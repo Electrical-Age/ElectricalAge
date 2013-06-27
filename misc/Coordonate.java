@@ -1,0 +1,187 @@
+package mods.eln.misc;
+
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.relauncher.Side;
+import mods.eln.INBTTReady;
+import mods.eln.node.NodeBlockEntity;
+import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldManager;
+import net.minecraft.world.WorldProvider;
+import net.minecraft.world.WorldServer;
+
+public class Coordonate implements INBTTReady {
+	public int x,y,z,dimention;
+	
+	public Coordonate()
+	{
+		x = 0;y= 0;z = 0;dimention = 0;
+	}
+	public Coordonate(Coordonate coord)
+	{
+		x = coord.x;y= coord.y;z = coord.z;dimention = coord.dimention;
+	}
+	
+	public Coordonate(NBTTagCompound nbt,String str)
+	{
+		readFromNBT(nbt, str);
+	}
+	
+	@Override
+	public int hashCode() {
+		// TODO Auto-generated method stub
+		return (x + y)*0x10101010;
+	}
+	
+	
+	public int worldDimension()
+	{
+		return dimention;
+	}
+	
+	private World w = null;
+	public World world()
+	{
+	//	Side sideCS = FMLCommonHandler.instance().getEffectiveSide();
+	//	if (sideCS == Side.CLIENT) return null;
+
+		//Minecraft m = Minecraft.getMinecraft();
+		//if(FMLCommonHandler.instance().getSidedDelegate().)
+		
+		if(w == null) w = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(worldDimension());
+		return w;
+        
+	}
+	
+	public Coordonate(NodeBlockEntity entity) {
+		x = entity.xCoord;
+		y = entity.yCoord;
+		z = entity.zCoord;
+		dimention = entity.getWorldObj().getWorldInfo().getDimension();
+	}
+	public Coordonate(int x,int y ,int z,int dimention)
+	{
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.dimention = dimention;
+	}
+	public Coordonate(int x,int y ,int z,World world)
+	{
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.dimention = world.provider.dimensionId;
+	}
+
+	public Coordonate(TileEntity entity)
+	{
+		this.x = entity.xCoord;
+		this.y = entity.yCoord;
+		this.z = entity.zCoord;
+		this.dimention = entity.worldObj.provider.dimensionId;
+	}
+	
+	public Coordonate newWithOffset(int x,int y,int z)
+	{
+		return new Coordonate(this.x + x, this.y + y, this.z + z, dimention);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if((obj instanceof Coordonate) == false) return false;
+		Coordonate id = (Coordonate) obj;
+		return id.x == x && id.y == y && id.z == z && id.dimention == dimention;
+	}
+	@Override
+	public void readFromNBT(NBTTagCompound nbt,String str) {
+		// TODO Auto-generated method stub
+		x = nbt.getInteger(str + "x");
+		y = nbt.getInteger(str + "y");
+		z = nbt.getInteger(str + "z");
+		dimention = nbt.getInteger(str + "d");
+	}
+	@Override
+	public void writeToNBT(NBTTagCompound nbt,String str) {
+		// TODO Auto-generated method stub
+		nbt.setInteger(str + "x", x);
+		nbt.setInteger(str + "y", y);
+		nbt.setInteger(str + "z", z);
+		nbt.setInteger(str + "d", dimention);
+	}
+	
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return "X : " + x + " Y : " + y + " Z : " + z + " D : " + dimention;
+	}
+	
+	
+	public void move(Direction dir)
+	{
+		switch(dir)
+		{
+		case XN:
+			x--;
+			break;
+		case XP:
+			x++;
+			break;
+		case YN:
+			y--;
+			break;
+		case YP:
+			y++;
+			break;
+		case ZN:
+			z--;
+			break;
+		case ZP:
+			z++;
+			break;
+		default:
+			break;
+			
+		}
+	}
+	
+	public int getBlockId()
+	{
+		return world().getBlockId(x, y, z);
+	}
+	
+	public Block getBlock()
+	{
+		return Block.blocksList[world().getBlockId(x, y, z)];
+	}
+	
+	
+	public static AxisAlignedBB getAxisAlignedBB(Coordonate a,Coordonate b)
+	{
+		AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(
+				Math.min(a.x, b.x),Math.min(a.y, b.y),Math.min(a.z, b.z),
+				Math.max(a.x, b.x) + 1.0,Math.max(a.y, b.y) + 1.0,Math.max(a.z, b.z) + 1.0);
+		return bb;
+	}
+	public  AxisAlignedBB getAxisAlignedBB(int ray)
+	{
+		AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(
+				x - ray , y - ray, z - ray,
+				x + ray + 1 , y + ray + 1, z + ray + 1);
+		return bb;
+	}
+	
+	
+	public double distanceTo(Entity e)
+	{
+		return Math.abs(e.posX - x) +  Math.abs(e.posY - y) + Math.abs(e.posZ - z);
+	}
+}

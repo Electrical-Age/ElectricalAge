@@ -1,0 +1,96 @@
+package mods.eln.electricalmachine;
+
+import java.util.List;
+
+import mods.eln.electricalcable.ElectricalCableDescriptor;
+import mods.eln.misc.Recipe;
+import mods.eln.misc.RecipesList;
+import mods.eln.node.TransparentNodeDescriptor;
+import mods.eln.sim.ElectricalLoad;
+import mods.eln.sim.ElectricalResistor;
+import mods.eln.sim.ElectricalStackMachineProcess;
+import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.ThermalLoadInitializer;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+
+public class ElectricalMachineDescriptor extends TransparentNodeDescriptor{
+
+	public RecipesList recipe = new  RecipesList();
+
+
+	double nominalU;
+	double nominalP;
+	double maximalP;
+	ThermalLoadInitializer thermal;
+	ElectricalCableDescriptor cable;
+	
+	double resistorR;
+
+	double boosterEfficiency = 1.0/1.1;
+	double boosterSpeedUp = 1.25 / boosterEfficiency;
+	public ElectricalMachineDescriptor(
+				String name,
+				double  nominalU,double nominalP,
+				double  maximalU,
+				ThermalLoadInitializer thermal,
+				ElectricalCableDescriptor cable,
+				RecipesList recipe
+				
+			) {
+		super(name, ElectricalMachineElement.class, ElectricalMachineRender.class);
+		this.nominalP = nominalP;
+		this.nominalU = nominalU;
+		this.maximalU = maximalU;
+		this.cable = cable;
+		this.thermal = thermal;
+		resistorR = nominalU*nominalU/nominalP;
+		this.maximalP = maximalU*maximalU/resistorR;
+		thermal.setMaximalPower(maximalP);
+		this.recipe = recipe;
+		
+	}
+
+	double maximalU;
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		list.add("Nominal U : " + nominalU);
+		list.add("Nominal P : " + nominalP);
+		
+	}
+	
+	
+	public void applyTo(ElectricalLoad load)
+	{
+		cable.applyTo(load, false);
+	}
+	
+	public void applyTo(ElectricalResistor resistor)
+	{
+		resistor.setR(resistorR);
+	}
+	public void applyTo(ElectricalStackMachineProcess machine)
+	{
+		machine.setResistorValue(resistorR);
+	}
+	
+	public void applyTo(ThermalLoad load)
+	{
+		thermal.applyTo(load);
+	}
+	
+	Object newDrawHandle()
+	{
+		return null;
+	}
+	
+	void draw(ElectricalMachineRender render,Object handleO,EntityItem inEntity, EntityItem outEntity, float powerFactor)
+	{
+		
+	}
+}

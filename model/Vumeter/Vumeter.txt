@@ -1,0 +1,8 @@
+s type rot
+o Pointer
+f originX 0.06250
+f originY 0.0
+f originZ 0.0
+f alphaOff 120.0
+f alphaOn -120.0
+f speed 10
