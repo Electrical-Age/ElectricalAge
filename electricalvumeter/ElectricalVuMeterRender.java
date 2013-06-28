@@ -28,7 +28,7 @@ public class ElectricalVuMeterRender extends SixNodeElementRender{
 			SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalVuMeterDescriptor) descriptor;
-		interpolator = new PhysicalInterpolator(1.0f,0.01f,1.0f,0.2f);
+		interpolator = new PhysicalInterpolator(0.4f,2.0f,1.5f,0.2f);
 	}
 
 	PhysicalInterpolator interpolator;

@@ -64,6 +64,8 @@ public class ElectricalSensorElement extends SixNodeElement {
     	electricalLoadList.add(outputGate);
     	electricalProcessList.add(outputGateProcess);
     	thermalProcessList.add(slowProcess);
+    	
+    	electricalLoad.setRp(100000000000000.0);
 
 	}
 

@@ -28,8 +28,8 @@ public class ElectricalDataLoggerGui extends GuiContainer implements GuiTextFiel
 	}
 
 
-	GuiButton resetBt,voltageType,currentType,powerType,celsuisTyp,config,printBt,pause;
-	GuiTextFieldEln samplingPeriode,highValue;
+	GuiButton resetBt,voltageType,currentType,powerType,celsuisTyp,percentTyp,config,printBt,pause;
+	GuiTextFieldEln samplingPeriode,maxValue,minValue;
 	ElectricalDataLoggerRender render;
 	
 
@@ -44,29 +44,34 @@ public class ElectricalDataLoggerGui extends GuiContainer implements GuiTextFiel
 		pause.drawButton = true;
 		resetBt.drawButton = true;
 		voltageType.drawButton = false;
+		percentTyp.drawButton = false;
 		currentType.drawButton = false;
 		powerType.drawButton = false;
 		celsuisTyp.drawButton = false;
 		samplingPeriode.setVisible(false);
-		highValue.setVisible(false);
+		maxValue.setVisible(false);
+		minValue.setVisible(false);
 		printBt.drawButton = true;
 		state = State.display;
 	}
 	
 	void configEntry()
 	{	
-		highValue.setVisible(false);
+
+
 		pause.drawButton = false;
 		config.drawButton = true;
 		config.displayString = "return to display";
 		resetBt.drawButton = false;
 		printBt.drawButton = false;
 		voltageType.drawButton = true;
+		percentTyp.drawButton = true;
 		currentType.drawButton = true;
 		powerType.drawButton = true;
 		celsuisTyp.drawButton = true;
 		samplingPeriode.setVisible(true);	
-		highValue.setVisible(true);
+		maxValue.setVisible(true);
+		minValue.setVisible(true);
 		state = State.config;
 	}
 	
@@ -76,14 +81,15 @@ public class ElectricalDataLoggerGui extends GuiContainer implements GuiTextFiel
 		// TODO Auto-generated method stub
 		super.initGui();
 
-        voltageType = new GuiButton(1, 100, 20 + 20, "voltageType");
-        currentType = new GuiButton(1, 100, 20 + 40, "currentType");
-		resetBt = new GuiButton(1, 100, 20, "reset");
-		powerType = new GuiButton(1, 100, 20 + 60, "powerType");
-		celsuisTyp = new GuiButton(1, 100, 20 + 80, "celsuisType");
-		config = new GuiButton(1, 100, 20 + 100, "");
-		printBt = new GuiButton(1, 100, 20 + 120, "Print");
-		pause = new GuiButton(1, 100, 20 + 140, "");
+        voltageType = new GuiButton(1, 100, 10,100, 20, "voltageType");
+        currentType = new GuiButton(1, 100, 30,100, 20, "currentType");
+		resetBt = new GuiButton(1, 100, 50,100, 20, "reset");
+		powerType = new GuiButton(1, 100, 50,100, 20, "powerType");
+		celsuisTyp = new GuiButton(1, 100, 70,100, 20, "celsuisType");
+		percentTyp = new GuiButton(1, 100, 90,100, 20, "percentType");
+		config = new GuiButton(1, 100, 120,100, 20, "");
+		printBt = new GuiButton(1, 100, 10,100, 20, "Print");
+		pause = new GuiButton(1, 100, 30,100, 20, "");
 		
 		buttonList.add(powerType);
 		buttonList.add(voltageType);
@@ -92,16 +98,21 @@ public class ElectricalDataLoggerGui extends GuiContainer implements GuiTextFiel
 		buttonList.add(config);
 		buttonList.add(printBt);
 		buttonList.add(pause);
+		buttonList.add(percentTyp);
 		
 		buttonList.add(resetBt);	
 		
 		samplingPeriode = new GuiTextFieldEln(this.fontRenderer, 120, 140+20, 103, 12);
 		samplingPeriode.setObserver(this);
-        samplingPeriode.setText( String.format("%3.2f", render.samplingPeriod));
+        samplingPeriode.setText( String.format("%3.2f", render.log.samplingPeriod));
         
-        highValue = new GuiTextFieldEln(this.fontRenderer, 120, 140, 103, 12);
-		highValue.setObserver(this);
-        highValue.setText( String.format("%3.2f", render.highValue));
+        maxValue = new GuiTextFieldEln(this.fontRenderer, 120, 140, 103, 12);
+		maxValue.setObserver(this);
+        maxValue.setText( String.format("%3.2f", render.log.maxValue));
+        
+        minValue = new GuiTextFieldEln(this.fontRenderer, 120, 120, 103, 12);
+		minValue.setObserver(this);
+        minValue.setText( String.format("%3.2f", render.log.minValue));
         
 
         displayEntry();
@@ -114,7 +125,11 @@ public class ElectricalDataLoggerGui extends GuiContainer implements GuiTextFiel
         {
 
         }
-        else if (this.highValue.textboxKeyTyped(par1, par2))
+        else if (this.maxValue.textboxKeyTyped(par1, par2))
+        {
+
+        }
+        else if (this.minValue.textboxKeyTyped(par1, par2))
         {
 
         }
@@ -127,7 +142,8 @@ public class ElectricalDataLoggerGui extends GuiContainer implements GuiTextFiel
     {
         super.mouseClicked(par1, par2, par3);
         this.samplingPeriode.mouseClicked(par1, par2, par3);
-        this.highValue.mouseClicked(par1, par2, par3);
+        this.maxValue.mouseClicked(par1, par2, par3);
+        this.minValue.mouseClicked(par1, par2, par3);
     }
 
 
@@ -147,19 +163,23 @@ public class ElectricalDataLoggerGui extends GuiContainer implements GuiTextFiel
     	}
     	else if(par1GuiButton == currentType)
     	{
-    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, ElectricalDataLoggerElement.currentType);
+    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.currentType);
     	}
     	else if(par1GuiButton == voltageType)
     	{
-    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, ElectricalDataLoggerElement.voltageType);
+    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.voltageType);
+    	}
+    	else if(par1GuiButton == percentTyp)
+    	{
+    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.percentType);
     	}
     	else if(par1GuiButton == powerType)
     	{
-    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, ElectricalDataLoggerElement.powerType);
+    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.powerType);
     	}
     	else if(par1GuiButton == celsuisTyp)
     	{
-    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, ElectricalDataLoggerElement.celsiusType);
+    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.celsiusType);
     	}
     	else if(par1GuiButton == config)
     	{ 
@@ -190,19 +210,24 @@ public class ElectricalDataLoggerGui extends GuiContainer implements GuiTextFiel
     	currentType.enabled = true;
     	voltageType.enabled = true;
     	celsuisTyp.enabled = true;
-    	switch(render.unitType)
+    	percentTyp.enabled = true;
+    	
+    	switch(render.log.unitType)
     	{
-    	case ElectricalDataLoggerElement.currentType:
+    	case DataLogs.currentType:
     		currentType.enabled = false;
     		break;
-    	case ElectricalDataLoggerElement.voltageType:
+    	case DataLogs.voltageType:
     		voltageType.enabled = false;
     		break;
-    	case ElectricalDataLoggerElement.powerType:
+    	case DataLogs.powerType:
     		powerType.enabled = false;
     		break;
-    	case ElectricalDataLoggerElement.celsiusType:
+    	case DataLogs.celsiusType:
     		celsuisTyp.enabled = false;
+    		break;		
+    	case DataLogs.percentType:
+    		percentTyp.enabled = false;
     		break;		
     	}
     	if(render.pause)
@@ -216,16 +241,17 @@ public class ElectricalDataLoggerGui extends GuiContainer implements GuiTextFiel
         super.drawScreen(par1, par2, par3);
         GL11.glDisable(GL11.GL_LIGHTING);
         this.samplingPeriode.drawTextBox();
-        this.highValue.drawTextBox();
-        
+        this.maxValue.drawTextBox();
+        this.minValue.drawTextBox();
+             
         
 		GL11.glLineWidth(1f);
 		GL11.glColor4f(1f, 0f, 0f, 1f);
 		
         GL11.glPushMatrix();
 	        GL11.glTranslatef(50, 100, 0);
-	        GL11.glScalef(200f, 80f, 1f);
-	        render.log.draw();
+	        GL11.glScalef(50, 50, 1f);
+	        render.log.draw(2.8f,1f);
         GL11.glPopMatrix();
 
     }
@@ -253,9 +279,13 @@ public class ElectricalDataLoggerGui extends GuiContainer implements GuiTextFiel
 
 		}	
 
-		if(textField == highValue)
+		if(textField == maxValue)
 		{
-			render.clientSetFloat(ElectricalDataLoggerElement.setHighValue, valuef);
+			render.clientSetFloat(ElectricalDataLoggerElement.setMaxValue, valuef);
+		}
+		else if(textField == minValue)
+		{
+			render.clientSetFloat(ElectricalDataLoggerElement.setMinValue, valuef);
 		}
 		else if(textField == samplingPeriode)
 		{

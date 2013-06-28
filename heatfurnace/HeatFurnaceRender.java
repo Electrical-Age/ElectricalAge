@@ -37,7 +37,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 	public HeatFurnaceRender(TransparentNodeEntity tileEntity,TransparentNodeDescriptor descriptor) {
 		super(tileEntity,descriptor);
 		this.descriptor = (HeatFurnaceDescriptor) descriptor;
-		interpolator = new PhysicalInterpolator(0.2f,0.03f,0.5f,0.2f);
+		interpolator = new PhysicalInterpolator(0.4f,8.0f,0.9f,0.2f);
 		coord = new Coordonate(tileEntity);
 	}
 	Coordonate coord;

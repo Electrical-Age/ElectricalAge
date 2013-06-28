@@ -47,12 +47,13 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender{
 
 
 	LRDU front;
-	public byte unitType;
 
 	@Override
 	public void draw() {
 		
-		GL11.glLineWidth(2f);
+		float distance = Utils.distanceFromClientPlayer(tileEntity);
+		
+		GL11.glLineWidth(8.0f / (distance + 0.1f));
 		GL11.glColor4f(1f, 0f, 0f, 1f);
 		GL11.glDisable(GL11.GL_LIGHTING);
         GL11.glPushMatrix();
@@ -61,7 +62,7 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender{
         	GL11.glTranslatef(0.1f,-0.5f,0.5f); 	
         	GL11.glRotatef(90,0f,1f,0f);  
         	
-	        log.draw();
+	        log.draw(0.8f,0.8f);
         GL11.glPopMatrix();
         GL11.glEnable(GL11.GL_LIGHTING);
 
@@ -75,18 +76,18 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender{
 	}
 	*/
 	
-	public float samplingPeriod = 1;
-	public float highValue = 60;
+
 	public boolean pause;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
-			unitType = stream.readByte();
+			log.unitType = stream.readByte();
 			pause = stream.readBoolean();
-			samplingPeriod = stream.readFloat();
-			highValue = stream.readFloat();
+			log.samplingPeriod = stream.readFloat();
+			log.maxValue = stream.readFloat();
+			log.minValue = stream.readFloat();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

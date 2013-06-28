@@ -3888,17 +3888,20 @@ public class Eln {
 	}
 	void recipeMeter()
   	{
-    	GameRegistry.addRecipe(	findItemStack("MultiMeter"),"RGR","RER","RCR",
+    	GameRegistry.addRecipe(	findItemStack("MultiMeter"),
+    			"RGR",
+    			"RER",
+    			"RCR",
 				Character.valueOf('G'), new ItemStack(Block.thinGlass),
 				Character.valueOf('C'), findItemStack("Electrical sensor"),
-				Character.valueOf('E'), findItemStack("Cheap chip"),
+				Character.valueOf('E'), new ItemStack(Item.redstone),
 				Character.valueOf('R'), findItemStack("Rubber")
     			);		
     	
     	GameRegistry.addRecipe(	findItemStack("ThermoMeter"),"RGR","RER","RCR",
 				Character.valueOf('G'), new ItemStack(Block.thinGlass),
 				Character.valueOf('C'), findItemStack("Thermal sensor"),
-				Character.valueOf('E'), findItemStack("Cheap chip"),
+				Character.valueOf('E'), new ItemStack(Item.redstone),
 				Character.valueOf('R'), findItemStack("Rubber")
     			);		
     	
@@ -3982,6 +3985,23 @@ public class Eln {
 	}
 	void recipeTreeResinAndRubber()
   	{
+		for(int idx = 0;idx < 4;idx++)
+		{
+			GameRegistry.addRecipe(	findItemStack("tree resin collector"),
+       			"W W",
+       			" WW",
+				Character.valueOf('W'), new ItemStack(Block.planks,1,idx)
+    			);
+		}
+		for(int idx = 0;idx < 4;idx++)
+		{
+			GameRegistry.addRecipe(	findItemStack("tree resin collector"),
+       			"W W",
+       			"WW",
+				Character.valueOf('W'), new ItemStack(Block.planks,1,idx)
+    			);
+		}
+
 		
 	}
 	void recipeRawCable()
@@ -4081,7 +4101,7 @@ public class Eln {
 	void recipeCompressor()
 	{	 
 		compressorRecipes.addRecipe(new Recipe(findItemStack("Coal dust",2),new ItemStack[]{findItemStack("High density coal")}, 4000.0));
-		compressorRecipes.addRecipe(new Recipe(findItemStack("High density coal",4),new ItemStack[]{new ItemStack(Item.diamond)}, 10000.0));
+		compressorRecipes.addRecipe(new Recipe(findItemStack("High density coal",4),new ItemStack[]{new ItemStack(Item.diamond)}, 80000.0));
 	//	extractorRecipes.addRecipe(new Recipe(findItemStack("Cinnabar dust"),new ItemStack[]{findItemStack("Purified cinnabar dust",1)}, 1000.0));
 	}    	
 	
@@ -4136,6 +4156,57 @@ public class Eln {
 
 	
 	}
+	
+	
+	
+	
+	
+	
+	
+    void recipeElectricalSensor()
+    {
+    	GameRegistry.addRecipe(	findItemStack("Voltage sensor sixNode",1),
+    			"ICI", 
+    			"ISI", 
+    			Character.valueOf('S'),findItemStack("Electrical sensor"),
+    			Character.valueOf('C'),findItemStack("Cheap chip"),
+    			Character.valueOf('I'),new ItemStack(Item.ingotIron)
+    			);	
+		    	    	
+    	GameRegistry.addRecipe(	findItemStack("Electrical sensor sixNode",1),
+    			"RRR", 
+    			"ICI", 
+    			"ISI", 
+    			Character.valueOf('S'),findItemStack("Electrical sensor"),
+    			Character.valueOf('C'),findItemStack("Cheap chip"),
+    			Character.valueOf('R'),new ItemStack(Item.redstone),
+    			Character.valueOf('I'),new ItemStack(Item.ingotIron)
+    			);	
+
+
+
+
+	}	
+    void recipeThermalSensor()
+    {
+    	GameRegistry.addRecipe(	findItemStack("Thermal sensor sixNode",1),
+    			"RRR", 
+    			"ICI", 
+    			"ISI", 
+    			Character.valueOf('S'),findItemStack("Thermal sensor"),
+    			Character.valueOf('C'),findItemStack("Cheap chip"),
+    			Character.valueOf('R'),new ItemStack(Item.redstone),
+    			Character.valueOf('I'),new ItemStack(Item.ingotIron)
+    			);	
+
+
+
+	}	
+	
+	
+	
+	
+	
     public ItemStack findItemStack(String name,int stackSize)
     {
     	return GameRegistry.findItemStack("Eln",name, stackSize);

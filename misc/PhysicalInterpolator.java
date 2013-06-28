@@ -27,7 +27,7 @@ public class PhysicalInterpolator {
 		float error = factorFiltred - factorPos;
 		factorSpeed *= 1 - (slowPerS * deltaT);
 		factorSpeed += error * accPerSPerError * deltaT;
-		factorPos += factorSpeed;
+		factorPos += factorSpeed * deltaT;
 		if(factorPos > 1.0)
 		{
 			factorPos = 1.0f;

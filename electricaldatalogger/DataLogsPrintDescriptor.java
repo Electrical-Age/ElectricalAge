@@ -22,7 +22,7 @@ public class DataLogsPrintDescriptor extends GenericItemUsingDamageDescriptor{
 	public void initializeStack(ItemStack stack,DataLogs logs) {
 		// TODO Auto-generated method stub
 		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
-		nbt.setByteArray("logs", logs.copyLog());
+		logs.writeToNBT(nbt, "");//.setByteArray("logs", logs.copyLog());
 		stack.setTagCompound(nbt);
 	}
 	
@@ -41,8 +41,8 @@ public class DataLogsPrintDescriptor extends GenericItemUsingDamageDescriptor{
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		NBTTagCompound nbt = item.getTagCompound();
-		byte [] logsArray = nbt.getByteArray("logs");
-		if(logsArray != null)
+		//byte [] logsArray = nbt.getByteArray("logs");
+		//if(logsArray != null)
 		{
 			
 			GL11.glLineWidth(1f);
@@ -53,8 +53,9 @@ public class DataLogsPrintDescriptor extends GenericItemUsingDamageDescriptor{
 	        //	GL11.glScalef(1f, -1f, 1f);
 	        //	GL11.glTranslatef(0.f,-0.5f,0.5f); 	
 	        	//GL11.glRotatef(90,0f,1f,0f);  
-	        	GL11.glTranslatef(-0.5f,-0.5f,0.1f); 	
-	        	DataLogs.draw(logsArray,logsArray.length);
+	        	GL11.glTranslatef(-0.5f,-0.5f,0.1f);
+	        	DataLogs.draw(nbt,1f,1f);
+	        //	DataLogs.draw(logsArray,logsArray.length);
 	        GL11.glPopMatrix();
 	        GL11.glEnable(GL11.GL_LIGHTING);
 		}

@@ -67,7 +67,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     	inputGate = new NodeElectricalGateInput("inputGate");
 		
 		electricalLoadList.add(inputGate);
-    	thermalProcessList.add(slowProcess);
+    	slowProcessList.add(slowProcess);
 
 	}
 
@@ -87,10 +87,9 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 		return true;
 	}
 	
-	public double samplingPeriod = 1;
-	public double highValue = 60;
+
 	public double timeToNextSample = 0;
-	public byte unitType = voltageType;
+
 	public DataLogs logs = new DataLogs(logsSizeMax);
 	
 	@Override
@@ -99,9 +98,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 		super.readFromNBT(nbt, str);
         byte value = nbt.getByte(str + "front");
         front = LRDU.fromInt((value>>0) & 0x3);
-        samplingPeriod = nbt.getDouble(str + "samplingPeriod");
-		highValue = nbt.getDouble(str + "highValue");
-		unitType = nbt.getByte(str + "unitType");
+
 		logs.readFromNBT(nbt, str + "logs");
 		pause = nbt.getBoolean(str + "pause");
 		timeToNextSample = nbt.getDouble(str + "timeToNextSample");
@@ -112,9 +109,6 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
 		nbt.setByte(str + "front",(byte) ((front.toInt()<<0)));
-		nbt.setDouble(str + "samplingPeriod", samplingPeriod);
-		nbt.setDouble(str + "highValue", highValue);
-		nbt.setByte(str + "unitType", unitType);
 		nbt.setDouble(str + "timeToNextSample", timeToNextSample);
 		nbt.setBoolean(str + "pause", pause);
 		
@@ -156,16 +150,17 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
 	static final byte publishId = 1,dataId = 2;
 	
-	static final byte voltageType = 0,currentType = 1,powerType = 2,celsiusType = 3;
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte(unitType);
+			stream.writeByte(logs.unitType);
 			stream.writeBoolean(pause);
-			stream.writeFloat((float) samplingPeriod);
-			stream.writeFloat((float) highValue);
+			stream.writeFloat((float) logs.samplingPeriod);
+			stream.writeFloat((float) logs.maxValue);
+			stream.writeFloat((float) logs.minValue);
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -208,12 +203,12 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 	}
 	
 	public static final byte resetId = 1;
-	public static final byte setSamplingPeriodeId = 2,setHighValue = 3;
+	public static final byte setSamplingPeriodeId = 2,setMaxValue = 3;
 	public static final byte setUnitId = 4;
 	public static final byte newClientId = 5;
 	public static final byte printId = 6;
 	public static final byte tooglePauseId = 7;
-
+	public static final byte setMinValue = 8;
 	
 	public static final byte toClientLogsClear = 1;
 	public static final byte toClientLogsAdd = 2;
@@ -231,16 +226,21 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
 			case setSamplingPeriodeId:
 				logs.reset();
-				samplingPeriod = stream.readFloat();
+				logs.samplingPeriod = stream.readFloat();
+				timeToNextSample = 0.1;
 				needPublish();
 				break;
-			case setHighValue:
-				highValue = stream.readFloat();
+			case setMaxValue:
+				logs.maxValue = stream.readFloat();
+				needPublish();
+				break;
+			case setMinValue:
+				logs.minValue = stream.readFloat();
 				needPublish();
 				break;
 			case setUnitId:
 				logs.reset();
-				unitType = stream.readByte();
+				logs.unitType = stream.readByte();
 				needPublish();
 				break;
 			case resetId:

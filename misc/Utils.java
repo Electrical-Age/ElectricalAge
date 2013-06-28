@@ -12,12 +12,15 @@ import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.common.registry.GameRegistry;
 
 import mods.eln.Eln;
+import mods.eln.PlayerManager;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeElectricalGateInput;
+import mods.eln.node.SixNodeEntity;
 import mods.eln.sim.PhysicalConstant;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.renderer.RenderEngine;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
@@ -35,6 +38,7 @@ import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.client.MinecraftForgeClient;
 
 
 public class Utils {
@@ -248,7 +252,11 @@ public class Utils {
 	}
 	public static String plotPercent(String header,double value)
 	{
-		return header +  String.format(" : %3.1f", value * 100.0)+ "%   ";
+		if(value >= 1.0)
+			return header +  String.format(" %3.0f", value * 100.0)+ "%   ";
+		else
+			return header +  String.format(" %3.1f", value * 100.0)+ "%   ";
+
 	}
 	public static String plotEnergy(String header,double value)
 	{
@@ -266,9 +274,11 @@ public class Utils {
 	
 
 	
-	public static String plotTime(String header,double value)
+	public static String plotTime(double value)
 	{
-		String str = header + " : ";
+		String str = "";
+		if(value == 0.0)
+			return str + "0'";
 		int h,mn,s;
 		h = (int) (value/3600); value = value % 3600;
 		mn = (int) (value/60); value = value % 60;
@@ -277,6 +287,12 @@ public class Utils {
 		if(mn != 0) str += mn + "'";
 		if(s != 0) str += s + "''";
 		return str;
+	}
+		
+	public static String plotTime(String header,double value)
+	{
+		return header + " " + plotTime(value);
+
 	}
 		
 	
@@ -562,6 +578,18 @@ public class Utils {
     	}
     	return value;
     }
+
+	public static float distanceFromClientPlayer(World world, int xCoord, int yCoord,int zCoord) {
+		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+		
+		return (float) Math.sqrt(	(xCoord - player.posX)*(xCoord - player.posX) 
+							+ (yCoord - player.posY) * (yCoord - player.posY)
+							+ (zCoord - player.posZ) * (zCoord - player.posZ));
+	}
+
+	public static float distanceFromClientPlayer(SixNodeEntity tileEntity) {
+		return distanceFromClientPlayer(tileEntity.worldObj,tileEntity.xCoord,tileEntity.yCoord,tileEntity.zCoord);
+	}
 
     /*
     public float frameTime()
