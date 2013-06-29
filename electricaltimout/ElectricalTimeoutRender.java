@@ -32,7 +32,7 @@ import net.minecraft.item.ItemStack;
 
 public class ElectricalTimeoutRender extends SixNodeElementRender{
 
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1,64,this);
+
 	ElectricalTimeoutDescriptor descriptor;
 	long time;
 	public ElectricalTimeoutRender(SixNodeEntity tileEntity, Direction side,
@@ -43,7 +43,7 @@ public class ElectricalTimeoutRender extends SixNodeElementRender{
 	}
 
 
-	LRDU front;
+
 
 	@Override
 	public void draw() {
@@ -59,9 +59,7 @@ public class ElectricalTimeoutRender extends SixNodeElementRender{
 		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
-			Byte b;
-			b = stream.readByte();
-			front = LRDU.fromInt((b>>4)&3);
+
 
 			timeoutValue = stream.readFloat();
 			timeoutCounter = stream.readFloat();
@@ -78,6 +76,6 @@ public class ElectricalTimeoutRender extends SixNodeElementRender{
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		// TODO Auto-generated method stub
-		return new ElectricalTimeoutGui(player,inventory,this);
+		return new ElectricalTimeoutGui(player,this);
 	}
 }

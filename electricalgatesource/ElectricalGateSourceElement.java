@@ -66,12 +66,10 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 	
 	public NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess",outputGate);
 
-	SixNodeElementInventory inventory = new SixNodeElementInventory(0,64,this);
+
 	LRDU front;
 
-	public SixNodeElementInventory getInventory() {
-		return inventory;
-	}
+
 
 	public static boolean canBePlacedOnSide(Direction side,int type)
 	{
@@ -228,11 +226,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 		return true;
 	}
 	
-	@Override
-	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
-		return new ElectricalGateSourceContainer(player, inventory);
-	}
+
 	
 	
 	

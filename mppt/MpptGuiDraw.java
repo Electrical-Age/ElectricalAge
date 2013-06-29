@@ -113,7 +113,7 @@ public class MpptGuiDraw extends GuiContainer {
             
                      
             if(render.UtargetSyncNew) syncVumeterUtarget();
-            vuMeterUtarget.mouseMove(par2, par3);
+            vuMeterUtarget.imouseMove(par2, par3);
             vuMeterUtarget.draw(par1, par2, par3);
             
     }

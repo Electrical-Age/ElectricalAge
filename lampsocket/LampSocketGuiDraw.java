@@ -4,6 +4,9 @@ import org.lwjgl.opengl.GL11;
 
 
 
+import mods.eln.gui.GuiContainerEln;
+import mods.eln.gui.GuiHelper;
+import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.SixNodeElementInventory;
@@ -32,7 +35,7 @@ public class MachineGuiClientExample extends GuiScreen {
 }
 */
 
-public class LampSocketGuiDraw extends GuiContainer {
+public class LampSocketGuiDraw extends GuiContainerEln {
 
 	
     private SixNodeElementInventory inventory;
@@ -51,42 +54,37 @@ public class LampSocketGuiDraw extends GuiContainer {
     {
     	super.initGui();
     	
-    	buttonGrounded = new GuiButton(1, width/2,height/2,100,20, "");
+    	buttonGrounded = newGuiButton(10,10,100,"");
     }
     
-    public void drawScreen(int par1, int par2, float par3)
-    {
-        super.drawScreen(par1, par2, par3);
-        GL11.glDisable(GL11.GL_LIGHTING);
-        buttonGrounded.displayString = "Grounded : " + lampRender.grounded;
-        this.buttonGrounded.drawButton(Minecraft.getMinecraft(), par1, par2);
+
+    @Override
+    public void guiObjectEvent(IGuiObject object) {
+    	super.guiObjectEvent(object);
+    	if(object == buttonGrounded)
+    	{
+    		lampRender.clientSetGrounded(!lampRender.getGrounded());
+    	}
     }
-    
-    protected void mouseClicked(int x, int y, int par3)
-    {
-        super.mouseClicked(x, y, par3);   
-        
-        if(this.buttonGrounded.mousePressed(Minecraft.getMinecraft(), x, y))
-        {
-        	System.out.println("miaou");
-        	lampRender.clientSetGrounded(!lampRender.getGrounded());
-        }
-    }
-	
+	/*
     @Override
     protected void drawGuiContainerForegroundLayer(int param1, int param2) {
             fontRenderer.drawString("Tiny", 8, 6, 4210752);
             fontRenderer.drawString(StatCollector.translateToLocal("container.inventory"), 8, ySize - 96 + 2, 4210752);
-    }
+    }*/
 
-    @Override
-    protected void drawGuiContainerBackgroundLayer(float par1, int par2,
-                    int par3) {
-    	Utils.bindTextureByName("/gui/trap.png");
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-  //          this.mc.renderEngine.bindTexture(texture);
-        int x = (width - xSize) / 2;
-        int y = (height - ySize) / 2;
-        this.drawTexturedModalRect(x, y, 0, 0, xSize, ySize);
-    }
+    
+
+	@Override
+	protected GuiHelper newHelper() {
+		// TODO Auto-generated method stub
+		return new GuiHelper(this, 176, 166, "lampsocket.png");
+	}
+
+	@Override
+	protected void preDraw(float f, int x, int y) {
+		// TODO Auto-generated method stub
+		super.preDraw(f, x, y);
+		buttonGrounded.displayString = "Grounded : " + lampRender.grounded;
+	}
 }

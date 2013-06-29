@@ -418,13 +418,13 @@ public class Obj3D {
 							{
 								part = partPtr;
 								part.textureName = directory + words[1];
-								Side side = FMLCommonHandler.instance().getEffectiveSide();
-								if (side == Side.CLIENT)
-									MinecraftForgeClient.preloadTexture(part.textureName);
+								//Side side = FMLCommonHandler.instance().getEffectiveSide();
+								//if (side == Side.CLIENT)
+									//MinecraftForgeClient.preloadTexture(part.textureName);
 
 							}
 						}
-											}
+					}
 
 				}	
 			}

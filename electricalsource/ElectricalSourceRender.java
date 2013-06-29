@@ -118,8 +118,8 @@ public class ElectricalSourceRender extends SixNodeElementRender{
 			b = stream.readByte();
 			
 			color = (b>>4) & 0xF;
-			voltage = stream.readShort() /Node.networkSerializeUFactor;
-			current = stream.readShort() /Node.networkSerializeIFactor;
+			voltage = stream.readFloat();
+
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

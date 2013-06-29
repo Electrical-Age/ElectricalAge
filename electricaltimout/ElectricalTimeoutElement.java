@@ -74,12 +74,7 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 	public ElectricalTimeoutProcess slowProcess = new ElectricalTimeoutProcess(this);
 	
 	
-	SixNodeElementInventory inventory = new SixNodeElementInventory(0,64,this);
-	LRDU front;
 
-	public SixNodeElementInventory getInventory() {
-		return inventory;
-	}
 
 	public static boolean canBePlacedOnSide(Direction side,int type)
 	{
@@ -148,7 +143,6 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte( (front.toInt()<<4));
 			stream.writeFloat((float) timeOutValue);
 			stream.writeFloat((float) timeOutCounter);
 		} catch (IOException e) {
@@ -166,10 +160,6 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 
 	}
 
-	@Override
-	protected void inventoryChanged() {
-
-	}
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,float vx,float vy,float vz)
@@ -227,11 +217,7 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 		return true;
 	}
 	
-	@Override
-	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
-		return new ElectricalTimeoutContainer(player, inventory);
-	}
+
 	
 	
 	

@@ -3,18 +3,29 @@ package mods.eln.gui;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 
-public class GuiVerticalTrackBar extends Gui{
+public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 	
 
     public int width,height,xPosition,yPosition;
 
-    public boolean enable = false;
+    public boolean enable = false,visible = true;
     boolean drag = false;	
     
     public float min = 0f,max = 1.0f;
     int stepId = 0,stepIdMax = 10;
     
     
+    public void setVisible(boolean visible)
+    {
+    	this.visible = visible;
+    	if(visible == false) drag = false;
+    }
+    
+    IGuiObjectObserver observer;
+    void setObserver(IGuiObjectObserver observer)
+    {
+    	this.observer = observer;
+    }
 	public GuiVerticalTrackBar(int xPosition,int yPosition,int width,int height) 
 	{
 		this.width = width;
@@ -26,7 +37,7 @@ public class GuiVerticalTrackBar extends Gui{
 	public void setEnable(boolean enable)
 	{
 		this.enable = enable;
-		if(enable == false) drag = false;
+		if(enable == false || visible == false) drag = false;
 	}
 
     void stepLimit()
@@ -54,10 +65,10 @@ public class GuiVerticalTrackBar extends Gui{
 	
 	public boolean mouseClicked(int x, int y, int which)
     {
-    	if(enable && which == 0 && x > xPosition && y > yPosition && x < xPosition + width && y < yPosition + height)
+    	if(enable  && visible && which == 0 && x > xPosition && y > yPosition && x < xPosition + width && y < yPosition + height)
     	{
     		//System.out.println("mouseClicked");
-    		drag = enable;
+    		drag = true;
     		return true;
     	}
     	return false;
@@ -70,10 +81,10 @@ public class GuiVerticalTrackBar extends Gui{
 	public boolean mouseMovedOrUp(int x, int y, int which)
     {
 		//System.out.println("mouseMovedOrUp "+ x + " " + y + " " + which);
-		if(drag && which == 0)
+		if(enable && visible && drag && which == 0)
 		{
 			mouseMove(x, y);
-
+			if(observer != null) observer.guiObjectEvent(this);
 			System.out.println("New Value : " + getValue());
 			drag = false;
 			return true;
@@ -87,7 +98,6 @@ public class GuiVerticalTrackBar extends Gui{
 		this.max = max;
 		stepLimit();
 	}
-	
 	public void mouseMove(int x,int y)
 	{
 		if(drag)
@@ -95,12 +105,12 @@ public class GuiVerticalTrackBar extends Gui{
 			stepId = (int) ((1.0 - (double)(y - yPosition)/height + 1.0/stepIdMax/2.0) * stepIdMax);
 			
 			stepLimit();
-			/*
-			value = max + ((float)(y-yPosition)) / (height) * (min-max);
-			
-			if(value < min) value = min;
-			if(value > max) value = max;*/
 		}
+	}
+		
+	public void imouseMove(int x,int y)
+	{
+		mouseMove(x, y);
 	}
 	
 	public int getCursorPosition()
@@ -120,9 +130,34 @@ public class GuiVerticalTrackBar extends Gui{
 	
 	public void draw(float par1, int x, int y)
 	{
-		//if(! enable) return;
+		if(! visible) return;
 		
 		drawRect(xPosition, yPosition,xPosition + width,yPosition + height,0x80808080);
 		drawRect(xPosition - 2, getCursorPosition(),xPosition + width + 2,getCursorPosition() + 1,0xFFFFFFFF);
+	}
+
+	@Override
+	public void idraw(int x, int y, float f) {
+		// TODO Auto-generated method stub
+		draw(f, x, y);
+	}
+
+	@Override
+	public boolean ikeyTyped(char key, int code) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void imouseClicked(int x, int y, int code) {
+		if(mouseClicked(x, y, code))
+		{
+			
+		}
+	}
+	@Override
+	public void imouseMovedOrUp(int x, int y, int witch) {
+		// TODO Auto-generated method stub
+		mouseMovedOrUp(x, y, witch);
 	}
 }

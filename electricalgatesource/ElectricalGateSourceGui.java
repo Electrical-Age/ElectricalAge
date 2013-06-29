@@ -7,7 +7,11 @@ import java.io.IOException;
 import org.lwjgl.opengl.GL11;
 
 
+import mods.eln.gui.GuiContainerEln;
+import mods.eln.gui.GuiHelper;
+import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.GuiVerticalTrackBar;
+import mods.eln.gui.IGuiObject;
 import mods.eln.heatfurnace.HeatFurnaceContainer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -19,10 +23,9 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.network.packet.Packet250CustomPayload;
 
-public class ElectricalGateSourceGui extends GuiContainer{
+public class ElectricalGateSourceGui extends GuiScreenEln{
 
-	public ElectricalGateSourceGui(EntityPlayer player, IInventory inventory,ElectricalGateSourceRender render) {
-		super(new ElectricalGateSourceContainer(player, inventory));
+	public ElectricalGateSourceGui(EntityPlayer player,ElectricalGateSourceRender render) {
 		this.render = render;
 	}
 
@@ -37,7 +40,7 @@ public class ElectricalGateSourceGui extends GuiContainer{
 		super.initGui();
 
 
-		voltage = new GuiVerticalTrackBar(width*1/3,height/5,20,50);
+		voltage = newGuiVerticalTrackBar(10,10,20,50);
 		voltage.setStepIdMax((int)50);
 		voltage.setEnable(true);
     	voltage.setRange(0f,50f);
@@ -49,62 +52,29 @@ public class ElectricalGateSourceGui extends GuiContainer{
     	voltage.setValue(render.voltageSyncValue);
     	render.voltageSyncNew = false;
     }
-	@Override
-	protected void keyTyped(char par1, int par2)
-    {
- 
-        {
-            super.keyTyped(par1, par2);
-        }
-    }
-    protected void mouseClicked(int par1, int par2, int par3)
-    {
-        super.mouseClicked(par1, par2, par3);
-        voltage.mouseClicked(par1, par2, par3);
-    }
+
 
     @Override
-    protected void mouseMovedOrUp(int par1, int par2, int par3) {
+    public void guiObjectEvent(IGuiObject object) {
     	// TODO Auto-generated method stub
-    	super.mouseMovedOrUp(par1, par2, par3);
-    	if(voltage.mouseMovedOrUp(par1, par2, par3))
+    	super.guiObjectEvent(object);
+    	if(object == voltage)
     	{
     		render.clientSetFloat(ElectricalGateSourceElement.setVoltagerId,voltage.getValue());
     	}
-
     }
+
     @Override
-    protected void actionPerformed(GuiButton par1GuiButton) {
-    
-    }
-   
-    /**
-     * Draws the screen and all the components in it.
-     */
-    @Override
-    public void drawScreen(int par1, int par2, float par3)
-    {
-  
-        super.drawScreen(par1, par2, par3);
-        GL11.glDisable(GL11.GL_LIGHTING);
-
-        
-    }
-
-	
-    public boolean doesGuiPauseGame()
-    {
-        return false;
+    protected void preDraw(float f, int x, int y) {
+    	// TODO Auto-generated method stub
+    	super.preDraw(f, x, y);
+    	if(render.voltageSyncNew) syncVoltage();
     }
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(float par1, int par2,
-            int par3) {
+	protected GuiHelper newHelper() {
 		// TODO Auto-generated method stub
-       if(render.voltageSyncNew) syncVoltage();
-       voltage.mouseMove(par2, par3);
-       voltage.draw(par1, par2, par3);
-        
+		return new GuiHelper(this, 176, 166, "electricalgatesource.png");
 	}
 	
 }

@@ -21,6 +21,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.RenderEngine;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
@@ -355,13 +357,6 @@ public class Utils {
     public static void bindTextureByName(String par1Str)
     {
     	Minecraft.getMinecraft().renderEngine.bindTexture(par1Str);
-    	/*
-        RenderEngine var2 = Minecraft.getMinecraft().renderEngine;
-
-        if (var2 != null)
-        {      	
-        	var2.bindTexture(var2.getTexture(par1Str)); //caca1.5.1	
-        }*/
     }
     
     
@@ -589,6 +584,18 @@ public class Utils {
 
 	public static float distanceFromClientPlayer(SixNodeEntity tileEntity) {
 		return distanceFromClientPlayer(tileEntity.worldObj,tileEntity.xCoord,tileEntity.yCoord,tileEntity.zCoord);
+	}
+
+	public static void bindGuiTexture(String string) {
+		Minecraft.getMinecraft().renderEngine.bindTexture("/mods/eln/sprites/gui/" + string);
+	}
+
+	public static void drawGuiBackground(String string,GuiScreen guiScreen,int xSize,int ySize) {
+		Utils.bindGuiTexture(string);
+		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+		int x = (guiScreen.width - xSize) / 2;
+		int y = (guiScreen.height - ySize) / 2;
+		guiScreen.drawTexturedModalRect(x, y, 0, 0, xSize, ySize);
 	}
 
     /*

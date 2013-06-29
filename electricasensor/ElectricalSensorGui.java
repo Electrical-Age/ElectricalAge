@@ -7,6 +7,10 @@ import java.io.IOException;
 import org.lwjgl.opengl.GL11;
 
 
+import mods.eln.gui.GuiContainerEln;
+import mods.eln.gui.GuiHelper;
+import mods.eln.gui.GuiTextFieldEln;
+import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -18,7 +22,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.network.packet.Packet250CustomPayload;
 
-public class ElectricalSensorGui extends GuiContainer{
+public class ElectricalSensorGui extends GuiContainerEln{
 
 	public ElectricalSensorGui(EntityPlayer player, IInventory inventory,ElectricalSensorRender render) {
 		super(new ElectricalSensorContainer(player, inventory));
@@ -27,7 +31,7 @@ public class ElectricalSensorGui extends GuiContainer{
 
 
 	GuiButton validate,voltageType,currentType,powerType;
-	GuiTextField lowValue,highValue;
+	GuiTextFieldEln lowValue,highValue;
 	ElectricalSensorRender render;
 	
 
@@ -36,62 +40,32 @@ public class ElectricalSensorGui extends GuiContainer{
 		// TODO Auto-generated method stub
 		super.initGui();
 
-        voltageType = new GuiButton(1, 100, 50 + 20, "voltageType");
-        currentType = new GuiButton(1, 100, 50 + 40, "currentType");
-		validate = new GuiButton(1, 100, 50, "validate");
-		powerType = new GuiButton(1, 100, 50 + 60, "powerType");
+ 		validate = newGuiButton(150, 50,100, "validate");
 		if(render.descriptor.voltageOnly == false)
 		{
-			buttonList.add(powerType);
-			buttonList.add(voltageType);
-			buttonList.add(currentType);	
+			voltageType = newGuiButton(150, 50 + 20,100, "voltageType");
+			currentType = newGuiButton(150, 50 + 40,100, "currentType");
+			powerType = newGuiButton(150, 50 + 60,100, "powerType");
 		}
-		buttonList.add(validate);	
-		
-		lowValue = new GuiTextField(this.fontRenderer, 120, 140+20, 103, 12);
-		this.lowValue.setTextColor(-1);
-        this.lowValue.setDisabledTextColour(-1);
-        this.lowValue.setEnableBackgroundDrawing(true);
-        this.lowValue.setMaxStringLength(30);
-        lowValue.setText( String.format("%3.2f", render.lowValue));
+
+		lowValue = newGuiTextField(120, 10, 103);
+        lowValue.setText(render.lowValue);
         
-        highValue = new GuiTextField(this.fontRenderer, 120, 140, 103, 12);
-		this.highValue.setTextColor(-1);
-        this.highValue.setDisabledTextColour(-1);
-        this.highValue.setEnableBackgroundDrawing(true);
-        this.highValue.setMaxStringLength(30);
-        highValue.setText( String.format("%3.2f", render.highValue));
+        highValue = newGuiTextField(120, 24, 103);
+        highValue.setText(render.highValue);
         
 
 	}
 	
-	@Override
-	protected void keyTyped(char par1, int par2)
-    {
-		if (this.lowValue.textboxKeyTyped(par1, par2))
-        {
 
-        }
-        else if (this.highValue.textboxKeyTyped(par1, par2))
-        {
 
-        }
-        else
-        {
-            super.keyTyped(par1, par2);
-        }
-    }
-    protected void mouseClicked(int par1, int par2, int par3)
-    {
-        super.mouseClicked(par1, par2, par3);
-        this.lowValue.mouseClicked(par1, par2, par3);
-        this.highValue.mouseClicked(par1, par2, par3);
-    }
 
 
     @Override
-    protected void actionPerformed(GuiButton par1GuiButton) {
-    	if(par1GuiButton == validate)
+    public void guiObjectEvent(IGuiObject object) {
+    	// TODO Auto-generated method stub
+    	super.guiObjectEvent(object);
+    	if(object == validate)
     	{
 			float lowVoltage,highVoltage;
 			
@@ -104,26 +78,24 @@ public class ElectricalSensorGui extends GuiContainer{
 
 			}
     	}
-    	else if(par1GuiButton == currentType)
+    	else if(object == currentType)
     	{
     		render.clientSetByte(ElectricalSensorElement.setTypeOfSensorId, ElectricalSensorElement.currantType);
     	}
-    	else if(par1GuiButton == voltageType)
+    	else if(object == voltageType)
     	{
     		render.clientSetByte(ElectricalSensorElement.setTypeOfSensorId, ElectricalSensorElement.voltageType);
     	}
-    	else if(par1GuiButton == powerType)
+    	else if(object == powerType)
     	{
     		render.clientSetByte(ElectricalSensorElement.setTypeOfSensorId, ElectricalSensorElement.powerType);
     	}
     }
    
-    /**
-     * Draws the screen and all the components in it.
-     */
     @Override
-    public void drawScreen(int par1, int par2, float par3)
-    {
+    protected void preDraw(float f, int x, int y) {
+    	// TODO Auto-generated method stub
+    	super.preDraw(f, x, y);
     	if(render.typeOfSensor == ElectricalSensorElement.currantType)
     	{
         	powerType.enabled = true;
@@ -142,23 +114,15 @@ public class ElectricalSensorGui extends GuiContainer{
         	currentType.enabled = true;
         	voltageType.enabled = true;
     	}
-        super.drawScreen(par1, par2, par3);
-        GL11.glDisable(GL11.GL_LIGHTING);
-        this.lowValue.drawTextBox();
-        this.highValue.drawTextBox();
-               
+
     }
 
-	
-    public boolean doesGuiPauseGame()
-    {
-        return false;
-    }
+
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
+	protected GuiHelper newHelper() {
 		// TODO Auto-generated method stub
-		
+		return new GuiHelper(this, 176, 166, "electricalsensor.png");
 	}
 	
 }

@@ -8,6 +8,10 @@ import org.lwjgl.opengl.GL11;
 
 
 import mods.eln.electricasensor.ElectricalSensorElement;
+import mods.eln.gui.GuiContainerEln;
+import mods.eln.gui.GuiHelper;
+import mods.eln.gui.GuiTextFieldEln;
+import mods.eln.gui.IGuiObject;
 import mods.eln.sim.PhysicalConstant;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -19,7 +23,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.network.packet.Packet250CustomPayload;
 
-public class ThermalSensorGui extends GuiContainer{
+public class ThermalSensorGui extends GuiContainerEln{
 
 	public ThermalSensorGui(EntityPlayer player, IInventory inventory,ThermalSensorRender render) {
 		super(new ThermalSensorContainer(player, inventory));
@@ -28,7 +32,7 @@ public class ThermalSensorGui extends GuiContainer{
 
 
 	GuiButton validate,temperatureType,powerType;
-	GuiTextField lowValue,highValue;
+	GuiTextFieldEln lowValue,highValue;
 	ThermalSensorRender render;
 	
 
@@ -37,57 +41,26 @@ public class ThermalSensorGui extends GuiContainer{
 		// TODO Auto-generated method stub
 		super.initGui();
 
-        temperatureType = new GuiButton(1, 100, 50 + 20, "temperatureType");
-		validate = new GuiButton(1, 100, 50, "validate");
-		powerType = new GuiButton(1, 100, 50 + 40, "powerType");
-		buttonList.add(powerType);
-		buttonList.add(temperatureType);
-		buttonList.add(validate);	
+        temperatureType = newGuiButton(100, 50 + 20,50, "temperatureType");
+		validate = newGuiButton(100, 50,50, "validate");
+		powerType = newGuiButton( 100, 50 + 40,50, "powerType");
+
 		
-		lowValue = new GuiTextField(this.fontRenderer, 120, 140+20, 103, 12);
-		this.lowValue.setTextColor(-1);
-        this.lowValue.setDisabledTextColour(-1);
-        this.lowValue.setEnableBackgroundDrawing(true);
-        this.lowValue.setMaxStringLength(30);
-        lowValue.setText( String.format("%3.2f", render.lowValue));
+		lowValue = newGuiTextField(120, 140+20, 103);
+        lowValue.setText(render.lowValue);
         
-        highValue = new GuiTextField(this.fontRenderer, 120, 140, 103, 12);
-		this.highValue.setTextColor(-1);
-        this.highValue.setDisabledTextColour(-1);
-        this.highValue.setEnableBackgroundDrawing(true);
-        this.highValue.setMaxStringLength(30);
-        highValue.setText( String.format("%3.2f", render.highValue));
+        highValue = newGuiTextField( 120, 140, 103);
+        highValue.setText( render.highValue);
         
 
 	}
 	
+
 	@Override
-	protected void keyTyped(char par1, int par2)
-    {
-		if (this.lowValue.textboxKeyTyped(par1, par2))
-        {
-
-        }
-        else if (this.highValue.textboxKeyTyped(par1, par2))
-        {
-
-        }
-        else
-        {
-            super.keyTyped(par1, par2);
-        }
-    }
-    protected void mouseClicked(int par1, int par2, int par3)
-    {
-        super.mouseClicked(par1, par2, par3);
-        this.lowValue.mouseClicked(par1, par2, par3);
-        this.highValue.mouseClicked(par1, par2, par3);
-    }
-
-
-    @Override
-    protected void actionPerformed(GuiButton par1GuiButton) {
-    	if(par1GuiButton == validate)
+	public void guiObjectEvent(IGuiObject object) {
+		// TODO Auto-generated method stub
+		super.guiObjectEvent(object);
+    	if(object == validate)
     	{
 			float lowVoltage,highVoltage;
 			
@@ -100,22 +73,20 @@ public class ThermalSensorGui extends GuiContainer{
 
 			}
     	}
-    	else if(par1GuiButton == temperatureType)
+    	else if(object == temperatureType)
     	{
     		render.clientSetByte(ThermalSensorElement.setTypeOfSensorId, ThermalSensorElement.temperatureType);
     	}
-    	else if(par1GuiButton == powerType)
+    	else if(object == powerType)
     	{
     		render.clientSetByte(ThermalSensorElement.setTypeOfSensorId, ThermalSensorElement.powerType);
     	}
-    }
-   
-    /**
-     * Draws the screen and all the components in it.
-     */
-    @Override
-    public void drawScreen(int par1, int par2, float par3)
-    {
+	}
+
+	@Override
+	protected void preDraw(float f, int x, int y) {
+		// TODO Auto-generated method stub
+		super.preDraw(f, x, y);
     	if(render.typeOfSensor == ThermalSensorElement.temperatureType)
     	{
     		powerType.enabled = true;
@@ -126,23 +97,18 @@ public class ThermalSensorGui extends GuiContainer{
         	powerType.enabled = false;
         	temperatureType.enabled = true;
     	}
-        super.drawScreen(par1, par2, par3);
-        GL11.glDisable(GL11.GL_LIGHTING);
-        this.lowValue.drawTextBox();
-        this.highValue.drawTextBox();
-        
-    }
 
-	
-    public boolean doesGuiPauseGame()
-    {
-        return false;
-    }
+	}
+
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
+	protected GuiHelper newHelper() {
 		// TODO Auto-generated method stub
-		
+		return new GuiHelper(this, 176, 166, "thermalsensor.png");
 	}
+  
+
+	
+   
 	
 }

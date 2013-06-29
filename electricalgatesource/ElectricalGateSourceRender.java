@@ -32,7 +32,7 @@ import net.minecraft.item.ItemStack;
 
 public class ElectricalGateSourceRender extends SixNodeElementRender{
 
-	SixNodeElementInventory inventory = new SixNodeElementInventory(0,64,this);
+
 	ElectricalGateSourceDescriptor descriptor;
 	long time;
 	public ElectricalGateSourceRender(SixNodeEntity tileEntity, Direction side,
@@ -85,6 +85,6 @@ public class ElectricalGateSourceRender extends SixNodeElementRender{
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		// TODO Auto-generated method stub
-		return new ElectricalGateSourceGui(player,inventory,this);
+		return new ElectricalGateSourceGui(player,this);
 	}
 }

@@ -3360,7 +3360,14 @@ public class Eln {
 	
 	void recipeLampSocket()
 	{
-		
+		GameRegistry.addRecipe(	findItemStack("Lamp socket A",3),
+				"G ",
+				"IG",
+				"G ",
+				Character.valueOf('G'), new ItemStack(Block.thinGlass),
+				Character.valueOf('I'), new ItemStack(Item.ingotIron)
+				);		
+				
 	}
 	 
 	void recipeDiode()
@@ -3518,7 +3525,7 @@ public class Eln {
 	
 	void recipeMppt()
 	{
-		
+		//ToBeRemoved
 	}
 	
 	void recipeBattery()
@@ -3837,7 +3844,7 @@ public class Eln {
     	GameRegistry.addRecipe(	findItemStack("Solar tracker"),
     			"VVV",
     			"RQR",
-    			"IGI",
+    			"III",
 				Character.valueOf('Q'), new ItemStack(Item.netherQuartz),
 				Character.valueOf('V'), new ItemStack(Block.thinGlass), 
 				Character.valueOf('R'), new ItemStack(Item.redstone),
@@ -4095,7 +4102,7 @@ public class Eln {
     
 	void recipeExtractor()
 	{	 
-		extractorRecipes.addRecipe(new Recipe(findItemStack("Tree resin"),new ItemStack[]{findItemStack("Rubber",2)}, 1000.0));
+		extractorRecipes.addRecipe(new Recipe(findItemStack("Tree resin"),new ItemStack[]{findItemStack("Rubber",3)}, 1000.0));
 		extractorRecipes.addRecipe(new Recipe(findItemStack("Cinnabar dust"),new ItemStack[]{findItemStack("Purified cinnabar dust",1)}, 1000.0));
 	}
 	void recipeCompressor()

@@ -68,12 +68,7 @@ public class ElectricalRelayElement extends SixNodeElement {
 	public ElectricalResistor switchResistor = new ElectricalResistor(aLoad, bLoad);
 	public NodeElectricalGateInput gate = new NodeElectricalGateInput("gate");
 	public ElectricalRelayGateProcess gateProcess = new ElectricalRelayGateProcess(this,"GP",gate);
-	SixNodeElementInventory inventory = new SixNodeElementInventory(0,64,this);
-	LRDU front;
 
-	public SixNodeElementInventory getInventory() {
-		return inventory;
-	}
 
 	public static boolean canBePlacedOnSide(Direction side,int type)
 	{
@@ -146,7 +141,6 @@ public class ElectricalRelayElement extends SixNodeElement {
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte( (front.toInt()<<4));
 			stream.writeBoolean(switchState);
 			stream.writeBoolean(defaultOutput);
 
@@ -253,12 +247,7 @@ public class ElectricalRelayElement extends SixNodeElement {
 		return true;
 	}
 	
-	@Override
-	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
-		return new ElectricalRelayContainer(player, inventory);
-	}
-	
+
 	
 	
 }

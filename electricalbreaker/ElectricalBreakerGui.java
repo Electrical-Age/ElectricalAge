@@ -6,6 +6,10 @@ import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
 
+import mods.eln.gui.GuiContainerEln;
+import mods.eln.gui.GuiHelper;
+import mods.eln.gui.GuiTextFieldEln;
+import mods.eln.gui.IGuiObject;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
@@ -16,7 +20,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.network.packet.Packet250CustomPayload;
 
-public class ElectricalBreakerGui extends GuiContainer{
+public class ElectricalBreakerGui extends GuiContainerEln{
 
 	public ElectricalBreakerGui(EntityPlayer player, IInventory inventory,ElectricalBreakerRender render) {
 		super(new ElectricalBreakerContainer(player, inventory));
@@ -24,137 +28,73 @@ public class ElectricalBreakerGui extends GuiContainer{
 	}
 
 
-	GuiButton validate,setUmin,setUmax,toogleSwitch;
-	GuiTextField voltage;
+	GuiButton toogleSwitch;
+	GuiTextFieldEln setUmin,setUmax;
 	ElectricalBreakerRender render;
 	
 	enum SelectedType{none,min,max};
-	SelectedType selected = SelectedType.none;
+
 	
 	@Override
 	public void initGui() {
 		// TODO Auto-generated method stub
 		super.initGui();
 
-        setUmin = new GuiButton(1, 100, 50 + 20, "SetUmin");
-        setUmax = new GuiButton(1, 100, 50 + 40, "SetUmax");
-		validate = new GuiButton(1, 100, 50, "validate");
-		toogleSwitch = new GuiButton(1, 100, 50 + 60, "toogle switch");
-		buttonList.add(toogleSwitch);
-		buttonList.add(setUmin);
-		buttonList.add(setUmax);	
-		buttonList.add(validate);	
-		
-		voltage = new GuiTextField(this.fontRenderer, 120, 140, 103, 12);
-		this.voltage.setTextColor(-1);
-        this.voltage.setDisabledTextColour(-1);
-        this.voltage.setEnableBackgroundDrawing(true);
-        this.voltage.setMaxStringLength(30);
-
-	
+        setUmin = newGuiTextField(8,28,100);
+        setUmax = newGuiTextField(8,8,100);
         
-        noneEntry();
+        setUmin.setText(render.uMin);
+        setUmax.setText(render.uMax);
+		toogleSwitch = newGuiButton(100, 50 + 60,100, "toogle switch");
+
+
 	}
 	
-	@Override
-	protected void keyTyped(char par1, int par2)
-    {
-        if (this.voltage.textboxKeyTyped(par1, par2))
-        {
 
-        }
-        else
-        {
-            super.keyTyped(par1, par2);
-        }
-    }
-    protected void mouseClicked(int par1, int par2, int par3)
-    {
-        super.mouseClicked(par1, par2, par3);
-        this.voltage.mouseClicked(par1, par2, par3);
-    }
 
-    void noneEntry()
-    {
-    	validate.enabled = false;
-    	setUmax.enabled = true;
-    	setUmin.enabled = true;
-    	voltage.setVisible(false);
-    	selected = SelectedType.none;
-    }
-    void setEntry()
-    {
-    	validate.enabled = true;
-    	setUmax.enabled = false;
-    	setUmin.enabled = false;
-    	voltage.setVisible(true);
-    }
+    
     @Override
-    protected void actionPerformed(GuiButton par1GuiButton) {
-    	if(par1GuiButton == validate)
+    public void guiObjectEvent(IGuiObject object) {
+    	// TODO Auto-generated method stub
+    	super.guiObjectEvent(object);
+    	if(object == setUmax)
     	{
-			float newVoltage;
-			
 			try{
-				newVoltage = Float.parseFloat (voltage.getText());
-				switch (selected) {
-				case max:
-					render.clientSetVoltageMax(newVoltage);
-					break;
-				case min:
-					render.clientSetVoltageMin(newVoltage);
-					break;
-
-				default:
-					break;
-				}
+				render.clientSetVoltageMax(Float.parseFloat (setUmax.getText()));
 			} catch(NumberFormatException e)
 			{
-				noneEntry();
-				return;
+
 			}
-			
-			noneEntry();
     	}
-    	else if(par1GuiButton == setUmax)
+    	else if(object == setUmin)
     	{
-    		selected = SelectedType.max;
-    		setEntry();
+			try{
+				render.clientSetVoltageMin(Float.parseFloat (setUmin.getText()));
+			} catch(NumberFormatException e)
+			{
+
+			}
     	}
-    	else if(par1GuiButton == setUmin)
-    	{
-    		selected = SelectedType.min;
-    		setEntry();
-    	}
-    	else if(par1GuiButton == toogleSwitch)
+    	else if(object == toogleSwitch)
     	{
     		render.clientToogleSwitch();
     	}
     }
+
    
-    /**
-     * Draws the screen and all the components in it.
-     */
     @Override
-    public void drawScreen(int par1, int par2, float par3)
-    {
+    protected void preDraw(float f, int x, int y) {
+    	// TODO Auto-generated method stub
+    	super.preDraw(f, x, y);
     	toogleSwitch.displayString = "state is " + render.switchState;
-        super.drawScreen(par1, par2, par3);
-        GL11.glDisable(GL11.GL_LIGHTING);
-        this.voltage.drawTextBox();
-        
     }
 
-	
-    public boolean doesGuiPauseGame()
-    {
-        return false;
-    }
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
+	protected GuiHelper newHelper() {
 		// TODO Auto-generated method stub
-		
+		return new GuiHelper(this, 176, 166, "electricalbreaker.png");
 	}
-	
+
+
 }

@@ -43,7 +43,6 @@ public class ElectricalRelayRender extends SixNodeElementRender{
 	}
 
 
-	LRDU front;
 
 	@Override
 	public void draw() {
@@ -63,9 +62,7 @@ public class ElectricalRelayRender extends SixNodeElementRender{
 		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
-			Byte b;
-			b = stream.readByte();
-			front = LRDU.fromInt((b>>4)&3);
+
 			switchState = stream.readBoolean();
 			defaultOutput = stream.readBoolean();
 
@@ -93,6 +90,6 @@ public class ElectricalRelayRender extends SixNodeElementRender{
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		// TODO Auto-generated method stub
-		return new ElectricalRelayGui(player,inventory,this);
+		return new ElectricalRelayGui(player,this);
 	}
 }

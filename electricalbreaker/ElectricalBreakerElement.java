@@ -147,13 +147,9 @@ public class ElectricalBreakerElement extends SixNodeElement {
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte( (front.toInt()<<4));
 			stream.writeBoolean(switchState);
-	    	stream.writeShort((short) ((aLoad.Uc)*Node.networkSerializeUFactor));
-	    	stream.writeShort((short) ((bLoad.Uc)*Node.networkSerializeUFactor));
-	    	stream.writeShort((short) (aLoad.getCurrent()*Node.networkSerializeIFactor));
-	    	stream.writeFloat( (voltageMin));
 	    	stream.writeFloat( (voltageMax));
+	    	stream.writeFloat( (voltageMin));
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

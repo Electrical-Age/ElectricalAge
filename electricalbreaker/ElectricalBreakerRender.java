@@ -42,9 +42,6 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 		time = System.currentTimeMillis();
 	}
 
-	double voltageAnode = 0,voltageCatode = 0,current = 0;
-	LRDU front;
-
 	@Override
 	public void draw() {
 				
@@ -59,7 +56,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 	}
 	*/
 	
-
+	float uMin,uMax;
 
 	boolean boot = true;
 	float switchAlpha = 0;
@@ -69,28 +66,10 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
-			Byte b;
-			b = stream.readByte();
-			front = LRDU.fromInt((b>>4)&3);
 			switchState = stream.readBoolean();
-			voltageAnode = stream.readShort() /Node.networkSerializeUFactor;
-			voltageCatode = stream.readShort() /Node.networkSerializeUFactor;
-			current = stream.readShort() /Node.networkSerializeIFactor;
+			uMax = stream.readFloat();
+			uMin = stream.readFloat();
 			
-			float readF;
-			readF = stream.readFloat();
-			if(voltageMaxSyncValue!= readF)
-			{
-				voltageMaxSyncValue = readF;
-				voltageMaxSyncNew = true;
-			}
-			readF = stream.readFloat();
-			if(voltageMinSyncValue!= readF)
-			{
-				voltageMinSyncValue = readF;
-				voltageMinSyncNew = true;
-			}
-
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -104,8 +83,6 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 	}
 	
 	
-	float voltageMaxSyncValue = -1234, voltageMinSyncValue = -1234;
-	boolean voltageMaxSyncNew = false,voltageMinSyncNew = false;
 	public void clientSetVoltageMin(float value)
 	{
         try {

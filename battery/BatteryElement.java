@@ -255,7 +255,8 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	public void readItemStackNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
 		super.readItemStackNBT(nbt);
-
+		
+		if(nbt == null) nbt = descriptor.getDefaultNBT();
 		fromItemStack_charge = nbt.getDouble("charge");
 		fromItemStack_life = nbt.getDouble("life");
 		

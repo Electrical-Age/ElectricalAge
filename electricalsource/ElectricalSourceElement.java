@@ -115,9 +115,7 @@ public class ElectricalSourceElement extends SixNodeElement{
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte( (color<<4));
-	    	stream.writeShort((short) (electricalLoad.Uc*Node.networkSerializeUFactor));
-	    	stream.writeShort((short) (electricalLoad.getCurrent()*Node.networkSerializeIFactor));
-
+	    	stream.writeFloat((float) groundProcess.Uc);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -186,6 +184,7 @@ public class ElectricalSourceElement extends SixNodeElement{
 			{
 			case setVoltageId:
 				groundProcess.Uc = stream.readFloat();
+				needPublish();
 				break;
 			}
 		} catch (IOException e) {

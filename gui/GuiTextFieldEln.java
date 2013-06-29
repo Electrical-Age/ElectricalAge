@@ -3,7 +3,7 @@ package mods.eln.gui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiTextField;
 
-public class GuiTextFieldEln extends GuiTextField{
+public class GuiTextFieldEln extends GuiTextField implements IGuiObject{
 
 	public GuiTextFieldEln(FontRenderer par1FontRenderer, int par2, int par3,
 			int par4, int par5) {
@@ -24,6 +24,11 @@ public class GuiTextFieldEln extends GuiTextField{
 	public interface GuiTextFieldElnObserver{
 		void textFieldNewValue(GuiTextFieldEln textField,String value);
 		
+	}
+	
+	public void setText(float value)
+	{
+		setText( String.format("%3.2f", value));
 	}
 	
 	private boolean enabled = true;
@@ -59,6 +64,33 @@ public class GuiTextFieldEln extends GuiTextField{
     	if(isFocused() == true && par1 == false && observer != null) observer.textFieldNewValue(this,this.getText());
     	super.setFocused(par1);
     }
+
+	@Override
+	public void idraw(int x, int y, float f) {
+		this.drawTextBox();
+	}
+
+	@Override
+	public boolean ikeyTyped(char key, int code) {
+		return this.textboxKeyTyped(key, code);
+	}
+
+	@Override
+	public void imouseClicked(int x, int y, int code) {
+		this.mouseClicked(x, y, code);
+	}
+
+	@Override
+	public void imouseMove(int x, int y) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void imouseMovedOrUp(int x, int y, int witch) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 
 }

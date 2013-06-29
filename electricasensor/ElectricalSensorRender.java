@@ -43,7 +43,7 @@ public class ElectricalSensorRender extends SixNodeElementRender{
 	}
 
 
-	LRDU front;
+
 
 	@Override
 	public void draw() {
@@ -70,7 +70,6 @@ public class ElectricalSensorRender extends SixNodeElementRender{
 		try {
 			Byte b;
 			b = stream.readByte();
-			front = LRDU.fromInt((b>>4)&3);
 			typeOfSensor = b & 0x3;
 			lowValue = stream.readFloat();
 			highValue = stream.readFloat();

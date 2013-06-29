@@ -54,18 +54,18 @@ public class ElectricalSensorElement extends SixNodeElement {
 	public ElectricalSensorElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-		front = LRDU.Left;
+		//front = LRDU.Left;
     	this.descriptor = (ElectricalSensorDescriptor) descriptor;
-		if(this.descriptor.voltageOnly == false)
+	//	if(this.descriptor.voltageOnly == false)
 			electricalLoad = new NodeElectricalLoad("electricalLoad");
-		else
-			electricalLoad = new NodeElectricalGateInput("inputGate");
+		/*else
+			electricalLoad = new NodeElectricalGateInput("inputGate");*/
 		electricalLoadList.add(electricalLoad);
     	electricalLoadList.add(outputGate);
     	electricalProcessList.add(outputGateProcess);
     	thermalProcessList.add(slowProcess);
     	
-    	electricalLoad.setRp(100000000000000.0);
+    //	electricalLoad.setRp(100000000000000.0);
 
 	}
 
@@ -78,7 +78,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 	
 	
 	SixNodeElementInventory inventory = new SixNodeElementInventory(1,64,this);
-	LRDU front;
+
 
 	public SixNodeElementInventory getInventory() {
 		return inventory;
@@ -177,7 +177,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte( (front.toInt()<<4) + typeOfSensor);
+			stream.writeByte( typeOfSensor);
 			stream.writeFloat(lowValue);
 			stream.writeFloat(highValue);
 		} catch (IOException e) {
@@ -204,7 +204,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 	public void computeElectricalLoad()
 	{
 		
-		if(descriptor.voltageOnly == false)
+		//if(descriptor.voltageOnly == false)
 		{
 			ItemStack cable = inventory.getStackInSlot(ElectricalSensorContainer.cableSlotId);
 			ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);

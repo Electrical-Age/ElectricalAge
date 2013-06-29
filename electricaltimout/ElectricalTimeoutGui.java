@@ -7,6 +7,10 @@ import java.io.IOException;
 import org.lwjgl.opengl.GL11;
 
 
+import mods.eln.gui.GuiHelper;
+import mods.eln.gui.GuiScreenEln;
+import mods.eln.gui.GuiTextFieldEln;
+import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -18,16 +22,15 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.network.packet.Packet250CustomPayload;
 
-public class ElectricalTimeoutGui extends GuiContainer{
+public class ElectricalTimeoutGui extends GuiScreenEln{
 
-	public ElectricalTimeoutGui(EntityPlayer player, IInventory inventory,ElectricalTimeoutRender render) {
-		super(new ElectricalTimeoutContainer(player, inventory));
+	public ElectricalTimeoutGui(EntityPlayer player,ElectricalTimeoutRender render) {
 		this.render = render;
 	}
 
 
 	GuiButton set,reset;
-	GuiTextField timeoutValue;
+	GuiTextFieldEln timeoutValue;
 	ElectricalTimeoutRender render;
 	
 
@@ -36,99 +39,51 @@ public class ElectricalTimeoutGui extends GuiContainer{
 		// TODO Auto-generated method stub
 		super.initGui();
 
-        reset = new GuiButton(1, 100, 50 + 20, "reset");
-		set = new GuiButton(1, 100, 50, "set");
+        reset = newGuiButton( 100, 50 + 20,50, "reset");
+		set = newGuiButton(100, 50,50, "set");
 
-		buttonList.add(reset);	
-		buttonList.add(set);	
-		
-		timeoutValue = new GuiTextField(this.fontRenderer, 120, 140+20, 103, 12);
-		this.timeoutValue.setTextColor(-1);
-        this.timeoutValue.setDisabledTextColour(-1);
-        this.timeoutValue.setEnableBackgroundDrawing(true);
-        this.timeoutValue.setMaxStringLength(30);
-        timeoutValue.setText( String.format("%3.2f", render.timeoutValue));
+		timeoutValue = newGuiTextField(120, 140+20, 103);
+
+        timeoutValue.setText( render.timeoutValue);
         
 
 	}
-	
-	@Override
-	protected void keyTyped(char par1, int par2)
-    {
-		if (this.timeoutValue.textboxKeyTyped(par1, par2))
-        {
-			
-        }
-		else if(par1 == '\r')
-		{
-			timeoutValue.setFocused(false);
-			sendTimeoutValue();		
-		}
-        else
-        {
-            super.keyTyped(par1, par2);
-        }
-    }
-    protected void mouseClicked(int par1, int par2, int par3)
-    {
-        boolean focus;
-        focus = timeoutValue.isFocused();
-        this.timeoutValue.mouseClicked(par1, par2, par3);
-        if(focus == true && timeoutValue.isFocused() == false)
-        {
-        	sendTimeoutValue();
-        }
-        super.mouseClicked(par1, par2, par3);
 
-    }
-
-    void sendTimeoutValue()
-    {
-		try{
-			float value = Float.parseFloat (timeoutValue.getText());
-			render.clientSetFloat(ElectricalTimeoutElement.setTimeOutValueId,value);
-		} catch(NumberFormatException e)
-		{
-
-		}	   	
-    }
+    
+    
     @Override
-    protected void actionPerformed(GuiButton par1GuiButton) {
-    	if(par1GuiButton == set)
+    public void guiObjectEvent(IGuiObject object) {
+    	// TODO Auto-generated method stub
+    	super.guiObjectEvent(object);
+    	if(object == set)
     	{
     		render.clientSend(ElectricalTimeoutElement.setId);
     	}
-    	else if(par1GuiButton == reset)
+    	else if(object == reset)
     	{
     		render.clientSend(ElectricalTimeoutElement.resetId);
     	}
+    	else if(object == timeoutValue)
+    	{
+    		try{
+    			float value = Float.parseFloat (timeoutValue.getText());
+    			render.clientSetFloat(ElectricalTimeoutElement.setTimeOutValueId,value);
+    		} catch(NumberFormatException e)
+    		{
 
+    		}	
+    	}
     }
    
-    /**
-     * Draws the screen and all the components in it.
-     */
-    @Override
-    public void drawScreen(int par1, int par2, float par3)
-    {
-    	
-        super.drawScreen(par1, par2, par3);
-        GL11.glDisable(GL11.GL_LIGHTING);
-        this.timeoutValue.drawTextBox();
-
-               
-    }
 
 	
-    public boolean doesGuiPauseGame()
-    {
-        return false;
-    }
+
+
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
+	protected GuiHelper newHelper() {
 		// TODO Auto-generated method stub
-		
+		return new GuiHelper(this, 176, 166, "electricaltimeout.png");
 	}
 	
 }
