@@ -21,10 +21,17 @@ import com.google.common.base.Function;
 public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor{
 
 	public ElectricalDataLoggerDescriptor(		
-					String name
+					String name,
+					String objName
 					) {
-			super(name, ElectricalDataLoggerElement.class, ElectricalDataLoggerRender.class);
-			
+		super(name, ElectricalDataLoggerElement.class, ElectricalDataLoggerRender.class);
+		obj = Eln.obj.getObj(objName);
+		if(obj != null)
+		{
+			main = obj.getPart("main");
 		}
+	}
+	Obj3D obj;
+	Obj3DPart main;
 
 }

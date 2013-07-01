@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL11;
 import mods.eln.electricasensor.ElectricalSensorElement;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
+import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
 import mods.eln.gui.IGuiObject;
 import mods.eln.sim.PhysicalConstant;
@@ -102,9 +103,9 @@ public class ThermalSensorGui extends GuiContainerEln{
 
 
 	@Override
-	protected GuiHelper newHelper() {
+	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelper(this, 176, 166, "thermalsensor.png");
+		return new GuiHelperContainer(this, 176, 166,8,84, "thermalsensor.png");
 	}
   
 

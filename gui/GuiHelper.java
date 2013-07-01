@@ -2,15 +2,18 @@ package mods.eln.gui;
 
 import java.util.ArrayList;
 
+import org.lwjgl.opengl.GL11;
+
 import mods.eln.misc.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.Tessellator;
 
 public class GuiHelper {
-	GuiScreen screen;
-	int xSize,ySize;
+	public GuiScreen screen;
+	public int xSize,ySize;
 	String backgroundName;
 	public GuiHelper(	
 			GuiScreen screen,
@@ -23,7 +26,7 @@ public class GuiHelper {
 		this.ySize = ySize;
 		this.backgroundName = backgroundName;
 	}
-
+	
 	
 	GuiTextFieldEln newGuiTextField(int x,int y,int width)
 	{
@@ -85,7 +88,12 @@ public class GuiHelper {
 			o.idraw(x, y, f);
 		}
 	}
-	
+    public void drawTexturedModalRect(int x, int y, int u, int v, int width, int height)
+    {
+		x += (screen.width - xSize) / 2;
+		y += (screen.height - ySize) / 2;
+		screen.drawTexturedModalRect(x, y, u, v, width, height);
+    }
 	protected void keyTyped(char key, int code)
     {
 		for(IGuiObject o : objectList)

@@ -109,7 +109,7 @@ public enum LRDU {
 			
 		}
 	}
-	
+
 	public LRDU getNextClockwise()
 	{
 		switch (this) {
@@ -128,6 +128,26 @@ public enum LRDU {
 			case Up: GL11.glRotatef(90f, 1f, 0f, 0f); break;
 			case Right:GL11.glRotatef(180f, 1f, 0f, 0f);  break;
 			case Down: GL11.glRotatef(270f, 1f, 0f, 0f); break;
+		}
+	}
+	public void rotateOnXnLeft(double [] v)
+	{
+		double y = v[1];
+		double z = v[2];
+		switch (this) {
+			case Left: break;
+			case Up: 
+				v[1] = -z;
+				v[2] = y;
+				break;
+			case Right:
+				v[1] = -y;
+				v[2] = -z;
+				break;
+			case Down: 
+				v[1] = z;
+				v[2] = -y;
+				break;
 		}
 	}
 	

@@ -67,6 +67,12 @@ public class FrameTime implements ITickHandler{
 			return 0f;
 		return instance.deltaT;
 	}
+	public static float getNotCaped()
+	{
+		float value = get();
+		if(value > 0.1f) return 0.1f;
+		return value;
+	}
 	float deltaT = 0.02f;
 	long oldNanoTime = 0;
 	boolean boot = true;
@@ -79,7 +85,6 @@ public class FrameTime implements ITickHandler{
 		else
 		{
 			deltaT = (nanoTime-oldNanoTime)*0.000000001f;
-			if(deltaT > 0.1f) deltaT = 0.1f;
 		}
 		oldNanoTime = nanoTime;
 	//	System.out.println("delta T : " + deltaT);

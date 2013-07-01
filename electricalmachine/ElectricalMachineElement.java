@@ -16,6 +16,7 @@ import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.Node;
 import mods.eln.node.NodeElectricalLoad;
+import mods.eln.node.NodePeriodicPublishProcess;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.NodeThermalWatchdogProcess;
 import mods.eln.node.TransparentNode;
@@ -29,6 +30,7 @@ import mods.eln.sim.ElectricalResistorGrounded;
 import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ElectricalResistorWithCounter;
 import mods.eln.sim.ElectricalStackMachineProcess;
+import mods.eln.sim.ElectricalStackMachineProcess.ElectricalStackMachineProcessObserver;
 import mods.eln.sim.ITemperatureWatchdogDescriptor;
 import mods.eln.sim.RegulatorThermalLoadToElectricalResistor;
 import mods.eln.sim.RegulatorType;
@@ -45,7 +47,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 
-public class ElectricalMachineElement extends TransparentNodeElement implements ITemperatureWatchdogDescriptor,IThermalDestructorDescriptor{
+public class ElectricalMachineElement extends TransparentNodeElement implements ITemperatureWatchdogDescriptor,IThermalDestructorDescriptor,ElectricalStackMachineProcessObserver{
 
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3 , 64, this);
 
@@ -85,6 +87,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		thermalProcessList.add(heatingProcess);
 		slowProcessList.add(thermalWatchdogProcess);
 		slowProcessList.add(slowProcess);
+		slowRefreshProcess.setObserver(this);
+	//	slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 2, 1));
 	}
 
 	@Override
@@ -201,6 +205,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 			stream.writeByte((int)(fPower*64));
 			serialiseItemStack(stream, inventory.getStackInSlot(ElectricalMachineContainer.inSlotId));
 			serialiseItemStack(stream, inventory.getStackInSlot(ElectricalMachineContainer.outSlotId));
+			stream.writeFloat((float) slowRefreshProcess.processState());
+			stream.writeFloat((float) slowRefreshProcess.processStatePerSecond());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -256,6 +262,12 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 	public double getTmin() {
 		// TODO Auto-generated method stub
 		return descriptor.thermal.coolLimit;
+	}
+
+	@Override
+	public void done(ElectricalStackMachineProcess who) {
+		// TODO Auto-generated method stub
+		needPublish();
 	}
 	
 

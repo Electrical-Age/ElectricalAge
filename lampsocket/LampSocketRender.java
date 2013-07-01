@@ -47,9 +47,7 @@ public class LampSocketRender extends SixNodeElementRender{
 	
 
 
-	double voltage = 0,voltageCatode = 0,current = 0,temperature = 0;
 
-	LRDU front;
 
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
@@ -66,11 +64,11 @@ public class LampSocketRender extends SixNodeElementRender{
 	
 	@Override
 	public void draw() {
-		Eln.obj.draw(descriptor.modelName, "socket");
+		descriptor.draw(front,alphaZ);
 	}
 
 	LampDescriptor lampDescriptor = null;
-	
+	float alphaZ;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -78,13 +76,10 @@ public class LampSocketRender extends SixNodeElementRender{
 		try {
 			Byte b;
 			b = stream.readByte();
-			front = LRDU.fromInt((b>>4)&3);
 			grounded = (b & (1<<6)) != 0;
-			voltage = stream.readShort() /Node.networkSerializeUFactor;
-			current = stream.readShort() /Node.networkSerializeIFactor;
-			temperature = stream.readShort() /Node.networkSerializeTFactor;
 			
 			lampDescriptor = (LampDescriptor) Eln.sharedItem.getDescriptor(stream.readShort());
+			alphaZ = stream.readFloat();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

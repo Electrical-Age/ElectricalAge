@@ -6,6 +6,9 @@ import org.lwjgl.opengl.GL11;
 
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
+import mods.eln.gui.GuiHelperContainer;
+import mods.eln.gui.GuiTextFieldEln;
+import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
@@ -41,6 +44,8 @@ public class LampSocketGuiDraw extends GuiContainerEln {
     private SixNodeElementInventory inventory;
     LampSocketRender lampRender;
     GuiButton buttonGrounded;
+    
+    GuiVerticalTrackBar alphaZ;
     public LampSocketGuiDraw(EntityPlayer player, IInventory inventory,LampSocketRender lampRender)
     {
         super(new LampSocketContainer(player, inventory,lampRender.lampSocketDescriptor));
@@ -55,6 +60,10 @@ public class LampSocketGuiDraw extends GuiContainerEln {
     	super.initGui();
     	
     	buttonGrounded = newGuiButton(10,10,100,"");
+    	alphaZ  = newGuiVerticalTrackBar(10, 40, 20, 50);
+    	alphaZ.setRange(lampRender.descriptor.alphaZMin, lampRender.descriptor.alphaZMax);
+    	alphaZ.setStepIdMax(100);
+    	alphaZ.setValue(lampRender.alphaZ);
     }
     
 
@@ -64,6 +73,10 @@ public class LampSocketGuiDraw extends GuiContainerEln {
     	if(object == buttonGrounded)
     	{
     		lampRender.clientSetGrounded(!lampRender.getGrounded());
+    	}
+    	else if(object == alphaZ)
+    	{
+    		lampRender.clientSetFloat(LampSocketElement.setAlphaZId, alphaZ.getValue());
     	}
     }
 	/*
@@ -76,9 +89,9 @@ public class LampSocketGuiDraw extends GuiContainerEln {
     
 
 	@Override
-	protected GuiHelper newHelper() {
+	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelper(this, 176, 166, "lampsocket.png");
+		return new GuiHelperContainer(this, 176, 166,8,84, "lampsocket.png");
 	}
 
 	@Override

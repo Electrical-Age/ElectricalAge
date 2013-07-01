@@ -59,55 +59,57 @@ public class NodeServer implements ITickHandler{
 	}
 	
 
-	
+	public int counter = 0;
 	@Override
 	public void tickStart(EnumSet<TickType> type, Object... tickData) {
     
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-        
-        if (server != null)
-        {
-        	
-		    for (Node node : NodeManager.instance.getNodeList())
-		    {
-		    	if(node.getNeedPublish())
-		    	{
-		    		node.publishToAllPlayer();
-		    	}
-		    }
-        	
-    	    for (Object obj :  server.getConfigurationManager().playerEntityList)
-    	    {
-    	    	EntityPlayerMP player = (EntityPlayerMP) obj;	
-    	    	
-    	    	Node openContainerNode = null;
-    	    	
-    	    	if(player.openContainer != null && player.openContainer instanceof INodeContainer)
-    	    	{
-    	    		openContainerNode = ((INodeContainer) player.openContainer).getNode();
-    	    	}
-    	    
-    	    
-
-    		    for (Node node : NodeManager.instance.getNodeList())
-    		    {
-	
-    		    	if(node == openContainerNode)
-    		    	{
-    		    		node.publishToPlayer((Player) player);
-    		    	}
-    		    }
-    		}
-
-
-        }
-
+ 
 
 	}
 	@Override
 	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
 		// TODO Auto-generated method stub
 		
+	       MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+	        
+	        if (server != null)
+	        {
+	        	
+			    for (Node node : NodeManager.instance.getNodeList())
+			    {
+			    	if(node.getNeedPublish())
+			    	{
+			    		node.publishToAllPlayer();
+			    	}
+			    }
+	        	
+	    	    for (Object obj :  server.getConfigurationManager().playerEntityList)
+	    	    {
+	    	    	EntityPlayerMP player = (EntityPlayerMP) obj;	
+	    	    	
+	    	    	Node openContainerNode = null;
+	    	    	INodeContainer container = null;
+	    	    	if(player.openContainer != null && player.openContainer instanceof INodeContainer)
+	    	    	{
+	    	    		container = ((INodeContainer) player.openContainer);
+	    	    		openContainerNode = container.getNode();
+	    	    	}
+	    	    
+	    	    
+
+	    		    for (Node node : NodeManager.instance.getNodeList())
+	    		    {
+		
+	    		    	if(node == openContainerNode)
+	    		    	{
+	    		    		if((counter % (1+container.getRefreshRateDivider())) == 0)
+	    		    			node.publishToPlayer((Player) player);
+	    		    	}
+	    		    }
+	    		}
+
+	    	    counter++;
+	        }
 		
 
 	}

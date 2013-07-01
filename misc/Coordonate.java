@@ -184,4 +184,32 @@ public class Coordonate implements INBTTReady {
 	{
 		return Math.abs(e.posX - x) +  Math.abs(e.posY - y) + Math.abs(e.posZ - z);
 	}
+	
+	public void setBlock(int id, int meta) {
+		world().setBlock(x, y, z, id, meta, 2);
+	}
+	public int getMeta() {
+		// TODO Auto-generated method stub
+		return world().getBlockMetadata(x, y, z);
+	}
+	public boolean getBlockExist() {
+		// TODO Auto-generated method stub
+		return world().blockExists(x, y, z);
+	}
+	public void copyTo(double[] v) {
+		v[0] = x + 0.5;
+		v[1] = y + 0.5;
+		v[2] = z + 0.5;
+		
+	}
+	public void setPosition(double[] vp) {
+		this.x = (int) vp[0];
+		this.y = (int) vp[1];
+		this.z = (int) vp[2];
+		
+	}
+	public TileEntity getTileEntity() {
+		// TODO Auto-generated method stub
+		return world().getBlockTileEntity(x, y, z);
+	}
 }

@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL11;
 
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
+import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.IGuiObject;
 import mods.eln.heatfurnace.HeatFurnaceContainer;
@@ -73,9 +74,9 @@ public class TransformerGuiDraw extends GuiContainerEln {
     }
 
 	@Override
-	protected GuiHelper newHelper() {
+	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelper(this, 176, 166, "transformer.png");
+		return new GuiHelperContainer(this, 176, 166,8,84, "transformer.png");
 	}
     
 

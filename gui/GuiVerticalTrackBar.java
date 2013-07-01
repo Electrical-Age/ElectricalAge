@@ -32,6 +32,7 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 		this.height = height;
 		this.xPosition = xPosition;
 		this.yPosition = yPosition;	
+		enable = true;
 	}
 	
 	public void setEnable(boolean enable)

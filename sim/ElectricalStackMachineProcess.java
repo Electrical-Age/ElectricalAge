@@ -12,7 +12,17 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 
 public class ElectricalStackMachineProcess implements IProcess{
-
+	public interface ElectricalStackMachineProcessObserver{
+		void done(ElectricalStackMachineProcess who);
+	}
+	
+	
+	ElectricalStackMachineProcessObserver observer;
+	
+	public void setObserver(ElectricalStackMachineProcessObserver observer)
+	{
+		this.observer = observer;
+	}
 	public IInventory inventory;
 	int inputSlotId,OutputSlotId,outputSlotNbr;
 	ElectricalResistor electricalResistor;
@@ -76,7 +86,7 @@ public class ElectricalStackMachineProcess implements IProcess{
 		
 		if(smeltInProcess)
 		{
-			energyCounter += electricalResistor.getP() * efficiency *time;
+			energyCounter += getPower() *time;
 			if(energyCounter > energyNeeded)
 			{
 				energyCounter -= energyNeeded;
@@ -86,7 +96,10 @@ public class ElectricalStackMachineProcess implements IProcess{
 		}
 
 	}
-
+	public double getPower()
+	{
+		return electricalResistor.getP() * efficiency;
+	}
 	
 	public void smeltInit()
 	{
@@ -150,7 +163,25 @@ public class ElectricalStackMachineProcess implements IProcess{
         	Recipe recipe = recipesList.getRecipe(inventory.getStackInSlot(inputSlotId));
             Utils.tryPutStackInInventory(recipe.getOutputCopy(), inventory,outSlotIdList);
             inventory.decrStackSize(inputSlotId, recipe.input.stackSize);
+            if(observer != null)observer.done(this);
         }
+    }
+    
+    
+    public double processState()
+    {
+    	if(smeltInProcess == false) return 0.0;
+    	double state = energyCounter/energyNeeded;
+    	if(state > 1.0) state = 1.0;
+    	return state;
+    }
+    
+    public double processStatePerSecond()
+    {
+    	if(smeltInProcess == false) return 0;
+    	double power = getPower()+0.1;
+    	double ret = power / (energyNeeded) ;
+    	return ret;
     }
 
 }

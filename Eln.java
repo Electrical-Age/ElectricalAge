@@ -92,6 +92,8 @@ import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
 import mods.eln.lampsocket.LampSocketDescriptor;
 import mods.eln.lampsocket.LampSocketType;
+import mods.eln.lampsocket.LightBlock;
+import mods.eln.lampsocket.LightBlockEntity;
 
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.FunctionTableYProtect;
@@ -248,6 +250,7 @@ public class Eln {
 	public static  TransparentNodeBlock transparentNodeBlock;
 	public static  OreBlock oreBlock;
 	public static  GhostBlock ghostBlock;
+	public static  LightBlock lightBlock;
 	
 	public static SixNodeItem sixNodeItem; 
 	public static TransparentNodeItem transparentNodeItem;
@@ -278,6 +281,7 @@ public class Eln {
     int transparentNodeBlockId;
     int SixNodeBlockId;
     int ghostBlockId;
+    public static int lightBlockId;
     
   //  int TreeResinCollectorId;
     
@@ -306,6 +310,8 @@ public class Eln {
     	
         ghostBlockId = config.getTerrainBlock("ELN", "GhostBlock", blocBaseId + 8, "choubakaka").getInt();
        
+        lightBlockId = config.getTerrainBlock("ELN", "LightBlock", blocBaseId + 2, "choubakaka").getInt();
+        
        // TreeResinCollectorId  = config.getTerrainBlock("ELN", "TreeResinCollectorId", blocBaseId + 9, "choubakaka").getInt();
         /*
     	sixNodeBlock = (SixNodeBlock) new SixNodeBlock(SixNodeBlockId, Material.ground,SixNodeEntity.class).setCreativeTab(creativeTab);
@@ -349,6 +355,7 @@ public class Eln {
     public FrameTime frameTime;
     @Init
     public void load(FMLInitializationEvent event) {
+    	
       	simulator = new Simulator(20,commonOverSampling,electricalOverSampling,thermalOverSampling);
       	nodeServer = new NodeServer();
       	frameTime = new FrameTime();
@@ -372,6 +379,7 @@ public class Eln {
        	sixNodeBlock = (SixNodeBlock) new SixNodeBlock(SixNodeBlockId, Material.ground,SixNodeEntity.class).setCreativeTab(creativeTab);
        	
        	ghostBlock = (GhostBlock) new GhostBlock(ghostBlockId);
+       	lightBlock = (LightBlock) new LightBlock(lightBlockId);
        	
        	obj.loadFolder("/mods/eln/model");
       // 	Obj3DFolder miaou = new Obj3DFolder();
@@ -399,6 +407,8 @@ public class Eln {
     	GameRegistry.registerBlock(oreBlock,OreItem.class);
 
 		TileEntity.addMapping(GhostEntity.class,"ghostTileEntity");   
+		TileEntity.addMapping(LightBlockEntity.class,"LightBlockEntity");   
+
 		
        	NodeManager.registerBlock(sixNodeBlock,SixNode.class);
        	NodeManager.registerBlock(transparentNodeBlock,TransparentNode.class);
@@ -555,9 +565,20 @@ public class Eln {
     }
     
 
-
+    @cpw.mods.fml.common.Mod.ServerStopping                /* Remember to use the right event! */
+    public void onServerStopping(FMLServerStoppingEvent ev) {
+    	LightBlockEntity.observers.clear();
+    	playerManager = null;
+        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+    	WorldServer worldServer = server.worldServers[0];
+        simulator.init();
+        nodeServer.init();
+    	nodeManager = null;
+    	ghostManager = null;
+    }  
     @ServerStarting                 /* Remember to use the right event! */
     public void onServerStarting(FMLServerStartingEvent ev) {
+    	LightBlockEntity.observers.clear();
     	playerManager = new PlayerManager();
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
     	WorldServer worldServer = server.worldServers[0];
@@ -915,11 +936,27 @@ public class Eln {
 
 	    	LampSocketDescriptor desc = 	new LampSocketDescriptor(
 	    			name,"ClassicLampSocket",
-					LampSocketType.Douille //LampSocketType socketType
+					LampSocketType.Douille, //LampSocketType socketType
+					0,
+					0,0
 					);
     		
 	    	sixNodeItem.addDescriptor(subId + (id << 6), desc);
-    	}   		
+    	}   
+    	{
+    		subId = 1;
+    		
+	    	name = "Lamp socket B projector";
+
+	    	LampSocketDescriptor desc = 	new LampSocketDescriptor(
+	    			name,"ClassicLampSocket",
+					LampSocketType.Douille, //LampSocketType socketType
+					10,
+					-90,90
+					);
+    		
+	    	sixNodeItem.addDescriptor(subId + (id << 6), desc);
+    	}   
 	}
 	
     void registerDiode(int id)

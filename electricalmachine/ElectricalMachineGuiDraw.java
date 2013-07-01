@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL11;
 
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
+import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.GuiVerticalTrackBarHeat;
 import mods.eln.misc.Utils;
@@ -45,8 +46,18 @@ public class ElectricalMachineGuiDraw extends GuiContainerEln {
 
 
 	@Override
-	protected GuiHelper newHelper() {
+	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelper(this, 176, 166, "electricalmachine.png");
+		return new GuiHelperContainer(this, 176, 166,8,84, "electricalmachine.png");
+	}
+	
+	
+	@Override
+	protected void postDraw(float f, int x, int y) {
+		// TODO Auto-generated method stub
+		super.postDraw(f, x, y);
+		
+		drawTexturedModalRectEln(94, 33,177,14 , (int) (22*render.processState), 15);
+		//draw
 	}
 }

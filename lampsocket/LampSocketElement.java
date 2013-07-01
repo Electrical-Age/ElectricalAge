@@ -42,14 +42,14 @@ import net.minecraft.nbt.NBTTagCompound;
 public class LampSocketElement extends SixNodeElement{
 
 	
-	LampSocketDescriptor lampSocketDescriptor = null;
+	LampSocketDescriptor socketDescriptor = null;
 	
 	public LampSocketElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-		this.lampSocketDescriptor = (LampSocketDescriptor) descriptor;
+		this.socketDescriptor = (LampSocketDescriptor) descriptor;
 		
-		front = LRDU.Left;
+		
     	electricalLoadList.add(positiveLoad);
     	electricalLoadList.add(negativeLoad);
     	electricalProcessList.add(lampResistor);
@@ -69,7 +69,7 @@ public class LampSocketElement extends SixNodeElement{
 
 	public LampSocketProcess lampProcess = new LampSocketProcess(this);
 	public ElectricalResistor lampResistor = new ElectricalResistor(positiveLoad, negativeLoad);
-	LRDU front;
+
 	
 	boolean grounded = true;
 	
@@ -106,6 +106,7 @@ public class LampSocketElement extends SixNodeElement{
 		//inventory.writeToNBT(nbt, str + "inv");
 	}
 	static final int setGroundedId = 1;
+	static final int setAlphaZId = 2;
 	public void networkUnserialize(DataInputStream stream) 
 	{
 		try {
@@ -115,6 +116,10 @@ public class LampSocketElement extends SixNodeElement{
 				grounded = stream.readByte() != 0 ? true : false;
 				computeElectricalLoad();
 				sixNode.reconnect();
+				needPublish();
+				break;
+			case setAlphaZId:
+				lampProcess.alphaZ = stream.readFloat();
 				needPublish();
 				break;
 			}
@@ -138,7 +143,7 @@ public class LampSocketElement extends SixNodeElement{
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
 		// TODO Auto-generated method stub
-		return new LampSocketContainer(player, inventory,lampSocketDescriptor);
+		return new LampSocketContainer(player, inventory,socketDescriptor);
 	}
 	public static boolean canBePlacedOnSide(Direction side,int type)
 	{
@@ -188,11 +193,9 @@ public class LampSocketElement extends SixNodeElement{
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte( (front.toInt()<<4) + (grounded ? (1<<6) : 0 ));
-	    	stream.writeShort((short) ((positiveLoad.Uc)*Node.networkSerializeUFactor));
-	    	stream.writeShort((short) (positiveLoad.getCurrent()*Node.networkSerializeIFactor));
-	    	stream.writeShort((short) (thermalLoad.Tc*Node.networkSerializeTFactor));
+			stream.writeByte((grounded ? (1<<6) : 0 ));
 	    	stream.writeShort(inventory.getStackInSlot(LampSocketContainer.lampSlotId) == null ? 0 : inventory.getStackInSlot(LampSocketContainer.lampSlotId).getItemDamage());
+	    	stream.writeFloat((float) lampProcess.alphaZ);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -264,7 +267,14 @@ public class LampSocketElement extends SixNodeElement{
 
 	public int getLightValue() 
 	{
-		return lampProcess.light;
+		return lampProcess.getBlockLight();
+	}
+	
+	@Override
+	public void destroy() {
+		// TODO Auto-generated method stub
+		super.destroy();
+		lampProcess.destructor();
 	}
 	
 }

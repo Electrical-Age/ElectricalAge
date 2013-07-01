@@ -4,6 +4,7 @@ import mods.eln.gui.GuiTextFieldEln.GuiTextFieldElnObserver;
 import mods.eln.gui.IGuiObject.IGuiObjectObserver;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
 
 public abstract class GuiContainerEln extends GuiContainer implements IGuiObjectObserver, GuiTextFieldElnObserver{
 	public GuiContainerEln(Container par1Container) {
@@ -11,17 +12,35 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 		// TODO Auto-generated constructor stub
 	}
 
-	GuiHelper helper;
+	GuiHelperContainer helper;
 	
 	
-	protected abstract GuiHelper newHelper();
+	protected abstract GuiHelperContainer newHelper();
 
 	
 	@Override
 	public void initGui() {
-		super.initGui();
+
 		helper = newHelper();
+		xSize = helper.xSize;
+		ySize = helper.ySize;
+		super.initGui();
+		
+		if(helper instanceof GuiHelperContainer) 
+		{
+			apply((GuiHelperContainer) helper);
+		}
 	}
+	
+    void apply(GuiHelperContainer helper)
+    {
+    	for(int idx =inventorySlots.inventorySlots.size() - 36;idx < inventorySlots.inventorySlots.size();idx++)
+    	{
+    		Slot s = (Slot)inventorySlots.inventorySlots.get(idx);
+    		s.xDisplayPosition += helper.xInv;
+    		s.yDisplayPosition += helper.yInv;
+    	}
+    }
 	
 	public GuiTextFieldEln newGuiTextField(int x,int y,int width)
 	{
@@ -48,7 +67,11 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 		o.setObserver(this);
 		return o;			
 	}
-	
+
+    public void drawTexturedModalRectEln(int x, int y, int u, int v, int width, int height)
+    {
+		helper.drawTexturedModalRect(x, y, u, v, width, height);
+    }
 	@Override
 	protected void keyTyped(char key, int code)
     {

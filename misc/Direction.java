@@ -547,9 +547,9 @@ public enum Direction {
 			p[2] = -z;
 			break;
 		case YN:
-			p[0] = -y;
+			p[0] = y;
 			p[1] = x;
-			p[2] = z;
+			p[2] = -z;
 			break;
 		case YP:
 			p[0] = y;

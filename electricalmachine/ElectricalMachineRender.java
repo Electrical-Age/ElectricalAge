@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.client.ClientProxy;
+import mods.eln.client.FrameTime;
 import mods.eln.misc.Direction;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElement;
@@ -38,6 +39,10 @@ public class ElectricalMachineRender extends TransparentNodeElementRender{
 	Object drawHandle;
 	@Override
 	public void draw() {	
+		processState += processStatePerSecond * FrameTime.getNotCaped();
+		if(processState > 1f) processState = 1f;
+		
+		
 		descriptor.draw(this,drawHandle, inEntity, outEntity, powerFactor);
 
 	}
@@ -59,8 +64,10 @@ public class ElectricalMachineRender extends TransparentNodeElementRender{
 
 	
 	EntityItem inEntity,outEntity;
-	float powerFactor;
+	float powerFactor,processState,processStatePerSecond;
 	
+	
+
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -70,6 +77,8 @@ public class ElectricalMachineRender extends TransparentNodeElementRender{
 			powerFactor = stream.readByte() / 64f;
 			inEntity = unserializeItemStackToEntityItem(stream, inEntity);
 			outEntity = unserializeItemStackToEntityItem(stream, outEntity);
+			processState = stream.readFloat();
+			processStatePerSecond = stream.readFloat();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -77,6 +86,7 @@ public class ElectricalMachineRender extends TransparentNodeElementRender{
 	
 	
 	}
+	
 	
 	
 

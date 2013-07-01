@@ -1,6 +1,8 @@
 package mods.eln;
 
 
+import mods.eln.gui.GuiHelper;
+import mods.eln.gui.GuiHelperContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -35,16 +37,25 @@ public class BasicContainer extends Container {
 
 
     protected void bindPlayerInventory(InventoryPlayer inventoryPlayer) {
-            for (int i = 0; i < 3; i++) {
-                    for (int j = 0; j < 9; j++) {
-                            addSlotToContainer(new Slot(inventoryPlayer, j + i * 9 + 9,
-                                            8 + j * 18, 84 + i * 18));
-                    }
-            }
+        for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 9; j++) {
+                        addSlotToContainer(new Slot(inventoryPlayer, j + i * 9 + 9,
+                                j * 18, i * 18));
+                    //    8 + j * 18, 84 + i * 18));
+                }
+        }
 
-            for (int i = 0; i < 9; i++) {
-                    addSlotToContainer(new Slot(inventoryPlayer, i, 8 + i * 18, 142));
-            }
+        for (int i = 0; i < 9; i++) {
+            addSlotToContainer(new Slot(inventoryPlayer, i, i * 18, 58));
+            //addSlotToContainer(new Slot(inventoryPlayer, i, 8 + i * 18, 142));
+        }
+	}
+
+    @Override
+    protected Slot addSlotToContainer(Slot slot)
+    {
+    	//slot.xDisplayPosition = helper.
+    	return super.addSlotToContainer(slot);
     }
 
     @Override
@@ -81,5 +92,8 @@ public class BasicContainer extends Container {
             }
             return stack;
     }
+    
+    
+
 
 }

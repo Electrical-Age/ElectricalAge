@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
+import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
@@ -96,33 +97,35 @@ public class ElectricalSensorGui extends GuiContainerEln{
     protected void preDraw(float f, int x, int y) {
     	// TODO Auto-generated method stub
     	super.preDraw(f, x, y);
-    	if(render.typeOfSensor == ElectricalSensorElement.currantType)
+    	if(render.descriptor.voltageOnly == false)
     	{
-        	powerType.enabled = true;
-        	currentType.enabled = false;
-        	voltageType.enabled = true;
+	    	if(render.typeOfSensor == ElectricalSensorElement.currantType)
+	    	{
+	        	powerType.enabled = true;
+	        	currentType.enabled = false;
+	        	voltageType.enabled = true;
+	    	}
+	    	else if(render.typeOfSensor == ElectricalSensorElement.voltageType)
+	    	{
+	    		powerType.enabled = true;
+	        	currentType.enabled = true;
+	        	voltageType.enabled = false;
+	    	}
+	    	else if(render.typeOfSensor == ElectricalSensorElement.powerType)
+	    	{
+	        	powerType.enabled = false;
+	        	currentType.enabled = true;
+	        	voltageType.enabled = true;
+	    	}
     	}
-    	else if(render.typeOfSensor == ElectricalSensorElement.voltageType)
-    	{
-    		powerType.enabled = true;
-        	currentType.enabled = true;
-        	voltageType.enabled = false;
-    	}
-    	else if(render.typeOfSensor == ElectricalSensorElement.powerType)
-    	{
-        	powerType.enabled = false;
-        	currentType.enabled = true;
-        	voltageType.enabled = true;
-    	}
-
     }
 
 
 
 	@Override
-	protected GuiHelper newHelper() {
+	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelper(this, 176, 166, "electricalsensor.png");
+		return new GuiHelperContainer(this, 176, 166,8,84, "electricalsensor.png");
 	}
 	
 }

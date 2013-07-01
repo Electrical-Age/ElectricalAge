@@ -7,6 +7,7 @@ import org.lwjgl.opengl.GL11;
 import mods.eln.gui.GuiButtonEln;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
+import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
@@ -96,9 +97,9 @@ public class BatteryGuiDraw extends GuiContainerEln {
     }
 
 	@Override
-	protected GuiHelper newHelper() {
+	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelper(this, 176, 166, "battery.png");
+		return new GuiHelperContainer(this, 176, 166,8,84, "battery.png");
 	}
 	
 

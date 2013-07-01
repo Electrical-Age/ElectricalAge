@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
+import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
 import mods.eln.gui.IGuiObject;
 import mods.eln.gui.GuiTextFieldEln.GuiTextFieldElnObserver;
@@ -250,9 +251,9 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	
 
 	@Override
-	protected GuiHelper newHelper() {
+	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelper(this, 176, 166, "electricaldatalogger.png");
+		return new GuiHelperContainer(this, 176, 230,8,148, "electricaldatalogger.png");
 	}
 	
 }

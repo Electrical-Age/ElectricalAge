@@ -25,18 +25,12 @@ public class ElectricalMachineContainer extends BasicContainer implements INodeC
 	public static final int inSlotId = 0,outSlotId = 1,boosterSlotId = 2;
 	public ElectricalMachineContainer(Node node,EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new Slot(inventory,inSlotId,62 +  0,17),
-				new Slot(inventory,outSlotId,62 + 18,17),
-			//	new SlotFilter(inventory,2,62 +  0,17 + 18,1,new ItemStackFilter[]{new ItemStackFilter()}),
+				new Slot(inventory,inSlotId,70,32),
+				new Slot(inventory,outSlotId,130,33),
 
+				new GenericItemUsingDamageSlot(inventory,boosterSlotId,20,32,5,MachineBoosterDescriptor.class),
 				
-				new GenericItemUsingDamageSlot(inventory,boosterSlotId,62 +  0,17 + 18,5,MachineBoosterDescriptor.class),
 				
-				
-				//new SlotFilter(inventory,2,62 +  0,17 + 18,1,new ItemStackFilter[]{new ItemStackFilter(Eln.heatingCorpItem)}),
-				//new SlotFilter(inventory,3,62 + 18,17 + 18,1,new ItemStackFilter[]{new ItemStackFilter(Eln.thermalIsolatorItem)}),
-				//new SlotFilter(inventory,4,62 + 36,17 + 18,1,new ItemStackFilter[]{new ItemStackFilter(Eln.regulatorItem)})
-
 			});
 		this.node = node;
 		// TODO Auto-generated constructor stub
@@ -51,7 +45,7 @@ public class ElectricalMachineContainer extends BasicContainer implements INodeC
 	@Override
 	public int getRefreshRateDivider() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 5;
 	}
 
 

@@ -117,14 +117,14 @@ public abstract class SixNodeElementRender {
 	{
 		
 	}
-	LRDU front;
+	public LRDU front;
 	CableRenderType connectionType;
 	public void publishUnserialize(DataInputStream stream)
 	{
 		try {
 			byte b = stream.readByte();
 			connectedSide.set(b & 0xF);
-			front.fromInt((b >> 4) & 0x3);
+			front = front.fromInt((b >> 4) & 0x3);
 			
 			needRedraw = true;
 			
