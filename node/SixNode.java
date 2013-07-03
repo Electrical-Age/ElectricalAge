@@ -98,8 +98,8 @@ public class SixNode extends Node {
 		SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(itemStack);
 		if(sideElementList[direction.getInt()]  != null) return false;
 		try {
-			Object bool = descriptor.ElementClass.getMethod("canBePlacedOnSide",Direction.class,SixNodeDescriptor.class).invoke(null, direction,descriptor);
-			if((Boolean)bool == false) return false;
+			//Object bool = descriptor.ElementClass.getMethod("canBePlacedOnSide",Direction.class,SixNodeDescriptor.class).invoke(null, direction,descriptor);
+			//if((Boolean)bool == false) return false;
 			sideElementList[direction.getInt()] =  (SixNodeElement) descriptor.ElementClass.getConstructor(SixNode.class,Direction.class,SixNodeDescriptor.class).newInstance(this,direction,descriptor);	
 			
 			disconnect();
@@ -637,6 +637,14 @@ public class SixNode extends Node {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	public boolean hasVolume() {
+		// TODO Auto-generated method stub
+		for(SixNodeElement element : sideElementList)
+		{
+			if(element != null && element.sixNodeElementDescriptor.hasVolume()) return true;
+		}
+		return false;
 	}
 	
 	

@@ -500,18 +500,12 @@ public class Eln {
     	recipeLampSocket();
        	recipeDiode();
        	recipeSwitch();
-           	
+       	recipeMachine();
     	recipeTransformer();
     	recipeHeatFurnace();
     	recipeTurbine();
-    	recipeIntelligentTransformer();
-    	recipeMppt();
     	recipeBattery();
     	recipeElectricalFurnace();
-    	recipeMacerator();
-       	recipeExtractor();
-       	recipeCompressor();
-       	recipemagnetiser();
         recipeAutoMiner();
     	recipeSolarPannel();
     	recipeWindTurbine();
@@ -540,8 +534,12 @@ public class Eln {
       	recipeMiscItem();
       
       	
-      	recipeMacerator();
+      	
       	recipeFurnace();
+    	recipeMacerator();
+       	recipeExtractor();
+       	recipeCompressor();
+       	recipemagnetiser();
 
 		
 		proxy.registerRenderers();
@@ -938,7 +936,7 @@ public class Eln {
 	    			name,"ClassicLampSocket",
 					LampSocketType.Douille, //LampSocketType socketType
 					0,
-					0,0
+					0,0,0
 					);
     		
 	    	sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -952,7 +950,7 @@ public class Eln {
 	    			name,"ClassicLampSocket",
 					LampSocketType.Douille, //LampSocketType socketType
 					10,
-					-90,90
+					-90,90,0
 					);
     		
 	    	sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1293,7 +1291,10 @@ public class Eln {
 	    	name = "electrical data logger";
 	    	
 	    	desc = new ElectricalDataLoggerDescriptor(
-	    			name
+	    			name,
+	    			true,
+	    			"DataloggerCRTFloor",
+	    			0f,1f,0f
 	    			);
 	    	sixNodeItem.addDescriptor(subId + (id << 6), desc);
     	}  
@@ -3335,7 +3336,10 @@ public class Eln {
  
 	void recipeGround()
 	{
-		GameRegistry.addRecipe(	findItemStack("Ground cable")," C ", " C ", "CCC",
+		GameRegistry.addRecipe(	findItemStack("Ground cable"),
+				" C ", 
+				" C ", 
+				"CCC",
 				Character.valueOf('C'),findItemStack("Cooper cable"));		
 	}
 	
@@ -3401,6 +3405,13 @@ public class Eln {
 				"G ",
 				"IG",
 				"G ",
+				Character.valueOf('G'), new ItemStack(Block.thinGlass),
+				Character.valueOf('I'), new ItemStack(Item.ingotIron)
+				);		
+		GameRegistry.addRecipe(	findItemStack("Lamp socket B projector",3),
+				" I",
+				"IG",
+				" I",
 				Character.valueOf('G'), new ItemStack(Block.thinGlass),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron)
 				);		
@@ -3477,26 +3488,13 @@ public class Eln {
 	
 	void recipeTransformer()
 	{
+		for(int idx = 0;idx< 4;idx++){
 		GameRegistry.addRecipe(	findItemStack("Transformer"),
 				"I I",
 				"WWW",
-				Character.valueOf('W'), new ItemStack(Block.planks,1,0),
-				Character.valueOf('I'), new ItemStack(Item.ingotIron));		
-		GameRegistry.addRecipe(	findItemStack("Transformer"),
-				"I I",
-				"WWW",
-				Character.valueOf('W'), new ItemStack(Block.planks,1,1),
-				Character.valueOf('I'), new ItemStack(Item.ingotIron));		
-		GameRegistry.addRecipe(	findItemStack("Transformer"),
-				"I I",
-				"WWW",
-				Character.valueOf('W'), new ItemStack(Block.planks,1,2),
-				Character.valueOf('I'), new ItemStack(Item.ingotIron));		
-		GameRegistry.addRecipe(	findItemStack("Transformer"),
-				"I I",
-				"WWW",
-				Character.valueOf('W'), new ItemStack(Block.planks,1,3),
-				Character.valueOf('I'), new ItemStack(Item.ingotIron));		
+				Character.valueOf('W'), new ItemStack(Block.planks,1,idx),
+				Character.valueOf('I'), new ItemStack(Item.ingotIron));
+		}
 	}
 	
 	void recipeHeatFurnace()
@@ -3506,14 +3504,14 @@ public class Eln {
 				"BIB",
 				"BBB",
 				Character.valueOf('B'), new ItemStack(Block.stone),
-				Character.valueOf('I'), new ItemStack(Item.ingotIron));		
+				Character.valueOf('I'), findItemStack("Combustion chamber"));		
 		
 		GameRegistry.addRecipe(	findItemStack("Brick heat furnace"),
 				"BIB",
 				"BIB",
 				"BBB",
 				Character.valueOf('B'), new ItemStack(Block.brick),
-				Character.valueOf('I'), new ItemStack(Item.ingotIron));		
+				Character.valueOf('I'), findItemStack("Combustion chamber"));		
 	}
 	
 	void recipeTurbine()
@@ -3555,15 +3553,6 @@ public class Eln {
 		
 	}
 	
-	void recipeIntelligentTransformer()
-	{
-		//ToBeRemoved
-	}
-	
-	void recipeMppt()
-	{
-		//ToBeRemoved
-	}
 	
 	void recipeBattery()
 	{
@@ -3713,7 +3702,33 @@ public class Eln {
 	}
 	void recipeRegulatorItem()
 	{
-		
+
+
+    	GameRegistry.addRecipe(	findItemStack("On/OFF regulator 10%",1),
+    			"R R",
+    			" R ",
+    			" I ",
+				Character.valueOf('R'), new ItemStack(Item.redstone),
+				Character.valueOf('I'), new ItemStack(Item.ingotIron)
+    			);	
+
+
+    	GameRegistry.addRecipe(	findItemStack("On/OFF regulator 10%",1),
+    			"RRR",
+    			" I ",
+				Character.valueOf('R'), new ItemStack(Item.redstone),
+				Character.valueOf('I'), new ItemStack(Item.ingotIron)
+    			);	
+    	
+
+    	GameRegistry.addRecipe(	findItemStack("Analogic PI regulator",1),
+    			"R R",
+    			" C ",
+    			" I ",
+				Character.valueOf('R'), new ItemStack(Item.redstone),
+				Character.valueOf('I'), new ItemStack(Item.ingotIron),
+				Character.valueOf('C'), findItemStack("Cheap chip")
+    			);	
 	}
 	void recipeLampItem()
 	{
@@ -4246,8 +4261,98 @@ public class Eln {
 
 
 	}	
-	
-	
+    void recipeMachine()
+    {
+    	GameRegistry.addRecipe(	findItemStack("50V macerator",1),
+    			"IRI", 
+    			"FMF", 
+    			"IcI",
+    			Character.valueOf('M'),findItemStack("Machine block"),
+    			Character.valueOf('c'),findItemStack("Low voltage cable"),
+    			Character.valueOf('F'),new ItemStack(Item.flint),
+    			Character.valueOf('I'),new ItemStack(Item.ingotIron),
+    			Character.valueOf('R'),new ItemStack(Item.redstone)
+    			);	
+    	GameRegistry.addRecipe(	findItemStack("200V macerator",1),
+    			"ICI", 
+    			"DMD", 
+    			"IcI",
+    			Character.valueOf('M'),findItemStack("Advanced machine block"),
+    			Character.valueOf('C'),findItemStack("Advanced chip"),
+    			Character.valueOf('c'),findItemStack("Medium voltage cable"),
+    			Character.valueOf('D'),new ItemStack(Item.diamond),
+    			Character.valueOf('I'),findItemStack("Steel ingot")
+    			);	
+
+    	GameRegistry.addRecipe(	findItemStack("50V extractor",1),
+    			"IRI", 
+    			"FMF", 
+    			"IcI",
+    			Character.valueOf('M'),findItemStack("Machine block"),
+    			Character.valueOf('c'),findItemStack("Low voltage cable"),
+    			Character.valueOf('F'),new ItemStack(Item.dyePowder,1,4),
+    			Character.valueOf('I'),new ItemStack(Item.ingotIron),
+    			Character.valueOf('R'),new ItemStack(Item.redstone)
+    			);	
+    	GameRegistry.addRecipe(	findItemStack("200V extractor",1),
+    			"ICI", 
+    			"DMD", 
+    			"IcI",
+    			Character.valueOf('M'),findItemStack("Advanced machine block"),
+    			Character.valueOf('C'),findItemStack("Advanced chip"),
+    			Character.valueOf('c'),findItemStack("Medium voltage cable"),
+    			Character.valueOf('D'),new ItemStack(Item.dyePowder,1,4),
+    			Character.valueOf('I'),findItemStack("Steel ingot")
+    			);
+
+    	GameRegistry.addRecipe(	findItemStack("50V compressor",1),
+    			"IRI", 
+    			"FMF", 
+    			"IcI",
+    			Character.valueOf('M'),findItemStack("Machine block"),
+    			Character.valueOf('c'),findItemStack("Low voltage cable"),
+    			Character.valueOf('F'),findItemStack("Iron plate"),
+    			Character.valueOf('I'),new ItemStack(Item.ingotIron),
+    			Character.valueOf('R'),new ItemStack(Item.redstone)
+    			);	
+    	GameRegistry.addRecipe(	findItemStack("200V compressor",1),
+    			"ICI", 
+    			"DMD", 
+    			"IcI",
+    			Character.valueOf('M'),findItemStack("Advanced machine block"),
+    			Character.valueOf('C'),findItemStack("Advanced chip"),
+    			Character.valueOf('c'),findItemStack("Medium voltage cable"),
+    			Character.valueOf('D'),findItemStack("Steel plate"),
+    			Character.valueOf('I'),findItemStack("Steel ingot")
+    			);	
+    	
+    	
+    	GameRegistry.addRecipe(	findItemStack("50V magnetizer",1),
+    			"IRI", 
+    			"cMc", 
+    			"IcI",
+    			Character.valueOf('M'),findItemStack("Machine block"),
+    			Character.valueOf('c'),findItemStack("Low voltage cable"),
+    			Character.valueOf('I'),new ItemStack(Item.ingotIron),
+    			Character.valueOf('R'),new ItemStack(Item.redstone)
+    			);	
+    	GameRegistry.addRecipe(	findItemStack("200V magnetizer",1),
+    			"ICI", 
+    			"cMc", 
+    			"IcI",
+    			Character.valueOf('M'),findItemStack("Advanced machine block"),
+    			Character.valueOf('C'),findItemStack("Advanced chip"),
+    			Character.valueOf('c'),findItemStack("Medium voltage cable"),
+    			Character.valueOf('I'),findItemStack("Steel ingot")
+    			);	
+    	
+
+
+
+	}	
+    
+    
+
 	
 	
 	

@@ -24,7 +24,7 @@ public class ElectricalFurnaceContainer extends BasicContainer implements INodeC
 				new Slot(inventory,0,62 +  0,17),
 				new Slot(inventory,1,62 + 18,17),
 				
-				new GenericItemUsingDamageSlot(inventory, 2, 0 +  0,0,1, HeatingCorpElement.class),
+				new GenericItemUsingDamageSlot(inventory, 2, 62 +  0,17 + 18,1, HeatingCorpElement.class),
 				new GenericItemUsingDamageSlot(inventory, 3, 62 +  18,17 + 18,1, ThermalIsolatorElement.class),
 				new RegulatorSlot(inventory, 4, 62 +  36,17 + 18,1, new RegulatorType[]{RegulatorType.onOff,RegulatorType.analog})
 				 

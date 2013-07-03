@@ -35,6 +35,7 @@ public abstract class SixNodeElementRender {
 
 	public SixNodeElementRender(SixNodeEntity tileEntity, Direction side,SixNodeDescriptor descriptor)
 	{
+		this.sixNodeDescriptor = descriptor;
 		this.tileEntity = tileEntity;
 		this.side = side;
 		cableList = new int[4];
@@ -119,6 +120,7 @@ public abstract class SixNodeElementRender {
 	}
 	public LRDU front;
 	CableRenderType connectionType;
+	public SixNodeDescriptor sixNodeDescriptor;
 	public void publishUnserialize(DataInputStream stream)
 	{
 		try {

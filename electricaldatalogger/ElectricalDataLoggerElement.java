@@ -71,6 +71,13 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
 	}
 
+	public static boolean canBePlacedOnSide(Direction side,SixNodeDescriptor descriptor)
+	{
+		if(((ElectricalDataLoggerDescriptor)descriptor).onFloor && side == Direction.YN) return true;
+		return false;
+	}
+	
+	
 	NodeElectricalGateInput inputGate;
 	ElectricalDataLoggerProcess slowProcess = new ElectricalDataLoggerProcess(this);
 	public ElectricalDataLoggerDescriptor descriptor;
@@ -117,7 +124,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {	
-		if(front == lrdu) return inputGate;
+		if(front.inverse() == lrdu) return inputGate;
 		
 		return null;
 	}
@@ -130,7 +137,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu) return Node.maskElectricalInputGate;
+		if(front.inverse() == lrdu) return Node.maskElectricalInputGate;
 		
 		return 0;
 	}

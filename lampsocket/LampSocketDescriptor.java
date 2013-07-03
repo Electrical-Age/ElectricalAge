@@ -14,7 +14,8 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 	public LampSocketDescriptor(String name, String modelName,
 								LampSocketType socketType,
 								int range,
-								float alphaZMin,float alphaZMax
+								float alphaZMin,float alphaZMax,
+								float alphaZBoot
 			) 
 	{
 		super(name, LampSocketElement.class,LampSocketRender.class);
@@ -23,11 +24,12 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 		this.range = range;
 		this.alphaZMin = alphaZMin;
 		this.alphaZMax = alphaZMax;
+		this.alphaZBoot = alphaZBoot;
 	}
 
 	public int range;
 	public String modelName;
-	float alphaZMin,alphaZMax;
+	float alphaZMin,alphaZMax,alphaZBoot;
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {

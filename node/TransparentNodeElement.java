@@ -17,6 +17,7 @@ import cpw.mods.fml.common.registry.LanguageRegistry;
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
 import mods.eln.lampsocket.LampSocketElement;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -49,6 +50,7 @@ public abstract class TransparentNodeElement implements INBTTReady {
 	
 	public static final byte unserializeGroundedId = -127;
 	public static final byte unserializeNulldId = -128;
+	TransparentNodeDescriptor transparentNodeDescriptor;
 	protected void serialiseItemStack(DataOutputStream stream,ItemStack stack) throws IOException
 	{
 		
@@ -150,25 +152,10 @@ public abstract class TransparentNodeElement implements INBTTReady {
 	public TransparentNodeElement(TransparentNode transparentNode,TransparentNodeDescriptor descriptor)
 	{
 		this.node = transparentNode;
+		this.transparentNodeDescriptor = descriptor;
 	}
 	
-	public boolean mustHaveFloor()
-	{
-		return true;
-	}
-	
-	public boolean mustHaveCeiling()
-	{
-		return false;
-	}
-	public boolean mustHaveWall()
-	{
-		return false;
-	}
-	public boolean mustHaveWallFrontInverse()
-	{
-		return false;
-	}
+
 	
 	
 	public void onNeighborBlockChange() 
@@ -180,22 +167,22 @@ public abstract class TransparentNodeElement implements INBTTReady {
 	public void checkCanStay(boolean onCreate) {
 		Block block;
 		boolean needDestroy = false;
-		if(mustHaveFloor())
+		if(transparentNodeDescriptor.mustHaveFloor())
 		{
 			block = Block.blocksList[node.neighborBlock[Direction.YN.getInt()]];
 			if(block == null || ! block.isOpaqueCube()) needDestroy = true;
 		}
-		if(mustHaveCeiling())
+		if(transparentNodeDescriptor.mustHaveCeiling())
 		{
 			block = Block.blocksList[node.neighborBlock[Direction.YP.getInt()]];
 			if(block == null || ! block.isOpaqueCube()) needDestroy = true;
 		}
-		if(mustHaveWallFrontInverse())
+		if(transparentNodeDescriptor.mustHaveWallFrontInverse())
 		{
 			block = Block.blocksList[node.neighborBlock[front.getInverse().getInt()]];
 			if(block == null || ! block.isOpaqueCube()) needDestroy = true;
 		}
-		if(mustHaveWall())
+		if(transparentNodeDescriptor.mustHaveWall())
 		{
 			boolean wall = false;
 			block = Block.blocksList[node.neighborBlock[Direction.XN.getInt()]];

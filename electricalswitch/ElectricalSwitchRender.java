@@ -36,8 +36,7 @@ public class ElectricalSwitchRender extends SixNodeElementRender{
 	}
 
 	double voltageAnode = 0,voltageCatode = 0,current = 0,temperature = 0;
-	LRDU front;
-
+	
 	@Override
 	public void draw() {
 		super.draw();
@@ -78,7 +77,7 @@ public class ElectricalSwitchRender extends SixNodeElementRender{
 					switchAlpha += switchDelta * speed;
 					
 					
-					part.draw(switchAlpha, 0, 0, 1);
+					part.draw(switchAlpha, 0, 1, 0);
 				}
 			}
 			//obj.draw("lever_lever");
@@ -122,9 +121,7 @@ public class ElectricalSwitchRender extends SixNodeElementRender{
 		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
-			Byte b;
-			b = stream.readByte();
-			front = LRDU.fromInt((b>>4)&3);
+
 			switchState = stream.readBoolean();
 			voltageAnode = stream.readShort() /Node.networkSerializeUFactor;
 			voltageCatode = stream.readShort() /Node.networkSerializeUFactor;

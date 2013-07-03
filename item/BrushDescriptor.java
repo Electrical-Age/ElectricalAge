@@ -80,7 +80,7 @@ public class BrushDescriptor  extends GenericItemUsingDamageDescriptor
 	public NBTTagCompound getDefaultNBT() {
 		// TODO Auto-generated method stub
 		NBTTagCompound nbt = new NBTTagCompound("painternbt");
-		nbt.setInteger("life", 16);
+		nbt.setInteger("life", 32);
 		return nbt;
 	}
 	

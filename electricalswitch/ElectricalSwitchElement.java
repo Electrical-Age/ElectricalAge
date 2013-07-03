@@ -43,7 +43,7 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
 	public ElectricalSwitchElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-		front = LRDU.Left;
+
     	electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
     	electricalProcessList.add(switchResistor);
@@ -70,8 +70,6 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
 	public NodeThermalWatchdogProcess thermalWatchdog = new NodeThermalWatchdogProcess(sixNode, this, this, thermalLoad);
 	public NodeVoltageWatchdogProcess voltageAWatchdog = new NodeVoltageWatchdogProcess(sixNode, this, this, aLoad);
 	public NodeVoltageWatchdogProcess voltageBWatchdog = new NodeVoltageWatchdogProcess(sixNode, this, this, bLoad);
-	
-	LRDU front;
 	
 
 	public static boolean canBePlacedOnSide(Direction side,int type)
@@ -103,8 +101,8 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
 		// TODO Auto-generated method stub
-		if(front.left() == lrdu) return aLoad;
-		if(front.right() == lrdu) return bLoad;
+		if(front == lrdu) return aLoad;
+		if(front.inverse() == lrdu) return bLoad;
 		return null;
 	}
 
@@ -117,8 +115,8 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		// TODO Auto-generated method stub4
-		if(front.left() == lrdu) return descriptor.getNodeMask();
-		if(front.right() == lrdu) return descriptor.getNodeMask();
+		if(front == lrdu) return descriptor.getNodeMask();
+		if(front.inverse() == lrdu) return descriptor.getNodeMask();
 
 		return 0;
 	}
@@ -141,7 +139,7 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte( (front.toInt()<<4));
+
 			stream.writeBoolean(switchState);
 	    	stream.writeShort((short) ((aLoad.Uc)*Node.networkSerializeUFactor));
 	    	stream.writeShort((short) ((bLoad.Uc)*Node.networkSerializeUFactor));

@@ -120,10 +120,7 @@ public abstract class SixNodeElement implements INBTTReady {
 		this.sixNodeElementDescriptor = descriptor;
 	}
 	
-	public static boolean canBePlacedOnSide(Direction side,SixNodeDescriptor descriptor)
-	{
-		return true;
-	}
+
     public void preparePacketForClient(DataOutputStream stream)
     {
     	sixNode.preparePacketForClient(stream, this);    	

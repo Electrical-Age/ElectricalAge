@@ -12,7 +12,8 @@ public class GuiVerticalTrackBarHeat extends GuiVerticalTrackBar{
 	@Override
 	public void draw(float par1, int x, int y) {
 		super.draw(par1, x, y);
-        drawRect(xPosition + 2, getCursorPositionForValue(temperatureHit), xPosition + width - 2, getCursorPositionForValue(temperatureHit) + 1, 0xFF00FFFF);
+        drawRect(xPosition + 5, getCursorPositionForValue(temperatureHit)-2, xPosition + width - 5, getCursorPositionForValue(temperatureHit) + 2, 0xFF400000);
+        drawRect(xPosition + 6, getCursorPositionForValue(temperatureHit)-1, xPosition + width - 6, getCursorPositionForValue(temperatureHit) + 1, 0xFF600000);
 
 		
 	}

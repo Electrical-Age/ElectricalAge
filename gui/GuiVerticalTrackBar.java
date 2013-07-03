@@ -1,5 +1,8 @@
 package mods.eln.gui;
 
+import org.lwjgl.opengl.GL11;
+
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 
@@ -132,9 +135,22 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 	public void draw(float par1, int x, int y)
 	{
 		if(! visible) return;
-		
-		drawRect(xPosition, yPosition,xPosition + width,yPosition + height,0x80808080);
-		drawRect(xPosition - 2, getCursorPosition(),xPosition + width + 2,getCursorPosition() + 1,0xFFFFFFFF);
+		Minecraft.getMinecraft().renderEngine.bindTexture("/gui/gui.png");
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        
+       // this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 46 + 1 * 20, this.width / 2, this.height);
+       // this.drawTexturedModalRect(this.xPosition + this.width / 2, this.yPosition, 200 - this.width / 2, 46 + 1 * 20, this.width / 2, this.height);
+
+        //this.drawTexturedModalRect(this.xPosition + (int)(0.2 * (float)(this.width - 8)), this.yPosition, 0, 66, 4, 20);
+       // this.drawTexturedModalRect(this.xPosition + (int)(0.2 * (float)(this.width - 8)) + 4, this.yPosition, 196, 66, 4, 20);
+
+		drawRect(xPosition, yPosition,xPosition + width,yPosition + height,0xFF404040);
+		drawRect(xPosition+1, yPosition+1,xPosition + width-1,yPosition + height-1,0xFF606060);
+		drawRect(xPosition+2, yPosition+2,xPosition + width-2,yPosition + height-2,0xFF808080);
+
+		drawRect(xPosition - 2, getCursorPosition()-2,xPosition + width + 2,getCursorPosition() + 2,0xFF202020);
+		drawRect(xPosition - 1, getCursorPosition()-1,xPosition + width + 1,getCursorPosition() + 1,0xFF606060);
+ 
 	}
 
 	@Override

@@ -113,11 +113,7 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 	}	
 	
 	
-	@Override
-	public boolean mustHaveFloor() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+
 	
 	
 	@Override

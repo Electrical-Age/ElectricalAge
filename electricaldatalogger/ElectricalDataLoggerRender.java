@@ -45,28 +45,20 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender{
 		clientSend(ElectricalDataLoggerElement.newClientId);
 	}
 
+	@Override
+	public CableRenderDescriptor getCableRender(LRDU lrdu) {
+		// TODO Auto-generated method stub
+		return Eln.instance.signalCableDescriptor.render;
+	}
 
-	LRDU front;
 
 	@Override
 	public void draw() {
-		
-		float distance = Utils.distanceFromClientPlayer(tileEntity);
-		
-		GL11.glLineWidth(8.0f / (distance + 0.1f));
-		GL11.glColor4f(1f, 0f, 0f, 1f);
-		GL11.glDisable(GL11.GL_LIGHTING);
-        GL11.glPushMatrix();
-        	
-        	GL11.glScalef(1f, -1f, 1f);
-        	GL11.glTranslatef(0.1f,-0.5f,0.5f); 	
-        	GL11.glRotatef(90,0f,1f,0f);  
-        	
-	        log.draw(0.8f,0.8f);
-        GL11.glPopMatrix();
-        GL11.glEnable(GL11.GL_LIGHTING);
+		super.draw();
+		descriptor.draw(log, front);
 
 	}
+
 	
 	/*
 	@Override

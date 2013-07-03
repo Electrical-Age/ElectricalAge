@@ -1,6 +1,7 @@
 package mods.eln.node;
 
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
+import mods.eln.misc.Direction;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
 
@@ -29,8 +30,15 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 		// TODO Auto-generated method stub
 		
 	}
+	public boolean hasVolume() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
 	
-	
+	public boolean canBePlacedOnSide(Direction side)
+	{
+		return true;
+	}
 
 }

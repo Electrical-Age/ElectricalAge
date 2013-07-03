@@ -238,12 +238,15 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 		}
 		if(!exit)
 		{
+			int count = 0;
 			while(newCoord.equals(myCoord()) == false)
 			{
 				int block = newCoord.getBlockId();
 				if(block == 0 || block == Eln.lightBlockId)
 				{
-					break;
+					count++;
+					if(count == 2)
+						break;
 				}
 				
 				vp[0] -= vv[0];

@@ -40,11 +40,18 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
     {
     	if(world.isRemote) return false;
     	Direction direction = Direction.fromIntMinecraftSide(side).getInverse();
-    	
+    	Coordonate coord = new Coordonate(x,y,z,world);
+    	TransparentNodeDescriptor descriptor = getDescriptor(stack);
+    	Direction front = descriptor.getFrontFromPlace(direction, player);
 		try {
-
+			if(descriptor.checkCanPlace(coord, front) == false)
+			{
+				player.sendChatToPlayer("You can't place this block at this side");
+				return false;
+			}
+			
         	TransparentNode node =  (TransparentNode) NodeManager.UUIDToClass[getBlockID()].getConstructor().newInstance();
-			node.onBlockPlacedBy(new Coordonate(x, y, z,world),direction,player,stack);
+			node.onBlockPlacedBy(new Coordonate(x, y, z,world),front,player,stack);
 			
 			world.setBlock(x, y, z, getBlockID(), node.getBlockMetadata(),0x03);//caca1.5.1
         	((NodeBlock)Block.blocksList[getBlockID()]).onBlockPlacedBy(world, x, y, z,direction, player,metadata);

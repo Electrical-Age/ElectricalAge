@@ -42,13 +42,13 @@ public class ThermalCableRender extends SixNodeElementRender{
 	@Override
 	public void draw() {
 		// TODO Auto-generated method stub
-		Minecraft.getMinecraft().mcProfiler.startSection("Cable");
+		//Minecraft.getMinecraft().mcProfiler.startSection("Cable");
 		
-		ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
+		//ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
 		
 	//	GL11.glDisable(GL11.GL_TEXTURE_2D);
 
-
+/*
 		if(i != null && i.getItem()  == Eln.thermoMeterHelmet)
 		{		
 			double factor = temperature  *MeterItemArmor.getBlockRenderColorFactor(i);
@@ -56,7 +56,7 @@ public class ThermalCableRender extends SixNodeElementRender{
 			GL11.glDisable(GL11.GL_LIGHTING);
 			GL11.glDisable(GL11.GL_TEXTURE_2D);	
 		}
-		else
+		else*/
 		{
 			Utils.setGlColorFromDye(color);
 		}
@@ -67,15 +67,17 @@ public class ThermalCableRender extends SixNodeElementRender{
 		glListCall();
 		
 		
-		GL11.glEnable(GL11.GL_LIGHTING);		
-		GL11.glEnable(GL11.GL_TEXTURE_2D);		
+		//GL11.glEnable(GL11.GL_LIGHTING);		
+		//GL11.glEnable(GL11.GL_TEXTURE_2D);		
 		
-		Minecraft.getMinecraft().mcProfiler.endSection();				
+		//Minecraft.getMinecraft().mcProfiler.endSection();				
 	}
 
 	@Override
 	public void glListDraw() {
 		CableRender.drawCable(cableDesciptor.render, connectedSide,CableRender.connectionType(this, side));
+		CableRender.drawNode(cableDesciptor.render, connectedSide,CableRender.connectionType(this, side));
+
 	}
 	@Override
 	public boolean glListEnable() {

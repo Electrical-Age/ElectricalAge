@@ -43,4 +43,11 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor{
 		watch.negativeLimit = -maximalVoltage * 0.1;
 		watch.positiveLimit = maximalVoltage;
 	}
+	
+	
+	@Override
+	public boolean mustHaveFloor() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

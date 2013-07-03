@@ -85,6 +85,7 @@ public class FrameTime implements ITickHandler{
 		else
 		{
 			deltaT = (nanoTime-oldNanoTime)*0.000000001f;
+		//	System.out.println(deltaT);
 		}
 		oldNanoTime = nanoTime;
 	//	System.out.println("delta T : " + deltaT);

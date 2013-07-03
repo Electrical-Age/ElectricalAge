@@ -38,13 +38,20 @@ public class SixNodeBlock extends NodeBlock{
 
     public AxisAlignedBB getCollisionBoundingBoxFromPool(World par1World, int par2, int par3, int par4)
     {
-        if(nodeHasCache(par1World, par2, par3, par4))
+        if(nodeHasCache(par1World, par2, par3, par4) || hasVolume(par1World, par2, par3, par4))
         	return super.getCollisionBoundingBoxFromPool(par1World, par2, par3, par4);
         else
         	return null;
     }
 
-    @Override
+    public boolean hasVolume(World world, int x, int y, int z) {
+		SixNodeEntity entity = getEntity(world, x, y, z);
+		if(entity == null) return false;
+		return entity.hasVolume(world,x,y,z);
+	
+	}
+
+	@Override
     public float getBlockHardness(World world, int x, int y, int z) {
     	return 0.3f;
     }

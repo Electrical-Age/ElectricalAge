@@ -405,36 +405,36 @@ public class CableRender {
 
 			}		
 			float height = cable.height;
-			tx = 0.5f;ty = 0.5f;
+			tx = 0.25f;ty = 0.5f;
 		//	Utils.bindTextureByName(cable.cableTexture);
 			if(left0 < -cable.widthDiv2 || right0 > cable.widthDiv2)
 			{
 				
 				GL11.glBegin(GL11.GL_QUAD_STRIP);
 					GL11.glNormal3f(0f, 1f, 0f);
-					GL11.glTexCoord2f(tx + cable.widthDiv2 + height, ty + left0); 	GL11.glVertex3f(0, cable.widthDiv2, left0);
-					GL11.glTexCoord2f(tx + cable.widthDiv2 + height, ty + right0);   	GL11.glVertex3f(0, cable.widthDiv2, right0);
-					GL11.glTexCoord2f(tx + cable.widthDiv2, ty + left0);					GL11.glVertex3f(height, cable.widthDiv2, left0);
-					GL11.glTexCoord2f(tx + cable.widthDiv2, ty + right0);					GL11.glVertex3f(height, cable.widthDiv2, right0);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2 + height)*0.5f, ty + left0); 	GL11.glVertex3f(0, cable.widthDiv2, left0);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2 + height)*0.5f, ty + right0);   		GL11.glVertex3f(0, cable.widthDiv2, right0);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f, ty + left0);					GL11.glVertex3f(height, cable.widthDiv2, left0);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f, ty + right0);					GL11.glVertex3f(height, cable.widthDiv2, right0);
 					GL11.glNormal3f(1f, 0f, 0f);
-					GL11.glTexCoord2f(tx - cable.widthDiv2, ty + left0);					GL11.glVertex3f(height, -cable.widthDiv2, left0);
-					GL11.glTexCoord2f(tx - cable.widthDiv2 , ty + right0);					GL11.glVertex3f(height, -cable.widthDiv2, right0);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2)*0.5f, ty + left0);					GL11.glVertex3f(height, -cable.widthDiv2, left0);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2)*0.5f , ty + right0);					GL11.glVertex3f(height, -cable.widthDiv2, right0);
 					GL11.glNormal3f(0f, -1f, 0f);
-					GL11.glTexCoord2f(tx - cable.widthDiv2 - height, ty + left0);		GL11.glVertex3f(0, -cable.widthDiv2, left0);
-					GL11.glTexCoord2f(tx - cable.widthDiv2 - height , ty + right0);	GL11.glVertex3f(0, -cable.widthDiv2, right0);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2)*0.5f - height, ty + left0);		GL11.glVertex3f(0, -cable.widthDiv2, left0);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2)*0.5f - height , ty + right0);	GL11.glVertex3f(0, -cable.widthDiv2, right0);
 				GL11.glEnd();
 				GL11.glBegin(GL11.GL_QUADS);
 					GL11.glNormal3f(0f, 0f, -1f);
-					GL11.glTexCoord2f(tx - cable.widthDiv2, ty + left0 - height);		GL11.glVertex3f(0, -cable.widthDiv2,left0);
-					GL11.glTexCoord2f(tx + cable.widthDiv2, ty + left0 - height);		GL11.glVertex3f(0, cable.widthDiv2, left0);
-					GL11.glTexCoord2f(tx + cable.widthDiv2, ty + left0);						GL11.glVertex3f(height, cable.widthDiv2, left0);
-					GL11.glTexCoord2f(tx - cable.widthDiv2, ty + left0);						GL11.glVertex3f(height, -cable.widthDiv2, left0);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2)*0.5f, ty + left0 - height);		GL11.glVertex3f(0, -cable.widthDiv2,left0);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f, ty + left0 - height);		GL11.glVertex3f(0, cable.widthDiv2, left0);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f, ty + left0);						GL11.glVertex3f(height, cable.widthDiv2, left0);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2)*0.5f, ty + left0);						GL11.glVertex3f(height, -cable.widthDiv2, left0);
 		
 					GL11.glNormal3f(0f, 0f, 1f);
-					GL11.glTexCoord2f(tx - cable.widthDiv2, ty + right0);						GL11.glVertex3f(height, -cable.widthDiv2, right0);
-					GL11.glTexCoord2f(tx + cable.widthDiv2, ty + right0);						GL11.glVertex3f(height, cable.widthDiv2, right0);			
-					GL11.glTexCoord2f(tx + cable.widthDiv2, ty + right0 + height);		GL11.glVertex3f(0, cable.widthDiv2, right0);
-					GL11.glTexCoord2f(tx - cable.widthDiv2, ty + right0 + height);		GL11.glVertex3f(0, -cable.widthDiv2, right0);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2)*0.5f, ty + right0);						GL11.glVertex3f(height, -cable.widthDiv2, right0);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f, ty + right0);						GL11.glVertex3f(height, cable.widthDiv2, right0);			
+					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f, ty + right0 + height);		GL11.glVertex3f(0, cable.widthDiv2, right0);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2)*0.5f, ty + right0 + height);		GL11.glVertex3f(0, -cable.widthDiv2, right0);
 				GL11.glEnd();
 			}
 		
@@ -442,30 +442,30 @@ public class CableRender {
 			{
 				GL11.glBegin(GL11.GL_QUAD_STRIP);
 					GL11.glNormal3f(0f, 0f, -1f);
-					GL11.glTexCoord2f(tx - cable.widthDiv2 - height, ty + down0);	GL11.glVertex3f(0, down0,-cable.widthDiv2);
-					GL11.glTexCoord2f(tx - cable.widthDiv2 - height, ty + up0);   GL11.glVertex3f(0, up0, -cable.widthDiv2);
-					GL11.glTexCoord2f(tx - cable.widthDiv2, ty + down0); 				GL11.glVertex3f(height, down0, -cable.widthDiv2);
-					GL11.glTexCoord2f(tx - cable.widthDiv2, ty + up0); 					GL11.glVertex3f(height, up0, -cable.widthDiv2);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2 - height)*0.5f, ty + down0);	GL11.glVertex3f(0, down0,-cable.widthDiv2);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2 - height)*0.5f, ty + up0);   GL11.glVertex3f(0, up0, -cable.widthDiv2);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2)*0.5f, ty + down0); 				GL11.glVertex3f(height, down0, -cable.widthDiv2);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2)*0.5f, ty + up0); 					GL11.glVertex3f(height, up0, -cable.widthDiv2);
 					GL11.glNormal3f(1f, 0f, 0f);
-					GL11.glTexCoord2f(tx + cable.widthDiv2, ty + down0);				GL11.glVertex3f(height, down0, cable.widthDiv2);
-					GL11.glTexCoord2f(tx + cable.widthDiv2 , ty + up0);   				GL11.glVertex3f(height, up0, cable.widthDiv2);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f, ty + down0);				GL11.glVertex3f(height, down0, cable.widthDiv2);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f , ty + up0);   				GL11.glVertex3f(height, up0, cable.widthDiv2);
 					GL11.glNormal3f(0f, 0f, 1f);
-					GL11.glTexCoord2f(tx + cable.widthDiv2 + height, ty + down0);	GL11.glVertex3f(0, down0, cable.widthDiv2);
-					GL11.glTexCoord2f(tx + cable.widthDiv2 + height , ty + up0);	GL11.glVertex3f(0, up0, cable.widthDiv2);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f + height, ty + down0);	GL11.glVertex3f(0, down0, cable.widthDiv2);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f + height , ty + up0);	GL11.glVertex3f(0, up0, cable.widthDiv2);
 				GL11.glEnd();
 				
 				GL11.glBegin(GL11.GL_QUADS);
 					GL11.glNormal3f(0f, 1f, 0f);
-					GL11.glTexCoord2f(tx - cable.widthDiv2, ty + up0 + height);	GL11.glVertex3f(0, up0, -cable.widthDiv2);
-					GL11.glTexCoord2f(tx + cable.widthDiv2, ty + up0 + height);	GL11.glVertex3f(0, up0, cable.widthDiv2);
-					GL11.glTexCoord2f(tx + cable.widthDiv2, ty + up0);					GL11.glVertex3f(height, up0, cable.widthDiv2);
-					GL11.glTexCoord2f(tx - cable.widthDiv2, ty + up0); 					GL11.glVertex3f(height, up0, -cable.widthDiv2);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2)*0.5f, ty + up0 + height);	GL11.glVertex3f(0, up0, -cable.widthDiv2);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f, ty + up0 + height);	GL11.glVertex3f(0, up0, cable.widthDiv2);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f, ty + up0);					GL11.glVertex3f(height, up0, cable.widthDiv2);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2)*0.5f, ty + up0); 					GL11.glVertex3f(height, up0, -cable.widthDiv2);
 					
 					GL11.glNormal3f(0f, -1f, 0f);
-					GL11.glTexCoord2f(tx - cable.widthDiv2, ty + down0);				GL11.glVertex3f(height, down0, -cable.widthDiv2);
-					GL11.glTexCoord2f(tx + cable.widthDiv2, ty + down0);				GL11.glVertex3f(height, down0, cable.widthDiv2);					
-					GL11.glTexCoord2f(tx + cable.widthDiv2, ty + down0 - height);	GL11.glVertex3f(0, down0, cable.widthDiv2);
-					GL11.glTexCoord2f(tx - cable.widthDiv2, ty + down0 - height);	GL11.glVertex3f(0, down0, -cable.widthDiv2);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2)*0.5f, ty + down0);				GL11.glVertex3f(height, down0, -cable.widthDiv2);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f, ty + down0);				GL11.glVertex3f(height, down0, cable.widthDiv2);					
+					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f, ty + down0 - height);	GL11.glVertex3f(0, down0, cable.widthDiv2);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2)*0.5f, ty + down0 - height);	GL11.glVertex3f(0, down0, -cable.widthDiv2);
 				GL11.glEnd();
 			}
 	
@@ -481,35 +481,35 @@ public class CableRender {
 		{
 			float widthDiv2 = cable.widthDiv2 + 1.0f/16.0f;
 			float height = cable.height + 1.0f/16.0f;
-			float tx = 0.5f;float ty = 0.5f;
+			float tx = 0.75f;float ty = 0.5f;
 			GL11.glColor4d(1.0, 1.0, 1.0, 1.0);
 		//	Utils.bindTextureByName(ClientProxy.CABLENODE_PNG);
 			GL11.glBegin(GL11.GL_QUAD_STRIP);
 				GL11.glNormal3f(0f, 1f, 0f);
-				GL11.glTexCoord2f(tx + widthDiv2 + cable.height, ty - widthDiv2);  GL11.glVertex3f(0, widthDiv2, -widthDiv2);
-				GL11.glTexCoord2f(tx + widthDiv2 + cable.height, ty + widthDiv2);	GL11.glVertex3f(0, widthDiv2, widthDiv2);
-				GL11.glTexCoord2f(tx + widthDiv2, ty - widthDiv2);	GL11.glVertex3f(height, widthDiv2, -widthDiv2);
-				GL11.glTexCoord2f(tx + widthDiv2, ty + widthDiv2);	GL11.glVertex3f(height, widthDiv2, widthDiv2);
+				GL11.glTexCoord2f(tx + (widthDiv2 + cable.height)*0.5f, ty - widthDiv2);  GL11.glVertex3f(0, widthDiv2, -widthDiv2);
+				GL11.glTexCoord2f(tx + (widthDiv2 + cable.height)*0.5f, ty + widthDiv2);	GL11.glVertex3f(0, widthDiv2, widthDiv2);
+				GL11.glTexCoord2f(tx + (widthDiv2)*0.5f, ty - widthDiv2);	GL11.glVertex3f(height, widthDiv2, -widthDiv2);
+				GL11.glTexCoord2f(tx + (widthDiv2)*0.5f, ty + widthDiv2);	GL11.glVertex3f(height, widthDiv2, widthDiv2);
 				GL11.glNormal3f(1f, 0f, 0f);
-				GL11.glTexCoord2f(tx - widthDiv2, ty - widthDiv2);	GL11.glVertex3f(height, -widthDiv2, -widthDiv2);
-				GL11.glTexCoord2f(tx - widthDiv2, ty + widthDiv2);	GL11.glVertex3f(height, -widthDiv2, widthDiv2);
+				GL11.glTexCoord2f(tx - (widthDiv2)*0.5f, ty - widthDiv2);	GL11.glVertex3f(height, -widthDiv2, -widthDiv2);
+				GL11.glTexCoord2f(tx - (widthDiv2)*0.5f, ty + widthDiv2);	GL11.glVertex3f(height, -widthDiv2, widthDiv2);
 				GL11.glNormal3f(0f, -1f, 0f);
-				GL11.glTexCoord2f(tx - widthDiv2 - cable.height, ty - widthDiv2);	GL11.glVertex3f(0, -widthDiv2, -widthDiv2);
-				GL11.glTexCoord2f(tx - widthDiv2 - cable.height, ty + widthDiv2);	GL11.glVertex3f(0, -widthDiv2, widthDiv2);		
+				GL11.glTexCoord2f(tx - (widthDiv2 - cable.height)*0.5f, ty - widthDiv2);	GL11.glVertex3f(0, -widthDiv2, -widthDiv2);
+				GL11.glTexCoord2f(tx - (widthDiv2 - cable.height)*0.5f, ty + widthDiv2);	GL11.glVertex3f(0, -widthDiv2, widthDiv2);		
 			GL11.glEnd();
 			
 			GL11.glBegin(GL11.GL_QUADS);
 				GL11.glNormal3f(0f, 0f, -1f);
-				GL11.glTexCoord2f(tx - widthDiv2, ty - widthDiv2 - cable.height);		GL11.glVertex3f(0, -widthDiv2,-widthDiv2);
-				GL11.glTexCoord2f(tx + widthDiv2, ty - widthDiv2 - cable.height);		GL11.glVertex3f(0, widthDiv2, -widthDiv2);
-				GL11.glTexCoord2f(tx + widthDiv2, ty - widthDiv2);						GL11.glVertex3f(height, widthDiv2, -widthDiv2);
-				GL11.glTexCoord2f(tx - widthDiv2, ty - widthDiv2);						GL11.glVertex3f(height, -widthDiv2, -widthDiv2);
+				GL11.glTexCoord2f(tx - widthDiv2*0.5f, ty - widthDiv2 - cable.height);		GL11.glVertex3f(0, -widthDiv2,-widthDiv2);
+				GL11.glTexCoord2f(tx + widthDiv2*0.5f, ty - widthDiv2 - cable.height);		GL11.glVertex3f(0, widthDiv2, -widthDiv2);
+				GL11.glTexCoord2f(tx + widthDiv2*0.5f, ty - widthDiv2);						GL11.glVertex3f(height, widthDiv2, -widthDiv2);
+				GL11.glTexCoord2f(tx - widthDiv2*0.5f, ty - widthDiv2);						GL11.glVertex3f(height, -widthDiv2, -widthDiv2);
 	
 				GL11.glNormal3f(0f, 0f, 1f);
-				GL11.glTexCoord2f(tx - widthDiv2, ty + widthDiv2);						GL11.glVertex3f(height, -widthDiv2, widthDiv2);
-				GL11.glTexCoord2f(tx + widthDiv2, ty + widthDiv2);						GL11.glVertex3f(height, widthDiv2, widthDiv2);			
-				GL11.glTexCoord2f(tx + widthDiv2, ty + widthDiv2 + cable.height);		GL11.glVertex3f(0, widthDiv2, widthDiv2);
-				GL11.glTexCoord2f(tx - widthDiv2, ty + widthDiv2 + cable.height);		GL11.glVertex3f(0, -widthDiv2, widthDiv2);
+				GL11.glTexCoord2f(tx - widthDiv2*0.5f, ty + widthDiv2);						GL11.glVertex3f(height, -widthDiv2, widthDiv2);
+				GL11.glTexCoord2f(tx + widthDiv2*0.5f, ty + widthDiv2);						GL11.glVertex3f(height, widthDiv2, widthDiv2);			
+				GL11.glTexCoord2f(tx + widthDiv2*0.5f, ty + widthDiv2 + cable.height);		GL11.glVertex3f(0, widthDiv2, widthDiv2);
+				GL11.glTexCoord2f(tx - widthDiv2*0.5f, ty + widthDiv2 + cable.height);		GL11.glVertex3f(0, -widthDiv2, widthDiv2);
 			GL11.glEnd();
 		}
 	//	GL11.glEnable(GL11.GL_TEXTURE);

@@ -49,7 +49,7 @@ public class LampSocketElement extends SixNodeElement{
 		super(sixNode, side, descriptor);
 		this.socketDescriptor = (LampSocketDescriptor) descriptor;
 		
-		
+		lampProcess.alphaZ = this.socketDescriptor.alphaZBoot;
     	electricalLoadList.add(positiveLoad);
     	electricalLoadList.add(negativeLoad);
     	electricalProcessList.add(lampResistor);

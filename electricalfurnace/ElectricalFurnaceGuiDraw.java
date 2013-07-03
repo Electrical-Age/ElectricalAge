@@ -50,7 +50,7 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     	super.initGui();
     	
     	buttonGrounded = newGuiButton(60,8,100, "");
-    	vuMeterTemperature = newGuiVerticalTrackBarHeat(8,70,20,60);
+    	vuMeterTemperature = newGuiVerticalTrackBarHeat(8,8,20,60);
     	vuMeterTemperature.setStepIdMax(800/10);
     	vuMeterTemperature.setEnable(true);
     	vuMeterTemperature.setRange(0,800);

@@ -212,6 +212,12 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
     {
     	int[] vect = new int[]{x,y,z};
     	Direction.fromIntMinecraftSide(par5).applyTo(vect, 1);
+    	SixNodeDescriptor descriptor = getDescriptor(par7ItemStack);
+    	if(descriptor.canBePlacedOnSide(Direction.fromIntMinecraftSide(par5).getInverse()) == false)
+		{
+    		par6EntityPlayer.sendChatToPlayer("You can't place this block at this side");
+			return false;
+		}
     	if(par1World.getBlockId(vect[0],vect[1],vect[2]) == Eln.sixNodeBlock.blockID) return true;
     	if(super.canPlaceItemBlockOnSide(par1World, x, y, z, par5, par6EntityPlayer, par7ItemStack))return true;  	
     	

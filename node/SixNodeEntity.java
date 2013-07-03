@@ -201,8 +201,26 @@ public class SixNodeEntity extends NodeBlockEntity {
 		}
 		return 0;
 	}
+
+
+
+	public boolean hasVolume(World world, int x, int y, int z) {
+		// TODO Auto-generated method stub
+		if(worldObj.isRemote)
+		{
+			for(SixNodeElementRender e : elementRenderList)
+			{
+				if(e != null && e.sixNodeDescriptor.hasVolume()) return true;
+			}
+			return false;
+		}
+		else
+		{
+			return ((SixNode)getNode()).hasVolume();
+		}
+	}
 	
-	
+
 	
 	
 	

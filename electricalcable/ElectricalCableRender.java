@@ -45,13 +45,13 @@ public class ElectricalCableRender extends SixNodeElementRender{
 	@Override
 	public void draw() {
 		// TODO Auto-generated method stub
-		Minecraft.getMinecraft().mcProfiler.startSection("Cable");
+		//Minecraft.getMinecraft().mcProfiler.startSection("Cable");
 		
-		ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
+		//ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
 		
 	//	GL11.glDisable(GL11.GL_TEXTURE_2D);
 
-		if(i != null && i.getItem()  == Eln.voltMeterHelmet)
+		/*if(i != null && i.getItem()  == Eln.voltMeterHelmet)
 		{		
 			double factor = voltage * MeterItemArmor.getBlockRenderColorFactor(i);
 			GL11.glColor4d(factor, 1.0-factor,0.0, 1.0);
@@ -72,7 +72,7 @@ public class ElectricalCableRender extends SixNodeElementRender{
 			GL11.glDisable(GL11.GL_LIGHTING);
 			GL11.glDisable(GL11.GL_TEXTURE_2D);	
 		}
-		else
+		else*/
 		{
 			Utils.setGlColorFromDye(color);
 		}
@@ -84,9 +84,9 @@ public class ElectricalCableRender extends SixNodeElementRender{
 		glListCall();
 		//GL11.glEnable(GL11.GL_LIGHTING);
 		
-		GL11.glEnable(GL11.GL_TEXTURE_2D);		
+		//GL11.glEnable(GL11.GL_TEXTURE_2D);		
 		
-		Minecraft.getMinecraft().mcProfiler.endSection();
+		//Minecraft.getMinecraft().mcProfiler.endSection();
 		
 		GL11.glColor3f(1f,1f,1f);
 	}

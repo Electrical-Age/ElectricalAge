@@ -163,9 +163,9 @@ public class TransparentNode extends Node {
 	@Override
 	public void initializeFromThat(Direction side, EntityLiving entityLiving,ItemStack itemStack) {
 		try {
-			Direction front = null;
+			//Direction front = null;
 			TransparentNodeDescriptor descriptor = Eln.transparentNodeItem.getDescriptor(itemStack);
-			switch(descriptor.getFrontType())
+			/*switch(descriptor.getFrontType())
 			{
 			case BlockSide:
 				front = side;
@@ -177,11 +177,12 @@ public class TransparentNode extends Node {
 				front = Utils.entityLivingHorizontalViewDirection(entityLiving).getInverse();
 				break;
 			
-			}
+			}*/
+	
 			int metadata = itemStack.getItemDamage();
 			elementId = metadata;
 			element = (TransparentNodeElement) descriptor.ElementClass.getConstructor(TransparentNode.class,TransparentNodeDescriptor.class).newInstance(this,descriptor);
-			element.initializeFromThat(front, entityLiving, itemStack.getTagCompound());
+			element.initializeFromThat(side, entityLiving, itemStack.getTagCompound());
 		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

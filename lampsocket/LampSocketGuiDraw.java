@@ -64,6 +64,11 @@ public class LampSocketGuiDraw extends GuiContainerEln {
     	alphaZ.setRange(lampRender.descriptor.alphaZMin, lampRender.descriptor.alphaZMax);
     	alphaZ.setStepIdMax(100);
     	alphaZ.setValue(lampRender.alphaZ);
+    	
+    	if(lampRender.descriptor.alphaZMax == lampRender.descriptor.alphaZMin)
+    	{
+    		alphaZ.setVisible(false);
+    	}
     }
     
 
