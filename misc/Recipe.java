@@ -9,6 +9,11 @@ public class Recipe {
 		this.output = output;
 		this.energy = energy;
 	}
+	public Recipe(ItemStack input,ItemStack output,double energy) {
+		this.input = input;
+		this.output = new ItemStack[]{output};
+		this.energy = energy;
+	}
 	
 	public ItemStack input;
 	public ItemStack[] output;

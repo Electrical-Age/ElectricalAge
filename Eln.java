@@ -3230,16 +3230,24 @@ public class Eln {
 	    	sharedItem.addElement(subId + (id << 6), desc);
     	}  	    	
   	  
-  	{
-  		subId = 11; name = "Steel plate";
-	    	GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
-	    			name,
-	    			new String[]{}
-	    			);			
-	    	sharedItem.addElement(subId + (id << 6), desc);
-  	}  	    	
-  	  
-  	
+      	{
+      		subId = 11; name = "Steel plate";
+    	    	GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+    	    			name,
+    	    			new String[]{}
+    	    			);			
+    	    	sharedItem.addElement(subId + (id << 6), desc);
+      	}  	    	
+      	{
+      		subId = 12; name = "Coal plate";
+    	    	GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+    	    			name,
+    	    			new String[]{}
+    	    			);			
+    	    	sharedItem.addElement(subId + (id << 6), desc);
+      	}  	    	
+      	  
+
 	  /*
 	{
 		subId = 12; name = "Stone plate";
@@ -3278,14 +3286,7 @@ public class Eln {
 	    			);			
 	    	sharedItem.addElement(subId + (id << 6), desc);
     	}  	 */     
-    	{
-    		subId = 21; name = "High density coal";
-    		GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
-	    			name,
-	    			new String[]{}
-	    			);			
-	    	sharedItem.addElement(subId + (id << 6), desc);
-    	}  	     	
+ 	
     	{
     		subId = 22; name = "Machine booster";
     		MachineBoosterDescriptor desc = new MachineBoosterDescriptor(
@@ -3560,10 +3561,10 @@ public class Eln {
 		
 		GameRegistry.addRecipe(	findItemStack("Cost oriented battery"),
 				"C C",
-				"IPI",
+				"PPP",
 				"III",
 				Character.valueOf('C'), findItemStack("Low voltage cable"),
-				Character.valueOf('P'), findItemStack("Plumb plate"),
+				Character.valueOf('P'), findItemStack("Plumb ingot"),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron));	
 		
 		GameRegistry.addRecipe(	findItemStack("Capacity oriented battery"),
@@ -4116,24 +4117,6 @@ public class Eln {
 				Character.valueOf('I'),  new ItemStack(Item.ingotIron),
 				Character.valueOf('R'), new ItemStack(Item.redstone));    	
     
-    	GameRegistry.addRecipe(	findItemStack("Tin plate"),"II", "II",
-				Character.valueOf('I'), findItemStack("Tin ingot"));    	
-    	GameRegistry.addRecipe(	findItemStack("Cooper plate"),"II", "II",
-				Character.valueOf('I'), findItemStack("Cooper ingot"));    	
-    	GameRegistry.addRecipe(	findItemStack("Plumb plate"),"II", "II",
-				Character.valueOf('I'), findItemStack("Plumb ingot"));  
-    	GameRegistry.addRecipe(	findItemStack("Silicon plate"),"II", "II",
-				Character.valueOf('I'), findItemStack("Silicon ingot"));    	
- 
-    	GameRegistry.addRecipe(	findItemStack("Steel plate"),"II", "II",
-				Character.valueOf('I'), findItemStack("Steel ingot"));    	
- 
-       	
-    	GameRegistry.addRecipe(	findItemStack("Iron plate"),"II", "II",
-				Character.valueOf('I'), new ItemStack(Item.ingotIron));    	
-    	GameRegistry.addRecipe(	findItemStack("Gold plate"),"II", "II",
-				Character.valueOf('I'), new ItemStack(Item.ingotGold));    	
-
 	}
   
 	
@@ -4159,9 +4142,17 @@ public class Eln {
 	}
 	void recipeCompressor()
 	{	 
-		compressorRecipes.addRecipe(new Recipe(findItemStack("Coal dust",2),new ItemStack[]{findItemStack("High density coal")}, 4000.0));
-		compressorRecipes.addRecipe(new Recipe(findItemStack("High density coal",4),new ItemStack[]{new ItemStack(Item.diamond)}, 80000.0));
+		compressorRecipes.addRecipe(new Recipe(findItemStack("Coal plate",4),new ItemStack[]{new ItemStack(Item.diamond)}, 80000.0));
 	//	extractorRecipes.addRecipe(new Recipe(findItemStack("Cinnabar dust"),new ItemStack[]{findItemStack("Purified cinnabar dust",1)}, 1000.0));
+
+		compressorRecipes.addRecipe(new Recipe(findItemStack("Coal dust",4),findItemStack("Coal plate"), 4000.0));
+		compressorRecipes.addRecipe(new Recipe(findItemStack("Cooper ingot",4),findItemStack("Cooper plate"), 10000.0));
+		compressorRecipes.addRecipe(new Recipe(findItemStack("Plumb ingot",4),findItemStack("Plumb plate"), 10000.0));
+		compressorRecipes.addRecipe(new Recipe(findItemStack("Silicon ingot",4),findItemStack("Silicon plate"), 10000.0));
+		compressorRecipes.addRecipe(new Recipe(findItemStack("Steel ingot",4),findItemStack("Steel plate"), 10000.0));
+		compressorRecipes.addRecipe(new Recipe(new ItemStack(Item.ingotIron,4,0),findItemStack("Iron plate"), 10000.0));
+		compressorRecipes.addRecipe(new Recipe(new ItemStack(Item.ingotGold,4,0),findItemStack("Gold plate"), 10000.0));  	
+
 	}    	
 	
 	void recipemagnetiser()
@@ -4190,7 +4181,7 @@ public class Eln {
 				in.getItemDamage(), findItemStack("Tungsten ingot"), 0);
 		in = findItemStack("Tungsten dust"); FurnaceRecipes.smelting().addSmelting(in.itemID,
 				in.getItemDamage(), findItemStack("Tungsten ingot"), 0);
-		in = new ItemStack(Item.ingotIron); FurnaceRecipes.smelting().addSmelting(in.itemID,
+		in = findItemStack("Steel ingot"); FurnaceRecipes.smelting().addSmelting(in.itemID,
 				in.getItemDamage(), findItemStack("Ferrite ingot"), 0);
 		in = findItemStack("Iron dust"); FurnaceRecipes.smelting().addSmelting(in.itemID,
 				in.getItemDamage(), new ItemStack(Item.ingotIron), 0);
