@@ -2369,7 +2369,7 @@ public class Eln {
 					);
 			sharedItem.addElement(id, element);
     	} 
-    	{
+    	/*{
 	    	id = 7;
 	    	
 	    	name = "Gold dust";
@@ -2379,7 +2379,7 @@ public class Eln {
 					new String[]{"dudu dust","miaou"}
 					);
 			sharedItem.addElement(id, element);
-    	} 
+    	} */
     	
     	{
 	    	id = 8;
@@ -4142,7 +4142,7 @@ public class Eln {
     	maceratorRecipes.addRecipe(new Recipe(findItemStack("Tin ore"),new ItemStack[]{findItemStack("Tin dust",2)}, 2000.0));
     	maceratorRecipes.addRecipe(new Recipe(findItemStack("Cooper ore"),new ItemStack[]{findItemStack("Cooper dust",2)}, 2000.0));
     	maceratorRecipes.addRecipe(new Recipe(new ItemStack(Block.oreIron),new ItemStack[]{findItemStack("Iron dust",2)}, 2000.0));
-    	maceratorRecipes.addRecipe(new Recipe(new ItemStack(Block.oreGold),new ItemStack[]{findItemStack("Gold dust",2)}, 4000.0));
+    	maceratorRecipes.addRecipe(new Recipe(new ItemStack(Block.oreGold),new ItemStack[]{new ItemStack(Item.goldNugget,18)}, 6000.0));
     	maceratorRecipes.addRecipe(new Recipe(findItemStack("Plumb ore"),new ItemStack[]{findItemStack("Plumb dust",2)}, 2000.0));
     	maceratorRecipes.addRecipe(new Recipe(findItemStack("Tungsten ore"),new ItemStack[]{findItemStack("Tungsten dust",2)}, 5000.0));
     	maceratorRecipes.addRecipe(new Recipe(new ItemStack(Item.coal,1,0),new ItemStack[]{findItemStack("Coal dust",2)}, 1000.0));
@@ -4194,9 +4194,9 @@ public class Eln {
 				in.getItemDamage(), findItemStack("Ferrite ingot"), 0);
 		in = findItemStack("Iron dust"); FurnaceRecipes.smelting().addSmelting(in.itemID,
 				in.getItemDamage(), new ItemStack(Item.ingotIron), 0);
-		in = findItemStack("Gold dust"); FurnaceRecipes.smelting().addSmelting(in.itemID,
+	/*	in = findItemStack("Gold dust"); FurnaceRecipes.smelting().addSmelting(in.itemID,
 				in.getItemDamage(), new ItemStack(Item.ingotGold), 0);
-		
+		*/
 		in = findItemStack("Tree resin"); FurnaceRecipes.smelting().addSmelting(in.itemID,
 				in.getItemDamage(), findItemStack("Rubber"), 0);
 		
