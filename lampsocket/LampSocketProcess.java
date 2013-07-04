@@ -182,6 +182,7 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 	void placeSpot(int newLight)
 	{
 		boolean exit = false;
+		if(lbCoord.getBlockExist() == false) return;
 		myCoord().copyTo(vp);
 		vv[0] = 1.0 * Math.cos(alphaZ*Math.PI/180.0);
 		vv[1] = 1.0 * Math.sin(alphaZ*Math.PI/180.0);
