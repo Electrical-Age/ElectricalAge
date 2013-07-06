@@ -3,8 +3,11 @@ package mods.eln.misc;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.text.DecimalFormat;
+import java.util.Iterator;
+import java.util.List;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 import org.lwjgl.util.Color;
 
 import cpw.mods.fml.common.network.PacketDispatcher;
@@ -21,9 +24,12 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.RenderEngine;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.inventory.IInventory;
@@ -215,15 +221,15 @@ public class Utils {
 		}
 		else if(valueAbs < 9.99)
 		{
-			return String.format("%1.2f", value)+ "" + unit + " ";
+			return String.format("%1.2f", value)+ "" + unit ;
 		}
 		else if(valueAbs < 99.9)
 		{
-			return String.format("%2.1f", value)+ "" + unit + " ";
+			return String.format("%2.1f", value)+ "" + unit ;
 		}
 		else if(valueAbs < 999)
 		{
-			return String.format("%3.0f", value)+ "" + unit + " ";
+			return String.format("%3.0f", value)+ "" + unit ;
 		}
 		else if(valueAbs < 9999)
 		{
@@ -241,32 +247,38 @@ public class Utils {
 	
 	public static String plotVolt(String header,double value)
 	{
-		return header + " " + plotValue(value, "V  ");
+		if(header.equals("") == false) header += " ";
+		return header + plotValue(value, "V  ");
 	}
 	public static String plotAmpere(String header,double value)
 	{
-		return header + " " + plotValue(value, "A  ");
+		if(header.equals("") == false) header += " ";
+		return header + plotValue(value, "A  ");
 	}
 	public static String plotCelsius(String header,double value)
 	{
 		value += PhysicalConstant.Tref - PhysicalConstant.TCelsius;
-		return header + " " + plotValue(value, "C ");
+		if(header.equals("") == false) header += " ";
+		return header + plotValue(value, "C ");
 	}
 	public static String plotPercent(String header,double value)
 	{
+		if(header.equals("") == false) header += " ";
 		if(value >= 1.0)
-			return header +  String.format(" %3.0f", value * 100.0)+ "%   ";
+			return header +  String.format("%3.0f", value * 100.0)+ "%   ";
 		else
-			return header +  String.format(" %3.1f", value * 100.0)+ "%   ";
+			return header +  String.format("%3.1f", value * 100.0)+ "%   ";
 
 	}
 	public static String plotEnergy(String header,double value)
 	{
-		return header + " " + plotValue(value, "J  ");
+		if(header.equals("") == false) header += " ";
+		return header + plotValue(value, "J  ");
 	}
 	public static String plotPower(String header,double value)
 	{
-		return header + " " + plotValue(value, "W  ");
+		if(header.equals("") == false) header += " ";
+		return header + plotValue(value, "W  ");
 	}
 	
 	public static String plotUIP(double U,double I)
@@ -293,7 +305,8 @@ public class Utils {
 		
 	public static String plotTime(String header,double value)
 	{
-		return header + " " + plotTime(value);
+		if(header.equals("") == false) header += " ";
+		return header + plotTime(value);
 
 	}
 		
@@ -603,4 +616,8 @@ public class Utils {
     {
     	float time = Minecraft.getMinecraft().entityRenderer.performanceToFps(par0)
     }*/
+	
+	
+	
+
 } 

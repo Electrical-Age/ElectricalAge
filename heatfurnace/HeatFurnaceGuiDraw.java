@@ -9,6 +9,7 @@ import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.GuiVerticalTrackBarHeat;
+import mods.eln.gui.HelperStdContainer;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
@@ -140,6 +141,6 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176, 166,8,84, "electricalfurnace.png");
+		return new HelperStdContainer(this);
 	}
 }

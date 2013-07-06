@@ -216,7 +216,9 @@ public class SixNodeEntity extends NodeBlockEntity {
 		}
 		else
 		{
-			return ((SixNode)getNode()).hasVolume();
+			SixNode node = ((SixNode)getNode());
+			if(node == null) return false;
+			return node.hasVolume();
 		}
 	}
 	

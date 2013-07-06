@@ -77,6 +77,7 @@ public abstract class GuiScreenEln extends GuiScreen implements GuiTextFieldElnO
 		helper.mouseMove(x,y);
 		helper.draw(x, y, f);
 		postDraw(f, x, y);
+		helper.draw2(x,y);
     }
     
     

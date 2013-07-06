@@ -9,6 +9,7 @@ import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.GuiVerticalTrackBarHeat;
+import mods.eln.gui.HelperStdContainer;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.SixNodeElementInventory;
@@ -48,7 +49,7 @@ public class ElectricalMachineGuiDraw extends GuiContainerEln {
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176, 166,8,84, "electricalmachine.png");
+		return new HelperStdContainer(this);
 	}
 	
 	
@@ -58,6 +59,7 @@ public class ElectricalMachineGuiDraw extends GuiContainerEln {
 		super.postDraw(f, x, y);
 		
 		drawTexturedModalRectEln(94, 33,177,14 , (int) (22*render.processState), 15);
+		
 		//draw
 	}
 }

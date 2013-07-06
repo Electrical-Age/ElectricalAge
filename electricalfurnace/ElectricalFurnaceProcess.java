@@ -62,7 +62,7 @@ public class ElectricalFurnaceProcess implements IProcess{
 		
 		if(smeltInProcess)
 		{
-			energyCounter += furnace.smeltResistor.getP()*time;
+			energyCounter += getPower()*time;
 			if(energyCounter > energyNeeded)
 			{
 				energyCounter -= energyNeeded;
@@ -83,8 +83,16 @@ public class ElectricalFurnaceProcess implements IProcess{
 			
 			furnace.smeltResistor.setR(T/P);
 		}
+		
+		
+		//System.out.println("FT : " + furnace.thermalLoad.Tc);
 	}
 
+	
+	double getPower()
+	{
+		return furnace.smeltResistor.getP();
+	}
 	
 	public void smeltInit()
 	{
@@ -159,6 +167,23 @@ public class ElectricalFurnaceProcess implements IProcess{
             }*/
             inventory.decrStackSize(ElectricalFurnaceElement.inSlotId, 1);
         }
+    }
+
+    
+    public double processState()
+    {
+    	if(smeltInProcess == false) return 0.0;
+    	double state = energyCounter/energyNeeded;
+    	if(state > 1.0) state = 1.0;
+    	return state;
+    }
+    
+    public double processStatePerSecond()
+    {
+    	if(smeltInProcess == false) return 0;
+    	double power = getPower()+0.1;
+    	double ret = power / (energyNeeded) ;
+    	return ret;
     }
 
 }

@@ -1,16 +1,18 @@
 package mods.eln;
 
+import mods.eln.gui.SlotWithSkin;
+import mods.eln.gui.SlotWithSkinAndComment;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-public class SlotFilter extends Slot {
+public class SlotFilter extends SlotWithSkinAndComment {
 	ItemStackFilter[] itemStackFilter;
 	int stackLimit;
 	
-	public SlotFilter(IInventory par1iInventory, int slot, int x, int y,int stackLimit,ItemStackFilter[] itemStackFilter) {
-		super(par1iInventory, slot, x, y);
+	public SlotFilter(IInventory par1iInventory, int slot, int x, int y,int stackLimit,ItemStackFilter[] itemStackFilter,SlotSkin skin,String[] comment) {
+		super(par1iInventory, slot, x, y,skin,comment);
 		// TODO Auto-generated constructor stub
 		this.stackLimit = stackLimit;
 		this.itemStackFilter = itemStackFilter;

@@ -6,6 +6,7 @@ import mods.eln.SlotFilter;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.GuiHelper;
+import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.LampSlot;
 import mods.eln.node.SixNodeItemSlot;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,8 +22,8 @@ public class ElectricalDataLoggerContainer extends BasicContainer {
 	
 	public ElectricalDataLoggerContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new SlotFilter(inventory,paperSlotId,8,8,64,new ItemStackFilter[]{new ItemStackFilter(Item.paper)}),
-				new GenericItemUsingDamageSlot(inventory, printSlotId,20,8, 1, DataLogsPrintDescriptor.class)
+				new SlotFilter(inventory,paperSlotId,176/2-44,125,64,new ItemStackFilter[]{new ItemStackFilter(Item.paper)},SlotSkin.medium,new String[]{"Paper slot"}),
+				new GenericItemUsingDamageSlot(inventory, printSlotId,176/2+45-17,125, 1, DataLogsPrintDescriptor.class,SlotSkin.medium,new String[]{})
 			});
 		
 		// TODO Auto-generated constructor stub

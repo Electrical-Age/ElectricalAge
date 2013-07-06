@@ -1,5 +1,8 @@
 package mods.eln.gui;
 
+import java.util.List;
+
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 
 public class GuiHelperContainer extends GuiHelper{
@@ -14,4 +17,6 @@ public class GuiHelperContainer extends GuiHelper{
 		this.yInv = yInv;
 	}
 	public int xInv, yInv;
+
+
 }

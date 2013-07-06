@@ -177,4 +177,9 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 		// TODO Auto-generated method stub
 		mouseMovedOrUp(x, y, witch);
 	}
+	@Override
+	public void idraw2(int x, int y) {
+		// TODO Auto-generated method stub
+		
+	}
 }

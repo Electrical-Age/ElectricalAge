@@ -245,7 +245,8 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 			
 			
 			stream.writeShort((int) heatingCorpResistor.getP());
-			
+			stream.writeFloat((float) slowRefreshProcess.processState());
+			stream.writeFloat((float) slowRefreshProcess.processStatePerSecond());
 			
 			
 		} catch (IOException e) {

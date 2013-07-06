@@ -1,7 +1,13 @@
 package mods.eln.gui;
 
+import java.util.ArrayList;
+
+import org.lwjgl.opengl.GL11;
+
 import mods.eln.gui.GuiTextFieldEln.GuiTextFieldElnObserver;
 import mods.eln.gui.IGuiObject.IGuiObjectObserver;
+import mods.eln.gui.ISlotSkin.SlotSkin;
+import mods.eln.misc.Utils;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
@@ -9,10 +15,12 @@ import net.minecraft.inventory.Slot;
 public abstract class GuiContainerEln extends GuiContainer implements IGuiObjectObserver, GuiTextFieldElnObserver{
 	public GuiContainerEln(Container par1Container) {
 		super(par1Container);
-		// TODO Auto-generated constructor stub
+
 	}
 
-	GuiHelperContainer helper;
+
+	
+	public GuiHelperContainer helper;
 	
 	
 	protected abstract GuiHelperContainer newHelper();
@@ -67,6 +75,12 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 		o.setObserver(this);
 		return o;			
 	}
+	public GuiVerticalProgressBar newGuiVerticalProgressBar(int x,int y,int width,int height)
+	{
+		GuiVerticalProgressBar o =  helper.newGuiVerticalProgressBar(x, y, width,height);
+
+		return o;			
+	}
 
     public void drawTexturedModalRectEln(int x, int y, int u, int v, int width, int height)
     {
@@ -112,15 +126,79 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 		// TODO Auto-generated method stub
 		
 	}
-	@Override
-	protected void drawGuiContainerBackgroundLayer(float f, int i, int j) {
-		preDraw(f, i, j);
-		helper.mouseMove(i,j);
-		helper.draw(i, j, f);
-		postDraw(f, i, j);
-		
-	}
+	
 
+	
+	@SuppressWarnings("incomplete-switch")
+	@Override
+	protected void drawGuiContainerBackgroundLayer(float f, int mx, int my) {
+		GL11.glColor4f(1f, 1f, 1f, 1f);
+		preDraw(f, mx, my);
+		helper.mouseMove(mx,my);
+		helper.draw(mx, my, f);
+		this.mc.renderEngine.bindTexture("/gui/furnace.png");
+		GL11.glColor4f(1f, 1f, 1f, 1f);
+		for(Object o : inventorySlots.inventorySlots)
+		{
+			Slot slot = (Slot) o;
+			SlotSkin skin = SlotSkin.none;
+			if(slot instanceof ISlotSkin) skin = ((ISlotSkin)slot).getSlotSkin();
+			switch (skin) {
+			case medium:
+				drawTexturedModalRectEln(slot.xDisplayPosition-1, slot.yDisplayPosition -1, 55, 16, 73-55, 34-16	);
+				break;
+			case big:
+				drawTexturedModalRectEln(slot.xDisplayPosition-5, slot.yDisplayPosition -5, 111, 30, 137-111, 56-30);
+				break;
+			}
+		}
+		
+		postDraw(f, mx, my);
+
+	}
+	@Override
+	protected void drawGuiContainerForegroundLayer(int mx, int my) {
+		// TODO Auto-generated method stub
+		super.drawGuiContainerForegroundLayer(mx, my);
+		helper.draw2(mx, my);
+		ArrayList<String> list = new ArrayList<String>();
+		GL11.glColor4f(1f, 1f, 1f, 1f);
+
+		for(Object o : inventorySlots.inventorySlots)
+		{
+			Slot slot = (Slot) o;
+			if(	slot.getHasStack() == false 
+				&&	mx - guiLeft >= slot.xDisplayPosition && my - guiTop >= slot.yDisplayPosition
+			   && 	mx - guiLeft < slot.xDisplayPosition + 17 && my - guiTop< slot.yDisplayPosition + 17)
+			{
+				list.clear();
+			    
+	
+				SlotSkin comment = SlotSkin.none;
+				if(slot instanceof ISlotWithComment)
+				{
+					((ISlotWithComment)slot).getComment(list);
+					int x, y;
+					int strWidth = 0;
+					for(String str : list)
+					{
+						int size = fontRenderer.getStringWidth(str);
+						if(size > strWidth) strWidth = size;
+					}
+					
+					x = slot.xDisplayPosition;
+					y = slot.yDisplayPosition;
+					
+					int xOffset = 0;
+					if(guiLeft + x + strWidth +30 > this.width) 
+					{
+						xOffset -= strWidth + 20;
+					}
+					if(list.isEmpty() == false) drawHoveringText((java.util.List) list,mx - guiLeft + xOffset,my-guiTop, fontRenderer);
+				}
+			}
+		}
+	}
 
 	protected void preDraw(float f, int x, int y)
 	{
@@ -129,7 +207,7 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 	
 	protected void postDraw(float f, int x, int y)
 	{
-		
+		Utils.bindGuiTexture(helper.backgroundName);
 	}
 	
 	protected void drawString(int x,int y,String str)

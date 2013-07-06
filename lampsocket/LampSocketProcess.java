@@ -147,7 +147,7 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 			
 			lifeLost *= overFactor;
 			lifeLost *= overFactor;
-			lifeLost *= overFactor;
+			//lifeLost *= overFactor;
 			
 			NBTTagCompound lampNbt = lampStack.getTagCompound();
 			

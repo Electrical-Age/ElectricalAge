@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
 import mods.eln.client.ClientProxy;
+import mods.eln.client.FrameTime;
 import mods.eln.misc.Direction;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElement;
@@ -41,11 +42,15 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender{
 		// TODO Auto-generated constructor stub
 	}
 
+	float processState,processStatePerSecond;
 	
 	@Override
 	public void draw() {
 
-
+		processState += processStatePerSecond * FrameTime.getNotCaped();
+		if(processState > 1f) processState = 1f;
+		
+		
 
 		Eln.obj.draw("ElectricFurnace", "furnace");
 	//	ClientProxy.obj.draw("ELFURNACE");	
@@ -118,6 +123,9 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender{
 			
 			
 			heatingCorpResistorP = stream.readShort();
+			
+			processState = stream.readFloat();
+			processStatePerSecond = stream.readFloat();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

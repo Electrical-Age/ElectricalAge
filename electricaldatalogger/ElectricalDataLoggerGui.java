@@ -67,7 +67,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 		config.drawButton = true;
 		config.displayString = "return to display";
 		resetBt.drawButton = false;
-		printBt.drawButton = false;
+		printBt.drawButton = true;
 		voltageType.drawButton = true;
 		percentTyp.drawButton = true;
 		currentType.drawButton = true;
@@ -85,26 +85,29 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 		// TODO Auto-generated method stub
 		super.initGui();
 
-        voltageType = newGuiButton( 100, 10,100,  "voltageType");
-        currentType = newGuiButton( 100, 30,100,  "currentType");
-		resetBt = newGuiButton( 100, 50,100, "reset");
-		powerType = newGuiButton( 100, 50,100,  "powerType");
-		celsuisTyp = newGuiButton( 100, 70,100,  "celsuisType");
-		percentTyp = newGuiButton( 100, 90,100,  "percentType");
-		config = newGuiButton( 100, 120,100, "");
-		printBt = newGuiButton( 100, 10,100, "Print");
-		pause = newGuiButton( 100, 30,100,"");
+        voltageType = newGuiButton( 176/2-60-2, 8+20+2-2,60,  "Voltage");
+        currentType = newGuiButton( 176/2+2, 8+20+2-2,60,  "Current");
+		resetBt = newGuiButton( 176/2-50, 8 + 20 + 2-2,48, "Reset");
+		powerType = newGuiButton( 176/2-60-2, 8+40+4-2,60,  "Power");
+		celsuisTyp = newGuiButton( 176/2+2, 8+40+4-2,60,  "Celsuis");
+		percentTyp = newGuiButton( 176/2-30, 8+60+6-2,60,  "Percent");
+		config = newGuiButton( 176/2-50, 8-2,100, "");
+		printBt = newGuiButton( 176/2-48/2, 123,48, "Print");
+		pause = newGuiButton( 176/2 + 2, 8+20+2-2,48,"");
 		
 		
-		samplingPeriode = newGuiTextField( 120, 140+20, 103);
+		samplingPeriode = newGuiTextField( 30, 101, 50);
         samplingPeriode.setText(  render.log.samplingPeriod);
+        samplingPeriode.setComment(new String[]{"Sampling period"});
         
-        maxValue = newGuiTextField( 120, 140, 103);
+        maxValue = newGuiTextField( 176 - 50 - 30, 101-7, 50);
         maxValue.setText(render.log.maxValue);
+        maxValue.setComment(new String[]{"Y axis max"});
         
-        minValue = newGuiTextField( 120, 120, 103);
+        minValue = newGuiTextField( 176 - 50 - 30, 101+8, 50);
         minValue.setText(render.log.minValue);
-        
+        minValue.setComment(new String[]{"Y axe min"});
+       
 
         displayEntry();
 	}
@@ -239,13 +242,16 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
     	// TODO Auto-generated method stub
     	super.postDraw(f, x, y);
     	
-		GL11.glColor4f(1f, 0f, 0f, 1f);
-		
-        GL11.glPushMatrix();
-	        GL11.glTranslatef(50, 100, 0);
-	        GL11.glScalef(50, 50, 1f);
-	        render.log.draw(2.8f,1f);
-        GL11.glPopMatrix();
+    	if(state == State.display)
+    	{
+			GL11.glColor4f(1f, 0f, 0f, 1f);
+			
+	        GL11.glPushMatrix();
+		        GL11.glTranslatef(guiLeft + 8, guiTop + 60, 0);
+		        GL11.glScalef(50, 50, 1f);
+		        render.log.draw(2.9f,1.2f);
+	        GL11.glPopMatrix();
+    	}
     }
 
 	

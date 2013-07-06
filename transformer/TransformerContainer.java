@@ -4,6 +4,7 @@ import mods.eln.BasicContainer;
 import mods.eln.Eln;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.generic.GenericItemUsingDamageSlot;
+import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.node.SixNodeItemSlot;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,9 +19,9 @@ public class TransformerContainer extends BasicContainer {
 	public TransformerContainer(EntityPlayer player, IInventory inventory) {
 		
 		super(player, inventory,new Slot[]{
-				new SixNodeItemSlot(inventory,primaryCableSlotId,62 +  0,17,4,new Class[]{ElectricalCableDescriptor.class}),
-				new SixNodeItemSlot(inventory,secondaryCableSlotId,62 + 18,17,4,new Class[]{ElectricalCableDescriptor.class}),
-				new GenericItemUsingDamageSlot(inventory,ferromagneticSlotId,62 + 0,17 + 18,1,new Class[]{FerromagneticCoreDescriptor.class})
+				new SixNodeItemSlot(inventory,primaryCableSlotId,62 +  0,17,4,new Class[]{ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{"Electrical cable slot"}),
+				new SixNodeItemSlot(inventory,secondaryCableSlotId,62 + 18,17,4,new Class[]{ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{"Electrical cable slot"}),
+				new GenericItemUsingDamageSlot(inventory,ferromagneticSlotId,62 + 0,17 + 18,1,new Class[]{FerromagneticCoreDescriptor.class},SlotSkin.medium,new String[]{"Ferromagnetic core slot"})
 			
 				//	new SlotFilter(inventory,1,62 + 18,17,1,new ItemStackFilter[]{new ItemStackFilter(Eln.sixNodeBlock,0xFF,Eln.electricalCableId)})
 			});

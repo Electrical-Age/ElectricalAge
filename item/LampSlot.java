@@ -10,7 +10,7 @@ public class LampSlot extends GenericItemUsingDamageSlot{
 	LampSocketType socket;
 	public LampSlot(IInventory inventory, int slot, int x, int y,
 			int stackLimit,LampSocketType socket) {
-		super(inventory, slot, x, y, stackLimit, LampDescriptor.class);
+		super(inventory, slot, x, y, stackLimit, LampDescriptor.class,SlotSkin.medium,new String[]{"Lamp slot"});
 		
 		this.socket = socket;
 		// TODO Auto-generated constructor stub

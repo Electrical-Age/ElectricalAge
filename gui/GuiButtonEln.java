@@ -49,4 +49,9 @@ public class GuiButtonEln extends GuiButton implements IGuiObject{
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public void idraw2(int x, int y) {
+		// TODO Auto-generated method stub
+		
+	}
 }

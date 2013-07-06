@@ -1,5 +1,8 @@
 package mods.eln.electricalfurnace;
 
+import java.awt.List;
+import java.util.ArrayList;
+
 import org.lwjgl.opengl.GL11;
 
 
@@ -9,6 +12,8 @@ import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.GuiVerticalTrackBarHeat;
+import mods.eln.gui.HelperStdContainer;
+import mods.eln.gui.HelperStdContainerBig;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
@@ -49,8 +54,8 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     {
     	super.initGui();
     	
-    	buttonGrounded = newGuiButton(60,8,100, "");
-    	vuMeterTemperature = newGuiVerticalTrackBarHeat(8,8,20,60);
+    	buttonGrounded = newGuiButton(7,57,60, "");
+    	vuMeterTemperature = newGuiVerticalTrackBarHeat(167-20,8,20,69);
     	vuMeterTemperature.setStepIdMax(800/10);
     	vuMeterTemperature.setEnable(true);
     	vuMeterTemperature.setRange(0,800);
@@ -67,7 +72,11 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     protected void preDraw(float f, int x, int y) {
     	// TODO Auto-generated method stub
     	super.preDraw(f, x, y);
-    	buttonGrounded.displayString = "powerOn : " + render.getPowerOn();
+    	if( render.getPowerOn())
+    		buttonGrounded.displayString = "Turn OFF";
+    	else
+    		buttonGrounded.displayString = "Turn ON";
+    	//buttonGrounded.displayString = "powerOn : " + render.getPowerOn();
     	
         if(render.temperatureTargetSyncNew) syncVumeter();
         vuMeterTemperature.temperatureHit = render.temperature;
@@ -93,8 +102,9 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
 	protected void postDraw(float f, int x, int y) {
 		// TODO Auto-generated method stub
 		super.postDraw(f, x, y);
-	    drawString( 8, 6,"Tiny P " + render.heatingCorpResistorP);
-	    
+	    ((HelperStdContainer)helper).drawProcess(176/2 - 25 +  0,28, render.processState);
+
+	    drawString( 8, 6,Utils.plotPower("Consummation", render.heatingCorpResistorP));
 	}
 	 
 
@@ -102,6 +112,6 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176, 166,8,84, "electricalfurnace.png");
+		return new HelperStdContainer(this);
 	}
 }

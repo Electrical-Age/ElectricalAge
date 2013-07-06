@@ -3,6 +3,8 @@ package mods.eln.heatfurnace;
 import mods.eln.BasicContainer;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageSlot;
+import mods.eln.gui.ISlotSkin.SlotSkin;
+import mods.eln.gui.SlotWithSkin;
 import mods.eln.item.CombustionChamber;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
@@ -24,11 +26,11 @@ public class HeatFurnaceContainer extends BasicContainer implements INodeContain
 	Node node;
 	public HeatFurnaceContainer(Node node,EntityPlayer player, IInventory inventory,HeatFurnaceDescriptor descriptor) {
 		super(player, inventory,new Slot[]{
-				new Slot(inventory,combustibleId,62 +  0,17),
+				new SlotWithSkin(inventory,combustibleId,62 +  0,17,SlotSkin.medium),
 			//	new RegulatorSlot(inventory,regulatorId,62 +  0,17+18,1,new RegulatorType[]{),
-				new GenericItemUsingDamageSlot(inventory,regulatorId, 62 +  0,17+18,1, IRegulatorDescriptor.class),
-				new GenericItemUsingDamageSlot(inventory, isolatorId, 62 +  18,17 + 18,1, ThermalIsolatorElement.class),
-				new GenericItemUsingDamageSlot(inventory, combustrionChamberId, 62 +  36,17 + 18,descriptor.combustionChamberMax, CombustionChamber.class),
+				new GenericItemUsingDamageSlot(inventory,regulatorId, 62 +  0,17+18,1, IRegulatorDescriptor.class,SlotSkin.medium,new String[]{"Regulator slot"}),
+				new GenericItemUsingDamageSlot(inventory, isolatorId, 62 +  18,17 + 18,1, ThermalIsolatorElement.class,SlotSkin.medium,new String[]{"Thermal isolator slot"}),
+				new GenericItemUsingDamageSlot(inventory, combustrionChamberId, 62 +  36,17 + 18,descriptor.combustionChamberMax, CombustionChamber.class,SlotSkin.medium,new String[]{"Combustion chamber slot"}),
 			});
 		this.node = node;
 		// TODO Auto-generated constructor stub

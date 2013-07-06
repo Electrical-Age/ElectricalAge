@@ -63,13 +63,6 @@ public class NodeServer implements ITickHandler{
 	@Override
 	public void tickStart(EnumSet<TickType> type, Object... tickData) {
     
- 
-
-	}
-	@Override
-	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
-		// TODO Auto-generated method stub
-		
 	       MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 	        
 	        if (server != null)
@@ -110,6 +103,13 @@ public class NodeServer implements ITickHandler{
 
 	    	    counter++;
 	        }
+
+	}
+	@Override
+	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
+		// TODO Auto-generated method stub
+		
+
 		
 
 	}

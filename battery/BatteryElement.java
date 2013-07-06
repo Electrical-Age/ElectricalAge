@@ -83,6 +83,8 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	   	slowProcessList.add(batterySlowProcess);
     	slowProcessList.add(thermalWatchdogProcess);
     	slowProcessList.add(inventoryProcess);
+    	
+    	grounded = false;
 	}
 
 	
@@ -142,14 +144,17 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
     	try {
+    		/*
 	    	stream.writeShort((short) (positiveLoad.Uc*node.networkSerializeUFactor));
 	    	stream.writeShort((short) (negativeLoad.Uc*node.networkSerializeUFactor));
 	    	stream.writeShort((short) (batteryProcess.dischargeCurrentMesure*node.networkSerializeIFactor));
 	    	stream.writeShort((short) (thermalLoad.Tc*node.networkSerializeTFactor));
-	    	
-	    	
+	    	*/
+    		//stream.writeFloat((float)(positiveLoad.Uc - negativeLoad.Uc));
+	    	stream.writeFloat((float)((positiveLoad.Uc - negativeLoad.Uc)*batteryProcess.dischargeCurrentMesure));
 	    	stream.writeFloat((float) batteryProcess.getEnergy());
 	    	stream.writeShort((short)(batteryProcess.life*1000));
+	    //	stream.writeFloat((float)(positiveLoad.Uc - negativeLoad.Uc));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

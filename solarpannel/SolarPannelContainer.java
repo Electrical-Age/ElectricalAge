@@ -4,6 +4,7 @@ package mods.eln.solarpannel;
 import mods.eln.BasicContainer;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageSlot;
+import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.HeatingCorpElement;
 import mods.eln.item.SolarTrackerDescriptor;
 import mods.eln.item.ThermalIsolatorElement;
@@ -23,7 +24,7 @@ public class SolarPannelContainer extends BasicContainer implements INodeContain
 	
 	public SolarPannelContainer(Node node,EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new GenericItemUsingDamageSlot(inventory, trackerSlotId, 62 +  0,17 + 0,1, SolarTrackerDescriptor.class)
+				new GenericItemUsingDamageSlot(inventory, trackerSlotId, 62 +  0,17 + 0,1, SolarTrackerDescriptor.class,SlotSkin.medium,new String[]{"Solar tracker slot"})
 
 			});
 		this.node = node;

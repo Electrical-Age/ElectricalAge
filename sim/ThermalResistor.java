@@ -4,7 +4,7 @@ public class ThermalResistor implements IProcess {
 	ThermalLoad a,b;
 	
 	protected double R,Rinv;
-	double P = 0;
+	//double P = 0;
 	
 	public ThermalResistor(ThermalLoad a, ThermalLoad b) {
 		this.a = a;this.b = b;
@@ -14,14 +14,14 @@ public class ThermalResistor implements IProcess {
 	@Override
 	public void process(double time) {
 		// TODO Auto-generated method stub
-		P = (a.Tc-b.Tc)*Rinv;
+		double P = (a.Tc-b.Tc)*Rinv;
 		a.PcTemp -= P;
 		b.PcTemp += P;
 	}
 	
 	public double getP()
 	{
-		return P;
+		return (a.Tc-b.Tc)*Rinv;
 	}
 
 	public void setR(double r) {
@@ -30,10 +30,10 @@ public class ThermalResistor implements IProcess {
 	}
 	public double getR() {
 		return R;
-	}	
+	}	/*
 	public double getU() {
 		return P*R;
-	}
+	}*/
 	
 	
 	public void highImpedance() {

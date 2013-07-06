@@ -4,6 +4,7 @@ package mods.eln.windturbine;
 import mods.eln.BasicContainer;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageSlot;
+import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.DynamoDescriptor;
 import mods.eln.item.ElectricalMotorDescriptor;
 import mods.eln.item.HeatingCorpElement;
@@ -27,8 +28,8 @@ public class WindTurbineContainer extends BasicContainer implements INodeContain
 	
 	public WindTurbineContainer(Node node,EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new GenericItemUsingDamageSlot(inventory, windRotorSlotId, 62 +  0,17 + 0,1, WindRotorDescriptor.class),
-				new GenericItemUsingDamageSlot(inventory, dynamoSlotId, 62 +  18,17 + 0,1, DynamoDescriptor.class)
+				new GenericItemUsingDamageSlot(inventory, windRotorSlotId, 62 +  0,17 + 0,1, WindRotorDescriptor.class,SlotSkin.medium,new String[]{"Wind rotor slot"}),
+				new GenericItemUsingDamageSlot(inventory, dynamoSlotId, 62 +  18,17 + 0,1, DynamoDescriptor.class,SlotSkin.medium,new String[]{"Dynamo slot"})
 
 			});
 		this.node = node;

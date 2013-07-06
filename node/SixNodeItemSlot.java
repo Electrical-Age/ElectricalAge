@@ -2,19 +2,23 @@ package mods.eln.node;
 
 import mods.eln.Eln;
 import mods.eln.ItemStackFilter;
+import mods.eln.gui.ISlotSkin.SlotSkin;
+import mods.eln.gui.ISlotWithComment;
+import mods.eln.gui.SlotWithSkin;
+import mods.eln.gui.SlotWithSkinAndComment;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
-public class SixNodeItemSlot extends Slot{
+public class SixNodeItemSlot extends SlotWithSkinAndComment{
 
 	public SixNodeItemSlot(
 			IInventory inventory, int slot,
 			int x, int y,
-			int stackLimit,Class[] descriptorClassList
+			int stackLimit,Class[] descriptorClassList,SlotSkin skin,String [] comment
 			)
 	{
-		super(inventory, slot, x, y);
+		super(inventory, slot, x, y,skin,comment);
 		this.stackLimit = stackLimit;
 		this.descriptorClassList = descriptorClassList;
 	}

@@ -4,6 +4,7 @@ import mods.eln.BasicContainer;
 import mods.eln.Eln;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.generic.GenericItemUsingDamageSlot;
+import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
@@ -24,9 +25,9 @@ public class AutoMinerContainer extends BasicContainer implements INodeContainer
 	public AutoMinerContainer(Node node,EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
 		
-				new GenericItemUsingDamageSlot(inventory,electricalDrillSlotId,62 + 0,17,1,ElectricalDrillDescriptor.class),
-				new GenericItemUsingDamageSlot(inventory,OreScannerSlotId,62 + 18,17,1,OreScanner.class),
-				new GenericItemUsingDamageSlot(inventory,MiningPipeSlotId,62 + 36,17,64,MiningPipeDescriptor.class)
+				new GenericItemUsingDamageSlot(inventory,electricalDrillSlotId,62 + 0,17,1,ElectricalDrillDescriptor.class,SlotSkin.medium,new String[]{"Drill slot"}),
+				new GenericItemUsingDamageSlot(inventory,OreScannerSlotId,62 + 18,17,1,OreScanner.class,SlotSkin.medium,new String[]{"Ore scanner slot"}),
+				new GenericItemUsingDamageSlot(inventory,MiningPipeSlotId,62 + 36,17,64,MiningPipeDescriptor.class,SlotSkin.medium,new String[]{"Mining pipe slot"})
 			
 			});
 		this.node = node;
