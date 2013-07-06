@@ -12,6 +12,7 @@ import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
+import mods.eln.gui.HelperStdContainer;
 import mods.eln.gui.IGuiObject;
 import mods.eln.sim.PhysicalConstant;
 import net.minecraft.client.gui.GuiButton;
@@ -42,18 +43,38 @@ public class ThermalSensorGui extends GuiContainerEln{
 		// TODO Auto-generated method stub
 		super.initGui();
 
-        temperatureType = newGuiButton(100, 50 + 20,50, "temperatureType");
-		validate = newGuiButton(100, 50,50, "validate");
-		powerType = newGuiButton( 100, 50 + 40,50, "powerType");
 
-		
-		lowValue = newGuiTextField(120, 140+20, 103);
-        lowValue.setText(render.lowValue);
-        
-        highValue = newGuiTextField( 120, 140, 103);
-        highValue.setText( render.highValue);
-        
+		if(render.descriptor.temperatureOnly == false)
+		{
 
+			
+			powerType = newGuiButton( 8, 8,70, "Power");
+	        temperatureType = newGuiButton(176-8-70,8,70, "Temperature");
+
+			int x = -15,y = 13;
+			validate = newGuiButton(x+8 + 50 + 4 + 50 + 4 -26,y+ (166-84)/2 - 8,50, "validate");
+			
+			lowValue = newGuiTextField(x+8 + 50 + 4-26, y+(166-84)/2+3, 50);
+	        lowValue.setText(render.lowValue);
+	        lowValue.setComment(new String[]{"Input value for low level output"});
+	        
+	        highValue = newGuiTextField(x+8 + 50 + 4-26,y+ (166-84)/2 -12, 50);
+	        highValue.setText(render.highValue);
+	        highValue.setComment(new String[]{"Input value for high level output"});
+		}
+		else
+		{
+			int x = 0,y = 0;
+			validate = newGuiButton(x+8 + 50 + 4 + 50 + 4 -26,y+ (166-84)/2 - 8,50, "validate");
+			
+			lowValue = newGuiTextField(x+8 + 50 + 4-26, y+(166-84)/2+3, 50);
+	        lowValue.setText(render.lowValue);
+	        lowValue.setComment(new String[]{"Input value for low level output"});
+	        
+	        highValue = newGuiTextField(x+8 + 50 + 4-26,y+ (166-84)/2 -12, 50);
+	        highValue.setText(render.highValue);
+	        highValue.setComment(new String[]{"Input value for high level output"});
+		}
 	}
 	
 
@@ -88,24 +109,25 @@ public class ThermalSensorGui extends GuiContainerEln{
 	protected void preDraw(float f, int x, int y) {
 		// TODO Auto-generated method stub
 		super.preDraw(f, x, y);
-    	if(render.typeOfSensor == ThermalSensorElement.temperatureType)
-    	{
-    		powerType.enabled = true;
-        	temperatureType.enabled = false;
-    	}
-    	else if(render.typeOfSensor == ThermalSensorElement.powerType)
-    	{
-        	powerType.enabled = false;
-        	temperatureType.enabled = true;
-    	}
-
+		if(render.descriptor.temperatureOnly == false){
+	    	if(render.typeOfSensor == ThermalSensorElement.temperatureType)
+	    	{
+	    		powerType.enabled = true;
+	        	temperatureType.enabled = false;
+	    	}
+	    	else if(render.typeOfSensor == ThermalSensorElement.powerType)
+	    	{
+	        	powerType.enabled = false;
+	        	temperatureType.enabled = true;
+	    	}
+		}
 	}
 
 
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176, 166,8,84, "thermalsensor.png");
+		return new HelperStdContainer(this);
 	}
   
 

@@ -5,6 +5,7 @@ import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.gui.SlotWithSkin;
+import mods.eln.gui.SlotWithSkinAndComment;
 import mods.eln.item.CombustionChamber;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
@@ -26,11 +27,11 @@ public class HeatFurnaceContainer extends BasicContainer implements INodeContain
 	Node node;
 	public HeatFurnaceContainer(Node node,EntityPlayer player, IInventory inventory,HeatFurnaceDescriptor descriptor) {
 		super(player, inventory,new Slot[]{
-				new SlotWithSkin(inventory,combustibleId,62 +  0,17,SlotSkin.medium),
+				new SlotWithSkinAndComment(inventory,combustibleId,18 +  0,51,SlotSkin.medium,new String[]{"Fuel slot"}),
 			//	new RegulatorSlot(inventory,regulatorId,62 +  0,17+18,1,new RegulatorType[]{),
-				new GenericItemUsingDamageSlot(inventory,regulatorId, 62 +  0,17+18,1, IRegulatorDescriptor.class,SlotSkin.medium,new String[]{"Regulator slot"}),
-				new GenericItemUsingDamageSlot(inventory, isolatorId, 62 +  18,17 + 18,1, ThermalIsolatorElement.class,SlotSkin.medium,new String[]{"Thermal isolator slot"}),
-				new GenericItemUsingDamageSlot(inventory, combustrionChamberId, 62 +  36,17 + 18,descriptor.combustionChamberMax, CombustionChamber.class,SlotSkin.medium,new String[]{"Combustion chamber slot"}),
+				new GenericItemUsingDamageSlot(inventory,regulatorId, 18 +  25,51,1, IRegulatorDescriptor.class,SlotSkin.medium,new String[]{"Regulator slot"}),
+				new GenericItemUsingDamageSlot(inventory, isolatorId, 18 +  25 + 18,51,1, ThermalIsolatorElement.class,SlotSkin.medium,new String[]{"Thermal isolator slot"}),
+				new GenericItemUsingDamageSlot(inventory, combustrionChamberId, 18 + 25 + 36,51,descriptor.combustionChamberMax, CombustionChamber.class,SlotSkin.medium,new String[]{"Combustion chamber slot"}),
 			});
 		this.node = node;
 		// TODO Auto-generated constructor stub

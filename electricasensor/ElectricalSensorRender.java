@@ -62,7 +62,7 @@ public class ElectricalSensorRender extends SixNodeElementRender{
 
 	int typeOfSensor = 0; 
 	float lowValue = 0,highValue = 50;
-
+	byte dirType;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -73,7 +73,7 @@ public class ElectricalSensorRender extends SixNodeElementRender{
 			typeOfSensor = b & 0x3;
 			lowValue = stream.readFloat();
 			highValue = stream.readFloat();
-
+			dirType = stream.readByte();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

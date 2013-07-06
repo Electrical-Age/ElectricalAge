@@ -19,12 +19,13 @@ import com.google.common.base.Function;
 
 
 public class ThermalSensorDescriptor extends SixNodeDescriptor{
-
+	public boolean temperatureOnly;
 	public ThermalSensorDescriptor(		
-					String name
+					String name,
+					boolean temperatureOnly
 					) {
 			super(name, ThermalSensorElement.class, ThermalSensorRender.class);
-
+			this.temperatureOnly = temperatureOnly;
 		}
 
 }

@@ -18,15 +18,43 @@ public class ElectricalSensorProcess implements IProcess{
 	public void process(double time) {
 		if(sensor.typeOfSensor == sensor.voltageType)
 		{
-			setOutput(sensor.electricalLoad.Uc);
+			setOutput(sensor.aLoad.Uc);
 		}
 		else if(sensor.typeOfSensor == sensor.currantType)
 		{
-			setOutput(sensor.electricalLoad.getCurrent());
+			double output = 0;
+			switch(sensor.dirType)
+			{
+			case ElectricalSensorElement.dirNone:
+				output = Math.abs(sensor.resistor.getCurrent());
+				break;
+			case ElectricalSensorElement.dirAB:
+				output = (sensor.resistor.getCurrent());
+				break;
+			case ElectricalSensorElement.dirBA:
+				output = (-sensor.resistor.getCurrent());
+				break;
+			}
+			
+			setOutput(output);		
 		}
 		else if(sensor.typeOfSensor == sensor.powerType)
 		{
-			setOutput(sensor.electricalLoad.Irs * 0.5 * sensor.electricalLoad.Uc);
+			double output = 0;
+			switch(sensor.dirType)
+			{
+			case ElectricalSensorElement.dirNone:
+				output = Math.abs(sensor.resistor.getCurrent()*sensor.aLoad.Uc);
+				break;
+			case ElectricalSensorElement.dirAB:
+				output = (sensor.resistor.getCurrent()*sensor.aLoad.Uc);
+				break;
+			case ElectricalSensorElement.dirBA:
+				output = (-sensor.resistor.getCurrent()*sensor.aLoad.Uc);
+				break;
+			}
+			
+			setOutput(output);		
 		}
 		 
 	}

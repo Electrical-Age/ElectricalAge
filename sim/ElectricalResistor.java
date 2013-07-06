@@ -39,6 +39,10 @@ public class ElectricalResistor implements IProcess{
 		return I*R;
 	}
 	
+	public double getCurrent()
+	{
+		return I;
+	}
 	
 	public void highImpedance() {
 		setR(1000000000.0);

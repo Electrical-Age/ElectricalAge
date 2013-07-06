@@ -34,12 +34,7 @@ public class TurbineRender extends TransparentNodeElementRender{
 	}
 
 	
-	@Override
-	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
-	//	return new TransformatorGuiDraw(player, inventory, this);
-		return new TurbineGuiDraw(player, inventory, this);
-	}
+
 	
 	
 }

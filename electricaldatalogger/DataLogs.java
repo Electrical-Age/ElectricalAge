@@ -155,13 +155,25 @@ public class DataLogs implements INBTTReady{
 		GL11.glEnd();
 		float temp = 0.01f;
 		GL11.glBegin(GL11.GL_QUAD_STRIP);
-		GL11.glVertex2f(margeX + temp,0f);
+			GL11.glVertex2f(margeX + temp,0f);
 			GL11.glVertex2f(margeX - temp,0f);
 			GL11.glVertex2f(margeX + temp,margeY + temp);
 			GL11.glVertex2f(margeX - temp,margeY - temp);
 			GL11.glVertex2f(0f,margeY + temp);
 			GL11.glVertex2f(0f,margeY - temp);
 		GL11.glEnd();
+		
+		if((minValue < 0 && maxValue > 0) ||(minValue > 0 && maxValue < 0))
+		{
+			temp = 0.005f;
+			float zeroY = (maxValue)/(maxValue - minValue) * margeY;
+			GL11.glBegin(GL11.GL_QUAD_STRIP);
+				GL11.glVertex2f(margeX,zeroY + temp);
+				GL11.glVertex2f(margeX,zeroY - temp);
+				GL11.glVertex2f(0f,zeroY + temp);
+				GL11.glVertex2f(0f,zeroY - temp);
+			GL11.glEnd();
+		}
 		/*
 		GL11.glBegin(GL11.GL_LINE_STRIP);
 			GL11.glVertex2f(margeX,0f);

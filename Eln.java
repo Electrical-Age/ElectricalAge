@@ -1171,7 +1171,21 @@ public class Eln {
 	    	name = "Thermal sensor sixNode";
 	    	
 	    	desc = new ThermalSensorDescriptor(
-	    			name
+	    			name,
+	    			false
+	    			);
+	    	
+    		
+	    	sixNodeItem.addDescriptor(subId + (id << 6), desc);
+    	}  
+    	{
+    		subId = 1;
+    		
+	    	name = "Temperature sensor sixNode";
+	    	
+	    	desc = new ThermalSensorDescriptor(
+	    			name,
+	    			true
 	    			);
 	    	
     		

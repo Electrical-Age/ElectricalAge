@@ -113,15 +113,6 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	}
 	
 
-    protected void mouseClicked(int par1, int par2, int par3)
-    {
-        super.mouseClicked(par1, par2, par3);
-        this.samplingPeriode.mouseClicked(par1, par2, par3);
-        this.maxValue.mouseClicked(par1, par2, par3);
-        this.minValue.mouseClicked(par1, par2, par3);
-    }
-
-
 
     @Override
 	public void guiObjectEvent(IGuiObject object) {
@@ -187,7 +178,11 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 			}
 			else if(object == samplingPeriode)
 			{
-				render.clientSetFloat(ElectricalDataLoggerElement.setSamplingPeriodeId, Float.parseFloat(samplingPeriode.getText()));
+				float value = Float.parseFloat(samplingPeriode.getText());
+				if(value < 0.05f) value = 0.05f;
+				samplingPeriode.setText(value);
+				
+				render.clientSetFloat(ElectricalDataLoggerElement.setSamplingPeriodeId, value);
 			}
 		} catch(NumberFormatException e)
 		{

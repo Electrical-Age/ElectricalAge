@@ -15,7 +15,7 @@ public class ElectricalSensorContainer extends BasicContainer {
 	
 	public ElectricalSensorContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new SixNodeItemSlot(inventory,cableSlotId,62 + 0,17,1,new Class[]{ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{"Electrical cable slot"})
+				new SixNodeItemSlot(inventory,cableSlotId,152,62,1,new Class[]{ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{"Electrical cable slot"})
 			});
 		
 		// TODO Auto-generated constructor stub

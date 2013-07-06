@@ -45,6 +45,16 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject{
 			this.comment.add(str);
 		}
 	}
+	
+	
+	
+	public void setComment(int line,String comment)
+	{
+		if(this.comment.size() < line + 1)
+			this.comment.add(line, comment);
+		else
+			this.comment.set(line, comment);
+	}
 	public void setText(float value)
 	{
 		setText( String.format("%3.2f", value));

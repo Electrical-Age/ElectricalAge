@@ -11,6 +11,7 @@ import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
+import mods.eln.gui.HelperStdContainer;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
 import net.minecraft.client.gui.GuiButton;
@@ -31,7 +32,7 @@ public class ElectricalSensorGui extends GuiContainerEln{
 	}
 
 
-	GuiButton validate,voltageType,currentType,powerType;
+	GuiButton validate,voltageType,currentType,powerType,dirType;
 	GuiTextFieldEln lowValue,highValue;
 	ElectricalSensorRender render;
 	
@@ -41,21 +42,37 @@ public class ElectricalSensorGui extends GuiContainerEln{
 		// TODO Auto-generated method stub
 		super.initGui();
 
- 		validate = newGuiButton(150, 50,100, "validate");
+ 		
 		if(render.descriptor.voltageOnly == false)
 		{
-			voltageType = newGuiButton(150, 50 + 20,100, "voltageType");
-			currentType = newGuiButton(150, 50 + 40,100, "currentType");
-			powerType = newGuiButton(150, 50 + 60,100, "powerType");
+			voltageType = newGuiButton(8, 8,50, "Voltage");
+			currentType = newGuiButton(8, 8+24,50, "Current");
+			powerType = newGuiButton(8, 8+48,50, "Power");
+			dirType = newGuiButton(8+50+4, 8+48, 50, "");
+
+			int x = 0,y = -12;
+			validate = newGuiButton(x+8 + 50 + 4 + 50 + 4,y+ (166-84)/2 - 9,50, "validate");
+			
+			lowValue = newGuiTextField(x+8 + 50 + 4,y+ (166-84)/2+3, 50);
+	        lowValue.setText(render.lowValue);
+	        lowValue.setComment(new String[]{"Input value for low level output"});
+	        
+	        highValue = newGuiTextField(x+8 + 50 + 4,y+ (166-84)/2 -13, 50);
+	        highValue.setText(render.highValue);
+	        highValue.setComment(new String[]{"Input value for high level output"});
 		}
-
-		lowValue = newGuiTextField(120, 10, 103);
-        lowValue.setText(render.lowValue);
-        
-        highValue = newGuiTextField(120, 24, 103);
-        highValue.setText(render.highValue);
-        
-
+		else
+		{
+			validate = newGuiButton(8 + 50 + 4 + 50 + 4 -26, (166-84)/2 - 8,50, "validate");
+			
+			lowValue = newGuiTextField(8 + 50 + 4-26, (166-84)/2+3, 50);
+	        lowValue.setText(render.lowValue);
+	        lowValue.setComment(new String[]{"Input value for low level output"});
+	        
+	        highValue = newGuiTextField(8 + 50 + 4-26, (166-84)/2 -12, 50);
+	        highValue.setText(render.highValue);
+	        highValue.setComment(new String[]{"Input value for high level output"});
+		}
 	}
 	
 
@@ -91,6 +108,11 @@ public class ElectricalSensorGui extends GuiContainerEln{
     	{
     		render.clientSetByte(ElectricalSensorElement.setTypeOfSensorId, ElectricalSensorElement.powerType);
     	}
+    	else if(object == dirType)
+    	{
+    		render.dirType = (byte) ((render.dirType + 1)%3);
+    		render.clientSetByte(ElectricalSensorElement.setDirType, render.dirType);
+    	}
     }
    
     @Override
@@ -99,6 +121,19 @@ public class ElectricalSensorGui extends GuiContainerEln{
     	super.preDraw(f, x, y);
     	if(render.descriptor.voltageOnly == false)
     	{
+    		switch(render.dirType)
+    		{
+    		case ElectricalSensorElement.dirNone:
+    			dirType.displayString = "<=>";
+    			break;
+    		case ElectricalSensorElement.dirAB:
+    			dirType.displayString = "A => B";
+    			break;
+    		case ElectricalSensorElement.dirBA:
+    			dirType.displayString = "A <= B";
+    			break;
+    		}
+    		
 	    	if(render.typeOfSensor == ElectricalSensorElement.currantType)
 	    	{
 	        	powerType.enabled = true;
@@ -125,7 +160,7 @@ public class ElectricalSensorGui extends GuiContainerEln{
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176, 166,8,84, "electricalsensor.png");
+		return new HelperStdContainer(this);
 	}
 	
 }

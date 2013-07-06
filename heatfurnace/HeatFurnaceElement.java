@@ -183,6 +183,7 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 				needPublish();
 				break;
 			case unserializeToogleControlExternalId:
+				regulator.setTarget(0);
 				setControlExternal(! getControlExternal());			
 				break;
 			case unserializeToogleTakeFuelId:

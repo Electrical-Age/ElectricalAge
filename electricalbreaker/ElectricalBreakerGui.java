@@ -10,6 +10,8 @@ import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
+import mods.eln.gui.HelperStdContainer;
+import mods.eln.gui.HelperStdContainerSmall;
 import mods.eln.gui.IGuiObject;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -41,12 +43,16 @@ public class ElectricalBreakerGui extends GuiContainerEln{
 		// TODO Auto-generated method stub
 		super.initGui();
 
-        setUmin = newGuiTextField(8,28,100);
-        setUmax = newGuiTextField(8,8,100);
-        
+        setUmin = newGuiTextField(12,58/2 - 5 - 10,50);
+        setUmax = newGuiTextField(12,58/2 + 3,50);
+
         setUmin.setText(render.uMin);
         setUmax.setText(render.uMax);
-		toogleSwitch = newGuiButton(100, 50 + 60,100, "toogle switch");
+        
+        setUmin.setComment(0,"Minimum voltage before cutting off");
+        setUmax.setComment(0,"Maximum voltage before cutting off");
+        
+		toogleSwitch = newGuiButton(72+1, 58/2-10,65, "toogle switch");
 
 
 	}
@@ -87,14 +93,17 @@ public class ElectricalBreakerGui extends GuiContainerEln{
     protected void preDraw(float f, int x, int y) {
     	// TODO Auto-generated method stub
     	super.preDraw(f, x, y);
-    	toogleSwitch.displayString = "state is " + render.switchState;
+    	if(render.switchState)
+    		toogleSwitch.displayString = "Switch OFF";
+    	else
+    		toogleSwitch.displayString = "Switch ON";
     }
 
 
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176, 166,8,84, "electricalbreaker.png");
+		return new HelperStdContainerSmall(this);
 	}
 
 

@@ -69,7 +69,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 	
 	SixNodeElementInventory inventory = new SixNodeElementInventory(1,64,this);
 	LRDU front;
-	public float voltageMax = 0,voltageMin = -2;
+	public float voltageMax = (float) Eln.SVU,voltageMin = 0;
 	
 	public SixNodeElementInventory getInventory() {
 		return inventory;

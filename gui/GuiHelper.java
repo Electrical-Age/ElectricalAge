@@ -63,7 +63,7 @@ public class GuiHelper {
 		GuiVerticalTrackBar o;
 		o = new GuiVerticalTrackBar(
 				screen.width/2 -xSize/2 + x , screen.height/2 -ySize/2 + y,
-				width, height
+				width, height,this
 				);
 		objectList.add(o);
 		return o;
@@ -73,7 +73,7 @@ public class GuiHelper {
 		GuiVerticalTrackBarHeat o;
 		o = new GuiVerticalTrackBarHeat(
 				screen.width/2 -xSize/2 + x , screen.height/2 -ySize/2 + y,
-				width, height
+				width, height,this
 				);
 		objectList.add(o);
 		return o;
@@ -158,17 +158,19 @@ public class GuiHelper {
 	}
 	
 
-	public void drawHoveringText(List par1List, int par2, int par3, FontRenderer font)
+	public void drawHoveringText(List par1List, int x, int y, FontRenderer font)
     {
         if (!par1List.isEmpty())
         {
-        	par2 -= (screen.width - xSize) / 2;
-        	par3 -= (screen.height - ySize) / 2;
+        	if(screen instanceof GuiContainer){
+	        	x -= (screen.width - xSize) / 2;
+	        	y -= (screen.height - ySize) / 2;
+        	}
             GL11.glDisable(GL12.GL_RESCALE_NORMAL);
             RenderHelper.disableStandardItemLighting();
             GL11.glDisable(GL11.GL_LIGHTING);
             GL11.glDisable(GL11.GL_DEPTH_TEST);
-            int k = 0;
+            int textWidth = 0;
             Iterator iterator = par1List.iterator();
 
             while (iterator.hasNext())
@@ -176,14 +178,27 @@ public class GuiHelper {
                 String s = (String)iterator.next();
                 int l = font.getStringWidth(s);
 
-                if (l > k)
+                if (l > textWidth)
                 {
-                    k = l;
+                    textWidth = l;
                 }
             }
+            if(screen instanceof GuiContainer){
+	            if( x +  (screen.width - xSize) / 2 + textWidth + 30 > screen.width)
+	            {
+	            	x-=textWidth + 24;
+	            }
+            }
+            else
+            {
+	            if( x  + textWidth + 30 > screen.width)
+	            {
+	            	x-=textWidth + 24;
+	            }            	
+            }
 
-            int i1 = par2 + 12;
-            int j1 = par3 - 12;
+            int i1 = x + 12;
+            int j1 = y - 12;
             int k1 = 8;
 
             if (par1List.size() > 1)
@@ -203,17 +218,17 @@ public class GuiHelper {
 
 
             int l1 = -267386864;
-            drawGradientRect(i1 - 3, j1 - 4, i1 + k + 3, j1 - 3, l1, l1);
-            drawGradientRect(i1 - 3, j1 + k1 + 3, i1 + k + 3, j1 + k1 + 4, l1, l1);
-            drawGradientRect(i1 - 3, j1 - 3, i1 + k + 3, j1 + k1 + 3, l1, l1);
+            drawGradientRect(i1 - 3, j1 - 4, i1 + textWidth + 3, j1 - 3, l1, l1);
+            drawGradientRect(i1 - 3, j1 + k1 + 3, i1 + textWidth + 3, j1 + k1 + 4, l1, l1);
+            drawGradientRect(i1 - 3, j1 - 3, i1 + textWidth + 3, j1 + k1 + 3, l1, l1);
             drawGradientRect(i1 - 4, j1 - 3, i1 - 3, j1 + k1 + 3, l1, l1);
-            drawGradientRect(i1 + k + 3, j1 - 3, i1 + k + 4, j1 + k1 + 3, l1, l1);
+            drawGradientRect(i1 + textWidth + 3, j1 - 3, i1 + textWidth + 4, j1 + k1 + 3, l1, l1);
             int i2 = 1347420415;
             int j2 = (i2 & 16711422) >> 1 | i2 & -16777216;
             drawGradientRect(i1 - 3, j1 - 3 + 1, i1 - 3 + 1, j1 + k1 + 3 - 1, i2, j2);
-            drawGradientRect(i1 + k + 2, j1 - 3 + 1, i1 + k + 3, j1 + k1 + 3 - 1, i2, j2);
-            drawGradientRect(i1 - 3, j1 - 3, i1 + k + 3, j1 - 3 + 1, i2, i2);
-            drawGradientRect(i1 - 3, j1 + k1 + 2, i1 + k + 3, j1 + k1 + 3, j2, j2);
+            drawGradientRect(i1 + textWidth + 2, j1 - 3 + 1, i1 + textWidth + 3, j1 + k1 + 3 - 1, i2, j2);
+            drawGradientRect(i1 - 3, j1 - 3, i1 + textWidth + 3, j1 - 3 + 1, i2, i2);
+            drawGradientRect(i1 - 3, j1 + k1 + 2, i1 + textWidth + 3, j1 + k1 + 3, j2, j2);
 
             for (int k2 = 0; k2 < par1List.size(); ++k2)
             {
@@ -264,4 +279,18 @@ public class GuiHelper {
         GL11.glEnable(GL11.GL_ALPHA_TEST);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
     }
+
+
+	public int getHoveringTextWidth(ArrayList<String> comment,FontRenderer fontRenderer) {
+		int strWidth = 0;
+		for(String str : comment)
+		{
+			int size = fontRenderer.getStringWidth(str);
+			if(size > strWidth) strWidth = size;
+		}
+		return strWidth +5;
+	}
+	public int getHoveringTextHeight(ArrayList<String> comment,FontRenderer fontRenderer) {
+		return comment.size() * 9 - 4;
+	}
 }

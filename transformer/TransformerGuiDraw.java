@@ -8,6 +8,7 @@ import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalTrackBar;
+import mods.eln.gui.HelperStdContainer;
 import mods.eln.gui.IGuiObject;
 import mods.eln.heatfurnace.HeatFurnaceContainer;
 import mods.eln.misc.Utils;
@@ -51,7 +52,7 @@ public class TransformerGuiDraw extends GuiContainerEln {
     	super.initGui();
     	
     
-    	buttonGrounded = newGuiButton(width/2,height/2,100, "");
+    	buttonGrounded = newGuiButton(176/2-60,8,120, "");
     }
     
 
@@ -59,7 +60,10 @@ public class TransformerGuiDraw extends GuiContainerEln {
     protected void preDraw(float f, int x, int y) {
     	// TODO Auto-generated method stub
     	super.preDraw(f, x, y);
-        buttonGrounded.displayString = "Grounded : " + render.grounded;
+    	if(render.grounded)
+    		buttonGrounded.displayString = "Self grounded";
+    	else
+    		buttonGrounded.displayString = "Externally grounded";
 
     }
 
@@ -69,14 +73,15 @@ public class TransformerGuiDraw extends GuiContainerEln {
     	super.guiObjectEvent(object);
     	if(object == buttonGrounded)
     	{
-    		//render.clientSetGrounded(!render.getGrounded());
+    		render.clientSetGrounded(!render.grounded);
     	}
     }
 
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176, 166,8,84, "transformer.png");
+			return new GuiHelperContainer(this, 176, 194,8,84 + 194 - 166, "transformer.png");
+		//return new HelperStdContainer(this);
 	}
     
 

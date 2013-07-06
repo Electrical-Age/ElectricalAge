@@ -56,7 +56,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class ElectricalDataLoggerElement extends SixNodeElement {
 
-	public static final int logsSizeMax = 128;
+	public static final int logsSizeMax = 256;
 
 	public ElectricalDataLoggerElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
@@ -68,9 +68,11 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 		
 		electricalLoadList.add(inputGate);
     	slowProcessList.add(slowProcess);
+    	sampleStackReset();
 
 	}
 
+	public int sampleStack,sampleStackNbr;
 	public static boolean canBePlacedOnSide(Direction side,SixNodeDescriptor descriptor)
 	{
 		if(((ElectricalDataLoggerDescriptor)descriptor).onFloor && side == Direction.YN) return true;
@@ -109,6 +111,8 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 		logs.readFromNBT(nbt, str + "logs");
 		pause = nbt.getBoolean(str + "pause");
 		timeToNextSample = nbt.getDouble(str + "timeToNextSample");
+		sampleStack = nbt.getInteger(str + "sampleStack");
+		sampleStackNbr = nbt.getInteger(str + "sampleStackNbr");
 	}
 
 	@Override
@@ -120,6 +124,8 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 		nbt.setBoolean(str + "pause", pause);
 		
 		logs.writeToNBT(nbt, str + "logs");
+		nbt.setInteger(str + "sampleStack", sampleStack);
+		nbt.setInteger(str + "sampleStackNbr", sampleStackNbr);
 	}
 
 	@Override
@@ -233,6 +239,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
 			case setSamplingPeriodeId:
 				logs.reset();
+				sampleStackReset();
 				logs.samplingPeriod = stream.readFloat();
 				timeToNextSample = 0.1;
 				needPublish();
@@ -246,11 +253,13 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 				needPublish();
 				break;
 			case setUnitId:
-				logs.reset();
+				//sampleStackReset();
+				//logs.reset();
 				logs.unitType = stream.readByte();
 				needPublish();
 				break;
 			case resetId:
+				sampleStackReset();
 				logs.reset();
 				break;
 			case newClientId:
@@ -304,6 +313,12 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 	public Container newContainer(Direction side, EntityPlayer player) {
 		// TODO Auto-generated method stub
 		return new ElectricalDataLoggerContainer(player, inventory);
+	}
+
+	public void sampleStackReset() {
+		// TODO Auto-generated method stub
+		sampleStack = 0;
+		sampleStackNbr = 0;
 	}
 	
 	

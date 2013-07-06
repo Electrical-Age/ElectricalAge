@@ -292,7 +292,7 @@ public class Utils {
 	{
 		String str = "";
 		if(value == 0.0)
-			return str + "0'";
+			return str + "0''";
 		int h,mn,s;
 		h = (int) (value/3600); value = value % 3600;
 		mn = (int) (value/60); value = value % 60;

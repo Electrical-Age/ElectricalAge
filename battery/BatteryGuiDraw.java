@@ -52,7 +52,7 @@ public class BatteryGuiDraw extends GuiContainerEln {
     	buttonGrounded.drawButton = false;
     	energyBar = newGuiVerticalProgressBar(167-16, 8,16, 69);
         energyBar.setColor(0.2f, 0.5f, 0.8f);
-        energyBar.setComment(new String[]{"Energy"});
+        
     }
     
 
@@ -78,6 +78,7 @@ public class BatteryGuiDraw extends GuiContainerEln {
     	super.preDraw(f, x, y);
         buttonGrounded.displayString = "Grounded : " + render.grounded;
         energyBar.setValue((float) (render.energy/(render.descriptor.electricalStdEnergy * render.life)));
+        energyBar.setComment(0,"Energy " + Utils.plotPercent("", energyBar.getValue()).replace(" ", ""));
     }
 
 
@@ -113,8 +114,12 @@ public class BatteryGuiDraw extends GuiContainerEln {
         drawString(8, 17 , "Energy");
         drawString(xDelta, 17,
         		Utils.plotValue(render.energy,"J/") +  Utils.plotValue( render.descriptor.electricalStdEnergy * render.life,"J"));
-        drawString(8, 26 , "Power out");
-        drawString(xDelta , 26 ,Utils.plotValue(render.power,"W/")  + Utils.plotValue(render.descriptor.electricalStdP,"W"));
+       
+        if(render.power >= 0)
+        	drawString(8, 26 , "Power out");
+        else
+        	drawString(8, 26 , "Power in");
+        drawString(xDelta , 26 ,Utils.plotValue(Math.abs(render.power),"W/")  + Utils.plotValue(render.descriptor.electricalStdP,"W"));
 
         drawString(8, 35 , str1);
         drawString(xDelta, 35 , str2);

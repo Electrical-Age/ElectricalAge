@@ -24,7 +24,12 @@ public class ElectricalDataLoggerProcess implements IProcess{
 	@Override
 	public void process(double time) {
 		if(e.pause == false)
+		{
 			e.timeToNextSample -= time;
+			byte value = ((byte)(e.inputGate.getNormalized() * 255.5 - 128));
+			e.sampleStack += value;
+			e.sampleStackNbr++;
+		}
 		
 		if(e.printToDo)
 		{
@@ -43,7 +48,8 @@ public class ElectricalDataLoggerProcess implements IProcess{
 		if(e.timeToNextSample <= 0.0)
 		{
 			e.timeToNextSample += e.logs.samplingPeriod;
-			byte value = ((byte)(e.inputGate.getNormalized() * 255.5 - 128));
+			byte value = (byte) (e.sampleStack / e.sampleStackNbr);
+			e.sampleStackReset();
 			e.logs.write(value);
 			
 	    	ByteArrayOutputStream bos = new ByteArrayOutputStream(64);

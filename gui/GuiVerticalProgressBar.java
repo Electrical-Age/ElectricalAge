@@ -93,5 +93,16 @@ public class GuiVerticalProgressBar  extends Gui implements IGuiObject {
 			helper.drawHoveringText(comment, x, y, Minecraft.getMinecraft().fontRenderer);
 				
 	}
+	public void setComment(int line,String comment)
+	{
+		if(this.comment.size() < line + 1)
+			this.comment.add(line, comment);
+		else
+			this.comment.set(line, comment);
+	}
+	public double getValue() {
+		// TODO Auto-generated method stub
+		return value;
+	}
 
 }

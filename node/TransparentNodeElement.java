@@ -101,7 +101,7 @@ public abstract class TransparentNodeElement implements INBTTReady {
 	
 	public void onGroundedChangedByClient()
 	{
-		
+		needPublish();
 	}
 
 	public void networkUnserialize(DataInputStream stream,Player player) 

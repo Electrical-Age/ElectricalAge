@@ -56,26 +56,30 @@ public class ElectricalSensorElement extends SixNodeElement {
 		super(sixNode, side, descriptor);
 		//front = LRDU.Left;
     	this.descriptor = (ElectricalSensorDescriptor) descriptor;
-	//	if(this.descriptor.voltageOnly == false)
-			electricalLoad = new NodeElectricalLoad("electricalLoad");
-		/*else
-			electricalLoad = new NodeElectricalGateInput("inputGate");*/
-		electricalLoadList.add(electricalLoad);
+
+		aLoad = new NodeElectricalLoad("aLoad");
+		bLoad = new NodeElectricalLoad("bLoad");
+		resistor = new NodeElectricalResistor("resistor", aLoad, bLoad);
+		
+
+		electricalLoadList.add(aLoad);
+		electricalLoadList.add(bLoad);
     	electricalLoadList.add(outputGate);
     	electricalProcessList.add(outputGateProcess);
     	thermalProcessList.add(slowProcess);
-    	
+    	electricalProcessList.add(resistor);
     //	electricalLoad.setRp(100000000000000.0);
 
 	}
 
 
 	public ElectricalSensorDescriptor descriptor;
-	public NodeElectricalLoad electricalLoad;
+	public NodeElectricalLoad aLoad,bLoad;
 	public NodeElectricalLoad outputGate = new NodeElectricalLoad("outputGate");
 	public NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess",outputGate);
 	public ElectricalSensorProcess slowProcess = new ElectricalSensorProcess(this);
 	
+	public NodeElectricalResistor resistor;
 	
 	SixNodeElementInventory inventory = new SixNodeElementInventory(1,64,this);
 
@@ -88,7 +92,8 @@ public class ElectricalSensorElement extends SixNodeElement {
 	{
 		return true;
 	}
-	
+	static final byte dirNone = 0,dirAB = 1,dirBA = 2;
+	byte dirType = dirNone;
 	static final byte powerType = 0,currantType = 1,voltageType = 2;
 	int typeOfSensor = voltageType; 
 	float lowValue = 0,highValue = 50;
@@ -102,6 +107,7 @@ public class ElectricalSensorElement extends SixNodeElement {
         typeOfSensor = nbt.getByte(str + "typeOfSensor");
         lowValue = nbt.getFloat(str + "lowValue");
         highValue = nbt.getFloat(str + "highValue");
+        dirType = nbt.getByte(str + "dirType");
 	}
 
 	@Override
@@ -112,6 +118,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 		nbt.setByte(str + "typeOfSensor", (byte) typeOfSensor);
 		nbt.setFloat(str + "lowValue", lowValue);
 		nbt.setFloat(str + "highValue", highValue);
+		nbt.setByte(str + "dirType", dirType);
 	}
 
 	@Override
@@ -119,13 +126,13 @@ public class ElectricalSensorElement extends SixNodeElement {
 		// TODO Auto-generated method stub
 		if(descriptor.voltageOnly == false)
 		{
-			if(front.left() == lrdu) return electricalLoad;
-			if(front.right() == lrdu) return electricalLoad;
+			if(front.left() == lrdu) return aLoad;
+			if(front.right() == lrdu) return bLoad;
 			if(front == lrdu) return outputGate;
 		}
 		else
 		{
-			if(front == lrdu) return electricalLoad;
+			if(front == lrdu) return aLoad;
 			if(front.inverse() == lrdu) return outputGate;
 		}
 		return null;
@@ -159,11 +166,14 @@ public class ElectricalSensorElement extends SixNodeElement {
 	public String multiMeterString() {
 		// TODO Auto-generated method stub
 		if(descriptor.voltageOnly == false)
-			return Utils.plotUIP(electricalLoad.Uc, electricalLoad.getCurrent());
+			return Utils.plotUIP(aLoad.Uc, aLoad.getCurrent());
 		else
-			return Utils.plotVolt("Uin", electricalLoad.Uc) + Utils.plotVolt("Uout", outputGate.Uc);
+			return Utils.plotVolt("Uin", aLoad.Uc) + Utils.plotVolt("Uout", outputGate.Uc);
 
 	}
+	
+	
+
 
 	@Override
 	public String thermoMeterString() {
@@ -180,6 +190,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 			stream.writeByte( typeOfSensor);
 			stream.writeFloat(lowValue);
 			stream.writeFloat(highValue);
+			stream.writeByte(dirType);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -210,11 +221,15 @@ public class ElectricalSensorElement extends SixNodeElement {
 			ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
 			if(cableDescriptor == null)
 			{
-				electricalLoad.highImpedance();
+				aLoad.highImpedance();
+				bLoad.highImpedance();
+				resistor.highImpedance();
 			}
 			else
 			{
-				cableDescriptor.applyTo(electricalLoad, false);
+				cableDescriptor.applyTo(aLoad, false);
+				cableDescriptor.applyTo(bLoad, false);
+				cableDescriptor.applyTo(resistor);
 			}
 		}
 
@@ -239,7 +254,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 	public static final byte setTypeOfSensorId = 1;
 	public static final byte setValueId = 2;
-
+	public static final byte setDirType = 3;
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -257,7 +272,10 @@ public class ElectricalSensorElement extends SixNodeElement {
 				if(lowValue == highValue) highValue += 0.0001;
 				needPublish();
 				break;
-
+			case setDirType:
+				dirType = stream.readByte();
+				needPublish();
+				break;
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

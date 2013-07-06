@@ -60,7 +60,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 		counter += FrameTime.get() * 60;
 		if(counter >= 360f) counter -= 360;
 		
-		if(Math.random() < 1 * FrameTime.get() * descriptor.flamePopRate * power/descriptor.nominalPower)
+		/*if(Math.random() < 1 * FrameTime.get() * descriptor.flamePopRate * power/descriptor.nominalPower)
 		{
 			double [] p = new double[3];
 			
@@ -70,7 +70,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 			front.rotateFromXN(p);
 			p[0] += tileEntity.xCoord + 0.5;p[1] += tileEntity.yCoord+0.5;p[2] += tileEntity.zCoord+0.5;
 			tileEntity.worldObj.spawnParticle("flame",p[0],p[1],p[2], 0.0D, 0.0D, 0.0D);
-		}
+		}*/
 	}
 	float counter = 0;
 	

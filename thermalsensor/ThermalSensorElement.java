@@ -112,8 +112,7 @@ public class ThermalSensorElement extends SixNodeElement {
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
 		// TODO Auto-generated method stub
-		if(front.left() == lrdu) return null;
-		if(front.right() == lrdu) return null;
+
 		if(front == lrdu) return outputGate;
 		
 		return null;
@@ -122,18 +121,33 @@ public class ThermalSensorElement extends SixNodeElement {
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
 		// TODO Auto-generated method stub
-		if(front.left() == lrdu) return thermalLoad;
-		if(front.right() == lrdu) return thermalLoad;
+		if(descriptor.temperatureOnly ==false)
+		{
+			if(front.left() == lrdu) return thermalLoad;
+			if(front.right() == lrdu) return thermalLoad;
+		}
+		else
+		{
+			if(front.inverse() == lrdu) return thermalLoad;
+		}
 		return  null;
 	}
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		// TODO Auto-generated method stub4
-		if(front.left() == lrdu) return Node.maskThermal;
-		if(front.right() == lrdu) return Node.maskThermal;
-		if(front == lrdu) return  Node.maskElectricalOutputGate;
 
+		if(descriptor.temperatureOnly==false)
+		{
+			if(front.left() == lrdu) return Node.maskThermal;
+			if(front.right() == lrdu) return Node.maskThermal;
+			if(front == lrdu) return  Node.maskElectricalOutputGate;
+		}
+		else
+		{
+			if(front.inverse() == lrdu) return Node.maskThermal;
+			if(front == lrdu) return  Node.maskElectricalOutputGate;
+		}
 		return 0;
 	}
 

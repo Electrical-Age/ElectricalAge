@@ -9,6 +9,7 @@ import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
 import mods.eln.gui.GuiVerticalTrackBar;
+import mods.eln.gui.HelperStdContainer;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
@@ -58,11 +59,16 @@ public class LampSocketGuiDraw extends GuiContainerEln {
     public void initGui()
     {
     	super.initGui();
+    	int x = 0;
+    	if(lampRender.descriptor.alphaZMax == lampRender.descriptor.alphaZMin)
+    	{
+    		x = - 0;
+    	}
     	
-    	buttonGrounded = newGuiButton(10,10,100,"");
-    	alphaZ  = newGuiVerticalTrackBar(10, 40, 20, 50);
+    	buttonGrounded = newGuiButton(x+176/2-30,20,60,"");
+    	alphaZ  = newGuiVerticalTrackBar(176 - 8 - 20, 8, 20, 69);
     	alphaZ.setRange(lampRender.descriptor.alphaZMin, lampRender.descriptor.alphaZMax);
-    	alphaZ.setStepIdMax(100);
+    	alphaZ.setStepIdMax(200);
     	alphaZ.setValue(lampRender.alphaZ);
     	
     	if(lampRender.descriptor.alphaZMax == lampRender.descriptor.alphaZMin)
@@ -96,13 +102,18 @@ public class LampSocketGuiDraw extends GuiContainerEln {
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176, 166,8,84, "lampsocket.png");
+		return new HelperStdContainer(this);
 	}
 
 	@Override
 	protected void preDraw(float f, int x, int y) {
 		// TODO Auto-generated method stub
 		super.preDraw(f, x, y);
-		buttonGrounded.displayString = "Grounded : " + lampRender.grounded;
+		if(lampRender.grounded)
+			buttonGrounded.displayString = "Parallel";
+		else
+			buttonGrounded.displayString = "Serial";
+		
+		alphaZ.setComment(0, "Orientation " + (int)alphaZ.getValue()+" degree");
 	}
 }

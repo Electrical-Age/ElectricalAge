@@ -49,7 +49,7 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
         
       
     }
-    
+
     public void initGui()
     {
     	super.initGui();
@@ -59,6 +59,9 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     	vuMeterTemperature.setStepIdMax(800/10);
     	vuMeterTemperature.setEnable(true);
     	vuMeterTemperature.setRange(0,800);
+    	vuMeterTemperature.setComment(new String[]{
+    			"temperature gauge"
+    			});
     	syncVumeter();
     }
     
@@ -80,6 +83,10 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     	
         if(render.temperatureTargetSyncNew) syncVumeter();
         vuMeterTemperature.temperatureHit = render.temperature;
+        
+        
+        vuMeterTemperature.setComment(1,"Current " + Utils.plotValue(render.temperature, "C°"));
+        vuMeterTemperature.setComment(2,"Target " + Utils.plotValue(vuMeterTemperature.getValue(), "C°"));
     }
     
     @Override

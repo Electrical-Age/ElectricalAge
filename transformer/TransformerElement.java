@@ -268,7 +268,13 @@ public class TransformerElement extends TransparentNodeElement{
 	
 	
 	
-	
+	@Override
+	public void onGroundedChangedByClient() {
+		// TODO Auto-generated method stub
+		super.onGroundedChangedByClient();
+		computeInventory();
+		reconnect();
+	}
 
 	@Override
 	public void networkSerialize(DataOutputStream stream) {

@@ -1,5 +1,7 @@
 package mods.eln.gui;
 
+import java.util.ArrayList;
+
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
@@ -29,13 +31,14 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
     {
     	this.observer = observer;
     }
-	public GuiVerticalTrackBar(int xPosition,int yPosition,int width,int height) 
+	public GuiVerticalTrackBar(int xPosition,int yPosition,int width,int height,GuiHelper helper) 
 	{
 		this.width = width;
 		this.height = height;
 		this.xPosition = xPosition;
 		this.yPosition = yPosition;	
 		enable = true;
+		this.helper = helper;	
 	}
 	
 	public void setEnable(boolean enable)
@@ -132,31 +135,49 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 	
 	
 	
-	public void draw(float par1, int x, int y)
+	public void drawBase(float par1, int x, int y)
 	{
 		if(! visible) return;
-		Minecraft.getMinecraft().renderEngine.bindTexture("/gui/gui.png");
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        
-       // this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 46 + 1 * 20, this.width / 2, this.height);
-       // this.drawTexturedModalRect(this.xPosition + this.width / 2, this.yPosition, 200 - this.width / 2, 46 + 1 * 20, this.width / 2, this.height);
 
-        //this.drawTexturedModalRect(this.xPosition + (int)(0.2 * (float)(this.width - 8)), this.yPosition, 0, 66, 4, 20);
-       // this.drawTexturedModalRect(this.xPosition + (int)(0.2 * (float)(this.width - 8)) + 4, this.yPosition, 196, 66, 4, 20);
+		drawRect(xPosition, yPosition-2,xPosition + width,yPosition + height+2,0xFF404040);
+		drawRect(xPosition+1, yPosition-1,xPosition + width-1,yPosition + height+1,0xFF606060);
+		drawRect(xPosition+2, yPosition,xPosition + width-2,yPosition + height,0xFF808080);
 
-		drawRect(xPosition, yPosition,xPosition + width,yPosition + height,0xFF404040);
-		drawRect(xPosition+1, yPosition+1,xPosition + width-1,yPosition + height-1,0xFF606060);
-		drawRect(xPosition+2, yPosition+2,xPosition + width-2,yPosition + height-2,0xFF808080);
+	}
+	public void drawBare(float par1, int x, int y)
+	{
+		if(! visible) return;
 
+ 
 		drawRect(xPosition - 2, getCursorPosition()-2,xPosition + width + 2,getCursorPosition() + 2,0xFF202020);
 		drawRect(xPosition - 1, getCursorPosition()-1,xPosition + width + 1,getCursorPosition() + 1,0xFF606060);
  
 	}
-
+	
+	
+	ArrayList<String> comment = new ArrayList<String>();
+	GuiHelper helper;
+	public void setComment(String[] comment)
+	{
+		this.comment.clear();
+		for(String str : comment)
+		{
+			this.comment.add(str);
+		}
+	}
+	
+	public void setComment(int line,String comment)
+	{
+		if(this.comment.size() < line + 1)
+			this.comment.add(line, comment);
+		else
+			this.comment.set(line, comment);
+	}
 	@Override
 	public void idraw(int x, int y, float f) {
 		// TODO Auto-generated method stub
-		draw(f, x, y);
+		drawBase(f, x, y);
+		drawBare(f, x, y);
 	}
 
 	@Override
@@ -180,6 +201,13 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 	@Override
 	public void idraw2(int x, int y) {
 		// TODO Auto-generated method stub
-		
+		if(visible == true && (x >= xPosition && y >= yPosition && x < xPosition + width && y < yPosition + height) || drag)
+		{
+			int px,py;
+			px = xPosition - helper.getHoveringTextWidth(comment,Minecraft.getMinecraft().fontRenderer)/2;
+			py = yPosition + height + 20/* - helper.getHoveringTextHeight(comment,Minecraft.getMinecraft().fontRenderer)*/;
+			helper.drawHoveringText(comment, px, py, Minecraft.getMinecraft().fontRenderer);
+		}
+				
 	}
 }
