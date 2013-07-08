@@ -259,7 +259,7 @@ public class Utils {
 	{
 		value += PhysicalConstant.Tref - PhysicalConstant.TCelsius;
 		if(header.equals("") == false) header += " ";
-		return header + plotValue(value, "C ");
+		return header + plotValue(value, "C\u00B0 ");
 	}
 	public static String plotPercent(String header,double value)
 	{

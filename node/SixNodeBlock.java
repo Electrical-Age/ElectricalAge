@@ -258,6 +258,15 @@ public class SixNodeBlock extends NodeBlock{
     		booltemp[3] = tileEntity.getSyncronizedSideEnable(Direction.YP);
     		booltemp[4] = tileEntity.getSyncronizedSideEnable(Direction.ZN);
     		booltemp[5] = tileEntity.getSyncronizedSideEnable(Direction.ZP);
+        	SixNodeEntity entity= getEntity(world, x, y, z);
+        	if(entity != null)
+        	{
+        		SixNodeElementRender element = entity.elementRenderList[Direction.YN.getInt()];
+        		if(element != null && element.sixNodeDescriptor.hasVolume())
+        			return new MovingObjectPosition(x, y, z, Direction.YN.toSideValue(), Vec3.createVectorHelper(0.5,0.5,0.5));
+
+        	}
+
     	}
     	else
     	{
@@ -268,6 +277,17 @@ public class SixNodeBlock extends NodeBlock{
     		booltemp[3] = sixNode.getSideEnable(Direction.YP);
     		booltemp[4] = sixNode.getSideEnable(Direction.ZN);
     		booltemp[5] = sixNode.getSideEnable(Direction.ZP);
+        	SixNodeEntity entity= getEntity(world, x, y, z);
+        	if(entity != null)
+        	{
+        		Node node = entity.getNode();
+        		if(node != null && node instanceof SixNode)
+        		{
+        			SixNodeElement element = ((SixNode)node).sideElementList[Direction.YN.getInt()];
+        			if(element != null && element.sixNodeElementDescriptor.hasVolume())
+        				return new MovingObjectPosition(x, y, z, Direction.YN.toSideValue(), Vec3.createVectorHelper(0.5,0.5,0.5));
+        		}
+        	}
 
     	}
     	//XN
@@ -344,7 +364,7 @@ public class SixNodeBlock extends NodeBlock{
     				return new MovingObjectPosition(x, y, z, Direction.ZP.toSideValue(), Vec3.createVectorHelper(hitX,hitY,hitZ));
     		}
     	}
-    	
+
     	return null;
     }
 

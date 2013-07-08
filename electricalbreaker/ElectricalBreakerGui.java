@@ -43,8 +43,8 @@ public class ElectricalBreakerGui extends GuiContainerEln{
 		// TODO Auto-generated method stub
 		super.initGui();
 
-        setUmin = newGuiTextField(12,58/2 - 5 - 10,50);
-        setUmax = newGuiTextField(12,58/2 + 3,50);
+        setUmin = newGuiTextField(12,58/2 + 3,50);
+        setUmax = newGuiTextField(12,58/2 - 5 - 10,50);
 
         setUmin.setText(render.uMin);
         setUmax.setText(render.uMax);

@@ -56,16 +56,18 @@ public class DataLogs implements INBTTReady{
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
 		byte[] cpy = nbt.getByteArray(str + "log");
+		System.out.println("Datalog readnbt " + cpy.length);
 		for(int idx = 0;idx < cpy.length;idx++)
 		{
 			write(cpy[cpy.length - 1 - idx]);
 		}
-		size = cpy.length;
+
 		
         samplingPeriod = nbt.getFloat(str + "samplingPeriod");
         maxValue = nbt.getFloat(str + "maxValue");
         minValue = nbt.getFloat(str + "minValue");
 		unitType = nbt.getByte(str + "unitType");
+		System.out.println("Datalog readnbt done");
 	}
 
 	@Override
