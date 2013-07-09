@@ -4,16 +4,17 @@ import mods.eln.sim.RegulatorProcess;
 import mods.eln.sim.RegulatorType;
 
 public class RegulatorAnalogDescriptor extends IRegulatorDescriptor{
-	double P,I,D;
+	//double P,I,D;
 
 	public RegulatorAnalogDescriptor(
-			String name,
-			double P,double I,double D
+			String name,String iconName/*,
+			double P,double I,double D*/
 			) {
 		super(name);
-		this.P = P;
+		changeDefaultIcon(iconName);
+		/*this.P = P;
 		this.D = D;
-		this.I = I;
+		this.I = I;*/
 	}
 
 	@Override
@@ -23,7 +24,7 @@ public class RegulatorAnalogDescriptor extends IRegulatorDescriptor{
 	}
 
 	@Override
-	public void applyTo(RegulatorProcess regulator,double workingPoint) {
+	public void applyTo(RegulatorProcess regulator,double workingPoint,double P,double I,double D) {
 		// TODO Auto-generated method stub
 		regulator.setAnalog(P, I, D,workingPoint);
 	}

@@ -14,7 +14,7 @@ public abstract class IRegulatorDescriptor extends GenericItemUsingDamageDescrip
 	}
 
 	public abstract RegulatorType getType();
-	public abstract void applyTo(RegulatorProcess regulator,double workingPoint);
+	public abstract void applyTo(RegulatorProcess regulator,double workingPoint,double P,double I,double D);
 
 
 }

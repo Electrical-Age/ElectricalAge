@@ -1978,21 +1978,21 @@ public class Eln {
 			sharedItem.addElement(completId, element);
 		}  
 		{
-			subId = 1; completId = subId + (id << 6);
+			subId = 2; completId = subId + (id << 6);
 			element = new ThermalIsolatorElement(
 					 "Brick thermal isolator",//iconId, name,
 					0.5,1000
 					);
 			sharedItem.addElement(completId, element);
 		}  
-		{
-			subId = 2; completId = subId + (id << 6);
+		/*{
+			subId = 3; completId = subId + (id << 6);
 			element = new ThermalIsolatorElement(
 					 "Wood thermal isolator",//iconId, name,
 					0.05,100
 					);
 			sharedItem.addElement(completId, element);
-		}    		
+		}    	*/	
 		
 	}
 	
@@ -2005,7 +2005,7 @@ public class Eln {
 		{
 			subId = 0; completId = subId + (id << 6);
 			element = new RegulatorOnOffDescriptor(
-					 "On/OFF regulator 1%",//iconId, name,
+					 "On/OFF regulator 1%","onoffregulator",
 					0.01
 					);
 			sharedItem.addElement(completId, element);
@@ -2013,7 +2013,7 @@ public class Eln {
 		{
 			subId = 1; completId = subId + (id << 6);
 			element = new RegulatorOnOffDescriptor(
-					 "On/OFF regulator 10%",//iconId, name,
+					 "On/OFF regulator 10%","onoffregulator",
 					0.1
 					);
 			sharedItem.addElement(completId, element);
@@ -2023,27 +2023,24 @@ public class Eln {
 		{
 			subId = 8; completId = subId + (id << 6);
 			element = new RegulatorAnalogDescriptor(
-					 "Analogic P regulator",//iconId, name,
-					10.0,0,0
+					 "Analogic regulator","Analogicregulator"
 					);
 			sharedItem.addElement(completId, element);
-		}
+		}/*
 		{
 			subId = 9; completId = subId + (id << 6);
 			element = new RegulatorAnalogDescriptor(
-					 "Analogic PI regulator",//iconId, name,
-					10.0,1.0,0
+					 "Analogic PI regulator"
 					);
 			sharedItem.addElement(completId, element);
 		}
 		{
 			subId = 10; completId = subId + (id << 6);
 			element = new RegulatorAnalogDescriptor(
-					 "Analogic PID regulator",//iconId, name,
-					10.0,1.0,1.0
+					 "Analogic PID regulator"
 					);
 			sharedItem.addElement(completId, element);
-		}	
+		}	*/
 		
 	}
 	
@@ -2071,7 +2068,7 @@ public class Eln {
 		{
 			subId = 0; completId = subId + (id << 6);
 			element = new LampDescriptor(
-					"Small 50V incandescent light bulb",
+					"Small 50V incandescent light bulb","incandescentlampiron",
 					LampDescriptor.Type.Incandescent,LampSocketType.Douille, 
 					LVU ,lightPower[12], 	//nominalU, nominalP
 					lightLevel[12],incondecentLife //nominalLight, nominalLife
@@ -2081,7 +2078,7 @@ public class Eln {
 		{
 			subId = 1; completId = subId + (id << 6);
 			element = new LampDescriptor(
-					"50V incandescent light bulb",
+					"50V incandescent light bulb","incandescentlampiron",
 					LampDescriptor.Type.Incandescent,LampSocketType.Douille, 
 					LVU ,lightPower[14], 	//nominalU, nominalP
 					lightLevel[14],incondecentLife //nominalLight, nominalLife
@@ -2091,7 +2088,7 @@ public class Eln {
 		{
 			subId = 2; completId = subId + (id << 6);
 			element = new LampDescriptor(
-					"200V incandescent light bulb",
+					"200V incandescent light bulb","incandescentlampiron",
 					LampDescriptor.Type.Incandescent,LampSocketType.Douille, 
 					MVU ,lightPower[14], 	//nominalU, nominalP
 					lightLevel[14],incondecentLife //nominalLight, nominalLife
@@ -2111,7 +2108,7 @@ public class Eln {
 		{
 			subId = 4; completId = subId + (id << 6);
 			element = new LampDescriptor(
-					"Small 50V carbon incandescent light bulb",
+					"Small 50V carbon incandescent light bulb","incandescentlampcarbon",
 					LampDescriptor.Type.Incandescent,LampSocketType.Douille, 
 					LVU ,lightPower[11], 	//nominalU, nominalP
 					lightLevel[11],incondecentLife/3 //nominalLight, nominalLife
@@ -2121,7 +2118,7 @@ public class Eln {
 		{
 			subId = 5; completId = subId + (id << 6);
 			element = new LampDescriptor(
-					"50V carbon incandescent light bulb",
+					"50V carbon incandescent light bulb","incandescentlampcarbon",
 					LampDescriptor.Type.Incandescent,LampSocketType.Douille, 
 					LVU ,lightPower[13], 	//nominalU, nominalP
 					lightLevel[13],incondecentLife/3 //nominalLight, nominalLife
@@ -2132,7 +2129,7 @@ public class Eln {
 		{
 			subId = 16; completId = subId + (id << 6);
 			element = new LampDescriptor(
-					"Small 50V economic light bulb",
+					"Small 50V economic light bulb","economiclamp",
 					LampDescriptor.Type.eco,LampSocketType.Douille, 
 					LVU ,lightPower[12] * economicPowerFactor, 	//nominalU, nominalP
 					lightLevel[12],economicLife //nominalLight, nominalLife
@@ -2142,7 +2139,7 @@ public class Eln {
 		{
 			subId = 17; completId = subId + (id << 6);
 			element = new LampDescriptor(
-					"50V economic light bulb",
+					"50V economic light bulb","economiclamp",
 					LampDescriptor.Type.eco,LampSocketType.Douille, 
 					LVU ,lightPower[14] * economicPowerFactor, 	//nominalU, nominalP
 					lightLevel[14],economicLife //nominalLight, nominalLife
@@ -2152,7 +2149,7 @@ public class Eln {
 		{
 			subId = 18; completId = subId + (id << 6);
 			element = new LampDescriptor(
-					"200V economic light bulb",
+					"200V economic light bulb","economiclamp",
 					LampDescriptor.Type.eco,LampSocketType.Douille, 
 					MVU ,lightPower[14] * economicPowerFactor, 	//nominalU, nominalP
 					lightLevel[14],economicLife //nominalLight, nominalLife
@@ -3710,9 +3707,9 @@ public class Eln {
 				Character.valueOf('C'), new ItemStack(Block.stone));
     	GameRegistry.addRecipe(	findItemStack("Brick thermal isolator"),"C C", " C ","C C",
 				Character.valueOf('C'), new ItemStack(Item.brick));
-    	GameRegistry.addRecipe(	findItemStack("Wood thermal isolator"),"C C", " C ","C C",
+    	/*GameRegistry.addRecipe(	findItemStack("Wood thermal isolator"),"C C", " C ","C C",
 				Character.valueOf('C'), new ItemStack(Block.wood));
-		
+		*/
 		
 	}
 	void recipeRegulatorItem()
@@ -3736,7 +3733,7 @@ public class Eln {
     			);	
     	
 
-    	GameRegistry.addRecipe(	findItemStack("Analogic PI regulator",1),
+    	GameRegistry.addRecipe(	findItemStack("Analogic regulator",1),
     			"R R",
     			" C ",
     			" I ",

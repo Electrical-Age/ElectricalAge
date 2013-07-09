@@ -25,7 +25,10 @@ public class GenericItemUsingDamageDescriptor {
 		this.IconName = "eln:" + name.replaceAll(" ", "") ;
 		this.name = name;
 	}
-	
+	public void changeDefaultIcon(String name)
+	{
+		this.IconName = "eln:" + name.replaceAll(" ", "") ;
+	}
 	public NBTTagCompound getDefaultNBT()
 	{
 		return null;

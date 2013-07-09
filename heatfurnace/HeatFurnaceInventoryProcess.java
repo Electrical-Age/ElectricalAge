@@ -77,7 +77,8 @@ public class HeatFurnaceInventoryProcess implements IProcess , INBTTReady{
 		if(regulatorStack != null)
 		{
 			IRegulatorDescriptor regulator = (IRegulatorDescriptor) Eln.sharedItem.getDescriptor(regulatorStack);
-			regulator.applyTo(furnace.regulator,500);
+			
+			regulator.applyTo(furnace.regulator,500.0,10.0,0.1,0.1);
 		//	furnace.regulator.target = 240;
 		}
 		else

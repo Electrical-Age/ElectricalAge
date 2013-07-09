@@ -206,7 +206,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 		else
 		{
 			IRegulatorDescriptor element = ((GenericItemUsingDamage<IRegulatorDescriptor>)itemStack.getItem()).getDescriptor(itemStack);
-			element.applyTo(thermalRegulator,500);
+			element.applyTo(thermalRegulator,500.0,10.0,0.1,0.1);
 		}	
 	}
 	

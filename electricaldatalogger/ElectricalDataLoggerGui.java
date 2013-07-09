@@ -244,7 +244,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	        GL11.glPushMatrix();
 		        GL11.glTranslatef(guiLeft + 8, guiTop + 60, 0);
 		        GL11.glScalef(50, 50, 1f);
-		        render.log.draw(2.9f,1.2f);
+		        render.log.draw(2.9f,1.2f,"");
 	        GL11.glPopMatrix();
     	}
     }

@@ -14,10 +14,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class LampDescriptor  extends GenericItemUsingDamageDescriptor
 {
-	public LampDescriptor(String name) {
-		super(name);
-		// TODO Auto-generated constructor stub
-	}
+
 
 	public enum Type {Incandescent,eco}
 	public double nominalP,nominalLight,nominalLife;
@@ -32,12 +29,13 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptor
 	public double stableU,stableUNormalised,stableTime;
 	
 	public LampDescriptor(	
-			String name,
+			String name,String iconName,
 			Type type,LampSocketType socket,
 			double nominalU,double nominalP,double nominalLight,double nominalLife
 			)
 	{
 		super( name);
+		changeDefaultIcon(iconName);
 		this.type = type;
 		this.socket = socket;
 		this.nominalU = nominalU;

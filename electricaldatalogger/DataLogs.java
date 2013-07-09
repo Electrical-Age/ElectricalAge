@@ -102,9 +102,9 @@ public class DataLogs implements INBTTReady{
 		return str;
 	}
 	
-	void draw(float margeX,float margeY)
+	void draw(float margeX,float margeY,String textHeader)
 	{
-		draw(log,size,samplingPeriod,maxValue,minValue,unitType,margeX,margeY);
+		draw(log,size,samplingPeriod,maxValue,minValue,unitType,margeX,margeY,textHeader);
 	}
 	
 	float samplingPeriod = 0.5f;
@@ -112,7 +112,7 @@ public class DataLogs implements INBTTReady{
 	byte unitType = percentType;
 	static final byte voltageType = 0,currentType = 1,powerType = 2,celsiusType = 3,percentType = 4;
 	
-	static void draw(byte []value,int size,float samplingPeriod,float maxValue,float minValue,byte unitType,float margeX,float margeY)
+	static void draw(byte []value,int size,float samplingPeriod,float maxValue,float minValue,byte unitType,float margeX,float margeY,String textHeader)
 	{
 		if(value == null) return;
 		if(size < 2) return;
@@ -192,12 +192,12 @@ public class DataLogs implements INBTTReady{
 			GL11.glScalef(scale,scale, 1f);
 		//	fontrenderer.drawString("Time",(int)( 0.5f/scale),(int) (0.8f/scale), 0);
 		
-			fontrenderer.drawString(" " + getYstring(1f, maxValue,minValue, unitType),(int)( margeX/scale),(int) (0f/scale), 0);
-			fontrenderer.drawString(" " + getYstring(0.5f, maxValue,minValue, unitType),(int)( margeX/scale),(int) ((margeY/2 - 0.05f)/scale), 0);
-			fontrenderer.drawString(" " + getYstring(0.0f, maxValue,minValue, unitType),(int)( margeX/scale),(int) ((margeY - 0.08f)/scale), 0);
+			fontrenderer.drawString(textHeader + " " + getYstring(1f, maxValue,minValue, unitType),(int)( margeX/scale),(int) (0f/scale), 0);
+			fontrenderer.drawString(textHeader + " " + getYstring(0.5f, maxValue,minValue, unitType),(int)( margeX/scale),(int) ((margeY/2 - 0.05f)/scale), 0);
+			fontrenderer.drawString(textHeader + " " + getYstring(0.0f, maxValue,minValue, unitType),(int)( margeX/scale),(int) ((margeY - 0.08f)/scale), 0);
 			
-			fontrenderer.drawString(Utils.plotTime(size * samplingPeriod),(int)( 0f/scale),(int) ((margeY + 0.03)/scale), 0);
-			fontrenderer.drawString(Utils.plotTime( 0),(int)( (margeX - 0.05)/scale),(int) ((margeY + 0.03)/scale), 0);
+			fontrenderer.drawString(textHeader + Utils.plotTime(size * samplingPeriod),(int)( 0f/scale),(int) ((margeY + 0.03)/scale), 0);
+			fontrenderer.drawString(textHeader + Utils.plotTime( 0),(int)( (margeX - 0.05)/scale),(int) ((margeY + 0.03)/scale), 0);
 			//fontrenderer.drawString("Time",(int)( 0.5f/scale),(int) (0.8f/scale), 0);
 		GL11.glPopMatrix();
 		//startT = System.nanoTime() - startT;
@@ -233,11 +233,11 @@ public class DataLogs implements INBTTReady{
 		return str;
 	}
 	
-	public static void draw(NBTTagCompound nbt,float margeX,float margeY) {
+	public static void draw(NBTTagCompound nbt,float margeX,float margeY,String textHeader) {
 		if(nbt == null) return;
 		byte[] data = nbt.getByteArray("log");
 		if(data == null) return;
-		draw(data, data.length, nbt.getFloat("samplingPeriod"), nbt.getFloat( "maxValue"),  nbt.getFloat( "minValue"),  nbt.getByte("unitType"),margeX,margeY);
+		draw(data, data.length, nbt.getFloat("samplingPeriod"), nbt.getFloat( "maxValue"),  nbt.getFloat( "minValue"),  nbt.getByte("unitType"),margeX,margeY,textHeader);
 	}
 
 	

@@ -54,7 +54,7 @@ public class DataLogsPrintDescriptor extends GenericItemUsingDamageDescriptor{
 	        //	GL11.glTranslatef(0.f,-0.5f,0.5f); 	
 	        	//GL11.glRotatef(90,0f,1f,0f);  
 	        	GL11.glTranslatef(-0.5f,-0.5f,0.1f);
-	        	DataLogs.draw(nbt,1f,1f);
+	        	DataLogs.draw(nbt,1f,1f,"");
 	        //	DataLogs.draw(logsArray,logsArray.length);
 	        GL11.glPopMatrix();
 	        GL11.glEnable(GL11.GL_LIGHTING);
