@@ -21,11 +21,19 @@ import com.google.common.base.Function;
 public class ElectricalSensorDescriptor extends SixNodeDescriptor{
 
 	public ElectricalSensorDescriptor(		
-					String name,
+					String name,String modelName,
 					boolean voltageOnly
 					) {
 			super(name, ElectricalSensorElement.class, ElectricalSensorRender.class);
 			this.voltageOnly = voltageOnly;
+			main = Eln.obj.getPart(modelName, "main");
 		}
 	boolean voltageOnly;
+	Obj3DPart main;
+	
+	
+	void draw()
+	{
+		if(main != null) main.drawList();
+	}
 }

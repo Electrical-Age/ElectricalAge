@@ -132,8 +132,8 @@ public class ElectricalSensorElement extends SixNodeElement {
 		}
 		else
 		{
-			if(front == lrdu) return aLoad;
-			if(front.inverse() == lrdu) return outputGate;
+			if(front.inverse() == lrdu) return aLoad;
+			if(front == lrdu) return outputGate;
 		}
 		return null;
 	}
@@ -147,17 +147,17 @@ public class ElectricalSensorElement extends SixNodeElement {
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		// TODO Auto-generated method stub4
-
+		boolean cable = inventory.getStackInSlot(ElectricalSensorContainer.cableSlotId) != null;
 		if(descriptor.voltageOnly == false)
 		{
-			if(front.left() == lrdu) return Node.maskElectricalAll;
-			if(front.right() == lrdu) return Node.maskElectricalAll;
+			if(front.left() == lrdu && cable) return Node.maskElectricalAll;
+			if(front.right() == lrdu && cable) return Node.maskElectricalAll;
 			if(front == lrdu) return Node.maskElectricalOutputGate;
 		}
 		else
 		{
-			if(front == lrdu) return Node.maskElectricalAll;
-			if(front.inverse() == lrdu) return Node.maskElectricalOutputGate;
+			if(front.inverse() == lrdu && cable) return Node.maskElectricalAll;
+			if(front == lrdu) return Node.maskElectricalOutputGate;
 		}
 		return 0;
 	}
@@ -191,6 +191,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 			stream.writeFloat(lowValue);
 			stream.writeFloat(highValue);
 			stream.writeByte(dirType);
+			Utils.serialiseItemStack(stream, inventory.getStackInSlot(ElectricalSensorContainer.cableSlotId));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -210,6 +211,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 	@Override
 	protected void inventoryChanged() {
 		computeElectricalLoad();
+		reconnect();
 	}
 
 	public void computeElectricalLoad()

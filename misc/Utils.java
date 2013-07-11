@@ -1,7 +1,9 @@
 package mods.eln.misc;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +45,7 @@ import net.minecraft.item.ItemTool;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.packet.Packet250CustomPayload;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -259,7 +262,7 @@ public class Utils {
 	{
 		value += PhysicalConstant.Tref - PhysicalConstant.TCelsius;
 		if(header.equals("") == false) header += " ";
-		return header + plotValue(value, "C\u00B0 ");
+		return header + plotValue(value, "\u00B0C ");
 	}
 	public static String plotPercent(String header,double value)
 	{
@@ -609,6 +612,50 @@ public class Utils {
 		int x = (guiScreen.width - xSize) / 2;
 		int y = (guiScreen.height - ySize) / 2;
 		guiScreen.drawTexturedModalRect(x, y, 0, 0, xSize, ySize);
+	}
+
+
+	public static void serialiseItemStack(DataOutputStream stream,ItemStack stack) throws IOException
+	{
+		
+		if((stack) == null)
+		{
+			stream.writeShort(-1);
+			stream.writeShort(-1);
+		}
+		else
+		{
+			stream.writeShort(stack.itemID);
+			stream.writeShort(stack.getItemDamage());				
+		}
+	}
+	public static ItemStack unserialiseItemStack(DataInputStream stream) throws IOException
+	{
+		short id,damage;
+		id = stream.readShort();
+		damage = stream.readShort();
+		if(id == -1)
+			return null;
+		return new ItemStack(id,1,damage);
+	}
+	public static   EntityItem unserializeItemStackToEntityItem(DataInputStream stream,EntityItem old,TileEntity tileEntity) throws IOException
+	{
+		short itemId,ItemDamage;
+		if((itemId = stream.readShort()) == -1)
+		{
+			stream.readShort();
+			return  null;
+			
+		}
+		else
+		{
+			ItemDamage = stream.readShort();
+			if(old == null || old.getEntityItem().itemID != itemId || old.getEntityItem().getItemDamage() != ItemDamage)
+				return  new EntityItem(tileEntity.worldObj,tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, new ItemStack(itemId, 1, ItemDamage));
+			else
+				return old;
+		}
+		
 	}
 
     /*

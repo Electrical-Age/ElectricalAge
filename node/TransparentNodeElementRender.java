@@ -31,21 +31,7 @@ public abstract class TransparentNodeElementRender {
 	}
 	protected   EntityItem unserializeItemStackToEntityItem(DataInputStream stream,EntityItem old) throws IOException
 	{
-		short itemId,ItemDamage;
-		if((itemId = stream.readShort()) == -1)
-		{
-			stream.readShort();
-			return  null;
-			
-		}
-		else
-		{
-			ItemDamage = stream.readShort();
-			if(old == null || old.getEntityItem().itemID != itemId || old.getEntityItem().getItemDamage() != ItemDamage)
-				return  new EntityItem(tileEntity.worldObj,tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, new ItemStack(itemId, 1, ItemDamage));
-			else
-				return old;
-		}
+		return Utils.unserializeItemStackToEntityItem(stream,old,tileEntity);
 		
 	}
 	public void drawEntityItem(EntityItem entityItem,double x, double y , double z,float roty,float scale)

@@ -124,13 +124,13 @@ public class ElectricalSensorGui extends GuiContainerEln{
     		switch(render.dirType)
     		{
     		case ElectricalSensorElement.dirNone:
-    			dirType.displayString = "<=>";
+    			dirType.displayString = "\u00a74\u25CF\u00a77 <=> \u00a72\u25CF";
     			break;
     		case ElectricalSensorElement.dirAB:
-    			dirType.displayString = "A => B";
+    			dirType.displayString = "\u00a74\u25CF\u00a77 => \u00a72\u25CF";
     			break;
     		case ElectricalSensorElement.dirBA:
-    			dirType.displayString = "A <= B";
+    			dirType.displayString = "\u00a74\u25CF\u00a77 <= \u00a72\u25CF";
     			break;
     		}
     		

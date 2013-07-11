@@ -53,17 +53,7 @@ public abstract class TransparentNodeElement implements INBTTReady {
 	TransparentNodeDescriptor transparentNodeDescriptor;
 	protected void serialiseItemStack(DataOutputStream stream,ItemStack stack) throws IOException
 	{
-		
-		if((stack) == null)
-		{
-			stream.writeShort(-1);
-			stream.writeShort(-1);
-		}
-		else
-		{
-			stream.writeShort(stack.itemID);
-			stream.writeShort(stack.getItemDamage());				
-		}
+		Utils.serialiseItemStack(stream,stack);
 	}
 	protected int serialiseItemStackSize()
 	{

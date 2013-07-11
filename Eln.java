@@ -737,7 +737,7 @@ public class Eln {
     	//	highVoltageCableId = subId;
 	    	name = "High voltage cable";
 	    	
-	    	stdCableRender800V = new CableRenderDescriptor(ClientProxy.CABLE_PNG,4,2.95f);
+	    	stdCableRender800V = new CableRenderDescriptor(ClientProxy.CABLE_PNG,3.9f,2.9f);
 
 			desc = new ElectricalCableDescriptor(
 					name,
@@ -1139,7 +1139,8 @@ public class Eln {
 	    	name = "Electrical sensor sixNode";
 	    	
 	    	desc = new ElectricalSensorDescriptor(
-	    			name,false
+	    			name,"electricalsensor",
+	    			false
 	    			);
 	    	
     		
@@ -1151,7 +1152,8 @@ public class Eln {
 	    	name = "Voltage sensor sixNode";
 	    	
 	    	desc = new ElectricalSensorDescriptor(
-	    			name,true
+	    			name,"voltagesensor",
+	    			true
 	    			);
 	    	
     		
@@ -1541,7 +1543,7 @@ public class Eln {
     	{
     		subId = 0;
 	    	name = "Electrical furnace";
-	    	double []PfTTable = new  double[]{10,
+	    	double []PfTTable = new  double[]{0,
 					 20,
 					 40,
 					 80,
@@ -1556,7 +1558,7 @@ public class Eln {
 	    	double[] thermalPlostfTTable = new double[PfTTable.length];
 	    	for(int idx = 0;idx < thermalPlostfTTable.length;idx++)
 	    	{
-	    		thermalPlostfTTable[idx] = PfTTable[idx] * Math.pow((idx + 1.0) / thermalPlostfTTable.length, 2) * 4;
+	    		thermalPlostfTTable[idx] = PfTTable[idx] * Math.pow((idx + 1.0) / thermalPlostfTTable.length, 2) * 2;
 	    	}
 	    	
 	    	FunctionTableYProtect PfT = new FunctionTableYProtect(
@@ -1569,7 +1571,7 @@ public class Eln {
 					name,
 					PfT,
 					thermalPlostfT,//thermalPlostfT; 
-					10//thermalC;
+					20//thermalC;
 					);
 			
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1993,6 +1995,7 @@ public class Eln {
 					);
 			sharedItem.addElement(completId, element);
 		}    	*/	
+		
 		
 	}
 	

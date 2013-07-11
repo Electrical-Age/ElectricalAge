@@ -35,7 +35,7 @@ public class ElectricalRelayGui extends GuiScreenEln{
 		// TODO Auto-generated method stub
 		super.initGui();
 
-		toogleDefaultOutput = newGuiButton(100, 50 + 60,120, "toogle switch");
+		toogleDefaultOutput = newGuiButton(6, 64/2-10,115, "toogle switch");
 
 	}
 	
@@ -52,12 +52,15 @@ public class ElectricalRelayGui extends GuiScreenEln{
 	protected void preDraw(float f, int x, int y) {
 		// TODO Auto-generated method stub
 		super.preDraw(f, x, y);
-		toogleDefaultOutput.displayString = "default output is " + render.defaultOutput;
+		if(render.defaultOutput)
+			toogleDefaultOutput.displayString = "default output is high";
+		else
+			toogleDefaultOutput.displayString = "default output is low";
 	}
 	@Override
 	protected GuiHelper newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelper(this, 176, 166, "electricalrelay.png");
+		return new GuiHelper(this, 128, 64, "electricalsource.png");
 	}
 
 

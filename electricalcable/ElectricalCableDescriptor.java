@@ -4,6 +4,7 @@ import java.util.List;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.misc.Utils;
 import mods.eln.node.Node;
 import mods.eln.node.NodeElectricalLoad;
@@ -206,5 +207,16 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 			return Node.maskElectricalGate;
 		else 
 			return Node.maskElectricalPower;
+	}
+
+	public static CableRenderDescriptor getCableRender(
+			ItemStack cable) {
+
+		if(cable == null) return null;
+		GenericItemBlockUsingDamageDescriptor desc = ElectricalCableDescriptor.getDescriptor(cable);
+		if(desc instanceof ElectricalCableDescriptor)
+			return ((ElectricalCableDescriptor)desc).render;
+		else 
+			return  null;
 	}
 }

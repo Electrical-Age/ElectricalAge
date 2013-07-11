@@ -173,7 +173,7 @@ public class CableRender {
 				CableRenderDescriptor render = element.getCableRender(lrdu);
 				SixNodeElementRender otherElement = element.tileEntity.elementRenderList[sideLrdu.getInt()];
 				CableRenderDescriptor otherRender = otherElement.getCableRender(otherLRDU);
-				if(otherRender == null)
+				if(otherRender == null || render == null)
 				{
 					continue;
 				}

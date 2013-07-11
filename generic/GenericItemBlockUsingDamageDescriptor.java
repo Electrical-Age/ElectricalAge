@@ -18,7 +18,7 @@ public class GenericItemBlockUsingDamageDescriptor {
 	public int parentItemDamage;	
 	
 	public GenericItemBlockUsingDamageDescriptor(String name) {
-		this.iconName = "eln:" + name.replaceAll(" ", "") ;
+		this.iconName = "eln:" + name.replaceAll(" ", "").toLowerCase() ;
 		this.name = name;
 	}
 	
@@ -55,5 +55,14 @@ public class GenericItemBlockUsingDamageDescriptor {
 		return new ItemStack(parentItem, size, parentItemDamage);
 	}	
 	
+	public static GenericItemBlockUsingDamageDescriptor getDescriptor(ItemStack stack)
+	{
+		if(stack == null) return null;
+		Item item = stack.getItem();
+		if(item instanceof GenericItemBlockUsingDamage == false) return null; 
+		GenericItemBlockUsingDamage genItem = (GenericItemBlockUsingDamage) item;
+		return genItem.getDescriptor(stack);
+		
+	}
 
 }

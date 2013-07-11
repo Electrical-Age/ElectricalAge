@@ -36,6 +36,8 @@ public class GenericItemBlock extends ItemBlock {
 	public int getMetadata (int damageValue) {
 		return damageValue;
 	}
+	
+	
 	/*
 	@Override //caca1.5.1
 	public String getItemNameIS(ItemStack itemstack) {

@@ -52,7 +52,7 @@ public class ElectricalBreakerGui extends GuiContainerEln{
         setUmin.setComment(0,"Minimum voltage before cutting off");
         setUmax.setComment(0,"Maximum voltage before cutting off");
         
-		toogleSwitch = newGuiButton(72+1, 58/2-10,65, "toogle switch");
+		toogleSwitch = newGuiButton(72-2, 58/2-10,70, "toogle switch");
 
 
 	}
@@ -93,10 +93,10 @@ public class ElectricalBreakerGui extends GuiContainerEln{
     protected void preDraw(float f, int x, int y) {
     	// TODO Auto-generated method stub
     	super.preDraw(f, x, y);
-    	if(render.switchState)
-    		toogleSwitch.displayString = "Switch OFF";
+    	if(!render.switchState)
+    		toogleSwitch.displayString = "Switch is OFF";
     	else
-    		toogleSwitch.displayString = "Switch ON";
+    		toogleSwitch.displayString = "Switch is ON";
     }
 
 

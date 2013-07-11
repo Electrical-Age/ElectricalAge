@@ -3,6 +3,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+
 
 import mods.eln.CommonProxy;
 import mods.eln.Eln;
@@ -44,11 +47,13 @@ public class OreBlock extends Block {
     	
     }
     
-    public Icon getBlockTextureFromSideAndMetadata(int side, int meta)
-    {
-    	 return Eln.oreItem.getDescriptor(meta).getBlockIconId(side, meta);
+  
+    @Override
+    @SideOnly(Side.CLIENT)
+    public Icon getIcon(int par1, int par2) {
+    	// TODO Auto-generated method stub
+    	return Eln.oreItem.getDescriptor(par2).getBlockIconId(par1, par2);
     }
-
 
 	public ArrayList<ItemStack> getBlockDropped(World w, int x, int y, int z, int meta, int fortune){ //Specifies the block drop
 	/*	ArrayList<ItemStack> list = new ArrayList<ItemStack>(); //The list of items

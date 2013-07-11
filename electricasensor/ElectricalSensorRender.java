@@ -11,7 +11,10 @@ import mods.eln.Eln;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientProxy;
+import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.electricalsource.ElectricalSourceGui;
+import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.heatfurnace.HeatFurnaceElement;
 import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
@@ -47,7 +50,9 @@ public class ElectricalSensorRender extends SixNodeElementRender{
 
 	@Override
 	public void draw() {
-				
+		super.draw();
+		front.glRotateOnX();
+		descriptor.draw();
 
 	}
 	
@@ -63,6 +68,7 @@ public class ElectricalSensorRender extends SixNodeElementRender{
 	int typeOfSensor = 0; 
 	float lowValue = 0,highValue = 50;
 	byte dirType;
+	CableRenderDescriptor cableRender = null;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -74,6 +80,8 @@ public class ElectricalSensorRender extends SixNodeElementRender{
 			lowValue = stream.readFloat();
 			highValue = stream.readFloat();
 			dirType = stream.readByte();
+			cableRender = ElectricalCableDescriptor.getCableRender(Utils.unserialiseItemStack(stream));
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -81,7 +89,21 @@ public class ElectricalSensorRender extends SixNodeElementRender{
 
 	}
 	
-	
+	@Override
+	public CableRenderDescriptor getCableRender(LRDU lrdu) {
+		if(descriptor.voltageOnly)
+		{
+			if(lrdu == front) return Eln.instance.signalCableDescriptor.render;
+			if(lrdu == front.inverse()) return cableRender;
+			
+		}
+		else
+		{
+			if(lrdu == front) return Eln.instance.signalCableDescriptor.render;
+			if(lrdu == front.left() || lrdu == front.right()) return cableRender;
+		}
+		return super.getCableRender(lrdu);
+	}
 	
 	
 	@Override
