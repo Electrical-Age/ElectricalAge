@@ -1,5 +1,9 @@
 package mods.eln.heatfurnace;
 
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
+
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
@@ -92,5 +96,24 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor{
 		if(tiroir != null) tiroir.draw(alphaClose + tiroirFactor * (alphaOpen - alphaClose),0f, 0f, 1f);
 		//GL11.glEnable(GL11.GL_TEXTURE_2D);
 		//GL11.glCullFace(GL11.GL_BACK);
+	}
+	
+	
+	
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		return true;
+	}
+	
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		draw(1.0f);
 	}
 }

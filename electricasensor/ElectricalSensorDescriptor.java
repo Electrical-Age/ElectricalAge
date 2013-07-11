@@ -36,4 +36,23 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor{
 	{
 		if(main != null) main.drawList();
 	}
+	
+	
+	
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		return true;
+	}
+	
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		draw();
+	}
 }
