@@ -41,6 +41,7 @@ import mods.eln.electricalredstoneinput.ElectricalRedstoneInputDescriptor;
 import mods.eln.electricalredstoneoutput.ElectricalRedstoneOutputDescriptor;
 import mods.eln.electricalrelay.ElectricalRelayDescriptor;
 import mods.eln.electricalrelay.ElectricalRelayElement;
+import mods.eln.electricalsource.ElectricalSourceDescriptor;
 import mods.eln.electricalsource.ElectricalSourceElement;
 import mods.eln.electricalsource.ElectricalSourceRender;
 import mods.eln.electricalswitch.ElectricalSwitchDescriptor;
@@ -57,6 +58,7 @@ import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostEntity;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
+import mods.eln.groundcable.GroundCableDescriptor;
 import mods.eln.groundcable.GroundCableElement;
 import mods.eln.groundcable.GroundCableRender;
 import mods.eln.heatfurnace.HeatFurnaceDescriptor;
@@ -134,6 +136,7 @@ import mods.eln.thermalcable.ThermalCableDescriptor;
 import mods.eln.thermaldissipatoractive.ThermalDissipatorActiveDescriptor;
 import mods.eln.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor;
 import mods.eln.thermalsensor.ThermalSensorDescriptor;
+import mods.eln.transformer.TransformerDescriptor;
 import mods.eln.transformer.TransformerElement;
 import mods.eln.transformer.TransformerRender;
 import mods.eln.turbine.TurbineCoreDescriptor;
@@ -778,7 +781,7 @@ public class Eln {
 
 	    	ThermalCableDescriptor desc = new ThermalCableDescriptor(
 	    					name,
-	    					1000,-200, //thermalWarmLimit, thermalCoolLimit,
+	    					1000-20,-200, //thermalWarmLimit, thermalCoolLimit,
 	    					500,2000, //thermalStdT, thermalStdPower, 
 	    					4,400,0.1,//thermalStdDrop, thermalStdLost, thermalTao,
 	    					new CableRenderDescriptor("eln","sprites/TEX_THERMALCABLEBASE.PNG",4,4),
@@ -793,7 +796,7 @@ public class Eln {
 
 	    	ThermalCableDescriptor desc = new ThermalCableDescriptor(
 	    					name,
-	    					1000,-200, //thermalWarmLimit, thermalCoolLimit,
+	    					1000-20,-200, //thermalWarmLimit, thermalCoolLimit,
 	    					500,2000, //thermalStdT, thermalStdPower, 
 	    					4,10,0.1,//thermalStdDrop, thermalStdLost, thermalTao,
 	    					new CableRenderDescriptor("eln","sprites/TEX_THERMALCABLEBASE.PNG",4,4),
@@ -820,8 +823,9 @@ public class Eln {
 
     		BatteryDescriptor desc = new BatteryDescriptor(
     				name,"LowCostBattery",
+    				0.5,true,
     				voltageFunction,
-    				stdU,stdP*1.2,0.001,	   // electricalU, electricalPMax,electricalDischargeRate
+    				stdU,stdP*1.2,0.000,	   // electricalU, electricalPMax,electricalDischargeRate
     				stdP,stdDischargeTime,0.99,stdHalfLife,  //   electricalStdP, electricalStdDischargeTime, electricalStdEfficiency, electricalStdHalfLife,
 					50,60,-100,  // thermalHeatTime, thermalWarmLimit, thermalCoolLimit,
 					"Cheap battery"  // name, description)
@@ -834,8 +838,9 @@ public class Eln {
 
     		BatteryDescriptor desc = new BatteryDescriptor(
     				name,"HighCapacityBattery",
+    				0.5,true,
     				voltageFunction,
-    				stdU/4,stdP/2*1.2,0.001,	   // electricalU, electricalPMax,electricalDischargeRate
+    				stdU/4,stdP/2*1.2,0.000,	   // electricalU, electricalPMax,electricalDischargeRate
     				stdP/2,stdDischargeTime*8,0.99,stdHalfLife,  //   electricalStdP, electricalStdDischargeTime, electricalStdEfficiency, electricalStdHalfLife,
 					50,60,-100,  // thermalHeatTime, thermalWarmLimit, thermalCoolLimit,
 					"the battery"  // name, description)
@@ -848,8 +853,9 @@ public class Eln {
 
     		BatteryDescriptor desc = new BatteryDescriptor(
     				name,"HighVoltageBattery",
+    				0.5,true,
     				voltageFunction,
-    				stdU*4,stdP*1.2,0.001,	   // electricalU, electricalPMax,electricalDischargeRate
+    				stdU*4,stdP*1.2,0.000,	   // electricalU, electricalPMax,electricalDischargeRate
     				stdP,stdDischargeTime,0.99,stdHalfLife,  //   electricalStdP, electricalStdDischargeTime, electricalStdEfficiency, electricalStdHalfLife,
 					50,60,-100,  // thermalHeatTime, thermalWarmLimit, thermalCoolLimit,
 					"the battery"  // name, description)
@@ -863,8 +869,9 @@ public class Eln {
 
     		BatteryDescriptor desc = new BatteryDescriptor(
     				name,"HighCurrentBattery",
+    				0.5,true,
     				voltageFunction,
-    				stdU,stdP*1.2*4,0.001,	   // electricalU, electricalPMax,electricalDischargeRate
+    				stdU,stdP*1.2*4,0.000,	   // electricalU, electricalPMax,electricalDischargeRate
     				stdP*4,stdDischargeTime/6,0.99,stdHalfLife,  //   electricalStdP, electricalStdDischargeTime, electricalStdEfficiency, electricalStdHalfLife,
 					50,60,-100,  // thermalHeatTime, thermalWarmLimit, thermalCoolLimit,
 					"the battery"  // name, description)
@@ -877,9 +884,26 @@ public class Eln {
 
     		BatteryDescriptor desc = new BatteryDescriptor(
     				name,"LongLifeBattery",
+    				0.5,true,
     				voltageFunction,
-    				stdU,stdP*1.2,0.001,	   // electricalU, electricalPMax,electricalDischargeRate
+    				stdU,stdP*1.2,0.000,	   // electricalU, electricalPMax,electricalDischargeRate
     				stdP,stdDischargeTime,0.99,stdHalfLife*8,  //   electricalStdP, electricalStdDischargeTime, electricalStdEfficiency, electricalStdHalfLife,
+					50,60,-100,  // thermalHeatTime, thermalWarmLimit, thermalCoolLimit,
+					"the battery"  // name, description)
+				);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+    	}
+    	
+    	{
+    		subId = 5;
+	    	name = "Single usage battery";
+
+    		BatteryDescriptor desc = new BatteryDescriptor(
+    				name,"LongLifeBattery",
+    				1.0,false,
+    				voltageFunction,
+    				stdU,stdP*1.2*2,0.000,	   // electricalU, electricalPMax,electricalDischargeRate
+    				stdP*2,stdDischargeTime,0.99,stdHalfLife*8,  //   electricalStdP, electricalStdDischargeTime, electricalStdEfficiency, electricalStdHalfLife,
 					50,60,-100,  // thermalHeatTime, thermalWarmLimit, thermalCoolLimit,
 					"the battery"  // name, description)
 				);
@@ -900,9 +924,8 @@ public class Eln {
     		subId = 0;
 	    	name = "Ground cable";
 
-			SixNodeDescriptor desc = new SixNodeDescriptor(
-					name,
-					GroundCableElement.class, GroundCableRender.class);
+			GroundCableDescriptor desc = new GroundCableDescriptor(
+					name);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
     	}
 	}
@@ -915,9 +938,8 @@ public class Eln {
     		subId = 0;
 	    	name = "ElectricalSource";
 
-			SixNodeDescriptor desc = new SixNodeDescriptor(
-					name,
-					ElectricalSourceElement.class, ElectricalSourceRender.class);
+	    	ElectricalSourceDescriptor desc = new ElectricalSourceDescriptor(
+					name);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
     	}
 
@@ -1375,9 +1397,8 @@ public class Eln {
     		subId = 0;
 	    	name = "Transformer";
 
-			TransparentNodeDescriptor desc = new TransparentNodeDescriptor(
-					name,
-					TransformerElement.class, TransformerRender.class);
+	    	TransformerDescriptor desc = new TransformerDescriptor(
+					name);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
     	}
 
@@ -1420,7 +1441,7 @@ public class Eln {
     	int subId,completId;
     	String name;
 
-		FunctionTable TtoU = new FunctionTable(new double[]{0,0.1,0.75,0.90,1.05,1.10,1.15,1.20,1.25}, 8.0/5.0);
+		FunctionTable TtoU = new FunctionTable(new double[]{0,0.1,0.85,1.0,1.1,1.15,1.18,1.19,1.25}, 8.0/5.0);
 	//	FunctionTable TtoU = new FunctionTable(new double[]{0,0.2,0.4,0.6,0.8,1.00,1.2,1.40,1.6}, 8.0/5.0);
 		FunctionTable TtoP = new FunctionTable(new double[]{0,0.1,0.25,0.6,0.8,1.0,1.15,1.30,1.40}, 8.0/5.0);
 		FunctionTable PoutToPin = new FunctionTable(new double[]{0.0,0.2,0.4,0.6,0.8,1.0,1.3,1.8,2.7}, 8.0/5.0);
@@ -3612,8 +3633,24 @@ public class Eln {
 				Character.valueOf('B'), findItemStack("Cost oriented battery"),
 				Character.valueOf('P'), new ItemStack(Item.ingotGold));	
 				
+		GameRegistry.addRecipe(	findItemStack("Single usage battery"),
+				"C C",
+				"ccc",
+				"III",
+				Character.valueOf('C'), findItemStack("Low voltage cable"),
+				Character.valueOf('c'), new ItemStack(Item.coal,1,0),
+				Character.valueOf('I'), new ItemStack(Item.ingotIron));	
+		
+		GameRegistry.addRecipe(	findItemStack("Single usage battery"),
+				"C C",
+				"ccc",
+				"III",
+				Character.valueOf('C'), findItemStack("Low voltage cable"),
+				Character.valueOf('c'), new ItemStack(Item.coal,1,1),
+				Character.valueOf('I'), new ItemStack(Item.ingotIron));	
+				
 	
-
+		
 	}
 	
 	void recipeElectricalFurnace()

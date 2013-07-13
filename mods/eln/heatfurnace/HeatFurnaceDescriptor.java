@@ -1,5 +1,8 @@
 package mods.eln.heatfurnace;
 
+import java.util.List;
+
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
@@ -9,6 +12,7 @@ import org.lwjgl.opengl.GL11;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.sim.FurnaceProcess;
@@ -115,5 +119,17 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor{
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		draw(1.0f);
+	}
+	
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		list.add("Provide heat when");
+		list.add("consume fuel");
+		list.add(Utils.plotPower("Power :", nominalPower));
+		list.add(Utils.plotCelsius("Tmax :",thermal.warmLimit));
 	}
 }

@@ -1,7 +1,10 @@
 package mods.eln.electricaldatalogger;
 
+import java.util.List;
+
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
@@ -61,4 +64,12 @@ public class DataLogsPrintDescriptor extends GenericItemUsingDamageDescriptor{
 		}
 	}	
 
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+
+	}
 }

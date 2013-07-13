@@ -1,6 +1,11 @@
 package mods.eln.thermaldissipatorpassive;
 
+import java.util.List;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import mods.eln.Eln;
+import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.sim.ITemperatureWatchdogDescriptor;
@@ -22,10 +27,12 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
 		thermalRs = nominalConnectionDrop / nominalP;
 		this.coolLimit = coolLimit;
 		this.warmLimit = warmLimit;
+		this.nominalP = nominalP;
+		this.nominalT = nominalT;
 		Eln.simulator.checkThermalLoad(thermalRs, thermalRp, thermalC);
 	}
 	double warmLimit,coolLimit;
-	
+	double nominalP, nominalT;
 	public void applyTo(ThermalLoad load)
 	{
 		load.set(thermalRs, thermalRp, thermalC);
@@ -71,5 +78,19 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
 	public double getTmin() {
 		// TODO Auto-generated method stub
 		return coolLimit;
+	}
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		list.add("Dissipates heat in air");
+		list.add("Useful for cooling turbine");
+		list.add(Utils.plotCelsius("Tmax :", warmLimit));
+		list.add("Nominal usage ->");
+		list.add(Utils.plotCelsius("  Temperature :", nominalT));
+		list.add(Utils.plotPower("  Cooling :", nominalP));
+
 	}
 }

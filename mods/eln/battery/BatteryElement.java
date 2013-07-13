@@ -281,14 +281,14 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	@Override
 	public double getThermalDestructionMax() {
 		// TODO Auto-generated method stub
-		return 2;
+		return 3;
 	}
 
 
 	@Override
 	public double getThermalDestructionStart() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 2;
 	}
 
 

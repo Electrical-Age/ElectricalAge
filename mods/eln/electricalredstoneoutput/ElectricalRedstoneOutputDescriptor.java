@@ -1,5 +1,9 @@
 package mods.eln.electricalredstoneoutput;
 
+import java.util.List;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import mods.eln.Eln;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.misc.IFunction;
@@ -32,4 +36,12 @@ public class ElectricalRedstoneOutputDescriptor extends SixNodeDescriptor{
 
 	}
 	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		list.add("Convert voltage signal");
+		list.add("to redstone signal");
+	}
 }

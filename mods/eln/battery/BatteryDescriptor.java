@@ -43,7 +43,8 @@ public class BatteryDescriptor extends TransparentNodeDescriptor{
 	public double electricalQ,electricalRs,electricalRp;
 	public double thermalC,thermalRp,thermalPMax;
 	public double lifeNominalCurrent,lifeNominalLost;
-	
+	public double startCharge;
+	public boolean isRechargable;
 	String description = "todo battery";
 	
 	FunctionTable UfCharge;
@@ -56,6 +57,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor{
 	}
 	public BatteryDescriptor(
 				String name,String modelName,
+				double startCharge,boolean isRechargable,
 				FunctionTable UfCharge,
 				double electricalU,double electricalPMax,double electricalDischargeRate,
 				double electricalStdP,double electricalStdDischargeTime,double electricalStdEfficiency,double electricalStdHalfLife,
@@ -69,7 +71,8 @@ public class BatteryDescriptor extends TransparentNodeDescriptor{
 		this.electricalStdP = electricalStdP;
 		this.electricalStdHalfLife = electricalStdHalfLife;
 		this.electricalStdDischargeTime = electricalStdDischargeTime;
-
+		this.startCharge = startCharge;
+		this.isRechargable = isRechargable;
 		
 		this.thermalHeatTime = thermalHeatTime;
 		this.thermalWarmLimit = thermalWarmLimit;
@@ -112,6 +115,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor{
 		battery.QNominal = electricalQ;
 		battery.uNominal = electricalU;
 		battery.voltageFunction = UfCharge;
+		battery.isRechargeable = isRechargable;
 		//battery.efficiency = electricalStdEfficiency;
    		
 	}
@@ -147,7 +151,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor{
 	public NBTTagCompound getDefaultNBT() {
 		// TODO Auto-generated method stub
 		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
-		nbt.setDouble("charge",0.5);
+		nbt.setDouble("charge",startCharge);
 		nbt.setDouble("life",1.0);
 		return nbt;
 	}

@@ -285,6 +285,11 @@ public class Utils {
 		if(header.equals("") == false) header += " ";
 		return header + plotValue(value, "W  ");
 	}
+	public static String plotOhm(String header,double value)
+	{
+		if(header.equals("") == false) header += " ";
+		return header + plotValue(value, "ohm  ");
+	}
 	
 	public static String plotUIP(double U,double I)
 	{

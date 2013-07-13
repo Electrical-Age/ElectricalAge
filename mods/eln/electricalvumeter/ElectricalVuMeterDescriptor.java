@@ -1,5 +1,9 @@
 package mods.eln.electricalvumeter;
 
+import java.util.List;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import mods.eln.Eln;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.misc.IFunction;
@@ -40,6 +44,16 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor{
 			alphaOn = pointer.getFloat("alphaOn");
 			pointer.draw((factor*(alphaOn-alphaOff) + alphaOff), 1.0f, 0, 0);
 		}
+	}
+	
+	
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		list.add("Display the value of a signal");
 	}
 	
 }

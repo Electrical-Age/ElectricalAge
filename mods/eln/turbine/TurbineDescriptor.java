@@ -1,5 +1,8 @@
 package mods.eln.turbine;
 
+import java.util.List;
+
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
@@ -13,6 +16,7 @@ import mods.eln.misc.FunctionTable;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.Utils;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.PhysicalConstant;
@@ -111,5 +115,19 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		draw();
+	}
+	
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		list.add("Converts heat in electricity");
+		list.add("Nominal use at");
+		list.add(Utils.plotCelsius(" Delta T :", nominalDeltaT));
+		list.add(Utils.plotPower(" Voltage out :", nominalU));
+		list.add(Utils.plotPower(" Power out :", nominalP));
+
 	}
 }

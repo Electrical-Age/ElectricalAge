@@ -14,6 +14,7 @@ public class BatteryProcess implements IProcess {
 	//public double efficiency = 1.0;
 	
 	public boolean cut;
+	public boolean isRechargeable = true;
 	
 	public BatteryProcess(ElectricalLoad positiveLoad,ElectricalLoad negativeLoad,FunctionTable voltageFunction )
 	{
@@ -35,10 +36,17 @@ public class BatteryProcess implements IProcess {
 		double Cequ = (positiveLoad.getC()*negativeLoad.getC())/(positiveLoad.getC()+negativeLoad.getC());
 		double QNeeded = (voltage - (positiveLoad.Uc-negativeLoad.Uc))*Cequ;
 		//Q -= QNeeded > 0 ? QNeeded : QNeeded * efficiency;
-		Q -= QNeeded;
-		
-		ElectricalLoad.moveCurrent(QNeeded/time, negativeLoad, positiveLoad);
-		dischargeCurrentMesure = QNeeded/time;
+		if(isRechargeable == true || QNeeded > 0)
+		{
+			Q -= QNeeded;
+			
+			ElectricalLoad.moveCurrent(QNeeded/time, negativeLoad, positiveLoad);
+			dischargeCurrentMesure = QNeeded/time;
+		}
+		else
+		{
+			dischargeCurrentMesure = 0;
+		}
 		
 	}
 	

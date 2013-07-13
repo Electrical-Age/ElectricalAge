@@ -1,5 +1,7 @@
 package mods.eln.electricaldatalogger;
 
+import java.util.List;
+
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
@@ -15,6 +17,7 @@ import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistor;
 import mods.eln.sim.ThermalLoadInitializer;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
@@ -125,7 +128,18 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor{
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if(main != null) main.drawList();
 	}
-	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		
+		list.add("This bloc can measure signals");
+		list.add("from 0V to 50V and plot");
+		list.add("a graphic with the signal");
+		list.add("evolution over time");
+		list.add("Store 256 sample");
+	}
 }
 
 

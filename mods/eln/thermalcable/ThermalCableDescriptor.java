@@ -1,7 +1,10 @@
 package mods.eln.thermalcable;
 
+import java.util.List;
+
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.NodeThermalWatchdogProcess;
@@ -11,6 +14,7 @@ import mods.eln.sim.ElectricalLoadDynamicProcess;
 import mods.eln.sim.ElectricalLoadHeatThermalLoadProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalWatchdogProcess;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
 public class ThermalCableDescriptor extends SixNodeDescriptor{
@@ -98,4 +102,20 @@ public class ThermalCableDescriptor extends SixNodeDescriptor{
 		thermalLoad.C = thermalC;
 	}
 
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		
+		list.add(Utils.plotCelsius("Tmax", thermalWarmLimit));
+		list.add(Utils.plotOhm("Serial resistance",thermalRs*2));
+		list.add(Utils.plotOhm("Parallel resistance",thermalRp));
+		list.add("");
+		list.add("low Serial resistance");
+		list.add(" => High conductivity");
+		list.add("High parallel resistance");
+		list.add(" => low power dissipation");
+	}
 }

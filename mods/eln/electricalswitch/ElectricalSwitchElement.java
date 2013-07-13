@@ -216,7 +216,7 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
 	@Override
 	public double getThermalDestructionStart() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 1;
 	}
 
 	@Override
@@ -252,7 +252,7 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
 	@Override
 	public double getVoltageDestructionStart() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 1;
 	}
 
 	@Override

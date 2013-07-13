@@ -34,7 +34,7 @@ public class ThermalDissipatorActiveElement extends TransparentNodeElement{
 
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		if(side == front && lrdu == LRDU.Down) return positiveLoad;
+		if(side == front || side == front.getInverse()) return positiveLoad;
 		return null;
 	}
 
@@ -42,6 +42,7 @@ public class ThermalDissipatorActiveElement extends TransparentNodeElement{
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub
 		if(side == Direction.YN || side == Direction.YP || lrdu != lrdu.Down) return null;
+		if(side == front || side == front.getInverse()) return null;
 		return thermalLoad;
 	}
 
@@ -49,7 +50,7 @@ public class ThermalDissipatorActiveElement extends TransparentNodeElement{
 	public int getConnectionMask(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub
 		if(side == Direction.YN || side == Direction.YP  || lrdu != lrdu.Down) return 0;
-		if(side == front) return node.maskElectricalPower;
+		if(side == front || side == front.getInverse()) return node.maskElectricalPower;
 		return node.maskThermal;
 	}
 

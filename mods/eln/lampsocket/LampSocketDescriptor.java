@@ -1,10 +1,13 @@
 package mods.eln.lampsocket;
 
+import java.util.List;
+
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
 import mods.eln.misc.LRDU;
 import mods.eln.node.SixNodeDescriptor;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
@@ -61,6 +64,25 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glEnable(GL11.GL_LIGHTING);
 	}		
+	
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		list.add("Socket type : " + socketType.toString());
+		
+		if(range != 0 || alphaZMin != alphaZMax){
+			list.add("Projector");
+			if(range != 0){
+				list.add("  range : " + range + " Blocks");
+			}
+			if(alphaZMin != alphaZMax){
+				list.add("  angle  : " + ((int)alphaZMin) + "\u00B0 to " + ((int)alphaZMax) + "\u00B0");
+			}
+		}
+	}
 }	
 	
 

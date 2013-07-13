@@ -46,7 +46,7 @@ public class ElectricalRelayRender extends SixNodeElementRender{
 
 	@Override
 	public void draw() {
-				
+		super.draw();
 
 	}
 	
@@ -92,4 +92,15 @@ public class ElectricalRelayRender extends SixNodeElementRender{
 		// TODO Auto-generated method stub
 		return new ElectricalRelayGui(player,this);
 	}
+	
+	
+	
+	@Override
+	public CableRenderDescriptor getCableRender(LRDU lrdu) {
+		if(lrdu == front) return Eln.instance.signalCableDescriptor.render;
+		if(lrdu == front.left() || lrdu == front.right()) return descriptor.cable.render;
+		return null;
+	}
+	
+	
 }

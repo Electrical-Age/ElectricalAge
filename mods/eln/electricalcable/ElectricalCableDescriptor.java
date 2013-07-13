@@ -155,28 +155,39 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Resistor : " + Utils.plotValue(electricalNominalRs,"ohm"));
-
-		list.add("Designed usage ->");
-		list.add("  Voltage : " + (int)electricalNominalVoltage + " V");
-		list.add("  Power : " + (int)electricalNominalPower + " W");
-		list.add("  Power lost : " + (int)(electricalNominalPowerDropFactor * electricalNominalPower) + " W/Block");
 		
-		
-		
-		String lol = "";
-		for(int idx = 0;idx<15;idx++)
-		{
-			if(idx <10) 
+		if(signalWire){
+			list.add("This cable is adapted to");
+			list.add("transporte signals quickly");
+			list.add("A signal is a electrical information");
+			list.add("That must be between 0V and " + Eln.SVU + "V");
+			list.add("Don't try transporte power");
+			
+			
+			String lol = "";
+			for(int idx = 0;idx<15;idx++)
 			{
-				lol += "\u00a7" + idx + "" +  idx;
+				if(idx <10) 
+				{
+					lol += "\u00a7" + idx + "" +  idx;
+				}
+				else
+				{
+					lol += "\u00a7" + "abcdef".charAt(idx-10) +   "abcdef".charAt(idx-10);
+				}
 			}
-			else
-			{
-				lol += "\u00a7" + "abcdef".charAt(idx-10) +   "abcdef".charAt(idx-10);
-			}
+			list.add(lol);
 		}
-		list.add(lol);
+		else 
+		{
+			list.add(Utils.plotOhm("Serial resistor :",electricalNominalRs*2));
+			list.add("low resistor => low power lost");
+			list.add("Nominal usage ->");
+			list.add("  Voltage : " + (int)electricalNominalVoltage + " V");
+			list.add("  Current : " + (int)(electricalNominalPower/electricalNominalVoltage) + " A");
+			list.add("  Power : " + (int)electricalNominalPower + " W");
+			list.add("  Power lost : " + (int)(electricalNominalPowerDropFactor * electricalNominalPower) + " W/Block");
+		}
 	}
 
 	@Override

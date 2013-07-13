@@ -69,21 +69,21 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub
-		if(side == front && lrdu == LRDU.Down) return electricalCmdLoad;
-		return null;
+		return electricalCmdLoad;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-		if(side == front) return null;
-		return thermalLoad;
+		if(side == front.getInverse() && lrdu == LRDU.Down) return thermalLoad;
+		return null;
 	}
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub
-		if(side == front && lrdu == LRDU.Down)  return Node.maskElectricalInputGate;
-		return Node.maskThermal;
+		if((side == front.left() || side == front.right()) && lrdu == LRDU.Down)  return Node.maskElectricalInputGate;
+		if(side == front.getInverse() && lrdu == LRDU.Down)	return Node.maskThermal;
+		return 0;
 	}
 
 	@Override
@@ -266,4 +266,7 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 		takeFuel = nbt.getBoolean(str + "takeFuel");
 		controlExternal = nbt.getBoolean(str + "controlExternal");
 	}
+	
+	
+	
 }

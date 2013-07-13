@@ -1,5 +1,9 @@
 package mods.eln.diode;
 
+import java.util.List;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import mods.eln.Eln;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.item.ThermalIsolatorElement;
@@ -52,5 +56,13 @@ public class DiodeDescriptor extends SixNodeDescriptor{
 	{
 		cable.applyTo(load,false);
 	}
-
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		list.add("The current can run only");
+		list.add("in a single way");
+	
+	}
 }

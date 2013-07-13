@@ -1,5 +1,7 @@
 package mods.eln.electricasensor;
 
+import java.util.List;
+
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientProxy;
@@ -11,6 +13,7 @@ import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistor;
 import mods.eln.sim.ThermalLoadInitializer;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
@@ -54,5 +57,25 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor{
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		draw();
+	}
+	
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		
+		if(voltageOnly){
+			list.add("In function of input voltage,");
+			list.add("give a output voltage signal");
+		}
+		else
+		{
+			list.add("In function of inputs,");
+			list.add("give a output voltage signal");
+			list.add("Can measure :");
+			list.add("Voltage/Power/Current");
+		}
 	}
 }

@@ -1,5 +1,7 @@
 package mods.eln.electricalswitch;
 
+import java.util.List;
+
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientProxy;
@@ -12,6 +14,7 @@ import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistor;
 import mods.eln.sim.ThermalLoadInitializer;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
@@ -103,7 +106,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor{
 				if(part != null) 
 				{
 					float switchDelta;			
-					part.draw(part.getFloat("alphaOff"), 0, 0, 1);
+					part.draw(part.getFloat("alphaOff"), 0, 1, 0);
 				}
 			}
 		}
@@ -114,5 +117,12 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor{
 			return Node.maskElectricalGate;
 		else 
 			return Node.maskElectricalPower;
+	}
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		list.add("Can manualy cut off a line");
 	}
 }

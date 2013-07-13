@@ -1,5 +1,9 @@
 package mods.eln.autominer;
 
+import java.util.List;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import mods.eln.Eln;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElectricalLoadWatchdog;
@@ -49,5 +53,14 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor{
 	public boolean mustHaveFloor() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		//list.add("");
 	}
 }

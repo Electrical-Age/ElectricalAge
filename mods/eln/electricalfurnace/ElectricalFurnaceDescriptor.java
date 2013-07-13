@@ -1,11 +1,14 @@
 package mods.eln.electricalfurnace;
 
+import java.util.List;
+
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.misc.IFunction;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalLoadInitializer;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
@@ -56,5 +59,14 @@ public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor{
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		 Eln.obj.draw("ElectricFurnace", "furnace");	
+	}
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		list.add("A minecraft furnace equivalent");
+		list.add("But need electricity to work");
 	}
 }
