@@ -335,8 +335,12 @@ public class CableRender {
 		}
 		return connectionTypeBuild;
 	}
-	
 	public static void drawCable(CableRenderDescriptor cable,LRDUMask connection,CableRenderType connectionType)
+	{
+		
+		drawCable(cable, connection, connectionType,cable.widthDiv2);
+	}
+	public static void drawCable(CableRenderDescriptor cable,LRDUMask connection,CableRenderType connectionType,float deltaStart)
 	{
 		if(cable == null) return;
 		//GL11.glDisable(GL11.GL_TEXTURE);
@@ -345,9 +349,9 @@ public class CableRender {
 
 		//GL11.glColor3b(wireColor.getRedByte(), wireColor.getGreenByte(), wireColor.getBlueByte());
 		{
-			float left0 = -cable.widthDiv2,right0 = cable.widthDiv2,up0 = cable.widthDiv2,down0 = -cable.widthDiv2;
+			float left0 = -deltaStart,right0 = deltaStart,up0 = deltaStart,down0 = -deltaStart;
 			
-			if(connection.mask == 0)
+			if(connection.mask == 0 & deltaStart >= 0f)
 			{
 				left0 = -cable.widthDiv2 - 3.0f/16.0f;
 				right0 = cable.widthDiv2 + 3.0f/16.0f;
@@ -421,7 +425,7 @@ public class CableRender {
 			float height = cable.height;
 			tx = 0.25f;ty = 0.5f;
 		//	Utils.bindTextureByName(cable.cableTexture);
-			if(left0 < -cable.widthDiv2 || right0 > cable.widthDiv2)
+			if((left0 < -cable.widthDiv2 || right0 > cable.widthDiv2) && right0 > left0)
 			{
 				
 				GL11.glBegin(GL11.GL_QUAD_STRIP);
@@ -452,7 +456,7 @@ public class CableRender {
 				GL11.glEnd();
 			}
 		
-			if(down0 < -cable.widthDiv2 || up0 > cable.widthDiv2)
+			if((down0 < -cable.widthDiv2 || up0 > cable.widthDiv2) & down0 < up0)
 			{
 				GL11.glBegin(GL11.GL_QUAD_STRIP);
 					GL11.glNormal3f(0f, 0f, -1f);

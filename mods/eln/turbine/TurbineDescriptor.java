@@ -96,7 +96,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 		
 		//GL11.glTranslatef(0f, 0.5f, 0f);
 		//GL11.glScalef(1f, 2f, 1f);
-		if(main != null) main.drawList();
+		if(main != null) main.draw();
 	}
 
 	

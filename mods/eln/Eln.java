@@ -1245,8 +1245,8 @@ public class Eln {
     		subId = 0;    		
 	    	name = "Electrical alarm A";	    	
 	    	desc = new ElectricalAlarmDescriptor(
-	    			name,
-	    			"Vumeter",
+	    			name,obj.getObj("alarmmedium"),
+	    			5,
 	    			"eln:alarma",11,1f
 	    			);  		
 	    	sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1255,8 +1255,8 @@ public class Eln {
     		subId = 1;    		
 	    	name = "Electrical alarm B";	    	
 	    	desc = new ElectricalAlarmDescriptor(
-	    			name,
-	    			"Vumeter",
+	    			name,obj.getObj("alarmmedium"),
+	    			5,
 	    			"eln:smallalarm_critical",1.2,2f
 	    			);  		
 	    	sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -2902,7 +2902,7 @@ public class Eln {
 	    	name = "Low power receiver antenna";
 	    	double P = 250;
 	    	desc = new ElectricalAntennaRxDescriptor(
-	    			name,obj.getObj("lowpowertransmitterantenna"),
+	    			name,obj.getObj("lowpowerreceiverantenna"),
 	    			LVU,P,//double electricalNominalVoltage,double electricalNominalPower,
 	    			LVU * 1.3,P*1.3,// electricalMaximalVoltage,double electricalMaximalPower,
 	    			lowVoltageCableDescriptor	   			
@@ -2933,7 +2933,7 @@ public class Eln {
 	    	name = "Medium power receiver antenna";
 	    	double P = 1000;
 	    	desc = new ElectricalAntennaRxDescriptor(
-	    			name,obj.getObj("lowpowertransmitterantenna"),
+	    			name,obj.getObj("lowpowerreceiverantenna"),
 	    			MVU,P,//double electricalNominalVoltage,double electricalNominalPower,
 	    			MVU * 1.3,P*1.3,// electricalMaximalVoltage,double electricalMaximalPower,
 	    			meduimVoltageCableDescriptor	   			
@@ -2964,7 +2964,7 @@ public class Eln {
 	    	name = "High power receiver antenna";
 	    	double P = 2000;
 	    	desc = new ElectricalAntennaRxDescriptor(
-	    			name,obj.getObj("lowpowertransmitterantenna"),
+	    			name,obj.getObj("lowpowerreceiverantenna"),
 	    			HVU,P,//double electricalNominalVoltage,double electricalNominalPower,
 	    			HVU * 1.3,P*1.3,// electricalMaximalVoltage,double electricalMaximalPower,
 	    			highVoltageCableDescriptor	   			

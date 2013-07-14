@@ -37,7 +37,7 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor{
 	
 	void draw()
 	{
-		if(main != null) main.drawList();
+		if(main != null) main.draw();
 	}
 	
 	

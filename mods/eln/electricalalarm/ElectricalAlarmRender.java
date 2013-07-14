@@ -8,9 +8,11 @@ import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.client.FrameTime;
 import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
+import mods.eln.misc.RcInterpolator;
 import mods.eln.node.Node;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementRender;
@@ -31,44 +33,21 @@ public class ElectricalAlarmRender extends SixNodeElementRender{
 
 	LRDU front;
 
-
+	RcInterpolator interpol = new RcInterpolator(0.4f);
 	@Override
 	public void draw() {
 		super.draw();
 		
-/*
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_LIGHTING);
+		interpol.setTarget(warm ? descriptor.rotSpeed : 0f);
+		interpol.stepGraphic();
+		
+		rotAlpha += interpol.get() *FrameTime.get();
 
+		//front.glRotateOnX();		
+		descriptor.draw(warm,rotAlpha);
 
-		GL11.glPointSize(20);
-		
-	
-		
-		double[] vector = new double[2];
-		vector[0] = 0;
-		vector[1] = 0;		
-		front.inverse().applyTo(vector, 0.4);
-		
-		GL11.glBegin(GL11.GL_POINTS);	
-		GL11.glColor3f(1f-factor, factor, 0);
-			GL11.glVertex3d(0.07,vector[1],vector[0]);
-		GL11.glEnd();
-		
-
-		
-		GL11.glEnable(GL11.GL_LIGHTING);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);		
-		
-		*/
-		GL11.glPushMatrix();
-		front.glRotateOnX();
-
-		
-		//descriptor.draw(factorFiltred);
-		GL11.glPopMatrix();
 	}
-
+	float rotAlpha = 0;
 	boolean warm = false;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {

@@ -11,6 +11,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
@@ -73,7 +74,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor{
 	{
 		front.glRotateOnX();
 		//GL11.glDisable(GL11.GL_TEXTURE_2D);
-		if(main != null) main.drawList();
+		if(main != null) main.draw();
 		//GL11.glEnable(GL11.GL_TEXTURE_2D);
 		if(log != null)
 		{
@@ -83,8 +84,9 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor{
         		GL11.glTranslatef(tx,ty,tz); 	
         		GL11.glRotatef(ra,rx,ry,rz);  
 	        	GL11.glScalef(sx, sy, sz);
+	        	Utils.disableLight();
 	        	log.draw(mx,my,"\u00a76");
-
+	        	Utils.enableLight();
 				
 				/*
 	        	GL11.glTranslatef(1f-0.22f,-0.5f+0.16f,-0.5f+0.1f); 	        	
@@ -126,7 +128,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor{
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		if(main != null) main.drawList();
+		if(main != null) main.draw();
 	}
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,

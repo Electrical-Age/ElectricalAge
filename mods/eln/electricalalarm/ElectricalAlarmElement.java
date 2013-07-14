@@ -40,7 +40,7 @@ public class ElectricalAlarmElement extends SixNodeElement{
 	public ElectricalAlarmElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-		front = LRDU.Left;
+		front = LRDU.Down;
     	electricalLoadList.add(inputGate);
     	slowProcessList.add(slowProcess);
     	this.descriptor = (ElectricalAlarmDescriptor) descriptor;
@@ -75,7 +75,7 @@ public class ElectricalAlarmElement extends SixNodeElement{
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
 		// TODO Auto-generated method stub
-		if(front == lrdu.left()) return inputGate;
+		if(front == lrdu) return inputGate;
 		return null;
 	}
 
@@ -88,7 +88,7 @@ public class ElectricalAlarmElement extends SixNodeElement{
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		// TODO Auto-generated method stub4
-		if(front == lrdu.left()) return Node.maskElectricalInputGate;
+		if(front == lrdu) return Node.maskElectricalInputGate;
 		return 0;
 	}
 
@@ -121,16 +121,22 @@ public class ElectricalAlarmElement extends SixNodeElement{
 	public void setWarm(boolean value)
 	{
 		if(warm != value) {
+			warm = value;
+			sixNode.recalculateLightValue();
 			needPublish();
 		}
-		warm = value;
+		
 	}
 	@Override
 	public void initialize() {
 
 	}
 
-
+	public int getLightValue() 
+	{
+		return warm ? descriptor.light : 0;
+	}
+	
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,float vx,float vy,float vz)
 	{

@@ -12,6 +12,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.CommonProxy;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -125,5 +126,13 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 		Descriptor desc = getDescriptor(itemStack);
 		if(desc == null) return;
 		desc.addInformation(itemStack, entityPlayer, list, par4);
+    }
+    
+    
+    public boolean onEntityItemUpdate(EntityItem entityItem)
+    {
+        Descriptor desc  = getDescriptor(entityItem.getEntityItem());
+        if(desc != null) return desc.onEntityItemUpdate(entityItem);
+        return false;
     }
 }

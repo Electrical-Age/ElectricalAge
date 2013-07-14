@@ -96,7 +96,7 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor{
 		//GL11.glDisable(GL11.GL_CULL_FACE);
 		//GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
 	//	GL11.glColor3f(0.5f,0.5f,0.5f);
-		if(main != null) main.drawList();
+		if(main != null) main.draw();
 		if(tiroir != null) tiroir.draw(alphaClose + tiroirFactor * (alphaOpen - alphaClose),0f, 0f, 1f);
 		//GL11.glEnable(GL11.GL_TEXTURE_2D);
 		//GL11.glCullFace(GL11.GL_BACK);

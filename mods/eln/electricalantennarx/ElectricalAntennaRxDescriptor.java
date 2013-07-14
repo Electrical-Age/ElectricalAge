@@ -58,7 +58,7 @@ public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor{
 	public void draw()
 	{
 		GL11.glDisable(GL11.GL_CULL_FACE);
-		if(main != null) main.drawList();
+		if(main != null) main.draw();
 		GL11.glEnable(GL11.GL_CULL_FACE);
 	}
 	

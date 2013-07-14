@@ -54,7 +54,7 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 		front.glRotateOnX();
 		Eln.obj.draw(modelName, "socket");
 		GL11.glLineWidth(2f);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
+	/*	GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_LIGHTING);
 		GL11.glColor3f(1f,1f,1f);
 		GL11.glBegin(GL11.GL_LINES);
@@ -62,7 +62,7 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 			GL11.glVertex3d(Math.cos(alphaZ*Math.PI/180.0), Math.sin(alphaZ*Math.PI/180.0),0.0);
 		GL11.glEnd();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glEnable(GL11.GL_LIGHTING);
+		GL11.glEnable(GL11.GL_LIGHTING);*/
 	}		
 	
 	

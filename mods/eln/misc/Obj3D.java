@@ -107,18 +107,16 @@ public class Obj3D {
 	    	  ARBVertexBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ELEMENT_ARRAY_BUFFER_ARB, VBOIndices);
 	    	  GL12.glDrawRangeElements(GL11.GL_TRIANGLES, 0, 3, indices);
 	    	}*/
-		public void drawList()
-		{
-			
+		
+		public void drawNoBind(){
 			if(listReady == false)
 			{
 				listReady = true;
 				glList = GL11.glGenLists(1);
 				
 				GL11.glNewList(glList, GL11.GL_COMPILE);
-				draw();
-				GL11.glEndList();	
-				
+				drawVertex();
+				GL11.glEndList();					
 				/*
 				
 		        float[] vertexArray = {-0.5f,  0.5f, 0,
@@ -143,12 +141,17 @@ public class Obj3D {
 				*/
 				
 			}
-			if(textureResource != null)Utils.bindTexture(textureResource);
-		//	render();
-			//draw();
+
 			
-			GL11.glCallList(glList);
+			GL11.glCallList(glList);			
 		}
+		public void draw()
+		{		
+			if(textureResource != null)Utils.bindTexture(textureResource);
+			drawNoBind();
+		}
+		
+
 		public float getFloat(String name)
 		{
 			return nameToFloatHash.get(name);
@@ -170,12 +173,23 @@ public class Obj3D {
 			GL11.glTranslatef(ox,oy,oz);
 			GL11.glRotatef(angle,x,y,z);
 			GL11.glTranslatef(-ox,-oy,-oz);
-			drawList();
+			draw();
+			
+			GL11.glPopMatrix();
+		}
+		public void drawNoBind(float angle,float x,float y,float z)
+		{
+			GL11.glPushMatrix();
+			
+			GL11.glTranslatef(ox,oy,oz);
+			GL11.glRotatef(angle,x,y,z);
+			GL11.glTranslatef(-ox,-oy,-oz);
+			drawNoBind();
 			
 			GL11.glPopMatrix();
 		}
 		
-		private void draw()
+		private void drawVertex()
 		{
 			//float dx = 0,dy = 0,dz = 0;
 			//if(nameToFloatHash.containsKey("offsetX")) dx = nameToFloatHash.get("offsetX");
@@ -307,17 +321,22 @@ public class Obj3D {
 	public Obj3D() {
 	}
 	
-	
+	public ResourceLocation getAlternativeTexture(String name)
+	{
+		ResourceLocation resource = new ResourceLocation(mod,directory + name);
+		return resource;
+	}
 //	static final String rootDirectory = "/mods/eln/model/";
 	
 	String directory;
-	
+	String mod;
 	public void loadFile(String modName,String path)
 	{
 		int lastSlashId = path.lastIndexOf('/');
 		this.directory = path.substring(0, lastSlashId + 1);
 		this.fileName = path.substring(lastSlashId + 1,path.length());
 		Obj3DPart part = null;
+		mod = modName;
 		try {
 			
 		//	File f  = Minecraft.getAppDir("../src/minecraft");	
@@ -514,7 +533,7 @@ public class Obj3D {
 	public void draw(String part)
 	{ 
 		Obj3DPart partPtr = getPart(part);
-		if(partPtr != null) partPtr.drawList();
+		if(partPtr != null) partPtr.draw();
 	}
 	
 	public String getString(String name)

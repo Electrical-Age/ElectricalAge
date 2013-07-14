@@ -3,6 +3,7 @@ package mods.eln.generic;
 import java.util.List;
 
 import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -64,5 +65,9 @@ public class GenericItemBlockUsingDamageDescriptor {
 		return genItem.getDescriptor(stack);
 		
 	}
-
+	public boolean onEntityItemUpdate(EntityItem entityItem)
+	{
+		return false;
+		
+	}
 }

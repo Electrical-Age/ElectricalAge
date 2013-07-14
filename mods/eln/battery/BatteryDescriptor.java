@@ -21,6 +21,7 @@ import mods.eln.sim.ElectricalLoadHeatThermalLoadProcess;
 import mods.eln.sim.ElectricalResistor;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoad;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -53,7 +54,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor{
 	public void draw()
 	{
 		if(modelPart == null) return;
-		modelPart.drawList();
+		modelPart.draw();
 	}
 	public BatteryDescriptor(
 				String name,String modelName,
@@ -225,4 +226,15 @@ public class BatteryDescriptor extends TransparentNodeDescriptor{
 		draw();
 	}
 	
+	@Override
+	public boolean onEntityItemUpdate(EntityItem entityItem) {
+		if(entityItem.isBurning())
+		{
+			entityItem.worldObj.createExplosion(entityItem, entityItem.posX, entityItem.posY, entityItem.posZ, 2,true);
+			entityItem.extinguish();
+			entityItem.setDead();	
+		}
+
+		return false;
+	}
 }

@@ -85,6 +85,6 @@ public class Obj3DFolder {
 	public void draw(String objName,String partName)
 	{
 		Obj3DPart part = getPart(objName,partName);
-		if(part != null) part.drawList();
+		if(part != null) part.draw();
 	}
 }

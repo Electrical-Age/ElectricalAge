@@ -45,7 +45,7 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor{
 		MaceratorDescriptorHandle handle = (MaceratorDescriptorHandle) handleO;
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
-		main.drawList();
+		main.draw();
 		rouleau1.draw(handle.counter, 1f, 0f, 0f);
 		rouleau2.draw(handle.counter, -1f, 0f, 0f);
 		

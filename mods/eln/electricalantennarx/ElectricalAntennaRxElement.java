@@ -158,6 +158,7 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement{
 	public void networkSerialize(DataOutputStream stream) {
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
-		rot.serialize(stream);
+		rot.serialize(stream);		
+		node.lrduCubeMask.getTranslate(front.getInverse()).serialize(stream);
 	}
 }
