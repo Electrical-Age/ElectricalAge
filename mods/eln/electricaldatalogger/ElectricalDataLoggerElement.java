@@ -150,7 +150,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		return inputGate.plot("in");
+		return inputGate.plot("In ");
 
 	}
 

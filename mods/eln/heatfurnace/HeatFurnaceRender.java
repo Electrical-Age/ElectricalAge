@@ -52,6 +52,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 			interpolator.setTarget(1f);
 		interpolator.stepGraphic();
 		
+		front.glRotateXnRef();
 		descriptor.draw(interpolator.get());
 		
 		if(entityItemIn != null)

@@ -1,5 +1,10 @@
 package mods.eln.misc;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.Set;
+
 public class LRDUMask {
 	public int mask;
 	public LRDUMask()
@@ -34,5 +39,26 @@ public class LRDUMask {
 	public boolean get(LRDU lrdu)
 	{
 		return (mask & (1<<lrdu.dir)) != 0;
+	}
+	
+	public void serialize(DataOutputStream stream) {
+		// TODO Auto-generated method stub
+		try {
+			stream.writeByte(mask);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public void deserialize(DataInputStream stream) {
+		// TODO Auto-generated method stub
+		try {
+			set(stream.readByte());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			set(0);
+		}
+		
 	}
 }

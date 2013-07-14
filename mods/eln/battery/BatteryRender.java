@@ -32,15 +32,7 @@ public class BatteryRender extends TransparentNodeElementRender{
 
 	@Override
 	public void draw() {
-		// TODO Auto-generated method stub
-		GL11.glPointSize(20);
-		
-		double[] vector = new double[3];
-		vector[0] = 0;
-		vector[1] = 0;		
-		vector[2] = 0;		
-	//	front.applyTo(vector, 0.4);
-		
+		front.glRotateXnRef();
 		descriptor.draw();
 	}
 

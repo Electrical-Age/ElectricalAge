@@ -42,7 +42,7 @@ public class ElectricalMachineRender extends TransparentNodeElementRender{
 		processState += processStatePerSecond * FrameTime.getNotCaped();
 		if(processState > 1f) processState = 1f;
 		
-		
+		front.glRotateXnRef();
 		descriptor.draw(this,drawHandle, inEntity, outEntity, powerFactor);
 
 	}

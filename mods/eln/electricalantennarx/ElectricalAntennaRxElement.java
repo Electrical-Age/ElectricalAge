@@ -1,5 +1,7 @@
 package mods.eln.electricalantennarx;
 
+import java.io.DataOutputStream;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
@@ -151,5 +153,11 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement{
 	public boolean mustHaveWallFrontInverse()
 	{
 		return true;
+	}
+	@Override
+	public void networkSerialize(DataOutputStream stream) {
+		// TODO Auto-generated method stub
+		super.networkSerialize(stream);
+		rot.serialize(stream);
 	}
 }

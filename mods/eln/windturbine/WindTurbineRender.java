@@ -20,7 +20,7 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 	@Override
 	public void draw() {
 		// TODO Auto-generated method stub
-		
+		front.glRotateXnRef();
 	}
 	
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2 , 64, this);

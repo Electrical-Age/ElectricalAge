@@ -76,6 +76,8 @@ public class CableRender {
 				SixNodeEntity sixNodeEntity = (SixNodeEntity) otherTileEntity;
 				if(sixNodeEntity.elementRenderList[side.getInt()] !=null)
 				{
+					Direction otherSide = side.applyLRDU(lrdu);
+					connectionTypeBuild.otherdry[lrdu.dir] = sixNodeEntity.getCableDry(otherSide,otherSide.getLRDUGoingTo(side));
 					continue;
 				}
 			}
@@ -108,13 +110,23 @@ public class CableRender {
 				otherTileEntity = entity.worldObj.getBlockTileEntity(x2, y2, z2);
 
 				if(otherTileEntity instanceof NodeBlockEntity)
-				{				
+				{				/*
+					Direction otherDirection = side.getInverse();
+					LRDU otherLRDU = otherDirection.getLRDUGoingTo(sideLrdu).inverse();
+					CableRenderDescriptor render = entity.getCableRender(sideLrdu,sideLrdu.getLRDUGoingTo(side));
+					//CableRenderDescriptor render = entity.getCableRender(side,lrdu);
+					NodeBlockEntity otherNode =  ((NodeBlockEntity)otherTileEntity);
+					CableRenderDescriptor otherRender = otherNode.getCableRender(otherDirection, otherLRDU);*/
 					Direction otherDirection = side.getInverse();
 					LRDU otherLRDU = otherDirection.getLRDUGoingTo(sideLrdu).inverse();
 					CableRenderDescriptor render = entity.getCableRender(sideLrdu,sideLrdu.getLRDUGoingTo(side));
 					NodeBlockEntity otherNode =  ((NodeBlockEntity)otherTileEntity);
 					CableRenderDescriptor otherRender = otherNode.getCableRender(otherDirection, otherLRDU);
-					
+					if(render == null) {		
+						//System.out.println("ASSERT cableRender missing");
+						continue;
+					}
+						
 					if(otherRender == null)
 					{
 						connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend;
@@ -130,9 +142,10 @@ public class CableRender {
 						{
 							connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend;
 							connectionTypeBuild.param[lrdu.dir] = otherRender.heightPixel;
-							connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection,otherLRDU);
+							
 							//connectionTypeBuild += (connectionExtend + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
 						}
+						connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection,otherLRDU);
 						continue;	
 					}					
 					if(render.width < otherRender.width)
@@ -264,11 +277,12 @@ public class CableRender {
 
 				if(otherTileEntity instanceof NodeBlockEntity)
 				{				
-					Direction otherDirection = side.getInverse();
-					LRDU otherLRDU = otherDirection.getLRDUGoingTo(sideLrdu).inverse();
+//					Direction otherDirection = side.getInverse();
+					Direction otherDirection = side.applyLRDU(lrdu).getInverse();
+					LRDU otherLRDU = otherDirection.getLRDUGoingTo(side.getInverse());
 					CableRenderDescriptor render = element.getCableRender(lrdu);
 					NodeBlockEntity otherNode = ((NodeBlockEntity)otherTileEntity);
-					CableRenderDescriptor otherRender = otherNode.getCableRender(otherDirection, otherLRDU);
+					CableRenderDescriptor otherRender = otherNode.getCableRender(side.getInverse(), lrdu.inverse());
 					
 					if(otherRender == null)
 					{
@@ -324,7 +338,7 @@ public class CableRender {
 	
 	public static void drawCable(CableRenderDescriptor cable,LRDUMask connection,CableRenderType connectionType)
 	{
-
+		if(cable == null) return;
 		//GL11.glDisable(GL11.GL_TEXTURE);
 		//if(connection.mask != 0 ) return;
 		float tx,ty;

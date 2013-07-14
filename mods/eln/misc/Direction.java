@@ -569,6 +569,28 @@ public enum Direction {
 		
 		}		
 	}
+
+	public void glTranslate(float v) {
+		// TODO Auto-generated method stub
+		switch (this) {
+		case XN:GL11.glTranslatef(-v,0f,0f);
+			break;
+		case XP:GL11.glTranslatef(v,0f,0f);
+			break;
+		case YN:GL11.glTranslatef(0f,-v,0f);
+			break;
+		case YP:GL11.glTranslatef(0f,v,0f);
+			break;
+		case ZN:GL11.glTranslatef(0f,0f,-v);
+			break;
+		case ZP:GL11.glTranslatef(0f,0f,v);
+			break;
+		default:
+			break;
+
+
+		}
+	}
 	
 }
 

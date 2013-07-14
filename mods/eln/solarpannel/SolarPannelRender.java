@@ -43,7 +43,8 @@ public class SolarPannelRender extends TransparentNodeElementRender{
 		{
 			alpha = (float) descriptor.alphaTrunk(SolarPannelSlowProcess.getSolarAlpha(tileEntity.worldObj));
 		}
-		front.getInverse().glRotateXnRefInv();
+		
+		
 		
 		GL11.glTranslatef(0, 2, 0);
 		

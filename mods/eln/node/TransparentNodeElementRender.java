@@ -9,7 +9,9 @@ import org.lwjgl.opengl.GL11;
 
 
 import mods.eln.Eln;
+import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.entity.Render;
@@ -54,7 +56,11 @@ public abstract class TransparentNodeElementRender {
 		GL11.glPopMatrix();		
 	}
 	
-	
+	public void glCableTransforme(Direction inverse) {
+		inverse.glTranslate(0.5f);
+		inverse.glRotateXnRef();
+	}
+
 	public abstract void draw() ;
 
 	public void networkUnserialize(DataInputStream stream)
@@ -132,4 +138,8 @@ public abstract class TransparentNodeElementRender {
     {
     	return true;
     }
+	public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
+
+		return null;
+	}
 }

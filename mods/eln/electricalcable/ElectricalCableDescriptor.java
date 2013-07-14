@@ -230,4 +230,9 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 		else 
 			return  null;
 	}
+
+	public void bindCableTexture() {
+		// TODO Auto-generated method stub
+		this.render.bindCableTexture();
+	}
 }

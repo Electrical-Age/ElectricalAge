@@ -1,5 +1,9 @@
 package mods.eln.misc;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 import org.lwjgl.opengl.GL11;
 
 import com.google.common.base.CaseFormat;
@@ -180,5 +184,26 @@ public enum LRDU {
 	}
 	
 	public int dir;
+
+	public void serialize(DataOutputStream stream) {
+		try {
+			stream.writeByte(this.toInt());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	static public LRDU deserialize(DataInputStream stream) {
+		try {
+			return fromInt(stream.readByte());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return Up;
+		}
+		
+		
+	}
 }
 

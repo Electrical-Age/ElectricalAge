@@ -38,6 +38,8 @@ public class AutoMinerRender extends TransparentNodeElementRender{
 			
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
+		
+		front.glRotateXnRef();
 	}
 
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);

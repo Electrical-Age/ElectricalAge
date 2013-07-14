@@ -1453,7 +1453,7 @@ public class Eln {
 	    	double RsFactor = 0.25;
 	    	double nominalU = LVU;
 	    	double nominalP = 200;
-	    	double nominalDeltaT = 200;
+	    	double nominalDeltaT = 200	;
 	    	TurbineDescriptor desc = new TurbineDescriptor(
 	    			name,"turbine50V","Miaouuuu turbine",//int iconId, String name,String description,
 	    			TtoU.duplicate(nominalDeltaT, nominalU),
@@ -1490,7 +1490,7 @@ public class Eln {
     		subId = 8;
 	    	name = "200V turbine";
 	    	double RsFactor = 0.25;
-	    	double nominalU = LVU;
+	    	double nominalU = MVU;
 	    	double nominalP = 500;
 	    	double nominalDeltaT = 350;
 	    	TurbineDescriptor desc = new TurbineDescriptor(
@@ -2883,10 +2883,10 @@ public class Eln {
         	
     		subId = 0;
     		ElectricalAntennaTxDescriptor desc;
-	    	name = "Small power transmitter antenna";
+	    	name = "Low power transmitter antenna";
 	    	double P = 250;
 	    	desc = new ElectricalAntennaTxDescriptor(
-	    			name,
+	    			name,obj.getObj("lowpowertransmitterantenna"),
 	    			200,//int rangeMax,
 	    			0.9,0.7,//double electricalPowerRatioEffStart,double electricalPowerRatioEffEnd,
 	    			LVU,P,//double electricalNominalVoltage,double electricalNominalPower,
@@ -2899,16 +2899,78 @@ public class Eln {
         	
     		subId = 1;
     		ElectricalAntennaRxDescriptor desc;
-	    	name = "Small power receiver antenna";
+	    	name = "Low power receiver antenna";
 	    	double P = 250;
 	    	desc = new ElectricalAntennaRxDescriptor(
-	    			name,
+	    			name,obj.getObj("lowpowertransmitterantenna"),
 	    			LVU,P,//double electricalNominalVoltage,double electricalNominalPower,
 	    			LVU * 1.3,P*1.3,// electricalMaximalVoltage,double electricalMaximalPower,
 	    			lowVoltageCableDescriptor	   			
 	    			);			
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+    	}    
+    	
+    	{
+        	
+    		subId = 2;
+    		ElectricalAntennaTxDescriptor desc;
+	    	name = "Medium power transmitter antenna";
+	    	double P = 1000;
+	    	desc = new ElectricalAntennaTxDescriptor(
+	    			name,obj.getObj("lowpowertransmitterantenna"),
+	    			250,//int rangeMax,
+	    			0.9,0.75,//double electricalPowerRatioEffStart,double electricalPowerRatioEffEnd,
+	    			MVU,P,//double electricalNominalVoltage,double electricalNominalPower,
+	    			MVU * 1.3,P*1.3,// electricalMaximalVoltage,double electricalMaximalPower,
+	    			meduimVoltageCableDescriptor			
+	    			);			
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
     	}      	
+    	{
+        	
+    		subId = 3;
+    		ElectricalAntennaRxDescriptor desc;
+	    	name = "Medium power receiver antenna";
+	    	double P = 1000;
+	    	desc = new ElectricalAntennaRxDescriptor(
+	    			name,obj.getObj("lowpowertransmitterantenna"),
+	    			MVU,P,//double electricalNominalVoltage,double electricalNominalPower,
+	    			MVU * 1.3,P*1.3,// electricalMaximalVoltage,double electricalMaximalPower,
+	    			meduimVoltageCableDescriptor	   			
+	    			);			
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+    	}
+    	
+    	{
+        	
+    		subId = 4;
+    		ElectricalAntennaTxDescriptor desc;
+	    	name = "High power transmitter antenna";
+	    	double P = 2000;
+	    	desc = new ElectricalAntennaTxDescriptor(
+	    			name,obj.getObj("lowpowertransmitterantenna"),
+	    			300,//int rangeMax,
+	    			0.95,0.8,//double electricalPowerRatioEffStart,double electricalPowerRatioEffEnd,
+	    			HVU,P,//double electricalNominalVoltage,double electricalNominalPower,
+	    			HVU * 1.3,P*1.3,// electricalMaximalVoltage,double electricalMaximalPower,
+	    			highVoltageCableDescriptor			
+	    			);			
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+    	}      	
+    	{
+        	
+    		subId = 5;
+    		ElectricalAntennaRxDescriptor desc;
+	    	name = "High power receiver antenna";
+	    	double P = 2000;
+	    	desc = new ElectricalAntennaRxDescriptor(
+	    			name,obj.getObj("lowpowertransmitterantenna"),
+	    			HVU,P,//double electricalNominalVoltage,double electricalNominalPower,
+	    			HVU * 1.3,P*1.3,// electricalMaximalVoltage,double electricalMaximalPower,
+	    			highVoltageCableDescriptor	   			
+	    			);			
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+    	}
     }
      
     

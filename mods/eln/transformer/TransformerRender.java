@@ -32,6 +32,8 @@ public class TransformerRender extends TransparentNodeElementRender{
 	@Override
 	public void draw() {
 		// TODO Auto-generated method stub
+		
+		front.glRotateXnRef();
 		GL11.glPointSize(20);
 		/*
 		double[] vector = new double[3];

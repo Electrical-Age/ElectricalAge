@@ -1,5 +1,6 @@
 package mods.eln.cable;
 
+import mods.eln.misc.Utils;
 import net.minecraft.util.ResourceLocation;
 
 public class CableRenderDescriptor {
@@ -16,4 +17,8 @@ public class CableRenderDescriptor {
 	}
 	
 	public ResourceLocation cableTexture;
+	public void bindCableTexture() {
+		// TODO Auto-generated method stub
+		Utils.bindTexture(cableTexture);
+	}
 }

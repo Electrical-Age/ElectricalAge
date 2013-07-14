@@ -34,10 +34,12 @@ public class TransparentNodeRender extends TileEntitySpecialRenderer
 		if(tileEntity.elementRender == null) return;
 		GL11.glPushMatrix();
 			GL11.glTranslatef((float)x+.5F, (float)y+.5F, (float)z+.5F);
-			tileEntity.elementRender.front.glRotateXnRef();
+			//tileEntity.elementRender.front.glRotateXnRef();
 			tileEntity.elementRender.draw();
 		GL11.glPopMatrix();
 
 	}
+	
+	
 }
 		

@@ -46,7 +46,8 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender{
 	
 	@Override
 	public void draw() {
-
+		front.glRotateXnRef();
+		
 		processState += processStatePerSecond * FrameTime.getNotCaped();
 		if(processState > 1f) processState = 1f;
 		

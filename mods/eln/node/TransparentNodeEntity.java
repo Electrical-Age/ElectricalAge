@@ -8,7 +8,9 @@ import java.lang.reflect.InvocationTargetException;
 
 
 import mods.eln.Eln;
+import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
@@ -35,6 +37,12 @@ public class TransparentNodeEntity extends NodeBlockEntity {
 		return getNode().onBlockActivated(entityPlayer, direction);
 	}
 	*/
+	@Override
+	public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
+		// TODO Auto-generated method stub
+		if(elementRender == null) return null;
+		return elementRender.getCableRender(side, lrdu);
+	}
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub

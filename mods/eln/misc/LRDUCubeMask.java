@@ -36,4 +36,15 @@ public class LRDUCubeMask {
 	{
 		return lrduMaskArray[direction.getInt()];
 	}
+
+	public LRDUMask getTranslate(Direction side) {
+		LRDUMask mask = new LRDUMask();
+		
+		for(LRDU lrdu : LRDU.values()) {
+			Direction otherSide = side.applyLRDU(lrdu);
+			LRDU otherLrdu = otherSide.getLRDUGoingTo(side);
+			mask.set(lrdu, this.get(otherSide, otherLrdu));
+		}
+		return mask;
+	}
 }
