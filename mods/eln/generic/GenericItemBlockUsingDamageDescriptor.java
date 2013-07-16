@@ -2,6 +2,7 @@ package mods.eln.generic;
 
 import java.util.List;
 
+import mods.eln.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -64,6 +65,15 @@ public class GenericItemBlockUsingDamageDescriptor {
 		GenericItemBlockUsingDamage genItem = (GenericItemBlockUsingDamage) item;
 		return genItem.getDescriptor(stack);
 		
+	}
+	
+	public static GenericItemBlockUsingDamageDescriptor getDescriptor(
+			ItemStack stack,
+			Class extendClass) {
+		GenericItemBlockUsingDamageDescriptor desc = getDescriptor(stack);
+		if(desc == null) return null;
+		if(extendClass.isAssignableFrom(desc.getClass()) == false) return null;
+		return desc;
 	}
 	public boolean onEntityItemUpdate(EntityItem entityItem)
 	{

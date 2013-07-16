@@ -132,6 +132,7 @@ public class LampSocketElement extends SixNodeElement{
 	@Override
 	protected void inventoryChanged() {
 		computeElectricalLoad();
+		needPublish();
 	}
 	@Override
 	public boolean hasGui() {
@@ -196,6 +197,7 @@ public class LampSocketElement extends SixNodeElement{
 			stream.writeByte((grounded ? (1<<6) : 0 ));
 	    	stream.writeShort(inventory.getStackInSlot(LampSocketContainer.lampSlotId) == null ? 0 : inventory.getStackInSlot(LampSocketContainer.lampSlotId).getItemDamage());
 	    	stream.writeFloat((float) lampProcess.alphaZ);
+	    	Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSocketContainer.cableSlotId));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

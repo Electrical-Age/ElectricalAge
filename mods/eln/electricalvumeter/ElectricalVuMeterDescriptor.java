@@ -9,6 +9,7 @@ import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.Utils;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ThermalLoad;
@@ -26,23 +27,49 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor{
 			) {
 		super(name, ElectricalVuMeterElement.class,ElectricalVuMeterRender.class);
 		obj = Eln.instance.obj.getObj(objName);
-		
+		if(obj.getString("type").toLowerCase().equals("rot")){
+			objType = ObjType.Rot;
+			vumeter = obj.getPart("Vumeter");
+			pointer = obj.getPart("Pointer");
+		}
+		if(obj.getString("type").equals("LedOnOff")){
+			objType = ObjType.LedOnOff;
+			main = obj.getPart("main");
+			halo = obj.getPart("halo");
+		}
 	}
 
 	Obj3D obj;
+	
+	enum ObjType{Rot,LedOnOff};
+	ObjType objType;
 
-	void draw(float factor)
+	Obj3DPart vumeter,pointer,led,halo,main;
+	void draw(float factor,float distance)
 	{
 		if(factor < 0.0) factor = 0.0f;
 		if(factor > 1.0) factor = 1.0f;
-		if(obj.getString("type").equals("rot"))
+		switch(objType)
 		{
-			obj.draw("Vumeter");
-			Obj3DPart pointer = obj.getPart("Pointer");
+		case LedOnOff:
+			
+			main.draw();
+			Utils.ledOnOffColor(factor > 0.5);
+			//Utils.enableBilinear();
+			Utils.drawLight(halo,distance*5,1f,0f,0f);
+			//Utils.disableBilinear();
+			Utils.glDefaultColor();
+			break;
+		case Rot:
+			vumeter.draw();
 			float alphaOff,alphaOn;
 			alphaOff = pointer.getFloat("alphaOff");
 			alphaOn = pointer.getFloat("alphaOn");
 			pointer.draw((factor*(alphaOn-alphaOff) + alphaOff), 1.0f, 0, 0);
+			break;
+		default:
+			break;
+
 		}
 	}
 	

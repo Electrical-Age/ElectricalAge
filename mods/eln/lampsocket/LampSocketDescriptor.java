@@ -52,7 +52,10 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 	}
 	public void draw(LRDU front, float alphaZ) {
 		front.glRotateOnX();
+		
+		GL11.glDisable(GL11.GL_CULL_FACE);
 		Eln.obj.draw(modelName, "socket");
+		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glLineWidth(2f);
 	/*	GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_LIGHTING);

@@ -8,11 +8,14 @@ import java.io.IOException;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
+import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientProxy;
+import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.item.LampDescriptor;
 import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
+import mods.eln.misc.Utils;
 import mods.eln.node.Node;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.SixNodeDescriptor;
@@ -21,6 +24,7 @@ import mods.eln.node.SixNodeElementRender;
 import mods.eln.node.SixNodeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.texture.Tickable;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -64,6 +68,7 @@ public class LampSocketRender extends SixNodeElementRender{
 	
 	@Override
 	public void draw() {
+		super.draw();
 		descriptor.draw(front,alphaZ);
 	}
 
@@ -80,12 +85,13 @@ public class LampSocketRender extends SixNodeElementRender{
 			
 			lampDescriptor = (LampDescriptor) Eln.sharedItem.getDescriptor(stream.readShort());
 			alphaZ = stream.readFloat();
+			cable = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream),ElectricalCableDescriptor.class);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}
-	
+	ElectricalCableDescriptor cable;
 	
 	public boolean getGrounded()
 	{
@@ -95,6 +101,12 @@ public class LampSocketRender extends SixNodeElementRender{
 		this.grounded = grounded;
 	}
 	
+	
+	@Override
+	public CableRenderDescriptor getCableRender(LRDU lrdu) {
+		if(cable == null) return null;
+		return cable.render;
+	}
 	public void clientSetGrounded(boolean value)
 	{
         try {

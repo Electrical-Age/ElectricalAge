@@ -80,25 +80,24 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor{
 		//GL11.glEnable(GL11.GL_TEXTURE_2D);
 		if(log != null)
 		{
-			GL11.glColor4f(1f, 0.5f, 0.0f, 1f);
-			GL11.glDisable(GL11.GL_LIGHTING);
+
+        	Utils.disableLight();
 	       // GL11.glPushMatrix();	
-        		GL11.glTranslatef(tx,ty,tz); 	
-        		GL11.glRotatef(ra,rx,ry,rz);  
-	        	GL11.glScalef(sx, sy, sz);
-	        	Utils.disableLight();
-	        	log.draw(mx,my,"\u00a76");
-	        	GL11.glColor4f(1f, 1.0f, 1.0f, 1f);
-	        	if(led != null) led.draw();
-	        	Utils.enableLight();
-				
-				/*
-	        	GL11.glTranslatef(1f-0.22f,-0.5f+0.16f,-0.5f+0.1f); 	        	
-	        	GL11.glRotatef(90,0f,0f,1f);	
-	        	GL11.glScalef(0.7f/1.5f, 0.7f/1.5f, 1f);
-		        log.draw(0.8f*1.5f,0.8f*1.5f);*/
-	        //GL11.glPopMatrix();
-	        GL11.glEnable(GL11.GL_LIGHTING);
+        	Utils.ledOnOffColor(true);
+        	if(led != null) led.draw();
+        	
+			Utils.glDefaultColor();
+			
+    		GL11.glTranslatef(tx,ty,tz); 	
+    		GL11.glRotatef(ra,rx,ry,rz);  
+        	GL11.glScalef(sx, sy, sz);
+			GL11.glColor4f(1f, 0.5f, 0.0f, 1f);
+        	log.draw(mx,my,"\u00a76");
+        	
+        	Utils.glDefaultColor();
+
+
+	        Utils.enableLight();
 	        
 		}
 	}

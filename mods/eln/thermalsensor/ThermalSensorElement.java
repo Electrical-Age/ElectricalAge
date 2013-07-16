@@ -195,6 +195,7 @@ public class ThermalSensorElement extends SixNodeElement {
 	@Override
 	protected void inventoryChanged() {
 		computeElectricalLoad();
+		needPublish();
 	}
 
 	public void computeElectricalLoad()

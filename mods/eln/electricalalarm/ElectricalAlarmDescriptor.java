@@ -66,8 +66,10 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor{
 			GL11.glDisable(GL11.GL_CULL_FACE);
 			GL11.glColor3f(1.0f, 1.0f, 1.0f);
 			if(warm) Utils.disableLight();
+			else GL11.glDisable(GL11.GL_LIGHTING);
 			rot.drawNoBind(rotAlpha,1f,0f,0f);
 			if(warm) Utils.enableLight();
+			else GL11.glEnable(GL11.GL_LIGHTING);
 			GL11.glEnable(GL11.GL_CULL_FACE);
 		}
 	}

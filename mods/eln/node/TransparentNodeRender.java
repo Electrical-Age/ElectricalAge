@@ -7,6 +7,7 @@ import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
+import mods.eln.misc.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderBlocks;
 
@@ -32,11 +33,13 @@ public class TransparentNodeRender extends TileEntitySpecialRenderer
 		//System.out.println("delta T : " + var8);
 		TransparentNodeEntity tileEntity = (TransparentNodeEntity) entity;
 		if(tileEntity.elementRender == null) return;
+		Utils.glDefaultColor();
 		GL11.glPushMatrix();
 			GL11.glTranslatef((float)x+.5F, (float)y+.5F, (float)z+.5F);
 			//tileEntity.elementRender.front.glRotateXnRef();
 			tileEntity.elementRender.draw();
 		GL11.glPopMatrix();
+		Utils.glDefaultColor();
 
 	}
 	

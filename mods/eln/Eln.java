@@ -680,7 +680,7 @@ public class Eln {
 			name = "Low voltage cable";
 
 			stdCableRender50V = new CableRenderDescriptor("eln",
-					"/sprites/CABLE.PNG", 2, 1.5f);
+					"/sprites/CABLE.PNG", 2, 0.95f);
 
 			desc = new ElectricalCableDescriptor(name, stdCableRender50V,
 					"For low voltage with high current", false);
@@ -708,7 +708,7 @@ public class Eln {
 			name = "Medium voltage cable";
 
 			stdCableRender200V = new CableRenderDescriptor("eln",
-					"/sprites/CABLE.PNG", 3, 1.95f);
+					"/sprites/CABLE.PNG", 3, 0.95f);
 
 			desc = new ElectricalCableDescriptor(name, stdCableRender200V,
 					"miaou", false);
@@ -736,7 +736,7 @@ public class Eln {
 			name = "High voltage cable";
 
 			stdCableRender800V = new CableRenderDescriptor("eln",
-					"/sprites/CABLE.PNG", 3.9f, 2.9f);
+					"/sprites/CABLE.PNG", 3.9f, 1.95f);
 
 			desc = new ElectricalCableDescriptor(name, stdCableRender800V,
 					"miaou2", false);
@@ -1172,7 +1172,7 @@ public class Eln {
 			name = "Temperature sensor sixNode";
 
 			desc = new ThermalSensorDescriptor(name,
-					obj.getObj("thermalsensor"), true);
+					obj.getObj("temperaturesensor"), true);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -1185,8 +1185,14 @@ public class Eln {
 		ElectricalVuMeterDescriptor desc;
 		{
 			subId = 0;
-			name = "Electrical vuMeter";
+			name = "Electrical analog vuMeter";
 			desc = new ElectricalVuMeterDescriptor(name, "Vumeter");
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		{
+			subId = 8;
+			name = "Electrical led vuMeter";
+			desc = new ElectricalVuMeterDescriptor(name, "Led");
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}

@@ -147,8 +147,16 @@ public class Obj3D {
 		}
 		public void draw()
 		{		
-			if(textureResource != null)Utils.bindTexture(textureResource);
-			drawNoBind();
+			if(textureResource != null){
+				Utils.bindTexture(textureResource);
+				drawNoBind();
+			}
+			else {
+				GL11.glDisable(GL11.GL_TEXTURE_2D);
+				drawNoBind();
+				GL11.glEnable(GL11.GL_TEXTURE_2D);
+			}
+			
 		}
 		
 

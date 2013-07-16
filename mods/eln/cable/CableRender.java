@@ -338,7 +338,7 @@ public class CableRender {
 	public static void drawCable(CableRenderDescriptor cable,LRDUMask connection,CableRenderType connectionType)
 	{
 		
-		drawCable(cable, connection, connectionType,cable.widthDiv2);
+		drawCable(cable, connection, connectionType,cable.widthDiv2/2f);
 	}
 	public static void drawCable(CableRenderDescriptor cable,LRDUMask connection,CableRenderType connectionType,float deltaStart)
 	{
