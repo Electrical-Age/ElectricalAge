@@ -20,6 +20,7 @@ import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -356,6 +357,8 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		Minecraft.getMinecraft().mcProfiler.startSection("SixNodeItem");
+
 		switch(type)
 		{
 		case ENTITY:
@@ -377,6 +380,9 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 		}
 		//GL11.glTranslatef(0, 1, 0);
 		getDescriptor(item).renderItem(type, item, data);
+		
+		Minecraft.getMinecraft().mcProfiler.endSection();
+
 	}	
     
     

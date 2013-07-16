@@ -39,10 +39,10 @@ public class ElectricalTimeoutGui extends GuiScreenEln{
 		// TODO Auto-generated method stub
 		super.initGui();
 
-        reset = newGuiButton( 8, 64/2-20-2,50, "reset");
-		set = newGuiButton(8, 64/2+2,50, "set");
+        reset = newGuiButton( 6,6,50, "reset");
+		set = newGuiButton(6, 6 + 20 + 4,50, "set");
 
-		timeoutValue = newGuiTextField(8 + 50 +8, 64/2-6, 50);
+		timeoutValue = newGuiTextField(6,6 + 20*2 + 4*2, 50);
 
         timeoutValue.setText( render.timeoutValue);
         timeoutValue.setComment(0,"The output stay high");
@@ -84,7 +84,7 @@ public class ElectricalTimeoutGui extends GuiScreenEln{
 	@Override
 	protected GuiHelper newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelper(this, 128, 64, "electricalsource.png");
+		return new GuiHelper(this, 50+12, 6 + 20*2 + 4*2 + 12 + 6);
 	}
 	
 }

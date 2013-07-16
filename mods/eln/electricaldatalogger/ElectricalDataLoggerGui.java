@@ -254,7 +254,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176, 230,8,148, "electricaldatalogger.png");
+		return new GuiHelperContainer(this, 176, 230,8,148);
 	}
 	
 }

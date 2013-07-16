@@ -27,7 +27,6 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 
 	public TurbineDescriptor(String name,String modelName,String description,
 			FunctionTable TtoU,
-			FunctionTable TtoP,
 			FunctionTable PoutToPin,
 			double nominalDeltaT, double nominalU,double nominalP,double nominalPowerLost,
 			double electricalRs,double electricalRp,double electricalC,
@@ -38,7 +37,6 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 		super(name, TurbineElement.class, TurbineRender.class);
 		double nominalEff =  Math.abs(1 - (0 + PhysicalConstant.Tref)/(nominalDeltaT + PhysicalConstant.Tref));
 		this.TtoU = TtoU;
-		this.TtoP = TtoP;
 		this.PoutToPin = PoutToPin;
 		this.nominalDeltaT = nominalDeltaT;
 		this.nominalU = nominalU; 
@@ -62,7 +60,6 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 	
 	public double powerOutPerDeltaU;
 	public FunctionTable TtoU;
-	public FunctionTable TtoP;
 	public FunctionTable PoutToPin;
 	public double nominalDeltaT,nominalU; 
 	double nominalP;
@@ -126,7 +123,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 		list.add("Converts heat in electricity");
 		list.add("Nominal use at");
 		list.add(" Delta T : " +  ((int)nominalDeltaT) + "\u00B0C");
-		list.add(Utils.plotPower(" Voltage out :", nominalU));
+		list.add(Utils.plotVolt(" Voltage out :", nominalU));
 		list.add(Utils.plotPower(" Power out :", nominalP));
 
 	}

@@ -11,12 +11,14 @@ import mods.eln.Eln;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientProxy;
+import mods.eln.client.FrameTime;
 import mods.eln.electricalsource.ElectricalSourceGui;
 import mods.eln.heatfurnace.HeatFurnaceElement;
 import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.Node;
@@ -42,18 +44,31 @@ public class ElectricalTimeoutRender extends SixNodeElementRender{
 		time = System.currentTimeMillis();
 	}
 
+	//PhysicalInterpolator interpolator = new PhysicalInterpolator(0.2f,2.0f,1.5f,0.2f);
 
-
-
+	
 	@Override
 	public void draw() {
-				
+		super.draw();
+		front.glRotateOnX();
+		if(inputState == false) {
+			timeoutCounter -= FrameTime.get();
+			if(timeoutCounter < 0f) timeoutCounter = 0f;
+		}
+		//interpolator.setTarget(timeoutCounter/timeoutValue);
+		//interpolator.stepGraphic();	
+		//descriptor.draw(interpolator.get());
+		descriptor.draw(timeoutCounter/timeoutValue);
 
 	}
-	
+	@Override
+	public boolean cameraDrawOptimisation() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
 	float timeoutValue = 0,timeoutCounter = 0;
-	
+	boolean inputState;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -63,6 +78,7 @@ public class ElectricalTimeoutRender extends SixNodeElementRender{
 
 			timeoutValue = stream.readFloat();
 			timeoutCounter = stream.readFloat();
+			inputState = stream.readBoolean();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -71,7 +87,11 @@ public class ElectricalTimeoutRender extends SixNodeElementRender{
 	}
 	
 	
-	
+	@Override
+	public CableRenderDescriptor getCableRender(LRDU lrdu) {
+		// TODO Auto-generated method stub
+		return Eln.instance.signalCableDescriptor.render;
+	}
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {

@@ -12,54 +12,50 @@ import mods.eln.node.Node;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
-
 public class PlayerManager implements ITickHandler {
 	private Hashtable<EntityPlayerMP, PlayerMetadata> metadataHash = new Hashtable<EntityPlayerMP, PlayerMetadata>();
-	
-	public class PlayerMetadata 
-	{
+
+	public class PlayerMetadata {
 		private int timeout;
 		private boolean interactEnable = false;
-		
+
 		public PlayerMetadata() {
 			timeoutReset();
 		}
-		
-		public boolean needDelete()
-		{
+
+		public boolean needDelete() {
 			return timeout == 0;
 		}
-		
-		public void timeoutReset()
-		{
-			timeout = 20*120;
+
+		public void timeoutReset() {
+			timeout = 20 * 120;
 		}
-		public void timeoutDec()
-		{
+
+		public void timeoutDec() {
 			timeout--;
-			if(timeout<0) timeout = 0;
+			if (timeout < 0)
+				timeout = 0;
 		}
-		
+
 		public void setInteractEnable(boolean interactEnable) {
 			this.interactEnable = interactEnable;
 			timeoutReset();
 			System.out.println("interactEnable : " + interactEnable);
 		}
-		
+
 		public boolean getInteractEnable() {
 			timeoutReset();
 			return interactEnable;
 		}
-		
+
 	}
 
 	@Override
 	public void tickStart(EnumSet<TickType> type, Object... tickData) {
 		// TODO Auto-generated method stub
-		for(Entry<EntityPlayerMP, PlayerMetadata> entry : metadataHash.entrySet())
-		{
-			if(entry.getValue().needDelete())
-			{
+		for (Entry<EntityPlayerMP, PlayerMetadata> entry : metadataHash
+				.entrySet()) {
+			if (entry.getValue().needDelete()) {
 				metadataHash.remove(entry.getKey());
 			}
 		}
@@ -68,7 +64,7 @@ public class PlayerManager implements ITickHandler {
 	@Override
 	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -82,18 +78,17 @@ public class PlayerManager implements ITickHandler {
 		// TODO Auto-generated method stub
 		return "rondoudou";
 	}
-	
-	public PlayerMetadata get(EntityPlayerMP player)
-	{
+
+	public PlayerMetadata get(EntityPlayerMP player) {
 		PlayerMetadata metadata = metadataHash.get(player);
-		if(metadata != null) return metadata;
+		if (metadata != null)
+			return metadata;
 		metadataHash.put(player, new PlayerMetadata());
-		return  metadataHash.get(player);
-		
+		return metadataHash.get(player);
+
 	}
-	
-	public PlayerMetadata get(EntityPlayer player)
-	{
-		return get((EntityPlayerMP)player);
+
+	public PlayerMetadata get(EntityPlayer player) {
+		return get((EntityPlayerMP) player);
 	}
 }

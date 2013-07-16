@@ -54,7 +54,7 @@ public class WindTurbineGuiDraw extends GuiContainerEln {
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176, 166,8,84, "windturbine.png");
+		return new GuiHelperContainer(this, 176, 166,8,84);
 	}
 	
 }

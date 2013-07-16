@@ -25,14 +25,8 @@ public class SixNodeRender extends TileEntitySpecialRenderer
 	@Override
 	public void renderTileEntityAt(TileEntity entity, double x, double y,
 			double z, float var8) {
-		// TODO Auto-generated method stub
-	/*	try {
-			Thread.sleep(10);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		//Minecraft.getMinecraft().mcProfiler.startSection("miaou !!!!!");
+		Minecraft.getMinecraft().mcProfiler.startSection("SixNode");
+
 		SixNodeEntity tileEntity = (SixNodeEntity) entity;
 		
 
@@ -59,39 +53,8 @@ public class SixNodeRender extends TileEntitySpecialRenderer
 			idx++;
 		}
 		GL11.glPopMatrix();
-		//Minecraft.getMinecraft().mcProfiler.endSection();
-		/*
-		
-		ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
-		
-		GL11.glDisable(GL_TEXTURE_2D);
-		GL11.glPushMatrix();
-		GL11.glTranslatef((float)x+.5F, (float)y+.5F, (float)z+.5F);
-		GL11.glPointSize(10);
-		GL11.glBegin(GL11.GL_POINTS);
-		
-		GL11.glTexCoord2f(0.0f,0.0f);
-		GL11.glNormal3f(0.0f, 1.0f, 0.0f);
-		
-		
-		
+		Minecraft.getMinecraft().mcProfiler.endSection();
 
-		for(Direction dir : Direction.values())
-		{
-			if(tileEntity.getSyncronizedSideEnable(dir))
-			{
-				GL11.glColor4d(1.0, 0.0, 0.0, 1.0);
-
-				double[] vect = {0.0,0.0,0.0};
-				dir.applyTo(vect, 0.45);
-				GL11.glVertex3d(vect[0],vect[1],vect[2]);
-			}
-		}
-
-		GL11.glEnd();
-		GL11.glPopMatrix();
-		GL11.glEnable(GL_TEXTURE_2D);		
-		*/
 	}
 }
 		

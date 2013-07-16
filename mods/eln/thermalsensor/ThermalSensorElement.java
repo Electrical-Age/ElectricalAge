@@ -172,6 +172,7 @@ public class ThermalSensorElement extends SixNodeElement {
 			stream.writeByte( (front.toInt()<<4) + typeOfSensor);
 			stream.writeFloat(lowValue);
 			stream.writeFloat(highValue);
+			Utils.serialiseItemStack(stream,inventory.getStackInSlot(ThermalSensorContainer.cableSlotId));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

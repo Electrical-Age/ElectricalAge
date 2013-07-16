@@ -22,6 +22,8 @@ public class GuiHelper {
 	public GuiScreen screen;
 	public int xSize,ySize;
 	ResourceLocation background;
+	static ResourceLocation helperTexture = new ResourceLocation("eln","/sprites/gui/helperTexture.png");
+
 	public GuiHelper(	
 			GuiScreen screen,
 			int xSize,int ySize,
@@ -35,6 +37,17 @@ public class GuiHelper {
 	}
 	
 	
+	public GuiHelper(	
+			GuiScreen screen,
+			int xSize,int ySize
+	) 
+	{
+		this.screen = screen;
+		this.xSize = xSize;
+		this.ySize = ySize;
+		
+	}
+		
 	GuiTextFieldEln newGuiTextField(int x,int y,int width)
 	{
 		GuiTextFieldEln o;
@@ -102,7 +115,38 @@ public class GuiHelper {
 	ArrayList<IGuiObject> objectList = new ArrayList<IGuiObject>();
 	void draw(int x, int y, float f)
 	{
-		Utils.drawGuiBackground(background, screen, xSize, ySize);
+		screen.drawDefaultBackground();
+		if(background != null)
+			Utils.drawGuiBackground(background, screen, xSize, ySize);
+		else {
+			Utils.bindTexture(helperTexture);
+			int px = 0,py = 0;
+			px += (screen.width - xSize) / 2;
+			py += (screen.height - ySize) / 2;
+			
+			screen.drawRect(px+2, py+2, px+xSize-2, py+ySize-2, 0xFFC6C6C6);
+
+			screen.drawRect(px+4, py,	 			px+xSize -4, py+1, 0xFF000000);
+			screen.drawRect(px+4, py+1,				px+xSize -4, py+3, 0xFFFFFFFF);
+			screen.drawRect(px+4, py + ySize - 1,	px+xSize -4, py + ySize - 0, 0xFF000000);
+			screen.drawRect(px+4, py + ySize - 3, 	px+xSize -4, py + ySize -1, 0xFF555555);
+
+			screen.drawRect(px,				py+4,	px+1,				py+ySize -4, 0xFF000000);
+			screen.drawRect(px+1,			py+4,  	px+3, 				py+ySize -4,0xFFFFFFFF);
+			screen.drawRect(px + xSize - 1,	py+4,  	px + xSize - 0, 	py+ySize -4,0xFF000000);
+			screen.drawRect(px + xSize - 3,	py+4,  	px + xSize -1,		py+ySize -4, 0xFF555555);
+			
+			GL11.glColor3f(1f, 1f, 1f);
+			
+			screen.drawTexturedModalRect(px, py, 0, 0, 4, 4);
+			screen.drawTexturedModalRect(px + xSize - 4, py, 4, 0, 4, 4);
+			screen.drawTexturedModalRect(px, py + ySize - 4, 0, 4, 4, 4);
+			screen.drawTexturedModalRect(px + xSize - 4, py + ySize - 4, 4, 4, 4, 4);
+					
+
+		}
+		
+		
 		for(IGuiObject o : objectList)
 		{
 			o.idraw(x, y, f);
@@ -293,5 +337,12 @@ public class GuiHelper {
 	}
 	public int getHoveringTextHeight(ArrayList<String> comment,FontRenderer fontRenderer) {
 		return comment.size() * 9 - 4;
+	}
+	
+	public void drawProcess(int x,int y,float value)
+	{
+		Utils.bindTexture(helperTexture);
+		drawTexturedModalRect(x, y,8,0 , (int) (22), 16);
+		drawTexturedModalRect(x, y,8+22,0 , (int) (22*value), 16);
 	}
 }

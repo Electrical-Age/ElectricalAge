@@ -13,6 +13,7 @@ import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -40,6 +41,8 @@ public abstract class TransparentNodeElementRender {
 	{
 		if(entityItem == null) return;
 		
+		Minecraft.getMinecraft().mcProfiler.startSection("TransparentNode");
+
 		entityItem.hoverStart = 0.0f;
 		entityItem.rotationYaw = 0.0f;
 		entityItem.motionX = 0.0;
@@ -53,7 +56,9 @@ public abstract class TransparentNodeElementRender {
 			GL11.glRotatef(roty, 0, 1, 0);
 			GL11.glScalef(scale, scale, scale);
 			var10.doRender(entityItem,0, 0, 0, 0, 0);	
-		GL11.glPopMatrix();		
+		GL11.glPopMatrix();	
+		
+		Minecraft.getMinecraft().mcProfiler.endSection();
 	}
 	
 	public void glCableTransforme(Direction inverse) {

@@ -18,6 +18,7 @@ import cpw.mods.fml.common.registry.GameRegistry;
 
 import mods.eln.Eln;
 import mods.eln.PlayerManager;
+import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.node.SixNodeEntity;
@@ -693,6 +694,39 @@ public class Utils {
         GL11.glEnable(GL11.GL_LIGHTING);		
 	}
 
+	public static void enableBlend() {
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glDepthMask(false);
+
+	}
+
+	public static void disableBlend() {
+		// TODO Auto-generated method stub
+		GL11.glDepthMask(true);
+        GL11.glDisable(GL11.GL_BLEND);
+	}
+	
+	public static void ledOnOffColor(boolean on)
+	{
+		if(! on)
+			GL11.glColor3f(0.7f, 0f, 0f);
+		else
+			GL11.glColor3f(0f, 0.7f, 0f);
+	}
+	
+	public static void drawLight(Obj3DPart part)
+	{
+		if(part == null) return;
+		disableLight();
+		enableBlend();
+		
+		part.draw();
+		
+		enableLight();
+		disableBlend();
+		
+	}
 
     /*
     public float frameTime()

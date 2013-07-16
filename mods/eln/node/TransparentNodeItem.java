@@ -15,6 +15,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -24,6 +25,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
 
 public class TransparentNodeItem extends GenericItemBlockUsingDamage<TransparentNodeDescriptor> implements IItemRenderer{
 
@@ -102,9 +104,8 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		Minecraft.getMinecraft().mcProfiler.startSection("TransparentNodeItem");
 		
-		
-
 		switch(type)
 		{
 		case ENTITY:
@@ -123,5 +124,7 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 		}
 		getDescriptor(item).renderItem(type, item, data);
 		
+		Minecraft.getMinecraft().mcProfiler.endSection();
+
 	}	
 }

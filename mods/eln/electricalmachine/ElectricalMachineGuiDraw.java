@@ -58,8 +58,8 @@ public class ElectricalMachineGuiDraw extends GuiContainerEln {
 		// TODO Auto-generated method stub
 		super.postDraw(f, x, y);
 		
-		drawTexturedModalRectEln(94, 33,177,14 , (int) (22*render.processState), 15);
-		
+	//	drawTexturedModalRectEln(94, 33,177,14 , (int) (22*render.processState), 15);
+		((HelperStdContainer)helper).drawProcess(94, 33,render.processState);
 		//draw
 	}
 }

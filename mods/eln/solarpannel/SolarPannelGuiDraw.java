@@ -92,7 +92,7 @@ public class SolarPannelGuiDraw extends GuiContainerEln {
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176, 166,8,84, "solarpanel.png");
+		return new GuiHelperContainer(this, 176, 166,8,84);
 	}
 
 

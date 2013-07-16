@@ -60,7 +60,7 @@ public class ElectricalRelayGui extends GuiScreenEln{
 	@Override
 	protected GuiHelper newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelper(this, 128, 64, "electricalsource.png");
+		return new GuiHelper(this, 128, 64);
 	}
 
 

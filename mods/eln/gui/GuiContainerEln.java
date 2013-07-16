@@ -208,7 +208,8 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 	
 	protected void postDraw(float f, int x, int y)
 	{
-		Utils.bindTexture(helper.background);
+		if(helper.background != null)
+			Utils.bindTexture(helper.background);
 	}
 	
 	protected void drawString(int x,int y,String str)

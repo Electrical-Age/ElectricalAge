@@ -468,8 +468,8 @@ public class CableRender {
 					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f, ty + down0);				GL11.glVertex3f(height, down0, cable.widthDiv2);
 					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f , ty + up0);   				GL11.glVertex3f(height, up0, cable.widthDiv2);
 					GL11.glNormal3f(0f, 0f, 1f);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f + height, ty + down0);	GL11.glVertex3f(0, down0, cable.widthDiv2);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2)*0.5f + height , ty + up0);	GL11.glVertex3f(0, up0, cable.widthDiv2);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2+ height)*0.5f , ty + down0);	GL11.glVertex3f(0, down0, cable.widthDiv2);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2+ height )*0.5f , ty + up0);	GL11.glVertex3f(0, up0, cable.widthDiv2);
 				GL11.glEnd();
 				
 				GL11.glBegin(GL11.GL_QUADS);

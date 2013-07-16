@@ -20,47 +20,49 @@ import cpw.mods.fml.common.network.IGuiHandler;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 
-
 public class GuiHandler implements IGuiHandler {
-    //returns an instance of the Container you made earlier
-    @Override
-    public Object getServerGuiElement(int id, EntityPlayer player, World world,int x, int y, int z) {
-    	NodeBlockEntity tileEntity = (NodeBlockEntity) world.getBlockTileEntity(x, y, z);
-    	Direction side = Direction.fromInt(id);
-    	Object container = tileEntity.newContainer(side,player);
-    	if(container == null)
-    	{
-            try {
-            	ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                DataOutputStream stream = new DataOutputStream(bos);   	
-                
-    	        stream.writeByte(Eln.packetOpenLocalGui);
-    	        stream.writeInt(id);
-    	        stream.writeInt(x);
-    	        stream.writeInt(y);
-    	        stream.writeInt(z);
+	// returns an instance of the Container you made earlier
+	@Override
+	public Object getServerGuiElement(int id, EntityPlayer player, World world,
+			int x, int y, int z) {
+		NodeBlockEntity tileEntity = (NodeBlockEntity) world
+				.getBlockTileEntity(x, y, z);
+		Direction side = Direction.fromInt(id);
+		Object container = tileEntity.newContainer(side, player);
+		if (container == null) {
+			try {
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				DataOutputStream stream = new DataOutputStream(bos);
 
-    	        Packet250CustomPayload packet = new Packet250CustomPayload();
-    	        packet.channel = Eln.channelName;
-    	        packet.data = bos.toByteArray();
-    	        packet.length = bos.size();  
-    	        PacketDispatcher.sendPacketToPlayer(packet,(Player)player);  
-    		} catch (IOException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    			
-    		}
-    	}
+				stream.writeByte(Eln.packetOpenLocalGui);
+				stream.writeInt(id);
+				stream.writeInt(x);
+				stream.writeInt(y);
+				stream.writeInt(z);
+
+				Packet250CustomPayload packet = new Packet250CustomPayload();
+				packet.channel = Eln.channelName;
+				packet.data = bos.toByteArray();
+				packet.length = bos.size();
+				PacketDispatcher.sendPacketToPlayer(packet, (Player) player);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+
+			}
+		}
 		return container;
 
-    }
+	}
 
-    //returns an instance of the Gui you made earlier
-    @Override
-    public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-    	NodeBlockEntity tileEntity = (NodeBlockEntity) world.getBlockTileEntity(x, y, z);
-    	Direction side = Direction.fromInt(id);
-    
-    	return tileEntity.newGuiDraw(side,player);
-    }
+	// returns an instance of the Gui you made earlier
+	@Override
+	public Object getClientGuiElement(int id, EntityPlayer player, World world,
+			int x, int y, int z) {
+		NodeBlockEntity tileEntity = (NodeBlockEntity) world
+				.getBlockTileEntity(x, y, z);
+		Direction side = Direction.fromInt(id);
+
+		return tileEntity.newGuiDraw(side, player);
+	}
 }

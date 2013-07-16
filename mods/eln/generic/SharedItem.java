@@ -1,5 +1,6 @@
 package mods.eln.generic;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
@@ -29,8 +30,7 @@ public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDes
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		
-		
+		Minecraft.getMinecraft().mcProfiler.startSection("SharedItem");
 
 		switch(type)
 		{
@@ -60,6 +60,7 @@ public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDes
 		}
 		getDescriptor(item).renderItem(type, item, data);
 		
+		Minecraft.getMinecraft().mcProfiler.endSection();
 	}	
 
 }

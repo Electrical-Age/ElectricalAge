@@ -5,7 +5,7 @@ import net.minecraft.client.gui.GuiScreen;
 public class HelperStdContainerSmall extends GuiHelperContainer{
 
 	public HelperStdContainerSmall(GuiScreen screen) {
-		super(screen, 176, 140,8,84 + 140-166, "stdcontainersmall.png");
+		super(screen, 176, 140,8,84 + 140-166);
 		// TODO Auto-generated constructor stub
 	}
 

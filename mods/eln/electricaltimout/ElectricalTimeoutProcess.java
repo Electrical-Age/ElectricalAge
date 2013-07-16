@@ -16,7 +16,8 @@ public class ElectricalTimeoutProcess implements IProcess,INBTTReady{
 	
 	@Override
 	public void process(double time) {
-		if(inputState)
+		boolean oldInputState = inputState;
+		if(inputState) 
 		{
 			if(element.inputGate.stateLow()) inputState = false;
 		}
@@ -25,16 +26,22 @@ public class ElectricalTimeoutProcess implements IProcess,INBTTReady{
 			if(element.inputGate.stateHigh()) inputState = true;
 		}
 		
-		if(inputState) element.timeOutCounter = element.timeOutValue;
+		if(inputState) {
+			element.timeOutCounter = element.timeOutValue;
+		}
 		
 		if(element.timeOutCounter != 0.0){
 			element.outputGateProcess.state(true);
-			element.timeOutCounter -= time;
+			if(inputState == false) element.timeOutCounter -= time;
 			if(element.timeOutCounter < 0.0) element.timeOutCounter = 0.0;
 		}
 		else
 		{
 			element.outputGateProcess.state(false);
+		}
+		
+		if(inputState != oldInputState) {
+			element.needPublish();
 		}
 		 
 	}

@@ -145,6 +145,7 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 		try {
 			stream.writeFloat((float) timeOutValue);
 			stream.writeFloat((float) timeOutCounter);
+			stream.writeBoolean(slowProcess.inputState);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -181,7 +182,18 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 	public static final byte resetId = 1;
 	public static final byte setTimeOutValueId = 2;
 	public static final byte setId = 3;
-
+	
+	void set()
+	{
+		timeOutCounter = timeOutValue;
+		needPublish();
+	}
+	void reset()
+	{
+		timeOutCounter = 0.0;
+		needPublish();
+	}
+	
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -190,12 +202,10 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 			switch(stream.readByte())
 			{
 			case resetId:
-				timeOutCounter = 0.0;
-				needPublish();
+				reset();
 				break;			
 			case setId:
-				timeOutCounter = timeOutValue;
-				needPublish();
+				set();
 				break;
 			case setTimeOutValueId:
 				timeOutValue = stream.readFloat();

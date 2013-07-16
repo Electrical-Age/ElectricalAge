@@ -40,7 +40,7 @@ public class ElectricalGateSourceGui extends GuiScreenEln{
 		super.initGui();
 
 
-		voltage = newGuiVerticalTrackBar(8,8,21,64-16);
+		voltage = newGuiVerticalTrackBar(6,6+2,20,50);
 		voltage.setStepIdMax((int)100);
 		voltage.setEnable(true);
     	voltage.setRange(0f,50f);
@@ -75,7 +75,7 @@ public class ElectricalGateSourceGui extends GuiScreenEln{
 	@Override
 	protected GuiHelper newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelper(this, 38, 64, "electricalgatesource.png");
+		return new GuiHelper(this, 12 + 20 , 12 + 50+4);
 	}
 	
 }

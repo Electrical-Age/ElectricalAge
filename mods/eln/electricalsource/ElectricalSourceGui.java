@@ -30,7 +30,7 @@ public class ElectricalSourceGui extends GuiScreenEln {
 	@Override
 	protected GuiHelper newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelper(this, 128, 64, "electricalsource.png");
+		return new GuiHelper(this, 50+12, 12+12);
 	}
    
 	@Override
@@ -38,7 +38,7 @@ public class ElectricalSourceGui extends GuiScreenEln {
 		// TODO Auto-generated method stub
 		super.initGui();
 
-		voltage = newGuiTextField(128/2-60/2, 64/2-6, 60);
+		voltage = newGuiTextField(6,6, 50);
 		voltage.setText((float)render.voltage);
 		voltage.setObserver(this);
 		voltage.setComment(new String[]{"Set the output voltage"});

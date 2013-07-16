@@ -24,14 +24,19 @@ import com.google.common.base.Function;
 public class ThermalSensorDescriptor extends SixNodeDescriptor{
 	public boolean temperatureOnly;
 	public ThermalSensorDescriptor(		
-					String name,
+					String name,Obj3D obj,
 					boolean temperatureOnly
 					) {
-			super(name, ThermalSensorElement.class, ThermalSensorRender.class);
-			this.temperatureOnly = temperatureOnly;
+		super(name, ThermalSensorElement.class, ThermalSensorRender.class);
+		this.temperatureOnly = temperatureOnly;
+		this.obj = obj;
+		if(obj != null){
+			main = obj.getPart("main");
 		}
+	}
 	
-	
+	Obj3D obj;
+	Obj3DPart main;
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
@@ -49,6 +54,11 @@ public class ThermalSensorDescriptor extends SixNodeDescriptor{
 			list.add("Can measure :");
 			list.add("Temperature/Power conducted");
 		}
+	}
+	
+	void draw()
+	{
+		if(main != null) main.draw();
 	}
 
 }

@@ -45,7 +45,7 @@ public class ElectricalCableRender extends SixNodeElementRender{
 	@Override
 	public void draw() {
 		// TODO Auto-generated method stub
-		//Minecraft.getMinecraft().mcProfiler.startSection("Cable");
+		Minecraft.getMinecraft().mcProfiler.startSection("ECable");
 		
 		//ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
 		
@@ -86,9 +86,10 @@ public class ElectricalCableRender extends SixNodeElementRender{
 		
 		//GL11.glEnable(GL11.GL_TEXTURE_2D);		
 		
-		//Minecraft.getMinecraft().mcProfiler.endSection();
+		
 		
 		GL11.glColor3f(1f,1f,1f);
+		Minecraft.getMinecraft().mcProfiler.endSection();
 	}
 
 	@Override

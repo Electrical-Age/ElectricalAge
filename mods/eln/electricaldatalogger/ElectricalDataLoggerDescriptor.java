@@ -57,11 +57,13 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor{
 				ra = main.getFloat("ra");
 				mx = main.getFloat("mx");
 				my = main.getFloat("my");
+				
+				led = obj.getPart("led");
 			}
 		}
 	}
 	Obj3D obj;
-	Obj3DPart main;
+	Obj3DPart main,led;
 	float sx,sy,sz;
 	float tx,ty,tz;
 	float rx,ry,rz,ra;
@@ -86,6 +88,8 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor{
 	        	GL11.glScalef(sx, sy, sz);
 	        	Utils.disableLight();
 	        	log.draw(mx,my,"\u00a76");
+	        	GL11.glColor4f(1f, 1.0f, 1.0f, 1f);
+	        	if(led != null) led.draw();
 	        	Utils.enableLight();
 				
 				/*
@@ -95,6 +99,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor{
 		        log.draw(0.8f*1.5f,0.8f*1.5f);*/
 	        //GL11.glPopMatrix();
 	        GL11.glEnable(GL11.GL_LIGHTING);
+	        
 		}
 	}
 	

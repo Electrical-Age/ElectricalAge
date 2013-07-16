@@ -12,6 +12,8 @@ import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientProxy;
 import mods.eln.electricalsource.ElectricalSourceGui;
+import mods.eln.generic.GenericItemBlockUsingDamage;
+import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.heatfurnace.HeatFurnaceElement;
 import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
@@ -25,6 +27,7 @@ import mods.eln.node.SixNodeElementInventory;
 import mods.eln.node.SixNodeElementRender;
 import mods.eln.node.SixNodeEntity;
 import mods.eln.sim.PhysicalConstant;
+import mods.eln.thermalcable.ThermalCableDescriptor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
@@ -48,7 +51,9 @@ public class ThermalSensorRender extends SixNodeElementRender{
 
 	@Override
 	public void draw() {
-				
+		super.draw();	
+		front.glRotateOnX();
+		descriptor.draw();	
 
 	}
 	
@@ -75,7 +80,10 @@ public class ThermalSensorRender extends SixNodeElementRender{
 			typeOfSensor = b & 0x3;
 			lowValue = (float) (stream.readFloat() + PhysicalConstant.Tamb);
 			highValue = (float) (stream.readFloat() + PhysicalConstant.Tamb);
-
+			ItemStack stack = Utils.unserialiseItemStack(stream);
+			GenericItemBlockUsingDamageDescriptor desc = ThermalCableDescriptor.getDescriptor(stack);
+			if(desc instanceof ThermalCableDescriptor) cable = (ThermalCableDescriptor) desc;
+			else cable = null;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -83,11 +91,28 @@ public class ThermalSensorRender extends SixNodeElementRender{
 
 	}
 	
-	
+	ThermalCableDescriptor cable;
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		// TODO Auto-generated method stub
 		return new ThermalSensorGui(player,inventory,this);
+	}
+	
+	
+	@Override
+	public CableRenderDescriptor getCableRender(LRDU lrdu) {
+		if(descriptor.temperatureOnly==false)
+		{
+			if(front.left() == lrdu && cable != null) return cable.render;
+			if(front.right() == lrdu && cable != null) return cable.render;
+			if(front == lrdu) return  Eln.instance.signalCableDescriptor.render;
+		}
+		else
+		{
+			if(front.inverse() == lrdu && cable != null) return cable.render;
+			if(front == lrdu) return  Eln.instance.signalCableDescriptor.render;
+		}
+		return null;
 	}
 }
