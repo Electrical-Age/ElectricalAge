@@ -138,6 +138,11 @@ import mods.eln.turbine.TurbineDescriptor;
 import mods.eln.turbine.TurbineElement;
 import mods.eln.turbine.TurbineRender;
 import mods.eln.windturbine.WindTurbineDescriptor;
+
+import mods.eln.wirelesssignal.WirelessSignalRxDescriptor;
+import mods.eln.wirelesssignal.WirelessSignalRxElement;
+import mods.eln.wirelesssignal.WirelessSignalTxDescriptor;
+import mods.eln.wirelesssignal.WirelessSignalTxElement;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.creativetab.CreativeTabs;
@@ -442,6 +447,7 @@ public class Eln {
 		registerElectricalCable(32);
 		registerThermalCable(48);
 		registerLampSocket(64);
+		registerWirelessSignal(92);
 		registerElectricalDataLogger(93);
 		registerElectricalRelay(94);
 		registerElectricalGateSource(95);
@@ -580,6 +586,7 @@ public class Eln {
 	/* Remember to use the right event! */
 	public void onServerStarting(FMLServerStartingEvent ev) {
 		LightBlockEntity.observers.clear();
+		WirelessSignalTxElement.channelMap.clear();
 		playerManager = new PlayerManager();
 		MinecraftServer server = FMLCommonHandler.instance()
 				.getMinecraftServerInstance();
@@ -603,6 +610,9 @@ public class Eln {
 
 		nodeServer.init();
 
+
+		
+
 	}
 
 	@cpw.mods.fml.common.Mod.ServerStopping
@@ -612,6 +622,9 @@ public class Eln {
 		nodeServer.stop();
 
 		simulator.stop();
+		
+		
+		WirelessSignalTxElement.channelMap.clear();
 
 	}
 
@@ -1266,6 +1279,54 @@ public class Eln {
 		}
 	}
 
+	
+	
+	void registerWirelessSignal(int id) {
+		int subId, completId;
+		String name;
+		
+		{
+			WirelessSignalRxDescriptor desc;
+			subId = 0;
+
+			name = "Wireless signal receivers";
+
+			desc = new WirelessSignalRxDescriptor(
+					name,
+					false,0
+					);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}		
+		
+		{
+			WirelessSignalTxDescriptor desc;
+			subId = 8;
+
+			name = "Wireless signal transmitter";
+
+			desc = new WirelessSignalTxDescriptor(
+					name,
+					5
+					);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		
+
+		{
+			WirelessSignalRxDescriptor desc;
+			subId = 16;
+
+			name = "Wireless signal repeater";
+
+			desc = new WirelessSignalRxDescriptor(
+					name,
+					true,5
+					);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}		
+		
+	}
+	
 	void registerElectricalDataLogger(int id) {
 		int subId, completId;
 		String name;

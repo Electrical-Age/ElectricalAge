@@ -30,4 +30,10 @@ public class NodeElectricalGateOutputProcess extends NodeElectricalSourceWithCur
 		else
 			U = 0.0;
 	}
+
+
+	public double getOutputNormalized() {
+		// TODO Auto-generated method stub
+		return U/Eln.SVU;
+	}
 }

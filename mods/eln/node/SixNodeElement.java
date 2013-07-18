@@ -216,6 +216,8 @@ public abstract class SixNodeElement implements INBTTReady {
     	
         int idx;
         
+        front = front.readFromNBT(nbt, str + "sixFront");
+        
         IInventory inv = getInventory();
         if(inv != null)
         {
@@ -257,6 +259,9 @@ public abstract class SixNodeElement implements INBTTReady {
     {
       
         int idx;
+        
+        front.writeToNBT(nbt, str + "sixFront");
+        
 
         IInventory inv = getInventory();
         if(inv != null)

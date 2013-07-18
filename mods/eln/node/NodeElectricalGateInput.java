@@ -13,7 +13,7 @@ public class NodeElectricalGateInput extends NodeElectricalLoad{
 
 	public String plot(String str)
 	{
-		return str + Utils.plotVolt("", Uc) + Utils.plotAmpere("", getCurrent());
+		return str  + " "+ Utils.plotVolt("", Uc) + Utils.plotAmpere("", getCurrent());
 	}
 	
 	

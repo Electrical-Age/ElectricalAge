@@ -59,6 +59,10 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject{
 	{
 		setText( String.format("%3.2f", value));
 	}
+	public void setText(int value)
+	{
+		setText( String.format("%d", value));
+	}
 	
 	private boolean enabled = true;
 	
