@@ -139,6 +139,7 @@ import mods.eln.turbine.TurbineElement;
 import mods.eln.turbine.TurbineRender;
 import mods.eln.windturbine.WindTurbineDescriptor;
 
+import mods.eln.wirelesssignal.WirelessSignalAnalyserItemDescriptor;
 import mods.eln.wirelesssignal.WirelessSignalRxDescriptor;
 import mods.eln.wirelesssignal.WirelessSignalRxElement;
 import mods.eln.wirelesssignal.WirelessSignalTxDescriptor;
@@ -510,6 +511,9 @@ public class Eln {
 		recipeLampSocket();
 		recipeDiode();
 		recipeSwitch();
+		recipeWirelessSignal();
+		
+		
 		recipeMachine();
 		recipeTransformer();
 		recipeHeatFurnace();
@@ -1306,7 +1310,7 @@ public class Eln {
 
 			desc = new WirelessSignalTxDescriptor(
 					name,
-					5
+					32
 					);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -1320,7 +1324,7 @@ public class Eln {
 
 			desc = new WirelessSignalRxDescriptor(
 					name,
-					true,5
+					true,32
 					);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}		
@@ -2976,6 +2980,13 @@ public class Eln {
 			sharedItem.addElement(completId, element);
 			allMeterElement = element;
 		}
+		{
+			subId = 8;
+			completId = subId + (id << 6);
+			element = new WirelessSignalAnalyserItemDescriptor("Wireless analyser");
+			sharedItem.addElement(completId, element);
+
+		}
 
 	}
 
@@ -3362,6 +3373,15 @@ public class Eln {
 			dataLogsPrintDescriptor = desc;
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
+		
+		{
+			subId = 33;
+			name = "Signal antenna";
+			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+					name, new String[] {});
+			sharedItem.addElement(subId + (id << 6), desc);
+		}		
+		
 
 	}
 
@@ -3479,6 +3499,36 @@ public class Eln {
 				findItemStack("Rubber"), Character.valueOf('I'),
 				findItemStack("Cooper cable"), Character.valueOf('C'),
 				findItemStack("High voltage cable"));
+	}
+	void recipeWirelessSignal() {
+		
+		GameRegistry.addRecipe(findItemStack("Wireless signal transmitter"), 
+				" S ",
+				" R ", 
+				"ICI", 
+				Character.valueOf('R'), new ItemStack(Item.redstone), 
+				Character.valueOf('I'),new ItemStack(Item.ingotIron),
+				Character.valueOf('S'),findItemStack("Cheap chip"),
+				Character.valueOf('S'),findItemStack("Signal antenna"));
+		
+		GameRegistry.addRecipe(findItemStack("Wireless signal repeater"), 
+				"  S",
+				"S R", 
+				"ICI", 
+				Character.valueOf('R'), new ItemStack(Item.redstone), 
+				Character.valueOf('I'),new ItemStack(Item.ingotIron),
+				Character.valueOf('S'),findItemStack("Cheap chip"),
+				Character.valueOf('S'),findItemStack("Signal antenna"));
+		
+		GameRegistry.addRecipe(findItemStack("Wireless signal receivers"), 
+				" S ", 
+				"ICI", 
+				Character.valueOf('R'), new ItemStack(Item.redstone), 
+				Character.valueOf('I'),new ItemStack(Item.ingotIron),
+				Character.valueOf('S'),findItemStack("Cheap chip"),
+				Character.valueOf('S'),findItemStack("Signal antenna"));
+
+
 	}
 
 	void recipeTransformer() {
@@ -3903,6 +3953,18 @@ public class Eln {
 
 		GameRegistry.addShapelessRecipe(findItemStack("AllMeter"),
 				findItemStack("MultiMeter"), findItemStack("ThermoMeter"));
+		
+		GameRegistry.addRecipe(findItemStack("Wireless analyser"),
+				" S ",
+				"RGR",
+				"RER",
+				Character.valueOf('G'), new ItemStack(Block.thinGlass),
+				Character.valueOf('S'), findItemStack("Signal antenna"),
+				Character.valueOf('E'), new ItemStack(Item.redstone),
+				Character.valueOf('R'), findItemStack("Rubber"));
+		
+		
+		
 
 	}
 
@@ -4007,6 +4069,14 @@ public class Eln {
 				Character.valueOf('G'), new ItemStack(Item.ingotGold),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron),
 				Character.valueOf('R'), new ItemStack(Item.redstone));
+		
+		GameRegistry.addRecipe(findItemStack("Signal antenna"),
+				"c",
+				"c",
+				Character.valueOf('c'), findItemStack("Iron cable"));
+				
+		
+		
 
 	}
 

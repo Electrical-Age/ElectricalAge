@@ -19,6 +19,7 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Icon;
 import net.minecraft.util.StringTranslate;
+import net.minecraft.world.World;
 
 public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsingDamageDescriptor> extends ItemBlock {
 	Hashtable<Integer,Descriptor> subItemList = new Hashtable<Integer,Descriptor>();
@@ -133,6 +134,14 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
     {
         Descriptor desc  = getDescriptor(entityItem.getEntityItem());
         if(desc != null) return desc.onEntityItemUpdate(entityItem);
+        return false;
+    }
+    
+    @Override
+    public boolean onItemUseFirst(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ)
+    {
+        Descriptor desc  = getDescriptor(stack);
+        if(desc != null) return desc.onItemUseFirst(stack,player);
         return false;
     }
 }

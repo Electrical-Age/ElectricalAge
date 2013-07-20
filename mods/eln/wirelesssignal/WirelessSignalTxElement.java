@@ -25,7 +25,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 
 	
 
-	public static HashMap<Integer, ArrayList<IWirelessSignalTx>> channelMap = new HashMap<Integer, ArrayList<IWirelessSignalTx>>(); 
+	public static HashMap<String, ArrayList<IWirelessSignalTx>> channelMap = new HashMap<String, ArrayList<IWirelessSignalTx>>(); 
 	
 	NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");
 
@@ -33,7 +33,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 	
 	
 	
-	public int channel = 0;
+	public String channel = "Default channel";
 	
 	public WirelessSignalTxElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
@@ -47,7 +47,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 
 	static void channelRegister(IWirelessSignalTx tx)
 	{
-		int channel = tx.getChannel();
+		String channel = tx.getChannel();
 		ArrayList<IWirelessSignalTx> list = channelMap.get(channel);
 		if(list == null) 
 			channelMap.put(channel,list =  new ArrayList<IWirelessSignalTx>());
@@ -56,7 +56,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 	
 	static void channelRemove(IWirelessSignalTx tx)
 	{
-		int channel = tx.getChannel();
+		String channel = tx.getChannel();
 		ArrayList<IWirelessSignalTx> list = channelMap.get(channel);
 		if(list == null) return;
 		list.remove(tx);
@@ -128,7 +128,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
-		nbt.setInteger(str + "channel", channel);
+		nbt.setString(str + "channel", channel);
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
@@ -136,7 +136,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 		channelRemove(this);
 		
 		super.readFromNBT(nbt, str);
-		channel = nbt.getInteger(str + "channel");
+		channel = nbt.getString(str + "channel");
 		
 		channelRegister(this);
 		
@@ -155,7 +155,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 	}
 
 	@Override
-	public int getChannel() {
+	public String getChannel() {
 		// TODO Auto-generated method stub
 		return channel;
 	}
@@ -184,7 +184,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 			switch(stream.readByte()){
 			case setChannelId:
 				channelRemove(this);
-				channel = stream.readInt();
+				channel = stream.readUTF();
 				needPublish();
 				channelRegister(this);
 				break;
@@ -207,7 +207,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
-			stream.writeInt(channel);
+			stream.writeUTF(channel);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

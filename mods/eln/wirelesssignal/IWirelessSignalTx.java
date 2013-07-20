@@ -6,7 +6,7 @@ public interface IWirelessSignalTx {
 	public Coordonate getCoordonate();
 	
 	public int getRange();
-	public int getChannel();
+	public String getChannel();
 	public int getGeneration();
 	public double getValue();
 

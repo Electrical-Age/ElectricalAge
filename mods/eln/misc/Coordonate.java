@@ -212,4 +212,31 @@ public class Coordonate implements INBTTReady {
 		// TODO Auto-generated method stub
 		return world().getBlockTileEntity(x, y, z);
 	}
+	public void invalidate() {
+		// TODO Auto-generated method stub
+		x = -1;
+		y = -1;
+		z = -1;
+		dimention = -5123;
+	}
+	
+	public boolean isValid()
+	{
+		return dimention != -5123;
+	}
+	public double trueDistanceTo(Coordonate c) {
+		int dx = x-c.x;
+		int dy = y-c.y;
+		int dz = z-c.z;
+		return Math.sqrt(dx*dx+dy*dy+dz*dz) ;
+	}
+	public void setDimention(int dimention) {
+		this.dimention = dimention;
+	}
+	public void copyFrom(Coordonate c) {
+		this.x = c.x;
+		this.y = c.y;
+		this.z = c.z;
+		this.dimention = c.dimention;
+	}
 }

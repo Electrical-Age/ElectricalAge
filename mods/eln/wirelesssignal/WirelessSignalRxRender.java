@@ -42,19 +42,24 @@ public class WirelessSignalRxRender extends SixNodeElementRender{
 		return new WirelessSignalRxGui(this);
 	}
 	
-	int channel;
+	String channel;
 	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
-			channel = stream.readInt();
+			channel = stream.readUTF();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
+
+
+
+
 
 
 

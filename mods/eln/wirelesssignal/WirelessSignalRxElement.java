@@ -26,7 +26,8 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 	NodeElectricalGateOutput outputGate = new NodeElectricalGateOutput("outputGate");
 	NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess",outputGate);
 	
-	public int channel = 0,generation = 1000;
+	public int generation = 1000;
+	public String channel = "Default channel";
 	
 	WirelessSignalRxProcess slowProcess = new WirelessSignalRxProcess(this);
 	
@@ -111,7 +112,7 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
-		nbt.setInteger(str + "channel", channel);
+		nbt.setString(str + "channel", channel);
 		nbt.setInteger(str + "generation", generation);
 	}
 	@Override
@@ -120,7 +121,7 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 			WirelessSignalTxElement.channelRemove(this);
 		
 		super.readFromNBT(nbt, str);
-		channel = nbt.getInteger(str + "channel");
+		channel = nbt.getString(str + "channel");
 		generation = nbt.getInteger(str + "generation");
 		if(this.descriptor.repeater)
 			WirelessSignalTxElement.channelRegister(this);
@@ -139,7 +140,7 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 	}
 
 	@Override
-	public int getChannel() {
+	public String getChannel() {
 		// TODO Auto-generated method stub
 		return channel;
 	}
@@ -169,7 +170,7 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 			case setChannelId:
 				if(this.descriptor.repeater)
 					WirelessSignalTxElement.channelRemove(this);
-				channel = stream.readInt();
+				channel = stream.readUTF();
 				needPublish();
 				if(this.descriptor.repeater)
 					WirelessSignalTxElement.channelRegister(this);
@@ -193,7 +194,7 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
-			stream.writeInt(channel);
+			stream.writeUTF(channel);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

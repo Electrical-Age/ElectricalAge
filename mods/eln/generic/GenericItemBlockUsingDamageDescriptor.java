@@ -80,4 +80,9 @@ public class GenericItemBlockUsingDamageDescriptor {
 		return false;
 		
 	}
+	
+	public boolean onItemUseFirst(ItemStack stack, EntityPlayer player)
+	{
+		return false;
+	}
 }

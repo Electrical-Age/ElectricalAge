@@ -19,7 +19,7 @@ public class WirelessSignalTxGui extends GuiScreenEln{
 	public void initGui() {
 		// TODO Auto-generated method stub
 		super.initGui();
-		channel = newGuiTextField(6, 6, 50);
+		channel = newGuiTextField(6, 6, 150);
 		channel.setText(render.channel);
 		channel.setComment(0, "Specify the channel");
 	}
@@ -27,21 +27,14 @@ public class WirelessSignalTxGui extends GuiScreenEln{
 	@Override
 	protected GuiHelper newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelper(this, 50+12, 12+12);
+		return new GuiHelper(this, 150+12, 12+12);
 	}
 
 	
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
 		if(object == channel){
-			try{
-				int channelTarget = Integer.parseInt(channel.getText());
-				render.clientSetInt(WirelessSignalTxElement.setChannelId,channelTarget);
-				channel.setText(channelTarget);
-    		} catch(NumberFormatException e)
-    		{
-    			channel.setText(render.channel);
-    		}	
+			render.clientSetString(WirelessSignalTxElement.setChannelId,channel.getText());
 		}
 		super.guiObjectEvent(object);
 	}

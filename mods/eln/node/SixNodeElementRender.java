@@ -234,7 +234,25 @@ public abstract class SixNodeElementRender {
 		}        
         		
 	}	
+
+	public void clientSetString(byte id, String text) {
+        try {
+	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	        DataOutputStream stream = new DataOutputStream(bos);   	
 	
+	        preparePacketForServer(stream);
+			
+			stream.writeByte(id);
+			stream.writeUTF(text);
+			
+			sendPacketToServer(bos);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}        
+        		
+	}	
+
 	
 
 	public void clientSetInt(byte id, int value) {
