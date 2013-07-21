@@ -40,7 +40,7 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor{
 		if(main != null) main.draw();
 	}
 	
-	
+	/*
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
@@ -57,7 +57,7 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor{
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		draw();
-	}
+	}*/
 	
 	
 	@Override

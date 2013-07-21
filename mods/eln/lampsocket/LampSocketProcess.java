@@ -108,7 +108,7 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 			}
 			
 
-			if(lightDouble - oldLight > 1.3){
+			if(lightDouble - oldLight > 1.0){
 				newLight =  (int) lightDouble;
 			}
 			else if(lightDouble - oldLight < -0.3){
@@ -145,8 +145,11 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 			
 			lifeLost = Utils.voltageMargeFactorSub(lifeLost);
 			
-			lifeLost *= overFactor;
-			lifeLost *= overFactor;
+			
+			if(overFactor >= 1.21){
+				lifeLost *= overFactor;
+			}
+			//lifeLost *= overFactor;
 			//lifeLost *= overFactor;
 			
 			NBTTagCompound lampNbt = lampStack.getTagCompound();
