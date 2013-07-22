@@ -14,6 +14,7 @@ import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.Node;
@@ -32,56 +33,27 @@ public class ElectricalSwitchRender extends SixNodeElementRender{
 			SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalSwitchDescriptor) descriptor;
-
+		interpol = new RcInterpolator(this.descriptor.speed);
 	}
 
 	double voltageAnode = 0,voltageCatode = 0,current = 0,temperature = 0;
 	
+	RcInterpolator interpol;
+	
 	@Override
 	public void draw() {
 		super.draw();
-		Minecraft.getMinecraft().mcProfiler.startSection("Switch");
+
+		interpol.setTarget(switchState ? 1f :0f);
 		
-		ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
-
-
+		interpol.stepGraphic();
 		
 		front.glRotateOnX();
 		
 		
-		
-		Obj3D obj = descriptor.getObj();
-		if(obj != null)
-		{
-			String type = obj.getString("type");
-			if(type.equals("lever"))
-			{
-				obj.draw("case");
 
-				Obj3DPart part = obj.getPart("lever");
-				
-				
-				if(part != null) 
-				{
-					float switchDelta;
-					if(switchState == false)
-					{
-						switchDelta = part.getFloat("alphaOff") - switchAlpha;
-					}
-					else
-					{
-						switchDelta = part.getFloat("alphaOn") - switchAlpha;
-					}
-					float speed = part.getFloat("speed") * (FrameTime.get()); 
-					if(speed > 1.0) speed = 1f;
-					switchAlpha += switchDelta * speed;
-					
-					
-					part.draw(switchAlpha, 0, 1, 0);
-				}
-			}
-			//obj.draw("lever_lever");
-		}
+		
+		descriptor.draw(interpol.get(),Utils.distanceFromClientPlayer(tileEntity));
 		//ClientProxy.obj.draw("HighVoltageSwitchAll", "lever_lever");
 		/*
 
@@ -92,8 +64,7 @@ public class ElectricalSwitchRender extends SixNodeElementRender{
 		*/	
 		
 		
-	
-		Minecraft.getMinecraft().mcProfiler.endSection();
+
 	}
 	
 	
@@ -134,27 +105,7 @@ public class ElectricalSwitchRender extends SixNodeElementRender{
 		
 		if(boot)
 		{
-			Obj3D obj = descriptor.getObj();
-			if(obj != null)
-			{
-				String type = obj.getString("type");
-				if(type.equals("lever"))
-				{
-					Obj3DPart part = obj.getPart("lever");			
-					if(part != null) 
-					{
-						float switchDelta;
-						if(switchState == false)
-						{
-							switchAlpha = part.getFloat("alphaOff");
-						}
-						else
-						{
-							switchAlpha = part.getFloat("alphaOn");
-						}
-					}
-				}
-			}
+			interpol.setTarget(switchState ? 1f : 0f);
 		}
 		boot = false;
 	}

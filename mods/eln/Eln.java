@@ -726,7 +726,7 @@ public class Eln {
 			name = "Signal cable";
 
 			stdCableRenderSignal = new CableRenderDescriptor("eln",
-					"/sprites/CABLE.PNG", 1, 0.95f);
+					"/sprites/CABLE.PNG", 0.95f, 0.95f);
 
 			desc = new ElectricalCableDescriptor(name, stdCableRenderSignal,
 					"For signal transmition", true);
@@ -755,7 +755,7 @@ public class Eln {
 			name = "Low voltage cable";
 
 			stdCableRender50V = new CableRenderDescriptor("eln",
-					"/sprites/CABLE.PNG", 2, 0.95f);
+					"/sprites/CABLE.PNG", 1.95f, 0.95f);
 
 			desc = new ElectricalCableDescriptor(name, stdCableRender50V,
 					"For low voltage with high current", false);
@@ -783,7 +783,7 @@ public class Eln {
 			name = "Medium voltage cable";
 
 			stdCableRender200V = new CableRenderDescriptor("eln",
-					"/sprites/CABLE.PNG", 3, 0.95f);
+					"/sprites/CABLE.PNG", 2.95f, 0.95f);
 
 			desc = new ElectricalCableDescriptor(name, stdCableRender200V,
 					"miaou", false);
@@ -811,7 +811,7 @@ public class Eln {
 			name = "High voltage cable";
 
 			stdCableRender800V = new CableRenderDescriptor("eln",
-					"/sprites/CABLE.PNG", 3.9f, 1.95f);
+					"/sprites/CABLE.PNG", 3.95f, 1.95f);
 
 			desc = new ElectricalCableDescriptor(name, stdCableRender800V,
 					"miaou2", false);
@@ -1129,7 +1129,7 @@ public class Eln {
 			name = "High voltage switch";
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRender800V,
-					"HighVoltageSwitch", HVU, HVP, 0.02,// nominalVoltage,
+					obj.getObj("HighVoltageSwitch"), HVU, HVP, 0.02,// nominalVoltage,
 														// nominalPower,
 														// nominalDropFactor,
 					HVU * 1.5, HVP * 1.2,// maximalVoltage, maximalPower
@@ -1143,7 +1143,7 @@ public class Eln {
 			name = "Low voltage switch";
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRender50V,
-					"LowVoltageSwitch", LVU, LVP, 0.02,// nominalVoltage,
+					obj.getObj("LowVoltageSwitch"), LVU, LVP, 0.02,// nominalVoltage,
 														// nominalPower,
 														// nominalDropFactor,
 					LVU * 1.5, LVP * 1.2,// maximalVoltage, maximalPower
@@ -1157,7 +1157,7 @@ public class Eln {
 			name = "Medium voltage switch";
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRender200V,
-					"LowVoltageSwitch", MVU, MVP, 0.02,// nominalVoltage,
+					obj.getObj("LowVoltageSwitch"), MVU, MVP, 0.02,// nominalVoltage,
 														// nominalPower,
 														// nominalDropFactor,
 					MVU * 1.5, MVP * 1.2,// maximalVoltage, maximalPower
@@ -1171,7 +1171,23 @@ public class Eln {
 			name = "Signal voltage switch";
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRenderSignal,
-					"LowVoltageSwitch", SVU, SVP, 0.02,// nominalVoltage,
+					obj.getObj("LowVoltageSwitch"), SVU, SVP, 0.02,// nominalVoltage,
+														// nominalPower,
+														// nominalDropFactor,
+					SVU * 1.5, SVP * 1.2,// maximalVoltage, maximalPower
+					cableThermalLoadInitializer.copy(), true);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		
+		{
+			subId = 8;
+
+			name = "Low voltage led button";
+
+			desc = new ElectricalSwitchDescriptor(name, stdCableRenderSignal,
+					obj.getObj("ledswitch"), SVU, SVP, 0.02,// nominalVoltage,
 														// nominalPower,
 														// nominalDropFactor,
 					SVU * 1.5, SVP * 1.2,// maximalVoltage, maximalPower
@@ -1495,7 +1511,7 @@ public class Eln {
 			);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
-		{
+	/*	{
 			subId = 1;
 			name = "Brick heat furnace";
 
@@ -1509,7 +1525,7 @@ public class Eln {
 					new ThermalLoadInitializerByPowerDrop(780, -100, 10, 10) // thermal
 			);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-		}
+		}*/
 
 	}
 
@@ -1534,6 +1550,7 @@ public class Eln {
 					"turbine50V",
 					"Miaouuuu turbine",// int iconId, String name,String
 										// description,
+					lowVoltageCableDescriptor.render,
 					TtoU.duplicate(nominalDeltaT, nominalU),
 					PoutToPin.duplicate(nominalP, nominalP), nominalDeltaT,
 					nominalU,
@@ -1561,6 +1578,7 @@ public class Eln {
 					"turbine50V",
 					"Miaouuuu turbine",// int iconId, String name,String
 										// description,
+					lowVoltageCableDescriptor.render,
 					TtoU.duplicate(nominalDeltaT, nominalU),
 					PoutToPin.duplicate(nominalP, nominalP), nominalDeltaT,
 					nominalU,
@@ -1586,9 +1604,10 @@ public class Eln {
 			double nominalDeltaT = 350;
 			TurbineDescriptor desc = new TurbineDescriptor(
 					name,
-					"turbine50V",
+					"turbineb",
 					"Miaouuuu turbine",// int iconId, String name,String
 										// description,
+					meduimVoltageCableDescriptor.render,
 					TtoU.duplicate(nominalDeltaT, nominalU),
 					PoutToPin.duplicate(nominalP, nominalP), nominalDeltaT,
 					nominalU,
@@ -2321,7 +2340,7 @@ public class Eln {
 	void registerOre() {
 		int id;
 		String name;
-		{
+		/*{
 			id = 0;
 			name = "Tin ore";
 
@@ -2337,7 +2356,7 @@ public class Eln {
 			oreTin = desc;
 			oreItem.addDescriptor(id, desc);
 
-		}
+		}*/
 		{
 			id = 1;
 
@@ -2347,14 +2366,14 @@ public class Eln {
 																// String
 																// name,int
 																// metadata,
-					200, 3, 9, 0, 80 // int spawnRate,int spawnSizeMin,int
+					30, 6, 10, 0, 80 // int spawnRate,int spawnSizeMin,int
 										// spawnSizeMax,int spawnHeightMin,int
 										// spawnHeightMax
 			);
 			oreCooper = desc;
 			oreItem.addDescriptor(id, desc);
 		}
-		{
+		/*{
 			id = 2;
 
 			name = "Silver ore";
@@ -2369,8 +2388,8 @@ public class Eln {
 			);
 			oreSilver = desc;
 			oreItem.addDescriptor(id, desc);
-		}
-		{
+		}*/
+	/*{
 			id = 3;
 
 			name = "Aluminum ore";
@@ -2384,7 +2403,7 @@ public class Eln {
 										// spawnHeightMax
 			);
 			oreItem.addDescriptor(id, desc);
-		}
+		}*/
 		{
 			id = 4;
 
@@ -2394,7 +2413,7 @@ public class Eln {
 																// String
 																// name,int
 																// metadata,
-					200, 3, 9, 0, 80 // int spawnRate,int spawnSizeMin,int
+					8, 3, 9, 0, 24 // int spawnRate,int spawnSizeMin,int
 										// spawnSizeMax,int spawnHeightMin,int
 										// spawnHeightMax
 			);
@@ -2409,7 +2428,7 @@ public class Eln {
 																// String
 																// name,int
 																// metadata,
-					200, 3, 9, 0, 80 // int spawnRate,int spawnSizeMin,int
+					8, 3, 9, 0, 24 // int spawnRate,int spawnSizeMin,int
 										// spawnSizeMax,int spawnHeightMin,int
 										// spawnHeightMax
 			);
@@ -2424,7 +2443,7 @@ public class Eln {
 																// String
 																// name,int
 																// metadata,
-					200, 3, 9, 0, 80 // int spawnRate,int spawnSizeMin,int
+					5, 3, 9, 0, 24 // int spawnRate,int spawnSizeMin,int
 										// spawnSizeMax,int spawnHeightMin,int
 										// spawnHeightMax
 			);
@@ -2441,7 +2460,7 @@ public class Eln {
 		String name;
 		GenericItemUsingDamageDescriptorWithComment element;
 
-		{
+	/*	{
 			subId = 0;
 			completId = subId + (id << 6);
 
@@ -2451,7 +2470,7 @@ public class Eln {
 					new String[] { "dudu dust", "miaou" });
 			dustTin = element;
 			sharedItem.addElement(completId, element);
-		}
+		}*/
 		{
 			subId = 1;
 			completId = subId + (id << 6);
@@ -2558,7 +2577,7 @@ public class Eln {
 
 		GenericItemUsingDamageDescriptorWithComment element;
 
-		{
+	/*	{
 			subId = 0;
 			completId = subId + (id << 6);
 
@@ -2570,7 +2589,7 @@ public class Eln {
 			// GameRegistry.registerCustomItemStack(name,
 			// element.newItemStack(1));
 			tinIngot = element;
-		}
+		}*/
 		{
 			subId = 1;
 			completId = subId + (id << 6);
@@ -2584,7 +2603,7 @@ public class Eln {
 			// element.newItemStack(1));
 			cooperIngot = element;
 		}
-		{
+	/*	{
 			subId = 2;
 			completId = subId + (id << 6);
 
@@ -2609,7 +2628,7 @@ public class Eln {
 			// GameRegistry.registerCustomItemStack(name,
 			// element.newItemStack(1));
 
-		}
+		}*/
 		{
 			subId = 4;
 			completId = subId + (id << 6);
@@ -3334,14 +3353,14 @@ public class Eln {
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
-
+/*
 		{
 			subId = 5;
 			name = "Tin plate";
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
-		}
+		}*/
 		{
 			subId = 6;
 			name = "Cooper plate";
@@ -3660,11 +3679,11 @@ public class Eln {
 				"BIB", "BBB", Character.valueOf('B'),
 				new ItemStack(Block.stone), Character.valueOf('I'),
 				findItemStack("Combustion chamber"));
-
+/*
 		GameRegistry.addRecipe(findItemStack("Brick heat furnace"), "BIB",
 				"BIB", "BBB", Character.valueOf('B'),
 				new ItemStack(Block.brick), Character.valueOf('I'),
-				findItemStack("Combustion chamber"));
+				findItemStack("Combustion chamber"));*/
 	}
 
 	void recipeTurbine() {
@@ -4264,12 +4283,12 @@ public class Eln {
 
 	void recipeFurnace() {
 		ItemStack in;
-		in = findItemStack("Tin ore");
+		/*in = findItemStack("Tin ore");
 		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
 				findItemStack("Tin ingot"), 0);
 		in = findItemStack("Tin dust");
 		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-				findItemStack("Tin ingot"), 0);
+				findItemStack("Tin ingot"), 0);*/
 		in = findItemStack("Cooper ore");
 		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
 				findItemStack("Cooper ingot"), 0);
@@ -4526,19 +4545,21 @@ public class Eln {
 	
 	private void recipeElectricalAntenna() {
 		GameRegistry.addRecipe(findItemStack("Low power transmitter antenna", 1), 
-				"R I",
+				"R i",
 				"CI ",
-				"R I",
+				"R i",
 				Character.valueOf('C'),findItemStack("Cheap chip"), 
+				Character.valueOf('i'),new ItemStack(Item.ingotIron), 
 				Character.valueOf('I'),findItemStack("Iron plate"), 
 				Character.valueOf('R'),new ItemStack(Item.redstone)
 		);
 		GameRegistry.addRecipe(findItemStack("Low power receiver antenna", 1), 
-				"I  ",
+				"i  ",
 				" IC",
-				"I ",
+				"i ",
 				Character.valueOf('C'),findItemStack("Cheap chip"), 
 				Character.valueOf('I'),findItemStack("Iron plate"), 
+				Character.valueOf('i'),new ItemStack(Item.ingotIron),
 				Character.valueOf('R'),new ItemStack(Item.redstone)
 		);		
 		GameRegistry.addRecipe(findItemStack("Medium power transmitter antenna", 1), 

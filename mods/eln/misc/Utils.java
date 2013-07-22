@@ -749,15 +749,35 @@ public class Utils {
 	}
 
 	public static void disableBilinear() {
-
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-
+		
 	}
 
 	public static EntityClientPlayerMP getClientPlayer() {
 		// TODO Auto-generated method stub
 		return Minecraft.getMinecraft().thePlayer;
+	}
+
+	public static void drawHaloNoLightSetup(Obj3DPart halo, float distance) {
+		if(halo == null) return;
+		halo.bindTexture();
+		Utils.enableBilinear();
+		float scale = distance*0.5f;
+		if(scale > 1f) scale = 1f;
+		GL11.glPushMatrix();
+		GL11.glScalef(1f,scale,scale);
+		halo.drawNoBind(distance*5,1f,0f,0f);
+		GL11.glPopMatrix();
+	}
+	public static void drawHalo(Obj3DPart halo, float distance) {
+
+		disableLight();
+		enableBlend();
+		
+		drawHaloNoLightSetup(halo, distance);
+		enableLight();
+		disableBlend();
 	}
 
     /*

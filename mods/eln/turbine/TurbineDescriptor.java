@@ -10,6 +10,7 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
+import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.misc.FunctionTable;
@@ -25,7 +26,9 @@ import mods.eln.sim.TurbineThermalProcess;
 
 public class TurbineDescriptor extends TransparentNodeDescriptor{
 
+	CableRenderDescriptor eRender;
 	public TurbineDescriptor(String name,String modelName,String description,
+			CableRenderDescriptor eRender,
 			FunctionTable TtoU,
 			FunctionTable PoutToPin,
 			double nominalDeltaT, double nominalU,double nominalP,double nominalPowerLost,
@@ -48,7 +51,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 		this.electricalRp = electricalRp;
 		this.electricalC = electricalC;
 		this.powerOutPerDeltaU = powerOutPerDeltaU;
-		
+		this.eRender = eRender;
 		obj = Eln.obj.getObj(modelName);
 		if(obj != null)
 		{

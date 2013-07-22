@@ -43,7 +43,7 @@ public class ElectricalVuMeterRender extends SixNodeElementRender{
 		EntityClientPlayerMP player = Utils.getClientPlayer();
 		GL11.glPushMatrix();
 		interpolator.stepGraphic();
-		descriptor.draw(interpolator.get(),(float) (tileEntity.xCoord + tileEntity.yCoord +tileEntity.zCoord - player.posX - player.posY - player.posZ));
+		descriptor.draw(interpolator.get(),Utils.distanceFromClientPlayer(tileEntity));
 		GL11.glPopMatrix();
 	}
 

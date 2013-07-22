@@ -8,6 +8,7 @@ import cpw.mods.fml.common.IWorldGenerator;
 import mods.eln.CommonProxy;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
+import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
@@ -56,12 +57,14 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
 
 	public void generateSurface(Random random, int x, int z, World w)
 	{
+		
 		//for(int i = 0;i<4;i++){ //This goes through the ore metadata
 			for(int ii=0;ii<spawnRate;ii++){ //This makes it gen multiple times in each chunk
 				int posX = x + random.nextInt(16); //X coordinate to gen at
 				int posY = spawnHeightMin + random.nextInt(spawnHeightMax-spawnHeightMin); //Y coordinate less than 40 to gen at
 				int posZ = z + random.nextInt(16); //Z coordinate to gen at
-				new WorldGenMinable(Eln.oreBlock.blockID,metadata,spawnSizeMin + random.nextInt(spawnSizeMax-spawnSizeMin)).generate(w, random, posX, posY, posZ); //The gen call
+				int size = spawnSizeMin + random.nextInt(spawnSizeMax - spawnSizeMin);
+				new WorldGenMinable(Eln.oreBlock.blockID,metadata,size,Block.stone.blockID).generate(w, random, posX, posY, posZ); //The gen call
 			}
 		//}
 		//new WorldGenTrees(par1, par2, par3, par4, par5)

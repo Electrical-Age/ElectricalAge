@@ -56,9 +56,9 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor{
 			main.draw();
 			Utils.ledOnOffColor(factor > 0.5);
 			//Utils.enableBilinear();
-			Utils.drawLight(halo,distance*5,1f,0f,0f);
+			Utils.drawHalo(halo,distance);
 			//Utils.disableBilinear();
-			Utils.glDefaultColor();
+
 			break;
 		case Rot:
 			vumeter.draw();

@@ -5,4 +5,4 @@ f originY 0.0
 f originZ 0.0
 f alphaOff 20.0
 f alphaOn -20.0
-f speed 10
+f speed 0.1

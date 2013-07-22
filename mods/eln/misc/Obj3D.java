@@ -60,7 +60,7 @@ public class Obj3D {
 		Hashtable<String, Float> nameToFloatHash = new Hashtable<String, Float>();
 
 		String mtlName;
-		ResourceLocation textureResource;
+		public ResourceLocation textureResource;
 		public Obj3DPart(ArrayList<Vertex> vertex,ArrayList<Uv> uv) {
 			this.vertex = vertex;
 			this.uv = uv;
@@ -157,6 +157,11 @@ public class Obj3D {
 				GL11.glEnable(GL11.GL_TEXTURE_2D);
 			}
 			
+		}
+		
+		public void bindTexture()
+		{
+			Utils.bindTexture(textureResource);
 		}
 		
 

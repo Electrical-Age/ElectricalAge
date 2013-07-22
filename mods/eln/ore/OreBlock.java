@@ -52,7 +52,10 @@ public class OreBlock extends Block {
     @SideOnly(Side.CLIENT)
     public Icon getIcon(int par1, int par2) {
     	// TODO Auto-generated method stub
-    	return Eln.oreItem.getDescriptor(par2).getBlockIconId(par1, par2);
+    	
+    	OreDescriptor desc = Eln.oreItem.getDescriptor(par2);
+    	if(desc == null) return null;
+    	return desc.getBlockIconId(par1, par2);
     }
 
 	public ArrayList<ItemStack> getBlockDropped(World w, int x, int y, int z, int meta, int fortune){ //Specifies the block drop
@@ -67,7 +70,9 @@ public class OreBlock extends Block {
 		}
 		
 		return list; //Returns the finished list :)*/
-		return Eln.oreItem.getDescriptor(meta).getBlockDropped(fortune);
+    	OreDescriptor desc = Eln.oreItem.getDescriptor(meta);
+    	if(desc == null) return new ArrayList<ItemStack>();
+		return desc.getBlockDropped(fortune);
 	}
 	/*//caca1.5.1
 	@Override

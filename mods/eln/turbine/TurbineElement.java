@@ -185,4 +185,12 @@ public class TurbineElement extends TransparentNodeElement{
 		// TODO Auto-generated method stub
 		return 1.0f;
 	}
+	
+	
+	@Override
+	public void networkSerialize(DataOutputStream stream) {
+		// TODO Auto-generated method stub
+		super.networkSerialize(stream);
+		node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
+	}
 }
