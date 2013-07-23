@@ -132,6 +132,11 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor{
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		if(type == ItemRenderType.INVENTORY){
+			GL11.glRotatef(-90, 0f, 1f, 0f);
+			GL11.glTranslatef(-0.4f, 0f, 0f);
+		}
+		
 		if(main != null) main.draw();
 	}
 	@Override

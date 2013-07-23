@@ -462,7 +462,7 @@ public class Eln {
 		registerElectricalAlarm(103);
 		registerElectricalLightSensor(104);
 		registerElectricalRedstone(108);
-		registerElectricalGate(109);
+		registerElectricalGate(109); 
 		registerTreeResinCollector(116);
 
 		registerTransformer(2);
@@ -1371,6 +1371,7 @@ public class Eln {
 
 			desc = new WirelessSignalRxDescriptor(
 					name,
+					obj.getObj("wirelesssignalrx"),
 					false,0
 					);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1384,6 +1385,7 @@ public class Eln {
 
 			desc = new WirelessSignalTxDescriptor(
 					name,
+					obj.getObj("wirelesssignaltx"),
 					32
 					);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1398,6 +1400,7 @@ public class Eln {
 
 			desc = new WirelessSignalRxDescriptor(
 					name,
+					obj.getObj("wirelesssignalrepeater"),
 					true,32
 					);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);

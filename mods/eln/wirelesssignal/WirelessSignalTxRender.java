@@ -17,14 +17,23 @@ import mods.eln.node.SixNodeEntity;
 
 public class WirelessSignalTxRender extends SixNodeElementRender{
 
+	
+	WirelessSignalTxDescriptor descriptor;
 	public WirelessSignalTxRender(SixNodeEntity tileEntity, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
+		this.descriptor = (WirelessSignalTxDescriptor) descriptor;
 		// TODO Auto-generated constructor stub
 	}
 
 	
-	
+	@Override
+	public void draw() {
+		// TODO Auto-generated method stub
+		super.draw();
+		front.glRotateOnX();
+		descriptor.draw();
+	}
 	
 	
 	

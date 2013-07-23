@@ -99,7 +99,16 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 		}
 		return false;
 	}
+	boolean connection = false;
 	
+	void setConnection(boolean connection)
+	{
+		if(connection != this.connection) {
+			this.connection = connection;
+			needPublish();
+		}
+
+	}
 	
 	@Override
 	public void destroy() {
@@ -114,6 +123,7 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 		super.writeToNBT(nbt, str);
 		nbt.setString(str + "channel", channel);
 		nbt.setInteger(str + "generation", generation);
+		nbt.setBoolean(str + "connection", connection);
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
@@ -123,6 +133,7 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 		super.readFromNBT(nbt, str);
 		channel = nbt.getString(str + "channel");
 		generation = nbt.getInteger(str + "generation");
+		connection = nbt.getBoolean(str + "connection");
 		if(this.descriptor.repeater)
 			WirelessSignalTxElement.channelRegister(this);
 	}
@@ -195,6 +206,7 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 		super.networkSerialize(stream);
 		try {
 			stream.writeUTF(channel);
+			stream.writeBoolean(connection);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

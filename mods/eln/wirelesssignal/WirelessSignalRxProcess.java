@@ -78,6 +78,7 @@ public class WirelessSignalRxProcess implements IProcess,INBTTReady{
 			}
 		}
 		
+		boolean connection = false;
 		if(bestTx != null){
 			if(bestTx == rx){
 				sleepTimer = 10;
@@ -87,6 +88,7 @@ public class WirelessSignalRxProcess implements IProcess,INBTTReady{
 			}
 			else
 			{
+				connection = true;
 				rx.outputGateProcess.setOutputNormalized(bestTx.getValue());
 				rx.generation = bestGeneration + 1;
 				lastCoordonate.copyFrom(bestTx.getCoordonate());
@@ -98,6 +100,8 @@ public class WirelessSignalRxProcess implements IProcess,INBTTReady{
 			rx.generation = 1000;
 			rx.outputGateProcess.setOutputNormalized(0.0);
 		}
+		
+		rx.setConnection(connection);
 		
 	}
 

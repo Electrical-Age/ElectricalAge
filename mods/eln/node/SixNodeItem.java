@@ -374,6 +374,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 			break;
 		case INVENTORY:
 			GL11.glRotatef(-90, 0, 1, 0);
+			GL11.glRotatef(-90, 1, 0, 0);
 			break;
 		default:
 			break;

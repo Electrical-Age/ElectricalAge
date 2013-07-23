@@ -15,9 +15,12 @@ import mods.eln.node.SixNodeEntity;
 
 public class WirelessSignalRxRender extends SixNodeElementRender{
 
+	WirelessSignalRxDescriptor descriptor;
+	
 	public WirelessSignalRxRender(SixNodeEntity tileEntity, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
+		this.descriptor = (WirelessSignalRxDescriptor)descriptor;
 		// TODO Auto-generated constructor stub
 	}
 
@@ -34,7 +37,14 @@ public class WirelessSignalRxRender extends SixNodeElementRender{
 	
 	
 	
-	
+	@Override
+	public void draw() {
+		// TODO Auto-generated method stub
+		super.draw();
+		front.glRotateOnX();
+		descriptor.draw(connection);
+	}
+	boolean connection;
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
@@ -50,6 +60,7 @@ public class WirelessSignalRxRender extends SixNodeElementRender{
 		super.publishUnserialize(stream);
 		try {
 			channel = stream.readUTF();
+			connection = stream.readBoolean();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

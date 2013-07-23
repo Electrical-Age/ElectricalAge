@@ -130,7 +130,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor{
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		// TODO Auto-generated method stub
 		
-
+		if(type == ItemRenderType.INVENTORY) GL11.glScalef(1.8f, 1.8f, 1.8f);
 		draw(0f,0f);
 	}	
 	public void draw(float on,float distance) {
