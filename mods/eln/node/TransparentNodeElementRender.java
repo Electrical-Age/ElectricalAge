@@ -38,10 +38,10 @@ public abstract class TransparentNodeElementRender {
 		
 	}
 	public void drawEntityItem(EntityItem entityItem,double x, double y , double z,float roty,float scale)
-	{
+	{/*
 		if(entityItem == null) return;
 		
-		Minecraft.getMinecraft().mcProfiler.startSection("TransparentNode");
+
 
 		entityItem.hoverStart = 0.0f;
 		entityItem.rotationYaw = 0.0f;
@@ -57,8 +57,9 @@ public abstract class TransparentNodeElementRender {
 			GL11.glScalef(scale, scale, scale);
 			var10.doRender(entityItem,0, 0, 0, 0, 0);	
 		GL11.glPopMatrix();	
-		
-		Minecraft.getMinecraft().mcProfiler.endSection();
+		*/
+		Utils.drawEntityItem(entityItem, x, y, z, roty, scale);
+
 	}
 	
 	public void glCableTransforme(Direction inverse) {

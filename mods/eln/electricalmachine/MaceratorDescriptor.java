@@ -43,8 +43,7 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor{
 	@Override
 	void draw(ElectricalMachineRender render,Object handleO,EntityItem inEntity, EntityItem outEntity, float powerFactor) {
 		MaceratorDescriptorHandle handle = (MaceratorDescriptorHandle) handleO;
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		
+	
 		main.draw();
 		rouleau1.draw(handle.counter, 1f, 0f, 0f);
 		rouleau2.draw(handle.counter, -1f, 0f, 0f);
@@ -54,7 +53,6 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor{
 		handle.counter += FrameTime.get() * handle.interpolator.get() *  360;
 		while(handle.counter >= 360f) handle.counter -= 360;
 		
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		
+	
 	}
 }

@@ -33,6 +33,8 @@ import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -678,10 +680,13 @@ public class Utils {
 		return false;
 	}
 
+	static boolean lightmapTexUnitTextureEnable;
 	public static void disableLight() {
 		// TODO Auto-generated method stub
         OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        lightmapTexUnitTextureEnable = GL11.glGetBoolean(GL11.GL_TEXTURE_2D);
+        if(lightmapTexUnitTextureEnable)
+        	GL11.glDisable(GL11.GL_TEXTURE_2D);
         OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
         GL11.glDisable(GL11.GL_LIGHTING);
 	}
@@ -689,7 +694,8 @@ public class Utils {
 	public static void enableLight() {
 		// TODO Auto-generated method stub
         OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        if(lightmapTexUnitTextureEnable)
+        	GL11.glEnable(GL11.GL_TEXTURE_2D);
         OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
         GL11.glEnable(GL11.GL_LIGHTING);		
 	}
@@ -727,6 +733,19 @@ public class Utils {
 		disableBlend();
 		
 	}
+	
+	public static void drawLightNoBind(Obj3DPart part) {
+
+		if(part == null) return;
+		disableLight();
+		enableBlend();
+		
+		part.drawNoBind();
+	
+		enableLight();
+		disableBlend();		
+	}
+
 	public static void drawLight(Obj3DPart part,float angle,float x,float y,float z)
 	{
 		if(part == null) return;
@@ -765,6 +784,7 @@ public class Utils {
 		Utils.enableBilinear();
 		float scale = distance*0.5f;
 		if(scale > 1f) scale = 1f;
+		scale = scale *scale;
 		GL11.glPushMatrix();
 		GL11.glScalef(1f,scale,scale);
 		halo.drawNoBind(distance*5,1f,0f,0f);
@@ -780,6 +800,29 @@ public class Utils {
 		disableBlend();
 	}
 
+	static public void drawEntityItem(EntityItem entityItem,double x, double y , double z,float roty,float scale)
+	{
+		if(entityItem == null) return;
+		
+
+
+		entityItem.hoverStart = 0.0f;
+		entityItem.rotationYaw = 0.0f;
+		entityItem.motionX = 0.0;
+		entityItem.motionY = 0.0;
+		entityItem.motionZ =0.0;
+		
+		Render var10 = null;
+		var10 = RenderManager.instance.getEntityRenderObject(entityItem);
+		GL11.glPushMatrix();
+			GL11.glTranslatef((float)x, (float)y, (float)z);
+			GL11.glRotatef(roty, 0, 1, 0);
+			GL11.glScalef(scale, scale, scale);
+			var10.doRender(entityItem,0, 0, 0, 0, 0);	
+		GL11.glPopMatrix();	
+		
+
+	}
     /*
     public float frameTime()
     {

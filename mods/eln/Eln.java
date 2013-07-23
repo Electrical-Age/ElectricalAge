@@ -29,6 +29,7 @@ import mods.eln.electricalfurnace.ElectricalFurnaceElement;
 import mods.eln.electricalfurnace.ElectricalFurnaceRender;
 import mods.eln.electricalgatesource.ElectricalGateSourceDescriptor;
 import mods.eln.electricallightsensor.ElectricalLightSensorDescriptor;
+import mods.eln.electricalmachine.PlateMachineDescriptor;
 import mods.eln.electricalmachine.ElectricalMachineDescriptor;
 import mods.eln.electricalmachine.MaceratorDescriptor;
 import mods.eln.electricalredstoneinput.ElectricalRedstoneInputDescriptor;
@@ -477,6 +478,7 @@ public class Eln {
 		registerExtractor(34);
 		registerCompressor(35);
 		registermagnetiser(36);
+		registerPlateMachine(37);
 		registerAutoMiner(42);
 		registerSolarPannel(48);
 		registerWindTurbine(49);
@@ -603,6 +605,7 @@ public class Eln {
 		recipeMacerator();
 		recipeExtractor();
 		recipeCompressor();
+		recipePlateMachine();
 		recipemagnetiser();
 
 		proxy.registerRenderers();
@@ -1774,7 +1777,46 @@ public class Eln {
 	}
 
 	public RecipesList compressorRecipes = new RecipesList();
+	public RecipesList plateMachineRecipes = new RecipesList();
 
+	void registerPlateMachine(int id) {
+
+		int subId, completId;
+		String name;
+		{
+			subId = 0;
+			name = "50V plate machine";
+
+			PlateMachineDescriptor desc = new PlateMachineDescriptor(
+					name,// String name,
+					obj.getObj("platemachinea"),
+					LVU, 200,// double nominalU,double nominalP,
+					LVU * 1.25,// double maximalU,
+					new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
+					lowVoltageCableDescriptor,// ElectricalCableDescriptor cable
+					plateMachineRecipes);
+
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 4;
+			name = "200V plate machine";
+
+			PlateMachineDescriptor desc = new PlateMachineDescriptor(
+					name,// String name,
+					obj.getObj("platemachinea"),
+					MVU, 400,// double nominalU,double nominalP,
+					MVU * 1.25,// double maximalU,
+					new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
+					meduimVoltageCableDescriptor,// ElectricalCableDescriptor
+													// cable
+					plateMachineRecipes);
+
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+	}
+	
 	void registerCompressor(int id) {
 
 		int subId, completId;
@@ -1783,8 +1825,9 @@ public class Eln {
 			subId = 0;
 			name = "50V compressor";
 
-			ElectricalMachineDescriptor desc = new ElectricalMachineDescriptor(
+			PlateMachineDescriptor desc = new PlateMachineDescriptor(
 					name,// String name,
+					obj.getObj("compressora"),
 					LVU, 200,// double nominalU,double nominalP,
 					LVU * 1.25,// double maximalU,
 					new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
@@ -1798,8 +1841,9 @@ public class Eln {
 			subId = 4;
 			name = "200V compressor";
 
-			ElectricalMachineDescriptor desc = new ElectricalMachineDescriptor(
+			PlateMachineDescriptor desc = new PlateMachineDescriptor(
 					name,// String name,
+					obj.getObj("compressora"),
 					MVU, 400,// double nominalU,double nominalP,
 					MVU * 1.25,// double maximalU,
 					new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
@@ -1810,6 +1854,9 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
+	
+		
+	
 
 	public RecipesList magnetiserRecipes = new RecipesList();
 
@@ -4251,6 +4298,23 @@ public class Eln {
 				1000.0));
 	}
 
+	void recipePlateMachine(){
+		plateMachineRecipes.addRecipe(new Recipe(
+				findItemStack("Cooper ingot", 4),
+				findItemStack("Cooper plate"), 10000.0));
+		compressorRecipes.addRecipe(new Recipe(findItemStack("Plumb ingot", 4),
+				findItemStack("Plumb plate"), 10000.0));
+		plateMachineRecipes.addRecipe(new Recipe(
+				findItemStack("Silicon ingot", 4),
+				findItemStack("Silicon plate"), 10000.0));
+		plateMachineRecipes.addRecipe(new Recipe(findItemStack("Steel ingot", 4),
+				findItemStack("Steel plate"), 10000.0));
+		plateMachineRecipes.addRecipe(new Recipe(new ItemStack(Item.ingotIron, 4,
+				0), findItemStack("Iron plate"), 10000.0));
+		plateMachineRecipes.addRecipe(new Recipe(new ItemStack(Item.ingotGold, 4,
+				0), findItemStack("Gold plate"), 10000.0));		
+	}
+	
 	void recipeCompressor() {
 		compressorRecipes.addRecipe(new Recipe(findItemStack("Coal plate", 4),
 				new ItemStack[] { new ItemStack(Item.diamond) }, 80000.0));
@@ -4260,20 +4324,7 @@ public class Eln {
 
 		compressorRecipes.addRecipe(new Recipe(findItemStack("Coal dust", 4),
 				findItemStack("Coal plate"), 4000.0));
-		compressorRecipes.addRecipe(new Recipe(
-				findItemStack("Cooper ingot", 4),
-				findItemStack("Cooper plate"), 10000.0));
-		compressorRecipes.addRecipe(new Recipe(findItemStack("Plumb ingot", 4),
-				findItemStack("Plumb plate"), 10000.0));
-		compressorRecipes.addRecipe(new Recipe(
-				findItemStack("Silicon ingot", 4),
-				findItemStack("Silicon plate"), 10000.0));
-		compressorRecipes.addRecipe(new Recipe(findItemStack("Steel ingot", 4),
-				findItemStack("Steel plate"), 10000.0));
-		compressorRecipes.addRecipe(new Recipe(new ItemStack(Item.ingotIron, 4,
-				0), findItemStack("Iron plate"), 10000.0));
-		compressorRecipes.addRecipe(new Recipe(new ItemStack(Item.ingotGold, 4,
-				0), findItemStack("Gold plate"), 10000.0));
+
 
 	}
 

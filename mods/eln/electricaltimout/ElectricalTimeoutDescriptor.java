@@ -71,4 +71,26 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor{
 			GL11.glColor3f(1f, 1f, 1f);
 		}
 	}
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		if(type == ItemRenderType.INVENTORY) {
+			GL11.glScalef(2.2f, 2.2f, 2.2f);
+			//GL11.glTranslatef(-0.1f, 0.0f, 0f);
+		}
+		draw(1f);
+	}
+	
 }

@@ -2,8 +2,12 @@ package mods.eln.electricalvumeter;
 
 import java.util.List;
 
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.Eln;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.misc.IFunction;
@@ -81,6 +85,25 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor{
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Display the value of a signal");
+	}
+	
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		if(type == ItemRenderType.INVENTORY) GL11.glRotatef(90, 1f, 0f, 0f);
+		draw(0.0f,1f);
 	}
 	
 }

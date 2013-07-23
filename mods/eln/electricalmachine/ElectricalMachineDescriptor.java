@@ -3,6 +3,8 @@ package mods.eln.electricalmachine;
 import java.util.List;
 
 import mods.eln.electricalcable.ElectricalCableDescriptor;
+import mods.eln.misc.Obj3D;
+import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
 import mods.eln.node.TransparentNodeDescriptor;
@@ -27,6 +29,9 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor{
 	ElectricalCableDescriptor cable;
 	
 	double resistorR;
+	
+	
+
 
 	double boosterEfficiency = 1.0/1.1;
 	double boosterSpeedUp = 1.25 / boosterEfficiency;
@@ -49,6 +54,8 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor{
 		this.maximalP = maximalU*maximalU/resistorR;
 		thermal.setMaximalPower(maximalP);
 		this.recipe = recipe;
+		
+
 		
 	}
 
@@ -91,6 +98,6 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor{
 	
 	void draw(ElectricalMachineRender render,Object handleO,EntityItem inEntity, EntityItem outEntity, float powerFactor)
 	{
-		
+
 	}
 }

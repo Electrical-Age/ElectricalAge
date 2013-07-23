@@ -8,9 +8,12 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.Eln;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.misc.IFunction;
+import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
@@ -40,6 +43,8 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor{
 		if(obj != null){
 			main = obj.getPart("main");
 			rot = obj.getPart("rot");
+			lightPart = obj.getPart("light");
+			
 			onTexture = obj.getAlternativeTexture(obj.getString("onTexture"));
 			offTexture = obj.getAlternativeTexture(obj.getString("offTexture"));
 			if(rot != null){
@@ -49,7 +54,7 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor{
 	}
 	int light;
 	Obj3D obj;
-	Obj3DPart main,rot;
+	Obj3DPart main,rot,lightPart;
 	
 	ResourceLocation onTexture,offTexture;
 	String soundName;
@@ -72,9 +77,33 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor{
 			else GL11.glEnable(GL11.GL_LIGHTING);
 			GL11.glEnable(GL11.GL_CULL_FACE);
 		}
+		if(lightPart != null){
+			Utils.drawLightNoBind(lightPart);
+		}
 	}
 	
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
 	
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		if(type == ItemRenderType.INVENTORY) {
+			GL11.glScalef(1.6f, 1.6f, 1.6f);
+			GL11.glTranslatef(-0.1f, 0.0f, 0f);
+			LRDU.Up.glRotateOnX();
+		}
+		draw(true,0.0f);
+	}
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
