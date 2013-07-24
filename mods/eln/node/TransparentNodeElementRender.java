@@ -6,12 +6,16 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
+import org.omg.CORBA.REBIND;
 
 
 import mods.eln.Eln;
+import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.cable.CableRenderType;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
+import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -147,5 +151,24 @@ public abstract class TransparentNodeElementRender {
 	public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
 
 		return null;
+	}
+	
+	static LRDUMask maskTempDraw = new LRDUMask();
+	
+	public CableRenderType drawCable(Direction side,CableRenderDescriptor render,LRDUMask connection,CableRenderType renderPreProcess)
+	{
+		if(renderPreProcess==null)  renderPreProcess = CableRender.connectionType(tileEntity,connection,side);
+		glCableTransforme(side);
+		render.bindCableTexture();
+		
+		for(LRDU lrdu : LRDU.values())
+		{
+			Utils.setGlColorFromDye(renderPreProcess.otherdry[lrdu.toInt()]);
+			if(connection.get(lrdu) == false) continue;
+			maskTempDraw.set(1<<lrdu.toInt());
+			CableRender.drawCable(render, maskTempDraw,renderPreProcess);
+		}		
+		 
+		return renderPreProcess;
 	}
 }

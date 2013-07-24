@@ -88,7 +88,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		slowProcessList.add(thermalWatchdogProcess);
 		slowProcessList.add(slowProcess);
 		slowRefreshProcess.setObserver(this);
-	//	slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 2, 1));
+		slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 2, 1));
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+
 		return electricalLoad;
 	}
 
@@ -124,7 +124,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+		if(lrdu != LRDU.Down) return 0;
+		if(descriptor.powerLrdu(side, front) == false) return 0;
 		return Node.maskElectricalPower;
 	}
 
@@ -207,6 +208,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 			serialiseItemStack(stream, inventory.getStackInSlot(ElectricalMachineContainer.outSlotId));
 			stream.writeFloat((float) slowRefreshProcess.processState());
 			stream.writeFloat((float) slowRefreshProcess.processStatePerSecond());
+			
+			node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

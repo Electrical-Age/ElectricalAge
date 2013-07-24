@@ -7,9 +7,14 @@ import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
 
+import mods.eln.cable.CableRender;
+import mods.eln.cable.CableRenderType;
 import mods.eln.client.ClientProxy;
 import mods.eln.client.FrameTime;
 import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
+import mods.eln.misc.LRDUMask;
+import mods.eln.misc.Utils;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElement;
 import mods.eln.node.TransparentNodeElementInventory;
@@ -37,14 +42,42 @@ public class ElectricalMachineRender extends TransparentNodeElementRender{
 	}
 
 	Object drawHandle;
+
+
+
+	private CableRenderType connectionType;
+	LRDUMask eConn = new LRDUMask(),maskTemp = new LRDUMask();
 	@Override
 	public void draw() {	
+		
 		processState += processStatePerSecond * FrameTime.getNotCaped();
 		if(processState > 1f) processState = 1f;
 		
+		GL11.glPushMatrix();
 		front.glRotateXnRef();
-		descriptor.draw(this,drawHandle, inEntity, outEntity, powerFactor);
-
+		descriptor.draw(this,drawHandle, inEntity, outEntity, powerFactor,processState);
+		GL11.glPopMatrix();
+		/*
+		if(connectionType == null)
+		{
+			cableRefresh = false;
+			connectionType = CableRender.connectionType(tileEntity,eConn, front.getInverse());
+		}
+				
+		glCableTransforme(front.down());
+		descriptor.getPowerCableRender().bindCableTexture();
+		
+		for(LRDU lrdu : LRDU.values())
+		{
+			Utils.setGlColorFromDye(connectionType.otherdry[lrdu.toInt()]);
+			if(eConn.get(lrdu) == false) continue;
+			if(lrdu != front.down().getLRDUGoingTo(front) && lrdu.inverse() != front.down().getLRDUGoingTo(front)) continue;
+			maskTemp.set(1<<lrdu.toInt());
+			CableRender.drawCable(descriptor.getPowerCableRender(), maskTemp,connectionType);
+		}	*/
+		
+		if(descriptor.drawCable()) connectionType = drawCable(front.down(), descriptor.getPowerCableRender(), eConn, connectionType);
+		
 	}
 	
 	float counter = 0;
@@ -79,6 +112,8 @@ public class ElectricalMachineRender extends TransparentNodeElementRender{
 			outEntity = unserializeItemStackToEntityItem(stream, outEntity);
 			processState = stream.readFloat();
 			processStatePerSecond = stream.readFloat();
+			eConn.deserialize(stream);
+			connectionType = null;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -87,6 +122,7 @@ public class ElectricalMachineRender extends TransparentNodeElementRender{
 	
 	}
 	
+
 	
 	
 

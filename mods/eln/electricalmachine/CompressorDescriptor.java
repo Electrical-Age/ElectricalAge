@@ -1,5 +1,7 @@
 package mods.eln.electricalmachine;
 
+import org.lwjgl.opengl.GL11;
+
 import mods.eln.client.FrameTime;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.electricalmachine.MaceratorDescriptor.MaceratorDescriptorHandle;
@@ -12,9 +14,9 @@ import mods.eln.misc.RecipesList;
 import mods.eln.sim.ThermalLoadInitializer;
 import net.minecraft.entity.item.EntityItem;
 
-public class PlateMachineDescriptor extends ElectricalMachineDescriptor{
+public class CompressorDescriptor extends ElectricalMachineDescriptor{
 
-	public PlateMachineDescriptor(String name, 
+	public CompressorDescriptor(String name, 
 			Obj3D obj,			
 			double nominalU, double nominalP,
 			double maximalU, ThermalLoadInitializer thermal,
@@ -25,47 +27,52 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor{
 		this.obj = obj;
 		if(obj != null){
 			main = obj.getPart("main");
-			rot1 = obj.getPart("rot1");
-			rot2 = obj.getPart("rot2");
+			move = obj.getPart("move");
+			if(move != null){
+				tyOn = move.getFloat("tyon");
+				tyOff = move.getFloat("tyoff");
+			}
 		}		
 	}
-
+	
+	float tyOn,tyOff;
 
 	Obj3D obj;
-	Obj3DPart main,rot1,rot2;
+	Obj3DPart main,move;
 	
-	class PlateMachineDescriptorHandle{
-		float counter = 0;
-		RcInterpolator interpolator = new RcInterpolator(0.5f);
-		float itemCounter = 0;
+	class CompressorDescriptorHandle{
+		RcInterpolator interpolator = new RcInterpolator(0.25f);
+		float itemCounter = 0f;
 	}
 	
 	@Override
 	Object newDrawHandle() {
 		// TODO Auto-generated method stub
-		return new PlateMachineDescriptorHandle();
+		return new CompressorDescriptorHandle();
 	}
 
 
 	@Override
 	void draw(ElectricalMachineRender render,Object handleO,EntityItem inEntity, EntityItem outEntity, float powerFactor,float processState)
 	{
-		PlateMachineDescriptorHandle handle = (PlateMachineDescriptorHandle) handleO;
+		CompressorDescriptorHandle handle = (CompressorDescriptorHandle) handleO;
+		handle.interpolator.setTarget(processState);
+		handle.interpolator.stepGraphic();
+		
+		Utils.drawEntityItem(inEntity, -0.35f, 0.04f, 0.3f, handle.itemCounter, 1f);
+		Utils.drawEntityItem(outEntity, 0.35f, 0.04f, 0.3f, -handle.itemCounter + 139f, 1f);
 		
 		main.draw();
-		rot1.draw(handle.counter, 0f, 0f, -1f);
-		rot2.draw(handle.counter, 0f, 0f, 1f);
+		GL11.glTranslatef(0f, tyOff + (float)Math.sqrt(handle.interpolator.get())*(tyOn-tyOff), 0f);
+		move.draw();
+
 		
-		handle.interpolator.setTarget(powerFactor);
-		handle.interpolator.stepGraphic();
-		handle.counter += FrameTime.get() * handle.interpolator.get() *  360;
-		while(handle.counter >= 360f) handle.counter -= 360;
-		
+
+
 		handle.itemCounter += FrameTime.get() *  90;
 		while(handle.itemCounter >= 360f) handle.itemCounter -= 360;
 				
-		Utils.drawEntityItem(inEntity, -0.35f, 0.1f, 0f, handle.itemCounter, 1f);
-		Utils.drawEntityItem(outEntity, 0.35f, 0.1f, 0f, -handle.itemCounter + 139f, 1f);
+
 	
 	}
 	

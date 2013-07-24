@@ -2,7 +2,10 @@ package mods.eln.electricalmachine;
 
 import java.util.List;
 
+import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Recipe;
@@ -18,6 +21,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
 public class ElectricalMachineDescriptor extends TransparentNodeDescriptor{
+
+
 
 	public RecipesList recipe = new  RecipesList();
 
@@ -96,8 +101,26 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor{
 		return null;
 	}
 	
-	void draw(ElectricalMachineRender render,Object handleO,EntityItem inEntity, EntityItem outEntity, float powerFactor)
+	void draw(ElectricalMachineRender render,Object handleO,EntityItem inEntity, EntityItem outEntity, float powerFactor,float processState)
 	{
 
 	}
+	
+	
+	public boolean powerLrdu(Direction side,Direction front)
+	{
+		return true;
+	}
+	
+	public boolean drawCable()
+	{
+		return false;
+	}
+	
+	CableRenderDescriptor getPowerCableRender()
+	{
+		return null;
+	}
+
+	
 }

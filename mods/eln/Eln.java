@@ -29,6 +29,8 @@ import mods.eln.electricalfurnace.ElectricalFurnaceElement;
 import mods.eln.electricalfurnace.ElectricalFurnaceRender;
 import mods.eln.electricalgatesource.ElectricalGateSourceDescriptor;
 import mods.eln.electricallightsensor.ElectricalLightSensorDescriptor;
+import mods.eln.electricalmachine.CompressorDescriptor;
+import mods.eln.electricalmachine.MagnetizerDescriptor;
 import mods.eln.electricalmachine.PlateMachineDescriptor;
 import mods.eln.electricalmachine.ElectricalMachineDescriptor;
 import mods.eln.electricalmachine.MaceratorDescriptor;
@@ -1825,7 +1827,7 @@ public class Eln {
 			subId = 0;
 			name = "50V compressor";
 
-			PlateMachineDescriptor desc = new PlateMachineDescriptor(
+			CompressorDescriptor desc = new CompressorDescriptor(
 					name,// String name,
 					obj.getObj("compressora"),
 					LVU, 200,// double nominalU,double nominalP,
@@ -1841,7 +1843,7 @@ public class Eln {
 			subId = 4;
 			name = "200V compressor";
 
-			PlateMachineDescriptor desc = new PlateMachineDescriptor(
+			CompressorDescriptor desc = new CompressorDescriptor(
 					name,// String name,
 					obj.getObj("compressora"),
 					MVU, 400,// double nominalU,double nominalP,
@@ -1868,8 +1870,9 @@ public class Eln {
 			subId = 0;
 			name = "50V magnetizer";
 
-			ElectricalMachineDescriptor desc = new ElectricalMachineDescriptor(
+			MagnetizerDescriptor desc = new MagnetizerDescriptor(
 					name,// String name,
+					obj.getObj("magnetizera"),
 					LVU, 200,// double nominalU,double nominalP,
 					LVU * 1.25,// double maximalU,
 					new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
@@ -1883,8 +1886,9 @@ public class Eln {
 			subId = 4;
 			name = "200V magnetizer";
 
-			ElectricalMachineDescriptor desc = new ElectricalMachineDescriptor(
+			MagnetizerDescriptor desc = new MagnetizerDescriptor(
 					name,// String name,
+					obj.getObj("magnetizera"),
 					MVU, 400,// double nominalU,double nominalP,
 					MVU * 1.25,// double maximalU,
 					new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
@@ -4423,57 +4427,99 @@ public class Eln {
 	}
 
 	void recipeMachine() {
-		GameRegistry.addRecipe(findItemStack("50V macerator", 1), "IRI", "FMF",
-				"IcI", Character.valueOf('M'), findItemStack("Machine block"),
+		GameRegistry.addRecipe(findItemStack("50V macerator", 1),
+				"IRI",
+				"FMF",
+				"IcI",
+				Character.valueOf('M'), findItemStack("Machine block"),
 				Character.valueOf('c'), findItemStack("Low voltage cable"),
 				Character.valueOf('F'), new ItemStack(Item.flint),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron),
 				Character.valueOf('R'), new ItemStack(Item.redstone));
-		GameRegistry.addRecipe(findItemStack("200V macerator", 1), "ICI",
-				"DMD", "IcI", Character.valueOf('M'),
+		GameRegistry.addRecipe(findItemStack("200V macerator", 1), 
+				"ICI",
+				"DMD",
+				"IcI", Character.valueOf('M'),
 				findItemStack("Advanced machine block"),
 				Character.valueOf('C'), findItemStack("Advanced chip"),
 				Character.valueOf('c'), findItemStack("Medium voltage cable"),
 				Character.valueOf('D'), new ItemStack(Item.diamond),
 				Character.valueOf('I'), findItemStack("Steel ingot"));
 
-		GameRegistry.addRecipe(findItemStack("50V extractor", 1), "IRI", "FMF",
-				"IcI", Character.valueOf('M'), findItemStack("Machine block"),
+		GameRegistry.addRecipe(findItemStack("50V extractor", 1), 
+				"IRI",
+				"FMF",
+				"IcI",
+				Character.valueOf('M'), findItemStack("Machine block"),
 				Character.valueOf('c'), findItemStack("Low voltage cable"),
 				Character.valueOf('F'), new ItemStack(Item.dyePowder, 1, 4),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron),
 				Character.valueOf('R'), new ItemStack(Item.redstone));
-		GameRegistry.addRecipe(findItemStack("200V extractor", 1), "ICI",
-				"DMD", "IcI", Character.valueOf('M'),
+		GameRegistry.addRecipe(findItemStack("200V extractor", 1),
+				"ICI",
+				"DMD",
+				"IcI", Character.valueOf('M'),
 				findItemStack("Advanced machine block"),
 				Character.valueOf('C'), findItemStack("Advanced chip"),
 				Character.valueOf('c'), findItemStack("Medium voltage cable"),
 				Character.valueOf('D'), new ItemStack(Item.dyePowder, 1, 4),
 				Character.valueOf('I'), findItemStack("Steel ingot"));
 
-		GameRegistry.addRecipe(findItemStack("50V compressor", 1), "IRI",
-				"FMF", "IcI", Character.valueOf('M'),
-				findItemStack("Machine block"), Character.valueOf('c'),
-				findItemStack("Low voltage cable"), Character.valueOf('F'),
-				findItemStack("Iron plate"), Character.valueOf('I'),
-				new ItemStack(Item.ingotIron), Character.valueOf('R'),
-				new ItemStack(Item.redstone));
-		GameRegistry.addRecipe(findItemStack("200V compressor", 1), "ICI",
-				"DMD", "IcI", Character.valueOf('M'),
+		GameRegistry.addRecipe(findItemStack("50V compressor", 1),
+				"IRI",
+				"FMF",
+				"IcI",
+				Character.valueOf('M'),findItemStack("Machine block"), 
+				Character.valueOf('c'),findItemStack("Low voltage cable"), 
+				Character.valueOf('F'),findItemStack("Iron plate"),
+				Character.valueOf('I'),new ItemStack(Item.ingotIron),
+				Character.valueOf('R'),new ItemStack(Item.redstone));
+		GameRegistry.addRecipe(findItemStack("200V compressor", 1),
+				"ICI",
+				"DMD",
+				"IcI",
+				Character.valueOf('M'),
 				findItemStack("Advanced machine block"),
 				Character.valueOf('C'), findItemStack("Advanced chip"),
 				Character.valueOf('c'), findItemStack("Medium voltage cable"),
 				Character.valueOf('D'), findItemStack("Steel plate"),
 				Character.valueOf('I'), findItemStack("Steel ingot"));
+		
+		
+		GameRegistry.addRecipe(findItemStack("50V plate machine", 1),
+				"IRI",
+				"IMI",
+				"IcI",
+				Character.valueOf('M'),findItemStack("Machine block"), 
+				Character.valueOf('c'),findItemStack("Low voltage cable"), 
+				Character.valueOf('F'),findItemStack("Iron plate"),
+				Character.valueOf('I'),new ItemStack(Item.ingotIron),
+				Character.valueOf('R'),new ItemStack(Item.redstone));
+		
+		GameRegistry.addRecipe(findItemStack("200V plate machine", 1),
+				"DCD",
+				"DMD",
+				"DcD",
+				Character.valueOf('M'),findItemStack("Advanced machine block"),
+				Character.valueOf('C'), findItemStack("Advanced chip"),
+				Character.valueOf('c'), findItemStack("Medium voltage cable"),
+				Character.valueOf('D'), findItemStack("Steel plate"),
+				Character.valueOf('I'), findItemStack("Steel ingot"));
 
-		GameRegistry.addRecipe(findItemStack("50V magnetizer", 1), "IRI",
-				"cMc", "IcI", Character.valueOf('M'),
+		GameRegistry.addRecipe(findItemStack("50V magnetizer", 1),
+				"IRI",
+				"cMc",
+				"IcI",
+				Character.valueOf('M'),
 				findItemStack("Machine block"), Character.valueOf('c'),
 				findItemStack("Low voltage cable"), Character.valueOf('I'),
 				new ItemStack(Item.ingotIron), Character.valueOf('R'),
 				new ItemStack(Item.redstone));
-		GameRegistry.addRecipe(findItemStack("200V magnetizer", 1), "ICI",
-				"cMc", "IcI", Character.valueOf('M'),
+		GameRegistry.addRecipe(findItemStack("200V magnetizer", 1),
+				"ICI",
+				"cMc",
+				"IcI",
+				Character.valueOf('M'),
 				findItemStack("Advanced machine block"),
 				Character.valueOf('C'), findItemStack("Advanced chip"),
 				Character.valueOf('c'), findItemStack("Medium voltage cable"),
