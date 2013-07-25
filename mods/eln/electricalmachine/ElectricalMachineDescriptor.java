@@ -101,6 +101,8 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor{
 		return null;
 	}
 	
+	Object defaultHandle = null;
+	
 	void draw(ElectricalMachineRender render,Object handleO,EntityItem inEntity, EntityItem outEntity, float powerFactor,float processState)
 	{
 
@@ -122,5 +124,29 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor{
 		return null;
 	}
 
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
 	
+	
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		// TODO Auto-generated method stub
+		draw(null, getDefaultHandle(), null, null, 0f, 0f);
+	}
+	
+	
+	Object getDefaultHandle()
+	{
+		if(defaultHandle == null) defaultHandle = newDrawHandle();
+		return defaultHandle;
+	}
 }

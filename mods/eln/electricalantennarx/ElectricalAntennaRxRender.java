@@ -54,10 +54,9 @@ public class ElectricalAntennaRxRender extends TransparentNodeElementRender{
 			Utils.setGlColorFromDye(connectionType.otherdry[lrdu.toInt()]);
 			if(lrduConnection.get(lrdu) == false) continue;
 			maskTemp.set(1<<lrdu.toInt());
-			if(lrdu == rot.left())
-				CableRender.drawCable( descriptor.cable.render, maskTemp,connectionType);
-			else if(lrdu == rot.right())
-				CableRender.drawCable( Eln.instance.signalCableDescriptor.render, maskTemp,connectionType);
+			
+			Direction side = front.getInverse().applyLRDU(lrdu);
+			CableRender.drawCable(getCableRender(side,side.getLRDUGoingTo(front.getInverse())), maskTemp,connectionType);
 		}
 	}
 	

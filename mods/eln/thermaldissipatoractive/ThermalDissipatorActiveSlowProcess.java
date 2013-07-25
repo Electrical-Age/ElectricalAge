@@ -15,6 +15,10 @@ public class ThermalDissipatorActiveSlowProcess implements IProcess{
 		double poweredFactor = dissipator.positiveLoad.getRpPower() / descriptor.electricalNominalP;
 		double thermalRp = 1/(1/descriptor.thermalRp + poweredFactor/(descriptor.electricalToThermalRp));
 		dissipator.thermalLoad.setRp(thermalRp);
+		
+		
+		if(Math.abs(dissipator.lastPowerFactor - (float) (poweredFactor)) > 0.2f)
+			dissipator.needPublish();
 	}
 
 }

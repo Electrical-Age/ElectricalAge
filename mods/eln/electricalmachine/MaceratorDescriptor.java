@@ -10,6 +10,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.RecipesList;
+import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.sim.ThermalLoadInitializer;
 
@@ -23,17 +24,17 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor{
 		obj = Eln.obj.getObj(modelName);
 		if(obj != null)
 		{
-			rouleau1 = obj.getPart("rouleau1");
-			rouleau2 = obj.getPart("rouleau2");
+			rot1 = obj.getPart("rot1");
+			rot2 = obj.getPart("rot2");
 			main = obj.getPart("main");
 		}
 
 	}
 	Obj3D obj;
-	Obj3DPart main,rouleau1,rouleau2;		
+	Obj3DPart main,rot1,rot2;		
 
 	class MaceratorDescriptorHandle{
-		float counter = 0;
+		float counter = 0,itemCounter = 0;
 		RcInterpolator interpolator = new RcInterpolator(0.5f);
 	}
 	@Override
@@ -46,21 +47,27 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor{
 		MaceratorDescriptorHandle handle = (MaceratorDescriptorHandle) handleO;
 	
 		main.draw();
-		rouleau1.draw(handle.counter, 1f, 0f, 0f);
-		rouleau2.draw(handle.counter, -1f, 0f, 0f);
+		rot1.draw(handle.counter, 0f, 0f, -1f);
+		rot2.draw(handle.counter, 0f, 0f, 1f);
 		
 		handle.interpolator.setTarget(powerFactor);
 		handle.interpolator.stepGraphic();
-		handle.counter += FrameTime.get() * handle.interpolator.get() *  360;
+		handle.counter += FrameTime.get() * handle.interpolator.get() *  180;
 		while(handle.counter >= 360f) handle.counter -= 360;
 		
-	
+		handle.itemCounter += FrameTime.get() *  90;
+		while(handle.itemCounter >= 360f) handle.itemCounter -= 360;
+				
+		GL11.glScalef(0.7f, 0.7f, 0.7f);
+		Utils.drawEntityItem(inEntity, 0.0, 0.4f, 0f, handle.itemCounter, 1f);	
+		Utils.drawEntityItem(outEntity, 0.0, -0.6f, 0f, 130 + handle.itemCounter, 1f);	
 	}
 	
-	/*
 	
 	@Override
 	public boolean powerLrdu(Direction side, Direction front) {
 		return side != front && side != front.getInverse();
-	}*/
+	}
+	
+
 }

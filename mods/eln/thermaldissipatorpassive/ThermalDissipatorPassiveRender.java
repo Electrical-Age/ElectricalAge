@@ -15,8 +15,9 @@ public class ThermalDissipatorPassiveRender extends TransparentNodeElementRender
 
 	@Override
 	public void draw() {
-		// TODO Auto-generated method stub
+		front.glRotateXnRef();
 		
+		descriptor.draw();
 	}
 
 }

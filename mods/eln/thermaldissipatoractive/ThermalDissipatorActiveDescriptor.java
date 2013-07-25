@@ -6,6 +6,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import mods.eln.Eln;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
+import mods.eln.misc.Obj3D;
+import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.TransparentNodeDescriptor;
@@ -21,9 +23,13 @@ import mods.eln.thermaldissipatorpassive.ThermalDissipatorPassiveRender;
 public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor  implements ITemperatureWatchdogDescriptor ,IThermalDestructorDescriptor{
 	
 	double nominalP, nominalT;
+	private Obj3D obj;
+	private Obj3DPart main;
+	private Obj3DPart rot;
 	
 	public ThermalDissipatorActiveDescriptor(
 			String name, 
+			Obj3D obj,
 			double nominalElectricalU,double electricalNominalP,
 			double nominalElectricalCoolingPower,
 			ElectricalCableDescriptor cableDescriptor,
@@ -46,6 +52,11 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
 		this.warmLimit = warmLimit;
 		this.nominalP = nominalP;
 		this.nominalT = nominalT;
+		this.obj = obj;
+		if(obj != null){
+			main = obj.getPart("main");
+			rot = obj.getPart("rot");
+		}
 	}
 	double warmLimit, coolLimit;
 	double nominalElectricalU;
@@ -68,6 +79,28 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
 	}
 	
 	
+	void draw(float alpha)
+	{
+		if(main != null) main.draw();
+		if(rot != null) rot.draw(alpha, 0f, 1f, 0f);
+	}
+	
+	
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		draw(0f);
+	}
 
 	@Override
 	public double getThermalDestructionMax() {

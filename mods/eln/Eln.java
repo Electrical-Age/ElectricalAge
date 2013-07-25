@@ -1715,7 +1715,7 @@ public class Eln {
 			name = "50V macerator";
 
 			MaceratorDescriptor desc = new MaceratorDescriptor(name,
-					"macerator50V", LVU, 200,// double nominalU,double nominalP,
+					"maceratora", LVU, 200,// double nominalU,double nominalP,
 					LVU * 1.25,// double maximalU,
 					new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
 					lowVoltageCableDescriptor,// ElectricalCableDescriptor cable
@@ -1729,7 +1729,7 @@ public class Eln {
 			name = "200V macerator";
 
 			MaceratorDescriptor desc = new MaceratorDescriptor(name,
-					"macerator50V", MVU, 400,// double nominalU,double nominalP,
+					"maceratora", MVU, 400,// double nominalU,double nominalP,
 					MVU * 1.25,// double maximalU,
 					new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
 					meduimVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -2853,7 +2853,9 @@ public class Eln {
 			name = "Small passive thermal dissipator";
 
 			ThermalDissipatorPassiveDescriptor desc = new ThermalDissipatorPassiveDescriptor(
-					name, 200, -100,// double warmLimit,double coolLimit,
+					name,
+					obj.getObj("passivethermaldissipatora"),
+					200, -100,// double warmLimit,double coolLimit,
 					250, 30,// double nominalP,double nominalT,
 					10, 4// double nominalTao,double nominalConnectionDrop
 
@@ -2867,7 +2869,9 @@ public class Eln {
 			name = "Small active thermal dissipator";
 
 			ThermalDissipatorActiveDescriptor desc = new ThermalDissipatorActiveDescriptor(
-					name, LVU, 50,// double nominalElectricalU,double
+					name, 
+					obj.getObj("activethermaldissipatora"),
+					LVU, 50,// double nominalElectricalU,double
 									// electricalNominalP,
 					800,// double nominalElectricalCoolingPower,
 					lowVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -4269,12 +4273,15 @@ public class Eln {
 	}
 
 	void recipeMacerator() {
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("Tin ore"),
-				new ItemStack[] { findItemStack("Tin dust", 2) }, 2000.0));
+
 		maceratorRecipes.addRecipe(new Recipe(findItemStack("Cooper ore"),
 				new ItemStack[] { findItemStack("Cooper dust", 2) }, 2000.0));
+		
+		
 		maceratorRecipes.addRecipe(new Recipe(new ItemStack(Block.oreIron),
 				new ItemStack[] { findItemStack("Iron dust", 2) }, 2000.0));
+		
+		
 		maceratorRecipes
 				.addRecipe(new Recipe(new ItemStack(Block.oreGold),
 						new ItemStack[] { new ItemStack(Item.goldNugget, 18) },

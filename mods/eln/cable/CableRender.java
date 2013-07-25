@@ -278,12 +278,18 @@ public class CableRender {
 				if(otherTileEntity instanceof NodeBlockEntity)
 				{				
 //					Direction otherDirection = side.getInverse();
-					Direction otherDirection = side.applyLRDU(lrdu).getInverse();
+					/*Direction otherDirection = side.applyLRDU(lrdu).getInverse();
 					LRDU otherLRDU = otherDirection.getLRDUGoingTo(side.getInverse());
 					CableRenderDescriptor render = element.getCableRender(lrdu);
 					NodeBlockEntity otherNode = ((NodeBlockEntity)otherTileEntity);
-					CableRenderDescriptor otherRender = otherNode.getCableRender(side.getInverse(), lrdu.inverse());
-					
+					CableRenderDescriptor otherRender = otherNode.getCableRender(side.getInverse(), lrdu//.inverse());
+				*/	
+				
+					Direction otherDirection = side.getInverse();
+					LRDU otherLRDU = otherDirection.getLRDUGoingTo(sideLrdu).inverse();
+					CableRenderDescriptor render = element.getCableRender(lrdu);
+					NodeBlockEntity otherNode =  ((NodeBlockEntity)otherTileEntity);
+					CableRenderDescriptor otherRender = otherNode.getCableRender(otherDirection, otherLRDU);
 					if(otherRender == null)
 					{
 						connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend;
