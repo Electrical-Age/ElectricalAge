@@ -83,10 +83,10 @@ public class TransformerElement extends TransparentNodeElement{
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
 		if(lrdu != LRDU.Down) return null;
-		if(side == front) return positivePrimaryLoad;
-		if(side == front.back()) return positiveSecondaryLoad;
-		if(side == front.left() && ! grounded) return negativePrimaryLoad;
-		if(side == front.right() && ! grounded) return negativeSecondaryLoad;
+		if(side == front.left()) return positivePrimaryLoad;
+		if(side == front.right()) return positiveSecondaryLoad;
+		if(side == front && ! grounded) return negativePrimaryLoad ;
+		if(side == front.back() && ! grounded) return negativeSecondaryLoad;
 		return null;
 	}
 
@@ -99,10 +99,10 @@ public class TransformerElement extends TransparentNodeElement{
 	public int getConnectionMask(Direction side, LRDU lrdu) {
 		if(lrdu == lrdu.Down)
 		{
-			if(side == front) return Node.maskElectricalPower;	
-			if(side == front.back()) return Node.maskElectricalPower;	
-			if(side == front.left() && ! grounded) return Node.maskElectricalPower;
-			if(side == front.right() && ! grounded) return Node.maskElectricalPower;
+			if(side == front.left() ) return Node.maskElectricalPower;	
+			if(side == front.right()) return Node.maskElectricalPower;	
+			if(side == front&& ! grounded) return Node.maskElectricalPower;
+			if(side == front.back() && ! grounded) return Node.maskElectricalPower;
 		}
 		return Node.maskThermal;
 	}
@@ -231,6 +231,7 @@ public class TransformerElement extends TransparentNodeElement{
     public void inventoryChange(IInventory inventory)
     {
     	computeInventory();
+    	needPublish();
     }
 	
 	@Override
@@ -285,6 +286,8 @@ public class TransformerElement extends TransparentNodeElement{
 			else stream.writeByte(inventory.getStackInSlot(0).stackSize);
 			if(inventory.getStackInSlot(1) == null) stream.writeByte(0);
 			else stream.writeByte(inventory.getStackInSlot(1).stackSize);
+			
+			Utils.serialiseItemStack(stream, inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

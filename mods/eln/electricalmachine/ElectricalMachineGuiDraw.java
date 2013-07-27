@@ -9,6 +9,7 @@ import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.GuiVerticalTrackBarHeat;
+import mods.eln.gui.GuiVerticalWorkingZoneBar;
 import mods.eln.gui.HelperStdContainer;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
@@ -42,14 +43,30 @@ public class ElectricalMachineGuiDraw extends GuiContainerEln {
         this.render = render;     
     }
     
+    GuiVerticalWorkingZoneBar voltageBar;
 
-
-
+	@Override
+	public void initGui() {
+		// TODO Auto-generated method stub
+		super.initGui();
+		
+		
+		
+		voltageBar = new GuiVerticalWorkingZoneBar(176-1 , 8, 20, 122-18, helper);
+		voltageBar.setMinMax(0f,1.3f);
+		voltageBar.addZone(0.6f, 0xFF0000FF);
+		voltageBar.addZone(0.3f, 0xFF0066FF);
+		voltageBar.addZone(0.2f, 0xFF00FF00);
+		voltageBar.addZone(0.1f, 0xFFFF6600);
+		voltageBar.addZone(0.1f, 0xFFFF0000);
+		
+		helper.add(voltageBar);
+	}
 
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new HelperStdContainer(this);
+		return new GuiHelperContainer(this, 176+28, 122,8,40);
 	}
 	
 	
@@ -59,7 +76,10 @@ public class ElectricalMachineGuiDraw extends GuiContainerEln {
 		super.postDraw(f, x, y);
 		
 	//	drawTexturedModalRectEln(94, 33,177,14 , (int) (22*render.processState), 15);
-		((HelperStdContainer)helper).drawProcess(94, 33,render.processState);
+		((GuiHelperContainer)helper).drawProcess(94, 33-20-2,render.processState);
 		//draw
+		
+		voltageBar.setComment(0,Utils.plotVolt("Voltage supply :",render.UFactor*render.descriptor.nominalU));
+		voltageBar.setValue(render.UFactor);
 	}
 }

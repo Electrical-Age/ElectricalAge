@@ -210,4 +210,10 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 		}
 				
 	}
+	
+	@Override
+	public void translate(int x, int y) {
+		this.xPosition += x;
+		this.yPosition += y;
+	}
 }

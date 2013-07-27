@@ -6,8 +6,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import mods.eln.client.ClientProxy;
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.heatfurnace.HeatFurnaceElement;
+import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Direction;
+import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.Utils;
 import mods.eln.node.Node;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
@@ -16,6 +20,7 @@ import mods.eln.node.TransparentNodeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 
 import org.lwjgl.opengl.GL11;
 
@@ -23,10 +28,10 @@ import org.lwjgl.opengl.GL11;
 public class TransformerRender extends TransparentNodeElementRender{
 
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
-	
+	TransformerDescriptor descriptor;
 	public TransformerRender(TransparentNodeEntity tileEntity,TransparentNodeDescriptor descriptor) {
 		super(tileEntity,descriptor);
-		// TODO Auto-generated constructor stub
+		this.descriptor = (TransformerDescriptor) descriptor;
 	}
 
 	@Override
@@ -34,24 +39,7 @@ public class TransformerRender extends TransparentNodeElementRender{
 		// TODO Auto-generated method stub
 		
 		front.glRotateXnRef();
-		GL11.glPointSize(20);
-		/*
-		double[] vector = new double[3];
-		vector[0] = 0;
-		vector[1] = 0;		
-		vector[2] = 0;		
-		front.applyTo(vector, 0.4);
-		
-		GL11.glBegin(GL11.GL_POINTS);	
-			GL11.glColor4d(1.0, 1.0, 1.0, 1.0);
-			GL11.glVertex3d(0,0,0);
-			GL11.glVertex3d(vector[0],vector[1],vector[2]);
-		GL11.glEnd();	*/
-		GL11.glEnable(GL11.GL_LIGHTING);
-	//	Minecraft.getMinecraft().mcProfiler.startSection("monkey");
-		
-	//	ClientProxy.masterCubeObj.draw();
-	//	Minecraft.getMinecraft().mcProfiler.endSection();
+		descriptor.draw(feroPart, primaryStackSize, secondaryStackSize);
 	}
 
 	
@@ -63,6 +51,8 @@ public class TransformerRender extends TransparentNodeElementRender{
 	
 	byte primaryStackSize,secondaryStackSize;
 	
+	
+	Obj3DPart feroPart;
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -70,7 +60,12 @@ public class TransformerRender extends TransparentNodeElementRender{
 		try {
 			primaryStackSize = stream.readByte();
 			secondaryStackSize = stream.readByte();
-				
+			ItemStack feroStack = Utils.unserialiseItemStack(stream);
+			FerromagneticCoreDescriptor feroDesc = (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(feroStack,FerromagneticCoreDescriptor.class);
+			if(feroDesc == null)
+				feroPart = null;
+			else
+				feroPart = feroDesc.feroPart;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -54,4 +54,11 @@ public class GuiButtonEln extends GuiButton implements IGuiObject{
 		// TODO Auto-generated method stub
 		
 	}
+	
+	
+	@Override
+	public void translate(int x, int y) {
+		this.xPosition += x;
+		this.yPosition += y;
+	}
 }

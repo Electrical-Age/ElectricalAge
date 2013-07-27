@@ -104,5 +104,9 @@ public class GuiVerticalProgressBar  extends Gui implements IGuiObject {
 		// TODO Auto-generated method stub
 		return value;
 	}
-
+	@Override
+	public void translate(int x, int y) {
+		this.xPosition += x;
+		this.yPosition += y;
+	}
 }

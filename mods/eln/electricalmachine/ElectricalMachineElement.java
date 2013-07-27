@@ -208,8 +208,9 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 			serialiseItemStack(stream, inventory.getStackInSlot(ElectricalMachineContainer.outSlotId));
 			stream.writeFloat((float) slowRefreshProcess.processState());
 			stream.writeFloat((float) slowRefreshProcess.processStatePerSecond());
-			
 			node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
+			stream.writeFloat((float)(electricalLoad.Uc / descriptor.nominalU));
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

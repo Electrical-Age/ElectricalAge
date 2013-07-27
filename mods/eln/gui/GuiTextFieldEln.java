@@ -132,6 +132,10 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject{
 			helper.drawHoveringText(comment, x, y, Minecraft.getMinecraft().fontRenderer);
 				
 	}
-	
+	@Override
+	public void translate(int x, int y) {
+		this.xPos += x;
+		this.yPos += y;
+	}
 
 }

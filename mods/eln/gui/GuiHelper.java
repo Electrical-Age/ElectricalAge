@@ -108,10 +108,12 @@ public class GuiHelper {
 		
 	}*/
 
-	void add(IGuiObject o)
+	public void add(IGuiObject o)
 	{
+		o.translate(screen.width/2 -xSize/2 , screen.height/2 -ySize/2);
 		objectList.add(o);
 	}
+	
 	ArrayList<IGuiObject> objectList = new ArrayList<IGuiObject>();
 	void draw(int x, int y, float f)
 	{

@@ -63,7 +63,14 @@ public class GenericItemUsingDamageDescriptor {
 		if((stack.getItem() instanceof GenericItemUsingDamage) == false) return null;
 		return ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>)stack.getItem()).getDescriptor(stack);
 	}
-	
+	public static GenericItemUsingDamageDescriptor getDescriptor(
+			ItemStack stack,
+			Class extendClass) {
+		GenericItemUsingDamageDescriptor desc = getDescriptor(stack);
+		if(desc == null) return null;
+		if(extendClass.isAssignableFrom(desc.getClass()) == false) return null;
+		return desc;
+	}
 	public void setParent(Item item,int damage)
 	{
 		this.parentItem = item;

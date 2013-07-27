@@ -27,10 +27,10 @@ public class ElectricalMachineContainer extends BasicContainer implements INodeC
 	public static final int inSlotId = 0,outSlotId = 1,boosterSlotId = 2;
 	public ElectricalMachineContainer(Node node,EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new SlotWithSkin(inventory,inSlotId,70,32,SlotSkin.medium),
-				new SlotWithSkin(inventory,outSlotId,130,32,SlotSkin.big),
+				new SlotWithSkin(inventory,inSlotId,70,12,SlotSkin.medium),
+				new SlotWithSkin(inventory,outSlotId,130,12,SlotSkin.big),
 
-				new GenericItemUsingDamageSlot(inventory,boosterSlotId,20,32,5,
+				new GenericItemUsingDamageSlot(inventory,boosterSlotId,20,12,5,
 												MachineBoosterDescriptor.class,
 												SlotSkin.medium,
 												new String[]{"Booster slot"}),
@@ -50,7 +50,7 @@ public class ElectricalMachineContainer extends BasicContainer implements INodeC
 	@Override
 	public int getRefreshRateDivider() {
 		// TODO Auto-generated method stub
-		return 5;
+		return 1;
 	}
 
 

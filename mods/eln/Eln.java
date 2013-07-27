@@ -1494,7 +1494,7 @@ public class Eln {
 			subId = 0;
 			name = "Transformer";
 
-			TransformerDescriptor desc = new TransformerDescriptor(name);
+			TransformerDescriptor desc = new TransformerDescriptor(name,obj.getObj("transformator"),obj.getObj("feromagneticcorea"));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -2367,7 +2367,7 @@ public class Eln {
 			subId = 0;
 			completId = subId + (id << 6);
 			element = new FerromagneticCoreDescriptor(
-					"Cheap ferromagnetic core",// iconId, name,
+					"Cheap ferromagnetic core",obj.getObj("feromagneticcorea"),// iconId, name,
 					10);
 			sharedItem.addElement(completId, element);
 		}
@@ -2375,7 +2375,7 @@ public class Eln {
 			subId = 1;
 			completId = subId + (id << 6);
 			element = new FerromagneticCoreDescriptor(
-					"Average ferromagnetic core",// iconId, name,
+					"Average ferromagnetic core",obj.getObj("feromagneticcorea"),// iconId, name,
 					4);
 			sharedItem.addElement(completId, element);
 		}
@@ -2383,7 +2383,7 @@ public class Eln {
 			subId = 2;
 			completId = subId + (id << 6);
 			element = new FerromagneticCoreDescriptor(
-					"Optimal ferromagnetic core",// iconId, name,
+					"Optimal ferromagnetic core",obj.getObj("feromagneticcorea"),// iconId, name,
 					1);
 			sharedItem.addElement(completId, element);
 		}

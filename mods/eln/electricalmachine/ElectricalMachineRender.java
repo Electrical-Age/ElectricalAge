@@ -99,7 +99,7 @@ public class ElectricalMachineRender extends TransparentNodeElementRender{
 	EntityItem inEntity,outEntity;
 	float powerFactor,processState,processStatePerSecond;
 	
-	
+	float UFactor;
 
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
@@ -113,6 +113,7 @@ public class ElectricalMachineRender extends TransparentNodeElementRender{
 			processState = stream.readFloat();
 			processStatePerSecond = stream.readFloat();
 			eConn.deserialize(stream);
+			UFactor = stream.readFloat();
 			connectionType = null;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
