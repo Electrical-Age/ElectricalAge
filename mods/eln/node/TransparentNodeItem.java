@@ -111,6 +111,9 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 		case ENTITY:
 			GL11.glTranslatef(0.00f, 0.3f, 0.0f);
 			break;
+		case EQUIPPED_FIRST_PERSON:
+			GL11.glTranslatef(0.50f, 1, 0.5f);
+			break;
 		case EQUIPPED:
 			GL11.glTranslatef(0.50f, 1, 0.5f);
 			break;

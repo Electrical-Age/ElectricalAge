@@ -35,59 +35,22 @@ public class ElectricalRedstoneOutputRender extends SixNodeElementRender{
 	@Override
 	public void draw() {
 		super.draw();
-		ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
-/*
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_LIGHTING);
 
-
-		GL11.glPointSize(20);
-		
-	
-		
-		double[] vector = new double[2];
-		vector[0] = 0;
-		vector[1] = 0;		
-		front.inverse().applyTo(vector, 0.4);
-		
-		GL11.glBegin(GL11.GL_POINTS);	
-		GL11.glColor3f(1f-factor, factor, 0);
-			GL11.glVertex3d(0.07,vector[1],vector[0]);
-		GL11.glEnd();
-		
-
-		
-		GL11.glEnable(GL11.GL_LIGHTING);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);		
-		
-		*/
-		GL11.glPushMatrix();
-		//front.glRotateOnX();
-		float ff = 0.05f;
-		factorFiltred = factor * ff + factorFiltred * (1f-ff);
-		descriptor.draw(factorFiltred);
-		GL11.glPopMatrix();
+		descriptor.draw(redOutput);
 	}
 
-	boolean boot = true;
+	int redOutput;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
-			Byte b;
-			b = stream.readByte();
-			front = LRDU.fromInt((b>>4)&3);
-			factor = stream.readFloat();
+			redOutput = stream.readByte();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
-		if(boot)
-		{
-			factorFiltred = factor;
-			boot = false;
-		}
+
 	}
 	
 	@Override

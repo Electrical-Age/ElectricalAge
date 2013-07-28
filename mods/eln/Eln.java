@@ -1333,7 +1333,7 @@ public class Eln {
 			ElectricalRedstoneInputDescriptor desc;
 			subId = 0;
 			name = "Redstone to voltage converter";
-			desc = new ElectricalRedstoneInputDescriptor(name, "miaou");
+			desc = new ElectricalRedstoneInputDescriptor(name, obj.getObj("redtoele"));
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -1342,7 +1342,7 @@ public class Eln {
 			subId = 1;
 			name = "Voltage to redstone converter";
 			desc = new ElectricalRedstoneOutputDescriptor(name,
-					"miaou");
+					 obj.getObj("eletored"));
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}

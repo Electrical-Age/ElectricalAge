@@ -361,13 +361,22 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 
 		switch(type)
 		{
+
 		case ENTITY:
 			GL11.glRotatef(90, 0, 0, 1);
 			//GL11.glTranslatef(0, 1, 0);
 			break;
+			
+		case EQUIPPED_FIRST_PERSON:
+			GL11.glRotatef(160, 0, 1, 0);
+			GL11.glTranslatef(-0.70f, 1, -0.7f);
+			GL11.glScalef(1.8f,1.8f,1.8f);
+			GL11.glRotatef(-90, 1, 0, 0);
+			break;
 		case EQUIPPED:
 			GL11.glRotatef(180, 0, 1, 0);
 			GL11.glTranslatef(-0.70f, 1, -0.7f);
+			GL11.glScalef(1.5f,1.5f,1.5f);
 			break;
 		case FIRST_PERSON_MAP:
 			//GL11.glTranslatef(0, 1, 0);

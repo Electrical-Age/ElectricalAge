@@ -118,12 +118,7 @@ public class ElectricalRedstoneInputElement extends SixNodeElement{
 	public void networkSerialize(DataOutputStream stream) {
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
-		try {
-			stream.writeByte( (front.toInt()<<4) + (warm ? 1 : 0));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 	}
 
 	public void setWarm(boolean value)

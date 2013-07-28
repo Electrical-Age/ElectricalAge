@@ -62,6 +62,7 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement{
 		{
 			redstoneValue = newValue;
 			notifyNeighbor();
+			needPublish();
 			return true;
 		}
 			
@@ -132,8 +133,7 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement{
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte( (front.toInt()<<4));
-	    	stream.writeFloat((float) (inputGate.Uc / Eln.instance.SVU));
+			stream.writeByte(redstoneValue);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
