@@ -144,4 +144,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 		// TODO Auto-generated method stub
 		return new ElectricalBreakerGui(player,inventory,this);
 	}
+	
+	
+	
 }

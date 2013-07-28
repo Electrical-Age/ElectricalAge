@@ -6,6 +6,7 @@ public class CableRenderType {
 	public CableRenderTypeMethodType[] method = new CableRenderTypeMethodType[4];
 	public float[] param = new float[4];
 	public int[] otherdry = new int[4];
+	public CableRenderDescriptor[] otherRender = new CableRenderDescriptor[4];
 	
 	public CableRenderType() {
 		for(int idx = 0;idx<4;idx++)
@@ -13,6 +14,7 @@ public class CableRenderType {
 			method[idx] = CableRenderTypeMethodType.Standard;
 			param[idx] = 0;
 			otherdry[idx] = 0;
+			otherRender[idx] = null;
 		}
 	}
 }

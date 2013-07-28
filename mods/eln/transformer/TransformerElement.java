@@ -104,34 +104,17 @@ public class TransformerElement extends TransparentNodeElement{
 			if(side == front&& ! grounded) return Node.maskElectricalPower;
 			if(side == front.back() && ! grounded) return Node.maskElectricalPower;
 		}
-		return Node.maskThermal;
-	}
-/*
-	@Override
-	public String voltMeterString(Direction side) {
-		if(side == front)return  Utils.plotVolt("UP+",positivePrimaryLoad.Uc);
-		if(side == front.back())return  Utils.plotVolt("US+",positiveSecondaryLoad.Uc);
-		if(side == front.left() && grounded == false)return  Utils.plotVolt("UP-",negativePrimaryLoad.Uc);
-		if(side == front.right() && grounded == false)return Utils.plotVolt("US-",negativeSecondaryLoad.Uc);
-		return "";
+		return 0;
 	}
 
-	@Override
-	public String currentMeterString(Direction side) {
-		if(side == front)return  Utils.plotAmpere("IP+",positivePrimaryLoad.getCurrent()*2);
-		if(side == front.back())return  Utils.plotAmpere("IS+",positiveSecondaryLoad.getCurrent()*2);
-		if(side == front.left() && grounded == false)return  Utils.plotAmpere("IP-",negativePrimaryLoad.getCurrent()*2);
-		if(side == front.right() && grounded == false)return Utils.plotAmpere("IS-",negativeSecondaryLoad.getCurrent()*2);
-		return "";
-	}*/
 
 	
 	@Override
 	public String multiMeterString(Direction side) {
-		if(side == front)return  Utils.plotVolt("UP+",positivePrimaryLoad.Uc) + Utils.plotAmpere("IP+",positivePrimaryLoad.getCurrent());
-		if(side == front.back())return  Utils.plotVolt("US+",positiveSecondaryLoad.Uc) + Utils.plotAmpere("IS+",positiveSecondaryLoad.getCurrent());
-		if(side == front.left() && grounded == false)return  Utils.plotVolt("UP-",negativePrimaryLoad.Uc) + Utils.plotAmpere("IP-",negativePrimaryLoad.getCurrent());
-		if(side == front.right() && grounded == false)return Utils.plotVolt("US-",negativeSecondaryLoad.Uc) + Utils.plotAmpere("IS-",negativeSecondaryLoad.getCurrent());
+		if(side == front.left())return  Utils.plotVolt("UP+",positivePrimaryLoad.Uc) + Utils.plotAmpere("IP+",positivePrimaryLoad.getCurrent());
+		if(side == front.right())return  Utils.plotVolt("US+",positiveSecondaryLoad.Uc) + Utils.plotAmpere("IS+",positiveSecondaryLoad.getCurrent());
+		if(side == front && grounded == false)return  Utils.plotVolt("UP-",negativePrimaryLoad.Uc) + Utils.plotAmpere("IP-",negativePrimaryLoad.getCurrent());
+		if(side == front.back() && grounded == false)return Utils.plotVolt("US-",negativeSecondaryLoad.Uc) + Utils.plotAmpere("IS-",negativeSecondaryLoad.getCurrent());
 		return "";
 
 	}
@@ -288,6 +271,10 @@ public class TransformerElement extends TransparentNodeElement{
 			else stream.writeByte(inventory.getStackInSlot(1).stackSize);
 			
 			Utils.serialiseItemStack(stream, inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId));
+			Utils.serialiseItemStack(stream, inventory.getStackInSlot(TransformerContainer.primaryCableSlotId));
+			Utils.serialiseItemStack(stream, inventory.getStackInSlot(TransformerContainer.secondaryCableSlotId));
+			
+			node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

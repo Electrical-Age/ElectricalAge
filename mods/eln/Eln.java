@@ -1008,7 +1008,7 @@ public class Eln {
 			subId = 0;
 			name = "Ground cable";
 
-			GroundCableDescriptor desc = new GroundCableDescriptor(name);
+			GroundCableDescriptor desc = new GroundCableDescriptor(name,obj.getObj("groundcable"));
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
@@ -3302,7 +3302,7 @@ public class Eln {
 			name = "Stone cache";
 
 			descriptor = new SixNodeCacheItem(name,
-					this.obj.getObj("ElectricFurnace"), 1);
+					this.obj.getObj("stonecache"), 1);
 			sharedItem.addElement(completId, descriptor);
 
 		}

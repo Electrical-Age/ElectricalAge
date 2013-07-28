@@ -5,11 +5,16 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.cable.CableRenderType;
 import mods.eln.client.ClientProxy;
+import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.heatfurnace.HeatFurnaceElement;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
+import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.node.Node;
@@ -38,8 +43,15 @@ public class TransformerRender extends TransparentNodeElementRender{
 	public void draw() {
 		// TODO Auto-generated method stub
 		
+		GL11.glPushMatrix();
 		front.glRotateXnRef();
 		descriptor.draw(feroPart, primaryStackSize, secondaryStackSize);
+		GL11.glPopMatrix();
+		cableRenderType = drawCable(front.down(),priRender, priConn, cableRenderType);
+		cableRenderType = drawCable(front.down(),secRender, secConn, cableRenderType);
+		
+
+		
 	}
 
 	
@@ -50,7 +62,7 @@ public class TransformerRender extends TransparentNodeElementRender{
 	}
 	
 	byte primaryStackSize,secondaryStackSize;
-	
+	CableRenderDescriptor priRender,secRender;
 	
 	Obj3DPart feroPart;
 	@Override
@@ -66,6 +78,34 @@ public class TransformerRender extends TransparentNodeElementRender{
 				feroPart = null;
 			else
 				feroPart = feroDesc.feroPart;
+			
+			ItemStack priStack = Utils.unserialiseItemStack(stream);
+			ElectricalCableDescriptor priDesc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(priStack,ElectricalCableDescriptor.class);
+			if(priDesc == null)
+				priRender = null;
+			else
+				priRender = priDesc.render;
+			
+			ItemStack secStack = Utils.unserialiseItemStack(stream);
+			ElectricalCableDescriptor secDesc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(secStack,ElectricalCableDescriptor.class);
+			if(secDesc == null)
+				secRender = null;
+			else
+				secRender = secDesc.render;
+					
+			eConn.deserialize(stream);
+			
+			priConn.mask = 0;
+			secConn.mask = 0;
+			for(LRDU lrdu : LRDU.values()){
+				if(eConn.get(lrdu) == false || front.down().applyLRDU(lrdu) == front.left() || front.down().applyLRDU(lrdu) == front.right()) continue;
+				CableRenderDescriptor render = getCableRender(front.down().applyLRDU(lrdu), LRDU.Down);
+				
+				if(render == priRender) priConn.set(lrdu,true);
+				if(render == secRender) secConn.set(lrdu,true);
+			
+			}
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -73,7 +113,20 @@ public class TransformerRender extends TransparentNodeElementRender{
 	}
 	
 	
-
-
+	LRDUMask priConn = new LRDUMask(),secConn = new LRDUMask(),eConn = new LRDUMask();
+	CableRenderType cableRenderType;
 	
+	
+	@Override
+	public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
+		if(lrdu == lrdu.Down)
+		{
+			if(side == front.left() ) return priRender;	
+			if(side == front.right()) return secRender;	
+			if(side == front&& ! grounded) return priRender;
+			if(side == front.back() && ! grounded) return secRender;
+		}
+		return null;
+	}
+
 }

@@ -36,7 +36,7 @@ public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDes
 		{
 		case ENTITY:
 
-	        GL11.glScalef(0.5f, -0.5f, 0.5f);
+	        GL11.glScalef(0.5f, 0.5f, 0.5f);
 	    //    GL11.glTranslatef(0.f,-0.5f,0.5f); 	
 			GL11.glRotatef(90,0f,1f,0f);  
 	        	
@@ -52,8 +52,8 @@ public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDes
 			//GL11.glTranslatef(0.f,-0.5f,0.5f); 
 			break;
 		case INVENTORY:
-			GL11.glScalef(1.0f, -1f, 1.0f);
-			GL11.glRotatef(45, 0, 1, 0);
+			//GL11.glScalef(1.0f, 1f, 1.0f);
+			//GL11.glRotatef(45, 0, 1, 0);
 			break;
 		default:
 			break;

@@ -157,7 +157,9 @@ public abstract class TransparentNodeElementRender {
 	
 	public CableRenderType drawCable(Direction side,CableRenderDescriptor render,LRDUMask connection,CableRenderType renderPreProcess)
 	{
+		if(render == null) return renderPreProcess;
 		if(renderPreProcess==null)  renderPreProcess = CableRender.connectionType(tileEntity,connection,side);
+		GL11.glPushMatrix();
 		glCableTransforme(side);
 		render.bindCableTexture();
 		
@@ -168,7 +170,7 @@ public abstract class TransparentNodeElementRender {
 			maskTempDraw.set(1<<lrdu.toInt());
 			CableRender.drawCable(render, maskTempDraw,renderPreProcess);
 		}		
-		 
+		GL11.glPopMatrix();
 		return renderPreProcess;
 	}
 }

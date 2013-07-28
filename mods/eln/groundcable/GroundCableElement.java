@@ -8,6 +8,7 @@ import javax.swing.text.MaskFormatter;
 import org.bouncycastle.crypto.modes.SICBlockCipher;
 
 import mods.eln.Eln;
+import mods.eln.electricalbreaker.ElectricalBreakerContainer;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.misc.Direction;
@@ -20,6 +21,8 @@ import mods.eln.node.NodeThermalWatchdogProcess;
 import mods.eln.node.SixNode;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElement;
+import mods.eln.node.SixNodeElementInventory;
+import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalLoadDynamicProcess;
 import mods.eln.sim.ElectricalLoadHeatThermalLoadProcess;
@@ -27,6 +30,8 @@ import mods.eln.sim.ElectricalSourceRefGroundProcess;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -69,13 +74,17 @@ public class GroundCableElement extends SixNodeElement{
 		super.writeToNBT(nbt, str);
 		nbt.setByte(str + "color",(byte) (color + (colorCare << 4)));
 	}
-
+	@Override
+	public IInventory getInventory() {
+		// TODO Auto-generated method stub
+		return inventory;
+	}
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
 		// TODO Auto-generated method stub
 		return electricalLoad;
 	}
-
+	
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
 		// TODO Auto-generated method stub
@@ -85,6 +94,7 @@ public class GroundCableElement extends SixNodeElement{
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		// TODO Auto-generated method stub
+		if(inventory.getStackInSlot(GroundCableContainer.cableSlotId) == null) return 0;
 		return Node.maskElectricalAll + (color << Node.maskColorShift) +(colorCare << Node.maskColorCareShift);
 	}
 
@@ -109,9 +119,7 @@ public class GroundCableElement extends SixNodeElement{
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte( (color<<4));
-	    	stream.writeShort((short) (electricalLoad.Uc*Node.networkSerializeUFactor));
-	    	stream.writeShort((short) (electricalLoad.getCurrent()*Node.networkSerializeIFactor));
-
+			Utils.serialiseItemStack(stream, inventory.getStackInSlot(GroundCableContainer.cableSlotId));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -169,4 +177,24 @@ public class GroundCableElement extends SixNodeElement{
 		return false;
 	}
 
+	@Override
+	protected void inventoryChanged() {
+		super.inventoryChanged();
+		reconnect();
+	}
+	@Override
+	public boolean hasGui() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	
+	@Override
+	public Container newContainer(Direction side, EntityPlayer player) {
+		// TODO Auto-generated method stub
+		return new GroundCableContainer(player, inventory);
+	}
+	
+	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+	
 }

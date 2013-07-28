@@ -78,6 +78,7 @@ public class CableRender {
 				{
 					Direction otherSide = side.applyLRDU(lrdu);
 					connectionTypeBuild.otherdry[lrdu.dir] = sixNodeEntity.getCableDry(otherSide,otherSide.getLRDUGoingTo(side));
+					connectionTypeBuild.otherRender[lrdu.dir] = sixNodeEntity.getCableRender(otherSide,otherSide.getLRDUGoingTo(side));
 					continue;
 				}
 			}
@@ -132,6 +133,7 @@ public class CableRender {
 						connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend;
 						connectionTypeBuild.param[lrdu.dir] = render.heightPixel;
 						connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection,otherLRDU);
+						connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection,otherLRDU);
 					//	=  += (connectionExtend + (render.heightPixel<<4))<<(lrdu.dir*8) ;
 						continue;	
 					}
@@ -146,6 +148,7 @@ public class CableRender {
 							//connectionTypeBuild += (connectionExtend + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
 						}
 						connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection,otherLRDU);
+						connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection,otherLRDU);
 						continue;	
 					}					
 					if(render.width < otherRender.width)
@@ -153,6 +156,7 @@ public class CableRender {
 						connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend;
 						connectionTypeBuild.param[lrdu.dir] = otherRender.heightPixel;
 						connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection,otherLRDU);
+						connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection,otherLRDU);
 						//connectionTypeBuild += (connectionExtend + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
 						continue;	
 					}
@@ -201,6 +205,7 @@ public class CableRender {
 						
 					}
 					connectionTypeBuild.otherdry[lrdu.dir] = otherElement.getCableDry(otherLRDU);
+					connectionTypeBuild.otherRender[lrdu.dir] = otherElement.getCableRender(otherLRDU);
 					continue;
 				}
 
@@ -209,10 +214,12 @@ public class CableRender {
 					connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Internal;
 					connectionTypeBuild.param[lrdu.dir] = otherRender.heightPixel;
 					connectionTypeBuild.otherdry[lrdu.dir] = otherElement.getCableDry(otherLRDU);
+					connectionTypeBuild.otherRender[lrdu.dir] = otherElement.getCableRender(otherLRDU);
 					//connectionTypeBuild += (connectionInternal + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
 					continue;
 				}
 				connectionTypeBuild.otherdry[lrdu.dir] = otherElement.getCableDry(otherLRDU);
+				connectionTypeBuild.otherRender[lrdu.dir] = otherElement.getCableRender(otherLRDU);
 				continue;
 			}
 			
@@ -244,6 +251,7 @@ public class CableRender {
 				if(sixNodeEntity.elementRenderList[side.getInt()] !=null)
 				{
 					connectionTypeBuild.otherdry[lrdu.dir] = sixNodeEntity.elementRenderList[side.getInt()].getCableDry(lrdu.inverse());
+					connectionTypeBuild.otherRender[lrdu.dir] = sixNodeEntity.elementRenderList[side.getInt()].getCableRender(lrdu.inverse());
 					continue;
 				}
 			}
@@ -295,6 +303,7 @@ public class CableRender {
 						connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend;
 						connectionTypeBuild.param[lrdu.dir] = render.heightPixel;
 						connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection,otherLRDU);
+						connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection,otherLRDU);
 						//connectionTypeBuild += (connectionExtend + (render.heightPixel<<4))<<(lrdu.dir*8) ;
 						continue;	
 					}
@@ -309,6 +318,7 @@ public class CableRender {
 							///connectionTypeBuild += (connectionExtend + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
 						}
 						connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection,otherLRDU);
+						connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection,otherLRDU);
 						continue;	
 					}					
 					if(render.width < otherRender.width)
@@ -316,11 +326,13 @@ public class CableRender {
 						connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend;
 						connectionTypeBuild.param[lrdu.dir] = otherRender.heightPixel;
 						connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection,otherLRDU);
+						connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection,otherLRDU);
 						//connectionTypeBuild += (connectionExtend + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
 						continue;	
 					}
 
-					connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection,otherLRDU);		
+					connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection,otherLRDU);	
+					connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection,otherLRDU);	
 					continue;	
 				}
 				

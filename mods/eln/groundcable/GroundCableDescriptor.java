@@ -4,13 +4,26 @@ import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import mods.eln.misc.Obj3D;
+import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.SixNodeDescriptor;
 
 public class GroundCableDescriptor extends SixNodeDescriptor{
 
-	public GroundCableDescriptor(String name) {
+	Obj3D obj;
+	Obj3DPart main;
+	
+	public GroundCableDescriptor(String name,Obj3D obj) {
 		super(name, GroundCableElement.class, GroundCableRender.class);
-		// TODO Auto-generated constructor stub
+		this.obj = obj;
+		if(obj != null){
+			main = obj.getPart("main");
+		}
+	}
+	
+	void draw()
+	{
+		if(main != null) main.draw();
 	}
 
 	@Override

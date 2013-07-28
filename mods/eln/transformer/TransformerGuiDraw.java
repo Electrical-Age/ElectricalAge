@@ -52,7 +52,7 @@ public class TransformerGuiDraw extends GuiContainerEln {
     	super.initGui();
     	
     
-    	buttonGrounded = newGuiButton(176/2-60,8,120, "");
+    	buttonGrounded = newGuiButton(176/2-60,8+3,120 , "");
     }
     
 
