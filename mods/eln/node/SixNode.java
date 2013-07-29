@@ -44,8 +44,8 @@ public class SixNode extends Node {
 
 	public SixNodeElement sideElementList[] = new SixNodeElement[6];
 	public int sideElementIdList[] = new int[6];
-	public ArrayList<ElectricalConnection> internalElectricalConnectionList = new ArrayList<ElectricalConnection>();
-	public ArrayList<ThermalConnection> internalThermalConnectionList = new ArrayList<ThermalConnection>();
+	public ArrayList<ElectricalConnection> internalElectricalConnectionList = new ArrayList<ElectricalConnection>(1);
+	public ArrayList<ThermalConnection> internalThermalConnectionList = new ArrayList<ThermalConnection>(1);
 
 	public int sixNodeCacheMapId = -1;
 	

@@ -1,0 +1,8 @@
+s type pot
+o rot
+f originX 0.06250
+f originY 0.0
+f originZ 0.0
+f alphaOff 150.0
+f alphaOn -150.0
+f speed 0.3

@@ -1022,7 +1022,7 @@ public class Eln {
 			name = "ElectricalSource";
 
 			ElectricalSourceDescriptor desc = new ElectricalSourceDescriptor(
-					name);
+					name,obj.getObj("voltagesource"));
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -1213,7 +1213,7 @@ public class Eln {
 
 			name = "Electrical breaker";
 
-			desc = new ElectricalBreakerDescriptor(name);
+			desc = new ElectricalBreakerDescriptor(name,obj.getObj("HighVoltageSwitch"));
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -1282,13 +1282,13 @@ public class Eln {
 		{
 			subId = 0;
 			name = "Analog vuMeter";
-			desc = new ElectricalVuMeterDescriptor(name, "Vumeter");
+			desc = new ElectricalVuMeterDescriptor(name, "Vumeter",false);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
 			subId = 8;
 			name = "Led vuMeter";
-			desc = new ElectricalVuMeterDescriptor(name, "Led");
+			desc = new ElectricalVuMeterDescriptor(name, "Led",true);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
@@ -1479,7 +1479,16 @@ public class Eln {
 
 			name = "Signal source";
 
-			desc = new ElectricalGateSourceDescriptor(name);
+			desc = new ElectricalGateSourceDescriptor(name,obj.getObj("signalsourcepot"),false);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		{
+			subId = 1;
+
+			name = "Signal source B";
+
+			desc = new ElectricalGateSourceDescriptor(name,obj.getObj("ledswitch"),true);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -2568,15 +2577,17 @@ public class Eln {
 					new String[] { "dudu dust", "miaou" });
 			sharedItem.addElement(id, element);
 		}
-		/*
-		 * { id = 7;
-		 * 
-		 * name = "Gold dust";
-		 * 
-		 * element = new GenericItemUsingDamageDescriptorWithComment(
-		 * name,//iconId, name, new String[]{"dudu dust","miaou"} );
-		 * sharedItem.addElement(id, element); }
-		 */
+		
+		{ 
+			id = 7;
+		  
+		  name = "Gold dust";
+		  
+		  element = new GenericItemUsingDamageDescriptorWithComment(
+				  name, new String[]{"dudu dust","miaou"} );
+				  sharedItem.addElement(id, element); 
+		}
+		 
 
 		{
 			id = 8;
@@ -3186,7 +3197,7 @@ public class Eln {
 			completId = subId + (id << 6);
 			name = "tree resin collector";
 
-			descriptor = new TreeResinCollectorDescriptor(name);
+			descriptor = new TreeResinCollectorDescriptor(name,obj.getObj("treeresincolector"));
 			sixNodeItem.addDescriptor(completId, descriptor);
 		}
 	}
@@ -4284,7 +4295,7 @@ public class Eln {
 		
 		maceratorRecipes
 				.addRecipe(new Recipe(new ItemStack(Block.oreGold),
-						new ItemStack[] { new ItemStack(Item.goldNugget, 18) },
+						new ItemStack[] { findItemStack("Gold dust", 2) },
 						6000.0));
 		maceratorRecipes.addRecipe(new Recipe(findItemStack("Plumb ore"),
 				new ItemStack[] { findItemStack("Plumb dust", 2) }, 2000.0));
@@ -4378,11 +4389,11 @@ public class Eln {
 		in = findItemStack("Iron dust");
 		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
 				new ItemStack(Item.ingotIron), 0);
-		/*
-		 * in = findItemStack("Gold dust");
-		 * FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-		 * new ItemStack(Item.ingotGold), 0);
-		 */
+		
+		in = findItemStack("Gold dust");
+		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
+				new ItemStack(Item.ingotGold), 0);
+		 
 		in = findItemStack("Tree resin");
 		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
 				findItemStack("Rubber"), 0);
@@ -4608,6 +4619,16 @@ public class Eln {
 	private void recipeElectricalGateSource() {
 		// TODO Auto-generated method stub
 		GameRegistry.addRecipe(findItemStack("Signal source", 1), 
+				"RsR",
+				"rRr",
+				" c ",
+				Character.valueOf('M'),findItemStack("Machine block"), 
+				Character.valueOf('c'),findItemStack("Signal cable"), 
+				Character.valueOf('r'),findItemStack("Rubber"), 
+				Character.valueOf('s'),new ItemStack(Item.stick), 
+				Character.valueOf('R'),new ItemStack(Item.redstone));
+		
+		GameRegistry.addRecipe(findItemStack("Signal source B", 1), 
 				" r ",
 				"rRr",
 				" c ",

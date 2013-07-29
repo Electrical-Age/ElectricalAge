@@ -174,22 +174,11 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 			sixNode.setNeedPublish(true);
 			return true;	
 		}
-		else if(Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
-    	{ 
-    		return false;
-    	}
-    	if(Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
-    	{ 
-    		return false;
-    	}
-    	if(Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
-    	{
-    		return false;
-    	}    
-    	else
+		else if(!Utils.playerHasMeter(entityPlayer) && descriptor.onOffOnly)
 		{
-			//setSwitchState(true);
-			//return true;
+			outputGateProcess.state(!outputGateProcess.getOutputOnOff());
+			needPublish();
+			return true;
 		}
 		//front = LRDU.fromInt((front.toInt()+1)&3);
     	return false;
@@ -223,7 +212,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 	@Override
 	public boolean hasGui() {
 		// TODO Auto-generated method stub
-		return true;
+		return ! descriptor.onOffOnly;
 	}
 	
 

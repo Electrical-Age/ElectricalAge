@@ -143,7 +143,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor{
 			GL11.glTranslatef(leverTx*on, 0f, 0f);
 			if(lever != null) lever.draw();
 			
-			if(on > 0.5f){
+			if(on < 0.5f){
 				GL11.glColor3f(234f/255f, 80/255f, 0f);
 				Utils.disableLight();
 				if(led != null) led.draw();

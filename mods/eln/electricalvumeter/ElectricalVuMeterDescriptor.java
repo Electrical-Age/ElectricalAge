@@ -27,9 +27,11 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor{
 
 	public ElectricalVuMeterDescriptor(
 			String name,
-			String objName
+			String objName,
+			boolean onOffOnly
 			) {
 		super(name, ElectricalVuMeterElement.class,ElectricalVuMeterRender.class);
+		this.onOffOnly = onOffOnly;
 		obj = Eln.instance.obj.getObj(objName);
 		if(obj.getString("type").toLowerCase().equals("rot")){
 			objType = ObjType.Rot;
@@ -49,6 +51,8 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor{
 	ObjType objType;
 
 	Obj3DPart vumeter,pointer,led,halo,main;
+
+	public boolean onOffOnly;
 	void draw(float factor,float distance)
 	{
 		if(factor < 0.0) factor = 0.0f;

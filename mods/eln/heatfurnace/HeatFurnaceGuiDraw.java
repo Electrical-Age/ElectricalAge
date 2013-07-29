@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL11;
 
 
 import mods.eln.gui.GuiContainerEln;
+import mods.eln.gui.GuiHelpText;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalTrackBar;
@@ -72,7 +73,13 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
     	vuMeterHeat.setRange(0.0f,980.0f);
     	vuMeterHeat.setComment(0,"Temperature gauge");
     	syncVumeterHeat();
-
+    	
+    	/*
+    	GuiHelpText help = new GuiHelpText(0, 0, helper);
+    	helper.add(help);
+    	help.setComment(0, "Help me");
+    	help.setComment(1, "Miaou");
+*/
     }
     public void syncVumeterGain()
     {

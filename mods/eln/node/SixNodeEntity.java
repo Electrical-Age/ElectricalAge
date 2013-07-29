@@ -221,6 +221,16 @@ public class SixNodeEntity extends NodeBlockEntity {
 			return node.hasVolume();
 		}
 	}
+
+
+
+	@Override
+	public void tileEntityNeighborSpawn() {
+		// TODO Auto-generated method stub
+		for(SixNodeElementRender e : elementRenderList){
+			if(e != null)e.notifyNeighborSpawn();
+		}
+	}
 	
 
 	

@@ -86,6 +86,11 @@ public class ElectricalAntennaTxRender extends TransparentNodeElementRender{
 		if(side == front.applyLRDU(rot.right()))  return Eln.instance.signalCableDescriptor.render;
 		return null;
 	}
-	
+	@Override
+	public void notifyNeighborSpawn() {
+		// TODO Auto-generated method stub
+		super.notifyNeighborSpawn();
+		cableRefresh = true;
+	}
 
 }

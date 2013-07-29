@@ -19,6 +19,7 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import mods.eln.Eln;
 import mods.eln.PlayerManager;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.node.ITileEntitySpawnClient;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.node.SixNodeEntity;
@@ -38,6 +39,7 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -828,6 +830,49 @@ public class Utils {
     {
     	float time = Minecraft.getMinecraft().entityRenderer.performanceToFps(par0)
     }*/
+
+	public static void notifyNeighbor(TileEntity t) {
+		int x = t.xCoord;
+		int y = t.yCoord;
+		int z = t.zCoord;
+		World w = t.worldObj;
+		TileEntity o;
+		o = w.getBlockTileEntity(x+1, y, z);
+		if(o != null && o instanceof ITileEntitySpawnClient)
+			((ITileEntitySpawnClient)o).tileEntityNeighborSpawn();
+		o = w.getBlockTileEntity(x-1, y, z);
+		if(o != null && o instanceof ITileEntitySpawnClient)
+			((ITileEntitySpawnClient)o).tileEntityNeighborSpawn();
+		o = w.getBlockTileEntity(x, y+1, z);
+		if(o != null && o instanceof ITileEntitySpawnClient)
+			((ITileEntitySpawnClient)o).tileEntityNeighborSpawn();
+		o = w.getBlockTileEntity(x, y-1, z);
+		if(o != null && o instanceof ITileEntitySpawnClient)
+			((ITileEntitySpawnClient)o).tileEntityNeighborSpawn();
+		o = w.getBlockTileEntity(x, y, z+1);
+		if(o != null && o instanceof ITileEntitySpawnClient)
+			((ITileEntitySpawnClient)o).tileEntityNeighborSpawn();
+		o = w.getBlockTileEntity(x, y, z-1);
+		if(o != null && o instanceof ITileEntitySpawnClient)
+			((ITileEntitySpawnClient)o).tileEntityNeighborSpawn();
+		
+	}
+
+	public static boolean playerHasMeter(EntityPlayer entityPlayer) {
+		if(Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
+    	{ 
+    		return true;
+    	}
+    	if(Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
+    	{ 
+    		return true;
+    	}
+    	if(Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
+    	{
+    		return true;
+    	}    
+    	return false;
+	}
 	
 	
 	

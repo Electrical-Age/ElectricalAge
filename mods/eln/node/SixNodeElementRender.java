@@ -51,6 +51,10 @@ public abstract class SixNodeElementRender {
 		cableList[3] = GL11.glGenLists(1);
 	}
 	
+	public void needRedrawCable()
+	{
+		needRedraw = true;
+	}
 
 	boolean needRedraw;
 	public void draw()
@@ -318,6 +322,10 @@ public abstract class SixNodeElementRender {
 	public void serverPacketUnserialize(DataInputStream stream) throws IOException {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void notifyNeighborSpawn() {
+		needRedraw = true;
 	}  
     
 }

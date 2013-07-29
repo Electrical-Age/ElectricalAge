@@ -27,4 +27,8 @@ public class RcInterpolator {
 	public void setTarget(float value) {
 		factor = value;
 	}
+	public void setValue(float value)
+	{
+		factorFiltred = value;
+	}
 }

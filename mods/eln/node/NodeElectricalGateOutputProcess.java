@@ -23,6 +23,7 @@ public class NodeElectricalGateOutputProcess extends NodeElectricalSourceWithCur
 	{
 		U = value * Eln.SVU;
 	}
+
 	public void state(boolean value)
 	{
 		if(value)
@@ -35,5 +36,9 @@ public class NodeElectricalGateOutputProcess extends NodeElectricalSourceWithCur
 	public double getOutputNormalized() {
 		// TODO Auto-generated method stub
 		return U/Eln.SVU;
+	}
+	public boolean getOutputOnOff() {
+		// TODO Auto-generated method stub
+		return U >= Eln.SVU/2;
 	}
 }

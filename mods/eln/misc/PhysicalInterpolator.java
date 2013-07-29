@@ -55,4 +55,8 @@ public class PhysicalInterpolator {
 	public void setTarget(float value) {
 		factor = value;
 	}
+	public float getTarget() {
+		// TODO Auto-generated method stub
+		return factor;
+	}
 }

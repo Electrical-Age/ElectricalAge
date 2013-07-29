@@ -44,26 +44,13 @@ public class ElectricalSwitchRender extends SixNodeElementRender{
 	public void draw() {
 		super.draw();
 
-		interpol.setTarget(switchState ? 1f :0f);
 		
+		
+		interpol.setTarget(switchState ? 1f :0f);	
 		interpol.stepGraphic();
 		
-		front.glRotateOnX();
-		
-		
-
-		
+		front.glRotateOnX();	
 		descriptor.draw(interpol.get(),Utils.distanceFromClientPlayer(tileEntity));
-		//ClientProxy.obj.draw("HighVoltageSwitchAll", "lever_lever");
-		/*
-
-		ClientProxy.obj.draw("HighVoltageSwitch");
-		
-		GL11.glRotatef(leverAlpha, 0, 0, 1);
-		ClientProxy.obj.draw("HighVoltageSwitchLever");
-		*/	
-		
-		
 
 	}
 	
@@ -105,7 +92,7 @@ public class ElectricalSwitchRender extends SixNodeElementRender{
 		
 		if(boot)
 		{
-			interpol.setTarget(switchState ? 1f : 0f);
+			interpol.setValue(switchState ? 1f : 0f);
 		}
 		boot = false;
 	}

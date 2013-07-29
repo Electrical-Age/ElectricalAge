@@ -173,4 +173,8 @@ public abstract class TransparentNodeElementRender {
 		GL11.glPopMatrix();
 		return renderPreProcess;
 	}
+	public void notifyNeighborSpawn() {
+
+		
+	}
 }

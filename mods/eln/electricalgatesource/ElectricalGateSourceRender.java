@@ -17,6 +17,7 @@ import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.Node;
@@ -34,20 +35,25 @@ public class ElectricalGateSourceRender extends SixNodeElementRender{
 
 
 	ElectricalGateSourceDescriptor descriptor;
-	long time;
+
 	public ElectricalGateSourceRender(SixNodeEntity tileEntity, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalGateSourceDescriptor) descriptor;
-		time = System.currentTimeMillis();
+		interpolator = new RcInterpolator(this.descriptor.speed);
 	}
 
 
 	LRDU front;
 
+	RcInterpolator interpolator;
 	@Override
 	public void draw() {
-				
+		super.draw();
+		interpolator.setTarget((float) (voltageSyncValue/Eln.SVU));
+		interpolator.stepGraphic();
+		LRDU.Down.glRotateOnX();
+		descriptor.draw(interpolator.get(),Utils.distanceFromClientPlayer(this.tileEntity));
 
 	}
 	
@@ -56,6 +62,7 @@ public class ElectricalGateSourceRender extends SixNodeElementRender{
 
 	float voltageSyncValue = 0;
 	boolean voltageSyncNew = false;
+	boolean boot = true;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -71,7 +78,11 @@ public class ElectricalGateSourceRender extends SixNodeElementRender{
 				voltageSyncValue = readF;
 				voltageSyncNew = true;
 			}
-
+			
+			if(boot){
+				boot = false;
+				interpolator.setValue((float) (voltageSyncValue/Eln.SVU));
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -79,7 +90,10 @@ public class ElectricalGateSourceRender extends SixNodeElementRender{
 
 	}
 	
-	
+	@Override
+	public CableRenderDescriptor getCableRender(LRDU lrdu) {
+		return Eln.instance.signalCableDescriptor.render;
+	}
 	
 	
 	@Override

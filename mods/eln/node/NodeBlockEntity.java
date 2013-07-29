@@ -56,17 +56,23 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
 
-public abstract class NodeBlockEntity extends TileEntity {
+public abstract class NodeBlockEntity extends TileEntity implements ITileEntitySpawnClient{
 	
 	
 
 	boolean redstone = false;
 	int lastLight = 0xFF; // trololol
+	boolean firstUnserialize = true;
 	public void networkUnserialize(DataInputStream stream)
 	{
 
 		int light = 0;
 		try {
+			if(firstUnserialize){
+				firstUnserialize = false;
+				Utils.notifyNeighbor(this);
+
+			}
 			Byte b = stream.readByte();
 			light = b & 0xF;
 			boolean newRedstone = (b & 0x10) != 0;

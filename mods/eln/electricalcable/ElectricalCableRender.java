@@ -47,45 +47,12 @@ public class ElectricalCableRender extends SixNodeElementRender{
 		// TODO Auto-generated method stub
 		Minecraft.getMinecraft().mcProfiler.startSection("ECable");
 		
-		//ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
-		
-	//	GL11.glDisable(GL11.GL_TEXTURE_2D);
+		Utils.setGlColorFromDye(color);
 
-		/*if(i != null && i.getItem()  == Eln.voltMeterHelmet)
-		{		
-			double factor = voltage * MeterItemArmor.getBlockRenderColorFactor(i);
-			GL11.glColor4d(factor, 1.0-factor,0.0, 1.0);
-			GL11.glDisable(GL11.GL_LIGHTING);
-			GL11.glDisable(GL11.GL_TEXTURE_2D);	
-		}
-		else if(i != null && i.getItem()  == Eln.currentMeterHelmet)
-		{		
-			double factor = current * MeterItemArmor.getBlockRenderColorFactor(i);
-			GL11.glColor4d(factor, 1.0-factor,0.0, 1.0);
-			GL11.glDisable(GL11.GL_LIGHTING);
-			GL11.glDisable(GL11.GL_TEXTURE_2D);	
-		}
-		else if(i != null && i.getItem()  == Eln.thermoMeterHelmet)
-		{		
-			double factor = temperature  *MeterItemArmor.getBlockRenderColorFactor(i);
-			GL11.glColor4d(factor, 1.0-factor,0.0, 1.0);
-			GL11.glDisable(GL11.GL_LIGHTING);
-			GL11.glDisable(GL11.GL_TEXTURE_2D);	
-		}
-		else*/
-		{
-			Utils.setGlColorFromDye(color);
-		}
-		
 
-		
-		//GL11.glDisable(GL11.GL_LIGHTING);
 		Utils.bindTexture(descriptor.render.cableTexture);
 		glListCall();
-		//GL11.glEnable(GL11.GL_LIGHTING);
-		
-		//GL11.glEnable(GL11.GL_TEXTURE_2D);		
-		
+
 		
 		
 		GL11.glColor3f(1f,1f,1f);

@@ -38,6 +38,7 @@ public class ElectricalVuMeterElement extends SixNodeElement{
 	public ElectricalVuMeterElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
+		this.descriptor = (ElectricalVuMeterDescriptor) descriptor;
 		front = LRDU.Down;
     	electricalLoadList.add(inputGate);
     	slowProcessList.add(slowProcess);
@@ -46,7 +47,7 @@ public class ElectricalVuMeterElement extends SixNodeElement{
 	public NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");
 	public ElectricalVuMeterSlowProcess slowProcess = new ElectricalVuMeterSlowProcess(this);
 	LRDU front;
-	
+	ElectricalVuMeterDescriptor descriptor;
 
 	public static boolean canBePlacedOnSide(Direction side,int type)
 	{

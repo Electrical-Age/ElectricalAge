@@ -68,25 +68,5 @@ public class IntelligentTransformerRender extends TransparentNodeElementRender{
 	}
 	
 	
-	/*
-	
-	public void clientSetRatio(float value)
-	{
-        try {
-	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	        DataOutputStream stream = new DataOutputStream(bos);   	
-	
-	        preparePacketForServer(stream);
-			
-			stream.writeByte(IntelligentTransformerElement.unserializeRatio);
-			stream.writeFloat(value);
-			
-			sendPacketToServer(bos);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}        
-        		
-	}*/
-	
+
 }

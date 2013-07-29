@@ -24,7 +24,7 @@ import net.minecraft.item.ItemStack;
 public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVoltageWatchdogDescriptorForInventory{
 
 	double electricalNominalRs;
-	double electricalNominalVoltage, electricalNominalPower, electricalNominalPowerDropFactor;
+	public double electricalNominalVoltage, electricalNominalPower, electricalNominalPowerDropFactor;
 	boolean signalWire;
 	public ElectricalCableDescriptor(
 			String name,
@@ -78,7 +78,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 		dielectricVoltage = electricalMaximalVoltage;
 		dielectricBreakOhmMin = dielectricBreakOhm;
 	}	
-	double electricalMaximalVoltage;
+	public double electricalMaximalVoltage;
 	public double electricalRp = Double.POSITIVE_INFINITY,electricalRs = Double.POSITIVE_INFINITY,electricalC = 1;
 	public double thermalRp = 1, thermalRs = 1, thermalC = 1;
 	public double thermalWarmLimit = 100,thermalCoolLimit = -100;

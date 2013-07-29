@@ -125,7 +125,12 @@ public class ElectricalMachineRender extends TransparentNodeElementRender{
 	
 
 	
-	
+	@Override
+	public void notifyNeighborSpawn() {
+		// TODO Auto-generated method stub
+		super.notifyNeighborSpawn();
+		connectionType = null;
+	}
 
 	
 	

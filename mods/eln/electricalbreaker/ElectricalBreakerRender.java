@@ -11,12 +11,14 @@ import mods.eln.Eln;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientProxy;
+import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.electricalsource.ElectricalSourceGui;
 import mods.eln.heatfurnace.HeatFurnaceElement;
 import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.Node;
@@ -40,21 +42,28 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalBreakerDescriptor) descriptor;
 		time = System.currentTimeMillis();
+		interpol = new RcInterpolator(this.descriptor.speed);
 	}
-
+	RcInterpolator interpol;
+	
 	@Override
 	public void draw() {
-				
+		super.draw();
+		interpol.setTarget(switchState ? 1f :0f);	
+		interpol.stepGraphic();
+		
+		front.glRotateOnX();	
+		descriptor.draw(interpol.get(),Utils.distanceFromClientPlayer(tileEntity));			
 
 	}
 	
-	/*
+	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
 		// TODO Auto-generated method stub
-		return descriptor.cableRender;
+		return cableRender;
 	}
-	*/
+
 	
 	float uMin,uMax;
 
@@ -65,11 +74,17 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
+		System.out.println("Front : " + front);
 		try {
 			switchState = stream.readBoolean();
 			uMax = stream.readFloat();
 			uMin = stream.readFloat();
-			
+			ItemStack stack = Utils.unserialiseItemStack(stream);
+			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(stack, ElectricalCableDescriptor.class);
+			if(desc == null)
+				cableRender = null;
+			else
+				cableRender = desc.render;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -77,12 +92,12 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 		
 		if(boot)
 		{
-
+			interpol.setValue(switchState ? 1f : 0f);
 		}
 		boot = false;
 	}
 	
-	
+	CableRenderDescriptor cableRender;
 	public void clientSetVoltageMin(float value)
 	{
         try {
@@ -93,6 +108,9 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 			
 			stream.writeByte(ElectricalBreakerElement.setVoltageMinId);
 			stream.writeFloat(value);
+			
+
+			
 			
 			sendPacketToServer(bos);
 		} catch (IOException e) {

@@ -135,6 +135,14 @@ public class TransparentNodeEntity extends NodeBlockEntity {
 		}
 		return 0;
 	}
+	@Override
+	public void tileEntityNeighborSpawn() {
+		// TODO Auto-generated method stub
+		if(elementRender != null) elementRender.notifyNeighborSpawn();
+	}
+	
+	
+	
 	
 }
 // && 

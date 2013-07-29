@@ -2,17 +2,64 @@ package mods.eln.TreeResinCollector;
 
 import java.util.List;
 
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import mods.eln.misc.Obj3D;
+import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.SixNodeDescriptor;
 
 public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 
-	public TreeResinCollectorDescriptor(String name) {
+	private Obj3D obj;
+	private Obj3DPart main,fill;
+
+	public TreeResinCollectorDescriptor(String name,Obj3D obj) {
 		super(name, TreeResinCollectorElement.class, TreeResinCollectorRender.class);
-		// TODO Auto-generated constructor stub
+		this.obj = obj;
+		if(obj != null){
+			main = obj.getPart("main");
+			fill = obj.getPart("fill");
+			if(fill != null){
+				emptyT = fill.getFloat("emptyT");
+				emptyS = fill.getFloat("emptyS");
+			}
+		}
 	}
 
+	float emptyS,emptyT;
+	
+	
+	void draw(float factor)
+	{
+		if(main != null) main.draw();
+		if(fill != null){
+			if(factor>1f)factor = 1f;
+			factor = (1f-factor);
+			GL11.glTranslatef(0f,0f,factor*emptyT);
+			GL11.glScalef(1f - factor*(1f-emptyS),1f - factor*(1f-emptyS), 1f);
+			fill.draw();
+		}
+	}
+	
+	
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		draw(1.0f);
+	}
 	
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,

@@ -68,7 +68,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 	
 	
 	SixNodeElementInventory inventory = new SixNodeElementInventory(1,64,this);
-	LRDU front;
+
 	public float voltageMax = (float) Eln.SVU,voltageMin = 0;
 	
 	public SixNodeElementInventory getInventory() {
@@ -108,8 +108,8 @@ public class ElectricalBreakerElement extends SixNodeElement {
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
 		// TODO Auto-generated method stub
-		if(front.left() == lrdu) return aLoad;
-		if(front.right() == lrdu) return bLoad;
+		if(front == lrdu) return aLoad;
+		if(front.inverse() == lrdu) return bLoad;
 		return null;
 	}
 
@@ -122,8 +122,8 @@ public class ElectricalBreakerElement extends SixNodeElement {
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		// TODO Auto-generated method stub4
-		if(front.left() == lrdu) return Node.maskElectricalAll;
-		if(front.right() == lrdu) return Node.maskElectricalAll;
+		if(front == lrdu) return Node.maskElectricalAll;
+		if(front.inverse() == lrdu) return Node.maskElectricalAll;
 
 		return 0;
 	}
@@ -151,6 +151,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 	    	stream.writeFloat( (voltageMax));
 	    	stream.writeFloat( (voltageMin));
 
+	    	Utils.serialiseItemStack(stream, inventory.getStackInSlot(ElectricalBreakerContainer.cableSlotId));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -231,7 +232,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 		{
 			front = front.getNextClockwise();
 			sixNode.reconnect();
-			sixNode.setNeedPublish(true);
+			
 			return true;	
 		}
 		else if(Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))

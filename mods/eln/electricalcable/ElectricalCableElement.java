@@ -33,6 +33,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.World;
 
 
 public class ElectricalCableElement extends SixNodeElement implements IThermalDestructorDescriptor , ITemperatureWatchdogDescriptor {
@@ -53,6 +54,8 @@ public class ElectricalCableElement extends SixNodeElement implements IThermalDe
 		thermalProcessList.add(ETProcess);
 		slowProcessList.add(thermalWatchdogProcess);
 		slowProcessList.add(electricalLoadDynamicProcess);
+		
+
 	}
 
 
@@ -144,7 +147,11 @@ public class ElectricalCableElement extends SixNodeElement implements IThermalDe
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,float vx,float vy,float vz)
 	{
+	/*	World w = sixNode.coordonate.world();
+		boolean exist = w.blockExists(10000, 0, 0);
+		int id = w.getBlockId(10000, 0, 0);*/
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+		//int i;
 		if(Eln.playerManager.get(entityPlayer).getInteractEnable())
 		{
 			colorCare = colorCare ^ 1;

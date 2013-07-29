@@ -3,11 +3,15 @@ package mods.eln.electricalsource;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import javax.management.Descriptor;
+
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
+import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import mods.eln.node.Node;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementRender;
@@ -21,11 +25,13 @@ import net.minecraft.item.ItemStack;
 
 public class ElectricalSourceRender extends SixNodeElementRender{
 
+	ElectricalSourceDescriptor descriptor;
 
 
 	public ElectricalSourceRender(SixNodeEntity tileEntity, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
+		this.descriptor = (ElectricalSourceDescriptor)descriptor;
 		// TODO Auto-generated constructor stub
 	}
 
@@ -37,76 +43,12 @@ public class ElectricalSourceRender extends SixNodeElementRender{
 	
 	@Override
 	public void draw() {
-		// TODO Auto-generated method stub
-		ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
-		
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-
-		if(i != null && i.getItem()  == Eln.voltMeterHelmet)
-		{		
-			double factor = voltage * MeterItemArmor.getBlockRenderColorFactor(i);
-			GL11.glColor4d(factor, 1.0-factor,0.0, 1.0);
-			GL11.glDisable(GL11.GL_LIGHTING);
-		}
-		else if(i != null && i.getItem()  == Eln.currentMeterHelmet)
-		{		
-			double factor = current * MeterItemArmor.getBlockRenderColorFactor(i);
-			GL11.glColor4d(factor, 1.0-factor,0.0, 1.0);
-			GL11.glDisable(GL11.GL_LIGHTING);
-		}
-		else
-		{
-			GL11.glColor4d(1.0, 1.0, color/16.0, 1.0);
-		}
+		super.draw();
 		
 		
-		GL11.glPointSize(10);
-		GL11.glLineWidth(10);
-		GL11.glBegin(GL11.GL_LINES);
-		//GL11.glBegin(GL11.GL_POINTS);
 		
-		GL11.glTexCoord2f(0.0f,0.0f);
-		GL11.glNormal3f(1f, 0.0f, 0.0f);
-			
-		/*
-		GL11.glVertex3f(0.05f,0.0f,0f);
-		if(connectedSide.down()) 		GL11.glVertex3f(0.05f,-0.4f,0f);
-		if(connectedSide.up()) 			GL11.glVertex3f(0.05f,0.4f,0f);
-		if(connectedSide.left()) 		GL11.glVertex3f(0.05f,0f,-0.4f);
-		if(connectedSide.right()) 		GL11.glVertex3f(0.05f,0f,0.4f);*/
-		if(connectedSide.down())
-		{
-			GL11.glVertex3f(0.05f,0f,0f);
-			GL11.glVertex3f(0.05f,-0.55f,0f);
-		}
-		if(connectedSide.up())
-		{
-			GL11.glVertex3f(0.05f,0f,0f);
-			GL11.glVertex3f(0.05f,0.55f,0f);
-		}
-		if(connectedSide.left())
-		{
-			GL11.glVertex3f(0.05f,0f,0f);
-			GL11.glVertex3f(0.05f,0f,-0.55f);
-		}
-		if(connectedSide.right())
-		{
-			GL11.glVertex3f(0.05f,0f,0f);
-			GL11.glVertex3f(0.05f,0f,0.55f);
-		}
+		descriptor.draw();
 		
-
-
-		GL11.glEnd();
-		
-		GL11.glPointSize(25);
-		GL11.glColor3f(1.0f, 1.0f, 1.0f);
-		GL11.glBegin(GL11.GL_POINTS);
-			GL11.glVertex3f(0.08f,0f,0f);
-		GL11.glEnd();
-		
-		GL11.glEnable(GL11.GL_LIGHTING);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);				
 	}
 
 	@Override
@@ -120,7 +62,8 @@ public class ElectricalSourceRender extends SixNodeElementRender{
 			color = (b>>4) & 0xF;
 			voltage = stream.readFloat();
 
-
+			needRedrawCable();
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -138,5 +81,12 @@ public class ElectricalSourceRender extends SixNodeElementRender{
 	
 	
 	
-	
+	@Override
+	public CableRenderDescriptor getCableRender(LRDU lrdu) {
+		if(voltage < Eln.instance.lowVoltageCableDescriptor.electricalMaximalVoltage) return Eln.instance.lowVoltageCableDescriptor.render;
+		if(voltage < Eln.instance.meduimVoltageCableDescriptor.electricalMaximalVoltage) return Eln.instance.meduimVoltageCableDescriptor.render;
+		if(voltage < Eln.instance.highVoltageCableDescriptor.electricalMaximalVoltage) return Eln.instance.highVoltageCableDescriptor.render;
+
+		return super.getCableRender(lrdu);
+	}
 }

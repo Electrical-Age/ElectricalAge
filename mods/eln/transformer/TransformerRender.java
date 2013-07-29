@@ -128,5 +128,10 @@ public class TransformerRender extends TransparentNodeElementRender{
 		}
 		return null;
 	}
-
+	@Override
+	public void notifyNeighborSpawn() {
+		// TODO Auto-generated method stub
+		super.notifyNeighborSpawn();
+		cableRenderType = null;
+	}
 }
