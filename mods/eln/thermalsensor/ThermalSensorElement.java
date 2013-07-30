@@ -18,7 +18,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.IVoltageDestructorDescriptor;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalGateOutputProcess;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeElectricalResistor;
@@ -139,14 +139,14 @@ public class ThermalSensorElement extends SixNodeElement {
 
 		if(descriptor.temperatureOnly==false)
 		{
-			if(front.left() == lrdu) return Node.maskThermal;
-			if(front.right() == lrdu) return Node.maskThermal;
-			if(front == lrdu) return  Node.maskElectricalOutputGate;
+			if(front.left() == lrdu) return NodeBase.maskThermal;
+			if(front.right() == lrdu) return NodeBase.maskThermal;
+			if(front == lrdu) return  NodeBase.maskElectricalOutputGate;
 		}
 		else
 		{
-			if(front.inverse() == lrdu) return Node.maskThermal;
-			if(front == lrdu) return  Node.maskElectricalOutputGate;
+			if(front.inverse() == lrdu) return NodeBase.maskThermal;
+			if(front == lrdu) return  NodeBase.maskElectricalOutputGate;
 		}
 		return 0;
 	}

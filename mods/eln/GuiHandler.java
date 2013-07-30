@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
 import net.minecraft.entity.player.EntityPlayer;

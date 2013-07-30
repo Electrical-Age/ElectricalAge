@@ -11,7 +11,7 @@ import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorSlot;
 import mods.eln.node.INodeContainer;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.sim.RegulatorType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -19,9 +19,9 @@ import net.minecraft.inventory.Slot;
 
 public class ElectricalFurnaceContainer extends BasicContainer implements INodeContainer{
 
-	Node node = null;
+	NodeBase node = null;
 	
-	public ElectricalFurnaceContainer(Node node,EntityPlayer player, IInventory inventory) {
+	public ElectricalFurnaceContainer(NodeBase node,EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
 				new SlotWithSkin(inventory,0,176/2 - 35 - 18 +  0,28,SlotSkin.medium),
 				new SlotWithSkin(inventory,1,176/2 + 15 ,28,SlotSkin.big),
@@ -40,7 +40,7 @@ public class ElectricalFurnaceContainer extends BasicContainer implements INodeC
 	}
 
 	@Override
-	public Node getNode() {
+	public NodeBase getNode() {
 		// TODO Auto-generated method stub
 		return node;
 	}

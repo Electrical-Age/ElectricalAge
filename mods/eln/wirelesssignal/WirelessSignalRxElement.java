@@ -11,7 +11,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.node.NodeElectricalGateOutput;
 import mods.eln.node.NodeElectricalGateOutputProcess;
@@ -65,7 +65,7 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu) return Node.maskElectricalOutputGate;
+		if(front == lrdu) return NodeBase.maskElectricalOutputGate;
 		return 0;
 	}
 

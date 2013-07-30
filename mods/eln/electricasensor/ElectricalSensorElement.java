@@ -19,7 +19,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.IVoltageDestructorDescriptor;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.node.NodeElectricalGateOutputProcess;
 import mods.eln.node.NodeElectricalLoad;
@@ -150,14 +150,14 @@ public class ElectricalSensorElement extends SixNodeElement {
 		boolean cable = inventory.getStackInSlot(ElectricalSensorContainer.cableSlotId) != null;
 		if(descriptor.voltageOnly == false)
 		{
-			if(front.left() == lrdu && cable) return Node.maskElectricalAll;
-			if(front.right() == lrdu && cable) return Node.maskElectricalAll;
-			if(front == lrdu) return Node.maskElectricalOutputGate;
+			if(front.left() == lrdu && cable) return NodeBase.maskElectricalAll;
+			if(front.right() == lrdu && cable) return NodeBase.maskElectricalAll;
+			if(front == lrdu) return NodeBase.maskElectricalOutputGate;
 		}
 		else
 		{
-			if(front.inverse() == lrdu && cable) return Node.maskElectricalAll;
-			if(front == lrdu) return Node.maskElectricalOutputGate;
+			if(front.inverse() == lrdu && cable) return NodeBase.maskElectricalAll;
+			if(front == lrdu) return NodeBase.maskElectricalOutputGate;
 		}
 		return 0;
 	}

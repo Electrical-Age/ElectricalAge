@@ -14,7 +14,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.RecipesList;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodePeriodicPublishProcess;
 import mods.eln.node.NodeThermalLoad;
@@ -126,7 +126,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 	public int getConnectionMask(Direction side, LRDU lrdu) {
 		if(lrdu != LRDU.Down) return 0;
 		if(descriptor.powerLrdu(side, front) == false) return 0;
-		return Node.maskElectricalPower;
+		return NodeBase.maskElectricalPower;
 	}
 
 

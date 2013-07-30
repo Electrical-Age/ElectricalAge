@@ -281,7 +281,7 @@ public class SixNodeBlock extends NodeBlock{
         	SixNodeEntity entity= getEntity(world, x, y, z);
         	if(entity != null)
         	{
-        		Node node = entity.getNode();
+        		NodeBase node = entity.getNode();
         		if(node != null && node instanceof SixNode)
         		{
         			SixNodeElement element = ((SixNode)node).sideElementList[Direction.YN.getInt()];

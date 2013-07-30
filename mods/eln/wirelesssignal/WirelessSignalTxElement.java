@@ -12,7 +12,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.node.SixNode;
 import mods.eln.node.SixNodeDescriptor;
@@ -80,7 +80,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu) return Node.maskElectricalInputGate;
+		if(front == lrdu) return NodeBase.maskElectricalInputGate;
 		return 0;
 	}
 

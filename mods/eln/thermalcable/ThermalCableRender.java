@@ -12,7 +12,7 @@ import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementRender;
 import mods.eln.node.SixNodeEntity;
@@ -95,7 +95,7 @@ public class ThermalCableRender extends SixNodeElementRender{
 			b = stream.readByte();
 			
 			color = (b>>4) & 0xF;
-			temperature = stream.readShort() /Node.networkSerializeTFactor;
+			temperature = stream.readShort() /NodeBase.networkSerializeTFactor;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

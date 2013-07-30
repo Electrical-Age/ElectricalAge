@@ -18,7 +18,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.IVoltageDestructorDescriptor;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeElectricalResistor;
@@ -118,7 +118,7 @@ public class ElectricalRelayElement extends SixNodeElement {
 		// TODO Auto-generated method stub4
 		if(front.left() == lrdu) return descriptor.cable.getNodeMask();
 		if(front.right() == lrdu) return descriptor.cable.getNodeMask();
-		if(front == lrdu) return Node.maskElectricalInputGate;
+		if(front == lrdu) return NodeBase.maskElectricalInputGate;
 		return 0;
 	}
 

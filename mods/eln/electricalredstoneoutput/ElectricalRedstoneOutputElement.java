@@ -12,7 +12,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
@@ -111,7 +111,7 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement{
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		// TODO Auto-generated method stub4
-		if(front == lrdu.left()) return Node.maskElectricalInputGate;
+		if(front == lrdu.left()) return NodeBase.maskElectricalInputGate;
 		return 0;
 	}
 

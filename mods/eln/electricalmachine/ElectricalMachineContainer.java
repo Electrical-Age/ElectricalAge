@@ -15,7 +15,7 @@ import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorSlot;
 import mods.eln.node.INodeContainer;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.sim.RegulatorType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -23,9 +23,9 @@ import net.minecraft.inventory.Slot;
 
 public class ElectricalMachineContainer extends BasicContainer implements INodeContainer{
 
-	Node node = null;
+	NodeBase node = null;
 	public static final int inSlotId = 0,outSlotId = 1,boosterSlotId = 2;
-	public ElectricalMachineContainer(Node node,EntityPlayer player, IInventory inventory) {
+	public ElectricalMachineContainer(NodeBase node,EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
 				new SlotWithSkin(inventory,inSlotId,70,12,SlotSkin.medium),
 				new SlotWithSkin(inventory,outSlotId,130,12,SlotSkin.big),
@@ -42,7 +42,7 @@ public class ElectricalMachineContainer extends BasicContainer implements INodeC
 	}
 
 	@Override
-	public Node getNode() {
+	public NodeBase getNode() {
 		// TODO Auto-generated method stub
 		return node;
 	}

@@ -14,7 +14,7 @@ import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.NodeThermalWatchdogProcess;
@@ -169,10 +169,10 @@ public class LampSocketElement extends SixNodeElement{
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(grounded) return Node.maskElectricalPower;
+		if(grounded) return NodeBase.maskElectricalPower;
 		
-		if(front == lrdu) return Node.maskElectricalPower;
-		if(front == lrdu.inverse()) return Node.maskElectricalPower;
+		if(front == lrdu) return NodeBase.maskElectricalPower;
+		if(front == lrdu.inverse()) return NodeBase.maskElectricalPower;
 		
 		return 0;
 	}

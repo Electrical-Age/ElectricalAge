@@ -1,6 +1,7 @@
 package mods.eln.node;
 
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
+import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
@@ -21,6 +22,9 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 		this.RenderClass = RenderClass;
 		// TODO Auto-generated constructor stub
 	}
+	
+	
+	protected GhostGroup ghostGroup = null;
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
@@ -61,7 +65,7 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 	{
 		return false;
 	}
-	public boolean checkCanPlace(Coordonate coord,Direction front) {
+	public String checkCanPlace(Coordonate coord,Direction front) {
 		Block block;
 		boolean needDestroy = false;
 		if(mustHaveFloor())
@@ -69,21 +73,21 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 			Coordonate temp = new Coordonate(coord);
 			temp.move(Direction.YN);
 			block = temp.getBlock();
-			if(block == null || ! block.isOpaqueCube()) needDestroy = true;
+			if(block == null || ! block.isOpaqueCube()) return "You can't place this block at this side";
 		}
 		if(mustHaveCeiling())
 		{
 			Coordonate temp = new Coordonate(coord);
 			temp.move(Direction.YP);
 			block = temp.getBlock();
-			if(block == null || ! block.isOpaqueCube()) needDestroy = true;
+			if(block == null || ! block.isOpaqueCube()) return "You can't place this block at this side";
 		}
 		if(mustHaveWallFrontInverse())
 		{
 			Coordonate temp = new Coordonate(coord);
 			temp.move(front.getInverse());
 			block = temp.getBlock();
-			if(block == null || ! block.isOpaqueCube()) needDestroy = true;
+			if(block == null || ! block.isOpaqueCube()) return "You can't place this block at this side";
 		}
 		if(mustHaveWall())
 		{
@@ -106,10 +110,12 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 			block = temp.getBlock();
 			if(block != null && block.isOpaqueCube()) wall = true;
 			
-			if(! wall) needDestroy = true;
+			if(! wall) return "You can't place this block at this side";
 		}
 		
-		return ! needDestroy;
+		GhostGroup ghostGroup = getGhostGroup(front);
+		if(ghostGroup != null && ghostGroup.canBePloted(coord) == false) return "Not enough space for this block";
+		return null;
 	}
 
 	
@@ -130,5 +136,17 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 		
 		}
 		return front;
+	}
+	public boolean hasGhostGroup()
+	{
+		return ghostGroup != null;
+	}
+	public GhostGroup getGhostGroup(Direction front) {
+		// TODO Auto-generated method stub
+		return ghostGroup.newRotate(front);
+	}
+	public int getGhostGroupUuid() {
+		// TODO Auto-generated method stub
+		return -1;
 	}
 }

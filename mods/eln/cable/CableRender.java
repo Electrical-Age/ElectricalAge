@@ -12,7 +12,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Utils;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.SixNodeElementRender;
 import mods.eln.node.SixNodeEntity;
@@ -84,7 +84,7 @@ public class CableRender {
 			}
 			
 			//no wrappeConection ?
-			if(! Node.isBlockWrappable(entity.worldObj.getBlockId(x2, y2, z2)))
+			if(! NodeBase.isBlockWrappable(entity.worldObj.getBlockId(x2, y2, z2)))
 			{
 				continue;
 			}
@@ -257,7 +257,7 @@ public class CableRender {
 			}
 			
 			//no wrappeConection ?
-			if(! Node.isBlockWrappable(element.tileEntity.worldObj.getBlockId(x2, y2, z2)))
+			if(! NodeBase.isBlockWrappable(element.tileEntity.worldObj.getBlockId(x2, y2, z2)))
 			{
 				continue;
 			}

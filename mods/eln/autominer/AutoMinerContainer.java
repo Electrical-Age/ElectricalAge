@@ -10,19 +10,19 @@ import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
 import mods.eln.item.OreScanner;
 import mods.eln.node.INodeContainer;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeItemSlot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
 public class AutoMinerContainer extends BasicContainer implements INodeContainer {
-	Node node;
+	NodeBase node;
 	
 	public static final int electricalDrillSlotId = 0;
 	public static final int OreScannerSlotId = 1;
 	public static final int MiningPipeSlotId = 2;
-	public AutoMinerContainer(Node node,EntityPlayer player, IInventory inventory) {
+	public AutoMinerContainer(NodeBase node,EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
 		
 				new GenericItemUsingDamageSlot(inventory,electricalDrillSlotId,62 + 0,17,1,ElectricalDrillDescriptor.class,SlotSkin.medium,new String[]{"Drill slot"}),
@@ -35,7 +35,7 @@ public class AutoMinerContainer extends BasicContainer implements INodeContainer
 		// TODO Auto-generated constructor stub
 	}
 	@Override
-	public Node getNode() {
+	public NodeBase getNode() {
 		// TODO Auto-generated method stub
 		return node;
 	}

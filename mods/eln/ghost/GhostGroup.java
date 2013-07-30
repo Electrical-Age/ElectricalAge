@@ -48,6 +48,11 @@ public class GhostGroup {
 		}
 	}
 	
+	public boolean canBePloted(Coordonate c)
+	{
+		return canBePloted(c.world(),c.x,c.y,c.z);
+	}
+	
 	public boolean canBePloted(World world,int x,int y, int z)
 	{
 		for(GhostGroupElement element : elementList)

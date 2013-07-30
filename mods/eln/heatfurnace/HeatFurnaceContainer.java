@@ -11,7 +11,7 @@ import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorSlot;
 import mods.eln.node.INodeContainer;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.sim.RegulatorType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -24,8 +24,8 @@ public class HeatFurnaceContainer extends BasicContainer implements INodeContain
 	public static final int isolatorId = 2;
 	public static final int combustrionChamberId = 3;
 	
-	Node node;
-	public HeatFurnaceContainer(Node node,EntityPlayer player, IInventory inventory,HeatFurnaceDescriptor descriptor) {
+	NodeBase node;
+	public HeatFurnaceContainer(NodeBase node,EntityPlayer player, IInventory inventory,HeatFurnaceDescriptor descriptor) {
 		super(player, inventory,new Slot[]{
 				new SlotWithSkinAndComment(inventory,combustibleId,18 +  0,51,SlotSkin.medium,new String[]{"Fuel slot"}),
 			//	new RegulatorSlot(inventory,regulatorId,62 +  0,17+18,1,new RegulatorType[]{),
@@ -37,7 +37,7 @@ public class HeatFurnaceContainer extends BasicContainer implements INodeContain
 		// TODO Auto-generated constructor stub
 	}
 	@Override
-	public Node getNode() {
+	public NodeBase getNode() {
 		// TODO Auto-generated method stub
 		return node;
 	}

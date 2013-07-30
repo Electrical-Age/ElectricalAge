@@ -6,7 +6,7 @@ import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.misc.Utils;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.NodeThermalWatchdogProcess;
@@ -215,9 +215,9 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 	public int getNodeMask()
 	{
 		if(signalWire)
-			return Node.maskElectricalGate;
+			return NodeBase.maskElectricalGate;
 		else 
-			return Node.maskElectricalPower;
+			return NodeBase.maskElectricalPower;
 	}
 
 	public static CableRenderDescriptor getCableRender(

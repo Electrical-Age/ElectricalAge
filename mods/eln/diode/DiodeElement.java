@@ -18,7 +18,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.NodeThermalWatchdogProcess;
@@ -136,10 +136,10 @@ public class DiodeElement extends SixNodeElement implements IThermalDestructorDe
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte( (front.toInt()<<4));
-	    	stream.writeShort((short) ((anodeLoad.Uc)*Node.networkSerializeUFactor));
-	    	stream.writeShort((short) ((catodeLoad.Uc)*Node.networkSerializeUFactor));
-	    	stream.writeShort((short) (anodeLoad.getCurrent()*Node.networkSerializeIFactor));
-	    	stream.writeShort((short) (thermalLoad.Tc*Node.networkSerializeTFactor));
+	    	stream.writeShort((short) ((anodeLoad.Uc)*NodeBase.networkSerializeUFactor));
+	    	stream.writeShort((short) ((catodeLoad.Uc)*NodeBase.networkSerializeUFactor));
+	    	stream.writeShort((short) (anodeLoad.getCurrent()*NodeBase.networkSerializeIFactor));
+	    	stream.writeShort((short) (thermalLoad.Tc*NodeBase.networkSerializeTFactor));
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

@@ -67,11 +67,6 @@ public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 	double electricalRs;
 	IFunction diodeIfU;
 	FunctionTable solarIfS;
-	private GhostGroup ghostGroup;
-	
-	public GhostGroup getGhostGroup() {
-		return ghostGroup;
-	}
 
 	
 	public void applyTo(ElectricalLoad load,boolean grounded)

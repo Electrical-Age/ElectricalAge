@@ -328,7 +328,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
  
     public Node getNode()
     {
-    	if(node == null) node = NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord,this.worldObj));
+    	if(node == null) node = (Node)NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord,this.worldObj));
     	return node;
     }
     

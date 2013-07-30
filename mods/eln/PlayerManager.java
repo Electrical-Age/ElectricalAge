@@ -8,7 +8,7 @@ import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 
 import mods.eln.misc.Coordonate;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 

@@ -9,7 +9,7 @@ import mods.eln.electricalantennarx.ElectricalAntennaRxElement;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.node.NodeElectricalGateOutput;
 import mods.eln.node.NodeElectricalGateOutputProcess;
@@ -70,7 +70,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 		if(rxCoord == null) return null;
 		if(rxElement == null)
 		{
-			Node node = NodeManager.instance.getNodeFromCoordonate(rxCoord);
+			NodeBase node = NodeManager.instance.getNodeFromCoordonate(rxCoord);
 			if(node != null && node instanceof TransparentNode && ((TransparentNode)node).element instanceof ElectricalAntennaRxElement)
 				rxElement =  (ElectricalAntennaRxElement) ((TransparentNode)node).element;
 			else
@@ -103,9 +103,9 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	public int getConnectionMask(Direction side, LRDU lrdu) {
 		if(front.getInverse() != side.applyLRDU(lrdu)) return 0;
 		
-		if(side == front.applyLRDU(rot)) return Node.maskElectricalPower;
-		if(side == front.applyLRDU(rot.left())) return Node.maskElectricalOutputGate;
-		if(side == front.applyLRDU(rot.right())) return Node.maskElectricalInputGate;
+		if(side == front.applyLRDU(rot)) return NodeBase.maskElectricalPower;
+		if(side == front.applyLRDU(rot.left())) return NodeBase.maskElectricalOutputGate;
+		if(side == front.applyLRDU(rot.right())) return NodeBase.maskElectricalInputGate;
 		return 0;
 	}
 

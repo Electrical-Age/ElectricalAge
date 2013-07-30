@@ -17,7 +17,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.node.TransparentNodeElementRender;

@@ -11,6 +11,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.CommonProxy;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamage;
+import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
@@ -51,17 +52,23 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
     	TransparentNodeDescriptor descriptor = getDescriptor(stack);
     	Direction front = descriptor.getFrontFromPlace(direction, player);
 		try {
-			if(descriptor.checkCanPlace(coord, front) == false)
+			String error;
+			if((error = descriptor.checkCanPlace(coord, front)) != null)
 			{
-				player.addChatMessage("You can't place this block at this side");
+				player.addChatMessage(error);
 				return false;
 			}
+			
+			GhostGroup ghostgroup = descriptor.getGhostGroup(front);
+			if(ghostgroup != null) ghostgroup.plot(coord, coord, descriptor.getGhostGroupUuid());
 			
         	TransparentNode node =  (TransparentNode) NodeManager.UUIDToClass[getBlockID()].getConstructor().newInstance();
 			node.onBlockPlacedBy(new Coordonate(x, y, z,world),front,player,stack);
 			
 			world.setBlock(x, y, z, getBlockID(), node.getBlockMetadata(),0x03);//caca1.5.1
         	((NodeBlock)Block.blocksList[getBlockID()]).onBlockPlacedBy(world, x, y, z,direction, player,metadata);
+        	
+        	
         	
         	node.checkCanStay(true);
         	

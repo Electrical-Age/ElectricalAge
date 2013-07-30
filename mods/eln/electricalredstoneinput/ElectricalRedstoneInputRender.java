@@ -9,9 +9,11 @@ import org.lwjgl.opengl.GL11;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.item.MeterItemArmor;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.node.Node;
+import mods.eln.misc.Utils;
+import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementRender;
 import mods.eln.node.SixNodeEntity;
@@ -33,12 +35,18 @@ public class ElectricalRedstoneInputRender extends SixNodeElementRender{
 	@Override
 	public void draw() {
 		super.draw();
-	
+		if(redLevelTimeout == 0){
+			redLevelTimeout = 4 + (int)(Math.random()*2);
+			redLevel = Utils.getRedstoneLevelAround(new Coordonate(this.tileEntity));
+		}
+		redLevelTimeout--;
 		LRDU.Down.glRotateOnX();
-		descriptor.draw(tileEntity.worldObj.getStrongestIndirectPower(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord));
+		descriptor.draw(redLevel);
 	}
 
-
+	int redLevel = 0;
+	int redLevelTimeout = 0;
+	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub

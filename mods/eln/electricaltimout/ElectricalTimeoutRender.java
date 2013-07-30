@@ -21,7 +21,7 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementInventory;
 import mods.eln.node.SixNodeElementRender;

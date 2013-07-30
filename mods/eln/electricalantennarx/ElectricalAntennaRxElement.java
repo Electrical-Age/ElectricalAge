@@ -8,7 +8,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.node.NodeElectricalGateOutput;
 import mods.eln.node.NodeElectricalGateOutputProcess;
@@ -77,8 +77,8 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement{
 	public int getConnectionMask(Direction side, LRDU lrdu) {
 		if(front.getInverse() != side.applyLRDU(lrdu)) return 0;
 		
-		if(side == front.applyLRDU(rot.left())) return Node.maskElectricalPower;
-		if(side == front.applyLRDU(rot.right())) return Node.maskElectricalInputGate;
+		if(side == front.applyLRDU(rot.left())) return NodeBase.maskElectricalPower;
+		if(side == front.applyLRDU(rot.right())) return NodeBase.maskElectricalInputGate;
 		
 		return 0;
 	}

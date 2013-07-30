@@ -10,7 +10,7 @@ import mods.eln.misc.FunctionTable;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBatteryProcess;
 import mods.eln.node.NodeBatterySlowProcess;
 import mods.eln.node.NodeElectricalLoad;

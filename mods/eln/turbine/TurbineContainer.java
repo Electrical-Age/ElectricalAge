@@ -7,7 +7,7 @@ import mods.eln.item.CombustionChamber;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.item.regulator.RegulatorSlot;
 import mods.eln.node.INodeContainer;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.sim.RegulatorType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -18,8 +18,8 @@ public class TurbineContainer extends BasicContainer implements INodeContainer{
 //	public static final int turbineCoreId = 0;
 
 	
-	Node node;
-	public TurbineContainer(Node node,EntityPlayer player, IInventory inventory) {
+	NodeBase node;
+	public TurbineContainer(NodeBase node,EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
 			//	new GenericItemUsingDamageSlot(inventory, turbineCoreId, 62 +  0,17 + 0,1, TurbineCoreDescriptor.class),
 			});
@@ -27,7 +27,7 @@ public class TurbineContainer extends BasicContainer implements INodeContainer{
 		// TODO Auto-generated constructor stub
 	}
 	@Override
-	public Node getNode() {
+	public NodeBase getNode() {
 		// TODO Auto-generated method stub
 		return node;
 	}

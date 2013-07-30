@@ -11,7 +11,7 @@ import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorSlot;
 import mods.eln.node.INodeContainer;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.sim.RegulatorType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -19,10 +19,10 @@ import net.minecraft.inventory.Slot;
 
 public class SolarPannelContainer extends BasicContainer implements INodeContainer{
 
-	Node node = null;
+	NodeBase node = null;
 	static final int trackerSlotId = 0;
 	
-	public SolarPannelContainer(Node node,EntityPlayer player, IInventory inventory) {
+	public SolarPannelContainer(NodeBase node,EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
 				new GenericItemUsingDamageSlot(inventory, trackerSlotId, 62 +  0,17 + 0,1, SolarTrackerDescriptor.class,SlotSkin.medium,new String[]{"Solar tracker slot"})
 
@@ -32,7 +32,7 @@ public class SolarPannelContainer extends BasicContainer implements INodeContain
 	}
 
 	@Override
-	public Node getNode() {
+	public NodeBase getNode() {
 		// TODO Auto-generated method stub
 		return node;
 	}

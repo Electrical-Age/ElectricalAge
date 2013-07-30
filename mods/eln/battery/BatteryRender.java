@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.node.TransparentNodeElementRender;

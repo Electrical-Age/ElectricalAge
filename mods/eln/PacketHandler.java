@@ -12,7 +12,7 @@ import org.lwjgl.Sys;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
 import net.minecraft.client.Minecraft;
@@ -98,7 +98,7 @@ public class PacketHandler implements IPacketHandler {
 			Coordonate coordonate = new Coordonate(stream.readInt(),
 					stream.readInt(), stream.readInt(), stream.readByte());
 
-			Node node = NodeManager.instance.getNodeFromCoordonate(coordonate);
+			NodeBase node = NodeManager.instance.getNodeFromCoordonate(coordonate);
 			if (node != null && node.getBlockId() == stream.readShort()) {
 				node.networkUnserialize(stream, player);
 			} else {

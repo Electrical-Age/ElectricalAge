@@ -16,6 +16,8 @@ import cpw.mods.fml.common.registry.LanguageRegistry;
 
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
+import mods.eln.ghost.GhostManager;
+import mods.eln.ghost.GhostObserver;
 import mods.eln.lampsocket.LampSocketElement;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -36,7 +38,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public abstract class TransparentNodeElement implements INBTTReady {
+public abstract class TransparentNodeElement implements INBTTReady ,GhostObserver{
 
 	public ArrayList<IProcess> slowProcessList  = new ArrayList<IProcess>(4);
 
@@ -144,6 +146,7 @@ public abstract class TransparentNodeElement implements INBTTReady {
 	{
 		this.node = transparentNode;
 		this.transparentNodeDescriptor = descriptor;
+		if(descriptor.hasGhostGroup())Eln.ghostManager.addObserver(this);
 	}
 	
 
@@ -205,6 +208,10 @@ public abstract class TransparentNodeElement implements INBTTReady {
 	*/
 	public void onBreakElement()
 	{
+		if(transparentNodeDescriptor.hasGhostGroup()){
+			Eln.ghostManager.removeObserver(node.coordonate);
+			transparentNodeDescriptor.getGhostGroup(front).erase(node.coordonate);
+		}
 		node.dropInventory(getInventory());
 		node.dropItem(getDropItemStack());
 	}
@@ -380,7 +387,24 @@ public abstract class TransparentNodeElement implements INBTTReady {
 		return 0f;
 	}
     
-    
+	public Coordonate getGhostObserverCoordonate()
+	{
+		return node.coordonate;
+		
+	}
+	public void ghostDestroyed(int UUID)
+	{
+		if(UUID == transparentNodeDescriptor.getGhostGroupUuid()){
+			selfDestroy();
+		}
+	}
+	public boolean ghostBlockActivated(int UUID,EntityPlayer entityPlayer, Direction side,float vx, float vy, float vz)
+	{
+		if(UUID == transparentNodeDescriptor.getGhostGroupUuid()){
+			onBlockActivated(entityPlayer, side, vx, vy, vz);
+		}
+		return false;
+	}
 
     
 

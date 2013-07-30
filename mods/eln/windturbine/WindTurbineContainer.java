@@ -14,7 +14,7 @@ import mods.eln.item.WindRotorDescriptor;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorSlot;
 import mods.eln.node.INodeContainer;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.sim.RegulatorType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -22,11 +22,11 @@ import net.minecraft.inventory.Slot;
 
 public class WindTurbineContainer extends BasicContainer implements INodeContainer{
 
-	Node node = null;
+	NodeBase node = null;
 	static final int windRotorSlotId = 0;
 	static final int dynamoSlotId = 1;
 	
-	public WindTurbineContainer(Node node,EntityPlayer player, IInventory inventory) {
+	public WindTurbineContainer(NodeBase node,EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
 				new GenericItemUsingDamageSlot(inventory, windRotorSlotId, 62 +  0,17 + 0,1, WindRotorDescriptor.class,SlotSkin.medium,new String[]{"Wind rotor slot"}),
 				new GenericItemUsingDamageSlot(inventory, dynamoSlotId, 62 +  18,17 + 0,1, DynamoDescriptor.class,SlotSkin.medium,new String[]{"Dynamo slot"})
@@ -37,7 +37,7 @@ public class WindTurbineContainer extends BasicContainer implements INodeContain
 	}
 
 	@Override
-	public Node getNode() {
+	public NodeBase getNode() {
 		// TODO Auto-generated method stub
 		return node;
 	}

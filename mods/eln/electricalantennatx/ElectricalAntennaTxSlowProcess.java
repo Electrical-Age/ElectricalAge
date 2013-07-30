@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 import mods.eln.Eln;
 import mods.eln.electricalantennarx.ElectricalAntennaRxElement;
 import mods.eln.misc.Coordonate;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import mods.eln.node.TransparentNode;
 import mods.eln.sim.IProcess;
@@ -69,7 +69,7 @@ public class ElectricalAntennaTxSlowProcess implements IProcess{
 				else
 				{
 				//	b++;
-					Node unknowNode = NodeManager.instance.getNodeFromCoordonate(coord);
+					NodeBase unknowNode = NodeManager.instance.getNodeFromCoordonate(coord);
 					if(node != null)
 					{
 						if(		unknowNode instanceof TransparentNode

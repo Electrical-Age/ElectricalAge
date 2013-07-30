@@ -52,7 +52,6 @@ public class NodeBlock extends BlockContainer {//BlockContainer
 		return super.idPicked(par1World, par2, par3, par4);
 	}
 	
-
 	
 	@Override
     public int isProvidingWeakPower(IBlockAccess block, int x, int y, int z, int side)

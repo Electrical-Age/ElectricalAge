@@ -10,7 +10,7 @@ import mods.eln.Eln;
 import mods.eln.battery.BatteryElement;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import mods.eln.node.TransparentNode;
 import mods.eln.node.TransparentNodeElement;

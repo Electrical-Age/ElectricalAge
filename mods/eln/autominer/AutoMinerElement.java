@@ -10,7 +10,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.TransparentNode;
 import mods.eln.node.TransparentNodeDescriptor;
@@ -62,7 +62,7 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		return Node.maskElectricalPower;
+		return NodeBase.maskElectricalPower;
 	}
 
 	@Override

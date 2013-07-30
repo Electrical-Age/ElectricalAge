@@ -13,7 +13,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.IVoltageDestructorDescriptor;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeElectricalResistor;
 import mods.eln.node.NodeThermalLoad;
@@ -141,10 +141,10 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
 		try {
 
 			stream.writeBoolean(switchState);
-	    	stream.writeShort((short) ((aLoad.Uc)*Node.networkSerializeUFactor));
-	    	stream.writeShort((short) ((bLoad.Uc)*Node.networkSerializeUFactor));
-	    	stream.writeShort((short) (aLoad.getCurrent()*Node.networkSerializeIFactor));
-	    	stream.writeShort((short) (thermalLoad.Tc*Node.networkSerializeTFactor));
+	    	stream.writeShort((short) ((aLoad.Uc)*NodeBase.networkSerializeUFactor));
+	    	stream.writeShort((short) ((bLoad.Uc)*NodeBase.networkSerializeUFactor));
+	    	stream.writeShort((short) (aLoad.getCurrent()*NodeBase.networkSerializeIFactor));
+	    	stream.writeShort((short) (thermalLoad.Tc*NodeBase.networkSerializeTFactor));
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

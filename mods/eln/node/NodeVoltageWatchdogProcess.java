@@ -6,11 +6,11 @@ import mods.eln.sim.IVoltageWatchdogDescriptor;
 import mods.eln.sim.VoltageWatchdogProcess;
 
 public class NodeVoltageWatchdogProcess extends VoltageWatchdogProcess{
-	Node node;
+	NodeBase node;
 	ElectricalLoad voltageLoad;
 	IVoltageDestructorDescriptor destructor;
 	IVoltageWatchdogDescriptor watchdog;
-	public NodeVoltageWatchdogProcess(Node node,IVoltageWatchdogDescriptor watchdog,IVoltageDestructorDescriptor destructor,ElectricalLoad voltageLoad) {
+	public NodeVoltageWatchdogProcess(NodeBase node,IVoltageWatchdogDescriptor watchdog,IVoltageDestructorDescriptor destructor,ElectricalLoad voltageLoad) {
 		
 		this.node = node;
 		this.voltageLoad = voltageLoad;

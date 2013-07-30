@@ -15,7 +15,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.NodeThermalWatchdogProcess;
@@ -100,7 +100,7 @@ public class ElectricalCableElement extends SixNodeElement implements IThermalDe
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		// TODO Auto-generated method stub
-		return descriptor.getNodeMask() + Node.maskElectricalWire + (color << Node.maskColorShift) +(colorCare << Node.maskColorCareShift);
+		return descriptor.getNodeMask() + NodeBase.maskElectricalWire + (color << NodeBase.maskColorShift) +(colorCare << NodeBase.maskColorCareShift);
 	}
 
 
@@ -122,9 +122,9 @@ public class ElectricalCableElement extends SixNodeElement implements IThermalDe
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte( (color<<4));
-	    	stream.writeShort((short) (electricalLoad.Uc*Node.networkSerializeUFactor));
-	    	stream.writeShort((short) (electricalLoad.getCurrent()*Node.networkSerializeIFactor));
-	    	stream.writeShort((short) (thermalLoad.Tc*Node.networkSerializeTFactor));
+	    	stream.writeShort((short) (electricalLoad.Uc*NodeBase.networkSerializeUFactor));
+	    	stream.writeShort((short) (electricalLoad.getCurrent()*NodeBase.networkSerializeIFactor));
+	    	stream.writeShort((short) (thermalLoad.Tc*NodeBase.networkSerializeTFactor));
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

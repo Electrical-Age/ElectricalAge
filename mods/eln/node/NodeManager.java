@@ -19,9 +19,9 @@ import net.minecraft.world.WorldSavedData;
 public class NodeManager extends WorldSavedData{
 	public static NodeManager instance = null;
 	
-	HashMap<Coordonate, Node> nodeArray;
+	HashMap<Coordonate, NodeBase> nodeArray;
 	
-	public HashMap<Coordonate, Node> getNodeArray()
+	public HashMap<Coordonate, NodeBase> getNodeArray()
 	{
 		return nodeArray;
 	}
@@ -31,7 +31,7 @@ public class NodeManager extends WorldSavedData{
 		UUIDToClass[block.blockID] = classType;
 	}
 	
-	Collection<Node> getNodeList()
+	Collection<NodeBase> getNodeList()
 	{
 		return nodeArray.values();
 	}
@@ -41,12 +41,12 @@ public class NodeManager extends WorldSavedData{
 	
 	public NodeManager(String par1Str) {	
 		super(par1Str);
-		nodeArray = new HashMap<Coordonate, Node>();
+		nodeArray = new HashMap<Coordonate, NodeBase>();
 		instance = this;
 		// TODO Auto-generated constructor stub
 	}
 
-	public void addNode(Node node)
+	public void addNode(NodeBase node)
 	{
 	//	nodeArray.add(node);
 		if(node.coordonate == null) 
@@ -58,10 +58,16 @@ public class NodeManager extends WorldSavedData{
 		System.out.println("NodeManager has " + nodeArray.size() +"node");
 		//nodeArray.put(new NodeIdentifier(node), node);
 	}
-	public void removeNode(Node node)
+	public void removeNode(NodeBase node)
 	{
 	//	nodeArray.remove(node);
 		nodeArray.remove(node.coordonate);
+		System.out.println("NodeManager has " + nodeArray.size() +"node");
+	}
+	public void removeCoordonate(Coordonate c)
+	{
+	//	nodeArray.remove(node);
+		nodeArray.remove(c);
 		System.out.println("NodeManager has " + nodeArray.size() +"node");
 	}
 	@Override
@@ -77,7 +83,7 @@ public class NodeManager extends WorldSavedData{
 			NBTTagCompound tag = (NBTTagCompound) o;
 			Class nodeClass = UUIDToClass[tag.getShort("UUID")];
 			try {
-				Node node = (Node) nodeClass.getConstructor().newInstance();
+				NodeBase node = (NodeBase) nodeClass.getConstructor().newInstance();
 				node.readFromNBT(tag, "");
 				addNode(node);
 				node.initializeFromNBT();
@@ -116,7 +122,7 @@ public class NodeManager extends WorldSavedData{
 			nbt.setCompoundTag("node" + nodeCounter++, nbtNode);
 		}*/
 		//for(Node node : nodeArray)
-		for(Node node : nodeArray.values())
+		for(NodeBase node : nodeArray.values())
 		{
 			NBTTagCompound nbtNode = new NBTTagCompound();
 			nbtNode.setShort("UUID", node.getBlockId());
@@ -126,7 +132,7 @@ public class NodeManager extends WorldSavedData{
 	}
 	
 	
-	public Node getNodeFromCoordonate(Coordonate nodeCoordonate)
+	public NodeBase getNodeFromCoordonate(Coordonate nodeCoordonate)
 	{
 		int idx = 0;
 		idx++;

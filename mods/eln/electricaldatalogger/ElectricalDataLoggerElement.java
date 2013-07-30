@@ -24,7 +24,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.IVoltageDestructorDescriptor;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.node.NodeElectricalGateOutputProcess;
 import mods.eln.node.NodeElectricalLoad;
@@ -143,7 +143,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front.inverse() == lrdu) return Node.maskElectricalInputGate;
+		if(front.inverse() == lrdu) return NodeBase.maskElectricalInputGate;
 		
 		return 0;
 	}

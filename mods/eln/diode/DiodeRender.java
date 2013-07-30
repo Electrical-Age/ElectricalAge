@@ -9,7 +9,7 @@ import mods.eln.Eln;
 import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementRender;
 import mods.eln.node.SixNodeEntity;
@@ -108,10 +108,10 @@ public class DiodeRender extends SixNodeElementRender{
 			Byte b;
 			b = stream.readByte();
 			front = LRDU.fromInt((b>>4)&3);
-			voltageAnode = stream.readShort() /Node.networkSerializeUFactor;
-			voltageCatode = stream.readShort() /Node.networkSerializeUFactor;
-			current = stream.readShort() /Node.networkSerializeIFactor;
-			temperature = stream.readShort() /Node.networkSerializeTFactor;
+			voltageAnode = stream.readShort() /NodeBase.networkSerializeUFactor;
+			voltageCatode = stream.readShort() /NodeBase.networkSerializeUFactor;
+			current = stream.readShort() /NodeBase.networkSerializeIFactor;
+			temperature = stream.readShort() /NodeBase.networkSerializeTFactor;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

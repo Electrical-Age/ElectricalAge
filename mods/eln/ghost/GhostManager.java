@@ -8,7 +8,8 @@ import java.util.Map.Entry;
 
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
+import mods.eln.node.NodeManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
@@ -43,6 +44,7 @@ public class GhostManager extends WorldSavedData
 	}
 	public void removeGhost(Coordonate coordonate)
 	{
+		removeGhostNode(coordonate);
 		ghostTable.remove(coordonate);
 	}
 	
@@ -69,9 +71,17 @@ public class GhostManager extends WorldSavedData
 			if(element.observatorCoordonate.equals(observerCoordonate))
 			{  
 				iterator.remove();
+				removeGhostNode(element.elementCoordonate);
 				element.elementCoordonate.world().setBlock(element.elementCoordonate.x,element.elementCoordonate.y,element.elementCoordonate.z,0);//caca1.5.1				
 			}			
 		}	
+	}
+	
+	public void removeGhostNode(Coordonate c)
+	{
+		NodeBase node = NodeManager.instance.getNodeFromCoordonate(c);
+		if(node == null) return;
+		node.onBreakBlock();
 	}
 	
 	public void removeGhostAndBlock(Coordonate coordonate)

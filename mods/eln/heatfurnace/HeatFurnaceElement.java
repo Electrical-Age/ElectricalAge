@@ -9,7 +9,7 @@ import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeFurnaceProcess;
@@ -81,8 +81,8 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub
-		if((side == front.left() || side == front.right()) && lrdu == LRDU.Down)  return Node.maskElectricalInputGate;
-		if(side == front.getInverse() && lrdu == LRDU.Down)	return Node.maskThermal;
+		if((side == front.left() || side == front.right()) && lrdu == LRDU.Down)  return NodeBase.maskElectricalInputGate;
+		if(side == front.getInverse() && lrdu == LRDU.Down)	return NodeBase.maskThermal;
 		return 0;
 	}
 
@@ -128,7 +128,7 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 		try {
 			stream.writeBoolean(getControlExternal());
 			stream.writeBoolean(getTakeFuel());
-			stream.writeShort((short) (thermalLoad.Tc*Node.networkSerializeTFactor));
+			stream.writeShort((short) (thermalLoad.Tc*NodeBase.networkSerializeTFactor));
 			stream.writeFloat((float) furnaceProcess.getGain());
 			stream.writeFloat((float)regulator.getTarget());
 			stream.writeShort((int) furnaceProcess.getP());

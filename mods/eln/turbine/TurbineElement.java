@@ -6,7 +6,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.SixNode;
@@ -88,10 +88,10 @@ public class TurbineElement extends TransparentNodeElement{
 	public int getConnectionMask(Direction side, LRDU lrdu) {
 		if(lrdu == lrdu.Down)
 		{
-			if(side == front) return Node.maskElectricalPower;
-			if(side == front.back()) return Node.maskElectricalPower;
-			if(side == front.left()) return  Node.maskThermal;
-			if(side == front.right()) return Node.maskThermal;
+			if(side == front) return NodeBase.maskElectricalPower;
+			if(side == front.back()) return NodeBase.maskElectricalPower;
+			if(side == front.left()) return  NodeBase.maskThermal;
+			if(side == front.right()) return NodeBase.maskThermal;
 		}
 		return 0;
 	}

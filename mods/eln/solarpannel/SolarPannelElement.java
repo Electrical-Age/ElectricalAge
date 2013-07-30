@@ -26,7 +26,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class SolarPannelElement extends TransparentNodeElement implements GhostObserver{
+public class SolarPannelElement extends TransparentNodeElement{
 
 	SolarPannelDescriptor descriptor;
 	NodeElectricalLoad positiveLoad = new NodeElectricalLoad("positiveLoad");
@@ -44,7 +44,7 @@ public class SolarPannelElement extends TransparentNodeElement implements GhostO
 			TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		this.descriptor = (SolarPannelDescriptor) descriptor;
-		Eln.ghostManager.addObserver(this);
+
 		grounded = false;
 		
 		if(this.descriptor.basicModel == false)
@@ -129,33 +129,6 @@ public class SolarPannelElement extends TransparentNodeElement implements GhostO
 	}
 	
 	
-
-	@Override
-	public Coordonate getGhostObserverCoordonate() {
-		return node.coordonate;
-	}
-	@Override
-	public void checkCanStay(boolean onCreate) {
-		if(onCreate)
-		{
-			if(descriptor.getGhostGroup().plot(node.coordonate, node.coordonate,12) == false)
-			{
-				selfDestroy();
-			}
-		}
-		super.checkCanStay(onCreate);
-	}
-	@Override
-	public void ghostDestroyed(int UUID) {		
-		selfDestroy();
-	}
-	@Override
-	public void onBreakElement() {
-		Eln.ghostManager.removeObserver(node.coordonate);
-		descriptor.getGhostGroup().erase(node.coordonate);
-		super.onBreakElement();
-	}
-
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		// TODO Auto-generated method stub
@@ -169,13 +142,6 @@ public class SolarPannelElement extends TransparentNodeElement implements GhostO
 		pannelAlpha = nbt.getDouble(str + "pannelAlpha");
 	}
 
-	@Override
-	public boolean ghostBlockActivated(int UUID, EntityPlayer entityPlayer,
-			Direction side, float vx, float vy, float vz) {
-		return this.node.onBlockActivated(entityPlayer, side, vx, vy, vz);
-	}
-	
-	
 
 
 	public void networkSerialize(java.io.DataOutputStream stream)

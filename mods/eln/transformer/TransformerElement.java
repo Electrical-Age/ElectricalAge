@@ -11,7 +11,7 @@ import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.SixNode;
@@ -99,10 +99,10 @@ public class TransformerElement extends TransparentNodeElement{
 	public int getConnectionMask(Direction side, LRDU lrdu) {
 		if(lrdu == lrdu.Down)
 		{
-			if(side == front.left() ) return Node.maskElectricalPower;	
-			if(side == front.right()) return Node.maskElectricalPower;	
-			if(side == front&& ! grounded) return Node.maskElectricalPower;
-			if(side == front.back() && ! grounded) return Node.maskElectricalPower;
+			if(side == front.left() ) return NodeBase.maskElectricalPower;	
+			if(side == front.right()) return NodeBase.maskElectricalPower;	
+			if(side == front&& ! grounded) return NodeBase.maskElectricalPower;
+			if(side == front.back() && ! grounded) return NodeBase.maskElectricalPower;
 		}
 		return 0;
 	}

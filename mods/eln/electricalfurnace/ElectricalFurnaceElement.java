@@ -11,7 +11,7 @@ import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.TransparentNode;
@@ -124,7 +124,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub
-		return Node.maskElectricalPower;
+		return NodeBase.maskElectricalPower;
 	}
 
 

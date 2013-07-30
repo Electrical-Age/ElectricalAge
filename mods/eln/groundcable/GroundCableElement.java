@@ -14,7 +14,7 @@ import mods.eln.item.BrushDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.NodeThermalWatchdogProcess;
@@ -95,7 +95,7 @@ public class GroundCableElement extends SixNodeElement{
 	public int getConnectionMask(LRDU lrdu) {
 		// TODO Auto-generated method stub
 		if(inventory.getStackInSlot(GroundCableContainer.cableSlotId) == null) return 0;
-		return Node.maskElectricalAll + (color << Node.maskColorShift) +(colorCare << Node.maskColorCareShift);
+		return NodeBase.maskElectricalAll + (color << NodeBase.maskColorShift) +(colorCare << NodeBase.maskColorCareShift);
 	}
 
 

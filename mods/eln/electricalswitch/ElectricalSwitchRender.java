@@ -17,7 +17,7 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementRender;
 import mods.eln.node.SixNodeEntity;
@@ -81,10 +81,10 @@ public class ElectricalSwitchRender extends SixNodeElementRender{
 		try {
 
 			switchState = stream.readBoolean();
-			voltageAnode = stream.readShort() /Node.networkSerializeUFactor;
-			voltageCatode = stream.readShort() /Node.networkSerializeUFactor;
-			current = stream.readShort() /Node.networkSerializeIFactor;
-			temperature = stream.readShort() /Node.networkSerializeTFactor;
+			voltageAnode = stream.readShort() /NodeBase.networkSerializeUFactor;
+			voltageCatode = stream.readShort() /NodeBase.networkSerializeUFactor;
+			current = stream.readShort() /NodeBase.networkSerializeIFactor;
+			temperature = stream.readShort() /NodeBase.networkSerializeTFactor;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

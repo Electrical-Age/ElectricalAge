@@ -5,11 +5,11 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalWatchdogProcess;
 
 public class NodeThermalWatchdogProcess extends ThermalWatchdogProcess{
-	Node node;
+	NodeBase node;
 	ThermalLoad thermalLoad;
 	IThermalDestructorDescriptor destructor;
 	ITemperatureWatchdogDescriptor watchdog;
-	public NodeThermalWatchdogProcess(Node node,ITemperatureWatchdogDescriptor watchdog,IThermalDestructorDescriptor destructor,ThermalLoad thermalLoad) {
+	public NodeThermalWatchdogProcess(NodeBase node,ITemperatureWatchdogDescriptor watchdog,IThermalDestructorDescriptor destructor,ThermalLoad thermalLoad) {
 		
 		this.node = node;
 		this.thermalLoad = thermalLoad;

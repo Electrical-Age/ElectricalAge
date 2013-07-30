@@ -2,6 +2,6 @@ package mods.eln.node;
 
 public interface INodeContainer {
 
-	public Node getNode();
+	public NodeBase getNode();
 	public int getRefreshRateDivider();
 }

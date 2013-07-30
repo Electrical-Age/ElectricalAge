@@ -11,7 +11,7 @@ import mods.eln.electricalfurnace.ElectricalFurnaceElement;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.PhysicalInterpolator;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.node.TransparentNodeElementRender;
@@ -95,7 +95,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 			takeFuel = stream.readBoolean();
 			
 			
-			temperature = stream.readShort() /Node.networkSerializeTFactor;
+			temperature = stream.readShort() /NodeBase.networkSerializeTFactor;
 			float readF;
 			readF = stream.readFloat();
 			if(gainSyncValue != readF || controleExternal)

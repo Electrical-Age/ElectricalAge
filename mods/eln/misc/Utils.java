@@ -873,6 +873,20 @@ public class Utils {
     	}    
     	return false;
 	}
+
+	public static int getRedstoneLevelAround(Coordonate coord) {
+		int level = 0;
+		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z)); if(level == 15) return 15;
+		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x+1, coord.y, coord.z)); if(level == 15) return 15;
+		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y+1, coord.z)); if(level == 15) return 15;
+		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y-1, coord.z)); if(level == 15) return 15;
+		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z+1)); if(level == 15) return 15;
+		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z-1)); if(level == 15) return 15;
+		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z)); if(level == 15) return 15;
+		
+		
+		return level;
+	}
 	
 	
 	

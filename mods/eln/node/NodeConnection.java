@@ -9,12 +9,12 @@ import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalConnection;
 
 public class NodeConnection {
-	Node N1,N2;
+	NodeBase N1,N2;
 	Direction dir1,dir2;
 	LRDU lrdu1,lrdu2;
 	ElectricalConnection EC;
 	ThermalConnection TC;
-	public NodeConnection(Node N1,Direction dir1,LRDU lrdu1,Node N2,Direction dir2,LRDU lrdu2,ElectricalConnection EC, ThermalConnection TC) {
+	public NodeConnection(NodeBase N1,Direction dir1,LRDU lrdu1,NodeBase N2,Direction dir2,LRDU lrdu2,ElectricalConnection EC, ThermalConnection TC) {
 		this.N1 = N1;
 		this.N2 = N2;
 		this.dir1 = dir1;

@@ -12,7 +12,7 @@ import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
@@ -180,9 +180,9 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor{
 	public int getNodeMask()
 	{
 		if(signalSwitch)
-			return Node.maskElectricalGate;
+			return NodeBase.maskElectricalGate;
 		else 
-			return Node.maskElectricalPower;
+			return NodeBase.maskElectricalPower;
 	}
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,

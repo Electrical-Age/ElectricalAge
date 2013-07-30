@@ -3,8 +3,8 @@ package mods.eln.node;
 import mods.eln.sim.IProcess;
 
 public class NodePeriodicPublishProcess implements IProcess{
-	Node node;
-	public NodePeriodicPublishProcess(Node node,double base,double random) {
+	NodeBase node;
+	public NodePeriodicPublishProcess(NodeBase node,double base,double random) {
 		this.node = node;
 		this.base = base;
 		this.random = random;

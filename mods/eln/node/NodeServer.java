@@ -68,7 +68,7 @@ public class NodeServer implements ITickHandler{
 	        if (server != null)
 	        {
 	        	
-			    for (Node node : NodeManager.instance.getNodeList())
+			    for (NodeBase node : NodeManager.instance.getNodeList())
 			    {
 			    	if(node.getNeedPublish())
 			    	{
@@ -80,7 +80,7 @@ public class NodeServer implements ITickHandler{
 	    	    {
 	    	    	EntityPlayerMP player = (EntityPlayerMP) obj;	
 	    	    	
-	    	    	Node openContainerNode = null;
+	    	    	NodeBase openContainerNode = null;
 	    	    	INodeContainer container = null;
 	    	    	if(player.openContainer != null && player.openContainer instanceof INodeContainer)
 	    	    	{
@@ -90,7 +90,7 @@ public class NodeServer implements ITickHandler{
 	    	    
 	    	    
 
-	    		    for (Node node : NodeManager.instance.getNodeList())
+	    		    for (NodeBase node : NodeManager.instance.getNodeList())
 	    		    {
 		
 	    		    	if(node == openContainerNode)

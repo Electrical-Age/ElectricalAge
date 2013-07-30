@@ -7,7 +7,7 @@ import mods.eln.item.WindRotorDescriptor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.TransparentNode;
 import mods.eln.node.TransparentNodeDescriptor;
@@ -66,7 +66,7 @@ public class WindTurbineElement extends TransparentNodeElement implements GhostO
 	public int getConnectionMask(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub
 		if(lrdu != LRDU.Down) return 0;
-		if(side == front.left()) return Node.maskElectricalPower;
+		if(side == front.left()) return NodeBase.maskElectricalPower;
 		if(side == front.right() && ! grounded) return node.maskElectricalPower;
 		return 0;
 	}

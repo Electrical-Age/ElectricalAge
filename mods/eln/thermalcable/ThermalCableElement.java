@@ -14,7 +14,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.NodeThermalWatchdogProcess;
@@ -92,7 +92,7 @@ public class ThermalCableElement extends SixNodeElement  implements IThermalDest
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		// TODO Auto-generated method stub
-		return Node.maskThermalWire + (color << Node.maskColorShift) +(colorCare << Node.maskColorCareShift);
+		return NodeBase.maskThermalWire + (color << NodeBase.maskColorShift) +(colorCare << NodeBase.maskColorCareShift);
 	}
 
 	@Override
@@ -114,7 +114,7 @@ public class ThermalCableElement extends SixNodeElement  implements IThermalDest
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte( (color<<4));
-	    	stream.writeShort((short) (thermalLoad.Tc*Node.networkSerializeTFactor));
+	    	stream.writeShort((short) (thermalLoad.Tc*NodeBase.networkSerializeTFactor));
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

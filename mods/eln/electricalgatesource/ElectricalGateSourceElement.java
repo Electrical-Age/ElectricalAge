@@ -18,7 +18,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.IVoltageDestructorDescriptor;
-import mods.eln.node.Node;
+import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalGateOutputProcess;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeElectricalResistor;
@@ -111,7 +111,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		// TODO Auto-generated method stub4
-		if(front == lrdu) return Node.maskElectricalOutputGate;
+		if(front == lrdu) return NodeBase.maskElectricalOutputGate;
 
 		return 0;
 	}
