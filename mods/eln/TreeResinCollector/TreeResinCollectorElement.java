@@ -12,7 +12,8 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.INode;
+
+import mods.eln.node.Node;
 import mods.eln.node.NodeManager;
 import mods.eln.node.NodePeriodicPublishProcess;
 import mods.eln.node.SixNode;
@@ -109,7 +110,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 		{
 			coordTemp.y = posCollector[1];
 			//if(worldObj.getBlockId(posCollector[0],posCollector[1]+1,posCollector[2]) == Eln.treeResinCollectorBlock.blockID)
-			INode node = NodeManager.instance.getNodeFromCoordonate(coordTemp);
+			Node node = NodeManager.instance.getNodeFromCoordonate(coordTemp);
 			if(node instanceof SixNode)
 			{
 				SixNode six = (SixNode) node;
@@ -220,7 +221,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 		{
 			coordTemp.y = posCollector[1];
 			//if(worldObj.getBlockId(posCollector[0],posCollector[1]+1,posCollector[2]) == Eln.treeResinCollectorBlock.blockID)
-			INode node = NodeManager.instance.getNodeFromCoordonate(coordTemp);
+			Node node = NodeManager.instance.getNodeFromCoordonate(coordTemp);
 			if(node instanceof SixNode)
 			{
 				SixNode six = (SixNode) node;

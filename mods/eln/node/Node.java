@@ -41,8 +41,30 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-public abstract class Node implements INBTTReady , INode {
-	//NodeBlockEntity entity;
+public abstract class Node implements INBTTReady {
+
+	
+	public static final int maskElectricalPower = 1<<0 ;
+	public static final int maskThermal= 1<<1;
+	
+	public static final int maskElectricalGate = (1<<2);
+	public static final int maskElectricalAll = maskElectricalPower | maskElectricalGate;
+
+	public static final int maskElectricalInputGate = maskElectricalPower | maskElectricalGate;
+	public static final int maskElectricalOutputGate = maskElectricalGate;
+	
+	
+	public static final int maskWire = 0;
+	public static final int maskElectricalWire = (1<<3); 
+	public static final int maskThermalWire = maskWire + maskThermal;
+	
+	public static final int maskSignal = (1<<9);
+
+	public static final int maskColorData = 0xF<<16;
+	public static final int maskColorShift = 16;
+	public static final int maskColorCareShift = 20;
+	public static final int maskColorCareData = 1<<20;
+	
 	
 	public static final double networkSerializeUFactor = 10.0;
 	public static final double networkSerializeIFactor = 100.0;
@@ -81,6 +103,8 @@ public abstract class Node implements INBTTReady , INode {
 		coordonate.world().notifyBlockChange(coordonate.x, coordonate.y, coordonate.z, getBlockId());
 	}
 	
+	
+	public abstract short getBlockId();
 	
 	public IInventory getInventory()
 	{
@@ -127,7 +151,7 @@ public abstract class Node implements INBTTReady , INode {
 		return lastLight;
 	}
 	
-	@Override
+
 	public boolean hasGui(Direction side) {
 		// TODO Auto-generated method stub
 		return false;
@@ -205,6 +229,8 @@ public abstract class Node implements INBTTReady , INode {
 	}
 	
 	
+	abstract public void initializeFromThat(Direction front,
+			EntityLivingBase entityLiving, ItemStack itemStack);
 	public Node getNeighbor(Direction direction)
 	{
 		int[] position = new int[3];
@@ -314,6 +340,10 @@ public abstract class Node implements INBTTReady , INode {
 		}
 	}
 		
+	public abstract int getSideConnectionMask(Direction directionA, LRDU lrduA);
+	public abstract ThermalLoad getThermalLoad(Direction directionA, LRDU lrduA);
+	public abstract ElectricalLoad getElectricalLoad(Direction directionB, LRDU lrduB);
+	
 	public void checkCanStay(boolean onCreate)
 	{
 		
@@ -540,6 +570,11 @@ public abstract class Node implements INBTTReady , INode {
     	return "";
     }
     
+    public String thermoMeterString(Direction side)
+    {
+    	return "";
+    }
+    
     
     
     public void setNeedPublish(boolean needPublish)
@@ -564,7 +599,7 @@ public abstract class Node implements INBTTReady , INode {
 
     boolean needNotify = false;
     boolean oldSendedRedstone = false;
-    @Override
+
     public void networkSerialize(DataOutputStream stream) {
     	// TODO Auto-generated method stub
     	
@@ -726,7 +761,7 @@ public abstract class Node implements INBTTReady , INode {
 	{
 		return false;
 	}
-	
+	public abstract void initializeFromNBT();
 	
 	
 
