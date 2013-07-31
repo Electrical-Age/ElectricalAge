@@ -1,0 +1,13 @@
+o relay0
+f originX 0.5
+f originY 0.0
+f originZ 0.0
+f rOff 0
+f rOn 10
+f speed 0.1
+o relay1
+f originX 0.12500
+f originY 0.0
+f originZ -0.18750
+f rOff 0
+f rOn -10

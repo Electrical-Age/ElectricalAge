@@ -168,6 +168,8 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 		}
 		else
 		{
+			Node node =  getNode();
+			if(node == null) return 0;
 			return getNode().getLightValue();
 		}
 	}

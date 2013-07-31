@@ -31,7 +31,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		slowProcessList.add(slowProcess);
-		slowProcessList.add(new NodePeriodicPublishProcess(sixNode, 7f, 5f));
+		slowProcessList.add(new NodePeriodicPublishProcess(sixNode, 4f, 4f));
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 	}
 
 	final float occupancyMax = 2f;
-	final float occupancyProductPerSecondPerTreeBlock = 1f/5f/5f;
+	final float occupancyProductPerSecondPerTreeBlock = 1f/5f/120f;
 	
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
@@ -125,7 +125,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 			collectiorCount++;
 			System.out.println("ASSERT collectiorCount == 0");
 		}
-		double productPerSeconde = occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectiorCount;
+		double productPerSeconde = Math.min(0.05,occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectiorCount);
 		double product = productPerSeconde * timeFromLastActivated;
 		int productI = 0;
 		if(product > occupancyMax){
@@ -236,7 +236,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 			collectiorCount++;
 			System.out.println("ASSERT collectiorCount == 0");
 		}
-		double productPerSeconde = occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectiorCount;
+		double productPerSeconde = Math.min(0.05,occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectiorCount);
 		double product = productPerSeconde * timeFromLastActivated;
 		
 		try {

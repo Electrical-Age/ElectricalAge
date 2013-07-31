@@ -17,6 +17,7 @@ import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.NodeBase;
@@ -40,14 +41,21 @@ public class ElectricalRelayRender extends SixNodeElementRender{
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalRelayDescriptor) descriptor;
 		time = System.currentTimeMillis();
+		interpolator = new RcInterpolator(this.descriptor.speed);
 	}
 
 
-
+	RcInterpolator interpolator;
+	
 	@Override
 	public void draw() {
 		super.draw();
-
+		
+		front.glRotateOnX();
+		
+		interpolator.stepGraphic();
+		descriptor.draw(interpolator.get());
+		
 	}
 	
 
@@ -66,7 +74,7 @@ public class ElectricalRelayRender extends SixNodeElementRender{
 			switchState = stream.readBoolean();
 			defaultOutput = stream.readBoolean();
 
-
+			interpolator.setTarget(switchState ? 1f : 0f);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -74,7 +82,7 @@ public class ElectricalRelayRender extends SixNodeElementRender{
 		
 		if(boot)
 		{
-
+			interpolator.setValueFromTarget();
 		}
 		boot = false;
 	}

@@ -31,4 +31,8 @@ public class RcInterpolator {
 	{
 		factorFiltred = value;
 	}
+	public void setValueFromTarget() {
+		// TODO Auto-generated method stub
+		factorFiltred = factor;
+	}
 }

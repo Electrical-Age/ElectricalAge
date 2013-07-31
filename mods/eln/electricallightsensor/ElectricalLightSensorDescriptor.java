@@ -20,20 +20,26 @@ import com.google.common.base.Function;
 public class ElectricalLightSensorDescriptor extends SixNodeDescriptor{
 
 
+	private Obj3DPart main;
+
 	public ElectricalLightSensorDescriptor(
 			String name,
-			String objName
+			Obj3D obj
 			) {
 		super(name, ElectricalLightSensorElement.class,ElectricalLightSensorRender.class);
-		//obj = Eln.instance.obj.getObj(objName);
-
+		this.obj = obj;
+		
+		if(obj != null)
+		{
+			main = obj.getPart("main");
+		}
 	}
 
 	Obj3D obj;
 
-	void draw(float factor)
+	void draw()
 	{
-		
+		if(main != null) main.draw();
 	}
 	
 	

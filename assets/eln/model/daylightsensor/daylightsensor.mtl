@@ -1,4 +1,4 @@
-# Blender MTL File: 'RelayBig.blend'
+# Blender MTL File: 'daylightsensor.blend'
 # Material Count: 2
 
 newmtl Material
@@ -17,4 +17,4 @@ Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
-map_Kd RelayBig.png
+map_Kd daylightsensor.png

@@ -142,11 +142,23 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 		return ghostGroup != null;
 	}
 	public GhostGroup getGhostGroup(Direction front) {
-		// TODO Auto-generated method stub
+		if(ghostGroup == null) return null;
 		return ghostGroup.newRotate(front);
 	}
 	public int getGhostGroupUuid() {
 		// TODO Auto-generated method stub
 		return -1;
+	}
+	public int getSpawnDeltaX() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	public int getSpawnDeltaY() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	public int getSpawnDeltaZ() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

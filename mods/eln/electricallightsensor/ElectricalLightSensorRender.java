@@ -35,38 +35,7 @@ public class ElectricalLightSensorRender extends SixNodeElementRender{
 	@Override
 	public void draw() {
 		super.draw();
-		
-/*
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_LIGHTING);
-
-
-		GL11.glPointSize(20);
-		
-	
-		
-		double[] vector = new double[2];
-		vector[0] = 0;
-		vector[1] = 0;		
-		front.inverse().applyTo(vector, 0.4);
-		
-		GL11.glBegin(GL11.GL_POINTS);	
-		GL11.glColor3f(1f-factor, factor, 0);
-			GL11.glVertex3d(0.07,vector[1],vector[0]);
-		GL11.glEnd();
-		
-
-		
-		GL11.glEnable(GL11.GL_LIGHTING);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);		
-		
-		*/
-		GL11.glPushMatrix();
-		front.glRotateOnX();
-
-		
-		//descriptor.draw(factorFiltred);
-		GL11.glPopMatrix();
+		descriptor.draw();
 	}
 
 	boolean warm = false;
