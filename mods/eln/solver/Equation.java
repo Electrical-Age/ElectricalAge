@@ -31,14 +31,16 @@ public class Equation implements IValue{
 			case '*':
 			case '/':
 			case '^':
+			case ',':
 			case '(':
 			case ')':
 				if(stack != ""){
 					list.add(stack);
+					stringList.add(stack);
 					stack = "";
 				}
 				list.add(exp.substring(idx, idx+1));
-				stringList.add(exp.substring(idx, idx+1));
+				
 				break;
 			default:
 				stack += exp.charAt(idx);
@@ -78,6 +80,13 @@ public class Equation implements IValue{
 					}catch(NumberFormatException e){
 						
 					}
+					if(find == false){
+						if(str.equals("PI") || str.equals("pi")){
+							list.set(idx, new Constant(Math.PI));
+							find = true;
+						}
+					}
+				
 				}
 				idx++;
 			}
@@ -112,6 +121,21 @@ public class Equation implements IValue{
 							break;
 						}
 					}
+					if(depth + 1 == depthMax){
+						if(str.equals("periodic")){
+							if(isFuncReady(2,list,idx)){
+								Periodic p;
+								IValue c = (IValue) list.get(idx + 2);
+								IValue d = (IValue) list.get(idx + 4);
+								list.set(idx,p = new Periodic(c,d));
+								removeFunc(2,list,idx);
+								priority = -1;
+								depthMax = getDepthMax(list);
+								periodicList.add(p);
+								break;
+							}
+						}	
+					}
 					if(depth == depthMax){
 						if(priority >= 0){
 							if(b != null){
@@ -121,7 +145,21 @@ public class Equation implements IValue{
 									priority = -1;
 									break;
 								}								
+								if(str.equals("sin")){
+									list.set(idx, new Sin(b));
+									list.remove(idx+1);
+									priority = -1;
+									break;
+								}								
+								if(str.equals("cos")){
+									list.set(idx, new Cos(b));
+									list.remove(idx+1);
+									priority = -1;
+									break;
+								}								
 							}
+							
+
 						}
 						if(priority >= 1){
 							if(a != null && b != null){
@@ -197,6 +235,37 @@ public class Equation implements IValue{
 		}
 	}
 
+	private void removeFunc(int argCount, LinkedList<Object> list, int offset) {
+		for(int idx = 0;idx< 2 + argCount*2-1;idx++){
+			list.remove(offset + 1);
+		}
+		
+	}
+
+	private boolean isFuncReady(int argCount, LinkedList<Object> list, int offset) {
+		int counter = 0;
+		offset++;
+		for(int end = offset + 2 + argCount*2-1;offset < end;offset++) {
+			Object o = list.get(offset);
+			String str = null;
+			if(o instanceof String) str = (String) o;
+			if(counter == 0){
+				if(str.equals("(") == false) return false; 
+			}
+			else if(offset == end-1){
+				if(str.equals(")") == false) return false; 
+			}
+			else if((counter % 2) == 1){
+				if(o instanceof IValue == false) return false;
+			}
+			else{
+				if(str.equals(",") == false) return false; 
+			}
+			counter++;
+		}
+		return true;
+	}
+
 	int getDepthMax(LinkedList<Object> list)
 	{
 		int depth,depthMax;
@@ -217,6 +286,8 @@ public class Equation implements IValue{
 		return depthMax;
 	}
 	
+	
+	
 	IValue root;
 	
 	public double getValue() {
@@ -224,7 +295,19 @@ public class Equation implements IValue{
 			return 0.0;
 		return root.getValue();
 	}	
+	public double getValue(double deltaT) {
+		if(root == null)
+			return 0.0;
+		for(Periodic p : periodicList){
+			double perio = p.periode.getValue();
+			p.counter += deltaT / perio;
+			if(p.counter >= p.amplitude.getValue()) p.counter = 0.0;
+		}
+		return root.getValue();
+	}	
 	
+	
+
 	public boolean isValid()
 	{
 		return root != null;
@@ -314,5 +397,52 @@ public class Equation implements IValue{
 			// TODO Auto-generated method stub
 			return Math.abs(a.getValue());
 		}
+	}
+	
+	public class Sin implements IValue{
+		public Sin(IValue a) {
+			this.a = a;
+		}
+		IValue a;
+		@Override
+		public double getValue() {
+			// TODO Auto-generated method stub
+			return Math.sin(a.getValue());
+		}
+	}
+	public class Cos implements IValue{
+		public Cos(IValue a) {
+			this.a = a;
+		}
+		IValue a;
+		@Override
+		public double getValue() {
+			// TODO Auto-generated method stub
+			return Math.cos(a.getValue());
+		}
+	}
+	
+	public class Periodic implements IValue{
+		public double counter;
+		public Periodic(IValue periode,IValue amplitude) {
+			this.periode = periode;
+			this.amplitude = amplitude;
+			counter = 0.0;
+		}
+		public IValue periode,amplitude;
+		@Override
+		public double getValue() {
+			// TODO Auto-generated method stub
+
+			return counter*amplitude.getValue();
+		}
+	}
+	
+	
+	ArrayList<Periodic> periodicList = new ArrayList<Equation.Periodic>();
+	
+	public boolean isSymboleUsed(ISymbole iSymbole) {
+		if(isValid() == false) return false;
+		return stringList.contains(iSymbole.getName());
 	}
 }

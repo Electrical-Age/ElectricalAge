@@ -35,6 +35,7 @@ import mods.eln.electricalmachine.MagnetizerDescriptor;
 import mods.eln.electricalmachine.PlateMachineDescriptor;
 import mods.eln.electricalmachine.ElectricalMachineDescriptor;
 import mods.eln.electricalmachine.MaceratorDescriptor;
+import mods.eln.electricalmath.ElectricalMathDescriptor;
 import mods.eln.electricalredstoneinput.ElectricalRedstoneInputDescriptor;
 import mods.eln.electricalredstoneoutput.ElectricalRedstoneOutputDescriptor;
 import mods.eln.electricalrelay.ElectricalRelayDescriptor;
@@ -289,16 +290,17 @@ public class Eln {
 
 	@PreInit
 	public void preInit(FMLPreInitializationEvent event) {
-/*
+
 		ArrayList<ISymbole> symboleList = new ArrayList<ISymbole>();
 		symboleList.add(new ConstSymbole("A",0.1));
 		symboleList.add(new ConstSymbole("B",0.2));
 		symboleList.add(new ConstSymbole("C",0.3));
 		double value = 0.0;
-		Equation equ = new Equation("abs(-A) + B * (-0.4 - 0.5 + C)^3 + 0.5 * A",symboleList,100);
+		//Equation equ = new Equation("abs(-A) + B * (-0.4 - 0.5 + C)^3 + 0.5 * A",symboleList,100);
+		Equation equ = new Equation("1+periodic(2,1)*2",symboleList,100);
 		if(equ.isValid()){
 			value = equ.getValue();
-		}*/
+		}
 		
 		Side side = FMLCommonHandler.instance().getEffectiveSide();
 		if (side == Side.CLIENT)
@@ -1328,6 +1330,17 @@ public class Eln {
 					obj.getObj("electricaltimer"));
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
+		{
+			ElectricalMathDescriptor desc;
+			subId = 4;
+
+			name = "Electrical math";
+
+			desc = new ElectricalMathDescriptor(name,
+					obj.getObj("electricaltimer"));
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
 	}
 
 	

@@ -34,11 +34,18 @@ public class NodeElectricalGateOutputProcess extends NodeElectricalSourceWithCur
 
 
 	public double getOutputNormalized() {
-		// TODO Auto-generated method stub
 		return U/Eln.SVU;
 	}
 	public boolean getOutputOnOff() {
 		// TODO Auto-generated method stub
 		return U >= Eln.SVU/2;
+	}
+
+
+	public void setOutputNormalizedSafe(double value) {
+		if(value > 1.0) value = 1.0;
+		if(value < 0.0)value = 0.0;
+		if(Double.isNaN(value)) value = 0.0;
+		U = value * Eln.SVU;
 	}
 }

@@ -1,6 +1,14 @@
 package mods.eln.electricalmath;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import cpw.mods.fml.common.network.Player;
+
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.Node;
@@ -11,7 +19,10 @@ import mods.eln.node.SixNode;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
+import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.solver.Equation;
+import mods.eln.solver.ISymbole;
 
 public class ElectricalMathElement extends SixNodeElement {
 
@@ -20,6 +31,9 @@ public class ElectricalMathElement extends SixNodeElement {
 	
 	NodeElectricalGateInput[] gateInput = new NodeElectricalGateInput[]{new NodeElectricalGateInput("gateA"),new NodeElectricalGateInput("gateB"),new NodeElectricalGateInput("gateC")};
 
+	ArrayList<ISymbole> symboleList = new ArrayList<ISymbole>();
+	
+	ElectricalMathElectricalProcess electricalProcess = new ElectricalMathElectricalProcess(this);
 	
 	public ElectricalMathElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
@@ -30,25 +44,78 @@ public class ElectricalMathElement extends SixNodeElement {
 		electricalLoadList.add(gateInput[2]);
 		
 		electricalProcessList.add(gateOutputProcess);
+		
+		electricalProcessList.add(electricalProcess);
+		
+		
+		symboleList.add(new GateInputSymbol("A", gateInput[0]));
+		symboleList.add(new GateInputSymbol("B", gateInput[1]));
+		symboleList.add(new GateInputSymbol("C", gateInput[2]));
 	}
 	
-	byte sideConnection[] = new byte[3];
+	boolean sideConnectionEnable[] = new boolean[3];
+	String expression = "A+C";
+	Equation equation;
+	
+	
+	class GateInputSymbol implements ISymbole
+	{
+		private String name;
+		private NodeElectricalGateInput gate;
 
+		public GateInputSymbol(String name,NodeElectricalGateInput gate) {
+			this.name = name;
+			this.gate = gate;
+		}
+
+		@Override
+		public double getValue() {
+			// TODO Auto-generated method stub
+			return gate.getNormalized();
+		}
+
+		@Override
+		public String getName() {
+			// TODO Auto-generated method stub
+			return name;
+		}
+	}
+	
+	class ElectricalMathElectricalProcess implements IProcess{
+		private ElectricalMathElement e;
+
+		ElectricalMathElectricalProcess(ElectricalMathElement e){
+			this.e = e;
+		}
+
+		@Override
+		public void process(double time) {
+			
+			e.gateOutputProcess.setOutputNormalizedSafe(e.equation.getValue(time));
+		}
+	}
+	
+	void preProcessEquation(String expression)
+	{
+		this.expression = expression;
+		equation = new Equation(expression, symboleList, 100);
+		for(int idx = 0;idx<3;idx++){
+			sideConnectionEnable[idx] = equation.isSymboleUsed(symboleList.get(idx));
+		}
+		this.expression = expression;
+		
+	}
+	
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
 		if(lrdu == front) return gateOutput;
-		if(lrdu == front.left()) return sideConnectionToLoad(0);
-		if(lrdu == front.inverse()) return sideConnectionToLoad(1);
-		if(lrdu == front.right()) return sideConnectionToLoad(2);
+		if(lrdu == front.left() && sideConnectionEnable[2]) return gateInput[2];
+		if(lrdu == front.inverse() && sideConnectionEnable[1]) return gateInput[1];
+		if(lrdu == front.right() && sideConnectionEnable[0]) return gateInput[0];
 		return null;
 	}
 	
-	public NodeElectricalGateInput sideConnectionToLoad(int index)
-	{
-		byte id = sideConnection[index];
-		if(id < 0 || id >= 3) return null;	
-		return gateInput[id];
-	}
+
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
@@ -59,9 +126,9 @@ public class ElectricalMathElement extends SixNodeElement {
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		if(lrdu == front) return Node.maskElectricalOutputGate;
-		if(lrdu == front.left()) return sideConnectionToLoad(0) != null ? Node.maskElectricalInputGate : 0;
-		if(lrdu == front.inverse()) return sideConnectionToLoad(1) != null ? Node.maskElectricalInputGate : 0;
-		if(lrdu == front.right()) return sideConnectionToLoad(2) != null ? Node.maskElectricalInputGate : 0;
+		if(lrdu == front.left() && sideConnectionEnable[2]) return Node.maskElectricalInputGate;
+		if(lrdu == front.inverse() && sideConnectionEnable[1]) return Node.maskElectricalInputGate;
+		if(lrdu == front.right() && sideConnectionEnable[0]) return Node.maskElectricalInputGate;
 		return 0;
 	}
 
@@ -79,15 +146,14 @@ public class ElectricalMathElement extends SixNodeElement {
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
-		
+		preProcessEquation(expression);
 	}
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
 		// TODO Auto-generated method stub
-		return false;
+		return onBlockActivatedRotate(entityPlayer);
 	}
 
 	
@@ -95,5 +161,52 @@ public class ElectricalMathElement extends SixNodeElement {
 	public boolean hasGui() {
 		// TODO Auto-generated method stub
 		return true;
+	}
+	
+	
+	
+	@Override
+	public void writeToNBT(NBTTagCompound nbt, String str) {
+		// TODO Auto-generated method stub
+		super.writeToNBT(nbt, str);
+		nbt.setString(str +  "expression",expression);
+	}
+	
+	@Override
+	public void readFromNBT(NBTTagCompound nbt, String str) {
+		// TODO Auto-generated method stub
+		super.readFromNBT(nbt, str);
+		expression = nbt.getString(str + "expression");
+	}
+	
+	
+	@Override
+	public void networkSerialize(DataOutputStream stream) {
+		// TODO Auto-generated method stub
+		super.networkSerialize(stream);
+		try {
+			stream.writeUTF(expression);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	static final byte setExpressionId = 1;
+	@Override
+	public void networkUnserialize(DataInputStream stream, Player player) {
+		// TODO Auto-generated method stub
+		super.networkUnserialize(stream, player);
+		try {
+			switch(stream.readByte()){
+			case setExpressionId:
+				preProcessEquation(stream.readUTF());
+				reconnect();
+				break;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

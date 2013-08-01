@@ -18,7 +18,7 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject{
 		setTextColor(-1);
         setDisabledTextColour(-1);
         setEnableBackgroundDrawing(true);
-        setMaxStringLength(30);
+        setMaxStringLength(50);
         xPos = par2;
         yPos = par3;
         width = par4;

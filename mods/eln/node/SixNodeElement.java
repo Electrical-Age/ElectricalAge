@@ -56,6 +56,18 @@ public abstract class SixNodeElement implements INBTTReady {
 
 	}
 	
+	protected boolean onBlockActivatedRotate(EntityPlayer entityPlayer)
+	{
+		if(Eln.playerManager.get(entityPlayer).getInteractEnable())
+		{
+			front = front.getNextClockwise();
+			sixNode.reconnect();
+			sixNode.setNeedPublish(true);
+			return true;	
+		}
+		return false;
+	}
+	
 	public void sendPacketToAllClient(ByteArrayOutputStream bos) {
 		// TODO Auto-generated method stub
 		sixNode.sendPacketToAllClient(bos);
