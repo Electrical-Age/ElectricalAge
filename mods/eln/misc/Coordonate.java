@@ -16,6 +16,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldManager;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 
 public class Coordonate implements INBTTReady {
 	public int x,y,z,dimention;
@@ -54,7 +55,10 @@ public class Coordonate implements INBTTReady {
 
 		//Minecraft m = Minecraft.getMinecraft();
 		//if(FMLCommonHandler.instance().getSidedDelegate().)
-		
+		//WorldManager
+		//Minecraft.getMinecraft().
+		//World
+		//Minecraft m = Minecraft.getMinecraft().getWorldProviderName()();
 		if(w == null) w = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(worldDimension());
 		return w;
         

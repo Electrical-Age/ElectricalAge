@@ -888,6 +888,19 @@ public class Utils {
 		return level;
 	}
 
+	public static int getRedstoneLevelAround(World w,int x,int y,int z) {
+		int level = 0;
+		level = Math.max(level, w.getStrongestIndirectPower(x, y, z)); if(level == 15) return 15;
+		level = Math.max(level, w.getStrongestIndirectPower(x+1, y, z)); if(level == 15) return 15;
+		level = Math.max(level, w.getStrongestIndirectPower(x, y+1, z)); if(level == 15) return 15;
+		level = Math.max(level, w.getStrongestIndirectPower(x, y-1, z)); if(level == 15) return 15;
+		level = Math.max(level, w.getStrongestIndirectPower(x, y, z+1)); if(level == 15) return 15;
+		level = Math.max(level, w.getStrongestIndirectPower(x, y, z-1)); if(level == 15) return 15;
+		level = Math.max(level, w.getStrongestIndirectPower(x, y, z)); if(level == 15) return 15;
+		
+		
+		return level;
+	}
 	public static void disableCulling() {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 	}

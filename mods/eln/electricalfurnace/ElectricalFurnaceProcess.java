@@ -38,7 +38,12 @@ public class ElectricalFurnaceProcess implements IProcess{
 	@Override
 	public void process(double time) 
 	{
+		
+
+		
 		ItemStack itemStack = inventory.getStackInSlot(furnace.thermalIsolatorSlotId);
+		
+	
 		
 		if(itemStack == null)
 		{
@@ -84,7 +89,14 @@ public class ElectricalFurnaceProcess implements IProcess{
 			furnace.smeltResistor.setR(T/P);
 		}
 		
-		
+		if(furnace.autoShutDown){
+			if(smeltInProcess){
+				furnace.setPowerOn(true);
+			}
+			else{
+				furnace.setPowerOn(false);
+			}
+		}	
 		//System.out.println("FT : " + furnace.thermalLoad.Tc);
 	}
 

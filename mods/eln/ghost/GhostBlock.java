@@ -14,17 +14,17 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeDirection;
 	
 	
-	public class GhostBlock extends BlockContainer{
+	public class GhostBlock extends Block{
 	
 		public GhostBlock(int id) {
-			super(id,Material.air);
+			super(id,Material.iron);
 		}
 	
-		@Override
-		public TileEntity createNewTileEntity(World var1) {
-			// TODO Auto-generated method stub
+	/*@Override
+	public TileEntity createNewTileEntity(World var1) {
+		// TODO Auto-generated method stub
 		return new GhostEntity();
-	} 
+	}*/
 	@Override
 	@SideOnly(Side.CLIENT)
 	public int idPicked(World par1World, int par2, int par3, int par4) {

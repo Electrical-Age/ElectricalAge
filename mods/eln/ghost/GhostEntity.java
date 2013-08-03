@@ -4,7 +4,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-
+/*
 public class GhostEntity extends TileEntity {
 	
 	public GhostEntity() {
@@ -53,4 +53,4 @@ public class GhostEntity extends TileEntity {
     {
     	return Eln.ghostManager.getGhost(new Coordonate(this));
     }
-}
+}*/

@@ -58,16 +58,16 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
     	
 
     	externalControl = newGuiButton(6,6,100, "");
-    	takeFuel = newGuiButton(6,6+20+1,100, "");
+    	takeFuel = newGuiButton(6,6+20+4,100, "");
     	
-    	vuMeterGain = newGuiVerticalTrackBar(167-20,8,20,69);
+    	vuMeterGain = newGuiVerticalTrackBar(167-20-3,8,20,69);
     	vuMeterGain.setStepIdMax((int) (0.9f/0.01f));
     	vuMeterGain.setEnable(true);
     	vuMeterGain.setRange(0.1f,1.0f);
     	
     	syncVumeterGain();
    	
-    	vuMeterHeat = newGuiVerticalTrackBarHeat(167-20 - 20 - 5,8,20,69);
+    	vuMeterHeat = newGuiVerticalTrackBarHeat(167-20 - 20 - 5-6,8,20,69);
     	vuMeterHeat.setStepIdMax(98);
     	vuMeterHeat.setEnable(true);
     	vuMeterHeat.setRange(0.0f,980.0f);
@@ -124,6 +124,8 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
         if(render.controleExternal == false)
         	vuMeterHeat.setComment(2,Utils.plotCelsius("Target", vuMeterHeat.getValue()));
         vuMeterGain.setComment(0,"Control gauge at " +(int)(vuMeterGain.getValue()*100) + "%");
+        
+        vuMeterGain.setComment(1, Utils.plotPower("Power", render.power));
     }
     
     @Override
@@ -154,7 +156,7 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
     protected void postDraw(float f, int x, int y) {
     	// TODO Auto-generated method stub
     	super.postDraw(f, x, y);
-        drawString( 27, 51+17 + 3, Utils.plotPower("Power", render.power));
+        //drawString( 27, 51+17 + 3, Utils.plotPower("Power", render.power));
 
     }
 

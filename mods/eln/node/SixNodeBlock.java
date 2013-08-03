@@ -414,9 +414,9 @@ public class SixNodeBlock extends NodeBlock{
     {
     	if(world.isRemote)
     	{
-    		SixNodeEntity tileEntity = (SixNodeEntity) world.getBlockTileEntity(x, y, z);
+    		TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
     		if(tileEntity != null)
-    			return tileEntity.sixNodeCacheMapId >= 0;
+    			return ((SixNodeEntity)tileEntity).sixNodeCacheMapId >= 0;
 			else
 				System.out.println("ASSERT B public boolean nodeHasCache(World world, int x, int y, int z) ");
     		 

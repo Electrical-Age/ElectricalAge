@@ -12,6 +12,7 @@ import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.SixNodeDescriptor;
+import mods.eln.node.SixNodeElementInventory;
 import mods.eln.node.SixNodeElementRender;
 import mods.eln.node.SixNodeEntity;
 import mods.eln.node.SixNodeRender;
@@ -26,14 +27,20 @@ public class ElectricalMathRender extends SixNodeElementRender{
 	ElectricalMathDescriptor descriptor;
 	
 	
+	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		// TODO Auto-generated method stub
-		return new ElectricalMathGui(this);
+		return new ElectricalMathGui(player, inventory, this);
 	}
 	
 	
+	
 	String expression;
+
+
+	public int redstoneRequired;
 	
 
 	
@@ -43,6 +50,7 @@ public class ElectricalMathRender extends SixNodeElementRender{
 		super.publishUnserialize(stream);
 		try {
 			expression = stream.readUTF();
+			redstoneRequired = stream.readInt();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

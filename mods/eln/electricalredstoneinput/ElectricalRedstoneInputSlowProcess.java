@@ -13,7 +13,7 @@ public class ElectricalRedstoneInputSlowProcess implements IProcess {
 	}
 	double sleepCounter = 0;
 	static final double sleepDuration = 0.15;
-	int oldSignal = 0;
+	public int oldSignal = 0;
 	@Override
 	public void process(double time) {
 		// TODO Auto-generated method stub
@@ -24,8 +24,11 @@ public class ElectricalRedstoneInputSlowProcess implements IProcess {
 			int signal = Utils.getRedstoneLevelAround(coord);
 		//	System.out.println("Light : " + light);
 			element.outputGateProcess.setOutputNormalized((signal)/15.0 );
-			if(signal != oldSignal)
-				sleepCounter = sleepDuration + Math.random()*sleepDuration;
+			if(signal != oldSignal){
+				element.needPublish();
+			}
+				
+			sleepCounter = sleepDuration + Math.random()*sleepDuration;
 			oldSignal = signal;		
 		}
 		else

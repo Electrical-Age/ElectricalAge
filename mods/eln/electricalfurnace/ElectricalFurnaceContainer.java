@@ -23,12 +23,12 @@ public class ElectricalFurnaceContainer extends BasicContainer implements INodeC
 	
 	public ElectricalFurnaceContainer(NodeBase node,EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new SlotWithSkin(inventory,0,176/2 - 35 - 18 +  0,28,SlotSkin.medium),
-				new SlotWithSkin(inventory,1,176/2 + 15 ,28,SlotSkin.big),
+				new SlotWithSkin(inventory,0,7,58,SlotSkin.medium),
+				new SlotWithSkin(inventory,1,84,58,SlotSkin.big),
 				
-				new GenericItemUsingDamageSlot(inventory, 2, 80,59,1, HeatingCorpElement.class,SlotSkin.medium,new String[]{"Heating corp slot"}),
-				new GenericItemUsingDamageSlot(inventory, 3, 80 +  18,59,1, ThermalIsolatorElement.class,SlotSkin.medium,new String[]{"Thermal isolator slot"}),
-				new RegulatorSlot(inventory, 4, 80 +  36,59,1, new RegulatorType[]{RegulatorType.onOff,RegulatorType.analog},SlotSkin.medium)
+				new GenericItemUsingDamageSlot(inventory, 2, 70,6+20+6,1, HeatingCorpElement.class,SlotSkin.medium,new String[]{"Heating corp slot"}),
+				new GenericItemUsingDamageSlot(inventory, 3, 80 +  18,-2000,1, ThermalIsolatorElement.class,SlotSkin.medium,new String[]{"Thermal isolator slot"}),
+				new RegulatorSlot(inventory, 4, 70 +  18,6+20+6,1, new RegulatorType[]{RegulatorType.onOff,RegulatorType.analog},SlotSkin.medium)
 				 
 				//new SlotFilter(inventory,2,62 +  0,17 + 18,1,new ItemStackFilter[]{new ItemStackFilter(Eln.heatingCorpItem)}),
 				//new SlotFilter(inventory,3,62 + 18,17 + 18,1,new ItemStackFilter[]{new ItemStackFilter(Eln.thermalIsolatorItem)}),

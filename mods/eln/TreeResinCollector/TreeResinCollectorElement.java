@@ -71,7 +71,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 	}
 
 	final float occupancyMax = 2f;
-	final float occupancyProductPerSecondPerTreeBlock = 1f/5f/120f;
+	final float occupancyProductPerSecondPerTreeBlock = 3f/5f/(60f*24f); //3 par jour, pour 5 tronc de haut
 	
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,

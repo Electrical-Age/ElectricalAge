@@ -19,7 +19,9 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 
 	}
 
-
+	public void add(IGuiObject object){
+		helper.add(object);
+	}
 	
 	public GuiHelperContainer helper;
 	

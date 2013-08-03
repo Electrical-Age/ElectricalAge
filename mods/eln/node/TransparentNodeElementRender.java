@@ -171,6 +171,7 @@ public abstract class TransparentNodeElementRender {
 			CableRender.drawCable(render, maskTempDraw,renderPreProcess);
 		}		
 		GL11.glPopMatrix();
+		GL11.glColor3f(1f, 1f, 1f);
 		return renderPreProcess;
 	}
 	public void notifyNeighborSpawn() {

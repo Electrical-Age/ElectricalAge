@@ -24,20 +24,7 @@ public class BrushDescriptor  extends GenericItemUsingDamageDescriptor
 	{
 		super( name);
 	}
-	/*Icon[] iconIndex = new Icon[16];
-    public void updateIcons(IconRegister iconRegister)
-    {
-    	for(int idx = 0;idx<16;idx++)
-    	{
-    		iconIndex[idx] = iconRegister.registerIcon(IconName + subNames[idx]);
-    	}
-        
-    }*/
-   /* 
-    public String getNameForColor(int color)
-    {
-    	return subNames[color] + " " + name;
-    }*/
+
 	@Override
 	public String getName(ItemStack stack) {
 		// TODO Auto-generated method stub
@@ -46,19 +33,7 @@ public class BrushDescriptor  extends GenericItemUsingDamageDescriptor
 			return "Empty " + super.getName(stack);
 		return super.getName(stack);
 	}
-	/*@Override
-	public void getSubItems(List list)
-	{
-		super.getSubItems(list);
-		for(int idx = 0;idx<16;idx++)
-    	{
-    		ItemStack stack = newItemStack(1);
-    		setColor(stack,idx);
-    		setLife(stack,4);
-	    	list.add(stack);
-    	}
-	    	
-	}*/
+
 	public int getColor(ItemStack stack)
 	{
 		return stack.getItemDamage() & 0xF;

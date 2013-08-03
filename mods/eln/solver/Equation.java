@@ -6,9 +6,15 @@ import java.util.LinkedList;
 import java.util.ListResourceBundle;
 import java.util.Scanner;
 
-public class Equation implements IValue{
+import net.minecraft.nbt.NBTTagCompound;
+
+import mods.eln.INBTTReady;
+
+public class Equation implements IValue,INBTTReady{
 	
 	LinkedList<String> stringList = new LinkedList<String>();
+	
+	ArrayList<INBTTReady> nbtList = new ArrayList<INBTTReady>();
 	
 	public Equation(String exp,ArrayList<ISymbole> symboleList,int iterationLimit)
 	{
@@ -124,6 +130,7 @@ public class Equation implements IValue{
 					if(depth + 1 == depthMax){
 						if(str.equals("periodic")){
 							if(isFuncReady(2,list,idx)){
+								operatorCount+=2;
 								Periodic p;
 								IValue c = (IValue) list.get(idx + 2);
 								IValue d = (IValue) list.get(idx + 4);
@@ -132,6 +139,21 @@ public class Equation implements IValue{
 								priority = -1;
 								depthMax = getDepthMax(list);
 								periodicList.add(p);
+								nbtList.add(p);
+								break;
+							}
+						}	
+						if(str.equals("rs")){
+							if(isFuncReady(2,list,idx)){
+								operatorCount+=2;
+								Rs rs;
+								IValue c = (IValue) list.get(idx + 2);
+								IValue d = (IValue) list.get(idx + 4);
+								list.set(idx,rs = new Rs(c,d));
+								removeFunc(2,list,idx);
+								priority = -1;
+								depthMax = getDepthMax(list);
+								nbtList.add(rs);
 								break;
 							}
 						}	
@@ -140,18 +162,21 @@ public class Equation implements IValue{
 						if(priority >= 0){
 							if(b != null){
 								if(str.equals("abs")){
+									operatorCount++;
 									list.set(idx, new Abs(b));
 									list.remove(idx+1);
 									priority = -1;
 									break;
 								}								
 								if(str.equals("sin")){
+									operatorCount++;
 									list.set(idx, new Sin(b));
 									list.remove(idx+1);
 									priority = -1;
 									break;
 								}								
 								if(str.equals("cos")){
+									operatorCount++;
 									list.set(idx, new Cos(b));
 									list.remove(idx+1);
 									priority = -1;
@@ -164,6 +189,7 @@ public class Equation implements IValue{
 						if(priority >= 1){
 							if(a != null && b != null){
 								if(str.equals("^")){
+									operatorCount++;
 									list.set(idx-1, new Pow(a,b));
 									list.remove(idx);list.remove(idx);
 									priority = -1;
@@ -174,6 +200,7 @@ public class Equation implements IValue{
 						if(priority >= 2){
 							if(a == null && b != null){
 								if(str.equals("-")){
+									operatorCount++;
 									list.set(idx, new Inv(b));
 									list.remove(idx+1);
 									priority = -1;
@@ -182,12 +209,14 @@ public class Equation implements IValue{
 							}
 							if(a != null && b != null){
 								if(str.equals("*")){
+									operatorCount++;
 									list.set(idx-1, new Mul(a,b));
 									list.remove(idx);list.remove(idx);
 									priority = -1;
 									break;
 								}
 								if(str.equals("/")){
+									operatorCount++;
 									list.set(idx-1, new Div(a,b));
 									list.remove(idx);list.remove(idx);
 									priority = -1;
@@ -197,13 +226,15 @@ public class Equation implements IValue{
 						}
 						if(priority >= 3){
 							if(a != null && b != null){
-								if(str.equals("+")){								
+								if(str.equals("+")){		
+									operatorCount++;
 									list.set(idx-1, new Add(a,b));
 									list.remove(idx);list.remove(idx);
 									priority = -1;
 									break;
 								}						
 								if(str.equals("-")){
+									operatorCount++;
 									list.set(idx-1, new Sub(a,b));
 									list.remove(idx);list.remove(idx);
 									priority = -1;
@@ -422,7 +453,7 @@ public class Equation implements IValue{
 		}
 	}
 	
-	public class Periodic implements IValue{
+	public class Periodic implements IValue,INBTTReady{
 		public double counter;
 		public Periodic(IValue periode,IValue amplitude) {
 			this.periode = periode;
@@ -436,6 +467,40 @@ public class Equation implements IValue{
 
 			return counter*amplitude.getValue();
 		}
+		@Override
+		public void readFromNBT(NBTTagCompound nbt, String str) {
+			// TODO Auto-generated method stub
+			counter = nbt.getDouble(str + "counter");
+		}
+		@Override
+		public void writeToNBT(NBTTagCompound nbt, String str) {
+			// TODO Auto-generated method stub
+			nbt.setDouble(str + "counter", counter);
+		}
+	}
+	public class Rs implements IValue,INBTTReady{
+		public boolean state;
+		public Rs(IValue reset,IValue set) {
+			this.set = set;
+			this.reset = reset;
+			state = false;
+		}
+		public IValue set,reset;
+		@Override
+		public double getValue() {
+			// TODO Auto-generated method stub
+			if(set.getValue() > 0.6) state = true;
+			if(reset.getValue() > 0.6) state = false;
+			return state ? 1.0 : 0.0;
+		}
+		@Override
+		public void readFromNBT(NBTTagCompound nbt, String str) {
+			state = nbt.getBoolean(str + "state");
+		}
+		@Override
+		public void writeToNBT(NBTTagCompound nbt, String str) {
+			nbt.setBoolean(str + "state",state);
+		}
 	}
 	
 	
@@ -444,5 +509,32 @@ public class Equation implements IValue{
 	public boolean isSymboleUsed(ISymbole iSymbole) {
 		if(isValid() == false) return false;
 		return stringList.contains(iSymbole.getName());
+	}
+
+	@Override
+	public void readFromNBT(NBTTagCompound nbt, String str) {
+		if(isValid() == false) return;
+		int idx = 0;
+		for(INBTTReady o : nbtList){
+			o.readFromNBT(nbt, str + idx);
+			idx++;
+		}		
+	}
+
+	@Override
+	public void writeToNBT(NBTTagCompound nbt, String str) {
+		if(isValid() == false) return;
+		int idx = 0;
+		for(INBTTReady o : nbtList){
+			o.writeToNBT(nbt, str + idx);
+			idx++;
+		}
+	}
+
+	int operatorCount;
+	
+	public int getOperatorCount() {
+		// TODO Auto-generated method stub
+		return operatorCount;
 	}
 }

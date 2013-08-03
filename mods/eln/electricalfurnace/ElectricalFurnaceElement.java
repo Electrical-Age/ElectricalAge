@@ -67,7 +67,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 	ThermalWatchdogProcessForInventoryItemDamageSingleLoad thermalIsolationWatchdog = new ThermalWatchdogProcessForInventoryItemDamageSingleLoad(inventory,thermalIsolatorSlotId,thermalLoad); 
 	
 	boolean powerOn = false;
-	
+	boolean autoShutDown = true;
 	ElectricalFurnaceDescriptor descriptor;
 	
 	public ElectricalFurnaceElement(TransparentNode transparentNode,TransparentNodeDescriptor descriptor) {
@@ -245,10 +245,13 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 			
 			
 			stream.writeShort((int) heatingCorpResistor.getP());
+			stream.writeFloat((float) electricalLoad.Uc);
 			stream.writeFloat((float) slowRefreshProcess.processState());
 			stream.writeFloat((float) slowRefreshProcess.processStatePerSecond());
 			
+			stream.writeBoolean(autoShutDown);
 			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -261,6 +264,8 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
 		nbt.setBoolean(str + "powerOn", powerOn);
+		nbt.setBoolean(str + "autoShutDown", autoShutDown);
+		
 	}
 	
 	@Override
@@ -268,10 +273,21 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 		// TODO Auto-generated method stub
 		super.readFromNBT(nbt, str);
 		powerOn = nbt.getBoolean(str + "powerOn");
+		autoShutDown = nbt.getBoolean(str + "autoShutDown");
 	}
 	
+	
+	public void setPowerOn(boolean value)
+	{
+		if(powerOn != value){
+			powerOn = value;
+			setPhysicalValue();
+			needPublish();
+		}
+	}
 	public static final byte unserializePowerOnId = 1;
 	public static final byte unserializeTemperatureTarget = 2;
+	public static final byte unserializeAutoShutDownId = 3;
 	
 	@Override
 	public byte networkUnserialize(DataInputStream stream) {
@@ -281,8 +297,10 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 			switch(packetType)
 			{
 			case unserializePowerOnId:			
-				powerOn = stream.readByte() != 0;
-				setPhysicalValue();
+				setPowerOn(stream.readByte()!=0);
+				break;
+			case unserializeAutoShutDownId:			
+				autoShutDown = ! autoShutDown;
 				needPublish();
 				break;
 			case unserializeTemperatureTarget:

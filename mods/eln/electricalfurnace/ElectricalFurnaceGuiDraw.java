@@ -12,14 +12,17 @@ import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.GuiVerticalTrackBarHeat;
+import mods.eln.gui.GuiVerticalVoltageSupplyBar;
 import mods.eln.gui.HelperStdContainer;
 import mods.eln.gui.HelperStdContainerBig;
 import mods.eln.gui.IGuiObject;
+import mods.eln.item.HeatingCorpElement;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.SixNodeElementInventory;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.sim.PhysicalConstant;
+import mods.eln.solver.Equation.Add;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -30,6 +33,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerFurnace;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.StatCollector;
 
@@ -39,8 +43,10 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
 	
     private TransparentNodeElementInventory inventory;
     ElectricalFurnaceRender render;
-    GuiButton buttonGrounded;   
+    GuiButton buttonGrounded,autoShutDown;   
     GuiVerticalTrackBarHeat vuMeterTemperature;
+    
+    GuiVerticalVoltageSupplyBar supplyBar;
     
     public ElectricalFurnaceGuiDraw(EntityPlayer player, IInventory inventory,ElectricalFurnaceRender render)
     {
@@ -54,9 +60,9 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     public void initGui()
     {
     	super.initGui();
-    	
-    	buttonGrounded = newGuiButton(7,57,60, "");
-    	vuMeterTemperature = newGuiVerticalTrackBarHeat(167-20,8,20,69);
+    	autoShutDown = newGuiButton(6, 6, 99, "");
+    	buttonGrounded = newGuiButton(6,6+20+4,60, "");
+    	vuMeterTemperature = newGuiVerticalTrackBarHeat(167-20 -20 -8-4,8,20,69);
     	vuMeterTemperature.setStepIdMax(800/10);
     	vuMeterTemperature.setEnable(true);
     	vuMeterTemperature.setRange(0,800);
@@ -64,7 +70,12 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     			"temperature gauge"
     			});
     	syncVumeter();
+    	
+    	supplyBar = new GuiVerticalVoltageSupplyBar(167-20-2, 8, 20, 69, helper);
+    	add(supplyBar);
     }
+    
+    
     
     public void syncVumeter()
     {
@@ -80,7 +91,14 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     		buttonGrounded.displayString = "Turn OFF";
     	else
     		buttonGrounded.displayString = "Turn ON";
-    	//buttonGrounded.displayString = "powerOn : " + render.getPowerOn();
+    	
+    	if( render.autoShutDown){
+    		buttonGrounded.enabled = false;
+    		autoShutDown.displayString = "Auto shutdown";
+    	}else{
+    		autoShutDown.displayString = "Manual shutdown";
+    		buttonGrounded.enabled = true;
+    	}
     	
         if(render.temperatureTargetSyncNew) syncVumeter();
         vuMeterTemperature.temperatureHit = render.temperature;
@@ -98,6 +116,10 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     	{
     		render.clientSetPowerOn(!render.getPowerOn());
     	}
+    	else if(object == autoShutDown)
+    	{
+    		render.clientSendId(ElectricalFurnaceElement.unserializeAutoShutDownId);
+    	}
     	else if(object == vuMeterTemperature)
     	{
     		render.clientSetTemperatureTarget(vuMeterTemperature.getValue());
@@ -110,9 +132,22 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
 	protected void postDraw(float f, int x, int y) {
 		// TODO Auto-generated method stub
 		super.postDraw(f, x, y);
-	    ((HelperStdContainer)helper).drawProcess(176/2 - 25 +  0,28, render.processState);
+	    ((HelperStdContainer)helper).drawProcess(40,57, render.processState);
 
-	    drawString( 8, 6,Utils.plotPower("Consummation", render.heatingCorpResistorP));
+	  //  drawString( 8, 6,Utils.plotPower("Consummation", render.heatingCorpResistorP));
+	    
+	    ItemStack stack = render.inventory.getStackInSlot(ElectricalFurnaceElement.heatingCorpSlotId);
+	    if(stack == null){
+	    	supplyBar.setEnabled(false);
+	    }
+	    else{
+	    	supplyBar.setEnabled(true);
+	    	HeatingCorpElement desc = (HeatingCorpElement) HeatingCorpElement.getDescriptor(stack);
+	    	supplyBar.setNominalU((float) desc.electricalNominalU);
+
+	    }
+    	supplyBar.setVoltage(render.voltage);
+    	supplyBar.setPower(render.heatingCorpResistorP);
 	}
 	 
 

@@ -5,6 +5,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Icon;
+import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -27,14 +28,29 @@ public class SixNodeCacheItem extends GenericItemUsingDamageDescriptor{
 		map[mapIndex] = this;
 		if(obj != null){
 			main = obj.getPart("main");
+			xn = obj.getPart("xn");
+			xp = obj.getPart("xp");
+			yn = obj.getPart("yn");
+			yp = obj.getPart("yp");
+			zn = obj.getPart("zn");
+			zp = obj.getPart("zp");
+			
 		}
 	}
 	
-	Obj3DPart main;
-	public void draw()
+	Obj3DPart main,xp,xn,yp,yn,zp,zn;
+	public void draw(World world,int x,int y,int z)
 	{
 		if(main != null)main.draw();
-		
+	/*	//Utils.disableLight();
+		if(xn != null){
+			float light = world.getLightBrightness(x-1, y, z)*0.97f+0.03f;
+		//	float light = world.getBrightness(x-1, y, z,0);
+			//light = 1f;
+		//	GL11.glColor3f(light, light, light);
+			xn.draw();
+		}
+		Utils.enableLight();*/
 	}
 	
 	
@@ -53,6 +69,6 @@ public class SixNodeCacheItem extends GenericItemUsingDamageDescriptor{
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		
-		main.draw();
+		if(main != null)main.draw();
 	}
 }

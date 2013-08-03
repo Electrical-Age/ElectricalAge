@@ -127,7 +127,7 @@ public class GhostManager extends WorldSavedData
 	}
 	public void createGhost(Coordonate coordonate,Coordonate observerCoordonate,int UUID)
 	{
-	
+		coordonate.world().setBlock(coordonate.x ,coordonate.y ,coordonate.z,0);
 		if(coordonate.world().setBlock(coordonate.x ,coordonate.y ,coordonate.z,Eln.ghostBlock.blockID))
 		{
 			coordonate = new Coordonate(coordonate);

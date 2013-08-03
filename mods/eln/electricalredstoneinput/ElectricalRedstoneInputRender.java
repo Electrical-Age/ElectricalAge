@@ -35,22 +35,23 @@ public class ElectricalRedstoneInputRender extends SixNodeElementRender{
 	@Override
 	public void draw() {
 		super.draw();
-		if(redLevelTimeout == 0){
-			redLevelTimeout = 4 + (int)(Math.random()*2);
-			redLevel = Utils.getRedstoneLevelAround(new Coordonate(this.tileEntity));
-		}
-		redLevelTimeout--;
+
 		LRDU.Down.glRotateOnX();
 		descriptor.draw(redLevel);
 	}
 
-	int redLevel = 0;
-	int redLevelTimeout = 0;
+	byte redLevel;
 	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
+		try {
+			redLevel = stream.readByte();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 	

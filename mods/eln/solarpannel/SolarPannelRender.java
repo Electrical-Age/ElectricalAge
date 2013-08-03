@@ -8,9 +8,14 @@ import java.io.IOException;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
+import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.cable.CableRenderType;
 import mods.eln.client.ClientProxy;
 import mods.eln.electricalfurnace.ElectricalFurnaceElement;
 import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
+import mods.eln.misc.LRDUMask;
+import mods.eln.misc.RcInterpolator;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.node.TransparentNodeElementRender;
@@ -25,6 +30,7 @@ import net.minecraft.item.ItemStack;
 public class SolarPannelRender extends TransparentNodeElementRender{
 
 	public SolarPannelDescriptor descriptor;
+	private CableRenderType renderPreProcess;
 	public SolarPannelRender(TransparentNodeEntity tileEntity,
 			TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
@@ -32,9 +38,15 @@ public class SolarPannelRender extends TransparentNodeElementRender{
 		// TODO Auto-generated constructor stub
 	}
 
+	RcInterpolator interpol = new RcInterpolator(1f);
+	boolean boot = true;
 	@Override
 	public void draw() {
 		float alpha;
+
+		renderPreProcess = drawCable(Direction.YN, descriptor.cableRender, eConn, renderPreProcess);
+		
+		
 		if(hasTracker == false)
 		{
 			alpha = (float) descriptor.alphaTrunk(pannelAlphaSyncValue);
@@ -43,15 +55,23 @@ public class SolarPannelRender extends TransparentNodeElementRender{
 		{
 			alpha = (float) descriptor.alphaTrunk(SolarPannelSlowProcess.getSolarAlpha(tileEntity.worldObj));
 		}
+		interpol.setTarget(alpha);
+		if(boot){
+			boot = false;
+			interpol.setValueFromTarget();
+		}
+		
+		interpol.stepGraphic();
+		
+		descriptor.draw((float) (interpol.get()*180/Math.PI - 90),front);
 		
 		
-		
-		GL11.glTranslatef(0, 2, 0);
-		
-		GL11.glRotatef((float) (alpha*180/Math.PI - 90), 0, 0, -1);
-		Eln.obj.draw("SOLARPANEL_2X2","Cube");	
 	}
 
+	@Override
+	public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
+		return descriptor.cableRender;
+	}
 	
 	
 
@@ -61,6 +81,8 @@ public class SolarPannelRender extends TransparentNodeElementRender{
 	
 	public boolean hasTracker;
 	
+	
+	LRDUMask eConn = new LRDUMask();
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -82,6 +104,10 @@ public class SolarPannelRender extends TransparentNodeElementRender{
 				pannelAlphaSyncValue = pannelAlphaIncoming;
 				pannelAlphaSyncNew = true;
 			}
+			
+			eConn.deserialize(stream);
+			
+			renderPreProcess = null;
 	
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

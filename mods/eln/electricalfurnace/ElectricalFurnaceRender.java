@@ -11,6 +11,7 @@ import mods.eln.Eln;
 import mods.eln.client.ClientProxy;
 import mods.eln.client.FrameTime;
 import mods.eln.misc.Direction;
+import mods.eln.misc.Utils;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElement;
 import mods.eln.node.TransparentNodeElementInventory;
@@ -81,7 +82,7 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender{
 	public boolean temperatureTargetSyncNew = false;
 	public float temperatureTargetSyncValue = -1234;
 
-	
+	public boolean autoShutDown;
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -124,9 +125,13 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender{
 			
 			
 			heatingCorpResistorP = stream.readShort();
-			
+			voltage = stream.readFloat();
 			processState = stream.readFloat();
 			processStatePerSecond = stream.readFloat();
+			
+			autoShutDown = stream.readBoolean();
+			
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -134,6 +139,7 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender{
 		
 	}
 	
+	float voltage;
 	
 	public void clientSetPowerOn(boolean value)
 	{

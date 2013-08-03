@@ -39,7 +39,7 @@ public class SixNodeRender extends TileEntitySpecialRenderer
 			if(SixNodeCacheItem.map[tileEntity.sixNodeCacheMapId] != null)
 			{
 				Utils.glDefaultColor();
-				SixNodeCacheItem.map[tileEntity.sixNodeCacheMapId].draw();
+				SixNodeCacheItem.map[tileEntity.sixNodeCacheMapId].draw(entity.worldObj,entity.xCoord,entity.yCoord,entity.zCoord);
 			}
 		}
 		

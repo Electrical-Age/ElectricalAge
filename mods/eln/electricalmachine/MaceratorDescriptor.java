@@ -60,7 +60,7 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor{
 				
 		GL11.glScalef(0.7f, 0.7f, 0.7f);
 		Utils.drawEntityItem(inEntity, 0.0, 0.4f, 0f, handle.itemCounter, 1f);	
-		Utils.drawEntityItem(outEntity, 0.0, -0.6f, 0f, 130 + handle.itemCounter, 1f);	
+		Utils.drawEntityItem(outEntity, 0.0, -0.5f, 0f, 130 + handle.itemCounter, 1f);	
 	}
 	
 	

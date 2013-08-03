@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import cpw.mods.fml.common.network.Player;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -18,6 +21,7 @@ import mods.eln.node.NodeElectricalGateOutputProcess;
 import mods.eln.node.SixNode;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElement;
+import mods.eln.node.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
@@ -34,6 +38,8 @@ public class ElectricalMathElement extends SixNodeElement {
 	ArrayList<ISymbole> symboleList = new ArrayList<ISymbole>();
 	
 	ElectricalMathElectricalProcess electricalProcess = new ElectricalMathElectricalProcess(this);
+	
+	boolean firstBoot = true;
 	
 	public ElectricalMathElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
@@ -54,7 +60,7 @@ public class ElectricalMathElement extends SixNodeElement {
 	}
 	
 	boolean sideConnectionEnable[] = new boolean[3];
-	String expression = "A+C";
+	String expression = "";
 	Equation equation;
 	
 	
@@ -91,7 +97,10 @@ public class ElectricalMathElement extends SixNodeElement {
 		@Override
 		public void process(double time) {
 			
-			e.gateOutputProcess.setOutputNormalizedSafe(e.equation.getValue(time));
+			if(e.redstoneReady)
+				e.gateOutputProcess.setOutputNormalizedSafe(e.equation.getValue(time));
+			else
+				e.gateOutputProcess.setOutputNormalized(0.0);
 		}
 	}
 	
@@ -103,6 +112,13 @@ public class ElectricalMathElement extends SixNodeElement {
 			sideConnectionEnable[idx] = equation.isSymboleUsed(symboleList.get(idx));
 		}
 		this.expression = expression;
+		
+		redstoneRequired = 0;
+		if(equation.isValid()){
+			redstoneRequired = equation.getOperatorCount();
+		}
+		
+		checkRedstone();
 		
 	}
 	
@@ -146,9 +162,32 @@ public class ElectricalMathElement extends SixNodeElement {
 
 	@Override
 	public void initialize() {
-		preProcessEquation(expression);
+		if(firstBoot)
+			preProcessEquation(expression);
 	}
+	
+	
+	@Override
+	protected void inventoryChanged() {
+		// TODO Auto-generated method stub
+		super.inventoryChanged();
+		
+		checkRedstone();
+	}
+	int redstoneRequired;
+	void checkRedstone()
+	{
+		int redstoneInStack = 0;
 
+		ItemStack stack = inventory.getStackInSlot(ElectricalMathContainer.restoneSlotId);
+		if(stack != null) redstoneInStack = stack.stackSize;
+		
+		redstoneReady = redstoneRequired <= redstoneInStack;
+		needPublish();
+	}
+	
+	boolean redstoneReady = false;
+	
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
@@ -156,20 +195,31 @@ public class ElectricalMathElement extends SixNodeElement {
 		return onBlockActivatedRotate(entityPlayer);
 	}
 
+	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 	
+	@Override
+	public IInventory getInventory() {
+		// TODO Auto-generated method stub
+		return inventory;
+	}
 	@Override
 	public boolean hasGui() {
 		// TODO Auto-generated method stub
 		return true;
 	}
 	
-	
+	@Override
+	public Container newContainer(Direction side, EntityPlayer player) {
+		// TODO Auto-generated method stub
+		return new ElectricalMathContainer(sixNode, player, inventory);
+	}
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
 		nbt.setString(str +  "expression",expression);
+		equation.writeToNBT(nbt, str + "equation");
 	}
 	
 	@Override
@@ -177,6 +227,10 @@ public class ElectricalMathElement extends SixNodeElement {
 		// TODO Auto-generated method stub
 		super.readFromNBT(nbt, str);
 		expression = nbt.getString(str + "expression");
+		preProcessEquation(expression);
+		equation.readFromNBT(nbt, str + "equation");
+		
+		firstBoot = false;
 	}
 	
 	
@@ -186,6 +240,7 @@ public class ElectricalMathElement extends SixNodeElement {
 		super.networkSerialize(stream);
 		try {
 			stream.writeUTF(expression);
+			stream.writeInt(redstoneRequired);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

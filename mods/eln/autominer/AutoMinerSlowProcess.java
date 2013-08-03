@@ -127,7 +127,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady{
 			miner.inPowerLoad.setRp(Double.POSITIVE_INFINITY);
 			break;
 		case ore:
-			miner.inPowerLoad.setRp(drill.getRp(scanner.OperationEnergy));
+			miner.inPowerLoad.setRp(drill.getRp(scanner != null ? scanner.OperationEnergy : 0));
 			break;
 		case pipeAdd:
 			miner.inPowerLoad.setRp(miner.descriptor.pipeOperationRp);
@@ -238,7 +238,9 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady{
 				jobCoord.z = miner.node.coordonate.z;
 				
 				int blockId = jobCoord.world().getBlockId(jobCoord.x, jobCoord.y, jobCoord.z);
-				if(blockId != 0)
+				if(		blockId != 0 
+						&& blockId != Block.waterMoving.blockID && blockId != Block.waterStill.blockID
+						&& blockId != Block.lavaMoving.blockID && blockId != Block.lavaStill.blockID)
 				{
 					if(blockId != Block.obsidian.blockID && blockId != Block.bedrock.blockID)
 					{

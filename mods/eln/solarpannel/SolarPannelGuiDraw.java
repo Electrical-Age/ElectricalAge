@@ -34,7 +34,7 @@ public class SolarPannelGuiDraw extends GuiContainerEln {
     private TransparentNodeElementInventory inventory;
     SolarPannelRender render;
  
-    GuiVerticalTrackBarHeat vuMeterTemperature;
+    GuiVerticalTrackBar vuMeterTemperature;
     
     public SolarPannelGuiDraw(EntityPlayer player, IInventory inventory,SolarPannelRender render)
     {
@@ -50,7 +50,7 @@ public class SolarPannelGuiDraw extends GuiContainerEln {
     	super.initGui();
     	
     	
-    	vuMeterTemperature = newGuiVerticalTrackBarHeat(width*1/3,height/5,20,60);
+    	vuMeterTemperature = newGuiVerticalTrackBar(176/2+12,8,20,69);
     	vuMeterTemperature.setStepIdMax(181);
     	vuMeterTemperature.setEnable(true);
     	vuMeterTemperature.setRange((float)render.descriptor.alphaMin,(float)render.descriptor.alphaMax);
@@ -79,14 +79,21 @@ public class SolarPannelGuiDraw extends GuiContainerEln {
 		// TODO Auto-generated method stub
 		super.preDraw(f, x, y);
         if(render.pannelAlphaSyncNew) syncVumeter();
-        vuMeterTemperature.temperatureHit = (float) (SolarPannelSlowProcess.getSolarAlpha(render.tileEntity.worldObj));
+        //vuMeterTemperature.temperatureHit = (float) (SolarPannelSlowProcess.getSolarAlpha(render.tileEntity.worldObj));
         vuMeterTemperature.setEnable(! render.hasTracker);
+        int sunAlpha = ((int)(180/Math.PI * SolarPannelSlowProcess.getSolarAlpha(render.tileEntity.worldObj))-90);
+        
+        vuMeterTemperature.setComment(0,"Solar pannel alpha : " + ((int)(180/Math.PI * vuMeterTemperature.getValue())-90) + "\u00B0");
+        if(Math.abs(sunAlpha)>90)
+        	vuMeterTemperature.setComment(1,"It's the night");
+        else
+        	vuMeterTemperature.setComment(1,"Sun alpha : " + sunAlpha + "\u00B0");
 	}
 	@Override
 	protected void postDraw(float f, int x, int y) {
 		// TODO Auto-generated method stub
 		super.postDraw(f, x, y);
-		drawString(8, 6,"Alpha " + render.pannelAlphaSyncNew);
+		//drawString(8, 6,"Alpha " + render.pannelAlphaSyncNew);
 	}
 
 	@Override
@@ -96,4 +103,5 @@ public class SolarPannelGuiDraw extends GuiContainerEln {
 	}
 
 
+	
 }

@@ -72,8 +72,8 @@ public class SolarPannelElement extends TransparentNodeElement{
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub
 		if(lrdu != LRDU.Down) return null;
-		if(side == front) return positiveLoad;
-		if(side == front.getInverse() && ! grounded) return negativeLoad;
+		if(side == front.left()) return positiveLoad;
+		if(side == front.right() && ! grounded) return negativeLoad;
 		return null;	
 	}
 
@@ -90,8 +90,8 @@ public class SolarPannelElement extends TransparentNodeElement{
 	public int getConnectionMask(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub
 		if(lrdu != LRDU.Down) return 0;
-		if(side == front) return node.maskElectricalPower;
-		if(side == front.getInverse() && ! grounded) return node.maskElectricalPower;
+		if(side == front.left()) return node.maskElectricalPower;
+		if(side == front.right() && ! grounded) return node.maskElectricalPower;
 		return 0;		
 	}
 
@@ -150,7 +150,7 @@ public class SolarPannelElement extends TransparentNodeElement{
 		try {	
 			stream.writeBoolean(inventory.getStackInSlot(SolarPannelContainer.trackerSlotId) != null);
 			stream.writeFloat((float) pannelAlpha);
-	
+			node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -190,11 +190,14 @@ public class SolarPannelElement extends TransparentNodeElement{
 	@Override
 	public boolean hasGui() {
 		// TODO Auto-generated method stub
-		return true;
+		
+		return descriptor.canRotate;
 	}
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
 		// TODO Auto-generated method stub
+		
 		return new SolarPannelContainer(node, player, inventory);
 	}
+	
 }

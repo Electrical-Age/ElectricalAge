@@ -2,6 +2,8 @@ package mods.eln.gui;
 
 import java.util.ArrayList;
 
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 
@@ -18,8 +20,15 @@ public class GuiVerticalWorkingZoneBar extends Gui implements IGuiObject{
 		this.xPosition = xPosition;
 		this.yPosition = yPosition;	
 		this.helper = helper;	
+		enabled = true;
 	}
 	
+
+	public void setEnabled(boolean b) {
+		this.enabled = b;
+	}
+	
+	boolean enabled;
 	
 	public void setValue(float value)
 	{
@@ -53,19 +62,28 @@ public class GuiVerticalWorkingZoneBar extends Gui implements IGuiObject{
 	
 	@Override
 	public void idraw(int x, int y, float f) {
+		//if(enabled == false) 
+			//GL11.glColor3f(0.7f, 0.7f, 0.7f);
 		drawRect(xPosition, yPosition-2,xPosition + width,yPosition + height+2,0xFF404040);
 		drawRect(xPosition+1, yPosition-1,xPosition + width-1,yPosition + height+1,0xFF606060);
 		drawRect(xPosition+2, yPosition,xPosition + width-2,yPosition + height,0xFF808080);
 		
 		float factorY = 0f;
-		
+		if(enabled == true)
 		for(Zone zone : zoneList){
-			drawRect(xPosition+2, getYFromFactor(factorY + zone.height),xPosition + width-2,getYFromFactor(factorY),zone.color);
+			int c = zone.color;
+			/*if(enabled == false)
+				c = (c & 0xFF000000) 
+					+ (((int)((c & 0xFF0000)*0.7f)) & (0xFF0000))
+					+ (((int)((c & 0xFF00)*0.7f)) & (0xFF00))
+					+ (((int)((c & 0xFF)*0.7f)) & (0xFF));*/
+			drawRect(xPosition+2, getYFromFactor(factorY + zone.height),xPosition + width-2,getYFromFactor(factorY),c);
 				
 			factorY += zone.height;
 		}
 		
-		drawBare(f, x, y);
+		if(enabled)drawBare(f, x, y);
+		//else GL11.glColor3f(1f, 1f, 1f);
 
 	}
 	public void drawBare(float par1, int x, int y)
@@ -128,15 +146,19 @@ public class GuiVerticalWorkingZoneBar extends Gui implements IGuiObject{
 	
 	public void setComment(int line,String comment)
 	{
-		if(this.comment.size() < line + 1)
-			this.comment.add(line, comment);
-		else
-			this.comment.set(line, comment);
+		if(this.comment.size() < line + 1){
+			for(int idx = this.comment.size();idx <= line;idx++){
+				this.comment.add("");
+			}
+		}
+
+		this.comment.set(line, comment);
 	}
 	
 	@Override
 	public void idraw2(int x, int y) {
 		// TODO Auto-generated method stub
+		
 		if(/*visible == true && */(x >= xPosition && y >= yPosition && x < xPosition + width && y < yPosition + height))
 		{
 			int px,py;

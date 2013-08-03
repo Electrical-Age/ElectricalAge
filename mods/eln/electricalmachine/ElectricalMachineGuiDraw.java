@@ -9,6 +9,7 @@ import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.GuiVerticalTrackBarHeat;
+import mods.eln.gui.GuiVerticalVoltageSupplyBar;
 import mods.eln.gui.GuiVerticalWorkingZoneBar;
 import mods.eln.gui.HelperStdContainer;
 import mods.eln.misc.Utils;
@@ -43,7 +44,7 @@ public class ElectricalMachineGuiDraw extends GuiContainerEln {
         this.render = render;     
     }
     
-    GuiVerticalWorkingZoneBar voltageBar;
+    GuiVerticalVoltageSupplyBar voltageBar;
 
 	@Override
 	public void initGui() {
@@ -52,14 +53,8 @@ public class ElectricalMachineGuiDraw extends GuiContainerEln {
 		
 		
 		
-		voltageBar = new GuiVerticalWorkingZoneBar(176-1 , 8, 20, 122-18, helper);
-		voltageBar.setMinMax(0f,1.3f);
-		voltageBar.addZone(0.6f, 0xFF0000FF);
-		voltageBar.addZone(0.3f, 0xFF0066FF);
-		voltageBar.addZone(0.2f, 0xFF00FF00);
-		voltageBar.addZone(0.1f, 0xFFFF6600);
-		voltageBar.addZone(0.1f, 0xFFFF0000);
-		
+		voltageBar = new GuiVerticalVoltageSupplyBar(176-1 , 8, 20, 122-18, helper);
+		voltageBar.setNominalU((float) render.descriptor.nominalU);
 		helper.add(voltageBar);
 	}
 
@@ -79,7 +74,8 @@ public class ElectricalMachineGuiDraw extends GuiContainerEln {
 		((GuiHelperContainer)helper).drawProcess(94, 33-20-2,render.processState);
 		//draw
 		
-		voltageBar.setComment(0,Utils.plotVolt("Voltage supply :",render.UFactor*render.descriptor.nominalU));
-		voltageBar.setValue(render.UFactor);
+		
+		voltageBar.setVoltage((float) (render.UFactor*render.descriptor.nominalU));
+		voltageBar.setPower((float) (render.powerFactor * render.descriptor.nominalP));
 	}
 }
