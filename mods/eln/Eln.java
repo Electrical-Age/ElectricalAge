@@ -487,6 +487,7 @@ public class Eln {
 		recipeElectricalCable();
 		recipeThermalCable();
 		recipeLampSocket();
+		recipeLampSupply();
 		recipeDiode();
 		recipeSwitch();
 		recipeWirelessSignal();
@@ -1976,7 +1977,7 @@ public class Eln {
 					// FunctionTable solarIfSBase,
 					LVSolarU / 4, 65.0,// double electricalUmax,double
 										// electricalPmax,
-					0.002,// ,double electricalDropFactor
+					0.01,// ,double electricalDropFactor
 					Math.PI / 2, Math.PI / 2 // alphaMin alphaMax
 			);
 
@@ -2005,7 +2006,7 @@ public class Eln {
 					// FunctionTable solarIfSBase,
 					LVSolarU / 4, 65.0,// double electricalUmax,double
 										// electricalPmax,
-					0.002,// ,double electricalDropFactor
+					0.01,// ,double electricalDropFactor
 					Math.PI / 4, Math.PI / 4 * 3 // alphaMin alphaMax
 			);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -2478,7 +2479,7 @@ public class Eln {
 																// String
 																// name,int
 																// metadata,
-					6, 3, 9, 0, 24 // int spawnRate,int spawnSizeMin,int
+					8, 3, 9, 0, 24 // int spawnRate,int spawnSizeMin,int
 										// spawnSizeMax,int spawnHeightMin,int
 										// spawnHeightMax
 			);
@@ -3580,8 +3581,11 @@ public class Eln {
 	public DataLogsPrintDescriptor dataLogsPrintDescriptor;
 
 	void recipeGround() {
-		GameRegistry.addRecipe(findItemStack("Ground cable"), " C ", " C ",
-				"CCC", Character.valueOf('C'), findItemStack("Cooper cable"));
+		GameRegistry.addRecipe(findItemStack("Ground cable"), 
+				" C ", 
+				" C ",
+				"CCC", 
+				Character.valueOf('C'), findItemStack("Cooper cable"));
 	}
 
 	void recipeElectricalSource() {
@@ -3589,29 +3593,43 @@ public class Eln {
 	}
 
 	void recipeElectricalCable() {
-		GameRegistry.addRecipe(signalCableDescriptor.newItemStack(1), "R", "C",
+		GameRegistry.addRecipe(signalCableDescriptor.newItemStack(1), 
+				"R", 
+				"C",
 				Character.valueOf('C'), findItemStack("Iron cable"),
 				Character.valueOf('R'), findItemStack("Rubber"));
-		GameRegistry.addRecipe(lowVoltageCableDescriptor.newItemStack(1), "R",
-				"C", Character.valueOf('C'), findItemStack("Cooper cable"),
+		
+		GameRegistry.addRecipe(lowVoltageCableDescriptor.newItemStack(1), 
+				"R",
+				"C", 
+				Character.valueOf('C'), findItemStack("Cooper cable"),
 				Character.valueOf('R'), findItemStack("Rubber"));
+		
 		GameRegistry.addRecipe(meduimVoltageCableDescriptor.newItemStack(1),
-				"R", "C", Character.valueOf('C'),
-				lowVoltageCableDescriptor.newItemStack(1),
+				"R",
+				"C", 
+				Character.valueOf('C'),lowVoltageCableDescriptor.newItemStack(1),
 				Character.valueOf('R'), findItemStack("Rubber"));
-		GameRegistry.addRecipe(highVoltageCableDescriptor.newItemStack(1), "R",
-				"C", Character.valueOf('C'),
-				meduimVoltageCableDescriptor.newItemStack(1),
+		
+		GameRegistry.addRecipe(highVoltageCableDescriptor.newItemStack(1), 
+				"R",
+				"C", 
+				Character.valueOf('C'),meduimVoltageCableDescriptor.newItemStack(1),
 				Character.valueOf('R'), findItemStack("Rubber"));
 
-		GameRegistry.addRecipe(signalCableDescriptor.newItemStack(6), "RRR",
-				"CCC", "RRR", Character.valueOf('C'), new ItemStack(
-						Item.ingotIron), Character.valueOf('R'),
-				findItemStack("Rubber"));
+		GameRegistry.addRecipe(signalCableDescriptor.newItemStack(6), 
+				"RRR",
+				"CCC", 
+				"RRR", 
+				Character.valueOf('C'), new ItemStack(Item.ingotIron), 
+				Character.valueOf('R'),findItemStack("Rubber"));
+		
 		GameRegistry.addRecipe(lowVoltageCableDescriptor.newItemStack(6),
-				"RRR", "CCC", "RRR", Character.valueOf('C'),
-				findItemStack("Cooper ingot"), Character.valueOf('R'),
-				findItemStack("Rubber"));
+				"RRR",
+				"CCC", 
+				"RRR", 
+				Character.valueOf('C'),findItemStack("Cooper ingot"), 
+				Character.valueOf('R'),findItemStack("Rubber"));
 
 	}
 
@@ -3644,65 +3662,93 @@ public class Eln {
 	}
 
 	void recipeLampSocket() {
-		GameRegistry.addRecipe(findItemStack("Lamp socket A", 3), "G ", "IG",
-				"G ", Character.valueOf('G'), new ItemStack(Block.thinGlass),
+		GameRegistry.addRecipe(findItemStack("Lamp socket A", 3), 
+				"G ", 
+				"IG",
+				"G ", 
+				Character.valueOf('G'), new ItemStack(Block.thinGlass),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron));
+		
 		GameRegistry.addRecipe(findItemStack("Lamp socket B projector", 3),
-				" I", "IG", " I", Character.valueOf('G'), new ItemStack(
-						Block.thinGlass), Character.valueOf('I'),
-				new ItemStack(Item.ingotIron));
+				" I", 
+				"IG", 
+				" I",
+				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
+				Character.valueOf('I'), new ItemStack(Item.ingotIron));
 
 	}
 
+	void recipeLampSupply(){
+		GameRegistry.addRecipe(findItemStack("Lamp supply", 1),
+				" I ",
+				"ICI",
+				" I ",
+				Character.valueOf('C'), findItemStack("Cooper ingot"), 
+				Character.valueOf('I'),new ItemStack(Item.ingotIron));
+		
+	}
 	void recipeDiode() {
 
-		GameRegistry.addRecipe(findItemStack("Signal diode", 4), " RB", "IIR",
-				" RB", Character.valueOf('R'), new ItemStack(Item.redstone),
+		GameRegistry.addRecipe(findItemStack("Signal diode", 4), 
+				" RB", 
+				"IIR",
+				" RB", 
+				Character.valueOf('R'), new ItemStack(Item.redstone),
 				Character.valueOf('I'), findItemStack("Iron cable"),
 				Character.valueOf('B'), findItemStack("Rubber"));
 
-		GameRegistry.addRecipe(findItemStack("10A diode", 3), " RB", "IIR",
-				" RB", Character.valueOf('R'), new ItemStack(Item.redstone),
+		GameRegistry.addRecipe(findItemStack("10A diode", 3), 
+				" RB", 
+				"IIR",
+				" RB", 
+				Character.valueOf('R'), new ItemStack(Item.redstone),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron),
 				Character.valueOf('B'), findItemStack("Rubber"));
 
-		GameRegistry.addRecipe(findItemStack("25A diode"), "D", "D", "D",
+		GameRegistry.addRecipe(findItemStack("25A diode"), 
+				"D", 
+				"D", 
+				"D",
 				Character.valueOf('D'), findItemStack("10A diode"));
 
 	}
 
 	void recipeSwitch() {
 		GameRegistry.addRecipe(findItemStack("Signal voltage switch"),
-				" AI",
-				"AIA",
-				"CAC", Character.valueOf('R'), new ItemStack(
-						Item.redstone), Character.valueOf('A'),
-				findItemStack("Rubber"), Character.valueOf('I'),
-				findItemStack("Cooper cable"), Character.valueOf('C'),
-				findItemStack("Signal cable"));
+				"  I",
+				" I ",
+				"CAC", 
+				Character.valueOf('R'), new ItemStack(Item.redstone), 
+				Character.valueOf('A'), findItemStack("Rubber"), 
+				Character.valueOf('I'), findItemStack("Cooper cable"), 
+				Character.valueOf('C'), findItemStack("Signal cable"));
 
 		GameRegistry.addRecipe(findItemStack("Low voltage switch"),
+				"  I",
+				" I ",
+				"CAC", 
+				Character.valueOf('R'), new ItemStack(Item.redstone), 
+				Character.valueOf('A'),findItemStack("Rubber"), 
+				Character.valueOf('I'),findItemStack("Cooper cable"), 
+				Character.valueOf('C'),findItemStack("Low voltage cable"));
+
+		GameRegistry.addRecipe(findItemStack("Medium voltage switch"), 
+				"  I",
+				" I ", 
+				"CAC", 
+				Character.valueOf('R'), new ItemStack(Item.redstone), 
+				Character.valueOf('A'),	findItemStack("Rubber"), 
+				Character.valueOf('I'),findItemStack("Cooper cable"), 
+				Character.valueOf('C'),findItemStack("Medium voltage cable"));
+
+		GameRegistry.addRecipe(findItemStack("High voltage switch"), 
 				" AI",
-				"AIA",
-				"CAC", Character.valueOf('R'), new ItemStack(
-						Item.redstone), Character.valueOf('A'),
-				findItemStack("Rubber"), Character.valueOf('I'),
-				findItemStack("Cooper cable"), Character.valueOf('C'),
-				findItemStack("Low voltage cable"));
-
-		GameRegistry.addRecipe(findItemStack("Medium voltage switch"), " AI",
-				"AIA", "CAC", Character.valueOf('R'), new ItemStack(
-						Item.redstone), Character.valueOf('A'),
-				findItemStack("Rubber"), Character.valueOf('I'),
-				findItemStack("Cooper cable"), Character.valueOf('C'),
-				findItemStack("Medium voltage cable"));
-
-		GameRegistry.addRecipe(findItemStack("High voltage switch"), " AI",
-				"AIA", "CAC", Character.valueOf('R'), new ItemStack(
-						Item.redstone), Character.valueOf('A'),
-				findItemStack("Rubber"), Character.valueOf('I'),
-				findItemStack("Cooper cable"), Character.valueOf('C'),
-				findItemStack("High voltage cable"));
+				"AIA", 
+				"CAC", 
+				Character.valueOf('R'), new ItemStack(Item.redstone), 
+				Character.valueOf('A'),findItemStack("Rubber"), 
+				Character.valueOf('I'),findItemStack("Cooper cable"), 
+				Character.valueOf('C'),findItemStack("High voltage cable"));
 	}
 	
 	
@@ -3721,19 +3767,19 @@ public class Eln {
 				"  I",
 				" I ",
 				"CRC", 
-				Character.valueOf('R'),new ItemStack(Item.redstone), Character.valueOf('A'),
-				findItemStack("Rubber"), Character.valueOf('I'),
-				findItemStack("Cooper cable"), Character.valueOf('C'),
-				findItemStack("Medium voltage cable"));
+				Character.valueOf('R'),new ItemStack(Item.redstone), 
+				Character.valueOf('A'),findItemStack("Rubber"),
+				Character.valueOf('I'),findItemStack("Cooper cable"), 
+				Character.valueOf('C'),findItemStack("Medium voltage cable"));
 
 		GameRegistry.addRecipe(findItemStack("High voltage relay"), 
 				"  I",
 				" I ",
 				"CRC", 
-				Character.valueOf('R'),new ItemStack(Item.redstone), Character.valueOf('A'),
-				findItemStack("Rubber"), Character.valueOf('I'),
-				findItemStack("Cooper cable"), Character.valueOf('C'),
-				findItemStack("High voltage cable"));
+				Character.valueOf('R'),new ItemStack(Item.redstone), 
+				Character.valueOf('A'),findItemStack("Rubber"), 
+				Character.valueOf('I'),findItemStack("Cooper cable"),
+				Character.valueOf('C'),findItemStack("High voltage cable"));
 	}
 	
 	void recipeWirelessSignal() {
@@ -3769,16 +3815,19 @@ public class Eln {
 
 	void recipeTransformer() {
 		for (int idx = 0; idx < 4; idx++) {
-			GameRegistry.addRecipe(findItemStack("Transformer"), "I I", "WWW",
-					Character.valueOf('W'),
-					new ItemStack(Block.planks, 1, idx),
+			GameRegistry.addRecipe(findItemStack("Transformer"), 
+					"I I", 
+					"WWW",
+					Character.valueOf('W'),new ItemStack(Block.planks, 1, idx),
 					Character.valueOf('I'), new ItemStack(Item.ingotIron));
 		}
 	}
 
 	void recipeHeatFurnace() {
-		GameRegistry.addRecipe(findItemStack("Stone heat furnace"), "BBB",
-				"BIB", "BiB", 
+		GameRegistry.addRecipe(findItemStack("Stone heat furnace"), 
+				"BBB",
+				"BIB", 
+				"BiB", 
 				Character.valueOf('B'),new ItemStack(Block.stone), 
 				Character.valueOf('i'),findItemStack("Cooper thermal cable"), 
 				Character.valueOf('I'),findItemStack("Combustion chamber"));
@@ -3811,14 +3860,15 @@ public class Eln {
 				Character.valueOf('m'), findItemStack("Electrical motor")
 
 		);
-		GameRegistry.addRecipe(findItemStack("200V turbine"), "ImI", "HMH",
-				"IEI", Character.valueOf('I'), findItemStack("Rubber"),
-				Character.valueOf('M'),
-				findItemStack("Advanced machine block"),
+		GameRegistry.addRecipe(findItemStack("200V turbine"), 
+				"ImI", 
+				"HMH",
+				"IEI", 
+				Character.valueOf('I'), findItemStack("Rubber"),
+				Character.valueOf('M'),findItemStack("Advanced machine block"),
 				Character.valueOf('E'), findItemStack("Medium voltage cable"),
 				Character.valueOf('H'), findItemStack("Cooper thermal cable"),
-				Character.valueOf('m'),
-				findItemStack("Advanced electrical motor"));
+				Character.valueOf('m'),findItemStack("Advanced electrical motor"));
 
 	}
 
@@ -3827,58 +3877,54 @@ public class Eln {
 		GameRegistry.addRecipe(findItemStack("Cost oriented battery"),
 				"C C",
 				"PPP",
-				"PPP", Character.valueOf('C'),findItemStack("Low voltage cable"),
+				"PPP",
+				Character.valueOf('C'),findItemStack("Low voltage cable"),
 				Character.valueOf('P'),findItemStack("Plumb ingot"), 
 				Character.valueOf('I'),new ItemStack(Item.ingotIron));
 
 		GameRegistry.addRecipe(findItemStack("Capacity oriented battery"),
 				"PPP",
 				"PBP",
-				"PPP", Character.valueOf('B'),
-				findItemStack("Cost oriented battery"), Character.valueOf('P'),
-				findItemStack("Plumb ingot"));
+				"PPP", 
+				Character.valueOf('B'),findItemStack("Cost oriented battery"), 
+				Character.valueOf('P'),findItemStack("Plumb ingot"));
 
 		GameRegistry.addRecipe(findItemStack("Voltage oriented battery"),
 				"PPP",
 				"PBP",
 				"PPP",
-				Character.valueOf('B'),
-				findItemStack("Cost oriented battery"),
+				Character.valueOf('B'),findItemStack("Cost oriented battery"),
 				Character.valueOf('P'),new ItemStack(Item.ingotIron));
 
 		GameRegistry.addRecipe(findItemStack("Current oriented battery"),
 				"PPP",
 				"PBP",
 				"PPP",
-				Character.valueOf('B'),
-				findItemStack("Cost oriented battery"), Character.valueOf('P'),
-				findItemStack("Cooper ingot"));
+				Character.valueOf('B'),findItemStack("Cost oriented battery"), 
+				Character.valueOf('P'),findItemStack("Cooper ingot"));
 
 		GameRegistry.addRecipe(findItemStack("Life oriented battery"), 
 				"PPP",
 				"PBP",
 				"PPP",
-				Character.valueOf('B'),
-				findItemStack("Cost oriented battery"), Character.valueOf('P'),
-				new ItemStack(Item.ingotGold));
+				Character.valueOf('B'),findItemStack("Cost oriented battery"), 
+				Character.valueOf('P'),new ItemStack(Item.ingotGold));
 
 		GameRegistry.addRecipe(findItemStack("Single usage battery"), 
 				"C C",
 				"ccc",
 				"III",
-				Character.valueOf('C'),
-				findItemStack("Low voltage cable"), Character.valueOf('c'),
-				new ItemStack(Item.coal, 1, 0), Character.valueOf('I'),
-				new ItemStack(Item.ingotIron));
+				Character.valueOf('C'),findItemStack("Low voltage cable"), 
+				Character.valueOf('c'),new ItemStack(Item.coal, 1, 0), 
+				Character.valueOf('I'),new ItemStack(Item.ingotIron));
 
 		GameRegistry.addRecipe(findItemStack("Single usage battery"), 
 				"C C",
 				"ccc", 
 				"III", 
-				Character.valueOf('C'),
-				findItemStack("Low voltage cable"), Character.valueOf('c'),
-				new ItemStack(Item.coal, 1, 1), Character.valueOf('I'),
-				new ItemStack(Item.ingotIron));
+				Character.valueOf('C'),findItemStack("Low voltage cable"), 
+				Character.valueOf('c'),new ItemStack(Item.coal, 1, 1), 
+				Character.valueOf('I'),new ItemStack(Item.ingotIron));
 
 	}
 
@@ -3887,14 +3933,18 @@ public class Eln {
 		GameRegistry.addRecipe(findItemStack("Electrical furnace"),
 				"III",
 				"IFI",
-				"ICI", Character.valueOf('C'),findItemStack("Low voltage cable"),
+				"ICI", 
+				Character.valueOf('C'),findItemStack("Low voltage cable"),
 				Character.valueOf('F'),new ItemStack(Block.furnaceIdle),
 				Character.valueOf('I'),new ItemStack(Item.ingotIron));
 	}
 
 	void recipeAutoMiner() {
-		GameRegistry.addRecipe(findItemStack("Auto miner"), "CMC", " B ",
-				" P ", Character.valueOf('C'), findItemStack("Cheap chip"),
+		GameRegistry.addRecipe(findItemStack("Auto miner"),
+				"CMC", 
+				" B ",
+				" P ", 
+				Character.valueOf('C'), findItemStack("Cheap chip"),
 				Character.valueOf('B'), findItemStack("Machine block"),
 				Character.valueOf('M'), findItemStack("Electrical motor"),
 				Character.valueOf('P'), findItemStack("Mining pipe"));
@@ -3935,7 +3985,8 @@ public class Eln {
 				findItemStack("Small active thermal dissipator"),
 				"RMR",
 				"I I",
-				"III", Character.valueOf('I'), findItemStack("Cooper ingot"),
+				"III", 
+				Character.valueOf('I'), findItemStack("Cooper ingot"),
 				Character.valueOf('M'), findItemStack("Electrical motor"),
 				Character.valueOf('R'), findItemStack("Rubber"),
 				Character.valueOf('C'), findItemStack("Cooper thermal cable"));
@@ -3944,8 +3995,7 @@ public class Eln {
 				findItemStack("Small active thermal dissipator"), 
 				"RMR", 
 				" D ",
-				Character.valueOf('D'),
-				findItemStack("Small passive thermal dissipator"),
+				Character.valueOf('D'), findItemStack("Small passive thermal dissipator"),
 				Character.valueOf('M'), findItemStack("Electrical motor"),
 				Character.valueOf('R'), findItemStack("Rubber"));
 
@@ -3959,44 +4009,62 @@ public class Eln {
 
 	void recipeHeatingCorp() {
 		GameRegistry.addRecipe(findItemStack("Small 50V cooper heating corp"),
-				"CCC", "C C", "C C", Character.valueOf('C'),
-				findItemStack("Cooper cable"));
-		GameRegistry.addRecipe(findItemStack("50V cooper heating corp"), "CCC",
-				"C C", "C C", Character.valueOf('C'),
-				findItemStack("Cooper ingot"));
+				"CCC",
+				"C C",
+				"C C",
+				Character.valueOf('C'),findItemStack("Cooper cable"));
+		
+		GameRegistry.addRecipe(findItemStack("50V cooper heating corp"), 
+				"CCC",
+				"C C", 
+				"C C", 
+				Character.valueOf('C'),findItemStack("Cooper ingot"));
+		
 		GameRegistry.addRecipe(findItemStack("Small 200V cooper heating corp"),
-				"CC", Character.valueOf('C'),
-				findItemStack("50V cooper heating corp"));
-		GameRegistry.addRecipe(findItemStack("200V cooper heating corp"), "CC",
-				Character.valueOf('C'),
-				findItemStack("Small 200V cooper heating corp"));
+				"CC", 
+				Character.valueOf('C'),findItemStack("50V cooper heating corp"));
+		
+		GameRegistry.addRecipe(findItemStack("200V cooper heating corp"),
+				"CC",
+				Character.valueOf('C'),findItemStack("Small 200V cooper heating corp"));
 
 		GameRegistry.addRecipe(findItemStack("Small 50V iron heating corp"),
-				"CCC", "C C", "C C", Character.valueOf('C'),
-				findItemStack("Iron cable"));
-		GameRegistry.addRecipe(findItemStack("50V iron heating corp"), "CCC",
-				"C C", "C C", Character.valueOf('C'), new ItemStack(
-						Item.ingotIron));
+				"CCC",
+				"C C", 
+				"C C", Character.valueOf('C'),findItemStack("Iron cable"));
+		
+		GameRegistry.addRecipe(findItemStack("50V iron heating corp"),
+				"CCC",
+				"C C",
+				"C C", 
+				Character.valueOf('C'), new ItemStack(Item.ingotIron));
+		
 		GameRegistry.addRecipe(findItemStack("Small 200V iron heating corp"),
-				"CC", Character.valueOf('C'),
-				findItemStack("50V iron heating corp"));
-		GameRegistry.addRecipe(findItemStack("200V iron heating corp"), "CC",
-				Character.valueOf('C'),
-				findItemStack("Small 200V iron heating corp"));
+				"CC",
+				Character.valueOf('C'),findItemStack("50V iron heating corp"));
+		
+		GameRegistry.addRecipe(findItemStack("200V iron heating corp"),
+				"CC",
+				Character.valueOf('C'),findItemStack("Small 200V iron heating corp"));
 
-		GameRegistry.addRecipe(
-				findItemStack("Small 50V tungsten heating corp"), "CCC", "C C",
-				"C C", Character.valueOf('C'), findItemStack("Tungsten cable"));
+		GameRegistry.addRecipe(findItemStack("Small 50V tungsten heating corp"),
+				"CCC",
+				"C C",
+				"C C", 
+				Character.valueOf('C'), findItemStack("Tungsten cable"));
+		
 		GameRegistry.addRecipe(findItemStack("50V tungsten heating corp"),
-				"CCC", "C C", "C C", Character.valueOf('C'),
-				findItemStack("Tungsten ingot"));
-		GameRegistry.addRecipe(
-				findItemStack("Small 200V tungsten heating corp"), "CC",
-				Character.valueOf('C'),
-				findItemStack("50V tungsten heating corp"));
+				"CCC",
+				"C C", 
+				"C C", 
+				Character.valueOf('C'),findItemStack("Tungsten ingot"));
+		
+		GameRegistry.addRecipe(findItemStack("Small 200V tungsten heating corp"),
+				"CC",
+				Character.valueOf('C'),findItemStack("50V tungsten heating corp"));
 		GameRegistry.addRecipe(findItemStack("200V tungsten heating corp"),
-				"CC", Character.valueOf('C'),
-				findItemStack("Small 200V tungsten heating corp"));
+				"CC", 
+				Character.valueOf('C'),findItemStack("Small 200V tungsten heating corp"));
 	}
 
 	void recipeThermalIsolator() {
@@ -4019,9 +4087,9 @@ public class Eln {
 		GameRegistry.addRecipe(findItemStack("On/OFF regulator 10%", 1),
 				"R R",
 				" R ",
-				" I ", Character.valueOf('R'), new ItemStack(
-						Item.redstone), Character.valueOf('I'), new ItemStack(
-						Item.ingotIron));
+				" I ", 
+				Character.valueOf('R'), new ItemStack(Item.redstone),
+				Character.valueOf('I'), new ItemStack(Item.ingotIron));
 
 		GameRegistry.addRecipe(findItemStack("On/OFF regulator 10%", 1), 
 				"RRR",
@@ -4033,28 +4101,36 @@ public class Eln {
 				"R R",
 				" C ", 
 				" I ", 
-						Character.valueOf('R'), new ItemStack(Item.redstone), 
-						Character.valueOf('I'), new ItemStack(Item.ingotIron), 
-						Character.valueOf('C'), findItemStack("Cheap chip"));
+				Character.valueOf('R'), new ItemStack(Item.redstone), 
+				Character.valueOf('I'), new ItemStack(Item.ingotIron), 
+				Character.valueOf('C'), findItemStack("Cheap chip"));
 	}
 
 	void recipeLampItem() {
 
 		// Tungsten
 		GameRegistry.addRecipe(
-				findItemStack("Small 50V incandescent light bulb", 4), " G ",
-				"GFG", " S ", Character.valueOf('G'), new ItemStack(
-						Block.thinGlass), Character.valueOf('F'),
-				findItemStack("Tungsten ingot"), Character.valueOf('S'),
-				findItemStack("Cooper cable"));
+				findItemStack("Small 50V incandescent light bulb", 4), 
+				" G ",
+				"GFG", 
+				" S ",
+				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
+				Character.valueOf('F'),findItemStack("Tungsten ingot"), 
+				Character.valueOf('S'),findItemStack("Cooper cable"));
+		
 		GameRegistry.addRecipe(findItemStack("50V incandescent light bulb", 4),
-				" G ", "GFG", " S ", Character.valueOf('G'), new ItemStack(
-						Block.thinGlass), Character.valueOf('F'),
-				findItemStack("Tungsten ingot"), Character.valueOf('S'),
-				findItemStack("Low voltage cable"));
-		GameRegistry.addRecipe(
-				findItemStack("200V incandescent light bulb", 4), " G ", "GFG",
-				" S ", Character.valueOf('G'), new ItemStack(Block.thinGlass),
+				" G ",
+				"GFG",
+				" S ",
+				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
+				Character.valueOf('F'),findItemStack("Tungsten ingot"), 
+				Character.valueOf('S'),findItemStack("Low voltage cable"));
+		
+		GameRegistry.addRecipe(	findItemStack("200V incandescent light bulb", 4),
+				" G ",
+				"GFG",
+				" S ", 
+				Character.valueOf('G'), new ItemStack(Block.thinGlass),
 				Character.valueOf('F'), findItemStack("Tungsten ingot"),
 				Character.valueOf('S'), findItemStack("Medium voltage cable"));
 		/*
@@ -4065,78 +4141,105 @@ public class Eln {
 		 * Character.valueOf('S'), findItemStack("High voltage cable") );
 		 */
 		// CARBON
+		GameRegistry.addRecipe(findItemStack("Small 50V carbon incandescent light bulb", 4),
+				" G ", 
+				"GFG", 
+				" S ", 
+				Character.valueOf('G'), new ItemStack(Block.thinGlass),
+				Character.valueOf('F'),new ItemStack(Item.coal),
+				Character.valueOf('S'),findItemStack("Cooper cable"));
+		
+		GameRegistry.addRecipe(findItemStack("Small 50V carbon incandescent light bulb", 4),
+				" G ",
+				"GFG", 
+				" S ", 
+				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
+				Character.valueOf('F'),new ItemStack(Item.coal, 1, 1), 
+				Character.valueOf('S'),findItemStack("Cooper cable"));
+		
 		GameRegistry.addRecipe(
-				findItemStack("Small 50V carbon incandescent light bulb", 4),
-				" G ", "GFG", " S ", Character.valueOf('G'), new ItemStack(
-						Block.thinGlass), Character.valueOf('F'),
-				new ItemStack(Item.coal), Character.valueOf('S'),
-				findItemStack("Cooper cable"));
-		GameRegistry.addRecipe(
-				findItemStack("Small 50V carbon incandescent light bulb", 4),
-				" G ", "GFG", " S ", Character.valueOf('G'), new ItemStack(
-						Block.thinGlass), Character.valueOf('F'),
-				new ItemStack(Item.coal, 1, 1), Character.valueOf('S'),
-				findItemStack("Cooper cable"));
-		GameRegistry.addRecipe(
-				findItemStack("50V carbon incandescent light bulb", 4), " G ",
-				"GFG", " S ", Character.valueOf('G'), new ItemStack(
-						Block.thinGlass), Character.valueOf('F'),
-				new ItemStack(Item.coal), Character.valueOf('S'),
-				findItemStack("Low voltage cable"));
-		GameRegistry.addRecipe(
-				findItemStack("50V carbon incandescent light bulb", 4), " G ",
-				"GFG", " S ", Character.valueOf('G'), new ItemStack(
-						Block.thinGlass), Character.valueOf('F'),
-				new ItemStack(Item.coal, 1, 1), Character.valueOf('S'),
-				findItemStack("Low voltage cable"));
+				findItemStack("50V carbon incandescent light bulb", 4), 
+				" G ",
+				"GFG", 
+				" S ", 
+				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
+				Character.valueOf('F'),new ItemStack(Item.coal), 
+				Character.valueOf('S'),findItemStack("Low voltage cable"));
+		
+		GameRegistry.addRecipe(findItemStack("50V carbon incandescent light bulb", 4), 
+				" G ",
+				"GFG", 
+				" S ", 
+				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
+				Character.valueOf('F'),new ItemStack(Item.coal, 1, 1),
+				Character.valueOf('S'),findItemStack("Low voltage cable"));
 
 		GameRegistry.addRecipe(
-				findItemStack("Small 50V economic light bulb", 4), " G ",
-				"GFG", " S ", Character.valueOf('G'), new ItemStack(
-						Block.thinGlass), Character.valueOf('F'),
-				findItemStack("Mercury"), Character.valueOf('S'),
-				findItemStack("Cooper cable"));
+				findItemStack("Small 50V economic light bulb", 4), 
+				" G ",
+				"GFG", 
+				" S ", 
+				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
+				Character.valueOf('F'),findItemStack("Mercury"), 
+				Character.valueOf('S'),findItemStack("Cooper cable"));
+		
 		GameRegistry.addRecipe(findItemStack("50V economic light bulb", 4),
-				" G ", "GFG", " S ", Character.valueOf('G'), new ItemStack(
-						Block.thinGlass), Character.valueOf('F'),
-				findItemStack("Mercury"), Character.valueOf('S'),
-				findItemStack("Low voltage cable"));
+				" G ",
+				"GFG", 
+				" S ", 
+				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
+				Character.valueOf('F'),findItemStack("Mercury"), 
+				Character.valueOf('S'),findItemStack("Low voltage cable"));
+		
 		GameRegistry.addRecipe(findItemStack("200V economic light bulb", 4),
-				" G ", "GFG", " S ", Character.valueOf('G'), new ItemStack(
-						Block.thinGlass), Character.valueOf('F'),
-				findItemStack("Mercury"), Character.valueOf('S'),
-				findItemStack("Medium voltage cable"));
+				" G ",
+				"GFG",
+				" S ", 
+				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
+				Character.valueOf('F'),findItemStack("Mercury"), 
+				Character.valueOf('S'),findItemStack("Medium voltage cable"));
 	}
 
 	void recipeProtection() {
 
 		GameRegistry.addRecipe(findItemStack("OverVoltage protection", 4),
-				"SCD", Character.valueOf('S'),
-				findItemStack("Electrical probe"), Character.valueOf('C'),
-				findItemStack("Cheap chip"), Character.valueOf('D'),
-				new ItemStack(Item.redstone));
+				"SCD",
+				Character.valueOf('S'),findItemStack("Electrical probe"), 
+				Character.valueOf('C'),findItemStack("Cheap chip"),
+				Character.valueOf('D'),new ItemStack(Item.redstone));
+		
 		GameRegistry.addRecipe(findItemStack("OverHeating protection", 4),
-				"SCD", Character.valueOf('S'), findItemStack("Thermal probe"),
+				"SCD", 
+				Character.valueOf('S'), findItemStack("Thermal probe"),
 				Character.valueOf('C'), findItemStack("Cheap chip"),
 				Character.valueOf('D'), new ItemStack(Item.redstone));
 
 	}
 
 	void recipeCombustionChamber() {
-		GameRegistry.addRecipe(findItemStack("Combustion chamber"), " L ",
-				"L L", " L ", Character.valueOf('L'),
-				new ItemStack(Block.stone));
+		GameRegistry.addRecipe(findItemStack("Combustion chamber"),
+				" L ",
+				"L L", 
+				" L ", 
+				Character.valueOf('L'),new ItemStack(Block.stone));
 	}
 
 	void recipeFerromagneticCore() {
 		GameRegistry.addRecipe(findItemStack("Cheap ferromagnetic core"),
-				"LLL", "L  ", "LLL", Character.valueOf('L'), Item.ingotIron);
+				"LLL",
+				"L  ", 
+				"LLL", 
+				Character.valueOf('L'), Item.ingotIron);
+		
 		GameRegistry.addRecipe(findItemStack("Average ferromagnetic core"),
-				"LLL", "L  ", "LLL", Character.valueOf('L'),
-				findItemStack("Ferrite ingot"));
+				"LLL",
+				"L  ", 
+				"LLL", 
+				Character.valueOf('L'),findItemStack("Ferrite ingot"));
+		
 		GameRegistry.addRecipe(findItemStack("Optimal ferromagnetic core"),
-				"ll", Character.valueOf('l'),
-				findItemStack("Average ferromagnetic core"));
+				"ll", 
+				Character.valueOf('l'),findItemStack("Average ferromagnetic core"));
 	}
 
 	void recipeIngot() {
@@ -4145,7 +4248,8 @@ public class Eln {
 
 	void recipeDust() {
 		GameRegistry.addShapelessRecipe(findItemStack("Steel dust"),
-				findItemStack("Iron dust"), findItemStack("Coal dust"));
+				findItemStack("Iron dust"), 
+				findItemStack("Coal dust"));
 
 	}
 
@@ -4159,11 +4263,13 @@ public class Eln {
 				Character.valueOf('C'), findItemStack("Low voltage cable"));
 
 		GameRegistry.addRecipe(findItemStack("Advanced electrical motor"),
-				"RCR", "MIM", "CRC", Character.valueOf('M'),
-				findItemStack("Basic magnet"), Character.valueOf('I'),
-				new ItemStack(Item.ingotIron), Character.valueOf('R'),
-				new ItemStack(Item.redstone), Character.valueOf('C'),
-				findItemStack("Medium voltage cable"));
+				"RCR", 
+				"MIM", 
+				"CRC",
+				Character.valueOf('M'),findItemStack("Basic magnet"), 
+				Character.valueOf('I'),new ItemStack(Item.ingotIron), 
+				Character.valueOf('R'),new ItemStack(Item.redstone), 
+				Character.valueOf('C'),findItemStack("Medium voltage cable"));
 
 		// TODO
 		/*
@@ -4238,7 +4344,8 @@ public class Eln {
 				Character.valueOf('R'), findItemStack("Rubber"));
 
 		GameRegistry.addShapelessRecipe(findItemStack("AllMeter"),
-				findItemStack("MultiMeter"), findItemStack("ThermoMeter"));
+				findItemStack("MultiMeter"), 
+				findItemStack("ThermoMeter"));
 		
 		GameRegistry.addRecipe(findItemStack("Wireless analyser"),
 				" S ",
@@ -4273,10 +4380,11 @@ public class Eln {
 				Character.valueOf('d'), new ItemStack(Item.diamond));
 
 		GameRegistry.addRecipe(findItemStack("Fast electrical drill"), "MCM",
-				" T ", " P ", Character.valueOf('T'),
-				findItemStack("Mining pipe"), Character.valueOf('C'),
-				findItemStack("Advanced chip"), Character.valueOf('M'),
-				findItemStack("Advanced electrical motor"),
+				" T ", 
+				" P ", 
+				Character.valueOf('T'),findItemStack("Mining pipe"), 
+				Character.valueOf('C'),findItemStack("Advanced chip"), 
+				Character.valueOf('M'),findItemStack("Advanced electrical motor"),
 				Character.valueOf('P'), new ItemStack(Item.pickaxeDiamond));
 
 	}
@@ -4286,11 +4394,11 @@ public class Eln {
 		GameRegistry.addRecipe(findItemStack("Basic ore scanner"), 
 				"IGI",
 				"RCR", 
-				"IGI", Character.valueOf('C'),
-				findItemStack("Cheap chip"), Character.valueOf('R'),
-				new ItemStack(Item.redstone), Character.valueOf('I'),
-				new ItemStack(Item.ingotIron), Character.valueOf('G'),
-				new ItemStack(Item.ingotGold));
+				"IGI", 
+				Character.valueOf('C'),findItemStack("Cheap chip"),
+				Character.valueOf('R'),new ItemStack(Item.redstone),
+				Character.valueOf('I'),new ItemStack(Item.ingotIron), 
+				Character.valueOf('G'),new ItemStack(Item.ingotGold));
 
 		GameRegistry.addRecipe(findItemStack("Advanced ore scanner"), 
 				"GCG",
@@ -4304,30 +4412,39 @@ public class Eln {
 	}
 
 	void recipeMiningPipe() {
-		GameRegistry.addRecipe(findItemStack("Mining pipe",4), "A", "A", "A",
+		GameRegistry.addRecipe(findItemStack("Mining pipe",4),
+				"A", 
+				"A", 
+				"A",
 				Character.valueOf('A'), findItemStack("Steel ingot"));
 	}
 
 	void recipeTreeResinAndRubber() {
 		for (int idx = 0; idx < 4; idx++) {
 			GameRegistry.addRecipe(findItemStack("tree resin collector"),
-					"W W", " WW", Character.valueOf('W'), new ItemStack(
-							Block.planks, 1, idx));
+					"W W",
+					" WW",
+					Character.valueOf('W'), new ItemStack(Block.planks, 1, idx));
 		}
 		for (int idx = 0; idx < 4; idx++) {
 			GameRegistry.addRecipe(findItemStack("tree resin collector"),
-					"W W", "WW", Character.valueOf('W'), new ItemStack(
-							Block.planks, 1, idx));
+					"W W",
+					"WW ", Character.valueOf('W'), new ItemStack(Block.planks, 1, idx));
 		}
 
 	}
 
 	void recipeRawCable() {
-		GameRegistry.addRecipe(findItemStack("Cooper cable", 6), "III",
+		GameRegistry.addRecipe(findItemStack("Cooper cable", 6), 
+				"III",
 				Character.valueOf('I'), findItemStack("Cooper ingot"));
-		GameRegistry.addRecipe(findItemStack("Iron cable", 6), "III",
+		
+		GameRegistry.addRecipe(findItemStack("Iron cable", 6), 
+				"III",
 				Character.valueOf('I'), new ItemStack(Item.ingotIron));
-		GameRegistry.addRecipe(findItemStack("Tungsten cable", 6), "III",
+		
+		GameRegistry.addRecipe(findItemStack("Tungsten cable", 6), 
+				"III",
 				Character.valueOf('I'), findItemStack("Tungsten ingot"));
 
 	}
@@ -4342,17 +4459,23 @@ public class Eln {
 		GameRegistry.addRecipe(findItemStack("Advanced chip"), 
 				"LRL",
 				"RCR",
-				"LRL", Character.valueOf('C'), findItemStack("Cheap chip"),
+				"LRL",
+				Character.valueOf('C'), findItemStack("Cheap chip"),
 				Character.valueOf('L'), new ItemStack(Item.glowstone),
 				Character.valueOf('R'), new ItemStack(Item.redstone));
 
-		GameRegistry.addRecipe(findItemStack("Machine block"), "LLL", "L L",
-				"LLL", Character.valueOf('L'), new ItemStack(Item.ingotIron));
+		GameRegistry.addRecipe(findItemStack("Machine block"),
+				"LLL",
+				"L L",
+				"LLL",
+				Character.valueOf('L'), new ItemStack(Item.ingotIron));
 
-		GameRegistry.addRecipe(findItemStack("Advanced machine block"), "LLL",
-				"LCL", "LLL", Character.valueOf('C'),
-				findItemStack("Steel plate"), Character.valueOf('L'),
-				findItemStack("Steel ingot"));
+		GameRegistry.addRecipe(findItemStack("Advanced machine block"),
+				"LLL",
+				"LCL",
+				"LLL", 
+				Character.valueOf('C'),findItemStack("Steel plate"), 
+				Character.valueOf('L'),findItemStack("Steel ingot"));
 
 		GameRegistry.addRecipe(findItemStack("Electrical probe"), 
 				" R ",
@@ -4435,15 +4558,20 @@ public class Eln {
 		plateMachineRecipes.addRecipe(new Recipe(
 				findItemStack("Cooper ingot", 4),
 				findItemStack("Cooper plate"), 1.0*f));
+		
 		compressorRecipes.addRecipe(new Recipe(findItemStack("Plumb ingot", 4),
 				findItemStack("Plumb plate"), 1.0*f));
+		
 		plateMachineRecipes.addRecipe(new Recipe(
 				findItemStack("Silicon ingot", 4),
 				findItemStack("Silicon plate"), 1.0*f));
+		
 		plateMachineRecipes.addRecipe(new Recipe(findItemStack("Steel ingot", 4),
 				findItemStack("Steel plate"), 1.0*f));
+		
 		plateMachineRecipes.addRecipe(new Recipe(new ItemStack(Item.ingotIron, 4,
 				0), findItemStack("Iron plate"), 1.0*f));
+		
 		plateMachineRecipes.addRecipe(new Recipe(new ItemStack(Item.ingotGold, 4,
 				0), findItemStack("Gold plate"),1.0*f));		
 	}
@@ -4566,8 +4694,8 @@ public class Eln {
 		GameRegistry.addRecipe(findItemStack("200V macerator", 1), 
 				"ICI",
 				"DMD",
-				"IcI", Character.valueOf('M'),
-				findItemStack("Advanced machine block"),
+				"IcI", 
+				Character.valueOf('M'),findItemStack("Advanced machine block"),
 				Character.valueOf('C'), findItemStack("Advanced chip"),
 				Character.valueOf('c'), findItemStack("Medium voltage cable"),
 				Character.valueOf('D'), new ItemStack(Item.diamond),
@@ -4605,8 +4733,7 @@ public class Eln {
 				"ICI",
 				"DMD",
 				"IcI",
-				Character.valueOf('M'),
-				findItemStack("Advanced machine block"),
+				Character.valueOf('M'), findItemStack("Advanced machine block"),
 				Character.valueOf('C'), findItemStack("Advanced chip"),
 				Character.valueOf('c'), findItemStack("Medium voltage cable"),
 				Character.valueOf('D'), findItemStack("Steel plate"),
@@ -4636,17 +4763,16 @@ public class Eln {
 				"IRI",
 				"cMc",
 				"IcI",
-				Character.valueOf('M'),
-				findItemStack("Machine block"), Character.valueOf('c'),
-				findItemStack("Low voltage cable"), Character.valueOf('I'),
-				new ItemStack(Item.ingotIron), Character.valueOf('R'),
-				new ItemStack(Item.redstone));
+				Character.valueOf('M'),findItemStack("Machine block"), 
+				Character.valueOf('c'),findItemStack("Low voltage cable"),
+				Character.valueOf('I'),new ItemStack(Item.ingotIron), 
+				Character.valueOf('R'),new ItemStack(Item.redstone));
+		
 		GameRegistry.addRecipe(findItemStack("200V magnetizer", 1),
 				"ICI",
 				"cMc",
 				"IcI",
-				Character.valueOf('M'),
-				findItemStack("Advanced machine block"),
+				Character.valueOf('M'),findItemStack("Advanced machine block"),
 				Character.valueOf('C'), findItemStack("Advanced chip"),
 				Character.valueOf('c'), findItemStack("Medium voltage cable"),
 				Character.valueOf('I'), findItemStack("Steel ingot"));

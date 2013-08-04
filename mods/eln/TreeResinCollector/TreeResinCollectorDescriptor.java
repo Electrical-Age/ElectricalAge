@@ -58,7 +58,10 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		draw(1.0f);
+		if(type == ItemRenderType.INVENTORY){
+			GL11.glScalef(2f, 2f, 2f);
+		}
+		draw(0.0f);
 	}
 	
 	@Override

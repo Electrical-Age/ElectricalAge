@@ -2,6 +2,8 @@ package mods.eln.electricallightsensor;
 
 import java.util.List;
 
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import mods.eln.Eln;
@@ -51,5 +53,24 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor{
 		list.add("Provide electrical signal");
 		list.add("in function of day light");
 		list.add("0V the night, " + Eln.SVU + "V the midday");
+	}
+	
+	
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		// TODO Auto-generated method stub
+		GL11.glScalef(2f, 2f, 2f);
+		draw();
 	}
 }

@@ -50,6 +50,10 @@ public class WirelessSignalTxDescriptor extends SixNodeDescriptor{
 			GL11.glScalef(2.8f, 2.8f, 2.8f);
 			GL11.glTranslatef(-0.1f, 0.0f, 0f);
 		}
+		if(type == ItemRenderType.ENTITY) {
+		//	GL11.glTranslatef(1.0f, 0f, 0f);
+			GL11.glScalef(2.8f, 2.8f, 2.8f);
+		}
 		draw();
 	}
 	
