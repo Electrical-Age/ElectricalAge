@@ -95,6 +95,8 @@ import mods.eln.lampsocket.LampSocketDescriptor;
 import mods.eln.lampsocket.LampSocketType;
 import mods.eln.lampsocket.LightBlock;
 import mods.eln.lampsocket.LightBlockEntity;
+import mods.eln.lampsupply.LampSupplyDescriptor;
+import mods.eln.lampsupply.LampSupplyElement;
 
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.FunctionTableYProtect;
@@ -422,6 +424,7 @@ public class Eln {
 		registerElectricalCable(32);
 		registerThermalCable(48);
 		registerLampSocket(64);
+		registerLampSupply(65);
 		registerWirelessSignal(92);
 		registerElectricalDataLogger(93);
 		registerElectricalRelay(94);
@@ -625,6 +628,7 @@ public class Eln {
 	public void onServerStarting(FMLServerStartingEvent ev) {
 		LightBlockEntity.observers.clear();
 		WirelessSignalTxElement.channelMap.clear();
+		LampSupplyElement.channelMap.clear();
 		playerManager = new PlayerManager();
 		MinecraftServer server = FMLCommonHandler.instance()
 				.getMinecraftServerInstance();
@@ -661,7 +665,8 @@ public class Eln {
 
 		simulator.stop();
 		
-		
+		LightBlockEntity.observers.clear(); //?
+		LampSupplyElement.channelMap.clear();
 		WirelessSignalTxElement.channelMap.clear();
 
 	}
@@ -1027,6 +1032,24 @@ public class Eln {
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
+	}
+	void registerLampSupply(int id) {
+		int subId, completId;
+		String name;
+
+		{
+			subId = 0;
+
+			name = "Lamp supply";
+
+			LampSupplyDescriptor desc = new LampSupplyDescriptor(
+					name,obj.getObj("lampsupply"),
+					32
+					);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
 	}
 
 	void registerDiode(int id) {
@@ -3888,7 +3911,7 @@ public class Eln {
 
 		GameRegistry.addRecipe(findItemStack("Small rotating solar pannel"),
 				"ISI",
-				"IMI", 
+				"I I", 
 				Character.valueOf('S'),findItemStack("Small solar pannel"),
 				Character.valueOf('M'),findItemStack("Electrical motor"),
 				Character.valueOf('I'),new ItemStack(Item.ingotIron));
@@ -4154,7 +4177,7 @@ public class Eln {
 	}
 
 	void recipeSolarTracker() {
-		GameRegistry.addRecipe(findItemStack("Solar tracker"), 
+		GameRegistry.addRecipe(findItemStack("Solar tracker",4), 
 				"VVV", 
 				"RQR",
 				"III", 
@@ -4242,10 +4265,11 @@ public class Eln {
 				Character.valueOf('P'),new ItemStack(Item.pickaxeIron));
 
 		GameRegistry.addRecipe(findItemStack("Average electrical drill"),
-				"RCR", " D ", " d ", Character.valueOf('R'), Item.redstone,
+				"RCR",
+				" D ", 
+				" d ", Character.valueOf('R'), Item.redstone,
 				Character.valueOf('C'), findItemStack("Cheap chip"),
-				Character.valueOf('D'),
-				findItemStack("Cheap electrical drill"),
+				Character.valueOf('D'),findItemStack("Cheap electrical drill"),
 				Character.valueOf('d'), new ItemStack(Item.diamond));
 
 		GameRegistry.addRecipe(findItemStack("Fast electrical drill"), "MCM",
@@ -4304,7 +4328,7 @@ public class Eln {
 		GameRegistry.addRecipe(findItemStack("Iron cable", 6), "III",
 				Character.valueOf('I'), new ItemStack(Item.ingotIron));
 		GameRegistry.addRecipe(findItemStack("Tungsten cable", 6), "III",
-				Character.valueOf('I'), findItemStack("Cooper ingot"));
+				Character.valueOf('I'), findItemStack("Tungsten ingot"));
 
 	}
 
@@ -4595,7 +4619,6 @@ public class Eln {
 				"IcI",
 				Character.valueOf('M'),findItemStack("Machine block"), 
 				Character.valueOf('c'),findItemStack("Low voltage cable"), 
-				Character.valueOf('F'),findItemStack("Iron plate"),
 				Character.valueOf('I'),new ItemStack(Item.ingotIron),
 				Character.valueOf('R'),new ItemStack(Item.redstone));
 		

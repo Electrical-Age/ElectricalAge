@@ -1,5 +1,7 @@
 package mods.eln.lampsocket;
 
+import java.util.ArrayList;
+
 import cpw.mods.fml.relauncher.Side;
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
@@ -7,11 +9,14 @@ import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.LampDescriptor;
 import mods.eln.lampsocket.LightBlockEntity.LightBlockObserver;
+import mods.eln.lampsupply.LampSupplyElement;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeServer;
 import mods.eln.node.SixNode;
+import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.IProcess;
+import mods.eln.sim.Simulator;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -180,8 +185,66 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 
 		placeSpot(newLight);
 
-	}
+		
+		
+		
+		
+		if(!lamp.poweredByLampSupply || lamp.inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null){
+			if(connection != null){
+				Eln.simulator.removeElectricalConnection(connection);
+				connection = null;
+			}
+		}
+		else
+		{
+			Coordonate myCoord = lamp.sixNode.coordonate;
+			LampSupplyElement best = null;
+			float bestDistance = 10000;
+			ArrayList<LampSupplyElement> list = LampSupplyElement.channelMap.get(lamp.channel);
+			if(list != null){
+				for(LampSupplyElement s : list ){
+					float distance = (float) s.sixNode.coordonate.trueDistanceTo(myCoord);
+					if(distance < bestDistance && distance <= s.descriptor.range){
+						bestDistance = distance;
+						best = s;
+					}
+				}
+			}
+			
+			if(best != null){
 
+				if(connection != null){
+					if(connection.L2 != best.powerLoad){
+						connection.removeFromSimulator();
+						connection = null;
+					}
+				}
+				
+				if(connection == null){
+					connection = new ElectricalConnection(lamp.positiveLoad, best.powerLoad);
+					connection.addToSimulator();
+				}
+			}
+			else{
+				if(connection != null){
+					connection.removeFromSimulator();
+					connection = null;
+				}
+			}
+			
+			
+			
+			
+		}
+	}
+	
+	
+	
+
+	
+	ElectricalConnection connection = null;
+	
+	
 	void placeSpot(int newLight)
 	{
 		boolean exit = false;
@@ -318,6 +381,11 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 		//if(lbCoord.equals(myCoord()) == false && lbCoord.getBlockId() == Eln.lightBlockId)
 		//	lbCoord.setBlock(0,0);
 		//TODO
+		if(connection != null){
+			connection.removeFromSimulator();
+			connection = null;
+		}
+		
 		LightBlockEntity.removeObserver(this);
 		if(lbCoord.equals(myCoord()) == false)
 			LightBlockEntity.removeLight(lbCoord, light);

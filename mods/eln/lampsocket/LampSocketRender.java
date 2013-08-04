@@ -47,7 +47,7 @@ public class LampSocketRender extends SixNodeElementRender{
 
 	SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);;
 	boolean grounded = true;
-	
+	public boolean poweredByLampSupply;
 	
 
 
@@ -71,7 +71,7 @@ public class LampSocketRender extends SixNodeElementRender{
 		super.draw();
 		descriptor.draw(front,alphaZ);
 	}
-
+	public String channel;
 	LampDescriptor lampDescriptor = null;
 	float alphaZ;
 	@Override
@@ -86,6 +86,9 @@ public class LampSocketRender extends SixNodeElementRender{
 			lampDescriptor = (LampDescriptor) Eln.sharedItem.getDescriptor(stream.readShort());
 			alphaZ = stream.readFloat();
 			cable = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream),ElectricalCableDescriptor.class);
+			
+			poweredByLampSupply = stream.readBoolean();
+			channel = stream.readUTF();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

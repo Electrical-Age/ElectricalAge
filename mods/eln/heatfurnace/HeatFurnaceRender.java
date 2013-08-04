@@ -11,6 +11,7 @@ import mods.eln.electricalfurnace.ElectricalFurnaceElement;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.PhysicalInterpolator;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
@@ -45,8 +46,8 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 	@Override
 	public void draw() {	
 		
-		List list = tileEntity.worldObj.getEntitiesWithinAABB(EntityPlayer.class, coord.getAxisAlignedBB(1));
-		if(list.size() == 0)
+		
+		if(Utils.isPlayerAround(tileEntity.worldObj,coord.getAxisAlignedBB(1)) == false)
 			interpolator.setTarget(0f);
 		else
 			interpolator.setTarget(1f);

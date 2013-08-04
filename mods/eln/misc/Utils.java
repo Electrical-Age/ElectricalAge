@@ -53,6 +53,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
@@ -908,6 +909,11 @@ public class Utils {
 	
 	public static void enableCulling() {
 		GL11.glEnable(GL11.GL_CULL_FACE);
+	}
+
+	public static boolean isPlayerAround(World world,AxisAlignedBB axisAlignedBB) {
+		// TODO Auto-generated method stub
+		return world.getEntitiesWithinAABB(EntityPlayer.class, axisAlignedBB).size() != 0;
 	}
 	
 	

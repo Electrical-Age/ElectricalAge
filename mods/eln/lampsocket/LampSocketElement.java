@@ -71,6 +71,7 @@ public class LampSocketElement extends SixNodeElement{
 	public ElectricalResistor lampResistor = new ElectricalResistor(positiveLoad, negativeLoad);
 
 	
+	boolean poweredByLampSupply = false;
 	boolean grounded = true;
 	
 	SixNodeElementInventory inventory = new SixNodeElementInventory(2,64,this);
@@ -79,6 +80,8 @@ public class LampSocketElement extends SixNodeElement{
 	
 	LampDescriptor lampDescriptor = null;
 	//ElectricalCableDescriptor cableDescriptor = null;
+	public String channel = "Default channel";
+	
 
 	
 	@Override
@@ -94,8 +97,9 @@ public class LampSocketElement extends SixNodeElement{
         byte value = nbt.getByte(str + "front");
         front = LRDU.fromInt((value>>0) & 0x3);
         grounded = (value & 4) != 0;
-      //  inventory.readFromNBT(nbt, str + "inv");
-       
+        
+        poweredByLampSupply = nbt.getBoolean(str + "poweredByLampSupply");
+        channel = nbt.getString(str + "channel");
 	}
 
 	@Override
@@ -103,10 +107,12 @@ public class LampSocketElement extends SixNodeElement{
 		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
 		nbt.setByte(str + "front",(byte) ((front.toInt()<<0) + (grounded ? 4 : 0)));
-		//inventory.writeToNBT(nbt, str + "inv");
+		nbt.setBoolean(str + "poweredByLampSupply", poweredByLampSupply);
+		nbt.setString(str + "channel", channel);
 	}
 	static final int setGroundedId = 1;
 	static final int setAlphaZId = 2;
+	static final int tooglePowerSupplyType = 3,setChannel = 4;
 	public void networkUnserialize(DataInputStream stream) 
 	{
 		try {
@@ -115,11 +121,18 @@ public class LampSocketElement extends SixNodeElement{
 			case setGroundedId:
 				grounded = stream.readByte() != 0 ? true : false;
 				computeElectricalLoad();
-				sixNode.reconnect();
-				needPublish();
+				reconnect();
 				break;
 			case setAlphaZId:
 				lampProcess.alphaZ = stream.readFloat();
+				needPublish();
+				break;
+			case tooglePowerSupplyType:
+				poweredByLampSupply = ! poweredByLampSupply;
+				reconnect();
+				break;
+			case setChannel:
+				channel = stream.readUTF();
 				needPublish();
 				break;
 			}
@@ -132,7 +145,7 @@ public class LampSocketElement extends SixNodeElement{
 	@Override
 	protected void inventoryChanged() {
 		computeElectricalLoad();
-		needPublish();
+		reconnect();
 	}
 	@Override
 	public boolean hasGui() {
@@ -152,6 +165,8 @@ public class LampSocketElement extends SixNodeElement{
 	}	
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+		if(inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null) return null;
+		if(poweredByLampSupply) return null;
 		// TODO Auto-generated method stub
 		if(grounded) return positiveLoad;
 		
@@ -163,12 +178,15 @@ public class LampSocketElement extends SixNodeElement{
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		if(inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null) return null;
+		if(poweredByLampSupply) return null;
 		return thermalLoad;
 	}
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
+		if(inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null) return 0;
+		if(poweredByLampSupply) return 0;
 		if(grounded) return NodeBase.maskElectricalPower;
 		
 		if(front == lrdu) return NodeBase.maskElectricalPower;
@@ -198,6 +216,8 @@ public class LampSocketElement extends SixNodeElement{
 	    	stream.writeShort(inventory.getStackInSlot(LampSocketContainer.lampSlotId) == null ? 0 : inventory.getStackInSlot(LampSocketContainer.lampSlotId).getItemDamage());
 	    	stream.writeFloat((float) lampProcess.alphaZ);
 	    	Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSocketContainer.cableSlotId));
+	    	stream.writeBoolean(poweredByLampSupply);
+	    	stream.writeUTF(channel);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

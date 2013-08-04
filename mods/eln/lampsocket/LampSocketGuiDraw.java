@@ -16,6 +16,7 @@ import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.SixNodeElementInventory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiTextField;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiContainerCreative;
@@ -44,8 +45,8 @@ public class LampSocketGuiDraw extends GuiContainerEln {
 	
     private SixNodeElementInventory inventory;
     LampSocketRender lampRender;
-    GuiButton buttonGrounded;
-    
+    GuiButton buttonGrounded,buttonSupplyType;
+    GuiTextFieldEln channel;
     GuiVerticalTrackBar alphaZ;
     public LampSocketGuiDraw(EntityPlayer player, IInventory inventory,LampSocketRender lampRender)
     {
@@ -63,9 +64,20 @@ public class LampSocketGuiDraw extends GuiContainerEln {
     	if(lampRender.descriptor.alphaZMax == lampRender.descriptor.alphaZMin)
     	{
     		x = - 0;
+    		buttonSupplyType = newGuiButton(x+176/2-140/2,8,140,"");
+    		channel = newGuiTextField(x+176/2-140/2 +1, 34, 140);
     	}
+    	else
+    	{
+    		buttonSupplyType = newGuiButton(x+176/2-140/2-12,8,136,"");
+    		channel = newGuiTextField(x+176/2-140/2-11, 34, 135);
+    	}
+    
+    	buttonGrounded = newGuiButton(x+176/2-30,-2000,60,"");
     	
-    	buttonGrounded = newGuiButton(x+176/2-30,20,60,"");
+    	channel.setComment(0,"Sepcify the supply channel");
+    	
+    	channel.setText(lampRender.channel);
     	alphaZ  = newGuiVerticalTrackBar(176 - 8 - 20, 8, 20, 69);
     	alphaZ.setRange(lampRender.descriptor.alphaZMin, lampRender.descriptor.alphaZMax);
     	alphaZ.setStepIdMax(200);
@@ -84,6 +96,12 @@ public class LampSocketGuiDraw extends GuiContainerEln {
     	if(object == buttonGrounded)
     	{
     		lampRender.clientSetGrounded(!lampRender.getGrounded());
+    	}
+    	else if(object == buttonSupplyType){
+    		lampRender.clientSend(LampSocketElement.tooglePowerSupplyType);
+    	}
+    	else if(object == channel){
+    		lampRender.clientSetString((byte) LampSocketElement.setChannel, channel.getText());
     	}
     	else if(object == alphaZ)
     	{
@@ -113,6 +131,15 @@ public class LampSocketGuiDraw extends GuiContainerEln {
 			buttonGrounded.displayString = "Parallel";
 		else
 			buttonGrounded.displayString = "Serial";
+		
+		if(lampRender.poweredByLampSupply){
+			buttonSupplyType.displayString = "Powered by a lamp supply";
+			channel.setVisible(true);
+		}
+		else{
+			channel.setVisible(false);
+			buttonSupplyType.displayString = "powered by a cable";
+		}
 		
 		alphaZ.setComment(0, "Orientation " + (int)alphaZ.getValue()+" degree");
 	}

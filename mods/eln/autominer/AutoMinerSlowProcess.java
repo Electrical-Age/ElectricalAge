@@ -55,7 +55,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady{
 		
 		if(job != jobType.none)
 		{
-			if(energyCounter >= energyTarget)
+			if(energyCounter >= energyTarget || (job == jobType.ore && drill == null))
 			{
 				setupJob();
 			}		
@@ -127,7 +127,12 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady{
 			miner.inPowerLoad.setRp(Double.POSITIVE_INFINITY);
 			break;
 		case ore:
-			miner.inPowerLoad.setRp(drill.getRp(scanner != null ? scanner.OperationEnergy : 0));
+			if(drill == null){
+				miner.inPowerLoad.setRp(Double.POSITIVE_INFINITY);
+			}
+			else{
+				miner.inPowerLoad.setRp(drill.getRp(scanner != null ? scanner.OperationEnergy : 0));
+			}
 			break;
 		case pipeAdd:
 			miner.inPowerLoad.setRp(miner.descriptor.pipeOperationRp);
