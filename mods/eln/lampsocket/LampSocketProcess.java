@@ -15,6 +15,7 @@ import mods.eln.misc.Utils;
 import mods.eln.node.NodeServer;
 import mods.eln.node.SixNode;
 import mods.eln.sim.ElectricalConnection;
+import mods.eln.sim.ElectricalConnectionOneWay;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.Simulator;
 import net.minecraft.block.Block;
@@ -146,7 +147,7 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 			
 			if(invulerabilityTimeLeft != 0 && overFactor > 1.5 ) overFactor = 1.5;			
 		
-			double lifeLost = deltaT / lampDescriptor.nominalLife;
+			double lifeLost = overFactor*deltaT / lampDescriptor.nominalLife;
 			
 			lifeLost = Utils.voltageMargeFactorSub(lifeLost);
 			
@@ -190,10 +191,8 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 		
 		
 		if(!lamp.poweredByLampSupply || lamp.inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null){
-			if(connection != null){
-				Eln.simulator.removeElectricalConnection(connection);
-				connection = null;
-			}
+			deleteElectricalConnectionOneWay();
+			lamp.setIsConnectedToLampSupply(false);
 		}
 		else
 		{
@@ -211,25 +210,22 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 				}
 			}
 			
-			if(best != null){
-
+			if(best != null){		
 				if(connection != null){
-					if(connection.L2 != best.powerLoad){
-						connection.removeFromSimulator();
-						connection = null;
+					if(connection.from != best.powerLoad){
+						deleteElectricalConnectionOneWay();
 					}
 				}
 				
 				if(connection == null){
-					connection = new ElectricalConnection(lamp.positiveLoad, best.powerLoad);
-					connection.addToSimulator();
+					connection = new ElectricalConnectionOneWay(best.powerLoad,lamp.positiveLoad);
+					Eln.simulator.addElectricalProcess(connection);
 				}
+				lamp.setIsConnectedToLampSupply(true);
 			}
 			else{
-				if(connection != null){
-					connection.removeFromSimulator();
-					connection = null;
-				}
+				deleteElectricalConnectionOneWay();
+				lamp.setIsConnectedToLampSupply(false);
 			}
 			
 			
@@ -239,10 +235,16 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 	}
 	
 	
-	
+	void deleteElectricalConnectionOneWay()
+	{
+		if(connection != null){
+			Eln.simulator.removeElectricalProcess(connection);
+			connection = null;
+		}
+	}
 
 	
-	ElectricalConnection connection = null;
+	ElectricalConnectionOneWay connection = null;
 	
 	
 	void placeSpot(int newLight)
@@ -381,10 +383,7 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 		//if(lbCoord.equals(myCoord()) == false && lbCoord.getBlockId() == Eln.lightBlockId)
 		//	lbCoord.setBlock(0,0);
 		//TODO
-		if(connection != null){
-			connection.removeFromSimulator();
-			connection = null;
-		}
+		deleteElectricalConnectionOneWay();
 		
 		LightBlockEntity.removeObserver(this);
 		if(lbCoord.equals(myCoord()) == false)
@@ -429,7 +428,9 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 	public void lightBlockDestructor(Coordonate coord) {
 		if(coord.equals(lbCoord))
 		{
-			placeSpot(light);
+			light = 0;
+			lbCoord = new Coordonate(myCoord());
+			//placeSpot(light);
 		}
 	}
 }

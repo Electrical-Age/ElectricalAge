@@ -51,6 +51,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor{
 	FunctionTable UfCharge;
 	String modelName;
 	Obj3DPart modelPart;
+	public double IMax;
 	public void draw()
 	{
 		if(modelPart == null) return;
@@ -100,11 +101,12 @@ public class BatteryDescriptor extends TransparentNodeDescriptor{
 		
 
 		thermalPMax = electricalPMax/electricalU*electricalPMax/electricalU*electricalRs;
-		thermalC = electricalPMax/electricalU*thermalHeatTime/thermalWarmLimit;
+		thermalC = Math.pow(electricalPMax/electricalU,2)*electricalRs*thermalHeatTime/thermalWarmLimit;
 		thermalRp = thermalWarmLimit/thermalPMax;
 		
 		modelPart = Eln.obj.getPart(modelName, "Battery");
 		
+		IMax = electricalStdI*3;
 	}
 	public void applyTo(ElectricalResistor resistor)
 	{

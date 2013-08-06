@@ -162,6 +162,7 @@ public class TransformerElement extends TransparentNodeElement{
 		ItemStack primaryCable = inventory.getStackInSlot(TransformerContainer.primaryCableSlotId);
 		ItemStack secondaryCable = inventory.getStackInSlot(TransformerContainer.secondaryCableSlotId);
 		ItemStack core = inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId);
+		ElectricalCableDescriptor primaryCableDescriptor = null,secondaryCableDescriptor = null;
 		
 		tranformerProcess.setEnable(primaryCable != null && core != null && secondaryCable != null);
 		
@@ -173,7 +174,7 @@ public class TransformerElement extends TransparentNodeElement{
 		}
 		else
 		{
-			ElectricalCableDescriptor primaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(primaryCable);	
+			primaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(primaryCable);	
 			primaryCableDescriptor.applyTo( positivePrimaryLoad, false);
 			primaryCableDescriptor.applyTo( negativePrimaryLoad, grounded);	
 		}
@@ -185,7 +186,7 @@ public class TransformerElement extends TransparentNodeElement{
 		}
 		else
 		{
-			ElectricalCableDescriptor secondaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(secondaryCable);
+			secondaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(secondaryCable);
 			secondaryCableDescriptor.applyTo( positiveSecondaryLoad, false);
 			secondaryCableDescriptor.applyTo( negativeSecondaryLoad, grounded);	
 		}		
@@ -204,10 +205,15 @@ public class TransformerElement extends TransparentNodeElement{
 		if(primaryCable != null && secondaryCable != null)
 		{
 			tranformerProcess.setRatio(1.0 * secondaryCable.stackSize / primaryCable.stackSize);
+			tranformerProcess.setIMax(
+					2*primaryCableDescriptor.electricalNominalPower/primaryCableDescriptor.electricalNominalVoltage, 
+					2*secondaryCableDescriptor.electricalNominalPower/secondaryCableDescriptor.electricalNominalVoltage);
+			
 		}
 		else
 		{
 			tranformerProcess.setRatio(1);
+			tranformerProcess.setIMax(1,1);
 		}
 	}
 

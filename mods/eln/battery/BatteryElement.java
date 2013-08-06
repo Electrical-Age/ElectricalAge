@@ -40,7 +40,7 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	public NodeElectricalLoad positiveLoad = new NodeElectricalLoad("positiveLoad");
 	public NodeElectricalLoad negativeLoad = new NodeElectricalLoad("negativeLoad");
 	public NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
-	public NodeBatteryProcess batteryProcess = new NodeBatteryProcess(positiveLoad,negativeLoad,null);
+	public NodeBatteryProcess batteryProcess = new NodeBatteryProcess(positiveLoad,negativeLoad,null,0);
 	public ElectricalLoadHeatThermalLoadProcess positiveETProcess = new ElectricalLoadHeatThermalLoadProcess(positiveLoad,thermalLoad);
 //	public ElectricalLoadHeatThermalLoadProcess negativeETProcess = new ElectricalLoadHeatThermalLoadProcess(negativeLoad,thermalLoad);
 	public ElectricalResistor dischargeResistor = new ElectricalResistor(positiveLoad, negativeLoad);
@@ -85,6 +85,7 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
     	slowProcessList.add(inventoryProcess);
     	
     	grounded = false;
+    	batteryProcess.setIMax(this.descriptor.IMax);
 	}
 
 	
@@ -110,8 +111,8 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub
 		if(lrdu != LRDU.Down) return null;
-		if(side == front.left()) return thermalLoad;
-		if(side == front.right() && ! grounded) return thermalLoad;
+	/*	if(side == front.left()) return thermalLoad;
+		if(side == front.right() && ! grounded) return thermalLoad;*/
 		return null;			
 	}
 

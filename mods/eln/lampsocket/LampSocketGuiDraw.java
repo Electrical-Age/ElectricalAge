@@ -75,7 +75,7 @@ public class LampSocketGuiDraw extends GuiContainerEln {
     
     	buttonGrounded = newGuiButton(x+176/2-30,-2000,60,"");
     	
-    	channel.setComment(0,"Sepcify the supply channel");
+    	channel.setComment(0,"Specify the supply channel");
     	
     	channel.setText(lampRender.channel);
     	alphaZ  = newGuiVerticalTrackBar(176 - 8 - 20, 8, 20, 69);
@@ -135,6 +135,12 @@ public class LampSocketGuiDraw extends GuiContainerEln {
 		if(lampRender.poweredByLampSupply){
 			buttonSupplyType.displayString = "Powered by a lamp supply";
 			channel.setVisible(true);
+			if(inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null)
+				channel.setComment(1,"\u00a74Cable slot empty");	
+			else if(lampRender.isConnectedToLampSupply)
+				channel.setComment(1,"\u00a72connected to " + lampRender.channel);
+			else
+				channel.setComment(1,"\u00a74" +  lampRender.channel + " is not in range");	
 		}
 		else{
 			channel.setVisible(false);

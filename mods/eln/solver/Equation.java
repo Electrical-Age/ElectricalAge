@@ -40,6 +40,8 @@ public class Equation implements IValue,INBTTReady{
 			case ',':
 			case '(':
 			case ')':
+			case '<':
+			case '>':
 				if(stack != ""){
 					list.add(stack);
 					stringList.add(stack);
@@ -242,6 +244,24 @@ public class Equation implements IValue,INBTTReady{
 								}
 							}		
 						}
+						if(priority >= 4){
+							if(a != null && b != null){
+								if(str.equals(">")){		
+									operatorCount++;
+									list.set(idx-1, new Bigger(a,b));
+									list.remove(idx);list.remove(idx);
+									priority = -1;
+									break;
+								}						
+								if(str.equals("<")){
+									operatorCount++;
+									list.set(idx-1, new Smaller(a,b));
+									list.remove(idx);list.remove(idx);
+									priority = -1;
+									break;
+								}
+							}		
+						}
 					}
 
 					
@@ -343,6 +363,32 @@ public class Equation implements IValue,INBTTReady{
 	{
 		return root != null;
 	}
+
+	public class Bigger implements IValue{
+		public Bigger(IValue a,IValue b) {
+			this.a = a;
+			this.b = b;
+		}
+		IValue a,b;
+		@Override
+		public double getValue() {
+			// TODO Auto-generated method stub
+			return a.getValue() > b.getValue() ? 1.0 : 0.0;
+		}
+	}
+	public class Smaller implements IValue{
+		public Smaller(IValue a,IValue b) {
+			this.a = a;
+			this.b = b;
+		}
+		IValue a,b;
+		@Override
+		public double getValue() {
+			// TODO Auto-generated method stub
+			return a.getValue() < b.getValue() ? 1.0 : 0.0;
+		}
+	}
+
 	
 	public class Add implements IValue{
 		public Add(IValue a,IValue b) {
@@ -452,7 +498,7 @@ public class Equation implements IValue,INBTTReady{
 			return Math.cos(a.getValue());
 		}
 	}
-	
+
 	public class Periodic implements IValue,INBTTReady{
 		public double counter;
 		public Periodic(IValue periode,IValue amplitude) {

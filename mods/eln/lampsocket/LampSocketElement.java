@@ -71,7 +71,7 @@ public class LampSocketElement extends SixNodeElement{
 	public ElectricalResistor lampResistor = new ElectricalResistor(positiveLoad, negativeLoad);
 
 	
-	boolean poweredByLampSupply = false;
+	boolean poweredByLampSupply = true;
 	boolean grounded = true;
 	
 	SixNodeElementInventory inventory = new SixNodeElementInventory(2,64,this);
@@ -218,6 +218,7 @@ public class LampSocketElement extends SixNodeElement{
 	    	Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSocketContainer.cableSlotId));
 	    	stream.writeBoolean(poweredByLampSupply);
 	    	stream.writeUTF(channel);
+	    	stream.writeBoolean(isConnectedToLampSupply);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -298,5 +299,13 @@ public class LampSocketElement extends SixNodeElement{
 		super.destroy();
 		lampProcess.destructor();
 	}
+	
+	void setIsConnectedToLampSupply(boolean value){
+		if(isConnectedToLampSupply != value){
+			isConnectedToLampSupply = value;
+			needPublish();
+		}
+	}
+	boolean isConnectedToLampSupply = false;
 	
 }

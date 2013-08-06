@@ -8,8 +8,8 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class NodeBatteryProcess extends BatteryProcess implements INBTTReady {
 
-	public NodeBatteryProcess(ElectricalLoad positiveLoad,ElectricalLoad negativeLoad,FunctionTable voltageFunction ) {
-		super(positiveLoad,negativeLoad,voltageFunction);
+	public NodeBatteryProcess(ElectricalLoad positiveLoad,ElectricalLoad negativeLoad,FunctionTable voltageFunction,double IMax ) {
+		super(positiveLoad,negativeLoad,voltageFunction,IMax);
 	}
 
 	@Override
@@ -24,6 +24,10 @@ public class NodeBatteryProcess extends BatteryProcess implements INBTTReady {
 	       nbttagcompound.setDouble(str + "NBP" + "Q", Q);
 	       nbttagcompound.setDouble(str + "NBP" + "life", life);
 	       nbttagcompound.setBoolean(str + "NBP" + "cut", cut);
+	}
+
+	public void setIMax(double iMax) {
+		this.IMax = iMax;
 	}
 
 }

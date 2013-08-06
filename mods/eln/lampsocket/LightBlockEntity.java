@@ -8,6 +8,7 @@ import mods.eln.INBTTReady;
 import mods.eln.misc.Coordonate;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.EnumSkyBlock;
 
 public class LightBlockEntity extends TileEntity{
 	/*
@@ -57,6 +58,7 @@ public class LightBlockEntity extends TileEntity{
 	}
 	void removeLight(int light)
 	{
+		//int meta = worldObj.getBlockMetadata(xCoord, yCoord, zCoord);
 		for(int idx = 0;idx<lightList.size();idx++)
 		{
 			if(lightList.get(idx) == light)
@@ -128,8 +130,11 @@ public class LightBlockEntity extends TileEntity{
 		else
 		{
 			int light = getLight();
-			if(light != worldObj.getBlockMetadata(xCoord, yCoord, zCoord))
-				worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light, 2);
+			if(light != worldObj.getBlockMetadata(xCoord, yCoord, zCoord)){
+				
+				worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light,2);
+				worldObj.updateLightByType(EnumSkyBlock.Block,xCoord, yCoord, zCoord);
+			}
 		}
 	}	
 	
@@ -159,6 +164,10 @@ public class LightBlockEntity extends TileEntity{
 		}
 		((LightBlockEntity)coord.getTileEntity()).remplaceLight(oldLight,newLight);		
 	}
+	public int getClientLight() {
+		// TODO Auto-generated method stub
+		return clientLight;
+	}
 	
-	
+	int clientLight = 0;
 }

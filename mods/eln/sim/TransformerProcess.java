@@ -6,11 +6,20 @@ import mods.eln.misc.FunctionTable;
 
 public class TransformerProcess implements IProcess {
 	ElectricalLoad positivePrimaryLoad, negativePrimaryLoad,positiveSecondaryLoad,negativeSecondaryLoad;
-	private double ratio,precalcPrimary,precalcSecondary;
+	private double ratio,ratioInv,precalcPrimary,precalcSecondary;
+	
+	double IpMax,IsMax;
+	
+	public void setIMax(double IpMax,double IsMax)
+	{
+		this.IpMax = IpMax;
+		this.IsMax = IsMax;
+	}
 	
 	public void setRatio(double ratio)
 	{
 		this.ratio = ratio;
+		this.ratioInv = 1.0/ratio;
 		this.precalcPrimary = 1.0/(ratio*ratio + 1);
 		this.precalcSecondary = ratio*ratio/(ratio*ratio + 1);
 	}
@@ -67,6 +76,12 @@ public class TransformerProcess implements IProcess {
 		
 		double Ip = (UpTarget-Up)*Cp/time/2;
 		double Is = (UsTarget-Us)*Cs/time/2;
+		
+		double overflow = Math.max(Math.abs(Ip)/IpMax, Math.abs(Is)/IsMax);
+		if(overflow > 1.0){
+			Ip /= overflow;
+			Is /= overflow;
+		}
 
 		ElectricalLoad.moveCurrent(Ip, negativePrimaryLoad, positivePrimaryLoad);
 		ElectricalLoad.moveCurrent(Is, negativeSecondaryLoad, positiveSecondaryLoad);

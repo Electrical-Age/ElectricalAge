@@ -689,12 +689,13 @@ public class Eln {
 	public static final double MVP = 2000;
 	public static final double HVP = 4000;
 
+	public static final double cableHeatingTime = 30;
 	public static final double cableWarmLimit = 130;
 	public static final double cableThermalConductionTao = 0.5;
 	public static final ThermalLoadInitializer cableThermalLoadInitializer = new ThermalLoadInitializer(
-			cableWarmLimit, -100, 30, cableThermalConductionTao);
+			cableWarmLimit, -100, cableHeatingTime, cableThermalConductionTao);
 	public static final ThermalLoadInitializer sixNodeThermalLoadInitializer = new ThermalLoadInitializer(
-			cableWarmLimit, -100, 30, 1000);
+			cableWarmLimit, -100, cableHeatingTime, 1000);
 
 	void registerElectricalCable(int id) {
 		int subId, completId;
@@ -723,7 +724,7 @@ public class Eln {
 											// electricalMaximalPower,
 					0.5,// electricalOverVoltageStartPowerLost,
 					cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
-					10, 1// thermalNominalHeatTime, thermalConductivityTao
+					cableHeatingTime, 1// thermalNominalHeatTime, thermalConductivityTao
 			);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -751,7 +752,7 @@ public class Eln {
 											// electricalMaximalPower,
 					20,// electricalOverVoltageStartPowerLost,
 					cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
-					10, cableThermalConductionTao// thermalNominalHeatTime,
+					cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
 													// thermalConductivityTao
 			);
 
@@ -779,7 +780,7 @@ public class Eln {
 											// electricalMaximalPower,
 					30,// electricalOverVoltageStartPowerLost,
 					cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
-					10, cableThermalConductionTao// thermalNominalHeatTime,
+					cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
 													// thermalConductivityTao
 			);
 
@@ -807,7 +808,7 @@ public class Eln {
 											// electricalMaximalPower,
 					40,// electricalOverVoltageStartPowerLost,
 					cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
-					10, cableThermalConductionTao// thermalNominalHeatTime,
+					cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
 													// thermalConductivityTao
 			);
 
@@ -855,7 +856,7 @@ public class Eln {
 	void registerBattery(int id) {
 		int subId, completId;
 		String name;
-
+		double heatTIme = 30;
 		double[] voltageFunctionTable = { 0.000, 0.9, 1.0, 1.025, 1.04, 1.05,
 				2.0 };
 		FunctionTable voltageFunction = new FunctionTable(voltageFunctionTable,
@@ -877,7 +878,7 @@ public class Eln {
 																// electricalStdDischargeTime,
 																// electricalStdEfficiency,
 																// electricalStdHalfLife,
-					50, 60, -100, // thermalHeatTime, thermalWarmLimit,
+					heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
 									// thermalCoolLimit,
 					"Cheap battery" // name, description)
 			);
@@ -895,7 +896,7 @@ public class Eln {
 																		// electricalStdDischargeTime,
 																		// electricalStdEfficiency,
 																		// electricalStdHalfLife,
-					50, 60, -100, // thermalHeatTime, thermalWarmLimit,
+					heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
 									// thermalCoolLimit,
 					"the battery" // name, description)
 			);
@@ -913,7 +914,7 @@ public class Eln {
 																// electricalStdDischargeTime,
 																// electricalStdEfficiency,
 																// electricalStdHalfLife,
-					50, 60, -100, // thermalHeatTime, thermalWarmLimit,
+					heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
 									// thermalCoolLimit,
 					"the battery" // name, description)
 			);
@@ -932,7 +933,7 @@ public class Eln {
 																		// electricalStdDischargeTime,
 																		// electricalStdEfficiency,
 																		// electricalStdHalfLife,
-					50, 60, -100, // thermalHeatTime, thermalWarmLimit,
+					heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
 									// thermalCoolLimit,
 					"the battery" // name, description)
 			);
@@ -950,7 +951,7 @@ public class Eln {
 																	// electricalStdDischargeTime,
 																	// electricalStdEfficiency,
 																	// electricalStdHalfLife,
-					50, 60, -100, // thermalHeatTime, thermalWarmLimit,
+					heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
 									// thermalCoolLimit,
 					"the battery" // name, description)
 			);
@@ -969,7 +970,7 @@ public class Eln {
 																		// electricalStdDischargeTime,
 																		// electricalStdEfficiency,
 																		// electricalStdHalfLife,
-					50, 60, -100, // thermalHeatTime, thermalWarmLimit,
+					heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
 									// thermalCoolLimit,
 					"the battery" // name, description)
 			);
@@ -1017,7 +1018,7 @@ public class Eln {
 			LampSocketDescriptor desc = new LampSocketDescriptor(name,
 					"ClassicLampSocket", LampSocketType.Douille, // LampSocketType
 																	// socketType
-					0, 0, 0, 0);
+					4, 0, 0, 0);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}

@@ -15,13 +15,14 @@ public class BatteryProcess implements IProcess {
 	
 	public boolean cut;
 	public boolean isRechargeable = true;
-	
-	public BatteryProcess(ElectricalLoad positiveLoad,ElectricalLoad negativeLoad,FunctionTable voltageFunction )
+	public double IMax = 20;
+	public BatteryProcess(ElectricalLoad positiveLoad,ElectricalLoad negativeLoad,FunctionTable voltageFunction,double IMax)
 	{
 		this.positiveLoad = positiveLoad;
 		this.negativeLoad = negativeLoad;
 		this.voltageFunction = voltageFunction;
 		setCut(false);
+		this.IMax = IMax;
 	}
 
 	@Override
@@ -38,10 +39,13 @@ public class BatteryProcess implements IProcess {
 		//Q -= QNeeded > 0 ? QNeeded : QNeeded * efficiency;
 		if(isRechargeable == true || QNeeded > 0)
 		{
-			Q -= QNeeded;
 			
-			ElectricalLoad.moveCurrent(QNeeded/time, negativeLoad, positiveLoad);
-			dischargeCurrentMesure = QNeeded/time;
+			double I = QNeeded/time;
+			if(I>IMax) I = IMax;
+			if(I<-IMax) I = -IMax;
+			ElectricalLoad.moveCurrent(I, negativeLoad, positiveLoad);
+			Q -= I*time;
+			dischargeCurrentMesure = I;
 		}
 		else
 		{

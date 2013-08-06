@@ -89,11 +89,15 @@ public class LampSocketRender extends SixNodeElementRender{
 			
 			poweredByLampSupply = stream.readBoolean();
 			channel = stream.readUTF();
+			
+			isConnectedToLampSupply = stream.readBoolean();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}
+	public boolean isConnectedToLampSupply;
+	
 	ElectricalCableDescriptor cable;
 	
 	public boolean getGrounded()
