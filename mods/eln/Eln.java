@@ -18,6 +18,7 @@ import mods.eln.client.ClientProxy;
 import mods.eln.client.FrameTime;
 import mods.eln.client.SoundLoader;
 import mods.eln.diode.DiodeDescriptor;
+import mods.eln.eggincubator.EggIncubatorDescriptor;
 import mods.eln.electricalalarm.ElectricalAlarmDescriptor;
 import mods.eln.electricalantennarx.ElectricalAntennaRxDescriptor;
 import mods.eln.electricalantennatx.ElectricalAntennaTxDescriptor;
@@ -454,6 +455,7 @@ public class Eln {
 		registerCompressor(35);
 		registermagnetiser(36);
 		registerPlateMachine(37);
+		registerEggIncubator(41);
 		registerAutoMiner(42);
 		registerSolarPannel(48);
 		registerWindTurbine(49);
@@ -1834,6 +1836,24 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
+	void registerEggIncubator(int id) {
+
+		int subId, completId;
+		String name;
+		{
+			subId = 0;
+			name = "Egg incubator";
+
+			EggIncubatorDescriptor desc = new EggIncubatorDescriptor(
+					name, obj.getObj("eggincubator"), 
+					lowVoltageCableDescriptor,
+					LVU,400);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+
+	}
+	
 	
 	void registerCompressor(int id) {
 
