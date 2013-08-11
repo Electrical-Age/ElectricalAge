@@ -55,7 +55,7 @@ public class EggIncubatorRender extends TransparentNodeElementRender{
 		if(egg != null){
 			Utils.drawEntityItem(egg, 0.0f,-0.3f,0.13f,alpha,0.6f);
 		}
-		descriptor.draw(eggStackSize);
+		descriptor.draw(eggStackSize,(float) (voltage/descriptor.nominalVoltage));
 		GL11.glPopMatrix();
 		cableRenderType = drawCable(front.down(),descriptor.cable.render, eConn, cableRenderType);
 	
@@ -94,6 +94,7 @@ public class EggIncubatorRender extends TransparentNodeElementRender{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+		cableRenderType = null;
 	}
 	
 	

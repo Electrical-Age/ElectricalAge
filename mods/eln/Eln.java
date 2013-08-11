@@ -54,6 +54,7 @@ import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptorWithComment;
 import mods.eln.generic.SharedItem;
+import mods.eln.generic.genericArmorItem;
 import mods.eln.ghost.GhostBlock;
 
 import mods.eln.ghost.GhostGroup;
@@ -201,6 +202,8 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 
+
+
 @Mod(modid = "Eln", name = "Eln", version = "0.0.1")
 @NetworkMod(clientSideRequired = true, serverSideRequired = false, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
@@ -233,7 +236,16 @@ public class Eln {
 
 	public final static int blocBaseId = 220;
 	public final static int itemBaseId = 7260;
+	/* public static ItemArmor helmetLeather = (ItemArmor)(new ItemArmor(42, EnumArmorMaterial.CLOTH, 0, 0)).setUnlocalizedName("helmetCloth").func_111206_d("leather_helmet");
+	    public static ItemArmor plateLeather = (ItemArmor)(new ItemArmor(43, EnumArmorMaterial.CLOTH, 0, 1)).setUnlocalizedName("chestplateCloth").func_111206_d("leather_chestplate");
+	    public static ItemArmor legsLeather = (ItemArmor)(new ItemArmor(44, EnumArmorMaterial.CLOTH, 0, 2)).setUnlocalizedName("leggingsCloth").func_111206_d("leather_leggings");
+	    public static ItemArmor bootsLeather = (ItemArmor)(new ItemArmor(45, EnumArmorMaterial.CLOTH, 0, 3)).setUnlocalizedName("bootsCloth").func_111206_d("leather_boots");
+	   
+	
+	*/
+	public static int helmetCooperId,plateCooperId,legsCooperId,bootsCooperId;
 
+	public static ItemArmor helmetCooper,plateCooper,legsCooper,bootsCooper;
 	public static Item voltMeterHelmet;
 	public static Item thermoMeterHelmet;
 	public static Item currentMeterHelmet;
@@ -316,7 +328,17 @@ public class Eln {
 		creativeTabId = config.getItem("itemCreativeTab", itemBaseId - 1)
 				.getInt();
 		brushItemId = config.getItem("brushItem", itemBaseId - 1).getInt();
+		
+		helmetCooperId = config.getItem("helmetCooperId", itemBaseId + 2).getInt();
+		plateCooperId = config.getItem("plateCooperId", itemBaseId + 3).getInt();
+		legsCooperId = config.getItem("legsCooperId", itemBaseId + 4).getInt();
+		bootsCooperId = config.getItem("bootsCooperId", itemBaseId + 5).getInt();
+		
 		sharedItemId = config.getItem("sharedItem", itemBaseId + 18).getInt();
+
+
+
+		
 
 		oreId = config.getTerrainBlock("ELN", "OreBlock", blocBaseId + 7,
 				"choubakaka").getInt();
@@ -333,6 +355,9 @@ public class Eln {
 
 
 
+		
+		
+		
 		electricalOverSampling = config.get("Simulator", "ElectricalHz", 8000)
 				.getInt() / commonOverSampling / 20;
 		if (electricalOverSampling < 1)
@@ -418,6 +443,7 @@ public class Eln {
 		 * int id = 0,subId = 0,completId; String name;
 		 */
 
+		registerArmor();
 		registerOre();
 
 		registerGround(2);
@@ -484,6 +510,9 @@ public class Eln {
 		registerBrush(119);
 		registerMiscItem(120);
 
+		
+		recipeArmor();
+		
 		recipeGround();
 		recipeElectricalSource();
 		recipeElectricalCable();
@@ -537,7 +566,7 @@ public class Eln {
 		recipeWindTurbine();
 		recipeThermalDissipatorPassiveAndActive();
 		recipeElectricalAntenna();
-		
+		recipeEggIncubatore();
 
 		
 		/*		registerTransformer(2);
@@ -597,6 +626,8 @@ public class Eln {
 		}
 
 	}
+
+
 
 
 
@@ -1842,7 +1873,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "Egg incubator";
+			name = "50V Egg incubator";
 
 			EggIncubatorDescriptor desc = new EggIncubatorDescriptor(
 					name, obj.getObj("eggincubator"), 
@@ -2872,6 +2903,46 @@ public class Eln {
 
 	}
 
+
+	private void registerArmor() {
+		ItemStack stack;
+		String name;
+		int legs;
+		legs = legsCooperId + 256;
+		{
+			name = "Cooper helmet";
+			helmetCooper = (ItemArmor)(new genericArmorItem(helmetCooperId, EnumArmorMaterial.IRON, 2,0,"eln:textures/armor/cooper_layer_1.png","eln:textures/armor/cooper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:cooper_helmet").setCreativeTab(creativeTab);
+			stack = new ItemStack(helmetCooper);
+			LanguageRegistry.addName(stack,name);
+			GameRegistry.registerCustomItemStack(name, stack.copy());
+		}
+		{
+			name = "Cooper plate";
+			plateCooper = (ItemArmor)(new genericArmorItem(plateCooperId, EnumArmorMaterial.IRON, 2,1,"eln:textures/armor/cooper_layer_1.png","eln:textures/armor/cooper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:cooper_chestplate").setCreativeTab(creativeTab);
+			stack = new ItemStack(plateCooper);
+			LanguageRegistry.addName(stack,name);
+			GameRegistry.registerCustomItemStack(name, stack.copy());
+		}
+		{
+			name = "Cooper legs";
+			legsCooper = (ItemArmor)(new genericArmorItem(legsCooperId, EnumArmorMaterial.IRON, 2,2,"eln:textures/armor/cooper_layer_1.png","eln:textures/armor/cooper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:cooper_leggings").setCreativeTab(creativeTab);
+			stack = new ItemStack(legsCooper);
+			LanguageRegistry.addName(stack,name);
+			GameRegistry.registerCustomItemStack(name, stack.copy());
+		}
+		{
+			name = "Cooper boots";
+			bootsCooper = (ItemArmor)(new genericArmorItem(bootsCooperId, EnumArmorMaterial.IRON, 2,3,"eln:textures/armor/cooper_layer_1.png","eln:textures/armor/cooper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:cooper_boots").setCreativeTab(creativeTab);
+			stack = new ItemStack(bootsCooper);
+			LanguageRegistry.addName(stack,name);
+			GameRegistry.registerCustomItemStack(name, stack.copy());
+		}
+		
+
+		
+	}
+
+	
 	void registerSolarTracker(int id) {
 		int subId, completId;
 		String name;
@@ -5040,36 +5111,49 @@ public class Eln {
 				Character.valueOf('R'),new ItemStack(Item.redstone),
 				Character.valueOf('R'),new ItemStack(Item.diamond)
 		);	
-/*
-
-		name = "Medium power transmitter antenna";
-
-		name = "Medium power receiver antenna";
-
-		name = "High power transmitter antenna";
-
-		name = "High power receiver antenna";
-*/
 		
-		
+
 		
 		
 	}
 	
-	/*
-			GameRegistry.addRecipe(findItemStack("50V compressor", 1), 
-				"   ",
-				"   ",
-				"   ",
-				Character.valueOf('M'),findItemStack("Machine block"), 
-				Character.valueOf('c'),findItemStack("Low voltage cable"), 
-				Character.valueOf('F'),findItemStack("Iron plate"), 
-				Character.valueOf('I'),new ItemStack(Item.ingotIron), 
-				Character.valueOf('R'),new ItemStack(Item.redstone)
-		);	
+	private void recipeEggIncubatore() {
+		GameRegistry.addRecipe(findItemStack("50V Egg incubator", 1), 
+				"IGG",
+				"E G",
+				"CII",
+				Character.valueOf('C'),findItemStack("Cheap chip"), 
+				Character.valueOf('E'),findItemStack("Small 50V tungsten heating corp"), 
+				Character.valueOf('I'),new ItemStack(Item.ingotIron),
+				Character.valueOf('G'),new ItemStack(Block.thinGlass));
+		
+	}
 	
-	
-	 */
+	void recipeArmor()
+	{
+		GameRegistry.addRecipe(new ItemStack(helmetCooper), 
+				"CCC",
+				"C C",
+				Character.valueOf('C'),findItemStack("Cooper ingot"));	
+		
+		GameRegistry.addRecipe(new ItemStack(plateCooper), 
+				"C C",
+				"CCC",
+				"CCC",
+				Character.valueOf('C'),findItemStack("Cooper ingot"));	
+		
+		GameRegistry.addRecipe(new ItemStack(legsCooper), 
+				"CCC",
+				"C C",
+				"C C",
+				Character.valueOf('C'),findItemStack("Cooper ingot"));	
+		
+		GameRegistry.addRecipe(new ItemStack(bootsCooper), 
+				"C C",
+				"C C",
+				Character.valueOf('C'),findItemStack("Cooper ingot"));	
+	}
+
 	public ItemStack findItemStack(String name, int stackSize) {
 		return GameRegistry.findItemStack("Eln", name, stackSize);
 	}

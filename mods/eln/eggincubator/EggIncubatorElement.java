@@ -97,6 +97,8 @@ public class EggIncubatorElement extends TransparentNodeElement{
 				descriptor.setState(powerLoad, false);
 				resetEnergy();
 			}
+			
+			if(Math.abs(powerLoad.Uc - lastVoltagePublish)/descriptor.nominalVoltage > 0.1) needPublish();
 		}
 
 		@Override
@@ -196,7 +198,7 @@ public class EggIncubatorElement extends TransparentNodeElement{
 	
 	
 	
-
+	double lastVoltagePublish;
 
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
@@ -214,5 +216,6 @@ public class EggIncubatorElement extends TransparentNodeElement{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		lastVoltagePublish = powerLoad.Uc;
 	}
 }

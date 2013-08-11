@@ -2,6 +2,8 @@ package mods.eln.eggincubator;
 
 import java.util.List;
 
+import javax.rmi.CORBA.Util;
+
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.block.Block;
@@ -24,6 +26,7 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 	public ElectricalCableDescriptor cable;
 	private Obj3DPart lamp;
 	private EntityItem eggEntity;
+	private Obj3DPart lampf;
 	public EggIncubatorDescriptor(
 			String name,
 			Obj3D obj,
@@ -40,7 +43,7 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 		if(obj != null){
 			main = obj.getPart("main");
 			lamp = obj.getPart("lamp");
-		
+			lampf  = obj.getPart("lampf");
 		}
 
 		
@@ -73,15 +76,28 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		// TODO Auto-generated method stub
-		draw(0);
+		draw(0,1f);
 	}
 	
 	
-	void draw(int eggStackSize)
+	void draw(int eggStackSize,float powerFactor)
 	{
+		if(eggStackSize == 0) powerFactor = 0f;
 		Utils.disableCulling();
 		if(main != null) main.draw();
-		if(lamp != null) lamp.draw();
+		if(lampf != null){
+			GL11.glColor3f(0.1f, 0.1f, 0.1f);
+			lampf.draw();
+		}
+		if(lamp != null){
+
+			Utils.disableLight();
+			Utils.enableBlend();
+			GL11.glColor4f(1f , 0.2f, 0.0f,powerFactor*powerFactor*0.5f);
+			lamp.draw();
+			Utils.disableBlend();
+			Utils.enableLight();
+		}
 		Utils.enableCulling();
 		
 
