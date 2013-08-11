@@ -10,6 +10,7 @@ import com.google.common.base.CaseFormat;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Vec3;
 
 
 /**
@@ -151,6 +152,26 @@ public enum LRDU {
 			case Down: 
 				v[1] = z;
 				v[2] = -y;
+				break;
+		}
+	}
+	public void rotateOnXnLeft(Vec3  v)
+	{
+		double y = v.yCoord;
+		double z = v.zCoord;
+		switch (this) {
+			case Left: break;
+			case Up: 
+				v.yCoord = -z;
+				v.zCoord= y;
+				break;
+			case Right:
+				v.yCoord= -y;
+				v.zCoord = -z;
+				break;
+			case Down: 
+				v.yCoord = z;
+				v.zCoord = -y;
 				break;
 		}
 	}

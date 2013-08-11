@@ -8,6 +8,7 @@ import com.google.common.base.CaseFormat;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Vec3;
 
 
 /**
@@ -563,6 +564,40 @@ public enum Direction {
 		case ZP:
 			p[0] = z;
 			p[2] = -x;
+			break;
+		default:
+			break;
+		
+		}		
+	}
+	public void rotateFromXN(Vec3 p) {
+		// TODO Auto-generated method stub
+		double x = p.xCoord,y = p.yCoord,z = p.zCoord;
+		switch(this)
+		{
+		case XN:
+			break;
+		case XP:
+			p.xCoord = -x;
+			p.zCoord = -z;
+			break;
+		case YN:
+			p.xCoord = y;
+			p.yCoord = x;
+			p.zCoord = -z;
+			break;
+		case YP:
+			p.xCoord = y;
+			p.yCoord = -x;
+			p.zCoord = z;
+			break;
+		case ZN:
+			p.xCoord = -z;
+			p.zCoord = x;
+			break;
+		case ZP:
+			p.xCoord = z;
+			p.zCoord = -x;
 			break;
 		default:
 			break;

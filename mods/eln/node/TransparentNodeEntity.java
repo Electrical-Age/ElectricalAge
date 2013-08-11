@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 
 import mods.eln.Eln;
@@ -18,6 +19,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 
 public class TransparentNodeEntity extends NodeBlockEntity {
@@ -139,6 +141,27 @@ public class TransparentNodeEntity extends NodeBlockEntity {
 	public void tileEntityNeighborSpawn() {
 		// TODO Auto-generated method stub
 		if(elementRender != null) elementRender.notifyNeighborSpawn();
+	}
+	public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB,List list) {
+		if(worldObj.isRemote){
+			if(elementRender == null){
+				AxisAlignedBB bb = Block.stone.getCollisionBoundingBoxFromPool(worldObj, xCoord, yCoord, zCoord);
+				if(par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
+			}
+			else{
+				elementRender.transparentNodedescriptor.addCollisionBoxesToList( par5AxisAlignedBB, list,  this);
+			}
+		}
+		else{
+			TransparentNode node = (TransparentNode) getNode();
+			if(node == null){
+				AxisAlignedBB bb = Block.stone.getCollisionBoundingBoxFromPool(worldObj, xCoord, yCoord, zCoord);
+				if(par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
+			}
+			else{
+				node.element.transparentNodeDescriptor.addCollisionBoxesToList( par5AxisAlignedBB, list,  this);
+			}
+		}
 	}
 	
 	

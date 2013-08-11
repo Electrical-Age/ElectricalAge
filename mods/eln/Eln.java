@@ -1847,7 +1847,7 @@ public class Eln {
 			EggIncubatorDescriptor desc = new EggIncubatorDescriptor(
 					name, obj.getObj("eggincubator"), 
 					lowVoltageCableDescriptor,
-					LVU,400);
+					LVU,50	);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -2241,14 +2241,14 @@ public class Eln {
 	void registerLampItem(int id) {
 		int subId, completId;
 		String name;
-		double incondecentLife = Utils.minecraftDay * 5;
+		double incondecentLife = Utils.minecraftDay * 10;
 		double[] lightPower = new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 				15, 20, 30, 40, 60 };
 		double[] lightLevel = new double[16];
 		double economicPowerFactor = 0.75;
 		double economicLife = incondecentLife * 4;
-
-		for (int idx = 0; idx < 15; idx++) {
+		double standardGrowRate = 0.0;
+		for (int idx = 0; idx < 16; idx++) {
 			lightLevel[idx] = (idx + 0.49) / 15.0;
 		}
 		LampDescriptor element;
@@ -2259,7 +2259,7 @@ public class Eln {
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[12], // nominalU,
 																	// nominalP
-					lightLevel[12], incondecentLife // nominalLight, nominalLife
+					lightLevel[12], incondecentLife,standardGrowRate // nominalLight, nominalLife
 			);
 			sharedItem.addElement(completId, element);
 		}
@@ -2270,7 +2270,7 @@ public class Eln {
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[14], // nominalU,
 																	// nominalP
-					lightLevel[14], incondecentLife // nominalLight, nominalLife
+					lightLevel[14], incondecentLife,standardGrowRate // nominalLight, nominalLife
 			);
 			sharedItem.addElement(completId, element);
 		}
@@ -2281,7 +2281,7 @@ public class Eln {
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, MVU, lightPower[14], // nominalU,
 																	// nominalP
-					lightLevel[14], incondecentLife // nominalLight, nominalLife
+					lightLevel[14], incondecentLife,standardGrowRate // nominalLight, nominalLife
 			);
 			sharedItem.addElement(completId, element);
 		}
@@ -2301,7 +2301,7 @@ public class Eln {
 					"incandescentlampcarbon", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[11], // nominalU,
 																	// nominalP
-					lightLevel[11], incondecentLife / 3 // nominalLight,
+					lightLevel[11], incondecentLife / 3,standardGrowRate // nominalLight,
 														// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -2313,7 +2313,7 @@ public class Eln {
 					"incandescentlampcarbon", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[13], // nominalU,
 																	// nominalP
-					lightLevel[13], incondecentLife / 3 // nominalLight,
+					lightLevel[13], incondecentLife / 3,standardGrowRate // nominalLight,
 														// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -2326,7 +2326,7 @@ public class Eln {
 					"economiclamp", LampDescriptor.Type.eco,
 					LampSocketType.Douille, LVU, lightPower[12]
 							* economicPowerFactor, // nominalU, nominalP
-					lightLevel[12], economicLife // nominalLight, nominalLife
+					lightLevel[12], economicLife,standardGrowRate // nominalLight, nominalLife
 			);
 			sharedItem.addElement(completId, element);
 		}
@@ -2337,7 +2337,7 @@ public class Eln {
 					"economiclamp", LampDescriptor.Type.eco,
 					LampSocketType.Douille, LVU, lightPower[14]
 							* economicPowerFactor, // nominalU, nominalP
-					lightLevel[14], economicLife // nominalLight, nominalLife
+					lightLevel[14], economicLife,standardGrowRate // nominalLight, nominalLife
 			);
 			sharedItem.addElement(completId, element);
 		}
@@ -2348,7 +2348,28 @@ public class Eln {
 					"economiclamp", LampDescriptor.Type.eco,
 					LampSocketType.Douille, MVU, lightPower[14]
 							* economicPowerFactor, // nominalU, nominalP
-					lightLevel[14], economicLife // nominalLight, nominalLife
+					lightLevel[14], economicLife,standardGrowRate // nominalLight, nominalLife
+			);
+			sharedItem.addElement(completId, element);
+		}
+		
+		{
+			subId = 32;
+			completId = subId + (id << 6);
+			element = new LampDescriptor("50V farming lamp",
+					"incandescentlampiron", LampDescriptor.Type.Incandescent,
+					LampSocketType.Douille, LVU, 120, // nominalU, nominalP
+					lightLevel[15], incondecentLife,0.50 // nominalLight, nominalLife
+			);
+			sharedItem.addElement(completId, element);
+		}
+		{
+			subId = 36;
+			completId = subId + (id << 6);
+			element = new LampDescriptor("200V farming lamp",
+					"incandescentlampiron", LampDescriptor.Type.Incandescent,
+					LampSocketType.Douille, MVU, 120, // nominalU, nominalP
+					lightLevel[15], incondecentLife,0.50 // nominalLight, nominalLife
 			);
 			sharedItem.addElement(completId, element);
 		}
@@ -4219,6 +4240,25 @@ public class Eln {
 				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
 				Character.valueOf('F'),findItemStack("Mercury"), 
 				Character.valueOf('S'),findItemStack("Medium voltage cable"));
+		
+		
+		GameRegistry.addRecipe(findItemStack("50V farming lamp", 2),
+				"GGG",
+				"FFF",
+				"GSG",
+				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
+				Character.valueOf('F'),findItemStack("Tungsten ingot"), 
+				Character.valueOf('S'),findItemStack("Low voltage cable"));
+		
+		GameRegistry.addRecipe(findItemStack("200V farming lamp", 2),
+				"GGG",
+				"FFF",
+				"GSG",
+				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
+				Character.valueOf('F'),findItemStack("Tungsten ingot"), 
+				Character.valueOf('S'),findItemStack("Medium voltage cable"));
+				
+		
 	}
 
 	void recipeProtection() {

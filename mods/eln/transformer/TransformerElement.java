@@ -38,13 +38,8 @@ public class TransformerElement extends TransparentNodeElement{
 	public NodeElectricalLoad positiveSecondaryLoad = new NodeElectricalLoad("positiveSecondaryLoad");
 	public NodeElectricalLoad negativeSecondaryLoad = new NodeElectricalLoad("negativeSecondaryLoad");
 
-	public NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
 
-	public ElectricalLoadHeatThermalLoadProcess positivePrimaryLoadETProcess = new ElectricalLoadHeatThermalLoadProcess(positivePrimaryLoad,thermalLoad);
-	public ElectricalLoadHeatThermalLoadProcess negativePrimaryLoadETProcess = new ElectricalLoadHeatThermalLoadProcess(negativePrimaryLoad,thermalLoad);
-	public ElectricalLoadHeatThermalLoadProcess positiveSecondaryLoadETProcess = new ElectricalLoadHeatThermalLoadProcess(positiveSecondaryLoad,thermalLoad);
-	public ElectricalLoadHeatThermalLoadProcess negativeSecondaryLoadETProcess = new ElectricalLoadHeatThermalLoadProcess(negativeSecondaryLoad,thermalLoad);
-	
+
 	public TransformerProcess tranformerProcess = new TransformerProcess(positivePrimaryLoad,negativePrimaryLoad,positiveSecondaryLoad,negativeSecondaryLoad);
 	
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
@@ -60,12 +55,8 @@ public class TransformerElement extends TransparentNodeElement{
 	   	electricalLoadList.add(positiveSecondaryLoad);
 	   	electricalLoadList.add(negativeSecondaryLoad);
 	   	
-	   	thermalLoadList.add(thermalLoad);
-    	
-	   	thermalProcessList.add(positivePrimaryLoadETProcess);
-	   	thermalProcessList.add(negativePrimaryLoadETProcess);
-	   	thermalProcessList.add(positiveSecondaryLoadETProcess);
-	   	thermalProcessList.add(negativeSecondaryLoadETProcess);
+
+
 	   	
 	   	slowProcessList.add(primaryVoltageWatchdog);
 	   	slowProcessList.add(secondaryVoltageWatchdog);
@@ -92,7 +83,7 @@ public class TransformerElement extends TransparentNodeElement{
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-		return thermalLoad;
+		return null;
 	}
 
 	@Override
@@ -121,7 +112,7 @@ public class TransformerElement extends TransparentNodeElement{
 	
 	@Override
 	public String thermoMeterString(Direction side) {
-		return  Utils.plotCelsius("T",thermalLoad.Tc);
+		return  null;
 	}
 
 	
@@ -145,10 +136,7 @@ public class TransformerElement extends TransparentNodeElement{
 		//tranformerProcess.setRatio(2);	
 	   		
 
-    	thermalLoad.Rs = 100000.0f;
-    	thermalLoad.C = 1.0f;
-    	thermalLoad.Rp = 1.0f;
-          	
+
 
 		
 		computeInventory();
@@ -166,27 +154,32 @@ public class TransformerElement extends TransparentNodeElement{
 		
 		tranformerProcess.setEnable(primaryCable != null && core != null && secondaryCable != null);
 		
+		if(primaryCable != null){
+			primaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(primaryCable);	
+		}
+		if(secondaryCable != null){
+			secondaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(secondaryCable);			
+		}
+		
 		if(primaryCable == null || core == null)
 		{
 			positivePrimaryLoad.highImpedance();
 			negativePrimaryLoad.highImpedance();
 			if(grounded) negativePrimaryLoad.groundedEnable(); 
 		}
-		else
-		{
-			primaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(primaryCable);	
+		else{			
 			primaryCableDescriptor.applyTo( positivePrimaryLoad, false);
 			primaryCableDescriptor.applyTo( negativePrimaryLoad, grounded);	
 		}
+		
 		if(secondaryCable == null || core == null)
 		{
 			positiveSecondaryLoad.highImpedance();
 			negativeSecondaryLoad.highImpedance();
 			if(grounded) negativeSecondaryLoad.groundedEnable(); 
 		}
-		else
-		{
-			secondaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(secondaryCable);
+		else{
+
 			secondaryCableDescriptor.applyTo( positiveSecondaryLoad, false);
 			secondaryCableDescriptor.applyTo( negativeSecondaryLoad, grounded);	
 		}		

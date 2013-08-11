@@ -26,12 +26,13 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptor
 	
 	
 	public double nominalU,minimalU;
-	public double stableU,stableUNormalised,stableTime;
+	public double stableU,stableUNormalised,stableTime,vegetableGrowRate;
 	
 	public LampDescriptor(	
 			String name,String iconName,
 			Type type,LampSocketType socket,
-			double nominalU,double nominalP,double nominalLight,double nominalLife
+			double nominalU,double nominalP,double nominalLight,double nominalLife,
+			double vegetableGrowRate
 			)
 	{
 		super( name);
@@ -43,7 +44,7 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptor
 		this.nominalLight = nominalLight;
 		this.nominalLife = nominalLife;
 		//this.description = description;
-		
+		this.vegetableGrowRate = vegetableGrowRate;
 
 		switch (type) {
 		case Incandescent:

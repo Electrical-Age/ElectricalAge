@@ -4,20 +4,26 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.block.Block;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.AxisAlignedBB;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.TransparentNodeDescriptor;
+import mods.eln.node.TransparentNodeEntity;
 
 public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 	Obj3D obj;
 	Obj3D defaultFeroObj;
 	public ElectricalCableDescriptor cable;
 	private Obj3DPart lamp;
+	private EntityItem eggEntity;
 	public EggIncubatorDescriptor(
 			String name,
 			Obj3D obj,
@@ -36,6 +42,8 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 			lamp = obj.getPart("lamp");
 		
 		}
+
+		
 
 	}
 	
@@ -75,6 +83,8 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 		if(main != null) main.draw();
 		if(lamp != null) lamp.draw();
 		Utils.enableCulling();
+		
+
 	}
 
 	public void applyTo(NodeElectricalLoad powerLoad) {
@@ -90,4 +100,13 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 		
 	}
 
+	
+	
+	@Override
+	public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB,
+			List list, TransparentNodeEntity entity) {
+		AxisAlignedBB bb = Block.stone.getCollisionBoundingBoxFromPool(entity.worldObj,entity.xCoord,entity.yCoord,entity.zCoord);
+		bb.maxY-=0.5;
+		if(par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
+	}
 }

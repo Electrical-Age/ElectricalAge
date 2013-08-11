@@ -57,6 +57,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 
@@ -915,7 +916,6 @@ public class Utils {
 		// TODO Auto-generated method stub
 		return world.getEntitiesWithinAABB(EntityPlayer.class, axisAlignedBB).size() != 0;
 	}
-	
 	
 	
 

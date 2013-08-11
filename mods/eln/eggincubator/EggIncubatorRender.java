@@ -8,6 +8,7 @@ import java.io.IOException;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
 import mods.eln.client.ClientProxy;
+import mods.eln.client.FrameTime;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.heatfurnace.HeatFurnaceElement;
@@ -22,9 +23,12 @@ import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.node.TransparentNodeElementRender;
 import mods.eln.node.TransparentNodeEntity;
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 import org.lwjgl.opengl.GL11;
@@ -42,15 +46,22 @@ public class EggIncubatorRender extends TransparentNodeElementRender{
 	@Override
 	public void draw() {
 		// TODO Auto-generated method stub
+
+		alpha += FrameTime.get()*60;
+		if(alpha >= 360) alpha-=360;
 		
 		GL11.glPushMatrix();
 		front.glRotateXnRef();
+		if(egg != null){
+			Utils.drawEntityItem(egg, 0.0f,-0.3f,0.13f,alpha,0.6f);
+		}
 		descriptor.draw(eggStackSize);
 		GL11.glPopMatrix();
 		cableRenderType = drawCable(front.down(),descriptor.cable.render, eConn, cableRenderType);
 	
 	}
 
+	float alpha = 0;
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
@@ -60,18 +71,25 @@ public class EggIncubatorRender extends TransparentNodeElementRender{
 	
 	byte eggStackSize;
 
+	EntityItem egg;
+	public float voltage;
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
 		super.networkUnserialize(stream);
 		try {
 			eggStackSize = stream.readByte();
-			
+			if(eggStackSize != 0){
+				egg = new EntityItem(this.tileEntity.worldObj, 0,0,0, new ItemStack(Item.egg));
+			}
+			else{
+				egg = null;
+			}
 					
 			eConn.deserialize(stream);
 			
 
-			
+			voltage = stream.readFloat();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

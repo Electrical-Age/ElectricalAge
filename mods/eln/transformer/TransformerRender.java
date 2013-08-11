@@ -105,6 +105,7 @@ public class TransformerRender extends TransparentNodeElementRender{
 				if(render == secRender) secConn.set(lrdu,true);
 			
 			}
+			cableRenderType = null;
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

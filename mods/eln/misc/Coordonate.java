@@ -12,6 +12,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldManager;
 import net.minecraft.world.WorldProvider;
@@ -210,6 +211,13 @@ public class Coordonate implements INBTTReady {
 		this.x = (int) vp[0];
 		this.y = (int) vp[1];
 		this.z = (int) vp[2];
+		
+	}
+	
+	public void setPosition(Vec3 vp) {
+		this.x = (int) vp.xCoord;
+		this.y = (int) vp.yCoord;
+		this.z = (int) vp.zCoord;
 		
 	}
 	public TileEntity getTileEntity() {

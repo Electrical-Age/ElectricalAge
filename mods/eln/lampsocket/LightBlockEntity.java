@@ -159,7 +159,7 @@ public class LightBlockEntity extends TileEntity{
 		if(blockId != Eln.lightBlockId)
 		{
 			//coord.setBlock(Eln.lightBlockId, newLight);
-			System.out.println("ASSERT public static void remplaceLight(Coordonate coord,int oldLight,int newLight)");
+			System.out.println("ASSERT public static void remplaceLight(Coordonate coord,int oldLight,int newLight) " + coord);
 			return;
 		}
 		((LightBlockEntity)coord.getTileEntity()).remplaceLight(oldLight,newLight);		

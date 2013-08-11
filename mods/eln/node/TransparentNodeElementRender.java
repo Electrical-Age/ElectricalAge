@@ -31,10 +31,12 @@ public abstract class TransparentNodeElementRender {
 	public TransparentNodeEntity tileEntity;
 	public Direction front;
 	public boolean grounded;
+	public TransparentNodeDescriptor transparentNodedescriptor;
 	
 	public TransparentNodeElementRender(TransparentNodeEntity tileEntity,TransparentNodeDescriptor descriptor)
 	{
 		this.tileEntity = tileEntity;
+		this.transparentNodedescriptor = descriptor;
 	}
 	protected   EntityItem unserializeItemStackToEntityItem(DataInputStream stream,EntityItem old) throws IOException
 	{

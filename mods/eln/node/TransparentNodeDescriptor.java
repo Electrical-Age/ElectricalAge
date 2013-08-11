@@ -1,5 +1,7 @@
 package mods.eln.node;
 
+import java.util.List;
+
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Coordonate;
@@ -10,6 +12,8 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.IRenderContextHandler;
 
@@ -160,5 +164,9 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 	public int getSpawnDeltaZ() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+	public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB,List list, TransparentNodeEntity entity) {
+		AxisAlignedBB bb = Block.stone.getCollisionBoundingBoxFromPool(entity.worldObj,entity.xCoord,entity.yCoord,entity.zCoord);
+		if(par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
 	}
 }

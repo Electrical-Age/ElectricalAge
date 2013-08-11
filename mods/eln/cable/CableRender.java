@@ -6,6 +6,7 @@ import java.nio.FloatBuffer;
 import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
 
 import mods.eln.CommonProxy;
+import mods.eln.Eln;
 import mods.eln.cable.CableRenderType.CableRenderTypeMethodType;
 import mods.eln.client.ClientProxy;
 import mods.eln.misc.Direction;
@@ -118,6 +119,12 @@ public class CableRender {
 					//CableRenderDescriptor render = entity.getCableRender(side,lrdu);
 					NodeBlockEntity otherNode =  ((NodeBlockEntity)otherTileEntity);
 					CableRenderDescriptor otherRender = otherNode.getCableRender(otherDirection, otherLRDU);*/
+				/*	Direction otherDirection = side.getInverse();
+					LRDU otherLRDU = otherDirection.getLRDUGoingTo(sideLrdu).inverse();
+					CableRenderDescriptor render = entity.getCableRender(sideLrdu,sideLrdu.getLRDUGoingTo(side));
+					NodeBlockEntity otherNode =  ((NodeBlockEntity)otherTileEntity);
+					CableRenderDescriptor otherRender = otherNode.getCableRender(otherDirection, otherLRDU);
+					*/
 					Direction otherDirection = side.getInverse();
 					LRDU otherLRDU = otherDirection.getLRDUGoingTo(sideLrdu).inverse();
 					CableRenderDescriptor render = entity.getCableRender(sideLrdu,sideLrdu.getLRDUGoingTo(side));
@@ -298,6 +305,7 @@ public class CableRender {
 					CableRenderDescriptor render = element.getCableRender(lrdu);
 					NodeBlockEntity otherNode =  ((NodeBlockEntity)otherTileEntity);
 					CableRenderDescriptor otherRender = otherNode.getCableRender(otherDirection, otherLRDU);
+					
 					if(otherRender == null)
 					{
 						connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend;

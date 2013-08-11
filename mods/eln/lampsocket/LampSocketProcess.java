@@ -19,8 +19,12 @@ import mods.eln.sim.ElectricalConnectionOneWay;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.Simulator;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockCrops;
+import net.minecraft.block.BlockFarmland;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.Vec3;
+import net.minecraft.util.Vec3Pool;
 
 public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserver{
 	double time = 0;
@@ -44,11 +48,88 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 	boolean boot = true;
 	
 	double vp[] = new double[3];
-	double vv[] = new double[3];
+	//double vv[] = new double[3];
 	
 	@Override
 	public void process(double time) {
-		// TODO Auto-generated method stub
+		ItemStack lampStack = lamp.inventory.getStackInSlot(0);
+		
+		if(lampStack != null)
+		{
+			LampDescriptor lampDescriptor = (LampDescriptor) ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>)lampStack.getItem()).getDescriptor(lampStack);
+			
+			
+			if(lampDescriptor.vegetableGrowRate != 0.0){
+				double randTarget = 1.0/lampDescriptor.vegetableGrowRate*time * (1.0*light/lampDescriptor.nominalLight/15.0);
+				if( randTarget >  Math.random()){
+					boolean exit = false;
+					Vec3 vv = Vec3.createVectorHelper(1,0,0);
+					Vec3 vp = Vec3.createVectorHelper(myCoord().x + 0.5,myCoord().y + 0.5,myCoord().z + 0.5);
+					
+					vv.rotateAroundZ((float) (alphaZ*Math.PI/180.0));
+
+					vv.rotateAroundY((float) ((Math.random()-0.5)*2*Math.PI/4));
+					vv.rotateAroundZ((float) ((Math.random()-0.5)*2*Math.PI/4));
+
+					
+					lamp.front.rotateOnXnLeft(vv);
+					lamp.side.rotateFromXN(vv);
+					
+					Coordonate c = new Coordonate(myCoord());
+					for(int idx = 0;idx < lamp.socketDescriptor.range+light;idx++)
+					{
+						//newCoord.move(lamp.side.getInverse());
+						vp.xCoord += vv.xCoord;
+						vp.yCoord += vv.yCoord;
+						vp.zCoord += vv.zCoord;
+				
+						c.setPosition(vp);
+						Block b = c.getBlock();
+						if(c.getBlockExist() == false)
+						{
+							exit = true;
+							break;
+						}
+						if(isOpaque(c))
+						{
+							vp.xCoord -= vv.xCoord;
+							vp.yCoord -= vv.yCoord;
+							vp.zCoord -= vv.zCoord;
+					
+							c.setPosition(vp);
+							b = c.getBlock();
+							break;
+						}
+					}
+					
+					
+				//int max = (int) (time / lampDescriptor.vegetableGrowRate*1.001);
+				//for(int idx = 0;idx < max;idx++){
+					
+
+					if(exit == false){
+						
+						Block b = c.getBlock();
+					/*	if(c.y == 4){
+							int I = 0;
+							I++;						
+						}
+						if(b instanceof BlockCrops){
+							int I = 0;
+							I++;
+							System.out.println(c + " CROP !");
+						}*/
+
+						if(b != null){
+							b.updateTick(c.world(), c.x, c.y, c.z, c.world().rand);
+						}
+					}
+
+				}
+			}
+		}
+		
+		
 		this.time += time;
 		if(this.time < deltaT) return;
 		
@@ -58,8 +139,7 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 		int oldLight = light;
 		int newLight = 0;
 		
-		ItemStack lampStack = lamp.inventory.getStackInSlot(0);
-		
+
 		if(boot == false && (lampStack != lampStackLast || lampStack == null))
 		{
 			stableProb = 0;
@@ -69,6 +149,8 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 		if(lampStack != null)
 		{
 			LampDescriptor lampDescriptor = (LampDescriptor) ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>)lampStack.getItem()).getDescriptor(lampStack);
+			
+
 			
 			if(stableProb < 0) stableProb = 0;
 			
@@ -232,6 +314,9 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 			
 			
 		}
+		
+		
+	
 	}
 	
 	
@@ -246,50 +331,27 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 	
 	ElectricalConnectionOneWay connection = null;
 	
-	
+
 	void placeSpot(int newLight)
 	{
 		boolean exit = false;
 		if(lbCoord.getBlockExist() == false) return;
-		myCoord().copyTo(vp);
-		vv[0] = 1.0 * Math.cos(alphaZ*Math.PI/180.0);
-		vv[1] = 1.0 * Math.sin(alphaZ*Math.PI/180.0);
-		vv[2] = 0.0;
+		Vec3 vv = Vec3.createVectorHelper(1,0,0);
+		Vec3 vp = Vec3.createVectorHelper(myCoord().x + 0.5,myCoord().y + 0.5,myCoord().z + 0.5);
+		
+		vv.rotateAroundZ((float) (alphaZ*Math.PI/180.0));
+
 		lamp.front.rotateOnXnLeft(vv);
 		lamp.side.rotateFromXN(vv);
+		
 		Coordonate newCoord = new Coordonate(myCoord());
-/*
 		for(int idx = 0;idx < lamp.socketDescriptor.range;idx++)
 		{
 			//newCoord.move(lamp.side.getInverse());
-			vp[0] += vv[0];
-			vp[1] += vv[1];
-			vp[2] += vv[2];
-			newCoord.setPosition(vp);
-			if(newCoord.getBlockExist() == false)
-			{
-				exit = true;
-				break;
-			}
-			int block = newCoord.getBlockId();
-			if(block != 0)
-			{
-				if(block != Eln.lightBlockId || lbCoord.equals(newCoord) == false)
-				{
-					vp[0] -= vv[0];
-					vp[1] -= vv[1];
-					vp[2] -= vv[2];
-					newCoord.setPosition(vp);
-					break;
-				}
-			}
-		}*/
-		for(int idx = 0;idx < lamp.socketDescriptor.range;idx++)
-		{
-			//newCoord.move(lamp.side.getInverse());
-			vp[0] += vv[0];
-			vp[1] += vv[1];
-			vp[2] += vv[2];
+			vp.xCoord += vv.xCoord;
+			vp.yCoord += vv.yCoord;
+			vp.zCoord += vv.zCoord;
+	
 			newCoord.setPosition(vp);
 			if(newCoord.getBlockExist() == false)
 			{
@@ -298,9 +360,10 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 			}
 			if(isOpaque(newCoord))
 			{
-				vp[0] -= vv[0];
-				vp[1] -= vv[1];
-				vp[2] -= vv[2];
+				vp.xCoord -= vv.xCoord;
+				vp.yCoord -= vv.yCoord;
+				vp.zCoord -= vv.zCoord;
+		
 				newCoord.setPosition(vp);
 				break;
 			}
@@ -318,9 +381,9 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 						break;
 				}
 				
-				vp[0] -= vv[0];
-				vp[1] -= vv[1];
-				vp[2] -= vv[2];
+				vp.xCoord -= vv.xCoord;
+				vp.yCoord -= vv.yCoord;
+				vp.zCoord -= vv.zCoord;
 				newCoord.setPosition(vp);
 			}
 			
@@ -333,6 +396,7 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 	{
 		int blockId = coord.getBlockId();
 		boolean isNotOpaque = blockId == 0 || ! Block.blocksList[blockId].isOpaqueCube();
+		if(blockId == Block.tilledField.blockID) isNotOpaque = false;
 		return ! isNotOpaque;
 	}
 

@@ -8,6 +8,7 @@ import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalTrackBar;
+import mods.eln.gui.GuiVerticalVoltageSupplyBar;
 import mods.eln.gui.HelperStdContainer;
 import mods.eln.gui.IGuiObject;
 import mods.eln.heatfurnace.HeatFurnaceContainer;
@@ -35,10 +36,11 @@ public class EggIncubatorGuiDraw extends GuiContainerEln {
     private TransparentNodeElementInventory inventory;
     EggIncubatorRender render;
 
+    GuiVerticalVoltageSupplyBar voltage;
     
     public EggIncubatorGuiDraw(EntityPlayer player, IInventory inventory,EggIncubatorRender render)
     {
-        super(new EggIncubatorContainer(player, inventory));
+        super(new EggIncubatorContainer(player, inventory,null));
         this.inventory = (TransparentNodeElementInventory) inventory;
         this.render = render;
         
@@ -49,8 +51,9 @@ public class EggIncubatorGuiDraw extends GuiContainerEln {
     {
     	super.initGui();
     	
-    
-
+    	voltage = new GuiVerticalVoltageSupplyBar(176-2, 8, 20, 166 - 55-18, helper);
+    	voltage.setNominalU((float) render.descriptor.nominalVoltage);
+    	add(voltage);
     }
     
 
@@ -58,7 +61,7 @@ public class EggIncubatorGuiDraw extends GuiContainerEln {
     protected void preDraw(float f, int x, int y) {
     	// TODO Auto-generated method stub
     	super.preDraw(f, x, y);
-
+    	voltage.setVoltage(render.voltage);
     }
 
     @Override
@@ -71,7 +74,7 @@ public class EggIncubatorGuiDraw extends GuiContainerEln {
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-			return new GuiHelperContainer(this, 176, 194,8,84 + 194 - 166);
+			return new GuiHelperContainer(this, 176+20+6, 166-55,8,84 - 55);
 		//return new HelperStdContainer(this);
 	}
     

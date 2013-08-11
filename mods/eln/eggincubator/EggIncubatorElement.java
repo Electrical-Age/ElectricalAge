@@ -46,7 +46,7 @@ public class EggIncubatorElement extends TransparentNodeElement{
 	public NodeElectricalLoad powerLoad = new NodeElectricalLoad("powerLoad");
 
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 64, this);
-	EggIncubatorProcess slowProcess = new EggIncubatorProcess(this);
+	EggIncubatorProcess slowProcess = new EggIncubatorProcess();
 	EggIncubatorDescriptor descriptor;
 	public EggIncubatorElement(TransparentNode transparentNode,TransparentNodeDescriptor descriptor) {
 		super(transparentNode,descriptor);
@@ -60,35 +60,37 @@ public class EggIncubatorElement extends TransparentNodeElement{
 
 	class EggIncubatorProcess implements IProcess,INBTTReady
 	{
-		private EggIncubatorElement e;
-		double energy = 500;
-		public EggIncubatorProcess(EggIncubatorElement e) {
-			this.e = e;
+
+		double energy = 5000;
+		public EggIncubatorProcess() {
+
 			resetEnergy();
 		}
 		void resetEnergy()
 		{
-			energy = 500 + Math.random()*1000;
+			energy = 10000 + Math.random()*10000;
 		}
 		
 		@Override
 		public void process(double time) {
-			energy -= e.powerLoad.getRpPower()*time;
+			energy -= powerLoad.getRpPower()*time;
 			if(inventory.getStackInSlot(EggIncubatorContainer.EggSlotId)!=null){
 				descriptor.setState(powerLoad, true);
 				if(energy <= 0){
 					inventory.decrStackSize(EggIncubatorContainer.EggSlotId, 1);
 					EntityChicken chicken = new EntityChicken(node.coordonate.world());
-
+					chicken.setGrowingAge(-24000);
 					EntityLiving entityliving = (EntityLiving)chicken;
-					entityliving.setLocationAndAngles(e.node.coordonate.x+0.5, e.node.coordonate.y+2, e.node.coordonate.z+0.5, MathHelper.wrapAngleTo180_float(e.node.coordonate.world().rand.nextFloat() * 360.0F), 0.0F);
+					entityliving.setLocationAndAngles(node.coordonate.x+0.5, node.coordonate.y+0.5, node.coordonate.z+0.5, MathHelper.wrapAngleTo180_float(node.coordonate.world().rand.nextFloat() * 360.0F), 0.0F);
                     entityliving.rotationYawHead = entityliving.rotationYaw;
                     entityliving.renderYawOffset = entityliving.rotationYaw;
                     entityliving.func_110161_a((EntityLivingData)null);
-                    e.node.coordonate.world().spawnEntityInWorld(entityliving);
+                    node.coordonate.world().spawnEntityInWorld(entityliving);
                     entityliving.playLivingSound();
 					//node.coordonate.world().spawnEntityInWorld());
                     resetEnergy();
+
+                	needPublish();
 				}
 			}
 			else{
@@ -176,7 +178,7 @@ public class EggIncubatorElement extends TransparentNodeElement{
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
 		// TODO Auto-generated method stub
-		return new EggIncubatorContainer(player, inventory);
+		return new EggIncubatorContainer(player, inventory,node);
 	}
 
 	
@@ -206,6 +208,8 @@ public class EggIncubatorElement extends TransparentNodeElement{
 
 			
 			node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
+			
+			stream.writeFloat((float) powerLoad.Uc);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
