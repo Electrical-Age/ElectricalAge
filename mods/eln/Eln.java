@@ -90,6 +90,8 @@ import mods.eln.item.TreeResin;
 import mods.eln.item.WindRotorDescriptor;
 import mods.eln.item.LampDescriptor.Type;
 import mods.eln.item.WindRotorDescriptor.WindRotorAxeType;
+import mods.eln.item.lamp.ElectricalLampItem;
+import mods.eln.item.lamp.LampItem;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
@@ -107,6 +109,7 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3DFolder;
 import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
+import mods.eln.misc.TileEntityDestructor;
 import mods.eln.misc.Utils;
 import mods.eln.mppt.MpptDescriptor;
 import mods.eln.node.NodeBlock;
@@ -252,11 +255,11 @@ public class Eln {
 	
 	
 	
-	public static int helmetCooperId,plateCooperId,legsCooperId,bootsCooperId;
-	public static ItemArmor helmetCooper,plateCooper,legsCooper,bootsCooper;
+	public static int helmetCopperId,plateCopperId,legsCopperId,bootsCopperId;
+	public static ItemArmor helmetCopper,plateCopper,legsCopper,bootsCopper;
 	
-	public static int swordCooperId,hoeCooperId,shovelCooperId,pickaxeCooperId,axeCooperId;
-	public static Item swordCooper,hoeCooper,shovelCooper,pickaxeCooper,axeCooper;
+	public static int swordCopperId,hoeCopperId,shovelCopperId,pickaxeCopperId,axeCopperId;
+	public static Item swordCopper,hoeCopper,shovelCopper,pickaxeCopper,axeCopper;
 	
 	public static Item voltMeterHelmet;
 	public static Item thermoMeterHelmet;
@@ -341,16 +344,16 @@ public class Eln {
 				.getInt();
 		brushItemId = config.getItem("brushItem", itemBaseId - 1).getInt();
 		
-		helmetCooperId = config.getItem("helmetCooperId", itemBaseId + 2).getInt();
-		plateCooperId = config.getItem("plateCooperId", itemBaseId + 3).getInt();
-		legsCooperId = config.getItem("legsCooperId", itemBaseId + 4).getInt();
-		bootsCooperId = config.getItem("bootsCooperId", itemBaseId + 5).getInt();
+		helmetCopperId = config.getItem("helmetCopperId", itemBaseId + 2).getInt();
+		plateCopperId = config.getItem("plateCopperId", itemBaseId + 3).getInt();
+		legsCopperId = config.getItem("legsCopperId", itemBaseId + 4).getInt();
+		bootsCopperId = config.getItem("bootsCopperId", itemBaseId + 5).getInt();
 
-		swordCooperId = config.getItem("swordCooperId", itemBaseId + 6).getInt();
-		hoeCooperId = config.getItem("hoeCooperId", itemBaseId + 7).getInt();
-		shovelCooperId = config.getItem("shovelCooperId", itemBaseId + 8).getInt();
-		pickaxeCooperId = config.getItem("pickaxeCooperId", itemBaseId + 9).getInt();
-		axeCooperId = config.getItem("axeCooperId", itemBaseId + 10).getInt();
+		swordCopperId = config.getItem("swordCopperId", itemBaseId + 6).getInt();
+		hoeCopperId = config.getItem("hoeCopperId", itemBaseId + 7).getInt();
+		shovelCopperId = config.getItem("shovelCopperId", itemBaseId + 8).getInt();
+		pickaxeCopperId = config.getItem("pickaxeCopperId", itemBaseId + 9).getInt();
+		axeCopperId = config.getItem("axeCopperId", itemBaseId + 10).getInt();
 		
 
 		sharedItemId = config.getItem("sharedItem", itemBaseId + 18).getInt();
@@ -392,6 +395,9 @@ public class Eln {
 
 		simulator = new Simulator(20, commonOverSampling,
 				electricalOverSampling, thermalOverSampling);
+		playerManager = new PlayerManager();
+		tileEntityDestructor = new TileEntityDestructor();
+		
 		nodeServer = new NodeServer();
 		frameTime = new FrameTime();
 		packetHandler = new PacketHandler();
@@ -529,6 +535,7 @@ public class Eln {
 		registerRawCable(65);
 		registerBrush(119);
 		registerMiscItem(120);
+		registerElectricalTool(121);
 
 		
 		recipeArmor();
@@ -668,7 +675,7 @@ public class Eln {
 	/* Remember to use the right event! */
 	public void onServerStopping(FMLServerStoppingEvent ev) {
 		LightBlockEntity.observers.clear();
-		playerManager = null;
+		playerManager.clear();
 		MinecraftServer server = FMLCommonHandler.instance()
 				.getMinecraftServerInstance();
 		WorldServer worldServer = server.worldServers[0];
@@ -678,13 +685,16 @@ public class Eln {
 		ghostManager = null;
 	}
 
+	public TileEntityDestructor tileEntityDestructor;
+	
 	@ServerStarting
 	/* Remember to use the right event! */
 	public void onServerStarting(FMLServerStartingEvent ev) {
+		tileEntityDestructor.clear();
 		LightBlockEntity.observers.clear();
 		WirelessSignalTxElement.channelMap.clear();
 		LampSupplyElement.channelMap.clear();
-		playerManager = new PlayerManager();
+		playerManager.clear();
 		MinecraftServer server = FMLCommonHandler.instance()
 				.getMinecraftServerInstance();
 		WorldServer worldServer = server.worldServers[0];
@@ -714,12 +724,13 @@ public class Eln {
 
 	@cpw.mods.fml.common.Mod.ServerStopping
 	public void ServerStopping(FMLServerStoppingEvent ev) {
-		playerManager = null;
+		
+		playerManager.clear();
 
 		nodeServer.stop();
 
 		simulator.stop();
-		
+		tileEntityDestructor.clear();
 		LightBlockEntity.observers.clear(); //?
 		LampSupplyElement.channelMap.clear();
 		WirelessSignalTxElement.channelMap.clear();
@@ -878,7 +889,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "Cooper thermal cable";
+			name = "Copper thermal cable";
 
 			ThermalCableDescriptor desc = new ThermalCableDescriptor(name,
 					1000 - 20, -200, // thermalWarmLimit, thermalCoolLimit,
@@ -893,7 +904,7 @@ public class Eln {
 		{
 			subId = 1;
 
-			name = "Isolated cooper thermal cable";
+			name = "Isolated copper thermal cable";
 
 			ThermalCableDescriptor desc = new ThermalCableDescriptor(name,
 					1000 - 20, -200, // thermalWarmLimit, thermalCoolLimit,
@@ -2094,7 +2105,7 @@ public class Eln {
 		{
 			subId = 0;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("Small 50V cooper heating corp",// iconId,
+			element = new HeatingCorpElement("Small 50V copper heating corp",// iconId,
 																				// name,
 					LVU, 150,// electricalNominalU, electricalNominalP,
 					190,// electricalMaximalP)
@@ -2105,7 +2116,7 @@ public class Eln {
 		{
 			subId = 1;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("50V cooper heating corp",// iconId,
+			element = new HeatingCorpElement("50V copper heating corp",// iconId,
 																		// name,
 					LVU, 250,// electricalNominalU, electricalNominalP,
 					320,// electricalMaximalP)
@@ -2115,7 +2126,7 @@ public class Eln {
 		{
 			subId = 2;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("Small 200V cooper heating corp",// iconId,
+			element = new HeatingCorpElement("Small 200V copper heating corp",// iconId,
 																				// name,
 					MVU, 400,// electricalNominalU, electricalNominalP,
 					500,// electricalMaximalP)
@@ -2125,7 +2136,7 @@ public class Eln {
 		{
 			subId = 3;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("200V cooper heating corp",// iconId,
+			element = new HeatingCorpElement("200V copper heating corp",// iconId,
 																		// name,
 					MVU, 600,// electricalNominalU, electricalNominalP,
 					750,// electricalMaximalP)
@@ -2495,7 +2506,7 @@ public class Eln {
 		}
 	}
 
-	public static OreDescriptor oreTin, oreCooper, oreSilver;
+	public static OreDescriptor oreTin, oreCopper, oreSilver;
 
 	void registerOre() {
 		int id;
@@ -2520,7 +2531,7 @@ public class Eln {
 		{
 			id = 1;
 
-			name = "Cooper ore";
+			name = "Copper ore";
 
 			OreDescriptor desc = new OreDescriptor(name, id, // int itemIconId,
 																// String
@@ -2530,7 +2541,7 @@ public class Eln {
 										// spawnSizeMax,int spawnHeightMin,int
 										// spawnHeightMax
 			);
-			oreCooper = desc;
+			oreCopper = desc;
 			oreItem.addDescriptor(id, desc);
 		}
 		/*{
@@ -2613,7 +2624,7 @@ public class Eln {
 	}
 
 	public static GenericItemUsingDamageDescriptorWithComment dustTin,
-			dustCooper, dustSilver;
+			dustCopper, dustSilver;
 
 	void registerDust(int id) {
 		int subId, completId;
@@ -2635,11 +2646,11 @@ public class Eln {
 			subId = 1;
 			completId = subId + (id << 6);
 
-			name = "Cooper dust";
+			name = "Copper dust";
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] { "dudu dust", "miaou" });
-			dustCooper = element;
+			dustCopper = element;
 			sharedItem.addElement(completId, element);
 		}
 		{
@@ -2650,7 +2661,7 @@ public class Eln {
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] { "dudu dust", "miaou" });
-			dustCooper = element;
+			dustCopper = element;
 			sharedItem.addElement(completId, element);
 		}
 
@@ -2730,7 +2741,7 @@ public class Eln {
 
 	}
 
-	GenericItemUsingDamageDescriptorWithComment tinIngot, cooperIngot,
+	GenericItemUsingDamageDescriptorWithComment tinIngot, copperIngot,
 			silverIngot, plumbIngot, tungstenIngot;
 
 	void registerIngot(int id) {
@@ -2756,14 +2767,14 @@ public class Eln {
 			subId = 1;
 			completId = subId + (id << 6);
 
-			name = "Cooper ingot";
+			name = "Copper ingot";
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] { "useless^2", "miaou" });
 			sharedItem.addElement(completId, element);
 			// GameRegistry.registerCustomItemStack(name,
 			// element.newItemStack(1));
-			cooperIngot = element;
+			copperIngot = element;
 		}
 	/*	{
 			subId = 2;
@@ -2929,32 +2940,32 @@ public class Eln {
 		ItemStack stack;
 		String name;
 		int legs;
-		legs = legsCooperId + 256;
+		legs = legsCopperId + 256;
 		{
-			name = "Cooper helmet";
-			helmetCooper = (ItemArmor)(new genericArmorItem(helmetCooperId, EnumArmorMaterial.IRON, 2,0,"eln:textures/armor/cooper_layer_1.png","eln:textures/armor/cooper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:cooper_helmet").setCreativeTab(creativeTab);
-			stack = new ItemStack(helmetCooper);
+			name = "Copper helmet";
+			helmetCopper = (ItemArmor)(new genericArmorItem(helmetCopperId, EnumArmorMaterial.IRON, 2,0,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:copper_helmet").setCreativeTab(creativeTab);
+			stack = new ItemStack(helmetCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}
 		{
-			name = "Cooper plate";
-			plateCooper = (ItemArmor)(new genericArmorItem(plateCooperId, EnumArmorMaterial.IRON, 2,1,"eln:textures/armor/cooper_layer_1.png","eln:textures/armor/cooper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:cooper_chestplate").setCreativeTab(creativeTab);
-			stack = new ItemStack(plateCooper);
+			name = "Copper plate";
+			plateCopper = (ItemArmor)(new genericArmorItem(plateCopperId, EnumArmorMaterial.IRON, 2,1,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:copper_chestplate").setCreativeTab(creativeTab);
+			stack = new ItemStack(plateCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}
 		{
-			name = "Cooper legs";
-			legsCooper = (ItemArmor)(new genericArmorItem(legsCooperId, EnumArmorMaterial.IRON, 2,2,"eln:textures/armor/cooper_layer_1.png","eln:textures/armor/cooper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:cooper_leggings").setCreativeTab(creativeTab);
-			stack = new ItemStack(legsCooper);
+			name = "Copper legs";
+			legsCopper = (ItemArmor)(new genericArmorItem(legsCopperId, EnumArmorMaterial.IRON, 2,2,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:copper_leggings").setCreativeTab(creativeTab);
+			stack = new ItemStack(legsCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}
 		{
-			name = "Cooper boots";
-			bootsCooper = (ItemArmor)(new genericArmorItem(bootsCooperId, EnumArmorMaterial.IRON, 2,3,"eln:textures/armor/cooper_layer_1.png","eln:textures/armor/cooper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:cooper_boots").setCreativeTab(creativeTab);
-			stack = new ItemStack(bootsCooper);
+			name = "Copper boots";
+			bootsCopper = (ItemArmor)(new genericArmorItem(bootsCopperId, EnumArmorMaterial.IRON, 2,3,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:copper_boots").setCreativeTab(creativeTab);
+			stack = new ItemStack(bootsCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}
@@ -2968,44 +2979,45 @@ public class Eln {
 		ItemStack stack;
 		String name;
 		{
-			name = "Cooper sword";
-			swordCooper = (new ItemSword(swordCooperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:cooper_sword");
-			stack = new ItemStack(swordCooper);
+			name = "Copper sword";
+			swordCopper = (new ItemSword(swordCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:copper_sword");
+			stack = new ItemStack(swordCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}		
 		{
-			name = "Cooper hoe";
-			hoeCooper = (new ItemHoe(hoeCooperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:cooper_hoe");
-			stack = new ItemStack(hoeCooper);
+			name = "Copper hoe";
+			hoeCopper = (new ItemHoe(hoeCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:copper_hoe");
+			stack = new ItemStack(hoeCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}		
 		{
-			name = "Cooper shovel";
-			shovelCooper = (new ItemSpade(shovelCooperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:cooper_shovel");
-			stack = new ItemStack(shovelCooper);
+			name = "Copper shovel";
+			shovelCopper = (new ItemSpade(shovelCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:copper_shovel");
+			stack = new ItemStack(shovelCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}		
 		{
-			name = "Cooper pickaxe";
-			pickaxeCooper = (new ItemPickaxe(pickaxeCooperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:cooper_pickaxe");
-			stack = new ItemStack(pickaxeCooper);
+			name = "Copper pickaxe";
+			pickaxeCopper = (new ItemPickaxe(pickaxeCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:copper_pickaxe");
+			stack = new ItemStack(pickaxeCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}		
 		{
-			name = "Cooper axe";
-			axeCooper = (new ItemAxe(axeCooperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:cooper_axe");
-			stack = new ItemStack(axeCooper);
+			name = "Copper axe";
+			axeCopper = (new ItemAxe(axeCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:copper_axe");
+			stack = new ItemStack(axeCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}		
+	
 
 	}
-	//public static int swordCooperId,hoeCooperId,shovelCooperId,pickaxeCooperId,axeCooperId;
-	//public static Item swordCooper,hoeCooper,shovelCooper,pickaxeCooper,axeCooper;
+	//public static int swordCopperId,hoeCopperId,shovelCopperId,pickaxeCopperId,axeCopperId;
+	//public static Item swordCopper,hoeCopper,shovelCopper,pickaxeCopper,axeCopper;
 	
 	void registerSolarTracker(int id) {
 		int subId, completId;
@@ -3525,7 +3537,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptor descriptor;
 			subId = 0;
 			completId = subId + (id << 6);
-			name = "Cooper cable";
+			name = "Copper cable";
 
 			descriptor = new GenericItemUsingDamageDescriptor(name);
 			sharedItem.addElement(completId, descriptor);
@@ -3584,6 +3596,22 @@ public class Eln {
 		}
 		
 	}
+	
+	void registerElectricalTool(int id) {
+		int subId, completId;
+		String name;
+		{
+			subId = 0;
+			name = "Basic flashlight";
+			
+			ElectricalLampItem desc = new ElectricalLampItem(
+					name,
+					10,5,//int light,int range,
+					5000,10,4//, energyStorage,autonomy, chargeTime
+					);
+			sharedItem.addElement(subId + (id << 6), desc);
+		}	
+	}
 
 	void registerMiscItem(int id) {
 		int subId, completId;
@@ -3633,7 +3661,7 @@ public class Eln {
 		}*/
 		{
 			subId = 6;
-			name = "Cooper plate";
+			name = "Copper plate";
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -3762,7 +3790,7 @@ public class Eln {
 				" C ", 
 				" C ",
 				"CCC", 
-				Character.valueOf('C'), findItemStack("Cooper cable"));
+				Character.valueOf('C'), findItemStack("Copper cable"));
 	}
 
 	void recipeElectricalSource() {
@@ -3779,7 +3807,7 @@ public class Eln {
 		GameRegistry.addRecipe(lowVoltageCableDescriptor.newItemStack(1), 
 				"R",
 				"C", 
-				Character.valueOf('C'), findItemStack("Cooper cable"),
+				Character.valueOf('C'), findItemStack("Copper cable"),
 				Character.valueOf('R'), findItemStack("Rubber"));
 		
 		GameRegistry.addRecipe(meduimVoltageCableDescriptor.newItemStack(1),
@@ -3805,36 +3833,36 @@ public class Eln {
 				"RRR",
 				"CCC", 
 				"RRR", 
-				Character.valueOf('C'),findItemStack("Cooper ingot"), 
+				Character.valueOf('C'),findItemStack("Copper ingot"), 
 				Character.valueOf('R'),findItemStack("Rubber"));
 
 	}
 
 	void recipeThermalCable() {
 
-		GameRegistry.addRecipe(findItemStack("Cooper thermal cable", 6),
+		GameRegistry.addRecipe(findItemStack("Copper thermal cable", 6),
 				"SSS",
 				"CCC",
 				"SSS",
 				Character.valueOf('S'), new ItemStack(Block.cobblestone), 
-				Character.valueOf('C'),	findItemStack("Cooper ingot"));
+				Character.valueOf('C'),	findItemStack("Copper ingot"));
 		
-		GameRegistry.addRecipe(findItemStack("Cooper thermal cable", 1),
+		GameRegistry.addRecipe(findItemStack("Copper thermal cable", 1),
 				"S",
 				"C",
 				"S",
 				Character.valueOf('S'), new ItemStack(Block.cobblestone),
-				Character.valueOf('C'), findItemStack("Cooper cable"));
+				Character.valueOf('C'), findItemStack("Copper cable"));
 
 		// for(int idx = 0;idx<16;idx++)
 		GameRegistry.addRecipe(
-				findItemStack("Isolated cooper thermal cable", 3), 
+				findItemStack("Isolated copper thermal cable", 3), 
 				" W ",
 				" S ",
 				"CCC",
 				Character.valueOf('W'),findItemStack("Rubber"),// new ItemStack(Block.cloth,1,idx),
 				Character.valueOf('S'), new ItemStack(Block.sand),
-				Character.valueOf('C'), findItemStack("Cooper thermal cable"));
+				Character.valueOf('C'), findItemStack("Copper thermal cable"));
 
 	}
 
@@ -3860,7 +3888,7 @@ public class Eln {
 				" I ",
 				"ICI",
 				" I ",
-				Character.valueOf('C'), findItemStack("Cooper ingot"), 
+				Character.valueOf('C'), findItemStack("Copper ingot"), 
 				Character.valueOf('I'),new ItemStack(Item.ingotIron));
 		
 	}
@@ -3897,7 +3925,7 @@ public class Eln {
 				"CAC", 
 				Character.valueOf('R'), new ItemStack(Item.redstone), 
 				Character.valueOf('A'), findItemStack("Rubber"), 
-				Character.valueOf('I'), findItemStack("Cooper cable"), 
+				Character.valueOf('I'), findItemStack("Copper cable"), 
 				Character.valueOf('C'), findItemStack("Signal cable"));
 
 		GameRegistry.addRecipe(findItemStack("Low voltage switch"),
@@ -3906,7 +3934,7 @@ public class Eln {
 				"CAC", 
 				Character.valueOf('R'), new ItemStack(Item.redstone), 
 				Character.valueOf('A'),findItemStack("Rubber"), 
-				Character.valueOf('I'),findItemStack("Cooper cable"), 
+				Character.valueOf('I'),findItemStack("Copper cable"), 
 				Character.valueOf('C'),findItemStack("Low voltage cable"));
 
 		GameRegistry.addRecipe(findItemStack("Medium voltage switch"), 
@@ -3915,7 +3943,7 @@ public class Eln {
 				"CAC", 
 				Character.valueOf('R'), new ItemStack(Item.redstone), 
 				Character.valueOf('A'),	findItemStack("Rubber"), 
-				Character.valueOf('I'),findItemStack("Cooper cable"), 
+				Character.valueOf('I'),findItemStack("Copper cable"), 
 				Character.valueOf('C'),findItemStack("Medium voltage cable"));
 
 		GameRegistry.addRecipe(findItemStack("High voltage switch"), 
@@ -3924,7 +3952,7 @@ public class Eln {
 				"CAC", 
 				Character.valueOf('R'), new ItemStack(Item.redstone), 
 				Character.valueOf('A'),findItemStack("Rubber"), 
-				Character.valueOf('I'),findItemStack("Cooper cable"), 
+				Character.valueOf('I'),findItemStack("Copper cable"), 
 				Character.valueOf('C'),findItemStack("High voltage cable"));
 	}
 	
@@ -3937,7 +3965,7 @@ public class Eln {
 				"CRC", 
 				Character.valueOf('R'), new ItemStack(Item.redstone), 
 				Character.valueOf('A'),	findItemStack("Rubber"),
-				Character.valueOf('I'),	findItemStack("Cooper cable"), 
+				Character.valueOf('I'),	findItemStack("Copper cable"), 
 				Character.valueOf('C'),	findItemStack("Low voltage cable"));
 
 		GameRegistry.addRecipe(findItemStack("Medium voltage relay"),
@@ -3946,7 +3974,7 @@ public class Eln {
 				"CRC", 
 				Character.valueOf('R'),new ItemStack(Item.redstone), 
 				Character.valueOf('A'),findItemStack("Rubber"),
-				Character.valueOf('I'),findItemStack("Cooper cable"), 
+				Character.valueOf('I'),findItemStack("Copper cable"), 
 				Character.valueOf('C'),findItemStack("Medium voltage cable"));
 
 		GameRegistry.addRecipe(findItemStack("High voltage relay"), 
@@ -3955,7 +3983,7 @@ public class Eln {
 				"CRC", 
 				Character.valueOf('R'),new ItemStack(Item.redstone), 
 				Character.valueOf('A'),findItemStack("Rubber"), 
-				Character.valueOf('I'),findItemStack("Cooper cable"),
+				Character.valueOf('I'),findItemStack("Copper cable"),
 				Character.valueOf('C'),findItemStack("High voltage cable"));
 	}
 	
@@ -4006,7 +4034,7 @@ public class Eln {
 				"BIB", 
 				"BiB", 
 				Character.valueOf('B'),new ItemStack(Block.stone), 
-				Character.valueOf('i'),findItemStack("Cooper thermal cable"), 
+				Character.valueOf('i'),findItemStack("Copper thermal cable"), 
 				Character.valueOf('I'),findItemStack("Combustion chamber"));
 /*
 		GameRegistry.addRecipe(findItemStack("Brick heat furnace"), "BIB",
@@ -4024,8 +4052,8 @@ public class Eln {
 
 				Character.valueOf('m'), findItemStack("Electrical motor"),
 				Character.valueOf('M'), findItemStack("Machine block"),
-				Character.valueOf('E'), findItemStack("Cooper cable"),
-				Character.valueOf('H'), findItemStack("Cooper thermal cable"));
+				Character.valueOf('E'), findItemStack("Copper cable"),
+				Character.valueOf('H'), findItemStack("Copper thermal cable"));
 */
 		GameRegistry.addRecipe(findItemStack("50V turbine"), 
 				" m ",
@@ -4033,7 +4061,7 @@ public class Eln {
 				" E ", 
 				Character.valueOf('M'), findItemStack("Machine block"),
 				Character.valueOf('E'), findItemStack("Low voltage cable"),
-				Character.valueOf('H'), findItemStack("Cooper thermal cable"),
+				Character.valueOf('H'), findItemStack("Copper thermal cable"),
 				Character.valueOf('m'), findItemStack("Electrical motor")
 
 		);
@@ -4044,7 +4072,7 @@ public class Eln {
 				Character.valueOf('I'), findItemStack("Rubber"),
 				Character.valueOf('M'),findItemStack("Advanced machine block"),
 				Character.valueOf('E'), findItemStack("Medium voltage cable"),
-				Character.valueOf('H'), findItemStack("Cooper thermal cable"),
+				Character.valueOf('H'), findItemStack("Copper thermal cable"),
 				Character.valueOf('m'),findItemStack("Advanced electrical motor"));
 
 	}
@@ -4078,7 +4106,7 @@ public class Eln {
 				"PBP",
 				"PPP",
 				Character.valueOf('B'),findItemStack("Cost oriented battery"), 
-				Character.valueOf('P'),findItemStack("Cooper ingot"));
+				Character.valueOf('P'),findItemStack("Copper ingot"));
 
 		GameRegistry.addRecipe(findItemStack("Life oriented battery"), 
 				"PPP",
@@ -4154,8 +4182,8 @@ public class Eln {
 				findItemStack("Small passive thermal dissipator"),
 				"I I",
 				"III", 
-				Character.valueOf('I'), findItemStack("Cooper ingot"),
-				Character.valueOf('C'), findItemStack("Cooper thermal cable")
+				Character.valueOf('I'), findItemStack("Copper ingot"),
+				Character.valueOf('C'), findItemStack("Copper thermal cable")
 				);
 
 		GameRegistry.addRecipe(
@@ -4163,10 +4191,10 @@ public class Eln {
 				"RMR",
 				"I I",
 				"III", 
-				Character.valueOf('I'), findItemStack("Cooper ingot"),
+				Character.valueOf('I'), findItemStack("Copper ingot"),
 				Character.valueOf('M'), findItemStack("Electrical motor"),
 				Character.valueOf('R'), findItemStack("Rubber"),
-				Character.valueOf('C'), findItemStack("Cooper thermal cable"));
+				Character.valueOf('C'), findItemStack("Copper thermal cable"));
 
 		GameRegistry.addRecipe(
 				findItemStack("Small active thermal dissipator"), 
@@ -4185,25 +4213,25 @@ public class Eln {
 	}
 
 	void recipeHeatingCorp() {
-		GameRegistry.addRecipe(findItemStack("Small 50V cooper heating corp"),
+		GameRegistry.addRecipe(findItemStack("Small 50V copper heating corp"),
 				"CCC",
 				"C C",
 				"C C",
-				Character.valueOf('C'),findItemStack("Cooper cable"));
+				Character.valueOf('C'),findItemStack("Copper cable"));
 		
-		GameRegistry.addRecipe(findItemStack("50V cooper heating corp"), 
+		GameRegistry.addRecipe(findItemStack("50V copper heating corp"), 
 				"CCC",
 				"C C", 
 				"C C", 
-				Character.valueOf('C'),findItemStack("Cooper ingot"));
+				Character.valueOf('C'),findItemStack("Copper ingot"));
 		
-		GameRegistry.addRecipe(findItemStack("Small 200V cooper heating corp"),
+		GameRegistry.addRecipe(findItemStack("Small 200V copper heating corp"),
 				"CC", 
-				Character.valueOf('C'),findItemStack("50V cooper heating corp"));
+				Character.valueOf('C'),findItemStack("50V copper heating corp"));
 		
-		GameRegistry.addRecipe(findItemStack("200V cooper heating corp"),
+		GameRegistry.addRecipe(findItemStack("200V copper heating corp"),
 				"CC",
-				Character.valueOf('C'),findItemStack("Small 200V cooper heating corp"));
+				Character.valueOf('C'),findItemStack("Small 200V copper heating corp"));
 
 		GameRegistry.addRecipe(findItemStack("Small 50V iron heating corp"),
 				"CCC",
@@ -4293,7 +4321,7 @@ public class Eln {
 				" S ",
 				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
 				Character.valueOf('F'),findItemStack("Tungsten ingot"), 
-				Character.valueOf('S'),findItemStack("Cooper cable"));
+				Character.valueOf('S'),findItemStack("Copper cable"));
 		
 		GameRegistry.addRecipe(findItemStack("50V incandescent light bulb", 4),
 				" G ",
@@ -4324,7 +4352,7 @@ public class Eln {
 				" S ", 
 				Character.valueOf('G'), new ItemStack(Block.thinGlass),
 				Character.valueOf('F'),new ItemStack(Item.coal),
-				Character.valueOf('S'),findItemStack("Cooper cable"));
+				Character.valueOf('S'),findItemStack("Copper cable"));
 		
 		GameRegistry.addRecipe(findItemStack("Small 50V carbon incandescent light bulb", 4),
 				" G ",
@@ -4332,7 +4360,7 @@ public class Eln {
 				" S ", 
 				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
 				Character.valueOf('F'),new ItemStack(Item.coal, 1, 1), 
-				Character.valueOf('S'),findItemStack("Cooper cable"));
+				Character.valueOf('S'),findItemStack("Copper cable"));
 		
 		GameRegistry.addRecipe(
 				findItemStack("50V carbon incandescent light bulb", 4), 
@@ -4358,7 +4386,7 @@ public class Eln {
 				" S ", 
 				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
 				Character.valueOf('F'),findItemStack("Mercury"), 
-				Character.valueOf('S'),findItemStack("Cooper cable"));
+				Character.valueOf('S'),findItemStack("Copper cable"));
 		
 		GameRegistry.addRecipe(findItemStack("50V economic light bulb", 4),
 				" G ",
@@ -4496,13 +4524,13 @@ public class Eln {
 		/*
 		 * GameRegistry.addRecipe( findItemStack("Small dynamo"), " C ", "PIP",
 		 * " C ", Character.valueOf('P'), findItemStack("Iron plate"),
-		 * Character.valueOf('I'), findItemStack("Cooper ingot"),
+		 * Character.valueOf('I'), findItemStack("Copper ingot"),
 		 * Character.valueOf('C'), findItemStack("Low voltage cable") );
 		 * 
 		 * 
 		 * GameRegistry.addRecipe( findItemStack("Medium dynamo"), "CPC", "PIP",
 		 * "CPC", Character.valueOf('P'), findItemStack("Iron plate"),
-		 * Character.valueOf('I'), findItemStack("Cooper ingot"),
+		 * Character.valueOf('I'), findItemStack("Copper ingot"),
 		 * Character.valueOf('C'), findItemStack("Low voltage cable") );
 		 */
 
@@ -4631,9 +4659,9 @@ public class Eln {
 	}
 
 	void recipeRawCable() {
-		GameRegistry.addRecipe(findItemStack("Cooper cable", 6), 
+		GameRegistry.addRecipe(findItemStack("Copper cable", 6), 
 				"III",
-				Character.valueOf('I'), findItemStack("Cooper ingot"));
+				Character.valueOf('I'), findItemStack("Copper ingot"));
 		
 		GameRegistry.addRecipe(findItemStack("Iron cable", 6), 
 				"III",
@@ -4703,7 +4731,7 @@ public class Eln {
 				"CcC",
 				"RpR",
 				Character.valueOf('R'), new ItemStack(Item.redstone),
-				Character.valueOf('C'), findItemStack("Cooper ingot"),
+				Character.valueOf('C'), findItemStack("Copper ingot"),
 				Character.valueOf('c'), findItemStack("Cheap chip"),
 				Character.valueOf('p'), findItemStack("Plumb ingot")
 						);
@@ -4713,8 +4741,8 @@ public class Eln {
 
 	void recipeMacerator() {
 		float f = 3000;
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("Cooper ore"),
-				new ItemStack[] { findItemStack("Cooper dust", 2) }, 1.0*f));		
+		maceratorRecipes.addRecipe(new Recipe(findItemStack("Copper ore"),
+				new ItemStack[] { findItemStack("Copper dust", 2) }, 1.0*f));		
 		maceratorRecipes.addRecipe(new Recipe(new ItemStack(Block.oreIron),
 				new ItemStack[] { findItemStack("Iron dust", 2) }, 1.0*f));	
 		maceratorRecipes.addRecipe(new Recipe(new ItemStack(Block.oreGold),
@@ -4752,8 +4780,8 @@ public class Eln {
 	void recipePlateMachine(){
 		float f = 10000;
 		plateMachineRecipes.addRecipe(new Recipe(
-				findItemStack("Cooper ingot", 4),
-				findItemStack("Cooper plate"), 1.0*f));
+				findItemStack("Copper ingot", 4),
+				findItemStack("Copper plate"), 1.0*f));
 		
 		compressorRecipes.addRecipe(new Recipe(findItemStack("Plumb ingot", 4),
 				findItemStack("Plumb plate"), 1.0*f));
@@ -4800,12 +4828,12 @@ public class Eln {
 		in = findItemStack("Tin dust");
 		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
 				findItemStack("Tin ingot"), 0);*/
-		in = findItemStack("Cooper ore");
+		in = findItemStack("Copper ore");
 		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-				findItemStack("Cooper ingot"), 0);
-		in = findItemStack("Cooper dust");
+				findItemStack("Copper ingot"), 0);
+		in = findItemStack("Copper dust");
 		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-				findItemStack("Cooper ingot"), 0);
+				findItemStack("Copper ingot"), 0);
 		in = findItemStack("Plumb ore");
 		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
 				findItemStack("Plumb ingot"), 0);
@@ -5195,66 +5223,66 @@ public class Eln {
 	
 	void recipeArmor()
 	{
-		GameRegistry.addRecipe(new ItemStack(helmetCooper), 
+		GameRegistry.addRecipe(new ItemStack(helmetCopper), 
 				"CCC",
 				"C C",
-				Character.valueOf('C'),findItemStack("Cooper ingot"));	
+				Character.valueOf('C'),findItemStack("Copper ingot"));	
 		
-		GameRegistry.addRecipe(new ItemStack(plateCooper), 
+		GameRegistry.addRecipe(new ItemStack(plateCopper), 
 				"C C",
 				"CCC",
 				"CCC",
-				Character.valueOf('C'),findItemStack("Cooper ingot"));	
+				Character.valueOf('C'),findItemStack("Copper ingot"));	
 		
-		GameRegistry.addRecipe(new ItemStack(legsCooper), 
+		GameRegistry.addRecipe(new ItemStack(legsCopper), 
 				"CCC",
 				"C C",
 				"C C",
-				Character.valueOf('C'),findItemStack("Cooper ingot"));	
+				Character.valueOf('C'),findItemStack("Copper ingot"));	
 		
-		GameRegistry.addRecipe(new ItemStack(bootsCooper), 
+		GameRegistry.addRecipe(new ItemStack(bootsCopper), 
 				"C C",
 				"C C",
-				Character.valueOf('C'),findItemStack("Cooper ingot"));	
+				Character.valueOf('C'),findItemStack("Copper ingot"));	
 	}
 
 	
 	
 	void recipeTool()
 	{
-		GameRegistry.addRecipe(new ItemStack(shovelCooper), 
+		GameRegistry.addRecipe(new ItemStack(shovelCopper), 
 				" i ",
 				" s ",
 				" s ",
-				Character.valueOf('i'),findItemStack("Cooper ingot"),
+				Character.valueOf('i'),findItemStack("Copper ingot"),
 				Character.valueOf('s'),new ItemStack(Item.stick)
 				);	
-		GameRegistry.addRecipe(new ItemStack(axeCooper), 
+		GameRegistry.addRecipe(new ItemStack(axeCopper), 
 				"ii ",
 				"is ",
 				" s ",
-				Character.valueOf('i'),findItemStack("Cooper ingot"),
+				Character.valueOf('i'),findItemStack("Copper ingot"),
 				Character.valueOf('s'),new ItemStack(Item.stick)
 				);	
-		GameRegistry.addRecipe(new ItemStack(hoeCooper), 
+		GameRegistry.addRecipe(new ItemStack(hoeCopper), 
 				"ii ",
 				" s ",
 				" s ",
-				Character.valueOf('i'),findItemStack("Cooper ingot"),
+				Character.valueOf('i'),findItemStack("Copper ingot"),
 				Character.valueOf('s'),new ItemStack(Item.stick)
 				);	
-		GameRegistry.addRecipe(new ItemStack(pickaxeCooper), 
+		GameRegistry.addRecipe(new ItemStack(pickaxeCopper), 
 				"iii",
 				" s ",
 				" s ",
-				Character.valueOf('i'),findItemStack("Cooper ingot"),
+				Character.valueOf('i'),findItemStack("Copper ingot"),
 				Character.valueOf('s'),new ItemStack(Item.stick)
 				);	
-		GameRegistry.addRecipe(new ItemStack(swordCooper), 
+		GameRegistry.addRecipe(new ItemStack(swordCopper), 
 				" i ",
 				" i ",
 				" s ",
-				Character.valueOf('i'),findItemStack("Cooper ingot"),
+				Character.valueOf('i'),findItemStack("Copper ingot"),
 				Character.valueOf('s'),new ItemStack(Item.stick)
 				);	
 			

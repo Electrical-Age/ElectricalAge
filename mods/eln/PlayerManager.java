@@ -6,6 +6,8 @@ import java.util.Map.Entry;
 
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
+import cpw.mods.fml.common.registry.TickRegistry;
+import cpw.mods.fml.relauncher.Side;
 
 import mods.eln.misc.Coordonate;
 import mods.eln.node.NodeBase;
@@ -14,10 +16,11 @@ import net.minecraft.entity.player.EntityPlayerMP;
 
 public class PlayerManager implements ITickHandler {
 	private Hashtable<EntityPlayerMP, PlayerMetadata> metadataHash = new Hashtable<EntityPlayerMP, PlayerMetadata>();
-
+	
 	public class PlayerMetadata {
 		private int timeout;
-		private boolean interactEnable = false;
+		public boolean interactEnable = false,interactEnableOld = false;
+		public boolean interactRise;
 
 		public PlayerMetadata() {
 			timeoutReset();
@@ -39,6 +42,7 @@ public class PlayerManager implements ITickHandler {
 
 		public void setInteractEnable(boolean interactEnable) {
 			this.interactEnable = interactEnable;
+
 			timeoutReset();
 			System.out.println("interactEnable : " + interactEnable);
 		}
@@ -47,15 +51,37 @@ public class PlayerManager implements ITickHandler {
 			timeoutReset();
 			return interactEnable;
 		}
+		public boolean getInteractRise() {
+			timeoutReset();
+			return interactRise;
+		}
+
 
 	}
 
+	public PlayerManager() {
+		TickRegistry.registerTickHandler(this, Side.SERVER);
+	}
+	public void clear()
+	{
+		metadataHash.clear();
+	}
+	
 	@Override
 	public void tickStart(EnumSet<TickType> type, Object... tickData) {
 		// TODO Auto-generated method stub
 		for (Entry<EntityPlayerMP, PlayerMetadata> entry : metadataHash
 				.entrySet()) {
-			if (entry.getValue().needDelete()) {
+			PlayerMetadata p = entry.getValue();
+			
+			p.interactRise = p.interactEnable == true && p.interactEnableOld == false;
+			if(p.interactRise){
+				p.interactRise = true;
+			}
+			p.interactEnableOld = p.interactEnable;
+			
+			
+			if (p.needDelete()) {
 				metadataHash.remove(entry.getKey());
 			}
 		}

@@ -14,6 +14,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -84,6 +85,10 @@ public class LightBlock extends BlockContainer {
 		{
 			o.lightBlockDestructor(coord);
 		}
+	/*	world.updateLightByType(EnumSkyBlock.Block,x,y,z);
+		if(world.isRemote){
+			
+		}*/
 		super.breakBlock(world, x, y, z, par5, par6);
 	}
 }

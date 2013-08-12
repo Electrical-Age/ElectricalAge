@@ -26,7 +26,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.Vec3;
 import net.minecraft.util.Vec3Pool;
 
-public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserver{
+public class LampSocketProcess implements IProcess , INBTTReady/*,LightBlockObserver*/{
 	double time = 0;
 	double deltaTBase = 0.2;
 	double deltaT = deltaTBase;
@@ -41,7 +41,7 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 	public LampSocketProcess(LampSocketElement lamp) {
 		this.lamp = lamp;
 		lbCoord = new Coordonate(lamp.sixNode.coordonate);
-		LightBlockEntity.addObserver(this);
+	//	LightBlockEntity.addObserver(this);
 	}
 	
 	ItemStack lampStackLast = null;
@@ -417,8 +417,8 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 		{
 			if(oldLbCoord.equals(myCoord()))		
 				lamp.sixNode.recalculateLightValue();
-			else
-				LightBlockEntity.removeLight(oldLbCoord, oldLight);
+			/*else
+				LightBlockEntity.removeLight(oldLbCoord, oldLight);*/
 		}
 		
 
@@ -430,10 +430,11 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 		}
 		else
 		{
-			if(same)
+			/*if(same)
 				LightBlockEntity.remplaceLight(lbCoord, oldLight, light);
 			else
-				LightBlockEntity.addLight(lbCoord, light);
+				LightBlockEntity.addLight(lbCoord, light);*/
+			LightBlockEntity.addLight(lbCoord, light, 5);
 		}
 	
 	}
@@ -449,9 +450,9 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 		//TODO
 		deleteElectricalConnectionOneWay();
 		
-		LightBlockEntity.removeObserver(this);
+		/*LightBlockEntity.removeObserver(this);
 		if(lbCoord.equals(myCoord()) == false)
-			LightBlockEntity.removeLight(lbCoord, light);
+			LightBlockEntity.removeLight(lbCoord, light);*/
 		
 	}
 	
@@ -486,7 +487,7 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 			return 0;
 		}
 	}
-
+/*
 
 	@Override
 	public void lightBlockDestructor(Coordonate coord) {
@@ -496,5 +497,5 @@ public class LampSocketProcess implements IProcess , INBTTReady,LightBlockObserv
 			lbCoord = new Coordonate(myCoord());
 			//placeSpot(light);
 		}
-	}
+	}*/
 }

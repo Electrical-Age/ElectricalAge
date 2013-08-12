@@ -4,6 +4,7 @@ import java.util.List;
 
 import mods.eln.Eln;
 import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -121,5 +122,19 @@ public class GenericItemUsingDamageDescriptor {
 	
 	
 
-
+	 public void onUpdate(ItemStack stack, World world, Entity entity, int par4, boolean par5)
+	 {
+		 
+		 
+	 }
+	 
+	 
+		
+		protected NBTTagCompound getNbt(ItemStack stack){
+			NBTTagCompound nbt = stack.getTagCompound();
+			if(nbt == null){
+				stack.setTagCompound(nbt = getDefaultNBT());
+			}
+			return nbt;		
+		}
 }

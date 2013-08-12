@@ -1,4 +1,4 @@
-package mods.eln.lampsupply;
+package mods.eln.batterycharger;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -26,22 +26,20 @@ import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElement;
 import mods.eln.node.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
+import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 
-public class LampSupplyElement extends SixNodeElement {
+public class BatteryChargerElement extends SixNodeElement {
 
 
 	
 
-	public static HashMap<String, ArrayList<LampSupplyElement>> channelMap = new HashMap<String, ArrayList<LampSupplyElement>>(); 
-	
-	//NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");
 
-	public LampSupplyDescriptor descriptor;
+	public BatteryChargerDescriptor descriptor;
 	
 	public NodeElectricalLoad powerLoad = new NodeElectricalLoad("powerLoad");
 	
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+	SixNodeElementInventory inventory = new SixNodeElementInventory(4, 64, this);
 	@Override
 	public IInventory getInventory() {
 		// TODO Auto-generated method stub
@@ -51,57 +49,34 @@ public class LampSupplyElement extends SixNodeElement {
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
 		// TODO Auto-generated method stub
-		return new LampSupplyContainer(player, inventory);
+		return new BatteryChargerContainer(player, inventory);
 	}
 	
 	public String channel = "Default channel";
 	
-	public LampSupplyElement(SixNode sixNode, Direction side,
+	public BatteryChargerElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		electricalLoadList.add(powerLoad);
 
 		front = LRDU.Down;
-		this.descriptor = (LampSupplyDescriptor) descriptor;
-		channelRegister(this);
+		this.descriptor = (BatteryChargerDescriptor) descriptor;
+		
 	}
-
-	static void channelRegister(LampSupplyElement tx)
-	{
-		String channel = tx.channel;
-		ArrayList<LampSupplyElement> list = channelMap.get(channel);
-		if(list == null) 
-			channelMap.put(channel,list =  new ArrayList<LampSupplyElement>());
-		list.add(tx);
-	}
-	
-	static void channelRemove(LampSupplyElement tx)
-	{
-		String channel = tx.channel;
-		ArrayList<LampSupplyElement> list = channelMap.get(channel);
-		if(list == null) return;
-		list.remove(tx);
-		if(list.size() == 0)
-			channelMap.remove(channel);
-	}
-	
 	
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(inventory.getStackInSlot(LampSupplyContainer.cableSlotId) == null) return null;
 		if(front == lrdu) return powerLoad;
 		return null;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		if(inventory.getStackInSlot(LampSupplyContainer.cableSlotId) == null) return null;
 		return null;
 	}
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(inventory.getStackInSlot(LampSupplyContainer.cableSlotId) == null) return 0;
 		if(front == lrdu) return NodeBase.maskElectricalPower;
 		return 0;
 	}
@@ -120,15 +95,14 @@ public class LampSupplyElement extends SixNodeElement {
 
 	@Override
 	public void initialize() {
-		setupFromInventory();
+		descriptor.applyTo(powerLoad,powerOn);
 	}
 	
 	@Override
 	protected void inventoryChanged() {
 		// TODO Auto-generated method stub
 		super.inventoryChanged();
-		setupFromInventory();
-		reconnect();
+
 		needPublish();
 	}
 
@@ -145,48 +119,25 @@ public class LampSupplyElement extends SixNodeElement {
 		return false;
 	}
 
-	@Override
-	public void destroy() {
-		// TODO Auto-generated method stub
-		channelRemove(this);
-		super.destroy();
-	}
-	
-	
+
+	boolean powerOn = false;
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
-		nbt.setString(str + "channel", channel);
+		nbt.setBoolean(str + "powerOn", powerOn);
+
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		
-		channelRemove(this);
-		
 		super.readFromNBT(nbt, str);
-		channel = nbt.getString(str + "channel");
-		
-		channelRegister(this);
-		
+		powerOn = nbt.getBoolean(str + "powerOn");
 	}
 
 
 
-	void setupFromInventory(){
-		ItemStack cableStack = inventory.getStackInSlot(LampSupplyContainer.cableSlotId);
-		if(cableStack != null){
-			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
-			desc.applyTo(powerLoad,false);
-		}
-		else{
-			powerLoad.highImpedance();
-		}
-	}
-
-	
-	public static final byte setChannelId = 1;
+	public static final byte toogleCharge = 1;
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		
@@ -194,11 +145,9 @@ public class LampSupplyElement extends SixNodeElement {
 		
 		try {
 			switch(stream.readByte()){
-			case setChannelId:
-				channelRemove(this);
-				channel = stream.readUTF();
-				needPublish();
-				channelRegister(this);
+			case toogleCharge:
+				powerOn = ! powerOn;
+				descriptor.applyTo(powerLoad,powerOn);
 				break;
 			}
 		} catch (IOException e) {
@@ -214,16 +163,37 @@ public class LampSupplyElement extends SixNodeElement {
 	}
 	
 	
+	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
-			stream.writeUTF(channel);
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSupplyContainer.cableSlotId));
+			stream.writeBoolean(powerOn);
+			stream.writeFloat((float) powerLoad.Uc);
+			Utils.serialiseItemStack(stream, inventory.getStackInSlot(0));
+			Utils.serialiseItemStack(stream, inventory.getStackInSlot(1));
+			Utils.serialiseItemStack(stream, inventory.getStackInSlot(2));
+			Utils.serialiseItemStack(stream, inventory.getStackInSlot(3));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	
+	
+	
+	
+	
+	class BatteryChargerSlowProcess implements IProcess
+	{
+
+		@Override
+		public void process(double time) {
+			// TODO Auto-generated method stub
+			
+		}
+		
 	}
 }

@@ -1,37 +1,22 @@
 package mods.eln.lampsocket;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
 
+import mods.eln.ghost.GhostElement;
 import mods.eln.misc.Coordonate;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.World;
 
 public class LightBlockEntity extends TileEntity{
-	/*
-	class LightBlockTag implements INBTTReady{
-		int uuid;
-		int light;
-		@Override
-		public void readFromNBT(NBTTagCompound nbt, String str) {
-			uuid = nbt.getInteger(str + "uuid");
-			light = nbt.getByte(str + "light");
-		}
-		@Override
-		public void writeToNBT(NBTTagCompound nbt, String str) {
-			// TODO Auto-generated method stub
-			nbt.setInteger(str + "uuid", uuid);
-			nbt.setByte(str + "light", (byte) light);
-		}		
-		
-		
-	}
-	*
-	*
-	*/
+
 	static void addObserver(LightBlockObserver observer)
 	{
 		observers.add(observer);
@@ -40,7 +25,7 @@ public class LightBlockEntity extends TileEntity{
 	{
 		observers.remove(observer);
 	}
-	ArrayList<Integer> lightList = new ArrayList<Integer>();
+	ArrayList<LightHandle> lightList = new ArrayList<LightHandle>();
 	
 	public interface LightBlockObserver{
 		void lightBlockDestructor(Coordonate coord);
@@ -49,14 +34,39 @@ public class LightBlockEntity extends TileEntity{
 	public static ArrayList<LightBlockObserver> observers = new ArrayList<LightBlockObserver>();
 	
 	
+	static class LightHandle implements INBTTReady{
+		public LightHandle() {
+			value = 0;
+			timeout = 0;
+		}
+		public LightHandle(		byte value,int timeout) {
+			this.value = value;
+			this.timeout = timeout;
+		}
+		
+		byte value;
+		int timeout;
+		@Override
+		public void readFromNBT(NBTTagCompound nbt, String str) {
+			value = nbt.getByte(str + "value");
+			timeout = nbt.getInteger(str + "timeout");
+		}
+
+		@Override
+		public void writeToNBT(NBTTagCompound nbt, String str) {
+			// TODO Auto-generated method stub
+			nbt.setByte(str + "value",value);
+			nbt.setInteger(str + "timeout",timeout);			
+		}
+		
+	}
 	
-	
-	void addLight(int light)
+	void addLight(int light,int timeout)
 	{
-		lightList.add(light);
+		lightList.add(new LightHandle((byte) light,timeout));
 		lightManager();
 	}
-	void removeLight(int light)
+	/*void removeLight(int light)
 	{
 		//int meta = worldObj.getBlockMetadata(xCoord, yCoord, zCoord);
 		for(int idx = 0;idx<lightList.size();idx++)
@@ -69,8 +79,8 @@ public class LightBlockEntity extends TileEntity{
 			}
 		}
 		System.out.println("Assert void removeLight(int light)");
-	}
-	
+	}*/
+	/*
 	void remplaceLight(int oldLight,int newLight)
 	{
 		for(int idx = 0;idx<lightList.size();idx++)
@@ -83,47 +93,47 @@ public class LightBlockEntity extends TileEntity{
 			}
 		}	
 		System.out.println("Assert void remplaceLight(int oldLight,int newLight)");
-	}
+	}*/
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
 		super.writeToNBT(nbt);
-		byte[]  array = new byte[lightList.size()];
-		for(int idx = 0;idx<lightList.size();idx++)
-		{
-			int value = lightList.get(idx);
-			array[idx] = (byte) value;
+		int idx = 0;
+		for(LightHandle l :lightList){
+			l.writeToNBT(nbt, "light" + idx);
+			idx++;
 		}
-		nbt.setByteArray("values", array);
+		nbt.setInteger("lightNbr", lightList.size());
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
 		super.readFromNBT(nbt);
-		byte [] array = nbt.getByteArray("values");
-		
-		for(byte value : array)
-		{
-			lightList.add((int) value);
+		int size = nbt.getInteger("lightNbr");
+		for(int idx = 0;idx < size;idx++){
+			LightHandle l = new LightHandle();
+			l.readFromNBT(nbt, "light" + idx);
+			lightList.add(l);
+			idx++;
 		}
 	}
 	
-	
+	/*
 	
 	int getLight()
 	{
 		int light = 0;
-		for(Integer value : lightList)
+		for(LightHandle l : lightList)
 		{
-			if(light < value) light = value;
+			if(light < l.value) light = l.value;
 		}
 		return light;
-	}
+	}*/
 	
 	void lightManager()
 	{
-		if(lightList.size() == 0)
+		/*if(lightList.size() == 0)
 		{
 			worldObj.setBlock(xCoord, yCoord, zCoord, 0);
 		}
@@ -135,17 +145,59 @@ public class LightBlockEntity extends TileEntity{
 				worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light,2);
 				worldObj.updateLightByType(EnumSkyBlock.Block,xCoord, yCoord, zCoord);
 			}
-		}
+		}*/
 	}	
 	
-	public static void addLight(Coordonate coord,int light)
-	{
-		int blockId = coord.getBlockId();
-		if(blockId != Eln.lightBlockId)
-			coord.setBlock(Eln.lightBlockId, light);
-		((LightBlockEntity)coord.getTileEntity()).addLight(light);
+	
+	@Override
+	public void updateEntity() {
+		if(worldObj.isRemote) return;
+		
+		if(lightList.size() == 0){
+		//	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1,2);
+			worldObj.setBlock(xCoord, yCoord, zCoord, 0);
+			//worldObj.updateLightByType(EnumSkyBlock.Block,xCoord, yCoord, zCoord);
+			//Eln.instance.tileEntityDestructor.add(this);
+			System.out.println("Destroy light at " + xCoord + " " + yCoord + " " + zCoord + " " );
+			return;
+		}
+		
+		int light = 0;
+		Iterator<LightHandle> iterator = lightList.iterator();
+		while(iterator.hasNext())
+		{
+			LightHandle l = iterator.next();
+			if(light < l.value) light = l.value;
+			
+			l.timeout--;
+			if(l.timeout == 0){
+				iterator.remove();
+			}
+		}	
+	
+		if(light != worldObj.getBlockMetadata(xCoord, yCoord, zCoord)){
+			
+			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light,2);
+			worldObj.updateLightByType(EnumSkyBlock.Block,xCoord, yCoord, zCoord);
+		}	
+	
 	}
-	public static void removeLight(Coordonate coord,int light)
+	public static void addLight(World w,int x,int y,int z,int light,int timeout)
+	{
+		int blockId = w.getBlockId(x, y, z);
+		if(blockId != Eln.lightBlockId)
+			w.setBlock(x, y, z, Eln.lightBlockId, light, 2);
+		TileEntity t = w.getBlockTileEntity(x, y, z);
+		if(t != null && t instanceof LightBlockEntity)
+			((LightBlockEntity)t).addLight(light,timeout);
+		else
+			System.out.println("ASSERT if(t != null && t instanceof LightBlockEntity)");
+	}	
+	public static void addLight(Coordonate coord,int light,int timeout)
+	{
+		addLight(coord.world(), coord.x, coord.y, coord.z,light,timeout);
+	}
+	/*public static void removeLight(Coordonate coord,int light)
 	{
 		int blockId = coord.getBlockId();
 		if(blockId != Eln.lightBlockId) return;
@@ -163,11 +215,11 @@ public class LightBlockEntity extends TileEntity{
 			return;
 		}
 		((LightBlockEntity)coord.getTileEntity()).remplaceLight(oldLight,newLight);		
-	}
-	public int getClientLight() {
+	}*/
+	/*public int getClientLight() {
 		// TODO Auto-generated method stub
 		return clientLight;
 	}
 	
-	int clientLight = 0;
+	int clientLight = 0;*/
 }
