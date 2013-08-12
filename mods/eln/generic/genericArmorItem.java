@@ -20,25 +20,13 @@ public class genericArmorItem  extends ItemArmor{
 	
 	@Override
 	public String getArmorTexture(ItemStack stack, Entity entity, int slot, int layer)
-
 	{
-
-		if(stack.itemID == legs)
-
-		{
-
+		if(stack.itemID == legs){
 			return t2;
-
 		}
-
-		else
-
-		{
-
+		else{
 			return t1;
-
 		}
-
 	}
 
 }

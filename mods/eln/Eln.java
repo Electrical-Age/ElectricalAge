@@ -160,10 +160,16 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.EnumArmorMaterial;
+import net.minecraft.item.EnumToolMaterial;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemHoe;
+import net.minecraft.item.ItemPickaxe;
+import net.minecraft.item.ItemSpade;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemSword;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTBase;
@@ -243,9 +249,15 @@ public class Eln {
 	   
 	
 	*/
+	
+	
+	
 	public static int helmetCooperId,plateCooperId,legsCooperId,bootsCooperId;
-
 	public static ItemArmor helmetCooper,plateCooper,legsCooper,bootsCooper;
+	
+	public static int swordCooperId,hoeCooperId,shovelCooperId,pickaxeCooperId,axeCooperId;
+	public static Item swordCooper,hoeCooper,shovelCooper,pickaxeCooper,axeCooper;
+	
 	public static Item voltMeterHelmet;
 	public static Item thermoMeterHelmet;
 	public static Item currentMeterHelmet;
@@ -333,7 +345,14 @@ public class Eln {
 		plateCooperId = config.getItem("plateCooperId", itemBaseId + 3).getInt();
 		legsCooperId = config.getItem("legsCooperId", itemBaseId + 4).getInt();
 		bootsCooperId = config.getItem("bootsCooperId", itemBaseId + 5).getInt();
+
+		swordCooperId = config.getItem("swordCooperId", itemBaseId + 6).getInt();
+		hoeCooperId = config.getItem("hoeCooperId", itemBaseId + 7).getInt();
+		shovelCooperId = config.getItem("shovelCooperId", itemBaseId + 8).getInt();
+		pickaxeCooperId = config.getItem("pickaxeCooperId", itemBaseId + 9).getInt();
+		axeCooperId = config.getItem("axeCooperId", itemBaseId + 10).getInt();
 		
+
 		sharedItemId = config.getItem("sharedItem", itemBaseId + 18).getInt();
 
 
@@ -444,6 +463,7 @@ public class Eln {
 		 */
 
 		registerArmor();
+		registerTool();
 		registerOre();
 
 		registerGround(2);
@@ -512,6 +532,7 @@ public class Eln {
 
 		
 		recipeArmor();
+		recipeTool();
 		
 		recipeGround();
 		recipeElectricalSource();
@@ -2943,6 +2964,49 @@ public class Eln {
 	}
 
 	
+	private void registerTool(){
+		ItemStack stack;
+		String name;
+		{
+			name = "Cooper sword";
+			swordCooper = (new ItemSword(swordCooperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:cooper_sword");
+			stack = new ItemStack(swordCooper);
+			LanguageRegistry.addName(stack,name);
+			GameRegistry.registerCustomItemStack(name, stack.copy());
+		}		
+		{
+			name = "Cooper hoe";
+			hoeCooper = (new ItemHoe(hoeCooperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:cooper_hoe");
+			stack = new ItemStack(hoeCooper);
+			LanguageRegistry.addName(stack,name);
+			GameRegistry.registerCustomItemStack(name, stack.copy());
+		}		
+		{
+			name = "Cooper shovel";
+			shovelCooper = (new ItemSpade(shovelCooperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:cooper_shovel");
+			stack = new ItemStack(shovelCooper);
+			LanguageRegistry.addName(stack,name);
+			GameRegistry.registerCustomItemStack(name, stack.copy());
+		}		
+		{
+			name = "Cooper pickaxe";
+			pickaxeCooper = (new ItemPickaxe(pickaxeCooperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:cooper_pickaxe");
+			stack = new ItemStack(pickaxeCooper);
+			LanguageRegistry.addName(stack,name);
+			GameRegistry.registerCustomItemStack(name, stack.copy());
+		}		
+		{
+			name = "Cooper axe";
+			axeCooper = (new ItemAxe(axeCooperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:cooper_axe");
+			stack = new ItemStack(axeCooper);
+			LanguageRegistry.addName(stack,name);
+			GameRegistry.registerCustomItemStack(name, stack.copy());
+		}		
+
+	}
+	//public static int swordCooperId,hoeCooperId,shovelCooperId,pickaxeCooperId,axeCooperId;
+	//public static Item swordCooper,hoeCooper,shovelCooper,pickaxeCooper,axeCooper;
+	
 	void registerSolarTracker(int id) {
 		int subId, completId;
 		String name;
@@ -5154,6 +5218,48 @@ public class Eln {
 				Character.valueOf('C'),findItemStack("Cooper ingot"));	
 	}
 
+	
+	
+	void recipeTool()
+	{
+		GameRegistry.addRecipe(new ItemStack(shovelCooper), 
+				" i ",
+				" s ",
+				" s ",
+				Character.valueOf('i'),findItemStack("Cooper ingot"),
+				Character.valueOf('s'),new ItemStack(Item.stick)
+				);	
+		GameRegistry.addRecipe(new ItemStack(axeCooper), 
+				"ii ",
+				"is ",
+				" s ",
+				Character.valueOf('i'),findItemStack("Cooper ingot"),
+				Character.valueOf('s'),new ItemStack(Item.stick)
+				);	
+		GameRegistry.addRecipe(new ItemStack(hoeCooper), 
+				"ii ",
+				" s ",
+				" s ",
+				Character.valueOf('i'),findItemStack("Cooper ingot"),
+				Character.valueOf('s'),new ItemStack(Item.stick)
+				);	
+		GameRegistry.addRecipe(new ItemStack(pickaxeCooper), 
+				"iii",
+				" s ",
+				" s ",
+				Character.valueOf('i'),findItemStack("Cooper ingot"),
+				Character.valueOf('s'),new ItemStack(Item.stick)
+				);	
+		GameRegistry.addRecipe(new ItemStack(swordCooper), 
+				" i ",
+				" i ",
+				" s ",
+				Character.valueOf('i'),findItemStack("Cooper ingot"),
+				Character.valueOf('s'),new ItemStack(Item.stick)
+				);	
+			
+	}
+	
 	public ItemStack findItemStack(String name, int stackSize) {
 		return GameRegistry.findItemStack("Eln", name, stackSize);
 	}
