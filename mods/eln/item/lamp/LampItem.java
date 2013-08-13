@@ -56,10 +56,11 @@ public abstract class LampItem extends GenericItemUsingDamageDescriptor{
 			if(blockId == 0 || blockId == Eln.instance.lightBlockId){
 				//break;
 				LightBlockEntity.addLight(world, (int)x, (int)y, (int)z, light,3);
+				break;/*
 				x-=v.xCoord*4;
 				y-=v.yCoord*4;
 				z-=v.zCoord*4;	
-				rCount-=4;
+				rCount-=4;*/
 			}
 			x-=v.xCoord;
 			y-=v.yCoord;

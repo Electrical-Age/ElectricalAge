@@ -12,6 +12,7 @@ import mods.eln.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.TreeResinCollector.TreeResinCollectorTileEntity;
 import mods.eln.autominer.AutoMinerDescriptor;
 import mods.eln.battery.BatteryDescriptor;
+import mods.eln.batterycharger.BatteryChargerDescriptor;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.ClientProxy;
@@ -478,6 +479,7 @@ public class Eln {
 		registerThermalCable(48);
 		registerLampSocket(64);
 		registerLampSupply(65);
+		registerBatteryCharger(66);
 		registerWirelessSignal(92);
 		registerElectricalDataLogger(93);
 		registerElectricalRelay(94);
@@ -3393,7 +3395,25 @@ public class Eln {
 			sixNodeItem.addDescriptor(completId, descriptor);
 		}
 	}
+	void registerBatteryCharger(int id) {
+		int subId, completId;
+		String name;
 
+		BatteryChargerDescriptor descriptor;
+		{
+			subId = 0;
+			completId = subId + (id << 6);
+			name = "50V battery charger";
+
+			descriptor = new BatteryChargerDescriptor(
+					name,obj.getObj("batterychargera"),
+					lowVoltageCableDescriptor,//ElectricalCableDescriptor cable,
+					LVU,200//double nominalVoltage,double nominalPower
+					);
+			sixNodeItem.addDescriptor(completId, descriptor);
+		}
+	}
+	
 	void registerElectricalDrill(int id) {
 		int subId, completId;
 		String name;
@@ -3607,7 +3627,7 @@ public class Eln {
 			ElectricalLampItem desc = new ElectricalLampItem(
 					name,
 					10,5,//int light,int range,
-					5000,10,4//, energyStorage,autonomy, chargeTime
+					10*60*10,10*60,120//, energyStorage,autonomy, chargeTime
 					);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}	

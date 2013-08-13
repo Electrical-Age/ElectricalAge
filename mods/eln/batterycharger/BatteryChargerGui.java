@@ -3,6 +3,7 @@ package mods.eln.batterycharger;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import mods.eln.gui.GuiButtonEln;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
@@ -17,33 +18,46 @@ public class BatteryChargerGui extends GuiContainerEln{
 		this.render = render;
 	}
 
-
-	GuiTextFieldEln channel;
 	private BatteryChargerRender render;
 	
 	
-	
+	GuiButtonEln powerOn;
 	
 	@Override
 	public void initGui() {
 		// TODO Auto-generated method stub
 		super.initGui();
-		channel = newGuiTextField(8, 8, 138);
-		channel.setText(render.channel);
-		channel.setComment(0, "Specify the channel to supply");
+		
+		
+		powerOn = newGuiButton(97, 6+17-10, 60, "");
+
+	}
+	
+	
+	@Override
+	protected void preDraw(float f, int x, int y) {
+		// TODO Auto-generated method stub
+		super.preDraw(f, x, y);
+		
+		if(render.powerOn){
+			powerOn.displayString = "Switch OFF";
+		}
+		else{
+			powerOn.displayString = "Switch ON";
+		}
 	}
 	
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176,166-57,8,84-57);
+		return new GuiHelperContainer(this, 176,166-40,8,84-40);
 	}
 
 	
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
-		if(object == channel){
-		//	render.clientSetString(BatteryChargerElement.setChannelId,channel.getText());
+		if(object == powerOn){
+			render.clientSend(BatteryChargerElement.toogleCharge);
 		}
 		super.guiObjectEvent(object);
 	}

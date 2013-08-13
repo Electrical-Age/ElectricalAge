@@ -16,10 +16,10 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor{
 
 	private Obj3D obj;
 	Obj3DPart main;
-	private double nominalVoltage;
-	private double nominalPower;
-	private ElectricalCableDescriptor cable;
-	private double Rp;
+	public double nominalVoltage;
+	public double nominalPower;
+	public ElectricalCableDescriptor cable;
+	double Rp;
 
 
 	public BatteryChargerDescriptor(
@@ -36,15 +36,31 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor{
 		this.cable = cable;
 		if(obj != null) {
 			main = obj.getPart("main");
-
+			for(int idx = 0;idx < 4;idx++){
+				leds[idx] = obj.getPart("led" + idx);
+			}
 		}
 	}
-	public int range;
+
+	Obj3DPart [] leds = new Obj3DPart[4];
 	
-	
-	public void draw()
+	public void draw(boolean drawLed,boolean [] charged)
 	{
 		if(main != null) main.draw();
+		if(drawLed){
+			int idx = 0;
+			for(Obj3DPart led : leds){
+				Utils.ledOnOffColor(charged[idx]);
+				Utils.drawLight(led);
+				idx++;
+			}
+		}
+		else{
+			for(Obj3DPart led : leds){
+				GL11.glColor3f(0.2f,0.2f,0.2f);
+				led.draw();
+			}
+		}
 
 	}
 	
@@ -60,20 +76,23 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor{
 		// TODO Auto-generated method stub
 		return true;
 	}
-	
+	//boolean[] defaultCharged = new boolean[]{true,true,true,true};
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if(type == ItemRenderType.INVENTORY) {
 			GL11.glScalef(1.5f, 1.5f, 1.5f);
 			GL11.glTranslatef(-0.2f, 0.0f, 0f);
 		}
-		draw();
+		draw(false,null);
 	}
-	public void applyTo(NodeElectricalLoad powerLoad,boolean powerOn) {
+	public void applyTo(NodeElectricalLoad powerLoad) {
 		cable.applyTo(powerLoad, false);
-		powerLoad.setRp(Rp);
-		if(powerOn == false)
-			powerLoad.setRs(1000000000.0);
 	}
 	
+	public void setRp(NodeElectricalLoad powerload,boolean powerOn)
+	{
+		powerload.setRp(Rp);
+		if(powerOn == false)
+			powerload.setRp(1000000000000000000000.0);
+	}
 }

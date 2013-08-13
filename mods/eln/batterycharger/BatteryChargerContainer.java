@@ -13,6 +13,7 @@ import mods.eln.gui.SlotWithSkinAndComment;
 import mods.eln.item.LampSlot;
 import mods.eln.item.MachineBoosterDescriptor;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
+import mods.eln.misc.Utils;
 import mods.eln.node.SixNodeItemSlot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -31,13 +32,9 @@ public class BatteryChargerContainer extends BasicContainer {
 		}
 		
 		public boolean isItemValid(ItemStack itemStack) {
-			Item i = itemStack.getItem();
-			if(i instanceof GenericItemUsingDamage){
-				GenericItemUsingDamage ii = (GenericItemUsingDamage)i;
-				GenericItemUsingDamageDescriptor d = ii.getDescriptor(itemStack);
-				if(d instanceof IItemEnergyBattery){
-					return true;
-				}
+			Object d = Utils.getItemObject(itemStack);
+			if(d instanceof IItemEnergyBattery){
+				return true;
 			}
 			return false;
 		}
@@ -54,11 +51,11 @@ public class BatteryChargerContainer extends BasicContainer {
 	
 	public BatteryChargerContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new BatterySlot(inventory, 0, 0, 0),
-				new BatterySlot(inventory, 18, 0, 1),
-				new BatterySlot(inventory, 0, 18, 2),
-				new BatterySlot(inventory, 18, 18, 3),
-				new GenericItemUsingDamageSlot(inventory,boosterSlotId,50,12,5,
+				new BatterySlot(inventory,0,26 -18 + 0,6 + 0),
+				new BatterySlot(inventory,1,26 -18+ 18,6 + 0),
+				new BatterySlot(inventory,2,26 -18+ 0,6 + 18),
+				new BatterySlot(inventory,3,26 -18+ 18,6 + 18),
+				new GenericItemUsingDamageSlot(inventory,boosterSlotId,80-18,6+18/2,5,
 						MachineBoosterDescriptor.class,
 						SlotSkin.medium,
 						new String[]{"Booster slot"})
@@ -67,4 +64,6 @@ public class BatteryChargerContainer extends BasicContainer {
 		// TODO Auto-generated constructor stub
 	}
 
+	
+	
 }

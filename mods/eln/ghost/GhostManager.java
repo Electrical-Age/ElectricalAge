@@ -10,6 +10,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
+import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
@@ -122,7 +123,7 @@ public class GhostManager extends WorldSavedData
 	public boolean canCreateGhostAt(World world,int x,int y, int z)
 	{
 		if(world.getChunkProvider().chunkExists(x>>4 , z>>4) == false) return false;
-		if(world.getBlockId(x ,y ,z) != 0) return false;
+		if(world.getBlockId(x ,y ,z) != 0 && Block.blocksList[world.getBlockId(x ,y ,z)].isBlockReplaceable(world, x, y, z) == false) return false;
 		return true;
 	}
 	public void createGhost(Coordonate coordonate,Coordonate observerCoordonate,int UUID)

@@ -65,9 +65,9 @@ public class SixNodeBlock extends NodeBlock{
     
     SixNodeEntity getEntity(World world, int x, int y, int z)
     {
-    	SixNodeEntity tileEntity = (SixNodeEntity) world.getBlockTileEntity(x, y, z);
-		if(tileEntity != null)
-			return tileEntity;
+    	TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
+		if(tileEntity != null && tileEntity instanceof SixNodeEntity)
+			return (SixNodeEntity)tileEntity;
 		System.out.println("ASSERTSixNodeEntity getEntity() null");
 		return null;
 		   	
@@ -415,7 +415,7 @@ public class SixNodeBlock extends NodeBlock{
     	if(world.isRemote)
     	{
     		TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
-    		if(tileEntity != null)
+    		if(tileEntity != null && tileEntity instanceof SixNodeEntity)
     			return ((SixNodeEntity)tileEntity).sixNodeCacheMapId >= 0;
 			else
 				System.out.println("ASSERT B public boolean nodeHasCache(World world, int x, int y, int z) ");

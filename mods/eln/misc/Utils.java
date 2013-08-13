@@ -18,6 +18,8 @@ import cpw.mods.fml.common.registry.GameRegistry;
 
 import mods.eln.Eln;
 import mods.eln.PlayerManager;
+import mods.eln.generic.GenericItemUsingDamage;
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.ITileEntitySpawnClient;
 import mods.eln.node.NodeBlockEntity;
@@ -915,6 +917,15 @@ public class Utils {
 	public static boolean isPlayerAround(World world,AxisAlignedBB axisAlignedBB) {
 		// TODO Auto-generated method stub
 		return world.getEntitiesWithinAABB(EntityPlayer.class, axisAlignedBB).size() != 0;
+	}
+
+	public static Object getItemObject(ItemStack stack) {
+		if(stack == null) return null;
+		Item i = stack.getItem();
+		if(i instanceof GenericItemUsingDamage){
+			return ((GenericItemUsingDamage)i).getDescriptor(stack);
+		}
+		return i;
 	}
 	
 	

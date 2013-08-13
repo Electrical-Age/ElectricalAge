@@ -233,7 +233,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
     	
     	Direction direction = Direction.fromIntMinecraftSide(side).getInverse();    	
     	int blockID = world.getBlockId(x, y, z);
-    	if(blockID == 0)   		
+    	if(blockID == 0 || Block.blocksList[blockID].isBlockReplaceable(world, x, y, z)) 		
     	{	
     		blockID = this.getBlockID();
     		SixNodeBlock block = (SixNodeBlock)Block.blocksList[blockID];

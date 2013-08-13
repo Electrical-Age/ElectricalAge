@@ -24,15 +24,16 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 		super(name);
 		this.light = light;
 		this.range = range;
-		this.energyChargeRate = energyStorage/(chargeTime*20);
-		this.energyDischargeRate = energyStorage/(autonomy*20);
+		this.chargePower = energyStorage/chargeTime;
+		this.dischargePower = energyStorage/autonomy;
 		this.energyStorage = energyStorage;
 	}
 	int light,range;
-	double energyStorage, energyDischargeRate, energyChargeRate;
+	double energyStorage, dischargePower, chargePower;
 
 	
 
+	
 	@Override
 	int getRange(ItemStack stack) {
 		// TODO Auto-generated method stub
@@ -42,8 +43,8 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	@Override
 	int getLight(ItemStack stack) {
 		double energy = getEnergy(stack);
-		if(energy > energyDischargeRate){
-			setEnergy(stack, energy - energyDischargeRate);
+		if(energy > dischargePower*0.05){
+			setEnergy(stack, energy - dischargePower*0.05);
 			return light;
 		}
 		return 0;
@@ -52,7 +53,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	@Override
 	public NBTTagCompound getDefaultNBT() {
 		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
-		nbt.setDouble("energy",10000);
+		nbt.setDouble("energy",0);
 		nbt.setBoolean("powerOn",false);
 		return nbt;
 	}
@@ -104,8 +105,8 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	}
 
 	@Override
-	public double putEnergy(ItemStack stack, double energy) {
-		double hit = Math.min(energy,Math.min(energyStorage - getEnergy(stack), energyChargeRate));
+	public double putEnergy(ItemStack stack, double energy,double time) {
+		double hit = Math.min(energy,Math.min(energyStorage - getEnergy(stack), chargePower*time));
 		setEnergy(stack, getEnergy(stack) + hit);
 		return energy - hit;
 	}

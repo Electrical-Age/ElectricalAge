@@ -13,6 +13,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
+import mods.eln.item.MachineBoosterDescriptor;
+import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.lampsocket.LampSocketContainer;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -38,8 +40,10 @@ public class BatteryChargerElement extends SixNodeElement {
 	public BatteryChargerDescriptor descriptor;
 	
 	public NodeElectricalLoad powerLoad = new NodeElectricalLoad("powerLoad");
+	public BatteryChargerSlowProcess slowProcess = new BatteryChargerSlowProcess();
 	
-	SixNodeElementInventory inventory = new SixNodeElementInventory(4, 64, this);
+	
+	SixNodeElementInventory inventory = new SixNodeElementInventory(5, 64, this);
 	@Override
 	public IInventory getInventory() {
 		// TODO Auto-generated method stub
@@ -58,7 +62,7 @@ public class BatteryChargerElement extends SixNodeElement {
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		electricalLoadList.add(powerLoad);
-
+		slowProcessList.add(slowProcess);
 		front = LRDU.Down;
 		this.descriptor = (BatteryChargerDescriptor) descriptor;
 		
@@ -95,7 +99,7 @@ public class BatteryChargerElement extends SixNodeElement {
 
 	@Override
 	public void initialize() {
-		descriptor.applyTo(powerLoad,powerOn);
+		descriptor.applyTo(powerLoad);
 	}
 	
 	@Override
@@ -103,7 +107,7 @@ public class BatteryChargerElement extends SixNodeElement {
 		// TODO Auto-generated method stub
 		super.inventoryChanged();
 
-		needPublish();
+		needPublish(); 
 	}
 
 	@Override
@@ -127,12 +131,14 @@ public class BatteryChargerElement extends SixNodeElement {
 		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
 		nbt.setBoolean(str + "powerOn", powerOn);
+		nbt.setDouble(str + "energyCounter", slowProcess.energyCounter);
 
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
 		super.readFromNBT(nbt, str);
 		powerOn = nbt.getBoolean(str + "powerOn");
+		slowProcess.energyCounter = nbt.getDouble(str + "energyCounter");
 	}
 
 
@@ -147,7 +153,7 @@ public class BatteryChargerElement extends SixNodeElement {
 			switch(stream.readByte()){
 			case toogleCharge:
 				powerOn = ! powerOn;
-				descriptor.applyTo(powerLoad,powerOn);
+				needPublish();
 				break;
 			}
 		} catch (IOException e) {
@@ -175,6 +181,8 @@ public class BatteryChargerElement extends SixNodeElement {
 			Utils.serialiseItemStack(stream, inventory.getStackInSlot(1));
 			Utils.serialiseItemStack(stream, inventory.getStackInSlot(2));
 			Utils.serialiseItemStack(stream, inventory.getStackInSlot(3));
+			
+			stream.writeByte(charged);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -184,16 +192,71 @@ public class BatteryChargerElement extends SixNodeElement {
 	
 	
 	
-	
+	byte charged;
 	
 	class BatteryChargerSlowProcess implements IProcess
 	{
-
+		double energyCounter = 0;
 		@Override
 		public void process(double time) {
 			// TODO Auto-generated method stub
+			byte oldCharged = charged;
+			charged = 0;
+			if(powerOn == false){
+				descriptor.setRp(powerLoad, false);
+			}
+			else{
+				
+				ItemStack booster = (inventory.getStackInSlot(BatteryChargerContainer.boosterSlotId));
+				double boost = 1.0;
+				double eff = 1.0;
+				if(booster != null){
+
+					boost = Math.pow(1.25, booster.stackSize);
+					eff = Math.pow(0.9, booster.stackSize);
+				}
+				
+				energyCounter += powerLoad.getRpPower()*time*eff;
+				
 			
+				for(int idx = 0;idx < 4;idx++){
+					ItemStack stack = inventory.getStackInSlot(idx);
+					Object o = Utils.getItemObject(stack);
+					if(o instanceof IItemEnergyBattery){
+						IItemEnergyBattery b = (IItemEnergyBattery) o;
+						double oldEnergy = energyCounter;
+						energyCounter = b.putEnergy(stack, energyCounter,time*boost);
+						if(oldEnergy == energyCounter){
+							charged += 1 << idx;
+						}
+					}
+					else{
+						charged += 1 << idx;
+					}
+				}
+				
+				
+				if(energyCounter < descriptor.nominalPower*time * 2*boost){
+					//double target = descriptor.nominalPower*time * 2;
+					double power = Math.min(descriptor.nominalPower*boost,(descriptor.nominalPower*time * 2*boost - energyCounter) / time);
+					powerLoad.setRp(Math.max(powerLoad.Uc*powerLoad.Uc / power,descriptor.Rp/boost));
+					
+				}
+				else{
+					descriptor.setRp(powerLoad, false);
+				}
+
+			}
+			if(charged != oldCharged) 
+				needPublish();
 		}
 		
+		
+		
+		
 	}
+	
+	
+	
+	
 }
