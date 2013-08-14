@@ -43,6 +43,7 @@ public class BatteryChargerRender extends SixNodeElementRender{
 	}
 	Coordonate coord;
 	boolean [] charged = new boolean[]{false,false,false,false};
+	boolean [] batteryPresence = new boolean[]{false,false,false,false};
 	@Override
 	public void draw() {	
 		super.draw();
@@ -52,7 +53,7 @@ public class BatteryChargerRender extends SixNodeElementRender{
 
 		
 		//LRDU.Down.glRotateOnX();
-		descriptor.draw(powerOn,charged);
+		descriptor.draw(batteryPresence,charged);
 		
 		
 		drawEntityItem(b[0], 0.1875,0.15625, 0.15625,alpha, 0.2f);
@@ -122,6 +123,11 @@ public class BatteryChargerRender extends SixNodeElementRender{
 			byte temp = stream.readByte();
 			for(int idx = 0;idx < 4;idx++){
 				charged[idx] = (temp & 1) != 0;
+				temp = (byte) (temp >> 1);
+			}
+			temp = stream.readByte();
+			for(int idx = 0;idx < 4;idx++){
+				batteryPresence[idx] = (temp & 1) != 0;
 				temp = (byte) (temp >> 1);
 			}
 

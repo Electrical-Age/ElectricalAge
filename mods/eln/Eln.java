@@ -91,6 +91,8 @@ import mods.eln.item.TreeResin;
 import mods.eln.item.WindRotorDescriptor;
 import mods.eln.item.LampDescriptor.Type;
 import mods.eln.item.WindRotorDescriptor.WindRotorAxeType;
+import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
+import mods.eln.item.lamp.BatteryItem;
 import mods.eln.item.lamp.ElectricalLampItem;
 import mods.eln.item.lamp.LampItem;
 import mods.eln.item.regulator.IRegulatorDescriptor;
@@ -538,6 +540,7 @@ public class Eln {
 		registerBrush(119);
 		registerMiscItem(120);
 		registerElectricalTool(121);
+		registerBatteryItem(122);
 
 		
 		recipeArmor();
@@ -702,6 +705,8 @@ public class Eln {
 		WorldServer worldServer = server.worldServers[0];
 		simulator.init();
 
+		simulator.addSlowProcess(new ItemEnergyInventoryProcess());
+		
 		ghostManager = (GhostManager) worldServer.mapStorage.loadData(
 				GhostManager.class, "GhostManager");
 		if (ghostManager == null) {
@@ -3628,6 +3633,23 @@ public class Eln {
 					name,
 					10,5,//int light,int range,
 					10*60*10,10*60,120//, energyStorage,autonomy, chargeTime
+					);
+			sharedItem.addElement(subId + (id << 6), desc);
+		}	
+	}
+	
+	
+	void registerBatteryItem(int id) {
+		int subId, completId;
+		String name;
+		{
+			subId = 0;
+			name = "Small portable battery";
+			
+			BatteryItem desc = new BatteryItem(
+					name,
+					1000,100,100,//double energyStorage,double chargePower,double dischargePower, 
+					1//int priority
 					);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}	

@@ -47,7 +47,10 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 			setEnergy(stack, energy - dischargePower*0.05);
 			return light;
 		}
-		return 0;
+		else{
+			setEnergy(stack,0);
+			return 0;
+		}
 	}
 	
 	@Override
@@ -69,14 +72,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 		getNbt(stack).setBoolean("powerOn",value);
 	}
 	
-	double getEnergy(ItemStack stack)
-	{
-		return getNbt(stack).getDouble("energy");
-	}
-	void setEnergy(ItemStack stack,double value)
-	{
-		getNbt(stack).setDouble("energy",value);
-	}
+
 	
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int par4,
@@ -103,13 +99,54 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 		list.add(Utils.plotEnergy("Energy stored", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
 		list.add("Power button is " + (getPowerOn(itemStack) ? "ON" : "OFF"));
 	}
-
+/*
 	@Override
 	public double putEnergy(ItemStack stack, double energy,double time) {
 		double hit = Math.min(energy,Math.min(energyStorage - getEnergy(stack), chargePower*time));
 		setEnergy(stack, getEnergy(stack) + hit);
 		return energy - hit;
 	}
+
+	@Override
+	public boolean isFull(ItemStack stack) {
+		// TODO Auto-generated method stub
+		return getEnergy(stack) == energyStorage;
+	}
+*/
+
+	public double getEnergy(ItemStack stack)
+	{
+		return getNbt(stack).getDouble("energy");
+	}
+	public void setEnergy(ItemStack stack,double value)
+	{
+		getNbt(stack).setDouble("energy",value);
+	}
+
+	@Override
+	public double getEnergyMax(ItemStack stack) {
+		// TODO Auto-generated method stub
+		return energyStorage;
+	}
+
+	@Override
+	public double getChargePower(ItemStack stack) {
+		// TODO Auto-generated method stub
+		return chargePower;
+	}
+
+	@Override
+	public double getDischagePower(ItemStack stack) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getPriority(ItemStack stack) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 
 
 

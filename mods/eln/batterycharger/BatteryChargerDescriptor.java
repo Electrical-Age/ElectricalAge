@@ -44,24 +44,24 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor{
 
 	Obj3DPart [] leds = new Obj3DPart[4];
 	
-	public void draw(boolean drawLed,boolean [] charged)
+	public void draw(boolean [] presence,boolean [] charged)
 	{
 		if(main != null) main.draw();
-		if(drawLed){
-			int idx = 0;
-			for(Obj3DPart led : leds){
+		
+		int idx = 0;
+		for(Obj3DPart led : leds){
+			if(presence != null && presence[idx]){
 				Utils.ledOnOffColor(charged[idx]);
 				Utils.drawLight(led);
-				idx++;
 			}
-		}
-		else{
-			for(Obj3DPart led : leds){
+			else{
 				GL11.glColor3f(0.2f,0.2f,0.2f);
-				led.draw();
+				led.draw();	
 			}
+			idx++;
 		}
 
+	
 	}
 	
 	@Override
@@ -83,7 +83,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor{
 			GL11.glScalef(1.5f, 1.5f, 1.5f);
 			GL11.glTranslatef(-0.2f, 0.0f, 0f);
 		}
-		draw(false,null);
+		draw(null,null);
 	}
 	public void applyTo(NodeElectricalLoad powerLoad) {
 		cable.applyTo(powerLoad, false);

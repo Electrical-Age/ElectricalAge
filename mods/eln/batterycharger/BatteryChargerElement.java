@@ -183,6 +183,7 @@ public class BatteryChargerElement extends SixNodeElement {
 			Utils.serialiseItemStack(stream, inventory.getStackInSlot(3));
 			
 			stream.writeByte(charged);
+			stream.writeByte(presence);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -192,7 +193,7 @@ public class BatteryChargerElement extends SixNodeElement {
 	
 	
 	
-	byte charged;
+	byte charged,presence;
 	
 	class BatteryChargerSlowProcess implements IProcess
 	{
@@ -202,6 +203,7 @@ public class BatteryChargerElement extends SixNodeElement {
 			// TODO Auto-generated method stub
 			byte oldCharged = charged;
 			charged = 0;
+			presence = 0;
 			if(powerOn == false){
 				descriptor.setRp(powerLoad, false);
 			}
@@ -224,15 +226,12 @@ public class BatteryChargerElement extends SixNodeElement {
 					Object o = Utils.getItemObject(stack);
 					if(o instanceof IItemEnergyBattery){
 						IItemEnergyBattery b = (IItemEnergyBattery) o;
-						double oldEnergy = energyCounter;
-						energyCounter = b.putEnergy(stack, energyCounter,time*boost);
-						if(oldEnergy == energyCounter){
-							charged += 1 << idx;
-						}
+						double e = Math.min(Math.min(energyCounter, b.getChargePower(stack)*time*boost),b.getEnergyMax(stack) - b.getEnergy(stack));
+						b.setEnergy(stack, b.getEnergy(stack) + e);
+						energyCounter -= e;
+						
 					}
-					else{
-						charged += 1 << idx;
-					}
+
 				}
 				
 				
@@ -247,6 +246,18 @@ public class BatteryChargerElement extends SixNodeElement {
 				}
 
 			}
+			for(int idx = 0;idx < 4;idx++){
+				ItemStack stack = inventory.getStackInSlot(idx);
+				Object o = Utils.getItemObject(stack);
+				if(o instanceof IItemEnergyBattery){
+					IItemEnergyBattery b = (IItemEnergyBattery) o;
+					if(b.getEnergy(stack) == b.getEnergyMax(stack)){
+						charged += 1 << idx;
+					}
+					presence += 1 << idx;
+				}
+			}
+			
 			if(charged != oldCharged) 
 				needPublish();
 		}
