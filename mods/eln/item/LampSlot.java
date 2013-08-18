@@ -3,6 +3,7 @@ package mods.eln.item;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.lampsocket.LampSocketType;
+import mods.eln.misc.Utils;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 
@@ -20,7 +21,7 @@ public class LampSlot extends GenericItemUsingDamageSlot{
 	public boolean isItemValid(ItemStack itemStack) {
 		// TODO Auto-generated method stub
 		if(!super.isItemValid(itemStack)) return false;
-		LampDescriptor descriptor = (LampDescriptor) Eln.sharedItem.getDescriptor(itemStack);
+		LampDescriptor descriptor = (LampDescriptor)  Utils.getItemObject(itemStack);
 		return descriptor.socket == socket;
 	}
 

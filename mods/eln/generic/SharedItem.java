@@ -1,6 +1,12 @@
 package mods.eln.generic;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelBiped;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
@@ -27,7 +33,21 @@ public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDes
 		// TODO Auto-generated method stub
 		return getDescriptor(item).shouldUseRenderHelper(type, item, helper);
 	}
-
+	
+    public boolean isValidArmor(ItemStack stack, int armorType, Entity entity)
+    {
+    	return true;
+    }
+    /*
+	@Override
+	public String getArmorTexture(ItemStack stack, Entity entity, int slot, int layer)
+	{
+		return "eln:textures/armor/copper_layer_1.png";
+	}
+    public ModelBiped getArmorModel(EntityLivingBase entityLiving, ItemStack itemStack, int armorSlot)
+    {
+        return new ModelBiped();
+    }*/
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		Minecraft.getMinecraft().mcProfiler.startSection("SharedItem");
@@ -36,16 +56,16 @@ public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDes
 		{
 		case ENTITY:
 
-	        GL11.glScalef(0.5f, 0.5f, 0.5f);
+	    //    GL11.glScalef(0.5f, 0.5f, 0.5f);
 	    //    GL11.glTranslatef(0.f,-0.5f,0.5f); 	
-			GL11.glRotatef(90,0f,1f,0f);  
+		//	GL11.glRotatef(90,0f,1f,0f);  
 	        	
 		//	GL11.glTranslatef(0.00f, 0.3f, 0.0f);
 			break;
 		case EQUIPPED:
 			
-			GL11.glTranslatef(0.50f, 1, 0.5f);
-			GL11.glRotatef(130,1f,0.0f,1f);  
+			//GL11.glTranslatef(0.50f, 1, 0.5f);
+			//GL11.glRotatef(130,1f,0.0f,1f);  
         	
 			break;
 		case FIRST_PERSON_MAP:

@@ -92,9 +92,12 @@ import mods.eln.item.WindRotorDescriptor;
 import mods.eln.item.LampDescriptor.Type;
 import mods.eln.item.WindRotorDescriptor.WindRotorAxeType;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
-import mods.eln.item.lamp.BatteryItem;
-import mods.eln.item.lamp.ElectricalLampItem;
-import mods.eln.item.lamp.LampItem;
+import mods.eln.item.electricalitem.BatteryItem;
+import mods.eln.item.electricalitem.ElectricalAxe;
+import mods.eln.item.electricalitem.ElectricalLampItem;
+import mods.eln.item.electricalitem.ElectricalPickaxe;
+import mods.eln.item.electricalitem.ElectricalTool;
+import mods.eln.item.electricalitem.LampItem;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
@@ -264,6 +267,11 @@ public class Eln {
 	public static int swordCopperId,hoeCopperId,shovelCopperId,pickaxeCopperId,axeCopperId;
 	public static Item swordCopper,hoeCopper,shovelCopper,pickaxeCopper,axeCopper;
 	
+	//public static int electricalPickaxeId;
+//	public static Item electricalPickaxe;
+	
+	
+	
 	public static Item voltMeterHelmet;
 	public static Item thermoMeterHelmet;
 	public static Item currentMeterHelmet;
@@ -279,6 +287,7 @@ public class Eln {
 	 */
 
 	public static SharedItem sharedItem;
+	public static SharedItem sharedItemStackOne;
 
 	public static SixNodeBlock sixNodeBlock;
 	public static TransparentNodeBlock transparentNodeBlock;
@@ -311,7 +320,7 @@ public class Eln {
 	int brushItemId;
 
 	int oreId;
-	int sharedItemId;
+	int sharedItemId,sharedItemStackOneId;
 	int transparentNodeBlockId;
 	int SixNodeBlockId;
 	int ghostBlockId;
@@ -359,7 +368,12 @@ public class Eln {
 		axeCopperId = config.getItem("axeCopperId", itemBaseId + 10).getInt();
 		
 
+		
+	//	electricalPickaxeId =  config.getItem("axeCopperId", itemBaseId + 11).getInt();
+		
+		
 		sharedItemId = config.getItem("sharedItem", itemBaseId + 18).getInt();
+		sharedItemStackOneId = config.getItem("sharedItemStackOne", itemBaseId + 19).getInt();
 
 
 
@@ -419,6 +433,10 @@ public class Eln {
 		sharedItem = (SharedItem) new SharedItem(sharedItemId)
 				.setCreativeTab(creativeTab).setMaxStackSize(64)
 				.setUnlocalizedName("sharedItem");
+
+		sharedItemStackOne = (SharedItem) new SharedItem(sharedItemStackOneId)
+			.setCreativeTab(creativeTab).setMaxStackSize(1)
+			.setUnlocalizedName("sharedItemStackOne");
 
 		transparentNodeBlock = (TransparentNodeBlock) new TransparentNodeBlock(
 				transparentNodeBlockId, Material.ground,
@@ -2946,32 +2964,31 @@ public class Eln {
 	private void registerArmor() {
 		ItemStack stack;
 		String name;
-		int legs;
-		legs = legsCopperId + 256;
+
 		{
 			name = "Copper helmet";
-			helmetCopper = (ItemArmor)(new genericArmorItem(helmetCopperId, EnumArmorMaterial.IRON, 2,0,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:copper_helmet").setCreativeTab(creativeTab);
+			helmetCopper = (ItemArmor)(new genericArmorItem(helmetCopperId, EnumArmorMaterial.IRON, 2,0,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).func_111206_d("eln:copper_helmet").setCreativeTab(creativeTab);
 			stack = new ItemStack(helmetCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}
 		{
 			name = "Copper plate";
-			plateCopper = (ItemArmor)(new genericArmorItem(plateCopperId, EnumArmorMaterial.IRON, 2,1,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:copper_chestplate").setCreativeTab(creativeTab);
+			plateCopper = (ItemArmor)(new genericArmorItem(plateCopperId, EnumArmorMaterial.IRON, 2,1,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).func_111206_d("eln:copper_chestplate").setCreativeTab(creativeTab);
 			stack = new ItemStack(plateCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}
 		{
 			name = "Copper legs";
-			legsCopper = (ItemArmor)(new genericArmorItem(legsCopperId, EnumArmorMaterial.IRON, 2,2,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:copper_leggings").setCreativeTab(creativeTab);
+			legsCopper = (ItemArmor)(new genericArmorItem(legsCopperId, EnumArmorMaterial.IRON, 2,2,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).func_111206_d("eln:copper_leggings").setCreativeTab(creativeTab);
 			stack = new ItemStack(legsCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}
 		{
 			name = "Copper boots";
-			bootsCopper = (ItemArmor)(new genericArmorItem(bootsCopperId, EnumArmorMaterial.IRON, 2,3,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png",legs)).setUnlocalizedName(name).func_111206_d("eln:copper_boots").setCreativeTab(creativeTab);
+			bootsCopper = (ItemArmor)(new genericArmorItem(bootsCopperId, EnumArmorMaterial.IRON, 2,3,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).func_111206_d("eln:copper_boots").setCreativeTab(creativeTab);
 			stack = new ItemStack(bootsCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
@@ -3624,18 +3641,48 @@ public class Eln {
 	
 	void registerElectricalTool(int id) {
 		int subId, completId;
+		ItemStack stack;
 		String name;
 		{
 			subId = 0;
-			name = "Basic flashlight";
+			name = "Small flashlight";
 			
 			ElectricalLampItem desc = new ElectricalLampItem(
 					name,
 					10,5,//int light,int range,
-					10*60*10,10*60,120//, energyStorage,autonomy, chargeTime
+					6000,20,100//, energyStorage,discharg, charge
 					);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}	
+		
+		
+		
+		{
+			subId = 8;
+			name = "Portable electrical mining drill";
+			
+			ElectricalPickaxe desc = new ElectricalPickaxe(
+					name,
+					8,3,//float strengthOn,float strengthOff,
+					20000,100,400//double energyStorage,double energyPerBlock,double chargePower
+					);
+			sharedItemStackOne.addElement(subId + (id << 6), desc);
+		}	
+
+		{
+			subId = 12;
+			name = "Portable electrical axe";
+			
+			ElectricalAxe desc = new ElectricalAxe(
+					name,
+					8,3,//float strengthOn,float strengthOff,
+					20000,100,400//double energyStorage,double energyPerBlock,double chargePower
+					);
+			sharedItemStackOne.addElement(subId + (id << 6), desc);
+		}	
+		
+				
+		
 	}
 	
 	
@@ -3644,11 +3691,23 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "Small portable battery";
+			name = "Portable battery";
 			
 			BatteryItem desc = new BatteryItem(
 					name,
-					1000,100,100,//double energyStorage,double chargePower,double dischargePower, 
+					20000,500,100,//double energyStorage,double chargePower,double dischargePower, 
+					1//int priority
+					);
+			sharedItem.addElement(subId + (id << 6), desc);
+		}	
+		
+		{
+			subId = 1;
+			name = "Portable battery pack";
+			
+			BatteryItem desc = new BatteryItem(
+					name,
+					60000,1500,300,//double energyStorage,double chargePower,double dischargePower, 
 					1//int priority
 					);
 			sharedItem.addElement(subId + (id << 6), desc);

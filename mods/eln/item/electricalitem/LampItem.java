@@ -1,4 +1,4 @@
-package mods.eln.item.lamp;
+package mods.eln.item.electricalitem;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -70,4 +70,6 @@ public abstract class LampItem extends GenericItemUsingDamageDescriptor{
 
 	}
 
+	
+	
 }

@@ -36,6 +36,7 @@ public class ClientProxy extends CommonProxy {
       	MinecraftForgeClient.registerItemRenderer(Eln.transparentNodeItem.itemID, Eln.transparentNodeItem);
       	MinecraftForgeClient.registerItemRenderer(Eln.sixNodeItem.itemID, Eln.sixNodeItem);
       	MinecraftForgeClient.registerItemRenderer(Eln.sharedItem.itemID, Eln.sharedItem);
+      	MinecraftForgeClient.registerItemRenderer(Eln.sharedItemStackOne.itemID, Eln.sharedItemStackOne);
       	       
 
 		Eln.clientKeyHandler = new ClientKeyHandler();

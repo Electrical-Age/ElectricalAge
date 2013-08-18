@@ -239,7 +239,7 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 		
 		if(regulatorStack != null && controlExternal == false)
 		{
-			IRegulatorDescriptor regulator = (IRegulatorDescriptor) Eln.sharedItem.getDescriptor(regulatorStack);
+			IRegulatorDescriptor regulator = (IRegulatorDescriptor) Utils.getItemObject(regulatorStack);
 			
 			regulator.applyTo(this.regulator,500.0,10.0,0.1,0.1);
 		//	furnace.regulator.target = 240;

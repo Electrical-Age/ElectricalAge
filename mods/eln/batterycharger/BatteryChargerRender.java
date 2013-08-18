@@ -51,15 +51,16 @@ public class BatteryChargerRender extends SixNodeElementRender{
 		alpha += 90*FrameTime.get();
 		if(alpha > 360) alpha -=360;
 
+
+		drawEntityItem(b[0], 0.1875,0.15625, 0.15625,alpha, 0.2f);
+		drawEntityItem(b[1], 0.1875,0.15625, -0.15625,alpha, 0.2f);
+		drawEntityItem(b[2], 0.1875,-0.15625, 0.15625,alpha, 0.2f);
+		drawEntityItem(b[3], 0.1875,-0.15625, -0.15625,alpha, 0.2f);
 		
 		//LRDU.Down.glRotateOnX();
 		descriptor.draw(batteryPresence,charged);
 		
 		
-		drawEntityItem(b[0], 0.1875,0.15625, 0.15625,alpha, 0.2f);
-		drawEntityItem(b[1], 0.1875,0.15625, -0.15625,alpha, 0.2f);
-		drawEntityItem(b[2], 0.1875,-0.15625, 0.15625,alpha, 0.2f);
-		drawEntityItem(b[3], 0.1875,-0.15625, -0.15625,alpha, 0.2f);
 	}
 	
 	float alpha = 0;

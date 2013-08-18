@@ -1,4 +1,4 @@
-package mods.eln.item.lamp;
+package mods.eln.item.electricalitem;
 
 import java.util.List;
 
@@ -7,7 +7,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.Eln;
 import mods.eln.PlayerManager;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
@@ -18,20 +21,23 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	public ElectricalLampItem(
 			String name,
 			int light,int range,
-			double energyStorage,double autonomy,double chargeTime
+			double energyStorage,double dischargePower,double chargePower
 			
 			) {
 		super(name);
 		this.light = light;
 		this.range = range;
-		this.chargePower = energyStorage/chargeTime;
-		this.dischargePower = energyStorage/autonomy;
+		this.chargePower = chargePower;
+		this.dischargePower = dischargePower;
 		this.energyStorage = energyStorage;
+		on = new ResourceLocation("eln", "/textures/items/" + name.replace(" ", "").toLowerCase() + "on.png");
+		off = new ResourceLocation("eln", "/textures/items/" + name.replace(" ", "").toLowerCase() + "off.png");
+	//	off = new ResourceLocation("eln", "/model/StoneFurnace/all.png");
 	}
 	int light,range;
 	double energyStorage, dischargePower, chargePower;
 
-	
+	ResourceLocation on,off;
 
 	
 	@Override
@@ -58,6 +64,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
 		nbt.setDouble("energy",0);
 		nbt.setBoolean("powerOn",false);
+		nbt.setInteger("rand", (int) (Math.random()*0xFFFFFFF));
 		return nbt;
 	}
 	
@@ -149,5 +156,24 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 
 
 
-
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		if(type == ItemRenderType.INVENTORY)
+			return false;
+		return true;
+	}
+	
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {		
+		if(type == ItemRenderType.INVENTORY)		
+			Utils.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
+		Utils.drawIcon(type,(getPowerOn(item) ? on : off));
+	}
 }

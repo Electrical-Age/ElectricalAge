@@ -213,7 +213,7 @@ public class LampSocketElement extends SixNodeElement{
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte((grounded ? (1<<6) : 0 ));
-	    	stream.writeShort(inventory.getStackInSlot(LampSocketContainer.lampSlotId) == null ? 0 : inventory.getStackInSlot(LampSocketContainer.lampSlotId).getItemDamage());
+			Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSocketContainer.lampSlotId));
 	    	stream.writeFloat((float) lampProcess.alphaZ);
 	    	Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSocketContainer.cableSlotId));
 	    	stream.writeBoolean(poweredByLampSupply);
@@ -255,7 +255,7 @@ public class LampSocketElement extends SixNodeElement{
 			cableDescriptor.applyTo(negativeLoad, grounded);
 		}
 
-		lampDescriptor = (LampDescriptor) Eln.sharedItem.getDescriptor(lamp);
+		lampDescriptor = (LampDescriptor)  Utils.getItemObject(lamp);
 		if(lampDescriptor == null)
 		{
 			lampResistor.setR(Double.POSITIVE_INFINITY);

@@ -33,6 +33,7 @@ import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
@@ -57,11 +58,13 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatMessageComponent;
+import net.minecraft.util.Icon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 
 
 public class Utils {
@@ -926,6 +929,110 @@ public class Utils {
 			return ((GenericItemUsingDamage)i).getDescriptor(stack);
 		}
 		return i;
+	}
+	public static void drawIcon(ItemRenderType type,Icon icon) {
+		drawIcon(type, icon.getIconName());
+	}
+	public static void drawIcon(ItemRenderType type) {
+		if(type == ItemRenderType.INVENTORY){
+			
+			Utils.disableCulling();
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glTexCoord2f(1f, 0f); GL11.glVertex3f(16f,0f,0f);
+				GL11.glTexCoord2f(0f, 0f);GL11.glVertex3f(0f,0f,0f);
+				GL11.glTexCoord2f(0f, 1f);GL11.glVertex3f(0f,16f,0f);
+				GL11.glTexCoord2f(1f, 1f);GL11.glVertex3f(16f,16f,0f);
+			GL11.glEnd();
+			Utils.enableCulling();
+		}
+		else if(type == ItemRenderType.ENTITY){
+			
+			Utils.disableCulling();
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glTexCoord2f(1f, 1f); GL11.glVertex3f(0,0f,0.5f);
+				GL11.glTexCoord2f(0f, 1f);GL11.glVertex3f(0.0f,0f,-0.5f);
+				GL11.glTexCoord2f(0f, 0f);GL11.glVertex3f(0.0f,1f,-0.5f);
+				GL11.glTexCoord2f(1f, 0f);GL11.glVertex3f(0.0f,1f,0.5f);
+			GL11.glEnd();
+			Utils.enableCulling();					
+		}
+		else{
+			GL11.glTranslatef(0.5f, -0.3f, 0.5f);
+			
+			Utils.disableCulling();
+			GL11.glBegin(GL11.GL_QUADS);
+				GL11.glTexCoord2f(1f, 1f);GL11.glVertex3f(0.0f,0.5f,0.5f);
+				GL11.glTexCoord2f(0f, 1f);GL11.glVertex3f(0.0f,0.5f,-0.5f);
+				GL11.glTexCoord2f(0f, 0f);GL11.glVertex3f(0.0f,1.5f,-0.5f);
+				GL11.glTexCoord2f(1f, 0f);GL11.glVertex3f(0.0f,1.5f,0.5f);
+			GL11.glEnd();
+			Utils.enableCulling();			
+		}
+	}
+	public static void drawIcon(ItemRenderType type,String icon) {
+		Utils.bindTextureByName(icon);
+		drawIcon(type);
+	}
+	public static void drawIcon(ItemRenderType type,ResourceLocation icon) {
+		Utils.bindTexture(icon);
+		drawIcon(type);
+	}
+
+	public static void drawEnergyBare(ItemRenderType type,float e) {
+		float x = 13f,y = 15f-e*14f;
+		GL11.glDisable(GL11.GL_TEXTURE_2D);	
+		
+		GL11.glColor3f(0f, 0f, 0f);
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glVertex3f(x+2f,1,0.01f);
+			GL11.glVertex3f(x,1,0f);
+			GL11.glVertex3f(x,15f,0f);
+			GL11.glVertex3f(x+2f,15f,0.01f);
+		GL11.glEnd();		
+		
+		GL11.glColor3f(1, e, 0f);
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glVertex3f(x+1f,y,0.01f);
+			GL11.glVertex3f(x,y,0f);
+			GL11.glVertex3f(x,15f,0f);
+			GL11.glVertex3f(x+1f,15f,0.01f);
+		GL11.glEnd();
+	
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glColor3f(1f, 1f, 1f);
+		
+	}
+/*
+ * 	public static void drawIcon(Icon icon) {
+		Utils.bindTextureByName(icon.getIconName());
+		Utils.disableCulling();
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glTexCoord2f(0f, 0f); GL11.glVertex3f(0.5f,-0.5f,0f);
+			GL11.glTexCoord2f(0f, 0f);GL11.glVertex3f(-0.5f,-0.5f,0f);
+			GL11.glTexCoord2f(0f, 1f);GL11.glVertex3f(-0.5f,0.5f,0f);
+			GL11.glTexCoord2f(1f, 1f);GL11.glVertex3f(0.5f,0.5f,0f);
+		GL11.glEnd();
+		Utils.enableCulling();
+	}
+
+	public static void drawEnergyBare(float e) {
+		float x = 14f/16f,y = 15f/16f-e*14f/16f;
+		GL11.glColor3f(e, e, 0f);
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glVertex3f(x+1f/16f,y,0.01f);
+			GL11.glVertex3f(x,y,0f);
+			GL11.glVertex3f(x,15f/16f,0f);
+			GL11.glVertex3f(x+1f/16f,15f/16f,0.01f);
+		GL11.glEnd();
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glColor3f(1f, 1f, 1f);
+	}
+
+ */
+	public static void guiScale() {
+		GL11.glScalef(16f, 16f, 1f);
+		
 	}
 	
 	

@@ -83,7 +83,8 @@ public class LampSocketRender extends SixNodeElementRender{
 			b = stream.readByte();
 			grounded = (b & (1<<6)) != 0;
 			
-			lampDescriptor = (LampDescriptor) Eln.sharedItem.getDescriptor(stream.readShort());
+			ItemStack lampStack = Utils.unserialiseItemStack(stream);
+			lampDescriptor = (LampDescriptor) Utils.getItemObject(lampStack);
 			alphaZ = stream.readFloat();
 			cable = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream),ElectricalCableDescriptor.class);
 			

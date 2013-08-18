@@ -3,8 +3,10 @@ package mods.eln.generic;
 import java.util.List;
 
 import mods.eln.Eln;
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -16,7 +18,7 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 public class GenericItemUsingDamageDescriptor {
 	public String IconName;
-	Icon iconIndex;
+	private Icon iconIndex;
 	public String name;
 	
 	public Item parentItem;
@@ -130,11 +132,27 @@ public class GenericItemUsingDamageDescriptor {
 	 
 	 
 		
-		protected NBTTagCompound getNbt(ItemStack stack){
-			NBTTagCompound nbt = stack.getTagCompound();
-			if(nbt == null){
-				stack.setTagCompound(nbt = getDefaultNBT());
-			}
-			return nbt;		
+	protected NBTTagCompound getNbt(ItemStack stack){
+		NBTTagCompound nbt = stack.getTagCompound();
+		if(nbt == null){
+			stack.setTagCompound(nbt = getDefaultNBT());
 		}
+		return nbt;		
+	}
+	
+
+	   public float getStrVsBlock(ItemStack stack, Block block)
+	   {
+		   return 1f;
+	   }
+
+
+
+
+	   public boolean onBlockDestroyed(ItemStack stack, World w, int blockId, int x, int y, int z, EntityLivingBase entity)
+	   {
+		   return false;
+	   }
+	   
+
 }

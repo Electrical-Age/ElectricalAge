@@ -1,4 +1,4 @@
-package mods.eln.item.lamp;
+package mods.eln.item.electricalitem;
 
 import java.util.List;
 
@@ -7,7 +7,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.Eln;
 import mods.eln.PlayerManager;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -32,8 +35,9 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 		this.chargePower = chargePower;
 		this.dischargePower = dischargePower;
 		this.energyStorage = energyStorage;
+		iconRessource = new ResourceLocation("eln", "/textures/items/" + name.replace(" ", "").toLowerCase() + ".png");
 	}
-
+	ResourceLocation iconRessource;
 	double energyStorage, dischargePower, chargePower;
 
 	
@@ -93,6 +97,25 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 	}
 
 
-
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		if(type == ItemRenderType.INVENTORY)
+			return false;
+		return true;
+	}
+	
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {		
+		if(type == ItemRenderType.INVENTORY)		
+			Utils.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
+		Utils.drawIcon(type,iconRessource);
+	}
 
 }

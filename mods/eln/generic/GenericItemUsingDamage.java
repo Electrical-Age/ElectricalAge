@@ -10,9 +10,12 @@ import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.CommonProxy;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -20,6 +23,8 @@ import net.minecraft.util.Icon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.util.StringTranslate;
 import net.minecraft.world.World;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDescriptor> extends Item implements IGenericItemUsingDamage{
 	Hashtable<Integer,Descriptor> subItemList = new Hashtable<Integer,Descriptor>();
@@ -156,8 +161,34 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
    
    public void onUpdate(ItemStack stack, World world, Entity entity, int par4, boolean par5)
    {
+	   if(world.isRemote){
+		   return;
+	   }
 	   getDescriptor(stack).onUpdate(stack, world, entity, par4, par5);
    }
 
-	
+   @Override
+   public float getStrVsBlock(ItemStack stack, Block block)
+   {
+	  // return 6;
+	   return getDescriptor(stack).getStrVsBlock(stack, block);
+   }
+
+
+   @Override
+   public boolean canHarvestBlock(Block par1Block)
+   {
+       return true;
+   }
+
+   @Override
+   public boolean onBlockDestroyed(ItemStack stack, World w, int blockId, int x, int y, int z, EntityLivingBase entity)
+   {
+	   if(w.isRemote){
+		   return false;
+	   }
+	   return getDescriptor(stack).onBlockDestroyed( stack,  w, blockId, x,  y,  z,  entity);
+   }
+   
+
 }
