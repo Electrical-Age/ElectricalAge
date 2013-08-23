@@ -10,6 +10,7 @@ import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeDirection;
 	
@@ -31,7 +32,13 @@ import net.minecraftforge.common.ForgeDirection;
 		// TODO Auto-generated method stub
 		return Block.dirt.blockID;
 	}
-
+	@Override
+	@SideOnly(Side.CLIENT)
+	public AxisAlignedBB getSelectedBoundingBoxFromPool(World par1World,
+			int par2, int par3, int par4) {
+		// TODO Auto-generated method stub
+		return AxisAlignedBB.getAABBPool().getAABB(0,0,-10,-10,0,0);
+	}
 	@Override
 	public boolean isOpaqueCube() {
 	  return false;

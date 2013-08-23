@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamage;
-import mods.eln.item.ElectricalMotorDescriptor;
 import mods.eln.item.HeatingCorpElement;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;

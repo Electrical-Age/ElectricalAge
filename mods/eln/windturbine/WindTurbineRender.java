@@ -1,6 +1,11 @@
 package mods.eln.windturbine;
 
+import java.io.DataInputStream;
+import java.io.IOException;
+
+import mods.eln.client.FrameTime;
 import mods.eln.misc.Direction;
+import mods.eln.misc.RcInterpolator;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.node.TransparentNodeElementRender;
@@ -14,16 +19,25 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 	public WindTurbineRender(TransparentNodeEntity tileEntity,
 			TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
-		// TODO Auto-generated constructor stub
+		this.descriptor = (WindTurbineDescriptor) descriptor;
 	}
-	
+	RcInterpolator powerFactorFilter = new RcInterpolator(2);
+	WindTurbineDescriptor descriptor;
+	float alpha = 0;
 	@Override
 	public void draw() {
-		// TODO Auto-generated method stub
+		powerFactorFilter.setTarget(powerFactor);
+		powerFactorFilter.stepGraphic();
+		
+		alpha += FrameTime.get() * descriptor.speed * powerFactorFilter.get();
+		if(alpha > 360) alpha -= 360;
 		front.glRotateXnRef();
+		descriptor.draw(alpha);
 	}
 	
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2 , 64, this);
+	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(0 , 64, this);
+	private float wind;
+	private float powerFactor;
 
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
@@ -36,5 +50,21 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 	public boolean cameraDrawOptimisation() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	
+	
+	@Override
+	public void networkUnserialize(DataInputStream stream) {
+		// TODO Auto-generated method stub
+		super.networkUnserialize(stream);
+		try {
+			wind = stream.readFloat();
+			powerFactor = stream.readFloat();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 }

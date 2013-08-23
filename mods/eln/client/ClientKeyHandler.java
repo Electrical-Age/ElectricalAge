@@ -1,17 +1,23 @@
 package mods.eln.client;
 
+import java.io.IOException;
 import java.util.EnumSet;
 
 import org.lwjgl.input.Keyboard;
 
 import cpw.mods.fml.client.registry.KeyBindingRegistry;
 import cpw.mods.fml.client.registry.KeyBindingRegistry.KeyHandler;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.TickType;
+import cpw.mods.fml.common.network.IGuiHandler;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 
 import mods.eln.Eln;
+import mods.eln.GuiHandler;
 import mods.eln.PacketHandler;
+import mods.eln.misc.Utils;
+import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.network.packet.Packet250CustomPayload;
 
@@ -21,6 +27,7 @@ public class ClientKeyHandler extends KeyHandler {
 	static final String stuffInteractA = "stuffInteractA";
 	static final String stuffInteractB = "stuffInteractB++";
 	static final String interact = "ElnInteract";
+	static final String openWiki = "Open wiki";
 	
 
 	
@@ -31,6 +38,7 @@ public class ClientKeyHandler extends KeyHandler {
     	
 	        super(new KeyBinding[]{	new KeyBinding(stuffInteractA, Keyboard.KEY_V),
 	    							new KeyBinding(stuffInteractB, Keyboard.KEY_B),
+	    							new KeyBinding(openWiki, Keyboard.KEY_X),
 	        						new KeyBinding(interact, Keyboard.KEY_C)},
 	        						new boolean[]{false,false,false});
 	        KeyBindingRegistry.registerKeyBinding(this);
@@ -49,6 +57,15 @@ public class ClientKeyHandler extends KeyHandler {
 	  //  System.out.println("keyDown " + kb + "   " +  tickEnd + "   " + isRepeat);
 	    
 	    if(! tickEnd) return;
+	    if(kb.keyDescription.equals(openWiki)){
+
+			EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP) Utils.getClientPlayer();
+		
+			clientPlayer.openGui(Eln.instance,GuiHandler.wikiId,clientPlayer.worldObj, 0,0,0);
+
+	    	return;
+	    }
+	    
         Packet250CustomPayload packet = new Packet250CustomPayload();
         packet.channel = Eln.channelName;
         packet.data = new byte[2];

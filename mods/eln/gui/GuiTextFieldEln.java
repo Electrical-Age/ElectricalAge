@@ -12,18 +12,23 @@ import net.minecraft.client.gui.GuiTextField;
 
 public class GuiTextFieldEln extends GuiTextField implements IGuiObject{
 	int xPos,yPos,width,height;
-	public GuiTextFieldEln(FontRenderer par1FontRenderer, int par2, int par3,
-			int par4, int par5,GuiHelper helper) {
-		super(par1FontRenderer, par2, par3, par4, par5);
+	public GuiTextFieldEln(FontRenderer par1FontRenderer, int x, int y,
+			int w, int h,GuiHelper helper) {
+		super(par1FontRenderer, x, y, w, h);
 		setTextColor(-1);
         setDisabledTextColour(-1);
         setEnableBackgroundDrawing(true);
         setMaxStringLength(50);
-        xPos = par2;
-        yPos = par3;
-        width = par4;
-        height = par5;
+        xPos = x;
+        yPos = y;
+        width = w;
+        height = h;
         this.helper = helper;
+	}
+	public GuiTextFieldEln(FontRenderer par1FontRenderer, int x, int y,
+			int w,GuiHelper helper) {
+		this(par1FontRenderer, x, y, w, 12, helper);
+
 	}
 	GuiTextFieldElnObserver observer;
 	

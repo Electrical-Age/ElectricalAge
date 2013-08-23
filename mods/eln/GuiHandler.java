@@ -10,6 +10,7 @@ import mods.eln.misc.Direction;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
+import mods.eln.wiki.Root;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -54,15 +55,21 @@ public class GuiHandler implements IGuiHandler {
 		return container;
 
 	}
-
+	public static final int wikiId = 6;
 	// returns an instance of the Gui you made earlier
 	@Override
 	public Object getClientGuiElement(int id, EntityPlayer player, World world,
 			int x, int y, int z) {
-		NodeBlockEntity tileEntity = (NodeBlockEntity) world
-				.getBlockTileEntity(x, y, z);
-		Direction side = Direction.fromInt(id);
-
-		return tileEntity.newGuiDraw(side, player);
+		if(id >= 0 && id <= 5){		
+			NodeBlockEntity tileEntity = (NodeBlockEntity) world
+					.getBlockTileEntity(x, y, z);
+			Direction side = Direction.fromInt(id);
+	
+			return tileEntity.newGuiDraw(side, player);
+		}
+		if(id == wikiId){
+			return new Root(player);
+		}
+		return null;
 	}
 }

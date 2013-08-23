@@ -5,16 +5,19 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
+import net.minecraftforge.common.ISpecialArmor;
 
 import org.lwjgl.opengl.GL11;
 
-public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDescriptor> implements IItemRenderer {
+public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDescriptor> implements IItemRenderer , ISpecialArmor{
 
 	public SharedItem(int par1) {
 		super(par1);
@@ -33,12 +36,12 @@ public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDes
 		// TODO Auto-generated method stub
 		return getDescriptor(item).shouldUseRenderHelper(type, item, helper);
 	}
-	
+	/*
     public boolean isValidArmor(ItemStack stack, int armorType, Entity entity)
     {
     	return true;
     }
-    /*
+    
 	@Override
 	public String getArmorTexture(ItemStack stack, Entity entity, int slot, int layer)
 	{
@@ -81,6 +84,26 @@ public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDes
 		getDescriptor(item).renderItem(type, item, data);
 		
 		Minecraft.getMinecraft().mcProfiler.endSection();
+	}
+
+	@Override
+	public ArmorProperties getProperties(EntityLivingBase player,
+			ItemStack armor, DamageSource source, double damage, int slot) {
+		// TODO Auto-generated method stub
+		return new ArmorProperties(10, 1.0, 10000);
+	}
+
+	@Override
+	public int getArmorDisplay(EntityPlayer player, ItemStack armor, int slot) {
+		// TODO Auto-generated method stub
+		return 4;
+	}
+
+	@Override
+	public void damageArmor(EntityLivingBase entity, ItemStack stack,
+			DamageSource source, int damage, int slot) {
+		// TODO Auto-generated method stub
+		
 	}	
 
 }

@@ -9,7 +9,7 @@ import mods.eln.SlotFilter;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.SlotWithSkin;
 import mods.eln.gui.ISlotSkin.SlotSkin;
-import mods.eln.item.ElectricalMotorDescriptor;
+
 import mods.eln.item.HeatingCorpElement;
 import mods.eln.item.MaceratorSorterDescriptor;
 import mods.eln.item.MachineBoosterDescriptor;

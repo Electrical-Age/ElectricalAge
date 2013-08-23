@@ -6,15 +6,21 @@ import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
 import mods.eln.misc.LRDU;
+import mods.eln.misc.Obj3D;
+import mods.eln.misc.Utils;
+import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.SixNodeDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 public class LampSocketDescriptor extends SixNodeDescriptor{
 	public LampSocketType socketType;
-	public LampSocketDescriptor(String name, String modelName,
+	private Obj3D obj;
+	private Obj3DPart socket;
+	public LampSocketDescriptor(String name, Obj3D obj,boolean onOffModel,
 								LampSocketType socketType,
 								int range,
 								float alphaZMin,float alphaZMax,
@@ -28,12 +34,21 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 		this.alphaZMin = alphaZMin;
 		this.alphaZMax = alphaZMax;
 		this.alphaZBoot = alphaZBoot;
+		this.onOffModel = onOffModel;
+		this.obj = obj;
+		
+		if(obj != null){
+			socket = obj.getPart("socket");
+			tOff = obj.getAlternativeTexture(obj.getString("tOff"));
+			tOn = obj.getAlternativeTexture(obj.getString("tOn"));
+		}
 	}
 
+	ResourceLocation tOn,tOff;
 	public int range;
 	public String modelName;
 	float alphaZMin,alphaZMax,alphaZBoot;
-	
+	boolean onOffModel;
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		// TODO Auto-generated method stub
@@ -48,16 +63,39 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		// TODO Auto-generated method stub
-		Eln.obj.draw(modelName, "socket");
+		if(type == ItemRenderType.INVENTORY){
+			if(hasGhostGroup()){
+				GL11.glScalef(0.5f, 0.5f, 0.5f);
+				GL11.glRotatef(90, 0, -1, 0);
+				GL11.glTranslatef(-1.5f,0f, 0f);
+			}
+		}
+		else if(type == ItemRenderType.EQUIPPED_FIRST_PERSON){
+			if(hasGhostGroup()){
+				GL11.glScalef(0.3f, 0.3f, 0.3f);
+				GL11.glRotatef(90, 0, -1, 0);
+				GL11.glTranslatef(-0.5f,0f, -1f);
+			}
+		}
+		draw(LRDU.Up, 0, (byte) 0);
 	}
-	public void draw(LRDU front, float alphaZ) {
+	public void draw(LRDU front, float alphaZ,byte light) {
 		front.glRotateOnX();
 		
 		GL11.glDisable(GL11.GL_CULL_FACE);
-		Eln.obj.draw(modelName, "socket");
+		if(onOffModel == false){
+			socket.draw();
+		}
+		else{
+			if(light > 5)
+				Utils.bindTexture(tOn);
+			else
+				Utils.bindTexture(tOff);
+			socket.drawNoBind();
+		}
 		GL11.glEnable(GL11.GL_CULL_FACE);
-		GL11.glLineWidth(2f);
-	/*	GL11.glDisable(GL11.GL_TEXTURE_2D);
+	/*	GL11.glLineWidth(2f);
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(GL11.GL_LIGHTING);
 		GL11.glColor3f(1f,1f,1f);
 		GL11.glBegin(GL11.GL_LINES);
@@ -67,7 +105,11 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glEnable(GL11.GL_LIGHTING);*/
 	}		
-	
+	@Override
+	public boolean hasVolume() {
+		// TODO Auto-generated method stub
+		return hasGhostGroup();
+	}
 	
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,

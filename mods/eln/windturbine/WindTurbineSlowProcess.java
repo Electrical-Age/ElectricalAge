@@ -2,7 +2,7 @@ package mods.eln.windturbine;
 
 import mods.eln.INBTTReady;
 import mods.eln.item.DynamoDescriptor;
-import mods.eln.item.WindRotorDescriptor;
+
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
@@ -17,7 +17,7 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 	
 	double environementWindFactor = 0.0;
 	double environementTimeCounter = 0;
-	static final double environementTimeCounterReset = 2.0;	
+	static final double environementTimeCounterReset = 10.0;	
 	
 	double localWind = 0;
 	double localWindDerive = 0;
@@ -48,129 +48,54 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 	@Override
 	public void process(double time) 
 	{
-
-		ItemStack rotorStack = turbine.getInventory().getStackInSlot(WindTurbineContainer.windRotorSlotId);
-		ItemStack dynamoStack = turbine.getInventory().getStackInSlot(WindTurbineContainer.dynamoSlotId);
-		
-		if(turbine.inventoryChangeFlag)
-		{
-			turbine.inventoryChangeFlag = false;
-			turbine.setPhysicalValue(false);
-			
-			environementTimeCounter = 0.0;
-			rotorStack = turbine.getInventory().getStackInSlot(WindTurbineContainer.windRotorSlotId);
-			dynamoStack = turbine.getInventory().getStackInSlot(WindTurbineContainer.dynamoSlotId);
-
-		}
-		
-		
+		WindTurbineDescriptor d = turbine.descriptor;
 		environementTimeCounter -= time;
 		if(environementTimeCounter < 0.0)
 		{
-			environementTimeCounter += environementTimeCounterReset;
-
-			if(rotorStack == null)
-			{
-				environementWindFactor = 0.0;
-			}
-			else
-			{
-				WindRotorDescriptor rotor = (WindRotorDescriptor) WindRotorDescriptor.getDescriptor(rotorStack);
-
-				int x1 = 0,x2 = 0,y1 = 0,y2 = 0,z1 = 0,z2 = 0;
-				y1 = rotor.environnementalHeightStart;
-				y2 = rotor.environnementalHeightEnd;
-				
-				switch (rotor.axe) {
-
-				case horizontal:
-					switch (turbine.front) {
-					case XN:
-						z1 = rotor.environnementalWidthStart;
-						z2 = rotor.environnementalWidthEnd;
-						x1 = rotor.environnementalDepthStart;
-						x2 = rotor.environnementalDepthEnd;
-						break;
-					case XP:
-						z2 = -rotor.environnementalWidthStart;
-						z1 = -rotor.environnementalWidthEnd;
-						x2 = -rotor.environnementalDepthStart;
-						x1 = -rotor.environnementalDepthEnd;
-						break;
-					case ZN:
-						x2 = -rotor.environnementalWidthStart;
-						x1 = -rotor.environnementalWidthEnd;
-						z1 = rotor.environnementalDepthStart;
-						z2 = rotor.environnementalDepthEnd;
-						break;
-					case ZP:
-						x1 = rotor.environnementalWidthStart;
-						x2 = rotor.environnementalWidthEnd;
-						z2 = -rotor.environnementalDepthStart;
-						z1 = -rotor.environnementalDepthEnd;
-						break;
-					default:
-					case YN:
-					case YP:
-						break;
-
-				
-					}
-					break;
-				case vertical:
-					z2 = -rotor.environnementalWidthStart;
-					z1 = -rotor.environnementalWidthEnd;
-					x2 = -rotor.environnementalDepthStart;
-					x1 = -rotor.environnementalDepthEnd;
-				
-					break;
-				default:
-					break;
-
-				}
-				
-				Coordonate coord = turbine.node.coordonate;
-				
-				x1 += coord.x;
-				x2 += coord.x;
-				y1 += coord.y;
-				y2 += coord.y;
-				z1 += coord.z;
-				z2 += coord.z;
-				
-				int blockFreeCount = 0;
-				World world = turbine.node.coordonate.world();
-				IChunkProvider chunk = world.getChunkProvider();
-				boolean notInCache = false;
-				for(int x = x1;x<=x2;x++)
-				{
-					for(int y = y1;y<=y2;y++)
-					{
-						for(int z = z1;z<=z2;z++)
-						{
-							if(chunk.chunkExists(x>>4, z>>4) == false) 
-							{
-								notInCache = true;
-								break;
-							}
-							if(world.getBlockId(x, y, z) != 0) continue;
-								
-							blockFreeCount++;
-						}		
-						if(notInCache) break;
-					}	
-					if(notInCache) break;
-				}
-				if(! notInCache)
-				{
-					double ratio = blockFreeCount / ((double)((x2-x1+1)*(y2-y1+1)*(z2-z1+1) - rotor.environementalOffsetBlock));
-					if(ratio > 1.0) ratio = 1.0;
-					environementWindFactor = rotor.environnementalFunction.getValue(ratio);
-			//		System.out.println("Ratio : " + ratio + "   environementWindFactor : " + environementWindFactor);
-				}
-				
-			}
+			environementTimeCounter += environementTimeCounterReset*(0.75 + Math.random()*0.5);
 			
+			int x1 = 0,x2 = 0,y1 = 0,y2 = 0,z1 = 0,z2 = 0;
+
+			
+			Coordonate coord = new Coordonate(turbine.node.coordonate);
+			
+			x1 = coord.x - d.rayX;
+			x2 = coord.x + d.rayX;
+			y1 = coord.y - d.rayY + d.offY;
+			y2 = coord.y + d.rayY + d.offY;
+			z1 = coord.z - d.rayZ;
+			z2 = coord.z + d.rayZ;
+			
+			int blockBusyCount = -d.blockMalusSubCount;
+			World world = turbine.node.coordonate.world();
+			IChunkProvider chunk = world.getChunkProvider();
+			boolean notInCache = false;
+			for(int x = x1;x<=x2;x++)
+			{
+				for(int y = y1;y<=y2;y++)
+				{
+					for(int z = z1;z<=z2;z++)
+					{
+						if(world.blockExists(x, y, z) == false) 
+						{
+							notInCache = true;
+							break;
+						}
+						if(world.getBlockId(x, y, z) != 0){
+							blockBusyCount++;
+						}
+					}		
+					if(notInCache) break;
+				}	
+				if(notInCache) break;
+			}
+			if(! notInCache)
+			{
+				environementWindFactor = Math.max(0.0,Math.min(1.0,1.0 - blockBusyCount*d.blockMalus));
+				
+				System.out.println("EnvironementWindFactor : " + environementWindFactor);
+			}
+		
 		}
 		
 		
@@ -201,34 +126,22 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 
 		
 		double P = 0;
-		if(rotorStack != null)
+		double wind = getWind();
+		
+		if(wind > d.maxWind)
 		{
-			WindRotorDescriptor rotor = (WindRotorDescriptor) WindRotorDescriptor.getDescriptor(rotorStack);
-			double wind = getWind();
-			if(wind > rotor.maximalWind)
-			{
-				if(Math.random() <  (wind - rotor.maximalWind) * 0.02);
+			if(Math.random() <  (wind - d.maxWind) * 0.02){
+				turbine.selfDestroy();
 			}
-			else
-			{
-				P = rotor.PfW.getValue(wind);
-			}
-		}
-		double Umax = 0;
-		if(dynamoStack != null)
-		{
-			DynamoDescriptor rotor = (DynamoDescriptor) WindRotorDescriptor.getDescriptor(dynamoStack);
-			P = rotor.PoutfPin.getValue(P);
-			Umax = rotor.UfPout.getValue(P);
 		}
 		else
 		{
-			P = 0;
+			P = d.PfW.getValue(wind);
 		}
 		
 		
 		turbine.powerSource.setP(P);	
-		turbine.powerSource.setUmax(Umax);
+		turbine.powerSource.setUmax(d.maxVoltage);
 		
 		
 		

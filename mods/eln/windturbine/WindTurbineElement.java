@@ -1,14 +1,17 @@
 package mods.eln.windturbine;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 import mods.eln.Eln;
 import mods.eln.ghost.GhostObserver;
 import mods.eln.item.DynamoDescriptor;
-import mods.eln.item.WindRotorDescriptor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
+import mods.eln.node.NodePeriodicPublishProcess;
 import mods.eln.node.TransparentNode;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElement;
@@ -21,7 +24,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 
-public class WindTurbineElement extends TransparentNodeElement implements GhostObserver{
+public class WindTurbineElement extends TransparentNodeElement{
 
 	NodeElectricalLoad positiveLoad = new NodeElectricalLoad("positiveLoad");
 	NodeElectricalLoad negativeLoad = new NodeElectricalLoad("negativeLoad");
@@ -36,7 +39,7 @@ public class WindTurbineElement extends TransparentNodeElement implements GhostO
 			TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		
-		Eln.ghostManager.addObserver(this);
+
 		
 		this.descriptor = (WindTurbineDescriptor) descriptor;
 		
@@ -44,7 +47,7 @@ public class WindTurbineElement extends TransparentNodeElement implements GhostO
 		electricalLoadList.add(negativeLoad);
 		
 		electricalProcessList.add(powerSource);
-		
+		slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 4, 4));
 		slowProcessList.add(slowProcess);
 	}
 
@@ -85,66 +88,25 @@ public class WindTurbineElement extends TransparentNodeElement implements GhostO
 
 	@Override
 	public void initialize() {
-		setPhysicalValue(true);
+		setPhysicalValue();
 		
 		connect();
 	}
 
-	boolean inventoryChangeFlag = false;
-	@Override
-	public void inventoryChange(IInventory inventory) {
-		//setPhysicalValue();
-		inventoryChangeFlag = true;
-		super.inventoryChange(inventory);
+
+	private void setPhysicalValue() {
+		descriptor.cable.applyTo(positiveLoad,false);
+		descriptor.cable.applyTo(negativeLoad,grounded);
 	}
-	
-	public void setPhysicalValue(boolean  boot) {
-		ItemStack rotorStack = getInventory().getStackInSlot(WindTurbineContainer.windRotorSlotId);
-		ItemStack dynamoStack = getInventory().getStackInSlot(WindTurbineContainer.dynamoSlotId);
-		
-		if(! boot)
-		{
-			Eln.ghostManager.removeGhostAndBlockWithObserver(node.coordonate);
-		}
-		
-		if(rotorStack != null)
-		{
-			WindRotorDescriptor rotor = (WindRotorDescriptor) WindRotorDescriptor.getDescriptor(rotorStack);
-			
-			
-			if(boot == true || rotor.ghostGroupe.newRotate(front).plot(node.coordonate, node.coordonate, 42))
-			{
-				
-			}
-			else
-			{
-				getInventory().setInventorySlotContents(WindTurbineContainer.windRotorSlotId, null);
-				node.dropItem(rotorStack);
-			}
-			
-		}
-		if(dynamoStack != null)
-		{
-			DynamoDescriptor rotor = (DynamoDescriptor) WindRotorDescriptor.getDescriptor(dynamoStack);
-			rotor.applyTo(positiveLoad,false);
-			rotor.applyTo(negativeLoad,grounded);
-		}
-		else
-		{
-			positiveLoad.highImpedance();
-			negativeLoad.highImpedance();
-		}
-		
-	}
-	
+
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2 , 64, this);
+	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(0 , 64, this);
 	
 	@Override
 	public IInventory getInventory() {
@@ -162,37 +124,20 @@ public class WindTurbineElement extends TransparentNodeElement implements GhostO
 		return new WindTurbineContainer(this.node, player, inventory);
 	}
 
-	@Override
-	public Coordonate getGhostObserverCoordonate() {
-		// TODO Auto-generated method stub
-		return node.coordonate;
-	}
 
+	
 	@Override
-	public void ghostDestroyed(int UUID) {
+	public void networkSerialize(DataOutputStream stream) {
 		// TODO Auto-generated method stub
-		//System.out.println("destroy : " + UUID);
-		Eln.ghostManager.removeGhostAndBlockWithObserver(this.node.coordonate);
-		ItemStack rotorStack = getInventory().getStackInSlot(WindTurbineContainer.windRotorSlotId);
-		if(rotorStack != null)
-		{
-			node.dropItem(rotorStack);
-			inventory.setInventorySlotContents(WindTurbineContainer.windRotorSlotId, null);
+		super.networkSerialize(stream);
+		try {
+			stream.writeFloat((float) slowProcess.getWind());
+			stream.writeFloat((float) (powerSource.getP()/descriptor.nominalPower));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		setPhysicalValue(false);
+		
 	}
 
-	@Override
-	public boolean ghostBlockActivated(int UUID, EntityPlayer entityPlayer,
-			Direction side, float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void onBreakElement() {
-		Eln.ghostManager.removeObserver(this.node.coordonate);
-		Eln.ghostManager.removeGhostAndBlockWithObserver(this.node.coordonate);
-		super.onBreakElement();
-	}
 }

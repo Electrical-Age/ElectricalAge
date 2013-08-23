@@ -7,6 +7,7 @@ import com.google.common.base.CaseFormat;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import net.minecraft.world.World;
 
 
@@ -107,8 +108,14 @@ public class GhostGroup {
 				break;
 			default:
 			case YN:
+				x = -element.y;
+				y = element.x;
+				z = element.z;				
+				break;
 			case YP:
-				x = 0; y = 0; z = 0;
+				x = element.y;
+				y = -element.x;
+				z = element.z;		
 				break;
 
 			}
@@ -119,6 +126,13 @@ public class GhostGroup {
 		return other;
 	}
 	
-	
+	public GhostGroup newRotate(Direction dir,LRDU front)
+	{
+		GhostGroup g = newRotate(dir);
+		return g;
+	}
+	public int size() {
+		return elementList.size();
+	}
 	
 }

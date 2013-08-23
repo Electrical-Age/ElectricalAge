@@ -219,6 +219,7 @@ public class LampSocketElement extends SixNodeElement{
 	    	stream.writeBoolean(poweredByLampSupply);
 	    	stream.writeUTF(channel);
 	    	stream.writeBoolean(isConnectedToLampSupply);
+	    	stream.writeByte(lampProcess.light);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -265,7 +266,7 @@ public class LampSocketElement extends SixNodeElement{
 			lampDescriptor.applyTo(lampResistor);
 		}
 		
-
+		
 	}
 	
 

@@ -62,5 +62,7 @@ public class SixNodeRender extends TileEntitySpecialRenderer
 		Minecraft.getMinecraft().mcProfiler.endSection();
 
 	}
+	
+	
 }
 		

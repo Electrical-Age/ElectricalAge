@@ -16,9 +16,11 @@ import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamage;
+import mods.eln.ghost.GhostGroup;
 import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
@@ -237,8 +239,18 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
     	{	
     		blockID = this.getBlockID();
     		SixNodeBlock block = (SixNodeBlock)Block.blocksList[blockID];
+    		Coordonate coord = new Coordonate(x,y,z,world);
+    		SixNodeDescriptor descriptor = getDescriptor(stack);
 
-	
+			String error;
+			if((error = descriptor.checkCanPlace(coord, direction,LRDU.Up)) != null)
+			{
+				player.addChatMessage(error);
+				return false;
+			}
+			
+			GhostGroup ghostgroup = descriptor.getGhostGroup(direction,LRDU.Up);
+			if(ghostgroup != null) ghostgroup.plot(coord, coord, descriptor.getGhostGroupUuid());
 
     	   if(block.getIfOtherBlockIsSolid(world,x,y,z,direction))
     	   {

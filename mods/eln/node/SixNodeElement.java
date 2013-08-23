@@ -12,6 +12,8 @@ import cpw.mods.fml.common.registry.LanguageRegistry;
 
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
+import mods.eln.ghost.GhostObserver;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -28,7 +30,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public abstract class SixNodeElement implements INBTTReady {
+public abstract class SixNodeElement implements INBTTReady, GhostObserver {
 	//private static Class[] idToClass = new Class[256];
 	//private static Class[] idToRenderClass = new Class[256];
 	
@@ -130,6 +132,8 @@ public abstract class SixNodeElement implements INBTTReady {
 		this.sixNode = sixNode;
 		this.side = side;
 		this.sixNodeElementDescriptor = descriptor;
+		
+		if(descriptor.hasGhostGroup())Eln.ghostManager.addObserver(this);
 	}
 	
 
@@ -204,6 +208,11 @@ public abstract class SixNodeElement implements INBTTReady {
     
     public void destroy()
     {
+		if(sixNodeElementDescriptor.hasGhostGroup()){
+			Eln.ghostManager.removeObserver(sixNode.coordonate);
+			sixNodeElementDescriptor.getGhostGroup(side,front).erase(sixNode.coordonate);
+		}
+		
     	sixNode.dropInventory(getInventory());
     	sixNode.dropItem(getDropItemStack());
     }
@@ -338,5 +347,27 @@ public abstract class SixNodeElement implements INBTTReady {
 		return false;
 	}
     
+	public Coordonate getGhostObserverCoordonate()
+	{
+		return sixNode.coordonate;
+		
+	}
+	public void ghostDestroyed(int UUID)
+	{
+		if(UUID == sixNodeElementDescriptor.getGhostGroupUuid()){
+			selfDestroy();
+		}
+	}
+	public boolean ghostBlockActivated(int UUID,EntityPlayer entityPlayer, Direction side,float vx, float vy, float vz)
+	{
+		if(UUID == sixNodeElementDescriptor.getGhostGroupUuid()){
+			sixNode.onBlockActivated(entityPlayer, this.side, vx, vy, vz);
+		}
+		return false;
+	}
 
+	
+	private void selfDestroy() {
+		sixNode.deleteSubBlock(side);
+	}
 }

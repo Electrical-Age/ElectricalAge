@@ -72,7 +72,7 @@ import mods.eln.item.BrushDescriptor;
 import mods.eln.item.CombustionChamber;
 import mods.eln.item.DynamoDescriptor;
 import mods.eln.item.ElectricalDrillDescriptor;
-import mods.eln.item.ElectricalMotorDescriptor;
+
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.item.HeatingCorpElement;
 import mods.eln.item.LampDescriptor;
@@ -88,11 +88,12 @@ import mods.eln.item.SolarTrackerDescriptor;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.item.ToolsSetItem;
 import mods.eln.item.TreeResin;
-import mods.eln.item.WindRotorDescriptor;
+
 import mods.eln.item.LampDescriptor.Type;
-import mods.eln.item.WindRotorDescriptor.WindRotorAxeType;
+
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
 import mods.eln.item.electricalitem.BatteryItem;
+import mods.eln.item.electricalitem.ElectricalArmor;
 import mods.eln.item.electricalitem.ElectricalAxe;
 import mods.eln.item.electricalitem.ElectricalLampItem;
 import mods.eln.item.electricalitem.ElectricalPickaxe;
@@ -108,6 +109,7 @@ import mods.eln.lampsocket.LightBlockEntity;
 import mods.eln.lampsupply.LampSupplyDescriptor;
 import mods.eln.lampsupply.LampSupplyElement;
 
+import mods.eln.misc.Direction;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.FunctionTableYProtect;
 import mods.eln.misc.IFunction;
@@ -193,6 +195,7 @@ import net.minecraft.world.storage.WorldInfo;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.EnumHelper;
 import net.minecraftforge.common.ForgeDummyContainer;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
@@ -263,6 +266,10 @@ public class Eln {
 	
 	public static int helmetCopperId,plateCopperId,legsCopperId,bootsCopperId;
 	public static ItemArmor helmetCopper,plateCopper,legsCopper,bootsCopper;
+
+	public static int helmetECoalId,plateECoalId,legsECoalId,bootsECoalId;
+	public static ItemArmor helmetECoal,plateECoal,legsECoal,bootsECoal;
+
 	
 	public static int swordCopperId,hoeCopperId,shovelCopperId,pickaxeCopperId,axeCopperId;
 	public static Item swordCopper,hoeCopper,shovelCopper,pickaxeCopper,axeCopper;
@@ -367,6 +374,10 @@ public class Eln {
 		pickaxeCopperId = config.getItem("pickaxeCopperId", itemBaseId + 9).getInt();
 		axeCopperId = config.getItem("axeCopperId", itemBaseId + 10).getInt();
 		
+		helmetECoalId = config.getItem("helmetECoalId", itemBaseId + 11).getInt();
+		plateECoalId = config.getItem("plateECoalId", itemBaseId + 12).getInt();
+		legsECoalId = config.getItem("legsECoalId", itemBaseId + 13).getInt();
+		bootsECoalId = config.getItem("bootsECoalId", itemBaseId + 14).getInt();
 
 		
 	//	electricalPickaxeId =  config.getItem("axeCopperId", itemBaseId + 11).getInt();
@@ -546,8 +557,8 @@ public class Eln {
 		registerDust(9);
 		registerElectricalMotor(10);
 		registerSolarTracker(11);
-		registerDynamo(12);
-		registerWindRotor(13);
+
+
 		registerMeter(14);
 		registerElectricalDrill(15);
 		registerOreScanner(16);
@@ -618,7 +629,7 @@ public class Eln {
 		recipeThermalDissipatorPassiveAndActive();
 		recipeElectricalAntenna();
 		recipeEggIncubatore();
-
+		recipeBatteryCharger();
 		
 		/*		registerTransformer(2);
 		registerHeatFurnace(3);
@@ -659,6 +670,9 @@ public class Eln {
 		recipeTreeResinAndRubber();
 		recipeRawCable();
 		recipeMiscItem();
+		recipeBatteryItem();
+		recipeElectricalTool();
+		
 
 		recipeFurnace();
 		recipeMacerator();
@@ -1106,7 +1120,7 @@ public class Eln {
 			name = "Lamp socket A";
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name,
-					"ClassicLampSocket", LampSocketType.Douille, // LampSocketType
+					obj.getObj("ClassicLampSocket"),false, LampSocketType.Douille, // LampSocketType
 																	// socketType
 					4, 0, 0, 0);
 
@@ -1118,10 +1132,26 @@ public class Eln {
 			name = "Lamp socket B projector";
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name,
-					"ClassicLampSocket", LampSocketType.Douille, // LampSocketType
+					obj.getObj("ClassicLampSocket"),false, LampSocketType.Douille, // LampSocketType
 																	// socketType
 					10, -90, 90, 0);
 
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		{
+			subId = 8;
+
+			name = "Street light";
+
+			LampSocketDescriptor desc = new LampSocketDescriptor(name,
+					obj.getObj("StreetLight"),true, LampSocketType.Douille, // LampSocketType
+																	// socketType
+					0, 0, 0, 0);
+			desc.setPlaceDirection(Direction.YN);
+			GhostGroup g = new GhostGroup();
+			g.addElement(1, 0, 0);
+			g.addElement(2, 0, 0);
+			desc.setGhostGroup(g);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
@@ -1453,7 +1483,7 @@ public class Eln {
 			name = "Electrical math";
 
 			desc = new ElectricalMathDescriptor(name,
-					obj.getObj("electricaltimer"));
+					obj.getObj("PLC"));
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -2994,8 +3024,65 @@ public class Eln {
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}
 		
-
-		
+		int armorPoint;
+		String t1,t2;
+		t1 = "eln:textures/armor/copper_layer_1.png";
+		t2 = "eln:textures/armor/copper_layer_2.png";
+		double energyPerDamage = 500;
+		int armor,armorMarge;
+		EnumArmorMaterial eCoalMaterial = EnumHelper.addArmorMaterial("ECoal", 10, new int[]{2, 6, 5, 2}, 9);
+		{
+			name = "ECoal helmet";
+			armor = 2;
+			armorMarge = 1;
+			helmetECoal = (ItemArmor)(new ElectricalArmor(helmetECoalId, eCoalMaterial, 2,0,t1,t2,
+										(armor + armorMarge)*energyPerDamage,250.0,//double energyStorage,double chargePower
+										armor/20.0,armor*energyPerDamage,//double ratioMax,double ratioMaxEnergy,
+										energyPerDamage//double energyPerDamage										
+										)).setUnlocalizedName(name).func_111206_d("eln:copper_chesthelmet").setCreativeTab(creativeTab);
+			stack = new ItemStack(helmetECoal);
+			LanguageRegistry.addName(stack,name);
+			GameRegistry.registerCustomItemStack(name, stack.copy());
+		}	
+		{
+			name = "ECoal plate";
+			armor = 6;
+			armorMarge = 2;
+			plateECoal = (ItemArmor)(new ElectricalArmor(plateECoalId, eCoalMaterial, 2,1,t1,t2,
+										(armor + armorMarge)*energyPerDamage,250.0,//double energyStorage,double chargePower
+										armor/20.0,armor*energyPerDamage,//double ratioMax,double ratioMaxEnergy,
+										energyPerDamage//double energyPerDamage										
+										)).setUnlocalizedName(name).func_111206_d("eln:copper_chestplate").setCreativeTab(creativeTab);
+			stack = new ItemStack(plateECoal);
+			LanguageRegistry.addName(stack,name);
+			GameRegistry.registerCustomItemStack(name, stack.copy());
+		}		
+		{
+			name = "ECoal legs";
+			armor = 5;
+			armorMarge = 2;
+			legsECoal = (ItemArmor)(new ElectricalArmor(legsECoalId, eCoalMaterial, 2,2,t1,t2,
+										(armor + armorMarge)*energyPerDamage,250.0,//double energyStorage,double chargePower
+										armor/20.0,armor*energyPerDamage,//double ratioMax,double ratioMaxEnergy,
+										energyPerDamage//double energyPerDamage										
+										)).setUnlocalizedName(name).func_111206_d("eln:copper_chestlegs").setCreativeTab(creativeTab);
+			stack = new ItemStack(legsECoal);
+			LanguageRegistry.addName(stack,name);
+			GameRegistry.registerCustomItemStack(name, stack.copy());
+		}
+		{
+			name = "ECoal boots";
+			armor = 2;
+			armorMarge = 1;
+			bootsECoal = (ItemArmor)(new ElectricalArmor(bootsECoalId, eCoalMaterial, 2,3,t1,t2,
+										(armor + armorMarge)*energyPerDamage,250.0,//double energyStorage,double chargePower
+										armor/20.0,armor*energyPerDamage,//double ratioMax,double ratioMaxEnergy,
+										energyPerDamage//double energyPerDamage										
+										)).setUnlocalizedName(name).func_111206_d("eln:copper_chestboots").setCreativeTab(creativeTab);
+			stack = new ItemStack(bootsECoal);
+			LanguageRegistry.addName(stack,name);
+			GameRegistry.registerCustomItemStack(name, stack.copy());
+		}	
 	}
 
 	
@@ -3062,12 +3149,30 @@ public class Eln {
 	void registerWindTurbine(int id) {
 		int subId, completId;
 		String name;
+		
+		FunctionTable PfW = new FunctionTable(
+				new double[] { 0.0, 0.2,0.4, 0.6, 0.8, 1.0, 1.1, 1.15, 1.2 },
+				8.0 / 5.0);
 		{
 			subId = 0;
 			name = "Wind turbine";
 
-			WindTurbineDescriptor desc = new WindTurbineDescriptor(name);
+			WindTurbineDescriptor desc = new WindTurbineDescriptor(
+					name,obj.getObj("WindTurbineMini"),   //name,Obj3D obj,
+					lowVoltageCableDescriptor,//ElectricalCableDescriptor cable,
+					PfW,//PfW
+					200,10,//double nominalPower,double nominalWind,
+					LVU*1.18,25,//double maxVoltage, double maxWind,
+					3,//int offY,
+					7,2,2,//int rayX,int rayY,int rayZ,
+					2,0.07//int blockMalusMinCount,double blockMalus
+					
+					);
 
+			GhostGroup g = new GhostGroup();
+			g.addElement(0, 1, 0);
+			g.addRectangle(0, 0, 1, 3, -1, 1);
+			desc.setGhostGroup(g);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
@@ -3114,89 +3219,6 @@ public class Eln {
 
 	}
 
-	void registerWindRotor(int id) {
-		int subId, completId;
-		String name;
-
-		FunctionTable PfW = new FunctionTable(new double[] { 0.0, 0.1, 0.3,
-				0.6, 1.0 }, 1.0);
-		FunctionTable environnementalFunction = new FunctionTable(new double[] {
-				0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.2, 0.4, 0.5, 1.0 }, 1.0);
-		GhostGroup ghostGroupe;
-		WindRotorDescriptor desc;
-		{
-			subId = 0;
-			name = "Wind rotor";
-
-			ghostGroupe = new GhostGroup();
-			ghostGroupe.addRectangle(-1, -1, -1, 1, -1, 1);
-
-			desc = new WindRotorDescriptor(
-					name,// int iconId, String name,
-					ghostGroupe, -2,
-					2,// int environnementalWidthStart,int
-						// environnementalWidthEnd,
-					-2,
-					2,// int environnementalHeightStart,int
-						// environnementalHeightEnd,
-					-5,
-					5,// int environnementalDepthStart,int
-						// environnementalDepthEnd,
-					9 + 1 + 2 + 1 + 5, environnementalFunction,
-					WindRotorAxeType.horizontal,// WindRotorAxeType axe,
-					PfW, 10, 500, 30);
-
-			sharedItem.addElement(subId + (id << 6), desc);
-		}
-	}
-
-	void registerDynamo(int id) {
-		int subId, completId;
-		String name;
-		/*
-		 * FunctionTable PoutfPin = new FunctionTable(new double[]{1.0,
-		 * 1.0,1.0,1.0,1.0,1.0, 1.0,1.0,1.0,1.0,1.0, 0.95,0.90,0.85,0.78,0.70 },
-		 * 1.5);
-		 */
-		FunctionTable PoutfPin = new FunctionTable(new double[] { 0.0, 0.1,
-				0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.08, 1.15, 1.21,
-				1.26, 1.29 }, 1.5);
-		FunctionTable UfP = new FunctionTable(new double[] { 0.0, 0.9, 1.0,
-				1.10, 1.15, 1.18, 1.18, 1.18, 1.18, 1.18, 1.18 }, 1.0);
-
-		DynamoDescriptor element;
-		{
-			subId = 0;
-			completId = subId + (id << 6);
-			element = new DynamoDescriptor("Small dynamo",// iconId, name,
-					PoutfPin, UfP, LVU, 250, 0.01// electricalMaxU,
-													// electricalMaxP,
-													// electricalDropFactor
-			);
-			sharedItem.addElement(completId, element);
-		}
-		{
-			subId = 1;
-			completId = subId + (id << 6);
-			element = new DynamoDescriptor("Medium dynamo",// iconId, name,
-					PoutfPin, UfP, LVU, 500, 0.01// electricalMaxU,
-													// electricalMaxP,
-													// electricalDropFactor
-			);
-			sharedItem.addElement(completId, element);
-		}
-		{
-			subId = 2;
-			completId = subId + (id << 6);
-			element = new DynamoDescriptor("Big dynamo",// iconId, name,
-					PoutfPin, UfP, LVU, 750, 0.01// electricalMaxU,
-													// electricalMaxP,
-													// electricalDropFactor
-			);
-			sharedItem.addElement(completId, element);
-		}
-
-	}
 
 	void registerMppt(int id) {
 		int subId, completId;
@@ -3425,12 +3447,36 @@ public class Eln {
 		{
 			subId = 0;
 			completId = subId + (id << 6);
-			name = "50V battery charger";
+			name = "Weak 50V battery charger";
 
 			descriptor = new BatteryChargerDescriptor(
 					name,obj.getObj("batterychargera"),
 					lowVoltageCableDescriptor,//ElectricalCableDescriptor cable,
 					LVU,200//double nominalVoltage,double nominalPower
+					);
+			sixNodeItem.addDescriptor(completId, descriptor);
+		}
+		{
+			subId = 1;
+			completId = subId + (id << 6);
+			name = "50V battery charger";
+
+			descriptor = new BatteryChargerDescriptor(
+					name,obj.getObj("batterychargera"),
+					lowVoltageCableDescriptor,//ElectricalCableDescriptor cable,
+					LVU,400//double nominalVoltage,double nominalPower
+					);
+			sixNodeItem.addDescriptor(completId, descriptor);
+		}
+		{
+			subId = 4;
+			completId = subId + (id << 6);
+			name = "200V battery charger";
+
+			descriptor = new BatteryChargerDescriptor(
+					name,obj.getObj("batterychargera"),
+					meduimVoltageCableDescriptor,//ElectricalCableDescriptor cable,
+					MVU,1000//double nominalVoltage,double nominalPower
 					);
 			sixNodeItem.addDescriptor(completId, descriptor);
 		}
@@ -3664,7 +3710,7 @@ public class Eln {
 			ElectricalPickaxe desc = new ElectricalPickaxe(
 					name,
 					8,3,//float strengthOn,float strengthOff,
-					20000,100,400//double energyStorage,double energyPerBlock,double chargePower
+					40000,200,800//double energyStorage,double energyPerBlock,double chargePower
 					);
 			sharedItemStackOne.addElement(subId + (id << 6), desc);
 		}	
@@ -3676,7 +3722,7 @@ public class Eln {
 			ElectricalAxe desc = new ElectricalAxe(
 					name,
 					8,3,//float strengthOn,float strengthOff,
-					20000,100,400//double energyStorage,double energyPerBlock,double chargePower
+					40000,200,800//double energyStorage,double energyPerBlock,double chargePower
 					);
 			sharedItemStackOne.addElement(subId + (id << 6), desc);
 		}	
@@ -3696,7 +3742,7 @@ public class Eln {
 			BatteryItem desc = new BatteryItem(
 					name,
 					20000,500,100,//double energyStorage,double chargePower,double dischargePower, 
-					1//int priority
+					2//int priority
 					);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}	
@@ -3708,10 +3754,34 @@ public class Eln {
 			BatteryItem desc = new BatteryItem(
 					name,
 					60000,1500,300,//double energyStorage,double chargePower,double dischargePower, 
+					2//int priority
+					);
+			sharedItem.addElement(subId + (id << 6), desc);
+		}	
+		
+		{
+			subId = 16;
+			name = "Portable condensator";
+			
+			BatteryItem desc = new BatteryItem(
+					name,
+					5000,2000,500,//double energyStorage,double chargePower,double dischargePower, 
 					1//int priority
 					);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}	
+		{
+			subId = 17;
+			name = "Portable condensator pack";
+			
+			BatteryItem desc = new BatteryItem(
+					name,
+					15000,6000,1500,//double energyStorage,double chargePower,double dischargePower, 
+					1//int priority
+					);
+			sharedItem.addElement(subId + (id << 6), desc);
+		}	
+		
 	}
 
 	void registerMiscItem(int id) {
@@ -3979,6 +4049,14 @@ public class Eln {
 				" I", 
 				"IG", 
 				" I",
+				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
+				Character.valueOf('I'), new ItemStack(Item.ingotIron));
+
+		
+		GameRegistry.addRecipe(findItemStack("Street light", 1),
+				"G", 
+				"I", 
+				"I",
 				Character.valueOf('G'), new ItemStack(Block.thinGlass), 
 				Character.valueOf('I'), new ItemStack(Item.ingotIron));
 
@@ -4774,6 +4852,50 @@ public class Eln {
 
 	}
 
+	void recipeBatteryItem(){
+		GameRegistry.addRecipe(findItemStack("Portable battery"),
+				"I",
+				"P",
+				"P",
+				Character.valueOf('P'), findItemStack("Plumb ingot"),
+				Character.valueOf('I'), new ItemStack(Item.ingotIron));		
+		GameRegistry.addShapelessRecipe(
+				findItemStack("Portable battery pack"),
+				findItemStack("Portable battery"),findItemStack("Portable battery"),findItemStack("Portable battery"));		
+	}
+
+
+	
+	
+	void recipeElectricalTool() {
+
+		GameRegistry.addRecipe(findItemStack("Small flashlight"),
+				"L",
+				"B",
+				"I",
+				Character.valueOf('L'), findItemStack("50V incandescent light bulb"),
+				Character.valueOf('B'), findItemStack("Portable battery"),
+				Character.valueOf('R'), new ItemStack(Item.ingotIron));		
+		
+		GameRegistry.addRecipe(findItemStack("Portable electrical mining drill"),
+				" T ",
+				"IBI",
+				" I",
+				Character.valueOf('T'), findItemStack("Average electrical drill"),
+				Character.valueOf('B'), findItemStack("Portable battery"),
+				Character.valueOf('R'), new ItemStack(Item.ingotIron));		
+	
+		GameRegistry.addRecipe(findItemStack("Portable electrical axe"),
+				" T ",
+				"IBI",
+				" I",
+				Character.valueOf('T'), new ItemStack(Item.axeIron),
+				Character.valueOf('B'), findItemStack("Portable battery"),
+				Character.valueOf('R'), new ItemStack(Item.ingotIron));		
+	
+		
+	}
+	
 	void recipeMiscItem() {
 		GameRegistry.addRecipe(findItemStack("Cheap chip"),
 				" R ",
@@ -5309,6 +5431,36 @@ public class Eln {
 		
 		
 	}
+	
+	private void recipeBatteryCharger() {
+		GameRegistry.addRecipe(findItemStack("Weak 50V battery charger", 1), 
+				"RIR",
+				"III",
+				"RcR",
+				Character.valueOf('c'),findItemStack("Low voltage cable"), 
+				Character.valueOf('I'),new ItemStack(Item.ingotIron),
+				Character.valueOf('R'),new ItemStack(Item.redstone));
+		GameRegistry.addRecipe(findItemStack("50V battery charger", 1), 
+				"RIR",
+				"ICI",
+				"RcR",
+				Character.valueOf('C'),findItemStack("Cheap chip"), 
+				Character.valueOf('c'),findItemStack("Low voltage cable"), 
+				Character.valueOf('I'),new ItemStack(Item.ingotIron),
+				Character.valueOf('R'),new ItemStack(Item.redstone));
+		
+		GameRegistry.addRecipe(findItemStack("200V battery charger", 1), 
+				"RIR",
+				"ICI",
+				"RcR",
+				Character.valueOf('C'),findItemStack("Advanced chip"), 
+				Character.valueOf('c'),findItemStack("Medium voltage cable"), 
+				Character.valueOf('I'),new ItemStack(Item.ingotIron),
+				Character.valueOf('R'),new ItemStack(Item.redstone));
+		
+	}	
+	
+
 	
 	private void recipeEggIncubatore() {
 		GameRegistry.addRecipe(findItemStack("50V Egg incubator", 1), 

@@ -169,4 +169,9 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 		AxisAlignedBB bb = Block.stone.getCollisionBoundingBoxFromPool(entity.worldObj,entity.xCoord,entity.yCoord,entity.zCoord);
 		if(par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
 	}
+	
+	public void setGhostGroup(GhostGroup ghostGroup)
+	{
+		this.ghostGroup = ghostGroup;
+	}
 }

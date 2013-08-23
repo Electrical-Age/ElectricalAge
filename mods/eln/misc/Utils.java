@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -38,7 +39,10 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -1035,6 +1039,75 @@ public class Utils {
 		
 	}
 	
+	
+    static public void getItemStack(String name,List list)
+    {
+        
+        Item[] aitem = Item.itemsList;
+        ArrayList<ItemStack> tempList = new ArrayList<ItemStack>(3000);
+        int i = aitem.length;
+        int j;
+
+        for (j = 0; j < i; ++j)
+        {
+            Item item = aitem[j];
+
+            if (item != null && item.getCreativeTab() != null)
+            {
+                item.getSubItems(item.itemID, (CreativeTabs)null, tempList);
+            }
+        }
+        /*
+        Enchantment[] aenchantment = Enchantment.enchantmentsList;
+        i = aenchantment.length;
+
+        for (j = 0; j < i; ++j)
+        {
+            Enchantment enchantment = aenchantment[j];
+
+            if (enchantment != null && enchantment.type != null)
+            {
+                Item.enchantedBook.func_92113_a(enchantment, containercreative.itemList);
+            }
+        }*/
+
+  
+        String s = name.toLowerCase();
+
+        for(ItemStack itemstack : tempList)  {
+            //String s1 = itemstack.getDisplayName();
+
+            if (itemstack.getDisplayName().toLowerCase().contains(s))
+            {
+            	list.add(itemstack);
+            }
+    
+        }
+
+    }
+	protected static RenderItem itemRenderer = new RenderItem();
+	
+	static Minecraft mc()
+	{
+		return Minecraft.getMinecraft();
+	}
+    
+    public static void drawItemStack(ItemStack par1ItemStack, int x, int y, String par4Str)
+    {
+    	
+    	
+        GL11.glTranslatef(0.0F, 0.0F, 32.0F);
+       
+        itemRenderer.zLevel = 200.0F;
+        FontRenderer font = null;
+        if (par1ItemStack != null) font = par1ItemStack.getItem().getFontRenderer(par1ItemStack);
+        if (font == null) font = mc().fontRenderer;
+        itemRenderer.renderItemAndEffectIntoGUI(font, mc().func_110434_K(), par1ItemStack, x, y);
+        itemRenderer.renderItemOverlayIntoGUI(font, mc().func_110434_K(), par1ItemStack, x, y, par4Str);
+        
+        itemRenderer.zLevel = 0.0F;
+    }
+
 	
 
 } 

@@ -36,12 +36,21 @@ public class ItemEnergyInventoryProcess implements IProcess {
 	   {
 		   	EntityPlayerMP player = (EntityPlayerMP) obj;	
 		   	list.clear();
+		   	
+		   	for(ItemStack stack : player.inventory.armorInventory){
+		   		
+		   		Object o = Utils.getItemObject(stack);
+		   		if(o instanceof IItemEnergyBattery){
+		   			list.add(new Element(stack, (IItemEnergyBattery) o));
+		   		}
+		   	}
 		   	for(ItemStack stack : player.inventory.mainInventory){
 		   		Object o = Utils.getItemObject(stack);
 		   		if(o instanceof IItemEnergyBattery){
 		   			list.add(new Element(stack, (IItemEnergyBattery) o));
 		   		}
 		   	}
+
 		   boolean rememberDst = false;
 		   double rememberDstEToDstMax = 0;
 		   while(true){
@@ -70,13 +79,13 @@ public class ItemEnergyInventoryProcess implements IProcess {
 				   double eToDst = Math.min(eFromSrc,eToDstMax);
 				   eFromSrc -= eToDst;
 				   dst.i.setEnergy(dst.stack, dst.i.getEnergy(dst.stack) + eToDst);
-				   
-				   if(eToDstMax == eToDst){
+				   eToDstMax -= eToDst;
+				   if(eToDstMax == 0){
 					   list.remove(dst);
 				   }
 				   else{
 					   rememberDst = true;
-					   rememberDstEToDstMax = eToDst;
+					   rememberDstEToDstMax = eToDstMax;
 				   }
 			   }
 			   

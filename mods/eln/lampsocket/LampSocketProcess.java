@@ -1,5 +1,8 @@
 package mods.eln.lampsocket;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import cpw.mods.fml.relauncher.Side;
@@ -127,6 +130,10 @@ public class LampSocketProcess implements IProcess , INBTTReady/*,LightBlockObse
 
 				}
 			}
+			
+			
+			
+
 		}
 		
 		
@@ -435,6 +442,21 @@ public class LampSocketProcess implements IProcess , INBTTReady/*,LightBlockObse
 			else
 				LightBlockEntity.addLight(lbCoord, light);*/
 			LightBlockEntity.addLight(lbCoord, light, 5);
+		}
+		
+		
+		if(light != oldLight){
+	    	ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+	        DataOutputStream packet = new DataOutputStream(bos);   	
+	        
+			lamp.preparePacketForClient(packet);
+			try {
+				packet.writeByte(light);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			lamp.sendPacketToAllClient(bos);
 		}
 	
 	}

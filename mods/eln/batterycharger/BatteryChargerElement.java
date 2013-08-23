@@ -23,6 +23,7 @@ import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.node.NodeElectricalLoad;
+import mods.eln.node.NodeElectricalLoadWatchdogProcess;
 import mods.eln.node.SixNode;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElement;
@@ -61,10 +62,14 @@ public class BatteryChargerElement extends SixNodeElement {
 	public BatteryChargerElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
+		this.descriptor = (BatteryChargerDescriptor) descriptor;
+		
 		electricalLoadList.add(powerLoad);
 		slowProcessList.add(slowProcess);
+		slowProcessList.add(new NodeElectricalLoadWatchdogProcess(powerLoad, sixNode,this.descriptor.cable));
+		
 		front = LRDU.Down;
-		this.descriptor = (BatteryChargerDescriptor) descriptor;
+
 		
 	}
 	

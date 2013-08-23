@@ -69,11 +69,12 @@ public class LampSocketRender extends SixNodeElementRender{
 	@Override
 	public void draw() {
 		super.draw();
-		descriptor.draw(front,alphaZ);
+		descriptor.draw(front,alphaZ,light);
 	}
 	public String channel;
 	LampDescriptor lampDescriptor = null;
 	float alphaZ;
+	private byte light;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -92,11 +93,22 @@ public class LampSocketRender extends SixNodeElementRender{
 			channel = stream.readUTF();
 			
 			isConnectedToLampSupply = stream.readBoolean();
+			
+			
+			light = stream.readByte();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}
+	@Override
+	public void serverPacketUnserialize(DataInputStream stream)
+			throws IOException {
+		// TODO Auto-generated method stub
+		super.serverPacketUnserialize(stream);
+		light = stream.readByte();
+	}
+	
 	public boolean isConnectedToLampSupply;
 	
 	ElectricalCableDescriptor cable;
@@ -132,5 +144,11 @@ public class LampSocketRender extends SixNodeElementRender{
 			e.printStackTrace();
 		}        
         
+	}
+	
+	
+	@Override
+	public boolean cameraDrawOptimisation() {
+		return ! descriptor.hasGhostGroup();
 	}
 }

@@ -18,6 +18,12 @@ public class NodeThermalWatchdogProcess extends ThermalWatchdogProcess{
 		// TODO Auto-generated constructor stub
 	}
 
+	void setParam(ITemperatureWatchdogDescriptor watchdog,IThermalDestructorDescriptor destructor)
+	{
+		this.watchdog = watchdog;
+		this.destructor = destructor;
+	}
+	
 	
 	@Override
 	public double getTemperature() {

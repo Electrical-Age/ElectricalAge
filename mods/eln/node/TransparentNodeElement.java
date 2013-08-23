@@ -401,7 +401,7 @@ public abstract class TransparentNodeElement implements INBTTReady ,GhostObserve
 	public boolean ghostBlockActivated(int UUID,EntityPlayer entityPlayer, Direction side,float vx, float vy, float vz)
 	{
 		if(UUID == transparentNodeDescriptor.getGhostGroupUuid()){
-			onBlockActivated(entityPlayer, side, vx, vy, vz);
+			return node.onBlockActivated(entityPlayer, side, vx, vy, vz);
 		}
 		return false;
 	}

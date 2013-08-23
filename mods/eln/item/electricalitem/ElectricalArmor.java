@@ -2,31 +2,65 @@ package mods.eln.item.electricalitem;
 
 import java.util.List;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumArmorMaterial;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
+import net.minecraftforge.common.ISpecialArmor;
 import mods.eln.generic.genericArmorItem;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
-/*
-public class ElectricalArmor extends genericArmorItem implements IItemEnergyBattery{
+
+public class ElectricalArmor extends genericArmorItem implements IItemEnergyBattery ,ISpecialArmor{
 
 	public ElectricalArmor(int par1, EnumArmorMaterial par2EnumArmorMaterial,
-			int par3, int par4, String t1, String t2,String icon) {
+			int par3, int par4, 
+			String t1, String t2,//String icon,
+			double energyStorage,double chargePower,
+			double ratioMax,double ratioMaxEnergy,
+			double energyPerDamage
+			) {
 		super(par1, par2EnumArmorMaterial, par3, par4, t1, t2);
-		rIcon = new ResourceLocation("eln",icon);
+		//rIcon = new ResourceLocation("eln",icon);
+		this.chargePower = chargePower;
+		this.energyStorage = energyStorage;
+		this.ratioMax = ratioMax;
+		this.ratioMaxEnergy = ratioMaxEnergy;
+		this.energyPerDamage = energyPerDamage;
+	}
+	double ratioMax, ratioMaxEnergy,energyPerDamage;
+	@Override
+	public ArmorProperties getProperties(EntityLivingBase player,
+			ItemStack armor, DamageSource source, double damage, int slot) {
+		// TODO Auto-generated method stub
+		return new ArmorProperties(100, Math.min(1.0, getEnergy(armor)/ratioMaxEnergy)*ratioMax, (int) (getEnergy(armor)/energyPerDamage*25D));
 	}
 
+	@Override
+	public int getArmorDisplay(EntityPlayer player, ItemStack armor, int slot) {
+		// TODO Auto-generated method stub
+		return (int)(Math.min(1.0, getEnergy(armor)/ratioMaxEnergy)*ratioMax*20);
+	}
 
+	@Override
+	public void damageArmor(EntityLivingBase entity, ItemStack stack,
+			DamageSource source, int damage, int slot) {
+		double e = getEnergy(stack);
+		e = Math.max(0.0, e - damage*energyPerDamage);
+		setEnergy(stack, e);
+		System.out.println("armor hit  damage=" + damage + " energy=" + e + " energyLost=" + damage*energyPerDamage);
+	}
 	double energyStorage, chargePower;
 
 
-	ResourceLocation rIcon;
+//	ResourceLocation rIcon;
 	
 	
 	
@@ -45,9 +79,15 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
     		ItemStack itemStack) {
     	// TODO Auto-generated method stub
     	super.onArmorTickUpdate(world, player, itemStack);
+    	
+	//	int maxDamage = getArmorMaterial().getDurability(armorType);
+		
+	//	System.out.println("maxDamage=" + maxDamage + " Damage=" + itemStack.getItemDamage());
     }
+    
+    
 	
-	@Override
+	
 	public NBTTagCompound getDefaultNBT() {
 		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
 		nbt.setDouble("energy",0);
@@ -56,7 +96,14 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
 		return nbt;
 	}
 	
-
+	protected NBTTagCompound getNbt(ItemStack stack){
+		NBTTagCompound nbt = stack.getTagCompound();
+		if(nbt == null){
+			stack.setTagCompound(nbt = getDefaultNBT());
+		}
+		return nbt;		
+	}
+	
 	
 	boolean getPowerOn(ItemStack stack)
 	{
@@ -115,6 +162,21 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
 
 
 
+/*
+	@Override
+	public void onUpdate(ItemStack par1ItemStack, World par2World,
+			Entity par3Entity, int par4, boolean par5) {
+		// TODO Auto-generated method stub
+		//super.onUpdate(par1ItemStack, par2World, par3Entity, par4, par5);
+		int maxDamage = getArmorMaterial().getDurability(armorType);
+		
+		System.out.println("maxDamage=" + maxDamage + " Damage=" + par1ItemStack.getItemDamage());
+	}
+	*/
+	
+	
+/*
+
 	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
@@ -135,7 +197,6 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
 		if(type == ItemRenderType.INVENTORY)		
 			Utils.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
 		Utils.drawIcon(type,rIcon);
-	}
+	}*/
  
 }
-*/
