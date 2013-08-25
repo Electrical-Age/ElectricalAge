@@ -1,5 +1,9 @@
 # Blender v2.67 (sub 0) OBJ File: 'WindTurbineMini.blend'
 # www.blender.org
+# ---------------
+# Author : lambdaShade
+# This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/.
+
 mtllib WindTurbineMini.mtl
 o halo
 v -0.125000 2.687500 0.125000
