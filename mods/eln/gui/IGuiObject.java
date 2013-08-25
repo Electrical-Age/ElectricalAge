@@ -12,4 +12,6 @@ public interface IGuiObject {
 		public void guiObjectEvent(IGuiObject object);
 	}
 	public void translate(int x, int y);
+	
+	public int getYMax();
 }

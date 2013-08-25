@@ -58,10 +58,7 @@ public abstract class TransparentNodeElement implements INBTTReady ,GhostObserve
 	{
 		Utils.serialiseItemStack(stream,stack);
 	}
-	protected int serialiseItemStackSize()
-	{
-		return 4;
-	}
+
 	public void connectJob()
 	{
 		Eln.simulator.addAllSlowProcess(slowProcessList);
@@ -135,8 +132,33 @@ public abstract class TransparentNodeElement implements INBTTReady ,GhostObserve
 		return null;
 	}
 	
-
+    public void preparePacketForClient(DataOutputStream stream)
+    {
+    	node.preparePacketForClient(stream); 	
+    }
 	
+	public void sendIdToAllClient(byte id){
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+        DataOutputStream packet = new DataOutputStream(bos);   	
+        
+		preparePacketForClient(packet);
+		
+		try {
+			packet.writeByte(id);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+		sendPacketToAllClient(bos);
+	}
+	
+	
+	
+	private void sendPacketToAllClient(ByteArrayOutputStream bos) {
+		node.sendPacketToAllClient(bos);
+	}
+
 	public Container newContainer(Direction side,EntityPlayer player)
 	{
 		return null;

@@ -124,6 +124,7 @@ public class NodeManager extends WorldSavedData{
 		//for(Node node : nodeArray)
 		for(NodeBase node : nodeArray.values())
 		{
+			if(node.mustBeSaved() == false) continue;
 			NBTTagCompound nbtNode = new NBTTagCompound();
 			nbtNode.setShort("UUID", node.getBlockId());
 			node.writeToNBT(nbtNode,"");

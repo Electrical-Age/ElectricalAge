@@ -21,7 +21,12 @@ public class GuiButtonEln extends GuiButton implements IGuiObject{
 		// TODO Auto-generated method stub
 		drawButton(Minecraft.getMinecraft(), x, y);
 	}
-
+	@Override
+	public int getYMax() {
+		// TODO Auto-generated method stub
+		return yPosition + height;
+	}
+	
 	@Override
 	public boolean ikeyTyped(char key, int code) {
 		// TODO Auto-generated method stub

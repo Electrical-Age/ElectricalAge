@@ -145,6 +145,44 @@ public abstract class TransparentNodeElementRender {
 			e.printStackTrace();
 		}        
         
+	}	
+	
+	public void clientSendString(Byte id,String str)
+	{
+        try {
+	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	        DataOutputStream stream = new DataOutputStream(bos);   	
+	
+	        preparePacketForServer(stream);
+			
+			stream.writeByte(id);
+			stream.writeUTF(str);
+			
+			sendPacketToServer(bos);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}        
+        
+	}		
+	
+	public void clientSendFloat(Byte id,float str)
+	{
+        try {
+	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	        DataOutputStream stream = new DataOutputStream(bos);   	
+	
+	        preparePacketForServer(stream);
+			
+			stream.writeByte(id);
+			stream.writeFloat(str);
+			
+			sendPacketToServer(bos);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}        
+        
 	}		
     public boolean cameraDrawOptimisation()
     {
@@ -178,6 +216,10 @@ public abstract class TransparentNodeElementRender {
 	}
 	public void notifyNeighborSpawn() {
 
+		
+	}
+	public void serverPacketUnserialize(DataInputStream stream) {
+		// TODO Auto-generated method stub
 		
 	}
 }

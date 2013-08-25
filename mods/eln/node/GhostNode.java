@@ -17,6 +17,10 @@ public abstract class GhostNode extends NodeBase{
 	}
 
 
-	
+	@Override
+	public boolean mustBeSaved() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
 }

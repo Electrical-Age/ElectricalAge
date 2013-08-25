@@ -18,9 +18,12 @@ import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.common.registry.GameRegistry;
 
 import mods.eln.Eln;
+import mods.eln.GuiHandler;
 import mods.eln.PlayerManager;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.gui.ISlotSkin;
+import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.ITileEntitySpawnClient;
 import mods.eln.node.NodeBlockEntity;
@@ -48,6 +51,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemDye;
@@ -444,9 +448,12 @@ public class Utils {
     
     
     
-    public static double getWind(World world)
+    public static double getWind(World world,int y)
     {
-    	return Math.cos(world.getCelestialAngleRadians(0)*2)*5 + 10;
+    	float factor = 1f;
+    	if(world.isRaining()) factor *= 1.2;
+    	if(world.isThundering()) factor *= 1.25;
+    	return Math.max(0.0,(Math.cos(world.getCelestialAngleRadians(0)*2)*5 + 4 + y/20.0)*factor);
     }
     
     public static void dropItem(ItemStack itemStack,int x,int y,int z,World world)
@@ -1096,9 +1103,9 @@ public class Utils {
     {
     	
     	
-        GL11.glTranslatef(0.0F, 0.0F, 32.0F);
+       // GL11.glTranslatef(0.0F, 0.0F, 32.0F);
        
-        itemRenderer.zLevel = 200.0F;
+        itemRenderer.zLevel = 400.0F;
         FontRenderer font = null;
         if (par1ItemStack != null) font = par1ItemStack.getItem().getFontRenderer(par1ItemStack);
         if (font == null) font = mc().fontRenderer;
@@ -1108,6 +1115,16 @@ public class Utils {
         itemRenderer.zLevel = 0.0F;
     }
 
-	
+	public static GuiScreen guiLastOpen;
+
+    public static void clientOpenGui(GuiScreen gui)
+    {
+    	guiLastOpen = gui;
+		EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP) Utils.getClientPlayer();	
+		clientPlayer.openGui(Eln.instance,GuiHandler.genericOpen,clientPlayer.worldObj, 0,0,0);
+    }
+    
+    
+    
 
 } 

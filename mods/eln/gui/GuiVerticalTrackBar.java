@@ -25,9 +25,14 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
     	this.visible = visible;
     	if(visible == false) drag = false;
     }
-    
+	@Override
+	public int getYMax() {
+		// TODO Auto-generated method stub
+		return yPosition + height;
+	}
+	
     IGuiObjectObserver observer;
-    void setObserver(IGuiObjectObserver observer)
+    public void setObserver(IGuiObjectObserver observer)
     {
     	this.observer = observer;
     }
@@ -215,5 +220,9 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 	public void translate(int x, int y) {
 		this.xPosition += x;
 		this.yPosition += y;
+	}
+	public float getStepId() {
+		// TODO Auto-generated method stub
+		return stepId;
 	}
 }

@@ -23,7 +23,12 @@ public class GuiVerticalWorkingZoneBar extends Gui implements IGuiObject{
 		enabled = true;
 	}
 	
-
+	@Override
+	public int getYMax() {
+		// TODO Auto-generated method stub
+		return yPosition + height;
+	}
+	
 	public void setEnabled(boolean b) {
 		this.enabled = b;
 	}

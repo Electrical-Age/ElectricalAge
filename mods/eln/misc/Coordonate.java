@@ -244,6 +244,7 @@ public class Coordonate implements INBTTReady {
 	}
 	public void setDimention(int dimention) {
 		this.dimention = dimention;
+		w = null;
 	}
 	public void copyFrom(Coordonate c) {
 		this.x = c.x;
@@ -251,4 +252,12 @@ public class Coordonate implements INBTTReady {
 		this.z = c.z;
 		this.dimention = c.dimention;
 	}
+	public void applyTransformation(Direction front, Coordonate coordonate) {
+		front.rotateFromXN(this);
+		x += coordonate.x;
+		y += coordonate.y;
+		z += coordonate.z;
+
+	}
+
 }

@@ -141,35 +141,6 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
     {
     	sixNode.preparePacketForClient(stream, this);    	
     }
-/*	static boolean  staticInitialized = false;
-	public static void staticInitialize()
-	{
-		for(int idx = 0;idx<256;idx++)
-		{
-			idToClass[idx] = null;
-			idToRenderClass[idx] = null;
-		}
-		staticInitialized = true;
-	}*/
-	/*
-	public static void registerElement(int id,Class sixNodeElementClass,Class sixNodeElementRenderClass)
-	{
-		if(!staticInitialized) staticInitialize();
-		if(id == 0)
-		{
-			System.out.println("Reserved ID sixenodeelement");
-			while(true);
-		}
-		if(idToClass[id] != null)
-		{
-			System.out.println("used ID sixenodeelement");
-			while(true);	
-		}
-
-
-		idToClass[id] = sixNodeElementClass;
-		idToRenderClass[id] = sixNodeElementRenderClass;
-	}*/
 	
 
 	

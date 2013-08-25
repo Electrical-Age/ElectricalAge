@@ -31,6 +31,11 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject{
 
 	}
 	GuiTextFieldElnObserver observer;
+	@Override
+	public int getYMax() {
+		// TODO Auto-generated method stub
+		return yPos + height;
+	}
 	
 	public void setObserver(GuiTextFieldElnObserver observer)
 	{

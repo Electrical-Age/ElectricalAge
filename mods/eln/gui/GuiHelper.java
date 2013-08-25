@@ -113,7 +113,21 @@ public class GuiHelper {
 		o.translate(screen.width/2 -xSize/2 , screen.height/2 -ySize/2);
 		objectList.add(o);
 	}
+	public void remove(IGuiObject o)
+	{
+		o.translate(-screen.width/2 +xSize/2 , -screen.height/2 +ySize/2);
+		objectList.remove(o);		
+	}
+	/*
+	void flushRemove(){
+		for(IGuiObject o : removeList){
+			o.translate(-screen.width/2 +xSize/2 , -screen.height/2 +ySize/2);
+			objectList.remove(o);			
+		}
+		removeList.clear();
+	}
 	
+	ArrayList<IGuiObject> removeList = new ArrayList<IGuiObject>();*/
 	ArrayList<IGuiObject> objectList = new ArrayList<IGuiObject>();
 	void draw(int x, int y, float f)
 	{
@@ -160,16 +174,26 @@ public class GuiHelper {
 		y += (screen.height - ySize) / 2;
 		screen.drawTexturedModalRect(x, y, u, v, width, height);
     }
-	protected void keyTyped(char key, int code)
+    
+    IGuiObject[] objectListCopy()
     {
-		for(IGuiObject o : objectList)
+    	IGuiObject[] cpy = new IGuiObject[objectList.size()];
+    	for(int idx = 0;idx<cpy.length;idx++){
+    		cpy[idx] = objectList.get(idx);
+    	}
+    	return cpy;
+    }
+    
+	protected void keyTyped(char key, int code)
+    {	
+		for(IGuiObject o : objectListCopy())
 		{
 			o.ikeyTyped(key, code);
 		}
     }
     protected void mouseClicked(int x, int y, int code)
     {
-		for(IGuiObject o : objectList)
+		for(IGuiObject o : objectListCopy())
 		{
 			o.imouseClicked(x, y, code);
 		}
@@ -346,5 +370,15 @@ public class GuiHelper {
 		Utils.bindTexture(helperTexture);
 		drawTexturedModalRect(x, y,8,0 , (int) (22), 16);
 		drawTexturedModalRect(x, y,8+22,0 , (int) (22*value), 16);
+	}
+	
+	
+	
+	static final ResourceLocation slotSkin = new ResourceLocation("textures/gui/container/furnace.png");
+	
+	protected void drawSlot(int x, int y) {
+		Utils.bindTexture(slotSkin);
+
+		drawTexturedModalRect(x-1, y -1, 55, 16, 73-55, 34-16);
 	}
 }

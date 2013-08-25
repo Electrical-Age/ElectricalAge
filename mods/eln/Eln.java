@@ -109,6 +109,7 @@ import mods.eln.lampsocket.LightBlockEntity;
 import mods.eln.lampsupply.LampSupplyDescriptor;
 import mods.eln.lampsupply.LampSupplyElement;
 
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.FunctionTableYProtect;
@@ -149,6 +150,8 @@ import mods.eln.solarpannel.SolarPannelDescriptor;
 import mods.eln.solver.ConstSymbole;
 import mods.eln.solver.Equation;
 import mods.eln.solver.ISymbole;
+import mods.eln.teleporter.TeleporterDescriptor;
+import mods.eln.teleporter.TeleporterElement;
 import mods.eln.thermalcable.ThermalCableDescriptor;
 import mods.eln.thermaldissipatoractive.ThermalDissipatorActiveDescriptor;
 import mods.eln.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor;
@@ -545,6 +548,7 @@ public class Eln {
 		registerSolarPannel(48);
 		registerWindTurbine(49);
 		registerThermalDissipatorPassiveAndActive(64);
+		registerTransparentNodeMisc(65);
 
 		registerHeatingCorp(1);
 		registerThermalIsolator(2);
@@ -625,7 +629,7 @@ public class Eln {
 		recipeElectricalFurnace(); 
 		recipeAutoMiner();
 		recipeSolarPannel();
-		recipeWindTurbine();
+
 		recipeThermalDissipatorPassiveAndActive();
 		recipeElectricalAntenna();
 		recipeEggIncubatore();
@@ -712,6 +716,7 @@ public class Eln {
 	/* Remember to use the right event! */
 	public void onServerStopping(FMLServerStoppingEvent ev) {
 		LightBlockEntity.observers.clear();
+		TeleporterElement.teleporterList.clear();
 		playerManager.clear();
 		MinecraftServer server = FMLCommonHandler.instance()
 				.getMinecraftServerInstance();
@@ -727,6 +732,7 @@ public class Eln {
 	@ServerStarting
 	/* Remember to use the right event! */
 	public void onServerStarting(FMLServerStartingEvent ev) {
+		TeleporterElement.teleporterList.clear();
 		tileEntityDestructor.clear();
 		LightBlockEntity.observers.clear();
 		WirelessSignalTxElement.channelMap.clear();
@@ -3151,7 +3157,7 @@ public class Eln {
 		String name;
 		
 		FunctionTable PfW = new FunctionTable(
-				new double[] { 0.0, 0.2,0.4, 0.6, 0.8, 1.0, 1.1, 1.15, 1.2 },
+				new double[] { 0.0, 0.05,0.2, 0.5, 0.8, 1.0, 1.1, 1.15, 1.2 },
 				8.0 / 5.0);
 		{
 			subId = 0;
@@ -3162,7 +3168,7 @@ public class Eln {
 					lowVoltageCableDescriptor,//ElectricalCableDescriptor cable,
 					PfW,//PfW
 					200,10,//double nominalPower,double nominalWind,
-					LVU*1.18,25,//double maxVoltage, double maxWind,
+					LVU*1.18,22,//double maxVoltage, double maxWind,
 					3,//int offY,
 					7,2,2,//int rayX,int rayY,int rayZ,
 					2,0.07//int blockMalusMinCount,double blockMalus
@@ -3217,6 +3223,36 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
+	}
+	
+	
+	void registerTransparentNodeMisc(int id) {
+		int subId, completId;
+		String name;
+		{
+			subId = 0;
+			name = "Experimental transporter";
+
+			Coordonate[] powerLoad = new Coordonate[1];
+			powerLoad[0] = new Coordonate(2,0,0,0);
+			
+			TeleporterDescriptor desc = new TeleporterDescriptor(
+					name, obj.getObj(""),
+					highVoltageCableDescriptor,
+					new Coordonate(2,0,0,0),
+					4,//int areaH	
+					powerLoad
+
+			);
+
+			GhostGroup g = new GhostGroup();
+			g.addRectangle(1, 2, 0, 0, 0, 0);
+			
+			desc.setGhostGroup(g);
+			
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}		
+		
 	}
 
 
@@ -4352,9 +4388,7 @@ public class Eln {
 
 	}
 
-	void recipeWindTurbine() {
 
-	}
 
 	void recipeThermalDissipatorPassiveAndActive() {
 		GameRegistry.addRecipe(

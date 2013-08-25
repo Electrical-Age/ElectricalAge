@@ -180,10 +180,10 @@ public class PacketHandler implements IPacketHandler {
 			} else {
 				System.out.println("No node found");
 				stream.readShort();
-				int dataSkipLength = stream.readByte();
+				/*int dataSkipLength = stream.readByte();
 				for (int idx = 0; idx < dataSkipLength; idx++) {
 					stream.readByte();
-				}
+				}*/
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

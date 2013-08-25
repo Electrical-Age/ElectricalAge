@@ -112,4 +112,15 @@ public abstract class GuiScreenEln extends GuiScreen implements GuiTextFieldElnO
 	{
 		helper.drawString(x,y,color,str);		
 	}
+	
+	
+	
+	protected void add(IGuiObject o)
+	{
+		helper.add(o);
+	}
+	protected void remove(IGuiObject o)
+	{
+		helper.remove(o);
+	}
 }

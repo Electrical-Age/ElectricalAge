@@ -17,6 +17,8 @@ import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.PacketHandler;
 import mods.eln.misc.Utils;
+import mods.eln.wiki.Root;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.network.packet.Packet250CustomPayload;
@@ -40,7 +42,7 @@ public class ClientKeyHandler extends KeyHandler {
 	    							new KeyBinding(stuffInteractB, Keyboard.KEY_B),
 	    							new KeyBinding(openWiki, Keyboard.KEY_X),
 	        						new KeyBinding(interact, Keyboard.KEY_C)},
-	        						new boolean[]{false,false,false});
+	        						new boolean[]{false,false,false,false});
 	        KeyBindingRegistry.registerKeyBinding(this);
 	}
 	
@@ -57,12 +59,10 @@ public class ClientKeyHandler extends KeyHandler {
 	  //  System.out.println("keyDown " + kb + "   " +  tickEnd + "   " + isRepeat);
 	    
 	    if(! tickEnd) return;
-	    if(kb.keyDescription.equals(openWiki)){
-
-			EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP) Utils.getClientPlayer();
-		
-			clientPlayer.openGui(Eln.instance,GuiHandler.wikiId,clientPlayer.worldObj, 0,0,0);
-
+	    if(Minecraft.getMinecraft().currentScreen != null) return;
+	    		
+	    if(kb.keyDescription.equals(openWiki)){	    	
+	    	Utils.clientOpenGui(new Root());
 	    	return;
 	    }
 	    

@@ -32,13 +32,36 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.util.Icon;
 
-public class Root extends GuiScreenEln{
+public class Search extends GuiScreenEln{
 
-	public Root() {
+	private String bootText;
 
+	public Search(String text) {
+		bootText = text;
+		
 	}
 
 
+	ArrayList<ItemStack> searchList = new ArrayList<ItemStack>();
+	ArrayList<GuiItemStack> guiStackList = new ArrayList<GuiItemStack>();
+	void searchStack(String text){
+		for(GuiItemStack gui : guiStackList){
+			remove(gui);
+		}
+		guiStackList.clear();
+		searchList.clear();
+		Utils.getItemStack(text, searchList);
+		int idx = 0;;
+		for(ItemStack stack : searchList){
+			GuiItemStack gui = new GuiItemStack((idx % 8)*21+6, idx/8*21+24, stack, this,this);
+			guiStackList.add(gui);
+			add(gui);
+			idx++;
+		}
+	}
+	
+	
+	
 	GuiButton toogleDefaultOutput;
 	GuiTextFieldEln searchText;
 
@@ -47,11 +70,15 @@ public class Root extends GuiScreenEln{
 		// TODO Auto-generated method stub
 		super.initGui();
 
-		toogleDefaultOutput = newGuiButton(6, 64/2-10,115, "toogle switch");
-		searchText = newGuiTextField(0, 0, 100);
+		//toogleDefaultOutput = newGuiButton(8, 8,176-16, "toogle switch");
+		searchText = newGuiTextField(8, 8,176-16);
+		searchText.setText(bootText);
+		
+		
+		searchStack(searchText.getText());
 
 	}
-	ArrayList<ItemStack> searchList = new ArrayList<ItemStack>();
+
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
 		// TODO Auto-generated method stub
@@ -60,7 +87,12 @@ public class Root extends GuiScreenEln{
     	
     	}
     	else if(object == searchText){
-    		Utils.clientOpenGui(new Search(searchText.getText()));	
+
+    		searchStack(searchText.getText());
+    	}
+    	else if(object instanceof GuiItemStack){
+    		GuiItemStack gui = (GuiItemStack) object;
+    		//Utils.clientOpenGui(new ItemDefault(gui.stack));
     	}
 	}
 	@Override
@@ -76,17 +108,16 @@ public class Root extends GuiScreenEln{
 		// TODO Auto-generated method stub
 		super.postDraw(f, x, y);
 
+
 	}
 
 	@Override
 	protected GuiHelper newHelper() {
 		// TODO Auto-generated method stub
-		return helper = new GuiHelper(this, 128, 64);
+		return helper = new GuiHelper(this, 176, 166);
 	}
 
 
 	GuiHelper helper;
-	
-	
 	
 }

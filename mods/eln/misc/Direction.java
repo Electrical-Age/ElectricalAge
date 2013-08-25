@@ -570,6 +570,41 @@ public enum Direction {
 		
 		}		
 	}
+	
+	public void rotateFromXN(int[] p) {
+		// TODO Auto-generated method stub
+		int x = p[0],y = p[1],z = p[2];
+		switch(this)
+		{
+		case XN:
+			break;
+		case XP:
+			p[0] = -x;
+			p[2] = -z;
+			break;
+		case YN:
+			p[0] = y;
+			p[1] = x;
+			p[2] = -z;
+			break;
+		case YP:
+			p[0] = y;
+			p[1] = -x;
+			p[2] = z;
+			break;
+		case ZN:
+			p[0] = -z;
+			p[2] = x;
+			break;
+		case ZP:
+			p[0] = z;
+			p[2] = -x;
+			break;
+		default:
+			break;
+		
+		}		
+	}
 	public void rotateFromXN(Vec3 p) {
 		// TODO Auto-generated method stub
 		double x = p.xCoord,y = p.yCoord,z = p.zCoord;
@@ -604,7 +639,39 @@ public enum Direction {
 		
 		}		
 	}
-
+	public void rotateFromXN(Coordonate p) {
+		int x = p.x,y = p.y,z = p.z;
+		switch(this)
+		{
+		case XN:
+			break;
+		case XP:
+			p.x = -x;
+			p.z = -z;
+			break;
+		case YN:
+			p.x = y;
+			p.y = x;
+			p.z = -z;
+			break;
+		case YP:
+			p.x = y;
+			p.y = -x;
+			p.z = z;
+			break;
+		case ZN:
+			p.x = -z;
+			p.z = x;
+			break;
+		case ZP:
+			p.x = z;
+			p.z = -x;
+			break;
+		default:
+			break;
+		
+		}	
+	}
 	public void glTranslate(float v) {
 		// TODO Auto-generated method stub
 		switch (this) {
@@ -626,6 +693,8 @@ public enum Direction {
 
 		}
 	}
+
+
 	
 }
 

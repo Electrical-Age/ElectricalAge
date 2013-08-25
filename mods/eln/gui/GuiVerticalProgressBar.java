@@ -21,6 +21,12 @@ public class GuiVerticalProgressBar  extends Gui implements IGuiObject {
 	{
 		color = (0xFF<<24) + (((int)(r*255))<<16)+ (((int)(g*255))<<8)+ (((int)(b*255))<<0);
 	}
+	@Override
+	public int getYMax() {
+		// TODO Auto-generated method stub
+		return yPosition + height;
+	}
+	
 	int color;
 	public GuiVerticalProgressBar(int xPosition,int yPosition,int width,int height,GuiHelper helper) 
 	{

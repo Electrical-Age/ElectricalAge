@@ -164,7 +164,12 @@ public class TransparentNodeEntity extends NodeBlockEntity {
 		}
 	}
 	
-	
+	public void serverPacketUnserialize(DataInputStream stream)
+	{
+		super.serverPacketUnserialize(stream);
+		if(elementRender != null)
+			elementRender.serverPacketUnserialize(stream);
+	}
 	
 	
 }

@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
@@ -55,7 +56,7 @@ public class GuiHandler implements IGuiHandler {
 		return container;
 
 	}
-	public static final int wikiId = 6;
+	public static final int genericOpen = 6;
 	// returns an instance of the Gui you made earlier
 	@Override
 	public Object getClientGuiElement(int id, EntityPlayer player, World world,
@@ -67,8 +68,8 @@ public class GuiHandler implements IGuiHandler {
 	
 			return tileEntity.newGuiDraw(side, player);
 		}
-		if(id == wikiId){
-			return new Root(player);
+		if(id == genericOpen){
+			return Utils.guiLastOpen;
 		}
 		return null;
 	}

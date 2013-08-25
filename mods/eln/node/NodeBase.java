@@ -88,6 +88,11 @@ public abstract class NodeBase implements INBTTReady {
 	
 	//public static boolean canBePlacedOn(ItemStack itemStack,Direction side)
 
+	public boolean mustBeSaved()
+	{
+		return true;
+	}
+	
 	public int getBlockMetadata()
 	{
 		return 0;

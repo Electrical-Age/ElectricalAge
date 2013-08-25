@@ -24,7 +24,12 @@ public class GuiHelpText extends Gui implements IGuiObject{
 	}
 	
 	
-
+	@Override
+	public int getYMax() {
+		// TODO Auto-generated method stub
+		return yPosition + height;
+	}
+	
 	
 	@Override
 	public void idraw(int x, int y, float f) {
