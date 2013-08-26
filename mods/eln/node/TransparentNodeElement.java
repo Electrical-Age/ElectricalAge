@@ -232,7 +232,8 @@ public abstract class TransparentNodeElement implements INBTTReady ,GhostObserve
 	{
 		if(transparentNodeDescriptor.hasGhostGroup()){
 			Eln.ghostManager.removeObserver(node.coordonate);
-			transparentNodeDescriptor.getGhostGroup(front).erase(node.coordonate);
+			Eln.ghostManager.removeGhostAndBlockWithObserver(node.coordonate);
+			//transparentNodeDescriptor.getGhostGroup(front).erase(node.coordonate);
 		}
 		node.dropInventory(getInventory());
 		node.dropItem(getDropItemStack());

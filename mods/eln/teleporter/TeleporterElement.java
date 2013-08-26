@@ -14,10 +14,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import mods.eln.lampsocket.LightBlockEntity;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.NodeElectricalLoad;
+import mods.eln.node.NodePeriodicPublishProcess;
 import mods.eln.node.TransparentNode;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElement;
@@ -31,26 +33,28 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	NodeElectricalLoad powerLoad = new NodeElectricalLoad("powerLoad");
 	TeleporterSlowProcess slowProcess = new TeleporterSlowProcess();
 	
-	
+	NodePeriodicPublishProcess publisher;
 	static public ArrayList<ITeleporter> teleporterList = new ArrayList<ITeleporter>();
 	
 	public TeleporterElement(TransparentNode transparentNode,
 			TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		this.descriptor = (TeleporterDescriptor)descriptor;
-		
+		publisher = new NodePeriodicPublishProcess(node, 2, 1);
 		
 		electricalLoadList.add(powerLoad);
 		slowProcessList.add(slowProcess);
-		
+		slowProcessList.add(publisher);
 		
 		teleporterList.add(this);
-	}
+		
 
+	}
+	Coordonate lightCoordonate;
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub
-		return null;
+		return powerLoad;
 	}
 
 	@Override
@@ -62,9 +66,11 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub
-		return 0;
+		if(side == Direction.YP || side == Direction.YN) return 0;
+		if(lrdu != LRDU.Down) return 0;
+		return node.maskElectricalPower;
 	}
-
+	
 	@Override
 	public String multiMeterString(Direction side) {
 		// TODO Auto-generated method stub
@@ -85,6 +91,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	
 	@Override
 	public void initialize() {
+		
 		descriptor.cable.applyTo(powerLoad, false);
 		
 		
@@ -97,6 +104,8 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			powerNodeList.add(n);
 		}
 		
+		lightCoordonate = new Coordonate(this.descriptor.lightCoordonate);
+		lightCoordonate.applyTransformation(front, node.coordonate);
 		
 		connect();
 	}
@@ -154,22 +163,34 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	}
 	
 	public static final byte StateIdle = 0;
-	public static final byte StateCharge = 1;
-	public static final byte StateTeleport = 2;
-	public static final byte StateStart = 3;
-	public static final byte StateEnd = 4;
+	public static final byte StateStart = 1;
+	public static final byte StateClose = 2;
+	public static final byte StateCharge = 3;
+	public static final byte StateTeleport = 4;
+	public static final byte StateOpen = 5;
+	public static final byte StateReserved = 6;
 	
 	byte state = StateIdle;
 	float timeCounter;
 	
 	
+	boolean doorState = true;
+	
 	void setState(byte state){
 		if(state != this.state){
-		
+			timeCounter = 0;
 			switch (this.state) {
-
 			case StateCharge:
 				powerLoad.setRp(100000000000.0);
+				publisher.reconfigure(2,1);
+				energyHit = 0;
+				processRatio = 0;
+				break;
+				
+			case StateReserved:
+				publisher.reconfigure(2,1);
+				doorState = true;
+				processRatio = 0;
 				break;
 			default:
 				break;
@@ -178,18 +199,28 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			this.state = state;
 			
 			switch (this.state) {
-			case StateStart:
-			case StateEnd:
-			case StateTeleport:
-				timeCounter = 0;
+			case StateClose:
+				doorState = false;
+				descriptor.ghostDoorOpen.newRotate(front).eraseGeo(node.coordonate);				
+				descriptor.ghostDoorClose.newRotate(front).plot(node.coordonate, node.coordonate, descriptor.getGhostGroupUuid());
+				break;
+			case StateOpen:
+				doorState = true;
+				descriptor.ghostDoorClose.newRotate(front).eraseGeo(node.coordonate);	
+				descriptor.ghostDoorOpen.newRotate(front).plot(node.coordonate, node.coordonate, descriptor.getGhostGroupUuid());
 				break;
 			case StateCharge:
 				powerLoad.setRp(Math.pow(descriptor.cable.electricalNominalVoltage,2) / powerCharge);
+				publisher.reconfigure(0.2,0);
+				break;
+			case StateReserved:
+				publisher.reconfigure(0.2,0);
 				break;
 			default:
 				break;
 			}
 
+			
 			
 			
 			System.out.println("Teleporter state=" + state);
@@ -199,32 +230,68 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 		}
 	}
 	
+	@Override
+	public boolean reservate(){
+		if(state != StateIdle) return false;
+		setState(StateReserved);
+		
+		return true;
+	}
 	
+	@Override
+	public void reservateRefresh(boolean doorState, float processRatio) {
+		reservateRefreshed = true;
+		if(this.doorState == false && doorState == true){
+			setState(StateOpen);
+			setState(StateReserved);
+		}
+		if(this.doorState == true && doorState == false){
+			setState(StateClose);
+			setState(StateReserved);
+		}
+		this.processRatio = processRatio;
+	}
+	
+	boolean reservateRefreshed = false;
+	
+	
+	float processRatio = 0;
 	public static final byte eventNoTargetFind = 1;
 	public static final byte eventMultipleoTargetFind = 2;
 	public static final byte eventTargetFind = 3;
 	public static final byte eventSameTarget = 4;
 	public static final byte eventNotSameDimensionTarget = 5;
+	public static final byte eventTargetBusy = 6;
+	
+	
 	
 	class TeleporterSlowProcess implements IProcess{
 
 		int dx,dy,dz;
 		
-		
+		String targetNameCopy = "";
 		@Override
 		public void process(double time) {
-			
+			LightBlockEntity.addLight(lightCoordonate, 12, 1);
 			
 			switch(state)
 			{
+			case StateReserved:
+				if(reservateRefreshed == false){
+					setState(StateOpen);
+					setState(StateIdle);
+				}
+				break;
+			
 			case StateIdle:	
 				if(startFlag){
+					targetNameCopy = targetName;
 					energyHit = 0;
-					if(targetName.equals(name)){
+					if(targetNameCopy.equals(name)){
 						sendIdToAllClient(eventSameTarget);		
 						break;
 					}
-					int count = getTargetCount();
+					int count = getTargetCount(targetNameCopy);
 					if(count == 0){
 						sendIdToAllClient(eventNoTargetFind);	
 						break;
@@ -233,44 +300,68 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 						sendIdToAllClient(eventMultipleoTargetFind);
 						break;
 					}
+					ITeleporter target = getTarget(targetNameCopy);
+					if(target.reservate() == false){
+						sendIdToAllClient(eventTargetBusy);
+					}
 					sendIdToAllClient(eventTargetFind);
 					
+				/*	AxisAlignedBB bb = descriptor.getBB(node.coordonate,front);
+					List list = node.coordonate.world().getEntitiesWithinAABB(EntityItem.class, bb);
+					for(Object o : list){
+						Entity e = (Entity)o;
+						if(e instanceof EntityPlayerMP)
+							((EntityPlayerMP)e).setPositionAndUpdate(e.posX + dx, e.posY + dy, e.posZ + dz);
+						else
+							e.setPosition(e.posX + dx, e.posY + dy, e.posZ + dz);
+					}*/
 					setState(StateStart);
 				
 				}
 				break;
+				
 			case StateStart:
+				{
+					int count = node.coordonate.world().getEntitiesWithinAABB(Entity.class, descriptor.getBB(node.coordonate,front)).size();
+					if(count == 0){
+						timeCounter = 0;
+					}
+					else{
+						timeCounter += time;
+						if(timeCounter > 2){
+							setState(StateClose);
+						}
+					}
+				}
+				break;
+				
+			case StateClose:
 				timeCounter += time;
-				if(timeCounter > 2){
+				if(timeCounter > 3){
 					setState(StateCharge);
 				}
 				break;
-			case StateEnd:
-				timeCounter += time;
-				if(timeCounter > 2){
-					setState(StateIdle);
-				}
-				break;
+
 			case StateCharge:
 				{
-					if(targetName.equals(name)){
+					if(targetNameCopy.equals(name)){
 						sendIdToAllClient(eventSameTarget);		
-						setState(StateEnd);
+						setState(StateOpen);
 						break;
 					}
-					int count = getTargetCount();
+					int count = getTargetCount(targetNameCopy);
 					if(count == 0){
 						sendIdToAllClient(eventNoTargetFind);	
-						setState(StateEnd);
+						setState(StateOpen);
 						break;
 					}
 					if(count > 1){
 						sendIdToAllClient(eventMultipleoTargetFind);
-						setState(StateEnd);
+						setState(StateOpen);
 						break;
 					}
 					
-					ITeleporter target = getTarget();
+					ITeleporter target = getTarget(targetNameCopy);
 					Coordonate c = getTeleportCoordonate();
 					double distance = getTeleportCoordonate().trueDistanceTo(c);
 					AxisAlignedBB bb = descriptor.getBB(node.coordonate,front);
@@ -284,9 +375,11 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 									1000 *itemCount;
 					
 					energyTarget *= 1.0 + distance/250.0;
-					
-					
+
 					energyHit += powerLoad.getRpPower()*time;
+					processRatio = (float) (energyHit/energyTarget);
+					
+					
 					if(energyHit >= energyTarget){
 						dx = target.getTeleportCoordonate().x - c.x;
 						dy = target.getTeleportCoordonate().y - c.y;
@@ -300,7 +393,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			case StateTeleport:
 				{
 					timeCounter += time;
-					if(timeCounter > 2){
+					if(timeCounter > 0){
 						
 						AxisAlignedBB bb = descriptor.getBB(node.coordonate,front);
 						List list = node.coordonate.world().getEntitiesWithinAABB(Entity.class, bb);
@@ -311,14 +404,24 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 							else
 								e.setPosition(e.posX + dx, e.posY + dy, e.posZ + dz);
 						}
-						setState(StateEnd);
+						setState(StateOpen);
 					}	
+				}
+				break;
+				
+			case StateOpen:
+				timeCounter += time;
+				if(timeCounter > 3){
+					setState(StateIdle);
 				}
 				break;
 
 			}
 				
-			
+			if(state != StateIdle){
+				ITeleporter target = getTarget(targetNameCopy);
+				if(target != null) target.reservateRefresh(doorState,processRatio);
+			}
 			
 			startFlag = false;
 		}
@@ -326,22 +429,22 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 
 	}
 	
-	int getTargetCount()
+	int getTargetCount(String str)
 	{
 		int count = 0;
 		for(ITeleporter t : teleporterList){
-			if(t.getName().equals(targetName) && node.coordonate.dimention == t.getTeleportCoordonate().dimention){
+			if(t.getName().equals(str) && node.coordonate.dimention == t.getTeleportCoordonate().dimention){
 				count++;
 			}
 		}
 		return count;			
 	}
 	
-	ITeleporter getTarget()
+	ITeleporter getTarget(String str)
 	{
 		ITeleporter target = null;
 		for(ITeleporter t : teleporterList){
-			if(t.getName().equals(targetName)  && node.coordonate.dimention == t.getTeleportCoordonate().dimention){
+			if(t.getName().equals(str)  && node.coordonate.dimention == t.getTeleportCoordonate().dimention){
 				if(target != null) return null;
 				target = t;
 			}
@@ -361,6 +464,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 		
 		switch(super.networkUnserialize(stream)){
 		case setNameId:
+			if(state != StateIdle) break;
 			try {
 				name = stream.readUTF();
 			} catch (IOException e) {
@@ -370,6 +474,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			needPublish();
 			break;
 		case setTargetNameId:
+			if(state != StateIdle) break;
 			try {
 				targetName = stream.readUTF();
 			} catch (IOException e) {
@@ -382,6 +487,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			startFlag = true;
 			break;
 		case setChargePowerId:
+			if(state != StateIdle) break;
 			try {
 				powerCharge = stream.readFloat();
 			} catch (IOException e) {
@@ -405,6 +511,15 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			stream.writeUTF(targetName);
 			stream.writeFloat((float) powerCharge);
 			stream.writeByte(state);
+			stream.writeByte(
+							(doorState ? 0x1 : 0x0)
+							
+							);
+			stream.writeFloat(processRatio);
+			stream.writeFloat((float) powerLoad.Uc);
+			//stream.writeFloat((float) energyHit);
+			//stream.writeFloat((float) energyTarget);
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

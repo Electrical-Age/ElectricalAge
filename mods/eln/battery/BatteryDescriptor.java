@@ -7,6 +7,7 @@ import org.bouncycastle.jcajce.provider.asymmetric.dsa.DSASigner.stdDSA;
 
 import mods.eln.Eln;
 import mods.eln.client.ClientProxy;
+import mods.eln.gui.GuiLabel;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.NodeElectricalLoad;
@@ -21,6 +22,8 @@ import mods.eln.sim.ElectricalLoadHeatThermalLoadProcess;
 import mods.eln.sim.ElectricalResistor;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.wiki.GuiVerticalExtender;
+import mods.eln.wiki.ItemDefault.IPlugIn;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -28,7 +31,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 
 
-public class BatteryDescriptor extends TransparentNodeDescriptor{
+public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlugIn{
 	
 
 
@@ -238,5 +241,16 @@ public class BatteryDescriptor extends TransparentNodeDescriptor{
 		}
 
 		return false;
+	}
+	@Override
+	public int top(int y, GuiVerticalExtender extender, ItemStack stack) {
+		extender.add(new GuiLabel(6, y, "miaouuuu"));
+		y+=12;
+		return y;
+	}
+	@Override
+	public int bottom(int y, GuiVerticalExtender extender, ItemStack stack) {
+		// TODO Auto-generated method stub
+		return y;
 	}
 }

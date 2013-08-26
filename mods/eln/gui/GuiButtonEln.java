@@ -1,5 +1,7 @@
 package mods.eln.gui;
 
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -19,6 +21,7 @@ public class GuiButtonEln extends GuiButton implements IGuiObject{
 	@Override
 	public void idraw(int x, int y, float f) {
 		// TODO Auto-generated method stub
+		GL11.glColor4f(1f, 1f, 1f,1f);
 		drawButton(Minecraft.getMinecraft(), x, y);
 	}
 	@Override

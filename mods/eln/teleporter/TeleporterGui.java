@@ -82,6 +82,7 @@ public class TeleporterGui extends GuiScreenEln{
 			render.chargePowerNew = false;
 		}
 		
+		start.enabled = render.state == TeleporterElement.StateIdle;
 		
 	/*	if(render.defaultOutput)
 			toogleDefaultOutput.displayString = "default output is high";

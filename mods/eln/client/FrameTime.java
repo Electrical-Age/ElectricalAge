@@ -65,12 +65,11 @@ public class FrameTime implements ITickHandler{
 	{
 		if(Utils.isGameInPause())
 			return 0f;
-		return instance.deltaT;
+		return Math.min(0.1f,instance.deltaT);
 	}
 	public static float getNotCaped()
 	{
 		float value = get();
-		if(value > 0.1f) return 0.1f;
 		return value;
 	}
 	float deltaT = 0.02f;

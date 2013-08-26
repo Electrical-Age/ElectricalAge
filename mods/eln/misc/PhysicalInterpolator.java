@@ -27,14 +27,21 @@ public class PhysicalInterpolator {
 		float error = factorFiltred - factorPos;
 		factorSpeed *= 1 - (slowPerS * deltaT);
 		factorSpeed += error * accPerSPerError * deltaT;
+		
+		if(factorSpeed > maxSpeed) factorSpeed = maxSpeed;
+		if(factorSpeed < -maxSpeed) factorSpeed = -maxSpeed;
+		
+		
 		factorPos += factorSpeed * deltaT;
 		if(factorPos > 1.0)
 		{
+			factorFiltred = factor;
 			factorPos = 1.0f;
 			factorSpeed = -factorSpeed * rebond;
 		}
 		if(factorPos < 0.0)
 		{
+			factorFiltred = factor;
 			factorPos = 0.0f;
 			factorSpeed = -factorSpeed * rebond;
 		}
@@ -58,5 +65,10 @@ public class PhysicalInterpolator {
 	public float getTarget() {
 		// TODO Auto-generated method stub
 		return factor;
+	}
+	float maxSpeed = 1000;
+	public void setMaxSpeed(float d) {
+		// TODO Auto-generated method stub
+		maxSpeed = d;
 	}
 }

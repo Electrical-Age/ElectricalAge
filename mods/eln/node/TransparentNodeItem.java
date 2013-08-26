@@ -48,15 +48,19 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 	{
     	if(world.isRemote) return false;
     	TransparentNodeDescriptor descriptor = getDescriptor(stack);
-    	x += descriptor.getSpawnDeltaX();
-    	y += descriptor.getSpawnDeltaY();
-    	z += descriptor.getSpawnDeltaZ();
+    	Direction direction = Direction.fromIntMinecraftSide(side).getInverse();
+    	Direction front = descriptor.getFrontFromPlace(direction, player);
+    	int[]v = new int[]{descriptor.getSpawnDeltaX(),descriptor.getSpawnDeltaY(),descriptor.getSpawnDeltaZ()};
+    	front.rotateFromXN(v);
+    	x += v[0];
+    	y += v[1];
+    	z += v[2];
     	
     	if(world.getBlockId(x, y, z) != 0) return false;
-    	Direction direction = Direction.fromIntMinecraftSide(side).getInverse();
+    	
     	Coordonate coord = new Coordonate(x,y,z,world);
     	
-    	Direction front = descriptor.getFrontFromPlace(direction, player);
+    	
 		try {
 			String error;
 			if((error = descriptor.checkCanPlace(coord, front)) != null)

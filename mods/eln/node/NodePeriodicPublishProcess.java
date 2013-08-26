@@ -19,5 +19,10 @@ public class NodePeriodicPublishProcess implements IProcess{
 			node.setNeedPublish(true);
 		}
 	}
+	public void reconfigure(double base,double random) {
+		this.base = base;
+		this.random = random;	
+		counter = 0;
+	}
 
 }

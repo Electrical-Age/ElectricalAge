@@ -61,6 +61,10 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 		this.stepIdMax = stepIdMax;
 		stepLimit();
 	}
+    public void setStepId(int stepId) {
+		this.stepId = stepId;
+		stepLimit();
+	}
 	
 	public void setValue(float value)
 	{
@@ -156,7 +160,7 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
  
 		drawRect(xPosition - 2, getCursorPosition()-2,xPosition + width + 2,getCursorPosition() + 2,0xFF202020);
 		drawRect(xPosition - 1, getCursorPosition()-1,xPosition + width + 1,getCursorPosition() + 1,0xFF606060);
- 
+		
 	}
 	
 	
@@ -183,6 +187,8 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 		// TODO Auto-generated method stub
 		drawBase(f, x, y);
 		drawBare(f, x, y);
+		
+		
 	}
 
 	@Override

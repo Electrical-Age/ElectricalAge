@@ -3233,20 +3233,36 @@ public class Eln {
 			subId = 0;
 			name = "Experimental transporter";
 
-			Coordonate[] powerLoad = new Coordonate[1];
-			powerLoad[0] = new Coordonate(2,0,0,0);
+			Coordonate[] powerLoad = new Coordonate[2];
+			powerLoad[0] = new Coordonate(-1,0,1,0);
+			powerLoad[1] = new Coordonate(-1,0,-1,0);
+			
+			GhostGroup doorOpen = new GhostGroup();
+			doorOpen.addRectangle(-4, -3, 2, 2, 0, 0);
+			
+			GhostGroup doorClose = new GhostGroup();
+			doorClose.addRectangle(-2, -2, 0, 1, 0, 0);
+
 			
 			TeleporterDescriptor desc = new TeleporterDescriptor(
-					name, obj.getObj(""),
+					name, obj.getObj("Transporter"),
 					highVoltageCableDescriptor,
-					new Coordonate(2,0,0,0),
-					4,//int areaH	
-					powerLoad
+					new Coordonate(-1,0,0,0),new Coordonate(-1,1,0,0),
+					2,//int areaH	
+					powerLoad,
+					doorOpen,doorClose
 
 			);
 
 			GhostGroup g = new GhostGroup();
-			g.addRectangle(1, 2, 0, 0, 0, 0);
+			g.addRectangle(-2, 0, 0, 2, -1, -1);
+			g.addRectangle(-2, 0, 0, 2, 1, 1);
+			g.addRectangle(-4, 0, 2, 2, 0, 0);
+			g.addElement(0, 1, 0);
+			g.addRectangle(-3, -3, 0, 1, -1, -1);
+			g.addRectangle(-3, -3, 0, 1 , 1, 1);
+			//g.addElement(-4, 0, -1);
+			//g.addElement(-4, 0, 1);
 			
 			desc.setGhostGroup(g);
 			
@@ -4914,15 +4930,15 @@ public class Eln {
 		GameRegistry.addRecipe(findItemStack("Portable electrical mining drill"),
 				" T ",
 				"IBI",
-				" I",
+				" I ",
 				Character.valueOf('T'), findItemStack("Average electrical drill"),
 				Character.valueOf('B'), findItemStack("Portable battery"),
-				Character.valueOf('R'), new ItemStack(Item.ingotIron));		
+				Character.valueOf('I'), new ItemStack(Item.ingotIron));		
 	
 		GameRegistry.addRecipe(findItemStack("Portable electrical axe"),
 				" T ",
 				"IBI",
-				" I",
+				" I ",
 				Character.valueOf('T'), new ItemStack(Item.axeIron),
 				Character.valueOf('B'), findItemStack("Portable battery"),
 				Character.valueOf('R'), new ItemStack(Item.ingotIron));		

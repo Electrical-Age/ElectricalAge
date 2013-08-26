@@ -1,5 +1,5 @@
 # Blender MTL File: 'Transporter.blend'
-# Material Count: 5
+# Material Count: 4
 
 newmtl Material
 Ns 96.078431
@@ -18,14 +18,6 @@ Ks 0.8 0.8 0.8
 d 1
 illum 2
 map_Kd Transporter.png
-
-newmtl None_NONE
-Ns 0
-Ka 0.000000 0.000000 0.000000
-Kd 0.8 0.8 0.8
-Ks 0.8 0.8 0.8
-d 1
-illum 2
 
 newmtl None_Transporter_In.png
 Ns 0

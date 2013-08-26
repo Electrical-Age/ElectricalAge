@@ -5,6 +5,8 @@ import mods.eln.client.FrameTime;
 public class RcInterpolator {
 	public RcInterpolator(float preTao) {
 		ff = 1/preTao;
+		factorFiltred = 0;
+		factor = 0;
 	}
 	
 	

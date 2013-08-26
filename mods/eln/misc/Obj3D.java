@@ -179,6 +179,7 @@ public class Obj3D {
 			return 0;
 		}*/
 		float ox,oy,oz;
+		float ox2,oy2,oz2;
 		public void draw(float angle,float x,float y,float z)
 		{
 			GL11.glPushMatrix();
@@ -190,6 +191,22 @@ public class Obj3D {
 			
 			GL11.glPopMatrix();
 		}
+		
+		public void draw(float angle,float x,float y,float z,float angle2,float x2,float y2,float z2)
+		{
+			GL11.glPushMatrix();
+			
+			GL11.glTranslatef(ox,oy,oz);
+			GL11.glRotatef(angle,x,y,z);
+			GL11.glTranslatef(ox2,oy2,oz2);
+			GL11.glRotatef(angle2,x2,y2,z2);
+			GL11.glTranslatef(-ox2,-oy2,-oz2);
+			GL11.glTranslatef(-ox,-oy,-oz);
+			draw();
+			
+			GL11.glPopMatrix();
+		}
+		
 		public void drawNoBind(float angle,float x,float y,float z)
 		{
 			GL11.glPushMatrix();
@@ -503,6 +520,18 @@ public class Obj3D {
 						else if(words[1].equals("originZ"))
 						{
 							part.oz = Float.valueOf(words[2]);
+						}
+						else if(words[1].equals("originX2"))
+						{
+							part.ox2 = Float.valueOf(words[2]);
+						}
+						else if(words[1].equals("originY2"))
+						{
+							part.oy2 = Float.valueOf(words[2]);
+						}
+						else if(words[1].equals("originZ2"))
+						{
+							part.oz2 = Float.valueOf(words[2]);
 						}
 						else 
 						{

@@ -20,6 +20,7 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.PlayerManager;
+import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.gui.ISlotSkin;
@@ -939,6 +940,9 @@ public class Utils {
 		if(i instanceof GenericItemUsingDamage){
 			return ((GenericItemUsingDamage)i).getDescriptor(stack);
 		}
+		if(i instanceof GenericItemBlockUsingDamage){
+			return ((GenericItemBlockUsingDamage)i).getDescriptor(stack);
+		}
 		return i;
 	}
 	public static void drawIcon(ItemRenderType type,Icon icon) {
@@ -1099,7 +1103,7 @@ public class Utils {
 		return Minecraft.getMinecraft();
 	}
     
-    public static void drawItemStack(ItemStack par1ItemStack, int x, int y, String par4Str)
+    public static void drawItemStack(ItemStack par1ItemStack, int x, int y, String par4Str,boolean gui)
     {
     	
     	
@@ -1113,6 +1117,10 @@ public class Utils {
         itemRenderer.renderItemOverlayIntoGUI(font, mc().func_110434_K(), par1ItemStack, x, y, par4Str);
         
         itemRenderer.zLevel = 0.0F;
+        
+        if(gui){
+            GL11.glDisable(GL11.GL_LIGHTING);
+        }
     }
 
 	public static GuiScreen guiLastOpen;

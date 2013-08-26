@@ -78,6 +78,17 @@ public class GhostGroup {
 	{
 		Eln.ghostManager.removeGhostAndBlockWithObserver(observerCoordonate);
 	}
+	public void erase(Coordonate observerCoordonate,int uuid)
+	{
+		Eln.ghostManager.removeGhostAndBlockWithObserver(observerCoordonate,uuid);
+	}	
+	
+	public void eraseGeo(Coordonate coordonate) {
+		for(GhostGroupElement element : elementList)
+		{
+			Eln.ghostManager. removeGhostAndBlock(coordonate.newWithOffset(element.x,element.y,element.z));
+		}
+	}
 	
 	public GhostGroup newRotate(Direction dir)
 	{
@@ -93,8 +104,8 @@ public class GhostGroup {
 				break;
 			case XP:
 				x = -element.x;
-				y = -element.y;
-				z = element.z;
+				y = element.y;
+				z = -element.z;
 				break;
 			case ZN:
 				x = -element.z;

@@ -14,43 +14,23 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.item.ItemStack;
 
-public class GuiVerticalExtender extends Gui implements IGuiObject,IGuiObjectObserver{
+public class GuiGroup extends Gui implements IGuiObject,IGuiObjectObserver{
 	
-	GuiVerticalTrackBar slider;
+
 	int offX,offY;
 	
-	public GuiVerticalExtender(int x,int y,int w,int h,GuiHelper helper) {
+	public GuiGroup(int x,int y,int w,int h,GuiHelper helper) {
 		this.posX = x;
 		this.posY = y;
 		this.h = h;
 		this.w = w;
 		this.offX = x;
 		this.offY = y;
-		slider = new GuiVerticalTrackBar(x+w-10, y, 10, h, helper);
-		
-		slider.setStepIdMax(200);
-		slider.setStepId(200);
-		refreshRange();
 
-		//add(slider);
-		slider.setObserver(observer);
 		this.helper = helper;
 	}
 	
-	void refreshRange()
-	{
 
-		int maxY = 10;
-		for(IGuiObject o : objectList){
-			maxY = Math.max(maxY, o.getYMax());
-		}		
-		float max = Math.min(0, -(maxY + 10 - h));
-		slider.setRange(max, 0);
-
-		
-		slider.setVisible(max != 0);
-		
-	}
 	
 	GuiHelper helper;
 	
@@ -61,7 +41,7 @@ public class GuiVerticalExtender extends Gui implements IGuiObject,IGuiObjectObs
 
 	ArrayList<IGuiObject> objectList = new ArrayList<IGuiObject>();
 	
-	public void add(IGuiObject o){
+	void add(IGuiObject o){
 		objectList.add(o);
 	}
 	void remove(IGuiObject o){
@@ -71,8 +51,8 @@ public class GuiVerticalExtender extends Gui implements IGuiObject,IGuiObjectObs
 		return posX;
 	}
 	int getYOffset(){
-		int sliderOffset = (int) slider.getValue();
-		return posY + sliderOffset;
+		
+		return posY;
 	}
     IGuiObject[] objectListCopy()
     {
@@ -86,9 +66,7 @@ public class GuiVerticalExtender extends Gui implements IGuiObject,IGuiObjectObs
 	
 	@Override
 	public void idraw(int x, int y, float f) {
-		refreshRange();
-		
-		slider.idraw(x, y, f);
+
 		x -= getxOffset();
 		y -= getYOffset();
 		GL11.glPushMatrix();		
@@ -110,13 +88,11 @@ public class GuiVerticalExtender extends Gui implements IGuiObject,IGuiObjectObs
 			GL11.glDisable(GL11.GL_SCISSOR_TEST);
 			//GL11.glDisable(GL11.GL_SCISSOR_BOX);
 		GL11.glPopMatrix();
-		
-	//	GL11.glColor3f(1f, 1f, 1f);
 	}
 
 	@Override
 	public void idraw2(int x, int y) {
-		slider.idraw2(x, y);
+
 		x -= getxOffset();
 		y -= getYOffset();
 		GL11.glPushMatrix();		
@@ -149,7 +125,7 @@ public class GuiVerticalExtender extends Gui implements IGuiObject,IGuiObjectObs
 
 	@Override
 	public void imouseClicked(int x, int y, int code) {
-		slider.imouseClicked(x, y, code);
+		
 		x -= getxOffset();
 		y -= getYOffset();
 		for(IGuiObject o : objectListCopy()){
@@ -159,7 +135,7 @@ public class GuiVerticalExtender extends Gui implements IGuiObject,IGuiObjectObs
 
 	@Override
 	public void imouseMove(int x, int y) {
-		slider.imouseMove(x, y);
+		
 		x -= getxOffset();
 		y -= getYOffset();
 		for(IGuiObject o : objectList){
@@ -169,7 +145,7 @@ public class GuiVerticalExtender extends Gui implements IGuiObject,IGuiObjectObs
 
 	@Override
 	public void imouseMovedOrUp(int x, int y, int witch) {
-		slider.imouseMovedOrUp(x, y, witch);
+		
 		x -= getxOffset();
 		y -= getYOffset();
 		for(IGuiObject o : objectList){
@@ -179,15 +155,13 @@ public class GuiVerticalExtender extends Gui implements IGuiObject,IGuiObjectObs
 
 	@Override
 	public void translate(int x, int y) {
-		slider.translate(x, y);
+		
 		posX+=x;
 		posY+=y;
 	}
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
-		if(object == slider){
-			
-		}
+
 	}
 	@Override
 	public int getYMax() {
