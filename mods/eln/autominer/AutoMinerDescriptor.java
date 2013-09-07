@@ -3,11 +3,13 @@ package mods.eln.autominer;
 import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import mods.eln.Eln;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElectricalLoadWatchdog;
 import mods.eln.sim.ElectricalLoad;
+import mods.eln.wiki.Data;
 
 public class AutoMinerDescriptor extends TransparentNodeDescriptor{
 
@@ -41,6 +43,13 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor{
 		load.setMinimalC(Eln.simulator);
 	}
 	
+	
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addMachine(newItemStack());
+	}
 	
 	public void applyTo(TransparentNodeElectricalLoadWatchdog watch)
 	{

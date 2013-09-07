@@ -18,7 +18,9 @@ import mods.eln.sim.ElectricalResistor;
 import mods.eln.sim.IVoltageWatchdogDescriptorForInventory;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalWatchdogProcess;
+import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVoltageWatchdogDescriptorForInventory{
@@ -95,7 +97,16 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 	
 	public CableRenderDescriptor render;
 	
-
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addWiring(newItemStack());
+		
+		if(signalWire){
+			Data.addSignal(newItemStack());
+		}
+	}
 	
 	public void applyTo(ElectricalLoad electricalLoad,boolean grounded)
 	{

@@ -2,11 +2,13 @@ package mods.eln.wirelesssignal;
 
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.SixNodeDescriptor;
+import mods.eln.wiki.Data;
 
 public class WirelessSignalRxDescriptor extends SixNodeDescriptor{
 
@@ -29,6 +31,12 @@ public class WirelessSignalRxDescriptor extends SixNodeDescriptor{
 			main = obj.getPart("main");
 			led = obj.getPart("led");
 		}
+	}
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addSignal(newItemStack());
 	}
 	
 	@Override

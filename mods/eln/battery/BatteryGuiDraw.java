@@ -109,8 +109,10 @@ public class BatteryGuiDraw extends GuiContainerEln {
     		str1 = "Charged";
     	}
     	int xDelta = 70;
-        drawString(8, 8 , "Life");
-        drawString(xDelta, 8 , Utils.plotPercent("",render.life));
+    	if(render.descriptor.lifeEnable){
+    		drawString(8, 8 , "Life");
+        	drawString(xDelta, 8 , Utils.plotPercent("",render.life));
+    	}
         drawString(8, 17 , "Energy");
         drawString(xDelta, 17,
         		Utils.plotValue(render.energy,"J/") +  Utils.plotValue( render.descriptor.electricalStdEnergy * render.life,"J"));

@@ -19,6 +19,7 @@ import mods.eln.misc.Utils;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeEntity;
+import mods.eln.wiki.Data;
 
 public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 	Obj3D obj;
@@ -48,6 +49,13 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 
 		
 
+	}
+	
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addMachine(newItemStack());
 	}
 	
 	Obj3DPart main;

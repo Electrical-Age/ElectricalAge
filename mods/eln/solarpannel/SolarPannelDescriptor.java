@@ -16,6 +16,7 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
+import mods.eln.wiki.Data;
 
 public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 
@@ -60,6 +61,12 @@ public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 		canRotate = alphaMax != alphaMin;
 	}
 	
+	
+	public void setParent(net.minecraft.item.Item item, int damage)
+	{
+		super.setParent(item, damage);
+		Data.addEnergy(newItemStack());
+	}
 	
 	CableRenderDescriptor cableRender;
 	double electricalUmax;

@@ -3,6 +3,7 @@ package mods.eln.heatfurnace;
 import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
@@ -19,6 +20,7 @@ import mods.eln.sim.FurnaceProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
+import mods.eln.wiki.Data;
 
 public class HeatFurnaceDescriptor extends TransparentNodeDescriptor{
 
@@ -67,6 +69,15 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor{
 		
 		
 	}
+	
+	
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addThermal(newItemStack());
+	}
+	
 	Obj3D obj;
 	Obj3DPart tiroir,main;
 	float alphaClose,alphaOpen;

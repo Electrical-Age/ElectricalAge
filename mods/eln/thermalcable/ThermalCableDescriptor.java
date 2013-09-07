@@ -14,7 +14,9 @@ import mods.eln.sim.ElectricalLoadDynamicProcess;
 import mods.eln.sim.ElectricalLoadHeatThermalLoadProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalWatchdogProcess;
+import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class ThermalCableDescriptor extends SixNodeDescriptor{
@@ -63,7 +65,13 @@ public class ThermalCableDescriptor extends SixNodeDescriptor{
 	 double thermalStdDrop, thermalStdLost;
 	 double thermalTao;
 		  
-
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addWiring(newItemStack());
+		Data.addThermal(newItemStack());
+	}
 	
 
 	String description = "todo cable";

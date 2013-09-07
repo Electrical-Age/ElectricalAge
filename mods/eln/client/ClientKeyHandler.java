@@ -62,7 +62,7 @@ public class ClientKeyHandler extends KeyHandler {
 	    if(Minecraft.getMinecraft().currentScreen != null) return;
 	    		
 	    if(kb.keyDescription.equals(openWiki)){	    	
-	    	Utils.clientOpenGui(new Root());
+	    	Utils.clientOpenGui(new Root(null));
 	    	return;
 	    }
 	    

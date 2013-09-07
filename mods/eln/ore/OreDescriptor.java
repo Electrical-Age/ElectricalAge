@@ -8,7 +8,9 @@ import cpw.mods.fml.common.IWorldGenerator;
 import mods.eln.CommonProxy;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
+import mods.eln.wiki.Data;
 import net.minecraft.block.Block;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
@@ -38,6 +40,12 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
 		return getIcon();
 	}
 	
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addOre(newItemStack());
+	}
 
 	public ArrayList<ItemStack> getBlockDropped(int fortune)
 	{

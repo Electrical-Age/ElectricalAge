@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
@@ -21,6 +22,7 @@ import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalLoadInitializer;
+import mods.eln.wiki.Data;
 
 import com.google.common.base.Function;
 
@@ -61,6 +63,13 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor{
 	double soundTime;
 	float soundLevel;
 	public float rotSpeed = 0f;
+	
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addUtilities(newItemStack());
+	}
 	
 	void draw(boolean warm,float rotAlpha)
 	{

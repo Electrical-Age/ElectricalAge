@@ -15,6 +15,9 @@ public class BatteryInventoryProcess implements IProcess{
 	@Override
 	public void process(double time) {
 		// TODO Auto-generated method stub
+		battery.batteryProcess.life = 1.0;
+		
+		
 		boolean cut = false;
 		if(battery.hasOverHeatingProtection())
 		{

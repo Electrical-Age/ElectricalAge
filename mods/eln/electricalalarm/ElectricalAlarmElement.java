@@ -26,6 +26,7 @@ import mods.eln.sim.ElectricalLoadDynamicProcess;
 import mods.eln.sim.ElectricalLoadHeatThermalLoadProcess;
 import mods.eln.sim.ITemperatureWatchdogDescriptor;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -51,6 +52,7 @@ public class ElectricalAlarmElement extends SixNodeElement{
 	LRDU front;
 	
 
+	
 	public static boolean canBePlacedOnSide(Direction side,int type)
 	{
 		return true;

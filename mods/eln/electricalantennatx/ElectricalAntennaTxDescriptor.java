@@ -3,6 +3,7 @@ package mods.eln.electricalantennatx;
 import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
@@ -15,6 +16,7 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNode.FrontType;
+import mods.eln.wiki.Data;
 
 public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor{
 
@@ -45,6 +47,15 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor{
 		if(obj != null) main = obj.getPart("main");
 		
 	}
+	
+
+	@Override	
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addWiring(newItemStack());
+	}
+	
 	Obj3D obj;
 	Obj3DPart main;
 	@Override

@@ -1,15 +1,21 @@
 package mods.eln.teleporter;
 
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.GhostNode;
 import mods.eln.node.TransparentNodeDescriptor;
+import mods.eln.wiki.Data;
 
 public class TeleporterDescriptor extends TransparentNodeDescriptor{
 
@@ -20,7 +26,7 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor{
 	public Obj3DPart outlampline0_alpha,outlampline0;
 	public Obj3DPart[] leds = new Obj3DPart[10];
 	public Obj3DPart scr0_electrictity,scr1_cables,scr2_transporter,scr3_userin,scr5_dooropen,src4_doorclosed;
-	public Obj3DPart gyro_alpha,gyro;
+	public Obj3DPart gyro_alpha,gyro,whiteblur;
 	
 	public TeleporterDescriptor(
 			String name,Obj3D obj,
@@ -54,6 +60,8 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor{
 			src4_doorclosed = obj.getPart("src4_doorclosed");
 			gyro_alpha = obj.getPart("gyro_alpha");
 			gyro = obj.getPart("gyro");
+			whiteblur = obj.getPart("whiteblur");
+			
 			for(int idx = 0;idx < 10;idx++){
 				leds[idx] = obj.getPart("led"+idx);
 			}
@@ -87,6 +95,14 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor{
 		return temp;
 	}
 	
+	
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addMachine(newItemStack());
+	}
+	
 	public ElectricalCableDescriptor cable;
 
 
@@ -114,4 +130,31 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor{
 		return 4;
 	}
 	
+	
+	
+	
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		objItemScale(obj);
+		main.draw();
+		ext_control.draw();
+		ext_power.draw();
+		Utils.disableCulling();
+		door_out.draw();
+		Utils.enableCulling();
+		indoor_open.draw();
+	}
 }

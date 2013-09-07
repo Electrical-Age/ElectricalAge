@@ -12,12 +12,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
+import net.minecraft.item.crafting.ShapelessRecipes;
 import mods.eln.gui.GuiButtonEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiLabel;
 import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Recipe;
+import mods.eln.misc.RecipesList;
 import mods.eln.misc.Utils;
 
 public class ItemDefault extends Default{
@@ -56,7 +58,7 @@ public class ItemDefault extends Default{
 			plugIn = (IPlugIn)desc;
 		}
 				
-		self = new GuiItemStack(6, y, stack, this,helper);
+		self = new GuiItemStack(6, y, stack,helper);
 		extender.add(self);
 		extender.add(new GuiLabel(6+21, y+3, stack.getDisplayName()));
 		y += 24;
@@ -80,6 +82,16 @@ public class ItemDefault extends Default{
 					if(r instanceof ShapedRecipes){
 						ShapedRecipes s = (ShapedRecipes)r;
 						for(ItemStack rStack : s.recipeItems){
+							if(rStack != null && rStack.itemID == stack.itemID && rStack.getItemDamage() == stack.getItemDamage()){
+								recipeInList.add(r);
+								break;
+							}						
+						}
+					}
+					if(r instanceof ShapelessRecipes){
+						ShapelessRecipes s = (ShapelessRecipes)r;
+						for(Object o2 : s.recipeItems){
+							ItemStack rStack = (ItemStack)o2;
 							if(rStack != null && rStack.itemID == stack.itemID && rStack.getItemDamage() == stack.getItemDamage()){
 								recipeInList.add(r);
 								break;
@@ -111,10 +123,27 @@ public class ItemDefault extends Default{
 							if(idx < s.recipeWidth && idx2 < s.recipeHeight){
 								rStack = s.recipeItems[idx + idx2*s.recipeWidth];
 							}
-							GuiItemStack gui = new GuiItemStack(idx * 18+6 + counter*60, idx2*18+y	, rStack, this,helper);
+							GuiItemStack gui = new GuiItemStack(idx * 18+6 + counter*60, idx2*18+y	, rStack,helper);
 							extender.add(gui);
 						}	
 					}
+					counter = (counter + 1) % 3;
+				}
+				if(r instanceof ShapelessRecipes){
+					ShapelessRecipes s = (ShapelessRecipes)r;
+					int idx = 0;
+					for(Object o : s.recipeItems){
+						ItemStack stack = (ItemStack)o;
+						GuiItemStack gui = new GuiItemStack((idx % 3) * 18+6 + counter*60, (idx / 3)*18+y	, stack,helper);
+						extender.add(gui);
+						idx++;
+					}
+					while(idx != 9){
+						GuiItemStack gui = new GuiItemStack((idx % 3) * 18+6 + counter*60, (idx / 3)*18+y	, null,helper);
+						extender.add(gui);
+						idx++;
+					}
+					
 					counter = (counter + 1) % 3;
 				}
 			}
@@ -141,13 +170,34 @@ public class ItemDefault extends Default{
 							if(idx < s.recipeWidth && idx2 < s.recipeHeight){
 								rStack = s.recipeItems[idx + idx2*s.recipeWidth];
 							}
-							GuiItemStack gui = new GuiItemStack(idx * 18+6 + counter*105, idx2*18+y	, rStack, this,helper);
+							GuiItemStack gui = new GuiItemStack(idx * 18+6 + counter*105, idx2*18+y	, rStack,helper);
 							extender.add(gui);
 						}	
 					}
 					
 	
-					GuiItemStack gui = new GuiItemStack((int)(3.5* 18)+6 + counter*105, 1*18+y	, s.getRecipeOutput(), this,helper);
+					GuiItemStack gui = new GuiItemStack((int)(3.5* 18)+6 + counter*105, 1*18+y	, s.getRecipeOutput(),helper);
+					extender.add(gui);
+					
+					counter = (counter + 1) % 2;
+				}
+				
+				if(r instanceof ShapelessRecipes){
+					ShapelessRecipes s = (ShapelessRecipes)r;
+					int idx = 0;
+					for(Object o : s.recipeItems){
+						ItemStack stack = (ItemStack)o;
+						GuiItemStack gui = new GuiItemStack((idx % 3) * 18+6 + counter*105, (idx / 3)*18+y	, stack,helper);
+						extender.add(gui);
+						idx++;
+					}
+					while(idx != 9){
+						GuiItemStack gui = new GuiItemStack((idx % 3) * 18+6 + counter*105, (idx / 3)*18+y	, null,helper);
+						extender.add(gui);
+						idx++;
+					}
+					
+					GuiItemStack gui = new GuiItemStack((int)(3.5* 18)+6 + counter*105, 1*18+y	, s.getRecipeOutput(),helper);
 					extender.add(gui);
 					
 					counter = (counter + 1) % 2;
@@ -156,8 +206,55 @@ public class ItemDefault extends Default{
 			y+=70;
 		}
 		
+		{
+			counter = -1;
+			ArrayList<Recipe> list = RecipesList.getGlobalRecipeWithInput(stack);
+			if(list.size() == 0){
+				//extender.add(new GuiLabel(6, y, "Can't Product"));
+			}
+			else{
+				extender.add(new GuiLabel(6, y, "Can Product"));
+				y += 12;
+				for(Recipe r : list){
+					if(counter == 0) y+=(int)(18*1.3);
+					if(counter == -1) counter = 0;
+					
+					extender.add(new GuiItemStack(6 + counter*60, y	, r.input,helper));
+					extender.add(new GuiItemStack(18 + 6 + counter*60, y	, r.output[0],helper));
+					counter = (counter + 1) % 3;							
+				}
+				y+=(int)(18*1.3);
+			}
+		}
+		{
+			counter = -1;
+			ArrayList<Recipe> list = RecipesList.getGlobalRecipeWithOutput(stack);
+			if(list.size() == 0){
+				//extender.add(new GuiLabel(6, y, "Can't Product"));
+			}
+			else{
+				extender.add(new GuiLabel(6, y, "Is producted by"));
+				y += 12;
+				for(Recipe r : list){
+					if(counter == 0) y+=(int)(18*1.3);
+					if(counter == -1) counter = 0;
+					int x = 6 + counter*60;
+					extender.add(new GuiItemStack(x, y	, r.input,helper));
+					x+=18*2;
+					
+					for(ItemStack m : r.machineList){			
+						extender.add(new GuiItemStack(x, y	, m,helper));
+						x+=18;
+					}
+					x+=18;
+					extender.add(new GuiItemStack(x, y	, r.getOutputCopy()[0],helper));
+					counter = (counter + 1) % 1;							
+				}
+				y+=(int)(18*1.3);
+			}
+		}
 
-		
+				
 		if(plugIn != null) y = plugIn.bottom(y, extender, stack);
 	}
 	

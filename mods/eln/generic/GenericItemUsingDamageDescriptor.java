@@ -86,6 +86,11 @@ public class GenericItemUsingDamageDescriptor {
 		return stack;
 	}
 	
+	public ItemStack newItemStack()
+	{
+		return newItemStack(1);
+	}
+	
 	public boolean checkSameItemStack(ItemStack stack)
 	{
 		if(stack == null) return false;

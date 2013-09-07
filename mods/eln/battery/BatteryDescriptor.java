@@ -7,6 +7,7 @@ import org.bouncycastle.jcajce.provider.asymmetric.dsa.DSASigner.stdDSA;
 
 import mods.eln.Eln;
 import mods.eln.client.ClientProxy;
+import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.gui.GuiLabel;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -22,10 +23,12 @@ import mods.eln.sim.ElectricalLoadHeatThermalLoadProcess;
 import mods.eln.sim.ElectricalResistor;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.wiki.Data;
 import mods.eln.wiki.GuiVerticalExtender;
 import mods.eln.wiki.ItemDefault.IPlugIn;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -55,6 +58,8 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	String modelName;
 	Obj3DPart modelPart;
 	public double IMax;
+	public boolean lifeEnable;
+	private ElectricalCableDescriptor cable;
 	public void draw()
 	{
 		if(modelPart == null) return;
@@ -62,7 +67,8 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	}
 	public BatteryDescriptor(
 				String name,String modelName,
-				double startCharge,boolean isRechargable,
+				ElectricalCableDescriptor cable,
+				double startCharge,boolean isRechargable,boolean lifeEnable,
 				FunctionTable UfCharge,
 				double electricalU,double electricalPMax,double electricalDischargeRate,
 				double electricalStdP,double electricalStdDischargeTime,double electricalStdEfficiency,double electricalStdHalfLife,
@@ -78,6 +84,8 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 		this.electricalStdDischargeTime = electricalStdDischargeTime;
 		this.startCharge = startCharge;
 		this.isRechargable = isRechargable;
+		this.lifeEnable = lifeEnable;
+		this.cable = cable;
 		
 		this.thermalHeatTime = thermalHeatTime;
 		this.thermalWarmLimit = thermalWarmLimit;
@@ -95,7 +103,8 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 		electricalQ = 1;
 		double energy = getEnergy(1.0, 1.0);
 		electricalQ *= electricalStdEnergy/energy;
-		electricalRs =  electricalStdP*(1-electricalStdEfficiency) / electricalStdI/electricalStdI / 2;
+		//electricalRs =  electricalStdP*(1-electricalStdEfficiency) / electricalStdI/electricalStdI / 2;
+		electricalRs = cable.electricalRs;
 		electricalRp = electricalU*electricalU/electricalStdP/electricalDischargeRate;
 		
 		
@@ -111,6 +120,14 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 		
 		IMax = electricalStdI*3;
 	}
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addEnergy(newItemStack());
+	}
+	
+	
 	public void applyTo(ElectricalResistor resistor)
 	{
 		resistor.setR(electricalRp);
@@ -171,7 +188,9 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 		list.add("Full charge energy : " + (int)(electricalStdDischargeTime*electricalStdP/1000) + "KJ");
 		list.add("");
 	   	list.add("Charge : " + (int)(getChargeInTag(itemStack)*100) + "%");
-    	list.add("Life : " + (int)(getLifeInTag(itemStack)*100) + "%");
+	   	
+	   	if(lifeEnable)
+	   		list.add("Life : " + (int)(getLifeInTag(itemStack)*100) + "%");
  
 	}
 

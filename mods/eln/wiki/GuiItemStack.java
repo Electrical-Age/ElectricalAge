@@ -18,18 +18,16 @@ import net.minecraft.util.ResourceLocation;
 
 public class GuiItemStack extends Gui implements IGuiObject{
 
-	public GuiItemStack(int x,int y,ItemStack stack,IGuiObjectObserver observer,GuiHelper helper) {
+	public GuiItemStack(int x,int y,ItemStack stack ,GuiHelper helper) {
 		this.posX = x;
 		this.posY = y;
 		h = 18;
 		w = 18;
 		this.stack = stack;
-		this.observer = observer;
 		this.helper = helper;
 	}
 	
 	
-	IGuiObjectObserver observer;
 	
 	int posX,posY,h,w;
 	ItemStack stack;

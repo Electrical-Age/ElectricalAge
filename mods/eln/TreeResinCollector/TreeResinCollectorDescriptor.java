@@ -5,10 +5,12 @@ import java.util.List;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.SixNodeDescriptor;
+import mods.eln.wiki.Data;
 
 public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 
@@ -43,6 +45,12 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 		}
 	}
 	
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addMachine(newItemStack());
+	}
 	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,

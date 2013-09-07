@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -16,6 +17,7 @@ import mods.eln.PlayerManager;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
+import mods.eln.wiki.Data;
 
 public class BatteryItem extends GenericItemUsingDamageDescriptor implements IItemEnergyBattery{
 
@@ -41,7 +43,12 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 	double energyStorage, dischargePower, chargePower;
 
 	
-
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addPortable(newItemStack());
+	}
 	
 	@Override
 	public NBTTagCompound getDefaultNBT() {

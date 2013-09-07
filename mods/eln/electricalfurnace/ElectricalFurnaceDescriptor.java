@@ -8,7 +8,9 @@ import mods.eln.misc.IFunction;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalLoadInitializer;
+import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
@@ -44,6 +46,12 @@ public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor{
 		load.setRp(Rp);
 	}
 	
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addMachine(newItemStack());
+	}
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {

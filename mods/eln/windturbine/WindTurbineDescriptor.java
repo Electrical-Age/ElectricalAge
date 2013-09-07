@@ -1,6 +1,7 @@
 package mods.eln.windturbine;
 
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Direction;
@@ -8,6 +9,7 @@ import mods.eln.misc.FunctionTable;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.TransparentNodeDescriptor;
+import mods.eln.wiki.Data;
 
 public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 
@@ -37,7 +39,7 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 		this.blockMalusSubCount = blockMalusMinCount + 1;
 		this.blockMalus = blockMalus;
 		this.PfW = PfW.duplicate(nominalWind, nominalPower);
-		
+		this.obj = obj;
 		if(obj != null){
 			main = obj.getPart("main");
 			rot = obj.getPart("rot");
@@ -46,7 +48,11 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 			}
 		}
 	}
-	
+	public void setParent(net.minecraft.item.Item item, int damage)
+	{
+		super.setParent(item, damage);
+		Data.addEnergy(newItemStack());
+	}
 	public double speed;
 	
 	public void setGhostGroup(GhostGroup ghostGroup)
@@ -79,5 +85,27 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 	public Direction getFrontFromPlace(Direction side,
 			EntityLivingBase entityLiving) {
 		return Direction.XN;
+	}
+	
+	
+	
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		objItemScale(obj);
+		Direction.ZN.glRotateXnRef();
+		draw(0f);
 	}
 }

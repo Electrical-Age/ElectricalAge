@@ -56,6 +56,10 @@ public class GenericItemBlockUsingDamageDescriptor {
 	{
 		return new ItemStack(parentItem, size, parentItemDamage);
 	}	
+	public ItemStack newItemStack()
+	{
+		return new ItemStack(parentItem, 1, parentItemDamage);
+	}	
 	
 	public static GenericItemBlockUsingDamageDescriptor getDescriptor(ItemStack stack)
 	{

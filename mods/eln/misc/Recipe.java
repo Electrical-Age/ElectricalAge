@@ -1,5 +1,7 @@
 package mods.eln.misc;
 
+import java.util.ArrayList;
+
 import net.minecraft.item.ItemStack;
 
 public class Recipe {
@@ -35,5 +37,10 @@ public class Recipe {
 			cpy[idx] = output[idx].copy();
 		}
 		return cpy;
+	}
+	public ArrayList<ItemStack> machineList = new ArrayList<ItemStack>();
+	
+	public void setMachineList(ArrayList<ItemStack> machineList) {
+		this.machineList = machineList;
 	}
 }

@@ -2,10 +2,13 @@ package mods.eln.node;
 
 import java.util.List;
 
+import org.lwjgl.opengl.GL11;
+
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
+import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.node.TransparentNode.FrontType;
 import net.minecraft.block.Block;
@@ -47,6 +50,17 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 		
 	}
 	
+	public void objItemScale(Obj3D obj)
+	{
+		if(obj == null) return;
+		float factor = obj.yDim*0.6f;
+		//factor = obj.dimMaxInv*1.0f;
+		factor = Math.max(factor, (Math.max(obj.zMax,-obj.xMin) + Math.max(obj.xMax,-obj.zMin))*0.7f);
+		factor = 1f/factor;
+		
+		GL11.glScalef(factor,factor,factor);
+		GL11.glTranslatef((Math.max(obj.zMax,-obj.xMin) - Math.max(obj.xMax,-obj.zMin))*0.5f,-((obj.yMax + Math.max(-obj.xMin,obj.zMax)*0.3f) + (obj.yMin + Math.min(obj.zMin,-obj.xMax)*0.3f))*0.4f,0.0f);
+	}
 	
 	public FrontType getFrontType()
 	{

@@ -6,7 +6,9 @@ import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.lampsocket.LampSocketType;
 import mods.eln.misc.Utils;
 import mods.eln.sim.ElectricalResistor;
+import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -60,6 +62,16 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptor
 		default:
 			break;
 		}
+		
+		
+	}
+	
+	
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addLight(newItemStack());
 	}
 	
 	public double getR()

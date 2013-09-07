@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -15,6 +16,7 @@ import mods.eln.Eln;
 import mods.eln.PlayerManager;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
+import mods.eln.wiki.Data;
 
 public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 
@@ -38,7 +40,13 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	double energyStorage, dischargePower, chargePower;
 
 	ResourceLocation on,off;
-
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addPortable(newItemStack());
+		Data.addLight(newItemStack());
+	}
 	
 	@Override
 	int getRange(ItemStack stack) {

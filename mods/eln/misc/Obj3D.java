@@ -49,7 +49,10 @@ public class Obj3D {
 	
 	Hashtable<String, String> nameToStringHash = new Hashtable<String, String>();
 
-	
+	public float xDim,yDim,zDim;
+	public float xMin=0,yMin=0,zMin=0;
+	public float xMax=0,yMax=0,zMax=0;
+	public float dimMax,dimMaxInv;
 	public class Obj3DPart
 	{
 		boolean listReady = false;
@@ -393,10 +396,19 @@ public class Obj3D {
 					}
 					else if(words[0].equals("v"))
 					{
-						part.vertex.add(new Vertex(	Float.parseFloat(words[1]),
+						Vertex v;
+						part.vertex.add(v = new Vertex(	Float.parseFloat(words[1]),
 												Float.parseFloat(words[2]),
 												Float.parseFloat(words[3])
 									));
+						xMin = Math.min(xMin, v.x);
+						yMin = Math.min(yMin, v.y);
+						zMin = Math.min(zMin, v.z);
+						xMax = Math.max(xMax, v.x);
+						yMax = Math.max(yMax, v.y);
+						zMax = Math.max(zMax, v.z);
+						
+
 					}
 					else if(words[0].equals("vt"))
 					{
@@ -564,6 +576,12 @@ public class Obj3D {
 			GL11.glEndList();			
 		}*/
 
+		xDim = xMax-xMin;
+		yDim = yMax-yMin;
+		zDim = zMax-zMin;
+		
+		dimMax = Math.max(Math.max(xMax, yMax),zMax);
+		dimMaxInv = 1.0f/dimMax;
 	}
 	
 

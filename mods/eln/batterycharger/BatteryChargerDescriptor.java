@@ -2,6 +2,7 @@ package mods.eln.batterycharger;
 
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
@@ -11,6 +12,7 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.SixNodeDescriptor;
+import mods.eln.wiki.Data;
 
 public class BatteryChargerDescriptor extends SixNodeDescriptor{
 
@@ -41,7 +43,14 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor{
 			}
 		}
 	}
-
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addEnergy(newItemStack());
+		Data.addUtilities(newItemStack());
+	}
+	
 	Obj3DPart [] leds = new Obj3DPart[4];
 	
 	public void draw(boolean [] presence,boolean [] charged)

@@ -16,8 +16,10 @@ import mods.eln.sim.ElectricalResistor;
 import mods.eln.sim.ElectricalStackMachineProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalLoadInitializer;
+import mods.eln.wiki.Data;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class ElectricalMachineDescriptor extends TransparentNodeDescriptor{
@@ -62,6 +64,15 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor{
 		
 
 		
+	}
+	
+	
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		recipe.addMachine(newItemStack(1));
+		Data.addMachine(newItemStack(1));
 	}
 
 	double maximalU;

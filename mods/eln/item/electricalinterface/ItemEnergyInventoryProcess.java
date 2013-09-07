@@ -3,6 +3,7 @@ package mods.eln.item.electricalinterface;
 import java.util.ArrayList;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -12,6 +13,7 @@ import mods.eln.node.INodeContainer;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import mods.eln.sim.IProcess;
+import mods.eln.wiki.Data;
 
 public class ItemEnergyInventoryProcess implements IProcess {
 
@@ -26,6 +28,9 @@ public class ItemEnergyInventoryProcess implements IProcess {
 		public IItemEnergyBattery i;
 		public int p;
 	}
+	
+
+	
 	
 	@Override
 	public void process(double time) {

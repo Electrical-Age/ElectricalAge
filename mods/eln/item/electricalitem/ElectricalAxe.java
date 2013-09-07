@@ -1,7 +1,9 @@
 package mods.eln.item.electricalitem;
 
+import mods.eln.wiki.Data;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class ElectricalAxe extends ElectricalTool {
@@ -10,8 +12,16 @@ public class ElectricalAxe extends ElectricalTool {
 			double energyStorage, double energyPerBlock, double chargePower) {
 		super(name, strengthOn, strengthOff, energyStorage, energyPerBlock, chargePower);
 		// TODO Auto-generated constructor stub
+		
+		
 	}
 	
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addPortable(newItemStack());
+	}
 	
 	@Override
 	public float getStrVsBlock(ItemStack stack, Block block) {

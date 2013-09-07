@@ -10,6 +10,7 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.SixNodeDescriptor;
+import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -44,6 +45,12 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 		}
 	}
 
+	public void setParent(net.minecraft.item.Item item, int damage)
+	{
+		super.setParent(item, damage);
+		Data.addLight(newItemStack());
+	}
+	
 	ResourceLocation tOn,tOff;
 	public int range;
 	public String modelName;
@@ -69,6 +76,7 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 				GL11.glRotatef(90, 0, -1, 0);
 				GL11.glTranslatef(-1.5f,0f, 0f);
 			}
+			
 		}
 		else if(type == ItemRenderType.EQUIPPED_FIRST_PERSON){
 			if(hasGhostGroup()){

@@ -1,11 +1,15 @@
 package mods.eln.electricalmath;
 
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.SixNodeDescriptor;
+import mods.eln.wiki.Data;
 
 public class ElectricalMathDescriptor extends SixNodeDescriptor {
 
@@ -31,6 +35,12 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
 	Obj3DPart main,door;
 	Obj3DPart led[] = new Obj3DPart[8];
 	
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addSignal(newItemStack());
+	}
 	
 	float alphaOff;
 	void draw(float open,boolean ledOn[])
@@ -55,4 +65,26 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
 		
 	}
 	
+	
+	
+	static boolean[] ledDefault = {true,false,true,false,true,true,true,false};
+	
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		// TODO Auto-generated method stub
+		GL11.glTranslatef(-0.3f, -0.1f, 0f);
+		draw(0.7f, ledDefault);
+		
+	}
 }

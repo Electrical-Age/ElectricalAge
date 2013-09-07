@@ -107,6 +107,10 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 		lightCoordonate = new Coordonate(this.descriptor.lightCoordonate);
 		lightCoordonate.applyTransformation(front, node.coordonate);
 		
+
+		descriptor.ghostDoorClose.newRotate(front).eraseGeo(node.coordonate);
+		descriptor.ghostDoorOpen.newRotate(front).plot(node.coordonate, node.coordonate, descriptor.getGhostGroupUuid());
+		
 		connect();
 	}
 	
@@ -192,6 +196,12 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 				doorState = true;
 				processRatio = 0;
 				break;
+			case StateClose:
+				descriptor.ghostDoorOpen.newRotate(front).eraseGeo(node.coordonate);
+				break;
+			case StateOpen:
+				descriptor.ghostDoorClose.newRotate(front).eraseGeo(node.coordonate);
+				break;
 			default:
 				break;
 			}	
@@ -201,12 +211,10 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			switch (this.state) {
 			case StateClose:
 				doorState = false;
-				descriptor.ghostDoorOpen.newRotate(front).eraseGeo(node.coordonate);				
 				descriptor.ghostDoorClose.newRotate(front).plot(node.coordonate, node.coordonate, descriptor.getGhostGroupUuid());
 				break;
 			case StateOpen:
 				doorState = true;
-				descriptor.ghostDoorClose.newRotate(front).eraseGeo(node.coordonate);	
 				descriptor.ghostDoorOpen.newRotate(front).plot(node.coordonate, node.coordonate, descriptor.getGhostGroupUuid());
 				break;
 			case StateCharge:
@@ -230,11 +238,13 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 		}
 	}
 	
+
+	
 	@Override
 	public boolean reservate(){
 		if(state != StateIdle) return false;
 		setState(StateReserved);
-		
+		imMaster = false;
 		return true;
 	}
 	
@@ -243,11 +253,11 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 		reservateRefreshed = true;
 		if(this.doorState == false && doorState == true){
 			setState(StateOpen);
-			setState(StateReserved);
+			//setState(StateReserved);
 		}
 		if(this.doorState == true && doorState == false){
 			setState(StateClose);
-			setState(StateReserved);
+		//	setState(StateReserved);
 		}
 		this.processRatio = processRatio;
 	}
@@ -262,7 +272,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	public static final byte eventSameTarget = 4;
 	public static final byte eventNotSameDimensionTarget = 5;
 	public static final byte eventTargetBusy = 6;
-	
+	boolean imMaster = false;
 	
 	
 	class TeleporterSlowProcess implements IProcess{
@@ -278,12 +288,15 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			{
 			case StateReserved:
 				if(reservateRefreshed == false){
-					setState(StateOpen);
-					setState(StateIdle);
+					if(doorState == false)
+						setState(StateOpen);
+					else
+						setState(StateIdle);
 				}
 				break;
 			
 			case StateIdle:	
+				imMaster = false;
 				if(startFlag){
 					targetNameCopy = targetName;
 					energyHit = 0;
@@ -315,6 +328,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 						else
 							e.setPosition(e.posX + dx, e.posY + dy, e.posZ + dz);
 					}*/
+					imMaster = true;
 					setState(StateStart);
 				
 				}
@@ -338,7 +352,10 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			case StateClose:
 				timeCounter += time;
 				if(timeCounter > 3){
-					setState(StateCharge);
+					if(reservateRefreshed)
+						setState(StateReserved);
+					else
+						setState(StateCharge);
 				}
 				break;
 
@@ -412,21 +429,26 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			case StateOpen:
 				timeCounter += time;
 				if(timeCounter > 3){
-					setState(StateIdle);
+					if(reservateRefreshed)
+						setState(StateReserved);
+					else
+						setState(StateIdle);
 				}
 				break;
 
 			}
 				
-			if(state != StateIdle){
+			if(state != StateIdle && imMaster){
 				ITeleporter target = getTarget(targetNameCopy);
 				if(target != null) target.reservateRefresh(doorState,processRatio);
 			}
 			
+			reservateRefreshed = false;
+
 			startFlag = false;
 		}
 		
-
+	
 	}
 	
 	int getTargetCount(String str)

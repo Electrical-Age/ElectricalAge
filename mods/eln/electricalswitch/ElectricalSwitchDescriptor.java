@@ -18,8 +18,10 @@ import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistor;
 import mods.eln.sim.ThermalLoadInitializer;
+import mods.eln.wiki.Data;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
@@ -92,6 +94,14 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor{
 	Obj3DPart main,lever,led,halo;
 
 	CableRenderDescriptor cableRender;
+	
+	
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addWiring(newItemStack());
+	}
 	
 	double nominalVoltage, nominalPower,nominalDropFactor;
 	double maximalVoltage, maximalPower;	

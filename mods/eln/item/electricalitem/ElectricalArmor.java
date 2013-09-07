@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumArmorMaterial;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
@@ -17,6 +18,7 @@ import net.minecraftforge.common.ISpecialArmor;
 import mods.eln.generic.genericArmorItem;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
+import mods.eln.wiki.Data;
 
 public class ElectricalArmor extends genericArmorItem implements IItemEnergyBattery ,ISpecialArmor{
 
@@ -34,6 +36,7 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
 		this.ratioMax = ratioMax;
 		this.ratioMaxEnergy = ratioMaxEnergy;
 		this.energyPerDamage = energyPerDamage;
+		Data.addPortable(new ItemStack(this));
 	}
 	double ratioMax, ratioMaxEnergy,energyPerDamage;
 	@Override
@@ -60,9 +63,7 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
 	double energyStorage, chargePower;
 
 
-//	ResourceLocation rIcon;
-	
-	
+
 	
     public boolean getIsRepairable(ItemStack par1ItemStack, ItemStack par2ItemStack)
     {

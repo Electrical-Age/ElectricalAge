@@ -533,8 +533,8 @@ public class Eln {
 		registerTransformer(2);
 		registerHeatFurnace(3);
 		registerTurbine(4);
-		registerIntelligentTransformer(5);
-		registerMppt(6);
+	//	registerIntelligentTransformer(5);
+	//	registerMppt(6);
 		registerElectricalAntenna(7);
 		registerBattery(16);
 		registerElectricalFurnace(32);
@@ -676,7 +676,7 @@ public class Eln {
 		recipeMiscItem();
 		recipeBatteryItem();
 		recipeElectricalTool();
-		
+		recipePortableCondensator();
 
 		recipeFurnace();
 		recipeMacerator();
@@ -981,7 +981,7 @@ public class Eln {
 			name = "Cost oriented battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"LowCostBattery", 0.5, true, voltageFunction, stdU,
+					"LowCostBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU,
 					stdP * 1.2, 0.000, // electricalU,
 										// electricalPMax,electricalDischargeRate
 					stdP, stdDischargeTime, 0.998, stdHalfLife, // electricalStdP,
@@ -999,7 +999,7 @@ public class Eln {
 			name = "Capacity oriented battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighCapacityBattery", 0.5, true, voltageFunction,
+					"HighCapacityBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction,
 					stdU / 4, stdP / 2 * 1.2, 0.000, // electricalU,
 														// electricalPMax,electricalDischargeRate
 					stdP / 2, stdDischargeTime * 8, 0.998, stdHalfLife, // electricalStdP,
@@ -1017,7 +1017,7 @@ public class Eln {
 			name = "Voltage oriented battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery", 0.5, true, voltageFunction, stdU * 4,
+					"HighVoltageBattery",meduimVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU * 4,
 					stdP * 1.2, 0.000, // electricalU,
 										// electricalPMax,electricalDischargeRate
 					stdP, stdDischargeTime, 0.998, stdHalfLife, // electricalStdP,
@@ -1036,7 +1036,7 @@ public class Eln {
 			name = "Current oriented battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighCurrentBattery", 0.5, true, voltageFunction, stdU,
+					"HighCurrentBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU,
 					stdP * 1.2 * 4, 0.000, // electricalU,
 											// electricalPMax,electricalDischargeRate
 					stdP * 4, stdDischargeTime / 6, 0.998, stdHalfLife, // electricalStdP,
@@ -1054,7 +1054,7 @@ public class Eln {
 			name = "Life oriented battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"LongLifeBattery", 0.5, true, voltageFunction, stdU,
+					"LongLifeBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU,
 					stdP * 1.2, 0.000, // electricalU,
 										// electricalPMax,electricalDischargeRate
 					stdP, stdDischargeTime, 0.998, stdHalfLife * 8, // electricalStdP,
@@ -1073,7 +1073,7 @@ public class Eln {
 			name = "Single usage battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"LongLifeBattery", 1.0, false, voltageFunction, stdU,
+					"LongLifeBattery",lowVoltageCableDescriptor, 1.0, false,false, voltageFunction, stdU,
 					stdP * 1.2 * 2, 0.000, // electricalU,
 											// electricalPMax,electricalDischargeRate
 					stdP * 2, stdDischargeTime, 0.998, stdHalfLife * 8, // electricalStdP,
@@ -1086,6 +1086,25 @@ public class Eln {
 			);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
+		{
+			subId = 32;
+			name = "50V condensator";
+
+			BatteryDescriptor desc = new BatteryDescriptor(name,
+					"LongLifeBattery",lowVoltageCableDescriptor, 0.0, true,false,
+					voltageFunction,
+					stdU,stdP * 1.2 * 8, 0.005, // electricalU,// electricalPMax,electricalDischargeRate
+					stdP * 8, 4, 0.998, stdHalfLife , // electricalStdP,
+																		// electricalStdDischargeTime,
+																		// electricalStdEfficiency,
+																		// electricalStdHalfLife,
+					heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
+									// thermalCoolLimit,
+					"the battery" // name, description)
+			);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		
 	}
 
 	void registerGround(int id) {
@@ -1138,12 +1157,25 @@ public class Eln {
 			name = "Lamp socket B projector";
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name,
-					obj.getObj("ClassicLampSocket"),false, LampSocketType.Douille, // LampSocketType
+					obj.getObj("ClassicLampSocket"),true, LampSocketType.Douille, // LampSocketType
 																	// socketType
 					10, -90, 90, 0);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
+		
+		{
+			subId = 4;
+
+			name = "Robust lamp socket";
+
+			LampSocketDescriptor desc = new LampSocketDescriptor(name,
+					obj.getObj("RobustLamp"),true, LampSocketType.Douille, // LampSocketType
+																	// socketType
+					0, 0, 0, 0);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		
 		{
 			subId = 8;
 
@@ -3032,8 +3064,8 @@ public class Eln {
 		
 		int armorPoint;
 		String t1,t2;
-		t1 = "eln:textures/armor/copper_layer_1.png";
-		t2 = "eln:textures/armor/copper_layer_2.png";
+		t1 = "eln:textures/armor/ecoal_layer_1.png";
+		t2 = "eln:textures/armor/ecoal_layer_2.png";
 		double energyPerDamage = 500;
 		int armor,armorMarge;
 		EnumArmorMaterial eCoalMaterial = EnumHelper.addArmorMaterial("ECoal", 10, new int[]{2, 6, 5, 2}, 9);
@@ -3045,7 +3077,7 @@ public class Eln {
 										(armor + armorMarge)*energyPerDamage,250.0,//double energyStorage,double chargePower
 										armor/20.0,armor*energyPerDamage,//double ratioMax,double ratioMaxEnergy,
 										energyPerDamage//double energyPerDamage										
-										)).setUnlocalizedName(name).func_111206_d("eln:copper_chesthelmet").setCreativeTab(creativeTab);
+										)).setUnlocalizedName(name).func_111206_d("eln:ecoal_helmet").setCreativeTab(creativeTab);
 			stack = new ItemStack(helmetECoal);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
@@ -3058,7 +3090,7 @@ public class Eln {
 										(armor + armorMarge)*energyPerDamage,250.0,//double energyStorage,double chargePower
 										armor/20.0,armor*energyPerDamage,//double ratioMax,double ratioMaxEnergy,
 										energyPerDamage//double energyPerDamage										
-										)).setUnlocalizedName(name).func_111206_d("eln:copper_chestplate").setCreativeTab(creativeTab);
+										)).setUnlocalizedName(name).func_111206_d("eln:ecoal_chestplate").setCreativeTab(creativeTab);
 			stack = new ItemStack(plateECoal);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
@@ -3071,7 +3103,7 @@ public class Eln {
 										(armor + armorMarge)*energyPerDamage,250.0,//double energyStorage,double chargePower
 										armor/20.0,armor*energyPerDamage,//double ratioMax,double ratioMaxEnergy,
 										energyPerDamage//double energyPerDamage										
-										)).setUnlocalizedName(name).func_111206_d("eln:copper_chestlegs").setCreativeTab(creativeTab);
+										)).setUnlocalizedName(name).func_111206_d("eln:ecoal_leggings").setCreativeTab(creativeTab);
 			stack = new ItemStack(legsECoal);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
@@ -3084,7 +3116,7 @@ public class Eln {
 										(armor + armorMarge)*energyPerDamage,250.0,//double energyStorage,double chargePower
 										armor/20.0,armor*energyPerDamage,//double ratioMax,double ratioMaxEnergy,
 										energyPerDamage//double energyPerDamage										
-										)).setUnlocalizedName(name).func_111206_d("eln:copper_chestboots").setCreativeTab(creativeTab);
+										)).setUnlocalizedName(name).func_111206_d("eln:ecoal_boots").setCreativeTab(creativeTab);
 			stack = new ItemStack(bootsECoal);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
@@ -4946,6 +4978,25 @@ public class Eln {
 		
 	}
 	
+	
+	
+	
+	void recipePortableCondensator()
+	{
+		GameRegistry.addRecipe(findItemStack("Portable condensator"),
+				"C",
+				"c",
+				Character.valueOf('C'), findItemStack("Coal plate"),
+				Character.valueOf('c'), findItemStack("Copper plate")
+				);		
+	
+		GameRegistry.addShapelessRecipe(findItemStack("Portable condensator pack"), 
+				findItemStack("Portable condensator"),
+				findItemStack("Portable condensator"),
+				findItemStack("Portable condensator"));
+	}
+	
+
 	void recipeMiscItem() {
 		GameRegistry.addRecipe(findItemStack("Cheap chip"),
 				" R ",

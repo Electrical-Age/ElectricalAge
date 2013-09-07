@@ -19,6 +19,7 @@ import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor;
 import mods.eln.thermaldissipatorpassive.ThermalDissipatorPassiveElement;
 import mods.eln.thermaldissipatorpassive.ThermalDissipatorPassiveRender;
+import mods.eln.wiki.Data;
 
 public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor  implements ITemperatureWatchdogDescriptor ,IThermalDestructorDescriptor{
 	
@@ -65,7 +66,11 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
 	{
 		load.set(thermalRs, thermalRp, thermalC);
 	}
-	
+	public void setParent(net.minecraft.item.Item item, int damage)
+	{
+		super.setParent(item, damage);
+		Data.addThermal(newItemStack());
+	}
 	
 	public double thermalRs,thermalRp,thermalC;
 	double electricalRp;

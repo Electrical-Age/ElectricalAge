@@ -53,7 +53,7 @@ public class Search extends GuiScreenEln{
 		Utils.getItemStack(text, searchList);
 		int idx = 0;;
 		for(ItemStack stack : searchList){
-			GuiItemStack gui = new GuiItemStack((idx % 8)*21+6, idx/8*21+24, stack, this,helper);
+			GuiItemStack gui = new GuiItemStack((idx % 8)*21+6, idx/8*21+24, stack,helper);
 			guiStackList.add(gui);
 			add(gui);
 			idx++;

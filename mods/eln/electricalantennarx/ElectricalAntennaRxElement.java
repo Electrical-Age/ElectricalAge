@@ -42,6 +42,8 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement{
 		powerSrc.setP(0.0);
 	}
 	
+	
+	
 	LRDU rot = LRDU.Up;
 	Coordonate rxCoord = null;
 	ElectricalAntennaRxDescriptor descriptor;

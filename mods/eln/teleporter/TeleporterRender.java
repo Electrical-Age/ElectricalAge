@@ -40,7 +40,7 @@ public class TeleporterRender extends TransparentNodeElementRender{
 	
 	boolean[] ledState = new boolean[10];
 	
-	float counter = 0;
+	float counter = 0,ledCounter;
 	boolean blink = false;
 	float gyroAlpha = 0;
 	@Override
@@ -49,6 +49,10 @@ public class TeleporterRender extends TransparentNodeElementRender{
 		if(counter > 0.4){
 			counter = 0;
 			blink = ! blink;
+		}		
+		ledCounter += FrameTime.get();
+		if(ledCounter > 0.1){
+			ledCounter = 0;
 		}
 		
 		doorInterpolator.stepGraphic();
@@ -63,8 +67,9 @@ public class TeleporterRender extends TransparentNodeElementRender{
 		d.main.draw();
 		d.ext_control.draw();
 		d.ext_power.draw();
+		Utils.disableCulling();
 		d.door_out.draw(doorInterpolator.get()*doorAlphaOpen,0,0,1);
-	
+		Utils.enableCulling();
 
 	//	d.outlampline0.draw();
 		GL11.glColor3f(1f, 1f, 1f);
@@ -88,47 +93,52 @@ public class TeleporterRender extends TransparentNodeElementRender{
 			GL11.glColor3f(1f, 1f, 1f);
 			d.door_in.draw(doorInterpolator.get()*doorAlphaOpen,0,0,1);
 			d.indoor_open.draw();
-			GL11.glColor3f(1f, 0f, 0f);
-			d.leds[0].draw();
-			d.leds[1].draw();
-			
-			GL11.glColor3f(0f, 1f, 0f);
-			
-			for(int idx = 2;idx < 10;idx++){
-				if(counter == 0){
-					if(Math.random() < 0.3)
-					ledState[idx] = ! ledState[idx];
-				}
-				if(ledState[idx])
-					d.leds[idx].draw();
-			}
 
-			GL11.glColor4f(1f, 0.5f, 0.0f, 1f);
-			if((voltage > 0.875 && voltage < 1.2) || blink)
-				d.scr0_electrictity.draw();
+			if(voltage > 0.6f){
 			
-			//GL11.glColor3f(1f,1f,0f);
-			d.scr1_cables.draw();
-			
-			//GL11.glColor3f(0f,1f,0f);
-			d.scr2_transporter.draw();
-			
-			if(tileEntity.worldObj.getEntitiesWithinAABB(Entity.class, d.getBB(c, front)).size() != 0 )
-				d.scr3_userin.draw();
-			
-			if(doorState)
-				d.scr5_dooropen.draw();
-			else
-				d.src4_doorclosed.draw();
-			
+				GL11.glColor3f(1f, 0f, 0f);
+				d.leds[0].draw();
+				d.leds[1].draw();
+				
+				GL11.glColor3f(0f, 1f, 0f);
+				
+				
+				for(int idx = 2;idx < 10;idx++){
+					if(ledCounter == 0){
+						if(Math.random() < 0.3)
+						ledState[idx] = ! ledState[idx];
+					}
+					if(ledState[idx])
+						d.leds[idx].draw();
+				}
+	
+				GL11.glColor4f(1f, 0.5f, 0.0f, 1f);
+				
+
+				if((voltage > 0.875f && voltage < 1.2f) || blink)
+					d.scr0_electrictity.draw();
+				
+				d.scr1_cables.draw();
+				d.scr2_transporter.draw();
+				
+				if(tileEntity.worldObj.getEntitiesWithinAABB(Entity.class, d.getBB(c, front)).size() != 0 )
+					d.scr3_userin.draw();
+				
+				if(doorState)
+					d.scr5_dooropen.draw();
+				else
+					d.src4_doorclosed.draw();
+			}	
 			
 			if(processRatioInterpolator.get() > 0.005){
 				Utils.enableBlend();
 				GL11.glColor4f(1f, 1f, 1f,blueInterpolator.get());
+				
 				d.indoor_closed.draw();
 				d.door_in_charge.draw(doorInterpolator.get()*doorAlphaOpen,0,0,1);
 				//GL11.glColor4f(0f, 0.5f, 1f,blueInterpolator.get());
 				//d.outlampline0_alpha.draw();
+				d.whiteblur.draw(doorInterpolator.get()*doorAlphaOpen,0,0,1);
 				GL11.glColor4f(1f, 1f, 1f,1f);
 				
 				Utils.disableBlend();
