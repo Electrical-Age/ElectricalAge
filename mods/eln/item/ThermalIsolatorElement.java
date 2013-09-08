@@ -8,7 +8,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalResistor;
 
 
-public class ThermalIsolatorElement extends GenericItemUsingDamageDescriptor implements ITemperatureWatchdogDescriptorForInventory{
+public class ThermalIsolatorElement extends GenericItemUsingDamageDescriptorUpgrade implements ITemperatureWatchdogDescriptorForInventory{
 	
 
 	

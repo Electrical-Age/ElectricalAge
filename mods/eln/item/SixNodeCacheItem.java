@@ -12,6 +12,7 @@ import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.wiki.Data;
 
 public class SixNodeCacheItem extends GenericItemUsingDamageDescriptor{
 	public static SixNodeCacheItem[] map = new SixNodeCacheItem[128];
@@ -36,6 +37,12 @@ public class SixNodeCacheItem extends GenericItemUsingDamageDescriptor{
 			zp = obj.getPart("zp");
 			
 		}
+	}
+	
+	public void setParent(net.minecraft.item.Item item, int damage) 
+	{
+		super.setParent(item, damage);
+		Data.addWiring(newItemStack());
 	}
 	
 	Obj3DPart main,xp,xn,yp,yn,zp,zn;

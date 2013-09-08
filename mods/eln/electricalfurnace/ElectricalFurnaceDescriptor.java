@@ -34,6 +34,10 @@ public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor{
 	//public double thermalRp;
 	//ThermalLoadInitializer thermal;
 	
+	
+	
+	
+	
 	public void applyTo(ThermalLoad load)
 	{
 		load.set(Double.POSITIVE_INFINITY,thermalPlostfT.getValue(0),thermalC);

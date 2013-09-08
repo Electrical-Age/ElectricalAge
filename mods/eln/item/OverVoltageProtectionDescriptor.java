@@ -7,7 +7,7 @@ import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-public class OverVoltageProtectionDescriptor extends GenericItemUsingDamageDescriptor{
+public class OverVoltageProtectionDescriptor extends GenericItemUsingDamageDescriptorUpgrade{
 
 	public OverVoltageProtectionDescriptor(String name) {
 		super(name);

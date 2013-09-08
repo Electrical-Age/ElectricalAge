@@ -5,7 +5,7 @@ import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.misc.FunctionTable;
 import mods.eln.sim.ElectricalLoad;
 
-public class DynamoDescriptor extends GenericItemUsingDamageDescriptor{
+public class DynamoDescriptor extends GenericItemUsingDamageDescriptorUpgrade{
 
 	public DynamoDescriptor(
 			String name,

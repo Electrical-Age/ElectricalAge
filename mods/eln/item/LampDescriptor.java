@@ -14,7 +14,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 
 
-public class LampDescriptor  extends GenericItemUsingDamageDescriptor
+public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 {
 
 

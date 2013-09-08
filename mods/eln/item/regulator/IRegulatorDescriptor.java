@@ -1,11 +1,12 @@
 package mods.eln.item.regulator;
 
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.item.GenericItemUsingDamageDescriptorUpgrade;
 import mods.eln.sim.RegulatorProcess;
 import mods.eln.sim.RegulatorType;
 import mods.eln.sim.ThermalRegulator;
 
-public abstract class IRegulatorDescriptor extends GenericItemUsingDamageDescriptor{
+public abstract class IRegulatorDescriptor extends GenericItemUsingDamageDescriptorUpgrade{
 	
 	
 	public IRegulatorDescriptor(String name) {

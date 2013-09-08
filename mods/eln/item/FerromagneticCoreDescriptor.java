@@ -15,7 +15,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 
 
-public class FerromagneticCoreDescriptor  extends GenericItemUsingDamageDescriptor
+public class FerromagneticCoreDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 {
 	private double cableMultiplicator;
 	public Obj3DPart feroPart;

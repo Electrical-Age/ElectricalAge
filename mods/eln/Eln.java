@@ -163,6 +163,7 @@ import mods.eln.turbine.TurbineCoreDescriptor;
 import mods.eln.turbine.TurbineDescriptor;
 import mods.eln.turbine.TurbineElement;
 import mods.eln.turbine.TurbineRender;
+import mods.eln.wiki.Data;
 import mods.eln.windturbine.WindTurbineDescriptor;
 
 import mods.eln.wirelesssignal.WirelessSignalAnalyserItemDescriptor;
@@ -2745,6 +2746,7 @@ public class Eln {
 					new String[] { "dudu dust", "miaou" });
 			dustCopper = element;
 			sharedItem.addElement(completId, element);
+			Data.addResource(element.newItemStack());
 		}
 		{
 			subId = 2;
@@ -2756,6 +2758,7 @@ public class Eln {
 					new String[] { "dudu dust", "miaou" });
 			dustCopper = element;
 			sharedItem.addElement(completId, element);
+			Data.addResource(element.newItemStack());
 		}
 
 		{
@@ -2767,6 +2770,7 @@ public class Eln {
 																			// name,
 					new String[] { "dudu dust", "miaou" });
 			sharedItem.addElement(id, element);
+			Data.addResource(element.newItemStack());
 		}
 		{
 			id = 6;
@@ -2777,6 +2781,7 @@ public class Eln {
 																			// name,
 					new String[] { "dudu dust", "miaou" });
 			sharedItem.addElement(id, element);
+			Data.addResource(element.newItemStack());
 		}
 		
 		{ 
@@ -2787,6 +2792,7 @@ public class Eln {
 		  element = new GenericItemUsingDamageDescriptorWithComment(
 				  name, new String[]{"dudu dust","miaou"} );
 				  sharedItem.addElement(id, element); 
+			Data.addResource(element.newItemStack());
 		}
 		 
 
@@ -2799,6 +2805,7 @@ public class Eln {
 																			// name,
 					new String[] { "dudu dust", "miaou" });
 			sharedItem.addElement(id, element);
+			Data.addResource(element.newItemStack());
 		}
 		{
 			id = 9;
@@ -2809,6 +2816,7 @@ public class Eln {
 																			// name,
 					new String[] { "dudu dust", "miaou" });
 			sharedItem.addElement(id, element);
+			Data.addResource(element.newItemStack());
 		}
 
 		{
@@ -2820,6 +2828,7 @@ public class Eln {
 																			// name,
 					new String[] { "dudu dust", "miaou" });
 			sharedItem.addElement(id, element);
+			Data.addResource(element.newItemStack());
 		}
 		{
 			id = 11;
@@ -2830,6 +2839,7 @@ public class Eln {
 																			// name,
 					new String[] { "dudu dust", "miaou" });
 			sharedItem.addElement(id, element);
+			Data.addResource(element.newItemStack());
 		}
 
 	}
@@ -2868,6 +2878,7 @@ public class Eln {
 			// GameRegistry.registerCustomItemStack(name,
 			// element.newItemStack(1));
 			copperIngot = element;
+			Data.addResource(element.newItemStack());
 		}
 	/*	{
 			subId = 2;
@@ -2907,6 +2918,7 @@ public class Eln {
 			// GameRegistry.registerCustomItemStack(name,
 			// element.newItemStack(1));
 			plumbIngot = element;
+			Data.addResource(element.newItemStack());
 		}
 
 		{
@@ -2921,6 +2933,7 @@ public class Eln {
 			// GameRegistry.registerCustomItemStack(name,
 			// element.newItemStack(1));
 			tungstenIngot = element;
+			Data.addResource(element.newItemStack());
 		}
 
 		{
@@ -2935,6 +2948,7 @@ public class Eln {
 			// GameRegistry.registerCustomItemStack(name,
 			// element.newItemStack(1));
 
+			Data.addResource(element.newItemStack());
 		}
 
 		{
@@ -2949,6 +2963,7 @@ public class Eln {
 			// GameRegistry.registerCustomItemStack(name,
 			// element.newItemStack(1));
 
+			Data.addResource(element.newItemStack());
 		}
 
 		{
@@ -2963,6 +2978,7 @@ public class Eln {
 			// GameRegistry.registerCustomItemStack(name,
 			// element.newItemStack(1));
 
+			Data.addResource(element.newItemStack());
 		}
 	}
 
@@ -2984,6 +3000,8 @@ public class Eln {
 			// GameRegistry.registerCustomItemStack(name,
 			// element.newItemStack(1));
 
+			Data.addResource(element.newItemStack());
+
 		}
 		{
 			subId = 1;
@@ -2996,6 +3014,7 @@ public class Eln {
 			sharedItem.addElement(completId, element);
 			// GameRegistry.registerCustomItemStack(name,
 			// element.newItemStack(1));
+			Data.addResource(element.newItemStack());
 
 		}
 
@@ -3713,6 +3732,7 @@ public class Eln {
 
 			descriptor = new GenericItemUsingDamageDescriptor(name);
 			sharedItem.addElement(completId, descriptor);
+			Data.addResource(descriptor.newItemStack());
 		}
 		{
 			GenericItemUsingDamageDescriptor descriptor;
@@ -3722,6 +3742,7 @@ public class Eln {
 
 			descriptor = new GenericItemUsingDamageDescriptor(name);
 			sharedItem.addElement(completId, descriptor);
+			Data.addResource(descriptor.newItemStack());
 		}
 		{
 			GenericItemUsingDamageDescriptor descriptor;
@@ -3731,6 +3752,7 @@ public class Eln {
 
 			descriptor = new GenericItemUsingDamageDescriptor(name);
 			sharedItem.addElement(completId, descriptor);
+			Data.addResource(descriptor.newItemStack());
 		}
 	}
 
@@ -3877,6 +3899,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 		{
 			subId = 1;
@@ -3884,6 +3907,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 		{
 			subId = 2;
@@ -3891,6 +3915,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 		{
 			subId = 3;
@@ -3898,6 +3923,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 		{
 			subId = 4;
@@ -3905,6 +3931,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 /*
 		{
@@ -3920,6 +3947,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 		{
 			subId = 7;
@@ -3927,6 +3955,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 		{
 			subId = 8;
@@ -3934,6 +3963,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 		{
 			subId = 9;
@@ -3941,6 +3971,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 		{
 			subId = 10;
@@ -3948,6 +3979,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 
 		{
@@ -3956,6 +3988,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 		{
 			subId = 12;
@@ -3963,6 +3996,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 
 		/*
@@ -3978,6 +4012,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 		{
 			subId = 17;
@@ -3985,6 +4020,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 		/*
 		 * { subId = 20; name = "Macerator sorter module";
@@ -4004,6 +4040,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 		{
 			subId = 28;
@@ -4011,6 +4048,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 		{
 			subId = 29;
@@ -4018,6 +4056,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}
 		{
 			subId = 32;
@@ -4033,6 +4072,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
+			Data.addResource(desc.newItemStack());
 		}		
 		
 

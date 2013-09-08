@@ -6,7 +6,7 @@ import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-public class CombustionChamber extends GenericItemUsingDamageDescriptor{
+public class CombustionChamber extends GenericItemUsingDamageDescriptorUpgrade{
 
 	public CombustionChamber(String name) {
 		super( name);

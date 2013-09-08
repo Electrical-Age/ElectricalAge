@@ -8,8 +8,10 @@ import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.lampsocket.LampSocketType;
 import mods.eln.misc.Utils;
 import mods.eln.sim.ElectricalResistor;
+import mods.eln.wiki.Data;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.Icon;
@@ -32,6 +34,14 @@ public class BrushDescriptor  extends GenericItemUsingDamageDescriptor
 		if(color == 15 && life == 0)
 			return "Empty " + super.getName(stack);
 		return super.getName(stack);
+	}
+	
+	
+	@Override
+	public void setParent(Item item, int damage) {
+		// TODO Auto-generated method stub
+		super.setParent(item, damage);
+		Data.addWiring(newItemStack());
 	}
 
 	public int getColor(ItemStack stack)

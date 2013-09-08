@@ -53,4 +53,14 @@ public class Data {
 		// TODO Auto-generated method stub
 		add("Portable",stack);
 	}
+
+	public static void addResource(ItemStack stack) {
+		// TODO Auto-generated method stub
+		add("Resource",stack);
+	}
+
+	public static void addUpgrade(ItemStack stack) {
+		// TODO Auto-generated method stub
+		add("Upgrade",stack);
+	}
 }

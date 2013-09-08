@@ -4,20 +4,19 @@ import net.minecraft.item.Item;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.wiki.Data;
 
-public class MiningPipeDescriptor extends GenericItemUsingDamageDescriptorUpgrade{
+public class GenericItemUsingDamageDescriptorUpgrade extends GenericItemUsingDamageDescriptor{
 
-	public MiningPipeDescriptor(
-			String name
-			) {
+	public GenericItemUsingDamageDescriptorUpgrade(String name) {
 		super(name);
-		
+		// TODO Auto-generated constructor stub
 	}
+	
 	
 	@Override
 	public void setParent(Item item, int damage) {
 		// TODO Auto-generated method stub
 		super.setParent(item, damage);
-		
+		Data.addUpgrade(newItemStack());
 	}
 
 }

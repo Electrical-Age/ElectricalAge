@@ -9,7 +9,7 @@ import mods.eln.sim.IVoltageWatchdogDescriptorForInventory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-public class OreScanner extends GenericItemUsingDamageDescriptor implements IVoltageWatchdogDescriptorForInventory{
+public class OreScanner extends GenericItemUsingDamageDescriptorUpgrade implements IVoltageWatchdogDescriptorForInventory{
 
 	public OreScanner(
 			String name,

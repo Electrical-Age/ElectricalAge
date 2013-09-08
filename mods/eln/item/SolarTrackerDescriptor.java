@@ -13,7 +13,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 
 
-public class SolarTrackerDescriptor  extends GenericItemUsingDamageDescriptor
+public class SolarTrackerDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 {	
 	public SolarTrackerDescriptor(
 			String name

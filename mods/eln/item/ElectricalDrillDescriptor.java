@@ -9,7 +9,7 @@ import mods.eln.sim.IVoltageWatchdogDescriptorForInventory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-public class ElectricalDrillDescriptor extends GenericItemUsingDamageDescriptor implements IVoltageWatchdogDescriptorForInventory{
+public class ElectricalDrillDescriptor extends GenericItemUsingDamageDescriptorUpgrade implements IVoltageWatchdogDescriptorForInventory{
 
 	public ElectricalDrillDescriptor(
 			String name,

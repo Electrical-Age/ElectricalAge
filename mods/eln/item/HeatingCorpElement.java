@@ -14,7 +14,7 @@ import mods.eln.sim.ThermalRegulator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-public class HeatingCorpElement extends GenericItemUsingDamageDescriptor implements IVoltageWatchdogDescriptorForInventory{
+public class HeatingCorpElement extends GenericItemUsingDamageDescriptorUpgrade implements IVoltageWatchdogDescriptorForInventory{
 	
 	public double electricalNominalU;
 	double electricalNominalP;

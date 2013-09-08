@@ -7,7 +7,7 @@ import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-public class OverHeatingProtectionDescriptor extends GenericItemUsingDamageDescriptor{
+public class OverHeatingProtectionDescriptor extends GenericItemUsingDamageDescriptorUpgrade{
 
 	public OverHeatingProtectionDescriptor(String name) {
 		super(name);
