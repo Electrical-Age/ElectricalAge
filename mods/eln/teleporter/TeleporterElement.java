@@ -279,11 +279,16 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 
 		int dx,dy,dz;
 		
+		int blinkCounter = 0;
+		
 		String targetNameCopy = "";
 		@Override
 		public void process(double time) {
-			LightBlockEntity.addLight(lightCoordonate, 12, 1);
-			
+			if(++blinkCounter >= 9){
+				blinkCounter = 0;
+				if((powerLoad.Uc/descriptor.cable.electricalNominalVoltage-0.5)*3 > Math.random())
+					LightBlockEntity.addLight(lightCoordonate, 12, 11);
+			}
 			switch(state)
 			{
 			case StateReserved:

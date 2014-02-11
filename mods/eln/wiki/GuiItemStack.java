@@ -45,9 +45,11 @@ public class GuiItemStack extends Gui implements IGuiObject{
 		drawTexturedModalRect(posX-1, posY -1, 55, 16, 73-55, 34-16);	
 		
 		if(stack != null){
+		//	RenderHelper.enableStandardItemLighting();
 			RenderHelper.enableGUIStandardItemLighting();
+			
 	        Utils.drawItemStack(stack, posX, posY, null,true);
-	        RenderHelper.disableStandardItemLighting();
+	      //  RenderHelper.disableStandardItemLighting();
 	       // GL11.glEnable(GL11.GL_LIGHTING);
 	      //  GL11.glEnable(GL11.GL_DEPTH_TEST);
 	      //  RenderHelper.enableStandardItemLighting();

@@ -101,11 +101,14 @@ public class SixNode extends Node {
 		try {
 			//Object bool = descriptor.ElementClass.getMethod("canBePlacedOnSide",Direction.class,SixNodeDescriptor.class).invoke(null, direction,descriptor);
 			//if((Boolean)bool == false) return false;
+			sideElementIdList[direction.getInt()] = itemStack.getItemDamage(); //Je sais c'est moche !
 			sideElementList[direction.getInt()] =  (SixNodeElement) descriptor.ElementClass.getConstructor(SixNode.class,Direction.class,SixNodeDescriptor.class).newInstance(this,direction,descriptor);	
+			sideElementIdList[direction.getInt()] = 0;
 			
 			disconnect();
 			sideElementList[direction.getInt()].initialize();
 			sideElementIdList[direction.getInt()] = itemStack.getItemDamage();
+			
 			connect();
 			
 			System.out.println("createSubBlock " + sideElementIdList[direction.getInt()] + " " + direction);
@@ -163,9 +166,12 @@ public class SixNode extends Node {
 		}*/
 		
 		disconnect();
-		sideElementList[direction.getInt()].destroy();
+		SixNodeElement e = sideElementList[direction.getInt()];
 		sideElementList[direction.getInt()] = null;
 		sideElementIdList[direction.getInt()] = 0;
+		e.destroy();
+
+
 		connect();
 		
 		recalculateLightValue();

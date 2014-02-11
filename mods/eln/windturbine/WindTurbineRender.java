@@ -29,7 +29,7 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 		powerFactorFilter.setTarget(powerFactor);
 		powerFactorFilter.stepGraphic();
 		
-		alpha += FrameTime.get() * descriptor.speed * powerFactorFilter.get();
+		alpha += FrameTime.get() * descriptor.speed * Math.sqrt(powerFactorFilter.get());
 		if(alpha > 360) alpha -= 360;
 		front.glRotateXnRef();
 		descriptor.draw(alpha);

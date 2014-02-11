@@ -10,7 +10,9 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 
+import mods.eln.Eln;
 import mods.eln.client.FrameTime;
+import mods.eln.ghost.GhostBlock;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.PhysicalInterpolator;
@@ -45,6 +47,11 @@ public class TeleporterRender extends TransparentNodeElementRender{
 	float gyroAlpha = 0;
 	@Override
 	public void draw() {
+		Coordonate lightCoordonate = new Coordonate(this.d.lightCoordonate);
+		lightCoordonate.applyTransformation(front, c);
+		
+		boolean lightEnable = tileEntity.worldObj.getBlockId(lightCoordonate.x, lightCoordonate.y, lightCoordonate.z) == Eln.lightBlockId;
+		
 		counter += FrameTime.get();
 		if(counter > 0.4){
 			counter = 0;
@@ -63,6 +70,12 @@ public class TeleporterRender extends TransparentNodeElementRender{
 		front.glRotateXnRef();
 		GL11.glTranslatef(-1, 0, 0);
 		
+		GL11.glColor3f(1f, 1f, 1f);
+
+		if(! lightEnable){
+			d.door_in.draw(doorInterpolator.get()*doorAlphaOpen,0,0,1);
+			d.indoor_open.draw();
+		}
 		
 		d.main.draw();
 		d.ext_control.draw();
@@ -90,10 +103,13 @@ public class TeleporterRender extends TransparentNodeElementRender{
 				d.gyro_alpha.draw(doorInterpolator.get()*doorAlphaOpen,0,0,1,gyroAlpha,-0.11746f,0.04275f,0);
 				Utils.disableBlend();
 			}
-			GL11.glColor3f(1f, 1f, 1f);
-			d.door_in.draw(doorInterpolator.get()*doorAlphaOpen,0,0,1);
-			d.indoor_open.draw();
 
+			GL11.glColor3f(1f, 1f, 1f);
+
+			if(lightEnable){
+				d.door_in.draw(doorInterpolator.get()*doorAlphaOpen,0,0,1);
+				d.indoor_open.draw();
+			}
 			if(voltage > 0.6f){
 			
 				GL11.glColor3f(1f, 0f, 0f);

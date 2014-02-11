@@ -145,5 +145,8 @@ public class GhostGroup {
 	public int size() {
 		return elementList.size();
 	}
-	
+	/*public void eraseWithNoNotification(Coordonate observerCoordonate) {
+		Eln.ghostManager.removeGhostAndBlockWithObserver(observerCoordonate);
+	}
+	*/
 }

@@ -132,6 +132,7 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
 		this.sixNode = sixNode;
 		this.side = side;
 		this.sixNodeElementDescriptor = descriptor;
+		this.itemStackDamageId = sixNode.sideElementIdList[side.getInt()];
 		
 		if(descriptor.hasGhostGroup())Eln.ghostManager.addObserver(this);
 	}
@@ -158,6 +159,9 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
 	public abstract String thermoMeterString();
 	
 	public LRDU front = LRDU.Up;
+
+	private int itemStackDamageId;
+	
 	public  void networkSerialize(DataOutputStream stream)
 	{
 		
@@ -200,7 +204,7 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
 	
 	public ItemStack getDropItemStack()
 	{
-		return new ItemStack(Eln.sixNodeBlock, 1, sixNode.sideElementIdList[side.getInt()]);
+		return new ItemStack(Eln.sixNodeBlock, 1, itemStackDamageId); //sixNode.sideElementIdList[side.getInt()]
 	}	
 	
 	public void readFromNBT(NBTTagCompound nbt,String str)

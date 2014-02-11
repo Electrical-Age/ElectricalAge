@@ -155,7 +155,9 @@ public abstract class NodeBase implements INBTTReady {
 	{
 		//super.onNeighborBlockChange();
 		neighborBlockRead();
-		reconnect();
+		if(isAdded){
+			reconnect();
+		}
 	}
 	
 	public boolean isBlockWrappable(Direction direction)

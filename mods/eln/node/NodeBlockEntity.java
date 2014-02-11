@@ -337,12 +337,12 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     
     public static NodeBlockEntity getEntity(int x, int y, int z)
     {
-    	NodeBlockEntity entity;
-    	if((entity = (NodeBlockEntity) Minecraft.getMinecraft().theWorld.getBlockTileEntity(x, y, z)) != null)
+    	TileEntity entity;
+    	if((entity = Minecraft.getMinecraft().theWorld.getBlockTileEntity(x, y, z)) != null)
     	{
     		if(entity instanceof NodeBlockEntity)
     		{
-    			return entity;
+    			return (NodeBlockEntity)entity;
     		}
     	}
     	return null;

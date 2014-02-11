@@ -93,7 +93,9 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 	protected void keyTyped(char key, int code)
     {
 		helper.keyTyped(key, code);
-		super.keyTyped(key, code);
+		if(code != 18){
+			super.keyTyped(key, code);
+		}
     }
     protected void mouseClicked(int x, int y, int code)
     {
