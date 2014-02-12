@@ -13,6 +13,7 @@ import org.bouncycastle.crypto.tls.ByteQueue;
 
 import com.google.common.primitives.Bytes;
 
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -112,6 +113,8 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 		thermalLoadList = new ArrayList<ThermalLoad>();
 
 		run = false;
+		
+		setSimplify(true);
 	}
 	
 	public void init()
@@ -149,11 +152,23 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 	
 	public void addElectricalConnection(ElectricalConnection connection)
 	{
-		if(connection!=null)electricalConnectionList.add(connection);
+		if(connection!=null){
+			electricalConnectionList.add(connection);
+			connection.L1.electricalConnections.add(connection);
+			connection.L2.electricalConnections.add(connection);
+			workingGenerated = false;
+		}
 	}
 	public void removeElectricalConnection(ElectricalConnection connection)
 	{
-		if(connection!=null)electricalConnectionList.remove(connection);
+		if(connection!=null){
+			electricalConnectionList.remove(connection);
+			connection.L1.electricalConnections.remove(connection);
+			connection.L2.electricalConnections.remove(connection);
+			workingGenerated = false;
+		}
+
+
 	}
 	
 	public void addThermalConnection(ThermalConnection connection)
@@ -168,11 +183,18 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 	
 	public void addElectricalLoad(ElectricalLoad load)
 	{
-		if(load!=null)electricalLoadList.add(load);
+		if(load!=null){
+			electricalLoadList.add(load);
+			workingGenerated = false;
+		}
+		
 	}
 	public void removeElectricalLoad(ElectricalLoad load)
 	{
-		if(load!=null)electricalLoadList.remove(load);
+		if(load!=null){
+			electricalLoadList.remove(load);
+			workingGenerated = false;
+		}
 	}
 	
 	public void addThermalLoad(ThermalLoad load)
@@ -214,11 +236,21 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 	
 	public void addAllElectricalConnection(ArrayList<ElectricalConnection> connection)
 	{
-		if(connection!=null)electricalConnectionList.addAll(connection);
+		if(connection!=null){
+			for (ElectricalConnection c : connection) {
+				addElectricalConnection(c);
+			}
+			workingGenerated = false;
+		}
 	}
 	public void removeAllElectricalConnection(ArrayList<ElectricalConnection> connection)
 	{
-		if(connection!=null)electricalConnectionList.removeAll(connection);
+		if(connection!=null){
+			for (ElectricalConnection c : connection) {
+				removeElectricalConnection(c);
+			}
+			workingGenerated = false;
+		}
 	}
 	
 	public void addAllThermalConnection(ArrayList<ThermalConnection> connection)
@@ -233,11 +265,17 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 	
 	public void addAllElectricalLoad(ArrayList<ElectricalLoad> load)
 	{
-		if(load!=null)electricalLoadList.addAll(load);
+		if(load!=null){
+			electricalLoadList.addAll(load);
+			workingGenerated = false;
+		}
 	}
 	public void removeAllElectricalLoad(ArrayList<ElectricalLoad> load)
 	{
-		if(load!=null)electricalLoadList.removeAll(load);
+		if(load!=null){
+			electricalLoadList.removeAll(load);
+			workingGenerated = false;
+		}
 	}
 	
 	public void addAllThermalLoad(ArrayList<ThermalLoad> load)
@@ -277,14 +315,135 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 	}	
 	
 	
+	private ArrayList<ElectricalConnection> workingElectricalConnectionList = new ArrayList<ElectricalConnection>();
+	private ArrayList<ElectricalLoad> workingElectricalLoadList = new ArrayList<ElectricalLoad>();
+	private ArrayList<SimplifiedElectricalBranch> simplifiedElectricalBranchList = new ArrayList<SimplifiedElectricalBranch>();
 	
+	int simplifyCMin = 0;
+	int simplifyCMax = 100;
 	
+	void generateSimplify(){
+		destroySimplify();
+		
+		for (ElectricalConnection c : electricalConnectionList) {
+			c.resetTag();
+		}
+		for (ElectricalLoad l : electricalLoadList) {
+			l.resetTag();
+		}
+		for (ElectricalLoad lStart : electricalLoadList) {
+			if(!lStart.isTaged() && lStart.getSimplifyAuthorized() && lStart.electricalConnections.size() == 2){
+				int cCount = 0;
+				int lCount = 0;
+				ElectricalConnection c/*,cA,cB*/;
+				ElectricalLoad l = null,lA,lB;
+				ArrayList<ElectricalLoad> lAList = new ArrayList<ElectricalLoad>(16);
+				ArrayList<ElectricalLoad> lBList = new ArrayList<ElectricalLoad>(16);
+				
+				cCount = 2;
+				
+				c = lStart.electricalConnections.get(0);
+				if(c.L1 == lStart)
+					l = c.L2;
+				else
+					l = c.L1;
+
+				while(cCount < simplifyCMax && l != lStart && l.electricalConnections.size() == 2 && l.getSimplifyAuthorized()){
+					lAList.add(l);cCount++;
+					if(l.electricalConnections.get(0) == c)
+						c = l.electricalConnections.get(1);
+					else
+						c = l.electricalConnections.get(0);
+					
+					if(c.L1 == l)
+						l = c.L2;
+					else
+						l = c.L1;									
+				}
+			//	cA = c;
+				lA = l;
+				
+				if(l != lStart){
+					c = lStart.electricalConnections.get(1);
+					if(c.L1 == lStart)
+						l = c.L2;
+					else
+						l = c.L1;
+					
+					while(cCount < simplifyCMax && l != lStart && l.electricalConnections.size() == 2 && l.getSimplifyAuthorized()){
+						lBList.add(l);cCount++;
+						if(l.electricalConnections.get(0) == c)
+							c = l.electricalConnections.get(1);
+						else
+							c = l.electricalConnections.get(0);
+						
+						if(c.L1 == l)
+							l = c.L2;
+						else
+							l = c.L1;
+					}
+				}
+					//cB = c;
+				lB = l;
+				
+				if(cCount >= simplifyCMin){
+					ElectricalLoad[] lList = new ElectricalLoad[1+lAList.size() + lBList.size()];
+					int idx;
+					
+					idx = 0;	
+					for (;idx < lAList.size();idx++) {
+						lList[idx] = lAList.get(lAList.size() - 1 - idx);
+					}
+					lList[idx++] = lStart;
+					for (ElectricalLoad e : lBList) {
+						lList[idx++] = e;
+					}
+					
+					for (ElectricalLoad e : lList) {
+						e.setTag();
+						for (ElectricalConnection e2 : e.electricalConnections) {
+							e2.setTag();
+						}
+					}
+					
+					SimplifiedElectricalBranch b = new SimplifiedElectricalBranch(lList,lA,lB);
+					simplifiedElectricalBranchList.add(b);
+					
+					//System.out.println("Simplify    C:" + cCount);
+					
+					
+				}
+				
+				
+				
+			}
+		}
+		
+		//electricalProcessList.addAll(simplifiedElectricalBranchList);
+		
+		for (ElectricalConnection c : electricalConnectionList) {
+			if(!c.isTaged()){
+				workingElectricalConnectionList.add(c);
+			}
+		}
+		
+		
+		for (ElectricalLoad l : electricalLoadList) {
+			if(!l.isTaged()){
+				workingElectricalLoadList.add(l);
+			}
+		}
+	}
 	
-	
-	
+	void destroySimplify(){
+		simplifiedElectricalBranchList.clear();
+		workingElectricalConnectionList.clear();
+		workingElectricalLoadList.clear();
+	}
 
 	//private ArrayList<Double> conectionSerialConductance = new ArrayList<Double>();
-
+	boolean simplifyEnable;
+	boolean workingGenerated;
 	double avgTickTime = 0;
 	@Override
 	public void tickStart(EnumSet<TickType> type, Object... tickData) {
@@ -297,20 +456,48 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 			load.invC = 1/load.C;
 			load.invRp = 1/load.Rp;
 		}*/
-			 
+	
+		
+
+
 		long startTime =  System.nanoTime();
 		double commonTime = 1.0f/fps/commonOverSampling;
 		double electricalTime = 1.0f/fps/commonOverSampling/electricalOverSampling;
 		double thermalTime = 1.0f/fps/commonOverSampling/thermalOverSampling;
-	
-		/*
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		//double[] conRs = new double[electricalConnectionList.size()];
+		
+		
+
+		if(!workingGenerated){
+			destroySimplify();
+			
+			if(simplifyEnable){
+				
+				generateSimplify();
+				double eOpt = 0;
+				for (SimplifiedElectricalBranch b : simplifiedElectricalBranchList) {
+					eOpt += b.energyStored();
+				}
+				double eNow = 0;
+				for (ElectricalLoad l : workingElectricalLoadList) {
+					eNow += l.energyStored();
+				}
+				
+				System.out.println("Simplify! " + Utils.plotValue(eOpt,"J less ") + Utils.plotValue(eNow,"J remaine"));
+			}
+			else{
+				System.out.println("NO simplify!");
+				workingElectricalLoadList.addAll(electricalLoadList);
+				workingElectricalConnectionList.addAll(electricalConnectionList);
+			}
+			workingGenerated = true;
+		}
+		
+		for (SimplifiedElectricalBranch e : simplifiedElectricalBranchList) {
+			e.preStep();
+		}
+
+		
+		
 		for(int idx2 = 0;idx2<commonOverSampling;idx2++)
 		{
 			
@@ -321,11 +508,8 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 				 
 			for(int idx = 0;idx<electricalOverSampling-1;idx++)
 			{
-			//	int length = electricalConnectionList.size();
-			//	for(int cId = 0;cId<length;cId++)
-			    for (ElectricalConnection c : electricalConnectionList)
+			    for (ElectricalConnection c : workingElectricalConnectionList)
 			    {
-			//		ElectricalConnection c = electricalConnectionList.get(cId);
 			    	double i;
 			    	ElectricalLoad L1 = c.L1,L2 = c.L2;
 			    	
@@ -335,11 +519,15 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 			    	L2.IcTemp -= i;
 
 			    }
+			    
+			    for (SimplifiedElectricalBranch b : simplifiedElectricalBranchList) {
+					b.stepA();
+				}
 			    for (IProcess process : electricalProcessList)
 			    {
 			    	process.process(electricalTime);
 			    }				   
-			    for (ElectricalLoad load : electricalLoadList)
+			    for (ElectricalLoad load : workingElectricalLoadList)
 			    {
 			    	//load.IcTemp -= load.Uc*load.invRp;
 			    	load.Uc += (load.IcTemp - load.Uc*load.invRp) * electricalTime*load.invC;
@@ -350,11 +538,11 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 			
 			
 			
-		    for (ElectricalLoad load : electricalLoadList)
+		    for (ElectricalLoad load : workingElectricalLoadList)
 		    {
 		    	load.Isp = 0;
 		    }
-		    for (ElectricalConnection c : electricalConnectionList)
+		    for (ElectricalConnection c : workingElectricalConnectionList)
 		    {
 		    	double i,absi,iPow2;
 		    	ElectricalLoad L1 = c.L1,L2 = c.L2;
@@ -372,11 +560,14 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 		    	L1.IrsPow2Temp += iPow2;
 		    	L2.IrsPow2Temp += iPow2;
 		    }
+		    for (SimplifiedElectricalBranch b : simplifiedElectricalBranchList) {
+				b.stepB();
+			}
 		    for (IProcess process : electricalProcessList)
 		    {
 		    	process.process(electricalTime);
 		    }				   
-		    for (ElectricalLoad load : electricalLoadList)
+		    for (ElectricalLoad load : workingElectricalLoadList)
 		    {
 		    	load.IcTemp -= load.Uc*load.invRp;
 		    	load.Uc += load.IcTemp*electricalTime*load.invC;
@@ -424,6 +615,11 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 			
 
 		}
+		
+		for (SimplifiedElectricalBranch e : simplifiedElectricalBranchList) {
+			e.postStep();
+		}
+		
 		long slowProcessTime = System.nanoTime();
 	    for (Object o : slowProcessList.toArray())
 	    {
@@ -437,8 +633,11 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 			printTimeCounter = 0;
 			
 			System.out.println("ticks " + new DecimalFormat("#").format((int)avgTickTime) + " us (" + (int)(slowProcessTime/1000) + "us SP) for " 
-				+ "    " + electricalLoadList.size()  + " EL" 
-				+ "    " + electricalConnectionList.size()  + " EC" 
+					+ "    " + simplifiedElectricalBranchList.size()  + " EB" 
+					+ "    " + electricalLoadList.size()  + " EL" 
+					+ "    " + workingElectricalLoadList.size()  + " WL" 
+					+ "    " + electricalConnectionList.size()  + " EC" 
+					+ "    " + workingElectricalConnectionList.size()  + " WC" 
 				+ "    " + electricalProcessList.size()  + " EP" 
 				+ "    " + thermalLoadList.size()  + " TL" 
 				+ "    " + thermalConnectionList.size()  + " TC" 
@@ -466,6 +665,10 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 	public String getLabel() {
 		// TODO Auto-generated method stub
 		return "Miaou";
+	}
+	public void setSimplify(boolean b) {
+		simplifyEnable = b;
+		workingGenerated = false;
 	}
 
 	

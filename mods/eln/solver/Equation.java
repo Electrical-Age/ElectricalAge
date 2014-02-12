@@ -1,5 +1,7 @@
 package mods.eln.solver;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -82,11 +84,14 @@ public class Equation implements IValue,INBTTReady{
 					}
 					if(find == false)
 					try{	
-						double value = Double.parseDouble(str);
+						double value = NumberFormat.getInstance().parse(str).floatValue();
 						list.set(idx, new Constant(value));
 						find = true;
 					}catch(NumberFormatException e){
 						
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+					//	e.printStackTrace();
 					}
 					if(find == false){
 						if(str.equals("PI") || str.equals("pi")){

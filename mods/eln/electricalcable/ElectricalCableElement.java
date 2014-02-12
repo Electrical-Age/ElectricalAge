@@ -55,6 +55,7 @@ public class ElectricalCableElement extends SixNodeElement implements IThermalDe
 		slowProcessList.add(thermalWatchdogProcess);
 		slowProcessList.add(electricalLoadDynamicProcess);
 		
+		electricalLoad.setSimplifyAuthorized(true);
 
 	}
 

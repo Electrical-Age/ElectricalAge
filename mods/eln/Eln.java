@@ -173,6 +173,8 @@ import mods.eln.wirelesssignal.WirelessSignalTxDescriptor;
 import mods.eln.wirelesssignal.WirelessSignalTxElement;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.command.ICommandManager;
+import net.minecraft.command.ServerCommandManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.EnumArmorMaterial;
 import net.minecraft.item.EnumToolMaterial;
@@ -733,38 +735,44 @@ public class Eln {
 	@ServerStarting
 	/* Remember to use the right event! */
 	public void onServerStarting(FMLServerStartingEvent ev) {
-		TeleporterElement.teleporterList.clear();
-		tileEntityDestructor.clear();
-		LightBlockEntity.observers.clear();
-		WirelessSignalTxElement.channelMap.clear();
-		LampSupplyElement.channelMap.clear();
-		playerManager.clear();
-		MinecraftServer server = FMLCommonHandler.instance()
-				.getMinecraftServerInstance();
-		WorldServer worldServer = server.worldServers[0];
-		simulator.init();
-
-		simulator.addSlowProcess(new ItemEnergyInventoryProcess());
-		
-		ghostManager = (GhostManager) worldServer.mapStorage.loadData(
-				GhostManager.class, "GhostManager");
-		if (ghostManager == null) {
-			ghostManager = new GhostManager("GhostManager");
-			worldServer.mapStorage.setData("GhostManager", ghostManager);
+		{
+			TeleporterElement.teleporterList.clear();
+			tileEntityDestructor.clear();
+			LightBlockEntity.observers.clear();
+			WirelessSignalTxElement.channelMap.clear();
+			LampSupplyElement.channelMap.clear();
+			playerManager.clear();
+			MinecraftServer server = FMLCommonHandler.instance()
+					.getMinecraftServerInstance();
+			WorldServer worldServer = server.worldServers[0];
+			simulator.init();
+	
+			simulator.addSlowProcess(new ItemEnergyInventoryProcess());
+			
+			ghostManager = (GhostManager) worldServer.mapStorage.loadData(
+					GhostManager.class, "GhostManager");
+			if (ghostManager == null) {
+				ghostManager = new GhostManager("GhostManager");
+				worldServer.mapStorage.setData("GhostManager", ghostManager);
+			}
+			ghostManager.init();
+	
+			nodeManager = (NodeManager) worldServer.mapStorage.loadData(
+					NodeManager.class, "NodeManager");
+			if (nodeManager == null) {
+				nodeManager = new NodeManager("NodeManager");
+				worldServer.mapStorage.setData("NodeManager", nodeManager);
+			}
+	
+			nodeServer.init();
 		}
-		ghostManager.init();
 
-		nodeManager = (NodeManager) worldServer.mapStorage.loadData(
-				NodeManager.class, "NodeManager");
-		if (nodeManager == null) {
-			nodeManager = new NodeManager("NodeManager");
-			worldServer.mapStorage.setData("NodeManager", nodeManager);
-		}
-
-		nodeServer.init();
-
-
-		
+		 {
+			 MinecraftServer s = MinecraftServer.getServer();
+			 ICommandManager command = s.getCommandManager();
+			 ServerCommandManager manager = (ServerCommandManager) command;
+			 manager.registerCommand(new ConsoleListener());
+		 }
 
 	}
 

@@ -1,5 +1,7 @@
 package mods.eln.sim;
 
+import java.util.ArrayList;
+
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -9,6 +11,17 @@ public class ElectricalLoad{
 	public double Uc,Ic,IcTemp,Irs,IrsTemp,IrsPow2,IrsPow2Temp,invC,invRp;
 	public double Isp;
 	private double Rp,Rs,C;
+	private boolean simplifyAuthorized= false;
+	
+	ArrayList<ElectricalConnection> electricalConnections = new ArrayList<ElectricalConnection>(4);
+	
+	public void setSimplifyAuthorized(boolean value){
+		simplifyAuthorized = value;
+	}
+	
+	public boolean getSimplifyAuthorized(){
+		return simplifyAuthorized;
+	}
 	
 	public double getRp() {
 		return Rp;
@@ -178,5 +191,24 @@ public class ElectricalLoad{
 	public void weakPullDown(double tao)
 	{
 		setRp(tao/getC());
+	}
+	
+	
+	private boolean tag = false;
+	
+	public boolean isTaged() {
+		return tag;
+	}
+
+	public void resetTag() {
+		tag = false;
+	}
+	public void setTag(){
+		tag = true;
+	}
+
+	public double energyStored() {
+		// TODO Auto-generated method stub
+		return Uc*Uc*C/2;
 	}
 }
