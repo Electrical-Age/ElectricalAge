@@ -3,6 +3,8 @@ package mods.eln.electricalbreaker;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 import org.lwjgl.opengl.GL11;
 
@@ -67,8 +69,8 @@ public class ElectricalBreakerGui extends GuiContainerEln{
     	if(object == setUmax)
     	{
 			try{
-				render.clientSetVoltageMax(Float.parseFloat (setUmax.getText()));
-			} catch(NumberFormatException e)
+				render.clientSetVoltageMax(NumberFormat.getInstance().parse(setUmax.getText()).floatValue());
+			} catch(ParseException e)
 			{
 
 			}
@@ -76,8 +78,8 @@ public class ElectricalBreakerGui extends GuiContainerEln{
     	else if(object == setUmin)
     	{
 			try{
-				render.clientSetVoltageMin(Float.parseFloat (setUmin.getText()));
-			} catch(NumberFormatException e)
+				render.clientSetVoltageMin(NumberFormat.getInstance().parse(setUmin.getText()).floatValue());
+			} catch(ParseException e)
 			{
 
 			}

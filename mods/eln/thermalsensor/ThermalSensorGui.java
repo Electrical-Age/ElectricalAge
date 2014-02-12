@@ -3,9 +3,10 @@ package mods.eln.thermalsensor;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 import org.lwjgl.opengl.GL11;
-
 
 import mods.eln.electricasensor.ElectricalSensorElement;
 import mods.eln.gui.GuiContainerEln;
@@ -87,10 +88,10 @@ public class ThermalSensorGui extends GuiContainerEln{
 			float lowVoltage,highVoltage;
 			
 			try{
-				lowVoltage = (float) (Float.parseFloat (lowValue.getText()));
-				highVoltage = (float) (Float.parseFloat (highValue.getText()));
+				lowVoltage = NumberFormat.getInstance().parse(lowValue.getText()).floatValue();
+				highVoltage = NumberFormat.getInstance().parse(highValue.getText()).floatValue();
 				render.clientSetFloat(ElectricalSensorElement.setValueId, lowVoltage - (float)PhysicalConstant.Tamb,highVoltage - (float)PhysicalConstant.Tamb);
-			} catch(NumberFormatException e)
+			} catch(ParseException e)
 			{
 
 			}

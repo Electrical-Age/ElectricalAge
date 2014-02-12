@@ -3,9 +3,10 @@ package mods.eln.electricaldatalogger;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 import org.lwjgl.opengl.GL11;
-
 
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
@@ -170,21 +171,21 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	    	}
 	    	else if(object == maxValue)
 			{
-				render.clientSetFloat(ElectricalDataLoggerElement.setMaxValue, Float.parseFloat(maxValue.getText()));
+				render.clientSetFloat(ElectricalDataLoggerElement.setMaxValue, NumberFormat.getInstance().parse(maxValue.getText()).floatValue());
 			}
 			else if(object == minValue)
 			{
-				render.clientSetFloat(ElectricalDataLoggerElement.setMinValue, Float.parseFloat(minValue.getText()));
+				render.clientSetFloat(ElectricalDataLoggerElement.setMinValue, NumberFormat.getInstance().parse(minValue.getText()).floatValue());
 			}
 			else if(object == samplingPeriode)
 			{
-				float value = Float.parseFloat(samplingPeriode.getText());
+				float value = NumberFormat.getInstance().parse(samplingPeriode.getText()).floatValue();
 				if(value < 0.05f) value = 0.05f;
 				samplingPeriode.setText(value);
 				
 				render.clientSetFloat(ElectricalDataLoggerElement.setSamplingPeriodeId, value);
 			}
-		} catch(NumberFormatException e)
+		} catch(ParseException e)
 		{
 
 		}

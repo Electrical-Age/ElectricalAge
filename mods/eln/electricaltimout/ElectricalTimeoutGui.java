@@ -3,9 +3,10 @@ package mods.eln.electricaltimout;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 import org.lwjgl.opengl.GL11;
-
 
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiScreenEln;
@@ -67,9 +68,9 @@ public class ElectricalTimeoutGui extends GuiScreenEln{
     	else if(object == timeoutValue)
     	{
     		try{
-    			float value = Float.parseFloat (timeoutValue.getText());
+    			float value = NumberFormat.getInstance().parse(timeoutValue.getText()).floatValue();
     			render.clientSetFloat(ElectricalTimeoutElement.setTimeOutValueId,value);
-    		} catch(NumberFormatException e)
+    		} catch(ParseException e)
     		{
 
     		}	

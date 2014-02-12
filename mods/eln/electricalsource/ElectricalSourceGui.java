@@ -3,6 +3,8 @@ package mods.eln.electricalsource;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 import org.lwjgl.opengl.GL11;
 
@@ -54,8 +56,8 @@ public class ElectricalSourceGui extends GuiScreenEln {
 		float newVoltage;
 		
 		try{
-			newVoltage = Float.parseFloat (voltage.getText());
-		} catch(NumberFormatException e)
+			newVoltage = NumberFormat.getInstance().parse(voltage.getText()).floatValue();
+		} catch(ParseException e)
 		{
 			return;
 		}

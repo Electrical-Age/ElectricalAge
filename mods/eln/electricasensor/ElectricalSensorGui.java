@@ -3,9 +3,10 @@ package mods.eln.electricasensor;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 import org.lwjgl.opengl.GL11;
-
 
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
@@ -88,10 +89,10 @@ public class ElectricalSensorGui extends GuiContainerEln{
 			float lowVoltage,highVoltage;
 			
 			try{
-				lowVoltage = Float.parseFloat (lowValue.getText());
-				highVoltage = Float.parseFloat (highValue.getText());
+				lowVoltage = NumberFormat.getInstance().parse(lowValue.getText()).floatValue();
+				highVoltage = NumberFormat.getInstance().parse(highValue.getText()).floatValue();
 				render.clientSetFloat(ElectricalSensorElement.setValueId, lowVoltage,highVoltage);
-			} catch(NumberFormatException e)
+			} catch(ParseException e)
 			{
 
 			}
