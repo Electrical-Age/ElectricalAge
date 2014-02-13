@@ -324,15 +324,17 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 	
 	void generateSimplify(){
 		destroySimplify();
+	//	ArrayList<ElectricalLoad> extremity = new ArrayList<ElectricalLoad>(16);
 		
 		for (ElectricalConnection c : electricalConnectionList) {
 			c.resetTag();
 		}
 		for (ElectricalLoad l : electricalLoadList) {
 			l.resetTag();
+			l.resetTag2();
 		}
 		for (ElectricalLoad lStart : electricalLoadList) {
-			if(!lStart.isTaged() && lStart.getSimplifyAuthorized() && lStart.electricalConnections.size() == 2){
+			if((!lStart.isTaged()) && (!lStart.isTaged2()) && lStart.getSimplifyAuthorized() && lStart.electricalConnections.size() == 2 && false == lStart.electricalConnections.get(0).isTaged() && false == lStart.electricalConnections.get(1).isTaged()){
 				int cCount = 0;
 				int lCount = 0;
 				ElectricalConnection c/*,cA,cB*/;
@@ -348,7 +350,7 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 				else
 					l = c.L1;
 
-				while(cCount < simplifyCMax && l != lStart && l.electricalConnections.size() == 2 && l.getSimplifyAuthorized()){
+				while(cCount < simplifyCMax && l != lStart && l.electricalConnections.size() == 2 && l.getSimplifyAuthorized() && (!l.isTaged()) && (!l.isTaged2())){
 					lAList.add(l);cCount++;
 					if(l.electricalConnections.get(0) == c)
 						c = l.electricalConnections.get(1);
@@ -370,7 +372,7 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 					else
 						l = c.L1;
 					
-					while(cCount < simplifyCMax && l != lStart && l.electricalConnections.size() == 2 && l.getSimplifyAuthorized()){
+					while(cCount < simplifyCMax && l != lStart && l.electricalConnections.size() == 2 && l.getSimplifyAuthorized() && (!l.isTaged()) && (!l.isTaged2())){
 						lBList.add(l);cCount++;
 						if(l.electricalConnections.get(0) == c)
 							c = l.electricalConnections.get(1);
@@ -387,7 +389,10 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 				lB = l;
 				
 				if(cCount >= simplifyCMin){
+					//extremity.add(lB);
+					//extremity.add(lA);
 					ElectricalLoad[] lList = new ElectricalLoad[1+lAList.size() + lBList.size()];
+					
 					int idx;
 					
 					idx = 0;	
@@ -400,11 +405,22 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 					}
 					
 					for (ElectricalLoad e : lList) {
+						if(e.isTaged()){
+							int i = 0;
+							i++;
+						}
 						e.setTag();
 						for (ElectricalConnection e2 : e.electricalConnections) {
+							if(e2.isTaged()){
+								int i = 0;
+								i++;
+							}
 							e2.setTag();
 						}
 					}
+					
+					lA.setTag2();
+					lB.setTag2();
 					
 					SimplifiedElectricalBranch b = new SimplifiedElectricalBranch(lList,lA,lB);
 					simplifiedElectricalBranchList.add(b);

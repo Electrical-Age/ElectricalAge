@@ -207,6 +207,19 @@ public class ElectricalLoad{
 		tag = true;
 	}
 
+	private boolean tag2 = false;
+	
+	public boolean isTaged2() {
+		return tag2;
+	}
+
+	public void resetTag2() {
+		tag2 = false;
+	}
+	public void setTag2(){
+		tag2 = true;
+	}
+
 	public double energyStored() {
 		// TODO Auto-generated method stub
 		return Uc*Uc*C/2;
