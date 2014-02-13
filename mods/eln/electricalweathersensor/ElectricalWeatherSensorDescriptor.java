@@ -1,4 +1,4 @@
-package mods.eln.electricallightsensor;
+package mods.eln.electricalweathersensor;
 
 import java.util.List;
 
@@ -21,19 +21,17 @@ import mods.eln.wiki.Data;
 import com.google.common.base.Function;
 
 
-public class ElectricalLightSensorDescriptor extends SixNodeDescriptor{
+public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor{
 
 
 	private Obj3DPart main;
-	public boolean dayLightOnly;
-	public ElectricalLightSensorDescriptor(
+
+	public ElectricalWeatherSensorDescriptor(
 			String name,
-			Obj3D obj,
-			boolean dayLightOnly
+			Obj3D obj
 			) {
-		super(name, ElectricalLightSensorElement.class,ElectricalLightSensorRender.class);
+		super(name, ElectricalWeatherSensorElement.class,ElectricalWeatherSensorRender.class);
 		this.obj = obj;
-		this.dayLightOnly = dayLightOnly;
 		
 		if(obj != null)
 		{
@@ -59,15 +57,11 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		if(dayLightOnly){
-			list.add("Provide electrical signal");
-			list.add("in function of day light");
-			list.add("0V the night, " + Eln.SVU + "V the midday");
-		}
-		else{
-			list.add("Provide electrical signal");
-			list.add("in function of light");		
-		}
+		list.add("Provide electrical signal");
+		list.add("in function of wheater");
+		list.add("0V -> clear, ");
+		list.add(Eln.SVU/2 +"V -> rain, ");
+		list.add(Eln.SVU +"V -> thunder, ");
 	}
 	
 	

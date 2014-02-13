@@ -325,7 +325,8 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 	void generateSimplify(){
 		destroySimplify();
 	//	ArrayList<ElectricalLoad> extremity = new ArrayList<ElectricalLoad>(16);
-		
+		ArrayList<ElectricalLoad> lAList = new ArrayList<ElectricalLoad>(16);
+		ArrayList<ElectricalLoad> lBList = new ArrayList<ElectricalLoad>(16);		
 		for (ElectricalConnection c : electricalConnectionList) {
 			c.resetTag();
 		}
@@ -339,8 +340,8 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 				int lCount = 0;
 				ElectricalConnection c/*,cA,cB*/;
 				ElectricalLoad l = null,lA,lB;
-				ArrayList<ElectricalLoad> lAList = new ArrayList<ElectricalLoad>(16);
-				ArrayList<ElectricalLoad> lBList = new ArrayList<ElectricalLoad>(16);
+				lAList.clear();
+				lBList.clear();
 				
 				cCount = 2;
 				
@@ -405,10 +406,6 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 					}
 					
 					for (ElectricalLoad e : lList) {
-						if(e.isTaged()){
-							int i = 0;
-							i++;
-						}
 						e.setTag();
 						for (ElectricalConnection e2 : e.electricalConnections) {
 							if(e2.isTaged()){
@@ -489,6 +486,9 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 			if(simplifyEnable){
 				
 				generateSimplify();
+			    long generateTIme = System.nanoTime() - startTime;
+				
+				
 				double eOpt = 0;
 				for (SimplifiedElectricalBranch b : simplifiedElectricalBranchList) {
 					eOpt += b.energyStored();
@@ -498,7 +498,7 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 					eNow += l.energyStored();
 				}
 				
-				System.out.println("Simplify! " + Utils.plotValue(eOpt,"J less ") + Utils.plotValue(eNow,"J remaine"));
+				System.out.println("Simplify! " + Utils.plotValue(eOpt,"J less ") + Utils.plotValue(eNow,"J remain in ") + (generateTIme/1000) + "us");
 			}
 			else{
 				System.out.println("NO simplify!");

@@ -48,6 +48,7 @@ import mods.eln.electricalsource.ElectricalSourceRender;
 import mods.eln.electricalswitch.ElectricalSwitchDescriptor;
 import mods.eln.electricaltimout.ElectricalTimeoutDescriptor;
 import mods.eln.electricalvumeter.ElectricalVuMeterDescriptor;
+import mods.eln.electricalweathersensor.ElectricalWeatherSensorDescriptor;
 import mods.eln.electricasensor.ElectricalSensorDescriptor;
 import mods.eln.elnhttpserver.ElnHttpServer;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
@@ -528,7 +529,7 @@ public class Eln {
 		registerThermalSensor(101);
 		registerElectricalVuMeter(102);
 		registerElectricalAlarm(103);
-		registerElectricalLightSensor(104);
+		registerElectricalEnvironementalSensor(104);
 		registerElectricalRedstone(108);
 		registerElectricalGate(109); 
 		registerTreeResinCollector(116);
@@ -596,7 +597,7 @@ public class Eln {
 		recipeElectricalGateSource();
 		recipeElectricalBreaker();
 		recipeElectricalVuMeter();
-		recipeElectricalLightSensor();
+		recipeElectricalEnvironnementalSensor();
 		recipeElectricalRedstone();
 		recipeElectricalGate();
 		recipeElectricalAlarm();
@@ -920,7 +921,7 @@ public class Eln {
 
 			highVoltageCableDescriptor = desc;
 
-			desc.setPhysicalConstantLikeNormalCable(HVU, HVP, 0.1 / 20,// electricalNominalVoltage,
+			desc.setPhysicalConstantLikeNormalCable(HVU, HVP, 0.075 / 20,// electricalNominalVoltage,
 																		// electricalNominalPower,
 																		// electricalNominalPowerDrop,
 					HVU * 1.3, HVP * 1.2,// electricalMaximalVoltage,
@@ -1166,7 +1167,7 @@ public class Eln {
 			name = "Lamp socket B projector";
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name,
-					obj.getObj("ClassicLampSocket"),true, LampSocketType.Douille, // LampSocketType
+					obj.getObj("ClassicLampSocket"),false, LampSocketType.Douille, // LampSocketType
 																	// socketType
 					10, -90, 90, 0);
 
@@ -1477,15 +1478,32 @@ public class Eln {
 		}
 	}
 
-	void registerElectricalLightSensor(int id) {
+	void registerElectricalEnvironementalSensor(int id) {
 		int subId, completId;
 		String name;
-		ElectricalLightSensorDescriptor desc;
 		{
-			subId = 0;
-			name = "Electrical daylight sensor";
-			desc = new ElectricalLightSensorDescriptor(name, obj.getObj("daylightsensor"));
-			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			ElectricalLightSensorDescriptor desc;
+			{
+				subId = 0;
+				name = "Electrical daylight sensor";
+				desc = new ElectricalLightSensorDescriptor(name, obj.getObj("daylightsensor"),true);
+				sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			}
+			{
+				subId = 1;
+				name = "Electrical light sensor";
+				desc = new ElectricalLightSensorDescriptor(name, obj.getObj("daylightsensor"),false);
+				sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			}
+		}
+		{
+			ElectricalWeatherSensorDescriptor desc;
+			{
+				subId = 4;
+				name = "Electrical weather sensor";
+				desc = new ElectricalWeatherSensorDescriptor(name, obj.getObj("daylightsensor"));
+				sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			}
 		}
 	}
 
@@ -5410,10 +5428,20 @@ public class Eln {
 
 	}
 
-	private void recipeElectricalLightSensor() {		
+	private void recipeElectricalEnvironnementalSensor() {		
 		GameRegistry.addShapelessRecipe(findItemStack("Electrical daylight sensor"),
 				new ItemStack(Block.daylightSensor),
 				findItemStack("Redstone to voltage converter"));			
+		GameRegistry.addShapelessRecipe(findItemStack("Electrical light sensor"),
+				new ItemStack(Block.daylightSensor),
+				new ItemStack(Item.netherQuartz),
+				findItemStack("Redstone to voltage converter"));			
+		GameRegistry.addRecipe(findItemStack("Electrical weather sensor"),
+				" I ",
+				" R ",
+				"I I",
+				Character.valueOf('R'),new ItemStack(Item.redstone), 
+				Character.valueOf('I'),new ItemStack(Item.ingotIron));	
 	}
 
 	private void recipeElectricalVuMeter() {

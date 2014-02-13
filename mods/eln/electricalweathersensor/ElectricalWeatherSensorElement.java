@@ -1,4 +1,4 @@
-package mods.eln.electricallightsensor;
+package mods.eln.electricalweathersensor;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -36,27 +36,28 @@ import net.minecraft.nbt.NBTTagCompound;
 
 
 
-public class ElectricalLightSensorElement extends SixNodeElement{
+public class ElectricalWeatherSensorElement extends SixNodeElement{
 
-	ElectricalLightSensorDescriptor descriptor;
-	public ElectricalLightSensorElement(SixNode sixNode, Direction side,
+	ElectricalWeatherSensorDescriptor descriptor;
+	public ElectricalWeatherSensorElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-
+	
     	electricalLoadList.add(outputGate);
     	electricalProcessList.add(outputGateProcess);
     	slowProcessList.add(slowProcess);
-    	this.descriptor = (ElectricalLightSensorDescriptor) descriptor;
+    	this.descriptor = (ElectricalWeatherSensorDescriptor) descriptor;
 	}
 	public NodeElectricalGateOutput outputGate = new NodeElectricalGateOutput("outputGate");
 	public NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess",outputGate);
-	public ElectricalLightSensorSlowProcess slowProcess = new ElectricalLightSensorSlowProcess(this);
+	public ElectricalWeatherSensorSlowProcess slowProcess = new ElectricalWeatherSensorSlowProcess(this);
+
+	
 
 	public static boolean canBePlacedOnSide(Direction side,int type)
 	{
 		return true;
 	}
-
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
@@ -91,19 +92,20 @@ public class ElectricalLightSensorElement extends SixNodeElement{
 	}
 
 
+
 	@Override
 	public void initialize() {
 	
 	}
 
-
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,float vx,float vy,float vz)
-	{
-
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
+			float vx, float vy, float vz) {
+		// TODO Auto-generated method stub
 		return onBlockActivatedRotate(entityPlayer);
 	}
-	
+
+
 
 }
 

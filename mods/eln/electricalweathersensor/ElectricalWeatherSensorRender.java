@@ -1,5 +1,5 @@
 
-package mods.eln.electricallightsensor;
+package mods.eln.electricalweathersensor;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -19,15 +19,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 
 
-public class ElectricalLightSensorRender extends SixNodeElementRender{
+public class ElectricalWeatherSensorRender extends SixNodeElementRender{
 
-	ElectricalLightSensorDescriptor descriptor;
-	public ElectricalLightSensorRender(SixNodeEntity tileEntity, Direction side,
+	ElectricalWeatherSensorDescriptor descriptor;
+	public ElectricalWeatherSensorRender(SixNodeEntity tileEntity, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
-		this.descriptor = (ElectricalLightSensorDescriptor) descriptor;
+		this.descriptor = (ElectricalWeatherSensorDescriptor) descriptor;
 	}
-
 
 
 
