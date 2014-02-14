@@ -1096,7 +1096,15 @@ public class Utils {
         }
 
     }
-	protected static RenderItem itemRenderer = new RenderItem();
+	protected static RenderItem itemRendererr;
+	
+	static RenderItem getItemRender(){
+		if(itemRendererr == null){
+			itemRendererr = new RenderItem();
+		}
+		
+		return itemRendererr;
+	}
 	
 	static Minecraft mc()
 	{
@@ -1105,7 +1113,7 @@ public class Utils {
     
     public static void drawItemStack(ItemStack par1ItemStack, int x, int y, String par4Str,boolean gui)
     {
-    	
+    	RenderItem itemRenderer = getItemRender();
     	
        // GL11.glTranslatef(0.0F, 0.0F, 32.0F);
        

@@ -20,7 +20,8 @@ public class ElectricalWeatherSensorSlowProcess implements IProcess ,INBTTReady{
 	}
 	double timeCounter = 0;
 	static final double refreshPeriode = 0.2;
-	RcInterpolator rc = new RcInterpolator(2);
+	RcInterpolator rc = new RcInterpolator(3f);
+	final float premonitionTime = 120;
 	@Override
 	public void process(double time) {
 		// TODO Auto-generated method stub
@@ -32,9 +33,28 @@ public class ElectricalWeatherSensorSlowProcess implements IProcess ,INBTTReady{
 
 			World world = coord.world();
 	    	float target = 0f;
-	    	if(world.isRaining()) target = 0.5f;
-	    	if(world.isThundering()) target = 1.0f;
+	    	if(world.isRaining()){
+	    		//float f = Math.max(0f,(float) ((premonitionTime-rain*time)/premonitionTime));
+	    		target = 0.5f;
+	    	}
+	    	if(world.isThundering()){
+	    		target = 1.0f;
+	    	}
 	    	
+	    	
+	    /*	int rain = world.getWorldInfo().getRainTime();
+	    	int thunder = world.getWorldInfo().getThunderTime();
+	    	
+
+	    	if(rain < thunder){
+	    		
+	    		target = target*(1-f) + f * 0.5f;
+	    	} else {
+	    		
+	    		target = target*(1-f) + f * 1f;
+	    	}
+	    	*/
+	    	//System.out.println(target);
 			rc.setTarget(target);
 			rc.step((float) time);
 			element.outputGateProcess.setOutputNormalized(rc.get());

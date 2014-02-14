@@ -2,6 +2,7 @@ package mods.eln.heatfurnace;
 
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
+import mods.eln.SaveConfig;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageSlot;
@@ -29,6 +30,13 @@ public class HeatFurnaceInventoryProcess implements IProcess , INBTTReady{
 		ItemStack combustibleStack = furnace.inventory.getStackInSlot(HeatFurnaceContainer.combustibleId);
 		ItemStack combustionChamberStack = furnace.inventory.getStackInSlot(HeatFurnaceContainer.combustrionChamberId);
 		ItemStack isolatorChamberStack = furnace.inventory.getStackInSlot(HeatFurnaceContainer.isolatorId);
+		
+
+		if(! SaveConfig.instance.heatFurnaceFuel){
+			combustibleBuffer =  furnace.furnaceProcess.nominalCombustibleEnergy;		
+		}
+		
+		
 		
 		double isolationFactor = 1;
 		if(isolatorChamberStack != null)
@@ -74,8 +82,6 @@ public class HeatFurnaceInventoryProcess implements IProcess , INBTTReady{
 		}
 
 
-		
-		
 	
 	}
 

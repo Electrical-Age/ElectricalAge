@@ -1,5 +1,7 @@
 package mods.eln.sim;
 
+import mods.eln.SaveConfig;
+
 public abstract class BatterySlowProcess implements IProcess{
 	BatteryProcess batteryProcess;
 	
@@ -19,13 +21,14 @@ public abstract class BatterySlowProcess implements IProcess{
 		double U = batteryProcess.getU();
 		if(U < -0.1 * batteryProcess.uNominal) {destroy();return; }
 		if(U > getUMax()) {destroy();return; }
-		
-		double newLife = batteryProcess.life;
-		double normalisedCurrent = Math.abs(batteryProcess.dischargeCurrentMesure) / lifeNominalCurrent;
-		newLife -= normalisedCurrent*normalisedCurrent * lifeNominalLost * time;
-		
-		if(newLife < 0.1) newLife = 0.1;
-		batteryProcess.changeLife(newLife);
+		if(SaveConfig.instance.batteryAging){
+			double newLife = batteryProcess.life;
+			double normalisedCurrent = Math.abs(batteryProcess.dischargeCurrentMesure) / lifeNominalCurrent;
+			newLife -= normalisedCurrent*normalisedCurrent * lifeNominalLost * time;
+				
+			if(newLife < 0.1) newLife = 0.1;
+			batteryProcess.changeLife(newLife);
+		}
 
 		
 	}

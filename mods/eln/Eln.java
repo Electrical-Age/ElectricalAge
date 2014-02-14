@@ -174,6 +174,7 @@ import mods.eln.wirelesssignal.WirelessSignalTxDescriptor;
 import mods.eln.wirelesssignal.WirelessSignalTxElement;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.creativetab.CreativeTabs;
@@ -251,6 +252,7 @@ public class Eln {
 	static PacketHandler packetHandler;
 	static NodeServer nodeServer;
 	public static ClientKeyHandler clientKeyHandler;
+	public static SaveConfig saveConfig;
 	public static GhostManager ghostManager;
 	private static NodeManager nodeManager;
 	public static PlayerManager playerManager;
@@ -697,7 +699,11 @@ public class Eln {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		
+	/*	if(Utils.){
+			Utils.itemRenderer= new RenderItem()
+		}
+*/
 	}
 
 
@@ -729,6 +735,7 @@ public class Eln {
 		nodeServer.init();
 		nodeManager = null;
 		ghostManager = null;
+		saveConfig = null;
 	}
 
 	public TileEntityDestructor tileEntityDestructor;
@@ -757,6 +764,14 @@ public class Eln {
 				worldServer.mapStorage.setData("GhostManager", ghostManager);
 			}
 			ghostManager.init();
+			
+			saveConfig = (SaveConfig) worldServer.mapStorage.loadData(
+					SaveConfig.class, "SaveConfig");
+			if (saveConfig == null) {
+				saveConfig = new SaveConfig("SaveConfig");
+				worldServer.mapStorage.setData("SaveConfig", saveConfig);
+			}
+			//saveConfig.init();
 	
 			nodeManager = (NodeManager) worldServer.mapStorage.loadData(
 					NodeManager.class, "NodeManager");

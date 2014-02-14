@@ -79,8 +79,9 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 			switchState = stream.readBoolean();
 			uMax = stream.readFloat();
 			uMin = stream.readFloat();
-			ItemStack stack = Utils.unserialiseItemStack(stream);
-			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(stack, ElectricalCableDescriptor.class);
+			
+			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream),ElectricalCableDescriptor.class);
+			
 			if(desc == null)
 				cableRender = null;
 			else

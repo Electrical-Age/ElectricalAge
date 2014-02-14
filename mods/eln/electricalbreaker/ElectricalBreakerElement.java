@@ -122,6 +122,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		// TODO Auto-generated method stub4
+		if(inventory.getStackInSlot(ElectricalBreakerContainer.cableSlotId) == null) return 0;
 		if(front == lrdu) return NodeBase.maskElectricalAll;
 		if(front.inverse() == lrdu) return NodeBase.maskElectricalAll;
 
@@ -195,6 +196,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 	@Override
 	protected void inventoryChanged() {
 		computeElectricalLoad();
+		reconnect();
 	}
 	
 	public ElectricalCableDescriptor cableDescriptor = null;

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import cpw.mods.fml.relauncher.Side;
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
+import mods.eln.SaveConfig;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.LampDescriptor;
@@ -247,17 +248,18 @@ public class LampSocketProcess implements IProcess , INBTTReady/*,LightBlockObse
 			//lifeLost *= overFactor;
 			//lifeLost *= overFactor;
 			
-			NBTTagCompound lampNbt = lampStack.getTagCompound();
-			
-			double life = lampNbt.getDouble("life") - lifeLost;
-			lampNbt.setDouble("life", life);
-			
-			if(life<0)
-			{
-				lamp.inventory.setInventorySlotContents(0, null);
-				light = 0;
+			if(SaveConfig.instance.electricalLampAging){
+				NBTTagCompound lampNbt = lampStack.getTagCompound();
+				
+				double life = lampNbt.getDouble("life") - lifeLost;
+				lampNbt.setDouble("life", life);
+				
+				if(life<0)
+				{
+					lamp.inventory.setInventorySlotContents(0, null);
+					light = 0;
+				}
 			}
-			
 
 			boot = false;
 			
