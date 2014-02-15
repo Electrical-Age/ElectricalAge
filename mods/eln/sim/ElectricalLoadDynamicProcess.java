@@ -48,10 +48,12 @@ public class ElectricalLoadDynamicProcess implements IProcess {
 			electricalLoad.setRp(RpOffset);
 		}
 		else {
-			double RpTh  = dielectricBreakOhm*Math.pow(dielectricBreakOhmPerVolt,electricalLoad.Uc - dielectricVoltage*1.00);//(dielectricBreakOhm - Math.abs(electricalLoad.Uc - dielectricVoltage*1.00)*dielectricBreakOhmPerVolt);
+
+			double RpTh  = dielectricBreakOhm*Math.pow(dielectricBreakOhmPerVolt,Math.abs(electricalLoad.Uc) - dielectricVoltage*1.00);//(dielectricBreakOhm - Math.abs(electricalLoad.Uc - dielectricVoltage*1.00)*dielectricBreakOhmPerVolt);
 		//	if(RpTh > dielectricBreakOhmMin) RpTh = dielectricBreakOhmMin;		
 			
-			electricalLoad.setRp(1/(1/RpOffset + 1/RpTh));
+			RpTh = Math.max(RsMin*3,1/(1/RpOffset + 1/RpTh));
+			electricalLoad.setRp(RpTh);
 		}
 		
 	}

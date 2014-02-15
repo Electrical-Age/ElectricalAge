@@ -141,7 +141,7 @@ public class ElectricalLoad{
 	
 	public double getCurrent()
 	{
-		return (Irs + Math.abs(Ic) + Uc/getRp() + Isp)/2;
+		return (Irs + Math.abs(Ic) + Math.abs(Uc)/getRp() + Isp)/2;
 	} 	
 	
 	

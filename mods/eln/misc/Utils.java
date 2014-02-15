@@ -315,7 +315,7 @@ public class Utils {
 	
 	public static String plotUIP(double U,double I)
 	{
-		return plotVolt("U", U) + plotAmpere("I", I) + plotPower("P", U*I);
+		return plotVolt("U", U) + plotAmpere("I", I) + plotPower("P", Math.abs(U*I));
 	}
 	
 

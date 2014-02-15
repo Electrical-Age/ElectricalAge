@@ -123,8 +123,10 @@ public class ThermalSensorElement extends SixNodeElement {
 		// TODO Auto-generated method stub
 		if(descriptor.temperatureOnly ==false)
 		{
-			if(front.left() == lrdu) return thermalLoad;
-			if(front.right() == lrdu) return thermalLoad;
+			if(inventory.getStackInSlot(ThermalSensorContainer.cableSlotId) != null){
+				if(front.left() == lrdu) return thermalLoad;
+				if(front.right() == lrdu) return thermalLoad;
+			}
 		}
 		else
 		{
@@ -139,13 +141,17 @@ public class ThermalSensorElement extends SixNodeElement {
 
 		if(descriptor.temperatureOnly==false)
 		{
-			if(front.left() == lrdu) return NodeBase.maskThermal;
-			if(front.right() == lrdu) return NodeBase.maskThermal;
+			if(inventory.getStackInSlot(ThermalSensorContainer.cableSlotId) != null){
+				if(front.left() == lrdu) return NodeBase.maskThermal;
+				if(front.right() == lrdu) return NodeBase.maskThermal;
+			}
 			if(front == lrdu) return  NodeBase.maskElectricalOutputGate;
 		}
 		else
 		{
-			if(front.inverse() == lrdu) return NodeBase.maskThermal;
+			if(inventory.getStackInSlot(ThermalSensorContainer.cableSlotId) != null){
+				if(front.inverse() == lrdu) return NodeBase.maskThermal;
+			}
 			if(front == lrdu) return  NodeBase.maskElectricalOutputGate;
 		}
 		return 0;
@@ -195,7 +201,7 @@ public class ThermalSensorElement extends SixNodeElement {
 	@Override
 	protected void inventoryChanged() {
 		computeElectricalLoad();
-		needPublish();
+		reconnect();
 	}
 
 	public void computeElectricalLoad()

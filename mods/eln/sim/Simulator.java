@@ -493,12 +493,16 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 				for (SimplifiedElectricalBranch b : simplifiedElectricalBranchList) {
 					eOpt += b.energyStored();
 				}
-				double eNow = 0;
+				double eNow = 0,eNotSimplified = 0;
 				for (ElectricalLoad l : workingElectricalLoadList) {
-					eNow += l.energyStored();
+					double e = l.energyStored();
+					eNow += e;
+					if(l.getSimplifyAuthorized()){
+						eNotSimplified += e;
+					}
 				}
 				
-				System.out.println("Simplify! " + Utils.plotValue(eOpt,"J less ") + Utils.plotValue(eNow,"J remain in ") + (generateTIme/1000) + "us");
+				System.out.println("Simplify! " + Utils.plotValue(eOpt,"J, ") + Utils.plotValue(eNotSimplified,"J left   ") + Utils.plotValue(eNow,"J remain in all     in ") + (generateTIme/1000) + "us");
 			}
 			else{
 				System.out.println("NO simplify!");
@@ -644,6 +648,21 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 	    }	
 	    slowProcessTime = System.nanoTime() - slowProcessTime;
 		avgTickTime += 1.0/20*((int)(System.nanoTime()-startTime)/1000);
+		
+		
+		for (ElectricalLoad l : electricalLoadList) {
+			if(Double.isNaN(l.Uc)){
+				for(int i = 0;i < 10;i++){
+					System.out.println("NAN NAN NAN NAN NAN NAN NAN NAN NAN NAN NAN");
+				}
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		}
 		
 		if(++printTimeCounter == 20){
 			printTimeCounter = 0;
