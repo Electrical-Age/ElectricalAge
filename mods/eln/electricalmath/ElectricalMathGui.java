@@ -85,10 +85,21 @@ public class ElectricalMathGui extends GuiContainerEln{
 		ItemStack stack = render.inventory.getStackInSlot(ElectricalMathContainer.restoneSlotId);
 		if(stack != null)
 			redNbr = stack.stackSize;
-		if(redNbr >= render.redstoneRequired)
-			c = 0xFF108F00;
-		else
+		if(!expression.getText().equals(render.expression)){
+			c = 0xFF404040;
+			helper.drawString(8, 29, c,"Waiting for completion");
+		}else if(expression.getText().equals("")){
+			c = 0xFF404040;
+			helper.drawString(8, 29, c,"Need an equation");
+		}else if(render.equationIsValid){
+			if(redNbr >= render.redstoneRequired)
+				c = 0xFF108F00;
+			else
+				c = 0xFFFF0000;
+			helper.drawString(8, 29, c,"Redstone required : " + render.redstoneRequired);
+		}else{
 			c = 0xFFFF0000;
-		helper.drawString(8, 29, c,"Redstone required : " + render.redstoneRequired);
+			helper.drawString(8, 29, c,"Invalid equation");
+		}
 	}
 }

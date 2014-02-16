@@ -75,7 +75,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 		electricalRsMin = electricalNominalRs;
 		electricalRsPerCelcius = 0;
 		
-		dielectricBreakOhmPerVolt = 0.75;
+		dielectricBreakOhmPerVolt = 0.95;
 		dielectricBreakOhm = electricalMaximalVoltage*electricalMaximalVoltage / electricalOverVoltageStartPowerLost;
 		dielectricVoltage = electricalMaximalVoltage;
 		dielectricBreakOhmMin = dielectricBreakOhm;

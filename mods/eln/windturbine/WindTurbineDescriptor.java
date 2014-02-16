@@ -1,12 +1,16 @@
 package mods.eln.windturbine;
 
+import java.util.List;
+
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Direction;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.wiki.Data;
@@ -48,6 +52,7 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 			}
 		}
 	}
+	
 	public void setParent(net.minecraft.item.Item item, int damage)
 	{
 		super.setParent(item, damage);
@@ -108,4 +113,21 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 		Direction.ZN.glRotateXnRef();
 		draw(0f);
 	}
+	
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		
+		list.add("Product power from wind");
+		list.add(Utils.plotVolt("Voltage:", maxVoltage));
+		list.add(Utils.plotPower("Power:", nominalPower));
+		list.add("Wind area:");
+		list.add("  front: " + rayX);
+		list.add("  up/down: " + rayY);
+		list.add("  left/right: " + rayZ);
+	}
 }
+

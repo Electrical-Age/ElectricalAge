@@ -51,7 +51,7 @@ public class ElectricalMathRender extends SixNodeElementRender{
 
 
 	public int redstoneRequired;
-	
+	public boolean equationIsValid;
 
 	
 	@Override
@@ -61,6 +61,7 @@ public class ElectricalMathRender extends SixNodeElementRender{
 		try {
 			expression = stream.readUTF();
 			redstoneRequired = stream.readInt();
+			equationIsValid = stream.readBoolean();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

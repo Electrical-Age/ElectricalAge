@@ -11,6 +11,7 @@ import java.util.Scanner;
 import net.minecraft.nbt.NBTTagCompound;
 
 import mods.eln.INBTTReady;
+import mods.eln.sim.IProcess;
 
 public class Equation implements IValue,INBTTReady{
 	
@@ -37,6 +38,8 @@ public class Equation implements IValue,INBTTReady{
 			case '+':
 			case '-':
 			case '*':
+			case '&':
+			case '|':
 			case '/':
 			case '^':
 			case ',':
@@ -135,17 +138,16 @@ public class Equation implements IValue,INBTTReady{
 						}
 					}
 					if(depth + 1 == depthMax){
-						if(str.equals("periodic")){
-							if(isFuncReady(2,list,idx)){
+						if(str.equals("ramp")){
+							if(isFuncReady(1,list,idx)){
 								operatorCount+=2;
-								Periodic p;
+								Ramp p;
 								IValue c = (IValue) list.get(idx + 2);
-								IValue d = (IValue) list.get(idx + 4);
-								list.set(idx,p = new Periodic(c,d));
-								removeFunc(2,list,idx);
+								list.set(idx,p = new Ramp(c));
+								removeFunc(1,list,idx);
 								priority = -1;
 								depthMax = getDepthMax(list);
-								periodicList.add(p);
+								processList.add(p);
 								nbtList.add(p);
 								break;
 							}
@@ -163,7 +165,36 @@ public class Equation implements IValue,INBTTReady{
 								nbtList.add(rs);
 								break;
 							}
-						}	
+						}							
+						if(str.equals("integrate")){
+							if(isFuncReady(2,list,idx)){
+								operatorCount+=2;
+								Integrator integrator;
+								IValue c = (IValue) list.get(idx + 2);
+								IValue d = (IValue) list.get(idx + 4);
+								list.set(idx,integrator = new Integrator(c,d));
+								removeFunc(2,list,idx);
+								priority = -1;
+								depthMax = getDepthMax(list);
+								processList.add(integrator);
+								nbtList.add(integrator);
+								break;
+							}
+						}
+						if(str.equals("derivate")){
+							if(isFuncReady(1,list,idx)){
+								operatorCount+=2;
+								Derivator derivator;
+								IValue c = (IValue) list.get(idx + 2);
+								list.set(idx,derivator = new Derivator(c));
+								removeFunc(1,list,idx);
+								priority = -1;
+								depthMax = getDepthMax(list);
+								processList.add(derivator);
+								nbtList.add(derivator);
+								break;
+							}
+						}
 					}
 					if(depth == depthMax){
 						if(priority >= 0){
@@ -265,6 +296,20 @@ public class Equation implements IValue,INBTTReady{
 									priority = -1;
 									break;
 								}
+								if(str.equals("&")){
+									operatorCount++;
+									list.set(idx-1, new And(a,b));
+									list.remove(idx);list.remove(idx);
+									priority = -1;
+									break;
+								}
+								if(str.equals("|")){
+									operatorCount++;
+									list.set(idx-1, new Or(a,b));
+									list.remove(idx);list.remove(idx);
+									priority = -1;
+									break;
+								}
 							}		
 						}
 					}
@@ -354,10 +399,8 @@ public class Equation implements IValue,INBTTReady{
 	public double getValue(double deltaT) {
 		if(root == null)
 			return 0.0;
-		for(Periodic p : periodicList){
-			double perio = p.periode.getValue();
-			p.counter += deltaT / perio;
-			if(p.counter >= p.amplitude.getValue()) p.counter = 0.0;
+		for(IProcess p : processList){
+			p.process(deltaT);
 		}
 		return root.getValue();
 	}	
@@ -393,7 +436,31 @@ public class Equation implements IValue,INBTTReady{
 			return a.getValue() < b.getValue() ? 1.0 : 0.0;
 		}
 	}
-
+	public class And implements IValue{
+		public And(IValue a,IValue b) {
+			this.a = a;
+			this.b = b;
+		}
+		IValue a,b;
+		@Override
+		public double getValue() {
+			// TODO Auto-generated method stub
+			return a.getValue() > 0.5 && b.getValue() > 0.5 ? 1.0 : 0.0;
+		}
+	}
+	
+	public class Or implements IValue{
+		public Or(IValue a,IValue b) {
+			this.a = a;
+			this.b = b;
+		}
+		IValue a,b;
+		@Override
+		public double getValue() {
+			// TODO Auto-generated method stub
+			return a.getValue() > 0.5 || b.getValue() > 0.5 ? 1.0 : 0.0;
+		}
+	}
 	
 	public class Add implements IValue{
 		public Add(IValue a,IValue b) {
@@ -504,19 +571,18 @@ public class Equation implements IValue,INBTTReady{
 		}
 	}
 
-	public class Periodic implements IValue,INBTTReady{
+	public class Ramp implements IValue,INBTTReady,IProcess{
 		public double counter;
-		public Periodic(IValue periode,IValue amplitude) {
+		public Ramp(IValue periode) {
 			this.periode = periode;
-			this.amplitude = amplitude;
 			counter = 0.0;
 		}
-		public IValue periode,amplitude;
+		public IValue periode;
 		@Override
 		public double getValue() {
 			// TODO Auto-generated method stub
 
-			return counter*amplitude.getValue();
+			return counter;
 		}
 		@Override
 		public void readFromNBT(NBTTagCompound nbt, String str) {
@@ -528,7 +594,74 @@ public class Equation implements IValue,INBTTReady{
 			// TODO Auto-generated method stub
 			nbt.setDouble(str + "counter", counter);
 		}
+		@Override
+		public void process(double time) {
+			double p = periode.getValue();
+			counter += time / p;
+			if(counter >= 1.0) counter -= 1.0;
+			if(counter >= 1.0) counter = 0;
+		}
 	}
+	
+	public class Integrator implements IValue,INBTTReady,IProcess{
+		public double counter;
+		public Integrator(IValue probe,IValue reset) {
+			this.probe = probe;
+			this.reset = reset;
+			counter = 0.0;
+		}
+		public IValue probe,reset;
+		@Override
+		public double getValue() {
+			return counter;
+		}
+		@Override
+		public void readFromNBT(NBTTagCompound nbt, String str) {
+			// TODO Auto-generated method stub
+			counter = nbt.getDouble(str + "counter");
+		}
+		@Override
+		public void writeToNBT(NBTTagCompound nbt, String str) {
+			// TODO Auto-generated method stub
+			nbt.setDouble(str + "counter", counter);
+		}
+		@Override
+		public void process(double time) {
+			counter += time*probe.getValue();
+			if(reset.getValue() > 0.5) counter = 0;
+		}
+	}
+	
+	public class Derivator implements IValue,INBTTReady,IProcess{
+		public double old,value;
+		public Derivator(IValue probe) {
+			this.probe = probe;
+		}
+		public IValue probe;
+		@Override
+		public double getValue() {
+			return value;
+		}
+		@Override
+		public void readFromNBT(NBTTagCompound nbt, String str) {
+			// TODO Auto-generated method stub
+			old = nbt.getDouble(str + "old");
+			value = nbt.getDouble(str + "value");
+		}
+		@Override
+		public void writeToNBT(NBTTagCompound nbt, String str) {
+			// TODO Auto-generated method stub
+			nbt.setDouble(str + "old", old);
+			nbt.setDouble(str + "value", value);
+		}
+		@Override
+		public void process(double time) {
+			double next = probe.getValue();
+			value = (next-old)/time;
+			old = next;
+		}
+	}
+	
 	public class Rs implements IValue,INBTTReady{
 		public boolean state;
 		public Rs(IValue reset,IValue set) {
@@ -554,8 +687,10 @@ public class Equation implements IValue,INBTTReady{
 		}
 	}
 	
+
 	
-	ArrayList<Periodic> periodicList = new ArrayList<Equation.Periodic>();
+	
+	ArrayList<IProcess> processList = new ArrayList<IProcess>();
 	
 	public boolean isSymboleUsed(ISymbole iSymbole) {
 		if(isValid() == false) return false;
@@ -582,7 +717,7 @@ public class Equation implements IValue,INBTTReady{
 		}
 	}
 
-	int operatorCount;
+	int operatorCount; //Juste a counter for fun
 	
 	public int getOperatorCount() {
 		// TODO Auto-generated method stub

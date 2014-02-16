@@ -154,6 +154,9 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 		nbt.setString(str + "name", name);
 		nbt.setString(str + "targetName", targetName);
 		nbt.setDouble(str + "powerCharge", powerCharge);
+		nbt.setBoolean(str + "reset", state != StateIdle);
+		 
+
 	}
 	
 	@Override
@@ -164,6 +167,9 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 		name = nbt.getString(str + "name");
 		targetName = nbt.getString(str + "targetName");
 		powerCharge = nbt.getDouble(str + "powerCharge");
+		
+		if(nbt.getBoolean(str + "reset"))
+			state = StateReset;
 	}
 	
 	public static final byte StateIdle = 0;
@@ -173,6 +179,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	public static final byte StateTeleport = 4;
 	public static final byte StateOpen = 5;
 	public static final byte StateReserved = 6;
+	public static final byte StateReset = 7;
 	
 	byte state = StateIdle;
 	float timeCounter;
@@ -185,7 +192,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			timeCounter = 0;
 			switch (this.state) {
 			case StateCharge:
-				powerLoad.setRp(100000000000.0);
+				powerLoad.setRp(10000000000000.0);
 				publisher.reconfigure(2,1);
 				energyHit = 0;
 				processRatio = 0;
@@ -272,6 +279,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	public static final byte eventSameTarget = 4;
 	public static final byte eventNotSameDimensionTarget = 5;
 	public static final byte eventTargetBusy = 6;
+	public static final byte eventInstablePowerSupply = 7;
 	boolean imMaster = false;
 	
 	
@@ -316,6 +324,10 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 					}
 					if(count > 1){
 						sendIdToAllClient(eventMultipleoTargetFind);
+						break;
+					}
+					if(powerLoad.Uc < descriptor.cable.electricalNominalVoltage*0.8){
+						
 						break;
 					}
 					ITeleporter target = getTarget(targetNameCopy);
@@ -382,31 +394,35 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 						setState(StateOpen);
 						break;
 					}
-					
-					ITeleporter target = getTarget(targetNameCopy);
-					Coordonate c = getTeleportCoordonate();
-					double distance = getTeleportCoordonate().trueDistanceTo(c);
-					AxisAlignedBB bb = descriptor.getBB(node.coordonate,front);
-					int playerCount = c.world().getEntitiesWithinAABB(EntityPlayer.class, bb).size();
-					int itemCount = c.world().getEntitiesWithinAABB(EntityItem.class,bb).size();
-					int petCount = c.world().getEntitiesWithinAABB(EntityLivingBase.class,bb).size() - playerCount;
-					
-					energyTarget = 	10000 + 
-									20000 *playerCount +
-									5000 *petCount +
-									1000 *itemCount;
-					
-					energyTarget *= 1.0 + distance/250.0;
-
-					energyHit += powerLoad.getRpPower()*time;
-					processRatio = (float) (energyHit/energyTarget);
-					
-					
-					if(energyHit >= energyTarget){
-						dx = target.getTeleportCoordonate().x - c.x;
-						dy = target.getTeleportCoordonate().y - c.y;
-						dz = target.getTeleportCoordonate().z - c.z;
-						setState(StateTeleport);
+					if(powerLoad.Uc < descriptor.cable.electricalNominalVoltage*0.8){
+						sendIdToAllClient(eventInstablePowerSupply);
+						setState(StateOpen);
+					} else {
+						ITeleporter target = getTarget(targetNameCopy);
+						Coordonate c = getTeleportCoordonate();
+						double distance = getTeleportCoordonate().trueDistanceTo(c);
+						AxisAlignedBB bb = descriptor.getBB(node.coordonate,front);
+						int playerCount = c.world().getEntitiesWithinAABB(EntityPlayer.class, bb).size();
+						int itemCount = c.world().getEntitiesWithinAABB(EntityItem.class,bb).size();
+						int petCount = c.world().getEntitiesWithinAABB(EntityLivingBase.class,bb).size() - playerCount;
+						
+						energyTarget = 	10000 + 
+										20000 *playerCount +
+										5000 *petCount +
+										1000 *itemCount;
+						
+						energyTarget *= 1.0 + distance/250.0;
+	
+						energyHit += powerLoad.getRpPower()*time;
+						processRatio = (float) (energyHit/energyTarget);
+						
+						
+						if(energyHit >= energyTarget){
+							dx = target.getTeleportCoordonate().x - c.x;
+							dy = target.getTeleportCoordonate().y - c.y;
+							dz = target.getTeleportCoordonate().z - c.z;
+							setState(StateTeleport);
+						}
 					}
 				}
 				break;
@@ -439,6 +455,9 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 					else
 						setState(StateIdle);
 				}
+				break;
+			case StateReset:
+				setState(StateIdle);
 				break;
 
 			}

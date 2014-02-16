@@ -1,7 +1,10 @@
 package mods.eln.solarpannel;
 
+import java.util.List;
+
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
@@ -12,6 +15,7 @@ import mods.eln.misc.FunctionTable;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
@@ -152,5 +156,18 @@ public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		// TODO Auto-generated method stub
 		draw((float) alphaMin,Direction.XN);
+	}
+	
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+			List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		
+		list.add("Product power from daylight");
+		list.add(Utils.plotVolt("Voltage max:", electricalUmax));
+		list.add(Utils.plotPower("Power max:", electricalPmax));
+		if(canRotate) list.add("Can be oriented");
 	}
 }

@@ -51,7 +51,7 @@ public class ElectricalMathElement extends SixNodeElement {
 		
 		electricalProcessList.add(gateOutputProcess);
 		
-		electricalProcessList.add(electricalProcess);
+		slowProcessList.add(electricalProcess);
 		
 		
 		symboleList.add(new GateInputSymbol("A", gateInput[0]));
@@ -103,7 +103,7 @@ public class ElectricalMathElement extends SixNodeElement {
 				e.gateOutputProcess.setOutputNormalized(0.0);
 		}
 	}
-	
+	boolean equationIsValid;
 	void preProcessEquation(String expression)
 	{
 		this.expression = expression;
@@ -114,7 +114,7 @@ public class ElectricalMathElement extends SixNodeElement {
 		this.expression = expression;
 		
 		redstoneRequired = 0;
-		if(equation.isValid()){
+		if(equationIsValid = equation.isValid()){
 			redstoneRequired = equation.getOperatorCount();
 		}
 		
@@ -241,6 +241,7 @@ public class ElectricalMathElement extends SixNodeElement {
 		try {
 			stream.writeUTF(expression);
 			stream.writeInt(redstoneRequired);
+			stream.writeBoolean(equationIsValid);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

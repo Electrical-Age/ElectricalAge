@@ -996,6 +996,10 @@ public class Eln {
 				2.0 };
 		FunctionTable voltageFunction = new FunctionTable(voltageFunctionTable,
 				6.0 / 5);
+		double[] condoVoltageFunctionTable = { 0.000, 0.89, 0.90, 0.905, 0.91, 0.915,
+				2.0 };
+		FunctionTable condoVoltageFunction = new FunctionTable(condoVoltageFunctionTable,
+				6.0 / 5);
 		double stdDischargeTime = 4 * 60;
 		double stdU = LVU;
 		double stdP = LVP / 4;
@@ -1114,10 +1118,10 @@ public class Eln {
 		{
 			subId = 32;
 			name = "50V condensator";
-
+			
 			BatteryDescriptor desc = new BatteryDescriptor(name,
 					"LongLifeBattery",lowVoltageCableDescriptor, 0.0, true,false,
-					voltageFunction,
+					condoVoltageFunction,
 					stdU,stdP * 1.2 * 8, 0.005, // electricalU,// electricalPMax,electricalDischargeRate
 					stdP * 8, 4, 0.998, stdHalfLife , // electricalStdP,
 																		// electricalStdDischargeTime,

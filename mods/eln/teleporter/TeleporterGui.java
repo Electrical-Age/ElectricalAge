@@ -11,6 +11,7 @@ import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.GuiTextFieldEln;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.IGuiObject;
+import mods.eln.misc.Utils;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
@@ -41,10 +42,11 @@ public class TeleporterGui extends GuiScreenEln{
 		// TODO Auto-generated method stub
 		super.initGui();
 
-		start = newGuiButton(0,0,115, "Start");
-		name = newGuiTextField(0, 20, 100);
-		target = newGuiTextField(0, 40, 100);
-		chargePower = newGuiVerticalTrackBar(0, 60, 20, 60);
+		
+		name = newGuiTextField(6, 6, 80);
+		target = newGuiTextField(6, 6+20, 80);
+		start = newGuiButton(6,6+20+6+12,80, "Start");
+		chargePower = newGuiVerticalTrackBar(6+80+6, 7, 20, 56);
 		chargePower.setRange(2000, 20000);
 		chargePower.setStepIdMax(20/2*10);
 		
@@ -52,6 +54,11 @@ public class TeleporterGui extends GuiScreenEln{
 		name.setText(render.name);
 		target.setText(render.targetName);
 		chargePower.setValue(render.chargePower);
+		
+		name.setComment(0, "Self transporter name");
+		target.setComment(0, "target transporter name");
+		chargePower.setComment(0, "Power sink");
+		
 	}
 	
 	@Override
@@ -81,7 +88,7 @@ public class TeleporterGui extends GuiScreenEln{
 			chargePower.setValue(render.chargePower);
 			render.chargePowerNew = false;
 		}
-		
+		chargePower.setComment(0, Utils.plotPower("Power sink", chargePower.getValue()));
 		start.enabled = render.state == TeleporterElement.StateIdle;
 		
 	/*	if(render.defaultOutput)
@@ -92,7 +99,7 @@ public class TeleporterGui extends GuiScreenEln{
 	@Override
 	protected GuiHelper newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelper(this, 128, 64);
+		return new GuiHelper(this, 6+80+6+20+6+2, 70);
 	}
 
 

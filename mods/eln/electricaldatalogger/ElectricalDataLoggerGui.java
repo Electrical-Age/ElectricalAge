@@ -33,7 +33,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	}
 
 
-	GuiButton resetBt,voltageType,currentType,powerType,celsuisTyp,percentTyp,config,printBt,pause;
+	GuiButton resetBt,voltageType,energyType,currentType,powerType,celsuisTyp,percentTyp,config,printBt,pause;
 	GuiTextFieldEln samplingPeriode,maxValue,minValue;
 	ElectricalDataLoggerRender render;
 	
@@ -49,6 +49,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 		pause.drawButton = true;
 		resetBt.drawButton = true;
 		voltageType.drawButton = false;
+		energyType.drawButton = false;
 		percentTyp.drawButton = false;
 		currentType.drawButton = false;
 		powerType.drawButton = false;
@@ -70,6 +71,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 		resetBt.drawButton = false;
 		printBt.drawButton = true;
 		voltageType.drawButton = true;
+		energyType.drawButton = true;
 		percentTyp.drawButton = true;
 		currentType.drawButton = true;
 		powerType.drawButton = true;
@@ -91,7 +93,8 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 		resetBt = newGuiButton( 176/2-50, 8 + 20 + 2-2,48, "Reset");
 		powerType = newGuiButton( 176/2-60-2, 8+40+4-2,60,  "Power");
 		celsuisTyp = newGuiButton( 176/2+2, 8+40+4-2,60,  "Celsuis");
-		percentTyp = newGuiButton( 176/2-30, 8+60+6-2,60,  "Percent");
+		percentTyp = newGuiButton( 176/2-60-2, 8+60+6-2,60,  "Percent");
+		energyType = newGuiButton( 176/2+2, 8+60+6-2,60,  "energy");
 		config = newGuiButton( 176/2-50, 8-2,100, "");
 		printBt = newGuiButton( 176/2-48/2, 123,48, "Print");
 		pause = newGuiButton( 176/2 + 2, 8+20+2-2,48,"");
@@ -140,6 +143,10 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	    	else if(object == voltageType)
 	    	{
 	    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.voltageType);
+	    	}
+	    	else if(object == energyType)
+	    	{
+	    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.energyType);
 	    	}
 	    	else if(object == percentTyp)
 	    	{
@@ -202,7 +209,8 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
     	voltageType.enabled = true;
     	celsuisTyp.enabled = true;
     	percentTyp.enabled = true;
-    	
+    	energyType.enabled = true;
+    	    	
     	switch(render.log.unitType)
     	{
     	case DataLogs.currentType:
@@ -220,6 +228,9 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
     	case DataLogs.percentType:
     		percentTyp.enabled = false;
     		break;		
+    	case DataLogs.energyType:
+    		energyType.enabled = false;
+    		break;	
     	}
     	if(render.pause)
     		pause.displayString = "Continue";

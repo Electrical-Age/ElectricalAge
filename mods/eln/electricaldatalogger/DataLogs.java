@@ -110,7 +110,7 @@ public class DataLogs implements INBTTReady{
 	float samplingPeriod = 0.5f;
 	float maxValue = 100f,minValue = 0f;
 	byte unitType = percentType;
-	static final byte voltageType = 0,currentType = 1,powerType = 2,celsiusType = 3,percentType = 4;
+	static final byte voltageType = 0,currentType = 1,powerType = 2,celsiusType = 3,percentType = 4,energyType = 5;
 	
 	static void draw(byte []value,int size,float samplingPeriod,float maxValue,float minValue,byte unitType,float margeX,float margeY,String textHeader)
 	{
@@ -225,6 +225,9 @@ public class DataLogs implements INBTTReady{
 			break;
 		case percentType:
 			str = Utils.plotPercent("", (factor * (maxValue - minValue) + minValue)*0.01);
+			break;
+		case energyType:
+			str = Utils.plotEnergy("", (factor * (maxValue - minValue) + minValue));
 			break;
 		}
 		
