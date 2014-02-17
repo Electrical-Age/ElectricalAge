@@ -147,5 +147,9 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject{
 		this.xPos += x;
 		this.yPos += y;
 	}
+	public int getHeight() {
+		// TODO Auto-generated method stub
+		return height;
+	}
 
 }

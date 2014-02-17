@@ -184,6 +184,25 @@ public abstract class TransparentNodeElementRender {
 		}        
         
 	}		
+	
+	public void clientSendInt(Byte id,int str)
+	{
+        try {
+	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	        DataOutputStream stream = new DataOutputStream(bos);   	
+	
+	        preparePacketForServer(stream);
+			
+			stream.writeByte(id);
+			stream.writeInt(str);
+			
+			sendPacketToServer(bos);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}        
+        
+	}	
     public boolean cameraDrawOptimisation()
     {
     	return true;

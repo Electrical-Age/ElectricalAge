@@ -59,7 +59,6 @@ import mods.eln.generic.GenericItemUsingDamageDescriptorWithComment;
 import mods.eln.generic.SharedItem;
 import mods.eln.generic.genericArmorItem;
 import mods.eln.ghost.GhostBlock;
-
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.groundcable.GroundCableDescriptor;
@@ -74,7 +73,6 @@ import mods.eln.item.BrushDescriptor;
 import mods.eln.item.CombustionChamber;
 import mods.eln.item.DynamoDescriptor;
 import mods.eln.item.ElectricalDrillDescriptor;
-
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.item.HeatingCorpElement;
 import mods.eln.item.LampDescriptor;
@@ -90,9 +88,7 @@ import mods.eln.item.SolarTrackerDescriptor;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.item.ToolsSetItem;
 import mods.eln.item.TreeResin;
-
 import mods.eln.item.LampDescriptor.Type;
-
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
 import mods.eln.item.electricalitem.BatteryItem;
 import mods.eln.item.electricalitem.ElectricalArmor;
@@ -110,7 +106,6 @@ import mods.eln.lampsocket.LightBlock;
 import mods.eln.lampsocket.LightBlockEntity;
 import mods.eln.lampsupply.LampSupplyDescriptor;
 import mods.eln.lampsupply.LampSupplyElement;
-
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.FunctionTable;
@@ -122,6 +117,8 @@ import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
 import mods.eln.misc.TileEntityDestructor;
 import mods.eln.misc.Utils;
+import mods.eln.modbusrtu.ModbusRtuDescriptor;
+import mods.eln.modbusrtu.ModbusServer;
 import mods.eln.mppt.MpptDescriptor;
 import mods.eln.node.NodeBlock;
 import mods.eln.node.NodeBlockItemWithSubTypes;
@@ -167,7 +164,6 @@ import mods.eln.turbine.TurbineElement;
 import mods.eln.turbine.TurbineRender;
 import mods.eln.wiki.Data;
 import mods.eln.windturbine.WindTurbineDescriptor;
-
 import mods.eln.wirelesssignal.WirelessSignalAnalyserItemDescriptor;
 import mods.eln.wirelesssignal.WirelessSignalRxDescriptor;
 import mods.eln.wirelesssignal.WirelessSignalRxElement;
@@ -257,6 +253,7 @@ public class Eln {
 	public static GhostManager ghostManager;
 	private static NodeManager nodeManager;
 	public static PlayerManager playerManager;
+	public static ModbusServer modbusServer;
 
 	public static Simulator simulator = null;
 
@@ -435,6 +432,7 @@ public class Eln {
 				electricalOverSampling, thermalOverSampling);
 		playerManager = new PlayerManager();
 		tileEntityDestructor = new TileEntityDestructor();
+		
 		
 		nodeServer = new NodeServer();
 		frameTime = new FrameTime();
@@ -726,6 +724,7 @@ public class Eln {
 	@cpw.mods.fml.common.Mod.ServerStopping
 	/* Remember to use the right event! */
 	public void onServerStopping(FMLServerStoppingEvent ev) {
+		modbusServer.destroy();
 		LightBlockEntity.observers.clear();
 		TeleporterElement.teleporterList.clear();
 		playerManager.clear();
@@ -737,6 +736,8 @@ public class Eln {
 		nodeManager = null;
 		ghostManager = null;
 		saveConfig = null;
+		modbusServer = null;
+		
 	}
 
 	public TileEntityDestructor tileEntityDestructor;
@@ -745,6 +746,7 @@ public class Eln {
 	/* Remember to use the right event! */
 	public void onServerStarting(FMLServerStartingEvent ev) {
 		{
+			modbusServer = new ModbusServer();
 			TeleporterElement.teleporterList.clear();
 			tileEntityDestructor.clear();
 			LightBlockEntity.observers.clear();
@@ -790,7 +792,7 @@ public class Eln {
 			 ServerCommandManager manager = (ServerCommandManager) command;
 			 manager.registerCommand(new ConsoleListener());
 		 }
-
+		 
 	}
 
 	@cpw.mods.fml.common.Mod.ServerStopping
@@ -3379,7 +3381,19 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		
-		
+		{
+			subId = 16;
+			name = "Modbus RTU";
+
+			ModbusRtuDescriptor desc = new ModbusRtuDescriptor(
+					name,
+					obj.getObj("passivethermaldissipatora")
+
+			);
+
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+				
 		
 	}
 

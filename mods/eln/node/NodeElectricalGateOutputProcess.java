@@ -39,7 +39,7 @@ public class NodeElectricalGateOutputProcess extends NodeElectricalSourceWithCur
 	
 	public void setOutputNormalized(double value)
 	{
-		U = value * Eln.SVU;
+		setOutputNormalizedSafe(value);
 	}
 
 	public void state(boolean value)

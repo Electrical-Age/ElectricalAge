@@ -97,9 +97,9 @@ public abstract class TransparentNodeElement implements INBTTReady ,GhostObserve
 		needPublish();
 	}
 
-	public void networkUnserialize(DataInputStream stream,Player player) 
+	public byte networkUnserialize(DataInputStream stream,Player player) 
 	{
-		networkUnserialize(stream);
+		return networkUnserialize(stream);
 	}
 	public byte networkUnserialize(DataInputStream stream) 
 	{
