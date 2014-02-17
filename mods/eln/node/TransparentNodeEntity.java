@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import dan200.computer.api.IComputerAccess;
+import dan200.computer.api.ILuaContext;
+import dan200.computer.api.IPeripheral;
+
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
@@ -22,7 +26,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 
-public class TransparentNodeEntity extends NodeBlockEntity {
+public class TransparentNodeEntity extends NodeBlockEntity implements IPeripheral {
 	//boolean[] syncronizedSideEnable = new boolean[6];
 	TransparentNodeElementRender elementRender = null;
 	short elementRenderId;
@@ -169,6 +173,37 @@ public class TransparentNodeEntity extends NodeBlockEntity {
 		super.serverPacketUnserialize(stream);
 		if(elementRender != null)
 			elementRender.serverPacketUnserialize(stream);
+	}
+	@Override
+	public String getType() {
+		//Utils.printSide("getType");
+		return ((TransparentNode) getNode()).getType();
+	}
+	@Override
+	public String[] getMethodNames() {
+		//Utils.printSide("getMethodNames");
+		return ((TransparentNode) getNode()).getMethodNames();
+	}
+	@Override
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context,
+			int method, Object[] arguments) throws Exception {
+		//Utils.printSide("callMethod");
+		return ((TransparentNode) getNode()).callMethod(computer, context, method, arguments);
+	}
+	@Override
+	public boolean canAttachToSide(int side) {
+		//Utils.printSide("canAttachToSide");
+		return ((TransparentNode) getNode()).canAttachToSide(side);
+	}
+	@Override
+	public void attach(IComputerAccess computer) {
+		//Utils.printSide("attach");
+		((TransparentNode) getNode()).attach(computer);
+	}
+	@Override
+	public void detach(IComputerAccess computer) {
+		//Utils.printSide("detach");
+		((TransparentNode) getNode()).detach(computer);
 	}
 	
 	

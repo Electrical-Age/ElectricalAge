@@ -1139,6 +1139,10 @@ public class Utils {
 		EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP) Utils.getClientPlayer();	
 		clientPlayer.openGui(Eln.instance,GuiHandler.genericOpen,clientPlayer.worldObj, 0,0,0);
     }
+
+	public static void printSide(String string) {
+		System.out.println(string);
+	}
     
     
     

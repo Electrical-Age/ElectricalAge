@@ -55,7 +55,12 @@ public enum Direction {
 	{
 		return dir;
 	}
-	
+	public boolean isNotY(){
+		return this != YP && this != YN;
+	}
+	public boolean isY(){
+		return this == YP || this == YN;
+	}
 	public void applyTo(double[] vector,double distance)
 	{
 		if(dir == 0)vector[0]-=distance;

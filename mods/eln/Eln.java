@@ -18,6 +18,7 @@ import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.ClientProxy;
 import mods.eln.client.FrameTime;
 import mods.eln.client.SoundLoader;
+import mods.eln.computercraftio.ComputerCraftIoDescriptor;
 import mods.eln.diode.DiodeDescriptor;
 import mods.eln.eggincubator.EggIncubatorDescriptor;
 import mods.eln.electricalalarm.ElectricalAlarmDescriptor;
@@ -1511,7 +1512,7 @@ public class Eln {
 			{
 				subId = 1;
 				name = "Electrical light sensor";
-				desc = new ElectricalLightSensorDescriptor(name, obj.getObj("daylightsensor"),false);
+				desc = new ElectricalLightSensorDescriptor(name, obj.getObj("lightsensor"),false);
 				sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			}
 		}
@@ -3364,6 +3365,21 @@ public class Eln {
 			
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}		
+		
+		{
+			subId = 4;
+			name = "Computer craft probe";
+
+			ComputerCraftIoDescriptor desc = new ComputerCraftIoDescriptor(
+					name,
+					obj.getObj("passivethermaldissipatora")
+
+			);
+
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		
+		
 		
 	}
 

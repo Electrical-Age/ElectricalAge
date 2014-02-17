@@ -87,15 +87,12 @@ public class Equation implements IValue,INBTTReady{
 					}
 					if(find == false)
 					try{	
-						double value = NumberFormat.getInstance().parse(str).floatValue();
+						double value = Double.parseDouble(str);
 						list.set(idx, new Constant(value));
 						find = true;
 					}catch(NumberFormatException e){
 						
-					} catch (ParseException e) {
-						// TODO Auto-generated catch block
-					//	e.printStackTrace();
-					}
+					} 
 					if(find == false){
 						if(str.equals("PI") || str.equals("pi")){
 							list.set(idx, new Constant(Math.PI));

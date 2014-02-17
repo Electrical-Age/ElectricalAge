@@ -10,13 +10,31 @@ public class NodeElectricalGateOutputProcess extends NodeElectricalSourceWithCur
 		super(name, positiveLoad, ElectricalLoad.groundLoad, 0, Eln.instance.gateOutputCurrent);
 		// TODO Auto-generated constructor stub
 	}
-
 	
+	public void setHighImpedance(boolean enable){
+		this.highImpedance = enable;
+		if(highImpedance)
+			Imax = 0;
+		else
+			Imax = Eln.instance.gateOutputCurrent;
+	}
+	public boolean isHighImpedance(){
+		return highImpedance;
+	}
+	
+	boolean highImpedance = false;
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
 		// TODO Auto-generated method stub
 		super.readFromNBT(nbt, str);
-		Imax = Eln.instance.gateOutputCurrent;
+		setHighImpedance(nbt.getBoolean(name + "highImpedance"));
+	}
+	
+	@Override
+	public void writeToNBT(NBTTagCompound nbt, String str) {
+		// TODO Auto-generated method stub
+		super.writeToNBT(nbt, str);
+		nbt.setBoolean(name + "highImpedance", highImpedance);
 	}
 	
 	public void setOutputNormalized(double value)
@@ -48,4 +66,9 @@ public class NodeElectricalGateOutputProcess extends NodeElectricalSourceWithCur
 		if(Double.isNaN(value)) value = 0.0;
 		U = value * Eln.SVU;
 	}
+	
+	
+
+	
+	
 }

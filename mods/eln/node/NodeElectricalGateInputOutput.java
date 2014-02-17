@@ -3,30 +3,27 @@ package mods.eln.node;
 import mods.eln.Eln;
 import mods.eln.misc.Utils;
 
-public class NodeElectricalGateInput extends NodeElectricalLoad{
+public class NodeElectricalGateInputOutput extends NodeElectricalLoad{
 
-	public NodeElectricalGateInput(String name) {
+	public NodeElectricalGateInputOutput(String name) {
 		super(name);
 		Eln.instance.signalCableDescriptor.applyTo(this,false);
-		//this.setRp(Eln.instance.SVU/Eln.instance.SVII);
 	}
-
 	public String plot(String str)
 	{
-		return str  + " "+ Utils.plotVolt("", Uc) + Utils.plotAmpere("", getCurrent());
+		return str + " " + Utils.plotVolt("", Uc) + Utils.plotAmpere("", getCurrent());
 	}
-	
-	
-	public boolean stateHigh()
+
+	public boolean isInputHigh()
 	{
 		return Uc > Eln.SVU * 0.6;
 	}
-	public boolean stateLow()
+	public boolean isInputLow()
 	{
 		return Uc < Eln.SVU * 0.2;
 	}
 	
-	public double getNormalized()
+	public double getInputNormalized()
 	{
 		double norm =  Uc * Eln.SVUinv;
 		if(norm < 0.0) norm = 0.0;
@@ -34,7 +31,7 @@ public class NodeElectricalGateInput extends NodeElectricalLoad{
 		return norm;
 	}
 	
-	public double getBornedU()
+	public double getInputBornedU()
 	{
 		double U = this.Uc;
 		if(U < 0.0) U = 0.0;

@@ -12,6 +12,9 @@ import com.google.common.base.CaseFormat;
 
 import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.common.registry.LanguageRegistry;
+import dan200.computer.api.IComputerAccess;
+import dan200.computer.api.ILuaContext;
+import dan200.computer.api.IPeripheral;
 
 
 import mods.eln.Eln;
@@ -38,7 +41,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public abstract class TransparentNodeElement implements INBTTReady ,GhostObserver{
+public abstract class TransparentNodeElement implements INBTTReady ,GhostObserver, IPeripheral{
 
 	public ArrayList<IProcess> slowProcessList  = new ArrayList<IProcess>(4);
 
@@ -429,6 +432,52 @@ public abstract class TransparentNodeElement implements INBTTReady ,GhostObserve
 		return false;
 	}
 
-    
+	
+	@Override
+	public String getType() {
+		// TODO Auto-generated method stub
+		return "Eln";
+	}
+
+
+
+	@Override
+	public String[] getMethodNames() {
+		// TODO Auto-generated method stub
+		return new String[]{};
+	}
+
+
+
+	@Override
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context,
+			int method, Object[] arguments) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	@Override
+	public boolean canAttachToSide(int side) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+
+	@Override
+	public void attach(IComputerAccess computer) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+	@Override
+	public void detach(IComputerAccess computer) {
+		// TODO Auto-generated method stub
+		
+	}    
 
 }
