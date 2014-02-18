@@ -346,7 +346,10 @@ public class Eln {
 
 	@PreInit
 	public void preInit(FMLPreInitializationEvent event) {
-
+		/*float v = 0;
+		v = Utils.modbusToFloat(Utils.modbusToShort(1f, 0),Utils.modbusToShort(1f, 1));
+		v = Utils.modbusToFloat(Utils.modbusToShort(1.2f, 0),Utils.modbusToShort(1.2f, 1));
+		*/
 		ArrayList<ISymbole> symboleList = new ArrayList<ISymbole>();
 		symboleList.add(new ConstSymbole("A",0.1));
 		symboleList.add(new ConstSymbole("B",0.2));
@@ -534,7 +537,8 @@ public class Eln {
 		registerElectricalRedstone(108);
 		registerElectricalGate(109); 
 		registerTreeResinCollector(116);
-
+		registerSixNodeMisc(117);
+		
 		registerTransformer(2);
 		registerHeatFurnace(3);
 		registerTurbine(4);
@@ -834,6 +838,8 @@ public class Eln {
 			cableWarmLimit, -100, cableHeatingTime, cableThermalConductionTao);
 	public static final ThermalLoadInitializer sixNodeThermalLoadInitializer = new ThermalLoadInitializer(
 			cableWarmLimit, -100, cableHeatingTime, 1000);
+
+	public static final int wirelessTxRange = 32;
 
 	void registerElectricalCable(int id) {
 		int subId, completId;
@@ -1389,6 +1395,24 @@ public class Eln {
 
 	}
 
+	private void registerSixNodeMisc(int id) {
+		// TODO Auto-generated method stub
+		int subId, completId;
+		String name;
+		{
+			subId = 0;
+			name = "Modbus RTU";
+
+			ModbusRtuDescriptor desc = new ModbusRtuDescriptor(
+					name,
+					obj.getObj("passivethermaldissipatora")
+
+			);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+	}
+
 	void registerElectricalBreaker(int id) {
 		int subId, completId;
 		String name;
@@ -1605,7 +1629,7 @@ public class Eln {
 			desc = new WirelessSignalTxDescriptor(
 					name,
 					obj.getObj("wirelesssignaltx"),
-					32
+					wirelessTxRange
 					);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -1620,7 +1644,7 @@ public class Eln {
 			desc = new WirelessSignalRxDescriptor(
 					name,
 					obj.getObj("wirelesssignalrepeater"),
-					true,32
+					true,wirelessTxRange
 					);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}		
@@ -3381,18 +3405,7 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		
-		{
-			subId = 16;
-			name = "Modbus RTU";
 
-			ModbusRtuDescriptor desc = new ModbusRtuDescriptor(
-					name,
-					obj.getObj("passivethermaldissipatora")
-
-			);
-
-			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-		}
 				
 		
 	}

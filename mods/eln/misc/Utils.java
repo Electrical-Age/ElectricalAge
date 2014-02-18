@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,10 +14,13 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.util.Color;
 
+import com.serotonin.modbus4j.base.ModbusUtils;
+import com.serotonin.modbus4j.code.DataType;
+import com.serotonin.modbus4j.value.ModbusValue;
+
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 import cpw.mods.fml.common.registry.GameRegistry;
-
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.PlayerManager;
@@ -1143,8 +1147,23 @@ public class Utils {
 	public static void printSide(String string) {
 		System.out.println(string);
 	}
+
+	public static short modbusToShort(double outputNormalized, int i) {
+		int bit = Float.floatToRawIntBits((float)outputNormalized);
+		if(i == 1)
+			return (short) bit;
+		else
+			return (short) (bit >>> 16);
+		
+		
+	}
     
+	public static float modbusToFloat(short first,short second) {
+		int bit = ((((int)first)&0xFFFF) << 16) + (((int)second)&0xFFFF);
+		return Float.intBitsToFloat(bit);
+	}
     
+       
     
 
 } 

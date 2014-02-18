@@ -37,6 +37,15 @@ public class GuiVerticalExtender extends Gui implements IGuiObject,IGuiObjectObs
 		this.helper = helper;
 	}
 	
+	public float getSliderPosition(){
+		return (slider.getValue());
+	}
+	
+	public void setSliderPosition(float position){
+		refreshRange();
+		slider.setValue(position);
+	}
+	
 	void refreshRange()
 	{
 

@@ -104,7 +104,12 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject{
     
     @Override
     public void setFocused(boolean par1) {
-    	if(isFocused() == true && par1 == false && observer != null) observer.textFieldNewValue(this,this.getText());
+    	if(isFocused() == true && par1 == false){
+    		if(observer != null)
+    			observer.textFieldNewValue(this,this.getText());
+    		if(iGuiObjectObserver != null)
+    			iGuiObjectObserver.guiObjectEvent(this);
+    	}
     	super.setFocused(par1);
     }
 
@@ -150,6 +155,10 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject{
 	public int getHeight() {
 		// TODO Auto-generated method stub
 		return height;
+	}
+	IGuiObjectObserver iGuiObjectObserver;
+	public void setGuiObserver(IGuiObjectObserver iGuiObjectObserver) {
+		this.iGuiObjectObserver = iGuiObjectObserver;
 	}
 
 }

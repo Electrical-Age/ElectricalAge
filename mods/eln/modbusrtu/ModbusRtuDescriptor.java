@@ -17,11 +17,12 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeElectricalLoad;
+import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeEntity;
 import mods.eln.wiki.Data;
 
-public class ModbusRtuDescriptor extends TransparentNodeDescriptor {
+public class ModbusRtuDescriptor extends SixNodeDescriptor {
 
 	public ModbusRtuDescriptor(
 			String name,

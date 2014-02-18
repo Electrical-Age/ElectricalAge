@@ -1,8 +1,12 @@
 package mods.eln.modbusrtu;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import javax.management.Descriptor;
 
@@ -33,6 +37,8 @@ import mods.eln.node.NodeElectricalGateOutputProcess;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.SixNode;
+import mods.eln.node.SixNodeDescriptor;
+import mods.eln.node.SixNodeElement;
 import mods.eln.node.TransparentNode;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElement;
@@ -55,21 +61,27 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 
-public class ModbusRtuElement extends TransparentNodeElement implements ProcessImage{
+public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 	
 	
 	public NodeElectricalGateInputOutput[] ioGate = new NodeElectricalGateInputOutput[4];
 	public NodeElectricalGateOutputProcess[] ioGateProcess = new NodeElectricalGateOutputProcess[4];
 
+
+	HashMap<Integer,ServerWirelessTxStatus> wirelessTxStatusList = new HashMap<Integer,ServerWirelessTxStatus>();
+	HashMap<Integer,ServerWirelessRxStatus> wirelessRxStatusList = new HashMap<Integer,ServerWirelessRxStatus>();
+	
 	ModbusRtuDescriptor descriptor;
 	
 	
+	static final int ioStartOffset = 16;
+	static final int ioRange = 8;
 	int station = -1;
 	
 	String name = "";
 	
-	public ModbusRtuElement(TransparentNode transparentNode,TransparentNodeDescriptor descriptor) {
-		super(transparentNode,descriptor);
+	public ModbusRtuElement(SixNode sixNode,Direction side,SixNodeDescriptor descriptor) {
+		super(sixNode,side,descriptor);
 
 		for(int idx = 0;idx < 4;idx++){
 			ioGate[idx] = new NodeElectricalGateInputOutput("ioGate"+idx);
@@ -79,7 +91,11 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 			electricalProcessList.add(ioGateProcess[idx]);
 			
 			ioGateProcess[idx].setHighImpedance(true);
+			
+			mapping.add(new modbusAnalogIoSlot(ioStartOffset + idx * ioRange, ioRange, ioGate[idx], ioGateProcess[idx]));
 		}
+		
+		slowProcessList.add(new ModbusRtuSlowProcess());
 
 	   	this.descriptor = (ModbusRtuDescriptor) descriptor;
 	   	
@@ -89,37 +105,46 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 
 	
 	
+	class ModbusRtuSlowProcess implements IProcess{
+
+		@Override
+		public void process(double time) {
+			for (ServerWirelessRxStatus rx : wirelessRxStatusList.values()) {
+				if(rx.isConnected() != rx.connected){
+					rx.connected = ! rx.connected;
+					sendRx1Connected(rx);
+				}
+			}
+		}
+		
+	}
+	
+	
 	@Override
-	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		if(lrdu != LRDU.Down || side.isY()) return null;
-		return ioGate[side.getHorizontalIndex()];
+	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+		return ioGate[lrdu.toInt()];
 	}
 
 	@Override
-	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
+	public ThermalLoad getThermalLoad(LRDU lrdu) {
 		return null;
 	}
 
 	@Override
-	public int getConnectionMask(Direction side, LRDU lrdu) {
-
-		if(lrdu == lrdu.Down && side.isNotY())
-		{
-			return NodeBase.maskElectricalGate;	
-		}
-		return 0;
+	public int getConnectionMask(LRDU lrdu) {
+		return NodeBase.maskElectricalGate;	
 	}
 
 
 	
 	@Override
-	public String multiMeterString(Direction side) {
+	public String multiMeterString() {
 		return null;//Utils.plotUIP(powerLoad.Uc, powerLoad.getCurrent());
 
 	}
 	
 	@Override
-	public String thermoMeterString(Direction side) {
+	public String thermoMeterString() {
 		return  null;
 	}
 
@@ -128,7 +153,7 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 	public void initialize() {
 
 		addToServer();
-		connect();
+		//connect();
     			
 	}
 
@@ -157,25 +182,236 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 
 	static final byte setStation = 1;
 	static final byte setName = 2;
-
+	static final byte serverTxAdd = 3;
+	static final byte serverRxAdd = 4;
+	static final byte serverTxConfig = 5;
+	static final byte serverRxConfig = 6;
+	static final byte serverTxDelete = 7;
+	static final byte serverRxDelete = 8;
+	static final byte serverAllSyncronise = 9;
 	
-	@Override
-	public byte networkUnserialize(DataInputStream stream, Player player) {
-		// TODO Auto-generated method stub
+	static final byte clientAllSyncronise = 1;
+	static final byte clientTx1Syncronise = 2;
+	static final byte clientRx1Syncronise = 3;
+	static final byte clientTxDelete = 4;
+	static final byte clientRxDelete = 5;
+	static final byte clientRx1Connected = 6;
+	
+	
+	void sendTx1Syncronise(WirelessTxStatus tx){
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+        DataOutputStream packet = new DataOutputStream(bos);   	
+        
+		preparePacketForClient(packet);
+		
 		try {
-			switch(super.networkUnserialize(stream, player)){
+			packet.writeByte(clientTx1Syncronise);
+			
+			tx.writeTo(packet);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		//TODO
+
+		sendPacketToAllClient(bos);	
+	}
+	
+	void sendRx1Syncronise(WirelessRxStatus rx){
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+        DataOutputStream packet = new DataOutputStream(bos);   	
+        
+		preparePacketForClient(packet);
+		
+		try {
+			packet.writeByte(clientRx1Syncronise);
+			
+			rx.writeTo(packet);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		//TODO
+
+		sendPacketToAllClient(bos);	
+	}
+		
+	void sendRx1Connected(WirelessRxStatus rx){
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+        DataOutputStream packet = new DataOutputStream(bos);   	
+        
+		preparePacketForClient(packet);
+		
+		try {
+			packet.writeByte(clientRx1Connected);
+			packet.writeInt(rx.uuid);
+			packet.writeBoolean(rx.connected);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		//TODO
+
+		sendPacketToAllClient(bos);	
+	}
+		
+	@Override
+	public void networkUnserialize(DataInputStream stream, Player player) {
+		super.networkUnserialize(stream, player);
+		try {
+			switch(stream.readByte()){
 			case setStation:
 				setStation(stream.readInt());
 				break;
 			case setName:
 				setName(stream.readUTF());	
 				break;
+			case serverTxAdd:
+				{
+					int idx = 0;
+					String name = stream.readUTF();
+					
+					
+					int uuid = 0;
+					/*do{
+						uuid = (int)(Math.random()*100000);
+					}while(wirelessTxStatusList.containsKey(uuid));*/
+					for (ServerWirelessTxStatus tx : wirelessTxStatusList.values()) {
+						uuid = Math.max(uuid, tx.uuid);
+					}
+					uuid++;
+					ServerWirelessTxStatus tx;
+					wirelessTxStatusList.put(uuid,tx = new ServerWirelessTxStatus(name, -1, 0,sixNode.coordonate,uuid, this));					
+				
+					
+					sendTx1Syncronise(tx);
+				}
+				break;
+			case serverRxAdd:
+				{
+					int idx = 0;
+					String name = stream.readUTF();
+
+					int uuid = 0;
+					/*do{
+						uuid = (int)(Math.random()*100000);
+					}while(wirelessTxStatusList.containsKey(uuid));*/
+					for (ServerWirelessRxStatus rx : wirelessRxStatusList.values()) {
+						uuid = Math.max(uuid, rx.uuid);
+					}
+					uuid++;
+					
+					ServerWirelessRxStatus rx;
+					wirelessRxStatusList.put(uuid,rx = new ServerWirelessRxStatus(name, -1, false,uuid,this));
+				
+					
+					sendRx1Syncronise(rx);
+				}
+				break;
+			case serverTxConfig:
+			{
+				int uuid = stream.readInt();
+				String name = stream.readUTF();
+				int id = stream.readInt();
+
+				WirelessTxStatus tx = wirelessTxStatusList.get(uuid);
+				if(tx != null){
+					tx.setName(name);
+					tx.setId(id);
+					sendTx1Syncronise(tx);
+
+				}
+				
+								
+			}
+				break;
+			case serverRxConfig:
+				{
+					int uuid = stream.readInt();
+					String name = stream.readUTF();
+					int id = stream.readInt();
+
+					WirelessRxStatus rx = wirelessRxStatusList.get(uuid);
+					if(rx != null){
+						rx.setName(name);
+						rx.setId(id);
+						sendRx1Syncronise(rx);
+					}
+				}
+				break;
+			case serverTxDelete:
+			{
+				int uuid = stream.readInt();
+				ServerWirelessTxStatus tx = wirelessTxStatusList.get(uuid);
+				if(tx != null){
+					tx.delete();
+					wirelessTxStatusList.remove(tx.uuid);
+					
+			    	ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+			        DataOutputStream packet = new DataOutputStream(bos);   	
+			        
+					preparePacketForClient(packet);
+					
+					packet.writeByte(clientTxDelete);
+					packet.writeInt(uuid);
+					//TODO
+
+					sendPacketToAllClient(bos);					
+				}
+			}
+				break;
+			case serverRxDelete:
+				int uuid = stream.readInt();
+				ServerWirelessRxStatus rx = wirelessRxStatusList.get(uuid);
+				if(rx != null){
+					rx.delete();
+					wirelessRxStatusList.remove(uuid);
+					
+			    	ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+			        DataOutputStream packet = new DataOutputStream(bos);   	
+			        
+					preparePacketForClient(packet);
+					
+					packet.writeByte(clientRxDelete);
+					packet.writeInt(uuid);
+					//TODO
+
+					sendPacketToAllClient(bos);					
+				}
+				break;
+			case serverAllSyncronise:
+				{
+			    	ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+			        DataOutputStream packet = new DataOutputStream(bos);   	
+			        
+					preparePacketForClient(packet);
+					
+					packet.writeByte(clientAllSyncronise);
+
+					packet.writeInt(wirelessTxStatusList.size());
+					for (ServerWirelessTxStatus e : wirelessTxStatusList.values()) {
+						e.writeTo(packet);
+					}
+					
+					packet.writeInt(wirelessRxStatusList.size());
+					for (WirelessRxStatus e : wirelessRxStatusList.values()) {
+						e.writeTo(packet);
+					}
+
+					sendPacketToClient(bos, player);
+
+				}
+				break;
+				
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return unserializeNulldId;
+	
 	}
 	/*
 	public String getType() {
@@ -206,58 +442,28 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 
 
 	@Override
-	public String[] getMethodNames() {
-		// TODO Auto-generated method stub
-		return new String[]{"writeDirection","readDirection","writeOutput","readOutput","readInput"};
-	}
-
-
-	
-	
-	
-	
-	
-
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context,
-			int method, Object[] arguments) throws Exception {
-		int id = -1;
-		if(arguments.length < 1) return null;
-		if(arguments[0].equals("XN")) id = 0;
-		if(arguments[0].equals("XP")) id = 1;
-		if(arguments[0].equals("ZN")) id = 2;
-		if(arguments[0].equals("ZP")) id = 3;
-		if(id == -1) return null;
-		
-		switch (method) {
-		case 0:
-			if(arguments.length < 2) return null;
-			ioGateProcess[id].setHighImpedance((Boolean) arguments[1]);
-			break;
-		case 1:
-			return new Object[]{ioGateProcess[id].isHighImpedance()};
-		case 2:
-			if(arguments.length < 2) return null;
-			ioGateProcess[id].setOutputNormalized((Double) arguments[1]);
-			break;
-		case 3:
-			return new Object[]{ioGateProcess[id].getOutputNormalized()};
-		case 4:
-			return new Object[]{ioGate[id].getInputNormalized()};
-		default:
-			break;
-		}
-		return null;
-	}
-
-
-
-	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
 		nbt.setInteger(str + "station", station);
 		nbt.setString(str + "name", name);
+		
+		int idx;
+		
+		nbt.setInteger(str + "txCnt", wirelessTxStatusList.size());	
+		idx = 0;
+		for (ServerWirelessTxStatus tx : wirelessTxStatusList.values()) {
+			tx.writeToNBT(nbt,str + "tx" + idx);		
+			idx++;
+		}
+		
+		nbt.setInteger(str + "rxCnt", wirelessRxStatusList.size());	
+		idx = 0;
+		for (ServerWirelessRxStatus rx : wirelessRxStatusList.values()) {
+			rx.writeToNBT(nbt,str + "rx" + idx);		
+			idx++;
+		}
+		
 	}
 	
 	@Override
@@ -266,6 +472,20 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 		super.readFromNBT(nbt, str);
 		station = nbt.getInteger(str + "station");
 		name = nbt.getString(str + "name");
+		
+		int cnt;
+		
+		cnt = nbt.getInteger(str + "txCnt");
+		for(int idx = 0;idx < cnt;idx++){
+			ServerWirelessTxStatus tx = new ServerWirelessTxStatus(nbt,str + "tx" + idx,this);
+			wirelessTxStatusList.put(tx.uuid, tx);
+		}
+		cnt = nbt.getInteger(str + "rxCnt");
+		for(int idx = 0;idx < cnt;idx++){
+			ServerWirelessRxStatus rx = new ServerWirelessRxStatus(nbt,str + "rx" + idx,this);
+			wirelessRxStatusList.put(rx.uuid, rx);
+		}
+		
 	}
 	
 	@Override
@@ -288,19 +508,23 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 	}
 
 
-
-
+	ArrayList<IModbusSlot> mapping = new ArrayList<IModbusSlot>();
+	ModbusNullSlot nullSlot = new ModbusNullSlot();
+	
+	IModbusSlot getModbusSlot(int id){
+		for (IModbusSlot slot : mapping) {
+			if(id >= slot.getOffset() && id < slot.getOffset() + slot.getSize()){
+				return slot;
+			}
+		}
+		return nullSlot;
+	}
+	
 
 	@Override
 	public boolean getCoil(int id) throws IllegalDataAddressException {
-		if(id < 4){
-			return ioGateProcess[id].isHighImpedance();
-		}else if(id < 8){
-			return ioGateProcess[id-4].getOutputNormalized() > 0.5;
-		}else if(id < 12){
-			return ioGate[id-8].isInputHigh();
-		}
-		return false;
+		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		return slot.getCoil(id);
 	}
 
 
@@ -320,14 +544,8 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 	@Override
 	public short getHoldingRegister(int id)
 			throws IllegalDataAddressException {
-		if(id < 4){
-			return (short) (ioGateProcess[id].isHighImpedance() ? 1 : 0);
-		}else if(id < 8){
-			return (short)(ioGateProcess[id-4].getOutputNormalized()*10000);
-		}else if(id < 12){
-			return (short) (ioGate[id-8].getInputNormalized()*10000);
-		}
-		return 0;
+		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		return slot.getHoldingRegister(id);
 	}
 
 
@@ -336,8 +554,8 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 
 	@Override
 	public boolean getInput(int id) throws IllegalDataAddressException {
-		// TODO Auto-generated method stub
-		return getCoil(id);
+		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		return slot.getInput(id);
 	}
 
 
@@ -346,8 +564,8 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 
 	@Override
 	public short getInputRegister(int id) throws IllegalDataAddressException {
-		// TODO Auto-generated method stub
-		return getHoldingRegister(id);
+		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		return slot.getInputRegister(id);
 	}
 
 
@@ -376,11 +594,8 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 
 	@Override
 	public void setCoil(int id, boolean value) {
-		if(id < 4){
-			ioGateProcess[id].setHighImpedance(value);
-		}else if(id < 8){
-			ioGateProcess[id-4].state(value);
-		}		
+		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		slot.setCoil(id, value);
 	}
 
 
@@ -389,19 +604,16 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 
 	@Override
 	public void setHoldingRegister(int id, short value) {
-		if(id < 4){
-			ioGateProcess[id].setHighImpedance(value != 0);
-		}else if(id < 8){
-			ioGateProcess[id-4].setOutputNormalized(value/10000.0);
-			System.out.println(value/10000.0);
-		}
+		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		slot.setHoldingRegister(id, value);
 	}
 
 
 
 	@Override
 	public void setInput(int id, boolean value) {
-		setCoil(id, value);
+		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		slot.setInput(id, value);
 	}
 
 
@@ -410,7 +622,8 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 
 	@Override
 	public void setInputRegister(int id, short value) {
-		setHoldingRegister(id, value);
+		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		slot.setInputRegister(id, value);
 	}
 
 
@@ -420,8 +633,8 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 	@Override
 	public void writeCoil(int id, boolean value)
 			throws IllegalDataAddressException {
-		setCoil(id, value);
-		
+		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		slot.writeCoil(id, value);
 	}
 
 
@@ -431,7 +644,8 @@ public class ModbusRtuElement extends TransparentNodeElement implements ProcessI
 	@Override
 	public void writeHoldingRegister(int id, short value)
 			throws IllegalDataAddressException {
-		setHoldingRegister(id, value);
+		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		slot.writeHoldingRegister(id, value);
 	}
 
 }
