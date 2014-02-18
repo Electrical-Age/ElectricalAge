@@ -86,8 +86,8 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 	}
 	
 */
-	@Override
-    public String getLocalizedName(ItemStack par1ItemStack)
+	@Override  //1.6.4
+    public String getUnlocalizedNameInefficiently(ItemStack par1ItemStack)
     {
 		return "trololol";
     }

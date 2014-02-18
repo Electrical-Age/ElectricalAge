@@ -18,6 +18,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Utils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -59,6 +60,7 @@ public abstract class SixNodeElementRender {
 	boolean needRedraw;
 	public void draw()
 	{
+		//Minecraft.getMinecraft().mcProfiler.startSection("SixNodeRender");
 		if(needRedraw)
 		{
 			needRedraw = false;
@@ -91,6 +93,7 @@ public abstract class SixNodeElementRender {
 		}
 	
 		GL11.glColor3f(1f, 1f, 1f);	
+		//Minecraft.getMinecraft().mcProfiler.endSection();
 	}
 	
 	public boolean drawCableAuto()

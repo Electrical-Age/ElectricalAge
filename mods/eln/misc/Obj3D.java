@@ -150,6 +150,7 @@ public class Obj3D {
 		}
 		public void draw()
 		{		
+		//	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
 			if(textureResource != null){
 				Utils.bindTexture(textureResource);
 				drawNoBind();
@@ -159,7 +160,7 @@ public class Obj3D {
 				drawNoBind();
 				GL11.glEnable(GL11.GL_TEXTURE_2D);
 			}
-			
+		//	Minecraft.getMinecraft().mcProfiler.endSection();
 		}
 		
 		public void bindTexture()

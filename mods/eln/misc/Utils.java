@@ -406,12 +406,12 @@ public class Utils {
     public static void bindTextureByName(String par1Str)
     {
     	//Minecraft.getMinecraft().renderEngine.func_110577_a(new ResourceLocation(par1Str));
-    	Minecraft.getMinecraft().renderEngine.func_110577_a(new ResourceLocation("eln",par1Str));
+    	Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation("eln",par1Str));
     }
     public static void bindTexture(ResourceLocation ressource)
     {
     	//Minecraft.getMinecraft().renderEngine.func_110577_a(new ResourceLocation(par1Str));
-    	Minecraft.getMinecraft().renderEngine.func_110577_a(ressource);
+    	Minecraft.getMinecraft().renderEngine.bindTexture(ressource);
     }
        
     
@@ -1125,8 +1125,8 @@ public class Utils {
         FontRenderer font = null;
         if (par1ItemStack != null) font = par1ItemStack.getItem().getFontRenderer(par1ItemStack);
         if (font == null) font = mc().fontRenderer;
-        itemRenderer.renderItemAndEffectIntoGUI(font, mc().func_110434_K(), par1ItemStack, x, y);
-        itemRenderer.renderItemOverlayIntoGUI(font, mc().func_110434_K(), par1ItemStack, x, y, par4Str);
+        itemRenderer.renderItemAndEffectIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y);
+        itemRenderer.renderItemOverlayIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y, par4Str);
         
         itemRenderer.zLevel = 0.0F;
         

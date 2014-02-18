@@ -261,10 +261,10 @@ public class Eln {
 
 	public final static int blocBaseId = 220;
 	public final static int itemBaseId = 7260;
-	/* public static ItemArmor helmetLeather = (ItemArmor)(new ItemArmor(42, EnumArmorMaterial.CLOTH, 0, 0)).setUnlocalizedName("helmetCloth").func_111206_d("leather_helmet");
-	    public static ItemArmor plateLeather = (ItemArmor)(new ItemArmor(43, EnumArmorMaterial.CLOTH, 0, 1)).setUnlocalizedName("chestplateCloth").func_111206_d("leather_chestplate");
-	    public static ItemArmor legsLeather = (ItemArmor)(new ItemArmor(44, EnumArmorMaterial.CLOTH, 0, 2)).setUnlocalizedName("leggingsCloth").func_111206_d("leather_leggings");
-	    public static ItemArmor bootsLeather = (ItemArmor)(new ItemArmor(45, EnumArmorMaterial.CLOTH, 0, 3)).setUnlocalizedName("bootsCloth").func_111206_d("leather_boots");
+	/* public static ItemArmor helmetLeather = (ItemArmor)(new ItemArmor(42, EnumArmorMaterial.CLOTH, 0, 0)).setUnlocalizedName("helmetCloth").setTextureName("leather_helmet");
+	    public static ItemArmor plateLeather = (ItemArmor)(new ItemArmor(43, EnumArmorMaterial.CLOTH, 0, 1)).setUnlocalizedName("chestplateCloth").setTextureName("leather_chestplate");
+	    public static ItemArmor legsLeather = (ItemArmor)(new ItemArmor(44, EnumArmorMaterial.CLOTH, 0, 2)).setUnlocalizedName("leggingsCloth").setTextureName("leather_leggings");
+	    public static ItemArmor bootsLeather = (ItemArmor)(new ItemArmor(45, EnumArmorMaterial.CLOTH, 0, 3)).setUnlocalizedName("bootsCloth").setTextureName("leather_boots");
 	   
 	
 	*/
@@ -446,7 +446,7 @@ public class Eln {
 
 		Item itemCreativeTab = new Item(creativeTabId).setMaxStackSize(1)
 				.setUnlocalizedName("eln:ElnCreativeTab")
-				.func_111206_d("eln:ElnCreativeTab");
+				.setTextureName("eln:ElnCreativeTab");
 
 		creativeTab = new GenericCreativeTab("Eln", itemCreativeTab);
 
@@ -3126,28 +3126,28 @@ public class Eln {
 
 		{
 			name = "Copper helmet";
-			helmetCopper = (ItemArmor)(new genericArmorItem(helmetCopperId, EnumArmorMaterial.IRON, 2,0,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).func_111206_d("eln:copper_helmet").setCreativeTab(creativeTab);
+			helmetCopper = (ItemArmor)(new genericArmorItem(helmetCopperId, EnumArmorMaterial.IRON, 2,0,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_helmet").setCreativeTab(creativeTab);
 			stack = new ItemStack(helmetCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}
 		{
 			name = "Copper plate";
-			plateCopper = (ItemArmor)(new genericArmorItem(plateCopperId, EnumArmorMaterial.IRON, 2,1,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).func_111206_d("eln:copper_chestplate").setCreativeTab(creativeTab);
+			plateCopper = (ItemArmor)(new genericArmorItem(plateCopperId, EnumArmorMaterial.IRON, 2,1,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_chestplate").setCreativeTab(creativeTab);
 			stack = new ItemStack(plateCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}
 		{
 			name = "Copper legs";
-			legsCopper = (ItemArmor)(new genericArmorItem(legsCopperId, EnumArmorMaterial.IRON, 2,2,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).func_111206_d("eln:copper_leggings").setCreativeTab(creativeTab);
+			legsCopper = (ItemArmor)(new genericArmorItem(legsCopperId, EnumArmorMaterial.IRON, 2,2,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_leggings").setCreativeTab(creativeTab);
 			stack = new ItemStack(legsCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}
 		{
 			name = "Copper boots";
-			bootsCopper = (ItemArmor)(new genericArmorItem(bootsCopperId, EnumArmorMaterial.IRON, 2,3,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).func_111206_d("eln:copper_boots").setCreativeTab(creativeTab);
+			bootsCopper = (ItemArmor)(new genericArmorItem(bootsCopperId, EnumArmorMaterial.IRON, 2,3,"eln:textures/armor/copper_layer_1.png","eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_boots").setCreativeTab(creativeTab);
 			stack = new ItemStack(bootsCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
@@ -3168,7 +3168,7 @@ public class Eln {
 										(armor + armorMarge)*energyPerDamage,250.0,//double energyStorage,double chargePower
 										armor/20.0,armor*energyPerDamage,//double ratioMax,double ratioMaxEnergy,
 										energyPerDamage//double energyPerDamage										
-										)).setUnlocalizedName(name).func_111206_d("eln:ecoal_helmet").setCreativeTab(creativeTab);
+										)).setUnlocalizedName(name).setTextureName("eln:ecoal_helmet").setCreativeTab(creativeTab);
 			stack = new ItemStack(helmetECoal);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
@@ -3181,7 +3181,7 @@ public class Eln {
 										(armor + armorMarge)*energyPerDamage,250.0,//double energyStorage,double chargePower
 										armor/20.0,armor*energyPerDamage,//double ratioMax,double ratioMaxEnergy,
 										energyPerDamage//double energyPerDamage										
-										)).setUnlocalizedName(name).func_111206_d("eln:ecoal_chestplate").setCreativeTab(creativeTab);
+										)).setUnlocalizedName(name).setTextureName("eln:ecoal_chestplate").setCreativeTab(creativeTab);
 			stack = new ItemStack(plateECoal);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
@@ -3194,7 +3194,7 @@ public class Eln {
 										(armor + armorMarge)*energyPerDamage,250.0,//double energyStorage,double chargePower
 										armor/20.0,armor*energyPerDamage,//double ratioMax,double ratioMaxEnergy,
 										energyPerDamage//double energyPerDamage										
-										)).setUnlocalizedName(name).func_111206_d("eln:ecoal_leggings").setCreativeTab(creativeTab);
+										)).setUnlocalizedName(name).setTextureName("eln:ecoal_leggings").setCreativeTab(creativeTab);
 			stack = new ItemStack(legsECoal);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
@@ -3207,7 +3207,7 @@ public class Eln {
 										(armor + armorMarge)*energyPerDamage,250.0,//double energyStorage,double chargePower
 										armor/20.0,armor*energyPerDamage,//double ratioMax,double ratioMaxEnergy,
 										energyPerDamage//double energyPerDamage										
-										)).setUnlocalizedName(name).func_111206_d("eln:ecoal_boots").setCreativeTab(creativeTab);
+										)).setUnlocalizedName(name).setTextureName("eln:ecoal_boots").setCreativeTab(creativeTab);
 			stack = new ItemStack(bootsECoal);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
@@ -3220,35 +3220,35 @@ public class Eln {
 		String name;
 		{
 			name = "Copper sword";
-			swordCopper = (new ItemSword(swordCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:copper_sword");
+			swordCopper = (new ItemSword(swordCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_sword");
 			stack = new ItemStack(swordCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}		
 		{
 			name = "Copper hoe";
-			hoeCopper = (new ItemHoe(hoeCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:copper_hoe");
+			hoeCopper = (new ItemHoe(hoeCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_hoe");
 			stack = new ItemStack(hoeCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}		
 		{
 			name = "Copper shovel";
-			shovelCopper = (new ItemSpade(shovelCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:copper_shovel");
+			shovelCopper = (new ItemSpade(shovelCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_shovel");
 			stack = new ItemStack(shovelCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}		
 		{
 			name = "Copper pickaxe";
-			pickaxeCopper = (new ItemPickaxe(pickaxeCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:copper_pickaxe");
+			pickaxeCopper = (new ItemPickaxe(pickaxeCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_pickaxe");
 			stack = new ItemStack(pickaxeCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}		
 		{
 			name = "Copper axe";
-			axeCopper = (new ItemAxe(axeCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).func_111206_d("eln:copper_axe");
+			axeCopper = (new ItemAxe(axeCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_axe");
 			stack = new ItemStack(axeCopper);
 			LanguageRegistry.addName(stack,name);
 			GameRegistry.registerCustomItemStack(name, stack.copy());

@@ -84,7 +84,7 @@ public class EggIncubatorElement extends TransparentNodeElement{
 					entityliving.setLocationAndAngles(node.coordonate.x+0.5, node.coordonate.y+0.5, node.coordonate.z+0.5, MathHelper.wrapAngleTo180_float(node.coordonate.world().rand.nextFloat() * 360.0F), 0.0F);
                     entityliving.rotationYawHead = entityliving.rotationYaw;
                     entityliving.renderYawOffset = entityliving.rotationYaw;
-                    entityliving.func_110161_a((EntityLivingData)null);
+                   // entityliving.func_110161_a((EntityLivingData)null); 1.6.4
                     node.coordonate.world().spawnEntityInWorld(entityliving);
                     entityliving.playLivingSound();
 					//node.coordonate.world().spawnEntityInWorld());
