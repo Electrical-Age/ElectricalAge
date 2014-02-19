@@ -157,6 +157,19 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
     			
 	}
 
+	@Override
+	public void destroy() {
+		// TODO Auto-generated method stub
+		super.destroy();
+		removeFromServer();
+		
+		// Remove all TX signals.
+		for(Integer key: wirelessTxStatusList.keySet()) {
+			ServerWirelessTxStatus status = wirelessTxStatusList.get(key);
+			status.delete();
+			wirelessTxStatusList.remove(key);
+		}
+	}
 	
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,

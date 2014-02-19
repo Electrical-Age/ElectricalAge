@@ -86,7 +86,7 @@ public class ServerWirelessTxStatus extends WirelessTxStatus implements IWireles
 	@Override
 	public boolean getCoil(int id) {
 		switch (id) {
-		case 0:
+		case 1:
 			return value >= 0.5;
 		}
 		return false;
@@ -96,12 +96,14 @@ public class ServerWirelessTxStatus extends WirelessTxStatus implements IWireles
 	@Override
 	public short getHoldingRegister(int id) {
 		switch (id) {
-		case 0:
+		case 1:
 			float v = (float) getValue();
 			getHoldingRegister_1 = Utils.modbusToShort(v, 1);
 			return Utils.modbusToShort(v, 0);
-		case 1:
+		case 2:
 			return getHoldingRegister_1;
+		case 3:
+			return (short)(65535.0 * getValue());
 		}
 		return 0;
 	}
@@ -122,7 +124,7 @@ public class ServerWirelessTxStatus extends WirelessTxStatus implements IWireles
 	public void setCoil(int id, boolean value) {
 		// TODO Auto-generated method stub
 		switch (id) {
-		case 0:
+		case 1:
 			setValue(value ? 1.0 : 0.0);
 			break;
 		}
@@ -133,11 +135,14 @@ public class ServerWirelessTxStatus extends WirelessTxStatus implements IWireles
 	@Override
 	public void setHoldingRegister(int id, short value) {
 		switch (id) {
-		case 0:
+		case 1:
 			setHoldingRegister_0 = value;
 			break;
-		case 1:
+		case 2:
 			setValue(Utils.modbusToFloat(setHoldingRegister_0, value));
+			break;
+		case 3:
+			setValue((double)((int)value & 0xFFFF) / 65535.0);
 			break;
 		}
 	

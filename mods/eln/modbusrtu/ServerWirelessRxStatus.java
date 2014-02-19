@@ -67,9 +67,9 @@ public class ServerWirelessRxStatus extends WirelessRxStatus implements IModbusS
 	public boolean getInput(int id) {
 		switch(id){
 		case 0:
-			return readWireless() >= 0.5;
-		case 2:
 			return isConnected();
+		case 1:
+			return readWireless() >= 0.5;
 		}
 		return false;
 	}
@@ -79,11 +79,15 @@ public class ServerWirelessRxStatus extends WirelessRxStatus implements IModbusS
 	public short getInputRegister(int id) {
 		switch(id){
 		case 0:
+			return (short)(isConnected() ? 1 : 0);
+		case 1:
 			float v = (float) readWireless();
 			getInputRegister_1 = Utils.modbusToShort(v, 1);
 			return Utils.modbusToShort(v, 0);
-		case 1:
+		case 2:
 			return getInputRegister_1;
+		case 3:
+			return (short)(65535.0 * readWireless());
 		}
 		return 0;
 	}
