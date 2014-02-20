@@ -1405,7 +1405,7 @@ public class Eln {
 
 			ModbusRtuDescriptor desc = new ModbusRtuDescriptor(
 					name,
-					obj.getObj("passivethermaldissipatora")
+					obj.getObj("RTU")
 
 			);
 
