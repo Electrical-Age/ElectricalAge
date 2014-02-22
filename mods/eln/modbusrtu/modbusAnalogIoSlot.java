@@ -31,13 +31,18 @@ public class modbusAnalogIoSlot extends ModbusSlot{
 		return false;
 	}
 
+	short getHoldingRegister_2;
 	@Override
 	public short getHoldingRegister(int id) {
 		switch (id) {
 		case 1:
-			return Utils.modbusToShort(gateProcess.getOutputNormalized(),0);
+			double f = gateProcess.getOutputNormalized();
+			getHoldingRegister_2 = Utils.modbusToShort(f, 1);
+			return Utils.modbusToShort(f, 0);
 		case 2:
-			return Utils.modbusToShort(gateProcess.getOutputNormalized(),1);
+			return getHoldingRegister_2;
+		case 3:
+			return (short)(65535.0 * gateProcess.getOutputNormalized());
 		}
 		return 0;
 	}
@@ -54,7 +59,6 @@ public class modbusAnalogIoSlot extends ModbusSlot{
 	short getInputRegister_2;
 	@Override
 	public short getInputRegister(int id) {
-		//System.out.println("getInputRegister " + id);
 		switch (id) {
 		case 1:
 			double f = gate.getInputNormalized();
@@ -62,6 +66,8 @@ public class modbusAnalogIoSlot extends ModbusSlot{
 			return Utils.modbusToShort(f, 0);
 		case 2:
 			return getInputRegister_2;
+		case 3:
+			return (short)(65535.0 * gate.getInputNormalized());
 		}
 		return 0;
 	}
@@ -87,6 +93,9 @@ public class modbusAnalogIoSlot extends ModbusSlot{
 			break;
 		case 2:
 			gateProcess.setOutputNormalized(Utils.modbusToFloat(setHoldingRegister_1, value));
+			break;
+		case 3:
+			gateProcess.setOutputNormalized((double)((int)value & 0xFFFF) / 65535.0);
 			break;
 		}		
 	}

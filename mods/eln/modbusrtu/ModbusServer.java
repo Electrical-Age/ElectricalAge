@@ -8,7 +8,7 @@ import com.serotonin.modbus4j.exception.ModbusInitException;
 public class ModbusServer {
 	ModbusServerExtended slave;
 	public ModbusServer() {
-		slave = new ModbusServerExtended(true);
+		slave = new ModbusServerExtended(false);
 		//new ServerThread(slave).run();
 		(new Thread(new ServerThread(slave))).start();
 		int a = 0;

@@ -157,6 +157,19 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
     			
 	}
 
+	@Override
+	public void destroy() {
+		// TODO Auto-generated method stub
+		super.destroy();
+		removeFromServer();
+		
+		// Remove all TX signals.
+		for(Integer key: wirelessTxStatusList.keySet()) {
+			ServerWirelessTxStatus status = wirelessTxStatusList.get(key);
+			status.delete();
+			wirelessTxStatusList.remove(key);
+		}
+	}
 	
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
@@ -196,6 +209,9 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 	static final byte clientTxDelete = 4;
 	static final byte clientRxDelete = 5;
 	static final byte clientRx1Connected = 6;
+	
+	static final byte ClientModbusActivityEvent = 7;
+	static final byte ClientModbusErrorEvent = 8;
 	
 	
 	void sendTx1Syncronise(WirelessTxStatus tx){
@@ -258,6 +274,40 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 		sendPacketToAllClient(bos);	
 	}
 		
+	void onActivity()
+	{
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+        DataOutputStream packet = new DataOutputStream(bos);   	
+        
+		preparePacketForClient(packet);
+		
+		try {
+			packet.writeByte(ClientModbusActivityEvent);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		sendPacketToAllClient(bos);	
+	}
+	
+	void onError()
+	{
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+        DataOutputStream packet = new DataOutputStream(bos);   	
+        
+		preparePacketForClient(packet);
+		
+		try {
+			packet.writeByte(ClientModbusErrorEvent);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		sendPacketToAllClient(bos);	
+	}
+	
 	@Override
 	public void networkUnserialize(DataInputStream stream, Player player) {
 		super.networkUnserialize(stream, player);
@@ -514,9 +564,11 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 	IModbusSlot getModbusSlot(int id){
 		for (IModbusSlot slot : mapping) {
 			if(id >= slot.getOffset() && id < slot.getOffset() + slot.getSize()){
+				onActivity();
 				return slot;
 			}
 		}
+		onError();
 		return nullSlot;
 	}
 	

@@ -15,9 +15,11 @@ import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.heatfurnace.HeatFurnaceElement;
 import mods.eln.item.FerromagneticCoreDescriptor;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
+import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
@@ -44,22 +46,46 @@ import com.google.common.base.CaseFormat;
 
 public class ModbusRtuRender extends SixNodeElementRender{
 
+	Coordonate coord;
+	PhysicalInterpolator interpolator;
+	float modbusActivityTimeout = 0;
+	float modbusErrorTimeout = 0;
+	
 	ModbusRtuDescriptor descriptor;
 	public ModbusRtuRender(SixNodeEntity tileEntity, Direction side,SixNodeDescriptor descriptor) {
 		super(tileEntity,side,descriptor);
 		this.descriptor = (ModbusRtuDescriptor) descriptor;
+		
+		interpolator = new PhysicalInterpolator(0.4f,8.0f,0.9f,0.2f);
+		coord = new Coordonate(tileEntity);
 	}
 
 	
 	HashMap<Integer,WirelessTxStatus> wirelessTxStatusList = new HashMap<Integer,WirelessTxStatus>();
 	HashMap<Integer,WirelessRxStatus> wirelessRxStatusList = new HashMap<Integer,WirelessRxStatus>();
 	
-
 	@Override
 	public void draw() {
+		super.draw();
 		// TODO Auto-generated method stub
 
-
+		if(Utils.isPlayerAround(tileEntity.worldObj,coord.getAxisAlignedBB(0)) == false)
+			interpolator.setTarget(0f);
+		else
+			interpolator.setTarget(1f);
+		
+		
+		interpolator.stepGraphic();
+		
+		LRDU.Down.glRotateOnX();
+		
+		if (modbusActivityTimeout > 0) 
+			modbusActivityTimeout -= FrameTime.get();
+		
+		if (modbusErrorTimeout > 0) 
+			modbusErrorTimeout -= FrameTime.get();
+		
+		descriptor.draw(interpolator.get(), modbusActivityTimeout > 0, modbusErrorTimeout > 0);
 	}
 
 	int station = -1;
@@ -144,6 +170,14 @@ public class ModbusRtuRender extends SixNodeElementRender{
 			if(rx != null){
 				rx.connected = stream.readBoolean();
 			}
+			break;
+			
+		case ModbusRtuElement.ClientModbusActivityEvent:
+			modbusActivityTimeout = 0.1f;
+			break;
+			
+		case ModbusRtuElement.ClientModbusErrorEvent:
+			modbusErrorTimeout = 1f;
 			break;
 		}
 	}
