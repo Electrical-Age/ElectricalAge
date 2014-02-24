@@ -32,9 +32,7 @@ public class HeatFurnaceInventoryProcess implements IProcess , INBTTReady{
 		ItemStack isolatorChamberStack = furnace.inventory.getStackInSlot(HeatFurnaceContainer.isolatorId);
 		
 
-		if(! SaveConfig.instance.heatFurnaceFuel){
-			combustibleBuffer =  furnace.furnaceProcess.nominalCombustibleEnergy;		
-		}
+
 		
 		
 		
@@ -54,16 +52,21 @@ public class HeatFurnaceInventoryProcess implements IProcess , INBTTReady{
 		}
 		furnace.furnaceProcess.nominalPower = furnace.descriptor.nominalPower + furnace.descriptor.combustionChamberPower * combustionChamberNbr;
 		
-		if(combustibleStack != null && furnace.getTakeFuel() == true)
+		if(furnace.getTakeFuel() == true)
 		{
-			double itemEnergy = Utils.getItemEnergie(combustibleStack);
-			if(itemEnergy != 0)
-			{
-				if(furnace.furnaceProcess.combustibleEnergy + combustibleBuffer < furnace.furnaceProcess.nominalCombustibleEnergy)
+			if(! SaveConfig.instance.heatFurnaceFuel){
+				combustibleBuffer =  furnace.furnaceProcess.nominalCombustibleEnergy;		
+			} 
+			else if(combustibleStack != null){
+				double itemEnergy = Utils.getItemEnergie(combustibleStack);
+				if(itemEnergy != 0)
 				{
-				//	furnace.furnaceProcess.combustibleEnergy += itemEnergy;
-					combustibleBuffer += itemEnergy;
-					furnace.inventory.decrStackSize(HeatFurnaceContainer.combustibleId, 1);
+					if(furnace.furnaceProcess.combustibleEnergy + combustibleBuffer < furnace.furnaceProcess.nominalCombustibleEnergy)
+					{
+					//	furnace.furnaceProcess.combustibleEnergy += itemEnergy;
+						combustibleBuffer += itemEnergy;
+						furnace.inventory.decrStackSize(HeatFurnaceContainer.combustibleId, 1);
+					}
 				}
 			}
 		}
