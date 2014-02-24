@@ -93,7 +93,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 				c.x = (int) vx;
 				c.y = (int) vy;
 				c.z = (int) vz;
-				if(c.getBlockExist() == false) return Double.NaN;
+				//if(c.getBlockExist() == false) return Double.NaN;
 				Block b = c.getBlock();
 				if(b != null && b.isOpaqueCube()){
 					virtualDistance += 2.0;

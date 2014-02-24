@@ -131,13 +131,12 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 		if(wind > d.maxWind)
 		{
 			if(Math.random() <  (wind - d.maxWind) * 0.02){
-				turbine.selfDestroy();
+			//	turbine.selfDestroy();
 			}
 		}
-		else
-		{
-			P = d.PfW.getValue(wind);
-		}
+
+		P = d.PfW.getValue(wind);
+		
 		
 		
 		turbine.powerSource.setP(P);	
