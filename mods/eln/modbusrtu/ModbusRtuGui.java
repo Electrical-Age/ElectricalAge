@@ -217,7 +217,12 @@ public class ModbusRtuGui extends GuiScreenEln{
 		// TODO Auto-generated method stub
 		super.guiObjectEvent(object);
     	if(object == station){
-    		render.clientSetInt(ModbusRtuElement.setStation, Integer.parseInt(station.getText()));
+    		try {
+    			render.clientSetInt(ModbusRtuElement.setStation, Integer.parseInt(station.getText()));
+			} catch (NumberFormatException e) {
+				// TODO: handle exception
+			}
+    		
     	}else if(object == name){
     		render.clientSetString(ModbusRtuElement.setName, name.getText());
     	}else if(object == txAddButton){

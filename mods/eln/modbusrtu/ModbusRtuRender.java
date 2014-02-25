@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
 import mods.eln.client.ClientProxy;
@@ -79,13 +80,13 @@ public class ModbusRtuRender extends SixNodeElementRender{
 		
 		LRDU.Down.glRotateOnX();
 		
+		descriptor.draw(interpolator.get(), modbusActivityTimeout > 0, modbusErrorTimeout > 0);
+		
 		if (modbusActivityTimeout > 0) 
 			modbusActivityTimeout -= FrameTime.get();
 		
 		if (modbusErrorTimeout > 0) 
 			modbusErrorTimeout -= FrameTime.get();
-		
-		descriptor.draw(interpolator.get(), modbusActivityTimeout > 0, modbusErrorTimeout > 0);
 	}
 
 	int station = -1;
@@ -173,7 +174,7 @@ public class ModbusRtuRender extends SixNodeElementRender{
 			break;
 			
 		case ModbusRtuElement.ClientModbusActivityEvent:
-			modbusActivityTimeout = 0.1f;
+			modbusActivityTimeout = 0.05f;
 			break;
 			
 		case ModbusRtuElement.ClientModbusErrorEvent:
@@ -190,6 +191,9 @@ public class ModbusRtuRender extends SixNodeElementRender{
 		return new ModbusRtuGui(player, this);
 	}
 
-
+    public CableRenderDescriptor getCableRender(LRDU lrdu)
+    {
+    	return Eln.instance.signalCableDescriptor.render;
+    }
 
 }

@@ -101,7 +101,7 @@ public class ElectricalCableElement extends SixNodeElement implements IThermalDe
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		// TODO Auto-generated method stub
-		return descriptor.getNodeMask() + NodeBase.maskElectricalWire + (color << NodeBase.maskColorShift) +(colorCare << NodeBase.maskColorCareShift);
+		return descriptor.getNodeMask() /*+ NodeBase.maskElectricalWire*/ + (color << NodeBase.maskColorShift) +(colorCare << NodeBase.maskColorCareShift);
 	}
 
 

@@ -133,19 +133,5 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
 				display.draw();
 			}
 		}
-		
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		
-		FontRenderer fontrenderer = Minecraft.getMinecraft().fontRenderer;
-		GL11.glPushMatrix();
-			float scale = 0.01f;	
-			GL11.glScalef(scale,scale, 1f);
-		
-			fontrenderer.drawString("Toto", 0, 0, 0);
-		GL11.glPopMatrix();
 	}
-
-
-	
-
 }

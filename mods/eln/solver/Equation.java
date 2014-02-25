@@ -178,6 +178,22 @@ public class Equation implements IValue,INBTTReady{
 								break;
 							}
 						}
+						if(str.equals("integrate")){
+							if(isFuncReady(3,list,idx)){
+								operatorCount+=3;
+								IntegratorMinMax integrator;
+								IValue c = (IValue) list.get(idx + 2);
+								IValue d = (IValue) list.get(idx + 4);
+								IValue e = (IValue) list.get(idx + 6);
+								list.set(idx,integrator = new IntegratorMinMax(c,d,e));
+								removeFunc(3,list,idx);
+								priority = -1;
+								depthMax = getDepthMax(list);
+								processList.add(integrator);
+								nbtList.add(integrator);
+								break;
+							}
+						}
 						if(str.equals("derivate")){
 							if(isFuncReady(1,list,idx)){
 								operatorCount+=2;
@@ -626,6 +642,37 @@ public class Equation implements IValue,INBTTReady{
 		public void process(double time) {
 			counter += time*probe.getValue();
 			if(reset.getValue() > 0.5) counter = 0;
+		}
+	}
+	
+	public class IntegratorMinMax implements IValue,INBTTReady,IProcess{
+		public double counter;
+		public IntegratorMinMax(IValue probe,IValue min, IValue max) {
+			this.probe = probe;
+			this.min = min;
+			this.max = max;
+			counter = 0.0;
+		}
+		public IValue probe,min,max;
+		@Override
+		public double getValue() {
+			return counter;
+		}
+		@Override
+		public void readFromNBT(NBTTagCompound nbt, String str) {
+			// TODO Auto-generated method stub
+			counter = nbt.getDouble(str + "counter");
+		}
+		@Override
+		public void writeToNBT(NBTTagCompound nbt, String str) {
+			// TODO Auto-generated method stub
+			nbt.setDouble(str + "counter", counter);
+		}
+		@Override
+		public void process(double time) {
+			counter += time*probe.getValue();
+			if(counter < min.getValue()) counter = min.getValue();
+			if(counter > max.getValue()) counter = max.getValue();
 		}
 	}
 	

@@ -4,13 +4,13 @@ import java.util.List;
 
 import org.bouncycastle.jcajce.provider.asymmetric.dsa.DSASigner.stdDSA;
 
-
 import mods.eln.Eln;
 import mods.eln.client.ClientProxy;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.gui.GuiLabel;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.NodeThermalWatchdogProcess;
@@ -186,6 +186,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 		list.add("Nominal voltage : " + (int)(electricalU) + "V");
 		list.add("Nominal power : " + (int)(electricalStdP) + "W");
 		list.add("Full charge energy : " + (int)(electricalStdDischargeTime*electricalStdP/1000) + "KJ");
+		list.add("Capacity : " + Utils.plotValue((electricalQ/3600),"Ah"));
 		list.add("");
 	   	list.add("Charge : " + (int)(getChargeInTag(itemStack)*100) + "%");
 	   	
