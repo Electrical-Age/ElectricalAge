@@ -3,6 +3,7 @@ package mods.eln.solver;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListResourceBundle;
@@ -19,34 +20,73 @@ public class Equation implements IValue,INBTTReady{
 	
 	ArrayList<INBTTReady> nbtList = new ArrayList<INBTTReady>();
 	
+	static HashMap<Integer,ArrayList<IOperatorMapper>> staticOperatorList;
+	HashMap<Integer,ArrayList<IOperatorMapper>> operatorList;
+
+	static String staticSeparatorList; 
+	String separatorList; 
+	 
+	static{
+		staticSeparatorList = "+-*&|/^,()<>";
+		staticOperatorList = new HashMap<Integer,ArrayList<IOperatorMapper>>();
+
+		int priority = 0;
+		{
+			ArrayList<IOperatorMapper> list = new ArrayList<IOperatorMapper>();
+			list.add(new OperatorMapperFunc("sin",1,Sin.class));
+			list.add(new OperatorMapperFunc("cos",1,Cos.class));
+			list.add(new OperatorMapperFunc("abs",1,Abs.class));
+			list.add(new OperatorMapperFunc("ramp",1,Ramp.class));
+			list.add(new OperatorMapperFunc("integrate",2,Integrator.class));
+			list.add(new OperatorMapperFunc("integrate",3,IntegratorMinMax.class));
+			list.add(new OperatorMapperFunc("derivate",1,Derivator.class));
+			list.add(new OperatorMapperFunc("rs",2,Rs.class));
+			list.add(new OperatorMapperBracket());
+			staticOperatorList.put(priority++, list);		
+		}
+		{
+			ArrayList<IOperatorMapper> list = new ArrayList<IOperatorMapper>();
+			list.add(new OperatorMapperAB("^",Pow.class));
+			staticOperatorList.put(priority++, list);		
+		}
+		{
+			ArrayList<IOperatorMapper> list = new ArrayList<IOperatorMapper>();
+			list.add(new OperatorMapperA("-",Inv.class));
+			list.add(new OperatorMapperAB("*",Mul.class));
+			list.add(new OperatorMapperAB("/",Div.class));
+			staticOperatorList.put(priority++, list);
+		}
+		{
+			ArrayList<IOperatorMapper> list = new ArrayList<IOperatorMapper>();
+			list.add(new OperatorMapperAB("+",Add.class));
+			list.add(new OperatorMapperAB("-",Sub.class));
+			staticOperatorList.put(priority++, list);
+		}
+		{
+			ArrayList<IOperatorMapper> list = new ArrayList<IOperatorMapper>();
+			list.add(new OperatorMapperAB(">",Bigger.class));
+			list.add(new OperatorMapperAB("<",Smaller.class));
+			list.add(new OperatorMapperAB("&",And.class));
+			list.add(new OperatorMapperAB("|",Or.class));
+			staticOperatorList.put(priority++, list);
+		}
+		
+	}
+	
 	public Equation(String exp,ArrayList<ISymbole> symboleList,int iterationLimit)
 	{
 		int idx;
+		this.operatorList = staticOperatorList;
+		separatorList = staticSeparatorList;
 		exp = exp.replace(" ", "");
 
-		//String [] sList = exp.split("\\+|\\-|\\*|\\/|\\(|\\)");//+|\\-|\\*|\\/|\\(|\\)
-		/*for(String str : sList){
-			list.add(str);
-		}  */
 
 		stringList.clear();
 		LinkedList<Object> list = new LinkedList<Object>();
 		String stack = "";
 		idx = 0;
 		while(idx != exp.length()){
-			switch(exp.charAt(idx)){
-			case '+':
-			case '-':
-			case '*':
-			case '&':
-			case '|':
-			case '/':
-			case '^':
-			case ',':
-			case '(':
-			case ')':
-			case '<':
-			case '>':
+			if(separatorList.contains(exp.subSequence(idx, idx+1))){
 				if(stack != ""){
 					list.add(stack);
 					stringList.add(stack);
@@ -54,11 +94,11 @@ public class Equation implements IValue,INBTTReady{
 				}
 				list.add(exp.substring(idx, idx+1));
 				
-				break;
-			default:
-				stack += exp.charAt(idx);
-				break;
 			}
+			else{
+				stack += exp.charAt(idx);
+			}
+
 			idx++;
 		}
 		if(stack != ""){
@@ -117,217 +157,31 @@ public class Equation implements IValue,INBTTReady{
 			while(i.hasNext()){
 				Object o = i.next();	
 				if(o instanceof String){
-					if(idx-1 >= 0 && list.get(idx-1) instanceof IValue) a = (IValue)list.get(idx-1);
-					else a = null;
-					if(idx+1 <= list.size()-1 && list.get(idx+1) instanceof IValue) b = (IValue)list.get(idx+1);
-					else b = null;
-					
 					String str = (String) o;
-					if(str.equals("(")){
-						if(idx > list.size() - 3) return;
-						if(list.get(idx+1) instanceof IValue 
-								&& list.get(idx+2) instanceof String && ((String)list.get(idx+2)).equals(")")){
-							list.remove(idx+2);
-							list.remove(idx+0);
-							priority = -1;
-							depthMax = getDepthMax(list);
-							break;
-						}
-					}
-					if(depth + 1 == depthMax){
-						if(str.equals("ramp")){
-							if(isFuncReady(1,list,idx)){
-								operatorCount+=2;
-								Ramp p;
-								IValue c = (IValue) list.get(idx + 2);
-								list.set(idx,p = new Ramp(c));
-								removeFunc(1,list,idx);
-								priority = -1;
-								depthMax = getDepthMax(list);
-								processList.add(p);
-								nbtList.add(p);
+
+					
+					if(operatorList.containsKey(priority)){
+						int depthDelta = depth - depthMax;
+						boolean resetPriority = false;
+						for (IOperatorMapper mapper : operatorList.get(priority)) {
+							IOperator operator;
+							if((operator = mapper.newOperator(str,depthDelta, list, idx)) != null){
+								if(operator instanceof IProcess)
+									processList.add((IProcess) operator);
+								if(operator instanceof INBTTReady)
+									nbtList.add((INBTTReady) operator);
+								operatorCount += operator.getRedstoneCost();
+								resetPriority = true;
 								break;
 							}
 						}	
-						if(str.equals("rs")){
-							if(isFuncReady(2,list,idx)){
-								operatorCount+=2;
-								Rs rs;
-								IValue c = (IValue) list.get(idx + 2);
-								IValue d = (IValue) list.get(idx + 4);
-								list.set(idx,rs = new Rs(c,d));
-								removeFunc(2,list,idx);
-								priority = -1;
-								depthMax = getDepthMax(list);
-								nbtList.add(rs);
-								break;
-							}
-						}							
-						if(str.equals("integrate")){
-							if(isFuncReady(2,list,idx)){
-								operatorCount+=2;
-								Integrator integrator;
-								IValue c = (IValue) list.get(idx + 2);
-								IValue d = (IValue) list.get(idx + 4);
-								list.set(idx,integrator = new Integrator(c,d));
-								removeFunc(2,list,idx);
-								priority = -1;
-								depthMax = getDepthMax(list);
-								processList.add(integrator);
-								nbtList.add(integrator);
-								break;
-							}
-						}
-						if(str.equals("integrate")){
-							if(isFuncReady(3,list,idx)){
-								operatorCount+=3;
-								IntegratorMinMax integrator;
-								IValue c = (IValue) list.get(idx + 2);
-								IValue d = (IValue) list.get(idx + 4);
-								IValue e = (IValue) list.get(idx + 6);
-								list.set(idx,integrator = new IntegratorMinMax(c,d,e));
-								removeFunc(3,list,idx);
-								priority = -1;
-								depthMax = getDepthMax(list);
-								processList.add(integrator);
-								nbtList.add(integrator);
-								break;
-							}
-						}
-						if(str.equals("derivate")){
-							if(isFuncReady(1,list,idx)){
-								operatorCount+=2;
-								Derivator derivator;
-								IValue c = (IValue) list.get(idx + 2);
-								list.set(idx,derivator = new Derivator(c));
-								removeFunc(1,list,idx);
-								priority = -1;
-								depthMax = getDepthMax(list);
-								processList.add(derivator);
-								nbtList.add(derivator);
-								break;
-							}
-						}
-					}
-					if(depth == depthMax){
-						if(priority >= 0){
-							if(b != null){
-								if(str.equals("abs")){
-									operatorCount++;
-									list.set(idx, new Abs(b));
-									list.remove(idx+1);
-									priority = -1;
-									break;
-								}								
-								if(str.equals("sin")){
-									operatorCount++;
-									list.set(idx, new Sin(b));
-									list.remove(idx+1);
-									priority = -1;
-									break;
-								}								
-								if(str.equals("cos")){
-									operatorCount++;
-									list.set(idx, new Cos(b));
-									list.remove(idx+1);
-									priority = -1;
-									break;
-								}								
-							}
-							
-
-						}
-						if(priority >= 1){
-							if(a != null && b != null){
-								if(str.equals("^")){
-									operatorCount++;
-									list.set(idx-1, new Pow(a,b));
-									list.remove(idx);list.remove(idx);
-									priority = -1;
-									break;
-								}
-							}	
-						}
-						if(priority >= 2){
-							if(a == null && b != null){
-								if(str.equals("-")){
-									operatorCount++;
-									list.set(idx, new Inv(b));
-									list.remove(idx+1);
-									priority = -1;
-									break;
-								}								
-							}
-							if(a != null && b != null){
-								if(str.equals("*")){
-									operatorCount++;
-									list.set(idx-1, new Mul(a,b));
-									list.remove(idx);list.remove(idx);
-									priority = -1;
-									break;
-								}
-								if(str.equals("/")){
-									operatorCount++;
-									list.set(idx-1, new Div(a,b));
-									list.remove(idx);list.remove(idx);
-									priority = -1;
-									break;
-								}
-							}	
-						}
-						if(priority >= 3){
-							if(a != null && b != null){
-								if(str.equals("+")){		
-									operatorCount++;
-									list.set(idx-1, new Add(a,b));
-									list.remove(idx);list.remove(idx);
-									priority = -1;
-									break;
-								}						
-								if(str.equals("-")){
-									operatorCount++;
-									list.set(idx-1, new Sub(a,b));
-									list.remove(idx);list.remove(idx);
-									priority = -1;
-									break;
-								}
-							}		
-						}
-						if(priority >= 4){
-							if(a != null && b != null){
-								if(str.equals(">")){		
-									operatorCount++;
-									list.set(idx-1, new Bigger(a,b));
-									list.remove(idx);list.remove(idx);
-									priority = -1;
-									break;
-								}						
-								if(str.equals("<")){
-									operatorCount++;
-									list.set(idx-1, new Smaller(a,b));
-									list.remove(idx);list.remove(idx);
-									priority = -1;
-									break;
-								}
-								if(str.equals("&")){
-									operatorCount++;
-									list.set(idx-1, new And(a,b));
-									list.remove(idx);list.remove(idx);
-									priority = -1;
-									break;
-								}
-								if(str.equals("|")){
-									operatorCount++;
-									list.set(idx-1, new Or(a,b));
-									list.remove(idx);list.remove(idx);
-									priority = -1;
-									break;
-								}
-							}		
+						if(resetPriority){
+							depthMax = getDepthMax(list);
+							priority = -1;
+							break;							
 						}
 					}
 
-					
 					if(str.equals("(")) 
 						depth++;
 					if(str.equals(")")) 
@@ -349,36 +203,6 @@ public class Equation implements IValue,INBTTReady{
 		}
 	}
 
-	private void removeFunc(int argCount, LinkedList<Object> list, int offset) {
-		for(int idx = 0;idx< 2 + argCount*2-1;idx++){
-			list.remove(offset + 1);
-		}
-		
-	}
-
-	private boolean isFuncReady(int argCount, LinkedList<Object> list, int offset) {
-		int counter = 0;
-		offset++;
-		for(int end = offset + 2 + argCount*2-1;offset < end;offset++) {
-			Object o = list.get(offset);
-			String str = null;
-			if(o instanceof String) str = (String) o;
-			if(counter == 0){
-				if(str.equals("(") == false) return false; 
-			}
-			else if(offset == end-1){
-				if(str.equals(")") == false) return false; 
-			}
-			else if((counter % 2) == 1){
-				if(o instanceof IValue == false) return false;
-			}
-			else{
-				if(str.equals(",") == false) return false; 
-			}
-			counter++;
-		}
-		return true;
-	}
 
 	int getDepthMax(LinkedList<Object> list)
 	{
@@ -425,176 +249,190 @@ public class Equation implements IValue,INBTTReady{
 		return root != null;
 	}
 
-	public class Bigger implements IValue{
-		public Bigger(IValue a,IValue b) {
-			this.a = a;
-			this.b = b;
-		}
-		IValue a,b;
+	public static class Bigger extends OperatorAB{
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
 			return a.getValue() > b.getValue() ? 1.0 : 0.0;
 		}
-	}
-	public class Smaller implements IValue{
-		public Smaller(IValue a,IValue b) {
-			this.a = a;
-			this.b = b;
+
+		@Override
+		public int getRedstoneCost() {
+			return 1;
 		}
-		IValue a,b;
+	}
+	public static class Smaller extends OperatorAB{
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
 			return a.getValue() < b.getValue() ? 1.0 : 0.0;
 		}
-	}
-	public class And implements IValue{
-		public And(IValue a,IValue b) {
-			this.a = a;
-			this.b = b;
+		@Override
+		public int getRedstoneCost() {
+			return 1;
 		}
-		IValue a,b;
+	}
+	public static class And extends OperatorAB{
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
 			return a.getValue() > 0.5 && b.getValue() > 0.5 ? 1.0 : 0.0;
 		}
+		@Override
+		public int getRedstoneCost() {
+			return 1;
+		}
 	}
 	
-	public class Or implements IValue{
-		public Or(IValue a,IValue b) {
-			this.a = a;
-			this.b = b;
-		}
-		IValue a,b;
+	public static class Or extends OperatorAB{
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
 			return a.getValue() > 0.5 || b.getValue() > 0.5 ? 1.0 : 0.0;
 		}
+		@Override
+		public int getRedstoneCost() {
+			return 1;
+		}
 	}
 	
-	public class Add implements IValue{
-		public Add(IValue a,IValue b) {
-			this.a = a;
-			this.b = b;
-		}
-		IValue a,b;
+	public static class Add extends OperatorAB{
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
 			return a.getValue() + b.getValue();
+		}
+		@Override
+		public int getRedstoneCost() {
+			return 1;
 		}
 	}
 
-	public class Sub implements IValue{
-		public Sub(IValue a,IValue b) {
-			this.a = a;
-			this.b = b;
-		}
-		IValue a,b;
+	public static class Sub extends OperatorAB{
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
 			return a.getValue() - b.getValue();
 		}
+		@Override
+		public int getRedstoneCost() {
+			return 1;
+		}
 	}
 	
-	public class Mul implements IValue{
-		public Mul(IValue a,IValue b) {
-			this.a = a;
-			this.b = b;
-		}
-		IValue a,b;
+	public static class Mul extends OperatorAB{
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
 			return a.getValue() * b.getValue();
 		}
+		@Override
+		public int getRedstoneCost() {
+			return 1;
+		}
 	}
 	
-	public class Div implements IValue{
-		public Div(IValue a,IValue b) {
-			this.a = a;
-			this.b = b;
-		}
-		IValue a,b;
+	public static class Div extends OperatorAB{
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
 			return a.getValue() / b.getValue();
 		}
-	}
-	public class Pow implements IValue{
-		public Pow(IValue a,IValue b) {
-			this.a = a;
-			this.b = b;
+		@Override
+		public int getRedstoneCost() {
+			return 1;
 		}
-		IValue a,b;
+	}
+	public static class Pow extends OperatorAB{
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
 			return Math.pow(a.getValue() , b.getValue());
 		}
-	}
-	public class Inv implements IValue{
-		public Inv(IValue a) {
-			this.a = a;
+		@Override
+		public int getRedstoneCost() {
+			return 1;
 		}
+	}
+	
+	public static class Inv implements IOperator{
 		IValue a;
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
 			return -a.getValue();
 		}
-	}
-	public class Abs implements IValue{
-		public Abs(IValue a) {
-			this.a = a;
+		@Override
+		public void setOperator(IValue[] values) {
+			this.a = values[0];
 		}
+		@Override
+		public int getRedstoneCost() {
+			return 1;
+		}
+	}
+	public static class Bracket implements IOperator{
+		IValue a;
+		@Override
+		public double getValue() {
+			return a.getValue();
+		}
+		@Override
+		public void setOperator(IValue[] values) {
+			this.a = values[0];
+		}
+		@Override
+		public int getRedstoneCost() {
+			return 0;
+		}
+	}
+	
+	public static class Abs implements IOperator{
 		IValue a;
 		@Override
 		public double getValue() {
 			// TODO Auto-generated method stub
 			return Math.abs(a.getValue());
 		}
+		@Override
+		public void setOperator(IValue[] values) {
+			this.a = values[0];
+		}
+		@Override
+		public int getRedstoneCost() {
+			return 1;
+		}
 	}
 	
-	public class Sin implements IValue{
-		public Sin(IValue a) {
-			this.a = a;
-		}
+	public static class Sin implements IOperator{
 		IValue a;
 		@Override
 		public double getValue() {
 			// TODO Auto-generated method stub
 			return Math.sin(a.getValue());
 		}
-	}
-	public class Cos implements IValue{
-		public Cos(IValue a) {
-			this.a = a;
+		@Override
+		public void setOperator(IValue[] values) {
+			this.a = values[0];
 		}
+		@Override
+		public int getRedstoneCost() {
+			return 2;
+		}
+	}
+	public static class Cos implements IOperator{
 		IValue a;
 		@Override
 		public double getValue() {
 			// TODO Auto-generated method stub
 			return Math.cos(a.getValue());
 		}
+		@Override
+		public void setOperator(IValue[] values) {
+			this.a = values[0];
+		}
+		@Override
+		public int getRedstoneCost() {
+			return 2;
+		}
 	}
 
-	public class Ramp implements IValue,INBTTReady,IProcess{
-		public double counter;
-		public Ramp(IValue periode) {
-			this.periode = periode;
-			counter = 0.0;
-		}
+	public static class Ramp implements IOperator,INBTTReady,IProcess{
+		public double counter = 0.0;
+
 		public IValue periode;
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
-
 			return counter;
 		}
 		@Override
@@ -614,15 +452,18 @@ public class Equation implements IValue,INBTTReady{
 			if(counter >= 1.0) counter -= 1.0;
 			if(counter >= 1.0) counter = 0;
 		}
+		@Override
+		public void setOperator(IValue[] values) {
+			this.periode = values[0];
+		}
+		@Override
+		public int getRedstoneCost() {
+			return 3;
+		}
 	}
 	
-	public class Integrator implements IValue,INBTTReady,IProcess{
-		public double counter;
-		public Integrator(IValue probe,IValue reset) {
-			this.probe = probe;
-			this.reset = reset;
-			counter = 0.0;
-		}
+	public static class Integrator implements IOperator,INBTTReady,IProcess{
+		public double counter = 0.0;
 		public IValue probe,reset;
 		@Override
 		public double getValue() {
@@ -643,16 +484,20 @@ public class Equation implements IValue,INBTTReady{
 			counter += time*probe.getValue();
 			if(reset.getValue() > 0.5) counter = 0;
 		}
+		@Override
+		public void setOperator(IValue[] values) {
+			this.probe = values[0];
+			this.reset = values[1];
+		}
+		@Override
+		public int getRedstoneCost() {
+			return 4;
+		}
 	}
 	
-	public class IntegratorMinMax implements IValue,INBTTReady,IProcess{
-		public double counter;
-		public IntegratorMinMax(IValue probe,IValue min, IValue max) {
-			this.probe = probe;
-			this.min = min;
-			this.max = max;
-			counter = 0.0;
-		}
+	public static class IntegratorMinMax implements IOperator,INBTTReady,IProcess{
+		public double counter = 0.0;
+
 		public IValue probe,min,max;
 		@Override
 		public double getValue() {
@@ -674,13 +519,21 @@ public class Equation implements IValue,INBTTReady{
 			if(counter < min.getValue()) counter = min.getValue();
 			if(counter > max.getValue()) counter = max.getValue();
 		}
+		@Override
+		public void setOperator(IValue[] values) {
+			this.probe = values[0];
+			this.min = values[1];
+			this.max = values[2];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 4;
+		}
 	}
 	
-	public class Derivator implements IValue,INBTTReady,IProcess{
-		public double old,value;
-		public Derivator(IValue probe) {
-			this.probe = probe;
-		}
+	public static class Derivator implements IOperator,INBTTReady,IProcess{
+		public double old = 0.0,value = 0.0;
 		public IValue probe;
 		@Override
 		public double getValue() {
@@ -704,15 +557,20 @@ public class Equation implements IValue,INBTTReady{
 			value = (next-old)/time;
 			old = next;
 		}
+		@Override
+		public void setOperator(IValue[] values) {
+			this.probe = values[0];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 3;
+		}
 	}
 	
-	public class Rs implements IValue,INBTTReady{
-		public boolean state;
-		public Rs(IValue reset,IValue set) {
-			this.set = set;
-			this.reset = reset;
-			state = false;
-		}
+	public static class Rs implements IOperator,INBTTReady{
+		public boolean state = false;
+
 		public IValue set,reset;
 		@Override
 		public double getValue() {
@@ -728,6 +586,16 @@ public class Equation implements IValue,INBTTReady{
 		@Override
 		public void writeToNBT(NBTTagCompound nbt, String str) {
 			nbt.setBoolean(str + "state",state);
+		}
+		@Override
+		public void setOperator(IValue[] values) {
+			this.set = values[0];
+			this.reset = values[1];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 3;
 		}
 	}
 	

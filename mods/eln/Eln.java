@@ -356,10 +356,16 @@ public class Eln {
 		symboleList.add(new ConstSymbole("C",0.3));
 		double value = 0.0;
 		//Equation equ = new Equation("abs(-A) + B * (-0.4 - 0.5 + C)^3 + 0.5 * A",symboleList,100);
-		Equation equ = new Equation("1+periodic(2,1)*2",symboleList,100);
+		/*Equation equ;
+		equ = new Equation("3^2 + (1+5*4) +(-((1&1)))",symboleList,100);
 		if(equ.isValid()){
 			value = equ.getValue();
 		}
+		
+		equ = new Equation("1+ramp(2)*2",symboleList,100);
+		if(equ.isValid()){
+			value = equ.getValue();
+		}*/
 		
 		Side side = FMLCommonHandler.instance().getEffectiveSide();
 		if (side == Side.CLIENT)
