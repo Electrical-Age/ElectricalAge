@@ -94,16 +94,28 @@ public class BatteryProcess implements IProcess {
 		double chargeStep = getCharge() / stepNbr;
 		double chargeIntegrator = 0;
 		double energy = 0;
-		double QperStep = QNominal*life*getCharge() / stepNbr;
+		double QperStep = QNominal*life*chargeStep;
 		
 		for(int step = 0; step < stepNbr;step++)
 		{	
-			chargeIntegrator += chargeStep;
 			double voltage = voltageFunction.getValue(chargeIntegrator)*uNominal;
 			energy += voltage*QperStep;
+			chargeIntegrator += chargeStep;
 		}
 		
-		return energy;		
+		return energy;
+		
+		/*double probeU = (positiveLoad.Uc-negativeLoad.Uc);
+		double q = 0,dq = 0.00001;
+		double e = 0;
+		double u;
+		while((u = voltageFunction.getValue(q)*uNominal) < probeU){
+			e += u*dq*QNominal;			
+			q += dq;
+			
+			//if(e > 1) break;
+		}
+		return e*life;		*/
 	}
 	
 	public double getEnergyMax()
@@ -116,9 +128,9 @@ public class BatteryProcess implements IProcess {
 		
 		for(int step = 0; step < stepNbr;step++)
 		{	
-			chargeIntegrator += chargeStep;
 			double voltage = voltageFunction.getValue(chargeIntegrator)*uNominal;
 			energy += voltage*QperStep;
+			chargeIntegrator += chargeStep;
 		}
 		
 		return energy;

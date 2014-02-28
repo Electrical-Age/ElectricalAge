@@ -224,9 +224,10 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 		
 		for(int step = 0; step < stepNbr;step++)
 		{	
-			chargeIntegrator += chargeStep;
 			double voltage = UfCharge.getValue(chargeIntegrator)*electricalU;
 			energy += voltage*QperStep;
+			chargeIntegrator += chargeStep;
+
 		}
 		
 		return energy;

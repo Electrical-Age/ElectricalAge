@@ -604,7 +604,17 @@ public class Equation implements IValue,INBTTReady{
 
 	
 	public static class BatteryCharge implements IOperator{
-	
+		public BatteryCharge() {
+			FunctionTable  uFq= Eln.instance.batteryVoltageFunctionTable;
+			double q = 0,dq = 0.01;
+			eMax = 0;
+			q = 0;
+			while(q <= 1.0){
+				eMax += uFq.getValue(q)*dq;			
+				q += dq;
+			}
+		}
+		double eMax;
 		public IValue probe;
 
 		@Override
@@ -621,16 +631,17 @@ public class Equation implements IValue,INBTTReady{
 		public double getValue() {
 			FunctionTable  uFq= Eln.instance.batteryVoltageFunctionTable;
 			double probeU = probe.getValue();
+			if(probeU > 1.5) return 1;
 			double q = 0,dq = 0.01;
 			double e = 0;
 			double u;
+			
 			while((u = uFq.getValue(q)) < probeU){
 				e += u*dq;			
 				q += dq;
-				
-				if(e > 1) break;
 			}
-			return e;
+
+			return e/eMax;
 		}
 	}
 	
