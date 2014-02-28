@@ -121,8 +121,12 @@ public class ElectricalLoad{
 	public void highImpedance()
 	{
 		setRs(1000000000.0);
-	//	setC(0.01);
-		setRp(1000000000.0);
+		infinitRp();
+	}
+	
+	public void infinitRp()
+	{
+		setRp(100000000000000000000.0);
 	}
 	public void groundedEnable()
 	{
@@ -130,7 +134,7 @@ public class ElectricalLoad{
 	}
 	public void groundedDisable()
 	{
-		setRp(1000000000.0);
+		infinitRp();
 	}
 	
 	public void grounded(boolean enable)

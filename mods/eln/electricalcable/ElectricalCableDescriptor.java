@@ -124,7 +124,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 			}
 			else
 			{
-				electricalLoad.setRp(1000000000);
+				electricalLoad.infinitRp();
 			}		
 		}	
 	}

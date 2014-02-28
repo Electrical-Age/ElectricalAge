@@ -103,9 +103,9 @@ public class BatteryProcess implements IProcess {
 			energy += voltage*QperStep;
 		}
 		
-		return energy;
-		
+		return energy;		
 	}
+	
 	public double getEnergyMax()
 	{
 		int stepNbr = 50;

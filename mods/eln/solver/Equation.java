@@ -10,8 +10,9 @@ import java.util.ListResourceBundle;
 import java.util.Scanner;
 
 import net.minecraft.nbt.NBTTagCompound;
-
+import mods.eln.Eln;
 import mods.eln.INBTTReady;
+import mods.eln.misc.FunctionTable;
 import mods.eln.sim.IProcess;
 
 public class Equation implements IValue,INBTTReady{
@@ -40,6 +41,7 @@ public class Equation implements IValue,INBTTReady{
 			list.add(new OperatorMapperFunc("integrate",2,Integrator.class));
 			list.add(new OperatorMapperFunc("integrate",3,IntegratorMinMax.class));
 			list.add(new OperatorMapperFunc("derivate",1,Derivator.class));
+			list.add(new OperatorMapperFunc("batteryCharge",1,BatteryCharge.class));
 			list.add(new OperatorMapperFunc("rs",2,Rs.class));
 			list.add(new OperatorMapperBracket());
 			staticOperatorList.put(priority++, list);		
@@ -589,8 +591,8 @@ public class Equation implements IValue,INBTTReady{
 		}
 		@Override
 		public void setOperator(IValue[] values) {
-			this.set = values[0];
-			this.reset = values[1];
+			this.set = values[1];
+			this.reset = values[0];
 		}
 
 		@Override
@@ -600,6 +602,37 @@ public class Equation implements IValue,INBTTReady{
 	}
 	
 
+	
+	public static class BatteryCharge implements IOperator{
+	
+		public IValue probe;
+
+		@Override
+		public void setOperator(IValue[] values) {
+			this.probe = values[0];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 8;
+		}
+
+		@Override
+		public double getValue() {
+			FunctionTable  uFq= Eln.instance.batteryVoltageFunctionTable;
+			double probeU = probe.getValue();
+			double q = 0,dq = 0.01;
+			double e = 0;
+			double u;
+			while((u = uFq.getValue(q)) < probeU){
+				e += u*dq;			
+				q += dq;
+				
+				if(e > 1) break;
+			}
+			return e;
+		}
+	}
 	
 	
 	ArrayList<IProcess> processList = new ArrayList<IProcess>();

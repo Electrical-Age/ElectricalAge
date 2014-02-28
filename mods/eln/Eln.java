@@ -1003,6 +1003,7 @@ public class Eln {
 		}
 	}
 
+	public FunctionTable batteryVoltageFunctionTable;
 	void registerBattery(int id) {
 		int subId, completId;
 		String name;
@@ -1020,6 +1021,8 @@ public class Eln {
 		double stdP = LVP / 4;
 		double stdHalfLife = Utils.minecraftDay * 2;
 
+		
+		batteryVoltageFunctionTable = voltageFunction;
 		{
 			subId = 0;
 			name = "Cost oriented battery";
