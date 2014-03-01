@@ -1028,7 +1028,7 @@ public class Eln {
 			name = "Cost oriented battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"LowCostBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU,
+					"LowCostBattery2",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU,
 					stdP * 1.2, 0.000, // electricalU,
 										// electricalPMax,electricalDischargeRate
 					stdP, stdDischargeTime, 0.998, stdHalfLife, // electricalStdP,

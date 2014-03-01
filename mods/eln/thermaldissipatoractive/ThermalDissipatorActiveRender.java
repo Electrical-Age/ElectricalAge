@@ -20,6 +20,8 @@ public class ThermalDissipatorActiveRender extends TransparentNodeElementRender{
 	RcInterpolator rc = new RcInterpolator(2f);
 	@Override
 	public void draw() {
+		front.glRotateXnRef();
+		
 		rc.setTarget(powerFactor);
 		rc.stepGraphic();
 		alpha += rc.get() * 360f * FrameTime.get();

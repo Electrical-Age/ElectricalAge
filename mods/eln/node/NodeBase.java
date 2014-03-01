@@ -50,7 +50,7 @@ public abstract class NodeBase implements INBTTReady {
 	public static final int maskElectricalGate = (1<<2);
 	public static final int maskElectricalAll = maskElectricalPower | maskElectricalGate;
 
-	public static final int maskElectricalInputGate = maskElectricalPower | maskElectricalGate;
+	public static final int maskElectricalInputGate = maskElectricalGate;
 	public static final int maskElectricalOutputGate = maskElectricalGate;
 	
 	
