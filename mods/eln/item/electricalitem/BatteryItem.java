@@ -37,7 +37,7 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 		this.chargePower = chargePower;
 		this.dischargePower = dischargePower;
 		this.energyStorage = energyStorage;
-		iconRessource = new ResourceLocation("eln", "/textures/items/" + name.replace(" ", "").toLowerCase() + ".png");
+		iconRessource = new ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + ".png");
 	}
 	ResourceLocation iconRessource;
 	double energyStorage, dischargePower, chargePower;

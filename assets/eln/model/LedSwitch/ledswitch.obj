@@ -1,6 +1,6 @@
 # Blender v2.65 (sub 0) OBJ File: 'LedSwitch.blend'
 # www.blender.org
-mtllib LedSwitch.mtl
+mtllib ledswitch.mtl
 o led
 v 0.126000 -0.031250 0.031250
 v 0.126000 0.031250 0.031250

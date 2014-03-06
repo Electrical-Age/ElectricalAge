@@ -17,7 +17,7 @@ Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
-map_Kd LedSwitch.PNG
+map_Kd LedSwitch.png
 
 newmtl None_halo.png
 Ns 0
@@ -26,4 +26,4 @@ Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
-map_Kd ..\_Common\halosmall.png
+map_Kd halosmall.png

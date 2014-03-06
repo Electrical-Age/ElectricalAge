@@ -35,15 +35,17 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor{
 		super(name, ElectricalVuMeterElement.class,ElectricalVuMeterRender.class);
 		this.onOffOnly = onOffOnly;
 		obj = Eln.instance.obj.getObj(objName);
-		if(obj.getString("type").toLowerCase().equals("rot")){
-			objType = ObjType.Rot;
-			vumeter = obj.getPart("Vumeter");
-			pointer = obj.getPart("Pointer");
-		}
-		if(obj.getString("type").equals("LedOnOff")){
-			objType = ObjType.LedOnOff;
-			main = obj.getPart("main");
-			halo = obj.getPart("halo");
+		if(obj != null){
+			if(obj.getString("type").toLowerCase().equals("rot")){
+				objType = ObjType.Rot;
+				vumeter = obj.getPart("Vumeter");
+				pointer = obj.getPart("Pointer");
+			}
+			if(obj.getString("type").equals("LedOnOff")){
+				objType = ObjType.LedOnOff;
+				main = obj.getPart("main");
+				halo = obj.getPart("halo");
+			}
 		}
 	}
 	

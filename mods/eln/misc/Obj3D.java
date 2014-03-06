@@ -111,58 +111,7 @@ public class Obj3D {
 	    	  GL12.glDrawRangeElements(GL11.GL_TRIANGLES, 0, 3, indices);
 	    	}*/
 		
-		public void drawNoBind(){
-			if(listReady == false)
-			{
-				listReady = true;
-				glList = GL11.glGenLists(1);
-				
-				GL11.glNewList(glList, GL11.GL_COMPILE);
-				drawVertex();
-				GL11.glEndList();					
-				/*
-				
-		        float[] vertexArray = {-0.5f,  0.5f, 0,
-                        0.5f,  0.5f, 0,
-                        0.5f, -0.5f, 0,
-                       -0.5f, -0.5f, 0};
-				vertices = BufferUtils.createFloatBuffer(vertexArray.length);
-				vertices.put(vertexArray);
-				vertices.flip();
-				
-				int[] indexArray = {0, 1, 2, 0, 2, 3};
-				indices = BufferUtils.createIntBuffer(indexArray.length);
-				indices.put(indexArray);
-				indices.flip();
-				
-				
-				VBOVertices = createVBOID();
-				VBOIndices = createVBOID();
-				bufferData(VBOVertices, vertices);
-				bufferElementData(VBOIndices,indices);
 
-				*/
-				
-			}
-
-			
-			GL11.glCallList(glList);			
-		}
-		public void draw()
-		{		
-		//	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
-			if(textureResource != null){
-				Utils.bindTexture(textureResource);
-				drawNoBind();
-			}
-			else {
-				GL11.glDisable(GL11.GL_TEXTURE_2D);
-				drawNoBind();
-				GL11.glEnable(GL11.GL_TEXTURE_2D);
-			}
-		//	Minecraft.getMinecraft().mcProfiler.endSection();
-		}
-		
 		public void bindTexture()
 		{
 			Utils.bindTexture(textureResource);
@@ -222,17 +171,40 @@ public class Obj3D {
 			
 			GL11.glPopMatrix();
 		}
-		
+		public void drawNoBind(){
+			if(listReady == false)
+			{
+				listReady = true;
+				glList = GL11.glGenLists(1);
+				
+				GL11.glNewList(glList, GL11.GL_COMPILE);
+				drawVertex();
+				GL11.glEndList();					
+				
+			}
+
+			GL11.glCallList(glList);		
+		}
+		public void draw()
+		{		
+		//	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
+			if(textureResource != null){
+				Utils.bindTexture(textureResource);
+				drawNoBind();
+			}
+			else {
+				GL11.glDisable(GL11.GL_TEXTURE_2D);
+				drawNoBind();
+				GL11.glEnable(GL11.GL_TEXTURE_2D);
+			}
+		//	Minecraft.getMinecraft().mcProfiler.endSection();
+		}
+			
 		private void drawVertex()
 		{
-			//float dx = 0,dy = 0,dz = 0;
-			//if(nameToFloatHash.containsKey("offsetX")) dx = nameToFloatHash.get("offsetX");
-			//if(nameToFloatHash.containsKey("offsetY")) dy = nameToFloatHash.get("offsetY");
-			//if(nameToFloatHash.containsKey("offsetZ")) dz = nameToFloatHash.get("offsetZ");
+
 			int mode = 0;
-		/*	Minecraft.getMinecraft().renderEngine.resetBoundTexture();
-			if(textureName != null) Utils.bindTextureByName(textureName);
-			*/
+
 			for(Face f : face)
 			{
 				if(f.vertexNbr!=mode)
@@ -357,14 +329,14 @@ public class Obj3D {
 	
 	public ResourceLocation getAlternativeTexture(String name)
 	{
-		ResourceLocation resource = new ResourceLocation(mod,directory + name);
+		ResourceLocation resource = new ResourceLocation(mod,directory.substring(1) + name);
 		return resource;
 	}
 //	static final String rootDirectory = "/mods/eln/model/";
 	
 	String directory;
 	String mod;
-	public void loadFile(String modName,String path)
+	public boolean loadFile(String modName,String path)
 	{
 		int lastSlashId = path.lastIndexOf('/');
 		this.directory = path.substring(0, lastSlashId + 1);
@@ -378,8 +350,12 @@ public class Obj3D {
 			{
 				//ITexturePack var6 = Minecraft.getMinecraft().renderEngine.texturePack.getSelectedTexturePack(); 
 				//InputStream stream = var6.getResourceAsStream(/*rootDirectory + */directory + fileName);
+				System.out.println("getResourceAsStream /assets/" + modName + directory + fileName);
 				InputStream stream = Eln.class.getResourceAsStream("/assets/" + modName + directory + fileName);
-				
+				if(stream == null){
+					System.out.println("obj loading fail");
+					return false;
+				}
 				//InputStream stream =  new  FileInputStream(path);
 				//InputStream stream = Eln.class.getResourceAsStream("/Eln/model/MONKEY.obj");//(directory + fileName);	
 				StringBuilder inputStringBuilder = new StringBuilder();
@@ -459,7 +435,12 @@ public class Obj3D {
 			}
 			part = null;
 			{		 
+				System.out.println("getResourceAsStream /assets/" + modName + directory + mtlName);
 				InputStream stream = Eln.class.getResourceAsStream("/assets/" + modName + directory +  mtlName);	
+				if(stream == null){
+					System.out.println("mtl loading fail");
+					return false;
+				}
 				StringBuilder inputStringBuilder = new StringBuilder();
 		        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
 		        String mtlName = "";
@@ -479,7 +460,8 @@ public class Obj3D {
 							if(partPtr.mtlName.equals(mtlName))
 							{
 								part = partPtr;
-								part.textureResource = new ResourceLocation(modName, directory + words[1]);
+								part.textureResource = new ResourceLocation(modName, directory.substring(1) + words[1]);
+
 								//Side side = FMLCommonHandler.instance().getEffectiveSide();
 								//if (side == Side.CLIENT)
 									//MinecraftForgeClient.preloadTexture(part.textureName);
@@ -495,9 +477,12 @@ public class Obj3D {
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
+			return false;
 		}
 	
 		part = null;
@@ -506,6 +491,7 @@ public class Obj3D {
 			InputStream stream = Eln.class.getResourceAsStream("/assets/" + modName + directory +  fileName.replace(".obj", ".txt").replace(".OBJ", ".txt"));	
 			if(stream != null)
 			{
+				System.out.println("getResourceAsStream /assets/" + modName + directory +  fileName.replace(".obj", ".txt").replace(".OBJ", ".txt"));
 				StringBuilder inputStringBuilder = new StringBuilder();
 		        BufferedReader bufferedReader;
 				
@@ -583,6 +569,7 @@ public class Obj3D {
 		
 		dimMax = Math.max(Math.max(xMax, yMax),zMax);
 		dimMaxInv = 1.0f/dimMax;
+		return true;
 	}
 	
 

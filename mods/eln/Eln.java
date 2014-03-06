@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.bouncycastle.asn1.esf.CompleteRevocationRefs;
+import org.omg.CORBA.OMGVMCID;
 
 import mods.eln.TreeResinCollector.TreeResinCollectorBlock;
 import mods.eln.TreeResinCollector.TreeResinCollectorDescriptor;
@@ -234,6 +235,75 @@ public class Eln {
 	 * Eln() { instance = this; }
 	 */
 	public static String channelName = "miaouMod";
+	
+	public static final String[] objNames = new String[]{
+		
+		
+		 "/model/activeThermalDissipatorA/activethermaldissipatora.obj",
+		 "/model/AlarmMedium/alarmmedium.obj",
+		 "/model/BatteryBig/BatteryBig.obj",
+		 "/model/batterychargera/batterychargera.obj",
+		 "/model/batterychargerb/batterychargerb.obj",
+		 "/model/ClassicLampSocket/ClassicLampSocket.obj",
+		 "/model/compressora/compressora.obj",
+		 "/model/DataloggerCRTFloor/DataloggerCRTFloor.obj",
+		 "/model/daylightsensor/daylightsensor.obj",
+		 "/model/eggIncubator/eggincubator.obj",
+		 "/model/ElectricalSensor/electricalsensor.obj",
+		 "/model/electricaltimer/electricaltimer.obj",
+		 "/model/ElectricFurnace/ElectricFurnace.obj",
+		 "/model/eleToRed/eletored.obj",
+		 "/model/groundCable/groundcable.obj",
+		 "/model/HighCapacityBattery/HighCapacityBattery.obj",
+		 "/model/HighCurrentBattery/HighCurrentBattery.obj",
+		 "/model/HighVoltageBattery/HighVoltageBattery.obj",
+		 "/model/HighVoltageSwitch/HighVoltageSwitch.obj",
+		 "/model/lampsupply/lampsupply.obj",
+		 "/model/Led/Led.obj",
+		 "/model/LedSwitch/ledswitch.obj",
+		 "/model/lightsensor/lightsensor.obj",
+		 "/model/LongLifeBattery/LongLifeBattery.obj",
+		 "/model/LowCostBattery/LowCostBattery.obj",
+		 "/model/LowCostBattery2/LowCostBattery2.obj",
+		 "/model/LowPowerReceiverAntenna/lowpowerreceiverantenna.obj",
+		 "/model/LowPowerTransmitterAntenna/lowpowertransmitterantenna.obj",
+		 "/model/LowVoltageSwitch/LowVoltageSwitch.obj",
+		 "/model/macerator50V/macerator50V.obj",
+		 "/model/maceratora/maceratora.obj",
+		 "/model/magnetizera/magnetizera.obj",
+		 "/model/MediumVoltageSwitch/MediumVoltageSwitch.obj",
+		 "/model/passiveThermalDissipatorA/passivethermaldissipatora.obj",
+		 "/model/plateMachineA/platemachinea.obj",
+		 "/model/PLC/PLC.obj",
+		 "/model/redToEle/redtoele.obj",
+		 "/model/RelayBig/RelayBig.obj",
+		 "/model/RobustLamp/RobustLamp.obj",
+		 "/model/RTU/RTU.obj",
+		 "/model/signalsourcepot/signalsourcepot.obj",
+		 "/model/smallsolarpannel/smallsolarpannel.obj",
+		 "/model/smallsolarpannelrot/smallsolarpannelrot.obj",
+		 "/model/SolarPanel2x2/SolarPanel2x2.obj",
+		 "/model/stoneCache/stonecache.obj",
+		 "/model/StoneFurnace/stonefurnace.obj",
+		 "/model/StreetLight/StreetLight.obj",
+		 "/model/TemperatureSensor/temperaturesensor.obj",
+		 "/model/ThermalSensor/thermalsensor.obj",
+		 "/model/transformator/corea/feromagneticcorea.obj",
+		 "/model/transformator/transformator.obj",
+		 "/model/Transporter/Transporter.obj",
+		 "/model/treeresincolector/treeresincolector.obj",
+		 "/model/turbine50V/turbine50V.obj",
+		 "/model/turbineB/turbineb.obj",
+		 "/model/VoltageSensor/voltagesensor.obj",
+		 "/model/voltagesource/voltagesource.obj",
+		 "/model/Vumeter/Vumeter.obj",
+		 "/model/WindTurbineMini/WindTurbineMini.obj",
+		 "/model/wirelesssignalrepeater/wirelesssignalrepeater.obj",
+		 "/model/wirelesssignalrx/wirelesssignalrx.obj",
+		 "/model/wirelesssignaltx/wirelesssignaltx.obj"	
+		
+		
+	};
 
 	public static final double networkSerializeValueFactor = 100.0;
 
@@ -476,7 +546,11 @@ public class Eln {
 		ghostBlock = (GhostBlock) new GhostBlock(ghostBlockId);
 		lightBlock = (LightBlock) new LightBlock(lightBlockId);
 
-		obj.loadFolder("eln", "/model");
+	//	obj.loadFolder("eln", "/model");
+		for (String path : objNames) {
+			obj.loadObj("eln", path);
+		}
+		//obj.loadObj("eln","/model/activeThermalDissipatorA/activethermaldissipatora.obj");
 		// Obj3DFolder miaou = new Obj3DFolder();
 		// miaou.loadFolder("/mods/eln/model");
 
@@ -859,7 +933,7 @@ public class Eln {
 			name = "Signal cable";
 
 			stdCableRenderSignal = new CableRenderDescriptor("eln",
-					"/sprites/CABLE.PNG", 0.95f, 0.95f);
+					"sprites/cable.png", 0.95f, 0.95f);
 
 			desc = new ElectricalCableDescriptor(name, stdCableRenderSignal,
 					"For signal transmition", true);
@@ -888,7 +962,7 @@ public class Eln {
 			name = "Low voltage cable";
 
 			stdCableRender50V = new CableRenderDescriptor("eln",
-					"/sprites/CABLE.PNG", 1.95f, 0.95f);
+					"sprites/cable.png", 1.95f, 0.95f);
 
 			desc = new ElectricalCableDescriptor(name, stdCableRender50V,
 					"For low voltage with high current", false);
@@ -916,7 +990,7 @@ public class Eln {
 			name = "Medium voltage cable";
 
 			stdCableRender200V = new CableRenderDescriptor("eln",
-					"/sprites/CABLE.PNG", 2.95f, 0.95f);
+					"sprites/cable.png", 2.95f, 0.95f);
 
 			desc = new ElectricalCableDescriptor(name, stdCableRender200V,
 					"miaou", false);
@@ -944,7 +1018,7 @@ public class Eln {
 			name = "High voltage cable";
 
 			stdCableRender800V = new CableRenderDescriptor("eln",
-					"/sprites/CABLE.PNG", 3.95f, 1.95f);
+					"sprites/cable.png", 3.95f, 1.95f);
 
 			desc = new ElectricalCableDescriptor(name, stdCableRender800V,
 					"miaou2", false);
@@ -981,7 +1055,7 @@ public class Eln {
 					500, 2000, // thermalStdT, thermalStdPower,
 					4, 400, 0.1,// thermalStdDrop, thermalStdLost, thermalTao,
 					new CableRenderDescriptor("eln",
-							"sprites/TEX_THERMALCABLEBASE.PNG", 4, 4),
+							"sprites/tex_thermalcablebase.png", 4, 4),
 					"Miaou !");// description
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -996,7 +1070,7 @@ public class Eln {
 					500, 2000, // thermalStdT, thermalStdPower,
 					4, 10, 0.1,// thermalStdDrop, thermalStdLost, thermalTao,
 					new CableRenderDescriptor("eln",
-							"sprites/TEX_THERMALCABLEBASE.PNG", 4, 4),
+							"sprites/tex_thermalcablebase.png", 4, 4),
 					"Miaou !");// description
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1028,7 +1102,7 @@ public class Eln {
 			name = "Cost oriented battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"LowCostBattery2",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU,
+					"HighVoltageBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU,
 					stdP * 1.2, 0.000, // electricalU,
 										// electricalPMax,electricalDischargeRate
 					stdP, stdDischargeTime, 0.998, stdHalfLife, // electricalStdP,
@@ -1046,7 +1120,7 @@ public class Eln {
 			name = "Capacity oriented battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighCapacityBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction,
+					"HighVoltageBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction,
 					stdU / 4, stdP / 2 * 1.2, 0.000, // electricalU,
 														// electricalPMax,electricalDischargeRate
 					stdP / 2, stdDischargeTime * 8, 0.998, stdHalfLife, // electricalStdP,
@@ -1083,7 +1157,7 @@ public class Eln {
 			name = "Current oriented battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighCurrentBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU,
+					"HighVoltageBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU,
 					stdP * 1.2 * 4, 0.000, // electricalU,
 											// electricalPMax,electricalDischargeRate
 					stdP * 4, stdDischargeTime / 6, 0.998, stdHalfLife, // electricalStdP,
@@ -1101,7 +1175,7 @@ public class Eln {
 			name = "Life oriented battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"LongLifeBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU,
+					"HighVoltageBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU,
 					stdP * 1.2, 0.000, // electricalU,
 										// electricalPMax,electricalDischargeRate
 					stdP, stdDischargeTime, 0.998, stdHalfLife * 8, // electricalStdP,
@@ -1120,7 +1194,7 @@ public class Eln {
 			name = "Single usage battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"LongLifeBattery",lowVoltageCableDescriptor, 1.0, false,false, voltageFunction, stdU,
+					"HighVoltageBattery",lowVoltageCableDescriptor, 1.0, false,false, voltageFunction, stdU,
 					stdP * 1.2 * 2, 0.000, // electricalU,
 											// electricalPMax,electricalDischargeRate
 					stdP * 2, stdDischargeTime, 0.998, stdHalfLife * 8, // electricalStdP,
@@ -1138,7 +1212,7 @@ public class Eln {
 			name = "50V condensator";
 			
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"LongLifeBattery",lowVoltageCableDescriptor, 0.0, true,false,
+					"HighVoltageBattery",lowVoltageCableDescriptor, 0.0, true,false,
 					condoVoltageFunction,
 					stdU,stdP * 1.2 * 8, 0.005, // electricalU,// electricalPMax,electricalDischargeRate
 					stdP * 8, 4, 0.998, stdHalfLife , // electricalStdP,

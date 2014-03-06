@@ -1,6 +1,6 @@
 # Blender v2.65 (sub 0) OBJ File: 'AlarmMedium.blend'
 # www.blender.org
-mtllib AlarmMedium.mtl
+mtllib alarmmedium.mtl
 o light
 v 0.192500 -0.312500 0.249999
 v 0.192500 0.312500 0.250001

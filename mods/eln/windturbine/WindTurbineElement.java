@@ -4,6 +4,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import mods.eln.Eln;
+import mods.eln.PlayerManager;
 import mods.eln.ghost.GhostObserver;
 import mods.eln.item.DynamoDescriptor;
 import mods.eln.misc.Coordonate;
@@ -23,6 +24,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class WindTurbineElement extends TransparentNodeElement{
 
@@ -34,6 +36,8 @@ public class WindTurbineElement extends TransparentNodeElement{
 	WindTurbineSlowProcess slowProcess = new WindTurbineSlowProcess("slowProcess",this);
 	
 	WindTurbineDescriptor descriptor;
+	
+	Direction cableFront = Direction.ZP;
 	
 	public WindTurbineElement(TransparentNode transparentNode,
 			TransparentNodeDescriptor descriptor) {
@@ -54,8 +58,8 @@ public class WindTurbineElement extends TransparentNodeElement{
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
 		if(lrdu != LRDU.Down) return null;
-		if(side == front.left()) return positiveLoad;
-		if(side == front.right() && ! grounded) return negativeLoad;
+		if(side == cableFront.left()) return positiveLoad;
+		if(side == cableFront.right() && ! grounded) return negativeLoad;
 		return null;
 	}
 
@@ -69,8 +73,8 @@ public class WindTurbineElement extends TransparentNodeElement{
 	public int getConnectionMask(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub
 		if(lrdu != LRDU.Down) return 0;
-		if(side == front.left()) return NodeBase.maskElectricalPower;
-		if(side == front.right() && ! grounded) return node.maskElectricalPower;
+		if(side == cableFront.left()) return NodeBase.maskElectricalPower;
+		if(side == cableFront.right() && ! grounded) return node.maskElectricalPower;
 		return 0;
 	}
 
@@ -103,6 +107,10 @@ public class WindTurbineElement extends TransparentNodeElement{
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
 		
+		if(Eln.playerManager.get(entityPlayer).getInteractEnable()){
+			cableFront = cableFront.right();
+			reconnect();
+		}
 		return false;
 	}
 
@@ -116,7 +124,7 @@ public class WindTurbineElement extends TransparentNodeElement{
 	@Override
 	public boolean hasGui() {
 		// TODO Auto-generated method stub
-		return true;
+		return false;
 	}
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
@@ -139,5 +147,24 @@ public class WindTurbineElement extends TransparentNodeElement{
 		}
 		
 	}
+	
+	
+	@Override
+	public void writeToNBT(NBTTagCompound nbt, String str) {
+		// TODO Auto-generated method stub
+		super.writeToNBT(nbt, str);
+		cableFront.writeToNBT(nbt, str + "cableFront");
+		System.out.println(cableFront);
+	}
+	
+	@Override
+	public void readFromNBT(NBTTagCompound nbt, String str) {
+		// TODO Auto-generated method stub
+		super.readFromNBT(nbt, str);
+		cableFront = Direction.readFromNBT(nbt, str + "cableFront");
+		System.out.println(cableFront);
+	}
+	
+	 
 
 }

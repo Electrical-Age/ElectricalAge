@@ -51,6 +51,7 @@ public class Obj3DFolder {
 							    //	String fileName = folder + file.getName();
 							    	Obj3D obj =  new Obj3D();
 							    	obj.loadFile(modName,folderName + "/" + file.getName());
+							    	//System.out.println( '"' + folderName + "/" + file.getName() + '"' + ',');
 							    	String tag = file.getName().replaceAll(".obj", "").replaceAll(".OBJ", "");
 							    	nameToObjHash.put(tag,obj);
 						    	}
@@ -70,6 +71,16 @@ public class Obj3DFolder {
 			
 		}
 
+	
+	public void loadObj(String modName,String path){
+		Obj3D obj =  new Obj3D();
+    	if(obj.loadFile(modName,path)){
+    		String tag =path.replaceAll(".obj", "").replaceAll(".OBJ", "");
+    		tag = tag.substring(tag.lastIndexOf('/')+1, tag.length());
+    		nameToObjHash.put(tag,obj);
+    		System.out.println(path + " loaded");
+    	}
+	}
 	
 	public Obj3D getObj(String obj3DName)
 	{

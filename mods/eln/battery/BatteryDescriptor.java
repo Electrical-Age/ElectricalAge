@@ -9,6 +9,7 @@ import mods.eln.client.ClientProxy;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.gui.GuiLabel;
 import mods.eln.misc.FunctionTable;
+import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeElectricalLoad;
@@ -62,8 +63,20 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	private ElectricalCableDescriptor cable;
 	public void draw()
 	{
-		if(modelPart == null) return;
-		modelPart.draw();
+		switch (renderType) {
+		case 0:
+			if(modelPart == null) return;
+			modelPart.draw();			
+			break;
+		case 1:
+			if(main != null) main.draw();
+			if(plugPlus != null) plugPlus.draw();
+			if(plusMinus != null) plusMinus.draw();
+			if(cables != null) cables.draw();
+			if(battery != null) battery.draw();
+			break;
+		}
+
 	}
 	public BatteryDescriptor(
 				String name,String modelName,
@@ -116,10 +129,41 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 		thermalC = Math.pow(electricalPMax/electricalU,2)*electricalRs*thermalHeatTime/thermalWarmLimit;
 		thermalRp = thermalWarmLimit/thermalPMax;
 		
-		modelPart = Eln.obj.getPart(modelName, "Battery");
+		IMax = electricalStdI*3;		
 		
-		IMax = electricalStdI*3;
+		obj = Eln.obj.getObj(modelName);
+		
+		if(obj != null){
+			if(obj.getString("type").equals("A"))
+				renderType = 0;
+			if(obj.getString("type").equals("B"))
+				renderType = 1;
+			
+			switch (renderType) {
+			case 0:
+				modelPart = obj.getPart("Battery");
+			case 1:
+				main = obj.getPart("main");
+				plugPlus = obj.getPart("plugPlus");
+				plusMinus = obj.getPart("plusMinus");
+				cables = obj.getPart("cables");
+				battery = obj.getPart("battery");
+				break;
+
+			}
+			
+		}
+		
+		
+		
+
 	}
+	
+	Obj3D obj;
+	
+	Obj3DPart main,plugPlus,plusMinus,cables,battery;
+	
+	int renderType;
 	@Override
 	public void setParent(Item item, int damage) {
 		// TODO Auto-generated method stub

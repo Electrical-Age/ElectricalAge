@@ -25,12 +25,12 @@ public class GenericItemUsingDamageDescriptor {
 	public int parentItemDamage;
 	
 	public GenericItemUsingDamageDescriptor(String name) {
-		this.IconName = "eln:" + name.replaceAll(" ", "") ;
+		this.IconName = "eln:" + name.replaceAll(" ", "").toLowerCase() ;
 		this.name = name;
 	}
 	public void changeDefaultIcon(String name)
 	{
-		this.IconName = "eln:" + name.replaceAll(" ", "") ;
+		this.IconName = "eln:" + name.replaceAll(" ", "").toLowerCase()  ;
 	}
 	public NBTTagCompound getDefaultNBT()
 	{

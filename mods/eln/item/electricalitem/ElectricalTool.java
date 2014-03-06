@@ -39,7 +39,7 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 		this.strengthOn = strengthOn;
 		this.strengthOff = strengthOff;
 		
-		rIcon = new ResourceLocation("eln", "/textures/items/" + name.replace(" ", "").toLowerCase() + ".png");
+		rIcon = new ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + ".png");
 	}
 	int light,range;
 	double energyStorage, energyPerBlock, chargePower;
