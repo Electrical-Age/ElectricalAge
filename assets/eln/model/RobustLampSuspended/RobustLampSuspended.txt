@@ -1,0 +1,4 @@
+s tOn RobustLampSuspended_on.png
+s tOff RobustLampSuspended_off.png
+s type noLampDraw
+s cable enable

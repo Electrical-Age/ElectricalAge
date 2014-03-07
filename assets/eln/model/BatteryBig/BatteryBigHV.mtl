@@ -8,7 +8,7 @@ Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
-map_Kd BatteryBase.png
+map_Kd C:\GITHUB\ELN\eln\assets\eln\model\BatteryBig\BatteryBase.png
 
 newmtl None_BatteryHiVoltage.png
 Ns 0
@@ -17,4 +17,4 @@ Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
-map_Kd BatteryHiVoltage.png
+map_Kd C:\GITHUB\ELN\eln\assets\eln\model\BatteryBig\BatteryHiVoltage.png
