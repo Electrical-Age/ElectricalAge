@@ -300,7 +300,8 @@ public class Eln {
 		 "/model/WindTurbineMini/WindTurbineMini.obj",
 		 "/model/wirelesssignalrepeater/wirelesssignalrepeater.obj",
 		 "/model/wirelesssignalrx/wirelesssignalrx.obj",
-		 "/model/wirelesssignaltx/wirelesssignaltx.obj"	
+		 "/model/wirelesssignaltx/wirelesssignaltx.obj"
+		// "/model/BatteryBigHV/BatteryBigHV.obj"	
 		
 		
 	};
@@ -1138,7 +1139,7 @@ public class Eln {
 			name = "Voltage oriented battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery",meduimVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU * 4,
+					"BatteryBig",meduimVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU * 4,
 					stdP * 1.2, 0.000, // electricalU,
 										// electricalPMax,electricalDischargeRate
 					stdP, stdDischargeTime, 0.998, stdHalfLife, // electricalStdP,
@@ -1149,6 +1150,7 @@ public class Eln {
 									// thermalCoolLimit,
 					"the battery" // name, description)
 			);
+			desc.setRenderSpec("highvoltage");
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 

@@ -61,7 +61,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	public double IMax;
 	public boolean lifeEnable;
 	private ElectricalCableDescriptor cable;
-	public void draw()
+	public void draw(boolean plus,boolean minus)
 	{
 		switch (renderType) {
 		case 0:
@@ -70,9 +70,9 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 			break;
 		case 1:
 			if(main != null) main.draw();
-			if(plugPlus != null) plugPlus.draw();
-			if(plusMinus != null) plusMinus.draw();
-			if(cables != null) cables.draw();
+			if(plugPlus != null && plus) plugPlus.draw();
+			if(plusMinus != null && minus) plusMinus.draw();
+			//if(cables != null) cables.draw();
 			if(battery != null) battery.draw();
 			break;
 		}
@@ -143,11 +143,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 			case 0:
 				modelPart = obj.getPart("Battery");
 			case 1:
-				main = obj.getPart("main");
-				plugPlus = obj.getPart("plugPlus");
-				plusMinus = obj.getPart("plusMinus");
-				cables = obj.getPart("cables");
-				battery = obj.getPart("battery");
+
 				break;
 
 			}
@@ -161,9 +157,10 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	
 	Obj3D obj;
 	
-	Obj3DPart main,plugPlus,plusMinus,cables,battery;
+	Obj3DPart main,plugPlus,plusMinus,battery;
 	
 	int renderType;
+	private String renderSpec;
 	@Override
 	public void setParent(Item item, int damage) {
 		// TODO Auto-generated method stub
@@ -293,7 +290,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		draw();
+		draw(true,true);
 	}
 	
 	@Override
@@ -317,5 +314,24 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	public int bottom(int y, GuiVerticalExtender extender, ItemStack stack) {
 		// TODO Auto-generated method stub
 		return y;
+	}
+	public void setRenderSpec(String renderSpec) {
+		this.renderSpec = renderSpec;
+		
+		if(obj != null){
+			switch (renderType) {
+			case 0:
+
+			case 1:
+				main = obj.getPart("main");
+				plugPlus = obj.getPart("plugPlus");
+				plusMinus = obj.getPart("plugMinus");
+			//	cables = obj.getPart("cables");
+				battery = obj.getPart("battery_" + renderSpec);
+				break;
+
+			}
+			
+		}		
 	}
 }

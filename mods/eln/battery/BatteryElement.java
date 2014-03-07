@@ -8,6 +8,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.LRDU;
+import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.NodeBase;
@@ -145,17 +146,12 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
     	try {
-    		/*
-	    	stream.writeShort((short) (positiveLoad.Uc*node.networkSerializeUFactor));
-	    	stream.writeShort((short) (negativeLoad.Uc*node.networkSerializeUFactor));
-	    	stream.writeShort((short) (batteryProcess.dischargeCurrentMesure*node.networkSerializeIFactor));
-	    	stream.writeShort((short) (thermalLoad.Tc*node.networkSerializeTFactor));
-	    	*/
-    		//stream.writeFloat((float)(positiveLoad.Uc - negativeLoad.Uc));
+
 	    	stream.writeFloat((float)((positiveLoad.Uc - negativeLoad.Uc)*batteryProcess.dischargeCurrentMesure));
 	    	stream.writeFloat((float) batteryProcess.getEnergy());
 	    	stream.writeShort((short)(batteryProcess.life*1000));
-	    //	stream.writeFloat((float)(positiveLoad.Uc - negativeLoad.Uc));
+
+	    	node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

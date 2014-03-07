@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
+import mods.eln.misc.LRDUMask;
 import mods.eln.node.NodeBase;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
@@ -33,15 +34,18 @@ public class BatteryRender extends TransparentNodeElementRender{
 	@Override
 	public void draw() {
 		front.glRotateXnRef();
-		descriptor.draw();
+		descriptor.draw(plus,minus);
 	}
 
+	boolean plus,minus;
 	/*
 	@Override
 	public GuiContainer newGuiDraw(Direction side, EntityPlayer player) {
 		// TODO Auto-generated method stupb
 		return new TransformatorGuiDraw(player, inventory, this);
 	}*/
+	
+	LRDUMask lrdu = new LRDUMask();
 	
 	float power;
 	@Override
@@ -57,6 +61,12 @@ public class BatteryRender extends TransparentNodeElementRender{
 			power = stream.readFloat();
 			energy = stream.readFloat();
 			life = stream.readShort()/1000.0f;
+
+			lrdu.deserialize(stream);
+			
+			plus = true;
+			minus = true;
+			//plus = lrdu.get(lrdu)
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
