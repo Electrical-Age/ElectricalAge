@@ -14,6 +14,7 @@ import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
 import mods.eln.electricasensor.ElectricalSensorElement;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
@@ -330,5 +331,7 @@ public abstract class SixNodeElementRender {
 	public void notifyNeighborSpawn() {
 		needRedraw = true;
 	}  
+	
+	
     
 }

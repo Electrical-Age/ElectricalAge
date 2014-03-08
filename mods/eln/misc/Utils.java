@@ -451,6 +451,12 @@ public class Utils {
     	//GL11.glColor3f(((color>>16) & 0xFF)/255f, ((color>>7) & 0xFF)/255f, ((color>>0) & 0xFF)/255f);
     }
     
+    public static double getWeather(World world){
+    	if(world.isThundering()) return 1.0;
+    	if(world.isRaining()) return 0.5;
+    	return 0.0;
+    	
+    }
     
     
     public static double getWind(World world,int y)

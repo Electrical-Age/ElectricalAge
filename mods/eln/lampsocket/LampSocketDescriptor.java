@@ -19,9 +19,9 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 public class LampSocketDescriptor extends SixNodeDescriptor{
 	public LampSocketType socketType;
-	private Obj3D obj;
-	private Obj3DPart socket;
-	public LampSocketDescriptor(String name, Obj3D obj,boolean onOffModel,
+	LampSocketObjRender render;
+
+	public LampSocketDescriptor(String name,LampSocketObjRender render,
 								LampSocketType socketType,
 								int range,
 								float alphaZMin,float alphaZMax,
@@ -30,19 +30,12 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 	{
 		super(name, LampSocketElement.class,LampSocketRender.class);
 		this.socketType = socketType;
-		this.modelName = modelName;
 		this.range = range;
 		this.alphaZMin = alphaZMin;
 		this.alphaZMax = alphaZMax;
 		this.alphaZBoot = alphaZBoot;
-		this.onOffModel = onOffModel;
-		this.obj = obj;
-		
-		if(obj != null){
-			socket = obj.getPart("socket");
-			tOff = obj.getAlternativeTexture(obj.getString("tOff"));
-			tOn = obj.getAlternativeTexture(obj.getString("tOn"));
-		}
+		this.render = render;
+
 	}
 
 	public void setParent(net.minecraft.item.Item item, int damage)
@@ -51,11 +44,11 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 		Data.addLight(newItemStack());
 	}
 	
-	ResourceLocation tOn,tOff;
+
 	public int range;
 	public String modelName;
 	float alphaZMin,alphaZMax,alphaZBoot;
-	boolean onOffModel;
+
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		// TODO Auto-generated method stub
@@ -85,34 +78,9 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 				GL11.glTranslatef(-0.5f,0f, -1f);
 			}
 		}
-		draw(LRDU.Up, 0, (byte) 0);
+		render.draw(this);
 	}
-	public void draw(LRDU front, float alphaZ,byte light) {
-		front.glRotateOnX();
-		
-		GL11.glDisable(GL11.GL_CULL_FACE);
-		if(onOffModel == false){
-			socket.draw();
-		}
-		else{
-			if(light > 5)
-				Utils.bindTexture(tOn);
-			else
-				Utils.bindTexture(tOff);
-			socket.drawNoBind();
-		}
-		GL11.glEnable(GL11.GL_CULL_FACE);
-	/*	GL11.glLineWidth(2f);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_LIGHTING);
-		GL11.glColor3f(1f,1f,1f);
-		GL11.glBegin(GL11.GL_LINES);
-			GL11.glVertex3d(0f, 0f, 0f);
-			GL11.glVertex3d(Math.cos(alphaZ*Math.PI/180.0), Math.sin(alphaZ*Math.PI/180.0),0.0);
-		GL11.glEnd();
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glEnable(GL11.GL_LIGHTING);*/
-	}		
+
 	@Override
 	public boolean hasVolume() {
 		// TODO Auto-generated method stub

@@ -22,7 +22,7 @@ public class GuiHelper {
 	public GuiScreen screen;
 	public int xSize,ySize;
 	ResourceLocation background;
-	static ResourceLocation helperTexture = new ResourceLocation("eln","/sprites/gui/helperTexture.png");
+	static ResourceLocation helperTexture = new ResourceLocation("eln","sprites/gui/helpertexture.png");
 
 	public GuiHelper(	
 			GuiScreen screen,
@@ -33,7 +33,7 @@ public class GuiHelper {
 		this.screen = screen;
 		this.xSize = xSize;
 		this.ySize = ySize;
-		background = new ResourceLocation("eln", "/sprites/gui/" + backgroundName);
+		background = new ResourceLocation("eln", "sprites/gui/" + backgroundName);
 	}
 	
 	

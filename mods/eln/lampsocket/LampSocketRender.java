@@ -4,15 +4,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.commons.lang3.text.translate.EntityArrays;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientProxy;
+import mods.eln.client.FrameTime;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.item.LampDescriptor;
 import mods.eln.item.MeterItemArmor;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -26,10 +31,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.texture.Tickable;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet250CustomPayload;
+import net.minecraft.world.EnumSkyBlock;
 
 
 public class LampSocketRender extends SixNodeElementRender{
@@ -65,16 +75,69 @@ public class LampSocketRender extends SixNodeElementRender{
 		return inventory;
 	}
 	
+	float pertuVy = 0,pertuPy = 0;
+	float pertuVz = 0,pertuPz = 0;
+	float weatherAlphaZ = 0,weatherAlphaY = 0;
 	
+	List entityList = new ArrayList();
+	float entityTimout = 0;
 	@Override
 	public void draw() {
 		super.draw();
-		descriptor.draw(front,alphaZ,light);
+		
+		if(descriptor.render instanceof LampSocketSuspendedObjRender){
+			float dt = FrameTime.get();
+			/*if(Math.random() < 0.2*dt || (pertuVy == 0 && pertuPy == 0)){
+				pertuVy += Math.random();
+			}
+			if(Math.random() < 0.2*dt || (pertuVz == 0 && pertuPz == 0)){
+				pertuVz += Math.random();
+			}*/
+			entityTimout -= dt;
+			if(entityTimout < 0){
+				entityList = tileEntity.worldObj.getEntitiesWithinAABB(Entity.class, new Coordonate(tileEntity.xCoord,tileEntity.yCoord-2,tileEntity.zCoord,tileEntity.worldObj).getAxisAlignedBB(2));
+				entityTimout = 0.1f;
+			}
+			
+			for (Object o : entityList ) {
+				Entity e = (Entity) o;
+				float eFactor = 0;
+				if(e instanceof EntityArrow) eFactor = 1f;
+				if(e instanceof EntityLivingBase) eFactor = 2f;
+
+				if(eFactor == 0) continue;
+				pertuVz += e.motionX * eFactor * dt;
+				pertuVy += e.motionZ * eFactor * dt;
+			}
+
+			
+			if(tileEntity.worldObj.getSavedLightValue(EnumSkyBlock.Sky, tileEntity.xCoord,tileEntity.yCoord,tileEntity.zCoord) > 3){
+				float weather = (float) Utils.getWeather(tileEntity.worldObj);
+		
+				weatherAlphaY += (0.0-Math.random())*dt*Math.PI/0.5*weather;
+				weatherAlphaZ += (0.0-Math.random())*dt*Math.PI/0.5*weather;
+				if(weatherAlphaY > 2*Math.PI) weatherAlphaY -= 2*Math.PI;
+				if(weatherAlphaZ > 2*Math.PI) weatherAlphaZ -= 2*Math.PI;
+				pertuVy += Math.random()*Math.sin(weatherAlphaY)*weather*weather*dt*3; 
+				pertuVz += Math.random()*Math.cos(weatherAlphaZ)*weather*weather*dt*3; 
+			}
+			
+			
+			pertuVy -= pertuPy/10*dt;
+			pertuVy *= (1-0.2*dt); 
+			pertuPy += pertuVy;
+			
+			pertuVz -= pertuPz/10*dt;
+			pertuVz *= (1-0.2*dt); 
+			pertuPz += pertuVz;
+		}
+		
+		descriptor.render.draw(this);
 	}
 	public String channel;
 	LampDescriptor lampDescriptor = null;
 	float alphaZ;
-	private byte light;
+	byte light;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -112,6 +175,7 @@ public class LampSocketRender extends SixNodeElementRender{
 	public boolean isConnectedToLampSupply;
 	
 	ElectricalCableDescriptor cable;
+
 	
 	public boolean getGrounded()
 	{

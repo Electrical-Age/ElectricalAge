@@ -102,6 +102,8 @@ import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
 import mods.eln.lampsocket.LampSocketDescriptor;
+import mods.eln.lampsocket.LampSocketStandardObjRender;
+import mods.eln.lampsocket.LampSocketSuspendedObjRender;
 import mods.eln.lampsocket.LampSocketType;
 import mods.eln.lampsocket.LightBlock;
 import mods.eln.lampsocket.LightBlockEntity;
@@ -238,7 +240,7 @@ public class Eln {
 	
 	public static final String[] objNames = new String[]{
 		
-		
+		 "/model/RobustLampSuspended/RobustLampSuspended.obj",
 		 "/model/activeThermalDissipatorA/activethermaldissipatora.obj",
 		 "/model/AlarmMedium/alarmmedium.obj",
 		 "/model/BatteryBig/BatteryBig.obj",
@@ -1267,8 +1269,8 @@ public class Eln {
 
 			name = "Lamp socket A";
 
-			LampSocketDescriptor desc = new LampSocketDescriptor(name,
-					obj.getObj("ClassicLampSocket"),false, LampSocketType.Douille, // LampSocketType
+			LampSocketDescriptor desc = new LampSocketDescriptor(name,new LampSocketStandardObjRender(obj.getObj("ClassicLampSocket"),false),
+					 LampSocketType.Douille, // LampSocketType
 																	// socketType
 					4, 0, 0, 0);
 
@@ -1279,8 +1281,8 @@ public class Eln {
 
 			name = "Lamp socket B projector";
 
-			LampSocketDescriptor desc = new LampSocketDescriptor(name,
-					obj.getObj("ClassicLampSocket"),false, LampSocketType.Douille, // LampSocketType
+			LampSocketDescriptor desc = new LampSocketDescriptor(name,new LampSocketStandardObjRender(obj.getObj("ClassicLampSocket"),false),
+					 LampSocketType.Douille, // LampSocketType
 																	// socketType
 					10, -90, 90, 0);
 
@@ -1292,8 +1294,8 @@ public class Eln {
 
 			name = "Robust lamp socket";
 
-			LampSocketDescriptor desc = new LampSocketDescriptor(name,
-					obj.getObj("RobustLamp"),true, LampSocketType.Douille, // LampSocketType
+			LampSocketDescriptor desc = new LampSocketDescriptor(name,new LampSocketStandardObjRender(obj.getObj("RobustLamp"),true),
+					LampSocketType.Douille, // LampSocketType
 																	// socketType
 					0, 0, 0, 0);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1304,11 +1306,47 @@ public class Eln {
 
 			name = "Street light";
 
-			LampSocketDescriptor desc = new LampSocketDescriptor(name,
-					obj.getObj("StreetLight"),true, LampSocketType.Douille, // LampSocketType
+			LampSocketDescriptor desc = new LampSocketDescriptor(name,new LampSocketStandardObjRender(obj.getObj("StreetLight"),true),
+					LampSocketType.Douille, // LampSocketType
 																	// socketType
 					0, 0, 0, 0);
 			desc.setPlaceDirection(Direction.YN);
+			GhostGroup g = new GhostGroup();
+			g.addElement(1, 0, 0);
+			g.addElement(2, 0, 0);
+			desc.setGhostGroup(g);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		
+		{
+			subId = 12;
+
+			name = "Suspended lamp socket";
+
+			LampSocketDescriptor desc = new LampSocketDescriptor(name,
+					new LampSocketSuspendedObjRender(obj.getObj("RobustLampSuspended"),true,3),
+					LampSocketType.Douille, // LampSocketType
+																	// socketType
+					0, 0, 0, 0);
+			desc.setPlaceDirection(Direction.YP);
+		/*	GhostGroup g = new GhostGroup();
+			g.addElement(1, 0, 0);
+			g.addElement(2, 0, 0);
+			desc.setGhostGroup(g);*/
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		
+		{
+			subId = 13;
+
+			name = "Long suspended lamp socket";
+
+			LampSocketDescriptor desc = new LampSocketDescriptor(name,
+					new LampSocketSuspendedObjRender(obj.getObj("RobustLampSuspended"),true,7),
+					LampSocketType.Douille, // LampSocketType
+																	// socketType
+					3, 0, 0, 0);
+			desc.setPlaceDirection(Direction.YP);
 			GhostGroup g = new GhostGroup();
 			g.addElement(1, 0, 0);
 			g.addElement(2, 0, 0);
