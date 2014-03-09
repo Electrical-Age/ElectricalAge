@@ -34,12 +34,15 @@ public class ConsoleListener extends CommandBase{
 			SaveConfig.instance.batteryAging = (!astring[1].equals("0"));
 			SaveConfig.instance.electricalLampAging = (!astring[1].equals("0"));
 			SaveConfig.instance.heatFurnaceFuel = (!astring[1].equals("0"));
-		}else if(a.equals("lampAging")){
+		}else if(a.equals("lampaging")){
 			SaveConfig.instance.electricalLampAging = (!astring[1].equals("0"));
-		}else if(a.equals("batteryAging")){
+		}else if(a.equals("batteryaging")){
 			SaveConfig.instance.batteryAging = (!astring[1].equals("0"));
-		}else if(a.equals("heatFurnaceFuel")){
+		}else if(a.equals("heatfurnacefuel")){
 			SaveConfig.instance.heatFurnaceFuel = (!astring[1].equals("0"));	
+		}else if(a.equals("newwind")){
+			Eln.wind.newWindTarget();
+			System.out.println("newWind : " + Eln.wind.getTargetNotFiltred());
 		}
 	}
 

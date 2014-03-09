@@ -346,7 +346,7 @@ public class LampSocketProcess implements IProcess , INBTTReady/*,LightBlockObse
 		boolean exit = false;
 		if(lbCoord.getBlockExist() == false) return;
 		Vec3 vv = Vec3.createVectorHelper(1,0,0);
-		Vec3 vp = Vec3.createVectorHelper(myCoord().x + 0.5,myCoord().y + 0.5,myCoord().z + 0.5);
+		Vec3 vp = Utils.getVec05(myCoord());
 		
 		vv.rotateAroundZ((float) (alphaZ*Math.PI/180.0));
 

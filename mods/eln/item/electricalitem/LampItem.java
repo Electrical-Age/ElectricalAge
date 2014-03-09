@@ -16,7 +16,7 @@ public abstract class LampItem extends GenericItemUsingDamageDescriptor{
 		// TODO Auto-generated constructor stub
 	}
 	
-	abstract boolean getPowerOn(ItemStack stack);
+	abstract int getLightState(ItemStack stack);
 	abstract int getRange(ItemStack stack);
 	abstract int getLight(ItemStack stack);
 	
@@ -24,7 +24,7 @@ public abstract class LampItem extends GenericItemUsingDamageDescriptor{
 	public void onUpdate(ItemStack stack, World world, Entity entity, int par4,
 			boolean par5) {
 		if(world.isRemote) return;
-		if(getPowerOn(stack) == false) return;
+		if(getLightState(stack) == 0 ) return;
 		int light = getLight(stack);
 		if(light == 0) return;
 		
@@ -55,7 +55,7 @@ public abstract class LampItem extends GenericItemUsingDamageDescriptor{
 			int blockId = world.getBlockId((int)x, (int)y, (int)z);
 			if(blockId == 0 || blockId == Eln.instance.lightBlockId){
 				//break;
-				LightBlockEntity.addLight(world, (int)x, (int)y, (int)z, light,3);
+				LightBlockEntity.addLight(world, (int)x, (int)y, (int)z, light,10);
 				break;/*
 				x-=v.xCoord*4;
 				y-=v.yCoord*4;

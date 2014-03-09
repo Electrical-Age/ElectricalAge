@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.oredict.OreDictionary;
 
 public class RecipesList {
 	public static ArrayList<RecipesList> listOfList = new ArrayList<RecipesList>();
@@ -43,7 +44,7 @@ public class RecipesList {
 		for(Recipe r : recipeList)
 		{
 			for(ItemStack stack : r.getOutputCopy()){
-				if(stack.itemID == output.itemID && stack.getItemDamage() == output.getItemDamage()){
+				if(Utils.areSame(stack,output)){
 					list.add(r);
 					break;
 				}

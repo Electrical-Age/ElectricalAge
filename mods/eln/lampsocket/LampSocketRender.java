@@ -112,7 +112,7 @@ public class LampSocketRender extends SixNodeElementRender{
 
 			
 			if(tileEntity.worldObj.getSavedLightValue(EnumSkyBlock.Sky, tileEntity.xCoord,tileEntity.yCoord,tileEntity.zCoord) > 3){
-				float weather = (float) Utils.getWeather(tileEntity.worldObj);
+				float weather = (float) Utils.getWeather(tileEntity.worldObj)*0.9f+0.1f;
 		
 				weatherAlphaY += (0.0-Math.random())*dt*Math.PI/0.5*weather;
 				weatherAlphaZ += (0.0-Math.random())*dt*Math.PI/0.5*weather;
@@ -213,6 +213,6 @@ public class LampSocketRender extends SixNodeElementRender{
 	
 	@Override
 	public boolean cameraDrawOptimisation() {
-		return ! descriptor.hasGhostGroup();
+		return descriptor.cameraOpt;
 	}
 }

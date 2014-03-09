@@ -78,6 +78,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.oredict.OreDictionary;
 
 
 public class Utils {
@@ -461,10 +462,10 @@ public class Utils {
     
     public static double getWind(World world,int y)
     {
-    	float factor = 1f;
-    	if(world.isRaining()) factor *= 1.2;
-    	if(world.isThundering()) factor *= 1.25;
-    	return Math.max(0.0,(Math.cos(world.getCelestialAngleRadians(0)*2)*5 + 4 + y/20.0)*factor);
+    	float factor = 1f + world.getRainStrength(0)*0.2f + world.getWeightedThunderStrength(0)*0.2f;
+    	/*if(world.isRaining()) factor *= 1.2;
+    	if(world.isThundering()) factor *= 1.25;*/
+	    return Math.max(0.0,Eln.instance.wind.getWind(y)*factor + world.getRainStrength(0)*1f + world.getWeightedThunderStrength(0)*2f);
     }
     
     public static void dropItem(ItemStack itemStack,int x,int y,int z,World world)
@@ -1167,6 +1168,17 @@ public class Utils {
 	public static float modbusToFloat(short first,short second) {
 		int bit = ((((int)first)&0xFFFF) << 16) + (((int)second)&0xFFFF);
 		return Float.intBitsToFloat(bit);
+	}
+
+	public static boolean areSame(ItemStack stack, ItemStack output) {
+		// TODO Auto-generated method stub
+		return (stack.itemID == output.itemID && stack.getItemDamage() == output.getItemDamage())
+				|| (OreDictionary.getOreID(stack) == OreDictionary.getOreID(output) && OreDictionary.getOreID(output) != -1);
+	}
+
+	public static Vec3 getVec05(Coordonate c) {
+		// TODO Auto-generated method stub
+		return Vec3.createVectorHelper(c.x + (c.x < 0 ? -1 : 1) * 0.5,c.y + (c.y < 0 ? -1 : 1) * 0.5,c.z + (c.z < 0 ? -1 : 1) * 0.5);
 	}
     
        

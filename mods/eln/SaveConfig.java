@@ -21,6 +21,8 @@ public class SaveConfig extends WorldSavedData{
 		heatFurnaceFuel = nbt.getBoolean("heatFurnaceFuel");
 		electricalLampAging = nbt.getBoolean("electricalLampAging");
 		batteryAging = nbt.getBoolean("batteryAging");
+		
+		Eln.wind.readFromNBT(nbt, "wind");
 	}
 
 	@Override
@@ -29,6 +31,8 @@ public class SaveConfig extends WorldSavedData{
 		nbt.setBoolean("heatFurnaceFuel", heatFurnaceFuel);
 		nbt.setBoolean("electricalLampAging", electricalLampAging);
 		nbt.setBoolean("batteryAging", batteryAging);
+		
+		Eln.wind.writeToNBT(nbt, "wind");
 	}
 	@Override
 	public boolean isDirty() {

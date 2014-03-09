@@ -124,7 +124,7 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 		
 		
 
-		
+		localWind = 0;
 		double P = 0;
 		double wind = getWind();
 		

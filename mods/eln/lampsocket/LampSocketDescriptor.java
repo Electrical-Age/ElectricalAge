@@ -38,6 +38,10 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 
 	}
 
+	boolean noCameraOpt(){
+		return cameraOpt;
+	}
+	public boolean cameraOpt = true;
 	public void setParent(net.minecraft.item.Item item, int damage)
 	{
 		super.setParent(item, damage);
@@ -63,22 +67,8 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		// TODO Auto-generated method stub
-		if(type == ItemRenderType.INVENTORY){
-			if(hasGhostGroup()){
-				GL11.glScalef(0.5f, 0.5f, 0.5f);
-				GL11.glRotatef(90, 0, -1, 0);
-				GL11.glTranslatef(-1.5f,0f, 0f);
-			}
-			
-		}
-		else if(type == ItemRenderType.EQUIPPED_FIRST_PERSON){
-			if(hasGhostGroup()){
-				GL11.glScalef(0.3f, 0.3f, 0.3f);
-				GL11.glRotatef(90, 0, -1, 0);
-				GL11.glTranslatef(-0.5f,0f, -1f);
-			}
-		}
-		render.draw(this);
+
+		render.draw(this,type);
 	}
 
 	@Override

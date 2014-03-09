@@ -3,7 +3,9 @@ package mods.eln.solarpannel;
 import org.lwjgl.Sys;
 
 import mods.eln.misc.Coordonate;
+import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class SolarPannelSlowProcess implements IProcess {
@@ -49,7 +51,8 @@ public class SolarPannelSlowProcess implements IProcess {
 
 		
 		Coordonate coordonate = solarPannel.node.coordonate;
-		double x = coordonate.x + 0.5 + solarPannel.descriptor.solarOffsetX,y = coordonate.y + 0.5 + solarPannel.descriptor.solarOffsetY,z = coordonate.z + 0.5 + solarPannel.descriptor.solarOffsetZ;
+		Vec3 v = Utils.getVec05(coordonate);
+		double x = v.xCoord +  solarPannel.descriptor.solarOffsetX,y = v.yCoord + solarPannel.descriptor.solarOffsetY,z = v.zCoord + solarPannel.descriptor.solarOffsetZ;
 		World world = coordonate.world();
 
 		double lightAlpha = solarPannel.pannelAlpha - solarAlpha;

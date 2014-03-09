@@ -22,22 +22,26 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 
 	public ElectricalLampItem(
 			String name,
-			int light,int range,
-			double energyStorage,double dischargePower,double chargePower
+			int lightMin,int rangeMin,double dischargeMin,int lightMax,int rangeMax,double dischargeMax,
+			double energyStorage,double chargePower
 			
 			) {
 		super(name);
-		this.light = light;
-		this.range = range;
+		this.lightMin = lightMin;
+		this.rangeMin = rangeMin;
+		this.lightMax = lightMax;
+		this.rangeMax = rangeMax;
 		this.chargePower = chargePower;
-		this.dischargePower = dischargePower;
+		this.dischargeMin = dischargeMin;
+		this.dischargeMax = dischargeMax;
 		this.energyStorage = energyStorage;
 		on = new ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + "on.png");
 		off = new ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + "off.png");
 	//	off = new ResourceLocation("eln", "/model/StoneFurnace/all.png");
 	}
-	int light,range;
-	double energyStorage, dischargePower, chargePower;
+	int lightMin,rangeMin;
+	int lightMax,rangeMax;
+	double energyStorage, dischargeMin,dischargeMax, chargePower;
 
 	ResourceLocation on,off;
 	@Override
@@ -51,15 +55,25 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	@Override
 	int getRange(ItemStack stack) {
 		// TODO Auto-generated method stub
-		return range;
+		return getLightState(stack) == 1 ? rangeMin : rangeMax;
 	}
 	
 	@Override
 	int getLight(ItemStack stack) {
 		double energy = getEnergy(stack);
-		if(energy > dischargePower*0.05){
-			setEnergy(stack, energy - dischargePower*0.05);
-			return light;
+		int state = getLightState(stack);
+		double power = 0;
+		switch (state) {
+		case 1:
+			power = dischargeMin*0.05;
+			break;
+		case 2:
+			power = dischargeMax*0.05;
+			break;
+		}
+		if(energy > power){
+			setEnergy(stack, energy - power);
+			return getLightLevel(stack);
 		}
 		else{
 			setEnergy(stack,0);
@@ -78,28 +92,43 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	
 
 	
-	boolean getPowerOn(ItemStack stack)
+	int getLightState(ItemStack stack)
 	{
-		return getNbt(stack).getBoolean("powerOn");
+		return getNbt(stack).getInteger("LightState");
 	}
-	void setPowerOn(ItemStack stack,boolean value)
+	void setLightState(ItemStack stack,int value)
 	{
-		getNbt(stack).setBoolean("powerOn",value);
+		getNbt(stack).setInteger("LightState",value);
 	}
 	
-
+	int getLightLevel(ItemStack stack)
+	{
+		return getLightState(stack) == 1 ? lightMin : lightMax;
+	}
 	
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int par4,
 			boolean par5) {
 		
 		if(world.isRemote == false && entity instanceof EntityPlayer && ((EntityPlayer) entity).inventory.getCurrentItem() == stack && Eln.playerManager.get((EntityPlayer) entity).getInteractRise()){
-			boolean status = ! getPowerOn(stack);
-			if(status)
-				((EntityPlayer) entity).addChatMessage("Flashlight ON");
-			else
+			int lightState = getLightState(stack) + 1;
+			if(lightState > 1) lightState = 0;
+			//((EntityPlayer) entity).addChatMessage("Flashlight !!!");
+			switch (lightState) {
+			case 0:
 				((EntityPlayer) entity).addChatMessage("Flashlight OFF");
-			setPowerOn(stack, status);
+				break;
+			case 1:
+				((EntityPlayer) entity).addChatMessage("Flashlight ON");
+				break;
+			case 2:
+				((EntityPlayer) entity).addChatMessage("Flashlight ON-2");
+				break;
+
+			default:
+				break;
+			}
+			setLightState(stack, lightState);
 		}
 		super.onUpdate(stack, world, entity, par4, par5);
 	}
@@ -112,7 +141,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
 		list.add(Utils.plotEnergy("Energy stored", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
-		list.add("Power button is " + (getPowerOn(itemStack) ? "ON" : "OFF"));
+		list.add("Power button is " + (getLightState(itemStack) != 0 ? "ON" : "OFF"));
 	}
 /*
 	@Override
@@ -182,6 +211,6 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {		
 		if(type == ItemRenderType.INVENTORY)		
 			Utils.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
-		Utils.drawIcon(type,(getPowerOn(item) ? on : off));
+		Utils.drawIcon(type,(getLightState(item) != 0? on : off));
 	}
 }

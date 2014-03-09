@@ -26,7 +26,7 @@ public class Recipe {
 	public boolean canBeCraftedBy(ItemStack stack)
 	{
 		if(stack == null) return false;
-		return input.stackSize <= stack.stackSize && input.getItem() == stack.getItem() && input.getItemDamage() == stack.getItemDamage();
+		return input.stackSize <= stack.stackSize && Utils.areSame(stack, input);
 	}
 	
 	public ItemStack[] getOutputCopy()
