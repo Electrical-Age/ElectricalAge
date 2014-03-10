@@ -130,14 +130,14 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	public String multiMeterString(Direction side) {
 	//	if(side == front)return  Utils.plotVolt("U+", positiveLoad.Uc );
 	//	if(side == front.back() && ! grounded)return  Utils.plotVolt("U-", negativeLoad.Uc );
-		return  Utils.plotVolt("Ubat", batteryProcess.getU()) + Utils.plotAmpere("Output current",batteryProcess.dischargeCurrentMesure);
+		return  Utils.plotVolt("Ubat:", batteryProcess.getU()) + Utils.plotAmpere("Current Output:",batteryProcess.dischargeCurrentMesure);
 	}
 
 
 	@Override
 	public String thermoMeterString(Direction side) {
 		// TODO Auto-generated method stub
-		return  Utils.plotCelsius("Tbat",thermalLoad.Tc);
+		return  Utils.plotCelsius("Tbat:",thermalLoad.Tc);
 	}
 	
 

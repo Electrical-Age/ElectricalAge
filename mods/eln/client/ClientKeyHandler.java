@@ -29,7 +29,7 @@ public class ClientKeyHandler extends KeyHandler {
 	static final String stuffInteractA = "stuffInteractA";
 	static final String stuffInteractB = "stuffInteractB++";
 	static final String interact = "ElnInteract";
-	static final String openWiki = "Open wiki";
+	static final String openWiki = "Open Wiki";
 	
 
 	

@@ -169,10 +169,10 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 		
 		if(signalWire){
 			list.add("This cable is adapted to");
-			list.add("transporte signals quickly");
-			list.add("A signal is a electrical information");
-			list.add("That must be between 0V and " + Eln.SVU + "V");
-			list.add("Don't try transporte power");
+			list.add("transport signals quickly.");
+			list.add("A signal is electrical information");
+			list.add("that must be between 0V and " + Eln.SVU + "V.");
+			list.add("Don't try to transport power.");
 			
 			
 			String lol = "";
@@ -192,7 +192,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 		else 
 		{
 			list.add(Utils.plotOhm("Serial resistor :",electricalNominalRs*2));
-			list.add("low resistor => low power lost");
+			list.add("Low resistor => low power lost");
 			list.add("Nominal usage ->");
 			list.add("  Voltage : " + (int)electricalNominalVoltage + " V");
 			list.add("  Current : " + (int)(electricalNominalPower/electricalNominalVoltage) + " A");

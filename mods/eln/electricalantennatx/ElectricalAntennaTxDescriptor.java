@@ -119,6 +119,6 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor{
 		list.add(Utils.plotVolt(" U :", electricalNominalVoltage));
 		list.add(Utils.plotPower(" P :", electricalNominalPower));
 		list.add("Range : " + rangeMax + " Blocks");
-		list.add("efficiency : " + (int)(electricalPowerRatioEffEnd*100) + "% to " + (int)(electricalPowerRatioEffStart*100) + "%" );
+		list.add("Efficiency : " + (int)(electricalPowerRatioEffEnd*100) + "% to " + (int)(electricalPowerRatioEffStart*100) + "%" );
 	}
 }
