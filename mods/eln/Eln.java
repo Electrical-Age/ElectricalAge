@@ -422,6 +422,11 @@ public class Eln {
 
 	public static Obj3DFolder obj = new Obj3DFolder();
 
+	public static boolean genCooper,genPlumb,genTungsten,genCinnabar;
+
+
+
+
 	@PreInit
 	public void preInit(FMLPreInitializationEvent event) {
 		/*float v = 0;
@@ -500,7 +505,11 @@ public class Eln {
 
 
 		
-		
+		genCooper = config.get("mapGenerate","cooper",true).getBoolean(true);
+		genPlumb = config.get("mapGenerate","plumb",true).getBoolean(true);
+		genTungsten = config.get("mapGenerate","tungsten",true).getBoolean(true);
+		genCinnabar = config.get("mapGenerate","cinnabar",true).getBoolean(true);
+
 		
 		electricalOverSampling = config.get("Simulator", "ElectricalHz", 8000)
 				.getInt() / commonOverSampling / 20;
@@ -2840,7 +2849,7 @@ public class Eln {
 																// String
 																// name,int
 																// metadata,
-					30, 6, 10, 0, 80 // int spawnRate,int spawnSizeMin,int
+					30 * (genCooper ? 1 : 0), 6, 10, 0, 80 // int spawnRate,int spawnSizeMin,int
 										// spawnSizeMax,int spawnHeightMin,int
 										// spawnHeightMax
 			);
@@ -2887,7 +2896,7 @@ public class Eln {
 																// String
 																// name,int
 																// metadata,
-					8, 3, 9, 0, 24 // int spawnRate,int spawnSizeMin,int
+					8 * (genPlumb ? 1 : 0), 3, 9, 0, 24 // int spawnRate,int spawnSizeMin,int
 										// spawnSizeMax,int spawnHeightMin,int
 										// spawnHeightMax
 			);
@@ -2902,7 +2911,7 @@ public class Eln {
 																// String
 																// name,int
 																// metadata,
-					4, 3, 9, 0, 32 // int spawnRate,int spawnSizeMin,int
+					4 * (genTungsten ? 1 : 0), 3, 9, 0, 32 // int spawnRate,int spawnSizeMin,int
 										// spawnSizeMax,int spawnHeightMin,int
 										// spawnHeightMax
 			);
@@ -2917,7 +2926,7 @@ public class Eln {
 																// String
 																// name,int
 																// metadata,
-					3, 3, 9, 0, 32 // int spawnRate,int spawnSizeMin,int
+					3 * (genCinnabar ? 1 : 0), 3, 9, 0, 32 // int spawnRate,int spawnSizeMin,int
 										// spawnSizeMax,int spawnHeightMin,int
 										// spawnHeightMax
 			);
