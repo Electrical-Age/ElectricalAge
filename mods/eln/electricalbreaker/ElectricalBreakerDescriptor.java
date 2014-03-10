@@ -96,8 +96,8 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Protect other electrical component");
-		list.add("Cut off when");
+		list.add("Protects other electrical components");
+		list.add("Cut off when:");
 		list.add("- Voltage reach a defined level");
 		list.add("- Current reach the cable limit");
 	}

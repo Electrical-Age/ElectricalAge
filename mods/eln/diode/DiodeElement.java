@@ -120,13 +120,13 @@ public class DiodeElement extends SixNodeElement implements IThermalDestructorDe
 	@Override
 	public String multiMeterString() {
 		// TODO Auto-generated method stub
-		return Utils.plotVolt("U+", anodeLoad.Uc) + Utils.plotVolt("U-", catodeLoad.Uc) + Utils.plotAmpere("I", anodeLoad.getCurrent()) ;
+		return Utils.plotVolt("U+:", anodeLoad.Uc) + Utils.plotVolt("U-:", catodeLoad.Uc) + Utils.plotAmpere("I:", anodeLoad.getCurrent()) ;
 	}
 
 	@Override
 	public String thermoMeterString() {
 		// TODO Auto-generated method stub
-		return Utils.plotCelsius("T",thermalLoad.Tc);
+		return Utils.plotCelsius("T:",thermalLoad.Tc);
 	}
 
 
