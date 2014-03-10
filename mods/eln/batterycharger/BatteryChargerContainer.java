@@ -27,7 +27,7 @@ public class BatteryChargerContainer extends BasicContainer {
 	{
 
 		public BatterySlot(IInventory par1iInventory, int slot, int x,int y) {
-			super(par1iInventory, slot, x, y, SlotSkin.medium, new String[]{"Battery slot"});
+			super(par1iInventory, slot, x, y, SlotSkin.medium, new String[]{"Battery Slot"});
 			// TODO Auto-generated constructor stub
 		}
 		
@@ -58,7 +58,7 @@ public class BatteryChargerContainer extends BasicContainer {
 				new GenericItemUsingDamageSlot(inventory,boosterSlotId,80-18,6+18/2,5,
 						MachineBoosterDescriptor.class,
 						SlotSkin.medium,
-						new String[]{"Booster slot"})
+						new String[]{"Booster Slot"})
 			});
 		
 		// TODO Auto-generated constructor stub

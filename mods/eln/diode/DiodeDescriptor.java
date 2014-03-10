@@ -68,8 +68,8 @@ public class DiodeDescriptor extends SixNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("The current can run only");
-		list.add("in a single way");
+		list.add("The current can only run");
+		list.add("one way");
 	
 	}
 }

@@ -132,7 +132,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 	@Override
 	public String multiMeterString() {
 		// TODO Auto-generated method stub
-		return Utils.plotVolt("Ua", aLoad.Uc) + Utils.plotVolt("Ub", bLoad.Uc) + Utils.plotVolt("I", aLoad.getCurrent()) ;
+		return Utils.plotVolt("Ua:", aLoad.Uc) + Utils.plotVolt("Ub:", bLoad.Uc) + Utils.plotVolt("I:", aLoad.getCurrent()) ;
 	}
 
 	@Override
