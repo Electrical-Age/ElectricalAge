@@ -99,6 +99,7 @@ import mods.eln.item.electricalitem.ElectricalLampItem;
 import mods.eln.item.electricalitem.ElectricalPickaxe;
 import mods.eln.item.electricalitem.ElectricalTool;
 import mods.eln.item.electricalitem.LampItem;
+import mods.eln.item.electricalitem.PortableOreScannerItem;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
@@ -679,7 +680,7 @@ public class Eln {
 		registerBrush(119);
 		registerMiscItem(120);
 		registerElectricalTool(121);
-		registerBatteryItem(122);
+		registerPortableItem(122);
 
 		
 		recipeArmor();
@@ -3421,6 +3422,7 @@ public class Eln {
 			GameRegistry.registerCustomItemStack(name, stack.copy());
 		}		
 	
+	
 
 	}
 	//public static int swordCopperId,hoeCopperId,shovelCopperId,pickaxeCopperId,axeCopperId;
@@ -4118,7 +4120,7 @@ public class Eln {
 	}
 	
 	
-	void registerBatteryItem(int id) {
+	void registerPortableItem(int id) {
 		int subId, completId;
 		String name;
 		{
@@ -4167,7 +4169,20 @@ public class Eln {
 					);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}	
+	
 		
+		{
+			subId = 32;
+			name = "Portable ore scanner";
+			
+			PortableOreScannerItem desc = new PortableOreScannerItem(
+					name,
+					15000,6000,1500,//double energyStorage,double chargePower,double dischargePower, 
+					10,(float) (Math.PI/2),//float viewRange,float viewYAlpha,
+					32,32//int resWidth,int resHeight
+					);
+			sharedItem.addElement(subId + (id << 6), desc);
+		}	
 	}
 
 	void registerMiscItem(int id) {

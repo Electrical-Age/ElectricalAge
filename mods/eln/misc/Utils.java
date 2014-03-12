@@ -1180,7 +1180,15 @@ public class Utils {
 		// TODO Auto-generated method stub
 		return Vec3.createVectorHelper(c.x + (c.x < 0 ? -1 : 1) * 0.5,c.y + (c.y < 0 ? -1 : 1) * 0.5,c.z + (c.z < 0 ? -1 : 1) * 0.5);
 	}
-    
+
+	public static void disableTexture() {
+		// TODO Auto-generated method stub
+		GL11.glDisable(GL11.GL_TEXTURE_2D);	
+	}
+	public static void enableTexture() {
+		// TODO Auto-generated method stub
+		GL11.glEnable(GL11.GL_TEXTURE_2D);	
+	} 
        
     
 
