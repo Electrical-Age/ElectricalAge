@@ -128,7 +128,7 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 	@Override
 	public String multiMeterString() {
 		// TODO Auto-generated method stub
-		return inputGate.plot("input") + outputGate.plot("output");
+		return inputGate.plot("Input:") + outputGate.plot("Output:");
 	}
 
 	@Override

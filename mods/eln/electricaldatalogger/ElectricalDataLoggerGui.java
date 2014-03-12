@@ -44,7 +44,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	
 	void displayEntry()
 	{
-		config.displayString = "config";
+		config.displayString = "Config";
 		config.drawButton = true;
 		pause.drawButton = true;
 		resetBt.drawButton = true;
@@ -67,7 +67,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 
 		pause.drawButton = false;
 		config.drawButton = true;
-		config.displayString = "return to display";
+		config.displayString = "Return to Display";
 		resetBt.drawButton = false;
 		printBt.drawButton = true;
 		voltageType.drawButton = true;
@@ -94,7 +94,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 		powerType = newGuiButton( 176/2-60-2, 8+40+4-2,60,  "Power");
 		celsuisTyp = newGuiButton( 176/2+2, 8+40+4-2,60,  "Celsuis");
 		percentTyp = newGuiButton( 176/2-60-2, 8+60+6-2,60,  "Percent");
-		energyType = newGuiButton( 176/2+2, 8+60+6-2,60,  "energy");
+		energyType = newGuiButton( 176/2+2, 8+60+6-2,60,  "Energy");
 		config = newGuiButton( 176/2-50, 8-2,100, "");
 		printBt = newGuiButton( 176/2-48/2, 123,48, "Print");
 		pause = newGuiButton( 176/2 + 2, 8+20+2-2,48,"");
@@ -106,11 +106,11 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
         
         maxValue = newGuiTextField( 176 - 50 - 30, 101-7, 50);
         maxValue.setText(render.log.maxValue);
-        maxValue.setComment(new String[]{"Y axis max"});
+        maxValue.setComment(new String[]{"Y-axis Max"});
         
         minValue = newGuiTextField( 176 - 50 - 30, 101+8, 50);
         minValue.setText(render.log.minValue);
-        minValue.setComment(new String[]{"Y axe min"});
+        minValue.setComment(new String[]{"Y-axis Min"});
        
 
         displayEntry();

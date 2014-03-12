@@ -81,7 +81,7 @@ public class ElectricalRedstoneOutputDescriptor extends SixNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Convert voltage signal");
-		list.add("to redstone signal");
+		list.add("Converts voltage signal");
+		list.add("to redstone signal.");
 	}
 }

@@ -50,9 +50,9 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("When the input signal is high,");
-		list.add("maintains high output signal");
-		list.add("for a defined time");
+		list.add("When the input signal is high this");
+		list.add("maintains a high output signal");
+		list.add("for a defined time.");
 				
 	}	
 	@Override

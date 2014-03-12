@@ -82,7 +82,7 @@ public class ElectricalWeatherSensorElement extends SixNodeElement{
 	@Override
 	public String multiMeterString() {
 		// TODO Auto-generated method stub
-		return Utils.plotVolt("U", outputGate.Uc) + Utils.plotAmpere("I", outputGate.getCurrent()) ;
+		return Utils.plotVolt("U:", outputGate.Uc) + Utils.plotAmpere("I:", outputGate.getCurrent()) ;
 	}
 
 	@Override

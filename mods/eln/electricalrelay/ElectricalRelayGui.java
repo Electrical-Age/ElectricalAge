@@ -53,9 +53,9 @@ public class ElectricalRelayGui extends GuiScreenEln{
 		// TODO Auto-generated method stub
 		super.preDraw(f, x, y);
 		if(render.defaultOutput)
-			toogleDefaultOutput.displayString = "default output is high";
+			toogleDefaultOutput.displayString = "Default output: High";
 		else
-			toogleDefaultOutput.displayString = "default output is low";
+			toogleDefaultOutput.displayString = "Default output: Low";
 	}
 	@Override
 	protected GuiHelper newHelper() {

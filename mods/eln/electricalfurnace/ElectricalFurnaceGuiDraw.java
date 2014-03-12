@@ -67,7 +67,7 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     	vuMeterTemperature.setEnable(true);
     	vuMeterTemperature.setRange(0,800);
     	vuMeterTemperature.setComment(new String[]{
-    			"temperature gauge"
+    			"Temperature Gauge"
     			});
     	syncVumeter();
     	
@@ -94,9 +94,9 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     	
     	if( render.autoShutDown){
     		buttonGrounded.enabled = false;
-    		autoShutDown.displayString = "Auto shutdown";
+    		autoShutDown.displayString = "Auto Shutdown";
     	}else{
-    		autoShutDown.displayString = "Manual shutdown";
+    		autoShutDown.displayString = "Manual Shutdown";
     		buttonGrounded.enabled = true;
     	}
     	
@@ -104,8 +104,8 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
         vuMeterTemperature.temperatureHit = render.temperature;
         
         
-        vuMeterTemperature.setComment(1,"Current " + Utils.plotValue(render.temperature + PhysicalConstant.Tamb, "\u00B0C"));
-        vuMeterTemperature.setComment(2,"Target " + Utils.plotValue(vuMeterTemperature.getValue() + PhysicalConstant.Tamb, "\u00B0C"));
+        vuMeterTemperature.setComment(1,"Current: " + Utils.plotValue(render.temperature + PhysicalConstant.Tamb, "\u00B0C"));
+        vuMeterTemperature.setComment(2,"Target: " + Utils.plotValue(vuMeterTemperature.getValue() + PhysicalConstant.Tamb, "\u00B0C"));
     }
     
     @Override

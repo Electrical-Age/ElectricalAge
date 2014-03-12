@@ -124,13 +124,13 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
 	@Override
 	public String multiMeterString() {
 		// TODO Auto-generated method stub
-		return Utils.plotVolt("Ua", aLoad.Uc) + Utils.plotVolt("Ub", bLoad.Uc) + Utils.plotVolt("I", aLoad.getCurrent()) ;
+		return Utils.plotVolt("Ua:", aLoad.Uc) + Utils.plotVolt("Ub:", bLoad.Uc) + Utils.plotVolt("I:", aLoad.getCurrent()) ;
 	}
 
 	@Override
 	public String thermoMeterString() {
 		// TODO Auto-generated method stub
-		return Utils.plotCelsius("T",thermalLoad.Tc);
+		return Utils.plotCelsius("T:",thermalLoad.Tc);
 	}
 
 
