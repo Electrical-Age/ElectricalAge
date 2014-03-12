@@ -60,13 +60,14 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor{
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		if(dayLightOnly){
-			list.add("Provide electrical signal");
-			list.add("in function of day light");
-			list.add("0V the night, " + Eln.SVU + "V the midday");
+			list.add("Provides an electrical signal");
+			list.add("with strength proportional to");
+			list.add("the amount of daylight.");
+			list.add("0V at night, " + Eln.SVU + "V at midday.");
 		}
 		else{
-			list.add("Provide electrical signal");
-			list.add("in function of light");		
+			list.add("Provides an electrical signal");
+			list.add("whilst in the presense of light.");		
 		}
 	}
 	

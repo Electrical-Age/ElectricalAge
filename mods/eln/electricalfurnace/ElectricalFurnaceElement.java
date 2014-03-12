@@ -137,7 +137,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 	@Override
 	public String thermoMeterString(Direction side) {
 		// TODO Auto-generated method stub
-		return Utils.plotCelsius("T", thermalLoad.Tc);
+		return Utils.plotCelsius("T:", thermalLoad.Tc);
 	}
 
 	@Override

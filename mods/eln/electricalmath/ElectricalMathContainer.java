@@ -30,7 +30,7 @@ public class ElectricalMathContainer extends BasicContainer{
 	public static final int restoneSlotId = 0;
 	public ElectricalMathContainer(NodeBase node,EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new SlotFilter(inventory,restoneSlotId,125,25,64,new ItemStackFilter[]{new ItemStackFilter(Item.redstone)},SlotSkin.medium,new String[]{"Redstone slot"})
+				new SlotFilter(inventory,restoneSlotId,125,25,64,new ItemStackFilter[]{new ItemStackFilter(Item.redstone)},SlotSkin.medium,new String[]{"Redstone Slot"})
 				
 				
 			});

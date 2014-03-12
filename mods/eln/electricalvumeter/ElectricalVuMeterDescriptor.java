@@ -98,7 +98,7 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Display the value of a signal");
+		list.add("Displays the voltage of a signal.");
 	}
 	
 	@Override

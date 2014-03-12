@@ -168,7 +168,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 		if(descriptor.voltageOnly == false)
 			return Utils.plotUIP(aLoad.Uc, aLoad.getCurrent());
 		else
-			return Utils.plotVolt("Uin", aLoad.Uc) + Utils.plotVolt("Uout", outputGate.Uc);
+			return Utils.plotVolt("Uin:", aLoad.Uc) + Utils.plotVolt("Uout:", outputGate.Uc);
 
 	}
 	

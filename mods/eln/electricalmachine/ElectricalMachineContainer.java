@@ -32,7 +32,7 @@ public class ElectricalMachineContainer extends BasicContainer implements INodeC
 				new GenericItemUsingDamageSlot(inventory,boosterSlotId,20,12,5,
 												MachineBoosterDescriptor.class,
 												SlotSkin.medium,
-												new String[]{"Booster slot"}),
+												new String[]{"Booster Slot"}),
 				
 				
 			});

@@ -199,6 +199,6 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Can manualy cut off a line");
+		list.add("Can manually cut off a power line.");
 	}
 }

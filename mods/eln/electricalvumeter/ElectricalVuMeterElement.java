@@ -93,7 +93,7 @@ public class ElectricalVuMeterElement extends SixNodeElement{
 	@Override
 	public String multiMeterString() {
 		// TODO Auto-generated method stub
-		return Utils.plotVolt("U", inputGate.Uc) + Utils.plotAmpere("I", inputGate.getCurrent()) ;
+		return Utils.plotVolt("U:", inputGate.Uc) + Utils.plotAmpere("I:", inputGate.getCurrent()) ;
 	}
 
 	@Override

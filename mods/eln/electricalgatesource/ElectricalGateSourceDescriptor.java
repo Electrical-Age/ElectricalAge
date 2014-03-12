@@ -78,8 +78,8 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("A weak adjustable voltage source");
-		list.add("Provide signal voltage");
+		list.add("A weak adjustable voltage source.");
+		list.add("Provides signal voltage.");
 	}
 	enum ObjType {Pot,Button};
 	ObjType objType;

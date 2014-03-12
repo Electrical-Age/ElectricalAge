@@ -75,14 +75,14 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor{
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
 		if(voltageOnly){
-			list.add("In function of input voltage,");
-			list.add("give a output voltage signal");
+			list.add("When input voltage is within");
+			list.add("bounds set, outputs the voltage signal.");
 		}
 		else
 		{
-			list.add("In function of inputs,");
-			list.add("give a output voltage signal");
-			list.add("Can measure :");
+			list.add("When input voltage is within");
+			list.add("bounds set, outputs the voltage signal.");
+			list.add("Can measure:");
 			list.add("Voltage/Power/Current");
 		}
 	}

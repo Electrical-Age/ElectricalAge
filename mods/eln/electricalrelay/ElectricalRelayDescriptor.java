@@ -89,7 +89,7 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor{
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("The relay has the capability to");
 		list.add("conduct electricity or not,");
-		list.add("depending the input signal voltage");
+		list.add("depending on the input signal voltage.");
 	}
 	
 	@Override

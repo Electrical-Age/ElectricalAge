@@ -154,11 +154,11 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor{
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add("This bloc can measure signals");
+		list.add("This block can measure signals");
 		list.add("from 0V to 50V and plot");
-		list.add("a graphic with the signal");
-		list.add("evolution over time");
-		list.add("Store 256 sample");
+		list.add("a graph with the signal");
+		list.add("change over time.");
+		list.add("Can store 256 samples.");
 	}
 }
 

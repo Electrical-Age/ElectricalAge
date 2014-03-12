@@ -78,7 +78,7 @@ public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("A minecraft furnace equivalent");
-		list.add("But need electricity to work");
+		list.add("Equivalent to a vanilla furnace");
+		list.add("but needs electricity to work.");
 	}
 }

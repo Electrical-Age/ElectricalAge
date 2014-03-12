@@ -57,11 +57,11 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Provide electrical signal");
-		list.add("in function of wheater");
-		list.add("0V -> clear, ");
-		list.add(Eln.SVU/2 +"V -> rain, ");
-		list.add(Eln.SVU +"V -> thunder, ");
+		list.add("Provides an electrical signal");
+		list.add("dependant on weather type.");
+		list.add("0V -> clear ");
+		list.add(Eln.SVU/2 +"V -> rain ");
+		list.add(Eln.SVU +"V -> thunder ");
 	}
 	
 	
