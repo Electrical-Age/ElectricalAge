@@ -814,13 +814,13 @@ public class Utils {
 		if(halo == null) return;
 		halo.bindTexture();
 		Utils.enableBilinear();
-		float scale = distance*0.5f;
+		float scale = 1f;/*distance*0.5f;
 		if(scale > 1f) scale = 1f;
-		scale = scale *scale;
-		GL11.glPushMatrix();
-		GL11.glScalef(1f,scale,scale);
-		halo.drawNoBind(distance*5,1f,0f,0f);
-		GL11.glPopMatrix();
+		scale = scale *scale;*/
+		//GL11.glPushMatrix();
+		//GL11.glScalef(1f,scale,scale);
+		halo.drawNoBind();//distance*5,1f,0f,0f);
+		//GL11.glPopMatrix();
 	}
 	public static void drawHalo(Obj3DPart halo, float distance) {
 

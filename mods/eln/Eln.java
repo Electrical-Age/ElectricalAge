@@ -52,6 +52,7 @@ import mods.eln.electricalswitch.ElectricalSwitchDescriptor;
 import mods.eln.electricaltimout.ElectricalTimeoutDescriptor;
 import mods.eln.electricalvumeter.ElectricalVuMeterDescriptor;
 import mods.eln.electricalweathersensor.ElectricalWeatherSensorDescriptor;
+import mods.eln.electricalwindsensor.ElectricalWindSensorDescriptor;
 import mods.eln.electricasensor.ElectricalSensorDescriptor;
 import mods.eln.elnhttpserver.ElnHttpServer;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
@@ -247,7 +248,8 @@ public class Eln {
 	public static String channelName = "miaouMod";
 	
 	public static final String[] objNames = new String[]{
-		
+		 "/model/Anemometer/Anemometer.obj",
+		 "/model/XRayScanner/XRayScanner.obj",
 		 "/model/RobustLampSuspended/RobustLampSuspended.obj",
 		 "/model/activeThermalDissipatorA/activethermaldissipatora.obj",
 		 "/model/AlarmMedium/alarmmedium.obj",
@@ -1708,6 +1710,15 @@ public class Eln {
 				subId = 4;
 				name = "Electrical weather sensor";
 				desc = new ElectricalWeatherSensorDescriptor(name, obj.getObj("daylightsensor"));
+				sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			}
+		}
+		{
+			ElectricalWindSensorDescriptor desc;
+			{
+				subId = 8;
+				name = "Electrical anemometer sensor";
+				desc = new ElectricalWindSensorDescriptor(name, obj.getObj("daylightsensor"),25);
 				sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			}
 		}
@@ -4178,7 +4189,7 @@ public class Eln {
 			BatteryItem desc = new BatteryItem(
 					name,
 					15000,6000,1500,//double energyStorage,double chargePower,double dischargePower, 
-					1//int priority
+					1//int priority	
 					);
 			sharedItemStackOne.addElement(subId + (id << 6), desc);
 		}	
@@ -4189,10 +4200,10 @@ public class Eln {
 			name = "Portable ore scanner";
 			
 			PortableOreScannerItem desc = new PortableOreScannerItem(
-					name,
+					name,obj.getObj("XRayScanner"),
 					15000,6000,1500,//double energyStorage,double chargePower,double dischargePower, 
 					5,(float) (Math.PI/2),//float viewRange,float viewYAlpha,
-					48,48//int resWidth,int resHeight
+					32,20//int resWidth,int resHeight
 					);
 			sharedItemStackOne.addElement(subId + (id << 6), desc);
 		}	

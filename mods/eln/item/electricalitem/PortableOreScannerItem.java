@@ -29,6 +29,8 @@ import mods.eln.Eln;
 import mods.eln.PlayerManager;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
+import mods.eln.misc.Obj3D;
+import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.wiki.Data;
 
@@ -38,8 +40,10 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	
 
 	
+
+
 	public PortableOreScannerItem(
-			String name,
+			String name,Obj3D obj,
 			double energyStorage,double chargePower,double dischargePower,
 			float viewRange,float viewYAlpha,
 			int resWidth,int resHeight
@@ -53,11 +57,21 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		this.viewYAlpha = viewYAlpha;
 		this.resWidth = resWidth;
 		this.resHeight = resHeight;
+		this.obj = obj;
+		
+		if(obj != null){
+			base = obj.getPart("Base");
+			led = obj.getPart("Led");
+			ledHalo = obj.getPart("LedHalo");
+		}
 	}
 
 	double energyStorage, dischargePower, chargePower;
 	float viewRange, viewYAlpha;
 	int resWidth, resHeight;
+	private Obj3D obj;
+
+	Obj3DPart base,led,ledHalo;
 	
 	
 	
@@ -140,6 +154,10 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {		
 		if(type == ItemRenderType.INVENTORY)		
 			Utils.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
+		
+		
+		
+		
 		 
 		Object oRender = Eln.clientLiveDataManager.getData(item, 1);
 		if(oRender == null) oRender =  Eln.clientLiveDataManager.newData(item, new RenderStorage(viewRange,viewYAlpha,resWidth,resHeight), 1);
@@ -173,11 +191,26 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			render.generate(e.worldObj, e.posX, e.posY, e.posZ, e.rotationYaw * (float)Math.PI / 180.0F, e.rotationPitch * (float)Math.PI / 180.0F);
 		}
 		
+		
 		GL11.glPushMatrix();
-			float scale = 1f/resWidth;
+			GL11.glTranslatef(0, 1, 0);
+			GL11.glRotatef(90, 0, 0, 1);
+			GL11.glRotatef(40, 1, 0, 0);
+			GL11.glTranslatef(0.0f, 1, -0.2f);
+			base.draw();
+		
+			Utils.disableLight();
+			led.draw();
+			Utils.enableBlend();
+			ledHalo.draw();
+			Utils.disableBlend();
+			Utils.enableLight();
 			
-			GL11.glTranslatef(-1, 2, 0);
-			GL11.glRotatef(135+180, 0, 1, 0);
+			float scale = 1f/resWidth/2;
+			float p = 1/64f;
+			GL11.glTranslatef(0.9125f-p*1, 0.163f, -0.25625f+p*1.5f);
+			GL11.glRotatef(270, 1,0, 0);
+			GL11.glRotatef(270, 0,0, 1);
 			//GL11.glTranslatef(0, 1, 0);
 			GL11.glScalef(scale, -scale, 1);
 			render.draw();
