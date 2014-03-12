@@ -155,7 +155,8 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 	@Override
     public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float vx, float vy, float vz)
     {
-        return getDescriptor(stack).onItemUse(stack, player, world, x, y, z, side, vx, vy, vz);
+		GenericItemUsingDamageDescriptor d = getDescriptor(stack); if(d == null) return false;
+        return d.onItemUse(stack, player, world, x, y, z, side, vx, vy, vz);
     }
     
    
@@ -164,14 +165,15 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 	   if(world.isRemote){
 		   return;
 	   }
-	   getDescriptor(stack).onUpdate(stack, world, entity, par4, par5);
+	   GenericItemUsingDamageDescriptor d = getDescriptor(stack); if(d == null) return ;
+	   d.onUpdate(stack, world, entity, par4, par5);
    }
 
    @Override
    public float getStrVsBlock(ItemStack stack, Block block)
    {
-	  // return 6;
-	   return getDescriptor(stack).getStrVsBlock(stack, block);
+	   GenericItemUsingDamageDescriptor d = getDescriptor(stack); if(d == null) return 0.2f;
+	   return d.getStrVsBlock(stack, block);
    }
 
 
@@ -187,7 +189,8 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 	   if(w.isRemote){
 		   return false;
 	   }
-	   return getDescriptor(stack).onBlockDestroyed( stack,  w, blockId, x,  y,  z,  entity);
+	   GenericItemUsingDamageDescriptor d = getDescriptor(stack); if(d == null) return true;
+	   return d.onBlockDestroyed( stack,  w, blockId, x,  y,  z,  entity);
    }
    
 

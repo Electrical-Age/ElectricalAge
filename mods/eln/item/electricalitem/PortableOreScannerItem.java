@@ -5,7 +5,13 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.relauncher.Side;
+
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.achievement.GuiAchievement;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -29,7 +35,7 @@ import mods.eln.wiki.Data;
 public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor implements IItemEnergyBattery{
 
 
-
+	
 
 	
 	public PortableOreScannerItem(
@@ -52,6 +58,8 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	double energyStorage, dischargePower, chargePower;
 	float viewRange, viewYAlpha;
 	int resWidth, resHeight;
+	
+	
 	
 	@Override
 	public void setParent(Item item, int damage) {
@@ -132,19 +140,19 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {		
 		if(type == ItemRenderType.INVENTORY)		
 			Utils.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
-		
-		RenderStorage render = new RenderStorage(
-									viewRange,viewYAlpha,
-									resWidth,resHeight);
+		 
+		Object oRender = Eln.clientLiveDataManager.getData(item, 1);
+		if(oRender == null) oRender =  Eln.clientLiveDataManager.newData(item, new RenderStorage(viewRange,viewYAlpha,resWidth,resHeight), 1);
+		RenderStorage render = (RenderStorage) oRender;
 		
 		Entity e;
 		
 		switch (type) {
 		case ENTITY:
-			e = null;
+			e = null;//(Entity)data[1];
 			break;
 		case EQUIPPED:
-			e = null;
+			e = null;//(Entity)data[1];
 			break;
 		case EQUIPPED_FIRST_PERSON:
 			e = (Entity)data[1];
@@ -153,7 +161,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			e = null;
 			break;
 		case FIRST_PERSON_MAP:
-			e = null;
+			e = null;//(Entity)data[0];
 			break;
 	
 		default:
@@ -177,7 +185,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	}
 
 	
-	static class RenderStorage{
+	public static class RenderStorage{
 		public RenderStorage(float viewRange,float viewYAlpha,
 							int resWidth,int resHeight) {
 			this.viewRange = viewRange;
@@ -189,19 +197,52 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			this.worldBlocksDim2 = this.worldBlocksDim / 2 ;
 			screenRed = new float[resHeight][resWidth];
 			screenBlue = new float[resHeight][resWidth];
+			screenGreen = new float[resHeight][resWidth];
 			worldBlocks = new short[worldBlocksDim][worldBlocksDim][worldBlocksDim];
 		}
 		
 		float camDist;
 		float viewRange, viewYAlpha,viewXAlpha;
 		int resWidth, resHeight;
-		float[][] screenRed,screenBlue;
+		float[][] screenRed,screenBlue,screenGreen;
 		short[][][] worldBlocks;
 		int worldBlocksDim,worldBlocksDim2;
 		
+		static float[] blockKeyFactor;
+		float[] getBlockKeyFactor(){
+			if(blockKeyFactor == null){
+				blockKeyFactor = new float[1024*64];
+				for(int blockId = 0;blockId < 4096;blockId++){
+					Block block = Block.blocksList[blockId];
+					for(int meta = 0;meta < 16;meta++){
+						//if(block == null)
+							blockKeyFactor[blockId + (meta << 12)] = 0;
+						//else
+							//blockKeyFactor[blockId + (meta << 12)] = block.isOpaqueCube() ? 0.2f : 0;
+					}
+				}
+			}
+			
+			for(OreScannerConfigElement c : Eln.instance.oreScannerConfig){
+				blockKeyFactor[c.blockKey] = c.factor;
+			}
+			return blockKeyFactor;
+		}
+		
+		
+		public static class OreScannerConfigElement{
+			public OreScannerConfigElement(int blockKey,float factor){
+				this.blockKey = blockKey;
+				this.factor = factor;
+			}
+			
+			public int blockKey;
+			public float factor;
+		}
+		
 		void generate(	World w,double posX,double posY,double posZ,
 						float alphaY,float alphaX){
-			
+			float[] blockKeyFactor = getBlockKeyFactor();
 			long start = System.nanoTime();
 			
 			int posXint = (int)Math.round(posX);
@@ -261,7 +302,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 					
 
 					
-					float stackRed = 0,stackBlue = 0;
+					float stackRed = 0,stackBlue = 0,stackGreen = 0;
 					float d = 0;
 					while(d < viewRange){
 						float xFloor = MathHelper.floor_float(x);
@@ -280,8 +321,11 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 						int yInt = (int)yFloor + worldBlocksDim2;
 						int zInt = (int)zFloor + worldBlocksDim2;
 
-						short blockKey = worldBlocks[xInt][yInt][zInt];
-						if(blockKey == -1){
+						//short blockKey = (short) w.getBlockId(posXint + MathHelper.floor_float(x), posYint + MathHelper.floor_float(y), posZint + MathHelper.floor_float(z));;
+						int blockKey = worldBlocks[xInt][yInt][zInt];
+						if(blockKey < 0) blockKey += 65536;
+						if(blockKey == 65535){
+							//short blockKey;
 							///w.getBlockId(par1, par2, par3)
 							int xBlock = posXint + (int)xFloor;
 							int yBlock = posYint + (int)yFloor;
@@ -296,7 +340,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 										int yLocal = yBlock & 0xF;
 										int zLocal = zBlock & 0xF;
 										
-										blockKey = (short) (storage.getExtBlockID(xLocal, yLocal, zLocal) + (storage.getExtBlockMetadata(xLocal, yLocal, zLocal) << 12));
+										blockKey = (storage.getExtBlockID(xLocal, yLocal, zLocal) + (storage.getExtBlockMetadata(xLocal, yLocal, zLocal) << 12));
 									}
 								}
 							}
@@ -305,23 +349,33 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 						}
 						
 						
-						if(blockKey != 0){
-							if(blockKey != Block.dirt.blockID && blockKey != Block.stone.blockID)
-								if(d + dBest < viewRange)
-									stackRed += 0.1f*dBest;
-								else{
-									stackRed += 0.1f*(viewRange - d);
-									break;
-								}			
-						}
+						float dToStack;
+						if(d + dBest < viewRange)
+							dToStack = dBest;
 						else{
-							if(d + dBest < viewRange)
-								stackBlue += 0.03f*dBest;
-							else{
-								stackBlue += 0.03f*(viewRange - d);
-								break;
-							}	
-						}
+							dToStack = (viewRange - d);
+						}	
+						
+						
+						
+						//dToStack += ((float)Math.random()-0.5f) * 0.1f;
+												
+						/*if(blockKey != 0){
+							stackRed += 0.2f*dToStack;			
+							if(blockKey != Block.dirt.blockID && blockKey != Block.stone.blockID)
+								stackGreen += 0.2f*dToStack;		
+						}*/
+						
+						stackGreen += blockKeyFactor[blockKey]*dToStack;
+						Block b = Block.blocksList[blockKey & 0xFFF];
+						if(b != null && b.isOpaqueCube())
+							stackRed += 0.2f*dToStack;	
+						else
+							stackBlue += 0.06f*dToStack;
+						/*else
+							stackRed += */
+
+
 
 						x += vx*dBest;
 						y += vy*dBest;
@@ -332,8 +386,9 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 					}
 					
 					
-					screenRed[screenY][screenX] = stackRed;
-					screenBlue[screenY][screenX] = stackBlue;
+					screenRed[screenY][screenX] = stackRed-stackGreen*0f;
+					screenGreen[screenY][screenX] = stackGreen;
+					screenBlue[screenY][screenX] = stackBlue-stackGreen*0f;
 				}				
 			}
 			long end = System.nanoTime();
@@ -354,7 +409,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 					//s = screen[screenY][screenX]; GL11.glColor3f(s >= 0 ? s : 0, 0, s < 0.1 ? -s + 0.1f : 0);		
 					//Color c = Color.getHSBColor(Math.max(0,Math.min(1,s)),1,1);
 				//	GL11.glColor3ub((byte)c.getRed(),(byte)c.getGreen(),(byte)c.getBlue());		
-					GL11.glColor3f(screenRed[screenY][screenX], 0, screenBlue[screenY][screenX]);
+					GL11.glColor3f(screenRed[screenY][screenX], screenGreen[screenY][screenX], screenBlue[screenY][screenX]);
 					GL11.glVertex3f(screenX, screenY, 0);
 					GL11.glVertex3f(screenX, screenY+1, 0);
 					
@@ -388,6 +443,18 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			long end = System.nanoTime();
 			//System.out.println("Draw : " + (end - start)/1000 + "us");
 		}	
+	}
+	
+	
+	@Override
+	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world,
+			int x, int y, int z, int side, float vx, float vy, float vz) {
+		//Utils.clientOpenGui(new GuiChat());
+		/*Side s = FMLCommonHandler.instance().getEffectiveSide();
+		if (s == s.SERVER){
+			setEnergy(stack, energyStorage/3);
+		}*/
+		return false;
 	}
 }
 

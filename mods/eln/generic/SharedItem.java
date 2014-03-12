@@ -27,14 +27,15 @@ public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDes
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		// TODO Auto-generated method stub
-		return getDescriptor(item).handleRenderType(item, type);
+		GenericItemUsingDamageDescriptor d = getDescriptor(item); if(d == null) return false;
+		return d.handleRenderType(item, type);
 	}
 
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
-		return getDescriptor(item).shouldUseRenderHelper(type, item, helper);
+		GenericItemUsingDamageDescriptor d = getDescriptor(item); if(d == null) return false;
+		return d.shouldUseRenderHelper(type, item, helper);
 	}
 	/*
     public boolean isValidArmor(ItemStack stack, int armorType, Entity entity)
@@ -81,7 +82,9 @@ public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDes
 		default:
 			break;
 		}
-		getDescriptor(item).renderItem(type, item, data);
+		GenericItemUsingDamageDescriptor d = getDescriptor(item); if(d != null){
+			d.renderItem(type, item, data);
+		}
 		
 		Minecraft.getMinecraft().mcProfiler.endSection();
 	}

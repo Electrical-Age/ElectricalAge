@@ -100,6 +100,7 @@ import mods.eln.item.electricalitem.ElectricalPickaxe;
 import mods.eln.item.electricalitem.ElectricalTool;
 import mods.eln.item.electricalitem.LampItem;
 import mods.eln.item.electricalitem.PortableOreScannerItem;
+import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage.OreScannerConfigElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
@@ -116,6 +117,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.FunctionTableYProtect;
 import mods.eln.misc.IFunction;
+import mods.eln.misc.LiveDataManager;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3DFolder;
 import mods.eln.misc.Recipe;
@@ -254,6 +256,7 @@ public class Eln {
 		 "/model/batterychargerb/batterychargerb.obj",
 		 "/model/ClassicLampSocket/ClassicLampSocket.obj",
 		 "/model/compressora/compressora.obj",
+		 "/model/compressorb/compressorb.obj",
 		 "/model/DataloggerCRTFloor/DataloggerCRTFloor.obj",
 		 "/model/daylightsensor/daylightsensor.obj",
 		 "/model/eggIncubator/eggincubator.obj",
@@ -278,10 +281,13 @@ public class Eln {
 		 "/model/LowVoltageSwitch/LowVoltageSwitch.obj",
 		 "/model/macerator50V/macerator50V.obj",
 		 "/model/maceratora/maceratora.obj",
+		 "/model/maceratorb/maceratorb.obj",
 		 "/model/magnetizera/magnetizera.obj",
+		 "/model/magnetizerb/magnetizerb.obj",
 		 "/model/MediumVoltageSwitch/MediumVoltageSwitch.obj",
 		 "/model/passiveThermalDissipatorA/passivethermaldissipatora.obj",
 		 "/model/plateMachineA/platemachinea.obj",
+		 "/model/plateMachineB/platemachineb.obj",
 		 "/model/PLC/PLC.obj",
 		 "/model/redToEle/redtoele.obj",
 		 "/model/RelayBig/RelayBig.obj",
@@ -327,6 +333,7 @@ public class Eln {
 
 	static PacketHandler packetHandler;
 	static NodeServer nodeServer;
+	public static LiveDataManager clientLiveDataManager;
 	public static ClientKeyHandler clientKeyHandler;
 	public static SaveConfig saveConfig;
 	public static GhostManager ghostManager;
@@ -425,8 +432,8 @@ public class Eln {
 
 	public static boolean genCooper,genPlumb,genTungsten,genCinnabar;
 
-
-
+	
+	public static ArrayList<OreScannerConfigElement> oreScannerConfig = new ArrayList<OreScannerConfigElement>();
 
 	@PreInit
 	public void preInit(FMLPreInitializationEvent event) {
@@ -511,6 +518,9 @@ public class Eln {
 		genTungsten = config.get("mapGenerate","tungsten",true).getBoolean(true);
 		genCinnabar = config.get("mapGenerate","cinnabar",true).getBoolean(true);
 
+
+		oreScannerConfig.add(new OreScannerConfigElement(15,0.2f));
+		
 		
 		electricalOverSampling = config.get("Simulator", "ElectricalHz", 8000)
 				.getInt() / commonOverSampling / 20;
@@ -532,6 +542,7 @@ public class Eln {
 		
 		
 		nodeServer = new NodeServer();
+		clientLiveDataManager = new LiveDataManager();
 		frameTime = new FrameTime();
 		packetHandler = new PacketHandler();
 		// ForgeDummyContainer
@@ -839,6 +850,7 @@ public class Eln {
 		WorldServer worldServer = server.worldServers[0];
 		simulator.init();
 		nodeServer.init();
+		clientLiveDataManager.stop();
 		nodeManager = null;
 		ghostManager = null;
 		saveConfig = null;
@@ -861,6 +873,7 @@ public class Eln {
 			WirelessSignalTxElement.channelMap.clear();
 			LampSupplyElement.channelMap.clear();
 			playerManager.clear();
+			clientLiveDataManager.start();
 			MinecraftServer server = FMLCommonHandler.instance()
 					.getMinecraftServerInstance();
 			WorldServer worldServer = server.worldServers[0];
@@ -2123,7 +2136,7 @@ public class Eln {
 			name = "200V macerator";
 
 			MaceratorDescriptor desc = new MaceratorDescriptor(name,
-					"maceratora", MVU, 400,// double nominalU,double nominalP,
+					"maceratorb", MVU, 400,// double nominalU,double nominalP,
 					MVU * 1.25,// double maximalU,
 					new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
 					meduimVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -2201,7 +2214,7 @@ public class Eln {
 
 			PlateMachineDescriptor desc = new PlateMachineDescriptor(
 					name,// String name,
-					obj.getObj("platemachinea"),
+					obj.getObj("platemachineb"),
 					MVU, 400,// double nominalU,double nominalP,
 					MVU * 1.25,// double maximalU,
 					new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
@@ -2257,7 +2270,7 @@ public class Eln {
 
 			CompressorDescriptor desc = new CompressorDescriptor(
 					name,// String name,
-					obj.getObj("compressora"),
+					obj.getObj("compressorb"),
 					MVU, 400,// double nominalU,double nominalP,
 					MVU * 1.25,// double maximalU,
 					new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
@@ -2300,7 +2313,7 @@ public class Eln {
 
 			MagnetizerDescriptor desc = new MagnetizerDescriptor(
 					name,// String name,
-					obj.getObj("magnetizera"),
+					obj.getObj("magnetizerb"),
 					MVU, 400,// double nominalU,double nominalP,
 					MVU * 1.25,// double maximalU,
 					new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
@@ -4086,7 +4099,7 @@ public class Eln {
 					10,8,30,15,5,50,//int light,int range,
 					6000,100//, energyStorage,discharg, charge
 					);
-			sharedItem.addElement(subId + (id << 6), desc);
+			sharedItemStackOne.addElement(subId + (id << 6), desc);
 		}	
 		
 		
@@ -4132,7 +4145,7 @@ public class Eln {
 					20000,500,100,//double energyStorage,double chargePower,double dischargePower, 
 					2//int priority
 					);
-			sharedItem.addElement(subId + (id << 6), desc);
+			sharedItemStackOne.addElement(subId + (id << 6), desc);
 		}	
 		
 		{
@@ -4144,7 +4157,7 @@ public class Eln {
 					60000,1500,300,//double energyStorage,double chargePower,double dischargePower, 
 					2//int priority
 					);
-			sharedItem.addElement(subId + (id << 6), desc);
+			sharedItemStackOne.addElement(subId + (id << 6), desc);
 		}	
 		
 		{
@@ -4156,7 +4169,7 @@ public class Eln {
 					5000,2000,500,//double energyStorage,double chargePower,double dischargePower, 
 					1//int priority
 					);
-			sharedItem.addElement(subId + (id << 6), desc);
+			sharedItemStackOne.addElement(subId + (id << 6), desc);
 		}	
 		{
 			subId = 17;
@@ -4167,7 +4180,7 @@ public class Eln {
 					15000,6000,1500,//double energyStorage,double chargePower,double dischargePower, 
 					1//int priority
 					);
-			sharedItem.addElement(subId + (id << 6), desc);
+			sharedItemStackOne.addElement(subId + (id << 6), desc);
 		}	
 	
 		
@@ -4178,10 +4191,10 @@ public class Eln {
 			PortableOreScannerItem desc = new PortableOreScannerItem(
 					name,
 					15000,6000,1500,//double energyStorage,double chargePower,double dischargePower, 
-					10,(float) (Math.PI/2),//float viewRange,float viewYAlpha,
-					32,32//int resWidth,int resHeight
+					5,(float) (Math.PI/2),//float viewRange,float viewYAlpha,
+					48,48//int resWidth,int resHeight
 					);
-			sharedItem.addElement(subId + (id << 6), desc);
+			sharedItemStackOne.addElement(subId + (id << 6), desc);
 		}	
 	}
 
