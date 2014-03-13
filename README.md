@@ -4,21 +4,32 @@ Minecraft Mod - Codename : ELN
 ## ABOUT
 [ELN](https://github.com/Dolu1990/eln) is a Minecraft Mod offering the ability to perform large-scale in-game electrical simulations. Here is some highlighted features:
 
-A better simulation > Electrical simulation with resistive and capacitive effects. Behaviour similar to those of real life objects.
+A better simulation
+> Electrical simulation with resistive and capacitive effects. Behaviour similar to those of real life objects.
 	
-Multiple electrical sources > Furnaces, Solar panels, Wind turbines, Batteries, Capacitors, ...
+Multiple electrical sources
+> Furnaces, Solar panels, Wind turbines, Batteries, Capacitors, ...
 	
-Break the cube > Cables, sensors, actuators, alarms, etc. can be placed on each face (outer and inner) of a cube, witch allows a significant reduction of the consumed space by electrical installations.
+Break the cube
+> Cables, sensors, actuators, alarms, etc. can be placed on each face (outer and inner) of a cube, witch allows a significant reduction of the consumed space by electrical installations.
 	
-Night-lighting revisited > Lamps, switches, captors, ...
+Night-lighting revisited
+> Lamps, switches, captors, ...
 	
-Small and big electricals consumers > From the lamps, electrical furnaces,... to the miners, transporters, ...
-	
-Genericity > Old redstones circuits can be exploited with electrical<->redstones converters.
-	
-Game lifetime/complexity extended > A consequent list of new raw materials and items...
+Small and big electricals consumers
+> From the lamps, electrical furnaces,... to the miners, transporters, ...
 
-Actual state : Alpha
+Incredible tools
+> XRay scanner, flashlight, portable mining drill, ...
+
+Genericity
+> Old redstones circuits can be exploited with electrical<->redstones converters.
+	
+Game lifetime/complexity extended
+> A consequent list of new raw materials and items...
+
+## ACTUAL STATE
+Beta. Bugs corrections, additionnals objects and enhancements.
 
 ## DEVELOPPERS
 Concepts :
@@ -33,6 +44,10 @@ Source code :
 - lambdaShade
 - dolu1990
 - cm0x4D
+
+Others contributions :
+- DrummingFish (GUI text parsing, testing)
+- TheBroBeans (Mod promotion)
 
 ## DEPENDENCIES
 "modbus4j" 1.1 must be added in java path of eclipse project.
