@@ -1,5 +1,6 @@
 package mods.eln.electricalgatesource;
 
+import java.awt.Color;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
@@ -21,6 +22,7 @@ import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
@@ -84,7 +86,7 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor{
 	enum ObjType {Pot,Button};
 	ObjType objType;
 	float leverTx;
-	void draw(float factor,float distance)
+	void draw(float factor,float distance,TileEntity e)
 	{
 		switch (objType) {
 		case Button:
@@ -104,8 +106,12 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor{
 				
 				if(halo != null){
 	
-
-					Utils.drawHaloNoLightSetup(halo,distance);
+					if(e == null)
+						Utils.drawLight(halo);
+					else{
+						Color c = Utils.ledOnOffColorC(factor > 0.5f);
+						Utils.drawHaloNoLightSetup(halo,c.getRed()/255f,c.getGreen()/255f,c.getBlue()/255f,e,false);
+					}
 				}
 			
 				Utils.disableBlend();
@@ -146,6 +152,6 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor{
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		GL11.glScalef(1.5f, 1.5f, 1.5f);
 		if(type == ItemRenderType.INVENTORY) GL11.glScalef(1.5f, 1.5f, 1.5f);
-		draw(0f,1f);
+		draw(0f,1f,null);
 	}
 }

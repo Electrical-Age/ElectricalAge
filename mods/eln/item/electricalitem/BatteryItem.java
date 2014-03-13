@@ -125,4 +125,10 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 		Utils.drawIcon(type,iconRessource);
 	}
 
+	@Override
+	public void electricalItemUpdate(ItemStack stack,double time) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

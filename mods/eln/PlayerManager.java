@@ -19,8 +19,8 @@ public class PlayerManager implements ITickHandler {
 	
 	public class PlayerMetadata {
 		private int timeout;
-		public boolean interactEnable = false,interactEnableOld = false;
-		public boolean interactRise;
+		public boolean interactEnable = false;
+		public boolean interactRise = false,interactRiseBuffer = false;
 
 		public PlayerMetadata() {
 			timeoutReset();
@@ -41,6 +41,10 @@ public class PlayerManager implements ITickHandler {
 		}
 
 		public void setInteractEnable(boolean interactEnable) {
+			if(this.interactEnable == false && interactEnable == true){
+				interactRiseBuffer = true;
+				System.out.println("interactRiseBuffer");
+			}
 			this.interactEnable = interactEnable;
 
 			timeoutReset();
@@ -74,13 +78,9 @@ public class PlayerManager implements ITickHandler {
 				.entrySet()) {
 			PlayerMetadata p = entry.getValue();
 			
-			p.interactRise = p.interactEnable == true && p.interactEnableOld == false;
-			if(p.interactRise){
-				p.interactRise = true;
-			}
-			p.interactEnableOld = p.interactEnable;
-			
-			
+			p.interactRise = p.interactRiseBuffer;
+			p.interactRiseBuffer = false;
+
 			if (p.needDelete()) {
 				metadataHash.remove(entry.getKey());
 			}

@@ -161,6 +161,12 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
 		return 0;
 	}
 
+	@Override
+	public void electricalItemUpdate(ItemStack stack,double time) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 
 /*

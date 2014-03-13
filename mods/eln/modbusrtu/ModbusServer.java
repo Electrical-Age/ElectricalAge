@@ -1,5 +1,7 @@
 package mods.eln.modbusrtu;
 
+import mods.eln.Eln;
+
 import com.serotonin.modbus4j.ModbusFactory;
 import com.serotonin.modbus4j.ModbusSlaveSet;
 import com.serotonin.modbus4j.ProcessImage;
@@ -8,11 +10,10 @@ import com.serotonin.modbus4j.exception.ModbusInitException;
 public class ModbusServer {
 	ModbusServerExtended slave;
 	public ModbusServer() {
-		slave = new ModbusServerExtended(false);
-		//new ServerThread(slave).run();
-		(new Thread(new ServerThread(slave))).start();
-		int a = 0;
-		a++;
+		if(Eln.modbusEnable){
+			slave = new ModbusServerExtended(false);
+			(new Thread(new ServerThread(slave))).start();
+		}
 	}
 	
 	public class ServerThread implements Runnable {
@@ -36,15 +37,21 @@ public class ModbusServer {
 	}
 	
 	public void destroy(){
-		slave.stop();
+		if(Eln.modbusEnable){
+			slave.stop();
+		}
 	}
 	
 	public boolean add(ProcessImage processImage){
-		if(slave.getProcessImage(processImage.getSlaveId()) != null) return false;
-		slave.addProcessImage(processImage);
+		if(Eln.modbusEnable){
+			if(slave.getProcessImage(processImage.getSlaveId()) != null) return false;
+			slave.addProcessImage(processImage);
+		}
 		return true;
 	}
 	public void remove(ProcessImage processImage){
-		slave.remove(processImage);
+		if(Eln.modbusEnable){
+			slave.remove(processImage);
+		}
 	}
 }

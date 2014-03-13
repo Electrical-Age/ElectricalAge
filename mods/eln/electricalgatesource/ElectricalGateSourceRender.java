@@ -53,7 +53,7 @@ public class ElectricalGateSourceRender extends SixNodeElementRender{
 		interpolator.setTarget((float) (voltageSyncValue/Eln.SVU));
 		interpolator.stepGraphic();
 		LRDU.Down.glRotateOnX();
-		descriptor.draw(interpolator.get(),Utils.distanceFromClientPlayer(this.tileEntity));
+		descriptor.draw(interpolator.get(),Utils.distanceFromClientPlayer(this.tileEntity),tileEntity);
 
 	}
 	

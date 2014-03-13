@@ -1,5 +1,6 @@
 package mods.eln.electricalvumeter;
 
+import java.awt.Color;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
@@ -7,6 +8,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.Eln;
@@ -45,6 +47,7 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor{
 				objType = ObjType.LedOnOff;
 				main = obj.getPart("main");
 				halo = obj.getPart("halo");
+				led = obj.getPart("Led");
 			}
 		}
 	}
@@ -63,7 +66,7 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor{
 	Obj3DPart vumeter,pointer,led,halo,main;
 
 	public boolean onOffOnly;
-	void draw(float factor,float distance)
+	void draw(float factor,float distance,TileEntity entity)
 	{
 		if(factor < 0.0) factor = 0.0f;
 		if(factor > 1.0) factor = 1.0f;
@@ -72,9 +75,17 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor{
 		case LedOnOff:
 			
 			main.draw();
-			Utils.ledOnOffColor(factor > 0.5);
+			boolean s = factor > 0.5;
+			Color c = Utils.ledOnOffColorC(s);
+			GL11.glColor3f(c.getRed()/255f,c.getGreen()/255f,c.getBlue()/255f);		
+			Utils.drawLight(led);
 			//Utils.enableBilinear();
-			Utils.drawHalo(halo,distance);
+			if(entity != null)
+				Utils.drawHalo(halo,c.getRed()/255f,c.getGreen()/255f,c.getBlue()/255f,entity,false);
+			else
+				Utils.drawLight(halo);
+
+
 			//Utils.disableBilinear();
 
 			break;
@@ -117,7 +128,7 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor{
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if(type == ItemRenderType.INVENTORY) GL11.glRotatef(90, 1f, 0f, 0f);
-		draw(0.0f,1f);
+		draw(0.0f,1f,null);
 	}
 	
 }

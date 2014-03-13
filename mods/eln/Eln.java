@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bouncycastle.asn1.esf.CompleteRevocationRefs;
 import org.omg.CORBA.OMGVMCID;
@@ -207,12 +208,14 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraft.block.material.Material;
+import net.minecraftforge.common.ConfigCategory;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.EnumHelper;
 import net.minecraftforge.common.ForgeDummyContainer;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.Property;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
@@ -239,7 +242,7 @@ import cpw.mods.fml.relauncher.Side;
 
 
 
-@Mod(modid = "Eln", name = "Eln", version = "0.0.1")
+@Mod(modid = "Eln", name = "Electrical age", version = "BETA-1.1.0")
 @NetworkMod(clientSideRequired = true, serverSideRequired = false, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
 	/*
@@ -436,7 +439,9 @@ public class Eln {
 
 	
 	public static ArrayList<OreScannerConfigElement> oreScannerConfig = new ArrayList<OreScannerConfigElement>();
-
+	public static boolean modbusEnable = false;
+	
+	float xRayScannerRange;
 	@PreInit
 	public void preInit(FMLPreInitializationEvent event) {
 		/*float v = 0;
@@ -513,16 +518,41 @@ public class Eln {
 				blocBaseId + 2, "choubakaka").getInt();
 
 
-
+		modbusEnable = config.get("modbus","enable",false).getBoolean(false);
 		
 		genCooper = config.get("mapGenerate","cooper",true).getBoolean(true);
 		genPlumb = config.get("mapGenerate","plumb",true).getBoolean(true);
 		genTungsten = config.get("mapGenerate","tungsten",true).getBoolean(true);
 		genCinnabar = config.get("mapGenerate","cinnabar",true).getBoolean(true);
-
-
-		oreScannerConfig.add(new OreScannerConfigElement(15,0.2f));
 		
+		ConfigCategory xRayOre;
+		if(config.hasCategory("xrayscannerore") == false){
+			xRayOre = config.getCategory("xrayscannerore");
+			xRayOre.setComment("Random name     Block id + metadata*4096     yellow factor");
+			config.get("xrayscannerore", "Coal", new int[]{16,5});
+			config.get("xrayscannerore", "Iron", new int[]{15,15});
+			config.get("xrayscannerore", "Gold", new int[]{14,40});
+			config.get("xrayscannerore", "Lapis", new int[]{21,40});
+			config.get("xrayscannerore", "Redstone", new int[]{73,40});
+			config.get("xrayscannerore", "Diamond", new int[]{56,100});			
+			config.get("xrayscannerore", "Emerald", new int[]{129,40});
+
+			config.get("xrayscannerore", "EACooper", new int[]{227 + (1<<12),10});
+			config.get("xrayscannerore", "EAPlumb", new int[]{227 + (4<<12),20});
+			config.get("xrayscannerore", "EATungsten", new int[]{227 + (5<<12),20});
+			config.get("xrayscannerore", "EACinnabar", new int[]{227 + (6<<12),20});
+			config.save();
+			config.load();
+		}
+		xRayOre = config.getCategory("xrayscannerore");
+		for(Entry<String, Property> e : xRayOre.getValues().entrySet()){
+			int[] v = e.getValue().getIntList();
+			oreScannerConfig.add(new OreScannerConfigElement(v[0],v[1]/100f));
+		}
+		
+		
+		xRayScannerRange = (float) config.get("xrayscannerconfig","rangeInBloc",5.0).getDouble(5.0);
+		xRayScannerRange = Math.max(Math.min(xRayScannerRange, 10),4);
 		
 		electricalOverSampling = config.get("Simulator", "ElectricalHz", 8000)
 				.getInt() / commonOverSampling / 20;
@@ -4197,12 +4227,12 @@ public class Eln {
 		
 		{
 			subId = 32;
-			name = "Portable ore scanner";
+			name = "XRay scanner";
 			
 			PortableOreScannerItem desc = new PortableOreScannerItem(
 					name,obj.getObj("XRayScanner"),
-					15000,6000,1500,//double energyStorage,double chargePower,double dischargePower, 
-					5,(float) (Math.PI/2),//float viewRange,float viewYAlpha,
+					10000,400,300,//double energyStorage,double chargePower,double dischargePower, 
+					xRayScannerRange,(float) (Math.PI/2),//float viewRange,float viewYAlpha,
 					32,20//int resWidth,int resHeight
 					);
 			sharedItemStackOne.addElement(subId + (id << 6), desc);

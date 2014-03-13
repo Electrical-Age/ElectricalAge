@@ -158,6 +158,21 @@ public class GenericItemUsingDamageDescriptor {
 	   {
 		   return false;
 	   }
+	public boolean onDroppedByPlayer(ItemStack item, EntityPlayer player) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	public boolean onBlockStartBreak(ItemStack itemstack, int x, int y, int z,
+			EntityPlayer player) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 	   
+	
+	
 
 }

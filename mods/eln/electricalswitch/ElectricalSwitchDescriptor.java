@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
@@ -141,9 +142,9 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor{
 		// TODO Auto-generated method stub
 		
 		if(type == ItemRenderType.INVENTORY) GL11.glScalef(1.8f, 1.8f, 1.8f);
-		draw(0f,0f);
+		draw(0f,0f,null);
 	}	
-	public void draw(float on,float distance) {
+	public void draw(float on,float distance,TileEntity e) {
 		switch (objType) {
 		case Button:
 			
@@ -161,8 +162,10 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor{
 				
 				if(halo != null){
 	
-
-					Utils.drawHaloNoLightSetup(halo,distance);
+					if(e == null)
+						Utils.drawLight(halo);
+					else
+						Utils.drawHaloNoLightSetup(halo,234f/255f, 80/255f, 0f,e,false);
 				}
 			
 				Utils.disableBlend();

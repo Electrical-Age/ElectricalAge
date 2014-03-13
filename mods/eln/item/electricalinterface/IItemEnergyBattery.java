@@ -13,5 +13,7 @@ public interface IItemEnergyBattery {
 	
 	int getPriority(ItemStack stack);
 	
+	void electricalItemUpdate(ItemStack stack,double time);
+	
 
 }

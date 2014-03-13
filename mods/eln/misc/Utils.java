@@ -1,5 +1,6 @@
 package mods.eln.misc;
 
+import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -12,7 +13,8 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
-import org.lwjgl.util.Color;
+
+import org.objectweb.asm.tree.InnerClassNode;
 
 import com.serotonin.modbus4j.base.ModbusUtils;
 import com.serotonin.modbus4j.code.DataType;
@@ -39,6 +41,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -51,10 +54,13 @@ import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
@@ -75,6 +81,7 @@ import net.minecraft.util.Icon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
@@ -752,6 +759,13 @@ public class Utils {
 		else
 			GL11.glColor3f(0f, 0.7f, 0f);
 	}
+	public static Color ledOnOffColorC(boolean on)
+	{
+		if(! on)
+			return new Color(0.7f, 0f, 0f);
+		else
+			return new Color(0f, 0.7f, 0f);
+	}
 	
 	public static void drawLight(Obj3DPart part)
 	{
@@ -809,28 +823,95 @@ public class Utils {
 		// TODO Auto-generated method stub
 		return Minecraft.getMinecraft().thePlayer;
 	}
+	
+	
+	
+	public static int getLight(World w,int x,int y,int z){
+		int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.Block,x,y,z);
+		int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.Sky,x,y,z)-w.calculateSkylightSubtracted(0f);
+		return Math.max(b, s);
+	}
 
 	public static void drawHaloNoLightSetup(Obj3DPart halo, float distance) {
 		if(halo == null) return;
 		halo.bindTexture();
 		Utils.enableBilinear();
-		float scale = 1f;/*distance*0.5f;
-		if(scale > 1f) scale = 1f;
-		scale = scale *scale;*/
-		//GL11.glPushMatrix();
-		//GL11.glScalef(1f,scale,scale);
-		halo.drawNoBind();//distance*5,1f,0f,0f);
-		//GL11.glPopMatrix();
+		float scale = 1f;
+
+		halo.drawNoBind();
 	}
 	public static void drawHalo(Obj3DPart halo, float distance) {
+
+	disableLight();
+	enableBlend();
+	
+	drawHaloNoLightSetup(halo, distance);
+	enableLight();
+	disableBlend();
+}
+	
+	public static void drawHaloNoLightSetup(Obj3DPart halo,float r,float g,float b,Entity e,boolean bilinear) {
+		if(halo == null) return;
+		if(bilinear)Utils.enableBilinear();
+		int light = getLight(e.worldObj,MathHelper.floor_double(e.posX), MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ));
+		//light = e.worldObj.getLightBrightnessForSkyBlocks(MathHelper.floor_double(e.posX), MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ),0);
+		//System.out.println(light);
+		GL11.glColor4f(r,g,b, 1f-(light/15f));
+		halo.draw();
+		GL11.glColor4f(1f,1f,1f, 1f);
+		if(bilinear)Utils.disableBilinear();
+	}
+	
+	public static void drawHalo(Obj3DPart halo,float r,float g,float b,Entity e,boolean bilinear) {
 
 		disableLight();
 		enableBlend();
 		
-		drawHaloNoLightSetup(halo, distance);
+		drawHaloNoLightSetup(halo,r,g,b,e,bilinear);
 		enableLight();
 		disableBlend();
+	}	
+	public static void drawHaloNoLightSetup(Obj3DPart halo,float r,float g,float b,World w,int x,int y,int z,boolean bilinear) {
+		if(halo == null) return;
+		if(bilinear)Utils.enableBilinear();
+		int light = getLight(w,x,y,z)*19/15-4;
+		Entity e = getClientPlayer();
+		float d = (float) (Math.abs(x-e.posX) + Math.abs(y-e.posY) + Math.abs(z-e.posZ));
+		
+		GL11.glColor4f(r,g,b, 1f-(light/15f));
+		halo.draw(d*20,1,0,0);
+		GL11.glColor4f(1f,1f,1f, 1f);
+		if(bilinear)Utils.disableBilinear();
 	}
+	
+	public static void drawHalo(Obj3DPart halo,float r,float g,float b,World w,int x,int y,int z,boolean bilinear) {
+
+		disableLight();
+		enableBlend();
+		
+		drawHaloNoLightSetup(halo,r,g,b,w,x,y,z,bilinear);
+		enableLight();
+		disableBlend();
+	}	
+	
+
+	
+	public static void drawHaloNoLightSetup(Obj3DPart halo,float r,float g,float b,TileEntity e,boolean bilinear) {		
+		drawHaloNoLightSetup(halo,r,g,b,e.worldObj,e.xCoord,e.yCoord,e.zCoord,bilinear);
+	}	
+	public static void drawHalo(Obj3DPart halo,float r,float g,float b,TileEntity e,boolean bilinear) {		
+		drawHalo(halo,r,g,b,e.worldObj,e.xCoord,e.yCoord,e.zCoord,bilinear);
+	}	
+	
+	/*public static void drawHalo(Obj3DPart halo,float r,float g,float b,World w,int x,int y,int z,boolean bilinear) {
+
+		disableLight();
+		enableBlend();
+		
+		drawHaloNoLightSetup(halo,r,g,b, w,x,y,z,bilinear);
+		enableLight();
+		disableBlend();
+	}	*/
 
 	static public void drawEntityItem(EntityItem entityItem,double x, double y , double z,float roty,float scale)
 	{
@@ -1188,8 +1269,34 @@ public class Utils {
 	public static void enableTexture() {
 		// TODO Auto-generated method stub
 		GL11.glEnable(GL11.GL_TEXTURE_2D);	
+	}
+
+	public static double clientDistanceTo(Entity e) {
+		if(e == null) return 100000000.0;
+		Entity c = Minecraft.getMinecraft().thePlayer;
+		double x = (c.posX-e.posX),y = (c.posY-e.posY),z = (c.posZ-e.posZ);
+		return Math.sqrt(x*x+y*y+z*z);
+	}
+
+	public static double getHeadPosY(Entity e) {
+		if(e instanceof EntityOtherPlayerMP) return e.posY + e.getEyeHeight();
+		return e.posY;
+	}
+
+	public static boolean isPlayerInteractRiseWith(EntityPlayerMP entity,
+			ItemStack stack) {
+
+		return entity.inventory.getCurrentItem() == stack && Eln.playerManager.get(entity).getInteractRise();
+	}
+
+	public static boolean isCreative() {
+		// TODO Auto-generated method stub
+		return ! Minecraft.getMinecraft().playerController.isNotCreative();
 	} 
        
-    
+	public static boolean mustDropItem() {
+		// TODO Auto-generated method stub
+		return !isCreative();
+	}    
 
 } 

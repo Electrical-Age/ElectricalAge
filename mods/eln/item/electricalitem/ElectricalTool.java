@@ -177,4 +177,10 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 		Utils.drawIcon(type,rIcon);
 	}
 
+	@Override
+	public void electricalItemUpdate(ItemStack stack,
+			double time) {
+		
+	}
+
 }

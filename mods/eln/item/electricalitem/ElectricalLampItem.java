@@ -65,18 +65,18 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 		double power = 0;
 		switch (state) {
 		case 1:
-			power = dischargeMin*0.05;
+			power = dischargeMin;
 			break;
 		case 2:
-			power = dischargeMax*0.05;
+			power = dischargeMax;
 			break;
 		}
 		if(energy > power){
-			setEnergy(stack, energy - power);
+			//setEnergy(stack, energy - power);
 			return getLightLevel(stack);
 		}
 		else{
-			setEnergy(stack,0);
+			//setEnergy(stack,0);
 			return 0;
 		}
 	}
@@ -211,6 +211,28 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {		
 		if(type == ItemRenderType.INVENTORY)		
 			Utils.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
-		Utils.drawIcon(type,(getLightState(item) != 0? on : off));
+		Utils.drawIcon(type,(getLight(item) != 0 && getLightState(item) != 0? on : off));
+	}
+
+	@Override
+	public void electricalItemUpdate(ItemStack stack,double time) {
+		// TODO Auto-generated method stub
+	
+		double energy = getEnergy(stack);
+		int state = getLightState(stack);
+		double power = 0;
+		switch (state) {
+		case 1:
+			power = dischargeMin*time;
+			break;
+		case 2:
+			power = dischargeMax*time;
+			break;
+		}
+		
+		if(energy > power)
+			setEnergy(stack, energy - power);
+		else
+			setEnergy(stack,0);
 	}
 }

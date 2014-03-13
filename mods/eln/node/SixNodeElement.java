@@ -189,7 +189,8 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
 		}
 		
     	sixNode.dropInventory(getInventory());
-    	sixNode.dropItem(getDropItemStack());
+    	if(Utils.mustDropItem())
+    		sixNode.dropItem(getDropItemStack());
     }
 
 	public abstract boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
