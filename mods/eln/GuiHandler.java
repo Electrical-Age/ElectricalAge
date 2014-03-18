@@ -65,7 +65,7 @@ public class GuiHandler implements IGuiHandler {
 			NodeBlockEntity tileEntity = (NodeBlockEntity) world
 					.getBlockTileEntity(x, y, z);
 			Direction side = Direction.fromInt(id);
-	
+			if(tileEntity == null) return null;
 			return tileEntity.newGuiDraw(side, player);
 		}
 		if(id == genericOpen){

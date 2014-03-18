@@ -598,7 +598,7 @@ public class Eln {
 			.setUnlocalizedName("sharedItemStackOne");
 
 		transparentNodeBlock = (TransparentNodeBlock) new TransparentNodeBlock(
-				transparentNodeBlockId, Material.ground,
+				transparentNodeBlockId, Material.iron,
 				TransparentNodeEntity.class).setCreativeTab(creativeTab);
 		sixNodeBlock = (SixNodeBlock) new SixNodeBlock(SixNodeBlockId,
 				Material.ground, SixNodeEntity.class)

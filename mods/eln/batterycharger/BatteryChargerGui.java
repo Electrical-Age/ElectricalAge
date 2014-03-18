@@ -29,7 +29,7 @@ public class BatteryChargerGui extends GuiContainerEln{
 		super.initGui();
 		
 		
-		powerOn = newGuiButton(97, 6+17-10, 60, "");
+		powerOn = newGuiButton(97+10, 6+17-10, 40, "");
 
 	}
 	
@@ -40,10 +40,10 @@ public class BatteryChargerGui extends GuiContainerEln{
 		super.preDraw(f, x, y);
 		
 		if(render.powerOn){
-			powerOn.displayString = "Switch OFF";
+			powerOn.displayString = "Is ON";
 		}
 		else{
-			powerOn.displayString = "Switch ON";
+			powerOn.displayString = "Is OFF";
 		}
 	}
 	

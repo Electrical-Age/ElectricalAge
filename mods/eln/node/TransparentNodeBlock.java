@@ -54,10 +54,7 @@ public class TransparentNodeBlock extends NodeBlock{
 	  return -1;
 	}
 
-    public void registerIcons(IconRegister par1IconRegister)
-    {
-    	
-    }
+
     @Override
     public int getDamageValue(World world, int x, int y, int z) {
     	// TODO Auto-generated method stub

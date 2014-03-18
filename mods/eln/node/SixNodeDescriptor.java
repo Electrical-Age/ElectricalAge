@@ -41,6 +41,15 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 	
 	public boolean canBePlacedOnSide(Direction side)
 	{
+		if(placeDirection != null){
+			boolean ok = false;
+			for(Direction d : placeDirection){
+				if(d == side) {
+					return true;
+				}
+			}
+			return false;
+		}
 		return true;
 	}
 

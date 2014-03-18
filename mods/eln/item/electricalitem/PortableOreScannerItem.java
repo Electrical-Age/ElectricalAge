@@ -88,6 +88,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	Obj3DPart base,led,ledHalo;
 	Obj3DPart textBat[],textRun,textInit;
 	Obj3DPart buttons,screenDamage[],screenLuma;
+	private byte damagePerBreakLevel = 3;
 	
 	static final byte sIdle = 0,sBoot = 1,sRun = 2,sStop = 3,sError = 4;
 	static final short bootTime = (short) (4/0.05);
@@ -105,6 +106,11 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		short counter = getCounter(stack);
 		boolean playerInteractRise = Utils.isPlayerInteractRiseWith((EntityPlayerMP)entity,stack);
 		
+		if(getDamage(stack)/damagePerBreakLevel >= 4){
+			if(state != sIdle)
+				setState(stack, sIdle);
+			return;
+		}
 
 		switch(state){
 		case sIdle:
@@ -418,7 +424,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 				}
 				Utils.enableBlend();
 				GL11.glColor4f(1f, 1f, 1f, 1f);
-				int breakLevel = getDamage(item)/3;
+				int breakLevel = getDamage(item)/damagePerBreakLevel ;
 				if(state == sIdle) breakLevel = Math.min(breakLevel, screenDamage.length-1);
 				for(int idx = 0; idx < breakLevel;idx++){
 					if(idx == screenDamage.length) break;

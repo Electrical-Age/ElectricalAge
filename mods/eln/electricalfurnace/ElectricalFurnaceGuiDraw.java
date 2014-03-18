@@ -61,7 +61,7 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     {
     	super.initGui();
     	autoShutDown = newGuiButton(6, 6, 99, "");
-    	buttonGrounded = newGuiButton(6,6+20+4,60, "");
+    	buttonGrounded = newGuiButton(6+10*0,6+20+4,60-20, "");
     	vuMeterTemperature = newGuiVerticalTrackBarHeat(167-20 -20 -8-4,8,20,69);
     	vuMeterTemperature.setStepIdMax(800/10);
     	vuMeterTemperature.setEnable(true);
@@ -88,9 +88,9 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     	// TODO Auto-generated method stub
     	super.preDraw(f, x, y);
     	if( render.getPowerOn())
-    		buttonGrounded.displayString = "Turn OFF";
+    		buttonGrounded.displayString = "Is ON";
     	else
-    		buttonGrounded.displayString = "Turn ON";
+    		buttonGrounded.displayString = "Is OFF";
     	
     	if( render.autoShutDown){
     		buttonGrounded.enabled = false;
