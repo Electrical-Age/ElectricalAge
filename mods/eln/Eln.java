@@ -599,10 +599,13 @@ public class Eln {
 
 		transparentNodeBlock = (TransparentNodeBlock) new TransparentNodeBlock(
 				transparentNodeBlockId, Material.iron,
-				TransparentNodeEntity.class).setCreativeTab(creativeTab);
+				TransparentNodeEntity.class)
+			.setCreativeTab(creativeTab)
+			.setTextureName("iron_block");
 		sixNodeBlock = (SixNodeBlock) new SixNodeBlock(SixNodeBlockId,
 				Material.ground, SixNodeEntity.class)
-				.setCreativeTab(creativeTab);
+				.setCreativeTab(creativeTab)
+				.setTextureName("iron_block");
 
 		ghostBlock = (GhostBlock) new GhostBlock(ghostBlockId);
 		lightBlock = (LightBlock) new LightBlock(lightBlockId);
