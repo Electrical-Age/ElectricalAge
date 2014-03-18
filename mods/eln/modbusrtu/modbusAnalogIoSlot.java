@@ -26,6 +26,8 @@ public class modbusAnalogIoSlot extends ModbusSlot{
 		switch (id) {
 		case 0:
 			return gateProcess.isHighImpedance();
+		case 1:
+			return gateProcess.getOutputOnOff();
 
 		}
 		return false;
