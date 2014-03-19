@@ -6,7 +6,7 @@ import mods.eln.sim.ThermalLoad;
 
 public class NodeBatterySlowProcess extends BatterySlowProcess {
 	NodeBase node;
-	float explosionRadius = 0;
+	float explosionRadius = 2;
 	
 	public NodeBatterySlowProcess(NodeBase node,BatteryProcess batteryProcess,ThermalLoad thermalLoad) {
 		super(batteryProcess,thermalLoad);

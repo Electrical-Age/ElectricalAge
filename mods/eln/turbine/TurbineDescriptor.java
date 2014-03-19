@@ -34,6 +34,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 			FunctionTable TtoU,
 			FunctionTable PoutToPin,
 			double nominalDeltaT, double nominalU,double nominalP,double nominalPowerLost,
+			double maxU,
 			double electricalRs,double electricalRp,double electricalC,
 			double thermalC,double DeltaTForInput,
 			double powerOutPerDeltaU
@@ -54,6 +55,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 		this.electricalC = electricalC;
 		this.powerOutPerDeltaU = powerOutPerDeltaU;
 		this.eRender = eRender;
+		this.maxU = maxU;
 		obj = Eln.obj.getObj(modelName);
 		if(obj != null)
 		{
@@ -69,7 +71,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 	public double nominalDeltaT,nominalU; 
 	double nominalP;
 	public double thermalC,thermalRs,thermalRp;
-	
+	public double maxU;
 	double electricalRs,electricalRp,electricalC;
 	/*
 	public void applyTo(TurbineThermalProcess turbine)

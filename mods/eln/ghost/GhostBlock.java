@@ -52,11 +52,7 @@ import net.minecraftforge.common.ForgeDirection;
 	  return -1;
 	}
 	
-    public void registerIcons(IconRegister par1IconRegister)
-    {
-    	
-    }
-    
+
 	@Override
 	public boolean isBlockSolidOnSide(World world, int x, int y, int z,
 			ForgeDirection side) {

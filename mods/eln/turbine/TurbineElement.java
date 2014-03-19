@@ -9,6 +9,7 @@ import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
+import mods.eln.node.NodeVoltageWatchdogProcess;
 import mods.eln.node.SixNode;
 import mods.eln.node.TransparentNode;
 import mods.eln.node.TransparentNodeDescriptor;
@@ -41,7 +42,7 @@ public class TurbineElement extends TransparentNodeElement{
 
 	public ElectricalPowerSource electricalPowerSourceProcess = new ElectricalPowerSource(positiveLoad,negativeLoad); 
 	public TurbineInOutProcess turbineInOutProcess = new TurbineInOutProcess(this);
-	
+	public NodeVoltageWatchdogProcess voltageWatchdog = new NodeVoltageWatchdogProcess(node, positiveLoad,negativeLoad);
 	
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 1, this);
 	
@@ -57,6 +58,11 @@ public class TurbineElement extends TransparentNodeElement{
 	   	
     	thermalLoadList.add(warmLoad);
     	thermalLoadList.add(coolLoad);
+    	
+    	slowProcessList.add(voltageWatchdog);
+    	
+    	voltageWatchdog.setVoltage(this.descriptor.maxU);
+    	voltageWatchdog.setDestructor(2);
 
     	
     	electricalProcessList.add(electricalPowerSourceProcess);

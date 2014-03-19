@@ -13,6 +13,7 @@ import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraftforge.oredict.ShapedOreRecipe;
 import mods.eln.gui.GuiButtonEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiLabel;
@@ -129,6 +130,22 @@ public class ItemDefault extends Default{
 					}
 					counter = (counter + 1) % 3;
 				}
+			/*	if(r instanceof ShapedOreRecipe){
+					ShapedOreRecipe s = (ShapedOreRecipe)r;
+				//	s.
+					//s.getInput()
+					for(int idx2 = 0;idx2 < 3;idx2++){
+						for(int idx = 0;idx < 3;idx++){
+							ItemStack rStack = null;
+							//if(idx < s.recipeWidth && idx2 < s.getRecipeSize()recipeHeight){
+							//	rStack = s.recipeItems[idx + idx2*s.recipeWidth];
+							//}
+							GuiItemStack gui = new GuiItemStack(idx * 18+6 + counter*60, idx2*18+y	, rStack,helper);
+							extender.add(gui);
+						}	
+					}
+					counter = (counter + 1) % 3;
+				}*/
 				if(r instanceof ShapelessRecipes){
 					ShapelessRecipes s = (ShapelessRecipes)r;
 					int idx = 0;

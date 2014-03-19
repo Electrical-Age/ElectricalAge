@@ -79,10 +79,7 @@ public class SixNodeBlock extends NodeBlock{
 		}*/
 		Eln.sixNodeItem.getSubItems(par1, tab, subItems);
 	}
-    public void registerIcons(IconRegister par1IconRegister)
-    {
-    	
-    }
+
     
 	@Override
 	public boolean isOpaqueCube() {

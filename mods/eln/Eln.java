@@ -607,7 +607,7 @@ public class Eln {
 				.setCreativeTab(creativeTab)
 				.setTextureName("iron_block");
 
-		ghostBlock = (GhostBlock) new GhostBlock(ghostBlockId);
+		ghostBlock = (GhostBlock) new GhostBlock(ghostBlockId).setTextureName("iron_block");
 		lightBlock = (LightBlock) new LightBlock(lightBlockId);
 
 	//	obj.loadFolder("eln", "/model");
@@ -972,7 +972,7 @@ public class Eln {
 	public CableRenderDescriptor stdCableRender800V;
 
 	public static double gateOutputCurrent = 0.100;
-	public static final double SVU = 50, SVII = gateOutputCurrent / 10,
+	public static final double SVU = 50, SVII = gateOutputCurrent / 50,
 			SVUinv = 1.0 / SVU;
 	public static final double LVU = 50;
 	public static final double MVU = 200;
@@ -1012,7 +1012,7 @@ public class Eln {
 
 			signalCableDescriptor = desc;
 
-			desc.setPhysicalConstantLikeNormalCable(SVU, SVP, 0.02 / 20
+			desc.setPhysicalConstantLikeNormalCable(SVU, SVP, 0.02 / 50
 					* gateOutputCurrent / SVII,// electricalNominalVoltage,
 												// electricalNominalPower,
 												// electricalNominalPowerDrop,
@@ -2044,6 +2044,7 @@ public class Eln {
 					nominalP,
 					nominalP / 40,// double nominalDeltaT, double
 									// nominalU,nominalP,double nominalPowerLost
+					nominalU*1.3,
 					lowVoltageCableDescriptor.electricalRs * RsFactor,
 					lowVoltageCableDescriptor.electricalRp,
 					lowVoltageCableDescriptor.electricalC / RsFactor,// ElectricalCableDescriptor
@@ -2073,6 +2074,7 @@ public class Eln {
 					nominalP,
 					nominalP / 40,// double nominalDeltaT, double
 									// nominalU,nominalP,double nominalPowerLost
+					nominalU*1.3,
 					meduimVoltageCableDescriptor.electricalRs * RsFactor,
 					meduimVoltageCableDescriptor.electricalRp,
 					meduimVoltageCableDescriptor.electricalC / RsFactor,// ElectricalCableDescriptor
@@ -5425,6 +5427,23 @@ public class Eln {
 				Character.valueOf('M'), findItemStack("Electrical motor"),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron));		
 	
+		addRecipe(findItemStack("Portable electrical mining drill"),
+				" T ",
+				"IBI",
+				" I ",
+				Character.valueOf('T'), findItemStack("Average electrical drill"),
+				Character.valueOf('B'), findItemStack("Portable battery"),
+				Character.valueOf('I'), new ItemStack(Item.ingotIron));		
+	
+		addRecipe(findItemStack("XRay scanner"),
+				"PGP",
+				"PCP",
+				"PBP",
+				Character.valueOf('C'), findItemStack("Advanced chip"),
+				Character.valueOf('B'), findItemStack("Portable battery"),
+				Character.valueOf('P'), new ItemStack(Item.ingotIron),
+				Character.valueOf('G'), new ItemStack(Block.thinGlass));		
+			
 		
 	}
 	
@@ -5492,7 +5511,7 @@ public class Eln {
 				"RCR",
 				"LRL",
 				Character.valueOf('C'), findItemStack("Cheap chip"),
-				Character.valueOf('L'), new ItemStack(Item.glowstone),
+				Character.valueOf('L'), "ingotSilicon",
 				Character.valueOf('R'), new ItemStack(Item.redstone));
 
 		addRecipe(findItemStack("Machine block"),
@@ -5958,9 +5977,9 @@ public class Eln {
 	
 	private void recipeElectricalAlarm() {
 		addRecipe(findItemStack("Electrical alarm A", 1), 
-				" T ",
-				" M ",
-				" c ",
+				"T",
+				"M",
+				"c",
 				Character.valueOf('c'),findItemStack("Signal cable"), 
 				Character.valueOf('T'),new ItemStack(Block.torchRedstoneActive), 
 				Character.valueOf('I'),new ItemStack(Item.ingotIron), 
