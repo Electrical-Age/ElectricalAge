@@ -1784,7 +1784,7 @@ public class Eln {
 			{
 				subId = 12;
 				name = "Electrical entity sensor";
-				desc = new ElectricalEntitySensorDescriptor(name, obj.getObj("lightsensor"),20);
+				desc = new ElectricalEntitySensorDescriptor(name, obj.getObj("lightsensor"),15);
 				sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			}
 		}

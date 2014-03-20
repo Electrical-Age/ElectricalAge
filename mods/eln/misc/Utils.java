@@ -1318,6 +1318,7 @@ public class Utils {
 		dx *= normInv;dy *= normInv;dz *= normInv;
 		double d = 0;
 		while(d < norm){
+			if(Utils.isBlockLoaded(world,x,y,z) == false) continue;
 			Block b = Utils.getBlock(world,x,y,z);
 			if(b != null) blockList.add(b);
 			
@@ -1331,7 +1332,13 @@ public class Utils {
 		return blockList;
 	}
 
-	private static Block getBlock(World world, double x, double y, double z) {
+	public static boolean isBlockLoaded(World world, double x, double y,
+			double z) {
+		// TODO Auto-generated method stub
+		return world.blockExists(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
+	}
+
+	public static Block getBlock(World world, double x, double y, double z) {
 		int blockId = world.getBlockId(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
 		return blockId == 0 ? null : Block.blocksList[blockId];
 	}
