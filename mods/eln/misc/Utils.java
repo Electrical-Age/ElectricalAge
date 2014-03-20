@@ -1297,6 +1297,51 @@ public class Utils {
 	public static boolean mustDropItem() {
 		// TODO Auto-generated method stub
 		return !isCreative();
+	}
+
+	public static void serverTeleport(Entity e, double x, double y, double z) {
+		// TODO Auto-generated method stub
+		if(e instanceof EntityPlayerMP)
+			((EntityPlayerMP)e).setPositionAndUpdate(x,y,z);
+		else
+			e.setPosition(x,y,z);		
+	}
+
+	public static ArrayList<Block> traceRay(World world, double x, double y,
+			double z, double tx, double ty, double tz) {
+		ArrayList<Block> blockList = new ArrayList<Block>();
+		
+		double dx,dy,dz;
+		dx = tx-x;dy = ty-y;dz = tz-z;
+		double norm = (Math.sqrt(dx*dx+dy*dy+dz*dz));
+		double normInv = 1/(norm + 0.000000001);
+		dx *= normInv;dy *= normInv;dz *= normInv;
+		double d = 0;
+		while(d < norm){
+			Block b = Utils.getBlock(world,x,y,z);
+			if(b != null) blockList.add(b);
+			
+			x += dx;
+			y += dy;
+			z += dz;
+			d+=1;
+		}
+		
+		
+		return blockList;
+	}
+
+	private static Block getBlock(World world, double x, double y, double z) {
+		int blockId = world.getBlockId(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
+		return blockId == 0 ? null : Block.blocksList[blockId];
+	}
+
+	public static double getLength( double x, double y,
+			double z, double tx, double ty, double tz) {
+		double dx,dy,dz;
+		dx = tx-x;dy = ty-y;dz = tz-z;
+		double norm = (Math.sqrt(dx*dx+dy*dy+dz*dz));
+		return norm;
 	}    
 
 } 

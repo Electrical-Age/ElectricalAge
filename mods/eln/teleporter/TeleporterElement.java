@@ -18,6 +18,7 @@ import mods.eln.lampsocket.LightBlockEntity;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodePeriodicPublishProcess;
 import mods.eln.node.TransparentNode;
@@ -250,6 +251,8 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	@Override
 	public boolean reservate(){
 		if(state != StateIdle) return false;
+		if(powerLoad.Uc < descriptor.cable.electricalNominalVoltage*0.8) return false;
+		
 		setState(StateReserved);
 		imMaster = false;
 		return true;
@@ -327,13 +330,18 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 						break;
 					}
 					if(powerLoad.Uc < descriptor.cable.electricalNominalVoltage*0.8){
-						
 						break;
 					}
 					ITeleporter target = getTarget(targetNameCopy);
+					
+					
 					if(target.reservate() == false){
 						sendIdToAllClient(eventTargetBusy);
+						break;
 					}
+					
+					
+
 					sendIdToAllClient(eventTargetFind);
 					
 				/*	AxisAlignedBB bb = descriptor.getBB(node.coordonate,front);
@@ -396,6 +404,23 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 					}
 					if(powerLoad.Uc < descriptor.cable.electricalNominalVoltage*0.8){
 						sendIdToAllClient(eventInstablePowerSupply);
+						AxisAlignedBB bb = descriptor.getBB(node.coordonate,front);
+						List list = node.coordonate.world().getEntitiesWithinAABB(Entity.class, bb);
+						for(Object o : list){
+							Entity e = (Entity)o;
+							double failDistance = 1000;
+							while(true){
+								int x,y,z;
+								x = (int) (e.posX + (Math.random()*2-1)*failDistance);
+								z = (int) (e.posZ + (Math.random()*2-1)*failDistance);
+								y = 20;
+								while(e.worldObj.getBlockId(x, y, z) != 0 && e.worldObj.getBlockId(x, y + 1, z) != 0){
+									y++;
+								}
+								Utils.serverTeleport(e, x+0.5, y, z+0.5);
+								break;
+							}
+						}
 						setState(StateOpen);
 					} else {
 						ITeleporter target = getTarget(targetNameCopy);
@@ -437,10 +462,8 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 						List list = node.coordonate.world().getEntitiesWithinAABB(Entity.class, bb);
 						for(Object o : list){
 							Entity e = (Entity)o;
-							if(e instanceof EntityPlayerMP)
-								((EntityPlayerMP)e).setPositionAndUpdate(e.posX + dx, e.posY + dy, e.posZ + dz);
-							else
-								e.setPosition(e.posX + dx, e.posY + dy, e.posZ + dz);
+							Utils.serverTeleport(e,e.posX + dx, e.posY + dy, e.posZ + dz);
+							
 						}
 						setState(StateOpen);
 					}	

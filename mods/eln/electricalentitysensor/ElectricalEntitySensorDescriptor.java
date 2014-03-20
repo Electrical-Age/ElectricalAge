@@ -1,4 +1,4 @@
-package mods.eln.electricalwindsensor;
+package mods.eln.electricalentitysensor;
 
 import java.util.List;
 
@@ -12,7 +12,6 @@ import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.Utils;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ThermalLoad;
@@ -22,40 +21,30 @@ import mods.eln.wiki.Data;
 import com.google.common.base.Function;
 
 
-public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
+public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor{
 
 
-	private Obj3DPart baseWall,baseGround,anemometer;
-
-	public ElectricalWindSensorDescriptor(
+	private Obj3DPart main;
+	double maxRange;
+	public ElectricalEntitySensorDescriptor(
 			String name,
 			Obj3D obj,
-			double windMax
+			double maxRange
 			) {
-		super(name, ElectricalWindSensorElement.class,ElectricalWindSensorRender.class);
-		this.windMax = windMax;
+		super(name, ElectricalEntitySensorElement.class,ElectricalEntitySensorRender.class);
 		this.obj = obj;
-		
+		this.maxRange = maxRange;
 		if(obj != null)
 		{
-			baseWall = obj.getPart("base_wall");
-			baseGround = obj.getPart("base_ground");
-			anemometer = obj.getPart("anemometer");
+			main = obj.getPart("main");
 		}
 	}
 
 	Obj3D obj;
 
-	public double windMax;
-
-	void draw(float alpha)
+	void draw()
 	{
-		if(baseWall != null) baseWall.draw();
-		if(anemometer != null) {
-			Utils.disableCulling();
-			anemometer.draw(alpha, 0, 1, 0);
-			Utils.enableCulling();
-		}
+		if(main != null) main.draw();
 	}
 	
 	@Override
@@ -69,11 +58,8 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Provides an electrical signal");
-		list.add("dependant on weather type.");
-		list.add("0V -> clear ");
-		list.add(Eln.SVU/2 +"V -> rain ");
-		list.add(Eln.SVU +"V -> thunder ");
+		list.add("Max range : " + (int)maxRange);
+
 	}
 	
 	
@@ -92,6 +78,6 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		// TODO Auto-generated method stub
 		GL11.glScalef(2f, 2f, 2f);
-		draw(0);
+		draw();
 	}
 }

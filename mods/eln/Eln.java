@@ -31,6 +31,7 @@ import mods.eln.electricalbreaker.ElectricalBreakerDescriptor;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.electricaldatalogger.DataLogsPrintDescriptor;
 import mods.eln.electricaldatalogger.ElectricalDataLoggerDescriptor;
+import mods.eln.electricalentitysensor.ElectricalEntitySensorDescriptor;
 import mods.eln.electricalfurnace.ElectricalFurnaceDescriptor;
 import mods.eln.electricalfurnace.ElectricalFurnaceElement;
 import mods.eln.electricalfurnace.ElectricalFurnaceRender;
@@ -71,12 +72,14 @@ import mods.eln.groundcable.GroundCableRender;
 import mods.eln.heatfurnace.HeatFurnaceDescriptor;
 import mods.eln.heatfurnace.HeatFurnaceElement;
 import mods.eln.heatfurnace.HeatFurnaceRender;
+import mods.eln.inductor.InductorDescriptor;
 import mods.eln.intelligenttransformer.IntelligentTransformerElement;
 import mods.eln.intelligenttransformer.IntelligentTransformerRender;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.item.CombustionChamber;
 import mods.eln.item.DynamoDescriptor;
 import mods.eln.item.ElectricalDrillDescriptor;
+import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.item.HeatingCorpElement;
 import mods.eln.item.LampDescriptor;
@@ -185,6 +188,8 @@ import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.EnumArmorMaterial;
 import net.minecraft.item.EnumToolMaterial;
 import net.minecraft.item.Item;
@@ -670,7 +675,7 @@ public class Eln {
 		registerElectricalDataLogger(93);
 		registerElectricalRelay(94);
 		registerElectricalGateSource(95);
-		registerDiode(96);
+		registerPassiveComponent(96);
 		registerSwitch(97);
 		registerElectricalBreaker(98);
 		registerElectricalSensor(100);
@@ -1445,7 +1450,7 @@ public class Eln {
 
 	}
 
-	void registerDiode(int id) {
+	void registerPassiveComponent(int id) {
 		int subId, completId;
 		String name;
 		IFunction function;
@@ -1507,6 +1512,25 @@ public class Eln {
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
+
+		/*{
+			subId = 16;
+
+			name = "100H inductor";
+
+
+
+			InductorDescriptor desc = new InductorDescriptor(name,// int iconId,
+															// String name,
+					100,
+					meduimVoltageCableDescriptor
+
+			);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}*/
+		
+		
 	}
 
 	void registerSwitch(int id) {
@@ -1751,7 +1775,16 @@ public class Eln {
 			{
 				subId = 8;
 				name = "Electrical anemometer sensor";
-				desc = new ElectricalWindSensorDescriptor(name, obj.getObj("daylightsensor"),25);
+				desc = new ElectricalWindSensorDescriptor(name, obj.getObj("Anemometer"),25);
+				sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			}
+		}
+		{
+			ElectricalEntitySensorDescriptor desc;
+			{
+				subId = 12;
+				name = "Electrical entity sensor";
+				desc = new ElectricalEntitySensorDescriptor(name, obj.getObj("lightsensor"),20);
 				sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			}
 		}
@@ -4429,6 +4462,19 @@ public class Eln {
 			Data.addResource(desc.newItemStack());
 		}		
 		
+		
+		{
+			subId = 40;
+			name = "Player filter";
+			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name,EntityPlayerMP.class);
+			sharedItem.addElement(subId + (id << 6), desc);
+		}
+		{
+			subId = 41;
+			name = "Monster filter";
+			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name,EntityMob.class);
+			sharedItem.addElement(subId + (id << 6), desc);
+		}
 
 	}
 
@@ -5442,7 +5488,7 @@ public class Eln {
 				Character.valueOf('C'), findItemStack("Advanced chip"),
 				Character.valueOf('B'), findItemStack("Portable battery"),
 				Character.valueOf('P'), new ItemStack(Item.ingotIron),
-				Character.valueOf('G'), new ItemStack(Block.thinGlass));		
+				Character.valueOf('G'), findItemStack("Basic ore scanner"));		
 			
 		
 	}

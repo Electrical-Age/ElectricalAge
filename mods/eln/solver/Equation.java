@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.ListResourceBundle;
 import java.util.Scanner;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
@@ -75,11 +76,41 @@ public class Equation implements IValue,INBTTReady{
 		
 	}
 	
-	public Equation(String exp,ArrayList<ISymbole> symboleList,int iterationLimit)
-	{
+	public Equation() {
+		operatorList = new HashMap<Integer, ArrayList<IOperatorMapper>>();
+		separatorList = "";
+		symboleList = new ArrayList<ISymbole>();
+		int iterationLimit = 100;
+	}
+	
+
+	public void setUpDefaultOperatorAndMapper(){
+		operatorList.putAll(staticOperatorList);
+		separatorList += staticSeparatorList;
+	}
+	
+	public void addMapper(int priority,IOperatorMapper mapper){
+		ArrayList<IOperatorMapper> list = operatorList.get(priority);
+		if(list == null){
+			list = new ArrayList<IOperatorMapper>();
+			operatorList.put(priority, list);
+		}
+		list.add(mapper);
+	}
+	
+	public void setIterationLimit(int iterationLimit){
+		this.iterationLimit = iterationLimit;
+	}
+	
+	public void addSymbole(ArrayList<ISymbole> symboleList){
+		this.symboleList.addAll(symboleList);
+	}
+	
+	int iterationLimit;
+	ArrayList<ISymbole> symboleList;
+	
+	public void preProcess(String exp){
 		int idx;
-		this.operatorList = staticOperatorList;
-		separatorList = staticSeparatorList;
 		exp = exp.replace(" ", "");
 
 
@@ -202,8 +233,10 @@ public class Equation implements IValue,INBTTReady{
 			}
 			else
 				root = null;
-		}
+		}	
 	}
+	
+
 
 
 	int getDepthMax(LinkedList<Object> list)
@@ -251,6 +284,8 @@ public class Equation implements IValue,INBTTReady{
 		return root != null;
 	}
 
+
+	
 	public static class Bigger extends OperatorAB{
 		@Override
 		public double getValue() {

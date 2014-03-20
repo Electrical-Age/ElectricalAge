@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import cpw.mods.fml.common.network.Player;
 
@@ -12,6 +13,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.World;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.Node;
@@ -26,7 +28,10 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.solver.Equation;
+import mods.eln.solver.IOperator;
 import mods.eln.solver.ISymbole;
+import mods.eln.solver.IValue;
+import mods.eln.solver.OperatorMapperFunc;
 
 public class ElectricalMathElement extends SixNodeElement {
 
@@ -57,6 +62,7 @@ public class ElectricalMathElement extends SixNodeElement {
 		symboleList.add(new GateInputSymbol("A", gateInput[0]));
 		symboleList.add(new GateInputSymbol("B", gateInput[1]));
 		symboleList.add(new GateInputSymbol("C", gateInput[2]));
+		symboleList.add(new DayTime());
 	}
 	
 	boolean sideConnectionEnable[] = new boolean[3];
@@ -107,7 +113,12 @@ public class ElectricalMathElement extends SixNodeElement {
 	void preProcessEquation(String expression)
 	{
 		this.expression = expression;
-		equation = new Equation(expression, symboleList, 100);
+		equation = new Equation();//expression, symboleList, 100);
+		equation.setUpDefaultOperatorAndMapper();
+		equation.setIterationLimit(100);
+		equation.addSymbole(symboleList);
+		equation.preProcess(expression);
+		
 		for(int idx = 0;idx<3;idx++){
 			sideConnectionEnable[idx] = equation.isSymboleUsed(symboleList.get(idx));
 		}
@@ -120,6 +131,19 @@ public class ElectricalMathElement extends SixNodeElement {
 		
 		checkRedstone();
 		
+	}
+
+	
+	public class DayTime implements ISymbole{
+		@Override
+		public double getValue() {
+			return sixNode.coordonate.world().getWorldTime()/(24000.0-1.0);
+		}
+
+		@Override
+		public String getName() {
+			return "daytime";
+		}	
 	}
 	
 	@Override
