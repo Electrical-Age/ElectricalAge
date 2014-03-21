@@ -39,9 +39,9 @@ public class OreScanner extends GenericItemUsingDamageDescriptorUpgrade implemen
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
 		list.add("Nominal :");
-		list.add(Utils.plotVolt("    voltage",nominalVoltage));
-		list.add(Utils.plotEnergy("Energy per operation",OperationEnergy));
-		list.add("Scann area " + (radius*2 +1)*(radius*2 +1) + " blocks");
+		list.add(Utils.plotVolt("    Voltage :",nominalVoltage));
+		list.add(Utils.plotEnergy("Energy per Operation :",OperationEnergy));
+		list.add("Scan Area :" + (radius*2 +1)*(radius*2 +1) + " blocks");
 
 	}
 

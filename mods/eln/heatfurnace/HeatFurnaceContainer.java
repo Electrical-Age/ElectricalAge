@@ -27,11 +27,11 @@ public class HeatFurnaceContainer extends BasicContainer implements INodeContain
 	NodeBase node;
 	public HeatFurnaceContainer(NodeBase node,EntityPlayer player, IInventory inventory,HeatFurnaceDescriptor descriptor) {
 		super(player, inventory,new Slot[]{
-				new SlotWithSkinAndComment(inventory,combustibleId,70 ,58,SlotSkin.medium,new String[]{"Fuel slot"}),
+				new SlotWithSkinAndComment(inventory,combustibleId,70 ,58,SlotSkin.medium,new String[]{"Fuel Slot"}),
 			//	new RegulatorSlot(inventory,regulatorId,62 +  0,17+18,1,new RegulatorType[]{),
-				new GenericItemUsingDamageSlot(inventory,regulatorId, 8,58,1, IRegulatorDescriptor.class,SlotSkin.medium,new String[]{"Regulator slot"}),
-				new GenericItemUsingDamageSlot(inventory, isolatorId,8 + 18,-2000,1, ThermalIsolatorElement.class,SlotSkin.medium,new String[]{"Thermal isolator slot"}),
-				new GenericItemUsingDamageSlot(inventory, combustrionChamberId,8+ 18,58,descriptor.combustionChamberMax, CombustionChamber.class,SlotSkin.medium,new String[]{"Combustion chamber slot"}),
+				new GenericItemUsingDamageSlot(inventory,regulatorId, 8,58,1, IRegulatorDescriptor.class,SlotSkin.medium,new String[]{"Regulator Slot"}),
+				new GenericItemUsingDamageSlot(inventory, isolatorId,8 + 18,-2000,1, ThermalIsolatorElement.class,SlotSkin.medium,new String[]{"Thermal Isolator Slot"}),
+				new GenericItemUsingDamageSlot(inventory, combustrionChamberId,8+ 18,58,descriptor.combustionChamberMax, CombustionChamber.class,SlotSkin.medium,new String[]{"Combustion Chamber Slot"}),
 			});
 		this.node = node;
 		// TODO Auto-generated constructor stub

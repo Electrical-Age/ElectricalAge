@@ -198,13 +198,13 @@ public class LampSocketElement extends SixNodeElement{
 	@Override
 	public String multiMeterString() {
 		// TODO Auto-generated method stub
-		return Utils.plotVolt("U",positiveLoad.Uc - negativeLoad.Uc) +  Utils.plotAmpere("I",positiveLoad.getCurrent());
+		return Utils.plotVolt("U:",positiveLoad.Uc - negativeLoad.Uc) +  Utils.plotAmpere("I:",positiveLoad.getCurrent());
 	}
 	
 	@Override
 	public String thermoMeterString() {
 		// TODO Auto-generated method stub
-		return Utils.plotCelsius("T",thermalLoad.Tc);
+		return Utils.plotCelsius("T:",thermalLoad.Tc);
 	}
 
 	@Override

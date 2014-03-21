@@ -15,7 +15,7 @@ public class GroundCableContainer extends BasicContainer {
 	
 	public GroundCableContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new SixNodeItemSlot(inventory,cableSlotId,176/2-8,8,1,new Class[]{ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{"Electrical cable slot"})
+				new SixNodeItemSlot(inventory,cableSlotId,176/2-8,8,1,new Class[]{ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{"Electrical Cable Slot"})
 			});
 		
 		// TODO Auto-generated constructor stub

@@ -84,7 +84,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 		if(render.station != -1)
 			station.setText(render.station);
 		station.setObserver(this);
-		station.setComment(0, "Station id");
+		station.setComment(0, "Station ID");
 		extender.add(station);
 		
 		name = new GuiTextFieldEln(fontRenderer,2+station.getWidth() + 12, y, 101,helper);  y+= name.getHeight();

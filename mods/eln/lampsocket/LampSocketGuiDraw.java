@@ -133,20 +133,20 @@ public class LampSocketGuiDraw extends GuiContainerEln {
 			buttonGrounded.displayString = "Serial";
 		
 		if(lampRender.poweredByLampSupply){
-			buttonSupplyType.displayString = "Powered by a lamp supply";
+			buttonSupplyType.displayString = "Powered by Lamp Supply";
 			channel.setVisible(true);
 			if(inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null)
 				channel.setComment(1,"\u00a74Cable slot empty");	
 			else if(lampRender.isConnectedToLampSupply)
 				channel.setComment(1,"\u00a72connected to " + lampRender.channel);
 			else
-				channel.setComment(1,"\u00a74" +  lampRender.channel + " is not in range");	
+				channel.setComment(1,"\u00a74" +  lampRender.channel + " is not in range!");	
 		}
 		else{
 			channel.setVisible(false);
-			buttonSupplyType.displayString = "powered by a cable";
+			buttonSupplyType.displayString = "Powered by Cable";
 		}
 		
-		alphaZ.setComment(0, "Orientation " + (int)alphaZ.getValue()+" degree");
+		alphaZ.setComment(0, "Orientation: " + (int)alphaZ.getValue()+"\u00B0");
 	}
 }
