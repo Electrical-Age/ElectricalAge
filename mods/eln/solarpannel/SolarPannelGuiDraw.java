@@ -83,7 +83,7 @@ public class SolarPannelGuiDraw extends GuiContainerEln {
         vuMeterTemperature.setEnable(! render.hasTracker);
         int sunAlpha = ((int)(180/Math.PI * SolarPannelSlowProcess.getSolarAlpha(render.tileEntity.worldObj))-90);
         
-        vuMeterTemperature.setComment(0,"Solar pannel alpha : " + ((int)(180/Math.PI * vuMeterTemperature.getValue())-90) + "\u00B0");
+        vuMeterTemperature.setComment(0,"Solar Panel alpha : " + ((int)(180/Math.PI * vuMeterTemperature.getValue())-90) + "\u00B0");
         if(Math.abs(sunAlpha)>90)
         	vuMeterTemperature.setComment(1,"It's the night");
         else

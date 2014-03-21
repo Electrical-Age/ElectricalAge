@@ -140,8 +140,8 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add(Utils.plotEnergy("Energy stored", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
-		list.add("Power button is " + (getLightState(itemStack) != 0 ? "ON" : "OFF"));
+		list.add(Utils.plotEnergy("Energy Stored:", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
+		list.add("Power: " + (getLightState(itemStack) != 0 ? "ON" : "OFF"));
 	}
 /*
 	@Override

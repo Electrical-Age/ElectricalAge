@@ -82,15 +82,15 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Socket type : " + socketType.toString());
+		list.add("Socket Type : " + socketType.toString());
 		
 		if(range != 0 || alphaZMin != alphaZMax){
 			list.add("Projector");
 			if(range != 0){
-				list.add("  range : " + range + " Blocks");
+				list.add("  Range : " + range + " Blocks");
 			}
 			if(alphaZMin != alphaZMax){
-				list.add("  angle  : " + ((int)alphaZMin) + "\u00B0 to " + ((int)alphaZMax) + "\u00B0");
+				list.add("  Angle : " + ((int)alphaZMin) + "\u00B0 to " + ((int)alphaZMax) + "\u00B0");
 			}
 		}
 	}

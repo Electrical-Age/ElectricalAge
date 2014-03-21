@@ -121,17 +121,17 @@ public class MpptElement extends TransparentNodeElement{
 	
 	@Override
 	public String multiMeterString(Direction side) {
-		if(side == front)return  Utils.plotVolt("UP+",positivePrimaryLoad.Uc) + Utils.plotAmpere("IP+",positivePrimaryLoad.getCurrent());
-		if(side == front.back())return  Utils.plotVolt("US+",positiveSecondaryLoad.Uc) + Utils.plotAmpere("IS+",positiveSecondaryLoad.getCurrent());
-		if(side == front.left() && grounded == false)return  Utils.plotVolt("UP-",negativePrimaryLoad.Uc) + Utils.plotAmpere("IP-",negativePrimaryLoad.getCurrent());
-		if(side == front.right() && grounded == false)return Utils.plotVolt("US-",negativeSecondaryLoad.Uc) + Utils.plotAmpere("IS-",negativeSecondaryLoad.getCurrent());
+		if(side == front)return  Utils.plotVolt("UP+:",positivePrimaryLoad.Uc) + Utils.plotAmpere("IP+:",positivePrimaryLoad.getCurrent());
+		if(side == front.back())return  Utils.plotVolt("US+:",positiveSecondaryLoad.Uc) + Utils.plotAmpere("IS+:",positiveSecondaryLoad.getCurrent());
+		if(side == front.left() && grounded == false)return  Utils.plotVolt("UP-:",negativePrimaryLoad.Uc) + Utils.plotAmpere("IP-:",negativePrimaryLoad.getCurrent());
+		if(side == front.right() && grounded == false)return Utils.plotVolt("US-:",negativeSecondaryLoad.Uc) + Utils.plotAmpere("IS-:",negativeSecondaryLoad.getCurrent());
 		return "";
 
 	}
 	
 	@Override
 	public String thermoMeterString(Direction side) {
-		return  Utils.plotCelsius("T",thermalLoad.Tc);
+		return  Utils.plotCelsius("T:",thermalLoad.Tc);
 	}
 
 	

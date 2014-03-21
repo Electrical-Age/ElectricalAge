@@ -18,6 +18,6 @@ public class CombustionChamber extends GenericItemUsingDamageDescriptorUpgrade{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Can be used to extande heat furnace");
+		list.add("Upgrade for the Stone Heat Furnace.");
 	}
 }

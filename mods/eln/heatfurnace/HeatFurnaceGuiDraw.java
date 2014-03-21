@@ -71,7 +71,7 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
     	vuMeterHeat.setStepIdMax(98);
     	vuMeterHeat.setEnable(true);
     	vuMeterHeat.setRange(0.0f,980.0f);
-    	vuMeterHeat.setComment(0,"Temperature gauge");
+    	vuMeterHeat.setComment(0,"Temperature Gauge");
     	syncVumeterHeat();
     	
     	/*
@@ -98,14 +98,14 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
     	// TODO Auto-generated method stub
     	super.preDraw(f, x, y);
     	if(render.controleExternal)
-    		externalControl.displayString = "Internal control";
+    		externalControl.displayString = "Internal Control";
     	else
-    		externalControl.displayString = "External control";
+    		externalControl.displayString = "External Control";
     	//externalControl.displayString = "External control : " + render.controleExternal;
     	if(render.takeFuel)
-    		takeFuel.displayString = "Take fuel";
+    		takeFuel.displayString = "Take Fuel";
     	else
-    		takeFuel.displayString = "Decline fuel";
+    		takeFuel.displayString = "Decline Fuel";
     	takeFuel.enabled = !render.controleExternal;
     	
     	
@@ -119,13 +119,13 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
         //vuMeterHeat.setVisible(render.controleExternal == false);
 
         vuMeterHeat.setComment(new String[]{});
-        vuMeterHeat.setComment(0,"Temperature gauge");
-        vuMeterHeat.setComment(1,Utils.plotCelsius("Current", render.temperature));
+        vuMeterHeat.setComment(0,"Temperature Gauge");
+        vuMeterHeat.setComment(1,Utils.plotCelsius("Current:", render.temperature));
         if(render.controleExternal == false)
-        	vuMeterHeat.setComment(2,Utils.plotCelsius("Target", vuMeterHeat.getValue()));
-        vuMeterGain.setComment(0,"Control gauge at " +(int)(vuMeterGain.getValue()*100) + "%");
+        	vuMeterHeat.setComment(2,Utils.plotCelsius("Target:", vuMeterHeat.getValue()));
+        vuMeterGain.setComment(0,"Control Gauge at " +(int)(vuMeterGain.getValue()*100) + "%");
         
-        vuMeterGain.setComment(1, Utils.plotPower("Power", render.power));
+        vuMeterGain.setComment(1, Utils.plotPower("Power:", render.power));
     }
     
     @Override

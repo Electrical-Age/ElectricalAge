@@ -19,7 +19,7 @@ public class OverVoltageProtectionDescriptor extends GenericItemUsingDamageDescr
     		List list, boolean par4) {
     	// TODO Auto-generated method stub
     	super.addInformation(itemStack, entityPlayer, list, par4);
-    	list.add("Useful to prevent overvoltage on :");
+    	list.add("Useful to prevent overvoltage with:");
     	list.add("  Battery");
     }
 }

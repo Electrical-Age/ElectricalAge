@@ -9,7 +9,7 @@ import net.minecraft.item.ItemStack;
 public class GenericItemBlock extends ItemBlock {
 	int textureIdOffset;
 	public String[] subNames = {
-		"Cooper", "Silver",  "Gold"
+		"Copper", "Silver",  "Gold"
 	};
 
 	public GenericItemBlock(int id,int textureIdOffset,String ItemName,String[] subNames) {

@@ -103,7 +103,7 @@ public class GroundCableElement extends SixNodeElement{
 	@Override
 	public String multiMeterString() {
 		// TODO Auto-generated method stub
-		return Utils.plotVolt("U",electricalLoad.Uc) + Utils.plotAmpere("I",electricalLoad.getCurrent());
+		return Utils.plotVolt("U:",electricalLoad.Uc) + Utils.plotAmpere("I:",electricalLoad.getCurrent());
 	}
 
 	@Override
@@ -169,7 +169,7 @@ public class GroundCableElement extends SixNodeElement{
 					}
 					else
 					{
-						entityPlayer.addChatMessage("Brush is empty");
+						entityPlayer.addChatMessage("Brush is empty!");
 					}
 				}
 			}

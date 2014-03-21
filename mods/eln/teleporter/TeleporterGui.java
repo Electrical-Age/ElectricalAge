@@ -55,9 +55,9 @@ public class TeleporterGui extends GuiScreenEln{
 		target.setText(render.targetName);
 		chargePower.setValue(render.chargePower);
 		
-		name.setComment(0, "Self transporter name");
-		target.setComment(0, "target transporter name");
-		chargePower.setComment(0, "Power sink");
+		name.setComment(0, "Current Transporter");
+		target.setComment(0, "Target Transporter");
+		chargePower.setComment(0, "Power Sink:");
 		
 	}
 	
@@ -88,7 +88,7 @@ public class TeleporterGui extends GuiScreenEln{
 			chargePower.setValue(render.chargePower);
 			render.chargePowerNew = false;
 		}
-		chargePower.setComment(0, Utils.plotPower("Power sink", chargePower.getValue()));
+		chargePower.setComment(0, Utils.plotPower("Power Sink:", chargePower.getValue()));
 		start.enabled = render.state == TeleporterElement.StateIdle;
 		
 	/*	if(render.defaultOutput)

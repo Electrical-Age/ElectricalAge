@@ -29,6 +29,6 @@ public class SolarTrackerDescriptor  extends GenericItemUsingDamageDescriptorUpg
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Usefull to upgrade solarPannel");
+		list.add("Upgrade for the Solar Panel.");
 	}
 }

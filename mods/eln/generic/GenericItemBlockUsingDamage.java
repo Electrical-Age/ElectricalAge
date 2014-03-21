@@ -88,7 +88,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
     public String getItemDisplayName(ItemStack par1ItemStack)
     {
 		Descriptor desc = getDescriptor(par1ItemStack);
-		if(desc == null) return "Unknow";
+		if(desc == null) return "Unknown";
         return desc.getName(par1ItemStack);
     }
 
