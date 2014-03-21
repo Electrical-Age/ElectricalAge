@@ -2159,10 +2159,11 @@ public class Eln {
 		}
 
 	}
-
+	public ArrayList<ItemStack> furnaceList = new ArrayList<ItemStack>();
 	void registerElectricalFurnace(int id) {
 		int subId, completId;
 		String name;
+		furnaceList.add(new ItemStack(Block.furnaceIdle));
 		{
 			subId = 0;
 			name = "Electrical furnace";
@@ -2188,6 +2189,7 @@ public class Eln {
 			);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+			furnaceList.add(desc.newItemStack());
 		}
 	}
 

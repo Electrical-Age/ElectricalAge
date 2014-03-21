@@ -1,5 +1,6 @@
 package mods.eln.wiki;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import javax.management.Descriptor;
 import cpw.mods.fml.common.registry.GameRegistry;
 
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
@@ -79,26 +81,14 @@ public class ItemDefault extends Default{
 					if(out != null && out.itemID == stack.itemID && out.getItemDamage() == stack.getItemDamage()){
 						recipeOutList.add(r);
 					}
+
+					for(ItemStack rStack : Utils.getRecipeInputs(r)){
+						if(rStack != null && rStack.itemID == stack.itemID && rStack.getItemDamage() == stack.getItemDamage()){
+							recipeInList.add(r);
+							break;
+						}						
+					}
 					
-					if(r instanceof ShapedRecipes){
-						ShapedRecipes s = (ShapedRecipes)r;
-						for(ItemStack rStack : s.recipeItems){
-							if(rStack != null && rStack.itemID == stack.itemID && rStack.getItemDamage() == stack.getItemDamage()){
-								recipeInList.add(r);
-								break;
-							}						
-						}
-					}
-					if(r instanceof ShapelessRecipes){
-						ShapelessRecipes s = (ShapelessRecipes)r;
-						for(Object o2 : s.recipeItems){
-							ItemStack rStack = (ItemStack)o2;
-							if(rStack != null && rStack.itemID == stack.itemID && rStack.getItemDamage() == stack.getItemDamage()){
-								recipeInList.add(r);
-								break;
-							}						
-						}
-					}
 				}
 
 			}
@@ -116,51 +106,15 @@ public class ItemDefault extends Default{
 			for(IRecipe r : recipeOutList){
 				if(counter == 0) y += 60;
 				if(counter == -1) counter = 0;
-				if(r instanceof ShapedRecipes){
-					ShapedRecipes s = (ShapedRecipes)r;
+				ItemStack[][] stacks = Utils.getItemStackGrid(r);
+				
+				if(stacks != null){
 					for(int idx2 = 0;idx2 < 3;idx2++){
 						for(int idx = 0;idx < 3;idx++){
-							ItemStack rStack = null;
-							if(idx < s.recipeWidth && idx2 < s.recipeHeight){
-								rStack = s.recipeItems[idx + idx2*s.recipeWidth];
-							}
-							GuiItemStack gui = new GuiItemStack(idx * 18+6 + counter*60, idx2*18+y	, rStack,helper);
+							GuiItemStack gui = new GuiItemStack(idx * 18+6 + counter*60, idx2*18+y	, stacks[idx2][idx],helper);
 							extender.add(gui);
 						}	
 					}
-					counter = (counter + 1) % 3;
-				}
-			/*	if(r instanceof ShapedOreRecipe){
-					ShapedOreRecipe s = (ShapedOreRecipe)r;
-				//	s.
-					//s.getInput()
-					for(int idx2 = 0;idx2 < 3;idx2++){
-						for(int idx = 0;idx < 3;idx++){
-							ItemStack rStack = null;
-							//if(idx < s.recipeWidth && idx2 < s.getRecipeSize()recipeHeight){
-							//	rStack = s.recipeItems[idx + idx2*s.recipeWidth];
-							//}
-							GuiItemStack gui = new GuiItemStack(idx * 18+6 + counter*60, idx2*18+y	, rStack,helper);
-							extender.add(gui);
-						}	
-					}
-					counter = (counter + 1) % 3;
-				}*/
-				if(r instanceof ShapelessRecipes){
-					ShapelessRecipes s = (ShapelessRecipes)r;
-					int idx = 0;
-					for(Object o : s.recipeItems){
-						ItemStack stack = (ItemStack)o;
-						GuiItemStack gui = new GuiItemStack((idx % 3) * 18+6 + counter*60, (idx / 3)*18+y	, stack,helper);
-						extender.add(gui);
-						idx++;
-					}
-					while(idx != 9){
-						GuiItemStack gui = new GuiItemStack((idx % 3) * 18+6 + counter*60, (idx / 3)*18+y	, null,helper);
-						extender.add(gui);
-						idx++;
-					}
-					
 					counter = (counter + 1) % 3;
 				}
 			}
@@ -179,46 +133,26 @@ public class ItemDefault extends Default{
 			for(IRecipe r : recipeInList){
 				if(counter == 0) y += 60;
 				if(counter == -1) counter = 0;
-				if(r instanceof ShapedRecipes){
-					ShapedRecipes s = (ShapedRecipes)r;
+				
+				ItemStack[][] stacks = Utils.getItemStackGrid(r);			
+				if(stacks != null){
 					for(int idx2 = 0;idx2 < 3;idx2++){
 						for(int idx = 0;idx < 3;idx++){
-							ItemStack rStack = null;
-							if(idx < s.recipeWidth && idx2 < s.recipeHeight){
-								rStack = s.recipeItems[idx + idx2*s.recipeWidth];
-							}
+							ItemStack rStack = stacks[idx2][idx];
+
 							GuiItemStack gui = new GuiItemStack(idx * 18+6 + counter*105, idx2*18+y	, rStack,helper);
 							extender.add(gui);
 						}	
 					}
 					
 	
-					GuiItemStack gui = new GuiItemStack((int)(3.5* 18)+6 + counter*105, 1*18+y	, s.getRecipeOutput(),helper);
+					GuiItemStack gui = new GuiItemStack((int)(3.5* 18)+6 + counter*105, 1*18+y	, r.getRecipeOutput(),helper);
 					extender.add(gui);
 					
 					counter = (counter + 1) % 2;
 				}
 				
-				if(r instanceof ShapelessRecipes){
-					ShapelessRecipes s = (ShapelessRecipes)r;
-					int idx = 0;
-					for(Object o : s.recipeItems){
-						ItemStack stack = (ItemStack)o;
-						GuiItemStack gui = new GuiItemStack((idx % 3) * 18+6 + counter*105, (idx / 3)*18+y	, stack,helper);
-						extender.add(gui);
-						idx++;
-					}
-					while(idx != 9){
-						GuiItemStack gui = new GuiItemStack((idx % 3) * 18+6 + counter*105, (idx / 3)*18+y	, null,helper);
-						extender.add(gui);
-						idx++;
-					}
-					
-					GuiItemStack gui = new GuiItemStack((int)(3.5* 18)+6 + counter*105, 1*18+y	, s.getRecipeOutput(),helper);
-					extender.add(gui);
-					
-					counter = (counter + 1) % 2;
-				}
+
 			}
 			y+=70;
 		}
@@ -235,10 +169,17 @@ public class ItemDefault extends Default{
 				for(Recipe r : list){
 					if(counter == 0) y+=(int)(18*1.3);
 					if(counter == -1) counter = 0;
+					int x = 6 + counter*60;
+					extender.add(new GuiItemStack(x, y	, r.input,helper));
+					x+=18*2;
 					
-					extender.add(new GuiItemStack(6 + counter*60, y	, r.input,helper));
-					extender.add(new GuiItemStack(18 + 6 + counter*60, y	, r.output[0],helper));
-					counter = (counter + 1) % 3;							
+					for(ItemStack m : r.machineList){			
+						extender.add(new GuiItemStack(x, y	, m,helper));
+						x+=18;
+					}
+					x+=18;
+					extender.add(new GuiItemStack(x, y	, r.getOutputCopy()[0],helper));
+					counter = (counter + 1) % 1;										
 				}
 				y+=(int)(18*1.3);
 			}

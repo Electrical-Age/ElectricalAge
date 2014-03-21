@@ -76,7 +76,7 @@ public class ElectricalEntitySensorSlowProcess implements IProcess {
 					}
 				}
 			}
-			System.out.println(output);
+			//System.out.println(output);
 			element.outputGateProcess.setOutputNormalized(output);
 		}
 

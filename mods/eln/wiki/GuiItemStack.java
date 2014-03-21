@@ -46,10 +46,12 @@ public class GuiItemStack extends Gui implements IGuiObject{
 		
 		if(stack != null){
 		//	RenderHelper.enableStandardItemLighting();
+			RenderHelper.enableStandardItemLighting();
 			RenderHelper.enableGUIStandardItemLighting();
-			
+
 	        Utils.drawItemStack(stack, posX, posY, null,true);
-	      //  RenderHelper.disableStandardItemLighting();
+
+	        RenderHelper.disableStandardItemLighting();
 	       // GL11.glEnable(GL11.GL_LIGHTING);
 	      //  GL11.glEnable(GL11.GL_DEPTH_TEST);
 	      //  RenderHelper.enableStandardItemLighting();

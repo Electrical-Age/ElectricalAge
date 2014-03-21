@@ -6,10 +6,12 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Stack;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -37,6 +39,7 @@ import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.node.SixNodeEntity;
 import mods.eln.sim.PhysicalConstant;
+import mods.eln.wiki.GuiItemStack;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
@@ -70,6 +73,9 @@ import net.minecraft.item.ItemHoe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.item.ItemTool;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.ShapedRecipes;
+import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.packet.Packet250CustomPayload;
@@ -86,6 +92,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.oredict.ShapedOreRecipe;
+import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 
 public class Utils {
@@ -1349,6 +1357,135 @@ public class Utils {
 		dx = tx-x;dy = ty-y;dz = tz-z;
 		double norm = (Math.sqrt(dx*dx+dy*dy+dz*dz));
 		return norm;
+	}
+	public static <T> int readPrivateInt(Object o,String feildName){
+		try {
+			Field f = o.getClass().getDeclaredField(feildName);
+			f.setAccessible(true);
+			return f.getInt(o);
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchFieldException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 0;
+	}
+	public static ItemStack[][] getItemStackGrid(IRecipe r) {
+		ItemStack[][] stacks = new ItemStack[3][3];
+		
+		
+		
+		if(r instanceof ShapedRecipes){
+			ShapedRecipes s = (ShapedRecipes)r;
+			for(int idx2 = 0;idx2 < 3;idx2++){
+				for(int idx = 0;idx < 3;idx++){
+					ItemStack rStack = null;
+					if(idx < s.recipeWidth && idx2 < s.recipeHeight){
+						rStack = s.recipeItems[idx + idx2*s.recipeWidth];
+					}
+					stacks[idx2][idx] = rStack;
+				}	
+			}
+			return stacks;
+		}
+		if(r instanceof ShapedOreRecipe){
+			ShapedOreRecipe s = (ShapedOreRecipe)r;
+			int width = readPrivateInt(s, "width");
+			int height = readPrivateInt(s, "height");
+			Object[] inputs = s.getInput();
+			
+			for(int idx2 = 0;idx2 < height;idx2++){
+				for(int idx = 0;idx < width;idx++){
+					Object o = inputs[idx+idx2*width];
+					ItemStack stack = null;
+					if(o instanceof List){
+						stack = (ItemStack) ((List)o).get(0);
+					}
+					
+					if(o instanceof ItemStack){
+						stack = (ItemStack) o;
+					}
+					stacks[idx2][idx] = stack;
+				}
+			}
+			
+			return stacks;
+		}
+		if(r instanceof ShapelessRecipes){
+			ShapelessRecipes s = (ShapelessRecipes)r;
+			int idx = 0;
+			for(Object o : s.recipeItems){
+				ItemStack stack = (ItemStack)o;
+				stacks[idx/3][idx%3] = stack;
+				idx++;
+			}
+			return stacks;
+		}
+		if(r instanceof ShapelessOreRecipe){
+			ShapelessOreRecipe s = (ShapelessOreRecipe)r;
+			int idx = 0;
+			for(Object o : s.getInput()){
+				ItemStack stack = null;
+				if(o instanceof List){
+					stack = (ItemStack) ((List)o).get(0);
+				}
+				
+				if(o instanceof ItemStack){
+					stack = (ItemStack) o;
+				}
+				stacks[idx/3][idx%3] = stack;
+				idx++;
+			}
+			return stacks;
+		}		
+		return null;
+	}
+
+	public static ArrayList<ItemStack> getRecipeInputs(IRecipe r) {
+		ArrayList<ItemStack> stacks = new ArrayList<ItemStack>();
+		if(r instanceof ShapedRecipes){
+			for(ItemStack stack : ((ShapedRecipes)r).recipeItems){
+				stacks.add(stack);
+			}			
+		}
+		if(r instanceof ShapelessRecipes){
+			for(Object stack : ((ShapelessRecipes)r).recipeItems){
+				stacks.add((ItemStack)stack);
+			}			
+		}
+		if(r instanceof ShapedOreRecipe){
+			ShapedOreRecipe rr = (ShapedOreRecipe)r;
+			for(Object o : ((ShapedOreRecipe) r).getInput()){
+				if(o instanceof List){
+					stacks.addAll(((List)o));
+				}
+				
+				if(o instanceof ItemStack){
+					stacks.add((ItemStack)o);
+				}
+			}
+		}
+		if(r instanceof ShapelessOreRecipe){
+			ShapelessOreRecipe rr = (ShapelessOreRecipe)r;
+			for(Object o : ((ShapelessOreRecipe) r).getInput()){
+				if(o instanceof List){
+					stacks.addAll(((List)o));
+				}
+				
+				if(o instanceof ItemStack){
+					stacks.add((ItemStack)o);
+				}
+			}
+		}
+		return stacks;
 	}    
 
 } 

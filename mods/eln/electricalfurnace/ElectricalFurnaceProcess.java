@@ -21,7 +21,7 @@ public class ElectricalFurnaceProcess implements IProcess{
 		this.inventory = (TransparentNodeElementInventory) furnace.getInventory();
 	}
 	
-
+	public static double energyNeededPerSmelt = 1000;
 	
 	
 	
@@ -118,7 +118,7 @@ public class ElectricalFurnaceProcess implements IProcess{
 		else
 		{
 			smeltInProcess = true;
-			energyNeeded = 1000;
+			energyNeeded = energyNeededPerSmelt;
 			energyCounter = 0.0;			
 		}
 	}
