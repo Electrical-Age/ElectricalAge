@@ -138,8 +138,7 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Provide heat when");
-		list.add("consume fuel");
+		list.add("Provides heat when fuelled.");
 		list.add(Utils.plotPower("Power :", nominalPower));
 		list.add(Utils.plotCelsius("Tmax :",thermal.warmLimit));
 	}

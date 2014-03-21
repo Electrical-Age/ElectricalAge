@@ -39,9 +39,9 @@ public class GroundCableDescriptor extends SixNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Provide a zero volt reference");
-		list.add("Can be used to put negative");
-		list.add("battery pin to the ground");
+		list.add("Provides a zero volt reference.");
+		list.add("Can be used to ground negative");
+		list.add("battery pins.");
 	}
 	
 }

@@ -115,7 +115,7 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 		
 		list.add("Socket : " + socket);
 		list.add("Techno : " + type);
-		list.add(Utils.plotTime("Life",getLifeInTag(itemStack)*nominalLife));
+		list.add(Utils.plotTime("Life : ",getLifeInTag(itemStack)*nominalLife));
 		
 	}
 }

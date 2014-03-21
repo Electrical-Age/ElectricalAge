@@ -83,7 +83,7 @@ public class BrushDescriptor  extends GenericItemUsingDamageDescriptor
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add("life : " + itemStack.getTagCompound().getInteger("life"));
+		list.add("Life : " + itemStack.getTagCompound().getInteger("life"));
 		
 	}
 	

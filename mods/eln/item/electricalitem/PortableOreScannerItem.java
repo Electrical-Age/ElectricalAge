@@ -170,7 +170,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add(Utils.plotEnergy("Energy stored", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
+		list.add(Utils.plotEnergy("Energy Stored:", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
 	}
 
 

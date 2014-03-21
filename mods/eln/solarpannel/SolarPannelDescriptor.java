@@ -165,9 +165,9 @@ public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add("Product power from daylight");
-		list.add(Utils.plotVolt("Voltage max:", electricalUmax));
-		list.add(Utils.plotPower("Power max:", electricalPmax));
-		if(canRotate) list.add("Can be oriented");
+		list.add("Produces power from daylight.");
+		list.add(Utils.plotVolt("Voltage Max:", electricalUmax));
+		list.add(Utils.plotPower("Power Max:", electricalPmax));
+		if(canRotate) list.add("Can be oriented.");
 	}
 }

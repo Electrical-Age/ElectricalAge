@@ -26,7 +26,7 @@ public class GuiVerticalVoltageSupplyBar extends GuiVerticalWorkingZoneBar {
 	public void setVoltage(float value) {
 		// TODO Auto-generated method stub
 		super.setValue(value/nominalU);
-		setComment(0,Utils.plotVolt("Voltage supply :",value));
+		setComment(0,Utils.plotVolt("Voltage Supply :",value));
 	}	
 	
 	@Override
@@ -37,7 +37,7 @@ public class GuiVerticalVoltageSupplyBar extends GuiVerticalWorkingZoneBar {
 	
 	public void setPower(float f) {
 		// TODO Auto-generated method stub
-		setComment(1,Utils.plotPower("Power supply   :",f));
+		setComment(1,Utils.plotPower("Power Supply :",f));
 	}
 
 
