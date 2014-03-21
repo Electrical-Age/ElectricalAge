@@ -63,6 +63,10 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor{
 				led = obj.getPart("led");
 			}
 		}
+		
+		if(onFloor){
+			setPlaceDirection(Direction.YN);
+		}
 	}
 	Obj3D obj;
 	Obj3DPart main,led;
@@ -119,13 +123,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor{
 		// TODO Auto-generated method stub
 		return true;
 	}
-	@Override
-	public boolean canBePlacedOnSide(Direction side) {
-		if(onFloor && side != Direction.YN) return false;
-		return super.canBePlacedOnSide(side);
-	}
-	
-	
+
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {

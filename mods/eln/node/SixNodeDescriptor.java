@@ -5,6 +5,7 @@ import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
 
@@ -38,8 +39,11 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 		return false;
 	}
 
+	public boolean canBePlacedOnSide(EntityPlayer player,Coordonate c,Direction side){
+		return canBePlacedOnSide(player,side);
+	}
 	
-	public boolean canBePlacedOnSide(Direction side)
+	public boolean canBePlacedOnSide(EntityPlayer player,Direction side)
 	{
 		if(placeDirection != null){
 			boolean ok = false;
@@ -48,6 +52,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 					return true;
 				}
 			}
+			player.addChatMessage("You can't place this block at this side");
 			return false;
 		}
 		return true;
@@ -83,7 +88,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 		placeDirection = d;
 	}
 	
-	Direction[] placeDirection = null;
+	protected Direction[] placeDirection = null;
 	public String checkCanPlace(Coordonate coord, Direction direction,LRDU front) {
 		if(placeDirection != null){
 			boolean ok = false;

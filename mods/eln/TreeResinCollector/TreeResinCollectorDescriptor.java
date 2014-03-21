@@ -4,9 +4,12 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import mods.eln.misc.Coordonate;
+import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.SixNodeDescriptor;
@@ -28,6 +31,9 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 				emptyS = fill.getFloat("emptyS");
 			}
 		}
+		
+		
+		
 	}
 
 	float emptyS,emptyT;
@@ -80,5 +86,22 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 		list.add("Product tree resin over time");
 		list.add("when placed on tree");
 		list.add("The production is slow");
+	}
+	
+	
+	@Override
+	public boolean canBePlacedOnSide(EntityPlayer player,Coordonate c,Direction side) {
+		// TODO Auto-generated method stub
+		Block b = c.getBlock();
+		if(b!= Block.wood){
+			player.addChatMessage("This block must be placed on tree");
+			return false;
+		}
+		if(side.isY()){
+			player.addChatMessage("You can't place this block at this side");
+			return false;
+		}
+
+		return true;
 	}
 }
