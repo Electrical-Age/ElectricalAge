@@ -34,6 +34,7 @@ public class ConsoleListener extends CommandBase{
 			SaveConfig.instance.batteryAging = (!astring[1].equals("0"));
 			SaveConfig.instance.electricalLampAging = (!astring[1].equals("0"));
 			SaveConfig.instance.heatFurnaceFuel = (!astring[1].equals("0"));
+			SaveConfig.instance.infinitPortableBattery = (astring[1].equals("0"));
 		}else if(a.equals("lampaging")){
 			SaveConfig.instance.electricalLampAging = (!astring[1].equals("0"));
 		}else if(a.equals("batteryaging")){

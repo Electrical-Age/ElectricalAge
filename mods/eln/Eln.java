@@ -247,7 +247,7 @@ import cpw.mods.fml.relauncher.Side;
 
 
 
-@Mod(modid = "Eln", name = "Electrical age", version = "BETA-1.1.0")
+@Mod(modid = "Eln", name = "Electrical age", version = "BETA-1.1.1")
 @NetworkMod(clientSideRequired = true, serverSideRequired = false, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
 	/*

@@ -103,7 +103,7 @@ public class LampSocketRender extends SixNodeElementRender{
 				Entity e = (Entity) o;
 				float eFactor = 0;
 				if(e instanceof EntityArrow) eFactor = 1f;
-				if(e instanceof EntityLivingBase) eFactor = 2f;
+				if(e instanceof EntityLivingBase) eFactor = 4f;
 
 				if(eFactor == 0) continue;
 				pertuVz += e.motionX * eFactor * dt;
@@ -114,12 +114,15 @@ public class LampSocketRender extends SixNodeElementRender{
 			if(tileEntity.worldObj.getSavedLightValue(EnumSkyBlock.Sky, tileEntity.xCoord,tileEntity.yCoord,tileEntity.zCoord) > 3){
 				float weather = (float) Utils.getWeather(tileEntity.worldObj)*0.9f+0.1f;
 		
-				weatherAlphaY += (0.0-Math.random())*dt*Math.PI/0.5*weather;
-				weatherAlphaZ += (0.0-Math.random())*dt*Math.PI/0.5*weather;
+				weatherAlphaY += (0.4-Math.random())*dt*Math.PI/0.2*weather;
+				weatherAlphaZ += (0.4-Math.random())*dt*Math.PI/0.2*weather;
 				if(weatherAlphaY > 2*Math.PI) weatherAlphaY -= 2*Math.PI;
 				if(weatherAlphaZ > 2*Math.PI) weatherAlphaZ -= 2*Math.PI;
 				pertuVy += Math.random()*Math.sin(weatherAlphaY)*weather*weather*dt*3; 
-				pertuVz += Math.random()*Math.cos(weatherAlphaZ)*weather*weather*dt*3; 
+				pertuVz += Math.random()*Math.cos(weatherAlphaY)*weather*weather*dt*3; 
+				
+				pertuVy += 0.4 * dt * weather*Math.signum(pertuVy) * Math.random();
+				pertuVz += 0.4 * dt * weather*Math.signum(pertuVz) * Math.random();
 			}
 			
 			
