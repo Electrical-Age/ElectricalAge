@@ -153,15 +153,14 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Dissipates heat in air");
-		list.add("Useful for cooling turbine");
+		list.add("Used for cooling the Turbine.");
 		list.add(Utils.plotCelsius("Tmax :", warmLimit));
 		list.add("Nominal usage ->");
 		list.add(Utils.plotCelsius("  Temperature :", nominalT));
 		list.add(Utils.plotPower("  Cooling :", nominalP));
-		list.add(Utils.plotVolt("  Fan voltage :", nominalElectricalU));
-		list.add(Utils.plotPower("  Fan electrical power :", electricalNominalP));
-		list.add(Utils.plotPower("  Fan cooling power :", nominalElectricalCoolingPower));
+		list.add(Utils.plotVolt("  Fan Voltage :", nominalElectricalU));
+		list.add(Utils.plotPower("  Fan Electrical Power :", electricalNominalP));
+		list.add(Utils.plotPower("  Fan Cooling Power :", nominalElectricalCoolingPower));
 
 	}
 }

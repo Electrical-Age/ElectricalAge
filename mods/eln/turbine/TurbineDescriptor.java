@@ -135,11 +135,11 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Converts heat in electricity");
-		list.add("Nominal use at");
-		list.add(" Delta T : " +  ((int)nominalDeltaT) + "\u00B0C");
-		list.add(Utils.plotVolt(" Voltage out :", nominalU));
-		list.add(Utils.plotPower(" Power out :", nominalP));
+		list.add("Converts heat into electricity.");
+		list.add("Nominal usage ->");
+		list.add("  Delta T : " +  ((int)nominalDeltaT) + "\u00B0C");
+		list.add(Utils.plotVolt("  Voltage out :", nominalU));
+		list.add(Utils.plotPower("  Power out :", nominalP));
 
 	}
 }

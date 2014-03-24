@@ -61,9 +61,9 @@ public class TransformerGuiDraw extends GuiContainerEln {
     	// TODO Auto-generated method stub
     	super.preDraw(f, x, y);
     	if(render.grounded)
-    		buttonGrounded.displayString = "Self grounded";
+    		buttonGrounded.displayString = "Self Grounded";
     	else
-    		buttonGrounded.displayString = "Externally grounded";
+    		buttonGrounded.displayString = "Externally Grounded";
 
     }
 

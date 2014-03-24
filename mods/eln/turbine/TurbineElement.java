@@ -107,17 +107,17 @@ public class TurbineElement extends TransparentNodeElement{
 	public String multiMeterString(Direction side) {
 		if(side == front.left())return "";
 		if(side == front.right())return "";
-		if(side == front)return  Utils.plotVolt("U+",positiveLoad.Uc) + Utils.plotAmpere("I+",positiveLoad.getCurrent());
-		if(side == front.back() && grounded == false)return  Utils.plotVolt("U-",negativeLoad.Uc) + Utils.plotAmpere("I-",negativeLoad.getCurrent());
-		return  Utils.plotVolt("U",positiveLoad.Uc-negativeLoad.Uc) + Utils.plotAmpere("I",positiveLoad.getCurrent());
+		if(side == front)return  Utils.plotVolt("U+:",positiveLoad.Uc) + Utils.plotAmpere("I+:",positiveLoad.getCurrent());
+		if(side == front.back() && grounded == false)return  Utils.plotVolt("U-:",negativeLoad.Uc) + Utils.plotAmpere("I-:",negativeLoad.getCurrent());
+		return  Utils.plotVolt("U:",positiveLoad.Uc-negativeLoad.Uc) + Utils.plotAmpere("I:",positiveLoad.getCurrent());
 
 	}
 	
 	@Override
 	public String thermoMeterString(Direction side) {
-		if(side == front.left())return  Utils.plotCelsius("T+",warmLoad.Tc) + Utils.plotPower("P+",warmLoad.getPower());
-		if(side == front.right())return  Utils.plotCelsius("T-",coolLoad.Tc) + Utils.plotPower("P-",coolLoad.getPower());
-		return  Utils.plotCelsius("T",warmLoad.Tc-coolLoad.Tc);
+		if(side == front.left())return  Utils.plotCelsius("T+:",warmLoad.Tc) + Utils.plotPower("P+:",warmLoad.getPower());
+		if(side == front.right())return  Utils.plotCelsius("T-:",coolLoad.Tc) + Utils.plotPower("P-:",coolLoad.getPower());
+		return  Utils.plotCelsius("T:",warmLoad.Tc-coolLoad.Tc);
 
 	}
 

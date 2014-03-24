@@ -16,7 +16,7 @@ public class ThermalSensorContainer extends BasicContainer {
 	
 	public ThermalSensorContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new SixNodeItemSlot(inventory,cableSlotId,152,62,1,new Class[]{ThermalCableDescriptor.class},SlotSkin.medium,new String[]{"Thermal cable slot"})
+				new SixNodeItemSlot(inventory,cableSlotId,152,62,1,new Class[]{ThermalCableDescriptor.class},SlotSkin.medium,new String[]{"Thermal Cable Slot"})
 			});
 		
 		// TODO Auto-generated constructor stub

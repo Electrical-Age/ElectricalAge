@@ -95,11 +95,11 @@ public class ItemDefault extends Default{
 		}
 		int counter = 0;
 		if(recipeOutList.size() == 0){
-			extender.add(new GuiLabel(6, y, "Is not craftable"));
+			extender.add(new GuiLabel(6, y, "Is not craftable!"));
 			y += 12;			
 		}
 		else{
-			extender.add(new GuiLabel(6, y, "Recipe :"));
+			extender.add(new GuiLabel(6, y, "Recipe:"));
 			y += 12;
 			
 			counter = -1;
@@ -123,11 +123,11 @@ public class ItemDefault extends Default{
 		}
 		
 		if(recipeInList.size() == 0){
-			extender.add(new GuiLabel(6, y, "Is not a crafting material"));
+			extender.add(new GuiLabel(6, y, "Is not a crafting material!"));
 			y += 12;			
 		}
 		else{
-			extender.add(new GuiLabel(6, y, "Can craft :"));
+			extender.add(new GuiLabel(6, y, "Can craft:"));
 			y += 12;
 			counter = -1;
 			for(IRecipe r : recipeInList){
@@ -164,7 +164,7 @@ public class ItemDefault extends Default{
 				//extender.add(new GuiLabel(6, y, "Can't Product"));
 			}
 			else{
-				extender.add(new GuiLabel(6, y, "Can Product"));
+				extender.add(new GuiLabel(6, y, "Can create:"));
 				y += 12;
 				for(Recipe r : list){
 					if(counter == 0) y+=(int)(18*1.3);
@@ -191,7 +191,7 @@ public class ItemDefault extends Default{
 				//extender.add(new GuiLabel(6, y, "Can't Product"));
 			}
 			else{
-				extender.add(new GuiLabel(6, y, "Is producted by"));
+				extender.add(new GuiLabel(6, y, "Is created by:"));
 				y += 12;
 				for(Recipe r : list){
 					if(counter == 0) y+=(int)(18*1.3);
