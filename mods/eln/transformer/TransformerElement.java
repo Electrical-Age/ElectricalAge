@@ -102,10 +102,10 @@ public class TransformerElement extends TransparentNodeElement{
 	
 	@Override
 	public String multiMeterString(Direction side) {
-		if(side == front.left())return  Utils.plotVolt("UP+",positivePrimaryLoad.Uc) + Utils.plotAmpere("IP+",positivePrimaryLoad.getCurrent());
-		if(side == front.right())return  Utils.plotVolt("US+",positiveSecondaryLoad.Uc) + Utils.plotAmpere("IS+",positiveSecondaryLoad.getCurrent());
-		if(side == front && grounded == false)return  Utils.plotVolt("UP-",negativePrimaryLoad.Uc) + Utils.plotAmpere("IP-",negativePrimaryLoad.getCurrent());
-		if(side == front.back() && grounded == false)return Utils.plotVolt("US-",negativeSecondaryLoad.Uc) + Utils.plotAmpere("IS-",negativeSecondaryLoad.getCurrent());
+		if(side == front.left())return  Utils.plotVolt("UP+:",positivePrimaryLoad.Uc) + Utils.plotAmpere("IP+:",positivePrimaryLoad.getCurrent());
+		if(side == front.right())return  Utils.plotVolt("US+:",positiveSecondaryLoad.Uc) + Utils.plotAmpere("IS+:",positiveSecondaryLoad.getCurrent());
+		if(side == front && grounded == false)return  Utils.plotVolt("UP-:",negativePrimaryLoad.Uc) + Utils.plotAmpere("IP-:",negativePrimaryLoad.getCurrent());
+		if(side == front.back() && grounded == false)return Utils.plotVolt("US-:",negativeSecondaryLoad.Uc) + Utils.plotAmpere("IS-:",negativeSecondaryLoad.getCurrent());
 		return "";
 
 	}

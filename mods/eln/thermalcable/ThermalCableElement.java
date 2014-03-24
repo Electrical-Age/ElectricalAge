@@ -160,7 +160,7 @@ public class ThermalCableElement extends SixNodeElement  implements IThermalDest
 					}
 					else
 					{
-						entityPlayer.addChatMessage("Brush is empty");
+						entityPlayer.addChatMessage("Brush is empty!");
 					}
 				}
 			}

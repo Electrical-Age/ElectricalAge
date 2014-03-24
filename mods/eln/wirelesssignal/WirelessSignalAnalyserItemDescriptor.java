@@ -32,12 +32,12 @@ public class WirelessSignalAnalyserItemDescriptor extends GenericItemUsingDamage
 		int idx = 0;
 		for(WirelessSignalInfo e : list)
 		{
-			player.addChatMessage(/*idx + " : " + */e.tx.getChannel() + " Strength=" + String.format("%2.1f",e.power) +" value=" +String.format("%2.1fV",e.tx.getValue() * Eln.instance.SVU));
+			player.addChatMessage(/*idx + " : " + */e.tx.getChannel() + " Strength=" + String.format("%2.1f",e.power) +" Value=" +String.format("%2.1fV",e.tx.getValue() * Eln.instance.SVU));
 			idx++;
 		}
 		if(list.size() == 0)
 		{
-			player.addChatMessage("No wireless signal in area");
+			player.addChatMessage("No wireless signal in area!");
 		}
 		return true;
 	}

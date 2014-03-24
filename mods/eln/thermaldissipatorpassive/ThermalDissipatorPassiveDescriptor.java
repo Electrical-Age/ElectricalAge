@@ -97,8 +97,7 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Dissipates heat in air");
-		list.add("Useful for cooling turbine");
+		list.add("Used for cooling the Turbine.");
 		list.add(Utils.plotCelsius("Tmax :", warmLimit));
 		list.add("Nominal usage ->");
 		list.add(Utils.plotCelsius("  Temperature :", nominalT));
