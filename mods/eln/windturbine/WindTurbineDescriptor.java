@@ -121,13 +121,13 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add("Product power from wind");
+		list.add("Produces power from wind.");
 		list.add(Utils.plotVolt("Voltage:", maxVoltage));
 		list.add(Utils.plotPower("Power:", nominalPower));
 		list.add("Wind area:");
-		list.add("  front: " + rayX);
-		list.add("  up/down: " + rayY);
-		list.add("  left/right: " + rayZ);
+		list.add("  Front: " + rayX);
+		list.add("  Up/Down: " + rayY);
+		list.add("  Left/Right: " + rayZ);
 	}
 }
 

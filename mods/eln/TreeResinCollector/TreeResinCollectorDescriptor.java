@@ -83,9 +83,8 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Product tree resin over time");
-		list.add("when placed on tree");
-		list.add("The production is slow");
+		list.add("Slowly produces Tree Resin over");
+		list.add("time when placed on a tree.");
 	}
 	
 	
@@ -94,11 +93,11 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 		// TODO Auto-generated method stub
 		Block b = c.getBlock();
 		if(b!= Block.wood){
-			player.addChatMessage("This block must be placed on tree");
+			player.addChatMessage("This block can only be placed on the side of a tree!");
 			return false;
 		}
 		if(side.isY()){
-			player.addChatMessage("You can't place this block at this side");
+			player.addChatMessage("This block can only be placed on the side of a tree!");
 			return false;
 		}
 

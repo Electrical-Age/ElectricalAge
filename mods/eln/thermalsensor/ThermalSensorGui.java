@@ -53,28 +53,28 @@ public class ThermalSensorGui extends GuiContainerEln{
 	        temperatureType = newGuiButton(176-8-70,8,70, "Temperature");
 
 			int x = -15,y = 13;
-			validate = newGuiButton(x+8 + 50 + 4 + 50 + 4 -26,y+ (166-84)/2 - 8,50, "validate");
+			validate = newGuiButton(x+8 + 50 + 4 + 50 + 4 -26,y+ (166-84)/2 - 8,50, "Validate");
 			
 			lowValue = newGuiTextField(x+8 + 50 + 4-26, y+(166-84)/2+3, 50);
 	        lowValue.setText(render.lowValue);
-	        lowValue.setComment(new String[]{"Input value for low level output"});
+	        lowValue.setComment(new String[]{"Minimum input"});
 	        
 	        highValue = newGuiTextField(x+8 + 50 + 4-26,y+ (166-84)/2 -12, 50);
 	        highValue.setText(render.highValue);
-	        highValue.setComment(new String[]{"Input value for high level output"});
+	        highValue.setComment(new String[]{"Maximum input"});
 		}
 		else
 		{
 			int x = 0,y = 0;
-			validate = newGuiButton(x+8 + 50 + 4 + 50 + 4 -26,y+ (166-84)/2 - 8,50, "validate");
+			validate = newGuiButton(x+8 + 50 + 4 + 50 + 4 -26,y+ (166-84)/2 - 8,50, "Validate");
 			
 			lowValue = newGuiTextField(x+8 + 50 + 4-26, y+(166-84)/2+3, 50);
 	        lowValue.setText(render.lowValue);
-	        lowValue.setComment(new String[]{"Input value for low level output"});
+	        lowValue.setComment(new String[]{"Minimum input"});
 	        
 	        highValue = newGuiTextField(x+8 + 50 + 4-26,y+ (166-84)/2 -12, 50);
 	        highValue.setText(render.highValue);
-	        highValue.setComment(new String[]{"Input value for high level output"});
+	        highValue.setComment(new String[]{"Maximum input"});
 		}
 	}
 	

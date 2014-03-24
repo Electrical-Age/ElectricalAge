@@ -46,9 +46,10 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Can transform voltage");
-		list.add("The transform ratio is");
-		list.add("defined by cables stacks size ratio");
+		list.add("Transforms an input voltage and");
+		list.add("outputs it.");
+		list.add("The transform ratio is defined");
+		list.add("by the cable stacks size ratio.");
 	}
 	
 	@Override
