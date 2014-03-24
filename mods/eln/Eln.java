@@ -848,6 +848,8 @@ public class Eln {
 		recipemagnetiser();
 
 		proxy.registerRenderers();
+		
+		LanguageRegistry.instance().addStringLocalization("itemGroup.Eln", "Electrical Age");
 
 		try {
 			elnHttpServer = new ElnHttpServer();
