@@ -41,6 +41,8 @@ public class ElectricalEntitySensorSlowProcess implements IProcess {
 		if(timeCounter > refreshPeriode)
 		{
 			timeCounter -= refreshPeriode;
+			boolean useSpeed = element.descriptor.useEntitySpeed;
+			double speedFactor = element.descriptor.speedFactor;
 			Coordonate coord = element.sixNode.coordonate;
 			ItemStack filterStack = element.inventory.getStackInSlot(ElectricalEntitySensorContainer.filterId);
 			
@@ -72,7 +74,13 @@ public class ElectricalEntitySensorSlowProcess implements IProcess {
 				if(view){
 					double distance = Utils.getLength(coord.x+0.5,coord.y+0.5,coord.z+0.5,e.posX,e.posY+e.getEyeHeight(),e.posZ);
 					if(distance < rayMax){
-						output += weight*(rayMax-distance)/rayMax;
+						double sf = 1;
+						if(useSpeed){
+							sf = speedFactor*Utils.getLength(e.posX, e.posY, e.posZ, e.lastTickPosX, e.lastTickPosY, e.lastTickPosZ);//Math.sqrt(e.motionX*e.motionX+e.motionY*e.motionY+e.motionZ*e.motionZ);
+							System.out.println(sf);
+						}
+						
+						output += sf*weight*(rayMax-distance)/rayMax;
 					}
 				}
 			}

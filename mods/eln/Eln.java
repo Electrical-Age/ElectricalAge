@@ -1355,7 +1355,7 @@ public class Eln {
 		{
 			subId = 1;
 
-			name = "Lamp socket B Projector";
+			name = "Lamp Socket B Projector";
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name,new LampSocketStandardObjRender(obj.getObj("ClassicLampSocket"),false),
 					 LampSocketType.Douille, // LampSocketType
@@ -4756,7 +4756,7 @@ public class Eln {
 				Character.valueOf('C'),findItemStack("Cheap Chip"),
 				Character.valueOf('S'),findItemStack("Signal Antenna"));
 		
-		addRecipe(findItemStack("Wireless Signal Receivers"), 
+		addRecipe(findItemStack("Wireless Signal Receiver"), 
 				" S ", 
 				"ICI", 
 				Character.valueOf('R'), new ItemStack(Item.redstone), 
@@ -5958,7 +5958,7 @@ public class Eln {
 					);	
 		}
 		for(int idx = 0;idx<4;idx++){
-			addRecipe(findItemStack("Led vuMeter", 1), 
+			addRecipe(findItemStack("LED vuMeter", 1), 
 					" W ",
 					"WTW",
 					" S ",
@@ -5975,7 +5975,7 @@ public class Eln {
 		addRecipe(findItemStack("Electrical Breaker", 1), 
 				"crC",
 				Character.valueOf('c'),findItemStack("Overvoltage Protection"), 
-				Character.valueOf('C'),findItemStack("OverHeating Protection"), 
+				Character.valueOf('C'),findItemStack("Overheating Protection"), 
 				Character.valueOf('r'),findItemStack("High Voltage Relay")
 				);
 
