@@ -27,31 +27,21 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.StatCollector;
 
-
-
-
 public class AutoMinerGuiDraw extends GuiContainerEln {
 
-	
     private TransparentNodeElementInventory inventory;
     AutoMinerRender render;
 
-    
-    public AutoMinerGuiDraw(EntityPlayer player, IInventory inventory,AutoMinerRender render)
+    public AutoMinerGuiDraw(EntityPlayer player, IInventory inventory, AutoMinerRender render)
     {
-        super(new AutoMinerContainer(null,player, inventory));
+        super(new AutoMinerContainer(null, player, inventory));
         this.inventory = (TransparentNodeElementInventory) inventory;
-        this.render = render;
-        
-      
+        this.render = render; 
     }
-
 
 	@Override
 	protected GuiHelperContainer newHelper() {
 		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176, 166,8,84);
+		return new GuiHelperContainer(this, 176, 166, 8, 84);
 	}
-    
-
 }

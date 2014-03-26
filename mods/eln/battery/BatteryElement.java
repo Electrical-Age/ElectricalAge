@@ -36,22 +36,22 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class BatteryElement extends TransparentNodeElement implements IThermalDestructorDescriptor , ITemperatureWatchdogDescriptor{
+public class BatteryElement extends TransparentNodeElement implements IThermalDestructorDescriptor, ITemperatureWatchdogDescriptor {
 
 	public NodeElectricalLoad positiveLoad = new NodeElectricalLoad("positiveLoad");
 	public NodeElectricalLoad negativeLoad = new NodeElectricalLoad("negativeLoad");
 	public NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
-	public NodeBatteryProcess batteryProcess = new NodeBatteryProcess(positiveLoad,negativeLoad,null,0);
-	public ElectricalLoadHeatThermalLoadProcess positiveETProcess = new ElectricalLoadHeatThermalLoadProcess(positiveLoad,thermalLoad);
-//	public ElectricalLoadHeatThermalLoadProcess negativeETProcess = new ElectricalLoadHeatThermalLoadProcess(negativeLoad,thermalLoad);
+	public NodeBatteryProcess batteryProcess = new NodeBatteryProcess(positiveLoad, negativeLoad, null, 0);
+	public ElectricalLoadHeatThermalLoadProcess positiveETProcess = new ElectricalLoadHeatThermalLoadProcess(positiveLoad, thermalLoad);
+//	public ElectricalLoadHeatThermalLoadProcess negativeETProcess = new ElectricalLoadHeatThermalLoadProcess(negativeLoad, thermalLoad);
 	public ElectricalResistor dischargeResistor = new ElectricalResistor(positiveLoad, negativeLoad);
 	
 	public BatteryInventoryProcess inventoryProcess = new BatteryInventoryProcess(this);
 	
-	double syncronizedPositiveUc,syncronizedNegativeUc,syncronizedCurrent,syncronizedTc;
+	double syncronizedPositiveUc, syncronizedNegativeUc, syncronizedCurrent, syncronizedTc;
 	
-	NodeBatterySlowProcess batterySlowProcess = new NodeBatterySlowProcess(node,batteryProcess,thermalLoad);
-	NodeThermalWatchdogProcess thermalWatchdogProcess = new NodeThermalWatchdogProcess(node,this,this,thermalLoad);
+	NodeBatterySlowProcess batterySlowProcess = new NodeBatterySlowProcess(node, batteryProcess, thermalLoad);
+	NodeThermalWatchdogProcess thermalWatchdogProcess = new NodeThermalWatchdogProcess(node, this, this, thermalLoad);
 		 
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2, 64, this);
 	
@@ -63,14 +63,10 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	
 	boolean fromNBT = false;
 	
-	
 	public BatteryDescriptor descriptor;
 	
-	
-	
-	
 	public BatteryElement(TransparentNode transparentNode,TransparentNodeDescriptor descriptor) {
-		super(transparentNode,descriptor);
+		super(transparentNode, descriptor);
 		this.descriptor = (BatteryDescriptor) descriptor;
 		
 	   	electricalLoadList.add(positiveLoad);
@@ -79,7 +75,7 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	   	thermalLoadList.add(thermalLoad);
 	   	electricalProcessList.add(batteryProcess);
 	   	thermalProcessList.add(positiveETProcess);
-	   //	thermalProcessList.add(negativeETProcess);
+	    //	thermalProcessList.add(negativeETProcess);
 
 	   	slowProcessList.add(batterySlowProcess);
     	slowProcessList.add(thermalWatchdogProcess);
@@ -89,13 +85,11 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
     	batteryProcess.setIMax(this.descriptor.IMax);
 	}
 
-	
-	public boolean hasOverVoltageProtection()
-	{
+	public boolean hasOverVoltageProtection() {
 		return inventory.getStackInSlot(0) != null;
 	}
-	public boolean hasOverHeatingProtection()
-	{
+	
+	public boolean hasOverHeatingProtection() {
 		return inventory.getStackInSlot(1) != null;
 	}
 	
@@ -133,23 +127,20 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 		return  Utils.plotVolt("Ubat:", batteryProcess.getU()) + Utils.plotAmpere("Current Output:",batteryProcess.dischargeCurrentMesure);
 	}
 
-
 	@Override
 	public String thermoMeterString(Direction side) {
 		// TODO Auto-generated method stub
-		return  Utils.plotCelsius("Tbat:",thermalLoad.Tc);
+		return  Utils.plotCelsius("Tbat:", thermalLoad.Tc);
 	}
 	
-
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
     	try {
-
-	    	stream.writeFloat((float)((positiveLoad.Uc - negativeLoad.Uc)*batteryProcess.dischargeCurrentMesure));
+	    	stream.writeFloat((float)((positiveLoad.Uc - negativeLoad.Uc) * batteryProcess.dischargeCurrentMesure));
 	    	stream.writeFloat((float) batteryProcess.getEnergy());
-	    	stream.writeShort((short)(batteryProcess.life*1000));
+	    	stream.writeShort((short)(batteryProcess.life * 1000));
 
 	    	node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
 		} catch (IOException e) {
@@ -160,39 +151,28 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	
 	@Override
 	public void initialize() {
-
 		initPhysicalValue();
-		
-		
-		
-		connect();
-    			
+		connect();		
 	}
 	
-	public void initPhysicalValue()
-	{
-		
+	public void initPhysicalValue() {
 		descriptor.applyTo(batteryProcess);
 		descriptor.applyTo(thermalLoad);
 		descriptor.applyTo(negativeLoad, Eln.simulator);
 		descriptor.applyTo(positiveLoad, Eln.simulator);
 		descriptor.applyTo(dischargeResistor);
 		descriptor.applyTo(batterySlowProcess);
-
 		
-		if(fromItemStack)
-		{
+		if(fromItemStack) {
 			batteryProcess.life = fromItemStack_life;
 			batteryProcess.setCharge(fromItemStack_charge);
 			fromItemStack = false;
 		}
-		
 		negativeLoad.grounded(grounded);
 	}
 
 	@Override
-    public void inventoryChange(IInventory inventory)
-    {
+    public void inventoryChange(IInventory inventory) {
 	//	initPhysicalValue();
     }
 	
@@ -202,9 +182,6 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
-	
-
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
@@ -221,10 +198,6 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 		//inventory.readFromNBT(nbt, str + "inv");
 	}
 	
-
-
-	
-	
 	@Override
 	public boolean hasGui() {
 		// TODO Auto-generated method stub
@@ -237,8 +210,6 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 		return new BatteryContainer(this.node,player, inventory);
 	}
 
-	
-	
 	@Override
 	public void onGroundedChangedByClient() {
 		super.onGroundedChangedByClient();
@@ -253,6 +224,7 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	boolean fromItemStack = false;
 	double fromItemStack_charge;
 	double fromItemStack_life;
+	
 	@Override
 	public void readItemStackNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
@@ -265,15 +237,13 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 		fromItemStack = true;
 	}
 	
-	
 	@Override
 	public NBTTagCompound getItemStackNBT() {
 		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
-		nbt.setDouble("charge",batteryProcess.getCharge());
-		nbt.setDouble("life",batteryProcess.life);
+		nbt.setDouble("charge", batteryProcess.getCharge());
+		nbt.setDouble("life", batteryProcess.life);
 		return nbt;
 	}
-
 
 	@Override
 	public double getThermalDestructionMax() {
@@ -281,13 +251,11 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 		return 3;
 	}
 
-
 	@Override
 	public double getThermalDestructionStart() {
 		// TODO Auto-generated method stub
 		return 2;
 	}
-
 
 	@Override
 	public double getThermalDestructionPerOverflow() {
@@ -295,20 +263,17 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 		return 0.2;
 	}
 
-
 	@Override
 	public double getThermalDestructionProbabilityPerOverflow() {
 		// TODO Auto-generated method stub
-		return 1/descriptor.thermalWarmLimit/0.1;
+		return 1 / descriptor.thermalWarmLimit / 0.1;
 	}
-
 
 	@Override
 	public double getTmax() {
 		// TODO Auto-generated method stub
 		return descriptor.thermalWarmLimit;
 	}
-
 
 	@Override
 	public double getTmin() {

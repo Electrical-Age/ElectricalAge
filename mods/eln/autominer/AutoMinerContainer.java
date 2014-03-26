@@ -44,5 +44,4 @@ public class AutoMinerContainer extends BasicContainer implements INodeContainer
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
 }
