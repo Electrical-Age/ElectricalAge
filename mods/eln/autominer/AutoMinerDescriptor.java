@@ -18,7 +18,6 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor{
 			double nominalVoltage,double maximalVoltage,
 			double nominalPower,double nominalDropFactor,
 			double pipeOperationTime,double pipeOperationEnergy
-			
 			) {
 		super(name, AutoMinerElement.class, AutoMinerRender.class);
 		this.nominalVoltage = nominalVoltage;
@@ -43,7 +42,6 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor{
 		load.setMinimalC(Eln.simulator);
 	}
 	
-	
 	@Override
 	public void setParent(Item item, int damage) {
 		// TODO Auto-generated method stub
@@ -57,13 +55,11 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor{
 		watch.positiveLimit = maximalVoltage;
 	}
 	
-	
 	@Override
 	public boolean mustHaveFloor() {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
 	
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,

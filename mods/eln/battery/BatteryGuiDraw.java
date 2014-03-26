@@ -28,41 +28,33 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.StatCollector;
 
-
 public class BatteryGuiDraw extends GuiContainerEln {
 
-	
     private TransparentNodeElementInventory inventory;
     BatteryRender render;
     GuiButtonEln buttonGrounded;
     GuiVerticalProgressBar energyBar;
-    public BatteryGuiDraw(EntityPlayer player, IInventory inventory,BatteryRender render)
-    {
+    
+    public BatteryGuiDraw(EntityPlayer player, IInventory inventory, BatteryRender render) {
         super(new BatteryContainer(null,player, inventory));
         this.inventory = (TransparentNodeElementInventory) inventory;
         this.render = render;
-
     }
     
-    public void initGui()
-    {
+    public void initGui() {
     	super.initGui();
     	
-    	buttonGrounded = newGuiButton(8,45,100, "");
+    	buttonGrounded = newGuiButton(8, 45, 100, "");
     	buttonGrounded.drawButton = false;
-    	energyBar = newGuiVerticalProgressBar(167-16, 8,16, 69);
+    	energyBar = newGuiVerticalProgressBar(167-16, 8, 16, 69);
         energyBar.setColor(0.2f, 0.5f, 0.8f);
-        
     }
-    
-
     
     @Override
     public void guiObjectEvent(IGuiObject object) {
     	// TODO Auto-generated method stub
     	super.guiObjectEvent(object);
-    	if(buttonGrounded == object)
-    	{
+    	if(buttonGrounded == object) {
     		render.clientSetGrounded(!render.grounded);
     	}
     }
@@ -77,10 +69,9 @@ public class BatteryGuiDraw extends GuiContainerEln {
     	// TODO Auto-generated method  stub
     	super.preDraw(f, x, y);
         buttonGrounded.displayString = "Grounded : " + render.grounded;
-        energyBar.setValue((float) (render.energy/(render.descriptor.electricalStdEnergy * render.life)));
-        energyBar.setComment(0,"Energy " + Utils.plotPercent("", energyBar.getValue()).replace(" ", ""));
+        energyBar.setValue((float) (render.energy / (render.descriptor.electricalStdEnergy * render.life)));
+        energyBar.setComment(0, "Energy " + Utils.plotPercent("", energyBar.getValue()).replace(" ", ""));
     }
-
 
     @Override
     protected void postDraw(float f, int x, int y) {
@@ -90,48 +81,45 @@ public class BatteryGuiDraw extends GuiContainerEln {
     	
     	double p = render.power;
     	double energyMiss = render.descriptor.electricalStdEnergy * render.life - render.energy;
-    	if(Math.abs(p) < 5)
-    	{
+    	
+    	if(Math.abs(p) < 5) {
     		str1 = "No charge"; 
     	}
-    	else if(p > 0)
-    	{
+    	else if(p > 0) {
     		str1 = "Discharge"; 
-    		str2 = Utils.plotTime("", render.energy/p); 
+    		str2 = Utils.plotTime("", render.energy / p); 
     	}
-    	else if(energyMiss > 0)
-    	{
+    	else if(energyMiss > 0) {
     		str1 = "Charge"; 
-    		str2 = Utils.plotTime("", -energyMiss/p); 
+    		str2 = Utils.plotTime("", -energyMiss / p); 
     	}
-    	else
-    	{
+    	else {
     		str1 = "Charged";
     	}
+    	
     	int xDelta = 70;
-    	if(render.descriptor.lifeEnable){
-    		drawString(8, 8 , "Life:");
-        	drawString(xDelta, 8 , Utils.plotPercent("",render.life));
+    	if(render.descriptor.lifeEnable) {
+    		drawString(8, 8, "Life:");
+        	drawString(xDelta, 8 , Utils.plotPercent("", render.life));
     	}
-        drawString(8, 17 , "Energy:");
+        drawString(8, 17, "Energy:");
         drawString(xDelta, 17,
-        		Utils.plotValue(render.energy,"J/") +  Utils.plotValue( render.descriptor.electricalStdEnergy * render.life,"J"));
+        		Utils.plotValue(render.energy, "J/") +  Utils.plotValue(render.descriptor.electricalStdEnergy * render.life, "J"));
        
         if(render.power >= 0)
-        	drawString(8, 26 , "Power out:");
+        	drawString(8, 26, "Power out:");
         else
-        	drawString(8, 26 , "Power in:");
-        drawString(xDelta , 26 ,Utils.plotValue(Math.abs(render.power),"W/")  + Utils.plotValue(render.descriptor.electricalStdP,"W"));
+        	drawString(8, 26, "Power in:");
+        drawString(xDelta, 26, Utils.plotValue(Math.abs(render.power), "W/")  + Utils.plotValue(render.descriptor.electricalStdP, "W"));
 
-        drawString(8, 35 , str1);
-        drawString(xDelta, 35 , str2);
-              
+        drawString(8, 35, str1);
+        drawString(xDelta, 35, str2);
  
      //   drawString(8 , 44 , "Thermal protection");
        
     }
     /*
-    		list.add("Nominal voltage : " + (int)(electricalU) + "V");
+    	list.add("Nominal voltage : " + (int)(electricalU) + "V");
 		list.add("Nominal power : " + (int)(electricalStdP) + "W");
  
      */
@@ -141,6 +129,4 @@ public class BatteryGuiDraw extends GuiContainerEln {
 		// TODO Auto-generated method stub
 		return new HelperStdContainer(this);
 	}
-	
-
 }

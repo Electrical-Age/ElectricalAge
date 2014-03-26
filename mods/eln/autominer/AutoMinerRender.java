@@ -62,7 +62,6 @@ public class AutoMinerRender extends TransparentNodeElementRender{
 		}
 	}
 	
-	
 	@Override
 	public boolean cameraDrawOptimisation() {
 		// TODO Auto-generated method stub

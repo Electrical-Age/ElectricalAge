@@ -36,6 +36,7 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 	VoltageWatchdogProcessForInventoryItemDamageSingleLoad electricalScannerWatchDog = new VoltageWatchdogProcessForInventoryItemDamageSingleLoad(inventory, AutoMinerContainer.OreScannerSlotId, inPowerLoad);
 	
 	AutoMinerDescriptor descriptor;
+	
 	public AutoMinerElement(TransparentNode transparentNode,
 			TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
@@ -91,9 +92,6 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 		return false;
 	}
 
-	
-	
-	
 	@Override
 	public boolean hasGui() {
 		// TODO Auto-generated method stub
@@ -111,10 +109,6 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 		// TODO Auto-generated method stub
 		return inventory;
 	}	
-	
-	
-
-	
 	
 	@Override
 	public void onBreakElement() {
@@ -140,7 +134,6 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 		return false;
 	}
 	
-
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
 		// TODO Auto-generated method stub
