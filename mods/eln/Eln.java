@@ -955,6 +955,8 @@ public class Eln {
 	public static final double LVP = 1000;
 	public static final double MVP = 2000;
 	public static final double HVP = 4000;
+	
+	public static double electricalCableDeltaTMax = 20;
 
 	public static final double cableHeatingTime = 30;
 	public static final double cableWarmLimit = 130;
@@ -3985,6 +3987,8 @@ public class Eln {
 	}
 
 	public static MiningPipeDescriptor miningPipeDescriptor;
+
+	
 
 	void registerMiningPipe(int id) {
 		int subId, completId;

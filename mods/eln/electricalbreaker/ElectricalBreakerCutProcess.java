@@ -1,5 +1,6 @@
 package mods.eln.electricalbreaker;
 
+import mods.eln.Eln;
 import mods.eln.INBTTReady;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sim.IProcess;
@@ -32,7 +33,8 @@ public class ElectricalBreakerCutProcess implements IProcess,INBTTReady{
 				i++;
 				System.out.println(P);
 			}*/
-			T += P/cable.thermalC*time;
+			double pMax = Eln.electricalCableDeltaTMax * cable.thermalC;
+			T += Math.min(pMax,P)/cable.thermalC*time;
 			Tmax = cable.thermalWarmLimit*0.8;
 		}
 		//System.out.println(T);
