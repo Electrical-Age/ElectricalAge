@@ -169,7 +169,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	public void applyTo(ElectricalLoad load,Simulator simulator) {
 		load.setRs(electricalRs);
 		load.infinitRp();
-		load.setMinimalC(simulator);
+		load.setMinimalCOneConnection(simulator);
 	}
 	
 	public void applyTo(ThermalLoad load) {
