@@ -36,7 +36,7 @@ public class BatteryGuiDraw extends GuiContainerEln {
     GuiVerticalProgressBar energyBar;
     
     public BatteryGuiDraw(EntityPlayer player, IInventory inventory, BatteryRender render) {
-        super(new BatteryContainer(null,player, inventory));
+        super(new BatteryContainer(null, player, inventory));
         this.inventory = (TransparentNodeElementInventory) inventory;
         this.render = render;
     }
@@ -52,7 +52,6 @@ public class BatteryGuiDraw extends GuiContainerEln {
     
     @Override
     public void guiObjectEvent(IGuiObject object) {
-    	// TODO Auto-generated method stub
     	super.guiObjectEvent(object);
     	if(buttonGrounded == object) {
     		render.clientSetGrounded(!render.grounded);
@@ -66,7 +65,6 @@ public class BatteryGuiDraw extends GuiContainerEln {
     
     @Override
     protected void preDraw(float f, int x, int y) {
-    	// TODO Auto-generated method  stub
     	super.preDraw(f, x, y);
         buttonGrounded.displayString = "Grounded : " + render.grounded;
         energyBar.setValue((float) (render.energy / (render.descriptor.electricalStdEnergy * render.life)));
@@ -75,9 +73,8 @@ public class BatteryGuiDraw extends GuiContainerEln {
 
     @Override
     protected void postDraw(float f, int x, int y) {
-    	// TODO Auto-generated method stub
     	super.postDraw(f, x, y);
-    	String str1 = "",str2 = "";
+    	String str1 = "", str2 = "";
     	
     	double p = render.power;
     	double energyMiss = render.descriptor.electricalStdEnergy * render.life - render.energy;
@@ -100,7 +97,7 @@ public class BatteryGuiDraw extends GuiContainerEln {
     	int xDelta = 70;
     	if(render.descriptor.lifeEnable) {
     		drawString(8, 8, "Life:");
-        	drawString(xDelta, 8 , Utils.plotPercent("", render.life));
+        	drawString(xDelta, 8, Utils.plotPercent("", render.life));
     	}
         drawString(8, 17, "Energy:");
         drawString(xDelta, 17,
@@ -115,18 +112,15 @@ public class BatteryGuiDraw extends GuiContainerEln {
         drawString(8, 35, str1);
         drawString(xDelta, 35, str2);
  
-     //   drawString(8 , 44 , "Thermal protection");
-       
+     //   drawString(8, 44, "Thermal protection");
     }
     /*
     	list.add("Nominal voltage : " + (int)(electricalU) + "V");
 		list.add("Nominal power : " + (int)(electricalStdP) + "W");
- 
      */
 
 	@Override
 	protected GuiHelperContainer newHelper() {
-		// TODO Auto-generated method stub
 		return new HelperStdContainer(this);
 	}
 }

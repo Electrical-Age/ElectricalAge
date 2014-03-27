@@ -24,13 +24,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 
-public class AutoMinerElement extends TransparentNodeElement implements GhostObserver
-{
+public class AutoMinerElement extends TransparentNodeElement implements GhostObserver {
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
 	
 	NodeElectricalLoad inPowerLoad = new NodeElectricalLoad("inPowerLoad");
 	AutoMinerSlowProcess slowProcess = new AutoMinerSlowProcess(this);
-	TransparentNodeElectricalLoadWatchdog electricalLoadWatchdog = new TransparentNodeElectricalLoadWatchdog(this,inPowerLoad, 2);
+	TransparentNodeElectricalLoadWatchdog electricalLoadWatchdog = new TransparentNodeElectricalLoadWatchdog(this, inPowerLoad, 2);
 	
 	VoltageWatchdogProcessForInventoryItemDamageSingleLoad electricalDrillWatchDog = new VoltageWatchdogProcessForInventoryItemDamageSingleLoad(inventory, AutoMinerContainer.electricalDrillSlotId, inPowerLoad);
 	VoltageWatchdogProcessForInventoryItemDamageSingleLoad electricalScannerWatchDog = new VoltageWatchdogProcessForInventoryItemDamageSingleLoad(inventory, AutoMinerContainer.OreScannerSlotId, inPowerLoad);
@@ -51,13 +50,11 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return inPowerLoad;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -68,13 +65,11 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 
 	@Override
 	public String multiMeterString(Direction side) {
-		// TODO Auto-generated method stub
 		return Utils.plotUIP(inPowerLoad.Uc, inPowerLoad.getCurrent());
 	}
 
 	@Override
 	public String thermoMeterString(Direction side) {
-		// TODO Auto-generated method stub
 		return "";
 	}
 
@@ -88,25 +83,21 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
 		return new AutoMinerContainer(node,player, inventory);
 	}
 	
 	@Override
 	public IInventory getInventory() {
-		// TODO Auto-generated method stub
 		return inventory;
 	}	
 	
@@ -118,7 +109,6 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 
 	@Override
 	public Coordonate getGhostObserverCoordonate() {
-		// TODO Auto-generated method stub
 		return node.coordonate;
 	}
 
@@ -130,19 +120,15 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 	@Override
 	public boolean ghostBlockActivated(int UUID, EntityPlayer entityPlayer,
 			Direction side, float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
-		
 		try {
 			stream.writeShort(slowProcess.pipeLength);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

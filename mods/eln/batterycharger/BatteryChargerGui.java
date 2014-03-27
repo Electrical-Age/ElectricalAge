@@ -11,48 +11,39 @@ import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.GuiTextFieldEln;
 import mods.eln.gui.IGuiObject;
 
-public class BatteryChargerGui extends GuiContainerEln{
+public class BatteryChargerGui extends GuiContainerEln {
 
-	public BatteryChargerGui(BatteryChargerRender render,EntityPlayer player, IInventory inventory){
+	public BatteryChargerGui(BatteryChargerRender render, EntityPlayer player, IInventory inventory){
 		super(new BatteryChargerContainer(player, inventory));
 		this.render = render;
 	}
 
 	private BatteryChargerRender render;
 	
-	
 	GuiButtonEln powerOn;
 	
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
 		super.initGui();
-		
-		
-		powerOn = newGuiButton(97+10, 6+17-10, 40, "");
-
+		powerOn = newGuiButton(97 + 10, 6 + 17 - 10, 40, "");
 	}
-	
 	
 	@Override
 	protected void preDraw(float f, int x, int y) {
-		// TODO Auto-generated method stub
 		super.preDraw(f, x, y);
 		
-		if(render.powerOn){
+		if(render.powerOn) {
 			powerOn.displayString = "Is ON";
 		}
-		else{
+		else {
 			powerOn.displayString = "Is OFF";
 		}
 	}
 	
 	@Override
 	protected GuiHelperContainer newHelper() {
-		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176,166-40,8,84-40);
+		return new GuiHelperContainer(this, 176, 166 - 40, 8, 84 - 40);
 	}
-
 	
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
@@ -61,5 +52,4 @@ public class BatteryChargerGui extends GuiContainerEln{
 		}
 		super.guiObjectEvent(object);
 	}
-	
 }

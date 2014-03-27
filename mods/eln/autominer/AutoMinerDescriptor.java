@@ -11,60 +11,55 @@ import mods.eln.node.TransparentNodeElectricalLoadWatchdog;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.wiki.Data;
 
-public class AutoMinerDescriptor extends TransparentNodeDescriptor{
+public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 
 	public AutoMinerDescriptor(
 			String name,
-			double nominalVoltage,double maximalVoltage,
-			double nominalPower,double nominalDropFactor,
-			double pipeOperationTime,double pipeOperationEnergy
+			double nominalVoltage, double maximalVoltage,
+			double nominalPower, double nominalDropFactor,
+			double pipeOperationTime, double pipeOperationEnergy
 			) {
 		super(name, AutoMinerElement.class, AutoMinerRender.class);
 		this.nominalVoltage = nominalVoltage;
 		this.maximalVoltage = maximalVoltage;
 		this.pipeOperationTime = pipeOperationTime;
 		this.pipeOperationEnergy = pipeOperationEnergy;
-		pipeOperationPower = pipeOperationEnergy/pipeOperationTime;
-		pipeOperationRp = nominalVoltage*nominalVoltage/pipeOperationPower;
+		pipeOperationPower = pipeOperationEnergy / pipeOperationTime;
+		pipeOperationRp = nominalVoltage * nominalVoltage / pipeOperationPower;
 		
-		Rs = nominalVoltage*nominalVoltage / nominalPower  * nominalDropFactor;
+		Rs = nominalVoltage * nominalVoltage / nominalPower * nominalDropFactor;
 	}
 
-	double nominalVoltage,maximalVoltage;
-	double pipeOperationTime,pipeOperationEnergy,pipeOperationPower;
+	double nominalVoltage, maximalVoltage;
+	double pipeOperationTime, pipeOperationEnergy, pipeOperationPower;
 	
 	double pipeOperationRp;
 	double Rs;
 	
-	public void applyTo(ElectricalLoad load)
-	{
+	public void applyTo(ElectricalLoad load) {
 		load.setRs(Rs);
 		load.setMinimalC(Eln.simulator);
 	}
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addMachine(newItemStack());
 	}
 	
-	public void applyTo(TransparentNodeElectricalLoadWatchdog watch)
-	{
+	public void applyTo(TransparentNodeElectricalLoadWatchdog watch) {
 		watch.negativeLimit = -maximalVoltage * 0.1;
 		watch.positiveLimit = maximalVoltage;
 	}
 	
 	@Override
 	public boolean mustHaveFloor() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		//list.add("");
 	}

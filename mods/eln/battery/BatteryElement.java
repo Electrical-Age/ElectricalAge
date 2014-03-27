@@ -57,7 +57,6 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	
 	@Override
 	public IInventory getInventory() {
-		// TODO Auto-generated method stub
 		return inventory;
 	}
 	
@@ -65,7 +64,7 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	
 	public BatteryDescriptor descriptor;
 	
-	public BatteryElement(TransparentNode transparentNode,TransparentNodeDescriptor descriptor) {
+	public BatteryElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		this.descriptor = (BatteryDescriptor) descriptor;
 		
@@ -95,7 +94,6 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
 		if(lrdu != LRDU.Down) return null;
 		if(side == front.left()) return positiveLoad;
 		if(side == front.right() && ! grounded) return negativeLoad;
@@ -104,7 +102,6 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
 		if(lrdu != LRDU.Down) return null;
 	/*	if(side == front.left()) return thermalLoad;
 		if(side == front.right() && ! grounded) return thermalLoad;*/
@@ -113,7 +110,6 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
 		if(lrdu != LRDU.Down) return 0;
 		if(side == front.left()) return node.maskElectricalPower;
 		if(side == front.right() && ! grounded) return node.maskElectricalPower;
@@ -124,18 +120,16 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	public String multiMeterString(Direction side) {
 	//	if(side == front)return  Utils.plotVolt("U+", positiveLoad.Uc );
 	//	if(side == front.back() && ! grounded)return  Utils.plotVolt("U-", negativeLoad.Uc );
-		return  Utils.plotVolt("Ubat:", batteryProcess.getU()) + Utils.plotAmpere("Current Output:",batteryProcess.dischargeCurrentMesure);
+		return  Utils.plotVolt("Ubat:", batteryProcess.getU()) + Utils.plotAmpere("Current Output:", batteryProcess.dischargeCurrentMesure);
 	}
 
 	@Override
 	public String thermoMeterString(Direction side) {
-		// TODO Auto-generated method stub
 		return  Utils.plotCelsius("Tbat:", thermalLoad.Tc);
 	}
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
     	try {
 	    	stream.writeFloat((float)((positiveLoad.Uc - negativeLoad.Uc) * batteryProcess.dischargeCurrentMesure));
@@ -144,7 +138,6 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 
 	    	node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -179,20 +172,17 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
 		//inventory.writeToNBT(nbt, str + "inv");
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		super.readFromNBT(nbt, str);
 		fromNBT = true;
 		//inventory.readFromNBT(nbt, str + "inv");
@@ -200,14 +190,12 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
-		return new BatteryContainer(this.node,player, inventory);
+		return new BatteryContainer(this.node, player, inventory);
 	}
 
 	@Override
@@ -227,7 +215,6 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	
 	@Override
 	public void readItemStackNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
 		super.readItemStackNBT(nbt);
 		
 		if(nbt == null) nbt = descriptor.getDefaultNBT();
@@ -247,45 +234,39 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 
 	@Override
 	public double getThermalDestructionMax() {
-		// TODO Auto-generated method stub
 		return 3;
 	}
 
 	@Override
 	public double getThermalDestructionStart() {
-		// TODO Auto-generated method stub
 		return 2;
 	}
 
 	@Override
 	public double getThermalDestructionPerOverflow() {
-		// TODO Auto-generated method stub
 		return 0.2;
 	}
 
 	@Override
 	public double getThermalDestructionProbabilityPerOverflow() {
-		// TODO Auto-generated method stub
 		return 1 / descriptor.thermalWarmLimit / 0.1;
 	}
 
 	@Override
 	public double getTmax() {
-		// TODO Auto-generated method stub
 		return descriptor.thermalWarmLimit;
 	}
 
 	@Override
 	public double getTmin() {
-		// TODO Auto-generated method stub
 		return descriptor.thermalCoolLimit;
 	}
 
 	/*
 	public static NBTTagCompound newItemStackNBT() {
 		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
-		nbt.setDouble("charge",0.5);
-		nbt.setDouble("life",1.0);
+		nbt.setDouble("charge", 0.5);
+		nbt.setDouble("life", 1.0);
 		return nbt;
 	}*/
 }

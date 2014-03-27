@@ -18,7 +18,7 @@ import org.lwjgl.opengl.GL11;
 
 public class BatteryRender extends TransparentNodeElementRender {
 
-	//public double voltagePositive = 0,voltageNegative,current = 0,temperature = 0;
+	//public double voltagePositive = 0, voltageNegative, current = 0, temperature = 0;
 	public float energy, life;
 	
 	public BatteryDescriptor descriptor;
@@ -36,11 +36,10 @@ public class BatteryRender extends TransparentNodeElementRender {
 		descriptor.draw(plus, minus);
 	}
 
-	boolean plus,minus;
+	boolean plus, minus;
 	/*
 	@Override
 	public GuiContainer newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stupb
 		return new TransformatorGuiDraw(player, inventory, this);
 	}*/
 	
@@ -50,7 +49,6 @@ public class BatteryRender extends TransparentNodeElementRender {
 	
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.networkUnserialize(stream);
 		try {
 			/*voltagePositive = stream.readShort() / Node.networkSerializeUFactor;
@@ -68,14 +66,12 @@ public class BatteryRender extends TransparentNodeElementRender {
 			minus = true;
 			//plus = lrdu.get(lrdu)
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
 		return new BatteryGuiDraw(player, inventory, this);
 	}
 }

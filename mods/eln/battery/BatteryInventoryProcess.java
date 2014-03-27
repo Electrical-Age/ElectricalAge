@@ -14,7 +14,6 @@ public class BatteryInventoryProcess implements IProcess {
 	
 	@Override
 	public void process(double time) {
-		// TODO Auto-generated method stub
 		if(battery.descriptor.lifeEnable == false)
 			battery.batteryProcess.life = 1.0;
 		

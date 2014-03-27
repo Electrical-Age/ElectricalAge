@@ -23,21 +23,23 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.world.World;
 
-public class AutoMinerSlowProcess implements IProcess,INBTTReady{
+public class AutoMinerSlowProcess implements IProcess,INBTTReady {
+	
 	AutoMinerElement miner;
+	
 	public AutoMinerSlowProcess(AutoMinerElement autoMiner) {
 		this.miner = autoMiner;
 	}
 	
 	int pipeLength = 0;
 	
-	double energyCounter = 0,energyTarget = 0;
+	double energyCounter = 0, energyTarget = 0;
 	
 	int workY;
 	
 	static final int pipeGhostUUID = 75;
 
-	enum jobType {none,ore,pipeAdd,pipeRemove};
+	enum jobType {none, ore, pipeAdd, pipeRemove};
 	jobType job = jobType.none;
 	Coordonate jobCoord = new Coordonate();
 	
@@ -47,7 +49,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady{
 		OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.OreScannerSlotId));
 		MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
 		
-		energyCounter += miner.inPowerLoad.getRpPower()*time;
+		energyCounter += miner.inPowerLoad.getRpPower() * time;
 		
 		if(job != jobType.none) {
 			if(energyCounter >= energyTarget || (job == jobType.ore && drill == null)) {
@@ -56,47 +58,48 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady{
 			
 			if(energyCounter >= energyTarget) {
 				switch(job) {
-					case ore:
-						Block block = Block.blocksList[jobCoord.world().getBlockId(jobCoord.x, jobCoord.y, jobCoord.z)];
-						int meta = jobCoord.world().getBlockMetadata(jobCoord.x, jobCoord.y, jobCoord.z);
-						ArrayList<ItemStack> drop = block.getBlockDropped(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0);
-						
-						for(ItemStack stack : drop) {
-							drop(stack);
-						}
-						
-						jobCoord.world().setBlock(jobCoord.x, jobCoord.y, jobCoord.z, 0);
-						
-						energyCounter -= energyTarget;
-						setupJob();
-							
+				case ore:
+					Block block = Block.blocksList[jobCoord.world().getBlockId(jobCoord.x, jobCoord.y, jobCoord.z)];
+					int meta = jobCoord.world().getBlockMetadata(jobCoord.x, jobCoord.y, jobCoord.z);
+					ArrayList<ItemStack> drop = block.getBlockDropped(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0);
+					
+					for(ItemStack stack : drop) {
+						drop(stack);
+					}
+					
+					jobCoord.world().setBlock(jobCoord.x, jobCoord.y, jobCoord.z, 0);
+					
+					energyCounter -= energyTarget;
+					setupJob();
 					break;
-					case pipeAdd:
-						Eln.ghostManager.createGhost(jobCoord, miner.node.coordonate, jobCoord.y);
-						miner.inventory.decrStackSize(AutoMinerContainer.MiningPipeSlotId, 1);
-												
-						pipeLength++;
-						miner.needPublish();
-						
-						energyCounter -= energyTarget;
-						setupJob();	
+					
+				case pipeAdd:
+					Eln.ghostManager.createGhost(jobCoord, miner.node.coordonate, jobCoord.y);
+					miner.inventory.decrStackSize(AutoMinerContainer.MiningPipeSlotId, 1);
+											
+					pipeLength++;
+					miner.needPublish();
+					
+					energyCounter -= energyTarget;
+					setupJob();	
 					break;	
 					
-					case pipeRemove:
-						Eln.ghostManager.removeGhostAndBlock(jobCoord);
-						if(miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId) == null) {
-							miner.inventory.setInventorySlotContents(AutoMinerContainer.MiningPipeSlotId, Eln.miningPipeDescriptor.newItemStack(1));
-						}
-						else{
-							miner.inventory.decrStackSize(AutoMinerContainer.MiningPipeSlotId, -1);
-						}
+				case pipeRemove:
+					Eln.ghostManager.removeGhostAndBlock(jobCoord);
+					if(miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId) == null) {
+						miner.inventory.setInventorySlotContents(AutoMinerContainer.MiningPipeSlotId, Eln.miningPipeDescriptor.newItemStack(1));
+					}
+					else {
+						miner.inventory.decrStackSize(AutoMinerContainer.MiningPipeSlotId, -1);
+					}
 						 
-						pipeLength--;
-						miner.needPublish();
+					pipeLength--;
+					miner.needPublish();
 						
-						energyCounter -= energyTarget;
-						setupJob();	
+					energyCounter -= energyTarget;
+					setupJob();	
 					break;
+					
 				default:
 					break;
 				}
@@ -111,7 +114,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady{
 			miner.inPowerLoad.setRp(Double.POSITIVE_INFINITY);
 			break;
 		case ore:
-			if(drill == null){
+			if(drill == null) {
 				miner.inPowerLoad.setRp(Double.POSITIVE_INFINITY);
 			}
 			else {
@@ -165,11 +168,10 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady{
 		jobCoord.x = miner.node.coordonate.x;
 		jobCoord.y = miner.node.coordonate.y - pipeLength;
 		jobCoord.z = miner.node.coordonate.z;
-		/*for(jobCoord.y = miner.node.coordonate.y - 1; jobCoord.y > 0;jobCoord.y--)
+		/*for(jobCoord.y = miner.node.coordonate.y - 1; jobCoord.y > 0; jobCoord.y--)
 		{
 			GhostElement ghost = Eln.ghostManager.getGhost(jobCoord);
-			if(ghost == null || ghost.getObservatorCoordonate().equals(miner.node.coordonate) != true)
-			{
+			if(ghost == null || ghost.getObservatorCoordonate().equals(miner.node.coordonate) != true) {
 				jobCoord.y++;
 				break;
 			}
@@ -188,8 +190,8 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady{
 		}
 		else if(pipe != null) {		
 			if(jobCoord.y < miner.node.coordonate.y - 1) {
-				for(jobCoord.z = miner.node.coordonate.z - scannerRadius;jobCoord.z <= miner.node.coordonate.z + scannerRadius;jobCoord.z++) {
-					for(jobCoord.x = miner.node.coordonate.x - scannerRadius;jobCoord.x <= miner.node.coordonate.x + scannerRadius;jobCoord.x++) {
+				for(jobCoord.z = miner.node.coordonate.z - scannerRadius; jobCoord.z <= miner.node.coordonate.z + scannerRadius; jobCoord.z++) {
+					for(jobCoord.x = miner.node.coordonate.x - scannerRadius; jobCoord.x <= miner.node.coordonate.x + scannerRadius; jobCoord.x++) {
 						if(checkIsOre(jobCoord)) {
 							jobFind = true;
 							setJob(jobType.ore);
@@ -214,7 +216,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady{
 						setJob(jobType.ore);
 					}
 				}
-				else{
+				else {
 					jobFind = true;
 					setJob(jobType.pipeAdd);
 				}
@@ -252,13 +254,12 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady{
 		Block block = Block.blocksList[blockId];
 		if(block instanceof BlockOre) return true;
 		if(block instanceof OreBlock) return true;
-		if(block instanceof BlockRedstoneOre)return true;
+		if(block instanceof BlockRedstoneOre) return true;
 		
 		return false;
 	}
 
 	public void onBreakElement() {
-		// TODO Auto-generated method stub
 		destroyPipe(-1);
 	}
 	
@@ -273,22 +274,19 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady{
 		World world = miner.node.coordonate.world();
 		Coordonate coord = new Coordonate(miner.node.coordonate);
 /*
-		for(coord.y = miner.node.coordonate.y - 1; coord.y > 0;coord.y--)
+		for(coord.y = miner.node.coordonate.y - 1; coord.y > 0; coord.y--)
 		{
 			GhostElement ghost = Eln.ghostManager.getGhost(coord);
-			if(coord.y != jumpY)
-			{
-				if(ghost == null || ghost.getObservatorCoordonate().equals(miner.node.coordonate) != true)
-				{
+			if(coord.y != jumpY) {
+				if(ghost == null || ghost.getObservatorCoordonate().equals(miner.node.coordonate) != true) {
 					coord.y++;
 					break;
 				}
 			}
-			
 			Utils.dropItem(Eln.miningPipeDescriptor.newItemStack(1), coord);
 		}	
 		*/
-		for(coord.y = miner.node.coordonate.y - 1; coord.y >= miner.node.coordonate.y - pipeLength;coord.y--) {
+		for(coord.y = miner.node.coordonate.y - 1; coord.y >= miner.node.coordonate.y - pipeLength; coord.y--) {
 			Utils.dropItem(Eln.miningPipeDescriptor.newItemStack(1), coord);
 		}
 	}
