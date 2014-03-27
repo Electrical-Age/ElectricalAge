@@ -32,8 +32,7 @@ public class AutoMinerGuiDraw extends GuiContainerEln {
     private TransparentNodeElementInventory inventory;
     AutoMinerRender render;
 
-    public AutoMinerGuiDraw(EntityPlayer player, IInventory inventory, AutoMinerRender render)
-    {
+    public AutoMinerGuiDraw(EntityPlayer player, IInventory inventory, AutoMinerRender render) {
         super(new AutoMinerContainer(null, player, inventory));
         this.inventory = (TransparentNodeElementInventory) inventory;
         this.render = render; 
@@ -41,7 +40,6 @@ public class AutoMinerGuiDraw extends GuiContainerEln {
 
 	@Override
 	protected GuiHelperContainer newHelper() {
-		// TODO Auto-generated method stub
 		return new GuiHelperContainer(this, 176, 166, 8, 84);
 	}
 }

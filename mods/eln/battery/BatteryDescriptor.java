@@ -35,16 +35,16 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlugIn {
 	
-	public double electricalU,electricalDischargeRate;
-	public double electricalStdP,electricalStdDischargeTime,electricalStdHalfLife,electricalStdEfficiency,electricalPMax;
+	public double electricalU, electricalDischargeRate;
+	public double electricalStdP, electricalStdDischargeTime, electricalStdHalfLife, electricalStdEfficiency, electricalPMax;
 	
-	public double electricalStdEnergy,electricalStdI;
+	public double electricalStdEnergy, electricalStdI;
 	
-	public double thermalHeatTime,thermalWarmLimit,thermalCoolLimit;
+	public double thermalHeatTime, thermalWarmLimit, thermalCoolLimit;
 	
-	public double electricalQ,electricalRs,electricalRp;
-	public double thermalC,thermalRp,thermalPMax;
-	public double lifeNominalCurrent,lifeNominalLost;
+	public double electricalQ, electricalRs, electricalRp;
+	public double thermalC, thermalRp, thermalPMax;
+	public double lifeNominalCurrent, lifeNominalLost;
 	public double startCharge;
 	public boolean isRechargable;
 	String description = "todo battery";
@@ -55,7 +55,8 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	public double IMax;
 	public boolean lifeEnable;
 	private ElectricalCableDescriptor cable;
-	public void draw(boolean plus,boolean minus) {
+	
+	public void draw(boolean plus, boolean minus) {
 		switch (renderType) {
 		case 0:
 			if(modelPart == null) return;
@@ -70,6 +71,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 			break;
 		}
 	}
+	
 	public BatteryDescriptor(
 				String name, String modelName,
 				ElectricalCableDescriptor cable,
@@ -107,7 +109,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 		electricalQ = 1;
 		double energy = getEnergy(1.0, 1.0);
 		electricalQ *= electricalStdEnergy / energy;
-		//electricalRs =  electricalStdP*(1-electricalStdEfficiency) / electricalStdI/electricalStdI / 2;
+		//electricalRs =  electricalStdP * (1 - electricalStdEfficiency) / electricalStdI / electricalStdI / 2;
 		electricalRs = cable.electricalRs;
 		electricalRp = electricalU * electricalU / electricalStdP / electricalDischargeRate;
 		
@@ -117,7 +119,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 		
 
 		thermalPMax = electricalPMax / electricalU * electricalPMax / electricalU * electricalRs;
-		thermalC = Math.pow(electricalPMax/electricalU, 2) * electricalRs * thermalHeatTime / thermalWarmLimit;
+		thermalC = Math.pow(electricalPMax / electricalU, 2) * electricalRs * thermalHeatTime / thermalWarmLimit;
 		thermalRp = thermalWarmLimit / thermalPMax;
 		
 		IMax = electricalStdI * 3;		
@@ -141,14 +143,13 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	
 	Obj3D obj;
 	
-	Obj3DPart main,plugPlus,plusMinus,battery;
+	Obj3DPart main, plugPlus, plusMinus, battery;
 	
 	int renderType;
 	private String renderSpec;
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addEnergy(newItemStack());
 	}
@@ -166,7 +167,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 		//battery.efficiency = electricalStdEfficiency;
 	}
 	
-	public void applyTo(ElectricalLoad load,Simulator simulator) {
+	public void applyTo(ElectricalLoad load, Simulator simulator) {
 		load.setRs(electricalRs);
 		load.infinitRp();
 		load.setMinimalCOneConnection(simulator);
@@ -191,22 +192,20 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	
 	@Override
 	public NBTTagCompound getDefaultNBT() {
-		// TODO Auto-generated method stub
 		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
-		nbt.setDouble("charge",startCharge);
-		nbt.setDouble("life",1.0);
+		nbt.setDouble("charge", startCharge);
+		nbt.setDouble("life", 1.0);
 		return nbt;
 	}
 	
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Nominal voltage : " + (int)(electricalU) + "V");
 		list.add("Nominal power : " + (int)(electricalStdP) + "W");
 		list.add("Full charge energy : " + (int)(electricalStdDischargeTime * electricalStdP / 1000) + "KJ");
-		list.add("Capacity : " + Utils.plotValue((electricalQ / 3600),"Ah"));
+		list.add("Capacity : " + Utils.plotValue((electricalQ / 3600), "Ah"));
 		list.add("");
 	   	list.add("Charge : " + (int)(getChargeInTag(itemStack) * 100) + "%");
 	   	
@@ -231,14 +230,14 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 		return stack.getTagCompound().getDouble("life");
 	}
 	
-	public double getEnergy(double charge,double life) {
+	public double getEnergy(double charge, double life) {
 		int stepNbr = 50;
 		double chargeStep = charge / stepNbr;
 		double chargeIntegrator = 0;
 		double energy = 0;
 		double QperStep = electricalQ * life * charge / stepNbr;
 		
-		for(int step = 0; step < stepNbr;step++) {	
+		for(int step = 0; step < stepNbr; step++) {	
 			double voltage = UfCharge.getValue(chargeIntegrator) * electricalU;
 			energy += voltage * QperStep;
 			chargeIntegrator += chargeStep;
@@ -248,7 +247,6 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
 		return true;
 	}
 	
@@ -276,13 +274,12 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	@Override
 	public int top(int y, GuiVerticalExtender extender, ItemStack stack) {
 		extender.add(new GuiLabel(6, y, "miaouuuu"));
-		y+=12;
+		y += 12;
 		return y;
 	}
 	
 	@Override
 	public int bottom(int y, GuiVerticalExtender extender, ItemStack stack) {
-		// TODO Auto-generated method stub
 		return y;
 	}
 	
