@@ -62,7 +62,7 @@ public class BatteryProcess implements IProcess {
 	double computeVoltage()
 	{
 		double voltage = voltageFunction.getValue(Q/(QNominal*life));
-		return voltage*uNominal;
+		return Math.max(0,voltage*uNominal);
 	}	
 
 	

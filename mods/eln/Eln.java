@@ -424,6 +424,7 @@ public class Eln {
 	public ElectricalCableDescriptor highVoltageCableDescriptor;
 	public ElectricalCableDescriptor signalCableDescriptor;
 	public ElectricalCableDescriptor lowVoltageCableDescriptor;
+	public ElectricalCableDescriptor batteryCableDescriptor;
 	public ElectricalCableDescriptor meduimVoltageCableDescriptor;
 
 	int creativeTabId;
@@ -1059,7 +1060,25 @@ public class Eln {
 													// thermalConductivityTao
 			);
 
+			
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			
+			
+			desc = new ElectricalCableDescriptor(name, stdCableRender50V,
+					"For low voltage with high current.", false);
+			
+			desc.setPhysicalConstantLikeNormalCable(
+					LVU, LVP/4, 0.2 / 20,// electricalNominalVoltage,
+								// electricalNominalPower,
+								// electricalNominalPowerDrop,
+					LVU * 1.3, LVP * 1.2,// electricalMaximalVoltage,
+					// electricalMaximalPower,
+					20,// electricalOverVoltageStartPowerLost,
+					cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+					cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+					// thermalConductivityTao
+					);		
+			batteryCableDescriptor = desc;
 
 		}
 
@@ -1165,8 +1184,8 @@ public class Eln {
 				2.0 };
 		FunctionTable voltageFunction = new FunctionTable(voltageFunctionTable,
 				6.0 / 5);
-		double[] condoVoltageFunctionTable = { 0.000, 0.89, 0.90, 0.905, 0.91, 0.915,
-				2.0 };
+		double[] condoVoltageFunctionTable = { 0.000, 0.89, 0.90, 0.905, 0.91, 1.1,
+				1.5 };
 		FunctionTable condoVoltageFunction = new FunctionTable(condoVoltageFunctionTable,
 				6.0 / 5);
 		double stdDischargeTime = 4 * 60;
@@ -1181,7 +1200,7 @@ public class Eln {
 			name = "Cost Oriented Battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU,
+					"HighVoltageBattery",batteryCableDescriptor, 0.5, true,true, voltageFunction, stdU,
 					stdP * 1.2, 0.000, // electricalU,
 										// electricalPMax,electricalDischargeRate
 					stdP, stdDischargeTime, 0.998, stdHalfLife, // electricalStdP,
@@ -1199,7 +1218,7 @@ public class Eln {
 			name = "Capacity Oriented Battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction,
+					"HighVoltageBattery",batteryCableDescriptor, 0.5, true,true, voltageFunction,
 					stdU / 4, stdP / 2 * 1.2, 0.000, // electricalU,
 														// electricalPMax,electricalDischargeRate
 					stdP / 2, stdDischargeTime * 8, 0.998, stdHalfLife, // electricalStdP,
@@ -1237,7 +1256,7 @@ public class Eln {
 			name = "Current Oriented Battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU,
+					"HighVoltageBattery",batteryCableDescriptor, 0.5, true,true, voltageFunction, stdU,
 					stdP * 1.2 * 4, 0.000, // electricalU,
 											// electricalPMax,electricalDischargeRate
 					stdP * 4, stdDischargeTime / 6, 0.998, stdHalfLife, // electricalStdP,
@@ -1255,7 +1274,7 @@ public class Eln {
 			name = "Life Oriented Battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery",lowVoltageCableDescriptor, 0.5, true,true, voltageFunction, stdU,
+					"HighVoltageBattery",batteryCableDescriptor, 0.5, true,true, voltageFunction, stdU,
 					stdP * 1.2, 0.000, // electricalU,
 										// electricalPMax,electricalDischargeRate
 					stdP, stdDischargeTime, 0.998, stdHalfLife * 8, // electricalStdP,
@@ -1274,7 +1293,7 @@ public class Eln {
 			name = "Single-use Battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery",lowVoltageCableDescriptor, 1.0, false,false, voltageFunction, stdU,
+					"HighVoltageBattery",batteryCableDescriptor, 1.0, false,false, voltageFunction, stdU,
 					stdP * 1.2 * 2, 0.000, // electricalU,
 											// electricalPMax,electricalDischargeRate
 					stdP * 2, stdDischargeTime, 0.998, stdHalfLife * 8, // electricalStdP,
@@ -1292,7 +1311,7 @@ public class Eln {
 			name = "50V Condensator";
 			
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery",lowVoltageCableDescriptor, 0.0, true,false,
+					"HighVoltageBattery",batteryCableDescriptor, 0.0, true,false,
 					condoVoltageFunction,
 					stdU,stdP * 1.2 * 8, 0.005, // electricalU,// electricalPMax,electricalDischargeRate
 					stdP * 8, 4, 0.998, stdHalfLife , // electricalStdP,
@@ -1301,11 +1320,29 @@ public class Eln {
 																		// electricalStdHalfLife,
 					heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
 									// thermalCoolLimit,
-					"the battery" // name, description)
+					"Obselete, must be deleted" // name, description)
 			);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		
+		{
+			subId = 36;
+			name = "200V Condensator";
+			
+			BatteryDescriptor desc = new BatteryDescriptor(name,
+					"HighVoltageBattery",highVoltageCableDescriptor, 0.0, true,false,
+					condoVoltageFunction,
+					MVU,MVP / 2 * 1.2, 0.005, // electricalU,// electricalPMax,electricalDischargeRate
+					MVP / 2, 8, 0.998, stdHalfLife , // electricalStdP,
+																		// electricalStdDischargeTime,
+																		// electricalStdEfficiency,
+																		// electricalStdHalfLife,
+					heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
+									// thermalCoolLimit,
+					"the battery" // name, description)
+			);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}		
 	}
 
 	void registerGround(int id) {

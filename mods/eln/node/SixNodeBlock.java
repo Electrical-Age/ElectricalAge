@@ -168,6 +168,7 @@ public class SixNodeBlock extends NodeBlock{
 		
 		
 		SixNode sixNode = (SixNode) tileEntity.getNode();
+		if(sixNode == null) return true;
 		if(sixNode.sixNodeCacheMapId >= 0)
 		{
 			if(SixNodeCacheItem.map[sixNode.sixNodeCacheMapId] != null)
@@ -198,6 +199,8 @@ public class SixNodeBlock extends NodeBlock{
     	{
     		SixNodeEntity tileEntity = (SixNodeEntity) world.getBlockTileEntity(x, y, z);
     		SixNode sixNode = (SixNode) tileEntity.getNode();
+    		if(sixNode == null) return;
+    		
     		for(Direction direction : Direction.values())
         	{
     			if(sixNode.getSideEnable(direction))
@@ -214,7 +217,7 @@ public class SixNodeBlock extends NodeBlock{
     {
     	SixNodeEntity tileEntity = (SixNodeEntity) world.getBlockTileEntity(x, y, z);
    		SixNode sixNode = (SixNode) tileEntity.getNode();
- 
+   		if(sixNode == null) return;
 		
 		for(Direction direction : Direction.values())
     	{
@@ -247,7 +250,7 @@ public class SixNodeBlock extends NodeBlock{
     {
     	if(nodeHasCache(world, x, y, z)) return super.collisionRayTrace(world, x, y, z, start, end);
     	SixNodeEntity tileEntity = (SixNodeEntity) world.getBlockTileEntity(x, y, z);
-
+    	if(tileEntity == null) return null;
     	if(world.isRemote)
     	{
     		booltemp[0] = tileEntity.getSyncronizedSideEnable(Direction.XN);

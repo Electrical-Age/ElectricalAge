@@ -118,6 +118,12 @@ public class ElectricalLoad{
 	{
 		setC(3/(Rs * simulator.electricalHz));
 	}
+	public void setMinimalCOneConnection(Simulator simulator)
+	{
+		setC(1.5/(Rs * simulator.electricalHz));
+	}
+	
+	
 	public void highImpedance()
 	{
 		setRs(1000000000.0);

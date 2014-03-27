@@ -291,6 +291,10 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
     		SixNodeBlock block = (SixNodeBlock)Block.blocksList[blockID];
     	
 			SixNode sixNode = (SixNode) ((SixNodeEntity) world.getBlockTileEntity(x, y, z)).getNode();
+			if(sixNode == null){
+				world.setBlock(x, y, z, 0);
+				return false;
+			}
            	if(sixNode.getSideEnable(direction) == false && block.getIfOtherBlockIsSolid(world,x,y,z,direction))
            	{		
 	    		sixNode.createSubBlock(stack, direction);
@@ -298,6 +302,13 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 	    		return true;
 			}
 
+    	}
+    	else{
+			SixNode sixNode = (SixNode) ((SixNodeEntity) world.getBlockTileEntity(x, y, z)).getNode();
+			if(sixNode == null){
+				world.setBlock(x, y, z, 0);
+				return false;
+			}    		
     	}
     	return false;
     }

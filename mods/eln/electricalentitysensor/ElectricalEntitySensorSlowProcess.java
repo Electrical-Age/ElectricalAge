@@ -26,7 +26,7 @@ import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 
-public class ElectricalEntitySensorSlowProcess implements IProcess {
+public class ElectricalEntitySensorSlowProcess implements IProcess,INBTTReady{
 	ElectricalEntitySensorElement element;
 	public ElectricalEntitySensorSlowProcess(ElectricalEntitySensorElement element) {
 		this.element = element;
@@ -34,6 +34,8 @@ public class ElectricalEntitySensorSlowProcess implements IProcess {
 	double timeCounter = 0;
 	static final double refreshPeriode = 0.2;
 
+	RcInterpolator rc1 = new RcInterpolator(0.8f);
+	RcInterpolator rc2 = new RcInterpolator(0.8f);
 	@Override
 	public void process(double time) {
 		// TODO Auto-generated method stub
@@ -64,6 +66,7 @@ public class ElectricalEntitySensorSlowProcess implements IProcess {
 				double weight = 1;
 				ArrayList<Block> blockList = Utils.traceRay(world,coord.x+0.5,coord.y+0.5,coord.z+0.5,e.posX,e.posY+e.getEyeHeight(),e.posZ);
 				
+				
 				boolean view = true;
 				for(Block b : blockList){
 					if(b.isOpaqueCube()){
@@ -72,12 +75,13 @@ public class ElectricalEntitySensorSlowProcess implements IProcess {
 					}
 				}
 				if(view){
+					if(e instanceof EntityPlayerMP) weight = 2.0;
 					double distance = Utils.getLength(coord.x+0.5,coord.y+0.5,coord.z+0.5,e.posX,e.posY+e.getEyeHeight(),e.posZ);
 					if(distance < rayMax){
 						double sf = 1;
 						if(useSpeed){
 							sf = speedFactor*Utils.getLength(e.posX, e.posY, e.posZ, e.lastTickPosX, e.lastTickPosY, e.lastTickPosZ);//Math.sqrt(e.motionX*e.motionX+e.motionY*e.motionY+e.motionZ*e.motionZ);
-							System.out.println(sf);
+							//System.out.println(sf);
 						}
 						
 						output += sf*weight*(rayMax-distance)/rayMax;
@@ -85,9 +89,28 @@ public class ElectricalEntitySensorSlowProcess implements IProcess {
 				}
 			}
 			//System.out.println(output);
-			element.outputGateProcess.setOutputNormalized(output);
+			rc1.setTarget((float) output);
+			
 		}
-
+		
+		rc1.step((float) time);
+		rc2.setTarget(rc1.get());
+		rc2.step((float) time);
+		
+		element.outputGateProcess.setOutputNormalized(rc2.get());
+		
+	}
+	@Override
+	public void readFromNBT(NBTTagCompound nbt, String str) {
+		// TODO Auto-generated method stub
+		rc1.readFromNBT(nbt, str + "rc1");
+		rc2.readFromNBT(nbt, str + "rc2");
+	}
+	@Override
+	public void writeToNBT(NBTTagCompound nbt, String str) {
+		// TODO Auto-generated method stub
+		rc1.writeToNBT(nbt, str + "rc1");
+		rc2.writeToNBT(nbt, str + "rc2");
 	}
 
 }

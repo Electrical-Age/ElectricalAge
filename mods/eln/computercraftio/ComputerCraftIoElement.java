@@ -16,6 +16,7 @@ import mods.eln.INBTTReady;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.heatfurnace.HeatFurnaceContainer;
 import mods.eln.item.FerromagneticCoreDescriptor;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -25,6 +26,7 @@ import mods.eln.node.NodeElectricalGateInputOutput;
 import mods.eln.node.NodeElectricalGateOutput;
 import mods.eln.node.NodeElectricalGateOutputProcess;
 import mods.eln.node.NodeElectricalLoad;
+import mods.eln.node.NodeManager;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.SixNode;
 import mods.eln.node.TransparentNode;
@@ -151,11 +153,39 @@ public class ComputerCraftIoElement extends TransparentNodeElement{
 			int method, Object[] arguments) throws Exception {
 		int id = -1;
 		if(arguments.length < 1) return null;
-		if(arguments[0].equals("XN")) id = 0;
-		if(arguments[0].equals("XP")) id = 1;
-		if(arguments[0].equals("ZN")) id = 2;
-		if(arguments[0].equals("ZP")) id = 3;
+		if(arguments[0] instanceof String == false) return null;
+		String arg0 = (String) arguments[0];
+		if(arg0.length() < 2) return null;
+		
+		String sideStr = arg0.substring(0, 2);
+		String remaineStr = arg0.substring(2, arg0.length());
+		
+		//System.out.println(sideStr + " " + remaineStr);
+		
+		if(sideStr.equals("XN")) id = 0;
+		if(sideStr.equals("XP")) id = 1;
+		if(sideStr.equals("ZN")) id = 2;
+		if(sideStr.equals("ZP")) id = 3;
 		if(id == -1) return null;
+		
+		if(remaineStr.length() != 0){
+			Coordonate c = new Coordonate(this.node.coordonate);
+			Direction side = Direction.fromHorizontalIndex(id);	
+			c.move(side);
+			//System.out.println("SUB probe ! " + side + " " + c);
+			NodeBase n = NodeManager.instance.getNodeFromCoordonate(c);
+			if(n == null) return null;
+			//System.out.println("  NodeBase");
+			if(n instanceof TransparentNode == false) return null;
+			//System.out.println("  TransparentNode");
+			TransparentNode tn = (TransparentNode)n;
+			if(tn.element instanceof ComputerCraftIoElement == false) return null;
+			//System.out.println("  ComputerCraftIoElement");
+			ComputerCraftIoElement e = (ComputerCraftIoElement) tn.element;
+			Object[] argumentsCopy = arguments.clone();
+			argumentsCopy[0] = remaineStr;
+			return e.callMethod(computer, context, method, argumentsCopy);
+		}
 		
 		switch (method) {
 		case 0:

@@ -36,7 +36,7 @@ public abstract class BatterySlowProcess implements IProcess{
 	
 	public double getUMax()
 	{
-		return 1.2 * batteryProcess.uNominal;
+		return 1.3 * batteryProcess.uNominal;
 	}
 	
 	public abstract void destroy();

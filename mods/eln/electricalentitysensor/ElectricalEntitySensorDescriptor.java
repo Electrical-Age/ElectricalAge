@@ -24,7 +24,7 @@ import com.google.common.base.Function;
 public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor{
 
 	boolean useEntitySpeed = true;
-	double speedFactor = 1/0.15;
+	double speedFactor = 1/0.10;
 	private Obj3DPart main;
 	double maxRange;
 	public ElectricalEntitySensorDescriptor(
