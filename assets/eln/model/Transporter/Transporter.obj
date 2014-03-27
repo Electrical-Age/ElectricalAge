@@ -1,5 +1,9 @@
 # Blender v2.65 (sub 0) OBJ File: 'Transporter.blend'
 # www.blender.org
+# ---------------
+# Author : lambdaShade
+# This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/.
+
 mtllib Transporter.mtl
 o whiteblur
 v -1.250000 0.871094 -0.246094
