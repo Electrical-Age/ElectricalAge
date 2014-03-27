@@ -109,8 +109,8 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 		electricalQ = 1;
 		double energy = getEnergy(1.0, 1.0);
 		electricalQ *= electricalStdEnergy / energy;
-		//electricalRs =  electricalStdP * (1 - electricalStdEfficiency) / electricalStdI / electricalStdI / 2;
-		electricalRs = cable.electricalRs;
+		electricalRs =  electricalStdP * (1 - electricalStdEfficiency) / electricalStdI / electricalStdI / 2;
+		//electricalRs = cable.electricalRs;
 		electricalRp = electricalU * electricalU / electricalStdP / electricalDischargeRate;
 		
 		

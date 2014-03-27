@@ -25,11 +25,17 @@ public class ElectricalBreakerCutProcess implements IProcess,INBTTReady{
 		}
 		else
 		{
-			double P = I*I*cable.electricalRs*2 - T/cable.thermalRp*0.9;
-			T += P*time;
-			Tmax = cable.thermalWarmLimit;
+			Math.min(I , cable.electricalNominalPower/cable.electricalMaximalVoltage*10);			
+			double P = I*I*cable.electricalRs*2 - T/cable.thermalRp;
+			/*if(P > 200){
+				int i = 0;
+				i++;
+				System.out.println(P);
+			}*/
+			T += P/cable.thermalC*time;
+			Tmax = cable.thermalWarmLimit*0.8;
 		}
-		
+		//System.out.println(T);
 		
 		if(U >= breaker.voltageMax || U < breaker.voltageMin || T > Tmax) {
 			breaker.setSwitchState(false);
