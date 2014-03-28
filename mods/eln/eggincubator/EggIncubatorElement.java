@@ -40,51 +40,46 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 
-public class EggIncubatorElement extends TransparentNodeElement{
-	
+public class EggIncubatorElement extends TransparentNodeElement {
 	
 	public NodeElectricalLoad powerLoad = new NodeElectricalLoad("powerLoad");
 
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 64, this);
 	EggIncubatorProcess slowProcess = new EggIncubatorProcess();
 	EggIncubatorDescriptor descriptor;
-	public EggIncubatorElement(TransparentNode transparentNode,TransparentNodeDescriptor descriptor) {
+	public EggIncubatorElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode,descriptor);
 	   	electricalLoadList.add(powerLoad);
 	   	slowProcessList.add(slowProcess);
 	   	
 	   	this.descriptor = (EggIncubatorDescriptor) descriptor;
-	   	
 	}
 
-
-	class EggIncubatorProcess implements IProcess,INBTTReady
-	{
+	class EggIncubatorProcess implements IProcess, INBTTReady {
 
 		double energy = 5000;
 		public EggIncubatorProcess() {
-
 			resetEnergy();
 		}
-		void resetEnergy()
-		{
-			energy = 10000 + Math.random()*10000;
+		
+		void resetEnergy() {
+			energy = 10000 + Math.random() * 10000;
 		}
 		
 		@Override
 		public void process(double time) {
-			energy -= powerLoad.getRpPower()*time;
-			if(inventory.getStackInSlot(EggIncubatorContainer.EggSlotId)!=null){
+			energy -= powerLoad.getRpPower() * time;
+			if(inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) != null) {
 				descriptor.setState(powerLoad, true);
-				if(energy <= 0){
+				if(energy <= 0) {
 					inventory.decrStackSize(EggIncubatorContainer.EggSlotId, 1);
 					EntityChicken chicken = new EntityChicken(node.coordonate.world());
 					chicken.setGrowingAge(-24000);
 					EntityLiving entityliving = (EntityLiving)chicken;
-					entityliving.setLocationAndAngles(node.coordonate.x+0.5, node.coordonate.y+0.5, node.coordonate.z+0.5, MathHelper.wrapAngleTo180_float(node.coordonate.world().rand.nextFloat() * 360.0F), 0.0F);
+					entityliving.setLocationAndAngles(node.coordonate.x + 0.5, node.coordonate.y + 0.5, node.coordonate.z + 0.5, MathHelper.wrapAngleTo180_float(node.coordonate.world().rand.nextFloat() * 360.0F), 0.0F);
                     entityliving.rotationYawHead = entityliving.rotationYaw;
                     entityliving.renderYawOffset = entityliving.rotationYaw;
-                   // entityliving.func_110161_a((EntityLivingData)null); 1.6.4
+                    //entityliving.func_110161_a((EntityLivingData)null); 1.6.4
                     node.coordonate.world().spawnEntityInWorld(entityliving);
                     entityliving.playLivingSound();
 					//node.coordonate.world().spawnEntityInWorld());
@@ -93,17 +88,15 @@ public class EggIncubatorElement extends TransparentNodeElement{
                 	needPublish();
 				}
 			}
-			else{
+			else {
 				descriptor.setState(powerLoad, false);
 				resetEnergy();
 			}
-			
-			if(Math.abs(powerLoad.Uc - lastVoltagePublish)/descriptor.nominalVoltage > 0.1) needPublish();
+			if(Math.abs(powerLoad.Uc - lastVoltagePublish) / descriptor.nominalVoltage > 0.1) needPublish();
 		}
 
 		@Override
 		public void readFromNBT(NBTTagCompound nbt, String str) {
-			// TODO Auto-generated method stub
 			energy = nbt.getDouble(str + "energyCounter");
 		}
 
@@ -112,7 +105,6 @@ public class EggIncubatorElement extends TransparentNodeElement{
 			nbt.setDouble(str + "energyCounter", energy);
 		}
 	}
-	
 	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
@@ -127,19 +119,15 @@ public class EggIncubatorElement extends TransparentNodeElement{
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		if(lrdu == lrdu.Down)
-		{
+		if(lrdu == lrdu.Down) {
 			return NodeBase.maskElectricalPower;	
 		}
 		return 0;
 	}
 
-
-	
 	@Override
 	public String multiMeterString(Direction side) {
 		return Utils.plotUIP(powerLoad.Uc, powerLoad.getCurrent());
-
 	}
 	
 	@Override
@@ -147,73 +135,54 @@ public class EggIncubatorElement extends TransparentNodeElement{
 		return  null;
 	}
 
-	
 	@Override
 	public void initialize() {
-
 		descriptor.applyTo(powerLoad);
-		
 		connect();
-    			
 	}
 
-    public void inventoryChange(IInventory inventory)
-    {
- 
+    public void inventoryChange(IInventory inventory) {
     	needPublish();
     }
 	
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	
-	
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
 		return new EggIncubatorContainer(player, inventory,node);
 	}
 
-	
-
 	public float getLightOpacity() {
-		// TODO Auto-generated method stub
 		return 1.0f;
 	}
 	
 	@Override
 	public IInventory getInventory() {
-		// TODO Auto-generated method stub
 		return inventory;
 	}
-	
-	
 	
 	double lastVoltagePublish;
 
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
 			if(inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) == null) stream.writeByte(0);
 			else stream.writeByte(inventory.getStackInSlot(EggIncubatorContainer.EggSlotId).stackSize);
 
-			
 			node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
 			
 			stream.writeFloat((float) powerLoad.Uc);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		lastVoltagePublish = powerLoad.Uc;
