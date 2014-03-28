@@ -1,6 +1,5 @@
 package mods.eln.client;
 
-
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 
 import java.io.ByteArrayOutputStream;
@@ -46,69 +45,59 @@ import cpw.mods.fml.relauncher.Side;
 
 public class FrameTime implements ITickHandler{
 	static FrameTime instance;
-	public FrameTime()
-	{
+	public FrameTime() {
 		instance = this;
 		TickRegistry.registerTickHandler(this, Side.CLIENT);
-		
 	}
-	public void init()
-	{
-	//	NodeBlockEntity.nodeAddedList.clear();
-	}
-	public void stop()
-	{
+	
+	public void init() {
 	//	NodeBlockEntity.nodeAddedList.clear();
 	}
 	
-	public static float get()
-	{
+	public void stop() {
+	//	NodeBlockEntity.nodeAddedList.clear();
+	}
+	
+	public static float get() {
 		if(Utils.isGameInPause())
 			return 0f;
-		return Math.min(0.1f,instance.deltaT);
+		return Math.min(0.1f, instance.deltaT);
 	}
-	public static float getNotCaped()
-	{
+	
+	public static float getNotCaped() {
 		float value = get();
 		return value;
 	}
+	
 	float deltaT = 0.02f;
 	long oldNanoTime = 0;
 	boolean boot = true;
+	
 	@Override
 	public void tickStart(EnumSet<TickType> type, Object... tickData) {
 		long nanoTime = System.nanoTime();
-		if(boot){
+		if(boot) {
 			boot = false;
 		}
-		else
-		{
-			deltaT = (nanoTime-oldNanoTime)*0.000000001f;
+		else {
+			deltaT = (nanoTime - oldNanoTime) * 0.000000001f;
 		//	System.out.println(deltaT);
 		}
 		oldNanoTime = nanoTime;
-	//	System.out.println("delta T : " + deltaT);
-   
-
-
+	    //	System.out.println("delta T : " + deltaT);
 	}
+	
 	@Override
 	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
-		// TODO Auto-generated method stub
-		
-		
-
 	}
+	
 	@Override
 	public EnumSet<TickType> ticks() {
 		return EnumSet.of(TickType.RENDER);
-		
 	}
+	
 	@Override
 	public String getLabel() {
-		// TODO Auto-generated method stub
 		return "Miaou2";
 	}
-
-	
 }

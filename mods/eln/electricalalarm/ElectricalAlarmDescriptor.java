@@ -26,39 +26,36 @@ import mods.eln.wiki.Data;
 
 import com.google.common.base.Function;
 
-
-public class ElectricalAlarmDescriptor extends SixNodeDescriptor{
-
+public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
 
 	public ElectricalAlarmDescriptor(
 			String name,
 			Obj3D obj,
 			int light,
-			String soundName,double soundTime,float soundLevel
-			) {
-		super(name, ElectricalAlarmElement.class,ElectricalAlarmRender.class);
+			String soundName, double soundTime, float soundLevel) {
+		super(name, ElectricalAlarmElement.class, ElectricalAlarmRender.class);
 		this.obj = obj;
 		this.soundName = soundName;
 		this.soundTime = soundTime;
 		this.soundLevel = soundLevel;
 		this.light = light;
-		if(obj != null){
+		if(obj != null) {
 			main = obj.getPart("main");
 			rot = obj.getPart("rot");
 			lightPart = obj.getPart("light");
 			
 			onTexture = obj.getAlternativeTexture(obj.getString("onTexture"));
 			offTexture = obj.getAlternativeTexture(obj.getString("offTexture"));
-			if(rot != null){
+			if(rot != null) {
 				rotSpeed = rot.getFloat("speed");
 			}
 		}
 	}
 	int light;
 	Obj3D obj;
-	Obj3DPart main,rot,lightPart;
+	Obj3DPart main, rot, lightPart;
 	
-	ResourceLocation onTexture,offTexture;
+	ResourceLocation onTexture, offTexture;
 	String soundName;
 	double soundTime;
 	float soundLevel;
@@ -66,17 +63,15 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor{
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addUtilities(newItemStack());
 	}
 	
-	void draw(boolean warm,float rotAlpha)
-	{
+	void draw(boolean warm, float rotAlpha) {
 		if(warm) Utils.bindTexture(onTexture);
-		else	Utils.bindTexture(offTexture);
+		else Utils.bindTexture(offTexture);
 		if(main != null) main.drawNoBind();
-		if(rot != null){
+		if(rot != null) {
 			GL11.glDisable(GL11.GL_CULL_FACE);
 			GL11.glColor3f(1.0f, 1.0f, 1.0f);
 			if(warm) Utils.disableLight();
@@ -86,7 +81,7 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor{
 			else GL11.glEnable(GL11.GL_LIGHTING);
 			GL11.glEnable(GL11.GL_CULL_FACE);
 		}
-		if(lightPart != null){
+		if(lightPart != null) {
 			Utils.drawLightNoBind(lightPart);
 		}
 	}
@@ -94,13 +89,11 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor{
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
 		return true;
 	}
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
 		return true;
 	}
 	
@@ -113,10 +106,10 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor{
 		}
 		draw(true,0.0f);
 	}
+	
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Emit a sonor alarm when");
 		list.add("the input signal is high");

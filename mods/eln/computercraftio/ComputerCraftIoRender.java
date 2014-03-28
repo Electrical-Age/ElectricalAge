@@ -33,26 +33,16 @@ import net.minecraft.item.ItemStack;
 
 import org.lwjgl.opengl.GL11;
 
-
 public class ComputerCraftIoRender extends TransparentNodeElementRender{
 
 	ComputerCraftIoDescriptor descriptor;
-	public ComputerCraftIoRender(TransparentNodeEntity tileEntity,TransparentNodeDescriptor descriptor) {
-		super(tileEntity,descriptor);
+	
+	public ComputerCraftIoRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
+		super(tileEntity, descriptor);
 		this.descriptor = (ComputerCraftIoDescriptor) descriptor;
 	}
 
 	@Override
 	public void draw() {
-		// TODO Auto-generated method stub
-
-
 	}
-
-
-	
-	
-
-	
-
 }

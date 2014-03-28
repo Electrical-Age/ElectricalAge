@@ -53,33 +53,25 @@ import net.minecraft.util.MathHelper;
 
 public class ComputerCraftIoElement extends TransparentNodeElement{
 	
-	
-
 	public NodeElectricalGateInputOutput[] ioGate = new NodeElectricalGateInputOutput[4];
 	public NodeElectricalGateOutputProcess[] ioGateProcess = new NodeElectricalGateOutputProcess[4];
 
 	ComputerCraftIoDescriptor descriptor;
-	public ComputerCraftIoElement(TransparentNode transparentNode,TransparentNodeDescriptor descriptor) {
-		super(transparentNode,descriptor);
-
-		for(int idx = 0;idx < 4;idx++){
-			ioGate[idx] = new NodeElectricalGateInputOutput("ioGate"+idx);
-			ioGateProcess[idx] = new NodeElectricalGateOutputProcess("ioGateProcess"+idx,ioGate[idx]);
+	
+	public ComputerCraftIoElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
+		super(transparentNode, descriptor);
+		for(int idx = 0; idx < 4; idx++){
+			ioGate[idx] = new NodeElectricalGateInputOutput("ioGate" + idx);
+			ioGateProcess[idx] = new NodeElectricalGateOutputProcess("ioGateProcess" + idx, ioGate[idx]);
 			
 			electricalLoadList.add(ioGate[idx]);
 			electricalProcessList.add(ioGateProcess[idx]);
 			
 			ioGateProcess[idx].setHighImpedance(true);
 		}
-
 	   	this.descriptor = (ComputerCraftIoDescriptor) descriptor;
-	   	
 	}
 
-
-
-	
-	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
 		if(lrdu != LRDU.Down || side.isY()) return null;
@@ -93,20 +85,16 @@ public class ComputerCraftIoElement extends TransparentNodeElement{
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-
-		if(lrdu == lrdu.Down && side.isNotY())
-		{
+		if(lrdu == lrdu.Down && side.isNotY()) {
 			return NodeBase.maskElectricalGate;	
 		}
 		return 0;
 	}
 
-
-	
 	@Override
 	public String multiMeterString(Direction side) {
-		return null;//Utils.plotUIP(powerLoad.Uc, powerLoad.getCurrent());
-
+		return null;
+		//Utils.plotUIP(powerLoad.Uc, powerLoad.getCurrent());
 	}
 	
 	@Override
@@ -114,39 +102,25 @@ public class ComputerCraftIoElement extends TransparentNodeElement{
 		return  null;
 	}
 
-	
 	@Override
 	public void initialize() {
-
-		connect();
-    			
+		connect();		
 	}
 
-	
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	
-	
-
-	
 	public String getType() {
-		// TODO Auto-generated method stub
 		return "Probe";
 	}
 
-
-
 	@Override
 	public String[] getMethodNames() {
-		// TODO Auto-generated method stub
-		return new String[]{"writeDirection","readDirection","writeOutput","readOutput","readInput"};
+		return new String[]{"writeDirection", "readDirection", "writeOutput", "readOutput", "readInput"};
 	}
-
-
 
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context,
@@ -168,7 +142,7 @@ public class ComputerCraftIoElement extends TransparentNodeElement{
 		if(sideStr.equals("ZP")) id = 3;
 		if(id == -1) return null;
 		
-		if(remaineStr.length() != 0){
+		if(remaineStr.length() != 0) {
 			Coordonate c = new Coordonate(this.node.coordonate);
 			Direction side = Direction.fromHorizontalIndex(id);	
 			c.move(side);
@@ -208,30 +182,16 @@ public class ComputerCraftIoElement extends TransparentNodeElement{
 		return null;
 	}
 
-
-
 	@Override
 	public boolean canAttachToSide(int side) {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
-
-
 	@Override
 	public void attach(IComputerAccess computer) {
-		// TODO Auto-generated method stub
-		
 	}
-
-
 
 	@Override
 	public void detach(IComputerAccess computer) {
-		// TODO Auto-generated method stub
-		
 	}    
-
-
-
 }

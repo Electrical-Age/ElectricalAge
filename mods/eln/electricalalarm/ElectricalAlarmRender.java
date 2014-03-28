@@ -1,4 +1,3 @@
-
 package mods.eln.electricalalarm;
 
 import java.io.DataInputStream;
@@ -20,8 +19,7 @@ import mods.eln.node.SixNodeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 
-
-public class ElectricalAlarmRender extends SixNodeElementRender{
+public class ElectricalAlarmRender extends SixNodeElementRender {
 
 	ElectricalAlarmDescriptor descriptor;
 	public ElectricalAlarmRender(SixNodeEntity tileEntity, Direction side,
@@ -30,10 +28,10 @@ public class ElectricalAlarmRender extends SixNodeElementRender{
 		this.descriptor = (ElectricalAlarmDescriptor) descriptor;
 	}
 
-
 	LRDU front;
 
 	RcInterpolator interpol = new RcInterpolator(0.4f);
+	
 	@Override
 	public void draw() {
 		super.draw();
@@ -41,17 +39,17 @@ public class ElectricalAlarmRender extends SixNodeElementRender{
 		interpol.setTarget(warm ? descriptor.rotSpeed : 0f);
 		interpol.stepGraphic();
 		
-		rotAlpha += interpol.get() *FrameTime.get();
+		rotAlpha += interpol.get() * FrameTime.get();
 
 		//front.glRotateOnX();		
-		descriptor.draw(warm,rotAlpha);
-
+		descriptor.draw(warm, rotAlpha);
 	}
+	
 	float rotAlpha = 0;
 	boolean warm = false;
+	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
 			Byte b;
@@ -60,15 +58,12 @@ public class ElectricalAlarmRender extends SixNodeElementRender{
 			warm = (b & 1) != 0 ? true : false;
 			System.out.println("WARM : " + warm);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}		
-
+		}
 	}
 	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return Eln.instance.signalCableDescriptor.render;
 	}
 }
