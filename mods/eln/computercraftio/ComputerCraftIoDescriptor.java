@@ -23,19 +23,12 @@ import mods.eln.wiki.Data;
 
 public class ComputerCraftIoDescriptor extends TransparentNodeDescriptor {
 
-	public ComputerCraftIoDescriptor(
-			String name,
-			Obj3D obj
-			) {
-		super(name, ComputerCraftIoElement.class,ComputerCraftIoRender.class);
-
-		
-
+	public ComputerCraftIoDescriptor(String name, Obj3D obj) {
+		super(name, ComputerCraftIoElement.class, ComputerCraftIoRender.class);
 	}
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
@@ -43,37 +36,25 @@ public class ComputerCraftIoDescriptor extends TransparentNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-
 	}
 	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
 		return true;
 	}
+	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
 		return true;
 	}
+	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		// TODO Auto-generated method stub
-		draw(0,1f);
+		draw(0, 1f);
 	}
 	
-	
-	void draw(int eggStackSize,float powerFactor)
-	{
-	
-		
-
+	void draw(int eggStackSize, float powerFactor) {
 	}
-
-
-	
-
 }

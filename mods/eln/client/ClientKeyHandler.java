@@ -23,7 +23,6 @@ import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.network.packet.Packet250CustomPayload;
 
-
 public class ClientKeyHandler extends KeyHandler {
 
 	static final String stuffInteractA = "stuffInteractA";
@@ -31,24 +30,20 @@ public class ClientKeyHandler extends KeyHandler {
 	static final String interact = "ElnInteract";
 	static final String openWiki = "Open Wiki";
 	
-
-	
-	
 	public ClientKeyHandler() {
-	        //the first value is an array of KeyBindings, the second is whether or not the call 
-	//keyDown should repeat as long as the key is down
-    	
-	        super(new KeyBinding[]{	new KeyBinding(stuffInteractA, Keyboard.KEY_V),
-	    							new KeyBinding(stuffInteractB, Keyboard.KEY_B),
-	    							new KeyBinding(openWiki, Keyboard.KEY_X),
-	        						new KeyBinding(interact, Keyboard.KEY_C)},
-	        						new boolean[]{false,false,false,false});
-	        KeyBindingRegistry.registerKeyBinding(this);
+	    //the first value is an array of KeyBindings, the second is whether or not the call 
+		//keyDown should repeat as long as the key is down
+	    super(new KeyBinding[]{	new KeyBinding(stuffInteractA, Keyboard.KEY_V),
+	    						new KeyBinding(stuffInteractB, Keyboard.KEY_B),
+	    						new KeyBinding(openWiki, Keyboard.KEY_X),
+	        					new KeyBinding(interact, Keyboard.KEY_C)},
+	        					new boolean[]{false, false, false, false});
+	    KeyBindingRegistry.registerKeyBinding(this);
 	}
 	
 	@Override
 	public String getLabel() {
-	        return "mykeybindings";
+	    return "mykeybindings";
 	}
 	
 	@Override
@@ -56,12 +51,12 @@ public class ClientKeyHandler extends KeyHandler {
 	                boolean tickEnd, boolean isRepeat) {
 		int i = 0;
 		i++;
-	  //  System.out.println("keyDown " + kb + "   " +  tickEnd + "   " + isRepeat);
+	    // System.out.println("keyDown " + kb + "   " +  tickEnd + "   " + isRepeat);
 	    
 	    if(! tickEnd) return;
 	    if(Minecraft.getMinecraft().currentScreen != null) return;
 	    		
-	    if(kb.keyDescription.equals(openWiki)){	    	
+	    if(kb.keyDescription.equals(openWiki)) {	    	
 	    	Utils.clientOpenGui(new Root(null));
 	    	return;
 	    }
@@ -72,21 +67,20 @@ public class ClientKeyHandler extends KeyHandler {
         packet.length = 2;
         boolean job = false;
         packet.data[0] = Eln.packetPlayerKey;
-        if(kb.keyDescription.equals(stuffInteractA))
-        {
-        	packet.data[1] = PacketHandler.stuffInteractAId; job = true;
+        
+        if(kb.keyDescription.equals(stuffInteractA)) {
+        	packet.data[1] = PacketHandler.stuffInteractAId;
+        	job = true;
         }
-        if(kb.keyDescription.equals(stuffInteractB))
-        {
-        	packet.data[1] = PacketHandler.stuffInteractBId; job = true;
+        if(kb.keyDescription.equals(stuffInteractB)) {
+        	packet.data[1] = PacketHandler.stuffInteractBId;
+        	job = true;
         }
-        if(kb.keyDescription.equals(interact))
-        {
-        	packet.data[1] = PacketHandler.interactEnableId; job = true;
+        if(kb.keyDescription.equals(interact)) {
+        	packet.data[1] = PacketHandler.interactEnableId;
+        	job = true;
         }
         
-        
-           
     	if(!job)return;
     	PacketDispatcher.sendPacketToServer(packet);
 	}
@@ -103,13 +97,11 @@ public class ClientKeyHandler extends KeyHandler {
 
         boolean job = false;
         
-        if(kb.keyDescription.equals(interact))
-        {
-        	packet.data[1] = PacketHandler.interactDisableId; job = true;
+        if(kb.keyDescription.equals(interact)) {
+        	packet.data[1] = PacketHandler.interactDisableId; 
+        	job = true;
         }
         
-        
-           
         if(!job)return;
     	PacketDispatcher.sendPacketToServer(packet);
 	}
@@ -117,6 +109,5 @@ public class ClientKeyHandler extends KeyHandler {
 	@Override
 	public EnumSet<TickType> ticks() {
 	        return EnumSet.of(TickType.CLIENT);
-	       
 	}
 }

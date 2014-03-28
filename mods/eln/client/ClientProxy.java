@@ -17,19 +17,10 @@ import mods.eln.node.TransparentNodeEntity;
 import mods.eln.node.TransparentNodeRender;
 import net.minecraftforge.client.MinecraftForgeClient;
 
-
-
-
-
-
-
-
 public class ClientProxy extends CommonProxy {
 
-   
 	@Override
 	public void registerRenderers() {
-
 		ClientRegistry.bindTileEntitySpecialRenderer(SixNodeEntity.class, new SixNodeRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TransparentNodeEntity.class, new TransparentNodeRender());
        	
@@ -37,10 +28,7 @@ public class ClientProxy extends CommonProxy {
       	MinecraftForgeClient.registerItemRenderer(Eln.sixNodeItem.itemID, Eln.sixNodeItem);
       	MinecraftForgeClient.registerItemRenderer(Eln.sharedItem.itemID, Eln.sharedItem);
       	MinecraftForgeClient.registerItemRenderer(Eln.sharedItemStackOne.itemID, Eln.sharedItemStackOne);
-      	       
 
 		Eln.clientKeyHandler = new ClientKeyHandler();
 	}
-	
-	
 }
