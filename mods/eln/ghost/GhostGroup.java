@@ -2,6 +2,8 @@ package mods.eln.ghost;
 
 import java.util.ArrayList;
 
+import javax.swing.text.html.HTMLDocument.Iterator;
+
 import com.google.common.base.CaseFormat;
 
 import mods.eln.Eln;
@@ -33,6 +35,21 @@ public class GhostGroup {
 	{
 		elementList.add(new GhostGroupElement(x, y, z));
 	}
+	
+	
+	public void removeElement(int x,int y, int z)
+	{
+		java.util.Iterator<GhostGroupElement>  i = elementList.iterator();
+		GhostGroupElement g;
+		while(i.hasNext()){
+			g = i.next();
+			if(g.x == x && g.y == y && g.z == z){
+				i.remove();
+			}
+		}
+
+	}
+	
 	public void addRectangle(int x1,int x2,int y1,int y2,int z1,int z2)
 	{
 		for(int x = x1;x <= x2;x++)

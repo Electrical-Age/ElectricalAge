@@ -27,6 +27,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalLoadDynamicProcess;
 import mods.eln.sim.ElectricalLoadHeatThermalLoadProcess;
 import mods.eln.sim.ElectricalResistor;
+import mods.eln.sim.ElectricalResistorCableHeatThermalLoad;
 import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ITemperatureWatchdogDescriptor;
 import mods.eln.sim.IVoltageWatchdogDescriptor;
@@ -48,8 +49,8 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
     	electricalLoadList.add(bLoad);
     	electricalProcessList.add(switchResistor);
     	thermalLoadList.add(thermalLoad);
-    	thermalProcessList.add(aETProcess);
-    	thermalProcessList.add(bETProcess);
+    	//thermalProcessList.add(aETProcess);
+    	//thermalProcessList.add(bETProcess);
     	thermalProcessList.add(switchResistorETProcess);
     	slowProcessList.add(thermalWatchdog);
     	slowProcessList.add(voltageAWatchdog);
@@ -63,9 +64,9 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
 	public NodeElectricalLoad bLoad = new NodeElectricalLoad("bLoad");
 	public ElectricalResistor switchResistor = new ElectricalResistor(aLoad, bLoad);
 	public NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
-	public ElectricalLoadHeatThermalLoadProcess aETProcess = new ElectricalLoadHeatThermalLoadProcess(aLoad,thermalLoad);
-	public ElectricalLoadHeatThermalLoadProcess bETProcess = new ElectricalLoadHeatThermalLoadProcess(bLoad,thermalLoad);
-	public ElectricalResistorHeatThermalLoad switchResistorETProcess = new ElectricalResistorHeatThermalLoad(switchResistor, thermalLoad);
+	//public ElectricalLoadHeatThermalLoadProcess aETProcess = new ElectricalLoadHeatThermalLoadProcess(aLoad,thermalLoad);
+	//public ElectricalLoadHeatThermalLoadProcess bETProcess = new ElectricalLoadHeatThermalLoadProcess(bLoad,thermalLoad);
+	public ElectricalResistorCableHeatThermalLoad switchResistorETProcess = new ElectricalResistorCableHeatThermalLoad(switchResistor, thermalLoad);
 
 	public NodeThermalWatchdogProcess thermalWatchdog = new NodeThermalWatchdogProcess(sixNode, this, this, thermalLoad);
 	public NodeVoltageWatchdogProcess voltageAWatchdog = new NodeVoltageWatchdogProcess(sixNode, this, this, aLoad);

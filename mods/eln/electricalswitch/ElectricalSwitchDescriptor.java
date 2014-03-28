@@ -76,7 +76,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor{
 		}
 		this.thermal = thermal;
 		double I = maximalPower / nominalVoltage;
-		thermal.setMaximalPower(I*I*electricalRs*3);
+		thermal.setMaximalPower(I*I*electricalRs);
 		this.signalSwitch = signalSwitch;
 	}
 	

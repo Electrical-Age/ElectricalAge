@@ -2,6 +2,7 @@ package mods.eln.autominer;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import mods.eln.Eln;
 import mods.eln.ghost.GhostObserver;
@@ -20,6 +21,7 @@ import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.VoltageWatchdogProcessForInventoryItemDamageSingleLoad;
+import mods.eln.teleporter.TeleporterPowerNode;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -35,6 +37,8 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 	VoltageWatchdogProcessForInventoryItemDamageSingleLoad electricalScannerWatchDog = new VoltageWatchdogProcessForInventoryItemDamageSingleLoad(inventory, AutoMinerContainer.OreScannerSlotId, inPowerLoad);
 	
 	AutoMinerDescriptor descriptor;
+	
+	Coordonate lightCoordonate;
 	
 	public AutoMinerElement(TransparentNode transparentNode,
 			TransparentNodeDescriptor descriptor) {
@@ -75,10 +79,47 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 
 	@Override
 	public void initialize() {
+		lightCoordonate = new Coordonate(this.descriptor.lightCoord);
+		lightCoordonate.applyTransformation(front, node.coordonate);
+		
+		int idx = 0;
+		for(Coordonate c : descriptor.getPowerCoordonate(node.coordonate.world())){
+			AutoMinerPowerNode n = new AutoMinerPowerNode();
+			n.setElement(this);
+			c.applyTransformation(front,node.coordonate);
+			
+			Direction dir;
+			if(idx != 0)
+				dir = front.left();
+			else
+				dir = front.right();
+			
+			//dir = front;
+			n.onBlockPlacedBy(c, dir, null, null);
+			
+			powerNodeList.add(n);
+			idx++;
+		}
+		
 		descriptor.applyTo(inPowerLoad);
 		descriptor.applyTo(electricalLoadWatchdog);
 		connect();
 	}
+	
+	@Override
+	public void onBreakElement() {
+		// TODO Auto-generated method stub
+		super.onBreakElement();
+		slowProcess.onBreakElement();
+	
+		for(AutoMinerPowerNode n : powerNodeList){
+			n.onBreakBlock();
+		}
+		powerNodeList.clear();
+		
+	}
+	ArrayList<AutoMinerPowerNode> powerNodeList = new ArrayList<AutoMinerPowerNode>();
+
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
@@ -101,11 +142,7 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 		return inventory;
 	}	
 	
-	@Override
-	public void onBreakElement() {
-		slowProcess.onBreakElement();
-		super.onBreakElement();
-	}
+
 
 	@Override
 	public Coordonate getGhostObserverCoordonate() {
@@ -114,6 +151,7 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 
 	@Override
 	public void ghostDestroyed(int UUID) {
+		super.ghostDestroyed(UUID);
 		slowProcess.ghostDestroyed(UUID);
 	}
 

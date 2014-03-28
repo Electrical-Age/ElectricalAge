@@ -3,9 +3,11 @@ package mods.eln.autominer;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import org.bouncycastle.jcajce.provider.symmetric.DES;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.misc.Direction;
+import mods.eln.misc.Obj3D;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.node.TransparentNodeElementRender;
@@ -14,14 +16,17 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class AutoMinerRender extends TransparentNodeElementRender {
-
+	AutoMinerDescriptor descriptor;
 	public AutoMinerRender(TransparentNodeEntity tileEntity,
 			TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
+		this.descriptor = (AutoMinerDescriptor) descriptor;
 	}
 
 	@Override
 	public void draw() {
+		
+		
 		if(pipeLength != 0) {
 			GL11.glLineWidth(20f);
 			GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -35,6 +40,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 		}
 		front.glRotateXnRef();
+		descriptor.draw();
 	}
 
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);

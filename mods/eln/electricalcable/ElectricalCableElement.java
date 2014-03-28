@@ -23,6 +23,7 @@ import mods.eln.node.SixNode;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
+import mods.eln.sim.ElectricalLoadCableHeatThermalLoadProcess;
 import mods.eln.sim.ElectricalLoadDynamicProcess;
 import mods.eln.sim.ElectricalLoadHeatThermalLoadProcess;
 import mods.eln.sim.IProcess;
@@ -57,12 +58,13 @@ public class ElectricalCableElement extends SixNodeElement implements IThermalDe
 		
 		electricalLoad.setSimplifyAuthorized(true);
 
+		
 	}
 
 
 	NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");
 	NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
-	ElectricalLoadHeatThermalLoadProcess ETProcess = new ElectricalLoadHeatThermalLoadProcess(electricalLoad,thermalLoad);
+	ElectricalLoadCableHeatThermalLoadProcess ETProcess = new ElectricalLoadCableHeatThermalLoadProcess(electricalLoad,thermalLoad);
 
 	NodeThermalWatchdogProcess thermalWatchdogProcess;
 	ElectricalLoadDynamicProcess electricalLoadDynamicProcess = new ElectricalLoadDynamicProcess(electricalLoad,thermalLoad);

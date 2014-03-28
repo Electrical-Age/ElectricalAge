@@ -430,7 +430,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 						int playerCount = c.world().getEntitiesWithinAABB(EntityPlayer.class, bb).size();
 						int itemCount = c.world().getEntitiesWithinAABB(EntityItem.class,bb).size();
 						int petCount = c.world().getEntitiesWithinAABB(EntityLivingBase.class,bb).size() - playerCount;
-						
+						//Object o = c.world().getEntitiesWithinAABB(EntityItem.class,bb);
 						energyTarget = 	10000 + 
 										40000 *playerCount +
 										5000 *petCount +

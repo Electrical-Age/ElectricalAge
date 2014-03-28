@@ -8,6 +8,7 @@ import mods.eln.ghost.GhostElement;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
 import mods.eln.item.OreScanner;
+import mods.eln.lampsocket.LightBlockEntity;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
@@ -42,12 +43,18 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 	enum jobType {none, ore, pipeAdd, pipeRemove};
 	jobType job = jobType.none;
 	Coordonate jobCoord = new Coordonate();
-	
+	int blinkCounter = 0;
 	@Override
 	public void process(double time) {
 		ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
 		OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.OreScannerSlotId));
 		MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
+		
+		if(++blinkCounter >= 9){
+			blinkCounter = 0;
+			if((miner.inPowerLoad.Uc/miner.descriptor.nominalVoltage-0.5)*3 > Math.random())
+				LightBlockEntity.addLight(miner.lightCoordonate, 12, 11);
+		}
 		
 		energyCounter += miner.inPowerLoad.getRpPower() * time;
 		

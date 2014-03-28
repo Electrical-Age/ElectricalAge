@@ -27,7 +27,7 @@ public class ElectricalBreakerCutProcess implements IProcess,INBTTReady{
 		else
 		{
 			Math.min(I , cable.electricalNominalPower/cable.electricalMaximalVoltage*10);			
-			double P = I*I*cable.electricalRs*2 - T/cable.thermalRp;
+			double P = I*I*cable.electricalRs*2 - T/cable.thermalRp*0.9;
 			/*if(P > 200){
 				int i = 0;
 				i++;

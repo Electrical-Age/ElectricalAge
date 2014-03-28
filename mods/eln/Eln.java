@@ -254,6 +254,7 @@ public class Eln {
 	public static String channelName = "miaouMod";
 
 	public static final String[] objNames = new String[] {
+			"/model/AutoMiner/AutoMiner.obj",
 			"/model/Anemometer/Anemometer.obj",
 			"/model/XRayScanner/XRayScanner.obj",
 			"/model/RobustLampSuspended/RobustLampSuspended.obj",
@@ -4034,12 +4035,37 @@ public class Eln {
 			subId = 0;
 			name = "Auto Miner";
 
-			AutoMinerDescriptor desc = new AutoMinerDescriptor(name, LVU,
-					LVU * 1.4,// double nominalVoltage,double maximalVoltage,
+			Coordonate[] powerLoad = new Coordonate[2];
+			powerLoad[0] = new Coordonate(-2, -1, 1, 0);
+			powerLoad[1] = new Coordonate(-2, -1, -1, 0);
+			
+			Coordonate lightCoord = new Coordonate(-1, 0, 1, 0);
+
+			Coordonate miningCoord = new Coordonate(-1, 0, 1, 0);
+
+			AutoMinerDescriptor desc = new AutoMinerDescriptor(name, 
+					obj.getObj("AutoMiner"),
+					powerLoad,lightCoord,miningCoord,
+					2,1,0,
+					MVU,
+					MVU * 1.4,// double nominalVoltage,double maximalVoltage,
 					1500, 0.01,// double nominalPower,double nominalDropFactor,
 					1, 50// double pipeRemoveTime,double pipeRemoveEnergy
 			);
 
+			GhostGroup ghostGroup = new GhostGroup();
+			
+			ghostGroup.addRectangle(-2, -1, -1, 0, -1, 1);
+			ghostGroup.addRectangle(1, 1, -1, 0, 1, 1);
+			ghostGroup.addRectangle(1, 1, -1, 0, -1, -1);
+			ghostGroup.addElement(1, 0, 0);
+			ghostGroup.addElement(0, 0, 1);
+			ghostGroup.addElement(0, 1, 0);
+			ghostGroup.addElement(0, 0, -1);
+			ghostGroup.removeElement(-1, -1, 0);
+			
+			desc.setGhostGroup(ghostGroup);
+			
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
