@@ -15,16 +15,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
-public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor{
+public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor {
 
-	public ElectricalFurnaceDescriptor(
-			String name, 
-			IFunction PfT,
-			IFunction thermalPlostfT,
-			double thermalC
-			) {
+	public ElectricalFurnaceDescriptor(String name, IFunction PfT, IFunction thermalPlostfT, double thermalC) {
 		super(name, ElectricalFurnaceElement.class, ElectricalFurnaceRender.class);
-		// TODO Auto-generated constructor stub
 		this.PfT = PfT;
 		this.thermalPlostfT= thermalPlostfT; 
 		this.thermalC = thermalC;
@@ -34,17 +28,11 @@ public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor{
 	//public double thermalRp;
 	//ThermalLoadInitializer thermal;
 	
-	
-	
-	
-	
-	public void applyTo(ThermalLoad load)
-	{
-		load.set(Double.POSITIVE_INFINITY,thermalPlostfT.getValue(0),thermalC);
+	public void applyTo(ThermalLoad load) {
+		load.set(Double.POSITIVE_INFINITY, thermalPlostfT.getValue(0), thermalC);
 	}
 	
-	public void refreshTo(ThermalLoad load,double conductionFactor)
-	{
+	public void refreshTo(ThermalLoad load, double conductionFactor) {
 		double Rp = (load.Tc / thermalPlostfT.getValue(load.Tc)) / conductionFactor ;
 		if(Rp < 0.1) Rp = 0.1;
 		load.setRp(Rp);
@@ -52,31 +40,27 @@ public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor{
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addMachine(newItemStack());
 	}
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
 		return true;
 	}
+	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
+	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		 Eln.obj.draw("ElectricFurnace", "furnace");	
 	}
 	
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-		// TODO Auto-generated method stub
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Equivalent to a vanilla furnace");
 		list.add("but needs electricity to work.");

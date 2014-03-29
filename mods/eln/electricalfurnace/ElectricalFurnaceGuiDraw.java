@@ -37,65 +37,54 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.StatCollector;
 
-
 public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
 
-	
     private TransparentNodeElementInventory inventory;
     ElectricalFurnaceRender render;
-    GuiButton buttonGrounded,autoShutDown;   
+    GuiButton buttonGrounded, autoShutDown;   
     GuiVerticalTrackBarHeat vuMeterTemperature;
     
     GuiVerticalVoltageSupplyBar supplyBar;
     
-    public ElectricalFurnaceGuiDraw(EntityPlayer player, IInventory inventory,ElectricalFurnaceRender render)
-    {
-        super(new ElectricalFurnaceContainer(null,player, inventory));
+    public ElectricalFurnaceGuiDraw(EntityPlayer player, IInventory inventory, ElectricalFurnaceRender render) {
+        super(new ElectricalFurnaceContainer(null, player, inventory));
         this.inventory = (TransparentNodeElementInventory) inventory;
         this.render = render;
-        
-      
     }
 
-    public void initGui()
-    {
+    public void initGui() {
     	super.initGui();
     	autoShutDown = newGuiButton(6, 6, 99, "");
-    	buttonGrounded = newGuiButton(6+10*0,6+20+4,60-20, "");
-    	vuMeterTemperature = newGuiVerticalTrackBarHeat(167-20 -20 -8-4,8,20,69);
-    	vuMeterTemperature.setStepIdMax(800/10);
+    	buttonGrounded = newGuiButton(6 + 10 * 0, 6 + 20 + 4, 60 - 20, "");
+    	vuMeterTemperature = newGuiVerticalTrackBarHeat(167 - 20 - 20 - 8 - 4, 8, 20, 69);
+    	vuMeterTemperature.setStepIdMax(800 / 10);
     	vuMeterTemperature.setEnable(true);
-    	vuMeterTemperature.setRange(0,800);
-    	vuMeterTemperature.setComment(new String[]{
-    			"Temperature Gauge"
-    			});
+    	vuMeterTemperature.setRange(0, 800);
+    	vuMeterTemperature.setComment(new String[]{"Temperature Gauge"});
     	syncVumeter();
     	
-    	supplyBar = new GuiVerticalVoltageSupplyBar(167-20-2, 8, 20, 69, helper);
+    	supplyBar = new GuiVerticalVoltageSupplyBar(167 - 20 - 2, 8, 20, 69, helper);
     	add(supplyBar);
     }
     
-    
-    
-    public void syncVumeter()
-    {
+    public void syncVumeter() {
     	vuMeterTemperature.setValue(render.temperatureTargetSyncValue);
     	render.temperatureTargetSyncNew = false;
     }
     
     @Override
     protected void preDraw(float f, int x, int y) {
-    	// TODO Auto-generated method stub
     	super.preDraw(f, x, y);
-    	if( render.getPowerOn())
+    	if(render.getPowerOn())
     		buttonGrounded.displayString = "Is ON";
     	else
     		buttonGrounded.displayString = "Is OFF";
     	
-    	if( render.autoShutDown){
+    	if(render.autoShutDown) {
     		buttonGrounded.enabled = false;
     		autoShutDown.displayString = "Auto Shutdown";
-    	}else{
+    	}
+    	else {
     		autoShutDown.displayString = "Manual Shutdown";
     		buttonGrounded.enabled = true;
     	}
@@ -103,58 +92,46 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
         if(render.temperatureTargetSyncNew) syncVumeter();
         vuMeterTemperature.temperatureHit = render.temperature;
         
-        
-        vuMeterTemperature.setComment(1,"Current: " + Utils.plotValue(render.temperature + PhysicalConstant.Tamb, "\u00B0C"));
-        vuMeterTemperature.setComment(2,"Target: " + Utils.plotValue(vuMeterTemperature.getValue() + PhysicalConstant.Tamb, "\u00B0C"));
+        vuMeterTemperature.setComment(1, "Current: " + Utils.plotValue(render.temperature + PhysicalConstant.Tamb, "\u00B0C"));
+        vuMeterTemperature.setComment(2, "Target: " + Utils.plotValue(vuMeterTemperature.getValue() + PhysicalConstant.Tamb, "\u00B0C"));
     }
     
     @Override
     public void guiObjectEvent(IGuiObject object) {
-    	// TODO Auto-generated method stub
     	super.guiObjectEvent(object);
-    	if(object == buttonGrounded)
-    	{
+    	if(object == buttonGrounded) {
     		render.clientSetPowerOn(!render.getPowerOn());
     	}
-    	else if(object == autoShutDown)
-    	{
+    	else if(object == autoShutDown) {
     		render.clientSendId(ElectricalFurnaceElement.unserializeAutoShutDownId);
     	}
-    	else if(object == vuMeterTemperature)
-    	{
+    	else if(object == vuMeterTemperature) {
     		render.clientSetTemperatureTarget(vuMeterTemperature.getValue());
     	}
     }
     
-
-    
-	 @Override
+	@Override
 	protected void postDraw(float f, int x, int y) {
-		// TODO Auto-generated method stub
 		super.postDraw(f, x, y);
-	    ((HelperStdContainer)helper).drawProcess(40,57, render.processState);
+	    ((HelperStdContainer)helper).drawProcess(40, 57, render.processState);
 
-	  //  drawString( 8, 6,Utils.plotPower("Consummation", render.heatingCorpResistorP));
+	    //drawString(8, 6, Utils.plotPower("Consummation", render.heatingCorpResistorP));
 	    
 	    ItemStack stack = render.inventory.getStackInSlot(ElectricalFurnaceElement.heatingCorpSlotId);
-	    if(stack == null){
+	    if(stack == null) {
 	    	supplyBar.setEnabled(false);
 	    }
-	    else{
+	    else {
 	    	supplyBar.setEnabled(true);
 	    	HeatingCorpElement desc = (HeatingCorpElement) HeatingCorpElement.getDescriptor(stack);
 	    	supplyBar.setNominalU((float) desc.electricalNominalU);
-
 	    }
     	supplyBar.setVoltage(render.voltage);
     	supplyBar.setPower(render.heatingCorpResistorP);
 	}
 	 
-
-
 	@Override
 	protected GuiHelperContainer newHelper() {
-		// TODO Auto-generated method stub
 		return new HelperStdContainer(this);
 	}
 }

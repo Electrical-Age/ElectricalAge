@@ -20,64 +20,51 @@ import mods.eln.wiki.Data;
 
 import com.google.common.base.Function;
 
-
-public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor{
+public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
 
 	boolean useEntitySpeed = true;
-	double speedFactor = 1/0.10;
+	double speedFactor = 1 / 0.10;
 	private Obj3DPart main;
 	double maxRange;
-	public ElectricalEntitySensorDescriptor(
-			String name,
-			Obj3D obj,
-			double maxRange
-			) {
-		super(name, ElectricalEntitySensorElement.class,ElectricalEntitySensorRender.class);
+	public ElectricalEntitySensorDescriptor(String name, Obj3D obj, double maxRange) {
+		super(name, ElectricalEntitySensorElement.class, ElectricalEntitySensorRender.class);
 		this.obj = obj;
 		this.maxRange = maxRange;
-		if(obj != null)
-		{
+		if(obj != null) {
 			main = obj.getPart("main");
 		}
 	}
 
 	Obj3D obj;
 
-	void draw()
-	{
+	void draw() {
 		if(main != null) main.draw();
 	}
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
+	
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-		// TODO Auto-generated method stub
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Max range : " + (int)maxRange);
-
 	}
-	
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
 		return true;
 	}
+	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
+	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		// TODO Auto-generated method stub
 		GL11.glScalef(2f, 2f, 2f);
 		draw();
 	}

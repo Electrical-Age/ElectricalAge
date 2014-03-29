@@ -1,4 +1,3 @@
-
 package mods.eln.electricalentitysensor;
 
 import java.io.DataInputStream;
@@ -21,17 +20,13 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-
-public class ElectricalEntitySensorRender extends SixNodeElementRender{
+public class ElectricalEntitySensorRender extends SixNodeElementRender {
 
 	ElectricalEntitySensorDescriptor descriptor;
-	public ElectricalEntitySensorRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalEntitySensorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalEntitySensorDescriptor) descriptor;
 	}
-
-
 
 	@Override
 	public void draw() {
@@ -39,19 +34,14 @@ public class ElectricalEntitySensorRender extends SixNodeElementRender{
 		descriptor.draw();
 	}
 
-
-	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return Eln.instance.signalCableDescriptor.render;
 	}
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
 		return new ElectricalEntitySensorGui(player, inventory, this);
 	}
-	
 	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 }
