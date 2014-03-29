@@ -6,7 +6,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.node.NodeManager;
 import mods.eln.sim.IProcess;
 
-public class ElectricalAntennaRxSlowProcess implements IProcess{
+public class ElectricalAntennaRxSlowProcess implements IProcess {
 	ElectricalAntennaRxElement element;
 	
 	public ElectricalAntennaRxSlowProcess(ElectricalAntennaRxElement element) {
@@ -24,5 +24,4 @@ public class ElectricalAntennaRxSlowProcess implements IProcess{
 			element.node.physicalSelfDestruction(2.0f);
 		}
 	}
-
 }

@@ -18,16 +18,15 @@ import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNode.FrontType;
 import mods.eln.wiki.Data;
 
-public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor{
+public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
 
 	public ElectricalAntennaTxDescriptor(
-			String name,Obj3D obj,
+			String name, Obj3D obj,
 			int rangeMax,
-			double electricalPowerRatioEffStart,double electricalPowerRatioEffEnd,
-			double electricalNominalVoltage,double electricalNominalPower,
-			double electricalMaximalVoltage,double electricalMaximalPower,
-			ElectricalCableDescriptor cable
-			) {
+			double electricalPowerRatioEffStart, double electricalPowerRatioEffEnd,
+			double electricalNominalVoltage, double electricalNominalPower,
+			double electricalMaximalVoltage, double electricalMaximalPower,
+			ElectricalCableDescriptor cable) {
 		super(name, ElectricalAntennaTxElement.class, ElectricalAntennaTxRender.class);
 		this.rangeMax = rangeMax;
 		this.electricalNominalVoltage = electricalNominalVoltage;
@@ -39,41 +38,38 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor{
 		this.cable = cable;
 		
 		electricalPowerRatioLostOffset = 1.0 - electricalPowerRatioEffStart;
-		electricalPowerRatioLostPerBlock = (electricalPowerRatioEffStart-electricalPowerRatioEffEnd) / rangeMax;
+		electricalPowerRatioLostPerBlock = (electricalPowerRatioEffStart - electricalPowerRatioEffEnd) / rangeMax;
 		
-		electricalNominalInputR = electricalNominalVoltage*electricalNominalVoltage / electricalNominalPower;
+		electricalNominalInputR = electricalNominalVoltage * electricalNominalVoltage / electricalNominalPower;
 		
 		this.obj = obj;
 		if(obj != null) main = obj.getPart("main");
-		
 	}
 	
-
 	@Override	
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addWiring(newItemStack());
 	}
 	
 	Obj3D obj;
 	Obj3DPart main;
+	
 	@Override
 	public FrontType getFrontType() {
-		// TODO Auto-generated method stub
 		return FrontType.PlayerView;
 	}
 	
 	@Override
 	public boolean mustHaveWallFrontInverse() {
-		// TODO Auto-generated method stub
 		return true;
 	}
+	
 	@Override
 	public boolean mustHaveFloor() {
-		// TODO Auto-generated method stub
 		return false;
 	}
+	
 	int rangeMax;
 	double electricalPowerRatioEffStart, electricalPowerRatioEffEnd;
 	double electricalPowerRatioLostOffset, electricalPowerRatioLostPerBlock;
@@ -84,41 +80,33 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor{
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
 		return true;
 	}
+	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
+	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		// TODO Auto-generated method stub
 		draw();
 	}	
 		
-	public void draw()
-	{
+	public void draw() {
 		GL11.glDisable(GL11.GL_CULL_FACE);
 		if(main != null) main.draw();
 		GL11.glEnable(GL11.GL_CULL_FACE);
 	}
 
-	
-	
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-		// TODO Auto-generated method stub
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
 		list.add("Wireless power transmitter");
 		list.add("Nominal usage");
 		list.add(Utils.plotVolt(" U :", electricalNominalVoltage));
 		list.add(Utils.plotPower(" P :", electricalNominalPower));
 		list.add("Range : " + rangeMax + " Blocks");
-		list.add("Efficiency : " + (int)(electricalPowerRatioEffEnd*100) + "% to " + (int)(electricalPowerRatioEffStart*100) + "%" );
+		list.add("Efficiency : " + (int)(electricalPowerRatioEffEnd * 100) + "% to " + (int)(electricalPowerRatioEffStart * 100) + "%" );
 	}
 }

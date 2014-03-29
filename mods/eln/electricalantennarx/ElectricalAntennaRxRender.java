@@ -1,6 +1,5 @@
 package mods.eln.electricalantennarx;
 
-
 import java.io.DataInputStream;
 
 import org.lwjgl.opengl.GL11;
@@ -18,10 +17,9 @@ import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementRender;
 import mods.eln.node.TransparentNodeEntity;
 
-public class ElectricalAntennaRxRender extends TransparentNodeElementRender{
+public class ElectricalAntennaRxRender extends TransparentNodeElementRender {
 
-	public ElectricalAntennaRxRender(TransparentNodeEntity tileEntity,
-			TransparentNodeDescriptor descriptor) {
+	public ElectricalAntennaRxRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
 		this.descriptor = (ElectricalAntennaRxDescriptor) descriptor;
 	}
@@ -30,33 +28,27 @@ public class ElectricalAntennaRxRender extends TransparentNodeElementRender{
 
 	@Override
 	public void draw() {
-		// TODO Auto-generated method stub
-		
 		GL11.glPushMatrix();
 			front.glRotateXnRef();
 			rot.glRotateOnX();
 			descriptor.draw();
 		GL11.glPopMatrix();
 		
-		
 		glCableTransforme(front.getInverse());
 		descriptor.cable.bindCableTexture();
 		
-		if(cableRefresh)
-		{
+		if(cableRefresh) {
 			cableRefresh = false;
-			connectionType = CableRender.connectionType(tileEntity,lrduConnection, front.getInverse());
+			connectionType = CableRender.connectionType(tileEntity, lrduConnection, front.getInverse());
 		}
 		
-
-		for(LRDU lrdu : LRDU.values())
-		{
+		for(LRDU lrdu : LRDU.values()) {
 			Utils.setGlColorFromDye(connectionType.otherdry[lrdu.toInt()]);
 			if(lrduConnection.get(lrdu) == false) continue;
 			maskTemp.set(1<<lrdu.toInt());
 			
 			Direction side = front.getInverse().applyLRDU(lrdu);
-			CableRender.drawCable(getCableRender(side,side.getLRDUGoingTo(front.getInverse())), maskTemp,connectionType);
+			CableRender.drawCable(getCableRender(side, side.getLRDUGoingTo(front.getInverse())), maskTemp, connectionType);
 		}
 	}
 	
@@ -66,29 +58,26 @@ public class ElectricalAntennaRxRender extends TransparentNodeElementRender{
 	LRDUMask lrduConnection = new LRDUMask();
 	CableRenderType connectionType;
 	boolean cableRefresh = false;
+	
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.networkUnserialize(stream);
 		rot = LRDU.deserialize(stream);
 		lrduConnection.deserialize(stream);
 		cableRefresh = true;
 	}
 	
-	
-	
 	@Override
 	public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
 		if(front.getInverse() != side.applyLRDU(lrdu)) return null;
 		
 		if(side == front.applyLRDU(rot.left())) return descriptor.cable.render;
-		if(side == front.applyLRDU(rot.right()))  return Eln.instance.signalCableDescriptor.render;
+		if(side == front.applyLRDU(rot.right())) return Eln.instance.signalCableDescriptor.render;
 		return null;
 	}
 	
 	@Override
 	public void notifyNeighborSpawn() {
-		// TODO Auto-generated method stub
 		super.notifyNeighborSpawn();
 		cableRefresh = true;
 	}

@@ -25,7 +25,6 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 
 	ElectricalAntennaTxSlowProcess slowProcess = new ElectricalAntennaTxSlowProcess(this);
 	
-
 	NodeElectricalLoad powerIn = new NodeElectricalLoad("powerIn");
 	NodeElectricalGateInput commandIn = new NodeElectricalGateInput("commandIn");
 	NodeElectricalGateOutput signalOut = new NodeElectricalGateOutput("signalOut");
@@ -38,8 +37,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	boolean placeBoot = true;
 	
 	ElectricalAntennaTxDescriptor descriptor;
-	public ElectricalAntennaTxElement(TransparentNode transparentNode,
-			TransparentNodeDescriptor descriptor) {
+	public ElectricalAntennaTxElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		slowProcessList.add(slowProcess);
 		
@@ -56,8 +54,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	ElectricalAntennaRxElement rxElement = null;
 	double powerEfficency = 0.0;
 
-	public void txDisconnect()
-	{
+	public void txDisconnect() {
 		ElectricalAntennaRxElement rx = getRxElement();
 		
 		if(rx != null) rx.rxDisconnect();
@@ -65,16 +62,13 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 		rxElement = null;
 	}
 	
-	ElectricalAntennaRxElement getRxElement()
-	{
+	ElectricalAntennaRxElement getRxElement() {
 		if(rxCoord == null) return null;
-		if(rxElement == null)
-		{
+		if(rxElement == null) {
 			NodeBase node = NodeManager.instance.getNodeFromCoordonate(rxCoord);
 			if(node != null && node instanceof TransparentNode && ((TransparentNode)node).element instanceof ElectricalAntennaRxElement)
-				rxElement =  (ElectricalAntennaRxElement) ((TransparentNode)node).element;
-			else
-			{
+				rxElement = (ElectricalAntennaRxElement) ((TransparentNode)node).element;
+			else {
 				rxCoord = null;
 				System.out.println("ASSERT ElectricalAntennaRxElement getRxElement()");
 			}
@@ -94,10 +88,8 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return null;
 	}
-
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
@@ -111,27 +103,24 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 
 	@Override
 	public String multiMeterString(Direction side) {
-		// TODO Auto-generated method stub
 		return "";
 	}
 
 	@Override
 	public String thermoMeterString(Direction side) {
-		// TODO Auto-generated method stub
 		return "";
 	}
 
-	void calculatePowerInRp()
-	{
+	void calculatePowerInRp() {
 		double cmd = commandIn.getNormalized();
 		if(cmd == 0.0)
 			powerIn.setRp(1000000000.0);
 		else
 			powerIn.setRp(descriptor.electricalNominalInputR / cmd);
 	}
+	
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
 		descriptor.cable.applyTo(powerIn, false);
 		calculatePowerInRp();
 		connect();
@@ -140,8 +129,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		if(Eln.playerManager.get(entityPlayer).getInteractEnable())
-		{
+		if(Eln.playerManager.get(entityPlayer).getInteractEnable()) {
 			rot = rot.getNextClockwise();
 			node.reconnect();
 			return true;	
@@ -149,13 +137,10 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 		return false;
 	}
 
-	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		super.readFromNBT(nbt, str);
-		if(nbt.getBoolean(str + "rxCoordValid") == true)
-		{
+		if(nbt.getBoolean(str + "rxCoordValid") == true) {
 			rxCoord = new Coordonate();
 			rxCoord.readFromNBT(nbt, str + "rxCoord");
 		}
@@ -165,46 +150,40 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
 		if(rxCoord == null)
 			nbt.setBoolean(str + "rxCoordValid", false);
-		else
-		{
+		else {
 			nbt.setBoolean(str + "rxCoordValid", true);
 			rxCoord.writeToNBT(nbt, str + "rxCoord");	
 		}
 		rot.writeToNBT(nbt, str + "rot");
-		
 	}
+	
 	@Override
 	public void onBreakElement() {
-		// TODO Auto-generated method stub
 		txDisconnect();
 		super.onBreakElement();
 	}
 	
-	public boolean mustHaveFloor()
-	{
+	public boolean mustHaveFloor() {
 		return false;
 	}
 	
-	public boolean mustHaveCeiling()
-	{
+	public boolean mustHaveCeiling() {
 		return false;
 	}
-	public boolean mustHaveWall()
-	{
+	
+	public boolean mustHaveWall() {
 		return false;
 	}
-	public boolean mustHaveWallFrontInverse()
-	{
+	
+	public boolean mustHaveWallFrontInverse() {
 		return true;
 	}
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		rot.serialize(stream);
 		node.lrduCubeMask.getTranslate(front.getInverse()).serialize(stream);

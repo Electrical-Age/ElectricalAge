@@ -44,11 +44,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
-
 public class ElectricalBreakerElement extends SixNodeElement {
 
-	public ElectricalBreakerElement(SixNode sixNode, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalBreakerElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		front = LRDU.Left;
     	electricalLoadList.add(aLoad);
@@ -59,33 +57,30 @@ public class ElectricalBreakerElement extends SixNodeElement {
     	this.descriptor = (ElectricalBreakerDescriptor) descriptor;
 	}
 
-
 	public ElectricalBreakerDescriptor descriptor;
 	public NodeElectricalLoad aLoad = new NodeElectricalLoad("aLoad");
 	public NodeElectricalLoad bLoad = new NodeElectricalLoad("bLoad");
 	public ElectricalResistor switchResistor = new ElectricalResistor(aLoad, bLoad);
 	public ElectricalBreakerCutProcess cutProcess = new ElectricalBreakerCutProcess(this);
 	
-	
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1,64,this);
+	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
-	public float voltageMax = (float) Eln.SVU,voltageMin = 0;
+	public float voltageMax = (float) Eln.SVU, voltageMin = 0;
 	
 	public SixNodeElementInventory getInventory() {
 		return inventory;
 	}
 
-	public static boolean canBePlacedOnSide(Direction side,int type)
-	{
+	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
 	}
 	
 	boolean switchState = false;
 	double currantMax = 0;
 	boolean nbtBoot = false;
+	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		super.readFromNBT(nbt, str);
         byte value = nbt.getByte(str + "front");
         front = LRDU.fromInt((value>>0) & 0x3);
@@ -97,17 +92,15 @@ public class ElectricalBreakerElement extends SixNodeElement {
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
-		nbt.setByte(str + "front",(byte) ((front.toInt()<<0)));
+		nbt.setByte(str + "front", (byte) ((front.toInt()<<0)));
 		nbt.setBoolean(str + "switchState", switchState);
-		nbt.setFloat(str + "voltageMax",voltageMax);
-        nbt.setFloat(str + "voltageMin",voltageMin);
+		nbt.setFloat(str + "voltageMax", voltageMax);
+        nbt.setFloat(str + "voltageMin", voltageMin);
 	}
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		if(front == lrdu) return aLoad;
 		if(front.inverse() == lrdu) return bLoad;
 		return null;
@@ -115,13 +108,11 @@ public class ElectricalBreakerElement extends SixNodeElement {
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		// TODO Auto-generated method stub4
 		if(inventory.getStackInSlot(ElectricalBreakerContainer.cableSlotId) == null) return 0;
 		if(front == lrdu) return NodeBase.maskElectricalAll;
 		if(front.inverse() == lrdu) return NodeBase.maskElectricalAll;
@@ -131,65 +122,53 @@ public class ElectricalBreakerElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		// TODO Auto-generated method stub
-		return Utils.plotVolt("Ua:", aLoad.Uc) + Utils.plotVolt("Ub:", bLoad.Uc) + Utils.plotVolt("I:", aLoad.getCurrent()) ;
+		return Utils.plotVolt("Ua:", aLoad.Uc) + Utils.plotVolt("Ub:", bLoad.Uc) + Utils.plotVolt("I:", aLoad.getCurrent());
 	}
 
 	@Override
 	public String thermoMeterString() {
-		// TODO Auto-generated method stub
 		return "";
 	}
 
-
-
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
 			stream.writeBoolean(switchState);
-	    	stream.writeFloat( (voltageMax));
-	    	stream.writeFloat( (voltageMin));
+	    	stream.writeFloat((voltageMax));
+	    	stream.writeFloat((voltageMin));
 
 	    	Utils.serialiseItemStack(stream, inventory.getStackInSlot(ElectricalBreakerContainer.cableSlotId));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-
-	public void setSwitchState(boolean state)
-	{
+	public void setSwitchState(boolean state) {
 		if(state == switchState) return;
 		switchState = state;
 		refreshSwitchResistor();
 		needPublish(); 
 	}
-	public void refreshSwitchResistor()
-	{
+	
+	public void refreshSwitchResistor() {
 		ItemStack cable = inventory.getStackInSlot(ElectricalBreakerContainer.cableSlotId);
 		ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
-		if(cableDescriptor == null || switchState == false)
-		{
+		if(cableDescriptor == null || switchState == false) {
 			switchResistor.highImpedance();
 		}
-		else
-		{
+		else {
 			cableDescriptor.applyTo(switchResistor);
 		}
 	}
 	
-	public boolean getSwitchState()
-	{
+	public boolean getSwitchState() {
 		return switchState;
 	}
+	
 	@Override
 	public void initialize() {
-
     	computeElectricalLoad();
-    	
     	setSwitchState(switchState);
 	}
 
@@ -201,74 +180,61 @@ public class ElectricalBreakerElement extends SixNodeElement {
 	
 	public ElectricalCableDescriptor cableDescriptor = null;
 	
-	public void computeElectricalLoad()
-	{
+	public void computeElectricalLoad() {
 		ItemStack cable = inventory.getStackInSlot(ElectricalBreakerContainer.cableSlotId);
 		
 		if(!nbtBoot)setSwitchState(false);
 		nbtBoot = false;
 		
 		cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
-		if(cableDescriptor == null)
-		{
+		if(cableDescriptor == null) {
 			aLoad.highImpedance();
 			bLoad.highImpedance();	
 		}
-		else
-		{
+		else {
 			cableDescriptor.applyTo(aLoad, false);
 			cableDescriptor.applyTo(bLoad, false);
 			currantMax = cableDescriptor.getImax();
 		}
 		refreshSwitchResistor();
-
-		
-		
 	}
+	
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,float vx,float vy,float vz)
-	{
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 		
-		if(Eln.playerManager.get(entityPlayer).getInteractEnable())
-		{
+		if(Eln.playerManager.get(entityPlayer).getInteractEnable()) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			
 			return true;	
 		}
-		else if(Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
-    	{ 
+		else if(Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) { 
     		return false;
     	}
-    	if(Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
-    	{ 
+    	if(Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) { 
     		return false;
     	}
-    	if(Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
-    	{
+    	if(Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
     		return false;
     	}    
-    	else
-		{
+    	else {
 			//setSwitchState(true);
 			//return true;
 		}
-		//front = LRDU.fromInt((front.toInt()+1)&3);
+		//front = LRDU.fromInt((front.toInt() + 1)&3);
     	return false;
-
 	}
 
 	public static final byte setVoltageMaxId = 1;
 	public static final byte setVoltageMinId = 2;
 	public static final byte toogleSwitchId = 3;
+	
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.networkUnserialize(stream);
 		try {
-			switch(stream.readByte())
-			{
+			switch(stream.readByte()) {
 			case setVoltageMaxId:
 				voltageMax = stream.readFloat();
 				needPublish();
@@ -283,25 +249,17 @@ public class ElectricalBreakerElement extends SixNodeElement {
 				break;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
-	
 	
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
 		return new ElectricalBreakerContainer(player, inventory);
 	}
-	
-	
-	
 }
