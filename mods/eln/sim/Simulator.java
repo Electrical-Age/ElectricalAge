@@ -458,6 +458,8 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 	boolean simplifyEnable;
 	boolean workingGenerated;
 	double avgTickTime = 0;
+	long electricalNsStack = 0,thermalNsStack = 0,slowNsStack = 0;
+
 	@Override
 	public void tickStart(EnumSet<TickType> type, Object... tickData) {
 		
@@ -471,7 +473,7 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 		}*/
 	
 		
-
+		long stackStart;
 
 		long startTime =  System.nanoTime();
 		double commonTime = 1.0f/fps/commonOverSampling;
@@ -520,7 +522,7 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 		
 		for(int idx2 = 0;idx2<commonOverSampling;idx2++)
 		{
-			
+			stackStart = System.nanoTime();
 			for (ElectricalConnection c : electricalConnectionList)
 			{
 				c.serialConductance = 1/(c.L2.getRs() + c.L1.getRs());
@@ -600,6 +602,9 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 		    	load.IrsPow2Temp = 0;
 		    }
 
+		    electricalNsStack += System.nanoTime() - stackStart;
+		    stackStart = System.nanoTime();
+		    
 			for(int idx = 0;idx<thermalOverSampling;idx++)
 			{
 			    for (ThermalConnection c : thermalConnectionList)
@@ -632,6 +637,8 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 		
 			}
 			
+			thermalNsStack += System.nanoTime() - stackStart;
+			
 			
 
 		}
@@ -641,11 +648,13 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 		}
 		
 		long slowProcessTime = System.nanoTime();
+		stackStart = System.nanoTime();
 	    for (Object o : slowProcessList.toArray())
 	    {
 	    	IProcess process  = (IProcess) o;
 	    	process.process(1.0/20);
 	    }	
+	    slowNsStack += System.nanoTime() - stackStart;
 	    slowProcessTime = System.nanoTime() - slowProcessTime;
 		avgTickTime += 1.0/20*((int)(System.nanoTime()-startTime)/1000);
 		
@@ -666,8 +675,13 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 		
 		if(++printTimeCounter == 20){
 			printTimeCounter = 0;
+			electricalNsStack /= 20;
+			thermalNsStack /= 20;
+			slowNsStack /= 20;
 			
-			System.out.println("ticks " + new DecimalFormat("#").format((int)avgTickTime) + " us (" + (int)(slowProcessTime/1000) + "us SP) for " 
+			System.out.println(
+					//"ticks " + new DecimalFormat("#").format((int)avgTickTime) + " us (" + (int)(slowProcessTime/1000) + "us SP) for "
+					"ticks " + new DecimalFormat("#").format((int)avgTickTime) + " us" + "  E " + electricalNsStack/1000  + "  T " + thermalNsStack/1000  + "  S " + slowNsStack/1000 
 					+ "    " + simplifiedElectricalBranchList.size()  + " EB" 
 					+ "    " + electricalLoadList.size()  + " EL" 
 					+ "    " + workingElectricalLoadList.size()  + " WL" 
@@ -680,6 +694,10 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 				+ "    " + slowProcessList.size()  + " SP" 			
 				);
 			avgTickTime = 0;
+			
+			electricalNsStack = 0;
+			thermalNsStack = 0;
+			slowNsStack = 0;
 		}
 		//Minecraft.getMinecraft().mcProfiler.endSection();
 	}

@@ -31,10 +31,10 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 	
 	NodeElectricalLoad inPowerLoad = new NodeElectricalLoad("inPowerLoad");
 	AutoMinerSlowProcess slowProcess = new AutoMinerSlowProcess(this);
-	TransparentNodeElectricalLoadWatchdog electricalLoadWatchdog = new TransparentNodeElectricalLoadWatchdog(this, inPowerLoad, 2);
+	TransparentNodeElectricalLoadWatchdog electricalLoadWatchdog = new TransparentNodeElectricalLoadWatchdog(this, inPowerLoad, 4);
 	
-	VoltageWatchdogProcessForInventoryItemDamageSingleLoad electricalDrillWatchDog = new VoltageWatchdogProcessForInventoryItemDamageSingleLoad(inventory, AutoMinerContainer.electricalDrillSlotId, inPowerLoad);
-	VoltageWatchdogProcessForInventoryItemDamageSingleLoad electricalScannerWatchDog = new VoltageWatchdogProcessForInventoryItemDamageSingleLoad(inventory, AutoMinerContainer.OreScannerSlotId, inPowerLoad);
+	//VoltageWatchdogProcessForInventoryItemDamageSingleLoad electricalDrillWatchDog = new VoltageWatchdogProcessForInventoryItemDamageSingleLoad(inventory, AutoMinerContainer.electricalDrillSlotId, inPowerLoad);
+	//VoltageWatchdogProcessForInventoryItemDamageSingleLoad electricalScannerWatchDog = new VoltageWatchdogProcessForInventoryItemDamageSingleLoad(inventory, AutoMinerContainer.OreScannerSlotId, inPowerLoad);
 	
 	AutoMinerDescriptor descriptor;
 	
@@ -47,9 +47,9 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 		this.slowProcessList.add(electricalLoadWatchdog);
 		electricalLoadList.add(inPowerLoad);
 		slowProcessList.add(slowProcess);
-		slowProcessList.add(electricalDrillWatchDog);
-		slowProcessList.add(electricalScannerWatchDog);
-		Eln.ghostManager.addObserver(this);
+		//slowProcessList.add(electricalDrillWatchDog);
+		//slowProcessList.add(electricalScannerWatchDog);
+		//Eln.ghostManager.addObserver(this);
 	}
 
 	@Override
@@ -124,6 +124,7 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
+
 		return false;
 	}
 
@@ -158,7 +159,8 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 	@Override
 	public boolean ghostBlockActivated(int UUID, EntityPlayer entityPlayer,
 			Direction side, float vx, float vy, float vz) {
-		return false;
+		
+		return super.ghostBlockActivated(UUID, entityPlayer, side, vx, vy, vz);
 	}
 	
 	@Override

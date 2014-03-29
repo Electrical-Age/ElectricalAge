@@ -48,6 +48,7 @@ import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
@@ -1299,7 +1300,14 @@ public class Utils {
 
 	public static boolean isCreative() {
 		// TODO Auto-generated method stub
-		return ! Minecraft.getMinecraft().playerController.isNotCreative();
+		PlayerControllerMP pc = Minecraft.getMinecraft().playerController;
+		if(pc == null){
+		
+			return true;
+		}
+		return !pc.isNotCreative();
+		/*Minecraft m = Minecraft.getMinecraft();
+		return m.getIntegratedServer().getGameType().isCreative();*/
 	} 
        
 	public static boolean mustDropItem() {

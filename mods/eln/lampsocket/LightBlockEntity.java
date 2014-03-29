@@ -185,8 +185,10 @@ public class LightBlockEntity extends TileEntity{
 	public static void addLight(World w,int x,int y,int z,int light,int timeout)
 	{
 		int blockId = w.getBlockId(x, y, z);
-		if(blockId != Eln.lightBlockId)
+		if(blockId != Eln.lightBlockId){
+			if(blockId != 0) return;
 			w.setBlock(x, y, z, Eln.lightBlockId, light, 2);
+		}
 		TileEntity t = w.getBlockTileEntity(x, y, z);
 		if(t != null && t instanceof LightBlockEntity)
 			((LightBlockEntity)t).addLight(light,timeout);

@@ -175,6 +175,7 @@ import mods.eln.turbine.TurbineCoreDescriptor;
 import mods.eln.turbine.TurbineDescriptor;
 import mods.eln.turbine.TurbineElement;
 import mods.eln.turbine.TurbineRender;
+import mods.eln.waterturbine.WaterTurbineDescriptor;
 import mods.eln.wiki.Data;
 import mods.eln.windturbine.WindTurbineDescriptor;
 import mods.eln.wirelesssignal.WirelessSignalAnalyserItemDescriptor;
@@ -254,6 +255,7 @@ public class Eln {
 	public static String channelName = "miaouMod";
 
 	public static final String[] objNames = new String[] {
+			"/model/SmallWaterWheel/SmallWaterWheel.obj",
 			"/model/AutoMiner/AutoMiner.obj",
 			"/model/Anemometer/Anemometer.obj",
 			"/model/XRayScanner/XRayScanner.obj",
@@ -1160,7 +1162,8 @@ public class Eln {
 		double stdU = LVU;
 		double stdP = LVP / 4;
 		double stdHalfLife = Utils.minecraftDay * 2;
-		double stdEfficiency = 1.0-Math.pow(4.0/50.0,2);
+		double stdEfficiency = 1.0-4.0/50.0;
+		double condoEfficiency = 1.0-2.0/50.0;
 
 		batteryVoltageFunctionTable = voltageFunction;
 		{
@@ -1283,7 +1286,7 @@ public class Eln {
 					condoVoltageFunction,
 					stdU, stdP * 1.2 * 8, 0.005, // electricalU,//
 													// electricalPMax,electricalDischargeRate
-					stdP * 8, 4, stdEfficiency, stdHalfLife, // electricalStdP,
+					stdP * 8, 4, condoEfficiency, stdHalfLife, // electricalStdP,
 														// electricalStdDischargeTime,
 														// electricalStdEfficiency,
 														// electricalStdHalfLife,
@@ -1301,9 +1304,9 @@ public class Eln {
 			BatteryDescriptor desc = new BatteryDescriptor(name,
 					"HighVoltageBattery", highVoltageCableDescriptor, 0.0, true, false,
 					condoVoltageFunction,
-					MVU, MVP / 2 * 1.5, 0.005, // electricalU,//
+					MVU, MVP  * 1.5, 0.005, // electricalU,//
 												// electricalPMax,electricalDischargeRate
-					MVP / 2, 8, stdEfficiency, stdHalfLife, // electricalStdP,
+					MVP , 4, condoEfficiency, stdHalfLife, // electricalStdP,
 													// electricalStdDischargeTime,
 													// electricalStdEfficiency,
 													// electricalStdHalfLife,
@@ -3521,6 +3524,30 @@ public class Eln {
 			desc.setGhostGroup(g);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
+		
+		
+		
+		{
+			subId = 16;
+			name = "Water Turbine";
+
+			Coordonate waterCoord = new Coordonate(1,-1,0,0);
+			
+			WaterTurbineDescriptor desc = new WaterTurbineDescriptor(
+					name, obj.getObj("SmallWaterWheel"), // name,Obj3D obj,
+					lowVoltageCableDescriptor,// ElectricalCableDescriptor
+					200,
+					LVU * 1.18,
+					waterCoord
+
+			);
+
+			GhostGroup g = new GhostGroup();
+
+			g.addRectangle(1, 1, 0, 1, -1, 1);
+			desc.setGhostGroup(g);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
 
 		/*
 		 * { subId = 1; name = "Wind Turbine";
@@ -4039,7 +4066,7 @@ public class Eln {
 			powerLoad[0] = new Coordonate(-2, -1, 1, 0);
 			powerLoad[1] = new Coordonate(-2, -1, -1, 0);
 			
-			Coordonate lightCoord = new Coordonate(-1, 0, 1, 0);
+			Coordonate lightCoord = new Coordonate(-3, 0, 0, 0);
 
 			Coordonate miningCoord = new Coordonate(-1, 0, 1, 0);
 
