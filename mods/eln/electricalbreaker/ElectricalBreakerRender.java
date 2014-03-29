@@ -31,14 +31,12 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
+public class ElectricalBreakerRender extends SixNodeElementRender {
 
-public class ElectricalBreakerRender extends SixNodeElementRender{
-
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1,64,this);
+	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 	ElectricalBreakerDescriptor descriptor;
 	long time;
-	public ElectricalBreakerRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalBreakerRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalBreakerDescriptor) descriptor;
 		time = System.currentTimeMillis();
@@ -53,26 +51,22 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 		interpol.stepGraphic();
 		
 		front.glRotateOnX();	
-		descriptor.draw(interpol.get(),Utils.distanceFromClientPlayer(tileEntity));			
-
+		descriptor.draw(interpol.get(), Utils.distanceFromClientPlayer(tileEntity));			
 	}
-	
 	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return cableRender;
 	}
 
-	
-	float uMin,uMax;
+	float uMin, uMax;
 
 	boolean boot = true;
 	float switchAlpha = 0;
 	public boolean switchState;
+	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		System.out.println("Front : " + front);
 		try {
@@ -80,27 +74,24 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 			uMax = stream.readFloat();
 			uMin = stream.readFloat();
 			
-			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream),ElectricalCableDescriptor.class);
+			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), ElectricalCableDescriptor.class);
 			
 			if(desc == null)
 				cableRender = null;
 			else
 				cableRender = desc.render;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
 		
-		if(boot)
-		{
+		if(boot) {
 			interpol.setValue(switchState ? 1f : 0f);
 		}
 		boot = false;
 	}
 	
 	CableRenderDescriptor cableRender;
-	public void clientSetVoltageMin(float value)
-	{
+	public void clientSetVoltageMin(float value) {
         try {
 	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
 	        DataOutputStream stream = new DataOutputStream(bos);   	
@@ -110,19 +101,13 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 			stream.writeByte(ElectricalBreakerElement.setVoltageMinId);
 			stream.writeFloat(value);
 			
-
-			
-			
 			sendPacketToServer(bos);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}        
-        		
 	}
 	
-	public void clientSetVoltageMax(float value)
-	{
+	public void clientSetVoltageMax(float value) {
         try {
 	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
 	        DataOutputStream stream = new DataOutputStream(bos);   	
@@ -134,13 +119,11 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 			
 			sendPacketToServer(bos);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}        
-        		
 	}
-	public void clientToogleSwitch()
-	{
+	
+	public void clientToogleSwitch() {
         try {
 	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
 	        DataOutputStream stream = new DataOutputStream(bos);   	
@@ -151,19 +134,12 @@ public class ElectricalBreakerRender extends SixNodeElementRender{
 			
 			sendPacketToServer(bos);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}        
-        		
 	}
-	
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
-		return new ElectricalBreakerGui(player,inventory,this);
+		return new ElectricalBreakerGui(player, inventory, this);
 	}
-	
-	
-	
 }

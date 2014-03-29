@@ -23,33 +23,22 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.network.packet.Packet250CustomPayload;
 
-public class ElectricalEntitySensorGui extends GuiContainerEln{
+public class ElectricalEntitySensorGui extends GuiContainerEln {
 
-	public ElectricalEntitySensorGui(EntityPlayer player, IInventory inventory,ElectricalEntitySensorRender render) {
+	public ElectricalEntitySensorGui(EntityPlayer player, IInventory inventory, ElectricalEntitySensorRender render) {
 		super(new ElectricalEntitySensorContainer(player, inventory));
 		this.render = render;
 	}
 
-
-
 	ElectricalEntitySensorRender render;
 
-	
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
 		super.initGui();
-
-
 	}
 	
-
-
 	@Override
 	protected GuiHelperContainer newHelper() {
-		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176, 166-52,8,84-52);
+		return new GuiHelperContainer(this, 176, 166 - 52, 8, 84 - 52);
 	}
-
-
 }

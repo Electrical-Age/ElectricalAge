@@ -53,13 +53,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
-
 public class ElectricalDataLoggerElement extends SixNodeElement {
 
 	public static final int logsSizeMax = 256;
 
-	public ElectricalDataLoggerElement(SixNode sixNode, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalDataLoggerElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 
     	this.descriptor = (ElectricalDataLoggerDescriptor) descriptor;
@@ -69,44 +67,38 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 		electricalLoadList.add(inputGate);
     	slowProcessList.add(slowProcess);
     	sampleStackReset();
-
 	}
 
-	public int sampleStack,sampleStackNbr;
-	public static boolean canBePlacedOnSide(Direction side,SixNodeDescriptor descriptor)
-	{
+	public int sampleStack, sampleStackNbr;
+	
+	public static boolean canBePlacedOnSide(Direction side,SixNodeDescriptor descriptor) {
 		if(((ElectricalDataLoggerDescriptor)descriptor).onFloor && side == Direction.YN) return true;
 		return false;
 	}
-	
 	
 	NodeElectricalGateInput inputGate;
 	ElectricalDataLoggerProcess slowProcess = new ElectricalDataLoggerProcess(this);
 	public ElectricalDataLoggerDescriptor descriptor;
 	
-	
-	SixNodeElementInventory inventory = new SixNodeElementInventory(2,64,this);
+	SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
 
 	public SixNodeElementInventory getInventory() {
 		return inventory;
 	}
 
-	public static boolean canBePlacedOnSide(Direction side,int type)
-	{
+	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
 	}
 	
-
 	public double timeToNextSample = 0;
 
 	public DataLogs logs = new DataLogs(logsSizeMax);
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		super.readFromNBT(nbt, str);
         byte value = nbt.getByte(str + "front");
-        front = LRDU.fromInt((value>>0) & 0x3);
+        front = LRDU.fromInt((value >> 0) & 0x3);
 
 		logs.readFromNBT(nbt, str + "logs");
 		pause = nbt.getBoolean(str + "pause");
@@ -117,9 +109,8 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
-		nbt.setByte(str + "front",(byte) ((front.toInt()<<0)));
+		nbt.setByte(str + "front", (byte)((front.toInt() << 0)));
 		nbt.setDouble(str + "timeToNextSample", timeToNextSample);
 		nbt.setBoolean(str + "pause", pause);
 		
@@ -131,41 +122,34 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {	
 		if(front.inverse() == lrdu) return inputGate;
-		
 		return null;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		if(front.inverse() == lrdu) return NodeBase.maskElectricalInputGate;
-		
 		return 0;
 	}
 
 	@Override
 	public String multiMeterString() {
 		return inputGate.plot("In: ");
-
 	}
 
 	@Override
 	public String thermoMeterString() {
-		// TODO Auto-generated method stub
 		return "";
 	}
 
-
-	static final byte publishId = 1,dataId = 2;
+	static final byte publishId = 1, dataId = 2;
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte(logs.unitType);
@@ -173,14 +157,10 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 			stream.writeFloat((float) logs.samplingPeriod);
 			stream.writeFloat((float) logs.maxValue);
 			stream.writeFloat((float) logs.minValue);
-
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
-
 
 	@Override
 	public void initialize() {
@@ -192,31 +172,24 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 		computeElectricalLoad();
 	}
 
-	public void computeElectricalLoad()
-	{
-		
-		
-
+	public void computeElectricalLoad() {
 	}
+	
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,float vx,float vy,float vz)
-	{
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 		
-		if(Eln.playerManager.get(entityPlayer).getInteractEnable())
-		{
+		if(Eln.playerManager.get(entityPlayer).getInteractEnable()) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);
 			return true;	
 		}
-
     	return false;
-
 	}
 	
 	public static final byte resetId = 1;
-	public static final byte setSamplingPeriodeId = 2,setMaxValue = 3;
+	public static final byte setSamplingPeriodeId = 2, setMaxValue = 3;
 	public static final byte setUnitId = 4;
 	public static final byte newClientId = 5;
 	public static final byte printId = 6;
@@ -228,15 +201,13 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
 	boolean printToDo;
 	boolean pause = false;
+	
 	@Override
-	public void networkUnserialize(DataInputStream stream,Player player) {
-		// TODO Auto-generated method stub
+	public void networkUnserialize(DataInputStream stream, Player player) {
 		super.networkUnserialize(stream);
 		byte header;
 		try {
-			switch(header = stream.readByte())
-			{
-
+			switch(header = stream.readByte()) {
 			case setSamplingPeriodeId:
 				logs.reset();
 				sampleStackReset();
@@ -263,7 +234,6 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 				logs.reset();
 				break;
 			case newClientId:
-
 				break;
 			case printId:
 				printToDo = true;
@@ -272,11 +242,9 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 				pause = !pause;
 				needPublish();
 				break;
-			
 			}
 			
-			if(header == resetId || header == newClientId || header == setSamplingPeriodeId)
-			{
+			if(header == resetId || header == newClientId || header == setSamplingPeriodeId) {
 		    	ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
 		        DataOutputStream packet = new DataOutputStream(bos);   	
 		        
@@ -284,8 +252,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 				
 				packet.writeByte(toClientLogsClear);
 				int size = logs.size();
-				for(int idx = size - 1;idx >= 0;idx--)
-				{
+				for(int idx = size - 1; idx >= 0; idx--) {
 					packet.writeByte(logs.read(idx));
 				}
 				if(header == newClientId)
@@ -294,33 +261,22 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 					sendPacketToAllClient(bos);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
-	
-	
-	
 	
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
 		return new ElectricalDataLoggerContainer(player, inventory);
 	}
 
 	public void sampleStackReset() {
-		// TODO Auto-generated method stub
 		sampleStack = 0;
 		sampleStackNbr = 0;
 	}
-	
-	
-	
 }

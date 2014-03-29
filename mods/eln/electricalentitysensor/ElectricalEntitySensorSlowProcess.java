@@ -1,6 +1,5 @@
 package mods.eln.electricalentitysensor;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,22 +25,23 @@ import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 
-public class ElectricalEntitySensorSlowProcess implements IProcess,INBTTReady{
+public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
 	ElectricalEntitySensorElement element;
+	
 	public ElectricalEntitySensorSlowProcess(ElectricalEntitySensorElement element) {
 		this.element = element;
 	}
+	
 	double timeCounter = 0;
 	static final double refreshPeriode = 0.2;
 
 	RcInterpolator rc1 = new RcInterpolator(0.8f);
 	RcInterpolator rc2 = new RcInterpolator(0.8f);
+	
 	@Override
 	public void process(double time) {
-		// TODO Auto-generated method stub
 		timeCounter += time;
-		if(timeCounter > refreshPeriode)
-		{
+		if(timeCounter > refreshPeriode) {
 			timeCounter -= refreshPeriode;
 			boolean useSpeed = element.descriptor.useEntitySpeed;
 			double speedFactor = element.descriptor.speedFactor;
@@ -49,9 +49,9 @@ public class ElectricalEntitySensorSlowProcess implements IProcess,INBTTReady{
 			ItemStack filterStack = element.inventory.getStackInSlot(ElectricalEntitySensorContainer.filterId);
 			
 			Class filterClass = EntityLivingBase.class;
-			if(filterStack != null){
+			if(filterStack != null) {
 				GenericItemUsingDamageDescriptor gen = EntitySensorFilterDescriptor.getDescriptor(filterStack);
-				if(gen != null && gen instanceof EntitySensorFilterDescriptor){
+				if(gen != null && gen instanceof EntitySensorFilterDescriptor) {
 					EntitySensorFilterDescriptor filter = (EntitySensorFilterDescriptor) gen;
 					filterClass = filter.entityClass;
 				}
@@ -61,36 +61,34 @@ public class ElectricalEntitySensorSlowProcess implements IProcess,INBTTReady{
 			AxisAlignedBB bb = coord.getAxisAlignedBB((int) rayMax);
 			List list = world.getEntitiesWithinAABB(filterClass, bb);
 			double output = 0;
-			for(Object o : list){
+			for(Object o : list) {
 				Entity e = (Entity)o;
 				double weight = 1;
-				ArrayList<Block> blockList = Utils.traceRay(world,coord.x+0.5,coord.y+0.5,coord.z+0.5,e.posX,e.posY+e.getEyeHeight(),e.posZ);
-				
+				ArrayList<Block> blockList = Utils.traceRay(world, coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ);
 				
 				boolean view = true;
-				for(Block b : blockList){
-					if(b.isOpaqueCube()){
+				for(Block b : blockList) {
+					if(b.isOpaqueCube()) {
 						view = false;
 						break;
 					}
 				}
-				if(view){
+				if(view) {
 					if(e instanceof EntityPlayerMP) weight = 2.0;
-					double distance = Utils.getLength(coord.x+0.5,coord.y+0.5,coord.z+0.5,e.posX,e.posY+e.getEyeHeight(),e.posZ);
-					if(distance < rayMax){
+					double distance = Utils.getLength(coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ);
+					if(distance < rayMax) {
 						double sf = 1;
-						if(useSpeed){
-							sf = speedFactor*Utils.getLength(e.posX, e.posY, e.posZ, e.lastTickPosX, e.lastTickPosY, e.lastTickPosZ);//Math.sqrt(e.motionX*e.motionX+e.motionY*e.motionY+e.motionZ*e.motionZ);
+						if(useSpeed) {
+							sf = speedFactor * Utils.getLength(e.posX, e.posY, e.posZ, e.lastTickPosX, e.lastTickPosY, e.lastTickPosZ);
+							//Math.sqrt(e.motionX * e.motionX + e.motionY * e.motionY + e.motionZ * e.motionZ);
 							//System.out.println(sf);
 						}
-						
-						output += sf*weight*(rayMax-distance)/rayMax;
+						output += sf * weight * (rayMax - distance) / rayMax;
 					}
 				}
 			}
 			//System.out.println(output);
 			rc1.setTarget((float) output);
-			
 		}
 		
 		rc1.step((float) time);
@@ -98,19 +96,17 @@ public class ElectricalEntitySensorSlowProcess implements IProcess,INBTTReady{
 		rc2.step((float) time);
 		
 		element.outputGateProcess.setOutputNormalized(rc2.get());
-		
 	}
+	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		rc1.readFromNBT(nbt, str + "rc1");
 		rc2.readFromNBT(nbt, str + "rc2");
 	}
+	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		rc1.writeToNBT(nbt, str + "rc1");
 		rc2.writeToNBT(nbt, str + "rc2");
 	}
-
 }

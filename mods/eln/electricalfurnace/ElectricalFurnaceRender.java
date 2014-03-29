@@ -26,21 +26,19 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-public class ElectricalFurnaceRender extends TransparentNodeElementRender{
+public class ElectricalFurnaceRender extends TransparentNodeElementRender {
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(5, 64, this);
 
-	
 	public float temperature = 0;
-	public boolean powerOn,heatingCorpOn;
-//	float temperatureTarget;
+	public boolean powerOn, heatingCorpOn;
+    //float temperatureTarget;
 	EntityItem entityItemIn = null;
 	
 	long time;
 	
-	public ElectricalFurnaceRender(TransparentNodeEntity tileEntity,TransparentNodeDescriptor descriptor) {
+	public ElectricalFurnaceRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
 		super(tileEntity,descriptor);
 		time = System.currentTimeMillis();
-		// TODO Auto-generated constructor stub
 	}
 
 	float processState,processStatePerSecond;
@@ -52,13 +50,11 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender{
 		processState += processStatePerSecond * FrameTime.getNotCaped();
 		if(processState > 1f) processState = 1f;
 		
-		
-
 		Eln.obj.draw("ElectricFurnace", "furnace");
-	//	ClientProxy.obj.draw("ELFURNACE");	
+	    //ClientProxy.obj.draw("ELFURNACE");	
 		
-		drawEntityItem(entityItemIn, -0.1, -0.20, 0, counter,0.8f);
-		counter += (System.currentTimeMillis()-time) * 0.001 *360 / 4;
+		drawEntityItem(entityItemIn, -0.1, -0.20, 0, counter, 0.8f);
+		counter += (System.currentTimeMillis() - time) * 0.001 * 360 / 4;
 		if(counter > 360) counter -= 360;
 		
 		time = System.currentTimeMillis();
@@ -66,32 +62,25 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender{
 	
 	float counter = 0;
 
-
-
-	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
 		return new ElectricalFurnaceGuiDraw(player, inventory, this);
 	}
 
-	
-	
 	short heatingCorpResistorP = 0;
 	
 	public boolean temperatureTargetSyncNew = false;
 	public float temperatureTargetSyncValue = -1234;
 
 	public boolean autoShutDown;
+	
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.networkUnserialize(stream);
 		
 		short read;
 		
 		try {
-			
 			Byte b;
 			
 			b = stream.readByte();
@@ -99,30 +88,22 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender{
 			powerOn = (b & 1) != 0;
 			heatingCorpOn = (b & 2) != 0;
 			
-			
-			
 			float temperatureTargetIncoming = stream.readShort();
 			
-			if(temperatureTargetIncoming != temperatureTargetSyncValue)
-			{
+			if(temperatureTargetIncoming != temperatureTargetSyncValue) {
 				temperatureTargetSyncValue = temperatureTargetIncoming;
 				temperatureTargetSyncNew = true;
 			}
 			
 			temperature = stream.readShort();
 			
-			
-			
-			if((read = stream.readShort()) == -1)
-			{
+			if((read = stream.readShort()) == -1) {
 				entityItemIn = null;
 				stream.readShort();
 			}
-			else
-			{
-				entityItemIn = new EntityItem(tileEntity.worldObj,tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, new ItemStack(read, 1, stream.readShort()));
+			else {
+				entityItemIn = new EntityItem(tileEntity.worldObj, tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, new ItemStack(read, 1, stream.readShort()));
 			}
-			
 			
 			heatingCorpResistorP = stream.readShort();
 			voltage = stream.readFloat();
@@ -131,9 +112,7 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender{
 			
 			autoShutDown = stream.readBoolean();
 			
-			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -141,8 +120,7 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender{
 	
 	float voltage;
 	
-	public void clientSetPowerOn(boolean value)
-	{
+	public void clientSetPowerOn(boolean value) {
         try {
 	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
 	        DataOutputStream stream = new DataOutputStream(bos);   	
@@ -154,15 +132,12 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender{
 			
 			sendPacketToServer(bos);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}        
         
 	}
 	
-	
-	public void clientSetTemperatureTarget(float value)
-	{
+	public void clientSetTemperatureTarget(float value) {
         try {
 	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
 	        DataOutputStream stream = new DataOutputStream(bos);   	
@@ -174,14 +149,12 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender{
 			
 			sendPacketToServer(bos);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}        
         		
 	}
 	
-	public boolean getPowerOn()
-	{
+	public boolean getPowerOn() {
 		return powerOn;
 	}
 }
