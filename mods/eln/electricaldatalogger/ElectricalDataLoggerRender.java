@@ -31,14 +31,12 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
+public class ElectricalDataLoggerRender extends SixNodeElementRender {
 
-public class ElectricalDataLoggerRender extends SixNodeElementRender{
-
-	SixNodeElementInventory inventory = new SixNodeElementInventory(2,64,this);
+	SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
 	ElectricalDataLoggerDescriptor descriptor;
 	long time;
-	public ElectricalDataLoggerRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalDataLoggerRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalDataLoggerDescriptor) descriptor;
 		time = System.currentTimeMillis();
@@ -47,32 +45,26 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender{
 
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return Eln.instance.signalCableDescriptor.render;
 	}
-
 
 	@Override
 	public void draw() {
 		super.draw();
 		descriptor.draw(log, front);
-
 	}
 
-	
 	/*
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return descriptor.cableRender;
 	}
 	*/
 	
-
 	public boolean pause;
+	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
 			log.unitType = stream.readByte();
@@ -81,10 +73,8 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender{
 			log.maxValue = stream.readFloat();
 			log.minValue = stream.readFloat();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
-
 	}
 	
 	DataLogs log = new DataLogs(ElectricalDataLoggerElement.logsSizeMax);
@@ -94,31 +84,25 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender{
 	public void serverPacketUnserialize(DataInputStream stream) throws IOException {
 		byte header = stream.readByte();
 		
-		switch(header)
-		{
+		switch(header) {
 		case ElectricalDataLoggerElement.toClientLogsAdd:
 		case ElectricalDataLoggerElement.toClientLogsClear:
-			if(header == ElectricalDataLoggerElement.toClientLogsClear)
-			{
+			if(header == ElectricalDataLoggerElement.toClientLogsClear) {
 				log.reset();
 				waitFistSync = false;
 			}
 			int size = stream.available();
-			while(size != 0)
-			{
+			while(size != 0) {
 				size--;
 				log.write(stream.readByte());
 			}
 		//	System.out.println(log);
 			break;
 		}
-
-		
 	}
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
-		return new ElectricalDataLoggerGui(player,inventory,this);
+		return new ElectricalDataLoggerGui(player, inventory, this);
 	}
 }

@@ -21,73 +21,60 @@ import mods.eln.node.SixNodeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 
-
-public class ElectricalCableRender extends SixNodeElementRender{
+public class ElectricalCableRender extends SixNodeElementRender {
 
 	ElectricalCableDescriptor descriptor;
 	
-	public ElectricalCableRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalCableRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalCableDescriptor) descriptor;
-		// TODO Auto-generated constructor stub
 	}
 
-
-	
-	double voltage = 0,current = 0,temperature = 0;
+	double voltage = 0, current = 0, temperature = 0;
 	int color = 0;
 	
 	public boolean drawCableAuto() {
-		
 		return false;
 	}
+	
 	@Override
 	public void draw() {
-		// TODO Auto-generated method stub
 		Minecraft.getMinecraft().mcProfiler.startSection("ECable");
 		
 		Utils.setGlColorFromDye(color);
 
-
 		Utils.bindTexture(descriptor.render.cableTexture);
 		glListCall();
-
 		
-		
-		GL11.glColor3f(1f,1f,1f);
+		GL11.glColor3f(1f, 1f, 1f);
 		Minecraft.getMinecraft().mcProfiler.endSection();
 	}
 
 	@Override
 	public void glListDraw() {
-		CableRender.drawCable(descriptor.render, connectedSide,CableRender.connectionType(this, side));
-		CableRender.drawNode(descriptor.render, connectedSide,CableRender.connectionType(this, side));
+		CableRender.drawCable(descriptor.render, connectedSide, CableRender.connectionType(this, side));
+		CableRender.drawNode(descriptor.render, connectedSide, CableRender.connectionType(this, side));
 	}
+	
 	@Override
 	public boolean glListEnable() {
 		return true;	
 	}
 	
-
-	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
 			Byte b;
 			b = stream.readByte();
-			color = (b>>4) & 0xF;
-			voltage = stream.readShort() /NodeBase.networkSerializeUFactor;
-			current = stream.readShort() /NodeBase.networkSerializeIFactor;
-			temperature = stream.readShort() /NodeBase.networkSerializeTFactor;
+			color = (b >> 4) & 0xF;
+			voltage = stream.readShort() / NodeBase.networkSerializeUFactor;
+			current = stream.readShort() / NodeBase.networkSerializeIFactor;
+			temperature = stream.readShort() / NodeBase.networkSerializeTFactor;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
 	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
@@ -96,7 +83,6 @@ public class ElectricalCableRender extends SixNodeElementRender{
 
 	@Override
 	public int getCableDry(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return color;
 	}
 }

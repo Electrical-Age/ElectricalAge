@@ -25,25 +25,21 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.network.packet.Packet250CustomPayload;
 
-public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextFieldElnObserver{
+public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextFieldElnObserver {
 
-	public ElectricalDataLoggerGui(EntityPlayer player, IInventory inventory,ElectricalDataLoggerRender render) {
+	public ElectricalDataLoggerGui(EntityPlayer player, IInventory inventory, ElectricalDataLoggerRender render) {
 		super(new ElectricalDataLoggerContainer(player, inventory));
 		this.render = render;
 	}
 
-
-	GuiButton resetBt,voltageType,energyType,currentType,powerType,celsuisTyp,percentTyp,config,printBt,pause;
-	GuiTextFieldEln samplingPeriode,maxValue,minValue;
+	GuiButton resetBt, voltageType, energyType, currentType, powerType, celsuisTyp, percentTyp, config, printBt, pause;
+	GuiTextFieldEln samplingPeriode, maxValue, minValue;
 	ElectricalDataLoggerRender render;
 	
-
 	enum State {display,config};
 	State state = State.display;
 	
-	
-	void displayEntry()
-	{
+	void displayEntry() {
 		config.displayString = "Config";
 		config.drawButton = true;
 		pause.drawButton = true;
@@ -61,10 +57,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 		state = State.display;
 	}
 	
-	void configEntry()
-	{	
-
-
+	void configEntry() {	
 		pause.drawButton = false;
 		config.drawButton = true;
 		config.displayString = "Return to Display";
@@ -82,88 +75,69 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 		state = State.config;
 	}
 	
-	
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
 		super.initGui();
 
-        voltageType = newGuiButton( 176/2-60-2, 8+20+2-2,60,  "Voltage");
-        currentType = newGuiButton( 176/2+2, 8+20+2-2,60,  "Current");
-		resetBt = newGuiButton( 176/2-50, 8 + 20 + 2-2,48, "Reset");
-		powerType = newGuiButton( 176/2-60-2, 8+40+4-2,60,  "Power");
-		celsuisTyp = newGuiButton( 176/2+2, 8+40+4-2,60,  "Celsuis");
-		percentTyp = newGuiButton( 176/2-60-2, 8+60+6-2,60,  "Percent");
-		energyType = newGuiButton( 176/2+2, 8+60+6-2,60,  "Energy");
-		config = newGuiButton( 176/2-50, 8-2,100, "");
-		printBt = newGuiButton( 176/2-48/2, 123,48, "Print");
-		pause = newGuiButton( 176/2 + 2, 8+20+2-2,48,"");
+        voltageType = newGuiButton(176 / 2 - 60 - 2, 8 + 20 + 2 - 2, 60, "Voltage");
+        currentType = newGuiButton(176 / 2 + 2, 8 + 20 + 2 - 2, 60, "Current");
+		resetBt = newGuiButton(176 / 2 - 50, 8 + 20 + 2 - 2, 48, "Reset");
+		powerType = newGuiButton(176 / 2 - 60 - 2, 8 + 40 + 4 - 2, 60, "Power");
+		celsuisTyp = newGuiButton(176 / 2 + 2, 8 + 40 + 4 - 2, 60, "Celsuis");
+		percentTyp = newGuiButton(176 / 2 - 60 - 2, 8 + 60 + 6 - 2, 60, "Percent");
+		energyType = newGuiButton(176 / 2 + 2, 8 + 60 + 6 - 2, 60, "Energy");
+		config = newGuiButton(176 / 2 - 50, 8 - 2, 100, "");
+		printBt = newGuiButton(176 / 2 - 48 / 2, 123, 48, "Print");
+		pause = newGuiButton(176 / 2 + 2, 8 + 20 + 2 - 2, 48, "");
 		
-		
-		samplingPeriode = newGuiTextField( 30, 101, 50);
-        samplingPeriode.setText(  render.log.samplingPeriod);
+		samplingPeriode = newGuiTextField(30, 101, 50);
+        samplingPeriode.setText(render.log.samplingPeriod);
         samplingPeriode.setComment(new String[]{"Sampling period"});
         
-        maxValue = newGuiTextField( 176 - 50 - 30, 101-7, 50);
+        maxValue = newGuiTextField(176 - 50 - 30, 101 - 7, 50);
         maxValue.setText(render.log.maxValue);
         maxValue.setComment(new String[]{"Y-axis Max"});
         
-        minValue = newGuiTextField( 176 - 50 - 30, 101+8, 50);
+        minValue = newGuiTextField(176 - 50 - 30, 101 + 8, 50);
         minValue.setText(render.log.minValue);
         minValue.setComment(new String[]{"Y-axis Min"});
        
-
         displayEntry();
 	}
 	
-
-
     @Override
 	public void guiObjectEvent(IGuiObject object) {
-		// TODO Auto-generated method stub
 		super.guiObjectEvent(object);
-
-		try{
-	    	if(object == resetBt)
-	    	{
+		try {
+	    	if(object == resetBt) {
 	    		render.clientSend(ElectricalDataLoggerElement.resetId);
 	    	}
-	    	else if(object == pause)
-	    	{
+	    	else if(object == pause) {
 	    		render.clientSend(ElectricalDataLoggerElement.tooglePauseId);
 	    	}
-	    	else if(object == printBt)
-	    	{
+	    	else if(object == printBt) {
 	    		render.clientSend(ElectricalDataLoggerElement.printId);
 	    	}
-	    	else if(object == currentType)
-	    	{
+	    	else if(object == currentType) {
 	    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.currentType);
 	    	}
-	    	else if(object == voltageType)
-	    	{
+	    	else if(object == voltageType) {
 	    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.voltageType);
 	    	}
-	    	else if(object == energyType)
-	    	{
+	    	else if(object == energyType) {
 	    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.energyType);
 	    	}
-	    	else if(object == percentTyp)
-	    	{
+	    	else if(object == percentTyp) {
 	    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.percentType);
 	    	}
-	    	else if(object == powerType)
-	    	{
+	    	else if(object == powerType) {
 	    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.powerType);
 	    	}
-	    	else if(object == celsuisTyp)
-	    	{
+	    	else if(object == celsuisTyp) {
 	    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.celsiusType);
 	    	}
-	    	else if(object == config)
-	    	{ 
-	    		switch(state)
-	    		{
+	    	else if(object == config) { 
+	    		switch(state) {
 				case config:
 					displayEntry();
 					break;
@@ -172,37 +146,27 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 					break;
 				default:
 					break;
-	    		
 	    		}
-	    		
 	    	}
-	    	else if(object == maxValue)
-			{
+	    	else if(object == maxValue) {
 				render.clientSetFloat(ElectricalDataLoggerElement.setMaxValue, NumberFormat.getInstance().parse(maxValue.getText()).floatValue());
 			}
-			else if(object == minValue)
-			{
+			else if(object == minValue) {
 				render.clientSetFloat(ElectricalDataLoggerElement.setMinValue, NumberFormat.getInstance().parse(minValue.getText()).floatValue());
 			}
-			else if(object == samplingPeriode)
-			{
+			else if(object == samplingPeriode) {
 				float value = NumberFormat.getInstance().parse(samplingPeriode.getText()).floatValue();
 				if(value < 0.05f) value = 0.05f;
 				samplingPeriode.setText(value);
 				
 				render.clientSetFloat(ElectricalDataLoggerElement.setSamplingPeriodeId, value);
 			}
-		} catch(ParseException e)
-		{
-
+		} catch(ParseException e) {
 		}
-		
     }
    
-    
     @Override
     protected void preDraw(float f, int x, int y) {
-    	// TODO Auto-generated method stub
     	super.preDraw(f, x, y);
     	powerType.enabled = true;
     	currentType.enabled = true;
@@ -211,8 +175,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
     	percentTyp.enabled = true;
     	energyType.enabled = true;
     	    	
-    	switch(render.log.unitType)
-    	{
+    	switch(render.log.unitType) {
     	case DataLogs.currentType:
     		currentType.enabled = false;
     		break;
@@ -232,6 +195,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
     		energyType.enabled = false;
     		break;	
     	}
+    	
     	if(render.pause)
     		pause.displayString = "Continue";
     	else
@@ -240,33 +204,25 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
     	boolean a = inventorySlots.getSlot(ElectricalDataLoggerContainer.paperSlotId).getStack() != null;
     	boolean b = inventorySlots.getSlot(ElectricalDataLoggerContainer.printSlotId).getStack() == null;
     	printBt.enabled = a && b;
-
     }
-    
     
     @Override
     protected void postDraw(float f, int x, int y) {
-    	// TODO Auto-generated method stub
     	super.postDraw(f, x, y);
     	
-    	if(state == State.display)
-    	{
+    	if(state == State.display) {
 			GL11.glColor4f(1f, 0f, 0f, 1f);
 			
 	        GL11.glPushMatrix();
 		        GL11.glTranslatef(guiLeft + 8, guiTop + 60, 0);
 		        GL11.glScalef(50, 50, 1f);
-		        render.log.draw(2.9f,1.2f,"");
+		        render.log.draw(2.9f, 1.2f, "");
 	        GL11.glPopMatrix();
     	}
     }
 
-	
-
 	@Override
 	protected GuiHelperContainer newHelper() {
-		// TODO Auto-generated method stub
-		return new GuiHelperContainer(this, 176, 230,8,148);
+		return new GuiHelperContainer(this, 176, 230, 8, 148);
 	}
-	
 }
