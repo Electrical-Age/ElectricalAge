@@ -34,13 +34,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
-
-
-public class ElectricalLightSensorElement extends SixNodeElement{
+public class ElectricalLightSensorElement extends SixNodeElement {
 
 	ElectricalLightSensorDescriptor descriptor;
-	public ElectricalLightSensorElement(SixNode sixNode, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalLightSensorElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 
     	electricalLoadList.add(outputGate);
@@ -48,76 +45,48 @@ public class ElectricalLightSensorElement extends SixNodeElement{
     	slowProcessList.add(slowProcess);
     	this.descriptor = (ElectricalLightSensorDescriptor) descriptor;
 	}
+	
 	public NodeElectricalGateOutput outputGate = new NodeElectricalGateOutput("outputGate");
-	public NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess",outputGate);
+	public NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess", outputGate);
 	public ElectricalLightSensorSlowProcess slowProcess = new ElectricalLightSensorSlowProcess(this);
 
-	public static boolean canBePlacedOnSide(Direction side,int type)
-	{
+	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
 	}
 
-
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		if(front == lrdu.left()) return outputGate;
 		return null;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		// TODO Auto-generated method stub4
 		if(front == lrdu.left()) return NodeBase.maskElectricalOutputGate;
 		return 0;
 	}
 
 	@Override
 	public String multiMeterString() {
-		// TODO Auto-generated method stub
-		return Utils.plotVolt("U:", outputGate.Uc) + Utils.plotAmpere("I:", outputGate.getCurrent()) ;
+		return Utils.plotVolt("U:", outputGate.Uc) + Utils.plotAmpere("I:", outputGate.getCurrent());
 	}
 
 	@Override
 	public String thermoMeterString() {
-		// TODO Auto-generated method stub
 		return "";
 	}
 
-
 	@Override
 	public void initialize() {
-	
 	}
-
 
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,float vx,float vy,float vz)
-	{
-
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		return onBlockActivatedRotate(entityPlayer);
 	}
-	
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

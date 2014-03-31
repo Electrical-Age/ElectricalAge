@@ -23,59 +23,49 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.network.packet.Packet250CustomPayload;
 
-public class ElectricalGateSourceGui extends GuiScreenEln{
+public class ElectricalGateSourceGui extends GuiScreenEln {
 
-	public ElectricalGateSourceGui(EntityPlayer player,ElectricalGateSourceRender render) {
+	public ElectricalGateSourceGui(EntityPlayer player, ElectricalGateSourceRender render) {
 		this.render = render;
 	}
-
-
 
 	ElectricalGateSourceRender render;
 	GuiVerticalTrackBar voltage;
 
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
 		super.initGui();
 
-
-		voltage = newGuiVerticalTrackBar(6,6+2,20,50);
+		voltage = newGuiVerticalTrackBar(6, 6 + 2, 20, 50);
 		voltage.setStepIdMax((int)100);
 		voltage.setEnable(true);
-    	voltage.setRange(0f,50f);
+    	voltage.setRange(0f, 50f);
 
     	syncVoltage();
 	}
-    public void syncVoltage()
-    {
+	
+    public void syncVoltage() {
     	voltage.setValue(render.voltageSyncValue);
     	render.voltageSyncNew = false;
     }
 
-
     @Override
     public void guiObjectEvent(IGuiObject object) {
-    	// TODO Auto-generated method stub
     	super.guiObjectEvent(object);
-    	if(object == voltage)
-    	{
-    		render.clientSetFloat(ElectricalGateSourceElement.setVoltagerId,voltage.getValue());
+    	if(object == voltage) {
+    		render.clientSetFloat(ElectricalGateSourceElement.setVoltagerId, voltage.getValue());
     	}
     }
 
     @Override
     protected void preDraw(float f, int x, int y) {
-    	// TODO Auto-generated method stub
     	super.preDraw(f, x, y);
     	if(render.voltageSyncNew) syncVoltage();
-    	voltage.setComment(0, "Output at " + ((int)voltage.getValue()*2) + "%");
+    	voltage.setComment(0, "Output at " + ((int)voltage.getValue() * 2) + "%");
     }
 
 	@Override
 	protected GuiHelper newHelper() {
-		// TODO Auto-generated method stub
-		return new GuiHelper(this, 12 + 20 , 12 + 50+4);
+		return new GuiHelper(this, 12 + 20, 12 + 50 + 4);
 	}
-	
 }
