@@ -45,38 +45,34 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+public class ElectricalMachineElement extends TransparentNodeElement implements ITemperatureWatchdogDescriptor, IThermalDestructorDescriptor, ElectricalStackMachineProcessObserver {
 
-public class ElectricalMachineElement extends TransparentNodeElement implements ITemperatureWatchdogDescriptor,IThermalDestructorDescriptor,ElectricalStackMachineProcessObserver{
+	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
 
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3 , 64, this);
-
-	
-	
-
-	
 	NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");	
 	ElectricalResistorGrounded electricalResistor = new ElectricalResistorGrounded(electricalLoad);	
 	
 	NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
 	
-	ElectricalLoadHeatThermalLoadProcess heatEToTProcess = new ElectricalLoadHeatThermalLoadProcess(electricalLoad,thermalLoad);
+	ElectricalLoadHeatThermalLoadProcess heatEToTProcess = new ElectricalLoadHeatThermalLoadProcess(electricalLoad, thermalLoad);
 	ElectricalStackMachineProcess slowRefreshProcess;
 	
 	ElectricalResistorHeatThermalLoad heatingProcess = new ElectricalResistorHeatThermalLoad(electricalResistor, thermalLoad);
 	
 	//VoltageWatchdogProcessForInventoryItemBlockDamageSingleLoad motorWatchdog = new VoltageWatchdogProcessForInventoryItemBlockDamageSingleLoad(inventory, motorSlotId, electricalLoad);
 	
-	NodeThermalWatchdogProcess thermalWatchdogProcess = new NodeThermalWatchdogProcess(this.node, this,this, thermalLoad);
+	NodeThermalWatchdogProcess thermalWatchdogProcess = new NodeThermalWatchdogProcess(this.node, this, this, thermalLoad);
 	ElectricalMachineSlowProcess slowProcess = new ElectricalMachineSlowProcess(this);
 	boolean powerOn = false;
 	ElectricalMachineDescriptor descriptor;
-	public ElectricalMachineElement(TransparentNode transparentNode,TransparentNodeDescriptor descriptor) {
-		super(transparentNode,descriptor);
+	
+	public ElectricalMachineElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
+		super(transparentNode, descriptor);
 		this.descriptor = (ElectricalMachineDescriptor) descriptor;
 		
 		slowRefreshProcess = new ElectricalStackMachineProcess(
-				inventory,ElectricalMachineContainer.inSlotId,ElectricalMachineContainer.outSlotId,1,
-				electricalResistor,Double.POSITIVE_INFINITY,this.descriptor.recipe);
+				inventory, ElectricalMachineContainer.inSlotId, ElectricalMachineContainer.outSlotId, 1,
+				electricalResistor, Double.POSITIVE_INFINITY, this.descriptor.recipe);
 		
 		electricalLoadList.add(electricalLoad);
 		electricalProcessList.add(electricalResistor);
@@ -92,32 +88,26 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 
 	@Override
 	public IInventory getInventory() {
-		// TODO Auto-generated method stub
 		return inventory;
 	}
 	
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
 		return new ElectricalMachineContainer(this.node,player, inventory);
 	}
 	
-	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-
 		return electricalLoad;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -128,48 +118,35 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		return NodeBase.maskElectricalPower;
 	}
 
-
 	@Override
 	public String multiMeterString(Direction side) {
-		// TODO Auto-generated method stub
 		return Utils.plotUIP(electricalLoad.Uc, electricalLoad.getCurrent());
 	}
 	
 	@Override
 	public String thermoMeterString(Direction side) {
-		// TODO Auto-generated method stub
 		return Utils.plotCelsius("T", thermalLoad.Tc);
 	}
 
 	@Override
 	public void initialize() {
-	
-		
 		inventoryChange(getInventory());
-		
 		connect();
 	}
 	
 	@Override
 	public void inventoryChange(IInventory inventory) {
-		// TODO Auto-generated method stub
 		super.inventoryChange(inventory);
-
-		
 		setPhysicalValue();
-
 		needPublish();
-
 	}
 	
-	public void setPhysicalValue()
-	{
+	public void setPhysicalValue() {
 		ItemStack stack;
 		
 		int boosterCount = 0;
 		stack = getInventory().getStackInSlot(ElectricalMachineContainer.boosterSlotId);
-		if(stack != null)
-		{
+		if(stack != null) {
 			boosterCount = stack.stackSize;
 		}
 		double speedUp = Math.pow(descriptor.boosterSpeedUp, boosterCount);
@@ -181,98 +158,79 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		descriptor.applyTo(slowRefreshProcess);
 		
 		thermalLoad.setRp(thermalLoad.Rp / speedUp);
-		//electricalLoad.setRp(electricalLoad.getRp()/ Math.pow(descriptor.boosterSpeedUp, boosterCount));
+		//electricalLoad.setRp(electricalLoad.getRp() / Math.pow(descriptor.boosterSpeedUp, boosterCount));
 	}
 	
 	double efficiency = 1.0;
 	
-
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
-
-	public void networkSerialize(java.io.DataOutputStream stream)
-	{
+	public void networkSerialize(java.io.DataOutputStream stream) {
 		super.networkSerialize(stream);
 		double fPower = electricalResistor.getP() / descriptor.nominalP;
 		if(electricalResistor.getP() < 11) fPower = 0.0;
 		if(fPower > 1.9)fPower = 1.9;
 		try {
-			stream.writeByte((int)(fPower*64));
+			stream.writeByte((int)(fPower * 64));
 			serialiseItemStack(stream, inventory.getStackInSlot(ElectricalMachineContainer.inSlotId));
 			serialiseItemStack(stream, inventory.getStackInSlot(ElectricalMachineContainer.outSlotId));
 			stream.writeFloat((float) slowRefreshProcess.processState());
 			stream.writeFloat((float) slowRefreshProcess.processStatePerSecond());
 			node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
 			stream.writeFloat((float)(electricalLoad.Uc / descriptor.nominalU));
-
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
 		nbt.setBoolean(str + "powerOn", powerOn);
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		super.readFromNBT(nbt, str);
 		powerOn = nbt.getBoolean(str + "powerOn");
 	}
 
 	@Override
 	public double getThermalDestructionMax() {
-		// TODO Auto-generated method stub
 		return 2;
 	}
 
 	@Override
 	public double getThermalDestructionStart() {
-		// TODO Auto-generated method stub
 		return 1;
 	}
 
 	@Override
 	public double getThermalDestructionPerOverflow() {
-		// TODO Auto-generated method stub
 		return 1;
 	}
 
 	@Override
 	public double getThermalDestructionProbabilityPerOverflow() {
-		// TODO Auto-generated method stub
 		return 0.05;
 	}
 
 	@Override
 	public double getTmax() {
-		// TODO Auto-generated method stub
 		return descriptor.thermal.warmLimit;
 	}
 
 	@Override
 	public double getTmin() {
-		// TODO Auto-generated method stub
 		return descriptor.thermal.coolLimit;
 	}
 
 	@Override
 	public void done(ElectricalStackMachineProcess who) {
-		// TODO Auto-generated method stub
 		needPublish();
 	}
-	
-
-
 }

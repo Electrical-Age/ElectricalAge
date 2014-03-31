@@ -23,17 +23,12 @@ import mods.eln.wiki.Data;
 
 import com.google.common.base.Function;
 
+public class ElectricalRedstoneOutputDescriptor extends SixNodeDescriptor {
 
-public class ElectricalRedstoneOutputDescriptor extends SixNodeDescriptor{
-
-
-	public ElectricalRedstoneOutputDescriptor(
-			String name,
-			Obj3D obj
-			) {
-		super(name, ElectricalRedstoneOutputElement.class,ElectricalRedstoneOutputRender.class);
+	public ElectricalRedstoneOutputDescriptor(String name, Obj3D obj) {
+		super(name, ElectricalRedstoneOutputElement.class, ElectricalRedstoneOutputRender.class);
 		this.obj = obj;
-		if(obj != null){
+		if(obj != null) {
 			main = obj.getPart("main");
 			led = obj.getPart("led");
 		}
@@ -41,45 +36,40 @@ public class ElectricalRedstoneOutputDescriptor extends SixNodeDescriptor{
 
 	Obj3D obj;
 	Obj3DPart main,led;
-	void draw(int redstone)
-	{
+	
+	void draw(int redstone) {
 		//LRDU.Down.glRotateOnX();
 		if(main != null) main.draw();
 		
-		float light = redstone/15f;
-		GL11.glColor4f(light,light,light, 1f);
+		float light = redstone / 15f;
+		GL11.glColor4f(light, light, light, 1f);
 		Utils.drawLight(led);
 	}
 	
-	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
+	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
+	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
 		return true;
 	}
+	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		// TODO Auto-generated method stub
 		if(type == ItemRenderType.INVENTORY) GL11.glScalef(2.8f, 2.8f, 2.8f);
 		draw(15);
 	}
 	
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-		// TODO Auto-generated method stub
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Converts voltage signal");
 		list.add("to redstone signal.");

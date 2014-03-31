@@ -13,19 +13,16 @@ import mods.eln.wiki.Data;
 
 public class ElectricalMathDescriptor extends SixNodeDescriptor {
 
-	public ElectricalMathDescriptor(
-			String name,
-			Obj3D obj
-			) {
+	public ElectricalMathDescriptor(String name, Obj3D obj) {
 		super(name, ElectricalMathElement.class, ElectricalMathRender.class);
 		this.obj = obj;
-		if(obj != null){
+		if(obj != null) {
 			main = obj.getPart("main");
 			door = obj.getPart("door");
-			if(door != null){
+			if(door != null) {
 				alphaOff = door.getFloat("alphaOff");
 			}
-			for(int idx = 0;idx < 8;idx++){
+			for(int idx = 0; idx < 8; idx++) {
 				led[idx] = obj.getPart("led" + idx);
 			}
 		}
@@ -37,54 +34,46 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
 	
 	float alphaOff;
-	void draw(float open,boolean ledOn[])
-	{
+	
+	void draw(float open,boolean ledOn[]) {
 		if(main != null) main.draw();
-		if(door != null) door.draw((1f-open)*alphaOff, 0f, 0f, 1f);
+		if(door != null) door.draw((1f - open) * alphaOff, 0f, 0f, 1f);
 		
-		for(int idx = 0;idx < 8;idx++){
-			if(ledOn[idx]){
+		for(int idx = 0; idx < 8; idx++) {
+			if(ledOn[idx]) {
 				if((idx & 3) == 0)
 					GL11.glColor3f(0.8f, 0f, 0f);
 				else
 					GL11.glColor3f(0f, 0.8f, 0f);
 				Utils.drawLight(led[idx]);		
 			}
-			else{
+			else {
 				GL11.glColor3f(0.3f, 0.3f, 0.3f);
 				led[idx].draw();
 			}
 		}
-		
-		
 	}
-	
-	
 	
 	static boolean[] ledDefault = {true,false,true,false,true,true,true,false};
 	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
+	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
 		return true;
 	}
+	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		// TODO Auto-generated method stub
 		GL11.glTranslatef(-0.3f, -0.1f, 0f);
 		draw(0.7f, ledDefault);
-		
 	}
 }

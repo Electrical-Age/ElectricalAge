@@ -1,7 +1,5 @@
 package mods.eln.electricalmath;
 
-
-
 import mods.eln.BasicContainer;
 import mods.eln.Eln;
 import mods.eln.ItemStackFilter;
@@ -24,21 +22,15 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 
-public class ElectricalMathContainer extends BasicContainer{
+public class ElectricalMathContainer extends BasicContainer {
 
 	NodeBase node = null;
 	public static final int restoneSlotId = 0;
-	public ElectricalMathContainer(NodeBase node,EntityPlayer player, IInventory inventory) {
-		super(player, inventory,new Slot[]{
-				new SlotFilter(inventory,restoneSlotId,125,25,64,new ItemStackFilter[]{new ItemStackFilter(Item.redstone)},SlotSkin.medium,new String[]{"Redstone Slot"})
-				
-				
+	
+	public ElectricalMathContainer(NodeBase node, EntityPlayer player, IInventory inventory) {
+		super(player, inventory, new Slot[]{
+				new SlotFilter(inventory, restoneSlotId, 125, 25, 64, new ItemStackFilter[]{new ItemStackFilter(Item.redstone)}, SlotSkin.medium, new String[]{"Redstone Slot"})
 			});
 		this.node = node;
-		// TODO Auto-generated constructor stub
 	}
-
-
-
-
 }

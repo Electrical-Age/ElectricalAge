@@ -12,7 +12,7 @@ import mods.eln.misc.RecipesList;
 import mods.eln.sim.ThermalLoadInitializer;
 import net.minecraft.entity.item.EntityItem;
 
-public class PlateMachineDescriptor extends ElectricalMachineDescriptor{
+public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
 
 	public PlateMachineDescriptor(String name, 
 			Obj3D obj,			
@@ -21,20 +21,17 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor{
 			ElectricalCableDescriptor cable, RecipesList recipe) {
 		super(name, nominalU, nominalP, maximalU, thermal, cable, recipe);
 		
-		
 		this.obj = obj;
-		if(obj != null){
+		if(obj != null) {
 			main = obj.getPart("main");
 			rot1 = obj.getPart("rot1");
 			rot2 = obj.getPart("rot2");
 		}		
 	}
-
-
 	Obj3D obj;
 	Obj3DPart main,rot1,rot2;
 	
-	class PlateMachineDescriptorHandle{
+	class PlateMachineDescriptorHandle {
 		float counter = 0;
 		RcInterpolator interpolator = new RcInterpolator(0.5f);
 		float itemCounter = 0;
@@ -42,14 +39,11 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor{
 	
 	@Override
 	Object newDrawHandle() {
-		// TODO Auto-generated method stub
 		return new PlateMachineDescriptorHandle();
 	}
 
-
 	@Override
-	void draw(ElectricalMachineRender render,Object handleO,EntityItem inEntity, EntityItem outEntity, float powerFactor,float processState)
-	{
+	void draw(ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity, float powerFactor, float processState) {
 		PlateMachineDescriptorHandle handle = (PlateMachineDescriptorHandle) handleO;
 		
 		main.draw();
@@ -58,15 +52,14 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor{
 		
 		handle.interpolator.setTarget(powerFactor);
 		handle.interpolator.stepGraphic();
-		handle.counter += FrameTime.get() * handle.interpolator.get() *  360;
+		handle.counter += FrameTime.get() * handle.interpolator.get() * 360;
 		while(handle.counter >= 360f) handle.counter -= 360;
 		
-		handle.itemCounter += FrameTime.get() *  90;
+		handle.itemCounter += FrameTime.get() * 90;
 		while(handle.itemCounter >= 360f) handle.itemCounter -= 360;
 				
 		Utils.drawEntityItem(inEntity, -0.35f, 0.1f, 0f, handle.itemCounter, 1f);
 		Utils.drawEntityItem(outEntity, 0.35f, 0.1f, 0f, -handle.itemCounter + 139f, 1f);
-	
 	}
 	
 	@Override

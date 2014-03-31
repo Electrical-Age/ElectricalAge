@@ -22,18 +22,13 @@ import mods.eln.wiki.Data;
 
 import com.google.common.base.Function;
 
+public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor {
 
-public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor{
-
-
-	public ElectricalRedstoneInputDescriptor(
-			String name,
-			Obj3D obj
-			) {
-		super(name, ElectricalRedstoneInputElement.class,ElectricalRedstoneInputRender.class);
+	public ElectricalRedstoneInputDescriptor(String name, Obj3D obj) {
+		super(name, ElectricalRedstoneInputElement.class, ElectricalRedstoneInputRender.class);
 		//obj = Eln.instance.obj.getObj(objName);
 		this.obj = obj;
-		if(obj != null){
+		if(obj != null) {
 			main = obj.getPart("main");
 			led = obj.getPart("led");
 		}
@@ -41,47 +36,41 @@ public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor{
 
 	Obj3D obj;
 	Obj3DPart main,led;
-	void draw(int redstone)
-	{
+	
+	void draw(int redstone) {
 		//LRDU.Down.glRotateOnX();
 		if(main != null) main.draw();
 		
-		float light = redstone/15f;
-		GL11.glColor4f(light,light,light, 1f);
+		float light = redstone / 15f;
+		GL11.glColor4f(light, light, light, 1f);
 		Utils.drawLight(led);
 	}
 	
-	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
+	
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-		// TODO Auto-generated method stub
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Converts redstone signal");
 		list.add("to voltage signal.");
 	}
 	
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		return true;
+	}
 	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
-		return true;
-	}
-	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
 		return true;
 	}
+	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		// TODO Auto-generated method stub
 		if(type == ItemRenderType.INVENTORY) GL11.glScalef(2.8f, 2.8f, 2.8f);
 		draw(15);
 	}

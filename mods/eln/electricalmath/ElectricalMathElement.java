@@ -36,9 +36,9 @@ import mods.eln.solver.OperatorMapperFunc;
 public class ElectricalMathElement extends SixNodeElement {
 
 	NodeElectricalGateOutput gateOutput = new NodeElectricalGateOutput("gateOutput");
-	NodeElectricalGateOutputProcess gateOutputProcess = new NodeElectricalGateOutputProcess("gateOutputProcess",gateOutput);
+	NodeElectricalGateOutputProcess gateOutputProcess = new NodeElectricalGateOutputProcess("gateOutputProcess", gateOutput);
 	
-	NodeElectricalGateInput[] gateInput = new NodeElectricalGateInput[]{new NodeElectricalGateInput("gateA"),new NodeElectricalGateInput("gateB"),new NodeElectricalGateInput("gateC")};
+	NodeElectricalGateInput[] gateInput = new NodeElectricalGateInput[]{new NodeElectricalGateInput("gateA"), new NodeElectricalGateInput("gateB"), new NodeElectricalGateInput("gateC")};
 
 	ArrayList<ISymbole> symboleList = new ArrayList<ISymbole>();
 	
@@ -46,8 +46,7 @@ public class ElectricalMathElement extends SixNodeElement {
 	
 	boolean firstBoot = true;
 	
-	public ElectricalMathElement(SixNode sixNode, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalMathElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		electricalLoadList.add(gateOutput);
 		electricalLoadList.add(gateInput[0]);
@@ -57,7 +56,6 @@ public class ElectricalMathElement extends SixNodeElement {
 		electricalProcessList.add(gateOutputProcess);
 		
 		slowProcessList.add(electricalProcess);
-		
 		
 		symboleList.add(new GateInputSymbol("A", gateInput[0]));
 		symboleList.add(new GateInputSymbol("B", gateInput[1]));
@@ -69,9 +67,7 @@ public class ElectricalMathElement extends SixNodeElement {
 	String expression = "";
 	Equation equation;
 	
-	
-	class GateInputSymbol implements ISymbole
-	{
+	class GateInputSymbol implements ISymbole {
 		private String name;
 		private NodeElectricalGateInput gate;
 
@@ -82,36 +78,34 @@ public class ElectricalMathElement extends SixNodeElement {
 
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
 			return gate.getNormalized();
 		}
 
 		@Override
 		public String getName() {
-			// TODO Auto-generated method stub
 			return name;
 		}
 	}
 	
-	class ElectricalMathElectricalProcess implements IProcess{
+	class ElectricalMathElectricalProcess implements IProcess {
 		private ElectricalMathElement e;
 
-		ElectricalMathElectricalProcess(ElectricalMathElement e){
+		ElectricalMathElectricalProcess(ElectricalMathElement e) {
 			this.e = e;
 		}
 
 		@Override
 		public void process(double time) {
-			
 			if(e.redstoneReady)
 				e.gateOutputProcess.setOutputNormalizedSafe(e.equation.getValue(time));
 			else
 				e.gateOutputProcess.setOutputNormalized(0.0);
 		}
 	}
+	
 	boolean equationIsValid;
-	void preProcessEquation(String expression)
-	{
+	
+	void preProcessEquation(String expression) {
 		this.expression = expression;
 		equation = new Equation();//expression, symboleList, 100);
 		equation.setUpDefaultOperatorAndMapper();
@@ -119,25 +113,23 @@ public class ElectricalMathElement extends SixNodeElement {
 		equation.addSymbole(symboleList);
 		equation.preProcess(expression);
 		
-		for(int idx = 0;idx<3;idx++){
+		for(int idx = 0; idx < 3; idx++) {
 			sideConnectionEnable[idx] = equation.isSymboleUsed(symboleList.get(idx));
 		}
 		this.expression = expression;
 		
 		redstoneRequired = 0;
-		if(equationIsValid = equation.isValid()){
+		if(equationIsValid = equation.isValid()) {
 			redstoneRequired = equation.getOperatorCount();
 		}
-		
 		checkRedstone();
-		
 	}
 
-	
-	public class DayTime implements ISymbole{
+	public class DayTime implements ISymbole {
+		
 		@Override
 		public double getValue() {
-			return sixNode.coordonate.world().getWorldTime()/(24000.0-1.0);
+			return sixNode.coordonate.world().getWorldTime() / (24000.0 - 1.0);
 		}
 
 		@Override
@@ -155,11 +147,8 @@ public class ElectricalMathElement extends SixNodeElement {
 		return null;
 	}
 	
-
-
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -174,13 +163,11 @@ public class ElectricalMathElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String thermoMeterString() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -190,17 +177,15 @@ public class ElectricalMathElement extends SixNodeElement {
 			preProcessEquation(expression);
 	}
 	
-	
 	@Override
 	protected void inventoryChanged() {
-		// TODO Auto-generated method stub
 		super.inventoryChanged();
-		
 		checkRedstone();
 	}
+	
 	int redstoneRequired;
-	void checkRedstone()
-	{
+	
+	void checkRedstone() {
 		int redstoneInStack = 0;
 
 		ItemStack stack = inventory.getStackInSlot(ElectricalMathContainer.restoneSlotId);
@@ -213,9 +198,7 @@ public class ElectricalMathElement extends SixNodeElement {
 	boolean redstoneReady = false;
 	
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-			float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		return onBlockActivatedRotate(entityPlayer);
 	}
 
@@ -223,32 +206,28 @@ public class ElectricalMathElement extends SixNodeElement {
 	
 	@Override
 	public IInventory getInventory() {
-		// TODO Auto-generated method stub
 		return inventory;
 	}
+	
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
 		return new ElectricalMathContainer(sixNode, player, inventory);
 	}
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
-		nbt.setString(str +  "expression",expression);
+		nbt.setString(str + "expression", expression);
 		equation.writeToNBT(nbt, str + "equation");
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		super.readFromNBT(nbt, str);
 		expression = nbt.getString(str + "expression");
 		preProcessEquation(expression);
@@ -257,35 +236,31 @@ public class ElectricalMathElement extends SixNodeElement {
 		firstBoot = false;
 	}
 	
-	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
 			stream.writeUTF(expression);
 			stream.writeInt(redstoneRequired);
 			stream.writeBoolean(equationIsValid);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
 	static final byte setExpressionId = 1;
+	
 	@Override
 	public void networkUnserialize(DataInputStream stream, Player player) {
-		// TODO Auto-generated method stub
 		super.networkUnserialize(stream, player);
 		try {
-			switch(stream.readByte()){
+			switch(stream.readByte()) {
 			case setExpressionId:
 				preProcessEquation(stream.readUTF());
 				reconnect();
 				break;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
