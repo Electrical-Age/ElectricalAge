@@ -20,72 +20,61 @@ import mods.eln.wiki.Data;
 
 import com.google.common.base.Function;
 
-
-public class ElectricalLightSensorDescriptor extends SixNodeDescriptor{
-
+public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
 
 	private Obj3DPart main;
 	public boolean dayLightOnly;
-	public ElectricalLightSensorDescriptor(
-			String name,
-			Obj3D obj,
-			boolean dayLightOnly
-			) {
-		super(name, ElectricalLightSensorElement.class,ElectricalLightSensorRender.class);
+	public ElectricalLightSensorDescriptor(String name, Obj3D obj, boolean dayLightOnly) {
+		super(name, ElectricalLightSensorElement.class, ElectricalLightSensorRender.class);
 		this.obj = obj;
 		this.dayLightOnly = dayLightOnly;
 		
-		if(obj != null)
-		{
+		if(obj != null) {
 			main = obj.getPart("main");
 		}
 	}
 
 	Obj3D obj;
 
-	void draw()
-	{
+	void draw() {
 		if(main != null) main.draw();
 	}
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
+	
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		if(dayLightOnly){
+		if(dayLightOnly) {
 			list.add("Provides an electrical signal");
 			list.add("with strength proportional to");
 			list.add("the amount of daylight.");
 			list.add("0V at night, " + Eln.SVU + "V at midday.");
 		}
-		else{
+		else {
 			list.add("Provides an electrical signal");
 			list.add("whilst in the presense of light.");		
 		}
 	}
 	
-	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
 		return true;
 	}
+	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
 		return true;
 	}
+	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		// TODO Auto-generated method stub
 		GL11.glScalef(2f, 2f, 2f);
 		draw();
 	}

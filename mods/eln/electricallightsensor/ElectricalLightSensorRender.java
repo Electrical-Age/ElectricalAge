@@ -1,4 +1,3 @@
-
 package mods.eln.electricallightsensor;
 
 import java.io.DataInputStream;
@@ -18,18 +17,13 @@ import mods.eln.node.SixNodeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 
-
-public class ElectricalLightSensorRender extends SixNodeElementRender{
+public class ElectricalLightSensorRender extends SixNodeElementRender {
 
 	ElectricalLightSensorDescriptor descriptor;
-	public ElectricalLightSensorRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalLightSensorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalLightSensorDescriptor) descriptor;
 	}
-
-
-
 
 	@Override
 	public void draw() {
@@ -37,11 +31,8 @@ public class ElectricalLightSensorRender extends SixNodeElementRender{
 		descriptor.draw();
 	}
 
-
-	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return Eln.instance.signalCableDescriptor.render;
 	}
 }

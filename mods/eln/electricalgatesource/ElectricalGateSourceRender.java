@@ -30,64 +30,54 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-
-public class ElectricalGateSourceRender extends SixNodeElementRender{
-
+public class ElectricalGateSourceRender extends SixNodeElementRender {
 
 	ElectricalGateSourceDescriptor descriptor;
 
-	public ElectricalGateSourceRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalGateSourceRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalGateSourceDescriptor) descriptor;
 		interpolator = new RcInterpolator(this.descriptor.speed);
 	}
 
-
 	LRDU front;
 
 	RcInterpolator interpolator;
+	
 	@Override
 	public void draw() {
 		super.draw();
-		interpolator.setTarget((float) (voltageSyncValue/Eln.SVU));
+		interpolator.setTarget((float)(voltageSyncValue / Eln.SVU));
 		interpolator.stepGraphic();
 		LRDU.Down.glRotateOnX();
-		descriptor.draw(interpolator.get(),Utils.distanceFromClientPlayer(this.tileEntity),tileEntity);
-
+		descriptor.draw(interpolator.get(), Utils.distanceFromClientPlayer(this.tileEntity), tileEntity);
 	}
 	
-
-	
-
 	float voltageSyncValue = 0;
 	boolean voltageSyncNew = false;
 	boolean boot = true;
+	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
 			Byte b;
 			b = stream.readByte();
-			front = LRDU.fromInt((b>>4)&3);
+			front = LRDU.fromInt((b >> 4)&3);
 			float readF;
 			readF = stream.readFloat();
-			if(voltageSyncValue != readF )
-			{
+			if(voltageSyncValue != readF) {
 				voltageSyncValue = readF;
 				voltageSyncNew = true;
 			}
 			
-			if(boot){
+			if(boot) {
 				boot = false;
-				interpolator.setValue((float) (voltageSyncValue/Eln.SVU));
+				interpolator.setValue((float)(voltageSyncValue / Eln.SVU));
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
-
 	}
 	
 	@Override
@@ -95,10 +85,8 @@ public class ElectricalGateSourceRender extends SixNodeElementRender{
 		return Eln.instance.signalCableDescriptor.render;
 	}
 	
-	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
-		return new ElectricalGateSourceGui(player,this);
+		return new ElectricalGateSourceGui(player, this);
 	}
 }

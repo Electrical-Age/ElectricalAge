@@ -15,7 +15,7 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.sim.ThermalLoadInitializer;
 
-public class MagnetizerDescriptor extends ElectricalMachineDescriptor{
+public class MagnetizerDescriptor extends ElectricalMachineDescriptor {
 
 	public MagnetizerDescriptor(String name, Obj3D obj,
 			double nominalU, double nominalP,
@@ -23,8 +23,7 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor{
 			ElectricalCableDescriptor cable, RecipesList recipe) {
 		super(name, nominalU, nominalP, maximalU, thermal, cable, recipe);
 		this.obj = obj;
-		if(obj != null)
-		{
+		if(obj != null) {
 			rot = obj.getPart("rot");
 
 			main = obj.getPart("main");
@@ -34,18 +33,19 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor{
 	Obj3D obj;
 	Obj3DPart main,rot;		
 
-	class MaceratorDescriptorHandle{
+	class MaceratorDescriptorHandle {
 		float counter = 0;
 		float itemCounter = 0;
 		RcInterpolator interpolator = new RcInterpolator(0.5f);
 	}
+	
 	@Override
 	Object newDrawHandle() {
-		// TODO Auto-generated method stub
 		return new MaceratorDescriptorHandle();
 	}
+	
 	@Override
-	void draw(ElectricalMachineRender render,Object handleO,EntityItem inEntity, EntityItem outEntity, float powerFactor,float processState) {
+	void draw(ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity, float powerFactor, float processState) {
 		MaceratorDescriptorHandle handle = (MaceratorDescriptorHandle) handleO;
 	
 		main.draw();
@@ -53,11 +53,10 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor{
 
 		handle.interpolator.setTarget(powerFactor);
 		handle.interpolator.stepGraphic();
-		handle.counter += FrameTime.get() * handle.interpolator.get() *  360;
+		handle.counter += FrameTime.get() * handle.interpolator.get() * 360;
 		while(handle.counter >= 360f) handle.counter -= 360;
 		
-	
-		handle.itemCounter += FrameTime.get() *  90;
+		handle.itemCounter += FrameTime.get() * 90;
 		while(handle.itemCounter >= 360f) handle.itemCounter -= 360;
 				
 		GL11.glScalef(0.5f, 0.5f, 0.5f);
@@ -65,7 +64,6 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor{
 	}
 	
 	/*
-	
 	@Override
 	public boolean powerLrdu(Direction side, Direction front) {
 		return side != front && side != front.getInverse();
@@ -73,12 +71,11 @@ public class MagnetizerDescriptor extends ElectricalMachineDescriptor{
 	
 	@Override
 	public boolean drawCable() {
-		// TODO Auto-generated method stub
 		return true;
 	}
+	
 	@Override
 	CableRenderDescriptor getPowerCableRender() {
-		// TODO Auto-generated method stub
 		return cable.render;
 	}
 }

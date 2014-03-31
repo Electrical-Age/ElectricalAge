@@ -14,7 +14,7 @@ import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.sim.ThermalLoadInitializer;
 
-public class MaceratorDescriptor extends ElectricalMachineDescriptor{
+public class MaceratorDescriptor extends ElectricalMachineDescriptor {
 
 	public MaceratorDescriptor(String name, String modelName,
 			double nominalU, double nominalP,
@@ -22,28 +22,27 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor{
 			ElectricalCableDescriptor cable, RecipesList recipe) {
 		super(name, nominalU, nominalP, maximalU, thermal, cable, recipe);
 		obj = Eln.obj.getObj(modelName);
-		if(obj != null)
-		{
+		if(obj != null) {
 			rot1 = obj.getPart("rot1");
 			rot2 = obj.getPart("rot2");
 			main = obj.getPart("main");
 		}
-
 	}
 	Obj3D obj;
 	Obj3DPart main,rot1,rot2;		
 
-	class MaceratorDescriptorHandle{
-		float counter = 0,itemCounter = 0;
+	class MaceratorDescriptorHandle {
+		float counter = 0, itemCounter = 0;
 		RcInterpolator interpolator = new RcInterpolator(0.5f);
 	}
+	
 	@Override
 	Object newDrawHandle() {
-		// TODO Auto-generated method stub
 		return new MaceratorDescriptorHandle();
 	}
+	
 	@Override
-	void draw(ElectricalMachineRender render,Object handleO,EntityItem inEntity, EntityItem outEntity, float powerFactor,float processState) {
+	void draw(ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity, float powerFactor, float processState) {
 		MaceratorDescriptorHandle handle = (MaceratorDescriptorHandle) handleO;
 	
 		main.draw();
@@ -63,11 +62,8 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor{
 		Utils.drawEntityItem(outEntity, 0.0, -0.5f, 0f, 130 + handle.itemCounter, 1f);	
 	}
 	
-	
 	@Override
 	public boolean powerLrdu(Direction side, Direction front) {
 		return side != front && side != front.getInverse();
 	}
-	
-
 }

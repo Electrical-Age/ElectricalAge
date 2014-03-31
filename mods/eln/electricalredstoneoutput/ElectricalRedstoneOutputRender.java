@@ -1,4 +1,3 @@
-
 package mods.eln.electricalredstoneoutput;
 
 import java.io.DataInputStream;
@@ -18,12 +17,10 @@ import mods.eln.node.SixNodeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 
-
-public class ElectricalRedstoneOutputRender extends SixNodeElementRender{
+public class ElectricalRedstoneOutputRender extends SixNodeElementRender {
 
 	ElectricalRedstoneOutputDescriptor descriptor;
-	public ElectricalRedstoneOutputRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalRedstoneOutputRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalRedstoneOutputDescriptor) descriptor;
 	}
@@ -32,6 +29,7 @@ public class ElectricalRedstoneOutputRender extends SixNodeElementRender{
 	LRDU front;
 
 	float factorFiltred = 0;
+	
 	@Override
 	public void draw() {
 		super.draw();
@@ -40,22 +38,19 @@ public class ElectricalRedstoneOutputRender extends SixNodeElementRender{
 	}
 
 	int redOutput;
+	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
 			redOutput = stream.readByte();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
-
 	}
 	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return Eln.instance.signalCableDescriptor.render;
 	}
 }
