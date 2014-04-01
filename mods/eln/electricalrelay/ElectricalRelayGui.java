@@ -19,51 +19,41 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.network.packet.Packet250CustomPayload;
 
-public class ElectricalRelayGui extends GuiScreenEln{
+public class ElectricalRelayGui extends GuiScreenEln {
 
 	public ElectricalRelayGui(EntityPlayer player,ElectricalRelayRender render) {
-
 		this.render = render;
 	}
-
 
 	GuiButton toogleDefaultOutput;
 	ElectricalRelayRender render;
 
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
 		super.initGui();
 
-		toogleDefaultOutput = newGuiButton(6, 32/2-10,115, "toogle switch");
-
+		toogleDefaultOutput = newGuiButton(6, 32 / 2 - 10, 115, "toogle switch");
 	}
 	
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
-		// TODO Auto-generated method stub
 		super.guiObjectEvent(object);
-    	if(object == toogleDefaultOutput)
-    	{
+    	if(object == toogleDefaultOutput) {
     		render.clientToogleDefaultOutput();
     	}
 	}
+	
 	@Override
 	protected void preDraw(float f, int x, int y) {
-		// TODO Auto-generated method stub
 		super.preDraw(f, x, y);
 		if(render.defaultOutput)
 			toogleDefaultOutput.displayString = "Normally closed";
 		else
 			toogleDefaultOutput.displayString = "Normally open";
 	}
+	
 	@Override
 	protected GuiHelper newHelper() {
-		// TODO Auto-generated method stub
 		return new GuiHelper(this, 128, 32);
 	}
-
-
-
-	
 }

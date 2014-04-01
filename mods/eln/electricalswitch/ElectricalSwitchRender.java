@@ -24,19 +24,17 @@ import mods.eln.node.SixNodeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 
-
-public class ElectricalSwitchRender extends SixNodeElementRender{
+public class ElectricalSwitchRender extends SixNodeElementRender {
 
 	ElectricalSwitchDescriptor descriptor;
 
-	public ElectricalSwitchRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalSwitchRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalSwitchDescriptor) descriptor;
 		interpol = new RcInterpolator(this.descriptor.speed);
 	}
 
-	double voltageAnode = 0,voltageCatode = 0,current = 0,temperature = 0;
+	double voltageAnode = 0, voltageCatode = 0, current = 0, temperature = 0;
 	
 	RcInterpolator interpol;
 	
@@ -44,54 +42,45 @@ public class ElectricalSwitchRender extends SixNodeElementRender{
 	public void draw() {
 		super.draw();
 
-		
-		
-		interpol.setTarget(switchState ? 1f :0f);	
+		interpol.setTarget(switchState ? 1f : 0f);	
 		interpol.stepGraphic();
 		
 		front.glRotateOnX();	
-		descriptor.draw(interpol.get(),Utils.distanceFromClientPlayer(tileEntity),tileEntity);
-
+		descriptor.draw(interpol.get(), Utils.distanceFromClientPlayer(tileEntity), tileEntity);
 	}
-	
 	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return descriptor.cableRender;
 	}
 	
 	@Override
 	public void glListDraw() {
-
 	}
+	
 	@Override
 	public boolean glListEnable() {
 		return false;	
 	}
 
-
 	boolean boot = true;
 	float switchAlpha = 0;
 	boolean switchState;
+	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
-
 			switchState = stream.readBoolean();
-			voltageAnode = stream.readShort() /NodeBase.networkSerializeUFactor;
-			voltageCatode = stream.readShort() /NodeBase.networkSerializeUFactor;
-			current = stream.readShort() /NodeBase.networkSerializeIFactor;
-			temperature = stream.readShort() /NodeBase.networkSerializeTFactor;
+			voltageAnode = stream.readShort() / NodeBase.networkSerializeUFactor;
+			voltageCatode = stream.readShort() / NodeBase.networkSerializeUFactor;
+			current = stream.readShort() / NodeBase.networkSerializeIFactor;
+			temperature = stream.readShort() / NodeBase.networkSerializeTFactor;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
 		
-		if(boot)
-		{
+		if(boot) {
 			interpol.setValue(switchState ? 1f : 0f);
 		}
 		boot = false;

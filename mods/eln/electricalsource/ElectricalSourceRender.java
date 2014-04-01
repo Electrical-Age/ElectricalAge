@@ -22,21 +22,14 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-
-public class ElectricalSourceRender extends SixNodeElementRender{
+public class ElectricalSourceRender extends SixNodeElementRender {
 
 	ElectricalSourceDescriptor descriptor;
 
-
-	public ElectricalSourceRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalSourceRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalSourceDescriptor)descriptor;
-		// TODO Auto-generated constructor stub
 	}
-
-
-
 
 	double voltage = 0,current = 0;
 	int color = 0;
@@ -44,42 +37,29 @@ public class ElectricalSourceRender extends SixNodeElementRender{
 	@Override
 	public void draw() {
 		super.draw();
-		
-		
-		
 		descriptor.draw();
-		
 	}
 
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
 			Byte b;
 			b = stream.readByte();
 			
-			color = (b>>4) & 0xF;
+			color = (b >> 4) & 0xF;
 			voltage = stream.readFloat();
 
 			needRedrawCable();
-			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	
-	
-	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
 		return new ElectricalSourceGui(this);
 	}
-	
-	
 	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {

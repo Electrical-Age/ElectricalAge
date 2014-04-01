@@ -31,34 +31,26 @@ public class ElectricalSourceGui extends GuiScreenEln {
 	
 	@Override
 	protected GuiHelper newHelper() {
-		// TODO Auto-generated method stub
-		return new GuiHelper(this, 50+12, 12+12);
+		return new GuiHelper(this, 50 + 12, 12 + 12);
 	}
    
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
 		super.initGui();
 
-		voltage = newGuiTextField(6,6, 50);
+		voltage = newGuiTextField(6, 6, 50);
 		voltage.setText((float)render.voltage);
 		voltage.setObserver(this);
 		voltage.setComment(new String[]{"Set the output voltage"});
 	}
 	
-
-
-	
-
 	@Override
 	public void textFieldNewValue(GuiTextFieldEln textField, String value) {
-		// TODO Auto-generated method stub
 		float newVoltage;
 		
-		try{
+		try {
 			newVoltage = NumberFormat.getInstance().parse(voltage.getText()).floatValue();
-		} catch(ParseException e)
-		{
+		} catch(ParseException e) {
 			return;
 		}
 		
@@ -73,10 +65,7 @@ public class ElectricalSourceGui extends GuiScreenEln {
 			
 			render.sendPacketToServer(bos);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 		
 	}
-
-
 }

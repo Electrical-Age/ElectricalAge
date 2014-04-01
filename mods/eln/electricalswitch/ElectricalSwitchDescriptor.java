@@ -29,26 +29,24 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 import com.google.common.base.Function;
 
-
-public class ElectricalSwitchDescriptor extends SixNodeDescriptor{
+public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 
 	public ElectricalSwitchDescriptor(
-			String name, CableRenderDescriptor cableRender,Obj3D obj,
-			double nominalVoltage,double nominalPower,double nominalDropFactor,
-			double maximalVoltage,double maximalPower,
+			String name, CableRenderDescriptor cableRender, Obj3D obj,
+			double nominalVoltage, double nominalPower, double nominalDropFactor,
+			double maximalVoltage, double maximalPower,
 			ThermalLoadInitializer thermal,
-			boolean signalSwitch
-			) {
-		super(name, ElectricalSwitchElement.class,ElectricalSwitchRender.class);
+			boolean signalSwitch) {
+		super(name, ElectricalSwitchElement.class, ElectricalSwitchRender.class);
 		this.nominalVoltage = nominalVoltage;
 		this.nominalPower = nominalPower;
 		this.maximalPower = maximalPower;
 		this.maximalVoltage = maximalVoltage;
 		this.nominalDropFactor = nominalDropFactor;
 		this.cableRender = cableRender;
-		electricalRs = nominalVoltage*nominalVoltage / nominalPower * nominalDropFactor / 3;
+		electricalRs = nominalVoltage * nominalVoltage / nominalPower * nominalDropFactor / 3;
 		this.obj = obj;
-		if(obj != null){
+		if(obj != null) {
 			if(main == null) main = obj.getPart("case");
 			if(main == null) main = obj.getPart("main");
 			if(lever == null) lever = obj.getPart("lever");
@@ -56,34 +54,32 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor{
 			led = obj.getPart("led");
 			halo = obj.getPart("halo");	
 
-			
-			if(obj.getString("type").equals("lever")){
+			if(obj.getString("type").equals("lever")) {
 				objType = ObjType.Lever;
-				if(lever != null){
+				if(lever != null) {
 					speed = lever.getFloat("speed");
 					alphaOff = lever.getFloat("alphaOff");
 					alphaOn = lever.getFloat("alphaOn");
 				}
 			}
-			else if(obj.getString("type").equals("button")){
+			else if(obj.getString("type").equals("button")) {
 				objType = ObjType.Button;
-				if(lever != null){
+				if(lever != null) {
 					speed = lever.getFloat("speed");
 					leverTx = lever.getFloat("tx");
 				}
 			}
-
 		}
 		this.thermal = thermal;
 		double I = maximalPower / nominalVoltage;
-		thermal.setMaximalPower(I*I*electricalRs);
+		thermal.setMaximalPower(I * I * electricalRs);
 		this.signalSwitch = signalSwitch;
 	}
 	
 	public float speed = 1f;
-	float alphaOn,alphaOff;
+	float alphaOn, alphaOff;
 	float leverTx;
-	enum ObjType {Lever,Button};
+	enum ObjType {Lever, Button};
 	ObjType objType;
 	
 	boolean signalSwitch;
@@ -92,87 +88,74 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor{
 	ThermalLoadInitializer thermal;
 	
 	Obj3D obj;
-	Obj3DPart main,lever,led,halo;
+	Obj3DPart main, lever, led, halo;
 
 	CableRenderDescriptor cableRender;
 	
-	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addWiring(newItemStack());
 	}
 	
-	double nominalVoltage, nominalPower,nominalDropFactor;
-	double maximalVoltage, maximalPower;	
-	public void applyTo(ElectricalLoad load)
-	{
+	double nominalVoltage, nominalPower, nominalDropFactor;
+	double maximalVoltage, maximalPower;
+	
+	public void applyTo(ElectricalLoad load) {
 		load.setRs(electricalRs);
 		load.setMinimalC(Eln.simulator);
 	}
-	public void applyTo(ElectricalResistor resistor,boolean state)
-	{
-		if(state)
-		{
+	
+	public void applyTo(ElectricalResistor resistor, boolean state) {
+		if(state) {
 			resistor.setR(electricalRs);
 		}
-		else
-		{
+		else {
 			resistor.highImpedance();
 		}
 	}
 	
-
-
-	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
 		return true;
 	}
+	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
-	}	
+	}
+	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		// TODO Auto-generated method stub
-		
 		if(type == ItemRenderType.INVENTORY) GL11.glScalef(1.8f, 1.8f, 1.8f);
-		draw(0f,0f,null);
-	}	
-	public void draw(float on,float distance,TileEntity e) {
+		draw(0f, 0f, null);
+	}
+	
+	public void draw(float on, float distance, TileEntity e) {
 		switch (objType) {
 		case Button:
-			
-			
 			if(main != null)main.draw();
 			
-			GL11.glTranslatef(leverTx*on, 0f, 0f);
+			GL11.glTranslatef(leverTx * on, 0f, 0f);
 			if(lever != null) lever.draw();
 			
-			if(on < 0.5f){
-				GL11.glColor3f(234f/255f, 80/255f, 0f);
+			if(on < 0.5f) {
+				GL11.glColor3f(234f / 255f, 80 / 255f, 0f);
 				Utils.disableLight();
 				if(led != null) led.draw();
 				Utils.enableBlend();
 				
-				if(halo != null){
-	
+				if(halo != null) {
 					if(e == null)
 						Utils.drawLight(halo);
 					else
-						Utils.drawHaloNoLightSetup(halo,234f/255f, 80/255f, 0f,e,false);
+						Utils.drawHaloNoLightSetup(halo, 234f / 255f, 80 / 255f, 0f, e, false);
 				}
 			
 				Utils.disableBlend();
 				Utils.enableLight();
 			}
-			else
-			{
+			else {
 				if(led != null) led.draw();
 			}
 
@@ -183,24 +166,23 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor{
 
 			if(lever != null) {
 				float switchDelta;			
-				lever.draw(on*(alphaOn - alphaOff) + alphaOff, 0, 1, 0);
+				lever.draw(on * (alphaOn - alphaOff) + alphaOff, 0, 1, 0);
 			}		
 			break;
 		default:
 			break;
 		}		
 	}
-	public int getNodeMask()
-	{
+	
+	public int getNodeMask() {
 		if(signalSwitch)
 			return NodeBase.maskElectricalGate;
 		else 
 			return NodeBase.maskElectricalPower;
 	}
+	
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-		// TODO Auto-generated method stub
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Can manually cut off a power line.");
 	}

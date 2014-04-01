@@ -30,20 +30,18 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
+public class ElectricalRelayRender extends SixNodeElementRender {
 
-public class ElectricalRelayRender extends SixNodeElementRender{
-
-	SixNodeElementInventory inventory = new SixNodeElementInventory(0,64,this);
+	SixNodeElementInventory inventory = new SixNodeElementInventory(0, 64, this);
 	ElectricalRelayDescriptor descriptor;
 	long time;
-	public ElectricalRelayRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+	
+	public ElectricalRelayRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalRelayDescriptor) descriptor;
 		time = System.currentTimeMillis();
 		interpolator = new RcInterpolator(this.descriptor.speed);
 	}
-
 
 	RcInterpolator interpolator;
 	
@@ -55,53 +53,38 @@ public class ElectricalRelayRender extends SixNodeElementRender{
 		
 		interpolator.stepGraphic();
 		descriptor.draw(interpolator.get());
-		
 	}
 	
-
-	
-
-
 	boolean boot = true;
 	float switchAlpha = 0;
-	public boolean switchState,defaultOutput;
+	public boolean switchState, defaultOutput;
+	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
-
 			switchState = stream.readBoolean();
 			defaultOutput = stream.readBoolean();
 
 			interpolator.setTarget(switchState ? 1f : 0f);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
 		
-		if(boot)
-		{
+		if(boot) {
 			interpolator.setValueFromTarget();
 		}
 		boot = false;
 	}
 	
-	
-
-	public void clientToogleDefaultOutput()
-	{
+	public void clientToogleDefaultOutput() {
         clientSend(ElectricalRelayElement.toogleOutputDefaultId);
 	}
 	
-	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
 		return new ElectricalRelayGui(player,this);
 	}
-	
-	
 	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
@@ -109,6 +92,4 @@ public class ElectricalRelayRender extends SixNodeElementRender{
 		if(lrdu == front.left() || lrdu == front.right()) return descriptor.cable.render;
 		return null;
 	}
-	
-	
 }
