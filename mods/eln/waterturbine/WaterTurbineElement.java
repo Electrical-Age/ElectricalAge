@@ -49,7 +49,7 @@ public class WaterTurbineElement extends TransparentNodeElement{
 		electricalLoadList.add(positiveLoad);
 		
 		electricalProcessList.add(powerSource);
-		slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 4, 4));
+		slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 2, 2));
 		slowProcessList.add(slowProcess);
 	}
 
@@ -90,9 +90,13 @@ public class WaterTurbineElement extends TransparentNodeElement{
 		
 	@Override
 	public void initialize() {
+
 		setPhysicalValue();
 		waterCoord = descriptor.getWaterCoordonate(node.coordonate.world());
 		waterCoord.applyTransformation(front, node.coordonate);
+		powerSource.setUmax(descriptor.maxVoltage);
+		powerSource.setImax(descriptor.nominalPower*5/descriptor.maxVoltage);
+		connect();
 	}
 
 
@@ -141,6 +145,8 @@ public class WaterTurbineElement extends TransparentNodeElement{
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+
 	
 	
 	 

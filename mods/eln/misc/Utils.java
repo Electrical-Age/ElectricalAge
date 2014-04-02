@@ -1494,6 +1494,15 @@ public class Utils {
 			}
 		}
 		return stacks;
+	}
+
+	public static double getWorldTime(World world) {
+		return world.getWorldTime()/(23999.0);
+	}
+
+	public static boolean isWater(Coordonate waterCoord) {
+		int blockId = waterCoord.getBlockId();
+		return (blockId == Block.waterMoving.blockID || blockId == Block.waterStill.blockID) ;
 	}    
 
 } 

@@ -40,6 +40,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.world.World;
 
 public abstract class TransparentNodeElement implements INBTTReady ,GhostObserver, IPeripheral{
 
@@ -481,4 +482,12 @@ public abstract class TransparentNodeElement implements INBTTReady ,GhostObserve
 		
 	}    
 
+	
+	public World world() {
+		// TODO Auto-generated method stub
+		return node.coordonate.world();
+	}
+	public Coordonate coordonate(){
+		return node.coordonate;
+	}
 }

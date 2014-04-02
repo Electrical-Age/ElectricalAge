@@ -4,8 +4,10 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import mods.eln.client.FrameTime;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.RcInterpolator;
+import mods.eln.misc.Utils;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.node.TransparentNodeElementRender;
@@ -20,18 +22,31 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 			TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
 		this.descriptor = (WaterTurbineDescriptor) descriptor;
+		
+
+		
 	}
-	RcInterpolator powerFactorFilter = new RcInterpolator(2);
+	
+
+	Coordonate waterCoord,waterCoordRight;
+	RcInterpolator powerFactorFilter = new RcInterpolator(1);
+	RcInterpolator dirFilter = new RcInterpolator(0.5f);
 	WaterTurbineDescriptor descriptor;
 	float alpha = 0;
 	@Override
 	public void draw() {
 		front.glRotateXnRef();
+		float flowDir = waterCoord.getMeta() > waterCoordRight.getMeta() ? 1 : -1;
+		if(Utils.isWater(waterCoord) == false) flowDir = 0;
 		
-		powerFactorFilter.setTarget(powerFactor);
+		dirFilter.setTarget(flowDir);
+		dirFilter.stepGraphic();
+		powerFactorFilter.setTarget(dirFilter.get() * powerFactor);
 		powerFactorFilter.stepGraphic();
 		
-		alpha += FrameTime.get() * 10 * Math.sqrt(powerFactorFilter.get());
+		
+		System.out.println(powerFactorFilter.get());
+		alpha += FrameTime.get() * 30 * (powerFactorFilter.get());
 		if(alpha > 360) alpha -= 360;
 		front.glRotateXnRef();
 		descriptor.draw(alpha);
@@ -67,5 +82,10 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 			e.printStackTrace();
 		}
 		
+		waterCoord = this.descriptor.getWaterCoordonate(tileEntity.worldObj);
+		waterCoord.setWorld(tileEntity.worldObj);
+		waterCoord.applyTransformation(front, coordonate());
+		waterCoordRight = new Coordonate(waterCoord);
+		waterCoordRight.move(front.right());
 	}
 }

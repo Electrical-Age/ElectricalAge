@@ -93,7 +93,7 @@ public class WindTurbineElement extends TransparentNodeElement{
 	@Override
 	public void initialize() {
 		setPhysicalValue();
-		
+		powerSource.setImax(descriptor.nominalPower*5/descriptor.maxVoltage);
 		connect();
 	}
 

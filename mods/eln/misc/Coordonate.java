@@ -84,6 +84,7 @@ public class Coordonate implements INBTTReady {
 		this.y = y;
 		this.z = z;
 		this.dimention = world.provider.dimensionId;
+		this.w = world;
 	}
 
 	public Coordonate(TileEntity entity)
@@ -258,6 +259,11 @@ public class Coordonate implements INBTTReady {
 		y += coordonate.y;
 		z += coordonate.z;
 
+	}
+	public void setWorld(World worldObj) {
+		// TODO Auto-generated method stub
+		w = worldObj;
+		dimention = worldObj.provider.dimensionId;
 	}
 
 }

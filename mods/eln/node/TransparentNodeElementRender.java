@@ -13,6 +13,7 @@ import mods.eln.Eln;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
@@ -241,4 +242,10 @@ public abstract class TransparentNodeElementRender {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	protected Coordonate coordonate() {
+		// TODO Auto-generated method stub
+		return new Coordonate(tileEntity.xCoord,tileEntity.yCoord,tileEntity.zCoord,tileEntity.worldObj);
+	}
+
 }
