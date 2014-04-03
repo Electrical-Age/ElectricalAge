@@ -3,7 +3,7 @@ package mods.eln.autominer;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
-
+ 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
