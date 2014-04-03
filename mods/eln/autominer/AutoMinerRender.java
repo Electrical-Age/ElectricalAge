@@ -25,8 +25,6 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
 	@Override
 	public void draw() {
-		
-		
 		if(pipeLength != 0) {
 			GL11.glLineWidth(20f);
 			GL11.glDisable(GL11.GL_TEXTURE_2D);
