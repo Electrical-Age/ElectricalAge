@@ -2,7 +2,7 @@ package mods.eln.autominer;
 
 import org.lwjgl.opengl.GL11;
 
-
+ 
 
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
