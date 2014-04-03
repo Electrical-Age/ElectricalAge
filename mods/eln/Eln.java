@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -202,6 +203,7 @@ import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemSpade;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTBase;
@@ -839,6 +841,40 @@ public class Eln {
 		/*
 		 * if(Utils.){ Utils.itemRenderer= new RenderItem() }
 		 */
+		
+		checkRecipe();
+		
+		System.out.println("Electrical age init done");
+	}
+	
+	void checkRecipe(){
+		System.out.println("No recipe for ");
+		for (SixNodeDescriptor d : sixNodeItem.subItemList.values()) {
+			ItemStack stack = d.newItemStack();
+			if(aRecipeExist(stack) == false){
+				System.out.println("  " + d.name);
+			}
+		}
+		for (TransparentNodeDescriptor d : transparentNodeItem.subItemList.values()) {
+			ItemStack stack = d.newItemStack();
+			if(aRecipeExist(stack) == false){
+				System.out.println("  " + d.name);
+			}
+		}
+	}
+	
+	boolean aRecipeExist(ItemStack stack){
+		if(stack == null) return false;
+		List list = CraftingManager.getInstance().getRecipeList();
+		for(Object o : list){
+			if(o instanceof IRecipe){
+				IRecipe r = (IRecipe)o;
+				if(r.getRecipeOutput() == null) continue;
+				if(Utils.areSame(stack, r.getRecipeOutput()))
+					return true;
+			}
+		}
+		return false;
 	}
 
 	ElnHttpServer elnHttpServer;
@@ -5874,16 +5910,32 @@ public class Eln {
 		addShapelessRecipe(findItemStack("Electrical Daylight Sensor"),
 				new ItemStack(Block.daylightSensor),
 				findItemStack("Redstone-to-Voltage Converter"));
+		
 		addShapelessRecipe(findItemStack("Electrical Light Sensor"),
 				new ItemStack(Block.daylightSensor),
 				new ItemStack(Item.netherQuartz),
 				findItemStack("Redstone-to-Voltage Converter"));
+		
 		addRecipe(findItemStack("Electrical Weather Sensor"),
+				" r ",
+				"rRr",
+				" r ",
+				Character.valueOf('R'), new ItemStack(Item.redstone),
+				Character.valueOf('r'), "materialRubber");
+		
+		addRecipe(findItemStack("Electrical Anemometer Sensor"),
 				" I ",
 				" R ",
 				"I I",
 				Character.valueOf('R'), new ItemStack(Item.redstone),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron));
+		
+		addRecipe(findItemStack("Electrical Entity Sensor"),
+				" G ",
+				"GRG",
+				" G ",
+				Character.valueOf('G'), new ItemStack(Block.thinGlass),
+				Character.valueOf('R'), new ItemStack(Item.redstone));
 	}
 
 	private void recipeElectricalVuMeter() {
