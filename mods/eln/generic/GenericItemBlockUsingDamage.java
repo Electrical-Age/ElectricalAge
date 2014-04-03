@@ -22,7 +22,7 @@ import net.minecraft.util.StringTranslate;
 import net.minecraft.world.World;
 
 public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsingDamageDescriptor> extends ItemBlock {
-	Hashtable<Integer,Descriptor> subItemList = new Hashtable<Integer,Descriptor>();
+	public Hashtable<Integer,Descriptor> subItemList = new Hashtable<Integer,Descriptor>();
 	ArrayList<Integer> orderList = new ArrayList<Integer>();
 	
 	
