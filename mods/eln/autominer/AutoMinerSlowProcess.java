@@ -150,7 +150,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 		}
 		
 		//for(ItemStack stack : drop)
-	//	{
+		//{
 			if(chestEntity != null) {
 				Utils.tryPutStackInInventory(stack, chestEntity);
 			}
