@@ -23,69 +23,50 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.network.packet.Packet250CustomPayload;
 
-public class ElectricalTimeoutGui extends GuiScreenEln{
+public class ElectricalTimeoutGui extends GuiScreenEln {
 
 	public ElectricalTimeoutGui(EntityPlayer player,ElectricalTimeoutRender render) {
 		this.render = render;
 	}
 
-
 	GuiButton set,reset;
 	GuiTextFieldEln timeoutValue;
 	ElectricalTimeoutRender render;
 	
-
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
 		super.initGui();
 
-        reset = newGuiButton( 6,6,50, "reset");
-		set = newGuiButton(6, 6 + 20 + 4,50, "set");
+        reset = newGuiButton(6, 6, 50, "reset");
+		set = newGuiButton(6, 6 + 20 + 4, 50, "set");
 
-		timeoutValue = newGuiTextField(6,6 + 20*2 + 4*2, 50);
+		timeoutValue = newGuiTextField(6, 6 + 20 * 2 + 4 * 2, 50);
 
-        timeoutValue.setText( render.timeoutValue);
-        timeoutValue.setComment(0,"The amount of time the");
-        timeoutValue.setComment(1,"output is kept high");
-
+        timeoutValue.setText(render.timeoutValue);
+        timeoutValue.setComment(0, "The amount of time the");
+        timeoutValue.setComment(1, "output is kept high");
 	}
 
-    
-    
     @Override
     public void guiObjectEvent(IGuiObject object) {
-    	// TODO Auto-generated method stub
     	super.guiObjectEvent(object);
-    	if(object == set)
-    	{
+    	if(object == set) {
     		render.clientSend(ElectricalTimeoutElement.setId);
     	}
-    	else if(object == reset)
-    	{
+    	else if(object == reset) {
     		render.clientSend(ElectricalTimeoutElement.resetId);
     	}
-    	else if(object == timeoutValue)
-    	{
-    		try{
+    	else if(object == timeoutValue) {
+    		try {
     			float value = NumberFormat.getInstance().parse(timeoutValue.getText()).floatValue();
-    			render.clientSetFloat(ElectricalTimeoutElement.setTimeOutValueId,value);
-    		} catch(ParseException e)
-    		{
-
+    			render.clientSetFloat(ElectricalTimeoutElement.setTimeOutValueId, value);
+    		} catch(ParseException e) {
     		}	
     	}
     }
-   
-
-	
-
-
 
 	@Override
 	protected GuiHelper newHelper() {
-		// TODO Auto-generated method stub
-		return new GuiHelper(this, 50+12, 6 + 20*2 + 4*2 + 12 + 6);
+		return new GuiHelper(this, 50 + 12, 6 + 20 * 2 + 4 * 2 + 12 + 6);
 	}
-	
 }

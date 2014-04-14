@@ -31,22 +31,18 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-
-public class ElectricalTimeoutRender extends SixNodeElementRender{
-
+public class ElectricalTimeoutRender extends SixNodeElementRender {
 
 	ElectricalTimeoutDescriptor descriptor;
 	long time;
-	public ElectricalTimeoutRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalTimeoutRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalTimeoutDescriptor) descriptor;
 		time = System.currentTimeMillis();
 	}
 
-	//PhysicalInterpolator interpolator = new PhysicalInterpolator(0.2f,2.0f,1.5f,0.2f);
+	//PhysicalInterpolator interpolator = new PhysicalInterpolator(0.2f, 2.0f, 1.5f, 0.2f);
 
-	
 	@Override
 	public void draw() {
 		super.draw();
@@ -55,47 +51,39 @@ public class ElectricalTimeoutRender extends SixNodeElementRender{
 			timeoutCounter -= FrameTime.get();
 			if(timeoutCounter < 0f) timeoutCounter = 0f;
 		}
-		//interpolator.setTarget(timeoutCounter/timeoutValue);
+		//interpolator.setTarget(timeoutCounter / timeoutValue);
 		//interpolator.stepGraphic();	
 		//descriptor.draw(interpolator.get());
-		descriptor.draw(timeoutCounter/timeoutValue);
-
+		descriptor.draw(timeoutCounter / timeoutValue);
 	}
+	
 	@Override
 	public boolean cameraDrawOptimisation() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
-	float timeoutValue = 0,timeoutCounter = 0;
+	float timeoutValue = 0, timeoutCounter = 0;
 	boolean inputState;
+	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
-
-
 			timeoutValue = stream.readFloat();
 			timeoutCounter = stream.readFloat();
 			inputState = stream.readBoolean();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}	
-
+		}
 	}
-	
-	
+
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return Eln.instance.signalCableDescriptor.render;
 	}
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
 		return new ElectricalTimeoutGui(player,this);
 	}
 }

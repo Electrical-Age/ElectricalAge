@@ -31,12 +31,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+public class ElectricalVuMeterElement extends SixNodeElement {
 
-
-public class ElectricalVuMeterElement extends SixNodeElement{
-
-	public ElectricalVuMeterElement(SixNode sixNode, Direction side,
-			SixNodeDescriptor descriptor) {
+	public ElectricalVuMeterElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		this.descriptor = (ElectricalVuMeterDescriptor) descriptor;
 		front = LRDU.Down;
@@ -49,114 +46,91 @@ public class ElectricalVuMeterElement extends SixNodeElement{
 	LRDU front;
 	ElectricalVuMeterDescriptor descriptor;
 
-	public static boolean canBePlacedOnSide(Direction side,int type)
-	{
+	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
 	}
+	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		super.readFromNBT(nbt, str);
         byte value = nbt.getByte(str + "front");
-        front = LRDU.fromInt((value>>0) & 0x3);
+        front = LRDU.fromInt((value >> 0) & 0x3);
        
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
-		nbt.setByte(str + "front",(byte) ((front.toInt()<<0)));
-        
+		nbt.setByte(str + "front", (byte)((front.toInt() << 0)));
 	}
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		if(front == lrdu) return inputGate;
 		return null;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		// TODO Auto-generated method stub4
 		if(front == lrdu) return NodeBase.maskElectricalInputGate;
 		return 0;
 	}
 
 	@Override
 	public String multiMeterString() {
-		// TODO Auto-generated method stub
-		return Utils.plotVolt("U:", inputGate.Uc) + Utils.plotAmpere("I:", inputGate.getCurrent()) ;
+		return Utils.plotVolt("U:", inputGate.Uc) + Utils.plotAmpere("I:", inputGate.getCurrent());
 	}
 
 	@Override
 	public String thermoMeterString() {
-		// TODO Auto-generated method stub
 		return "";
 	}
 
-
-
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte( (front.toInt()<<4));
-	    	stream.writeFloat((float) (inputGate.Uc / Eln.instance.SVU));
+			stream.writeByte((front.toInt() << 4));
+	    	stream.writeFloat((float)(inputGate.Uc / Eln.instance.SVU));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-
 	@Override
 	public void initialize() {
-
 	}
 
-
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,float vx,float vy,float vz)
-	{
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-		if(currentItemStack != null)
-		{
+		if(currentItemStack != null) {
 			Item item = currentItemStack.getItem();
-			/*if(item== Eln.toolsSetItem)
-			{
+			/*if(item== Eln.toolsSetItem) {
 				colorCare = colorCare ^ 1;
 				entityPlayer.addChatMessage("Wire color care " + colorCare);
 				sixNode.reconnect();
 			}
-			if(item == Eln.brushItem)
-			{
-				if(currentItemStack.getItemDamage() < BrushItem.maximalUse)
-				{
+			if(item == Eln.brushItem) {
+				if(currentItemStack.getItemDamage() < BrushItem.maximalUse) {
 					color = currentItemStack.getItemDamage() & 0xF;
 					
 					currentItemStack.setItemDamage(currentItemStack.getItemDamage() + 16);
 					
 					sixNode.reconnect();
 				}
-				else
-				{
+				else {
 					entityPlayer.addChatMessage("Brush is empty");
 				}
 			}*/
-
 		}
-		//front = LRDU.fromInt((front.toInt()+1)&3);
-		if(Eln.playerManager.get(entityPlayer).getInteractEnable())
-		{
+		//front = LRDU.fromInt((front.toInt() + 1)&3);
+		if(Eln.playerManager.get(entityPlayer).getInteractEnable()) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);
@@ -164,21 +138,4 @@ public class ElectricalVuMeterElement extends SixNodeElement{
 		}
 		return false;
 	}
-	
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

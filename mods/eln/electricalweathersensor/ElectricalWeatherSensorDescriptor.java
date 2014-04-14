@@ -20,65 +20,53 @@ import mods.eln.wiki.Data;
 
 import com.google.common.base.Function;
 
-
-public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor{
-
+public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
 
 	private Obj3DPart main;
 
-	public ElectricalWeatherSensorDescriptor(
-			String name,
-			Obj3D obj
-			) {
+	public ElectricalWeatherSensorDescriptor(String name, Obj3D obj) {
 		super(name, ElectricalWeatherSensorElement.class,ElectricalWeatherSensorRender.class);
 		this.obj = obj;
 		
-		if(obj != null)
-		{
+		if(obj != null) {
 			main = obj.getPart("main");
 		}
 	}
 
 	Obj3D obj;
 
-	void draw()
-	{
+	void draw() {
 		if(main != null) main.draw();
 	}
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
+	
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-		// TODO Auto-generated method stub
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Provides an electrical signal");
 		list.add("dependant on weather type.");
 		list.add("0V -> clear ");
-		list.add(Eln.SVU/2 +"V -> rain ");
-		list.add(Eln.SVU +"V -> thunder ");
+		list.add(Eln.SVU/2 + "V -> rain ");
+		list.add(Eln.SVU + "V -> thunder ");
 	}
-	
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
 		return true;
 	}
+	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
+	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		// TODO Auto-generated method stub
 		GL11.glScalef(2f, 2f, 2f);
 		draw();
 	}

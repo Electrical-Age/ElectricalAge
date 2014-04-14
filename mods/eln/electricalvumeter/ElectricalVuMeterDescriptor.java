@@ -25,25 +25,19 @@ import mods.eln.wiki.Data;
 
 import com.google.common.base.Function;
 
+public class ElectricalVuMeterDescriptor extends SixNodeDescriptor {
 
-public class ElectricalVuMeterDescriptor extends SixNodeDescriptor{
-
-
-	public ElectricalVuMeterDescriptor(
-			String name,
-			String objName,
-			boolean onOffOnly
-			) {
-		super(name, ElectricalVuMeterElement.class,ElectricalVuMeterRender.class);
+	public ElectricalVuMeterDescriptor(String name, String objName, boolean onOffOnly) {
+		super(name, ElectricalVuMeterElement.class, ElectricalVuMeterRender.class);
 		this.onOffOnly = onOffOnly;
 		obj = Eln.instance.obj.getObj(objName);
 		if(obj != null){
-			if(obj.getString("type").toLowerCase().equals("rot")){
+			if(obj.getString("type").toLowerCase().equals("rot")) {
 				objType = ObjType.Rot;
 				vumeter = obj.getPart("Vumeter");
 				pointer = obj.getPart("Pointer");
 			}
-			if(obj.getString("type").equals("LedOnOff")){
+			if(obj.getString("type").equals("LedOnOff")) {
 				objType = ObjType.LedOnOff;
 				main = obj.getPart("main");
 				halo = obj.getPart("halo");
@@ -54,81 +48,67 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor{
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
+	
 	Obj3D obj;
 	
-	enum ObjType{Rot,LedOnOff};
+	enum ObjType{Rot, LedOnOff};
 	ObjType objType;
 
-	Obj3DPart vumeter,pointer,led,halo,main;
+	Obj3DPart vumeter, pointer, led, halo, main;
 
 	public boolean onOffOnly;
-	void draw(float factor,float distance,TileEntity entity)
-	{
+	
+	void draw(float factor, float distance, TileEntity entity) {
 		if(factor < 0.0) factor = 0.0f;
 		if(factor > 1.0) factor = 1.0f;
-		switch(objType)
-		{
+		switch(objType) {
 		case LedOnOff:
-			
 			main.draw();
 			boolean s = factor > 0.5;
 			Color c = Utils.ledOnOffColorC(s);
-			GL11.glColor3f(c.getRed()/255f,c.getGreen()/255f,c.getBlue()/255f);		
+			GL11.glColor3f(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);		
 			Utils.drawLight(led);
 			//Utils.enableBilinear();
 			if(entity != null)
-				Utils.drawHalo(halo,c.getRed()/255f,c.getGreen()/255f,c.getBlue()/255f,entity,false);
+				Utils.drawHalo(halo, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, entity, false);
 			else
 				Utils.drawLight(halo);
-
-
 			//Utils.disableBilinear();
-
 			break;
 		case Rot:
 			vumeter.draw();
-			float alphaOff,alphaOn;
+			float alphaOff, alphaOn;
 			alphaOff = pointer.getFloat("alphaOff");
 			alphaOn = pointer.getFloat("alphaOn");
-			pointer.draw((factor*(alphaOn-alphaOff) + alphaOff), 1.0f, 0, 0);
+			pointer.draw((factor * (alphaOn - alphaOff) + alphaOff), 1.0f, 0, 0);
 			break;
 		default:
 			break;
-
 		}
 	}
 	
-	
-	
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-		// TODO Auto-generated method stub
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Displays the voltage of a signal.");
 	}
 	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
 		return true;
 	}
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if(type == ItemRenderType.INVENTORY) GL11.glRotatef(90, 1f, 0f, 0f);
-		draw(0.0f,1f,null);
+		draw(0.0f, 1f, null);
 	}
-	
 }

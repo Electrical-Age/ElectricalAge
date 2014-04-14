@@ -1,4 +1,3 @@
-
 package mods.eln.electricalvumeter;
 
 import java.io.DataInputStream;
@@ -22,15 +21,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.item.ItemStack;
 
-
-public class ElectricalVuMeterRender extends SixNodeElementRender{
+public class ElectricalVuMeterRender extends SixNodeElementRender {
 
 	ElectricalVuMeterDescriptor descriptor;
-	public ElectricalVuMeterRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+	
+	public ElectricalVuMeterRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalVuMeterDescriptor) descriptor;
-		interpolator = new PhysicalInterpolator(0.4f,2.0f,1.5f,0.2f);
+		interpolator = new PhysicalInterpolator(0.4f, 2.0f, 1.5f, 0.2f);
 	}
 
 	PhysicalInterpolator interpolator;
@@ -43,52 +41,40 @@ public class ElectricalVuMeterRender extends SixNodeElementRender{
 		EntityClientPlayerMP player = Utils.getClientPlayer();
 		GL11.glPushMatrix();
 		interpolator.stepGraphic();
-		descriptor.draw(descriptor.onOffOnly ? interpolator.getTarget() : interpolator.get(),Utils.distanceFromClientPlayer(tileEntity),tileEntity);
+		descriptor.draw(descriptor.onOffOnly ? interpolator.getTarget() : interpolator.get(), Utils.distanceFromClientPlayer(tileEntity), tileEntity);
 		GL11.glPopMatrix();
 	}
 
-	
 	@Override
 	public boolean cameraDrawOptimisation() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	
 	boolean boot = true;
+	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
 			Byte b;
 			b = stream.readByte();
-			front = LRDU.fromInt((b>>4)&3);
-			if(boot)
-			{
+			front = LRDU.fromInt((b >> 4)&3);
+			if(boot) {
 				interpolator.setPos(stream.readFloat());
 			}
-			else
-			{
+			else {
 				interpolator.setTarget(stream.readFloat());
 			}
-
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
-		if(boot)
-		{
-			
+		if(boot) {
 			boot = false;
 		}
 	}
 	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return Eln.instance.signalCableDescriptor.render;
 	}
-	
-
-	
 }

@@ -1,4 +1,3 @@
-
 package mods.eln.electricalweathersensor;
 
 import java.io.DataInputStream;
@@ -18,17 +17,14 @@ import mods.eln.node.SixNodeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 
-
-public class ElectricalWeatherSensorRender extends SixNodeElementRender{
+public class ElectricalWeatherSensorRender extends SixNodeElementRender {
 
 	ElectricalWeatherSensorDescriptor descriptor;
-	public ElectricalWeatherSensorRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+	
+	public ElectricalWeatherSensorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalWeatherSensorDescriptor) descriptor;
 	}
-
-
 
 	@Override
 	public void draw() {
@@ -36,11 +32,8 @@ public class ElectricalWeatherSensorRender extends SixNodeElementRender{
 		descriptor.draw();
 	}
 
-
-	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return Eln.instance.signalCableDescriptor.render;
 	}
 }
