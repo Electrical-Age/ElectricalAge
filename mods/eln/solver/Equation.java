@@ -44,6 +44,7 @@ public class Equation implements IValue,INBTTReady{
 			list.add(new OperatorMapperFunc("derivate",1,Derivator.class));
 			list.add(new OperatorMapperFunc("batteryCharge",1,BatteryCharge.class));
 			list.add(new OperatorMapperFunc("rs",2,Rs.class));
+			list.add(new OperatorMapperFunc("rc",2,RC.class));
 			list.add(new OperatorMapperBracket());
 			staticOperatorList.put(priority++, list);		
 		}
@@ -636,7 +637,42 @@ public class Equation implements IValue,INBTTReady{
 		}
 	}
 	
+	public static class RC implements IOperator,INBTTReady,IProcess{
+		public double state;
 
+		public IValue tao,input;
+		
+		@Override
+		public double getValue() {	
+			return state;
+		}
+		
+		@Override
+		public void process(double time) {
+			double tao = Math.max(time,this.tao.getValue());			
+			state += (input.getValue()-state)/tao*time;
+		}
+		@Override
+		public void readFromNBT(NBTTagCompound nbt, String str) {
+			state = nbt.getDouble(str + "state");
+		}
+		@Override
+		public void writeToNBT(NBTTagCompound nbt, String str) {
+			nbt.setDouble(str + "state",state);
+		}
+		@Override
+		public void setOperator(IValue[] values) {
+			this.input = values[1];
+			this.tao = values[0];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 3;
+		}
+
+	}
+	
 	
 	public static class BatteryCharge implements IOperator{
 		public BatteryCharge() {

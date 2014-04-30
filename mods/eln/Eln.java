@@ -248,8 +248,8 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 
-@Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.1.1")
-@NetworkMod(clientSideRequired = true, serverSideRequired = false, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
+@Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.1.2a")
+@NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
 	/*
 	 * Eln() { instance = this; }
@@ -3535,7 +3535,7 @@ public class Eln {
 		String name;
 
 		FunctionTable PfW = new FunctionTable(
-				new double[] { 0.0, 0.05, 0.2, 0.5, 0.8, 1.0, 1.1, 1.15, 1.2 },
+				new double[] { 0.0, 0.1, 0.3, 0.5, 0.8, 1.0, 1.1, 1.15, 1.2 },
 				8.0 / 5.0);
 		{
 			subId = 0;
@@ -3546,7 +3546,7 @@ public class Eln {
 					lowVoltageCableDescriptor,// ElectricalCableDescriptor
 												// cable,
 					PfW,// PfW
-					200, 10,// double nominalPower,double nominalWind,
+					160, 10,// double nominalPower,double nominalWind,
 					LVU * 1.18, 22,// double maxVoltage, double maxWind,
 					3,// int offY,
 					7, 2, 2,// int rayX,int rayY,int rayZ,
@@ -3572,7 +3572,7 @@ public class Eln {
 			WaterTurbineDescriptor desc = new WaterTurbineDescriptor(
 					name, obj.getObj("SmallWaterWheel"), // name,Obj3D obj,
 					lowVoltageCableDescriptor,// ElectricalCableDescriptor
-					200,
+					30,
 					LVU * 1.18,
 					waterCoord
 
@@ -4905,6 +4905,14 @@ public class Eln {
 				Character.valueOf('c'), new ItemStack(Item.coal, 1, 1),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron));
 
+		addRecipe(findItemStack("200V Condensator"),
+				"C C",
+				"ppp",
+				"III",
+				Character.valueOf('C'), findItemStack("Medium Voltage Cable"),
+				Character.valueOf('p'), findItemStack("Coal Plate"),
+				Character.valueOf('I'), new ItemStack(Item.ingotIron));
+
 	}
 
 	void recipeElectricalFurnace() {
@@ -4931,12 +4939,22 @@ public class Eln {
 
 	void recipeWindTurbine() {
 		addRecipe(findItemStack("Wind Turbine"),
+				" I ",
 				"IMI",
 				" B ",
-				" B ",
 				Character.valueOf('B'), findItemStack("Machine Block"),
-				Character.valueOf('I'), new ItemStack(Item.ingotIron),
+				Character.valueOf('I'),  findItemStack("Iron Plate"),
 				Character.valueOf('M'), findItemStack("Electrical Motor"));
+		
+		addRecipe(findItemStack("Water Turbine"),
+				"  I",
+				"BMI",
+				"  I",
+				Character.valueOf('I'), findItemStack("Iron Plate"),
+				Character.valueOf('B'), findItemStack("Machine Block"),
+				Character.valueOf('M'), findItemStack("Electrical Motor"));
+		
+		
 	}
 
 	void recipeSolarPannel() {

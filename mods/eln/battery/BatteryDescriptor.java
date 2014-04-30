@@ -205,7 +205,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 		list.add("Nominal voltage : " + (int)(electricalU) + "V");
 		list.add("Nominal power : " + (int)(electricalStdP) + "W");
 		list.add("Full charge energy : " + (int)(electricalStdDischargeTime * electricalStdP / 1000) + "KJ");
-		list.add("Capacity : " + Utils.plotValue((electricalQ / 3600), "Ah"));
+		//list.add("Capacity : " + Utils.plotValue((electricalQ), "As"));
 		list.add("");
 	   	list.add("Charge : " + (int)(getChargeInTag(itemStack) * 100) + "%");
 	   	

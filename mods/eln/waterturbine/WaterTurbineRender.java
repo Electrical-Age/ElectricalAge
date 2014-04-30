@@ -35,7 +35,7 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 	float alpha = 0;
 	@Override
 	public void draw() {
-		front.glRotateXnRef();
+		//front.glRotateXnRef();
 		float flowDir = waterCoord.getMeta() > waterCoordRight.getMeta() ? 1 : -1;
 		if(Utils.isWater(waterCoord) == false) flowDir = 0;
 		
@@ -45,7 +45,7 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 		powerFactorFilter.stepGraphic();
 		
 		
-		System.out.println(powerFactorFilter.get());
+		//System.out.println(powerFactorFilter.get());
 		alpha += FrameTime.get() * 30 * (powerFactorFilter.get());
 		if(alpha > 360) alpha -= 360;
 		front.glRotateXnRef();

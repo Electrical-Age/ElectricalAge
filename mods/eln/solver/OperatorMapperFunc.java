@@ -66,16 +66,16 @@ public class OperatorMapperFunc implements IOperatorMapper {
 			String str = null;
 			if(o instanceof String) str = (String) o;
 			if(counter == 0){
-				if(str.equals("(") == false) return false; 
+				if(str == null || str.equals("(") == false) return false; 
 			}
 			else if(argOffset == end-1){
-				if(str.equals(")") == false) return false; 
+				if(str == null || str.equals(")") == false) return false; 
 			}
 			else if((counter % 2) == 1){
 				if(o instanceof IValue == false) return false;
 			}
 			else{
-				if(str.equals(",") == false) return false; 
+				if(str == null || str.equals(",") == false) return false; 
 			}
 			counter++;
 		}

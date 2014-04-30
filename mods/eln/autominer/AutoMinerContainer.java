@@ -42,3 +42,4 @@ public class AutoMinerContainer extends BasicContainer implements INodeContainer
 		return 0;
 	}
 }
+ 

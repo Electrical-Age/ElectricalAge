@@ -8,7 +8,7 @@ public class NodeElectricalGateInput extends NodeElectricalLoad{
 	public NodeElectricalGateInput(String name) {
 		super(name);
 		Eln.instance.signalCableDescriptor.applyTo(this,false);
-		this.setRp(Eln.instance.SVU/Eln.instance.SVII);
+		//this.setRp(Eln.instance.SVU/Eln.instance.SVII);
 	}
 
 	public String plot(String str)

@@ -116,6 +116,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		// TODO Auto-generated method stub
 		super.renderItem(type, item, data);
+		GL11.glScalef(0.18f, 0.18f, 0.18f);
 		draw();
 	}
 	

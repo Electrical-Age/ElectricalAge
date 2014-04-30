@@ -59,7 +59,8 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 		factor = 1f/factor;
 		
 		GL11.glScalef(factor,factor,factor);
-		GL11.glTranslatef((Math.max(obj.zMax,-obj.xMin) - Math.max(obj.xMax,-obj.zMin))*0.5f,-((obj.yMax + Math.max(-obj.xMin,obj.zMax)*0.3f) + (obj.yMin + Math.min(obj.zMin,-obj.xMax)*0.3f))*0.4f,0.0f);
+		//GL11.glTranslatef((Math.max(obj.zMax,-obj.xMin) - Math.max(obj.xMax,-obj.zMin))*0.5f,-((obj.yMax + Math.max(-obj.xMin,obj.zMax)*0.3f) + (obj.yMin + Math.min(obj.zMin,-obj.xMax)*0.3f))*0.4f,0.0f);
+		GL11.glTranslatef((Math.min(obj.zMin,obj.xMin) + Math.max(obj.xMax,obj.zMax))/2 -(obj.xMax+obj.xMin)/2,1.0f -(obj.xMax+obj.xMin)/2-(obj.zMax+obj.zMin)/2 -(obj.yMax+obj.yMin)/2,0.0f);
 	}
 	
 	public FrontType getFrontType()

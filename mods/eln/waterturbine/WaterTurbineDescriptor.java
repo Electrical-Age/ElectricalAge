@@ -77,7 +77,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 	@Override
 	public Direction getFrontFromPlace(Direction side,
 			EntityLivingBase entityLiving) {
-		return Direction.XN;
+		return super.getFrontFromPlace(side, entityLiving);
 	}
 	
 	
@@ -119,6 +119,27 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 		Coordonate coord = new Coordonate(waterCoord);
 		coord.setDimention(w.provider.dimensionId);
 		return coord;
+	}
+	
+	
+	
+	@Override
+	public String checkCanPlace(Coordonate coord, Direction front) {
+		// TODO Auto-generated method stub
+		String str = super.checkCanPlace(coord, front);
+		if(str != null) return str;
+		if(checkCanPlaceWater(coord, front) == false) return "No place for water";
+		return str;
+	}
+	
+	
+
+	public boolean checkCanPlaceWater(Coordonate coord, Direction front) {
+		Coordonate water = new Coordonate(waterCoord);
+		water.applyTransformation(front, coord);
+		if(coord.getBlockExist() == false) return true;
+		if(water.getBlock() == null || Utils.isWater(water)) return true;
+		return false;
 	}
 }
 

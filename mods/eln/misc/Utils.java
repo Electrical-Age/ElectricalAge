@@ -1415,7 +1415,9 @@ public class Utils {
 					Object o = inputs[idx+idx2*width];
 					ItemStack stack = null;
 					if(o instanceof List){
-						stack = (ItemStack) ((List)o).get(0);
+						if(o instanceof List && ((List)o).size() > 0)
+							stack = (ItemStack) ((List)o).get(0);
+
 					}
 					
 					if(o instanceof ItemStack){
@@ -1442,7 +1444,7 @@ public class Utils {
 			int idx = 0;
 			for(Object o : s.getInput()){
 				ItemStack stack = null;
-				if(o instanceof List){
+				if(o instanceof List && ((List)o).size() > 0){
 					stack = (ItemStack) ((List)o).get(0);
 				}
 				
