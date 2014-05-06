@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 
@@ -69,8 +70,8 @@ public class WirelessSignalRxDescriptor extends SixNodeDescriptor{
 		if(main != null) main.draw();
 		
 		if(led != null){
-			Utils.ledOnOffColor(connection);
-			Utils.drawLight(led);
+			UtilsClient.ledOnOffColor(connection);
+			UtilsClient.drawLight(led);
 		}
 	}
 

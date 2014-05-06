@@ -14,6 +14,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ThermalLoad;
@@ -43,7 +44,7 @@ public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor {
 		
 		float light = redstone / 15f;
 		GL11.glColor4f(light, light, light, 1f);
-		Utils.drawLight(led);
+		UtilsClient.drawLight(led);
 	}
 	
 	@Override

@@ -17,6 +17,7 @@ import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.PacketHandler;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.wiki.Root;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -57,7 +58,7 @@ public class ClientKeyHandler extends KeyHandler {
 	    if(Minecraft.getMinecraft().currentScreen != null) return;
 	    		
 	    if(kb.keyDescription.equals(openWiki)) {	    	
-	    	Utils.clientOpenGui(new Root(null));
+	    	UtilsClient.clientOpenGui(new Root(null));
 	    	return;
 	    }
 	    

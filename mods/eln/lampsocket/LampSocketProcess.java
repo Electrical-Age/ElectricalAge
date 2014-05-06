@@ -27,6 +27,7 @@ import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockFarmland;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.util.Vec3Pool;
 
@@ -340,7 +341,18 @@ public class LampSocketProcess implements IProcess , INBTTReady/*,LightBlockObse
 	
 	ElectricalConnectionOneWay connection = null;
 	
-
+    public void rotateAroundZ(Vec3 v,float par1)
+    {
+        float f1 = MathHelper.cos(par1);
+        float f2 = MathHelper.sin(par1);
+        double d0 = v.xCoord * (double)f1 + v.yCoord * (double)f2;
+        double d1 = v.yCoord * (double)f1 - v.xCoord * (double)f2;
+        double d2 = v.zCoord;
+        v.xCoord = d0;
+        v.yCoord = d1;
+        v.zCoord = d2;
+    }
+    
 	void placeSpot(int newLight)
 	{
 		boolean exit = false;
@@ -348,7 +360,7 @@ public class LampSocketProcess implements IProcess , INBTTReady/*,LightBlockObse
 		Vec3 vv = Vec3.createVectorHelper(1,0,0);
 		Vec3 vp = Utils.getVec05(myCoord());
 		
-		vv.rotateAroundZ((float) (alphaZ*Math.PI/180.0));
+		rotateAroundZ(vv,(float) (alphaZ*Math.PI/180.0));
 
 		lamp.front.rotateOnXnLeft(vv);
 		lamp.side.rotateFromXN(vv);

@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
@@ -69,7 +70,7 @@ public class GuiHandler implements IGuiHandler {
 			return tileEntity.newGuiDraw(side, player);
 		}
 		if(id == genericOpen){
-			return Utils.guiLastOpen;
+			return UtilsClient.guiLastOpen;
 		}
 		return null;
 	}

@@ -41,7 +41,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 		descriptor.draw();
 	}
 
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
+	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this);
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {

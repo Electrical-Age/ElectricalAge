@@ -19,6 +19,7 @@ import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.TransparentNodeDescriptor;
@@ -92,14 +93,14 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
 		if (led_power != null)
 		{
 			GL11.glColor3f(0f, 0.8f, 0f);
-			Utils.drawLight(led_power);
+			UtilsClient.drawLight(led_power);
 		}
 		
 		if (led_activity != null)
 		{
 			if (activityLed) {
 				GL11.glColor3f(0.8f, 0.8f, 0f);
-				Utils.drawLight(led_activity);
+				UtilsClient.drawLight(led_activity);
 			}
 			else {
 				GL11.glColor3f(0.4f, 0.4f, 0.1f);
@@ -112,7 +113,7 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
 			if (errorLed)
 			{
 				GL11.glColor3f(0.8f, 0f, 0f);
-				Utils.drawLight(led_error);
+				UtilsClient.drawLight(led_error);
 			}
 			else {
 				GL11.glColor3f(0.4f, 0.2f, 0.2f);
@@ -125,7 +126,7 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
 			if (open > 0.9)
 			{
 				GL11.glColor3f(1f, 1f, 1f);
-				Utils.drawLight(display);
+				UtilsClient.drawLight(display);
 			}
 			else
 			{

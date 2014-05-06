@@ -20,6 +20,7 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementInventory;
@@ -50,7 +51,7 @@ public class ElectricalGateSourceRender extends SixNodeElementRender {
 		interpolator.setTarget((float)(voltageSyncValue / Eln.SVU));
 		interpolator.stepGraphic();
 		LRDU.Down.glRotateOnX();
-		descriptor.draw(interpolator.get(), Utils.distanceFromClientPlayer(this.tileEntity), tileEntity);
+		descriptor.draw(interpolator.get(), UtilsClient.distanceFromClientPlayer(this.tileEntity), tileEntity);
 	}
 	
 	float voltageSyncValue = 0;

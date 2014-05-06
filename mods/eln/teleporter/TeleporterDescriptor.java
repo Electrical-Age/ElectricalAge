@@ -13,6 +13,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.GhostNode;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.wiki.Data;
@@ -152,9 +153,9 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor{
 		main.draw();
 		ext_control.draw();
 		ext_power.draw();
-		Utils.disableCulling();
+		UtilsClient.disableCulling();
 		door_out.draw();
-		Utils.enableCulling();
+		UtilsClient.enableCulling();
 		indoor_open.draw();
 	}
 }

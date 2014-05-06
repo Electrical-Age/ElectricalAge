@@ -12,6 +12,7 @@ import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.RecipesList;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.UtilsClient;
 import mods.eln.sim.ThermalLoadInitializer;
 
 public class MaceratorDescriptor extends ElectricalMachineDescriptor {
@@ -58,8 +59,8 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
 		while(handle.itemCounter >= 360f) handle.itemCounter -= 360;
 				
 		GL11.glScalef(0.7f, 0.7f, 0.7f);
-		Utils.drawEntityItem(inEntity, 0.0, 0.4f, 0f, handle.itemCounter, 1f);	
-		Utils.drawEntityItem(outEntity, 0.0, -0.5f, 0f, 130 + handle.itemCounter, 1f);	
+		UtilsClient.drawEntityItem(inEntity, 0.0, 0.4f, 0f, handle.itemCounter, 1f);	
+		UtilsClient.drawEntityItem(outEntity, 0.0, -0.5f, 0f, 130 + handle.itemCounter, 1f);	
 	}
 	
 	@Override

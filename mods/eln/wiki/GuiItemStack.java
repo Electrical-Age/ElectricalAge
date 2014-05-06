@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL12;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
@@ -41,7 +42,7 @@ public class GuiItemStack extends Gui implements IGuiObject{
 	public void idraw(int x, int y, float f) {
 		//RenderHelper.disableStandardItemLighting();
 		GL11.glColor3f(1f, 1f, 1f);
-		Utils.bindTexture(slotSkin);
+		UtilsClient.bindTexture(slotSkin);
 		drawTexturedModalRect(posX-1, posY -1, 55, 16, 73-55, 34-16);	
 		
 		if(stack != null){
@@ -49,7 +50,7 @@ public class GuiItemStack extends Gui implements IGuiObject{
 			RenderHelper.enableStandardItemLighting();
 			RenderHelper.enableGUIStandardItemLighting();
 
-	        Utils.drawItemStack(stack, posX, posY, null,true);
+			UtilsClient.drawItemStack(stack, posX, posY, null,true);
 
 	        RenderHelper.disableStandardItemLighting();
 	       // GL11.glEnable(GL11.GL_LIGHTING);
@@ -118,7 +119,7 @@ public class GuiItemStack extends Gui implements IGuiObject{
 	public void imouseClicked(int x, int y, int code) {
 		if(x >= posX && y >= posY && x < posX + w && y < posY + h){
     		if(stack != null){
-    			Utils.clientOpenGui(new ItemDefault(stack,helper.screen));
+    			UtilsClient.clientOpenGui(new ItemDefault(stack,helper.screen));
     		}
 			/*if(observer != null){
 				observer.guiObjectEvent(this);

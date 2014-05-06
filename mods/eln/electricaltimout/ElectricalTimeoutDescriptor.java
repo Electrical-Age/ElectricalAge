@@ -11,6 +11,7 @@ import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
@@ -64,8 +65,8 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 			rot.draw(rotEnd + (rotStart - rotEnd) * left, 1f, 0f, 0f);
 		}
 		if(led != null) {
-			Utils.ledOnOffColor(left != 0f);
-			Utils.drawLight(led);
+			UtilsClient.ledOnOffColor(left != 0f);
+			UtilsClient.drawLight(led);
 			GL11.glColor3f(1f, 1f, 1f);
 		}
 	}

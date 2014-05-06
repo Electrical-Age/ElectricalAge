@@ -13,6 +13,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
@@ -76,12 +77,12 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 		if(main != null) main.draw();
 		//GL11.glEnable(GL11.GL_TEXTURE_2D);
 		if(log != null) {
-        	Utils.disableLight();
+			UtilsClient.disableLight();
 	       // GL11.glPushMatrix();	
-        	Utils.ledOnOffColor(true);
+			UtilsClient.ledOnOffColor(true);
         	if(led != null) led.draw();
         	
-			Utils.glDefaultColor();
+        	UtilsClient.glDefaultColor();
 			
     		GL11.glTranslatef(tx, ty, tz); 	
     		GL11.glRotatef(ra, rx, ry, rz);  
@@ -89,9 +90,9 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 			GL11.glColor4f(1f, 0.5f, 0.0f, 1f);
         	log.draw(mx, my, "\u00a76");
         	
-        	Utils.glDefaultColor();
+        	UtilsClient.glDefaultColor();
 
-	        Utils.enableLight();
+        	UtilsClient.enableLight();
 		}
 	}
 	

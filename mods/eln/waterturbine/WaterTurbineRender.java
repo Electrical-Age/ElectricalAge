@@ -86,6 +86,7 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 		waterCoord.setWorld(tileEntity.worldObj);
 		waterCoord.applyTransformation(front, coordonate());
 		waterCoordRight = new Coordonate(waterCoord);
+		waterCoordRight.setWorld(tileEntity.worldObj);
 		waterCoordRight.move(front.right());
 	}
 }

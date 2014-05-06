@@ -10,6 +10,7 @@ import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.wiki.Data;
@@ -59,8 +60,8 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 		int idx = 0;
 		for(Obj3DPart led : leds) {
 			if(presence != null && presence[idx]) {
-				Utils.ledOnOffColor(charged[idx]);
-				Utils.drawLight(led);
+				UtilsClient.ledOnOffColor(charged[idx]);
+				UtilsClient.drawLight(led);
 			}
 			else {
 				GL11.glColor3f(0.2f, 0.2f, 0.2f);

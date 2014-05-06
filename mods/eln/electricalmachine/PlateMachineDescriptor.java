@@ -9,6 +9,7 @@ import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.RecipesList;
+import mods.eln.misc.UtilsClient;
 import mods.eln.sim.ThermalLoadInitializer;
 import net.minecraft.entity.item.EntityItem;
 
@@ -58,8 +59,8 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
 		handle.itemCounter += FrameTime.get() * 90;
 		while(handle.itemCounter >= 360f) handle.itemCounter -= 360;
 				
-		Utils.drawEntityItem(inEntity, -0.35f, 0.1f, 0f, handle.itemCounter, 1f);
-		Utils.drawEntityItem(outEntity, 0.35f, 0.1f, 0f, -handle.itemCounter + 139f, 1f);
+		UtilsClient.drawEntityItem(inEntity, -0.35f, 0.1f, 0f, handle.itemCounter, 1f);
+		UtilsClient.drawEntityItem(outEntity, 0.35f, 0.1f, 0f, -handle.itemCounter + 139f, 1f);
 	}
 	
 	@Override

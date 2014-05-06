@@ -9,6 +9,7 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 
@@ -56,11 +57,11 @@ public class LampSupplyDescriptor extends SixNodeDescriptor{
 	public void draw(float openFactor)
 	{
 		if(main != null) main.draw();
-		Utils.drawLight(led);
-		Utils.disableCulling();
+		UtilsClient.drawLight(led);
+		UtilsClient.disableCulling();
 		if(rot1 != null) rot1.draw((1f-openFactor)*rot1AlphaClose, 0f,0f,1f);
 		if(rot2 != null) rot2.draw((1f-openFactor)*rot2AlphaClose, 0f,0f,1f);
-		Utils.enableCulling();
+		UtilsClient.enableCulling();
 	}
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,

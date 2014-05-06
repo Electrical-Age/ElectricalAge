@@ -34,6 +34,7 @@ import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.wiki.Data;
 
 public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor implements IItemEnergyBattery{
@@ -274,7 +275,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {		
 		if(type == ItemRenderType.INVENTORY)		
-			Utils.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
+			UtilsClient.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
 		
 		double energy = getEnergy(item);
 		byte state = getState(item);
@@ -329,7 +330,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			}
 			
 			
-			boolean drawScreen = e != null && Utils.clientDistanceTo(e) < 10;
+			boolean drawScreen = e != null && UtilsClient.clientDistanceTo(e) < 10;
 			boolean drawRay = drawScreen && state == sRun;
 	
 		
@@ -372,7 +373,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 				r /= count;
 				g /= count;
 				b /= count;
-				Utils.drawHalo(screenLuma,r,g,b,e, false);					
+				UtilsClient.drawHalo(screenLuma,r,g,b,e, false);					
 				
 				
 
@@ -389,7 +390,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 					GL11.glColor4f(1f, 1f, 1f, 1f);
 					buttons.draw();
 				}
-				Utils.disableLight();
+				UtilsClient.disableLight();
 				if(state != sIdle){
 					GL11.glColor4f(1f, 1f, 1f, 1f);
 					buttons.draw();
@@ -404,8 +405,8 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 					}
 					GL11.glColor4f(r*0.6f,g*0.6f,b*0.6f, 1f);
 					led.draw();
-					Utils.enableBlend();
-					Utils.drawHaloNoLightSetup(ledHalo, r,g,b,e, false);			
+					UtilsClient.enableBlend();
+					UtilsClient.drawHaloNoLightSetup(ledHalo, r,g,b,e, false);			
 				}				
 
 				GL11.glColor4f(1f,1f,1f,0.4f);
@@ -422,7 +423,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 				default:
 					break;
 				}
-				Utils.enableBlend();
+				UtilsClient.enableBlend();
 				GL11.glColor4f(1f, 1f, 1f, 1f);
 				int breakLevel = getDamage(item)/damagePerBreakLevel ;
 				if(state == sIdle) breakLevel = Math.min(breakLevel, screenDamage.length-1);
@@ -432,8 +433,8 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 					
 				}
 
-				Utils.disableBlend();
-				Utils.enableLight();	
+				UtilsClient.disableBlend();
+				UtilsClient.enableLight();	
 			}
 			
 			
@@ -663,8 +664,8 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		
 		void draw(){
 			long start = System.nanoTime();
-			Utils.disableLight();
-			Utils.disableTexture();
+			UtilsClient.disableLight();
+			UtilsClient.disableTexture();
 			//GL11.glShadeModel(GL11.GL_SMOOTH);
 
 			for(int screenY = 0;screenY < resHeight;screenY++){
@@ -703,8 +704,8 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 				}
 				GL11.glEnd();
 			}
-			Utils.enableTexture();
-			Utils.enableLight();
+			UtilsClient.enableTexture();
+			UtilsClient.enableLight();
 			//GL11.glShadeModel(GL11.GL_FLAT);
 			long end = System.nanoTime();
 			//System.out.println("Draw : " + (end - start)/1000 + "us");

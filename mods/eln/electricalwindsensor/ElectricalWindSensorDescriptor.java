@@ -13,6 +13,7 @@ import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ThermalLoad;
@@ -52,9 +53,9 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
 	{
 		if(baseWall != null) baseWall.draw();
 		if(anemometer != null) {
-			Utils.disableCulling();
+			UtilsClient.disableCulling();
 			anemometer.draw(alpha, 0, 1, 0);
-			Utils.enableCulling();
+			UtilsClient.enableCulling();
 		}
 	}
 	

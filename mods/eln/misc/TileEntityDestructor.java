@@ -2,19 +2,12 @@ package mods.eln.misc;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.Hashtable;
-import java.util.Map.Entry;
 
+import net.minecraft.tileentity.TileEntity;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
-
-import mods.eln.misc.Coordonate;
-import mods.eln.node.NodeBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.tileentity.TileEntity;
 
 public class TileEntityDestructor implements ITickHandler {
 	ArrayList<TileEntity> destroyList = new ArrayList<TileEntity>();

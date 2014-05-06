@@ -9,11 +9,10 @@ import mods.eln.sim.IVoltageWatchdogDescriptorForInventory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-public class OreScanner extends GenericItemUsingDamageDescriptorUpgrade implements IVoltageWatchdogDescriptorForInventory{
+public class OreScanner extends GenericItemUsingDamageDescriptorUpgrade{
 
 	public OreScanner(
 			String name,
-			double nominalVoltage,double maximalVoltage,
 			int operationRadius,double operationEnergy
 
 			
@@ -21,13 +20,10 @@ public class OreScanner extends GenericItemUsingDamageDescriptorUpgrade implemen
 		super(name);
 		this.radius = operationRadius;
 		this.OperationEnergy = operationEnergy;
-		this.nominalVoltage = nominalVoltage;
-		this.maximalVoltage = maximalVoltage;
 		// TODO Auto-generated constructor stub
 	}
 
 	
-	public double nominalVoltage,maximalVoltage;
 	public double OperationEnergy;
 	public int radius;
 	
@@ -39,7 +35,6 @@ public class OreScanner extends GenericItemUsingDamageDescriptorUpgrade implemen
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
 		list.add("Nominal :");
-		list.add(Utils.plotVolt("    Voltage :",nominalVoltage));
 		list.add(Utils.plotEnergy("Energy per Operation :",OperationEnergy));
 		list.add("Scan Area :" + (radius*2 +1)*(radius*2 +1) + " blocks");
 
@@ -47,23 +42,5 @@ public class OreScanner extends GenericItemUsingDamageDescriptorUpgrade implemen
 
 
 
-	@Override
-	public double getBreakPropPerVoltOverflow() {
-		// TODO Auto-generated method stub
-		return 1/maximalVoltage/0.2;
-	}
 
-
-	@Override
-	public double getUmax() {
-		// TODO Auto-generated method stub
-		return maximalVoltage;
-	}
-
-
-	@Override
-	public double getUmin() {
-		// TODO Auto-generated method stub
-		return -0.1 * maximalVoltage;
-	}
 }

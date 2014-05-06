@@ -248,6 +248,22 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+
+
+
+
+
+
 @Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.1.2a")
 @NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
@@ -659,6 +675,7 @@ public class Eln {
 		 * 
 		 * int id = 0,subId = 0,completId; String name;
 		 */
+
 
 		registerArmor();
 		registerTool();
@@ -4013,8 +4030,6 @@ public class Eln {
 			name = "Cheap Electrical Drill";
 
 			descriptor = new ElectricalDrillDescriptor(name,// iconId, name,
-					LVU, LVU * 1.25,// double nominalVoltage,double
-									// maximalVoltage,
 					10, 1000 // double operationTime,double operationEnergy
 			);
 			sharedItem.addElement(completId, descriptor);
@@ -4025,8 +4040,6 @@ public class Eln {
 			name = "Average Electrical Drill";
 
 			descriptor = new ElectricalDrillDescriptor(name,// iconId, name,
-					LVU, LVU * 1.25,// double nominalVoltage,double
-									// maximalVoltage,
 					5, 1500 // double operationTime,double operationEnergy
 			);
 			sharedItem.addElement(completId, descriptor);
@@ -4037,9 +4050,7 @@ public class Eln {
 			name = "Fast Electrical Drill";
 
 			descriptor = new ElectricalDrillDescriptor(name,// iconId, name,
-					LVU, LVU * 1.25,// double nominalVoltage,double
-									// maximalVoltage,
-					3, 2000 // double operationTime,double operationEnergy
+					2, 2000 // double operationTime,double operationEnergy
 			);
 			sharedItem.addElement(completId, descriptor);
 		}
@@ -4057,8 +4068,6 @@ public class Eln {
 			name = "Basic Ore Scanner";
 
 			descriptor = new OreScanner(name,// iconId, name,
-					LVU, LVU * 1.25,// double nominalVoltage,double
-									// maximalVoltage,
 					2, 300// ,int operationRadius,double operationTime,double
 							// operationEnergy
 
@@ -4071,8 +4080,6 @@ public class Eln {
 			name = "Advanced Ore Scanner";
 
 			descriptor = new OreScanner(name,// iconId, name,
-					LVU, LVU * 1.25,// double nominalVoltage,double
-									// maximalVoltage,
 					4, 800// ,int operationRadius,double operationEnergy
 
 			);

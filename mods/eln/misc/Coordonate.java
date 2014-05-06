@@ -1,23 +1,16 @@
 package mods.eln.misc;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
 import mods.eln.INBTTReady;
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldManager;
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
+import cpw.mods.fml.common.FMLCommonHandler;
 
 public class Coordonate implements INBTTReady {
 	public int x,y,z,dimention;
@@ -59,7 +52,9 @@ public class Coordonate implements INBTTReady {
 		//WorldManager
 		//Minecraft.getMinecraft().
 		//World
-		//Minecraft m = Minecraft.getMinecraft().getWorldProviderName()();
+		//Minecraft m = Minecraft.getMinecraft();
+		
+		
 		if(w == null) w = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(worldDimension());
 		return w;
         

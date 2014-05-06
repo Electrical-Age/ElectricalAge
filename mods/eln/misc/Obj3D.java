@@ -1,46 +1,18 @@
 package mods.eln.misc;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
-
-import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Hashtable;
 
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.ARBVertexBufferObject;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
-import org.lwjgl.opengl.GLContext;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
-import com.google.common.io.Files;
-
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-
-
-
 import mods.eln.Eln;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.common.MinecraftForge;
+import org.lwjgl.opengl.GL11;
 
 public class Obj3D {
 	String fileName;
@@ -114,7 +86,7 @@ public class Obj3D {
 
 		public void bindTexture()
 		{
-			Utils.bindTexture(textureResource);
+			UtilsClient.bindTexture(textureResource);
 		}
 		
 
@@ -189,7 +161,7 @@ public class Obj3D {
 		{		
 		//	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
 			if(textureResource != null){
-				Utils.bindTexture(textureResource);
+				UtilsClient.bindTexture(textureResource);
 				drawNoBind();
 			}
 			else {

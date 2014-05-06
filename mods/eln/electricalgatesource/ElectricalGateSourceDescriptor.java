@@ -13,6 +13,7 @@ import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
@@ -91,22 +92,22 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 			
 		//	if(factor < 0.5f) {
 			//	GL11.glColor3f(234f / 255f, 80 / 255f, 0f);
-			Utils.ledOnOffColor(factor > 0.5f);
-				Utils.disableLight();
+			UtilsClient.ledOnOffColor(factor > 0.5f);
+			UtilsClient.disableLight();
 				if(led != null) led.draw();
-				Utils.enableBlend();
+				UtilsClient.enableBlend();
 				
 				if(halo != null) {
 					if(e == null)
-						Utils.drawLight(halo);
+						UtilsClient.drawLight(halo);
 					else {
-						Color c = Utils.ledOnOffColorC(factor > 0.5f);
-						Utils.drawHaloNoLightSetup(halo, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, e, false);
+						Color c = UtilsClient.ledOnOffColorC(factor > 0.5f);
+						UtilsClient.drawHaloNoLightSetup(halo, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, e, false);
 					}
 				}
 			
-				Utils.disableBlend();
-				Utils.enableLight();
+				UtilsClient.disableBlend();
+				UtilsClient.enableLight();
 		//	}
 		/*	else {
 				if(led != null) led.draw();

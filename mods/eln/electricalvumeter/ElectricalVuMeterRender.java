@@ -13,6 +13,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementRender;
@@ -38,10 +39,10 @@ public class ElectricalVuMeterRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
 		ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
-		EntityClientPlayerMP player = Utils.getClientPlayer();
+		EntityClientPlayerMP player = UtilsClient.getClientPlayer();
 		GL11.glPushMatrix();
 		interpolator.stepGraphic();
-		descriptor.draw(descriptor.onOffOnly ? interpolator.getTarget() : interpolator.get(), Utils.distanceFromClientPlayer(tileEntity), tileEntity);
+		descriptor.draw(descriptor.onOffOnly ? interpolator.getTarget() : interpolator.get(), UtilsClient.distanceFromClientPlayer(tileEntity), tileEntity);
 		GL11.glPopMatrix();
 	}
 

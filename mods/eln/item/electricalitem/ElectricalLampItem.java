@@ -16,6 +16,7 @@ import mods.eln.Eln;
 import mods.eln.PlayerManager;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.wiki.Data;
 
 public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
@@ -210,8 +211,8 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {		
 		if(type == ItemRenderType.INVENTORY)		
-			Utils.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
-		Utils.drawIcon(type,(getLight(item) != 0 && getLightState(item) != 0? on : off));
+			UtilsClient.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
+		UtilsClient.drawIcon(type,(getLight(item) != 0 && getLightState(item) != 0? on : off));
 	}
 
 	@Override

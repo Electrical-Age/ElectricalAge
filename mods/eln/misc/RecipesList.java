@@ -1,16 +1,13 @@
 package mods.eln.misc;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import mods.eln.Eln;
 import mods.eln.electricalfurnace.ElectricalFurnaceProcess;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
-import net.minecraftforge.oredict.OreDictionary;
 
 public class RecipesList {
 	public static ArrayList<RecipesList> listOfList = new ArrayList<RecipesList>();

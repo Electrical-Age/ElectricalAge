@@ -21,6 +21,7 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementInventory;
@@ -51,7 +52,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
 		interpol.stepGraphic();
 		
 		front.glRotateOnX();	
-		descriptor.draw(interpol.get(), Utils.distanceFromClientPlayer(tileEntity));			
+		descriptor.draw(interpol.get(), UtilsClient.distanceFromClientPlayer(tileEntity));			
 	}
 	
 	@Override

@@ -78,7 +78,7 @@ import net.minecraftforge.common.ForgeDirection;
 			GhostElement element = getElement(world, x, y, z);
 			if(element != null)  return element.onBlockActivated(player, Direction.fromIntMinecraftSide(side), vx, vy, vz);
 		}
-		return false;
+		return true;
 	}
 	
 	GhostElement getElement(World world, int x, int y, int z)

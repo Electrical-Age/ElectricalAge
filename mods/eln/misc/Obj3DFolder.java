@@ -4,13 +4,8 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
 
-
-import mods.eln.Eln;
 import mods.eln.misc.Obj3D.Obj3DPart;
 
 

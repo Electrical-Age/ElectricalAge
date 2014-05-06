@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL11;
 import mods.eln.item.SixNodeCacheItem;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderBlocks;
 
@@ -38,7 +39,7 @@ public class SixNodeRender extends TileEntitySpecialRenderer
 		{
 			if(SixNodeCacheItem.map[tileEntity.sixNodeCacheMapId] != null)
 			{
-				Utils.glDefaultColor();
+				UtilsClient.glDefaultColor();
 				SixNodeCacheItem.map[tileEntity.sixNodeCacheMapId].draw(entity.worldObj,entity.xCoord,entity.yCoord,entity.zCoord);
 			}
 		}
@@ -48,7 +49,7 @@ public class SixNodeRender extends TileEntitySpecialRenderer
 		{
 			if(render != null)
 			{
-				Utils.glDefaultColor();
+				UtilsClient.glDefaultColor();
 				GL11.glPushMatrix();
 				Direction.fromInt(idx).glRotateXnRef();
 				GL11.glTranslatef(-0.5F, 0f, 0f);

@@ -15,6 +15,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElectricalLoadWatchdog;
 import mods.eln.sim.ElectricalLoad;
@@ -103,11 +104,11 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 		GL11.glTranslatef(0, -1.5f, 0);
 		GL11.glScalef(0.5f, 0.5f, 0.5f);
 		
-		Utils.disableCulling();
+		UtilsClient.disableCulling();
 		core.draw();
 		gui.draw();
 		lamp.draw();
-		Utils.enableCulling();
+		UtilsClient.enableCulling();
 	}
 	
 	

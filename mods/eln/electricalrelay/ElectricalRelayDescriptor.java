@@ -12,6 +12,7 @@ import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
@@ -101,11 +102,11 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
 	}
 	
 	void draw(float factor) {
-		Utils.disableCulling();
+		UtilsClient.disableCulling();
 		GL11.glScalef(0.5f, 0.5f, 0.5f);
 		if(main != null) main.draw();
 		if(relay0 != null) relay0.draw(factor * (r0rOn - r0rOff) + r0rOff, 0f, 0f, 1f);
 		if(relay1 != null) relay1.draw(factor * (r1rOn - r1rOff) + r1rOff, 0f, 0f, 1f);
-		Utils.enableCulling();
+		UtilsClient.enableCulling();
 	}
 }

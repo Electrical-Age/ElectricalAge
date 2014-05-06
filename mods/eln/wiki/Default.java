@@ -7,6 +7,7 @@ import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.GuiTextFieldEln;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 
 public class Default extends GuiScreenEln{
 	public Default(GuiScreen preview) {
@@ -46,10 +47,10 @@ public class Default extends GuiScreenEln{
 		super.guiObjectEvent(object);
 		
 		if(object == previewBt){
-			Utils.clientOpenGui(preview);
+			UtilsClient.clientOpenGui(preview);
 		}
     	else if(object == searchText){
-    		Utils.clientOpenGui(new Search(searchText.getText()));	
+    		UtilsClient.clientOpenGui(new Search(searchText.getText()));	
     	}
 		
 	}

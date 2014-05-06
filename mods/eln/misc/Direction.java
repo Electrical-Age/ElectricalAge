@@ -1,14 +1,11 @@
 package mods.eln.misc;
 
-import org.lwjgl.opengl.GL11;
-
-import com.google.common.base.CaseFormat;
-
-
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Vec3;
+
+import org.lwjgl.opengl.GL11;
 
 
 /**

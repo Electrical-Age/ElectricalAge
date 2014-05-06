@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL11;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 
@@ -50,7 +51,7 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
 					GL11.glColor3f(0.8f, 0f, 0f);
 				else
 					GL11.glColor3f(0f, 0.8f, 0f);
-				Utils.drawLight(led[idx]);		
+				UtilsClient.drawLight(led[idx]);		
 			}
 			else {
 				GL11.glColor3f(0.3f, 0.3f, 0.3f);

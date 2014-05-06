@@ -17,6 +17,7 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementRender;
@@ -46,7 +47,7 @@ public class ElectricalSwitchRender extends SixNodeElementRender {
 		interpol.stepGraphic();
 		
 		front.glRotateOnX();	
-		descriptor.draw(interpol.get(), Utils.distanceFromClientPlayer(tileEntity), tileEntity);
+		descriptor.draw(interpol.get(), UtilsClient.distanceFromClientPlayer(tileEntity), tileEntity);
 	}
 	
 	@Override

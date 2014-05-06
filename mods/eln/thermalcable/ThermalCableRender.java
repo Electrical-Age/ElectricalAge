@@ -12,6 +12,7 @@ import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementRender;
@@ -63,7 +64,7 @@ public class ThermalCableRender extends SixNodeElementRender{
 		
 
 		
-		Utils.bindTexture(cableDesciptor.render.cableTexture);
+		UtilsClient.bindTexture(cableDesciptor.render.cableTexture);
 		glListCall();
 		
 		

@@ -1,8 +1,8 @@
 package mods.eln.misc;
 
-import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.INBTTReady;
 import mods.eln.sim.IProcess;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class WindProcess implements IProcess,INBTTReady{
 

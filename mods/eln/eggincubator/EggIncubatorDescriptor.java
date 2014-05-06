@@ -16,6 +16,7 @@ import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeEntity;
@@ -82,21 +83,21 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 	
 	void draw(int eggStackSize, float powerFactor) {
 		if(eggStackSize == 0) powerFactor = 0f;
-		Utils.disableCulling();
+		UtilsClient.disableCulling();
 		if(main != null) main.draw();
 		if(lampf != null) {
 			GL11.glColor3f(0.1f, 0.1f, 0.1f);
 			lampf.draw();
 		}
 		if(lamp != null) {
-			Utils.disableLight();
-			Utils.enableBlend();
+			UtilsClient.disableLight();
+			UtilsClient.enableBlend();
 			GL11.glColor4f(1f, 0.2f, 0.0f, powerFactor * powerFactor * 0.5f);
 			lamp.draw();
-			Utils.disableBlend();
-			Utils.enableLight();
+			UtilsClient.disableBlend();
+			UtilsClient.enableLight();
 		}
-		Utils.enableCulling();
+		UtilsClient.enableCulling();
 	}
 
 	public void applyTo(NodeElectricalLoad powerLoad) {

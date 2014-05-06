@@ -22,6 +22,7 @@ import mods.eln.PlayerManager;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 
 public class ElectricalTool extends GenericItemUsingDamageDescriptor implements IItemEnergyBattery{
 
@@ -173,8 +174,8 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {		
 		if(type == ItemRenderType.INVENTORY)		
-			Utils.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
-		Utils.drawIcon(type,rIcon);
+			UtilsClient.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
+		UtilsClient.drawIcon(type,rIcon);
 	}
 
 	@Override

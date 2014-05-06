@@ -1,8 +1,8 @@
 package mods.eln.misc;
 
-import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.INBTTReady;
 import mods.eln.client.FrameTime;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class RcRcInterpolator implements INBTTReady{
 	public RcRcInterpolator(float tao1,float tao2) {

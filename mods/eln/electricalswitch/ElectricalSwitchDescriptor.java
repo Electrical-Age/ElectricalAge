@@ -12,6 +12,7 @@ import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
@@ -141,19 +142,19 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 			
 			if(on < 0.5f) {
 				GL11.glColor3f(234f / 255f, 80 / 255f, 0f);
-				Utils.disableLight();
+				UtilsClient.disableLight();
 				if(led != null) led.draw();
-				Utils.enableBlend();
+				UtilsClient.enableBlend();
 				
 				if(halo != null) {
 					if(e == null)
-						Utils.drawLight(halo);
+						UtilsClient.drawLight(halo);
 					else
-						Utils.drawHaloNoLightSetup(halo, 234f / 255f, 80 / 255f, 0f, e, false);
+						UtilsClient.drawHaloNoLightSetup(halo, 234f / 255f, 80 / 255f, 0f, e, false);
 				}
 			
-				Utils.disableBlend();
-				Utils.enableLight();
+				UtilsClient.disableBlend();
+				UtilsClient.enableLight();
 			}
 			else {
 				if(led != null) led.draw();

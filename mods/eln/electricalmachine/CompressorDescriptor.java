@@ -11,6 +11,7 @@ import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.RecipesList;
+import mods.eln.misc.UtilsClient;
 import mods.eln.sim.ThermalLoadInitializer;
 import net.minecraft.entity.item.EntityItem;
 
@@ -55,8 +56,8 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
 		handle.interpolator.setTarget(processState);
 		handle.interpolator.stepGraphic();
 		
-		Utils.drawEntityItem(inEntity, -0.35f, 0.04f, 0.3f, handle.itemCounter, 1f);
-		Utils.drawEntityItem(outEntity, 0.35f, 0.04f, 0.3f, -handle.itemCounter + 139f, 1f);
+		UtilsClient.drawEntityItem(inEntity, -0.35f, 0.04f, 0.3f, handle.itemCounter, 1f);
+		UtilsClient.drawEntityItem(outEntity, 0.35f, 0.04f, 0.3f, -handle.itemCounter + 139f, 1f);
 		
 		main.draw();
 		GL11.glTranslatef(0f, tyOff + (float)Math.sqrt(handle.interpolator.get()) * (tyOn - tyOff), 0f);

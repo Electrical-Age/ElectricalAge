@@ -7,6 +7,7 @@ import org.lwjgl.opengl.GL11;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.heatfurnace.HeatFurnaceContainer;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.SixNodeElementInventory;
 import mods.eln.node.TransparentNodeElementInventory;
@@ -91,7 +92,7 @@ public class IntelligentTransformerGuiDraw extends GuiContainer {
     @Override
     protected void drawGuiContainerBackgroundLayer(float par1, int par2,
                     int par3) {
-    		Utils.bindTextureByName("/gui/trap.png");
+    		UtilsClient.bindTextureByName("/gui/trap.png");
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 //            this.mc.renderEngine.bindTexture(texture);
             int x = (width - xSize) / 2;

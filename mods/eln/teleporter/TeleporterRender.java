@@ -18,6 +18,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementRender;
 import mods.eln.node.TransparentNodeEntity;
@@ -80,28 +81,28 @@ public class TeleporterRender extends TransparentNodeElementRender{
 		d.main.draw();
 		d.ext_control.draw();
 		d.ext_power.draw();
-		Utils.disableCulling();
+		UtilsClient.disableCulling();
 		d.door_out.draw(doorInterpolator.get()*doorAlphaOpen,0,0,1);
-		Utils.enableCulling();
+		UtilsClient.enableCulling();
 
 	//	d.outlampline0.draw();
 		GL11.glColor3f(1f, 1f, 1f);
 		if(doorState == true){
-			Utils.disableCulling();
+			UtilsClient.disableCulling();
 			d.gyro.draw(doorInterpolator.get()*doorAlphaOpen,0,0,1,gyroAlpha,-0.11746f,0.04275f,0);
-			Utils.enableCulling();
+			UtilsClient.enableCulling();
 		}
 
-		Utils.disableLight();
+		UtilsClient.disableLight();
 			GL11.glColor3f(1f, 0.5f, 0f);
 			if(doorState == false){
-				Utils.disableCulling();
+				UtilsClient.disableCulling();
 				d.gyro.draw(doorInterpolator.get()*doorAlphaOpen,0,0,1,gyroAlpha,-0.11746f,0.04275f,0);
-				Utils.enableCulling();
+				UtilsClient.enableCulling();
 				GL11.glColor4f(1f, 0.5f, 0f,0.4f);
-				Utils.enableBlend();
+				UtilsClient.enableBlend();
 				d.gyro_alpha.draw(doorInterpolator.get()*doorAlphaOpen,0,0,1,gyroAlpha,-0.11746f,0.04275f,0);
-				Utils.disableBlend();
+				UtilsClient.disableBlend();
 			}
 
 			GL11.glColor3f(1f, 1f, 1f);
@@ -147,7 +148,7 @@ public class TeleporterRender extends TransparentNodeElementRender{
 			}	
 			
 			if(processRatioInterpolator.get() > 0.005){
-				Utils.enableBlend();
+				UtilsClient.enableBlend();
 				GL11.glColor4f(1f, 1f, 1f,blueInterpolator.get());
 				
 				d.indoor_closed.draw();
@@ -157,10 +158,10 @@ public class TeleporterRender extends TransparentNodeElementRender{
 				d.whiteblur.draw(doorInterpolator.get()*doorAlphaOpen,0,0,1);
 				GL11.glColor4f(1f, 1f, 1f,1f);
 				
-				Utils.disableBlend();
+				UtilsClient.disableBlend();
 			}
 			
-		Utils.enableLight();
+			UtilsClient.enableLight();
 
 		
 	//	GL11.glColor4f(1f, 1f, 1f,1f);

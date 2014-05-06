@@ -4,13 +4,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import org.lwjgl.opengl.GL11;
-
-import com.google.common.base.CaseFormat;
-
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Vec3;
+
+import org.lwjgl.opengl.GL11;
 
 
 /**

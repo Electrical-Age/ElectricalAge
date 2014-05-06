@@ -177,7 +177,7 @@ public void setInventorySlotContents(int par1, ItemStack par2ItemStack)
 		if(transparentNodeElement != null)
 		{
 			if(NodeManager.instance.getNodeFromCoordonate(transparentNodeElement.node.coordonate) != transparentNodeElement.node) return false;
-			return player.getDistanceSq(transparentNodeElement.node.coordonate.x + 0.5, transparentNodeElement.node.coordonate.y + 0.5, transparentNodeElement.node.coordonate.z + 0.5) < 18;
+			return player.getDistance(transparentNodeElement.node.coordonate.x + 0.5, transparentNodeElement.node.coordonate.y + 0.5, transparentNodeElement.node.coordonate.z + 0.5) < 10;
 		}
 		return true;
 		//return player.getDistanceSq(transparentNodeRender.tileEntity.xCoord + 0.5, transparentNodeRender.tileEntity.yCoord + 0.5, transparentNodeRender.tileEntity.zCoord + 0.5) < 18;

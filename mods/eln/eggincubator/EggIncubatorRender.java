@@ -18,6 +18,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBase;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
@@ -51,7 +52,7 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
 		GL11.glPushMatrix();
 		front.glRotateXnRef();
 		if(egg != null) {
-			Utils.drawEntityItem(egg, 0.0f, -0.3f, 0.13f, alpha, 0.6f);
+			UtilsClient.drawEntityItem(egg, 0.0f, -0.3f, 0.13f, alpha, 0.6f);
 		}
 		descriptor.draw(eggStackSize, (float) (voltage / descriptor.nominalVoltage));
 		GL11.glPopMatrix();

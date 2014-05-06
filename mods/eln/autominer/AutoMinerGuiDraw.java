@@ -40,6 +40,6 @@ public class AutoMinerGuiDraw extends GuiContainerEln {
 
 	@Override
 	protected GuiHelperContainer newHelper() {
-		return new GuiHelperContainer(this, 176, 166, 8, 84);
+		return new GuiHelperContainer(this, 176, 166+18*2, 8, 84+18*2);
 	}
 }

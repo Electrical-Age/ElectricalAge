@@ -8,6 +8,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.UtilsClient;
 
 public class LampSocketStandardObjRender implements LampSocketObjRender{
 	private Obj3D obj;
@@ -59,9 +60,9 @@ public class LampSocketStandardObjRender implements LampSocketObjRender{
 		}
 		else{
 			if(light > 5)
-				Utils.bindTexture(tOn);
+				UtilsClient.bindTexture(tOn);
 			else
-				Utils.bindTexture(tOff);
+				UtilsClient.bindTexture(tOff);
 			socket.drawNoBind();
 		}
 		GL11.glEnable(GL11.GL_CULL_FACE);

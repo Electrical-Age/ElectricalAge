@@ -19,6 +19,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
@@ -88,7 +89,7 @@ public abstract class SixNodeElementRender {
 			Utils.setGlColorFromDye(connectionType.otherdry[idx]);
 			if(cableListReady[idx])
 			{
-				Utils.bindTexture(getCableRender(LRDU.fromInt(idx)).cableTexture);
+				UtilsClient.bindTexture(getCableRender(LRDU.fromInt(idx)).cableTexture);
 				GL11.glCallList(cableList[idx]);			
 			}				
 		}

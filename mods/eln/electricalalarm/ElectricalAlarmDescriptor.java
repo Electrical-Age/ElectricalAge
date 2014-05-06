@@ -18,6 +18,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ThermalLoad;
@@ -68,21 +69,21 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
 	}
 	
 	void draw(boolean warm, float rotAlpha) {
-		if(warm) Utils.bindTexture(onTexture);
-		else Utils.bindTexture(offTexture);
+		if(warm) UtilsClient.bindTexture(onTexture);
+		else UtilsClient.bindTexture(offTexture);
 		if(main != null) main.drawNoBind();
 		if(rot != null) {
 			GL11.glDisable(GL11.GL_CULL_FACE);
 			GL11.glColor3f(1.0f, 1.0f, 1.0f);
-			if(warm) Utils.disableLight();
+			if(warm) UtilsClient.disableLight();
 			else GL11.glDisable(GL11.GL_LIGHTING);
 			rot.drawNoBind(rotAlpha,1f,0f,0f);
-			if(warm) Utils.enableLight();
+			if(warm) UtilsClient.enableLight();
 			else GL11.glEnable(GL11.GL_LIGHTING);
 			GL11.glEnable(GL11.GL_CULL_FACE);
 		}
 		if(lightPart != null) {
-			Utils.drawLightNoBind(lightPart);
+			UtilsClient.drawLightNoBind(lightPart);
 		}
 	}
 	

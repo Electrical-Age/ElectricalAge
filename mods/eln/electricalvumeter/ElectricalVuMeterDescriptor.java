@@ -17,6 +17,7 @@ import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ThermalLoad;
@@ -68,14 +69,14 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor {
 		case LedOnOff:
 			main.draw();
 			boolean s = factor > 0.5;
-			Color c = Utils.ledOnOffColorC(s);
+			Color c = UtilsClient.ledOnOffColorC(s);
 			GL11.glColor3f(c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f);		
-			Utils.drawLight(led);
+			UtilsClient.drawLight(led);
 			//Utils.enableBilinear();
 			if(entity != null)
-				Utils.drawHalo(halo, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, entity, false);
+				UtilsClient.drawHalo(halo, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, entity, false);
 			else
-				Utils.drawLight(halo);
+				UtilsClient.drawLight(halo);
 			//Utils.disableBilinear();
 			break;
 		case Rot:

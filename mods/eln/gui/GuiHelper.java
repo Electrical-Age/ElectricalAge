@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.XRandR.Screen;
 
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
@@ -133,9 +134,9 @@ public class GuiHelper {
 	{
 		screen.drawDefaultBackground();
 		if(background != null)
-			Utils.drawGuiBackground(background, screen, xSize, ySize);
+			UtilsClient.drawGuiBackground(background, screen, xSize, ySize);
 		else {
-			Utils.bindTexture(helperTexture);
+			UtilsClient.bindTexture(helperTexture);
 			int px = 0,py = 0;
 			px += (screen.width - xSize) / 2;
 			py += (screen.height - ySize) / 2;
@@ -367,7 +368,7 @@ public class GuiHelper {
 	
 	public void drawProcess(int x,int y,float value)
 	{
-		Utils.bindTexture(helperTexture);
+		UtilsClient.bindTexture(helperTexture);
 		drawTexturedModalRect(x, y,8,0 , (int) (22), 16);
 		drawTexturedModalRect(x, y,8+22,0 , (int) (22*value), 16);
 	}
@@ -377,7 +378,7 @@ public class GuiHelper {
 	static final ResourceLocation slotSkin = new ResourceLocation("textures/gui/container/furnace.png");
 	
 	protected void drawSlot(int x, int y) {
-		Utils.bindTexture(slotSkin);
+		UtilsClient.bindTexture(slotSkin);
 
 		drawTexturedModalRect(x-1, y -1, 55, 16, 73-55, 34-16);
 	}

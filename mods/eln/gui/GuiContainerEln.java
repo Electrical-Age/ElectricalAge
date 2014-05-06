@@ -8,6 +8,7 @@ import mods.eln.gui.GuiTextFieldEln.GuiTextFieldElnObserver;
 import mods.eln.gui.IGuiObject.IGuiObjectObserver;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
@@ -141,7 +142,7 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 		preDraw(f, mx, my);
 		helper.mouseMove(mx,my);
 		helper.draw(mx, my, f);
-		Utils.bindTexture(slotSkin);
+		UtilsClient.bindTexture(slotSkin);
 		GL11.glColor4f(1f, 1f, 1f, 1f);
 		for(Object o : inventorySlots.inventorySlots)
 		{
@@ -213,7 +214,7 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 	protected void postDraw(float f, int x, int y)
 	{
 		if(helper.background != null)
-			Utils.bindTexture(helper.background);
+			UtilsClient.bindTexture(helper.background);
 	}
 	
 	protected void drawString(int x,int y,String str)

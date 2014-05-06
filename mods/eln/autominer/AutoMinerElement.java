@@ -26,8 +26,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 
-public class AutoMinerElement extends TransparentNodeElement implements GhostObserver {
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
+public class AutoMinerElement extends TransparentNodeElement  {
+	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this);
 	
 	NodeElectricalLoad inPowerLoad = new NodeElectricalLoad("inPowerLoad");
 	AutoMinerSlowProcess slowProcess = new AutoMinerSlowProcess(this);
@@ -146,22 +146,17 @@ public class AutoMinerElement extends TransparentNodeElement implements GhostObs
 
 
 	@Override
-	public Coordonate getGhostObserverCoordonate() {
-		return node.coordonate;
-	}
-
-	@Override
 	public void ghostDestroyed(int UUID) {
 		super.ghostDestroyed(UUID);
 		slowProcess.ghostDestroyed(UUID);
 	}
-
+/*
 	@Override
 	public boolean ghostBlockActivated(int UUID, EntityPlayer entityPlayer,
 			Direction side, float vx, float vy, float vz) {
 		
 		return super.ghostBlockActivated(UUID, entityPlayer, side, vx, vy, vz);
-	}
+	}*/
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {

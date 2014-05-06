@@ -18,6 +18,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.entity.Render;
@@ -65,7 +66,7 @@ public abstract class TransparentNodeElementRender {
 			var10.doRender(entityItem,0, 0, 0, 0, 0);	
 		GL11.glPopMatrix();	
 		*/
-		Utils.drawEntityItem(entityItem, x, y, z, roty, scale);
+		UtilsClient.drawEntityItem(entityItem, x, y, z, roty, scale);
 
 	}
 	
