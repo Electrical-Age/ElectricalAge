@@ -41,7 +41,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 	static final int pipeGhostUUID = 75;
 
 	enum jobType {none,done,full, ore, pipeAdd, pipeRemove};
-	jobType job = jobType.none;
+	jobType job = jobType.none,oldJob = jobType.none;
 	Coordonate jobCoord = new Coordonate();
 	int blinkCounter = 0;
 	boolean isReadyToDrill(){
@@ -59,6 +59,8 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 		}
 		return false;
 	}
+	
+	
 	
 	@Override
 	public void process(double time) {
@@ -153,6 +155,11 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 			break;		
 		}
 		
+		
+		if(oldJob != job){
+			miner.needPublish();
+		}
+		oldJob = job;
 		//System.out.println(job);
 	}
 	

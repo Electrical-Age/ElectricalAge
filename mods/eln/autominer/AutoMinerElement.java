@@ -163,6 +163,7 @@ public class AutoMinerElement extends TransparentNodeElement  {
 		super.networkSerialize(stream);
 		try {
 			stream.writeShort(slowProcess.pipeLength);
+			stream.writeByte(slowProcess.job.ordinal());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

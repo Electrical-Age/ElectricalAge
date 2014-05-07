@@ -17,7 +17,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
-public class AutoMinerContainer extends BasicContainer implements INodeContainer {
+public class AutoMinerContainer extends BasicContainer /*implements INodeContainer*/ {
 	NodeBase node;
 
 	public static final int electricalDrillSlotId = 0;
@@ -49,7 +49,7 @@ public class AutoMinerContainer extends BasicContainer implements INodeContainer
 		return slots;
 	}
 
-	@Override
+	/*@Override
 	public NodeBase getNode() {
 		return node;
 	}
@@ -57,5 +57,5 @@ public class AutoMinerContainer extends BasicContainer implements INodeContainer
 	@Override
 	public int getRefreshRateDivider() {
 		return 0;
-	}
+	}*/
 }

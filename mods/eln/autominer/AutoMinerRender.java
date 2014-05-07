@@ -49,12 +49,16 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 	}
 	
 	short pipeLength = 0;
+	AutoMinerSlowProcess.jobType job;
 	
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		super.networkUnserialize(stream);
 		try {
 			pipeLength = stream.readShort();
+			job = AutoMinerSlowProcess.jobType.values()[stream.readByte()];
+		//	System.out.println(job + " " + pipeLength);
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
