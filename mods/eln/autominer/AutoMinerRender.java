@@ -25,8 +25,20 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
 	@Override
 	public void draw() {
+		
 		if(pipeLength != 0) {
-			GL11.glLineWidth(20f);
+			GL11.glPushMatrix();
+			for(int idx = pipeLength;idx != 0;idx--){
+				if(pipeLength != 1){
+					descriptor.pipe.draw();
+				}
+				else{
+					descriptor.head.draw();
+				}
+				GL11.glTranslatef(0, -1f, 0);
+			}
+			GL11.glPopMatrix();
+			/*GL11.glLineWidth(20f);
 			GL11.glDisable(GL11.GL_TEXTURE_2D);
 			
 			GL11.glBegin(GL11.GL_LINES);
@@ -35,8 +47,9 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 				GL11.glVertex3f(0f, -0.5f - pipeLength, 0f);
 			GL11.glEnd();
 			
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
+			GL11.glEnable(GL11.GL_TEXTURE_2D);*/
 		}
+		
 		front.glRotateXnRef();
 		descriptor.draw();
 	}

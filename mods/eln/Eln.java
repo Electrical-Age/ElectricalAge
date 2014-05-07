@@ -273,7 +273,7 @@ public class Eln {
 	public static String channelName = "miaouMod";
 
 	public static final String[] objNames = new String[] {
-			"/model/SmallWaterWheel/SmallWaterWheel.obj",
+			"/model/FlatLamp/FlatLamp.obj",
 			"/model/AutoMiner/AutoMiner.obj",
 			"/model/Anemometer/Anemometer.obj",
 			"/model/XRayScanner/XRayScanner.obj",
@@ -1466,6 +1466,17 @@ public class Eln {
 			name = "Robust Lamp Socket";
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("RobustLamp"), true),
+					LampSocketType.Douille, // LampSocketType
+											// socketType
+					0, 0, 0, 0);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		{
+			subId = 5;
+
+			name = "Flat Lamp Socket";
+
+			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("FlatLamp"), true),
 					LampSocketType.Douille, // LampSocketType
 											// socketType
 					0, 0, 0, 0);
@@ -3722,9 +3733,9 @@ public class Eln {
 					);
 
 			GhostGroup g = new GhostGroup();
-			g.addRectangle(-2, 0, 0, 2, -1, -1);
-			g.addRectangle(-2, 0, 0, 2, 1, 1);
-			g.addRectangle(-4, 0, 2, 2, 0, 0);
+			g.addRectangle(-2, 0, 0, 1, -1, -1);
+			g.addRectangle(-2, 0, 0, 1, 1, 1);
+			g.addRectangle(-4, -1, 2, 2, 0, 0);
 			g.addElement(0, 1, 0);
 			g.addRectangle(-3, -3, 0, 1, -1, -1);
 			g.addRectangle(-3, -3, 0, 1, 1, 1);
@@ -4065,16 +4076,14 @@ public class Eln {
 		{
 			subId = 0;
 			completId = subId + (id << 6);
-			name = "Basic Ore Scanner";
+			name = "Ore Scanner";
 
-			descriptor = new OreScanner(name,// iconId, name,
-					2, 300// ,int operationRadius,double operationTime,double
-							// operationEnergy
+			descriptor = new OreScanner(name
 
 			);
 			sharedItem.addElement(completId, descriptor);
 		}
-		{
+	/*	{
 			subId = 1;
 			completId = subId + (id << 6);
 			name = "Advanced Ore Scanner";
@@ -4084,7 +4093,7 @@ public class Eln {
 
 			);
 			sharedItem.addElement(completId, descriptor);
-		}
+		}*/
 
 	}
 
@@ -4971,11 +4980,12 @@ public class Eln {
 
 	void recipeAutoMiner() {
 		addRecipe(findItemStack("Auto Miner"),
-				"CMC",
-				" B ",
+				"MCM",
+				"BOB",
 				" P ",
-				Character.valueOf('C'), findItemStack("Cheap Chip"),
-				Character.valueOf('B'), findItemStack("Machine Block"),
+				Character.valueOf('C'), findItemStack("Advanced Chip"),
+				Character.valueOf('O'), findItemStack("Ore Scanner"),
+				Character.valueOf('B'), findItemStack("Advanced Machine Block"),
 				Character.valueOf('M'), findItemStack("Electrical Motor"),
 				Character.valueOf('P'), findItemStack("Mining Pipe"));
 	}
@@ -5450,7 +5460,7 @@ public class Eln {
 
 	void recipeOreScanner() {
 
-		addRecipe(findItemStack("Basic Ore Scanner"),
+		addRecipe(findItemStack("Ore Scanner"),
 				"IGI",
 				"RCR",
 				"IGI",
@@ -5458,7 +5468,7 @@ public class Eln {
 				Character.valueOf('R'), new ItemStack(Item.redstone),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron),
 				Character.valueOf('G'), new ItemStack(Item.ingotGold));
-
+/*
 		addRecipe(findItemStack("Advanced Ore Scanner"),
 				"GCG",
 				"RSR",
@@ -5466,7 +5476,7 @@ public class Eln {
 				Character.valueOf('S'), findItemStack("Basic Ore Scanner"),
 				Character.valueOf('C'), findItemStack("Advanced Chip"),
 				Character.valueOf('G'), new ItemStack(Item.glowstone),
-				Character.valueOf('R'), new ItemStack(Item.redstone));
+				Character.valueOf('R'), new ItemStack(Item.redstone));*/
 
 	}
 
@@ -5562,7 +5572,7 @@ public class Eln {
 				Character.valueOf('C'), findItemStack("Advanced Chip"),
 				Character.valueOf('B'), findItemStack("Portable Battery"),
 				Character.valueOf('P'), new ItemStack(Item.ingotIron),
-				Character.valueOf('G'), findItemStack("Basic Ore Scanner"));
+				Character.valueOf('G'), findItemStack("Ore Scanner"));
 
 	}
 
@@ -5632,9 +5642,9 @@ public class Eln {
 				Character.valueOf('L'), new ItemStack(Item.ingotIron));
 
 		addRecipe(findItemStack("Advanced Machine Block"),
-				"LLL",
-				"LCL",
-				"LLL",
+				" C ",
+				"C C",
+				" C ",
 				Character.valueOf('C'), "plateSteel",
 				Character.valueOf('L'), "ingotSteel");
 
