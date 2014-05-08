@@ -273,6 +273,8 @@ public class Eln {
 	public static String channelName = "miaouMod";
 
 	public static final String[] objNames = new String[] {
+			"/model/SmallWaterWheel/SmallWaterWheel.obj",
+			"/model/ProximitySensor/ProximitySensor.obj",
 			"/model/FlatLamp/FlatLamp.obj",
 			"/model/AutoMiner/AutoMiner.obj",
 			"/model/Anemometer/Anemometer.obj",
@@ -1534,6 +1536,7 @@ public class Eln {
 			 */
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			desc.cameraOpt = false;
+			desc.useIcon(true);
 		}
 
 		{
@@ -1553,6 +1556,7 @@ public class Eln {
 			 */
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			desc.cameraOpt = false;
+			desc.useIcon(true);
 		}
 	}
 
@@ -1905,7 +1909,7 @@ public class Eln {
 			{
 				subId = 12;
 				name = "Electrical Entity Sensor";
-				desc = new ElectricalEntitySensorDescriptor(name, obj.getObj("lightsensor"), 15);
+				desc = new ElectricalEntitySensorDescriptor(name, obj.getObj("ProximitySensor"), 15);
 				sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			}
 		}
@@ -3047,7 +3051,7 @@ public class Eln {
 		{
 			id = 4;
 
-			name = "Plumb Ore";
+			name = "Lead Ore";
 
 			OreDescriptor desc = new OreDescriptor(name, id, // int itemIconId,
 																// String
@@ -3148,14 +3152,14 @@ public class Eln {
 		{
 			id = 5;
 
-			name = "Plumb Dust";
+			name = "Lead Dust";
 
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] { });
 			sharedItem.addElement(id, element);
 			Data.addResource(element.newItemStack());
-			addToOre("dustPlumb", element.newItemStack());
+			addToOre("dustLead", element.newItemStack());
 		}
 		{
 			id = 6;
@@ -3292,7 +3296,7 @@ public class Eln {
 			subId = 4;
 			completId = subId + (id << 6);
 
-			name = "Plumb Ingot";
+			name = "Lead Ingot";
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] {});
@@ -5712,8 +5716,8 @@ public class Eln {
 				new ItemStack[] { findItemStack("Iron Dust", 2) }, 1.0 * f));
 		maceratorRecipes.addRecipe(new Recipe(new ItemStack(Block.oreGold),
 				new ItemStack[] { findItemStack("Gold Dust", 2) }, 3.0 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("Plumb Ore"),
-				new ItemStack[] { findItemStack("Plumb Dust", 2) }, 2.0 * f));
+		maceratorRecipes.addRecipe(new Recipe(findItemStack("Lead Ore"),
+				new ItemStack[] { findItemStack("Lead Dust", 2) }, 2.0 * f));
 		maceratorRecipes.addRecipe(new Recipe(findItemStack("Tungsten Ore"),
 				new ItemStack[] { findItemStack("Tungsten Dust", 2) }, 2.0 * f));
 		maceratorRecipes.addRecipe(new Recipe(new ItemStack(Item.coal, 1, 0),
@@ -5746,7 +5750,7 @@ public class Eln {
 				findItemStack("Copper Ingot", 4),
 				findItemStack("Copper Plate"), 1.0 * f));
 
-		compressorRecipes.addRecipe(new Recipe(findItemStack("Plumb Ingot", 4),
+		compressorRecipes.addRecipe(new Recipe(findItemStack("Lead Ingot", 4),
 				findItemStack("Lead Plate"), 1.0 * f));
 
 		plateMachineRecipes.addRecipe(new Recipe(
@@ -5797,10 +5801,10 @@ public class Eln {
 		in = findItemStack("dustCopper");
 		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
 				findItemStack("Copper Ingot"), 0);
-		in = findItemStack("Plumb Ore");
+		in = findItemStack("Lead Ore");
 		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
 				findItemStack("ingotLead"), 0);
-		in = findItemStack("dustPlumb");
+		in = findItemStack("dustLead");
 		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
 				findItemStack("ingotLead"), 0);
 		in = findItemStack("Tungsten Ore");

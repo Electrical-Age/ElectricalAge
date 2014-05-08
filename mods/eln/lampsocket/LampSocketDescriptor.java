@@ -37,7 +37,11 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 		this.render = render;
 
 	}
-
+	boolean useIconEnable = false;
+	public void useIcon(boolean enable){
+		useIconEnable = enable;
+	}
+	
 	boolean noCameraOpt(){
 		return cameraOpt;
 	}
@@ -56,13 +60,13 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		// TODO Auto-generated method stub
-		return true;
+		return !useIconEnable;
 	}
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
 		// TODO Auto-generated method stub
-		return true;
+		return !useIconEnable;
 	}
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {

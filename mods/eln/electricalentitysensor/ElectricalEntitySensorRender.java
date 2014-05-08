@@ -31,9 +31,16 @@ public class ElectricalEntitySensorRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
-		descriptor.draw();
+		descriptor.draw(0.0f);
 	}
 
+	
+	@Override
+	public void publishUnserialize(DataInputStream stream) {
+		// TODO Auto-generated method stub
+		super.publishUnserialize(stream);
+	}
+	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
 		return Eln.instance.signalCableDescriptor.render;
