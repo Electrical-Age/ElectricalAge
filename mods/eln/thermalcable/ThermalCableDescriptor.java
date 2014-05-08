@@ -55,7 +55,12 @@ public class ThermalCableDescriptor extends SixNodeDescriptor{
 			while(true);
 		}
 		
-		}
+	}
+	
+	boolean addToDataEnabled = true;
+	public void addToData(boolean enable){
+		this.addToDataEnabled = enable;
+	}
 		
 
 	double thermalRp = 1, thermalRs = 1, thermalC = 1;
@@ -69,8 +74,10 @@ public class ThermalCableDescriptor extends SixNodeDescriptor{
 	public void setParent(Item item, int damage) {
 		// TODO Auto-generated method stub
 		super.setParent(item, damage);
-		Data.addWiring(newItemStack());
-		Data.addThermal(newItemStack());
+		if(addToDataEnabled){
+			Data.addWiring(newItemStack());
+			Data.addThermal(newItemStack());
+		}
 	}
 	
 

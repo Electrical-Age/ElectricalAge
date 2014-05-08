@@ -136,6 +136,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
      */
     public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
     {
+    	if(isStackValidToPlace(par1ItemStack) == false) return false;
         int i1 = par3World.getBlockId(par4, par5, par6);
 
         if (i1 == Block.snow.blockID && (par3World.getBlockMetadata(par4, par5, par6) & 7) < 1)
@@ -212,7 +213,8 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
      * Returns true if the given ItemBlock can be placed on the given side of the given block position.
      */
     public boolean canPlaceItemBlockOnSide(World par1World, int x, int y, int z, int par5, EntityPlayer par6EntityPlayer, ItemStack par7ItemStack)
-    {
+    {    	
+    	if(isStackValidToPlace(par7ItemStack) == false) return false;
     	int[] vect = new int[]{x,y,z};
     	Direction.fromIntMinecraftSide(par5).applyTo(vect, 1);
     	SixNodeDescriptor descriptor = getDescriptor(par7ItemStack);
@@ -228,10 +230,15 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
     }
     
 	
+    public boolean isStackValidToPlace(ItemStack stack){
+    	SixNodeDescriptor descriptor = getDescriptor(stack);
+    	return descriptor != null;
+    }
+    
     public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata)
     {
-    
     	if(world.isRemote)return false;
+    	if(isStackValidToPlace(stack) == false) return false;
     	
     	Direction direction = Direction.fromIntMinecraftSide(side).getInverse();    	
     	int blockID = world.getBlockId(x, y, z);
@@ -375,11 +382,13 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
 		// TODO Auto-generated method stub
+    	if(isStackValidToPlace(item) == false) return false;
 		return getDescriptor(item).shouldUseRenderHelper(type, item, helper);
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+    	if(isStackValidToPlace(item) == false) return;
 		Minecraft.getMinecraft().mcProfiler.startSection("SixNodeItem");
 
 		switch(type)

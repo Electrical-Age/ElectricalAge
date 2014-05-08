@@ -1200,7 +1200,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "Copper Thermal Cable";
+			name = "Removed from mod Copper Thermal Cable";
 
 			ThermalCableDescriptor desc = new ThermalCableDescriptor(name,
 					1000 - 20, -200, // thermalWarmLimit, thermalCoolLimit,
@@ -1210,12 +1210,18 @@ public class Eln {
 							"sprites/tex_thermalcablebase.png", 4, 4),
 					"Miaou !");// description
 
-			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			desc.addToData(false);
+			sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
+			 
 		}
+		
+		//subId 0 taken !
+		
+		
 		{
 			subId = 1;
 
-			name = "Isolated Copper Thermal Cable";
+			name = "Copper Thermal Cable";
 
 			ThermalCableDescriptor desc = new ThermalCableDescriptor(name,
 					1000 - 20, -200, // thermalWarmLimit, thermalCoolLimit,
@@ -1226,6 +1232,8 @@ public class Eln {
 					"Miaou !");// description
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			
+			//sixNodeItem.doubleEntry(subId + (id << 6), subId + (0 << 6));
 		}
 	}
 
@@ -1287,6 +1295,7 @@ public class Eln {
 					// thermalCoolLimit,
 					"the battery" // name, description)
 			);
+			desc.setCurrentDrop(stdU*1.2,desc.electricalStdP*1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -1306,6 +1315,7 @@ public class Eln {
 					"the battery" // name, description)
 			);
 			desc.setRenderSpec("highvoltage");
+			desc.setCurrentDrop(stdU*1.2,desc.electricalStdP*1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -1325,6 +1335,7 @@ public class Eln {
 					// thermalCoolLimit,
 					"the battery" // name, description)
 			);
+			desc.setCurrentDrop(stdU*1.2,desc.electricalStdP*1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -1343,6 +1354,7 @@ public class Eln {
 					// thermalCoolLimit,
 					"the battery" // name, description)
 			);
+			desc.setCurrentDrop(stdU*1.2,desc.electricalStdP*1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -1381,6 +1393,7 @@ public class Eln {
 					// thermalCoolLimit,
 					"Obselete, must be deleted" // name, description)
 			);
+			desc.setCurrentDrop(stdU*1.2,desc.electricalStdP*2.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -1401,6 +1414,7 @@ public class Eln {
 					// thermalCoolLimit,
 					"the battery" // name, description)
 			);
+			desc.setCurrentDrop(stdU*1.2,desc.electricalStdP*2.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
@@ -4642,25 +4656,25 @@ public class Eln {
 				Character.valueOf('C'), findItemStack("Copper Cable"));
 
 		// for(int idx = 0;idx<16;idx++)
-		addRecipe(
-				findItemStack("Isolated Copper Thermal Cable", 3),
+	/*	addRecipe(
+				findItemStack("Copper Thermal Cable", 3),
 				"WWW",
 				"SSS",
 				"CCC",
 				Character.valueOf('W'), "ingotRubber",// new
 														// ItemStack(Block.cloth,1,idx),
 				Character.valueOf('S'), new ItemStack(Block.sand),
-				Character.valueOf('C'), findItemStack("Copper Thermal Cable"));
+				Character.valueOf('C'), findItemStack("Removed from mod Copper Thermal Cable"));
 
 		addRecipe(
-				findItemStack("Isolated Copper Thermal Cable", 1),
+				findItemStack("Copper Thermal Cable", 1),
 				"W",
 				"S",
 				"C",
 				Character.valueOf('W'), "ingotRubber",// new
 														// ItemStack(Block.cloth,1,idx),
 				Character.valueOf('S'), new ItemStack(Block.sand),
-				Character.valueOf('C'), findItemStack("Copper Thermal Cable"));
+				Character.valueOf('C'), findItemStack("Removed from mod Copper Thermal Cable"));*/
 
 	}
 
@@ -4885,7 +4899,7 @@ public class Eln {
 		 * Character.valueOf('m'), findItemStack("Electrical motor"),
 		 * Character.valueOf('M'), findItemStack("Machine block"),
 		 * Character.valueOf('E'), findItemStack("Copper cable"),
-		 * Character.valueOf('H'), findItemStack("Copper thermal cable"));
+		 * Character.valueOf('H'), findItemStack("Removed from mod Copper Thermal Cable"));
 		 */
 		addRecipe(findItemStack("50V Turbine"),
 				" m ",

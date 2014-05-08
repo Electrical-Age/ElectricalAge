@@ -26,7 +26,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 	ArrayList<Integer> orderList = new ArrayList<Integer>();
 	
 	
-	Descriptor defaultElement = null;
+	public Descriptor defaultElement = null;
 	
 	public GenericItemBlockUsingDamage(int par1) {
 		super(par1);
@@ -39,6 +39,9 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 		defaultElement = descriptor;
 	}
 	
+	public void doubleEntry(int src,int dst){
+		subItemList.put(dst,subItemList.get(src));
+	}
 
 	public void addDescriptor(int damage,Descriptor descriptor)
 	{
@@ -50,7 +53,14 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 		descriptor.setParent(this, damage);
 		GameRegistry.registerCustomItemStack(descriptor.name, descriptor.newItemStack(1));
 	}
-	
+	public void addWithoutRegistry(int damage,Descriptor descriptor)
+	{
+		subItemList.put(damage,descriptor);
+		ItemStack stack = new ItemStack(this, 1, damage);
+		stack.setTagCompound(descriptor.getDefaultNBT());
+		LanguageRegistry.addName(stack,descriptor.name);
+		descriptor.setParent(this, damage);
+	}	
 	public Descriptor getDescriptor(int damage)
 	{
 		return subItemList.get(damage);
