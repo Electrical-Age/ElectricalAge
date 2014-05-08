@@ -41,7 +41,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 	static final int pipeGhostUUID = 75;
 
 	enum jobType {none,done,full, ore, pipeAdd, pipeRemove};
-	jobType job = jobType.none;
+	jobType job = jobType.none,oldJob = jobType.none;
 	Coordonate jobCoord = new Coordonate();
 	int blinkCounter = 0;
 	boolean isReadyToDrill(){
@@ -60,10 +60,11 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 		return false;
 	}
 	
+	
+	
 	@Override
 	public void process(double time) {
 		ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
-		OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.OreScannerSlotId));
 		MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
 		
 		if(++blinkCounter >= 9){
@@ -141,7 +142,8 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 				miner.inPowerLoad.setRp(Double.POSITIVE_INFINITY);
 			}
 			else {
-				double p = drill.nominalPower + (scanner != null ? scanner.OperationEnergy/drill.operationTime : 0);
+			//	double p = drill.nominalPower + (scanner != null ? scanner.OperationEnergy/drill.operationTime : 0);
+				double p = drill.nominalPower;
 				miner.inPowerLoad.setRp(Math.pow(miner.descriptor.nominalVoltage,2.0)/p);
 			}
 			break;
@@ -153,6 +155,11 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 			break;		
 		}
 		
+		
+		if(oldJob != job){
+			miner.needPublish();
+		}
+		oldJob = job;
 		//System.out.println(job);
 	}
 	
@@ -177,15 +184,12 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 	
 	void setupJob() {
 		ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
-		OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.OreScannerSlotId));
+	//	OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.OreScannerSlotId));
 		MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
 		
-		int scannerRadius = 0;
+		int scannerRadius = 2;
 		double scannerEnergy = 0;
-		if(scanner != null) {
-			scannerRadius = scanner.radius;
-			scannerEnergy = scanner.OperationEnergy;
-		}
+
 		
 		World world = miner.node.coordonate.world();
 		jobCoord.dimention = miner.node.coordonate.dimention;

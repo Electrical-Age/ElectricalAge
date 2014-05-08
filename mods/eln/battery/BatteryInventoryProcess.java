@@ -45,5 +45,19 @@ public class BatteryInventoryProcess implements IProcess {
 			}		
 		}
 		battery.batteryProcess.setCut(cut);
+		
+		double U = battery.positiveLoad.Uc - battery.negativeLoad.Uc;
+		
+		double currentDropPower = (U-battery.descriptor.currentDropVoltage) / battery.descriptor.electricalU * battery.descriptor.currentDropFactor;
+		if(currentDropPower < 0.0e-14){
+			currentDropPower = 0.0e-14;
+		}
+		/*else{
+			System.out.println(currentDropPower);
+		}*/
+		
+		battery.dischargeResistor.setR(1/(1/battery.descriptor.electricalRp + 1/(U*U/currentDropPower)));
+
+
 	}
 }
