@@ -1267,6 +1267,8 @@ public class Eln {
 					// thermalCoolLimit,
 					"Cheap battery" // name, description)
 			);
+			
+			desc.setCurrentDrop(stdU*1.2,desc.electricalStdP*1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -4442,12 +4444,12 @@ public class Eln {
 		}
 		{
 			subId = 9;
-			name = "Plumb Plate";
+			name = "Lead Plate";
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
 			Data.addResource(desc.newItemStack());
-			addToOre("platePlumb", desc.newItemStack());
+			addToOre("plateLead", desc.newItemStack());
 		}
 		{
 			subId = 10;
@@ -4686,6 +4688,10 @@ public class Eln {
 
 		addRecipe(findItemStack("Robust Lamp Socket", 3),
 				"GIG",
+				Character.valueOf('G'), new ItemStack(Block.thinGlass),
+				Character.valueOf('I'), new ItemStack(Item.ingotIron));
+		addRecipe(findItemStack("Flat Lamp Socket", 3),
+				"IGI",
 				Character.valueOf('G'), new ItemStack(Block.thinGlass),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron));
 
@@ -4935,9 +4941,9 @@ public class Eln {
 				Character.valueOf('P'), "ingotCopper");
 
 		addRecipe(findItemStack("Life Oriented Battery"),
-				"PPP",
-				"PBP",
-				"PPP",
+				"P P",
+				" BP",
+				"P P",
 				Character.valueOf('B'), findItemStack("Cost Oriented Battery"),
 				Character.valueOf('P'), new ItemStack(Item.ingotGold));
 
@@ -5727,7 +5733,7 @@ public class Eln {
 				findItemStack("Copper Plate"), 1.0 * f));
 
 		compressorRecipes.addRecipe(new Recipe(findItemStack("Plumb Ingot", 4),
-				findItemStack("Plumb Plate"), 1.0 * f));
+				findItemStack("Lead Plate"), 1.0 * f));
 
 		plateMachineRecipes.addRecipe(new Recipe(
 				findItemStack("Silicon Ingot", 4),

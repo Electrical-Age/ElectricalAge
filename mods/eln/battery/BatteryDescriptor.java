@@ -300,4 +300,10 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 			}
 		}		
 	}
+
+	public double currentDropVoltage = 1000000, currentDropFactor = 0;
+	public void setCurrentDrop(double currentDropVoltage, double currentDropFactor) {
+		this.currentDropFactor = currentDropFactor;
+		this.currentDropVoltage = currentDropVoltage;
+	}
 }

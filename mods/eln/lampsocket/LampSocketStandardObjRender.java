@@ -12,7 +12,7 @@ import mods.eln.misc.UtilsClient;
 
 public class LampSocketStandardObjRender implements LampSocketObjRender {
 	private Obj3D obj;
-	private Obj3DPart socket;
+	private Obj3DPart socket,socket_unlightable,socket_lightable;
 	ResourceLocation tOn, tOff;
 	private boolean onOffModel;
 
@@ -21,6 +21,8 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 		this.onOffModel = onOffModel;
 		if (obj != null) {
 			socket = obj.getPart("socket");
+			socket_unlightable = obj.getPart("socket_unlightable");
+			socket_lightable = obj.getPart("socket_lightable");
 			tOff = obj.getAlternativeTexture(obj.getString("tOff"));
 			tOn = obj.getAlternativeTexture(obj.getString("tOn"));
 		}
@@ -56,18 +58,24 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 
 		GL11.glDisable(GL11.GL_CULL_FACE);
 		if (onOffModel == false) {
-			socket.draw();
+			if(socket != null) socket.draw();
 		}
 		else {
 			//
 			if (light > 5) {
-				UtilsClient.disableLight();
 				UtilsClient.bindTexture(tOn);
 			}
 			else
 				UtilsClient.bindTexture(tOff);
 
-			socket.drawNoBind();
+			if(socket_unlightable != null) socket_unlightable.drawNoBind();
+			
+			if (light > 5) {
+				UtilsClient.disableLight();
+				if(socket_lightable != null) socket_lightable.drawNoBind();
+			}
+			
+			if(socket != null) socket.drawNoBind();
 			
 			if (light > 5) 
 				UtilsClient.enableLight();
