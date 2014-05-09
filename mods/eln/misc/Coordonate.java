@@ -183,7 +183,7 @@ public class Coordonate implements INBTTReady {
 	
 	public double distanceTo(Entity e)
 	{
-		return Math.abs(e.posX - x) +  Math.abs(e.posY - y) + Math.abs(e.posZ - z);
+		return Math.abs(e.posX - (x+0.5)) +  Math.abs(e.posY - (y+0.5)) + Math.abs(e.posZ - (z+0.5));
 	}
 	
 	public void setBlock(int id, int meta) {

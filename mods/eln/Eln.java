@@ -58,6 +58,7 @@ import mods.eln.electricalweathersensor.ElectricalWeatherSensorDescriptor;
 import mods.eln.electricalwindsensor.ElectricalWindSensorDescriptor;
 import mods.eln.electricasensor.ElectricalSensorDescriptor;
 import mods.eln.elnhttpserver.ElnHttpServer;
+import mods.eln.entity.ReplicatorEntity;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -190,6 +191,7 @@ import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.EnumArmorMaterial;
@@ -213,6 +215,7 @@ import net.minecraft.src.ModLoader;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.WorldSavedData;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraft.block.material.Material;
@@ -244,6 +247,7 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.event.FMLServerStoppingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
@@ -678,7 +682,7 @@ public class Eln {
 		 * 
 		 * int id = 0,subId = 0,completId; String name;
 		 */
-
+		registerReplicator();
 
 		registerArmor();
 		registerTool();
@@ -1910,7 +1914,7 @@ public class Eln {
 			{
 				subId = 12;
 				name = "Electrical Entity Sensor";
-				desc = new ElectricalEntitySensorDescriptor(name, obj.getObj("ProximitySensor"), 15);
+				desc = new ElectricalEntitySensorDescriptor(name, obj.getObj("ProximitySensor"), 10);
 				sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			}
 		}
@@ -6285,6 +6289,23 @@ public class Eln {
 				Character.valueOf('s'), new ItemStack(Item.stick));
 
 	}
+	
+	
+	void registerReplicator(){
+	    int redColor = (255 << 16);
+	    int orangeColor = (255 << 16)+ (200 << 8);
+
+	    //Register mob
+	    EntityRegistry.registerGlobalEntityID(ReplicatorEntity.class,"EAReplicator",EntityRegistry.findGlobalUniqueEntityId(), redColor,orangeColor);
+
+	    //Localize mob name
+	    LanguageRegistry.instance().addStringLocalization("entity.EAReplicator.name", "en_US", "Replicator");
+
+	    //Add mob spawn
+	    EntityRegistry.addSpawn(ReplicatorEntity.class, 2, 1, 2, EnumCreatureType.monster, BiomeGenBase.plains);
+	    EntityRegistry.addSpawn(ReplicatorEntity.class, 5, 1, 2, EnumCreatureType.monster, BiomeGenBase.extremeHills);		
+	}
+	
 
 	public ItemStack findItemStack(String name, int stackSize) {
 		ItemStack stack = GameRegistry.findItemStack("Eln", name, stackSize);

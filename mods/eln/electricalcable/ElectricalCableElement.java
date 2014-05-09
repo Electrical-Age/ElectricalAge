@@ -38,7 +38,7 @@ import net.minecraft.world.World;
 
 public class ElectricalCableElement extends SixNodeElement implements IThermalDestructorDescriptor, ITemperatureWatchdogDescriptor {
 
-	ElectricalCableDescriptor descriptor;
+	public ElectricalCableDescriptor descriptor;
 	
 	public ElectricalCableElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
@@ -57,7 +57,7 @@ public class ElectricalCableElement extends SixNodeElement implements IThermalDe
 		electricalLoad.setSimplifyAuthorized(true);
 	}
 
-	NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");
+	public NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");
 	NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
 	ElectricalLoadCableHeatThermalLoadProcess ETProcess = new ElectricalLoadCableHeatThermalLoadProcess(electricalLoad, thermalLoad);
 

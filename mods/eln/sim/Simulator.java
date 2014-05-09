@@ -662,7 +662,7 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 		for (ElectricalLoad l : electricalLoadList) {
 			if(Double.isNaN(l.Uc)){
 				for(int i = 0;i < 10;i++){
-					System.out.println("NAN NAN NAN NAN NAN NAN NAN NAN NAN NAN NAN");
+					System.out.print("NAN");
 				}
 				try {
 					Thread.sleep(100);

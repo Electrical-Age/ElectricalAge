@@ -19,11 +19,15 @@ import net.minecraft.world.WorldSavedData;
 public class NodeManager extends WorldSavedData{
 	public static NodeManager instance = null;
 	
-	HashMap<Coordonate, NodeBase> nodeArray;
+	HashMap<Coordonate, NodeBase> nodesmap;
+	ArrayList<NodeBase> nodes;
 	
 	public HashMap<Coordonate, NodeBase> getNodeArray()
 	{
-		return nodeArray;
+		return nodesmap;
+	}
+	public ArrayList<NodeBase> getNodes(){
+		return nodes;
 	}
 	public static Class[] UUIDToClass = new Class[4096];
 	public static void registerBlock(Block block,Class classType)
@@ -33,7 +37,7 @@ public class NodeManager extends WorldSavedData{
 	
 	Collection<NodeBase> getNodeList()
 	{
-		return nodeArray.values();
+		return nodesmap.values();
 	}
 	
 	//private ArrayList<Node> nodeArray = new ArrayList<Node>();
@@ -41,7 +45,8 @@ public class NodeManager extends WorldSavedData{
 	
 	public NodeManager(String par1Str) {	
 		super(par1Str);
-		nodeArray = new HashMap<Coordonate, NodeBase>();
+		nodesmap = new HashMap<Coordonate, NodeBase>();
+		nodes = new ArrayList<NodeBase>();
 		instance = this;
 		// TODO Auto-generated constructor stub
 	}
@@ -54,21 +59,24 @@ public class NodeManager extends WorldSavedData{
 			System.out.println("Null coordonate addnode");
 			while(true);
 		}
-		nodeArray.put(node.coordonate, node);
-		System.out.println("NodeManager has " + nodeArray.size() +"node");
+		nodesmap.put(node.coordonate, node);
+		nodes.add(node);
+		System.out.println("NodeManager has " + nodesmap.size() +"node");
 		//nodeArray.put(new NodeIdentifier(node), node);
 	}
 	public void removeNode(NodeBase node)
 	{
 	//	nodeArray.remove(node);
-		nodeArray.remove(node.coordonate);
-		System.out.println("NodeManager has " + nodeArray.size() +"node");
+		nodesmap.remove(node.coordonate);
+		nodes.remove(node);
+		System.out.println("NodeManager has " + nodesmap.size() +"node");
 	}
 	public void removeCoordonate(Coordonate c)
 	{
 	//	nodeArray.remove(node);
-		nodeArray.remove(c);
-		System.out.println("NodeManager has " + nodeArray.size() +"node");
+		NodeBase n = nodesmap.remove(c);
+		if(n != null) nodes.remove(n);
+		System.out.println("NodeManager has " + nodesmap.size() +"node");
 	}
 	@Override
     public boolean isDirty()
@@ -122,7 +130,7 @@ public class NodeManager extends WorldSavedData{
 			nbt.setCompoundTag("node" + nodeCounter++, nbtNode);
 		}*/
 		//for(Node node : nodeArray)
-		for(NodeBase node : nodeArray.values())
+		for(NodeBase node : nodesmap.values())
 		{
 			if(node.mustBeSaved() == false) continue;
 			NBTTagCompound nbtNode = new NBTTagCompound();
@@ -141,7 +149,7 @@ public class NodeManager extends WorldSavedData{
 		{
 		//	if(nodeCoordonate.equals(node.coordonate)) return node;
 		}
-		return nodeArray.get(nodeCoordonate);
+		return nodesmap.get(nodeCoordonate);
 		//return null;
 	}
 	

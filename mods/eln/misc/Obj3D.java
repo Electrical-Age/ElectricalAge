@@ -429,7 +429,8 @@ public class Obj3D {
 					{
 						for(Obj3DPart partPtr : nameToPartHash.values())
 						{
-							if(partPtr.mtlName.equals(mtlName))
+
+							if(partPtr.mtlName != null && partPtr.mtlName.equals(mtlName))
 							{
 								part = partPtr;
 								part.textureResource = new ResourceLocation(modName, directory.substring(1) + words[1]);
