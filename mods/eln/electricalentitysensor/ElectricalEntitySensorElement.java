@@ -108,4 +108,24 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
 	public Container newContainer(Direction side, EntityPlayer player) {
 		return new ElectricalEntitySensorContainer(player, inventory);
 	}
+	
+	@Override
+	protected void inventoryChanged() {
+		// TODO Auto-generated method stub
+		super.inventoryChanged();
+		needPublish();
+	}
+	
+	@Override
+	public void networkSerialize(DataOutputStream stream) {
+		// TODO Auto-generated method stub
+		super.networkSerialize(stream);
+		try {
+			stream.writeBoolean(slowProcess.state);
+			Utils.serialiseItemStack(stream, inventory.getStackInSlot(ElectricalEntitySensorContainer.filterId));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

@@ -46,6 +46,16 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 	}
 	
 	
+	
+	public void addWithoutRegistry(int damage,Descriptor descriptor)
+	{
+		subItemList.put(damage,descriptor);
+		ItemStack stack = new ItemStack(this, 1, damage);
+		LanguageRegistry.addName(stack,descriptor.name);
+		descriptor.setParent(this, damage);
+
+	}
+	
 	public void addElement(int damage,Descriptor descriptor)
 	{
 		subItemList.put(damage,descriptor);

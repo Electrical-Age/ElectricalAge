@@ -273,6 +273,7 @@ public class Eln {
 	public static String channelName = "miaouMod";
 
 	public static final String[] objNames = new String[] {
+			"/model/electricalweathersensor/electricalweathersensor.obj",
 			"/model/SmallWaterWheel/SmallWaterWheel.obj",
 			"/model/ProximitySensor/ProximitySensor.obj",
 			"/model/FlatLamp/FlatLamp.obj",
@@ -1891,7 +1892,7 @@ public class Eln {
 			{
 				subId = 4;
 				name = "Electrical Weather Sensor";
-				desc = new ElectricalWeatherSensorDescriptor(name, obj.getObj("daylightsensor"));
+				desc = new ElectricalWeatherSensorDescriptor(name, obj.getObj("electricalweathersensor"));
 				sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			}
 		}
@@ -4562,7 +4563,7 @@ public class Eln {
 			name = "Data Logger Print";
 			DataLogsPrintDescriptor desc = new DataLogsPrintDescriptor(name);
 			dataLogsPrintDescriptor = desc;
-			sharedItem.addElement(subId + (id << 6), desc);
+			sharedItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
 
 		{
@@ -4577,13 +4578,13 @@ public class Eln {
 		{
 			subId = 40;
 			name = "Player Filter";
-			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityPlayerMP.class);
+			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityPlayerMP.class,0f,1f,0f);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
 			subId = 41;
 			name = "Monster Filter";
-			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityMob.class);
+			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityMob.class,1f,0f,0f);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 

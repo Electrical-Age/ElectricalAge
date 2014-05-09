@@ -7,9 +7,11 @@ import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementInventory;
@@ -31,14 +33,24 @@ public class ElectricalEntitySensorRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
-		descriptor.draw(0.0f);
+		descriptor.draw(state,filter);
 	}
 
+	boolean state = false;
+	EntitySensorFilterDescriptor filter = null;
 	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
+		try {
+			state = stream.readBoolean();
+			ItemStack filterStack = Utils.unserialiseItemStack(stream);
+			filter = (EntitySensorFilterDescriptor) EntitySensorFilterDescriptor.getDescriptor(filterStack);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -51,4 +63,6 @@ public class ElectricalEntitySensorRender extends SixNodeElementRender {
 		return new ElectricalEntitySensorGui(player, inventory, this);
 	}
 	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+	
+	
 }

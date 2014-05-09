@@ -8,6 +8,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import mods.eln.Eln;
+import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
@@ -39,11 +40,17 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
 
 	Obj3D obj;
 
-	void draw(float state) {
+	void draw(boolean state,EntitySensorFilterDescriptor filter) {
 		if(detector != null) detector.draw();
-		/*if(state){
+		if(state){
+			if(filter == null){
+				GL11.glColor3f(1f, 1f, 0f);
+			}
+			else{
+				filter.glColor();
+			}
 			UtilsClient.drawLight(haloMask);
-		}*/
+		}
 	}
 	
 	@Override
@@ -71,6 +78,6 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		GL11.glScalef(2f, 2f, 2f);
-		draw(0.0f);
+		draw(false,null);
 	}
 }

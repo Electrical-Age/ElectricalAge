@@ -11,6 +11,7 @@ import mods.eln.Eln;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.UtilsClient;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
@@ -36,7 +37,9 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
 	Obj3D obj;
 
 	void draw() {
+		UtilsClient.disableCulling();
 		if(main != null) main.draw();
+		UtilsClient.enableCulling();
 	}
 	
 	@Override

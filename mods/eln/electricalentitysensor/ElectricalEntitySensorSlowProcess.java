@@ -38,6 +38,8 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
 	RcInterpolator rc1 = new RcInterpolator(0.8f);
 	RcInterpolator rc2 = new RcInterpolator(0.8f);
 	
+	boolean oldState = false;
+	boolean state = false;
 	@Override
 	public void process(double time) {
 		timeCounter += time;
@@ -96,6 +98,10 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
 		rc2.step((float) time);
 		
 		element.outputGateProcess.setOutputNormalized(rc2.get());
+		
+		state = element.outputGateProcess.getOutputNormalized() > 0.6;
+		if(state != oldState) element.needPublish();
+		oldState = state;
 	}
 	
 	@Override
