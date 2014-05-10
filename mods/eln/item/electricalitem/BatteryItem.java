@@ -77,6 +77,7 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 	}
 	public void setEnergy(ItemStack stack,double value)
 	{
+		if(value < 0) value = 0;
 		getNbt(stack).setDouble("energy",value);
 	}
 

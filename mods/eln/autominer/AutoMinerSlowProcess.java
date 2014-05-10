@@ -187,7 +187,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 	//	OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.OreScannerSlotId));
 		MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
 		
-		int scannerRadius = 2;
+		int scannerRadius = 10;
 		double scannerEnergy = 0;
 
 		

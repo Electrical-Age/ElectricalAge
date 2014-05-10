@@ -54,6 +54,7 @@ import mods.eln.electricalsource.ElectricalSourceRender;
 import mods.eln.electricalswitch.ElectricalSwitchDescriptor;
 import mods.eln.electricaltimout.ElectricalTimeoutDescriptor;
 import mods.eln.electricalvumeter.ElectricalVuMeterDescriptor;
+import mods.eln.electricalwatch.ElectricalWatchDescriptor;
 import mods.eln.electricalweathersensor.ElectricalWeatherSensorDescriptor;
 import mods.eln.electricalwindsensor.ElectricalWindSensorDescriptor;
 import mods.eln.electricasensor.ElectricalSensorDescriptor;
@@ -277,6 +278,7 @@ public class Eln {
 	public static String channelName = "miaouMod";
 
 	public static final String[] objNames = new String[] {
+			"/model/WallClock/WallClock.obj",
 			"/model/electricalweathersensor/electricalweathersensor.obj",
 			"/model/SmallWaterWheel/SmallWaterWheel.obj",
 			"/model/ProximitySensor/ProximitySensor.obj",
@@ -1755,6 +1757,21 @@ public class Eln {
 			ModbusRtuDescriptor desc = new ModbusRtuDescriptor(
 					name,
 					obj.getObj("RTU")
+
+					);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		
+		
+		{
+			subId = 4;
+			name = "Watch";
+
+			ElectricalWatchDescriptor desc = new ElectricalWatchDescriptor(
+					name,
+					obj.getObj("WallClock"),
+					20000.0/(3600*40)
 
 					);
 
@@ -6296,14 +6313,14 @@ public class Eln {
 	    int orangeColor = (255 << 16)+ (200 << 8);
 
 	    //Register mob
-	    EntityRegistry.registerGlobalEntityID(ReplicatorEntity.class,"EAReplicator",EntityRegistry.findGlobalUniqueEntityId(), redColor,orangeColor);
+	/*    EntityRegistry.registerGlobalEntityID(ReplicatorEntity.class,"EAReplicator",EntityRegistry.findGlobalUniqueEntityId(), redColor,orangeColor);
 
 	    //Localize mob name
 	    LanguageRegistry.instance().addStringLocalization("entity.EAReplicator.name", "en_US", "Replicator");
 
 	    //Add mob spawn
 	    EntityRegistry.addSpawn(ReplicatorEntity.class, 2, 1, 2, EnumCreatureType.monster, BiomeGenBase.plains);
-	    EntityRegistry.addSpawn(ReplicatorEntity.class, 5, 1, 2, EnumCreatureType.monster, BiomeGenBase.extremeHills);		
+	    EntityRegistry.addSpawn(ReplicatorEntity.class, 5, 1, 2, EnumCreatureType.monster, BiomeGenBase.extremeHills);		*/
 	}
 	
 
