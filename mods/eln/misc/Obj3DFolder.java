@@ -16,11 +16,7 @@ public class Obj3DFolder {
 	public void loadFolder(String modName,String folderName)
 	{
 		
-		/*
-		System.out.println("public void loadFolder(String folderName) at ");
-		System.out.println( " .  ->" + mods.eln.Eln.class.getResource("."));
-		System.out.println( " /.  ->" + mods.eln.Eln.class.getResource("/."));
-		System.out.print("     " + folderName);*/
+
 			URI url;
 			try {
 				URL rec = mods.eln.Eln.class.getResource("/assets/" + modName +  folderName);

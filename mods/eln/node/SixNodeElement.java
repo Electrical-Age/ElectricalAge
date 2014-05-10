@@ -58,6 +58,13 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
 
 	}
 	
+	public void playSoundEffect(String sournd,float strengh,float pitch){
+		Coordonate c = getCoordonate();
+		c.world().playSoundEffect((double)c.x + 0.5D, (double)c.y + 0.5D, (double)c.z + 0.5D, sournd,strengh, pitch);
+	}
+	public Coordonate getCoordonate(){
+		return sixNode.coordonate;
+	}
 	protected boolean onBlockActivatedRotate(EntityPlayer entityPlayer)
 	{
 		if(Eln.playerManager.get(entityPlayer).getInteractEnable())

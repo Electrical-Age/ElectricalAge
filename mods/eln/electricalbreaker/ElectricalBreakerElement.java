@@ -146,6 +146,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 
 	public void setSwitchState(boolean state) {
 		if(state == switchState) return;
+		playSoundEffect("random.click", 0.3F, 0.6F);
 		switchState = state;
 		refreshSwitchResistor();
 		needPublish(); 

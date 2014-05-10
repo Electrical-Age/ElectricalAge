@@ -25,141 +25,22 @@ public class Obj3D {
 	public float xMin=0,yMin=0,zMin=0;
 	public float xMax=0,yMax=0,zMax=0;
 	public float dimMax,dimMaxInv;
-	public class Obj3DPart
-	{
+	
+	
+	public static class FaceGroupe{
+		String mtlName = null;
+		public ResourceLocation textureResource;
+		ArrayList<Face> face = new ArrayList<Face>();
 		boolean listReady = false;
 		int glList;
-		ArrayList<Vertex> vertex;
-		ArrayList<Uv> uv;
-		ArrayList<Face> face = new ArrayList<Face>();
-		Hashtable<String, Float> nameToFloatHash = new Hashtable<String, Float>();
-
-		String mtlName;
-		public ResourceLocation textureResource;
-		public Obj3DPart(ArrayList<Vertex> vertex,ArrayList<Uv> uv) {
-			this.vertex = vertex;
-			this.uv = uv;
-		}
-		/*
-		
-	    private FloatBuffer vertices;
-	    private IntBuffer indices;
-	    private int VBOVertices;
-	    private int VBOIndices;
-		
-	
-	    public int createVBOID() {
-    	  if (GLContext.getCapabilities().GL_ARB_vertex_buffer_object) {
-    	    IntBuffer buffer = BufferUtils.createIntBuffer(1);
-    	    ARBVertexBufferObject.glGenBuffersARB(buffer);
-    	    return buffer.get(0);
-    	  }
-    	  return 0;
-    	}	    
-    
-	    public void bufferData(int id, FloatBuffer buffer) {
-    	  if (GLContext.getCapabilities().GL_ARB_vertex_buffer_object) {
-    	    ARBVertexBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, id);
-    	    ARBVertexBufferObject.glBufferDataARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, buffer, ARBVertexBufferObject.GL_STATIC_DRAW_ARB);
-    	  }
-    	}
-	    public void bufferElementData(int id, IntBuffer buffer) {
-		  if (GLContext.getCapabilities().GL_ARB_vertex_buffer_object) {
-		    ARBVertexBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ELEMENT_ARRAY_BUFFER_ARB, id);
-		    ARBVertexBufferObject.glBufferDataARB(ARBVertexBufferObject.GL_ELEMENT_ARRAY_BUFFER_ARB, buffer, ARBVertexBufferObject.GL_STATIC_DRAW_ARB);
-		  }
-    	}
-	    
-	    public void render() {
-	    	  GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-	    	  ARBVertexBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, VBOVertices);
-	    	  GL11.glVertexPointer(3, GL11.GL_FLOAT, 0, 0);
-	    	 
-	    	  //GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
-	    	//  ARBVertexBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ARRAY_BUFFER_ARB, colourBufferID);
-	    	//  GL11.glColorPointer(4, GL11.GL_FLOAT, 0, 0);
-	    	 
-	    	  ARBVertexBufferObject.glBindBufferARB(ARBVertexBufferObject.GL_ELEMENT_ARRAY_BUFFER_ARB, VBOIndices);
-	    	  GL12.glDrawRangeElements(GL11.GL_TRIANGLES, 0, 3, indices);
-	    	}*/
-		
 
 		public void bindTexture()
 		{
 			UtilsClient.bindTexture(textureResource);
 		}
 		
-
-		public float getFloat(String name)
-		{
-			return nameToFloatHash.get(name);
-		}
-		/*
-		public static int createVBOID() {
-			if (GLContext.getCapabilities().GL_ARB_vertex_buffer_object) {
-			IntBuffer buffer = BufferUtils.createIntBuffer(1);
-			ARBVertexBufferObject.glGenBuffersARB(buffer);
-			return buffer.get(0);
-			}
-			return 0;
-		}*/
-		float ox,oy,oz;
-		float ox2,oy2,oz2;
-		public void draw(float angle,float x,float y,float z)
-		{
-			GL11.glPushMatrix();
-			
-			GL11.glTranslatef(ox,oy,oz);
-			GL11.glRotatef(angle,x,y,z);
-			GL11.glTranslatef(-ox,-oy,-oz);
-			draw();
-			
-			GL11.glPopMatrix();
-		}
 		
-		public void draw(float angle,float x,float y,float z,float angle2,float x2,float y2,float z2)
-		{
-			GL11.glPushMatrix();
-			
-			GL11.glTranslatef(ox,oy,oz);
-			GL11.glRotatef(angle,x,y,z);
-			GL11.glTranslatef(ox2,oy2,oz2);
-			GL11.glRotatef(angle2,x2,y2,z2);
-			GL11.glTranslatef(-ox2,-oy2,-oz2);
-			GL11.glTranslatef(-ox,-oy,-oz);
-			draw();
-			
-			GL11.glPopMatrix();
-		}
-		
-		public void drawNoBind(float angle,float x,float y,float z)
-		{
-			GL11.glPushMatrix();
-			
-			GL11.glTranslatef(ox,oy,oz);
-			GL11.glRotatef(angle,x,y,z);
-			GL11.glTranslatef(-ox,-oy,-oz);
-			drawNoBind();
-			
-			GL11.glPopMatrix();
-		}
-		public void drawNoBind(){
-			if(listReady == false)
-			{
-				listReady = true;
-				glList = GL11.glGenLists(1);
-				
-				GL11.glNewList(glList, GL11.GL_COMPILE);
-				drawVertex();
-				GL11.glEndList();					
-				
-			}
-
-			GL11.glCallList(glList);		
-		}
-		public void draw()
-		{		
-		//	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
+		public void draw(){
 			if(textureResource != null){
 				UtilsClient.bindTexture(textureResource);
 				drawNoBind();
@@ -169,9 +50,9 @@ public class Obj3D {
 				drawNoBind();
 				GL11.glEnable(GL11.GL_TEXTURE_2D);
 			}
-		//	Minecraft.getMinecraft().mcProfiler.endSection();
 		}
-			
+		
+		
 		private void drawVertex()
 		{
 
@@ -213,6 +94,107 @@ public class Obj3D {
 		}
 		
 		
+		public void drawNoBind(){
+			if(listReady == false)
+			{
+				listReady = true;
+				glList = GL11.glGenLists(1);
+				
+				GL11.glNewList(glList, GL11.GL_COMPILE);
+				drawVertex();
+				GL11.glEndList();					
+				
+			}
+
+			GL11.glCallList(glList);	
+			
+
+		}
+		
+	}
+	
+	public class Obj3DPart
+	{
+
+		ArrayList<Vertex> vertex;
+		ArrayList<Uv> uv;
+
+		ArrayList<FaceGroupe> faceGroupe = new ArrayList<FaceGroupe>();
+
+		Hashtable<String, Float> nameToFloatHash = new Hashtable<String, Float>();
+
+
+		public Obj3DPart(ArrayList<Vertex> vertex,ArrayList<Uv> uv) {
+			this.vertex = vertex;
+			this.uv = uv;
+		}
+	
+		
+
+
+		public float getFloat(String name)
+		{
+			return nameToFloatHash.get(name);
+		}
+
+		float ox,oy,oz;
+		float ox2,oy2,oz2;
+		public void draw(float angle,float x,float y,float z)
+		{
+			GL11.glPushMatrix();
+			
+			GL11.glTranslatef(ox,oy,oz);
+			GL11.glRotatef(angle,x,y,z);
+			GL11.glTranslatef(-ox,-oy,-oz);
+			draw();
+			
+			GL11.glPopMatrix();
+		}
+		
+		public void draw(float angle,float x,float y,float z,float angle2,float x2,float y2,float z2)
+		{
+			GL11.glPushMatrix();
+			
+			GL11.glTranslatef(ox,oy,oz);
+			GL11.glRotatef(angle,x,y,z);
+			GL11.glTranslatef(ox2,oy2,oz2);
+			GL11.glRotatef(angle2,x2,y2,z2);
+			GL11.glTranslatef(-ox2,-oy2,-oz2);
+			GL11.glTranslatef(-ox,-oy,-oz);
+			draw();
+			
+			GL11.glPopMatrix();
+		}
+		
+		public void drawNoBind(float angle,float x,float y,float z)
+		{
+			GL11.glPushMatrix();
+			
+			GL11.glTranslatef(ox,oy,oz);
+			GL11.glRotatef(angle,x,y,z);
+			GL11.glTranslatef(-ox,-oy,-oz);
+			drawNoBind();
+			
+			GL11.glPopMatrix();
+		}
+		public void drawNoBind(){
+			
+			for(FaceGroupe fg : faceGroupe){
+				fg.drawNoBind();
+			}
+		}
+		public void draw()
+		{		
+		//	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
+			for(FaceGroupe fg : faceGroupe){
+				fg.draw();
+			}
+		//	Minecraft.getMinecraft().mcProfiler.endSection();
+		}
+			
+
+		
+		
 	}
 	Hashtable<String, Obj3DPart> nameToPartHash = new Hashtable<String, Obj3DPart>();
 
@@ -229,9 +211,6 @@ public class Obj3D {
 			y = Float.parseFloat(value[1]);
 			z = Float.parseFloat(value[2]);
 		}
-		
-
-
 		public float x,y,z;
 	}
 	class Uv{
@@ -314,22 +293,21 @@ public class Obj3D {
 		this.directory = path.substring(0, lastSlashId + 1);
 		this.fileName = path.substring(lastSlashId + 1,path.length());
 		Obj3DPart part = null;
+		FaceGroupe fg = null;
 		mod = modName;
 		try {
 			
 		//	File f  = Minecraft.getAppDir("../src/minecraft");	
 
 			{
-				//ITexturePack var6 = Minecraft.getMinecraft().renderEngine.texturePack.getSelectedTexturePack(); 
-				//InputStream stream = var6.getResourceAsStream(/*rootDirectory + */directory + fileName);
+
 				System.out.println("getResourceAsStream /assets/" + modName + directory + fileName);
 				InputStream stream = Eln.class.getResourceAsStream("/assets/" + modName + directory + fileName);
 				if(stream == null){
 					System.out.println("obj loading fail");
 					return false;
 				}
-				//InputStream stream =  new  FileInputStream(path);
-				//InputStream stream = Eln.class.getResourceAsStream("/Eln/model/MONKEY.obj");//(directory + fileName);	
+
 				StringBuilder inputStringBuilder = new StringBuilder();
 		        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
 
@@ -388,7 +366,7 @@ public class Obj3D {
 							}
 									
 							//System.out.println(vertexNbr  + " " +  uvId + " " +  verticeId[0] + " " + verticeId[1] + " " + verticeId[2] + " ");
-							part.face.add(new Face(verticeId, uvId, new Normal(verticeId[0], verticeId[1],verticeId[2])));
+							fg.face.add(new Face(verticeId, uvId, new Normal(verticeId[0], verticeId[1],verticeId[2])));
 						}
 						else
 						{
@@ -401,7 +379,9 @@ public class Obj3D {
 					}
 					else if(words[0].equals("usemtl"))
 					{
-						part.mtlName = words[1];
+						fg = new FaceGroupe();
+						fg.mtlName = words[1];
+						part.faceGroupe.add(fg);						
 					}
 				}
 			}
@@ -429,16 +409,19 @@ public class Obj3D {
 					{
 						for(Obj3DPart partPtr : nameToPartHash.values())
 						{
-
-							if(partPtr.mtlName != null && partPtr.mtlName.equals(mtlName))
+							for(FaceGroupe faceGroupe : partPtr.faceGroupe)
 							{
-								part = partPtr;
-								part.textureResource = new ResourceLocation(modName, directory.substring(1) + words[1]);
 
-								//Side side = FMLCommonHandler.instance().getEffectiveSide();
-								//if (side == Side.CLIENT)
-									//MinecraftForgeClient.preloadTexture(part.textureName);
-
+								if(faceGroupe.mtlName != null && faceGroupe.mtlName.equals(mtlName))
+								{
+									//part = partPtr;
+									faceGroupe.textureResource = new ResourceLocation(modName, directory.substring(1) + words[1]);
+	
+									//Side side = FMLCommonHandler.instance().getEffectiveSide();
+									//if (side == Side.CLIENT)
+										//MinecraftForgeClient.preloadTexture(part.textureName);
+	
+								}
 							}
 						}
 					}

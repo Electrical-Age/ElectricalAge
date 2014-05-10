@@ -51,7 +51,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 		}
 		
 		front.glRotateXnRef();
-		descriptor.draw();
+		descriptor.draw(false);
 	}
 
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this);

@@ -91,7 +91,7 @@ public class UtilsClient {
 	public static void drawHaloNoLightSetup(Obj3DPart halo, float distance) {
 		if (halo == null)
 			return;
-		halo.bindTexture();
+		halo.faceGroupe.get(0).bindTexture();
 		enableBilinear();
 		float scale = 1f;
 

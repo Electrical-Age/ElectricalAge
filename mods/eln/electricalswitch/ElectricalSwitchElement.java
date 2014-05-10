@@ -8,6 +8,7 @@ import javax.swing.text.MaskFormatter;
 import org.bouncycastle.crypto.modes.SICBlockCipher;
 
 import mods.eln.Eln;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -172,6 +173,7 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
     	}    
     	else {
 			setSwitchState(! switchState);
+			playSoundEffect("random.click", 0.3F, 0.6F);
 			return true;
 		}
 		//front = LRDU.fromInt((front.toInt()+1)&3);

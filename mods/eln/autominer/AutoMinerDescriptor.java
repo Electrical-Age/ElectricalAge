@@ -26,7 +26,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 	Coordonate[] powerCoord;
 	Coordonate lightCoord, miningCoord;
 	public Obj3D obj;
-	public Obj3DPart core,gui,lamp,head,pipe;
+	public Obj3DPart core,gui,lampSocket,lampOff,lampOn,head,pipe;
 	int deltaX,deltaY,deltaZ;
 	public AutoMinerDescriptor(
 			String name,
@@ -58,7 +58,9 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 		
 		core = obj.getPart("AutominerCore");
 		gui = obj.getPart("AutominerGUI");
-		lamp = obj.getPart("LampUser");
+		lampSocket = obj.getPart("LampSocket");
+		lampOff = obj.getPart("LampOff");
+		lampOn = obj.getPart("LampOn");
 		head = obj.getPart("MinerHead");
 		pipe = obj.getPart("MinerPipe");
 	}
@@ -99,15 +101,19 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 		
 	}
 	
-	void draw(){
+	void draw(boolean lampState){
 		GL11.glRotatef(-90, 0, 1, 0);
 		GL11.glTranslatef(0, -1.5f, 0);
-		GL11.glScalef(0.5f, 0.5f, 0.5f);
+		//GL11.glScalef(0.5f, 0.5f, 0.5f);
 		
 		UtilsClient.disableCulling();
 		core.draw();
 		gui.draw();
-		lamp.draw();
+		lampSocket.draw();
+		if(lampState)
+			lampOff.draw();
+		else
+			lampOn.draw();
 		UtilsClient.enableCulling();
 	}
 	
@@ -118,7 +124,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 		// TODO Auto-generated method stub
 		super.renderItem(type, item, data);
 		GL11.glScalef(0.18f, 0.18f, 0.18f);
-		draw();
+		draw(false);
 	}
 	
 	@Override
