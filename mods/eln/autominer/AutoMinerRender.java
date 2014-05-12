@@ -6,8 +6,10 @@ import java.io.IOException;
 import org.bouncycastle.jcajce.provider.symmetric.DES;
 import org.lwjgl.opengl.GL11;
 
+import mods.eln.client.FrameTime;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.node.TransparentNodeElementRender;
@@ -17,19 +19,41 @@ import net.minecraft.entity.player.EntityPlayer;
 
 public class AutoMinerRender extends TransparentNodeElementRender {
 	AutoMinerDescriptor descriptor;
+	float[] buttonsState;
+	boolean[] ledsAState;
+	boolean[] ledsPState;
+	
+	
 	public AutoMinerRender(TransparentNodeEntity tileEntity,
 			TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
 		this.descriptor = (AutoMinerDescriptor) descriptor;
+		
+		buttonsState = new float[this.descriptor.buttonsCount];
+		for(int idx = 0;idx < this.descriptor.buttonsCount;idx++){
+			buttonsState[idx] = (float) Math.random();
+		}
+		
+		ledsAState = new boolean[this.descriptor.ledsACount];
+		for(int idx = 0;idx < this.descriptor.ledsACount;idx++){
+			ledsAState[idx] = Math.random() > 0.5;
+		}
+
+		ledsPState = new boolean[this.descriptor.ledsPCount];
+		for(int idx = 0;idx < this.descriptor.ledsPCount;idx++){
+			ledsPState[idx] = Math.random() > 0.5;
+		}
 	}
 
+	
+	
 	@Override
 	public void draw() {
 		
 		if(pipeLength != 0) {
 			GL11.glPushMatrix();
 			for(int idx = pipeLength;idx != 0;idx--){
-				if(pipeLength != 1){
+				if(idx != 1){
 					descriptor.pipe.draw();
 				}
 				else{
@@ -50,8 +74,23 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 			GL11.glEnable(GL11.GL_TEXTURE_2D);*/
 		}
 		
+		for(int idx = 0;idx < this.descriptor.buttonsCount;idx++){
+			buttonsState[idx] = idx == job.ordinal() ? 1 : 0;
+		}
+		
+		for(int idx = 0;idx < this.descriptor.ledsACount;idx++){
+			if(Math.random() < 0.2*FrameTime.get())
+				ledsAState[idx] = ! ledsAState[idx];
+		}
+
+		for(int idx = 0;idx < this.descriptor.ledsPCount;idx++){
+			if(Math.random() < 0.2*FrameTime.get())
+				ledsPState[idx] = ! ledsPState[idx];
+		}
+		
+		
 		front.glRotateXnRef();
-		descriptor.draw(false);
+		descriptor.draw(false,buttonsState,ledsAState,ledsPState);
 	}
 
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this);

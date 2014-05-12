@@ -6,8 +6,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.client.registry.RenderingRegistry;
 import mods.eln.CommonProxy;
 import mods.eln.Eln;
+import mods.eln.entity.ReplicatorEntity;
+import mods.eln.entity.ReplicatorModel;
+import mods.eln.entity.ReplicatorRender;
 import mods.eln.misc.ItemRender;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3DFolder;
@@ -15,6 +19,8 @@ import mods.eln.node.SixNodeEntity;
 import mods.eln.node.SixNodeRender;
 import mods.eln.node.TransparentNodeEntity;
 import mods.eln.node.TransparentNodeRender;
+import net.minecraft.client.model.ModelSilverfish;
+import net.minecraft.client.renderer.entity.RenderSilverfish;
 import net.minecraftforge.client.MinecraftForgeClient;
 
 public class ClientProxy extends CommonProxy {
@@ -29,6 +35,10 @@ public class ClientProxy extends CommonProxy {
       	MinecraftForgeClient.registerItemRenderer(Eln.sharedItem.itemID, Eln.sharedItem);
       	MinecraftForgeClient.registerItemRenderer(Eln.sharedItemStackOne.itemID, Eln.sharedItemStackOne);
 
+      //	RenderingRegistry.registerEntityRenderingHandler(ReplicatorEntity.class, new RenderSilverfish());
+      //	RenderingRegistry.registerEntityRenderingHandler(ReplicatorEntity.class, new ReplicatorRender(new ReplicatorModel(),1));
+      	RenderingRegistry.registerEntityRenderingHandler(ReplicatorEntity.class, new ReplicatorRender(new ModelSilverfish(),(float) 0.3));
+      	      	    	
 		Eln.clientKeyHandler = new ClientKeyHandler();
 	}
 }

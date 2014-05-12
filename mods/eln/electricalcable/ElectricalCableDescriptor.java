@@ -27,7 +27,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 
 	double electricalNominalRs;
 	public double electricalNominalVoltage, electricalNominalPower, electricalNominalPowerDropFactor;
-	boolean signalWire;
+	public boolean signalWire;
 	public ElectricalCableDescriptor(String name, CableRenderDescriptor render, String description, boolean signalWire) {
 		super(name, ElectricalCableElement.class, ElectricalCableRender.class);
 	

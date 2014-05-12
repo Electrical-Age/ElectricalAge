@@ -27,6 +27,14 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 	Coordonate lightCoord, miningCoord;
 	public Obj3D obj;
 	public Obj3DPart core,gui,lampSocket,lampOff,lampOn,head,pipe;
+	public Obj3DPart buttonFixed;
+	public Obj3DPart[] buttons,ledsA,ledsP;
+	float[] buttonsStateDefault;
+	boolean[] ledsAStateDefault;
+	boolean[] ledsPStateDefault;
+	int buttonsCount = 5;
+	int ledsACount = 11;
+	int ledsPCount = 8;
 	int deltaX,deltaY,deltaZ;
 	public AutoMinerDescriptor(
 			String name,
@@ -63,6 +71,31 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 		lampOn = obj.getPart("LampOn");
 		head = obj.getPart("MinerHead");
 		pipe = obj.getPart("MinerPipe");
+		
+		buttonFixed = obj.getPart("ButtonsFixed");
+
+		buttons = new Obj3DPart[buttonsCount];
+		buttonsStateDefault = new float[buttonsCount];
+		for(int idx = 0;idx < buttonsCount;idx++){
+			buttons[idx] = obj.getPart("Button" + idx);
+			buttonsStateDefault[idx] = (float) Math.random();
+		}
+		
+		ledsA = new Obj3DPart[ledsACount];
+		ledsAStateDefault = new boolean[ledsACount];
+		for(int idx = 0;idx < ledsACount;idx++){
+			ledsA[idx] = obj.getPart("ledA" + idx);
+			ledsAStateDefault[idx] = Math.random() > 0.5;
+		}
+		
+		ledsP = new Obj3DPart[ledsPCount];
+		ledsPStateDefault = new boolean[ledsPCount];
+		for(int idx = 0;idx < ledsPCount;idx++){
+			ledsP[idx] = obj.getPart("ledP" + idx);
+			ledsPStateDefault[idx] = Math.random() > 0.5;
+		}
+		
+		
 	}
 
 	double nominalVoltage, maximalVoltage;
@@ -101,14 +134,39 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 		
 	}
 	
-	void draw(boolean lampState){
+	
+	
+	void draw(boolean lampState,float[] buttonsState,boolean[] ledsAState,boolean[] ledsPState){
 		GL11.glRotatef(-90, 0, 1, 0);
 		GL11.glTranslatef(0, -1.5f, 0);
 		//GL11.glScalef(0.5f, 0.5f, 0.5f);
 		
+
+
+		for(int idx = 0;idx < buttonsCount;idx++){
+			GL11.glPushMatrix();
+			GL11.glTranslatef(0, (1-buttonsState[idx])*0.01f, 0);
+			if(buttons[idx]!=null)buttons[idx].draw();
+			GL11.glPopMatrix();
+		}
+		
+		UtilsClient.disableLight();
+		for(int idx = 0;idx < ledsACount;idx++){
+			GL11.glColor3f(0, ledsAState[idx] ? 0 : 1, 0);
+			if(ledsA[idx]!=null)ledsA[idx].draw();
+		}
+
+		for(int idx = 0;idx < ledsPCount;idx++){
+			GL11.glColor3f(0, ledsPState[idx] ? 0 : 1, 0);
+			if(ledsP[idx]!=null)ledsP[idx].draw();
+		}
+		UtilsClient.enableLight();
+		GL11.glColor3f(1,1,1);
+		
 		UtilsClient.disableCulling();
 		core.draw();
 		gui.draw();
+		buttonFixed.draw();
 		lampSocket.draw();
 		if(lampState)
 			lampOff.draw();
@@ -124,7 +182,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 		// TODO Auto-generated method stub
 		super.renderItem(type, item, data);
 		GL11.glScalef(0.18f, 0.18f, 0.18f);
-		draw(false);
+		draw(false,buttonsStateDefault,ledsAStateDefault,ledsPStateDefault);
 	}
 	
 	@Override

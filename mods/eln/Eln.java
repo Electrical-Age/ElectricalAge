@@ -633,7 +633,7 @@ public class Eln {
 				.setCreativeTab(creativeTab)
 				.setTextureName("iron_block");
 		sixNodeBlock = (SixNodeBlock) new SixNodeBlock(SixNodeBlockId,
-				Material.ground, SixNodeEntity.class)
+				Material.air, SixNodeEntity.class)
 				.setCreativeTab(creativeTab)
 				.setTextureName("iron_block");
 
@@ -6313,11 +6313,11 @@ public class Eln {
 	    int orangeColor = (255 << 16)+ (200 << 8);
 
 	    //Register mob
-	/*    EntityRegistry.registerGlobalEntityID(ReplicatorEntity.class,"EAReplicator",EntityRegistry.findGlobalUniqueEntityId(), redColor,orangeColor);
+	    EntityRegistry.registerGlobalEntityID(ReplicatorEntity.class,"EAReplicator",EntityRegistry.findGlobalUniqueEntityId(), redColor,orangeColor);
 
 	    //Localize mob name
 	    LanguageRegistry.instance().addStringLocalization("entity.EAReplicator.name", "en_US", "Replicator");
-
+/*
 	    //Add mob spawn
 	    EntityRegistry.addSpawn(ReplicatorEntity.class, 2, 1, 2, EnumCreatureType.monster, BiomeGenBase.plains);
 	    EntityRegistry.addSpawn(ReplicatorEntity.class, 5, 1, 2, EnumCreatureType.monster, BiomeGenBase.extremeHills);		*/

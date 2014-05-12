@@ -449,11 +449,10 @@ public class Utils {
     
     
     
-    public static boolean tryPutStackInInventory(ItemStack stack,IInventory inventory)
+    public static boolean tryPutStackInInventory(ItemStack stack,IInventory inventory,int start,int count)
     {
-    	for(int idx = 0;idx<inventory.getSizeInventory();idx++)
+    	for(int idx = start;idx<start+count;idx++)
     	{
-    		if(inventory.isItemValidForSlot(idx, stack) == false)  continue;
     		ItemStack targetStack = inventory.getStackInSlot(idx);
     		if(targetStack == null)
     		{

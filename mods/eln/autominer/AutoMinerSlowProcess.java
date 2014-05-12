@@ -38,7 +38,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 	
 	int workY;
 	
-	static final int pipeGhostUUID = 75;
+	//static final int pipeGhostUUID = 75;
 
 	enum jobType {none,done,full, ore, pipeAdd, pipeRemove};
 	jobType job = jobType.none,oldJob = jobType.none;
@@ -60,7 +60,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 		return false;
 	}
 	
-	
+	double oreRand = Math.random();
 	
 	@Override
 	public void process(double time) {
@@ -76,7 +76,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 		energyCounter += miner.inPowerLoad.getRpPower() * time;
 		
 		if(job != jobType.none && job != jobType.full && job != jobType.done) {
-			if(energyCounter >= energyTarget || (job == jobType.ore && isReadyToDrill())) {
+			if(energyCounter >= energyTarget || (job == jobType.ore && !isReadyToDrill())) {
 				setupJob();
 			}		
 			
@@ -94,6 +94,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 					jobCoord.world().setBlock(jobCoord.x, jobCoord.y, jobCoord.z, 0);
 					
 					energyCounter -= energyTarget;
+					oreRand = Math.random();
 					setupJob();
 					break;
 					
@@ -179,7 +180,14 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 				Utils.tryPutStackInInventory(stack, chestEntity);
 			}
 			if(stack.stackSize != 0) miner.node.dropItem(stack);*/
-		Utils.tryPutStackInInventory(stack, miner.inventory);
+		Utils.tryPutStackInInventory(stack, miner.inventory,AutoMinerContainer.StorageStartId,AutoMinerContainer.StorageSize);
+	}
+	
+	boolean isMinable(int blockId){
+		return blockId != 0 
+				&& blockId != Block.waterMoving.blockID && blockId != Block.waterStill.blockID
+				&& blockId != Block.lavaMoving.blockID && blockId != Block.lavaStill.blockID
+				&&blockId != Block.obsidian.blockID && blockId != Block.bedrock.blockID;
 	}
 	
 	void setupJob() {
@@ -206,6 +214,14 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 		}*/
 		//JobCoord at last pipe		
 		
+		/*int invFreeCnt = 0;
+		for(int idx = AutoMinerContainer.StorageStartId;idx < AutoMinerContainer.StorageSize + AutoMinerContainer.StorageStartId;idx++){
+			if(miner.inventory.getStackInSlot(idx) == null){
+				invFreeCnt++;
+			}
+		}			
+		System.out.println(" " + invFreeCnt);
+		*/
 		boolean jobFind = false;
 		if(drill == null) {
 			if(jobCoord.y != miner.node.coordonate.y) {
@@ -213,6 +229,9 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 				if(pipeStack == null || (pipeStack.stackSize != pipeStack.getMaxStackSize() && pipeStack.stackSize != miner.inventory.getInventoryStackLimit())) {
 					jobFind = true;
 					setJob(jobType.pipeRemove);
+				}else{
+					jobFind = true;
+					setJob(jobType.full);
 				}
 			}
 		}
@@ -222,9 +241,19 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 		}
 		else if(pipe != null) {		
 			if(jobCoord.y < miner.node.coordonate.y - 2) {
+				int depth = (miner.node.coordonate.y - jobCoord.y);
+				double miningRay = depth/10 + 0.1;
+				miningRay = Math.min(miningRay, 3);
+				if(depth < scannerRadius) scannerRadius = depth+1;
+				miningRay = Math.min(miningRay, scannerRadius-2);
 				for(jobCoord.z = miner.node.coordonate.z - scannerRadius; jobCoord.z <= miner.node.coordonate.z + scannerRadius; jobCoord.z++) {
 					for(jobCoord.x = miner.node.coordonate.x - scannerRadius; jobCoord.x <= miner.node.coordonate.x + scannerRadius; jobCoord.x++) {
-						if(checkIsOre(jobCoord)) {
+						double dx = jobCoord.x - miner.node.coordonate.x;
+						double dy = 0;
+						double dz = jobCoord.z - miner.node.coordonate.z;
+						double distance = Math.sqrt(dx*dx+dy*dy+dz*dz)*(0.9 + 0.2*oreRand);
+						int blockId = jobCoord.world().getBlockId(jobCoord.x, jobCoord.y, jobCoord.z);
+						if(checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(blockId))) {
 							jobFind = true;
 							setJob(jobType.ore);
 							break;
@@ -305,7 +334,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 	
 	void destroyPipe(int jumpY) {
 		dropPipe(jumpY);
-		Eln.ghostManager.removeGhostAndBlockWithObserver(miner.node.coordonate);
+		Eln.ghostManager.removeGhostAndBlockWithObserverAndNotUuid(miner.node.coordonate,miner.descriptor.getGhostGroupUuid());
 		pipeLength = 0;
 		miner.needPublish();
 	}

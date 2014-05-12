@@ -20,7 +20,7 @@ public abstract class NodeElectricalGateInputHysteresisProcess implements IProce
 	public void process(double time) {
 		if(state)
 		{
-			if(gate.Uc < Eln.instance.SVU*0.2) 
+			if(gate.Uc < Eln.instance.SVU*0.3) 
 			{
 				state = false;
 				setOutput(false);
@@ -29,7 +29,7 @@ public abstract class NodeElectricalGateInputHysteresisProcess implements IProce
 		}
 		else
 		{
-			if(gate.Uc > Eln.instance.SVU*0.6) 
+			if(gate.Uc > Eln.instance.SVU*0.7) 
 			{
 				state = true;
 				setOutput(true);

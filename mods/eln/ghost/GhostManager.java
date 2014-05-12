@@ -92,6 +92,23 @@ public class GhostManager extends WorldSavedData
 			}			
 		}	
 	}
+	public void removeGhostAndBlockWithObserverAndNotUuid(Coordonate observerCoordonate,int uuid)
+	{
+		Iterator<Entry<Coordonate, GhostElement>> iterator = ghostTable.entrySet().iterator();
+		while(iterator.hasNext())
+		{
+			Map.Entry<Coordonate, GhostElement> entry = iterator.next();
+			GhostElement element = entry.getValue();
+			if(element.observatorCoordonate.equals(observerCoordonate) && element.getUUID() != uuid)
+			{  
+				iterator.remove();
+				removeGhostNode(element.elementCoordonate);
+				element.elementCoordonate.world().setBlock(element.elementCoordonate.x,element.elementCoordonate.y,element.elementCoordonate.z,0);//caca1.5.1				
+			}			
+		}	
+	}	
+	
+	
 	public void removeGhostNode(Coordonate c)
 	{
 		NodeBase node = NodeManager.instance.getNodeFromCoordonate(c);

@@ -147,7 +147,9 @@ public class AutoMinerElement extends TransparentNodeElement  {
 
 	@Override
 	public void ghostDestroyed(int UUID) {
-		super.ghostDestroyed(UUID);
+		if(UUID == descriptor.getGhostGroupUuid()){
+			super.ghostDestroyed(UUID);
+		}
 		slowProcess.ghostDestroyed(UUID);
 	}
 /*
