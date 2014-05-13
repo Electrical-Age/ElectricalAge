@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
+import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.WorldSavedData;
@@ -56,12 +57,12 @@ public class NodeManager extends WorldSavedData{
 	//	nodeArray.add(node);
 		if(node.coordonate == null) 
 		{
-			System.out.println("Null coordonate addnode");
+			Utils.println("Null coordonate addnode");
 			while(true);
 		}
 		nodesmap.put(node.coordonate, node);
 		nodes.add(node);
-		System.out.println("NodeManager has " + nodesmap.size() +"node");
+		Utils.println("NodeManager has " + nodesmap.size() +"node");
 		//nodeArray.put(new NodeIdentifier(node), node);
 	}
 	public void removeNode(NodeBase node)
@@ -69,14 +70,14 @@ public class NodeManager extends WorldSavedData{
 	//	nodeArray.remove(node);
 		nodesmap.remove(node.coordonate);
 		nodes.remove(node);
-		System.out.println("NodeManager has " + nodesmap.size() +"node");
+		Utils.println("NodeManager has " + nodesmap.size() +"node");
 	}
 	public void removeCoordonate(Coordonate c)
 	{
 	//	nodeArray.remove(node);
 		NodeBase n = nodesmap.remove(c);
 		if(n != null) nodes.remove(n);
-		System.out.println("NodeManager has " + nodesmap.size() +"node");
+		Utils.println("NodeManager has " + nodesmap.size() +"node");
 	}
 	@Override
     public boolean isDirty()

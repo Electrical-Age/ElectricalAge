@@ -64,9 +64,9 @@ public class LightBlock extends BlockContainer {
     public int getLightValue(IBlockAccess world, int x, int y, int z) {
     	// TODO Auto-generated method stub
     	/*if(FMLCommonHandler.instance().getEffectiveSide().isClient()){
-    		System.out.println("Light at " + x +":"+ y +":" + z +" " + FMLCommonHandler.instance().getEffectiveSide().toString() + " get light " + world.getBlockMetadata(x, y, z));
+    		Utils.println("Light at " + x +":"+ y +":" + z +" " + FMLCommonHandler.instance().getEffectiveSide().toString() + " get light " + world.getBlockMetadata(x, y, z));
     	}*/
-    //	System.out.println("Light at " + x +":"+ y +":" + z +" " + FMLCommonHandler.instance().getEffectiveSide().toString() + " get light " + world.getBlockMetadata(x, y, z));
+    //	Utils.println("Light at " + x +":"+ y +":" + z +" " + FMLCommonHandler.instance().getEffectiveSide().toString() + " get light " + world.getBlockMetadata(x, y, z));
     	return world.getBlockMetadata(x, y, z);
     	
     	//return ((LightBlockEntity)world.getBlockTileEntity(x, y, z)).getClientLight();

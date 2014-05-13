@@ -10,6 +10,7 @@ import mods.eln.INBTTReady;
 
 import mods.eln.ghost.GhostElement;
 import mods.eln.misc.Coordonate;
+import mods.eln.misc.Utils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.EnumSkyBlock;
@@ -78,7 +79,7 @@ public class LightBlockEntity extends TileEntity{
 				return;
 			}
 		}
-		System.out.println("Assert void removeLight(int light)");
+		Utils.println("Assert void removeLight(int light)");
 	}*/
 	/*
 	void remplaceLight(int oldLight,int newLight)
@@ -92,7 +93,7 @@ public class LightBlockEntity extends TileEntity{
 				return;
 			}
 		}	
-		System.out.println("Assert void remplaceLight(int oldLight,int newLight)");
+		Utils.println("Assert void remplaceLight(int oldLight,int newLight)");
 	}*/
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
@@ -158,7 +159,7 @@ public class LightBlockEntity extends TileEntity{
 			worldObj.setBlock(xCoord, yCoord, zCoord, 0);
 			//worldObj.updateLightByType(EnumSkyBlock.Block,xCoord, yCoord, zCoord);
 			//Eln.instance.tileEntityDestructor.add(this);
-			System.out.println("Destroy light at " + xCoord + " " + yCoord + " " + zCoord + " " );
+			Utils.println("Destroy light at " + xCoord + " " + yCoord + " " + zCoord + " " );
 			return;
 		}
 		
@@ -193,7 +194,7 @@ public class LightBlockEntity extends TileEntity{
 		if(t != null && t instanceof LightBlockEntity)
 			((LightBlockEntity)t).addLight(light,timeout);
 		else
-			System.out.println("ASSERT if(t != null && t instanceof LightBlockEntity)");
+			Utils.println("ASSERT if(t != null && t instanceof LightBlockEntity)");
 	}	
 	public static void addLight(Coordonate coord,int light,int timeout)
 	{
@@ -213,7 +214,7 @@ public class LightBlockEntity extends TileEntity{
 		if(blockId != Eln.lightBlockId)
 		{
 			//coord.setBlock(Eln.lightBlockId, newLight);
-			System.out.println("ASSERT public static void remplaceLight(Coordonate coord,int oldLight,int newLight) " + coord);
+			Utils.println("ASSERT public static void remplaceLight(Coordonate coord,int oldLight,int newLight) " + coord);
 			return;
 		}
 		((LightBlockEntity)coord.getTileEntity()).remplaceLight(oldLight,newLight);		

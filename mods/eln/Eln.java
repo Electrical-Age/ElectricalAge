@@ -193,6 +193,7 @@ import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.EnumArmorMaterial;
@@ -217,6 +218,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.WorldSavedData;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.SpawnListEntry;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraft.block.material.Material;
@@ -478,6 +480,7 @@ public class Eln {
 
 	float xRayScannerRange;
 	boolean addOtherModOreToXRay;
+	public static boolean debugEnable = false;
 
 	@PreInit
 	public void preInit(FMLPreInitializationEvent event) {
@@ -551,6 +554,7 @@ public class Eln {
 				blocBaseId + 2, "choubakaka").getInt();
 
 		modbusEnable = config.get("modbus", "enable", false).getBoolean(false);
+		debugEnable = config.get("debug", "enable", false).getBoolean(false);
 
 		genCooper = config.get("mapGenerate", "cooper", true).getBoolean(true);
 		genPlumb = config.get("mapGenerate", "plumb", true).getBoolean(true);
@@ -871,21 +875,21 @@ public class Eln {
 
 		checkRecipe();
 
-		System.out.println("Electrical age init done");
+		Utils.println("Electrical age init done");
 	}
 
 	void checkRecipe() {
-		System.out.println("No recipe for ");
+		Utils.println("No recipe for ");
 		for (SixNodeDescriptor d : sixNodeItem.subItemList.values()) {
 			ItemStack stack = d.newItemStack();
 			if (aRecipeExist(stack) == false) {
-				System.out.println("  " + d.name);
+				Utils.println("  " + d.name);
 			}
 		}
 		for (TransparentNodeDescriptor d : transparentNodeItem.subItemList.values()) {
 			ItemStack stack = d.newItemStack();
 			if (aRecipeExist(stack) == false) {
-				System.out.println("  " + d.name);
+				Utils.println("  " + d.name);
 			}
 		}
 	}
@@ -947,12 +951,12 @@ public class Eln {
 			if (firstStart) {
 				if (addOtherModOreToXRay) {
 					for (String name : OreDictionary.getOreNames()) {
-						// System.out.println(name + " " +
+						// Utils.println(name + " " +
 						// OreDictionary.getOreID(name));
 						if (name.startsWith("ore")) {
 							for (ItemStack stack : OreDictionary.getOres(name)) {
 								int id = stack.itemID + 4096*stack.getItem().getMetadata(stack.getItemDamage());
-								// System.out.println(OreDictionary.getOreID(name));
+								// Utils.println(OreDictionary.getOreID(name));
 								boolean find = false;
 								for (OreScannerConfigElement c : oreScannerConfig) {
 									if (c.blockKey == id) {
@@ -962,7 +966,7 @@ public class Eln {
 								}
 
 								if (!find) {
-									System.out.println(id + " added to xRay (other mod)");
+									Utils.println(id + " added to xRay (other mod)");
 									oreScannerConfig.add(new OreScannerConfigElement(id, 0.15f));
 								}
 							}
@@ -6317,10 +6321,20 @@ public class Eln {
 
 	    //Localize mob name
 	    LanguageRegistry.instance().addStringLocalization("entity.EAReplicator.name", "en_US", "Replicator");
-/*
+
 	    //Add mob spawn
-	    EntityRegistry.addSpawn(ReplicatorEntity.class, 2, 1, 2, EnumCreatureType.monster, BiomeGenBase.plains);
-	    EntityRegistry.addSpawn(ReplicatorEntity.class, 5, 1, 2, EnumCreatureType.monster, BiomeGenBase.extremeHills);		*/
+	   // EntityRegistry.addSpawn(ReplicatorEntity.class, 1, 1, 2, EnumCreatureType.monster, BiomeGenBase.plains);
+	    for(BiomeGenBase biome : BiomeGenBase.biomeList){
+	    	if(biome == null) continue;
+	    	{
+	    		List list = biome.getSpawnableList(EnumCreatureType.monster);
+	    		list.add(new SpawnListEntry(ReplicatorEntity.class, 1, 1, 2));
+	    	}
+	    	{
+	    		List list = biome.getSpawnableList(EnumCreatureType.ambient);
+	    		list.add(new SpawnListEntry(ReplicatorEntity.class, 2, 1, 2));
+	    	}
+	    }
 	}
 	
 

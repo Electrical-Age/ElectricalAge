@@ -51,7 +51,7 @@ public class DataLogs implements INBTTReady {
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
 		byte[] cpy = nbt.getByteArray(str + "log");
-		System.out.println("Datalog readnbt " + cpy.length);
+		Utils.println("Datalog readnbt " + cpy.length);
 		for(int idx = 0; idx < cpy.length; idx++) {
 			write(cpy[cpy.length - 1 - idx]);
 		}
@@ -60,7 +60,7 @@ public class DataLogs implements INBTTReady {
         maxValue = nbt.getFloat(str + "maxValue");
         minValue = nbt.getFloat(str + "minValue");
 		unitType = nbt.getByte(str + "unitType");
-		System.out.println("Datalog readnbt done");
+		Utils.println("Datalog readnbt done");
 	}
 
 	@Override
@@ -183,7 +183,7 @@ public class DataLogs implements INBTTReady {
 			//fontrenderer.drawString("Time", (int)(0.5f / scale), (int)(0.8f / scale), 0);
 		GL11.glPopMatrix();
 		//startT = System.nanoTime() - startT;
-		//System.out.println("startT : " + startT);
+		//Utils.println("startT : " + startT);
 	}
 
 	public static String getYstring(float factor, float maxValue, float minValue, byte unitType) {

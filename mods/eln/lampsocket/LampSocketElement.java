@@ -60,7 +60,7 @@ public class LampSocketElement extends SixNodeElement{
     	slowProcessList.add(cableVoltageWatchdog);
     	slowProcessList.add(monsterPopFreeProcess);
 	}
-	public MonsterPopFreeProcess monsterPopFreeProcess = new MonsterPopFreeProcess(sixNode.coordonate,16);
+	public MonsterPopFreeProcess monsterPopFreeProcess = new MonsterPopFreeProcess(sixNode.coordonate,12);
 	public NodeElectricalLoad positiveLoad = new NodeElectricalLoad("positiveLoad");
 	public NodeElectricalLoad negativeLoad = new NodeElectricalLoad("negativeLoad");
 	public NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");

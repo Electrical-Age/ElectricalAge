@@ -23,13 +23,13 @@ public class Obj3DFolder {
 				
 				if(rec == null)
 				{
-					System.out.println("if(rec == null)");
+					Utils.println("if(rec == null)");
 				}
 				else
 				{
 					url = rec.toURI();
 					if (url == null) {
-						System.out.println("if(url == null)");
+						Utils.println("if(url == null)");
 
 					} else {
 					    File dir = new File(url);
@@ -42,7 +42,7 @@ public class Obj3DFolder {
 							    //	String fileName = folder + file.getName();
 							    	Obj3D obj =  new Obj3D();
 							    	obj.loadFile(modName,folderName + "/" + file.getName());
-							    	//System.out.println( '"' + folderName + "/" + file.getName() + '"' + ',');
+							    	//Utils.println( '"' + folderName + "/" + file.getName() + '"' + ',');
 							    	String tag = file.getName().replaceAll(".obj", "").replaceAll(".OBJ", "");
 							    	nameToObjHash.put(tag,obj);
 						    	}
@@ -69,7 +69,7 @@ public class Obj3DFolder {
     		String tag =path.replaceAll(".obj", "").replaceAll(".OBJ", "");
     		tag = tag.substring(tag.lastIndexOf('/')+1, tag.length());
     		nameToObjHash.put(tag,obj);
-    		System.out.println(path + " loaded");
+    		Utils.println(path + " loaded");
     	}
 	}
 	

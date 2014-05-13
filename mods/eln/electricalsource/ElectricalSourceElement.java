@@ -84,7 +84,7 @@ public class ElectricalSourceElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		return NodeBase.maskElectricalAll + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);
+		return NodeBase.maskElectricalPower + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);
 	}
 
 	@Override

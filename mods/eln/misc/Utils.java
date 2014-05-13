@@ -55,6 +55,15 @@ public class Utils {
 	
 	public static double minecraftDay = 60*24;
 	
+	public static void println(String str){
+		if(Eln.debugEnable == false) return;
+		System.out.println(str);
+	}
+	public static void print(String str){
+		if(Eln.debugEnable == false) return;
+		System.out.print(str);
+	}
+	
 	static String floatToStr(double f,int high,int low)
 	{
 		String temp = "";
@@ -855,7 +864,7 @@ public class Utils {
 
 
 	public static void printSide(String string) {
-		System.out.println(string);
+		Utils.println(string);
 	}
 
 	public static short modbusToShort(double outputNormalized, int i) {

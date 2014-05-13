@@ -25,27 +25,30 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 	public ReplicatoCableAI(ReplicatorEntity entity) {
 		this.entity = entity;
 		Eln.instance.highVoltageCableDescriptor.applyTo(load, false);
+		load.setRs(load.getRs()*10);
 		 this.setMutexBits(1);
 	}
 	
 	public Coordonate cableCoordonate = null;
 	Random rand = new Random();
-	int lookingPerUpdate = 10;	
+	int lookingPerUpdate = 20;	
 
 	ElectricalLoad load = new ElectricalLoad(),cableLoad;
 	ElectricalConnection connection;
 	TimeRemover timeRemover = new TimeRemover(this);
 	double moveTimeOut;
 	double moveTimeOutReset = 20;
+	double resetTimeout;
+	double resetTimeoutReset = 120;
 	@Override
 	public boolean shouldExecute() {
-		System.out.println("LookingForCableAi");
+		//System.out.println("LookingForCableAi");
 		ArrayList<NodeBase> nodes = NodeManager.instance.getNodes();
 		if(nodes.size() == 0) return false;
 		for(int idx = 0;idx < lookingPerUpdate;idx++){
 			NodeBase node = nodes.get(rand.nextInt(nodes.size()));
 			double distance = node.coordonate.distanceTo(entity);
-			if(distance > 10) continue;
+			if(distance > 15) continue;
 			if(node instanceof SixNode == false) continue;
 			SixNode sixNode = (SixNode)node;
 			for(SixNodeElement e : sixNode.sideElementList){
@@ -57,9 +60,10 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 				if(path == null/* || path.isFinished() == false*/) continue;
 				entity.getNavigator().setPath(path, 1);
 				cableCoordonate = node.coordonate;
-				System.out.println("LookingForCableAi done");
+				//System.out.println("LookingForCableAi done");
 				moveTimeOut = moveTimeOutReset;
 				load.setRp(1000000000000.0);
+				resetTimeout = resetTimeoutReset;
 				return true;
 			}
 		}
@@ -79,6 +83,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 	public void updateTask() {
 		//System.out.println("update");
 		moveTimeOut -= 0.05;
+		resetTimeout -= 0.05;
 		ElectricalCableElement cable;
 		if((cable = getCable()) == null){
 			cableCoordonate = null;
@@ -93,14 +98,14 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 		if(distance < 2){
 			//System.out.println("replicator on cable !");
 			double u = cable.electricalLoad.Uc;
-			
-			if(load.getRpPower() > 200){
+			double nextRp = Math.pow(u/Eln.LVU, -0.3)*u*u/(50);
+			if(load.getRp() < 0.8*nextRp){
 				entity.attackEntityFrom(DamageSource.magic, 5);
 			}
 			else{
 				entity.eatElectricity(load.getRpPower()*0.05);
 			}
-			load.setRp(Math.pow(u/Eln.LVU, -0.3)*u*u/(50));
+			load.setRp(nextRp);
 
 			timeRemover.setTimeout(0.16);
 			moveTimeOut = moveTimeOutReset;
@@ -111,7 +116,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 		}
 		
 		
-		if(moveTimeOut < 0){
+		if(moveTimeOut < 0 || resetTimeout < 0){
 			cableCoordonate = null;
 		}
 		
@@ -145,7 +150,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 	@Override
 	public void startExecuting() {
 		// TODO Auto-generated method stub
-		System.out.println("START REPLICATOOOOOR");
+		//System.out.println("START REPLICATOOOOOR");
 
 		//System.out.println(this.entity.getNavigator().tryMoveToXYZ(-2470,56,-50, 1));
 	}

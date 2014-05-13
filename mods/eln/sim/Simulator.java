@@ -83,7 +83,7 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 	{
 		if(thermalC < getMinimalThermalC(thermalRs,thermalRp))
 		{
-			System.out.println("checkThermalLoad ERROR");
+			Utils.println("checkThermalLoad ERROR");
 			while(true);
 			//return false;
 		}
@@ -422,7 +422,7 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 					SimplifiedElectricalBranch b = new SimplifiedElectricalBranch(lList,lA,lB);
 					simplifiedElectricalBranchList.add(b);
 					
-					//System.out.println("Simplify    C:" + cCount);
+					//Utils.println("Simplify    C:" + cCount);
 					
 					
 				}
@@ -504,10 +504,10 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 					}
 				}
 				
-				System.out.println("Simplify! " + Utils.plotValue(eOpt,"J, ") + Utils.plotValue(eNotSimplified,"J left   ") + Utils.plotValue(eNow,"J remain in all     in ") + (generateTIme/1000) + "us");
+				Utils.println("Simplify! " + Utils.plotValue(eOpt,"J, ") + Utils.plotValue(eNotSimplified,"J left   ") + Utils.plotValue(eNow,"J remain in all     in ") + (generateTIme/1000) + "us");
 			}
 			else{
-				System.out.println("NO simplify!");
+				Utils.println("NO simplify!");
 				workingElectricalLoadList.addAll(electricalLoadList);
 				workingElectricalConnectionList.addAll(electricalConnectionList);
 			}
@@ -661,15 +661,15 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 		
 		for (ElectricalLoad l : electricalLoadList) {
 			if(Double.isNaN(l.Uc)){
-				for(int i = 0;i < 10;i++){
-					System.out.print("NAN");
+				for(int i = 0;i < 1;i++){
+					Utils.print("NAN");
 				}
-				try {
+			/*	try {
 					Thread.sleep(100);
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-				}
+				}*/
 			}
 		}
 		
@@ -679,7 +679,7 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 			thermalNsStack /= 20;
 			slowNsStack /= 20;
 			
-			System.out.println(
+			Utils.println(
 					//"ticks " + new DecimalFormat("#").format((int)avgTickTime) + " us (" + (int)(slowProcessTime/1000) + "us SP) for "
 					"ticks " + new DecimalFormat("#").format((int)avgTickTime) + " us" + "  E " + electricalNsStack/1000  + "  T " + thermalNsStack/1000  + "  S " + slowNsStack/1000 
 					+ "    " + simplifiedElectricalBranchList.size()  + " EB" 

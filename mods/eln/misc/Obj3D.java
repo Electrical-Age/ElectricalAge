@@ -301,10 +301,10 @@ public class Obj3D {
 
 			{
 
-				System.out.println("getResourceAsStream /assets/" + modName + directory + fileName);
+				Utils.println("getResourceAsStream /assets/" + modName + directory + fileName);
 				InputStream stream = Eln.class.getResourceAsStream("/assets/" + modName + directory + fileName);
 				if(stream == null){
-					System.out.println("obj loading fail");
+					Utils.println("obj loading fail");
 					return false;
 				}
 
@@ -365,12 +365,12 @@ public class Obj3D {
 								}
 							}
 									
-							//System.out.println(vertexNbr  + " " +  uvId + " " +  verticeId[0] + " " + verticeId[1] + " " + verticeId[2] + " ");
+							//Utils.println(vertexNbr  + " " +  uvId + " " +  verticeId[0] + " " + verticeId[1] + " " + verticeId[2] + " ");
 							fg.face.add(new Face(verticeId, uvId, new Normal(verticeId[0], verticeId[1],verticeId[2])));
 						}
 						else
 						{
-							System.out.println("obj assert vertexNbr != 3");
+							Utils.println("obj assert vertexNbr != 3");
 						}
 					}
 					else if(words[0].equals("mtllib"))
@@ -387,10 +387,10 @@ public class Obj3D {
 			}
 			part = null;
 			{		 
-				System.out.println("getResourceAsStream /assets/" + modName + directory + mtlName);
+				Utils.println("getResourceAsStream /assets/" + modName + directory + mtlName);
 				InputStream stream = Eln.class.getResourceAsStream("/assets/" + modName + directory +  mtlName);	
 				if(stream == null){
-					System.out.println("mtl loading fail");
+					Utils.println("mtl loading fail");
 					return false;
 				}
 				StringBuilder inputStringBuilder = new StringBuilder();
@@ -447,7 +447,7 @@ public class Obj3D {
 			InputStream stream = Eln.class.getResourceAsStream("/assets/" + modName + directory +  fileName.replace(".obj", ".txt").replace(".OBJ", ".txt"));	
 			if(stream != null)
 			{
-				System.out.println("getResourceAsStream /assets/" + modName + directory +  fileName.replace(".obj", ".txt").replace(".OBJ", ".txt"));
+				Utils.println("getResourceAsStream /assets/" + modName + directory +  fileName.replace(".obj", ".txt").replace(".OBJ", ".txt"));
 				StringBuilder inputStringBuilder = new StringBuilder();
 		        BufferedReader bufferedReader;
 				
