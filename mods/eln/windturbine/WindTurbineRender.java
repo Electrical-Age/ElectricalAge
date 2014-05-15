@@ -4,18 +4,21 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import mods.eln.client.FrameTime;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.node.TransparentNodeElementRender;
 import mods.eln.node.TransparentNodeEntity;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.src.ModLoader;
 
 public class WindTurbineRender extends TransparentNodeElementRender {
 
-
+	private boolean soundPlaying = false;
 	public WindTurbineRender(TransparentNodeEntity tileEntity,
 			TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
@@ -28,11 +31,22 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 	public void draw() {
 		powerFactorFilter.setTarget(powerFactor);
 		powerFactorFilter.stepGraphic();
-		
 		alpha += FrameTime.get() * descriptor.speed * Math.sqrt(powerFactorFilter.get());
 		if(alpha > 360) alpha -= 360;
 		front.glRotateXnRef();
 		descriptor.draw(alpha);
+		
+		if (alpha % 120 > 45 && alpha % 120 < 50 && soundPlaying == false) {
+			Coordonate coord = coordonate();
+			tileEntity.worldObj.playSound(coord.x, coord.y, coord.z, descriptor.soundName, 
+					descriptor.nominalVolume * 3f * (float)powerFactorFilter.get() * (float)powerFactorFilter.get(), 
+					1f + (float)Math.sqrt(powerFactorFilter.get()) / 1.3f, false);
+			soundPlaying = true;
+		}
+		else if ( alpha % 120 > 55 ) {
+			soundPlaying = false;
+		}
+			
 	}
 	
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(0 , 64, this);

@@ -27,7 +27,8 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 			double maxVoltage, double maxWind,
 			int offY,
 			int rayX,int rayY,int rayZ,
-			int blockMalusMinCount,double blockMalus
+			int blockMalusMinCount,double blockMalus, 
+			String soundName, float nominalVolume
 			) {
 		super(name, WindTurbineElement.class, WindTurbineRender.class);
 
@@ -42,6 +43,8 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 		this.rayZ = rayZ;
 		this.blockMalusSubCount = blockMalusMinCount + 1;
 		this.blockMalus = blockMalus;
+		this.soundName = soundName;
+		this.nominalVolume = nominalVolume;
 		this.PfW = PfW.duplicate(nominalWind, nominalPower);
 		this.obj = obj;
 		if(obj != null){
@@ -76,6 +79,8 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 	public int offY,rayX, rayY, rayZ;
 	public int blockMalusSubCount;
 	public double blockMalus;
+	public String soundName;
+	public float nominalVolume;
 
 	public FunctionTable PfW;
 	

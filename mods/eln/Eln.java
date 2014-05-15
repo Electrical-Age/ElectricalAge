@@ -3657,8 +3657,8 @@ public class Eln {
 					LVU * 1.18, 22,// double maxVoltage, double maxWind,
 					3,// int offY,
 					7, 2, 2,// int rayX,int rayY,int rayZ,
-					2, 0.07// int blockMalusMinCount,double blockMalus
-
+					2, 0.07,// int blockMalusMinCount,double blockMalus
+					"eln:wind_turbine", 1f // Use the wind turbine sound and play at normal volume (1 => 100%)
 			);
 
 			GhostGroup g = new GhostGroup();
