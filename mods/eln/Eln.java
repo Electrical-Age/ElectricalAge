@@ -271,7 +271,7 @@ import java.util.List;
 
 
 
-@Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.1.2a")
+@Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0")
 @NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
 	/*
@@ -6324,7 +6324,7 @@ public class Eln {
 
 	    //Add mob spawn
 	   // EntityRegistry.addSpawn(ReplicatorEntity.class, 1, 1, 2, EnumCreatureType.monster, BiomeGenBase.plains);
-	    for(BiomeGenBase biome : BiomeGenBase.biomeList){
+	  /*  for(BiomeGenBase biome : BiomeGenBase.biomeList){
 	    	if(biome == null) continue;
 	    	{
 	    		List list = biome.getSpawnableList(EnumCreatureType.monster);
@@ -6334,7 +6334,7 @@ public class Eln {
 	    		List list = biome.getSpawnableList(EnumCreatureType.ambient);
 	    		list.add(new SpawnListEntry(ReplicatorEntity.class, 2, 1, 2));
 	    	}
-	    }
+	    }*/
 	}
 	
 
