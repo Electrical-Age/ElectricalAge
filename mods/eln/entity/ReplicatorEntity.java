@@ -1,7 +1,14 @@
 package mods.eln.entity;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Set;
+
 import mods.eln.misc.Utils;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -24,10 +31,12 @@ import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.common.ForgeDummyContainer;
 
 public class ReplicatorEntity extends EntityMob {
@@ -35,6 +44,29 @@ public class ReplicatorEntity extends EntityMob {
 	private ReplicatoCableAI replicatorIa = new ReplicatoCableAI(this);
 	public ReplicatorEntity(World par1World) {
 		super(par1World);
+		
+
+		try {
+			Class c = EntityLiving.class;
+			Field f;
+			f = c.getDeclaredField("persistenceRequired");
+			f.setAccessible(true);		
+			f.set(this, true);
+		} catch (NoSuchFieldException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		
 	//	Utils.println("new replicator");
         this.setSize(0.3F, 0.7F);
 		
@@ -61,6 +93,12 @@ public class ReplicatorEntity extends EntityMob {
 
 	}
 	
+	@Override
+	protected void despawnEntity() {
+		// TODO Auto-generated method stub
+		//Utils.println("Replicator despawn");
+		super.despawnEntity();
+	}
 	
 	@Override
 	public boolean attackEntityAsMob(Entity e) {
@@ -73,7 +111,7 @@ public class ReplicatorEntity extends EntityMob {
 		return super.attackEntityAsMob(e);
 	}
 	
-	
+	boolean isSpawnedFromWeather = false;
 	double hungerTime = 10*60;
 	//double hungerTime = 20;
 	double hungerToEnergy = 10.0*hungerTime; 
@@ -91,8 +129,7 @@ public class ReplicatorEntity extends EntityMob {
 				attackEntityFrom(DamageSource.starve, 1);
 		} 
 		if(hunger < hungerToDuplicate){
-			ReplicatorEntity chicken = new ReplicatorEntity(this.worldObj);
-			EntityLiving entityliving = (EntityLiving)chicken;
+			ReplicatorEntity entityliving = new ReplicatorEntity(this.worldObj);
 			entityliving.setLocationAndAngles(this.posX,this.posY,this.posZ,0f,0f);
             entityliving.rotationYawHead = entityliving.rotationYaw;
             entityliving.renderYawOffset = entityliving.rotationYaw;
@@ -159,6 +196,24 @@ public class ReplicatorEntity extends EntityMob {
         return Item.rottenFlesh.itemID;
     }
     
+    public static ArrayList<ItemStack> dropList = new ArrayList<ItemStack>();
+    @Override
+    protected void dropFewItems(boolean par1, int par2) {
+    	// TODO Auto-generated method stub
+    	this.entityDropItem(dropList.get(new Random().nextInt(dropList.size())).copy(), 0.5f);
+    	if(isSpawnedFromWeather == true){
+    		if(Math.random() < 0.33){
+    			for(Object s : EntityList.IDtoClassMapping.entrySet()){
+    				Entry e = (Entry)s;
+    				if(e.getValue() == ReplicatorEntity.class){
+    					this.entityDropItem(new ItemStack(Item.monsterPlacer,1,(Integer)e.getKey()), 0.5f);
+    					break;
+    				}
+    			}
+    		}
+    	}
+    }
+    
     
     public EnumCreatureAttribute getCreatureAttribute()
     {
@@ -171,6 +226,7 @@ public class ReplicatorEntity extends EntityMob {
     public void writeEntityToNBT(NBTTagCompound nbt) {
     	super.writeEntityToNBT(nbt);
     	nbt.setDouble("ElnHunger",hunger);
+    	nbt.setBoolean("isSpawnedFromWeather", isSpawnedFromWeather);
     }
     
     @Override
@@ -178,6 +234,9 @@ public class ReplicatorEntity extends EntityMob {
     	super.readEntityFromNBT(nbt);
     	
     	hunger = nbt.getDouble("ElnHunger");
+    	isSpawnedFromWeather = nbt.getBoolean("isSpawnedFromWeather");
+
     }
+    
 	
 }

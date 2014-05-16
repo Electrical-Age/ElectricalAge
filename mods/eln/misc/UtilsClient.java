@@ -434,5 +434,14 @@ public class UtilsClient {
 		return Math.sqrt(x*x+y*y+z*z);
 	}
 
+	public static void disableDepthTest() {
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
+	}
+
+	public static void enableDepthTest() {
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		
+	}
+
 
 }

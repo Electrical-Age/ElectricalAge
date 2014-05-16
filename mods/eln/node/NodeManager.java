@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map.Entry;
+import java.util.Random;
 
 
 
@@ -152,6 +153,11 @@ public class NodeManager extends WorldSavedData{
 		}
 		return nodesmap.get(nodeCoordonate);
 		//return null;
+	}
+	Random rand = new Random();
+	public NodeBase getRandomNode() {
+		if(nodes.size() == 0) return null;
+		return nodes.get(rand.nextInt(nodes.size()));
 	}
 	
 }

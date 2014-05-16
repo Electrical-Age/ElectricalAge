@@ -60,6 +60,7 @@ import mods.eln.electricalwindsensor.ElectricalWindSensorDescriptor;
 import mods.eln.electricasensor.ElectricalSensorDescriptor;
 import mods.eln.elnhttpserver.ElnHttpServer;
 import mods.eln.entity.ReplicatorEntity;
+import mods.eln.entity.ReplicatorPopProcess;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -688,7 +689,6 @@ public class Eln {
 		 * 
 		 * int id = 0,subId = 0,completId; String name;
 		 */
-		registerReplicator();
 
 		registerArmor();
 		registerTool();
@@ -761,6 +761,10 @@ public class Eln {
 		registerMiscItem(120);
 		registerElectricalTool(121);
 		registerPortableItem(122);
+		
+		
+		registerReplicator();
+
 
 		recipeArmor();
 		recipeTool();
@@ -988,6 +992,7 @@ public class Eln {
 			WorldServer worldServer = server.worldServers[0];
 			simulator.init();
 			simulator.addSlowProcess(wind = new WindProcess());
+			simulator.addSlowProcess(new ReplicatorPopProcess());
 			simulator.addSlowProcess(new ItemEnergyInventoryProcess());
 
 			ghostManager = (GhostManager) worldServer.mapStorage.loadData(
@@ -6322,6 +6327,12 @@ public class Eln {
 	    //Localize mob name
 	    LanguageRegistry.instance().addStringLocalization("entity.EAReplicator.name", "en_US", "Replicator");
 
+	    
+	    ReplicatorEntity.dropList.add(findItemStack("Iron Dust", 1));
+	    ReplicatorEntity.dropList.add(findItemStack("Copper Dust", 1));
+	    ReplicatorEntity.dropList.add(findItemStack("Gold Dust", 1));
+	    ReplicatorEntity.dropList.add(new ItemStack(Item.redstone));
+	    ReplicatorEntity.dropList.add(new ItemStack(Item.glowstone));
 	    //Add mob spawn
 	   // EntityRegistry.addSpawn(ReplicatorEntity.class, 1, 1, 2, EnumCreatureType.monster, BiomeGenBase.plains);
 	  /*  for(BiomeGenBase biome : BiomeGenBase.biomeList){
