@@ -63,7 +63,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 				//System.out.println("LookingForCableAi done");
 				moveTimeOut = moveTimeOutReset;
 				load.setRp(1000000000000.0);
-				resetTimeout = resetTimeoutReset;
+				resetTimeout = resetTimeoutReset*(0.8 + Math.random()*0.4);
 				return true;
 			}
 		}

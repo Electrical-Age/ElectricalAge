@@ -55,6 +55,8 @@ public class Utils {
 	
 	public static double minecraftDay = 60*24;
 	
+	//public static double rand(double min,double max)
+	
 	public static void println(String str){
 		if(Eln.debugEnable == false) return;
 		System.out.println(str);

@@ -1,5 +1,8 @@
 package mods.eln.electricalmath;
 
+import java.util.List;
+
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -76,5 +79,15 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		GL11.glTranslatef(-0.3f, -0.1f, 0f);
 		draw(0.7f, ledDefault);
+	}
+	
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);
+		
+		list.add("Calculate a output signal from");
+		list.add("3 inputs (A,B,C) and one equation");
 	}
 }

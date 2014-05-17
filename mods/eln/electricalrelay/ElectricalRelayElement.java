@@ -112,7 +112,7 @@ public class ElectricalRelayElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		return Utils.plotVolt("Ua:", aLoad.Uc) + Utils.plotVolt("Ub:", bLoad.Uc) + Utils.plotVolt("I:", aLoad.getCurrent());
+		return Utils.plotVolt("Ua:", aLoad.Uc) + Utils.plotVolt("Ub:", bLoad.Uc) + Utils.plotAmpere("I:", aLoad.getCurrent());
 	}
 
 	@Override

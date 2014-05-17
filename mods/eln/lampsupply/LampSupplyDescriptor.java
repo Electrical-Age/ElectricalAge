@@ -1,7 +1,10 @@
 package mods.eln.lampsupply;
 
+import java.util.List;
+
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
@@ -85,4 +88,12 @@ public class LampSupplyDescriptor extends SixNodeDescriptor{
 		draw(1f);
 	}
 	
+	
+	@Override
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+		// TODO Auto-generated method stub
+		super.addInformation(itemStack, entityPlayer, list, par4);		
+		list.add("Provide supply to any");
+		list.add("lamp on the same channel");
+	}
 }

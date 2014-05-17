@@ -1195,7 +1195,7 @@ public class Eln {
 
 			highVoltageCableDescriptor = desc;
 
-			desc.setPhysicalConstantLikeNormalCable(HVU, HVP, 0.075 / 20,// electricalNominalVoltage,
+			desc.setPhysicalConstantLikeNormalCable(HVU, HVP, 0.05 / 20,// electricalNominalVoltage,
 																			// electricalNominalPower,
 																			// electricalNominalPowerDrop,
 					HVU * 1.3, HVP * 1.2,// electricalMaximalVoltage,
@@ -1726,7 +1726,7 @@ public class Eln {
 		{
 			subId = 3;
 
-			name = "Signal Voltage Switch";
+			name = "Signal Switch";
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRenderSignal,
 					obj.getObj("LowVoltageSwitch"), SVU, SVP, 0.02,// nominalVoltage,
@@ -1741,7 +1741,7 @@ public class Eln {
 		{
 			subId = 8;
 
-			name = "Low Voltage LED Button";
+			name = "Signal Switch with LED";
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRenderSignal,
 					obj.getObj("ledswitch"), SVU, SVP, 0.02,// nominalVoltage,
@@ -1813,7 +1813,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "Electrical Sensor";
+			name = "Electrical Probe";
 
 			desc = new ElectricalSensorDescriptor(name, "electricalsensor",
 					false);
@@ -1823,7 +1823,7 @@ public class Eln {
 		{
 			subId = 1;
 
-			name = "Voltage Sensor";
+			name = "Voltage Probe";
 
 			desc = new ElectricalSensorDescriptor(name, "voltagesensor", true);
 
@@ -1840,7 +1840,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "Thermal Sensor";
+			name = "Thermal Probe";
 
 			desc = new ThermalSensorDescriptor(name,
 					obj.getObj("thermalsensor"), false);
@@ -1850,7 +1850,7 @@ public class Eln {
 		{
 			subId = 1;
 
-			name = "Temperature Sensor";
+			name = "Temperature Probe";
 
 			desc = new ThermalSensorDescriptor(name,
 					obj.getObj("temperaturesensor"), true);
@@ -1884,14 +1884,14 @@ public class Eln {
 		ElectricalAlarmDescriptor desc;
 		{
 			subId = 0;
-			name = "Electrical Alarm A";
+			name = "Nuclear Alarm";
 			desc = new ElectricalAlarmDescriptor(name,
 					obj.getObj("alarmmedium"), 7, "eln:alarma", 11, 1f);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
 			subId = 1;
-			name = "Electrical Alarm B";
+			name = "Standard Alarm";
 			desc = new ElectricalAlarmDescriptor(name,
 					obj.getObj("alarmmedium"), 7, "eln:smallalarm_critical",
 					1.2, 2f);
@@ -2105,7 +2105,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "Signal Source";
+			name = "Signal Trimmer";
 
 			desc = new ElectricalGateSourceDescriptor(name, obj.getObj("signalsourcepot"), false);
 
@@ -2114,7 +2114,7 @@ public class Eln {
 		{
 			subId = 1;
 
-			name = "Signal Source B";
+			name = "Signal Button";
 
 			desc = new ElectricalGateSourceDescriptor(name, obj.getObj("ledswitch"), true);
 
@@ -4444,7 +4444,7 @@ public class Eln {
 		}
 		{
 			subId = 3;
-			name = "Electrical Probe";
+			name = "Electrical Probe Chip";
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4452,7 +4452,7 @@ public class Eln {
 		}
 		{
 			subId = 4;
-			name = "Thermal Probe";
+			name = "Thermal Probe Chip";
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4796,7 +4796,7 @@ public class Eln {
 	}
 
 	void recipeSwitch() {
-		addRecipe(findItemStack("Signal Voltage Switch"),
+		addRecipe(findItemStack("Signal Switch"),
 				"  I",
 				" I ",
 				"CAC",
@@ -4805,7 +4805,7 @@ public class Eln {
 				Character.valueOf('I'), findItemStack("Copper Cable"),
 				Character.valueOf('C'), findItemStack("Signal Cable"));
 
-		addRecipe(findItemStack("Low Voltage LED Button"),
+		addRecipe(findItemStack("Signal Switch with LED"),
 				" RI",
 				" I ",
 				"CAC",
@@ -5326,13 +5326,13 @@ public class Eln {
 
 		addRecipe(findItemStack("Overvoltage Protection", 4),
 				"SCD",
-				Character.valueOf('S'), findItemStack("Electrical Probe"),
+				Character.valueOf('S'), findItemStack("Electrical Probe Chip"),
 				Character.valueOf('C'), findItemStack("Cheap Chip"),
 				Character.valueOf('D'), new ItemStack(Item.redstone));
 
 		addRecipe(findItemStack("Overheating Protection", 4),
 				"SCD",
-				Character.valueOf('S'), findItemStack("Thermal Probe"),
+				Character.valueOf('S'), findItemStack("Thermal Probe Chip"),
 				Character.valueOf('C'), findItemStack("Cheap Chip"),
 				Character.valueOf('D'), new ItemStack(Item.redstone));
 
@@ -5457,7 +5457,7 @@ public class Eln {
 				"RER",
 				"RCR",
 				Character.valueOf('G'), new ItemStack(Block.thinGlass),
-				Character.valueOf('C'), findItemStack("Electrical Probe"),
+				Character.valueOf('C'), findItemStack("Electrical Probe Chip"),
 				Character.valueOf('E'), new ItemStack(Item.redstone),
 				Character.valueOf('R'), "ingotRubber");
 
@@ -5466,7 +5466,7 @@ public class Eln {
 				"RER",
 				"RCR",
 				Character.valueOf('G'), new ItemStack(Block.thinGlass),
-				Character.valueOf('C'), findItemStack("Thermal Probe"),
+				Character.valueOf('C'), findItemStack("Thermal Probe Chip"),
 				Character.valueOf('E'), new ItemStack(Item.redstone),
 				Character.valueOf('R'), "ingotRubber");
 
@@ -5703,20 +5703,20 @@ public class Eln {
 				Character.valueOf('C'), "plateSteel",
 				Character.valueOf('L'), "ingotSteel");
 
-		addRecipe(findItemStack("Electrical Probe"),
+		addRecipe(findItemStack("Electrical Probe Chip"),
 				" R ",
 				"RCR",
 				" R ",
 				Character.valueOf('C'), findItemStack("High Voltage Cable"),
 				Character.valueOf('R'), new ItemStack(Item.redstone));
 
-		addRecipe(findItemStack("Thermal Probe"),
+		addRecipe(findItemStack("Thermal Probe Chip"),
 				"RIR",
 				"RGR",
 				Character.valueOf('G'), new ItemStack(Item.ingotGold),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron),
 				Character.valueOf('R'), new ItemStack(Item.redstone));
-		addRecipe(findItemStack("Thermal Probe"),
+		addRecipe(findItemStack("Thermal Probe Chip"),
 				"RGR",
 				"RIR",
 				Character.valueOf('G'), new ItemStack(Item.ingotGold),
@@ -5875,28 +5875,28 @@ public class Eln {
 	}
 
 	void recipeElectricalSensor() {
-		addRecipe(findItemStack("Voltage Sensor", 1),
+		addRecipe(findItemStack("Voltage Probe", 1),
 				"SC",
-				Character.valueOf('S'), findItemStack("Electrical Probe"),
+				Character.valueOf('S'), findItemStack("Electrical Probe Chip"),
 				Character.valueOf('C'), findItemStack("Signal Cable"));
 
-		addRecipe(findItemStack("Electrical Sensor", 1),
+		addRecipe(findItemStack("Electrical Probe", 1),
 				"SCS",
-				Character.valueOf('S'), findItemStack("Electrical Probe"),
+				Character.valueOf('S'), findItemStack("Electrical Probe Chip"),
 				Character.valueOf('C'), findItemStack("Signal Cable"));
 
 	}
 
 	void recipeThermalSensor() {
 
-		addRecipe(findItemStack("Thermal Sensor", 1),
+		addRecipe(findItemStack("Thermal Probe", 1),
 				"SC",
-				Character.valueOf('S'), findItemStack("Thermal Probe"),
+				Character.valueOf('S'), findItemStack("Thermal Probe Chip"),
 				Character.valueOf('C'), findItemStack("Signal Cable"));
 
-		addRecipe(findItemStack("Temperature Sensor", 1),
+		addRecipe(findItemStack("Temperature Probe", 1),
 				"SCS",
-				Character.valueOf('S'), findItemStack("Thermal Probe"),
+				Character.valueOf('S'), findItemStack("Thermal Probe Chip"),
 				Character.valueOf('C'), findItemStack("Signal Cable"));
 
 	}
@@ -6101,7 +6101,7 @@ public class Eln {
 
 	private void recipeElectricalGateSource() {
 		// TODO Auto-generated method stub
-		addRecipe(findItemStack("Signal Source", 1),
+		addRecipe(findItemStack("Signal Trimmer", 1),
 				"RsR",
 				"rRr",
 				" c ",
@@ -6111,7 +6111,7 @@ public class Eln {
 				Character.valueOf('s'), new ItemStack(Item.stick),
 				Character.valueOf('R'), new ItemStack(Item.redstone));
 
-		addRecipe(findItemStack("Signal Source B", 1),
+		addRecipe(findItemStack("Signal Button", 1),
 				" r ",
 				"rRr",
 				" c ",
@@ -6142,7 +6142,7 @@ public class Eln {
 	}
 
 	private void recipeElectricalAlarm() {
-		addRecipe(findItemStack("Electrical Alarm A", 1),
+		addRecipe(findItemStack("Nuclear Alarm", 1),
 				"T",
 				"M",
 				"c",
@@ -6150,7 +6150,7 @@ public class Eln {
 				Character.valueOf('T'), new ItemStack(Block.torchRedstoneActive),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron),
 				Character.valueOf('M'), new ItemStack(Block.music));
-		addRecipe(findItemStack("Electrical Alarm B", 1),
+		addRecipe(findItemStack("Standard Alarm", 1),
 				"MTM",
 				" c ",
 				Character.valueOf('c'), findItemStack("Signal Cable"),

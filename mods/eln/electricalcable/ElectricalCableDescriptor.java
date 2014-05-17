@@ -148,7 +148,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 			list.add("that must be between 0V and " + Eln.SVU + "V.");
 			list.add("Don't try to transport power.");
 			
-			String lol = "";
+			/*String lol = "";
 			for(int idx = 0; idx < 15; idx++) {
 				if(idx < 10) {
 					lol += "\u00a7" + idx + "" +  idx;
@@ -157,16 +157,16 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 					lol += "\u00a7" + "abcdef".charAt(idx - 10) + "abcdef".charAt(idx - 10);
 				}
 			}
-			list.add(lol);
+			list.add(lol);*/
 		}
 		else {
-			list.add(Utils.plotOhm("Serial resistor :", electricalNominalRs * 2));
-			list.add("Low resistor => low power lost");
+			//list.add("Low resistor => low power lost");
 			list.add("Nominal usage ->");
 			list.add("  Voltage : " + (int)electricalNominalVoltage + " V");
 			list.add("  Current : " + (int)(electricalNominalPower / electricalNominalVoltage) + " A");
 			list.add("  Power : " + (int)electricalNominalPower + " W");
 			list.add("  Power lost : " + (int)(electricalNominalPowerDropFactor * electricalNominalPower) + " W/Block");
+			list.add(Utils.plotOhm("Serial resistor :", electricalNominalRs * 2));
 		}
 	}
 

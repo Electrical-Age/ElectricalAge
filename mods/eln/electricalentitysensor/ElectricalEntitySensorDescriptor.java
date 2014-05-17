@@ -62,6 +62,8 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
+		list.add("Output value rise when");
+		list.add("entities move around");
 		list.add("Max range : " + (int)maxRange);
 	}
 	

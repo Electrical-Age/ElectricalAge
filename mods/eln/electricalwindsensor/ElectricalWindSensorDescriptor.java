@@ -71,10 +71,8 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Provides an electrical signal");
-		list.add("dependant on weather type.");
-		list.add("0V -> clear ");
-		list.add(Eln.SVU/2 +"V -> rain ");
-		list.add(Eln.SVU +"V -> thunder ");
+		list.add("dependant on wind.");
+		list.add("Maximal wind is " + Utils.plotValue(windMax, " m/s"));
 	}
 	
 	

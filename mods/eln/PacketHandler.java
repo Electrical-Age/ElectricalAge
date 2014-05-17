@@ -137,7 +137,7 @@ public class PacketHandler implements IPacketHandler {
 					}
 				}
 			} else {
-				System.out.println("No node found");
+				System.out.println("No node found at " + x + " " + y + " " + z);
 				stream.readShort();
 				int dataSkipLength = stream.readByte();
 				for (int idx = 0; idx < dataSkipLength; idx++) {

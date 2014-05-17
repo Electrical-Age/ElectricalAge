@@ -114,8 +114,9 @@ public class ReplicatorEntity extends EntityMob {
 	boolean isSpawnedFromWeather = false;
 	double hungerTime = 10*60;
 	//double hungerTime = 20;
-	double hungerToEnergy = 10.0*hungerTime; 
-	double hungerToDuplicate = -1;
+	double hungerToEnergy = 10.0*hungerTime;
+	double energyToDuplicate = 10000;
+	double hungerToDuplicate = - energyToDuplicate / hungerToEnergy;
 	double hungerToCanibal = 0.6;
 	
 	@Override
@@ -128,6 +129,11 @@ public class ReplicatorEntity extends EntityMob {
 			if(Math.random() < 0.05/5)
 				attackEntityFrom(DamageSource.starve, 1);
 		} 
+		if(hunger < 0.5){
+			if(Math.random() * 10 < 0.05){
+				heal(1f);
+			}
+		}
 		if(hunger < hungerToDuplicate){
 			ReplicatorEntity entityliving = new ReplicatorEntity(this.worldObj);
 			entityliving.setLocationAndAngles(this.posX,this.posY,this.posZ,0f,0f);
