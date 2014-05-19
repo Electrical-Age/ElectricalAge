@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntityMob;
 import mods.eln.entity.ReplicatorEntity;
 import mods.eln.misc.Coordonate;
+import mods.eln.misc.Utils;
 
 public class MonsterPopFreeProcess implements IProcess{
 	private Coordonate coordonate;
@@ -34,7 +35,7 @@ public class MonsterPopFreeProcess implements IProcess{
 				{
 					if(coordonate.distanceTo(mob) < range && o instanceof ReplicatorEntity == false){
 						mob.setDead();
-						System.out.println("MonsterPopFreeProcess : dead");
+						Utils.println("MonsterPopFreeProcess : dead");
 					}
 				}
 			}

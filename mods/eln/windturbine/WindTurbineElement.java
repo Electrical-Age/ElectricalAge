@@ -10,6 +10,7 @@ import mods.eln.item.DynamoDescriptor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodePeriodicPublishProcess;
@@ -154,7 +155,7 @@ public class WindTurbineElement extends TransparentNodeElement{
 		// TODO Auto-generated method stub
 		super.writeToNBT(nbt, str);
 		cableFront.writeToNBT(nbt, str + "cableFront");
-		System.out.println(cableFront);
+		Utils.println(cableFront);
 	}
 	
 	@Override
@@ -162,7 +163,7 @@ public class WindTurbineElement extends TransparentNodeElement{
 		// TODO Auto-generated method stub
 		super.readFromNBT(nbt, str);
 		cableFront = Direction.readFromNBT(nbt, str + "cableFront");
-		System.out.println(cableFront);
+		Utils.println(cableFront);
 	}
 	
 	 

@@ -77,7 +77,7 @@ public class TreeResinCollectorTileEntity extends TileEntity{
 				
 			if(occupancy > occupancyMax) occupancy = occupancyMax;	
 			
-			System.out.println("occupancy : " + occupancy);
+			Utils.println("occupancy : " + occupancy);
 			timeTarget = (float) (Math.random()*timeRandom);
 		}
 

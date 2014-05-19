@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.lwjgl.opengl.GL11;
 
+import mods.eln.misc.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
@@ -83,7 +84,7 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
     {
     	if(enable  && visible && which == 0 && x > xPosition && y > yPosition && x < xPosition + width && y < yPosition + height)
     	{
-    		//System.out.println("mouseClicked");
+    		//Utils.println("mouseClicked");
     		drag = true;
     		return true;
     	}
@@ -96,12 +97,12 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
      */
 	public boolean mouseMovedOrUp(int x, int y, int which)
     {
-		//System.out.println("mouseMovedOrUp "+ x + " " + y + " " + which);
+		//Utils.println("mouseMovedOrUp "+ x + " " + y + " " + which);
 		if(enable && visible && drag && which == 0)
 		{
 			mouseMove(x, y);
 			if(observer != null) observer.guiObjectEvent(this);
-			System.out.println("New Value : " + getValue());
+			Utils.println("New Value : " + getValue());
 			drag = false;
 			return true;
 		}

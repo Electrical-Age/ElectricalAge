@@ -31,7 +31,7 @@ public class WindProcess implements IProcess,INBTTReady{
 		windTargetFiltred.setTarget((float) windTarget);
 		windTargetFiltred.step((float) time);
 		
-		//System.out.println("WIND : " + windHit + "  TARGET : " + getTarget());
+		//Utils.println("WIND : " + windHit + "  TARGET : " + getTarget());
 		
 	}
 

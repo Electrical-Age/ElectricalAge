@@ -51,7 +51,7 @@ public class ThermalCableDescriptor extends SixNodeDescriptor{
 		thermalC = Eln.simulator.getMinimalThermalC(thermalRs, thermalRp);	
 		if( ! Eln.simulator.checkThermalLoad(thermalRs,thermalRp,thermalC))
 		{
-			System.out.println("Bad thermalCable setup");
+			Utils.println("Bad thermalCable setup");
 			while(true);
 		}
 		

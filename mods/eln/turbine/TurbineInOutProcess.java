@@ -50,7 +50,7 @@ public class TurbineInOutProcess implements IProcess{
 		timeCounter+=time;
 		if(timeCounter >= 1.0){
 			timeCounter -= 1.0;
-			//System.out.println("Turbine " + id + " : " + Utils.plotPower("Pin : ", Pin) + Utils.plotPower("Pout : ", Pout) + Utils.plotEnergy("Pavg", energyCounterGlobal));
+			//Utils.println("Turbine " + id + " : " + Utils.plotPower("Pin : ", Pin) + Utils.plotPower("Pout : ", Pout) + Utils.plotEnergy("Pavg", energyCounterGlobal));
 			energyCounterGlobal = 0;
 		}
 	}

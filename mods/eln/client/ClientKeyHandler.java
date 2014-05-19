@@ -52,7 +52,7 @@ public class ClientKeyHandler extends KeyHandler {
 	                boolean tickEnd, boolean isRepeat) {
 		int i = 0;
 		i++;
-	    // System.out.println("keyDown " + kb + "   " +  tickEnd + "   " + isRepeat);
+	    // Utils.println("keyDown " + kb + "   " +  tickEnd + "   " + isRepeat);
 	    
 	    if(! tickEnd) return;
 	    if(Minecraft.getMinecraft().currentScreen != null) return;

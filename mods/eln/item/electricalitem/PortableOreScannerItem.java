@@ -258,7 +258,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
 		if(entityLiving.worldObj.isRemote == false){
 			setDamage(stack, (byte) (getDamage(stack)+1));
-			System.out.println("Break");
+			Utils.println("Break");
 		}
 		return super.onEntitySwing(entityLiving, stack);
 	}*/
@@ -266,7 +266,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			EntityPlayer player) {
 		if(player.worldObj.isRemote == false){
 			setDamage(itemstack, (byte) (getDamage(itemstack)+1));
-			//System.out.println("Break");
+			//Utils.println("Break");
 		}
 		return super.onBlockStartBreak(itemstack, x, y, z, player);
 	}
@@ -502,7 +502,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			float[] blockKeyFactor = getBlockKeyFactor();
 			long start = System.nanoTime();
 			
-			//System.out.println(posX + " " + posY + " " + posZ + " " + alphaX + " " + alphaY + " ");
+			//Utils.println(posX + " " + posY + " " + posZ + " " + alphaX + " " + alphaY + " ");
 			
 			int posXint = (int)Math.round(posX);
 			int posYint = (int)Math.round(posY);
@@ -653,7 +653,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 				}				
 			}
 			long end = System.nanoTime();
-			//System.out.println("Generate : " + (end - start)/1000 + "us");
+			//Utils.println("Generate : " + (end - start)/1000 + "us");
 		}
 		
 		
@@ -708,7 +708,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			UtilsClient.enableLight();
 			//GL11.glShadeModel(GL11.GL_FLAT);
 			long end = System.nanoTime();
-			//System.out.println("Draw : " + (end - start)/1000 + "us");
+			//Utils.println("Draw : " + (end - start)/1000 + "us");
 		}	
 	}
 	

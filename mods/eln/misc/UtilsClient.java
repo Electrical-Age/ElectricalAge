@@ -117,7 +117,7 @@ public class UtilsClient {
 		// light =
 		// e.worldObj.getLightBrightnessForSkyBlocks(MathHelper.floor_double(e.posX),
 		// MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ),0);
-		// System.out.println(light);
+		// Utils.println(light);
 		GL11.glColor4f(r, g, b, 1f - (light / 15f));
 		halo.draw();
 		GL11.glColor4f(1f, 1f, 1f, 1f);

@@ -120,7 +120,7 @@ public class CableRender {
 					NodeBlockEntity otherNode =  ((NodeBlockEntity)otherTileEntity);
 					CableRenderDescriptor otherRender = otherNode.getCableRender(otherDirection, otherLRDU);
 					if(render == null) {		
-						//System.out.println("ASSERT cableRender missing");
+						//Utils.println("ASSERT cableRender missing");
 						continue;
 					}
 						

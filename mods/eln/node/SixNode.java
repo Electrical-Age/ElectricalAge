@@ -31,6 +31,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -111,7 +112,7 @@ public class SixNode extends Node {
 			
 			connect();
 			
-			System.out.println("createSubBlock " + sideElementIdList[direction.getInt()] + " " + direction);
+			Utils.println("createSubBlock " + sideElementIdList[direction.getInt()] + " " + direction);
 			
 			setNeedPublish(true);
 			return true;
@@ -152,13 +153,13 @@ public class SixNode extends Node {
         }
     }*/
     
-	public boolean deleteSubBlock(Direction direction) {
+	public boolean deleteSubBlock(EntityPlayerMP entityPlayer,Direction direction) {
 		// TODO Auto-generated method stub
 		if(sideElementList[direction.getInt()] == null) return false;
 		
 		
 		
-		System.out.println("deleteSubBlock "+ " " + direction);
+		Utils.println("deleteSubBlock "+ " " + direction);
 		/*
 		if(sideElementList[direction.getInt()].dropItems())
 		{	
@@ -169,7 +170,7 @@ public class SixNode extends Node {
 		SixNodeElement e = sideElementList[direction.getInt()];
 		sideElementList[direction.getInt()] = null;
 		sideElementIdList[direction.getInt()] = 0;
-		e.destroy();
+		e.destroy(entityPlayer);
 
 
 		connect();
@@ -529,7 +530,7 @@ public class SixNode extends Node {
 		SixNodeElement element = sideElementList[elementSide.getInt()];
 		if(element == null)
 		{
-			System.out.println("sixnode newConnectionAt error");
+			Utils.println("sixnode newConnectionAt error");
 			while(true);
 		}
 		lrduElementMask.set(elementSide,elementSide.getLRDUGoingTo(side),true);
@@ -542,7 +543,7 @@ public class SixNode extends Node {
 		SixNodeElement element = sideElementList[elementSide.getInt()];
 		if(element == null)
 		{
-			System.out.println("sixnode newConnectionAt error");
+			Utils.println("sixnode newConnectionAt error");
 			while(true);
 		}
 		lrduElementMask.set(elementSide,elementSide.getLRDUGoingTo(side),false);		
@@ -638,7 +639,7 @@ public class SixNode extends Node {
 			}
 			else
 			{
-				System.out.println("sixnode unserialize miss");
+				Utils.println("sixnode unserialize miss");
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

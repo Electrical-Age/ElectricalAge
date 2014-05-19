@@ -49,17 +49,25 @@ import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 
 public class Utils {
 	
 	public static double minecraftDay = 60*24;
 	
-	//public static double rand(double min,double max)
+	public static double rand(double min,double max){
+		return Math.random()*(max-min)+min;
+	}
 	
 	public static void println(String str){
 		if(Eln.debugEnable == false) return;
 		System.out.println(str);
+	}	
+	public static void println(Object str){
+		if(Eln.debugEnable == false) return;
+		System.out.println(str.toString());
 	}
 	public static void print(String str){
 		if(Eln.debugEnable == false) return;
@@ -909,21 +917,16 @@ public class Utils {
 		return entity.inventory.getCurrentItem() == stack && Eln.playerManager.get(entity).getInteractRise();
 	}
 
-	public static boolean isCreative() {
-		// TODO Auto-generated method stub
-		PlayerControllerMP pc = Minecraft.getMinecraft().playerController;
-		if(pc == null){
-		
-			return true;
-		}
-		return !pc.isNotCreative();
+	public static boolean isCreative(EntityPlayerMP entityPlayer) {
+
+		return entityPlayer.theItemInWorldManager.isCreative();
 		/*Minecraft m = Minecraft.getMinecraft();
 		return m.getIntegratedServer().getGameType().isCreative();*/
 	} 
        
-	public static boolean mustDropItem() {
-		// TODO Auto-generated method stub
-		return !isCreative();
+	public static boolean mustDropItem(EntityPlayerMP entityPlayer) {
+		if(entityPlayer == null) return true;
+		return !isCreative(entityPlayer);
 	}
 
 	public static void serverTeleport(Entity e, double x, double y, double z) {

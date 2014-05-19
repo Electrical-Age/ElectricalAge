@@ -58,7 +58,7 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
 		double e = getEnergy(stack);
 		e = Math.max(0.0, e - damage*energyPerDamage);
 		setEnergy(stack, e);
-		System.out.println("armor hit  damage=" + damage + " energy=" + e + " energyLost=" + damage*energyPerDamage);
+		Utils.println("armor hit  damage=" + damage + " energy=" + e + " energyLost=" + damage*energyPerDamage);
 	}
 	double energyStorage, chargePower;
 
@@ -83,7 +83,7 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
     	
 	//	int maxDamage = getArmorMaterial().getDurability(armorType);
 		
-	//	System.out.println("maxDamage=" + maxDamage + " Damage=" + itemStack.getItemDamage());
+	//	Utils.println("maxDamage=" + maxDamage + " Damage=" + itemStack.getItemDamage());
     }
     
     
@@ -177,7 +177,7 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
 		//super.onUpdate(par1ItemStack, par2World, par3Entity, par4, par5);
 		int maxDamage = getArmorMaterial().getDurability(armorType);
 		
-		System.out.println("maxDamage=" + maxDamage + " Damage=" + par1ItemStack.getItemDamage());
+		Utils.println("maxDamage=" + maxDamage + " Damage=" + par1ItemStack.getItemDamage());
 	}
 	*/
 	

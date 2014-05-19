@@ -9,6 +9,7 @@ import mods.eln.electricalantennarx.ElectricalAntennaRxElement;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.node.NodeElectricalGateOutput;
@@ -70,7 +71,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 				rxElement = (ElectricalAntennaRxElement) ((TransparentNode)node).element;
 			else {
 				rxCoord = null;
-				System.out.println("ASSERT ElectricalAntennaRxElement getRxElement()");
+				Utils.println("ASSERT ElectricalAntennaRxElement getRxElement()");
 			}
 		}
 		return rxElement;

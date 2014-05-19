@@ -2,6 +2,7 @@ package mods.eln.sim;
 
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.IFunction;
+import mods.eln.misc.Utils;
 
 public class TurbineThermalProcess implements IProcess{
 	ThermalLoad warmLoad,coolLoad;
@@ -72,7 +73,7 @@ public class TurbineThermalProcess implements IProcess{
 		if(timeCounter > 1.0)
 		{
 			timeCounter -= 1.0;
-			System.out.println("Eletrical : " + (int)(electricalSource.energyCounter / time) + "  thermal : " + (int)(( energy / efficiency) / time) + "  target % : " + (int)(100*efficiency) +  "  hit % : " + (int)(100*electricalSource.energyCounter/( energy / efficiency))  );
+			Utils.println("Eletrical : " + (int)(electricalSource.energyCounter / time) + "  thermal : " + (int)(( energy / efficiency) / time) + "  target % : " + (int)(100*efficiency) +  "  hit % : " + (int)(100*electricalSource.energyCounter/( energy / efficiency))  );
 		}
 		electricalSource.energyCounter = 0;
 		timeCounter += time;

@@ -15,6 +15,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -54,7 +55,26 @@ public class TransparentNodeBlock extends NodeBlock{
 	  return -1;
 	}
 
+	
+	
+    @Override
+    public boolean removeBlockByPlayer(World world, EntityPlayer entityPlayer, int x, int y, int z) 
+    {  	
+		if(!world.isRemote){
+			NodeBlockEntity entity = (NodeBlockEntity) world.getBlockTileEntity(x, y, z);
+			if(entity != null){
+				NodeBase nodeBase = entity.getNode();
+				if(nodeBase instanceof TransparentNode){
+					TransparentNode t = (TransparentNode) nodeBase;
+					t.removedByPlayer = (EntityPlayerMP)entityPlayer;
+				}
+			}
+		}
 
+    	return super.removeBlockByPlayer(world, entityPlayer, x, y, z);
+
+    }
+	
     @Override
     public int getDamageValue(World world, int x, int y, int z) {
     	// TODO Auto-generated method stub
@@ -94,7 +114,7 @@ public class TransparentNodeBlock extends NodeBlock{
     	else{
     		tileEntity.addCollisionBoxesToList(par5AxisAlignedBB, list);
     	}
-        //System.out.println(list);
+        //Utils.println(list);
     }
 
 

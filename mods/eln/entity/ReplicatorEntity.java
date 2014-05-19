@@ -46,9 +46,14 @@ public class ReplicatorEntity extends EntityMob {
 		super(par1World);
 		
 
-		try {
+		func_110163_bv(); //persistenceRequired
+		/*try {
 			Class c = EntityLiving.class;
 			Field f;
+			for(Field ff : c.getDeclaredFields()){
+				Utils.println(ff.getName());
+			}
+			
 			f = c.getDeclaredField("persistenceRequired");
 			f.setAccessible(true);		
 			f.set(this, true);
@@ -64,7 +69,7 @@ public class ReplicatorEntity extends EntityMob {
 		} catch (IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 
 		
 	//	Utils.println("new replicator");
@@ -104,9 +109,9 @@ public class ReplicatorEntity extends EntityMob {
 	public boolean attackEntityAsMob(Entity e) {
 		// TODO Auto-generated method stub
 		if(e instanceof ReplicatorEntity){
-			this.hunger -= 0.2;
-			((ReplicatorEntity)e).hunger += 0.2;	
-		//	System.out.print("ATTAQUE");
+			this.hunger -= 0.8;
+			((ReplicatorEntity)e).hunger += 0.8;	
+		//	Utils.print("ATTAQUE");
 		}
 		return super.attackEntityAsMob(e);
 	}
@@ -123,7 +128,7 @@ public class ReplicatorEntity extends EntityMob {
 	protected void updateAITick() {
 		// TODO Auto-generated method stub
 		super.updateAITick();
-//		System.out.print(hunger + " ");
+//		Utils.print(hunger + " ");
 		hunger += 0.05/hungerTime;
 		if(hunger > 1){
 			if(Math.random() < 0.05/5)

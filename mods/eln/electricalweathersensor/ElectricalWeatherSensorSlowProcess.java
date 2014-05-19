@@ -51,7 +51,7 @@ public class ElectricalWeatherSensorSlowProcess implements IProcess, INBTTReady 
 	    		target = target * (1 - f) + f * 1f;
 	    	}
 	    	*/
-	    	//System.out.println(target);
+	    	//Utils.println(target);
 			rc.setTarget(target);
 			rc.step((float) time);
 			element.outputGateProcess.setOutputNormalized(rc.get());

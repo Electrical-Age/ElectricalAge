@@ -21,6 +21,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;
@@ -100,13 +101,13 @@ public class NodeBlock extends BlockContainer {//BlockContainer
 	
     public void func_85105_g(World world, int x, int y, int z, int metadata)
     {
-    	System.out.println("CACATOTAL3");
+    	Utils.println("CACATOTAL3");
         while(true);//DON'tCALL THAT XD	
     }
 	
     public void onBlockPlacedBy(World par1World, int x, int y, int z, EntityLiving entityLiving)
     {
-    	System.out.println("CACATOTAL2");
+    	Utils.println("CACATOTAL2");
     	while(true);
     }   
     
@@ -129,6 +130,9 @@ public class NodeBlock extends BlockContainer {//BlockContainer
     		entity.onBlockAdded();
     	}   	
     }
+    
+
+    
     //server
     public void breakBlock(World par1World, int x, int y, int z, int par5, int par6)
     {

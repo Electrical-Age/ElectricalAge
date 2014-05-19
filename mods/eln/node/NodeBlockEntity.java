@@ -241,7 +241,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         		if(getNode() == null) //to verrifie todo
         		{
         			//worldObj.setBlock(xCoord, yCoord, zCoord, 0);//caca1.5.1
-        			//System.out.println("ASSERT NODE DESTROYED BY SECURITY updateEntity");
+        			//Utils.println("ASSERT NODE DESTROYED BY SECURITY updateEntity");
         		}
     		}    		
     	}
@@ -359,7 +359,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     	Node node = getNode(); //TO DO NULL POINTER
     	if(node == null)
     	{
-    		System.out.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
+    		Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
     		return null;
     	}
     	return node.getPacketNodeSingleSerialized();

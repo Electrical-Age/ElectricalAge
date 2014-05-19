@@ -35,6 +35,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -240,8 +241,8 @@ public abstract class TransparentNodeElement implements INBTTReady ,GhostObserve
 			//transparentNodeDescriptor.getGhostGroup(front).erase(node.coordonate);
 		}
 		node.dropInventory(getInventory());
-		if(Utils.mustDropItem())
-			node.dropItem(getDropItemStack());
+		node.dropElement(node.removedByPlayer);
+
 	}
 	public ItemStack getDropItemStack()
 	{

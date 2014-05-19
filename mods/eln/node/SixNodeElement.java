@@ -24,6 +24,7 @@ import mods.eln.sim.ThermalConnection;
 import mods.eln.sim.ThermalLoad;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -187,8 +188,13 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
     	initialize();
     }*/
     public abstract void initialize();
-    
+
     public void destroy()
+    {
+    	destroy(null);
+    }
+    
+    public void destroy(EntityPlayerMP entityPlayer)
     {
 		if(sixNodeElementDescriptor.hasGhostGroup()){
 			Eln.ghostManager.removeObserver(sixNode.coordonate);
@@ -196,7 +202,8 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
 		}
 		
     	sixNode.dropInventory(getInventory());
-    	if(Utils.mustDropItem())
+    //	getCoordonate().world().getWorldInfo().
+    	if(Utils.mustDropItem(entityPlayer))
     		sixNode.dropItem(getDropItemStack());
     }
 
@@ -351,6 +358,6 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
 
 	
 	private void selfDestroy() {
-		sixNode.deleteSubBlock(side);
+		sixNode.deleteSubBlock(null,side);
 	}
 }

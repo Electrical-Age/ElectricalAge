@@ -96,7 +96,7 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
 				size--;
 				log.write(stream.readByte());
 			}
-		//	System.out.println(log);
+		//	Utils.println(log);
 			break;
 		}
 	}

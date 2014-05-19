@@ -42,7 +42,7 @@ public class LiveDataManager implements ITickHandler{
 	
 	public Object newData(Object key,Object data,int timeout){
 		map.put(key, new Element(data,timeout));
-		System.out.println("NewLiveData");
+		Utils.println("NewLiveData");
 		return data;
 	}
 	
@@ -55,7 +55,7 @@ public class LiveDataManager implements ITickHandler{
 			e.timeout--;
 			if(e.timeout < 0){
 				keyToRemove.add(entry.getKey());
-				System.out.println("LiveDeleted");
+				Utils.println("LiveDeleted");
 			}
 		}
 		

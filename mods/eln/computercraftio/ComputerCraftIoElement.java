@@ -134,7 +134,7 @@ public class ComputerCraftIoElement extends TransparentNodeElement{
 		String sideStr = arg0.substring(0, 2);
 		String remaineStr = arg0.substring(2, arg0.length());
 		
-		//System.out.println(sideStr + " " + remaineStr);
+		//Utils.println(sideStr + " " + remaineStr);
 		
 		if(sideStr.equals("XN")) id = 0;
 		if(sideStr.equals("XP")) id = 1;
@@ -146,15 +146,15 @@ public class ComputerCraftIoElement extends TransparentNodeElement{
 			Coordonate c = new Coordonate(this.node.coordonate);
 			Direction side = Direction.fromHorizontalIndex(id);	
 			c.move(side);
-			//System.out.println("SUB probe ! " + side + " " + c);
+			//Utils.println("SUB probe ! " + side + " " + c);
 			NodeBase n = NodeManager.instance.getNodeFromCoordonate(c);
 			if(n == null) return null;
-			//System.out.println("  NodeBase");
+			//Utils.println("  NodeBase");
 			if(n instanceof TransparentNode == false) return null;
-			//System.out.println("  TransparentNode");
+			//Utils.println("  TransparentNode");
 			TransparentNode tn = (TransparentNode)n;
 			if(tn.element instanceof ComputerCraftIoElement == false) return null;
-			//System.out.println("  ComputerCraftIoElement");
+			//Utils.println("  ComputerCraftIoElement");
 			ComputerCraftIoElement e = (ComputerCraftIoElement) tn.element;
 			Object[] argumentsCopy = arguments.clone();
 			argumentsCopy[0] = remaineStr;

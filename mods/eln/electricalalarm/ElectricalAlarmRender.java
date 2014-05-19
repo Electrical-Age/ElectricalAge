@@ -12,6 +12,7 @@ import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.RcInterpolator;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementRender;
@@ -56,7 +57,7 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
 			b = stream.readByte();
 			front = LRDU.fromInt((b>>4)&3);
 			warm = (b & 1) != 0 ? true : false;
-			System.out.println("WARM : " + warm);
+			Utils.println("WARM : " + warm);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

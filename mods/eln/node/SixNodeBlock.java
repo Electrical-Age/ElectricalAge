@@ -10,6 +10,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.item.SixNodeCacheItem;
 import mods.eln.misc.Direction;
+import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -19,6 +20,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -68,7 +70,7 @@ public class SixNodeBlock extends NodeBlock{
     	TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
 		if(tileEntity != null && tileEntity instanceof SixNodeEntity)
 			return (SixNodeEntity)tileEntity;
-		System.out.println("ASSERTSixNodeEntity getEntity() null");
+		Utils.println("ASSERTSixNodeEntity getEntity() null");
 		return null;
 		   	
     }
@@ -134,7 +136,7 @@ public class SixNodeBlock extends NodeBlock{
     @Override
     public boolean canPlaceBlockAt(World par1World, int par2, int par3, int par4)
     {
-    	System.out.println("CACATOTAL1");
+    	Utils.println("CACATOTAL1");
         while(true);//DON'tCALL THAT XD
     }
     
@@ -185,7 +187,7 @@ public class SixNodeBlock extends NodeBlock{
 			sixNode.setNeedPublish(true);
 			return false;
 		}
-		if(false == sixNode.deleteSubBlock(Direction.fromIntMinecraftSide(MOP.sideHit))) return false;
+		if(false == sixNode.deleteSubBlock((EntityPlayerMP)entityPlayer,Direction.fromIntMinecraftSide(MOP.sideHit))) return false;
 
 		if(sixNode.getIfSideRemain()) return true;
 		
@@ -205,7 +207,7 @@ public class SixNodeBlock extends NodeBlock{
         	{
     			if(sixNode.getSideEnable(direction))
     			{
-    				sixNode.deleteSubBlock(direction); 	
+    				sixNode.deleteSubBlock(null,direction); 	
     			}
         	}
     	}
@@ -225,7 +227,7 @@ public class SixNodeBlock extends NodeBlock{
 			{
 	    		if(! getIfOtherBlockIsSolid(world, x, y, z,direction))
 	    		{
-	    			sixNode.deleteSubBlock(direction); 
+	    			sixNode.deleteSubBlock(null,direction); 
 	    		} 	
 			}
     	}
@@ -418,7 +420,7 @@ public class SixNodeBlock extends NodeBlock{
     		if(tileEntity != null && tileEntity instanceof SixNodeEntity)
     			return ((SixNodeEntity)tileEntity).sixNodeCacheMapId >= 0;
 			else
-				System.out.println("ASSERT B public boolean nodeHasCache(World world, int x, int y, int z) ");
+				Utils.println("ASSERT B public boolean nodeHasCache(World world, int x, int y, int z) ");
     		 
     	}
     	else
@@ -428,7 +430,7 @@ public class SixNodeBlock extends NodeBlock{
 			if(sixNode != null)
 				return sixNode.sixNodeCacheMapId >= 0;
 			else
-				System.out.println("ASSERT A public boolean nodeHasCache(World world, int x, int y, int z) ");
+				Utils.println("ASSERT A public boolean nodeHasCache(World world, int x, int y, int z) ");
     	}
     	return false;
 	}

@@ -89,7 +89,7 @@ public class TreeResinCollectorBlock extends BlockContainer{
     	
     	if(! canPlaceBlockOnSide(world, x, y, z, world.getBlockMetadata(x, y, z)))
     	{
-    	//System.out.println("WOOOOOOD down");
+    	//Utils.println("WOOOOOOD down");
     		
     		dropBlockAsItem_do(world, x, y, z, new ItemStack(this));
     		world.setBlockToAir(x, y, z);

@@ -45,7 +45,7 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 		powerFactorFilter.stepGraphic();
 		
 		
-		//System.out.println(powerFactorFilter.get());
+		//Utils.println(powerFactorFilter.get());
 		alpha += FrameTime.get() * 30 * (powerFactorFilter.get());
 		if(alpha > 360) alpha -= 360;
 		front.glRotateXnRef();

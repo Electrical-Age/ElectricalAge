@@ -3,6 +3,7 @@ package mods.eln.mppt;
 import java.util.ArrayList;
 
 import mods.eln.INBTTReady;
+import mods.eln.misc.Utils;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistor;
 import mods.eln.sim.IProcess;
@@ -63,19 +64,19 @@ public class MpptSlowProcess implements IProcess,INBTTReady{
 		if(fall)
 		{
 			inResistorValue = inResistorValue*(1-factor);	
-			System.out.print("-- ");
+			Utils.print("-- ");
 		}
 		else
 		{
 			inResistorValue = inResistorValue*(1+factor);		
-			System.out.print("++ ");
+			Utils.print("++ ");
 		}
 		
 		
 		if(inResistorValue < mppt.descriptor.inResistorMin)inResistorValue = mppt.descriptor.inResistorMin;
 		if(inResistorValue > mppt.descriptor.inResistorMax)inResistorValue = mppt.descriptor.inResistorMax;
 		
-		System.out.println("P : "  + mppt.inResistor.getP() + "   inResistor : " + inResistorValue + "skype : " + (TimeLeft) + "  consecutiveTry : " + tryNoChangeNumber);
+		Utils.println("P : "  + mppt.inResistor.getP() + "   inResistor : " + inResistorValue + "skype : " + (TimeLeft) + "  consecutiveTry : " + tryNoChangeNumber);
 			
 		mppt.inResistor.setR(inResistorValue);
 		

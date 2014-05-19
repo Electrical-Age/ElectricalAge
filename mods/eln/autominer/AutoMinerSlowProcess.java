@@ -161,7 +161,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 			miner.needPublish();
 		}
 		oldJob = job;
-		//System.out.println(job);
+		//Utils.println(job);
 	}
 	
 	public void drop(ItemStack stack) {
@@ -220,7 +220,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 				invFreeCnt++;
 			}
 		}			
-		System.out.println(" " + invFreeCnt);
+		Utils.println(" " + invFreeCnt);
 		*/
 		boolean jobFind = false;
 		if(drill == null) {

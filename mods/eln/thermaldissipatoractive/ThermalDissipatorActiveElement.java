@@ -98,7 +98,7 @@ public class ThermalDissipatorActiveElement extends TransparentNodeElement{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("DISIP");
+		Utils.println("DISIP");
 	}
 	public float lastPowerFactor;
 	

@@ -21,7 +21,7 @@ public class SolarPannelSlowProcess implements IProcess {
 		timeCounter -= time;
 		if(timeCounter < 0)
 		{
-			//System.out.println("Solar Light : " + getSolarLight());
+			//Utils.println("Solar Light : " + getSolarLight());
 			if(solarPannel.descriptor.basicModel == false)
 			{
 				solarPannel.currentSource.setI(solarPannel.descriptor.solarIfS.getValue(getSolarLight()));
@@ -38,7 +38,7 @@ public class SolarPannelSlowProcess implements IProcess {
 	public double getSolarLight()
 	{
 		double solarAlpha = getSolarAlpha();
-	//	System.out.print("solarAlpha : " + solarAlpha + "  ");
+	//	Utils.print("solarAlpha : " + solarAlpha + "  ");
 		if(solarAlpha >= Math.PI) return 0.0;
 		
 		if(solarPannel.inventory.getStackInSlot(SolarPannelContainer.trackerSlotId) != null)
@@ -94,7 +94,7 @@ public class SolarPannelSlowProcess implements IProcess {
 			count++;
 			if(y > 256.0) break;
 		}
-//		System.out.print("count : " + count + "   ");
+//		Utils.print("count : " + count + "   ");
 		return light;
 	}
 	public static double getSolarAlpha(World world)

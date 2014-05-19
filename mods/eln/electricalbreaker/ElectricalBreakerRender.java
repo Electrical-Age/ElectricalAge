@@ -69,7 +69,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);
-		System.out.println("Front : " + front);
+		Utils.println("Front : " + front);
 		try {
 			switchState = stream.readBoolean();
 			uMax = stream.readFloat();

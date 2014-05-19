@@ -25,7 +25,7 @@ public class ElectricalLightSensorSlowProcess implements IProcess {
 			timeCounter -= refreshPeriode;
 			Coordonate coord = element.sixNode.coordonate;
 			//int light = coord.world().getSavedLightValue(EnumSkyBlock.Sky, coord.x, coord.y, coord.z) - coord.world().skylightSubtracted;
-			//	System.out.println("Light : " + light);
+			//	Utils.println("Light : " + light);
 			World world = coord.world();
 			int light = 0;
 			//if(element.descriptor.dayLightOnly) {

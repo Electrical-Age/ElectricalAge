@@ -83,13 +83,13 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
 						if(useSpeed) {
 							sf = speedFactor * Utils.getLength(e.posX, e.posY, e.posZ, e.lastTickPosX, e.lastTickPosY, e.lastTickPosZ);
 							//Math.sqrt(e.motionX * e.motionX + e.motionY * e.motionY + e.motionZ * e.motionZ);
-							//System.out.println(sf);
+							//Utils.println(sf);
 						}
 						output += sf * weight * (rayMax - distance) / rayMax;
 					}
 				}
 			}
-			//System.out.println(output);
+			//Utils.println(output);
 			rc1.setTarget((float) output);
 		}
 		

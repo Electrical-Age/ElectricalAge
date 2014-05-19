@@ -30,7 +30,7 @@ public class TileEntityDestructor implements ITickHandler {
 		for(TileEntity t : destroyList){
 			if(t.worldObj != null && t.worldObj.getBlockTileEntity(t.xCoord, t.yCoord, t.zCoord) == t){
 				t.worldObj.setBlock(t.xCoord, t.yCoord, t.zCoord, 0);
-				System.out.println("destroy light at " + t.xCoord + " " + t.yCoord + " " +  t.zCoord);
+				Utils.println("destroy light at " + t.xCoord + " " + t.yCoord + " " +  t.zCoord);
 			}
 		}
 		destroyList.clear();

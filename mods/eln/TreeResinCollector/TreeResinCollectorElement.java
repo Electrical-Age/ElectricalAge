@@ -123,7 +123,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 		if(collectiorCount == 0)
 		{
 			collectiorCount++;
-			System.out.println("ASSERT collectiorCount == 0");
+			Utils.println("ASSERT collectiorCount == 0");
 		}
 		double productPerSeconde = Math.min(0.05,occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectiorCount);
 		double product = productPerSeconde * timeFromLastActivated;
@@ -234,7 +234,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 		if(collectiorCount == 0)
 		{
 			collectiorCount++;
-			System.out.println("ASSERT collectiorCount == 0");
+			Utils.println("ASSERT collectiorCount == 0");
 		}
 		double productPerSeconde = Math.min(0.05,occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectiorCount);
 		double product = productPerSeconde * timeFromLastActivated;

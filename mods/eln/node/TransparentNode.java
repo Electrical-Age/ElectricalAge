@@ -31,6 +31,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -44,6 +45,7 @@ public class TransparentNode extends Node implements IPeripheral{
 
 	public TransparentNodeElement element;
 	public int elementId;
+	public EntityPlayerMP removedByPlayer;
 	
 	
 	@Override
@@ -275,7 +277,7 @@ public class TransparentNode extends Node implements IPeripheral{
 			}
 			else
 			{
-				System.out.println("Transparent node unserialize miss");
+				Utils.println("Transparent node unserialize miss");
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -351,6 +353,14 @@ public class TransparentNode extends Node implements IPeripheral{
 	public void detach(IComputerAccess computer) {
 		// TODO Auto-generated method stub
 		element.detach(computer);
+	}
+
+
+
+	public void dropElement(EntityPlayerMP entityPlayer) {
+		if(element != null)
+			if(Utils.mustDropItem(entityPlayer))
+				dropItem(element.getDropItemStack());
 	}
 	
 	

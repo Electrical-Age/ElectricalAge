@@ -57,7 +57,7 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 			if(e < 0) e = 0;
 			setEnergy(stack, e);
 		}
-		System.out.println("destroy");
+		Utils.println("destroy");
 		return false;
 	}
 	

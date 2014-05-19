@@ -109,7 +109,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 		try {
 			pipeLength = stream.readShort();
 			job = AutoMinerSlowProcess.jobType.values()[stream.readByte()];
-		//	System.out.println(job + " " + pipeLength);
+		//	Utils.println(job + " " + pipeLength);
 
 		} catch (IOException e) {
 			e.printStackTrace();

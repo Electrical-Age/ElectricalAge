@@ -272,7 +272,7 @@ import java.util.List;
 
 
 
-@Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0")
+@Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0b")
 @NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
 	/*
@@ -4991,7 +4991,7 @@ public class Eln {
 
 		addRecipe(findItemStack("Life Oriented Battery"),
 				"P P",
-				" BP",
+				" B ",
 				"P P",
 				Character.valueOf('B'), findItemStack("Cost Oriented Battery"),
 				Character.valueOf('P'), new ItemStack(Item.ingotGold));

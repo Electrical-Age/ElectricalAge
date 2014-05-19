@@ -10,6 +10,7 @@ import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
 import mods.eln.misc.Coordonate;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -43,12 +44,12 @@ public class PlayerManager implements ITickHandler {
 		public void setInteractEnable(boolean interactEnable) {
 			if(this.interactEnable == false && interactEnable == true){
 				interactRiseBuffer = true;
-				System.out.println("interactRiseBuffer");
+				Utils.println("interactRiseBuffer");
 			}
 			this.interactEnable = interactEnable;
 
 			timeoutReset();
-			System.out.println("interactEnable : " + interactEnable);
+			Utils.println("interactEnable : " + interactEnable);
 		}
 
 		public boolean getInteractEnable() {

@@ -85,4 +85,9 @@ import net.minecraftforge.common.ForgeDirection;
 	{
 		return Eln.ghostManager.getGhost(new Coordonate(x,y,z,world));
 	}
+	@Override
+	public float getBlockHardness(World par1World, int par2, int par3, int par4) {
+		// TODO Auto-generated method stub
+		return 0.5f;
+	}
 }

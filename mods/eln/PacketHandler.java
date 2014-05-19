@@ -102,7 +102,7 @@ public class PacketHandler implements IPacketHandler {
 			if (node != null && node.getBlockId() == stream.readShort()) {
 				node.networkUnserialize(stream, player);
 			} else {
-				System.out.println("packetForNode node found");
+				Utils.println("packetForNode node found");
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -126,18 +126,18 @@ public class PacketHandler implements IPacketHandler {
 				if (node.getBlockId() == stream.readShort()) {
 					node.serverPacketUnserialize(stream);
 					if (0 != stream.available()) {
-						System.out.println("0 != stream.available()");
+						Utils.println("0 != stream.available()");
 						// while(true);
 					}
 				} else {
-					System.out.println("Wrong node UUID warning");
+					Utils.println("Wrong node UUID warning");
 					int dataSkipLength = stream.readByte();
 					for (int idx = 0; idx < dataSkipLength; idx++) {
 						stream.readByte();
 					}
 				}
 			} else {
-				System.out.println("No node found at " + x + " " + y + " " + z);
+				Utils.println("No node found at " + x + " " + y + " " + z);
 				stream.readShort();
 				int dataSkipLength = stream.readByte();
 				for (int idx = 0; idx < dataSkipLength; idx++) {
@@ -166,19 +166,19 @@ public class PacketHandler implements IPacketHandler {
 				if (node.getBlockId() == stream.readShort()) {
 					node.networkUnserialize(stream);
 					if (0 != stream.available()) {
-						System.out.println("0 != stream.available()");
+						Utils.println("0 != stream.available()");
 						while (true)
 							;
 					}
 				} else {
-					System.out.println("Wrong node UUID warning");
+					Utils.println("Wrong node UUID warning");
 					int dataSkipLength = stream.readByte();
 					for (int idx = 0; idx < dataSkipLength; idx++) {
 						stream.readByte();
 					}
 				}
 			} else {
-				System.out.println("No node found");
+				Utils.println("No node found");
 				stream.readShort();
 				/*int dataSkipLength = stream.readByte();
 				for (int idx = 0; idx < dataSkipLength; idx++) {
@@ -242,7 +242,7 @@ public class PacketHandler implements IPacketHandler {
 
 	void packetNodeSerialized24bitPosition(DataInputStream stream,
 			INetworkManager manager, Player player) {
-		System.out.println("packetNodeSerialized24bitPosition OLD");
+		Utils.println("packetNodeSerialized24bitPosition OLD");
 		while (true)
 			;/*
 			 * try{ EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP)
@@ -261,13 +261,13 @@ public class PacketHandler implements IPacketHandler {
 			 * int streamByteNbrToRead = stream.readByte(); int streamByteLeft =
 			 * stream.available(); node.networkUnserialize(stream);
 			 * if(streamByteLeft-stream.available() != streamByteNbrToRead) {
-			 * System.out.println(
+			 * Utils.println(
 			 * "if(streamByteLeft-stream.available() != streamByteNbrToRead) error"
 			 * ); while(true); } } else {
-			 * System.out.println("Wrong node UUID warning"); int dataSkipLength
+			 * Utils.println("Wrong node UUID warning"); int dataSkipLength
 			 * = stream.readByte(); for(int idx = 0;idx< dataSkipLength;idx++) {
 			 * stream.readByte(); } } } else {
-			 * System.out.println("No node found"); stream.readShort(); int
+			 * Utils.println("No node found"); stream.readShort(); int
 			 * dataSkipLength = stream.readByte(); for(int idx = 0;idx<
 			 * dataSkipLength;idx++) { stream.readByte(); } } } } catch
 			 * (IOException e) { // TODO Auto-generated catch block

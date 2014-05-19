@@ -93,7 +93,7 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 			{
 				environementWindFactor = Math.max(0.0,Math.min(1.0,1.0 - blockBusyCount*d.blockMalus));
 				
-				System.out.println("EnvironementWindFactor : " + environementWindFactor);
+				Utils.println("EnvironementWindFactor : " + environementWindFactor);
 			}
 		
 		}
@@ -148,7 +148,7 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 		counter++;
 		if(counter%20 == 0)
 		{
-			System.out.println("Wind : " + getWind() + "  Derivate : " + localWindDerive + " EPmax : " + P);
+			Utils.println("Wind : " + getWind() + "  Derivate : " + localWindDerive + " EPmax : " + P);
 		}
 		
 	}

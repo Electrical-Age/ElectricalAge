@@ -1,5 +1,6 @@
 package mods.eln;
 
+import mods.eln.misc.Utils;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 
@@ -43,7 +44,7 @@ public class ConsoleListener extends CommandBase{
 			SaveConfig.instance.heatFurnaceFuel = (!astring[1].equals("0"));	
 		}else if(a.equals("newwind")){
 			Eln.wind.newWindTarget();
-			System.out.println("newWind : " + Eln.wind.getTargetNotFiltred());
+			Utils.println("newWind : " + Eln.wind.getTargetNotFiltred());
 		}
 	}
 

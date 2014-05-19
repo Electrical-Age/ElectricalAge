@@ -22,7 +22,7 @@ public class ElectricalRedstoneInputSlowProcess implements IProcess {
 		if(sleepCounter == 0.0) {
 			Coordonate coord = element.sixNode.coordonate;
 			int signal = Utils.getRedstoneLevelAround(coord);
-			//System.out.println("Light : " + light);
+			//Utils.println("Light : " + light);
 			element.outputGateProcess.setOutputNormalized((signal) / 15.0 );
 			if(signal != oldSignal) {
 				element.needPublish();

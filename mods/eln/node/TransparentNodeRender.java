@@ -30,7 +30,7 @@ public class TransparentNodeRender extends TileEntitySpecialRenderer
 	public void renderTileEntityAt(TileEntity entity, double x, double y,
 			double z, float var8) {
 		// TODO Auto-generated method stub
-		//System.out.println("delta T : " + var8);
+		//Utils.println("delta T : " + var8);
 		TransparentNodeEntity tileEntity = (TransparentNodeEntity) entity;
 		if(tileEntity.elementRender == null) return;
 		//Utils.glDefaultColor();

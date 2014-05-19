@@ -42,7 +42,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 	double resetTimeoutReset = 120;
 	@Override
 	public boolean shouldExecute() {
-		//System.out.println("LookingForCableAi");
+		//Utils.println("LookingForCableAi");
 		ArrayList<NodeBase> nodes = NodeManager.instance.getNodes();
 		if(nodes.size() == 0) return false;
 		for(int idx = 0;idx < lookingPerUpdate;idx++){
@@ -60,7 +60,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 				if(path == null/* || path.isFinished() == false*/) continue;
 				entity.getNavigator().setPath(path, 1);
 				cableCoordonate = node.coordonate;
-				//System.out.println("LookingForCableAi done");
+				//Utils.println("LookingForCableAi done");
 				moveTimeOut = moveTimeOutReset;
 				load.setRp(1000000000000.0);
 				resetTimeout = resetTimeoutReset*(0.8 + Math.random()*0.4);
@@ -74,14 +74,14 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 	@Override
 	public boolean continueExecuting() {
 		// TODO Auto-generated method stub
-		//System.out.println("Continue");
+		//Utils.println("Continue");
 		return cableCoordonate != null;
 	}
 
 
 	@Override
 	public void updateTask() {
-		//System.out.println("update");
+		//Utils.println("update");
 		moveTimeOut -= 0.05;
 		resetTimeout -= 0.05;
 		ElectricalCableElement cable;
@@ -96,7 +96,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 			this.entity.getNavigator().tryMoveToXYZ(cableCoordonate.x,cableCoordonate.y,cableCoordonate.z, 1);
 		}
 		if(distance < 2){
-			//System.out.println("replicator on cable !");
+			//Utils.println("replicator on cable !");
 			double u = cable.electricalLoad.Uc;
 			double nextRp = Math.pow(u/Eln.LVU, -0.3)*u*u/(50);
 			if(load.getRp() < 0.8*nextRp){
@@ -150,9 +150,9 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 	@Override
 	public void startExecuting() {
 		// TODO Auto-generated method stub
-		//System.out.println("START REPLICATOOOOOR");
+		//Utils.println("START REPLICATOOOOOR");
 
-		//System.out.println(this.entity.getNavigator().tryMoveToXYZ(-2470,56,-50, 1));
+		//Utils.println(this.entity.getNavigator().tryMoveToXYZ(-2470,56,-50, 1));
 	}
 
 

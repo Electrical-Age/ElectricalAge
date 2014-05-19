@@ -117,7 +117,7 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 						Block b = c.getBlock();
 						/*
 						 * if(c.y == 4){ int I = 0; I++; } if(b instanceof
-						 * BlockCrops){ int I = 0; I++; System.out.println(c +
+						 * BlockCrops){ int I = 0; I++; Utils.println(c +
 						 * " CROP !"); }
 						 */
 
@@ -409,7 +409,7 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 
 	public void publish()
 	{
-		System.out.print("Light published");
+		Utils.print("Light published");
 	}
 
 	public void setLightAt(Coordonate coord, int value)

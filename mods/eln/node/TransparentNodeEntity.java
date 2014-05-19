@@ -38,7 +38,7 @@ public class TransparentNodeEntity extends NodeBlockEntity implements IPeriphera
 	/* caca
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction direction) {
 		// TODO Auto-generated method stub
-		//System.out.println("onBlockActivated " + direction);
+		//Utils.println("onBlockActivated " + direction);
 		
 		return getNode().onBlockActivated(entityPlayer, direction);
 	}

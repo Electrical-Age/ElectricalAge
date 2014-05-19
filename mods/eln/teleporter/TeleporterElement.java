@@ -239,7 +239,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			
 			
 			
-			System.out.println("Teleporter state=" + state);
+			Utils.println("Teleporter state=" + state);
 			needPublish();
 			
 			

@@ -218,7 +218,7 @@ public abstract class NodeBase implements INBTTReady {
 		initializeFromThat(front, entityLiving, itemStack);
 
 		if(itemStack != null)
-			System.out.println("Node::constructor( meta = " + itemStack.getItemDamage() + ")");
+			Utils.println("Node::constructor( meta = " + itemStack.getItemDamage() + ")");
 	}
 	
 	
@@ -235,13 +235,15 @@ public abstract class NodeBase implements INBTTReady {
 		return NodeManager.instance.getNodeFromCoordonate(nodeCoordonate);	
 	}
 	
+	
+	
 	//leaf
 	public void onBreakBlock()
 	{
 		dropInventory(getInventory());
 		disconnect();
 		NodeManager.instance.removeNode(this);
-		System.out.println("Node::onBreakBlock()");
+		Utils.println("Node::onBreakBlock()");
 	}
 	
 	public  boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,float vx,float vy,float vz)
@@ -472,7 +474,7 @@ public abstract class NodeBase implements INBTTReady {
 	{
 		if(! isAdded)
 		{
-			System.out.println("Node destroy error already destroy");
+			Utils.println("Node destroy error already destroy");
 			return;			
 		}
 		
