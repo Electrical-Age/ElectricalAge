@@ -26,7 +26,9 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 			ElectricalCableDescriptor cable,
 			double nominalPower,
 			double maxVoltage,
-			Coordonate waterCoord
+			Coordonate waterCoord,
+			String soundName,
+			float nominalVolume
 			) {
 		super(name, WaterTurbineElement.class, WaterTurbineRender.class);
 
@@ -34,12 +36,15 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 		this.nominalPower = nominalPower;
 		this.maxVoltage = maxVoltage;
 		this.waterCoord = waterCoord;
+		this.soundName = soundName;
+		this.nominalVolume = nominalVolume;
 		
 		this.obj = obj;
 		if(obj != null){
 			wheel = obj.getPart("Wheel");
 			support = obj.getPart("Support");
 			generator = obj.getPart("Generator");
+			speed = 60;
 		}
 	}
 	
@@ -62,6 +67,11 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 
 
 	public double maxVoltage;
+	
+	public float speed;
+	
+	public String soundName;
+	public float nominalVolume;
 
 
 	public FunctionTable PfW;

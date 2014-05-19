@@ -33,6 +33,7 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 	RcInterpolator dirFilter = new RcInterpolator(0.5f);
 	WaterTurbineDescriptor descriptor;
 	float alpha = 0;
+	boolean soundPlaying = false;
 	@Override
 	public void draw() {
 		//front.glRotateXnRef();
@@ -46,10 +47,20 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 		
 		
 		//Utils.println(powerFactorFilter.get());
-		alpha += FrameTime.get() * 30 * (powerFactorFilter.get());
+		float alphaN_1 = alpha;
+		alpha += FrameTime.get() * descriptor.speed * (powerFactorFilter.get());
 		if(alpha > 360) alpha -= 360;
 		front.glRotateXnRef();
 		descriptor.draw(alpha);
+		
+		if (alpha % 45 > 40 && alphaN_1 % 45 < 40 && soundPlaying == false) {
+			Coordonate coord = coordonate();
+			tileEntity.worldObj.playSound(coord.x, coord.y, coord.z, descriptor.soundName, 
+					descriptor.nominalVolume * (0.007f + 0.2f * (float)powerFactorFilter.get() * (float)powerFactorFilter.get()), 
+					1.1f, false);
+			soundPlaying = true;
+		} else 
+			soundPlaying = false;
 	}
 	
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(0 , 64, this);

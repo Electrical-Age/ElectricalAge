@@ -3684,8 +3684,8 @@ public class Eln {
 					lowVoltageCableDescriptor,// ElectricalCableDescriptor
 					30,
 					LVU * 1.18,
-					waterCoord
-
+					waterCoord,
+					"eln:water_turbine", 1f
 					);
 
 			GhostGroup g = new GhostGroup();

@@ -31,19 +31,19 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 	public void draw() {
 		powerFactorFilter.setTarget(powerFactor);
 		powerFactorFilter.stepGraphic();
+		float alphaN_1 = alpha;
 		alpha += FrameTime.get() * descriptor.speed * Math.sqrt(powerFactorFilter.get());
 		if(alpha > 360) alpha -= 360;
 		front.glRotateXnRef();
 		descriptor.draw(alpha);
 		
-		if (alpha % 120 > 45 && alpha % 120 < 50 && soundPlaying == false) {
+		if (alpha % 120 > 45 && alphaN_1 % 120 < 45 && soundPlaying == false) {
 			Coordonate coord = coordonate();
 			tileEntity.worldObj.playSound(coord.x, coord.y, coord.z, descriptor.soundName, 
 					descriptor.nominalVolume * (0.007f + 1f * (float)powerFactorFilter.get() * (float)powerFactorFilter.get()), 
 					1f + (float)Math.sqrt(powerFactorFilter.get()) / 1.3f, false);
 			soundPlaying = true;
-		}
-		else if ( alpha % 120 > 55 ) {
+		} else {
 			soundPlaying = false;
 		}
 			
