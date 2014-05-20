@@ -1282,7 +1282,7 @@ public class Eln {
 			name = "Cost Oriented Battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
+					"BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
 					stdP * 1.2, 0.000, // electricalU,
 										// electricalPMax,electricalDischargeRate
 					stdP, stdDischargeTime, stdEfficiency, stdHalfLife, // electricalStdP,
@@ -1293,8 +1293,8 @@ public class Eln {
 					// thermalCoolLimit,
 					"Cheap battery" // name, description)
 			);
-			
-			desc.setCurrentDrop(stdU*1.2,desc.electricalStdP*1.0);
+			desc.setRenderSpec("lowcost");
+			desc.setCurrentDrop(desc.electricalU*1.2,desc.electricalStdP*1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -1302,7 +1302,7 @@ public class Eln {
 			name = "Capacity Oriented Battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery", batteryCableDescriptor, 0.5, true, true, voltageFunction,
+					"BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction,
 					stdU / 4, stdP / 2 * 1.2, 0.000, // electricalU,
 														// electricalPMax,electricalDischargeRate
 					stdP / 2, stdDischargeTime * 8, stdEfficiency, stdHalfLife, // electricalStdP,
@@ -1313,7 +1313,8 @@ public class Eln {
 					// thermalCoolLimit,
 					"the battery" // name, description)
 			);
-			desc.setCurrentDrop(stdU*1.2,desc.electricalStdP*1.0);
+			desc.setRenderSpec("capacity");
+			desc.setCurrentDrop(desc.electricalU*1.2,desc.electricalStdP*1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -1333,7 +1334,7 @@ public class Eln {
 					"the battery" // name, description)
 			);
 			desc.setRenderSpec("highvoltage");
-			desc.setCurrentDrop(stdU*1.2,desc.electricalStdP*1.0);
+			desc.setCurrentDrop(desc.electricalU*1.2,desc.electricalStdP*1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -1342,7 +1343,7 @@ public class Eln {
 			name = "Current Oriented Battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
+					"BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
 					stdP * 1.2 * 4, 0.000, // electricalU,
 											// electricalPMax,electricalDischargeRate
 					stdP * 4, stdDischargeTime / 6, stdEfficiency, stdHalfLife, // electricalStdP,
@@ -1353,7 +1354,8 @@ public class Eln {
 					// thermalCoolLimit,
 					"the battery" // name, description)
 			);
-			desc.setCurrentDrop(stdU*1.2,desc.electricalStdP*1.0);
+			desc.setRenderSpec("current");
+			desc.setCurrentDrop(desc.electricalU*1.2,desc.electricalStdP*1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -1361,7 +1363,7 @@ public class Eln {
 			name = "Life Oriented Battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
+					"BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
 					stdP * 1.2, 0.000, // electricalU,
 										// electricalPMax,electricalDischargeRate
 					stdP, stdDischargeTime, stdEfficiency, stdHalfLife * 8, // electricalStdP,
@@ -1372,7 +1374,8 @@ public class Eln {
 					// thermalCoolLimit,
 					"the battery" // name, description)
 			);
-			desc.setCurrentDrop(stdU*1.2,desc.electricalStdP*1.0);
+			desc.setRenderSpec("life");
+			desc.setCurrentDrop(desc.electricalU*1.2,desc.electricalStdP*1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -1411,7 +1414,7 @@ public class Eln {
 					// thermalCoolLimit,
 					"Obselete, must be deleted" // name, description)
 			);
-			desc.setCurrentDrop(stdU*1.2,desc.electricalStdP*2.0);
+			desc.setCurrentDrop(desc.electricalU*1.2,desc.electricalStdP*2.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -1432,7 +1435,7 @@ public class Eln {
 					// thermalCoolLimit,
 					"the battery" // name, description)
 			);
-			desc.setCurrentDrop(stdU*1.2,desc.electricalStdP*2.0);
+			desc.setCurrentDrop(desc.electricalU*1.2,desc.electricalStdP*2.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
