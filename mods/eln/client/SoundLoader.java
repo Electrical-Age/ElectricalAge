@@ -15,6 +15,8 @@ public class SoundLoader {
             event.manager.soundPoolSounds.addSound("eln:smallalarm_critical.ogg");  
             event.manager.soundPoolSounds.addSound("eln:wind_turbine.ogg");
             event.manager.soundPoolSounds.addSound("eln:water_turbine.ogg");
+            event.manager.soundPoolSounds.addSound("eln:heat_turbine_200v.ogg");
+            event.manager.soundPoolSounds.addSound("eln:heat_turbine_50v.ogg");
         } 
         catch (Exception e) {
             System.err.println("Failed to register one or more sounds.");

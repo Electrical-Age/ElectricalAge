@@ -2223,7 +2223,8 @@ public class Eln {
 																		// electricalCable,
 					5.0, nominalDeltaT / 40, // double thermalC,double
 												// DeltaTForInput
-					nominalP / 2);
+					nominalP / 2,
+					"eln:heat_turbine_50v", 1.5f);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -2253,7 +2254,8 @@ public class Eln {
 																		// electricalCable,
 					5.0, nominalDeltaT / 40, // double thermalC,double
 												// DeltaTForInput
-					nominalP / 2);
+					nominalP / 2,
+					"eln:heat_turbine_200v", 1f);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 

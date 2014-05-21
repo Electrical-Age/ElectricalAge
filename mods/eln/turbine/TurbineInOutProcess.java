@@ -1,5 +1,6 @@
 package mods.eln.turbine;
 
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.ElectricalPowerSource;
 import mods.eln.sim.IProcess;
@@ -9,7 +10,7 @@ import mods.eln.sim.ThermalLoad;
 
 public class TurbineInOutProcess implements IProcess{
 	TurbineElement turbine;
-	double timeCounter = 0,energyCounterGlobal = 0;
+	double timeCounter = 0, soundTimerCounter = 0, energyCounterGlobal = 0;
 	static int staticId = 0;
 	int id;
 	public TurbineInOutProcess(TurbineElement turbine) {
@@ -53,6 +54,15 @@ public class TurbineInOutProcess implements IProcess{
 			//Utils.println("Turbine " + id + " : " + Utils.plotPower("Pin : ", Pin) + Utils.plotPower("Pout : ", Pout) + Utils.plotEnergy("Pavg", energyCounterGlobal));
 			energyCounterGlobal = 0;
 		}
+		
+		soundTimerCounter += time;
+		if (soundTimerCounter >= 2.0 && deltaT > 0.) {
+			Coordonate coord = turbine.coordonate();
+			coord.world().playSoundEffect(coord.x, coord.y, coord.z, descriptor.soundName, descriptor.nominalVolume * (0.1f + 0.1f * (float)deltaT / 400f), 0.95f + 0.1f * (float)deltaT / 400f);
+			soundTimerCounter = 0;
+		}
+		
+		
 	}
 
 }

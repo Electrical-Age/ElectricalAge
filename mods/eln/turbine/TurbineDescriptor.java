@@ -37,7 +37,9 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 			double maxU,
 			double electricalRs,double electricalRp,double electricalC,
 			double thermalC,double DeltaTForInput,
-			double powerOutPerDeltaU
+			double powerOutPerDeltaU,
+			String soundName,
+			float nominalVolume
 			) 
 	{
 		super(name, TurbineElement.class, TurbineRender.class);
@@ -56,6 +58,8 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 		this.powerOutPerDeltaU = powerOutPerDeltaU;
 		this.eRender = eRender;
 		this.maxU = maxU;
+		this.soundName = soundName;
+		this.nominalVolume = nominalVolume;
 		obj = Eln.obj.getObj(modelName);
 		if(obj != null)
 		{
@@ -73,6 +77,8 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 	public double thermalC,thermalRs,thermalRp;
 	public double maxU;
 	double electricalRs,electricalRp,electricalC;
+	public String soundName;
+	public float nominalVolume;
 	/*
 	public void applyTo(TurbineThermalProcess turbine)
 	{
