@@ -168,9 +168,7 @@ public class HubElement extends SixNodeElement {
 			if (connectionGrid[idx]) {
 				LRDU[] lrdu = connectionIdToSide(idx);
 				if(inventory.getStackInSlot(HubContainer.cableSlotId + lrdu[0].toInt()) != null && inventory.getStackInSlot(HubContainer.cableSlotId + lrdu[1].toInt()) != null)
-					electricalConnectionList.add(new ElectricalConnection(
-						electricalLoad[lrdu[0].toInt()], electricalLoad[lrdu[1]
-								.toInt()]));
+					electricalConnectionList.add(new ElectricalConnection(electricalLoad[lrdu[0].toInt()], electricalLoad[lrdu[1].toInt()]));
 			}
 		}
 	}
