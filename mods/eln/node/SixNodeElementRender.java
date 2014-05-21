@@ -281,7 +281,7 @@ public abstract class SixNodeElementRender {
 		}    		
 	}
 	
-	public void clientSetByte(int id,byte value)
+	public void clientSetByte(byte id,byte value)
 	{
         try {
 	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();

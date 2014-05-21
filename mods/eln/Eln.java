@@ -76,6 +76,7 @@ import mods.eln.groundcable.GroundCableRender;
 import mods.eln.heatfurnace.HeatFurnaceDescriptor;
 import mods.eln.heatfurnace.HeatFurnaceElement;
 import mods.eln.heatfurnace.HeatFurnaceRender;
+import mods.eln.hub.HubDescriptor;
 import mods.eln.inductor.InductorDescriptor;
 import mods.eln.intelligenttransformer.IntelligentTransformerElement;
 import mods.eln.intelligenttransformer.IntelligentTransformerRender;
@@ -1449,6 +1450,13 @@ public class Eln {
 			name = "Ground Cable";
 
 			GroundCableDescriptor desc = new GroundCableDescriptor(name, obj.getObj("groundcable"));
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		{
+			subId = 8;
+			name = "Hub";
+
+			HubDescriptor desc = new HubDescriptor(name, obj.getObj("groundcable"));
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
