@@ -283,6 +283,7 @@ public class Eln {
 
 	public static final String[] objNames = new String[] {
 			"/model/WallClock/WallClock.obj",
+			"/model/hub/hub.obj",
 			"/model/electricalweathersensor/electricalweathersensor.obj",
 			"/model/SmallWaterWheel/SmallWaterWheel.obj",
 			"/model/ProximitySensor/ProximitySensor.obj",
@@ -1456,7 +1457,7 @@ public class Eln {
 			subId = 8;
 			name = "Hub";
 
-			HubDescriptor desc = new HubDescriptor(name, obj.getObj("groundcable"));
+			HubDescriptor desc = new HubDescriptor(name, obj.getObj("hub"));
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
@@ -2229,7 +2230,7 @@ public class Eln {
 					lowVoltageCableDescriptor.electricalRp,
 					lowVoltageCableDescriptor.electricalC / RsFactor,// ElectricalCableDescriptor
 																		// electricalCable,
-					5.0, nominalDeltaT / 40, // double thermalC,double
+					25.0, nominalDeltaT / 40, // double thermalC,double
 												// DeltaTForInput
 					nominalP / 2,
 					"eln:heat_turbine_50v", 1.5f);
@@ -2260,7 +2261,7 @@ public class Eln {
 					meduimVoltageCableDescriptor.electricalRp,
 					meduimVoltageCableDescriptor.electricalC / RsFactor,// ElectricalCableDescriptor
 																		// electricalCable,
-					5.0, nominalDeltaT / 40, // double thermalC,double
+					25.0, nominalDeltaT / 40, // double thermalC,double
 												// DeltaTForInput
 					nominalP / 2,
 					"eln:heat_turbine_200v", 1f);

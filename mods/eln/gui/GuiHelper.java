@@ -176,6 +176,12 @@ public class GuiHelper {
 		screen.drawTexturedModalRect(x, y, u, v, width, height);
     }
     
+    public void drawRect(int x0,int y0,int x1,int y1,int color){
+		int dx = (screen.width - xSize) / 2;
+		int dy = (screen.height - ySize) / 2;
+		screen.drawRect(x0 + dx, y0 + dy, x1 + dx, y1 + dy, color);    	
+    }
+    
     IGuiObject[] objectListCopy()
     {
     	IGuiObject[] cpy = new IGuiObject[objectList.size()];

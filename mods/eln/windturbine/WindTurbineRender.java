@@ -26,7 +26,7 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 	}
 	RcInterpolator powerFactorFilter = new RcInterpolator(2);
 	WindTurbineDescriptor descriptor;
-	float alpha = 0;
+	float alpha = (float) (Math.random()*360);
 	@Override
 	public void draw() {
 		powerFactorFilter.setTarget(powerFactor);
@@ -37,7 +37,7 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 		front.glRotateXnRef();
 		descriptor.draw(alpha);
 		
-		if (alpha % 120 > 45 && alphaN_1 % 120 < 45 && soundPlaying == false) {
+		if (alpha % 120 > 45 && alphaN_1 % 120 <= 45 && soundPlaying == false) {
 			Coordonate coord = coordonate();
 			tileEntity.worldObj.playSound(coord.x, coord.y, coord.z, descriptor.soundName, 
 					descriptor.nominalVolume * (0.007f + 1f * (float)powerFactorFilter.get() * (float)powerFactorFilter.get()), 

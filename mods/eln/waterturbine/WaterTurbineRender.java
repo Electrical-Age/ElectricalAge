@@ -32,7 +32,7 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 	RcInterpolator powerFactorFilter = new RcInterpolator(1);
 	RcInterpolator dirFilter = new RcInterpolator(0.5f);
 	WaterTurbineDescriptor descriptor;
-	float alpha = 0;
+	float alpha = (float) (Math.random()*360);
 	boolean soundPlaying = false;
 	@Override
 	public void draw() {

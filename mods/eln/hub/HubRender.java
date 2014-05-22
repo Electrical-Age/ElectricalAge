@@ -40,8 +40,7 @@ public class HubRender extends SixNodeElementRender{
 	public void draw() {
 		// TODO Auto-generated method stub
 		super.draw();
-		
-		descriptor.draw();			
+		descriptor.draw(connectionGrid);			
 	}
 
 	@Override
