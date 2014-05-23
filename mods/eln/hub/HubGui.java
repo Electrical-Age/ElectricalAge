@@ -118,19 +118,19 @@ public class HubGui extends GuiContainerEln {
 
 	void drawConnection(int id, int color) {
 		switch (id) {
-		case 0:
+		case 2:
 			helper.drawRect(h0, v5, h2, v6, color);
 			helper.drawRect(h1, v5, h2, v7, color);
 			break;
-		case 1:
+		case 3:
 			helper.drawRect(h5, v0, h6, v2, color);
 			helper.drawRect(h5, v1, h7, v2, color);
 			break;
-		case 2:
+		case 1:
 			helper.drawRect(h0, v1, h2, v2, color);
 			helper.drawRect(h1, v0, h2, v2, color);
 			break;
-		case 3:
+		case 0:
 			helper.drawRect(h5, v5, h6, v7, color);
 			helper.drawRect(h5, v5, h7, v6, color);
 			break;
@@ -151,13 +151,13 @@ public class HubGui extends GuiContainerEln {
     	y -= height/2 -ySize/2;
     	
     	if(isInto(x,y,h0, v5, h2, v6) || isInto(x,y,h1, v5, h2, v7))
-		render.clientSetByte(HubElement.clientConnectionGridToggle,(byte) 0);
+		render.clientSetByte(HubElement.clientConnectionGridToggle,(byte) 2);
     	if(isInto(x,y,h5, v0, h6, v2) || isInto(x,y,h5, v1, h7, v2))
-    		render.clientSetByte(HubElement.clientConnectionGridToggle,(byte) 1);
-    	if(isInto(x,y,h0, v1, h2, v2) || isInto(x,y,h1, v0, h2, v2))
-    		render.clientSetByte(HubElement.clientConnectionGridToggle,(byte) 2);
-    	if(isInto(x,y,h5, v5, h6, v7) || isInto(x,y,h5, v5, h7, v6))
     		render.clientSetByte(HubElement.clientConnectionGridToggle,(byte) 3);
+    	if(isInto(x,y,h0, v1, h2, v2) || isInto(x,y,h1, v0, h2, v2))
+    		render.clientSetByte(HubElement.clientConnectionGridToggle,(byte) 1);
+    	if(isInto(x,y,h5, v5, h6, v7) || isInto(x,y,h5, v5, h7, v6))
+    		render.clientSetByte(HubElement.clientConnectionGridToggle,(byte) 0);
     	if(isInto(x,y,h0, v3, h7, v4))
     		render.clientSetByte(HubElement.clientConnectionGridToggle,(byte) 4);
     	if(isInto(x,y,h3, v0, h4, v7))

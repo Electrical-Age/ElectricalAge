@@ -35,10 +35,13 @@ public class HubDescriptor extends SixNodeDescriptor{
 	{
 		if(main != null) main.draw();
 		for(int idx = 0;idx < 6;idx++){
-			if(connectionGrid[idx]){
-				if(connection[idx] != null) connection[idx].draw();
-			}
+			if(connectionGrid[idx])
+				GL11.glColor3f(0, 0, 0);
+			else
+				GL11.glColor3f(130/255f, 67/255f, 18/255f);
+			if(connection[idx] != null) connection[idx].draw();
 		}
+		GL11.glColor3f(1, 1, 1);
 	}
 	
 	@Override
