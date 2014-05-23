@@ -282,6 +282,7 @@ public class Eln {
 	public static String channelName = "miaouMod";
 
 	public static final String[] objNames = new String[] {
+			"/model/condo200/condo200.obj",
 			"/model/WallClock/WallClock.obj",
 			"/model/hub/hub.obj",
 			"/model/electricalweathersensor/electricalweathersensor.obj",
@@ -1386,7 +1387,7 @@ public class Eln {
 			name = "Single-use Battery";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery", batteryCableDescriptor, 1.0, false, false, voltageFunction, stdU,
+					"BatteryBig", batteryCableDescriptor, 1.0, false, false, voltageFunction, stdU,
 					stdP * 1.2 * 2, 0.000, // electricalU,
 											// electricalPMax,electricalDischargeRate
 					stdP * 2, stdDischargeTime, stdEfficiency, stdHalfLife * 8, // electricalStdP,
@@ -1397,6 +1398,7 @@ public class Eln {
 					// thermalCoolLimit,
 					"the battery" // name, description)
 			);
+			desc.setRenderSpec("coal");
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -1404,7 +1406,7 @@ public class Eln {
 			name = "50V Condensator";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery", batteryCableDescriptor, 0.0, true, false,
+					"condo200", batteryCableDescriptor, 0.0, true, false,
 					condoVoltageFunction,
 					stdU, stdP * 1.2 * 8, 0.005, // electricalU,//
 													// electricalPMax,electricalDischargeRate
@@ -1425,7 +1427,7 @@ public class Eln {
 			name = "200V Condensator";
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
-					"HighVoltageBattery", highVoltageCableDescriptor, 0.0, true, false,
+					"condo200", highVoltageCableDescriptor, 0.0, true, false,
 					condoVoltageFunction,
 					MVU, MVP * 1.5, 0.005, // electricalU,//
 											// electricalPMax,electricalDischargeRate
