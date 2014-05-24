@@ -5013,20 +5013,20 @@ public class Eln {
 				Character.valueOf('P'), new ItemStack(Item.ingotGold));
 
 		addRecipe(findItemStack("Single-use Battery"),
-				"C C",
-				"ccc",
-				"III",
+				"Cpp",
+				"CII",
+				"Cpp",
 				Character.valueOf('C'), findItemStack("Low Voltage Cable"),
-				Character.valueOf('c'), new ItemStack(Item.coal, 1, 0),
-				Character.valueOf('I'), new ItemStack(Item.ingotIron));
+				Character.valueOf('p'), new ItemStack(Item.coal, 1, 0),
+				Character.valueOf('I'), "ingotCopper");
 
 		addRecipe(findItemStack("Single-use Battery"),
-				"C C",
-				"ccc",
-				"III",
+				"Cpp",
+				"CII",
+				"Cpp",
 				Character.valueOf('C'), findItemStack("Low Voltage Cable"),
-				Character.valueOf('c'), new ItemStack(Item.coal, 1, 1),
-				Character.valueOf('I'), new ItemStack(Item.ingotIron));
+				Character.valueOf('p'), new ItemStack(Item.coal, 1, 1),
+				Character.valueOf('I'), "ingotCopper");
 
 		addRecipe(findItemStack("200V Condensator"),
 				"C C",
