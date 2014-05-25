@@ -23,6 +23,7 @@ import mods.eln.client.ClientProxy;
 import mods.eln.client.FrameTime;
 import mods.eln.client.SoundLoader;
 import mods.eln.computercraftio.ComputerCraftIoDescriptor;
+import mods.eln.computercraftio.PeripheralHandler;
 import mods.eln.diode.DiodeDescriptor;
 import mods.eln.eggincubator.EggIncubatorDescriptor;
 import mods.eln.electricalalarm.ElectricalAlarmDescriptor;
@@ -256,6 +257,7 @@ import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
+import dan200.computercraft.api.ComputerCraftAPI;
 
 
 import java.io.ByteArrayOutputStream;
@@ -693,6 +695,9 @@ public class Eln {
 		 * int id = 0,subId = 0,completId; String name;
 		 */
 
+		ComputerCraftAPI.registerPeripheralProvider(new PeripheralHandler());
+		
+		
 		registerArmor();
 		registerTool();
 		registerOre();
@@ -5727,17 +5732,13 @@ public class Eln {
 				Character.valueOf('R'), new ItemStack(Item.redstone));
 
 		addRecipe(findItemStack("Thermal Probe Chip"),
-				"RIR",
-				"RGR",
+				"RMR",
+				"RMR",
 				Character.valueOf('G'), new ItemStack(Item.ingotGold),
 				Character.valueOf('I'), new ItemStack(Item.ingotIron),
+				Character.valueOf('M'), "quicksilver",
 				Character.valueOf('R'), new ItemStack(Item.redstone));
-		addRecipe(findItemStack("Thermal Probe Chip"),
-				"RGR",
-				"RIR",
-				Character.valueOf('G'), new ItemStack(Item.ingotGold),
-				Character.valueOf('I'), new ItemStack(Item.ingotIron),
-				Character.valueOf('R'), new ItemStack(Item.redstone));
+
 
 		addRecipe(findItemStack("Signal Antenna"),
 				"c",
@@ -5751,7 +5752,7 @@ public class Eln {
 				Character.valueOf('R'), new ItemStack(Item.redstone),
 				Character.valueOf('C'), "ingotCopper",
 				Character.valueOf('c'), findItemStack("Cheap Chip"),
-				Character.valueOf('p'), "ingotLead");
+				Character.valueOf('p'), "quicksilver");
 
 	}
 
@@ -5906,12 +5907,12 @@ public class Eln {
 	void recipeThermalSensor() {
 
 		addRecipe(findItemStack("Thermal Probe", 1),
-				"SC",
+				"SCS",
 				Character.valueOf('S'), findItemStack("Thermal Probe Chip"),
 				Character.valueOf('C'), findItemStack("Signal Cable"));
 
 		addRecipe(findItemStack("Temperature Probe", 1),
-				"SCS",
+				"SC",
 				Character.valueOf('S'), findItemStack("Thermal Probe Chip"),
 				Character.valueOf('C'), findItemStack("Signal Cable"));
 

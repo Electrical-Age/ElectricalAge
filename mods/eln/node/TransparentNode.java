@@ -9,9 +9,10 @@ import java.util.ArrayList;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.Player;
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
-import dan200.computer.api.IPeripheral;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.peripheral.IPeripheral;
+
 
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
@@ -40,7 +41,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-public class TransparentNode extends Node implements IPeripheral{
+public class TransparentNode extends Node{
 
 
 	public TransparentNodeElement element;
@@ -308,52 +309,8 @@ public class TransparentNode extends Node implements IPeripheral{
 
 
 
-	@Override
-	public String getType() {
-		// TODO Auto-generated method stub
-		return element.getType();
-	}
 
 
-
-	@Override
-	public String[] getMethodNames() {
-		// TODO Auto-generated method stub
-		return element.getMethodNames();
-	}
-
-
-
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context,
-			int method, Object[] arguments) throws Exception {
-		// TODO Auto-generated method stub
-		return element.callMethod(computer, context, method, arguments);
-	}
-
-
-
-	@Override
-	public boolean canAttachToSide(int side) {
-		// TODO Auto-generated method stub
-		return element.canAttachToSide(side);
-	}
-
-
-
-	@Override
-	public void attach(IComputerAccess computer) {
-		// TODO Auto-generated method stub
-		element.attach(computer);
-	}
-
-
-
-	@Override
-	public void detach(IComputerAccess computer) {
-		// TODO Auto-generated method stub
-		element.detach(computer);
-	}
 
 
 
@@ -362,6 +319,10 @@ public class TransparentNode extends Node implements IPeripheral{
 			if(Utils.mustDropItem(entityPlayer))
 				dropItem(element.getDropItemStack());
 	}
+
+
+
+
 	
 	
 }

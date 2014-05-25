@@ -18,8 +18,7 @@ import com.serotonin.modbus4j.exception.IllegalDataAddressException;
 import com.serotonin.modbus4j.ip.tcp.TcpSlave;
 
 import cpw.mods.fml.common.network.Player;
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
+
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
 import mods.eln.electricalcable.ElectricalCableDescriptor;

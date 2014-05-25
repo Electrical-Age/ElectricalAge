@@ -8,8 +8,11 @@ import javax.management.Descriptor;
 
 import com.google.common.base.CaseFormat;
 
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.peripheral.IPeripheral;
+
+
 
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
@@ -51,7 +54,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 
-public class ComputerCraftIoElement extends TransparentNodeElement{
+public class ComputerCraftIoElement extends TransparentNodeElement implements IPeripheral{
 	
 	public NodeElectricalGateInputOutput[] ioGate = new NodeElectricalGateInputOutput[4];
 	public NodeElectricalGateOutputProcess[] ioGateProcess = new NodeElectricalGateOutputProcess[4];
@@ -114,7 +117,7 @@ public class ComputerCraftIoElement extends TransparentNodeElement{
 	}
 	
 	public String getType() {
-		return "Probe";
+		return "EAProbe";
 	}
 
 	@Override
@@ -164,10 +167,10 @@ public class ComputerCraftIoElement extends TransparentNodeElement{
 		switch (method) {
 		case 0:
 			if(arguments.length < 2) return null;
-			ioGateProcess[id].setHighImpedance((Boolean) arguments[1]);
+			ioGateProcess[id].setHighImpedance(arguments[1].equals("in"));
 			break;
 		case 1:
-			return new Object[]{ioGateProcess[id].isHighImpedance()};
+			return new Object[]{ioGateProcess[id].isHighImpedance() ? "in" : "out"};
 		case 2:
 			if(arguments.length < 2) return null;
 			ioGateProcess[id].setOutputNormalized((Double) arguments[1]);
@@ -182,16 +185,21 @@ public class ComputerCraftIoElement extends TransparentNodeElement{
 		return null;
 	}
 
-	@Override
-	public boolean canAttachToSide(int side) {
-		return true;
-	}
+
 
 	@Override
 	public void attach(IComputerAccess computer) {
+		System.out.println("ATTACHE");
 	}
 
 	@Override
 	public void detach(IComputerAccess computer) {
+		System.out.println("DETACH");
+	}
+
+	@Override
+	public boolean equals(IPeripheral other) {
+		// TODO Auto-generated method stub
+		return other == this;
 	}    
 }
