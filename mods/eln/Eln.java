@@ -286,6 +286,7 @@ public class Eln {
 	public static final String[] objNames = new String[] {
 			"/model/condo200/condo200.obj",
 			"/model/WallClock/WallClock.obj",
+			"/model/relay800/relay800.obj",
 			"/model/hub/hub.obj",
 			"/model/electricalweathersensor/electricalweathersensor.obj",
 			"/model/SmallWaterWheel/SmallWaterWheel.obj",
@@ -2108,7 +2109,7 @@ public class Eln {
 			name = "High Voltage Relay";
 
 			desc = new ElectricalRelayDescriptor(
-					name, obj.getObj("RelayBig"),
+					name, obj.getObj("relay800"),
 					highVoltageCableDescriptor);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -3275,7 +3276,7 @@ public class Eln {
 			Data.addResource(element.newItemStack());
 			addToOre("dustCinnabar", element.newItemStack());
 		}
-		{
+		/*{
 			id = 11;
 
 			name = "Purified Cinnabar Dust";
@@ -3286,7 +3287,7 @@ public class Eln {
 			sharedItem.addElement(id, element);
 			Data.addResource(element.newItemStack());
 			addToOre("dustCinnabarPurified", element.newItemStack());
-		}
+		}*/
 
 	}
 

@@ -1,5 +1,6 @@
 package mods.eln.electricalalarm;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
@@ -58,12 +59,14 @@ public class ElectricalAlarmElement extends SixNodeElement {
 		super.readFromNBT(nbt, str);
         byte value = nbt.getByte(str + "front");
         front = LRDU.fromInt((value>>0) & 0x3);
+        mute = nbt.getBoolean(str + "mute");
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		super.writeToNBT(nbt, str);
 		nbt.setByte(str + "front", (byte) ((front.toInt()<<0)));
+		nbt.setBoolean(str + "mute", mute);
 	}
 
 	@Override
@@ -100,6 +103,7 @@ public class ElectricalAlarmElement extends SixNodeElement {
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte( (front.toInt()<<4) + (warm ? 1 : 0));
+			stream.writeBoolean(mute);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -152,5 +156,32 @@ public class ElectricalAlarmElement extends SixNodeElement {
 			return true;	
 		}
 		return false;
+	}
+	
+	@Override
+	public boolean hasGui() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	boolean mute = false;
+	
+	public static final byte clientSoundToggle = 1;
+	@Override
+	public void networkUnserialize(DataInputStream stream) {
+		// TODO Auto-generated method stub
+		super.networkUnserialize(stream);
+		
+		try {
+			switch(stream.readByte()){
+			case clientSoundToggle:
+				mute = ! mute;
+				needPublish();
+				break;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

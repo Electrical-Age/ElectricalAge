@@ -112,7 +112,9 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		return NodeBase.maskElectricalPower;
+		if(side == front.getInverse() && lrdu == LRDU.Down)
+			return NodeBase.maskElectricalPower;
+		return 0;
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL11;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.FrameTime;
+import mods.eln.electricalrelay.ElectricalRelayGui;
 import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -18,6 +19,8 @@ import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementRender;
 import mods.eln.node.SixNodeEntity;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
 public class ElectricalAlarmRender extends SixNodeElementRender {
@@ -48,7 +51,7 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
 	
 	float rotAlpha = 0;
 	boolean warm = false;
-	
+	boolean mute = false;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);
@@ -57,6 +60,7 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
 			b = stream.readByte();
 			front = LRDU.fromInt((b>>4)&3);
 			warm = (b & 1) != 0 ? true : false;
+			mute = stream.readBoolean();
 			Utils.println("WARM : " + warm);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -66,5 +70,10 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
 		return Eln.instance.signalCableDescriptor.render;
+	}
+	
+	@Override
+	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
+		return new ElectricalAlarmGui(player,this);
 	}
 }

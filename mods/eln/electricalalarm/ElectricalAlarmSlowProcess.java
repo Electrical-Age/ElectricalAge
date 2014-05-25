@@ -12,7 +12,7 @@ public class ElectricalAlarmSlowProcess implements IProcess {
 		this.element = element;
 	}
 	
-	double timeCounter = 0, soundTimeTimeout = 0;
+	double timeCounter = 0, soundTimeTimeout = Math.random();
 	static final double refreshPeriode = 0.25;
 	
 	@Override
@@ -23,7 +23,7 @@ public class ElectricalAlarmSlowProcess implements IProcess {
 			
 			boolean warm = element.inputGate.Uc > Eln.instance.SVU / 2;		
 			element.setWarm(warm);
-			if(warm) {
+			if(warm & !element.mute) {
 				if(soundTimeTimeout == 0) {
 					float speed = 1f;
 					Coordonate coord = element.sixNode.coordonate;
