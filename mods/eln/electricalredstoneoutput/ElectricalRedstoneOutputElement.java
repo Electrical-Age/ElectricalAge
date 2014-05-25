@@ -40,7 +40,7 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
     	slowProcessList.add(slowProcess);
 	}
 
-	public NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");
+	public NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate",true);
 	public ElectricalRedstoneOutputSlowProcess slowProcess = new ElectricalRedstoneOutputSlowProcess(this);
 	LRDU front;
 	

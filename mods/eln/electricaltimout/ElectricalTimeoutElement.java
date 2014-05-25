@@ -64,7 +64,7 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 
 	public ElectricalTimeoutDescriptor descriptor;
 
-	public NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");	
+	public NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate",false);	
 	public NodeElectricalGateOutput outputGate = new NodeElectricalGateOutput("outputGate");	
 	public NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess", outputGate);
 	

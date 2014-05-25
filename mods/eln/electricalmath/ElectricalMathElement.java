@@ -38,7 +38,7 @@ public class ElectricalMathElement extends SixNodeElement {
 	NodeElectricalGateOutput gateOutput = new NodeElectricalGateOutput("gateOutput");
 	NodeElectricalGateOutputProcess gateOutputProcess = new NodeElectricalGateOutputProcess("gateOutputProcess", gateOutput);
 	
-	NodeElectricalGateInput[] gateInput = new NodeElectricalGateInput[]{new NodeElectricalGateInput("gateA"), new NodeElectricalGateInput("gateB"), new NodeElectricalGateInput("gateC")};
+	NodeElectricalGateInput[] gateInput = new NodeElectricalGateInput[]{new NodeElectricalGateInput("gateA",false), new NodeElectricalGateInput("gateB",false), new NodeElectricalGateInput("gateC",false)};
 
 	ArrayList<ISymbole> symboleList = new ArrayList<ISymbole>();
 	

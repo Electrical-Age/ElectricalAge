@@ -45,7 +45,7 @@ public class ElectricalAlarmElement extends SixNodeElement {
     	this.descriptor = (ElectricalAlarmDescriptor) descriptor;
 	}
 
-	public NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");
+	public NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate",true);
 	public ElectricalAlarmSlowProcess slowProcess = new ElectricalAlarmSlowProcess(this);
 	LRDU front;
 	

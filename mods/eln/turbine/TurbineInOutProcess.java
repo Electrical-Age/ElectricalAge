@@ -10,7 +10,8 @@ import mods.eln.sim.ThermalLoad;
 
 public class TurbineInOutProcess implements IProcess{
 	TurbineElement turbine;
-	double timeCounter = 0, soundTimerCounter = 0, energyCounterGlobal = 0;
+	double soundTimeOut = 2.0;
+	double timeCounter = 0, soundTimerCounter = Math.random()*soundTimeOut, energyCounterGlobal = 0;
 	static int staticId = 0;
 	int id;
 	public TurbineInOutProcess(TurbineElement turbine) {
@@ -56,9 +57,10 @@ public class TurbineInOutProcess implements IProcess{
 		}
 		
 		soundTimerCounter += time;
-		if (soundTimerCounter >= 2.0 && deltaT > 0.) {
+		if (soundTimerCounter >= soundTimeOut && deltaT > 40) {
 			Coordonate coord = turbine.coordonate();
-			coord.world().playSoundEffect(coord.x, coord.y, coord.z, descriptor.soundName, descriptor.nominalVolume * (0.1f + 0.1f * (float)deltaT / 400f), 0.95f + 0.1f * (float)deltaT / 400f);
+			float factor = (float)(deltaT / turbine.descriptor.nominalDeltaT);
+			coord.world().playSoundEffect(coord.x, coord.y, coord.z, descriptor.soundName, descriptor.nominalVolume * (0.1f * factor), 0.9f + 0.2f * factor);
 			soundTimerCounter = 0;
 		}
 		

@@ -41,7 +41,7 @@ public class ElectricalVuMeterElement extends SixNodeElement {
     	slowProcessList.add(slowProcess);
 	}
 
-	public NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");
+	public NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate",true);
 	public ElectricalVuMeterSlowProcess slowProcess = new ElectricalVuMeterSlowProcess(this);
 	LRDU front;
 	ElectricalVuMeterDescriptor descriptor;

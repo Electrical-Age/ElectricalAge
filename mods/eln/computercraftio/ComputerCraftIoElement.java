@@ -189,12 +189,10 @@ public class ComputerCraftIoElement extends TransparentNodeElement implements IP
 
 	@Override
 	public void attach(IComputerAccess computer) {
-		System.out.println("ATTACHE");
 	}
 
 	@Override
 	public void detach(IComputerAccess computer) {
-		System.out.println("DETACH");
 	}
 
 	@Override

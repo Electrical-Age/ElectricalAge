@@ -63,7 +63,7 @@ public class ElectricalRelayElement extends SixNodeElement {
 	public NodeElectricalLoad aLoad = new NodeElectricalLoad("aLoad");
 	public NodeElectricalLoad bLoad = new NodeElectricalLoad("bLoad");
 	public ElectricalResistor switchResistor = new ElectricalResistor(aLoad, bLoad);
-	public NodeElectricalGateInput gate = new NodeElectricalGateInput("gate");
+	public NodeElectricalGateInput gate = new NodeElectricalGateInput("gate",true);
 	public ElectricalRelayGateProcess gateProcess = new ElectricalRelayGateProcess(this, "GP", gate);
 
 	public static boolean canBePlacedOnSide(Direction side, int type) {

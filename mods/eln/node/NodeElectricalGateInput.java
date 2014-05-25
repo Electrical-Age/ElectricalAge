@@ -5,10 +5,11 @@ import mods.eln.misc.Utils;
 
 public class NodeElectricalGateInput extends NodeElectricalLoad{
 
-	public NodeElectricalGateInput(String name) {
+	public NodeElectricalGateInput(String name,boolean withRp) {
 		super(name);
 		Eln.instance.signalCableDescriptor.applyTo(this,false);
-		//this.setRp(Eln.instance.SVU/Eln.instance.SVII);
+		if(withRp)
+			this.setRp(Eln.instance.SVU/Eln.instance.SVII);
 	}
 
 	public String plot(String str)
