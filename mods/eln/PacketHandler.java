@@ -15,6 +15,7 @@ import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
+import mods.eln.sound.SoundClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -68,6 +69,9 @@ public class PacketHandler implements IPacketHandler {
 				case Eln.packetOpenLocalGui:
 					packetOpenLocalGui(stream, manager, player);
 					break;
+				case Eln.packetPlaySound:
+					packetPlaySound(stream, manager, player);
+					break;
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -77,6 +81,34 @@ public class PacketHandler implements IPacketHandler {
 		}
 	}
 
+	void packetPlaySound(DataInputStream stream, INetworkManager manager,
+			Player player) {
+		EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP) player;
+		try {
+			if(stream.readByte() != clientPlayer.dimension) return;
+
+		    SoundClient.play(
+		    		clientPlayer.worldObj,
+		    		stream.readInt()/8.0,
+		    		stream.readInt()/8.0,
+		    		stream.readInt()/8.0,
+		    		stream.readUTF(),
+		    		stream.readFloat(),
+		    		stream.readFloat(),
+		    		stream.readFloat(),
+		    		stream.readFloat());
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+
+	}
+
+
+   
+	
 	void packetOpenLocalGui(DataInputStream stream, INetworkManager manager,
 			Player player) {
 		EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP) player;

@@ -41,6 +41,8 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
@@ -962,6 +964,98 @@ public class Utils {
 		return blockList;
 	}
 
+	interface TraceRayWeight{
+		float getWeight(int blockId);
+	}
+	
+	public static class TraceRayWeightOpaque implements TraceRayWeight{
+
+		@Override
+		public float getWeight(int blockId) {
+			Block b = Block.blocksList[blockId];
+			if(b == null) return 0;
+			return b.isOpaqueCube() ? 1f : 0f;
+		}
+		
+	}
+	
+	public static float traceRay(World w,double posX,double posY,double posZ,double targetX,double targetY,double targetZ,TraceRayWeight weight){
+		int posXint = (int)Math.round(posX);
+		int posYint = (int)Math.round(posY);
+		int posZint = (int)Math.round(posZ);	
+		
+		float x = (float) (posX - posXint),y = (float) (posY - posYint),z = (float) (posZ - posZint);
+		
+        float vx = (float)(targetX-posX);
+		float vy = (float)(targetY-posY);
+        float vz = (float)(targetZ-posZ);
+
+
+        float rangeMax = (float) Math.sqrt(vx*vx+vy*vy+vz*vz);
+        float normInv = 1f/rangeMax;
+        vx *= normInv;
+        vy *= normInv;
+        vz *= normInv;
+		
+		if(vx == 0) vx += 0.0001f;
+		if(vy == 0) vy += 0.0001f;
+		if(vz == 0) vz += 0.0001f;
+		
+		
+		float vxInv = 1f/vx,vyInv = 1f/vy,vzInv = 1f/vz;
+		
+
+		
+		float stackRed = 0,stackBlue = 0,stackGreen = 0;
+		float d = 0;
+		while(d < rangeMax){
+			float xFloor = MathHelper.floor_float(x);
+			float yFloor = MathHelper.floor_float(y);
+			float zFloor = MathHelper.floor_float(z);
+			
+			float dx = x-xFloor,dy = y-yFloor,dz = z-zFloor;
+			dx = (vx > 0 ? (1 - dx)*vxInv : -dx*vxInv);
+			dy = (vy > 0 ? (1 - dy)*vyInv : -dy*vyInv);
+			dz = (vz > 0 ? (1 - dz)*vzInv : -dz*vzInv);
+			
+			float dBest =  Math.min(Math.min(dx, dy),dz)+0.01f;
+
+			int xInt = (int)xFloor;
+			int yInt = (int)yFloor;
+			int zInt = (int)zFloor;
+
+			int blockKey = w.getBlockId(xInt + posXint,yInt + posYint,zInt + posZint);
+
+			
+			
+			float dToStack;
+			if(d + dBest < rangeMax)
+				dToStack = dBest;
+			else{
+				dToStack = (rangeMax - d);
+			}	
+			
+			
+
+			stackRed += weight.getWeight(blockKey)*dToStack;
+
+
+
+			x += vx*dBest;
+			y += vy*dBest;
+			z += vz*dBest;
+			
+			d += dBest;
+		
+		}
+		
+		
+
+		return stackRed;		
+	}
+	
+	
+	
 	public static boolean isBlockLoaded(World world, double x, double y,
 			double z) {
 		// TODO Auto-generated method stub

@@ -574,18 +574,15 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 						dz = (vz > 0 ? (1 - dz)*vzInv : -dz*vzInv);
 						
 						float dBest =  Math.min(Math.min(dx, dy),dz)+0.01f;
-						//float dBest = 0.5f;
 
 						int xInt = (int)xFloor + worldBlocksDim2;
 						int yInt = (int)yFloor + worldBlocksDim2;
 						int zInt = (int)zFloor + worldBlocksDim2;
 
-						//short blockKey = (short) w.getBlockId(posXint + MathHelper.floor_float(x), posYint + MathHelper.floor_float(y), posZint + MathHelper.floor_float(z));;
 						int blockKey = worldBlocks[xInt][yInt][zInt];
 						if(blockKey < 0) blockKey += 65536;
 						if(blockKey == 65535){
-							//short blockKey;
-							///w.getBlockId(par1, par2, par3)
+
 							int xBlock = posXint + (int)xFloor;
 							int yBlock = posYint + (int)yFloor;
 							int zBlock = posZint + (int)zFloor;
@@ -603,7 +600,6 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 									}
 								}
 							}
-							//blockKey = (short) w.getBlockId(posXint + MathHelper.floor_float(x), posYint + MathHelper.floor_float(y), posZint + MathHelper.floor_float(z));;
 							worldBlocks[xInt][yInt][zInt] = (short) blockKey;
 						}
 						
@@ -617,12 +613,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 						
 						
 						
-						//dToStack += ((float)Math.random()-0.5f) * 0.1f;												
-						/*if(blockKey != 0){
-							stackRed += 0.2f*dToStack;			
-							if(blockKey != Block.dirt.blockID && blockKey != Block.stone.blockID)
-								stackGreen += 0.2f*dToStack;		
-						}*/
+
 						
 						stackGreen += blockKeyFactor[blockKey]*dToStack;
 						Block b = Block.blocksList[blockKey & 0xFFF];

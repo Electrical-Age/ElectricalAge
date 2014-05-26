@@ -376,6 +376,7 @@ public class Eln {
 	public static final byte packetPublishForNode = 16;
 	public static final byte packetOpenLocalGui = 17;
 	public static final byte packetForClientNode = 18;
+	public static final byte packetPlaySound = 19;
 
 	static PacketHandler packetHandler;
 	static NodeServer nodeServer;
