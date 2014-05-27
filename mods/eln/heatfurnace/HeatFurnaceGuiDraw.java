@@ -97,7 +97,7 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
     protected void preDraw(float f, int x, int y) {
     	// TODO Auto-generated method stub
     	super.preDraw(f, x, y);
-    	if(render.controleExternal)
+    	if(!render.controleExternal)
     		externalControl.displayString = "Internal Control";
     	else
     		externalControl.displayString = "External Control";

@@ -14,6 +14,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenTrees;
@@ -65,7 +66,7 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
 
 	public void generateSurface(Random random, int x, int z, World w)
 	{
-		
+		if(w.getWorldInfo().getTerrainType() == WorldType.FLAT) return;
 		//for(int i = 0;i<4;i++){ //This goes through the ore metadata
 			for(int ii=0;ii<spawnRate;ii++){ //This makes it gen multiple times in each chunk
 				int posX = x + random.nextInt(16); //X coordinate to gen at

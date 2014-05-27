@@ -297,6 +297,7 @@ public class Eln {
 			"/model/XRayScanner/XRayScanner.obj",
 			"/model/RobustLampSuspended/RobustLampSuspended.obj",
 			"/model/activeThermalDissipatorA/activethermaldissipatora.obj",
+			"/model/200vactiveThermalDissipatorA/200vactivethermaldissipatora.obj",
 			"/model/AlarmMedium/alarmmedium.obj",
 			"/model/BatteryBig/BatteryBig.obj",
 			"/model/batterychargera/batterychargera.obj",
@@ -3777,6 +3778,27 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
+		
+		{
+			subId = 34;
+			name = "200V Active Thermal Dissipator";
+
+			ThermalDissipatorActiveDescriptor desc = new ThermalDissipatorActiveDescriptor(
+					name,
+					obj.getObj("200vactivethermaldissipatora"),
+					MVU, 60,// double nominalElectricalU,double
+							// electricalNominalP,
+					1200,// double nominalElectricalCoolingPower,
+					lowVoltageCableDescriptor,// ElectricalCableDescriptor
+												// cableDescriptor,
+					130, -100,// double warmLimit,double coolLimit,
+					200, 30,// double nominalP,double nominalT,
+					10, 4// double nominalTao,double nominalConnectionDrop
+
+			);
+
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
 	}
 
 	void registerTransparentNodeMisc(int id) {
@@ -5131,6 +5153,25 @@ public class Eln {
 				Character.valueOf('M'), findItemStack("Electrical Motor"),
 				Character.valueOf('R'), "ingotRubber");
 
+		
+		addRecipe(
+				findItemStack("200V Active Thermal Dissipator"),
+				"RMR",
+				"I I",
+				"III",
+				Character.valueOf('I'), "ingotCopper",
+				Character.valueOf('M'), findItemStack("Advanced Electrical Motor"),
+				Character.valueOf('R'), "ingotRubber",
+				Character.valueOf('C'), findItemStack("Copper Thermal Cable"));
+
+		addRecipe(
+				findItemStack("200V Active Thermal Dissipator"),
+				"RMR",
+				" D ",
+				Character.valueOf('D'), findItemStack("Small Passive Thermal Dissipator"),
+				Character.valueOf('M'), findItemStack("Advanced Electrical Motor"),
+				Character.valueOf('R'), "ingotRubber");
+		
 	}
 
 	void recipeGeneral() {
