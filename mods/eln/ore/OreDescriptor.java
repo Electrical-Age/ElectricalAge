@@ -10,9 +10,10 @@ import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -36,7 +37,7 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
 		this.spawnSizeMin = spawnSizeMin;
 		this.spawnSizeMax = spawnSizeMax;
 	}
-	public Icon getBlockIconId(int side,int damage)
+	public IIcon getBlockIconId(int side,int damage)
 	{
 		return getIcon();
 	}
@@ -73,7 +74,7 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
 				int posY = spawnHeightMin + random.nextInt(spawnHeightMax-spawnHeightMin); //Y coordinate less than 40 to gen at
 				int posZ = z + random.nextInt(16); //Z coordinate to gen at
 				int size = spawnSizeMin + random.nextInt(spawnSizeMax - spawnSizeMin);
-				new WorldGenMinable(Eln.oreBlock.blockID,metadata,size,Block.stone.blockID).generate(w, random, posX, posY, posZ); //The gen call
+				new WorldGenMinable(Eln.oreBlock,metadata,size,Blocks.stone).generate(w, random, posX, posY, posZ); //The gen call
 			}
 		//}
 		//new WorldGenTrees(par1, par2, par3, par4, par5)

@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
@@ -33,8 +31,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerManager;
 import net.minecraft.world.EnumSkyBlock;
@@ -102,7 +98,7 @@ public abstract class Node extends NodeBase implements INBTTReady {
     
     public NodeBlockEntity getEntity()
     {
-    	return (NodeBlockEntity) coordonate.world().getBlockTileEntity(coordonate.x, coordonate.y, coordonate.z);
+    	return (NodeBlockEntity) coordonate.world().getTileEntity(coordonate.x, coordonate.y, coordonate.z);
     }
     
 	int isProvidingWeakPower(Direction side) {

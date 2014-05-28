@@ -7,11 +7,14 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import mods.eln.Eln;
+import mods.eln.client.ClientProxy;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.generic.GenericItemUsingDamage;
+import mods.eln.ghost.GhostBlock;
 import mods.eln.node.ITileEntitySpawnClient;
 import mods.eln.sim.PhysicalConstant;
 import net.minecraft.block.Block;
@@ -24,6 +27,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemDye;
@@ -31,15 +35,19 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.packet.Packet250CustomPayload;
+import net.minecraft.network.play.server.S27PacketExplosion;
+import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -49,8 +57,7 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 import org.lwjgl.opengl.GL11;
 
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -338,14 +345,14 @@ public class Utils {
 
 	}
 		
-	
+	//1.7.2
 	public static void readFromNBT(NBTTagCompound nbt, String str,IInventory inventory) {
-        NBTTagList var2 = nbt.getTagList(str);
+        NBTTagList var2 = nbt.getTagList(str,0);
         
 
         for (int var3 = 0; var3 < var2.tagCount(); ++var3)
         {
-            NBTTagCompound var4 = (NBTTagCompound)var2.tagAt(var3);
+            NBTTagCompound var4 = (NBTTagCompound)var2.getCompoundTagAt(var3); //1.7.2
             int var5 = var4.getByte("Slot") & 255;
 
             if (var5 >= 0 && var5 < inventory.getSizeInventory())
@@ -373,28 +380,27 @@ public class Utils {
    
 	}
 
-	
+	//1.7.2
 	public static void sendPacketToServer(ByteArrayOutputStream bos)
 	{
-
-	    Packet250CustomPayload packet = new Packet250CustomPayload();
-        packet.channel = Eln.channelName;
-        packet.data = bos.toByteArray();
-        packet.length = bos.size();
-        	    	
-    	PacketDispatcher.sendPacketToServer(packet);		
+		S3FPacketCustomPayload packet = new S3FPacketCustomPayload(Eln.channelName,bos.toByteArray());
+		 
+		Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(packet);
 	}
-	public static void sendPacketToClient(ByteArrayOutputStream bos,Player player)
+	public static void sendPacketToClient(ByteArrayOutputStream bos,EntityPlayerMP player)
 	{
 
-	    Packet250CustomPayload packet = new Packet250CustomPayload();
-        packet.channel = Eln.channelName;
-        packet.data = bos.toByteArray();
-        packet.length = bos.size();
+		S3FPacketCustomPayload packet = new S3FPacketCustomPayload(Eln.channelName,bos.toByteArray());
         	    	
-    	PacketDispatcher.sendPacketToPlayer(packet,player);		
+		sendPacketToPlayer(packet, player);
 	}
 	
+	public static void sendPacketToPlayer(
+			S3FPacketCustomPayload packet,
+			EntityPlayerMP player) {
+		// TODO Auto-generated method stub
+		player.playerNetServerHandler.sendPacket(packet);		
+	}    
 
     
     //private static Color[] dyeColors
@@ -406,7 +412,7 @@ public class Utils {
     
     public static void setGlColorFromDye(int damage)
     {
-    	int color = ItemDye.dyeColors[damage];
+    	int color = ItemDye.field_150922_c[damage]; // dyeColors
     	float gain = 1.0f;
     	switch(damage)
     	{
@@ -628,7 +634,7 @@ public class Utils {
 	}*/
 
 
-
+    //1.7.2
 	public static void serialiseItemStack(DataOutputStream stream,ItemStack stack) throws IOException
 	{
 		
@@ -639,7 +645,7 @@ public class Utils {
 		}
 		else
 		{
-			stream.writeShort(stack.itemID);
+			stream.writeShort(Item.getIdFromItem(stack.getItem()));
 			stream.writeShort(stack.getItemDamage());				
 		}
 	}
@@ -650,7 +656,7 @@ public class Utils {
 		damage = stream.readShort();
 		if(id == -1)
 			return null;
-		return new ItemStack(id,1,damage);
+		return Utils.newItemStack(id,1,damage);
 	}
 	public static   EntityItem unserializeItemStackToEntityItem(DataInputStream stream,EntityItem old,TileEntity tileEntity) throws IOException
 	{
@@ -664,8 +670,9 @@ public class Utils {
 		else
 		{
 			ItemDamage = stream.readShort();
-			if(old == null || old.getEntityItem().itemID != itemId || old.getEntityItem().getItemDamage() != ItemDamage)
-				return  new EntityItem(tileEntity.worldObj,tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, new ItemStack(itemId, 1, ItemDamage));
+		    //1.7.2			
+			if(old == null || Item.getIdFromItem(old.getEntityItem().getItem()) != itemId || old.getEntityItem().getItemDamage() != ItemDamage)
+				return  new EntityItem(tileEntity.getWorldObj(),tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, Utils.newItemStack(itemId, 1, ItemDamage));
 			else
 				return old;
 		}
@@ -713,24 +720,24 @@ public class Utils {
 		int x = t.xCoord;
 		int y = t.yCoord;
 		int z = t.zCoord;
-		World w = t.worldObj;
+		World w = t.getWorldObj();
 		TileEntity o;
-		o = w.getBlockTileEntity(x+1, y, z);
+		o = w.getTileEntity(x+1, y, z);
 		if(o != null && o instanceof ITileEntitySpawnClient)
 			((ITileEntitySpawnClient)o).tileEntityNeighborSpawn();
-		o = w.getBlockTileEntity(x-1, y, z);
+		o = w.getTileEntity(x-1, y, z);
 		if(o != null && o instanceof ITileEntitySpawnClient)
 			((ITileEntitySpawnClient)o).tileEntityNeighborSpawn();
-		o = w.getBlockTileEntity(x, y+1, z);
+		o = w.getTileEntity(x, y+1, z);
 		if(o != null && o instanceof ITileEntitySpawnClient)
 			((ITileEntitySpawnClient)o).tileEntityNeighborSpawn();
-		o = w.getBlockTileEntity(x, y-1, z);
+		o = w.getTileEntity(x, y-1, z);
 		if(o != null && o instanceof ITileEntitySpawnClient)
 			((ITileEntitySpawnClient)o).tileEntityNeighborSpawn();
-		o = w.getBlockTileEntity(x, y, z+1);
+		o = w.getTileEntity(x, y, z+1);
 		if(o != null && o instanceof ITileEntitySpawnClient)
 			((ITileEntitySpawnClient)o).tileEntityNeighborSpawn();
-		o = w.getBlockTileEntity(x, y, z-1);
+		o = w.getTileEntity(x, y, z-1);
 		if(o != null && o instanceof ITileEntitySpawnClient)
 			((ITileEntitySpawnClient)o).tileEntityNeighborSpawn();
 		
@@ -831,33 +838,18 @@ public class Utils {
     static public void getItemStack(String name,List list)
     {
         
-        Item[] aitem = Item.itemsList;
+        Iterator aitem = Item.itemRegistry.iterator();
         ArrayList<ItemStack> tempList = new ArrayList<ItemStack>(3000);
-        int i = aitem.length;
-        int j;
-
-        for (j = 0; j < i; ++j)
+        Item item;
+        //1.7.2
+        while((item = (Item) aitem.next()) != null)
         {
-            Item item = aitem[j];
 
             if (item != null && item.getCreativeTab() != null)
             {
-                item.getSubItems(item.itemID, (CreativeTabs)null, tempList);
+                item.getSubItems(item, (CreativeTabs)null, tempList);
             }
         }
-        /*
-        Enchantment[] aenchantment = Enchantment.enchantmentsList;
-        i = aenchantment.length;
-
-        for (j = 0; j < i; ++j)
-        {
-            Enchantment enchantment = aenchantment[j];
-
-            if (enchantment != null && enchantment.type != null)
-            {
-                Item.enchantedBook.func_92113_a(enchantment, containercreative.itemList);
-            }
-        }*/
 
   
         String s = name.toLowerCase();
@@ -896,7 +888,7 @@ public class Utils {
 
 	public static boolean areSame(ItemStack stack, ItemStack output) {
 		// TODO Auto-generated method stub
-		return (stack.itemID == output.itemID && stack.getItemDamage() == output.getItemDamage())
+		return (stack.getItem() == output.getItem() && stack.getItemDamage() == output.getItemDamage())
 				|| (OreDictionary.getOreID(stack) == OreDictionary.getOreID(output) && OreDictionary.getOreID(output) != -1);
 	}
 
@@ -972,7 +964,7 @@ public class Utils {
 
 		@Override
 		public float getWeight(int blockId) {
-			Block b = Block.blocksList[blockId];
+			Block b = Block.getBlockById(blockId);
 			if(b == null) return 0;
 			return b.isOpaqueCube() ? 1f : 0f;
 		}
@@ -1024,7 +1016,7 @@ public class Utils {
 			int yInt = (int)yFloor;
 			int zInt = (int)zFloor;
 
-			int blockKey = w.getBlockId(xInt + posXint,yInt + posYint,zInt + posZint);
+			int blockKey = Block.getIdFromBlock(w.getBlock(xInt + posXint,yInt + posYint,zInt + posZint));
 
 			
 			
@@ -1062,9 +1054,10 @@ public class Utils {
 		return world.blockExists(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
 	}
 
+	
 	public static Block getBlock(World world, double x, double y, double z) {
-		int blockId = world.getBlockId(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
-		return blockId == 0 ? null : Block.blocksList[blockId];
+		Block block = world.getBlock(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
+		return block == Blocks.air ? null : block;//1.7.2
 	}
 
 	public static double getLength( double x, double y,
@@ -1211,8 +1204,104 @@ public class Utils {
 	}
 
 	public static boolean isWater(Coordonate waterCoord) {
-		int blockId = waterCoord.getBlockId();
-		return (blockId == Block.waterMoving.blockID || blockId == Block.waterStill.blockID) ;
-	}    
+		Block block = waterCoord.getBlock();
+		return (block == Blocks.flowing_water || block == Blocks.water) ;
+	}
+
+	//1.7.2
+	public static NBTTagCompound newNBTTagCompound(String name) {
+		NBTTagCompound nbt = new NBTTagCompound();
+		return nbt;
+	}
+
+	public static void addChatMessage(EntityPlayer entityPlayer, String string) {
+
+		entityPlayer.addChatMessage(new ChatComponentText(string));
+	}
+
+	public static ItemStack newItemStack(int i,int size, int damage) {
+		// TODO Auto-generated method stub
+		return new ItemStack(Item.getItemById(i),size,damage);
+	}
+	public static ItemStack newItemStack(Item i,int size, int damage) {
+		// TODO Auto-generated method stub
+		return new ItemStack(i,size,damage);
+	}
+
+	//1.7.2
+	public static ArrayList<NBTTagCompound> getTags(NBTTagCompound nbt) {
+		NBTTagList list = nbt.getTagList(null, 0);
+		ArrayList<NBTTagCompound> tags = new ArrayList<NBTTagCompound>();
+		for(int idx = 0;idx < tags.size();idx++){
+			tags.add(list.getCompoundTagAt(idx));
+		}
+		return tags;
+	}
+
+	public static short getBlockId(World world, int x, int y, int z) {
+		// TODO Auto-generated method stub
+		return (short) Block.getIdFromBlock(world.getBlock(x, y, z));
+	}
+
+	//1.7.2
+	public static boolean isRemote(IBlockAccess world) {
+		if(world instanceof World == false){
+			fatal();
+		}
+		return ((World)world).isRemote;
+	}
+
+	public static boolean nullCheck(Object o){
+		return (o == null);
+	}
+	public static void nullFatal(Object o){
+		if(o == null) fatal();
+	}
+	public static void fatal(){
+		try {
+			throw new Exception();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.exit(0);
+	}
+	public static Block getBlock(int blockId) {
+		// TODO Auto-generated method stub
+		return Block.getBlockById(blockId);
+	}
+
+	public static int getBlockId(Item item) {
+		return Block.getIdFromBlock(Block.getBlockFromItem(item));
+	}
+
+	//1.7.2
+	public static void updateSkylight(Chunk chunk) {
+		// TODO Auto-generated method stub
+		chunk.func_150804_b(false); 
+	}
+
+	//1.7.2
+	public static void updateAllLightTypes(World worldObj, int xCoord, int yCoord, int zCoord) {
+		// TODO Auto-generated method stub
+		worldObj.func_147451_t(xCoord, yCoord, zCoord);
+	}
+
+	public static int getItemId(ItemStack stack) {
+		// TODO Auto-generated method stub
+		return Item.getIdFromItem(stack.getItem());
+	}
+
+	public static int getItemId(Block block) {
+		// TODO Auto-generated method stub
+		return Item.getIdFromItem(Item.getItemFromBlock(block));
+	}
+
+	public static short getBlockId(Block block) {
+		// TODO Auto-generated method stub
+		return (short) Block.getIdFromBlock(block);
+	}
+
+
 
 } 

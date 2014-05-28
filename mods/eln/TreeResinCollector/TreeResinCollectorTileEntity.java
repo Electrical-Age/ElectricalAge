@@ -4,6 +4,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 
@@ -49,7 +50,7 @@ public class TreeResinCollectorTileEntity extends TileEntity{
 			
 			int yStart,yEnd;
 			
-			while(worldObj.getBlockId(posWood[0],posWood[1]-1,posWood[2]) == Block.wood.blockID)
+			while(worldObj.getBlock(posWood[0],posWood[1]-1,posWood[2]) == Blocks.log)
 			{
 				posWood[1]--;
 			}
@@ -57,7 +58,7 @@ public class TreeResinCollectorTileEntity extends TileEntity{
 			
 			posWood[1] = yCoord;
 			timeCounter-= timeTarget;
-			while(worldObj.getBlockId(posWood[0],posWood[1]+1,posWood[2]) == Block.wood.blockID)
+			while(worldObj.getBlock(posWood[0],posWood[1]+1,posWood[2]) == Blocks.log)
 			{
 				posWood[1]++;
 			}

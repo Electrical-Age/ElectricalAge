@@ -25,8 +25,6 @@ import net.minecraft.client.gui.inventory.GuiEditSign;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.network.packet.Packet250CustomPayload;
-
 public class ModbusRtuGui extends GuiScreenEln{
 
 	public ModbusRtuGui(EntityPlayer player,ModbusRtuRender render) {
@@ -80,14 +78,14 @@ public class ModbusRtuGui extends GuiScreenEln{
 		
 		y += 10;
 		
-		station = new GuiTextFieldEln(fontRenderer, 2, y, 30,helper); 
+		station = new GuiTextFieldEln(fontRendererObj, 2, y, 30,helper); 
 		if(render.station != -1)
 			station.setText(render.station);
 		station.setObserver(this);
 		station.setComment(0, "Station ID");
 		extender.add(station);
 		
-		name = new GuiTextFieldEln(fontRenderer,2+station.getWidth() + 12, y, 101,helper);  y+= name.getHeight();
+		name = new GuiTextFieldEln(fontRendererObj,2+station.getWidth() + 12, y, 101,helper);  y+= name.getHeight();
 		name.setText(render.name);
 		name.setObserver(this);
 		name.setComment(0, "Station name");
@@ -123,14 +121,14 @@ public class ModbusRtuGui extends GuiScreenEln{
 			
 			y += 2;
 			x = 2;
-			GuiTextFieldEln txName = new GuiTextFieldEln(fontRenderer, x, y+4, 90, helper);
+			GuiTextFieldEln txName = new GuiTextFieldEln(fontRendererObj, x, y+4, 90, helper);
 			txName.setText(tx.name);
 			txName.setComment(0, "Channel name");
 			extender.add(txName);
 			
 			x += txName.getWidth() + 12;
 
-			GuiTextFieldEln txId = new GuiTextFieldEln(fontRenderer, x , y+4, 40, helper);
+			GuiTextFieldEln txId = new GuiTextFieldEln(fontRendererObj, x , y+4, 40, helper);
 			if(tx.id != -1)
 				txId.setText(tx.id);
 			else
@@ -178,14 +176,14 @@ public class ModbusRtuGui extends GuiScreenEln{
 			
 			y += 2;
 			x = 2;
-			GuiTextFieldEln rxName = new GuiTextFieldEln(fontRenderer, x, y+4, 90, helper);
+			GuiTextFieldEln rxName = new GuiTextFieldEln(fontRendererObj, x, y+4, 90, helper);
 			rxName.setText(rx.name);
 			rxName.setComment(0, "Channel name");
 			extender.add(rxName);
 			
 			x += rxName.getWidth() + 12;
 
-			GuiTextFieldEln rxId = new GuiTextFieldEln(fontRenderer, x , y+4, 40, helper);
+			GuiTextFieldEln rxId = new GuiTextFieldEln(fontRendererObj, x , y+4, 40, helper);
 			if(rx.id != -1)
 				rxId.setText(rx.id);
 			else

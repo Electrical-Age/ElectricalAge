@@ -51,7 +51,7 @@ public class TeleporterRender extends TransparentNodeElementRender{
 		Coordonate lightCoordonate = new Coordonate(this.d.lightCoordonate);
 		lightCoordonate.applyTransformation(front, c);
 		
-		boolean lightEnable = tileEntity.worldObj.getBlockId(lightCoordonate.x, lightCoordonate.y, lightCoordonate.z) == Eln.lightBlockId;
+		boolean lightEnable = tileEntity.getWorldObj().getBlock(lightCoordonate.x, lightCoordonate.y, lightCoordonate.z) == Eln.lightBlock;
 		
 		counter += FrameTime.get();
 		if(counter > 0.4){
@@ -138,7 +138,7 @@ public class TeleporterRender extends TransparentNodeElementRender{
 				d.scr1_cables.draw();
 				d.scr2_transporter.draw();
 				
-				if(tileEntity.worldObj.getEntitiesWithinAABB(Entity.class, d.getBB(c, front)).size() != 0 )
+				if(tileEntity.getWorldObj().getEntitiesWithinAABB(Entity.class, d.getBB(c, front)).size() != 0 )
 					d.scr3_userin.draw();
 				
 				if(doorState)

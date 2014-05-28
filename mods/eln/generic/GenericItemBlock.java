@@ -1,6 +1,7 @@
 package mods.eln.generic;
 
 import mods.eln.CommonProxy;
+import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -12,8 +13,8 @@ public class GenericItemBlock extends ItemBlock {
 		"Copper", "Silver",  "Gold"
 	};
 
-	public GenericItemBlock(int id,int textureIdOffset,String ItemName,String[] subNames) {
-		super(id);
+	public GenericItemBlock(Block b,int textureIdOffset,String ItemName,String[] subNames) {
+		super(b);
 		this.textureIdOffset = textureIdOffset;
 		this.subNames = subNames;
 		setHasSubtypes(true);

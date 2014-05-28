@@ -6,6 +6,7 @@ import mods.eln.item.DynamoDescriptor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -81,7 +82,7 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 							notInCache = true;
 							break;
 						}
-						if(world.getBlockId(x, y, z) != 0){
+						if(world.getBlock(x, y, z) != Blocks.air){
 							blockBusyCount++;
 						}
 					}		

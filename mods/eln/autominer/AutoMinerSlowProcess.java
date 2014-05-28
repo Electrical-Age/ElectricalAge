@@ -18,6 +18,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockOre;
 import net.minecraft.block.BlockRedstoneOre;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -83,15 +84,15 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 			if(energyCounter >= energyTarget) {
 				switch(job) {
 				case ore:
-					Block block = Block.blocksList[jobCoord.world().getBlockId(jobCoord.x, jobCoord.y, jobCoord.z)];
+					Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
 					int meta = jobCoord.world().getBlockMetadata(jobCoord.x, jobCoord.y, jobCoord.z);
-					ArrayList<ItemStack> drop = block.getBlockDropped(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0);
+					ArrayList<ItemStack> drop = block.getDrops(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0);
 					
 					for(ItemStack stack : drop) {
 						drop(stack);
 					}
 					
-					jobCoord.world().setBlock(jobCoord.x, jobCoord.y, jobCoord.z, 0);
+					jobCoord.world().setBlockToAir(jobCoord.x, jobCoord.y, jobCoord.z);
 					
 					energyCounter -= energyTarget;
 					oreRand = Math.random();
@@ -185,9 +186,9 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 	
 	boolean isMinable(int blockId){
 		return blockId != 0 
-				&& blockId != Block.waterMoving.blockID && blockId != Block.waterStill.blockID
-				&& blockId != Block.lavaMoving.blockID && blockId != Block.lavaStill.blockID
-				&&blockId != Block.obsidian.blockID && blockId != Block.bedrock.blockID;
+				&& Block.getBlockById(blockId) != Blocks.flowing_water && Block.getBlockById(blockId) != Blocks.water
+				&& Block.getBlockById(blockId) != Blocks.flowing_lava && Block.getBlockById(blockId) != Blocks.lava
+				&& Block.getBlockById(blockId) != Blocks.obsidian && Block.getBlockById(blockId) != Blocks.bedrock;
 	}
 	
 	void setupJob() {
@@ -252,7 +253,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 						double dy = 0;
 						double dz = jobCoord.z - miner.node.coordonate.z;
 						double distance = Math.sqrt(dx*dx+dy*dy+dz*dz)*(0.9 + 0.2*oreRand);
-						int blockId = jobCoord.world().getBlockId(jobCoord.x, jobCoord.y, jobCoord.z);
+						int blockId = Block.getIdFromBlock(jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z));
 						if(checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(blockId))) {
 							jobFind = true;
 							setJob(jobType.ore);
@@ -272,11 +273,11 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 					jobCoord.y--;
 					jobCoord.z = miner.node.coordonate.z;
 					
-					int blockId = jobCoord.world().getBlockId(jobCoord.x, jobCoord.y, jobCoord.z);
-					if(		blockId != 0 
-							&& blockId != Block.waterMoving.blockID && blockId != Block.waterStill.blockID
-							&& blockId != Block.lavaMoving.blockID && blockId != Block.lavaStill.blockID) {
-						if(blockId != Block.obsidian.blockID && blockId != Block.bedrock.blockID) {
+					Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
+					if(		block != null 
+							&& block != Blocks.flowing_water && block != Blocks.water
+							&& block != Blocks.flowing_lava && block != Blocks.lava) {
+						if(block != Blocks.obsidian && block != Blocks.bedrock) {
 							jobFind = true;
 							setJob(jobType.ore);
 						}
@@ -319,8 +320,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 	}
 	
 	boolean checkIsOre(Coordonate coordonate) {
-		int blockId = coordonate.world().getBlockId(coordonate.x, coordonate.y, coordonate.z);
-		Block block = Block.blocksList[blockId];
+		Block block = coordonate.world().getBlock(coordonate.x, coordonate.y, coordonate.z);
 		if(block instanceof BlockOre) return true;
 		if(block instanceof OreBlock) return true;
 		if(block instanceof BlockRedstoneOre) return true;

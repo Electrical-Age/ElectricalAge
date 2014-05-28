@@ -246,7 +246,7 @@ public abstract class TransparentNodeElementRender {
 	
 	protected Coordonate coordonate() {
 		// TODO Auto-generated method stub
-		return new Coordonate(tileEntity.xCoord,tileEntity.yCoord,tileEntity.zCoord,tileEntity.worldObj);
+		return new Coordonate(tileEntity.xCoord,tileEntity.yCoord,tileEntity.zCoord,tileEntity.getWorldObj());
 	}
 
 }

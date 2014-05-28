@@ -106,13 +106,13 @@ public class SixNodeEntity extends NodeBlockEntity {
 		{
 			Chunk chunk = worldObj.getChunkFromBlockCoords(xCoord, zCoord);
 			chunk.generateHeightMap();
-			chunk.updateSkylight();
+			Utils.updateSkylight(chunk);
 			chunk.generateSkylightMap();
-			worldObj.updateAllLightTypes(xCoord,yCoord,zCoord);
+			Utils.updateAllLightTypes(worldObj,xCoord,yCoord,zCoord);
 		}
 
 
-
+		
 	}
 	
 	

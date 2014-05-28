@@ -18,7 +18,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Icon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -37,7 +36,7 @@ public class UtilsClient {
 	}
 
 	public static float distanceFromClientPlayer(SixNodeEntity tileEntity) {
-		return distanceFromClientPlayer(tileEntity.worldObj, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord);
+		return distanceFromClientPlayer(tileEntity.getWorldObj(), tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord);
 	}
 
 	public static EntityClientPlayerMP getClientPlayer() {
@@ -81,11 +80,11 @@ public class UtilsClient {
 	}
 
 	public static void drawHaloNoLightSetup(Obj3DPart halo, float r, float g, float b, TileEntity e, boolean bilinear) {
-		drawHaloNoLightSetup(halo, r, g, b, e.worldObj, e.xCoord, e.yCoord, e.zCoord, bilinear);
+		drawHaloNoLightSetup(halo, r, g, b, e.getWorldObj(), e.xCoord, e.yCoord, e.zCoord, bilinear);
 	}
 
 	public static void drawHalo(Obj3DPart halo, float r, float g, float b, TileEntity e, boolean bilinear) {
-		drawHalo(halo, r, g, b, e.worldObj, e.xCoord, e.yCoord, e.zCoord, bilinear);
+		drawHalo(halo, r, g, b, e.getWorldObj(), e.xCoord, e.yCoord, e.zCoord, bilinear);
 	}
 
 	public static void drawHaloNoLightSetup(Obj3DPart halo, float distance) {
@@ -223,9 +222,11 @@ public class UtilsClient {
 		drawIcon(type);
 	}
 
-	public static void drawIcon(ItemRenderType type, Icon icon) {
+	
+	//1.7.2
+	/*public static void drawIcon(ItemRenderType type, Icon icon) {
 		drawIcon(type, icon.getIconName());
-	}
+	}*/
 
 	public static void drawEnergyBare(ItemRenderType type, float e) {
 		float x = 13f, y = 15f - e * 14f;

@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
@@ -29,12 +27,12 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.Packet250CustomPayload;
+import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerManager;
 import net.minecraft.world.EnumSkyBlock;
@@ -97,7 +95,7 @@ public abstract class NodeBase implements INBTTReady {
 	{
 		return 0;
 	}
-	public void networkUnserialize(DataInputStream stream,Player player)
+	public void networkUnserialize(DataInputStream stream,EntityPlayerMP player)
 	{
 		
 	}
@@ -105,11 +103,12 @@ public abstract class NodeBase implements INBTTReady {
 	public void notifyNeighbor()
 	{
 	//	coordonate.world().setBlockMetadataWithNotify(coordonate.x, coordonate.y, coordonate.z,0,0x02);
-		coordonate.world().notifyBlockChange(coordonate.x, coordonate.y, coordonate.z, getBlockId());
+		coordonate.world().notifyBlockChange(coordonate.x, coordonate.y, coordonate.z, getBlock());
 	}
 	
 	
 	public abstract short getBlockId();
+	public abstract Block getBlock();
 	
 	public IInventory getInventory()
 	{
@@ -133,7 +132,7 @@ public abstract class NodeBase implements INBTTReady {
 			
 			direction.applyTo(vector, 1);
 					
-			neighborBlock[direction.getInt()] = (short)world.getBlockId(vector[0], vector[1], vector[2]);
+			neighborBlock[direction.getInt()] = (short)Utils.getBlockId(world,vector[0], vector[1], vector[2]);
 		}
 	}
 	
@@ -162,17 +161,17 @@ public abstract class NodeBase implements INBTTReady {
 	
 	public boolean isBlockWrappable(Direction direction)
 	{
-		return isBlockWrappable(neighborBlock[direction.getInt()]); 
+		return isBlockWrappable(Utils.getBlock(neighborBlock[direction.getInt()])); 
 	}	
-	public static boolean isBlockWrappable(int blockId)
+	public static boolean isBlockWrappable(Block block)
 	{
-		if(blockId == 0) return true;
-		if(blockId == Eln.sixNodeBlock.blockID) return true;
-		if(blockId == Eln.ghostBlock.blockID) return true;
-		if(blockId == Block.torchWood.blockID) return true;
-		if(blockId == Block.torchRedstoneIdle.blockID) return true;
-		if(blockId == Block.torchRedstoneActive.blockID) return true;
-		if(blockId == Block.redstoneWire.blockID) return true;
+		if(block == Blocks.air) return true;
+		if(block == Eln.sixNodeBlock) return true;
+		if(block == Eln.ghostBlock) return true;
+		if(block == Blocks.torch) return true;
+		if(block == Blocks.redstone_torch) return true;
+		if(block == Blocks.unlit_redstone_torch) return true;
+		if(block == Blocks.redstone_wire) return true;
 			
 		return false;
 	}
@@ -199,7 +198,7 @@ public abstract class NodeBase implements INBTTReady {
 		if(destructed == true) return;
 		destructed = true;
 		disconnect();
-		coordonate.world().setBlock(coordonate.x, coordonate.y, coordonate.z, 0);
+		coordonate.world().setBlockToAir(coordonate.x, coordonate.y, coordonate.z);
 		NodeManager.instance.removeNode(this);
 		if(explosionStrength != 0)
 		{
@@ -256,14 +255,14 @@ public abstract class NodeBase implements INBTTReady {
 		    	{ 
 		    		String str = multiMeterString(side);
 		    		if(str != null)
-		    			entityPlayer.addChatMessage(str);	
+		    			Utils.addChatMessage(entityPlayer,str);	
 		    		return true;
 		    	}
 		    	if(Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
 		    	{ 
 		    		String str = thermoMeterString(side);
 		    		if(str != null)
-		    			entityPlayer.addChatMessage(str);	
+		    			Utils.addChatMessage(entityPlayer,str);	
 		    		return true;
 		    	}
 		    	if(Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
@@ -276,7 +275,7 @@ public abstract class NodeBase implements INBTTReady {
 		    		if(str2 != null)
 		    			str += str2;
 		    		if(str.equals("") == false)
-		    			entityPlayer.addChatMessage(str);	
+		    			Utils.addChatMessage(entityPlayer,str);	
 		    		return true;
 		    	}    			
     			
@@ -608,7 +607,7 @@ public abstract class NodeBase implements INBTTReady {
 		}	    	
     }
 	
-    public void sendPacketToClient(ByteArrayOutputStream bos,Player player)
+    public void sendPacketToClient(ByteArrayOutputStream bos,EntityPlayerMP player)
     {
     	Utils.sendPacketToClient(bos,player);
     } 
@@ -625,18 +624,14 @@ public abstract class NodeBase implements INBTTReady {
 	    	if(player.dimension != this.coordonate.dimention) continue;
 	    	if(! playerManager.isPlayerWatchingChunk(player, coordonate.x/16, coordonate.z/16)) continue;
 	    	
-		    Packet250CustomPayload packet = new Packet250CustomPayload();
-	        packet.channel = Eln.channelName;
-	        packet.data = bos.toByteArray();
-	        packet.length = bos.size();
-	        	    	
-	    	PacketDispatcher.sendPacketToPlayer(packet,(Player) player);	
+
+	    	Utils.sendPacketToClient(bos,player);	
 	    }   	
     }
     
     
     
-    public Packet getPacketNodeSingleSerialized()
+    public S3FPacketCustomPayload getPacketNodeSingleSerialized()
     {	
     	
   
@@ -658,10 +653,8 @@ public abstract class NodeBase implements INBTTReady {
 	        
 	        networkSerialize(stream);
 
-	        Packet250CustomPayload packet = new Packet250CustomPayload();
-	        packet.channel = Eln.channelName;
-	        packet.data = bos.toByteArray();
-	        packet.length = bos.size();  
+	        S3FPacketCustomPayload packet = new S3FPacketCustomPayload(Eln.channelName,bos.toByteArray());
+
 	    	return packet;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -684,7 +677,7 @@ public abstract class NodeBase implements INBTTReady {
 	    	if(player.dimension != this.coordonate.dimention) continue;
 	    	if(! playerManager.isPlayerWatchingChunk(player, coordonate.x/16, coordonate.z/16)) continue;
 	    	
-	    	PacketDispatcher.sendPacketToPlayer(getPacketNodeSingleSerialized(),(Player)player);
+	    	Utils.sendPacketToPlayer(getPacketNodeSingleSerialized(),player);
 	    }
 	    if(needNotify)
 	    {
@@ -693,9 +686,9 @@ public abstract class NodeBase implements INBTTReady {
 	    }
 	    needPublish = false;
     }
-    public void publishToPlayer(Player player)
+    public void publishToPlayer(EntityPlayerMP player)
     {
-    	PacketDispatcher.sendPacketToPlayer(getPacketNodeSingleSerialized(),(Player)player);
+    	Utils.sendPacketToPlayer(getPacketNodeSingleSerialized(),player);
     }
     
     

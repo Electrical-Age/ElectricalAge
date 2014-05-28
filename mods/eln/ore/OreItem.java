@@ -1,5 +1,6 @@
 package mods.eln.ore;
 
+import net.minecraft.block.Block;
 import mods.eln.CommonProxy;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
@@ -7,8 +8,8 @@ import cpw.mods.fml.common.registry.GameRegistry;
 
 public class OreItem extends GenericItemBlockUsingDamage<OreDescriptor>{
 
-	public OreItem(int id) {
-		super(id);
+	public OreItem(Block b ) {
+		super(b);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -30,7 +31,7 @@ public class OreItem extends GenericItemBlockUsingDamage<OreDescriptor>{
 	public void addDescriptor(int damage, OreDescriptor descriptor) {
 		// TODO Auto-generated method stub
 		super.addDescriptor(damage, descriptor);
-		GameRegistry.registerWorldGenerator(descriptor);
+		GameRegistry.registerWorldGenerator(descriptor,0);
 		
 	}
 

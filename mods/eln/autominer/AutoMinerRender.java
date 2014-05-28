@@ -3,7 +3,7 @@ package mods.eln.autominer;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import org.bouncycastle.jcajce.provider.symmetric.DES;
+
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.client.FrameTime;

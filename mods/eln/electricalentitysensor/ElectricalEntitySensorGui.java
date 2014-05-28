@@ -21,7 +21,6 @@ import net.minecraft.client.gui.inventory.GuiEditSign;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.network.packet.Packet250CustomPayload;
 
 public class ElectricalEntitySensorGui extends GuiContainerEln {
 

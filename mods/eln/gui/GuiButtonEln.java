@@ -3,8 +3,10 @@ package mods.eln.gui;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.ResourceLocation;
 
 public class GuiButtonEln extends GuiButton implements IGuiObject{
 
@@ -36,11 +38,14 @@ public class GuiButtonEln extends GuiButton implements IGuiObject{
 		return false;
 	}
 
+	
+	
 	@Override
 	public void imouseClicked(int x, int y, int code) {
         if (mousePressed(Minecraft.getMinecraft(), x, y))
         {
-        	Minecraft.getMinecraft().sndManager.playSoundFX("random.click", 1.0F, 1.0F);
+        	//1.7.2
+        	Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
         	if(observer != null)
         	{
         		observer.guiObjectEvent(this);

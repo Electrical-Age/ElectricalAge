@@ -157,7 +157,7 @@ public void setInventorySlotContents(int par1, ItemStack par2ItemStack)
      }
 }*/
 	@Override
-	public String getInvName() { 
+	public String getInventoryName() { 
 		return "tco.TransparentNodeInventory";
 	}
 
@@ -186,7 +186,7 @@ public void setInventorySlotContents(int par1, ItemStack par2ItemStack)
 
 
 	@Override
-	public void openChest() {
+	public void openInventory() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -194,14 +194,14 @@ public void setInventorySlotContents(int par1, ItemStack par2ItemStack)
 
 
 	@Override
-	public void closeChest() {
+	public void closeInventory() {
 		// TODO Auto-generated method stub
 		
 	}
 
+	
 	@Override
-	public void onInventoryChanged() {
-
+	public void markDirty() {
 		// TODO Auto-generated method stub
 		if(transparentNodeElement != null)
 		{
@@ -221,17 +221,18 @@ public void setInventorySlotContents(int par1, ItemStack par2ItemStack)
 		Utils.writeToNBT(nbt, str, this);
 	}
 
-	@Override
-	public boolean isInvNameLocalized() {
-		// TODO Auto-generated method stub
-		return false; //caca1.5.1
-	}
 
 
 	@Override
 	public boolean isItemValidForSlot(int i, ItemStack itemstack) {
 		// TODO Auto-generated method stub
 		return true;
+	}
+
+	@Override
+	public boolean hasCustomInventoryName() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 

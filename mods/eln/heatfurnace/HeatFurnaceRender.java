@@ -47,7 +47,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 	public void draw() {	
 		
 		
-		if(Utils.isPlayerAround(tileEntity.worldObj,coord.getAxisAlignedBB(1)) == false)
+		if(Utils.isPlayerAround(tileEntity.getWorldObj(),coord.getAxisAlignedBB(1)) == false)
 			interpolator.setTarget(0f);
 		else
 			interpolator.setTarget(1f);

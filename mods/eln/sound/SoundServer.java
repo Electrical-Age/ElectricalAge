@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import javax.swing.text.html.parser.Entity;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
@@ -18,7 +16,6 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 
@@ -54,10 +51,7 @@ public class SoundServer {
 		
 	       
 
-	        Packet250CustomPayload packet = new Packet250CustomPayload();
-	        packet.channel = Eln.channelName;
-	        packet.data = bos.toByteArray();
-	        packet.length = bos.size();
+
 	        
 	        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();       
 
@@ -65,7 +59,7 @@ public class SoundServer {
 		    {
 		    	EntityPlayerMP player = (EntityPlayerMP) obj;
 		    	if(player.dimension == world.provider.dimensionId && player.getDistance(x, y, z) < rangeMax + 2);
-		    		PacketDispatcher.sendPacketToPlayer(packet,(Player)player);
+		    		Utils.sendPacketToClient(bos,player);
 		    }
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

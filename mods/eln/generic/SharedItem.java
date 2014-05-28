@@ -19,8 +19,8 @@ import org.lwjgl.opengl.GL11;
 
 public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDescriptor> implements IItemRenderer , ISpecialArmor{
 
-	public SharedItem(int par1) {
-		super(par1);
+	public SharedItem() {
+		super();
 		// TODO Auto-generated constructor stub
 	}
 	

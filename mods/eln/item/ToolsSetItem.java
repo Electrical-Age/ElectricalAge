@@ -10,8 +10,8 @@ import net.minecraft.item.Item;
 
 public class ToolsSetItem extends Item {
 
-        public ToolsSetItem(int id) {
-            super(id);
+        public ToolsSetItem() {
+            super();
         }
         
 

@@ -8,7 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.Player;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
@@ -225,9 +224,14 @@ public class TransparentNode extends Node{
 	@Override
 	public short getBlockId() {
 		// TODO Auto-generated method stub
-		return (short) Eln.transparentNodeBlock.blockID;
+		return (short) Block.getIdFromBlock(Eln.transparentNodeBlock);
 	}
 
+	@Override
+	public Block getBlock() {
+		// TODO Auto-generated method stub
+		return Eln.transparentNodeBlock;
+	}
 
 	
 
@@ -267,7 +271,7 @@ public class TransparentNode extends Node{
 	
 	
 	@Override
-	public void networkUnserialize(DataInputStream stream,Player player) {
+	public void networkUnserialize(DataInputStream stream,EntityPlayerMP player) {
 		super.networkUnserialize(stream,player);
 		
 		Direction side;

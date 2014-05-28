@@ -6,9 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import cpw.mods.fml.common.network.Player;
-
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -251,7 +250,7 @@ public class ElectricalMathElement extends SixNodeElement {
 	static final byte setExpressionId = 1;
 	
 	@Override
-	public void networkUnserialize(DataInputStream stream, Player player) {
+	public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
 		super.networkUnserialize(stream, player);
 		try {
 			switch(stream.readByte()) {

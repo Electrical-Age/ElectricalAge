@@ -5,6 +5,7 @@ import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
+import mods.eln.misc.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
@@ -52,7 +53,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 					return true;
 				}
 			}
-			player.addChatMessage("You can't place this block at this side");
+			Utils.addChatMessage(player,"You can't place this block at this side");
 			return false;
 		}
 		return true;

@@ -90,7 +90,7 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 	@Override
 	public NBTTagCompound getDefaultNBT() {
 		// TODO Auto-generated method stub
-		NBTTagCompound nbt = new NBTTagCompound("lampnbt");
+		NBTTagCompound nbt = new NBTTagCompound();
 		nbt.setDouble("life", 1.0);
 		return nbt;
 	}

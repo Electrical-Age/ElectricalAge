@@ -11,6 +11,8 @@ import mods.eln.INBTTReady;
 import mods.eln.ghost.GhostElement;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.EnumSkyBlock;
@@ -156,7 +158,7 @@ public class LightBlockEntity extends TileEntity{
 		
 		if(lightList.size() == 0){
 		//	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1,2);
-			worldObj.setBlock(xCoord, yCoord, zCoord, 0);
+			worldObj.setBlockToAir(xCoord, yCoord, zCoord);
 			//worldObj.updateLightByType(EnumSkyBlock.Block,xCoord, yCoord, zCoord);
 			//Eln.instance.tileEntityDestructor.add(this);
 			Utils.println("Destroy light at " + xCoord + " " + yCoord + " " + zCoord + " " );
@@ -185,12 +187,12 @@ public class LightBlockEntity extends TileEntity{
 	}
 	public static void addLight(World w,int x,int y,int z,int light,int timeout)
 	{
-		int blockId = w.getBlockId(x, y, z);
-		if(blockId != Eln.lightBlockId){
-			if(blockId != 0) return;
-			w.setBlock(x, y, z, Eln.lightBlockId, light, 2);
+		Block block = w.getBlock(x, y, z);
+		if(block != Eln.lightBlock){
+			if(block != Blocks.air) return;
+			w.setBlock(x, y, z, Eln.lightBlock, light, 2);
 		}
-		TileEntity t = w.getBlockTileEntity(x, y, z);
+		TileEntity t = w.getTileEntity(x, y, z);
 		if(t != null && t instanceof LightBlockEntity)
 			((LightBlockEntity)t).addLight(light,timeout);
 		else

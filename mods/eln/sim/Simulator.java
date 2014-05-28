@@ -9,7 +9,6 @@ import java.util.Queue;
 
 import javax.swing.text.html.parser.Entity;
 
-import org.bouncycastle.crypto.tls.ByteQueue;
 
 import com.google.common.primitives.Bytes;
 
@@ -19,25 +18,20 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.INetworkManager;
-import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerManager;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.ITickHandler;
-import cpw.mods.fml.common.TickType;
-import cpw.mods.fml.common.network.IPacketHandler;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Type;
 import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
-import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
 
 
-public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
+public class Simulator /* ,IPacketHandler*/ {
 	
 	
 	private ArrayList<IProcess> slowProcessList;
@@ -98,7 +92,8 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 		this.thermalOverSampling = thermalOverSampling;
 		this.electricalHz = commonOverSampling*electricalOverSampling*fps;
 		
-		TickRegistry.registerTickHandler(this, Side.SERVER);
+
+		FMLCommonHandler.instance().bus().register(this);
 	
 		slowProcessList = new ArrayList<IProcess>();
 	
@@ -460,8 +455,9 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 	double avgTickTime = 0;
 	long electricalNsStack = 0,thermalNsStack = 0,slowNsStack = 0;
 
-	@Override
-	public void tickStart(EnumSet<TickType> type, Object... tickData) {
+	@SubscribeEvent
+	public void tick(ClientTickEvent event) {
+		if(event.type != Type.SERVER) return;
 		
 		//Minecraft.getMinecraft().mcProfiler.startSection("Miaou !!");
 		
@@ -702,23 +698,7 @@ public class Simulator implements ITickHandler/* ,IPacketHandler*/ {
 		//Minecraft.getMinecraft().mcProfiler.endSection();
 	}
 	private int printTimeCounter = 0;
-	@Override
-	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
-		// TODO Auto-generated method stub
-		
-		
 
-	}
-	@Override
-	public EnumSet<TickType> ticks() {
-		return EnumSet.of(TickType.SERVER);
-		
-	}
-	@Override
-	public String getLabel() {
-		// TODO Auto-generated method stub
-		return "Miaou";
-	}
 	public void setSimplify(boolean b) {
 		simplifyEnable = b;
 		workingGenerated = false;

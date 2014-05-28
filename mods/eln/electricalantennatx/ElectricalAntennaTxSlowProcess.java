@@ -6,6 +6,7 @@ import org.lwjgl.Sys;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import mods.eln.Eln;
@@ -44,11 +45,11 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
 			do {
 				coord.move(element.front);
 				distance++;
-				int blockId;
+				Block block;
 				if(element.placeBoot || element.rxCoord == null || coord.world().blockExists(coord.x, coord.y, coord.z)) {
 				//	a++;
-					if((blockId = coord.getBlockId()) != 0 && blockId != Block.fire.blockID) {
-						if(blockId == Eln.transparentNodeBlock.blockID 
+					if((block = coord.getBlock()) != null && block != Blocks.fire) {
+						if(block == Eln.transparentNodeBlock 
 							&& (node = (TransparentNode) NodeManager.instance.getNodeFromCoordonate(coord)) != null 
 							&& (node.element instanceof ElectricalAntennaRxElement)) {
 							ElectricalAntennaRxElement rx = (ElectricalAntennaRxElement) node.element;
@@ -82,7 +83,7 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
 				if(element.powerIn.getRpPower() > 50) {
 					if(coordCpy.world().blockExists(coordCpy.x, coordCpy.y, coordCpy.z)) {
 						if(coordCpy.getBlockId() == 0) {
-							coordCpy.world().setBlock(coordCpy.x, coordCpy.y, coordCpy.z, Block.fire.blockID);
+							coordCpy.world().setBlock(coordCpy.x, coordCpy.y, coordCpy.z, Blocks.fire);
 						}
 					}
 				}

@@ -14,8 +14,8 @@ import net.minecraft.world.World;
 
 public class NodeBlockItem extends ItemBlock {
 
-	public NodeBlockItem(int id) {
-		super(id);
+	public NodeBlockItem(Block b) {
+		super(b);
 		setUnlocalizedName("NodeBlockItem");
 	}
 
@@ -25,6 +25,13 @@ public class NodeBlockItem extends ItemBlock {
 		return damageValue;
 	}
 	
+	
+	int getBlockID(){
+		return Block.getIdFromBlock(getBlock());
+	}
+	NodeBlock getBlock(){
+		return (NodeBlock) Block.getBlockFromItem(this);
+	}
 
     public boolean placeBlockAt(ItemStack stack, EntityLivingBase player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata)
     {
@@ -36,8 +43,8 @@ public class NodeBlockItem extends ItemBlock {
         	NodeBase node = (NodeBase) NodeManager.UUIDToClass[getBlockID()].getConstructor().newInstance();
 			node.onBlockPlacedBy(new Coordonate(x, y, z,world),direction,player,stack);
 			
-			world.setBlock(x, y, z, getBlockID(), node.getBlockMetadata(),0x03);//caca1.5.1
-        	((NodeBlock)Block.blocksList[getBlockID()]).onBlockPlacedBy(world, x, y, z,direction, player,metadata);
+			world.setBlock(x, y, z, getBlock(), node.getBlockMetadata(),0x03);//caca1.5.1
+        	getBlock().onBlockPlacedBy(world, x, y, z,direction, player,metadata);
         	
         	node.checkCanStay(true);
         	

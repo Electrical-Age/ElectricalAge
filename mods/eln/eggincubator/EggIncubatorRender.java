@@ -29,6 +29,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -77,7 +78,7 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
 		try {
 			eggStackSize = stream.readByte();
 			if(eggStackSize != 0) {
-				egg = new EntityItem(this.tileEntity.worldObj, 0, 0, 0, new ItemStack(Item.egg));
+				egg = new EntityItem(this.tileEntity.getWorldObj(), 0, 0, 0, new ItemStack(Items.egg));
 			}
 			else {
 				egg = null;

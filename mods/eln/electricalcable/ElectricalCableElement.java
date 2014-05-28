@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.swing.text.MaskFormatter;
 
-import org.bouncycastle.crypto.modes.SICBlockCipher;
 
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -34,6 +33,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
 
 public class ElectricalCableElement extends SixNodeElement implements IThermalDestructorDescriptor, ITemperatureWatchdogDescriptor {
@@ -135,7 +135,7 @@ public class ElectricalCableElement extends SixNodeElement implements IThermalDe
 		//int i;
 		if(Eln.playerManager.get(entityPlayer).getInteractEnable()) {
 			colorCare = colorCare ^ 1;
-			entityPlayer.addChatMessage("Wire color care " + colorCare);
+			Utils.addChatMessage(entityPlayer,"Wire color care " + colorCare);
 			sixNode.reconnect();
 		}
 		else if(currentItemStack != null) {
@@ -151,7 +151,7 @@ public class ElectricalCableElement extends SixNodeElement implements IThermalDe
 						sixNode.reconnect();
 					}
 					else {
-						entityPlayer.addChatMessage("Brush is empty");
+						Utils.addChatMessage(entityPlayer,"Brush is empty");
 					}
 				}
 			}

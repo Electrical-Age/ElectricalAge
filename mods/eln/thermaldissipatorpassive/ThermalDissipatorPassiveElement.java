@@ -14,6 +14,8 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -75,14 +77,14 @@ public class ThermalDissipatorPassiveElement extends TransparentNodeElement{
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
 		ItemStack stack = entityPlayer.getCurrentEquippedItem();
-		if(stack.getItem() == Item.bucketWater)
+		if(stack.getItem() == Items.water_bucket)
 		{
 			thermalLoad.Tc *= 0.5;
 			
-			entityPlayer.inventory.setInventorySlotContents(entityPlayer.inventory.currentItem, new ItemStack(Item.bucketEmpty));
+			entityPlayer.inventory.setInventorySlotContents(entityPlayer.inventory.currentItem, new ItemStack(Items.bucket));
 			return true;
 		}
-		if(stack.itemID == Block.ice.blockID)
+		if(stack.getItem() == Item.getItemFromBlock(Blocks.ice))
 		{
 			thermalLoad.Tc *= 0.2;
 			if(stack.stackSize != 0)

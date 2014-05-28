@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import javax.swing.text.MaskFormatter;
 
-import org.bouncycastle.crypto.modes.SICBlockCipher;
 
 import mods.eln.Eln;
 import mods.eln.electricalbreaker.ElectricalBreakerContainer;
@@ -148,7 +147,7 @@ public class GroundCableElement extends SixNodeElement{
 		if(Eln.playerManager.get(entityPlayer).getInteractEnable())
 		{
 			colorCare = colorCare ^ 1;
-			entityPlayer.addChatMessage("Wire color care " + colorCare);
+			Utils.addChatMessage(entityPlayer,"Wire color care " + colorCare);
 			sixNode.reconnect();
 		}
 		else if(currentItemStack != null)
@@ -169,7 +168,7 @@ public class GroundCableElement extends SixNodeElement{
 					}
 					else
 					{
-						entityPlayer.addChatMessage("Brush is empty!");
+						Utils.addChatMessage(entityPlayer,"Brush is empty!");
 					}
 				}
 			}

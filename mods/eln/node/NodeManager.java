@@ -34,7 +34,7 @@ public class NodeManager extends WorldSavedData{
 	public static Class[] UUIDToClass = new Class[4096];
 	public static void registerBlock(Block block,Class classType)
 	{
-		UUIDToClass[block.blockID] = classType;
+		UUIDToClass[Block.getIdFromBlock(block)] = classType;
 	}
 	
 	Collection<NodeBase> getNodeList()
@@ -88,7 +88,7 @@ public class NodeManager extends WorldSavedData{
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		for(Object o : nbt.getTags())
+		for(Object o : Utils.getTags(nbt))
 		{
 			NBTTagCompound tag = (NBTTagCompound) o;
 			Class nodeClass = UUIDToClass[tag.getShort("UUID")];
@@ -138,7 +138,7 @@ public class NodeManager extends WorldSavedData{
 			NBTTagCompound nbtNode = new NBTTagCompound();
 			nbtNode.setShort("UUID", node.getBlockId());
 			node.writeToNBT(nbtNode,"");
-			nbt.setCompoundTag("n" + nodeCounter++, nbtNode);
+			nbt.setTag("n" + nodeCounter++, nbtNode);
 		}
 	}
 	

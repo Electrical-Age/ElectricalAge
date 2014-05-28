@@ -25,6 +25,7 @@ import mods.eln.sim.Simulator;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockFarmland;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
@@ -378,8 +379,8 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 			int count = 0;
 			while (newCoord.equals(myCoord()) == false)
 			{
-				int block = newCoord.getBlockId();
-				if (block == 0 || block == Eln.lightBlockId)
+				Block block = newCoord.getBlock();
+				if (block == Blocks.air || block == Eln.lightBlock)
 				{
 					count++;
 					if (count == 2)
@@ -400,9 +401,9 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 
 	public boolean isOpaque(Coordonate coord)
 	{
-		int blockId = coord.getBlockId();
-		boolean isNotOpaque = blockId == 0 || !Block.blocksList[blockId].isOpaqueCube();
-		if (blockId == Block.tilledField.blockID)
+		Block block = coord.getBlock();
+		boolean isNotOpaque = block == Blocks.air || ! block.isOpaqueCube();
+		if (block == Blocks.farmland)
 			isNotOpaque = false;
 		return !isNotOpaque;
 	}

@@ -84,7 +84,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	
 	@Override
 	public NBTTagCompound getDefaultNBT() {
-		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
+		NBTTagCompound nbt = new NBTTagCompound();
 		nbt.setDouble("energy",0);
 		nbt.setBoolean("powerOn",false);
 		nbt.setInteger("rand", (int) (Math.random()*0xFFFFFFF));
@@ -117,13 +117,13 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 			//((EntityPlayer) entity).addChatMessage("Flashlight !!!");
 			switch (lightState) {
 			case 0:
-				((EntityPlayer) entity).addChatMessage("Flashlight OFF");
+				Utils.addChatMessage((EntityPlayerMP)entity,"Flashlight OFF");
 				break;
 			case 1:
-				((EntityPlayer) entity).addChatMessage("Flashlight ON");
+				Utils.addChatMessage((EntityPlayerMP)entity,"Flashlight ON");
 				break;
 			case 2:
-				((EntityPlayer) entity).addChatMessage("Flashlight ON-2");
+				Utils.addChatMessage((EntityPlayerMP)entity,"Flashlight ON-2");
 				break;
 
 			default:

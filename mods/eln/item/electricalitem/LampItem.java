@@ -2,6 +2,7 @@ package mods.eln.item.electricalitem;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -41,8 +42,8 @@ public abstract class LampItem extends GenericItemUsingDamageDescriptor{
 			y+=v.yCoord;
 			z+=v.zCoord;
 	
-			int blockId = world.getBlockId((int)x, (int)y, (int)z);
-			if(blockId != 0 && blockId != Eln.instance.lightBlockId /*&& Block.blocksList[blockId].isOpaqueCube() == false*/){
+			Block block = world.getBlock((int)x, (int)y, (int)z);
+			if(block != Blocks.air && block != Eln.instance.lightBlock /*&& Block.blocksList[blockId].isOpaqueCube() == false*/){
 				x-=v.xCoord;
 				y-=v.yCoord;
 				z-=v.zCoord;		
@@ -52,8 +53,8 @@ public abstract class LampItem extends GenericItemUsingDamageDescriptor{
 		}
 		while(rCount > 0){
 
-			int blockId = world.getBlockId((int)x, (int)y, (int)z);
-			if(blockId == 0 || blockId == Eln.instance.lightBlockId){
+			Block block = world.getBlock((int)x, (int)y, (int)z);
+			if(block == Blocks.air || block == Eln.instance.lightBlock){
 				//break;
 				LightBlockEntity.addLight(world, (int)x, (int)y, (int)z, light,10);
 				break;/*

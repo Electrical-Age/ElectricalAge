@@ -8,9 +8,12 @@ import java.util.Map.Entry;
 
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
@@ -73,7 +76,7 @@ public class GhostManager extends WorldSavedData
 			{  
 				iterator.remove();
 				removeGhostNode(element.elementCoordonate);
-				element.elementCoordonate.world().setBlock(element.elementCoordonate.x,element.elementCoordonate.y,element.elementCoordonate.z,0);//caca1.5.1				
+				element.elementCoordonate.world().setBlockToAir(element.elementCoordonate.x,element.elementCoordonate.y,element.elementCoordonate.z);			
 			}			
 		}	
 	}
@@ -88,7 +91,7 @@ public class GhostManager extends WorldSavedData
 			{  
 				iterator.remove();
 				removeGhostNode(element.elementCoordonate);
-				element.elementCoordonate.world().setBlock(element.elementCoordonate.x,element.elementCoordonate.y,element.elementCoordonate.z,0);//caca1.5.1				
+				element.elementCoordonate.world().setBlockToAir(element.elementCoordonate.x,element.elementCoordonate.y,element.elementCoordonate.z);				
 			}			
 		}	
 	}
@@ -103,7 +106,7 @@ public class GhostManager extends WorldSavedData
 			{  
 				iterator.remove();
 				removeGhostNode(element.elementCoordonate);
-				element.elementCoordonate.world().setBlock(element.elementCoordonate.x,element.elementCoordonate.y,element.elementCoordonate.z,0);//caca1.5.1				
+				element.elementCoordonate.world().setBlockToAir(element.elementCoordonate.x,element.elementCoordonate.y,element.elementCoordonate.z);				
 			}			
 		}	
 	}	
@@ -119,7 +122,7 @@ public class GhostManager extends WorldSavedData
 	public void removeGhostAndBlock(Coordonate coordonate)
 	{
 		removeGhost(coordonate);
-		coordonate.world().setBlock(coordonate.x,coordonate.y,coordonate.z,0);//caca1.5.1
+		coordonate.world().setBlockToAir(coordonate.x,coordonate.y,coordonate.z);//caca1.5.1
 	}
 	
 	
@@ -128,7 +131,7 @@ public class GhostManager extends WorldSavedData
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		for(Object o : nbt.getTags())
+		for(NBTTagCompound o : Utils.getTags(nbt))
 		{
 			NBTTagCompound tag = (NBTTagCompound) o;
 
@@ -146,7 +149,7 @@ public class GhostManager extends WorldSavedData
 		{
 			NBTTagCompound nbtGhost = new NBTTagCompound();
 			ghost.writeToNBT(nbtGhost,"");
-			nbt.setCompoundTag("n" + nodeCounter++, nbtGhost);
+			nbt.setTag("n" + nodeCounter++, nbtGhost);
 		}		
 	}
 	
@@ -154,13 +157,13 @@ public class GhostManager extends WorldSavedData
 	public boolean canCreateGhostAt(World world,int x,int y, int z)
 	{
 		if(world.getChunkProvider().chunkExists(x>>4 , z>>4) == false) return false;
-		if(world.getBlockId(x ,y ,z) != 0 && Block.blocksList[world.getBlockId(x ,y ,z)].isBlockReplaceable(world, x, y, z) == false) return false;
+		if(world.getBlock(x ,y ,z) != Blocks.air && world.getBlock(x ,y ,z).isReplaceable(world, x, y, z) == false) return false;
 		return true;
 	}
 	public void createGhost(Coordonate coordonate,Coordonate observerCoordonate,int UUID)
 	{
-		coordonate.world().setBlock(coordonate.x ,coordonate.y ,coordonate.z,0);
-		if(coordonate.world().setBlock(coordonate.x ,coordonate.y ,coordonate.z,Eln.ghostBlock.blockID))
+		coordonate.world().setBlockToAir(coordonate.x ,coordonate.y ,coordonate.z);
+		if(coordonate.world().setBlock(coordonate.x ,coordonate.y ,coordonate.z,Eln.ghostBlock))
 		{
 			coordonate = new Coordonate(coordonate);
 			GhostElement element = new GhostElement(coordonate,observerCoordonate,UUID);

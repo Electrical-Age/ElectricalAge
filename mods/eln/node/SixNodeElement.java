@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import cpw.mods.fml.common.network.Player;
+
 import cpw.mods.fml.common.registry.LanguageRegistry;
 
 import mods.eln.Eln;
@@ -83,7 +83,7 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
 		sixNode.sendPacketToAllClient(bos);
 	}
 
-    public void sendPacketToClient(ByteArrayOutputStream bos,Player player)
+    public void sendPacketToClient(ByteArrayOutputStream bos,EntityPlayerMP player)
     {
     	sixNode.sendPacketToClient(bos, player);
     } 
@@ -110,7 +110,7 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
 	{
 
 	}
-	public void networkUnserialize(DataInputStream stream,Player player) 
+	public void networkUnserialize(DataInputStream stream,EntityPlayerMP player) 
 	{
 		networkUnserialize(stream);
 	}

@@ -17,23 +17,20 @@ import mods.eln.sim.ThermalLoad;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.server.MinecraftServer;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.ITickHandler;
-import cpw.mods.fml.common.TickType;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
-import cpw.mods.fml.common.registry.TickRegistry;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Type;
 import cpw.mods.fml.relauncher.Side;
 
-public class NodeClient implements ITickHandler{
+public class NodeClient{
 	public static ArrayList<NodeBlockEntity> nodeNeedRefreshList = new ArrayList<NodeBlockEntity>();	
 
 	public NodeClient()
 	{
-		TickRegistry.registerTickHandler(this, Side.CLIENT);
+		FMLCommonHandler.instance().bus().register(this);
 	}
 	public void init()
 	{
@@ -46,8 +43,9 @@ public class NodeClient implements ITickHandler{
 	
 	public static final int refreshDivider = 5;
 	public int refreshCounter = 0;
-	@Override
-	public void tickStart(EnumSet<TickType> type, Object... tickData) {
+	@SubscribeEvent
+	public void tick(ClientTickEvent event) {
+		if(event.type != Type.CLIENT) return;
 		/*
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
         if (server == null) return;
@@ -95,23 +93,6 @@ public class NodeClient implements ITickHandler{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}*/
-	}
-	@Override
-	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
-		// TODO Auto-generated method stub
-		
-		
-
-	}
-	@Override
-	public EnumSet<TickType> ticks() {
-		return EnumSet.of(TickType.CLIENT);
-		
-	}
-	@Override
-	public String getLabel() {
-		// TODO Auto-generated method stub
-		return "Miaou";
 	}
 
 	

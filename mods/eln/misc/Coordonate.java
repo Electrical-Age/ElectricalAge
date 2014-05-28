@@ -87,7 +87,7 @@ public class Coordonate implements INBTTReady {
 		this.x = entity.xCoord;
 		this.y = entity.yCoord;
 		this.z = entity.zCoord;
-		this.dimention = entity.worldObj.provider.dimensionId;
+		this.dimention = entity.getWorldObj().provider.dimensionId;
 	}
 	
 	public Coordonate newWithOffset(int x,int y,int z)
@@ -156,12 +156,12 @@ public class Coordonate implements INBTTReady {
 	
 	public int getBlockId()
 	{
-		return world().getBlockId(x, y, z);
+		return Block.getIdFromBlock(world().getBlock(x, y, z));
 	}
 	
 	public Block getBlock()
 	{
-		return Block.blocksList[world().getBlockId(x, y, z)];
+		return world().getBlock(x, y, z);
 	}
 	
 	
@@ -186,9 +186,9 @@ public class Coordonate implements INBTTReady {
 		return Math.abs(e.posX - (x+0.5)) +  Math.abs(e.posY - (y+0.5)) + Math.abs(e.posZ - (z+0.5));
 	}
 	
-	public void setBlock(int id, int meta) {
+	/*public void setBlock(int id, int meta) {
 		world().setBlock(x, y, z, id, meta, 2);
-	}
+	}*/
 	public int getMeta() {
 		// TODO Auto-generated method stub
 		return world().getBlockMetadata(x, y, z);
@@ -218,7 +218,7 @@ public class Coordonate implements INBTTReady {
 	}
 	public TileEntity getTileEntity() {
 		// TODO Auto-generated method stub
-		return world().getBlockTileEntity(x, y, z);
+		return world().getTileEntity(x, y, z);
 	}
 	public void invalidate() {
 		// TODO Auto-generated method stub

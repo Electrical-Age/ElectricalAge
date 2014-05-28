@@ -18,6 +18,7 @@ import mods.eln.node.INodeContainer;
 import mods.eln.node.NodeBase;
 import mods.eln.sim.RegulatorType;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
@@ -29,7 +30,7 @@ public class ElectricalMathContainer extends BasicContainer {
 	
 	public ElectricalMathContainer(NodeBase node, EntityPlayer player, IInventory inventory) {
 		super(player, inventory, new Slot[]{
-				new SlotFilter(inventory, restoneSlotId, 125, 25, 64, new ItemStackFilter[]{new ItemStackFilter(Item.redstone)}, SlotSkin.medium, new String[]{"Redstone Slot"})
+				new SlotFilter(inventory, restoneSlotId, 125, 25, 64, new ItemStackFilter[]{new ItemStackFilter(Items.redstone)}, SlotSkin.medium, new String[]{"Redstone Slot"})
 			});
 		this.node = node;
 	}

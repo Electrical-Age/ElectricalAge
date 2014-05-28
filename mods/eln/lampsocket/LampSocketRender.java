@@ -29,7 +29,6 @@ import mods.eln.node.SixNodeElementRender;
 import mods.eln.node.SixNodeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.texture.Tickable;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -38,7 +37,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.world.EnumSkyBlock;
 
 
@@ -95,7 +93,7 @@ public class LampSocketRender extends SixNodeElementRender{
 			}*/
 			entityTimout -= dt;
 			if(entityTimout < 0){
-				entityList = tileEntity.worldObj.getEntitiesWithinAABB(Entity.class, new Coordonate(tileEntity.xCoord,tileEntity.yCoord-2,tileEntity.zCoord,tileEntity.worldObj).getAxisAlignedBB(2));
+				entityList = tileEntity.getWorldObj().getEntitiesWithinAABB(Entity.class, new Coordonate(tileEntity.xCoord,tileEntity.yCoord-2,tileEntity.zCoord,tileEntity.getWorldObj()).getAxisAlignedBB(2));
 				entityTimout = 0.1f;
 			}
 			
@@ -111,8 +109,8 @@ public class LampSocketRender extends SixNodeElementRender{
 			}
 
 			
-			if(tileEntity.worldObj.getSavedLightValue(EnumSkyBlock.Sky, tileEntity.xCoord,tileEntity.yCoord,tileEntity.zCoord) > 3){
-				float weather = (float) Utils.getWeather(tileEntity.worldObj)*0.9f+0.1f;
+			if(tileEntity.getWorldObj().getSavedLightValue(EnumSkyBlock.Sky, tileEntity.xCoord,tileEntity.yCoord,tileEntity.zCoord) > 3){
+				float weather = (float) Utils.getWeather(tileEntity.getWorldObj())*0.9f+0.1f;
 		
 				weatherAlphaY += (0.4-Math.random())*dt*Math.PI/0.2*weather;
 				weatherAlphaZ += (0.4-Math.random())*dt*Math.PI/0.2*weather;

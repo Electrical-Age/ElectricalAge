@@ -3,17 +3,16 @@ package mods.eln.generic;
 import java.util.List;
 
 import mods.eln.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.Icon;
-
+import net.minecraft.util.IIcon;
 public class GenericItemBlockUsingDamageDescriptor {
 	String iconName;
-	Icon iconIndex;
+	IIcon iconIndex;
 	public String name;
 	
 	public Item parentItem;
@@ -32,12 +31,12 @@ public class GenericItemBlockUsingDamageDescriptor {
 	{
 		
 	}
-    public void updateIcons(IconRegister iconRegister)
+    public void updateIcons(IIconRegister iconRegister)
     {
         this.iconIndex = iconRegister.registerIcon(iconName);
     }
 	
-	public Icon getIcon()
+	public IIcon getIcon()
 	{
 		return iconIndex;
 	}

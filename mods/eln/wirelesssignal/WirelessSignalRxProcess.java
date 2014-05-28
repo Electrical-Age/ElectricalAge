@@ -2,7 +2,6 @@ package mods.eln.wirelesssignal;
 
 import java.util.ArrayList;
 
-import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
 
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;

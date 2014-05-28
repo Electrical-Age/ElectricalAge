@@ -12,6 +12,7 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageSlot;
+import mods.eln.misc.Utils;
 
 public class DataLogsPrintDescriptor extends GenericItemUsingDamageDescriptor {
 
@@ -20,7 +21,7 @@ public class DataLogsPrintDescriptor extends GenericItemUsingDamageDescriptor {
 	}
 
 	public void initializeStack(ItemStack stack, DataLogs logs) {
-		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
+		NBTTagCompound nbt = Utils.newNBTTagCompound("itemStackNBT");
 		logs.writeToNBT(nbt, "");//.setByteArray("logs", logs.copyLog());
 		stack.setTagCompound(nbt);
 	}

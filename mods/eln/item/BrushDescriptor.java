@@ -9,12 +9,10 @@ import mods.eln.lampsocket.LampSocketType;
 import mods.eln.misc.Utils;
 import mods.eln.sim.ElectricalResistor;
 import mods.eln.wiki.Data;
-import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.Icon;
 
 
 
@@ -64,7 +62,7 @@ public class BrushDescriptor  extends GenericItemUsingDamageDescriptor
 	@Override
 	public NBTTagCompound getDefaultNBT() {
 		// TODO Auto-generated method stub
-		NBTTagCompound nbt = new NBTTagCompound("painternbt");
+		NBTTagCompound nbt = new NBTTagCompound();
 		nbt.setInteger("life", 32);
 		return nbt;
 	}

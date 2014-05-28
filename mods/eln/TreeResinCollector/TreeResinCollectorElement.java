@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import mods.eln.Eln;
@@ -89,7 +90,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 		
 		int yStart,yEnd;
 		
-		while(worldObj.getBlockId(posWood[0],posWood[1]-1,posWood[2]) == Block.wood.blockID)
+		while(worldObj.getBlock(posWood[0],posWood[1]-1,posWood[2]) == Blocks.log)
 		{
 			posWood[1]--;
 		}
@@ -97,7 +98,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 		
 		posWood[1] = coord.y;
 		//timeCounter-= timeTarget;
-		while(worldObj.getBlockId(posWood[0],posWood[1]+1,posWood[2]) == Block.wood.blockID)
+		while(worldObj.getBlock(posWood[0],posWood[1]+1,posWood[2]) == Blocks.log)
 		{
 			posWood[1]++;
 		}
@@ -144,7 +145,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 			sixNode.dropItem(Eln.treeResin.newItemStack(1));
 		}
 		
-		entityPlayer.addChatMessage("Tree Resin in pot : " + String.format("%1.2f",productPerSeconde * timeFromLastActivated));
+		Utils.addChatMessage(entityPlayer,"Tree Resin in pot : " + String.format("%1.2f",productPerSeconde * timeFromLastActivated));
 		needPublish();
 		return true;
 	}
@@ -200,7 +201,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 		
 		int yStart,yEnd;
 		
-		while(worldObj.getBlockId(posWood[0],posWood[1]-1,posWood[2]) == Block.wood.blockID)
+		while(worldObj.getBlock(posWood[0],posWood[1]-1,posWood[2]) == Blocks.log)
 		{
 			posWood[1]--;
 		}
@@ -208,7 +209,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 		
 		posWood[1] = coord.y;
 		//timeCounter-= timeTarget;
-		while(worldObj.getBlockId(posWood[0],posWood[1]+1,posWood[2]) == Block.wood.blockID)
+		while(worldObj.getBlock(posWood[0],posWood[1]+1,posWood[2]) == Blocks.log)
 		{
 			posWood[1]++;
 		}

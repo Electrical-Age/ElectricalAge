@@ -154,7 +154,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	
 	@Override
 	public NBTTagCompound getDefaultNBT() {
-		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
+		NBTTagCompound nbt = new NBTTagCompound();
 		nbt.setDouble("e",energyStorage*0.2);
 		nbt.setByte("s", (byte) sBoot);
 		nbt.setShort("c", (short) (bootTime));
@@ -470,7 +470,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			if(blockKeyFactor == null){
 				blockKeyFactor = new float[1024*64];
 				for(int blockId = 0;blockId < 4096;blockId++){
-					Block block = Block.blocksList[blockId];
+					//Block block = Block.blocksList[blockId];
 					for(int meta = 0;meta < 16;meta++){
 						//if(block == null)
 							blockKeyFactor[blockId + (meta << 12)] = 0;
@@ -596,7 +596,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 										int yLocal = yBlock & 0xF;
 										int zLocal = zBlock & 0xF;
 										
-										blockKey = (storage.getExtBlockID(xLocal, yLocal, zLocal) + (storage.getExtBlockMetadata(xLocal, yLocal, zLocal) << 12));
+										//1.7.2 blockKey = (storage.getExtBlockID(xLocal, yLocal, zLocal) + (storage.getExtBlockMetadata(xLocal, yLocal, zLocal) << 12));
 									}
 								}
 							}
@@ -616,7 +616,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 
 						
 						stackGreen += blockKeyFactor[blockKey]*dToStack;
-						Block b = Block.blocksList[blockKey & 0xFFF];
+						Block b = Block.getBlockById(blockKey & 0xFFF);
 						if(b != null && b != Eln.lightBlock){
 							if(b.isOpaqueCube())
 								stackRed += 0.2f*dToStack;

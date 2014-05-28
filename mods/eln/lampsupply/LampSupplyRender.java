@@ -38,7 +38,7 @@ public class LampSupplyRender extends SixNodeElementRender{
 	public void draw() {	
 		super.draw();
 		
-		if(Utils.isPlayerAround(tileEntity.worldObj,coord.getAxisAlignedBB(1)) == false)
+		if(Utils.isPlayerAround(tileEntity.getWorldObj(),coord.getAxisAlignedBB(1)) == false)
 			interpolator.setTarget(0f);
 		else
 			interpolator.setTarget(1f);

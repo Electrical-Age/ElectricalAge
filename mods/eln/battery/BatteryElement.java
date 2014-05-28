@@ -227,7 +227,7 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	
 	@Override
 	public NBTTagCompound getItemStackNBT() {
-		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
+		NBTTagCompound nbt = Utils.newNBTTagCompound("itemStackNBT");
 		nbt.setDouble("charge", batteryProcess.getCharge());
 		nbt.setDouble("life", batteryProcess.life);
 		return nbt;

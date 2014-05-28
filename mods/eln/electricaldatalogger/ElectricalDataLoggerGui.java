@@ -23,7 +23,6 @@ import net.minecraft.client.gui.inventory.GuiEditSign;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.network.packet.Packet250CustomPayload;
 
 public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextFieldElnObserver {
 
@@ -41,34 +40,34 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	
 	void displayEntry() {
 		config.displayString = "Config";
-		config.drawButton = true;
-		pause.drawButton = true;
-		resetBt.drawButton = true;
-		voltageType.drawButton = false;
-		energyType.drawButton = false;
-		percentTyp.drawButton = false;
-		currentType.drawButton = false;
-		powerType.drawButton = false;
-		celsuisTyp.drawButton = false;
+		config.visible = true;
+		pause.visible = true;
+		resetBt.visible = true;
+		voltageType.visible = false;
+		energyType.visible = false;
+		percentTyp.visible = false;
+		currentType.visible = false;
+		powerType.visible = false;
+		celsuisTyp.visible = false;
 		samplingPeriode.setVisible(false);
 		maxValue.setVisible(false);
 		minValue.setVisible(false);
-		printBt.drawButton = true;
+		printBt.visible = true;
 		state = State.display;
 	}
 	
 	void configEntry() {	
-		pause.drawButton = false;
-		config.drawButton = true;
+		pause.visible = false;
+		config.visible = true;
 		config.displayString = "Return to Display";
-		resetBt.drawButton = false;
-		printBt.drawButton = true;
-		voltageType.drawButton = true;
-		energyType.drawButton = true;
-		percentTyp.drawButton = true;
-		currentType.drawButton = true;
-		powerType.drawButton = true;
-		celsuisTyp.drawButton = true;
+		resetBt.visible = false;
+		printBt.visible = true;
+		voltageType.visible = true;
+		energyType.visible = true;
+		percentTyp.visible = true;
+		currentType.visible = true;
+		powerType.visible = true;
+		celsuisTyp.visible = true;
 		samplingPeriode.setVisible(true);	
 		maxValue.setVisible(true);
 		minValue.setVisible(true);

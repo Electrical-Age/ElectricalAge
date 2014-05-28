@@ -8,7 +8,7 @@ import mods.eln.misc.RcRcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockFluid;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -50,10 +50,10 @@ public class WaterTurbineSlowProcess implements IProcess,INBTTReady {
 
 	double getWaterFactor(){
 		//Block b = turbine.waterCoord.getBlock();
-		int blockId = turbine.waterCoord.getBlockId();
+		Block block = turbine.waterCoord.getBlock();
 		int blockMeta = turbine.waterCoord.getMeta();
 		//Utils.println("WATER : " + b + "    " + turbine.waterCoord.getMeta());
-		if(blockId != Block.waterMoving.blockID && blockId != Block.waterStill.blockID) return -1;
+		if(block != Blocks.flowing_water && block != Blocks.water) return -1;
 		if(blockMeta == 0) return 0;
 		
 		double time = Utils.getWorldTime(turbine.world());

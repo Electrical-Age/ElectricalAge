@@ -70,7 +70,7 @@ public class ModbusRtuRender extends SixNodeElementRender{
 		super.draw();
 		// TODO Auto-generated method stub
 
-		if(Utils.isPlayerAround(tileEntity.worldObj,coord.getAxisAlignedBB(0)) == false)
+		if(Utils.isPlayerAround(tileEntity.getWorldObj(),coord.getAxisAlignedBB(0)) == false)
 			interpolator.setTarget(0f);
 		else
 			interpolator.setTarget(1f);

@@ -124,8 +124,8 @@ public enum Direction {
 		
 		coords[dir/2] += getSign();
 		
-		if (tileEntity.worldObj != null && tileEntity.worldObj.blockExists(coords[0], coords[1], coords[2])) {
-			return tileEntity.worldObj.getBlockTileEntity(coords[0], coords[1], coords[2]);
+		if (tileEntity.getWorldObj() != null && tileEntity.getWorldObj().blockExists(coords[0], coords[1], coords[2])) {
+			return tileEntity.getWorldObj().getTileEntity(coords[0], coords[1], coords[2]);
 		} else {
 			return null;
 		}
@@ -496,14 +496,14 @@ public enum Direction {
 		
 		}
 		
-		return coordonate.world().getBlockId(x, y, z);
+		return Block.getIdFromBlock(coordonate.world().getBlock(x, y, z));
 		
 	}
 	
-	
+	//1.7.2   ???? from past ????
 	public Block getBlock(Coordonate coordonate)
 	{
-		return Block.blocksList[getBlockId(coordonate)];
+		return coordonate.getBlock();
 	}
 	
 	public TileEntity getTileEntity(Coordonate coordonate)
@@ -528,7 +528,7 @@ public enum Direction {
 		
 		}
 		
-		return coordonate.world().getBlockTileEntity(x, y, z);
+		return coordonate.world().getTileEntity(x, y, z);
 	}
 
 	public void writeToNBT(NBTTagCompound nbt,String name) {

@@ -16,12 +16,9 @@ import mods.eln.wiki.Root;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.network.IGuiHandler;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 
 public class GuiHandler implements IGuiHandler {
 	// returns an instance of the Container you made earlier
@@ -29,7 +26,7 @@ public class GuiHandler implements IGuiHandler {
 	public Object getServerGuiElement(int id, EntityPlayer player, World world,
 			int x, int y, int z) {
 		NodeBlockEntity tileEntity = (NodeBlockEntity) world
-				.getBlockTileEntity(x, y, z);
+				.getTileEntity(x, y, z);
 		Direction side = Direction.fromInt(id);
 		Object container = tileEntity.newContainer(side, player);
 		if (container == null) {
@@ -43,11 +40,8 @@ public class GuiHandler implements IGuiHandler {
 				stream.writeInt(y);
 				stream.writeInt(z);
 
-				Packet250CustomPayload packet = new Packet250CustomPayload();
-				packet.channel = Eln.channelName;
-				packet.data = bos.toByteArray();
-				packet.length = bos.size();
-				PacketDispatcher.sendPacketToPlayer(packet, (Player) player);
+				
+				Utils.sendPacketToClient(bos,(EntityPlayerMP)player);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -64,7 +58,7 @@ public class GuiHandler implements IGuiHandler {
 			int x, int y, int z) {
 		if(id >= 0 && id <= 5){		
 			NodeBlockEntity tileEntity = (NodeBlockEntity) world
-					.getBlockTileEntity(x, y, z);
+					.getTileEntity(x, y, z);
 			Direction side = Direction.fromInt(id);
 			if(tileEntity == null) return null;
 			return tileEntity.newGuiDraw(side, player);

@@ -12,6 +12,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import mods.eln.lampsocket.LightBlockEntity;
@@ -414,7 +415,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 								x = (int) (e.posX + (Math.random()*2-1)*failDistance);
 								z = (int) (e.posZ + (Math.random()*2-1)*failDistance);
 								y = 20;
-								while(e.worldObj.getBlockId(x, y, z) != 0 && e.worldObj.getBlockId(x, y + 1, z) != 0){
+								while(e.worldObj.getBlock(x, y, z) != Blocks.air && e.worldObj.getBlock(x, y + 1, z) != Blocks.air){
 									y++;
 								}
 								Utils.serverTeleport(e, x+0.5, y, z+0.5);

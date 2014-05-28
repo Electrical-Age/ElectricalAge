@@ -2,7 +2,6 @@ package mods.eln.battery;
 
 import java.util.List;
 
-import org.bouncycastle.jcajce.provider.asymmetric.dsa.DSASigner.stdDSA;
 
 import mods.eln.Eln;
 import mods.eln.client.ClientProxy;
@@ -192,7 +191,8 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	
 	@Override
 	public NBTTagCompound getDefaultNBT() {
-		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
+		NBTTagCompound nbt = Utils.newNBTTagCompound("itemStackNBT");
+
 		nbt.setDouble("charge", startCharge);
 		nbt.setDouble("life", 1.0);
 		return nbt;

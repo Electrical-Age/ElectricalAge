@@ -15,12 +15,12 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -35,8 +35,8 @@ import net.minecraft.world.chunk.Chunk;
 public class SixNodeBlock extends NodeBlock{
 	//public static ArrayList<Integer> repertoriedItemStackId = new ArrayList<Integer>();
 	
-	public SixNodeBlock (int id, Material material,Class tileEntityClass) {
-		super(id, material, tileEntityClass, 0);
+	public SixNodeBlock ( Material material,Class tileEntityClass) {
+		super( material, tileEntityClass, 0);
 	}
 
     public AxisAlignedBB getCollisionBoundingBoxFromPool(World par1World, int par2, int par3, int par4)
@@ -62,12 +62,12 @@ public class SixNodeBlock extends NodeBlock{
 	@Override
 	public int getDamageValue(World world, int x, int y, int z) {
 		// TODO Auto-generated method stub
-		return ((SixNodeEntity) world.getBlockTileEntity(x, y, z)).getDamageValue( world,  x,  y,  z);
+		return ((SixNodeEntity) world.getTileEntity(x, y, z)).getDamageValue( world,  x,  y,  z);
 	}
     
     SixNodeEntity getEntity(World world, int x, int y, int z)
     {
-    	TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
+    	TileEntity tileEntity = world.getTileEntity(x, y, z);
 		if(tileEntity != null && tileEntity instanceof SixNodeEntity)
 			return (SixNodeEntity)tileEntity;
 		Utils.println("ASSERTSixNodeEntity getEntity() null");
@@ -75,7 +75,7 @@ public class SixNodeBlock extends NodeBlock{
 		   	
     }
 	//@SideOnly(Side.CLIENT)
-	public void getSubBlocks(int par1, CreativeTabs tab, List subItems) {
+	public void getSubBlocks(Item par1, CreativeTabs tab, List subItems) {
 		/*for (Integer id : repertoriedItemStackId) {
 			subItems.add(new ItemStack(this, 1, id));
 		}*/
@@ -103,9 +103,9 @@ public class SixNodeBlock extends NodeBlock{
 	}*/
 
 	@Override
-	public int idDropped(int par1, Random par2Random, int par3) {
+	public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
 		// TODO Auto-generated method stub
-		return 0;
+		return null;
 	}
     public int quantityDropped(Random par1Random)
     {
@@ -114,7 +114,7 @@ public class SixNodeBlock extends NodeBlock{
 	
 
     @Override
-    public boolean isBlockReplaceable(World world, int x, int y, int z) {
+    public boolean isReplaceable(IBlockAccess world, int x, int y, int z) {
     	return false;
     }
     @Override
@@ -159,11 +159,11 @@ public class SixNodeBlock extends NodeBlock{
     }
 	*/
     @Override
-    public boolean removeBlockByPlayer(World world, EntityPlayer entityPlayer, int x, int y, int z) 
+    public boolean removedByPlayer(World world, EntityPlayer entityPlayer, int x, int y, int z) 
     {
     	if(world.isRemote) return false;
     	
-    	SixNodeEntity tileEntity = (SixNodeEntity) world.getBlockTileEntity(x, y, z);
+    	SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(x, y, z);
     	 	
 		MovingObjectPosition MOP = collisionRayTrace(world,x,y,z,entityPlayer);
 		if(MOP == null) return false;
@@ -181,9 +181,9 @@ public class SixNodeBlock extends NodeBlock{
 			sixNode.sixNodeCacheMapId = -1;
 			Chunk chunk = world.getChunkFromBlockCoords(x, z);
 			chunk.generateHeightMap();
-			chunk.updateSkylight();
+			Utils.updateSkylight(chunk);
 			chunk.generateSkylightMap();
-			world.updateAllLightTypes(x,y,z);
+			Utils.updateAllLightTypes(world,x,y,z);
 			sixNode.setNeedPublish(true);
 			return false;
 		}
@@ -191,15 +191,15 @@ public class SixNodeBlock extends NodeBlock{
 
 		if(sixNode.getIfSideRemain()) return true;
 		
-        return super.removeBlockByPlayer(world, entityPlayer, x, y, z);
+        return super.removedByPlayer(world, entityPlayer, x, y, z);
     }
     @Override
-    public void breakBlock(World world, int x, int y, int z, int par5, int par6)
+    public void breakBlock(World world, int x, int y, int z, Block par5, int par6)
     {    	
     	
     	if(world.isRemote == false)
     	{
-    		SixNodeEntity tileEntity = (SixNodeEntity) world.getBlockTileEntity(x, y, z);
+    		SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(x, y, z);
     		SixNode sixNode = (SixNode) tileEntity.getNode();
     		if(sixNode == null) return;
     		
@@ -215,9 +215,9 @@ public class SixNodeBlock extends NodeBlock{
     }
     
     @Override
-    public void onNeighborBlockChange(World world, int x, int y, int z, int par5)
+    public void onNeighborBlockChange(World world, int x, int y, int z, Block par5)
     {
-    	SixNodeEntity tileEntity = (SixNodeEntity) world.getBlockTileEntity(x, y, z);
+    	SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(x, y, z);
    		SixNode sixNode = (SixNode) tileEntity.getNode();
    		if(sixNode == null) return;
 		
@@ -234,7 +234,7 @@ public class SixNodeBlock extends NodeBlock{
 		
 		if(! sixNode.getIfSideRemain())
 		{
-			world.setBlock(x, y, z, 0); //caca1.5.1
+			world.setBlockToAir(x, y, z); //caca1.5.1
 		}
 		else
 		{
@@ -251,7 +251,7 @@ public class SixNodeBlock extends NodeBlock{
     public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 start, Vec3 end)
     {
     	if(nodeHasCache(world, x, y, z)) return super.collisionRayTrace(world, x, y, z, start, end);
-    	SixNodeEntity tileEntity = (SixNodeEntity) world.getBlockTileEntity(x, y, z);
+    	SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(x, y, z);
     	if(tileEntity == null) return null;
     	if(world.isRemote)
     	{
@@ -403,20 +403,18 @@ public class SixNodeBlock extends NodeBlock{
 		direction.applyTo(vect, 1);    
 		
 		// TODO Auto-generated method stub
-		int blockId = world.getBlockId(vect[0],vect[1],vect[2]);
-		if(blockId == 0) return false;
-		Block block = Block.blocksList[blockId];
-		if(block == null) return false;
+		Block block = world.getBlock(vect[0],vect[1],vect[2]);
+		if(block == Blocks.air) return false;
 		if(block.isOpaqueCube()) return true;
 		
 		return false;
 	}
 	
-	public boolean nodeHasCache(World world, int x, int y, int z) 
+	public boolean nodeHasCache(IBlockAccess world, int x, int y, int z) 
     {
-    	if(world.isRemote)
+    	if(Utils.isRemote(world))
     	{
-    		TileEntity tileEntity = world.getBlockTileEntity(x, y, z);
+    		TileEntity tileEntity = world.getTileEntity(x, y, z);
     		if(tileEntity != null && tileEntity instanceof SixNodeEntity)
     			return ((SixNodeEntity)tileEntity).sixNodeCacheMapId >= 0;
 			else
@@ -425,7 +423,7 @@ public class SixNodeBlock extends NodeBlock{
     	}
     	else
     	{   	
-	    	SixNodeEntity tileEntity = (SixNodeEntity) world.getBlockTileEntity(x, y, z);
+	    	SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(x, y, z);
 			SixNode sixNode = (SixNode) tileEntity.getNode();
 			if(sixNode != null)
 				return sixNode.sixNodeCacheMapId >= 0;
@@ -437,7 +435,7 @@ public class SixNodeBlock extends NodeBlock{
 	
 	
 	@Override
-	public int getLightOpacity(World world, int x, int y, int z) {
+	public int getLightOpacity(IBlockAccess world, int x, int y, int z) {
 		if(nodeHasCache(world, x, y, z))
 			return 255;
 		else

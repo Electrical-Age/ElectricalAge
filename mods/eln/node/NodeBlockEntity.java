@@ -14,8 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -42,11 +41,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.INetworkManager;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.Packet130UpdateSign;
-import net.minecraft.network.packet.Packet132TileEntityData;
-import net.minecraft.network.packet.Packet250CustomPayload;
+import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerManager;
 import net.minecraft.tileentity.TileEntity;
@@ -79,7 +74,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 			if(redstone != newRedstone)
 			{
 				redstone = newRedstone;		
-				worldObj.notifyBlockChange(xCoord, yCoord, zCoord, getBlockId());
+				worldObj.notifyBlockChange(xCoord, yCoord, zCoord, getBlockType());
 			}
 			else
 			{
@@ -254,7 +249,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 		{
     		if(getNode() == null) //to verrifie todo
     		{
-    			worldObj.setBlock(xCoord, yCoord, zCoord, 0);//caca1.5.1
+    			worldObj.setBlockToAir(xCoord, yCoord, zCoord );
     		}
 		}
     }   
@@ -338,7 +333,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     public static NodeBlockEntity getEntity(int x, int y, int z)
     {
     	TileEntity entity;
-    	if((entity = Minecraft.getMinecraft().theWorld.getBlockTileEntity(x, y, z)) != null)
+    	if((entity = Minecraft.getMinecraft().theWorld.getTileEntity(x, y, z)) != null)
     	{
     		if(entity instanceof NodeBlockEntity)
     		{
@@ -350,7 +345,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     
     public short getBlockId()
     {
-    	return (short) getBlockType().blockID;
+    	return (short)Block.getIdFromBlock(getBlockType());
     }
     
     @Override

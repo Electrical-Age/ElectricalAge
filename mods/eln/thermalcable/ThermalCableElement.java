@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import javax.swing.text.MaskFormatter;
 
-import org.bouncycastle.crypto.modes.SICBlockCipher;
 
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -139,7 +138,7 @@ public class ThermalCableElement extends SixNodeElement  implements IThermalDest
 		if(Eln.playerManager.get(entityPlayer).getInteractEnable())
 		{
 			colorCare = colorCare ^ 1;
-			entityPlayer.addChatMessage("Wire color care " + colorCare);
+			Utils.addChatMessage(entityPlayer,"Wire color care " + colorCare);
 			sixNode.reconnect();
 		}
 		else if(currentItemStack != null)
@@ -160,7 +159,7 @@ public class ThermalCableElement extends SixNodeElement  implements IThermalDest
 					}
 					else
 					{
-						entityPlayer.addChatMessage("Brush is empty!");
+						Utils.addChatMessage(entityPlayer,"Brush is empty!");
 					}
 				}
 			}

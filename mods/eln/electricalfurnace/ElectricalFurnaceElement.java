@@ -200,7 +200,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 				stream.writeShort(-1);
 			}
 			else {
-				stream.writeShort(stack.itemID);
+				stream.writeShort(Item.getIdFromItem(stack.getItem()));
 				stream.writeShort(stack.getItemDamage());				
 			}
 			

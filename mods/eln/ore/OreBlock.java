@@ -11,16 +11,16 @@ import mods.eln.CommonProxy;
 import mods.eln.Eln;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class OreBlock extends Block {
-	public OreBlock(int ID){
-		super(ID,Material.rock); //Parameters: Block ID, Block material
+	public OreBlock(){
+		super(Material.rock); //Parameters: Block ID, Block material
 	/*	setTextureFile("/TutorialGFX/Blocks.png"); //The texture file used
 		setBlockName("DeverionXBlockOre"); //The incode block name
 		setHardness(3.0F); //The block hardness
@@ -37,20 +37,22 @@ public class OreBlock extends Block {
 	public int damageDropped(int i){ //Makes sure pick block works right
 	return i;
 	}
-	
-	public void getSubBlocks(int i, CreativeTabs tab, List l){ //Puts all sub blocks into the creative inventory
+
+	@Override
+	public void getSubBlocks(Item i, CreativeTabs tab, List l){ //Puts all sub blocks into the creative inventory
 		Eln.oreItem.getSubItems(i, tab, l);
 	}
 	
-    public void registerIcons(IconRegister par1IconRegister)
+	//1.7.2
+  /*  public void registerIcons(IconRegister par1IconRegister)
     {
     	
-    }
+    }*/
     
   
     @Override
     @SideOnly(Side.CLIENT)
-    public Icon getIcon(int par1, int par2) {
+    public IIcon getIcon(int par1, int par2) {
     	// TODO Auto-generated method stub
     	
     	OreDescriptor desc = Eln.oreItem.getDescriptor(par2);
@@ -85,7 +87,7 @@ public class OreBlock extends Block {
 	
 	@Override
 	public void breakBlock(World par1World, int par2, int par3, int par4,
-			int par5, int par6) {
+			Block par5, int par6) {
 		// TODO Auto-generated method stub
 		super.breakBlock(par1World, par2, par3, par4, par5, par6);
 		if(par1World.isRemote) return;

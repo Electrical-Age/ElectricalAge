@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import javax.swing.text.MaskFormatter;
 
-import org.bouncycastle.crypto.modes.SICBlockCipher;
 
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;

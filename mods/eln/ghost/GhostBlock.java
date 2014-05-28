@@ -1,6 +1,8 @@
 	package mods.eln.ghost;
 	
-	import cpw.mods.fml.relauncher.Side;
+	import java.util.Random;
+
+import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
@@ -8,37 +10,34 @@ import mods.eln.misc.Direction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.common.util.ForgeDirection;
 	
-	
-	public class GhostBlock extends Block{
-	
-		public GhostBlock(int id) {
-			super(id,Material.iron);
-		}
-	
-	/*@Override
-	public TileEntity createNewTileEntity(World var1) {
-		// TODO Auto-generated method stub
-		return new GhostEntity();
-	}*/
+public class GhostBlock extends Block{
+
+	public GhostBlock() {
+		super(Material.iron);
+	}
+
+
 	@Override
+	public Item getItemDropped(int p_149650_1_, Random p_149650_2_,
+			int p_149650_3_) {
+		// TODO Auto-generated method stub
+		return null;
+	}	
+		
+	/*@Override
 	@SideOnly(Side.CLIENT)
 	public int idPicked(World par1World, int par2, int par3, int par4) {
 		// TODO Auto-generated method stub
 		return Block.dirt.blockID;
-	}
-	/*@Override
-	@SideOnly(Side.CLIENT)
-	public AxisAlignedBB getSelectedBoundingBoxFromPool(World par1World,
-			int par2, int par3, int par4) {
-		// TODO Auto-generated method stub
-		return AxisAlignedBB.getAABBPool().getAABB(0,0,-10,-10,0,0);
 	}*/
+
 	@Override
 	public boolean isOpaqueCube() {
 	  return false;
@@ -52,17 +51,22 @@ import net.minecraftforge.common.ForgeDirection;
 	  return -1;
 	}
 	
+	
+	// 1.7.2
+	public boolean isBlockSolid(IBlockAccess p_149747_1_, int p_149747_2_, int p_149747_3_, int p_149747_4_, int p_149747_5_){
+		return false;
+	}
 
-	@Override
+	/*@Override
 	public boolean isBlockSolidOnSide(World world, int x, int y, int z,
-			ForgeDirection side) {
+			int side) {
 		// TODO Auto-generated method stub
 			return false;
-	}
+	}*/
 	
-	 @Override
+	@Override
 	public void breakBlock(World world, int x, int y, int z,
-			int par5, int par6) {
+			Block par5, int par6) {
 		if(world.isRemote == false)
 		{
 			GhostElement element = getElement(world, x, y, z);

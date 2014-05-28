@@ -2,12 +2,11 @@ package mods.eln.item;
 
 import mods.eln.IInteract;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.EnumArmorMaterial;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
-
-public class MeterItemArmor extends ItemArmor implements IInteract {
-
+//1.7.2
+public class MeterItemArmor /*extends ItemArmor implements IInteract */{
+/*
 	public MeterItemArmor(int par1, EnumArmorMaterial par2EnumArmorMaterial,
 			int par3, int par4) {
 		super(par1, par2EnumArmorMaterial, par3, par4);
@@ -36,5 +35,5 @@ public class MeterItemArmor extends ItemArmor implements IInteract {
 	{
 		return 1.0f/(1<<(itemStack.getItemDamage()&7));
 	}
-
+*/
 }

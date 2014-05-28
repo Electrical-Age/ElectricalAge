@@ -14,6 +14,7 @@ import mods.eln.node.TransparentNode.FrontType;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
@@ -181,7 +182,7 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 		return 0;
 	}
 	public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB,List list, TransparentNodeEntity entity) {
-		AxisAlignedBB bb = Block.stone.getCollisionBoundingBoxFromPool(entity.worldObj,entity.xCoord,entity.yCoord,entity.zCoord);
+		AxisAlignedBB bb = Blocks.stone.getCollisionBoundingBoxFromPool(entity.getWorldObj(),entity.xCoord,entity.yCoord,entity.zCoord);
 		if(par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
 	}
 	

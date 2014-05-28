@@ -57,7 +57,7 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 	//	if (Math.signum((alpha % 45) - 40f) != Math.signum((alphaN_1 % 45) - 40f) && soundPlaying == false) {
 		if ((int)(alpha/45) != (int)(alphaN_1/45) && soundPlaying == false) {
 			Coordonate coord = coordonate();
-			tileEntity.worldObj.playSound(coord.x, coord.y, coord.z, descriptor.soundName,
+			tileEntity.getWorldObj().playSound(coord.x, coord.y, coord.z, descriptor.soundName,
 					descriptor.nominalVolume * (0.007f + 0.2f * (float) powerFactorFilter.get() * (float) powerFactorFilter.get()),
 					1.1f, false);
 			//SoundClient.playFromBlock(tileEntity.worldObj,coord.x, coord.y, coord.z, descriptor.soundName,1,1,5,15);
@@ -93,11 +93,11 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 			e.printStackTrace();
 		}
 
-		waterCoord = this.descriptor.getWaterCoordonate(tileEntity.worldObj);
-		waterCoord.setWorld(tileEntity.worldObj);
+		waterCoord = this.descriptor.getWaterCoordonate(tileEntity.getWorldObj());
+		waterCoord.setWorld(tileEntity.getWorldObj());
 		waterCoord.applyTransformation(front, coordonate());
 		waterCoordRight = new Coordonate(waterCoord);
-		waterCoordRight.setWorld(tileEntity.worldObj);
+		waterCoordRight.setWorld(tileEntity.getWorldObj());
 		waterCoordRight.move(front.right());
 	}
 }

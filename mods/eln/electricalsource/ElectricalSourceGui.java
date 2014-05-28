@@ -18,7 +18,6 @@ import net.minecraft.client.gui.GuiPlayerInfo;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiEditSign;
-import net.minecraft.network.packet.Packet250CustomPayload;
 
 public class ElectricalSourceGui extends GuiScreenEln {
 

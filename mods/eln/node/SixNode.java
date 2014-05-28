@@ -8,7 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.Player;
 
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
@@ -385,7 +384,10 @@ public class SixNode extends Node {
 	@Override
 	public short getBlockId() {
 		// TODO Auto-generated method stub
-		return (short) Eln.sixNodeBlock.blockID;
+		return (short) Block.getIdFromBlock(getBlock());
+	}
+	public Block getBlock(){
+		return Eln.sixNodeBlock;
 	}
 
 	@Override
@@ -572,9 +574,9 @@ public class SixNode extends Node {
 				{
 					Chunk chunk = coordonate.world().getChunkFromBlockCoords(coordonate.x, coordonate.z);
 					chunk.generateHeightMap();
-					chunk.updateSkylight();
+					Utils.updateSkylight(chunk);
 					chunk.generateSkylightMap();
-					coordonate.world().updateAllLightTypes(coordonate.x,coordonate.y,coordonate.z);
+					Utils.updateAllLightTypes(coordonate.world(),coordonate.x,coordonate.y,coordonate.z);
 				}
 				return true;
 			}
@@ -627,7 +629,7 @@ public class SixNode extends Node {
 	
 	
 	@Override
-	public void networkUnserialize(DataInputStream stream,Player player) {
+	public void networkUnserialize(DataInputStream stream,EntityPlayerMP player) {
 		super.networkUnserialize(stream,player);
 		
 		Direction side;

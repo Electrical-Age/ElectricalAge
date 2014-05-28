@@ -65,11 +65,12 @@ public class RecipesList {
 		for(RecipesList recipesList : listOfList){
 			list.addAll(recipesList.getRecipeFromOutput(output));
 		}
-		FurnaceRecipes furnaceRecipes = FurnaceRecipes.smelting();
-		for(Entry<List<Integer>, ItemStack> entry : furnaceRecipes.getMetaSmeltingList().entrySet()){
+		//1.7.2
+		/*FurnaceRecipes furnaceRecipes = FurnaceRecipes.smelting();
+		for(Entry<List<Integer>, ItemStack> entry : furnaceRecipes.getSmeltingList().entrySet()){
 			Recipe recipe;
 			if(Utils.areSame(output,entry.getValue())){
-				list.add(recipe = new Recipe(new ItemStack(entry.getKey().get(0),1,entry.getKey().get(1)), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
+				list.add(recipe = new Recipe(Utils.newItemStack(entry.getKey().get(0),1,entry.getKey().get(1)), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
 				recipe.setMachineList(Eln.instance.furnaceList);
 			}
 		}
@@ -77,10 +78,10 @@ public class RecipesList {
 			Recipe recipe = null;
 			Entry<Integer, Object> e = (Entry<Integer, Object>)entry;
 			if(((ItemStack)e.getValue()).itemID == output.itemID){
-				list.add(recipe = new Recipe(new ItemStack(e.getKey(),1,0), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
+				list.add(recipe = new Recipe(Utils.newItemStack(e.getKey(),1,0), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
 				recipe.setMachineList(Eln.instance.furnaceList);
 			}
-		}
+		}*/
 				
 		return list;
 	}

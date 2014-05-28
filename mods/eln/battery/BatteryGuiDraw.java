@@ -45,7 +45,7 @@ public class BatteryGuiDraw extends GuiContainerEln {
     	super.initGui();
     	
     	buttonGrounded = newGuiButton(8, 45, 100, "");
-    	buttonGrounded.drawButton = false;
+    	buttonGrounded.visible = false;
     	energyBar = newGuiVerticalProgressBar(167-16, 8, 16, 69);
         energyBar.setColor(0.2f, 0.5f, 0.8f);
     }

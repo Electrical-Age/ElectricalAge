@@ -30,6 +30,7 @@ import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -37,7 +38,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.ChunkProviderServer;
-import net.minecraftforge.common.ForgeDummyContainer;
 
 public class ReplicatorEntity extends EntityMob {
 
@@ -157,10 +157,10 @@ public class ReplicatorEntity extends EntityMob {
     protected void applyEntityAttributes()
     {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.followRange).setAttribute(8.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setAttribute(8.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setAttribute(0.23000000417232513D);
-        this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setAttribute(3.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(8.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(8.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.23000000417232513D);
+        this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(3.0D);
        // this.getAttributeMap().func_111150_b(field_110186_bp).setAttribute(this.rand.nextDouble() * ForgeDummyContainer.zombieSummonBaseChance);
     }
 
@@ -204,7 +204,7 @@ public class ReplicatorEntity extends EntityMob {
     
     protected int getDropItemId()
     {
-        return Item.rottenFlesh.itemID;
+        return Item.getIdFromItem(Items.rotten_flesh);
     }
     
     public static ArrayList<ItemStack> dropList = new ArrayList<ItemStack>();
@@ -217,7 +217,7 @@ public class ReplicatorEntity extends EntityMob {
     			for(Object s : EntityList.IDtoClassMapping.entrySet()){
     				Entry e = (Entry)s;
     				if(e.getValue() == ReplicatorEntity.class){
-    					this.entityDropItem(new ItemStack(Item.monsterPlacer,1,(Integer)e.getKey()), 0.5f);
+    					this.entityDropItem(new ItemStack((Item)Item.itemRegistry.getObject("spawn_egg"),1,(Integer)e.getKey()), 0.5f);
     					break;
     				}
     			}

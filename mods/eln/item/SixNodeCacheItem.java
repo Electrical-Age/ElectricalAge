@@ -4,7 +4,6 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;

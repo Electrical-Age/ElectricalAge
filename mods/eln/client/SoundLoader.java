@@ -4,10 +4,10 @@ import java.util.HashMap;
 
 import mods.eln.Eln;
 import net.minecraftforge.client.event.sound.SoundLoadEvent;
-import net.minecraftforge.event.ForgeSubscribe;
 
 public class SoundLoader {
-
+	//1.7.2
+/*
 	@ForgeSubscribe
 	public void onSound(SoundLoadEvent event) {
 		try {
@@ -39,5 +39,9 @@ public class SoundLoader {
 		if (i == null)
 			return 1;
 		return i;
+	}*/
+	
+	static public int getTrackCount(String name){
+		return 1;
 	}
 }

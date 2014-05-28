@@ -38,21 +38,9 @@ public class DiodeRender extends SixNodeElementRender {
 		GL11.glTexCoord2f(0.0f, 0.0f);
 		GL11.glNormal3f(0.0f, 1.0f, 0.0f);
 		
-		if(i != null && i.getItem() == Eln.voltMeterHelmet) {		
-			double factor = voltageCatode * MeterItemArmor.getBlockRenderColorFactor(i);
-			GL11.glColor4d(factor, 1.0-factor, 0.0, 1.0);
-		}
-		else if(i != null && i.getItem()  == Eln.currentMeterHelmet) {		
-			double factor = current * MeterItemArmor.getBlockRenderColorFactor(i);
-			GL11.glColor4d(factor, 1.0-factor, 0.0, 1.0);
-		}
-		else if(i != null && i.getItem()  == Eln.thermoMeterHelmet) {		
-			double factor = temperature * MeterItemArmor.getBlockRenderColorFactor(i);
-			GL11.glColor4d(factor, 1.0-factor, 0.0, 1.0);
-		}
-		else {
-			GL11.glColor4d(1.0, 1.0, 1.0, 1.0);
-		}
+
+		GL11.glColor4d(1.0, 1.0, 1.0, 1.0);
+
 		
 		if(connectedSide.down()) {
 			GL11.glVertex3f(0.05f, 0f, 0f);

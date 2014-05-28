@@ -9,8 +9,8 @@ import net.minecraft.world.World;
 
 public class NodeBlockItemWithSubTypes extends NodeBlockItem {
 
-	public NodeBlockItemWithSubTypes(int id) {
-		super(id);
+	public NodeBlockItemWithSubTypes(Block b) {
+		super(b);
 		setHasSubtypes(true);
 		setUnlocalizedName("NodeBlockItemWithSubTypes");
 	}

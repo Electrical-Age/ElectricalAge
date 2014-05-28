@@ -8,7 +8,6 @@ import mods.eln.client.SoundLoader;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SoundPool;
 import net.minecraft.client.audio.SoundPoolEntry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;

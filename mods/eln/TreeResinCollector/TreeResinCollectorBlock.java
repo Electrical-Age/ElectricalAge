@@ -19,8 +19,8 @@ import net.minecraft.world.World;
 public class TreeResinCollectorBlock extends BlockContainer{
 
 	public TreeResinCollectorBlock(int id) {
-		super(id, Material.wood);
-		setUnlocalizedName("TreeResinCollector");
+		super(Material.wood);
+		setBlockName("TreeResinCollector"); //1.7.2
 		// TODO Auto-generated constructor stub
 	}
 	@Override
@@ -38,7 +38,7 @@ public class TreeResinCollectorBlock extends BlockContainer{
     }
 	
 	@Override
-	public TileEntity createNewTileEntity(World world) {
+	public TileEntity createNewTileEntity(World world,int a) {
 		// TODO Auto-generated method stub
 		return new TreeResinCollectorTileEntity();
 	}
@@ -77,10 +77,24 @@ public class TreeResinCollectorBlock extends BlockContainer{
     public boolean onBlockActivated(World par1World, int x, int y,
     		int z, EntityPlayer par5EntityPlayer, int par6, float par7,
     		float par8, float par9) {
-    	return ((TreeResinCollectorTileEntity)par1World.getBlockTileEntity(x, y, z)).onBlockActivated();
+    	return ((TreeResinCollectorTileEntity)par1World.getTileEntity(x, y, z)).onBlockActivated();
     }
     
     @Override
+    public void onNeighborBlockChange(World world, int x,
+    		int y, int z, Block b) {
+    	// TODO Auto-generated method stub
+    	super.onNeighborBlockChange(world, x, y, z,b);
+    	if(! canPlaceBlockOnSide(world, x, y, z, world.getBlockMetadata(x, y, z)))
+    	{
+    	//Utils.println("WOOOOOOD down");
+    		
+    		dropBlockAsItem(world, x, y, z, new ItemStack(this));
+    		world.setBlockToAir(x, y, z);
+    	}
+    }
+    //1.7.2
+   /* @Override
     public void onNeighborBlockChange(World world, int x, int y,
     		int z, int side) {
     	// TODO Auto-generated method stub
@@ -95,5 +109,5 @@ public class TreeResinCollectorBlock extends BlockContainer{
     		world.setBlockToAir(x, y, z);
     	}
     }
-
+*/
 }

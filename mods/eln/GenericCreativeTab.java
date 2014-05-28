@@ -1,5 +1,7 @@
 package mods.eln;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -12,9 +14,17 @@ public class GenericCreativeTab extends CreativeTabs {
 		this.item = item;
 	}
 
-	@Override
+	//1.7.2
+	/*@Override
 	public ItemStack getIconItemStack() {
 		return new ItemStack(item);
+	}*/
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Item getTabIconItem() {
+		// TODO Auto-generated method stub
+		return item;
 	}
 
 }

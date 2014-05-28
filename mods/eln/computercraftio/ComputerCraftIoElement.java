@@ -45,7 +45,6 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.TransformerProcess;
 import mods.eln.sim.VoltageWatchdogProcessForInventoryItemBlockDamageDualLoad;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingData;
 import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;

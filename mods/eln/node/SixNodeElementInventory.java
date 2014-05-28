@@ -97,7 +97,7 @@ public class SixNodeElementInventory implements IInventory, INBTTReady{
 
 
 	@Override
-	public String getInvName() { 
+	public String getInventoryName() { 
 		return "tco.SixNodeInventory";
 	}
 
@@ -132,7 +132,7 @@ public class SixNodeElementInventory implements IInventory, INBTTReady{
 
 
 	@Override
-	public void openChest() {
+	public void openInventory() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -140,17 +140,16 @@ public class SixNodeElementInventory implements IInventory, INBTTReady{
 
 
 	@Override
-	public void closeChest() {
+	public void closeInventory() {
 		// TODO Auto-generated method stub
 		
 	}
-
 	@Override
-	public void onInventoryChanged() {
+	public void markDirty() {
 		if(null != sixNodeElement)
 		{
 			sixNodeElement.inventoryChanged();
-		}
+		}		
 	}
 
 	@Override
@@ -165,15 +164,16 @@ public class SixNodeElementInventory implements IInventory, INBTTReady{
 		Utils.writeToNBT(nbt, str, this);
 	}
 
-	@Override
-	public boolean isInvNameLocalized() {
-		// TODO Auto-generated method stub
-		return false; //caca1.5.1
-	}
 
 
 	@Override
 	public boolean isItemValidForSlot(int i, ItemStack itemstack) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean hasCustomInventoryName() {
 		// TODO Auto-generated method stub
 		return false;
 	}

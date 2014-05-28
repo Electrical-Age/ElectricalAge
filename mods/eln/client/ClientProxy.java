@@ -21,6 +21,7 @@ import mods.eln.node.TransparentNodeEntity;
 import mods.eln.node.TransparentNodeRender;
 import net.minecraft.client.model.ModelSilverfish;
 import net.minecraft.client.renderer.entity.RenderSilverfish;
+import net.minecraft.item.Item;
 import net.minecraftforge.client.MinecraftForgeClient;
 
 public class ClientProxy extends CommonProxy {
@@ -30,10 +31,10 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(SixNodeEntity.class, new SixNodeRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TransparentNodeEntity.class, new TransparentNodeRender());
        	
-      	MinecraftForgeClient.registerItemRenderer(Eln.transparentNodeItem.itemID, Eln.transparentNodeItem);
-      	MinecraftForgeClient.registerItemRenderer(Eln.sixNodeItem.itemID, Eln.sixNodeItem);
-      	MinecraftForgeClient.registerItemRenderer(Eln.sharedItem.itemID, Eln.sharedItem);
-      	MinecraftForgeClient.registerItemRenderer(Eln.sharedItemStackOne.itemID, Eln.sharedItemStackOne);
+      	MinecraftForgeClient.registerItemRenderer(Eln.transparentNodeItem, Eln.transparentNodeItem);
+      	MinecraftForgeClient.registerItemRenderer(Eln.sixNodeItem, Eln.sixNodeItem);
+      	MinecraftForgeClient.registerItemRenderer(Eln.sharedItem, Eln.sharedItem);
+      	MinecraftForgeClient.registerItemRenderer(Eln.sharedItemStackOne, Eln.sharedItemStackOne);
 
       //	RenderingRegistry.registerEntityRenderingHandler(ReplicatorEntity.class, new RenderSilverfish());
       //	RenderingRegistry.registerEntityRenderingHandler(ReplicatorEntity.class, new ReplicatorRender(new ReplicatorModel(),1));

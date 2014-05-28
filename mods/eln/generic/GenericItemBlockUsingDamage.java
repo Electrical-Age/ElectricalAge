@@ -10,14 +10,16 @@ import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.CommonProxy;
-import net.minecraft.client.renderer.texture.IconRegister;
+import mods.eln.misc.Utils;
+import net.minecraft.block.Block;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.StringTranslate;
 import net.minecraft.world.World;
 
@@ -28,8 +30,8 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 	
 	public Descriptor defaultElement = null;
 	
-	public GenericItemBlockUsingDamage(int par1) {
-		super(par1);
+	public GenericItemBlockUsingDamage(Block b) {
+		super(b);
 		setHasSubtypes(true);
 		// TODO Auto-generated constructor stub
 	}
@@ -95,15 +97,15 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 	
 	
 	@Override
-    public String getItemDisplayName(ItemStack par1ItemStack)
+    public String getItemStackDisplayName(ItemStack par1ItemStack)
     {
 		Descriptor desc = getDescriptor(par1ItemStack);
 		if(desc == null) return "Unknown";
         return desc.getName(par1ItemStack);
     }
 
-
-    public Icon getIconFromDamage(int damage)
+	@Override
+    public IIcon getIconFromDamage(int damage)
     {
 		Descriptor desc = getDescriptor(damage);
 		if(desc == null) return null;
@@ -113,7 +115,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 
 	
 	@Override
-    public void registerIcons(IconRegister iconRegister)
+    public void registerIcons(IIconRegister iconRegister)
     {
        for(GenericItemBlockUsingDamageDescriptor descriptor : subItemList.values())
        {
@@ -122,12 +124,13 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
     }	
 	
     @SideOnly(Side.CLIENT)
-    public void getSubItems(int itemID, CreativeTabs tabs, List list){
+    @Override
+    public void getSubItems(Item itemID, CreativeTabs tabs, List list){
 	// You can also take a more direct approach and do each one individual but I prefer the lazy / right way
     	//for(Entry<Integer, Descriptor> entry : subItemList.entrySet()) 
     	for(int id : orderList)
     	{
-    		ItemStack stack = new ItemStack(itemID, 1, id);
+    		ItemStack stack = Utils.newItemStack(itemID, 1, id);
     		stack.setTagCompound(subItemList.get(id).getDefaultNBT());
 	        list.add(stack);
 	    }

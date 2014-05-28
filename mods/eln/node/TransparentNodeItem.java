@@ -21,9 +21,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
@@ -32,8 +32,8 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 
 	
 	
-	public TransparentNodeItem(int id) {
-		super(id);
+	public TransparentNodeItem(Block b) {
+		super(b);
 		setHasSubtypes(true);
 		setUnlocalizedName("TransparentNodeItem");
 	}
@@ -41,6 +41,11 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 	@Override
 	public int getMetadata (int damageValue) {
 		return damageValue;
+	}
+	
+	
+	int getBlockID(){
+		return Utils.getBlockId(this);
 	}
 	
 	@Override
@@ -56,7 +61,7 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
     	y += v[1];
     	z += v[2];
     	
-    	if(world.getBlockId(x, y, z) != 0) return false;
+    	if(world.getBlock(x, y, z) != Blocks.air) return false;
     	
     	Coordonate coord = new Coordonate(x,y,z,world);
     	
@@ -65,7 +70,7 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 			String error;
 			if((error = descriptor.checkCanPlace(coord, front)) != null)
 			{
-				player.addChatMessage(error);
+				Utils.addChatMessage(player,error);
 				return false;
 			}
 			
@@ -75,8 +80,8 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
         	TransparentNode node =  (TransparentNode) NodeManager.UUIDToClass[getBlockID()].getConstructor().newInstance();
 			node.onBlockPlacedBy(new Coordonate(x, y, z,world),front,player,stack);
 			
-			world.setBlock(x, y, z, getBlockID(), node.getBlockMetadata(),0x03);//caca1.5.1
-        	((NodeBlock)Block.blocksList[getBlockID()]).onBlockPlacedBy(world, x, y, z,direction, player,metadata);
+			world.setBlock(x, y, z, Block.getBlockFromItem(this), node.getBlockMetadata(),0x03);//caca1.5.1
+        	((NodeBlock)Block.getBlockFromItem(this)).onBlockPlacedBy(world, x, y, z,direction, player,metadata);
         	
         	
         	
@@ -108,8 +113,9 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
-		return getDescriptor(item).handleRenderType(item, type);
+		TransparentNodeDescriptor d = getDescriptor(item);
+		if(Utils.nullCheck(d)) return false;
+		return d.handleRenderType(item, type);
 	}
 
 	@Override

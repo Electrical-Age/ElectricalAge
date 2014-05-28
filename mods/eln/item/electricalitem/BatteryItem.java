@@ -53,7 +53,7 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 	
 	@Override
 	public NBTTagCompound getDefaultNBT() {
-		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
+		NBTTagCompound nbt = new NBTTagCompound();
 		nbt.setDouble("energy",0);
 		return nbt;
 	}

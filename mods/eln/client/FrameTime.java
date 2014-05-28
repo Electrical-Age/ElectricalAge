@@ -25,7 +25,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerManager;
 import net.minecraft.tileentity.TileEntity;
@@ -35,19 +34,17 @@ import net.minecraft.world.WorldServerMulti;
 
 import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.ITickHandler;
-import cpw.mods.fml.common.TickType;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Type;
 import cpw.mods.fml.common.registry.GameData;
-import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
-public class FrameTime implements ITickHandler{
+public class FrameTime{
 	static FrameTime instance;
 	public FrameTime() {
 		instance = this;
-		TickRegistry.registerTickHandler(this, Side.CLIENT);
+		FMLCommonHandler.instance().bus().register(this);
 	}
 	
 	public void init() {
@@ -73,8 +70,9 @@ public class FrameTime implements ITickHandler{
 	long oldNanoTime = 0;
 	boolean boot = true;
 	
-	@Override
-	public void tickStart(EnumSet<TickType> type, Object... tickData) {
+	@SubscribeEvent
+	public void tick(ClientTickEvent event) {
+		if(event.type != Type.RENDER) return;
 		long nanoTime = System.nanoTime();
 		if(boot) {
 			boot = false;
@@ -87,17 +85,5 @@ public class FrameTime implements ITickHandler{
 	    //	Utils.println("delta T : " + deltaT);
 	}
 	
-	@Override
-	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
-	}
-	
-	@Override
-	public EnumSet<TickType> ticks() {
-		return EnumSet.of(TickType.RENDER);
-	}
-	
-	@Override
-	public String getLabel() {
-		return "Miaou2";
-	}
+
 }

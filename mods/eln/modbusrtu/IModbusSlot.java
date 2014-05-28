@@ -1,6 +1,5 @@
 package mods.eln.modbusrtu;
 
-import com.serotonin.modbus4j.exception.IllegalDataAddressException;
 
 public interface IModbusSlot {
 	int getOffset();

@@ -26,7 +26,7 @@ public class ElectricalAxe extends ElectricalTool {
 	
 	@Override
 	public float getStrVsBlock(ItemStack stack, Block block) {
-        float value =   block != null && (block.blockMaterial == Material.wood || block.blockMaterial == Material.plants || block.blockMaterial == Material.vine) ? getStrength(stack) : super.getStrVsBlock(stack, block);
+        float value =   block != null && (block.getMaterial() == Material.wood || block.getMaterial() == Material.plants || block.getMaterial() == Material.vine) ? getStrength(stack) : super.getStrVsBlock(stack, block);
 		Utils.println(value);
         return value;
 	}

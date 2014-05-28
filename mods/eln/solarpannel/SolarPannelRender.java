@@ -53,7 +53,7 @@ public class SolarPannelRender extends TransparentNodeElementRender{
 		}
 		else
 		{
-			alpha = (float) descriptor.alphaTrunk(SolarPannelSlowProcess.getSolarAlpha(tileEntity.worldObj));
+			alpha = (float) descriptor.alphaTrunk(SolarPannelSlowProcess.getSolarAlpha(tileEntity.getWorldObj()));
 		}
 		interpol.setTarget(alpha);
 		if(boot){

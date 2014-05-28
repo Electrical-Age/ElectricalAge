@@ -13,6 +13,7 @@ import mods.eln.node.Node;
 import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeItemSlot;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
@@ -23,7 +24,7 @@ public class EggIncubatorContainer extends BasicContainer implements INodeContai
 
 	public EggIncubatorContainer(EntityPlayer player, IInventory inventory, Node node) {
 		super(player, inventory, new Slot[]{
-				new SlotFilter(inventory, EggSlotId, 176 / 2 - 8, 7, 64, new ItemStackFilter[]{new ItemStackFilter(Item.egg)}, SlotSkin.medium, new String[]{"Egg Slot"})
+				new SlotFilter(inventory, EggSlotId, 176 / 2 - 8, 7, 64, new ItemStackFilter[]{new ItemStackFilter(Items.egg)}, SlotSkin.medium, new String[]{"Egg Slot"})
 				//	new SlotFilter(inventory, 1, 62 + 18, 17, 1, new ItemStackFilter[]{new ItemStackFilter(Eln.sixNodeBlock, 0xFF, Eln.electricalCableId)})
 			});
 		this.node = node;

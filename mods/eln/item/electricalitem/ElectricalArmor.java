@@ -5,7 +5,6 @@ import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.EnumArmorMaterial;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -19,9 +18,9 @@ import mods.eln.generic.genericArmorItem;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
 import mods.eln.wiki.Data;
-
-public class ElectricalArmor extends genericArmorItem implements IItemEnergyBattery ,ISpecialArmor{
-
+//1.7.2
+public class ElectricalArmor /*extends genericArmorItem implements IItemEnergyBattery ,ISpecialArmor*/{
+/*
 	public ElectricalArmor(int par1, EnumArmorMaterial par2EnumArmorMaterial,
 			int par3, int par4, 
 			String t1, String t2,//String icon,
@@ -168,42 +167,6 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
 	}
 
 
-
-/*
-	@Override
-	public void onUpdate(ItemStack par1ItemStack, World par2World,
-			Entity par3Entity, int par4, boolean par5) {
-		// TODO Auto-generated method stub
-		//super.onUpdate(par1ItemStack, par2World, par3Entity, par4, par5);
-		int maxDamage = getArmorMaterial().getDurability(armorType);
-		
-		Utils.println("maxDamage=" + maxDamage + " Damage=" + par1ItemStack.getItemDamage());
-	}
-	*/
-	
-	
-/*
-
-	
-	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		if(type == ItemRenderType.INVENTORY)
-			return false;
-		return true;
-	}
-	
-	@Override
-	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
-		return true;
-	}
-	
-	@Override
-	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {		
-		if(type == ItemRenderType.INVENTORY)		
-			Utils.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
-		Utils.drawIcon(type,rIcon);
-	}*/
+*/
  
 }

@@ -7,6 +7,7 @@ import java.util.Random;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
@@ -44,7 +45,7 @@ public class ReplicatorPopProcess implements IProcess {
 						y = 2;
 						
 						if(world.blockExists(x, y, z) == false) break;
-						while (world.getBlockId(x, y, z) != 0 
+						while (world.getBlock(x, y, z) != Blocks.air 
 								|| world.getSkyBlockTypeBrightness(EnumSkyBlock.Block,x,y,z) > 6) {
 							y++;
 						}

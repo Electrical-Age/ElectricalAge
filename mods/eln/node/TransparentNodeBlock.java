@@ -10,7 +10,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -28,9 +27,9 @@ import net.minecraft.world.World;
 
 public class TransparentNodeBlock extends NodeBlock{
 	
-	public TransparentNodeBlock(int id, Material material,
+	public TransparentNodeBlock( Material material,
 			Class tileEntityClass) {
-		super(id, material, tileEntityClass, 0);
+		super( material, tileEntityClass, 0);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -38,7 +37,7 @@ public class TransparentNodeBlock extends NodeBlock{
 
 	
 	//@SideOnly(Side.CLIENT)
-	public void getSubBlocks(int par1, CreativeTabs tab, List subItems) {
+	public void getSubBlocks(Item par1, CreativeTabs tab, List subItems) {
 		Eln.transparentNodeItem.getSubItems(par1, tab, subItems);
 	}
 
@@ -58,10 +57,10 @@ public class TransparentNodeBlock extends NodeBlock{
 	
 	
     @Override
-    public boolean removeBlockByPlayer(World world, EntityPlayer entityPlayer, int x, int y, int z) 
+    public boolean removedByPlayer(World world, EntityPlayer entityPlayer, int x, int y, int z) 
     {  	
 		if(!world.isRemote){
-			NodeBlockEntity entity = (NodeBlockEntity) world.getBlockTileEntity(x, y, z);
+			NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(x, y, z);
 			if(entity != null){
 				NodeBase nodeBase = entity.getNode();
 				if(nodeBase instanceof TransparentNode){
@@ -71,25 +70,30 @@ public class TransparentNodeBlock extends NodeBlock{
 			}
 		}
 
-    	return super.removeBlockByPlayer(world, entityPlayer, x, y, z);
+    	return super.removedByPlayer(world, entityPlayer, x, y, z);
 
     }
 	
     @Override
     public int getDamageValue(World world, int x, int y, int z) {
     	// TODO Auto-generated method stub
-    	return ((TransparentNodeEntity) world.getBlockTileEntity(x, y, z)).getDamageValue( world,  x,  y,  z);
+    	return ((TransparentNodeEntity) world.getTileEntity(x, y, z)).getDamageValue( world,  x,  y,  z);
     }
+    
+    
+
 	@Override
-	public int getLightOpacity(World world, int x, int y, int z) {
+	public int getLightOpacity(IBlockAccess world, int x, int y, int z) {
 		return (world.getBlockMetadata(x, y, z) & 3) << 6;
 	}
 	
+	
 	@Override
-	public int idDropped(int par1, Random par2Random, int par3) {
-		// TODO Auto-generated method stub
-		return 0;
+	public Item getItemDropped(int p_149650_1_, Random p_149650_2_,
+			int p_149650_3_) {
+		return null;
 	}
+	
     public int quantityDropped(Random par1Random)
     {
         return 0;
@@ -107,7 +111,7 @@ public class TransparentNodeBlock extends NodeBlock{
     {
      //   this.setBlockBoundsBasedOnState(world,x, y, z);
       //  super.addCollisionBoxesToList(world, x, y, z, par5AxisAlignedBB, list, entity);
-    	TransparentNodeEntity tileEntity = (TransparentNodeEntity) world.getBlockTileEntity(x, y, z);
+    	TransparentNodeEntity tileEntity = (TransparentNodeEntity) world.getTileEntity(x, y, z);
     	if(tileEntity == null){
     		super.addCollisionBoxesToList(world, x, y, z, par5AxisAlignedBB, list, entity);
     	}

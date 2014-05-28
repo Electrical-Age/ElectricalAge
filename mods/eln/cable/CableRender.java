@@ -65,7 +65,7 @@ public class CableRender {
 			}
 			
 			//standardConnection
-			otherTileEntity = entity.worldObj.getBlockTileEntity(x2, y2, z2);
+			otherTileEntity = entity.getWorldObj().getTileEntity(x2, y2, z2);
 			if(otherTileEntity instanceof SixNodeEntity) {
 				SixNodeEntity sixNodeEntity = (SixNodeEntity) otherTileEntity;
 				if(sixNodeEntity.elementRenderList[side.getInt()] !=null) {
@@ -77,7 +77,7 @@ public class CableRender {
 			}
 			
 			//no wrappeConection ?
-			if(! NodeBase.isBlockWrappable(entity.worldObj.getBlockId(x2, y2, z2))) {
+			if(! NodeBase.isBlockWrappable(entity.getWorldObj().getBlock(x2, y2, z2))) {
 				continue;
 			}
 			else {
@@ -98,7 +98,7 @@ public class CableRender {
 					break;
 				}
 				
-				otherTileEntity = entity.worldObj.getBlockTileEntity(x2, y2, z2);
+				otherTileEntity = entity.getWorldObj().getTileEntity(x2, y2, z2);
 
 				if(otherTileEntity instanceof NodeBlockEntity) {				
 				/*
@@ -222,7 +222,7 @@ public class CableRender {
 			}
 			
 			//standardConnection
-			otherTileEntity = element.tileEntity.worldObj.getBlockTileEntity(x2, y2, z2);
+			otherTileEntity = element.tileEntity.getWorldObj().getTileEntity(x2, y2, z2);
 			if(otherTileEntity instanceof SixNodeEntity) {
 				SixNodeEntity sixNodeEntity = (SixNodeEntity) otherTileEntity;
 				if(sixNodeEntity.elementRenderList[side.getInt()] !=null) {
@@ -233,7 +233,7 @@ public class CableRender {
 			}
 			
 			//no wrappeConection ?
-			if(! NodeBase.isBlockWrappable(element.tileEntity.worldObj.getBlockId(x2, y2, z2))) {
+			if(! NodeBase.isBlockWrappable(element.tileEntity.getWorldObj().getBlock(x2, y2, z2))) {
 				continue;
 			}
 			else {
@@ -254,7 +254,7 @@ public class CableRender {
 					break;
 				}
 				
-				otherTileEntity = element.tileEntity.worldObj.getBlockTileEntity(x2, y2, z2);
+				otherTileEntity = element.tileEntity.getWorldObj().getTileEntity(x2, y2, z2);
 
 				if(otherTileEntity instanceof NodeBlockEntity) {				
 					//Direction otherDirection = side.getInverse();

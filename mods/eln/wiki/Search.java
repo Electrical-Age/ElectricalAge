@@ -29,8 +29,6 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.util.Icon;
 
 public class Search extends GuiScreenEln{
 

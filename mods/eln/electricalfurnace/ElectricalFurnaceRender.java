@@ -102,7 +102,7 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender {
 				stream.readShort();
 			}
 			else {
-				entityItemIn = new EntityItem(tileEntity.worldObj, tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, new ItemStack(read, 1, stream.readShort()));
+				entityItemIn = new EntityItem(tileEntity.getWorldObj(), tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, Utils.newItemStack(read, 1, stream.readShort()));
 			}
 			
 			heatingCorpResistorP = stream.readShort();

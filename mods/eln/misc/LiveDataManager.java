@@ -5,15 +5,16 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
-import cpw.mods.fml.common.ITickHandler;
-import cpw.mods.fml.common.TickType;
-import cpw.mods.fml.common.registry.TickRegistry;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Type;
 import cpw.mods.fml.relauncher.Side;
 
-public class LiveDataManager implements ITickHandler{
+public class LiveDataManager{
 	
 	public LiveDataManager() {
-		TickRegistry.registerTickHandler(this, Side.CLIENT);
+		FMLCommonHandler.instance().bus().register(this);
 	}
 	
 	public void start(){
@@ -47,8 +48,10 @@ public class LiveDataManager implements ITickHandler{
 	}
 	
 	HashMap<Object,Element> map = new HashMap<Object, LiveDataManager.Element>();
-	@Override
-	public void tickStart(EnumSet<TickType> type, Object... tickData) {
+	
+	@SubscribeEvent
+	public void tick(ClientTickEvent event) {
+		if(event.type != Type.RENDER) return;
 		ArrayList<Object> keyToRemove = new ArrayList<Object>();
 		for(Entry<Object, Element> entry : map.entrySet()){
 			Element e = entry.getValue();
@@ -65,23 +68,6 @@ public class LiveDataManager implements ITickHandler{
 		
 	}
 
-	@Override
-	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
-		// TODO Auto-generated method stub
-		
-	}
 
-	@Override
-	public EnumSet<TickType> ticks() {
-		// TODO Auto-generated method stub
-		return EnumSet.of(TickType.RENDER);
-	}
-
-	@Override
-	public String getLabel() {
-		// TODO Auto-generated method stub
-		return "miaou2";
-	}
-	
 	
 }

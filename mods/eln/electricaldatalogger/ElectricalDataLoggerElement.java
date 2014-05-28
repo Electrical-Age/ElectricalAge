@@ -8,9 +8,7 @@ import java.util.LinkedList;
 
 import javax.swing.text.MaskFormatter;
 
-import org.bouncycastle.crypto.modes.SICBlockCipher;
 
-import cpw.mods.fml.common.network.Player;
 
 
 import mods.eln.Eln;
@@ -203,7 +201,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 	boolean pause = false;
 	
 	@Override
-	public void networkUnserialize(DataInputStream stream, Player player) {
+	public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
 		super.networkUnserialize(stream);
 		byte header;
 		try {

@@ -10,7 +10,7 @@ import java.util.List;
 
 import com.google.common.base.CaseFormat;
 
-import cpw.mods.fml.common.network.Player;
+
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -100,7 +100,7 @@ public abstract class TransparentNodeElement implements INBTTReady ,GhostObserve
 		needPublish();
 	}
 
-	public byte networkUnserialize(DataInputStream stream,Player player) 
+	public byte networkUnserialize(DataInputStream stream,EntityPlayerMP player) 
 	{
 		return networkUnserialize(stream);
 	}
@@ -191,29 +191,29 @@ public abstract class TransparentNodeElement implements INBTTReady ,GhostObserve
 		boolean needDestroy = false;
 		if(transparentNodeDescriptor.mustHaveFloor())
 		{
-			block = Block.blocksList[node.neighborBlock[Direction.YN.getInt()]];
+			block = Block.getBlockById(node.neighborBlock[Direction.YN.getInt()]);
 			if(block == null || ! block.isOpaqueCube()) needDestroy = true;
 		}
 		if(transparentNodeDescriptor.mustHaveCeiling())
 		{
-			block = Block.blocksList[node.neighborBlock[Direction.YP.getInt()]];
+			block = Block.getBlockById(node.neighborBlock[Direction.YP.getInt()]);
 			if(block == null || ! block.isOpaqueCube()) needDestroy = true;
 		}
 		if(transparentNodeDescriptor.mustHaveWallFrontInverse())
 		{
-			block = Block.blocksList[node.neighborBlock[front.getInverse().getInt()]];
+			block = Block.getBlockById(node.neighborBlock[front.getInverse().getInt()]);
 			if(block == null || ! block.isOpaqueCube()) needDestroy = true;
 		}
 		if(transparentNodeDescriptor.mustHaveWall())
 		{
 			boolean wall = false;
-			block = Block.blocksList[node.neighborBlock[Direction.XN.getInt()]];
+			block = Block.getBlockById(node.neighborBlock[Direction.XN.getInt()]);
 			if(block != null && block.isOpaqueCube()) wall = true;
-			block = Block.blocksList[node.neighborBlock[Direction.XP.getInt()]];
+			block = Block.getBlockById(node.neighborBlock[Direction.XP.getInt()]);
 			if(block != null && block.isOpaqueCube()) wall = true;
-			block = Block.blocksList[node.neighborBlock[Direction.ZN.getInt()]];
+			block = Block.getBlockById(node.neighborBlock[Direction.ZN.getInt()]);
 			if(block != null && block.isOpaqueCube()) wall = true;
-			block = Block.blocksList[node.neighborBlock[Direction.ZP.getInt()]];
+			block = Block.getBlockById(node.neighborBlock[Direction.ZP.getInt()]);
 			if(block != null && block.isOpaqueCube()) wall = true;
 			
 			if(! wall) needDestroy = true;

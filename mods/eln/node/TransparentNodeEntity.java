@@ -23,6 +23,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -150,7 +151,7 @@ public class TransparentNodeEntity extends NodeBlockEntity {	//boolean[] syncron
 	public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB,List list) {
 		if(worldObj.isRemote){
 			if(elementRender == null){
-				AxisAlignedBB bb = Block.stone.getCollisionBoundingBoxFromPool(worldObj, xCoord, yCoord, zCoord);
+				AxisAlignedBB bb = Blocks.stone.getCollisionBoundingBoxFromPool(worldObj, xCoord, yCoord, zCoord);
 				if(par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
 			}
 			else{
@@ -160,7 +161,7 @@ public class TransparentNodeEntity extends NodeBlockEntity {	//boolean[] syncron
 		else{
 			TransparentNode node = (TransparentNode) getNode();
 			if(node == null){
-				AxisAlignedBB bb = Block.stone.getCollisionBoundingBoxFromPool(worldObj, xCoord, yCoord, zCoord);
+				AxisAlignedBB bb = Blocks.stone.getCollisionBoundingBoxFromPool(worldObj, xCoord, yCoord, zCoord);
 				if(par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
 			}
 			else{

@@ -11,13 +11,9 @@ import java.util.List;
 import javax.management.Descriptor;
 
 import com.google.common.base.CaseFormat;
-import com.serotonin.modbus4j.ModbusFactory;
-import com.serotonin.modbus4j.ModbusSlaveSet;
 import com.serotonin.modbus4j.ProcessImage;
 import com.serotonin.modbus4j.exception.IllegalDataAddressException;
-import com.serotonin.modbus4j.ip.tcp.TcpSlave;
 
-import cpw.mods.fml.common.network.Player;
 
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
@@ -51,9 +47,8 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.TransformerProcess;
 import mods.eln.sim.VoltageWatchdogProcessForInventoryItemBlockDamageDualLoad;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingData;
-import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -308,7 +303,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 	}
 	
 	@Override
-	public void networkUnserialize(DataInputStream stream, Player player) {
+	public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
 		super.networkUnserialize(stream, player);
 		try {
 			switch(stream.readByte()){

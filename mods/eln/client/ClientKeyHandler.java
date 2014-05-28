@@ -5,13 +5,9 @@ import java.util.EnumSet;
 
 import org.lwjgl.input.Keyboard;
 
-import cpw.mods.fml.client.registry.KeyBindingRegistry;
-import cpw.mods.fml.client.registry.KeyBindingRegistry.KeyHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.TickType;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.IGuiHandler;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.common.network.Player;
 
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
@@ -22,31 +18,48 @@ import mods.eln.wiki.Root;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.network.packet.Packet250CustomPayload;
 
-public class ClientKeyHandler extends KeyHandler {
+public class ClientKeyHandler {
 
 	static final String stuffInteractA = "stuffInteractA";
 	static final String stuffInteractB = "stuffInteractB++";
 	static final String interact = "ElnInteract";
 	static final String openWiki = "Open Wiki";
-	
+	//1.7.2
 	public ClientKeyHandler() {
 	    //the first value is an array of KeyBindings, the second is whether or not the call 
 		//keyDown should repeat as long as the key is down
-	    super(new KeyBinding[]{	new KeyBinding(stuffInteractA, Keyboard.KEY_V),
+	   /* super(new KeyBinding[]{	new KeyBinding(stuffInteractA, Keyboard.KEY_V),
 	    						new KeyBinding(stuffInteractB, Keyboard.KEY_B),
 	    						new KeyBinding(openWiki, Keyboard.KEY_X),
 	        					new KeyBinding(interact, Keyboard.KEY_C)},
 	        					new boolean[]{false, false, false, false});
-	    KeyBindingRegistry.registerKeyBinding(this);
+	    KeyBindingRegistry.registerKeyBinding(this);*/
+		
+		
+		
+		
+		/*public static final KeyBinding[] keys = new KeyBinding[desc.length];
+
+		public KeyHandler() {
+			mc = Minecraft.getMinecraft();
+			for (int i = 0; i < desc.length; ++i) {
+				keys[i] = new KeyBinding(desc[i], keyValues[i], StatCollector.translateToLocal("key.tutorial.label"));
+				ClientRegistry.registerKeyBinding(keys[i]);
+			}
+		}*/
+	//	ClientRegistry.registerKeyBinding(keys[i]);
 	}
 	
-	@Override
+	/*@Override
 	public String getLabel() {
 	    return "mykeybindings";
 	}
+	@SubscribeEvent
+	public void onKeyInput(KeyInputEvent event) {
+		
 	
+	}
 	@Override
 	public void keyDown(EnumSet<TickType> types, KeyBinding kb,
 	                boolean tickEnd, boolean isRepeat) {
@@ -110,5 +123,5 @@ public class ClientKeyHandler extends KeyHandler {
 	@Override
 	public EnumSet<TickType> ticks() {
 	        return EnumSet.of(TickType.CLIENT);
-	}
+	}*/
 }

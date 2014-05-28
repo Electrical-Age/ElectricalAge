@@ -4,9 +4,10 @@ import java.util.EnumSet;
 import java.util.Hashtable;
 import java.util.Map.Entry;
 
-import cpw.mods.fml.common.ITickHandler;
-import cpw.mods.fml.common.TickType;
-import cpw.mods.fml.common.registry.TickRegistry;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Type;
 import cpw.mods.fml.relauncher.Side;
 
 import mods.eln.misc.Coordonate;
@@ -15,7 +16,7 @@ import mods.eln.node.NodeBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
-public class PlayerManager implements ITickHandler {
+public class PlayerManager {
 	private Hashtable<EntityPlayerMP, PlayerMetadata> metadataHash = new Hashtable<EntityPlayerMP, PlayerMetadata>();
 	
 	public class PlayerMetadata {
@@ -65,16 +66,16 @@ public class PlayerManager implements ITickHandler {
 	}
 
 	public PlayerManager() {
-		TickRegistry.registerTickHandler(this, Side.SERVER);
+		FMLCommonHandler.instance().bus().register(this);
 	}
 	public void clear()
 	{
 		metadataHash.clear();
 	}
 	
-	@Override
-	public void tickStart(EnumSet<TickType> type, Object... tickData) {
-		// TODO Auto-generated method stub
+	@SubscribeEvent
+	public void tick(ClientTickEvent event) {
+		if(event.type != Type.SERVER) return;
 		for (Entry<EntityPlayerMP, PlayerMetadata> entry : metadataHash
 				.entrySet()) {
 			PlayerMetadata p = entry.getValue();
@@ -88,23 +89,7 @@ public class PlayerManager implements ITickHandler {
 		}
 	}
 
-	@Override
-	public void tickEnd(EnumSet<TickType> type, Object... tickData) {
-		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public EnumSet<TickType> ticks() {
-		// TODO Auto-generated method stub
-		return EnumSet.of(TickType.SERVER);
-	}
-
-	@Override
-	public String getLabel() {
-		// TODO Auto-generated method stub
-		return "rondoudou";
-	}
 
 	public PlayerMetadata get(EntityPlayerMP player) {
 		PlayerMetadata metadata = metadataHash.get(player);

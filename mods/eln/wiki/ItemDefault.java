@@ -78,12 +78,12 @@ public class ItemDefault extends Default{
 					IRecipe r = (IRecipe)o;
 					
 					ItemStack out = r.getRecipeOutput();
-					if(out != null && out.itemID == stack.itemID && out.getItemDamage() == stack.getItemDamage()){
+					if(out != null && out.getItem() == stack.getItem() && out.getItemDamage() == stack.getItemDamage()){
 						recipeOutList.add(r);
 					}
 
 					for(ItemStack rStack : Utils.getRecipeInputs(r)){
-						if(rStack != null && rStack.itemID == stack.itemID && rStack.getItemDamage() == stack.getItemDamage()){
+						if(rStack != null && rStack.getItem() == stack.getItem() && rStack.getItemDamage() == stack.getItemDamage()){
 							recipeInList.add(r);
 							break;
 						}						
