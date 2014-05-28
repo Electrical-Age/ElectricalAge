@@ -241,6 +241,7 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.event.FMLServerStoppingEvent;
+import cpw.mods.fml.common.network.FMLEventChannel;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -588,11 +589,16 @@ public class Eln {
 	}
 
 	public FrameTime frameTime;
+	public static FMLEventChannel eventChannel;
 
 	//FMLCommonHandler.instance().bus().register(this);
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
 		Object o;
+		
+		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
+		
+		
 		simulator = new Simulator(20, commonOverSampling,
 				electricalOverSampling, thermalOverSampling);
 		playerManager = new PlayerManager();
@@ -630,7 +636,7 @@ public class Eln {
 				.setCreativeTab(creativeTab)
 				.setBlockTextureName("iron_block");
 		sixNodeBlock = (SixNodeBlock) new SixNodeBlock(
-				Material.air, SixNodeEntity.class)
+				Material.plants, SixNodeEntity.class)
 				.setCreativeTab(creativeTab)
 				.setBlockTextureName("iron_block");
 
@@ -642,6 +648,9 @@ public class Eln {
 			obj.loadObj("eln", path);
 		}
 
+		GameRegistry.registerItem(sharedItem, "sharedItem");
+		GameRegistry.registerItem(sharedItemStackOne, "sharedItemStackOne");
+		
 		GameRegistry.registerBlock(sixNodeBlock,SixNodeItem.class, "SixNode");
 		TileEntity.addMapping(SixNodeEntity.class, "SixNodeEntity");
 

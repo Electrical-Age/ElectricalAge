@@ -45,7 +45,6 @@ public class NodeClient{
 	public int refreshCounter = 0;
 	@SubscribeEvent
 	public void tick(ClientTickEvent event) {
-		if(event.type != Type.CLIENT) return;
 		/*
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
         if (server == null) return;

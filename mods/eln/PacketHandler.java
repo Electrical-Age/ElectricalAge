@@ -14,6 +14,8 @@ import java.util.Iterator;
 
 import org.lwjgl.Sys;
 
+import com.jcraft.jogg.Packet;
+
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
@@ -43,6 +45,8 @@ import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket> */{
 
 	public PacketHandler() {
+		//FMLCommonHandler.instance().bus().register(this);
+		Eln.eventChannel.register(this);
 	}
 	// ByteBuffer stream = ByteBuffer.allocate(100000);
 
@@ -71,7 +75,15 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 		EntityPlayerMP player = ((NetHandlerPlayServer)event.handler).field_147369_b;
 		ByteBufInputStream bbis = new ByteBufInputStream(event.packet.payload());		
 		*/
+		Utils.println("onServerPacket");
 		
+		FMLProxyPacket packet = event.packet;
+		DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
+		NetworkManager manager = event.manager;
+		EntityPlayer player =  ((NetHandlerPlayServer)event.handler).playerEntity;
+		
+		
+		packetRx(stream, manager, player);
 	}
 	
 	@SubscribeEvent
@@ -81,6 +93,14 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 		EntityPlayerMP player = ((NetHandlerPlayServer)event.handler).field_147369_b;
 		ByteBufInputStream bbis = new ByteBufInputStream(event.packet.payload());		
 		*/
+		Utils.println("onClientPacket");
+		FMLProxyPacket packet = event.packet;
+		DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
+		NetworkManager manager = event.manager;
+		EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+		
+		
+		packetRx(stream, manager, player);
 	}
 		
 	

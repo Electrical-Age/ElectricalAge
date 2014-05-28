@@ -1230,10 +1230,12 @@ public class Utils {
 
 	//1.7.2
 	public static ArrayList<NBTTagCompound> getTags(NBTTagCompound nbt) {
-		NBTTagList list = nbt.getTagList(null, 0);
+		
+		Object[] set = nbt.func_150296_c().toArray();
+
 		ArrayList<NBTTagCompound> tags = new ArrayList<NBTTagCompound>();
-		for(int idx = 0;idx < tags.size();idx++){
-			tags.add(list.getCompoundTagAt(idx));
+		for(int idx = 0;idx < set.length;idx++){
+			tags.add(nbt.getCompoundTag((String)set[idx]));
 		}
 		return tags;
 	}

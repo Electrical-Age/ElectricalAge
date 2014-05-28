@@ -377,6 +377,7 @@ public class SixNodeBlock extends NodeBlock{
 		return false;
 	}
 	
+	
     public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z,EntityPlayer entityLiving)
     {
     	
