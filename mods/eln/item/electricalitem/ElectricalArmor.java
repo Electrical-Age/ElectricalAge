@@ -19,16 +19,16 @@ import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
 import mods.eln.wiki.Data;
 //1.7.2
-public class ElectricalArmor /*extends genericArmorItem implements IItemEnergyBattery ,ISpecialArmor*/{
-/*
-	public ElectricalArmor(int par1, EnumArmorMaterial par2EnumArmorMaterial,
+public class ElectricalArmor extends genericArmorItem implements IItemEnergyBattery ,ISpecialArmor{
+
+	public ElectricalArmor(ArmorMaterial par2EnumArmorMaterial,
 			int par3, int par4, 
 			String t1, String t2,//String icon,
 			double energyStorage,double chargePower,
 			double ratioMax,double ratioMaxEnergy,
 			double energyPerDamage
 			) {
-		super(par1, par2EnumArmorMaterial, par3, par4, t1, t2);
+		super(par2EnumArmorMaterial, par3, par4, t1, t2);
 		//rIcon = new ResourceLocation("eln",icon);
 		this.chargePower = chargePower;
 		this.energyStorage = energyStorage;
@@ -74,22 +74,12 @@ public class ElectricalArmor /*extends genericArmorItem implements IItemEnergyBa
     	// TODO Auto-generated method stub
     	return false;
     }
-    @Override
-    public void onArmorTickUpdate(World world, EntityPlayer player,
-    		ItemStack itemStack) {
-    	// TODO Auto-generated method stub
-    	super.onArmorTickUpdate(world, player, itemStack);
-    	
-	//	int maxDamage = getArmorMaterial().getDurability(armorType);
-		
-	//	Utils.println("maxDamage=" + maxDamage + " Damage=" + itemStack.getItemDamage());
-    }
-    
+
     
 	
 	
 	public NBTTagCompound getDefaultNBT() {
-		NBTTagCompound nbt = new NBTTagCompound("itemStackNBT");
+		NBTTagCompound nbt = new NBTTagCompound();
 		nbt.setDouble("energy",0);
 		nbt.setBoolean("powerOn",false);
 		nbt.setInteger("rand", (int) (Math.random()*0xFFFFFFF));
@@ -167,6 +157,6 @@ public class ElectricalArmor /*extends genericArmorItem implements IItemEnergyBa
 	}
 
 
-*/
+
  
 }

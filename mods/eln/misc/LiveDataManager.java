@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.RenderTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Type;
 import cpw.mods.fml.relauncher.Side;
@@ -52,6 +53,7 @@ public class LiveDataManager{
 	
 	@SubscribeEvent
 	public void tick(RenderTickEvent event) {
+		if(event.phase != Phase.START) return;
 		ArrayList<Object> keyToRemove = new ArrayList<Object>();
 		for(Entry<Object, Element> entry : map.entrySet()){
 			Element e = entry.getValue();

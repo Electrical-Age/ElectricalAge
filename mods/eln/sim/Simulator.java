@@ -25,6 +25,7 @@ import net.minecraft.server.management.PlayerManager;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Type;
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -458,7 +459,7 @@ public class Simulator /* ,IPacketHandler*/ {
 
 	@SubscribeEvent
 	public void tick(ServerTickEvent event) {
-
+		if(event.phase != Phase.START) return;
 		
 		//Minecraft.getMinecraft().mcProfiler.startSection("Miaou !!");
 		
@@ -671,6 +672,7 @@ public class Simulator /* ,IPacketHandler*/ {
 		}
 		
 		if(++printTimeCounter == 20){
+			
 			printTimeCounter = 0;
 			electricalNsStack /= 20;
 			thermalNsStack /= 20;

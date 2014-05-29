@@ -36,6 +36,7 @@ import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.RenderTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Type;
 import cpw.mods.fml.common.registry.GameData;
@@ -73,6 +74,7 @@ public class FrameTime{
 	
 	@SubscribeEvent
 	public void tick(RenderTickEvent event) {
+		if(event.phase != Phase.START) return;
 		long nanoTime = System.nanoTime();
 		if(boot) {
 			boot = false;

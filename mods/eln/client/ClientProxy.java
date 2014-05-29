@@ -7,6 +7,7 @@ import java.net.URL;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
+import cpw.mods.fml.common.FMLCommonHandler;
 import mods.eln.CommonProxy;
 import mods.eln.Eln;
 import mods.eln.entity.ReplicatorEntity;
@@ -41,5 +42,6 @@ public class ClientProxy extends CommonProxy {
       	RenderingRegistry.registerEntityRenderingHandler(ReplicatorEntity.class, new ReplicatorRender(new ModelSilverfish(),(float) 0.3));
       	      	    	
 		Eln.clientKeyHandler = new ClientKeyHandler();
+		FMLCommonHandler.instance().bus().register(Eln.clientKeyHandler);
 	}
 }

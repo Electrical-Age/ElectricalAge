@@ -32,6 +32,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
@@ -81,6 +82,10 @@ public class Utils {
 	public static void print(String str){
 		if(Eln.debugEnable == false) return;
 		System.out.print(str);
+	}
+	public static void print(Object str){
+		if(Eln.debugEnable == false) return;
+		System.out.print(str.toString());
 	}
 	
 	static String floatToStr(double f,int high,int low)
@@ -1304,6 +1309,19 @@ public class Utils {
 		return (short) Block.getIdFromBlock(block);
 	}
 
+	public static void addSmelting(Item parentItem, int parentItemDamage, ItemStack findItemStack, float f) {
+		FurnaceRecipes.smelting().func_151394_a(newItemStack(parentItem, 1, parentItemDamage), findItemStack, f);
+	}
+	public static void addSmelting(Block parentBlock, int parentItemDamage, ItemStack findItemStack, float f) {
+		FurnaceRecipes.smelting().func_151394_a(newItemStack(Item.getItemFromBlock(parentBlock), 1, parentItemDamage), findItemStack, f);
+	}
+
+	public static void addSmelting(Item parentItem, int parentItemDamage, ItemStack findItemStack) {
+		addSmelting(parentItem,  parentItemDamage, findItemStack, 0.3f);
+	}
+	public static void addSmelting(Block parentBlock, int parentItemDamage, ItemStack findItemStack) {
+		addSmelting(parentBlock,  parentItemDamage, findItemStack, 0.3f);
+	}
 
 
 } 

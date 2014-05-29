@@ -22,6 +22,7 @@ import net.minecraft.server.MinecraftServer;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.Type;
 import cpw.mods.fml.relauncher.Side;
 
@@ -45,6 +46,7 @@ public class NodeClient{
 	public int refreshCounter = 0;
 	@SubscribeEvent
 	public void tick(ClientTickEvent event) {
+		if(event.phase != Phase.START) return;
 		/*
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
         if (server == null) return;

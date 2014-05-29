@@ -169,6 +169,7 @@ public class GhostManager extends WorldSavedData
 			GhostElement element = new GhostElement(coordonate,observerCoordonate,UUID);
 			ghostTable.put(element.elementCoordonate, element);
 		}
+		
 	}
 	
 		

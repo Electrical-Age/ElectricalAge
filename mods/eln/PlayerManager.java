@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Type;
 import cpw.mods.fml.relauncher.Side;
@@ -76,6 +77,7 @@ public class PlayerManager {
 	
 	@SubscribeEvent
 	public void tick(ServerTickEvent event) {
+		if(event.phase != Phase.START) return;
 		for (Entry<EntityPlayerMP, PlayerMetadata> entry : metadataHash
 				.entrySet()) {
 			PlayerMetadata p = entry.getValue();

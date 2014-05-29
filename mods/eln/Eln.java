@@ -87,6 +87,8 @@ import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.item.HeatingCorpElement;
+import mods.eln.item.ItemAxeEln;
+import mods.eln.item.ItemPickaxeEln;
 import mods.eln.item.LampDescriptor;
 import mods.eln.item.MaceratorSorterDescriptor;
 import mods.eln.item.MachineBoosterDescriptor;
@@ -201,7 +203,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemArmor.ArmorMaterial;
 import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemHoe;
@@ -505,7 +509,7 @@ public class Eln {
 				event.getSuggestedConfigurationFile());
 		config.load();
 
-		/* 1.7.2
+		/* 
 		creativeTabId = config.getItem("itemCreativeTab", itemBaseId - 1)
 				.getInt();
 		brushItemId = config.getItem("brushItem", itemBaseId - 1).getInt();
@@ -597,8 +601,7 @@ public class Eln {
 		Object o;
 		
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
-		
-		
+	
 		simulator = new Simulator(20, commonOverSampling,
 				electricalOverSampling, thermalOverSampling);
 		playerManager = new PlayerManager();
@@ -641,8 +644,9 @@ public class Eln {
 				.setBlockTextureName("iron_block");
 
 		ghostBlock = (GhostBlock) new GhostBlock().setBlockTextureName("iron_block");
+		GameRegistry.registerBlock(ghostBlock, "ghostBlock");
 		lightBlock = (LightBlock) new LightBlock();
-
+		GameRegistry.registerBlock(lightBlock, "lightBlock");
 		// obj.loadFolder("eln", "/model");
 		for (String path : objNames) {
 			obj.loadObj("eln", path);
@@ -3473,38 +3477,30 @@ public class Eln {
 
 	}
 
-	//1.7.2
+	
 	private void registerArmor() {
 		ItemStack stack;
 		String name;
-/*
+
 		{
 			name = "Copper Helmet";
-			helmetCopper = (ItemArmor) (new genericArmorItem(helmetCopperId, EnumArmorMaterial.IRON, 2, 0, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_helmet").setCreativeTab(creativeTab);
-			stack = new ItemStack(helmetCopper);
-			LanguageRegistry.addName(stack, name);
-			GameRegistry.registerCustomItemStack(name, stack.copy());
+			helmetCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, 0, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_helmet").setCreativeTab(creativeTab);
+			GameRegistry.registerItem(helmetCopper, name);
 		}
 		{
 			name = "Copper Chestplate";
-			plateCopper = (ItemArmor) (new genericArmorItem(plateCopperId, EnumArmorMaterial.IRON, 2, 1, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_chestplate").setCreativeTab(creativeTab);
-			stack = new ItemStack(plateCopper);
-			LanguageRegistry.addName(stack, name);
-			GameRegistry.registerCustomItemStack(name, stack.copy());
+			plateCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, 1, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_chestplate").setCreativeTab(creativeTab);
+			GameRegistry.registerItem(plateCopper, name);
 		}
 		{
 			name = "Copper Leggings";
-			legsCopper = (ItemArmor) (new genericArmorItem(legsCopperId, EnumArmorMaterial.IRON, 2, 2, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_leggings").setCreativeTab(creativeTab);
-			stack = new ItemStack(legsCopper);
-			LanguageRegistry.addName(stack, name);
-			GameRegistry.registerCustomItemStack(name, stack.copy());
+			legsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, 2, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_leggings").setCreativeTab(creativeTab);
+			GameRegistry.registerItem(legsCopper, name);
 		}
 		{
 			name = "Copper Boots";
-			bootsCopper = (ItemArmor) (new genericArmorItem(bootsCopperId, EnumArmorMaterial.IRON, 2, 3, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_boots").setCreativeTab(creativeTab);
-			stack = new ItemStack(bootsCopper);
-			LanguageRegistry.addName(stack, name);
-			GameRegistry.registerCustomItemStack(name, stack.copy());
+			bootsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, 3, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_boots").setCreativeTab(creativeTab);
+			GameRegistry.registerItem(bootsCopper, name);
 		}
 
 		int armorPoint;
@@ -3513,12 +3509,12 @@ public class Eln {
 		t2 = "eln:textures/armor/ecoal_layer_2.png";
 		double energyPerDamage = 500;
 		int armor, armorMarge;
-		EnumArmorMaterial eCoalMaterial = EnumHelper.addArmorMaterial("ECoal", 10, new int[] { 2, 6, 5, 2 }, 9);
+		ArmorMaterial eCoalMaterial = net.minecraftforge.common.util.EnumHelper.addArmorMaterial("ECoal", 10, new int[] { 2, 6, 5, 2 }, 9);
 		{
 			name = "E-Coal Helmet";
 			armor = 2;
 			armorMarge = 1;
-			helmetECoal = (ItemArmor) (new ElectricalArmor(helmetECoalId, eCoalMaterial, 2, 0, t1, t2,
+			helmetECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, 0, t1, t2,
 					(armor + armorMarge) * energyPerDamage, 250.0,// double
 																	// energyStorage,double
 																	// chargePower
@@ -3527,15 +3523,13 @@ public class Eln {
 															// ratioMaxEnergy,
 					energyPerDamage// double energyPerDamage
 			)).setUnlocalizedName(name).setTextureName("eln:ecoal_helmet").setCreativeTab(creativeTab);
-			stack = new ItemStack(helmetECoal);
-			LanguageRegistry.addName(stack, name);
-			GameRegistry.registerCustomItemStack(name, stack.copy());
+			GameRegistry.registerItem(helmetECoal, name);
 		}
 		{
 			name = "E-Coal Chestplate";
 			armor = 6;
 			armorMarge = 2;
-			plateECoal = (ItemArmor) (new ElectricalArmor(plateECoalId, eCoalMaterial, 2, 1, t1, t2,
+			plateECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, 1, t1, t2,
 					(armor + armorMarge) * energyPerDamage, 250.0,// double
 																	// energyStorage,double
 																	// chargePower
@@ -3544,15 +3538,13 @@ public class Eln {
 															// ratioMaxEnergy,
 					energyPerDamage// double energyPerDamage
 			)).setUnlocalizedName(name).setTextureName("eln:ecoal_chestplate").setCreativeTab(creativeTab);
-			stack = new ItemStack(plateECoal);
-			LanguageRegistry.addName(stack, name);
-			GameRegistry.registerCustomItemStack(name, stack.copy());
+			GameRegistry.registerItem(plateECoal, name);
 		}
 		{
 			name = "E-Coal Leggings";
 			armor = 5;
 			armorMarge = 2;
-			legsECoal = (ItemArmor) (new ElectricalArmor(legsECoalId, eCoalMaterial, 2, 2, t1, t2,
+			legsECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, 2, t1, t2,
 					(armor + armorMarge) * energyPerDamage, 250.0,// double
 																	// energyStorage,double
 																	// chargePower
@@ -3561,15 +3553,13 @@ public class Eln {
 															// ratioMaxEnergy,
 					energyPerDamage// double energyPerDamage
 			)).setUnlocalizedName(name).setTextureName("eln:ecoal_leggings").setCreativeTab(creativeTab);
-			stack = new ItemStack(legsECoal);
-			LanguageRegistry.addName(stack, name);
-			GameRegistry.registerCustomItemStack(name, stack.copy());
+			GameRegistry.registerItem(legsECoal, name);
 		}
 		{
 			name = "E-Coal Boots";
 			armor = 2;
 			armorMarge = 1;
-			bootsECoal = (ItemArmor) (new ElectricalArmor(bootsECoalId, eCoalMaterial, 2, 3, t1, t2,
+			bootsECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, 3, t1, t2,
 					(armor + armorMarge) * energyPerDamage, 250.0,// double
 																	// energyStorage,double
 																	// chargePower
@@ -3578,52 +3568,40 @@ public class Eln {
 															// ratioMaxEnergy,
 					energyPerDamage// double energyPerDamage
 			)).setUnlocalizedName(name).setTextureName("eln:ecoal_boots").setCreativeTab(creativeTab);
-			stack = new ItemStack(bootsECoal);
-			LanguageRegistry.addName(stack, name);
-			GameRegistry.registerCustomItemStack(name, stack.copy());
-		}*/
+			GameRegistry.registerItem(bootsECoal, name);
+		}
 	}
 
-	//1.7.2
-	private void registerTool() {/*
+	
+	private void registerTool() {
 		ItemStack stack;
 		String name;
 		{
 			name = "Copper Sword";
-			swordCopper = (new ItemSword(swordCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_sword");
-			stack = new ItemStack(swordCopper);
-			LanguageRegistry.addName(stack, name);
-			GameRegistry.registerCustomItemStack(name, stack.copy());
+			swordCopper = (new ItemSword(ToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_sword").setCreativeTab(creativeTab);
+			GameRegistry.registerItem(swordCopper, name);
 		}
 		{
 			name = "Copper Hoe";
-			hoeCopper = (new ItemHoe(hoeCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_hoe");
-			stack = new ItemStack(hoeCopper);
-			LanguageRegistry.addName(stack, name);
-			GameRegistry.registerCustomItemStack(name, stack.copy());
+			hoeCopper = (new ItemHoe(ToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_hoe").setCreativeTab(creativeTab);
+			GameRegistry.registerItem(hoeCopper, name);
 		}
 		{
 			name = "Copper Shovel";
-			shovelCopper = (new ItemSpade(shovelCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_shovel");
-			stack = new ItemStack(shovelCopper);
-			LanguageRegistry.addName(stack, name);
-			GameRegistry.registerCustomItemStack(name, stack.copy());
+			shovelCopper = (new ItemSpade(ToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_shovel").setCreativeTab(creativeTab);
+			GameRegistry.registerItem(shovelCopper, name);
 		}
 		{
 			name = "Copper Pickaxe";
-			pickaxeCopper = (new ItemPickaxe(pickaxeCopperId, EnumToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_pickaxe");
-			stack = new ItemStack(pickaxeCopper);
-			LanguageRegistry.addName(stack, name);
-			GameRegistry.registerCustomItemStack(name, stack.copy());
+			pickaxeCopper = new ItemPickaxeEln(ToolMaterial.IRON).setUnlocalizedName(name).setTextureName("eln:copper_pickaxe").setCreativeTab(creativeTab);
+			GameRegistry.registerItem(pickaxeCopper, name);
 		}
 		{
 			name = "Copper Axe";
-			Item.itemRegistry.addObject(axeCopperId, "cooper_axe", axeCopper = new ItemAxe(Item.ToolMaterial.IRON).setUnlocalizedName(name).setTextureName("eln:copper_axe"));
-			stack = new ItemStack(axeCopper);
-			LanguageRegistry.addName(stack, name);
-			GameRegistry.registerCustomItemStack(name, stack.copy());
+			axeCopper = new ItemAxeEln(ToolMaterial.IRON).setUnlocalizedName(name).setTextureName("eln:copper_axe").setCreativeTab(creativeTab);
+			GameRegistry.registerItem(axeCopper, name);
 		}
-*/
+
 	}
 
 	// public static int
@@ -5157,10 +5135,9 @@ public class Eln {
 
 	void recipeGeneral() {
 		
-		//1.7.2
-	/*	FurnaceRecipes.smelting().addSmelting(Item.getIdFromItem(treeResin.parentItem),
+		Utils.addSmelting(treeResin.parentItem,
 				treeResin.parentItemDamage, findItemStack("Rubber", 1), 0f);
-*/
+
 	}
 
 	void recipeHeatingCorp() {
@@ -5861,55 +5838,55 @@ public class Eln {
 	}
 
 	void recipeFurnace() {
-		//1.7.2
-		/*ItemStack in;
+
+		ItemStack in;
 
 		in = findItemStack("Copper Ore");
-		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-				findItemStack("Copper Ingot"), 0);
+		Utils.addSmelting(in.getItem(), in.getItemDamage(),
+				findItemStack("Copper Ingot"));
 		in = findItemStack("dustCopper");
-		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-				findItemStack("Copper Ingot"), 0);
+		Utils.addSmelting(in.getItem(), in.getItemDamage(),
+				findItemStack("Copper Ingot"));
 		in = findItemStack("Lead Ore");
-		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-				findItemStack("ingotLead"), 0);
+		Utils.addSmelting(in.getItem(), in.getItemDamage(),
+				findItemStack("ingotLead"));
 		in = findItemStack("dustLead");
-		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-				findItemStack("ingotLead"), 0);
+		Utils.addSmelting(in.getItem(), in.getItemDamage(),
+				findItemStack("ingotLead"));
 		in = findItemStack("Tungsten Ore");
-		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-				findItemStack("Tungsten Ingot"), 0);
+		Utils.addSmelting(in.getItem(), in.getItemDamage(),
+				findItemStack("Tungsten Ingot"));
 		in = findItemStack("dustTungsten");
-		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-				findItemStack("Tungsten Ingot"), 0);
+		Utils.addSmelting(in.getItem(), in.getItemDamage(),
+				findItemStack("Tungsten Ingot"));
 		in = findItemStack("ingotSteel");
-		//FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-		//		findItemStack("Ferrite Ingot"), 0);
+		//Utils.addSmelting(in.getItem().itemID, in.getItemDamage(),
+		//		findItemStack("Ferrite Ingot"));
 		in = findItemStack("dustIron");
-		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-				new ItemStack(Items.iron_ingot), 0);
+		Utils.addSmelting(in.getItem(), in.getItemDamage(),
+				new ItemStack(Items.iron_ingot));
 
 		in = findItemStack("dustGold");
-		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-				new ItemStack(Items.gold_ingot), 0);
+		Utils.addSmelting(in.getItem(), in.getItemDamage(),
+				new ItemStack(Items.gold_ingot));
 
 		in = findItemStack("Tree Resin");
-		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-				findItemStack("Rubber", 2), 0);
+		Utils.addSmelting(in.getItem(), in.getItemDamage(),
+				findItemStack("Rubber", 2));
 
 		in = findItemStack("Steel Dust");
-		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-				findItemStack("Steel Ingot"), 0);
+		Utils.addSmelting(in.getItem(), in.getItemDamage(),
+				findItemStack("Steel Ingot"));
 
 		in = findItemStack("Silicon Dust");
-		FurnaceRecipes.smelting().addSmelting(in.itemID, in.getItemDamage(),
-				findItemStack("Silicon Ingot"), 0);
+		Utils.addSmelting(in.getItem(), in.getItemDamage(),
+				findItemStack("Silicon Ingot"));
 
 		// in = findItemStack("Purified Cinnabar Dust");
 		in = findItemStack("dustCinnabar");
-		FurnaceRecipes.smelting().addSmelting(Item.getIdFromItem(in.getItem()), in.getItemDamage(),
-				findItemStack("Mercury"), 0);
-*/
+		Utils.addSmelting(in.getItem(), in.getItemDamage(),
+				findItemStack("Mercury"));
+
 	}
 
 	void recipeElectricalSensor() {

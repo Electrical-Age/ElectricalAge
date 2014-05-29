@@ -52,8 +52,8 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 
 	public static final byte stuffInteractAId = 0;
 	public static final byte stuffInteractBId = 1;
-	public static final byte interactEnableId = 2;
-	public static final byte interactDisableId = 3;
+	public static final byte openWikiId = 2;
+	public static final byte interactId = 3;
 
 	/*@Override
 	public void onPacketData(INetworkManager manager,
@@ -293,44 +293,45 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 	void packetPlayerKey(DataInputStream stream, NetworkManager manager,
 			EntityPlayer player) {
 		EntityPlayerMP playerMP = (EntityPlayerMP) player;
-		byte value;
+		byte id;
 		try {
-			value = stream.readByte();
-			if (value == stuffInteractAId || value == stuffInteractBId) {
-				{
-					ItemStack itemStack = playerMP.getCurrentEquippedItem();
-					if (itemStack != null) {
-						if (Utils.hasTheInterface(itemStack.getItem(),
-								IInteract.class)) {
-							IInteract interactItem = ((IInteract) itemStack
-									.getItem());
-							interactItem.interact(playerMP, itemStack, value);
+			id = stream.readByte();
+			boolean state = stream.readBoolean();
+			if(state){
+				if (id == stuffInteractAId || id == stuffInteractBId) {
+					{
+						ItemStack itemStack = playerMP.getCurrentEquippedItem();
+						if (itemStack != null) {
+							if (Utils.hasTheInterface(itemStack.getItem(),
+									IInteract.class)) {
+								IInteract interactItem = ((IInteract) itemStack
+										.getItem());
+								interactItem.interact(playerMP, itemStack, id);
+							}
 						}
 					}
-				}
-
-				for (ItemStack itemStack : playerMP.inventory.armorInventory) {
-					if (itemStack != null) {
-						if (Utils.hasTheInterface(itemStack.getItem(),
-								IInteract.class)) {
-							IInteract interactItem = ((IInteract) itemStack
-									.getItem());
-							interactItem.interact(playerMP, itemStack, value);
+	
+					for (ItemStack itemStack : playerMP.inventory.armorInventory) {
+						if (itemStack != null) {
+							if (Utils.hasTheInterface(itemStack.getItem(),
+									IInteract.class)) {
+								IInteract interactItem = ((IInteract) itemStack
+										.getItem());
+								interactItem.interact(playerMP, itemStack, id);
+							}
 						}
+	
 					}
-
 				}
 			}
+			if(id == interactId){		
+				PlayerManager.PlayerMetadata metadata = Eln.playerManager
+						.get(playerMP);
+				metadata.setInteractEnable(state);
 
-			if (value == interactEnableId) {
-				PlayerManager.PlayerMetadata metadata = Eln.playerManager
-						.get(playerMP);
-				metadata.setInteractEnable(true);
 			}
-			if (value == interactDisableId) {
-				PlayerManager.PlayerMetadata metadata = Eln.playerManager
-						.get(playerMP);
-				metadata.setInteractEnable(false);
+			if (id == openWikiId) {
+				
 			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
