@@ -18,7 +18,7 @@ import mods.eln.generic.genericArmorItem;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
 import mods.eln.wiki.Data;
-//1.7.2
+
 public class ElectricalArmor extends genericArmorItem implements IItemEnergyBattery ,ISpecialArmor{
 
 	public ElectricalArmor(ArmorMaterial par2EnumArmorMaterial,

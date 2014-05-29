@@ -381,14 +381,8 @@ public class SixNode extends Node {
 	}
 
  
-	@Override
-	public short getBlockId() {
-		// TODO Auto-generated method stub
-		return (short) Block.getIdFromBlock(getBlock());
-	}
-	public Block getBlock(){
-		return Eln.sixNodeBlock;
-	}
+
+
 
 	@Override
 	public void connectInit()
@@ -655,6 +649,16 @@ public class SixNode extends Node {
 			if(element != null && element.sixNodeElementDescriptor.hasVolume()) return true;
 		}
 		return false;
+	}
+
+	@Override
+	public Block getBlock(){
+		return Eln.sixNodeBlock;
+	}
+	@Override
+	public INodeInfo getInfo() {
+		// TODO Auto-generated method stub
+		return Eln.sixNodeBlock;
 	}
 	
 	

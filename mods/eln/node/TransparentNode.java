@@ -221,11 +221,7 @@ public class TransparentNode extends Node{
 	}
 
  
-	@Override
-	public short getBlockId() {
-		// TODO Auto-generated method stub
-		return (short) Block.getIdFromBlock(Eln.transparentNodeBlock);
-	}
+
 
 	@Override
 	public Block getBlock() {
@@ -322,6 +318,14 @@ public class TransparentNode extends Node{
 		if(element != null)
 			if(Utils.mustDropItem(entityPlayer))
 				dropItem(element.getDropItemStack());
+	}
+
+
+
+	@Override
+	public INodeInfo getInfo() {
+		// TODO Auto-generated method stub
+		return Eln.transparentNodeBlock;
 	}
 
 

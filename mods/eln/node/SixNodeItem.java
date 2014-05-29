@@ -131,7 +131,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 	 * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
 	 * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
 	 */
-	//1.7.2
+	
 	/* public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
 	{
 		if(isStackValidToPlace(par1ItemStack) == false) return false;
@@ -281,7 +281,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 	 * Returns true if the given ItemBlock can be placed on the given side of the given block position.
 	 */
 
-	//1.7.2 func_150936_a <= canPlaceItemBlockOnSide
+	// func_150936_a <= canPlaceItemBlockOnSide
 	
 	@Override
 	public boolean func_150936_a(World par1World, int x, int y, int z, int par5, EntityPlayer par6EntityPlayer, ItemStack par7ItemStack)
@@ -343,36 +343,17 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 
 			if (block.getIfOtherBlockIsSolid(world, x, y, z, direction))
 			{
-				try {
 
-					SixNode sixNode = (SixNode) NodeManager.UUIDToClass[getBlockID()].getConstructor().newInstance();
-					sixNode.onBlockPlacedBy(new Coordonate(x, y, z, world), direction, player, stack);
-					sixNode.createSubBlock(stack, direction);
+				SixNode sixNode = new SixNode();
+				sixNode.onBlockPlacedBy(new Coordonate(x, y, z, world), direction, player, stack);
+				sixNode.createSubBlock(stack, direction);
 
-					world.setBlock(x, y, z, block, metadata, 0x03);
-					block.getIfOtherBlockIsSolid(world, x, y, z, direction);
-					block.onBlockPlacedBy(world, x, y, z, Direction.fromIntMinecraftSide(side).getInverse(), player, metadata);
-					return true;
+				world.setBlock(x, y, z, block, metadata, 0x03);
+				block.getIfOtherBlockIsSolid(world, x, y, z, direction);
+				block.onBlockPlacedBy(world, x, y, z, Direction.fromIntMinecraftSide(side).getInverse(), player, metadata);
+				return true;
 
-				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchMethodException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (SecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+
 			}
 		}
 		else if (blockOld == block)

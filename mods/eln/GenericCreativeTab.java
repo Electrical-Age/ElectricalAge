@@ -14,11 +14,7 @@ public class GenericCreativeTab extends CreativeTabs {
 		this.item = item;
 	}
 
-	//1.7.2
-	/*@Override
-	public ItemStack getIconItemStack() {
-		return new ItemStack(item);
-	}*/
+
 
 	@Override
 	@SideOnly(Side.CLIENT)

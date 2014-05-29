@@ -31,10 +31,10 @@ public class NodeManager extends WorldSavedData{
 	public ArrayList<NodeBase> getNodes(){
 		return nodes;
 	}
-	public static Class[] UUIDToClass = new Class[4096];
-	public static void registerBlock(Block block,Class classType)
+	public static HashMap<String, Class> UUIDToClass = new HashMap<String, Class>();
+	public static void registerUuid(String uuid,Class classType)
 	{
-		UUIDToClass[Block.getIdFromBlock(block)] = classType;
+		UUIDToClass.put(uuid, classType);
 	}
 	
 	Collection<NodeBase> getNodeList()
@@ -91,7 +91,7 @@ public class NodeManager extends WorldSavedData{
 		for(Object o : Utils.getTags(nbt))
 		{
 			NBTTagCompound tag = (NBTTagCompound) o;
-			Class nodeClass = UUIDToClass[tag.getShort("UUID")];
+			Class nodeClass = UUIDToClass.get(tag.getString("tag"));
 			try {
 				NodeBase node = (NodeBase) nodeClass.getConstructor().newInstance();
 				node.readFromNBT(tag, "");
@@ -136,7 +136,7 @@ public class NodeManager extends WorldSavedData{
 		{
 			if(node.mustBeSaved() == false) continue;
 			NBTTagCompound nbtNode = new NBTTagCompound();
-			nbtNode.setShort("UUID", node.getBlockId());
+			nbtNode.setString("tag", node.getInfo().getUuid());
 			node.writeToNBT(nbtNode,"");
 			nbt.setTag("n" + nodeCounter++, nbtNode);
 		}

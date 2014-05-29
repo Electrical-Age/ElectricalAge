@@ -5,6 +5,7 @@ import net.minecraft.item.ItemStack;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.GhostNode;
+import mods.eln.node.INodeInfo;
 import mods.eln.node.NodeBase;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
@@ -63,4 +64,5 @@ public class AutoMinerPowerNode extends GhostNode{
 	}
 	
 	AutoMinerElement e;
+
 }

@@ -25,7 +25,7 @@ import net.minecraft.util.Vec3Pool;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class TransparentNodeBlock extends NodeBlock{
+public class TransparentNodeBlock extends NodeBlock implements INodeInfo{
 	
 	public TransparentNodeBlock( Material material,
 			Class tileEntityClass) {
@@ -120,6 +120,16 @@ public class TransparentNodeBlock extends NodeBlock{
     	}
         //Utils.println(list);
     }
+
+
+
+
+
+	@Override
+	public String getUuid() {
+		// TODO Auto-generated method stub
+		return "t";
+	}
 
 
 

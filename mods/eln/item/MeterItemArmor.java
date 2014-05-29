@@ -4,7 +4,7 @@ import mods.eln.IInteract;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
-//1.7.2
+
 public class MeterItemArmor /*extends ItemArmor implements IInteract */{
 /*
 	public MeterItemArmor(int par1, EnumArmorMaterial par2EnumArmorMaterial,

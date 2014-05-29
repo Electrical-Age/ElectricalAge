@@ -6,7 +6,7 @@ import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemArmor.ArmorMaterial;
 import net.minecraft.item.ItemStack;
 
-//1.7.2
+
 public class genericArmorItem  extends ItemArmor{
 
 	public genericArmorItem(ArmorMaterial par2EnumArmorMaterial,

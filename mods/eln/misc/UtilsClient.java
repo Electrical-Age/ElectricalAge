@@ -223,7 +223,7 @@ public class UtilsClient {
 	}
 
 	
-	//1.7.2
+
 	/*public static void drawIcon(ItemRenderType type, Icon icon) {
 		drawIcon(type, icon.getIconName());
 	}*/

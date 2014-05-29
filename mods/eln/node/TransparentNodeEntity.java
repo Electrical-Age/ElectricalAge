@@ -176,6 +176,11 @@ public class TransparentNodeEntity extends NodeBlockEntity {	//boolean[] syncron
 		if(elementRender != null)
 			elementRender.serverPacketUnserialize(stream);
 	}
+	@Override
+	public INodeInfo getInfo() {
+		// TODO Auto-generated method stub
+		return Eln.transparentNodeBlock;
+	}
 
 
 	

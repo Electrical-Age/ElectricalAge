@@ -7,6 +7,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
+import mods.eln.node.INodeInfo;
+import mods.eln.node.NodeBase;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -17,7 +19,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 	
-public class GhostBlock extends Block{
+public class GhostBlock extends Block implements INodeInfo{
 
 	public GhostBlock() {
 		super(Material.iron);
@@ -52,17 +54,11 @@ public class GhostBlock extends Block{
 	}
 	
 	
-	// 1.7.2
+	
 	public boolean isBlockSolid(IBlockAccess p_149747_1_, int p_149747_2_, int p_149747_3_, int p_149747_4_, int p_149747_5_){
 		return false;
 	}
 
-	/*@Override
-	public boolean isBlockSolidOnSide(World world, int x, int y, int z,
-			int side) {
-		// TODO Auto-generated method stub
-			return false;
-	}*/
 	
 	@Override
 	public void breakBlock(World world, int x, int y, int z,
@@ -93,5 +89,14 @@ public class GhostBlock extends Block{
 	public float getBlockHardness(World par1World, int par2, int par3, int par4) {
 		// TODO Auto-generated method stub
 		return 0.5f;
+	}
+
+
+
+
+	@Override
+	public String getUuid() {
+		// TODO Auto-generated method stub
+		return "g";
 	}
 }

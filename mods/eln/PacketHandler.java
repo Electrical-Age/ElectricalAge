@@ -48,107 +48,69 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 		//FMLCommonHandler.instance().bus().register(this);
 		Eln.eventChannel.register(this);
 	}
-	// ByteBuffer stream = ByteBuffer.allocate(100000);
 
 	public static final byte stuffInteractAId = 0;
 	public static final byte stuffInteractBId = 1;
 	public static final byte openWikiId = 2;
 	public static final byte interactId = 3;
 
-	/*@Override
-	public void onPacketData(INetworkManager manager,
-			Packet250CustomPayload packet, Player player) {*/
-
-	//protected void channelRead0(ChannelHandlerContext ctx, FMLProxyPacket packet) throws Exception {
-		/*if (packet.channel().equals(Eln.channelName)) {
-			ByteBuf payload = packet.payload();
-			if (payload.readableBytes() == 4) {
-				int number = payload.readInt();
-				System.out.println("number = " + number);
-			}*/
-	
-	//1.7.2
 	@SubscribeEvent
 	public void onServerPacket(ServerCustomPacketEvent event) {
-		/*NetHandlerPlayServer a = null;
-		event.handler.
-		EntityPlayerMP player = ((NetHandlerPlayServer)event.handler).field_147369_b;
-		ByteBufInputStream bbis = new ByteBufInputStream(event.packet.payload());		
-		*/
-		Utils.println("onServerPacket");
-		
+
+		//Utils.println("onServerPacket");
+
 		FMLProxyPacket packet = event.packet;
 		DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
 		NetworkManager manager = event.manager;
-		EntityPlayer player =  ((NetHandlerPlayServer)event.handler).playerEntity;
-		
-		
+		EntityPlayer player = ((NetHandlerPlayServer) event.handler).playerEntity;
+
 		packetRx(stream, manager, player);
 	}
-	
+
 	@SubscribeEvent
 	public void onClientPacket(ClientCustomPacketEvent event) {
-		/*NetHandlerPlayServer a = null;
-		event.handler.
-		EntityPlayerMP player = ((NetHandlerPlayServer)event.handler).field_147369_b;
-		ByteBufInputStream bbis = new ByteBufInputStream(event.packet.payload());		
-		*/
-		Utils.println("onClientPacket");
+
+		//Utils.println("onClientPacket");
 		FMLProxyPacket packet = event.packet;
 		DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
 		NetworkManager manager = event.manager;
 		EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-		
-		
+
 		packetRx(stream, manager, player);
 	}
-		
-	
 
 	void packetRx(DataInputStream stream, NetworkManager manager,
 			EntityPlayer player) {
 
-		/*if (packet.channel().equals(Eln.channelName)) */{
-		/*	ByteBuf payload = packet.payload();
-			DataInputStream stream = new DataInputStream(new ByteArrayInputStream(
-					payload.array()));
-
-			// stream.position(0);
-			// stream.put(packet.data);
-			// stream.position(0);
-			ctx.channel().
-			NetworkManager manager = packet.getOrigin();
-			EntityPlayer player = manager.getNetHandler().;*/
-			try {
-				switch (stream.readByte()) {
-				case Eln.packetNodeSerialized24bitPosition:
-					packetNodeSerialized24bitPosition(stream);
-					break;
-				case Eln.packetPlayerKey:
-					packetPlayerKey(stream, manager, player);
-					break;
-				case Eln.packetNodeSingleSerialized:
-					packetNodeSingleSerialized(stream, manager, player);
-					break;
-				case Eln.packetPublishForNode:
-					packetForNode(stream, manager, player);
-					break;
-				case Eln.packetForClientNode:
-					packetForClientNode(stream, manager, player);
-					break;
-				case Eln.packetOpenLocalGui:
-					packetOpenLocalGui(stream, manager, player);
-					break;
-				case Eln.packetPlaySound:
-					packetPlaySound(stream, manager, player);
-					break;
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		try {
+			switch (stream.readByte()) {
+			case Eln.packetNodeSerialized24bitPosition:
+				packetNodeSerialized24bitPosition(stream);
+				break;
+			case Eln.packetPlayerKey:
+				packetPlayerKey(stream, manager, player);
+				break;
+			case Eln.packetNodeSingleSerialized:
+				packetNodeSingleSerialized(stream, manager, player);
+				break;
+			case Eln.packetPublishForNode:
+				packetForNode(stream, manager, player);
+				break;
+			case Eln.packetForClientNode:
+				packetForClientNode(stream, manager, player);
+				break;
+			case Eln.packetOpenLocalGui:
+				packetOpenLocalGui(stream, manager, player);
+				break;
+			case Eln.packetPlaySound:
+				packetPlaySound(stream, manager, player);
+				break;
 			}
-
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
 	}
 
 	void packetPlaySound(DataInputStream stream, NetworkManager manager,
@@ -198,7 +160,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 					stream.readInt(), stream.readInt(), stream.readByte());
 
 			NodeBase node = NodeManager.instance.getNodeFromCoordonate(coordonate);
-			if (node != null && node.getBlockId() == stream.readShort()) {
+			if (node != null && node.getInfo().getUuid().equals(stream.readUTF())) {
 				node.networkUnserialize(stream, (EntityPlayerMP) player);
 			} else {
 				Utils.println("packetForNode node found");
@@ -222,7 +184,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 			NodeBlockEntity node;
 			if (clientPlayer.dimension == dimention
 					&& (node = NodeBlockEntity.getEntity(x, y, z)) != null) {
-				if (node.getBlockId() == stream.readShort()) {
+				if (node.getInfo().getUuid().equals(stream.readUTF())) {
 					node.serverPacketUnserialize(stream);
 					if (0 != stream.available()) {
 						Utils.println("0 != stream.available()");
@@ -262,7 +224,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 			NodeBlockEntity node;
 			if (clientPlayer.dimension == dimention
 					&& (node = NodeBlockEntity.getEntity(x, y, z)) != null) {
-				if (node.getBlockId() == stream.readShort()) {
+				if (node.getInfo().getUuid().equals(stream.readUTF())) {
 					node.networkUnserialize(stream);
 					if (0 != stream.available()) {
 						Utils.println("0 != stream.available()");
@@ -297,7 +259,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 		try {
 			id = stream.readByte();
 			boolean state = stream.readBoolean();
-			if(state){
+			if (state) {
 				if (id == stuffInteractAId || id == stuffInteractBId) {
 					{
 						ItemStack itemStack = playerMP.getCurrentEquippedItem();
@@ -310,7 +272,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 							}
 						}
 					}
-	
+
 					for (ItemStack itemStack : playerMP.inventory.armorInventory) {
 						if (itemStack != null) {
 							if (Utils.hasTheInterface(itemStack.getItem(),
@@ -320,18 +282,18 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 								interactItem.interact(playerMP, itemStack, id);
 							}
 						}
-	
+
 					}
 				}
 			}
-			if(id == interactId){		
+			if (id == interactId) {
 				PlayerManager.PlayerMetadata metadata = Eln.playerManager
 						.get(playerMP);
 				metadata.setInteractEnable(state);
 
 			}
 			if (id == openWikiId) {
-				
+
 			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block

@@ -107,8 +107,9 @@ public abstract class NodeBase implements INBTTReady {
 	}
 	
 	
-	public abstract short getBlockId();
+	
 	public abstract Block getBlock();
+	public abstract INodeInfo getInfo();
 	
 	public IInventory getInventory()
 	{
@@ -598,7 +599,7 @@ public abstract class NodeBase implements INBTTReady {
 	    	
 	    	stream.writeByte(coordonate.dimention);
 	    	
-	    	stream.writeShort(getBlockId());
+	    	stream.writeUTF(getInfo().getUuid());
 	    		    	
 	    	
 		} catch (IOException e) {
@@ -648,7 +649,7 @@ public abstract class NodeBase implements INBTTReady {
 	        stream.writeByte(coordonate.dimention);
 	        
 	       
-	        stream.writeShort(getBlockId());
+	        stream.writeUTF(getInfo().getUuid());
 		
 	        
 	        networkSerialize(stream);

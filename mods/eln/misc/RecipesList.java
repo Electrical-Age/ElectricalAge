@@ -1,8 +1,11 @@
 package mods.eln.misc;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import mods.eln.Eln;
 import mods.eln.electricalfurnace.ElectricalFurnaceProcess;
@@ -65,20 +68,27 @@ public class RecipesList {
 		for(RecipesList recipesList : listOfList){
 			list.addAll(recipesList.getRecipeFromOutput(output));
 		}
-		//1.7.2
-		/*FurnaceRecipes furnaceRecipes = FurnaceRecipes.smelting();
-		for(Entry<List<Integer>, ItemStack> entry : furnaceRecipes.getSmeltingList().entrySet()){
-			Recipe recipe;
-			if(Utils.areSame(output,entry.getValue())){
-				list.add(recipe = new Recipe(Utils.newItemStack(entry.getKey().get(0),1,entry.getKey().get(1)), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
-				recipe.setMachineList(Eln.instance.furnaceList);
-			}
+		
+		FurnaceRecipes furnaceRecipes = FurnaceRecipes.smelting();
+
+		{
+			Iterator it = furnaceRecipes.getSmeltingList().entrySet().iterator();
+		    while (it.hasNext()) {
+		        Map.Entry pairs = (Map.Entry)it.next();
+				Recipe recipe; // List<Integer>, ItemStack
+				ItemStack stack = (ItemStack)pairs.getValue();
+				ItemStack li = (ItemStack)pairs.getKey();
+				if(Utils.areSame(output,stack)){
+					list.add(recipe = new Recipe(li.copy(), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
+					recipe.setMachineList(Eln.instance.furnaceList);
+				}
+		    }
 		}
-		for(Object entry : furnaceRecipes.getSmeltingList().entrySet()){
+	/*	for(Object entry : furnaceRecipes.getSmeltingList().entrySet()){
 			Recipe recipe = null;
-			Entry<Integer, Object> e = (Entry<Integer, Object>)entry;
-			if(((ItemStack)e.getValue()).itemID == output.itemID){
-				list.add(recipe = new Recipe(Utils.newItemStack(e.getKey(),1,0), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
+			Entry<ItemStack, ItemStack> e = (Entry<ItemStack, ItemStack>)entry;
+			if(((ItemStack)e.getValue()).getItem() == output.getItem()){
+				list.add(recipe = new Recipe(e.getKey().copy(), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
 				recipe.setMachineList(Eln.instance.furnaceList);
 			}
 		}*/

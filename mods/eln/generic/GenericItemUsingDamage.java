@@ -100,12 +100,6 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 		return "trololol";
 	}
 
-	//1.7.2
-	/*@Override
-	public String getStatName()
-	{
-	    return "troloo2";
-	}*/
 
 	@Override
 	public String getItemStackDisplayName(ItemStack par1ItemStack)

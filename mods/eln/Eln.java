@@ -248,6 +248,7 @@ import cpw.mods.fml.common.event.FMLServerStoppingEvent;
 import cpw.mods.fml.common.network.FMLEventChannel;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
+import cpw.mods.fml.common.registry.GameData;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
@@ -555,8 +556,8 @@ public class Eln {
 		genPlumb = config.get("mapGenerate", "plumb", true).getBoolean(true);
 		genTungsten = config.get("mapGenerate", "tungsten", true).getBoolean(true);
 		genCinnabar = config.get("mapGenerate", "cinnabar", true).getBoolean(true);
-/*1.7.2
-		ConfigCategory xRayOre;
+
+		/*ConfigCategory xRayOre;
 		if (config.hasCategory("xrayscannerore") == false) {
 			xRayOre = config.getCategory("xrayscannerore");
 			xRayOre.setComment("Random name     Block id + metadata*4096     yellow factor");
@@ -580,6 +581,8 @@ public class Eln {
 			int[] v = e.getValue().getIntList();
 			oreScannerConfig.add(new OreScannerConfigElement(v[0], v[1] / 100f));
 		}*/
+
+		
 		addOtherModOreToXRay = config.get("xrayscannerconfig", "addOtherModOreToXRay", true).getBoolean(true);
 		xRayScannerRange = (float) config.get("xrayscannerconfig", "rangeInBloc", 5.0).getDouble(5.0);
 		xRayScannerRange = Math.max(Math.min(xRayScannerRange, 10), 4);
@@ -623,7 +626,7 @@ public class Eln {
 
 		creativeTab = new GenericCreativeTab("Eln", itemCreativeTab);
 
-		oreBlock = (OreBlock) new OreBlock().setCreativeTab(creativeTab);
+		oreBlock = (OreBlock) new OreBlock().setCreativeTab(creativeTab).setBlockName("OreEln");
 
 		sharedItem = (SharedItem) new SharedItem()
 				.setCreativeTab(creativeTab).setMaxStackSize(64)
@@ -664,12 +667,13 @@ public class Eln {
 				"TransparentNodeEntity");
 
 		GameRegistry.registerBlock(oreBlock,OreItem.class, "OreEln");
-
+		//o = GameData.getBlockRegistry().getObject("tile.OreEln");
+		//o = Block.getBlockFromName("OreEln");
 		// TileEntity.addMapping(GhostEntity.class, "GhostEntity");
 		TileEntity.addMapping(LightBlockEntity.class, "LightBlockEntity");
 
-		NodeManager.registerBlock(sixNodeBlock, SixNode.class);
-		NodeManager.registerBlock(transparentNodeBlock, TransparentNode.class);
+		NodeManager.registerUuid(sixNodeBlock.getUuid(), SixNode.class);
+		NodeManager.registerUuid(transparentNodeBlock.getUuid(), TransparentNode.class);
 
 		o = Item.getItemFromBlock(sixNodeBlock);
 		sixNodeItem = (SixNodeItem) Item.getItemFromBlock(sixNodeBlock);
@@ -947,30 +951,7 @@ public class Eln {
 	public void onServerStarting(FMLServerStartingEvent ev) {
 		{
 			if (firstStart) {
-				if (addOtherModOreToXRay) {
-					for (String name : OreDictionary.getOreNames()) {
-						// Utils.println(name + " " +
-						// OreDictionary.getOreID(name));
-						if (name.startsWith("ore")) {
-							for (ItemStack stack : OreDictionary.getOres(name)) {
-								int id = Utils.getItemId(stack) + 4096*stack.getItem().getMetadata(stack.getItemDamage());
-								// Utils.println(OreDictionary.getOreID(name));
-								boolean find = false;
-								for (OreScannerConfigElement c : oreScannerConfig) {
-									if (c.blockKey == id) {
-										find = true;
-										break;
-									}
-								}
-
-								if (!find) {
-									Utils.println(id + " added to xRay (other mod)");
-									oreScannerConfig.add(new OreScannerConfigElement(id, 0.15f));
-								}
-							}
-						}
-					}
-				}
+				
 				firstStart = false;
 			}
 			modbusServer = new ModbusServer();
@@ -1022,7 +1003,11 @@ public class Eln {
 			manager.registerCommand(new ConsoleListener());
 		}
 
+		
+		regenOreScannerFactors();
 	}
+
+
 
 	@EventHandler
 	public void ServerStopping(FMLServerStoppingEvent ev) {
@@ -6363,6 +6348,52 @@ public class Eln {
 	    }*/
 	}
 	
+	private void regenOreScannerFactors() {
+		PortableOreScannerItem.RenderStorage.blockKeyFactor = null;
+		
+		oreScannerConfig.clear();
+		
+		
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.coal_ore), 5 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.iron_ore), 15 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.gold_ore), 40 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.lapis_ore), 40 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.redstone_ore), 40 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.diamond_ore), 100 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.emerald_ore), 40 / 100f));
+		
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (1<<12), 10 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (4<<12), 20 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (5<<12), 20 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (6<<12), 20 / 100f));
+		
+		
+		
+		if (addOtherModOreToXRay) {
+			for (String name : OreDictionary.getOreNames()) {
+				// Utils.println(name + " " +
+				// OreDictionary.getOreID(name));
+				if (name.startsWith("ore")) {
+					for (ItemStack stack : OreDictionary.getOres(name)) {
+						int id = Utils.getItemId(stack) + 4096*stack.getItem().getMetadata(stack.getItemDamage());
+						// Utils.println(OreDictionary.getOreID(name));
+						boolean find = false;
+						for (OreScannerConfigElement c : oreScannerConfig) {
+							if (c.blockKey == id) {
+								find = true;
+								break;
+							}
+						}
+
+						if (!find) {
+							Utils.println(id + " added to xRay (other mod)");
+							oreScannerConfig.add(new OreScannerConfigElement(id, 0.15f));
+						}
+					}
+				}
+			}
+		}
+	}
 
 	public ItemStack findItemStack(String name, int stackSize) {
 		ItemStack stack = GameRegistry.findItemStack("Eln", name, stackSize);

@@ -499,13 +499,7 @@ public enum Direction {
 		return Block.getIdFromBlock(coordonate.world().getBlock(x, y, z));
 		
 	}
-	
-	//1.7.2   ???? from past ????
-	public Block getBlock(Coordonate coordonate)
-	{
-		return coordonate.getBlock();
-	}
-	
+
 	public TileEntity getTileEntity(Coordonate coordonate)
 	{
 		int x = coordonate.x,y = coordonate.y,z = coordonate.z;

@@ -43,11 +43,7 @@ public class OreBlock extends Block {
 		Eln.oreItem.getSubItems(i, tab, l);
 	}
 	
-	//1.7.2
-  /*  public void registerIcons(IconRegister par1IconRegister)
-    {
-    	
-    }*/
+
     
   
     @Override

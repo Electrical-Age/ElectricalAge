@@ -32,7 +32,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
-public class SixNodeBlock extends NodeBlock{
+public class SixNodeBlock extends NodeBlock implements INodeInfo{
 	//public static ArrayList<Integer> repertoriedItemStackId = new ArrayList<Integer>();
 	
 	public SixNodeBlock ( Material material,Class tileEntityClass) {
@@ -441,5 +441,12 @@ public class SixNodeBlock extends NodeBlock{
 			return 255;
 		else
 			return 0;
+	}
+
+
+	@Override
+	public String getUuid() {
+		// TODO Auto-generated method stub
+		return "s";
 	}
 }

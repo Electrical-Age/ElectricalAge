@@ -53,8 +53,11 @@ import net.minecraft.world.WorldServer;
 
 public abstract class NodeBlockEntity extends TileEntity implements ITileEntitySpawnClient{
 	
+	public abstract INodeInfo getInfo();
+	public NodeBlock getBlock(){
+		return (NodeBlock) getBlockType();
+	}
 	
-
 	boolean redstone = false;
 	int lastLight = 0xFF; // trololol
 	boolean firstUnserialize = true;
@@ -343,10 +346,13 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     	return null;
     }
     
+    
+   
+    /*
     public short getBlockId()
     {
     	return (short)Block.getIdFromBlock(getBlockType());
-    }
+    }*/
     
     @Override
     public Packet getDescriptionPacket()
@@ -374,7 +380,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 	    	
 	    	stream.writeByte(worldObj.provider.dimensionId);
 	    	
-	    	stream.writeShort(getBlockId());
+	    	stream.writeUTF(getInfo().getUuid());
 	    		    	
 	    	
 		} catch (IOException e) {

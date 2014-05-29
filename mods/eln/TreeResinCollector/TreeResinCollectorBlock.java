@@ -20,7 +20,7 @@ public class TreeResinCollectorBlock extends BlockContainer{
 
 	public TreeResinCollectorBlock(int id) {
 		super(Material.wood);
-		setBlockName("TreeResinCollector"); //1.7.2
+		setBlockName("TreeResinCollector"); 
 		// TODO Auto-generated constructor stub
 	}
 	@Override
@@ -93,21 +93,5 @@ public class TreeResinCollectorBlock extends BlockContainer{
     		world.setBlockToAir(x, y, z);
     	}
     }
-    //1.7.2
-   /* @Override
-    public void onNeighborBlockChange(World world, int x, int y,
-    		int z, int side) {
-    	// TODO Auto-generated method stub
-    	super.onNeighborBlockChange(world, x, y, z, side);
-    	
-    	
-    	if(! canPlaceBlockOnSide(world, x, y, z, world.getBlockMetadata(x, y, z)))
-    	{
-    	//Utils.println("WOOOOOOD down");
-    		
-    		dropBlockAsItem_do(world, x, y, z, new ItemStack(this));
-    		world.setBlockToAir(x, y, z);
-    	}
-    }
-*/
+
 }

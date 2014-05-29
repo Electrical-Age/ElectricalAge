@@ -29,12 +29,12 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class NodeBlock extends BlockContainer {//BlockContainer
+public abstract class NodeBlock extends BlockContainer{//BlockContainer
 	public int blockItemNbr;
 	Class tileEntityClass;
 	public NodeBlock ( Material material,Class tileEntityClass,int blockItemNbr) {
 		super(material);
-		setBlockName("NodeBlock");//1.7.2
+		setBlockName("NodeBlock");
 		this.tileEntityClass = tileEntityClass;
 		useNeighborBrightness = true;
 		this.blockItemNbr = blockItemNbr;
@@ -200,6 +200,8 @@ public class NodeBlock extends BlockContainer {//BlockContainer
 		}
 		while(true);
 	}
+
+
     
 }
 

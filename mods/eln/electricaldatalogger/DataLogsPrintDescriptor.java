@@ -21,7 +21,7 @@ public class DataLogsPrintDescriptor extends GenericItemUsingDamageDescriptor {
 	}
 
 	public void initializeStack(ItemStack stack, DataLogs logs) {
-		NBTTagCompound nbt = Utils.newNBTTagCompound("itemStackNBT");
+		NBTTagCompound nbt = new NBTTagCompound();
 		logs.writeToNBT(nbt, "");//.setByteArray("logs", logs.copyLog());
 		stack.setTagCompound(nbt);
 	}

@@ -16,6 +16,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -465,7 +466,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		short[][][] worldBlocks;
 		int worldBlocksDim,worldBlocksDim2;
 		
-		static float[] blockKeyFactor;
+		public static float[] blockKeyFactor;
 		float[] getBlockKeyFactor(){
 			if(blockKeyFactor == null){
 				blockKeyFactor = new float[1024*64];
@@ -582,7 +583,6 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 						int blockKey = worldBlocks[xInt][yInt][zInt];
 						if(blockKey < 0) blockKey += 65536;
 						if(blockKey == 65535){
-
 							int xBlock = posXint + (int)xFloor;
 							int yBlock = posYint + (int)yFloor;
 							int zBlock = posZint + (int)zFloor;
@@ -596,7 +596,12 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 										int yLocal = yBlock & 0xF;
 										int zLocal = zBlock & 0xF;
 										
-										//1.7.2 blockKey = (storage.getExtBlockID(xLocal, yLocal, zLocal) + (storage.getExtBlockMetadata(xLocal, yLocal, zLocal) << 12));
+									    int blockId = storage.getBlockLSBArray()[yLocal << 8 | zLocal << 4 | xLocal] & 0xFF;
+									    if (storage.getBlockMSBArray() != null) {
+									    	blockId = storage.getBlockMSBArray().get(xLocal, yLocal, zLocal) << 8 | i;
+									    }
+										
+										blockKey = (blockId + (storage.getExtBlockMetadata(xLocal, yLocal, zLocal) << 12));
 									}
 								}
 							}
@@ -617,7 +622,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 						
 						stackGreen += blockKeyFactor[blockKey]*dToStack;
 						Block b = Block.getBlockById(blockKey & 0xFFF);
-						if(b != null && b != Eln.lightBlock){
+						if(b != Blocks.air && b != Eln.lightBlock){
 							if(b.isOpaqueCube())
 								stackRed += 0.2f*dToStack;
 							else 

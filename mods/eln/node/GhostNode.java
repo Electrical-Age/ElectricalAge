@@ -12,11 +12,7 @@ import net.minecraft.item.ItemStack;
 
 public abstract class GhostNode extends NodeBase{
 
-	@Override
-	public short getBlockId() {
-		// TODO Auto-generated method stub
-		return (short) Utils.getBlockId(Eln.ghostBlock);
-	}
+
 
 	@Override
 	public Block getBlock() {
@@ -29,5 +25,9 @@ public abstract class GhostNode extends NodeBase{
 		// TODO Auto-generated method stub
 		return false;
 	}
-
+	@Override
+	public INodeInfo getInfo() {
+		// TODO Auto-generated method stub
+		return Eln.ghostBlock;
+	}
 }

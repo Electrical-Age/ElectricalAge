@@ -66,49 +66,28 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
     	Coordonate coord = new Coordonate(x,y,z,world);
     	
     	
-		try {
-			String error;
-			if((error = descriptor.checkCanPlace(coord, front)) != null)
-			{
-				Utils.addChatMessage(player,error);
-				return false;
-			}
-			
-			GhostGroup ghostgroup = descriptor.getGhostGroup(front);
-			if(ghostgroup != null) ghostgroup.plot(coord, coord, descriptor.getGhostGroupUuid());
-			
-        	TransparentNode node =  (TransparentNode) NodeManager.UUIDToClass[getBlockID()].getConstructor().newInstance();
-			node.onBlockPlacedBy(new Coordonate(x, y, z,world),front,player,stack);
-			
-			world.setBlock(x, y, z, Block.getBlockFromItem(this), node.getBlockMetadata(),0x03);//caca1.5.1
-        	((NodeBlock)Block.getBlockFromItem(this)).onBlockPlacedBy(world, x, y, z,direction, player,metadata);
-        	
-        	
-        	
-        	node.checkCanStay(true);
-        	
-        	return true;
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		String error;
+		if((error = descriptor.checkCanPlace(coord, front)) != null)
+		{
+			Utils.addChatMessage(player,error);
+			return false;
 		}
-        
-        return false;
+		
+		GhostGroup ghostgroup = descriptor.getGhostGroup(front);
+		if(ghostgroup != null) ghostgroup.plot(coord, coord, descriptor.getGhostGroupUuid());
+		
+    	TransparentNode node =  new TransparentNode();
+		node.onBlockPlacedBy(new Coordonate(x, y, z,world),front,player,stack);
+		
+		world.setBlock(x, y, z, Block.getBlockFromItem(this), node.getBlockMetadata(),0x03);//caca1.5.1
+    	((NodeBlock)Block.getBlockFromItem(this)).onBlockPlacedBy(world, x, y, z,direction, player,metadata);
+    	
+    	
+    	
+    	node.checkCanStay(true);
+    	
+    	return true;
+
     }
 
 	@Override

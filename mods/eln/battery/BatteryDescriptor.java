@@ -191,7 +191,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor implements IPlu
 	
 	@Override
 	public NBTTagCompound getDefaultNBT() {
-		NBTTagCompound nbt = Utils.newNBTTagCompound("itemStackNBT");
+		NBTTagCompound nbt = new NBTTagCompound();
 
 		nbt.setDouble("charge", startCharge);
 		nbt.setDouble("life", 1.0);

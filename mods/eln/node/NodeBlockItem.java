@@ -35,40 +35,19 @@ public class NodeBlockItem extends ItemBlock {
 
     public boolean placeBlockAt(ItemStack stack, EntityLivingBase player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata)
     {
-    	if(world.isRemote) return false;
+    /*	if(world.isRemote) return false;
     	Direction direction = Direction.fromIntMinecraftSide(side).getInverse();
     	
-		try {
 
-        	NodeBase node = (NodeBase) NodeManager.UUIDToClass[getBlockID()].getConstructor().newInstance();
-			node.onBlockPlacedBy(new Coordonate(x, y, z,world),direction,player,stack);
-			
-			world.setBlock(x, y, z, getBlock(), node.getBlockMetadata(),0x03);//caca1.5.1
-        	getBlock().onBlockPlacedBy(world, x, y, z,direction, player,metadata);
-        	
-        	node.checkCanStay(true);
-        	
-        	return true;
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
-        return false;
+    	NodeBase node = (NodeBase) getBlock().newNodeBase();
+		node.onBlockPlacedBy(new Coordonate(x, y, z,world),direction,player,stack);
+		
+		world.setBlock(x, y, z, getBlock(), node.getBlockMetadata(),0x03);//caca1.5.1
+    	getBlock().onBlockPlacedBy(world, x, y, z,direction, player,metadata);
+    	
+    	node.checkCanStay(true);
+    	*/
+    	return false;
+
     }
 }

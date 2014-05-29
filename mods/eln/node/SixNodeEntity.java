@@ -231,6 +231,14 @@ public class SixNodeEntity extends NodeBlockEntity {
 			if(e != null)e.notifyNeighborSpawn();
 		}
 	}
+
+
+
+	@Override
+	public INodeInfo getInfo() {
+		// TODO Auto-generated method stub
+		return Eln.sixNodeBlock;
+	}
 	
 
 	
