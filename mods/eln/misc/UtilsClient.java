@@ -24,6 +24,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 
 public class UtilsClient {
 
@@ -163,6 +164,54 @@ public class UtilsClient {
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
+	public static void disableLight() {
+		OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+		lightmapTexUnitTextureEnable = GL11.glGetBoolean(GL11.GL_TEXTURE_2D);
+		if (lightmapTexUnitTextureEnable)
+			GL11.glDisable(GL11.GL_TEXTURE_2D);
+		OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
+		GL11.glDisable(GL11.GL_LIGHTING);
+	}
+
+	public static void enableLight() {
+		OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+		if (lightmapTexUnitTextureEnable)
+			GL11.glEnable(GL11.GL_TEXTURE_2D);
+		OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
+		GL11.glEnable(GL11.GL_LIGHTING);
+	}
+
+	public static void enableBlend() {
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glDepthMask(false);
+		
+/*
+		Utils.println(GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB) + " " 
+				+ GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA) + " " 
+				+ GL11.glGetInteger(GL14.GL_BLEND_DST_RGB) + " " 
+				+ GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA) + " " 
+				+ GL11.glIsEnabled(GL11.GL_BLEND));*/
+
+		//Utils.println(GL11.glGetInteger(GL11.GL_BLEND_SRC) + " " + GL11.glGetInteger(GL11.GL_BLEND_DST) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
+	     /* GL11.glEnable(2977);
+	      GL11.glEnable(3042);*/
+	  //    OpenGlHelper.glBlendFunc(770, 770, 771, 771);
+	}
+
+	public static void disableBlend() {
+		// TODO Auto-generated method stub
+		GL11.glDepthMask(true);
+		//GL11.glDisable(GL11.GL_BLEND);
+		//GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		//	Utils.println(GL11.glGetInteger(GL11.GL_BLEND_SRC) + " " + GL11.glGetInteger(GL11.GL_BLEND_DST) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
+		//GL11.glBlendFunc(GL11.GL_SRC_COLOR, GL11.GL_ONE_MINUS_SRC_COLOR);
+		//GL11.glBlendFunc(1, 1);
+		//GL11.glDisable(3042);
+		
+		//OpenGlHelper.glBlendFunc(1, 1, 1, 1);
+	}
+
 	public static void drawIcon(ItemRenderType type) {
 		if (type == ItemRenderType.INVENTORY) {
 
@@ -222,8 +271,6 @@ public class UtilsClient {
 		drawIcon(type);
 	}
 
-	
-
 	/*public static void drawIcon(ItemRenderType type, Icon icon) {
 		drawIcon(type, icon.getIconName());
 	}*/
@@ -269,79 +316,50 @@ public class UtilsClient {
 
 	static boolean lightmapTexUnitTextureEnable;
 
-	public static void disableLight() {
-		// TODO Auto-generated method stub
-		OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-		lightmapTexUnitTextureEnable = GL11.glGetBoolean(GL11.GL_TEXTURE_2D);
-		if (lightmapTexUnitTextureEnable)
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-		OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
-		GL11.glDisable(GL11.GL_LIGHTING);
-	}
-
-	public static void enableLight() {
-		// TODO Auto-generated method stub
-		OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
-		if (lightmapTexUnitTextureEnable)
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
-		OpenGlHelper.setActiveTexture(OpenGlHelper.defaultTexUnit);
-		GL11.glEnable(GL11.GL_LIGHTING);
-	}
-
-	public static void enableBlend() {
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glDepthMask(false);
-
-	}
-
-	public static void disableBlend() {
-		// TODO Auto-generated method stub
-		GL11.glDepthMask(true);
-		GL11.glDisable(GL11.GL_BLEND);
-	}
-	
-	
 	public static void ledOnOffColor(boolean on)
 	{
-		if(! on)
+		if (!on)
 			GL11.glColor3f(0.7f, 0f, 0f);
 		else
 			GL11.glColor3f(0f, 0.7f, 0f);
 	}
+
 	public static Color ledOnOffColorC(boolean on)
 	{
-		if(! on)
+		if (!on)
 			return new Color(0.7f, 0f, 0f);
 		else
 			return new Color(0f, 0.7f, 0f);
 	}
-	
+
 	public static void drawLight(Obj3DPart part)
 	{
-		if(part == null) return;
+		if (part == null)
+			return;
 		disableLight();
 		enableBlend();
-		
+
 		part.draw();
-	
+
 		enableLight();
 		disableBlend();
-		
+
 	}
-	
+
 	public static void drawLightNoBind(Obj3DPart part) {
 
-		if(part == null) return;
+		if (part == null)
+			return;
 		disableLight();
 		enableBlend();
-		
+
 		part.drawNoBind();
-	
+
 		enableLight();
-		disableBlend();		
+		disableBlend();
 	}
-	public static void drawGuiBackground(ResourceLocation ressource,GuiScreen guiScreen,int xSize,int ySize) {
+
+	public static void drawGuiBackground(ResourceLocation ressource, GuiScreen guiScreen, int xSize, int ySize) {
 		bindTexture(ressource);
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		int x = (guiScreen.width - xSize) / 2;
@@ -349,90 +367,94 @@ public class UtilsClient {
 		guiScreen.drawTexturedModalRect(x, y, 0, 0, xSize, ySize);
 	}
 
-	public static void drawLight(Obj3DPart part,float angle,float x,float y,float z)
+	public static void drawLight(Obj3DPart part, float angle, float x, float y, float z)
 	{
-		if(part == null) return;
+		if (part == null)
+			return;
 		disableLight();
 		enableBlend();
-		
+
 		part.draw(angle, x, y, z);
 
 		enableLight();
 		disableBlend();
-		
-	}
-	public static void glDefaultColor() {
-		GL11.glColor4f(1f,1f, 1f, 1f);
-	}
-	
-	
-	static public void drawEntityItem(EntityItem entityItem,double x, double y , double z,float roty,float scale)
-	{
-		if(entityItem == null) return;
-		
 
+	}
+
+	public static void glDefaultColor() {
+		GL11.glColor4f(1f, 1f, 1f, 1f);
+	}
+
+	static public void drawEntityItem(EntityItem entityItem, double x, double y, double z, float roty, float scale)
+	{
+		if (entityItem == null)
+			return;
 
 		entityItem.hoverStart = 0.0f;
 		entityItem.rotationYaw = 0.0f;
 		entityItem.motionX = 0.0;
 		entityItem.motionY = 0.0;
-		entityItem.motionZ =0.0;
-		
+		entityItem.motionZ = 0.0;
+
 		Render var10 = null;
 		var10 = RenderManager.instance.getEntityRenderObject(entityItem);
 		GL11.glPushMatrix();
-			GL11.glTranslatef((float)x, (float)y, (float)z);
-			GL11.glRotatef(roty, 0, 1, 0);
-			GL11.glScalef(scale, scale, scale);
-			var10.doRender(entityItem,0, 0, 0, 0, 0);	
-		GL11.glPopMatrix();	
-		
+		GL11.glTranslatef((float) x, (float) y, (float) z);
+		GL11.glRotatef(roty, 0, 1, 0);
+		GL11.glScalef(scale, scale, scale);
+		var10.doRender(entityItem, 0, 0, 0, 0, 0);
+		GL11.glPopMatrix();
 
 	}
-	
+
 	protected static RenderItem itemRendererr;
-	
-	static RenderItem getItemRender(){
-		if(itemRendererr == null){
+
+	static RenderItem getItemRender() {
+		if (itemRendererr == null) {
 			itemRendererr = new RenderItem();
 		}
-		
+
 		return itemRendererr;
 	}
-	
+
 	static Minecraft mc()
 	{
 		return Minecraft.getMinecraft();
 	}
+
 	public static void guiScale() {
 		GL11.glScalef(16f, 16f, 1f);
-		
+
 	}
-    public static void drawItemStack(ItemStack par1ItemStack, int x, int y, String par4Str,boolean gui)
-    {
-    	RenderItem itemRenderer = getItemRender();
-    	
-       // GL11.glTranslatef(0.0F, 0.0F, 32.0F);
-       
-        itemRenderer.zLevel = 400.0F;
-        FontRenderer font = null;
-        if (par1ItemStack != null) font = par1ItemStack.getItem().getFontRenderer(par1ItemStack);
-        if (font == null) font = mc().fontRenderer;
-        itemRenderer.renderItemAndEffectIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y);
-        itemRenderer.renderItemOverlayIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y, par4Str);
-        
-        itemRenderer.zLevel = 0.0F;
-        
-        if(gui){
-            GL11.glDisable(GL11.GL_LIGHTING);
-        }
-    }
+
+	public static void drawItemStack(ItemStack par1ItemStack, int x, int y, String par4Str, boolean gui)
+	{
+		RenderItem itemRenderer = getItemRender();
+
+		// GL11.glTranslatef(0.0F, 0.0F, 32.0F);
+
+		itemRenderer.zLevel = 400.0F;
+		FontRenderer font = null;
+		if (par1ItemStack != null)
+			font = par1ItemStack.getItem().getFontRenderer(par1ItemStack);
+		if (font == null)
+			font = mc().fontRenderer;
+		itemRenderer.renderItemAndEffectIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y);
+		itemRenderer.renderItemOverlayIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y, par4Str);
+
+		itemRenderer.zLevel = 0.0F;
+
+		if (gui) {
+			GL11.glDisable(GL11.GL_LIGHTING);
+		}
+	}
 
 	public static double clientDistanceTo(Entity e) {
-		if(e == null) return 100000000.0;
+		if (e == null)
+			return 100000000.0;
 		Entity c = Minecraft.getMinecraft().thePlayer;
-		double x = (c.posX-e.posX),y = (c.posY-e.posY),z = (c.posZ-e.posZ);
-		return Math.sqrt(x*x+y*y+z*z);
+		double x = (c.posX - e.posX), y = (c.posY - e.posY), z = (c.posZ - e.posZ);
+		return Math.sqrt(x * x + y * y + z * z);
 	}
 
 	public static void disableDepthTest() {
@@ -441,8 +463,7 @@ public class UtilsClient {
 
 	public static void enableDepthTest() {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
-		
-	}
 
+	}
 
 }

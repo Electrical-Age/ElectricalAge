@@ -13,39 +13,39 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
 public class SoundClient {
-	public static void playFromBlock(World world,int x, int y, int z, String track, float volume, float pitch,float rangeNominal,float rangeMax){
+	/*public static void playFromBlock(World world,int x, int y, int z, String track, float volume, float pitch,float rangeNominal,float rangeMax){
 		play(world, x+0.5, y+0.5, z+0.5, track, volume, pitch, rangeNominal, rangeMax);
-	}
+	}*/
 	
-	
-	public static void play(World world,double x, double y, double z, String track, float volume, float pitch,float rangeNominal,float rangeMax){
+	public static void play(SoundParam p){
+//	public static void play(World world,double x, double y, double z, String track, float volume, float pitch,float rangeNominal,float rangeMax){
 		EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-		if(world.provider.dimensionId != player.dimension) return;
-		double distance = Math.sqrt(Math.pow(x-player.posX, 2) + Math.pow(y-player.posY, 2) + Math.pow(z-player.posZ, 2));
-		if(distance >= rangeMax) return;
+		if(p.world.provider.dimensionId != player.dimension) return;
+		double distance = Math.sqrt(Math.pow(p.x-player.posX, 2) + Math.pow(p.y-player.posY, 2) + Math.pow(p.z-player.posZ, 2));
+		if(distance >= p.rangeMax) return;
 		float distanceFactor = 1;
-		if(distance > rangeNominal){
-			distanceFactor = (float) ((rangeMax - distance)/(rangeMax-rangeNominal));
+		if(distance > p.rangeNominal){
+			distanceFactor = (float) ((p.rangeMax - distance)/(p.rangeMax-p.rangeNominal));
 		}
 		
-		float blockFactor = Utils.traceRay(world, player.posX, player.posY, player.posZ, x, y, z,new Utils.TraceRayWeightOpaque());
+		float blockFactor = Utils.traceRay(p.world, player.posX, player.posY, player.posZ, p.x, p.y, p.z,new Utils.TraceRayWeightOpaque())*p.blockFactor;
 
-		int trackCount = SoundLoader.getTrackCount(track);
+		int trackCount = SoundLoader.getTrackCount(p.track);
 		
 		if(trackCount == 1){
-			volume -= blockFactor*0.2f;
-			volume *= distanceFactor;
-			if(volume <= 0) return;
-			world.playSound(player.posX + (x-player.posX)/distance, player.posY + (y-player.posY)/distance, player.posZ + (z-player.posZ)/distance, track, volume, pitch, false);
+			p.volume -= blockFactor*0.2f;
+			p.volume *= distanceFactor;
+			if(p.volume <= 0) return;
+			p.world.playSound(player.posX + (p.x-player.posX)/distance, player.posY + (p.y-player.posY)/distance, player.posZ + (p.z-player.posZ)/distance, p.track,p. volume, p.pitch, false);
 		}else{
 			for(int idx = 0;idx < trackCount;idx++){
-				float bandVolume = volume;
+				float bandVolume = p.volume;
 				bandVolume *= distanceFactor;
-				float normalizedBlockFactor = blockFactor*0.5f;
+				float normalizedBlockFactor = blockFactor;
 				
 				bandVolume -= ((trackCount-1-idx)/(trackCount-1f)+0.2)*normalizedBlockFactor;
 				Utils.print(bandVolume + " ");
-				world.playSound(player.posX + (x-player.posX)/distance, player.posY + (y-player.posY)/distance, player.posZ + (z-player.posZ)/distance, track + "_" + idx + "x", bandVolume, pitch, false);
+				p.world.playSound(player.posX + (p.x-player.posX)/distance, player.posY + (p.y-player.posY)/distance, player.posZ + (p.z-player.posZ)/distance, p.track + "_" + idx + "x", bandVolume, p.pitch, false);
 			}
 			Utils.println("");
 		}

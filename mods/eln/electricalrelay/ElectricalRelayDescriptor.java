@@ -102,6 +102,7 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
 	}
 	
 	void draw(float factor) {
+		//UtilsClient.disableBlend();
 		UtilsClient.disableCulling();
 		GL11.glScalef(0.5f, 0.5f, 0.5f);
 		if(main != null) main.draw();

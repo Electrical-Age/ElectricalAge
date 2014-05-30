@@ -20,15 +20,19 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 
 public class SoundServer {
-	public static void playFromBlock(World world,int x, int y, int z, String track, float volume, float pitch,float rangeNominal,float rangeMax){
-		play(world, x+0.5, y+0.5, z+0.5, track, volume, pitch, rangeNominal, rangeMax);
+	/*public static void playFromBlock(World world,int x, int y, int z, String track, float volume, float pitch,float rangeNominal,float rangeMax){
+		play(world, x+0.5, y+0.5, z+0.5, track, volume, pitch, rangeNominal, rangeMax,1);
 	}
 	public static void playFromCoord(Coordonate c, String track, float volume, float pitch,float rangeNominal,float rangeMax){
-		play(c.world(), c.x+0.5, c.y+0.5, c.z+0.5, track, volume, pitch, rangeNominal, rangeMax);
+		play(c.world(), c.x+0.5, c.y+0.5, c.z+0.5, track, volume, pitch, rangeNominal, rangeMax,1);
 	}
 	
+	public static void playFromCoord(Coordonate c, String track, float volume, float pitch,float rangeNominal,float rangeMax,float blockFactor){
+		play(c.world(), c.x+0.5, c.y+0.5, c.z+0.5, track, volume, pitch, rangeNominal, rangeMax,blockFactor);
+	}*/
 	
-	public static void play(World world,double x, double y, double z, String track, float volume, float pitch,float rangeNominal,float rangeMax){
+	
+	public static void play(SoundParam p){
 		
     	ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
         DataOutputStream stream = new DataOutputStream(bos);   	
@@ -37,20 +41,11 @@ public class SoundServer {
         
 	        stream.writeByte(Eln.packetPlaySound);
 	        
-	        stream.writeByte(world.provider.dimensionId);
-	        stream.writeInt((int)(x*8));
-	        stream.writeInt((int)(y*8));
-	        stream.writeInt((int)(z*8));
-	        
-	       
-	        stream.writeUTF(track);
-	        stream.writeFloat(volume);
-	        stream.writeFloat(pitch);
-	        stream.writeFloat(rangeNominal);
-	        stream.writeFloat(rangeMax);
+	        stream.writeByte(p.world.provider.dimensionId);
+
 		
 	       
-
+	        p.writeTo(stream);
 
 	        
 	        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();       
@@ -58,7 +53,7 @@ public class SoundServer {
 	        for (Object obj :  server.getConfigurationManager().playerEntityList)
 		    {
 		    	EntityPlayerMP player = (EntityPlayerMP) obj;
-		    	if(player.dimension == world.provider.dimensionId && player.getDistance(x, y, z) < rangeMax + 2);
+		    	if(player.dimension == p.world.provider.dimensionId && player.getDistance(p.x, p.y, p.z) < p.rangeMax + 2);
 		    		Utils.sendPacketToClient(bos,player);
 		    }
 		} catch (IOException e) {

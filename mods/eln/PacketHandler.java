@@ -23,6 +23,7 @@ import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
 import mods.eln.sound.SoundClient;
+import mods.eln.sound.SoundParam;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
@@ -120,16 +121,8 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 			if (stream.readByte() != clientPlayer.dimension)
 				return;
 
-			SoundClient.play(
-					clientPlayer.worldObj,
-					stream.readInt() / 8.0,
-					stream.readInt() / 8.0,
-					stream.readInt() / 8.0,
-					stream.readUTF(),
-					stream.readFloat(),
-					stream.readFloat(),
-					stream.readFloat(),
-					stream.readFloat());
+
+			SoundClient.play(SoundParam.fromStream(stream,clientPlayer.worldObj));
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

@@ -38,6 +38,8 @@ import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ITemperatureWatchdogDescriptor;
 import mods.eln.sim.IVoltageWatchdogDescriptor;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sound.SoundParam;
+import mods.eln.sound.SoundServer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -145,7 +147,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 		}
 		else if(!Utils.playerHasMeter(entityPlayer) && descriptor.onOffOnly) {
 			outputGateProcess.state(!outputGateProcess.getOutputOnOff());
-			playSoundEffect("random.click", 0.3F, 0.6F);
+			SoundServer.play(new SoundParam("random.click",this.getCoordonate()).setVolume(0.3F, 0.6F).smallRange());
 			needPublish();
 			return true;
 		}

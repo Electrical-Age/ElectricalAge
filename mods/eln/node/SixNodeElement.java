@@ -22,6 +22,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalConnection;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sound.SoundServer;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -59,10 +60,7 @@ public abstract class SixNodeElement implements  GhostObserver {
 
 	}
 	
-	public void playSoundEffect(String sournd,float strengh,float pitch){
-		Coordonate c = getCoordonate();
-		c.world().playSoundEffect((double)c.x + 0.5D, (double)c.y + 0.5D, (double)c.z + 0.5D, sournd,strengh, pitch);
-	}
+
 	public Coordonate getCoordonate(){
 		return sixNode.coordonate;
 	}

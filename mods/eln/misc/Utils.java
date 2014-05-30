@@ -1109,7 +1109,9 @@ public class Utils {
 
 			Block block = Blocks.air;
 			if (w.blockExists(xInt + posXint, yInt + posYint, zInt + posZint))
-				w.getBlock(xInt + posXint, yInt + posYint, zInt + posZint);
+				block = w.getBlock(xInt + posXint, yInt + posYint, zInt + posZint);
+			
+
 
 			float dToStack;
 			if (d + dBest < rangeMax)

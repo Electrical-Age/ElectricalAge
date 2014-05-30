@@ -11,6 +11,8 @@ import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.node.TransparentNodeElementRender;
 import mods.eln.node.TransparentNodeEntity;
+import mods.eln.sound.SoundClient;
+import mods.eln.sound.SoundParam;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,9 +40,10 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 		
 		if (alpha % 120 > 45 && alphaN_1 % 120 <= 45 && soundPlaying == false) {
 			Coordonate coord = coordonate();
-			tileEntity.getWorldObj().playSound(coord.x, coord.y, coord.z, descriptor.soundName, 
-					descriptor.nominalVolume * (0.007f + 1f * (float)powerFactorFilter.get() * (float)powerFactorFilter.get()), 
-					1f + (float)Math.sqrt(powerFactorFilter.get()) / 1.3f, false);
+			SoundClient.play(new SoundParam(descriptor.soundName, tileEntity)
+					.setVolume(descriptor.nominalVolume * (0.007f + 1f * (float)powerFactorFilter.get() * (float)powerFactorFilter.get()), 
+								1f + (float)Math.sqrt(powerFactorFilter.get()) / 1.3f));
+
 			soundPlaying = true;
 		} else {
 			soundPlaying = false;

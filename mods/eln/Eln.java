@@ -1176,7 +1176,7 @@ public class Eln {
 		double stdU = LVU;
 		double stdP = LVP / 4;
 		double stdHalfLife = Utils.minecraftDay * 2;
-		double stdEfficiency = 1.0 - 4.0 / 50.0;
+		double stdEfficiency = 1.0 - 2.0 / 50.0;
 		double condoEfficiency = 1.0 - 2.0 / 50.0;
 
 		batteryVoltageFunctionTable = voltageFunction;
