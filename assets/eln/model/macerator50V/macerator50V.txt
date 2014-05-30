@@ -1,8 +1,0 @@
-o rouleau1
-f originX 0.0
-f originY 0.34977
-f originZ -0.08707
-o rouleau2
-f originX 0.0
-f originY 0.34977
-f originZ 0.11293

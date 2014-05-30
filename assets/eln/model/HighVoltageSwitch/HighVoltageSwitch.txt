@@ -1,8 +1,0 @@
-s type lever
-o lever
-f originX 0.21
-f originY 0
-f originZ -0.22
-f alphaOff 45.0
-f alphaOn 0.0
-f speed 0.2

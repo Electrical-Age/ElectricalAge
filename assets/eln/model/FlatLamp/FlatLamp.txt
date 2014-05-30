@@ -1,4 +1,0 @@
-s tOn FlatLamp_on.png
-s tOff FlatLamp_off.png
-s type noLampDraw
-s cable enable

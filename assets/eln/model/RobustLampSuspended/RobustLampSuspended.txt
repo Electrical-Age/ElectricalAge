@@ -1,9 +1,0 @@
-s tOn RobustLampSuspended_on.png
-s tOff RobustLampSuspended_off.png
-s type noLampDraw
-s cable enable
-o base
-f length 0.09375
-o chain
-f length 0.26563
-f factor 1.0

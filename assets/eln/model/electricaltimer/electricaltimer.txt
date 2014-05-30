@@ -1,6 +1,0 @@
-o rot
-f originX 0.17200
-f originY 0.0
-f originZ 0.06250
-f rotStart 360
-f rotEnd 0

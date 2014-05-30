@@ -1,4 +1,0 @@
-o anemometer
-f originX 0.5
-f originY 0.0
-f originZ 0.0

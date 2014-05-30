@@ -3,6 +3,7 @@ package mods.eln;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -18,9 +19,10 @@ public class GenericCreativeTab extends CreativeTabs {
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public Item getTabIconItem() {
-		// TODO Auto-generated method stub
-		return item;
+	public Item getTabIconItem()
+	{
+		return (item);
 	}
+
 
 }

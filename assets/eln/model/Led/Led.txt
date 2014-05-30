@@ -1,5 +1,0 @@
-s type LedOnOff
-o halo
-f originX 0.18750
-f originY 0.0
-f originZ 0.0

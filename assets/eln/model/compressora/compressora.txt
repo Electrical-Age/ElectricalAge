@@ -1,3 +1,0 @@
-o move
-f tyoff 0.0
-f tyon -0.125
