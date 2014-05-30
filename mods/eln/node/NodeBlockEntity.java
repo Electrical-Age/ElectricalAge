@@ -28,6 +28,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUCubeMask;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.sim.*;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -42,6 +43,7 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerManager;
 import net.minecraft.tileentity.TileEntity;
@@ -358,7 +360,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     		Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
     		return null;
     	}
-    	return node.getPacketNodeSingleSerialized();
+    	return new S3FPacketCustomPayload(Eln.channelName,node.getPacketNodeSingleSerialized().toByteArray());
     	//return null;
     }
 
@@ -386,7 +388,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 	
     public void sendPacketToServer(ByteArrayOutputStream bos)
     {
-    	Utils.sendPacketToServer(bos);
+    	UtilsClient.sendPacketToServer(bos);
     }
     
     

@@ -25,7 +25,7 @@ import mods.eln.node.NodeManager;
 import mods.eln.sound.SoundClient;
 import mods.eln.sound.SoundParam;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -63,24 +63,24 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 		FMLProxyPacket packet = event.packet;
 		DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
 		NetworkManager manager = event.manager;
-		EntityPlayer player = ((NetHandlerPlayServer) event.handler).playerEntity;
+		EntityPlayer player = ((NetHandlerPlayServer) event.handler).playerEntity; // EntityPlayerMP
 
 		packetRx(stream, manager, player);
 	}
 
-	@SubscribeEvent
+	/*@SubscribeEvent
 	public void onClientPacket(ClientCustomPacketEvent event) {
 
 		//Utils.println("onClientPacket");
 		FMLProxyPacket packet = event.packet;
 		DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
 		NetworkManager manager = event.manager;
-		EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+		EntityPlayer player = Minecraft.getMinecraft().thePlayer; // EntityClientPlayerMP
 
 		packetRx(stream, manager, player);
-	}
+	}*/
 
-	void packetRx(DataInputStream stream, NetworkManager manager,
+	public void packetRx(DataInputStream stream, NetworkManager manager,
 			EntityPlayer player) {
 
 		try {
@@ -116,13 +116,13 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 
 	void packetPlaySound(DataInputStream stream, NetworkManager manager,
 			EntityPlayer player) {
-		EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP) player;
+	//	EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP) player;
 		try {
-			if (stream.readByte() != clientPlayer.dimension)
+			if (stream.readByte() != player.dimension)
 				return;
 
 
-			SoundClient.play(SoundParam.fromStream(stream,clientPlayer.worldObj));
+			SoundClient.play(SoundParam.fromStream(stream,player.worldObj));
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -133,7 +133,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 
 	void packetOpenLocalGui(DataInputStream stream, NetworkManager manager,
 			EntityPlayer player) {
-		EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP) player;
+		EntityPlayer clientPlayer = (EntityPlayer) player;
 		try {
 			clientPlayer.openGui(Eln.instance, stream.readInt(),
 					clientPlayer.worldObj, stream.readInt(), stream.readInt(),
@@ -166,7 +166,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 
 	void packetForClientNode(DataInputStream stream, NetworkManager manager,
 			EntityPlayer player) {
-		EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP) player;
+		EntityPlayer clientPlayer = (EntityPlayer) player;
 		int x = 0, y= 0, z= 0, dimention= 0;
 		try {
 
@@ -208,7 +208,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 	void packetNodeSingleSerialized(DataInputStream stream,
 			NetworkManager manager, EntityPlayer player) {
 		try {
-			EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP) player;
+			EntityPlayer clientPlayer = (EntityPlayer) player;
 			int x, y, z, dimention;
 			x = stream.readInt();
 			y = stream.readInt();
@@ -222,8 +222,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 					node.networkUnserialize(stream);
 					if (0 != stream.available()) {
 						Utils.println("0 != stream.available()");
-						while (true)
-							;
+
 					}
 				} else {
 					Utils.println("Wrong node UUID warning");

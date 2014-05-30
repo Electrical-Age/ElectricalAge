@@ -247,6 +247,7 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.event.FMLServerStoppingEvent;
 import cpw.mods.fml.common.network.FMLEventChannel;
 import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameData;
 import cpw.mods.fml.common.registry.GameRegistry;
@@ -368,7 +369,7 @@ public class Eln {
 	public static final byte packetForClientNode = 18;
 	public static final byte packetPlaySound = 19;
 
-	static PacketHandler packetHandler;
+	public static PacketHandler packetHandler;
 	static NodeServer nodeServer;
 	public static LiveDataManager clientLiveDataManager;
 	public static ClientKeyHandler clientKeyHandler;
@@ -544,7 +545,7 @@ public class Eln {
 		Object o;
 
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
-
+		
 		simulator = new Simulator(20, commonOverSampling,
 				electricalOverSampling, thermalOverSampling);
 		playerManager = new PlayerManager();

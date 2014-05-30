@@ -1,5 +1,8 @@
 package mods.eln.misc;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -39,7 +42,7 @@ import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.play.server.S27PacketExplosion;
+
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
@@ -58,8 +61,10 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 import org.lwjgl.opengl.GL11;
 
+import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import cpw.mods.fml.repackage.com.nothome.delta.ByteBufferSeekableSource;
 
 public class Utils {
 
@@ -426,27 +431,22 @@ public class Utils {
 		nbt.setTag(str, var2);
 	}
 
-	public static void sendPacketToServer(ByteArrayOutputStream bos)
-	{
-		S3FPacketCustomPayload packet = new S3FPacketCustomPayload(Eln.channelName, bos.toByteArray());
-
-		Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(packet);
-	}
 
 	public static void sendPacketToClient(ByteArrayOutputStream bos, EntityPlayerMP player)
 	{
 
-		S3FPacketCustomPayload packet = new S3FPacketCustomPayload(Eln.channelName, bos.toByteArray());
-
-		sendPacketToPlayer(packet, player);
+		ElnServerPacket packet = new ElnServerPacket(Eln.channelName, bos.toByteArray());
+		ByteBuf b = Unpooled.buffer().capacity(bos.size()).setBytes(0,bos.toByteArray());
+		Eln.eventChannel.sendTo(new FMLProxyPacket(b,Eln.channelName), player);
 	}
 
-	public static void sendPacketToPlayer(
-			S3FPacketCustomPayload packet,
+	/*public static void sendPacketToPlayer(
+			ElnServerPacket packet,
 			EntityPlayerMP player) {
 		// TODO Auto-generated method stub
-		player.playerNetServerHandler.sendPacket(packet);
-	}
+		Eln.eventChannel.sendTo(new FMLProxyPacket(packet), player);
+	//	player.playerNetServerHandler.sendPacket(new FMLProxyPacket(packet));
+	}*/
 
 	//private static Color[] dyeColors
 

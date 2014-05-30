@@ -29,6 +29,7 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void registerRenderers() {
+		new ClientPacketHandler();
 		ClientRegistry.bindTileEntitySpecialRenderer(SixNodeEntity.class, new SixNodeRender());
 		ClientRegistry.bindTileEntitySpecialRenderer(TransparentNodeEntity.class, new TransparentNodeRender());
        	

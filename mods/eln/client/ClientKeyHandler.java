@@ -96,6 +96,6 @@ public class ClientKeyHandler {
 		}
 
         
-    	Utils.sendPacketToServer(bos);		
+        UtilsClient.sendPacketToServer(bos);		
 	}
 }

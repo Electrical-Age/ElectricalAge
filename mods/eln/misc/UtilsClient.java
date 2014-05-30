@@ -1,6 +1,7 @@
 package mods.eln.misc;
 
 import java.awt.Color;
+import java.io.ByteArrayOutputStream;
 
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
@@ -17,6 +18,8 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.C17PacketCustomPayload;
+import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
@@ -25,6 +28,8 @@ import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
+
+import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 
 public class UtilsClient {
 
@@ -464,6 +469,13 @@ public class UtilsClient {
 	public static void enableDepthTest() {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 
+	}
+	public static void sendPacketToServer(ByteArrayOutputStream bos)
+	{
+		C17PacketCustomPayload packet = new C17PacketCustomPayload(Eln.channelName, bos.toByteArray());
+
+		Eln.eventChannel.sendToServer(new FMLProxyPacket(packet));
+		//Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new FMLProxyPacket(packet));
 	}
 
 }

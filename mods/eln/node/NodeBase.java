@@ -32,6 +32,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerManager;
@@ -643,7 +644,7 @@ public abstract class NodeBase {
     
     
     
-    public S3FPacketCustomPayload getPacketNodeSingleSerialized()
+    public ByteArrayOutputStream getPacketNodeSingleSerialized()
     {	
     	
   
@@ -665,9 +666,8 @@ public abstract class NodeBase {
 	        
 	        networkSerialize(stream);
 
-	        S3FPacketCustomPayload packet = new S3FPacketCustomPayload(Eln.channelName,bos.toByteArray());
 
-	    	return packet;
+	    	return bos;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -689,7 +689,7 @@ public abstract class NodeBase {
 	    	if(player.dimension != this.coordonate.dimention) continue;
 	    	if(! playerManager.isPlayerWatchingChunk(player, coordonate.x/16, coordonate.z/16)) continue;
 	    	
-	    	Utils.sendPacketToPlayer(getPacketNodeSingleSerialized(),player);
+	    	Utils.sendPacketToClient(getPacketNodeSingleSerialized(),player);
 	    }
 	    if(needNotify)
 	    {
@@ -700,7 +700,7 @@ public abstract class NodeBase {
     }
     public void publishToPlayer(EntityPlayerMP player)
     {
-    	Utils.sendPacketToPlayer(getPacketNodeSingleSerialized(),player);
+    	Utils.sendPacketToClient(getPacketNodeSingleSerialized(),player);
     }
     
     
