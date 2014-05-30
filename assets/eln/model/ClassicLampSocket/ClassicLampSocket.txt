@@ -1,0 +1,2 @@
+s type noLampDraw
+s cable enable

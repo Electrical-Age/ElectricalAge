@@ -1,0 +1,29 @@
+o door_out
+f originX -1.06250
+f originY 1.5
+f originZ 0.0
+o door_in
+f originX -1.06250
+f originY 1.5
+f originZ 0.0
+o door_in_charge
+f originX -1.06250
+f originY 1.5
+f originZ 0.0
+
+o gyro_alpha
+f originX -1.06250
+f originY 1.5
+f originZ 0.0
+f originX2 -0.06457
+f originY2 -0.26063
+f originZ2 0.0
+
+o gyro
+f originX -1.06250
+f originY 1.5
+f originZ 0.0
+f originX2 -0.06457
+f originY2 -0.26063
+f originZ2 0.0
+

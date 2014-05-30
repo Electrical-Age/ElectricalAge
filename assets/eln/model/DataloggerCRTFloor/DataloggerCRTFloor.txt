@@ -1,0 +1,17 @@
+o main
+f sx 0.46666
+f sy 0.46666
+f sz 1
+
+f tx 0.78
+f ty -0.34
+f tz -0.4
+
+f rx 0
+f ry 0
+f rz 1
+f ra 90
+
+f mx 1.15 
+f my 1.2
+

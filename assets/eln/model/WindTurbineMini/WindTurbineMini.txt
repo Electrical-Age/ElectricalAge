@@ -1,0 +1,5 @@
+o rot
+f speed 300
+f originX 0.31250
+f originY 2.50000
+f originZ 0.0

@@ -1,0 +1,4 @@
+o rot
+f originX 0.0
+f originY 0.25
+f originZ 0.0

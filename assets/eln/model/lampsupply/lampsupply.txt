@@ -1,0 +1,11 @@
+o rot1
+f originX 0.19061
+f originY -0.25
+f originZ 0.0
+f alphaClose 120
+o rot2
+f originX 0.19061
+f originY 0.25
+f originZ 0.0
+f alphaClose -120
+

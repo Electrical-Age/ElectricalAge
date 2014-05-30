@@ -1,0 +1,8 @@
+s type button
+o halo
+f originX 0.005
+f originY 0.0
+f originZ 0.0
+o button
+f tx -0.04
+f speed 0.11
