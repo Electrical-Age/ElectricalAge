@@ -254,7 +254,6 @@ import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import dan200.computercraft.api.ComputerCraftAPI;
 
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -264,13 +263,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
-
-
-
 @Mod(modid = "Eln", version = "BETA-1.3.0")
-
 //@Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0b")
 //@NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
@@ -487,12 +480,7 @@ public class Eln {
 	boolean addOtherModOreToXRay;
 	public static boolean debugEnable = false;
 
-	
-	
-    
-
-	
-    @EventHandler
+	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 
 		ArrayList<ISymbole> symboleList = new ArrayList<ISymbole>();
@@ -500,7 +488,6 @@ public class Eln {
 		symboleList.add(new ConstSymbole("B", 0.2));
 		symboleList.add(new ConstSymbole("C", 0.3));
 		double value = 0.0;
-
 
 		Side side = FMLCommonHandler.instance().getEffectiveSide();
 		if (side == Side.CLIENT)
@@ -582,7 +569,6 @@ public class Eln {
 			oreScannerConfig.add(new OreScannerConfigElement(v[0], v[1] / 100f));
 		}*/
 
-		
 		addOtherModOreToXRay = config.get("xrayscannerconfig", "addOtherModOreToXRay", true).getBoolean(true);
 		xRayScannerRange = (float) config.get("xrayscannerconfig", "rangeInBloc", 5.0).getDouble(5.0);
 		xRayScannerRange = Math.max(Math.min(xRayScannerRange, 10), 4);
@@ -602,9 +588,9 @@ public class Eln {
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
 		Object o;
-		
+
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
-	
+
 		simulator = new Simulator(20, commonOverSampling,
 				electricalOverSampling, thermalOverSampling);
 		playerManager = new PlayerManager();
@@ -616,7 +602,6 @@ public class Eln {
 		packetHandler = new PacketHandler();
 		// ForgeDummyContainer
 		instance = this;
-		
 
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
 
@@ -637,7 +622,7 @@ public class Eln {
 				.setUnlocalizedName("sharedItemStackOne");
 
 		transparentNodeBlock = (TransparentNodeBlock) new TransparentNodeBlock(
-				 Material.iron,
+				Material.iron,
 				TransparentNodeEntity.class)
 				.setCreativeTab(creativeTab)
 				.setBlockTextureName("iron_block");
@@ -647,31 +632,24 @@ public class Eln {
 				.setBlockTextureName("iron_block");
 
 		ghostBlock = (GhostBlock) new GhostBlock().setBlockTextureName("iron_block");
-		GameRegistry.registerBlock(ghostBlock, "ghostBlock");
 		lightBlock = (LightBlock) new LightBlock();
-		GameRegistry.registerBlock(lightBlock, "lightBlock");
 		// obj.loadFolder("eln", "/model");
 		for (String path : objNames) {
 			obj.loadObj("eln", path);
 		}
-
-		GameRegistry.registerItem(sharedItem, "sharedItem");
-		GameRegistry.registerItem(sharedItemStackOne, "sharedItemStackOne");
 		
-		GameRegistry.registerBlock(sixNodeBlock,SixNodeItem.class, "SixNode");
+		GameRegistry.registerItem(sharedItem, "Eln.sharedItem");
+		GameRegistry.registerItem(sharedItemStackOne, "Eln.sharedItemStackOne");
+		GameRegistry.registerBlock(ghostBlock, "Eln.ghostBlock");
+		GameRegistry.registerBlock(lightBlock, "Eln.lightBlock");
+		GameRegistry.registerBlock(sixNodeBlock, SixNodeItem.class, "Eln.SixNode");
+		GameRegistry.registerBlock(transparentNodeBlock, TransparentNodeItem.class,"Eln.TransparentNode");
+		GameRegistry.registerBlock(oreBlock, OreItem.class, "Eln.Ore");
+		TileEntity.addMapping(TransparentNodeEntity.class,"TransparentNodeEntity");
 		TileEntity.addMapping(SixNodeEntity.class, "SixNodeEntity");
-
-		GameRegistry.registerBlock(transparentNodeBlock,TransparentNodeItem.class,
-				"TransparentNode");
-		TileEntity.addMapping(TransparentNodeEntity.class,
-				"TransparentNodeEntity");
-
-		GameRegistry.registerBlock(oreBlock,OreItem.class, "OreEln");
-		//o = GameData.getBlockRegistry().getObject("tile.OreEln");
-		//o = Block.getBlockFromName("OreEln");
-		// TileEntity.addMapping(GhostEntity.class, "GhostEntity");
 		TileEntity.addMapping(LightBlockEntity.class, "LightBlockEntity");
 
+		
 		NodeManager.registerUuid(sixNodeBlock.getUuid(), SixNode.class);
 		NodeManager.registerUuid(transparentNodeBlock.getUuid(), TransparentNode.class);
 
@@ -686,8 +664,7 @@ public class Eln {
 		 */
 
 		ComputerCraftAPI.registerPeripheralProvider(new PeripheralHandler());
-		
-		
+
 		registerArmor();
 		registerTool();
 		registerOre();
@@ -759,10 +736,8 @@ public class Eln {
 		registerMiscItem(120);
 		registerElectricalTool(121);
 		registerPortableItem(122);
-		
-		
-		registerReplicator();
 
+		registerReplicator();
 
 		recipeArmor();
 		recipeTool();
@@ -951,7 +926,7 @@ public class Eln {
 	public void onServerStarting(FMLServerStartingEvent ev) {
 		{
 			if (firstStart) {
-				
+
 				firstStart = false;
 			}
 			modbusServer = new ModbusServer();
@@ -1003,11 +978,8 @@ public class Eln {
 			manager.registerCommand(new ConsoleListener());
 		}
 
-		
 		regenOreScannerFactors();
 	}
-
-
 
 	@EventHandler
 	public void ServerStopping(FMLServerStoppingEvent ev) {
@@ -1175,8 +1147,8 @@ public class Eln {
 			highVoltageCableDescriptor = desc;
 
 			desc.setPhysicalConstantLikeNormalCable(HVU, HVP, 0.05 / 20,// electricalNominalVoltage,
-																			// electricalNominalPower,
-																			// electricalNominalPowerDrop,
+																		// electricalNominalPower,
+																		// electricalNominalPowerDrop,
 					HVU * 1.3, HVP * 1.2,// electricalMaximalVoltage,
 											// electricalMaximalPower,
 					40,// electricalOverVoltageStartPowerLost,
@@ -1209,12 +1181,11 @@ public class Eln {
 
 			desc.addToData(false);
 			sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
-			 
+
 		}
-		
+
 		//subId 0 taken !
-		
-		
+
 		{
 			subId = 1;
 
@@ -1229,7 +1200,7 @@ public class Eln {
 					"Miaou !");// description
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
-			
+
 			//sixNodeItem.doubleEntry(subId + (id << 6), subId + (0 << 6));
 		}
 	}
@@ -1273,7 +1244,7 @@ public class Eln {
 					"Cheap battery" // name, description)
 			);
 			desc.setRenderSpec("lowcost");
-			desc.setCurrentDrop(desc.electricalU*1.2,desc.electricalStdP*1.0);
+			desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -1293,7 +1264,7 @@ public class Eln {
 					"the battery" // name, description)
 			);
 			desc.setRenderSpec("capacity");
-			desc.setCurrentDrop(desc.electricalU*1.2,desc.electricalStdP*1.0);
+			desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -1313,7 +1284,7 @@ public class Eln {
 					"the battery" // name, description)
 			);
 			desc.setRenderSpec("highvoltage");
-			desc.setCurrentDrop(desc.electricalU*1.2,desc.electricalStdP*1.0);
+			desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -1334,7 +1305,7 @@ public class Eln {
 					"the battery" // name, description)
 			);
 			desc.setRenderSpec("current");
-			desc.setCurrentDrop(desc.electricalU*1.2,desc.electricalStdP*1.0);
+			desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -1354,7 +1325,7 @@ public class Eln {
 					"the battery" // name, description)
 			);
 			desc.setRenderSpec("life");
-			desc.setCurrentDrop(desc.electricalU*1.2,desc.electricalStdP*1.0);
+			desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -1394,7 +1365,7 @@ public class Eln {
 					// thermalCoolLimit,
 					"Obselete, must be deleted" // name, description)
 			);
-			desc.setCurrentDrop(desc.electricalU*1.2,desc.electricalStdP*2.0);
+			desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -1415,7 +1386,7 @@ public class Eln {
 					// thermalCoolLimit,
 					"the battery" // name, description)
 			);
-			desc.setCurrentDrop(desc.electricalU*1.2,desc.electricalStdP*2.0);
+			desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
@@ -1761,8 +1732,7 @@ public class Eln {
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
-		
-		
+
 		{
 			subId = 4;
 			name = "Watch";
@@ -1770,7 +1740,7 @@ public class Eln {
 			ElectricalWatchDescriptor desc = new ElectricalWatchDescriptor(
 					name,
 					obj.getObj("WallClock"),
-					20000.0/(3600*40)
+					20000.0 / (3600 * 40)
 
 					);
 
@@ -2790,13 +2760,13 @@ public class Eln {
 					"Analogicregulator");
 			sharedItem.addElement(completId, element);
 		}/*
-		 * { subId = 9; completId = subId + (id << 6); element = new
-		 * RegulatorAnalogDescriptor( "Analogic PI regulator" );
-		 * sharedItem.addElement(completId, element); } { subId = 10; completId
-		 * = subId + (id << 6); element = new RegulatorAnalogDescriptor(
-		 * "Analogic PID regulator" ); sharedItem.addElement(completId,
-		 * element); }
-		 */
+			* { subId = 9; completId = subId + (id << 6); element = new
+			* RegulatorAnalogDescriptor( "Analogic PI regulator" );
+			* sharedItem.addElement(completId, element); } { subId = 10; completId
+			* = subId + (id << 6); element = new RegulatorAnalogDescriptor(
+			* "Analogic PID regulator" ); sharedItem.addElement(completId,
+			* element); }
+			*/
 
 	}
 
@@ -3152,7 +3122,7 @@ public class Eln {
 			name = "Copper Dust";
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
-					new String[] {  });
+					new String[] {});
 			dustCopper = element;
 			sharedItem.addElement(completId, element);
 			Data.addResource(element.newItemStack());
@@ -3179,7 +3149,7 @@ public class Eln {
 
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
-					new String[] { });
+					new String[] {});
 			sharedItem.addElement(id, element);
 			Data.addResource(element.newItemStack());
 			addToOre("dustLead", element.newItemStack());
@@ -3191,7 +3161,7 @@ public class Eln {
 
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
-					new String[] { });
+					new String[] {});
 			sharedItem.addElement(id, element);
 			Data.addResource(element.newItemStack());
 			addToOre("dustTungsten", element.newItemStack());
@@ -3203,7 +3173,7 @@ public class Eln {
 			name = "Gold Dust";
 
 			element = new GenericItemUsingDamageDescriptorWithComment(
-					name, new String[] { });
+					name, new String[] {});
 			sharedItem.addElement(id, element);
 			Data.addResource(element.newItemStack());
 			addToOre("dustGold", element.newItemStack());
@@ -3216,7 +3186,7 @@ public class Eln {
 
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
-					new String[] {  });
+					new String[] {});
 			sharedItem.addElement(id, element);
 			Data.addResource(element.newItemStack());
 			addToOre("dustCoal", element.newItemStack());
@@ -3228,7 +3198,7 @@ public class Eln {
 
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
-					new String[] {  });
+					new String[] {});
 			sharedItem.addElement(id, element);
 			Data.addResource(element.newItemStack());
 			addToOre("dustSteel", element.newItemStack());
@@ -3241,7 +3211,7 @@ public class Eln {
 
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
-					new String[] {  });
+					new String[] {});
 			sharedItem.addElement(id, element);
 			Data.addResource(element.newItemStack());
 			addToOre("dustCinnabar", element.newItemStack());
@@ -3462,7 +3432,6 @@ public class Eln {
 
 	}
 
-	
 	private void registerArmor() {
 		ItemStack stack;
 		String name;
@@ -3557,7 +3526,6 @@ public class Eln {
 		}
 	}
 
-	
 	private void registerTool() {
 		ItemStack stack;
 		String name;
@@ -3722,7 +3690,6 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
-		
 		{
 			subId = 34;
 			name = "200V Active Thermal Dissipator";
@@ -4120,20 +4087,20 @@ public class Eln {
 
 			descriptor = new OreScanner(name
 
-			);
+					);
 			sharedItem.addElement(completId, descriptor);
 		}
-	/*	{
-			subId = 1;
-			completId = subId + (id << 6);
-			name = "Advanced Ore Scanner";
+		/*	{
+				subId = 1;
+				completId = subId + (id << 6);
+				name = "Advanced Ore Scanner";
 
-			descriptor = new OreScanner(name,// iconId, name,
-					4, 800// ,int operationRadius,double operationEnergy
+				descriptor = new OreScanner(name,// iconId, name,
+						4, 800// ,int operationRadius,double operationEnergy
 
-			);
-			sharedItem.addElement(completId, descriptor);
-		}*/
+				);
+				sharedItem.addElement(completId, descriptor);
+			}*/
 
 	}
 
@@ -4597,13 +4564,13 @@ public class Eln {
 		{
 			subId = 40;
 			name = "Player Filter";
-			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityPlayerMP.class,0f,1f,0f);
+			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityPlayerMP.class, 0f, 1f, 0f);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
 			subId = 41;
 			name = "Monster Filter";
-			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityMob.class,1f,0f,0f);
+			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityMob.class, 1f, 0f, 0f);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 
@@ -4680,25 +4647,25 @@ public class Eln {
 				Character.valueOf('C'), findItemStack("Copper Cable"));
 
 		// for(int idx = 0;idx<16;idx++)
-	/*	addRecipe(
-				findItemStack("Copper Thermal Cable", 3),
-				"WWW",
-				"SSS",
-				"CCC",
-				Character.valueOf('W'), "ingotRubber",// new
-														// ItemStack(Block.cloth,1,idx),
-				Character.valueOf('S'), new ItemStack(Blocks.sand),
-				Character.valueOf('C'), findItemStack("Removed from mod Copper Thermal Cable"));
+		/*	addRecipe(
+					findItemStack("Copper Thermal Cable", 3),
+					"WWW",
+					"SSS",
+					"CCC",
+					Character.valueOf('W'), "ingotRubber",// new
+															// ItemStack(Block.cloth,1,idx),
+					Character.valueOf('S'), new ItemStack(Blocks.sand),
+					Character.valueOf('C'), findItemStack("Removed from mod Copper Thermal Cable"));
 
-		addRecipe(
-				findItemStack("Copper Thermal Cable", 1),
-				"W",
-				"S",
-				"C",
-				Character.valueOf('W'), "ingotRubber",// new
-														// ItemStack(Block.cloth,1,idx),
-				Character.valueOf('S'), new ItemStack(Blocks.sand),
-				Character.valueOf('C'), findItemStack("Removed from mod Copper Thermal Cable"));*/
+			addRecipe(
+					findItemStack("Copper Thermal Cable", 1),
+					"W",
+					"S",
+					"C",
+					Character.valueOf('W'), "ingotRubber",// new
+															// ItemStack(Block.cloth,1,idx),
+					Character.valueOf('S'), new ItemStack(Blocks.sand),
+					Character.valueOf('C'), findItemStack("Removed from mod Copper Thermal Cable"));*/
 
 	}
 
@@ -5097,7 +5064,6 @@ public class Eln {
 				Character.valueOf('M'), findItemStack("Electrical Motor"),
 				Character.valueOf('R'), "ingotRubber");
 
-		
 		addRecipe(
 				findItemStack("200V Active Thermal Dissipator"),
 				"RMR",
@@ -5115,11 +5081,11 @@ public class Eln {
 				Character.valueOf('D'), findItemStack("Small Passive Thermal Dissipator"),
 				Character.valueOf('M'), findItemStack("Advanced Electrical Motor"),
 				Character.valueOf('R'), "ingotRubber");
-		
+
 	}
 
 	void recipeGeneral() {
-		
+
 		Utils.addSmelting(treeResin.parentItem,
 				treeResin.parentItemDamage, findItemStack("Rubber", 1), 0f);
 
@@ -5532,15 +5498,15 @@ public class Eln {
 				Character.valueOf('R'), new ItemStack(Items.redstone),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('G'), new ItemStack(Items.gold_ingot));
-/*
-		addRecipe(findItemStack("Advanced Ore Scanner"),
-				"GCG",
-				"RSR",
-				"GRG",
-				Character.valueOf('S'), findItemStack("Basic Ore Scanner"),
-				Character.valueOf('C'), findItemStack("Advanced Chip"),
-				Character.valueOf('G'), new ItemStack(Item.glowstone),
-				Character.valueOf('R'), new ItemStack(Items.redstone));*/
+		/*
+				addRecipe(findItemStack("Advanced Ore Scanner"),
+						"GCG",
+						"RSR",
+						"GRG",
+						Character.valueOf('S'), findItemStack("Basic Ore Scanner"),
+						Character.valueOf('C'), findItemStack("Advanced Chip"),
+						Character.valueOf('G'), new ItemStack(Item.glowstone),
+						Character.valueOf('R'), new ItemStack(Items.redstone));*/
 
 	}
 
@@ -5726,7 +5692,6 @@ public class Eln {
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('M'), "quicksilver",
 				Character.valueOf('R'), new ItemStack(Items.redstone));
-
 
 		addRecipe(findItemStack("Signal Antenna"),
 				"c",
@@ -6315,45 +6280,42 @@ public class Eln {
 				Character.valueOf('s'), new ItemStack(Items.stick));
 
 	}
-	
-	
-	void registerReplicator(){
-	    int redColor = (255 << 16);
-	    int orangeColor = (255 << 16)+ (200 << 8);
 
-	    //Register mob
-	    EntityRegistry.registerGlobalEntityID(ReplicatorEntity.class,"EAReplicator",EntityRegistry.findGlobalUniqueEntityId(), redColor,orangeColor);
+	void registerReplicator() {
+		int redColor = (255 << 16);
+		int orangeColor = (255 << 16) + (200 << 8);
 
-	    //Localize mob name
-	    LanguageRegistry.instance().addStringLocalization("entity.EAReplicator.name", "en_US", "Replicator");
+		//Register mob
+		EntityRegistry.registerGlobalEntityID(ReplicatorEntity.class, "EAReplicator", EntityRegistry.findGlobalUniqueEntityId(), redColor, orangeColor);
 
-	    
-	    ReplicatorEntity.dropList.add(findItemStack("Iron Dust", 1));
-	    ReplicatorEntity.dropList.add(findItemStack("Copper Dust", 1));
-	    ReplicatorEntity.dropList.add(findItemStack("Gold Dust", 1));
-	    ReplicatorEntity.dropList.add(new ItemStack(Items.redstone));
-	    ReplicatorEntity.dropList.add(new ItemStack(Items.glowstone_dust));
-	    //Add mob spawn
-	   // EntityRegistry.addSpawn(ReplicatorEntity.class, 1, 1, 2, EnumCreatureType.monster, BiomeGenBase.plains);
-	  /*  for(BiomeGenBase biome : BiomeGenBase.biomeList){
-	    	if(biome == null) continue;
-	    	{
-	    		List list = biome.getSpawnableList(EnumCreatureType.monster);
-	    		list.add(new SpawnListEntry(ReplicatorEntity.class, 1, 1, 2));
-	    	}
-	    	{
-	    		List list = biome.getSpawnableList(EnumCreatureType.ambient);
-	    		list.add(new SpawnListEntry(ReplicatorEntity.class, 2, 1, 2));
-	    	}
-	    }*/
+		//Localize mob name
+		LanguageRegistry.instance().addStringLocalization("entity.EAReplicator.name", "en_US", "Replicator");
+
+		ReplicatorEntity.dropList.add(findItemStack("Iron Dust", 1));
+		ReplicatorEntity.dropList.add(findItemStack("Copper Dust", 1));
+		ReplicatorEntity.dropList.add(findItemStack("Gold Dust", 1));
+		ReplicatorEntity.dropList.add(new ItemStack(Items.redstone));
+		ReplicatorEntity.dropList.add(new ItemStack(Items.glowstone_dust));
+		//Add mob spawn
+		// EntityRegistry.addSpawn(ReplicatorEntity.class, 1, 1, 2, EnumCreatureType.monster, BiomeGenBase.plains);
+		/*  for(BiomeGenBase biome : BiomeGenBase.biomeList){
+		  	if(biome == null) continue;
+		  	{
+		  		List list = biome.getSpawnableList(EnumCreatureType.monster);
+		  		list.add(new SpawnListEntry(ReplicatorEntity.class, 1, 1, 2));
+		  	}
+		  	{
+		  		List list = biome.getSpawnableList(EnumCreatureType.ambient);
+		  		list.add(new SpawnListEntry(ReplicatorEntity.class, 2, 1, 2));
+		  	}
+		  }*/
 	}
-	
+
 	private void regenOreScannerFactors() {
 		PortableOreScannerItem.RenderStorage.blockKeyFactor = null;
-		
+
 		oreScannerConfig.clear();
-		
-		
+
 		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.coal_ore), 5 / 100f));
 		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.iron_ore), 15 / 100f));
 		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.gold_ore), 40 / 100f));
@@ -6361,21 +6323,19 @@ public class Eln {
 		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.redstone_ore), 40 / 100f));
 		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.diamond_ore), 100 / 100f));
 		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.emerald_ore), 40 / 100f));
-		
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (1<<12), 10 / 100f));
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (4<<12), 20 / 100f));
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (5<<12), 20 / 100f));
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (6<<12), 20 / 100f));
-		
-		
-		
+
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (1 << 12), 10 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (4 << 12), 20 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (5 << 12), 20 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (6 << 12), 20 / 100f));
+
 		if (addOtherModOreToXRay) {
 			for (String name : OreDictionary.getOreNames()) {
 				// Utils.println(name + " " +
 				// OreDictionary.getOreID(name));
 				if (name.startsWith("ore")) {
 					for (ItemStack stack : OreDictionary.getOres(name)) {
-						int id = Utils.getItemId(stack) + 4096*stack.getItem().getMetadata(stack.getItemDamage());
+						int id = Utils.getItemId(stack) + 4096 * stack.getItem().getMetadata(stack.getItemDamage());
 						// Utils.println(OreDictionary.getOreID(name));
 						boolean find = false;
 						for (OreScannerConfigElement c : oreScannerConfig) {

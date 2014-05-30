@@ -234,7 +234,7 @@ public class SixNodeBlock extends NodeBlock implements INodeInfo{
 		
 		if(! sixNode.getIfSideRemain())
 		{
-			world.setBlockToAir(x, y, z); //caca1.5.1
+			world.setBlockToAir(x, y, z); 
 		}
 		else
 		{

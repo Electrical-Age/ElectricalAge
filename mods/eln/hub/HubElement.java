@@ -59,19 +59,19 @@ public class HubElement extends SixNodeElement {
 	boolean[] connectionGrid = new boolean[6];
 
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
+	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.readFromNBT(nbt, str);
+		super.readFromNBT(nbt);
 		for (int idx = 0; idx < 6; idx++) {
-			connectionGrid[idx] = nbt.getBoolean(str + "connectionGrid" + idx);
+			connectionGrid[idx] = nbt.getBoolean( "connectionGrid" + idx);
 		}
 	}
 
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
-		super.writeToNBT(nbt, str);
+	public void writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
 		for (int idx = 0; idx < 6; idx++) {
-			nbt.setBoolean(str + "connectionGrid" + idx, connectionGrid[idx]);
+			nbt.setBoolean("connectionGrid" + idx, connectionGrid[idx]);
 		}
 	}
 

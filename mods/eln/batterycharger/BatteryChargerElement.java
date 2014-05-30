@@ -119,18 +119,18 @@ public class BatteryChargerElement extends SixNodeElement {
 	boolean powerOn = false;
 	
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
-		super.writeToNBT(nbt, str);
-		nbt.setBoolean(str + "powerOn", powerOn);
-		nbt.setDouble(str + "energyCounter", slowProcess.energyCounter);
+	public void writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		nbt.setBoolean("powerOn", powerOn);
+		nbt.setDouble("energyCounter", slowProcess.energyCounter);
 
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
-		super.readFromNBT(nbt, str);
-		powerOn = nbt.getBoolean(str + "powerOn");
-		slowProcess.energyCounter = nbt.getDouble(str + "energyCounter");
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		powerOn = nbt.getBoolean( "powerOn");
+		slowProcess.energyCounter = nbt.getDouble( "energyCounter");
 	}
 
 	public static final byte toogleCharge = 1;

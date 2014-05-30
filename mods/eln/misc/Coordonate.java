@@ -153,11 +153,7 @@ public class Coordonate implements INBTTReady {
 			
 		}
 	}
-	
-	public int getBlockId()
-	{
-		return Block.getIdFromBlock(world().getBlock(x, y, z));
-	}
+
 	
 	public Block getBlock()
 	{

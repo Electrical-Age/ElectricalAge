@@ -486,47 +486,47 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 
 
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
+	public void writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.writeToNBT(nbt, str);
-		nbt.setInteger(str + "station", station);
-		nbt.setString(str + "name", name);
+		super.writeToNBT(nbt);
+		nbt.setInteger("station", station);
+		nbt.setString("name", name);
 		
 		int idx;
 		
-		nbt.setInteger(str + "txCnt", wirelessTxStatusList.size());	
+		nbt.setInteger("txCnt", wirelessTxStatusList.size());	
 		idx = 0;
 		for (ServerWirelessTxStatus tx : wirelessTxStatusList.values()) {
-			tx.writeToNBT(nbt,str + "tx" + idx);		
+			tx.writeToNBT(nbt,"tx" + idx);		
 			idx++;
 		}
 		
-		nbt.setInteger(str + "rxCnt", wirelessRxStatusList.size());	
+		nbt.setInteger("rxCnt", wirelessRxStatusList.size());	
 		idx = 0;
 		for (ServerWirelessRxStatus rx : wirelessRxStatusList.values()) {
-			rx.writeToNBT(nbt,str + "rx" + idx);		
+			rx.writeToNBT(nbt,"rx" + idx);		
 			idx++;
 		}
 		
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
+	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.readFromNBT(nbt, str);
-		station = nbt.getInteger(str + "station");
-		name = nbt.getString(str + "name");
+		super.readFromNBT(nbt);
+		station = nbt.getInteger("station");
+		name = nbt.getString("name");
 		
 		int cnt;
 		
-		cnt = nbt.getInteger(str + "txCnt");
+		cnt = nbt.getInteger("txCnt");
 		for(int idx = 0;idx < cnt;idx++){
-			ServerWirelessTxStatus tx = new ServerWirelessTxStatus(nbt,str + "tx" + idx,this);
+			ServerWirelessTxStatus tx = new ServerWirelessTxStatus(nbt,"tx" + idx,this);
 			wirelessTxStatusList.put(tx.uuid, tx);
 		}
-		cnt = nbt.getInteger(str + "rxCnt");
+		cnt = nbt.getInteger("rxCnt");
 		for(int idx = 0;idx < cnt;idx++){
-			ServerWirelessRxStatus rx = new ServerWirelessRxStatus(nbt,str + "rx" + idx,this);
+			ServerWirelessRxStatus rx = new ServerWirelessRxStatus(nbt,"rx" + idx,this);
 			wirelessRxStatusList.put(rx.uuid, rx);
 		}
 		

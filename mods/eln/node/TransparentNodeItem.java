@@ -44,10 +44,7 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 	}
 	
 	
-	int getBlockID(){
-		return Utils.getBlockId(this);
-	}
-	
+
 	@Override
     public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata)
 	{

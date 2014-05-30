@@ -149,28 +149,28 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	
 	
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
+	public void writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.writeToNBT(nbt, str);
+		super.writeToNBT(nbt);
 		
-		nbt.setString(str + "name", name);
-		nbt.setString(str + "targetName", targetName);
-		nbt.setDouble(str + "powerCharge", powerCharge);
-		nbt.setBoolean(str + "reset", state != StateIdle);
+		nbt.setString("name", name);
+		nbt.setString("targetName", targetName);
+		nbt.setDouble("powerCharge", powerCharge);
+		nbt.setBoolean("reset", state != StateIdle);
 		 
 
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
+	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.readFromNBT(nbt, str);
+		super.readFromNBT(nbt);
 		
-		name = nbt.getString(str + "name");
-		targetName = nbt.getString(str + "targetName");
-		powerCharge = nbt.getDouble(str + "powerCharge");
+		name = nbt.getString("name");
+		targetName = nbt.getString("targetName");
+		powerCharge = nbt.getDouble("powerCharge");
 		
-		if(nbt.getBoolean(str + "reset"))
+		if(nbt.getBoolean("reset"))
 			state = StateReset;
 	}
 	

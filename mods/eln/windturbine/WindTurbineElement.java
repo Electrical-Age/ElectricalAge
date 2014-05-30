@@ -151,18 +151,18 @@ public class WindTurbineElement extends TransparentNodeElement{
 	
 	
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
+	public void writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.writeToNBT(nbt, str);
-		cableFront.writeToNBT(nbt, str + "cableFront");
+		super.writeToNBT(nbt);
+		cableFront.writeToNBT(nbt, "cableFront");
 		Utils.println(cableFront);
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
+	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.readFromNBT(nbt, str);
-		cableFront = Direction.readFromNBT(nbt, str + "cableFront");
+		super.readFromNBT(nbt);
+		cableFront = Direction.readFromNBT(nbt, "cableFront");
 		Utils.println(cableFront);
 	}
 	

@@ -72,20 +72,20 @@ public class ElectricalRelayElement extends SixNodeElement {
 	boolean switchState = false, defaultOutput = false;
 
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
-		super.readFromNBT(nbt, str);
-        byte value = nbt.getByte(str + "front");
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+        byte value = nbt.getByte("front");
         front = LRDU.fromInt((value >> 0) & 0x3);
-        switchState = nbt.getBoolean(str + "switchState");
-        defaultOutput = nbt.getBoolean(str + "defaultOutput");
+        switchState = nbt.getBoolean("switchState");
+        defaultOutput = nbt.getBoolean("defaultOutput");
 	}
 
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
-		super.writeToNBT(nbt, str);
-		nbt.setByte(str + "front", (byte)((front.toInt() << 0)));
-		nbt.setBoolean(str + "switchState", switchState);
-		nbt.setBoolean(str + "defaultOutput", defaultOutput);
+	public void writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		nbt.setByte("front", (byte)((front.toInt() << 0)));
+		nbt.setBoolean("switchState", switchState);
+		nbt.setBoolean("defaultOutput", defaultOutput);
 	}
 
 	@Override

@@ -309,9 +309,9 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 		return descriptor != null;
 	}
 
-	int getBlockID(){
+	/*int getBlockID(){
 		return Block.getIdFromBlock(Block.getBlockFromItem(this));
-	}
+	}*/
 	
 	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata)
 	{

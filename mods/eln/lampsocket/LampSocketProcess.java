@@ -109,20 +109,13 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 						}
 					}
 
-					// int max = (int) (time /
-					// lampDescriptor.vegetableGrowRate*1.001);
-					// for(int idx = 0;idx < max;idx++){
+
 
 					if (exit == false) {
 
 						Block b = c.getBlock();
-						/*
-						 * if(c.y == 4){ int I = 0; I++; } if(b instanceof
-						 * BlockCrops){ int I = 0; I++; Utils.println(c +
-						 * " CROP !"); }
-						 */
 
-						if (b != null) {
+						if (b != Blocks.air) {
 							b.updateTick(c.world(), c.x, c.y, c.z, c.world().rand);
 						}
 					}

@@ -139,26 +139,26 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	}
 
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
-		super.readFromNBT(nbt, str);
-		if(nbt.getBoolean(str + "rxCoordValid") == true) {
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		if(nbt.getBoolean("rxCoordValid") == true) {
 			rxCoord = new Coordonate();
-			rxCoord.readFromNBT(nbt, str + "rxCoord");
+			rxCoord.readFromNBT(nbt, "rxCoord");
 		}
-		rot = LRDU.readFromNBT(nbt, str + "rot");
+		rot = LRDU.readFromNBT(nbt, "rot");
 		placeBoot = false;
 	}
 	
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
-		super.writeToNBT(nbt, str);
+	public void writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
 		if(rxCoord == null)
-			nbt.setBoolean(str + "rxCoordValid", false);
+			nbt.setBoolean("rxCoordValid", false);
 		else {
-			nbt.setBoolean(str + "rxCoordValid", true);
-			rxCoord.writeToNBT(nbt, str + "rxCoord");	
+			nbt.setBoolean("rxCoordValid", true);
+			rxCoord.writeToNBT(nbt, "rxCoord");	
 		}
-		rot.writeToNBT(nbt, str + "rot");
+		rot.writeToNBT(nbt, "rot");
 	}
 	
 	@Override

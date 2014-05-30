@@ -155,17 +155,17 @@ public class TreeResinCollectorElement extends SixNodeElement{
 	
 	double timeFromLastActivated = 0;
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
+	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.readFromNBT(nbt, str);
-		timeFromLastActivated = nbt.getDouble(str + "timeFromLastActivated");
+		super.readFromNBT(nbt);
+		timeFromLastActivated = nbt.getDouble( "timeFromLastActivated");
 	}
 	
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
+	public void writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.writeToNBT(nbt, str);
-		nbt.setDouble(str + "timeFromLastActivated", timeFromLastActivated);
+		super.writeToNBT(nbt);
+		nbt.setDouble( "timeFromLastActivated", timeFromLastActivated);
 	}
 	
 	class TreeResinCollectorSlowProcess implements IProcess

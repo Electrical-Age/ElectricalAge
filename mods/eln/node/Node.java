@@ -37,7 +37,7 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-public abstract class Node extends NodeBase implements INBTTReady {
+public abstract class Node extends NodeBase {
 
 	
 	private int lastLight = 0;
@@ -61,9 +61,9 @@ public abstract class Node extends NodeBase implements INBTTReady {
 	
 
 
-    public void readFromNBT(NBTTagCompound nbt,String str)
+    public void readFromNBT(NBTTagCompound nbt)
     {
-    	super.readFromNBT(nbt, str);
+    	super.readFromNBT(nbt);
         
         lastLight = nbt.getByte("lastLight");        
     }
@@ -71,9 +71,9 @@ public abstract class Node extends NodeBase implements INBTTReady {
     
     
 
-    public void writeToNBT(NBTTagCompound nbt,String str)
+    public void writeToNBT(NBTTagCompound nbt)
     {
-        super.writeToNBT(nbt, str);
+        super.writeToNBT(nbt);
         nbt.setByte("lastLight",(byte) lastLight);
     }
 	

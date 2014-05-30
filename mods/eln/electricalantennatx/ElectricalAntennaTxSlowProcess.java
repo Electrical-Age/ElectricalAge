@@ -27,7 +27,7 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
 	double timeCounter = 0;
 	final double periode = 0.2;
 	
-	@SuppressWarnings("null")
+
 	@Override
 	public void process(double time) {
 		//if(element.rxCoord == null)
@@ -82,7 +82,7 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
 				coordCpy.move(element.front.getInverse());
 				if(element.powerIn.getRpPower() > 50) {
 					if(coordCpy.world().blockExists(coordCpy.x, coordCpy.y, coordCpy.z)) {
-						if(coordCpy.getBlockId() == 0) {
+						if(coordCpy.getBlock() == Blocks.air) {
 							coordCpy.world().setBlock(coordCpy.x, coordCpy.y, coordCpy.z, Blocks.fire);
 						}
 					}

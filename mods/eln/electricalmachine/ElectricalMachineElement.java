@@ -188,15 +188,15 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 	}
 	
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
-		super.writeToNBT(nbt, str);
-		nbt.setBoolean(str + "powerOn", powerOn);
+	public void writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		nbt.setBoolean("powerOn", powerOn);
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
-		super.readFromNBT(nbt, str);
-		powerOn = nbt.getBoolean(str + "powerOn");
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		powerOn = nbt.getBoolean("powerOn");
 	}
 
 	@Override

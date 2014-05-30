@@ -177,14 +177,14 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	}
 	
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
-		super.writeToNBT(nbt, str);
+	public void writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
 		//inventory.writeToNBT(nbt, str + "inv");
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
-		super.readFromNBT(nbt, str);
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
 		fromNBT = true;
 		//inventory.readFromNBT(nbt, str + "inv");
 	}

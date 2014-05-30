@@ -107,16 +107,16 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement{
 	}
 
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
-		super.readFromNBT(nbt, str);
-		rot = LRDU.readFromNBT(nbt, str + "rot");
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		rot = LRDU.readFromNBT(nbt, "rot");
 	}
 	
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
-		super.writeToNBT(nbt, str);
+	public void writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
 
-		rot.writeToNBT(nbt, str + "rot");
+		rot.writeToNBT(nbt,"rot");
 	}
 	
 	public boolean mustHaveFloor() {

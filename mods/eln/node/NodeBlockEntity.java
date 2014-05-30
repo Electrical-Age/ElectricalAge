@@ -348,12 +348,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     
     
    
-    /*
-    public short getBlockId()
-    {
-    	return (short)Block.getIdFromBlock(getBlockType());
-    }*/
-    
+
     @Override
     public Packet getDescriptionPacket()
     {	

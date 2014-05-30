@@ -141,8 +141,7 @@ public abstract class NodeBlock extends BlockContainer{//BlockContainer
     	}
     }
     @Override
-    public void onNeighborChange(IBlockAccess world, int x, int y, int z,
-    		int tileX, int tileY, int tileZ) {
+    public void onNeighborBlockChange(World world, int x, int y, int z,Block b) {
     	if(Utils.isRemote(world) == false)
     	{
     		NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(x, y, z);

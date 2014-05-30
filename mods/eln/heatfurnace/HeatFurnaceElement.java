@@ -251,20 +251,20 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 	}
 	
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
+	public void writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.writeToNBT(nbt, str);
+		super.writeToNBT(nbt);
 		
-		nbt.setBoolean(str + "takeFuel", takeFuel);
-		nbt.setBoolean(str + "controlExternal", controlExternal);
+		nbt.setBoolean("takeFuel", takeFuel);
+		nbt.setBoolean("controlExternal", controlExternal);
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
+	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.readFromNBT(nbt, str);
-		takeFuel = nbt.getBoolean(str + "takeFuel");
-		controlExternal = nbt.getBoolean(str + "controlExternal");
+		super.readFromNBT(nbt);
+		takeFuel = nbt.getBoolean("takeFuel");
+		controlExternal = nbt.getBoolean("controlExternal");
 	}
 	
 	

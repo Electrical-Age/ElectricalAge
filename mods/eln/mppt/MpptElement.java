@@ -244,9 +244,9 @@ public class MpptElement extends TransparentNodeElement{
 	
 	boolean fromNbt = false;
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
+	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
 		fromNbt = true;
-		super.readFromNBT(nbt, str);
+		super.readFromNBT(nbt);
 	}
 }

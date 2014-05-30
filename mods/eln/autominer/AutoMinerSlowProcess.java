@@ -184,11 +184,11 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 		Utils.tryPutStackInInventory(stack, miner.inventory,AutoMinerContainer.StorageStartId,AutoMinerContainer.StorageSize);
 	}
 	
-	boolean isMinable(int blockId){
-		return blockId != 0 
-				&& Block.getBlockById(blockId) != Blocks.flowing_water && Block.getBlockById(blockId) != Blocks.water
-				&& Block.getBlockById(blockId) != Blocks.flowing_lava && Block.getBlockById(blockId) != Blocks.lava
-				&& Block.getBlockById(blockId) != Blocks.obsidian && Block.getBlockById(blockId) != Blocks.bedrock;
+	boolean isMinable(Block block){
+		return block != Blocks.air 
+				&& (block) != Blocks.flowing_water && (block) != Blocks.water
+				&& (block) != Blocks.flowing_lava && (block) != Blocks.lava
+				&& (block) != Blocks.obsidian && (block) != Blocks.bedrock;
 	}
 	
 	void setupJob() {
@@ -253,8 +253,8 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 						double dy = 0;
 						double dz = jobCoord.z - miner.node.coordonate.z;
 						double distance = Math.sqrt(dx*dx+dy*dy+dz*dz)*(0.9 + 0.2*oreRand);
-						int blockId = Block.getIdFromBlock(jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z));
-						if(checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(blockId))) {
+						Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
+						if(checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(block))) {
 							jobFind = true;
 							setJob(jobType.ore);
 							break;

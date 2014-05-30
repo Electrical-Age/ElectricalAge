@@ -56,10 +56,10 @@ public class GroundCableElement extends SixNodeElement{
 	int colorCare = 0;
 
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
+	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.readFromNBT(nbt, str);
-		byte b = nbt.getByte(str + "color");
+		super.readFromNBT(nbt);
+		byte b = nbt.getByte( "color");
 		color = b & 0xF;
 		colorCare = (b >> 4) & 1;
 	}
@@ -68,10 +68,10 @@ public class GroundCableElement extends SixNodeElement{
 		return true;
 	}
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
+	public void writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.writeToNBT(nbt, str);
-		nbt.setByte(str + "color",(byte) (color + (colorCare << 4)));
+		super.writeToNBT(nbt);
+		nbt.setByte( "color",(byte) (color + (colorCare << 4)));
 	}
 	@Override
 	public IInventory getInventory() {

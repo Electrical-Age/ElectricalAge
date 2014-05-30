@@ -217,17 +217,17 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 	}
 	
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
-		super.writeToNBT(nbt, str);
-		nbt.setBoolean(str + "powerOn", powerOn);
-		nbt.setBoolean(str + "autoShutDown", autoShutDown);
+	public void writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		nbt.setBoolean("powerOn", powerOn);
+		nbt.setBoolean("autoShutDown", autoShutDown);
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
-		super.readFromNBT(nbt, str);
-		powerOn = nbt.getBoolean(str + "powerOn");
-		autoShutDown = nbt.getBoolean(str + "autoShutDown");
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		powerOn = nbt.getBoolean("powerOn");
+		autoShutDown = nbt.getBoolean("autoShutDown");
 	}
 	
 	public void setPowerOn(boolean value) {

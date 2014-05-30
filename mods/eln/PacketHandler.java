@@ -173,9 +173,10 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 
 	void packetForClientNode(DataInputStream stream, NetworkManager manager,
 			EntityPlayer player) {
+		EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP) player;
+		int x = 0, y= 0, z= 0, dimention= 0;
 		try {
-			EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP) player;
-			int x, y, z, dimention;
+
 			x = stream.readInt();
 			y = stream.readInt();
 			z = stream.readInt();
@@ -199,11 +200,11 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 				}
 			} else {
 				Utils.println("No node found at " + x + " " + y + " " + z);
-				stream.readShort();
+				/*stream.readShort();
 				int dataSkipLength = stream.readByte();
 				for (int idx = 0; idx < dataSkipLength; idx++) {
 					stream.readByte();
-				}
+				}*/
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -240,8 +241,8 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 				}
 			} else {
 				Utils.println("No node found");
-				stream.readShort();
-				/*int dataSkipLength = stream.readByte();
+				/*stream.readShort();
+				int dataSkipLength = stream.readByte();
 				for (int idx = 0; idx < dataSkipLength; idx++) {
 					stream.readByte();
 				}*/

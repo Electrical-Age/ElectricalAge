@@ -155,18 +155,18 @@ public class LampSupplyElement extends SixNodeElement {
 	
 	
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
+	public void writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.writeToNBT(nbt, str);
-		nbt.setString(str + "channel", channel);
+		super.writeToNBT(nbt);
+		nbt.setString("channel", channel);
 	}
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
+	public void readFromNBT(NBTTagCompound nbt) {
 		
 		channelRemove(this);
 		
-		super.readFromNBT(nbt, str);
-		channel = nbt.getString(str + "channel");
+		super.readFromNBT(nbt);
+		channel = nbt.getString( "channel");
 		
 		channelRegister(this);
 		

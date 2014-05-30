@@ -394,14 +394,12 @@ public class Utils {
 
 	}
 
-
-	
 	public static void readFromNBT(NBTTagCompound nbt, String str, IInventory inventory) {
 		NBTTagList var2 = nbt.getTagList(str, 10);
 
 		for (int var3 = 0; var3 < var2.tagCount(); ++var3)
 		{
-			NBTTagCompound var4 = (NBTTagCompound) var2.getCompoundTagAt(var3); 
+			NBTTagCompound var4 = (NBTTagCompound) var2.getCompoundTagAt(var3);
 			int var5 = var4.getByte("Slot") & 255;
 
 			if (var5 >= 0 && var5 < inventory.getSizeInventory())
@@ -427,7 +425,6 @@ public class Utils {
 
 		nbt.setTag(str, var2);
 	}
-
 
 	public static void sendPacketToServer(ByteArrayOutputStream bos)
 	{
@@ -712,7 +709,6 @@ public class Utils {
 		public static void bindGuiTexture(String string) {
 			Utils.bindTextureByName("/sprites/gui/" + string);
 		}*/
-
 
 	public static void serialiseItemStack(DataOutputStream stream, ItemStack stack) throws IOException
 	{
@@ -1053,17 +1049,16 @@ public class Utils {
 	}
 
 	interface TraceRayWeight {
-		float getWeight(int blockId);
+		float getWeight(Block block);
 	}
 
 	public static class TraceRayWeightOpaque implements TraceRayWeight {
 
 		@Override
-		public float getWeight(int blockId) {
-			Block b = Block.getBlockById(blockId);
-			if (b == null)
+		public float getWeight(Block block) {
+			if (block == null)
 				return 0;
-			return b.isOpaqueCube() ? 1f : 0f;
+			return block.isOpaqueCube() ? 1f : 0f;
 		}
 
 	}
@@ -1112,7 +1107,9 @@ public class Utils {
 			int yInt = (int) yFloor;
 			int zInt = (int) zFloor;
 
-			int blockKey = Block.getIdFromBlock(w.getBlock(xInt + posXint, yInt + posYint, zInt + posZint));
+			Block block = Blocks.air;
+			if (w.blockExists(xInt + posXint, yInt + posYint, zInt + posZint))
+				w.getBlock(xInt + posXint, yInt + posYint, zInt + posZint);
 
 			float dToStack;
 			if (d + dBest < rangeMax)
@@ -1121,7 +1118,7 @@ public class Utils {
 				dToStack = (rangeMax - d);
 			}
 
-			stackRed += weight.getWeight(blockKey) * dToStack;
+			stackRed += weight.getWeight(block) * dToStack;
 
 			x += vx * dBest;
 			y += vy * dBest;
@@ -1295,9 +1292,6 @@ public class Utils {
 		return (block == Blocks.flowing_water || block == Blocks.water);
 	}
 
-
-
-
 	public static void addChatMessage(EntityPlayer entityPlayer, String string) {
 
 		entityPlayer.addChatMessage(new ChatComponentText(string));
@@ -1313,7 +1307,6 @@ public class Utils {
 		return new ItemStack(i, size, damage);
 	}
 
-	
 	public static ArrayList<NBTTagCompound> getTags(NBTTagCompound nbt) {
 
 		Object[] set = nbt.func_150296_c().toArray();
@@ -1325,10 +1318,6 @@ public class Utils {
 		return tags;
 	}
 
-	public static short getBlockId(World world, int x, int y, int z) {
-		// TODO Auto-generated method stub
-		return (short) Block.getIdFromBlock(world.getBlock(x, y, z));
-	}
 
 
 	public static boolean isRemote(IBlockAccess world) {
@@ -1362,16 +1351,11 @@ public class Utils {
 		return Block.getBlockById(blockId);
 	}
 
-	public static int getBlockId(Item item) {
-		return Block.getIdFromBlock(Block.getBlockFromItem(item));
-	}
-
 
 	public static void updateSkylight(Chunk chunk) {
 		// TODO Auto-generated method stub
 		chunk.func_150804_b(false);
 	}
-
 
 	public static void updateAllLightTypes(World worldObj, int xCoord, int yCoord, int zCoord) {
 		// TODO Auto-generated method stub
@@ -1388,10 +1372,7 @@ public class Utils {
 		return Item.getIdFromItem(Item.getItemFromBlock(block));
 	}
 
-	public static short getBlockId(Block block) {
-		// TODO Auto-generated method stub
-		return (short) Block.getIdFromBlock(block);
-	}
+
 
 	public static void addSmelting(Item parentItem, int parentItemDamage, ItemStack findItemStack, float f) {
 		FurnaceRecipes.smelting().func_151394_a(newItemStack(parentItem, 1, parentItemDamage), findItemStack, f);
@@ -1407,6 +1388,12 @@ public class Utils {
 
 	public static void addSmelting(Block parentBlock, int parentItemDamage, ItemStack findItemStack) {
 		addSmelting(parentBlock, parentItemDamage, findItemStack, 0.3f);
+	}
+
+	public static NBTTagCompound newNbtTagCompund(NBTTagCompound nbt, String string) {
+		NBTTagCompound cmp = new NBTTagCompound();
+		nbt.setTag(string, cmp);
+		return cmp;
 	}
 
 }

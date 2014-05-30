@@ -62,10 +62,12 @@ public class TransparentNode extends Node{
 		element.onNeighborBlockChange();
 	}
 
-    public void readFromNBT(NBTTagCompound nbt,String str)
+    public void readFromNBT(NBTTagCompound nbt)
     {
-    	super.readFromNBT(nbt,str + "node");
-    	elementId = nbt.getShort(str + "eid");
+    	super.readFromNBT(nbt.getCompoundTag("node"));
+
+    	
+    	elementId = nbt.getShort("eid");
 		try {
 			TransparentNodeDescriptor descriptor = Eln.transparentNodeItem.getDescriptor(elementId);
 			element = (TransparentNodeElement) descriptor.ElementClass.getConstructor(TransparentNode.class,TransparentNodeDescriptor.class).newInstance(this,descriptor);
@@ -88,7 +90,7 @@ public class TransparentNode extends Node{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	element.readFromNBT(nbt,str + "element");
+    	element.readFromNBT(nbt.getCompoundTag("element"));
        
 
     }
@@ -96,11 +98,14 @@ public class TransparentNode extends Node{
     
 
 
-    public void writeToNBT(NBTTagCompound nbt,String str)
+    public void writeToNBT(NBTTagCompound nbt)
     {	
-    	super.writeToNBT(nbt,str + "node");
-    	nbt.setShort(str + "eid", (short) elementId);
-    	element.writeToNBT(nbt,str + "element");
+    	super.writeToNBT(Utils.newNbtTagCompund(nbt,"node"));
+
+    	nbt.setShort("eid", (short) elementId);
+    	
+    	
+    	element.writeToNBT(Utils.newNbtTagCompund(nbt,"element"));
     	
 
     }

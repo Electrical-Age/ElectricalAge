@@ -68,17 +68,17 @@ public class ElectricalCableElement extends SixNodeElement implements IThermalDe
 	int colorCare;
 
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
-		super.readFromNBT(nbt, str);
-		byte b = nbt.getByte(str + "color");
+	public void readFromNBT(NBTTagCompound nbt ) {
+		super.readFromNBT(nbt);
+		byte b = nbt.getByte("color");
 		color = b & 0xF;
 		colorCare = (b >> 4) & 1;
 	}
 
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
-		super.writeToNBT(nbt, str);
-		nbt.setByte(str + "color", (byte) (color + (colorCare << 4)));
+	public void writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		nbt.setByte("color", (byte) (color + (colorCare << 4)));
 	}
 
 	@Override

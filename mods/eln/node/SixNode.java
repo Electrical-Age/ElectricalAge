@@ -188,18 +188,19 @@ public class SixNode extends Node {
 	}
 
 	
-
-    public void readFromNBT(NBTTagCompound nbt,String str)
+	
+    public void readFromNBT(NBTTagCompound nbt)
     {
-    	super.readFromNBT(nbt,str + "node");
+    	super.readFromNBT(nbt.getCompoundTag("node"));
+
     	
-    	sixNodeCacheMapId = nbt.getByte(str + "cacheId");
+    	sixNodeCacheMapId = nbt.getByte("cacheId");
     	if(sixNodeCacheMapId == 0) sixNodeCacheMapId = -1;
     	int idx = 0;
 		for(idx = 0;idx<6;idx++)
 		{
 			
-			short sideElementId =  nbt.getShort(str + "EID"+idx);
+			short sideElementId =  nbt.getShort("EID"+idx);
 			if(sideElementId == 0)
 			{
 				sideElementList[idx] = null;
@@ -211,7 +212,7 @@ public class SixNode extends Node {
 					SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(sideElementId);
 					sideElementIdList[idx] = sideElementId;
 					sideElementList[idx] = (SixNodeElement) descriptor.ElementClass.getConstructor(SixNode.class,Direction.class,SixNodeDescriptor.class).newInstance(this,Direction.fromInt(idx),descriptor);	
-					sideElementList[idx].readFromNBT(nbt, str + "ED" + idx);
+					sideElementList[idx].readFromNBT(nbt.getCompoundTag("ED" + idx));
 					sideElementList[idx].initialize();
 				} catch (InstantiationException e) {
 					// TODO Auto-generated catch block
@@ -245,28 +246,30 @@ public class SixNode extends Node {
     }
     
 
-    public void writeToNBT(NBTTagCompound nbt,String str)
+    public void writeToNBT(NBTTagCompound nbt)
     {
     	int idx = 0;
-    	nbt.setByte(str + "cacheId",(byte) sixNodeCacheMapId);
+    	nbt.setByte("cacheId",(byte) sixNodeCacheMapId);
 		for(SixNodeElement sideElement  : sideElementList)
 		{
 
 			if(sideElement == null)
 			{
-				nbt.setShort(str + "EID"+idx, (short) 0);
+				nbt.setShort("EID"+idx, (short) 0);
 			}
 			else
 			{
-				nbt.setShort(str + "EID"+idx, (short) sideElementIdList[idx]);
-				sideElement.writeToNBT(nbt, str + "ED"+idx);			
+				nbt.setShort("EID"+idx, (short) sideElementIdList[idx]);
+				sideElement.writeToNBT(Utils.newNbtTagCompund(nbt,"ED"+idx));			
 			}		
 			idx++;
 		}
 
 
 		
-    	super.writeToNBT(nbt,str + "node");
+    	NBTTagCompound nodeNbt = new NBTTagCompound();
+    	super.writeToNBT(nodeNbt);
+    	nbt.setTag("node", nodeNbt);
     }
 	
 	

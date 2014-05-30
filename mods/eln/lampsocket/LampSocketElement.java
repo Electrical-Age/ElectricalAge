@@ -90,24 +90,24 @@ public class LampSocketElement extends SixNodeElement{
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
+	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.readFromNBT(nbt, str);
-        byte value = nbt.getByte(str + "front");
+		super.readFromNBT(nbt);
+        byte value = nbt.getByte("front");
         front = LRDU.fromInt((value>>0) & 0x3);
         grounded = (value & 4) != 0;
         
-        poweredByLampSupply = nbt.getBoolean(str + "poweredByLampSupply");
-        channel = nbt.getString(str + "channel");
+        poweredByLampSupply = nbt.getBoolean( "poweredByLampSupply");
+        channel = nbt.getString("channel");
 	}
 
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
+	public void writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.writeToNBT(nbt, str);
-		nbt.setByte(str + "front",(byte) ((front.toInt()<<0) + (grounded ? 4 : 0)));
-		nbt.setBoolean(str + "poweredByLampSupply", poweredByLampSupply);
-		nbt.setString(str + "channel", channel);
+		super.writeToNBT(nbt);
+		nbt.setByte( "front",(byte) ((front.toInt()<<0) + (grounded ? 4 : 0)));
+		nbt.setBoolean("poweredByLampSupply", poweredByLampSupply);
+		nbt.setString( "channel", channel);
 	}
 	static final int setGroundedId = 1;
 	static final int setAlphaZId = 2;

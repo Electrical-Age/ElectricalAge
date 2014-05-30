@@ -87,14 +87,15 @@ public class NodeManager extends WorldSavedData{
     }
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		int i = 0;
+		i++;
 		for(Object o : Utils.getTags(nbt))
 		{
 			NBTTagCompound tag = (NBTTagCompound) o;
 			Class nodeClass = UUIDToClass.get(tag.getString("tag"));
 			try {
 				NodeBase node = (NodeBase) nodeClass.getConstructor().newInstance();
-				node.readFromNBT(tag, "");
+				node.readFromNBT(tag);
 				addNode(node);
 				node.initializeFromNBT();
 				
@@ -137,7 +138,7 @@ public class NodeManager extends WorldSavedData{
 			if(node.mustBeSaved() == false) continue;
 			NBTTagCompound nbtNode = new NBTTagCompound();
 			nbtNode.setString("tag", node.getInfo().getUuid());
-			node.writeToNBT(nbtNode,"");
+			node.writeToNBT(nbtNode);
 			nbt.setTag("n" + nodeCounter++, nbtNode);
 		}
 	}

@@ -118,22 +118,22 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 	}
 	
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
+	public void writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.writeToNBT(nbt, str);
-		nbt.setString(str + "channel", channel);
-		nbt.setInteger(str + "generation", generation);
-		nbt.setBoolean(str + "connection", connection);
+		super.writeToNBT(nbt);
+		nbt.setString("channel", channel);
+		nbt.setInteger("generation", generation);
+		nbt.setBoolean("connection", connection);
 	}
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
+	public void readFromNBT(NBTTagCompound nbt) {
 		if(this.descriptor.repeater)
 			WirelessSignalTxElement.channelRemove(this);
 		
-		super.readFromNBT(nbt, str);
-		channel = nbt.getString(str + "channel");
-		generation = nbt.getInteger(str + "generation");
-		connection = nbt.getBoolean(str + "connection");
+		super.readFromNBT(nbt);
+		channel = nbt.getString("channel");
+		generation = nbt.getInteger("generation");
+		connection = nbt.getBoolean("connection");
 		if(this.descriptor.repeater)
 			WirelessSignalTxElement.channelRegister(this);
 	}

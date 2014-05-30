@@ -31,7 +31,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public abstract class SixNodeElement implements INBTTReady, GhostObserver {
+public abstract class SixNodeElement implements  GhostObserver {
 	//private static Class[] idToClass = new Class[256];
 	//private static Class[] idToRenderClass = new Class[256];
 	
@@ -222,17 +222,17 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
 		return new ItemStack(Eln.sixNodeBlock, 1, itemStackDamageId); //sixNode.sideElementIdList[side.getInt()]
 	}	
 	
-	public void readFromNBT(NBTTagCompound nbt,String str)
+	public void readFromNBT(NBTTagCompound nbt)
     {
     	
         int idx;
         
-        front = front.readFromNBT(nbt, str + "sixFront");
+        front = front.readFromNBT(nbt, "sixFront");
         
         IInventory inv = getInventory();
         if(inv != null)
         {
-        	Utils.readFromNBT(nbt, str + "inv", inv);
+        	Utils.readFromNBT(nbt, "inv", inv);
         }
         
 
@@ -240,25 +240,25 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
         idx = 0;
 		for(NodeElectricalLoad electricalLoad : electricalLoadList) 
 		{
-			electricalLoad.readFromNBT(nbt,str);
+			electricalLoad.readFromNBT(nbt,"");
 		}
 
 		for(NodeThermalLoad thermalLoad : thermalLoadList) 
 		{
-			thermalLoad.readFromNBT(nbt,str);
+			thermalLoad.readFromNBT(nbt,"");
 		}
 		
 		for(IProcess process : slowProcessList) 
 		{
-			if(process instanceof INBTTReady) ((INBTTReady)process).readFromNBT(nbt,str);
+			if(process instanceof INBTTReady) ((INBTTReady)process).readFromNBT(nbt,"");
 		}
 		for(IProcess process : electricalProcessList) 
 		{
-			if(process instanceof INBTTReady) ((INBTTReady)process).readFromNBT(nbt,str);
+			if(process instanceof INBTTReady) ((INBTTReady)process).readFromNBT(nbt,"");
 		}
 		for(IProcess process : thermalProcessList) 
 		{
-			if(process instanceof INBTTReady) ((INBTTReady)process).readFromNBT(nbt,str);
+			if(process instanceof INBTTReady) ((INBTTReady)process).readFromNBT(nbt,"");
 		}
 		
     }
@@ -266,18 +266,18 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
     
     
 
-    public void writeToNBT(NBTTagCompound nbt,String str)
+    public void writeToNBT(NBTTagCompound nbt)
     {
       
         int idx;
         
-        front.writeToNBT(nbt, str + "sixFront");
+        front.writeToNBT(nbt, "sixFront");
         
 
         IInventory inv = getInventory();
         if(inv != null)
         {
-        	Utils.writeToNBT(nbt, str + "inv", inv);
+        	Utils.writeToNBT(nbt, "inv", inv);
         }
         
 
@@ -286,25 +286,25 @@ public abstract class SixNodeElement implements INBTTReady, GhostObserver {
         idx = 0;
 		for(NodeElectricalLoad electricalLoad : electricalLoadList) 
 		{
-			electricalLoad.writeToNBT(nbt,str);
+			electricalLoad.writeToNBT(nbt,"");
 		}
 
 		for(NodeThermalLoad thermalLoad : thermalLoadList) 
 		{
-			thermalLoad.writeToNBT(nbt,str);
+			thermalLoad.writeToNBT(nbt,"");
 		}
 		
 		for(IProcess process : slowProcessList) 
 		{
-			if(process instanceof INBTTReady) ((INBTTReady)process).writeToNBT(nbt,str);
+			if(process instanceof INBTTReady) ((INBTTReady)process).writeToNBT(nbt,"");
 		}
 		for(IProcess process : electricalProcessList) 
 		{
-			if(process instanceof INBTTReady) ((INBTTReady)process).writeToNBT(nbt,str);
+			if(process instanceof INBTTReady) ((INBTTReady)process).writeToNBT(nbt,"");
 		}
 		for(IProcess process : thermalProcessList) 
 		{
-			if(process instanceof INBTTReady) ((INBTTReady)process).writeToNBT(nbt,str);
+			if(process instanceof INBTTReady) ((INBTTReady)process).writeToNBT(nbt,"");
 		}
            
     }

@@ -422,83 +422,9 @@ public enum Direction {
 
 		}		
 	}	
-	/*
-	public void glRotateYnRef()
-	{
-		switch(this)
-		{
-		case XN:
-			GL11.glRotatef(90f, 0f, 0f, 0f);
-			break;
-		case XP:
-			GL11.glRotatef(90f, 0f, 0f, 0f);
-			break;
-		case YN:
-		//	GL11.glRotatef(90f, 0f, 0f, 0f);
-			break;
-		case YP:
-			//GL11.glRotatef(90f, 0f, 0f, 0f);
-			break;
-		case ZN:
-			GL11.glRotatef(90f, 0f, 0f, 0f);
-			break;
-		case ZP:
-			GL11.glRotatef(90f, 0f, 0f, 0f);
-			break;
-		default:
-			break;
 
-		}		
-	}*/
 	
-	/*public void rotate(Integer x,Integer y,Integer z,Direction dir)
-	{
-		switch (dir) {
-		case XN: 
-			break;
-		case XP: 
-			break;
-		case YN:
-			break;
-		case YP:
-			break;
-		case ZN:
-			break;
-		case ZP:
-			break;
-		default:
-			break;
 
-		}
-	}*/
-	
-	
-	
-	public int getBlockId(Coordonate coordonate)
-	{
-		int x = coordonate.x,y = coordonate.y,z = coordonate.z;
-		switch(this)
-		{
-		case XN:x--;
-			break;
-		case XP:x++;
-			break;
-		case YN:y--;
-			break;
-		case YP:y++;
-			break;
-		case ZN:z--;
-			break;
-		case ZP:z++;
-			break;
-		default:
-			break;
-		
-		}
-		
-		return Block.getIdFromBlock(coordonate.world().getBlock(x, y, z));
-		
-	}
 
 	public TileEntity getTileEntity(Coordonate coordonate)
 	{

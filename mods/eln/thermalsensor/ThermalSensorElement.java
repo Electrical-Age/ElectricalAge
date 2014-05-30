@@ -87,24 +87,24 @@ public class ThermalSensorElement extends SixNodeElement {
 
 
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
+	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.readFromNBT(nbt, str);
-        byte value = nbt.getByte(str + "front");
+		super.readFromNBT(nbt);
+        byte value = nbt.getByte("front");
         front = LRDU.fromInt((value>>0) & 0x3);
-        typeOfSensor = nbt.getByte(str + "typeOfSensor");
-        lowValue = nbt.getFloat(str + "lowValue");
-        highValue = nbt.getFloat(str + "highValue");
+        typeOfSensor = nbt.getByte("typeOfSensor");
+        lowValue = nbt.getFloat("lowValue");
+        highValue = nbt.getFloat("highValue");
 	}
 
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
+	public void writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		super.writeToNBT(nbt, str);
-		nbt.setByte(str + "front",(byte) ((front.toInt()<<0)));
-		nbt.setByte(str + "typeOfSensor", (byte) typeOfSensor);
-		nbt.setFloat(str + "lowValue", lowValue);
-		nbt.setFloat(str + "highValue", highValue);
+		super.writeToNBT(nbt);
+		nbt.setByte("front",(byte) ((front.toInt()<<0)));
+		nbt.setByte("typeOfSensor", (byte) typeOfSensor);
+		nbt.setFloat("lowValue", lowValue);
+		nbt.setFloat("highValue", highValue);
 	}
 
 	@Override

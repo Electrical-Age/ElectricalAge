@@ -44,7 +44,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 
-public abstract class TransparentNodeElement implements INBTTReady ,GhostObserver{
+public abstract class TransparentNodeElement implements  GhostObserver{
 
 	public ArrayList<IProcess> slowProcessList  = new ArrayList<IProcess>(4);
 
@@ -191,30 +191,24 @@ public abstract class TransparentNodeElement implements INBTTReady ,GhostObserve
 		boolean needDestroy = false;
 		if(transparentNodeDescriptor.mustHaveFloor())
 		{
-			block = Block.getBlockById(node.neighborBlock[Direction.YN.getInt()]);
-			if(block == null || ! block.isOpaqueCube()) needDestroy = true;
+			if(! node.isBlockOpaque(Direction.YN)) needDestroy = true;
 		}
 		if(transparentNodeDescriptor.mustHaveCeiling())
 		{
-			block = Block.getBlockById(node.neighborBlock[Direction.YP.getInt()]);
-			if(block == null || ! block.isOpaqueCube()) needDestroy = true;
+			if(! node.isBlockOpaque(Direction.YP)) needDestroy = true;
 		}
 		if(transparentNodeDescriptor.mustHaveWallFrontInverse())
 		{
-			block = Block.getBlockById(node.neighborBlock[front.getInverse().getInt()]);
-			if(block == null || ! block.isOpaqueCube()) needDestroy = true;
+			if(! node.isBlockOpaque(front.getInverse())) needDestroy = true;
 		}
 		if(transparentNodeDescriptor.mustHaveWall())
 		{
 			boolean wall = false;
-			block = Block.getBlockById(node.neighborBlock[Direction.XN.getInt()]);
-			if(block != null && block.isOpaqueCube()) wall = true;
-			block = Block.getBlockById(node.neighborBlock[Direction.XP.getInt()]);
-			if(block != null && block.isOpaqueCube()) wall = true;
-			block = Block.getBlockById(node.neighborBlock[Direction.ZN.getInt()]);
-			if(block != null && block.isOpaqueCube()) wall = true;
-			block = Block.getBlockById(node.neighborBlock[Direction.ZP.getInt()]);
-			if(block != null && block.isOpaqueCube()) wall = true;
+
+			if(node.isBlockOpaque(Direction.XN)) wall = true;
+			if(node.isBlockOpaque(Direction.XP)) wall = true;
+			if(node.isBlockOpaque(Direction.ZN)) wall = true;
+			if(node.isBlockOpaque(Direction.ZP)) wall = true;
 			
 			if(! wall) needDestroy = true;
 		}
@@ -304,7 +298,7 @@ public abstract class TransparentNodeElement implements INBTTReady ,GhostObserve
 
 	
 		
-	public void readFromNBT(NBTTagCompound nbt,String str)
+	public void readFromNBT(NBTTagCompound nbt)
 	{      
 
         int idx;
@@ -312,36 +306,36 @@ public abstract class TransparentNodeElement implements INBTTReady ,GhostObserve
         IInventory inv = getInventory();
         if(inv != null)
         {
-        	Utils.readFromNBT(nbt, str + "inv", inv);
+        	Utils.readFromNBT(nbt, "inv", inv);
         }
         
         idx = 0;
         
 		for(NodeElectricalLoad electricalLoad : electricalLoadList) 
 		{
-			electricalLoad.readFromNBT(nbt,str);
+			electricalLoad.readFromNBT(nbt,"");
 		}
 
 		for(NodeThermalLoad thermalLoad : thermalLoadList) 
 		{
-			thermalLoad.readFromNBT(nbt,str);
+			thermalLoad.readFromNBT(nbt,"");
 		}
 		
 		for(IProcess process : slowProcessList) 
 		{
-			if(process instanceof INBTTReady) ((INBTTReady)process).readFromNBT(nbt,str);
+			if(process instanceof INBTTReady) ((INBTTReady)process).readFromNBT(nbt,"");
 		}
 		for(IProcess process : electricalProcessList) 
 		{
-			if(process instanceof INBTTReady) ((INBTTReady)process).readFromNBT(nbt,str);
+			if(process instanceof INBTTReady) ((INBTTReady)process).readFromNBT(nbt,"");
 		}
 		for(IProcess process : thermalProcessList) 
 		{
-			if(process instanceof INBTTReady) ((INBTTReady)process).readFromNBT(nbt,str);
+			if(process instanceof INBTTReady) ((INBTTReady)process).readFromNBT(nbt,"");
 		}
 			
 		
-		byte b = nbt.getByte(str + "others");
+		byte b = nbt.getByte("others");
 		front = Direction.fromInt(b & 0x7);		
 		grounded = (b & 8) != 0;
 	}
@@ -349,41 +343,41 @@ public abstract class TransparentNodeElement implements INBTTReady ,GhostObserve
 	    
 	    
 
-    public void writeToNBT(NBTTagCompound nbt,String str)
+    public void writeToNBT(NBTTagCompound nbt)
     {
         int idx = 0;
         
         IInventory inv = getInventory();
         if(inv != null)
         {
-        	Utils.writeToNBT(nbt, str + "inv", inv);
+        	Utils.writeToNBT(nbt,"inv", inv);
         }
         
 		for(NodeElectricalLoad electricalLoad : electricalLoadList) 
 		{
-			electricalLoad.writeToNBT(nbt,str );
+			electricalLoad.writeToNBT(nbt,"" );
 		}
 
 		for(NodeThermalLoad thermalLoad : thermalLoadList) 
 		{
-			thermalLoad.writeToNBT(nbt,str);
+			thermalLoad.writeToNBT(nbt,"");
 		}
 		
 		for(IProcess process : slowProcessList) 
 		{
-			if(process instanceof INBTTReady) ((INBTTReady)process).writeToNBT(nbt,str);
+			if(process instanceof INBTTReady) ((INBTTReady)process).writeToNBT(nbt,"");
 		}
 		for(IProcess process : electricalProcessList) 
 		{
-			if(process instanceof INBTTReady) ((INBTTReady)process).writeToNBT(nbt,str);
+			if(process instanceof INBTTReady) ((INBTTReady)process).writeToNBT(nbt,"");
 		}
 		for(IProcess process : thermalProcessList) 
 		{
-			if(process instanceof INBTTReady) ((INBTTReady)process).writeToNBT(nbt,str);
+			if(process instanceof INBTTReady) ((INBTTReady)process).writeToNBT(nbt,"");
 		}
 
 
-        nbt.setByte(str + "others",(byte) (front.getInt() + (grounded ? 8 : 0))) ;
+        nbt.setByte("others",(byte) (front.getInt() + (grounded ? 8 : 0))) ;
     }
     
     public void reconnect()

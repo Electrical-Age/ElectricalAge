@@ -69,16 +69,16 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
-		super.readFromNBT(nbt, str);
-        byte value = nbt.getByte(str + "front");
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+        byte value = nbt.getByte("front");
         front = LRDU.fromInt((value >> 0) & 0x3);
 	}
 
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
-		super.writeToNBT(nbt, str);
-		nbt.setByte(str + "front", (byte)((front.toInt() << 0)));
+	public void writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		nbt.setByte("front", (byte)((front.toInt() << 0)));
 	}
 
 	@Override

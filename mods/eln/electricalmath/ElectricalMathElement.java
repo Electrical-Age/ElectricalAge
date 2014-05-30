@@ -219,18 +219,18 @@ public class ElectricalMathElement extends SixNodeElement {
 	}
 	
 	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
-		super.writeToNBT(nbt, str);
-		nbt.setString(str + "expression", expression);
-		equation.writeToNBT(nbt, str + "equation");
+	public void writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		nbt.setString("expression", expression);
+		equation.writeToNBT(nbt, "equation");
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
-		super.readFromNBT(nbt, str);
-		expression = nbt.getString(str + "expression");
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		expression = nbt.getString("expression");
 		preProcessEquation(expression);
-		equation.readFromNBT(nbt, str + "equation");
+		equation.readFromNBT(nbt, "equation");
 		
 		firstBoot = false;
 	}

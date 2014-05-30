@@ -39,7 +39,7 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-public abstract class NodeBase implements INBTTReady {
+public abstract class NodeBase {
 
 	
 	public static final int maskElectricalPower = 1<<0 ;
@@ -69,7 +69,8 @@ public abstract class NodeBase implements INBTTReady {
 	public static final double networkSerializeTFactor = 10.0;
 	
 	
-	public short[] neighborBlock = new short[6];
+	public byte neighborOpaque;
+	public byte neighborWrapable;
 	
 	public static int teststatic;
 	
@@ -125,6 +126,9 @@ public abstract class NodeBase implements INBTTReady {
 	{
 		int[] vector = new int[3];
 		World world = coordonate.world();
+		
+		neighborOpaque = 0;
+		neighborWrapable = 0;
 		for(Direction direction : Direction.values())
 		{
 			vector[0] = coordonate.x;
@@ -133,7 +137,11 @@ public abstract class NodeBase implements INBTTReady {
 			
 			direction.applyTo(vector, 1);
 					
-			neighborBlock[direction.getInt()] = (short)Utils.getBlockId(world,vector[0], vector[1], vector[2]);
+			Block b = world.getBlock(vector[0], vector[1], vector[2]);
+			if(b.isOpaqueCube())
+				neighborOpaque |= 1 << direction.getInt();
+			if(isBlockWrappable(b))
+				neighborWrapable |= 1 << direction.getInt();
 		}
 	}
 	
@@ -162,7 +170,11 @@ public abstract class NodeBase implements INBTTReady {
 	
 	public boolean isBlockWrappable(Direction direction)
 	{
-		return isBlockWrappable(Utils.getBlock(neighborBlock[direction.getInt()])); 
+		return ((neighborWrapable >> direction.getInt()) & 1) != 0; 
+	}	
+	public boolean isBlockOpaque(Direction direction)
+	{
+		return ((neighborOpaque >> direction.getInt()) & 1) != 0; 
 	}	
 	public static boolean isBlockWrappable(Block block)
 	{
@@ -489,15 +501,15 @@ public abstract class NodeBase implements INBTTReady {
 		return true;
 	}
 
-    public void readFromNBT(NBTTagCompound nbt,String str)
+    public void readFromNBT(NBTTagCompound nbt)
     {
     	
-        coordonate.readFromNBT(nbt, str + "c");		
+        coordonate.readFromNBT(nbt, "c");		
         
         IInventory inv = getInventory();
         if(inv != null)
         {
-        	Utils.readFromNBT(nbt, str + "inv", inv);
+        	Utils.readFromNBT(nbt, "inv", inv);
         }
 
       /*  {
@@ -516,10 +528,10 @@ public abstract class NodeBase implements INBTTReady {
             }
         }*/
         
-		for(int idx = 0;idx<6;idx++)
-		{
-			neighborBlock[idx] =  nbt.getShort(str + "NBID"+idx);
-		}
+        neighborOpaque = nbt.getByte("NBOpaque");
+        neighborWrapable = nbt.getByte("NBWrap");
+        
+
 
 		initialized = true;
     }
@@ -527,14 +539,14 @@ public abstract class NodeBase implements INBTTReady {
     
     
 
-    public void writeToNBT(NBTTagCompound nbt,String str)
+    public void writeToNBT(NBTTagCompound nbt)
     {
         
-        coordonate.writeToNBT(nbt, str + "c");
+        coordonate.writeToNBT(nbt, "c");
         IInventory inv = getInventory();
         if(inv != null)
         {
-        	Utils.writeToNBT(nbt, str + "inv", inv);
+        	Utils.writeToNBT(nbt, "inv", inv);
         }
 
         
@@ -542,10 +554,9 @@ public abstract class NodeBase implements INBTTReady {
 
         
         
-        for(idx = 0;idx<6;idx++)
-        {
-			nbt.setShort(str + "NBID"+idx,neighborBlock[idx]);
-        }
+        nbt.setByte("NBOpaque",neighborOpaque);
+        nbt.setByte("NBWrap",neighborWrapable);
+ 
         
 
     }
