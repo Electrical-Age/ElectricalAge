@@ -46,7 +46,7 @@ public class ReplicatorPopProcess implements IProcess {
 						
 						if(world.blockExists(x, y, z) == false) break;
 						while (world.getBlock(x, y, z) != Blocks.air 
-								|| world.getSkyBlockTypeBrightness(EnumSkyBlock.Block,x,y,z) > 6) {
+								|| Utils.getLight(world,EnumSkyBlock.Block,x,y,z) > 6) {
 							y++;
 						}
 						ReplicatorEntity entityliving = new ReplicatorEntity(world);

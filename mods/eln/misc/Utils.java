@@ -760,11 +760,15 @@ public class Utils {
 		return false;
 	}
 
-	public static int getLight(World w, int x, int y, int z) {
+	public static int getLight(World w,EnumSkyBlock e, int x, int y, int z) {
+		return w.getSavedLightValue(e,x,y,z);
+	}
+		
+		/*
 		int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.Block, x, y, z);
 		int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, x, y, z) - w.calculateSkylightSubtracted(0f);
 		return Math.max(b, s);
-	}
+	}*/
 
 	/*public static void drawHalo(Obj3DPart halo,float r,float g,float b,World w,int x,int y,int z,boolean bilinear) {
 

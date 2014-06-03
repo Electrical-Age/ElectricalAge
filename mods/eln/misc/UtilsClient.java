@@ -23,6 +23,7 @@ import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 
@@ -55,7 +56,7 @@ public class UtilsClient {
 			return;
 		if (bilinear)
 			enableBilinear();
-		int light = Utils.getLight(w, x, y, z) * 19 / 15 - 4;
+		int light = getLight(w, x, y, z) * 19 / 15 - 4;
 		Entity e = getClientPlayer();
 		float d = (float) (Math.abs(x - e.posX) + Math.abs(y - e.posY) + Math.abs(z - e.posZ));
 
@@ -118,7 +119,7 @@ public class UtilsClient {
 			return;
 		if (bilinear)
 			enableBilinear();
-		int light = Utils.getLight(e.worldObj, MathHelper.floor_double(e.posX), MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ));
+		int light = getLight(e.worldObj, MathHelper.floor_double(e.posX), MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ));
 		// light =
 		// e.worldObj.getLightBrightnessForSkyBlocks(MathHelper.floor_double(e.posX),
 		// MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ),0);
@@ -207,6 +208,7 @@ public class UtilsClient {
 	public static void disableBlend() {
 		// TODO Auto-generated method stub
 		GL11.glDepthMask(true);
+		
 		//GL11.glDisable(GL11.GL_BLEND);
 		//GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		//	Utils.println(GL11.glGetInteger(GL11.GL_BLEND_SRC) + " " + GL11.glGetInteger(GL11.GL_BLEND_DST) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
@@ -461,7 +463,11 @@ public class UtilsClient {
 		double x = (c.posX - e.posX), y = (c.posY - e.posY), z = (c.posZ - e.posZ);
 		return Math.sqrt(x * x + y * y + z * z);
 	}
-
+	public static int getLight(World w, int x, int y, int z) {
+		int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.Block, x, y, z);
+		int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, x, y, z) - w.calculateSkylightSubtracted(0f);
+		return Math.max(b, s);
+	}
 	public static void disableDepthTest() {
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 	}

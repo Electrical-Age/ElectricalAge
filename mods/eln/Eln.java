@@ -264,7 +264,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mod(modid = "Eln", version = "BETA-1.3.0")
+@Mod(modid = "Eln", version = "BETA-1.3.0a")
 //@Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0b")
 //@NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
@@ -3395,24 +3395,28 @@ public class Eln {
 			helmetCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, 0, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_helmet").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(helmetCopper, "Eln." +name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(helmetCopper));
+			LanguageRegistry.addName(helmetCopper, name);
 		}
 		{
 			name = "Copper Chestplate";
 			plateCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, 1, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_chestplate").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(plateCopper, "Eln." +name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(plateCopper));
+			LanguageRegistry.addName(plateCopper, name);
 		}
 		{
 			name = "Copper Leggings";
 			legsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, 2, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_leggings").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(legsCopper, "Eln." +name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(legsCopper));
+			LanguageRegistry.addName(legsCopper, name);
 		}
 		{
 			name = "Copper Boots";
 			bootsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, 3, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_boots").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(bootsCopper, "Eln." +name);
-			GameRegistry.registerCustomItemStack(name, new ItemStack(bootsCopper));
+			GameRegistry.registerCustomItemStack(name, new ItemStack(bootsCopper));			
+			LanguageRegistry.addName(bootsCopper, name);
 		}
 
 		int armorPoint;
@@ -3437,6 +3441,7 @@ public class Eln {
 			)).setUnlocalizedName(name).setTextureName("eln:ecoal_helmet").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(helmetECoal,"Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(helmetECoal));
+			LanguageRegistry.addName(helmetECoal, name);
 		}
 		{
 			name = "E-Coal Chestplate";
@@ -3453,6 +3458,7 @@ public class Eln {
 			)).setUnlocalizedName(name).setTextureName("eln:ecoal_chestplate").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(plateECoal,"Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(plateECoal));
+			LanguageRegistry.addName(plateECoal, name);
 		}
 		{
 			name = "E-Coal Leggings";
@@ -3469,6 +3475,7 @@ public class Eln {
 			)).setUnlocalizedName(name).setTextureName("eln:ecoal_leggings").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(legsECoal,"Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(legsECoal));
+			LanguageRegistry.addName(legsECoal, name);
 		}
 		{
 			name = "E-Coal Boots";
@@ -3485,6 +3492,7 @@ public class Eln {
 			)).setUnlocalizedName(name).setTextureName("eln:ecoal_boots").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(bootsECoal,"Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(bootsECoal));
+			LanguageRegistry.addName(bootsECoal, name);
 		}
 	}
 
@@ -3496,30 +3504,35 @@ public class Eln {
 			swordCopper = (new ItemSword(ToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_sword").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(swordCopper, "Eln." +name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(swordCopper));
+			LanguageRegistry.addName(swordCopper, name);
 		}
 		{
 			name = "Copper Hoe";
 			hoeCopper = (new ItemHoe(ToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_hoe").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(hoeCopper, "Eln." +name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(hoeCopper));
+			LanguageRegistry.addName(hoeCopper, name);
 		}
 		{
 			name = "Copper Shovel";
 			shovelCopper = (new ItemSpade(ToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_shovel").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(shovelCopper, "Eln." +name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(shovelCopper));
+			LanguageRegistry.addName(shovelCopper, name);
 		}
 		{
 			name = "Copper Pickaxe";
 			pickaxeCopper = new ItemPickaxeEln(ToolMaterial.IRON).setUnlocalizedName(name).setTextureName("eln:copper_pickaxe").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(pickaxeCopper, "Eln." +name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(pickaxeCopper));
+			LanguageRegistry.addName(pickaxeCopper, name);
 		}
 		{
 			name = "Copper Axe";
 			axeCopper = new ItemAxeEln(ToolMaterial.IRON).setUnlocalizedName(name).setTextureName("eln:copper_axe").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(axeCopper, "Eln." +name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(axeCopper));
+			LanguageRegistry.addName(axeCopper, name);
 		}
 
 	}
@@ -3571,7 +3584,9 @@ public class Eln {
 
 			GhostGroup g = new GhostGroup();
 			g.addElement(0, 1, 0);
-			g.addRectangle(0, 0, 1, 3, -1, 1);
+			g.addElement(0, 2, -1);
+			g.addElement(0, 2, 1);
+			g.addRectangle(0, 0, 1, 3, 0, 0);
 			desc.setGhostGroup(g);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}

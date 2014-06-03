@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
@@ -148,7 +149,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 		Coordonate water = new Coordonate(waterCoord);
 		water.applyTransformation(front, coord);
 		if(coord.getBlockExist() == false) return true;
-		if(water.getBlock() == null || Utils.isWater(water)) return true;
+		if(water.getBlock() == Blocks.air || Utils.isWater(water)) return true;
 		return false;
 	}
 }

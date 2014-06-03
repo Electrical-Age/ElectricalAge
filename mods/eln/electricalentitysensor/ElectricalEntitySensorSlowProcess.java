@@ -1,7 +1,10 @@
 package mods.eln.electricalentitysensor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import com.sun.javafx.geom.Vec3d;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -12,6 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import mods.eln.Eln;
@@ -35,11 +39,14 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
 	double timeCounter = 0;
 	static final double refreshPeriode = 0.2;
 
-	RcInterpolator rc1 = new RcInterpolator(0.8f);
-	RcInterpolator rc2 = new RcInterpolator(0.8f);
+	RcInterpolator rc1 = new RcInterpolator(0.4f);
+	RcInterpolator rc2 = new RcInterpolator(0.4f);
 	
 	boolean oldState = false;
 	boolean state = false;
+	
+	
+	HashMap<Object, Vec3>  lastEPos = new HashMap<Object, Vec3>();
 	@Override
 	public void process(double time) {
 		timeCounter += time;
@@ -65,29 +72,35 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
 			double output = 0;
 			for(Object o : list) {
 				Entity e = (Entity)o;
-				double weight = 1;
-				ArrayList<Block> blockList = Utils.traceRay(world, coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ);
-				
-				boolean view = true;
-				for(Block b : blockList) {
-					if(b.isOpaqueCube()) {
-						view = false;
-						break;
-					}
-				}
-				if(view) {
-					if(e instanceof EntityPlayerMP) weight = 2.0;
-					double distance = Utils.getLength(coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ);
-					if(distance < rayMax) {
-						double sf = 1;
-						if(useSpeed) {
-							sf = speedFactor * Utils.getLength(e.posX, e.posY, e.posZ, e.lastTickPosX, e.lastTickPosY, e.lastTickPosZ);
-							//Math.sqrt(e.motionX * e.motionX + e.motionY * e.motionY + e.motionZ * e.motionZ);
-							//Utils.println(sf);
+				Vec3 lastPos;
+				if((lastPos = lastEPos.get(e)) != null){
+					double weight = 0.4;
+					ArrayList<Block> blockList = Utils.traceRay(world, coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ);
+					
+					boolean view = true;
+					for(Block b : blockList) {
+						if(b.isOpaqueCube()) {
+							view = false;
+							break;
 						}
-						output += sf * weight * (rayMax - distance) / rayMax;
+					}
+					if(view) {
+						if(e instanceof EntityPlayerMP) weight *= 2.0;
+						double distance = Utils.getLength(coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ);
+						if(distance < rayMax) {
+							double sf = 1;
+							if(useSpeed) {
+								sf = speedFactor * Utils.getLength(e.posX, e.posY, e.posZ, lastPos.xCoord, lastPos.yCoord, lastPos.zCoord);
+								
+								//Math.sqrt(e.motionX * e.motionX + e.motionY * e.motionY + e.motionZ * e.motionZ);
+							//	Utils.println(sf);
+							}
+							output += sf * weight * (rayMax - distance) / rayMax;
+						}
 					}
 				}
+				output = Math.min(1, output);
+				lastEPos.put(e, Vec3.createVectorHelper(e.posX, e.posY, e.posZ));
 			}
 			//Utils.println(output);
 			rc1.setTarget((float) output);

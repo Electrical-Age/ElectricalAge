@@ -274,7 +274,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 					jobCoord.z = miner.node.coordonate.z;
 					
 					Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
-					if(		block != null 
+					if(		block != Blocks.air 
 							&& block != Blocks.flowing_water && block != Blocks.water
 							&& block != Blocks.flowing_lava && block != Blocks.lava) {
 						if(block != Blocks.obsidian && block != Blocks.bedrock) {

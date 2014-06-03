@@ -62,7 +62,7 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 		}
 		else {
 			//
-			if (light > 5) {
+			if (light > 9) {
 				UtilsClient.bindTexture(tOn);
 			}
 			else
@@ -70,14 +70,14 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 
 			if(socket_unlightable != null) socket_unlightable.drawNoBind();
 			
-			if (light > 5) {
+			if (light > 9) {
 				UtilsClient.disableLight();
 				if(socket_lightable != null) socket_lightable.drawNoBind();
 			}
 			
 			if(socket != null) socket.drawNoBind();
 			
-			if (light > 5) 
+			if (light > 9) 
 				UtilsClient.enableLight();
 			//
 		}

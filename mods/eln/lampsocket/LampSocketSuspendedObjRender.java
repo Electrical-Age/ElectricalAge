@@ -80,11 +80,21 @@ public class LampSocketSuspendedObjRender implements LampSocketObjRender{
 			socket.draw();
 		}
 		else{
-			if(light > 5)
+			if(light > 8)
 				UtilsClient.bindTexture(tOn);
 			else
 				UtilsClient.bindTexture(tOff);
 			socket.drawNoBind();
+			
+			if (light > 8) {
+				UtilsClient.disableLight();
+			}
+			
+			if(socket != null) socket.drawNoBind();
+			
+			if (light > 8) 
+				UtilsClient.enableLight();
+			//
 		}
 		
 

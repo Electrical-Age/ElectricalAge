@@ -132,7 +132,7 @@ public class BatteryElement extends TransparentNodeElement implements IThermalDe
 	public void networkSerialize(DataOutputStream stream) {
 		super.networkSerialize(stream);
     	try {
-    		double U = (positiveLoad.Uc - negativeLoad.Uc);
+    		double U = batteryProcess.getU();//(positiveLoad.Uc - negativeLoad.Uc);
 	    	stream.writeFloat((float)(U * batteryProcess.dischargeCurrentMesure) );
 	    	stream.writeFloat((float) batteryProcess.getEnergy());
 	    	stream.writeShort((short)(batteryProcess.life * 1000));

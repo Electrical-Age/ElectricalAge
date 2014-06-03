@@ -6,6 +6,7 @@ import net.minecraft.world.World;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
+import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 
 public class ElectricalLightSensorSlowProcess implements IProcess {
@@ -57,7 +58,7 @@ public class ElectricalLightSensorSlowProcess implements IProcess {
 			if(false == element.descriptor.dayLightOnly) {
 				// light = Math.max(light, (int)(world.getBlockLightValue(coord.x, coord.y, coord.z)));
 				//light = 0;
-				light = Math.max(light, world.getSkyBlockTypeBrightness(EnumSkyBlock.Block, coord.x, coord.y, coord.z));
+				light = Math.max(light, Utils.getLight(world,EnumSkyBlock.Block, coord.x, coord.y, coord.z));
 			}
 			element.outputGateProcess.setOutputNormalized(light / 15.0);
 		}
