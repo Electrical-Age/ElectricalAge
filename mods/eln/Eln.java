@@ -182,6 +182,8 @@ import mods.eln.turbine.TurbineCoreDescriptor;
 import mods.eln.turbine.TurbineDescriptor;
 import mods.eln.turbine.TurbineElement;
 import mods.eln.turbine.TurbineRender;
+import mods.eln.tutorialsign.TutorialSignDescriptor;
+import mods.eln.tutorialsign.TutorialSignElement;
 import mods.eln.waterturbine.WaterTurbineDescriptor;
 import mods.eln.wiki.Data;
 import mods.eln.windturbine.WindTurbineDescriptor;
@@ -852,6 +854,7 @@ public class Eln {
 	@EventHandler
 	/* Remember to use the right event! */
 	public void onServerStopping(FMLServerStoppingEvent ev) {
+		TutorialSignElement.resetBalise();
 		modbusServer.destroy();
 		LightBlockEntity.observers.clear();
 		TeleporterElement.teleporterList.clear();
@@ -1698,6 +1701,16 @@ public class Eln {
 
 					);
 
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		
+		
+		{
+			subId = 8;
+			name = "Tutorial sign";
+
+			TutorialSignDescriptor desc = new TutorialSignDescriptor(
+					name, obj.getObj("voltagesource"));
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}

@@ -1,10 +1,18 @@
 package mods.eln.electricalsource;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 import javax.swing.text.MaskFormatter;
+
+import cpw.mods.fml.common.FMLCommonHandler;
 
 
 import mods.eln.Eln;
@@ -30,6 +38,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 
 public class ElectricalSourceElement extends SixNodeElement {
 
@@ -65,7 +74,7 @@ public class ElectricalSourceElement extends SixNodeElement {
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
+ 		super.writeToNBT(nbt);
 		nbt.setByte("color", (byte)(color + (colorCare << 4)));
 		
 		nbt.setDouble("voltage",groundProcess.Uc);

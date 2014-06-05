@@ -6,6 +6,9 @@ import io.netty.buffer.Unpooled;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
@@ -44,6 +47,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.AxisAlignedBB;
@@ -61,6 +65,7 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 import org.lwjgl.opengl.GL11;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -1400,6 +1405,23 @@ public class Utils {
 		NBTTagCompound cmp = new NBTTagCompound();
 		nbt.setTag(string, cmp);
 		return cmp;
+	}
+
+	
+	public static File getMapFile(String name){
+        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();       
+        File f = server.getFile("saves/" + server.getFolderName() + "/" + name); 
+        return f;
+	}
+	
+	public static String readMapFile(String name) throws IOException{
+		File file = getMapFile(name);
+		FileInputStream fis = new FileInputStream(file);
+	    byte[] data = new byte[(int)file.length()];
+	    fis.read(data);
+	    fis.close();
+	    String s = new String(data, "UTF-8");
+	    return s;
 	}
 
 }
