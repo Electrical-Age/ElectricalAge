@@ -41,7 +41,7 @@ public class SoundParam {
 	float volume = 1, pitch = 1;
 	float rangeNominal, rangeMax, blockFactor;
 
-	void play() {
+	public void play() {
 		if (world.isRemote)
 			SoundClient.play(this);
 		else

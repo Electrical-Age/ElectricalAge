@@ -40,9 +40,9 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 		
 		if (alpha % 120 > 45 && alphaN_1 % 120 <= 45 && soundPlaying == false) {
 			Coordonate coord = coordonate();
-			SoundClient.play(new SoundParam(descriptor.soundName, tileEntity)
+			new SoundParam(descriptor.soundName, tileEntity)
 					.setVolume(descriptor.nominalVolume * (0.007f + 1f * (float)powerFactorFilter.get() * (float)powerFactorFilter.get()), 
-								1f + (float)Math.sqrt(powerFactorFilter.get()) / 1.3f));
+								1f + (float)Math.sqrt(powerFactorFilter.get()) / 1.3f).play();
 
 			soundPlaying = true;
 		} else {

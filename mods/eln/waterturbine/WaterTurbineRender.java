@@ -42,7 +42,7 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 
 		dirFilter.setTarget(flowDir);
 		dirFilter.stepGraphic();
-		powerFactorFilter.setTarget(dirFilter.get() * powerFactor);
+		powerFactorFilter.setTarget((float) (dirFilter.get() * Math.sqrt(powerFactor)));
 		powerFactorFilter.stepGraphic();
 
 		// Utils.println(powerFactorFilter.get());
