@@ -41,6 +41,13 @@ public class SoundParam {
 	float volume = 1, pitch = 1;
 	float rangeNominal, rangeMax, blockFactor;
 
+	void play() {
+		if (world.isRemote)
+			SoundClient.play(this);
+		else
+			SoundServer.play(this);
+	}
+
 	public void set(Coordonate c) {
 		world = c.world();
 		x = c.x + 0.5;
@@ -94,10 +101,10 @@ public class SoundParam {
 		return this;
 	}
 
-	public static SoundParam fromStream(DataInputStream stream,World w) throws IOException {
+	public static SoundParam fromStream(DataInputStream stream, World w) throws IOException {
 		SoundParam p = new SoundParam();
 		p.world = w;
-		
+
 		p.x = stream.readInt() / 8.0;
 		p.y = stream.readInt() / 8.0;
 		p.z = stream.readInt() / 8.0;
@@ -111,16 +118,15 @@ public class SoundParam {
 	}
 
 	public void writeTo(DataOutputStream stream) throws IOException {
-        stream.writeInt((int)(x*8));
-        stream.writeInt((int)(y*8));
-        stream.writeInt((int)(z*8));
-        
-       
-        stream.writeUTF(track);
-        stream.writeFloat(volume);
-        stream.writeFloat(pitch);
-        stream.writeFloat(rangeNominal);
-        stream.writeFloat(rangeMax);
-        stream.writeFloat(blockFactor);	
+		stream.writeInt((int) (x * 8));
+		stream.writeInt((int) (y * 8));
+		stream.writeInt((int) (z * 8));
+
+		stream.writeUTF(track);
+		stream.writeFloat(volume);
+		stream.writeFloat(pitch);
+		stream.writeFloat(rangeNominal);
+		stream.writeFloat(rangeMax);
+		stream.writeFloat(blockFactor);
 	}
 }

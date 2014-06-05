@@ -36,7 +36,7 @@ public class SoundClient {
 			p.volume -= blockFactor*0.2f;
 			p.volume *= distanceFactor;
 			if(p.volume <= 0) return;
-			p.world.playSound(player.posX + (p.x-player.posX)/distance, player.posY + (p.y-player.posY)/distance, player.posZ + (p.z-player.posZ)/distance, p.track,p. volume, p.pitch, false);
+			p.world.playSound(player.posX + 2*(p.x-player.posX)/distance, player.posY + 2*(p.y-player.posY)/distance, player.posZ + 2*(p.z-player.posZ)/distance, p.track,p. volume, p.pitch, false);
 		}else{
 			for(int idx = 0;idx < trackCount;idx++){
 				float bandVolume = p.volume;
@@ -45,7 +45,7 @@ public class SoundClient {
 				
 				bandVolume -= ((trackCount-1-idx)/(trackCount-1f)+0.2)*normalizedBlockFactor;
 				Utils.print(bandVolume + " ");
-				p.world.playSound(player.posX + (p.x-player.posX)/distance, player.posY + (p.y-player.posY)/distance, player.posZ + (p.z-player.posZ)/distance, p.track + "_" + idx + "x", bandVolume, p.pitch, false);
+				p.world.playSound(player.posX + 2*(p.x-player.posX)/distance, player.posY + 2*(p.y-player.posY)/distance, player.posZ + 2*(p.z-player.posZ)/distance, p.track + "_" + idx + "x", bandVolume, p.pitch, false);
 			}
 			Utils.println("");
 		}
