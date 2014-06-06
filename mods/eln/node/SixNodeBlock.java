@@ -25,6 +25,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.util.Vec3Pool;
@@ -36,7 +37,7 @@ public class SixNodeBlock extends NodeBlock implements INodeInfo{
 	//public static ArrayList<Integer> repertoriedItemStackId = new ArrayList<Integer>();
 	
 	public SixNodeBlock ( Material material,Class tileEntityClass) {
-		super( material, tileEntityClass, 0);
+		super( Material.rock, tileEntityClass, 0);
 	}
 
     public AxisAlignedBB getCollisionBoundingBoxFromPool(World par1World, int par2, int par3, int par4)
@@ -91,6 +92,7 @@ public class SixNodeBlock extends NodeBlock implements INodeInfo{
 	public boolean renderAsNormalBlock() {
 	  return false;
 	}
+	
 	@Override
 	public int getRenderType() {
 	  return -1;
@@ -110,6 +112,13 @@ public class SixNodeBlock extends NodeBlock implements INodeInfo{
     public int quantityDropped(Random par1Random)
     {
         return 0;
+    }
+    
+    @Override
+    @SideOnly(Side.CLIENT)
+    public IIcon getIcon(IBlockAccess p_149673_1_, int p_149673_2_, int p_149673_3_, int p_149673_4_, int p_149673_5_) {
+    	return null;
+    	//return Blocks.sand.getIcon(p_149673_1_, p_149673_2_, p_149673_3_, p_149673_4_, p_149673_5_);
     }
 	
 
@@ -175,12 +184,14 @@ public class SixNodeBlock extends NodeBlock implements INodeInfo{
 		{
 			if(SixNodeCacheItem.map[sixNode.sixNodeCacheMapId] != null)
 			{
-				ItemStack stack = SixNodeCacheItem.map[sixNode.sixNodeCacheMapId].newItemStack(1);
-				sixNode.dropItem(stack);
+				if(Utils.isCreative((EntityPlayerMP) entityPlayer) == false){
+					ItemStack stack = SixNodeCacheItem.map[sixNode.sixNodeCacheMapId].newItemStack(1);
+					sixNode.dropItem(stack);
+				}
 			}
 			sixNode.sixNodeCacheMapId = -1;
 			Chunk chunk = world.getChunkFromBlockCoords(x, z);
-			chunk.generateHeightMap();
+			Utils.generateHeightMap(chunk);
 			Utils.updateSkylight(chunk);
 			chunk.generateSkylightMap();
 			Utils.updateAllLightTypes(world,x,y,z);

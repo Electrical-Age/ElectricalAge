@@ -8,7 +8,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.misc.Coordonate;
+import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.UtilsClient;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.wiki.Data;
@@ -16,6 +19,7 @@ import mods.eln.wiki.Data;
 public class SixNodeCacheItem extends GenericItemUsingDamageDescriptor{
 	public static SixNodeCacheItem[] map = new SixNodeCacheItem[128];
 	public Obj3D obj;
+	
 	public int mapIndex;
 	public SixNodeCacheItem(
 			String name,
@@ -28,13 +32,8 @@ public class SixNodeCacheItem extends GenericItemUsingDamageDescriptor{
 		map[mapIndex] = this;
 		if(obj != null){
 			main = obj.getPart("main");
-			xn = obj.getPart("xn");
-			xp = obj.getPart("xp");
-			yn = obj.getPart("yn");
-			yp = obj.getPart("yp");
-			zn = obj.getPart("zn");
-			zp = obj.getPart("zp");
-			
+			for(int idx = 0;idx < 6;idx++)
+				sidePart[idx] = obj.getPart("main"+idx);		
 		}
 	}
 	
@@ -44,19 +43,31 @@ public class SixNodeCacheItem extends GenericItemUsingDamageDescriptor{
 		Data.addWiring(newItemStack());
 	}
 	
-	Obj3DPart main,xp,xn,yp,yn,zp,zn;
+	Obj3DPart main;
+	Obj3DPart[] sidePart = new Obj3DPart[6];
 	public void draw(World world,int x,int y,int z)
 	{
 		if(main != null)main.draw();
-	/*	//Utils.disableLight();
-		if(xn != null){
-			float light = world.getLightBrightness(x-1, y, z)*0.97f+0.03f;
-		//	float light = world.getBrightness(x-1, y, z,0);
-			//light = 1f;
-		//	GL11.glColor3f(light, light, light);
-			xn.draw();
+		int[] v = new int[3];
+		if(world != null){
+			UtilsClient.disableLight();
+			for(int idx = 0;idx < 6;idx++){
+				if(sidePart[idx] == null) continue;
+				v[0] = x;v[1] = y;v[2] = z;
+				Direction.fromInt(idx).applyTo(v, 1);
+				float light = world.provider.lightBrightnessTable[UtilsClient.getLight(world,v[0],v[1],v[2])];
+				
+				GL11.glColor3f(light, light, light);
+				sidePart[idx].draw();
+			}
+			UtilsClient.enableLight();
+		} else {
+			for(int idx = 0;idx < 6;idx++){
+				if(sidePart[idx] == null) continue;
+				sidePart[idx].draw();
+			}			
 		}
-		Utils.enableLight();*/
+
 	}
 	
 	
@@ -74,7 +85,7 @@ public class SixNodeCacheItem extends GenericItemUsingDamageDescriptor{
 	}
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		
-		if(main != null)main.draw();
+		GL11.glScalef(0.5f, 0.5f, 0.5f);
+		draw(null, 0, 0, 0);
 	}
 }

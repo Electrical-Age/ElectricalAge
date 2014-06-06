@@ -565,12 +565,13 @@ public class SixNode extends Node {
 				if(sixNodeCacheMapId != ((SixNodeCacheItem)descriptor).mapIndex)
 				sixNodeCacheMapId = ((SixNodeCacheItem)descriptor).mapIndex;
 				setNeedPublish(true);
-				entityPlayer.inventory.decrStackSize(entityPlayer.inventory.currentItem, 1);
+				if(Utils.isCreative((EntityPlayerMP) entityPlayer) == false)
+					entityPlayer.inventory.decrStackSize(entityPlayer.inventory.currentItem, 1);
 				
 				//if(sixNodeCacheMapId != sixNodeCacheMapIdOld)
 				{
 					Chunk chunk = coordonate.world().getChunkFromBlockCoords(coordonate.x, coordonate.z);
-					chunk.generateHeightMap();
+					Utils.generateHeightMap(chunk);
 					Utils.updateSkylight(chunk);
 					chunk.generateSkylightMap();
 					Utils.updateAllLightTypes(coordonate.world(),coordonate.x,coordonate.y,coordonate.z);

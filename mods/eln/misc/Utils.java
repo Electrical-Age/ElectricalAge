@@ -1424,4 +1424,9 @@ public class Utils {
 	    return s;
 	}
 
+	public static void generateHeightMap(Chunk chunk) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

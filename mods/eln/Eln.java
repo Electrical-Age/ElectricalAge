@@ -266,7 +266,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mod(modid = "Eln", version = "BETA-1.3.0a")
+@Mod(modid = "Eln", version = "BETA-1.3.1")
 //@Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0b")
 //@NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
@@ -435,6 +435,8 @@ public class Eln {
 
 	float xRayScannerRange;
 	boolean addOtherModOreToXRay;
+
+	private boolean replicatorPop;
 	public static boolean debugEnable = false;
 
 	@EventHandler
@@ -496,10 +498,17 @@ public class Eln {
 		modbusEnable = config.get("modbus", "enable", false).getBoolean(false);
 		debugEnable = config.get("debug", "enable", false).getBoolean(false);
 
+		replicatorPop = config.get("entity", "replicatorPop", true).getBoolean(true);
+
 		genCooper = config.get("mapGenerate", "cooper", true).getBoolean(true);
 		genPlumb = config.get("mapGenerate", "plumb", true).getBoolean(true);
 		genTungsten = config.get("mapGenerate", "tungsten", true).getBoolean(true);
 		genCinnabar = config.get("mapGenerate", "cinnabar", true).getBoolean(true);
+
+		
+		
+		incondecentLampLife = config.get("lamp", "incondescentLifeInHours", 8).getDouble(8)*3600;
+		economicLampLife = config.get("lamp", "economicLifeInHours", 32).getDouble(32)*3600;
 
 		/*ConfigCategory xRayOre;
 		if (config.hasCategory("xrayscannerore") == false) {
@@ -899,7 +908,8 @@ public class Eln {
 			WorldServer worldServer = server.worldServers[0];
 			simulator.init();
 			simulator.addSlowProcess(wind = new WindProcess());
-			simulator.addSlowProcess(new ReplicatorPopProcess());
+			if(replicatorPop)
+				simulator.addSlowProcess(new ReplicatorPopProcess());
 			simulator.addSlowProcess(new ItemEnergyInventoryProcess());
 
 			ghostManager = (GhostManager) worldServer.mapStorage.loadData(
@@ -2736,16 +2746,15 @@ public class Eln {
 			*/
 
 	}
-
+	double incondecentLampLife;
+	double economicLampLife;
 	void registerLampItem(int id) {
 		int subId, completId;
 		String name;
-		double incondecentLife = Utils.minecraftDay * 10;
 		double[] lightPower = new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 				15, 20, 30, 40, 60 };
 		double[] lightLevel = new double[16];
 		double economicPowerFactor = 0.75;
-		double economicLife = incondecentLife * 4;
 		double standardGrowRate = 0.0;
 		for (int idx = 0; idx < 16; idx++) {
 			lightLevel[idx] = (idx + 0.49) / 15.0;
@@ -2758,7 +2767,7 @@ public class Eln {
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[12], // nominalU,
 																	// nominalP
-					lightLevel[12], incondecentLife, standardGrowRate // nominalLight,
+					lightLevel[12], incondecentLampLife, standardGrowRate // nominalLight,
 																		// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -2770,7 +2779,7 @@ public class Eln {
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[14], // nominalU,
 																	// nominalP
-					lightLevel[14], incondecentLife, standardGrowRate // nominalLight,
+					lightLevel[14], incondecentLampLife, standardGrowRate // nominalLight,
 																		// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -2782,7 +2791,7 @@ public class Eln {
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, MVU, lightPower[14], // nominalU,
 																	// nominalP
-					lightLevel[14], incondecentLife, standardGrowRate // nominalLight,
+					lightLevel[14], incondecentLampLife, standardGrowRate // nominalLight,
 																		// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -2803,7 +2812,7 @@ public class Eln {
 					"incandescentlampcarbon", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[11], // nominalU,
 																	// nominalP
-					lightLevel[11], incondecentLife / 3, standardGrowRate // nominalLight,
+					lightLevel[11], incondecentLampLife / 3, standardGrowRate // nominalLight,
 			// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -2815,7 +2824,7 @@ public class Eln {
 					"incandescentlampcarbon", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[13], // nominalU,
 																	// nominalP
-					lightLevel[13], incondecentLife / 3, standardGrowRate // nominalLight,
+					lightLevel[13], incondecentLampLife / 3, standardGrowRate // nominalLight,
 			// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -2828,7 +2837,7 @@ public class Eln {
 					"economiclamp", LampDescriptor.Type.eco,
 					LampSocketType.Douille, LVU, lightPower[12]
 							* economicPowerFactor, // nominalU, nominalP
-					lightLevel[12], economicLife, standardGrowRate // nominalLight,
+					lightLevel[12], economicLampLife, standardGrowRate // nominalLight,
 																	// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -2840,7 +2849,7 @@ public class Eln {
 					"economiclamp", LampDescriptor.Type.eco,
 					LampSocketType.Douille, LVU, lightPower[14]
 							* economicPowerFactor, // nominalU, nominalP
-					lightLevel[14], economicLife, standardGrowRate // nominalLight,
+					lightLevel[14], economicLampLife, standardGrowRate // nominalLight,
 																	// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -2852,7 +2861,7 @@ public class Eln {
 					"economiclamp", LampDescriptor.Type.eco,
 					LampSocketType.Douille, MVU, lightPower[14]
 							* economicPowerFactor, // nominalU, nominalP
-					lightLevel[14], economicLife, standardGrowRate // nominalLight,
+					lightLevel[14], economicLampLife, standardGrowRate // nominalLight,
 																	// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -2864,7 +2873,7 @@ public class Eln {
 			element = new LampDescriptor("50V Farming Lamp",
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, 120, // nominalU, nominalP
-					lightLevel[15], incondecentLife, 0.50 // nominalLight,
+					lightLevel[15], incondecentLampLife, 0.50 // nominalLight,
 															// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -2875,7 +2884,7 @@ public class Eln {
 			element = new LampDescriptor("200V Farming Lamp",
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, MVU, 120, // nominalU, nominalP
-					lightLevel[15], incondecentLife, 0.50 // nominalLight,
+					lightLevel[15], incondecentLampLife, 0.50 // nominalLight,
 															// nominalLife
 			);
 			sharedItem.addElement(completId, element);
