@@ -382,55 +382,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 		return false;
 	}
 
-	/*
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4)
-	{
-		try {
-			SixNodeElement.getClassFromMetadata(itemStack.getItemDamage()).getMethod("staticInformation", ItemStack.class,EntityPlayer.class,List.class,boolean.class).invoke(null, itemStack,entityPlayer,list,par4);
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}*/
-	/*
-	public static IndexResolver[] itemData = new IndexResolver[256];
-	*/
-	/*   public static ItemData getItemData(int itemDamage)
-	   {
-	   	return (ItemData) itemData[itemDamage & 0xFF].get((itemDamage>>8) & 0xFF);
-	   }
-	   public static ItemData getItemData(ItemStack itemStack)
-	   {
-	   	return getItemData(itemStack.getItemDamage());
-	   }*/
-	/*
-	@Override
-	public String getItemNameIS(ItemStack itemstack) {
-		return getItemName() + ".SixNodeItem" + getItemData(itemstack).name;
-	}
-	
-	@Override
-	@SideOnly(Side.CLIENT)
-	public int getIconFromDamage(int itemDamage) {
-		return getItemData(itemDamage).iconId;
-	}
-	@Override
-	public String getTextureFile() {
-		// TODO Auto-generated method stub
-		return CommonProxy.ITEMS_PNG;
-	}*/
+
 
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
@@ -450,40 +402,49 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 		return getDescriptor(item).shouldUseRenderHelper(type, item, helper);
 	}
 
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		if (isStackValidToPlace(item) == false)
+			return false;
+		return getDescriptor(item).shouldUseRenderHelperEln(type, item, helper);
+	}
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if (isStackValidToPlace(item) == false)
 			return;
 		Minecraft.getMinecraft().mcProfiler.startSection("SixNodeItem");
 
-		switch (type)
-		{
-
-		case ENTITY:
-			GL11.glRotatef(90, 0, 0, 1);
-			//GL11.glTranslatef(0, 1, 0);
-			break;
-
-		case EQUIPPED_FIRST_PERSON:
-			GL11.glRotatef(160, 0, 1, 0);
-			GL11.glTranslatef(-0.70f, 1, -0.7f);
-			GL11.glScalef(1.8f, 1.8f, 1.8f);
-			GL11.glRotatef(-90, 1, 0, 0);
-			break;
-		case EQUIPPED:
-			GL11.glRotatef(180, 0, 1, 0);
-			GL11.glTranslatef(-0.70f, 1, -0.7f);
-			GL11.glScalef(1.5f, 1.5f, 1.5f);
-			break;
-		case FIRST_PERSON_MAP:
-			//GL11.glTranslatef(0, 1, 0);
-			break;
-		case INVENTORY:
-			GL11.glRotatef(-90, 0, 1, 0);
-			GL11.glRotatef(-90, 1, 0, 0);
-			break;
-		default:
-			break;
+		if(shouldUseRenderHelperEln(type, item, null)){
+			switch (type)
+			{
+	
+			case ENTITY:
+				GL11.glRotatef(90, 0, 0, 1);
+				//GL11.glTranslatef(0, 1, 0);
+				break;
+	
+			case EQUIPPED_FIRST_PERSON:
+				GL11.glRotatef(160, 0, 1, 0);
+				GL11.glTranslatef(-0.70f, 1, -0.7f);
+				GL11.glScalef(1.8f, 1.8f, 1.8f);
+				GL11.glRotatef(-90, 1, 0, 0);
+				break;
+			case EQUIPPED:
+				GL11.glRotatef(180, 0, 1, 0);
+				GL11.glTranslatef(-0.70f, 1, -0.7f);
+				GL11.glScalef(1.5f, 1.5f, 1.5f);
+				break;
+			case FIRST_PERSON_MAP:
+				//GL11.glTranslatef(0, 1, 0);
+				break;
+			case INVENTORY:
+				GL11.glRotatef(-90, 0, 1, 0);
+				GL11.glRotatef(-90, 1, 0, 0);
+				break;
+			default:
+				break;
+			}
 		}
 		//GL11.glTranslatef(0, 1, 0);
 		getDescriptor(item).renderItem(type, item, data);

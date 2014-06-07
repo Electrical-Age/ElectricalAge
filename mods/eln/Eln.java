@@ -97,7 +97,6 @@ import mods.eln.item.MiningPipeDescriptor;
 import mods.eln.item.OreScanner;
 import mods.eln.item.OverHeatingProtectionDescriptor;
 import mods.eln.item.OverVoltageProtectionDescriptor;
-import mods.eln.item.SixNodeCacheItem;
 import mods.eln.item.SolarTrackerDescriptor;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.item.ToolsSetItem;
@@ -146,6 +145,7 @@ import mods.eln.node.NodeManager;
 import mods.eln.node.NodeServer;
 import mods.eln.node.SixNode;
 import mods.eln.node.SixNodeBlock;
+import mods.eln.node.SixNodeCacheStd;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElement;
 import mods.eln.node.SixNodeEntity;
@@ -628,6 +628,8 @@ public class Eln {
 		 * int id = 0,subId = 0,completId; String name;
 		 */
 
+		SixNode.sixNodeCacheList.add(new SixNodeCacheStd());
+		
 		ComputerCraftAPI.registerPeripheralProvider(new PeripheralHandler());
 
 		registerArmor();
@@ -2264,12 +2266,12 @@ public class Eln {
 					name, PfT, thermalPlostfT,// thermalPlostfT;
 					40// thermalC;
 			);
-
+			electricalFurnace = desc;
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 			furnaceList.add(desc.newItemStack());
 		}
 	}
-
+	public ElectricalFurnaceDescriptor electricalFurnace;
 	public RecipesList maceratorRecipes = new RecipesList();
 
 	void registerMacerator(int id) {
@@ -4130,7 +4132,7 @@ public class Eln {
 	}
 
 	void registerSixNodeCache(int id) {
-		int subId, completId;
+	/*	int subId, completId;
 		String name;
 
 		SixNodeCacheItem descriptor;
@@ -4143,7 +4145,7 @@ public class Eln {
 					this.obj.getObj("stonecache"), 1);
 			sharedItem.addElement(completId, descriptor);
 
-		}
+		}*/
 
 	}
 
@@ -6103,11 +6105,11 @@ public class Eln {
 
 	private void recipeSixNodeCache()
 	{
-		addRecipe(findItemStack("Stone Cache", 4),
+		/*addRecipe(findItemStack("Stone Cache", 4),
 				"s s",
 				"   ",
 				"s s",
-				Character.valueOf('s'), new ItemStack(Blocks.stone));
+				Character.valueOf('s'), new ItemStack(Blocks.stone));*/
 	}
 
 	private void recipeElectricalAlarm() {

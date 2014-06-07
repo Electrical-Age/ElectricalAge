@@ -92,7 +92,11 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
 			ItemRendererHelper helper) {
 		return true;
 	}
-	
+	@Override
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		return true;

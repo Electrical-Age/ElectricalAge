@@ -4,6 +4,8 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -52,7 +54,12 @@ public class WirelessSignalRxDescriptor extends SixNodeDescriptor{
 		// TODO Auto-generated method stub
 		return true;
 	}
-	
+	@Override
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if(type == ItemRenderType.INVENTORY) {

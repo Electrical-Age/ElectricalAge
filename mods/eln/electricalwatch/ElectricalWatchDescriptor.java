@@ -7,6 +7,8 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.Eln;
 import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.item.ThermalIsolatorElement;
@@ -65,6 +67,11 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
 	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		return true;
+	}
+	@Override
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
 		return true;
 	}
 	

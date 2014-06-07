@@ -36,7 +36,6 @@ public abstract class SixNodeElement implements  GhostObserver {
 	//private static Class[] idToClass = new Class[256];
 	//private static Class[] idToRenderClass = new Class[256];
 	
-
 	public ArrayList<IProcess> slowProcessList  = new ArrayList<IProcess>(4);
 
 	public ArrayList<IProcess> electricalProcessList = new ArrayList<IProcess>(4);

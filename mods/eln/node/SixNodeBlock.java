@@ -8,13 +8,13 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 import mods.eln.Eln;
-import mods.eln.item.SixNodeCacheItem;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -36,10 +36,21 @@ import net.minecraft.world.chunk.Chunk;
 public class SixNodeBlock extends NodeBlock implements INodeInfo{
 	//public static ArrayList<Integer> repertoriedItemStackId = new ArrayList<Integer>();
 	
+	//private IIcon icon;
 	public SixNodeBlock ( Material material,Class tileEntityClass) {
-		super( Material.rock, tileEntityClass, 0);
+		super( material, tileEntityClass, 0);
+		
+	//	setBlockTextureName("eln:air");
 	}
 
+	
+	@Override
+	public void registerBlockIcons(IIconRegister r)
+	{
+		super.registerBlockIcons(r);
+		this.blockIcon = r.registerIcon("eln:air");
+	}
+	
     public AxisAlignedBB getCollisionBoundingBoxFromPool(World par1World, int par2, int par3, int par4)
     {
         if(nodeHasCache(par1World, par2, par3, par4) || hasVolume(par1World, par2, par3, par4))
@@ -90,12 +101,12 @@ public class SixNodeBlock extends NodeBlock implements INodeInfo{
 	}
 	@Override
 	public boolean renderAsNormalBlock() {
-	  return false;
+	  return true;
 	}
 	
 	@Override
 	public int getRenderType() {
-	  return -1;
+	  return 0;
 	}
 /*
 	@Override
@@ -116,9 +127,21 @@ public class SixNodeBlock extends NodeBlock implements INodeInfo{
     
     @Override
     @SideOnly(Side.CLIENT)
-    public IIcon getIcon(IBlockAccess p_149673_1_, int p_149673_2_, int p_149673_3_, int p_149673_4_, int p_149673_5_) {
-    	return null;
+    public IIcon getIcon(IBlockAccess w, int x, int y, int z, int side) {
+    	TileEntity e = w.getTileEntity(x, y, z);
+    	if(e == null) return blockIcon;
+    	SixNodeEntity sne = (SixNodeEntity)e;
+    	Block b = sne.sixNodeCacheBlock;
+    	if(b == Blocks.air) return blockIcon;
+    	//return b.getIcon(w, x, y, z, side);
+    	try {
+    		return b.getIcon(side, sne.sixNodeCacheBlockMeta);
+		} catch (Exception e2) {
+			return blockIcon;
+		}
+    	
     	//return Blocks.sand.getIcon(p_149673_1_, p_149673_2_, p_149673_3_, p_149673_4_, p_149673_5_);
+    	//return Blocks.stone.getIcon(w, x, y, z, side);
     }
 	
 
@@ -180,21 +203,22 @@ public class SixNodeBlock extends NodeBlock implements INodeInfo{
 		
 		SixNode sixNode = (SixNode) tileEntity.getNode();
 		if(sixNode == null) return true;
-		if(sixNode.sixNodeCacheMapId >= 0)
+		if(sixNode.sixNodeCacheBlock != Blocks.air)
 		{
-			if(SixNodeCacheItem.map[sixNode.sixNodeCacheMapId] != null)
-			{
-				if(Utils.isCreative((EntityPlayerMP) entityPlayer) == false){
-					ItemStack stack = SixNodeCacheItem.map[sixNode.sixNodeCacheMapId].newItemStack(1);
-					sixNode.dropItem(stack);
-				}
+
+			if(Utils.isCreative((EntityPlayerMP) entityPlayer) == false){
+				ItemStack stack = new ItemStack(sixNode.sixNodeCacheBlock,1,sixNode.sixNodeCacheBlockMeta);
+				sixNode.dropItem(stack);
 			}
-			sixNode.sixNodeCacheMapId = -1;
+			
+			sixNode.sixNodeCacheBlock = Blocks.air;
+		
 			Chunk chunk = world.getChunkFromBlockCoords(x, z);
 			Utils.generateHeightMap(chunk);
 			Utils.updateSkylight(chunk);
 			chunk.generateSkylightMap();
 			Utils.updateAllLightTypes(world,x,y,z);
+			
 			sixNode.setNeedPublish(true);
 			return false;
 		}
@@ -428,7 +452,7 @@ public class SixNodeBlock extends NodeBlock implements INodeInfo{
     	{
     		TileEntity tileEntity = world.getTileEntity(x, y, z);
     		if(tileEntity != null && tileEntity instanceof SixNodeEntity)
-    			return ((SixNodeEntity)tileEntity).sixNodeCacheMapId >= 0;
+    			return ((SixNodeEntity)tileEntity).sixNodeCacheBlock != Blocks.air;
 			else
 				Utils.println("ASSERT B public boolean nodeHasCache(World world, int x, int y, int z) ");
     		 
@@ -438,7 +462,7 @@ public class SixNodeBlock extends NodeBlock implements INodeInfo{
 	    	SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(x, y, z);
 			SixNode sixNode = (SixNode) tileEntity.getNode();
 			if(sixNode != null)
-				return sixNode.sixNodeCacheMapId >= 0;
+				return sixNode.sixNodeCacheBlock != Blocks.air;
 			else
 				Utils.println("ASSERT A public boolean nodeHasCache(World world, int x, int y, int z) ");
     	}
@@ -447,11 +471,20 @@ public class SixNodeBlock extends NodeBlock implements INodeInfo{
 	
 	
 	@Override
-	public int getLightOpacity(IBlockAccess world, int x, int y, int z) {
-		if(nodeHasCache(world, x, y, z))
+	public int getLightOpacity(IBlockAccess w, int x, int y, int z) {
+		
+    	TileEntity e = w.getTileEntity(x, y, z);
+    	if(e == null) return 0;
+    	SixNodeEntity sne = (SixNodeEntity)e;
+    	Block b = sne.sixNodeCacheBlock;
+    	if(b == Blocks.air) return 0;
+    	//return b.getIcon(w, x, y, z, side);
+    	try {
+    		return b.getLightOpacity();
+		} catch (Exception e2) {
 			return 255;
-		else
-			return 0;
+		}
+    	
 	}
 
 

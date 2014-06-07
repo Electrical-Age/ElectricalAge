@@ -5,7 +5,7 @@ import static org.lwjgl.opengl.GL11.GL_TEXTURE_BINDING_2D;
 
 import org.lwjgl.opengl.GL11;
 
-import mods.eln.item.SixNodeCacheItem;
+
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
@@ -35,14 +35,14 @@ public class SixNodeRender extends TileEntitySpecialRenderer
 		
 		GL11.glPushMatrix();
 		GL11.glTranslatef((float)x+.5F, (float)y+.5F, (float)z+.5F);	
-		if(tileEntity.sixNodeCacheMapId >= 0)
+		/*if(tileEntity.sixNodeCacheMapId >= 0)
 		{
 			if(SixNodeCacheItem.map[tileEntity.sixNodeCacheMapId] != null)
 			{
 				UtilsClient.glDefaultColor();
 				SixNodeCacheItem.map[tileEntity.sixNodeCacheMapId].draw(entity.getWorldObj(),entity.xCoord,entity.yCoord,entity.zCoord);
 			}
-		}
+		}*/
 		
 		int idx = 0;
 		for(SixNodeElementRender render : tileEntity.elementRenderList)

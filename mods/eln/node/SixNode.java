@@ -12,7 +12,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
-import mods.eln.item.SixNodeCacheItem;
+
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUCubeMask;
@@ -31,6 +31,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -42,41 +43,48 @@ import net.minecraft.world.chunk.Chunk;
 
 public class SixNode extends Node {
 
+	public static ArrayList<ISixNodeCache> sixNodeCacheList = new ArrayList<ISixNodeCache>();
+
 	public SixNodeElement sideElementList[] = new SixNodeElement[6];
 	public int sideElementIdList[] = new int[6];
 	public ArrayList<ElectricalConnection> internalElectricalConnectionList = new ArrayList<ElectricalConnection>(1);
 	public ArrayList<ThermalConnection> internalThermalConnectionList = new ArrayList<ThermalConnection>(1);
 
-	public int sixNodeCacheMapId = -1;
-	
+	public Block sixNodeCacheBlock = Blocks.air;
+	public byte sixNodeCacheBlockMeta = 0;
+	//public int sixNodeCacheMapId = -1;
+
 	public LRDUCubeMask lrduElementMask = new LRDUCubeMask();
 
-	
 	public SixNodeElement getElement(Direction side)
 	{
 		return sideElementList[side.getInt()];
 	}
+
 	@Override
 	public boolean canConnectRedstone() {
-		for(SixNodeElement element : sideElementList)
+		for (SixNodeElement element : sideElementList)
 		{
-			if(element != null)
+			if (element != null)
 			{
-				if(element.canConnectRedstone()) return true;
+				if (element.canConnectRedstone())
+					return true;
 			}
 		}
 		return false;
 	}
+
 	@Override
 	int isProvidingWeakPower(Direction side)
 	{
 		int value = 0;
-		for(SixNodeElement element : sideElementList)
+		for (SixNodeElement element : sideElementList)
 		{
-			if(element != null)
+			if (element != null)
 			{
 				int eValue = element.isProvidingWeakPower();
-				if(eValue > value) value = eValue;
+				if (eValue > value)
+					value = eValue;
 			}
 		}
 		return value;
@@ -84,35 +92,34 @@ public class SixNode extends Node {
 
 	public SixNode()
 	{
-		for(int idx = 0;idx<6;idx++)
+		for (int idx = 0; idx < 6; idx++)
 		{
 			sideElementList[idx] = null;
 			sideElementIdList[idx] = 0;
 		}
 		lrduElementMask.clear();
 	}
-	
 
-	
 	public boolean createSubBlock(ItemStack itemStack, Direction direction) {
 		// TODO Auto-generated method stub
 		SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(itemStack);
-		if(sideElementList[direction.getInt()]  != null) return false;
+		if (sideElementList[direction.getInt()] != null)
+			return false;
 		try {
 			//Object bool = descriptor.ElementClass.getMethod("canBePlacedOnSide",Direction.class,SixNodeDescriptor.class).invoke(null, direction,descriptor);
 			//if((Boolean)bool == false) return false;
 			sideElementIdList[direction.getInt()] = itemStack.getItemDamage(); //Je sais c'est moche !
-			sideElementList[direction.getInt()] =  (SixNodeElement) descriptor.ElementClass.getConstructor(SixNode.class,Direction.class,SixNodeDescriptor.class).newInstance(this,direction,descriptor);	
+			sideElementList[direction.getInt()] = (SixNodeElement) descriptor.ElementClass.getConstructor(SixNode.class, Direction.class, SixNodeDescriptor.class).newInstance(this, direction, descriptor);
 			sideElementIdList[direction.getInt()] = 0;
-			
+
 			disconnect();
 			sideElementList[direction.getInt()].initialize();
 			sideElementIdList[direction.getInt()] = itemStack.getItemDamage();
-			
+
 			connect();
-			
+
 			Utils.println("createSubBlock " + sideElementIdList[direction.getInt()] + " " + direction);
-			
+
 			setNeedPublish(true);
 			return true;
 		} catch (InstantiationException e) {
@@ -136,82 +143,79 @@ public class SixNode extends Node {
 		}
 		return false;
 	}
-/*
-    protected void dropItem(ItemStack itemStack)
-    {
-    	
-        if (coordonate.world().getGameRules().getGameRuleBooleanValue("doTileDrops"))
-        {
-            float var6 = 0.7F;
-            double var7 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
-            double var9 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
-            double var11 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
-            EntityItem var13 = new EntityItem(coordonate.world(), (double)coordonate.x + var7, (double)coordonate.y + var9, (double)coordonate.z + var11, itemStack);
-            var13.delayBeforeCanPickup = 10;
-            coordonate.world().spawnEntityInWorld(var13);
-        }
-    }*/
-    
-	public boolean deleteSubBlock(EntityPlayerMP entityPlayer,Direction direction) {
+
+	/*
+	    protected void dropItem(ItemStack itemStack)
+	    {
+	    	
+	        if (coordonate.world().getGameRules().getGameRuleBooleanValue("doTileDrops"))
+	        {
+	            float var6 = 0.7F;
+	            double var7 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
+	            double var9 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
+	            double var11 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
+	            EntityItem var13 = new EntityItem(coordonate.world(), (double)coordonate.x + var7, (double)coordonate.y + var9, (double)coordonate.z + var11, itemStack);
+	            var13.delayBeforeCanPickup = 10;
+	            coordonate.world().spawnEntityInWorld(var13);
+	        }
+	    }*/
+
+	public boolean deleteSubBlock(EntityPlayerMP entityPlayer, Direction direction) {
 		// TODO Auto-generated method stub
-		if(sideElementList[direction.getInt()] == null) return false;
-		
-		
-		
-		Utils.println("deleteSubBlock "+ " " + direction);
+		if (sideElementList[direction.getInt()] == null)
+			return false;
+
+		Utils.println("deleteSubBlock " + " " + direction);
 		/*
 		if(sideElementList[direction.getInt()].dropItems())
 		{	
 			dropItem(new ItemStack(Eln.sixNodeBlock, 1, sideElementIdList[direction.getInt()] + (sideElementList[direction.getInt()].type<<8)));
 		}*/
-		
+
 		disconnect();
 		SixNodeElement e = sideElementList[direction.getInt()];
 		sideElementList[direction.getInt()] = null;
 		sideElementIdList[direction.getInt()] = 0;
 		e.destroy(entityPlayer);
 
-
 		connect();
-		
+
 		recalculateLightValue();
 		setNeedPublish(true);
 		return true;
 	}
 
 	public boolean getIfSideRemain() {
-		for(SixNodeElement sideElement  : sideElementList)
+		for (SixNodeElement sideElement : sideElementList)
 		{
-			if(sideElement != null) return true;
+			if (sideElement != null)
+				return true;
 		}
 		return false;
 	}
 
-	
-	
-    public void readFromNBT(NBTTagCompound nbt)
-    {
-    	super.readFromNBT(nbt.getCompoundTag("node"));
+	public void readFromNBT(NBTTagCompound nbt)
+	{
+		super.readFromNBT(nbt.getCompoundTag("node"));
 
-    	
-    	sixNodeCacheMapId = nbt.getByte("cacheId");
-    	if(sixNodeCacheMapId == 0) sixNodeCacheMapId = -1;
-    	int idx = 0;
-		for(idx = 0;idx<6;idx++)
+		sixNodeCacheBlock = Block.getBlockById(nbt.getInteger("cacheBlockId"));
+		sixNodeCacheBlockMeta = nbt.getByte("cacheBlockMeta");
+		int idx = 0;
+		for (idx = 0; idx < 6; idx++)
 		{
-			
-			short sideElementId =  nbt.getShort("EID"+idx);
-			if(sideElementId == 0)
+
+			short sideElementId = nbt.getShort("EID" + idx);
+			if (sideElementId == 0)
 			{
 				sideElementList[idx] = null;
 				sideElementIdList[idx] = 0;
 			}
 			else
 			{
-				try{
+				try {
 					SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(sideElementId);
 					sideElementIdList[idx] = sideElementId;
-					sideElementList[idx] = (SixNodeElement) descriptor.ElementClass.getConstructor(SixNode.class,Direction.class,SixNodeDescriptor.class).newInstance(this,Direction.fromInt(idx),descriptor);	
+					sideElementList[idx] = (SixNodeElement) descriptor.ElementClass.getConstructor(SixNode.class, Direction.class, SixNodeDescriptor.class).newInstance(this, Direction.fromInt(idx), descriptor);
 					sideElementList[idx].readFromNBT(nbt.getCompoundTag("ED" + idx));
 					sideElementList[idx].initialize();
 				} catch (InstantiationException e) {
@@ -233,119 +237,111 @@ public class SixNode extends Node {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}		
+			}
 		}
 		initializeFromNBT();
 
-    }
+	}
 
-    @Override
-    public boolean nodeAutoSave() {
-    	// TODO Auto-generated method stub
-    	return false;
-    }
-    
+	@Override
+	public boolean nodeAutoSave() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 
-    public void writeToNBT(NBTTagCompound nbt)
-    {
-    	int idx = 0;
-    	nbt.setByte("cacheId",(byte) sixNodeCacheMapId);
-		for(SixNodeElement sideElement  : sideElementList)
+	public void writeToNBT(NBTTagCompound nbt)
+	{
+		int idx = 0;
+		nbt.setInteger("cacheBlockId", Block.getIdFromBlock(sixNodeCacheBlock));
+		nbt.setByte("cacheBlockMeta", sixNodeCacheBlockMeta);
+
+		for (SixNodeElement sideElement : sideElementList)
 		{
 
-			if(sideElement == null)
+			if (sideElement == null)
 			{
-				nbt.setShort("EID"+idx, (short) 0);
+				nbt.setShort("EID" + idx, (short) 0);
 			}
 			else
 			{
-				nbt.setShort("EID"+idx, (short) sideElementIdList[idx]);
-				sideElement.writeToNBT(Utils.newNbtTagCompund(nbt,"ED"+idx));			
-			}		
+				nbt.setShort("EID" + idx, (short) sideElementIdList[idx]);
+				sideElement.writeToNBT(Utils.newNbtTagCompund(nbt, "ED" + idx));
+			}
 			idx++;
 		}
 
-
-		
-    	NBTTagCompound nodeNbt = new NBTTagCompound();
-    	super.writeToNBT(nodeNbt);
-    	nbt.setTag("node", nodeNbt);
-    }
-	
-	
+		NBTTagCompound nodeNbt = new NBTTagCompound();
+		super.writeToNBT(nodeNbt);
+		nbt.setTag("node", nodeNbt);
+	}
 
 	public boolean getSideEnable(Direction direction) {
 		// TODO Auto-generated method stub
 		return sideElementList[direction.getInt()] != null;
 	}
 
-
-
-
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
 		Direction elementSide = side.applyLRDU(lrdu);
 		SixNodeElement element = sideElementList[elementSide.getInt()];
-		if(element == null) return null;
+		if (element == null)
+			return null;
 		return element.getElectricalLoad(elementSide.getLRDUGoingTo(side));
 	}
-
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
 		Direction elementSide = side.applyLRDU(lrdu);
 		SixNodeElement element = sideElementList[elementSide.getInt()];
-		if(element == null) return null;
+		if (element == null)
+			return null;
 		return element.getThermalLoad(elementSide.getLRDUGoingTo(side));
 	}
-
 
 	@Override
 	public int getSideConnectionMask(Direction side, LRDU lrdu) {
 		Direction elementSide = side.applyLRDU(lrdu);
 		SixNodeElement element = sideElementList[elementSide.getInt()];
-		if(element == null) return 0;
+		if (element == null)
+			return 0;
 		return element.getConnectionMask(elementSide.getLRDUGoingTo(side));
 	}
-
-
 
 	@Override
 	public String multiMeterString(Direction side) {
 		SixNodeElement element = sideElementList[side.getInt()];
-		if(element == null) return "";
+		if (element == null)
+			return "";
 		return element.multiMeterString();
 	}
-
 
 	@Override
 	public String thermoMeterString(Direction side) {
 		SixNodeElement element = sideElementList[side.getInt()];
-		if(element == null) return "";
+		if (element == null)
+			return "";
 		return element.thermoMeterString();
 	}
-
-
-
 
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
-	    	int idx = 0;
-	    	stream.writeByte(sixNodeCacheMapId);
-			for(SixNodeElement sideElement  : sideElementList)
+			int idx = 0;
+			stream.writeInt(Block.getIdFromBlock(sixNodeCacheBlock));
+			stream.writeByte(sixNodeCacheBlockMeta);
+			for (SixNodeElement sideElement : sideElementList)
 			{
-				if(sideElement == null)
+				if (sideElement == null)
 				{
 					stream.writeShort((byte) 0);
 				}
 				else
 				{
 					stream.writeShort((short) sideElementIdList[idx]);
-					sideElement.networkSerialize(stream);			
-				}		
+					sideElement.networkSerialize(stream);
+				}
 				idx++;
 			}
 		} catch (IOException e) {
@@ -353,29 +349,27 @@ public class SixNode extends Node {
 			e.printStackTrace();
 		}
 	}
-	
 
-    public void preparePacketForClient(DataOutputStream stream,SixNodeElement e)
-    {
-    	try {
-    		super.preparePacketForClient(stream);
-    		int side = e.side.getInt();
-       		stream.writeByte(side);
-       		stream.writeShort(e.sixNodeElementDescriptor.parentItemDamage);	    	
+	public void preparePacketForClient(DataOutputStream stream, SixNodeElement e)
+	{
+		try {
+			super.preparePacketForClient(stream);
+			int side = e.side.getInt();
+			stream.writeByte(side);
+			stream.writeShort(e.sixNodeElementDescriptor.parentItemDamage);
 		} catch (IOException ex) {
 			// TODO Auto-generated catch block
 			ex.printStackTrace();
-		}	    	
-    }
+		}
+	}
 
 	@Override
 	public void initializeFromThat(Direction front, EntityLivingBase entityLiving,
 			ItemStack itemStack) {
 		neighborBlockRead();
 		// TODO Auto-generated method stub
-		
-	}
 
+	}
 
 	@Override
 	public void initializeFromNBT() {
@@ -383,259 +377,273 @@ public class SixNode extends Node {
 		connect();
 	}
 
- 
-
-
-
 	@Override
 	public void connectInit()
 	{
 		super.connectInit();
 		internalElectricalConnectionList.clear();
 		internalThermalConnectionList.clear();
-		
+
 		lrduElementMask.clear();
-		
+
 	}
-	
+
 	@Override
 	public void connectJob() {
 		// TODO Auto-generated method stub
 		super.connectJob();
-		for(SixNodeElement element : sideElementList)
+		for (SixNodeElement element : sideElementList)
 		{
-			if(element != null)
+			if (element != null)
 			{
 				element.connectJob();
 			}
 		}
-	
-		
+
 		//INTERNAL
 		{
 			Direction side = Direction.YN;
 			SixNodeElement element = sideElementList[side.getInt()];
-			if(element != null)
+			if (element != null)
 			{
-				for(LRDU lrdu : LRDU.values())
+				for (LRDU lrdu : LRDU.values())
 				{
 					Direction otherSide = side.applyLRDU(lrdu);
 					SixNodeElement otherElement = sideElementList[otherSide.getInt()];
-					if(otherElement != null)
+					if (otherElement != null)
 					{
 						LRDU otherLRDU = otherSide.getLRDUGoingTo(side);
-						tryConnectTwoInternalElement(side,element,lrdu,otherSide,otherElement,otherLRDU);						
+						tryConnectTwoInternalElement(side, element, lrdu, otherSide, otherElement, otherLRDU);
 					}
 				}
-			}			
+			}
 		}
 		{
 			Direction side = Direction.YP;
 			SixNodeElement element = sideElementList[side.getInt()];
-			if(element != null)
+			if (element != null)
 			{
-				for(LRDU lrdu : LRDU.values())
+				for (LRDU lrdu : LRDU.values())
 				{
 					Direction otherSide = side.applyLRDU(lrdu);
 					SixNodeElement otherElement = sideElementList[otherSide.getInt()];
-					if(otherElement != null)
+					if (otherElement != null)
 					{
 						LRDU otherLRDU = otherSide.getLRDUGoingTo(side);
-						tryConnectTwoInternalElement(side,element,lrdu,otherSide,otherElement,otherLRDU);						
+						tryConnectTwoInternalElement(side, element, lrdu, otherSide, otherElement, otherLRDU);
 					}
 				}
-			}			
+			}
 		}
-	
+
 		{
 			Direction side = Direction.XN;
-			for(int idx = 0;idx<4;idx++)
+			for (int idx = 0; idx < 4; idx++)
 			{
 				Direction otherSide = side.right();
 				SixNodeElement element = sideElementList[side.getInt()];
 				SixNodeElement otherElement = sideElementList[otherSide.getInt()];
-				if(element != null && otherElement != null)
+				if (element != null && otherElement != null)
 				{
-					tryConnectTwoInternalElement(side,element,LRDU.Right,otherSide,otherElement,LRDU.Left);
+					tryConnectTwoInternalElement(side, element, LRDU.Right, otherSide, otherElement, LRDU.Left);
 				}
-				
+
 				side = otherSide;
 			}
 		}
-		
-		
 
 	}
-	
-	
-	
+
 	@Override
 	public void disconnectJob() {
 		super.disconnectJob();
-		for(SixNodeElement element : sideElementList)
+		for (SixNodeElement element : sideElementList)
 		{
-			if(element != null)
+			if (element != null)
 			{
 				element.disconnectJob();
 			}
 		}
-		
+
 		Eln.simulator.removeAllElectricalConnection(internalElectricalConnectionList);
 		Eln.simulator.removeAllThermalConnection(internalThermalConnectionList);
 	}
-	
-	public void tryConnectTwoInternalElement(Direction side,SixNodeElement element,LRDU lrdu,Direction otherSide,SixNodeElement otherElement,LRDU otherLRDU)
+
+	public void tryConnectTwoInternalElement(Direction side, SixNodeElement element, LRDU lrdu, Direction otherSide, SixNodeElement otherElement, LRDU otherLRDU)
 	{
-		if(compareConnectionMask(element.getConnectionMask(lrdu) , otherElement.getConnectionMask(otherLRDU)))
+		if (compareConnectionMask(element.getConnectionMask(lrdu), otherElement.getConnectionMask(otherLRDU)))
 		{
-			lrduElementMask.set(side,lrdu,true);		
-			lrduElementMask.set(otherSide,otherLRDU,true);		
+			lrduElementMask.set(side, lrdu, true);
+			lrduElementMask.set(otherSide, otherLRDU, true);
 			ElectricalLoad eLoad;
-			if((eLoad = element.getElectricalLoad(lrdu)) != null)
-			{			
+			if ((eLoad = element.getElectricalLoad(lrdu)) != null)
+			{
 				ElectricalLoad otherELoad = otherElement.getElectricalLoad(otherLRDU);
-				if(otherELoad != null) 
+				if (otherELoad != null)
 				{
 					ElectricalConnection eCon;
-					eCon = new ElectricalConnection(eLoad,otherELoad);
-					
-					Eln.simulator.addElectricalConnection(eCon);				
-					
+					eCon = new ElectricalConnection(eLoad, otherELoad);
+
+					Eln.simulator.addElectricalConnection(eCon);
+
 					internalElectricalConnectionList.add(eCon);
 				}
 			}
 			ThermalLoad tLoad;
-			if((tLoad = this.getThermalLoad(side,lrdu)) != null)
+			if ((tLoad = this.getThermalLoad(side, lrdu)) != null)
 			{
-				
+
 				ThermalLoad otherTLoad = element.getThermalLoad(otherLRDU);
-				if(otherTLoad != null)
+				if (otherTLoad != null)
 				{
 					ThermalConnection tCon;
-					tCon = new ThermalConnection(tLoad,otherTLoad);
-					
+					tCon = new ThermalConnection(tLoad, otherTLoad);
+
 					Eln.simulator.addThermalConnection(tCon);
-					
+
 					internalThermalConnectionList.add(tCon);
 				}
-				
-			}	
+
+			}
 		}
 	}
-	
-	public void newConnectionAt(Direction side,LRDU lrdu)
+
+	public void newConnectionAt(Direction side, LRDU lrdu)
 	{
 		Direction elementSide = side.applyLRDU(lrdu);
 		SixNodeElement element = sideElementList[elementSide.getInt()];
-		if(element == null)
+		if (element == null)
 		{
 			Utils.println("sixnode newConnectionAt error");
-			while(true);
+			while (true)
+				;
 		}
-		lrduElementMask.set(elementSide,elementSide.getLRDUGoingTo(side),true);
+		lrduElementMask.set(elementSide, elementSide.getLRDUGoingTo(side), true);
 
 	}
-	
-	public void externalDisconnect(Direction side,LRDU lrdu)
+
+	public void externalDisconnect(Direction side, LRDU lrdu)
 	{
 		Direction elementSide = side.applyLRDU(lrdu);
 		SixNodeElement element = sideElementList[elementSide.getInt()];
-		if(element == null)
+		if (element == null)
 		{
 			Utils.println("sixnode newConnectionAt error");
-			while(true);
+			while (true)
+				;
 		}
-		lrduElementMask.set(elementSide,elementSide.getLRDUGoingTo(side),false);		
+		lrduElementMask.set(elementSide, elementSide.getLRDUGoingTo(side), false);
 	}
-	
-	
-	public  boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,float vx,float vy,float vz)
+
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz)
 	{
-		if(sixNodeCacheMapId >= 0)
+		if (sixNodeCacheBlock != Blocks.air)
 		{
 			return false;
 		}
 		else
 		{
-			
+
 			ItemStack stack = entityPlayer.getCurrentEquippedItem();
-			GenericItemUsingDamageDescriptor descriptor = SixNodeCacheItem.getDescriptor(stack);
-			if(descriptor instanceof SixNodeCacheItem)
+
+			Block b = Blocks.air;
+			if(stack != null)
+				b = Block.getBlockFromItem(stack.getItem());
+			
+			boolean accepted = false;
+			if(stack != null){
+				for(ISixNodeCache a : sixNodeCacheList){
+					if(a.accept(stack)){
+						accepted = true;
+						sixNodeCacheBlock = b;
+						sixNodeCacheBlockMeta = (byte) a.getMeta(stack);
+						break;
+					}
+				}
+			}
+			if (accepted)
 			{
-				if(sixNodeCacheMapId != ((SixNodeCacheItem)descriptor).mapIndex)
-				sixNodeCacheMapId = ((SixNodeCacheItem)descriptor).mapIndex;
-				setNeedPublish(true);
-				if(Utils.isCreative((EntityPlayerMP) entityPlayer) == false)
-					entityPlayer.inventory.decrStackSize(entityPlayer.inventory.currentItem, 1);
+				/*if (sixNodeCacheMapId != ((SixNodeCacheItem) descriptor).mapIndex)
+					sixNodeCacheMapId = ((SixNodeCacheItem) descriptor).mapIndex;*/
 				
+
+						
+				setNeedPublish(true);
+				if (Utils.isCreative((EntityPlayerMP) entityPlayer) == false)
+					entityPlayer.inventory.decrStackSize(entityPlayer.inventory.currentItem, 1);
+
 				//if(sixNodeCacheMapId != sixNodeCacheMapIdOld)
 				{
 					Chunk chunk = coordonate.world().getChunkFromBlockCoords(coordonate.x, coordonate.z);
 					Utils.generateHeightMap(chunk);
 					Utils.updateSkylight(chunk);
 					chunk.generateSkylightMap();
-					Utils.updateAllLightTypes(coordonate.world(),coordonate.x,coordonate.y,coordonate.z);
+					Utils.updateAllLightTypes(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
 				}
 				return true;
 			}
 			else
 			{
 				SixNodeElement element = sideElementList[side.getInt()];
-		    	if(element == null) return false;
-		    	if(element.onBlockActivated( entityPlayer,  side, vx, vy, vz)) return true;
-		    	return super.onBlockActivated(entityPlayer, side, vx, vy, vz);
+				if (element == null)
+					return false;
+				if (element.onBlockActivated(entityPlayer, side, vx, vy, vz))
+					return true;
+				return super.onBlockActivated(entityPlayer, side, vx, vy, vz);
 			}
 		}
 	}
 
 	@Override
 	public boolean hasGui(Direction side) {
-		if(sideElementList[side.getInt()] == null) return false;
+		if (sideElementList[side.getInt()] == null)
+			return false;
 		return sideElementList[side.getInt()].hasGui();
 	}
+
 	public IInventory getInventory(Direction side)
 	{
-		if(sideElementList[side.getInt()] == null) return null;
-		return sideElementList[side.getInt()].getInventory();		
+		if (sideElementList[side.getInt()] == null)
+			return null;
+		return sideElementList[side.getInt()].getInventory();
 	}
-	
-	public Container newContainer(Direction side,EntityPlayer player)
+
+	public Container newContainer(Direction side, EntityPlayer player)
 	{
-		if(sideElementList[side.getInt()] == null) return null;
+		if (sideElementList[side.getInt()] == null)
+			return null;
 		return sideElementList[side.getInt()].newContainer(side, player);
 	}
 
-	
 	public float physicalSelfDestructionExplosionStrength()
 	{
 		return 1.0f;
 	}
-	
-	
+
 	public void recalculateLightValue()
 	{
 		int light = 0;
-		for(SixNodeElement element : sideElementList)
+		for (SixNodeElement element : sideElementList)
 		{
-			if(element == null) continue;
+			if (element == null)
+				continue;
 			int eLight = element.getLightValue();
-			if(eLight > light) light = eLight;
+			if (eLight > light)
+				light = eLight;
 		}
 		setLightValue(light);
 	}
-	
-	
-	
+
 	@Override
-	public void networkUnserialize(DataInputStream stream,EntityPlayerMP player) {
-		super.networkUnserialize(stream,player);
-		
+	public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
+		super.networkUnserialize(stream, player);
+
 		Direction side;
 		try {
-			side = Direction.fromInt(stream.readByte());	
-			if(side != null & sideElementIdList[side.getInt()] == stream.readShort())
+			side = Direction.fromInt(stream.readByte());
+			if (side != null & sideElementIdList[side.getInt()] == stream.readShort())
 			{
-				sideElementList[side.getInt()].networkUnserialize(stream,player);
+				sideElementList[side.getInt()].networkUnserialize(stream, player);
 			}
 			else
 			{
@@ -646,25 +654,26 @@ public class SixNode extends Node {
 			e.printStackTrace();
 		}
 	}
+
 	public boolean hasVolume() {
 		// TODO Auto-generated method stub
-		for(SixNodeElement element : sideElementList)
+		for (SixNodeElement element : sideElementList)
 		{
-			if(element != null && element.sixNodeElementDescriptor.hasVolume()) return true;
+			if (element != null && element.sixNodeElementDescriptor.hasVolume())
+				return true;
 		}
 		return false;
 	}
 
 	@Override
-	public Block getBlock(){
+	public Block getBlock() {
 		return Eln.sixNodeBlock;
 	}
+
 	@Override
 	public INodeInfo getInfo() {
 		// TODO Auto-generated method stub
 		return Eln.sixNodeBlock;
 	}
-	
-	
-	
+
 }

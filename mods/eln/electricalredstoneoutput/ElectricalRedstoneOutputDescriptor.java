@@ -62,7 +62,12 @@ public class ElectricalRedstoneOutputDescriptor extends SixNodeDescriptor {
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		return true;
 	}
-	
+	@Override
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if(type == ItemRenderType.INVENTORY) GL11.glScalef(2.8f, 2.8f, 2.8f);

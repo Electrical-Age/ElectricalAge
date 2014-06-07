@@ -14,6 +14,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.client.FrameTime;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.misc.Obj3D;
@@ -78,6 +80,12 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
 		// TODO Auto-generated method stub
 		return true;
 	}
+	@Override
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		// TODO Auto-generated method stub

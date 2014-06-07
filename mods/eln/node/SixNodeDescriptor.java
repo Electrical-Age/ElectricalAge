@@ -1,14 +1,23 @@
 package mods.eln.node;
 
+import org.lwjgl.opengl.GL11;
+
+import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 
 public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor implements IItemRenderer{
 	public Class ElementClass,RenderClass;
@@ -22,18 +31,43 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
 		// TODO Auto-generated method stub
+		if(type == ItemRenderType.INVENTORY)
+			return false;
+		return true;
+	}
+
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item,
+			ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
 		return false;
 	}
+	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		// TODO Auto-generated method stub
-		
+		//RenderBlocks b = (RenderBlocks)data[0];
+
+
+		UtilsClient.drawIcon(type,getIcon().getIconName().replace("eln:", "textures/blocks/")+".png");
+
+	//	Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation("eln", getIcon().getIconName().replace("eln:", "textures/blocks/")+".png"));
+		/*UtilsClient.disableCulling();
+		GL11.glBegin(GL11.GL_QUADS);
+		GL11.glTexCoord2f(1f, 0f);
+		GL11.glVertex3f(0f,16f, 0f);
+		GL11.glTexCoord2f(0f, 0f);
+		GL11.glVertex3f(0f,0f, 0f);
+		GL11.glTexCoord2f(0f, 1f);
+		GL11.glVertex3f(0f,0f, 16f);
+		GL11.glTexCoord2f(1f, 1f);
+		GL11.glVertex3f(0f,16f, 16f);
+		GL11.glEnd();
+		UtilsClient.enableCulling();*/
 	}
 	public boolean hasVolume() {
 		// TODO Auto-generated method stub
@@ -106,4 +140,6 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 		if(ghostGroup != null && ghostGroup.canBePloted(coord) == false) return "Not enough space for this block";
 		return null;
 	}
+	
+	
 }

@@ -69,6 +69,12 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 		return !useIconEnable;
 	}
 	@Override
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return !useIconEnable;
+	}
+
+	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		// TODO Auto-generated method stub
 

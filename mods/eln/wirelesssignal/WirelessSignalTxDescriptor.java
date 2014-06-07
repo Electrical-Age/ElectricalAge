@@ -50,7 +50,12 @@ public class WirelessSignalTxDescriptor extends SixNodeDescriptor{
 		// TODO Auto-generated method stub
 		return true;
 	}
-	
+	@Override
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if(type == ItemRenderType.INVENTORY) {

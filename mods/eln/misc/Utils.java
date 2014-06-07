@@ -1371,6 +1371,8 @@ public class Utils {
 	public static void updateAllLightTypes(World worldObj, int xCoord, int yCoord, int zCoord) {
 		// TODO Auto-generated method stub
 		worldObj.func_147451_t(xCoord, yCoord, zCoord);
+		
+		worldObj.markBlocksDirtyVertical(xCoord, zCoord, 0, 255);
 	}
 
 	public static int getItemId(ItemStack stack) {
