@@ -563,9 +563,7 @@ public class SixNode extends Node {
 			}
 			if (accepted)
 			{
-				/*if (sixNodeCacheMapId != ((SixNodeCacheItem) descriptor).mapIndex)
-					sixNodeCacheMapId = ((SixNodeCacheItem) descriptor).mapIndex;*/
-				
+
 
 						
 				setNeedPublish(true);

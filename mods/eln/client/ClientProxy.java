@@ -20,13 +20,16 @@ import mods.eln.node.SixNodeEntity;
 import mods.eln.node.SixNodeRender;
 import mods.eln.node.TransparentNodeEntity;
 import mods.eln.node.TransparentNodeRender;
+import mods.eln.tutorialsign.TutorialSignOverlay;
 import net.minecraft.client.model.ModelSilverfish;
 import net.minecraft.client.renderer.entity.RenderSilverfish;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.common.MinecraftForge;
 
 public class ClientProxy extends CommonProxy {
 
+	TutorialSignOverlay TutorialSignOverlay;
 	@Override
 	public void registerRenderers() {
 		new ClientPacketHandler();
@@ -44,5 +47,7 @@ public class ClientProxy extends CommonProxy {
       	      	    	
 		Eln.clientKeyHandler = new ClientKeyHandler();
 		FMLCommonHandler.instance().bus().register(Eln.clientKeyHandler);
+		MinecraftForge.EVENT_BUS.register(new TutorialSignOverlay());
+	//	FMLCommonHandler.instance().bus().register();
 	}
 }

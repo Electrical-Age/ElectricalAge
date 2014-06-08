@@ -60,7 +60,7 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		// TODO Auto-generated method stub
-		return !useIconEnable;
+		return true;
 	}
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
@@ -77,8 +77,10 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		// TODO Auto-generated method stub
-
-		render.draw(this,type);
+		if(useIconEnable)
+			super.renderItem(type, item, data);
+		else
+			render.draw(this,type);
 	}
 
 	@Override

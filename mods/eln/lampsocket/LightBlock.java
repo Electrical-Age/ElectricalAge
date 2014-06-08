@@ -95,5 +95,12 @@ public class LightBlock extends BlockContainer {
 		super.breakBlock(world, x, y, z, arg4, arg5);
 	}
 
+	
+	
+	@Override
+	public int getLightOpacity() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
 }

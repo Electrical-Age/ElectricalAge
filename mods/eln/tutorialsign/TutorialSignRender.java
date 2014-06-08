@@ -37,12 +37,13 @@ public class TutorialSignRender extends SixNodeElementRender {
 
 	String text;
 	String baliseName;
+	String texts[];
 	
 	@Override
 	public void draw() {
 		super.draw();
 		descriptor.draw();
-		
+		/*
 		GL11.glPushMatrix();
 
 		GL11.glTranslatef(0.5f, 0f, 0f);
@@ -50,7 +51,7 @@ public class TutorialSignRender extends SixNodeElementRender {
 		float scale = 1/64f;
 		GL11.glScalef(scale, scale, scale);
 		Minecraft.getMinecraft().fontRenderer.drawString(text,0,0,0);
-		GL11.glPopMatrix();
+		GL11.glPopMatrix();*/
 	}
 
 	@Override
@@ -59,6 +60,7 @@ public class TutorialSignRender extends SixNodeElementRender {
 		try {
 			baliseName = stream.readUTF();
 			text = stream.readUTF();
+			texts = text.split("\r\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
