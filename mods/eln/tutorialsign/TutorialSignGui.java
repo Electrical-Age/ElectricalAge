@@ -30,14 +30,14 @@ public class TutorialSignGui extends GuiScreenEln {
 	
 	@Override
 	protected GuiHelper newHelper() {
-		return new GuiHelper(this, 50 + 12, 12 + 12);
+		return new GuiHelper(this, 150 + 12, 12 + 12);
 	}
    
 	@Override
 	public void initGui() {
 		super.initGui();
 
-		fileName = newGuiTextField(6, 6, 50);
+		fileName = newGuiTextField(6, 6, 150);
 		fileName.setText(render.baliseName);
 		fileName.setObserver(this);
 		fileName.setComment(new String[]{"Set balise name"});

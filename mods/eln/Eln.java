@@ -504,7 +504,7 @@ public class Eln {
 		genPlumb = config.get("mapGenerate", "plumb", true).getBoolean(true);
 		genTungsten = config.get("mapGenerate", "tungsten", true).getBoolean(true);
 		genCinnabar = config.get("mapGenerate", "cinnabar", true).getBoolean(true);
-
+		genCinnabar = false;
 		
 		
 		incondecentLampLife = config.get("lamp", "incondescentLifeInHours", 8).getDouble(8)*3600;
@@ -3044,7 +3044,7 @@ public class Eln {
 																// String
 																// name,int
 																// metadata,
-					4 * (genTungsten ? 1 : 0), 3, 9, 0, 32 // int spawnRate,int
+					6 * (genTungsten ? 1 : 0), 3, 9, 0, 32 // int spawnRate,int
 															// spawnSizeMin,int
 			// spawnSizeMax,int spawnHeightMin,int
 			// spawnHeightMax
@@ -3172,14 +3172,14 @@ public class Eln {
 		{
 			id = 9;
 
-			name = "Steel Dust";
+			name = "Alloy Dust";
 
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] {});
 			sharedItem.addElement(id, element);
 			Data.addResource(element.newItemStack());
-			addToOre("dustSteel", element.newItemStack());
+			addToOre("dustAlloy", element.newItemStack());
 		}
 
 		{
@@ -3316,7 +3316,7 @@ public class Eln {
 			subId = 7;
 			completId = subId + (id << 6);
 
-			name = "Steel Ingot";
+			name = "Alloy Ingot";
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] {});
@@ -3325,7 +3325,7 @@ public class Eln {
 			// element.newItemStack(1));
 
 			Data.addResource(element.newItemStack());
-			addToOre("ingotSteel", element.newItemStack());
+			addToOre("ingotAlloy", element.newItemStack());
 		}
 
 		{
@@ -4474,12 +4474,12 @@ public class Eln {
 
 		{
 			subId = 11;
-			name = "Steel Plate";
+			name = "Alloy Plate";
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
 			Data.addResource(desc.newItemStack());
-			addToOre("plateSteel", desc.newItemStack());
+			addToOre("plateAlloy", desc.newItemStack());
 		}
 		{
 			subId = 12;
@@ -5266,7 +5266,7 @@ public class Eln {
 				"GFG",
 				" S ",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
-				Character.valueOf('F'), "quicksilver",
+				Character.valueOf('F'), new ItemStack(Items.glowstone_dust),
 				Character.valueOf('S'), findItemStack("Copper Cable"));
 
 		addRecipe(findItemStack("50V Economic Light Bulb", 4),
@@ -5274,7 +5274,7 @@ public class Eln {
 				"GFG",
 				" S ",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
-				Character.valueOf('F'), "quicksilver",
+				Character.valueOf('F'), new ItemStack(Items.glowstone_dust),
 				Character.valueOf('S'), findItemStack("Low Voltage Cable"));
 
 		addRecipe(findItemStack("200V Economic Light Bulb", 4),
@@ -5282,7 +5282,7 @@ public class Eln {
 				"GFG",
 				" S ",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
-				Character.valueOf('F'), "quicksilver",
+				Character.valueOf('F'), new ItemStack(Items.glowstone_dust),
 				Character.valueOf('S'), findItemStack("Medium Voltage Cable"));
 
 		addRecipe(findItemStack("50V Farming Lamp", 2),
@@ -5352,9 +5352,11 @@ public class Eln {
 	}
 
 	void recipeDust() {
-		addShapelessRecipe(findItemStack("Steel Dust"),
+		addShapelessRecipe(findItemStack("Alloy Dust",3),
 				"dustIron",
-				findItemStack("Coal Dust"));
+				"dustIron",
+				"dustCoal",
+				"dustTungsten");
 
 	}
 
@@ -5521,7 +5523,7 @@ public class Eln {
 				"A",
 				"A",
 				"A",
-				Character.valueOf('A'), "ingotSteel");
+				Character.valueOf('A'), "ingotAlloy");
 	}
 
 	void recipeTreeResinAndRubber() {
@@ -5681,8 +5683,8 @@ public class Eln {
 				" C ",
 				"C C",
 				" C ",
-				Character.valueOf('C'), "plateSteel",
-				Character.valueOf('L'), "ingotSteel");
+				Character.valueOf('C'), "plateAlloy",
+				Character.valueOf('L'), "ingotAlloy");
 
 		addRecipe(findItemStack("Electrical Probe Chip"),
 				" R ",
@@ -5692,11 +5694,12 @@ public class Eln {
 				Character.valueOf('R'), new ItemStack(Items.redstone));
 
 		addRecipe(findItemStack("Thermal Probe Chip"),
-				"RMR",
-				"RMR",
+				" C ",
+				"RIR",
+				" C ",
 				Character.valueOf('G'), new ItemStack(Items.gold_ingot),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
-				Character.valueOf('M'), "quicksilver",
+				Character.valueOf('C'), "ingotCopper",
 				Character.valueOf('R'), new ItemStack(Items.redstone));
 
 		addRecipe(findItemStack("Signal Antenna"),
@@ -5705,13 +5708,11 @@ public class Eln {
 				Character.valueOf('c'), findItemStack("Iron Cable"));
 
 		addRecipe(findItemStack("Machine Booster"),
-				"RpR",
-				"CcC",
-				"RpR",
-				Character.valueOf('R'), new ItemStack(Items.redstone),
-				Character.valueOf('C'), "ingotCopper",
-				Character.valueOf('c'), findItemStack("Cheap Chip"),
-				Character.valueOf('p'), "quicksilver");
+				"m",
+				"c",
+				"m",
+				Character.valueOf('m'), findItemStack("Electrical Motor"),
+				Character.valueOf('c'), findItemStack("Advanced Chip"));
 
 	}
 
@@ -5764,8 +5765,8 @@ public class Eln {
 				findItemStack("Silicon Ingot", 4),
 				findItemStack("Silicon Plate"), 1.0 * f));
 
-		plateMachineRecipes.addRecipe(new Recipe(findItemStack("Steel Ingot", 4),
-				findItemStack("Steel Plate"), 1.0 * f));
+		plateMachineRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", 4),
+				findItemStack("Alloy Plate"), 1.0 * f));
 
 		plateMachineRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot, 4,
 				0), findItemStack("Iron Plate"), 1.0 * f));
@@ -5789,7 +5790,7 @@ public class Eln {
 	void recipemagnetiser() {
 		magnetiserRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot),
 				new ItemStack[] { findItemStack("Basic Magnet") }, 5000.0));
-		magnetiserRecipes.addRecipe(new Recipe(findItemStack("Steel Ingot", 1),
+		magnetiserRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", 1),
 				new ItemStack[] { findItemStack("Advanced Magnet") }, 15000.0));
 	}
 
@@ -5815,7 +5816,7 @@ public class Eln {
 		in = findItemStack("dustTungsten");
 		Utils.addSmelting(in.getItem(), in.getItemDamage(),
 				findItemStack("Tungsten Ingot"));
-		in = findItemStack("ingotSteel");
+		in = findItemStack("ingotAlloy");
 		//Utils.addSmelting(in.getItem().itemID, in.getItemDamage(),
 		//		findItemStack("Ferrite Ingot"));
 		in = findItemStack("dustIron");
@@ -5830,9 +5831,9 @@ public class Eln {
 		Utils.addSmelting(in.getItem(), in.getItemDamage(),
 				findItemStack("Rubber", 2));
 
-		in = findItemStack("Steel Dust");
+		in = findItemStack("Alloy Dust");
 		Utils.addSmelting(in.getItem(), in.getItemDamage(),
-				findItemStack("Steel Ingot"));
+				findItemStack("Alloy Ingot"));
 
 		in = findItemStack("Silicon Dust");
 		Utils.addSmelting(in.getItem(), in.getItemDamage(),
@@ -5889,7 +5890,7 @@ public class Eln {
 				"FMF",
 				"IcI",
 				Character.valueOf('M'), findItemStack("Machine Block"),
-				Character.valueOf('c'), findItemStack("Low Voltage Cable"),
+				Character.valueOf('c'), findItemStack("Electrical Motor"),
 				Character.valueOf('F'), new ItemStack(Items.flint),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
@@ -5899,29 +5900,29 @@ public class Eln {
 				"IcI",
 				Character.valueOf('M'), findItemStack("Advanced Machine Block"),
 				Character.valueOf('C'), findItemStack("Advanced Chip"),
-				Character.valueOf('c'), findItemStack("Medium Voltage Cable"),
+				Character.valueOf('c'), findItemStack("Advanced Electrical Motor"),
 				Character.valueOf('D'), new ItemStack(Items.diamond),
-				Character.valueOf('I'), "ingotSteel");
+				Character.valueOf('I'), "ingotAlloy");
 		/*
 		 * addRecipe(findItemStack("50V Extractor", 1), "IRI", "FMF", "IcI",
 		 * Character.valueOf('M'), findItemStack("Machine Block"),
-		 * Character.valueOf('c'), findItemStack("Low Voltage Cable"),
+		 * Character.valueOf('c'), findItemStack("Electrical Motor"),
 		 * Character.valueOf('F'), new ItemStack(Item.dyePowder, 1, 4),
 		 * Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 		 * Character.valueOf('R'), new ItemStack(Items.redstone));
 		 * addRecipe(findItemStack("200V Extractor", 1), "ICI", "DMD", "IcI",
 		 * Character.valueOf('M'), findItemStack("Advanced machine block"),
 		 * Character.valueOf('C'), findItemStack("Advanced Chip"),
-		 * Character.valueOf('c'), findItemStack("Medium Voltage Cable"),
+		 * Character.valueOf('c'), findItemStack("Advanced Electrical Motor"),
 		 * Character.valueOf('D'), new ItemStack(Item.dyePowder, 1, 4),
-		 * Character.valueOf('I'), "ingotSteel");
+		 * Character.valueOf('I'), "ingotAlloy");
 		 */
 		addRecipe(findItemStack("50V Compressor", 1),
 				"IRI",
 				"FMF",
 				"IcI",
 				Character.valueOf('M'), findItemStack("Machine Block"),
-				Character.valueOf('c'), findItemStack("Low Voltage Cable"),
+				Character.valueOf('c'), findItemStack("Electrical Motor"),
 				Character.valueOf('F'), "plateIron",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
@@ -5931,16 +5932,16 @@ public class Eln {
 				"IcI",
 				Character.valueOf('M'), findItemStack("Advanced Machine Block"),
 				Character.valueOf('C'), findItemStack("Advanced Chip"),
-				Character.valueOf('c'), findItemStack("Medium Voltage Cable"),
-				Character.valueOf('D'), "plateSteel",
-				Character.valueOf('I'), "ingotSteel");
+				Character.valueOf('c'), findItemStack("Advanced Electrical Motor"),
+				Character.valueOf('D'), "plateAlloy",
+				Character.valueOf('I'), "ingotAlloy");
 
 		addRecipe(findItemStack("50V Plate Machine", 1),
 				"IRI",
 				"IMI",
 				"IcI",
 				Character.valueOf('M'), findItemStack("Machine Block"),
-				Character.valueOf('c'), findItemStack("Low Voltage Cable"),
+				Character.valueOf('c'), findItemStack("Electrical Motor"),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
 
@@ -5950,27 +5951,27 @@ public class Eln {
 				"DcD",
 				Character.valueOf('M'), findItemStack("Advanced Machine Block"),
 				Character.valueOf('C'), findItemStack("Advanced Chip"),
-				Character.valueOf('c'), findItemStack("Medium Voltage Cable"),
-				Character.valueOf('D'), "plateSteel",
-				Character.valueOf('I'), "ingotSteel");
+				Character.valueOf('c'), findItemStack("Advanced Electrical Motor"),
+				Character.valueOf('D'), "plateAlloy",
+				Character.valueOf('I'), "ingotAlloy");
 
 		addRecipe(findItemStack("50V Magnetizer", 1),
 				"IRI",
 				"cMc",
-				"IcI",
+				"III",
 				Character.valueOf('M'), findItemStack("Machine Block"),
-				Character.valueOf('c'), findItemStack("Low Voltage Cable"),
+				Character.valueOf('c'), findItemStack("Electrical Motor"),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
 
 		addRecipe(findItemStack("200V Magnetizer", 1),
 				"ICI",
 				"cMc",
-				"IcI",
+				"III",
 				Character.valueOf('M'), findItemStack("Advanced Machine Block"),
 				Character.valueOf('C'), findItemStack("Advanced Chip"),
-				Character.valueOf('c'), findItemStack("Medium Voltage Cable"),
-				Character.valueOf('I'), "ingotSteel");
+				Character.valueOf('c'), findItemStack("Advanced Electrical Motor"),
+				Character.valueOf('I'), "ingotAlloy");
 
 	}
 

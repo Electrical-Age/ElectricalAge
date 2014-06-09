@@ -1,5 +1,7 @@
 package mods.eln.tutorialsign;
 
+import org.lwjgl.opengl.GL11;
+
 import mods.eln.misc.Utils;
 import mods.eln.node.SixNodeBlock;
 import mods.eln.node.SixNodeElementRender;
@@ -51,12 +53,16 @@ public class TutorialSignOverlay {
 			}
 		}
 		
+		
 		if(best != null){
+			GL11.glPushMatrix();
+			GL11.glScalef(0.5f, 0.5f, 0.5f);
 			int y = 0;
 			for(String str : best.texts){
 				Minecraft.getMinecraft().fontRenderer.drawString(str,10/* event.resolution.getScaledWidth()/2-50*/, 10+y, 0xFFFFFF);
 				y+=10;
 			}
+			GL11.glPopMatrix();
 		}
 		
 		

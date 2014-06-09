@@ -15,6 +15,15 @@ import javax.swing.text.MaskFormatter;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -50,8 +59,34 @@ public class TutorialSignElement extends SixNodeElement {
 	public static String getText(String balise){
 		if(baliseMap == null){		
 			baliseMap = new HashMap<String, String>();
+			
+		/*
+			try {
+				File fXmlFile = Utils.getMapFile("EA/tutorialSign.xml");
+				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+				DocumentBuilder dBuilder;
+				dBuilder = dbFactory.newDocumentBuilder();
+				Document doc = dBuilder.parse(fXmlFile);
+				//Node root = doc.getElementById("sign");
+				Node root = doc.getChildNodes().item(0);
+				NodeList nList = root.getChildNodes();
+				for(int idx = 0;idx < nList.getLength();idx++){
+					Node n = nList.item(idx);
+					n.getNamespaceURI();
+				}
+				int i = 0;
+				 
+			} catch (Exception e) {
+
+			}
+*/
+			//optional, but recommended
+			//read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
+			//doc.getDocumentElement().normalize();
+			
 		
 			try {
+
 				String file = Utils.readMapFile("EA/tutorialSign.txt");
 				String ret;				
 				if(file.contains("\r\n"))

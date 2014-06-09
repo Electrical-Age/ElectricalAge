@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
@@ -442,8 +443,11 @@ public class UtilsClient {
 
 		itemRenderer.zLevel = 400.0F;
 		FontRenderer font = null;
-		if (par1ItemStack != null)
-			font = par1ItemStack.getItem().getFontRenderer(par1ItemStack);
+		if (par1ItemStack != null){
+			Item i = par1ItemStack.getItem();
+			if(i == null) return;
+			font = i.getFontRenderer(par1ItemStack);
+		}
 		if (font == null)
 			font = mc().fontRenderer;
 		itemRenderer.renderItemAndEffectIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y);
