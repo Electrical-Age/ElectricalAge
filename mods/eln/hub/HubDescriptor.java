@@ -44,7 +44,7 @@ public class HubDescriptor extends SixNodeDescriptor{
 		GL11.glColor3f(1, 1, 1);
 	}
 	
-	@Override
+/*	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
 		// TODO Auto-generated method stub
@@ -54,13 +54,13 @@ public class HubDescriptor extends SixNodeDescriptor{
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		// TODO Auto-generated method stub
 		return true;
-	}
-	@Override
+	}*/
+	/*@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		// TODO Auto-generated method stub
 		//GL11.glTranslatef(-0.3f, -0.1f, 0f);
 		draw(new boolean[]{true,true,true,true,true,true});
-	}
+	}*/
 	
 	@Override
 	public void setParent(Item item, int damage) {
@@ -73,9 +73,8 @@ public class HubDescriptor extends SixNodeDescriptor{
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Provides a zero volt reference.");
-		list.add("Can be used to ground negative");
-		list.add("battery pins.");
+		list.add("Give the possibility");
+		list.add("to cross wires");
 	}
 	
 	

@@ -1923,7 +1923,7 @@ public class Eln {
 			ElectricalMathDescriptor desc;
 			subId = 4;
 
-			name = "Electrical Equation-Dependant Outputter";
+			name = "Signal Processor";
 
 			desc = new ElectricalMathDescriptor(name,
 					obj.getObj("PLC"));
@@ -5594,7 +5594,7 @@ public class Eln {
 				Character.valueOf('B'), findItemStack("Portable Battery"),
 				Character.valueOf('M'), findItemStack("Electrical Motor"),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
-
+/*
 		addRecipe(findItemStack("Portable Electrical Mining Drill"),
 				" T ",
 				"IBI",
@@ -5602,7 +5602,7 @@ public class Eln {
 				Character.valueOf('T'), findItemStack("Average Electrical Drill"),
 				Character.valueOf('B'), findItemStack("Portable Battery"),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
-
+*/
 		addRecipe(findItemStack("X-Ray Scanner"),
 				"PGP",
 				"PCP",
@@ -5981,7 +5981,7 @@ public class Eln {
 				new ItemStack(Items.repeater),
 				findItemStack("Cheap Chip"));
 
-		addRecipe(findItemStack("Electrical Equation-Dependant Outputter", 1),
+		addRecipe(findItemStack("Signal Processor", 1),
 				" c ",
 				"cCc",
 				" c ",
