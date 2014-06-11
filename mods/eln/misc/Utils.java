@@ -1432,7 +1432,7 @@ public class Utils {
 	}
 	private static int uuid = 1;
 	public static int getUuid() {
-		// TODO Auto-generated method stub
+		if(uuid < 1) uuid = 1;
 		return uuid++;
 	}
 

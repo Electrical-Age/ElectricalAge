@@ -489,7 +489,7 @@ public class UtilsClient {
 	}
 	private static int uuid = Integer.MIN_VALUE;
 	public static int getUuid() {
-		// TODO Auto-generated method stub
+		if(uuid > -1) uuid = Integer.MIN_VALUE;
 		return uuid++;
 	}
 }
