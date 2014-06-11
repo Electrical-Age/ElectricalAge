@@ -487,5 +487,9 @@ public class UtilsClient {
 		Eln.eventChannel.sendToServer(new FMLProxyPacket(packet));
 		//Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new FMLProxyPacket(packet));
 	}
-
+	private static int uuid = Integer.MIN_VALUE;
+	public static int getUuid() {
+		// TODO Auto-generated method stub
+		return uuid++;
+	}
 }

@@ -32,6 +32,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalConnection;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sound.SoundCommand;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -230,6 +231,22 @@ public abstract class TransparentNodeElement implements  GhostObserver{
 	*/
 	public void onBreakElement()
 	{
+		if (useUuid()) {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
+			DataOutputStream stream = new DataOutputStream(bos);
+
+			try {
+				stream.writeByte(Eln.packetDestroyUuid);
+				stream.writeInt(uuid);
+
+				sendPacketToAllClient(bos);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+
+			}
+		}
+		
 		if(transparentNodeDescriptor.hasGhostGroup()){
 			Eln.ghostManager.removeObserver(node.coordonate);
 			Eln.ghostManager.removeGhostAndBlockWithObserver(node.coordonate);
@@ -440,4 +457,21 @@ public abstract class TransparentNodeElement implements  GhostObserver{
 	public Coordonate coordonate(){
 		return node.coordonate;
 	}
+	
+	
+	private int uuid = 0;
+	public int getUuid(){
+		if(uuid == 0){
+			uuid = Utils.getUuid();
+		}
+		return uuid;
+	}
+	public boolean useUuid(){
+		return uuid != 0;
+	}
+	public void play(SoundCommand s){
+		s.addUuid(getUuid());
+		s.play();
+	}
+	
 }

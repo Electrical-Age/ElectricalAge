@@ -182,7 +182,12 @@ public class TransparentNodeEntity extends NodeBlockEntity {	//boolean[] syncron
 		return Eln.transparentNodeBlock;
 	}
 
+	@Override
+	public void destructor() {
+		if(elementRender != null)
+			elementRender.destructor();
+		super.destructor();
+	}
 
-	
 }
 // && 

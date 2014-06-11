@@ -1430,5 +1430,10 @@ public class Utils {
 		// TODO Auto-generated method stub
 		
 	}
+	private static int uuid = 1;
+	public static int getUuid() {
+		// TODO Auto-generated method stub
+		return uuid++;
+	}
 
 }

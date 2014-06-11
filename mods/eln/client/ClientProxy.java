@@ -20,6 +20,7 @@ import mods.eln.node.SixNodeEntity;
 import mods.eln.node.SixNodeRender;
 import mods.eln.node.TransparentNodeEntity;
 import mods.eln.node.TransparentNodeRender;
+import mods.eln.sound.SoundClientEventListener;
 import mods.eln.tutorialsign.TutorialSignOverlay;
 import net.minecraft.client.model.ModelSilverfish;
 import net.minecraft.client.renderer.entity.RenderSilverfish;
@@ -48,6 +49,12 @@ public class ClientProxy extends CommonProxy {
 		Eln.clientKeyHandler = new ClientKeyHandler();
 		FMLCommonHandler.instance().bus().register(Eln.clientKeyHandler);
 		MinecraftForge.EVENT_BUS.register(new TutorialSignOverlay());
+		uuidManager = new UuidManager();
+		soundClientEventListener = new SoundClientEventListener(uuidManager);
 	//	FMLCommonHandler.instance().bus().register();
+		
 	}
+	public static UuidManager uuidManager;
+	public static SoundClientEventListener soundClientEventListener;
+	
 }

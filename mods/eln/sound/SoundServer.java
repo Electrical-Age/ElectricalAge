@@ -32,7 +32,7 @@ public class SoundServer {
 	}*/
 	
 	
-	public static void play(SoundParam p){
+	public static void play(SoundCommand p){
 		
     	ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
         DataOutputStream stream = new DataOutputStream(bos);   	

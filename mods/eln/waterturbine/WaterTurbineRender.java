@@ -13,7 +13,7 @@ import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.node.TransparentNodeElementRender;
 import mods.eln.node.TransparentNodeEntity;
 import mods.eln.sound.SoundClient;
-import mods.eln.sound.SoundParam;
+import mods.eln.sound.SoundCommand;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -58,7 +58,7 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 	//	if (Math.signum((alpha % 45) - 40f) != Math.signum((alphaN_1 % 45) - 40f) && soundPlaying == false) {
 		if ((int)(alpha/45) != (int)(alphaN_1/45) && soundPlaying == false) {
 			Coordonate coord = coordonate();
-			SoundClient.play(new SoundParam(descriptor.soundName, tileEntity)
+			play(new SoundCommand(descriptor.soundName, tileEntity)
 			.setVolume(descriptor.nominalVolume * (0.007f + 0.2f * (float) powerFactorFilter.get() * (float) powerFactorFilter.get()),
 						1.1f));
 			//SoundClient.playFromBlock(tileEntity.worldObj,coord.x, coord.y, coord.z, descriptor.soundName,1,1,5,15);

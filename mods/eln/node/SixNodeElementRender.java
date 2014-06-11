@@ -13,6 +13,7 @@ import mods.eln.Eln;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
+import mods.eln.client.ClientProxy;
 import mods.eln.electricasensor.ElectricalSensorElement;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -20,6 +21,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
+import mods.eln.sound.SoundCommand;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
@@ -151,15 +153,30 @@ public abstract class SixNodeElementRender {
 
 	}
 	
+	private int uuid = 0;
+
+	public int getUuid() {
+		if (uuid == 0) {
+			uuid = UtilsClient.getUuid();
+		}
+		return uuid;
+	}
+
+	public boolean usedUuid() {
+		return uuid != 0;
+	}
 	
 	
-	/*
-	public CableRenderDescriptor getCableRender(LRDU lrdu)
-	{
-		return null;
-	}*/
+	public void play(SoundCommand s) {
+		s.addUuid(getUuid());
+		s.play();
+	}
+
 	public void destructor()
 	{
+		if(usedUuid())
+			ClientProxy.uuidManager.kill(uuid);
+		
 		if(glListEnable())
 		{
 			GL11.glDeleteLists(glList,1);

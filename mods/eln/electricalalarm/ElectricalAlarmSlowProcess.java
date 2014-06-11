@@ -3,7 +3,7 @@ package mods.eln.electricalalarm;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.sim.IProcess;
-import mods.eln.sound.SoundParam;
+import mods.eln.sound.SoundCommand;
 import mods.eln.sound.SoundServer;
 
 public class ElectricalAlarmSlowProcess implements IProcess {
@@ -29,7 +29,7 @@ public class ElectricalAlarmSlowProcess implements IProcess {
 				if(soundTimeTimeout == 0) {
 					float speed = 1f;
 					Coordonate coord = element.sixNode.coordonate;
-					SoundServer.play(new SoundParam(element.descriptor.soundName,coord).setVolume(1F, 1.0F).longRange());
+					element.play(new SoundCommand(element.descriptor.soundName,coord).setVolume(1F, 1.0F).longRange());
 					soundTimeTimeout = element.descriptor.soundTime;
 				}
 			}

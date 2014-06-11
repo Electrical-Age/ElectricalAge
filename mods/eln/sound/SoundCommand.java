@@ -3,14 +3,15 @@ package mods.eln.sound;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import mods.eln.misc.Coordonate;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
-public class SoundParam {
+public class SoundCommand {
 
-	public SoundParam(String track, TileEntity c) {
+	public SoundCommand(String track, TileEntity c) {
 		this.track = track;
 		world = c.getWorldObj();
 		x = c.xCoord + 0.5;
@@ -19,17 +20,17 @@ public class SoundParam {
 		mediumRange();
 	}
 
-	public SoundParam() {
+	public SoundCommand() {
 
 	}
 
-	public SoundParam(String track, Coordonate c) {
+	public SoundCommand(String track, Coordonate c) {
 		this.track = track;
 		set(c);
 		mediumRange();
 	}
 
-	public SoundParam(String track, Coordonate c, Range range) {
+	public SoundCommand(String track, Coordonate c, Range range) {
 		this.track = track;
 		set(c);
 		applyRange(range);
@@ -40,6 +41,7 @@ public class SoundParam {
 	String track;
 	float volume = 1, pitch = 1;
 	float rangeNominal, rangeMax, blockFactor;
+	ArrayList<Integer> uuid = new ArrayList<Integer>();
 
 	public void play() {
 		if (world.isRemote)
@@ -74,35 +76,39 @@ public class SoundParam {
 		Small, Mid, Far
 	};
 
-	public SoundParam mediumRange() {
+	public SoundCommand mediumRange() {
 		rangeNominal = 4;
 		rangeMax = 16;
 		blockFactor = 1;
 		return this;
 	}
 
-	public SoundParam smallRange() {
+	public SoundCommand smallRange() {
 		rangeNominal = 2;
 		rangeMax = 8;
 		blockFactor = 3;
 		return this;
 	}
 
-	public SoundParam longRange() {
+	public SoundCommand longRange() {
 		rangeNominal = 8;
 		rangeMax = 48;
 		blockFactor = 0.5f;
 		return this;
 	}
 
-	public SoundParam setVolume(float volume, float pitch) {
+	public SoundCommand setVolume(float volume, float pitch) {
 		this.volume = volume;
 		this.pitch = pitch;
 		return this;
 	}
 
-	public static SoundParam fromStream(DataInputStream stream, World w) throws IOException {
-		SoundParam p = new SoundParam();
+	
+	public void addUuid(int uuid){
+		this.uuid.add(uuid);
+	}
+	public static SoundCommand fromStream(DataInputStream stream, World w) throws IOException {
+		SoundCommand p = new SoundCommand();
 		p.world = w;
 
 		p.x = stream.readInt() / 8.0;
@@ -114,6 +120,10 @@ public class SoundParam {
 		p.rangeNominal = stream.readFloat();
 		p.rangeMax = stream.readFloat();
 		p.blockFactor = stream.readFloat();
+		p.uuid = new ArrayList<Integer>();
+		for(int idx = stream.readByte();idx != 0;idx--){
+			p.addUuid(stream.readInt());
+		}
 		return p;
 	}
 
@@ -128,5 +138,9 @@ public class SoundParam {
 		stream.writeFloat(rangeNominal);
 		stream.writeFloat(rangeMax);
 		stream.writeFloat(blockFactor);
+		stream.writeByte(uuid.size());
+		for(Integer i : uuid){
+			stream.writeInt(i);
+		}
 	}
 }

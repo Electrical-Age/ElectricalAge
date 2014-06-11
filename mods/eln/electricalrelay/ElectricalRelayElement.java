@@ -37,7 +37,7 @@ import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ITemperatureWatchdogDescriptor;
 import mods.eln.sim.IVoltageWatchdogDescriptor;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sound.SoundParam;
+import mods.eln.sound.SoundCommand;
 import mods.eln.sound.SoundServer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -136,7 +136,7 @@ public class ElectricalRelayElement extends SixNodeElement {
 		if(state == switchState) return;
 		switchState = state;
 		refreshSwitchResistor();
-		new SoundParam("random.click",this.getCoordonate()).setVolume(0.1F, 2.0F).smallRange().play();
+		new SoundCommand("random.click",this.getCoordonate()).setVolume(0.1F, 2.0F).smallRange().play();
 		needPublish(); 
 	}
 	

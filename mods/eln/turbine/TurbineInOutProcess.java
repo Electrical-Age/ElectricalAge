@@ -6,7 +6,7 @@ import mods.eln.sim.ElectricalPowerSource;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.PhysicalConstant;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sound.SoundParam;
+import mods.eln.sound.SoundCommand;
 import mods.eln.sound.SoundServer;
 
 
@@ -61,7 +61,7 @@ public class TurbineInOutProcess implements IProcess{
 		soundTimerCounter += time;
 		if (soundTimerCounter >= soundTimeOut && deltaT > 40) {
 			float factor = (float)(deltaT / turbine.descriptor.nominalDeltaT);
-			SoundServer.play(new SoundParam(descriptor.soundName,turbine.coordonate()).setVolume(descriptor.nominalVolume * (0.1f * factor), 0.9f + 0.2f * factor).mediumRange());
+			turbine.play(new SoundCommand(descriptor.soundName,turbine.coordonate()).setVolume(descriptor.nominalVolume * (0.1f * factor), 0.9f + 0.2f * factor).mediumRange());
 			soundTimerCounter = 0;
 		}
 		

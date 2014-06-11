@@ -370,7 +370,8 @@ public class Eln {
 	public static final byte packetOpenLocalGui = 17;
 	public static final byte packetForClientNode = 18;
 	public static final byte packetPlaySound = 19;
-
+	public static final byte packetDestroyUuid = 20;
+	
 	public static PacketHandler packetHandler;
 	static NodeServer nodeServer;
 	public static LiveDataManager clientLiveDataManager;

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.swing.text.html.parser.Entity;
 
+import mods.eln.client.ClientProxy;
 import mods.eln.client.SoundLoader;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
@@ -17,8 +18,10 @@ public class SoundClient {
 		play(world, x+0.5, y+0.5, z+0.5, track, volume, pitch, rangeNominal, rangeMax);
 	}*/
 	
-	public static void play(SoundParam p){
-//	public static void play(World world,double x, double y, double z, String track, float volume, float pitch,float rangeNominal,float rangeMax){
+	public static void play(SoundCommand p){
+		ClientProxy.soundClientEventListener.currentUuid = p.uuid; //trolilole 
+		
+		
 		EntityPlayer player = Minecraft.getMinecraft().thePlayer;
 		if(p.world.provider.dimensionId != player.dimension) return;
 		double distance = Math.sqrt(Math.pow(p.x-player.posX, 2) + Math.pow(p.y-player.posY, 2) + Math.pow(p.z-player.posZ, 2));
@@ -36,6 +39,7 @@ public class SoundClient {
 			p.volume -= blockFactor*0.2f;
 			p.volume *= distanceFactor;
 			if(p.volume <= 0) return;
+			
 			p.world.playSound(player.posX + 2*(p.x-player.posX)/distance, player.posY + 2*(p.y-player.posY)/distance, player.posZ + 2*(p.z-player.posZ)/distance, p.track,p. volume, p.pitch, false);
 		}else{
 			for(int idx = 0;idx < trackCount;idx++){
@@ -51,6 +55,6 @@ public class SoundClient {
 		}
 		
 		
-		
+		ClientProxy.soundClientEventListener.currentUuid = null;
 	}
 }

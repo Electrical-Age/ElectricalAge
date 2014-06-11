@@ -17,13 +17,14 @@ import org.lwjgl.Sys;
 import com.jcraft.jogg.Packet;
 
 import mods.eln.client.ClientKeyHandler;
+import mods.eln.client.ClientProxy;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
 import mods.eln.sound.SoundClient;
-import mods.eln.sound.SoundParam;
+import mods.eln.sound.SoundCommand;
 import net.minecraft.client.Minecraft;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -58,7 +59,6 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 	@SubscribeEvent
 	public void onServerPacket(ServerCustomPacketEvent event) {
 
-		//Utils.println("onServerPacket");
 
 		FMLProxyPacket packet = event.packet;
 		DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
@@ -106,12 +106,23 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 			case Eln.packetPlaySound:
 				packetPlaySound(stream, manager, player);
 				break;
+			case Eln.packetDestroyUuid:
+				packetDestroyUuid(stream, manager, player);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+	}
+
+	private void packetDestroyUuid(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
+		try {
+			ClientProxy.uuidManager.kill(stream.readInt());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	void packetPlaySound(DataInputStream stream, NetworkManager manager,
@@ -122,7 +133,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 				return;
 
 
-			SoundClient.play(SoundParam.fromStream(stream,player.worldObj));
+			SoundClient.play(SoundCommand.fromStream(stream,player.worldObj));
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

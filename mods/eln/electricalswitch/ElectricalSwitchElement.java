@@ -32,7 +32,7 @@ import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ITemperatureWatchdogDescriptor;
 import mods.eln.sim.IVoltageWatchdogDescriptor;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sound.SoundParam;
+import mods.eln.sound.SoundCommand;
 import mods.eln.sound.SoundServer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -175,7 +175,7 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
     	else {
 			setSwitchState(! switchState);
 			//playSoundEffect("random.click", 0.3F, 0.6F);
-			SoundServer.play(new SoundParam("random.click",this.getCoordonate()).setVolume(0.3F, 0.6f).smallRange());
+			SoundServer.play(new SoundCommand("random.click",this.getCoordonate()).setVolume(0.3F, 0.6f).smallRange());
 			return true;
 		}
 		//front = LRDU.fromInt((front.toInt()+1)&3);
