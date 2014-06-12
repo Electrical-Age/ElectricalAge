@@ -4,7 +4,9 @@
    "wind_turbine": {"category": "master","sounds": [{"name": "wind_turbine","stream": false}]},
    "water_turbine": {"category": "master","sounds": [{"name": "water_turbine","stream": false}]},
    "heat_turbine_200v": {"category": "master","sounds": [{"name": "heat_turbine_200v","stream": false}]},
-   "heat_turbine_50v": {"category": "master","sounds": [{"name": "heat_turbine_50v","stream": false}]}
+   "heat_turbine_50v": {"category": "master","sounds": [{"name": "heat_turbine_50v","stream": false}]},
+
+   "neon_lamp": {"category": "master","sounds": [{"name": "neon_lamp","stream": false}]}
 }
 
 

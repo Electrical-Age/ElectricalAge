@@ -136,7 +136,7 @@ public class ElectricalRelayElement extends SixNodeElement {
 		if(state == switchState) return;
 		switchState = state;
 		refreshSwitchResistor();
-		new SoundCommand("random.click",this.getCoordonate()).setVolume(0.1F, 2.0F).smallRange().play();
+		play(new SoundCommand("random.click").setVolume(0.1F, 2.0F).smallRange());
 		needPublish(); 
 	}
 	

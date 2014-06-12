@@ -268,6 +268,7 @@ public abstract class TransparentNodeElementRender {
 	
 	public void play(SoundCommand s) {
 		s.addUuid(getUuid());
+		s.set(tileEntity);
 		s.play();
 	}
 

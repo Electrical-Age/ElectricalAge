@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 
 public class SoundCommand {
 
-	public SoundCommand(String track, TileEntity c) {
+	/*public SoundCommand(String track, TileEntity c) {
 		this.track = track;
 		world = c.getWorldObj();
 		x = c.xCoord + 0.5;
@@ -19,12 +19,17 @@ public class SoundCommand {
 		z = c.zCoord + 0.5;
 		mediumRange();
 	}
-
+*/
 	public SoundCommand() {
 
 	}
 
-	public SoundCommand(String track, Coordonate c) {
+	public SoundCommand(String track) {
+		this.track = track;
+		mediumRange();
+	}
+	
+/*	public SoundCommand(String track, Coordonate c) {
 		this.track = track;
 		set(c);
 		mediumRange();
@@ -34,7 +39,7 @@ public class SoundCommand {
 		this.track = track;
 		set(c);
 		applyRange(range);
-	}
+	}*/
 
 	World world;
 	double x, y, z;
@@ -56,6 +61,15 @@ public class SoundCommand {
 		y = c.y + 0.5;
 		z = c.z + 0.5;
 	}
+	public SoundCommand set(TileEntity c) {
+		world = c.getWorldObj();
+		x = c.xCoord + 0.5;
+		y = c.yCoord + 0.5;
+		z = c.zCoord + 0.5;
+		mediumRange();
+		return this;
+	}
+
 
 	void applyRange(Range range) {
 		switch (range) {

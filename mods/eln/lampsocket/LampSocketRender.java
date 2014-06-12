@@ -16,6 +16,7 @@ import mods.eln.client.ClientProxy;
 import mods.eln.client.FrameTime;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.item.LampDescriptor;
+import mods.eln.item.LampDescriptor.Type;
 import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -27,6 +28,7 @@ import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementInventory;
 import mods.eln.node.SixNodeElementRender;
 import mods.eln.node.SixNodeEntity;
+import mods.eln.sound.SoundCommand;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 
@@ -134,11 +136,25 @@ public class LampSocketRender extends SixNodeElementRender{
 		}
 		
 		descriptor.render.draw(this);
+		
+		
+
+		
+		
 	}
 	public String channel;
 	LampDescriptor lampDescriptor = null;
 	float alphaZ;
-	byte light;
+	byte light,oldLight =-1;
+	
+	void setLight(byte newLight){
+		light = newLight;
+		if(lampDescriptor != null && lampDescriptor.type == Type.eco &&  oldLight != -1 && oldLight < 9 && light >= 9){
+			play(new SoundCommand("eln:neon_lamp").setVolume(1, 1f).smallRange());
+		}
+		oldLight = light;
+	}
+	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -158,8 +174,8 @@ public class LampSocketRender extends SixNodeElementRender{
 			
 			isConnectedToLampSupply = stream.readBoolean();
 			
+			setLight(stream.readByte());
 			
-			light = stream.readByte();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -170,7 +186,7 @@ public class LampSocketRender extends SixNodeElementRender{
 			throws IOException {
 		// TODO Auto-generated method stub
 		super.serverPacketUnserialize(stream);
-		light = stream.readByte();
+		setLight(stream.readByte());
 	}
 	
 	public boolean isConnectedToLampSupply;

@@ -58,7 +58,7 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 	//	if (Math.signum((alpha % 45) - 40f) != Math.signum((alphaN_1 % 45) - 40f) && soundPlaying == false) {
 		if ((int)(alpha/45) != (int)(alphaN_1/45) && soundPlaying == false) {
 			Coordonate coord = coordonate();
-			play(new SoundCommand(descriptor.soundName, tileEntity)
+			play(new SoundCommand(descriptor.soundName)
 			.setVolume(descriptor.nominalVolume * (0.007f + 0.2f * (float) powerFactorFilter.get() * (float) powerFactorFilter.get()),
 						1.1f));
 			//SoundClient.playFromBlock(tileEntity.worldObj,coord.x, coord.y, coord.z, descriptor.soundName,1,1,5,15);

@@ -62,6 +62,7 @@ public abstract class SixNodeElement implements GhostObserver {
 
 	public void play(SoundCommand s) {
 		s.addUuid(getUuid());
+		s.set(sixNode.coordonate);
 		s.play();
 	}
 

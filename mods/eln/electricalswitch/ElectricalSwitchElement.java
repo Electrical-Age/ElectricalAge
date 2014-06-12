@@ -175,7 +175,7 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
     	else {
 			setSwitchState(! switchState);
 			//playSoundEffect("random.click", 0.3F, 0.6F);
-			SoundServer.play(new SoundCommand("random.click",this.getCoordonate()).setVolume(0.3F, 0.6f).smallRange());
+			play(new SoundCommand("random.click").setVolume(0.3F, 0.6f).smallRange());
 			return true;
 		}
 		//front = LRDU.fromInt((front.toInt()+1)&3);

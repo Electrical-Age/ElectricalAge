@@ -471,6 +471,7 @@ public abstract class TransparentNodeElement implements  GhostObserver{
 	}
 	public void play(SoundCommand s){
 		s.addUuid(getUuid());
+		s.set(node.coordonate);
 		s.play();
 	}
 	

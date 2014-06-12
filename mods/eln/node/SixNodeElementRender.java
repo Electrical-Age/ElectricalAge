@@ -169,6 +169,7 @@ public abstract class SixNodeElementRender {
 	
 	public void play(SoundCommand s) {
 		s.addUuid(getUuid());
+		s.set(tileEntity);
 		s.play();
 	}
 
