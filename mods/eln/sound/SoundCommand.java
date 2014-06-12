@@ -104,8 +104,9 @@ public class SoundCommand {
 	}
 
 	
-	public void addUuid(int uuid){
+	public SoundCommand addUuid(int uuid){
 		this.uuid.add(uuid);
+		return this;
 	}
 	public static SoundCommand fromStream(DataInputStream stream, World w) throws IOException {
 		SoundCommand p = new SoundCommand();

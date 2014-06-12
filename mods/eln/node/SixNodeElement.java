@@ -197,22 +197,26 @@ public abstract class SixNodeElement implements GhostObserver {
 		destroy(null);
 	}
 
+	public void killUuid(int uuid){
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
+		DataOutputStream stream = new DataOutputStream(bos);
+
+		try {
+			stream.writeByte(Eln.packetDestroyUuid);
+			stream.writeInt(uuid);
+
+			sendPacketToAllClient(bos);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+
+		}
+	}
+	
 	public void destroy(EntityPlayerMP entityPlayer)
 	{
 		if (useUuid()) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-			DataOutputStream stream = new DataOutputStream(bos);
-
-			try {
-				stream.writeByte(Eln.packetDestroyUuid);
-				stream.writeInt(uuid);
-
-				sendPacketToAllClient(bos);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-
-			}
+			killUuid(uuid);
 		}
 
 		if (sixNodeElementDescriptor.hasGhostGroup()) {
