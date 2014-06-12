@@ -1,9 +1,10 @@
-package mods.eln.electricaltimout;
+package mods.eln.electricaltimeout;
 
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sim.IProcess;
+import mods.eln.sound.SoundCommand;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -14,6 +15,7 @@ public class ElectricalTimeoutProcess implements IProcess, INBTTReady {
 		this.element = element;
 	}
 	
+	int tickCounter = 0;
 	@Override
 	public void process(double time) {
 		boolean oldInputState = inputState;
@@ -32,6 +34,9 @@ public class ElectricalTimeoutProcess implements IProcess, INBTTReady {
 			element.outputGateProcess.state(true);
 			if(inputState == false) element.timeOutCounter -= time;
 			if(element.timeOutCounter < 0.0) element.timeOutCounter = 0.0;
+			
+			if (inputState == false && ++tickCounter % 200 == 0) 
+				element.play( new SoundCommand(element.descriptor.tickSound).setVolume(element.descriptor.tickVolume, 1f));
 		}
 		else {
 			element.outputGateProcess.state(false);

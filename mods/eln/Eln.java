@@ -52,7 +52,7 @@ import mods.eln.electricalsource.ElectricalSourceDescriptor;
 import mods.eln.electricalsource.ElectricalSourceElement;
 import mods.eln.electricalsource.ElectricalSourceRender;
 import mods.eln.electricalswitch.ElectricalSwitchDescriptor;
-import mods.eln.electricaltimout.ElectricalTimeoutDescriptor;
+import mods.eln.electricaltimeout.ElectricalTimeoutDescriptor;
 import mods.eln.electricalvumeter.ElectricalVuMeterDescriptor;
 import mods.eln.electricalwatch.ElectricalWatchDescriptor;
 import mods.eln.electricalweathersensor.ElectricalWeatherSensorDescriptor;
@@ -1918,6 +1918,7 @@ public class Eln {
 
 			desc = new ElectricalTimeoutDescriptor(name,
 					obj.getObj("electricaltimer"));
+			desc.setTickSound("eln:timer", 0.1f);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -3751,7 +3752,7 @@ public class Eln {
 					doorOpen, doorClose
 
 					);
-
+			desc.setChargeSound("eln:transporter", 0.5f);
 			GhostGroup g = new GhostGroup();
 			g.addRectangle(-2, 0, 0, 1, -1, -1);
 			g.addRectangle(-2, 0, 0, 1, 1, 1);

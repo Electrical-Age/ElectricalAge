@@ -1,4 +1,4 @@
-package mods.eln.electricaltimout;
+package mods.eln.electricaltimeout;
 
 import java.util.List;
 
@@ -69,6 +69,16 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 			UtilsClient.drawLight(led);
 			GL11.glColor3f(1f, 1f, 1f);
 		}
+	}
+	
+	String tickSound = null;
+	float tickVolume = 0f;
+	
+	public ElectricalTimeoutDescriptor setTickSound(String tickSound, float tickVolume)
+	{
+		this.tickSound = tickSound;
+		this.tickVolume = tickVolume;
+		return this;
 	}
 	
 	@Override
