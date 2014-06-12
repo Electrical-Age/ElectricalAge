@@ -5,7 +5,12 @@
    "water_turbine": {"category": "master","sounds": [{"name": "water_turbine","stream": false}]},
    "heat_turbine_200v": {"category": "master","sounds": [{"name": "heat_turbine_200v","stream": false}]},
    "heat_turbine_50v": {"category": "master","sounds": [{"name": "heat_turbine_50v","stream": false}]},
-
+   "autominer": {"category": "master","sounds": [{"name": "autominer","stream": false}]},
+   "compressor": {"category": "master","sounds": [{"name": "compressor","stream": false}]},
+   "macerator": {"category": "master","sounds": [{"name": "macerator","stream": false}]},
+   "plate_machine": {"category": "master","sounds": [{"name": "plate_machine","stream": false}]},
+   "timer": {"category": "master","sounds": [{"name": "timer","stream": false}]},
+   "transporter": {"category": "master","sounds": [{"name": "transporter","stream": false}]},
    "neon_lamp": {"category": "master","sounds": [{"name": "neon_lamp","stream": false}]}
 }
 

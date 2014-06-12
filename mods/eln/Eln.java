@@ -2355,6 +2355,8 @@ public class Eln {
 					plateMachineRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+			
+			desc.setEndSound("eln:plate_machine");
 		}
 
 		{
@@ -2372,6 +2374,7 @@ public class Eln {
 					plateMachineRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+			desc.setEndSound("eln:plate_machine");	
 		}
 	}
 
@@ -2410,6 +2413,8 @@ public class Eln {
 					compressorRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+			
+			desc.setRuningSound("eln:compressor",1.6);	
 		}
 
 		{
@@ -2427,6 +2432,7 @@ public class Eln {
 					compressorRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+			desc.setRuningSound("eln:compressor",1.6);	
 		}
 	}
 

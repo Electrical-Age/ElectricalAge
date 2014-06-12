@@ -37,6 +37,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalRegulator;
 import mods.eln.sim.ThermalResistor;
 import mods.eln.sim.VoltageWatchdogProcessForInventoryItemBlockDamageSingleLoad;
+import mods.eln.sound.SoundCommand;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -232,5 +233,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 	@Override
 	public void done(ElectricalStackMachineProcess who) {
 		needPublish();
+		if(descriptor.endSound != null)
+			play(new SoundCommand(descriptor.endSound));
 	}
 }

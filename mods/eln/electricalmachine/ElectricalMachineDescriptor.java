@@ -54,6 +54,17 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor {
 		thermal.setMaximalPower(maximalP);
 		this.recipe = recipe;
 	}
+	String runingSound = null,endSound = null;
+	double runingSoundLength;
+	public ElectricalMachineDescriptor setRuningSound(String runingSound,double length){
+		this.runingSound = runingSound;
+		this.runingSoundLength = length;
+		return this;
+	}
+	public ElectricalMachineDescriptor setEndSound(String endSound){
+		this.endSound = endSound;
+		return this;
+	}
 	
 	@Override
 	public void setParent(Item item, int damage) {
