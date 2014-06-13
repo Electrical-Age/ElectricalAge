@@ -131,7 +131,14 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor{
 		return 4;
 	}
 	
+	String chargeSound = null;
+	float chargeVolume = 0;
 	
+	public TeleporterDescriptor setChargeSound(String sound, float volume) {
+		chargeSound = sound;
+		chargeVolume = volume;
+		return this;
+	}
 	
 	
 	@Override

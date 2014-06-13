@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ibm.icu.util.RangeValueIterator.Element;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -28,6 +30,7 @@ import mods.eln.node.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sound.SoundCommand;
 
 public class TeleporterElement extends TransparentNodeElement implements ITeleporter{
 
@@ -292,7 +295,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 		int dx,dy,dz;
 		
 		int blinkCounter = 0;
-		
+		int soundCounter = 0;
 		String targetNameCopy = "";
 		@Override
 		public void process(double time) {
@@ -381,12 +384,18 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 					if(reservateRefreshed)
 						setState(StateReserved);
 					else
+					{
 						setState(StateCharge);
+						soundCounter = 0;
+					}
 				}
 				break;
 
 			case StateCharge:
 				{
+					if (soundCounter++ % 18 == 0)
+						play( new SoundCommand(descriptor.chargeSound).setVolume(descriptor.chargeVolume, 1f));
+					
 					if(targetNameCopy.equals(name)){
 						sendIdToAllClient(eventSameTarget);		
 						setState(StateOpen);

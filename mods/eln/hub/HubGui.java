@@ -8,7 +8,7 @@ import java.text.ParseException;
 
 import org.lwjgl.opengl.GL11;
 
-import mods.eln.electricaltimout.ElectricalTimeoutElement;
+import mods.eln.electricaltimeout.ElectricalTimeoutElement;
 import mods.eln.gui.GuiButtonEln;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;

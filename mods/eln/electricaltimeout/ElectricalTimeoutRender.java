@@ -1,4 +1,4 @@
-package mods.eln.electricaltimout;
+package mods.eln.electricaltimeout;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
