@@ -394,7 +394,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			case StateCharge:
 				{
 					if (soundCounter++ % 18 == 0)
-						play( new SoundCommand(descriptor.chargeSound).setVolume(descriptor.chargeVolume, 1f));
+						play( new SoundCommand(descriptor.chargeSound).mulVolume(descriptor.chargeVolume, 1f));
 					
 					if(targetNameCopy.equals(name)){
 						sendIdToAllClient(eventSameTarget);		
