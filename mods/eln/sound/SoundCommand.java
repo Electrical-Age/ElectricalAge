@@ -11,15 +11,7 @@ import net.minecraft.world.World;
 
 public class SoundCommand {
 
-	/*public SoundCommand(String track, TileEntity c) {
-		this.track = track;
-		world = c.getWorldObj();
-		x = c.xCoord + 0.5;
-		y = c.yCoord + 0.5;
-		z = c.zCoord + 0.5;
-		mediumRange();
-	}
-*/
+
 	public SoundCommand() {
 
 	}
@@ -28,26 +20,48 @@ public class SoundCommand {
 		this.track = track;
 		mediumRange();
 	}
-	
-/*	public SoundCommand(String track, Coordonate c) {
+	public SoundCommand(String track,double trackLength) {
 		this.track = track;
-		set(c);
+		this.trackLength = trackLength;
 		mediumRange();
 	}
-
-	public SoundCommand(String track, Coordonate c, Range range) {
-		this.track = track;
-		set(c);
-		applyRange(range);
-	}*/
+	
+	public SoundCommand(SoundTrack s) {
+		track = s.track;
+		volume = s.volume;
+		pitch = s.pitch;
+		rangeNominal = s.rangeNominal;
+		rangeMax = s.rangeMax;
+		blockFactor = s.blockFactor;
+		uuid = (ArrayList<Integer>) s.uuid.clone();
+	}
 
 	World world;
 	double x, y, z;
 	String track;
+	double trackLength;
 	float volume = 1, pitch = 1;
 	float rangeNominal, rangeMax, blockFactor;
 	ArrayList<Integer> uuid = new ArrayList<Integer>();
 
+	public SoundCommand copy(){
+		SoundCommand c = new SoundCommand();
+		c.world = world;
+		c.x = x;
+		c.y = y;
+		c.z = z;
+		c.track = track;
+		c.trackLength = trackLength;
+		c.volume = volume;
+		c.pitch = pitch;
+		c.rangeNominal = rangeNominal;
+		c.rangeMax = rangeMax;
+		c.blockFactor = blockFactor;
+		c.uuid = (ArrayList<Integer>) uuid.clone();
+		return c;
+	}
+
+	
 	public void play() {
 		if (world.isRemote)
 			SoundClient.play(this);
@@ -111,9 +125,9 @@ public class SoundCommand {
 		return this;
 	}
 
-	public SoundCommand setVolume(float volume, float pitch) {
-		this.volume = volume;
-		this.pitch = pitch;
+	public SoundCommand mulVolume(float volume, float pitch) {
+		this.volume *= volume;
+		this.pitch *= pitch;
 		return this;
 	}
 
@@ -157,5 +171,10 @@ public class SoundCommand {
 		for(Integer i : uuid){
 			stream.writeInt(i);
 		}
+	}
+
+	public SoundCommand mulVolume(double volume) {
+		this.volume *= volume;
+		return this;
 	}
 }

@@ -32,7 +32,7 @@ public class ElectricalAlarmSlowProcess implements IProcess {
 				if(soundTimeTimeout == 0) {
 					float speed = 1f;
 					Coordonate coord = element.sixNode.coordonate;
-					element.play(new SoundCommand(element.descriptor.soundName).setVolume(1F, 1.0F).longRange().addUuid(soundUuid));
+					element.play(new SoundCommand(element.descriptor.soundName).mulVolume(1F, 1.0F).longRange().addUuid(soundUuid));
 					soundTimeTimeout = element.descriptor.soundTime;
 				}
 			}

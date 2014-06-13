@@ -147,7 +147,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 		}
 		else if(!Utils.playerHasMeter(entityPlayer) && descriptor.onOffOnly) {
 			outputGateProcess.state(!outputGateProcess.getOutputOnOff());
-			play(new SoundCommand("random.click").setVolume(0.3F, 0.6F).smallRange());
+			play(new SoundCommand("random.click").mulVolume(0.3F, 0.6F).smallRange());
 			needPublish();
 			return true;
 		}

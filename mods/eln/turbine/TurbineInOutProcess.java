@@ -7,19 +7,32 @@ import mods.eln.sim.IProcess;
 import mods.eln.sim.PhysicalConstant;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sound.SoundCommand;
+import mods.eln.sound.SoundLooper;
 import mods.eln.sound.SoundServer;
+import mods.eln.sound.SoundTrack;
 
 
 public class TurbineInOutProcess implements IProcess{
 	TurbineElement turbine;
-	double soundTimeOut = 2.0;
-	double timeCounter = 0, soundTimerCounter = Math.random()*soundTimeOut, energyCounterGlobal = 0;
+	//double timeCounter = 0, soundTimerCounter = Math.random()*soundTimeOut, energyCounterGlobal = 0;
 	static int staticId = 0;
 	int id;
-	public TurbineInOutProcess(TurbineElement turbine) {
-		this.turbine = turbine;
-		id = staticId++;
+	public TurbineInOutProcess(TurbineElement t) {
+		this.turbine = t;
+		id = staticId++;	
+		soundLooper = new SoundLooper(t) {						
+			@Override
+			public SoundCommand mustStart() {
+				double deltaT = turbine.warmLoad.Tc - turbine.coolLoad.Tc;
+				if(deltaT < 40) return null;
+				float factor = (float)(deltaT / turbine.descriptor.nominalDeltaT);
+				SoundCommand track = turbine.descriptor.sound.copy().mulVolume(1 * (0.1f * factor), 0.9f + 0.2f * factor);
+				return track;
+			}
+		};
 	}
+	
+	SoundLooper soundLooper;
 	
 	@Override
 	public void process(double time) {
@@ -44,14 +57,14 @@ public class TurbineInOutProcess implements IProcess{
 		if(eff < 0.05) eff = 0.05;
 		//eff = 0.4;
 		double E = eps.getEnergyCounter();
-		energyCounterGlobal += E;
+		//energyCounterGlobal += E;
 		double Pout = E/time;
 		double Pin = descriptor.PoutToPin.getValue(Pout) / eff;
 		turbine.warmLoad.movePowerTo(-Pin);
 		turbine.coolLoad.movePowerTo(Pin * (1 - eff));
 		//ThermalLoad.movePower(Pin, turbine.warmLoad, turbine.coolLoad);		
 		eps.clearEnergyCounter();
-		timeCounter+=time;
+		/*timeCounter+=time;
 		if(timeCounter >= 1.0){
 			timeCounter -= 1.0;
 			//Utils.println("Turbine " + id + " : " + Utils.plotPower("Pin : ", Pin) + Utils.plotPower("Pout : ", Pout) + Utils.plotEnergy("Pavg", energyCounterGlobal));
@@ -63,8 +76,10 @@ public class TurbineInOutProcess implements IProcess{
 			float factor = (float)(deltaT / turbine.descriptor.nominalDeltaT);
 			turbine.play(new SoundCommand(descriptor.soundName).setVolume(descriptor.nominalVolume * (0.1f * factor), 0.9f + 0.2f * factor).mediumRange());
 			soundTimerCounter = 0;
-		}
+		}*/
 		
+		
+		soundLooper.process(time);
 		
 	}
 

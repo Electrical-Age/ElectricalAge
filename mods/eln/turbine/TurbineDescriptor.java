@@ -24,6 +24,8 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.PhysicalConstant;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.TurbineThermalProcess;
+import mods.eln.sound.SoundCommand;
+import mods.eln.sound.SoundTrack;
 import mods.eln.wiki.Data;
 
 public class TurbineDescriptor extends TransparentNodeDescriptor{
@@ -38,8 +40,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 			double electricalRs,double electricalRp,double electricalC,
 			double thermalC,double DeltaTForInput,
 			double powerOutPerDeltaU,
-			String soundName,
-			float nominalVolume
+			SoundCommand sound
 			) 
 	{
 		super(name, TurbineElement.class, TurbineRender.class);
@@ -58,8 +59,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 		this.powerOutPerDeltaU = powerOutPerDeltaU;
 		this.eRender = eRender;
 		this.maxU = maxU;
-		this.soundName = soundName;
-		this.nominalVolume = nominalVolume;
+		this.sound = sound;
 		obj = Eln.obj.getObj(modelName);
 		if(obj != null)
 		{
@@ -77,8 +77,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 	public double thermalC,thermalRs,thermalRp;
 	public double maxU;
 	double electricalRs,electricalRp,electricalC;
-	public String soundName;
-	public float nominalVolume;
+	public SoundCommand sound;
 	/*
 	public void applyTo(TurbineThermalProcess turbine)
 	{

@@ -33,7 +33,7 @@ public class ElectricalMachineSlowProcess implements IProcess {
 			if(playSoundCounter <= 0){
 				float pitch = (float)normalisedP;
 				playSoundCounter = element.descriptor.runingSoundLength/pitch;
-				element.play(new SoundCommand(element.descriptor.runingSound).setVolume((float)normalisedP, pitch));
+				element.play(new SoundCommand(element.descriptor.runingSound).mulVolume((float)normalisedP, pitch));
 			}
 		}
 		

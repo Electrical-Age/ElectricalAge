@@ -169,6 +169,7 @@ import mods.eln.solarpannel.SolarPannelDescriptor;
 import mods.eln.solver.ConstSymbole;
 import mods.eln.solver.Equation;
 import mods.eln.solver.ISymbole;
+import mods.eln.sound.SoundCommand;
 import mods.eln.teleporter.TeleporterDescriptor;
 import mods.eln.teleporter.TeleporterElement;
 import mods.eln.thermalcable.ThermalCableDescriptor;
@@ -2161,7 +2162,7 @@ public class Eln {
 					25.0, nominalDeltaT / 40, // double thermalC,double
 												// DeltaTForInput
 					nominalP / 2,
-					"eln:heat_turbine_50v", 1.5f);
+					new SoundCommand("eln:heat_turbine_50v",2).mulVolume(1.5));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -2192,7 +2193,7 @@ public class Eln {
 					25.0, nominalDeltaT / 40, // double thermalC,double
 												// DeltaTForInput
 					nominalP / 2,
-					"eln:heat_turbine_200v", 1f);
+					new SoundCommand("eln:heat_turbine_200v",2));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 

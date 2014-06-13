@@ -32,6 +32,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalConnection;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sound.IPlayer;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLiving;
@@ -45,7 +46,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 
-public abstract class TransparentNodeElement implements  GhostObserver{
+public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
 
 	public ArrayList<IProcess> slowProcessList  = new ArrayList<IProcess>(4);
 
@@ -229,23 +230,25 @@ public abstract class TransparentNodeElement implements  GhostObserver{
 		return true;
 	}
 	*/
+	
+	public void stop(int uuid){
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
+		DataOutputStream stream = new DataOutputStream(bos);
+
+		try {
+			stream.writeByte(Eln.packetDestroyUuid);
+			stream.writeInt(uuid);
+
+			sendPacketToAllClient(bos);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+
+		}
+	}
 	public void onBreakElement()
 	{
-		if (useUuid()) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-			DataOutputStream stream = new DataOutputStream(bos);
-
-			try {
-				stream.writeByte(Eln.packetDestroyUuid);
-				stream.writeInt(uuid);
-
-				sendPacketToAllClient(bos);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-
-			}
-		}
+		if (useUuid()) stop(uuid);
 		
 		if(transparentNodeDescriptor.hasGhostGroup()){
 			Eln.ghostManager.removeObserver(node.coordonate);
