@@ -36,7 +36,7 @@ public class ElectricalTimeoutProcess implements IProcess, INBTTReady {
 			if(element.timeOutCounter < 0.0) element.timeOutCounter = 0.0;
 			
 			if (inputState == false && ++tickCounter % 200 == 0) 
-				element.play( new SoundCommand(element.descriptor.tickSound).setVolume(element.descriptor.tickVolume, 1f));
+				element.play( new SoundCommand(element.descriptor.tickSound).mulVolume(element.descriptor.tickVolume, 1f));
 		}
 		else {
 			element.outputGateProcess.state(false);
