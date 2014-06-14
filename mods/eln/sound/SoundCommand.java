@@ -117,7 +117,13 @@ public class SoundCommand {
 		blockFactor = 3;
 		return this;
 	}
-
+	public SoundCommand verySmallRange() {
+		rangeNominal = 2;
+		rangeMax = 4;
+		blockFactor = 10;
+		return this;
+	}
+	
 	public SoundCommand longRange() {
 		rangeNominal = 8;
 		rangeMax = 48;
@@ -177,4 +183,6 @@ public class SoundCommand {
 		this.volume *= volume;
 		return this;
 	}
+
+
 }

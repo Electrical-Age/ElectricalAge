@@ -1,5 +1,9 @@
 package mods.eln.node;
 
+import java.lang.reflect.Field;
+import java.util.IdentityHashMap;
+import java.util.Random;
+
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
@@ -7,17 +11,26 @@ import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
+import mods.eln.misc.ItemRender;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.common.ForgeHooks;
 
 public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor implements IItemRenderer{
 	public Class ElementClass,RenderClass;
@@ -51,8 +64,15 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		//RenderBlocks b = (RenderBlocks)data[0];
-
-
+		//MinecraftForgeClient.getItemRenderer(item, type)
+		 IItemRenderer r = MinecraftForgeClient.getItemRenderer(new ItemStack(Items.bread), IItemRenderer.ItemRenderType.ENTITY);
+		 int i = 0;
+		
+		
+		//if(type == ItemRenderType.ENTITY)
+			//ForgeHooksClient.renderEntityItem((EntityItem)data[1], item, 0, 0, new Random(), Minecraft.getMinecraft().getTextureManager(),(RenderBlocks) data[0], 1);
+		//new ItemRenderer(Minecraft.getMinecraft()).renderItem(Minecraft.getMinecraft().thePlayer,item,1,ItemRenderType.ENTITY);
+		
 		UtilsClient.drawIcon(type,getIcon().getIconName().replace("eln:", "textures/blocks/")+".png");
 
 	//	Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation("eln", getIcon().getIconName().replace("eln:", "textures/blocks/")+".png"));

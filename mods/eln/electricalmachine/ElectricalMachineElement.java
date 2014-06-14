@@ -234,6 +234,6 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 	public void done(ElectricalStackMachineProcess who) {
 		needPublish();
 		if(descriptor.endSound != null)
-			play(new SoundCommand(descriptor.endSound));
+			play(descriptor.endSound);
 	}
 }

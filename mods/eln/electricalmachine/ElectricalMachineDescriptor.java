@@ -16,6 +16,7 @@ import mods.eln.sim.ElectricalResistor;
 import mods.eln.sim.ElectricalStackMachineProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalLoadInitializer;
+import mods.eln.sound.SoundCommand;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -54,14 +55,12 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor {
 		thermal.setMaximalPower(maximalP);
 		this.recipe = recipe;
 	}
-	String runingSound = null,endSound = null;
-	double runingSoundLength;
-	public ElectricalMachineDescriptor setRuningSound(String runingSound,double length){
+	SoundCommand runingSound,endSound;
+	public ElectricalMachineDescriptor setRuningSound(SoundCommand runingSound){
 		this.runingSound = runingSound;
-		this.runingSoundLength = length;
 		return this;
 	}
-	public ElectricalMachineDescriptor setEndSound(String endSound){
+	public ElectricalMachineDescriptor setEndSound(SoundCommand endSound){
 		this.endSound = endSound;
 		return this;
 	}

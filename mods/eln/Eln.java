@@ -1919,7 +1919,7 @@ public class Eln {
 
 			desc = new ElectricalTimeoutDescriptor(name,
 					obj.getObj("electricaltimer"));
-			desc.setTickSound("eln:timer", 0.1f);
+			desc.setTickSound("eln:timer", 0.01f);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -2163,7 +2163,7 @@ public class Eln {
 					25.0, nominalDeltaT / 40, // double thermalC,double
 												// DeltaTForInput
 					nominalP / 2,
-					new SoundCommand("eln:heat_turbine_50v",2).mulVolume(1.5));
+					new SoundCommand("eln:heat_turbine_50v",2).mulVolume(1.5).mulVolume(2));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -2194,7 +2194,7 @@ public class Eln {
 					25.0, nominalDeltaT / 40, // double thermalC,double
 												// DeltaTForInput
 					nominalP / 2,
-					new SoundCommand("eln:heat_turbine_200v",2));
+					new SoundCommand("eln:heat_turbine_200v",2).mulVolume(2));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -2292,6 +2292,7 @@ public class Eln {
 					maceratorRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+			desc.setRuningSound(new SoundCommand("eln:macerator",1.5).mulVolume(0.3));	
 		}
 
 		{
@@ -2307,6 +2308,7 @@ public class Eln {
 					maceratorRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+			desc.setRuningSound(new SoundCommand("eln:macerator",1.5).mulVolume(0.3));	
 		}
 	}
 
@@ -2358,7 +2360,7 @@ public class Eln {
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 			
-			desc.setEndSound("eln:plate_machine");
+			desc.setEndSound(new SoundCommand("eln:plate_machine"));
 		}
 
 		{
@@ -2376,7 +2378,7 @@ public class Eln {
 					plateMachineRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-			desc.setEndSound("eln:plate_machine");	
+			desc.setEndSound(new SoundCommand("eln:plate_machine"));	
 		}
 	}
 
@@ -2416,7 +2418,7 @@ public class Eln {
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 			
-			desc.setRuningSound("eln:compressor",1.6);	
+			desc.setRuningSound(new SoundCommand("eln:compressor",1.6).mulVolume(0.3));	
 		}
 
 		{
@@ -2434,7 +2436,7 @@ public class Eln {
 					compressorRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-			desc.setRuningSound("eln:compressor",1.6);	
+			desc.setRuningSound(new SoundCommand("eln:compressor",1.6).mulVolume(0.3));	
 		}
 	}
 

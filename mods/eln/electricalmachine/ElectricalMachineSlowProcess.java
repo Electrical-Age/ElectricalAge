@@ -2,19 +2,35 @@ package mods.eln.electricalmachine;
 
 import mods.eln.sim.IProcess;
 import mods.eln.sound.SoundCommand;
+import mods.eln.sound.SoundLooper;
 
 public class ElectricalMachineSlowProcess implements IProcess {
 	private ElectricalMachineElement element;
 	
-	public ElectricalMachineSlowProcess(ElectricalMachineElement element) {
-		this.element = element;
+	public ElectricalMachineSlowProcess(ElectricalMachineElement e) {
+		this.element = e;
+		
+		sound = new SoundLooper(e) {
+			
+			@Override
+			public SoundCommand mustStart() {
+				double P = element.electricalResistor.getP();
+				double normalisedP = Math.pow(P/element.descriptor.nominalP,0.5);
+				if(element.descriptor.runingSound == null || normalisedP < 0.3) return null;
+				
+				float pitch = (float)normalisedP;
+				
+				return element.descriptor.runingSound.copy().mulVolume((float)normalisedP, pitch); 
+			}
+		};
 	}
 	
 	double lastPublishAt = 0, lastUpdate = 0;
 	boolean boot = true;
+
 	
-	double playSoundCounter;
 	
+	SoundLooper sound;
 	@Override
 	public void process(double time) {
 		double P = element.electricalResistor.getP();
@@ -27,18 +43,7 @@ public class ElectricalMachineSlowProcess implements IProcess {
 			}
 		}
 		
-		double normalisedP = Math.pow(P/element.descriptor.nominalP,0.5);
-		
-		if(element.descriptor.runingSound != null && normalisedP > 0.3){
-			if(playSoundCounter <= 0){
-				float pitch = (float)normalisedP;
-				playSoundCounter = element.descriptor.runingSoundLength/pitch;
-				element.play(new SoundCommand(element.descriptor.runingSound).mulVolume((float)normalisedP, pitch));
-			}
-		}
-		
-		if(playSoundCounter > 0)
-			playSoundCounter -= time;
+		sound.process(time);
 			
 		boot = false;
 	}
