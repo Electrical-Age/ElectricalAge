@@ -38,6 +38,9 @@ public class LampSupplyRender extends SixNodeElementRender{
 	public void draw() {	
 		super.draw();
 		
+		
+		
+		
 		if(Utils.isPlayerAround(tileEntity.getWorldObj(),coord.getAxisAlignedBB(1)) == false)
 			interpolator.setTarget(0f);
 		else
@@ -46,6 +49,8 @@ public class LampSupplyRender extends SixNodeElementRender{
 		
 		interpolator.stepGraphic();
 		
+		
+		drawPowerPin(new float[]{4,4,5,5});
 		
 		LRDU.Down.glRotateOnX();
 		descriptor.draw(interpolator.get());

@@ -117,6 +117,20 @@ public class Obj3D {
 		ArrayList<Vertex> vertex;
 		ArrayList<Uv> uv;
 
+		public float xMin = 0, yMin = 0, zMin = 0;
+		public float xMax = 0, yMax = 0, zMax = 0;
+		
+		void addVertex(Vertex v){
+			vertex.add(v);
+			xMin = Math.min(xMin, v.x);
+			yMin = Math.min(yMin, v.y);
+			zMin = Math.min(zMin, v.z);
+			xMax = Math.max(xMax, v.x);
+			yMax = Math.max(yMax, v.y);
+			zMax = Math.max(zMax, v.z);
+		}
+		
+		
 		ArrayList<FaceGroupe> faceGroupe = new ArrayList<FaceGroupe>();
 
 		Hashtable<String, Float> nameToFloatHash = new Hashtable<String, Float>();
@@ -334,7 +348,7 @@ public class Obj3D {
 					else if (words[0].equals("v"))
 					{
 						Vertex v;
-						part.vertex.add(v = new Vertex(Float.parseFloat(words[1]),
+						part.addVertex(v = new Vertex(Float.parseFloat(words[1]),
 								Float.parseFloat(words[2]),
 								Float.parseFloat(words[3])
 								));

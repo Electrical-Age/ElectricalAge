@@ -48,6 +48,9 @@ public class ElectricalGateSourceRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
+		drawSignalPin(front,new float[]{3,3,3,3});
+
+		
 		interpolator.setTarget((float)(voltageSyncValue / Eln.SVU));
 		interpolator.stepGraphic();
 		LRDU.Down.glRotateOnX();

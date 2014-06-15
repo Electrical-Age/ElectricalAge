@@ -37,12 +37,14 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor {
 				objType = ObjType.Rot;
 				vumeter = obj.getPart("Vumeter");
 				pointer = obj.getPart("Pointer");
+				pinDistance = Utils.getSixNodePinDistance(vumeter);
 			}
 			if(obj.getString("type").equals("LedOnOff")) {
 				objType = ObjType.LedOnOff;
 				main = obj.getPart("main");
 				halo = obj.getPart("halo");
 				led = obj.getPart("Led");
+				pinDistance = Utils.getSixNodePinDistance(main);
 			}
 		}
 	}
@@ -61,6 +63,8 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor {
 	Obj3DPart vumeter, pointer, led, halo, main;
 
 	public boolean onOffOnly;
+
+	public float[] pinDistance;
 	
 	void draw(float factor, float distance, TileEntity entity) {
 		if(factor < 0.0) factor = 0.0f;

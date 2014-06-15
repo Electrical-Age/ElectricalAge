@@ -414,6 +414,71 @@ public class UtilsClient {
 		GL11.glPopMatrix();
 
 	}
+	
+	static public void drawConnectionPinSixNode(float d,float w,float h){
+		
+		d+=0.1f;
+		d*=0.0625f;
+		w*=0.0625f;
+		h*=0.0625f;
+		float w2 = w*0.5f;
+		disableTexture();
+		GL11.glBegin(GL11.GL_QUADS);
+			GL11.glVertex3f(-w2,d , 0);
+			GL11.glVertex3f(w2, d, 0);
+			GL11.glVertex3f(w2, d, h);
+			GL11.glVertex3f(-w2, d, h);
+		GL11.glEnd();
+		enableTexture();
+			
+	}
+	
+	static public void drawConnectionPinSixNode(LRDU front,float[] dList,float w,float h){
+		//front.glRotateOnX();
+		//drawConnectionPinSixNode(d[front.toInt()], w, h);
+		float d = dList[front.toInt()];
+		d+=0.1f;
+		d*=0.0625f;
+		w*=0.0625f;
+		h*=0.0625f;
+		float w2 = w*0.5f;
+		disableTexture();
+		GL11.glBegin(GL11.GL_QUADS);
+
+			switch (front) {
+			case Left:
+				GL11.glVertex3f(0, -w2, -d);				
+				GL11.glVertex3f(0, w2, -d);
+				GL11.glVertex3f(h, w2, -d);
+				GL11.glVertex3f(h, -w2, -d);				
+				break;
+			case Right:
+				GL11.glVertex3f(h, -w2, d);				
+				GL11.glVertex3f(h, w2, d);
+				GL11.glVertex3f(0, w2, d);
+				GL11.glVertex3f(0, -w2, d);						
+				break;
+			case Down:
+				GL11.glVertex3f(h, -d, -w2);				
+				GL11.glVertex3f(h, -d, w2);
+				GL11.glVertex3f(0, -d, w2);
+				GL11.glVertex3f(0, -d, -w2);
+				break;
+			case Up:
+				GL11.glVertex3f(0, d, -w2);
+				GL11.glVertex3f(0, d, w2);
+				GL11.glVertex3f(h, d, w2);
+				GL11.glVertex3f(h, d, -w2);	
+				break;
+
+			default:
+				break;
+			}
+
+		GL11.glEnd();
+		enableTexture();
+					
+	}
 
 	protected static RenderItem itemRendererr;
 

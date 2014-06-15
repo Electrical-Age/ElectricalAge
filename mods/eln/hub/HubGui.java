@@ -112,7 +112,10 @@ public class HubGui extends GuiContainerEln {
 				drawConnection(idx, 0xFF000000);
 			}
 		}
-
+		
+		int r = 5;
+		
+		helper.drawRect(h0-r, v7-r, h0+r, v7+r, 0xFF000000);
 	}
 
 	void drawConnection(int id, int color) {

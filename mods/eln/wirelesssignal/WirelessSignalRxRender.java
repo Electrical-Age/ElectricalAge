@@ -41,6 +41,8 @@ public class WirelessSignalRxRender extends SixNodeElementRender{
 	public void draw() {
 		// TODO Auto-generated method stub
 		super.draw();
+		
+		drawSignalPin(new float[]{2,2,2,2});
 		front.glRotateOnX();
 		descriptor.draw(connection);
 	}

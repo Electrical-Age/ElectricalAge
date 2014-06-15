@@ -38,6 +38,7 @@ public class ElectricalVuMeterRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
+		drawSignalPin(front,descriptor.pinDistance);
 		ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
 		EntityClientPlayerMP player = UtilsClient.getClientPlayer();
 		GL11.glPushMatrix();

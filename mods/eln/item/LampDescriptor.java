@@ -113,9 +113,12 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add("Socket : " + socket);
-		list.add("Techno : " + type);
-		list.add(Utils.plotTime("Life : ",getLifeInTag(itemStack)*nominalLife));
+		//list.add("Socket : " + socket);
+		list.add("Techn  : " + type);
+		list.add("Light   : " + (int)(nominalLight*15) + " blocks");
+		list.add("Power : " + (int)nominalP + " W");
+		//list.add(Utils.plotOhm("Resistance", this.getR()));
+		list.add(Utils.plotTime("Life    : ",getLifeInTag(itemStack)*nominalLife));
 		
 	}
 }

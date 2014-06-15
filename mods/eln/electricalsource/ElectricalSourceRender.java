@@ -37,6 +37,7 @@ public class ElectricalSourceRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
+
 		descriptor.draw();
 	}
 

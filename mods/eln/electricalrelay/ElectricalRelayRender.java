@@ -48,7 +48,7 @@ public class ElectricalRelayRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
-		
+		drawSignalPin(front,new float[]{2.5f,2.5f,2.5f,2.5f});
 		front.glRotateOnX();
 		
 		interpolator.stepGraphic();

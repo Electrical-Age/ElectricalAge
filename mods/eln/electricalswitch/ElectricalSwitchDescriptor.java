@@ -75,6 +75,8 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 		double I = maximalPower / nominalVoltage;
 		thermal.setMaximalPower(I * I * electricalRs);
 		this.signalSwitch = signalSwitch;
+		
+		pinDistance = Utils.getSixNodePinDistance(main);
 	}
 	
 	public float speed = 1f;
@@ -101,6 +103,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 	
 	double nominalVoltage, nominalPower, nominalDropFactor;
 	double maximalVoltage, maximalPower;
+	public float[] pinDistance;
 	
 	public void applyTo(ElectricalLoad load) {
 		load.setRs(electricalRs);

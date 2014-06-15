@@ -61,6 +61,25 @@ public abstract class SixNodeElementRender {
 		needRedraw = true;
 	}
 
+	public void drawPowerPin(float d[]){
+		drawPowerPin(front, d);
+	}
+	public void drawPowerPin(LRDU front,float d[]){
+		if(UtilsClient.distanceFromClientPlayer(tileEntity) > 20) return;
+		GL11.glColor3f(0, 0, 0);
+		UtilsClient.drawConnectionPinSixNode(front, d, 1.8f, 0.9f);
+		GL11.glColor3f(1, 1, 1);
+	}
+	public void drawSignalPin(float d[]){
+		drawSignalPin(front, d);
+	}
+	public void drawSignalPin(LRDU front,float d[]){
+		if(UtilsClient.distanceFromClientPlayer(tileEntity) > 20) return;
+		GL11.glColor3f(0, 0, 0);
+		UtilsClient.drawConnectionPinSixNode(front, d, 0.9f, 0.9f);
+		GL11.glColor3f(1, 1, 1);
+	}
+		
 	boolean needRedraw;
 	public void draw()
 	{

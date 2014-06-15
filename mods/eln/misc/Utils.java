@@ -21,6 +21,7 @@ import mods.eln.client.ClientProxy;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.ghost.GhostBlock;
+import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.ITileEntitySpawnClient;
 import mods.eln.sim.PhysicalConstant;
 import net.minecraft.block.Block;
@@ -1434,6 +1435,15 @@ public class Utils {
 	public static int getUuid() {
 		if(uuid < 1) uuid = 1;
 		return uuid++;
+	}
+/*
+	public static float[] getSixNodePinDistance(Obj3D obj) {
+		// TODO Auto-generated method stub
+		return new float[]{obj.zMin*16,obj.zMax*16,obj.yMin*16,obj.yMax*16};
+	}*/
+	public static float[] getSixNodePinDistance(Obj3DPart obj) {
+		// TODO Auto-generated method stub
+		return new float[]{Math.abs(obj.zMin*16),Math.abs(obj.zMax*16),Math.abs(obj.yMin*16),Math.abs(obj.yMax*16)};
 	}
 
 }
