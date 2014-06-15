@@ -21,6 +21,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalConnection;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sound.IPlayer;
 import mods.eln.sound.SoundCommand;
 import mods.eln.sound.SoundServer;
 import net.minecraft.entity.EntityLiving;
@@ -32,7 +33,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public abstract class SixNodeElement implements GhostObserver {
+public abstract class SixNodeElement implements GhostObserver,IPlayer {
 	//private static Class[] idToClass = new Class[256];
 	//private static Class[] idToRenderClass = new Class[256];
 
@@ -198,7 +199,8 @@ public abstract class SixNodeElement implements GhostObserver {
 		destroy(null);
 	}
 
-	public void killUuid(int uuid){
+	@Override
+	public void stop(int uuid){
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
 		DataOutputStream stream = new DataOutputStream(bos);
 
@@ -217,7 +219,7 @@ public abstract class SixNodeElement implements GhostObserver {
 	public void destroy(EntityPlayerMP entityPlayer)
 	{
 		if (useUuid()) {
-			killUuid(uuid);
+			stop(uuid);
 		}
 
 		if (sixNodeElementDescriptor.hasGhostGroup()) {

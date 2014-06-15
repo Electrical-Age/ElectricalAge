@@ -37,7 +37,7 @@ public class ElectricalAlarmSlowProcess implements IProcess {
 				}
 			}
 			if(oldWarm == true && warm == false){
-				element.killUuid(soundUuid);
+				element.stop(soundUuid);
 				soundTimeTimeout = 0;
 			}
 			

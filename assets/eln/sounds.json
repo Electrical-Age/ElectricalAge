@@ -11,6 +11,9 @@
    "plate_machine": {"category": "master","sounds": [{"name": "plate_machine","stream": false}]},
    "timer": {"category": "master","sounds": [{"name": "timer","stream": false}]},
    "transporter": {"category": "master","sounds": [{"name": "transporter","stream": false}]},
+   "NEON_LFNOISE": {"category": "master","sounds": [{"name": "NEON_LFNOISE","stream": false}]},
+   "WINDTURBINE_BIG_FF": {"category": "master","sounds": [{"name": "WINDTURBINE_BIG_FF","stream": false}]},
+   "WINDTURBINE_BIG_SF": {"category": "master","sounds": [{"name": "WINDTURBINE_BIG_SF","stream": false}]},
    "neon_lamp": {"category": "master","sounds": [{"name": "neon_lamp","stream": false}]}
 }
 

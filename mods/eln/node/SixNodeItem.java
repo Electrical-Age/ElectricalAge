@@ -416,7 +416,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 			return;
 		Minecraft.getMinecraft().mcProfiler.startSection("SixNodeItem");
 
-		if(shouldUseRenderHelper(type, item, null)){
+		if(shouldUseRenderHelperEln(type, item, null)){
 			switch (type)
 			{
 	

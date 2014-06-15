@@ -230,6 +230,7 @@ import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -267,7 +268,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mod(modid = "Eln", version = "BETA-1.3.1")
+@Mod(modid = "Eln", version = "BETA-1.4.0")
 //@Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0b")
 //@NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
@@ -275,7 +276,7 @@ public class Eln {
 	 * Eln() { instance = this; }
 	 */
 	public static String channelName = "miaouMod";
-
+	
 	public static final String[] objNames = new String[] {
 			"/model/condo200/condo200.obj",
 			"/model/WallClock/WallClock.obj",
@@ -3614,7 +3615,7 @@ public class Eln {
 					3,// int offY,
 					7, 2, 2,// int rayX,int rayY,int rayZ,
 					2, 0.07,// int blockMalusMinCount,double blockMalus
-					"eln:wind_turbine", 1f // Use the wind turbine sound and play at normal volume (1 => 100%)
+					"eln:WINDTURBINE_BIG_SF", 2f // Use the wind turbine sound and play at normal volume (1 => 100%)
 			);
 
 			GhostGroup g = new GhostGroup();

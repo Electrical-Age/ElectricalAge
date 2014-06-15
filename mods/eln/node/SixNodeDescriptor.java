@@ -53,6 +53,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 		if(type == ItemRenderType.INVENTORY)
 			return false;
 		return true;
+		//return false;
 	}
 
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item,
@@ -65,8 +66,8 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		//RenderBlocks b = (RenderBlocks)data[0];
 		//MinecraftForgeClient.getItemRenderer(item, type)
-		 IItemRenderer r = MinecraftForgeClient.getItemRenderer(new ItemStack(Items.bread), IItemRenderer.ItemRenderType.ENTITY);
-		 int i = 0;
+		// IItemRenderer r = MinecraftForgeClient.getItemRenderer(new ItemStack(Items.bread), IItemRenderer.ItemRenderType.ENTITY);
+		// int i = 0;
 		
 		
 		//if(type == ItemRenderType.ENTITY)

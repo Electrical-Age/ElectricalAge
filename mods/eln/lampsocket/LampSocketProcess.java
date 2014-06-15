@@ -12,6 +12,7 @@ import mods.eln.SaveConfig;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.LampDescriptor;
+import mods.eln.item.LampDescriptor.Type;
 import mods.eln.lampsocket.LightBlockEntity.LightBlockObserver;
 import mods.eln.lampsupply.LampSupplyElement;
 import mods.eln.misc.Coordonate;
@@ -22,6 +23,8 @@ import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalConnectionOneWay;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.Simulator;
+import mods.eln.sound.SoundCommand;
+import mods.eln.sound.SoundLooper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockFarmland;
@@ -33,8 +36,8 @@ import net.minecraft.util.Vec3;
 import net.minecraft.util.Vec3Pool;
 
 public class LampSocketProcess implements IProcess, INBTTReady/*
-															 * ,LightBlockObserver
-															 */{
+* ,LightBlockObserver
+*/{
 	double time = 0;
 	double deltaTBase = 0.2;
 	double deltaT = deltaTBase;
@@ -46,10 +49,44 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 
 	double stableProb = 0;
 
-	public LampSocketProcess(LampSocketElement lamp) {
-		this.lamp = lamp;
-		lbCoord = new Coordonate(lamp.sixNode.coordonate);
-		// LightBlockEntity.addObserver(this);
+	public LampSocketProcess(LampSocketElement l) {
+		this.lamp = l;
+		lbCoord = new Coordonate(l.sixNode.coordonate);
+		looper = new SoundLooper(l) {
+			double bzTimeout = 0;
+
+			SoundCommand bzzzz = new SoundCommand("eln:NEON_LFNOISE", 0.5).mulVolume(0.12).smallRange();
+
+			@Override
+			public SoundCommand mustStart() {
+				ItemStack lampStack = lamp.inventory.getStackInSlot(0);
+				LampDescriptor lampDescriptor = null;
+
+				if (lampStack != null) {
+					lampDescriptor = (LampDescriptor) ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) lampStack.getItem()).getDescriptor(lampStack);
+
+				}
+
+				if (lampDescriptor != null && lampDescriptor.type == Type.eco) {
+					if (bzTimeout != 0 && bzTimeout < 2) {
+						//Utils.println("bz");
+						//return bzzzz.copy();
+					}
+				}
+				//Utils.println("nbz");
+				return null;
+			}
+
+			@Override
+			public void process(double time) {
+				if (light <= 5)
+					bzTimeout = 0;
+				else
+					bzTimeout += time;
+
+				super.process(time);
+			}
+		};
 	}
 
 	ItemStack lampStackLast = null;
@@ -57,10 +94,12 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 
 	double vp[] = new double[3];
 
-	// double vv[] = new double[3];
+	SoundLooper looper;
 
 	@Override
 	public void process(double time) {
+		looper.process(time);
+		
 		ItemStack lampStack = lamp.inventory.getStackInSlot(0);
 
 		if (lampStack != null)
@@ -108,8 +147,6 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 							break;
 						}
 					}
-
-
 
 					if (exit == false) {
 
@@ -203,8 +240,8 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 
 			if (newLight < 0)
 				newLight = 0;
-			if (newLight > 15)
-				newLight = 15;
+			if (newLight > 14)
+				newLight = 14;
 
 			/*
 			 * double overFactor =
@@ -395,7 +432,7 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 	public boolean isOpaque(Coordonate coord)
 	{
 		Block block = coord.getBlock();
-		boolean isNotOpaque = block == Blocks.air || ! block.isOpaqueCube();
+		boolean isNotOpaque = block == Blocks.air || !block.isOpaqueCube();
 		if (block == Blocks.farmland)
 			isNotOpaque = false;
 		return !isNotOpaque;
