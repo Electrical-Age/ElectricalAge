@@ -237,6 +237,7 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
+import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -864,6 +865,12 @@ public class Eln {
 		// Stub Method
 
 	}
+
+	/*@EventHandler
+	public void clientStart(Client event) {
+		
+
+	}*/
 
 	@EventHandler
 	/* Remember to use the right event! */

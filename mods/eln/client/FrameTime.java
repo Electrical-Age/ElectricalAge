@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
+import java.util.Iterator;
 
 import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
 
@@ -15,6 +16,7 @@ import org.lwjgl.opengl.GL11;
 import mods.eln.Eln;
 import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Utils;
+import mods.eln.node.NodeBlockEntity;
 import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
@@ -28,6 +30,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerManager;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
@@ -84,7 +87,20 @@ public class FrameTime{
 		//	Utils.println(deltaT);
 		}
 		oldNanoTime = nanoTime;
-	    //	Utils.println("delta T : " + deltaT);
+		
+		Utils.println(NodeBlockEntity.clientList.size());
+		Iterator<NodeBlockEntity> i = NodeBlockEntity.clientList.iterator();
+		World w =  Minecraft.getMinecraft().theWorld;
+		while(i.hasNext()){
+			NodeBlockEntity e = i.next();
+			if(e.getWorldObj() != w){
+				i.remove();
+				continue;
+			}
+			//e.clientRefresh(deltaT);
+		}
+		//Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(1, 1).
+	    //	Utils.println("delta T : " + deltaT + "   " + event);
 	}
 	
 

@@ -12,6 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 
@@ -54,6 +55,10 @@ import net.minecraft.world.WorldServer;
 
 
 public abstract class NodeBlockEntity extends TileEntity implements ITileEntitySpawnClient{
+	
+	public static LinkedList<NodeBlockEntity> clientList = new LinkedList<NodeBlockEntity>();
+	
+
 	
 	public abstract INodeInfo getInfo();
 	public NodeBlock getBlock(){
@@ -243,7 +248,9 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         			//worldObj.setBlock(xCoord, yCoord, zCoord, 0);//caca1.5.1
         			//Utils.println("ASSERT NODE DESTROYED BY SECURITY updateEntity");
         		}
-    		}    		
+    		} else {
+    			clientList.add(this);
+    		}
     	}
     }
     
@@ -288,7 +295,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     //client only
     public void destructor()
     {
-    	
+		clientList.remove(this);
     }
     
     @Override

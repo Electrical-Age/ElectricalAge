@@ -42,7 +42,7 @@ public class GroundCableElement extends SixNodeElement{
 		super(sixNode, side, descriptor);
 	
 		electricalLoadList.add(electricalLoad);
-		slowProcessList.add(groundProcess);
+	//	electricalProcessList.add(groundProcess);
 	}
  
 
@@ -50,7 +50,7 @@ public class GroundCableElement extends SixNodeElement{
 
 	NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");
 
-	ElectricalSourceRefGroundProcess groundProcess = new ElectricalSourceRefGroundProcess(electricalLoad, 0);
+	//ElectricalSourceRefGroundProcess groundProcess = new ElectricalSourceRefGroundProcess(electricalLoad, 0);
 	
 	int color = 0;
 	int colorCare = 0;
@@ -93,7 +93,7 @@ public class GroundCableElement extends SixNodeElement{
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		// TODO Auto-generated method stub
-		if(inventory.getStackInSlot(GroundCableContainer.cableSlotId) == null) return 0;
+		//if(inventory.getStackInSlot(GroundCableContainer.cableSlotId) == null) return 0;
 		return NodeBase.maskElectricalPower + (color << NodeBase.maskColorShift) +(colorCare << NodeBase.maskColorCareShift);
 	}
 
@@ -130,8 +130,7 @@ public class GroundCableElement extends SixNodeElement{
 	@Override
 	public void initialize() {
 		// TODO Auto-generated method stub
-		electricalLoad.setC(10000);
-		electricalLoad.setRs(0.00001);
+		Eln.instance.lowVoltageCableDescriptor.applyTo(electricalLoad, true);
 		
 
 

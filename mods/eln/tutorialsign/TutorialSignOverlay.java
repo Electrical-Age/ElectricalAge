@@ -12,6 +12,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class TutorialSignOverlay {
@@ -20,7 +21,7 @@ public class TutorialSignOverlay {
 		i++;
 	}
 	@SubscribeEvent
-	public void render(RenderGameOverlayEvent.Post event) {
+	public void render(RenderGameOverlayEvent.Text event) {
 		Minecraft mc = Minecraft.getMinecraft();
 		EntityClientPlayerMP player = mc.thePlayer;
 		int px = MathHelper.floor_double(player.posX),py = MathHelper.floor_double(player.posY),pz = MathHelper.floor_double(player.posZ);

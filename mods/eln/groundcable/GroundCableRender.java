@@ -57,7 +57,7 @@ public class GroundCableRender extends SixNodeElementRender{
 			ItemStack cableStack = Utils.unserialiseItemStack(stream);
 			ElectricalCableDescriptor desc = (ElectricalCableDescriptor)ElectricalCableDescriptor.getDescriptor(cableStack, ElectricalCableDescriptor.class);
 			if(desc == null)
-				cableRender = null;
+				cableRender = Eln.instance.lowVoltageCableDescriptor.render;
 			else
 				cableRender = desc.render;
 		} catch (IOException e) {
