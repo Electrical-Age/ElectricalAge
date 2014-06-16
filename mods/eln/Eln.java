@@ -159,6 +159,7 @@ import mods.eln.node.TransparentNodeItem;
 import mods.eln.ore.OreBlock;
 import mods.eln.ore.OreDescriptor;
 import mods.eln.ore.OreItem;
+import mods.eln.server.OreRegenerate;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.RegulatorType;
 import mods.eln.sim.Simulator;
@@ -428,7 +429,7 @@ public class Eln {
 	public ElectricalCableDescriptor batteryCableDescriptor;
 	public ElectricalCableDescriptor meduimVoltageCableDescriptor;
 
-
+	public OreRegenerate oreRegenerate;
 
 	public static Obj3DFolder obj = new Obj3DFolder();
 
@@ -566,6 +567,7 @@ public class Eln {
 		playerManager = new PlayerManager();
 		tileEntityDestructor = new TileEntityDestructor();
 
+		oreRegenerate = new OreRegenerate();
 		nodeServer = new NodeServer();
 		clientLiveDataManager = new LiveDataManager();
 		
@@ -890,7 +892,7 @@ public class Eln {
 		ghostManager = null;
 		saveConfig = null;
 		modbusServer = null;
-
+		oreRegenerate.clear();
 	}
 
 	public TileEntityDestructor tileEntityDestructor;
@@ -907,6 +909,8 @@ public class Eln {
 
 				firstStart = false;
 			}
+			
+			
 			modbusServer = new ModbusServer();
 			TeleporterElement.teleporterList.clear();
 			tileEntityDestructor.clear();

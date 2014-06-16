@@ -25,7 +25,8 @@ import net.minecraft.world.World;
 
 public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsingDamageDescriptor> extends ItemBlock {
 	public Hashtable<Integer,Descriptor> subItemList = new Hashtable<Integer,Descriptor>();
-	ArrayList<Integer> orderList = new ArrayList<Integer>();
+	public ArrayList<Integer> orderList = new ArrayList<Integer>();
+	public ArrayList<Descriptor> descriptors = new ArrayList<Descriptor>();
 	
 	
 	public Descriptor defaultElement = null;
@@ -52,6 +53,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 		stack.setTagCompound(descriptor.getDefaultNBT());
 		LanguageRegistry.addName(stack,descriptor.name);
 		orderList.add(damage);
+		descriptors.add(descriptor);
 		descriptor.setParent(this, damage);
 		GameRegistry.registerCustomItemStack(descriptor.name, descriptor.newItemStack(1));
 	}

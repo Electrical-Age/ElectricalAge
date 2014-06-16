@@ -128,6 +128,12 @@ public class Simulator /* ,IPacketHandler*/ {
 		thermalConnectionList.clear();
 		thermalLoadList.clear();
 		
+		
+		workingElectricalConnectionList.clear();
+		workingElectricalLoadList.clear();
+		simplifiedElectricalBranchList.clear();
+		
+		
 		run = true;
 	}	
 	public void stop()
@@ -143,6 +149,10 @@ public class Simulator /* ,IPacketHandler*/ {
 		thermalProcessList.clear();
 		thermalConnectionList.clear();
 		thermalLoadList.clear();
+		
+		workingElectricalConnectionList.clear();
+		workingElectricalLoadList.clear();
+		simplifiedElectricalBranchList.clear();
 		
 		run = false;
 	}

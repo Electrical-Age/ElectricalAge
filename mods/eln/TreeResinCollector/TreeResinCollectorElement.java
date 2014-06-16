@@ -4,6 +4,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockLeavesBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
@@ -87,10 +88,10 @@ public class TreeResinCollectorElement extends SixNodeElement{
 		posWood[0] = coord.x;posWood[1] = coord.y;posWood[2] = coord.z;
 		posCollector[0] = coord.x;posCollector[1] = coord.y;posCollector[2] = coord.z;
 		woodDirection.applyTo(posWood, 1);
-		
+		int leafCount = 0;
 		int yStart,yEnd;
 		
-		while(worldObj.getBlock(posWood[0],posWood[1]-1,posWood[2]) == Blocks.log)
+		while(worldObj.getBlock(posWood[0],posWood[1]-1,posWood[2]) == Blocks.log || worldObj.getBlock(posWood[0],posWood[1]-1,posWood[2]) == Blocks.log2)
 		{
 			posWood[1]--;
 		}
@@ -98,8 +99,9 @@ public class TreeResinCollectorElement extends SixNodeElement{
 		
 		posWood[1] = coord.y;
 		//timeCounter-= timeTarget;
-		while(worldObj.getBlock(posWood[0],posWood[1]+1,posWood[2]) == Blocks.log)
+		while(worldObj.getBlock(posWood[0],posWood[1]+1,posWood[2]) == Blocks.log || worldObj.getBlock(posWood[0],posWood[1]+1,posWood[2]) == Blocks.log2)
 		{
+			if(worldObj.getBlock(posCollector[0],posWood[1]+1,posCollector[2]) instanceof BlockLeavesBase) leafCount++;
 			posWood[1]++;
 		}
 		yEnd = posWood[1];
@@ -126,7 +128,8 @@ public class TreeResinCollectorElement extends SixNodeElement{
 			collectiorCount++;
 			Utils.println("ASSERT collectiorCount == 0");
 		}
-		double productPerSeconde = Math.min(0.05,occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectiorCount);
+		double leaf = leafCount >= 1 ? 1 : 0.000000001;
+		double productPerSeconde = Math.min(0.05,occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectiorCount)*leaf;
 		double product = productPerSeconde * timeFromLastActivated;
 		int productI = 0;
 		if(product > occupancyMax){

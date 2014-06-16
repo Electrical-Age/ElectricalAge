@@ -1,8 +1,10 @@
 package mods.eln;
 
+import cpw.mods.fml.server.FMLServerHandler;
 import mods.eln.misc.Utils;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.world.WorldServer;
 
 public class ConsoleListener extends CommandBase{
 
@@ -20,7 +22,7 @@ public class ConsoleListener extends CommandBase{
 		str += "aging\n";
 		str += "lampAging\n";
 		str += "batteryAging\n";
-		str += "heatFurnaceFuel\n";
+		str += "heatFurnaceFuel\nreGenOre";
 		return str;
 	}
 	
@@ -45,6 +47,8 @@ public class ConsoleListener extends CommandBase{
 		}else if(a.equals("newwind")){
 			Eln.wind.newWindTarget();
 			Utils.println("newWind : " + Eln.wind.getTargetNotFiltred());
+		}else if(a.equals("regenore")){
+			Eln.instance.saveConfig.reGenOre = (!astring[1].equals("0"));
 		}
 	}
 

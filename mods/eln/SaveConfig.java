@@ -11,6 +11,8 @@ public class SaveConfig extends WorldSavedData{
 	public boolean electricalLampAging = true;
 	public boolean batteryAging = true;
 	public boolean infinitPortableBattery = false;
+
+	public boolean reGenOre = false;
 	public SaveConfig(String par1Str) {
 		super(par1Str);
 		instance = this;	
@@ -22,6 +24,7 @@ public class SaveConfig extends WorldSavedData{
 		electricalLampAging = nbt.getBoolean("electricalLampAging");
 		batteryAging = nbt.getBoolean("batteryAging");
 		infinitPortableBattery = nbt.getBoolean("infinitPortableBattery");
+		reGenOre = nbt.getBoolean("reGenOre");
 		
 		Eln.wind.readFromNBT(nbt, "wind");
 	}
@@ -33,6 +36,7 @@ public class SaveConfig extends WorldSavedData{
 		nbt.setBoolean("electricalLampAging", electricalLampAging);
 		nbt.setBoolean("batteryAging", batteryAging);
 		nbt.setBoolean("infinitPortableBattery", infinitPortableBattery);
+		nbt.setBoolean("reGenOre", reGenOre);
 		
 		Eln.wind.writeToNBT(nbt, "wind");
 	}
