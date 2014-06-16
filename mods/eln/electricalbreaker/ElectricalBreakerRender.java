@@ -48,11 +48,16 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
-		interpol.setTarget(switchState ? 1f :0f);	
-		interpol.stepGraphic();
 		
 		front.glRotateOnX();	
 		descriptor.draw(interpol.get(), UtilsClient.distanceFromClientPlayer(tileEntity));			
+	}
+	
+	@Override
+	public void refresh(float deltaT) {
+		interpol.setTarget(switchState ? 1f :0f);	
+		interpol.step(deltaT);
+		
 	}
 	
 	@Override

@@ -47,14 +47,16 @@ public class ElectricalTimeoutRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
 		front.glRotateOnX();
+	
+		descriptor.draw(timeoutCounter / timeoutValue);
+	}
+	
+	@Override
+	public void refresh(float deltaT) {
 		if(inputState == false) {
-			timeoutCounter -= FrameTime.get();
+			timeoutCounter -= deltaT;
 			if(timeoutCounter < 0f) timeoutCounter = 0f;
 		}
-		//interpolator.setTarget(timeoutCounter / timeoutValue);
-		//interpolator.stepGraphic();	
-		//descriptor.draw(interpolator.get());
-		descriptor.draw(timeoutCounter / timeoutValue);
 	}
 	
 	@Override

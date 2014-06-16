@@ -46,10 +46,10 @@ public class PhysicalInterpolator {
 			factorSpeed = -factorSpeed * rebond;
 		}
 	}
-	public void stepGraphic()
+	/*public void stepGraphic()
 	{
 		step(FrameTime.get());
-	}
+	}*/
 	public float get()
 	{
 		return factorPos;

@@ -24,69 +24,65 @@ import net.minecraft.item.ItemStack;
 
 import org.lwjgl.opengl.GL11;
 
-
 public class HeatFurnaceRender extends TransparentNodeElementRender {
 
 	double temperature;
 	float gainSyncValue = -1234, temperatureTargetSyncValue = -1234;
-	boolean gainSyncNew = false,temperatureTargetSyncNew = false;
+	boolean gainSyncNew = false, temperatureTargetSyncNew = false;
 	short power;
-	
-	public boolean controleExternal,takeFuel;
-	
+
+	public boolean controleExternal, takeFuel;
+
 	HeatFurnaceDescriptor descriptor;
-	public HeatFurnaceRender(TransparentNodeEntity tileEntity,TransparentNodeDescriptor descriptor) {
-		super(tileEntity,descriptor);
+
+	public HeatFurnaceRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
+		super(tileEntity, descriptor);
 		this.descriptor = (HeatFurnaceDescriptor) descriptor;
-		interpolator = new PhysicalInterpolator(0.4f,8.0f,0.9f,0.2f);
+		interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
 		coord = new Coordonate(tileEntity);
 	}
+
 	Coordonate coord;
 	PhysicalInterpolator interpolator;
+
 	@Override
-	public void draw() {	
-		
-		
-		if(Utils.isPlayerAround(tileEntity.getWorldObj(),coord.getAxisAlignedBB(1)) == false)
+	public void draw() {
+
+		front.glRotateXnRef();
+		descriptor.draw(interpolator.get());
+
+		if (entityItemIn != null)
+			drawEntityItem(entityItemIn, -0.1, -0.30, 0, counter, 0.8f);
+
+	}
+
+	@Override
+	public void refresh(float deltaT) {
+
+		if (Utils.isPlayerAround(tileEntity.getWorldObj(), coord.getAxisAlignedBB(1)) == false)
 			interpolator.setTarget(0f);
 		else
 			interpolator.setTarget(1f);
-		interpolator.stepGraphic();
-		
-		front.glRotateXnRef();
-		descriptor.draw(interpolator.get());
-		
-		if(entityItemIn != null)
-			drawEntityItem(entityItemIn, -0.1, -0.30, 0, counter,0.8f);
-		
-		counter += FrameTime.get() * 60;
-		if(counter >= 360f) counter -= 360;
-		
-		/*if(Math.random() < 1 * FrameTime.get() * descriptor.flamePopRate * power/descriptor.nominalPower)
-		{
-			double [] p = new double[3];
-			
-			p[0] = Math.random() * descriptor.flameDeltaX + descriptor.flameStartX;
-			p[1] = Math.random() * descriptor.flameDeltaY + descriptor.flameStartY;
-			p[2] = Math.random() * descriptor.flameDeltaZ + descriptor.flameStartZ;
-			front.rotateFromXN(p);
-			p[0] += tileEntity.xCoord + 0.5;p[1] += tileEntity.yCoord+0.5;p[2] += tileEntity.zCoord+0.5;
-			tileEntity.worldObj.spawnParticle("flame",p[0],p[1],p[2], 0.0D, 0.0D, 0.0D);
-		}*/
+		interpolator.step(deltaT);
+
+		counter += deltaT * 60;
+		if (counter >= 360f)
+			counter -= 360;
+
 	}
+
 	float counter = 0;
-	
+
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(4, 64, this);
 
 	boolean boot = true;
+
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		// TODO Auto-generated method stub
 		return new HeatFurnaceGuiDraw(player, inventory, this);
 	}
-	
 
-	
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -94,31 +90,27 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 		try {
 			controleExternal = stream.readBoolean();
 			takeFuel = stream.readBoolean();
-			
-			
-			temperature = stream.readShort() /NodeBase.networkSerializeTFactor;
+
+			temperature = stream.readShort() / NodeBase.networkSerializeTFactor;
 			float readF;
 			readF = stream.readFloat();
-			if(gainSyncValue != readF || controleExternal)
+			if (gainSyncValue != readF || controleExternal)
 			{
 				gainSyncValue = readF;
 				gainSyncNew = true;
 			}
 			readF = stream.readFloat();
-			if(temperatureTargetSyncValue!= readF || controleExternal)
+			if (temperatureTargetSyncValue != readF || controleExternal)
 			{
 				temperatureTargetSyncValue = readF;
 				temperatureTargetSyncNew = true;
 			}
-			
-		
+
 			power = stream.readShort();
-			
-			
-			entityItemIn = unserializeItemStackToEntityItem(stream,entityItemIn);
-	
-			
-			if(boot)
+
+			entityItemIn = unserializeItemStackToEntityItem(stream, entityItemIn);
+
+			if (boot)
 			{
 				coord.move(front);
 				//coord.move(front);
@@ -127,58 +119,59 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}		
+		}
 	}
-	
-	
+
 	public void clientToogleControl()
 	{
 		clientSendId(HeatFurnaceElement.unserializeToogleControlExternalId);
-	}	
+	}
+
 	public void clientToogleTakeFuel()
 	{
 		clientSendId(HeatFurnaceElement.unserializeToogleTakeFuelId);
 	}
+
 	EntityItem entityItemIn;
+
 	public void clientSetGain(float value)
 	{
-        try {
-	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	        DataOutputStream stream = new DataOutputStream(bos);   	
-	
-	        preparePacketForServer(stream);
-			
+		try {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			DataOutputStream stream = new DataOutputStream(bos);
+
+			preparePacketForServer(stream);
+
 			stream.writeByte(HeatFurnaceElement.unserializeGain);
 			stream.writeFloat(value);
-			
+
 			sendPacketToServer(bos);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}        
-        		
+		}
+
 	}
-	
+
 	public void clientSetTemperatureTarget(float value)
 	{
-        try {
-	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	        DataOutputStream stream = new DataOutputStream(bos);   	
-	
-	        preparePacketForServer(stream);
-			
+		try {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			DataOutputStream stream = new DataOutputStream(bos);
+
+			preparePacketForServer(stream);
+
 			stream.writeByte(HeatFurnaceElement.unserializeTemperatureTarget);
 			stream.writeFloat(value);
-			
+
 			sendPacketToServer(bos);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}        
-        		
+		}
+
 	}
-	
-	
+
 	@Override
 	public boolean cameraDrawOptimisation() {
 		// TODO Auto-generated method stub

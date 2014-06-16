@@ -277,4 +277,8 @@ public abstract class TransparentNodeElementRender {
 		if(usedUuid())
 			ClientProxy.uuidManager.kill(uuid);
 	}
+	public void refresh(float deltaT) {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -47,18 +47,25 @@ public class ElectricalFurnaceRender extends TransparentNodeElementRender {
 	public void draw() {
 		front.glRotateXnRef();
 		
-		processState += processStatePerSecond * FrameTime.getNotCaped();
-		if(processState > 1f) processState = 1f;
 		
 		Eln.obj.draw("ElectricFurnace", "furnace");
 	    //ClientProxy.obj.draw("ELFURNACE");	
 		
 		drawEntityItem(entityItemIn, -0.1, -0.20, 0, counter, 0.8f);
+		
+	}
+	
+	
+	@Override
+	public void refresh(float deltaT) {
+		processState += processStatePerSecond * FrameTime.getNotCaped2();
+		if(processState > 1f) processState = 1f;
 		counter += (System.currentTimeMillis() - time) * 0.001 * 360 / 4;
 		if(counter > 360) counter -= 360;
 		
 		time = System.currentTimeMillis();
 	}
+	
 	
 	float counter = 0;
 

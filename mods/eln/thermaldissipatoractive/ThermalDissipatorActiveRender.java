@@ -22,12 +22,18 @@ public class ThermalDissipatorActiveRender extends TransparentNodeElementRender{
 	public void draw() {
 		front.glRotateXnRef();
 		
-		rc.setTarget(powerFactor);
-		rc.stepGraphic();
-		alpha += rc.get() * 360f * FrameTime.get();
-		while(alpha > 360f) alpha -= 360f;
+
 		descriptor.draw(alpha);
 	}
+	
+	@Override
+	public void refresh(float deltaT) {
+		rc.setTarget(powerFactor);
+		rc.step(deltaT);
+		alpha += rc.get() * 360f * deltaT;
+		while(alpha > 360f) alpha -= 360f;
+	}
+	
 	float alpha = 0;
 	float powerFactor;
 	@Override

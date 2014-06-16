@@ -418,4 +418,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 			return getNode().canConnectRedstone(); 
 		}
 	}
+	public void clientRefresh(float deltaT) {
+		
+	}
 }

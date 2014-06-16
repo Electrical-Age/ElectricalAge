@@ -36,47 +36,49 @@ public class ElectricalSwitchRender extends SixNodeElementRender {
 	}
 
 	double voltageAnode = 0, voltageCatode = 0, current = 0, temperature = 0;
-	
+
 	RcInterpolator interpol;
-	
+
 	@Override
 	public void draw() {
 		super.draw();
 
-
-		interpol.setTarget(switchState ? 1f : 0f);	
-		interpol.stepGraphic();
-		
-		front.glRotateOnX();	
+		front.glRotateOnX();
 		descriptor.draw(interpol.get(), UtilsClient.distanceFromClientPlayer(tileEntity), tileEntity);
-		
-		if(descriptor.signalSwitch){
-			drawSignalPin(LRDU.Left,descriptor.pinDistance);
-			drawSignalPin(LRDU.Right,descriptor.pinDistance);
+
+		if (descriptor.signalSwitch) {
+			drawSignalPin(LRDU.Left, descriptor.pinDistance);
+			drawSignalPin(LRDU.Right, descriptor.pinDistance);
 		} else {
-			drawPowerPin(LRDU.Left,descriptor.pinDistance);
-			drawPowerPin(LRDU.Right,descriptor.pinDistance);
+			drawPowerPin(LRDU.Left, descriptor.pinDistance);
+			drawPowerPin(LRDU.Right, descriptor.pinDistance);
 		}
 	}
-	
+
+	@Override
+	public void refresh(float deltaT) {
+		interpol.setTarget(switchState ? 1f : 0f);
+		interpol.step(deltaT);
+	}
+
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
 		return descriptor.cableRender;
 	}
-	
+
 	@Override
 	public void glListDraw() {
 	}
-	
+
 	@Override
 	public boolean glListEnable() {
-		return false;	
+		return false;
 	}
 
 	boolean boot = true;
 	float switchAlpha = 0;
 	boolean switchState;
-	
+
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);
@@ -88,9 +90,9 @@ public class ElectricalSwitchRender extends SixNodeElementRender {
 			temperature = stream.readShort() / NodeBase.networkSerializeTFactor;
 		} catch (IOException e) {
 			e.printStackTrace();
-		}	
-		
-		if(boot) {
+		}
+
+		if (boot) {
 			interpol.setValue(switchState ? 1f : 0f);
 		}
 		boot = false;

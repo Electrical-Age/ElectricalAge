@@ -51,16 +51,22 @@ public class PlateMachineDescriptor extends ElectricalMachineDescriptor {
 		rot1.draw(handle.counter, 0f, 0f, -1f);
 		rot2.draw(handle.counter, 0f, 0f, 1f);
 		
-		handle.interpolator.setTarget(powerFactor);
-		handle.interpolator.stepGraphic();
-		handle.counter += FrameTime.get() * handle.interpolator.get() * 360;
-		while(handle.counter >= 360f) handle.counter -= 360;
 		
-		handle.itemCounter += FrameTime.get() * 90;
-		while(handle.itemCounter >= 360f) handle.itemCounter -= 360;
 				
 		UtilsClient.drawEntityItem(inEntity, -0.35f, 0.1f, 0f, handle.itemCounter, 1f);
 		UtilsClient.drawEntityItem(outEntity, 0.35f, 0.1f, 0f, -handle.itemCounter + 139f, 1f);
+	}
+	
+	@Override
+	void refresh(float deltaT, ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity, float powerFactor, float processState) {
+		PlateMachineDescriptorHandle handle = (PlateMachineDescriptorHandle) handleO;
+		handle.interpolator.setTarget(powerFactor);
+		handle.interpolator.step(deltaT);
+		handle.counter += deltaT * handle.interpolator.get() * 360;
+		while(handle.counter >= 360f) handle.counter -= 360;
+		
+		handle.itemCounter += deltaT * 90;
+		while(handle.itemCounter >= 360f) handle.itemCounter -= 360;
 	}
 	
 	@Override

@@ -30,14 +30,17 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 	float alpha = (float) (Math.random()*360);
 	@Override
 	public void draw() {
-		powerFactorFilter.setTarget(powerFactor);
-		powerFactorFilter.stepGraphic();
-		float alphaN_1 = alpha;
-		alpha += FrameTime.get() * descriptor.speed * Math.sqrt(powerFactorFilter.get());
-		if(alpha > 360) alpha -= 360;
 		front.glRotateXnRef();
-		descriptor.draw(alpha);
-		
+		descriptor.draw(alpha);		
+	}
+	
+	
+	public void refresh(float deltaT) {
+		powerFactorFilter.setTarget(powerFactor);
+		powerFactorFilter.step(deltaT);
+		float alphaN_1 = alpha;
+		alpha += deltaT * descriptor.speed * Math.sqrt(powerFactorFilter.get());
+		if(alpha > 360) alpha -= 360;		
 		if (alpha % 120 > 45 && alphaN_1 % 120 <= 45 && soundPlaying == false) {
 			Coordonate coord = coordonate();
 			this.play(new SoundCommand(descriptor.soundName)
@@ -48,7 +51,7 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 		} else {
 			soundPlaying = false;
 		}
-			
+		
 	}
 	
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(0 , 64, this);

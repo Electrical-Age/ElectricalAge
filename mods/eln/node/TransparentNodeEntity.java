@@ -189,5 +189,12 @@ public class TransparentNodeEntity extends NodeBlockEntity {	//boolean[] syncron
 		super.destructor();
 	}
 
+	
+	@Override
+	public void clientRefresh(float deltaT) {
+		if(elementRender != null){
+			elementRender.refresh(deltaT);
+		}
+	}
 }
 // && 

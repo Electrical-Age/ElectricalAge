@@ -234,6 +234,15 @@ public class SixNodeEntity extends NodeBlockEntity {
 		// TODO Auto-generated method stub
 		return Eln.sixNodeBlock;
 	}
+	
+	@Override
+	public void clientRefresh(float deltaT) {
+		for(SixNodeElementRender e : elementRenderList){
+			if(e != null){
+				e.refresh(deltaT);
+			}			
+		}
 
+	}
 }
 // && 

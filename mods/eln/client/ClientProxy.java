@@ -52,7 +52,7 @@ public class ClientProxy extends CommonProxy {
 		uuidManager = new UuidManager();
 		soundClientEventListener = new SoundClientEventListener(uuidManager);
 	//	FMLCommonHandler.instance().bus().register();
-		
+		new FrameTime();
 	}
 	public static UuidManager uuidManager;
 	public static SoundClientEventListener soundClientEventListener;

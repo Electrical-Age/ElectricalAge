@@ -41,13 +41,17 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
 		super.draw();
 		
 		drawSignalPin(front,descriptor.pinDistance);
-		interpol.setTarget(warm ? descriptor.rotSpeed : 0f);
-		interpol.stepGraphic();
-		
-		rotAlpha += interpol.get() * FrameTime.get();
 
 		//front.glRotateOnX();		
 		descriptor.draw(warm, rotAlpha);
+	}
+	@Override
+	public void refresh(float deltaT) {
+		interpol.setTarget(warm ? descriptor.rotSpeed : 0f);
+		interpol.step(deltaT);
+		
+		rotAlpha += interpol.get() * deltaT;
+		
 	}
 	
 	float rotAlpha = 0;

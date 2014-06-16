@@ -47,8 +47,6 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
 
 	@Override
 	public void draw() {
-		alpha += FrameTime.get() * 60;
-		if(alpha >= 360) alpha -= 360;
 		
 		GL11.glPushMatrix();
 		front.glRotateXnRef();
@@ -60,6 +58,13 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
 		cableRenderType = drawCable(front.down(), descriptor.cable.render, eConn, cableRenderType);
 	}
 
+	@Override
+	public void refresh(float deltaT) {
+		alpha += deltaT * 60;
+		if(alpha >= 360) alpha -= 360;
+
+	}
+	
 	float alpha = 0;
 	
 	@Override

@@ -50,17 +50,24 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
 		rot1.draw(handle.counter, 0f, 0f, -1f);
 		rot2.draw(handle.counter, 0f, 0f, 1f);
 		
-		handle.interpolator.setTarget(powerFactor);
-		handle.interpolator.stepGraphic();
-		handle.counter += FrameTime.get() * handle.interpolator.get() *  180;
-		while(handle.counter >= 360f) handle.counter -= 360;
-		
-		handle.itemCounter += FrameTime.get() *  90;
-		while(handle.itemCounter >= 360f) handle.itemCounter -= 360;
+	
 				
 		GL11.glScalef(0.7f, 0.7f, 0.7f);
 		UtilsClient.drawEntityItem(inEntity, 0.0, 0.4f, 0f, handle.itemCounter, 1f);	
 		UtilsClient.drawEntityItem(outEntity, 0.0, -0.5f, 0f, 130 + handle.itemCounter, 1f);	
+	}
+	
+	@Override
+	void refresh(float deltaT, ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity, float powerFactor, float processState) {
+		MaceratorDescriptorHandle handle = (MaceratorDescriptorHandle) handleO;
+
+		handle.interpolator.setTarget(powerFactor);
+		handle.interpolator.step(deltaT);
+		handle.counter += deltaT * handle.interpolator.get() *  180;
+		while(handle.counter >= 360f) handle.counter -= 360;
+		
+		handle.itemCounter += deltaT *  90;
+		while(handle.itemCounter >= 360f) handle.itemCounter -= 360;
 	}
 	
 	@Override

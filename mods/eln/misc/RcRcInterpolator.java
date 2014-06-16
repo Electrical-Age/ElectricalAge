@@ -23,10 +23,10 @@ public class RcRcInterpolator implements INBTTReady{
 		
 	}
 
-	public void stepGraphic()
+	/*public void stepGraphic()
 	{
 		step(FrameTime.get());
-	}
+	}*/
 	public float get()
 	{
 		return c2;

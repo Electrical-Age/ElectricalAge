@@ -1,4 +1,3 @@
-
 package mods.eln.electricalwindsensor;
 
 import java.io.DataInputStream;
@@ -20,43 +19,43 @@ import mods.eln.node.SixNodeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 
-
-public class ElectricalWindSensorRender extends SixNodeElementRender{
+public class ElectricalWindSensorRender extends SixNodeElementRender {
 
 	ElectricalWindSensorDescriptor descriptor;
+
 	public ElectricalWindSensorRender(SixNodeEntity tileEntity, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalWindSensorDescriptor) descriptor;
 	}
 
-
 	float alpha = 0;
 	float wind = 0;
-	
+
 	RcInterpolator windFilter = new RcInterpolator(5);
 
 	@Override
 	public void draw() {
 		super.draw();
-		drawSignalPin(front.right(),descriptor.pinDistance);
+		drawSignalPin(front.right(),new float[]{2,2,2,2});
 
-		windFilter.stepGraphic();
-		alpha += windFilter.get()*FrameTime.get()*20;
-		if(alpha>360) alpha-=360;
-		
 		descriptor.draw(alpha);
 	}
 
+	@Override
+	public void refresh(float deltaT) {
+		windFilter.step(deltaT);
+		alpha += windFilter.get() * deltaT * 20;
+		if (alpha > 360)
+			alpha -= 360;
+	}
 
-	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
 		// TODO Auto-generated method stub
 		return Eln.instance.signalCableDescriptor.render;
 	}
-	
-	
+
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub

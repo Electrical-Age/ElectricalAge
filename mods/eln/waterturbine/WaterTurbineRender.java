@@ -36,26 +36,31 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 	@Override
 	public void draw() {
 		// front.glRotateXnRef();
+
+		front.glRotateXnRef();
+		descriptor.draw(alpha);
+
+	}
+	
+	
+	public void refresh(float deltaT) {
 		float flowDir = waterCoord.getMeta() > waterCoordRight.getMeta() ? 1 : -1;
 		if (Utils.isWater(waterCoord) == false)
 			flowDir = 0;
 
 		dirFilter.setTarget(flowDir);
-		dirFilter.stepGraphic();
+		dirFilter.step(deltaT);
 		powerFactorFilter.setTarget((float) (dirFilter.get() * Math.sqrt(powerFactor)));
-		powerFactorFilter.stepGraphic();
+		powerFactorFilter.step(deltaT);
 
 		// Utils.println(powerFactorFilter.get());
 		float alphaN_1 = alpha;
-		alpha += FrameTime.get() * descriptor.speed * (powerFactorFilter.get());
+		alpha += deltaT * descriptor.speed * (powerFactorFilter.get());
 		if (alpha > 360)
 			alpha -= 360;
 		if (alpha < 0)
-			alpha += 360;
-		front.glRotateXnRef();
-		descriptor.draw(alpha);
-
-	//	if (Math.signum((alpha % 45) - 40f) != Math.signum((alphaN_1 % 45) - 40f) && soundPlaying == false) {
+			alpha += 360;	
+		
 		if ((int)(alpha/45) != (int)(alphaN_1/45) && soundPlaying == false) {
 			Coordonate coord = coordonate();
 			play(new SoundCommand(descriptor.soundName)
@@ -67,6 +72,8 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 			soundPlaying = false;
 	}
 
+	
+	
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(0, 64, this);
 	private float water;
 	private float powerFactor;

@@ -437,7 +437,7 @@ public class UtilsClient {
 		//front.glRotateOnX();
 		//drawConnectionPinSixNode(d[front.toInt()], w, h);
 		float d = dList[front.toInt()];
-		d+=0.1f;
+		d+=0.04f;
 		d*=0.0625f;
 		w*=0.0625f;
 		h*=0.0625f;

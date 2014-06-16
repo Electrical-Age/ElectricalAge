@@ -53,9 +53,7 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
 	@Override
 	void draw(ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity, float powerFactor, float processState) {
 		CompressorDescriptorHandle handle = (CompressorDescriptorHandle) handleO;
-		handle.interpolator.setTarget(processState);
-		handle.interpolator.stepGraphic();
-		
+
 		UtilsClient.drawEntityItem(inEntity, -0.35f, 0.04f, 0.3f, handle.itemCounter, 1f);
 		UtilsClient.drawEntityItem(outEntity, 0.35f, 0.04f, 0.3f, -handle.itemCounter + 139f, 1f);
 		
@@ -63,7 +61,16 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
 		GL11.glTranslatef(0f, tyOff + (float)Math.sqrt(handle.interpolator.get()) * (tyOn - tyOff), 0f);
 		move.draw();
 
-		handle.itemCounter += FrameTime.get() * 90;
+		
+	}
+	
+	@Override
+	void refresh(float deltaT, ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity, float powerFactor, float processState) {
+		CompressorDescriptorHandle handle = (CompressorDescriptorHandle) handleO;
+		handle.interpolator.setTarget(processState);
+		handle.interpolator.step(deltaT);
+		
+		handle.itemCounter += deltaT * 90;
 		while(handle.itemCounter >= 360f) handle.itemCounter -= 360;
 	}
 	

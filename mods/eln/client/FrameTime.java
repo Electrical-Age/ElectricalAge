@@ -60,14 +60,14 @@ public class FrameTime{
 	//	NodeBlockEntity.nodeAddedList.clear();
 	}
 	
-	public static float get() {
+	public static float get2() {
 		if(Utils.isGameInPause())
 			return 0f;
 		return Math.min(0.1f, instance.deltaT);
 	}
 	
-	public static float getNotCaped() {
-		float value = get();
+	public static float getNotCaped2() {
+		float value = get2();
 		return value;
 	}
 	
@@ -88,16 +88,18 @@ public class FrameTime{
 		}
 		oldNanoTime = nanoTime;
 		
-		Utils.println(NodeBlockEntity.clientList.size());
+		//Utils.println(NodeBlockEntity.clientList.size());
 		Iterator<NodeBlockEntity> i = NodeBlockEntity.clientList.iterator();
 		World w =  Minecraft.getMinecraft().theWorld;
+		
+		float deltaTcaped = getNotCaped2();
 		while(i.hasNext()){
 			NodeBlockEntity e = i.next();
 			if(e.getWorldObj() != w){
 				i.remove();
 				continue;
 			}
-			//e.clientRefresh(deltaT);
+			e.clientRefresh(deltaTcaped);
 		}
 		//Minecraft.getMinecraft().theWorld.getChunkFromChunkCoords(1, 1).
 	    //	Utils.println("delta T : " + deltaT + "   " + event);

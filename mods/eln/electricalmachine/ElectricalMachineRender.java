@@ -46,31 +46,23 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
 	
 	@Override
 	public void draw() {	
-		processState += processStatePerSecond * FrameTime.getNotCaped();
-		if(processState > 1f) processState = 1f;
+		
 		
 		GL11.glPushMatrix();
 		front.glRotateXnRef();
 		descriptor.draw(this, drawHandle, inEntity, outEntity, powerFactor, processState);
 		GL11.glPopMatrix();
-		/*
-		if(connectionType == null) {
-			cableRefresh = false;
-			connectionType = CableRender.connectionType(tileEntity, eConn, front.getInverse());
-		}
-				
-		glCableTransforme(front.down());
-		descriptor.getPowerCableRender().bindCableTexture();
-		
-		for(LRDU lrdu : LRDU.values()) {
-			Utils.setGlColorFromDye(connectionType.otherdry[lrdu.toInt()]);
-			if(eConn.get(lrdu) == false) continue;
-			if(lrdu != front.down().getLRDUGoingTo(front) && lrdu.inverse() != front.down().getLRDUGoingTo(front)) continue;
-			maskTemp.set(1 << lrdu.toInt());
-			CableRender.drawCable(descriptor.getPowerCableRender(), maskTemp, connectionType);
-		}	*/
+
 		
 		if(descriptor.drawCable()) connectionType = drawCable(front.down(), descriptor.getPowerCableRender(), eConn, connectionType);
+	}
+	
+	
+	@Override
+	public void refresh(float deltaT) {
+		processState += processStatePerSecond * deltaT;
+		if(processState > 1f) processState = 1f;
+		descriptor.refresh(deltaT, this, drawHandle, inEntity, outEntity, powerFactor, processState);
 	}
 	
 	float counter = 0;

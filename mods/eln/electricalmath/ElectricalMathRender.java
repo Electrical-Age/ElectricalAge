@@ -81,7 +81,14 @@ public class ElectricalMathRender extends SixNodeElementRender {
 			GL11.glColor3f(1, 1, 1);
 		}
 		
-		ledTime += FrameTime.get();
+
+
+		descriptor.draw(interpolator.get(), ledOn);
+	}
+	
+	@Override
+	public void refresh(float deltaT) {
+		ledTime += deltaT;
 
 		if(ledTime > 0.4) {
 			for(int idx = 1; idx <= 3; idx++){
@@ -98,10 +105,8 @@ public class ElectricalMathRender extends SixNodeElementRender {
 		else
 			interpolator.setTarget(1f);
 		
-		interpolator.stepGraphic();
+		interpolator.step(deltaT);
 		
-
-		descriptor.draw(interpolator.get(), ledOn);
 	}
 	
 	boolean[] ledOn = new boolean[8];

@@ -21,74 +21,72 @@ import mods.eln.node.SixNodeElementInventory;
 import mods.eln.node.SixNodeElementRender;
 import mods.eln.node.SixNodeEntity;
 
-public class LampSupplyRender extends SixNodeElementRender{
+public class LampSupplyRender extends SixNodeElementRender {
 
-	
 	LampSupplyDescriptor descriptor;
+
 	public LampSupplyRender(SixNodeEntity tileEntity, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (LampSupplyDescriptor) descriptor;
-		interpolator = new PhysicalInterpolator(0.4f,8.0f,0.9f,0.2f);
+		interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
 		coord = new Coordonate(tileEntity);
 	}
+
 	Coordonate coord;
 	PhysicalInterpolator interpolator;
+
 	@Override
-	public void draw() {	
+	public void draw() {
 		super.draw();
-		
-		
-		
-		
-		if(Utils.isPlayerAround(tileEntity.getWorldObj(),coord.getAxisAlignedBB(1)) == false)
-			interpolator.setTarget(0f);
-		else
-			interpolator.setTarget(1f);
-		
-		
-		interpolator.stepGraphic();
-		
-		
-		drawPowerPin(new float[]{4,4,5,5});
-		
+
+		drawPowerPin(new float[] { 4, 4, 5, 5 });
+
 		LRDU.Down.glRotateOnX();
 		descriptor.draw(interpolator.get());
 	}
-	
-	
-	
+
+	@Override
+	public void refresh(float deltaT) {
+
+		if (Utils.isPlayerAround(tileEntity.getWorldObj(), coord.getAxisAlignedBB(1)) == false)
+			interpolator.setTarget(0f);
+		else
+			interpolator.setTarget(1f);
+
+		interpolator.step(deltaT);
+
+	}
+
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
 		// TODO Auto-generated method stub
 		return cableRender;
 	}
-	
-	
-	
+
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		// TODO Auto-generated method stub
-		return new LampSupplyGui(this,player,inventory);
+		return new LampSupplyGui(this, player, inventory);
 	}
-	
+
 	String channel;
-	
+
 	CableRenderDescriptor cableRender;
-	
+
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
 		super.publishUnserialize(stream);
 		try {
 			channel = stream.readUTF();
-			
+
 			ItemStack cableStack = Utils.unserialiseItemStack(stream);
-			if(cableStack != null){
+			if (cableStack != null) {
 				ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
 				cableRender = desc.render;
 			}
-			else{
+			else {
 				cableRender = null;
 			}
 		} catch (IOException e) {
@@ -96,10 +94,6 @@ public class LampSupplyRender extends SixNodeElementRender{
 			e.printStackTrace();
 		}
 	}
-
-
-
-
 
 	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 }

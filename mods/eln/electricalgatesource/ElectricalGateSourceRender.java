@@ -44,51 +44,54 @@ public class ElectricalGateSourceRender extends SixNodeElementRender {
 	LRDU front;
 
 	RcInterpolator interpolator;
-	
+
 	@Override
 	public void draw() {
 		super.draw();
-		drawSignalPin(front,new float[]{3,3,3,3});
+		drawSignalPin(front, new float[] { 3, 3, 3, 3 });
 
-		
-		interpolator.setTarget((float)(voltageSyncValue / Eln.SVU));
-		interpolator.stepGraphic();
 		LRDU.Down.glRotateOnX();
 		descriptor.draw(interpolator.get(), UtilsClient.distanceFromClientPlayer(this.tileEntity), tileEntity);
 	}
-	
+
+	@Override
+	public void refresh(float deltaT) {
+		interpolator.setTarget((float) (voltageSyncValue / Eln.SVU));
+		interpolator.step(deltaT);
+	}
+
 	float voltageSyncValue = 0;
 	boolean voltageSyncNew = false;
 	boolean boot = true;
-	
+
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);
 		try {
 			Byte b;
 			b = stream.readByte();
-			front = LRDU.fromInt((b >> 4)&3);
+			front = LRDU.fromInt((b >> 4) & 3);
 			float readF;
 			readF = stream.readFloat();
-			if(voltageSyncValue != readF) {
+			if (voltageSyncValue != readF) {
 				voltageSyncValue = readF;
 				voltageSyncNew = true;
 			}
-			
-			if(boot) {
+
+			if (boot) {
 				boot = false;
-				interpolator.setValue((float)(voltageSyncValue / Eln.SVU));
+				interpolator.setValue((float) (voltageSyncValue / Eln.SVU));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		}	
+		}
 	}
-	
+
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
 		return Eln.instance.signalCableDescriptor.render;
 	}
-	
+
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		return new ElectricalGateSourceGui(player, this);

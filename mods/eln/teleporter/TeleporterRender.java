@@ -53,20 +53,9 @@ public class TeleporterRender extends TransparentNodeElementRender{
 		
 		boolean lightEnable = tileEntity.getWorldObj().getBlock(lightCoordonate.x, lightCoordonate.y, lightCoordonate.z) == Eln.lightBlock;
 		
-		counter += FrameTime.get();
-		if(counter > 0.4){
-			counter = 0;
-			blink = ! blink;
-		}		
-		ledCounter += FrameTime.get();
-		if(ledCounter > 0.1){
-			ledCounter = 0;
-		}
+
 		
-		doorInterpolator.stepGraphic();
-		processRatioInterpolator.stepGraphic();
-		blueInterpolator.setTarget(processRatioInterpolator.get() > 0.1  && (! doorState)? 1f : 0f);
-		blueInterpolator.stepGraphic();
+
 		
 		front.glRotateXnRef();
 		GL11.glTranslatef(-1, 0, 0);
@@ -168,8 +157,7 @@ public class TeleporterRender extends TransparentNodeElementRender{
 
 	
 		
-		gyroAlpha +=360*FrameTime.get()*(1.0f -doorInterpolator.get());
-		if(gyroAlpha >= 360) gyroAlpha -=360;
+		
 		/*
 		door_in_charge = obj.getPart("door_in_charge");
 		door_in = obj.getPart("door_in");
@@ -178,6 +166,29 @@ public class TeleporterRender extends TransparentNodeElementRender{
 		*/
 		
 	}
+	
+	
+	@Override
+	public void refresh(float deltaT) {
+		
+		doorInterpolator.step(deltaT);
+		processRatioInterpolator.step(deltaT);
+		blueInterpolator.setTarget(processRatioInterpolator.get() > 0.1  && (! doorState)? 1f : 0f);
+		blueInterpolator.step(deltaT);
+		
+		counter += deltaT;
+		if(counter > 0.4){
+			counter = 0;
+			blink = ! blink;
+		}		
+		ledCounter += deltaT;
+		if(ledCounter > 0.1){
+			ledCounter = 0;
+		}
+		gyroAlpha +=360*deltaT*(1.0f -doorInterpolator.get());
+		if(gyroAlpha >= 360) gyroAlpha -=360;
+	}
+	
 	float voltage;
 	String name,targetName;
 	float chargePower,chargePowerLast,energyHit/*,energyTarget,chargeRatio*/;

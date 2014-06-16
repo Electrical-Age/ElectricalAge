@@ -368,6 +368,11 @@ public abstract class SixNodeElementRender {
 
 	public void notifyNeighborSpawn() {
 		needRedraw = true;
+	}
+
+	public void refresh(float deltaT) {
+		// TODO Auto-generated method stub
+		
 	}  
 	
 	

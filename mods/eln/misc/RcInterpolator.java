@@ -20,10 +20,10 @@ public class RcInterpolator implements INBTTReady{
 
 	}
 	float factor,factorFiltred;
-	public void stepGraphic()
+	/*public void stepGraphic()
 	{
 		step(FrameTime.get());
-	}
+	}*/
 	public float get()
 	{
 		return factorFiltred;
