@@ -13,6 +13,7 @@ import mods.eln.Eln;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.DiodeProcess;
@@ -26,6 +27,7 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
 
 	private Obj3DPart main;
 	public boolean dayLightOnly;
+	public float[] pinDistance;
 	public ElectricalLightSensorDescriptor(String name, Obj3D obj, boolean dayLightOnly) {
 		super(name, ElectricalLightSensorElement.class, ElectricalLightSensorRender.class);
 		this.obj = obj;
@@ -33,6 +35,7 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
 		
 		if(obj != null) {
 			main = obj.getPart("main");
+			pinDistance = Utils.getSixNodePinDistance(main);
 		}
 	}
 

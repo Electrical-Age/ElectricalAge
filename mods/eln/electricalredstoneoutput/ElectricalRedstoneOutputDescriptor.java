@@ -26,12 +26,17 @@ import com.google.common.base.Function;
 
 public class ElectricalRedstoneOutputDescriptor extends SixNodeDescriptor {
 
+	public float[] pinDistance;
+
 	public ElectricalRedstoneOutputDescriptor(String name, Obj3D obj) {
 		super(name, ElectricalRedstoneOutputElement.class, ElectricalRedstoneOutputRender.class);
 		this.obj = obj;
 		if(obj != null) {
 			main = obj.getPart("main");
 			led = obj.getPart("led");
+			
+
+			pinDistance = Utils.getSixNodePinDistance(main);
 		}
 	}
 

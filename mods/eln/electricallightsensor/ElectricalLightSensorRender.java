@@ -28,6 +28,8 @@ public class ElectricalLightSensorRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
+		drawSignalPin(front.right(),descriptor.pinDistance);
+		
 		descriptor.draw();
 	}
 

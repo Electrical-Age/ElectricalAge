@@ -30,6 +30,8 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
 
 	private Obj3DPart baseWall,baseGround,anemometer;
 
+	public float[] pinDistance;
+
 	public ElectricalWindSensorDescriptor(
 			String name,
 			Obj3D obj,
@@ -41,9 +43,12 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
 		
 		if(obj != null)
 		{
+			
 			baseWall = obj.getPart("base_wall");
 			baseGround = obj.getPart("base_ground");
 			anemometer = obj.getPart("anemometer");
+
+			pinDistance = Utils.getSixNodePinDistance(baseWall);
 		}
 	}
 

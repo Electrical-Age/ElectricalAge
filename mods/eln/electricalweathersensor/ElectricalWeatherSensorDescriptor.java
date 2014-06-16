@@ -13,6 +13,7 @@ import mods.eln.Eln;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.SixNodeDescriptor;
@@ -26,6 +27,7 @@ import com.google.common.base.Function;
 public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
 
 	private Obj3DPart main;
+	public float[] pinDistance;
 
 	public ElectricalWeatherSensorDescriptor(String name, Obj3D obj) {
 		super(name, ElectricalWeatherSensorElement.class,ElectricalWeatherSensorRender.class);
@@ -33,6 +35,8 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
 		
 		if(obj != null) {
 			main = obj.getPart("main");
+
+			pinDistance = Utils.getSixNodePinDistance(main);
 		}
 	}
 

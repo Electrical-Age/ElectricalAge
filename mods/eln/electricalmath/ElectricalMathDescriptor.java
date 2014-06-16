@@ -19,6 +19,8 @@ import mods.eln.wiki.Data;
 
 public class ElectricalMathDescriptor extends SixNodeDescriptor {
 
+	public float[] pinDistance;
+
 	public ElectricalMathDescriptor(String name, Obj3D obj) {
 		super(name, ElectricalMathElement.class, ElectricalMathRender.class);
 		this.obj = obj;
@@ -31,6 +33,9 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
 			for(int idx = 0; idx < 8; idx++) {
 				led[idx] = obj.getPart("led" + idx);
 			}
+			
+
+			pinDistance = Utils.getSixNodePinDistance(main);
 		}
 	}
 
@@ -48,7 +53,7 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
 	
 	void draw(float open,boolean ledOn[]) {
 		if(main != null) main.draw();
-		if(door != null) door.draw((1f - open) * alphaOff, 0f, 0f, 1f);
+		if(door != null) door.draw((1f - open) * alphaOff, 0f, 1f, 0f);
 		
 		for(int idx = 0; idx < 8; idx++) {
 			if(ledOn[idx]) {

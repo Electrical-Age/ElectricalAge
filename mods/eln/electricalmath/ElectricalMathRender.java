@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import javax.management.Descriptor;
+import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -16,6 +17,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementInventory;
 import mods.eln.node.SixNodeElementRender;
@@ -67,6 +69,18 @@ public class ElectricalMathRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
 		
+		if(UtilsClient.distanceFromClientPlayer(tileEntity) < 15){
+			GL11.glColor3f(0, 0, 0);
+			UtilsClient.drawConnectionPinSixNode(front, descriptor.pinDistance, 1.8f, 1.35f);
+			GL11.glColor3f(1, 0, 0);
+			UtilsClient.drawConnectionPinSixNode(front.right(), descriptor.pinDistance, 1.8f, 1.35f);
+			GL11.glColor3f(0, 1, 0);
+			UtilsClient.drawConnectionPinSixNode(front.inverse(), descriptor.pinDistance, 1.8f, 1.35f);
+			GL11.glColor3f(0, 0, 1);
+			UtilsClient.drawConnectionPinSixNode(front.left(), descriptor.pinDistance, 1.8f, 1.35f);
+			GL11.glColor3f(1, 1, 1);
+		}
+		
 		ledTime += FrameTime.get();
 
 		if(ledTime > 0.4) {
@@ -86,7 +100,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
 		
 		interpolator.stepGraphic();
 		
-		LRDU.Down.glRotateOnX();
+
 		descriptor.draw(interpolator.get(), ledOn);
 	}
 	

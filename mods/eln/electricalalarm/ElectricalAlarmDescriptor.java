@@ -29,6 +29,8 @@ import com.google.common.base.Function;
 
 public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
 
+	public float[] pinDistance;
+
 	public ElectricalAlarmDescriptor(
 			String name,
 			Obj3D obj,
@@ -50,6 +52,7 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
 			if(rot != null) {
 				rotSpeed = rot.getFloat("speed");
 			}
+			pinDistance = Utils.getSixNodePinDistance(main);
 		}
 	}
 	int light;

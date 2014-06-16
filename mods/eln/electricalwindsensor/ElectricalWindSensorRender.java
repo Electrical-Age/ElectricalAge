@@ -39,6 +39,8 @@ public class ElectricalWindSensorRender extends SixNodeElementRender{
 	@Override
 	public void draw() {
 		super.draw();
+		drawSignalPin(front.right(),descriptor.pinDistance);
+
 		windFilter.stepGraphic();
 		alpha += windFilter.get()*FrameTime.get()*20;
 		if(alpha>360) alpha-=360;

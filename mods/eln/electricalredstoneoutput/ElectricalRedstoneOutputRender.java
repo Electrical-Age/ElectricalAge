@@ -26,7 +26,7 @@ public class ElectricalRedstoneOutputRender extends SixNodeElementRender {
 	}
 
 	float factor;
-	LRDU front;
+
 
 	float factorFiltred = 0;
 	
@@ -34,6 +34,8 @@ public class ElectricalRedstoneOutputRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
 
+		drawSignalPin(front.right(),descriptor.pinDistance);
+		
 		descriptor.draw(redOutput);
 	}
 

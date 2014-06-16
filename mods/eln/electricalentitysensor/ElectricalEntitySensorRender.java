@@ -33,6 +33,8 @@ public class ElectricalEntitySensorRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
+		drawSignalPin(front.right(),descriptor.pinDistance);
+
 		descriptor.draw(state,filter);
 	}
 

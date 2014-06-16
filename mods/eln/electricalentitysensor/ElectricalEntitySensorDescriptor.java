@@ -14,6 +14,7 @@ import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.SixNodeDescriptor;
@@ -30,6 +31,7 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
 	double speedFactor = 1 / 0.10;
 	private Obj3DPart detector,haloMask;
 	double maxRange;
+	public float[] pinDistance;
 	public ElectricalEntitySensorDescriptor(String name, Obj3D obj, double maxRange) {
 		super(name, ElectricalEntitySensorElement.class, ElectricalEntitySensorRender.class);
 		this.obj = obj;
@@ -37,6 +39,8 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
 		if(obj != null) {
 			detector = obj.getPart("Detector");
 			haloMask = obj.getPart("HaloMask");
+
+			pinDistance = Utils.getSixNodePinDistance(detector);
 		}
 	}
 

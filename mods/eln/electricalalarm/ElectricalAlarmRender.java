@@ -40,6 +40,7 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
 		
+		drawSignalPin(front,descriptor.pinDistance);
 		interpol.setTarget(warm ? descriptor.rotSpeed : 0f);
 		interpol.stepGraphic();
 		

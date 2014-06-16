@@ -30,6 +30,7 @@ public class ElectricalRedstoneInputRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
+		drawSignalPin(front.right(),descriptor.pinDistance);
 
 		LRDU.Down.glRotateOnX();
 		descriptor.draw(redLevel);

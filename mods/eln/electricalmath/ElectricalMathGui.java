@@ -50,7 +50,8 @@ public class ElectricalMathGui extends GuiContainerEln {
 		expression = newGuiTextField(8, 8, 176 - 16);
 		expression.setText(render.expression);
 		expression.setObserver(this);
-		expression.setComment(new String[]{"Output Voltage Formula"});
+		expression.setComment(new String[]{"Output Voltage Formula",
+											"Inputs are \u00a74A \u00a72B \u00a71C"});
 	}
 	
 	@Override

@@ -47,7 +47,7 @@ public class ElectricalRedstoneInputElement extends SixNodeElement {
 	public NodeElectricalGateOutput outputGate = new NodeElectricalGateOutput("outputGate");
 	public NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess", outputGate);
 	public ElectricalRedstoneInputSlowProcess slowProcess = new ElectricalRedstoneInputSlowProcess(this);
-	LRDU front;
+
 	
 	@Override
 	public boolean canConnectRedstone() {
