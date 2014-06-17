@@ -106,8 +106,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		double energy = getEnergy(stack);
 		byte state = getState(stack);
 		short counter = getCounter(stack);
-		boolean playerInteractRise = Utils.isPlayerInteractRiseWith((EntityPlayerMP)entity,stack);
-		
+	
 		if(getDamage(stack)/damagePerBreakLevel >= 4){
 			if(state != sIdle)
 				setState(stack, sIdle);
@@ -115,12 +114,12 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		}
 
 		switch(state){
-		case sIdle:
+		/*case sIdle:
 			if(playerInteractRise && energy > dischargePower*minimalEnergyTimeToBoot){
 				setState(stack, sBoot);
 				setCounter(stack, bootTime);
 			}
-			break;
+			break;*/
 		case sBoot:
 			if(--counter != 0){
 				setCounter(stack, counter);
@@ -128,12 +127,12 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 				setState(stack,sRun);
 			}
 			break;
-		case sRun:
+		/*case sRun:
 			if(playerInteractRise){
 				setState(stack, sStop);
 				setCounter(stack, stopTime);
 			}			
-			break;
+			break;*/
 		case sStop:
 			if(--counter != 0){
 				setCounter(stack, counter);
@@ -144,7 +143,32 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		}
 	}
 	
-	
+	@Override
+	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world,
+			int x, int y, int z, int side, float vx, float vy, float vz) {
+		if(world.isRemote) return false;
+		boolean playerInteractRise = player.isSneaking();
+		double energy = getEnergy(stack);
+		byte state = getState(stack);
+		short counter = getCounter(stack);
+		switch(state){
+		case sIdle:
+			if(playerInteractRise && energy > dischargePower*minimalEnergyTimeToBoot){
+				setState(stack, sBoot);
+				setCounter(stack, bootTime);
+			}
+			break;
+
+		case sRun:
+			if(playerInteractRise){
+				setState(stack, sStop);
+				setCounter(stack, stopTime);
+			}			
+			break;
+		
+		}
+		return false;
+	}	
 	
 	@Override
 	public void setParent(Item item, int damage) {
@@ -709,16 +733,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	}
 	
 	
-	@Override
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world,
-			int x, int y, int z, int side, float vx, float vy, float vz) {
-		//Utils.clientOpenGui(new GuiChat());
-		/*Side s = FMLCommonHandler.instance().getEffectiveSide();
-		if (s == s.SERVER){
-			setEnergy(stack, energyStorage/3);
-		}*/
-		return false;
-	}
+
 
 
 

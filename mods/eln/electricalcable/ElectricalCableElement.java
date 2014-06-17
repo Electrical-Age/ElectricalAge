@@ -133,7 +133,7 @@ public class ElectricalCableElement extends SixNodeElement implements IThermalDe
 		int id = w.getBlockId(10000, 0, 0);*/
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 		//int i;
-		if(Eln.playerManager.get(entityPlayer).getInteractEnable()) {
+		if(Utils.isPlayerUsingWrench(entityPlayer)) {
 			colorCare = colorCare ^ 1;
 			Utils.addChatMessage(entityPlayer,"Wire color care " + colorCare);
 			sixNode.reconnect();

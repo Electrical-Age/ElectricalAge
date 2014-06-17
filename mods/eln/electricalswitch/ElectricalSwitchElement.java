@@ -157,7 +157,7 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 		
-		if(Eln.playerManager.get(entityPlayer).getInteractEnable()) {
+		if(Utils.isPlayerUsingWrench(entityPlayer)) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);

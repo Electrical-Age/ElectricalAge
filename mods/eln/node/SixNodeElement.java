@@ -73,7 +73,7 @@ public abstract class SixNodeElement implements GhostObserver,IPlayer {
 
 	protected boolean onBlockActivatedRotate(EntityPlayer entityPlayer)
 	{
-		if (Eln.playerManager.get(entityPlayer).getInteractEnable())
+		if (Utils.isPlayerUsingWrench(entityPlayer))
 		{
 			front = front.getNextClockwise();
 			sixNode.reconnect();

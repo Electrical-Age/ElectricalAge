@@ -240,7 +240,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 	{
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 		
-		if(Eln.playerManager.get(entityPlayer).getInteractEnable())
+		if(Utils.isPlayerUsingWrench(entityPlayer))
 		{
 			front = front.getNextClockwise();
 			sixNode.reconnect();

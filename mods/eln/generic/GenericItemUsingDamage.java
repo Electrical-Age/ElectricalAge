@@ -27,7 +27,7 @@ import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDescriptor> extends Item implements IGenericItemUsingDamage {
-	Hashtable<Integer, Descriptor> subItemList = new Hashtable<Integer, Descriptor>();
+	public Hashtable<Integer, Descriptor> subItemList = new Hashtable<Integer, Descriptor>();
 	ArrayList<Integer> orderList = new ArrayList<Integer>();
 
 	Descriptor defaultElement = null;

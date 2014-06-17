@@ -28,12 +28,11 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.StatCollector;
 
 public class ClientKeyHandler {
-	static final String stuffInteractA = "Not used";
-	static final String stuffInteractB = "Not used 42";
-	static final String interact = "Interact";
+
+	static final int idOffset = 3;
 	static final String openWiki = "Open Wiki";
-	private static final int[] keyValues = {Keyboard.KEY_V,Keyboard.KEY_B,Keyboard.KEY_C,Keyboard.KEY_X};
-	private static final String[] desc = {stuffInteractA,stuffInteractB,interact,openWiki};
+	private static final int[] keyValues = {Keyboard.KEY_X};
+	private static final String[] desc = {openWiki};
 	public static final KeyBinding[] keys = new KeyBinding[desc.length];
 	
 	boolean[] states = new boolean[desc.length];
@@ -44,6 +43,7 @@ public class ClientKeyHandler {
 		mc = Minecraft.getMinecraft();
 		
 		for (int i = 0; i < desc.length; ++i) {
+			if(i != 3)
 			states[i] = false;
 			keys[i] = new KeyBinding(desc[i], keyValues[i], StatCollector.translateToLocal("ElectricalAge"));
 			ClientRegistry.registerKeyBinding(keys[i]);
@@ -78,6 +78,7 @@ public class ClientKeyHandler {
 	
 	void setState(int id,boolean state){
 		states[id] = state;
+		id+=idOffset;
 	    if(id == PacketHandler.openWikiId) {	    	
 	    	UtilsClient.clientOpenGui(new Root(null));
 	    }	

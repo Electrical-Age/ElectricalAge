@@ -108,28 +108,8 @@ public class ElectricalVuMeterElement extends SixNodeElement {
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-		if(currentItemStack != null) {
-			Item item = currentItemStack.getItem();
-			/*if(item== Eln.toolsSetItem) {
-				colorCare = colorCare ^ 1;
-				entityPlayer.addChatMessage("Wire color care " + colorCare);
-				sixNode.reconnect();
-			}
-			if(item == Eln.brushItem) {
-				if(currentItemStack.getItemDamage() < BrushItem.maximalUse) {
-					color = currentItemStack.getItemDamage() & 0xF;
-					
-					currentItemStack.setItemDamage(currentItemStack.getItemDamage() + 16);
-					
-					sixNode.reconnect();
-				}
-				else {
-					entityPlayer.addChatMessage("Brush is empty");
-				}
-			}*/
-		}
-		//front = LRDU.fromInt((front.toInt() + 1)&3);
-		if(Eln.playerManager.get(entityPlayer).getInteractEnable()) {
+
+		if(Utils.isPlayerUsingWrench(entityPlayer)) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);

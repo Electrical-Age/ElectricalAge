@@ -130,7 +130,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		if(Eln.playerManager.get(entityPlayer).getInteractEnable()) {
+		if(Utils.isPlayerUsingWrench(entityPlayer)) {
 			rot = rot.getNextClockwise();
 			node.reconnect();
 			return true;	

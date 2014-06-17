@@ -145,7 +145,7 @@ public class ElectricalRedstoneInputElement extends SixNodeElement {
 			}*/
 		}
 		//front = LRDU.fromInt((front.toInt() + 1)&3);
-		if(Eln.playerManager.get(entityPlayer).getInteractEnable()) {
+		if(Utils.isPlayerUsingWrench(entityPlayer)) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);

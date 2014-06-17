@@ -106,7 +106,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	{
 		return getLightState(stack) == 1 ? lightMin : lightMax;
 	}
-	
+	/*
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int par4,
 			boolean par5) {
@@ -132,15 +132,11 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 			setLightState(stack, lightState);
 		}
 		super.onUpdate(stack, world, entity, par4, par5);
-	}
-	/*@Override
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
-		return false;
 	}*/
-	/*@Override
+
+	@Override
 	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float vx, float vy, float vz) {
-		if(world.isRemote == false && Eln.playerManager.get((EntityPlayer) player).getInteractEnable()){
+		if(world.isRemote == false && player.isSneaking()){
 			int lightState = getLightState(stack) + 1;
 			if(lightState > 1) lightState = 0;
 			//((EntityPlayer) entity).addChatMessage("Flashlight !!!");
@@ -162,7 +158,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 		}
 
 		return false;
-	}*/
+	}
 
 	
 	@Override

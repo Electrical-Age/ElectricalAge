@@ -1001,11 +1001,11 @@ public class Utils {
 		return e.posY;
 	}
 
-	public static boolean isPlayerInteractRiseWith(EntityPlayerMP entity,
+	/*public static boolean isPlayerInteractRiseWith(EntityPlayerMP entity,
 			ItemStack stack) {
 
 		return entity.inventory.getCurrentItem() == stack && Eln.playerManager.get(entity).getInteractRise();
-	}
+	}*/
 	
 	
 
@@ -1448,4 +1448,16 @@ public class Utils {
 		return new float[]{Math.abs(obj.zMin*16),Math.abs(obj.zMax*16),Math.abs(obj.yMin*16),Math.abs(obj.yMax*16)};
 	}
 
+	
+	
+	public static boolean isWrench(ItemStack stack){
+		return areSame(stack, Eln.instance.wrenchItemStack) || stack.getDisplayName().toLowerCase().contains("wrench");
+	}
+
+	public static boolean isPlayerUsingWrench(EntityPlayer player) {
+		if(player == null) return false;
+		ItemStack stack = player.inventory.getCurrentItem();
+		if(stack == null) return false;
+		return isWrench(stack);
+	}
 }

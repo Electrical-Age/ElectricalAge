@@ -108,7 +108,7 @@ public class WindTurbineElement extends TransparentNodeElement{
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
 		
-		if(Eln.playerManager.get(entityPlayer).getInteractEnable()){
+		if(Utils.isPlayerUsingWrench(entityPlayer)){
 			cableFront = cableFront.right();
 			reconnect();
 		}

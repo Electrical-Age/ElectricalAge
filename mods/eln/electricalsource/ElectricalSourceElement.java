@@ -125,7 +125,7 @@ public class ElectricalSourceElement extends SixNodeElement {
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-		if(Eln.playerManager.get(entityPlayer).getInteractEnable()) {
+		if(Utils.isPlayerUsingWrench(entityPlayer)) {
 			colorCare = colorCare ^ 1;
 			Utils.addChatMessage(entityPlayer,"Wire color care " + colorCare);
 			sixNode.reconnect();

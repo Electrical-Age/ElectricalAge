@@ -401,7 +401,7 @@ public class Eln {
 
 	public static SharedItem sharedItem;
 	public static SharedItem sharedItemStackOne;
-
+	public static ItemStack wrenchItemStack;
 	public static SixNodeBlock sixNodeBlock;
 	public static TransparentNodeBlock transparentNodeBlock;
 	public static OreBlock oreBlock;
@@ -736,6 +736,7 @@ public class Eln {
 		recipeSixNodeCache();
 		recipeElectricalSensor();
 		recipeThermalSensor();
+		recipeSixNodeMisc();
 		/*
 		 * registerGround(2); registerElectricalSource(3);
 		 * registerElectricalCable(32); registerThermalCable(48);
@@ -828,6 +829,7 @@ public class Eln {
 		Utils.println("Electrical age init done");
 	}
 
+
 	void checkRecipe() {
 		Utils.println("No recipe for ");
 		for (SixNodeDescriptor d : sixNodeItem.subItemList.values()) {
@@ -837,6 +839,18 @@ public class Eln {
 			}
 		}
 		for (TransparentNodeDescriptor d : transparentNodeItem.subItemList.values()) {
+			ItemStack stack = d.newItemStack();
+			if (aRecipeExist(stack) == false) {
+				Utils.println("  " + d.name);
+			}
+		}
+		for (GenericItemUsingDamageDescriptor d : sharedItem.subItemList.values()) {
+			ItemStack stack = d.newItemStack();
+			if (aRecipeExist(stack) == false) {
+				Utils.println("  " + d.name);
+			}
+		}
+		for (GenericItemUsingDamageDescriptor d : sharedItemStackOne.subItemList.values()) {
 			ItemStack stack = d.newItemStack();
 			if (aRecipeExist(stack) == false) {
 				Utils.println("  " + d.name);
@@ -1812,6 +1826,7 @@ public class Eln {
 		}
 
 	}
+	
 
 	void registerElectricalVuMeter(int id) {
 		int subId, completId;
@@ -4603,6 +4618,17 @@ public class Eln {
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 
+		{
+			subId = 48;
+			name = "Wrench";
+			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+					name, new String[] {"Electrical age wrench","Can be used to turn","some small wall blocks"});
+			sharedItem.addElement(subId + (id << 6), desc);
+			
+			wrenchItemStack = desc.newItemStack();
+		}		
+		
+		
 	}
 
 	public DataLogsPrintDescriptor dataLogsPrintDescriptor;
@@ -5018,6 +5044,21 @@ public class Eln {
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
 	}
 
+	private void recipeSixNodeMisc() {
+		addRecipe(findItemStack("Watch"),
+				"crc",
+				"III",
+				Character.valueOf('c'), findItemStack("Iron Cable"),
+				Character.valueOf('r'), new ItemStack(Items.redstone),
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot));	
+		
+		addRecipe(findItemStack("Hub"),
+				"I I",
+				" c ",
+				"I I",
+				Character.valueOf('c'), findItemStack("Copper Cable"),
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot));		
+	}
 	void recipeAutoMiner() {
 		addRecipe(findItemStack("Auto Miner"),
 				"MCM",
@@ -5737,6 +5778,32 @@ public class Eln {
 				Character.valueOf('m'), findItemStack("Electrical Motor"),
 				Character.valueOf('c'), findItemStack("Advanced Chip"));
 
+		
+		addRecipe(findItemStack("Wrench"),
+				" c ",
+				"cc ",
+				"  c",
+				Character.valueOf('c'), new ItemStack(Items.iron_ingot));
+
+		
+		addRecipe(findItemStack("Player Filter"),
+				" g",
+				"gc",
+				" g",
+				Character.valueOf('g'), new ItemStack(Blocks.glass_pane),
+				Character.valueOf('c'), new ItemStack(Items.dye, 1, 2));
+
+		addRecipe(findItemStack("Monster Filter"),
+				" g",
+				"gc",
+				" g",
+				Character.valueOf('g'), new ItemStack(Blocks.glass_pane),
+				Character.valueOf('c'), new ItemStack(Items.dye, 1, 1));
+
+				
+
+		
+		
 	}
 
 	void recipeMacerator() {

@@ -561,6 +561,11 @@ public class SixNode extends Node {
 					}
 				}
 			}
+			
+			/*if(entityPlayer.isSneaking() == false){
+				accepted = false;
+			}*/
+			
 			if (accepted)
 			{
 
