@@ -77,6 +77,15 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 		return getDescriptor(itemStack.getItemDamage());
 	}
 
+	@Override
+	public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p)
+	{
+		Descriptor desc = getDescriptor(s);
+		if (desc == null)
+			return s;
+		return desc.onItemRightClick(s,w,p);
+	}
+
 	/*//caca1.5.1
 	@Override
 	@SideOnly(Side.CLIENT)
@@ -99,7 +108,6 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 	{
 		return "trololol";
 	}
-
 
 	@Override
 	public String getItemStackDisplayName(ItemStack par1ItemStack)
@@ -202,17 +210,17 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 		return true;
 	}
 
-
-
-	 @Override
-	 public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity)
-	 {
-	   if(w.isRemote){
-		   return false;
-	   }
-	   GenericItemUsingDamageDescriptor d = getDescriptor(stack); if(d == null) return true;
-	   return d.onBlockDestroyed( stack,  w, block, x,  y,  z,  entity);
-	 }
+	@Override
+	public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity)
+	{
+		if (w.isRemote) {
+			return false;
+		}
+		GenericItemUsingDamageDescriptor d = getDescriptor(stack);
+		if (d == null)
+			return true;
+		return d.onBlockDestroyed(stack, w, block, x, y, z, entity);
+	}
 
 	@Override
 	public boolean onDroppedByPlayer(ItemStack item, EntityPlayer player)

@@ -135,29 +135,29 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	}*/
 
 	@Override
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float vx, float vy, float vz) {
-		if(world.isRemote == false && player.isSneaking()){
-			int lightState = getLightState(stack) + 1;
+	public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p) {
+		if(w.isRemote == false){
+			int lightState = getLightState(s) + 1;
 			if(lightState > 1) lightState = 0;
 			//((EntityPlayer) entity).addChatMessage("Flashlight !!!");
 			switch (lightState) {
 			case 0:
-				Utils.addChatMessage((EntityPlayerMP)player,"Flashlight OFF");
+				Utils.addChatMessage((EntityPlayerMP)p,"Flashlight OFF");
 				break;
 			case 1:
-				Utils.addChatMessage((EntityPlayerMP)player,"Flashlight ON");
+				Utils.addChatMessage((EntityPlayerMP)p,"Flashlight ON");
 				break;
 			case 2:
-				Utils.addChatMessage((EntityPlayerMP)player,"Flashlight ON-2");
+				Utils.addChatMessage((EntityPlayerMP)p,"Flashlight ON-2");
 				break;
 
 			default:
 				break;
 			}
-			setLightState(stack, lightState);
+			setLightState(s, lightState);
 		}
 
-		return false;
+		return s;
 	}
 
 	

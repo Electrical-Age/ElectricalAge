@@ -44,6 +44,11 @@ public class GenericItemUsingDamageDescriptor {
 
 	}
 
+	public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p)
+	{
+		return s;
+	}
+	
 	public void getSubItems(List list)
 	{
 		ItemStack stack = newItemStack(1);

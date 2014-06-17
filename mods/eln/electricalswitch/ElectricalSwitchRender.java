@@ -44,8 +44,6 @@ public class ElectricalSwitchRender extends SixNodeElementRender {
 		super.draw();
 
 		front.glRotateOnX();
-		descriptor.draw(interpol.get(), UtilsClient.distanceFromClientPlayer(tileEntity), tileEntity);
-
 		if (descriptor.signalSwitch) {
 			drawSignalPin(LRDU.Left, descriptor.pinDistance);
 			drawSignalPin(LRDU.Right, descriptor.pinDistance);
@@ -53,6 +51,9 @@ public class ElectricalSwitchRender extends SixNodeElementRender {
 			drawPowerPin(LRDU.Left, descriptor.pinDistance);
 			drawPowerPin(LRDU.Right, descriptor.pinDistance);
 		}
+		descriptor.draw(interpol.get(), UtilsClient.distanceFromClientPlayer(tileEntity), tileEntity);
+
+
 	}
 
 	@Override

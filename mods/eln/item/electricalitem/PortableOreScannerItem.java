@@ -143,31 +143,31 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		}
 	}
 	
+
 	@Override
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world,
-			int x, int y, int z, int side, float vx, float vy, float vz) {
-		if(world.isRemote) return false;
-		boolean playerInteractRise = player.isSneaking();
-		double energy = getEnergy(stack);
-		byte state = getState(stack);
-		short counter = getCounter(stack);
+	public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p) {
+		if(w.isRemote) return s;
+		boolean playerInteractRise = true;
+		double energy = getEnergy(s);
+		byte state = getState(s);
+		short counter = getCounter(s);
 		switch(state){
 		case sIdle:
 			if(playerInteractRise && energy > dischargePower*minimalEnergyTimeToBoot){
-				setState(stack, sBoot);
-				setCounter(stack, bootTime);
+				setState(s, sBoot);
+				setCounter(s, bootTime);
 			}
 			break;
 
 		case sRun:
 			if(playerInteractRise){
-				setState(stack, sStop);
-				setCounter(stack, stopTime);
+				setState(s, sStop);
+				setCounter(s, stopTime);
 			}			
 			break;
 		
 		}
-		return false;
+		return s;
 	}	
 	
 	@Override

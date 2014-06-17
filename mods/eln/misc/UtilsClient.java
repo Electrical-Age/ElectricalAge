@@ -231,6 +231,7 @@ public class UtilsClient {
 	}
 
 	public static void drawIcon(ItemRenderType type) {
+		enableBlend();
 		if (type == ItemRenderType.INVENTORY) {
 
 			disableCulling();
@@ -277,6 +278,7 @@ public class UtilsClient {
 			GL11.glEnd();
 			enableCulling();
 		}
+		disableBlend();
 	}
 
 	public static void drawIcon(ItemRenderType type, String icon) {
