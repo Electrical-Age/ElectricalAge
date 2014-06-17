@@ -7,17 +7,21 @@ import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.SixNodeEntity;
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
@@ -26,10 +30,16 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
+import net.minecraftforge.client.MinecraftForgeClient;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
+
+import com.sun.org.apache.bcel.internal.generic.InstructionConstants.Clinit;
 
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 
@@ -193,17 +203,17 @@ public class UtilsClient {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glDepthMask(false);
 		GL11.glDisable(GL11.GL_ALPHA_TEST);
-/*
-		Utils.println(GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB) + " " 
-				+ GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA) + " " 
-				+ GL11.glGetInteger(GL14.GL_BLEND_DST_RGB) + " " 
-				+ GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA) + " " 
-				+ GL11.glIsEnabled(GL11.GL_BLEND));*/
+		/*
+				Utils.println(GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB) + " " 
+						+ GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA) + " " 
+						+ GL11.glGetInteger(GL14.GL_BLEND_DST_RGB) + " " 
+						+ GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA) + " " 
+						+ GL11.glIsEnabled(GL11.GL_BLEND));*/
 
 		//Utils.println(GL11.glGetInteger(GL11.GL_BLEND_SRC) + " " + GL11.glGetInteger(GL11.GL_BLEND_DST) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
-	     /* GL11.glEnable(2977);
-	      GL11.glEnable(3042);*/
-	  //    OpenGlHelper.glBlendFunc(770, 770, 771, 771);
+		/* GL11.glEnable(2977);
+		 GL11.glEnable(3042);*/
+		//    OpenGlHelper.glBlendFunc(770, 770, 771, 771);
 	}
 
 	public static void disableBlend() {
@@ -216,7 +226,7 @@ public class UtilsClient {
 		//GL11.glBlendFunc(GL11.GL_SRC_COLOR, GL11.GL_ONE_MINUS_SRC_COLOR);
 		//GL11.glBlendFunc(1, 1);
 		//GL11.glDisable(3042);
-		
+
 		//OpenGlHelper.glBlendFunc(1, 1, 1, 1);
 	}
 
@@ -414,70 +424,70 @@ public class UtilsClient {
 		GL11.glPopMatrix();
 
 	}
-	
-	static public void drawConnectionPinSixNode(float d,float w,float h){
-		
-		d+=0.1f;
-		d*=0.0625f;
-		w*=0.0625f;
-		h*=0.0625f;
-		float w2 = w*0.5f;
+
+	static public void drawConnectionPinSixNode(float d, float w, float h) {
+
+		d += 0.1f;
+		d *= 0.0625f;
+		w *= 0.0625f;
+		h *= 0.0625f;
+		float w2 = w * 0.5f;
 		disableTexture();
 		GL11.glBegin(GL11.GL_QUADS);
-			GL11.glVertex3f(-w2,d , 0);
-			GL11.glVertex3f(w2, d, 0);
-			GL11.glVertex3f(w2, d, h);
-			GL11.glVertex3f(-w2, d, h);
+		GL11.glVertex3f(-w2, d, 0);
+		GL11.glVertex3f(w2, d, 0);
+		GL11.glVertex3f(w2, d, h);
+		GL11.glVertex3f(-w2, d, h);
 		GL11.glEnd();
 		enableTexture();
-			
+
 	}
-	
-	static public void drawConnectionPinSixNode(LRDU front,float[] dList,float w,float h){
+
+	static public void drawConnectionPinSixNode(LRDU front, float[] dList, float w, float h) {
 		//front.glRotateOnX();
 		//drawConnectionPinSixNode(d[front.toInt()], w, h);
 		float d = dList[front.toInt()];
-		d+=0.04f;
-		d*=0.0625f;
-		w*=0.0625f;
-		h*=0.0625f;
-		float w2 = w*0.5f;
+		d += 0.04f;
+		d *= 0.0625f;
+		w *= 0.0625f;
+		h *= 0.0625f;
+		float w2 = w * 0.5f;
 		disableTexture();
 		GL11.glBegin(GL11.GL_QUADS);
 
-			switch (front) {
-			case Left:
-				GL11.glVertex3f(0, -w2, -d);				
-				GL11.glVertex3f(0, w2, -d);
-				GL11.glVertex3f(h, w2, -d);
-				GL11.glVertex3f(h, -w2, -d);				
-				break;
-			case Right:
-				GL11.glVertex3f(h, -w2, d);				
-				GL11.glVertex3f(h, w2, d);
-				GL11.glVertex3f(0, w2, d);
-				GL11.glVertex3f(0, -w2, d);						
-				break;
-			case Down:
-				GL11.glVertex3f(h, -d, -w2);				
-				GL11.glVertex3f(h, -d, w2);
-				GL11.glVertex3f(0, -d, w2);
-				GL11.glVertex3f(0, -d, -w2);
-				break;
-			case Up:
-				GL11.glVertex3f(0, d, -w2);
-				GL11.glVertex3f(0, d, w2);
-				GL11.glVertex3f(h, d, w2);
-				GL11.glVertex3f(h, d, -w2);	
-				break;
+		switch (front) {
+		case Left:
+			GL11.glVertex3f(0, -w2, -d);
+			GL11.glVertex3f(0, w2, -d);
+			GL11.glVertex3f(h, w2, -d);
+			GL11.glVertex3f(h, -w2, -d);
+			break;
+		case Right:
+			GL11.glVertex3f(h, -w2, d);
+			GL11.glVertex3f(h, w2, d);
+			GL11.glVertex3f(0, w2, d);
+			GL11.glVertex3f(0, -w2, d);
+			break;
+		case Down:
+			GL11.glVertex3f(h, -d, -w2);
+			GL11.glVertex3f(h, -d, w2);
+			GL11.glVertex3f(0, -d, w2);
+			GL11.glVertex3f(0, -d, -w2);
+			break;
+		case Up:
+			GL11.glVertex3f(0, d, -w2);
+			GL11.glVertex3f(0, d, w2);
+			GL11.glVertex3f(h, d, w2);
+			GL11.glVertex3f(h, d, -w2);
+			break;
 
-			default:
-				break;
-			}
+		default:
+			break;
+		}
 
 		GL11.glEnd();
 		enableTexture();
-					
+
 	}
 
 	protected static RenderItem itemRendererr;
@@ -503,26 +513,34 @@ public class UtilsClient {
 	public static void drawItemStack(ItemStack par1ItemStack, int x, int y, String par4Str, boolean gui)
 	{
 		RenderItem itemRenderer = getItemRender();
-
+		// GL11.glDisable(3042);
+		if (gui) {
+			GL11.glEnable(32826);
+			RenderHelper.enableGUIStandardItemLighting();
+		}
 		// GL11.glTranslatef(0.0F, 0.0F, 32.0F);
-
+		//ForgeHooksClient.renderInventoryItem(new RenderBlocks(),Minecraft.getMinecraft().getTextureManager(),par1ItemStack,false,0,x,y);
 		itemRenderer.zLevel = 400.0F;
+		//		ForgeHooksClient.renderInventoryItem(renderBlocks, engine, item, inColor, zLevel, x, y)
 		FontRenderer font = null;
-		if (par1ItemStack != null){
+		if (par1ItemStack != null) {
 			Item i = par1ItemStack.getItem();
-			if(i == null) return;
+			if (i == null)
+				return;
 			font = i.getFontRenderer(par1ItemStack);
 		}
 		if (font == null)
 			font = mc().fontRenderer;
 		itemRenderer.renderItemAndEffectIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y);
-		itemRenderer.renderItemOverlayIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y, par4Str);
+		//itemRenderer.renderItemOverlayIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y, par4Str);
 
 		itemRenderer.zLevel = 0.0F;
 
 		if (gui) {
-			GL11.glDisable(GL11.GL_LIGHTING);
+			RenderHelper.disableStandardItemLighting();
+			GL11.glDisable(32826);
 		}
+
 	}
 
 	public static double clientDistanceTo(Entity e) {
@@ -532,11 +550,13 @@ public class UtilsClient {
 		double x = (c.posX - e.posX), y = (c.posY - e.posY), z = (c.posZ - e.posZ);
 		return Math.sqrt(x * x + y * y + z * z);
 	}
+
 	public static int getLight(World w, int x, int y, int z) {
 		int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.Block, x, y, z);
 		int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, x, y, z) - w.calculateSkylightSubtracted(0f);
 		return Math.max(b, s);
 	}
+
 	public static void disableDepthTest() {
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 	}
@@ -545,6 +565,7 @@ public class UtilsClient {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 
 	}
+
 	public static void sendPacketToServer(ByteArrayOutputStream bos)
 	{
 		C17PacketCustomPayload packet = new C17PacketCustomPayload(Eln.channelName, bos.toByteArray());
@@ -552,9 +573,12 @@ public class UtilsClient {
 		Eln.eventChannel.sendToServer(new FMLProxyPacket(packet));
 		//Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new FMLProxyPacket(packet));
 	}
+
 	private static int uuid = Integer.MIN_VALUE;
+
 	public static int getUuid() {
-		if(uuid > -1) uuid = Integer.MIN_VALUE;
+		if (uuid > -1)
+			uuid = Integer.MIN_VALUE;
 		return uuid++;
 	}
 }

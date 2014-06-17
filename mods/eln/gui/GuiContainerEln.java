@@ -2,6 +2,9 @@ package mods.eln.gui;
 
 import java.util.ArrayList;
 
+import javax.swing.text.Keymap;
+
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.gui.GuiTextFieldEln.GuiTextFieldElnObserver;
@@ -94,7 +97,7 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 	protected void keyTyped(char key, int code)
     {
 		helper.keyTyped(key, code);
-		if(code != 18){
+		if(code == Keyboard.KEY_ESCAPE){
 			super.keyTyped(key, code);
 		}
     }

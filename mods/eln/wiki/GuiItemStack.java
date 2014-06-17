@@ -33,7 +33,7 @@ public class GuiItemStack extends Gui implements IGuiObject{
 	int posX,posY,h,w;
 	ItemStack stack;
 
-	GuiHelper helper;
+	public GuiHelper helper;
 	static final ResourceLocation slotSkin = new ResourceLocation("textures/gui/container/furnace.png");
 	
 

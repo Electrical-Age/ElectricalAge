@@ -90,6 +90,7 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		GL11.glTranslatef(-0.3f, -0.1f, 0f);
+		GL11.glRotatef(90, 1, 0, 0);
 		draw(0.7f, ledDefault);
 	}
 	

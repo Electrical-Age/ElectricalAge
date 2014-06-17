@@ -1006,6 +1006,8 @@ public class Utils {
 
 		return entity.inventory.getCurrentItem() == stack && Eln.playerManager.get(entity).getInteractRise();
 	}
+	
+	
 
 	public static boolean isCreative(EntityPlayerMP entityPlayer) {
 

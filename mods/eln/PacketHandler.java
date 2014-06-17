@@ -53,8 +53,8 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 
 	public static final byte stuffInteractAId = 0;
 	public static final byte stuffInteractBId = 1;
-	public static final byte openWikiId = 2;
-	public static final byte interactId = 3;
+	public static final byte openWikiId = 3;
+	public static final byte interactId = 2;
 
 	@SubscribeEvent
 	public void onServerPacket(ServerCustomPacketEvent event) {

@@ -23,6 +23,12 @@ public class RecipesList {
 		listOfList.add(this);
 	}
 
+	public ArrayList<Recipe> getRecipes(){
+		return recipeList;
+	}
+	public ArrayList<ItemStack> getMachines(){
+		return machineList;
+	}
 	public void addRecipe(Recipe recipe)
 	{
 		recipeList.add(recipe);

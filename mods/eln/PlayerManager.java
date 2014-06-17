@@ -25,9 +25,10 @@ public class PlayerManager {
 		private int timeout;
 		public boolean interactEnable = false;
 		public boolean interactRise = false,interactRiseBuffer = false;
-
-		public PlayerMetadata() {
+		EntityPlayer player;
+		public PlayerMetadata(EntityPlayer p) {
 			timeoutReset();
+			this.player = p;
 		}
 
 		public boolean needDelete() {
@@ -58,6 +59,7 @@ public class PlayerManager {
 		public boolean getInteractEnable() {
 			timeoutReset();
 			return interactEnable;
+			//return player.isSneaking();
 		}
 		public boolean getInteractRise() {
 			timeoutReset();
@@ -97,7 +99,7 @@ public class PlayerManager {
 		PlayerMetadata metadata = metadataHash.get(player);
 		if (metadata != null)
 			return metadata;
-		metadataHash.put(player, new PlayerMetadata());
+		metadataHash.put(player, new PlayerMetadata(player));
 		return metadataHash.get(player);
 
 	}

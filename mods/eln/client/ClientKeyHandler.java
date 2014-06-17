@@ -28,11 +28,11 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.StatCollector;
 
 public class ClientKeyHandler {
-	static final String stuffInteractA = "stuffInteractA";
-	static final String stuffInteractB = "stuffInteractB++";
-	static final String interact = "ElnInteract";
+	static final String stuffInteractA = "Not used";
+	static final String stuffInteractB = "Not used 42";
+	static final String interact = "Interact";
 	static final String openWiki = "Open Wiki";
-	private static final int[] keyValues = {Keyboard.KEY_V,Keyboard.KEY_B,Keyboard.KEY_X,Keyboard.KEY_C};
+	private static final int[] keyValues = {Keyboard.KEY_V,Keyboard.KEY_B,Keyboard.KEY_C,Keyboard.KEY_X};
 	private static final String[] desc = {stuffInteractA,stuffInteractB,interact,openWiki};
 	public static final KeyBinding[] keys = new KeyBinding[desc.length];
 	
@@ -45,7 +45,7 @@ public class ClientKeyHandler {
 		
 		for (int i = 0; i < desc.length; ++i) {
 			states[i] = false;
-			keys[i] = new KeyBinding(desc[i], keyValues[i], StatCollector.translateToLocal("MiaouuuXXX"));
+			keys[i] = new KeyBinding(desc[i], keyValues[i], StatCollector.translateToLocal("ElectricalAge"));
 			ClientRegistry.registerKeyBinding(keys[i]);
 		}
 	}

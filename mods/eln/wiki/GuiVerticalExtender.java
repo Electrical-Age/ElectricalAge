@@ -61,7 +61,7 @@ public class GuiVerticalExtender extends Gui implements IGuiObject,IGuiObjectObs
 		
 	}
 	
-	GuiHelper helper;
+	public GuiHelper helper;
 	
 	IGuiObjectObserver observer;
 	

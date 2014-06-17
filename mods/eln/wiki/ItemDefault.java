@@ -179,6 +179,10 @@ public class ItemDefault extends Default{
 					}
 					x+=18;
 					extender.add(new GuiItemStack(x, y	, r.getOutputCopy()[0],helper));
+					
+					x += 22;
+					extender.add(new GuiLabel(x, y+4, Utils.plotEnergy("Cost", r.energy)));
+					
 					counter = (counter + 1) % 1;										
 				}
 				y+=(int)(18*1.3);
@@ -206,6 +210,10 @@ public class ItemDefault extends Default{
 					}
 					x+=18;
 					extender.add(new GuiItemStack(x, y	, r.getOutputCopy()[0],helper));
+					
+					x += 22;
+					extender.add(new GuiLabel(x, y+4, Utils.plotEnergy("Cost", r.energy)));
+					
 					counter = (counter + 1) % 1;							
 				}
 				y+=(int)(18*1.3);
