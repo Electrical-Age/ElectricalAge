@@ -986,8 +986,13 @@ public class Utils {
 
 	public static boolean areSame(ItemStack stack, ItemStack output) {
 		// TODO Auto-generated method stub
-		return (stack.getItem() == output.getItem() && stack.getItemDamage() == output.getItemDamage())
-				|| (OreDictionary.getOreID(stack) == OreDictionary.getOreID(output) && OreDictionary.getOreID(output) != -1);
+		try {
+			return (stack.getItem() == output.getItem() && stack.getItemDamage() == output.getItemDamage())
+					|| (OreDictionary.getOreID(stack) == OreDictionary.getOreID(output) && OreDictionary.getOreID(output) != -1);
+			
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	public static Vec3 getVec05(Coordonate c) {

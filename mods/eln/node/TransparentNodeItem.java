@@ -58,7 +58,9 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
     	y += v[1];
     	z += v[2];
     	
-    	if(world.getBlock(x, y, z) != Blocks.air) return false;
+    	Block bb = world.getBlock(x, y, z);
+    	if(bb.isReplaceable(world, x, y, z));
+    	//if(world.getBlock(x, y, z) != Blocks.air) return false;
     	
     	Coordonate coord = new Coordonate(x,y,z,world);
     	
