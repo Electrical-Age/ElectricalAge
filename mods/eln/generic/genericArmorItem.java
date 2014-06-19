@@ -7,11 +7,28 @@ import net.minecraft.item.ItemArmor.ArmorMaterial;
 import net.minecraft.item.ItemStack;
 
 
-public class genericArmorItem  extends ItemArmor{
+public class genericArmorItem  extends ItemArmor {
 
+	public enum ArmourType {
+		Helmet(0),
+		Chestplate(1),
+		Leggings(2),
+		Boots(3);
+		
+		private int _Value;
+		
+		private ArmourType(int Value) {
+			this._Value = Value;
+		}
+		
+		public int getValue() {
+			return _Value;
+		}
+	}
+	
 	public genericArmorItem(ArmorMaterial par2EnumArmorMaterial,
-			int par3, int par4,String t1,String t2) {
-		super(par2EnumArmorMaterial, par3, par4);
+			int par3, ArmourType Type,String t1,String t2) {
+		super(par2EnumArmorMaterial, par3, Type.getValue());
 		this.t1 = t1;
 		this.t2 = t2;
 
