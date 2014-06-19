@@ -22,13 +22,17 @@ import mods.eln.wiki.Data;
 public class ElectricalArmor extends genericArmorItem implements IItemEnergyBattery ,ISpecialArmor{
 
 	public ElectricalArmor(ArmorMaterial par2EnumArmorMaterial,
-			int par3, int par4, 
-			String t1, String t2,//String icon,
-			double energyStorage,double chargePower,
-			double ratioMax,double ratioMaxEnergy,
+			int par3,
+			ArmourType type, 
+			String t1,
+			String t2,//String icon,
+			double energyStorage,
+			double chargePower,
+			double ratioMax,
+			double ratioMaxEnergy,
 			double energyPerDamage
 			) {
-		super(par2EnumArmorMaterial, par3, par4, t1, t2);
+		super(par2EnumArmorMaterial, par3, type, t1, t2);
 		//rIcon = new ResourceLocation("eln",icon);
 		this.chargePower = chargePower;
 		this.energyStorage = energyStorage;

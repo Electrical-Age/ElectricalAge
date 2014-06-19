@@ -67,6 +67,7 @@ import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptorWithComment;
 import mods.eln.generic.SharedItem;
 import mods.eln.generic.genericArmorItem;
+import mods.eln.generic.genericArmorItem.ArmourType;
 import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
@@ -390,14 +391,10 @@ public class Eln {
 
 	public static CreativeTabs creativeTab;
 
-
-	public static ItemArmor helmetCopper, plateCopper, legsCopper, bootsCopper;
-
-	public static ItemArmor helmetECoal, plateECoal, legsECoal, bootsECoal;
-
 	public static Item swordCopper, hoeCopper, shovelCopper, pickaxeCopper, axeCopper;
 
-
+	public static ItemArmor helmetCopper, plateCopper, legsCopper, bootsCopper;
+	public static ItemArmor helmetECoal, plateECoal, legsECoal, bootsECoal;
 
 	public static SharedItem sharedItem;
 	public static SharedItem sharedItemStackOne;
@@ -3454,28 +3451,28 @@ public class Eln {
 
 		{
 			name = "Copper Helmet";
-			helmetCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, 0, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_helmet").setCreativeTab(creativeTab);
+			helmetCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Helmet, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_helmet").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(helmetCopper, "Eln." +name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(helmetCopper));
 			LanguageRegistry.addName(helmetCopper, name);
 		}
 		{
 			name = "Copper Chestplate";
-			plateCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, 1, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_chestplate").setCreativeTab(creativeTab);
+			plateCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Chestplate, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_chestplate").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(plateCopper, "Eln." +name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(plateCopper));
 			LanguageRegistry.addName(plateCopper, name);
 		}
 		{
 			name = "Copper Leggings";
-			legsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, 2, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_leggings").setCreativeTab(creativeTab);
+			legsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Leggings, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_leggings").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(legsCopper, "Eln." +name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(legsCopper));
 			LanguageRegistry.addName(legsCopper, name);
 		}
 		{
 			name = "Copper Boots";
-			bootsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, 3, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_boots").setCreativeTab(creativeTab);
+			bootsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Boots, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_boots").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(bootsCopper, "Eln." +name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(bootsCopper));			
 			LanguageRegistry.addName(bootsCopper, name);
@@ -3492,7 +3489,7 @@ public class Eln {
 			name = "E-Coal Helmet";
 			armor = 2;
 			armorMarge = 1;
-			helmetECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, 0, t1, t2,
+			helmetECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Helmet, t1, t2,
 					(armor + armorMarge) * energyPerDamage, 250.0,// double
 																	// energyStorage,double
 																	// chargePower
@@ -3509,7 +3506,7 @@ public class Eln {
 			name = "E-Coal Chestplate";
 			armor = 6;
 			armorMarge = 2;
-			plateECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, 1, t1, t2,
+			plateECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Chestplate, t1, t2,
 					(armor + armorMarge) * energyPerDamage, 250.0,// double
 																	// energyStorage,double
 																	// chargePower
@@ -3526,7 +3523,7 @@ public class Eln {
 			name = "E-Coal Leggings";
 			armor = 5;
 			armorMarge = 2;
-			legsECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, 2, t1, t2,
+			legsECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Leggings, t1, t2,
 					(armor + armorMarge) * energyPerDamage, 250.0,// double
 																	// energyStorage,double
 																	// chargePower
@@ -3543,7 +3540,7 @@ public class Eln {
 			name = "E-Coal Boots";
 			armor = 2;
 			armorMarge = 1;
-			bootsECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, 3, t1, t2,
+			bootsECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Boots, t1, t2,
 					(armor + armorMarge) * energyPerDamage, 250.0,// double
 																	// energyStorage,double
 																	// chargePower
