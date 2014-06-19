@@ -270,7 +270,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mod(modid = "Eln", version = "BETA-1.4.6b")
+@Mod(modid = "Eln", version = "BETA-1.4.6c")
 //@Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0b")
 //@NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
@@ -4543,14 +4543,16 @@ public class Eln {
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
 			Data.addResource(desc.newItemStack());
+			addToOre("dustSilicon", desc.newItemStack());
 		}
 		{
-			subId = 17;
+			subId = 17; 
 			name = "Silicon Ingot";
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
 			Data.addResource(desc.newItemStack());
+			addToOre("ingotSilicon", desc.newItemStack());
 		}
 		/*
 		 * { subId = 20; name = "Macerator Sorter Module";
