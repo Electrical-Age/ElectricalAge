@@ -54,7 +54,7 @@ public class LampSocketRender extends SixNodeElementRender {
 		// TODO Auto-generated constructor stub
 	}
 
-	SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);;
+	SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
 	boolean grounded = true;
 	public boolean poweredByLampSupply;
 

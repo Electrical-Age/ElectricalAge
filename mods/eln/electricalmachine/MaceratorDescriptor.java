@@ -51,7 +51,7 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
 		rot2.draw(handle.counter, 0f, 0f, 1f);
 		
 	
-				
+		//UtilsClient.enableDepthTest();		
 		GL11.glScalef(0.7f, 0.7f, 0.7f);
 		UtilsClient.drawEntityItem(inEntity, 0.0, 0.4f, 0f, handle.itemCounter, 1f);	
 		UtilsClient.drawEntityItem(outEntity, 0.0, -0.5f, 0f, 130 + handle.itemCounter, 1f);	

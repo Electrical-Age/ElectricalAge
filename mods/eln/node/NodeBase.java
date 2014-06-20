@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import cpw.mods.fml.common.FMLCommonHandler;
 
 import mods.eln.Eln;
+import mods.eln.GuiHandler;
 import mods.eln.INBTTReady;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -297,7 +298,7 @@ public abstract class NodeBase {
     	}
     	if(hasGui(side))
     	{
-			entityPlayer.openGui( Eln.instance, side.getInt(), coordonate.world(),coordonate.x , coordonate.y, coordonate.z);
+			entityPlayer.openGui( Eln.instance, GuiHandler.nodeBaseOpen + side.getInt(), coordonate.world(),coordonate.x , coordonate.y, coordonate.z);
 			return true;
     	}
     		

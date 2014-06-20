@@ -66,7 +66,8 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
+		list.add("Charge speed: " + (int) chargePower + "W");
+		list.add("Discharge speed: " + (int) dischargePower + "W");
 		list.add(Utils.plotEnergy("Energy Stored:", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
 	}
 

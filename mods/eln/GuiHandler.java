@@ -27,7 +27,7 @@ public class GuiHandler implements IGuiHandler {
 			int x, int y, int z) {
 		NodeBlockEntity tileEntity = (NodeBlockEntity) world
 				.getTileEntity(x, y, z);
-		Direction side = Direction.fromInt(id);
+		Direction side = Direction.fromInt(id-nodeBaseOpen);
 		Object container = tileEntity.newContainer(side, player);
 		if (container == null) {
 			try {
@@ -51,21 +51,24 @@ public class GuiHandler implements IGuiHandler {
 		return container;
 
 	}
-	public static final int genericOpen = 6;
+	public static final int genericOpen = 5977;
+	public static final int nodeBaseOpen = 6935;
 	// returns an instance of the Gui you made earlier
 	@Override
 	public Object getClientGuiElement(int id, EntityPlayer player, World world,
 			int x, int y, int z) {
-		if(id >= 0 && id <= 5){		
-			NodeBlockEntity tileEntity = (NodeBlockEntity) world
-					.getTileEntity(x, y, z);
-			Direction side = Direction.fromInt(id);
-			if(tileEntity == null) return null;
-			return tileEntity.newGuiDraw(side, player);
-		}
 		if(id == genericOpen){
 			return UtilsClient.guiLastOpen;
 		}
+		
+		if(id >= nodeBaseOpen && id <= nodeBaseOpen + 5){		
+			NodeBlockEntity tileEntity = (NodeBlockEntity) world
+					.getTileEntity(x, y, z);
+			Direction side = Direction.fromInt(id-nodeBaseOpen);
+			if(tileEntity == null) return null;
+			return tileEntity.newGuiDraw(side, player);
+		}
+
 		return null;
 	}
 }

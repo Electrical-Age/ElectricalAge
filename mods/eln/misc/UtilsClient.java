@@ -201,8 +201,9 @@ public class UtilsClient {
 	public static void enableBlend() {
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glDepthMask(false);
-		GL11.glDisable(GL11.GL_ALPHA_TEST);
+		//GL11.glDepthMask(true);
+		GL11.glAlphaFunc(GL11.GL_GREATER, 0.02f);
+		//GL11.glDisable(GL11.GL_ALPHA_TEST);
 		/*
 				Utils.println(GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB) + " " 
 						+ GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA) + " " 
@@ -217,9 +218,10 @@ public class UtilsClient {
 	}
 
 	public static void disableBlend() {
+		GL11.glDisable(GL11.GL_BLEND);
 		// TODO Auto-generated method stub
-		GL11.glDepthMask(true);
-		GL11.glEnable(GL11.GL_ALPHA_TEST);
+		//GL11.glDepthMask(true);
+		//GL11.glEnable(GL11.GL_ALPHA_TEST);
 		//GL11.glDisable(GL11.GL_BLEND);
 		//GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		//	Utils.println(GL11.glGetInteger(GL11.GL_BLEND_SRC) + " " + GL11.glGetInteger(GL11.GL_BLEND_DST) + " " + GL11.glIsEnabled(GL11.GL_BLEND));

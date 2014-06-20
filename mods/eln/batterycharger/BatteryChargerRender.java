@@ -76,7 +76,7 @@ public class BatteryChargerRender extends SixNodeElementRender {
 		entityItem.motionX = 0.0;
 		entityItem.motionY = 0.0;
 		entityItem.motionZ =0.0;
-		
+		//scale *= 10;
 		Render var10 = null;
 		var10 = RenderManager.instance.getEntityRenderObject(entityItem);
 		GL11.glPushMatrix();

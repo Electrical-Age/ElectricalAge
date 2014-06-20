@@ -195,7 +195,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
+		list.add("Discharge speed: " + (int) dischargePower + "W");
 		list.add(Utils.plotEnergy("Energy Stored:", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
 	}
 
@@ -313,6 +313,8 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			switch (type) {
 			case ENTITY:
 				e = null;//(Entity)data[1];
+				GL11.glTranslatef(0, -0.2f, 0);
+				GL11.glRotatef(90,0,0,1);
 				break;
 			case EQUIPPED:
 				e = (Entity)data[1];

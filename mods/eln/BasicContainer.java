@@ -4,6 +4,8 @@ import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.SlotWithSkin;
 import mods.eln.gui.ISlotSkin.SlotSkin;
+import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -90,4 +92,17 @@ public class BasicContainer extends Container {
 		return stack;
 	}
 
+	
+	@Override
+	public ItemStack slotClick(int arg0, int arg1, int arg2, EntityPlayer arg3) {
+		if(arg0 >= this.inventorySlots.size()){
+			System.out.println("Damned !!! What happen ?");
+			Utils.addChatMessage(arg3, "Damned ! sorry, it's a debug");
+			Utils.addChatMessage(arg3, "message from Electrical age");
+			Utils.addChatMessage(arg3, "Could you send me a message about that ?");
+			Utils.addChatMessage(arg3, "Thanks : D");
+			return null;
+		}
+		return super.slotClick(arg0, arg1, arg2, arg3);
+	}
 }

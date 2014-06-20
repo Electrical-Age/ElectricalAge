@@ -19,6 +19,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.NodeBase;
 import mods.eln.node.SixNodeDescriptor;
@@ -48,6 +49,7 @@ public class ElectricalRelayRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
+		//UtilsClient.enableDepthTest();
 		drawSignalPin(front,new float[]{2.5f,2.5f,2.5f,2.5f});
 		front.glRotateOnX();
 		

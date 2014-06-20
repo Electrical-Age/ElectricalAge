@@ -52,6 +52,7 @@ public class SixNodeElementInventory implements IInventory, INBTTReady{
 	@Override
 	public ItemStack getStackInSlot(int slot) {
 		// TODO Auto-generated method stub
+		if(slot >= getInv().length) return null;
 		return getInv()[slot];
 	}
 
@@ -88,10 +89,16 @@ public class SixNodeElementInventory implements IInventory, INBTTReady{
 
 	@Override
 	public void setInventorySlotContents(int slot, ItemStack stack) {
-		getInv()[slot] = stack;
-        if (stack != null && stack.stackSize > getInventoryStackLimit()) {
-                stack.stackSize = getInventoryStackLimit();
-        }   	
+		try {
+			getInv()[slot] = stack;
+	        if (stack != null && stack.stackSize > getInventoryStackLimit()) {
+	                stack.stackSize = getInventoryStackLimit();
+	        }   			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	
+	        
 	}
 
 
