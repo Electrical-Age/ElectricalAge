@@ -13,7 +13,7 @@ Multiple electrical sources
 > Furnaces, Solar panels, Wind turbines, Batteries, Capacitors, ...
 	
 Break the cube
-> Cables, sensors, actuators, alarms, etc. can be placed on each face (outer and inner) of a cube, witch allows a significant reduction of the consumed space by electrical installations.
+> Cables, sensors, actuators, alarms, etc. can be placed on each face (outer and inner) of a cube, which allows a significant reduction of the consumed space by electrical installations.
 	
 Night-lighting revisited
 > Lamps, switches, captors, ...
