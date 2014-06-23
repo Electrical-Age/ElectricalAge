@@ -13,16 +13,16 @@ Multiple electrical sources
 > Furnaces, Solar panels, Wind turbines, Batteries, Capacitors, ...
 	
 Break the cube
-> Cables, sensors, actuators, alarms, etc. can be placed on each face (outer and inner) of a cube, witch allows a significant reduction of the consumed space by electrical installations.
+> Cables, sensors, actuators, alarms, etc. can be placed on each face (outer and inner) of a cube, which allows a significant reduction of the consumed space by electrical installations.
 	
 Night-lighting revisited
 > Lamps, switches, captors, ...
 	
 Small and big electricals consumers
-> From the lamps, electrical furnaces,... to the miners, transporters, ...
+> From the lamps, electrical furnaces... to the miners, transporters...
 
 Incredible tools
-> XRay scanner, flashlight, portable mining drill, ...
+> XRay scanner, flashlight, portable mining drill...
 
 Genericity
 > Old redstones circuits can be exploited with electrical<->redstones converters.
