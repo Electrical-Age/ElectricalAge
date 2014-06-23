@@ -470,15 +470,7 @@ public class Simulator /* ,IPacketHandler*/ {
 	@SubscribeEvent
 	public void tick(ServerTickEvent event) {
 		if(event.phase != Phase.START) return;
-		
-		//Minecraft.getMinecraft().mcProfiler.startSection("Miaou !!");
-		
-/*
-		for (ElectricalLoad load : electricalLoadList)
-		{
-			load.invC = 1/load.C;
-			load.invRp = 1/load.Rp;
-		}*/
+	
 	
 		
 		long stackStart;

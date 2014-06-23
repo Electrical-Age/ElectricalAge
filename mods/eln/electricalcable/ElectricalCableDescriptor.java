@@ -100,10 +100,10 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 		}
 	}
 	
-	public void applyTo(ElectricalLoad electricalLoad, boolean grounded) {
+	public void applyTo(ElectricalLoad electricalLoad, boolean grounded,double rsFactor) {
 		ElectricalCableDescriptor cableDescriptor = this;
 
-		electricalLoad.setRs(cableDescriptor.electricalRs);
+		electricalLoad.setRs(cableDescriptor.electricalRs*rsFactor);
 		electricalLoad.setMinimalC(Eln.simulator);		
 			
 		if(grounded) {
@@ -115,7 +115,9 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor implements IVol
 			electricalLoad.infinitRp();
 		}		
 	}	
-
+	public void applyTo(ElectricalLoad electricalLoad, boolean grounded) {
+		applyTo(electricalLoad, grounded, 1);
+	}	
 	public void applyTo(ElectricalResistor resistor) {
 		resistor.setR(electricalRs);
 	}

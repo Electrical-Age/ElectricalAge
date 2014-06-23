@@ -251,8 +251,8 @@ public class LampSocketElement extends SixNodeElement{
 		}
 		else
 		{
-			cableDescriptor.applyTo(positiveLoad, false);
-			cableDescriptor.applyTo(negativeLoad, grounded);
+			cableDescriptor.applyTo(positiveLoad, false,5);
+			cableDescriptor.applyTo(negativeLoad, grounded,5);
 		}
 
 		lampDescriptor = (LampDescriptor)  Utils.getItemObject(lamp);
