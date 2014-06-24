@@ -5,7 +5,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import mods.eln.transformer.TransformerElement;
 
 
 public class SharedFloat {

@@ -8,7 +8,6 @@ import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.IGuiObject;
 import mods.eln.gui.IGuiObject.IGuiObjectObserver;
-import mods.eln.solver.Equation.Add;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;

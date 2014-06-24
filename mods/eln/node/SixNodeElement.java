@@ -21,6 +21,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalConnection;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.mna.component.Component;
 import mods.eln.sound.IPlayer;
 import mods.eln.sound.SoundCommand;
 import mods.eln.sound.SoundServer;
@@ -40,7 +41,7 @@ public abstract class SixNodeElement implements GhostObserver,IPlayer {
 	public ArrayList<IProcess> slowProcessList = new ArrayList<IProcess>(4);
 
 	public ArrayList<IProcess> electricalProcessList = new ArrayList<IProcess>(4);
-	public ArrayList<ElectricalConnection> electricalConnectionList = new ArrayList<ElectricalConnection>(4);
+	public ArrayList<Component> electricComponentList = new ArrayList<Component>(4);
 	public ArrayList<NodeElectricalLoad> electricalLoadList = new ArrayList<NodeElectricalLoad>(4);
 
 	public ArrayList<IProcess> thermalProcessList = new ArrayList<IProcess>(4);
@@ -99,7 +100,7 @@ public abstract class SixNodeElement implements GhostObserver,IPlayer {
 
 	public void connectJob()
 	{
-		Eln.simulator.addAllElectricalConnection(electricalConnectionList);
+		Eln.simulator.addAllElectricalComponent(electricComponentList);
 		Eln.simulator.addAllThermalConnection(thermalConnectionList);
 
 		for (NodeElectricalLoad load : electricalLoadList)
@@ -344,7 +345,7 @@ public abstract class SixNodeElement implements GhostObserver,IPlayer {
 
 	public void disconnectJob()
 	{
-		Eln.simulator.removeAllElectricalConnection(electricalConnectionList);
+		Eln.simulator.removeAllElectricalComponent(electricComponentList);
 		Eln.simulator.removeAllThermalConnection(thermalConnectionList);
 
 		for (NodeElectricalLoad load : electricalLoadList)

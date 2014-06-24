@@ -21,7 +21,7 @@ import mods.eln.GuiHandler;
 import mods.eln.PacketHandler;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
-import mods.eln.wiki.Root;
+//import mods.eln.wiki.Root;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.settings.KeyBinding;
@@ -80,7 +80,7 @@ public class ClientKeyHandler {
 		states[id] = state;
 		id+=idOffset;
 	    if(id == PacketHandler.openWikiId) {	    	
-	    	UtilsClient.clientOpenGui(new Root(null));
+//	    	UtilsClient.clientOpenGui(new Root(null));
 	    }	
 		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(64);

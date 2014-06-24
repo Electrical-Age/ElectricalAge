@@ -2,7 +2,6 @@ package mods.eln.generic;
 
 import java.util.List;
 
-import mods.eln.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;

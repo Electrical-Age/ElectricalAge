@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import mods.eln.Eln;
-import mods.eln.electricalfurnace.ElectricalFurnaceProcess;
+//import mods.eln.electricalfurnace.ElectricalFurnaceProcess;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 
@@ -85,19 +85,12 @@ public class RecipesList {
 				ItemStack stack = (ItemStack)pairs.getValue();
 				ItemStack li = (ItemStack)pairs.getKey();
 				if(Utils.areSame(output,stack)){
-					list.add(recipe = new Recipe(li.copy(), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
-					recipe.setMachineList(Eln.instance.furnaceList);
+//					list.add(recipe = new Recipe(li.copy(), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
+//					recipe.setMachineList(Eln.instance.furnaceList);
 				}
 		    }
 		}
-	/*	for(Object entry : furnaceRecipes.getSmeltingList().entrySet()){
-			Recipe recipe = null;
-			Entry<ItemStack, ItemStack> e = (Entry<ItemStack, ItemStack>)entry;
-			if(((ItemStack)e.getValue()).getItem() == output.getItem()){
-				list.add(recipe = new Recipe(e.getKey().copy(), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
-				recipe.setMachineList(Eln.instance.furnaceList);
-			}
-		}*/
+
 				
 		return list;
 	}
@@ -118,8 +111,8 @@ public class RecipesList {
 		if(smeltResult != null) {
 			ItemStack input1 = input.copy();
 			input1.stackSize = 1;
-			list.add(smeltRecipe = new Recipe(input1, smeltResult, ElectricalFurnaceProcess.energyNeededPerSmelt));
-			smeltRecipe.machineList.addAll(Eln.instance.furnaceList);
+//			list.add(smeltRecipe = new Recipe(input1, smeltResult, ElectricalFurnaceProcess.energyNeededPerSmelt));
+//			smeltRecipe.machineList.addAll(Eln.instance.furnaceList);
 		}
 		
 		return list;

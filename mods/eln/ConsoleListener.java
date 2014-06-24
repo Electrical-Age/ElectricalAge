@@ -32,7 +32,7 @@ public class ConsoleListener extends CommandBase{
 	{
 		String a = astring[0].toLowerCase();
 		if(a.equals("opt")){
-			Eln.simulator.setSimplify(!astring[1].equals("0"));
+			//Eln.simulator.setSimplify(!astring[1].equals("0"));
 		}else if(a.equals("aging")){
 			SaveConfig.instance.batteryAging = (!astring[1].equals("0"));
 			SaveConfig.instance.electricalLampAging = (!astring[1].equals("0"));

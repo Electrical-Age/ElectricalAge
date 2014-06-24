@@ -14,6 +14,8 @@ import com.google.common.primitives.Bytes;
 
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
+import mods.eln.sim.mna.RootSystem;
+import mods.eln.sim.mna.component.Component;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
@@ -36,11 +38,13 @@ import cpw.mods.fml.relauncher.Side;
 public class Simulator /* ,IPacketHandler*/ {
 	
 	
+	RootSystem mna;
+	
 	private ArrayList<IProcess> slowProcessList;
 
 	private ArrayList<IProcess> electricalProcessList;
-	private ArrayList<ElectricalConnection> electricalConnectionList;
-	private ArrayList<ElectricalLoad> electricalLoadList;
+	/*private ArrayList<ElectricalConnection> electricalConnectionList;
+	private ArrayList<ElectricalLoad> electricalLoadList;*/
 	
 
 	private ArrayList<IProcess> thermalProcessList;
@@ -96,13 +100,15 @@ public class Simulator /* ,IPacketHandler*/ {
 		
 
 		FMLCommonHandler.instance().bus().register(this);
+		
+		mna = new RootSystem(1f/electricalHz);
 	
 		slowProcessList = new ArrayList<IProcess>();
 	
 		
 		electricalProcessList = new ArrayList<IProcess>();
-		electricalConnectionList = new ArrayList<ElectricalConnection>();
-		electricalLoadList = new ArrayList<ElectricalLoad>();
+//		electricalConnectionList = new ArrayList<ElectricalConnection>();
+//		electricalLoadList = new ArrayList<ElectricalLoad>();
 
 	
 		thermalProcessList = new ArrayList<IProcess>();
@@ -111,68 +117,68 @@ public class Simulator /* ,IPacketHandler*/ {
 
 		run = false;
 		
-		setSimplify(true);
+
 	}
 	
 	public void init()
 	{
 		nodeCount = 0;
+		
+		mna = new RootSystem(1f/electricalHz);
 
 		slowProcessList.clear();
 		
 		electricalProcessList.clear();
-		electricalConnectionList.clear();
-		electricalLoadList.clear();
+//		electricalConnectionList.clear();
+//		electricalLoadList.clear();
 
 		thermalProcessList.clear();
 		thermalConnectionList.clear();
 		thermalLoadList.clear();
 		
 		
-		workingElectricalConnectionList.clear();
-		workingElectricalLoadList.clear();
-		simplifiedElectricalBranchList.clear();
-		
+
 		
 		run = true;
 	}	
 	public void stop()
 	{
 		nodeCount = 0;
+		
+		mna = null;
 				
 		slowProcessList.clear();
 		
 		electricalProcessList.clear();
-		electricalConnectionList.clear();
-		electricalLoadList.clear();
+//		electricalConnectionList.clear();
+//		electricalLoadList.clear();
 
 		thermalProcessList.clear();
 		thermalConnectionList.clear();
 		thermalLoadList.clear();
-		
-		workingElectricalConnectionList.clear();
-		workingElectricalLoadList.clear();
-		simplifiedElectricalBranchList.clear();
+
 		
 		run = false;
 	}
 	
-	public void addElectricalConnection(ElectricalConnection connection)
+	public void addElectricalComponent(Component c)
 	{
-		if(connection!=null){
-			electricalConnectionList.add(connection);
-			connection.L1.electricalConnections.add(connection);
-			connection.L2.electricalConnections.add(connection);
-			workingGenerated = false;
+		if(c!=null){
+			mna.addComponent(c);
+//			electricalConnectionList.add(connection);
+//			connection.L1.electricalConnections.add(connection);
+//			connection.L2.electricalConnections.add(connection);
 		}
 	}
-	public void removeElectricalConnection(ElectricalConnection connection)
+	public void removeElectricalComponent(Component c)
 	{
-		if(connection!=null){
-			electricalConnectionList.remove(connection);
-			connection.L1.electricalConnections.remove(connection);
-			connection.L2.electricalConnections.remove(connection);
-			workingGenerated = false;
+		if(c!=null){
+			mna.removeComponent(c);
+
+			
+//			electricalConnectionList.remove(connection);
+//			connection.L1.electricalConnections.remove(connection);
+//			connection.L2.electricalConnections.remove(connection);
 		}
 
 
@@ -191,16 +197,16 @@ public class Simulator /* ,IPacketHandler*/ {
 	public void addElectricalLoad(ElectricalLoad load)
 	{
 		if(load!=null){
-			electricalLoadList.add(load);
-			workingGenerated = false;
+			mna.addState(load);
+			//electricalLoadList.add(load);
 		}
 		
 	}
 	public void removeElectricalLoad(ElectricalLoad load)
 	{
 		if(load!=null){
-			electricalLoadList.remove(load);
-			workingGenerated = false;
+			mna.removeState(load);
+			//electricalLoadList.remove(load);
 		}
 	}
 	
@@ -240,23 +246,37 @@ public class Simulator /* ,IPacketHandler*/ {
 		if(process!=null)thermalProcessList.remove(process);
 	}
 	
-	
 	public void addAllElectricalConnection(ArrayList<ElectricalConnection> connection)
 	{
 		if(connection!=null){
 			for (ElectricalConnection c : connection) {
-				addElectricalConnection(c);
+				addElectricalComponent(c);
 			}
-			workingGenerated = false;
 		}
 	}
 	public void removeAllElectricalConnection(ArrayList<ElectricalConnection> connection)
 	{
 		if(connection!=null){
 			for (ElectricalConnection c : connection) {
-				removeElectricalConnection(c);
+				removeElectricalComponent(c);
 			}
-			workingGenerated = false;
+		}
+	}
+	
+	public void addAllElectricalComponent(ArrayList<Component> cList)
+	{
+		if(cList!=null){
+			for (Component c : cList) {
+				addElectricalComponent(c);
+			}
+		}
+	}
+	public void removeAllElectricalComponent(ArrayList<Component> cList)
+	{
+		if(cList!=null){
+			for (Component c : cList) {
+				removeElectricalComponent(c);
+			}
 		}
 	}
 	
@@ -273,15 +293,17 @@ public class Simulator /* ,IPacketHandler*/ {
 	public void addAllElectricalLoad(ArrayList<ElectricalLoad> load)
 	{
 		if(load!=null){
-			electricalLoadList.addAll(load);
-			workingGenerated = false;
+			for(ElectricalLoad l : load){
+				addElectricalLoad(l);
+			}
 		}
 	}
 	public void removeAllElectricalLoad(ArrayList<ElectricalLoad> load)
 	{
 		if(load!=null){
-			electricalLoadList.removeAll(load);
-			workingGenerated = false;
+			for(ElectricalLoad l : load){
+				removeElectricalLoad(l);
+			}
 		}
 	}
 	
@@ -322,148 +344,14 @@ public class Simulator /* ,IPacketHandler*/ {
 	}	
 	
 	
-	private ArrayList<ElectricalConnection> workingElectricalConnectionList = new ArrayList<ElectricalConnection>();
-	private ArrayList<ElectricalLoad> workingElectricalLoadList = new ArrayList<ElectricalLoad>();
-	private ArrayList<SimplifiedElectricalBranch> simplifiedElectricalBranchList = new ArrayList<SimplifiedElectricalBranch>();
-	
+
 	int simplifyCMin = 0;
 	int simplifyCMax = 100;
-	
-	void generateSimplify(){
-		destroySimplify();
-	//	ArrayList<ElectricalLoad> extremity = new ArrayList<ElectricalLoad>(16);
-		ArrayList<ElectricalLoad> lAList = new ArrayList<ElectricalLoad>(16);
-		ArrayList<ElectricalLoad> lBList = new ArrayList<ElectricalLoad>(16);		
-		for (ElectricalConnection c : electricalConnectionList) {
-			c.resetTag();
-		}
-		for (ElectricalLoad l : electricalLoadList) {
-			l.resetTag();
-			l.resetTag2();
-		}
-		for (ElectricalLoad lStart : electricalLoadList) {
-			if((!lStart.isTaged()) && (!lStart.isTaged2()) && lStart.getSimplifyAuthorized() && lStart.electricalConnections.size() == 2 && false == lStart.electricalConnections.get(0).isTaged() && false == lStart.electricalConnections.get(1).isTaged()){
-				int cCount = 0;
-				int lCount = 0;
-				ElectricalConnection c/*,cA,cB*/;
-				ElectricalLoad l = null,lA,lB;
-				lAList.clear();
-				lBList.clear();
-				
-				cCount = 2;
-				
-				c = lStart.electricalConnections.get(0);
-				if(c.L1 == lStart)
-					l = c.L2;
-				else
-					l = c.L1;
 
-				while(cCount < simplifyCMax && l != lStart && l.electricalConnections.size() == 2 && l.getSimplifyAuthorized() && (!l.isTaged()) && (!l.isTaged2())){
-					lAList.add(l);cCount++;
-					if(l.electricalConnections.get(0) == c)
-						c = l.electricalConnections.get(1);
-					else
-						c = l.electricalConnections.get(0);
-					
-					if(c.L1 == l)
-						l = c.L2;
-					else
-						l = c.L1;									
-				}
-			//	cA = c;
-				lA = l;
-				
-				if(l != lStart){
-					c = lStart.electricalConnections.get(1);
-					if(c.L1 == lStart)
-						l = c.L2;
-					else
-						l = c.L1;
-					
-					while(cCount < simplifyCMax && l != lStart && l.electricalConnections.size() == 2 && l.getSimplifyAuthorized() && (!l.isTaged()) && (!l.isTaged2())){
-						lBList.add(l);cCount++;
-						if(l.electricalConnections.get(0) == c)
-							c = l.electricalConnections.get(1);
-						else
-							c = l.electricalConnections.get(0);
-						
-						if(c.L1 == l)
-							l = c.L2;
-						else
-							l = c.L1;
-					}
-				}
-					//cB = c;
-				lB = l;
-				
-				if(cCount >= simplifyCMin){
-					//extremity.add(lB);
-					//extremity.add(lA);
-					ElectricalLoad[] lList = new ElectricalLoad[1+lAList.size() + lBList.size()];
-					
-					int idx;
-					
-					idx = 0;	
-					for (;idx < lAList.size();idx++) {
-						lList[idx] = lAList.get(lAList.size() - 1 - idx);
-					}
-					lList[idx++] = lStart;
-					for (ElectricalLoad e : lBList) {
-						lList[idx++] = e;
-					}
-					
-					for (ElectricalLoad e : lList) {
-						e.setTag();
-						for (ElectricalConnection e2 : e.electricalConnections) {
-							if(e2.isTaged()){
-								int i = 0;
-								i++;
-							}
-							e2.setTag();
-						}
-					}
-					
-					lA.setTag2();
-					lB.setTag2();
-					
-					SimplifiedElectricalBranch b = new SimplifiedElectricalBranch(lList,lA,lB);
-					simplifiedElectricalBranchList.add(b);
-					
-					//Utils.println("Simplify    C:" + cCount);
-					
-					
-				}
-				
-				
-				
-			}
-		}
-		
-		//electricalProcessList.addAll(simplifiedElectricalBranchList);
-		
-		for (ElectricalConnection c : electricalConnectionList) {
-			if(!c.isTaged()){
-				workingElectricalConnectionList.add(c);
-			}
-		}
-		
-		
-		for (ElectricalLoad l : electricalLoadList) {
-			if(!l.isTaged()){
-				workingElectricalLoadList.add(l);
-			}
-		}
-	}
 	
-	void destroySimplify(){
-		simplifiedElectricalBranchList.clear();
-		workingElectricalConnectionList.clear();
-		workingElectricalLoadList.clear();
-	}
 
 	//private ArrayList<Double> conectionSerialConductance = new ArrayList<Double>();
-	boolean simplifyEnable;
-	boolean workingGenerated;
+
 	double avgTickTime = 0;
 	long electricalNsStack = 0,thermalNsStack = 0,slowNsStack = 0;
 
@@ -481,126 +369,22 @@ public class Simulator /* ,IPacketHandler*/ {
 		double thermalTime = 1.0f/fps/commonOverSampling/thermalOverSampling;
 		
 		
-
-		if(!workingGenerated){
-			destroySimplify();
-			
-			if(simplifyEnable){
-				
-				generateSimplify();
-			    long generateTIme = System.nanoTime() - startTime;
-				
-				
-				double eOpt = 0;
-				for (SimplifiedElectricalBranch b : simplifiedElectricalBranchList) {
-					eOpt += b.energyStored();
-				}
-				double eNow = 0,eNotSimplified = 0;
-				for (ElectricalLoad l : workingElectricalLoadList) {
-					double e = l.energyStored();
-					eNow += e;
-					if(l.getSimplifyAuthorized()){
-						eNotSimplified += e;
-					}
-				}
-				
-				Utils.println("Simplify! " + Utils.plotValue(eOpt,"J, ") + Utils.plotValue(eNotSimplified,"J left   ") + Utils.plotValue(eNow,"J remain in all     in ") + (generateTIme/1000) + "us");
-			}
-			else{
-				Utils.println("NO simplify!");
-				workingElectricalLoadList.addAll(electricalLoadList);
-				workingElectricalConnectionList.addAll(electricalConnectionList);
-			}
-			workingGenerated = true;
-		}
 		
-		for (SimplifiedElectricalBranch e : simplifiedElectricalBranchList) {
-			e.preStep();
-		}
 
 		
 		
 		for(int idx2 = 0;idx2<commonOverSampling;idx2++)
 		{
 			stackStart = System.nanoTime();
-			for (ElectricalConnection c : electricalConnectionList)
-			{
-				c.serialConductance = 1/(c.L2.getRs() + c.L1.getRs());
-			}	
+
 				 
-			for(int idx = 0;idx<electricalOverSampling-1;idx++)
+			for(int idx = 0;idx<electricalOverSampling;idx++)
 			{
-			    for (ElectricalConnection c : workingElectricalConnectionList)
-			    {
-			    	double i;
-			    	ElectricalLoad L1 = c.L1,L2 = c.L2;
-			    	
-			    	i = (L2.Uc - L1.Uc)*c.serialConductance;
-	    	
-			    	L1.IcTemp += i;
-			    	L2.IcTemp -= i;
-
-			    }
-			    
-			    for (SimplifiedElectricalBranch b : simplifiedElectricalBranchList) {
-					b.stepA();
-				}
-			    for (IProcess process : electricalProcessList)
-			    {
-			    	process.process(electricalTime);
-			    }				   
-			    for (ElectricalLoad load : workingElectricalLoadList)
-			    {
-			    	//load.IcTemp -= load.Uc*load.invRp;
-			    	load.Uc += (load.IcTemp - load.Uc*load.invRp) * electricalTime*load.invC;
-			    	load.IcTemp = 0;
-			    }
+				mna.step();
 
 			}
 			
 			
-			
-		    for (ElectricalLoad load : workingElectricalLoadList)
-		    {
-		    	load.Isp = 0;
-		    }
-		    for (ElectricalConnection c : workingElectricalConnectionList)
-		    {
-		    	double i,absi,iPow2;
-		    	ElectricalLoad L1 = c.L1,L2 = c.L2;
-		    	
-		    	i = (L2.Uc - L1.Uc)*c.serialConductance;
-		    	absi = Math.abs(i);
-		    	iPow2 = i*i;
-		    	
-		    	L1.IcTemp += i;
-		    	L2.IcTemp -= i;
-		    	
-		    	L1.IrsTemp += absi;
-		    	L2.IrsTemp += absi;
-		    	
-		    	L1.IrsPow2Temp += iPow2;
-		    	L2.IrsPow2Temp += iPow2;
-		    }
-		    for (SimplifiedElectricalBranch b : simplifiedElectricalBranchList) {
-				b.stepB();
-			}
-		    for (IProcess process : electricalProcessList)
-		    {
-		    	process.process(electricalTime);
-		    }				   
-		    for (ElectricalLoad load : workingElectricalLoadList)
-		    {
-		    	load.IcTemp -= load.Uc*load.invRp;
-		    	load.Uc += load.IcTemp*electricalTime*load.invC;
-
-		    	load.Irs = load.IrsTemp;
-		    	load.Ic = load.IcTemp;
-		    	load.IrsPow2 = load.IrsPow2Temp;
-		    	load.IrsTemp = 0;
-		    	load.IcTemp = 0;
-		    	load.IrsPow2Temp = 0;
-		    }
 
 		    electricalNsStack += System.nanoTime() - stackStart;
 		    stackStart = System.nanoTime();
@@ -643,9 +427,7 @@ public class Simulator /* ,IPacketHandler*/ {
 
 		}
 		
-		for (SimplifiedElectricalBranch e : simplifiedElectricalBranchList) {
-			e.postStep();
-		}
+
 		
 		long slowProcessTime = System.nanoTime();
 		stackStart = System.nanoTime();
@@ -659,7 +441,7 @@ public class Simulator /* ,IPacketHandler*/ {
 		avgTickTime += 1.0/20*((int)(System.nanoTime()-startTime)/1000);
 		
 		
-		for (ElectricalLoad l : electricalLoadList) {
+		/*for (ElectricalLoad l : electricalLoadList) {
 			if(Double.isNaN(l.Uc)){
 				for(int i = 0;i < 1;i++){
 					Utils.print("NAN");
@@ -669,9 +451,9 @@ public class Simulator /* ,IPacketHandler*/ {
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-				}*/
+				}*//*
 			}
-		}
+		}*/
 		
 		if(++printTimeCounter == 20){
 			
@@ -683,11 +465,10 @@ public class Simulator /* ,IPacketHandler*/ {
 			Utils.println(
 					//"ticks " + new DecimalFormat("#").format((int)avgTickTime) + " us (" + (int)(slowProcessTime/1000) + "us SP) for "
 					"ticks " + new DecimalFormat("#").format((int)avgTickTime) + " us" + "  E " + electricalNsStack/1000  + "  T " + thermalNsStack/1000  + "  S " + slowNsStack/1000 
-					+ "    " + simplifiedElectricalBranchList.size()  + " EB" 
+/*
 					+ "    " + electricalLoadList.size()  + " EL" 
-					+ "    " + workingElectricalLoadList.size()  + " WL" 
-					+ "    " + electricalConnectionList.size()  + " EC" 
-					+ "    " + workingElectricalConnectionList.size()  + " WC" 
+					+ "    " + electricalConnectionList.size()  + " EC" */
+				+ "    " + mna.getSubSystemCount() + " SS"	
 				+ "    " + electricalProcessList.size()  + " EP" 
 				+ "    " + thermalLoadList.size()  + " TL" 
 				+ "    " + thermalConnectionList.size()  + " TC" 
@@ -703,11 +484,6 @@ public class Simulator /* ,IPacketHandler*/ {
 		//Minecraft.getMinecraft().mcProfiler.endSection();
 	}
 	private int printTimeCounter = 0;
-
-	public void setSimplify(boolean b) {
-		simplifyEnable = b;
-		workingGenerated = false;
-	}
 
 	
 }

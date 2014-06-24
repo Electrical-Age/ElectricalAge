@@ -335,7 +335,7 @@ public abstract class NodeBase {
 				{
 					eCon = new ElectricalConnection(eLoad,otherELoad);
 					
-					Eln.simulator.addElectricalConnection(eCon);
+					Eln.simulator.addElectricalComponent(eCon);
 				}
 			}
 			ThermalLoad tLoad;

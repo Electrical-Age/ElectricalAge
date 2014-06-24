@@ -7,11 +7,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class NodeElectricalLoad extends ElectricalLoad implements INBTTReady{
 	String name;
-	public NodeElectricalLoad(String name,double Uc,double Rp,double Rs,double C)
-	{
-		super(Uc,Rp,Rs,C);
-		this.name = name;
-	}
+
 	public NodeElectricalLoad(String name)
 	{
 		super();
@@ -20,15 +16,15 @@ public class NodeElectricalLoad extends ElectricalLoad implements INBTTReady{
 		
     public void readFromNBT(NBTTagCompound nbttagcompound, String str)
     {
-    	Uc = nbttagcompound.getFloat(str + name + "Uc");	    
-    	if(Double.isNaN(Uc)) Uc = 0;
-    	if(Uc == Float.NEGATIVE_INFINITY) Uc = 0;
-    	if(Uc == Float.POSITIVE_INFINITY) Uc = 0;
+    	setU(nbttagcompound.getFloat(str + name + "Uc"));	    
+    	if(Double.isNaN(getU())) setU(0);
+    	if(getU() == Float.NEGATIVE_INFINITY) setU(0);
+    	if(getU() == Float.POSITIVE_INFINITY) setU(0);
     }
 
     public void writeToNBT(NBTTagCompound nbttagcompound, String str)
     {
-    	nbttagcompound.setFloat(str + name + "Uc", (float)Uc);
+    	nbttagcompound.setFloat(str + name + "Uc", (float)getU());
     }
     
 
