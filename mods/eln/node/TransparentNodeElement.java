@@ -22,7 +22,6 @@ import mods.eln.Eln;
 import mods.eln.INBTTReady;
 import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostObserver;
-import mods.eln.lampsocket.LampSocketElement;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;

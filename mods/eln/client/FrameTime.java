@@ -14,7 +14,6 @@ import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
-import mods.eln.item.MeterItemArmor;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.sim.ElectricalConnection;

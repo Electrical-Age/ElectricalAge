@@ -484,7 +484,7 @@ public class SixNode extends Node {
 					ElectricalConnection eCon;
 					eCon = new ElectricalConnection(eLoad, otherELoad);
 
-					Eln.simulator.addElectricalConnection(eCon);
+					Eln.simulator.addElectricalComponent(eCon);
 
 					internalElectricalConnectionList.add(eCon);
 				}

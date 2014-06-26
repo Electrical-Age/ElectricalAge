@@ -28,11 +28,10 @@ public class NodeConnection {
 
 	public void destroy()
 	{
-		
-		Eln.simulator.removeElectricalConnection(EC);
+		Eln.simulator.removeElectricalComponent(EC);
 		Eln.simulator.removeThermalConnection(TC);
 		
-		N1.externalDisconnect(dir1, lrdu1);
-		N2.externalDisconnect(dir2, lrdu2);
+		if(N1 != null) N1.externalDisconnect(dir1, lrdu1);
+		if(N2 != null) N2.externalDisconnect(dir2, lrdu2);
 	}
 }

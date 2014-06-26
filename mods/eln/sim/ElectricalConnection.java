@@ -1,38 +1,36 @@
 package mods.eln.sim;
 
 import mods.eln.Eln;
+import mods.eln.sim.mna.component.InterSystem;
 
 
-public class ElectricalConnection{
+public class ElectricalConnection extends InterSystem{
 	public ElectricalConnection(ElectricalLoad L1,ElectricalLoad L2)
 	{
 		this.L1 = L1;
 		this.L2 = L2;
 	}
 	
-	final public ElectricalLoad L1;
-	final public ElectricalLoad L2;
+	ElectricalLoad L1,L2;
 	
-	public double serialConductance; //simulator use only
-
-	public void removeFromSimulator() {
-		Eln.simulator.removeElectricalConnection(this);	
+	public void notifyRsChange() {
+		double R = ((ElectricalLoad) aPin).getRs() + ((ElectricalLoad) bPin).getRs();
+		setR(R);	
 	}
 
-	public void addToSimulator() {
-		Eln.simulator.addElectricalConnection(this);	
+	@Override
+	public void onAddToRootSystem() {
+		this.connectTo(L1, L2);
+	/*	((ElectricalLoad) aPin).electricalConnections.add(this);
+		((ElectricalLoad) bPin).electricalConnections.add(this);*/
+		notifyRsChange();
 	}
 	
-	private boolean tag = false;
-	
-	public boolean isTaged() {
-		return tag;
+	@Override
+	public void onRemovefromRootSystem() {
+		this.breakConnection();
+	/*	((ElectricalLoad) aPin).electricalConnections.remove(this);
+		((ElectricalLoad) bPin).electricalConnections.remove(this);*/
 	}
 
-	public void resetTag() {
-		tag = false;
-	}
-	public void setTag(){
-		tag = true;
-	}
 }

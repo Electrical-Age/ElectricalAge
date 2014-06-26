@@ -17,7 +17,6 @@ import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.ghost.GhostGroup;
-import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
