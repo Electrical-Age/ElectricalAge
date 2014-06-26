@@ -1,25 +1,17 @@
 package mods.eln;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import org.omg.CORBA.OMGVMCID;
-
-import mods.eln.TreeResinCollector.TreeResinCollectorBlock;
 import mods.eln.TreeResinCollector.TreeResinCollectorDescriptor;
-import mods.eln.TreeResinCollector.TreeResinCollectorTileEntity;
 import mods.eln.autominer.AutoMinerDescriptor;
 import mods.eln.battery.BatteryDescriptor;
 import mods.eln.batterycharger.BatteryChargerDescriptor;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
-import mods.eln.client.ClientProxy;
-import mods.eln.client.FrameTime;
 import mods.eln.client.SoundLoader;
 import mods.eln.computercraftio.ComputerCraftIoDescriptor;
 import mods.eln.computercraftio.PeripheralHandler;
@@ -34,23 +26,17 @@ import mods.eln.electricaldatalogger.DataLogsPrintDescriptor;
 import mods.eln.electricaldatalogger.ElectricalDataLoggerDescriptor;
 import mods.eln.electricalentitysensor.ElectricalEntitySensorDescriptor;
 import mods.eln.electricalfurnace.ElectricalFurnaceDescriptor;
-import mods.eln.electricalfurnace.ElectricalFurnaceElement;
-import mods.eln.electricalfurnace.ElectricalFurnaceRender;
 import mods.eln.electricalgatesource.ElectricalGateSourceDescriptor;
 import mods.eln.electricallightsensor.ElectricalLightSensorDescriptor;
 import mods.eln.electricalmachine.CompressorDescriptor;
+import mods.eln.electricalmachine.MaceratorDescriptor;
 import mods.eln.electricalmachine.MagnetizerDescriptor;
 import mods.eln.electricalmachine.PlateMachineDescriptor;
-import mods.eln.electricalmachine.ElectricalMachineDescriptor;
-import mods.eln.electricalmachine.MaceratorDescriptor;
 import mods.eln.electricalmath.ElectricalMathDescriptor;
 import mods.eln.electricalredstoneinput.ElectricalRedstoneInputDescriptor;
 import mods.eln.electricalredstoneoutput.ElectricalRedstoneOutputDescriptor;
 import mods.eln.electricalrelay.ElectricalRelayDescriptor;
-import mods.eln.electricalrelay.ElectricalRelayElement;
 import mods.eln.electricalsource.ElectricalSourceDescriptor;
-import mods.eln.electricalsource.ElectricalSourceElement;
-import mods.eln.electricalsource.ElectricalSourceRender;
 import mods.eln.electricalswitch.ElectricalSwitchDescriptor;
 import mods.eln.electricaltimeout.ElectricalTimeoutDescriptor;
 import mods.eln.electricalvumeter.ElectricalVuMeterDescriptor;
@@ -61,8 +47,6 @@ import mods.eln.electricasensor.ElectricalSensorDescriptor;
 import mods.eln.elnhttpserver.ElnHttpServer;
 import mods.eln.entity.ReplicatorEntity;
 import mods.eln.entity.ReplicatorPopProcess;
-import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
-import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptorWithComment;
 import mods.eln.generic.SharedItem;
@@ -72,18 +56,12 @@ import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.groundcable.GroundCableDescriptor;
-import mods.eln.groundcable.GroundCableElement;
-import mods.eln.groundcable.GroundCableRender;
 import mods.eln.heatfurnace.HeatFurnaceDescriptor;
-import mods.eln.heatfurnace.HeatFurnaceElement;
-import mods.eln.heatfurnace.HeatFurnaceRender;
 import mods.eln.hub.HubDescriptor;
-import mods.eln.inductor.InductorDescriptor;
 import mods.eln.intelligenttransformer.IntelligentTransformerElement;
 import mods.eln.intelligenttransformer.IntelligentTransformerRender;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.item.CombustionChamber;
-import mods.eln.item.DynamoDescriptor;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.item.FerromagneticCoreDescriptor;
@@ -91,26 +69,19 @@ import mods.eln.item.HeatingCorpElement;
 import mods.eln.item.ItemAxeEln;
 import mods.eln.item.ItemPickaxeEln;
 import mods.eln.item.LampDescriptor;
-import mods.eln.item.MaceratorSorterDescriptor;
 import mods.eln.item.MachineBoosterDescriptor;
-import mods.eln.item.MeterItemArmor;
 import mods.eln.item.MiningPipeDescriptor;
 import mods.eln.item.OreScanner;
 import mods.eln.item.OverHeatingProtectionDescriptor;
 import mods.eln.item.OverVoltageProtectionDescriptor;
 import mods.eln.item.SolarTrackerDescriptor;
-import mods.eln.item.ThermalIsolatorElement;
-import mods.eln.item.ToolsSetItem;
 import mods.eln.item.TreeResin;
-import mods.eln.item.LampDescriptor.Type;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
 import mods.eln.item.electricalitem.BatteryItem;
 import mods.eln.item.electricalitem.ElectricalArmor;
 import mods.eln.item.electricalitem.ElectricalAxe;
 import mods.eln.item.electricalitem.ElectricalLampItem;
 import mods.eln.item.electricalitem.ElectricalPickaxe;
-import mods.eln.item.electricalitem.ElectricalTool;
-import mods.eln.item.electricalitem.LampItem;
 import mods.eln.item.electricalitem.PortableOreScannerItem;
 import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage.OreScannerConfigElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
@@ -130,7 +101,6 @@ import mods.eln.misc.FunctionTable;
 import mods.eln.misc.FunctionTableYProtect;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.LiveDataManager;
-import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3DFolder;
 import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
@@ -140,36 +110,28 @@ import mods.eln.misc.WindProcess;
 import mods.eln.modbusrtu.ModbusRtuDescriptor;
 import mods.eln.modbusrtu.ModbusServer;
 import mods.eln.mppt.MpptDescriptor;
-import mods.eln.node.NodeBlock;
-import mods.eln.node.NodeBlockItemWithSubTypes;
 import mods.eln.node.NodeManager;
 import mods.eln.node.NodeServer;
 import mods.eln.node.SixNode;
 import mods.eln.node.SixNodeBlock;
 import mods.eln.node.SixNodeCacheStd;
 import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
 import mods.eln.node.SixNodeEntity;
 import mods.eln.node.SixNodeItem;
 import mods.eln.node.TransparentNode;
 import mods.eln.node.TransparentNodeBlock;
 import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
 import mods.eln.node.TransparentNodeEntity;
 import mods.eln.node.TransparentNodeItem;
 import mods.eln.ore.OreBlock;
 import mods.eln.ore.OreDescriptor;
 import mods.eln.ore.OreItem;
 import mods.eln.server.OreRegenerate;
-import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.RegulatorType;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
-import mods.eln.sim.ThermalRegulator;
 import mods.eln.solarpannel.SolarPannelDescriptor;
 import mods.eln.solver.ConstSymbole;
-import mods.eln.solver.Equation;
 import mods.eln.solver.ISymbole;
 import mods.eln.sound.SoundCommand;
 import mods.eln.teleporter.TeleporterDescriptor;
@@ -179,12 +141,7 @@ import mods.eln.thermaldissipatoractive.ThermalDissipatorActiveDescriptor;
 import mods.eln.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor;
 import mods.eln.thermalsensor.ThermalSensorDescriptor;
 import mods.eln.transformer.TransformerDescriptor;
-import mods.eln.transformer.TransformerElement;
-import mods.eln.transformer.TransformerRender;
-import mods.eln.turbine.TurbineCoreDescriptor;
 import mods.eln.turbine.TurbineDescriptor;
-import mods.eln.turbine.TurbineElement;
-import mods.eln.turbine.TurbineRender;
 import mods.eln.tutorialsign.TutorialSignDescriptor;
 import mods.eln.tutorialsign.TutorialSignElement;
 import mods.eln.waterturbine.WaterTurbineDescriptor;
@@ -192,17 +149,13 @@ import mods.eln.wiki.Data;
 import mods.eln.windturbine.WindTurbineDescriptor;
 import mods.eln.wirelesssignal.WirelessSignalAnalyserItemDescriptor;
 import mods.eln.wirelesssignal.WirelessSignalRxDescriptor;
-import mods.eln.wirelesssignal.WirelessSignalRxElement;
 import mods.eln.wirelesssignal.WirelessSignalTxDescriptor;
 import mods.eln.wirelesssignal.WirelessSignalTxElement;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.block.material.Material;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.EnumCreatureType;
-import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -211,41 +164,25 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemArmor.ArmorMaterial;
-import net.minecraft.item.ItemAxe;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemHoe;
-import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemSpade;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.item.crafting.CraftingManager;
-import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.WorldSavedData;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.storage.SaveHandler;
-import net.minecraft.world.storage.WorldInfo;
-import net.minecraft.block.material.Material;
-import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
+import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
@@ -254,30 +191,27 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.event.FMLServerStoppingEvent;
 import cpw.mods.fml.common.network.FMLEventChannel;
 import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.common.registry.EntityRegistry;
-import cpw.mods.fml.common.registry.GameData;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import dan200.computercraft.api.ComputerCraftAPI;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-
-@Mod(modid = "Eln", version = "BETA-1.4.6d")
-//@Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0b")
+@Mod(modid=Eln.MODID, name=Eln.NAME, version=Eln.VERSION)
 //@NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
-	/*
-	 * Eln() { instance = this; }
-	 */
+	
+	// Mod information (override from 'mcmod.info' file)
+	protected final static String MODID = "Eln";
+	protected final static String VERSION = "BETA-1.4.6d";
+	protected final static String NAME = "Electrical Age";
+	private final static String DESC = "Electricity in your base !";
+	private final static String URL = "http://dolu1990.github.io/ElectricalAge/";
+	private final static String UPDATE_URL = "https://github.com/Dolu1990/ElectricalAge/releases";
+	private final static String LOGO_FILE = "logo.png";
+	private final static String[] AUTHORS = {"Dolu1990", "lambdaShade", "cm0x4D", "TheBroBeans", "DrummingFish"};
+	
+	
 	public static String channelName = "miaouMod";
 	
 	public static final String[] objNames = new String[] {
@@ -440,10 +374,22 @@ public class Eln {
 
 	private boolean replicatorPop;
 	public static boolean debugEnable = false;
-
+	
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 
+		// Update ModInfo by code
+		ModMetadata meta = event.getModMetadata();
+		meta.modId = MODID;
+		meta.version = VERSION;
+		meta.name = NAME;
+		meta.description = DESC;
+		meta.url = URL;
+		meta.updateUrl = UPDATE_URL;
+		meta.logoFile = "/assets/eln/" + LOGO_FILE;
+		meta.authorList = Arrays.asList(AUTHORS);
+		meta.autogenerated = false;	// Force to update from code		
+		
 		ArrayList<ISymbole> symboleList = new ArrayList<ISymbole>();
 		symboleList.add(new ConstSymbole("A", 0.1));
 		symboleList.add(new ConstSymbole("B", 0.2));
