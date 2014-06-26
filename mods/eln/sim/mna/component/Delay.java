@@ -1,9 +1,9 @@
 package mods.eln.sim.mna.component;
 
 import mods.eln.sim.mna.SubSystem;
-import mods.eln.sim.mna.misc.ISystemProcessI;
+import mods.eln.sim.mna.misc.ISubSystemProcessI;
 
-public class Delay extends Bipole implements ISystemProcessI{
+public class Delay extends Bipole implements ISubSystemProcessI{
 
 	
 	public Delay set(double impedance){
@@ -41,5 +41,10 @@ public class Delay extends Bipole implements ISystemProcessI{
 	}
 	
 	
+	@Override
+	public double getCurrent() {
+		// TODO Auto-generated method stub
+		return oldIa-oldIb;
+	}
 
 }

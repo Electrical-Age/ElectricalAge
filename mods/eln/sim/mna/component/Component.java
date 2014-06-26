@@ -1,5 +1,6 @@
 package mods.eln.sim.mna.component;
 
+import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.state.State;
 
@@ -22,8 +23,12 @@ public abstract class Component {
 	}
 	public abstract void applyTo(SubSystem s);
 	public abstract State[] getConnectedStates();
-	public boolean isInterSystem(){ return false; }
+	public boolean canBeReplacedByInterSystem(){ return false; }
 	public void breakConnection(){};
+//	public void fromSubSystemToRoot(RootSystem root){root.addComponents.add(this);}
+	public void returnToRootSystem(RootSystem root){
+		root.addComponent(this);
+	} 
 
 	
 	public void dirty(){
@@ -32,9 +37,11 @@ public abstract class Component {
 		}
 	}
 	
-	public void disconnectFromSubSystem() {
+	public void quitSubSystem() {
 		subSystem = null;
 	}
+	
+	
 	
 	public void onAddToRootSystem(){}
 	public void onRemovefromRootSystem(){}

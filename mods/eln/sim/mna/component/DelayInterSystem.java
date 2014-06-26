@@ -1,10 +1,10 @@
 package mods.eln.sim.mna.component;
 
 import mods.eln.sim.mna.SubSystem;
-import mods.eln.sim.mna.misc.ISystemProcessI;
+import mods.eln.sim.mna.misc.ISubSystemProcessI;
 import mods.eln.sim.mna.state.State;
 
-public class DelayInterSystem extends Component implements ISystemProcessI {
+public class DelayInterSystem extends Component implements ISubSystemProcessI {
 
 	private DelayInterSystem other;
 	public State pin;
@@ -23,10 +23,10 @@ public class DelayInterSystem extends Component implements ISystemProcessI {
 
 	
 	@Override
-	public void disconnectFromSubSystem() {
+	public void quitSubSystem() {
 		subSystem.removeProcess(this);
 
-		super.disconnectFromSubSystem();	
+		super.quitSubSystem();	
 	}
 	
 	double impedance, conductance;

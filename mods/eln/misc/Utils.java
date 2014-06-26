@@ -73,12 +73,17 @@ import cpw.mods.fml.relauncher.SideOnly;
 import cpw.mods.fml.repackage.com.nothome.delta.ByteBufferSeekableSource;
 
 public class Utils {
+	
+	public static Object d[] = new Object[5];
 
 	public static double minecraftDay = 60 * 24;
 
 	public static double rand(double min, double max) {
 		return Math.random() * (max - min) + min;
 	}
+	
+	
+	
 
 	public static void println(String str) {
 		if (Eln.debugEnable == false)

@@ -1,4 +1,4 @@
-package mods.eln.sixnode.electricalcable;
+package mods.eln.electricalcable;
 
 import java.io.DataInputStream;
 import java.io.IOException;

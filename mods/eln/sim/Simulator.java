@@ -16,6 +16,7 @@ import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.component.Component;
+import mods.eln.sim.mna.state.State;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
@@ -60,23 +61,16 @@ public class Simulator /* ,IPacketHandler*/ {
 
 	
 	boolean run;
-	int fps = 20;
-	int commonOverSampling = 5;
-	int electricalOverSampling = 10;
-	int thermalOverSampling = 1;
+
+	double electricalPeriod,thermalPeriod,callPeriod;
 	int nodeCount = 0;
 	
-	public double electricalHz;
-	
-	public double getMinimalElectricalC(double Rs,double Rp)
-	{
-		return 3/(electricalHz * Rs);
-	}
+
 	public double getMinimalThermalC(double Rs,double Rp)
 	{
-		return 3/(fps * commonOverSampling * thermalOverSampling *  (1/(1/Rp + 1/Rs)));
+		return thermalPeriod*3/(  (1/(1/Rp + 1/Rs)));
 	}
-	
+
 	
 	
 	public boolean checkThermalLoad(double thermalRs, double thermalRp, double thermalC)
@@ -90,18 +84,16 @@ public class Simulator /* ,IPacketHandler*/ {
 		return true;
 	}
 	
-	public Simulator(int fps,int commonOverSampling,int electricalOverSampling,int thermalOverSampling)
+	public Simulator(double callPeriod,double electricalPeriod,double thermalPeriod)
 	{
-		this.fps = fps;
-		this.commonOverSampling = commonOverSampling;
-		this.electricalOverSampling = electricalOverSampling;
-		this.thermalOverSampling = thermalOverSampling;
-		this.electricalHz = commonOverSampling*electricalOverSampling*fps;
+		this.callPeriod = callPeriod;
+		this.electricalPeriod = electricalPeriod;
+		this.thermalPeriod = thermalPeriod;
 		
 
 		FMLCommonHandler.instance().bus().register(this);
 		
-		mna = new RootSystem(1f/electricalHz);
+		mna = new RootSystem(electricalPeriod);
 	
 		slowProcessList = new ArrayList<IProcess>();
 	
@@ -124,7 +116,7 @@ public class Simulator /* ,IPacketHandler*/ {
 	{
 		nodeCount = 0;
 		
-		mna = new RootSystem(1f/electricalHz);
+		mna = new RootSystem(electricalPeriod);
 
 		slowProcessList.clear();
 		
@@ -194,7 +186,7 @@ public class Simulator /* ,IPacketHandler*/ {
 	}
 
 	
-	public void addElectricalLoad(ElectricalLoad load)
+	public void addElectricalLoad(State load)
 	{
 		if(load!=null){
 			mna.addState(load);
@@ -202,7 +194,7 @@ public class Simulator /* ,IPacketHandler*/ {
 		}
 		
 	}
-	public void removeElectricalLoad(ElectricalLoad load)
+	public void removeElectricalLoad(State load)
 	{
 		if(load!=null){
 			mna.removeState(load);
@@ -355,6 +347,10 @@ public class Simulator /* ,IPacketHandler*/ {
 	double avgTickTime = 0;
 	long electricalNsStack = 0,thermalNsStack = 0,slowNsStack = 0;
 
+	double timeout = 0;
+	double electricalTimeout = 0;
+	double thermalTimeout = 0;
+	
 	@SubscribeEvent
 	public void tick(ServerTickEvent event) {
 		if(event.phase != Phase.START) return;
@@ -364,33 +360,34 @@ public class Simulator /* ,IPacketHandler*/ {
 		long stackStart;
 
 		long startTime =  System.nanoTime();
-		double commonTime = 1.0f/fps/commonOverSampling;
-		double electricalTime = 1.0f/fps/commonOverSampling/electricalOverSampling;
-		double thermalTime = 1.0f/fps/commonOverSampling/thermalOverSampling;
-		
-		
-		
 
 		
-		
-		for(int idx2 = 0;idx2<commonOverSampling;idx2++)
-		{
-			stackStart = System.nanoTime();
+		timeout += callPeriod;
 
-				 
-			for(int idx = 0;idx<electricalOverSampling;idx++)
-			{
+		
+		while(timeout > 0){
+			if(electricalTimeout <= thermalTimeout){
+				electricalTimeout += electricalPeriod;
+				thermalTimeout -= electricalPeriod;
+				timeout -= electricalPeriod;
+				
+				 stackStart = System.nanoTime();
+				
 				mna.step();
 
-			}
-			
-			
+				for(IProcess p : electricalProcessList) {
+					p.process(electricalPeriod);
+				}
+				
+				electricalNsStack += System.nanoTime() - stackStart;
+			}else{
+				thermalTimeout += thermalPeriod;
+				electricalTimeout -= thermalPeriod;
+				timeout -= thermalPeriod;
+				
+			    stackStart = System.nanoTime();
+			    
 
-		    electricalNsStack += System.nanoTime() - stackStart;
-		    stackStart = System.nanoTime();
-		    
-			for(int idx = 0;idx<thermalOverSampling;idx++)
-			{
 			    for (ThermalConnection c : thermalConnectionList)
 			    {
 			    	double i;
@@ -403,13 +400,13 @@ public class Simulator /* ,IPacketHandler*/ {
 			    }
 			    for (IProcess process : thermalProcessList)
 			    {
-			    	process.process(thermalTime);
+			    	process.process(thermalPeriod);
 			    }
 			    for (ThermalLoad load : thermalLoadList)
 			    {
 			    	load.PcTemp -= load.Tc/load.Rp;
 			    				    	
-			    	load.Tc += load.PcTemp*thermalTime/load.C;
+			    	load.Tc += load.PcTemp*thermalPeriod/load.C;
 			    	
 			    	load.Pc = load.PcTemp;	
 			    	load.Prs = load.PrsTemp;
@@ -418,13 +415,12 @@ public class Simulator /* ,IPacketHandler*/ {
 			    	load.PrsTemp = 0;
 			    	load.PspTemp = 0;
 			    }
-		
+			
+				
+				
+				thermalNsStack += System.nanoTime() - stackStart;
+								
 			}
-			
-			thermalNsStack += System.nanoTime() - stackStart;
-			
-			
-
 		}
 		
 

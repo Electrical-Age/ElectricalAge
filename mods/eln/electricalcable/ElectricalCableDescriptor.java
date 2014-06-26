@@ -1,4 +1,4 @@
-package mods.eln.sixnode.electricalcable;
+package mods.eln.electricalcable;
 
 import java.util.List;
 
@@ -50,7 +50,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 		double electricalNorminalI = electricalNominalPower / electricalNominalVoltage;
 		electricalNominalRs = (electricalNominalPower * electricalNominalPowerDropFactor) / electricalNorminalI / electricalNorminalI / 2;
 		electricalRs = electricalNominalRs;
-		electricalC = Eln.simulator.getMinimalElectricalC(electricalNominalRs, electricalRp);
+		//electricalC = Eln.simulator.getMinimalElectricalC(electricalNominalRs, electricalRp);
 	
 		electricalMaximalI = electricalMaximalPower / electricalNominalVoltage;
 		double thermalMaximalPowerDissipated = electricalMaximalI * electricalMaximalI * electricalRs * 2;
@@ -98,7 +98,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 	public void applyTo(ElectricalLoad electricalLoad,double rsFactor) {
 		electricalLoad.setRs(electricalRs*rsFactor);				
 	}	
-	public void applyTo(ElectricalLoad electricalLoad, boolean grounded) {
+	public void applyTo(ElectricalLoad electricalLoad) {
 		applyTo(electricalLoad, 1);
 	}	
 	

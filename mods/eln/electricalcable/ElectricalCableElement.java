@@ -1,4 +1,4 @@
-package mods.eln.sixnode.electricalcable;
+package mods.eln.electricalcable;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -40,9 +40,10 @@ public class ElectricalCableElement extends SixNodeElement {
 		this.descriptor = (ElectricalCableDescriptor) descriptor;
 		color = 0;
 		colorCare = 1;
-				
+		electricalLoad.setCanBeSimplifiedByLine(true);
 		electricalLoadList.add(electricalLoad);
 		thermalLoadList.add(thermalLoad);
+		Utils.d[0] = electricalLoad;
 
 	}
 
@@ -83,7 +84,7 @@ public class ElectricalCableElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		return Utils.plotUIP(electricalLoad.getU(), 0);
+		return Utils.plotUIP(electricalLoad.getU(), electricalLoad.getI());
 	}
 
 	@Override
@@ -106,7 +107,7 @@ public class ElectricalCableElement extends SixNodeElement {
 
 	@Override
 	public void initialize() {
-		descriptor.applyTo(electricalLoad, false);
+		descriptor.applyTo(electricalLoad);
 		descriptor.applyTo(thermalLoad);
 	}
 

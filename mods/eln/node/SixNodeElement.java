@@ -34,7 +34,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
-public abstract class SixNodeElement implements GhostObserver,IPlayer {
+public abstract class SixNodeElement implements GhostObserver, IPlayer {
 	//private static Class[] idToClass = new Class[256];
 	//private static Class[] idToRenderClass = new Class[256];
 
@@ -74,7 +74,7 @@ public abstract class SixNodeElement implements GhostObserver,IPlayer {
 
 	protected boolean onBlockActivatedRotate(EntityPlayer entityPlayer)
 	{
-		if (Utils.isPlayerUsingWrench(entityPlayer))
+		if(Utils.isPlayerUsingWrench(entityPlayer))
 		{
 			front = front.getNextClockwise();
 			sixNode.reconnect();
@@ -103,16 +103,16 @@ public abstract class SixNodeElement implements GhostObserver,IPlayer {
 		Eln.simulator.addAllElectricalComponent(electricComponentList);
 		Eln.simulator.addAllThermalConnection(thermalConnectionList);
 
-		for (NodeElectricalLoad load : electricalLoadList)
+		for(NodeElectricalLoad load : electricalLoadList)
 			Eln.simulator.addElectricalLoad(load);
-		for (NodeThermalLoad load : thermalLoadList)
+		for(NodeThermalLoad load : thermalLoadList)
 			Eln.simulator.addThermalLoad(load);
 
-		for (IProcess process : slowProcessList)
+		for(IProcess process : slowProcessList)
 			Eln.simulator.addSlowProcess(process);
-		for (IProcess process : electricalProcessList)
+		for(IProcess process : electricalProcessList)
 			Eln.simulator.addElectricalProcess(process);
-		for (IProcess process : thermalProcessList)
+		for(IProcess process : thermalProcessList)
 			Eln.simulator.addThermalProcess(process);
 
 	}
@@ -154,7 +154,7 @@ public abstract class SixNodeElement implements GhostObserver,IPlayer {
 		this.sixNodeElementDescriptor = descriptor;
 		this.itemStackDamageId = sixNode.sideElementIdList[side.getInt()];
 
-		if (descriptor.hasGhostGroup())
+		if(descriptor.hasGhostGroup())
 			Eln.ghostManager.addObserver(this);
 	}
 
@@ -201,7 +201,7 @@ public abstract class SixNodeElement implements GhostObserver,IPlayer {
 	}
 
 	@Override
-	public void stop(int uuid){
+	public void stop(int uuid) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
 		DataOutputStream stream = new DataOutputStream(bos);
 
@@ -216,21 +216,21 @@ public abstract class SixNodeElement implements GhostObserver,IPlayer {
 
 		}
 	}
-	
+
 	public void destroy(EntityPlayerMP entityPlayer)
 	{
-		if (useUuid()) {
+		if(useUuid()) {
 			stop(uuid);
 		}
 
-		if (sixNodeElementDescriptor.hasGhostGroup()) {
+		if(sixNodeElementDescriptor.hasGhostGroup()) {
 			Eln.ghostManager.removeObserver(sixNode.coordonate);
 			sixNodeElementDescriptor.getGhostGroup(side, front).erase(sixNode.coordonate);
 		}
 
 		sixNode.dropInventory(getInventory());
 		//	getCoordonate().world().getWorldInfo().
-		if (Utils.mustDropItem(entityPlayer))
+		if(Utils.mustDropItem(entityPlayer))
 			sixNode.dropItem(getDropItemStack());
 	}
 
@@ -257,35 +257,35 @@ public abstract class SixNodeElement implements GhostObserver,IPlayer {
 		front = front.readFromNBT(nbt, "sixFront");
 
 		IInventory inv = getInventory();
-		if (inv != null)
+		if(inv != null)
 		{
 			Utils.readFromNBT(nbt, "inv", inv);
 		}
 
 		idx = 0;
-		for (NodeElectricalLoad electricalLoad : electricalLoadList)
+		for(NodeElectricalLoad electricalLoad : electricalLoadList)
 		{
 			electricalLoad.readFromNBT(nbt, "");
 		}
 
-		for (NodeThermalLoad thermalLoad : thermalLoadList)
+		for(NodeThermalLoad thermalLoad : thermalLoadList)
 		{
 			thermalLoad.readFromNBT(nbt, "");
 		}
 
-		for (IProcess process : slowProcessList)
+		for(IProcess process : slowProcessList)
 		{
-			if (process instanceof INBTTReady)
+			if(process instanceof INBTTReady)
 				((INBTTReady) process).readFromNBT(nbt, "");
 		}
-		for (IProcess process : electricalProcessList)
+		for(IProcess process : electricalProcessList)
 		{
-			if (process instanceof INBTTReady)
+			if(process instanceof INBTTReady)
 				((INBTTReady) process).readFromNBT(nbt, "");
 		}
-		for (IProcess process : thermalProcessList)
+		for(IProcess process : thermalProcessList)
 		{
-			if (process instanceof INBTTReady)
+			if(process instanceof INBTTReady)
 				((INBTTReady) process).readFromNBT(nbt, "");
 		}
 
@@ -299,35 +299,35 @@ public abstract class SixNodeElement implements GhostObserver,IPlayer {
 		front.writeToNBT(nbt, "sixFront");
 
 		IInventory inv = getInventory();
-		if (inv != null)
+		if(inv != null)
 		{
 			Utils.writeToNBT(nbt, "inv", inv);
 		}
 
 		idx = 0;
-		for (NodeElectricalLoad electricalLoad : electricalLoadList)
+		for(NodeElectricalLoad electricalLoad : electricalLoadList)
 		{
 			electricalLoad.writeToNBT(nbt, "");
 		}
 
-		for (NodeThermalLoad thermalLoad : thermalLoadList)
+		for(NodeThermalLoad thermalLoad : thermalLoadList)
 		{
 			thermalLoad.writeToNBT(nbt, "");
 		}
 
-		for (IProcess process : slowProcessList)
+		for(IProcess process : slowProcessList)
 		{
-			if (process instanceof INBTTReady)
+			if(process instanceof INBTTReady)
 				((INBTTReady) process).writeToNBT(nbt, "");
 		}
-		for (IProcess process : electricalProcessList)
+		for(IProcess process : electricalProcessList)
 		{
-			if (process instanceof INBTTReady)
+			if(process instanceof INBTTReady)
 				((INBTTReady) process).writeToNBT(nbt, "");
 		}
-		for (IProcess process : thermalProcessList)
+		for(IProcess process : thermalProcessList)
 		{
-			if (process instanceof INBTTReady)
+			if(process instanceof INBTTReady)
 				((INBTTReady) process).writeToNBT(nbt, "");
 		}
 
@@ -348,16 +348,16 @@ public abstract class SixNodeElement implements GhostObserver,IPlayer {
 		Eln.simulator.removeAllElectricalComponent(electricComponentList);
 		Eln.simulator.removeAllThermalConnection(thermalConnectionList);
 
-		for (NodeElectricalLoad load : electricalLoadList)
+		for(NodeElectricalLoad load : electricalLoadList)
 			Eln.simulator.removeElectricalLoad(load);
-		for (NodeThermalLoad load : thermalLoadList)
+		for(NodeThermalLoad load : thermalLoadList)
 			Eln.simulator.removeThermalLoad(load);
 
-		for (IProcess process : slowProcessList)
+		for(IProcess process : slowProcessList)
 			Eln.simulator.removeSlowProcess(process);
-		for (IProcess process : electricalProcessList)
+		for(IProcess process : electricalProcessList)
 			Eln.simulator.removeElectricalProcess(process);
-		for (IProcess process : thermalProcessList)
+		for(IProcess process : thermalProcessList)
 			Eln.simulator.removeThermalProcess(process);
 
 	}
@@ -375,14 +375,14 @@ public abstract class SixNodeElement implements GhostObserver,IPlayer {
 
 	public void ghostDestroyed(int UUID)
 	{
-		if (UUID == sixNodeElementDescriptor.getGhostGroupUuid()) {
+		if(UUID == sixNodeElementDescriptor.getGhostGroupUuid()) {
 			selfDestroy();
 		}
 	}
 
 	public boolean ghostBlockActivated(int UUID, EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz)
 	{
-		if (UUID == sixNodeElementDescriptor.getGhostGroupUuid()) {
+		if(UUID == sixNodeElementDescriptor.getGhostGroupUuid()) {
 			sixNode.onBlockActivated(entityPlayer, this.side, vx, vy, vz);
 		}
 		return false;
@@ -395,7 +395,7 @@ public abstract class SixNodeElement implements GhostObserver,IPlayer {
 	private int uuid = 0;
 
 	public int getUuid() {
-		if (uuid == 0) {
+		if(uuid == 0) {
 			uuid = Utils.getUuid();
 		}
 		return uuid;

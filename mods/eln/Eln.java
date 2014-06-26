@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import org.omg.CORBA.OMGVMCID;
 
+import mods.eln.battery.BatteryDescriptor;
 //import mods.eln.TreeResinCollector.TreeResinCollectorBlock;
 //import mods.eln.TreeResinCollector.TreeResinCollectorDescriptor;
 //import mods.eln.TreeResinCollector.TreeResinCollectorTileEntity;
@@ -21,6 +22,8 @@ import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.ClientProxy;
 import mods.eln.client.FrameTime;
 import mods.eln.client.SoundLoader;
+import mods.eln.electricalcable.ElectricalCableDescriptor;
+import mods.eln.electricalswitch.ElectricalSwitchDescriptor;
 //import mods.eln.computercraftio.ComputerCraftIoDescriptor;
 //import mods.eln.computercraftio.PeripheralHandler;
 //import mods.eln.diode.DiodeDescriptor;
@@ -71,6 +74,10 @@ import mods.eln.generic.genericArmorItem.ArmourType;
 import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
+import mods.eln.item.HeatingCorpElement;
+import mods.eln.item.regulator.IRegulatorDescriptor;
+import mods.eln.item.regulator.RegulatorAnalogDescriptor;
+import mods.eln.item.regulator.RegulatorOnOffDescriptor;
 //import mods.eln.groundcable.GroundCableDescriptor;
 //import mods.eln.groundcable.GroundCableElement;
 //import mods.eln.groundcable.GroundCableRender;
@@ -133,6 +140,7 @@ import mods.eln.misc.LiveDataManager;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3DFolder;
 import mods.eln.misc.Recipe;
+import mods.eln.misc.RecipesList;
 //import mods.eln.misc.RecipesList;
 import mods.eln.misc.TileEntityDestructor;
 import mods.eln.misc.Utils;
@@ -166,7 +174,6 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.electricalsource.ElectricalSourceDescriptor;
 //import mods.eln.sim.ThermalRegulator;
 //import mods.eln.solarpannel.SolarPannelDescriptor;
@@ -174,6 +181,7 @@ import mods.eln.sixnode.electricalsource.ElectricalSourceDescriptor;
 //import mods.eln.solver.Equation;
 //import mods.eln.solver.ISymbole;
 import mods.eln.sound.SoundCommand;
+import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor;
 //import mods.eln.teleporter.TeleporterDescriptor;
 //import mods.eln.teleporter.TeleporterElement;
 //import mods.eln.thermalcable.ThermalCableDescriptor;
@@ -419,8 +427,7 @@ public class Eln {
 	@SidedProxy(clientSide = "mods.eln.client.ClientProxy", serverSide = "mods.eln.CommonProxy")
 	public static CommonProxy proxy;
 
-	public int electricalOverSampling, thermalOverSampling = 1,
-			commonOverSampling = 20;
+	public double electricalFrequancy, thermalFrequancy;
 
 	public ElectricalCableDescriptor highVoltageCableDescriptor;
 	public ElectricalCableDescriptor signalCableDescriptor;
@@ -483,11 +490,12 @@ public class Eln {
 		xRayScannerRange = (float) config.get("xrayscannerconfig", "rangeInBloc", 5.0).getDouble(5.0);
 		xRayScannerRange = Math.max(Math.min(xRayScannerRange, 10), 4);
 
-		electricalOverSampling = config.get("Simulator", "ElectricalHz", 8000)
-				.getInt() / commonOverSampling / 20;
-		if (electricalOverSampling < 1)
-			electricalOverSampling = 1;
 
+
+		electricalFrequancy = config.get("simulation", "electricalFrequancy", 8000).getDouble(8000);
+		thermalFrequancy = config.get("simulation", "thermalFrequancy", 400).getDouble(400);
+		
+		
 		config.save();
 	}
 
@@ -501,8 +509,8 @@ public class Eln {
 
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
 		
-		simulator = new Simulator(20, commonOverSampling,
-				electricalOverSampling, thermalOverSampling);
+		simulator = new Simulator(0.05, 1/electricalFrequancy,1/thermalFrequancy);
+		
 		playerManager = new PlayerManager();
 		tileEntityDestructor = new TileEntityDestructor();
 
@@ -593,7 +601,7 @@ public class Eln {
 //		registerElectricalRelay(94);
 //		registerElectricalGateSource(95);
 //		registerPassiveComponent(96);
-//		registerSwitch(97);
+		registerSwitch(97);
 //		registerElectricalBreaker(98);
 //		registerElectricalSensor(100);
 //		registerThermalSensor(101);
@@ -611,8 +619,8 @@ public class Eln {
 //		// registerIntelligentTransformer(5);
 //		// registerMppt(6);
 //		registerElectricalAntenna(7);
-//		registerBattery(16);
-//		registerElectricalFurnace(32);
+		registerBattery(16);
+		registerElectricalFurnace(32);
 //		registerMacerator(33);
 //		// registerExtractor(34);
 //		registerCompressor(35);
@@ -625,9 +633,9 @@ public class Eln {
 //		registerThermalDissipatorPassiveAndActive(64);
 //		registerTransparentNodeMisc(65);
 //
-//		registerHeatingCorp(1);
+		registerHeatingCorp(1);
 //		registerThermalIsolator(2);
-//		registerRegulatorItem(3);
+		registerRegulatorItem(3);
 //		registerLampItem(4);
 //		registerProtection(5);
 //		registerCombustionChamber(6);
@@ -1120,7 +1128,7 @@ public class Eln {
 			//sixNodeItem.doubleEntry(subId + (id << 6), subId + (0 << 6));
 		}
 	}
-
+*/
 	public FunctionTable batteryVoltageFunctionTable;
 
 	void registerBattery(int id) {
@@ -1305,7 +1313,7 @@ public class Eln {
 			desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
-	}
+	}/*
 
 	void registerGround(int id) {
 		int subId, completId;
@@ -1532,7 +1540,7 @@ public class Eln {
 
 
 	}
-
+*/
 	void registerSwitch(int id) {
 		int subId, completId;
 		String name;
@@ -1611,7 +1619,7 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
-	}
+	}/*
 
 	private void registerSixNodeMisc(int id) {
 		// TODO Auto-generated method stub
@@ -2117,7 +2125,7 @@ public class Eln {
 		}
 
 	}
-
+*/
 	public ArrayList<ItemStack> furnaceList = new ArrayList<ItemStack>();
 
 	void registerElectricalFurnace(int id) {
@@ -2152,9 +2160,10 @@ public class Eln {
 			furnaceList.add(desc.newItemStack());
 		}
 	}
+	
 	public ElectricalFurnaceDescriptor electricalFurnace;
 	public RecipesList maceratorRecipes = new RecipesList();
-
+/*
 	void registerMacerator(int id) {
 		int subId, completId;
 		String name;
@@ -2395,7 +2404,7 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
-
+*/
 	void registerHeatingCorp(int id) {
 		int subId, completId;
 		String name;
@@ -2562,7 +2571,7 @@ public class Eln {
 		}
 
 	}
-	*/
+	
 	double incondecentLampLife;
 	double economicLampLife;/*
 	void registerLampItem(int id) {

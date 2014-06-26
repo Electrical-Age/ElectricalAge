@@ -31,6 +31,8 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalConnection;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.mna.component.Component;
+import mods.eln.sim.mna.state.State;
 import mods.eln.sound.IPlayer;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.block.Block;
@@ -50,8 +52,8 @@ public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
 	public ArrayList<IProcess> slowProcessList  = new ArrayList<IProcess>(4);
 
 	public ArrayList<IProcess> electricalProcessList = new ArrayList<IProcess>(4);
-	public ArrayList<ElectricalConnection> electricalConnectionList = new ArrayList<ElectricalConnection>(4);
-	public ArrayList<NodeElectricalLoad> electricalLoadList = new ArrayList<NodeElectricalLoad>(4);
+	public ArrayList<Component> electricalComponentList = new ArrayList<Component>(4);
+	public ArrayList<State> electricalLoadList = new ArrayList<State>(4);
 	
 	public ArrayList<IProcess> thermalProcessList = new ArrayList<IProcess>(4);
 	public ArrayList<ThermalConnection> thermalConnectionList = new ArrayList<ThermalConnection>(4);
@@ -70,8 +72,8 @@ public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
 	{
 		Eln.simulator.addAllSlowProcess(slowProcessList);
 		
-		Eln.simulator.addAllElectricalConnection(electricalConnectionList);
-		for(NodeElectricalLoad load : electricalLoadList)Eln.simulator.addElectricalLoad(load);
+		Eln.simulator.addAllElectricalComponent(electricalComponentList);
+		for(State load : electricalLoadList)Eln.simulator.addElectricalLoad(load);
 		Eln.simulator.addAllElectricalProcess(electricalProcessList);
 		
 		Eln.simulator.addAllThermalConnection(thermalConnectionList);
@@ -82,8 +84,8 @@ public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
 	{
 		Eln.simulator.removeAllSlowProcess(slowProcessList);
 		
-		Eln.simulator.removeAllElectricalConnection(electricalConnectionList);
-		for(NodeElectricalLoad load : electricalLoadList)Eln.simulator.removeElectricalLoad(load);
+		Eln.simulator.removeAllElectricalComponent(electricalComponentList);
+		for(State load : electricalLoadList)Eln.simulator.removeElectricalLoad(load);
 		Eln.simulator.removeAllElectricalProcess(electricalProcessList);
 		
 		Eln.simulator.removeAllThermalConnection(thermalConnectionList);
@@ -330,10 +332,11 @@ public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
         
         idx = 0;
         
-		for(NodeElectricalLoad electricalLoad : electricalLoadList) 
+		for(State electricalLoad : electricalLoadList) 
 		{
-			electricalLoad.readFromNBT(nbt,"");
+			if(electricalLoad instanceof INBTTReady) ((INBTTReady)electricalLoad).readFromNBT(nbt,"" );
 		}
+
 
 		for(NodeThermalLoad thermalLoad : thermalLoadList) 
 		{
@@ -372,9 +375,9 @@ public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
         	Utils.writeToNBT(nbt,"inv", inv);
         }
         
-		for(NodeElectricalLoad electricalLoad : electricalLoadList) 
+		for(State electricalLoad : electricalLoadList) 
 		{
-			electricalLoad.writeToNBT(nbt,"" );
+			if(electricalLoad instanceof INBTTReady) ((INBTTReady)electricalLoad).writeToNBT(nbt,"" );
 		}
 
 		for(NodeThermalLoad thermalLoad : thermalLoadList) 

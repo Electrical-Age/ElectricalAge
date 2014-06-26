@@ -1,14 +1,26 @@
 package mods.eln.sim.mna.component;
 
+import mods.eln.INBTTReady;
 import mods.eln.sim.mna.SubSystem;
-import mods.eln.sim.mna.misc.ISystemProcessI;
+import mods.eln.sim.mna.misc.ISubSystemProcessI;
 import mods.eln.sim.mna.state.CurrentState;
+import mods.eln.sim.mna.state.State;
 
 import org.apache.commons.math3.linear.RealMatrix;
 
 
-public class VoltageSource extends Bipole implements ISystemProcessI{
+public class VoltageSource extends Bipole implements ISubSystemProcessI{
 
+	
+	public VoltageSource() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	public VoltageSource(State aPin,State bPin) {
+		super(aPin, bPin);
+	}
+	
+	
 	double u = 0;
 	CurrentState currentState = new CurrentState();
 	
@@ -22,10 +34,10 @@ public class VoltageSource extends Bipole implements ISystemProcessI{
 	}
 	
 	@Override
-	public void disconnectFromSubSystem() {
+	public void quitSubSystem() {
 		subSystem.states.remove(currentState);
 		subSystem.removeProcess(this);
-		super.disconnectFromSubSystem();
+		super.quitSubSystem();
 	}
 	
 	@Override
@@ -54,6 +66,12 @@ public class VoltageSource extends Bipole implements ISystemProcessI{
 		return -currentState.state;
 	}
 	
+	
+	@Override
+	public double getCurrent() {
+		// TODO Auto-generated method stub
+		return -currentState.state;
+	}
 	
 
 }
