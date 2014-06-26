@@ -2,11 +2,12 @@ package mods.eln.sim;
 
 import mods.eln.misc.FunctionTable;
 import mods.eln.sim.mna.component.VoltageSource;
+import mods.eln.sim.mna.state.VoltageState;
 
 
 
 public class BatteryProcess implements IProcess {
-	ElectricalLoad positiveLoad, negativeLoad;
+	VoltageState positiveLoad, negativeLoad;
 	public  FunctionTable voltageFunction;
 	public double Q = 0,QNominal = 0;
 	public double uNominal = 0;
@@ -16,15 +17,15 @@ public class BatteryProcess implements IProcess {
 	
 	public VoltageSource voltageSource;
 	
-	public boolean cut;
+
 	public boolean isRechargeable = true;
 	public double IMax = 20;
-	public BatteryProcess(ElectricalLoad positiveLoad,ElectricalLoad negativeLoad,FunctionTable voltageFunction,double IMax,VoltageSource voltageSource)
+	public BatteryProcess(VoltageState positiveLoad,VoltageState negativeLoad,FunctionTable voltageFunction,double IMax,VoltageSource voltageSource)
 	{
 		this.positiveLoad = positiveLoad;
 		this.negativeLoad = negativeLoad;
 		this.voltageFunction = voltageFunction;
-		setCut(false);
+
 		this.IMax = IMax;
 		this.voltageSource = voltageSource;
 	}
@@ -32,11 +33,7 @@ public class BatteryProcess implements IProcess {
 	@Override
 	public void process(double time) {
 		// TODO Auto-generated method stub
-		if(cut)
-		{
-			dischargeCurrentMesure = 0;
-			return;
-		}
+
 		Q -= voltageSource.getCurrent()*time;
 		
 		double voltage = computeVoltage();
@@ -63,10 +60,7 @@ public class BatteryProcess implements IProcess {
 		
 	}
 	
-	public void setCut(boolean enable)
-	{
-		cut = enable;
-	}
+
 	
 	double computeVoltage()
 	{

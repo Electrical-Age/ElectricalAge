@@ -23,9 +23,12 @@ import mods.eln.node.TransparentNodeElement;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
+import mods.eln.sim.NodeVoltageState;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.mna.component.VoltageSource;
+import mods.eln.sim.mna.state.VoltageState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -34,7 +37,8 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class BatteryElement extends TransparentNodeElement  {
 
-	public NodeElectricalLoad positiveLoad = new NodeElectricalLoad("positiveLoad");
+	public NodeElectricalLoad cutLoad = new NodeElectricalLoad("cutLoad");
+	public NodeVoltageState positiveLoad = new NodeVoltageState("positiveLoad");
 	public NodeElectricalLoad negativeLoad = new NodeElectricalLoad("negativeLoad");
 	public VoltageSource voltageSource = new VoltageSource(positiveLoad,negativeLoad);
 	
@@ -42,7 +46,8 @@ public class BatteryElement extends TransparentNodeElement  {
 	public NodeBatteryProcess batteryProcess = new NodeBatteryProcess(positiveLoad, negativeLoad, null, 0,voltageSource);
 
 	public Resistor dischargeResistor = new Resistor(positiveLoad, negativeLoad);
-	
+	public ResistorSwitch cutSwitch = new ResistorSwitch(cutLoad, positiveLoad);
+
 	public BatteryInventoryProcess inventoryProcess = new BatteryInventoryProcess(this);
 	
 	double syncronizedPositiveUc, syncronizedNegativeUc, syncronizedCurrent, syncronizedTc;
@@ -64,9 +69,12 @@ public class BatteryElement extends TransparentNodeElement  {
 		super(transparentNode, descriptor);
 		this.descriptor = (BatteryDescriptor) descriptor;
 		
+	   	electricalLoadList.add(cutLoad);
 	   	electricalLoadList.add(positiveLoad);
 	   	electricalLoadList.add(negativeLoad);
 	   	electricalComponentList.add(dischargeResistor);
+	   	electricalComponentList.add(voltageSource);
+	   	electricalComponentList.add(cutSwitch);
 	   	thermalLoadList.add(thermalLoad);
 	   	electricalProcessList.add(batteryProcess);
 	    //	thermalProcessList.add(negativeETProcess);
@@ -76,6 +84,8 @@ public class BatteryElement extends TransparentNodeElement  {
     	
     	grounded = false;
     	batteryProcess.setIMax(this.descriptor.IMax);
+    	
+    	
 	}
 
 	public boolean hasOverVoltageProtection() {
@@ -89,7 +99,7 @@ public class BatteryElement extends TransparentNodeElement  {
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
 		if(lrdu != LRDU.Down) return null;
-		if(side == front.left()) return positiveLoad;
+		if(side == front.left()) return cutLoad;
 		if(side == front.right() && ! grounded) return negativeLoad;
 		return null;	
 	}
@@ -146,11 +156,11 @@ public class BatteryElement extends TransparentNodeElement  {
 	public void initPhysicalValue() {
 		descriptor.applyTo(batteryProcess);
 		descriptor.applyTo(thermalLoad);
-		descriptor.applyTo(negativeLoad, Eln.simulator);
-		descriptor.applyTo(positiveLoad, Eln.simulator);
 		descriptor.applyTo(dischargeResistor);
 		descriptor.applyTo(batterySlowProcess);
-		
+		cutSwitch.setR(descriptor.electricalRs/2);
+		cutLoad.setRs(descriptor.electricalRs/2);
+		negativeLoad.setRs(descriptor.electricalRs);
 		if(fromItemStack) {
 			batteryProcess.life = fromItemStack_life;
 			batteryProcess.setCharge(fromItemStack_charge);

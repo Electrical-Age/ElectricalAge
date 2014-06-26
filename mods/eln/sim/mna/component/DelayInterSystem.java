@@ -44,10 +44,13 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 
 	public double[] oldIother = new double[] { 0, 0 };
 	int doubleBuffer = 0;
+
 	@Override
 	public void simProcessI(SubSystem s) {
-		double pinI = 2 * other.getSubSystem().getX(other.pin) * conductance + oldIother[doubleBuffer];			
+		double pinI = 2 * other.getSubSystem().getX(other.pin) * conductance + oldIother[doubleBuffer];		
+		//pinI = (pinI*1 - other.oldIother[doubleBuffer]*0);
 		s.addToI(pin, pinI);
+		
 		doubleBuffer = (doubleBuffer + 1 ) & 1;
 		other.oldIother[doubleBuffer]= -pinI;
 	}

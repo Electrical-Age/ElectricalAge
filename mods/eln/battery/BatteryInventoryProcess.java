@@ -44,7 +44,7 @@ public class BatteryInventoryProcess implements IProcess {
 				}
 			}		
 		}
-		battery.batteryProcess.setCut(cut);
+		battery.cutSwitch.setState(cut);
 		
 		double U = battery.positiveLoad.getU() - battery.negativeLoad.getU();
 		

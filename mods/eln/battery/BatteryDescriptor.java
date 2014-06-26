@@ -107,7 +107,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 		electricalQ *= electricalStdEnergy / energy;
 		electricalRs =  electricalStdP * (1 - electricalStdEfficiency) / electricalStdI / electricalStdI / 2;
 		//electricalRs = cable.electricalRs;
-		electricalRp = electricalU * electricalU / electricalStdP / electricalDischargeRate;
+		electricalRp = Math.min(electricalU * electricalU / electricalStdP / electricalDischargeRate,1000000000.0);
 		
 		
 		lifeNominalCurrent = electricalStdP / electricalU;

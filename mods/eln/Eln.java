@@ -453,6 +453,7 @@ public class Eln {
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 
+		
 //		ArrayList<ISymbole> symboleList = new ArrayList<ISymbole>();
 //		symboleList.add(new ConstSymbole("A", 0.1));
 //		symboleList.add(new ConstSymbole("B", 0.2));
@@ -492,7 +493,7 @@ public class Eln {
 
 
 
-		electricalFrequancy = config.get("simulation", "electricalFrequancy", 8000).getDouble(8000);
+		electricalFrequancy = config.get("simulation", "electricalFrequancy", 20).getDouble(20);
 		thermalFrequancy = config.get("simulation", "thermalFrequancy", 400).getDouble(400);
 		
 		
@@ -506,6 +507,7 @@ public class Eln {
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
 		Object o;
+		
 
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
 		

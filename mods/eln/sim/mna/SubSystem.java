@@ -179,21 +179,21 @@ public class SubSystem {
 
 	public void stepCalc() {
 		Profiler profiler = new Profiler();
-		profiler.add("generateMatrix");
+	//	profiler.add("generateMatrix");
 		if(matrixValid == false) {
 			generateMatrix();
 		}
 
 		if(singularMatrix == false){
-			profiler.add("generateMatrix");
+			//profiler.add("generateMatrix");
 			for(int y = 0; y < stateCount; y++) {
 				Idata[y] = 0;
 			}
-			profiler.add("generateMatrix");
+			//profiler.add("generateMatrix");
 			for(ISubSystemProcessI p : processI) {
 				p.simProcessI(this);
 			}
-			profiler.add("generateMatrix");
+		//	profiler.add("generateMatrix");
 			
 			for(int idx2 = 0;idx2 < stateCount;idx2++){
 				double stack = 0;

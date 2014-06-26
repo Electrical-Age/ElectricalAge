@@ -256,10 +256,12 @@ public class RootSystem {
 				aNewDelay.setInitialCurrent(-u / interSystemResistor.getR() - i);
 				bNewDelay.setInitialCurrent(-u / interSystemResistor.getR() + i);
 
-				aNewResistor.setR(interSystemResistor.getR() / 2).connectGhostTo(aState, aNewState);
-				aNewDelay.set(interSystemResistor.getR() / 2).set(aNewState, bNewDelay);
-				bNewResistor.setR(interSystemResistor.getR() / 2).connectGhostTo(bState, bNewState);
-				bNewDelay.set(interSystemResistor.getR() / 2).set(bNewState, aNewDelay);
+				
+				double r = interSystemResistor.getR()/2;
+				aNewResistor.setR(r).connectGhostTo(aState, aNewState);
+				aNewDelay.set(r).set(aNewState, bNewDelay);
+				bNewResistor.setR(r).connectGhostTo(bState, bNewState);
+				bNewDelay.set(r).set(bNewState, aNewDelay);
 
 				aSystem.addComponent(aNewResistor);
 				aSystem.addState(aNewState);
