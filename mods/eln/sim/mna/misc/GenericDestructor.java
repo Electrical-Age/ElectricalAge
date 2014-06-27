@@ -22,6 +22,7 @@ public class GenericDestructor implements IDestructor {
 	public ArrayList<SubSystem> removeSubSystemDestructor = new ArrayList<SubSystem>();
 	public ArrayList<Component> removeComponent = new ArrayList<Component>();
 	public ArrayList<State> removeState = new ArrayList<State>();
+	public  ArrayList<IRootSystemPreStepProcess> preProcess = new ArrayList<IRootSystemPreStepProcess>();
 
 	@Override
 	public void destruct(boolean withSubSystem) {
@@ -41,6 +42,10 @@ public class GenericDestructor implements IDestructor {
 				s.getSubSystem().removeState(s);
 		}
 
+		for(IRootSystemPreStepProcess p : preProcess){
+			root.removeProcess(p);
+		}
+		
 		//root.addComponent(component);
 		component.returnToRootSystem(root);
 		
@@ -54,6 +59,8 @@ public class GenericDestructor implements IDestructor {
 			root.removeProcess((ISubSystemProcessFlush) component);
 		}
 		
+		
+
 		
 	}
 

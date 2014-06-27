@@ -214,6 +214,33 @@ public class SubSystem {
 		//Utils.println(profiler);
 	}
 
+	
+	public double solve(State pin) {
+		Profiler profiler = new Profiler();
+		if(matrixValid == false) {
+			generateMatrix();
+		}
+
+		if(singularMatrix == false){
+			for(int y = 0; y < stateCount; y++) {
+				Idata[y] = 0;
+			}
+			for(ISubSystemProcessI p : processI) {
+				p.simProcessI(this);
+			}
+
+			int idx2 = pin.getId();
+			double stack = 0;
+			for(int idx = 0;idx < stateCount;idx++){
+				stack += AInvdata[idx2][idx]*Idata[idx];
+			}
+			return stack;
+			
+		}
+		return 0;
+	}
+	
+	
 	//RealMatrix Xtemp;
 	double[] XtempData;
 	public void stepFlush() {
@@ -335,6 +362,7 @@ public class SubSystem {
 	public void removeProcess(ISubSystemProcessFlush p) {
 		processF.remove(p);
 	}
+
 
 
 

@@ -13,12 +13,14 @@ import mods.eln.misc.Profiler;
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.component.DelayInterSystem;
+import mods.eln.sim.mna.component.DelayInterSystem.ThevnaCalculator;
 import mods.eln.sim.mna.component.InterSystem;
 import mods.eln.sim.mna.component.Line;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.misc.GenericDestructor;
 import mods.eln.sim.mna.misc.IDestructor;
+import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;
 import mods.eln.sim.mna.misc.ISubSystemProcessFlush;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.mna.state.VoltageState;
@@ -257,7 +259,7 @@ public class RootSystem {
 				bNewDelay.setInitialCurrent(-u / interSystemResistor.getR() + i);
 
 				
-				double r = interSystemResistor.getR();
+				double r = interSystemResistor.getR()/2;
 				aNewResistor.setR(r).connectGhostTo(aState, aNewState);
 				aNewDelay.set(r).set(aNewState, bNewDelay);
 				bNewResistor.setR(r).connectGhostTo(bState, bNewState);
@@ -279,13 +281,17 @@ public class RootSystem {
 				destructor.removeState.add(bNewState);
 				destructor.removeSubSystemDestructor.add(aSystem);
 				destructor.removeSubSystemDestructor.add(bSystem);
-
+				
 				aSystem.breakDestructor.add(destructor);
 				bSystem.breakDestructor.add(destructor);
 				componentDestructor.put(interSystemResistor, destructor);
 				
 				interSystemResistor.usedAsInterSystem = true;
-
+				
+				
+				DelayInterSystem.ThevnaCalculator thevnaCalc = new ThevnaCalculator(aNewDelay,bNewDelay);
+				addProcess(thevnaCalc);
+				destructor.preProcess.add(thevnaCalc);
 				if(interSystemResistor instanceof ISubSystemProcessFlush) {
 					addProcess((ISubSystemProcessFlush) interSystemResistor);
 				}
@@ -298,6 +304,10 @@ public class RootSystem {
 		//Profiler profiler = new Profiler();
 		//profiler.add("Generate");
 		generate();
+		
+		for(IRootSystemPreStepProcess p : processPre){
+			p.rootSystemPreStepProcess();
+		}
 
 		//profiler.add("stepCalc");
 		for(SubSystem s : systems) {
@@ -469,6 +479,16 @@ public class RootSystem {
 		processF.remove(p);
 	}
 
+
+	ArrayList<IRootSystemPreStepProcess> processPre = new ArrayList<IRootSystemPreStepProcess>();
+
+	public void addProcess(IRootSystemPreStepProcess p) {
+		processPre.add(p);
+	}
+
+	public void removeProcess(IRootSystemPreStepProcess p) {
+		processPre.remove(p);
+	}
 }
 
 //Ttodo garbadge collector

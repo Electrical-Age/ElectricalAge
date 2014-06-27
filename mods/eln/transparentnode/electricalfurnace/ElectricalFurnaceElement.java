@@ -67,7 +67,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 		//NOT SIMULATED electricalLoadList.add(negativeLoad);
 		electricalLoadList.add(electricalLoad);
 		electricalComponentList.add(heatingCorpResistor);
-		
+	   //	electricalComponentList.add(new Resistor(electricalLoad, null).setR(100000000));
 
 		thermalLoadList.add(thermalLoad);
 		thermalProcessList.add(smeltResistor);
