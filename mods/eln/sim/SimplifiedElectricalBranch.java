@@ -13,20 +13,6 @@ public class SimplifiedElectricalBranch implements IProcess {
 		this.lList = lList;
 		this.L1 = lA;
 		this.L2 = lB;
-		
-		lA.add(this);
-		lB.add(this);
-	}
-	
-	public void destroy(){
-		for (ElectricalLoad e : lList) {
-			e.clearSimplifiedElectricalBranchs();
-			for (ElectricalConnection e2 : e.electricalConnections) {
-				e2.inSimplifiedElectricalBranch(false);
-			}
-		}
-		L1.clearSimplifiedElectricalBranchs();
-		L2.clearSimplifiedElectricalBranchs();
 	}
 
 	@Override

@@ -415,7 +415,10 @@ public class Simulator /* ,IPacketHandler*/ {
 					for (ElectricalLoad e : lList) {
 						e.setTag();
 						for (ElectricalConnection e2 : e.electricalConnections) {
-							e2.inSimplifiedElectricalBranch(true);
+							if(e2.isTaged()){
+								int i = 0;
+								i++;
+							}
 							e2.setTag();
 						}
 					}
@@ -453,9 +456,6 @@ public class Simulator /* ,IPacketHandler*/ {
 	}
 	
 	void destroySimplify(){
-		for(SimplifiedElectricalBranch b : simplifiedElectricalBranchList){
-			b.destroy();
-		}
 		simplifiedElectricalBranchList.clear();
 		workingElectricalConnectionList.clear();
 		workingElectricalLoadList.clear();
@@ -527,22 +527,6 @@ public class Simulator /* ,IPacketHandler*/ {
 			{
 				c.serialConductance = 1/(c.L2.getRs() + c.L1.getRs());
 			}	
-		    for (ElectricalLoad load : workingElectricalLoadList)
-		    {
-		    	if(load.capacitorCanBeOptimised() == false) break;
-		    	double stack = 0;
-		    	for(ElectricalConnection c : load.electricalConnections){
-		    		if(c.inSimplifiedElectricalBranch == false){
-		    			stack += c.serialConductance;
-		    		}
-		    	}
-		    	for(SimplifiedElectricalBranch c : load.simplifiedElectricalBranchs){
-		    		stack += c.serialConductance;
-		    	}
-		    	
-		    	load.setC(Math.max(0.0001,stack*2*electricalTime));
-		    	//Utils.println(Math.max(0.0001,stack*2*electricalTime));
-		    }
 				 
 			for(int idx = 0;idx<electricalOverSampling-1;idx++)
 			{

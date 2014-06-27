@@ -51,11 +51,6 @@ public class LampSocketElement extends SixNodeElement{
 		lampProcess.alphaZ = this.socketDescriptor.alphaZBoot;
     	electricalLoadList.add(positiveLoad);
     	electricalLoadList.add(negativeLoad);
-    	
-    	
-    	positiveLoad.setCapacitorCanBeOptimised(true);
-    	negativeLoad.setCapacitorCanBeOptimised(true);
-    	
     	electricalProcessList.add(lampResistor);
     	thermalLoadList.add(thermalLoad);
     	thermalProcessList.add(positiveETProcess);

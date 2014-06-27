@@ -56,14 +56,8 @@ public class ElectricalSensorElement extends SixNodeElement {
 		//front = LRDU.Left;
     	this.descriptor = (ElectricalSensorDescriptor) descriptor;
 
-
-    	
 		aLoad = new NodeElectricalLoad("aLoad");
 		bLoad = new NodeElectricalLoad("bLoad");
-		
-    	aLoad.setCapacitorCanBeOptimised(true);
-    	bLoad.setCapacitorCanBeOptimised(true);
-		
 		resistor = new NodeElectricalResistor("resistor", aLoad, bLoad);
 		
 

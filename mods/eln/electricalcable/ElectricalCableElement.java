@@ -55,8 +55,6 @@ public class ElectricalCableElement extends SixNodeElement implements IThermalDe
 		slowProcessList.add(electricalLoadDynamicProcess);
 		
 		electricalLoad.setSimplifyAuthorized(true);
-		
-		electricalLoad.setCapacitorCanBeOptimised(true);
 	}
 
 	public NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");
