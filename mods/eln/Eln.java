@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import com.serotonin.web.i18n.I18NUtils;
+
 import mods.eln.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.autominer.AutoMinerDescriptor;
 import mods.eln.battery.BatteryDescriptor;
@@ -99,6 +101,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.FunctionTableYProtect;
+import mods.eln.misc.I18N;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.LiveDataManager;
 import mods.eln.misc.Obj3DFolder;
@@ -153,6 +156,7 @@ import mods.eln.wirelesssignal.WirelessSignalTxDescriptor;
 import mods.eln.wirelesssignal.WirelessSignalTxElement;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.creativetab.CreativeTabs;
@@ -172,6 +176,7 @@ import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -182,6 +187,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
+import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -205,7 +211,6 @@ public class Eln {
 	protected final static String MODID = "Eln";
 	protected final static String VERSION = "BETA-1.4.6d";
 	protected final static String NAME = "Electrical Age";
-	private final static String DESC = "Electricity in your base !";
 	private final static String URL = "http://dolu1990.github.io/ElectricalAge/";
 	private final static String UPDATE_URL = "https://github.com/Dolu1990/ElectricalAge/releases";
 	private final static String LOGO_FILE = "logo.png";
@@ -378,12 +383,16 @@ public class Eln {
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 
+		
+//		ModContainer container = FMLCommonHandler.instance().findContainerFor(this);
+//		LanguageRegistry.instance().loadLanguagesFor(container, Side.CLIENT);
+		
 		// Update ModInfo by code
 		ModMetadata meta = event.getModMetadata();
 		meta.modId = MODID;
 		meta.version = VERSION;
-		meta.name = NAME;
-		meta.description = DESC;
+		meta.name = I18N.getString("mod.name");
+		meta.description = I18N.getString("mod.desc");
 		meta.url = URL;
 		meta.updateUrl = UPDATE_URL;
 		meta.logoFile = "/assets/eln/" + LOGO_FILE;
