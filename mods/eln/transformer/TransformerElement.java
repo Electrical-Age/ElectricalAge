@@ -56,7 +56,10 @@ public class TransformerElement extends TransparentNodeElement{
 	   	electricalLoadList.add(negativeSecondaryLoad);
 	   	
 
-
+	   	positivePrimaryLoad.setCapacitorCanBeOptimised(false);
+	   	negativePrimaryLoad.setCapacitorCanBeOptimised(false);
+	   	positiveSecondaryLoad.setCapacitorCanBeOptimised(false);
+	   	negativeSecondaryLoad.setCapacitorCanBeOptimised(false);
 	   	
 	   	slowProcessList.add(primaryVoltageWatchdog);
 	   	slowProcessList.add(secondaryVoltageWatchdog);

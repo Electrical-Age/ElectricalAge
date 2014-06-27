@@ -17,6 +17,9 @@ public class NodeBatteryProcess extends BatteryProcess implements INBTTReady {
         Q = nbttagcompound.getDouble(str + "NBP" + "Q");
         life = nbttagcompound.getDouble(str + "NBP" + "life");
         setCut(nbttagcompound.getBoolean(str + "NBP" + "cut"));
+        
+        if(Double.isNaN(Q)) Q = 0;
+        if(Double.isNaN(life)) life = 1;
 	}
 
 	@Override
