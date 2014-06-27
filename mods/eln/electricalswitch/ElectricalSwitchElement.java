@@ -44,7 +44,9 @@ public class ElectricalSwitchElement extends SixNodeElement implements ITemperat
 
 	public ElectricalSwitchElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-
+		aLoad.setCapacitorCanBeOptimised(true);
+		bLoad.setCapacitorCanBeOptimised(true);
+		
     	electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
     	electricalProcessList.add(switchResistor);

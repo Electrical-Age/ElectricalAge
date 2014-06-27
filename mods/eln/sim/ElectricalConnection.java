@@ -35,4 +35,10 @@ public class ElectricalConnection{
 	public void setTag(){
 		tag = true;
 	}
+
+	public boolean inSimplifiedElectricalBranch = false;
+	public void inSimplifiedElectricalBranch(boolean b) {
+		inSimplifiedElectricalBranch = b;
+		
+	}
 }
