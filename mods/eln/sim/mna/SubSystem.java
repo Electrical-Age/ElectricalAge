@@ -132,7 +132,10 @@ public class SubSystem {
 		for(Component c : component) {
 			c.applyTo(this);
 		}
-
+		
+		Profiler p = new Profiler();
+		p.add("Inversse");
+		
 		try {
 			//FieldLUDecomposition QRDecomposition  LUDecomposition RRQRDecomposition
 			RealMatrix Ainv = new QRDecomposition(A).getSolver().getInverse();
@@ -142,6 +145,8 @@ public class SubSystem {
 			singularMatrix = true;
 		}
 		
+		p.stop();
+		Utils.println(p);
 
 		statesTab = new State[stateCount];
 		statesTab = states.toArray(statesTab);
@@ -231,48 +236,52 @@ public class SubSystem {
 
 	public static void main(String[] args) {
 
-		SubSystem s = new SubSystem(null,0.1);
-		VoltageState n1, n2;
-		VoltageSource u1;
-		Resistor r1, r2;
+//		SubSystem s = new SubSystem(null,0.1);
+//		VoltageState n1, n2;
+//		VoltageSource u1;
+//		Resistor r1, r2;
+//
+//		s.addState(n1 = new VoltageState());
+//		s.addState(n2 = new
+//				VoltageState());
+//
+//		//s.addComponent((u1 = new VoltageSource()).setU(1).connectTo(n1, null));
+//
+//		s.addComponent((r1 = new Resistor()).setR(10).connectTo(n1, n2));
+//		s.addComponent((r2 = new Resistor()).setR(20).connectTo(n2, null));
+//
+//		s.step();
+//		s.step();
 
-		s.addState(n1 = new VoltageState());
-		s.addState(n2 = new
-				VoltageState());
-
-		//s.addComponent((u1 = new VoltageSource()).setU(1).connectTo(n1, null));
-
-		s.addComponent((r1 = new Resistor()).setR(10).connectTo(n1, n2));
-		s.addComponent((r2 = new Resistor()).setR(20).connectTo(n2, null));
-
-		s.step();
-		s.step();
-
-		//		SubSystem s = new SubSystem(0.1);
-		//		VoltageState n1, n2, n3, n4, n5;
-		//		VoltageSource u1;
-		//		Resistor r1, r2, r3;
-		//		Delay d1, d2;
-		//
-		//		s.addState(n1 = new VoltageState());
-		//		s.addState(n2 = new VoltageState());
-		//		s.addState(n3 = new VoltageState());
-		//		s.addState(n4 = new VoltageState());
-		//		s.addState(n5 = new VoltageState());
-		//
-		//		s.addComponent((u1 = new VoltageSource()).setU(1).connectTo(n1, null));
-		//
-		//		s.addComponent((r1 = new Resistor()).setR(10).connectTo(n1, n2));
-		//		s.addComponent((d1 = new Delay()).set(5).connectTo(n2, n3));
-		//		s.addComponent((r2 = new Resistor()).setR(10).connectTo(n3, n4));
-		//		s.addComponent((d2 = new Delay()).set(10).connectTo(n4, n5));
-		//		s.addComponent((r2 = new Resistor()).setR(10).connectTo(n5, null));
+				SubSystem s = new SubSystem(null,0.1);
+				VoltageState n1, n2, n3, n4, n5;
+				VoltageSource u1;
+				Resistor r1, r2, r3;
+				Delay d1, d2;
+		
+				s.addState(n1 = new VoltageState());
+				s.addState(n2 = new VoltageState());
+				s.addState(n3 = new VoltageState());
+			//	s.addState(n4 = new VoltageState());
+			//	s.addState(n5 = new VoltageState());
+		
+				s.addComponent((u1 = new VoltageSource()).setU(1).connectTo(n1, null));
+		
+				s.addComponent((r1 = new Resistor()).setR(10).connectTo(n1, n2));
+				s.addComponent((d1 = new Delay()).set(1).connectTo(n2, n3));
+				s.addComponent((r2 = new Resistor()).setR(10).connectTo(n3, null));
+				//s.addComponent((d2 = new Delay()).set(10).connectTo(n4, n5));
+				//s.addComponent((r2 = new Resistor()).setR(10).connectTo(n5, null));
 
 		for(int idx = 0; idx < 100; idx++) {
 			s.step();
 		}
 
 		System.out.println("END");
+		
+		s.step();
+		s.step();
+		s.step();
 	}
 
 	public boolean containe(State state) {

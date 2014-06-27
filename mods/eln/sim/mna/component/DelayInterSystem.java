@@ -54,6 +54,35 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 		doubleBuffer = (doubleBuffer + 1 ) & 1;
 		other.oldIother[doubleBuffer]= -pinI;
 	}
+	/*@Override
+	public void simProcessI(SubSystem s) {
+		double iA = pin.state*conductance + oldIother[doubleBuffer];
+		double iB = other.pin.state*conductance + other.oldIother[doubleBuffer];
+		double iTarget = (iA - iB)/2;
+		
+		double aPinI = iTarget - (pin.state + other.pin.state)*0.5*conductance;
+		
+		s.addToI(pin, -aPinI);
+		
+		
+		doubleBuffer = (doubleBuffer + 1 ) & 1;
+		oldIother[doubleBuffer]= aPinI;
+	}*/
+	
+	/*
+	@Override
+	public void simProcessI(SubSystem s) {
+		double iThis = pin.state*conductance + oldIother[doubleBuffer];
+		double iOther = other.pin.state*conductance + other.oldIother[doubleBuffer];
+		double iTarget = (iThis - iOther)/2;
+		
+		double pinI = 2 * other.getSubSystem().getX(other.pin) * conductance + oldIother[doubleBuffer];		
+		//pinI = (pinI*1 - other.oldIother[doubleBuffer]*0);
+		s.addToI(pin, pinI);
+		
+		doubleBuffer = (doubleBuffer + 1 ) & 1;
+		other.oldIother[doubleBuffer]= -pinI;
+	}*/
 
 	@Override
 	public State[] getConnectedStates() {

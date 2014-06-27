@@ -257,7 +257,7 @@ public class RootSystem {
 				bNewDelay.setInitialCurrent(-u / interSystemResistor.getR() + i);
 
 				
-				double r = interSystemResistor.getR()/2;
+				double r = interSystemResistor.getR();
 				aNewResistor.setR(r).connectGhostTo(aState, aNewState);
 				aNewDelay.set(r).set(aNewState, bNewDelay);
 				bNewResistor.setR(r).connectGhostTo(bState, bNewState);
@@ -342,7 +342,7 @@ public class RootSystem {
 			stateSet.add(sExplored);
 			for(Component c : sExplored.getConnectedComponents()) {
 				if(stateSet.size() > maxSubSystemSize) {
-					continue;
+				//	continue;
 				}
 				if(withInterSystem == false && c.canBeReplacedByInterSystem()) continue;
 				if(componentSet.contains(c)) continue;
