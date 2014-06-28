@@ -47,6 +47,6 @@ public abstract class Bipole extends Component {
 	
 	public abstract double getCurrent();
 	public double getU(){
-		return aPin.state-bPin.state;
+		return (aPin == null ? 0 : aPin.state) - (bPin == null ? 0 : bPin.state);
 	}
 }
