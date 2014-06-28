@@ -24,6 +24,7 @@ public class Capacitor extends Bipole  implements ISubSystemProcessI {
 
 	public void setC(double c){
 		this.c = c;
+		dirty();
 	}
 	
 	private double c = 0;
@@ -41,7 +42,7 @@ public class Capacitor extends Bipole  implements ISubSystemProcessI {
 	
 	@Override
 	public void simProcessI(SubSystem s) {
-		double add = (s.getX(aPin)-s.getX(bPin))*cdt;
+		double add = (s.getXSafe(aPin)-s.getXSafe(bPin))*cdt;
 		s.addToI(aPin, add);
 		s.addToI(bPin, -add);
 	}

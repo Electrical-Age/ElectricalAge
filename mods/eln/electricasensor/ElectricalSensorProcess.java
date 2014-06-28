@@ -44,13 +44,13 @@ public class ElectricalSensorProcess implements IProcess{
 			switch(sensor.dirType)
 			{
 			case ElectricalSensorElement.dirNone:
-				output = Math.abs(sensor.resistor.getCurrent()*sensor.aLoad.Uc);
+				output = Math.abs(sensor.resistor.getCurrent()*sensor.aLoad.getU());
 				break;
 			case ElectricalSensorElement.dirAB:
-				output = (sensor.resistor.getCurrent()*sensor.aLoad.Uc);
+				output = (sensor.resistor.getCurrent()*sensor.aLoad.getU());
 				break;
 			case ElectricalSensorElement.dirBA:
-				output = (-sensor.resistor.getCurrent()*sensor.aLoad.Uc);
+				output = (-sensor.resistor.getCurrent()*sensor.aLoad.getU());
 				break;
 			}
 			
@@ -65,6 +65,6 @@ public class ElectricalSensorProcess implements IProcess{
 		double U = (physical - sensor.lowValue) / (sensor.highValue - sensor.lowValue) * Eln.SVU;
 		if(U > Eln.SVU) U = Eln.SVU;
 		if(U < 0) U = 0;
-		sensor.outputGateProcess.U = U;
+		sensor.outputGateProcess.setU(U);
 	}
 }

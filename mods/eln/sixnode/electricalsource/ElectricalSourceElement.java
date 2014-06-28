@@ -42,7 +42,7 @@ public class ElectricalSourceElement extends SixNodeElement {
 	public ElectricalSourceElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		electricalLoadList.add(electricalLoad);
-		electricComponentList.add(voltageSource.connectTo(electricalLoad, null));
+		electricalComponentList.add(voltageSource.connectTo(electricalLoad, null));
 	}
 
 	NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");

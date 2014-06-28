@@ -41,7 +41,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 	public ArrayList<IProcess> slowProcessList = new ArrayList<IProcess>(4);
 
 	public ArrayList<IProcess> electricalProcessList = new ArrayList<IProcess>(4);
-	public ArrayList<Component> electricComponentList = new ArrayList<Component>(4);
+	public ArrayList<Component> electricalComponentList = new ArrayList<Component>(4);
 	public ArrayList<NodeElectricalLoad> electricalLoadList = new ArrayList<NodeElectricalLoad>(4);
 
 	public ArrayList<IProcess> thermalProcessList = new ArrayList<IProcess>(4);
@@ -100,13 +100,14 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 
 	public void connectJob()
 	{
-		Eln.simulator.addAllElectricalComponent(electricComponentList);
+		Eln.simulator.addAllElectricalComponent(electricalComponentList);
 		Eln.simulator.addAllThermalConnection(thermalConnectionList);
 
 		for(NodeElectricalLoad load : electricalLoadList)
 			Eln.simulator.addElectricalLoad(load);
 		for(NodeThermalLoad load : thermalLoadList)
 			Eln.simulator.addThermalLoad(load);
+
 
 		for(IProcess process : slowProcessList)
 			Eln.simulator.addSlowProcess(process);
@@ -272,7 +273,12 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 		{
 			thermalLoad.readFromNBT(nbt, "");
 		}
-
+		
+		for(Component c : electricalComponentList)	
+			if(c instanceof INBTTReady)
+				((INBTTReady) c).readFromNBT(nbt, "");
+		
+		
 		for(IProcess process : slowProcessList)
 		{
 			if(process instanceof INBTTReady)
@@ -315,6 +321,11 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 			thermalLoad.writeToNBT(nbt, "");
 		}
 
+		for(Component c : electricalComponentList)	
+			if(c instanceof INBTTReady)
+				((INBTTReady) c).writeToNBT(nbt, "");
+		
+		
 		for(IProcess process : slowProcessList)
 		{
 			if(process instanceof INBTTReady)
@@ -345,7 +356,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 
 	public void disconnectJob()
 	{
-		Eln.simulator.removeAllElectricalComponent(electricComponentList);
+		Eln.simulator.removeAllElectricalComponent(electricalComponentList);
 		Eln.simulator.removeAllThermalConnection(thermalConnectionList);
 
 		for(NodeElectricalLoad load : electricalLoadList)

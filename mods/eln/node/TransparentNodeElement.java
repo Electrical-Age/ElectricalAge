@@ -343,6 +343,13 @@ public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
 			thermalLoad.readFromNBT(nbt,"");
 		}
 		
+		
+		for(Component c : electricalComponentList)	
+			if(c instanceof INBTTReady)
+				((INBTTReady) c).readFromNBT(nbt, "");
+		
+		
+		
 		for(IProcess process : slowProcessList) 
 		{
 			if(process instanceof INBTTReady) ((INBTTReady)process).readFromNBT(nbt,"");
@@ -384,6 +391,11 @@ public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
 		{
 			thermalLoad.writeToNBT(nbt,"");
 		}
+		
+		for(Component c : electricalComponentList)	
+			if(c instanceof INBTTReady)
+				((INBTTReady) c).writeToNBT(nbt, "");
+		
 		
 		for(IProcess process : slowProcessList) 
 		{

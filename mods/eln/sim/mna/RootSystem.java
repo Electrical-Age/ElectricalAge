@@ -202,7 +202,9 @@ public class RootSystem {
 					breakSystem(s.getSubSystem());
 				}
 				if(s.line != null) {
-					breakSystem(s.line.getSubSystem());
+					SubSystem s1 = s.line.aPin.getSubSystem(), s2 = s.line.bPin.getSubSystem();
+					breakSystem(s1);
+					if(s1 != s2) breakSystem(s2);				
 				}
 				//TODO
 			}
@@ -260,9 +262,9 @@ public class RootSystem {
 				DelayInterSystem2 bNewDelay = new DelayInterSystem2();
 
 				double u = (aState.state + bState.state) / 2;
-				aNewState.state = u;
-				bNewState.state = u;
-				double i = (aState.state - bState.state) * interSystemResistor.getRInv();
+	
+				aNewDelay.setU(u);
+				bNewDelay.setU(u);
 				//aNewDelay.setInitialCurrent(-u / interSystemResistor.getR() - i);
 				//bNewDelay.setInitialCurrent(-u / interSystemResistor.getR() + i);
 

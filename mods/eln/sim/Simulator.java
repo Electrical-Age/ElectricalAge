@@ -366,29 +366,37 @@ public class Simulator /* ,IPacketHandler*/ {
 		
 		timeout += callPeriod;
 
-		
+		//Utils.print("+");
 		while(timeout > 0){
+
+			if(timeout < electricalTimeout && timeout < thermalTimeout){
+				thermalTimeout -= timeout;
+				electricalTimeout -= timeout;		
+				timeout = 0;
+				break;
+			}
+			
+			double dt = 0;
+			
 			if(electricalTimeout <= thermalTimeout){
+				dt = electricalTimeout;
 				electricalTimeout += electricalPeriod;
-				thermalTimeout -= electricalPeriod;
-				timeout -= electricalPeriod;
 				
-				 stackStart = System.nanoTime();
+				stackStart = System.nanoTime();
 				
 				mna.step();
-
+				//Utils.print("-");
 				for(IProcess p : electricalProcessList) {
 					p.process(electricalPeriod);
 				}
 				
 				electricalNsStack += System.nanoTime() - stackStart;
 			}else{
+				dt = thermalTimeout;
 				thermalTimeout += thermalPeriod;
-				electricalTimeout -= thermalPeriod;
-				timeout -= thermalPeriod;
-				
+
 			    stackStart = System.nanoTime();
-			    
+			///    Utils.print("*");
 
 			    for (ThermalConnection c : thermalConnectionList)
 			    {
@@ -417,12 +425,13 @@ public class Simulator /* ,IPacketHandler*/ {
 			    	load.PrsTemp = 0;
 			    	load.PspTemp = 0;
 			    }
-			
-				
-				
+
 				thermalNsStack += System.nanoTime() - stackStart;
 								
 			}
+			thermalTimeout -= dt;
+			electricalTimeout -= dt;		
+			timeout -= dt;
 		}
 		
 

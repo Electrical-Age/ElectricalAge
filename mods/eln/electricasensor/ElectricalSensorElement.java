@@ -17,6 +17,7 @@ import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.IVoltageDestructorDescriptor;
 import mods.eln.node.NodeBase;
+import mods.eln.node.NodeElectricalGateOutputProcess;
 import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeThermalLoad;
 import mods.eln.node.SixNode;
@@ -44,16 +45,18 @@ public class ElectricalSensorElement extends SixNodeElement {
     	this.descriptor = (ElectricalSensorDescriptor) descriptor;
 
 		aLoad = new NodeElectricalLoad("aLoad");
-		bLoad = new NodeElectricalLoad("bLoad");
-		resistor = new Resistor(aLoad, bLoad);
-		
-
 		electricalLoadList.add(aLoad);
-		electricalLoadList.add(bLoad);
+		
+		if(this.descriptor.voltageOnly == false){
+			bLoad = new NodeElectricalLoad("bLoad");
+			resistor = new Resistor(aLoad, bLoad);
+			electricalLoadList.add(bLoad);
+			electricalComponentList.add(resistor);
+		}
     	electricalLoadList.add(outputGate);
-    	electricalProcessList.add(outputGateProcess);
+    	electricalComponentList.add(outputGateProcess);
     	thermalProcessList.add(slowProcess);
-    	electricComponentList.add(resistor);
+    	
     //	electricalLoad.setRp(100000000000000.0);
 
 	}
@@ -152,9 +155,9 @@ public class ElectricalSensorElement extends SixNodeElement {
 	public String multiMeterString() {
 		// TODO Auto-generated method stub
 		if(descriptor.voltageOnly == false)
-			return Utils.plotUIP(aLoad.Uc, aLoad.getCurrent());
+			return Utils.plotUIP(aLoad.getU(), aLoad.getCurrent());
 		else
-			return Utils.plotVolt("Uin:", aLoad.Uc) + Utils.plotVolt("Uout:", outputGate.Uc);
+			return Utils.plotVolt("Uin:", aLoad.getU()) + Utils.plotVolt("Uout:", outputGate.getU());
 
 	}
 	
@@ -190,8 +193,10 @@ public class ElectricalSensorElement extends SixNodeElement {
 	@Override
 	public void initialize() {
 		
-		Eln.instance.signalCableDescriptor.applyTo(outputGate, false);
+		Eln.instance.signalCableDescriptor.applyTo(outputGate);
     	computeElectricalLoad();
+		Eln.applySmallRs(aLoad);
+		if(bLoad != null) Eln.applySmallRs(bLoad);
 	}
 
 	@Override
@@ -202,22 +207,22 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 	public void computeElectricalLoad()
 	{
-		
+
 		//if(descriptor.voltageOnly == false)
 		{
 			ItemStack cable = inventory.getStackInSlot(ElectricalSensorContainer.cableSlotId);
 			ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
-			if(cableDescriptor == null)
+			
+			if(resistor != null)
 			{
-				aLoad.highImpedance();
-				bLoad.highImpedance();
-				resistor.highImpedance();
-			}
-			else
-			{
-				cableDescriptor.applyTo(aLoad, false);
-				cableDescriptor.applyTo(bLoad, false);
-				cableDescriptor.applyTo(resistor);
+				if(cableDescriptor == null)
+				{
+					resistor.highImpedance();
+				}
+				else
+				{
+					cableDescriptor.applyTo(resistor,2);
+				}
 			}
 		}
 

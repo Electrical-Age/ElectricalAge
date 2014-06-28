@@ -1,6 +1,7 @@
 package mods.eln.sim;
 
 import mods.eln.misc.FunctionTable;
+import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.state.VoltageState;
 
@@ -32,7 +33,7 @@ public class BatteryProcess implements IProcess {
 	@Override
 	public void process(double time) {
 		// TODO Auto-generated method stub
-
+//		Utils.print("*");
 		Q -= voltageSource.getCurrent()*time;
 		
 		double voltage = computeVoltage();

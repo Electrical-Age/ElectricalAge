@@ -38,7 +38,7 @@ public class ElectricalSwitchElement extends SixNodeElement {
 
     	electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
-    	electricComponentList.add(switchResistor);
+    	electricalComponentList.add(switchResistor);
     	thermalLoadList.add(thermalLoad);
 
     	this.descriptor = (ElectricalSwitchDescriptor) descriptor;

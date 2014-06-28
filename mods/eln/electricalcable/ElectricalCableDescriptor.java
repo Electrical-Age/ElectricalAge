@@ -103,7 +103,10 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 	}	
 	
 	public void applyTo(Resistor resistor) {
-		resistor.setR(electricalRs);
+		applyTo(resistor, 1);
+	}
+	public void applyTo(Resistor resistor,double factor) {
+		resistor.setR(electricalRs*factor);
 	}
 	
 	public void applyTo(ThermalLoad thermalLoad) {

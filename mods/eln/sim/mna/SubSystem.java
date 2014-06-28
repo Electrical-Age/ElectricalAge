@@ -162,6 +162,7 @@ public class SubSystem {
 	}
 
 	public void addToI(State s, double v) {
+		if(s == null) return;
 		Idata[s.getId()] =  v;
 		//Idata[s.getId()][0] += v;
 	}
@@ -324,6 +325,10 @@ public class SubSystem {
 		return s.state;
 	}
 
+	public double getXSafe(State bPin) {
+		// TODO Auto-generated method stub
+		return bPin == null ? 0 : getX(bPin);
+	}
 	
 	
 	public void breakSystem(){
@@ -367,6 +372,7 @@ public class SubSystem {
 		// TODO Auto-generated method stub
 		return dt;
 	}
+
 
 
 

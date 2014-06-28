@@ -23,7 +23,10 @@ import mods.eln.client.ClientProxy;
 import mods.eln.client.FrameTime;
 import mods.eln.client.SoundLoader;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
+import mods.eln.electricaldatalogger.DataLogsPrintDescriptor;
+import mods.eln.electricaldatalogger.ElectricalDataLoggerDescriptor;
 import mods.eln.electricalswitch.ElectricalSwitchDescriptor;
+import mods.eln.electricasensor.ElectricalSensorDescriptor;
 //import mods.eln.computercraftio.ComputerCraftIoDescriptor;
 //import mods.eln.computercraftio.PeripheralHandler;
 //import mods.eln.diode.DiodeDescriptor;
@@ -75,11 +78,19 @@ import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.item.HeatingCorpElement;
+import mods.eln.item.LampDescriptor;
 import mods.eln.item.OverHeatingProtectionDescriptor;
 import mods.eln.item.OverVoltageProtectionDescriptor;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
+import mods.eln.lampsocket.LampSocketDescriptor;
+import mods.eln.lampsocket.LampSocketStandardObjRender;
+import mods.eln.lampsocket.LampSocketSuspendedObjRender;
+import mods.eln.lampsocket.LampSocketType;
+import mods.eln.lampsocket.LightBlock;
+import mods.eln.lampsocket.LightBlockEntity;
+import mods.eln.lampsupply.LampSupplyDescriptor;
 //import mods.eln.groundcable.GroundCableDescriptor;
 //import mods.eln.groundcable.GroundCableElement;
 //import mods.eln.groundcable.GroundCableRender;
@@ -152,6 +163,7 @@ import mods.eln.misc.WindProcess;
 //import mods.eln.mppt.MpptDescriptor;
 import mods.eln.node.NodeBlock;
 import mods.eln.node.NodeBlockItemWithSubTypes;
+import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeManager;
 import mods.eln.node.NodeServer;
 import mods.eln.node.SixNode;
@@ -415,7 +427,7 @@ public class Eln {
 	public static TransparentNodeBlock transparentNodeBlock;
 	public static OreBlock oreBlock;
 	public static GhostBlock ghostBlock;
-//	public static LightBlock lightBlock;
+	public static LightBlock lightBlock;
 
 	public static SixNodeItem sixNodeItem;
 	public static TransparentNodeItem transparentNodeItem;
@@ -557,7 +569,7 @@ public class Eln {
 				.setBlockTextureName("iron_block");
 
 		ghostBlock = (GhostBlock) new GhostBlock().setBlockTextureName("iron_block");
-//		lightBlock = (LightBlock) new LightBlock();
+		lightBlock = (LightBlock) new LightBlock();
 		// obj.loadFolder("eln", "/model");
 		for (String path : objNames) {
 			obj.loadObj("eln", path);
@@ -566,13 +578,13 @@ public class Eln {
 		GameRegistry.registerItem(sharedItem, "Eln.sharedItem");
 		GameRegistry.registerItem(sharedItemStackOne, "Eln.sharedItemStackOne");
 		GameRegistry.registerBlock(ghostBlock, "Eln.ghostBlock");
-//		GameRegistry.registerBlock(lightBlock, "Eln.lightBlock");
+		GameRegistry.registerBlock(lightBlock, "Eln.lightBlock");
 		GameRegistry.registerBlock(sixNodeBlock, SixNodeItem.class, "Eln.SixNode");
 		GameRegistry.registerBlock(transparentNodeBlock, TransparentNodeItem.class,"Eln.TransparentNode");
 		GameRegistry.registerBlock(oreBlock, OreItem.class, "Eln.Ore");
 		TileEntity.addMapping(TransparentNodeEntity.class,"TransparentNodeEntity");
 		TileEntity.addMapping(SixNodeEntity.class, "SixNodeEntity");
-//		TileEntity.addMapping(LightBlockEntity.class, "LightBlockEntity");
+		TileEntity.addMapping(LightBlockEntity.class, "LightBlockEntity");
 		
 		NodeManager.registerUuid(sixNodeBlock.getUuid(), SixNode.class);
 		NodeManager.registerUuid(transparentNodeBlock.getUuid(), TransparentNode.class);
@@ -599,17 +611,17 @@ public class Eln {
 		registerElectricalSource(3);
 		registerElectricalCable(32);
 //		registerThermalCable(48);
-//		registerLampSocket(64);
-//		registerLampSupply(65);
+		registerLampSocket(64);
+		registerLampSupply(65);
 //		registerBatteryCharger(66);
 //		registerWirelessSignal(92);
-//		registerElectricalDataLogger(93);
+		registerElectricalDataLogger(93);
 //		registerElectricalRelay(94);
 //		registerElectricalGateSource(95);
 //		registerPassiveComponent(96);
 		registerSwitch(97);
 //		registerElectricalBreaker(98);
-//		registerElectricalSensor(100);
+		registerElectricalSensor(100);
 //		registerThermalSensor(101);
 //		registerElectricalVuMeter(102);
 //		registerElectricalAlarm(103);
@@ -642,7 +654,7 @@ public class Eln {
 		registerHeatingCorp(1);
 //		registerThermalIsolator(2);
 		registerRegulatorItem(3);
-//		registerLampItem(4);
+		registerLampItem(4);
 		registerProtection(5);
 //		registerCombustionChamber(6);
 //		registerFerromagneticCore(7);
@@ -823,7 +835,7 @@ public class Eln {
 	public void onServerStopping(FMLServerStoppingEvent ev) {
 //		TutorialSignElement.resetBalise();
 //		modbusServer.destroy();
-//		LightBlockEntity.observers.clear();
+		LightBlockEntity.observers.clear();
 //		TeleporterElement.teleporterList.clear();
 		playerManager.clear();
 		MinecraftServer server = FMLCommonHandler.instance()
@@ -858,7 +870,7 @@ public class Eln {
 //			modbusServer = new ModbusServer();
 //			TeleporterElement.teleporterList.clear();
 			tileEntityDestructor.clear();
-//			LightBlockEntity.observers.clear();
+			LightBlockEntity.observers.clear();
 //			WirelessSignalTxElement.channelMap.clear();
 //			LampSupplyElement.channelMap.clear();
 			playerManager.clear();
@@ -917,7 +929,7 @@ public class Eln {
 
 		simulator.stop();
 		tileEntityDestructor.clear();
-//		LightBlockEntity.observers.clear(); // ?
+		LightBlockEntity.observers.clear(); 
 //		LampSupplyElement.channelMap.clear();
 //		WirelessSignalTxElement.channelMap.clear();
 
@@ -1355,7 +1367,7 @@ public class Eln {
 		}
 
 	}
-/*
+
 	void registerLampSocket(int id) {
 		int subId, completId;
 		String name;
@@ -1460,7 +1472,7 @@ public class Eln {
 			desc.useIcon(true);
 		}
 	}
-
+	
 	void registerLampSupply(int id) {
 		int subId, completId;
 		String name;
@@ -1478,7 +1490,7 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
-	}
+	}/*
 
 	void registerPassiveComponent(int id) {
 		int subId, completId;
@@ -1685,7 +1697,7 @@ public class Eln {
 		}
 
 	}
-
+*/
 	void registerElectricalSensor(int id) {
 		int subId, completId;
 		String name;
@@ -1711,7 +1723,7 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
-	}
+	}/*
 
 	void registerThermalSensor(int id) {
 		int subId, completId;
@@ -1923,7 +1935,7 @@ public class Eln {
 		}
 
 	}
-
+*/
 	void registerElectricalDataLogger(int id) {
 		int subId, completId;
 		String name;
@@ -1938,7 +1950,7 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
-
+/*
 	void registerElectricalRelay(int id) {
 		int subId, completId;
 		String name;
@@ -2579,7 +2591,7 @@ public class Eln {
 	}
 	
 	double incondecentLampLife;
-	double economicLampLife;/*
+	double economicLampLife;
 	void registerLampItem(int id) {
 		int subId, completId;
 		String name;
@@ -2716,7 +2728,7 @@ public class Eln {
 		}
 
 	}
-*/
+
 	void registerProtection(int id) {
 		int subId, completId;
 		String name;
@@ -4221,13 +4233,13 @@ public class Eln {
 			sharedItem.addElement(subId + (id << 6), desc);
 			Data.addResource(desc.newItemStack());
 		}
-		{
+		*/{
 			subId = 32;
 			name = "Data Logger Print";
 			DataLogsPrintDescriptor desc = new DataLogsPrintDescriptor(name);
 			dataLogsPrintDescriptor = desc;
 			sharedItem.addWithoutRegistry(subId + (id << 6), desc);
-		}
+		}/*
 
 		{
 			subId = 33;
@@ -4263,9 +4275,9 @@ public class Eln {
 		
 		
 	}
-/*
-	public DataLogsPrintDescriptor dataLogsPrintDescriptor;
 
+	public DataLogsPrintDescriptor dataLogsPrintDescriptor;
+/*
 	void recipeGround() {
 		addRecipe(findItemStack("Ground Cable"),
 				" C ",
@@ -5969,6 +5981,11 @@ public class Eln {
 				}
 			}
 		}*/
+	}
+
+
+	public static void applySmallRs(NodeElectricalLoad aLoad) {
+		instance.lowVoltageCableDescriptor.applyTo(aLoad);
 	}
 
 	/*public ItemStack findItemStack(String name, int stackSize) {

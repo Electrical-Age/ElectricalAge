@@ -25,24 +25,15 @@ public class ElectricalLoad extends VoltageStateLineReady{
 	private double Rs = 1000000000.0;
 	
 	public void setRs(double Rs){
-		/*boolean reAdd = false;
-		if(line != null || getSubSystem() != null){
-			reAdd = true;
-			Eln.simulator.removeElectricalLoad(this);
-		}
-		*/
-		this.Rs = Rs;
-		for(Component c : getConnectedComponents()){
-			if(c instanceof ElectricalConnection){
-				((ElectricalConnection)c).notifyRsChange();
+
+		if(this.Rs != Rs){
+			this.Rs = Rs;
+			for(Component c : getConnectedComponents()){
+				if(c instanceof ElectricalConnection){
+					((ElectricalConnection)c).notifyRsChange();
+				}
 			}
 		}
-		
-		/*
-		if(reAdd){
-			Eln.simulator.addElectricalLoad(this);
-		}*/
-		
 		
 	}
 	
@@ -50,6 +41,10 @@ public class ElectricalLoad extends VoltageStateLineReady{
 		return Rs;
 	}
 	
+	
+	public void highImpedance(){
+		setRs(1000000000.0);
+	}
 //	ArrayList<ElectricalConnection> electricalConnections = new ArrayList<ElectricalConnection>(4);
 	
 
