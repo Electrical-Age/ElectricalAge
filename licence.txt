@@ -1,7 +1,0 @@
-This mod is under the LGPL V3.0 licence
-
-http://www.gnu.org/copyleft/lesser.html
-
-Please don't use this source code to do a mod copy++. It's better to extend one mod. 
-
-Contact me @ papuchoud@hotmail.com  
