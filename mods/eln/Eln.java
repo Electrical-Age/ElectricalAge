@@ -428,7 +428,8 @@ public class Eln {
 	public static CommonProxy proxy;
 
 	public double electricalFrequancy, thermalFrequancy;
-
+	public int electricalInterSystemOverSampling;
+	
 	public ElectricalCableDescriptor highVoltageCableDescriptor;
 	public ElectricalCableDescriptor signalCableDescriptor;
 	public ElectricalCableDescriptor lowVoltageCableDescriptor;
@@ -494,6 +495,7 @@ public class Eln {
 
 
 		electricalFrequancy = config.get("simulation", "electricalFrequancy", 20).getDouble(20);
+		electricalInterSystemOverSampling = config.get("simulation", "electricalInterSystemOverSampling", 50).getInt(50);
 		thermalFrequancy = config.get("simulation", "thermalFrequancy", 400).getDouble(400);
 		
 		
@@ -511,7 +513,7 @@ public class Eln {
 
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
 		
-		simulator = new Simulator(0.05, 1/electricalFrequancy,1/thermalFrequancy);
+		simulator = new Simulator(0.05, 1/electricalFrequancy,electricalInterSystemOverSampling,1/thermalFrequancy);
 		
 		playerManager = new PlayerManager();
 		tileEntityDestructor = new TileEntityDestructor();

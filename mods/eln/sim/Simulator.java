@@ -63,6 +63,7 @@ public class Simulator /* ,IPacketHandler*/ {
 	boolean run;
 
 	double electricalPeriod,thermalPeriod,callPeriod;
+	int electricalInterSystemOverSampling;
 	int nodeCount = 0;
 	
 
@@ -84,16 +85,17 @@ public class Simulator /* ,IPacketHandler*/ {
 		return true;
 	}
 	
-	public Simulator(double callPeriod,double electricalPeriod,double thermalPeriod)
+	public Simulator(double callPeriod,double electricalPeriod,int electricalInterSystemOverSampling,double thermalPeriod)
 	{
 		this.callPeriod = callPeriod;
 		this.electricalPeriod = electricalPeriod;
+		this.electricalInterSystemOverSampling = electricalInterSystemOverSampling;
 		this.thermalPeriod = thermalPeriod;
 		
 
 		FMLCommonHandler.instance().bus().register(this);
 		
-		mna = new RootSystem(electricalPeriod);
+		mna = new RootSystem(electricalPeriod,electricalInterSystemOverSampling);
 	
 		slowProcessList = new ArrayList<IProcess>();
 	
@@ -116,7 +118,7 @@ public class Simulator /* ,IPacketHandler*/ {
 	{
 		nodeCount = 0;
 		
-		mna = new RootSystem(electricalPeriod);
+		mna = new RootSystem(electricalPeriod,electricalInterSystemOverSampling);
 
 		slowProcessList.clear();
 		

@@ -216,7 +216,7 @@ public class SubSystem {
 
 	
 	public double solve(State pin) {
-		Profiler profiler = new Profiler();
+		//Profiler profiler = new Profiler();
 		if(matrixValid == false) {
 			generateMatrix();
 		}

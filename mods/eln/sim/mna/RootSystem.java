@@ -14,6 +14,7 @@ import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.component.DelayInterSystem;
 import mods.eln.sim.mna.component.DelayInterSystem.ThevnaCalculator;
+import mods.eln.sim.mna.component.DelayInterSystem2;
 import mods.eln.sim.mna.component.InterSystem;
 import mods.eln.sim.mna.component.Line;
 import mods.eln.sim.mna.component.Resistor;
@@ -27,11 +28,13 @@ import mods.eln.sim.mna.state.VoltageState;
 
 public class RootSystem {
 
-	public RootSystem(double dt) {
+	public RootSystem(double dt,int interSystemOverSampling) {
 		this.dt = dt;
+		this.interSystemOverSampling = interSystemOverSampling;
 	}
 
 	double dt;
+	int interSystemOverSampling;
 
 	ArrayList<SubSystem> systems = new ArrayList<SubSystem>();
 
@@ -246,6 +249,66 @@ public class RootSystem {
 
 				VoltageState aNewState = new VoltageState();
 				Resistor aNewResistor = new Resistor();
+				DelayInterSystem2 aNewDelay = new DelayInterSystem2();
+				VoltageState bNewState = new VoltageState();
+				Resistor bNewResistor = new Resistor();
+				DelayInterSystem2 bNewDelay = new DelayInterSystem2();
+
+				double u = (aState.state + bState.state) / 2;
+				aNewState.state = u;
+				bNewState.state = u;
+				double i = (aState.state - bState.state) * interSystemResistor.getRInv();
+				//aNewDelay.setInitialCurrent(-u / interSystemResistor.getR() - i);
+				//bNewDelay.setInitialCurrent(-u / interSystemResistor.getR() + i);
+
+				
+				double r = interSystemResistor.getR()/2;
+				aNewResistor.setR(r).connectGhostTo(aState, aNewState);
+				aNewDelay.connectTo(aNewState, null);
+				bNewResistor.setR(r).connectGhostTo(bState, bNewState);
+				bNewDelay.connectTo(bNewState, null);
+
+				aSystem.addComponent(aNewResistor);
+				aSystem.addState(aNewState);
+				aSystem.addComponent(aNewDelay);
+				bSystem.addComponent(bNewResistor);
+				bSystem.addState(bNewState);
+				bSystem.addComponent(bNewDelay);
+
+				GenericDestructor destructor = new GenericDestructor(this, interSystemResistor);
+				destructor.removeComponent.add(aNewResistor);
+				destructor.removeComponent.add(bNewResistor);
+				destructor.removeComponent.add(aNewDelay);
+				destructor.removeComponent.add(bNewDelay);
+				destructor.removeState.add(aNewState);
+				destructor.removeState.add(bNewState);
+				destructor.removeSubSystemDestructor.add(aSystem);
+				destructor.removeSubSystemDestructor.add(bSystem);
+				
+				aSystem.breakDestructor.add(destructor);
+				bSystem.breakDestructor.add(destructor);
+				componentDestructor.put(interSystemResistor, destructor);
+				
+				interSystemResistor.usedAsInterSystem = true;
+				
+				
+				DelayInterSystem2.ThevnaCalculator thevnaCalc = new DelayInterSystem2.ThevnaCalculator(aNewDelay,bNewDelay);
+				addProcess(thevnaCalc);
+				destructor.preProcess.add(thevnaCalc);
+				if(interSystemResistor instanceof ISubSystemProcessFlush) {
+					addProcess((ISubSystemProcessFlush) interSystemResistor);
+				}
+				
+				
+				
+				/*
+				 				State aState = interSystemResistor.aPin;
+				State bState = interSystemResistor.bPin;
+				SubSystem aSystem = aState.getSubSystem();
+				SubSystem bSystem = bState.getSubSystem();
+
+				VoltageState aNewState = new VoltageState();
+				Resistor aNewResistor = new Resistor();
 				DelayInterSystem aNewDelay = new DelayInterSystem();
 				VoltageState bNewState = new VoltageState();
 				Resistor bNewResistor = new Resistor();
@@ -295,33 +358,51 @@ public class RootSystem {
 				if(interSystemResistor instanceof ISubSystemProcessFlush) {
 					addProcess((ISubSystemProcessFlush) interSystemResistor);
 				}
+				 */
 			}
 			ic.remove();
 		}
 	}
 
 	public void step() {
-		//Profiler profiler = new Profiler();
-		//profiler.add("Generate");
+		Profiler profiler = new Profiler();
+		profiler.add("Generate");
 		generate();
-		
-		for(IRootSystemPreStepProcess p : processPre){
-			p.rootSystemPreStepProcess();
+		profiler.add("interSystem");
+		for(int idx = 0;idx < interSystemOverSampling;idx++){
+			for(IRootSystemPreStepProcess p : processPre){
+				p.rootSystemPreStepProcess();
+			}
 		}
-
-		//profiler.add("stepCalc");
+		
+	/*	for(SubSystem s : systems) {
+			for(State state : s.states){
+				Utils.print(state.state + " ");
+			}
+		}
+		Utils.println("");*/
+		
+		profiler.add("stepCalc");
 		for(SubSystem s : systems) {
 			s.stepCalc();
 		}
-		//profiler.add("stepFlush");
+		profiler.add("stepFlush");
 		for(SubSystem s : systems) {
 			s.stepFlush();
 		}
-		//profiler.add("simProcessFlush");
+		profiler.add("simProcessFlush");
 		for(ISubSystemProcessFlush p : processF) {
 			p.simProcessFlush();
 		}
-		//profiler.stop();
+		
+	/*	for(SubSystem s : systems) {
+			for(State state : s.states){
+				Utils.print(state.state + " ");
+			}
+		}
+		Utils.println("");*/
+		
+		profiler.stop();
 		//Utils.println(profiler);
 	}
 
@@ -420,7 +501,7 @@ public class RootSystem {
 	}
 
 	public static void main(String[] args) {
-		RootSystem s = new RootSystem(0.1);
+		RootSystem s = new RootSystem(0.1,1);
 
 		VoltageState n1, n2;
 		VoltageSource u1;

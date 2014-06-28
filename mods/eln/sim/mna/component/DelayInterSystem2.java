@@ -9,21 +9,15 @@ public class DelayInterSystem2 extends VoltageSource {
 
 	private DelayInterSystem2 other;
 
-
 	public void set(DelayInterSystem2 other) {
 		this.other = other;
 
 	}
 
-
 	public double Rth;
 	public double Uth;
 
-
 	public boolean thevnaCalc = false;
-	public double thenvaU;
-
-
 
 	public static class ThevnaCalculator implements IRootSystemPreStepProcess {
 		DelayInterSystem2 a, b;
@@ -37,30 +31,35 @@ public class DelayInterSystem2 extends VoltageSource {
 		public void rootSystemPreStepProcess() {
 			doJobFor(a);
 			doJobFor(b);
-			
-			double U = (a.Uth-b.Uth)/(a.Rth+b.Rth)*b.Rth+b.Uth;
+
+			double U = (a.Uth - b.Uth) * b.Rth / (a.Rth + b .Rth) + b.Uth;
+			if(Double.isNaN(U)){
+				U = 0;
+			}
 			a.setU(U);
 			b.setU(U);
 		}
 
 		void doJobFor(DelayInterSystem2 d) {
-			d.thevnaCalc = true;
+			double originalU = d.getU();
 
-			d.thenvaU = 2;
 			double aU = 10;
+			d.setU(aU);
 			double aI = d.getSubSystem().solve(d.currentState);
 
-			d.thenvaU = 1;
 			double bU = 5;
+			d.setU(bU);
 			double bI = d.getSubSystem().solve(d.currentState);
 
-			//double aC = -(aU * d.conductance + aIs);
-			//double bC = -(bU * d.conductance + bIs);
-
 			d.Rth = (aU - bU) / (bI - aI);
-			d.Uth = aU + d.Rth * aI;
-
-			d.thevnaCalc = false;
+			//if(Double.isInfinite(d.Rth)) d.Rth = Double.MAX_VALUE;
+ 			if(d.Rth > 10000000000000000000.0) {
+				d.Uth = 0;
+				d.Rth = 10000000000000000000.0;
+			} else {
+				d.Uth = aU + d.Rth * aI;
+			}
+			d.setU(originalU);
 		}
 
 	}
