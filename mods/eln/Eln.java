@@ -5108,14 +5108,14 @@ public class Eln {
 
 	void recipeHeatingCorp() {
 		addRecipe(findItemStack("Small 50V Copper Heating Corp"),
-				"CCC",
 				"C C",
+				"CCC",
 				"C C",
 				Character.valueOf('C'), findItemStack("Copper Cable"));
 
 		addRecipe(findItemStack("50V Copper Heating Corp"),
-				"CCC",
 				"C C",
+				"CCC",
 				"C C",
 				Character.valueOf('C'), "ingotCopper");
 
@@ -5128,13 +5128,13 @@ public class Eln {
 				Character.valueOf('C'), findItemStack("Small 200V Copper Heating Corp"));
 
 		addRecipe(findItemStack("Small 50V Iron Heating Corp"),
-				"CCC",
 				"C C",
+				"CCC",
 				"C C", Character.valueOf('C'), findItemStack("Iron Cable"));
 
 		addRecipe(findItemStack("50V Iron Heating Corp"),
-				"CCC",
 				"C C",
+				"CCC",
 				"C C",
 				Character.valueOf('C'), new ItemStack(Items.iron_ingot));
 
@@ -5147,14 +5147,14 @@ public class Eln {
 				Character.valueOf('C'), findItemStack("Small 200V Iron Heating Corp"));
 
 		addRecipe(findItemStack("Small 50V Tungsten Heating Corp"),
-				"CCC",
 				"C C",
+				"CCC",
 				"C C",
 				Character.valueOf('C'), findItemStack("Tungsten Cable"));
 
 		addRecipe(findItemStack("50V Tungsten Heating Corp"),
-				"CCC",
 				"C C",
+				"CCC",
 				"C C",
 				Character.valueOf('C'), findItemStack("Tungsten Ingot"));
 
