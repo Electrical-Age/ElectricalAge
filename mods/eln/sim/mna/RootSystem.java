@@ -183,6 +183,11 @@ public class RootSystem {
 
 				sPtr = sNext;
 			}
+			
+			if(lineResistors.getFirst() == lineResistors.getLast()) {
+				lineResistors.pop();
+				lineStates.pop();
+			}
 
 			//stateScope.removeAll(lineStates);
 			Line.newLine(this, lineResistors, lineStates);

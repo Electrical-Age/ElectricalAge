@@ -363,6 +363,11 @@ public class SubSystem {
 		processF.remove(p);
 	}
 
+	public double getDt() {
+		// TODO Auto-generated method stub
+		return dt;
+	}
+
 
 
 

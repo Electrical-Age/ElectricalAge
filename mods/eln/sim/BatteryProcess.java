@@ -11,7 +11,6 @@ public class BatteryProcess implements IProcess {
 	public  FunctionTable voltageFunction;
 	public double Q = 0,QNominal = 0;
 	public double uNominal = 0;
-	public double dischargeCurrentMesure = 0;
 	public double life = 1.0;
 	//public double efficiency = 1.0;
 	
@@ -142,5 +141,10 @@ public class BatteryProcess implements IProcess {
 	public double getU()
 	{
 		return computeVoltage();
+	}
+
+	public double getDischargeCurrent() {
+		// TODO Auto-generated method stub
+		return voltageSource.getI();
 	}
 }

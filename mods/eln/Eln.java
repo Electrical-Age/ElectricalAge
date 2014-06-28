@@ -75,6 +75,8 @@ import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.item.HeatingCorpElement;
+import mods.eln.item.OverHeatingProtectionDescriptor;
+import mods.eln.item.OverVoltageProtectionDescriptor;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
@@ -641,7 +643,7 @@ public class Eln {
 //		registerThermalIsolator(2);
 		registerRegulatorItem(3);
 //		registerLampItem(4);
-//		registerProtection(5);
+		registerProtection(5);
 //		registerCombustionChamber(6);
 //		registerFerromagneticCore(7);
 //		registerIngot(8);
@@ -657,7 +659,7 @@ public class Eln {
 //		registerTreeResinAndRubber(64);
 //		registerRawCable(65);
 //		registerBrush(119);
-//		registerMiscItem(120);
+		registerMiscItem(120);
 //		registerElectricalTool(121);
 //		registerPortableItem(122);
 //
@@ -2714,7 +2716,7 @@ public class Eln {
 		}
 
 	}
-
+*/
 	void registerProtection(int id) {
 		int subId, completId;
 		String name;
@@ -2737,7 +2739,7 @@ public class Eln {
 		}
 
 	}
-
+/*
 	void registerCombustionChamber(int id) {
 		int subId, completId;
 		String name;
@@ -4057,11 +4059,11 @@ public class Eln {
 			sharedItemStackOne.addElement(subId + (id << 6), desc);
 		}
 	}
-
+*/
 	void registerMiscItem(int id) {
 		int subId, completId;
 		String name;
-		{
+		/*{
 			subId = 0;
 			name = "Cheap Chip";
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
@@ -4247,7 +4249,7 @@ public class Eln {
 			name = "Monster Filter";
 			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityMob.class, 1f, 0f, 0f);
 			sharedItem.addElement(subId + (id << 6), desc);
-		}
+		}*/
 
 		{
 			subId = 48;
@@ -4261,7 +4263,7 @@ public class Eln {
 		
 		
 	}
-
+/*
 	public DataLogsPrintDescriptor dataLogsPrintDescriptor;
 
 	void recipeGround() {

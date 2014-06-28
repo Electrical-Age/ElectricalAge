@@ -34,17 +34,17 @@ public class BatteryInventoryProcess implements IProcess {
 		
 		if(battery.hasOverVoltageProtection()) {
 			if(battery.batteryProcess.getU() * 1.1 > battery.batterySlowProcess.getUMax()) {
-				if(battery.batteryProcess.getU() < battery.positiveLoad.getU() - battery.negativeLoad.getU()) {
+				if(battery.batteryProcess.getU() < battery.cutLoad.getU() - battery.negativeLoad.getU()) {
 					cut = true;
 				}
 			}		
 			if(battery.batteryProcess.getU() < battery.batteryProcess.uNominal * 0.001) {
-				if(battery.batteryProcess.getU() > battery.positiveLoad.getU() - battery.negativeLoad.getU()) {
+				if(battery.batteryProcess.getU() > battery.cutLoad.getU() - battery.negativeLoad.getU()) {
 					cut = true;
 				}
 			}		
 		}
-		battery.cutSwitch.setState(cut);
+		battery.cutSwitch.setState(!cut);
 		
 		double U = battery.positiveLoad.getU() - battery.negativeLoad.getU();
 		

@@ -127,7 +127,7 @@ public class BatteryElement extends TransparentNodeElement  {
 	public String multiMeterString(Direction side) {
 	//	if(side == front)return  Utils.plotVolt("U+", positiveLoad.Uc );
 	//	if(side == front.back() && ! grounded)return  Utils.plotVolt("U-", negativeLoad.Uc );
-		return  Utils.plotVolt("Ubat:", batteryProcess.getU()) + Utils.plotAmpere("Current Output:", batteryProcess.dischargeCurrentMesure);
+		return  Utils.plotVolt("Ubat:", batteryProcess.getU()) + Utils.plotAmpere("Current Output:", batteryProcess.getDischargeCurrent());
 	}
 
 	@Override
@@ -140,7 +140,7 @@ public class BatteryElement extends TransparentNodeElement  {
 		super.networkSerialize(stream);
     	try {
     		double U = batteryProcess.getU();//(positiveLoad.Uc - negativeLoad.Uc);
-	    	stream.writeFloat((float)(U * batteryProcess.dischargeCurrentMesure) );
+	    	stream.writeFloat((float)(U * batteryProcess.getDischargeCurrent()) );
 	    	stream.writeFloat((float) batteryProcess.getEnergy());
 	    	stream.writeShort((short)(batteryProcess.life * 1000));
 
