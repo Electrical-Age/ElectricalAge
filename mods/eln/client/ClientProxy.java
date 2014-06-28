@@ -16,6 +16,7 @@ import mods.eln.entity.ReplicatorRender;
 import mods.eln.misc.ItemRender;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3DFolder;
+import mods.eln.misc.Version;
 import mods.eln.node.SixNodeEntity;
 import mods.eln.node.SixNodeRender;
 import mods.eln.node.TransparentNodeEntity;
@@ -31,6 +32,7 @@ import net.minecraftforge.common.MinecraftForge;
 public class ClientProxy extends CommonProxy {
 
 	TutorialSignOverlay TutorialSignOverlay;
+	
 	@Override
 	public void registerRenderers() {
 		new ClientPacketHandler();
@@ -53,6 +55,8 @@ public class ClientProxy extends CommonProxy {
 		soundClientEventListener = new SoundClientEventListener(uuidManager);
 	//	FMLCommonHandler.instance().bus().register();
 		new FrameTime();
+		
+		FMLCommonHandler.instance().bus().register(VersionCheckerHandler.getInstance());
 	}
 	public static UuidManager uuidManager;
 	public static SoundClientEventListener soundClientEventListener;
