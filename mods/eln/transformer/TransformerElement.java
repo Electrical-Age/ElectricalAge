@@ -174,7 +174,9 @@ public class TransformerElement extends TransparentNodeElement {
 
 	public void inventoryChange(IInventory inventory)
 	{
+		disconnect();
 		computeInventory();
+		connect();
 		needPublish();
 	}
 

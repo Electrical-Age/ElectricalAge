@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import mods.eln.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.autominer.AutoMinerDescriptor;
 import mods.eln.battery.BatteryDescriptor;
 import mods.eln.batterycharger.BatteryChargerDescriptor;
@@ -54,6 +55,7 @@ import mods.eln.item.MiningPipeDescriptor;
 import mods.eln.item.OreScanner;
 import mods.eln.item.OverHeatingProtectionDescriptor;
 import mods.eln.item.OverVoltageProtectionDescriptor;
+import mods.eln.item.TreeResin;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
 import mods.eln.item.electricalitem.BatteryItem;
 import mods.eln.item.electricalitem.ElectricalAxe;
@@ -112,6 +114,7 @@ import mods.eln.sound.SoundCommand;
 import mods.eln.transformer.TransformerDescriptor;
 import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor;
 import mods.eln.wiki.Data;
+import mods.eln.windturbine.WindTurbineDescriptor;
 import mods.eln.wirelesssignal.WirelessSignalRxDescriptor;
 import mods.eln.wirelesssignal.WirelessSignalTxDescriptor;
 import mods.eln.wirelesssignal.WirelessSignalTxElement;
@@ -486,7 +489,7 @@ public class Eln {
 		registerElectricalEnvironementalSensor(104);
 		registerElectricalRedstone(108);
 		registerElectricalGate(109);
-//		registerTreeResinCollector(116);
+		registerTreeResinCollector(116);
 		registerSixNodeMisc(117);
 //
 		registerTransformer(2);
@@ -505,7 +508,7 @@ public class Eln {
 		registerEggIncubator(41);
 		registerAutoMiner(42);
 //		registerSolarPannel(48);
-//		registerWindTurbine(49);
+		registerWindTurbine(49);
 //		registerThermalDissipatorPassiveAndActive(64);
 		registerTransparentNodeMisc(65);
 //
@@ -526,7 +529,7 @@ public class Eln {
 		registerOreScanner(16);
 		registerMiningPipe(17);
 //		registerSixNodeCache(18);
-//		registerTreeResinAndRubber(64);
+		registerTreeResinAndRubber(64);
 //		registerRawCable(65);
 //		registerBrush(119);
 		registerMiscItem(120);
@@ -3174,7 +3177,7 @@ public class Eln {
 		}
 
 	}
-
+*/
 	void registerWindTurbine(int id) {
 		int subId, completId;
 		String name;
@@ -3207,7 +3210,7 @@ public class Eln {
 			desc.setGhostGroup(g);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
-
+/*
 		{
 			subId = 16;
 			name = "Water Turbine";
@@ -3230,9 +3233,9 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
-
+*/
 	}
-
+/*
 	void registerThermalDissipatorPassiveAndActive(int id) {
 		int subId, completId;
 		String name;
@@ -3528,7 +3531,7 @@ public class Eln {
 		}*/
 
 	}
-	/*
+	
 
 	public static TreeResin treeResin;
 
@@ -3559,8 +3562,8 @@ public class Eln {
 			addToOre("ingotRubber", descriptor.newItemStack());
 		}
 	}
-*/
-	/*void registerTreeResinCollector(int id) {
+
+	void registerTreeResinCollector(int id) {
 		int subId, completId;
 		String name;
 
@@ -3573,7 +3576,7 @@ public class Eln {
 			descriptor = new TreeResinCollectorDescriptor(name, obj.getObj("treeresincolector"));
 			sixNodeItem.addDescriptor(completId, descriptor);
 		}
-	}*/
+	}
 
 	void registerBatteryCharger(int id) {
 		int subId, completId;

@@ -3,8 +3,6 @@ package mods.eln.sim.mna;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
-
 import mods.eln.misc.Profiler;
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.Component;
@@ -12,16 +10,13 @@ import mods.eln.sim.mna.component.Delay;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.misc.IDestructor;
-import mods.eln.sim.mna.misc.ISubSystemProcessI;
 import mods.eln.sim.mna.misc.ISubSystemProcessFlush;
+import mods.eln.sim.mna.misc.ISubSystemProcessI;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.mna.state.VoltageState;
 
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.QRDecomposition;
-import org.apache.commons.math3.linear.RRQRDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 
 public class SubSystem {
@@ -33,6 +28,11 @@ public class SubSystem {
 	State[] statesTab;
 
 	RootSystem root;
+	
+	
+	public RootSystem getRoot() {
+		return root;
+	}
 	
 	public SubSystem(RootSystem root,double dt) {
 		this.dt = dt;
@@ -374,7 +374,37 @@ public class SubSystem {
 	}
 
 
+	static public class Th{
+		public double R,U;		
+	}
+	
+	public Th getTh(State d,VoltageSource voltageSource) {
+		Th th = new Th();
+		double originalU = d.state;
 
+		double aU = 10;
+		voltageSource.setU(aU);
+		double aI = solve(voltageSource.getCurrentState());
+
+		double bU = 5;
+		voltageSource.setU(bU);
+		double bI = solve(voltageSource.getCurrentState());
+
+		double Rth = (aU - bU) / (bI - aI);
+		double Uth;
+		//if(Double.isInfinite(d.Rth)) d.Rth = Double.MAX_VALUE;
+		if(Rth > 10000000000000000000.0 || Rth < 0) {
+			Uth = 0;
+			Rth = 10000000000000000000.0;
+		} else {
+			Uth = aU + Rth * aI;
+		}
+		voltageSource.setU(originalU);
+		
+		th.R = Rth;
+		th.U = Uth;
+		return th;
+	}
 
 
 }
