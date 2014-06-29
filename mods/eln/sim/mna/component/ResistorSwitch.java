@@ -17,11 +17,17 @@ public class ResistorSwitch extends Resistor {
 		setR(baseR);
 	}
 	
-	double baseR = 1;
+	protected double baseR = 1;
 	@Override
 	public Resistor setR(double r) {
 		baseR = r;
 		return super.setR(state ? r : 1000000000.0);
+	}
+	
+	
+	public boolean getState() {
+		// TODO Auto-generated method stub
+		return state;
 	}
 	
 }

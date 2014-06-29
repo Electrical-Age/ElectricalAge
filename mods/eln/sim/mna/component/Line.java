@@ -30,7 +30,7 @@ public class Line extends Resistor implements ISubSystemProcessFlush{
 		// TODO Auto-generated method stub
 		return ofInterSystem;
 	}
-	void recalculateR(){
+	public void recalculateR(){
 		double R = 0;
 		for(Resistor r : resistors){
 			R += r.getR();

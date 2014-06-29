@@ -39,7 +39,7 @@ import cpw.mods.fml.relauncher.Side;
 public class Simulator /* ,IPacketHandler*/ {
 	
 	
-	RootSystem mna;
+	public RootSystem mna;
 	
 	private ArrayList<IProcess> slowProcessList;
 
@@ -436,15 +436,20 @@ public class Simulator /* ,IPacketHandler*/ {
 		
 
 		
-		long slowProcessTime = System.nanoTime();
+	//	long slowProcessTime = System.nanoTime();
 		stackStart = System.nanoTime();
+		//String str = "";
 	    for (Object o : slowProcessList.toArray())
 	    {
+	    	//long s =  System.nanoTime();
 	    	IProcess process  = (IProcess) o;
+	    	//str += System.nanoTime()-s + " ";
 	    	process.process(1.0/20);
 	    }	
+	    
+	   // Utils.println(str);
 	    slowNsStack += System.nanoTime() - stackStart;
-	    slowProcessTime = System.nanoTime() - slowProcessTime;
+	   // slowProcessTime = System.nanoTime() - slowProcessTime;
 		avgTickTime += 1.0/20*((int)(System.nanoTime()-startTime)/1000);
 		
 		

@@ -45,11 +45,11 @@ public class DelayInterSystem2 extends VoltageSource {
 
 			double aU = 10;
 			d.setU(aU);
-			double aI = d.getSubSystem().solve(d.currentState);
+			double aI = d.getSubSystem().solve(d.getCurrentState());
 
 			double bU = 5;
 			d.setU(bU);
-			double bI = d.getSubSystem().solve(d.currentState);
+			double bI = d.getSubSystem().solve(d.getCurrentState());
 
 			d.Rth = (aU - bU) / (bI - aI);
 			//if(Double.isInfinite(d.Rth)) d.Rth = Double.MAX_VALUE;

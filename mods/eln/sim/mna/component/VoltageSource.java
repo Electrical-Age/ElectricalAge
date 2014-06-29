@@ -22,7 +22,7 @@ public class VoltageSource extends Bipole implements ISubSystemProcessI{
 	
 	
 	double u = 0;
-	CurrentState currentState = new CurrentState();
+	private CurrentState currentState = new CurrentState();
 	
 	public VoltageSource setU(double u) {
 		this.u = u;
@@ -35,7 +35,7 @@ public class VoltageSource extends Bipole implements ISubSystemProcessI{
 	
 	@Override
 	public void quitSubSystem() {
-		subSystem.states.remove(currentState);
+		subSystem.states.remove(getCurrentState());
 		subSystem.removeProcess(this);
 		super.quitSubSystem();
 	}
@@ -43,35 +43,41 @@ public class VoltageSource extends Bipole implements ISubSystemProcessI{
 	@Override
 	public void addedTo(SubSystem s) {
 		super.addedTo(s);
-		s.addState(currentState);
+		s.addState(getCurrentState());
 		s.addProcess(this);
 	}
 	@Override
 	public void applyTo(SubSystem s) {
-		s.addToA(aPin,currentState,1.0);
-		s.addToA(bPin,currentState,-1.0);
-		s.addToA(currentState,aPin,1.0);
-		s.addToA(currentState,bPin,-1.0);
+		s.addToA(aPin,getCurrentState(),1.0);
+		s.addToA(bPin,getCurrentState(),-1.0);
+		s.addToA(getCurrentState(),aPin,1.0);
+		s.addToA(getCurrentState(),bPin,-1.0);
 	}
 
 
 	@Override
 	public void simProcessI(SubSystem s) {
-		s.addToI(currentState, u);
+		s.addToI(getCurrentState(), u);
 		
 	}
 
 	public double getI() {
 		// TODO Auto-generated method stub
-		return -currentState.state;
+		return -getCurrentState().state;
 	}
 	
 	
 	@Override
 	public double getCurrent() {
 		// TODO Auto-generated method stub
-		return -currentState.state;
+		return -getCurrentState().state;
 	}
+
+	public CurrentState getCurrentState() {
+		return currentState;
+	}
+
+
 	
 
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import mods.eln.Eln;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.sim.mna.component.Component;
+import mods.eln.sim.mna.component.Line;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.mna.state.VoltageState;
 import mods.eln.sim.mna.state.VoltageStateLineReady;
@@ -31,6 +32,9 @@ public class ElectricalLoad extends VoltageStateLineReady{
 			for(Component c : getConnectedComponents()){
 				if(c instanceof ElectricalConnection){
 					((ElectricalConnection)c).notifyRsChange();
+				}else 
+				if(c instanceof Line){
+					((Line)c).recalculateR();
 				}
 			}
 		}
