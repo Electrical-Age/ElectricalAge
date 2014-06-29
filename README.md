@@ -1,7 +1,7 @@
 Minecraft Mod - Codename : ELN
 ==============================
 
-Website available here: [http://dolu1990.github.io/ElectricalAge/](http://dolu1990.github.io/ElectricalAge/).
+Website available here: [http://electrical-age.net/](http://electrical-age.net/).
 
 ## ABOUT
 [ELN](https://github.com/Dolu1990/eln) is a Minecraft Mod offering the ability to perform large-scale in-game electrical simulations. Here is some highlighted features:
