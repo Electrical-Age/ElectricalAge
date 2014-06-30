@@ -1,4 +1,0 @@
-s tOn StreetLight_on.png
-s tOff StreetLight_off.png
-s type noLampDraw
-s cable enable

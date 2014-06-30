@@ -1,3 +1,0 @@
-o fill
-f emptyT -0.3
-f emptyS 0.8

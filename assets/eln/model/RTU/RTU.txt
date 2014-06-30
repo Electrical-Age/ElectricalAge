@@ -1,5 +1,0 @@
-o door
-f originX 0.31250
-f originY -0.31250
-f originZ 0.0
-f alphaOff 90
