@@ -63,7 +63,7 @@ public class Resistor extends Bipole {
 		setR(1000000000000.0);
 	}
 	
-	@Override
+	/*@Override
 	public void dirty() {
 		if(line != null){
 			line.recalculateR();
@@ -76,7 +76,7 @@ public class Resistor extends Bipole {
 		}
 		
 		super.dirty();
-	}
+	}*/
 	
 	boolean canBridge() {
 		return false;

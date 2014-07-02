@@ -15,6 +15,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUCubeMask;
+import mods.eln.misc.Profiler;
 import mods.eln.misc.Utils;
 import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
@@ -628,10 +629,13 @@ public abstract class NodeBase {
     
     public void sendPacketToAllClient(ByteArrayOutputStream bos)
     {
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();       
+    	Profiler p = new Profiler();
 
+        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();       
+        
 	    for (Object obj :  server.getConfigurationManager().playerEntityList)
 	    {
+
 	    	EntityPlayerMP player = (EntityPlayerMP) obj;
 	        WorldServer worldServer = (WorldServer) MinecraftServer.getServer().worldServerForDimension(player.dimension);
 	    	PlayerManager playerManager = worldServer.getPlayerManager(); 
@@ -641,6 +645,7 @@ public abstract class NodeBase {
 
 	    	Utils.sendPacketToClient(bos,player);	
 	    }   	
+
     }
     
     

@@ -32,7 +32,9 @@ public abstract class Component {
 
 	
 	public void dirty(){
-		if(getSubSystem() != null){
+		/*if(abstractedBy != null){
+			abstractedBy.dirty(this);
+		} else */if(getSubSystem() != null){
 			getSubSystem().invalidate();
 		}
 	}
@@ -41,6 +43,8 @@ public abstract class Component {
 		subSystem = null;
 	}
 	
+	
+	public IComponentAbstractor abstractedBy;
 	
 	
 	public void onAddToRootSystem(){}

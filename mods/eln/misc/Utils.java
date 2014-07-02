@@ -445,10 +445,14 @@ public class Utils {
 
 	public static void sendPacketToClient(ByteArrayOutputStream bos, EntityPlayerMP player)
 	{
-
+		Profiler p = new Profiler();
+		//p.add("A");
 		ElnServerPacket packet = new ElnServerPacket(Eln.channelName, bos.toByteArray());
 		ByteBuf b = Unpooled.buffer().capacity(bos.size()).setBytes(0,bos.toByteArray());
+		//p.add("B");
 		Eln.eventChannel.sendTo(new FMLProxyPacket(b,Eln.channelName), player);
+		//p.stop();
+		//Utils.println(p);
 	}
 
 	/*public static void sendPacketToPlayer(

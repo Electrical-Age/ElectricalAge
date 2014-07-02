@@ -212,30 +212,37 @@ public class RootSystem {
 	}
 
 	private void generateSystems() {
-		while (true) {
-
-			State root = null;
-			for(Component c : addComponents) {
-				if(c.canBeReplacedByInterSystem()) continue;
-				for(State s : c.getConnectedStates()) {
-					if(s != null) {
-						root = s;
-						break;
-					}
-				}
-				if(root != null) break;
-			}
-			if(root == null) {
-				break;
-			}
-
-			buildSubSystem(root, false);
-
-		}
+//		while (true) {
+//
+//			State root = null;
+//			root = addStates.
+//			/*for(State state : addStates){
+//				if(state.getConnectedComponents().size() != 0){
+//					root = state;
+//					break;
+//				}
+//			}*/
+//			/*for(Component c : addComponents) {
+//				if(c.canBeReplacedByInterSystem()) continue;
+//				for(State s : c.getConnectedStates()) {
+//					if(s != null) {
+//						root = s;
+//						break;
+//					}
+//				}
+//				if(root != null) break;
+//			}*/
+//			if(root == null) {
+//				break;
+//			}
+//
+//			buildSubSystem(root, false);
+//
+//		}
 
 		while (addStates.isEmpty() == false) {
 			State root = addStates.iterator().next();
-			buildSubSystem(root, true);
+			buildSubSystem(root);
 		}
 
 	}
@@ -413,14 +420,14 @@ public class RootSystem {
 		//Utils.println(profiler);
 	}
 
-	private void buildSubSystem(State root, boolean withInterSystem) {
+	private void buildSubSystem(State root) {
 
 		Set<Component> componentSet = new HashSet<Component>();
 		Set<State> stateSet = new HashSet<State>();
 
 		LinkedList<State> roots = new LinkedList<State>();
 		roots.push(root);
-		buildSubSystem(roots, withInterSystem, componentSet, stateSet);
+		buildSubSystem(roots, componentSet, stateSet);
 
 		addComponents.removeAll(componentSet);
 		addStates.removeAll(stateSet);
@@ -432,17 +439,21 @@ public class RootSystem {
 		systems.add(subSystem);
 	}
 
-	static final int maxSubSystemSize = 10;
+	static final int maxSubSystemSize = 40;
 
-	private void buildSubSystem(LinkedList<State> roots, boolean withInterSystem, Set<Component> componentSet, Set<State> stateSet) {
+	private void buildSubSystem(LinkedList<State> roots, Set<Component> componentSet, Set<State> stateSet) {
+		boolean privateSystem = roots.getFirst().isPrivateSubSystem();
+		
 		while (roots.isEmpty() == false) {
 			State sExplored = roots.pop();
 			stateSet.add(sExplored);
+			
+			
+			
 			for(Component c : sExplored.getConnectedComponents()) {
-				if(stateSet.size() > maxSubSystemSize) {
-				//	continue;
+				if(privateSystem == false && roots.size() + stateSet.size() > maxSubSystemSize && c.canBeReplacedByInterSystem()){
+					continue;
 				}
-				if(withInterSystem == false && c.canBeReplacedByInterSystem()) continue;
 				if(componentSet.contains(c)) continue;
 				boolean noGo = false;
 				for(State sNext : c.getConnectedStates()) {
@@ -451,7 +462,12 @@ public class RootSystem {
 						noGo = true;
 						break;
 					}
+					if(sNext.isPrivateSubSystem() != privateSystem){
+						noGo = true;
+						break;						
+					}
 				}
+				
 				if(noGo) continue;
 				componentSet.add(c);
 				for(State sNext : c.getConnectedStates()) {

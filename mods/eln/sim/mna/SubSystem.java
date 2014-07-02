@@ -134,7 +134,7 @@ public class SubSystem {
 		}
 		
 		Profiler p = new Profiler();
-		p.add("Inversse");
+		p.add("Inversse with " + stateCount + " state : ");
 		
 		try {
 			//FieldLUDecomposition QRDecomposition  LUDecomposition RRQRDecomposition

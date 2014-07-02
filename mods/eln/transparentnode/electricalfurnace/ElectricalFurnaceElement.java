@@ -64,6 +64,9 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 	public ElectricalFurnaceElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode,descriptor);
 		this.descriptor = (ElectricalFurnaceDescriptor) descriptor;
+		
+		electricalLoad.setAsPrivate();
+		
 		//NOT SIMULATED electricalLoadList.add(negativeLoad);
 		electricalLoadList.add(electricalLoad);
 		electricalComponentList.add(heatingCorpResistor);

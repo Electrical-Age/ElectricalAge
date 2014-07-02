@@ -52,8 +52,15 @@ public class State {
 
 
 	public boolean canBeSimplifiedByLine(){ return false; }
-
-
+	
+	boolean isPrivateSubSystem = false;
+	public State setAsPrivate(){
+		isPrivateSubSystem = true;
+		return this;
+	}
+	
+	public boolean isPrivateSubSystem() { return isPrivateSubSystem;}
+	
 	public void returnToRootSystem(RootSystem root) {
 		root.addState(this);
 	}

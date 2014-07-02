@@ -7,6 +7,8 @@ import java.io.IOException;
 import mods.eln.Eln;
 import mods.eln.INBTTReady;
 import mods.eln.electricalcable.ElectricalCableDescriptor;
+import mods.eln.misc.Profiler;
+import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.item.ItemStack;
@@ -21,13 +23,15 @@ public class ElectricalDataLoggerProcess implements IProcess {
 
 	@Override
 	public void process(double time) {
+		//Profiler p = new Profiler();
+		//p.add("A");
 		if(e.pause == false) {
 			e.timeToNextSample -= time;
 			byte value = ((byte)(e.inputGate.getNormalized() * 255.5 - 128));
 			e.sampleStack += value;
 			e.sampleStackNbr++;
 		}
-		
+		//p.add("B");
 		if(e.printToDo) {
 			ItemStack paperStack = e.inventory.getStackInSlot(ElectricalDataLoggerContainer.paperSlotId);
 			ItemStack printStack = e.inventory.getStackInSlot(ElectricalDataLoggerContainer.printSlotId);
@@ -39,7 +43,7 @@ public class ElectricalDataLoggerProcess implements IProcess {
 			}
 			e.printToDo = false;
 		}
-		
+		//p.add("C");
 		if(e.timeToNextSample <= 0.0) {
 			e.timeToNextSample += e.logs.samplingPeriod;
 			byte value = (byte)(e.sampleStack / e.sampleStackNbr);
@@ -57,7 +61,10 @@ public class ElectricalDataLoggerProcess implements IProcess {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
+			//p.add("D");
 			e.sendPacketToAllClient(bos);
 		}
+		//p.stop();
+		//Utils.println(p);
 	}
 }
