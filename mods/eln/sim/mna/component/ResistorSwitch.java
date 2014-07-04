@@ -1,8 +1,10 @@
 package mods.eln.sim.mna.component;
 
+import net.minecraft.nbt.NBTTagCompound;
+import mods.eln.INBTTReady;
 import mods.eln.sim.mna.state.State;
 
-public class ResistorSwitch extends Resistor {
+public class ResistorSwitch extends Resistor implements INBTTReady{
 	public ResistorSwitch() {
 	}
 	
@@ -29,5 +31,16 @@ public class ResistorSwitch extends Resistor {
 		// TODO Auto-generated method stub
 		return state;
 	}
-	
+
+	@Override
+	public void readFromNBT(NBTTagCompound nbt, String str) {
+		setR(nbt.getDouble(str + "R"));
+		setState(nbt.getBoolean(str + "State"));
+	}
+
+	@Override
+	public void writeToNBT(NBTTagCompound nbt, String str) {
+		nbt.setDouble(str + "R",baseR);
+		nbt.setBoolean(str + "State",getState());
+	}
 }

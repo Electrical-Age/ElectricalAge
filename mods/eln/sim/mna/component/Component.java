@@ -19,22 +19,23 @@ public abstract class Component {
 		this.subSystem = s;
 	}
 	public SubSystem getSubSystem(){
+		if(isAbstracted()) return abstractedBy.getAbstractorSubSystem();
 		return subSystem;
-	}
+	}	
 	public abstract void applyTo(SubSystem s);
 	public abstract State[] getConnectedStates();
 	public boolean canBeReplacedByInterSystem(){ return false; }
 	public void breakConnection(){};
-//	public void fromSubSystemToRoot(RootSystem root){root.addComponents.add(this);}
+
 	public void returnToRootSystem(RootSystem root){
-		root.addComponent(this);
+		root.addComponents.add(this);
 	} 
 
 	
 	public void dirty(){
-		/*if(abstractedBy != null){
+		if(abstractedBy != null){
 			abstractedBy.dirty(this);
-		} else */if(getSubSystem() != null){
+		} else if(getSubSystem() != null){
 			getSubSystem().invalidate();
 		}
 	}
@@ -44,9 +45,12 @@ public abstract class Component {
 	}
 	
 	
-	public IComponentAbstractor abstractedBy;
-	
+	public IAbstractor abstractedBy;
+	public boolean isAbstracted() {
+		return abstractedBy != null;
+	}	
 	
 	public void onAddToRootSystem(){}
 	public void onRemovefromRootSystem(){}
+
 }

@@ -1,12 +1,11 @@
 package mods.eln.sim.mna.state;
 
-import java.awt.image.ComponentSampleModel;
 import java.util.ArrayList;
 
 import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.component.Component;
-import mods.eln.sim.mna.component.Line;
+import mods.eln.sim.mna.component.IAbstractor;
 
 
 public class State {
@@ -27,6 +26,7 @@ public class State {
 		this.subSystem = s;
 	}
 	public SubSystem getSubSystem(){
+		if(isAbstracted()) return abstractedBy.getAbstractorSubSystem();
 		return subSystem;
 	}	
 	public void quitSubSystem() {
@@ -48,7 +48,6 @@ public class State {
 		components.remove(c);
 	}
 	
-	public Line line = null;
 
 
 	public boolean canBeSimplifiedByLine(){ return false; }
@@ -62,7 +61,13 @@ public class State {
 	public boolean isPrivateSubSystem() { return isPrivateSubSystem;}
 	
 	public void returnToRootSystem(RootSystem root) {
-		root.addState(this);
+		root.addStates.add(this);
 	}
+	
+	
+	public IAbstractor abstractedBy;
+	public boolean isAbstracted() {
+		return abstractedBy != null;
+	}	
 	
 }

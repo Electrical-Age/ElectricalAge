@@ -1,26 +1,19 @@
 package mods.eln.sim.mna;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_ADDPeer;
-
 import mods.eln.misc.Profiler;
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.Component;
-import mods.eln.sim.mna.component.DelayInterSystem;
-import mods.eln.sim.mna.component.DelayInterSystem.ThevnaCalculator;
-import mods.eln.sim.mna.component.DelayInterSystem2;
 import mods.eln.sim.mna.component.InterSystem;
+import mods.eln.sim.mna.component.InterSystemAbstraction;
 import mods.eln.sim.mna.component.Line;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.VoltageSource;
-import mods.eln.sim.mna.misc.GenericDestructor;
-import mods.eln.sim.mna.misc.IDestructor;
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;
 import mods.eln.sim.mna.misc.ISubSystemProcessFlush;
 import mods.eln.sim.mna.state.State;
@@ -38,68 +31,60 @@ public class RootSystem {
 
 	ArrayList<SubSystem> systems = new ArrayList<SubSystem>();
 
-	public HashMap<Component, IDestructor> componentDestructor = new HashMap<Component, IDestructor>();
+	//public HashMap<Component, IDestructor> componentDestructor = new HashMap<Component, IDestructor>();
 
 	public HashSet<Component> addComponents = new HashSet<Component>();
 	public HashSet<State> addStates = new HashSet<State>();
 
-	//	boolean isValid = false;
 
-	public void invalidate() {
-		//isValid = false;
-	}
 
-	public void addState(State s) {
-		addStates.add(s);
-		invalidate();
-	}
 
 	public void addComponent(Component c) {
 		addComponents.add(c);
-		invalidate();
 		c.onAddToRootSystem();
-	}
-
-	public void removeComponent(Component c) {
-		if(c instanceof Resistor) {
-			Resistor r = (Resistor) c;
-			if(r.line != null) {
-				SubSystem s1 = r.line.aPin.getSubSystem(), s2 = r.line.bPin.getSubSystem();
-				breakSystem(s1);
-				if(s1 != s2) breakSystem(s2);
+		
+		for(State s : c.getConnectedStates()){
+			if(s == null) continue;
+			if(s.getSubSystem() != null){
+				breakSystems(s.getSubSystem());
 			}
 		}
 
-		if(c.getSubSystem() != null) {
-			breakSystem(c.getSubSystem());
-		} else {
-			IDestructor d = componentDestructor.get(c);
-			if(d != null) d.destruct(true);
+		
+	}
+	public void removeComponent(Component c) {
+		for(State s : c.getConnectedStates()){
+			if(s == null) continue;
+			if(s.getSubSystem() != null){
+				breakSystems(s.getSubSystem());
+			}
 		}
+		
 		addComponents.remove(c);
 		c.onRemovefromRootSystem();
-		invalidate();
 	}
 
-	LinkedList<Line> lines = new LinkedList<Line>();
-
+	public void addState(State s) {
+		for(Component c : s.getConnectedComponents()){
+			if(c.getSubSystem() != null)
+				breakSystems(c.getSubSystem());
+		} 
+		addStates.add(s);
+	}
 	public void removeState(State s) {
-		if(s.line != null) {
-			SubSystem s1 = s.line.aPin.getSubSystem(), s2 = s.line.bPin.getSubSystem();
-			breakSystem(s1);
-			if(s1 != s2) breakSystem(s2);
-		}
-
-		if(s.getSubSystem() != null) {
-			breakSystem(s.getSubSystem());
-		}
+		for(Component c : s.getConnectedComponents()){
+			if(c.getSubSystem() != null)
+				breakSystems(c.getSubSystem());
+		} 
 		addStates.remove(s);
-		invalidate();
 	}
 
 	public void generate() {
 		if(addComponents.size() != 0 || addStates.size() != 0) {
-			generateBreak();
+			//generateBreak();
+			//generateBreakLine();
+			Profiler p = new Profiler();
+			p.add("*** Generate ***");
 			generateLine();
 			generateSystems();
 			generateInterSystems();
@@ -109,7 +94,8 @@ public class RootSystem {
 				stateCnt += s.states.size();
 				componentCnt += s.component.size();
 			}
-			Utils.println("**** " + stateCnt + "   " + componentCnt);
+			p.stop();
+			Utils.println(p + " **** " + stateCnt + "   " + componentCnt);
 		}
 	}
 
@@ -122,6 +108,10 @@ public class RootSystem {
 		}
 
 		return true;
+	}
+	
+	private void generateBreakLine(){
+		
 	}
 
 	private void generateLine() {
@@ -160,7 +150,7 @@ public class RootSystem {
 			LinkedList<Resistor> lineResistors = new LinkedList<Resistor>();
 
 			lineResistors.add(rPtr);
-			rPtr.lineReversDir = rPtr.aPin == sPtr;
+			//rPtr.lineReversDir = rPtr.aPin == sPtr;
 			while (true) {
 				lineStates.add(sPtr);
 				stateScope.remove(sPtr);
@@ -171,7 +161,7 @@ public class RootSystem {
 					}
 				}
 				lineResistors.add(rPtr);
-				rPtr.lineReversDir = sPtr == rPtr.bPin;
+				//rPtr.lineReversDir = sPtr == rPtr.bPin;
 
 				State sNext = null;
 
@@ -194,57 +184,25 @@ public class RootSystem {
 		}
 	}
 
-	private void generateBreak() {
+/*	private void generateBreak() {
 		for(Component c : (HashSet<Component>) addComponents.clone()) {
 			for(State s : c.getConnectedStates()) {
 				if(s == null) continue;
 				if(s.getSubSystem() != null) {
 					breakSystem(s.getSubSystem());
 				}
-				if(s.line != null) {
-					SubSystem s1 = s.line.aPin.getSubSystem(), s2 = s.line.bPin.getSubSystem();
-					breakSystem(s1);
-					if(s1 != s2) breakSystem(s2);				
+				if(s.isAbstracted()){
+					s.abstractedBy.breakAbstraction(this);
 				}
-				//TODO
 			}
 		}
-	}
+	}*/
 
 	private void generateSystems() {
-//		while (true) {
-//
-//			State root = null;
-//			root = addStates.
-//			/*for(State state : addStates){
-//				if(state.getConnectedComponents().size() != 0){
-//					root = state;
-//					break;
-//				}
-//			}*/
-//			/*for(Component c : addComponents) {
-//				if(c.canBeReplacedByInterSystem()) continue;
-//				for(State s : c.getConnectedStates()) {
-//					if(s != null) {
-//						root = s;
-//						break;
-//					}
-//				}
-//				if(root != null) break;
-//			}*/
-//			if(root == null) {
-//				break;
-//			}
-//
-//			buildSubSystem(root, false);
-//
-//		}
-
 		while (addStates.isEmpty() == false) {
 			State root = addStates.iterator().next();
 			buildSubSystem(root);
 		}
-
 	}
 
 	public void generateInterSystems() {
@@ -254,126 +212,9 @@ public class RootSystem {
 			if(!c.canBeReplacedByInterSystem()) {
 				System.out.println("ELN generateInterSystems ERROR");
 			}
-			Resistor interSystemResistor = (Resistor) c;
-			{
-				State aState = interSystemResistor.aPin;
-				State bState = interSystemResistor.bPin;
-				SubSystem aSystem = aState.getSubSystem();
-				SubSystem bSystem = bState.getSubSystem();
 
-				VoltageState aNewState = new VoltageState();
-				Resistor aNewResistor = new Resistor();
-				DelayInterSystem2 aNewDelay = new DelayInterSystem2();
-				VoltageState bNewState = new VoltageState();
-				Resistor bNewResistor = new Resistor();
-				DelayInterSystem2 bNewDelay = new DelayInterSystem2();
-
-				double u = (aState.state + bState.state) / 2;
-	
-				aNewDelay.setU(u);
-				bNewDelay.setU(u);
-				//aNewDelay.setInitialCurrent(-u / interSystemResistor.getR() - i);
-				//bNewDelay.setInitialCurrent(-u / interSystemResistor.getR() + i);
-
-				
-				double r = interSystemResistor.getR()/2;
-				aNewResistor.setR(r).connectGhostTo(aState, aNewState);
-				aNewDelay.connectTo(aNewState, null);
-				bNewResistor.setR(r).connectGhostTo(bState, bNewState);
-				bNewDelay.connectTo(bNewState, null);
-
-				aSystem.addComponent(aNewResistor);
-				aSystem.addState(aNewState);
-				aSystem.addComponent(aNewDelay);
-				bSystem.addComponent(bNewResistor);
-				bSystem.addState(bNewState);
-				bSystem.addComponent(bNewDelay);
-
-				GenericDestructor destructor = new GenericDestructor(this, interSystemResistor);
-				destructor.removeComponent.add(aNewResistor);
-				destructor.removeComponent.add(bNewResistor);
-				destructor.removeComponent.add(aNewDelay);
-				destructor.removeComponent.add(bNewDelay);
-				destructor.removeState.add(aNewState);
-				destructor.removeState.add(bNewState);
-				destructor.removeSubSystemDestructor.add(aSystem);
-				destructor.removeSubSystemDestructor.add(bSystem);
-				
-				aSystem.breakDestructor.add(destructor);
-				bSystem.breakDestructor.add(destructor);
-				componentDestructor.put(interSystemResistor, destructor);
-				
-				interSystemResistor.usedAsInterSystem = true;
-				
-				
-				DelayInterSystem2.ThevnaCalculator thevnaCalc = new DelayInterSystem2.ThevnaCalculator(aNewDelay,bNewDelay);
-				addProcess(thevnaCalc);
-				destructor.preProcess.add(thevnaCalc);
-				if(interSystemResistor instanceof ISubSystemProcessFlush) {
-					addProcess((ISubSystemProcessFlush) interSystemResistor);
-				}
-				
-				
-				
-				/*
-				 				State aState = interSystemResistor.aPin;
-				State bState = interSystemResistor.bPin;
-				SubSystem aSystem = aState.getSubSystem();
-				SubSystem bSystem = bState.getSubSystem();
-
-				VoltageState aNewState = new VoltageState();
-				Resistor aNewResistor = new Resistor();
-				DelayInterSystem aNewDelay = new DelayInterSystem();
-				VoltageState bNewState = new VoltageState();
-				Resistor bNewResistor = new Resistor();
-				DelayInterSystem bNewDelay = new DelayInterSystem();
-
-				double u = (aState.state + bState.state) / 2;
-				aNewState.state = u;
-				bNewState.state = u;
-				double i = (aState.state - bState.state) * interSystemResistor.getRInv();
-				aNewDelay.setInitialCurrent(-u / interSystemResistor.getR() - i);
-				bNewDelay.setInitialCurrent(-u / interSystemResistor.getR() + i);
-
-				
-				double r = interSystemResistor.getR()/2;
-				aNewResistor.setR(r).connectGhostTo(aState, aNewState);
-				aNewDelay.set(r).set(aNewState, bNewDelay);
-				bNewResistor.setR(r).connectGhostTo(bState, bNewState);
-				bNewDelay.set(r).set(bNewState, aNewDelay);
-
-				aSystem.addComponent(aNewResistor);
-				aSystem.addState(aNewState);
-				aSystem.addComponent(aNewDelay);
-				bSystem.addComponent(bNewResistor);
-				bSystem.addState(bNewState);
-				bSystem.addComponent(bNewDelay);
-
-				GenericDestructor destructor = new GenericDestructor(this, interSystemResistor);
-				destructor.removeComponent.add(aNewResistor);
-				destructor.removeComponent.add(bNewResistor);
-				destructor.removeComponent.add(aNewDelay);
-				destructor.removeComponent.add(bNewDelay);
-				destructor.removeState.add(aNewState);
-				destructor.removeState.add(bNewState);
-				destructor.removeSubSystemDestructor.add(aSystem);
-				destructor.removeSubSystemDestructor.add(bSystem);
-				
-				aSystem.breakDestructor.add(destructor);
-				bSystem.breakDestructor.add(destructor);
-				componentDestructor.put(interSystemResistor, destructor);
-				
-				interSystemResistor.usedAsInterSystem = true;
-				
-				
-				DelayInterSystem.ThevnaCalculator thevnaCalc = new ThevnaCalculator(aNewDelay,bNewDelay);
-				addProcess(thevnaCalc);
-				destructor.preProcess.add(thevnaCalc);
-				if(interSystemResistor instanceof ISubSystemProcessFlush) {
-					addProcess((ISubSystemProcessFlush) interSystemResistor);
-				}
-				 */
-			}
+			new InterSystemAbstraction(this,(Resistor) c);
+			
 			ic.remove();
 		}
 	}
@@ -517,10 +358,15 @@ public class RootSystem {
 
 		return null;
 	}
+	
+	
 
-	public void breakSystem(SubSystem sub) {
-		sub.breakSystem();
-
+	public void breakSystems(SubSystem sub) {
+		if(sub.breakSystem()){
+			for(SubSystem s : sub.interSystemConnectivity){
+				breakSystems(s);
+			}
+		}	
 	}
 
 	public static void main(String[] args) {

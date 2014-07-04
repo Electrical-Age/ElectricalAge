@@ -21,17 +21,17 @@ public class Resistor extends Bipole {
 	//public SubSystem interSystemA, interSystemB;
 	
 	
-	public Line line = null;
+/*	public Line line = null;
 	public boolean lineReversDir;
 	public boolean isInLine() {
 		// TODO Auto-generated method stub
 		return line != null;
-	}
+	}*/
 	
 	private double r = 1000000000.0, rInv = 1/1000000000.0;
 
 
-	public boolean usedAsInterSystem = false;
+	//public boolean usedAsInterSystem = false;
 
 	
 	public double getRInv(){

@@ -23,7 +23,7 @@ public class SubSystem {
 	public ArrayList<Component> component = new ArrayList<Component>();
 	public ArrayList<State> states = new ArrayList<State>();
 	public LinkedList<IDestructor> breakDestructor = new LinkedList<IDestructor>();
-
+	public ArrayList<SubSystem> interSystemConnectivity = new ArrayList<SubSystem>();
 	ArrayList<ISubSystemProcessI> processI = new ArrayList<ISubSystemProcessI>();
 	State[] statesTab;
 
@@ -113,6 +113,10 @@ public class SubSystem {
 
 	public void generateMatrix() {
 		stateCount = states.size();
+		
+		Profiler p = new Profiler();
+		p.add("Inversse with " + stateCount + " state : ");
+
 
 		A = MatrixUtils.createRealMatrix(stateCount, stateCount);
 		//Adata = ((Array2DRowRealMatrix) A).getDataRef();
@@ -133,8 +137,7 @@ public class SubSystem {
 			c.applyTo(this);
 		}
 		
-		Profiler p = new Profiler();
-		p.add("Inversse with " + stateCount + " state : ");
+
 		
 		try {
 			//FieldLUDecomposition QRDecomposition  LUDecomposition RRQRDecomposition
@@ -144,14 +147,15 @@ public class SubSystem {
 		} catch (Exception e) {
 			singularMatrix = true;
 		}
-		
-		p.stop();
-		Utils.println(p);
+
 
 		statesTab = new State[stateCount];
 		statesTab = states.toArray(statesTab);
 
 		matrixValid = true;
+		
+		p.stop();
+		Utils.println(p);
 	}
 
 	public void addToA(State a, State b, double v) {
@@ -330,10 +334,12 @@ public class SubSystem {
 		return bPin == null ? 0 : getX(bPin);
 	}
 	
+	boolean breaked = false;
 	
-	public void breakSystem(){
+	public boolean breakSystem(){
+		if(breaked) return false;
 		while (breakDestructor.isEmpty() == false) {
-			breakDestructor.pop().destruct(false);
+			breakDestructor.pop().destruct();
 		}
 		
 		for(Component c : component) {
@@ -355,7 +361,10 @@ public class SubSystem {
 		
 		
 		
-		invalidate();		
+		invalidate();	
+		
+		breaked = true;
+		return true;
 	}
 	
 	

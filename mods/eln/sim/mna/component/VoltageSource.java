@@ -5,11 +5,12 @@ import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.ISubSystemProcessI;
 import mods.eln.sim.mna.state.CurrentState;
 import mods.eln.sim.mna.state.State;
+import net.minecraft.nbt.NBTTagCompound;
 
 import org.apache.commons.math3.linear.RealMatrix;
 
 
-public class VoltageSource extends Bipole implements ISubSystemProcessI{
+public class VoltageSource extends Bipole implements ISubSystemProcessI,INBTTReady{
 
 	
 	public VoltageSource() {
@@ -78,6 +79,15 @@ public class VoltageSource extends Bipole implements ISubSystemProcessI{
 	}
 
 
-	
 
+	
+	@Override
+	public void readFromNBT(NBTTagCompound nbt, String str) {
+		setU(nbt.getDouble(str + "U"));
+	}
+
+	@Override
+	public void writeToNBT(NBTTagCompound nbt, String str) {
+		nbt.setDouble(str + "U",u);
+	}
 }

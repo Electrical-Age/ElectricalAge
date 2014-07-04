@@ -44,11 +44,14 @@ public class NodeElectricalGateOutputProcess extends Capacitor implements INBTTR
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
 		setHighImpedance(nbt.getBoolean(name + "highImpedance"));
+		U = nbt.getDouble(name + "U");
 	}
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		nbt.setBoolean(name + "highImpedance", highImpedance);
+		nbt.setDouble(name + "U",U);
+
 	}
 	
 	public void setOutputNormalized(double value)

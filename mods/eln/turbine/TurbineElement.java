@@ -2,6 +2,7 @@ package mods.eln.turbine;
 
 import java.io.DataOutputStream;
 
+import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.LRDU;
@@ -30,8 +31,9 @@ public class TurbineElement extends TransparentNodeElement{
 	public NodeThermalLoad coolLoad = new NodeThermalLoad("coolLoad");
 
 	public PowerSource electricalPowerSourceProcess = new PowerSource(positiveLoad); 
-	public TurbineInOutProcess turbineInOutProcess = new TurbineInOutProcess(this);
-
+	public TurbineThermalProcess turbineThermaltProcess = new TurbineThermalProcess(this);
+	public TurbineElectricalProcess turbineElectricalProcess = new TurbineElectricalProcess(this);
+	public TurbineSlowProcess turbineSlowProcess = new TurbineSlowProcess(this);
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 1, this);
 	
 	
@@ -47,13 +49,27 @@ public class TurbineElement extends TransparentNodeElement{
     	thermalLoadList.add(coolLoad);
     	
     
-
+    	//electricalProcessList.add(turbineElectricalProcess);
+    	slowProcessList.add(turbineSlowProcess);
     	
     	electricalComponentList.add(electricalPowerSourceProcess);
-    	thermalProcessList.add(turbineInOutProcess);
+    	thermalProcessList.add(turbineThermaltProcess);
     
 	}
 
+	@Override
+	public void connectJob() {
+		// TODO Auto-generated method stub
+		super.connectJob();
+		Eln.simulator.mna.addProcess(turbineElectricalProcess);
+	}
+	@Override
+	public void disconnectJob() {
+		// TODO Auto-generated method stub
+		super.disconnectJob();
+		Eln.simulator.mna.removeProcess(turbineElectricalProcess);
+	}
+	
 	@Override
 	public IInventory getInventory() {
 		// TODO Auto-generated method stub
@@ -107,25 +123,7 @@ public class TurbineElement extends TransparentNodeElement{
 	
 	@Override
 	public void initialize() {
-/*
-    	positiveLoad.setRs(0.05f);
-    	positiveLoad.setC(0.1f);
-    	
-    	negativeLoad.setRs(0.05f);
-    	negativeLoad.setC(0.1f);
-    	
-    	warmLoad.Rs = 0.001f;
-     	warmLoad.C = 200.0f;
-       	warmLoad.Rp = 10000000.0f;
-          	
-       	coolLoad.Rs = 0.01f;
-    	coolLoad.C = 2000.0f;
-    	coolLoad.Rp = 0.00001f;		
-		
-    	turbineThermalProcess.baseEfficiency = 0.8;
-    	turbineThermalProcess.nominalU = 50;
-    	turbineThermalProcess.nominalDeltaT = 200;
-		*/
+
 		descriptor.applyTo(positiveLoad);
 		
 		descriptor.applyTo(warmLoad);

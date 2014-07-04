@@ -1,6 +1,6 @@
 package mods.eln.sim.mna.component;
 
-import java.util.ArrayList;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -9,7 +9,7 @@ import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.ISubSystemProcessFlush;
 import mods.eln.sim.mna.state.State;
 
-public class Line extends Resistor implements ISubSystemProcessFlush{
+public class Line extends Resistor implements ISubSystemProcessFlush , IAbstractor{
 	public LinkedList<Resistor> resistors = new LinkedList<Resistor>(); //from a to b
 	public LinkedList<State> states = new LinkedList<State>(); //from a to b
 	
@@ -81,13 +81,14 @@ public class Line extends Resistor implements ISubSystemProcessFlush{
 			l.connectTo(stateBefore,stateAfter);
 			l.removeResistorFromCircuit();
 			
+			root.addProcess(l);
 
 			for(Resistor r : resistors){
-				r.line = l;
+				r.abstractedBy = l;
 				l.ofInterSystem |= r.canBeReplacedByInterSystem();
 			}
 			for(State s : states){
-				s.line = l;
+				s.abstractedBy = l;
 			}
 		}
 		
@@ -97,10 +98,10 @@ public class Line extends Resistor implements ISubSystemProcessFlush{
 	@Override
 	public void returnToRootSystem(RootSystem root) {
 		for(Resistor r : resistors){
-			r.line = null;
+			r.abstractedBy = null;
 		}
 		for(State s : states){
-			s.line = null;
+			s.abstractedBy = null;
 		}
 	
 		restoreResistorIntoCircuit();
@@ -108,6 +109,7 @@ public class Line extends Resistor implements ISubSystemProcessFlush{
 		root.addStates.addAll(states);
 		root.addComponents.addAll(resistors);
 
+		root.removeProcess(this);
 		
 	}
 
@@ -136,7 +138,20 @@ public class Line extends Resistor implements ISubSystemProcessFlush{
 	
 	@Override
 	public void quitSubSystem() {
-		subSystem.removeProcess(this);
+		
+	}
+
+	@Override
+	public void dirty(Component component) {
+		recalculateR();
+		if(isAbstracted())
+			abstractedBy.dirty(this);
+	}
+
+	@Override
+	public SubSystem getAbstractorSubSystem() {
+		// TODO Auto-generated method stub
+		return getSubSystem();
 	}
 
 

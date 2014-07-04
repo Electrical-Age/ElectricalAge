@@ -146,12 +146,14 @@ public class SolarPannelElement extends TransparentNodeElement{
 	public void writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
 		super.writeToNBT(nbt);
+		powerSource.writeToNBT(nbt, "powerSource");
 		nbt.setDouble("pannelAlpha", pannelAlpha);
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
 		super.readFromNBT(nbt);
+		powerSource.readFromNBT(nbt, "powerSource");
 		pannelAlpha = nbt.getDouble("pannelAlpha");
 	}
 

@@ -1961,7 +1961,7 @@ public class Eln {
 		{
 			subId = 1;
 			name = "50V Turbine";
-			double RsFactor = 0.25;
+			double RsFactor = 2;
 			double nominalU = LVU;
 			double nominalP = 300;
 			double nominalDeltaT = 250;
@@ -1982,9 +1982,9 @@ public class Eln {
 					lowVoltageCableDescriptor.electricalRp,
 					lowVoltageCableDescriptor.electricalC / RsFactor,// ElectricalCableDescriptor
 																		// electricalCable,
-					25.0, nominalDeltaT / 40, // double thermalC,double
+					50.0, nominalDeltaT / 40, // double thermalC,double
 												// DeltaTForInput
-					nominalP / 2,
+					nominalP / (nominalU/25),
 					new SoundCommand("eln:heat_turbine_50v",2).mulVolume(1.5).mulVolume(2));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -1992,7 +1992,7 @@ public class Eln {
 		{
 			subId = 8;
 			name = "200V Turbine";
-			double RsFactor = 0.25;
+			double RsFactor = 2;
 			double nominalU = MVU;
 			double nominalP = 500;
 			double nominalDeltaT = 350;
@@ -2013,9 +2013,9 @@ public class Eln {
 					meduimVoltageCableDescriptor.electricalRp,
 					meduimVoltageCableDescriptor.electricalC / RsFactor,// ElectricalCableDescriptor
 																		// electricalCable,
-					25.0, nominalDeltaT / 40, // double thermalC,double
+					100.0, nominalDeltaT / 40, // double thermalC,double
 												// DeltaTForInput
-					nominalP / 2,
+					nominalP / (nominalU/25),
 					new SoundCommand("eln:heat_turbine_200v",2).mulVolume(2));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
