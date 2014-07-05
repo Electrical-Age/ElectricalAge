@@ -2,8 +2,8 @@ package mods.eln.item;
 
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageSlot;
-import mods.eln.lampsocket.LampSocketType;
 import mods.eln.misc.Utils;
+import mods.eln.sixnode.lampsocket.LampSocketType;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 

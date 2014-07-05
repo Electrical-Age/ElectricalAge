@@ -75,6 +75,8 @@ public class ElectricalFurnaceProcess implements IProcess {
 				furnace.setPowerOn(false);
 			}
 		}	
+		int i = 0;
+		i++;
 		//Utils.println("FT : " + furnace.thermalLoad.Tc);
 	}
 

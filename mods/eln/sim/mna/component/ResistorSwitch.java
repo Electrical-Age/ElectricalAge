@@ -35,6 +35,7 @@ public class ResistorSwitch extends Resistor implements INBTTReady{
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
 		setR(nbt.getDouble(str + "R"));
+		if(Double.isNaN(baseR)) highImpedance();
 		setState(nbt.getBoolean(str + "State"));
 	}
 

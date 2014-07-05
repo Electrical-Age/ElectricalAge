@@ -8,7 +8,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
-import mods.eln.lampsocket.LightBlockEntity;
+import mods.eln.sixnode.lampsocket.LightBlockEntity;
 
 public abstract class LampItem extends GenericItemUsingDamageDescriptor{
 

@@ -3,9 +3,9 @@ package mods.eln.item;
 import java.util.List;
 
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
-import mods.eln.lampsocket.LampSocketType;
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sixnode.lampsocket.LampSocketType;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
