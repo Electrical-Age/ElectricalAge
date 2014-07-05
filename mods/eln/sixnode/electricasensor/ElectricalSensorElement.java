@@ -6,8 +6,6 @@ import java.io.IOException;
 
 import javax.swing.text.MaskFormatter;
 
-
-
 import mods.eln.Eln;
 
 import mods.eln.misc.Direction;
@@ -27,6 +25,9 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.process.destruct.ResistorCurrentWatchdog;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -35,75 +36,81 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
-
 public class ElectricalSensorElement extends SixNodeElement {
 
 	public ElectricalSensorElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		//front = LRDU.Left;
-    	this.descriptor = (ElectricalSensorDescriptor) descriptor;
+		this.descriptor = (ElectricalSensorDescriptor) descriptor;
 
 		aLoad = new NodeElectricalLoad("aLoad");
 		electricalLoadList.add(aLoad);
-		
-		if(this.descriptor.voltageOnly == false){
+		WorldExplosion exp = new WorldExplosion(this).cableExplosion();
+
+		if(this.descriptor.voltageOnly == false) {
 			bLoad = new NodeElectricalLoad("bLoad");
 			resistor = new Resistor(aLoad, bLoad);
 			electricalLoadList.add(bLoad);
 			electricalComponentList.add(resistor);
-		}
-    	electricalLoadList.add(outputGate);
-    	electricalComponentList.add(outputGateProcess);
-    	thermalProcessList.add(slowProcess);
-    	
-    //	electricalLoad.setRp(100000000000000.0);
 
+			slowProcessList.add(currentWatchDog);
+			currentWatchDog.set(resistor).set(exp);
+			
+		}
+		electricalLoadList.add(outputGate);
+		electricalComponentList.add(outputGateProcess);
+		thermalProcessList.add(slowProcess);
+
+		slowProcessList.add(voltageWatchDog);
+		voltageWatchDog.set(aLoad).set(exp);
 	}
 
+	VoltageStateWatchDog voltageWatchDog = new VoltageStateWatchDog();
+	ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
 
 	public ElectricalSensorDescriptor descriptor;
-	public NodeElectricalLoad aLoad,bLoad;
+	public NodeElectricalLoad aLoad, bLoad;
 	public NodeElectricalLoad outputGate = new NodeElectricalLoad("outputGate");
-	public NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess",outputGate);
+	public NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess", outputGate);
 	public ElectricalSensorProcess slowProcess = new ElectricalSensorProcess(this);
-	
-	public Resistor resistor;
-	
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1,64,this);
 
+	public Resistor resistor;
+
+	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
 	public SixNodeElementInventory getInventory() {
 		return inventory;
 	}
 
-	public static boolean canBePlacedOnSide(Direction side,int type)
+	public static boolean canBePlacedOnSide(Direction side, int type)
 	{
 		return true;
 	}
-	static final byte dirNone = 0,dirAB = 1,dirBA = 2;
+
+	static final byte dirNone = 0, dirAB = 1, dirBA = 2;
 	byte dirType = dirNone;
-	static final byte powerType = 0,currantType = 1,voltageType = 2;
-	int typeOfSensor = voltageType; 
-	float lowValue = 0,highValue = 50;
+	static final byte powerType = 0, currantType = 1, voltageType = 2;
+	int typeOfSensor = voltageType;
+	float lowValue = 0, highValue = 50;
 
 	@Override
-	public void readFromNBT(NBTTagCompound nbt ) {
+	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
 		super.readFromNBT(nbt);
-        byte value = nbt.getByte("front");
-        front = LRDU.fromInt((value>>0) & 0x3);
-        typeOfSensor = nbt.getByte("typeOfSensor");
-        lowValue = nbt.getFloat("lowValue");
-        highValue = nbt.getFloat("highValue");
-        dirType = nbt.getByte("dirType");
+		byte value = nbt.getByte("front");
+		front = LRDU.fromInt((value >> 0) & 0x3);
+		typeOfSensor = nbt.getByte("typeOfSensor");
+		lowValue = nbt.getFloat("lowValue");
+		highValue = nbt.getFloat("highValue");
+		dirType = nbt.getByte("dirType");
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
 		super.writeToNBT(nbt);
-		nbt.setByte("front",(byte) ((front.toInt()<<0)));
+		nbt.setByte("front", (byte) ((front.toInt() << 0)));
 		nbt.setByte("typeOfSensor", (byte) typeOfSensor);
 		nbt.setFloat("lowValue", lowValue);
 		nbt.setFloat("highValue", highValue);
@@ -160,9 +167,6 @@ public class ElectricalSensorElement extends SixNodeElement {
 			return Utils.plotVolt("Uin:", aLoad.getU()) + Utils.plotVolt("Uout:", outputGate.getU());
 
 	}
-	
-	
-
 
 	@Override
 	public String thermoMeterString() {
@@ -170,13 +174,12 @@ public class ElectricalSensorElement extends SixNodeElement {
 		return "";
 	}
 
-
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
 		// TODO Auto-generated method stub
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte( typeOfSensor);
+			stream.writeByte(typeOfSensor);
 			stream.writeFloat(lowValue);
 			stream.writeFloat(highValue);
 			stream.writeByte(dirType);
@@ -187,14 +190,11 @@ public class ElectricalSensorElement extends SixNodeElement {
 		}
 	}
 
-
-
-
 	@Override
 	public void initialize() {
-		
+
 		Eln.instance.signalCableDescriptor.applyTo(outputGate);
-    	computeElectricalLoad();
+		computeElectricalLoad();
 		Eln.applySmallRs(aLoad);
 		if(bLoad != null) Eln.applySmallRs(bLoad);
 	}
@@ -212,48 +212,49 @@ public class ElectricalSensorElement extends SixNodeElement {
 		{
 			ItemStack cable = inventory.getStackInSlot(ElectricalSensorContainer.cableSlotId);
 			ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
-			
-			if(resistor != null)
-			{
-				if(cableDescriptor == null)
-				{
-					resistor.highImpedance();
-				}
-				else
-				{
-					cableDescriptor.applyTo(resistor,2);
-				}
+
+			if(cableDescriptor == null) {
+				if(resistor != null) resistor.highImpedance();
+				currentWatchDog.setIAbsMax(100000);
+				voltageWatchDog.setUNominal(1000000000);
+			} else {
+				if(resistor != null) cableDescriptor.applyTo(resistor, 2);
+				currentWatchDog.setIAbsMax(cableDescriptor.electricalMaximalCurrent);
+				voltageWatchDog.setUNominal(cableDescriptor.electricalNominalVoltage);
 			}
+
 		}
 
 	}
+
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,float vx,float vy,float vz)
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz)
 	{
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-		
+
 		if(Utils.isPlayerUsingWrench(entityPlayer))
 		{
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);
-			return true;	
+			return true;
 		}
 
 		//front = LRDU.fromInt((front.toInt()+1)&3);
-    	return false;
+		return false;
 
 	}
 
 	public static final byte setTypeOfSensorId = 1;
 	public static final byte setValueId = 2;
 	public static final byte setDirType = 3;
+
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
 		super.networkUnserialize(stream);
 		try {
-			switch(stream.readByte())
+			switch (stream.readByte())
 			{
 			case setTypeOfSensorId:
 				typeOfSensor = stream.readByte();
@@ -274,22 +275,19 @@ public class ElectricalSensorElement extends SixNodeElement {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
-	
-	
+
 	@Override
 	public boolean hasGui() {
 		// TODO Auto-generated method stub
 		return true;
 	}
-	
+
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
 		// TODO Auto-generated method stub
 		return new ElectricalSensorContainer(player, inventory);
 	}
-	
-	
-	
+
 }

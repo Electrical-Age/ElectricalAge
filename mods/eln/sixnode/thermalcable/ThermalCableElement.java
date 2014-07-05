@@ -15,6 +15,8 @@ import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -32,12 +34,20 @@ public class ThermalCableElement extends SixNodeElement {
 		this.descriptor = (ThermalCableDescriptor) descriptor;
 		// TODO Auto-generated constructor stub		
 		thermalLoadList.add(thermalLoad);
+		
+		slowProcessList.add(thermalWatchdog);
+		
+		thermalWatchdog
+		 .set(thermalLoad)
+		 .setLimit(this.descriptor.thermalWarmLimit, this.descriptor.thermalCoolLimit)
+		 .set(new WorldExplosion(this).cableExplosion());
 	}
 
 
 	NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
 
-
+	ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
+	
 	int color = 0;
 	int colorCare = 1;
 	

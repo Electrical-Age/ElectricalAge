@@ -17,6 +17,9 @@ import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.PowerSource;
+import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -55,8 +58,25 @@ public class TurbineElement extends TransparentNodeElement{
     	electricalComponentList.add(electricalPowerSourceProcess);
     	thermalProcessList.add(turbineThermaltProcess);
     
+    	
+    	WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+    	
+		slowProcessList.add(thermalWatchdog);
+		
+		thermalWatchdog
+		 .set(warmLoad)
+		 .setTMax(this.descriptor.nominalDeltaT*2)
+		 .set(exp);
+
+		
+		slowProcessList.add(voltageWatchdog.set(positiveLoad).setUNominal(this.descriptor.nominalU).set(exp));
+
 	}
 
+	VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
+	ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
+	
+	
 	@Override
 	public void connectJob() {
 		// TODO Auto-generated method stub

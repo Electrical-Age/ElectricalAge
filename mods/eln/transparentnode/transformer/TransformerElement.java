@@ -18,6 +18,8 @@ import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.process.TransformerInterSystemProcess;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -41,8 +43,14 @@ public class TransformerElement extends TransparentNodeElement {
 		electricalLoadList.add(secondaryLoad);
 		electricalComponentList.add(primaryVoltageSource);
 		electricalComponentList.add(secondaryVoltageSource);
+		
+		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+		slowProcessList.add(voltagePrimaryWatchdog.set(primaryLoad).set(exp));
+		slowProcessList.add(voltageSecondaryWatchdog.set(primaryLoad).set(exp));
+
 	}
 
+	VoltageStateWatchDog voltagePrimaryWatchdog = new VoltageStateWatchDog(),voltageSecondaryWatchdog = new VoltageStateWatchDog();
 	@Override
 	public void disconnectJob() {
 		super.disconnectJob();
@@ -132,7 +140,7 @@ public class TransformerElement extends TransparentNodeElement {
 		ElectricalCableDescriptor primaryCableDescriptor = null, secondaryCableDescriptor = null;
 
 		//tranformerProcess.setEnable(primaryCable != null && core != null && secondaryCable != null);
-
+		
 		if(primaryCable != null) {
 			primaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(primaryCable);
 		}
@@ -140,6 +148,16 @@ public class TransformerElement extends TransparentNodeElement {
 			secondaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(secondaryCable);
 		}
 
+		if(primaryCableDescriptor != null)
+			voltagePrimaryWatchdog.setUNominal(primaryCableDescriptor.electricalNominalVoltage);
+		else
+			voltagePrimaryWatchdog.setUNominal(1000000);
+		
+		if(secondaryCableDescriptor != null)
+			voltageSecondaryWatchdog.setUNominal(secondaryCableDescriptor.electricalNominalVoltage);
+		else
+			voltageSecondaryWatchdog.setUNominal(1000000);
+		
 		double coreFactor = 1;
 		if(core != null)	{
 			FerromagneticCoreDescriptor coreDescriptor = (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(core);

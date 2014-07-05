@@ -23,6 +23,9 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.ResistorSwitch;
+import mods.eln.sim.process.destruct.ResistorCurrentWatchdog;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sound.SoundCommand;
 import mods.eln.sound.SoundServer;
 import net.minecraft.entity.player.EntityPlayer;
@@ -39,9 +42,21 @@ public class ElectricalSwitchElement extends SixNodeElement {
     	electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
     	electricalComponentList.add(switchResistor);
-    	thermalLoadList.add(thermalLoad);
+
 
     	this.descriptor = (ElectricalSwitchDescriptor) descriptor;
+    	
+    	WorldExplosion exp = new WorldExplosion(this).cableExplosion();
+    	
+    	
+    	
+    	slowProcessList.add(currentWatchDog);
+    	slowProcessList.add(voltageWatchDogA);
+    	slowProcessList.add(voltageWatchDogB);
+    	
+    	currentWatchDog.set(switchResistor).setIAbsMax(this.descriptor.maximalPower/this.descriptor.nominalVoltage).set(exp);
+    	voltageWatchDogA.set(aLoad).setUNominal(this.descriptor.nominalVoltage).set(exp);
+    	voltageWatchDogB.set(bLoad).setUNominal(this.descriptor.nominalVoltage).set(exp);
 	}
 
 
@@ -49,10 +64,11 @@ public class ElectricalSwitchElement extends SixNodeElement {
 	public NodeElectricalLoad aLoad = new NodeElectricalLoad("aLoad");
 	public NodeElectricalLoad bLoad = new NodeElectricalLoad("bLoad");
 	public ResistorSwitch switchResistor = new ResistorSwitch(aLoad, bLoad);
-	public NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
-	//public ElectricalLoadHeatThermalLoadProcess aETProcess = new ElectricalLoadHeatThermalLoadProcess(aLoad, thermalLoad);
-	//public ElectricalLoadHeatThermalLoadProcess bETProcess = new ElectricalLoadHeatThermalLoadProcess(bLoad, thermalLoad);
 
+	VoltageStateWatchDog voltageWatchDogA = new VoltageStateWatchDog();
+	VoltageStateWatchDog voltageWatchDogB = new VoltageStateWatchDog();
+	ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
+	
 	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
 	}
@@ -83,7 +99,8 @@ public class ElectricalSwitchElement extends SixNodeElement {
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		return thermalLoad;
+		//return thermalLoad;
+		return null;
 	}
 
 	@Override
@@ -101,7 +118,8 @@ public class ElectricalSwitchElement extends SixNodeElement {
 
 	@Override
 	public String thermoMeterString() {
-		return Utils.plotCelsius("T:",thermalLoad.Tc);
+		//return Utils.plotCelsius("T:",thermalLoad.Tc);
+		return "";
 	}
 
 	@Override
@@ -112,7 +130,8 @@ public class ElectricalSwitchElement extends SixNodeElement {
 	    	stream.writeShort((short)((aLoad.getU()) * NodeBase.networkSerializeUFactor));
 	    	stream.writeShort((short)((bLoad.getU()) * NodeBase.networkSerializeUFactor));
 	    	stream.writeShort((short)(aLoad.getCurrent() * NodeBase.networkSerializeIFactor));
-	    	stream.writeShort((short)(thermalLoad.Tc * NodeBase.networkSerializeTFactor));
+	    	//stream.writeShort((short)(thermalLoad.Tc * NodeBase.networkSerializeTFactor));
+	    	stream.writeShort(0);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -126,7 +145,7 @@ public class ElectricalSwitchElement extends SixNodeElement {
 	
 	@Override
 	public void initialize() {
-    	descriptor.thermal.applyTo(thermalLoad);
+    	//descriptor.thermal.applyTo(thermalLoad);
       	
     	descriptor.applyTo(aLoad);
     	descriptor.applyTo(bLoad);

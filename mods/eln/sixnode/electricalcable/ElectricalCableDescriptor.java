@@ -67,8 +67,10 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 		dielectricBreakOhm = electricalMaximalVoltage * electricalMaximalVoltage / electricalOverVoltageStartPowerLost;
 		dielectricVoltage = electricalMaximalVoltage;
 		dielectricBreakOhmMin = dielectricBreakOhm;
+		
+		this.electricalMaximalCurrent = electricalMaximalPower/electricalNominalVoltage;
 	}	
-	public double electricalMaximalVoltage;
+	public double electricalMaximalVoltage,electricalMaximalCurrent;
 	public double electricalRp = Double.POSITIVE_INFINITY, electricalRs = Double.POSITIVE_INFINITY, electricalC = 1;
 	public double thermalRp = 1, thermalRs = 1, thermalC = 1;
 	public double thermalWarmLimit = 100,thermalCoolLimit = -100;

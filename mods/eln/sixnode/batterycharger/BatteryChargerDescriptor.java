@@ -3,6 +3,7 @@ package mods.eln.sixnode.batterycharger;
 import java.util.List;
 
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeElectricalLoad;
@@ -24,6 +25,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 	public double nominalPower;
 	public ElectricalCableDescriptor cable;
 	double Rp;
+	public float[] pinDistance;
 
 	public BatteryChargerDescriptor(
 			String name,
@@ -41,6 +43,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 			for (int idx = 0; idx < 4; idx++) {
 				leds[idx] = obj.getPart("led" + idx);
 			}
+			pinDistance = Utils.getSixNodePinDistance(main);
 		}
 	}
 
@@ -111,10 +114,11 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
 		list.add("Can be used to recharge");
 		list.add("some electrical items like");
 		list.add("Flash Light, Xray scanner,");
 		list.add("Portable Pattery ..");
+		list.add(Utils.plotPower("Nominal power", nominalPower));
+		//list.add(Utils.plotPower("Maximal power", nominalPower*3));
 	}
 }

@@ -16,6 +16,9 @@ import mods.eln.node.SixNodeElement;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.heater.ResistorHeatThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -26,42 +29,45 @@ public class DiodeElement extends SixNodeElement {
 	public DiodeElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
+
+		this.descriptor = (DiodeDescriptor) descriptor;
+
 		front = LRDU.Left;
-    	electricalLoadList.add(anodeLoad);
-    	electricalLoadList.add(catodeLoad);
-    	thermalLoadList.add(thermalLoad);
-    	electricalComponentList.add(resistorSwitch);
-    	electricalProcessList.add(diodeProcess);
-    	this.descriptor = (DiodeDescriptor) descriptor;
+		electricalLoadList.add(anodeLoad);
+		electricalLoadList.add(catodeLoad);
+		thermalLoadList.add(thermalLoad);
+		electricalComponentList.add(resistorSwitch);
+		electricalProcessList.add(diodeProcess);
+		slowProcessList.add(thermalWatchdog.set(thermalLoad).set(this.descriptor.thermal).set(new WorldExplosion(this).cableExplosion()));
+		thermalProcessList.add(heater);
 	}
 
 	public DiodeDescriptor descriptor;
 	public NodeElectricalLoad anodeLoad = new NodeElectricalLoad("anodeLoad");
 	public NodeElectricalLoad catodeLoad = new NodeElectricalLoad("catodeLoad");
-	public NodeResistorSwitch resistorSwitch = new NodeResistorSwitch(anodeLoad, catodeLoad,"resistorSwitch");
+	public NodeResistorSwitch resistorSwitch = new NodeResistorSwitch(anodeLoad, catodeLoad, "resistorSwitch");
 	public NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
-/*	public ElectricalLoadHeatThermalLoadProcess positiveETProcess = new ElectricalLoadHeatThermalLoadProcess(anodeLoad, thermalLoad);
-	public ElectricalLoadHeatThermalLoadProcess negativeETProcess = new ElectricalLoadHeatThermalLoadProcess(catodeLoad, thermalLoad);
-*/
+	public ResistorHeatThermalLoad heater = new ResistorHeatThermalLoad(resistorSwitch, thermalLoad);
+	public ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
 	public DiodeProcess diodeProcess = new DiodeProcess(resistorSwitch);
 
 	LRDU front;
-	
+
 	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
 	}
-	
+
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
-        byte value = nbt.getByte("front");
-        front = LRDU.fromInt((value>>0) & 0x3);
+		byte value = nbt.getByte("front");
+		front = LRDU.fromInt((value >> 0) & 0x3);
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
-		nbt.setByte( "front", (byte) ((front.toInt()<<0)));
+		nbt.setByte("front", (byte) ((front.toInt() << 0)));
 	}
 
 	@Override
@@ -97,11 +103,11 @@ public class DiodeElement extends SixNodeElement {
 	public void networkSerialize(DataOutputStream stream) {
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte( (front.toInt()<<4));
-	    	stream.writeShort((short) ((anodeLoad.getU()) * NodeBase.networkSerializeUFactor));
-	    	stream.writeShort((short) ((catodeLoad.getU()) * NodeBase.networkSerializeUFactor));
-	    	stream.writeShort((short) (anodeLoad.getCurrent() * NodeBase.networkSerializeIFactor));
-	    	stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));
+			stream.writeByte((front.toInt() << 4));
+			stream.writeShort((short) ((anodeLoad.getU()) * NodeBase.networkSerializeUFactor));
+			stream.writeShort((short) ((catodeLoad.getU()) * NodeBase.networkSerializeUFactor));
+			stream.writeShort((short) (anodeLoad.getCurrent() * NodeBase.networkSerializeIFactor));
+			stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -112,8 +118,8 @@ public class DiodeElement extends SixNodeElement {
 	public void initialize() {
 		descriptor.applyTo(catodeLoad);
 		descriptor.applyTo(anodeLoad);
-    	descriptor.applyTo(thermalLoad);    	
-    	descriptor.applyTo(resistorSwitch);
+		descriptor.applyTo(thermalLoad);
+		descriptor.applyTo(resistorSwitch);
 	}
 
 	@Override
@@ -144,9 +150,9 @@ public class DiodeElement extends SixNodeElement {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);
-			return true;	
+			return true;
 		}
 		return false;
 	}
-	
+
 }

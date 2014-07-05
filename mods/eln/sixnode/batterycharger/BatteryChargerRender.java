@@ -21,6 +21,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.node.SixNodeElementInventory;
 import mods.eln.node.SixNodeElementRender;
@@ -54,7 +55,9 @@ public class BatteryChargerRender extends SixNodeElementRender {
 		drawEntityItem(b[2], 0.1875, -0.15625, 0.15625, alpha, 0.2f);
 		drawEntityItem(b[3], 0.1875, -0.15625, -0.15625, alpha, 0.2f);
 		
-		//LRDU.Down.glRotateOnX();
+
+		drawPowerPin(descriptor.pinDistance);
+		
 		descriptor.draw(batteryPresence, charged);
 	}
 	

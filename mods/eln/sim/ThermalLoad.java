@@ -82,4 +82,8 @@ public class ThermalLoad{
 		PcTemp += power;
 		PspTemp += absI;
 	}
+	public double getT() {
+		// TODO Auto-generated method stub
+		return Tc;
+	}
 }

@@ -27,6 +27,8 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.lampsocket.LampSocketContainer;
 
@@ -66,9 +68,17 @@ public class LampSupplyElement extends SixNodeElement {
 		loadResistor.highImpedance();
 		front = LRDU.Down;
 		this.descriptor = (LampSupplyDescriptor) descriptor;
+		
+		slowProcessList.add(voltageWatchdog);
+		voltageWatchdog
+		 .set(powerLoad)
+		 .set(new WorldExplosion(this).cableExplosion());
+		
 		channelRegister(this);
 	}
 
+	
+	VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
 	
 	class LampSupplySlowProcess implements IProcess{
 
@@ -141,8 +151,9 @@ public class LampSupplyElement extends SixNodeElement {
 	protected void inventoryChanged() {
 		// TODO Auto-generated method stub
 		super.inventoryChanged();
+		sixNode.disconnect();
 		setupFromInventory();
-		reconnect();
+		sixNode.connect();
 		needPublish();
 	}
 
@@ -190,8 +201,9 @@ public class LampSupplyElement extends SixNodeElement {
 		if(cableStack != null) {
 			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
 			desc.applyTo(powerLoad);
-		}
-		else {
+			voltageWatchdog.setUNominal(desc.electricalNominalVoltage);
+		} else {
+			voltageWatchdog.setUNominal(10000);
 			powerLoad.highImpedance();
 		}
 	}

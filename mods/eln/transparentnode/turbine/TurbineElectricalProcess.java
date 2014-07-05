@@ -20,6 +20,22 @@ public class TurbineElectricalProcess implements IProcess,IRootSystemPreStepProc
 	
 	@Override
 	public void process(double time) {
+		/*TurbineDescriptor descriptor = turbine.descriptor;
+		double deltaT = turbine.warmLoad.Tc - turbine.coolLoad.Tc;
+		if(deltaT < 0) return;
+		double deltaU = turbine.positiveLoad.getSubSystem().solve(turbine.positiveLoad);//turbine.positiveLoad.getU();
+		double targetU = descriptor.TtoU.getValue(deltaT);
+
+		PowerSource eps = turbine.electricalPowerSourceProcess;
+		eps.setUmax(targetU);
+		double eP = 0;
+		if(targetU - deltaU > 0)
+			eP = (targetU - deltaU) * descriptor.powerOutPerDeltaU;
+		eP = eps.getP()*0.1 + eP*0.9;
+		
+		eP = Math.min(eP, turbine.descriptor.nominalP*3);
+		//eP = 250;
+		eps.setP(eP);		*/
 		TurbineDescriptor descriptor = turbine.descriptor;
 		double deltaT = turbine.warmLoad.Tc - turbine.coolLoad.Tc;
 		if(deltaT < 0) return;
@@ -31,9 +47,11 @@ public class TurbineElectricalProcess implements IProcess,IRootSystemPreStepProc
 		double eP = 0;
 		if(targetU - deltaU > 0)
 			eP = (targetU - deltaU) * descriptor.powerOutPerDeltaU;
-		//eP = eps.getP()*0.9 + eP*0.1;
+		eP = eps.getP()*0.1 + eP*0.9;
 		
-		eps.setP(eP);		
+		eP = Math.min(eP, turbine.descriptor.nominalP*3);
+		//eP = 250;
+		eps.setP(eP);	
 	}
 
 

@@ -19,6 +19,8 @@ import mods.eln.node.TransparentNodeElement;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -55,8 +57,18 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 		thermalProcessList.add(regulator);
 		electricalLoadList.add(electricalCmdLoad);
 		slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 2.0, 1.0));
+		
+		slowProcessList.add(thermalWatchdog);
+		
+		thermalWatchdog
+		 .set(thermalLoad)
+		 .setLimit(this.descriptor.thermal)
+		 .set(new WorldExplosion(this).machineExplosion());
 	}
 
+
+	ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
+	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub

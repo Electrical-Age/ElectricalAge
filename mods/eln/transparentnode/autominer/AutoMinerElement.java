@@ -17,6 +17,8 @@ import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -42,11 +44,16 @@ public class AutoMinerElement extends TransparentNodeElement  {
 		electricalLoadList.add(inPowerLoad);
 		electricalComponentList.add(powerResistor);
 		slowProcessList.add(slowProcess);
-		//slowProcessList.add(electricalDrillWatchDog);
-		//slowProcessList.add(electricalScannerWatchDog);
-		//Eln.ghostManager.addObserver(this);
+
+		
+		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+		slowProcessList.add(voltageWatchdog.set(inPowerLoad).setUNominal(this.descriptor.nominalVoltage).set(exp));
+
 	}
 
+	VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
+	
+	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
 		return inPowerLoad;

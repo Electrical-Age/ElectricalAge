@@ -11,6 +11,8 @@ import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -30,8 +32,17 @@ public class ThermalDissipatorPassiveElement extends TransparentNodeElement{
 		thermalLoadList.add(thermalLoad);
 		this.descriptor = (ThermalDissipatorPassiveDescriptor) descriptor;
 
+		slowProcessList.add(thermalWatchdog);
+		
+		thermalWatchdog
+		 .set(thermalLoad)
+		 .setTMax(this.descriptor.warmLimit)
+		 .set(new WorldExplosion(this).machineExplosion());
 	}
 
+
+	ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
+	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
 		// TODO Auto-generated method stub

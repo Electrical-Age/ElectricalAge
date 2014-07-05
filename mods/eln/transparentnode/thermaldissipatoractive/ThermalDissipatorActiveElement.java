@@ -15,6 +15,9 @@ import mods.eln.node.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class ThermalDissipatorActiveElement extends TransparentNodeElement{
@@ -37,7 +40,20 @@ public class ThermalDissipatorActiveElement extends TransparentNodeElement{
 		slowProcessList.add(new NodePeriodicPublishProcess(node, 4f, 2f));
 		
 
+		slowProcessList.add(thermalWatchdog);
+		
+		thermalWatchdog
+		 .set(thermalLoad)
+		 .setTMax(this.descriptor.warmLimit)
+		 .set(new WorldExplosion(this).machineExplosion());
+
+		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+		slowProcessList.add(voltageWatchdog.set(positiveLoad).setUNominal(this.descriptor.nominalElectricalU).set(exp));
+
 	}
+
+	VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
+	ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
 
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {

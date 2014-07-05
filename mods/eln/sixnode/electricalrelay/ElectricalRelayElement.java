@@ -27,6 +27,10 @@ import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
+import mods.eln.sim.process.destruct.ResistorCurrentWatchdog;
+import mods.eln.sim.process.destruct.ResistorPowerWatchdog;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.lampsocket.LampSocketContainer;
 import mods.eln.sound.SoundCommand;
@@ -42,6 +46,9 @@ public class ElectricalRelayElement extends SixNodeElement {
 
 	public ElectricalRelayElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
+
+    	this.descriptor = (ElectricalRelayDescriptor) descriptor;
+    	
 		front = LRDU.Left;
     	electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
@@ -49,7 +56,15 @@ public class ElectricalRelayElement extends SixNodeElement {
     	slowProcessList.add(gateProcess);
     	electricalLoadList.add(gate);
     	
-    	this.descriptor = (ElectricalRelayDescriptor) descriptor;
+    	slowProcessList.add(currentWatchDog);
+    	slowProcessList.add(voltageWatchDogA);
+    	slowProcessList.add(voltageWatchDogB);
+    	
+    	WorldExplosion exp = new WorldExplosion(this).cableExplosion();
+    	
+    	currentWatchDog.set(switchResistor).setIAbsMax(this.descriptor.cable.electricalMaximalCurrent).set(exp);
+    	voltageWatchDogA.set(aLoad).setUNominal(this.descriptor.cable.electricalNominalVoltage).set(exp);
+    	voltageWatchDogB.set(bLoad).setUNominal(this.descriptor.cable.electricalNominalVoltage).set(exp);
 	}
 
 	public ElectricalRelayDescriptor descriptor;
@@ -58,6 +73,12 @@ public class ElectricalRelayElement extends SixNodeElement {
 	public Resistor switchResistor = new Resistor(aLoad, bLoad);
 	public NodeElectricalGateInput gate = new NodeElectricalGateInput("gate",true);
 	public ElectricalRelayGateProcess gateProcess = new ElectricalRelayGateProcess(this, "GP", gate);
+	
+	VoltageStateWatchDog voltageWatchDogA = new VoltageStateWatchDog();
+	VoltageStateWatchDog voltageWatchDogB = new VoltageStateWatchDog();
+	ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
+
+	
 
 	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;

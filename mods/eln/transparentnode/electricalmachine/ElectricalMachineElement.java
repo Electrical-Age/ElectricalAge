@@ -19,6 +19,8 @@ import mods.eln.sim.ElectricalStackMachineProcess;
 import mods.eln.sim.ElectricalStackMachineProcess.ElectricalStackMachineProcessObserver;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -32,7 +34,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 	NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");	
 	Resistor electricalResistor = new Resistor(electricalLoad,null);	
 	
-	NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
+	//NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
 	
 	ElectricalStackMachineProcess slowRefreshProcess;
 	
@@ -54,14 +56,20 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		
 		electricalLoadList.add(electricalLoad);
 		electricalComponentList.add(electricalResistor);
-		thermalLoadList.add(thermalLoad);
+		//thermalLoadList.add(thermalLoad);
 		slowProcessList.add(slowRefreshProcess);
 		//thermalProcessList.add(heatingProcess);
 		slowProcessList.add(slowProcess);
 		slowRefreshProcess.setObserver(this);
 		slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 2, 1));
+		
+		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+		slowProcessList.add(voltageWatchdog.set(electricalLoad).setUNominal(this.descriptor.nominalU).set(exp));
+
 	}
 
+	VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
+	
 	@Override
 	public IInventory getInventory() {
 		return inventory;
@@ -101,7 +109,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 	
 	@Override
 	public String thermoMeterString(Direction side) {
-		return Utils.plotCelsius("T", thermalLoad.Tc);
+		return null;//Utils.plotCelsius("T", thermalLoad.Tc);
 	}
 
 	@Override
@@ -129,11 +137,11 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		slowRefreshProcess.setEfficiency(Math.pow(descriptor.boosterEfficiency, boosterCount));
 		slowRefreshProcess.setSpeedUp(speedUp);
 		
-		descriptor.applyTo(thermalLoad);
+		//descriptor.applyTo(thermalLoad);
 		descriptor.applyTo(electricalLoad);
 		descriptor.applyTo(slowRefreshProcess);
 		
-		thermalLoad.setRp(thermalLoad.Rp / speedUp);
+		//thermalLoad.setRp(thermalLoad.Rp / speedUp);
 		//electricalLoad.setRp(electricalLoad.getRp() / Math.pow(descriptor.boosterSpeedUp, boosterCount));
 	}
 	

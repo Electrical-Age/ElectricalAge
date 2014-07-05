@@ -15,6 +15,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import mods.eln.Eln;
 import mods.eln.client.ClientProxy;
@@ -78,8 +79,9 @@ public class Utils {
 
 	public static double minecraftDay = 60 * 24;
 
+	public static Random random = new Random();
 	public static double rand(double min, double max) {
-		return Math.random() * (max - min) + min;
+		return random.nextDouble() * (max - min) + min;
 	}
 	
 	

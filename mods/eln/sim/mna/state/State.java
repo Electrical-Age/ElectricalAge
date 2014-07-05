@@ -70,4 +70,9 @@ public class State {
 		return abstractedBy != null;
 	}	
 	
+	
+	public boolean isNotSimulated() {
+		// TODO Auto-generated method stub
+		return subSystem == null && abstractedBy == null;
+	}
 }

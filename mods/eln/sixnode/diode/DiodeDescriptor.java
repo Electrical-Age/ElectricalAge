@@ -26,12 +26,12 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 		super(name, DiodeElement.class, DiodeRender.class);
 		this.IfU = IfU;
 		
-		double Umax = 0;
-		while(IfU.getValue(Umax) < Imax) Umax += 0.01;
-		double Pmax = Umax * IfU.getValue(Umax);
+		//double Umax = 0;
+		//while(IfU.getValue(Umax) < Imax) Umax += 0.01;
+		//double Pmax = Umax * IfU.getValue(Umax);
 		this.cable = cable;
 		this.thermal = thermal;
-		thermal.setMaximalPower(Pmax);
+		thermal.setMaximalPower(stdU*stdI*1.2);
 		this.stdI = stdI;
 		this.stdU = stdU;
 	}

@@ -31,7 +31,7 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 
 	double nominalU;
 	double nominalP;
-	double maximalP;
+	//double maximalP;
 	ThermalLoadInitializer thermal;
 	ElectricalCableDescriptor cable;
 
@@ -54,8 +54,8 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 		this.cable = cable;
 		this.thermal = thermal;
 		resistorR = nominalU * nominalU / nominalP;
-		this.maximalP = maximalU * maximalU / resistorR;
-		thermal.setMaximalPower(maximalP);
+	//	this.maximalP = nominalP*3;
+		//thermal.setMaximalPower(maximalP);
 		this.recipe = recipe;
 	}
 

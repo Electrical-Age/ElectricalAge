@@ -19,6 +19,9 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.process.destruct.ResistorCurrentWatchdog;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -138,14 +141,31 @@ public class HubElement extends SixNodeElement {
 		sixNode.connect();
 
 	}
+	
 
 	void setup() {
+		slowProcessList.clear();
+		WorldExplosion exp = new WorldExplosion(this);
+		exp.cableExplosion();
 		
 		for(Component c : electricalComponentList){
 			Resistor r = (Resistor)c;
 			r.breakConnection();
 		}
 		electricalComponentList.clear();
+		
+		for(LRDU lrdu : LRDU.values()){
+			ElectricalCableDescriptor d = getCableDescriptorFromLrdu(lrdu);
+			if(d == null) continue;
+			
+			VoltageStateWatchDog watchdog = new VoltageStateWatchDog();
+			slowProcessList.add(watchdog);
+			watchdog	
+				.setUNominal(d.electricalNominalVoltage)
+				.set(electricalLoad[lrdu.toInt()])
+				.set(exp);			
+			
+		}
 
 		for (int idx = 0; idx < 6; idx++) {
 			if (connectionGrid[idx]) {
@@ -156,6 +176,13 @@ public class HubElement extends SixNodeElement {
 					Resistor r = new Resistor(electricalLoad[lrdu[0].toInt()], electricalLoad[lrdu[1].toInt()]);
 					r.setR(getCableDescriptorFromLrdu(lrdu[0]).electricalRs + getCableDescriptorFromLrdu(lrdu[1]).electricalRs);
 					electricalComponentList.add(r);
+					
+					ResistorCurrentWatchdog watchdog = new ResistorCurrentWatchdog();
+					slowProcessList.add(watchdog);
+					watchdog	
+						.set(r)
+						.setIAbsMax(Math.min(getCableDescriptorFromLrdu(lrdu[0]).electricalMaximalCurrent, getCableDescriptorFromLrdu(lrdu[1]).electricalMaximalCurrent))
+						.set(exp);
 				}
 			}
 		}

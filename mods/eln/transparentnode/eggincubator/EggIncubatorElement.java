@@ -17,6 +17,8 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,8 +40,14 @@ public class EggIncubatorElement extends TransparentNodeElement {
 	   	slowProcessList.add(slowProcess);
 	   	
 	   	this.descriptor = (EggIncubatorDescriptor) descriptor;
+	   	
+		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+		slowProcessList.add(voltageWatchdog.set(powerLoad).setUNominal(this.descriptor.nominalVoltage).set(exp));
 	}
 
+	VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
+	
+	
 	class EggIncubatorProcess implements IProcess, INBTTReady {
 
 		double energy = 5000;

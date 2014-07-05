@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 
@@ -17,6 +18,7 @@ import mods.eln.node.NodeBlockEntity;
 import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.state.State;
+import mods.eln.sim.process.destruct.IDestructable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
@@ -51,6 +53,7 @@ public class Simulator /* ,IPacketHandler*/ {
 	private ArrayList<IProcess> thermalProcessList;
 	private ArrayList<ThermalConnection> thermalConnectionList;
 	private ArrayList<ThermalLoad> thermalLoadList;
+	private HashSet<IDestructable> destructableSet;
 	
 
 	public ArrayList<IProcess> getElectricalProcessList()
@@ -108,6 +111,7 @@ public class Simulator /* ,IPacketHandler*/ {
 		thermalProcessList = new ArrayList<IProcess>();
 		thermalConnectionList = new ArrayList<ThermalConnection>();
 		thermalLoadList = new ArrayList<ThermalLoad>();
+		destructableSet = new HashSet<IDestructable>();
 
 		run = false;
 		
@@ -129,7 +133,7 @@ public class Simulator /* ,IPacketHandler*/ {
 		thermalProcessList.clear();
 		thermalConnectionList.clear();
 		thermalLoadList.clear();
-		
+		destructableSet.clear();
 		
 
 		
@@ -150,6 +154,7 @@ public class Simulator /* ,IPacketHandler*/ {
 		thermalProcessList.clear();
 		thermalConnectionList.clear();
 		thermalLoadList.clear();
+		destructableSet.clear();
 
 		
 		run = false;
@@ -446,6 +451,11 @@ public class Simulator /* ,IPacketHandler*/ {
 	    	//str += System.nanoTime()-s + " ";
 	    	process.process(1.0/20);
 	    }	
+	    
+	    for(IDestructable d : destructableSet){
+	    	d.destructImpl();
+	    }
+	    destructableSet.clear();
 	    
 	   // Utils.println(str);
 	    slowNsStack += System.nanoTime() - stackStart;

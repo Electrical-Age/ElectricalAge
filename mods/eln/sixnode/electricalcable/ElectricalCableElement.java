@@ -24,6 +24,10 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -43,12 +47,29 @@ public class ElectricalCableElement extends SixNodeElement {
 		electricalLoad.setCanBeSimplifiedByLine(true);
 		electricalLoadList.add(electricalLoad);
 		thermalLoadList.add(thermalLoad);
-		Utils.d[0] = electricalLoad;
+		thermalProcessList.add(heater);
+		
+		slowProcessList.add(thermalWatchdog);
+		thermalWatchdog
+			.set(thermalLoad)
+			.setLimit(this.descriptor.thermalWarmLimit,this.descriptor.thermalCoolLimit)
+			.set(new WorldExplosion(this).cableExplosion());
+		
+		slowProcessList.add(voltageWatchdog);
+		voltageWatchdog
+		 .set(electricalLoad)
+		 .setUNominal(this.descriptor.electricalNominalVoltage)
+		 .set(new WorldExplosion(this).cableExplosion());
+		
 
 	}
 
 	public NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");
 	NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
+	
+	ElectricalLoadHeatThermalLoad heater = new ElectricalLoadHeatThermalLoad(electricalLoad, thermalLoad);
+	ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
+	VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
 	
 	int color;
 	int colorCare;

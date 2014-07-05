@@ -18,6 +18,9 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.process.destruct.ResistorPowerWatchdog;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -34,6 +37,12 @@ public class BatteryChargerElement extends SixNodeElement {
 	
 	
 	SixNodeElementInventory inventory = new SixNodeElementInventory(5, 64, this);
+	
+	
+	VoltageStateWatchDog voltageWatchDog = new VoltageStateWatchDog();
+	ResistorPowerWatchdog powerWatchDog = new ResistorPowerWatchdog();
+	
+	
 	
 	@Override
 	public IInventory getInventory() {
@@ -56,6 +65,10 @@ public class BatteryChargerElement extends SixNodeElement {
 		electricalComponentList.add(powerResistor);
 		slowProcessList.add(slowProcess);
 
+		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+		slowProcessList.add(voltageWatchDog.set(powerLoad).setUNominal(this.descriptor.nominalVoltage).set(exp));
+		//slowProcessList.add(powerWatchDog.set(powerResistor).setPmax(this.descriptor.nominalPower*3).set(exp));
+		
 		front = LRDU.Down;
 	}
 	

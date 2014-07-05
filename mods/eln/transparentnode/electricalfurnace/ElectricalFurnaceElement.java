@@ -27,6 +27,8 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalResistor;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
+import mods.eln.sim.process.destruct.VoltageStateWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -79,8 +81,13 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 		thermalProcessList.add(thermalRegulator);
 		
 		slowProcessList.add(slowRefreshProcess);
+		
+		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+		slowProcessList.add(voltageWatchdog.set(electricalLoad).set(exp));
 	}
 
+	VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
+	
 	@Override
 	public IInventory getInventory() {
 		return inventory;
@@ -160,17 +167,12 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 		itemStack = inventory.getStackInSlot(heatingCorpSlotId);
 		if(itemStack == null) {
 			thermalRegulator.setRmin(1000000000.0);
+			voltageWatchdog.setUNominal(100000);
 		}
 		else {
 			HeatingCorpElement element = ((GenericItemUsingDamage<HeatingCorpElement>)itemStack.getItem()).getDescriptor(itemStack);
 			element.applyTo(thermalRegulator);
-			//element.applyTo(electricalLoad);
-/*10W*/		//electricalLoad.setRp(element.electricalNominalU * element.electricalNominalU / 10);
-			
-			
-			/*if(!powerOn) {
-				electricalLoad.setRs(1000000000.0);
-			}*/
+			voltageWatchdog.setUNominal(element.electricalNominalU);
 		}
 		
 		itemStack = inventory.getStackInSlot(thermalRegulatorSlotId);
