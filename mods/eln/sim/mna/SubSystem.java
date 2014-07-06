@@ -297,7 +297,7 @@ public class SubSystem {
 			//	s.addState(n4 = new VoltageState());
 			//	s.addState(n5 = new VoltageState());
 		
-				s.addComponent((u1 = new VoltageSource()).setU(1).connectTo(n1, null));
+				s.addComponent((u1 = new VoltageSource("")).setU(1).connectTo(n1, null));
 		
 				s.addComponent((r1 = new Resistor()).setR(10).connectTo(n1, n2));
 				s.addComponent((d1 = new Delay()).set(1).connectTo(n2, n3));

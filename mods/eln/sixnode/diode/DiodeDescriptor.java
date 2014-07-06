@@ -3,11 +3,11 @@ package mods.eln.sixnode.diode;
 import java.util.List;
 
 import mods.eln.misc.IFunction;
-import mods.eln.node.NodeResistorSwitch;
 import mods.eln.node.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalLoadInitializer;
+import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -60,7 +60,7 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 		cable.applyTo(load);
 	}
 	
-	public void applyTo(NodeResistorSwitch resistorSwitch) {
+	public void applyTo(ResistorSwitch resistorSwitch) {
 		resistorSwitch.setR(stdU/stdI);
 	}
 	

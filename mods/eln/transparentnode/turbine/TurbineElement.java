@@ -17,6 +17,8 @@ import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.PowerSource;
+import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
@@ -29,11 +31,15 @@ public class TurbineElement extends TransparentNodeElement{
 	private static final double[]  voltageFunctionTable = {0.000,0.5,0.8,0.9,0.95,1.0,1.1,1.2};
 	private static FunctionTable voltageFunction = new FunctionTable(voltageFunctionTable,1.2);
 
+	public NodeElectricalLoad inputLoad = new NodeElectricalLoad("inputLoad");
 	public NodeElectricalLoad positiveLoad = new NodeElectricalLoad("positiveLoad");
+
+	public Resistor inputToTurbinResistor = new Resistor(inputLoad,positiveLoad);
+	
 	public NodeThermalLoad warmLoad = new NodeThermalLoad("warmLoad");
 	public NodeThermalLoad coolLoad = new NodeThermalLoad("coolLoad");
 
-	public PowerSource electricalPowerSourceProcess = new PowerSource(positiveLoad); 
+	public VoltageSource electricalPowerSourceProcess = new VoltageSource("PowerSource",positiveLoad,null); 
 	public TurbineThermalProcess turbineThermaltProcess = new TurbineThermalProcess(this);
 	public TurbineElectricalProcess turbineElectricalProcess = new TurbineElectricalProcess(this);
 	public TurbineSlowProcess turbineSlowProcess = new TurbineSlowProcess(this);
@@ -46,7 +52,10 @@ public class TurbineElement extends TransparentNodeElement{
 		super(transparentNode,descriptor);
 		this.descriptor = (TurbineDescriptor) descriptor;
 		
+	   	electricalLoadList.add(inputLoad);
 	   	electricalLoadList.add(positiveLoad);
+	   	
+	   	electricalComponentList.add(inputToTurbinResistor);
 	   	
     	thermalLoadList.add(warmLoad);
     	thermalLoadList.add(coolLoad);
@@ -98,8 +107,8 @@ public class TurbineElement extends TransparentNodeElement{
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
 		if(lrdu != LRDU.Down) return null;
-		if(side == front) return positiveLoad;
-		if(side == front.back()) return positiveLoad;
+		if(side == front) return inputLoad;
+		if(side == front.back()) return inputLoad;
 		return null;
 	}
 
@@ -144,13 +153,14 @@ public class TurbineElement extends TransparentNodeElement{
 	@Override
 	public void initialize() {
 
-		descriptor.applyTo(positiveLoad);
+		descriptor.applyTo(inputLoad);
+		inputToTurbinResistor.setR(descriptor.electricalRs*2);
 		
 		descriptor.applyTo(warmLoad);
 		descriptor.applyTo(coolLoad);
 		
 		
-		electricalPowerSourceProcess.setImax(descriptor.nominalP/descriptor.nominalU*4);
+		//electricalPowerSourceProcess.setImax(descriptor.nominalP/descriptor.nominalU*4);
 
 		//coolLoad.Rp = 0.001;
 		

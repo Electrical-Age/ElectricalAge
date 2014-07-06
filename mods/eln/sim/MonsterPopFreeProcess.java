@@ -2,10 +2,10 @@ package mods.eln.sim;
 
 import java.util.List;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.monster.EntityMob;
+import mods.eln.entity.ReplicatorEntity;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
+import net.minecraft.entity.monster.EntityMob;
 
 public class MonsterPopFreeProcess implements IProcess{
 	private Coordonate coordonate;
@@ -32,10 +32,10 @@ public class MonsterPopFreeProcess implements IProcess{
 				EntityMob mob = (EntityMob) o;
 				if(oldList == null || oldList.contains(o) == false)
 				{
-					/*if(coordonate.distanceTo(mob) < range && o instanceof ReplicatorEntity == false){
+					if(coordonate.distanceTo(mob) < range && o instanceof ReplicatorEntity == false){
 						mob.setDead();
 						Utils.println("MonsterPopFreeProcess : dead");
-					}*/
+					}
 				}
 			}
 			

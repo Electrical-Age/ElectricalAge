@@ -7,6 +7,8 @@ import java.util.List;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
+import mods.eln.entity.ReplicatorEntity;
+import mods.eln.entity.ReplicatorPopProcess;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptorWithComment;
 import mods.eln.generic.SharedItem;
@@ -79,6 +81,7 @@ import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
 import mods.eln.sixnode.diode.DiodeDescriptor;
 import mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor;
+import mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor;
 import mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor;
@@ -125,6 +128,8 @@ import mods.eln.transparentnode.battery.BatteryDescriptor;
 import mods.eln.transparentnode.computercraftio.ComputerCraftIoDescriptor;
 import mods.eln.transparentnode.computercraftio.PeripheralHandler;
 import mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor;
+import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxDescriptor;
+import mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxDescriptor;
 import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor;
 import mods.eln.transparentnode.electricalmachine.CompressorDescriptor;
 import mods.eln.transparentnode.electricalmachine.MaceratorDescriptor;
@@ -180,6 +185,7 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.event.FMLServerStoppingEvent;
 import cpw.mods.fml.common.network.FMLEventChannel;
 import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
@@ -511,7 +517,7 @@ public class Eln {
 		registerElectricalGateSource(95);
 		registerPassiveComponent(96);
 		registerSwitch(97);
-//		registerElectricalBreaker(98);
+		registerElectricalBreaker(98);
 		registerElectricalSensor(100);
 		registerThermalSensor(101);
 		registerElectricalVuMeter(102);
@@ -526,7 +532,7 @@ public class Eln {
 		registerHeatFurnace(3);
 		registerTurbine(4);
 
-//		registerElectricalAntenna(7);
+		registerElectricalAntenna(7);
 		registerBattery(16);
 		registerElectricalFurnace(32);
 		registerMacerator(33);
@@ -564,7 +570,7 @@ public class Eln {
 		registerElectricalTool(121);
 		registerPortableItem(122);
 //
-//		registerReplicator();
+		registerReplicator();
 //
 		recipeArmor();
 		recipeTool();
@@ -581,7 +587,7 @@ public class Eln {
 		recipeElectricalRelay();
 		recipeElectricalDataLogger();
 		recipeElectricalGateSource();
-//		recipeElectricalBreaker();  TOREAD
+		recipeElectricalBreaker();  
 		recipeElectricalVuMeter();
 		recipeElectricalEnvironnementalSensor();
 		recipeElectricalRedstone();
@@ -602,7 +608,7 @@ public class Eln {
 		recipeSolarPannel();
 
 		recipeThermalDissipatorPassiveAndActive();
-//		recipeElectricalAntenna();  TOREAD
+		recipeElectricalAntenna();  
 		recipeEggIncubatore();
 		recipeBatteryCharger();
 		recipeTransporter();
@@ -769,8 +775,8 @@ public class Eln {
 			WorldServer worldServer = server.worldServers[0];
 			simulator.init();
 			simulator.addSlowProcess(wind = new WindProcess());
-/*			if(replicatorPop)
-				simulator.addSlowProcess(new ReplicatorPopProcess());*/
+			if(replicatorPop)
+				simulator.addSlowProcess(new ReplicatorPopProcess());
 			simulator.addSlowProcess(new ItemEnergyInventoryProcess());
 
 			ghostManager = (GhostManager) worldServer.mapStorage.loadData(
@@ -787,7 +793,7 @@ public class Eln {
 				saveConfig = new SaveConfig("SaveConfig");
 				worldServer.mapStorage.setData("SaveConfig", saveConfig);
 			}
-			// saveConfig.init();
+		//	saveConfig.init();
 
 			nodeManager = (NodeManager) worldServer.mapStorage.loadData(
 					NodeManager.class, "NodeManager");
@@ -1572,7 +1578,7 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
-/*
+
 	void registerElectricalBreaker(int id) {
 		int subId, completId;
 		String name;
@@ -1589,7 +1595,7 @@ public class Eln {
 		}
 
 	}
-*/
+
 	void registerElectricalSensor(int id) {
 		int subId, completId;
 		String name;
@@ -1961,7 +1967,7 @@ public class Eln {
 		{
 			subId = 1;
 			name = "50V Turbine";
-			double RsFactor = 2;
+			double RsFactor = 1;
 			double nominalU = LVU;
 			double nominalP = 300;
 			double nominalDeltaT = 250;
@@ -1982,7 +1988,7 @@ public class Eln {
 					lowVoltageCableDescriptor.electricalRp,
 					lowVoltageCableDescriptor.electricalC / RsFactor,// ElectricalCableDescriptor
 																		// electricalCable,
-					50.0, nominalDeltaT / 40, // double thermalC,double
+					25.0, nominalDeltaT / 40, // double thermalC,double
 												// DeltaTForInput
 					nominalP / (nominalU/25),
 					new SoundCommand("eln:heat_turbine_50v",2).mulVolume(1.5).mulVolume(2));
@@ -1992,7 +1998,7 @@ public class Eln {
 		{
 			subId = 8;
 			name = "200V Turbine";
-			double RsFactor = 2;
+			double RsFactor = 1;
 			double nominalU = MVU;
 			double nominalP = 500;
 			double nominalDeltaT = 350;
@@ -2013,7 +2019,7 @@ public class Eln {
 					meduimVoltageCableDescriptor.electricalRp,
 					meduimVoltageCableDescriptor.electricalC / RsFactor,// ElectricalCableDescriptor
 																		// electricalCable,
-					100.0, nominalDeltaT / 40, // double thermalC,double
+					50.0, nominalDeltaT / 40, // double thermalC,double
 												// DeltaTForInput
 					nominalP / (nominalU/25),
 					new SoundCommand("eln:heat_turbine_200v",2).mulVolume(2));
@@ -3415,7 +3421,7 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
-
+*/
 	void registerElectricalAntenna(int id) {
 		int subId, completId;
 		String name;
@@ -3521,7 +3527,7 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
-*/
+
 	static public GenericItemUsingDamageDescriptor multiMeterElement,
 			thermoMeterElement, allMeterElement;
 
@@ -5581,7 +5587,7 @@ public class Eln {
 		}
 	}
 
-	/*private void recipeElectricalBreaker() {
+	private void recipeElectricalBreaker() {
 		// TODO Auto-generated method stub
 		addRecipe(findItemStack("Electrical Breaker", 1),
 				"crC",
@@ -5589,7 +5595,7 @@ public class Eln {
 				Character.valueOf('C'), findItemStack("Overheating Protection"),
 				Character.valueOf('r'), findItemStack("High Voltage Relay"));
 
-	}*/
+	}
 
 	private void recipeElectricalGateSource() {
 		// TODO Auto-generated method stub
@@ -5648,7 +5654,7 @@ public class Eln {
 
 	}
 
-/*	private void recipeElectricalAntenna() {
+	private void recipeElectricalAntenna() {
 		addRecipe(findItemStack("Low Power Transmitter Antenna", 1),
 				"R i",
 				"CI ",
@@ -5698,7 +5704,7 @@ public class Eln {
 				Character.valueOf('R'), new ItemStack(Items.redstone),
 				Character.valueOf('R'), new ItemStack(Items.diamond));
 
-	}*/
+	}
 
 	private void recipeBatteryCharger() {
 		addRecipe(findItemStack("Weak 50V Battery Charger", 1),
@@ -5803,7 +5809,7 @@ public class Eln {
 				Character.valueOf('s'), new ItemStack(Items.stick));
 
 	}
-/*
+
 	void registerReplicator() {
 		int redColor = (255 << 16);
 		int orangeColor = (255 << 16) + (200 << 8);
@@ -5822,7 +5828,7 @@ public class Eln {
 		//Add mob spawn
 		// EntityRegistry.addSpawn(ReplicatorEntity.class, 1, 1, 2, EnumCreatureType.monster, BiomeGenBase.plains);
 
-	}*/
+	}
 
 	private void regenOreScannerFactors() {
 		PortableOreScannerItem.RenderStorage.blockKeyFactor = null;

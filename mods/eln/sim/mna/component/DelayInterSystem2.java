@@ -7,6 +7,13 @@ import mods.eln.sim.mna.state.State;
 
 public class DelayInterSystem2 extends VoltageSource {
 
+	
+
+	public DelayInterSystem2() {
+		super(null);
+		// TODO Auto-generated constructor stub
+	}
+
 	private DelayInterSystem2 other;
 
 	public void set(DelayInterSystem2 other) {

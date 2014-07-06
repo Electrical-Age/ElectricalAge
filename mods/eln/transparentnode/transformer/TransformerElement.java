@@ -10,13 +10,13 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.NodeVoltageSource;
 import mods.eln.node.TransparentNode;
 import mods.eln.node.TransparentNodeDescriptor;
 import mods.eln.node.TransparentNodeElement;
 import mods.eln.node.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.process.TransformerInterSystemProcess;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
@@ -30,8 +30,8 @@ public class TransformerElement extends TransparentNodeElement {
 	public NodeElectricalLoad primaryLoad = new NodeElectricalLoad("primaryLoad");
 	public NodeElectricalLoad secondaryLoad = new NodeElectricalLoad("secondaryLoad");
 
-	public NodeVoltageSource primaryVoltageSource = new NodeVoltageSource(primaryLoad, null, "primaryVoltageSource");
-	public NodeVoltageSource secondaryVoltageSource = new NodeVoltageSource(secondaryLoad, null, "secondaryVoltageSource");
+	public VoltageSource primaryVoltageSource = new VoltageSource("primaryVoltageSource",primaryLoad, null );
+	public VoltageSource secondaryVoltageSource = new VoltageSource("secondaryVoltageSource",secondaryLoad, null);
 
 	public TransformerInterSystemProcess interSystemProcess = new TransformerInterSystemProcess(primaryLoad, secondaryLoad, primaryVoltageSource, secondaryVoltageSource);
 
@@ -46,7 +46,7 @@ public class TransformerElement extends TransparentNodeElement {
 		
 		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
 		slowProcessList.add(voltagePrimaryWatchdog.set(primaryLoad).set(exp));
-		slowProcessList.add(voltageSecondaryWatchdog.set(primaryLoad).set(exp));
+		slowProcessList.add(voltageSecondaryWatchdog.set(secondaryLoad).set(exp));
 
 	}
 

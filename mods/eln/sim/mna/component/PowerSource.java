@@ -9,12 +9,11 @@ import mods.eln.sim.mna.state.State;
 
 public class PowerSource extends VoltageSource implements IRootSystemPreStepProcess,INBTTReady{
 	
-	public PowerSource() {
-		// TODO Auto-generated constructor stub
-	}
+	String name;
 	
-	public PowerSource(State aPin) {
-		super(aPin, null);
+	public PowerSource(String name,State aPin) {
+		super(name,aPin, null);
+		this.name = name;
 	}
 		
 	
@@ -72,6 +71,9 @@ public class PowerSource extends VoltageSource implements IRootSystemPreStepProc
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
 		super.readFromNBT(nbt, str);
+		
+		str += name;
+		
 		setP(nbt.getDouble(str + "P"));
 		setUmax(nbt.getDouble(str + "Umax"));
 		setImax(nbt.getDouble(str + "Imax"));
@@ -80,6 +82,9 @@ public class PowerSource extends VoltageSource implements IRootSystemPreStepProc
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		super.writeToNBT(nbt, str);
+		
+		str += name;
+		
 		nbt.setDouble(str + "P",getP());
 		nbt.setDouble(str + "Umax",Umax);
 		nbt.setDouble(str + "Imax",Imax);

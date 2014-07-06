@@ -28,7 +28,7 @@ public class WindTurbineElement extends TransparentNodeElement{
 	
 	
 
-	PowerSource powerSource = new PowerSource(positiveLoad);
+	PowerSource powerSource = new PowerSource("powerSource",positiveLoad);
 	
 	WindTurbineSlowProcess slowProcess = new WindTurbineSlowProcess("slowProcess",this);
 	

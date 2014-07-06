@@ -24,7 +24,7 @@ public class WaterTurbineElement extends TransparentNodeElement{
 
 	NodeElectricalLoad positiveLoad = new NodeElectricalLoad("positiveLoad");
 
-	PowerSource powerSource = new PowerSource(positiveLoad);
+	PowerSource powerSource = new PowerSource("powerSource",positiveLoad);
 	
 	WaterTurbineSlowProcess slowProcess = new WaterTurbineSlowProcess(this);
 	

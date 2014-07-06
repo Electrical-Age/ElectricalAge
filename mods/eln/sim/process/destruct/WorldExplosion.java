@@ -6,18 +6,20 @@ import mods.eln.node.SixNodeElement;
 import mods.eln.node.TransparentNodeElement;
 
 public class WorldExplosion implements IDestructable{
-
+	Object origine;
+	
 	public WorldExplosion(Coordonate c) {
 		this.c = c;
 	}
 	
 	public WorldExplosion(SixNodeElement e) {
 		this.c = e.getCoordonate();
+		origine = e;
 	}
 	
 	public WorldExplosion(TransparentNodeElement e) {
 		this.c = e.coordonate();
-		this.strength = strength;
+		origine = e;
 	}
 	
 	
@@ -37,6 +39,8 @@ public class WorldExplosion implements IDestructable{
 	
 	@Override
 	public void destructImpl() {
+		int i = 0;
+		i++;
 		c.world().createExplosion((Entity)null, c.x,c.y,c.z, strength, true);
 	}
 

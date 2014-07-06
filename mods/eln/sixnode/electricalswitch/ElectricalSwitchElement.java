@@ -63,7 +63,7 @@ public class ElectricalSwitchElement extends SixNodeElement {
 	public ElectricalSwitchDescriptor descriptor;
 	public NodeElectricalLoad aLoad = new NodeElectricalLoad("aLoad");
 	public NodeElectricalLoad bLoad = new NodeElectricalLoad("bLoad");
-	public ResistorSwitch switchResistor = new ResistorSwitch(aLoad, bLoad);
+	public ResistorSwitch switchResistor = new ResistorSwitch("switchRes",aLoad, bLoad);
 
 	VoltageStateWatchDog voltageWatchDogA = new VoltageStateWatchDog();
 	VoltageStateWatchDog voltageWatchDogB = new VoltageStateWatchDog();

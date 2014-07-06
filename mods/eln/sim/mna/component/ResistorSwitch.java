@@ -5,11 +5,12 @@ import mods.eln.INBTTReady;
 import mods.eln.sim.mna.state.State;
 
 public class ResistorSwitch extends Resistor implements INBTTReady{
-	public ResistorSwitch() {
-	}
+
 	
-	public ResistorSwitch(State aPin,State bPin) {
+	String name;
+	public ResistorSwitch(String name,State aPin,State bPin) {
 		super(aPin, bPin);
+		this.name = name;
 	}
 	
 	boolean state = false;
@@ -34,13 +35,15 @@ public class ResistorSwitch extends Resistor implements INBTTReady{
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
+		str += name;
 		setR(nbt.getDouble(str + "R"));
-		if(Double.isNaN(baseR)) highImpedance();
+		if(Double.isNaN(baseR) || baseR == 0) highImpedance();
 		setState(nbt.getBoolean(str + "State"));
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
+		str += name;
 		nbt.setDouble(str + "R",baseR);
 		nbt.setBoolean(str + "State",getState());
 	}

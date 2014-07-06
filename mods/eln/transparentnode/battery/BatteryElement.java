@@ -40,13 +40,13 @@ public class BatteryElement extends TransparentNodeElement  {
 	public NodeElectricalLoad cutLoad = new NodeElectricalLoad("cutLoad");
 	public NodeVoltageState positiveLoad = new NodeVoltageState("positiveLoad");
 	public NodeElectricalLoad negativeLoad = new NodeElectricalLoad("negativeLoad");
-	public VoltageSource voltageSource = new VoltageSource(positiveLoad,negativeLoad);
+	public VoltageSource voltageSource = new VoltageSource("volSrc",positiveLoad,negativeLoad);
 	
 	public NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
 	public NodeBatteryProcess batteryProcess = new NodeBatteryProcess(positiveLoad, negativeLoad, null, 0,voltageSource);
 
 	public Resistor dischargeResistor = new Resistor(positiveLoad, negativeLoad);
-	public ResistorSwitch cutSwitch = new ResistorSwitch(cutLoad, positiveLoad);
+	public ResistorSwitch cutSwitch = new ResistorSwitch("cutSwitch",cutLoad, positiveLoad);
 
 	public BatteryInventoryProcess inventoryProcess = new BatteryInventoryProcess(this);
 	

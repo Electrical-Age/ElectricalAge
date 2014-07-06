@@ -12,13 +12,14 @@ import org.apache.commons.math3.linear.RealMatrix;
 
 public class VoltageSource extends Bipole implements ISubSystemProcessI,INBTTReady{
 
-	
-	public VoltageSource() {
-		// TODO Auto-generated constructor stub
+	String name;
+	public VoltageSource(String name) {
+		this.name = name;
 	}
 	
-	public VoltageSource(State aPin,State bPin) {
+	public VoltageSource(String name,State aPin,State bPin) {
 		super(aPin, bPin);
+		this.name = name;
 	}
 	
 	
@@ -83,11 +84,18 @@ public class VoltageSource extends Bipole implements ISubSystemProcessI,INBTTRea
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
+		str += name;
 		setU(nbt.getDouble(str + "U"));
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
+		str += name;
 		nbt.setDouble(str + "U",u);
+	}
+
+	public double getP() {
+		// TODO Auto-generated method stub
+		return getU()*getI();
 	}
 }

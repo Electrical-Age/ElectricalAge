@@ -15,7 +15,8 @@ public abstract class ValueWatchdog implements IProcess {
 
 	double timeout = 0;
 	boolean boot = true;
-
+	boolean joker = true;
+	
 	double rand = Utils.rand(0.5, 1.5);
 	
 	@Override
@@ -26,6 +27,15 @@ public abstract class ValueWatchdog implements IProcess {
 		}
 		double value = getValue();
 		double overflow = Math.max(value - max, min - value);
+		if(overflow > 0){
+			if(joker){
+				joker = false;
+				overflow = 0;
+			}
+		}else{
+			joker = true;
+		}
+		
 		timeout -= time * overflow * rand;
 		if(timeout > timeoutReset) {
 			timeout = timeoutReset;

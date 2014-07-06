@@ -362,7 +362,7 @@ public class Simulator /* ,IPacketHandler*/ {
 	public void tick(ServerTickEvent event) {
 		if(event.phase != Phase.START) return;
 	
-	
+		//Utils.println("I");
 		
 		long stackStart;
 
@@ -504,6 +504,7 @@ public class Simulator /* ,IPacketHandler*/ {
 			slowNsStack = 0;
 		}
 		//Minecraft.getMinecraft().mcProfiler.endSection();
+		//Utils.println("O");
 	}
 	private int printTimeCounter = 0;
 

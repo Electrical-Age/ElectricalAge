@@ -43,7 +43,7 @@ public class GroundCableElement extends SixNodeElement{
 
 
 	NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");
-	VoltageSource ground = new VoltageSource(electricalLoad,null);
+	VoltageSource ground = new VoltageSource("ground",electricalLoad,null);
 	//ElectricalSourceRefGroundProcess groundProcess = new ElectricalSourceRefGroundProcess(electricalLoad, 0);
 	
 	int color = 0;

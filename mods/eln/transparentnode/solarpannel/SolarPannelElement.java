@@ -27,8 +27,8 @@ public class SolarPannelElement extends TransparentNodeElement{
 	SolarPannelDescriptor descriptor;
 	NodeElectricalLoad positiveLoad = new NodeElectricalLoad("positiveLoad");
 	NodeElectricalLoad negativeLoad = new NodeElectricalLoad("negativeLoad");
-	VoltageSource positiveSrc = new VoltageSource(positiveLoad, null);
-	VoltageSource negativeSrc = new VoltageSource(negativeLoad, null);
+	VoltageSource positiveSrc = new VoltageSource("posSrc",positiveLoad, null);
+	VoltageSource negativeSrc = new VoltageSource("negSrc",negativeLoad, null);
 	
 	//ElectricalCurrentSource currentSource;
 	DiodeProcess diode;
