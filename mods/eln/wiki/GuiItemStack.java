@@ -41,22 +41,27 @@ public class GuiItemStack extends Gui implements IGuiObject{
 	@Override
 	public void idraw(int x, int y, float f) {
 		//RenderHelper.disableStandardItemLighting();
-		GL11.glColor3f(1f, 1f, 1f);
-		UtilsClient.bindTexture(slotSkin);
-		drawTexturedModalRect(posX-1, posY -1, 55, 16, 73-55, 34-16);	
-		
-		if(stack != null){
-		//	RenderHelper.enableStandardItemLighting();
-			RenderHelper.enableStandardItemLighting();
-			RenderHelper.enableGUIStandardItemLighting();
+		try {
+			GL11.glColor3f(1f, 1f, 1f);
+			UtilsClient.bindTexture(slotSkin);
+			drawTexturedModalRect(posX-1, posY -1, 55, 16, 73-55, 34-16);	
+			
+			if(stack != null){
+			//	RenderHelper.enableStandardItemLighting();
+				RenderHelper.enableStandardItemLighting();
+				RenderHelper.enableGUIStandardItemLighting();
 
-			UtilsClient.drawItemStack(stack, posX, posY, null,true);
+				UtilsClient.drawItemStack(stack, posX, posY, null,true);
 
-	        RenderHelper.disableStandardItemLighting();
-	       // GL11.glEnable(GL11.GL_LIGHTING);
-	      //  GL11.glEnable(GL11.GL_DEPTH_TEST);
-	      //  RenderHelper.enableStandardItemLighting();
+		        RenderHelper.disableStandardItemLighting();
+		       // GL11.glEnable(GL11.GL_LIGHTING);
+		      //  GL11.glEnable(GL11.GL_DEPTH_TEST);
+		      //  RenderHelper.enableStandardItemLighting();
+			}			
+		} catch (Exception e) {
+			// TODO: handle exception
 		}
+
 		
 	}
 	/*    GL11.glDisable(GL12.GL_RESCALE_NORMAL);

@@ -192,7 +192,7 @@ import cpw.mods.fml.relauncher.Side;
 import dan200.computercraft.api.ComputerCraftAPI;
 
 
-@Mod(modid = "Eln", version = "BETA-1.4.6d")
+@Mod(modid = "Eln", version = "BETA-1.4.7")
 //@Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0b")
 //@NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
@@ -274,6 +274,7 @@ public class Eln {
 			"/model/treeresincolector/treeresincolector.obj",
 			"/model/turbine50V/turbine50V.obj",
 			"/model/turbineB/turbineb.obj",
+			"/model/turbineBBlue/turbinebblue.obj",
 			"/model/VoltageSensor/voltagesensor.obj",
 			"/model/voltagesource/voltagesource.obj",
 			"/model/Vumeter/Vumeter.obj",
@@ -360,6 +361,8 @@ public class Eln {
 	boolean addOtherModOreToXRay;
 
 	private boolean replicatorPop;
+
+	public  boolean forceOreRegen;
 	public static boolean debugEnable = false;
 
 	@EventHandler
@@ -384,9 +387,11 @@ public class Eln {
 
 		modbusEnable = config.get("modbus", "enable", false).getBoolean(false);
 		debugEnable = config.get("debug", "enable", false).getBoolean(false);
+		
 
 		replicatorPop = config.get("entity", "replicatorPop", true).getBoolean(true);
 
+		forceOreRegen = config.get("mapGenerate", "forceOreRegen", false).getBoolean(false);
 		genCooper = config.get("mapGenerate", "cooper", true).getBoolean(true);
 		genPlumb = config.get("mapGenerate", "plumb", true).getBoolean(true);
 		genTungsten = config.get("mapGenerate", "tungsten", true).getBoolean(true);
@@ -646,6 +651,10 @@ public class Eln {
 		recipePlateMachine();
 		recipemagnetiser();
 
+		
+
+
+		
 		proxy.registerRenderers();
 
 		LanguageRegistry.instance().addStringLocalization("itemGroup.Eln", "Electrical Age");
@@ -1973,7 +1982,7 @@ public class Eln {
 			double nominalDeltaT = 250;
 			TurbineDescriptor desc = new TurbineDescriptor(
 					name,
-					"turbine50V",
+					"turbineb",
 					"Miaouuuu turbine",// int iconId, String name,String
 										// description,
 					lowVoltageCableDescriptor.render,
@@ -2004,7 +2013,7 @@ public class Eln {
 			double nominalDeltaT = 350;
 			TurbineDescriptor desc = new TurbineDescriptor(
 					name,
-					"turbineb",
+					"turbinebblue",
 					"Miaouuuu turbine",// int iconId, String name,String
 										// description,
 					meduimVoltageCableDescriptor.render,
@@ -2076,7 +2085,10 @@ public class Eln {
 			electricalFurnace = desc;
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 			furnaceList.add(desc.newItemStack());
+			
+			//Utils.smeltRecipeList.addMachine(desc.newItemStack());
 		}
+		//Utils.smeltRecipeList.addMachine(new ItemStack(Blocks.furnace));
 	}
 	
 	public ElectricalFurnaceDescriptor electricalFurnace;
@@ -5194,16 +5206,18 @@ public class Eln {
 
 		addRecipe(findItemStack("Machine Block"),
 				"LLL",
-				"L L",
+				"LcL",
 				"LLL",
-				Character.valueOf('L'), new ItemStack(Items.iron_ingot));
+				Character.valueOf('L'), new ItemStack(Items.iron_ingot),
+				Character.valueOf('c'), findItemStack("Copper Cable"));
 
 		addRecipe(findItemStack("Advanced Machine Block"),
 				" C ",
-				"C C",
+				"CcC",
 				" C ",
 				Character.valueOf('C'), "plateAlloy",
-				Character.valueOf('L'), "ingotAlloy");
+				Character.valueOf('L'), "ingotAlloy",
+				Character.valueOf('c'), findItemStack("Copper Cable"));
 
 		addRecipe(findItemStack("Electrical Probe Chip"),
 				" R ",
@@ -5874,6 +5888,9 @@ public class Eln {
 		}
 	}
 
+	public static double getSmallRs() {
+		return instance.lowVoltageCableDescriptor.electricalRs;
+	}
 
 	public static void applySmallRs(NodeElectricalLoad aLoad) {
 		instance.lowVoltageCableDescriptor.applyTo(aLoad);

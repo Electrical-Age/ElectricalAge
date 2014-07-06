@@ -29,7 +29,7 @@ public class Equation implements IValue,INBTTReady{
 	String separatorList; 
 	 
 	static{
-		staticSeparatorList = "+-*&|/^,()<>";
+		staticSeparatorList = "+-*&|/^,()<>=";
 		staticOperatorList = new HashMap<Integer,ArrayList<IOperatorMapper>>();
 
 		int priority = 0;
@@ -50,7 +50,7 @@ public class Equation implements IValue,INBTTReady{
 		}
 		{
 			ArrayList<IOperatorMapper> list = new ArrayList<IOperatorMapper>();
-			list.add(new OperatorMapperAB("^",Pow.class));
+			//list.add(new OperatorMapperAB("^",Pow.class));
 			staticOperatorList.put(priority++, list);		
 		}
 		{
@@ -68,6 +68,8 @@ public class Equation implements IValue,INBTTReady{
 		}
 		{
 			ArrayList<IOperatorMapper> list = new ArrayList<IOperatorMapper>();
+			list.add(new OperatorMapperAB("=",Eguals.class));
+			list.add(new OperatorMapperAB("^",NotEguals.class));
 			list.add(new OperatorMapperAB(">",Bigger.class));
 			list.add(new OperatorMapperAB("<",Smaller.class));
 			list.add(new OperatorMapperAB("&",And.class));
@@ -286,7 +288,28 @@ public class Equation implements IValue,INBTTReady{
 	}
 
 
-	
+	public static class Eguals extends OperatorAB{
+		@Override
+		public double getValue() {
+			return (a.getValue() > 0.5) == (b.getValue() > 0.5) ? 1.0 : 0.0;
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 1;
+		}
+	}
+	public static class NotEguals extends OperatorAB{
+		@Override
+		public double getValue() {
+			return (a.getValue() > 0.5) != (b.getValue() > 0.5) ? 1.0 : 0.0;
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 1;
+		}
+	}
 	public static class Bigger extends OperatorAB{
 		@Override
 		public double getValue() {

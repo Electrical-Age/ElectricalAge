@@ -74,39 +74,37 @@ import cpw.mods.fml.relauncher.SideOnly;
 import cpw.mods.fml.repackage.com.nothome.delta.ByteBufferSeekableSource;
 
 public class Utils {
-	
+
 	public static Object d[] = new Object[5];
 
 	public static double minecraftDay = 60 * 24;
 
 	public static Random random = new Random();
+
 	public static double rand(double min, double max) {
 		return random.nextDouble() * (max - min) + min;
 	}
-	
-	
-	
 
 	public static void println(String str) {
-		if (Eln.debugEnable == false)
+		if(Eln.debugEnable == false)
 			return;
 		System.out.println(str);
 	}
 
 	public static void println(Object str) {
-		if (Eln.debugEnable == false)
+		if(Eln.debugEnable == false)
 			return;
 		System.out.println(str.toString());
 	}
 
 	public static void print(String str) {
-		if (Eln.debugEnable == false)
+		if(Eln.debugEnable == false)
 			return;
 		System.out.print(str);
 	}
 
 	public static void print(Object str) {
-		if (Eln.debugEnable == false)
+		if(Eln.debugEnable == false)
 			return;
 		System.out.print(str.toString());
 	}
@@ -114,10 +112,10 @@ public class Utils {
 	static String floatToStr(double f, int high, int low)
 	{
 		String temp = "";
-		for (int idx = 0; idx < high; idx++)
+		for(int idx = 0; idx < high; idx++)
 			temp = temp + "0";
 		temp = temp + ".";
-		for (int idx = 0; idx < low; idx++)
+		for(int idx = 0; idx < low; idx++)
 			temp = temp + "0";
 
 		String str = new DecimalFormat(temp).format(f);
@@ -125,13 +123,13 @@ public class Utils {
 		char[] ch = str.toCharArray();
 		while (true)
 		{
-			if (str.length() == idx)
+			if(str.length() == idx)
 				break;
-			if (ch[idx] == '.') {
+			if(ch[idx] == '.') {
 				ch[idx - 1] = '0';
 				break;
 			}
-			if (ch[idx] != '0' && ch[idx] != ' ')
+			if(ch[idx] != '0' && ch[idx] != ' ')
 				break;
 			ch[idx] = '_';
 			idx++;
@@ -142,15 +140,12 @@ public class Utils {
 
 	public static boolean isTheClass(Object o, Class c)
 	{
-		if (o.getClass() == c)
+		if(o.getClass() == c)
 			return true;
-		for (Class classIterator = o.getClass().getSuperclass(); classIterator != null; classIterator = classIterator.getSuperclass())
+		for(Class classIterator = o.getClass().getSuperclass(); classIterator != null; classIterator = classIterator.getSuperclass())
 		//for (Class classIterator : o.getClass().getClass())
 		{
-			if (classIterator == c)
-			{
-				return true;
-			}
+			if(classIterator == c) { return true; }
 		}
 		return false;
 	}
@@ -158,9 +153,9 @@ public class Utils {
 	public static boolean hasTheInterface(Object o, Class c)
 	{
 
-		for (Class i : o.getClass().getInterfaces())
+		for(Class i : o.getClass().getInterfaces())
 		{
-			if (i == c)
+			if(i == c)
 				return true;
 		}
 		return false;
@@ -168,16 +163,16 @@ public class Utils {
 
 	public static Direction entityLivingViewDirection(EntityLivingBase entityLiving)
 	{
-		if (entityLiving.rotationPitch > 45)
+		if(entityLiving.rotationPitch > 45)
 			return Direction.YN;
-		if (entityLiving.rotationPitch < -45)
+		if(entityLiving.rotationPitch < -45)
 			return Direction.YP;
 		int dirx = MathHelper.floor_double((double) (entityLiving.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
-		if (dirx == 3)
+		if(dirx == 3)
 			return Direction.XP;
-		if (dirx == 0)
+		if(dirx == 0)
 			return Direction.ZP;
-		if (dirx == 1)
+		if(dirx == 1)
 			return Direction.XN;
 		return Direction.ZN;
 
@@ -186,11 +181,11 @@ public class Utils {
 	public static Direction entityLivingHorizontalViewDirection(EntityLivingBase entityLiving)
 	{
 		int dirx = MathHelper.floor_double((double) (entityLiving.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
-		if (dirx == 3)
+		if(dirx == 3)
 			return Direction.XP;
-		if (dirx == 0)
+		if(dirx == 0)
 			return Direction.ZP;
-		if (dirx == 1)
+		if(dirx == 1)
 			return Direction.XN;
 		return Direction.ZN;
 
@@ -254,27 +249,27 @@ public class Utils {
 	public static byte booleanSideMaskToByte(boolean[] side)
 	{
 		byte b = 0;
-		if (side[0])
+		if(side[0])
 			b |= 1 << 0;
-		if (side[1])
+		if(side[1])
 			b |= 1 << 1;
-		if (side[2])
+		if(side[2])
 			b |= 1 << 2;
-		if (side[3])
+		if(side[3])
 			b |= 1 << 3;
-		if (side[4])
+		if(side[4])
 			b |= 1 << 4;
-		if (side[5])
+		if(side[5])
 			b |= 1 << 5;
 		return b;
 	}
 
 	public static void ByteTobooleanSideMask(byte b, boolean[] side)
 	{
-		for (int idx = 0; idx < 6; idx++)
+		for(int idx = 0; idx < 6; idx++)
 		{
 			side[idx] = false;
-			if (((b >> idx) & 1) != 0)
+			if(((b >> idx) & 1) != 0)
 				side[idx] = true;
 		}
 	}
@@ -282,40 +277,40 @@ public class Utils {
 	public static String plotValue(double value, String unit)
 	{
 		double valueAbs = Math.abs(value);
-		if (valueAbs < 0.001)
+		if(valueAbs < 0.001)
 		{
 			return "0" + unit;
 			//return String.format("%1.5f", value*1000)+ "m" + unit;
 		}
-		else if (valueAbs < 0.00999)
+		else if(valueAbs < 0.00999)
 		{
 			return String.format("%1.2f", value * 1000) + "m" + unit;
 		}
-		else if (valueAbs < 0.0999)
+		else if(valueAbs < 0.0999)
 		{
 			return String.format("%2.1f", value * 1000) + "m" + unit;
 		}
-		else if (valueAbs < 0.999)
+		else if(valueAbs < 0.999)
 		{
 			return String.format("%3.0f", value * 1000) + "m" + unit;
 		}
-		else if (valueAbs < 9.99)
+		else if(valueAbs < 9.99)
 		{
 			return String.format("%1.2f", value) + "" + unit;
 		}
-		else if (valueAbs < 99.9)
+		else if(valueAbs < 99.9)
 		{
 			return String.format("%2.1f", value) + "" + unit;
 		}
-		else if (valueAbs < 999)
+		else if(valueAbs < 999)
 		{
 			return String.format("%3.0f", value) + "" + unit;
 		}
-		else if (valueAbs < 9999)
+		else if(valueAbs < 9999)
 		{
 			return String.format("%1.2f", value / 1000.0) + "K" + unit;
 		}
-		else if (valueAbs < 99999)
+		else if(valueAbs < 99999)
 		{
 			return String.format("%2.1f", value / 1000.0) + "K" + unit;
 		}
@@ -327,14 +322,14 @@ public class Utils {
 
 	public static String plotVolt(String header, double value)
 	{
-		if (header.equals("") == false)
+		if(header.equals("") == false)
 			header += " ";
 		return header + plotValue(value, "V  ");
 	}
 
 	public static String plotAmpere(String header, double value)
 	{
-		if (header.equals("") == false)
+		if(header.equals("") == false)
 			header += " ";
 		return header + plotValue(value, "A  ");
 	}
@@ -342,16 +337,16 @@ public class Utils {
 	public static String plotCelsius(String header, double value)
 	{
 		value += PhysicalConstant.Tref - PhysicalConstant.TCelsius;
-		if (header.equals("") == false)
+		if(header.equals("") == false)
 			header += " ";
 		return header + plotValue(value, "\u00B0C ");
 	}
 
 	public static String plotPercent(String header, double value)
 	{
-		if (header.equals("") == false)
+		if(header.equals("") == false)
 			header += " ";
-		if (value >= 1.0)
+		if(value >= 1.0)
 			return header + String.format("%3.0f", value * 100.0) + "%   ";
 		else
 			return header + String.format("%3.1f", value * 100.0) + "%   ";
@@ -360,21 +355,21 @@ public class Utils {
 
 	public static String plotEnergy(String header, double value)
 	{
-		if (header.equals("") == false)
+		if(header.equals("") == false)
 			header += " ";
 		return header + plotValue(value, "J  ");
 	}
 
 	public static String plotPower(String header, double value)
 	{
-		if (header.equals("") == false)
+		if(header.equals("") == false)
 			header += " ";
 		return header + plotValue(value, "W  ");
 	}
 
 	public static String plotOhm(String header, double value)
 	{
-		if (header.equals("") == false)
+		if(header.equals("") == false)
 			header += " ";
 		return header + plotValue(value, "ohm  ");
 	}
@@ -387,7 +382,7 @@ public class Utils {
 	public static String plotTime(double value)
 	{
 		String str = "";
-		if (value == 0.0)
+		if(value == 0.0)
 			return str + "0''";
 		int h, mn, s;
 		h = (int) (value / 3600);
@@ -395,18 +390,18 @@ public class Utils {
 		mn = (int) (value / 60);
 		value = value % 60;
 		s = (int) (value / 1);
-		if (h != 0)
+		if(h != 0)
 			str += h + "h";
-		if (mn != 0)
+		if(mn != 0)
 			str += mn + "'";
-		if (s != 0)
+		if(s != 0)
 			str += s + "''";
 		return str;
 	}
 
 	public static String plotTime(String header, double value)
 	{
-		if (header.equals("") == false)
+		if(header.equals("") == false)
 			header += " ";
 		return header + plotTime(value);
 
@@ -415,12 +410,12 @@ public class Utils {
 	public static void readFromNBT(NBTTagCompound nbt, String str, IInventory inventory) {
 		NBTTagList var2 = nbt.getTagList(str, 10);
 
-		for (int var3 = 0; var3 < var2.tagCount(); ++var3)
+		for(int var3 = 0; var3 < var2.tagCount(); ++var3)
 		{
 			NBTTagCompound var4 = (NBTTagCompound) var2.getCompoundTagAt(var3);
 			int var5 = var4.getByte("Slot") & 255;
 
-			if (var5 >= 0 && var5 < inventory.getSizeInventory())
+			if(var5 >= 0 && var5 < inventory.getSizeInventory())
 			{
 				inventory.setInventorySlotContents(var5, ItemStack.loadItemStackFromNBT(var4));
 			}
@@ -430,9 +425,9 @@ public class Utils {
 	public static void writeToNBT(NBTTagCompound nbt, String str, IInventory inventory) {
 		NBTTagList var2 = new NBTTagList();
 
-		for (int var3 = 0; var3 < inventory.getSizeInventory(); ++var3)
+		for(int var3 = 0; var3 < inventory.getSizeInventory(); ++var3)
 		{
-			if (inventory.getStackInSlot(var3) != null)
+			if(inventory.getStackInSlot(var3) != null)
 			{
 				NBTTagCompound var4 = new NBTTagCompound();
 				var4.setByte("Slot", (byte) var3);
@@ -444,15 +439,14 @@ public class Utils {
 		nbt.setTag(str, var2);
 	}
 
-
 	public static void sendPacketToClient(ByteArrayOutputStream bos, EntityPlayerMP player)
 	{
 		Profiler p = new Profiler();
 		//p.add("A");
 		ElnServerPacket packet = new ElnServerPacket(Eln.channelName, bos.toByteArray());
-		ByteBuf b = Unpooled.buffer().capacity(bos.size()).setBytes(0,bos.toByteArray());
+		ByteBuf b = Unpooled.buffer().capacity(bos.size()).setBytes(0, bos.toByteArray());
 		//p.add("B");
-		Eln.eventChannel.sendTo(new FMLProxyPacket(b,Eln.channelName), player);
+		Eln.eventChannel.sendTo(new FMLProxyPacket(b, Eln.channelName), player);
 		//p.stop();
 		//Utils.println(p);
 	}
@@ -536,9 +530,9 @@ public class Utils {
 	}
 
 	public static double getWeather(World world) {
-		if (world.isThundering())
+		if(world.isThundering())
 			return 1.0;
-		if (world.isRaining())
+		if(world.isRaining())
 			return 0.5;
 		return 0.0;
 
@@ -554,9 +548,9 @@ public class Utils {
 
 	public static void dropItem(ItemStack itemStack, int x, int y, int z, World world)
 	{
-		if (itemStack == null)
+		if(itemStack == null)
 			return;
-		if (world.getGameRules().getGameRuleBooleanValue("doTileDrops"))
+		if(world.getGameRules().getGameRuleBooleanValue("doTileDrops"))
 		{
 			float var6 = 0.7F;
 			double var7 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
@@ -575,33 +569,30 @@ public class Utils {
 
 	public static boolean tryPutStackInInventory(ItemStack stack, IInventory inventory, int start, int count)
 	{
-		for (int idx = start; idx < start + count; idx++)
+		for(int idx = start; idx < start + count; idx++)
 		{
 			ItemStack targetStack = inventory.getStackInSlot(idx);
-			if (targetStack == null)
+			if(targetStack == null)
 			{
 				inventory.setInventorySlotContents(idx, stack.copy());
 				stack.stackSize = 0;
 				return true;
 			}
-			else if (targetStack.isItemEqual(stack))
+			else if(targetStack.isItemEqual(stack))
 			{
 				int sizeLast = targetStack.stackSize;
 				//inventory.decrStackSize(idx, -stack.stackSize);
 				int transferMax = inventory.getInventoryStackLimit() - targetStack.stackSize;
-				if (transferMax > 0)
+				if(transferMax > 0)
 				{
 					int transfer = stack.stackSize;
-					if (transfer > transferMax)
+					if(transfer > transferMax)
 						transfer = transferMax;
 					inventory.decrStackSize(idx, -transfer);
 					stack.stackSize -= transfer;
 				}
 
-				if (stack.stackSize == 0)
-				{
-					return true;
-				}
+				if(stack.stackSize == 0) { return true; }
 			}
 		}
 
@@ -614,46 +605,46 @@ public class Utils {
 		ItemStack[] outputStack = new ItemStack[slotsIdList.length];
 		ItemStack[] inputStack = new ItemStack[stackList.length];
 
-		for (int idx = 0; idx < outputStack.length; idx++)
+		for(int idx = 0; idx < outputStack.length; idx++)
 		{
-			if (inventory.getStackInSlot(slotsIdList[idx]) != null)
+			if(inventory.getStackInSlot(slotsIdList[idx]) != null)
 				outputStack[idx] = inventory.getStackInSlot(slotsIdList[idx]).copy();
 		}
-		for (int idx = 0; idx < stackList.length; idx++)
+		for(int idx = 0; idx < stackList.length; idx++)
 		{
 			inputStack[idx] = stackList[idx].copy();
 		}
 
 		boolean oneStackDone;
-		for (ItemStack stack : inputStack)
+		for(ItemStack stack : inputStack)
 		{
 			//if(stack == null) continue;
 			oneStackDone = false;
-			for (int idx = 0; idx < slotsIdList.length; idx++)
+			for(int idx = 0; idx < slotsIdList.length; idx++)
 			{
 				ItemStack targetStack = outputStack[idx];
 
-				if (targetStack == null)
+				if(targetStack == null)
 				{
 					outputStack[idx] = stack;
 					oneStackDone = true;
 					break;
 				}
-				else if (targetStack.isItemEqual(stack))
+				else if(targetStack.isItemEqual(stack))
 				{
 					int sizeLast = targetStack.stackSize;
 					//inventory.decrStackSize(idx, -stack.stackSize);
 					int transferMax = limit - targetStack.stackSize;
-					if (transferMax > 0)
+					if(transferMax > 0)
 					{
 						int transfer = stack.stackSize;
-						if (transfer > transferMax)
+						if(transfer > transferMax)
 							transfer = transferMax;
 						outputStack[idx].stackSize += transfer;
 						stack.stackSize -= transfer;
 					}
 
-					if (stack.stackSize == 0)
+					if(stack.stackSize == 0)
 					{
 						oneStackDone = true;
 						break;
@@ -661,7 +652,7 @@ public class Utils {
 				}
 			}
 
-			if (oneStackDone == false)
+			if(oneStackDone == false)
 				return false;
 		}
 		return true;
@@ -671,32 +662,32 @@ public class Utils {
 	{
 		int limit = inventory.getInventoryStackLimit();
 
-		for (ItemStack stack : stackList)
+		for(ItemStack stack : stackList)
 		{
-			for (int idx = 0; idx < slotsIdList.length; idx++)
+			for(int idx = 0; idx < slotsIdList.length; idx++)
 			{
 				ItemStack targetStack = inventory.getStackInSlot(slotsIdList[idx]);
-				if (targetStack == null)
+				if(targetStack == null)
 				{
 					inventory.setInventorySlotContents(slotsIdList[idx], stack.copy());
 					stack.stackSize = 0;
 					break;
 				}
-				else if (targetStack.isItemEqual(stack))
+				else if(targetStack.isItemEqual(stack))
 				{
 					int sizeLast = targetStack.stackSize;
 					//inventory.decrStackSize(idx, -stack.stackSize);
 					int transferMax = limit - targetStack.stackSize;
-					if (transferMax > 0)
+					if(transferMax > 0)
 					{
 						int transfer = stack.stackSize;
-						if (transfer > transferMax)
+						if(transfer > transferMax)
 							transfer = transferMax;
 						inventory.decrStackSize(slotsIdList[idx], -transfer);
 						stack.stackSize -= transfer;
 					}
 
-					if (stack.stackSize == 0)
+					if(stack.stackSize == 0)
 					{
 						break;
 					}
@@ -711,14 +702,11 @@ public class Utils {
 
 	public static double voltageMargeFactorSub(double value)
 	{
-		if (value > 1 + voltageMageFactor)
+		if(value > 1 + voltageMageFactor)
 		{
 			return value - voltageMageFactor;
 		}
-		else if (value > 1)
-		{
-			return 1;
-		}
+		else if(value > 1) { return 1; }
 		return value;
 	}
 
@@ -730,7 +718,7 @@ public class Utils {
 	public static void serialiseItemStack(DataOutputStream stream, ItemStack stack) throws IOException
 	{
 
-		if ((stack) == null)
+		if((stack) == null)
 		{
 			stream.writeShort(-1);
 			stream.writeShort(-1);
@@ -747,7 +735,7 @@ public class Utils {
 		short id, damage;
 		id = stream.readShort();
 		damage = stream.readShort();
-		if (id == -1)
+		if(id == -1)
 			return null;
 		return Utils.newItemStack(id, 1, damage);
 	}
@@ -755,7 +743,7 @@ public class Utils {
 	public static EntityItem unserializeItemStackToEntityItem(DataInputStream stream, EntityItem old, TileEntity tileEntity) throws IOException
 	{
 		short itemId, ItemDamage;
-		if ((itemId = stream.readShort()) == -1)
+		if((itemId = stream.readShort()) == -1)
 		{
 			stream.readShort();
 			return null;
@@ -764,7 +752,7 @@ public class Utils {
 		else
 		{
 			ItemDamage = stream.readShort();
-			if (old == null || Item.getIdFromItem(old.getEntityItem().getItem()) != itemId || old.getEntityItem().getItemDamage() != ItemDamage)
+			if(old == null || Item.getIdFromItem(old.getEntityItem().getItem()) != itemId || old.getEntityItem().getItemDamage() != ItemDamage)
 				return new EntityItem(tileEntity.getWorldObj(), tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, Utils.newItemStack(itemId, 1, ItemDamage));
 			else
 				return old;
@@ -777,14 +765,14 @@ public class Utils {
 		return false;
 	}
 
-	public static int getLight(World w,EnumSkyBlock e, int x, int y, int z) {
-		return w.getSavedLightValue(e,x,y,z);
+	public static int getLight(World w, EnumSkyBlock e, int x, int y, int z) {
+		return w.getSavedLightValue(e, x, y, z);
 	}
-		
-		/*
-		int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.Block, x, y, z);
-		int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, x, y, z) - w.calculateSkylightSubtracted(0f);
-		return Math.max(b, s);
+
+	/*
+	int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.Block, x, y, z);
+	int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, x, y, z) - w.calculateSkylightSubtracted(0f);
+	return Math.max(b, s);
 	}*/
 
 	/*public static void drawHalo(Obj3DPart halo,float r,float g,float b,World w,int x,int y,int z,boolean bilinear) {
@@ -810,64 +798,55 @@ public class Utils {
 		World w = t.getWorldObj();
 		TileEntity o;
 		o = w.getTileEntity(x + 1, y, z);
-		if (o != null && o instanceof ITileEntitySpawnClient)
+		if(o != null && o instanceof ITileEntitySpawnClient)
 			((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
 		o = w.getTileEntity(x - 1, y, z);
-		if (o != null && o instanceof ITileEntitySpawnClient)
+		if(o != null && o instanceof ITileEntitySpawnClient)
 			((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
 		o = w.getTileEntity(x, y + 1, z);
-		if (o != null && o instanceof ITileEntitySpawnClient)
+		if(o != null && o instanceof ITileEntitySpawnClient)
 			((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
 		o = w.getTileEntity(x, y - 1, z);
-		if (o != null && o instanceof ITileEntitySpawnClient)
+		if(o != null && o instanceof ITileEntitySpawnClient)
 			((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
 		o = w.getTileEntity(x, y, z + 1);
-		if (o != null && o instanceof ITileEntitySpawnClient)
+		if(o != null && o instanceof ITileEntitySpawnClient)
 			((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
 		o = w.getTileEntity(x, y, z - 1);
-		if (o != null && o instanceof ITileEntitySpawnClient)
+		if(o != null && o instanceof ITileEntitySpawnClient)
 			((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
 
 	}
 
 	public static boolean playerHasMeter(EntityPlayer entityPlayer) {
-		if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
-		{
-			return true;
-		}
-		if (Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
-		{
-			return true;
-		}
-		if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
-		{
-			return true;
-		}
+		if(Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) { return true; }
+		if(Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) { return true; }
+		if(Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) { return true; }
 		return false;
 	}
 
 	public static int getRedstoneLevelAround(Coordonate coord) {
 		int level = 0;
 		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z));
-		if (level == 15)
+		if(level == 15)
 			return 15;
 		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x + 1, coord.y, coord.z));
-		if (level == 15)
+		if(level == 15)
 			return 15;
 		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y + 1, coord.z));
-		if (level == 15)
+		if(level == 15)
 			return 15;
 		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y - 1, coord.z));
-		if (level == 15)
+		if(level == 15)
 			return 15;
 		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z + 1));
-		if (level == 15)
+		if(level == 15)
 			return 15;
 		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z - 1));
-		if (level == 15)
+		if(level == 15)
 			return 15;
 		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z));
-		if (level == 15)
+		if(level == 15)
 			return 15;
 
 		return level;
@@ -876,25 +855,25 @@ public class Utils {
 	public static int getRedstoneLevelAround(World w, int x, int y, int z) {
 		int level = 0;
 		level = Math.max(level, w.getStrongestIndirectPower(x, y, z));
-		if (level == 15)
+		if(level == 15)
 			return 15;
 		level = Math.max(level, w.getStrongestIndirectPower(x + 1, y, z));
-		if (level == 15)
+		if(level == 15)
 			return 15;
 		level = Math.max(level, w.getStrongestIndirectPower(x, y + 1, z));
-		if (level == 15)
+		if(level == 15)
 			return 15;
 		level = Math.max(level, w.getStrongestIndirectPower(x, y - 1, z));
-		if (level == 15)
+		if(level == 15)
 			return 15;
 		level = Math.max(level, w.getStrongestIndirectPower(x, y, z + 1));
-		if (level == 15)
+		if(level == 15)
 			return 15;
 		level = Math.max(level, w.getStrongestIndirectPower(x, y, z - 1));
-		if (level == 15)
+		if(level == 15)
 			return 15;
 		level = Math.max(level, w.getStrongestIndirectPower(x, y, z));
-		if (level == 15)
+		if(level == 15)
 			return 15;
 
 		return level;
@@ -906,15 +885,11 @@ public class Utils {
 	}
 
 	public static Object getItemObject(ItemStack stack) {
-		if (stack == null)
+		if(stack == null)
 			return null;
 		Item i = stack.getItem();
-		if (i instanceof GenericItemUsingDamage) {
-			return ((GenericItemUsingDamage) i).getDescriptor(stack);
-		}
-		if (i instanceof GenericItemBlockUsingDamage) {
-			return ((GenericItemBlockUsingDamage) i).getDescriptor(stack);
-		}
+		if(i instanceof GenericItemUsingDamage) { return ((GenericItemUsingDamage) i).getDescriptor(stack); }
+		if(i instanceof GenericItemBlockUsingDamage) { return ((GenericItemBlockUsingDamage) i).getDescriptor(stack); }
 		return i;
 	}
 
@@ -957,7 +932,7 @@ public class Utils {
 		while (aitem.hasNext())
 		{
 			item = (Item) aitem.next();
-			if (item != null && item.getCreativeTab() != null)
+			if(item != null && item.getCreativeTab() != null)
 			{
 				item.getSubItems(item, (CreativeTabs) null, tempList);
 			}
@@ -965,10 +940,10 @@ public class Utils {
 
 		String s = name.toLowerCase();
 
-		for (ItemStack itemstack : tempList) {
+		for(ItemStack itemstack : tempList) {
 			//String s1 = itemstack.getDisplayName();
 
-			if (itemstack.getDisplayName().toLowerCase().contains(s))
+			if(itemstack.getDisplayName().toLowerCase().contains(s))
 			{
 				list.add(itemstack);
 			}
@@ -983,7 +958,7 @@ public class Utils {
 
 	public static short modbusToShort(double outputNormalized, int i) {
 		int bit = Float.floatToRawIntBits((float) outputNormalized);
-		if (i == 1)
+		if(i == 1)
 			return (short) bit;
 		else
 			return (short) (bit >>> 16);
@@ -1000,7 +975,7 @@ public class Utils {
 		try {
 			return (stack.getItem() == output.getItem() && stack.getItemDamage() == output.getItemDamage())
 					|| (OreDictionary.getOreID(stack) == OreDictionary.getOreID(output) && OreDictionary.getOreID(output) != -1);
-			
+
 		} catch (Exception e) {
 			return false;
 		}
@@ -1012,7 +987,7 @@ public class Utils {
 	}
 
 	public static double getHeadPosY(Entity e) {
-		if (e instanceof EntityOtherPlayerMP)
+		if(e instanceof EntityOtherPlayerMP)
 			return e.posY + e.getEyeHeight();
 		return e.posY;
 	}
@@ -1022,8 +997,6 @@ public class Utils {
 
 		return entity.inventory.getCurrentItem() == stack && Eln.playerManager.get(entity).getInteractRise();
 	}*/
-	
-	
 
 	public static boolean isCreative(EntityPlayerMP entityPlayer) {
 
@@ -1033,14 +1006,14 @@ public class Utils {
 	}
 
 	public static boolean mustDropItem(EntityPlayerMP entityPlayer) {
-		if (entityPlayer == null)
+		if(entityPlayer == null)
 			return true;
 		return !isCreative(entityPlayer);
 	}
 
 	public static void serverTeleport(Entity e, double x, double y, double z) {
 		// TODO Auto-generated method stub
-		if (e instanceof EntityPlayerMP)
+		if(e instanceof EntityPlayerMP)
 			((EntityPlayerMP) e).setPositionAndUpdate(x, y, z);
 		else
 			e.setPosition(x, y, z);
@@ -1061,10 +1034,10 @@ public class Utils {
 		dz *= normInv;
 		double d = 0;
 		while (d < norm) {
-			if (Utils.isBlockLoaded(world, x, y, z) == false)
+			if(Utils.isBlockLoaded(world, x, y, z) == false)
 				continue;
 			Block b = Utils.getBlock(world, x, y, z);
-			if (b != null)
+			if(b != null)
 				blockList.add(b);
 
 			x += dx;
@@ -1084,7 +1057,7 @@ public class Utils {
 
 		@Override
 		public float getWeight(Block block) {
-			if (block == null)
+			if(block == null)
 				return 0;
 			return block.isOpaqueCube() ? 1f : 0f;
 		}
@@ -1108,11 +1081,11 @@ public class Utils {
 		vy *= normInv;
 		vz *= normInv;
 
-		if (vx == 0)
+		if(vx == 0)
 			vx += 0.0001f;
-		if (vy == 0)
+		if(vy == 0)
 			vy += 0.0001f;
-		if (vz == 0)
+		if(vz == 0)
 			vz += 0.0001f;
 
 		float vxInv = 1f / vx, vyInv = 1f / vy, vzInv = 1f / vz;
@@ -1136,13 +1109,11 @@ public class Utils {
 			int zInt = (int) zFloor;
 
 			Block block = Blocks.air;
-			if (w.blockExists(xInt + posXint, yInt + posYint, zInt + posZint))
+			if(w.blockExists(xInt + posXint, yInt + posYint, zInt + posZint))
 				block = w.getBlock(xInt + posXint, yInt + posYint, zInt + posZint);
-			
-
 
 			float dToStack;
-			if (d + dBest < rangeMax)
+			if(d + dBest < rangeMax)
 				dToStack = dBest;
 			else {
 				dToStack = (rangeMax - d);
@@ -1205,112 +1176,121 @@ public class Utils {
 
 	public static ItemStack[][] getItemStackGrid(IRecipe r) {
 		ItemStack[][] stacks = new ItemStack[3][3];
+		try {
 
-		if (r instanceof ShapedRecipes) {
-			ShapedRecipes s = (ShapedRecipes) r;
-			for (int idx2 = 0; idx2 < 3; idx2++) {
-				for (int idx = 0; idx < 3; idx++) {
-					ItemStack rStack = null;
-					if (idx < s.recipeWidth && idx2 < s.recipeHeight) {
-						rStack = s.recipeItems[idx + idx2 * s.recipeWidth];
+			if(r instanceof ShapedRecipes) {
+				ShapedRecipes s = (ShapedRecipes) r;
+				for(int idx2 = 0; idx2 < 3; idx2++) {
+					for(int idx = 0; idx < 3; idx++) {
+						ItemStack rStack = null;
+						if(idx < s.recipeWidth && idx2 < s.recipeHeight) {
+							rStack = s.recipeItems[idx + idx2 * s.recipeWidth];
+						}
+						stacks[idx2][idx] = rStack;
 					}
-					stacks[idx2][idx] = rStack;
 				}
+				return stacks;
 			}
-			return stacks;
-		}
-		if (r instanceof ShapedOreRecipe) {
-			ShapedOreRecipe s = (ShapedOreRecipe) r;
-			int width = readPrivateInt(s, "width");
-			int height = readPrivateInt(s, "height");
-			Object[] inputs = s.getInput();
+			if(r instanceof ShapedOreRecipe) {
+				ShapedOreRecipe s = (ShapedOreRecipe) r;
+				int width = readPrivateInt(s, "width");
+				int height = readPrivateInt(s, "height");
+				Object[] inputs = s.getInput();
 
-			for (int idx2 = 0; idx2 < height; idx2++) {
-				for (int idx = 0; idx < width; idx++) {
-					Object o = inputs[idx + idx2 * width];
+				for(int idx2 = 0; idx2 < height; idx2++) {
+					for(int idx = 0; idx < width; idx++) {
+						Object o = inputs[idx + idx2 * width];
+						ItemStack stack = null;
+						if(o instanceof List) {
+							if(o instanceof List && ((List) o).size() > 0)
+								stack = (ItemStack) ((List) o).get(0);
+
+						}
+
+						if(o instanceof ItemStack) {
+							stack = (ItemStack) o;
+						}
+						stacks[idx2][idx] = stack;
+					}
+				}
+
+				return stacks;
+			}
+			if(r instanceof ShapelessRecipes) {
+				ShapelessRecipes s = (ShapelessRecipes) r;
+				int idx = 0;
+				for(Object o : s.recipeItems) {
+					ItemStack stack = (ItemStack) o;
+					stacks[idx / 3][idx % 3] = stack;
+					idx++;
+				}
+				return stacks;
+			}
+			if(r instanceof ShapelessOreRecipe) {
+				ShapelessOreRecipe s = (ShapelessOreRecipe) r;
+				int idx = 0;
+				for(Object o : s.getInput()) {
 					ItemStack stack = null;
-					if (o instanceof List) {
-						if (o instanceof List && ((List) o).size() > 0)
-							stack = (ItemStack) ((List) o).get(0);
-
+					if(o instanceof List && ((List) o).size() > 0) {
+						stack = (ItemStack) ((List) o).get(0);
 					}
 
-					if (o instanceof ItemStack) {
+					if(o instanceof ItemStack) {
 						stack = (ItemStack) o;
 					}
-					stacks[idx2][idx] = stack;
+					stacks[idx / 3][idx % 3] = stack;
+					idx++;
 				}
+				return stacks;
 			}
-
-			return stacks;
-		}
-		if (r instanceof ShapelessRecipes) {
-			ShapelessRecipes s = (ShapelessRecipes) r;
-			int idx = 0;
-			for (Object o : s.recipeItems) {
-				ItemStack stack = (ItemStack) o;
-				stacks[idx / 3][idx % 3] = stack;
-				idx++;
-			}
-			return stacks;
-		}
-		if (r instanceof ShapelessOreRecipe) {
-			ShapelessOreRecipe s = (ShapelessOreRecipe) r;
-			int idx = 0;
-			for (Object o : s.getInput()) {
-				ItemStack stack = null;
-				if (o instanceof List && ((List) o).size() > 0) {
-					stack = (ItemStack) ((List) o).get(0);
-				}
-
-				if (o instanceof ItemStack) {
-					stack = (ItemStack) o;
-				}
-				stacks[idx / 3][idx % 3] = stack;
-				idx++;
-			}
-			return stacks;
+		} catch (Exception e) {
+			// TODO: handle exception
 		}
 		return null;
 	}
 
 	public static ArrayList<ItemStack> getRecipeInputs(IRecipe r) {
-		ArrayList<ItemStack> stacks = new ArrayList<ItemStack>();
-		if (r instanceof ShapedRecipes) {
-			for (ItemStack stack : ((ShapedRecipes) r).recipeItems) {
-				stacks.add(stack);
-			}
-		}
-		if (r instanceof ShapelessRecipes) {
-			for (Object stack : ((ShapelessRecipes) r).recipeItems) {
-				stacks.add((ItemStack) stack);
-			}
-		}
-		if (r instanceof ShapedOreRecipe) {
-			ShapedOreRecipe rr = (ShapedOreRecipe) r;
-			for (Object o : ((ShapedOreRecipe) r).getInput()) {
-				if (o instanceof List) {
-					stacks.addAll(((List) o));
-				}
+		try {
 
-				if (o instanceof ItemStack) {
-					stacks.add((ItemStack) o);
+			ArrayList<ItemStack> stacks = new ArrayList<ItemStack>();
+			if(r instanceof ShapedRecipes) {
+				for(ItemStack stack : ((ShapedRecipes) r).recipeItems) {
+					stacks.add(stack);
 				}
 			}
-		}
-		if (r instanceof ShapelessOreRecipe) {
-			ShapelessOreRecipe rr = (ShapelessOreRecipe) r;
-			for (Object o : ((ShapelessOreRecipe) r).getInput()) {
-				if (o instanceof List) {
-					stacks.addAll(((List) o));
+			if(r instanceof ShapelessRecipes) {
+				for(Object stack : ((ShapelessRecipes) r).recipeItems) {
+					stacks.add((ItemStack) stack);
 				}
+			}
+			if(r instanceof ShapedOreRecipe) {
+				ShapedOreRecipe rr = (ShapedOreRecipe) r;
+				for(Object o : ((ShapedOreRecipe) r).getInput()) {
+					if(o instanceof List) {
+						stacks.addAll(((List) o));
+					}
 
-				if (o instanceof ItemStack) {
-					stacks.add((ItemStack) o);
+					if(o instanceof ItemStack) {
+						stacks.add((ItemStack) o);
+					}
 				}
 			}
+			if(r instanceof ShapelessOreRecipe) {
+				ShapelessOreRecipe rr = (ShapelessOreRecipe) r;
+				for(Object o : ((ShapelessOreRecipe) r).getInput()) {
+					if(o instanceof List) {
+						stacks.addAll(((List) o));
+					}
+
+					if(o instanceof ItemStack) {
+						stacks.add((ItemStack) o);
+					}
+				}
+			}
+			return stacks;
+		} catch (Exception e) {
+			return new ArrayList<ItemStack>();
 		}
-		return stacks;
 	}
 
 	public static double getWorldTime(World world) {
@@ -1342,16 +1322,14 @@ public class Utils {
 		Object[] set = nbt.func_150296_c().toArray();
 
 		ArrayList<NBTTagCompound> tags = new ArrayList<NBTTagCompound>();
-		for (int idx = 0; idx < set.length; idx++) {
+		for(int idx = 0; idx < set.length; idx++) {
 			tags.add(nbt.getCompoundTag((String) set[idx]));
 		}
 		return tags;
 	}
 
-
-
 	public static boolean isRemote(IBlockAccess world) {
-		if (world instanceof World == false) {
+		if(world instanceof World == false) {
 			fatal();
 		}
 		return ((World) world).isRemote;
@@ -1362,7 +1340,7 @@ public class Utils {
 	}
 
 	public static void nullFatal(Object o) {
-		if (o == null)
+		if(o == null)
 			fatal();
 	}
 
@@ -1381,7 +1359,6 @@ public class Utils {
 		return Block.getBlockById(blockId);
 	}
 
-
 	public static void updateSkylight(Chunk chunk) {
 		// TODO Auto-generated method stub
 		chunk.func_150804_b(false);
@@ -1390,7 +1367,7 @@ public class Utils {
 	public static void updateAllLightTypes(World worldObj, int xCoord, int yCoord, int zCoord) {
 		// TODO Auto-generated method stub
 		worldObj.func_147451_t(xCoord, yCoord, zCoord);
-		
+
 		worldObj.markBlocksDirtyVertical(xCoord, zCoord, 0, 255);
 	}
 
@@ -1404,7 +1381,8 @@ public class Utils {
 		return Item.getIdFromItem(Item.getItemFromBlock(block));
 	}
 
-
+//	public static RecipesList smeltRecipeList = new RecipesList();
+	
 
 	public static void addSmelting(Item parentItem, int parentItemDamage, ItemStack findItemStack, float f) {
 		FurnaceRecipes.smelting().func_151394_a(newItemStack(parentItem, 1, parentItemDamage), findItemStack, f);
@@ -1428,45 +1406,45 @@ public class Utils {
 		return cmp;
 	}
 
-	
-	public static File getMapFile(String name){
-        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();       
-        File f = server.getFile("saves/" + server.getFolderName() + "/" + name); 
-        return f;
+	public static File getMapFile(String name) {
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+		File f = server.getFile("saves/" + server.getFolderName() + "/" + name);
+		return f;
 	}
-	
-	public static String readMapFile(String name) throws IOException{
+
+	public static String readMapFile(String name) throws IOException {
 		File file = getMapFile(name);
 		FileInputStream fis = new FileInputStream(file);
-	    byte[] data = new byte[(int)file.length()];
-	    fis.read(data);
-	    fis.close();
-	    String s = new String(data, "UTF-8");
-	    return s;
+		byte[] data = new byte[(int) file.length()];
+		fis.read(data);
+		fis.close();
+		String s = new String(data, "UTF-8");
+		return s;
 	}
 
 	public static void generateHeightMap(Chunk chunk) {
 		// TODO Auto-generated method stub
-		
+
 	}
+
 	private static int uuid = 1;
+
 	public static int getUuid() {
 		if(uuid < 1) uuid = 1;
 		return uuid++;
 	}
-/*
-	public static float[] getSixNodePinDistance(Obj3D obj) {
-		// TODO Auto-generated method stub
-		return new float[]{obj.zMin*16,obj.zMax*16,obj.yMin*16,obj.yMax*16};
-	}*/
+
+	/*
+		public static float[] getSixNodePinDistance(Obj3D obj) {
+			// TODO Auto-generated method stub
+			return new float[]{obj.zMin*16,obj.zMax*16,obj.yMin*16,obj.yMax*16};
+		}*/
 	public static float[] getSixNodePinDistance(Obj3DPart obj) {
 		// TODO Auto-generated method stub
-		return new float[]{Math.abs(obj.zMin*16),Math.abs(obj.zMax*16),Math.abs(obj.yMin*16),Math.abs(obj.yMax*16)};
+		return new float[] { Math.abs(obj.zMin * 16), Math.abs(obj.zMax * 16), Math.abs(obj.yMin * 16), Math.abs(obj.yMax * 16) };
 	}
 
-	
-	
-	public static boolean isWrench(ItemStack stack){
+	public static boolean isWrench(ItemStack stack) {
 		return areSame(stack, Eln.instance.wrenchItemStack) || stack.getDisplayName().toLowerCase().contains("wrench");
 	}
 

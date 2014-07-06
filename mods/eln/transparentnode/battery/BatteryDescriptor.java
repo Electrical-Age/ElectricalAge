@@ -201,6 +201,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 		list.add("Nominal voltage : " + (int)(electricalU) + "V");
 		list.add("Nominal power : " + (int)(electricalStdP) + "W");
 		list.add("Full charge energy : " + (int)(electricalStdDischargeTime * electricalStdP / 1000) + "KJ");
+		list.add(Utils.plotOhm("Internal resistance :",electricalRs*2));
 		//list.add("Capacity : " + Utils.plotValue((electricalQ), "As"));
 		list.add("");
 	   	list.add("Charge : " + (int)(getChargeInTag(itemStack) * 100) + "%");

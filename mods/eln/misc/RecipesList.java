@@ -2,15 +2,13 @@ package mods.eln.misc;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import mods.eln.Eln;
-//import mods.eln.electricalfurnace.ElectricalFurnaceProcess;
+import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
+//import mods.eln.electricalfurnace.ElectricalFurnaceProcess;
 
 public class RecipesList {
 	public static ArrayList<RecipesList> listOfList = new ArrayList<RecipesList>();
@@ -80,14 +78,19 @@ public class RecipesList {
 		{
 			Iterator it = furnaceRecipes.getSmeltingList().entrySet().iterator();
 		    while (it.hasNext()) {
-		        Map.Entry pairs = (Map.Entry)it.next();
-				Recipe recipe; // List<Integer>, ItemStack
-				ItemStack stack = (ItemStack)pairs.getValue();
-				ItemStack li = (ItemStack)pairs.getKey();
-				if(Utils.areSame(output,stack)){
-//					list.add(recipe = new Recipe(li.copy(), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
-//					recipe.setMachineList(Eln.instance.furnaceList);
+		    	try {
+			        Map.Entry pairs = (Map.Entry)it.next();
+					Recipe recipe; // List<Integer>, ItemStack
+					ItemStack stack = (ItemStack)pairs.getValue();
+					ItemStack li = (ItemStack)pairs.getKey();
+					if(Utils.areSame(output,stack)){
+						list.add(recipe = new Recipe(li.copy(), output, ElectricalFurnaceProcess.energyNeededPerSmelt));
+						recipe.setMachineList(Eln.instance.furnaceList);
+					}					
+				} catch (Exception e) {
+					// TODO: handle exception
 				}
+
 		    }
 		}
 
@@ -109,10 +112,16 @@ public class RecipesList {
 		ItemStack smeltResult = furnaceRecipes.getSmeltingResult(input);
 		Recipe smeltRecipe;
 		if(smeltResult != null) {
-			ItemStack input1 = input.copy();
-			input1.stackSize = 1;
-//			list.add(smeltRecipe = new Recipe(input1, smeltResult, ElectricalFurnaceProcess.energyNeededPerSmelt));
-//			smeltRecipe.machineList.addAll(Eln.instance.furnaceList);
+			try {
+				ItemStack input1 = input.copy();
+				input1.stackSize = 1;
+				list.add(smeltRecipe = new Recipe(input1, smeltResult, ElectricalFurnaceProcess.energyNeededPerSmelt));
+				smeltRecipe.machineList.addAll(Eln.instance.furnaceList);				
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			
+
 		}
 		
 		return list;

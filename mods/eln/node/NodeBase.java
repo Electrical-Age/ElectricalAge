@@ -141,9 +141,9 @@ public abstract class NodeBase {
 			direction.applyTo(vector, 1);
 					
 			Block b = world.getBlock(vector[0], vector[1], vector[2]);
-			if(b.isOpaqueCube())
+			if(b.isOpaqueCube());
 				neighborOpaque |= 1 << direction.getInt();
-			if(isBlockWrappable(b))
+			if(isBlockWrappable(b,world, coordonate.x, coordonate.y, coordonate.z))
 				neighborWrapable |= 1 << direction.getInt();
 		}
 	}
@@ -179,8 +179,9 @@ public abstract class NodeBase {
 	{
 		return ((neighborOpaque >> direction.getInt()) & 1) != 0; 
 	}	
-	public static boolean isBlockWrappable(Block block)
+	public static boolean isBlockWrappable(Block block,World w,int x,int y,int z)
 	{
+		if(block.isReplaceable(w, x, y, z)) return true;
 		if(block == Blocks.air) return true;
 		if(block == Eln.sixNodeBlock) return true;
 		if(block == Eln.ghostBlock) return true;
@@ -188,7 +189,7 @@ public abstract class NodeBase {
 		if(block == Blocks.redstone_torch) return true;
 		if(block == Blocks.unlit_redstone_torch) return true;
 		if(block == Blocks.redstone_wire) return true;
-			
+		
 		return false;
 	}
 	

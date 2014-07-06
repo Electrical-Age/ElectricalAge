@@ -111,7 +111,7 @@ public class SolarPannelElement extends TransparentNodeElement{
 	public String multiMeterString(Direction side) {
 	//	if(side == front)return  Utils.plotVolt("U+", positiveLoad.Uc );
 	//	if(side == front.back() && ! grounded)return  Utils.plotVolt("U-", negativeLoad.Uc );
-		return  Utils.plotUIP(positiveLoad.getU()-negativeLoad.getU(), positiveLoad.getCurrent()*2);
+		return  Utils.plotUIP(positiveLoad.getU()-negativeLoad.getU(), positiveLoad.getCurrent());
 	}
 
 

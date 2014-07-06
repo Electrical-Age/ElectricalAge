@@ -53,14 +53,18 @@ public class PowerSourceBipole implements IRootSystemPreStepProcess,INBTTReady{
 		
 		double Uth = a.U - b.U;
 		double Rth = a.R + b.R;
-		
-		double U = (Math.sqrt(Uth*Uth+4*P*Rth)+Uth)/2;
-		U =  Math.min(Math.min(U, Umax),Uth+Rth*Imax);
-		if(Double.isNaN(U)) U = 0;
-		
-		double I = (Uth-U)/Rth;
-		aSrc.setU(a.U-I*a.R);
-		bSrc.setU(b.U+I*b.R);
+		if(Uth >= Umax){
+			aSrc.setU(a.U);
+			bSrc.setU(b.U);			
+		}else{	
+			double U = (Math.sqrt(Uth*Uth+4*P*Rth)+Uth)/2;
+			U =  Math.min(Math.min(U, Umax),Uth+Rth*Imax);
+			if(Double.isNaN(U)) U = 0;
+			
+			double I = (Uth-U)/Rth;
+			aSrc.setU(a.U-I*a.R);
+			bSrc.setU(b.U+I*b.R);
+		}
 	}
 	
 	

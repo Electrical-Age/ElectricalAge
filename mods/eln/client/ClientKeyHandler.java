@@ -3,29 +3,23 @@ package mods.eln.client;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.EnumSet;
+
+import mods.eln.Eln;
+import mods.eln.PacketHandler;
+import mods.eln.misc.UtilsClient;
+import mods.eln.wiki.Root;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.StatCollector;
 
 import org.lwjgl.input.Keyboard;
 
 import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent.KeyInputEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
-import cpw.mods.fml.common.network.IGuiHandler;
-
-import mods.eln.Eln;
-import mods.eln.GuiHandler;
-import mods.eln.PacketHandler;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
 //import mods.eln.wiki.Root;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.util.StatCollector;
 
 public class ClientKeyHandler {
 
@@ -80,7 +74,7 @@ public class ClientKeyHandler {
 		states[id] = state;
 		id+=idOffset;
 	    if(id == PacketHandler.openWikiId) {	    	
-//	    	UtilsClient.clientOpenGui(new Root(null));
+	    	UtilsClient.clientOpenGui(new Root(null));
 	    }	
 		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(64);

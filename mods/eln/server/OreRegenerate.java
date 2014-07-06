@@ -43,7 +43,7 @@ public class OreRegenerate {
 		if(event.phase != Phase.START) return;
 		if(jobs.size() != 0){
 			Job j = jobs.pop();
-			if(Eln.instance.saveConfig.reGenOre == false) return; 
+			if(Eln.instance.saveConfig.reGenOre == false && Eln.instance.forceOreRegen == false) return; 
 			if(j.world.getChunkProvider().chunkExists(j.chunk.xPosition, j.chunk.zPosition) == false) return;
 			for(int y = 0;y < 60;y+=2){
 				for(int z = y & 1;z < 16;z+=2){
