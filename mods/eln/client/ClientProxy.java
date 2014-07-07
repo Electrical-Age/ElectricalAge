@@ -42,6 +42,7 @@ public class ClientProxy extends CommonProxy {
 		MinecraftForge.EVENT_BUS.register(new TutorialSignOverlay());
 		uuidManager = new UuidManager();
 		soundClientEventListener = new SoundClientEventListener(uuidManager);
+		FMLCommonHandler.instance().bus().register(VersionCheckerHandler.getInstance());
 	//	FMLCommonHandler.instance().bus().register();
 		new FrameTime();
 	}

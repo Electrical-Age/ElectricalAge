@@ -17,6 +17,8 @@ public class NodeBatteryProcess extends BatteryProcess implements INBTTReady {
 	@Override
 	public void readFromNBT(NBTTagCompound nbttagcompound, String str) {
 		Q = nbttagcompound.getDouble(str + "NBP" + "Q");
+		if(Double.isNaN(Q)) Q = 0;
+		if (Double.isNaN(life)) life = 1;
 		life = nbttagcompound.getDouble(str + "NBP" + "life");
 
 	}

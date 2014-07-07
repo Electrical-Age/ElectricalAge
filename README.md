@@ -1,10 +1,12 @@
 Minecraft Mod - Codename : ELN
 ==============================
 
-Website available here: [http://electrical-age.net/](http://electrical-age.net/).
+Website available here: [http://electrical-age.net/](http://electrical-age.net/)
+
+[Official Minecraft forum post](http://www.minecraftforum.net/topic/2741783-172forge-electrical-age-mod-beta-146/) (updated frequently)
 
 ## ABOUT
-[ELN](https://github.com/Dolu1990/eln) is a Minecraft Mod offering the ability to perform large-scale in-game electrical simulations. Here is some highlighted features:
+[ELN](http://electrical-age.net/) is a Minecraft Mod offering the ability to perform large-scale in-game electrical simulations. Here is some highlighted features:
 
 A better simulation
 > Electrical simulation with resistive and capacitive effects. Behaviour similar to those of real life objects.
@@ -35,21 +37,22 @@ Beta. Bugs corrections, additionnals objects and enhancements.
 
 ## DEVELOPPERS
 Concepts :
-- dolu1990
+- Dolu1990
 - lambdaShade
 - cm0x4D
 
 Source code :
-- dolu1990
+- Dolu1990
 
 3D models and texturing :
 - lambdaShade
-- dolu1990
+- Dolu1990
 - cm0x4D
 
-Others contributions :
+[Others contributions](https://github.com/Dolu1990/ElectricalAge/graphs/contributors) :
+- metc (website and wiki)
 - DrummingFish (GUI text parsing, testing)
-- TheBroBeans (Mod promotion)
+- TheBroBeans (mod promotion)
 
 ## DEPENDENCIES
 "modbus4j" 1.1 must be added in java path of eclipse project.
@@ -60,3 +63,5 @@ http://sourceforge.net/projects/modbus4j/files/modbus4j/
 The source code of this mod is licensed under the LGPL V3.0 licence. See http://www.gnu.org/copyleft/lesser.html for more informations.
 
 All graphics and 3D models are licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/.
+
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/e7e38dcb7701fa748a4f7273438228db "githalytics.com")](http://githalytics.com/Dolu1990/ElectricalAge)
