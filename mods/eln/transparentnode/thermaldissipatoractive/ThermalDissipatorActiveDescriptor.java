@@ -6,7 +6,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
-import mods.eln.node.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
@@ -87,13 +87,13 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	@Override
@@ -105,7 +105,7 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Used for cooling the Turbine.");
 		list.add(Utils.plotCelsius("Tmax :", warmLimit));

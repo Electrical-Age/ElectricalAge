@@ -6,7 +6,7 @@ public class ItemPickaxeEln extends ItemPickaxe{
 
 	public ItemPickaxeEln(ToolMaterial arg0) {
 		super(arg0);
-		// TODO Auto-generated constructor stub
+		
 	}
 
 }

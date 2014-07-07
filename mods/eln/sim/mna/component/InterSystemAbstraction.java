@@ -105,7 +105,7 @@ public class InterSystemAbstraction implements IAbstractor, IDestructor{
 	
 	@Override
 	public SubSystem getAbstractorSubSystem() {
-		// TODO Auto-generated method stub
+		
 		return aSystem;
 	}
 	

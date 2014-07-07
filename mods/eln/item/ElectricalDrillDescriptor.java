@@ -26,7 +26,7 @@ public class ElectricalDrillDescriptor extends GenericItemUsingDamageDescriptorU
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
 		list.add("Nominal :");

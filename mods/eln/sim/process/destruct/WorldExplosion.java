@@ -2,8 +2,8 @@ package mods.eln.sim.process.destruct;
 
 import net.minecraft.entity.Entity;
 import mods.eln.misc.Coordonate;
-import mods.eln.node.SixNodeElement;
-import mods.eln.node.TransparentNodeElement;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.transparent.TransparentNodeElement;
 
 public class WorldExplosion implements IDestructable{
 	Object origine;

@@ -1,6 +1,6 @@
 package mods.eln.transparentnode.waterturbine;
 
-import mods.eln.INBTTReady;
+import mods.eln.misc.INBTTReady;
 import mods.eln.misc.RcRcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
@@ -63,7 +63,7 @@ public class WaterTurbineSlowProcess implements IProcess,INBTTReady {
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
+		
 		filter.writeToNBT(nbt, str + "filter");
 	
 	}

@@ -415,7 +415,7 @@ public class RootSystem {
 	}
 
 	public int getSubSystemCount() {
-		// TODO Auto-generated method stub
+		
 		return systems.size();
 	}
 

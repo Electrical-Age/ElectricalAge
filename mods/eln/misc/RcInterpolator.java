@@ -1,6 +1,5 @@
 package mods.eln.misc;
 
-import mods.eln.INBTTReady;
 import mods.eln.client.FrameTime;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -36,23 +35,23 @@ public class RcInterpolator implements INBTTReady{
 		factorFiltred = value;
 	}
 	public void setValueFromTarget() {
-		// TODO Auto-generated method stub
+		
 		factorFiltred = factor;
 	}
 	public float getTarget() {
-		// TODO Auto-generated method stub
+		
 		return factor;
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
+		
 		factor = nbt.getFloat(str + "factor");
 		factorFiltred = nbt.getFloat(str + "factorFiltred");
 		
 	}
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
+		
 		nbt.setFloat(str + "factor",factor);
 		nbt.setFloat(str + "factorFiltred",factorFiltred);
 		

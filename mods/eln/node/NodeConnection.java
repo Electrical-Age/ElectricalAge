@@ -23,7 +23,7 @@ public class NodeConnection {
 		this.lrdu2 = lrdu2;
 		this.EC = EC;
 		this.TC = TC;
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	public void destroy()

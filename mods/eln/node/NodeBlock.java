@@ -44,7 +44,7 @@ public abstract class NodeBlock extends BlockContainer{//BlockContainer
 	
 	@Override
 	public float getBlockHardness(World par1World, int par2, int par3, int par4) {
-		// TODO Auto-generated method stub
+		
 		return 1.0f;
 	}
 	
@@ -66,7 +66,7 @@ public abstract class NodeBlock extends BlockContainer{//BlockContainer
 	 
     @Override
 	public boolean canProvidePower() {
-		// TODO Auto-generated method stub
+		
 		return super.canProvidePower();
 	}
 	
@@ -174,27 +174,27 @@ public abstract class NodeBlock extends BlockContainer{//BlockContainer
 
 	@Override
 	public TileEntity createNewTileEntity(World var1,int a) {
-		// TODO Auto-generated method stub
+		
 
 		try {
 			return (TileEntity) tileEntityClass.getConstructor().newInstance();
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		while(true);

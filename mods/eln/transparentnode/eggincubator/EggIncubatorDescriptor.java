@@ -5,10 +5,10 @@ import java.util.List;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeEntity;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.item.EntityItem;
@@ -98,7 +98,7 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 		UtilsClient.enableCulling();
 	}
 
-	public void applyTo(NodeElectricalLoad powerLoad) {
+	public void applyTo(NbtElectricalLoad powerLoad) {
 		cable.applyTo(powerLoad);
 	}
 	

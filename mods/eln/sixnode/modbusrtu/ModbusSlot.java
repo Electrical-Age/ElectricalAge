@@ -11,14 +11,14 @@ public abstract class ModbusSlot implements IModbusSlot{
 	
 	@Override
 	public int getSize() {
-		// TODO Auto-generated method stub
+		
 		return range;
 	}
 	
 	
 	@Override
 	public int getOffset() {
-		// TODO Auto-generated method stub
+		
 		return offset;
 	}
 	

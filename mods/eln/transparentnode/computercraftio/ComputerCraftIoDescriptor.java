@@ -15,9 +15,9 @@ import net.minecraft.util.AxisAlignedBB;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeEntity;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeEntity;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
 

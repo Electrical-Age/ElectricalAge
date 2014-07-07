@@ -29,7 +29,7 @@ public class GuiHelperContainer extends GuiHelper{
 
 	@Override
 	void draw(int x, int y, float f) {
-		// TODO Auto-generated method stub
+		
 		super.draw(x, y, f);
 	//	screen.drawTexturedModalRect(xInv, yInv, par3, par4, par5, par6)
 	}

@@ -3,20 +3,20 @@ package mods.eln.transparentnode.eggincubator;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import mods.eln.INBTTReady;
 import mods.eln.misc.Direction;
+import mods.eln.misc.INBTTReady;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.EntityLiving;
@@ -29,7 +29,7 @@ import net.minecraft.util.MathHelper;
 
 public class EggIncubatorElement extends TransparentNodeElement {
 	
-	public NodeElectricalLoad powerLoad = new NodeElectricalLoad("powerLoad");
+	public NbtElectricalLoad powerLoad = new NbtElectricalLoad("powerLoad");
 	public Resistor powerResistor = new Resistor(powerLoad,null);
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 64, this);
 	EggIncubatorProcess slowProcess = new EggIncubatorProcess();

@@ -10,13 +10,14 @@ import cpw.mods.fml.common.FMLCommonHandler;
 
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
-import mods.eln.INBTTReady;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
+import mods.eln.misc.INBTTReady;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUCubeMask;
 import mods.eln.misc.Profiler;
 import mods.eln.misc.Utils;
+import mods.eln.node.six.SixNode;
 import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
@@ -153,7 +154,7 @@ public abstract class NodeBase {
 
 
 	public boolean hasGui(Direction side) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 	/*
@@ -618,7 +619,7 @@ public abstract class NodeBase {
 	    		    	
 	    	
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}	    	
     }
@@ -676,7 +677,7 @@ public abstract class NodeBase {
 
 	    	return bos;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			
 		}

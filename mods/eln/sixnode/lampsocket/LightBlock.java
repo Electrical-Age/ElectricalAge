@@ -24,7 +24,7 @@ public class LightBlock extends BlockContainer {
 
 	public LightBlock() {
 		super(Material.air);
-		// TODO Auto-generated constructor stub
+		
 	}
 	public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 start, Vec3 end)
     {
@@ -51,7 +51,7 @@ public class LightBlock extends BlockContainer {
 	@Override
 	public Item getItemDropped(int p_149650_1_, Random p_149650_2_,
 			int p_149650_3_) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 	
@@ -68,7 +68,7 @@ public class LightBlock extends BlockContainer {
     
     @Override
     public int getLightValue(IBlockAccess world, int x, int y, int z) {
-    	// TODO Auto-generated method stub
+    	
     	/*if(FMLCommonHandler.instance().getEffectiveSide().isClient()){
     		Utils.println("Light at " + x +":"+ y +":" + z +" " + FMLCommonHandler.instance().getEffectiveSide().toString() + " get light " + world.getBlockMetadata(x, y, z));
     	}*/
@@ -99,7 +99,7 @@ public class LightBlock extends BlockContainer {
 	
 	@Override
 	public int getLightOpacity() {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 

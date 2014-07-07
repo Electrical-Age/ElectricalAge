@@ -33,7 +33,7 @@ public enum LRDU {
 	Up(3);
 	
 	LRDU(int dir) {
-		// TODO Auto-generated constructor stub
+		
 		this.dir = dir;
 	}
 	
@@ -207,7 +207,7 @@ public enum LRDU {
 		try {
 			stream.writeByte(this.toInt());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -216,7 +216,7 @@ public enum LRDU {
 		try {
 			return fromInt(stream.readByte());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			return Up;
 		}

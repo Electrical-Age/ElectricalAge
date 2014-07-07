@@ -21,12 +21,12 @@ public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDes
 
 	public SharedItem() {
 		super();
-		// TODO Auto-generated constructor stub
+		
 	}
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		GenericItemUsingDamageDescriptor d = getDescriptor(item); if(d == null) return false;
 		return d.handleRenderType(item, type);
 	}
@@ -92,20 +92,20 @@ public class SharedItem extends GenericItemUsingDamage<GenericItemUsingDamageDes
 	@Override
 	public ArmorProperties getProperties(EntityLivingBase player,
 			ItemStack armor, DamageSource source, double damage, int slot) {
-		// TODO Auto-generated method stub
+		
 		return new ArmorProperties(10, 1.0, 10000);
 	}
 
 	@Override
 	public int getArmorDisplay(EntityPlayer player, ItemStack armor, int slot) {
-		// TODO Auto-generated method stub
+		
 		return 4;
 	}
 
 	@Override
 	public void damageArmor(EntityLivingBase entity, ItemStack stack,
 			DamageSource source, int damage, int slot) {
-		// TODO Auto-generated method stub
+		
 		
 	}	
 

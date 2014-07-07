@@ -9,14 +9,14 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
-import mods.eln.node.SixNodeElementInventory;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,8 +38,8 @@ public class ElectricalBreakerElement extends SixNodeElement {
 	}
 
 	public ElectricalBreakerDescriptor descriptor;
-	public NodeElectricalLoad aLoad = new NodeElectricalLoad("aLoad");
-	public NodeElectricalLoad bLoad = new NodeElectricalLoad("bLoad");
+	public NbtElectricalLoad aLoad = new NbtElectricalLoad("aLoad");
+	public NbtElectricalLoad bLoad = new NbtElectricalLoad("bLoad");
 	public Resistor switchResistor = new Resistor(aLoad, bLoad);
 	public ElectricalBreakerCutProcess cutProcess = new ElectricalBreakerCutProcess(this);
 	

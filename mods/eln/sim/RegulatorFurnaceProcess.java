@@ -8,7 +8,7 @@ public class RegulatorFurnaceProcess extends RegulatorProcess{
 	}
 	@Override
 	protected double getHit() {
-		// TODO Auto-generated method stub
+		
 		return furnace.load.Tc;
 	}
 	@Override

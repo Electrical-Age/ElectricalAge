@@ -16,7 +16,7 @@ public class FurnaceProcess implements IProcess{
 	
 	@Override
 	public void process(double time) {
-		// TODO Auto-generated method stub
+		
 		double energyConsumed = getP()*time;
 		combustibleEnergy -= energyConsumed;
 		load.PcTemp += energyConsumed/time;

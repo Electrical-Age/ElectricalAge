@@ -11,7 +11,7 @@ public class Constant implements IValue{
 
 	@Override
 	public double getValue() {
-		// TODO Auto-generated method stub
+		
 		return value;
 	}
 	

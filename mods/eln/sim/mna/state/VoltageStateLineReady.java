@@ -10,7 +10,7 @@ public class VoltageStateLineReady extends VoltageState{
 	
 	@Override
 	public boolean canBeSimplifiedByLine() {
-		// TODO Auto-generated method stub
+		
 		return canBeSimplifiedByLine;
 	}
 }

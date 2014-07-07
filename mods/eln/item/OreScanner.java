@@ -12,7 +12,7 @@ public class OreScanner extends GenericItemUsingDamageDescriptorUpgrade{
 			
 			) {
 		super(name);
-		// TODO Auto-generated constructor stub
+		
 	}
 
 
@@ -20,7 +20,7 @@ public class OreScanner extends GenericItemUsingDamageDescriptorUpgrade{
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		/*
 		list.add("Nominal :");

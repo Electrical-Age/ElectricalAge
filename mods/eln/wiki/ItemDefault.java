@@ -45,7 +45,7 @@ public class ItemDefault extends Default {
 
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
+		
 		super.initGui();
 		try {
 
@@ -226,7 +226,7 @@ public class ItemDefault extends Default {
 
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
-		// TODO Auto-generated method stub
+		
 		super.guiObjectEvent(object);
 
 	}

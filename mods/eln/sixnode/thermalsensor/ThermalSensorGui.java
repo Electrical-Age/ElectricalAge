@@ -40,7 +40,7 @@ public class ThermalSensorGui extends GuiContainerEln{
 
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
+		
 		super.initGui();
 
 
@@ -80,7 +80,7 @@ public class ThermalSensorGui extends GuiContainerEln{
 
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
-		// TODO Auto-generated method stub
+		
 		super.guiObjectEvent(object);
     	if(object == validate)
     	{
@@ -107,7 +107,7 @@ public class ThermalSensorGui extends GuiContainerEln{
 
 	@Override
 	protected void preDraw(float f, int x, int y) {
-		// TODO Auto-generated method stub
+		
 		super.preDraw(f, x, y);
 		if(render.descriptor.temperatureOnly == false){
 	    	if(render.typeOfSensor == ThermalSensorElement.temperatureType)
@@ -126,7 +126,7 @@ public class ThermalSensorGui extends GuiContainerEln{
 
 	@Override
 	protected GuiHelperContainer newHelper() {
-		// TODO Auto-generated method stub
+		
 		return new HelperStdContainer(this);
 	}
   

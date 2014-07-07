@@ -56,7 +56,7 @@ public class Obj3DFolder {
 					}
 				}
 			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 			

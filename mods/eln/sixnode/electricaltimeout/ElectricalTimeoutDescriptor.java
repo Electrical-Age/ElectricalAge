@@ -5,7 +5,7 @@ import java.util.List;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
-import mods.eln.node.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -79,7 +79,7 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 	}
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 

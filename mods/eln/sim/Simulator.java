@@ -471,7 +471,7 @@ public class Simulator /* ,IPacketHandler*/ {
 			/*	try {
 					Thread.sleep(100);
 				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
+					
 					e1.printStackTrace();
 				}*//*
 			}

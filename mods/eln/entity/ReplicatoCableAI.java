@@ -7,8 +7,8 @@ import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeElement;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ITimeRemoverObserver;
@@ -75,7 +75,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 	
 	@Override
 	public boolean continueExecuting() {
-		// TODO Auto-generated method stub
+		
 		//Utils.println("Continue");
 		return cableCoordonate != null;
 	}
@@ -151,7 +151,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 	
 	@Override
 	public void startExecuting() {
-		// TODO Auto-generated method stub
+		
 		//Utils.println("START REPLICATOOOOOR");
 
 		//Utils.println(this.entity.getNavigator().tryMoveToXYZ(-2470,56,-50, 1));

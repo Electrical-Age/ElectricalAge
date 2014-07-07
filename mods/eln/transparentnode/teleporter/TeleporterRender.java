@@ -19,9 +19,9 @@ import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElementRender;
-import mods.eln.node.TransparentNodeEntity;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElementRender;
+import mods.eln.node.transparent.TransparentNodeEntity;
 
 public class TeleporterRender extends TransparentNodeElementRender{
 
@@ -197,7 +197,7 @@ public class TeleporterRender extends TransparentNodeElementRender{
 	float processRatio;
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkUnserialize(stream);
 
 		try {
@@ -215,7 +215,7 @@ public class TeleporterRender extends TransparentNodeElementRender{
 			//energyTarget = stream.readFloat();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		
@@ -243,26 +243,26 @@ public class TeleporterRender extends TransparentNodeElementRender{
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new TeleporterGui(player, this);
 	}
 	
 	
 	@Override
 	public void serverPacketUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.serverPacketUnserialize(stream);
 		try {
 			stream.readByte();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
 	
 	@Override
 	public boolean cameraDrawOptimisation() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 }

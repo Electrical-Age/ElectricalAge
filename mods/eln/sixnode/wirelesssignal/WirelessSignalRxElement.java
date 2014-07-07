@@ -13,19 +13,19 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateInput;
-import mods.eln.node.NodeElectricalGateOutput;
-import mods.eln.node.NodeElectricalGateOutputProcess;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalGateInput;
+import mods.eln.sim.nbt.NbtElectricalGateOutput;
+import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 
 public class WirelessSignalRxElement extends SixNodeElement implements IWirelessSignalTx{
 
-	NodeElectricalGateOutput outputGate = new NodeElectricalGateOutput("outputGate");
-	NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess",outputGate);
+	NbtElectricalGateOutput outputGate = new NbtElectricalGateOutput("outputGate");
+	NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess",outputGate);
 	
 	public int generation = 1000;
 	public String channel = "Default channel";
@@ -53,14 +53,14 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		if(front == lrdu) return outputGate;
 		return null;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -72,19 +72,19 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 
 	@Override
 	public String multiMeterString() {
-		// TODO Auto-generated method stub
+		
 		return outputGate.plot("Output gate");
 	}
 
 	@Override
 	public String thermoMeterString() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
@@ -120,7 +120,7 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.writeToNBT(nbt);
 		nbt.setString("channel", channel);
 		nbt.setInteger("generation", generation);
@@ -141,31 +141,31 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 
 	@Override
 	public Coordonate getCoordonate() {
-		// TODO Auto-generated method stub
+		
 		return sixNode.coordonate;
 	}
 
 	@Override
 	public int getRange() {
-		// TODO Auto-generated method stub
+		
 		return descriptor.range;
 	}
 
 	@Override
 	public String getChannel() {
-		// TODO Auto-generated method stub
+		
 		return channel;
 	}
 
 	@Override
 	public int getGeneration() {
-		// TODO Auto-generated method stub
+		
 		return generation;
 	}
 
 	@Override
 	public double getValue() {
-		// TODO Auto-generated method stub
+		
 		return outputGateProcess.getOutputNormalized();
 	}
 	
@@ -189,27 +189,27 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 				break;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
 	
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		try {
 			stream.writeUTF(channel);
 			stream.writeBoolean(connection);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}	

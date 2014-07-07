@@ -9,10 +9,10 @@ import mods.eln.client.FrameTime;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElementInventory;
-import mods.eln.node.TransparentNodeElementRender;
-import mods.eln.node.TransparentNodeEntity;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNodeElementRender;
+import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 

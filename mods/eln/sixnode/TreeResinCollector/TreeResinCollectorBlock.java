@@ -21,7 +21,7 @@ public class TreeResinCollectorBlock extends BlockContainer{
 	public TreeResinCollectorBlock(int id) {
 		super(Material.wood);
 		setBlockName("TreeResinCollector"); 
-		// TODO Auto-generated constructor stub
+		
 	}
 	@Override
 	public boolean isOpaqueCube() {
@@ -39,7 +39,7 @@ public class TreeResinCollectorBlock extends BlockContainer{
 	
 	@Override
 	public TileEntity createNewTileEntity(World world,int a) {
-		// TODO Auto-generated method stub
+		
 		return new TreeResinCollectorTileEntity();
 	}
     public boolean canPlaceBlockOnSide(World world, int x, int y, int z, int side)
@@ -62,7 +62,7 @@ public class TreeResinCollectorBlock extends BlockContainer{
     @Override
     public int onBlockPlaced(World world, int x, int y, int z,
     		int side, float par6, float par7, float par8, int par9) {
-    	// TODO Auto-generated method stub
+    	
 
     //	world.setBlockMetadataWithNotify(x, y, z, side, 0);
     //	((TreeResinCollectorTileEntity)world.getBlockTileEntity(x, y, z)).setWoodDirection(Direction.fromIntMinecraftSide(side));
@@ -83,7 +83,7 @@ public class TreeResinCollectorBlock extends BlockContainer{
     @Override
     public void onNeighborBlockChange(World world, int x,
     		int y, int z, Block b) {
-    	// TODO Auto-generated method stub
+    	
     	super.onNeighborBlockChange(world, x, y, z,b);
     	if(! canPlaceBlockOnSide(world, x, y, z, world.getBlockMetadata(x, y, z)))
     	{

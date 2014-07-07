@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream;
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.node.SixNodeEntity;
+import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -58,7 +58,7 @@ public class UtilsClient {
 	}
 
 	public static EntityClientPlayerMP getClientPlayer() {
-		// TODO Auto-generated method stub
+		
 		return Minecraft.getMinecraft().thePlayer;
 	}
 
@@ -172,12 +172,12 @@ public class UtilsClient {
 	}
 
 	public static void disableTexture() {
-		// TODO Auto-generated method stub
+		
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 	}
 
 	public static void enableTexture() {
-		// TODO Auto-generated method stub
+		
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
@@ -219,7 +219,7 @@ public class UtilsClient {
 
 	public static void disableBlend() {
 		GL11.glDisable(GL11.GL_BLEND);
-		// TODO Auto-generated method stub
+		
 		//GL11.glDepthMask(true);
 		//GL11.glEnable(GL11.GL_ALPHA_TEST);
 		//GL11.glDisable(GL11.GL_BLEND);

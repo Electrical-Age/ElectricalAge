@@ -3,7 +3,7 @@ package mods.eln.transparentnode.transformer;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.IGuiObject;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -38,7 +38,7 @@ public class TransformerGuiDraw extends GuiContainerEln {
 
     @Override
     protected void preDraw(float f, int x, int y) {
-    	// TODO Auto-generated method stub
+    	
     	super.preDraw(f, x, y);
     /*	if(render.grounded)
     		buttonGrounded.displayString = "Self Grounded";
@@ -49,7 +49,7 @@ public class TransformerGuiDraw extends GuiContainerEln {
 
     @Override
     public void guiObjectEvent(IGuiObject object) {
-    	// TODO Auto-generated method stub
+    	
     	super.guiObjectEvent(object);
     	/*if(object == buttonGrounded)
     	{
@@ -59,7 +59,7 @@ public class TransformerGuiDraw extends GuiContainerEln {
 
 	@Override
 	protected GuiHelperContainer newHelper() {
-		// TODO Auto-generated method stub
+		
 			return new GuiHelperContainer(this, 176, 194-33,8,84 + 194 - 166-33, "transformer.png");
 		//return new HelperStdContainer(this);
 	}

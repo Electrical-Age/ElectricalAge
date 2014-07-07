@@ -1,7 +1,7 @@
 package mods.eln.transparentnode.waterturbine;
 
 
-import mods.eln.BasicContainer;
+import mods.eln.misc.BasicContainer;
 import mods.eln.node.INodeContainer;
 import mods.eln.node.NodeBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,18 +19,18 @@ public class WaterTurbineContainer extends BasicContainer implements INodeContai
 
 			});
 		this.node = node;
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	@Override
 	public NodeBase getNode() {
-		// TODO Auto-generated method stub
+		
 		return node;
 	}
 
 	@Override
 	public int getRefreshRateDivider() {
-		// TODO Auto-generated method stub
+		
 		return 4;
 	}
 

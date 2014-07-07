@@ -1,7 +1,7 @@
 package mods.eln.sim.mna.component;
 
 import net.minecraft.nbt.NBTTagCompound;
-import mods.eln.INBTTReady;
+import mods.eln.misc.INBTTReady;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;

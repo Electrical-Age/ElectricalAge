@@ -11,7 +11,7 @@ public class DelayInterSystem2 extends VoltageSource {
 
 	public DelayInterSystem2() {
 		super(null);
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	private DelayInterSystem2 other;

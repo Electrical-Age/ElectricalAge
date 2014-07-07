@@ -8,9 +8,9 @@ import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.RcInterpolator;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElementRender;
-import mods.eln.node.SixNodeEntity;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElementRender;
+import mods.eln.node.six.SixNodeEntity;
 
 public class ElectricalWindSensorRender extends SixNodeElementRender {
 
@@ -45,19 +45,19 @@ public class ElectricalWindSensorRender extends SixNodeElementRender {
 
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return Eln.instance.signalCableDescriptor.render;
 	}
 
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.publishUnserialize(stream);
 		try {
 			wind = stream.readFloat();
 			windFilter.setTarget(wind);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

@@ -9,7 +9,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.node.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.wiki.Data;
 
 public class TransformerDescriptor extends TransparentNodeDescriptor {
@@ -34,7 +34,7 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 	}
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addWiring(newItemStack());
 	}
@@ -44,7 +44,7 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Transforms an input voltage and");
 		list.add("outputs it.");
@@ -55,17 +55,17 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		// TODO Auto-generated method stub
+		
 		draw(defaultFero, 1, 4);
 	}
 	

@@ -10,15 +10,15 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodePeriodicPublishProcess;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.lampsocket.LightBlockEntity;
@@ -34,7 +34,7 @@ import net.minecraft.util.AxisAlignedBB;
 public class TeleporterElement extends TransparentNodeElement implements ITeleporter{
 
 	TeleporterDescriptor descriptor;
-	NodeElectricalLoad powerLoad = new NodeElectricalLoad("powerLoad");
+	NbtElectricalLoad powerLoad = new NbtElectricalLoad("powerLoad");
 	Resistor powerResistor = new Resistor(powerLoad, null);
 	TeleporterSlowProcess slowProcess = new TeleporterSlowProcess();
 	
@@ -64,19 +64,19 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	Coordonate lightCoordonate;
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return powerLoad;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		if(side == Direction.YP || side == Direction.YN) return 0;
 		if(lrdu != LRDU.Down) return 0;
 		return node.maskElectricalPower;
@@ -84,19 +84,19 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	
 	@Override
 	public String multiMeterString(Direction side) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public String thermoMeterString(Direction side) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
@@ -129,7 +129,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 
 	@Override
 	public void onBreakElement() {
-		// TODO Auto-generated method stub
+		
 		super.onBreakElement();
 		teleporterList.remove(this);
 		for(TeleporterPowerNode n : powerNodeList){
@@ -146,7 +146,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 	
@@ -160,7 +160,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.writeToNBT(nbt);
 		
 		nbt.setString("name", name);
@@ -173,7 +173,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.readFromNBT(nbt);
 		
 		name = nbt.getString("name");
@@ -554,7 +554,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			try {
 				name = stream.readUTF();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 			needPublish();
@@ -564,7 +564,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			try {
 				targetName = stream.readUTF();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 			needPublish();
@@ -577,7 +577,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			try {
 				powerCharge = stream.readFloat();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 			needPublish();
@@ -590,7 +590,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		try {
 			stream.writeUTF(name);
@@ -607,7 +607,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 			//stream.writeFloat((float) energyTarget);
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	
@@ -620,13 +620,13 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 
 	@Override
 	public Coordonate getTeleportCoordonate() {
-		// TODO Auto-generated method stub
+		
 		return descriptor.getTeleportCoordonate(front,node.coordonate);
 	}
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
+		
 		return name;
 	}
 }

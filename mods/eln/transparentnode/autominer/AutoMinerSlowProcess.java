@@ -3,10 +3,10 @@ package mods.eln.transparentnode.autominer;
 import java.util.ArrayList;
 
 import mods.eln.Eln;
-import mods.eln.INBTTReady;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
 import mods.eln.misc.Coordonate;
+import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.ore.OreBlock;
 import mods.eln.sim.IProcess;

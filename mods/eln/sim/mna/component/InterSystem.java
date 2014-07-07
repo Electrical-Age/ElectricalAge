@@ -13,7 +13,7 @@ public class InterSystem extends Resistor{
 	
 	@Override
 	public boolean canBeReplacedByInterSystem() {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 

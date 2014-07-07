@@ -1,7 +1,7 @@
 package mods.eln.transparentnode.windturbine;
 
-import mods.eln.INBTTReady;
 import mods.eln.misc.Coordonate;
+import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import net.minecraft.init.Blocks;
@@ -154,7 +154,7 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
+		
 		localWind = nbt.getDouble(str + name + "localWind");
 		environementWindFactor = nbt.getDouble(str + name + "environementWindFactor");
 				

@@ -1,11 +1,11 @@
 package mods.eln.transparentnode.battery;
 
-import mods.eln.BasicContainer;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.OverHeatingProtectionDescriptor;
 import mods.eln.item.OverVoltageProtectionDescriptor;
+import mods.eln.misc.BasicContainer;
 import mods.eln.node.INodeContainer;
 import mods.eln.node.NodeBase;
 import net.minecraft.entity.player.EntityPlayer;

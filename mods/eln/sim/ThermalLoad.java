@@ -33,7 +33,7 @@ public class ThermalLoad{
 	}
 	
 	public void setHighImpedance() {
-		// TODO Auto-generated method stub
+		
 		Rs = 1000000000.0;
 		C = 1;
 		Rp = 1000000000.0;
@@ -42,7 +42,7 @@ public class ThermalLoad{
 	public static final ThermalLoad externalLoad = new ThermalLoad(0, 0, 0, 0);
 
 	public void setRp(double Rp) {
-		// TODO Auto-generated method stub
+		
 		this.Rp = Rp;
 	}
 	
@@ -83,7 +83,7 @@ public class ThermalLoad{
 		PspTemp += absI;
 	}
 	public double getT() {
-		// TODO Auto-generated method stub
+		
 		return Tc;
 	}
 }

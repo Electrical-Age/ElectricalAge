@@ -38,7 +38,7 @@ public class TeleporterGui extends GuiScreenEln{
 
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
+		
 		super.initGui();
 
 		
@@ -62,7 +62,7 @@ public class TeleporterGui extends GuiScreenEln{
 	
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
-		// TODO Auto-generated method stub
+		
 		super.guiObjectEvent(object);
     	if(object == start)
     	{
@@ -80,7 +80,7 @@ public class TeleporterGui extends GuiScreenEln{
 	}
 	@Override
 	protected void preDraw(float f, int x, int y) {
-		// TODO Auto-generated method stub
+		
 		super.preDraw(f, x, y);
 		
 		if(render.chargePowerNew){
@@ -97,7 +97,7 @@ public class TeleporterGui extends GuiScreenEln{
 	}
 	@Override
 	protected GuiHelper newHelper() {
-		// TODO Auto-generated method stub
+		
 		return new GuiHelper(this, 6+80+6+20+6+2, 70);
 	}
 

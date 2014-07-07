@@ -3,9 +3,9 @@ package mods.eln.sixnode.tutorialsign;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.misc.Utils;
-import mods.eln.node.SixNodeBlock;
-import mods.eln.node.SixNodeElementRender;
-import mods.eln.node.SixNodeEntity;
+import mods.eln.node.six.SixNodeBlock;
+import mods.eln.node.six.SixNodeElementRender;
+import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.tileentity.TileEntity;

@@ -5,7 +5,7 @@ import java.util.List;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Utils;
-import mods.eln.node.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -65,7 +65,7 @@ public class ThermalCableDescriptor extends SixNodeDescriptor{
 		  
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		if(addToDataEnabled){
 			Data.addWiring(newItemStack());
@@ -114,7 +114,7 @@ public class ThermalCableDescriptor extends SixNodeDescriptor{
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
 		list.add(Utils.plotCelsius("Tmax:", thermalWarmLimit));

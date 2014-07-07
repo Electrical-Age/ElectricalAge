@@ -454,7 +454,7 @@ public class Utils {
 	/*public static void sendPacketToPlayer(
 			ElnServerPacket packet,
 			EntityPlayerMP player) {
-		// TODO Auto-generated method stub
+		
 		Eln.eventChannel.sendTo(new FMLProxyPacket(packet), player);
 	//	player.playerNetServerHandler.sendPacket(new FMLProxyPacket(packet));
 	}*/
@@ -880,7 +880,7 @@ public class Utils {
 	}
 
 	public static boolean isPlayerAround(World world, AxisAlignedBB axisAlignedBB) {
-		// TODO Auto-generated method stub
+		
 		return world.getEntitiesWithinAABB(EntityPlayer.class, axisAlignedBB).size() != 0;
 	}
 
@@ -971,7 +971,7 @@ public class Utils {
 	}
 
 	public static boolean areSame(ItemStack stack, ItemStack output) {
-		// TODO Auto-generated method stub
+		
 		try {
 			return (stack.getItem() == output.getItem() && stack.getItemDamage() == output.getItemDamage())
 					|| (OreDictionary.getOreID(stack) == OreDictionary.getOreID(output) && OreDictionary.getOreID(output) != -1);
@@ -982,7 +982,7 @@ public class Utils {
 	}
 
 	public static Vec3 getVec05(Coordonate c) {
-		// TODO Auto-generated method stub
+		
 		return Vec3.createVectorHelper(c.x + (c.x < 0 ? -1 : 1) * 0.5, c.y + (c.y < 0 ? -1 : 1) * 0.5, c.z + (c.z < 0 ? -1 : 1) * 0.5);
 	}
 
@@ -1012,7 +1012,7 @@ public class Utils {
 	}
 
 	public static void serverTeleport(Entity e, double x, double y, double z) {
-		// TODO Auto-generated method stub
+		
 		if(e instanceof EntityPlayerMP)
 			((EntityPlayerMP) e).setPositionAndUpdate(x, y, z);
 		else
@@ -1134,7 +1134,7 @@ public class Utils {
 
 	public static boolean isBlockLoaded(World world, double x, double y,
 			double z) {
-		// TODO Auto-generated method stub
+		
 		return world.blockExists(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
 	}
 
@@ -1159,16 +1159,16 @@ public class Utils {
 			f.setAccessible(true);
 			return f.getInt(o);
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (NoSuchFieldException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		return 0;
@@ -1308,12 +1308,12 @@ public class Utils {
 	}
 
 	public static ItemStack newItemStack(int i, int size, int damage) {
-		// TODO Auto-generated method stub
+		
 		return new ItemStack(Item.getItemById(i), size, damage);
 	}
 
 	public static ItemStack newItemStack(Item i, int size, int damage) {
-		// TODO Auto-generated method stub
+		
 		return new ItemStack(i, size, damage);
 	}
 
@@ -1348,36 +1348,36 @@ public class Utils {
 		try {
 			throw new Exception();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		System.exit(0);
 	}
 
 	public static Block getBlock(int blockId) {
-		// TODO Auto-generated method stub
+		
 		return Block.getBlockById(blockId);
 	}
 
 	public static void updateSkylight(Chunk chunk) {
-		// TODO Auto-generated method stub
+		
 		chunk.func_150804_b(false);
 	}
 
 	public static void updateAllLightTypes(World worldObj, int xCoord, int yCoord, int zCoord) {
-		// TODO Auto-generated method stub
+		
 		worldObj.func_147451_t(xCoord, yCoord, zCoord);
 
 		worldObj.markBlocksDirtyVertical(xCoord, zCoord, 0, 255);
 	}
 
 	public static int getItemId(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return Item.getIdFromItem(stack.getItem());
 	}
 
 	public static int getItemId(Block block) {
-		// TODO Auto-generated method stub
+		
 		return Item.getIdFromItem(Item.getItemFromBlock(block));
 	}
 
@@ -1423,7 +1423,7 @@ public class Utils {
 	}
 
 	public static void generateHeightMap(Chunk chunk) {
-		// TODO Auto-generated method stub
+		
 
 	}
 
@@ -1436,11 +1436,11 @@ public class Utils {
 
 	/*
 		public static float[] getSixNodePinDistance(Obj3D obj) {
-			// TODO Auto-generated method stub
+			
 			return new float[]{obj.zMin*16,obj.zMax*16,obj.yMin*16,obj.yMax*16};
 		}*/
 	public static float[] getSixNodePinDistance(Obj3DPart obj) {
-		// TODO Auto-generated method stub
+		
 		return new float[] { Math.abs(obj.zMin * 16), Math.abs(obj.zMax * 16), Math.abs(obj.yMin * 16), Math.abs(obj.yMax * 16) };
 	}
 

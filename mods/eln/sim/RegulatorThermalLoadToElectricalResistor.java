@@ -1,6 +1,6 @@
 package mods.eln.sim;
 
-import mods.eln.INBTTReady;
+import mods.eln.misc.INBTTReady;
 import mods.eln.sim.mna.component.Resistor;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -24,7 +24,7 @@ public class RegulatorThermalLoadToElectricalResistor extends RegulatorProcess{
 	}
 	@Override
 	protected double getHit() {
-		// TODO Auto-generated method stub
+		
 		return thermalLoad.Tc;
 	}
 

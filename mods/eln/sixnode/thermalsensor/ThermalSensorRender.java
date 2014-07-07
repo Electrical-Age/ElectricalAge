@@ -9,10 +9,10 @@ import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElementInventory;
-import mods.eln.node.SixNodeElementRender;
-import mods.eln.node.SixNodeEntity;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElementInventory;
+import mods.eln.node.six.SixNodeElementRender;
+import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sim.PhysicalConstant;
 import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
 import net.minecraft.client.gui.GuiScreen;
@@ -46,7 +46,7 @@ public class ThermalSensorRender extends SixNodeElementRender{
 	/*
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return descriptor.cableRender;
 	}
 	*/
@@ -57,7 +57,7 @@ public class ThermalSensorRender extends SixNodeElementRender{
 
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.publishUnserialize(stream);
 		try {
 			Byte b;
@@ -71,7 +71,7 @@ public class ThermalSensorRender extends SixNodeElementRender{
 			if(desc instanceof ThermalCableDescriptor) cable = (ThermalCableDescriptor) desc;
 			else cable = null;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}	
 
@@ -81,7 +81,7 @@ public class ThermalSensorRender extends SixNodeElementRender{
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new ThermalSensorGui(player,inventory,this);
 	}
 	

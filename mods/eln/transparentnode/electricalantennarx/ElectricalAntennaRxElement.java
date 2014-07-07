@@ -7,14 +7,14 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateInput;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.PowerSource;
+import mods.eln.sim.nbt.NbtElectricalGateInput;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -22,8 +22,8 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement{
 
 	ElectricalAntennaRxSlowProcess slowProcess = new ElectricalAntennaRxSlowProcess(this);
 	
-	NodeElectricalLoad powerOut = new NodeElectricalLoad("powerOut");
-	NodeElectricalGateInput signalIn = new NodeElectricalGateInput("signalIn",false);
+	NbtElectricalLoad powerOut = new NbtElectricalLoad("powerOut");
+	NbtElectricalGateInput signalIn = new NbtElectricalGateInput("signalIn",false);
 
 	PowerSource powerSrc = new PowerSource("powerSrc",powerOut);
 	public double getSignal() {

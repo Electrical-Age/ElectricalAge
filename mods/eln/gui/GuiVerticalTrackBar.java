@@ -28,7 +28,7 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
     }
 	@Override
 	public int getYMax() {
-		// TODO Auto-generated method stub
+		
 		return yPosition + height;
 	}
 	
@@ -185,7 +185,7 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 	}
 	@Override
 	public void idraw(int x, int y, float f) {
-		// TODO Auto-generated method stub
+		
 		drawBase(f, x, y);
 		drawBare(f, x, y);
 		
@@ -194,7 +194,7 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 
 	@Override
 	public boolean ikeyTyped(char key, int code) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
@@ -207,12 +207,12 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 	}
 	@Override
 	public void imouseMovedOrUp(int x, int y, int witch) {
-		// TODO Auto-generated method stub
+		
 		mouseMovedOrUp(x, y, witch);
 	}
 	@Override
 	public void idraw2(int x, int y) {
-		// TODO Auto-generated method stub
+		
 		if(visible == true && (x >= xPosition && y >= yPosition && x < xPosition + width && y < yPosition + height) || drag)
 		{
 			int px,py;
@@ -229,7 +229,7 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 		this.yPosition += y;
 	}
 	public float getStepId() {
-		// TODO Auto-generated method stub
+		
 		return stepId;
 	}
 }

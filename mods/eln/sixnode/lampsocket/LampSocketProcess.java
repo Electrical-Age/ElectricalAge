@@ -7,16 +7,16 @@ import java.util.ArrayList;
 
 import cpw.mods.fml.relauncher.Side;
 import mods.eln.Eln;
-import mods.eln.INBTTReady;
-import mods.eln.SaveConfig;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.LampDescriptor;
 import mods.eln.item.LampDescriptor.Type;
 import mods.eln.misc.Coordonate;
+import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeServer;
-import mods.eln.node.SixNode;
+import mods.eln.node.six.SixNode;
+import mods.eln.server.SaveConfig;
 import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.Simulator;
@@ -474,7 +474,7 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 			try {
 				packet.writeByte(light);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 			lamp.sendPacketToAllClient(bos);

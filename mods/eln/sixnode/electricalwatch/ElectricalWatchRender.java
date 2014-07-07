@@ -4,10 +4,10 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import mods.eln.misc.Direction;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElementInventory;
-import mods.eln.node.SixNodeElementRender;
-import mods.eln.node.SixNodeEntity;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElementInventory;
+import mods.eln.node.six.SixNodeElementRender;
+import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -37,13 +37,13 @@ public class ElectricalWatchRender extends SixNodeElementRender {
 	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.publishUnserialize(stream);
 		try {
 			upToDate = stream.readBoolean();
 			oldDate = stream.readLong();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

@@ -12,26 +12,26 @@ import javax.swing.text.MaskFormatter;
 
 
 import mods.eln.Eln;
-import mods.eln.INBTTReady;
 
 import mods.eln.misc.Direction;
+import mods.eln.misc.INBTTReady;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.IVoltageDestructorDescriptor;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateInput;
-import mods.eln.node.NodeElectricalGateOutputProcess;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.NodeThermalLoad;
 
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
-import mods.eln.node.SixNodeElementInventory;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalGateInput;
+import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -49,7 +49,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
     	this.descriptor = (ElectricalDataLoggerDescriptor) descriptor;
 		
-    	inputGate = new NodeElectricalGateInput("inputGate",false);
+    	inputGate = new NbtElectricalGateInput("inputGate",false);
 		
 		electricalLoadList.add(inputGate);
     	slowProcessList.add(slowProcess);
@@ -63,7 +63,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 		return false;
 	}
 	
-	NodeElectricalGateInput inputGate;
+	NbtElectricalGateInput inputGate;
 	ElectricalDataLoggerProcess slowProcess = new ElectricalDataLoggerProcess(this);
 	public ElectricalDataLoggerDescriptor descriptor;
 	

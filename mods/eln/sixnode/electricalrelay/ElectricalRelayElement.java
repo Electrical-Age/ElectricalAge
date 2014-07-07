@@ -15,18 +15,18 @@ import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.IVoltageDestructorDescriptor;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateInput;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
-import mods.eln.node.SixNodeElementInventory;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
+import mods.eln.sim.nbt.NbtElectricalGateInput;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ResistorCurrentWatchdog;
 import mods.eln.sim.process.destruct.ResistorPowerWatchdog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
@@ -68,10 +68,10 @@ public class ElectricalRelayElement extends SixNodeElement {
 	}
 
 	public ElectricalRelayDescriptor descriptor;
-	public NodeElectricalLoad aLoad = new NodeElectricalLoad("aLoad");
-	public NodeElectricalLoad bLoad = new NodeElectricalLoad("bLoad");
+	public NbtElectricalLoad aLoad = new NbtElectricalLoad("aLoad");
+	public NbtElectricalLoad bLoad = new NbtElectricalLoad("bLoad");
 	public Resistor switchResistor = new Resistor(aLoad, bLoad);
-	public NodeElectricalGateInput gate = new NodeElectricalGateInput("gate",true);
+	public NbtElectricalGateInput gate = new NbtElectricalGateInput("gate",true);
 	public ElectricalRelayGateProcess gateProcess = new ElectricalRelayGateProcess(this, "GP", gate);
 	
 	VoltageStateWatchDog voltageWatchDogA = new VoltageStateWatchDog();

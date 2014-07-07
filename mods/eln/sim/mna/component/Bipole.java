@@ -41,7 +41,7 @@ public abstract class Bipole extends Component {
 	
 	@Override
 	public State[] getConnectedStates() {
-		// TODO Auto-generated method stub
+		
 		return new State[]{aPin,bPin};
 	}
 	

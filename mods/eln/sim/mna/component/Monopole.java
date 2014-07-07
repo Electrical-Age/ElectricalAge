@@ -15,7 +15,7 @@ public abstract class Monopole extends Component {
 	
 	@Override
 	public State[] getConnectedStates() {
-		// TODO Auto-generated method stub
+		
 		return new State[]{pin};
 	}
 	

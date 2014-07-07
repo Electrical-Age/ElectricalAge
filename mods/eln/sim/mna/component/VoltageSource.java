@@ -1,6 +1,6 @@
 package mods.eln.sim.mna.component;
 
-import mods.eln.INBTTReady;
+import mods.eln.misc.INBTTReady;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.ISubSystemProcessI;
 import mods.eln.sim.mna.state.CurrentState;
@@ -64,14 +64,14 @@ public class VoltageSource extends Bipole implements ISubSystemProcessI,INBTTRea
 	}
 
 	public double getI() {
-		// TODO Auto-generated method stub
+		
 		return -getCurrentState().state;
 	}
 	
 	
 	@Override
 	public double getCurrent() {
-		// TODO Auto-generated method stub
+		
 		return -getCurrentState().state;
 	}
 
@@ -95,7 +95,7 @@ public class VoltageSource extends Bipole implements ISubSystemProcessI,INBTTRea
 	}
 
 	public double getP() {
-		// TODO Auto-generated method stub
+		
 		return getU()*getI();
 	}
 }

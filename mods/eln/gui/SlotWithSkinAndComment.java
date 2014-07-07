@@ -16,7 +16,7 @@ public class SlotWithSkinAndComment extends Slot implements ISlotSkin ,ISlotWith
 	SlotSkin skin;
 	@Override
 	public SlotSkin getSlotSkin() {
-		// TODO Auto-generated method stub
+		
 		return skin;
 	}
 	@Override

@@ -6,8 +6,8 @@ import java.io.IOException;
 
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
-import mods.eln.INBTTReady;
 import mods.eln.misc.Coordonate;
+import mods.eln.misc.INBTTReady;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
 
 public class WirelessTxStatus implements INBTTReady{
@@ -34,7 +34,7 @@ public class WirelessTxStatus implements INBTTReady{
 		packet.writeDouble(value);
 	}
 	public void readFrom(DataInputStream stream) throws IOException {
-		// TODO Auto-generated method stub
+		
 		uuid = stream.readInt();
 		id = stream.readInt();
 		name = stream.readUTF();
@@ -51,7 +51,7 @@ public class WirelessTxStatus implements INBTTReady{
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
+		
 		name = nbt.getString(str + "name" );
 		id = nbt.getInteger(str + "id");
 		value = nbt.getDouble(str + "value");

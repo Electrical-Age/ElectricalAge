@@ -15,10 +15,10 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.misc.Utils;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElementInventory;
-import mods.eln.node.SixNodeElementRender;
-import mods.eln.node.SixNodeEntity;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElementInventory;
+import mods.eln.node.six.SixNodeElementRender;
+import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 
 public class LampSupplyRender extends SixNodeElementRender {
@@ -60,13 +60,13 @@ public class LampSupplyRender extends SixNodeElementRender {
 
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return cableRender;
 	}
 
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new LampSupplyGui(this, player, inventory);
 	}
 
@@ -76,7 +76,7 @@ public class LampSupplyRender extends SixNodeElementRender {
 
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.publishUnserialize(stream);
 		try {
 			channel = stream.readUTF();
@@ -90,7 +90,7 @@ public class LampSupplyRender extends SixNodeElementRender {
 				cableRender = null;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

@@ -8,12 +8,12 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateInput;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalGateInput;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -30,7 +30,7 @@ public class ElectricalAlarmElement extends SixNodeElement {
     	this.descriptor = (ElectricalAlarmDescriptor) descriptor;
 	}
 
-	public NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate",true);
+	public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate",true);
 	public ElectricalAlarmSlowProcess slowProcess = new ElectricalAlarmSlowProcess(this);
 	LRDU front;
 	
@@ -124,7 +124,7 @@ public class ElectricalAlarmElement extends SixNodeElement {
 	
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
@@ -133,7 +133,7 @@ public class ElectricalAlarmElement extends SixNodeElement {
 	public static final byte clientSoundToggle = 1;
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkUnserialize(stream);
 		
 		try {
@@ -144,7 +144,7 @@ public class ElectricalAlarmElement extends SixNodeElement {
 				break;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

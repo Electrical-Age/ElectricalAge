@@ -24,7 +24,7 @@ public class Resistor extends Bipole {
 /*	public Line line = null;
 	public boolean lineReversDir;
 	public boolean isInLine() {
-		// TODO Auto-generated method stub
+		
 		return line != null;
 	}*/
 	

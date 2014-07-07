@@ -24,7 +24,7 @@ public class GhostManager extends WorldSavedData
 {
 	public GhostManager(String par1Str) {
 		super(par1Str);
-		// TODO Auto-generated constructor stub
+		
 	}
 	Hashtable<Coordonate, GhostElement> ghostTable = new Hashtable<Coordonate, GhostElement>();
 	Hashtable<Coordonate, GhostObserver> observerTable = new Hashtable<Coordonate, GhostObserver>();
@@ -130,7 +130,7 @@ public class GhostManager extends WorldSavedData
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		for(NBTTagCompound o : Utils.getTags(nbt))
 		{
 			NBTTagCompound tag = (NBTTagCompound) o;
@@ -142,7 +142,7 @@ public class GhostManager extends WorldSavedData
 	}
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		int nodeCounter = 0;
 		
 		for(GhostElement ghost : ghostTable.values())

@@ -11,9 +11,9 @@ import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import mods.eln.node.NodePeriodicPublishProcess;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
@@ -36,37 +36,37 @@ public class TreeResinCollectorElement extends SixNodeElement{
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
 	@Override
 	public String multiMeterString() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public String thermoMeterString() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
@@ -157,14 +157,14 @@ public class TreeResinCollectorElement extends SixNodeElement{
 	double timeFromLastActivated = 0;
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.readFromNBT(nbt);
 		timeFromLastActivated = nbt.getDouble( "timeFromLastActivated");
 	}
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.writeToNBT(nbt);
 		nbt.setDouble( "timeFromLastActivated", timeFromLastActivated);
 	}
@@ -178,7 +178,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 
 		@Override
 		public void process(double time) {
-			// TODO Auto-generated method stub
+			
 			element.timeFromLastActivated += time;
 		}
 		
@@ -188,7 +188,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		double occupancy;
 		Coordonate coord = sixNode.coordonate;
@@ -244,7 +244,7 @@ public class TreeResinCollectorElement extends SixNodeElement{
 		try {
 			stream.writeFloat((float) product);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

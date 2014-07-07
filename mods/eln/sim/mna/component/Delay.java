@@ -57,7 +57,7 @@ public class Delay extends Bipole implements ISubSystemProcessI{
 
 	@Override
 	public double getCurrent() {
-		// TODO Auto-generated method stub
+		
 		return oldIa-oldIb;
 	}
 

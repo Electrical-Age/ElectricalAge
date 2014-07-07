@@ -4,14 +4,14 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateInputOutput;
-import mods.eln.node.NodeElectricalGateOutputProcess;
 import mods.eln.node.NodeManager;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalGateInputOutput;
+import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import net.minecraft.entity.player.EntityPlayer;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -19,16 +19,16 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 
 public class ComputerCraftIoElement extends TransparentNodeElement implements IPeripheral{
 	
-	public NodeElectricalGateInputOutput[] ioGate = new NodeElectricalGateInputOutput[4];
-	public NodeElectricalGateOutputProcess[] ioGateProcess = new NodeElectricalGateOutputProcess[4];
+	public NbtElectricalGateInputOutput[] ioGate = new NbtElectricalGateInputOutput[4];
+	public NbtElectricalGateOutputProcess[] ioGateProcess = new NbtElectricalGateOutputProcess[4];
 
 	ComputerCraftIoDescriptor descriptor;
 	
 	public ComputerCraftIoElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		for(int idx = 0; idx < 4; idx++){
-			ioGate[idx] = new NodeElectricalGateInputOutput("ioGate" + idx);
-			ioGateProcess[idx] = new NodeElectricalGateOutputProcess("ioGateProcess" + idx, ioGate[idx]);
+			ioGate[idx] = new NbtElectricalGateInputOutput("ioGate" + idx);
+			ioGateProcess[idx] = new NbtElectricalGateOutputProcess("ioGateProcess" + idx, ioGate[idx]);
 			
 			electricalLoadList.add(ioGate[idx]);
 			electricalComponentList.add(ioGateProcess[idx]);
@@ -160,7 +160,7 @@ public class ComputerCraftIoElement extends TransparentNodeElement implements IP
 
 	@Override
 	public boolean equals(IPeripheral other) {
-		// TODO Auto-generated method stub
+		
 		return other == this;
 	}    
 }

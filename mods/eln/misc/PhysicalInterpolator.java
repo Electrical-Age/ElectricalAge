@@ -63,12 +63,12 @@ public class PhysicalInterpolator {
 		factor = value;
 	}
 	public float getTarget() {
-		// TODO Auto-generated method stub
+		
 		return factor;
 	}
 	float maxSpeed = 1000;
 	public void setMaxSpeed(float d) {
-		// TODO Auto-generated method stub
+		
 		maxSpeed = d;
 	}
 }

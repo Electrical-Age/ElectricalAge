@@ -12,8 +12,8 @@ import java.util.Scanner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
-import mods.eln.INBTTReady;
 import mods.eln.misc.FunctionTable;
+import mods.eln.misc.INBTTReady;
 import mods.eln.sim.IProcess;
 
 public class Equation implements IValue,INBTTReady{
@@ -442,7 +442,7 @@ public class Equation implements IValue,INBTTReady{
 		IValue a;
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
+			
 			return Math.abs(a.getValue());
 		}
 		@Override
@@ -459,7 +459,7 @@ public class Equation implements IValue,INBTTReady{
 		IValue a;
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
+			
 			return Math.sin(a.getValue());
 		}
 		@Override
@@ -475,7 +475,7 @@ public class Equation implements IValue,INBTTReady{
 		IValue a;
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
+			
 			return Math.cos(a.getValue());
 		}
 		@Override
@@ -498,12 +498,12 @@ public class Equation implements IValue,INBTTReady{
 		}
 		@Override
 		public void readFromNBT(NBTTagCompound nbt, String str) {
-			// TODO Auto-generated method stub
+			
 			counter = nbt.getDouble(str + "counter");
 		}
 		@Override
 		public void writeToNBT(NBTTagCompound nbt, String str) {
-			// TODO Auto-generated method stub
+			
 			nbt.setDouble(str + "counter", counter);
 		}
 		@Override
@@ -532,12 +532,12 @@ public class Equation implements IValue,INBTTReady{
 		}
 		@Override
 		public void readFromNBT(NBTTagCompound nbt, String str) {
-			// TODO Auto-generated method stub
+			
 			counter = nbt.getDouble(str + "counter");
 		}
 		@Override
 		public void writeToNBT(NBTTagCompound nbt, String str) {
-			// TODO Auto-generated method stub
+			
 			nbt.setDouble(str + "counter", counter);
 		}
 		@Override
@@ -566,12 +566,12 @@ public class Equation implements IValue,INBTTReady{
 		}
 		@Override
 		public void readFromNBT(NBTTagCompound nbt, String str) {
-			// TODO Auto-generated method stub
+			
 			counter = nbt.getDouble(str + "counter");
 		}
 		@Override
 		public void writeToNBT(NBTTagCompound nbt, String str) {
-			// TODO Auto-generated method stub
+			
 			nbt.setDouble(str + "counter", counter);
 		}
 		@Override
@@ -602,13 +602,13 @@ public class Equation implements IValue,INBTTReady{
 		}
 		@Override
 		public void readFromNBT(NBTTagCompound nbt, String str) {
-			// TODO Auto-generated method stub
+			
 			old = nbt.getDouble(str + "old");
 			value = nbt.getDouble(str + "value");
 		}
 		@Override
 		public void writeToNBT(NBTTagCompound nbt, String str) {
-			// TODO Auto-generated method stub
+			
 			nbt.setDouble(str + "old", old);
 			nbt.setDouble(str + "value", value);
 		}
@@ -635,7 +635,7 @@ public class Equation implements IValue,INBTTReady{
 		public IValue set,reset;
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
+			
 			if(set.getValue() > 0.6) state = true;
 			if(reset.getValue() > 0.6) state = false;
 			return state ? 1.0 : 0.0;
@@ -770,7 +770,7 @@ public class Equation implements IValue,INBTTReady{
 	int operatorCount; //Juste a counter for fun
 	
 	public int getOperatorCount() {
-		// TODO Auto-generated method stub
+		
 		return operatorCount;
 	}
 }

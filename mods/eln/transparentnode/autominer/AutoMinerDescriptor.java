@@ -7,7 +7,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
-import mods.eln.node.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -171,7 +171,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		// TODO Auto-generated method stub
+		
 		super.renderItem(type, item, data);
 		GL11.glScalef(0.18f, 0.18f, 0.18f);
 		draw(false,buttonsStateDefault,ledsAStateDefault,ledsPStateDefault);
@@ -179,7 +179,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
@@ -199,15 +199,15 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 	}
 	
 	public int getSpawnDeltaX() {
-		// TODO Auto-generated method stub
+		
 		return deltaX;
 	}
 	public int getSpawnDeltaY() {
-		// TODO Auto-generated method stub
+		
 		return deltaY;
 	}
 	public int getSpawnDeltaZ() {
-		// TODO Auto-generated method stub
+		
 		return deltaZ;
 	}
 }

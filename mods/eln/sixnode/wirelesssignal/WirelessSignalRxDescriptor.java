@@ -10,7 +10,7 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
-import mods.eln.node.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 
 public class WirelessSignalRxDescriptor extends SixNodeDescriptor{
@@ -37,7 +37,7 @@ public class WirelessSignalRxDescriptor extends SixNodeDescriptor{
 	}
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
@@ -45,18 +45,18 @@ public class WirelessSignalRxDescriptor extends SixNodeDescriptor{
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 

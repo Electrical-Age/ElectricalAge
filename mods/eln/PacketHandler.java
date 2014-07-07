@@ -18,11 +18,13 @@ import com.jcraft.jogg.Packet;
 
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.ClientProxy;
+import mods.eln.item.IInteract;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
+import mods.eln.server.PlayerManager;
 import mods.eln.sound.SoundClient;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.client.Minecraft;
@@ -110,7 +112,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 				packetDestroyUuid(stream, manager, player);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -120,7 +122,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 		try {
 			ClientProxy.uuidManager.kill(stream.readInt());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -136,7 +138,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 			SoundClient.play(SoundCommand.fromStream(stream,player.worldObj));
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -150,7 +152,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 					clientPlayer.worldObj, stream.readInt(), stream.readInt(),
 					stream.readInt());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		// entityPlayer.openGui( Eln.instance, side.getInt(),
@@ -170,7 +172,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 				Utils.println("packetForNode node found");
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -211,7 +213,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 				}*/
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -251,7 +253,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 				}*/
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -300,7 +302,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 
 			}
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
+			
 			e1.printStackTrace();
 		}
 
@@ -335,7 +337,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 				* Utils.println("No node found"); stream.readShort(); int
 				* dataSkipLength = stream.readByte(); for(int idx = 0;idx<
 				* dataSkipLength;idx++) { stream.readByte(); } } } } catch
-				* (IOException e) { // TODO Auto-generated catch block
+				* (IOException e) { 
 				* e.printStackTrace(); }
 				*/
 	}

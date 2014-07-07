@@ -9,7 +9,7 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.node.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -59,24 +59,24 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+		
 		return !useIconEnable;
 	}
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+		
 		return !useIconEnable;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		// TODO Auto-generated method stub
+		
 		if(useIconEnable)
 			super.renderItem(type, item, data);
 		else
@@ -85,14 +85,14 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 
 	@Override
 	public boolean hasVolume() {
-		// TODO Auto-generated method stub
+		
 		return hasGhostGroup();
 	}
 	
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		//list.add("Socket Type : " + socketType.toString());
 		

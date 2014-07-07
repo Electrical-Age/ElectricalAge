@@ -4,13 +4,13 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateOutput;
-import mods.eln.node.NodeElectricalGateOutputProcess;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalGateOutput;
+import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class ElectricalWeatherSensorElement extends SixNodeElement {
@@ -26,8 +26,8 @@ public class ElectricalWeatherSensorElement extends SixNodeElement {
     	this.descriptor = (ElectricalWeatherSensorDescriptor) descriptor;
 	}
 	
-	public NodeElectricalGateOutput outputGate = new NodeElectricalGateOutput("outputGate");
-	public NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess", outputGate);
+	public NbtElectricalGateOutput outputGate = new NbtElectricalGateOutput("outputGate");
+	public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
 	public ElectricalWeatherSensorSlowProcess slowProcess = new ElectricalWeatherSensorSlowProcess(this);
 
 	public static boolean canBePlacedOnSide(Direction side, int type) {

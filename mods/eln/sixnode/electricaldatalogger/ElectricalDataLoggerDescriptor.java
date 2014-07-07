@@ -14,7 +14,7 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
-import mods.eln.node.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.wiki.Data;
@@ -116,7 +116,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 	}
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 

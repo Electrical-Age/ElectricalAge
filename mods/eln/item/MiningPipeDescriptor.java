@@ -15,7 +15,7 @@ public class MiningPipeDescriptor extends GenericItemUsingDamageDescriptorUpgrad
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		
 	}

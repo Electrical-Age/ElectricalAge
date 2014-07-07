@@ -65,7 +65,7 @@ public class Search extends GuiScreenEln{
 
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
+		
 		super.initGui();
 
 		//toogleDefaultOutput = newGuiButton(8, 8,176-16, "toogle switch");
@@ -79,7 +79,7 @@ public class Search extends GuiScreenEln{
 
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
-		// TODO Auto-generated method stub
+		
 		super.guiObjectEvent(object);
     	if(object == toogleDefaultOutput){
     	
@@ -95,7 +95,7 @@ public class Search extends GuiScreenEln{
 	}
 	@Override
 	protected void preDraw(float f, int x, int y) {
-		// TODO Auto-generated method stub
+		
 		super.preDraw(f, x, y);
 
 	}
@@ -103,7 +103,7 @@ public class Search extends GuiScreenEln{
 	
 	@Override
 	protected void postDraw(float f, int x, int y) {
-		// TODO Auto-generated method stub
+		
 		super.postDraw(f, x, y);
 
 
@@ -111,7 +111,7 @@ public class Search extends GuiScreenEln{
 
 	@Override
 	protected GuiHelper newHelper() {
-		// TODO Auto-generated method stub
+		
 		return helper = new GuiHelper(this, 176, 166);
 	}
 

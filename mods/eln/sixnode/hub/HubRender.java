@@ -6,10 +6,10 @@ import java.io.IOException;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElementInventory;
-import mods.eln.node.SixNodeElementRender;
-import mods.eln.node.SixNodeEntity;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElementInventory;
+import mods.eln.node.six.SixNodeElementRender;
+import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,7 +24,7 @@ public class HubRender extends SixNodeElementRender{
 			SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (HubDescriptor) descriptor;
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	//double voltage = 0,current = 0;
@@ -32,14 +32,14 @@ public class HubRender extends SixNodeElementRender{
 	
 	@Override
 	public void draw() {
-		// TODO Auto-generated method stub
+		
 		super.draw();
 		descriptor.draw(connectionGrid);			
 	}
 
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.publishUnserialize(stream);
 		try {
 			for(int idx = 0;idx < 4;idx++){
@@ -54,7 +54,7 @@ public class HubRender extends SixNodeElementRender{
 				connectionGrid[idx] = stream.readBoolean();
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -67,7 +67,7 @@ public class HubRender extends SixNodeElementRender{
 	boolean connectionGrid[] = new boolean[6];
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new HubGui(player, inventory, this);
 	}
 

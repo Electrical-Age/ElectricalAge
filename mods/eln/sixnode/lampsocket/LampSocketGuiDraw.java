@@ -13,7 +13,7 @@ import mods.eln.gui.HelperStdContainer;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
-import mods.eln.node.SixNodeElementInventory;
+import mods.eln.node.six.SixNodeElementInventory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
@@ -119,13 +119,13 @@ public class LampSocketGuiDraw extends GuiContainerEln {
 
 	@Override
 	protected GuiHelperContainer newHelper() {
-		// TODO Auto-generated method stub
+		
 		return new HelperStdContainer(this);
 	}
 
 	@Override
 	protected void preDraw(float f, int x, int y) {
-		// TODO Auto-generated method stub
+		
 		super.preDraw(f, x, y);
 		if(lampRender.grounded)
 			buttonGrounded.displayString = "Parallel";

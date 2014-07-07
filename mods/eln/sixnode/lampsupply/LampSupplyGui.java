@@ -26,7 +26,7 @@ public class LampSupplyGui extends GuiContainerEln{
 	
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
+		
 		super.initGui();
 		channel = newGuiTextField(8, 8, 138);
 		channel.setText(render.channel);
@@ -35,7 +35,7 @@ public class LampSupplyGui extends GuiContainerEln{
 	
 	@Override
 	protected GuiHelperContainer newHelper() {
-		// TODO Auto-generated method stub
+		
 		return new GuiHelperContainer(this, 176,166-57,8,84-57);
 	}
 

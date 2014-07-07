@@ -1,6 +1,6 @@
 package mods.eln.sim;
 
-import mods.eln.INBTTReady;
+import mods.eln.misc.INBTTReady;
 import net.minecraft.nbt.NBTTagCompound;
 
 public abstract class RegulatorProcess implements IProcess ,INBTTReady{
@@ -98,7 +98,7 @@ public abstract class RegulatorProcess implements IProcess ,INBTTReady{
 
 	@Override
 	public void process(double time) {
-		// TODO Auto-generated method stub
+		
 		double hit = getHit();
 
 		switch (type) {
@@ -160,7 +160,7 @@ public abstract class RegulatorProcess implements IProcess ,INBTTReady{
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
+		
 		nbt.setDouble(str + name + "errorIntegrated",errorIntegrated);
 		nbt.setDouble(str + name + "target", target);
 	}

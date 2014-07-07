@@ -8,7 +8,7 @@ import mods.eln.misc.FunctionTable;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
-import mods.eln.node.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.PhysicalConstant;
 import mods.eln.sim.ThermalLoad;
@@ -85,7 +85,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addThermal(newItemStack());
 		Data.addEnergy(newItemStack());
@@ -109,7 +109,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
@@ -128,7 +128,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Converts heat into electricity.");
 		list.add("Nominal usage ->");

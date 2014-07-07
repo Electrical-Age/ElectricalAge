@@ -11,9 +11,9 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.misc.Utils;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElementRender;
-import mods.eln.node.SixNodeEntity;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElementRender;
+import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -40,7 +40,7 @@ public class ModbusRtuRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
-		// TODO Auto-generated method stub
+		
 
 		LRDU.Down.glRotateOnX();
 
@@ -70,14 +70,14 @@ public class ModbusRtuRender extends SixNodeElementRender {
 
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.publishUnserialize(stream);
 
 		try {
 			station = stream.readInt();
 			name = stream.readUTF();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -90,7 +90,7 @@ public class ModbusRtuRender extends SixNodeElementRender {
 	@Override
 	public void serverPacketUnserialize(DataInputStream stream)
 			throws IOException {
-		// TODO Auto-generated method stub
+		
 		super.serverPacketUnserialize(stream);
 
 		switch (stream.readByte()) {
@@ -156,7 +156,7 @@ public class ModbusRtuRender extends SixNodeElementRender {
 
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new ModbusRtuGui(player, this);
 	}
 

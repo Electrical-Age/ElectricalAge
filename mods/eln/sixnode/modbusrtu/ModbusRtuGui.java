@@ -40,7 +40,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 	
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
+		
 		super.initGui();
 		
 
@@ -212,7 +212,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 	
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
-		// TODO Auto-generated method stub
+		
 		super.guiObjectEvent(object);
     	if(object == station){
     		try {
@@ -232,7 +232,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 	
 	@Override
 	protected void preDraw(float f, int x, int y) {
-		// TODO Auto-generated method stub
+		
 		super.preDraw(f, x, y);
 		
 		if(render.rxTxChange){
@@ -252,7 +252,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 	GuiHelper helper;
 	@Override
 	protected GuiHelper newHelper() {
-		// TODO Auto-generated method stub
+		
 		return helper = new GuiHelper(this, 190, 200);
 	}
 	
@@ -265,7 +265,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 		}
 		@Override
 		public void guiObjectEvent(IGuiObject object) {
-			// TODO Auto-generated method stub
+			
 	        try {
 		    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		        DataOutputStream stream = new DataOutputStream(bos);   	
@@ -277,7 +277,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 
 				render.sendPacketToServer(bos);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			} 			
 		}
@@ -319,7 +319,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 
 				render.sendPacketToServer(bos);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}   
 		}
@@ -337,7 +337,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 		}
 		@Override
 		public void guiObjectEvent(IGuiObject object) {
-			// TODO Auto-generated method stub
+			
 	        try {
 		    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		        DataOutputStream stream = new DataOutputStream(bos);   	
@@ -349,7 +349,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 
 				render.sendPacketToServer(bos);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			} 			
 		}
@@ -391,7 +391,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 
 				render.sendPacketToServer(bos);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}   
 		}

@@ -44,7 +44,7 @@ public enum Direction {
 	
 	
 	Direction(int dir) {
-		// TODO Auto-generated constructor stub
+		
 		this.dir = dir;
 	}
 	
@@ -459,7 +459,7 @@ public enum Direction {
 	}
 
 	public void rotateFromXN(double[] p) {
-		// TODO Auto-generated method stub
+		
 		double x = p[0],y = p[1],z = p[2];
 		switch(this)
 		{
@@ -494,7 +494,7 @@ public enum Direction {
 	}
 	
 	public void rotateFromXN(int[] p) {
-		// TODO Auto-generated method stub
+		
 		int x = p[0],y = p[1],z = p[2];
 		switch(this)
 		{
@@ -528,7 +528,7 @@ public enum Direction {
 		}		
 	}
 	public void rotateFromXN(Vec3 p) {
-		// TODO Auto-generated method stub
+		
 		double x = p.xCoord,y = p.yCoord,z = p.zCoord;
 		switch(this)
 		{
@@ -595,7 +595,7 @@ public enum Direction {
 		}	
 	}
 	public void glTranslate(float v) {
-		// TODO Auto-generated method stub
+		
 		switch (this) {
 		case XN:GL11.glTranslatef(-v,0f,0f);
 			break;

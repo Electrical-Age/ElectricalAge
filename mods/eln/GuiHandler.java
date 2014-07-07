@@ -42,7 +42,7 @@ public class GuiHandler implements IGuiHandler {
 				
 				Utils.sendPacketToClient(bos,(EntityPlayerMP)player);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 
 			}

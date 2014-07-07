@@ -1,9 +1,9 @@
 package mods.eln.sixnode.electricalentitysensor;
 
-import mods.eln.BasicContainer;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.EntitySensorFilterDescriptor;
+import mods.eln.misc.BasicContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;

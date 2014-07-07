@@ -30,7 +30,7 @@ public class ModbusServer {
 			try {
 				slave.start();
 			} catch (ModbusInitException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 	    }

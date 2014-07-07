@@ -2,15 +2,15 @@ package mods.eln.sim;
 
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
-import mods.eln.INBTTReady;
-import mods.eln.node.NodeElectricalGateInput;
+import mods.eln.misc.INBTTReady;
+import mods.eln.sim.nbt.NbtElectricalGateInput;
 
 public abstract class NodeElectricalGateInputHysteresisProcess implements IProcess,INBTTReady{
-	NodeElectricalGateInput gate;
+	NbtElectricalGateInput gate;
 	String name;
 
 	
-	public NodeElectricalGateInputHysteresisProcess(String name,NodeElectricalGateInput gate) {
+	public NodeElectricalGateInputHysteresisProcess(String name,NbtElectricalGateInput gate) {
 		this.gate = gate;
 		this.name = name;
 	}
@@ -42,12 +42,12 @@ public abstract class NodeElectricalGateInputHysteresisProcess implements IProce
 	boolean state = false;
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
+		
 		state = nbt.getBoolean(str + name +  "state");
 	}
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
+		
 		nbt.setBoolean(str + name +  "state",state);
 	}
 

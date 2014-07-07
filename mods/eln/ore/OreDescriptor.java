@@ -44,7 +44,7 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addOre(newItemStack());
 	}

@@ -43,43 +43,43 @@ public class ServerWirelessTxStatus extends WirelessTxStatus implements IWireles
 	Coordonate coordonate;
 	@Override
 	public Coordonate getCoordonate() {
-		// TODO Auto-generated method stub
+		
 		return coordonate;
 	}
 	
 	@Override
 	public int getRange() {
-		// TODO Auto-generated method stub
+		
 		return Eln.instance.wirelessTxRange;
 	}
 	@Override
 	public String getChannel() {
-		// TODO Auto-generated method stub
+		
 		return name;
 	}
 	@Override
 	public int getGeneration() {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 	@Override
 	public double getValue() {
-		// TODO Auto-generated method stub
+		
 		return value;
 	}
 	public void setValue(double value) {
-		// TODO Auto-generated method stub
+		
 		this.value = value;
 	}
 
 	@Override
 	public int getOffset() {
-		// TODO Auto-generated method stub
+		
 		return id;
 	}	
 	@Override
 	public int getSize() {
-		// TODO Auto-generated method stub
+		
 		return 4;
 	}
 
@@ -110,19 +110,19 @@ public class ServerWirelessTxStatus extends WirelessTxStatus implements IWireles
 
 	@Override
 	public boolean getInput(int id) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public short getInputRegister(int id) {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
 	@Override
 	public void setCoil(int id, boolean value) {
-		// TODO Auto-generated method stub
+		
 		switch (id) {
 		case 1:
 			setValue(value ? 1.0 : 0.0);
@@ -150,13 +150,13 @@ public class ServerWirelessTxStatus extends WirelessTxStatus implements IWireles
 
 	@Override
 	public void setInput(int id, boolean value) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void setInputRegister(int id, short value) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 

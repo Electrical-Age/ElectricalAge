@@ -21,7 +21,7 @@ public class Default extends GuiScreenEln{
 	
 	@Override
 	protected GuiHelper newHelper() {
-		// TODO Auto-generated method stub
+		
 		return helper = new GuiHelper(this, 240, 166);
 	}
 
@@ -29,7 +29,7 @@ public class Default extends GuiScreenEln{
 	
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
+		
 		super.initGui();
 		
 		extender = new GuiVerticalExtender(6, 28, helper.xSize-12, helper.ySize-28-8,helper);
@@ -43,7 +43,7 @@ public class Default extends GuiScreenEln{
 	
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
-		// TODO Auto-generated method stub
+		
 		super.guiObjectEvent(object);
 		
 		if(object == previewBt){

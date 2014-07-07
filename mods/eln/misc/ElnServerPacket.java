@@ -42,7 +42,7 @@ public class ElnServerPacket extends Packet {
 	    try {
 			this.field_149172_a = p_148837_1_.readStringFromBuffer(20);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	    this.field_149171_b = new byte[ByteBufUtils.readVarShort(p_148837_1_)];
@@ -54,7 +54,7 @@ public class ElnServerPacket extends Packet {
 	    try {
 			p_148840_1_.writeStringToBuffer(this.field_149172_a);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	    ByteBufUtils.writeVarShort(p_148840_1_, this.field_149171_b.length);
@@ -63,7 +63,7 @@ public class ElnServerPacket extends Packet {
 
 	@Override
 	public void processPacket(INetHandler arg0) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 	  

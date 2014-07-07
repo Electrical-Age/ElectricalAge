@@ -5,10 +5,10 @@ import java.io.IOException;
 
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
-import mods.eln.node.SixNodeElementInventory;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
@@ -81,20 +81,20 @@ public class ElectricalWatchElement extends SixNodeElement {
 	
 	@Override
 	protected void inventoryChanged() {
-		// TODO Auto-generated method stub
+		
 		super.inventoryChanged();
 		needPublish();
 	}
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		try {
 			stream.writeBoolean(slowProcess.upToDate);
 			stream.writeLong(slowProcess.oldDate);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

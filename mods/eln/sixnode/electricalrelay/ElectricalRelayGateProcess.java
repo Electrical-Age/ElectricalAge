@@ -1,12 +1,12 @@
 package mods.eln.sixnode.electricalrelay;
 
-import mods.eln.node.NodeElectricalGateInput;
 import mods.eln.sim.NodeElectricalGateInputHysteresisProcess;
+import mods.eln.sim.nbt.NbtElectricalGateInput;
 
 public class ElectricalRelayGateProcess extends NodeElectricalGateInputHysteresisProcess {
 
 	ElectricalRelayElement element;
-	public ElectricalRelayGateProcess(ElectricalRelayElement element, String name, NodeElectricalGateInput gate) {
+	public ElectricalRelayGateProcess(ElectricalRelayElement element, String name, NbtElectricalGateInput gate) {
 		super(name, gate);
 		this.element = element;
 	}

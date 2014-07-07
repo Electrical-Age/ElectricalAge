@@ -199,7 +199,7 @@ public class GuiVerticalExtender extends Gui implements IGuiObject,IGuiObjectObs
 	}
 	@Override
 	public int getYMax() {
-		// TODO Auto-generated method stub
+		
 		return posY + h;
 	}
 	

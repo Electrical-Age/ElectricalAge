@@ -20,7 +20,7 @@ public class TimeRemover implements IProcess{
 	
 	@Override
 	public void process(double time) {
-		// TODO Auto-generated method stub
+		
 		if(timeout > 0){
 			timeout -= time;
 			if(timeout <= 0){

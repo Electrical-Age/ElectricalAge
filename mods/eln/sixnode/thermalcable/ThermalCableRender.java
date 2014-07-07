@@ -10,9 +10,9 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBase;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElementRender;
-import mods.eln.node.SixNodeEntity;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElementRender;
+import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.client.Minecraft;
 
 
@@ -24,7 +24,7 @@ public class ThermalCableRender extends SixNodeElementRender{
 			SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.cableDesciptor = (ThermalCableDescriptor) descriptor;
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	double temperature = 0;
@@ -37,7 +37,7 @@ public class ThermalCableRender extends SixNodeElementRender{
 	
 	@Override
 	public void draw() {
-		// TODO Auto-generated method stub
+		
 		Minecraft.getMinecraft().mcProfiler.startSection("TCable");
 		
 		//ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
@@ -82,7 +82,7 @@ public class ThermalCableRender extends SixNodeElementRender{
 	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.publishUnserialize(stream);
 		try {
 			
@@ -93,7 +93,7 @@ public class ThermalCableRender extends SixNodeElementRender{
 			color = (b>>4) & 0xF;
 			temperature = stream.readShort() /NodeBase.networkSerializeTFactor;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -105,7 +105,7 @@ public class ThermalCableRender extends SixNodeElementRender{
 	
 	@Override
 	public int getCableDry(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return color;
 	}
 }

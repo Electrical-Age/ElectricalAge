@@ -317,7 +317,7 @@ public class SubSystem {
 	}
 
 	public boolean containe(State state) {
-		// TODO Auto-generated method stub
+		
 		return states.contains(state);
 	}
 
@@ -330,7 +330,7 @@ public class SubSystem {
 	}
 
 	public double getXSafe(State bPin) {
-		// TODO Auto-generated method stub
+		
 		return bPin == null ? 0 : getX(bPin);
 	}
 	
@@ -378,7 +378,7 @@ public class SubSystem {
 	}
 
 	public double getDt() {
-		// TODO Auto-generated method stub
+		
 		return dt;
 	}
 

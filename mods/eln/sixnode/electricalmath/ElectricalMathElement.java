@@ -8,16 +8,16 @@ import java.util.ArrayList;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.Node;
-import mods.eln.node.NodeElectricalGateInput;
-import mods.eln.node.NodeElectricalGateOutput;
-import mods.eln.node.NodeElectricalGateOutputProcess;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
-import mods.eln.node.SixNodeElementInventory;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalGateInput;
+import mods.eln.sim.nbt.NbtElectricalGateOutput;
+import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import mods.eln.solver.Equation;
 import mods.eln.solver.ISymbole;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,10 +29,10 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class ElectricalMathElement extends SixNodeElement {
 
-	NodeElectricalGateOutput gateOutput = new NodeElectricalGateOutput("gateOutput");
-	NodeElectricalGateOutputProcess gateOutputProcess = new NodeElectricalGateOutputProcess("gateOutputProcess", gateOutput);
+	NbtElectricalGateOutput gateOutput = new NbtElectricalGateOutput("gateOutput");
+	NbtElectricalGateOutputProcess gateOutputProcess = new NbtElectricalGateOutputProcess("gateOutputProcess", gateOutput);
 	
-	NodeElectricalGateInput[] gateInput = new NodeElectricalGateInput[]{new NodeElectricalGateInput("gateA",false), new NodeElectricalGateInput("gateB",false), new NodeElectricalGateInput("gateC",false)};
+	NbtElectricalGateInput[] gateInput = new NbtElectricalGateInput[]{new NbtElectricalGateInput("gateA",false), new NbtElectricalGateInput("gateB",false), new NbtElectricalGateInput("gateC",false)};
 
 	ArrayList<ISymbole> symboleList = new ArrayList<ISymbole>();
 	
@@ -63,9 +63,9 @@ public class ElectricalMathElement extends SixNodeElement {
 	
 	class GateInputSymbol implements ISymbole {
 		private String name;
-		private NodeElectricalGateInput gate;
+		private NbtElectricalGateInput gate;
 
-		public GateInputSymbol(String name,NodeElectricalGateInput gate) {
+		public GateInputSymbol(String name,NbtElectricalGateInput gate) {
 			this.name = name;
 			this.gate = gate;
 		}

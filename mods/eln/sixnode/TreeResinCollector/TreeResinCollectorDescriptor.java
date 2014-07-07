@@ -16,7 +16,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
-import mods.eln.node.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 
 public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
@@ -57,7 +57,7 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addMachine(newItemStack());
 	}
@@ -65,17 +65,17 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 
@@ -90,7 +90,7 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Slowly produces Tree Resin over");
 		list.add("time when placed on a tree.");
@@ -99,7 +99,7 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 	
 	@Override
 	public boolean canBePlacedOnSide(EntityPlayer player,Coordonate c,Direction side) {
-		// TODO Auto-generated method stub
+		
 		Block b = c.getBlock();
 		if(b!= Blocks.log){
 			Utils.addChatMessage(player,"This block can only be placed on the side of a tree!");

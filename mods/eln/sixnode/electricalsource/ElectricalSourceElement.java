@@ -22,15 +22,15 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -45,7 +45,7 @@ public class ElectricalSourceElement extends SixNodeElement {
 		electricalComponentList.add(voltageSource);
 	}
 
-	NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");
+	NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
 	VoltageSource voltageSource = new VoltageSource("voltSrc",electricalLoad, null);
 
 	public static final int setVoltageId = 1;

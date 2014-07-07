@@ -41,13 +41,13 @@ public class ServerWirelessRxStatus extends WirelessRxStatus implements IModbusS
 	
 	@Override
 	public int getOffset() {
-		// TODO Auto-generated method stub
+		
 		return id;
 	}
 
 	@Override
 	public int getSize() {
-		// TODO Auto-generated method stub
+		
 		return 4;
 	}
 
@@ -58,7 +58,7 @@ public class ServerWirelessRxStatus extends WirelessRxStatus implements IModbusS
 
 	@Override
 	public short getHoldingRegister(int id) {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
@@ -94,37 +94,37 @@ public class ServerWirelessRxStatus extends WirelessRxStatus implements IModbusS
 
 	@Override
 	public void setCoil(int id, boolean value) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void setHoldingRegister(int id, short value) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void setInput(int id, boolean value) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void setInputRegister(int id, short value) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void writeCoil(int id, boolean value) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void writeHoldingRegister(int id, short value) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 

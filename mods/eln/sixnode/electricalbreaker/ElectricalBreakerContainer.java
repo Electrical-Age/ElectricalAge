@@ -1,8 +1,8 @@
 package mods.eln.sixnode.electricalbreaker;
 
-import mods.eln.BasicContainer;
 import mods.eln.gui.ISlotSkin.SlotSkin;
-import mods.eln.node.SixNodeItemSlot;
+import mods.eln.misc.BasicContainer;
+import mods.eln.node.six.SixNodeItemSlot;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;

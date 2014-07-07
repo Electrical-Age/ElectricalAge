@@ -11,9 +11,9 @@ import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElementRender;
-import mods.eln.node.SixNodeEntity;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElementRender;
+import mods.eln.node.six.SixNodeEntity;
 
 public class WirelessSignalTxRender extends SixNodeElementRender{
 
@@ -23,13 +23,13 @@ public class WirelessSignalTxRender extends SixNodeElementRender{
 			SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (WirelessSignalTxDescriptor) descriptor;
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	
 	@Override
 	public void draw() {
-		// TODO Auto-generated method stub
+		
 		super.draw();
 		drawSignalPin(new float[]{2,2,2,2});
 		front.glRotateOnX();
@@ -40,7 +40,7 @@ public class WirelessSignalTxRender extends SixNodeElementRender{
 	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return Eln.instance.signalCableDescriptor.render;
 	}
 	
@@ -48,7 +48,7 @@ public class WirelessSignalTxRender extends SixNodeElementRender{
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new WirelessSignalTxGui(this);
 	}
 	
@@ -56,12 +56,12 @@ public class WirelessSignalTxRender extends SixNodeElementRender{
 	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.publishUnserialize(stream);
 		try {
 			channel = stream.readUTF();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

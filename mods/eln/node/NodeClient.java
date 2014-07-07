@@ -91,7 +91,7 @@ public class NodeClient{
 	    	nodeNeedRefreshList.clear();
    
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}*/
 	}

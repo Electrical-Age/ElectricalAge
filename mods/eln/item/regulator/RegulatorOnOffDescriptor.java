@@ -17,13 +17,13 @@ public class RegulatorOnOffDescriptor extends IRegulatorDescriptor{
 
 	@Override
 	public RegulatorType getType() {
-		// TODO Auto-generated method stub
+		
 		return RegulatorType.onOff;
 	}
 
 	@Override
 	public void applyTo(RegulatorProcess regulator,double workingPoint,double P,double I,double D) {
-		// TODO Auto-generated method stub
+		
 		regulator.setOnOff(hysteresis,workingPoint);
 	}
 

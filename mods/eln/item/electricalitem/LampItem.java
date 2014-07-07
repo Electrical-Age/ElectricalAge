@@ -14,7 +14,7 @@ public abstract class LampItem extends GenericItemUsingDamageDescriptor{
 
 	public LampItem(String name) {
 		super(name);
-		// TODO Auto-generated constructor stub
+		
 	}
 	
 	abstract int getLightState(ItemStack stack);

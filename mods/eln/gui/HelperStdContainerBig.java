@@ -6,7 +6,7 @@ public class HelperStdContainerBig extends GuiHelperContainer{
 
 	public HelperStdContainerBig(GuiScreen screen) {
 		super(screen, 176, 214,8,84 + 214-166, "stdcontainerbig.png");
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	public void drawProcess(int x,int y,float value)

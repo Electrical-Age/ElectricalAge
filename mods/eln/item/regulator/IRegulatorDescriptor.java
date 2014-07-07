@@ -10,7 +10,7 @@ public abstract class IRegulatorDescriptor extends GenericItemUsingDamageDescrip
 	
 	public IRegulatorDescriptor(String name) {
 		super(name);
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	public abstract RegulatorType getType();

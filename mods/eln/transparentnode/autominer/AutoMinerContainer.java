@@ -1,12 +1,12 @@
 package mods.eln.transparentnode.autominer;
 
-import mods.eln.BasicContainer;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.gui.SlotWithSkin;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
 import mods.eln.item.OreScanner;
+import mods.eln.misc.BasicContainer;
 import mods.eln.node.NodeBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;

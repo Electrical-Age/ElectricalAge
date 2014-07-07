@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 public class GhostGroup {
 
 	public GhostGroup() {
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	class GhostGroupElement{
@@ -24,7 +24,7 @@ public class GhostGroup {
 			this.x = x;
 			this.y = y;
 			this.z = z;
-			// TODO Auto-generated constructor stub
+			
 		}
 		int x,y,z;
 	}

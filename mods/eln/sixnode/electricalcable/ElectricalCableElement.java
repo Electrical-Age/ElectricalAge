@@ -15,15 +15,15 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
@@ -64,8 +64,8 @@ public class ElectricalCableElement extends SixNodeElement {
 
 	}
 
-	public NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");
-	NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
+	public NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
+	NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
 	
 	ElectricalLoadHeatThermalLoad heater = new ElectricalLoadHeatThermalLoad(electricalLoad, thermalLoad);
 	ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();

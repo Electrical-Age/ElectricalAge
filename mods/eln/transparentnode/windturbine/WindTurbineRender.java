@@ -7,10 +7,10 @@ import mods.eln.client.FrameTime;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.RcInterpolator;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElementInventory;
-import mods.eln.node.TransparentNodeElementRender;
-import mods.eln.node.TransparentNodeEntity;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNodeElementRender;
+import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.sound.SoundClient;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.client.Minecraft;
@@ -60,14 +60,14 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new WindTurbineGuiDraw(player, inventory, this);
 	}
 
 	
 	@Override
 	public boolean cameraDrawOptimisation() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 	
@@ -75,13 +75,13 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 	
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkUnserialize(stream);
 		try {
 			wind = stream.readFloat();
 			powerFactor = stream.readFloat();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		

@@ -1,6 +1,5 @@
 package mods.eln.misc;
 
-import mods.eln.INBTTReady;
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -31,7 +30,7 @@ public class Coordonate implements INBTTReady {
 	
 	@Override
 	public int hashCode() {
-		// TODO Auto-generated method stub
+		
 		return (x + y)*0x10101010;
 	}
 	
@@ -103,7 +102,7 @@ public class Coordonate implements INBTTReady {
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt,String str) {
-		// TODO Auto-generated method stub
+		
 		x = nbt.getInteger(str + "x");
 		y = nbt.getInteger(str + "y");
 		z = nbt.getInteger(str + "z");
@@ -111,7 +110,7 @@ public class Coordonate implements INBTTReady {
 	}
 	@Override
 	public void writeToNBT(NBTTagCompound nbt,String str) {
-		// TODO Auto-generated method stub
+		
 		nbt.setInteger(str + "x", x);
 		nbt.setInteger(str + "y", y);
 		nbt.setInteger(str + "z", z);
@@ -121,7 +120,7 @@ public class Coordonate implements INBTTReady {
 	
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
+		
 		return "X : " + x + " Y : " + y + " Z : " + z + " D : " + dimention;
 	}
 	
@@ -186,11 +185,11 @@ public class Coordonate implements INBTTReady {
 		world().setBlock(x, y, z, id, meta, 2);
 	}*/
 	public int getMeta() {
-		// TODO Auto-generated method stub
+		
 		return world().getBlockMetadata(x, y, z);
 	}
 	public boolean getBlockExist() {
-		// TODO Auto-generated method stub
+		
 		return world().blockExists(x, y, z);
 	}
 	public void copyTo(double[] v) {
@@ -213,11 +212,11 @@ public class Coordonate implements INBTTReady {
 		
 	}
 	public TileEntity getTileEntity() {
-		// TODO Auto-generated method stub
+		
 		return world().getTileEntity(x, y, z);
 	}
 	public void invalidate() {
-		// TODO Auto-generated method stub
+		
 		x = -1;
 		y = -1;
 		z = -1;
@@ -252,7 +251,7 @@ public class Coordonate implements INBTTReady {
 
 	}
 	public void setWorld(World worldObj) {
-		// TODO Auto-generated method stub
+		
 		w = worldObj;
 		dimention = worldObj.provider.dimensionId;
 	}

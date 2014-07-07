@@ -33,7 +33,7 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject{
 	GuiTextFieldElnObserver observer;
 	@Override
 	public int getYMax() {
-		// TODO Auto-generated method stub
+		
 		return yPos + height;
 	}
 	
@@ -131,18 +131,18 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject{
 
 	@Override
 	public void imouseMove(int x, int y) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void imouseMovedOrUp(int x, int y, int witch) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 	@Override
 	public void idraw2(int x, int y) {
-		// TODO Auto-generated method stub
+		
 		if(isFocused() == false && getVisible() == true && x >= xPos && y >= yPos && x < xPos + width && y < yPos + height)
 			helper.drawHoveringText(comment, x, y, Minecraft.getMinecraft().fontRenderer);
 				
@@ -153,7 +153,7 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject{
 		this.yPos += y;
 	}
 	public int getHeight() {
-		// TODO Auto-generated method stub
+		
 		return height;
 	}
 	IGuiObjectObserver iGuiObjectObserver;

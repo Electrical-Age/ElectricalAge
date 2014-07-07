@@ -8,7 +8,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
 import mods.eln.misc.Utils;
-import mods.eln.node.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalStackMachineProcess;
 import mods.eln.sim.ThermalLoad;
@@ -151,7 +151,7 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 
 	@Override
 	public int top(int y, GuiVerticalExtender extender, ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return y;
 	}
 

@@ -7,10 +7,10 @@ import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElementInventory;
-import mods.eln.node.SixNodeElementRender;
-import mods.eln.node.SixNodeEntity;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElementInventory;
+import mods.eln.node.six.SixNodeElementRender;
+import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,7 +25,7 @@ public class GroundCableRender extends SixNodeElementRender{
 			SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (GroundCableDescriptor) descriptor;
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	//double voltage = 0,current = 0;
@@ -33,7 +33,7 @@ public class GroundCableRender extends SixNodeElementRender{
 	
 	@Override
 	public void draw() {
-		// TODO Auto-generated method stub
+		
 		super.draw();
 		
 		descriptor.draw();			
@@ -41,7 +41,7 @@ public class GroundCableRender extends SixNodeElementRender{
 
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.publishUnserialize(stream);
 		try {
 			Byte b;
@@ -56,7 +56,7 @@ public class GroundCableRender extends SixNodeElementRender{
 			else
 				cableRender = desc.render;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -69,7 +69,7 @@ public class GroundCableRender extends SixNodeElementRender{
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new GroundCableGui(player, inventory, this);
 	}
 

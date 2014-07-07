@@ -5,7 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import net.minecraft.nbt.NBTTagCompound;
-import mods.eln.INBTTReady;
+import mods.eln.misc.INBTTReady;
 
 public class WirelessRxStatus implements INBTTReady{
 	public WirelessRxStatus(String name,int id,boolean connected,int uuid) {
@@ -15,7 +15,7 @@ public class WirelessRxStatus implements INBTTReady{
 		this.uuid = uuid;
 	}
 	public WirelessRxStatus() {
-		// TODO Auto-generated constructor stub
+		
 	}
 	String name;
 	int id,uuid;
@@ -25,7 +25,7 @@ public class WirelessRxStatus implements INBTTReady{
 		this.uuid = uuid;
 	}
 	public void writeTo(DataOutputStream packet) throws IOException {
-		// TODO Auto-generated method stub
+		
 		packet.writeInt(uuid);
 		packet.writeInt(id);
 		packet.writeUTF(name);
@@ -33,7 +33,7 @@ public class WirelessRxStatus implements INBTTReady{
 	}
 	
 	public void readFrom(DataInputStream stream) throws IOException {
-		// TODO Auto-generated method stub
+		
 		uuid = stream.readInt();
 		id = stream.readInt();
 		name = stream.readUTF();
@@ -55,7 +55,7 @@ public class WirelessRxStatus implements INBTTReady{
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
+		
 		name = nbt.getString(str + "name" );
 		id = nbt.getInteger(str + "id");
 		connected = nbt.getBoolean(str + "connected");

@@ -22,10 +22,10 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElementInventory;
-import mods.eln.node.SixNodeElementRender;
-import mods.eln.node.SixNodeEntity;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElementInventory;
+import mods.eln.node.six.SixNodeElementRender;
+import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.client.Minecraft;
@@ -50,7 +50,7 @@ public class LampSocketRender extends SixNodeElementRender {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (LampSocketDescriptor) descriptor;
 		lampSocketDescriptor = (LampSocketDescriptor) descriptor;
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
@@ -59,13 +59,13 @@ public class LampSocketRender extends SixNodeElementRender {
 
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new LampSocketGuiDraw(player, inventory, this);
 	}
 
 	@Override
 	public IInventory getInventory() {
-		// TODO Auto-generated method stub
+		
 		return inventory;
 	}
 
@@ -152,7 +152,7 @@ public class LampSocketRender extends SixNodeElementRender {
 
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.publishUnserialize(stream);
 		try {
 			Byte b;
@@ -172,7 +172,7 @@ public class LampSocketRender extends SixNodeElementRender {
 			setLight(stream.readByte());
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -180,7 +180,7 @@ public class LampSocketRender extends SixNodeElementRender {
 	@Override
 	public void serverPacketUnserialize(DataInputStream stream)
 			throws IOException {
-		// TODO Auto-generated method stub
+		
 		super.serverPacketUnserialize(stream);
 		setLight(stream.readByte());
 	}
@@ -218,7 +218,7 @@ public class LampSocketRender extends SixNodeElementRender {
 
 			sendPacketToServer(bos);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 

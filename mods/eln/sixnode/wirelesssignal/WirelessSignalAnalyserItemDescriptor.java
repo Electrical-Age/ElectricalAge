@@ -15,7 +15,7 @@ public class WirelessSignalAnalyserItemDescriptor extends GenericItemUsingDamage
 
 	public WirelessSignalAnalyserItemDescriptor(String name) {
 		super(name);
-		// TODO Auto-generated constructor stub
+		
 	}
 	
 	

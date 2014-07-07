@@ -9,15 +9,15 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
-import mods.eln.node.SixNodeElementInventory;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.ResistorPowerWatchdog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
@@ -31,7 +31,7 @@ public class BatteryChargerElement extends SixNodeElement {
 
 	public BatteryChargerDescriptor descriptor;
 	
-	public NodeElectricalLoad powerLoad = new NodeElectricalLoad("powerLoad");
+	public NbtElectricalLoad powerLoad = new NbtElectricalLoad("powerLoad");
 	public BatteryChargerSlowProcess slowProcess = new BatteryChargerSlowProcess();
 	Resistor powerResistor = new Resistor(powerLoad,null);
 	

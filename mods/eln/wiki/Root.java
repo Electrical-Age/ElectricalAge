@@ -37,13 +37,13 @@ public class Root extends Default{
 
 	public Root(GuiScreen preview) {
 		super(preview);
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
+		
 		super.initGui();
 		
 		int y = 8;

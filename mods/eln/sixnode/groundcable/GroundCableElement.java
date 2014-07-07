@@ -10,14 +10,14 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
-import mods.eln.node.SixNodeElementInventory;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -42,7 +42,7 @@ public class GroundCableElement extends SixNodeElement{
 
 
 
-	NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");
+	NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
 	VoltageSource ground = new VoltageSource("ground",electricalLoad,null);
 	//ElectricalSourceRefGroundProcess groundProcess = new ElectricalSourceRefGroundProcess(electricalLoad, 0);
 	
@@ -51,7 +51,7 @@ public class GroundCableElement extends SixNodeElement{
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.readFromNBT(nbt);
 		byte b = nbt.getByte( "color");
 		color = b & 0xF;
@@ -63,30 +63,30 @@ public class GroundCableElement extends SixNodeElement{
 	}
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.writeToNBT(nbt);
 		nbt.setByte( "color",(byte) (color + (colorCare << 4)));
 	}
 	@Override
 	public IInventory getInventory() {
-		// TODO Auto-generated method stub
+		
 		return inventory;
 	}
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return electricalLoad;
 	}
 	
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		//if(inventory.getStackInSlot(GroundCableContainer.cableSlotId) == null) return 0;
 		return NodeBase.maskElectricalPower + (color << NodeBase.maskColorShift) +(colorCare << NodeBase.maskColorCareShift);
 	}
@@ -95,26 +95,26 @@ public class GroundCableElement extends SixNodeElement{
 	
 	@Override
 	public String multiMeterString() {
-		// TODO Auto-generated method stub
+		
 		return Utils.plotVolt("U:",electricalLoad.getU()) + Utils.plotAmpere("I:",electricalLoad.getCurrent());
 	}
 
 	@Override
 	public String thermoMeterString() {
-		// TODO Auto-generated method stub
+		
 		return"";
 	}
 
 
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte( (color<<4));
 			Utils.serialiseItemStack(stream, inventory.getStackInSlot(GroundCableContainer.cableSlotId));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -123,7 +123,7 @@ public class GroundCableElement extends SixNodeElement{
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
+		
 		Eln.applySmallRs(electricalLoad);
 		
 
@@ -176,14 +176,14 @@ public class GroundCableElement extends SixNodeElement{
 	}
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new GroundCableContainer(player, inventory);
 	}
 	

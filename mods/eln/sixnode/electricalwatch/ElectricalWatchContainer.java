@@ -1,9 +1,9 @@
 package mods.eln.sixnode.electricalwatch;
 
-import mods.eln.BasicContainer;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.electricalitem.BatteryItem;
+import mods.eln.misc.BasicContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;

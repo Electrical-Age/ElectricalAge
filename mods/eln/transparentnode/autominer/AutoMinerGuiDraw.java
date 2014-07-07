@@ -11,8 +11,8 @@ import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.GuiVerticalTrackBarHeat;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
-import mods.eln.node.SixNodeElementInventory;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.six.SixNodeElementInventory;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 

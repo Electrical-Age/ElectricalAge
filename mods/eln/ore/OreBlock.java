@@ -49,7 +49,7 @@ public class OreBlock extends Block {
     @Override
     @SideOnly(Side.CLIENT)
     public IIcon getIcon(int par1, int par2) {
-    	// TODO Auto-generated method stub
+    	
     	
     	OreDescriptor desc = Eln.oreItem.getDescriptor(par2);
     	if(desc == null) return null;
@@ -75,7 +75,7 @@ public class OreBlock extends Block {
 	/*//caca1.5.1
 	@Override
 	public String getTextureFile() {
-		// TODO Auto-generated method stub
+		
 		return CommonProxy.BLOCK_PNG;
 	}
 	*/
@@ -84,7 +84,7 @@ public class OreBlock extends Block {
 	@Override
 	public void breakBlock(World par1World, int par2, int par3, int par4,
 			Block par5, int par6) {
-		// TODO Auto-generated method stub
+		
 		super.breakBlock(par1World, par2, par3, par4, par5, par6);
 		if(par1World.isRemote) return;
 		/*

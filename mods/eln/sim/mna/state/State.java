@@ -72,7 +72,7 @@ public class State {
 	
 	
 	public boolean isNotSimulated() {
-		// TODO Auto-generated method stub
+		
 		return subSystem == null && abstractedBy == null;
 	}
 }

@@ -14,7 +14,7 @@ import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.GhostNode;
-import mods.eln.node.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
 
@@ -99,7 +99,7 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor{
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addMachine(newItemStack());
 	}
@@ -127,7 +127,7 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor{
 	
 	@Override
 	public int getSpawnDeltaX() {
-		// TODO Auto-generated method stub
+		
 		return 4;
 	}
 	
@@ -143,14 +143,14 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor{
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	

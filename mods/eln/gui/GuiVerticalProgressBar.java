@@ -23,7 +23,7 @@ public class GuiVerticalProgressBar  extends Gui implements IGuiObject {
 	}
 	@Override
 	public int getYMax() {
-		// TODO Auto-generated method stub
+		
 		return yPosition + height;
 	}
 	
@@ -50,7 +50,7 @@ public class GuiVerticalProgressBar  extends Gui implements IGuiObject {
 	}
 	@Override
 	public void idraw(int x, int y, float f) {
-		// TODO Auto-generated method stub
+		
 		if(! visible) return;
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         
@@ -71,30 +71,30 @@ public class GuiVerticalProgressBar  extends Gui implements IGuiObject {
 
 	@Override
 	public boolean ikeyTyped(char key, int code) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public void imouseClicked(int x, int y, int code) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void imouseMove(int x, int y) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void imouseMovedOrUp(int x, int y, int witch) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 	@Override
 	public void idraw2(int x, int y) {
-		// TODO Auto-generated method stub
+		
 		if(visible == true && x >= xPosition && y >= yPosition && x < xPosition + width && y < yPosition + height)
 			helper.drawHoveringText(comment, x, y, Minecraft.getMinecraft().fontRenderer);
 				
@@ -107,7 +107,7 @@ public class GuiVerticalProgressBar  extends Gui implements IGuiObject {
 			this.comment.set(line, comment);
 	}
 	public double getValue() {
-		// TODO Auto-generated method stub
+		
 		return value;
 	}
 	@Override

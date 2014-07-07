@@ -13,7 +13,7 @@ public class ThermalResistor implements IProcess {
 	
 	@Override
 	public void process(double time) {
-		// TODO Auto-generated method stub
+		
 		double P = (a.Tc-b.Tc)*Rinv;
 		a.PcTemp -= P;
 		b.PcTemp += P;

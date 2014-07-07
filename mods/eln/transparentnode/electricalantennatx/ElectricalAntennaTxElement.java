@@ -7,17 +7,17 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateInput;
-import mods.eln.node.NodeElectricalGateOutput;
-import mods.eln.node.NodeElectricalGateOutputProcess;
-import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeManager;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.nbt.NbtElectricalGateInput;
+import mods.eln.sim.nbt.NbtElectricalGateOutput;
+import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxElement;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -26,10 +26,10 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 
 	ElectricalAntennaTxSlowProcess slowProcess = new ElectricalAntennaTxSlowProcess(this);
 	
-	NodeElectricalLoad powerIn = new NodeElectricalLoad("powerIn");
-	NodeElectricalGateInput commandIn = new NodeElectricalGateInput("commandIn",false);
-	NodeElectricalGateOutput signalOut = new NodeElectricalGateOutput("signalOut");
-	NodeElectricalGateOutputProcess signalOutProcess = new NodeElectricalGateOutputProcess("signalOutProcess", signalOut);
+	NbtElectricalLoad powerIn = new NbtElectricalLoad("powerIn");
+	NbtElectricalGateInput commandIn = new NbtElectricalGateInput("commandIn",false);
+	NbtElectricalGateOutput signalOut = new NbtElectricalGateOutput("signalOut");
+	NbtElectricalGateOutputProcess signalOutProcess = new NbtElectricalGateOutputProcess("signalOutProcess", signalOut);
 	
 	
 	Resistor powerResistor = new Resistor(powerIn, null);

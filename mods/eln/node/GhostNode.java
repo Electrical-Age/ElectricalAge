@@ -16,18 +16,18 @@ public abstract class GhostNode extends NodeBase{
 
 	@Override
 	public Block getBlock() {
-		// TODO Auto-generated method stub
+		
 		return Eln.ghostBlock;
 	}
 
 	@Override
 	public boolean mustBeSaved() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 	@Override
 	public INodeInfo getInfo() {
-		// TODO Auto-generated method stub
+		
 		return Eln.ghostBlock;
 	}
 }

@@ -30,37 +30,37 @@ public class Data {
 	}
 
 	public static void addEnergy(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		add("Energy", stack);
 	}
 
 	public static void addUtilities(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		add("Utilities",stack);
 	}
 
 	public static void addSignal(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		add("Signal",stack);
 	}
 
 	public static void addOre(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		add("Ore",stack);
 	}
 
 	public static void addPortable(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		add("Portable",stack);
 	}
 
 	public static void addResource(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		add("Resource",stack);
 	}
 
 	public static void addUpgrade(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		add("Upgrade",stack);
 	}
 }

@@ -14,15 +14,15 @@ import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.IVoltageDestructorDescriptor;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.ResistorSwitch;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ResistorCurrentWatchdog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
@@ -61,8 +61,8 @@ public class ElectricalSwitchElement extends SixNodeElement {
 
 
 	public ElectricalSwitchDescriptor descriptor;
-	public NodeElectricalLoad aLoad = new NodeElectricalLoad("aLoad");
-	public NodeElectricalLoad bLoad = new NodeElectricalLoad("bLoad");
+	public NbtElectricalLoad aLoad = new NbtElectricalLoad("aLoad");
+	public NbtElectricalLoad bLoad = new NbtElectricalLoad("bLoad");
 	public ResistorSwitch switchResistor = new ResistorSwitch("switchRes",aLoad, bLoad);
 
 	VoltageStateWatchDog voltageWatchDogA = new VoltageStateWatchDog();

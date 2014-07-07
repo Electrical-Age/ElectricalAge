@@ -7,15 +7,15 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.ResistorSwitch;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sim.process.heater.ResistorHeatThermalLoad;
@@ -43,10 +43,10 @@ public class DiodeElement extends SixNodeElement {
 	}
 
 	public DiodeDescriptor descriptor;
-	public NodeElectricalLoad anodeLoad = new NodeElectricalLoad("anodeLoad");
-	public NodeElectricalLoad catodeLoad = new NodeElectricalLoad("catodeLoad");
+	public NbtElectricalLoad anodeLoad = new NbtElectricalLoad("anodeLoad");
+	public NbtElectricalLoad catodeLoad = new NbtElectricalLoad("catodeLoad");
 	public ResistorSwitch resistorSwitch = new ResistorSwitch("resistorSwitch",anodeLoad, catodeLoad);
-	public NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
+	public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
 	public ResistorHeatThermalLoad heater = new ResistorHeatThermalLoad(resistorSwitch, thermalLoad);
 	public ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
 	public DiodeProcess diodeProcess = new DiodeProcess(resistorSwitch);

@@ -45,13 +45,13 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
 	@Override
 	public ArmorProperties getProperties(EntityLivingBase player,
 			ItemStack armor, DamageSource source, double damage, int slot) {
-		// TODO Auto-generated method stub
+		
 		return new ArmorProperties(100, Math.min(1.0, getEnergy(armor)/ratioMaxEnergy)*ratioMax, (int) (getEnergy(armor)/energyPerDamage*25D));
 	}
 
 	@Override
 	public int getArmorDisplay(EntityPlayer player, ItemStack armor, int slot) {
-		// TODO Auto-generated method stub
+		
 		return (int)(Math.min(1.0, getEnergy(armor)/ratioMaxEnergy)*ratioMax*20);
 	}
 
@@ -75,7 +75,7 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
     
     @Override
     public boolean hasColor(ItemStack par1ItemStack) {
-    	// TODO Auto-generated method stub
+    	
     	return false;
     }
 
@@ -113,7 +113,7 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Charge speed: " + (int) chargePower + "W");
 		list.add(Utils.plotEnergy("Energy Stored:", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
@@ -132,31 +132,31 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
 
 	@Override
 	public double getEnergyMax(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return energyStorage;
 	}
 
 	@Override
 	public double getChargePower(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return chargePower;
 	}
 
 	@Override
 	public double getDischagePower(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
 	@Override
 	public int getPriority(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
 	@Override
 	public void electricalItemUpdate(ItemStack stack,double time) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 

@@ -1,6 +1,6 @@
 package mods.eln.sim;
 
-import mods.eln.SaveConfig;
+import mods.eln.server.SaveConfig;
 
 public abstract class BatterySlowProcess implements IProcess{
 	BatteryProcess batteryProcess;
@@ -17,7 +17,7 @@ public abstract class BatterySlowProcess implements IProcess{
 	
 	@Override
 	public void process(double time) {
-		// TODO Auto-generated method stub
+		
 		double U = batteryProcess.getU();
 		if(U < -0.1 * batteryProcess.uNominal) {destroy();return; }
 		if(U > getUMax()) {destroy();return; }

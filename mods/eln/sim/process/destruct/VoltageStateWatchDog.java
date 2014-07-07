@@ -10,7 +10,7 @@ public class VoltageStateWatchDog extends ValueWatchdog{
 	
 	@Override
 	double getValue() {
-		// TODO Auto-generated method stub
+		
 		return state.getU();
 	}
 

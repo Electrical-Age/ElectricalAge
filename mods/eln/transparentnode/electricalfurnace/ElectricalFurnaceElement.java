@@ -13,12 +13,10 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.RegulatorThermalLoadToElectricalResistor;
@@ -27,6 +25,8 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalResistor;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.item.EntityItem;
@@ -47,10 +47,10 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 	public static final int thermalIsolatorSlotId = 3;
 	public static final int thermalRegulatorSlotId = 4;
 	
-	NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");
+	NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
 	ResistorSwitch heatingCorpResistor = new ResistorSwitch("heatResistor",electricalLoad, ElectricalLoad.groundLoad);
 	
-	NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
+	NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
 	ThermalResistor smeltResistor = new ThermalResistor(thermalLoad, ThermalLoad.externalLoad);
 
 	RegulatorThermalLoadToElectricalResistor thermalRegulator = new RegulatorThermalLoadToElectricalResistor("thermalRegulator", thermalLoad, heatingCorpResistor);

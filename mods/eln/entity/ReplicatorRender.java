@@ -24,13 +24,13 @@ public class ReplicatorRender extends RenderLiving
 
 	@Override
 	protected ResourceLocation getEntityTexture(Entity entity) {
-		// TODO Auto-generated method stub
+		
 		return Your_Texture;
 	}
 	
 	@Override
 	public void doRender(Entity par1Entity, double par2, double par4, double par6, float par8, float par9) {
-		// TODO Auto-generated method stub
+		
 		/*UtilsClient.disableDepthTest();
 		GL11.glColor3f(1, 0, 0);*/
 		super.doRender(par1Entity, par2, par4, par6, par8, par9);

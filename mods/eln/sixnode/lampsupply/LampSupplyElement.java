@@ -17,16 +17,16 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateInput;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
-import mods.eln.node.SixNodeElementInventory;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.nbt.NbtElectricalGateInput;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
@@ -39,7 +39,7 @@ public class LampSupplyElement extends SixNodeElement {
 	//NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");
 	public LampSupplyDescriptor descriptor;
 
-	public NodeElectricalLoad powerLoad = new NodeElectricalLoad("powerLoad");
+	public NbtElectricalLoad powerLoad = new NbtElectricalLoad("powerLoad");
 	public Resistor loadResistor = new Resistor(powerLoad, null);
 	public IProcess lampSupplySlowProcess = new LampSupplySlowProcess();
 
@@ -47,13 +47,13 @@ public class LampSupplyElement extends SixNodeElement {
 
 	@Override
 	public IInventory getInventory() {
-		// TODO Auto-generated method stub
+		
 		return inventory;
 	}
 
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new LampSupplyContainer(player, inventory);
 	}
 
@@ -132,13 +132,13 @@ public class LampSupplyElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		// TODO Auto-generated method stub
+		
 		return Utils.plotUIP(powerLoad.getU(), powerLoad.getCurrent());
 	}
 
 	@Override
 	public String thermoMeterString() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -149,7 +149,7 @@ public class LampSupplyElement extends SixNodeElement {
 
 	@Override
 	protected void inventoryChanged() {
-		// TODO Auto-generated method stub
+		
 		super.inventoryChanged();
 		sixNode.disconnect();
 		setupFromInventory();
@@ -172,14 +172,14 @@ public class LampSupplyElement extends SixNodeElement {
 
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
+		
 		channelRemove(this);
 		super.destroy();
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.writeToNBT(nbt);
 		nbt.setString("channel", channel);
 	}
@@ -225,26 +225,26 @@ public class LampSupplyElement extends SixNodeElement {
 				break;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		try {
 			stream.writeUTF(channel);
 			Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSupplyContainer.cableSlotId));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

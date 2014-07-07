@@ -26,7 +26,7 @@ public class GuiHelpText extends Gui implements IGuiObject{
 	
 	@Override
 	public int getYMax() {
-		// TODO Auto-generated method stub
+		
 		return yPosition + height;
 	}
 	
@@ -45,25 +45,25 @@ public class GuiHelpText extends Gui implements IGuiObject{
 
 	@Override
 	public boolean ikeyTyped(char key, int code) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public void imouseClicked(int x, int y, int code) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void imouseMove(int x, int y) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void imouseMovedOrUp(int x, int y, int witch) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
@@ -96,7 +96,7 @@ public class GuiHelpText extends Gui implements IGuiObject{
 	
 	@Override
 	public void idraw2(int x, int y) {
-		// TODO Auto-generated method stub
+		
 		if(/*visible == true && */(x >= xPosition && y >= yPosition && x < xPosition + width && y < yPosition + height))
 		{
 			/*int px,py;

@@ -39,7 +39,7 @@ public class GroundCableGui extends GuiContainerEln{
 	
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
+		
 		super.initGui();
 
 
@@ -49,7 +49,7 @@ public class GroundCableGui extends GuiContainerEln{
 
 	@Override
 	protected GuiHelperContainer newHelper() {
-		// TODO Auto-generated method stub
+		
 		return new GuiHelperContainer(this, 176, 166-52,8,84-52);
 	}
 

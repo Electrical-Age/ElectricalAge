@@ -1,7 +1,7 @@
 package mods.eln.sixnode.thermalsensor;
 
 import mods.eln.Eln;
-import mods.eln.INBTTReady;
+import mods.eln.misc.INBTTReady;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.client.renderer.entity.Render;

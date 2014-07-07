@@ -9,7 +9,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.node.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 
 public class GroundCableDescriptor extends SixNodeDescriptor{
@@ -32,14 +32,14 @@ public class GroundCableDescriptor extends SixNodeDescriptor{
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addWiring(newItemStack());
 	}
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Provides a zero volt reference.");
 		list.add("Can be used to ground negative");

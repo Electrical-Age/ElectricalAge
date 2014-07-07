@@ -20,11 +20,11 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 import mods.eln.Eln;
-import mods.eln.INBTTReady;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
+import mods.eln.misc.INBTTReady;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUCubeMask;
 import mods.eln.misc.LRDUMask;
@@ -200,7 +200,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     @Override
     @SideOnly(Side.CLIENT)
     public double getMaxRenderDistanceSquared() {
-    	// TODO Auto-generated method stub
+    	
     	return 4096.0*(4)*(4);
     }
     
@@ -218,7 +218,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     /*
     @Override
     public void validate() {
-    	// TODO Auto-generated method stub
+    	
     	super.validate();
     	if(!worldObj.isRemote)
 		{
@@ -231,7 +231,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     
     @Override
     public boolean canUpdate() {
-    	// TODO Auto-generated method stub
+    	
     	return true;
     }
     
@@ -300,7 +300,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     
     @Override
     public void invalidate() {
-    	// TODO Auto-generated method stub
+    	
     	if(worldObj.isRemote)
     	{
     		destructor();
@@ -388,7 +388,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 	    		    	
 	    	
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}	    	
     }
@@ -410,7 +410,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     }
 
 	public boolean canConnectRedstone(Direction xn) {
-		// TODO Auto-generated method stub
+		
 		if(worldObj.isRemote)
 			return redstone;
 		else

@@ -14,12 +14,12 @@ public class LampSlot extends GenericItemUsingDamageSlot{
 		super(inventory, slot, x, y, stackLimit, LampDescriptor.class,SlotSkin.medium,new String[]{"Lamp Slot"});
 		
 		this.socket = socket;
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	@Override
 	public boolean isItemValid(ItemStack itemStack) {
-		// TODO Auto-generated method stub
+		
 		if(!super.isItemValid(itemStack)) return false;
 		LampDescriptor descriptor = (LampDescriptor)  Utils.getItemObject(itemStack);
 		return descriptor.socket == socket;

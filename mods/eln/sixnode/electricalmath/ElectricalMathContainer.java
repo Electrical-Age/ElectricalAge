@@ -1,9 +1,9 @@
 package mods.eln.sixnode.electricalmath;
 
-import mods.eln.BasicContainer;
-import mods.eln.ItemStackFilter;
-import mods.eln.SlotFilter;
+import mods.eln.gui.ItemStackFilter;
+import mods.eln.gui.SlotFilter;
 import mods.eln.gui.ISlotSkin.SlotSkin;
+import mods.eln.misc.BasicContainer;
 import mods.eln.node.NodeBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;

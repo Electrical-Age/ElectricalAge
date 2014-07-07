@@ -20,7 +20,7 @@ public class ResistorPowerWatchdog extends ValueWatchdog{
 	
 	@Override
 	double getValue() {
-		// TODO Auto-generated method stub
+		
 		return resistor.getP();
 	}
 	

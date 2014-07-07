@@ -5,9 +5,9 @@ import java.io.IOException;
 
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElementRender;
-import mods.eln.node.SixNodeEntity;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElementRender;
+import mods.eln.node.six.SixNodeEntity;
 
 public class TreeResinCollectorRender extends SixNodeElementRender{
 
@@ -22,7 +22,7 @@ public class TreeResinCollectorRender extends SixNodeElementRender{
 	
 	@Override
 	public void draw() {
-		// TODO Auto-generated method stub
+		
 		super.draw();
 		
 		LRDU.Down.glRotateOnX();
@@ -33,13 +33,13 @@ public class TreeResinCollectorRender extends SixNodeElementRender{
 	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.publishUnserialize(stream);
 		
 		try {
 			stock = stream.readFloat();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

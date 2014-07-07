@@ -32,7 +32,7 @@ public class AutoMinerPowerNode extends GhostNode{
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction directionA, LRDU lrduA) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -44,7 +44,7 @@ public class AutoMinerPowerNode extends GhostNode{
 
 	@Override
 	public void initializeFromNBT() {
-		// TODO Auto-generated method stub
+		
 		
 	}
 

@@ -1,9 +1,9 @@
 package mods.eln.sixnode.groundcable;
 
-import mods.eln.BasicContainer;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.LampSlot;
-import mods.eln.node.SixNodeItemSlot;
+import mods.eln.misc.BasicContainer;
+import mods.eln.node.six.SixNodeItemSlot;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -18,7 +18,7 @@ public class GroundCableContainer extends BasicContainer {
 				new SixNodeItemSlot(inventory,cableSlotId,176/2-8,8,1,new Class[]{ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{"Electrical Cable Slot"})
 			});
 		
-		// TODO Auto-generated constructor stub
+		
 	}
 
 }

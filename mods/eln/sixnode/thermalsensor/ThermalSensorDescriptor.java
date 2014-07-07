@@ -4,7 +4,7 @@ import java.util.List;
 
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.node.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -30,7 +30,7 @@ public class ThermalSensorDescriptor extends SixNodeDescriptor{
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
 		if(temperatureOnly){
@@ -49,7 +49,7 @@ public class ThermalSensorDescriptor extends SixNodeDescriptor{
 	}
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addThermal(newItemStack());
 		Data.addSignal(newItemStack());

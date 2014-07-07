@@ -15,16 +15,16 @@ import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.IVoltageDestructorDescriptor;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateOutputProcess;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
-import mods.eln.node.SixNodeElementInventory;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.lampsocket.LampSocketContainer;
 import mods.eln.sound.SoundCommand;
@@ -49,9 +49,9 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 	}
 
 	public ElectricalGateSourceDescriptor descriptor;
-	public NodeElectricalLoad outputGate = new NodeElectricalLoad("outputGate");
+	public NbtElectricalLoad outputGate = new NbtElectricalLoad("outputGate");
 	
-	public NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess", outputGate);
+	public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
 
 	LRDU front;
 

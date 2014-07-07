@@ -12,15 +12,11 @@ import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeBatteryProcess;
-import mods.eln.node.NodeBatterySlowProcess;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.NodeVoltageState;
@@ -29,6 +25,10 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.state.VoltageState;
+import mods.eln.sim.nbt.NbtBatteryProcess;
+import mods.eln.sim.nbt.NbtBatterySlowProcess;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -37,13 +37,13 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class BatteryElement extends TransparentNodeElement  {
 
-	public NodeElectricalLoad cutLoad = new NodeElectricalLoad("cutLoad");
+	public NbtElectricalLoad cutLoad = new NbtElectricalLoad("cutLoad");
 	public NodeVoltageState positiveLoad = new NodeVoltageState("positiveLoad");
-	public NodeElectricalLoad negativeLoad = new NodeElectricalLoad("negativeLoad");
+	public NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
 	public VoltageSource voltageSource = new VoltageSource("volSrc",positiveLoad,negativeLoad);
 	
-	public NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
-	public NodeBatteryProcess batteryProcess = new NodeBatteryProcess(positiveLoad, negativeLoad, null, 0,voltageSource);
+	public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
+	public NbtBatteryProcess batteryProcess = new NbtBatteryProcess(positiveLoad, negativeLoad, null, 0,voltageSource);
 
 	public Resistor dischargeResistor = new Resistor(positiveLoad, negativeLoad);
 	public ResistorSwitch cutSwitch = new ResistorSwitch("cutSwitch",cutLoad, positiveLoad);
@@ -52,7 +52,7 @@ public class BatteryElement extends TransparentNodeElement  {
 	
 	double syncronizedPositiveUc, syncronizedNegativeUc, syncronizedCurrent, syncronizedTc;
 	
-	NodeBatterySlowProcess batterySlowProcess = new NodeBatterySlowProcess(node, batteryProcess, thermalLoad);
+	NbtBatterySlowProcess batterySlowProcess = new NbtBatterySlowProcess(node, batteryProcess, thermalLoad);
 
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2, 64, this);
 	

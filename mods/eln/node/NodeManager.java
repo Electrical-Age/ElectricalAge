@@ -50,7 +50,7 @@ public class NodeManager extends WorldSavedData{
 		nodesmap = new HashMap<Coordonate, NodeBase>();
 		nodes = new ArrayList<NodeBase>();
 		instance = this;
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	public void addNode(NodeBase node)
@@ -100,22 +100,22 @@ public class NodeManager extends WorldSavedData{
 				node.initializeFromNBT();
 				
 			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 

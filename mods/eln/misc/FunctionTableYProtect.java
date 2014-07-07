@@ -12,7 +12,7 @@ public class FunctionTableYProtect extends FunctionTable {
 
 	@Override
 	public double getValue(double x) {
-		// TODO Auto-generated method stub
+		
 		double value = super.getValue(x);
 		if(value > yMax) return yMax;
 		if(value < yMin) return yMin;

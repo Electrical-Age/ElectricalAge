@@ -1,6 +1,5 @@
 package mods.eln.misc;
 
-import mods.eln.INBTTReady;
 import mods.eln.client.FrameTime;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -42,7 +41,7 @@ public class RcRcInterpolator implements INBTTReady{
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
+		
 		c1 = nbt.getFloat(str + "c1");
 		c2 = nbt.getFloat(str + "c2");
 		target = nbt.getFloat(str + "target");
@@ -50,7 +49,7 @@ public class RcRcInterpolator implements INBTTReady{
 	}
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		// TODO Auto-generated method stub
+		
 		nbt.setFloat(str + "c1",c1);
 		nbt.setFloat(str + "c2",c2);
 		nbt.setFloat(str + "target",target);

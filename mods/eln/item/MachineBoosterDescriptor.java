@@ -6,7 +6,7 @@ public class MachineBoosterDescriptor extends GenericItemUsingDamageDescriptorUp
 
 	public MachineBoosterDescriptor(String name) {
 		super(name);
-		// TODO Auto-generated constructor stub
+		
 	}
 
 }

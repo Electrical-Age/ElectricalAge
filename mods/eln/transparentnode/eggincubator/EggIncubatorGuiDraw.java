@@ -4,7 +4,7 @@ import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalVoltageSupplyBar;
 import mods.eln.gui.IGuiObject;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 

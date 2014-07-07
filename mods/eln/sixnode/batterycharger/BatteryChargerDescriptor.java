@@ -6,9 +6,9 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -96,7 +96,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 		draw(null, null);
 	}
 
-	public void applyTo(NodeElectricalLoad powerLoad) {
+	public void applyTo(NbtElectricalLoad powerLoad) {
 		cable.applyTo(powerLoad);
 	}
 
@@ -112,7 +112,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Can be used to recharge");
 		list.add("some electrical items like");

@@ -18,7 +18,7 @@ public class Capacitor extends Bipole  implements ISubSystemProcessI {
 	
 	@Override
 	public double getCurrent() {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 

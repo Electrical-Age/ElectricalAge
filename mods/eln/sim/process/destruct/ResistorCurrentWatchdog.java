@@ -20,7 +20,7 @@ public class ResistorCurrentWatchdog extends ValueWatchdog{
 	
 	@Override
 	double getValue() {
-		// TODO Auto-generated method stub
+		
 		return resistor.getI();
 	}
 	

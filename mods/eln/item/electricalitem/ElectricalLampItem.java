@@ -13,10 +13,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.Eln;
-import mods.eln.PlayerManager;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
+import mods.eln.server.PlayerManager;
 import mods.eln.wiki.Data;
 
 public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
@@ -47,7 +47,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	ResourceLocation on,off;
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addPortable(newItemStack());
 		Data.addLight(newItemStack());
@@ -55,7 +55,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	
 	@Override
 	int getRange(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return getLightState(stack) == 1 ? rangeMin : rangeMax;
 	}
 	
@@ -164,7 +164,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 
 		list.add("Discharge speed: " + (int) dischargeMin + "W");
@@ -181,7 +181,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 
 	@Override
 	public boolean isFull(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return getEnergy(stack) == energyStorage;
 	}
 */
@@ -197,25 +197,25 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 
 	@Override
 	public double getEnergyMax(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return energyStorage;
 	}
 
 	@Override
 	public double getChargePower(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return chargePower;
 	}
 
 	@Override
 	public double getDischagePower(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
 	@Override
 	public int getPriority(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
@@ -231,7 +231,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
@@ -244,7 +244,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 
 	@Override
 	public void electricalItemUpdate(ItemStack stack,double time) {
-		// TODO Auto-generated method stub
+		
 	
 		double energy = getEnergy(stack);
 		int state = getLightState(stack);

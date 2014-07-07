@@ -7,16 +7,16 @@ import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.process.PowerSourceBipole;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -25,8 +25,8 @@ import net.minecraft.nbt.NBTTagCompound;
 public class SolarPannelElement extends TransparentNodeElement{
 
 	SolarPannelDescriptor descriptor;
-	NodeElectricalLoad positiveLoad = new NodeElectricalLoad("positiveLoad");
-	NodeElectricalLoad negativeLoad = new NodeElectricalLoad("negativeLoad");
+	NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
+	NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
 	VoltageSource positiveSrc = new VoltageSource("posSrc",positiveLoad, null);
 	VoltageSource negativeSrc = new VoltageSource("negSrc",negativeLoad, null);
 	
@@ -82,7 +82,7 @@ public class SolarPannelElement extends TransparentNodeElement{
 	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		if(lrdu != LRDU.Down) return null;
 		if(side == front.left()) return positiveLoad;
 		if(side == front.right() && ! grounded) return negativeLoad;
@@ -91,7 +91,7 @@ public class SolarPannelElement extends TransparentNodeElement{
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		/*if(lrdu != LRDU.Down) return null;
 		if(side == front) return thermalLoad;
 		if(side == front.getInverse() && ! grounded) return thermalLoad;*/
@@ -100,7 +100,7 @@ public class SolarPannelElement extends TransparentNodeElement{
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		if(lrdu != LRDU.Down) return 0;
 		if(side == front.left()) return node.maskElectricalPower;
 		if(side == front.right() && ! grounded) return node.maskElectricalPower;
@@ -117,7 +117,7 @@ public class SolarPannelElement extends TransparentNodeElement{
 
 	@Override
 	public String thermoMeterString(Direction side) {
-		// TODO Auto-generated method stub
+		
 		//return  Utils.plotCelsius("Tbat",thermalLoad.Tc);
 		return "";
 	}
@@ -135,21 +135,21 @@ public class SolarPannelElement extends TransparentNodeElement{
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 	
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.writeToNBT(nbt);
 		powerSource.writeToNBT(nbt, "powerSource");
 		nbt.setDouble("pannelAlpha", pannelAlpha);
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.readFromNBT(nbt);
 		powerSource.readFromNBT(nbt, "powerSource");
 		pannelAlpha = nbt.getDouble("pannelAlpha");
@@ -165,14 +165,14 @@ public class SolarPannelElement extends TransparentNodeElement{
 			stream.writeFloat((float) pannelAlpha);
 			node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}	
 	}	
 	
 	public static final byte unserializePannelAlpha = 0;
 	public byte networkUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		byte packetType = super.networkUnserialize(stream);
 		try {
 			switch(packetType)
@@ -186,7 +186,7 @@ public class SolarPannelElement extends TransparentNodeElement{
 				return packetType;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		return unserializeNulldId;
@@ -196,19 +196,19 @@ public class SolarPannelElement extends TransparentNodeElement{
 	
 	@Override
 	public IInventory getInventory() {
-		// TODO Auto-generated method stub
+		
 		return inventory;
 	}
 	
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
+		
 		
 		return descriptor.canRotate;
 	}
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		
 		return new SolarPannelContainer(node, player, inventory);
 	}

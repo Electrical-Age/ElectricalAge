@@ -11,10 +11,10 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElementInventory;
-import mods.eln.node.TransparentNodeElementRender;
-import mods.eln.node.TransparentNodeEntity;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNodeElementRender;
+import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,7 +34,7 @@ public class TransformerRender extends TransparentNodeElementRender{
 
 	@Override
 	public void draw() {
-		// TODO Auto-generated method stub
+		
 		
 		GL11.glPushMatrix();
 		front.glRotateXnRef();
@@ -50,7 +50,7 @@ public class TransformerRender extends TransparentNodeElementRender{
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new TransformerGuiDraw(player, inventory, this);
 	}
 	
@@ -60,7 +60,7 @@ public class TransformerRender extends TransparentNodeElementRender{
 	Obj3DPart feroPart;
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkUnserialize(stream);
 		try {
 			primaryStackSize = stream.readByte();
@@ -101,7 +101,7 @@ public class TransformerRender extends TransparentNodeElementRender{
 			cableRenderType = null;
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}		
 	}
@@ -124,7 +124,7 @@ public class TransformerRender extends TransparentNodeElementRender{
 	}
 	@Override
 	public void notifyNeighborSpawn() {
-		// TODO Auto-generated method stub
+		
 		super.notifyNeighborSpawn();
 		cableRenderType = null;
 	}

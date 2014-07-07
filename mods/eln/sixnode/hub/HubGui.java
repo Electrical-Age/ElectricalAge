@@ -45,7 +45,7 @@ public class HubGui extends GuiContainerEln {
 
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
+		
 		super.initGui();
 
 		/*for (int idx = 0; idx < 6; idx++) {
@@ -88,7 +88,7 @@ public class HubGui extends GuiContainerEln {
 
 	@Override
 	protected void preDraw(float f, int x, int y) {
-		// TODO Auto-generated method stub
+		
 		super.preDraw(f, x, y);
 	/*	for (int idx = 0; idx < 6; idx++) {
 			connectionGridToggle[idx].displayString = render.connectionGrid[idx] ? "is on"
@@ -98,7 +98,7 @@ public class HubGui extends GuiContainerEln {
 
 	@Override
 	protected void postDraw(float f, int x, int y) {
-		// TODO Auto-generated method stub
+		
 		super.postDraw(f, x, y);
 
 		for (int idx = 0; idx < 6; idx++) {

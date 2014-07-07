@@ -7,14 +7,14 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateOutput;
-import mods.eln.node.NodeElectricalGateOutputProcess;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
-import mods.eln.node.SixNodeElementInventory;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalGateOutput;
+import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -30,8 +30,8 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
     	slowProcessList.add(slowProcess);
     	this.descriptor = (ElectricalEntitySensorDescriptor) descriptor;
 	}
-	public NodeElectricalGateOutput outputGate = new NodeElectricalGateOutput("outputGate");
-	public NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess", outputGate);
+	public NbtElectricalGateOutput outputGate = new NbtElectricalGateOutput("outputGate");
+	public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
 	public ElectricalEntitySensorSlowProcess slowProcess = new ElectricalEntitySensorSlowProcess(this);
 
 	public static boolean canBePlacedOnSide(Direction side, int type) {
@@ -93,20 +93,20 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
 	
 	@Override
 	protected void inventoryChanged() {
-		// TODO Auto-generated method stub
+		
 		super.inventoryChanged();
 		needPublish();
 	}
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		try {
 			stream.writeBoolean(slowProcess.state);
 			Utils.serialiseItemStack(stream, inventory.getStackInSlot(ElectricalEntitySensorContainer.filterId));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

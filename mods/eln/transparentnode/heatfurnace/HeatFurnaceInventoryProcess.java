@@ -1,10 +1,10 @@
 package mods.eln.transparentnode.heatfurnace;
 
-import mods.eln.INBTTReady;
-import mods.eln.SaveConfig;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.item.ThermalIsolatorElement;
+import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
+import mods.eln.server.SaveConfig;
 import mods.eln.sim.IProcess;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -21,7 +21,7 @@ public class HeatFurnaceInventoryProcess implements IProcess , INBTTReady{
 	
 	@Override
 	public void process(double time) {
-		// TODO Auto-generated method stub
+		
 		ItemStack combustibleStack = furnace.inventory.getStackInSlot(HeatFurnaceContainer.combustibleId);
 		ItemStack combustionChamberStack = furnace.inventory.getStackInSlot(HeatFurnaceContainer.combustrionChamberId);
 		ItemStack isolatorChamberStack = furnace.inventory.getStackInSlot(HeatFurnaceContainer.isolatorId);

@@ -10,6 +10,7 @@ import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
 import mods.eln.entity.ReplicatorEntity;
 import mods.eln.entity.ReplicatorPopProcess;
+import mods.eln.generic.GenericCreativeTab;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptorWithComment;
 import mods.eln.generic.SharedItem;
@@ -59,27 +60,30 @@ import mods.eln.misc.TileEntityDestructor;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Version;
 import mods.eln.misc.WindProcess;
-import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodeManager;
 import mods.eln.node.NodeServer;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeBlock;
-import mods.eln.node.SixNodeCacheStd;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeEntity;
-import mods.eln.node.SixNodeItem;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeBlock;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeEntity;
-import mods.eln.node.TransparentNodeItem;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeBlock;
+import mods.eln.node.six.SixNodeCacheStd;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeEntity;
+import mods.eln.node.six.SixNodeItem;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeBlock;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeEntity;
+import mods.eln.node.transparent.TransparentNodeItem;
 import mods.eln.ore.OreBlock;
 import mods.eln.ore.OreDescriptor;
 import mods.eln.ore.OreItem;
+import mods.eln.server.ConsoleListener;
 import mods.eln.server.OreRegenerate;
+import mods.eln.server.PlayerManager;
+import mods.eln.server.SaveConfig;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
 import mods.eln.sixnode.diode.DiodeDescriptor;
@@ -671,7 +675,7 @@ public class Eln {
 		try {
 			// elnHttpServer = new ElnHttpServer();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -1550,7 +1554,7 @@ public class Eln {
 	}
 
 	private void registerSixNodeMisc(int id) {
-		// TODO Auto-generated method stub
+		
 		int subId, completId;
 		String name;
 		{
@@ -4342,7 +4346,7 @@ public class Eln {
 	}
 
 	void recipeElectricalRelay() {
-		// TODO Auto-generated method stub
+		
 		addRecipe(findItemStack("Low Voltage Relay"),
 				"  I",
 				" I ",
@@ -5464,7 +5468,7 @@ public class Eln {
 	}
 
 	private void recipeElectricalGate() {
-		// TODO Auto-generated method stub
+		
 		addShapelessRecipe(findItemStack("Electrical Timer"),
 				new ItemStack(Items.repeater),
 				findItemStack("Cheap Chip"));
@@ -5526,7 +5530,7 @@ public class Eln {
 	}
 
 	private void recipeElectricalVuMeter() {
-		// TODO Auto-generated method stub
+		
 		for (int idx = 0; idx < 4; idx++) {
 			addRecipe(findItemStack("Analog vuMeter", 1),
 					"WWW",
@@ -5550,7 +5554,7 @@ public class Eln {
 	}
 
 	private void recipeElectricalBreaker() {
-		// TODO Auto-generated method stub
+		
 		addRecipe(findItemStack("Electrical Breaker", 1),
 				"crC",
 				Character.valueOf('c'), findItemStack("Overvoltage Protection"),
@@ -5560,7 +5564,7 @@ public class Eln {
 	}
 
 	private void recipeElectricalGateSource() {
-		// TODO Auto-generated method stub
+		
 		addRecipe(findItemStack("Signal Trimmer", 1),
 				"RsR",
 				"rRr",
@@ -5840,7 +5844,7 @@ public class Eln {
 		return instance.lowVoltageCableDescriptor.electricalRs;
 	}
 
-	public static void applySmallRs(NodeElectricalLoad aLoad) {
+	public static void applySmallRs(NbtElectricalLoad aLoad) {
 		instance.lowVoltageCableDescriptor.applyTo(aLoad);
 	}
 

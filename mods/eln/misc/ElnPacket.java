@@ -33,7 +33,7 @@ public class ElnPacket extends Packet
 	  /*
 	@Override
 	public void readPacketData(DataInput datainput) throws IOException {
-		// TODO Auto-generated method stub
+		
 	    this.channel = datainput.readUTF();
 	    short size = datainput.readShort();
 	    data = new byte[size];
@@ -45,7 +45,7 @@ public class ElnPacket extends Packet
 
 	@Override
 	public void writePacketData(DataOutput dataoutput) throws IOException {
-		// TODO Auto-generated method stub
+		
 		dataoutput.writeUTF(channel);
 		dataoutput.writeShort(data.length);
 		dataoutput.write(data);
@@ -59,25 +59,25 @@ public class ElnPacket extends Packet
 
 	@Override
 	public int getPacketSize() {
-		// TODO Auto-generated method stub
+		
 		return data.length;
 	}*/
 
 	@Override
 	public void processPacket(INetHandler arg0) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void readPacketData(PacketBuffer arg0) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void writePacketData(PacketBuffer arg0) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 

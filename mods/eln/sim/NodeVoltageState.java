@@ -1,7 +1,7 @@
 package mods.eln.sim;
 
 import net.minecraft.nbt.NBTTagCompound;
-import mods.eln.INBTTReady;
+import mods.eln.misc.INBTTReady;
 import mods.eln.sim.mna.state.VoltageState;
 
 public class NodeVoltageState extends VoltageState implements INBTTReady{

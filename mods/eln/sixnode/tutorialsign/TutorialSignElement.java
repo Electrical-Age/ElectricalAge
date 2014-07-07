@@ -8,9 +8,9 @@ import java.util.HashMap;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
@@ -85,7 +85,7 @@ public class TutorialSignElement extends SixNodeElement {
 
 				
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}		
 		}
@@ -198,14 +198,14 @@ public class TutorialSignElement extends SixNodeElement {
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 }

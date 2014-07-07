@@ -27,7 +27,7 @@ public class Line extends Resistor implements ISubSystemProcessFlush , IAbstract
 
 	@Override
 	public boolean canBeReplacedByInterSystem() {
-		// TODO Auto-generated method stub
+		
 		return ofInterSystem;
 	}
 	public void recalculateR(){
@@ -150,7 +150,7 @@ public class Line extends Resistor implements ISubSystemProcessFlush , IAbstract
 
 	@Override
 	public SubSystem getAbstractorSubSystem() {
-		// TODO Auto-generated method stub
+		
 		return getSubSystem();
 	}
 

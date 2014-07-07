@@ -22,19 +22,19 @@ public class GuiButtonEln extends GuiButton implements IGuiObject{
     }
 	@Override
 	public void idraw(int x, int y, float f) {
-		// TODO Auto-generated method stub
+		
 		GL11.glColor4f(1f, 1f, 1f,1f);
 		drawButton(Minecraft.getMinecraft(), x, y);
 	}
 	@Override
 	public int getYMax() {
-		// TODO Auto-generated method stub
+		
 		return yPosition + height;
 	}
 	
 	@Override
 	public boolean ikeyTyped(char key, int code) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
@@ -53,17 +53,17 @@ public class GuiButtonEln extends GuiButton implements IGuiObject{
 	}
 	@Override
 	public void imouseMove(int x, int y) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 	@Override
 	public void imouseMovedOrUp(int x, int y, int witch) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 	@Override
 	public void idraw2(int x, int y) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 	

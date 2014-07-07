@@ -99,7 +99,7 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 
 	@Override
 	public State[] getConnectedStates() {
-		// TODO Auto-generated method stub
+		
 		return new State[] {};
 	}
 

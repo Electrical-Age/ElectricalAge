@@ -3,13 +3,13 @@ package mods.eln.item.electricalitem;
 import java.util.List;
 
 import mods.eln.Eln;
-import mods.eln.PlayerManager.PlayerMetadata;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
+import mods.eln.server.PlayerManager.PlayerMetadata;
 import mods.eln.wiki.Data;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -162,7 +162,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addPortable(newItemStack());
 	}
@@ -183,7 +183,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Discharge speed: " + (int) dischargePower + "W");
 		list.add(Utils.plotEnergy("Energy Stored:", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
@@ -225,32 +225,32 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 
 	@Override
 	public boolean onDroppedByPlayer(ItemStack stack, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		setState(stack, sIdle);
 		return super.onDroppedByPlayer(stack, player);
 	}
 	
 	@Override
 	public double getEnergyMax(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return energyStorage;
 	}
 
 	@Override
 	public double getChargePower(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return chargePower;
 	}
 
 	@Override
 	public double getDischagePower(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return dischargePower;
 	}
 
 	@Override
 	public int getPriority(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
@@ -265,7 +265,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	/*

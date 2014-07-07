@@ -6,7 +6,7 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
-import mods.eln.node.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -58,14 +58,14 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Provides an electrical signal");
 		list.add("dependant on wind.");
@@ -75,18 +75,18 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 
@@ -95,7 +95,7 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
 		GL11.glRotatef(270, 0, 1, 0);
 		GL11.glRotatef(270, 1, 0, 0);
 		GL11.glTranslatef(-0.6f, 0f, 0f);
-		// TODO Auto-generated method stub
+		
 		GL11.glScalef(2f, 2f, 2f);
 
 		draw(0);

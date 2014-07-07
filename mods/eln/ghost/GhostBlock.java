@@ -29,14 +29,14 @@ public class GhostBlock extends Block implements INodeInfo{
 	@Override
 	public Item getItemDropped(int p_149650_1_, Random p_149650_2_,
 			int p_149650_3_) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}	
 		
 	/*@Override
 	@SideOnly(Side.CLIENT)
 	public int idPicked(World par1World, int par2, int par3, int par4) {
-		// TODO Auto-generated method stub
+		
 		return Block.dirt.blockID;
 	}*/
 
@@ -87,7 +87,7 @@ public class GhostBlock extends Block implements INodeInfo{
 	}
 	@Override
 	public float getBlockHardness(World par1World, int par2, int par3, int par4) {
-		// TODO Auto-generated method stub
+		
 		return 0.5f;
 	}
 
@@ -96,7 +96,7 @@ public class GhostBlock extends Block implements INodeInfo{
 
 	@Override
 	public String getUuid() {
-		// TODO Auto-generated method stub
+		
 		return "g";
 	}
 }

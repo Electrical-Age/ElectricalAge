@@ -69,7 +69,7 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addLight(newItemStack());
 	}
@@ -89,7 +89,7 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 	
 	@Override
 	public NBTTagCompound getDefaultNBT() {
-		// TODO Auto-generated method stub
+		
 		NBTTagCompound nbt = new NBTTagCompound();
 		nbt.setDouble("life", 1.0);
 		return nbt;
@@ -97,7 +97,7 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 	
 	@Override
 	public ItemStack newItemStack(int size) {
-		// TODO Auto-generated method stub
+		
 
 		return super.newItemStack(size);
 	}
@@ -110,7 +110,7 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
 		//list.add("Socket : " + socket);

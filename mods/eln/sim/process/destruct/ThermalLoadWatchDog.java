@@ -13,7 +13,7 @@ public class ThermalLoadWatchDog extends ValueWatchdog{
 	
 	@Override
 	double getValue() {
-		// TODO Auto-generated method stub
+		
 		return state.getT();
 	}
 

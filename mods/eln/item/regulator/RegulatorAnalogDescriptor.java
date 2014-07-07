@@ -19,13 +19,13 @@ public class RegulatorAnalogDescriptor extends IRegulatorDescriptor{
 
 	@Override
 	public RegulatorType getType() {
-		// TODO Auto-generated method stub
+		
 		return RegulatorType.analog;
 	}
 
 	@Override
 	public void applyTo(RegulatorProcess regulator,double workingPoint,double P,double I,double D) {
-		// TODO Auto-generated method stub
+		
 		regulator.setAnalog(P, I, D,workingPoint);
 	}
 

@@ -9,12 +9,12 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
@@ -32,7 +32,7 @@ public class ThermalCableElement extends SixNodeElement {
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		this.descriptor = (ThermalCableDescriptor) descriptor;
-		// TODO Auto-generated constructor stub		
+				
 		thermalLoadList.add(thermalLoad);
 		
 		slowProcessList.add(thermalWatchdog);
@@ -44,7 +44,7 @@ public class ThermalCableElement extends SixNodeElement {
 	}
 
 
-	NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
+	NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
 
 	ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
 	
@@ -60,7 +60,7 @@ public class ThermalCableElement extends SixNodeElement {
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.readFromNBT(nbt);
 		byte b = nbt.getByte("color");
 		color = b & 0xF;
@@ -69,52 +69,52 @@ public class ThermalCableElement extends SixNodeElement {
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.writeToNBT(nbt);
 		nbt.setByte("color",(byte) (color + (colorCare << 4)));
 	}
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return thermalLoad;
 	}
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return NodeBase.maskThermalWire + (color << NodeBase.maskColorShift) +(colorCare << NodeBase.maskColorCareShift);
 	}
 
 	@Override
 	public String multiMeterString() {
-		// TODO Auto-generated method stub
+		
 		return "";
 	}
 
 	@Override
 	public String thermoMeterString() {
-		// TODO Auto-generated method stub
+		
 		return Utils.plotCelsius("T",thermalLoad.Tc) + Utils.plotPower("P", thermalLoad.getPower());
 	}
 
 
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte( (color<<4));
 	    	stream.writeShort((short) (thermalLoad.Tc*NodeBase.networkSerializeTFactor));
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

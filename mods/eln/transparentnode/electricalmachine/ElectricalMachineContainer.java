@@ -1,10 +1,10 @@
 package mods.eln.transparentnode.electricalmachine;
 
-import mods.eln.BasicContainer;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.gui.SlotWithSkin;
 import mods.eln.item.MachineBoosterDescriptor;
+import mods.eln.misc.BasicContainer;
 import mods.eln.node.INodeContainer;
 import mods.eln.node.NodeBase;
 import net.minecraft.entity.player.EntityPlayer;

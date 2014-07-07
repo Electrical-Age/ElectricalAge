@@ -30,7 +30,7 @@ public class SharedFloat {
 			}
 			syncBoot = false;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -48,7 +48,7 @@ public class SharedFloat {
 			
 			sendPacketToServer(bos);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}        
         		

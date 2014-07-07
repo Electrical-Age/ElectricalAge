@@ -10,9 +10,9 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Utils;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElementRender;
-import mods.eln.node.TransparentNodeEntity;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElementRender;
+import mods.eln.node.transparent.TransparentNodeEntity;
 
 import org.lwjgl.opengl.GL11;
 

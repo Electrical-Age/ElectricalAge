@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import cpw.mods.fml.common.FMLCommonHandler;
 
 import mods.eln.Eln;
-import mods.eln.INBTTReady;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
+import mods.eln.misc.INBTTReady;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUCubeMask;
 import mods.eln.misc.Utils;
@@ -89,7 +89,7 @@ public abstract class Node extends NodeBase {
 				needNotify = true;
 			oldSendedRedstone = redstone;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
     }
@@ -101,10 +101,10 @@ public abstract class Node extends NodeBase {
     	return (NodeBlockEntity) coordonate.world().getTileEntity(coordonate.x, coordonate.y, coordonate.z);
     }
     
-	int isProvidingWeakPower(Direction side) {
-		// TODO Auto-generated method stub
+	public int isProvidingWeakPower(Direction side) {
 		return 0;
 	}
+	
 	public boolean canConnectRedstone()
 	{
 		return false;

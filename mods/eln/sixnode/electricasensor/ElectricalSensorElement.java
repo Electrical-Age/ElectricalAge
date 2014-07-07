@@ -14,17 +14,17 @@ import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.IVoltageDestructorDescriptor;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateOutputProcess;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
-import mods.eln.node.SixNodeElementInventory;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ResistorCurrentWatchdog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
@@ -44,12 +44,12 @@ public class ElectricalSensorElement extends SixNodeElement {
 		//front = LRDU.Left;
 		this.descriptor = (ElectricalSensorDescriptor) descriptor;
 
-		aLoad = new NodeElectricalLoad("aLoad");
+		aLoad = new NbtElectricalLoad("aLoad");
 		electricalLoadList.add(aLoad);
 		WorldExplosion exp = new WorldExplosion(this).cableExplosion();
 
 		if(this.descriptor.voltageOnly == false) {
-			bLoad = new NodeElectricalLoad("bLoad");
+			bLoad = new NbtElectricalLoad("bLoad");
 			resistor = new Resistor(aLoad, bLoad);
 			electricalLoadList.add(bLoad);
 			electricalComponentList.add(resistor);
@@ -70,9 +70,9 @@ public class ElectricalSensorElement extends SixNodeElement {
 	ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
 
 	public ElectricalSensorDescriptor descriptor;
-	public NodeElectricalLoad aLoad, bLoad;
-	public NodeElectricalLoad outputGate = new NodeElectricalLoad("outputGate");
-	public NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess", outputGate);
+	public NbtElectricalLoad aLoad, bLoad;
+	public NbtElectricalLoad outputGate = new NbtElectricalLoad("outputGate");
+	public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
 	public ElectricalSensorProcess slowProcess = new ElectricalSensorProcess(this);
 
 	public Resistor resistor;
@@ -96,7 +96,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.readFromNBT(nbt);
 		byte value = nbt.getByte("front");
 		front = LRDU.fromInt((value >> 0) & 0x3);
@@ -108,7 +108,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.writeToNBT(nbt);
 		nbt.setByte("front", (byte) ((front.toInt() << 0)));
 		nbt.setByte("typeOfSensor", (byte) typeOfSensor);
@@ -119,7 +119,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		if(descriptor.voltageOnly == false)
 		{
 			if(front.left() == lrdu) return aLoad;
@@ -136,13 +136,12 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		// TODO Auto-generated method stub4
 		boolean cable = inventory.getStackInSlot(ElectricalSensorContainer.cableSlotId) != null;
 		if(descriptor.voltageOnly == false)
 		{
@@ -160,7 +159,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		// TODO Auto-generated method stub
+		
 		if(descriptor.voltageOnly == false)
 			return Utils.plotUIP(aLoad.getU(), aLoad.getCurrent());
 		else
@@ -170,13 +169,13 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 	@Override
 	public String thermoMeterString() {
-		// TODO Auto-generated method stub
+		
 		return "";
 	}
 
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte(typeOfSensor);
@@ -185,7 +184,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 			stream.writeByte(dirType);
 			Utils.serialiseItemStack(stream, inventory.getStackInSlot(ElectricalSensorContainer.cableSlotId));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -251,7 +250,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkUnserialize(stream);
 		try {
 			switch (stream.readByte())
@@ -272,7 +271,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 				break;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -280,13 +279,13 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new ElectricalSensorContainer(player, inventory);
 	}
 

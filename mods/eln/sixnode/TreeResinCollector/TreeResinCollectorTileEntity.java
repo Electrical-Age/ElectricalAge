@@ -27,7 +27,7 @@ public class TreeResinCollectorTileEntity extends TileEntity{
 	
 	@Override
 	public boolean canUpdate() {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
@@ -91,7 +91,7 @@ public class TreeResinCollectorTileEntity extends TileEntity{
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.readFromNBT(nbt);
 		occupancy = nbt.getFloat("occupancy");
 	//	woodDirection = Direction.readFromNBT(nbt, "woodDirection");

@@ -13,11 +13,11 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.Eln;
-import mods.eln.PlayerManager;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
+import mods.eln.server.PlayerManager;
 import mods.eln.wiki.Data;
 
 public class BatteryItem extends GenericItemUsingDamageDescriptor implements IItemEnergyBattery{
@@ -46,7 +46,7 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addPortable(newItemStack());
 	}
@@ -64,7 +64,7 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Charge speed: " + (int) chargePower + "W");
 		list.add("Discharge speed: " + (int) dischargePower + "W");
@@ -84,25 +84,25 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 
 	@Override
 	public double getEnergyMax(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return energyStorage;
 	}
 
 	@Override
 	public double getChargePower(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return chargePower;
 	}
 
 	@Override
 	public double getDischagePower(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return dischargePower;
 	}
 
 	@Override
 	public int getPriority(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return priority;
 	}
 
@@ -117,7 +117,7 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
@@ -130,7 +130,7 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 
 	@Override
 	public void electricalItemUpdate(ItemStack stack,double time) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 

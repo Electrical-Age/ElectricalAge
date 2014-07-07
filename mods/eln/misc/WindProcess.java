@@ -1,6 +1,5 @@
 package mods.eln.misc;
 
-import mods.eln.INBTTReady;
 import mods.eln.sim.IProcess;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -36,7 +35,7 @@ public class WindProcess implements IProcess,INBTTReady{
 	}
 
 	public void newWindTarget() {
-		// TODO Auto-generated method stub
+		
 		float next = (float) (Math.pow(Math.random(),3.0)*20);
 		windTarget += (next - windTarget)*0.7;
 	}

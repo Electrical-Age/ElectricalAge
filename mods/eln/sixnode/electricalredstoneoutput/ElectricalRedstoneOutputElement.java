@@ -8,12 +8,12 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateInput;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalGateInput;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -26,7 +26,7 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
     	slowProcessList.add(slowProcess);
 	}
 
-	public NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate",true);
+	public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate",true);
 	public ElectricalRedstoneOutputSlowProcess slowProcess = new ElectricalRedstoneOutputSlowProcess(this);
 
 	

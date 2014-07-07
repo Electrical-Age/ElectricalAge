@@ -5,12 +5,12 @@ package mods.eln.transparentnode.thermaldissipatorpassive;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,7 +21,7 @@ import net.minecraft.item.ItemStack;
 
 public class ThermalDissipatorPassiveElement extends TransparentNodeElement{
 	ThermalDissipatorPassiveDescriptor descriptor;
-	NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
+	NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
 	
 
 	
@@ -45,33 +45,33 @@ public class ThermalDissipatorPassiveElement extends TransparentNodeElement{
 	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		if(side == Direction.YN || side == Direction.YP || lrdu != lrdu.Down) return null;
 		return thermalLoad;
 	}
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		if(side == Direction.YN || side == Direction.YP || lrdu != lrdu.Down) return 0;
 		return node.maskThermal;
 	}
 
 	@Override
 	public String multiMeterString(Direction side) {
-		// TODO Auto-generated method stub
+		
 		return "";
 	}
 
 	@Override
 	public String thermoMeterString(Direction side) {
-		// TODO Auto-generated method stub
+		
 		return Utils.plotCelsius("T : ", thermalLoad.Tc) + Utils.plotPower("P : ",thermalLoad.getPower());
 	}
 

@@ -11,14 +11,14 @@ import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateInputOutput;
-import mods.eln.node.NodeElectricalGateOutputProcess;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalGateInputOutput;
+import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,8 +29,8 @@ import com.serotonin.modbus4j.exception.IllegalDataAddressException;
 public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 	
 	
-	public NodeElectricalGateInputOutput[] ioGate = new NodeElectricalGateInputOutput[4];
-	public NodeElectricalGateOutputProcess[] ioGateProcess = new NodeElectricalGateOutputProcess[4];
+	public NbtElectricalGateInputOutput[] ioGate = new NbtElectricalGateInputOutput[4];
+	public NbtElectricalGateOutputProcess[] ioGateProcess = new NbtElectricalGateOutputProcess[4];
 
 
 	HashMap<Integer,ServerWirelessTxStatus> wirelessTxStatusList = new HashMap<Integer,ServerWirelessTxStatus>();
@@ -49,8 +49,8 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 		super(sixNode,side,descriptor);
 
 		for(int idx = 0;idx < 4;idx++){
-			ioGate[idx] = new NodeElectricalGateInputOutput("ioGate"+idx);
-			ioGateProcess[idx] = new NodeElectricalGateOutputProcess("ioGateProcess"+idx,ioGate[idx]);
+			ioGate[idx] = new NbtElectricalGateInputOutput("ioGate"+idx);
+			ioGateProcess[idx] = new NbtElectricalGateOutputProcess("ioGateProcess"+idx,ioGate[idx]);
 			
 			electricalLoadList.add(ioGate[idx]);
 			electricalComponentList.add(ioGateProcess[idx]);
@@ -124,7 +124,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
+		
 		super.destroy();
 		removeFromServer();
 		
@@ -139,13 +139,13 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		
 		
@@ -153,7 +153,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 			stream.writeInt(station);
 			stream.writeUTF(name);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -190,7 +190,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 			
 			tx.writeTo(packet);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -210,7 +210,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 			
 			rx.writeTo(packet);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -230,7 +230,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 			packet.writeInt(rx.uuid);
 			packet.writeBoolean(rx.connected);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -249,7 +249,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 		try {
 			packet.writeByte(ClientModbusActivityEvent);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -266,7 +266,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 		try {
 			packet.writeByte(ClientModbusErrorEvent);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -423,14 +423,14 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 				
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	
 	}
 	/*
 	public String getType() {
-		// TODO Auto-generated method stub
+		
 		return "Probe";
 	}
 */
@@ -458,7 +458,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.writeToNBT(nbt);
 		nbt.setInteger("station", station);
 		nbt.setString("name", name);
@@ -483,7 +483,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.readFromNBT(nbt);
 		station = nbt.getInteger("station");
 		name = nbt.getString("name");
@@ -505,7 +505,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 	
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
@@ -550,7 +550,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 
 	@Override
 	public byte getExceptionStatus() {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
@@ -591,7 +591,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 
 	@Override
 	public byte[] getReportSlaveIdData() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -601,7 +601,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 
 	@Override
 	public int getSlaveId() {
-		// TODO Auto-generated method stub
+		
 		return station;
 	}
 

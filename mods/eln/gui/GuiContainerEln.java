@@ -118,7 +118,7 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 
     @Override
     public void drawScreen(int x, int y, float f) {
-    	// TODO Auto-generated method stub
+    	
     	super.drawScreen(x, y, f);
     	
     }
@@ -132,7 +132,7 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 	
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 	
@@ -167,7 +167,7 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 	}
 	@Override
 	protected void drawGuiContainerForegroundLayer(int mx, int my) {
-		// TODO Auto-generated method stub
+		
 		super.drawGuiContainerForegroundLayer(mx, my);
 		helper.draw2(mx, my);
 		ArrayList<String> list = new ArrayList<String>();

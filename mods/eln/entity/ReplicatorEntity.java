@@ -58,16 +58,16 @@ public class ReplicatorEntity extends EntityMob {
 			f.setAccessible(true);		
 			f.set(this, true);
 		} catch (NoSuchFieldException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}*/
 
@@ -100,14 +100,14 @@ public class ReplicatorEntity extends EntityMob {
 	
 	@Override
 	protected void despawnEntity() {
-		// TODO Auto-generated method stub
+		
 		//Utils.println("Replicator despawn");
 		super.despawnEntity();
 	}
 	
 	@Override
 	public boolean attackEntityAsMob(Entity e) {
-		// TODO Auto-generated method stub
+		
 		if(e instanceof ReplicatorEntity){
 			this.hunger -= 0.8;
 			((ReplicatorEntity)e).hunger += 0.8;	
@@ -126,7 +126,7 @@ public class ReplicatorEntity extends EntityMob {
 	
 	@Override
 	protected void updateAITick() {
-		// TODO Auto-generated method stub
+		
 		super.updateAITick();
 //		Utils.print(hunger + " ");
 		hunger += 0.05/hungerTime;
@@ -210,7 +210,7 @@ public class ReplicatorEntity extends EntityMob {
     public static ArrayList<ItemStack> dropList = new ArrayList<ItemStack>();
     @Override
     protected void dropFewItems(boolean par1, int par2) {
-    	// TODO Auto-generated method stub
+    	
     	this.entityDropItem(dropList.get(new Random().nextInt(dropList.size())).copy(), 0.5f);
     	if(isSpawnedFromWeather == true){
     		if(Math.random() < 0.33){

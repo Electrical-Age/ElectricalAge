@@ -14,8 +14,8 @@ import mods.eln.gui.HelperStdContainer;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
-import mods.eln.node.SixNodeElementInventory;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.six.SixNodeElementInventory;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 
@@ -95,7 +95,7 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
 
     @Override
     protected void preDraw(float f, int x, int y) {
-    	// TODO Auto-generated method stub
+    	
     	super.preDraw(f, x, y);
     	if(!render.controleExternal)
     		externalControl.displayString = "Internal Control";
@@ -130,7 +130,7 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
     
     @Override
     public void guiObjectEvent(IGuiObject object) {
-    	// TODO Auto-generated method stub
+    	
     	super.guiObjectEvent(object);
         if(object == externalControl)
         {
@@ -154,7 +154,7 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
     
     @Override
     protected void postDraw(float f, int x, int y) {
-    	// TODO Auto-generated method stub
+    	
     	super.postDraw(f, x, y);
         //drawString( 27, 51+17 + 3, Utils.plotPower("Power", render.power));
 
@@ -164,7 +164,7 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
 
 	@Override
 	protected GuiHelperContainer newHelper() {
-		// TODO Auto-generated method stub
+		
 		return new HelperStdContainer(this);
 	}
 }

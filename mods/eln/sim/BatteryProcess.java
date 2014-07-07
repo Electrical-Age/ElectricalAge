@@ -32,7 +32,7 @@ public class BatteryProcess implements IProcess {
 
 	@Override
 	public void process(double time) {
-		// TODO Auto-generated method stub
+		
 //		Utils.print("*");
 		Q -= voltageSource.getCurrent()*time;
 		
@@ -145,7 +145,7 @@ public class BatteryProcess implements IProcess {
 	}
 
 	public double getDischargeCurrent() {
-		// TODO Auto-generated method stub
+		
 		return voltageSource.getI();
 	}
 }

@@ -1,6 +1,5 @@
 package mods.eln.transparentnode.heatfurnace;
 
-import mods.eln.BasicContainer;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
@@ -10,6 +9,7 @@ import mods.eln.item.CombustionChamber;
 import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorSlot;
+import mods.eln.misc.BasicContainer;
 import mods.eln.node.INodeContainer;
 import mods.eln.node.NodeBase;
 import mods.eln.sim.RegulatorType;
@@ -34,16 +34,16 @@ public class HeatFurnaceContainer extends BasicContainer implements INodeContain
 				new GenericItemUsingDamageSlot(inventory, combustrionChamberId,8+ 18,58,descriptor.combustionChamberMax, CombustionChamber.class,SlotSkin.medium,new String[]{"Combustion Chamber Slot"}),
 			});
 		this.node = node;
-		// TODO Auto-generated constructor stub
+		
 	}
 	@Override
 	public NodeBase getNode() {
-		// TODO Auto-generated method stub
+		
 		return node;
 	}
 	@Override
 	public int getRefreshRateDivider() {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 

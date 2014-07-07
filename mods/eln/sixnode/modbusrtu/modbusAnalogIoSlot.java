@@ -3,26 +3,26 @@ package mods.eln.sixnode.modbusrtu;
 import com.google.common.base.CaseFormat;
 
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeElectricalGateInputOutput;
-import mods.eln.node.NodeElectricalGateOutputProcess;
+import mods.eln.sim.nbt.NbtElectricalGateInputOutput;
+import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 
 public class modbusAnalogIoSlot extends ModbusSlot{
 
 	
 	
-	public modbusAnalogIoSlot(int offset, int range,NodeElectricalGateInputOutput gate,NodeElectricalGateOutputProcess gateProcess) {
+	public modbusAnalogIoSlot(int offset, int range,NbtElectricalGateInputOutput gate,NbtElectricalGateOutputProcess gateProcess) {
 		super(offset, range);
 		this.gate = gate;
 		this.gateProcess = gateProcess;
 	}
 
-	NodeElectricalGateInputOutput gate;
-	NodeElectricalGateOutputProcess gateProcess;
+	NbtElectricalGateInputOutput gate;
+	NbtElectricalGateOutputProcess gateProcess;
 	
 	
 	@Override
 	public boolean getCoil(int id) {
-		// TODO Auto-generated method stub
+		
 		switch (id) {
 		case 0:
 			return gateProcess.isHighImpedance();

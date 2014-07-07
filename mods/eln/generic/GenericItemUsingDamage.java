@@ -35,7 +35,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 	public GenericItemUsingDamage() {
 		super();
 		setHasSubtypes(true);
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	public void setDefaultElement(Descriptor descriptor)

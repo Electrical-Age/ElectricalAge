@@ -70,7 +70,7 @@ public abstract class GuiScreenEln extends GuiScreen implements GuiTextFieldElnO
 
     @Override
     public void drawScreen(int x, int y, float f) {
-    	// TODO Auto-generated method stub
+    	
     	super.drawScreen(x, y, f);
 		preDraw(f, x, y);
 		helper.mouseMove(x,y);
@@ -89,7 +89,7 @@ public abstract class GuiScreenEln extends GuiScreen implements GuiTextFieldElnO
 	
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 

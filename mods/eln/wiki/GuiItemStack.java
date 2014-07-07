@@ -116,7 +116,7 @@ public class GuiItemStack extends Gui implements IGuiObject{
 
 	@Override
 	public boolean ikeyTyped(char key, int code) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
@@ -135,19 +135,19 @@ public class GuiItemStack extends Gui implements IGuiObject{
 
 	@Override
 	public void imouseMove(int x, int y) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void imouseMovedOrUp(int x, int y, int witch) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void translate(int x, int y) {
-		// TODO Auto-generated method stub
+		
 		this.posX +=x;
 		this.posY +=y;
 	}
@@ -155,7 +155,7 @@ public class GuiItemStack extends Gui implements IGuiObject{
 	
 	@Override
 	public int getYMax() {
-		// TODO Auto-generated method stub
+		
 		return posY + h;
 	}
 	

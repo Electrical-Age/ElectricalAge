@@ -86,7 +86,7 @@ public class ClientKeyHandler {
 			stream.writeByte(id);
 	        stream.writeBoolean(state);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 

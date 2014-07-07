@@ -164,7 +164,7 @@ public class GuiGroup extends Gui implements IGuiObject,IGuiObjectObserver{
 	}
 	@Override
 	public int getYMax() {
-		// TODO Auto-generated method stub
+		
 		return posY + h;
 	}
 	

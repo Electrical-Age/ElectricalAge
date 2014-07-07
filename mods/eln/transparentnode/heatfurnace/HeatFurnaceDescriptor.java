@@ -15,7 +15,7 @@ import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.node.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.FurnaceProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalLoadInitializer;
@@ -73,7 +73,7 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor{
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addThermal(newItemStack());
 	}
@@ -117,7 +117,7 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor{
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
@@ -136,7 +136,7 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor{
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Provides heat when fuelled.");
 		list.add(Utils.plotPower("Power :", nominalPower));

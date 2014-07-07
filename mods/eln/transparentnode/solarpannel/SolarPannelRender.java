@@ -11,10 +11,10 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.RcInterpolator;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElementInventory;
-import mods.eln.node.TransparentNodeElementRender;
-import mods.eln.node.TransparentNodeEntity;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNodeElementRender;
+import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -27,7 +27,7 @@ public class SolarPannelRender extends TransparentNodeElementRender {
 			TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
 		this.descriptor = (SolarPannelDescriptor) descriptor;
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	RcInterpolator interpol = new RcInterpolator(1f);
@@ -76,7 +76,7 @@ public class SolarPannelRender extends TransparentNodeElementRender {
 
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkUnserialize(stream);
 
 		short read;
@@ -100,7 +100,7 @@ public class SolarPannelRender extends TransparentNodeElementRender {
 			renderPreProcess = null;
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -119,7 +119,7 @@ public class SolarPannelRender extends TransparentNodeElementRender {
 
 			sendPacketToServer(bos);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -129,13 +129,13 @@ public class SolarPannelRender extends TransparentNodeElementRender {
 
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new SolarPannelGuiDraw(player, inventory, this);
 	}
 
 	@Override
 	public boolean cameraDrawOptimisation() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 

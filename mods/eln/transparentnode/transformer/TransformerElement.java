@@ -9,15 +9,15 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.process.TransformerInterSystemProcess;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
@@ -27,8 +27,8 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 
 public class TransformerElement extends TransparentNodeElement {
-	public NodeElectricalLoad primaryLoad = new NodeElectricalLoad("primaryLoad");
-	public NodeElectricalLoad secondaryLoad = new NodeElectricalLoad("secondaryLoad");
+	public NbtElectricalLoad primaryLoad = new NbtElectricalLoad("primaryLoad");
+	public NbtElectricalLoad secondaryLoad = new NbtElectricalLoad("secondaryLoad");
 
 	public VoltageSource primaryVoltageSource = new VoltageSource("primaryVoltageSource",primaryLoad, null );
 	public VoltageSource secondaryVoltageSource = new VoltageSource("secondaryVoltageSource",secondaryLoad, null);
@@ -109,7 +109,7 @@ public class TransformerElement extends TransparentNodeElement {
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
+		
 		/*switch (type) {
 			case 0:
 				tranformerProcess.setRatio(2);
@@ -201,36 +201,36 @@ public class TransformerElement extends TransparentNodeElement {
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new TransformerContainer(player, inventory);
 	}
 
 	public float getLightOpacity() {
-		// TODO Auto-generated method stub
+		
 		return 1.0f;
 	}
 
 	@Override
 	public IInventory getInventory() {
-		// TODO Auto-generated method stub
+		
 		return inventory;
 	}
 
 	@Override
 	public void onGroundedChangedByClient() {
-		// TODO Auto-generated method stub
+		
 		super.onGroundedChangedByClient();
 		computeInventory();
 		reconnect();
@@ -238,7 +238,7 @@ public class TransformerElement extends TransparentNodeElement {
 
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		try {
 			if(inventory.getStackInSlot(0) == null)
@@ -256,7 +256,7 @@ public class TransformerElement extends TransparentNodeElement {
 
 			node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

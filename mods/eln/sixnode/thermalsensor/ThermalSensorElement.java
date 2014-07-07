@@ -9,15 +9,15 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateOutputProcess;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
-import mods.eln.node.SixNodeElementInventory;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -41,10 +41,10 @@ public class ThermalSensorElement extends SixNodeElement {
 
 
 	public ThermalSensorDescriptor descriptor;
-	public NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
-	public NodeElectricalLoad outputGate = new NodeElectricalLoad("outputGate");
+	public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
+	public NbtElectricalLoad outputGate = new NbtElectricalLoad("outputGate");
 	
-	public NodeElectricalGateOutputProcess outputGateProcess = new NodeElectricalGateOutputProcess("outputGateProcess",outputGate);
+	public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess",outputGate);
 	public ThermalSensorProcess slowProcess = new ThermalSensorProcess(this);
 	
 	
@@ -67,7 +67,7 @@ public class ThermalSensorElement extends SixNodeElement {
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.readFromNBT(nbt);
         byte value = nbt.getByte("front");
         front = LRDU.fromInt((value>>0) & 0x3);
@@ -78,7 +78,7 @@ public class ThermalSensorElement extends SixNodeElement {
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.writeToNBT(nbt);
 		nbt.setByte("front",(byte) ((front.toInt()<<0)));
 		nbt.setByte("typeOfSensor", (byte) typeOfSensor);
@@ -88,7 +88,7 @@ public class ThermalSensorElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 
 		if(front == lrdu) return outputGate;
 		
@@ -97,7 +97,7 @@ public class ThermalSensorElement extends SixNodeElement {
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		if(descriptor.temperatureOnly ==false)
 		{
 			if(inventory.getStackInSlot(ThermalSensorContainer.cableSlotId) != null){
@@ -114,8 +114,6 @@ public class ThermalSensorElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		// TODO Auto-generated method stub4
-
 		if(descriptor.temperatureOnly==false)
 		{
 			if(inventory.getStackInSlot(ThermalSensorContainer.cableSlotId) != null){
@@ -136,20 +134,20 @@ public class ThermalSensorElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		// TODO Auto-generated method stub
+		
 		return "";//Utils.plotUIP(electricalLoad.Uc, electricalLoad.getCurrent());
 	}
 
 	@Override
 	public String thermoMeterString() {
-		// TODO Auto-generated method stub
+		
 		return Utils.plotCelsius("T :", thermalLoad.Tc);
 	}
 
 
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte( (front.toInt()<<4) + typeOfSensor);
@@ -157,7 +155,7 @@ public class ThermalSensorElement extends SixNodeElement {
 			stream.writeFloat(highValue);
 			Utils.serialiseItemStack(stream,inventory.getStackInSlot(ThermalSensorContainer.cableSlotId));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -237,7 +235,7 @@ public class ThermalSensorElement extends SixNodeElement {
 
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkUnserialize(stream);
 		try {
 			switch(stream.readByte())
@@ -255,7 +253,7 @@ public class ThermalSensorElement extends SixNodeElement {
 
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		
@@ -266,13 +264,13 @@ public class ThermalSensorElement extends SixNodeElement {
 	
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new ThermalSensorContainer(player, inventory);
 	}
 	

@@ -12,12 +12,12 @@ public class ElectricalPickaxe extends ElectricalTool {
 	public ElectricalPickaxe(String name, float strengthOn, float strengthOff,
 			double energyStorage, double energyPerBlock, double chargePower) {
 		super(name, strengthOn, strengthOff, energyStorage, energyPerBlock, chargePower);
-		// TODO Auto-generated constructor stub
+		
 	}
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addPortable(newItemStack());
 	}

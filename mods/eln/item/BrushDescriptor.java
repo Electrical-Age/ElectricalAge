@@ -25,7 +25,7 @@ public class BrushDescriptor  extends GenericItemUsingDamageDescriptor
 
 	@Override
 	public String getName(ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		int color = getColor(stack),life = getLife(stack);
 		if(color == 15 && life == 0)
 			return "Empty " + super.getName(stack);
@@ -35,7 +35,7 @@ public class BrushDescriptor  extends GenericItemUsingDamageDescriptor
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
+		
 		super.setParent(item, damage);
 		Data.addWiring(newItemStack());
 	}
@@ -59,7 +59,7 @@ public class BrushDescriptor  extends GenericItemUsingDamageDescriptor
 	
 	@Override
 	public NBTTagCompound getDefaultNBT() {
-		// TODO Auto-generated method stub
+		
 		NBTTagCompound nbt = new NBTTagCompound();
 		nbt.setInteger("life", 32);
 		return nbt;
@@ -67,7 +67,7 @@ public class BrushDescriptor  extends GenericItemUsingDamageDescriptor
 	
 	@Override
 	public ItemStack newItemStack(int size) {
-		// TODO Auto-generated method stub
+		
 
 		return super.newItemStack(size);
 	}
@@ -76,7 +76,7 @@ public class BrushDescriptor  extends GenericItemUsingDamageDescriptor
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
-		// TODO Auto-generated method stub
+		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
 		list.add("Life : " + itemStack.getTagCompound().getInteger("life"));

@@ -34,7 +34,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 	public GenericItemBlockUsingDamage(Block b) {
 		super(b);
 		setHasSubtypes(true);
-		// TODO Auto-generated constructor stub
+		
 	}
 	
 	public void setDefaultElement(Descriptor descriptor)

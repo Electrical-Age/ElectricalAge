@@ -1,11 +1,11 @@
 package mods.eln.transparentnode.transformer;
 
-import mods.eln.BasicContainer;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.FerromagneticCoreDescriptor;
-import mods.eln.node.SixNodeItemSlot;
+import mods.eln.misc.BasicContainer;
+import mods.eln.node.six.SixNodeItemSlot;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -26,7 +26,7 @@ public class TransformerContainer extends BasicContainer {
 				//	new SlotFilter(inventory,1,62 + 18,17,1,new ItemStackFilter[]{new ItemStackFilter(Eln.sixNodeBlock,0xFF,Eln.electricalCableId)})
 			});
 		
-		// TODO Auto-generated constructor stub
+		
 	}
 
 

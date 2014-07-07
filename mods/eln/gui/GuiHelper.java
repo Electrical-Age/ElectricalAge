@@ -222,13 +222,13 @@ public class GuiHelper {
     }
 
 	public void drawString(int x, int y, int color, String str) {
-		// TODO Auto-generated method stub
+		
 		Minecraft.getMinecraft().fontRenderer.drawString(str, screen.width/2 -xSize/2 + x , screen.height/2 -ySize/2 + y, color);
 	}
 
 
 	public void draw2(int x, int y) {
-		// TODO Auto-generated method stub
+		
 		for(IGuiObject o : objectList)
 		{
 			o.idraw2(x, y);

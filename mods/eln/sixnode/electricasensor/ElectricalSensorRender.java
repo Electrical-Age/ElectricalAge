@@ -19,10 +19,10 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.NodeBase;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElementInventory;
-import mods.eln.node.SixNodeElementRender;
-import mods.eln.node.SixNodeEntity;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElementInventory;
+import mods.eln.node.six.SixNodeElementRender;
+import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -56,7 +56,7 @@ public class ElectricalSensorRender extends SixNodeElementRender{
 	/*
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return descriptor.cableRender;
 	}
 	*/
@@ -68,7 +68,7 @@ public class ElectricalSensorRender extends SixNodeElementRender{
 	CableRenderDescriptor cableRender = null;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.publishUnserialize(stream);
 		try {
 			Byte b;
@@ -80,7 +80,7 @@ public class ElectricalSensorRender extends SixNodeElementRender{
 			cableRender = ElectricalCableDescriptor.getCableRender(Utils.unserialiseItemStack(stream));
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}	
 
@@ -105,7 +105,7 @@ public class ElectricalSensorRender extends SixNodeElementRender{
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new ElectricalSensorGui(player,inventory,this);
 	}
 }

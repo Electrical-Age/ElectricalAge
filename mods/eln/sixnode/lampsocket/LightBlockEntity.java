@@ -6,10 +6,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import mods.eln.Eln;
-import mods.eln.INBTTReady;
 
 import mods.eln.ghost.GhostElement;
 import mods.eln.misc.Coordonate;
+import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -57,7 +57,7 @@ public class LightBlockEntity extends TileEntity{
 
 		@Override
 		public void writeToNBT(NBTTagCompound nbt, String str) {
-			// TODO Auto-generated method stub
+			
 			nbt.setByte(str + "value",value);
 			nbt.setInteger(str + "timeout",timeout);			
 		}
@@ -99,7 +99,7 @@ public class LightBlockEntity extends TileEntity{
 	}*/
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.writeToNBT(nbt);
 		int idx = 0;
 		for(LightHandle l :lightList){
@@ -111,7 +111,7 @@ public class LightBlockEntity extends TileEntity{
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.readFromNBT(nbt);
 		int size = nbt.getInteger("lightNbr");
 		for(int idx = 0;idx < size;idx++){
@@ -222,7 +222,7 @@ public class LightBlockEntity extends TileEntity{
 		((LightBlockEntity)coord.getTileEntity()).remplaceLight(oldLight,newLight);		
 	}*/
 	/*public int getClientLight() {
-		// TODO Auto-generated method stub
+		
 		return clientLight;
 	}
 	

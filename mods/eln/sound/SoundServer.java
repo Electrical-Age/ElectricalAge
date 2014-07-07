@@ -57,7 +57,7 @@ public class SoundServer {
 		    		Utils.sendPacketToClient(bos,player);
 		    }
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			
 		}		

@@ -1,11 +1,11 @@
 package mods.eln.sixnode.batterycharger;
 
-import mods.eln.BasicContainer;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.gui.SlotWithSkinAndComment;
 import mods.eln.item.MachineBoosterDescriptor;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
+import mods.eln.misc.BasicContainer;
 import mods.eln.misc.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;

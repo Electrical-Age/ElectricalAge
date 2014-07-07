@@ -10,13 +10,13 @@ public class ConstSymbole implements ISymbole{
 	}
 	@Override
 	public double getValue() {
-		// TODO Auto-generated method stub
+		
 		return value;
 	}
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
+		
 		return name;
 	}
 

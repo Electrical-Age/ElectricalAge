@@ -6,19 +6,19 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodePeriodicPublishProcess;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ElectricalStackMachineProcess;
 import mods.eln.sim.ElectricalStackMachineProcess.ElectricalStackMachineProcessObserver;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
@@ -31,7 +31,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
 
-	NodeElectricalLoad electricalLoad = new NodeElectricalLoad("electricalLoad");	
+	NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");	
 	Resistor electricalResistor = new Resistor(electricalLoad,null);	
 	
 	//NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");

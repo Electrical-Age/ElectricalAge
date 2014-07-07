@@ -7,22 +7,22 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalLoad;
 import mods.eln.node.NodePeriodicPublishProcess;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.PowerSource;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 
 public class WaterTurbineElement extends TransparentNodeElement{
 
-	NodeElectricalLoad positiveLoad = new NodeElectricalLoad("positiveLoad");
+	NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
 
 	PowerSource powerSource = new PowerSource("powerSource",positiveLoad);
 	
@@ -56,13 +56,13 @@ public class WaterTurbineElement extends TransparentNodeElement{
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		if(lrdu != LRDU.Down) return 0;
 		if(side == front) return NodeBase.maskElectricalPower;
 		return 0;
@@ -70,13 +70,13 @@ public class WaterTurbineElement extends TransparentNodeElement{
 
 	@Override
 	public String multiMeterString(Direction side) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public String thermoMeterString(Direction side) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -103,19 +103,19 @@ public class WaterTurbineElement extends TransparentNodeElement{
 	
 	@Override
 	public IInventory getInventory() {
-		// TODO Auto-generated method stub
+		
 		return inventory;
 	}
 	
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new WaterTurbineContainer(this.node, player, inventory);
 	}
 
@@ -123,12 +123,12 @@ public class WaterTurbineElement extends TransparentNodeElement{
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		try {
 			stream.writeFloat((float) (powerSource.getP()/descriptor.nominalPower));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		
@@ -136,7 +136,7 @@ public class WaterTurbineElement extends TransparentNodeElement{
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 

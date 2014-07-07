@@ -9,16 +9,16 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateInput;
-import mods.eln.node.NodeFurnaceProcess;
 import mods.eln.node.NodePeriodicPublishProcess;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalGateInput;
+import mods.eln.sim.nbt.NbtFurnaceProcess;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
@@ -33,9 +33,9 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class HeatFurnaceElement extends TransparentNodeElement{
 	
-	public NodeElectricalGateInput electricalCmdLoad = new NodeElectricalGateInput("electricalCmdLoad",true);
-	public NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
-	public NodeFurnaceProcess furnaceProcess = new NodeFurnaceProcess("furnaceProcess",thermalLoad);
+	public NbtElectricalGateInput electricalCmdLoad = new NbtElectricalGateInput("electricalCmdLoad",true);
+	public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
+	public NbtFurnaceProcess furnaceProcess = new NbtFurnaceProcess("furnaceProcess",thermalLoad);
 	public HeatFurnaceInventoryProcess inventoryProcess = new HeatFurnaceInventoryProcess(this);
 	
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(4, 64, this);
@@ -71,7 +71,7 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		return electricalCmdLoad;
 	}
 
@@ -83,7 +83,7 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		// TODO Auto-generated method stub
+		
 		if((side == front.left() || side == front.right()) && lrdu == LRDU.Down)  return NodeBase.maskElectricalInputGate;
 		if(side == front.getInverse() && lrdu == LRDU.Down)	return NodeBase.maskThermal;
 		return 0;
@@ -91,13 +91,13 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 
 	@Override
 	public String multiMeterString(Direction side) {
-		// TODO Auto-generated method stub
+		
 		return "";
 	}
 
 	@Override
 	public String thermoMeterString(Direction side) {
-		// TODO Auto-generated method stub
+		
 		return Utils.plotCelsius("T:", thermalLoad.Tc);
 	}
 
@@ -116,7 +116,7 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 	
@@ -126,7 +126,7 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		try {
 			stream.writeBoolean(getControlExternal());
@@ -139,26 +139,26 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 			serialiseItemStack(stream,inventory.getStackInSlot(HeatFurnaceContainer.combustibleId));
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
 	
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new HeatFurnaceContainer(node,player, inventory,descriptor);
 	}
 	
 	@Override
 	public IInventory getInventory() {
-		// TODO Auto-generated method stub
+		
 		return inventory;
 	}
 
@@ -197,7 +197,7 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 				return packetType;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		return unserializeNulldId;
@@ -227,7 +227,7 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 	}
 	@Override
 	public void inventoryChange(IInventory inventory) {
-		// TODO Auto-generated method stub
+		
 		super.inventoryChange(inventory);
 		
 
@@ -255,7 +255,7 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.writeToNBT(nbt);
 		
 		nbt.setBoolean("takeFuel", takeFuel);
@@ -264,7 +264,7 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
+		
 		super.readFromNBT(nbt);
 		takeFuel = nbt.getBoolean("takeFuel");
 		controlExternal = nbt.getBoolean("controlExternal");

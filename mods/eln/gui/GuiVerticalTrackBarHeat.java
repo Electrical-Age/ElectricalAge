@@ -4,7 +4,7 @@ public class GuiVerticalTrackBarHeat extends GuiVerticalTrackBar{
 
 	public GuiVerticalTrackBarHeat(int xPosition, int yPosition, int width, int height,GuiHelper helper) {
 		super(xPosition, yPosition, width, height,helper);
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	public float temperatureHit = 0;

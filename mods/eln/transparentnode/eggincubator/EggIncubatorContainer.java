@@ -1,16 +1,16 @@
 package mods.eln.transparentnode.eggincubator;
 
-import mods.eln.BasicContainer;
 import mods.eln.Eln;
-import mods.eln.ItemStackFilter;
-import mods.eln.SlotFilter;
 import mods.eln.generic.GenericItemUsingDamageSlot;
+import mods.eln.gui.ItemStackFilter;
+import mods.eln.gui.SlotFilter;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.FerromagneticCoreDescriptor;
+import mods.eln.misc.BasicContainer;
 import mods.eln.node.INodeContainer;
 import mods.eln.node.Node;
 import mods.eln.node.NodeBase;
-import mods.eln.node.SixNodeItemSlot;
+import mods.eln.node.six.SixNodeItemSlot;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;

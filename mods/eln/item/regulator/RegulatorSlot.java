@@ -21,7 +21,7 @@ public class RegulatorSlot extends GenericItemUsingDamageSlot{
 
 	@Override
 	public boolean isItemValid(ItemStack itemStack) {
-		// TODO Auto-generated method stub
+		
 		if(!super.isItemValid(itemStack)) return false;
 		IRegulatorDescriptor element = (IRegulatorDescriptor) IRegulatorDescriptor.getDescriptor(itemStack);
 		for(RegulatorType t : type)

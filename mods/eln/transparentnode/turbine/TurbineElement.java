@@ -8,17 +8,17 @@ import mods.eln.misc.FunctionTable;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.PowerSource;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.VoltageSource;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
@@ -31,13 +31,13 @@ public class TurbineElement extends TransparentNodeElement{
 	private static final double[]  voltageFunctionTable = {0.000,0.5,0.8,0.9,0.95,1.0,1.1,1.2};
 	private static FunctionTable voltageFunction = new FunctionTable(voltageFunctionTable,1.2);
 
-	public NodeElectricalLoad inputLoad = new NodeElectricalLoad("inputLoad");
-	public NodeElectricalLoad positiveLoad = new NodeElectricalLoad("positiveLoad");
+	public NbtElectricalLoad inputLoad = new NbtElectricalLoad("inputLoad");
+	public NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
 
 	public Resistor inputToTurbinResistor = new Resistor(inputLoad,positiveLoad);
 	
-	public NodeThermalLoad warmLoad = new NodeThermalLoad("warmLoad");
-	public NodeThermalLoad coolLoad = new NodeThermalLoad("coolLoad");
+	public NbtThermalLoad warmLoad = new NbtThermalLoad("warmLoad");
+	public NbtThermalLoad coolLoad = new NbtThermalLoad("coolLoad");
 
 	public VoltageSource electricalPowerSourceProcess = new VoltageSource("PowerSource",positiveLoad,null); 
 	public TurbineThermalProcess turbineThermaltProcess = new TurbineThermalProcess(this);
@@ -88,20 +88,20 @@ public class TurbineElement extends TransparentNodeElement{
 	
 	@Override
 	public void connectJob() {
-		// TODO Auto-generated method stub
+		
 		super.connectJob();
 		Eln.simulator.mna.addProcess(turbineElectricalProcess);
 	}
 	@Override
 	public void disconnectJob() {
-		// TODO Auto-generated method stub
+		
 		super.disconnectJob();
 		Eln.simulator.mna.removeProcess(turbineElectricalProcess);
 	}
 	
 	@Override
 	public IInventory getInventory() {
-		// TODO Auto-generated method stub
+		
 		return inventory;
 	}
 	@Override
@@ -181,33 +181,33 @@ public class TurbineElement extends TransparentNodeElement{
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 	
 	
 	@Override
 	public boolean hasGui() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new TurbineContainer(node, player, inventory);
 	}
 
 
 	public float getLightOpacity() {
-		// TODO Auto-generated method stub
+		
 		return 1.0f;
 	}
 	
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkSerialize(stream);
 		node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
 	}

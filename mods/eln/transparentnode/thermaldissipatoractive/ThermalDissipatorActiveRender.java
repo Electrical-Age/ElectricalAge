@@ -5,10 +5,10 @@ import java.io.IOException;
 
 import mods.eln.client.FrameTime;
 import mods.eln.misc.RcInterpolator;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElementRender;
-import mods.eln.node.TransparentNodeEntity;
-import mods.eln.node.TransparentNodeRender;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElementRender;
+import mods.eln.node.transparent.TransparentNodeEntity;
+import mods.eln.node.transparent.TransparentNodeRender;
 
 public class ThermalDissipatorActiveRender extends TransparentNodeElementRender{
 	ThermalDissipatorActiveDescriptor descriptor;
@@ -38,12 +38,12 @@ public class ThermalDissipatorActiveRender extends TransparentNodeElementRender{
 	float powerFactor;
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkUnserialize(stream);
 		try {
 			powerFactor = stream.readFloat();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}

@@ -3,7 +3,7 @@ package mods.eln.sixnode.electricaldatalogger;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
-import mods.eln.INBTTReady;
+import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.sim.PhysicalConstant;
 import net.minecraft.client.Minecraft;

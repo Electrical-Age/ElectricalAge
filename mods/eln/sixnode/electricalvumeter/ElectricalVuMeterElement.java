@@ -12,14 +12,14 @@ import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalGateInput;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.NodeThermalLoad;
-import mods.eln.node.SixNode;
-import mods.eln.node.SixNodeDescriptor;
-import mods.eln.node.SixNodeElement;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalGateInput;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -36,7 +36,7 @@ public class ElectricalVuMeterElement extends SixNodeElement {
     	slowProcessList.add(slowProcess);
 	}
 
-	public NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate",true);
+	public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate",true);
 	public ElectricalVuMeterSlowProcess slowProcess = new ElectricalVuMeterSlowProcess(this);
 	LRDU front;
 	ElectricalVuMeterDescriptor descriptor;

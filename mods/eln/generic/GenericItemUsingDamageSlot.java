@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mods.eln.Eln;
-import mods.eln.ItemStackFilter;
 import mods.eln.gui.ISlotSkin;
 import mods.eln.gui.ISlotWithComment;
+import mods.eln.gui.ItemStackFilter;
 import mods.eln.gui.SlotWithSkin;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -71,7 +71,7 @@ public class GenericItemUsingDamageSlot extends SlotWithSkin implements ISlotWit
     
     @Override
     public int getSlotStackLimit() {
-    	// TODO Auto-generated method stub
+    	
     	//return super.getSlotStackLimit();
     	return stackLimit;
     }

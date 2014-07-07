@@ -3,7 +3,7 @@ package mods.eln.transparentnode.computercraftio;
 import mods.eln.misc.Coordonate;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
-import mods.eln.node.TransparentNode;
+import mods.eln.node.transparent.TransparentNode;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import dan200.computercraft.api.peripheral.IPeripheral;

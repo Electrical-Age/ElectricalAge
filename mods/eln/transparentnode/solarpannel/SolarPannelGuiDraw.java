@@ -12,8 +12,8 @@ import mods.eln.gui.GuiVerticalTrackBarHeat;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
-import mods.eln.node.SixNodeElementInventory;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.six.SixNodeElementInventory;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -67,7 +67,7 @@ public class SolarPannelGuiDraw extends GuiContainerEln {
 
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
-		// TODO Auto-generated method stub
+		
 		super.guiObjectEvent(object);
     	if(vuMeterTemperature == object)
     	{
@@ -76,7 +76,7 @@ public class SolarPannelGuiDraw extends GuiContainerEln {
 	}
 	@Override
 	protected void preDraw(float f, int x, int y) {
-		// TODO Auto-generated method stub
+		
 		super.preDraw(f, x, y);
         if(render.pannelAlphaSyncNew) syncVumeter();
         //vuMeterTemperature.temperatureHit = (float) (SolarPannelSlowProcess.getSolarAlpha(render.tileEntity.worldObj));
@@ -91,14 +91,14 @@ public class SolarPannelGuiDraw extends GuiContainerEln {
 	}
 	@Override
 	protected void postDraw(float f, int x, int y) {
-		// TODO Auto-generated method stub
+		
 		super.postDraw(f, x, y);
 		//drawString(8, 6,"Alpha " + render.pannelAlphaSyncNew);
 	}
 
 	@Override
 	protected GuiHelperContainer newHelper() {
-		// TODO Auto-generated method stub
+		
 		return new GuiHelperContainer(this, 176, 166,8,84);
 	}
 

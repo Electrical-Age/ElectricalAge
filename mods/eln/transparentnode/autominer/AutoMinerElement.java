@@ -9,14 +9,14 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeElectricalLoad;
-import mods.eln.node.TransparentNode;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElement;
-import mods.eln.node.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
@@ -26,7 +26,7 @@ import net.minecraft.inventory.IInventory;
 public class AutoMinerElement extends TransparentNodeElement  {
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this);
 	
-	NodeElectricalLoad inPowerLoad = new NodeElectricalLoad("inPowerLoad");
+	NbtElectricalLoad inPowerLoad = new NbtElectricalLoad("inPowerLoad");
 	AutoMinerSlowProcess slowProcess = new AutoMinerSlowProcess(this);
 	Resistor powerResistor = new Resistor(inPowerLoad,null);
 
@@ -110,7 +110,7 @@ public class AutoMinerElement extends TransparentNodeElement  {
 	
 	@Override
 	public void onBreakElement() {
-		// TODO Auto-generated method stub
+		
 		super.onBreakElement();
 		slowProcess.onBreakElement();
 	

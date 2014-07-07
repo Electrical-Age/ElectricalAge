@@ -7,8 +7,8 @@ import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.Vec3;
 
-import mods.eln.INBTTReady;
 import mods.eln.misc.Coordonate;
+import mods.eln.misc.INBTTReady;
 import mods.eln.sim.IProcess;
 
 public class WirelessSignalRxProcess implements IProcess,INBTTReady{

@@ -6,9 +6,9 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import mods.eln.Eln;
-import mods.eln.INBTTReady;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
+import mods.eln.misc.INBTTReady;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
@@ -24,7 +24,7 @@ public class ElectricalWindSensorSlowProcess implements IProcess ,INBTTReady{
 	final float premonitionTime = 120;
 	@Override
 	public void process(double time) {
-		// TODO Auto-generated method stub
+		
 		timeCounter += time;
 		if(timeCounter > refreshPeriode)
 		{

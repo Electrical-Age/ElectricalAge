@@ -3,7 +3,7 @@ package mods.eln.sixnode.diode;
 import java.util.List;
 
 import mods.eln.misc.IFunction;
-import mods.eln.node.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalLoadInitializer;

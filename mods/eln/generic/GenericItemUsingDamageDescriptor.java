@@ -127,18 +127,18 @@ public class GenericItemUsingDamageDescriptor {
 	}
 
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		// TODO Auto-generated method stub
+		
 
 	}
 
@@ -166,18 +166,18 @@ public class GenericItemUsingDamageDescriptor {
 	}
 
 	public boolean onDroppedByPlayer(ItemStack item, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 
 	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	public boolean onBlockStartBreak(ItemStack itemstack, int x, int y, int z,
 			EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 

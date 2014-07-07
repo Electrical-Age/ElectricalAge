@@ -10,10 +10,10 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.TransparentNodeDescriptor;
-import mods.eln.node.TransparentNodeElementInventory;
-import mods.eln.node.TransparentNodeElementRender;
-import mods.eln.node.TransparentNodeEntity;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNodeElementRender;
+import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -73,13 +73,13 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		// TODO Auto-generated method stub
+		
 		return new HeatFurnaceGuiDraw(player, inventory, this);
 	}
 
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
+		
 		super.networkUnserialize(stream);
 		try {
 			controleExternal = stream.readBoolean();
@@ -111,7 +111,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 				boot = false;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 	}
@@ -141,7 +141,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 
 			sendPacketToServer(bos);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -160,7 +160,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 
 			sendPacketToServer(bos);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -168,7 +168,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 
 	@Override
 	public boolean cameraDrawOptimisation() {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 }

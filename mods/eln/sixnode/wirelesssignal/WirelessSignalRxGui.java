@@ -17,7 +17,7 @@ public class WirelessSignalRxGui extends GuiScreenEln{
 	
 	@Override
 	public void initGui() {
-		// TODO Auto-generated method stub
+		
 		super.initGui();
 		channel = newGuiTextField(6, 6, 150);
 		channel.setText(render.channel);
@@ -26,7 +26,7 @@ public class WirelessSignalRxGui extends GuiScreenEln{
 	
 	@Override
 	protected GuiHelper newHelper() {
-		// TODO Auto-generated method stub
+		
 		return new GuiHelper(this, 150+12, 12+12);
 	}
 

@@ -4,8 +4,8 @@ import org.omg.CORBA.INITIALIZE;
 
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.item.ThermalIsolatorElement;
-import mods.eln.node.TransparentNodeElementInventory;
-import mods.eln.node.TransparentNodeElementRender;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.sim.IProcess;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
