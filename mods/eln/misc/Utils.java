@@ -952,6 +952,11 @@ public class Utils {
 
 	}
 
+	
+	public static Side getSide(){
+		return FMLCommonHandler.instance().getEffectiveSide();
+	}
+	
 	public static void printSide(String string) {
 		Utils.println(string);
 	}

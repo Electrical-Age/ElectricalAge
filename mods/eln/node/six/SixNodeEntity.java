@@ -25,6 +25,8 @@ import net.minecraft.world.chunk.Chunk;
 
 public class SixNodeEntity extends NodeBlockEntity {
 	//boolean[] syncronizedSideEnable = new boolean[6];
+	
+	
 	public SixNodeElementRender[] elementRenderList = new SixNodeElementRender[6];
 	short[] elementRenderIdList = new short[6];
 

@@ -2,6 +2,7 @@ package mods.eln.misc;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
+import java.util.HashSet;
 
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
@@ -584,5 +585,25 @@ public class UtilsClient {
 		if (uuid > -1)
 			uuid = Integer.MIN_VALUE;
 		return uuid++;
+	}
+	
+	
+	static HashSet<Integer> glListsAllocated = new HashSet<Integer>();
+	public static int glGenListsSafe(){
+		int id =  GL11.glGenLists(1);
+		glListsAllocated.add(id);
+		return id;
+	}
+	
+	public static void glDeleteListsSafe(int id){
+		glListsAllocated.remove(id);
+		GL11.glDeleteLists(id, 1);
+	}
+	
+	public static void glDeleteListsAllSafe(){
+		for(Integer id : glListsAllocated){
+			GL11.glDeleteLists(id, 1);
+		}
+		glListsAllocated.clear();
 	}
 }

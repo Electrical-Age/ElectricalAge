@@ -45,6 +45,7 @@ public class ClientProxy extends CommonProxy {
 		FMLCommonHandler.instance().bus().register(VersionCheckerHandler.getInstance());
 	//	FMLCommonHandler.instance().bus().register();
 		new FrameTime();
+		new ConnectionListener();
 	}
 	public static UuidManager uuidManager;
 	public static SoundClientEventListener soundClientEventListener;
