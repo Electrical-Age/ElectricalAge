@@ -30,7 +30,7 @@ public class ElectricalPickaxe extends ElectricalTool {
         		break;
         	}
         }
-        Utils.println(value);
+       // Utils.println("****" + value);
 		return value;
 	}
 

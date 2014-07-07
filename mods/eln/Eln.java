@@ -310,7 +310,7 @@ public class Eln {
 	public static ModbusServer modbusServer;
 
 	public static Simulator simulator = null;
-
+	public static ItemEnergyInventoryProcess itemEnergyInventoryProcess;
 	public static CreativeTabs creativeTab;
 
 	public static Item swordCopper, hoeCopper, shovelCopper, pickaxeCopper, axeCopper;
@@ -760,7 +760,7 @@ public class Eln {
 	public static WindProcess wind;
 
 	boolean firstStart = true;
-
+	
 	@EventHandler
 	/* Remember to use the right event! */
 	public void onServerStarting(FMLServerStartingEvent ev) {
@@ -786,7 +786,7 @@ public class Eln {
 			simulator.addSlowProcess(wind = new WindProcess());
 			if(replicatorPop)
 				simulator.addSlowProcess(new ReplicatorPopProcess());
-			simulator.addSlowProcess(new ItemEnergyInventoryProcess());
+			simulator.addSlowProcess(itemEnergyInventoryProcess = new ItemEnergyInventoryProcess());
 
 			ghostManager = (GhostManager) worldServer.mapStorage.loadData(
 					GhostManager.class, "GhostManager");

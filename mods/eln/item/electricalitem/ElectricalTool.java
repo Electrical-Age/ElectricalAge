@@ -48,18 +48,25 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 
 	float strengthOff,strengthOn;
 
-	ResourceLocation rIcon;
-	
-	@Override
-	public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity) {
 
+	
+	ResourceLocation rIcon;
+	@Override
+	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
+		if(entityLiving.worldObj.isRemote) return false;
+		
+		Eln.itemEnergyInventoryProcess.addExclusion(this, 2);
+		return super.onEntitySwing(entityLiving, stack);
+	}
+	@Override
+	public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity) {	
 		if(getStrVsBlock(stack, block) == strengthOn){
 			double e = getEnergy(stack) - energyPerBlock;
 			if(e < 0) e = 0;
 			setEnergy(stack, e);
 		}
 		Utils.println("destroy");
-		return false;
+		return true;
 	}
 	
    // public static final Block[] blocksEffectiveAgainst = new Block[] {Block.cobblestone, Block.stoneDoubleSlab, Block.stoneSingleSlab, Block.stone, Block.sandStone, Block.cobblestoneMossy, Block.oreIron, Block.blockIron, Block.oreCoal, Block.blockGold, Block.oreGold, Block.oreDiamond, Block.blockDiamond, Block.ice, Block.netherrack, Block.oreLapis, Block.blockLapis, Block.oreRedstone, Block.oreRedstoneGlowing, Block.rail, Block.railDetector, Block.railPowered, Block.railActivator};

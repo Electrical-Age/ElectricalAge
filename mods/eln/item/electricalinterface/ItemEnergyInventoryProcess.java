@@ -1,19 +1,16 @@
 package mods.eln.item.electricalinterface;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 
+import mods.eln.Eln;
+import mods.eln.misc.Utils;
+import mods.eln.sim.IProcess;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import cpw.mods.fml.common.FMLCommonHandler;
-import mods.eln.Eln;
-import mods.eln.misc.Utils;
-import mods.eln.node.INodeContainer;
-import mods.eln.node.NodeBase;
-import mods.eln.node.NodeManager;
-import mods.eln.sim.IProcess;
-import mods.eln.wiki.Data;
 
 public class ItemEnergyInventoryProcess implements IProcess {
 
@@ -29,11 +26,61 @@ public class ItemEnergyInventoryProcess implements IProcess {
 		public int p;
 	}
 
+	static class Exclusion {
+		public Exclusion(double timeout, Object o) {
+			this.timeout = timeout;
+			this.o = o;
+			Utils.println("new");
+		}
+
+		public double timeout;
+		public Object o;
+	}
+
+	LinkedList<Exclusion> exclude = new LinkedList<ItemEnergyInventoryProcess.Exclusion>();
+
+	// HashMap<Object, Double> exclude = new HashMap<Object, Double>();
+
+	public void addExclusion(Object o, double timeout) {
+		Exclusion exclusion = null;
+		for (Exclusion e : exclude) {
+			if (e.o == o) {
+				exclusion = e;
+			}
+		}
+
+		if (exclusion == null) {
+			exclusion = new Exclusion(timeout, o);
+			exclude.add(exclusion);
+		}
+
+		exclusion.timeout = timeout;
+	}
+
+	boolean isExcluded(Object o) {
+		for (Exclusion e : exclude) {
+			if (e.o == o) {
+				Utils.println("Exclude");
+				return true;
+			}
+		}
+		return false;
+	}
+
 	static final double energyUpdatePeriod = 0.5;
 	double energyUpdateTimout = energyUpdatePeriod;
 
 	@Override
 	public void process(double time) {
+		Iterator<Exclusion> ie = exclude.iterator();
+		while (ie.hasNext()) {
+			Exclusion e = ie.next();
+			e.timeout -= 0.05;
+			if (e.timeout < 0) {
+				ie.remove();
+			}
+		}
+
 		energyUpdateTimout -= time;
 		if (energyUpdateTimout > 0)
 			return;
@@ -51,28 +98,34 @@ public class ItemEnergyInventoryProcess implements IProcess {
 			for (ItemStack stack : player.inventory.armorInventory) {
 
 				Object o = Utils.getItemObject(stack);
+
 				if (o instanceof IItemEnergyBattery) {
+					if (isExcluded(o))
+						continue;
 					list.add(new Element(stack, (IItemEnergyBattery) o));
 				}
 			}
 			for (ItemStack stack : player.inventory.mainInventory) {
 				Object o = Utils.getItemObject(stack);
+
 				if (o instanceof IItemEnergyBattery) {
+					if (isExcluded(o))
+						continue;
 					list.add(new Element(stack, (IItemEnergyBattery) o));
 				}
 			}
 
-			// ArrayList<Element> listToUpdate = new
-			// ArrayList<ItemEnergyInventoryProcess.Element>(list);
 			for (Element e : list) {
 				e.i.electricalItemUpdate(e.stack, energyUpdatePeriod);
 			}
 
 			if (Eln.saveConfig.infinitPortableBattery) {
-				for(Element e : list){
+				for (Element e : list) {
 					double chargePower = e.i.getChargePower(e.stack);
-					double energy = Math.min( e.i.getEnergyMax(e.stack),
-											  e.i.getEnergy(e.stack) + e.i.getChargePower(e.stack) * time);
+					double energy = Math.min(
+							e.i.getEnergyMax(e.stack),
+							e.i.getEnergy(e.stack)
+									+ e.i.getChargePower(e.stack) * time);
 					e.i.setEnergy(e.stack, energy);
 				}
 			} else {

@@ -39,14 +39,24 @@ public class ElnServerPacket extends Packet {
 	  
 	  public void readPacketData(PacketBuffer p_148837_1_)
 	  {
-	    this.field_149172_a = p_148837_1_.readStringFromBuffer(20);
+	    try {
+			this.field_149172_a = p_148837_1_.readStringFromBuffer(20);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	    this.field_149171_b = new byte[ByteBufUtils.readVarShort(p_148837_1_)];
 	    p_148837_1_.readBytes(this.field_149171_b);
 	  }
 	  
 	  public void writePacketData(PacketBuffer p_148840_1_)
 	  {
-	    p_148840_1_.writeStringToBuffer(this.field_149172_a);
+	    try {
+			p_148840_1_.writeStringToBuffer(this.field_149172_a);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	    ByteBufUtils.writeVarShort(p_148840_1_, this.field_149171_b.length);
 	    p_148840_1_.writeBytes(this.field_149171_b);
 	  }
