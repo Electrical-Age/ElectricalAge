@@ -145,7 +145,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 			list.add("  Voltage : " + (int)electricalNominalVoltage + " V");
 			list.add("  Current : " + (int)(electricalNominalPower / electricalNominalVoltage) + " A");
 			list.add("  Power : " + (int)electricalNominalPower + " W");
-			list.add("  Power lost : " + (int)(electricalNominalPowerDropFactor * electricalNominalPower) + " W/Block");
+		//	list.add("  Power lost : " + (int)(electricalNominalPowerDropFactor * electricalNominalPower) + " W/Block");
 			list.add(Utils.plotOhm("Serial resistor :", electricalNominalRs * 2));
 		}
 	}

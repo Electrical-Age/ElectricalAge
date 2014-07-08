@@ -82,7 +82,7 @@ public class VersionCheckerHandler {
 					// DEV version (not stable)
 					else {
 						msg = Color.RED
-								+ "> Warning: this is a NOT a stable version !";
+								+ "> Warning: this is a version under test !";
 					}
 
 				} catch (Exception e) {

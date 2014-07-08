@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import javax.swing.text.MaskFormatter;
 
-
 import mods.eln.Eln;
 import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Direction;
@@ -21,6 +20,7 @@ import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistorHeatThermalLoad;
+import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
@@ -40,41 +40,67 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 
 	public ElectricalGateSourceElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-		front = LRDU.Left;
-		
-    	electricalLoadList.add(outputGate);
-    	electricalComponentList.add(outputGateProcess);
+		this.descriptor = (ElectricalGateSourceDescriptor) descriptor;
 
-    	this.descriptor = (ElectricalGateSourceDescriptor) descriptor;
+		front = LRDU.Left;
+
+		electricalLoadList.add(outputGate);
+		electricalComponentList.add(outputGateProcess);
+
+		if (this.descriptor.autoReset) {
+			electricalProcessList.add(autoResetProcess = new AutoResetProcess());
+		}
 	}
 
 	public ElectricalGateSourceDescriptor descriptor;
 	public NbtElectricalLoad outputGate = new NbtElectricalLoad("outputGate");
-	
+
 	public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
+
+	public AutoResetProcess autoResetProcess;
+
+	class AutoResetProcess implements IProcess {
+		double timeout = 0;
+		double timeoutDelay = 0.21;
+
+		@Override
+		public void process(double time) {
+			if (timeout > 0) {
+				if (timeout - time < 0) {
+					outputGateProcess.setOutputNormalized(0);
+					needPublish();
+				}
+				timeout -= time;
+			}
+		}
+
+		void reset(){
+			timeout = timeoutDelay;
+		}
+	}
 
 	LRDU front;
 
 	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
 	}
-	
+
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
-        byte value = nbt.getByte("front");
-        front = LRDU.fromInt((value >> 0) & 0x3);
+		byte value = nbt.getByte("front");
+		front = LRDU.fromInt((value >> 0) & 0x3);
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
-		nbt.setByte("front", (byte)((front.toInt() << 0)));
+		nbt.setByte("front", (byte) ((front.toInt() << 0)));
 	}
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(front == lrdu) return outputGate;
+		if (front == lrdu) return outputGate;
 		return null;
 	}
 
@@ -85,7 +111,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu) return NodeBase.maskElectricalOutputGate;
+		if (front == lrdu) return NodeBase.maskElectricalOutputGate;
 		return 0;
 	}
 
@@ -113,7 +139,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 	@Override
 	public void initialize() {
 		Eln.instance.signalCableDescriptor.applyTo(outputGate);
-    	computeElectricalLoad();
+		computeElectricalLoad();
 	}
 
 	@Override
@@ -123,25 +149,27 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 
 	public void computeElectricalLoad() {
 	}
-	
+
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-		
-		if(Utils.isPlayerUsingWrench(entityPlayer)) {
+
+		if (Utils.isPlayerUsingWrench(entityPlayer)) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);
-			return true;	
+			return true;
 		}
-		else if(!Utils.playerHasMeter(entityPlayer) && descriptor.onOffOnly) {
+		else if (!Utils.playerHasMeter(entityPlayer) && descriptor.onOffOnly) {
 			outputGateProcess.state(!outputGateProcess.getOutputOnOff());
 			play(new SoundCommand("random.click").mulVolume(0.3F, 0.6F).smallRange());
+			if(autoResetProcess != null)
+				autoResetProcess.reset();
 			needPublish();
 			return true;
 		}
-		//front = LRDU.fromInt((front.toInt() + 1)&3);
-    	return false;
+		// front = LRDU.fromInt((front.toInt() + 1)&3);
+		return false;
 	}
 
 	public static final byte setVoltagerId = 1;
@@ -150,7 +178,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 	public void networkUnserialize(DataInputStream stream) {
 		super.networkUnserialize(stream);
 		try {
-			switch(stream.readByte()) {
+			switch (stream.readByte()) {
 			case setVoltagerId:
 				outputGateProcess.setU(stream.readFloat());
 				needPublish();
@@ -160,9 +188,9 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public boolean hasGui() {
-		return ! descriptor.onOffOnly;
+		return !descriptor.onOffOnly;
 	}
 }

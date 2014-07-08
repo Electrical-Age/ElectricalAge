@@ -38,6 +38,8 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 	private Obj3DPart led;
 	private Obj3DPart halo;
 	public float speed;
+	public boolean autoReset = false;
+	
 	public ElectricalGateSourceDescriptor(String name, Obj3D obj, boolean onOffOnly) {
 			super(name, ElectricalGateSourceElement.class, ElectricalGateSourceRender.class);
 			this.obj = obj;
@@ -75,6 +77,11 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Provides signal voltage");
 		list.add("from user control");
+	}
+	
+	
+	public void setWithAutoReset(){
+		autoReset = true;
 	}
 	
 	enum ObjType {Pot, Button};

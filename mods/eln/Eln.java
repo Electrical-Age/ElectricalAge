@@ -973,7 +973,7 @@ public class Eln {
 
 			meduimVoltageCableDescriptor = desc;
 
-			desc.setPhysicalConstantLikeNormalCable(MVU, MVP, 0.15 / 20,// electricalNominalVoltage,
+			desc.setPhysicalConstantLikeNormalCable(MVU, MVP, 0.10 / 20,// electricalNominalVoltage,
 																		// electricalNominalPower,
 																		// electricalNominalPowerDrop,
 					MVU * 1.3, MVP * 1.2,// electricalMaximalVoltage,
@@ -1533,7 +1533,7 @@ public class Eln {
 					SVU * 1.5, SVP * 1.2,// maximalVoltage, maximalPower
 					cableThermalLoadInitializer.copy(), true);
 
-			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
 
 		{
@@ -1548,7 +1548,7 @@ public class Eln {
 					SVU * 1.5, SVP * 1.2,// maximalVoltage, maximalPower
 					cableThermalLoadInitializer.copy(), true);
 
-			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
 
 	}
@@ -1921,10 +1921,19 @@ public class Eln {
 		{
 			subId = 1;
 
-			name = "Signal Button";
+			name = "Signal Switch";
 
 			desc = new ElectricalGateSourceDescriptor(name, obj.getObj("ledswitch"), true);
 
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		{
+			subId = 8;
+
+			name = "Signal Button";
+
+			desc = new ElectricalGateSourceDescriptor(name, obj.getObj("ledswitch"), true);
+			desc.setWithAutoReset();
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -4299,7 +4308,7 @@ public class Eln {
 	}
 
 	void recipeSwitch() {
-		addRecipe(findItemStack("Signal Switch"),
+		/*addRecipe(findItemStack("Signal Switch"),
 				"  I",
 				" I ",
 				"CAC",
@@ -4315,7 +4324,7 @@ public class Eln {
 				Character.valueOf('R'), new ItemStack(Items.redstone),
 				Character.valueOf('A'), "ingotRubber",
 				Character.valueOf('I'), findItemStack("Copper Cable"),
-				Character.valueOf('C'), findItemStack("Signal Cable"));
+				Character.valueOf('C'), findItemStack("Signal Cable"));*/
 
 		addRecipe(findItemStack("Low Voltage Switch"),
 				"  I",
@@ -5575,8 +5584,18 @@ public class Eln {
 				Character.valueOf('s'), new ItemStack(Items.stick),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
 
-		addRecipe(findItemStack("Signal Button", 1),
+		addRecipe(findItemStack("Signal Switch", 1),
 				" r ",
+				"rRr",
+				" c ",
+				Character.valueOf('M'), findItemStack("Machine Block"),
+				Character.valueOf('c'), findItemStack("Signal Cable"),
+				Character.valueOf('r'), "ingotRubber",
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+				Character.valueOf('R'), new ItemStack(Items.redstone));
+		
+		addRecipe(findItemStack("Signal Button", 1),
+				" R ",
 				"rRr",
 				" c ",
 				Character.valueOf('M'), findItemStack("Machine Block"),

@@ -88,7 +88,9 @@ public class NbtElectricalGateOutputProcess extends Capacitor implements INBTTRe
 		this.U = U;
 	}
 	
-	
+	public double getU() {
+		return U;
+	}
 
 	
 	

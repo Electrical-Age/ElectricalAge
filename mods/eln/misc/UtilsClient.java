@@ -574,7 +574,6 @@ public class UtilsClient {
 	public static void sendPacketToServer(ByteArrayOutputStream bos)
 	{
 		C17PacketCustomPayload packet = new C17PacketCustomPayload(Eln.channelName, bos.toByteArray());
-
 		Eln.eventChannel.sendToServer(new FMLProxyPacket(packet));
 		//Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new FMLProxyPacket(packet));
 	}

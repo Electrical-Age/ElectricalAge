@@ -48,6 +48,7 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 
+import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
@@ -441,14 +442,21 @@ public class Utils {
 
 	public static void sendPacketToClient(ByteArrayOutputStream bos, EntityPlayerMP player)
 	{
-		Profiler p = new Profiler();
+		//Profiler p = new Profiler();
 		//p.add("A");
-		ElnServerPacket packet = new ElnServerPacket(Eln.channelName, bos.toByteArray());
-		ByteBuf b = Unpooled.buffer().capacity(bos.size()).setBytes(0, bos.toByteArray());
+		//ElnServerPacket packet = new ElnServerPacket(Eln.channelName, bos.toByteArray());
+		//ByteBuf b = Unpooled.buffer().capacity(bos.size()).setBytes(0, bos.toByteArray());
 		//p.add("B");
-		Eln.eventChannel.sendTo(new FMLProxyPacket(b, Eln.channelName), player);
+		//Eln.eventChannel.sendTo(new FMLProxyPacket(b, Eln.channelName), player);
 		//p.stop();
 		//Utils.println(p);
+		
+		S3FPacketCustomPayload packet = new S3FPacketCustomPayload(Eln.channelName, bos.toByteArray());
+		player.playerNetServerHandler.sendPacket(packet);
+		
+		//FMLCommonHandler.instance().getMinecraftServerInstance().getEln.eventChannel.sendTo(new FMLProxyPacket(packet),player);
+		
+		
 	}
 
 	/*public static void sendPacketToPlayer(
