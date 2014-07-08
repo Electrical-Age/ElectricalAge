@@ -86,12 +86,14 @@ public class VoltageSource extends Bipole implements ISubSystemProcessI,INBTTRea
 	public void readFromNBT(NBTTagCompound nbt, String str) {
 		str += name;
 		setU(nbt.getDouble(str + "U"));
+		currentState.state = (nbt.getDouble(str + "Istate"));
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		str += name;
 		nbt.setDouble(str + "U",u);
+		nbt.setDouble(str + "Istate",currentState.state);
 	}
 
 	public double getP() {

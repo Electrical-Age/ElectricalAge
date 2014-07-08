@@ -1029,7 +1029,7 @@ public class Eln {
 			ThermalCableDescriptor desc = new ThermalCableDescriptor(name,
 					1000 - 20, -200, // thermalWarmLimit, thermalCoolLimit,
 					500, 2000, // thermalStdT, thermalStdPower,
-					4, 400, 0.1,// thermalStdDrop, thermalStdLost, thermalTao,
+					2, 400, 0.1,// thermalStdDrop, thermalStdLost, thermalTao,
 					new CableRenderDescriptor("eln",
 							"sprites/tex_thermalcablebase.png", 4, 4),
 					"Miaou !");// description
@@ -1049,7 +1049,7 @@ public class Eln {
 			ThermalCableDescriptor desc = new ThermalCableDescriptor(name,
 					1000 - 20, -200, // thermalWarmLimit, thermalCoolLimit,
 					500, 2000, // thermalStdT, thermalStdPower,
-					4, 10, 0.1,// thermalStdDrop, thermalStdLost, thermalTao,
+					2, 10, 0.1,// thermalStdDrop, thermalStdLost, thermalTao,
 					new CableRenderDescriptor("eln",
 							"sprites/tex_thermalcablebase.png", 4, 4),
 					"Miaou !");// description
@@ -1959,7 +1959,7 @@ public class Eln {
 															// nominalCombustibleEnergy,
 					2, 500,// int combustionChamberMax,double
 							// combustionChamberPower,
-					new ThermalLoadInitializerByPowerDrop(780, -100, 10, 10) // thermal
+					new ThermalLoadInitializerByPowerDrop(780, -100, 10, 2) // thermal
 			);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -3278,7 +3278,7 @@ public class Eln {
 					obj.getObj("passivethermaldissipatora"),
 					200, -100,// double warmLimit,double coolLimit,
 					250, 30,// double nominalP,double nominalT,
-					10, 4// double nominalTao,double nominalConnectionDrop
+					10, 1// double nominalTao,double nominalConnectionDrop
 
 			);
 
@@ -3299,7 +3299,7 @@ public class Eln {
 												// cableDescriptor,
 					130, -100,// double warmLimit,double coolLimit,
 					200, 30,// double nominalP,double nominalT,
-					10, 4// double nominalTao,double nominalConnectionDrop
+					10, 1// double nominalTao,double nominalConnectionDrop
 
 			);
 
@@ -3320,7 +3320,7 @@ public class Eln {
 												// cableDescriptor,
 					130, -100,// double warmLimit,double coolLimit,
 					200, 30,// double nominalP,double nominalT,
-					10, 4// double nominalTao,double nominalConnectionDrop
+					10, 1// double nominalTao,double nominalConnectionDrop
 
 			);
 

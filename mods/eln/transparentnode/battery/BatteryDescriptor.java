@@ -114,7 +114,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 		lifeNominalLost = 0.5 / electricalStdHalfLife;
 		
 
-		thermalPMax = electricalPMax / electricalU * electricalPMax / electricalU * electricalRs;
+		thermalPMax = electricalPMax / electricalU * electricalPMax / electricalU * electricalRs*2;
 		thermalC = Math.pow(electricalPMax / electricalU, 2) * electricalRs * thermalHeatTime / thermalWarmLimit;
 		thermalRp = thermalWarmLimit / thermalPMax;
 		

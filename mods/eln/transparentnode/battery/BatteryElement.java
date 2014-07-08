@@ -29,6 +29,9 @@ import mods.eln.sim.nbt.NbtBatteryProcess;
 import mods.eln.sim.nbt.NbtBatterySlowProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
+import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
+import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -42,7 +45,11 @@ public class BatteryElement extends TransparentNodeElement  {
 	public NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
 	public VoltageSource voltageSource = new VoltageSource("volSrc",positiveLoad,negativeLoad);
 	
+	
 	public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
+	public ElectricalLoadHeatThermalLoad negativeETProcess = new ElectricalLoadHeatThermalLoad(negativeLoad, thermalLoad);
+	public ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
+	
 	public NbtBatteryProcess batteryProcess = new NbtBatteryProcess(positiveLoad, negativeLoad, null, 0,voltageSource);
 
 	public Resistor dischargeResistor = new Resistor(positiveLoad, negativeLoad);
@@ -80,7 +87,7 @@ public class BatteryElement extends TransparentNodeElement  {
 	   	electricalComponentList.add(cutSwitch);
 	   	thermalLoadList.add(thermalLoad);
 	   	electricalProcessList.add(batteryProcess);
-	    //	thermalProcessList.add(negativeETProcess);
+	   	thermalProcessList.add(negativeETProcess);
 
 	   	slowProcessList.add(batterySlowProcess);
     	slowProcessList.add(inventoryProcess);
@@ -88,7 +95,12 @@ public class BatteryElement extends TransparentNodeElement  {
     	grounded = false;
     	batteryProcess.setIMax(this.descriptor.IMax);
     	
-    	
+		slowProcessList.add(thermalWatchdog);
+		
+		thermalWatchdog
+		 .set(thermalLoad)
+		 .setTMax(this.descriptor.thermalWarmLimit)
+		 .set(new WorldExplosion(this).machineExplosion());
 	}
 
 	public boolean hasOverVoltageProtection() {
