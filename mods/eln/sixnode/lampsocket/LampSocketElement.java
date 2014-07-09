@@ -24,6 +24,7 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
@@ -304,9 +305,8 @@ public class LampSocketElement extends SixNodeElement {
 	}
 
 	@Override
-	public void destroy() {
-		
-		super.destroy();
+	public void destroy(EntityPlayerMP entityPlayer) {
+		super.destroy(entityPlayer);
 		lampProcess.destructor();
 	}
 

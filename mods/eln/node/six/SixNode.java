@@ -681,5 +681,14 @@ public class SixNode extends Node {
 		
 		return Eln.sixNodeBlock;
 	}
+	
+	@Override
+	public void globalBoot() {
+		super.globalBoot();
+		for(SixNodeElement e : sideElementList){
+			if(e == null) continue;
+			e.globalBoot();
+		}
+	}
 
 }

@@ -198,10 +198,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 	 }*/
 	public abstract void initialize();
 
-	public void destroy()
-	{
-		destroy(null);
-	}
+
 
 	@Override
 	public void stop(int uuid) {
@@ -416,6 +413,10 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 
 	public boolean useUuid() {
 		return uuid != 0;
+	}
+
+	public void globalBoot() {
+
 	}
 
 }

@@ -740,5 +740,9 @@ public abstract class NodeBase {
 	public abstract void initializeFromNBT();
 	
 	
+	public void globalBoot() {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

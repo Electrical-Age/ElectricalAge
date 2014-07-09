@@ -123,9 +123,8 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 	}
 
 	@Override
-	public void destroy() {
-		
-		super.destroy();
+	public void destroy(EntityPlayerMP entityPlayer) {
+		super.destroy(entityPlayer);
 		removeFromServer();
 		
 		// Remove all TX signals.

@@ -1,4 +1,4 @@
-package mods.eln.sixnode.wirelesssignal;
+package mods.eln.sixnode.wirelesssignal.rx;
 
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiScreenEln;

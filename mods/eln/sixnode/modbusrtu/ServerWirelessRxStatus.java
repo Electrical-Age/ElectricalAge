@@ -5,8 +5,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import com.google.common.base.CaseFormat;
 
 import mods.eln.misc.Utils;
-import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
-import mods.eln.sixnode.wirelesssignal.WirelessSignalTxElement;
+import mods.eln.sixnode.wirelesssignal.tx.IWirelessSignalTx;
+import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 
 public class ServerWirelessRxStatus extends WirelessRxStatus implements IModbusSlot{
 
@@ -28,13 +28,16 @@ public class ServerWirelessRxStatus extends WirelessRxStatus implements IModbusS
 	}
 	
 	boolean isConnected(){
-		return null != WirelessSignalTxElement.getBestTx(name, rtu.sixNode.coordonate);
+		return false;
+		//0xEE return null != WirelessSignalTxElement.getBestTx(name, rtu.sixNode.coordonate);
 	}
 	
 	double readWireless(){
-		IWirelessSignalTx tx = WirelessSignalTxElement.getBestTx(name, rtu.sixNode.coordonate);
+		/*IWirelessSignalTx tx = WirelessSignalTxElement.getBestTx(name, rtu.sixNode.coordonate);
 		if(tx == null) return 0;
-		return tx.getValue();
+		return tx.getValue();*/
+		//0xEE
+		return 0;
 	}
 	
 	

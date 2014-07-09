@@ -1,4 +1,4 @@
-package mods.eln.sixnode.wirelesssignal;
+package mods.eln.sixnode.wirelesssignal.rx;
 
 import java.io.DataInputStream;
 import java.io.IOException;

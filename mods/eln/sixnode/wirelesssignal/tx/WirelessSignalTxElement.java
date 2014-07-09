@@ -1,4 +1,4 @@
-package mods.eln.sixnode.wirelesssignal;
+package mods.eln.sixnode.wirelesssignal.tx;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
@@ -33,7 +34,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 
 	WirelessSignalTxDescriptor descriptor;
 	
-
+/*
 	public static IWirelessSignalTx getBestTx(String channel,Coordonate rxCoordonate){
 		IWirelessSignalTx bestTx = null;
 		float bestPower = -1f;
@@ -68,7 +69,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 		}
 		
 		return bestTx;		
-	}
+	}*/
 
 	
 	static public double getVirtualDistance(double distance,Coordonate txC,Coordonate rxC)
@@ -189,13 +190,11 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 	}
 
 	@Override
-	public void destroy() {
-		
+	public void destroy(EntityPlayerMP entityPlayer) {
 		channelRemove(this);
-		super.destroy();
+		super.destroy(entityPlayer);
 	}
-	
-	
+
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
@@ -233,11 +232,6 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 		return channel;
 	}
 
-	@Override
-	public int getGeneration() {
-		
-		return 0;
-	}
 
 	@Override
 	public double getValue() {

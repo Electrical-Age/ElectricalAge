@@ -123,10 +123,12 @@ import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
 import mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor;
 import mods.eln.sixnode.tutorialsign.TutorialSignDescriptor;
 import mods.eln.sixnode.tutorialsign.TutorialSignElement;
+import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
 import mods.eln.sixnode.wirelesssignal.WirelessSignalAnalyserItemDescriptor;
-import mods.eln.sixnode.wirelesssignal.WirelessSignalRxDescriptor;
-import mods.eln.sixnode.wirelesssignal.WirelessSignalTxDescriptor;
-import mods.eln.sixnode.wirelesssignal.WirelessSignalTxElement;
+import mods.eln.sixnode.wirelesssignal.repeater.WirelessSignalRepeaterDescriptor;
+import mods.eln.sixnode.wirelesssignal.rx.WirelessSignalRxDescriptor;
+import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxDescriptor;
+import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import mods.eln.solver.ConstSymbole;
 import mods.eln.solver.ISymbole;
 import mods.eln.sound.SoundCommand;
@@ -754,6 +756,7 @@ public class Eln {
 		modbusServer.destroy();
 		LightBlockEntity.observers.clear();
 		TeleporterElement.teleporterList.clear();
+		IWirelessSignalSpot.spots.clear();
 		playerManager.clear();
 		MinecraftServer server = FMLCommonHandler.instance()
 				.getMinecraftServerInstance();
@@ -844,6 +847,7 @@ public class Eln {
 		nodeServer.stop();
 
 		simulator.stop();
+		
 		tileEntityDestructor.clear();
 		LightBlockEntity.observers.clear();
 		LampSupplyElement.channelMap.clear();
@@ -1812,8 +1816,8 @@ public class Eln {
 
 			desc = new WirelessSignalRxDescriptor(
 					name,
-					obj.getObj("wirelesssignalrx"),
-					false, 0
+					obj.getObj("wirelesssignalrx")
+					
 					);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -1829,20 +1833,25 @@ public class Eln {
 					obj.getObj("wirelesssignaltx"),
 					wirelessTxRange
 					);
+			
+			
+			
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
 		{
-			WirelessSignalRxDescriptor desc;
+			WirelessSignalRepeaterDescriptor desc;
 			subId = 16;
 
 			name = "Wireless Signal Repeater";
 
-			desc = new WirelessSignalRxDescriptor(
+			desc = new WirelessSignalRepeaterDescriptor(
 					name,
 					obj.getObj("wirelesssignalrepeater"),
-					true, wirelessTxRange
+					wirelessTxRange
 					);
+			
+
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 

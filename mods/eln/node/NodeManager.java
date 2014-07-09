@@ -120,6 +120,12 @@ public class NodeManager extends WorldSavedData{
 			}
 
 		}
+		
+		
+		
+		for(NodeBase node : nodes){
+			node.globalBoot();
+		}
 	}
 
 	@Override

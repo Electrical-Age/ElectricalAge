@@ -1,4 +1,4 @@
-package mods.eln.sixnode.wirelesssignal;
+package mods.eln.sixnode.wirelesssignal.repeater;
 
 import org.lwjgl.opengl.GL11;
 
@@ -13,28 +13,29 @@ import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 
-public class WirelessSignalRxDescriptor extends SixNodeDescriptor{
+public class WirelessSignalRepeaterDescriptor extends SixNodeDescriptor{
 
-	public boolean repeater;
+
 	public int range;
 	private Obj3D obj;
 	Obj3DPart main,led;
 
-	public WirelessSignalRxDescriptor(
+	public WirelessSignalRepeaterDescriptor(
 			String name,
 			Obj3D obj,
-			boolean repeater,int range
+			int range
 			) {
-		super(name, WirelessSignalRxElement.class, WirelessSignalRxRender.class);
-		this.repeater = repeater;
+		super(name, WirelessSignalRepeaterElement.class, WirelessSignalRepeaterRender.class);
 		this.range = range;
-		
 		this.obj = obj;
 		if(obj != null){
 			main = obj.getPart("main");
 			led = obj.getPart("led");
 		}
 	}
+	
+	
+	
 	@Override
 	public void setParent(Item item, int damage) {
 		
@@ -69,17 +70,17 @@ public class WirelessSignalRxDescriptor extends SixNodeDescriptor{
 		if(type == ItemRenderType.ENTITY) {
 			GL11.glScalef(2.8f, 2.8f, 2.8f);
 		}
-		draw(false);
+		draw();
 	}
 	
-	public void draw(boolean connection)
+	public void draw()
 	{
 		if(main != null) main.draw();
 		
-		if(led != null){
+		/*if(led != null){
 			UtilsClient.ledOnOffColor(connection);
 			UtilsClient.drawLight(led);
-		}
+		}*/
 	}
 
 }

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -171,10 +172,9 @@ public class LampSupplyElement extends SixNodeElement {
 	}
 
 	@Override
-	public void destroy() {
-		
+	public void destroy(EntityPlayerMP entityPlayer) {	
+		super.destroy(entityPlayer);
 		channelRemove(this);
-		super.destroy();
 	}
 
 	@Override

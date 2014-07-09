@@ -8,7 +8,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.INBTTReady;
-import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
+import mods.eln.sixnode.wirelesssignal.tx.IWirelessSignalTx;
 
 public class WirelessTxStatus implements INBTTReady{
 	WirelessTxStatus(){

@@ -1,13 +1,11 @@
-package mods.eln.sixnode.wirelesssignal;
+package mods.eln.sixnode.wirelesssignal.rx;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -18,16 +16,19 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
+import mods.eln.sixnode.wirelesssignal.aggregator.BiggerAggregator;
+import mods.eln.sixnode.wirelesssignal.aggregator.IWirelessSignalAggregator;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 
-public class WirelessSignalRxElement extends SixNodeElement implements IWirelessSignalTx{
+public class WirelessSignalRxElement extends SixNodeElement{
 
 	NbtElectricalGateOutput outputGate = new NbtElectricalGateOutput("outputGate");
 	NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess",outputGate);
 	
-	public int generation = 1000;
+
 	public String channel = "Default channel";
 	
 	WirelessSignalRxProcess slowProcess = new WirelessSignalRxProcess(this);
@@ -39,16 +40,16 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 		super(sixNode, side, descriptor);
 		
 		this.descriptor = (WirelessSignalRxDescriptor) descriptor;
-		electricalLoadList.add(outputGate);
-		electricalComponentList.add(outputGateProcess);
 		
+		
+		
+		electricalLoadList.add(outputGate);
+		electricalComponentList.add(outputGateProcess);	
 		slowProcessList.add(slowProcess);
 		
 		front = LRDU.Down;
 
 
-		if(this.descriptor.repeater)
-			WirelessSignalTxElement.channelRegister(this);
 	}
 
 	@Override
@@ -111,32 +112,21 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 
 	}
 	
-	@Override
-	public void destroy() {
-		if(this.descriptor.repeater)
-			WirelessSignalTxElement.channelRemove(this);
-		super.destroy();
-	}
+
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		
 		super.writeToNBT(nbt);
 		nbt.setString("channel", channel);
-		nbt.setInteger("generation", generation);
 		nbt.setBoolean("connection", connection);
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		if(this.descriptor.repeater)
-			WirelessSignalTxElement.channelRemove(this);
-		
+
 		super.readFromNBT(nbt);
 		channel = nbt.getString("channel");
-		generation = nbt.getInteger("generation");
 		connection = nbt.getBoolean("connection");
-		if(this.descriptor.repeater)
-			WirelessSignalTxElement.channelRegister(this);
 	}
 
 	@Override
@@ -145,29 +135,6 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 		return sixNode.coordonate;
 	}
 
-	@Override
-	public int getRange() {
-		
-		return descriptor.range;
-	}
-
-	@Override
-	public String getChannel() {
-		
-		return channel;
-	}
-
-	@Override
-	public int getGeneration() {
-		
-		return generation;
-	}
-
-	@Override
-	public double getValue() {
-		
-		return outputGateProcess.getOutputNormalized();
-	}
 	
 	
 	
@@ -180,12 +147,8 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 		try {
 			switch(stream.readByte()){
 			case setChannelId:
-				if(this.descriptor.repeater)
-					WirelessSignalTxElement.channelRemove(this);
 				channel = stream.readUTF();
 				needPublish();
-				if(this.descriptor.repeater)
-					WirelessSignalTxElement.channelRegister(this);
 				break;
 			}
 		} catch (IOException e) {
@@ -212,6 +175,17 @@ public class WirelessSignalRxElement extends SixNodeElement implements IWireless
 			
 			e.printStackTrace();
 		}
-	}	
+	}
+
+	public IWirelessSignalAggregator getAggregator() {
+		// TODO Auto-generated method stub
+		return new BiggerAggregator();
+	}
+
+	
+//	HashMap<String, ArrayList<IWirelessSignalTx>> wirelessTxInRange = new HashMap<String, ArrayList<IWirelessSignalTx>>();
+//	ArrayList<IWirelessSignalSpot> wirelessSpotInRange = new ArrayList<IWirelessSignalSpot>();
+	
+
 
 }

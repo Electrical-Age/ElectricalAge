@@ -4,8 +4,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
-import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
-import mods.eln.sixnode.wirelesssignal.WirelessSignalTxElement;
+import mods.eln.sixnode.wirelesssignal.tx.IWirelessSignalTx;
+import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 
 public class ServerWirelessTxStatus extends WirelessTxStatus implements IWirelessSignalTx,IModbusSlot{
 
@@ -57,11 +57,7 @@ public class ServerWirelessTxStatus extends WirelessTxStatus implements IWireles
 		
 		return name;
 	}
-	@Override
-	public int getGeneration() {
-		
-		return 0;
-	}
+
 	@Override
 	public double getValue() {
 		
