@@ -6,10 +6,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -19,6 +21,9 @@ import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInputOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
+import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
+import mods.eln.sixnode.wirelesssignal.WirelessUtils;
+import mods.eln.sixnode.wirelesssignal.tx.IWirelessSignalTx;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -68,12 +73,23 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 	
 
 
+	HashMap<String, HashSet<IWirelessSignalTx>> txSet = new HashMap<String, HashSet<IWirelessSignalTx>>();
+	HashMap<IWirelessSignalTx, Double> txStrength = new HashMap<IWirelessSignalTx, Double>();	
 	
 	
 	class ModbusRtuSlowProcess implements IProcess{
-
+		double sleepTimer = 0;
+		
 		@Override
 		public void process(double time) {
+			sleepTimer -= time;
+			if(sleepTimer < 0){
+				sleepTimer += Utils.rand(1.2, 2);
+				
+				IWirelessSignalSpot spot = WirelessUtils.buildSpot(getCoordonate(), null, 0);
+				WirelessUtils.getTx(spot, txSet, txStrength);
+			}
+		
 			for (ServerWirelessRxStatus rx : wirelessRxStatusList.values()) {
 				if(rx.isConnected() != rx.connected){
 					rx.connected = ! rx.connected;

@@ -5,6 +5,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import com.google.common.base.CaseFormat;
 
 import mods.eln.misc.Utils;
+import mods.eln.sixnode.wirelesssignal.aggregator.BiggerAggregator;
 import mods.eln.sixnode.wirelesssignal.tx.IWirelessSignalTx;
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 
@@ -28,16 +29,13 @@ public class ServerWirelessRxStatus extends WirelessRxStatus implements IModbusS
 	}
 	
 	boolean isConnected(){
-		return false;
-		//0xEE return null != WirelessSignalTxElement.getBestTx(name, rtu.sixNode.coordonate);
+		return null != rtu.txSet.get(name);
 	}
 	
+	BiggerAggregator aggregator = new BiggerAggregator();
 	double readWireless(){
-		/*IWirelessSignalTx tx = WirelessSignalTxElement.getBestTx(name, rtu.sixNode.coordonate);
-		if(tx == null) return 0;
-		return tx.getValue();*/
-		//0xEE
-		return 0;
+		if(isConnected() == false) return 0;
+		return aggregator.aggregate(rtu.txSet.get(name));
 	}
 	
 	
