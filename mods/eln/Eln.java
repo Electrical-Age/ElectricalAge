@@ -4426,8 +4426,8 @@ public class Eln {
 				Character.valueOf('S'), findItemStack("Signal Antenna"));
 
 		addRecipe(findItemStack("Wireless Signal Repeater"),
-				"  S",
-				"S R",
+				"S S",
+				"R R",
 				"ICI",
 				Character.valueOf('R'), new ItemStack(Items.redstone),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
@@ -5614,7 +5614,7 @@ public class Eln {
 				Character.valueOf('s'), new ItemStack(Items.stick),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
 
-		addRecipe(findItemStack("Signal Switch", 1),
+		addRecipe(findItemStack("Signal Switch", 3),
 				" r ",
 				"rRr",
 				" c ",
@@ -5624,7 +5624,7 @@ public class Eln {
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
 		
-		addRecipe(findItemStack("Signal Button", 1),
+		addRecipe(findItemStack("Signal Button", 3),
 				" R ",
 				"rRr",
 				" c ",
@@ -5633,6 +5633,34 @@ public class Eln {
 				Character.valueOf('r'), "ingotRubber",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
+		
+		addRecipe(findItemStack("Wireless Switch", 3),
+				" a ",
+				"rCr",
+				" r ",
+				Character.valueOf('M'), findItemStack("Machine Block"),
+				Character.valueOf('c'), findItemStack("Signal Cable"),
+				Character.valueOf('C'), findItemStack("Cheap Chip"),
+				Character.valueOf('a'), findItemStack("Signal Antenna"),
+				Character.valueOf('r'), "ingotRubber",
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+				Character.valueOf('R'), new ItemStack(Items.redstone));
+		
+		addRecipe(findItemStack("Wireless Button", 3),
+				" a ",
+				"rCr",
+				" R ",
+				Character.valueOf('M'), findItemStack("Machine Block"),
+				Character.valueOf('c'), findItemStack("Signal Cable"),
+				Character.valueOf('C'), findItemStack("Cheap Chip"),
+				Character.valueOf('a'), findItemStack("Signal Antenna"),
+				Character.valueOf('r'), "ingotRubber",
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+				Character.valueOf('R'), new ItemStack(Items.redstone));
+		
+		
+		//Wireless Switch
+		//Wireless Button
 	}
 
 	private void recipeElectricalDataLogger() {
