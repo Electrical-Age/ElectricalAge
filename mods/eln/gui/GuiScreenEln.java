@@ -9,7 +9,7 @@ import mods.eln.gui.IGuiObject.IGuiObjectObserver;
 import net.minecraft.client.gui.GuiScreen;
 
 public abstract class GuiScreenEln extends GuiScreen implements GuiTextFieldElnObserver, IGuiObjectObserver{
-	GuiHelper helper;
+	protected GuiHelper helper;
 	
 	
 	protected abstract GuiHelper newHelper();

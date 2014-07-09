@@ -19,7 +19,7 @@ public class WirelessSignalTxGui extends GuiScreenEln{
 	public void initGui() {
 		
 		super.initGui();
-		channel = newGuiTextField(6, 6, 150);
+		channel = newGuiTextField(6, 6, 220);
 		channel.setText(render.channel);
 		channel.setComment(0, "Specify the channel");
 	}
@@ -27,7 +27,7 @@ public class WirelessSignalTxGui extends GuiScreenEln{
 	@Override
 	protected GuiHelper newHelper() {
 		
-		return new GuiHelper(this, 150+12, 12+12);
+		return new GuiHelper(this, 220+12, 12+12);
 	}
 
 	

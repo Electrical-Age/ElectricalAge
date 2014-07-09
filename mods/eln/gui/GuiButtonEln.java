@@ -1,5 +1,7 @@
 package mods.eln.gui;
 
+import java.util.ArrayList;
+
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
@@ -16,6 +18,12 @@ public class GuiButtonEln extends GuiButton implements IGuiObject{
     {
     	super(0, x, y, width, height, str);
     }
+    
+	GuiHelper helper;
+	
+	public void setHelper(GuiHelper helper) {
+		this.helper = helper;
+	}
     public void setObserver(IGuiObjectObserver observer)
     {
     	this.observer = observer;
@@ -64,7 +72,8 @@ public class GuiButtonEln extends GuiButton implements IGuiObject{
 	}
 	@Override
 	public void idraw2(int x, int y) {
-		
+		if(helper != null && visible  && x >= xPosition && y >= yPosition && x < xPosition + width && y < yPosition + height)
+			helper.drawHoveringText(comment, x, y, Minecraft.getMinecraft().fontRenderer);
 		
 	}
 	
@@ -73,5 +82,14 @@ public class GuiButtonEln extends GuiButton implements IGuiObject{
 	public void translate(int x, int y) {
 		this.xPosition += x;
 		this.yPosition += y;
+	}
+	
+	ArrayList<String> comment = new ArrayList<String>();
+	public void setComment(int line,String comment)
+	{
+		if(this.comment.size() < line + 1)
+			this.comment.add(line, comment);
+		else
+			this.comment.set(line, comment);
 	}
 }

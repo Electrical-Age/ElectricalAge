@@ -162,6 +162,7 @@ public class WirelessSignalRxElement extends SixNodeElement{
 			switch(stream.readByte()){
 			case setChannelId:
 				channel = stream.readUTF();
+				slowProcess.sleepTimer = 0;
 				needPublish();
 				break;
 			
