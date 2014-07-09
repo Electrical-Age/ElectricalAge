@@ -29,48 +29,17 @@ import com.google.common.base.Function;
 
 public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 
-	private Obj3DPart rot;
-	private Obj3DPart main;
-	private Obj3D obj;
-	private float rotAlphaOn, rotAlphaOff;
+
 	public boolean onOffOnly;
-	private Obj3DPart lever;
-	private Obj3DPart led;
-	private Obj3DPart halo;
-	public float speed;
+
 	public boolean autoReset = false;
-	
-	public ElectricalGateSourceDescriptor(String name, Obj3D obj, boolean onOffOnly) {
-			super(name, ElectricalGateSourceElement.class, ElectricalGateSourceRender.class);
-			this.obj = obj;
-			if(obj != null){
-				main = obj.getPart("main");
 
-				if(obj.getString("type").equals("pot")) {
-					objType = ObjType.Pot;
-					rot = obj.getPart("rot");
-					if(rot != null) {
-						rotAlphaOff = rot.getFloat("alphaOff");
-						rotAlphaOn = rot.getFloat("alphaOn");
-						speed = rot.getFloat("speed");
-					}
-				}
-				
-				if(obj.getString("type").equals("button")) {
-					lever = obj.getPart("button");
-					led = obj.getPart("led");
-					halo = obj.getPart("halo");	
+	public ElectricalGateSourceDescriptor(String name, ElectricalGateSourceRenderObj render, boolean onOffOnly) {
+		super(name, ElectricalGateSourceElement.class, ElectricalGateSourceRender.class);
+		this.render = render;
+		this.onOffOnly = onOffOnly;
+	}
 
-					objType = ObjType.Button;
-					if(lever != null) {
-						speed = lever.getFloat("speed");
-						leverTx = lever.getFloat("tx");
-					}
-				}
-			}
-			this.onOffOnly = onOffOnly;
-		}
-	
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
@@ -78,79 +47,48 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 		list.add("Provides signal voltage");
 		list.add("from user control");
 	}
-	
-	
-	public void setWithAutoReset(){
+
+	public void setWithAutoReset() {
 		autoReset = true;
 	}
-	
-	enum ObjType {Pot, Button};
+
+	enum ObjType {
+		Pot, Button
+	};
+
 	ObjType objType;
 	float leverTx;
+	ElectricalGateSourceRenderObj render;
 	void draw(float factor, float distance, TileEntity e) {
-		switch (objType) {
-		case Button:
-			if(main != null)main.draw();
-			
-			GL11.glTranslatef(leverTx * factor, 0f, 0f);
-			if(lever != null) lever.draw();
-			
-		//	if(factor < 0.5f) {
-			//	GL11.glColor3f(234f / 255f, 80 / 255f, 0f);
-			UtilsClient.ledOnOffColor(factor > 0.5f);
-			UtilsClient.disableLight();
-				if(led != null) led.draw();
-				UtilsClient.enableBlend();
-				
-				if(halo != null) {
-					if(e == null)
-						UtilsClient.drawLight(halo);
-					else {
-						Color c = UtilsClient.ledOnOffColorC(factor > 0.5f);
-						UtilsClient.drawHaloNoLightSetup(halo, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, e, false);
-					}
-				}
-			
-				UtilsClient.disableBlend();
-				UtilsClient.enableLight();
-		//	}
-		/*	else {
-				if(led != null) led.draw();
-			}*/
-
-			break;
-		case Pot:
-			if(main != null) main.draw();
-			if(rot != null) rot.draw(factor * (rotAlphaOn - rotAlphaOff) + rotAlphaOff, 1f, 0f, 0f);
-			break;
-		}
+		render.draw(factor, distance, e);
 	}
-	
+
 	@Override
 	public void setParent(Item item, int damage) {
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
-	
+
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
-	
+
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		return true;
 	}
+
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		
+
 		return true;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		GL11.glScalef(1.5f, 1.5f, 1.5f);
-		if(type == ItemRenderType.INVENTORY) GL11.glScalef(1.5f, 1.5f, 1.5f);
+		if (type == ItemRenderType.INVENTORY) GL11.glScalef(1.5f, 1.5f, 1.5f);
 		draw(0f, 1f, null);
 	}
 }

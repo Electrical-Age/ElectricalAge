@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 
 import mods.eln.misc.Coordonate;
-import mods.eln.sixnode.wirelesssignal.tx.IWirelessSignalTx;
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;

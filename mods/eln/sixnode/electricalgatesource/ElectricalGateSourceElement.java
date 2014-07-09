@@ -48,7 +48,8 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 		electricalComponentList.add(outputGateProcess);
 
 		if (this.descriptor.autoReset) {
-			electricalProcessList.add(autoResetProcess = new AutoResetProcess());
+			slowProcessList.add(autoResetProcess = new AutoResetProcess());
+			autoResetProcess.reset();
 		}
 	}
 

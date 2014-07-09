@@ -1,4 +1,4 @@
-package mods.eln.sixnode.wirelesssignal.tx;
+package mods.eln.sixnode.wirelesssignal;
 
 import mods.eln.misc.Coordonate;
 

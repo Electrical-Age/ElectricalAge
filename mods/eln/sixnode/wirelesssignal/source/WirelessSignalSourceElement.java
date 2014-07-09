@@ -1,4 +1,4 @@
-package mods.eln.sixnode.wirelesssignal.tx;
+package mods.eln.sixnode.wirelesssignal.source;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -6,74 +6,78 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
-import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
+import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
+import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
 
-public class WirelessSignalTxElement extends SixNodeElement implements IWirelessSignalTx{
+public class WirelessSignalSourceElement extends SixNodeElement implements IWirelessSignalTx{
 
 
 	
 
 	public static HashMap<String, ArrayList<IWirelessSignalTx>> channelMap = new HashMap<String, ArrayList<IWirelessSignalTx>>(); 
 	
-	NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate",false);
 
-	WirelessSignalTxDescriptor descriptor;
+	WirelessSignalSourceDescriptor descriptor;
 	
-
-	
+	public AutoResetProcess autoResetProcess;
+	boolean state = false;
 	
 	public String channel = "Default channel";
 	
-	public WirelessSignalTxElement(SixNode sixNode, Direction side,
+	public WirelessSignalSourceElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-		electricalLoadList.add(inputGate);
 
 		front = LRDU.Down;
-		this.descriptor = (WirelessSignalTxDescriptor) descriptor;
-		channelRegister(this);
+		this.descriptor = (WirelessSignalSourceDescriptor) descriptor;
+		WirelessSignalTxElement.channelRegister(this);
+		
+		if (this.descriptor.autoReset) {
+			slowProcessList.add(autoResetProcess = new AutoResetProcess());
+			autoResetProcess.reset();
+		}
+	}
+	class AutoResetProcess implements IProcess {
+		double timeout = 0;
+		double timeoutDelay = 0.21;
+
+		@Override
+		public void process(double time) {
+			if (timeout > 0) {
+				if (timeout - time < 0) {
+					if(state){
+						state = false;
+						needPublish();
+					}
+				}
+				timeout -= time;
+			}
+		}
+
+		void reset(){
+			timeout = timeoutDelay;
+		}
 	}
 
-	public static void channelRegister(IWirelessSignalTx tx)
-	{
-		String channel = tx.getChannel();
-		ArrayList<IWirelessSignalTx> list = channelMap.get(channel);
-		if(list == null) 
-			channelMap.put(channel,list =  new ArrayList<IWirelessSignalTx>());
-		list.add(tx);
-	}
-	
-	public static void channelRemove(IWirelessSignalTx tx)
-	{
-		String channel = tx.getChannel();
-		ArrayList<IWirelessSignalTx> list = channelMap.get(channel);
-		if(list == null) return;
-		list.remove(tx);
-		if(list.size() == 0)
-			channelMap.remove(channel);
-	}
-	
+
+
 	
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		
-		if(front == lrdu) return inputGate;
+
 		return null;
 	}
 
@@ -85,14 +89,12 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu) return NodeBase.maskElectricalInputGate;
 		return 0;
 	}
 
 	@Override
 	public String multiMeterString() {
-		
-		return inputGate.plot("Input gate");
+		return null;
 	}
 
 	@Override
@@ -111,18 +113,19 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
 		if(Utils.isPlayerUsingWrench(entityPlayer))
-		{
-			front = front.getNextClockwise();
-			sixNode.reconnect();
-			sixNode.setNeedPublish(true);
-			return true;	
-		}
-		return false;
+			return false;	
+		
+		state = ! state;
+		if(state && autoResetProcess != null) autoResetProcess.reset();
+		needPublish();
+		return true;
 	}
 
+	
+	 
 	@Override
 	public void destroy(EntityPlayerMP entityPlayer) {
-		channelRemove(this);
+		WirelessSignalTxElement.channelRemove(this);
 		super.destroy(entityPlayer);
 	}
 
@@ -132,16 +135,19 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 		
 		super.writeToNBT(nbt);
 		nbt.setString("channel", channel);
+		nbt.setBoolean("state", state);
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		
-		channelRemove(this);
+		WirelessSignalTxElement.channelRemove(this);
 		
 		super.readFromNBT(nbt);
 		channel = nbt.getString("channel");
+		state = nbt.getBoolean("state");
+
 		
-		channelRegister(this);
+		WirelessSignalTxElement.channelRegister(this);
 		
 	}
 
@@ -167,7 +173,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 	@Override
 	public double getValue() {
 		
-		return inputGate.getNormalized();
+		return state ? 1.0 : 0.0;
 	}
 
 
@@ -181,10 +187,10 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 		try {
 			switch(stream.readByte()){
 			case setChannelId:
-				channelRemove(this);
+				WirelessSignalTxElement.channelRemove(this);
 				channel = stream.readUTF();
 				needPublish();
-				channelRegister(this);
+				WirelessSignalTxElement.channelRegister(this);
 				break;
 			}
 		} catch (IOException e) {
@@ -199,6 +205,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 		return true;
 	}
 	
+
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
@@ -206,6 +213,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 		super.networkSerialize(stream);
 		try {
 			stream.writeUTF(channel);
+			stream.writeBoolean(state);
 		} catch (IOException e) {
 			
 			e.printStackTrace();

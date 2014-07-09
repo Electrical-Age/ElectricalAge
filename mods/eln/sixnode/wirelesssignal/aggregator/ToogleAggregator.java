@@ -5,7 +5,7 @@ import java.util.Collection;
 import net.minecraft.nbt.NBTTagCompound;
 
 import mods.eln.misc.INBTTReady;
-import mods.eln.sixnode.wirelesssignal.tx.IWirelessSignalTx;
+import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
 
 public class ToogleAggregator extends BiggerAggregator implements INBTTReady{
 

@@ -20,10 +20,18 @@ public class TutorialSignOverlay {
 		int i = 0;
 		i++;
 	}
+	
+	TutorialSignRender oldRender = null;
 	@SubscribeEvent
 	public void render(RenderGameOverlayEvent.Text event) {
 		Minecraft mc = Minecraft.getMinecraft();
 		EntityClientPlayerMP player = mc.thePlayer;
+		
+		if(oldRender != null){
+			oldRender.lightInterpol.setTarget(0);
+			oldRender = null;
+		}
+		
 		int px = MathHelper.floor_double(player.posX),py = MathHelper.floor_double(player.posY),pz = MathHelper.floor_double(player.posZ);
 		int r = 1;
 		World w = player.worldObj;
@@ -56,6 +64,8 @@ public class TutorialSignOverlay {
 		
 		
 		if(best != null){
+			oldRender = best;
+			oldRender.lightInterpol.setTarget(1f);
 			GL11.glPushMatrix();
 			GL11.glScalef(0.5f, 0.5f, 0.5f);
 			int y = 0;

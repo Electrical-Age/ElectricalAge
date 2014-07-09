@@ -14,9 +14,9 @@ import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
+import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
 import mods.eln.sixnode.wirelesssignal.WirelessUtils;
 import mods.eln.sixnode.wirelesssignal.aggregator.IWirelessSignalAggregator;
-import mods.eln.sixnode.wirelesssignal.tx.IWirelessSignalTx;
 
 public class WirelessSignalRepeaterProcess implements IProcess,IWirelessSignalSpot{
 

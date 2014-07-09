@@ -94,6 +94,7 @@ import mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor;
 import mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor;
 import mods.eln.sixnode.electricalentitysensor.ElectricalEntitySensorDescriptor;
 import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor;
+import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceRenderObj;
 import mods.eln.sixnode.electricallightsensor.ElectricalLightSensorDescriptor;
 import mods.eln.sixnode.electricalmath.ElectricalMathDescriptor;
 import mods.eln.sixnode.electricalredstoneinput.ElectricalRedstoneInputDescriptor;
@@ -127,6 +128,7 @@ import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
 import mods.eln.sixnode.wirelesssignal.WirelessSignalAnalyserItemDescriptor;
 import mods.eln.sixnode.wirelesssignal.repeater.WirelessSignalRepeaterDescriptor;
 import mods.eln.sixnode.wirelesssignal.rx.WirelessSignalRxDescriptor;
+import mods.eln.sixnode.wirelesssignal.source.WirelessSignalSourceDescriptor;
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxDescriptor;
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import mods.eln.solver.ConstSymbole;
@@ -219,6 +221,7 @@ public class Eln {
 	public static final String[] objNames = new String[] {
 			"/model/condo200/condo200.obj",
 			"/model/WallClock/WallClock.obj",
+			"/model/TutoPlate/TutoPlate.obj",
 			"/model/relay800/relay800.obj",
 			"/model/hub/hub.obj",
 			"/model/electricalweathersensor/electricalweathersensor.obj",
@@ -1593,7 +1596,7 @@ public class Eln {
 			name = "Tutorial sign";
 
 			TutorialSignDescriptor desc = new TutorialSignDescriptor(
-					name, obj.getObj("voltagesource"));
+					name, obj.getObj("TutoPlate"));
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
@@ -1916,14 +1919,16 @@ public class Eln {
 	void registerElectricalGateSource(int id) {
 		int subId, completId;
 		String name;
-		ElectricalGateSourceDescriptor desc;
-
+		
+		ElectricalGateSourceRenderObj signalsourcepot = new ElectricalGateSourceRenderObj(obj.getObj("signalsourcepot"));
+		ElectricalGateSourceRenderObj ledswitch = new ElectricalGateSourceRenderObj(obj.getObj("ledswitch"));
+		
 		{
 			subId = 0;
 
 			name = "Signal Trimmer";
 
-			desc = new ElectricalGateSourceDescriptor(name, obj.getObj("signalsourcepot"), false);
+			ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, signalsourcepot, false);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -1932,7 +1937,7 @@ public class Eln {
 
 			name = "Signal Switch";
 
-			desc = new ElectricalGateSourceDescriptor(name, obj.getObj("ledswitch"), true);
+			ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, ledswitch, true);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -1941,8 +1946,24 @@ public class Eln {
 
 			name = "Signal Button";
 
-			desc = new ElectricalGateSourceDescriptor(name, obj.getObj("ledswitch"), true);
+			ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, ledswitch, true);
 			desc.setWithAutoReset();
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		{
+			subId = 12;
+
+			name = "Wireless Button";
+
+			WirelessSignalSourceDescriptor desc = new WirelessSignalSourceDescriptor(name, ledswitch,wirelessTxRange, true);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		{
+			subId = 16;
+
+			name = "Wireless Switch";
+
+			WirelessSignalSourceDescriptor desc = new WirelessSignalSourceDescriptor(name, ledswitch,wirelessTxRange, false);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 

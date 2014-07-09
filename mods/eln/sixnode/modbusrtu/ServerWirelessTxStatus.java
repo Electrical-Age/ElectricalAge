@@ -4,7 +4,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
-import mods.eln.sixnode.wirelesssignal.tx.IWirelessSignalTx;
+import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 
 public class ServerWirelessTxStatus extends WirelessTxStatus implements IWirelessSignalTx,IModbusSlot{

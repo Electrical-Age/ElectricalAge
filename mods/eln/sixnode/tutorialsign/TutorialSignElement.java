@@ -90,7 +90,7 @@ public class TutorialSignElement extends SixNodeElement {
 			}		
 		}
 		String text = baliseMap.get(balise);
-		if(text == null) return "No balise found";
+		if(text == null) return "No assosiated text to this beacon";
 		return text;	
 	}
 	

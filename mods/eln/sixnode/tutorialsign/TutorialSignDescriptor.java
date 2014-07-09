@@ -2,27 +2,87 @@ package mods.eln.sixnode.tutorialsign;
 
 import java.util.List;
 
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.UtilsClient;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 
 public class TutorialSignDescriptor extends SixNodeDescriptor {
 
 	private Obj3D obj;
-	private Obj3DPart main;
+	private Obj3DPart main,light,halo;
 
 	public TutorialSignDescriptor(String name, Obj3D obj) {
 		super(name, TutorialSignElement.class, TutorialSignRender.class);
 		this.obj = obj;
 		if(obj != null) {
 			main = obj.getPart("main");
+			light = obj.getPart("light");
+			halo = obj.getPart("halo");
+			
 		}
 	}
 	
-	void draw() {
+	void setupColor(float factor,float alpha){
+		if(factor < 0.5){
+			factor *= 2;
+			float factorN = 1f-factor;
+			GL11.glColor4f(0, 0, 0.4f * factorN ,alpha);
+		}else{
+			factor = (factor - 0.5f)*2;			
+			float factorN = 1f-factor;
+			GL11.glColor4f(0, 1 * factor, 0 ,alpha);
+		}
+	}
+	
+	void draw(float factor) {
+		//GL11.glColor3f(0.8f, 0.8f, 0.8f);
 		if(main != null) main.draw();
+		UtilsClient.disableLight();
+		
+		setupColor(factor,1);
+		if(light != null){
+			light.draw();
+		}
+		
+		UtilsClient.enableBlend();
+		setupColor(factor,0.4f);
+		if(halo != null) halo.draw();
+		
+		UtilsClient.disableBlend();
+		UtilsClient.enableLight();
+		GL11.glColor3f(1f, 1f, 1f);
+	}
+	
+	
+	
+	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		return true;
+	}
+	
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		return true;
+	}
+	@Override
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		
+		return true;
+	}
+
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		/*if(type == ItemRenderType.INVENTORY) {
+			GL11.glScalef(2.2f, 2.2f, 2.2f);
+		}*/
+		draw(1f);
 	}
 	
 	@Override
@@ -30,4 +90,7 @@ public class TutorialSignDescriptor extends SixNodeDescriptor {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		//list.add("");
 	}
+	
+	
+	
 }

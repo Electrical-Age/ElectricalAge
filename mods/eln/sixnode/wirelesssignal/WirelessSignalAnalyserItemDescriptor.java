@@ -12,7 +12,6 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import mods.eln.sixnode.wirelesssignal.WirelessUtils.WirelessSignalSpot;
 import mods.eln.sixnode.wirelesssignal.aggregator.BiggerAggregator;
-import mods.eln.sixnode.wirelesssignal.tx.IWirelessSignalTx;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;

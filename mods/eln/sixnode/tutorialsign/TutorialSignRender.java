@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import mods.eln.misc.Direction;
+import mods.eln.misc.RcInterpolator;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
@@ -24,19 +25,19 @@ public class TutorialSignRender extends SixNodeElementRender {
 	String baliseName;
 	String texts[];
 	
+	RcInterpolator lightInterpol = new RcInterpolator(0.6f);
+	
 	@Override
 	public void draw() {
 		super.draw();
-		descriptor.draw();
-		/*
-		GL11.glPushMatrix();
+		descriptor.draw(lightInterpol.get());
 
-		GL11.glTranslatef(0.5f, 0f, 0f);
-		GL11.glRotatef(90, 0, 0, 1);
-		float scale = 1/64f;
-		GL11.glScalef(scale, scale, scale);
-		Minecraft.getMinecraft().fontRenderer.drawString(text,0,0,0);
-		GL11.glPopMatrix();*/
+	}
+	
+	@Override
+	public void refresh(float deltaT) {
+		lightInterpol.step(deltaT);
+		super.refresh(deltaT);
 	}
 
 	@Override

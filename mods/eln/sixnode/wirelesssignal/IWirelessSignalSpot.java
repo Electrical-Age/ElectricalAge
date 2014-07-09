@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import mods.eln.misc.Coordonate;
-import mods.eln.sixnode.wirelesssignal.tx.IWirelessSignalTx;
 
 public interface IWirelessSignalSpot {
 	public static ArrayList<IWirelessSignalSpot> spots = new ArrayList<IWirelessSignalSpot>();

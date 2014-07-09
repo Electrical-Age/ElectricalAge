@@ -35,7 +35,7 @@ public class ElectricalGateSourceRender extends SixNodeElementRender {
 	public ElectricalGateSourceRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalGateSourceDescriptor) descriptor;
-		interpolator = new RcInterpolator(this.descriptor.speed);
+		interpolator = new RcInterpolator(this.descriptor.render.speed);
 	}
 
 	LRDU front;

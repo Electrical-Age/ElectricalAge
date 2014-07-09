@@ -5,8 +5,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import com.google.common.base.CaseFormat;
 
 import mods.eln.misc.Utils;
+import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
 import mods.eln.sixnode.wirelesssignal.aggregator.BiggerAggregator;
-import mods.eln.sixnode.wirelesssignal.tx.IWirelessSignalTx;
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 
 public class ServerWirelessRxStatus extends WirelessRxStatus implements IModbusSlot{

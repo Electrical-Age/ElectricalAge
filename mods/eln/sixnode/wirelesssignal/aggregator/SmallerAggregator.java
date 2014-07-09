@@ -2,7 +2,7 @@ package mods.eln.sixnode.wirelesssignal.aggregator;
 
 import java.util.Collection;
 
-import mods.eln.sixnode.wirelesssignal.tx.IWirelessSignalTx;
+import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
 
 public class SmallerAggregator implements IWirelessSignalAggregator{
 

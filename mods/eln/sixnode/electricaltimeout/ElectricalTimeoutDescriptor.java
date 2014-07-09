@@ -87,7 +87,6 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if(type == ItemRenderType.INVENTORY) {
 			GL11.glScalef(2.2f, 2.2f, 2.2f);
-			//GL11.glTranslatef(-0.1f, 0.0f, 0f);
 		}
 		draw(1f);
 	}
