@@ -55,7 +55,7 @@ public class WirelessSignalRxRender extends SixNodeElementRender{
 	}
 	
 	String channel;
-	
+	int selectedAggregator;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		
@@ -63,6 +63,7 @@ public class WirelessSignalRxRender extends SixNodeElementRender{
 		try {
 			channel = stream.readUTF();
 			connection = stream.readBoolean();
+			selectedAggregator = stream.readByte();
 		} catch (IOException e) {
 			
 			e.printStackTrace();

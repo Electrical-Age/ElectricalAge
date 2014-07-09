@@ -42,9 +42,7 @@ public class WirelessSignalRxProcess implements IProcess,INBTTReady{
 			rx.outputGateProcess.setOutputNormalized(0);
 			rx.setConnection(false);
 		}else{
-			IWirelessSignalAggregator aggregator = rx.getAggregator();
-			IWirelessSignalTx tx = aggregator.aggregate(txs);
-			rx.outputGateProcess.setOutputNormalized(tx.getValue());
+			rx.outputGateProcess.setOutputNormalized( rx.getAggregator().aggregate(txs));
 			rx.setConnection(true);			
 		}
 		

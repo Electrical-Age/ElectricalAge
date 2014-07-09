@@ -3,6 +3,7 @@ package mods.eln.sixnode.wirelesssignal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -28,7 +29,7 @@ public class WirelessSignalAnalyserItemDescriptor extends GenericItemUsingDamage
 	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world,
 			int x, int y, int z, int side, float vx, float vy, float vz) {
 		if(world.isRemote) return true;
-		
+		Utils.addChatMessage(player,"-------------------");
 		Direction dir = Direction.fromIntMinecraftSide(side);
 		Coordonate c = new Coordonate(x,y,z,world);
 		c.move(dir);
@@ -40,14 +41,14 @@ public class WirelessSignalAnalyserItemDescriptor extends GenericItemUsingDamage
 		
 		BiggerAggregator aggregator = new BiggerAggregator();
 		
-		for(HashSet<IWirelessSignalTx> set : txSet.values()){
-			IWirelessSignalTx tx = aggregator.aggregate(set);
+		for(Entry<String, HashSet<IWirelessSignalTx>> entrySet : txSet.entrySet()){
+			HashSet<IWirelessSignalTx> set = entrySet.getValue();
 			double strength = 100000;
 			for(IWirelessSignalTx oneTx : set){
 				double temp = txStrength.get(oneTx);
 				if(temp < strength) strength = temp;
 			}
-			Utils.addChatMessage(player,tx.getChannel() + " Strength=" + String.format("%2.1f",strength) +" Value=" +String.format("%2.1fV",tx.getValue() * Eln.instance.SVU));
+			Utils.addChatMessage(player,entrySet.getKey() + " Strength=" + String.format("%2.1f",strength) +" Value=" +String.format("%2.1fV",aggregator.aggregate(set) * Eln.instance.SVU));
 
 		}
 		

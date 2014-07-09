@@ -5,5 +5,5 @@ import java.util.Collection;
 import mods.eln.sixnode.wirelesssignal.tx.IWirelessSignalTx;
 
 public interface IWirelessSignalAggregator {
-	IWirelessSignalTx aggregate(Collection<IWirelessSignalTx> txs);
+	double aggregate(Collection<IWirelessSignalTx> txs);
 }

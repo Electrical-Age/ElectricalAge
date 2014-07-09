@@ -20,6 +20,8 @@ import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import mods.eln.sixnode.wirelesssignal.aggregator.BiggerAggregator;
 import mods.eln.sixnode.wirelesssignal.aggregator.IWirelessSignalAggregator;
+import mods.eln.sixnode.wirelesssignal.aggregator.SmallerAggregator;
+import mods.eln.sixnode.wirelesssignal.aggregator.ToogleAggregator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -49,8 +51,15 @@ public class WirelessSignalRxElement extends SixNodeElement{
 		
 		front = LRDU.Down;
 
+		
+		aggregators = new IWirelessSignalAggregator[3];
+		aggregators[0] = new BiggerAggregator();
+		aggregators[1] = new SmallerAggregator();
+		aggregators[2] = toogleAggregator = new ToogleAggregator();
 
 	}
+	
+	ToogleAggregator toogleAggregator;
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
@@ -120,6 +129,8 @@ public class WirelessSignalRxElement extends SixNodeElement{
 		super.writeToNBT(nbt);
 		nbt.setString("channel", channel);
 		nbt.setBoolean("connection", connection);
+		nbt.setInteger("selectedAggregator", selectedAggregator);
+		toogleAggregator.writeToNBT(nbt, "toogleAggregator");
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
@@ -127,6 +138,8 @@ public class WirelessSignalRxElement extends SixNodeElement{
 		super.readFromNBT(nbt);
 		channel = nbt.getString("channel");
 		connection = nbt.getBoolean("connection");
+		selectedAggregator = nbt.getInteger("selectedAggregator");
+		toogleAggregator.readFromNBT(nbt, "toogleAggregator");
 	}
 
 	@Override
@@ -139,6 +152,7 @@ public class WirelessSignalRxElement extends SixNodeElement{
 	
 	
 	public static final byte setChannelId = 1;
+	public static final byte setSelectedAggregator = 2;
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		
@@ -148,6 +162,11 @@ public class WirelessSignalRxElement extends SixNodeElement{
 			switch(stream.readByte()){
 			case setChannelId:
 				channel = stream.readUTF();
+				needPublish();
+				break;
+			
+			case setSelectedAggregator:
+				selectedAggregator = stream.readByte();
 				needPublish();
 				break;
 			}
@@ -171,15 +190,21 @@ public class WirelessSignalRxElement extends SixNodeElement{
 		try {
 			stream.writeUTF(channel);
 			stream.writeBoolean(connection);
+			stream.writeByte(selectedAggregator);
 		} catch (IOException e) {
 			
 			e.printStackTrace();
 		}
 	}
 
+	
+	IWirelessSignalAggregator[] aggregators;
+	int selectedAggregator = 0;
+	
 	public IWirelessSignalAggregator getAggregator() {
-		// TODO Auto-generated method stub
-		return new BiggerAggregator();
+		if(selectedAggregator >= 0 && selectedAggregator < aggregators.length)
+			return aggregators[selectedAggregator];
+		return null;
 	}
 
 	

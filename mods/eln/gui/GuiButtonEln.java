@@ -38,13 +38,14 @@ public class GuiButtonEln extends GuiButton implements IGuiObject{
 		return false;
 	}
 
-	
+	public void onMouseClicked(){}
 	
 	@Override
 	public void imouseClicked(int x, int y, int code) {
         if (mousePressed(Minecraft.getMinecraft(), x, y))
         {
         	Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F));
+        	onMouseClicked();
         	if(observer != null)
         	{
         		observer.guiObjectEvent(this);
