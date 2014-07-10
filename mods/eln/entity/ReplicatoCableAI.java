@@ -11,6 +11,7 @@ import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
+import mods.eln.sim.IProcess;
 import mods.eln.sim.ITimeRemoverObserver;
 import mods.eln.sim.TimeRemover;
 import mods.eln.sim.mna.component.Resistor;
@@ -157,12 +158,15 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 		//Utils.println(this.entity.getNavigator().tryMoveToXYZ(-2470,56,-50, 1));
 	}
 
+	PreSimCheck preSimCheck;
 
 	@Override
 	public void timeRemoverRemove() {
 		Eln.simulator.removeElectricalLoad(load);
 		Eln.simulator.removeElectricalComponent(connection);
 		Eln.simulator.removeElectricalComponent(resistorLoad);
+		Eln.simulator.removeSlowPreProcess(preSimCheck);
+		connection = null;
 	}
 
 
@@ -171,6 +175,17 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 		Eln.simulator.addElectricalLoad(load);
 		Eln.simulator.addElectricalComponent(connection = new ElectricalConnection(load, cableLoad));
 		Eln.simulator.addElectricalComponent(resistorLoad);
+		Eln.simulator.addSlowPreProcess(preSimCheck = new PreSimCheck());
+	}
+	
+	class PreSimCheck implements IProcess{
+		@Override
+		public void process(double time) {
+			if(timeRemover.isArmed() == false) return;
+			if(Eln.simulator.isRegistred(cableLoad) == false){
+				timeRemover.shot();
+			}
+		}
 	}
 
 }

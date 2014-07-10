@@ -21,13 +21,24 @@ public class TimeRemover implements IProcess{
 	@Override
 	public void process(double time) {
 		
-		if(timeout > 0){
+		if(isArmed()){
 			timeout -= time;
 			if(timeout <= 0){
-				observer.timeRemoverRemove();
-				Eln.simulator.removeSlowProcess(this);
+				shot();
 			}
 		}
 	}
+
+
+	public boolean isArmed() {
+		return timeout > 0;
+	}
+	
+	public void shot(){
+		timeout = 0;
+		observer.timeRemoverRemove();
+		Eln.simulator.removeSlowProcess(this);		
+	}
+	
 
 }

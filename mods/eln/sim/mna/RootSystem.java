@@ -8,6 +8,7 @@ import java.util.Set;
 
 import mods.eln.misc.Profiler;
 import mods.eln.misc.Utils;
+import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.component.InterSystem;
 import mods.eln.sim.mna.component.InterSystemAbstraction;
@@ -438,6 +439,10 @@ public class RootSystem {
 
 	public void removeProcess(IRootSystemPreStepProcess p) {
 		processPre.remove(p);
+	}
+	public boolean isRegistred(ElectricalLoad load) {
+		// TODO Auto-generated method stub
+		return load.getSubSystem() != null || addStates.contains(load);
 	}
 }
 
