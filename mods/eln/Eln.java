@@ -80,6 +80,7 @@ import mods.eln.server.ConsoleListener;
 import mods.eln.server.OreRegenerate;
 import mods.eln.server.PlayerManager;
 import mods.eln.server.SaveConfig;
+import mods.eln.server.ServerEventListener;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
@@ -739,9 +740,12 @@ public class Eln {
 
 	// ElnHttpServer elnHttpServer;
 
+	public ServerEventListener serverEventListener;
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
-		// Stub Method
+
+
+		serverEventListener = new ServerEventListener();
 
 	}
 
@@ -845,6 +849,7 @@ public class Eln {
 	@EventHandler
 	public void ServerStopping(FMLServerStoppingEvent ev) {
 
+		serverEventListener.clear();
 		playerManager.clear();
 
 		nodeServer.stop();

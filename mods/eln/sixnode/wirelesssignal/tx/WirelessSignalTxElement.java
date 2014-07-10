@@ -20,6 +20,7 @@ import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
+import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
@@ -39,17 +40,49 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 	
 	
 	public String channel = "Default channel";
+
+	private SlowProcess slowProcess;
 	
 	public WirelessSignalTxElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		electricalLoadList.add(inputGate);
-
+		slowProcessList.add(slowProcess = new SlowProcess());
 		front = LRDU.Down;
 		this.descriptor = (WirelessSignalTxDescriptor) descriptor;
 		channelRegister(this);
 	}
 
+	
+	class SlowProcess implements IProcess{
+		double glichedTimer = 0;
+		double glichedStrangth = 0;
+		final double glitchLength = 6;
+		
+		double glitchOffset = 0;
+		@Override
+		public void process(double time) {
+			if(glichedTimer > 0)
+				glichedTimer -= time/* * Utils.rand(0.2, 1.8)*/;
+			
+			double strangth = 256 - Eln.instance.serverEventListener.getLightningClosestTo(getCoordonate());
+			if(strangth > 0 && glichedTimer <= 0){
+				glichedTimer = glitchLength;
+				glichedStrangth = (strangth)/128;
+			}
+			
+			if(glichedTimer > 0){
+				double phase = glitchLength - glichedTimer;
+				glitchOffset = Math.sin(phase*Math.PI*2*3)*glichedStrangth*Math.pow(glichedTimer/glitchLength,4);
+			}else{
+				glitchOffset = 0;
+			}
+		}
+		
+	}
+	
+	
+	
 	public static void channelRegister(IWirelessSignalTx tx)
 	{
 		String channel = tx.getChannel();
@@ -167,7 +200,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 	@Override
 	public double getValue() {
 		
-		return inputGate.getNormalized();
+		return inputGate.getNormalized() + slowProcess.glitchOffset;
 	}
 
 

@@ -86,7 +86,7 @@ public class TutorialSignElement extends SixNodeElement {
 				
 			} catch (IOException e) {
 				
-				e.printStackTrace();
+			//	e.printStackTrace();
 			}		
 		}
 		String text = baliseMap.get(balise);
