@@ -21,5 +21,10 @@ public class ElectricalLoadHeatThermalLoad implements IProcess {
 		double I = r.getI();
 		load.movePowerTo(I*I*r.getRs()*2);
 	}
+	
 
+	/*double powerMax = 100000;
+	public void setDeltaTPerSecondMax(double deltaTPerSecondMax){
+		powerMax = deltaTPerSecondMax*load.C;
+	}*/
 }

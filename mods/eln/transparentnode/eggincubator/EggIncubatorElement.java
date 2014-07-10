@@ -37,7 +37,9 @@ public class EggIncubatorElement extends TransparentNodeElement {
 	public EggIncubatorElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode,descriptor);
 	   	electricalLoadList.add(powerLoad);
+	   	electricalComponentList.add(powerResistor);
 	   	slowProcessList.add(slowProcess);
+	   	
 	   	
 	   	this.descriptor = (EggIncubatorDescriptor) descriptor;
 	   	

@@ -46,7 +46,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 		super(transparentNode, descriptor);
 		this.descriptor = (TeleporterDescriptor)descriptor;
 		publisher = new NodePeriodicPublishProcess(node, 2, 1);
-		
+		powerLoad.isPrivateSubSystem();
 		electricalLoadList.add(powerLoad);
 		electricalComponentList.add(powerResistor);
 		slowProcessList.add(slowProcess);

@@ -130,6 +130,7 @@ public class ElectricalCableElement extends SixNodeElement {
 	public void initialize() {
 		descriptor.applyTo(electricalLoad);
 		descriptor.applyTo(thermalLoad);
+		//heater.setDeltaTPerSecondMax(30);
 	}
 
 	@Override
