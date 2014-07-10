@@ -1,14 +1,10 @@
 package mods.eln.misc;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
@@ -18,17 +14,13 @@ import java.util.List;
 import java.util.Random;
 
 import mods.eln.Eln;
-import mods.eln.client.ClientProxy;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.generic.GenericItemUsingDamage;
-import mods.eln.ghost.GhostBlock;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.ITileEntitySpawnClient;
 import mods.eln.sim.PhysicalConstant;
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
-import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -44,11 +36,8 @@ import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-
-import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
@@ -61,7 +50,6 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
@@ -69,10 +57,7 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import cpw.mods.fml.repackage.com.nothome.delta.ByteBufferSeekableSource;
 
 public class Utils {
 
@@ -986,12 +971,19 @@ public class Utils {
 	public static boolean areSame(ItemStack stack, ItemStack output) {
 		
 		try {
-			return (stack.getItem() == output.getItem() && stack.getItemDamage() == output.getItemDamage())
-					|| (OreDictionary.getOreID(stack) == OreDictionary.getOreID(output) && OreDictionary.getOreID(output) != -1);
-
+			if(stack.getItem() == output.getItem() && stack.getItemDamage() == output.getItemDamage()) return true;
+			int[] stackIds = OreDictionary.getOreIDs(stack);
+			int[] outputIds = OreDictionary.getOreIDs(output);
+			//System.out.println(Arrays.toString(stackIds) + "   "  + Arrays.toString(outputIds));
+			for(int i : outputIds){
+				for(int j : stackIds){
+					if(i == j) return true;
+				}				
+			}
 		} catch (Exception e) {
-			return false;
+
 		}
+		return false;
 	}
 
 	public static Vec3 getVec05(Coordonate c) {
@@ -1421,7 +1413,8 @@ public class Utils {
 
 	public static File getMapFile(String name) {
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-		File f = server.getFile("saves/" + server.getFolderName() + "/" + name);
+		String savesAt = server.isDedicatedServer() == false ? "saves/" : "";
+		File f = server.getFile(savesAt + server.getFolderName() + "/" + name);
 		return f;
 	}
 

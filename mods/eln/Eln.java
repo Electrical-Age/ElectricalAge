@@ -2761,6 +2761,7 @@ public class Eln {
 			);
 			oreCopper = desc;
 			oreItem.addDescriptor(id, desc);
+			addToOre("oreCopper", desc.newItemStack());
 		}
 
 		{
@@ -2778,6 +2779,7 @@ public class Eln {
 			// spawnHeightMax
 			);
 			oreItem.addDescriptor(id, desc);
+			addToOre("oreLead", desc.newItemStack());
 		}
 		{
 			id = 5;
@@ -2794,6 +2796,7 @@ public class Eln {
 			// spawnHeightMax
 			);
 			oreItem.addDescriptor(id, desc);
+			addToOre("oreTungsten", desc.newItemStack());
 		}
 		{
 			id = 6;
@@ -2810,6 +2813,7 @@ public class Eln {
 			// spawnHeightMax
 			);
 			oreItem.addDescriptor(id, desc);
+			addToOre("oreCinnabar", desc.newItemStack());
 		}
 
 	}

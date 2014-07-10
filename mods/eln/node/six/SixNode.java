@@ -163,6 +163,9 @@ public class SixNode extends Node {
 	        }
 	    }*/
 
+	
+	
+	
 	public boolean deleteSubBlock(EntityPlayerMP entityPlayer, Direction direction) {
 		
 		if (sideElementList[direction.getInt()] == null)
