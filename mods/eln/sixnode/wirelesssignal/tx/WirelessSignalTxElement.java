@@ -41,31 +41,38 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 	
 	public String channel = "Default channel";
 
-	private SlowProcess slowProcess;
+	private LightningGlitchProcess lightningGlitchProcess;
 	
 	public WirelessSignalTxElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		electricalLoadList.add(inputGate);
-		slowProcessList.add(slowProcess = new SlowProcess());
+		slowProcessList.add(lightningGlitchProcess = new LightningGlitchProcess(getCoordonate()));
 		front = LRDU.Down;
 		this.descriptor = (WirelessSignalTxDescriptor) descriptor;
 		channelRegister(this);
 	}
 
 	
-	class SlowProcess implements IProcess{
+	static public class LightningGlitchProcess implements IProcess{
+		
+		public LightningGlitchProcess(Coordonate c) {
+			this.c = c;
+		}
+		
+		
+		Coordonate c;
 		double glichedTimer = 0;
 		double glichedStrangth = 0;
 		final double glitchLength = 6;
 		
-		double glitchOffset = 0;
+		public double glitchOffset = 0;
 		@Override
 		public void process(double time) {
 			if(glichedTimer > 0)
 				glichedTimer -= time/* * Utils.rand(0.2, 1.8)*/;
 			
-			double strangth = 256 - Eln.instance.serverEventListener.getLightningClosestTo(getCoordonate());
+			double strangth = 256 - Eln.instance.serverEventListener.getLightningClosestTo(c);
 			if(strangth > 0 && glichedTimer <= 0){
 				glichedTimer = glitchLength;
 				glichedStrangth = (strangth)/128;
@@ -200,7 +207,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 	@Override
 	public double getValue() {
 		
-		return inputGate.getNormalized() + slowProcess.glitchOffset;
+		return inputGate.getNormalized() + lightningGlitchProcess.glitchOffset;
 	}
 
 

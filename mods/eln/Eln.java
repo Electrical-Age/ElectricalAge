@@ -5870,7 +5870,7 @@ public class Eln {
 	void registerReplicator() {
 		int redColor = (255 << 16);
 		int orangeColor = (255 << 16) + (200 << 8);
-
+		
 		if(replicatorRegistrationId == -1)
 			replicatorRegistrationId =  EntityRegistry.findGlobalUniqueEntityId();
 		Utils.println("Replicator registred at" + replicatorRegistrationId);

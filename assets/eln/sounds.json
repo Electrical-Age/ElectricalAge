@@ -1,20 +1,20 @@
 {
-   "smallalarm_critical": {"category": "master","sounds": [{"name": "smallalarm_critical","stream": false}]},
-   "alarma": {"category": "master","sounds": [{"name": "alarma","stream": false}]},
-   "wind_turbine": {"category": "master","sounds": [{"name": "wind_turbine","stream": false}]},
-   "water_turbine": {"category": "master","sounds": [{"name": "water_turbine","stream": false}]},
-   "heat_turbine_200v": {"category": "master","sounds": [{"name": "heat_turbine_200v","stream": false}]},
-   "heat_turbine_50v": {"category": "master","sounds": [{"name": "heat_turbine_50v","stream": false}]},
-   "autominer": {"category": "master","sounds": [{"name": "autominer","stream": false}]},
-   "compressor": {"category": "master","sounds": [{"name": "compressor","stream": false}]},
-   "macerator": {"category": "master","sounds": [{"name": "macerator","stream": false}]},
-   "plate_machine": {"category": "master","sounds": [{"name": "plate_machine","stream": false}]},
-   "timer": {"category": "master","sounds": [{"name": "timer","stream": false}]},
-   "transporter": {"category": "master","sounds": [{"name": "transporter","stream": false}]},
-   "NEON_LFNOISE": {"category": "master","sounds": [{"name": "NEON_LFNOISE","stream": false}]},
-   "WINDTURBINE_BIG_FF": {"category": "master","sounds": [{"name": "WINDTURBINE_BIG_FF","stream": false}]},
-   "WINDTURBINE_BIG_SF": {"category": "master","sounds": [{"name": "WINDTURBINE_BIG_SF","stream": false}]},
-   "neon_lamp": {"category": "master","sounds": [{"name": "neon_lamp","stream": false}]}
+   "smallalarm_critical": {"category": "record","sounds": [{"name": "smallalarm_critical","stream": false}]},
+   "alarma": {"category": "record","sounds": [{"name": "alarma","stream": false}]},
+   "wind_turbine": {"category": "block","sounds": [{"name": "wind_turbine","stream": false}]},
+   "water_turbine": {"category": "block","sounds": [{"name": "water_turbine","stream": false}]},
+   "heat_turbine_200v": {"category": "block","sounds": [{"name": "heat_turbine_200v","stream": false}]},
+   "heat_turbine_50v": {"category": "block","sounds": [{"name": "heat_turbine_50v","stream": false}]},
+   "autominer": {"category": "block","sounds": [{"name": "autominer","stream": false}]},
+   "compressor": {"category": "block","sounds": [{"name": "compressor","stream": false}]},
+   "macerator": {"category": "block","sounds": [{"name": "macerator","stream": false}]},
+   "plate_machine": {"category": "block","sounds": [{"name": "plate_machine","stream": false}]},
+   "timer": {"category": "block","sounds": [{"name": "timer","stream": false}]},
+   "transporter": {"category": "block","sounds": [{"name": "transporter","stream": false}]},
+   "NEON_LFNOISE": {"category": "block","sounds": [{"name": "NEON_LFNOISE","stream": false}]},
+   "WINDTURBINE_BIG_FF": {"category": "block","sounds": [{"name": "WINDTURBINE_BIG_FF","stream": false}]},
+   "WINDTURBINE_BIG_SF": {"category": "block","sounds": [{"name": "WINDTURBINE_BIG_SF","stream": false}]},
+   "neon_lamp": {"category": "block","sounds": [{"name": "neon_lamp","stream": false}]}
 }
 
 

@@ -18,6 +18,7 @@ import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
+import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement.LightningGlitchProcess;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -36,6 +37,7 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
 	boolean state = false;
 	
 	public String channel = "Default channel";
+	private LightningGlitchProcess lightningGlitchProcess;
 	
 	public WirelessSignalSourceElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
@@ -44,7 +46,7 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
 		front = LRDU.Down;
 		this.descriptor = (WirelessSignalSourceDescriptor) descriptor;
 		WirelessSignalTxElement.channelRegister(this);
-		
+		slowProcessList.add(lightningGlitchProcess = new LightningGlitchProcess(getCoordonate()));
 		if (this.descriptor.autoReset) {
 			slowProcessList.add(autoResetProcess = new AutoResetProcess());
 			autoResetProcess.reset();
@@ -173,7 +175,7 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
 	@Override
 	public double getValue() {
 		
-		return state ? 1.0 : 0.0;
+		return (state ? 1.0 : 0.0) + lightningGlitchProcess.glitchOffset;
 	}
 
 

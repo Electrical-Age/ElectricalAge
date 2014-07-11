@@ -22,14 +22,14 @@ public class ElectricalMathGui extends GuiContainerEln {
 	
 	@Override
 	protected GuiHelperContainer newHelper() {
-		return new GuiHelperContainer(this, 176, 166 - 38, 8, 84 - 38);
+		return new GuiHelperContainer(this, 176+44, 166 - 38, 8+44/2, 84 - 38);
 	}
    
 	@Override
 	public void initGui() {
 		super.initGui();
 
-		expression = newGuiTextField(8, 8, 176 - 16);
+		expression = newGuiTextField(8, 8, 176 - 16+44);
 		expression.setText(render.expression);
 		expression.setObserver(this);
 		expression.setComment(new String[]{"Output Voltage Formula",
@@ -54,19 +54,19 @@ public class ElectricalMathGui extends GuiContainerEln {
 			redNbr = stack.stackSize;
 		if(!expression.getText().equals(render.expression)) {
 			c = 0xFF404040;
-			helper.drawString(8, 29, c, "Waiting for completion...");
+			helper.drawString(8+44/2, 29, c, "Waiting for completion...");
 		} else if(expression.getText().equals("")) {
 			c = 0xFF404040;
-			helper.drawString(8, 29, c, "Needs an equation!");
+			helper.drawString(8+44/2, 29, c, "Needs an equation!");
 		} else if(render.equationIsValid) {
 			if(redNbr >= render.redstoneRequired)
 				c = 0xFF108F00;
 			else
 				c = 0xFFFF0000;
-			helper.drawString(8, 29, c, "Redstone required : " + render.redstoneRequired);
+			helper.drawString(8+44/2, 29, c, "Redstone required : " + render.redstoneRequired);
 		} else {
 			c = 0xFFFF0000;
-			helper.drawString(8, 29, c, "Invalid equation!");
+			helper.drawString(8+44/2, 29, c, "Invalid equation!");
 		}
 	}
 }
