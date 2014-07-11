@@ -21,14 +21,18 @@ import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 
 /**
- * Check the current version with the last stable version when the map is loaded by the client. Singleton class. Uses the {@link ClientTickEvent} and must be registered by the caller on the {@link FMLCommonHandler} bus.
+ * Check the current version with the last stable version when the map is loaded
+ * by the client.<br>
+ * Singleton class. Uses the {@link ClientTickEvent} and must be registered by
+ * the caller on the {@link FMLCommonHandler} bus.
  * 
  * @author metc
  */
 public class VersionCheckerHandler {
 
 	// Official website link
-	private final static String URL = "http://electrical-age.net/modinfo/modinfo.json";
+	// Now use a PHP page with Google Analytics tracking
+	private final static String URL = "http://mc.electrical-age.net/checkVersion.php";
 
 	private static VersionCheckerHandler instance;
 
