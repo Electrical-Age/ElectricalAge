@@ -422,7 +422,10 @@ public class Eln {
 		debugEnable = config.get("debug", "enable", false).getBoolean(false);
 
 		replicatorPop = config.get("entity", "replicatorPop", true).getBoolean(true);
-
+		replicatorRegistrationId = config.get("entity", "replicatorId",-1).getInt(-1);
+		
+		
+		
 		forceOreRegen = config.get("mapGenerate", "forceOreRegen", false).getBoolean(false);
 		genCooper = config.get("mapGenerate", "cooper", true).getBoolean(true);
 		genPlumb = config.get("mapGenerate", "plumb", true).getBoolean(true);
@@ -5862,12 +5865,17 @@ public class Eln {
 
 	}
 
+	
+	int replicatorRegistrationId = -1;
 	void registerReplicator() {
 		int redColor = (255 << 16);
 		int orangeColor = (255 << 16) + (200 << 8);
 
+		if(replicatorRegistrationId == -1)
+			replicatorRegistrationId =  EntityRegistry.findGlobalUniqueEntityId();
+		Utils.println("Replicator registred at" + replicatorRegistrationId);
 		// Register mob
-		EntityRegistry.registerGlobalEntityID(ReplicatorEntity.class, "EAReplicator", EntityRegistry.findGlobalUniqueEntityId(), redColor, orangeColor);
+		EntityRegistry.registerGlobalEntityID(ReplicatorEntity.class, "EAReplicator", replicatorRegistrationId, redColor, orangeColor);
 
 		// Localize mob name
 		LanguageRegistry.instance().addStringLocalization("entity.EAReplicator.name", "en_US", "Replicator");
