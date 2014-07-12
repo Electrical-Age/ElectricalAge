@@ -59,7 +59,8 @@ public class VersionCheckerHandler {
 				String msg = null;
 				try {
 					// HTTP GET request with the current mod version and language. Yes, you are tracked !
-					final String url = String.format(URL, Version.getVersionName(), I18N.getCurrentLanguage());
+					final String v = Version.getVersionName().replaceAll("\\s+", "");
+					final String url = String.format(URL, v, I18N.getCurrentLanguage());
 					final String urlSrc = IOUtils.toString(new URL(url));
 					JsonObject j = new JsonParser().parse(urlSrc)
 							.getAsJsonObject();
