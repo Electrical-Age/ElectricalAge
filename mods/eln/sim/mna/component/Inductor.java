@@ -1,0 +1,88 @@
+package mods.eln.sim.mna.component;
+
+import net.minecraft.nbt.NBTTagCompound;
+import mods.eln.misc.INBTTReady;
+import mods.eln.sim.mna.SubSystem;
+import mods.eln.sim.mna.misc.ISubSystemProcessI;
+import mods.eln.sim.mna.state.CurrentState;
+import mods.eln.sim.mna.state.State;
+
+public class Inductor extends Bipole  implements ISubSystemProcessI ,INBTTReady{
+
+	
+	String name;
+	public Inductor(String name) {
+		this.name = name;
+	}
+	
+	public Inductor(String name,State aPin,State bPin) {
+		super(aPin, bPin);
+		this.name = name;
+	}
+		
+	private CurrentState currentState = new CurrentState();
+
+	
+	@Override
+	public double getCurrent() {
+		
+		return currentState.state;
+	}
+
+	public void setL(double l){
+		this.l = l;
+		dirty();
+	}
+	
+	private double l = 0;
+	double ldt;
+	
+	@Override
+	public void applyTo(SubSystem s) {
+		ldt = -l/s.getDt();
+		
+		s.addToA(aPin,currentState,1);
+		s.addToA(bPin,currentState,-1);
+		s.addToA(currentState,aPin,1);
+		s.addToA(currentState,bPin,-1);
+		s.addToA(currentState,currentState,ldt);
+	
+	}
+	
+	@Override
+	public void simProcessI(SubSystem s) {
+		s.addToI(currentState, ldt*currentState.state);
+	}
+	
+	
+	@Override
+	public void quitSubSystem() {
+		subSystem.states.remove(getCurrentState());
+		subSystem.removeProcess(this);
+		super.quitSubSystem();
+	}
+	
+	@Override
+	public void addedTo(SubSystem s) {
+		super.addedTo(s);
+		s.addState(getCurrentState());
+		s.addProcess(this);
+	}
+
+	public CurrentState getCurrentState() {
+		return currentState;
+	}
+	
+	
+	@Override
+	public void readFromNBT(NBTTagCompound nbt, String str) {
+		str += name;
+		currentState.state = (nbt.getDouble(str + "Istate"));
+	}
+
+	@Override
+	public void writeToNBT(NBTTagCompound nbt, String str) {
+		str += name;
+		nbt.setDouble(str + "Istate",currentState.state);
+	}
+}

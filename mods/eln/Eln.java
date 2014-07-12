@@ -19,6 +19,7 @@ import mods.eln.generic.genericArmorItem.ArmourType;
 import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
+import mods.eln.inductor.InductorDescriptor;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.item.CombustionChamber;
 import mods.eln.item.ElectricalDrillDescriptor;
@@ -422,10 +423,8 @@ public class Eln {
 		debugEnable = config.get("debug", "enable", false).getBoolean(false);
 
 		replicatorPop = config.get("entity", "replicatorPop", true).getBoolean(true);
-		replicatorRegistrationId = config.get("entity", "replicatorId",-1).getInt(-1);
-		
-		
-		
+		replicatorRegistrationId = config.get("entity", "replicatorId", -1).getInt(-1);
+
 		forceOreRegen = config.get("mapGenerate", "forceOreRegen", false).getBoolean(false);
 		genCooper = config.get("mapGenerate", "cooper", true).getBoolean(true);
 		genPlumb = config.get("mapGenerate", "plumb", true).getBoolean(true);
@@ -684,7 +683,7 @@ public class Eln {
 		try {
 			// elnHttpServer = new ElnHttpServer();
 		} catch (Exception e) {
-			
+
 			e.printStackTrace();
 		}
 
@@ -744,9 +743,9 @@ public class Eln {
 	// ElnHttpServer elnHttpServer;
 
 	public ServerEventListener serverEventListener;
+
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
-
 
 		serverEventListener = new ServerEventListener();
 
@@ -858,7 +857,7 @@ public class Eln {
 		nodeServer.stop();
 
 		simulator.stop();
-		
+
 		tileEntityDestructor.clear();
 		LightBlockEntity.observers.clear();
 		LampSupplyElement.channelMap.clear();
@@ -1486,6 +1485,18 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
+		{
+			subId = 16;
+
+			name = "100H inductor";
+
+			InductorDescriptor desc = new InductorDescriptor(
+					name, 20, lowVoltageCableDescriptor
+					);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
 	}
 
 	void registerSwitch(int id) {
@@ -1569,7 +1580,7 @@ public class Eln {
 	}
 
 	private void registerSixNodeMisc(int id) {
-		
+
 		int subId, completId;
 		String name;
 		{
@@ -1828,7 +1839,7 @@ public class Eln {
 			desc = new WirelessSignalRxDescriptor(
 					name,
 					obj.getObj("wirelesssignalrx")
-					
+
 					);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -1844,9 +1855,7 @@ public class Eln {
 					obj.getObj("wirelesssignaltx"),
 					wirelessTxRange
 					);
-			
-			
-			
+
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -1861,7 +1870,6 @@ public class Eln {
 					obj.getObj("wirelesssignalrepeater"),
 					wirelessTxRange
 					);
-			
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -1927,10 +1935,10 @@ public class Eln {
 	void registerElectricalGateSource(int id) {
 		int subId, completId;
 		String name;
-		
+
 		ElectricalGateSourceRenderObj signalsourcepot = new ElectricalGateSourceRenderObj(obj.getObj("signalsourcepot"));
 		ElectricalGateSourceRenderObj ledswitch = new ElectricalGateSourceRenderObj(obj.getObj("ledswitch"));
-		
+
 		{
 			subId = 0;
 
@@ -1963,7 +1971,7 @@ public class Eln {
 
 			name = "Wireless Button";
 
-			WirelessSignalSourceDescriptor desc = new WirelessSignalSourceDescriptor(name, ledswitch,wirelessTxRange, true);
+			WirelessSignalSourceDescriptor desc = new WirelessSignalSourceDescriptor(name, ledswitch, wirelessTxRange, true);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -1971,7 +1979,7 @@ public class Eln {
 
 			name = "Wireless Switch";
 
-			WirelessSignalSourceDescriptor desc = new WirelessSignalSourceDescriptor(name, ledswitch,wirelessTxRange, false);
+			WirelessSignalSourceDescriptor desc = new WirelessSignalSourceDescriptor(name, ledswitch, wirelessTxRange, false);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -4350,23 +4358,11 @@ public class Eln {
 	}
 
 	void recipeSwitch() {
-		/*addRecipe(findItemStack("Signal Switch"),
-				"  I",
-				" I ",
-				"CAC",
-				Character.valueOf('R'), new ItemStack(Items.redstone),
-				Character.valueOf('A'), "ingotRubber",
-				Character.valueOf('I'), findItemStack("Copper Cable"),
-				Character.valueOf('C'), findItemStack("Signal Cable"));
-
-		addRecipe(findItemStack("Signal Switch with LED"),
-				" RI",
-				" I ",
-				"CAC",
-				Character.valueOf('R'), new ItemStack(Items.redstone),
-				Character.valueOf('A'), "ingotRubber",
-				Character.valueOf('I'), findItemStack("Copper Cable"),
-				Character.valueOf('C'), findItemStack("Signal Cable"));*/
+		/*
+		 * addRecipe(findItemStack("Signal Switch"), "  I", " I ", "CAC", Character.valueOf('R'), new ItemStack(Items.redstone), Character.valueOf('A'), "ingotRubber", Character.valueOf('I'), findItemStack("Copper Cable"), Character.valueOf('C'), findItemStack("Signal Cable"));
+		 * 
+		 * addRecipe(findItemStack("Signal Switch with LED"), " RI", " I ", "CAC", Character.valueOf('R'), new ItemStack(Items.redstone), Character.valueOf('A'), "ingotRubber", Character.valueOf('I'), findItemStack("Copper Cable"), Character.valueOf('C'), findItemStack("Signal Cable"));
+		 */
 
 		addRecipe(findItemStack("Low Voltage Switch"),
 				"  I",
@@ -4397,7 +4393,7 @@ public class Eln {
 	}
 
 	void recipeElectricalRelay() {
-		
+
 		addRecipe(findItemStack("Low Voltage Relay"),
 				"  I",
 				" I ",
@@ -5519,7 +5515,7 @@ public class Eln {
 	}
 
 	private void recipeElectricalGate() {
-		
+
 		addShapelessRecipe(findItemStack("Electrical Timer"),
 				new ItemStack(Items.repeater),
 				findItemStack("Cheap Chip"));
@@ -5581,7 +5577,7 @@ public class Eln {
 	}
 
 	private void recipeElectricalVuMeter() {
-		
+
 		for (int idx = 0; idx < 4; idx++) {
 			addRecipe(findItemStack("Analog vuMeter", 1),
 					"WWW",
@@ -5605,7 +5601,7 @@ public class Eln {
 	}
 
 	private void recipeElectricalBreaker() {
-		
+
 		addRecipe(findItemStack("Electrical Breaker", 1),
 				"crC",
 				Character.valueOf('c'), findItemStack("Overvoltage Protection"),
@@ -5615,7 +5611,7 @@ public class Eln {
 	}
 
 	private void recipeElectricalGateSource() {
-		
+
 		addRecipe(findItemStack("Signal Trimmer", 1),
 				"RsR",
 				"rRr",
@@ -5635,7 +5631,7 @@ public class Eln {
 				Character.valueOf('r'), "ingotRubber",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
-		
+
 		addRecipe(findItemStack("Signal Button", 3),
 				" R ",
 				"rRr",
@@ -5645,7 +5641,7 @@ public class Eln {
 				Character.valueOf('r'), "ingotRubber",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
-		
+
 		addRecipe(findItemStack("Wireless Switch", 3),
 				" a ",
 				"rCr",
@@ -5657,7 +5653,7 @@ public class Eln {
 				Character.valueOf('r'), "ingotRubber",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
-		
+
 		addRecipe(findItemStack("Wireless Button", 3),
 				" a ",
 				"rCr",
@@ -5669,10 +5665,9 @@ public class Eln {
 				Character.valueOf('r'), "ingotRubber",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
-		
-		
-		//Wireless Switch
-		//Wireless Button
+
+		// Wireless Switch
+		// Wireless Button
 	}
 
 	private void recipeElectricalDataLogger() {
@@ -5865,14 +5860,14 @@ public class Eln {
 
 	}
 
-	
 	int replicatorRegistrationId = -1;
+
 	void registerReplicator() {
 		int redColor = (255 << 16);
 		int orangeColor = (255 << 16) + (200 << 8);
-		
-		if(replicatorRegistrationId == -1)
-			replicatorRegistrationId =  EntityRegistry.findGlobalUniqueEntityId();
+
+		if (replicatorRegistrationId == -1)
+			replicatorRegistrationId = EntityRegistry.findGlobalUniqueEntityId();
 		Utils.println("Replicator registred at" + replicatorRegistrationId);
 		// Register mob
 		EntityRegistry.registerGlobalEntityID(ReplicatorEntity.class, "EAReplicator", replicatorRegistrationId, redColor, orangeColor);
