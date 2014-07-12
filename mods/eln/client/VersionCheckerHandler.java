@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import mods.eln.misc.Color;
+import mods.eln.misc.I18N;
 import mods.eln.misc.Version;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -32,7 +33,7 @@ public class VersionCheckerHandler {
 
 	// Official website link
 	// Now use a PHP page with Google Analytics tracking
-	private final static String URL = "http://mc.electrical-age.net/checkVersion.php";
+	private final static String URL = "http://mc.electrical-age.net/version.php?v=%s&l=%s";
 
 	private static VersionCheckerHandler instance;
 
@@ -57,7 +58,9 @@ public class VersionCheckerHandler {
 			public void run() {
 				String msg = null;
 				try {
-					final String urlSrc = IOUtils.toString(new URL(URL));
+					// HTTP GET request with the current mod version and language. Yes, you are tracked !
+					final String url = String.format(URL, Version.getVersionName(), I18N.getCurrentLanguage());
+					final String urlSrc = IOUtils.toString(new URL(url));
 					JsonObject j = new JsonParser().parse(urlSrc)
 							.getAsJsonObject();
 					int manifestVersion = j.get("manifest_version").getAsInt();
@@ -73,7 +76,6 @@ public class VersionCheckerHandler {
 					if (rev > currentRev) {
 						int major = stable.get("version_major").getAsInt();
 						int minor = stable.get("version_minor").getAsInt();
-						String url = stable.get("url").getAsString();
 						msg = String
 								.format(Color.GREEN
 										+ "> New stable version avaiable: BETA-%d.%d r%d - please upgrade !",
