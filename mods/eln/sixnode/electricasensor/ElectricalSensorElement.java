@@ -286,7 +286,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
 		
-		return new ElectricalSensorContainer(player, inventory);
+		return new ElectricalSensorContainer(player, inventory,descriptor);
 	}
 
 }

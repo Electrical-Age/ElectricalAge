@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
+import javax.naming.LinkLoopException;
+
 import mods.eln.misc.Profiler;
 import mods.eln.misc.Utils;
 import mods.eln.sim.ElectricalLoad;
@@ -200,6 +202,19 @@ public class RootSystem {
 	}*/
 
 	private void generateSystems() {
+		LinkedList<State> firstState = new LinkedList<State>();
+		for(State s : addStates){
+			if(s.mustBeFarFromInterSystem()){
+				firstState.add(s);
+			}
+		}
+		
+		for(State s : firstState){
+			if(s.getSubSystem() == null){
+				buildSubSystem(s);
+			}
+		}
+		
 		while (addStates.isEmpty() == false) {
 			State root = addStates.iterator().next();
 			buildSubSystem(root);

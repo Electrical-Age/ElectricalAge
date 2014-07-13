@@ -27,6 +27,7 @@ public class InductorElement extends SixNodeElement{
     	electricalLoadList.add(postiveLoad);
     	electricalLoadList.add(negativeLoad);
     	electricalComponentList.add(inductor);
+    	postiveLoad.setAsMustBeFarFromInterSystem();
     	this.descriptor = (InductorDescriptor) descriptor;
 	}
 

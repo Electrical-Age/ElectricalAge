@@ -12,9 +12,9 @@ public class ElectricalSensorContainer extends BasicContainer {
 
 	public static final int cableSlotId = 0;
 	
-	public ElectricalSensorContainer(EntityPlayer player, IInventory inventory) {
+	public ElectricalSensorContainer(EntityPlayer player, IInventory inventory,ElectricalSensorDescriptor d) {
 		super(player, inventory,new Slot[]{
-				new SixNodeItemSlot(inventory,cableSlotId,152,62,1,new Class[]{ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{"Electrical Cable Slot"})
+				new SixNodeItemSlot(inventory,cableSlotId,152,d.voltageOnly ? 14 : 62,1,new Class[]{ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{"Electrical Cable Slot"})
 			});
 		
 		

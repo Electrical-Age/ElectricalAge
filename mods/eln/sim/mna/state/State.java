@@ -57,7 +57,16 @@ public class State {
 		isPrivateSubSystem = true;
 		return this;
 	}
-	
+
+	boolean mustBeFarFromInterSystem = false;
+	public State setAsMustBeFarFromInterSystem(){
+		mustBeFarFromInterSystem = true;
+		return this;
+	}
+	public boolean mustBeFarFromInterSystem() {
+		// TODO Auto-generated method stub
+		return mustBeFarFromInterSystem;
+	}	
 	public boolean isPrivateSubSystem() { return isPrivateSubSystem;}
 	
 	public void returnToRootSystem(RootSystem root) {
@@ -75,4 +84,6 @@ public class State {
 		
 		return subSystem == null && abstractedBy == null;
 	}
+
+
 }

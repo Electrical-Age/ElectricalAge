@@ -27,7 +27,7 @@ import net.minecraft.inventory.IInventory;
 public class ElectricalSensorGui extends GuiContainerEln{
 
 	public ElectricalSensorGui(EntityPlayer player, IInventory inventory,ElectricalSensorRender render) {
-		super(new ElectricalSensorContainer(player, inventory));
+		super(new ElectricalSensorContainer(player, inventory,render.descriptor));
 		this.render = render;
 	}
 
@@ -63,13 +63,13 @@ public class ElectricalSensorGui extends GuiContainerEln{
 		}
 		else
 		{
-			validate = newGuiButton(8 + 50 + 4 + 50 + 4 -26, (166-84)/2 - 8,50, "Validate");
+			validate = newGuiButton(8+50 + 4, 10,50, "Validate");
 			
-			lowValue = newGuiTextField(8 + 50 + 4-26, (166-84)/2+3, 50);
+			lowValue = newGuiTextField(8, 6+16, 50);
 	        lowValue.setText(render.lowValue);
 	        lowValue.setComment(new String[]{"Minimum input"});
 	        
-	        highValue = newGuiTextField(8 + 50 + 4-26, (166-84)/2 -12, 50);
+	        highValue = newGuiTextField(8,6, 50);
 	        highValue.setText(render.highValue);
 	        highValue.setComment(new String[]{"Maximum input"});
 		}
@@ -159,8 +159,10 @@ public class ElectricalSensorGui extends GuiContainerEln{
 
 	@Override
 	protected GuiHelperContainer newHelper() {
-		
-		return new HelperStdContainer(this);
+		if(render.descriptor.voltageOnly == false)	
+			return new HelperStdContainer(this);
+		else
+			return new GuiHelperContainer(this, 176, 166-45,8,84-45);
 	}
 	
 }
