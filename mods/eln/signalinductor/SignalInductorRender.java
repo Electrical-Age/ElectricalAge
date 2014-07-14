@@ -1,4 +1,4 @@
-package mods.eln.inductor;
+package mods.eln.signalinductor;
 
 import mods.eln.misc.Direction;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -10,10 +10,10 @@ import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 
-public class InductorRender extends SixNodeElementRender{
+public class SignalInductorRender extends SixNodeElementRender{
 
 
-	public InductorRender(SixNodeEntity tileEntity, Direction side,
+	public SignalInductorRender(SixNodeEntity tileEntity, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		// TODO Auto-generated constructor stub

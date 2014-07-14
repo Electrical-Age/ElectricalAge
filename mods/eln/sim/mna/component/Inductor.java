@@ -85,4 +85,8 @@ public class Inductor extends Bipole  implements ISubSystemProcessI ,INBTTReady{
 		str += name;
 		nbt.setDouble(str + "Istate",currentState.state);
 	}
+
+	public void resetStates() {
+		currentState.state = 0;
+	}
 }

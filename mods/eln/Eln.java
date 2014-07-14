@@ -19,9 +19,10 @@ import mods.eln.generic.genericArmorItem.ArmourType;
 import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
-import mods.eln.inductor.InductorDescriptor;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.item.CombustionChamber;
+import mods.eln.item.CopperCableDescriptor;
+import mods.eln.item.DielectricItem;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.item.FerromagneticCoreDescriptor;
@@ -61,6 +62,7 @@ import mods.eln.misc.TileEntityDestructor;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Version;
 import mods.eln.misc.WindProcess;
+import mods.eln.misc.series.SerieEE;
 import mods.eln.node.NodeManager;
 import mods.eln.node.NodeServer;
 import mods.eln.node.six.SixNode;
@@ -82,6 +84,7 @@ import mods.eln.server.OreRegenerate;
 import mods.eln.server.PlayerManager;
 import mods.eln.server.SaveConfig;
 import mods.eln.server.ServerEventListener;
+import mods.eln.signalinductor.SignalInductorDescriptor;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
@@ -149,6 +152,8 @@ import mods.eln.transparentnode.electricalmachine.MaceratorDescriptor;
 import mods.eln.transparentnode.electricalmachine.MagnetizerDescriptor;
 import mods.eln.transparentnode.electricalmachine.PlateMachineDescriptor;
 import mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor;
+import mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor;
+import mods.eln.transparentnode.powerinductor.PowerInductorDescriptor;
 import mods.eln.transparentnode.solarpannel.SolarPannelDescriptor;
 import mods.eln.transparentnode.teleporter.TeleporterDescriptor;
 import mods.eln.transparentnode.teleporter.TeleporterElement;
@@ -559,15 +564,15 @@ public class Eln {
 		registerTreeResinCollector(116);
 		registerSixNodeMisc(117);
 		//
+		
+		registerPowerComponent(1);
 		registerTransformer(2);
 		registerHeatFurnace(3);
 		registerTurbine(4);
-
 		registerElectricalAntenna(7);
 		registerBattery(16);
 		registerElectricalFurnace(32);
 		registerMacerator(33);
-
 		registerCompressor(35);
 		registermagnetiser(36);
 		registerPlateMachine(37);
@@ -577,6 +582,7 @@ public class Eln {
 		registerWindTurbine(49);
 		registerThermalDissipatorPassiveAndActive(64);
 		registerTransparentNodeMisc(65);
+
 
 		registerHeatingCorp(1);
 		// registerThermalIsolator(2);
@@ -1488,15 +1494,48 @@ public class Eln {
 		{
 			subId = 16;
 
-			name = "100H inductor";
+			name = "Signal 20H inductor";
 
-			InductorDescriptor desc = new InductorDescriptor(
+			SignalInductorDescriptor desc = new SignalInductorDescriptor(
 					name, 20, lowVoltageCableDescriptor
 					);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
+	}
+	
+	
+	
+	void registerPowerComponent(int id){
+		int subId, completId;
+		String name;
+
+		
+		{
+			subId = 16;
+
+			name = "Power inductor";
+
+			PowerInductorDescriptor desc = new PowerInductorDescriptor(
+					name,null,SerieEE.newE12(-1)
+					);
+
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		
+		{
+			subId = 20;
+
+			name = "Power capacitor";
+
+			PowerCapacitorDescriptor desc = new PowerCapacitorDescriptor(
+					name,null,SerieEE.newE6(-1),60
+					);
+
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		
 	}
 
 	void registerSwitch(int id) {
@@ -3820,12 +3859,12 @@ public class Eln {
 		String name;
 
 		{
-			GenericItemUsingDamageDescriptor descriptor;
+			CopperCableDescriptor descriptor;
 			subId = 0;
 			completId = subId + (id << 6);
 			name = "Copper Cable";
 
-			descriptor = new GenericItemUsingDamageDescriptor(name);
+			descriptor = new CopperCableDescriptor(name);
 			sharedItem.addElement(completId, descriptor);
 			Data.addResource(descriptor.newItemStack());
 		}
@@ -4199,6 +4238,12 @@ public class Eln {
 			wrenchItemStack = desc.newItemStack();
 		}
 
+		{
+			subId = 52;
+			name = "Dielectric";
+			DielectricItem desc = new DielectricItem(name,LVU);
+			sharedItem.addElement(subId + (id << 6), desc);
+		}
 	}
 
 	public DataLogsPrintDescriptor dataLogsPrintDescriptor;

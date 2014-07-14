@@ -30,8 +30,8 @@ public class TransformerElement extends TransparentNodeElement {
 	public NbtElectricalLoad primaryLoad = new NbtElectricalLoad("primaryLoad");
 	public NbtElectricalLoad secondaryLoad = new NbtElectricalLoad("secondaryLoad");
 
-	public VoltageSource primaryVoltageSource = new VoltageSource("primaryVoltageSource",primaryLoad, null );
-	public VoltageSource secondaryVoltageSource = new VoltageSource("secondaryVoltageSource",secondaryLoad, null);
+	public VoltageSource primaryVoltageSource = new VoltageSource("primaryVoltageSource", primaryLoad, null);
+	public VoltageSource secondaryVoltageSource = new VoltageSource("secondaryVoltageSource", secondaryLoad, null);
 
 	public TransformerInterSystemProcess interSystemProcess = new TransformerInterSystemProcess(primaryLoad, secondaryLoad, primaryVoltageSource, secondaryVoltageSource);
 
@@ -43,14 +43,15 @@ public class TransformerElement extends TransparentNodeElement {
 		electricalLoadList.add(secondaryLoad);
 		electricalComponentList.add(primaryVoltageSource);
 		electricalComponentList.add(secondaryVoltageSource);
-		
+
 		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
 		slowProcessList.add(voltagePrimaryWatchdog.set(primaryLoad).set(exp));
 		slowProcessList.add(voltageSecondaryWatchdog.set(secondaryLoad).set(exp));
 
 	}
 
-	VoltageStateWatchDog voltagePrimaryWatchdog = new VoltageStateWatchDog(),voltageSecondaryWatchdog = new VoltageStateWatchDog();
+	VoltageStateWatchDog voltagePrimaryWatchdog = new VoltageStateWatchDog(), voltageSecondaryWatchdog = new VoltageStateWatchDog();
+
 	@Override
 	public void disconnectJob() {
 		super.disconnectJob();
@@ -65,15 +66,15 @@ public class TransformerElement extends TransparentNodeElement {
 
 	@Override
 	public void onBreakElement() {
-		//	node.dropInventory(inventory);
+		// node.dropInventory(inventory);
 		super.onBreakElement();
 	}
 
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		if(lrdu != LRDU.Down) return null;
-		if(side == front.left()) return primaryLoad;
-		if(side == front.right()) return secondaryLoad;
+		if (lrdu != LRDU.Down) return null;
+		if (side == front.left()) return primaryLoad;
+		if (side == front.right()) return secondaryLoad;
 		return null;
 	}
 
@@ -84,20 +85,20 @@ public class TransformerElement extends TransparentNodeElement {
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		if(lrdu == lrdu.Down)
+		if (lrdu == lrdu.Down)
 		{
-			if(side == front.left()) return NodeBase.maskElectricalPower;
-			if(side == front.right()) return NodeBase.maskElectricalPower;
-			if(side == front && !grounded) return NodeBase.maskElectricalPower;
-			if(side == front.back() && !grounded) return NodeBase.maskElectricalPower;
+			if (side == front.left()) return NodeBase.maskElectricalPower;
+			if (side == front.right()) return NodeBase.maskElectricalPower;
+			if (side == front && !grounded) return NodeBase.maskElectricalPower;
+			if (side == front.back() && !grounded) return NodeBase.maskElectricalPower;
 		}
 		return 0;
 	}
 
 	@Override
 	public String multiMeterString(Direction side) {
-		if(side == front.left()) return Utils.plotVolt("UP+:", primaryLoad.getU()) + Utils.plotAmpere("IP+:", primaryLoad.getCurrent());
-		if(side == front.right()) return Utils.plotVolt("US+:", secondaryLoad.getU()) + Utils.plotAmpere("IS+:", secondaryLoad.getCurrent());
+		if (side == front.left()) return Utils.plotVolt("UP+:", primaryLoad.getU()) + Utils.plotAmpere("IP+:", primaryLoad.getCurrent());
+		if (side == front.right()) return Utils.plotVolt("US+:", secondaryLoad.getU()) + Utils.plotAmpere("IS+:", secondaryLoad.getCurrent());
 		return "";
 
 	}
@@ -109,27 +110,9 @@ public class TransformerElement extends TransparentNodeElement {
 
 	@Override
 	public void initialize() {
-		
-		/*switch (type) {
-			case 0:
-				tranformerProcess.setRatio(2);
-				break;
-			case 1:
-				tranformerProcess.setRatio(-2);
-				break;
-			case 2:
-				tranformerProcess.setRatio(10);
-				break;
-		
-			default:
-				break;
-		}*/
-		//tranformerProcess.setRatio(2);	
-
 		computeInventory();
 
 		connect();
-
 	}
 
 	public void computeInventory()
@@ -139,54 +122,53 @@ public class TransformerElement extends TransparentNodeElement {
 		ItemStack core = inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId);
 		ElectricalCableDescriptor primaryCableDescriptor = null, secondaryCableDescriptor = null;
 
-		//tranformerProcess.setEnable(primaryCable != null && core != null && secondaryCable != null);
-		
-		if(primaryCable != null) {
+		// tranformerProcess.setEnable(primaryCable != null && core != null && secondaryCable != null);
+
+		if (primaryCable != null) {
 			primaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(primaryCable);
 		}
-		if(secondaryCable != null) {
+		if (secondaryCable != null) {
 			secondaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(secondaryCable);
 		}
 
-		if(primaryCableDescriptor != null)
+		if (primaryCableDescriptor != null)
 			voltagePrimaryWatchdog.setUNominal(primaryCableDescriptor.electricalNominalVoltage);
 		else
 			voltagePrimaryWatchdog.setUNominal(1000000);
-		
-		if(secondaryCableDescriptor != null)
+
+		if (secondaryCableDescriptor != null)
 			voltageSecondaryWatchdog.setUNominal(secondaryCableDescriptor.electricalNominalVoltage);
 		else
 			voltageSecondaryWatchdog.setUNominal(1000000);
-		
+
 		double coreFactor = 1;
-		if(core != null)	{
+		if (core != null) {
 			FerromagneticCoreDescriptor coreDescriptor = (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(core);
 
 			coreFactor = coreDescriptor.cableMultiplicator;
 		}
 
-		if(primaryCable == null || core == null)
+		if (primaryCable == null || core == null)
 			primaryLoad.highImpedance();
 		else
 			primaryCableDescriptor.applyTo(primaryLoad, coreFactor);
 
-		if(secondaryCable == null || core == null)
+		if (secondaryCable == null || core == null)
 			secondaryLoad.highImpedance();
 		else
 			secondaryCableDescriptor.applyTo(secondaryLoad, coreFactor);
 
-		if(primaryCable != null && secondaryCable != null)
+		if (primaryCable != null && secondaryCable != null)
 		{
 			interSystemProcess.setRatio(1.0 * secondaryCable.stackSize / primaryCable.stackSize);
-			/*tranformerProcess.setIMax(
-					2 * primaryCableDescriptor.electricalNominalPower / primaryCableDescriptor.electricalNominalVoltage,
-					2 * secondaryCableDescriptor.electricalNominalPower / secondaryCableDescriptor.electricalNominalVoltage);
-*/
+			/*
+			 * tranformerProcess.setIMax( 2 * primaryCableDescriptor.electricalNominalPower / primaryCableDescriptor.electricalNominalVoltage, 2 * secondaryCableDescriptor.electricalNominalPower / secondaryCableDescriptor.electricalNominalVoltage);
+			 */
 		}
 		else
 		{
 			interSystemProcess.setRatio(1);
-			//tranformerProcess.setIMax(
+			// tranformerProcess.setIMax(
 		}
 	}
 
@@ -201,36 +183,36 @@ public class TransformerElement extends TransparentNodeElement {
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		
+
 		return false;
 	}
 
 	@Override
 	public boolean hasGui() {
-		
+
 		return true;
 	}
 
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		
+
 		return new TransformerContainer(player, inventory);
 	}
 
 	public float getLightOpacity() {
-		
+
 		return 1.0f;
 	}
 
 	@Override
 	public IInventory getInventory() {
-		
+
 		return inventory;
 	}
 
 	@Override
 	public void onGroundedChangedByClient() {
-		
+
 		super.onGroundedChangedByClient();
 		computeInventory();
 		reconnect();
@@ -238,14 +220,14 @@ public class TransformerElement extends TransparentNodeElement {
 
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		
+
 		super.networkSerialize(stream);
 		try {
-			if(inventory.getStackInSlot(0) == null)
+			if (inventory.getStackInSlot(0) == null)
 				stream.writeByte(0);
 			else
 				stream.writeByte(inventory.getStackInSlot(0).stackSize);
-			if(inventory.getStackInSlot(1) == null)
+			if (inventory.getStackInSlot(1) == null)
 				stream.writeByte(0);
 			else
 				stream.writeByte(inventory.getStackInSlot(1).stackSize);
@@ -256,7 +238,7 @@ public class TransformerElement extends TransparentNodeElement {
 
 			node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
 		} catch (IOException e) {
-			
+
 			e.printStackTrace();
 		}
 	}

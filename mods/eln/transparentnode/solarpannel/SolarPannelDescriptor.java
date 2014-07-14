@@ -12,11 +12,14 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.AxisAlignedBB;
 
 import org.lwjgl.opengl.GL11;
 
@@ -162,5 +165,17 @@ public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 		list.add(Utils.plotVolt("Voltage Max:", electricalUmax));
 		list.add(Utils.plotPower("Power Max:", electricalPmax));
 		if(canRotate) list.add("Can be oriented.");
+	}
+	
+	@Override
+	public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB,
+			List list, TransparentNodeEntity entity) {
+		if(canRotate) {
+			super.addCollisionBoxesToList(par5AxisAlignedBB, list, entity);
+			return;
+		}
+		AxisAlignedBB bb = Blocks.stone.getCollisionBoundingBoxFromPool(entity.getWorldObj(), entity.xCoord, entity.yCoord, entity.zCoord);
+		bb.maxY -= 0.5;
+		if(par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
 	}
 }

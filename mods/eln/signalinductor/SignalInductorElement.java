@@ -4,7 +4,7 @@
 
 
 
-package mods.eln.inductor;
+package mods.eln.signalinductor;
 
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -19,20 +19,20 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 
 
-public class InductorElement extends SixNodeElement{
+public class SignalInductorElement extends SixNodeElement{
 
-	public InductorElement(SixNode sixNode, Direction side,
+	public SignalInductorElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
     	electricalLoadList.add(postiveLoad);
     	electricalLoadList.add(negativeLoad);
     	electricalComponentList.add(inductor);
     	postiveLoad.setAsMustBeFarFromInterSystem();
-    	this.descriptor = (InductorDescriptor) descriptor;
+    	this.descriptor = (SignalInductorDescriptor) descriptor;
 	}
 
 
-	public InductorDescriptor descriptor;
+	public SignalInductorDescriptor descriptor;
 	public NbtElectricalLoad postiveLoad = new NbtElectricalLoad("postiveLoad");
 	public NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
 	public Inductor inductor = new Inductor("inductor",postiveLoad, negativeLoad);

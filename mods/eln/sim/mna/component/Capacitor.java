@@ -60,6 +60,16 @@ public class Capacitor extends Bipole  implements ISubSystemProcessI {
 		s.addProcess(this);
 	}
 
+	
+	public double getE(){
+		double u = getU();
+		return u*u*c/2;
+	}
+
+	public double getC() {
+		// TODO Auto-generated method stub
+		return c;
+	}
 
 
 }

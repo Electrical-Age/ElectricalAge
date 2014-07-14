@@ -1,4 +1,4 @@
-package mods.eln.inductor;
+package mods.eln.signalinductor;
 
 import java.util.List;
 
@@ -12,13 +12,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 
-public class InductorDescriptor extends SixNodeDescriptor{
-	public InductorDescriptor(
+public class SignalInductorDescriptor extends SixNodeDescriptor{
+	public SignalInductorDescriptor(
 			String name,
 			double henri,
 			ElectricalCableDescriptor cable
 			) {
-		super(name, InductorElement.class,InductorRender.class);
+		super(name, SignalInductorElement.class,SignalInductorRender.class);
 		this.henri = henri;
 		this.cable = cable;
 	}

@@ -57,7 +57,7 @@ public class Simulator /* ,IPacketHandler */{
 
 	boolean run;
 
-	double electricalPeriod, thermalPeriod, callPeriod;
+	public double electricalPeriod, thermalPeriod, callPeriod;
 	int electricalInterSystemOverSampling;
 	int nodeCount = 0;
 
