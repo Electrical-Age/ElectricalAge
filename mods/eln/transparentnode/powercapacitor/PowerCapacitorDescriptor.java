@@ -3,6 +3,7 @@ package mods.eln.transparentnode.powercapacitor;
 import java.util.List;
 
 import mods.eln.Eln;
+import mods.eln.item.DielectricItem;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.series.ISerie;
@@ -36,21 +37,31 @@ public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
 	ISerie serie;
 	public double dischargeTao;
 
-	public double getlValue(int cableCount) {
+	public double getCValue(int cableCount,double nominalDielVoltage) {
 		if(cableCount == 0) return 0;
-		return serie.getValue(cableCount-1);
+		double uTemp = nominalDielVoltage/Eln.LVU;
+		return serie.getValue(cableCount-1)/uTemp/uTemp;
 	}
 
 	public double getCValue(IInventory inventory) {
 		ItemStack core = inventory.getStackInSlot(PowerCapacitorContainer.redId);
 		ItemStack diel = inventory.getStackInSlot(PowerCapacitorContainer.dielectricId);
 		if (core == null || diel == null)
-			return getlValue(0);
-		else
-			return getlValue(core.stackSize);
+			return getCValue(0,0);
+		else{
+			return getCValue(core.stackSize,getUNominalValue(inventory));
+		}
 	}
 
-
+	public double getUNominalValue(IInventory inventory) {
+		ItemStack diel = inventory.getStackInSlot(PowerCapacitorContainer.dielectricId);
+		if (diel == null)
+			return 10000;
+		else{
+			DielectricItem desc = (DielectricItem) DielectricItem.getDescriptor(diel);
+			return desc.uNominal*diel.stackSize;
+		}
+	}
 	public void setParent(net.minecraft.item.Item item, int damage)
 	{
 		super.setParent(item, damage);

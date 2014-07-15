@@ -1530,7 +1530,7 @@ public class Eln {
 			name = "Power capacitor";
 
 			PowerCapacitorDescriptor desc = new PowerCapacitorDescriptor(
-					name,null,SerieEE.newE6(-1),60
+					name,null,SerieEE.newE6(-2),300
 					);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);

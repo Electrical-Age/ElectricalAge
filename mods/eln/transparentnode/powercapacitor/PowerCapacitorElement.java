@@ -22,6 +22,8 @@ import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.process.PowerSourceBipole;
 import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.process.destruct.BipoleVoltageWatchdog;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -35,7 +37,9 @@ public class PowerCapacitorElement extends TransparentNodeElement {
 
 	Capacitor capacitor = new Capacitor(positiveLoad, negativeLoad);
 	Resistor dischargeResistor = new Resistor(positiveLoad,negativeLoad);
-
+	PunkProcess punkProcess = new PunkProcess();
+	BipoleVoltageWatchdog watchdog = new BipoleVoltageWatchdog().set(capacitor);
+	
 	public PowerCapacitorElement(TransparentNode transparentNode,
 			TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
@@ -45,16 +49,28 @@ public class PowerCapacitorElement extends TransparentNodeElement {
 		electricalLoadList.add(negativeLoad);
 		electricalComponentList.add(capacitor);
 		electricalComponentList.add(dischargeResistor);
-		electricalProcessList.add(new SlowProcess());
+		electricalProcessList.add(punkProcess);
+		slowProcessList.add(watchdog);
+		
+		watchdog.set(new WorldExplosion(this).machineExplosion());
 		positiveLoad.setAsMustBeFarFromInterSystem();
 	}
 	
 	
 	
-	class SlowProcess implements IProcess{
+	class PunkProcess implements IProcess{
+		double eLeft = 0;
+		double eLegaliseResistor;
+		
 		@Override
 		public void process(double time) {
-			dischargeResistor.setR(stdDischargeResistor);
+			if(eLeft <= 0){
+				eLeft = 0;
+				dischargeResistor.setR(stdDischargeResistor);
+			}else{
+				eLeft -= dischargeResistor.getP()*time;
+				dischargeResistor.setR(eLegaliseResistor);
+			}
 		}
 	}
 
@@ -111,27 +127,25 @@ public class PowerCapacitorElement extends TransparentNodeElement {
 	
 	boolean fromNbt = false;
 	public void setupPhysical() {
-		//double rs = descriptor.getRsValue(inventory);
-
 		double eOld = capacitor.getE();
 		capacitor.setC(descriptor.getCValue(inventory));
-		//positiveLoad.setRs(rs);
-		//negativeLoad.setRs(rs);
 		stdDischargeResistor = descriptor.dischargeTao/capacitor.getC();
 		
+		watchdog.setUNominal(descriptor.getUNominalValue(inventory));
+		punkProcess.eLegaliseResistor = Math.pow(descriptor.getUNominalValue(inventory),2)/400;
 		
 		if(fromNbt){
 			dischargeResistor.setR(stdDischargeResistor);
 			fromNbt = false;
 		}else{
 			double deltaE = capacitor.getE()-eOld;
+			punkProcess.eLeft += deltaE;
 			if(deltaE < 0){
 				dischargeResistor.setR(stdDischargeResistor);
 			}else{
-				double egualiseR = Math.pow(dischargeResistor.getU(),2)/(deltaE/Eln.simulator.electricalPeriod);
-				dischargeResistor.setR(1/(1/egualiseR+1/stdDischargeResistor));
+				dischargeResistor.setR(punkProcess.eLegaliseResistor);
 			}
-		}
+		}	
 	}
 
 	@Override
@@ -144,11 +158,14 @@ public class PowerCapacitorElement extends TransparentNodeElement {
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
+		nbt.setDouble("punkELeft",punkProcess.eLeft);
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
+		punkProcess.eLeft = nbt.getDouble("punkELeft");
+		if(Double.isNaN(punkProcess.eLeft)) punkProcess.eLeft = 0;
 		fromNbt = true;
 	}
 
