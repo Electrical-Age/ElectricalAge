@@ -4,8 +4,8 @@ import mods.eln.misc.Coordonate;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import mods.eln.node.transparent.TransparentNode;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.peripheral.IPeripheralProvider;
 
@@ -21,5 +21,9 @@ public class PeripheralHandler implements IPeripheralProvider {
 			}
 		}
 		return null;
+	}
+
+	public static void register() {
+		ComputerCraftAPI.registerPeripheralProvider(new PeripheralHandler());
 	}
 }

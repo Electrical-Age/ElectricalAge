@@ -209,7 +209,6 @@ import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
-import dan200.computercraft.api.ComputerCraftAPI;
 
 @Mod(modid = Eln.MODID, name = Eln.NAME, version = Version.REVISION)
 // @Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0b")
@@ -452,12 +451,21 @@ public class Eln {
 	}
 
 	public static FMLEventChannel eventChannel;
-
+	boolean computerCraftReady = false;
 	// FMLCommonHandler.instance().bus().register(this);
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
 		Object o;
 
+		try {
+			Class<?> cc = Class.forName("dan200.computercraft.ComputerCraft");
+			if(cc != null){
+				computerCraftReady = true;
+			}
+		} catch (ClassNotFoundException e) {
+
+		}
+		
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
 
 		simulator = new Simulator(0.05, 1 / electricalFrequancy, electricalInterSystemOverSampling, 1 / thermalFrequancy);
@@ -534,7 +542,9 @@ public class Eln {
 
 		SixNode.sixNodeCacheList.add(new SixNodeCacheStd());
 
-		ComputerCraftAPI.registerPeripheralProvider(new PeripheralHandler());
+		if(computerCraftReady){
+			PeripheralHandler.register();
+		}
 
 		registerArmor();
 		registerTool();
@@ -3467,8 +3477,9 @@ public class Eln {
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
+		
 
-		{
+		if(computerCraftReady){
 			subId = 4;
 			name = "ComputerCraft Probe";
 

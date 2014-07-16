@@ -37,14 +37,10 @@ public class GuiHandler implements IGuiHandler {
 				stream.writeInt(id);
 				stream.writeInt(x);
 				stream.writeInt(y);
-				stream.writeInt(z);
-
-				
+				stream.writeInt(z);		
 				Utils.sendPacketToClient(bos,(EntityPlayerMP)player);
 			} catch (IOException e) {
-				
 				e.printStackTrace();
-
 			}
 		}
 		return container;

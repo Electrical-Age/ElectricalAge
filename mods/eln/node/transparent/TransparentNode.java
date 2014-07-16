@@ -1,46 +1,26 @@
 package mods.eln.node.transparent;
 
-import java.awt.List;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-
-import cpw.mods.fml.common.FMLCommonHandler;
-import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
-
 
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
-import mods.eln.misc.INBTTReady;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.LRDUCubeMask;
 import mods.eln.misc.Utils;
 import mods.eln.node.INodeInfo;
 import mods.eln.node.Node;
-import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.IProcess;
-import mods.eln.sim.ThermalConnection;
 import mods.eln.sim.ThermalLoad;
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
-
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 
 public class TransparentNode extends Node{
 

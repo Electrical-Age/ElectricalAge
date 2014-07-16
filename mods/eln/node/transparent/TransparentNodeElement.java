@@ -4,29 +4,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.List;
-
-import com.google.common.base.CaseFormat;
-
-
-import cpw.mods.fml.common.registry.LanguageRegistry;
-import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
-
-
 
 import mods.eln.Eln;
-import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostObserver;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalConnection;
@@ -37,7 +23,6 @@ import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sound.IPlayer;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.block.Block;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -45,7 +30,6 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 
 public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
