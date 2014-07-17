@@ -60,7 +60,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 			this.c = c;
 		}
 		
-		
+		double range = 64;
 		Coordonate c;
 		double glichedTimer = 0;
 		double glichedStrangth = 0;
@@ -72,10 +72,11 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 			if(glichedTimer > 0)
 				glichedTimer -= time/* * Utils.rand(0.2, 1.8)*/;
 			
-			double strangth = 256 - Eln.instance.serverEventListener.getLightningClosestTo(c);
+			double strangth = range - Eln.instance.serverEventListener.getLightningClosestTo(c);
 			if(strangth > 0 && glichedTimer <= 0){
 				glichedTimer = glitchLength;
-				glichedStrangth = (strangth)/128;
+				glichedStrangth = (strangth)/range;
+				glichedStrangth = Math.pow(glichedStrangth, 1.4);
 			}
 			
 			if(glichedTimer > 0){

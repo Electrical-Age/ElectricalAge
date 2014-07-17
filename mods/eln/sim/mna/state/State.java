@@ -39,6 +39,14 @@ public class State {
 	public ArrayList<Component> getConnectedComponents(){
 		return components;
 	}
+	public ArrayList<Component> getConnectedComponentsNotAbstracted(){
+		ArrayList<Component> list = new ArrayList<Component>();
+		for(Component c : components){
+			if(c.isAbstracted()) continue;
+			list.add(c);
+		}
+		return list;
+	}
 	
 	public void add(Component c) {
 		components.add(c);

@@ -68,14 +68,14 @@ public class RootSystem {
 	}
 
 	public void addState(State s) {
-		for(Component c : (ArrayList<Component>)s.getConnectedComponents().clone()){
+		for(Component c : (ArrayList<Component>)s.getConnectedComponentsNotAbstracted().clone()){
 			if(c.getSubSystem() != null)
 				breakSystems(c.getSubSystem());
 		} 
 		addStates.add(s);
 	}
 	public void removeState(State s) {
-		for(Component c : (ArrayList<Component>)s.getConnectedComponents().clone()){
+		for(Component c : (ArrayList<Component>)s.getConnectedComponentsNotAbstracted().clone()){
 			if(c.getSubSystem() != null)
 				breakSystems(c.getSubSystem());
 		} 
@@ -104,7 +104,7 @@ public class RootSystem {
 
 	private boolean isValidForLine(State s) {
 		if(s.canBeSimplifiedByLine() == false) return false;
-		ArrayList<Component> sc = s.getConnectedComponents();
+		ArrayList<Component> sc = s.getConnectedComponentsNotAbstracted();
 		if(sc.size() != 2) return false;
 		for(Component c : sc) {
 			if(false == c instanceof Resistor) { return false; }
@@ -130,9 +130,9 @@ public class RootSystem {
 			State sRoot = stateScope.iterator().next();
 
 			State sPtr = sRoot;
-			Resistor rPtr = (Resistor) sPtr.getConnectedComponents().get(0);
+			Resistor rPtr = (Resistor) sPtr.getConnectedComponentsNotAbstracted().get(0);
 			while (true) {
-				for(Component c : sPtr.getConnectedComponents()) {
+				for(Component c : sPtr.getConnectedComponentsNotAbstracted()) {
 					if(c != rPtr) {
 						rPtr = (Resistor) c;
 						break;
@@ -157,7 +157,7 @@ public class RootSystem {
 			while (true) {
 				lineStates.add(sPtr);
 				stateScope.remove(sPtr);
-				for(Component c : sPtr.getConnectedComponents()) {
+				for(Component c : sPtr.getConnectedComponentsNotAbstracted()) {
 					if(c != rPtr) {
 						rPtr = (Resistor) c;
 						break;
@@ -307,7 +307,7 @@ public class RootSystem {
 			
 			
 			
-			for(Component c : sExplored.getConnectedComponents()) {
+			for(Component c : sExplored.getConnectedComponentsNotAbstracted()) {
 				if(privateSystem == false && roots.size() + stateSet.size() > maxSubSystemSize && c.canBeReplacedByInterSystem()){
 					continue;
 				}

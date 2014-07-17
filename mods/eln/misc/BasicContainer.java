@@ -69,13 +69,16 @@ public class BasicContainer extends Container {
 			ItemStack stackInSlot = slotObject.getStack();
 			stack = stackInSlot.copy();
 
-			// merges the item into player inventory since its in the tileEntity
-			/*
-			 * if (slot < 9) { if (!this.mergeItemStack(stackInSlot, 9, 45,
-			 * true)) { return null; } } //places it into the tileEntity is
-			 * possible since its in the player inventory else if
-			 * (!this.mergeItemStack(stackInSlot, 0, 9, false)) { return null; }
-			 */
+            //merges the item into player inventory since its in the tileEntity
+//            if (slot < 9) {
+//                    if (!this.mergeItemStack(stackInSlot, 0, 35, true)) {
+//                            return null;
+//                    }
+//            }
+//            //places it into the tileEntity is possible since its in the player inventory
+//            else if (!this.mergeItemStack(stackInSlot, 0, 9, false)) {
+//                    return null;
+//            }
 			if (stackInSlot.stackSize == 0) {
 				slotObject.putStack(null);
 			} else {

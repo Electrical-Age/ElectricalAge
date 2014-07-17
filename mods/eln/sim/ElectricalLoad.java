@@ -2,6 +2,7 @@ package mods.eln.sim;
 
 import mods.eln.sim.mna.component.Bipole;
 import mods.eln.sim.mna.component.Component;
+import mods.eln.sim.mna.component.Line;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.mna.state.VoltageStateLineReady;
 
@@ -45,7 +46,7 @@ public class ElectricalLoad extends VoltageStateLineReady{
 	public double getI() {
 		double i = 0;
 		for(Component c : getConnectedComponents()){
-			if(c instanceof Bipole)
+			if(c instanceof Bipole && (c instanceof Line == false))
 				i += Math.abs(((Bipole)c).getCurrent());
 		}
 		return i*0.5;

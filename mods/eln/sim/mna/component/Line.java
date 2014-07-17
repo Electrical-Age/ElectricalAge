@@ -40,14 +40,14 @@ public class Line extends Resistor implements ISubSystemProcessFlush , IAbstract
 	}
 	
 	void restoreResistorIntoCircuit(){
-		aPin.add(resistors.getFirst());
-		bPin.add(resistors.getLast());
+		//aPin.add(resistors.getFirst());
+		//bPin.add(resistors.getLast());
 		this.breakConnection();
 	}
 	
 	void removeResistorFromCircuit(){
-		aPin.remove(resistors.getFirst());
-		bPin.remove(resistors.getLast());
+		//aPin.remove(resistors.getFirst());
+		//bPin.remove(resistors.getLast());
 	}	
 	
 	/*void removeCompFromState(Resistor r,State s){
@@ -68,8 +68,8 @@ public class Line extends Resistor implements ISubSystemProcessFlush , IAbstract
 			Resistor last = resistors.getLast();
 			State stateBefore = first.aPin == states.getFirst() ? first.bPin : first.aPin;
 			State stateAfter = last.aPin == states.getLast() ? last.bPin : last.aPin;
-			stateBefore.remove(first);
-			stateAfter.remove(last);
+			//stateBefore.remove(first);
+			//stateAfter.remove(last);
 			
 			Line l = new Line();
 			l.resistors = resistors;

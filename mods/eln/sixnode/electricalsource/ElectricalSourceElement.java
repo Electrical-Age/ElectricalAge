@@ -114,7 +114,7 @@ public class ElectricalSourceElement extends SixNodeElement {
 	@Override
 	public void initialize() {
 
-		electricalLoad.setRs(0.000001);
+		Eln.applySmallRs(electricalLoad);
 	}
 
 	@Override
