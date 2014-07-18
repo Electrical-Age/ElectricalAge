@@ -5314,6 +5314,8 @@ public class Eln {
 				"  c",
 				Character.valueOf('c'), new ItemStack(Items.iron_ingot));
 
+		
+		
 		addRecipe(findItemStack("Player Filter"),
 				" g",
 				"gc",
@@ -5366,7 +5368,7 @@ public class Eln {
 				findItemStack("Copper Ingot", 4),
 				findItemStack("Copper Plate"), 1.0 * f));
 
-		compressorRecipes.addRecipe(new Recipe(findItemStack("Lead Ingot", 4),
+		plateMachineRecipes.addRecipe(new Recipe(findItemStack("Lead Ingot", 4),
 				findItemStack("Lead Plate"), 1.0 * f));
 
 		plateMachineRecipes.addRecipe(new Recipe(
@@ -5381,6 +5383,9 @@ public class Eln {
 
 		plateMachineRecipes.addRecipe(new Recipe(new ItemStack(Items.gold_ingot, 4,
 				0), findItemStack("Gold Plate"), 1.0 * f));
+		
+		
+
 	}
 
 	void recipeCompressor() {
@@ -5393,6 +5398,10 @@ public class Eln {
 		compressorRecipes.addRecipe(new Recipe(findItemStack("Coal Dust", 4),
 				findItemStack("Coal Plate"), 4000.0));
 
+		compressorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.sand),
+				findItemStack("Dielectric"), 2000.0));
+
+			
 	}
 
 	void recipemagnetiser() {
