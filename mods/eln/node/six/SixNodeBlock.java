@@ -418,7 +418,7 @@ public class SixNodeBlock extends NodeBlock implements INodeInfo {
 
 		// double distanceMax = (double)Minecraft.getMinecraft().playerController.getBlockReachDistance();
 		double distanceMax = 5.0;
-		Vec3 start = Vec3.fakePool.getVecFromPool(entityLiving.posX, entityLiving.posY, entityLiving.posZ);
+		Vec3 start = Vec3.createVectorHelper(entityLiving.posX, entityLiving.posY, entityLiving.posZ);
 
 		if (!world.isRemote) start.yCoord += 1.62;
 		Vec3 var5 = entityLiving.getLook(0.5f);

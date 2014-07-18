@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import cpw.mods.fml.relauncher.Side;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -14,25 +13,17 @@ import mods.eln.item.LampDescriptor.Type;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeServer;
-import mods.eln.node.six.SixNode;
 import mods.eln.server.SaveConfig;
-import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.IProcess;
-import mods.eln.sim.Simulator;
-import mods.eln.sixnode.lampsocket.LightBlockEntity.LightBlockObserver;
 import mods.eln.sixnode.lampsupply.LampSupplyElement;
 import mods.eln.sound.SoundCommand;
 import mods.eln.sound.SoundLooper;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockCrops;
-import net.minecraft.block.BlockFarmland;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
-import net.minecraft.util.Vec3Pool;
 
 public class LampSocketProcess implements IProcess, INBTTReady/*
 * ,LightBlockObserver
