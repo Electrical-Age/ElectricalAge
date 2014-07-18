@@ -248,5 +248,20 @@ public class SixNodeEntity extends NodeBlockEntity {
 		}
 
 	}
+
+	@Override
+	public int isProvidingWeakPower(Direction side) {
+		if(worldObj.isRemote) {
+			int max = 0;
+			for(SixNodeElementRender r : elementRenderList){
+				if(r == null) continue;
+				if(max < r.isProvidingWeakPower(side)) max = r.isProvidingWeakPower(side);
+			}
+			return max;
+		}
+		else{
+			return getNode().isProvidingWeakPower(side);
+		}
+	}
 }
 // && 

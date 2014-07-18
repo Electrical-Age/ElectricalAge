@@ -151,7 +151,11 @@ public abstract class SixNodeElementRender {
 	public LRDU front;
 	CableRenderType connectionType;
 	public SixNodeDescriptor sixNodeDescriptor;
-
+	
+	public int isProvidingWeakPower(Direction side) {
+		return 0;
+	}
+	
 	public void publishUnserialize(DataInputStream stream)
 	{
 		try {

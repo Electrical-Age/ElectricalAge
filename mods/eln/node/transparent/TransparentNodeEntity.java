@@ -187,5 +187,10 @@ public class TransparentNodeEntity extends NodeBlockEntity {	//boolean[] syncron
 			elementRender.refresh(deltaT);
 		}
 	}
+	@Override
+	public int isProvidingWeakPower(Direction side) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
 // && 

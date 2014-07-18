@@ -63,6 +63,7 @@ import mods.eln.misc.Utils;
 import mods.eln.misc.Version;
 import mods.eln.misc.WindProcess;
 import mods.eln.misc.series.SerieEE;
+import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
 import mods.eln.node.NodeServer;
 import mods.eln.node.six.SixNode;
@@ -780,6 +781,7 @@ public class Eln {
 		TutorialSignElement.resetBalise();
 		modbusServer.destroy();
 		LightBlockEntity.observers.clear();
+		NodeBlockEntity.clientList.clear();
 		TeleporterElement.teleporterList.clear();
 		IWirelessSignalSpot.spots.clear();
 		playerManager.clear();

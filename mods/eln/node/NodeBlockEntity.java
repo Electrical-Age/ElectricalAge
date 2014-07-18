@@ -120,10 +120,11 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 	//abstract public Node newNode();
 	//abstract public Node newNode(Direction front,EntityLiving entityLiving,int metadata);
 	
-	int isProvidingWeakPower(Direction side)
-	{
-		return getNode().isProvidingWeakPower(side);
-	}
+	public abstract int isProvidingWeakPower(Direction side);
+	//{
+		//if(worldObj.isRemote) return 0;
+		//return getNode().isProvidingWeakPower(side);
+	//}
 	
 	Node node = null;
 	
@@ -337,6 +338,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
  
     public Node getNode()
     {
+    	if(worldObj.isRemote)Utils.fatal();
     	if(node == null) node = (Node)NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord,this.worldObj));
     	return node;
     }

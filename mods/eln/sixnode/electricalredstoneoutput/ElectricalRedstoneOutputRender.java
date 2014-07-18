@@ -36,6 +36,12 @@ public class ElectricalRedstoneOutputRender extends SixNodeElementRender {
 	int redOutput;
 	
 	@Override
+	public int isProvidingWeakPower(Direction side) {
+		return redOutput;
+	}
+	
+	
+	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);
 		try {
