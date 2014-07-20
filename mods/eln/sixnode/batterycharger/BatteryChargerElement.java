@@ -184,9 +184,15 @@ public class BatteryChargerElement extends SixNodeElement {
 	
 	class BatteryChargerSlowProcess implements IProcess {
 		double energyCounter = 0;
-		
+		double timeout = 0;
 		@Override
 		public void process(double time) {
+			timeout -= time;
+			if(timeout > 0) return;
+			timeout = 1;
+			time = 1;
+			
+			
 			byte oldCharged = charged;
 			charged = 0;
 			presence = 0;

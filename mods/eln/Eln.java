@@ -126,6 +126,8 @@ import mods.eln.sixnode.lampsupply.LampSupplyDescriptor;
 import mods.eln.sixnode.lampsupply.LampSupplyElement;
 import mods.eln.sixnode.modbusrtu.ModbusRtuDescriptor;
 import mods.eln.sixnode.modbusrtu.ModbusServer;
+import mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor;
+import mods.eln.sixnode.powerinductorsix.PowerInductorSixDescriptor;
 import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
 import mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor;
 import mods.eln.sixnode.tutorialsign.TutorialSignDescriptor;
@@ -377,8 +379,9 @@ public class Eln {
 
 	public static Obj3DFolder obj = new Obj3DFolder();
 
+	public static boolean dicThungsten;
 	public static boolean genCooper, genPlumb, genTungsten, genCinnabar;
-
+	public static String dicTungstenOre,dicTungstenDust,dicTungstenIngot;
 	public static ArrayList<OreScannerConfigElement> oreScannerConfig = new ArrayList<OreScannerConfigElement>();
 	public static boolean modbusEnable = false;
 
@@ -437,6 +440,17 @@ public class Eln {
 		genCinnabar = config.get("mapGenerate", "cinnabar", true).getBoolean(true);
 		genCinnabar = false;
 
+		dicThungsten = config.get("dictionary", "tungsten", false).getBoolean(false);
+		if(dicThungsten){
+			dicTungstenOre = "oreTungsten";
+			dicTungstenDust = "dustTungsten";
+			dicTungstenIngot = "ingotTungsten";
+		}else{
+			dicTungstenOre = "oreElnTungsten";
+			dicTungstenDust = "dustElnTungsten";
+			dicTungstenIngot = "ingotElnTungsten";		
+		}
+		
 		incondecentLampLife = config.get("lamp", "incondescentLifeInHours", 8).getDouble(8) * 3600;
 		economicLampLife = config.get("lamp", "economicLifeInHours", 32).getDouble(32) * 3600;
 
@@ -1514,6 +1528,34 @@ public class Eln {
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
+		
+		
+		{
+			subId = 32;
+
+			name = "Power Capacitor";
+
+			PowerCapacitorSixDescriptor desc = new PowerCapacitorSixDescriptor(
+					name,null,SerieEE.newE6(-2),300
+					);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		
+		{
+			subId = 34;
+
+			name = "Power Inductor";
+
+			PowerInductorSixDescriptor desc = new PowerInductorSixDescriptor(
+					name,null,SerieEE.newE12(-1)
+					);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		
+		
+		
 
 	}
 	
@@ -1533,7 +1575,7 @@ public class Eln {
 					name,null,SerieEE.newE12(-1)
 					);
 
-			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+			transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
 		
 		{
@@ -1545,7 +1587,7 @@ public class Eln {
 					name,null,SerieEE.newE6(-2),300
 					);
 
-			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+			transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
 		
 	}
@@ -2863,7 +2905,7 @@ public class Eln {
 			// spawnHeightMax
 			);
 			oreItem.addDescriptor(id, desc);
-			addToOre("oreTungsten", desc.newItemStack());
+			addToOre(dicTungstenOre, desc.newItemStack());
 		}
 		{
 			id = 6;
@@ -2949,7 +2991,7 @@ public class Eln {
 					new String[] {});
 			sharedItem.addElement(id, element);
 			Data.addResource(element.newItemStack());
-			addToOre("dustTungsten", element.newItemStack());
+			addToOre(dicTungstenDust, element.newItemStack());
 		}
 
 		{
@@ -3059,7 +3101,7 @@ public class Eln {
 			// element.newItemStack(1));
 			tungstenIngot = element;
 			Data.addResource(element.newItemStack());
-			addToOre("ingotTungsten", element.newItemStack());
+			addToOre(dicTungstenIngot, element.newItemStack());
 		}
 
 		{
@@ -4845,7 +4887,7 @@ public class Eln {
 				"GFG",
 				" S ",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
-				Character.valueOf('F'), findItemStack("Tungsten Ingot"),
+				Character.valueOf('F'), dicTungstenIngot,
 				Character.valueOf('S'), findItemStack("Copper Cable"));
 
 		addRecipe(findItemStack("50V Incandescent Light Bulb", 4),
@@ -4853,7 +4895,7 @@ public class Eln {
 				"GFG",
 				" S ",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
-				Character.valueOf('F'), findItemStack("Tungsten Ingot"),
+				Character.valueOf('F'), dicTungstenIngot,
 				Character.valueOf('S'), findItemStack("Low Voltage Cable"));
 
 		addRecipe(findItemStack("200V Incandescent Light Bulb", 4),
@@ -4861,7 +4903,7 @@ public class Eln {
 				"GFG",
 				" S ",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
-				Character.valueOf('F'), findItemStack("Tungsten Ingot"),
+				Character.valueOf('F'), dicTungstenIngot,
 				Character.valueOf('S'), findItemStack("Medium Voltage Cable"));
 
 		// CARBON
@@ -4928,7 +4970,7 @@ public class Eln {
 				"FFF",
 				"GSG",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
-				Character.valueOf('F'), findItemStack("Tungsten Ingot"),
+				Character.valueOf('F'), dicTungstenIngot,
 				Character.valueOf('S'), findItemStack("Low Voltage Cable"));
 
 		addRecipe(findItemStack("200V Farming Lamp", 2),
@@ -4936,7 +4978,7 @@ public class Eln {
 				"FFF",
 				"GSG",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
-				Character.valueOf('F'), findItemStack("Tungsten Ingot"),
+				Character.valueOf('F'), dicTungstenIngot,
 				Character.valueOf('S'), findItemStack("Medium Voltage Cable"));
 
 	}
@@ -4994,7 +5036,7 @@ public class Eln {
 				"dustIron",
 				"dustIron",
 				"dustCoal",
-				"dustTungsten");
+				dicTungstenDust);
 
 	}
 
@@ -5154,7 +5196,7 @@ public class Eln {
 
 		addRecipe(findItemStack("Tungsten Cable", 6),
 				"III",
-				Character.valueOf('I'), findItemStack("Tungsten Ingot"));
+				Character.valueOf('I'), dicTungstenIngot);
 
 	}
 
@@ -5432,7 +5474,7 @@ public class Eln {
 		in = findItemStack("Tungsten Ore");
 		Utils.addSmelting(in.getItem(), in.getItemDamage(),
 				findItemStack("Tungsten Ingot"));
-		in = findItemStack("dustTungsten");
+		in = findItemStack("Tungsten Dust");
 		Utils.addSmelting(in.getItem(), in.getItemDamage(),
 				findItemStack("Tungsten Ingot"));
 		in = findItemStack("ingotAlloy");

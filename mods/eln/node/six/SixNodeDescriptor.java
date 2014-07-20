@@ -53,7 +53,6 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 		if(type == ItemRenderType.INVENTORY)
 			return false;
 		return true;
-		//return false;
 	}
 
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item,
@@ -64,32 +63,9 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		//RenderBlocks b = (RenderBlocks)data[0];
-		//MinecraftForgeClient.getItemRenderer(item, type)
-		// IItemRenderer r = MinecraftForgeClient.getItemRenderer(new ItemStack(Items.bread), IItemRenderer.ItemRenderType.ENTITY);
-		// int i = 0;
-		
-		
-		//if(type == ItemRenderType.ENTITY)
-			//ForgeHooksClient.renderEntityItem((EntityItem)data[1], item, 0, 0, new Random(), Minecraft.getMinecraft().getTextureManager(),(RenderBlocks) data[0], 1);
-		//new ItemRenderer(Minecraft.getMinecraft()).renderItem(Minecraft.getMinecraft().thePlayer,item,1,ItemRenderType.ENTITY);
-		
 		UtilsClient.drawIcon(type,getIcon().getIconName().replace("eln:", "textures/blocks/")+".png");
-
-	//	Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation("eln", getIcon().getIconName().replace("eln:", "textures/blocks/")+".png"));
-		/*UtilsClient.disableCulling();
-		GL11.glBegin(GL11.GL_QUADS);
-		GL11.glTexCoord2f(1f, 0f);
-		GL11.glVertex3f(0f,16f, 0f);
-		GL11.glTexCoord2f(0f, 0f);
-		GL11.glVertex3f(0f,0f, 0f);
-		GL11.glTexCoord2f(0f, 1f);
-		GL11.glVertex3f(0f,0f, 16f);
-		GL11.glTexCoord2f(1f, 1f);
-		GL11.glVertex3f(0f,16f, 16f);
-		GL11.glEnd();
-		UtilsClient.enableCulling();*/
 	}
+	
 	public boolean hasVolume() {
 		
 		return false;
