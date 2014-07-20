@@ -67,7 +67,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 
 	float counter = 0;
 
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(4, 64, this);
+	TransparentNodeElementInventory inventory = new HeatFurnaceInventory(4, 64, this);
 
 	boolean boot = true;
 

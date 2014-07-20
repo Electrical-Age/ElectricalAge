@@ -27,7 +27,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class ElectricalFurnaceRender extends TransparentNodeElementRender {
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(5, 64, this);
+	TransparentNodeElementInventory inventory = new ElectricalFurnaceInventory(5, 64, this);
 
 	public float temperature = 0;
 	public boolean powerOn, heatingCorpOn;

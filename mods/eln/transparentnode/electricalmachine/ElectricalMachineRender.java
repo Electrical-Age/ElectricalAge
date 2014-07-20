@@ -30,7 +30,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class ElectricalMachineRender extends TransparentNodeElementRender {
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
+	TransparentNodeElementInventory inventory = new ElectricalMachineInventory(3, 64, this);
 
 	ElectricalMachineDescriptor descriptor;
 	public ElectricalMachineRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {

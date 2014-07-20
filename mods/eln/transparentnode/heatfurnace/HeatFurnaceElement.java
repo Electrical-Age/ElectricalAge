@@ -38,7 +38,7 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 	public NbtFurnaceProcess furnaceProcess = new NbtFurnaceProcess("furnaceProcess",thermalLoad);
 	public HeatFurnaceInventoryProcess inventoryProcess = new HeatFurnaceInventoryProcess(this);
 	
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(4, 64, this);
+	TransparentNodeElementInventory inventory = new HeatFurnaceInventory(4, 64, this);
 
 	HeatFurnaceThermalProcess regulator = new HeatFurnaceThermalProcess("regulator",furnaceProcess,this);
 	

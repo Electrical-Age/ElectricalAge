@@ -23,7 +23,7 @@ import org.lwjgl.opengl.GL11;
 
 public class EggIncubatorRender extends TransparentNodeElementRender {
 
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
+	TransparentNodeElementInventory inventory = new EggIncubatorInventory(1, 64, this);
 	EggIncubatorDescriptor descriptor;
 	
 	public EggIncubatorRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {

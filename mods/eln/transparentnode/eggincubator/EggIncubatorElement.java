@@ -31,7 +31,7 @@ public class EggIncubatorElement extends TransparentNodeElement {
 	
 	public NbtElectricalLoad powerLoad = new NbtElectricalLoad("powerLoad");
 	public Resistor powerResistor = new Resistor(powerLoad,null);
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 64, this);
+	TransparentNodeElementInventory inventory = new EggIncubatorInventory(1, 64, this);
 	EggIncubatorProcess slowProcess = new EggIncubatorProcess();
 	EggIncubatorDescriptor descriptor;
 	public EggIncubatorElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {

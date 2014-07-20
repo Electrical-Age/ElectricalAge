@@ -39,7 +39,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class ElectricalFurnaceElement extends TransparentNodeElement {
 
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(5, 64, this);
+	TransparentNodeElementInventory inventory = new ElectricalFurnaceInventory(5, 64, this);
 
 	public static final int inSlotId = 0;
 	public static final int outSlotId = 1;

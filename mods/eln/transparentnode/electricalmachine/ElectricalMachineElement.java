@@ -29,7 +29,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class ElectricalMachineElement extends TransparentNodeElement implements ElectricalStackMachineProcessObserver {
 
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
+	TransparentNodeElementInventory inventory = new ElectricalMachineInventory(3, 64, this);
 
 	NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");	
 	Resistor electricalResistor = new Resistor(electricalLoad,null);	

@@ -12,6 +12,7 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNode.FrontType;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockHopper;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
@@ -93,7 +94,7 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 			Coordonate temp = new Coordonate(coord);
 			temp.move(Direction.YN);
 			block = temp.getBlock();
-			if(block == null || ! block.isOpaqueCube()) return "You can't place this block at this side";
+			if(block == null || ((! block.isOpaqueCube()) && block instanceof BlockHopper == false)) return "You can't place this block at this side";
 		}
 		if(mustHaveCeiling())
 		{
