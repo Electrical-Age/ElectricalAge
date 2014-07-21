@@ -23,10 +23,12 @@ import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 
 public class ClientKeyHandler {
 
-	static final int idOffset = 3;
+	static public final int openWikiId = 0;
+	static public final int wrenchId = 1;
 	static final String openWiki = "Open Wiki";
-	private static final int[] keyValues = {Keyboard.KEY_X};
-	private static final String[] desc = {openWiki};
+	static final String wrench = "Wrench";
+	private static final int[] keyValues = {Keyboard.KEY_X,Keyboard.KEY_C};
+	private static final String[] desc = {openWiki,wrench};
 	public static final KeyBinding[] keys = new KeyBinding[desc.length];
 	
 	boolean[] states = new boolean[desc.length];
@@ -72,8 +74,7 @@ public class ClientKeyHandler {
 	
 	void setState(int id,boolean state){
 		states[id] = state;
-		id+=idOffset;
-	    if(id == PacketHandler.openWikiId) {	    	
+	    if(id == openWikiId) {	    	
 	    	UtilsClient.clientOpenGui(new Root(null));
 	    }	
 		

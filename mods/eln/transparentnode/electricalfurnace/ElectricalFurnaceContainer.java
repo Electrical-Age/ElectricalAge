@@ -20,10 +20,11 @@ public class ElectricalFurnaceContainer extends BasicContainer implements INodeC
 
 	NodeBase node = null;
 	
+
 	public ElectricalFurnaceContainer(NodeBase node, EntityPlayer player, IInventory inventory) {
 		super(player, inventory, new Slot[]{
-				new SlotWithSkin(inventory, 0, 7, 58, SlotSkin.medium),
-				new SlotWithSkin(inventory, 1, 84, 58, SlotSkin.big),
+				new SlotWithSkin(inventory, ElectricalFurnaceElement.outSlotId, 84, 58, SlotSkin.big),
+				new SlotWithSkin(inventory, ElectricalFurnaceElement.inSlotId, 7, 58, SlotSkin.medium),
 				
 				new GenericItemUsingDamageSlot(inventory, 2, 70, 6 + 20 + 6, 1, HeatingCorpElement.class, SlotSkin.medium, new String[]{"Heating Corp Slot"}),
 				new GenericItemUsingDamageSlot(inventory, 3, 80 + 18, -2000, 1, ThermalIsolatorElement.class, SlotSkin.medium, new String[]{"Thermal Isolator Slot"}),

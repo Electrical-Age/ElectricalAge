@@ -58,6 +58,7 @@ import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public class Utils {
 
@@ -1454,8 +1455,10 @@ public class Utils {
 		return areSame(stack, Eln.instance.wrenchItemStack) || stack.getDisplayName().toLowerCase().contains("wrench");
 	}
 
+	//@SideOnly(Side.SERVER)
 	public static boolean isPlayerUsingWrench(EntityPlayer player) {
 		if(player == null) return false;
+		if(Eln.playerManager.get(player).getInteractEnable()) return true;
 		ItemStack stack = player.inventory.getCurrentItem();
 		if(stack == null) return false;
 		return isWrench(stack);

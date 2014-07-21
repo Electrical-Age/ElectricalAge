@@ -14,11 +14,11 @@ import net.minecraft.inventory.Slot;
 public class ElectricalMachineContainer extends BasicContainer implements INodeContainer {
 
 	NodeBase node = null;
-	public static final int inSlotId = 0, outSlotId = 1, boosterSlotId = 2;
+	public static final int inSlotId = 1, outSlotId = 0, boosterSlotId = 2;
 	public ElectricalMachineContainer(NodeBase node, EntityPlayer player, IInventory inventory) {
 		super(player, inventory, new Slot[]{
-				new SlotWithSkin(inventory, inSlotId, 70, 12, SlotSkin.medium),
 				new SlotWithSkin(inventory, outSlotId, 130, 12, SlotSkin.big),
+				new SlotWithSkin(inventory, inSlotId, 70, 12, SlotSkin.medium),
 				new GenericItemUsingDamageSlot(inventory, boosterSlotId, 20, 12, 5,
 												MachineBoosterDescriptor.class,
 												SlotSkin.medium,

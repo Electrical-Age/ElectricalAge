@@ -53,10 +53,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 		Eln.eventChannel.register(this);
 	}
 
-	public static final byte stuffInteractAId = 0;
-	public static final byte stuffInteractBId = 1;
-	public static final byte openWikiId = 3;
-	public static final byte interactId = 2;
+
 
 	@SubscribeEvent
 	public void onServerPacket(ServerCustomPacketEvent event) {
@@ -265,7 +262,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 		try {
 			id = stream.readByte();
 			boolean state = stream.readBoolean();
-			if (state) {
+			/*if (state) {
 				if (id == stuffInteractAId || id == stuffInteractBId) {
 					{
 						ItemStack itemStack = playerMP.getCurrentEquippedItem();
@@ -291,14 +288,14 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 
 					}
 				}
-			}
-			if (id == interactId) {
+			}*/
+			if (id == ClientKeyHandler.wrenchId) {
 				PlayerManager.PlayerMetadata metadata = Eln.playerManager
 						.get(playerMP);
 				metadata.setInteractEnable(state);
 
 			}
-			if (id == openWikiId) {
+			if (id == ClientKeyHandler.openWikiId) {
 
 			}
 		} catch (IOException e1) {

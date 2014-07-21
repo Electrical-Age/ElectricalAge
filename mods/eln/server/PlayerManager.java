@@ -56,11 +56,11 @@ public class PlayerManager {
 			Utils.println("interactEnable : " + interactEnable);
 		}
 
-		/*public boolean getInteractEnable() {
+		public boolean getInteractEnable() {
 			timeoutReset();
-			//return interactEnable;
-			return player.isSneaking();
-		}*/
+			return interactEnable;
+			//return player.isSneaking();
+		}
 		/*public boolean getInteractRise() {
 			timeoutReset();
 			return interactRise;

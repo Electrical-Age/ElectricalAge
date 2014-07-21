@@ -16,14 +16,10 @@ public class BasicContainer extends Container {
 	public BasicContainer(EntityPlayer player, IInventory inventory, Slot[] slot) {
 		this.inventory = inventory;
 
-		// the Slot constructor takes the IInventory and the slot number in that
-		// it binds to
-		// and the x-y coordinates it resides on-screen
 		for (int i = 0; i < slot.length; i++) {
 			addSlotToContainer(slot[i]);
 		}
 
-		// commonly used vanilla code that adds the player's inventory
 		bindPlayerInventory(player.inventory);
 	}
 
