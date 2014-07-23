@@ -48,7 +48,7 @@ public class ElectricalWatchSlowProcess implements IProcess, INBTTReady {
 			if(upToDate == true){
 				upToDate = false;
 				oldDate = element.sixNode.coordonate.world().getWorldTime();
-				battery.setEnergy(batteryStack, 0);
+				if(batteryStack != null) battery.setEnergy(batteryStack, 0);
 				element.needPublish();
 			}
 		}else{

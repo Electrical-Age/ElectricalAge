@@ -49,16 +49,24 @@ public class TurbineElectricalProcess implements IProcess,IRootSystemPreStepProc
 		if(targetU < th.U){
 			Ut = th.U;
 		}else{
-			double f = descriptor.powerOutPerDeltaU;
-			Ut = (Math.sqrt(-4*f*th.R*th.U+f*f*th.R*th.R+4*f*targetU*th.R)+2*th.U-f*th.R)/2;			
+			//double f = descriptor.powerOutPerDeltaU;
+			//Ut = (Math.sqrt(-4*f*th.R*th.U+f*f*th.R*th.R+4*f*targetU*th.R)+2*th.U-f*th.R)/2;	
+			double a = 1/th.R;
+			double b = descriptor.powerOutPerDeltaU - th.U/th.R;
+			double c = -descriptor.powerOutPerDeltaU*targetU;
+			Ut = (-b + Math.sqrt(b*b-4*a*c))/(2*a)+0;
 		}
 
 		double i = (Ut - th.U)/th.R;
 		double p = i*Ut;
+		double pMax = descriptor.nominalP*1.5;
+		if(p > pMax){
+			Ut = (Math.sqrt(th.U*th.U+4*pMax*th.R)+th.U)/2;
+			Ut =  Math.min(Ut, targetU);
+			if(Double.isNaN(Ut)) Ut = 0;
+			if(Ut < th.U) Ut = th.U;
+			//double pCalc = Ut*(Ut-th.U)/th.R;
 		
-		if(p > descriptor.nominalP){
-			int idx = 0;
-			idx++;
 		}
 		
 //		Ut = th.U;

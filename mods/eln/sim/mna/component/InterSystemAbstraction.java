@@ -100,6 +100,8 @@ public class InterSystemAbstraction implements IAbstractor, IDestructor {
 		bSystem.removeState(bNewState);
 
 		root.removeProcess(thevnaCalc);
+		
+		interSystemResistor.abstractedBy = null;
 
 		aSystem.component.add(interSystemResistor);
 	}

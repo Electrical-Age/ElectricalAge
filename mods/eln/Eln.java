@@ -2126,7 +2126,7 @@ public class Eln {
 		{
 			subId = 1;
 			name = "50V Turbine";
-			double RsFactor = 1;
+			double RsFactor = 0.1;
 			double nominalU = LVU;
 			double nominalP = 300;
 			double nominalDeltaT = 250;
@@ -2157,7 +2157,7 @@ public class Eln {
 		{
 			subId = 8;
 			name = "200V Turbine";
-			double RsFactor = 1;
+			double RsFactor = 0.10;
 			double nominalU = MVU;
 			double nominalP = 500;
 			double nominalDeltaT = 350;
@@ -5397,6 +5397,20 @@ public class Eln {
 		maceratorRecipes.addRecipe(new Recipe(findItemStack("Cinnabar Ore"),
 				new ItemStack[] { findItemStack("Cinnabar Dust", 2) }, 2.0 * f));
 
+		
+		maceratorRecipes.addRecipe(new Recipe(findItemStack("Copper Ingot"),
+				new ItemStack[] { findItemStack("Copper Dust", 1) }, 0.5 * f));
+		maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot),
+				new ItemStack[] { findItemStack("Iron Dust", 1) }, 0.5 * f));
+		maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.gold_ingot),
+				new ItemStack[] { findItemStack("Gold Dust", 1) }, 0.5 * f));
+		maceratorRecipes.addRecipe(new Recipe(findItemStack("Lead Ingot"),
+				new ItemStack[] { findItemStack("Lead Dust", 1) }, 0.5 * f));
+		maceratorRecipes.addRecipe(new Recipe(findItemStack("Tungsten Ingot"),
+				new ItemStack[] { findItemStack("Tungsten Dust", 1) }, 0.5 * f));
+
+
+		
 		maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.cobblestone),
 				new ItemStack[] { new ItemStack(Blocks.gravel) }, 1.0 * f));
 		maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.gravel),
@@ -5538,10 +5552,9 @@ public class Eln {
 		addRecipe(findItemStack("Experimental Transporter", 1),
 				"RMR",
 				"RMR",
-				" D ",
+				" R ",
 				Character.valueOf('M'), findItemStack("Advanced Machine Block"),
 				Character.valueOf('C'), findItemStack("High Voltage Cable"),
-				Character.valueOf('D'), new ItemStack(Blocks.iron_door),
 				Character.valueOf('R'), findItemStack("Advanced Chip"));
 	}
 

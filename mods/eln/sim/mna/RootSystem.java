@@ -56,11 +56,9 @@ public class RootSystem {
 		
 	}
 	public void removeComponent(Component c) {
-		for(State s : c.getConnectedStates()){
-			if(s == null) continue;
-			if(s.getSubSystem() != null){
-				breakSystems(s.getSubSystem());
-			}
+		SubSystem system = c.getSubSystem();
+		if(system != null){
+			breakSystems(system);
 		}
 		
 		addComponents.remove(c);
@@ -75,10 +73,10 @@ public class RootSystem {
 		addStates.add(s);
 	}
 	public void removeState(State s) {
-		for(Component c : (ArrayList<Component>)s.getConnectedComponentsNotAbstracted().clone()){
-			if(c.getSubSystem() != null)
-				breakSystems(c.getSubSystem());
-		} 
+		SubSystem system = s.getSubSystem();
+		if(system != null){
+			breakSystems(system);
+		}
 		addStates.remove(s);
 	}
 

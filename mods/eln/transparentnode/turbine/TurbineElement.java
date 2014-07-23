@@ -154,7 +154,7 @@ public class TurbineElement extends TransparentNodeElement{
 	public void initialize() {
 
 		descriptor.applyTo(inputLoad);
-		inputToTurbinResistor.setR(descriptor.electricalRs*2);
+		inputToTurbinResistor.setR(descriptor.electricalRs*30);
 		
 		descriptor.applyTo(warmLoad);
 		descriptor.applyTo(coolLoad);
