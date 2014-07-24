@@ -476,5 +476,12 @@ public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
 		s.set(node.coordonate);
 		s.play();
 	}
-	
+
+/*	protected boolean hasSidedInventory(){
+		return false;
+	}
+	public int tileEntityMetaTag() {
+		return hasSidedInventory() ? 0x4 : 0;
+	}
+	*/
 }

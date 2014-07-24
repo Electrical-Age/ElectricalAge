@@ -14,6 +14,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -26,8 +27,14 @@ public class TransparentNodeBlock extends NodeBlock implements INodeInfo{
 		
 	}
 
+	/*@Override
+	public TileEntity createNewTileEntity(World world, int meta) {
 
-
+		if((meta & 0x4) != 0)
+			return new TransparentNodeEntityWithSiededInv();
+		return super.createNewTileEntity(world, meta);
+	}
+*/
 	
 	//@SideOnly(Side.CLIENT)
 	public void getSubBlocks(Item par1, CreativeTabs tab, List subItems) {

@@ -2,8 +2,6 @@ package mods.eln.sixnode.powerinductorsix;
 
 import org.lwjgl.opengl.GL11;
 
-
-
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
@@ -28,54 +26,46 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.StatCollector;
 
-
 public class PowerInductorSixGui extends GuiContainerEln {
 
-	
-    private TransparentNodeElementInventory inventory;
-    PowerInductorSixRender render;
-    
+	private SixNodeElementInventory inventory;
+	PowerInductorSixRender render;
 
-    
-    public PowerInductorSixGui(EntityPlayer player, IInventory inventory,PowerInductorSixRender render)
-    {
-        super(new PowerInductorSixContainer(player, inventory));
-        this.inventory = (TransparentNodeElementInventory) inventory;
-        this.render = render;   
-    }
-    
-    public void initGui()
-    {
-    	super.initGui();
-    }
-    
+	public PowerInductorSixGui(EntityPlayer player, IInventory inventory, PowerInductorSixRender render)
+	{
+		super(new PowerInductorSixContainer(player, inventory));
+		this.inventory = (SixNodeElementInventory) inventory;
+		this.render = render;
+	}
 
-    
+	public void initGui()
+	{
+		super.initGui();
+	}
 
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
-		
+
 		super.guiObjectEvent(object);
 
 	}
+
 	@Override
 	protected void preDraw(float f, int x, int y) {
 
 		super.preDraw(f, x, y);
 	}
-	
+
 	@Override
 	protected void postDraw(float f, int x, int y) {
-    	helper.drawString(8, 12, 0xFF000000, "Inductance : "  + Utils.plotValue(render.descriptor.getlValue(render.inventory),"H"));
+		helper.drawString(8, 12, 0xFF000000, "Inductance : " + Utils.plotValue(render.descriptor.getlValue(render.inventory), "H"));
 		super.postDraw(f, x, y);
 	}
 
 	@Override
 	protected GuiHelperContainer newHelper() {
-		
-		return new GuiHelperContainer(this, 176, 166-54,8,84-54);
+
+		return new GuiHelperContainer(this, 176, 166 - 54, 8, 84 - 54);
 	}
 
-
-	
 }

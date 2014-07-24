@@ -13,6 +13,7 @@ import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
+import mods.eln.transparentnode.autominer.AutoMinerSlowProcess.jobType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 
@@ -38,8 +39,18 @@ public class AutoMinerGuiDraw extends GuiContainerEln {
         this.render = render; 
     }
 
+    
+    @Override
+    protected void postDraw(float f, int x, int y) {
+    	if(render.job == jobType.chestFull){
+    		drawString( 8,7, "Chest missing on the"); 
+    		drawString( 8,7+9, "back of the Auto Miner");
+    	}
+    	super.postDraw(f, x, y);
+    }
+    
 	@Override
 	protected GuiHelperContainer newHelper() {
-		return new GuiHelperContainer(this, 176, 166+18*2, 8, 84+18*2);
+		return new GuiHelperContainer(this, 176, 166+18*2-90, 8, 84-90+18*2);
 	}
 }

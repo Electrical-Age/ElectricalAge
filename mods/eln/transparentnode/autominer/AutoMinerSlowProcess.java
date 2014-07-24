@@ -15,8 +15,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockOre;
 import net.minecraft.block.BlockRedstoneOre;
 import net.minecraft.init.Blocks;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.world.World;
 
 public class AutoMinerSlowProcess implements IProcess,INBTTReady {
@@ -35,7 +37,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 	
 	//static final int pipeGhostUUID = 75;
 
-	enum jobType {none,done,full, ore, pipeAdd, pipeRemove};
+	enum jobType {none,done,full,chestFull, ore, pipeAdd, pipeRemove};
 	jobType job = jobType.none,oldJob = jobType.none;
 	Coordonate jobCoord = new Coordonate();
 	int blinkCounter = 0;
@@ -47,10 +49,11 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 	
 	
 	boolean isStorageReady(){
-		for(int idx = AutoMinerContainer.StorageStartId;idx < AutoMinerContainer.StorageSize + AutoMinerContainer.StorageStartId;idx++){
-			if(miner.inventory.getStackInSlot(idx) == null){
+		IInventory i = getDropInventory();
+		if(i == null) return false;
+		for(int idx = 0;idx < i.getSizeInventory();idx++){
+			if(i.getStackInSlot(idx) == null) 
 				return true;
-			}
 		}
 		return false;
 	}
@@ -70,7 +73,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 		
 		energyCounter += miner.powerResistor.getP() * time;
 		
-		if(job != jobType.none && job != jobType.full && job != jobType.done) {
+		if(job != jobType.none && job != jobType.full && job != jobType.chestFull && job != jobType.done) {
 			if(energyCounter >= energyTarget || (job == jobType.ore && !isReadyToDrill())) {
 				setupJob();
 			}		
@@ -159,6 +162,25 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 		//Utils.println(job);
 	}
 	
+	IInventory getDropInventory(){
+		TileEntityChest chestEntity = null;
+		{
+			Coordonate c = new Coordonate(2, -1, 0, miner.world());
+			c.applyTransformation(miner.front, miner.coordonate());
+			if(c.getTileEntity() instanceof TileEntityChest){
+				chestEntity = (TileEntityChest) c.getTileEntity();
+			}
+		}
+		{
+			Coordonate c = new Coordonate(1, -1, 0, miner.world());
+			c.applyTransformation(miner.front, miner.coordonate());
+			if(c.getTileEntity() instanceof TileEntityChest){
+				chestEntity = (TileEntityChest) c.getTileEntity();
+			}
+		}
+		return chestEntity;
+	}
+	
 	public void drop(ItemStack stack) {
 		/*Direction dir = miner.front;
 		TileEntityChest chestEntity = null;
@@ -175,7 +197,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 				Utils.tryPutStackInInventory(stack, chestEntity);
 			}
 			if(stack.stackSize != 0) miner.node.dropItem(stack);*/
-		Utils.tryPutStackInInventory(stack, miner.inventory,AutoMinerContainer.StorageStartId,AutoMinerContainer.StorageSize);
+		Utils.tryPutStackInInventory(stack, getDropInventory(),0,36);
 	}
 	
 	boolean isMinable(Block block){
@@ -231,7 +253,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 			}
 		}
 		else if(!isStorageReady()){
-			setJob(jobType.full);
+			setJob(jobType.chestFull);
 			jobFind = true;
 		}
 		else if(pipe != null) {		
@@ -246,7 +268,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 						double dx = jobCoord.x - miner.node.coordonate.x;
 						double dy = 0;
 						double dz = jobCoord.z - miner.node.coordonate.z;
-						double distance = Math.sqrt(dx*dx+dy*dy+dz*dz)*(0.9 + 0.2*oreRand);
+						double distance = Math.sqrt(dx*dx+dy*dy+dz*dz)*(1);
 						Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
 						if(checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(block))) {
 							jobFind = true;
@@ -308,6 +330,7 @@ public class AutoMinerSlowProcess implements IProcess,INBTTReady {
 	
 	void setJob(jobType job) {
 		if(job != this.job) {
+			miner.needPublish();
 			energyCounter = 0;
 		}
 		this.job = job;

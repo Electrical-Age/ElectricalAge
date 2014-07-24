@@ -158,6 +158,7 @@ public class Coordonate implements INBTTReady {
 	{
 		return world().getBlock(x, y, z);
 	}
+
 	
 	
 	public static AxisAlignedBB getAxisAlignedBB(Coordonate a,Coordonate b)

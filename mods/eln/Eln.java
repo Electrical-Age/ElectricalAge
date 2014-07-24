@@ -76,6 +76,7 @@ import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeBlock;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeEntity;
+import mods.eln.node.transparent.TransparentNodeEntityWithSiededInv;
 import mods.eln.node.transparent.TransparentNodeItem;
 import mods.eln.ore.OreBlock;
 import mods.eln.ore.OreDescriptor;
@@ -228,6 +229,7 @@ public class Eln {
 	public static String channelName = "miaouMod";
 
 	public static final String[] objNames = new String[] {
+			"/model/PowerElectricPrimitives/PowerElectricPrimitives.obj",
 			"/model/condo200/condo200.obj",
 			"/model/WallClock/WallClock.obj",
 			"/model/TutoPlate/TutoPlate.obj",
@@ -539,6 +541,7 @@ public class Eln {
 		GameRegistry.registerBlock(transparentNodeBlock, TransparentNodeItem.class, "Eln.TransparentNode");
 		GameRegistry.registerBlock(oreBlock, OreItem.class, "Eln.Ore");
 		TileEntity.addMapping(TransparentNodeEntity.class, "TransparentNodeEntity");
+		//TileEntity.addMapping(TransparentNodeEntityWithSiededInv.class, "TransparentNodeEntityWSI");
 		TileEntity.addMapping(SixNodeEntity.class, "SixNodeEntity");
 		TileEntity.addMapping(LightBlockEntity.class, "LightBlockEntity");
 
@@ -706,6 +709,8 @@ public class Eln {
 		recipeCompressor();
 		recipePlateMachine();
 		recipemagnetiser();
+		
+		recipeECoal();
 
 		proxy.registerRenderers();
 
@@ -1536,7 +1541,7 @@ public class Eln {
 			name = "Power Capacitor";
 
 			PowerCapacitorSixDescriptor desc = new PowerCapacitorSixDescriptor(
-					name,null,SerieEE.newE6(-2),300
+					name,obj.getObj("PowerElectricPrimitives"),SerieEE.newE6(-2),300
 					);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1548,7 +1553,7 @@ public class Eln {
 			name = "Power Inductor";
 
 			PowerInductorSixDescriptor desc = new PowerInductorSixDescriptor(
-					name,null,SerieEE.newE12(-1)
+					name,obj.getObj("PowerElectricPrimitives"),SerieEE.newE12(-1)
 					);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -5459,6 +5464,8 @@ public class Eln {
 		compressorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.sand),
 				findItemStack("Dielectric"), 2000.0));
 
+		compressorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.log),
+				findItemStack("Tree Resin"), 3000.0));
 			
 	}
 

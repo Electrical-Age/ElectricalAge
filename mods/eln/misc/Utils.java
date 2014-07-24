@@ -563,6 +563,7 @@ public class Utils {
 
 	public static boolean tryPutStackInInventory(ItemStack stack, IInventory inventory, int start, int count)
 	{
+		if(inventory == null) return false;
 		for(int idx = start; idx < start + count; idx++)
 		{
 			ItemStack targetStack = inventory.getStackInSlot(idx);

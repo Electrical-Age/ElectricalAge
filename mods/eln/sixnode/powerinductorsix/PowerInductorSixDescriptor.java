@@ -5,18 +5,19 @@ import java.util.List;
 import mods.eln.Eln;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.UtilsClient;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 
 	private Obj3D obj;
+	Obj3DPart InductorBaseExtention, InductorCables, InductorCore, Base;
 
 	public PowerInductorSixDescriptor(
 			String name,
@@ -28,7 +29,10 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 		this.serie = serie;
 		this.obj = obj;
 		if (obj != null) {
-
+			InductorBaseExtention = obj.getPart("InductorBaseExtention");
+			InductorCables = obj.getPart("InductorCables");
+			InductorCore = obj.getPart("InductorCore");
+			Base = obj.getPart("Base");
 		}
 
 	}
@@ -36,8 +40,8 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 	ISerie serie;
 
 	public double getlValue(int cableCount) {
-		if(cableCount == 0) return 0;
-		return serie.getValue(cableCount-1);
+		if (cableCount == 0) return 0;
+		return serie.getValue(cableCount - 1);
 	}
 
 	public double getlValue(IInventory inventory) {
@@ -66,7 +70,12 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 	}
 
 	void draw() {
-
+		//UtilsClient.disableCulling();
+	//	UtilsClient.disableTexture();
+		if (null != Base) Base.draw();
+		if (null != InductorBaseExtention) InductorBaseExtention.draw();
+		if (null != InductorCables) InductorCables.draw();
+		if (null != InductorCore) InductorCore.draw();
 	}
 
 	@Override

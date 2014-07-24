@@ -5,18 +5,21 @@ import java.util.List;
 import mods.eln.Eln;
 import mods.eln.item.DielectricItem;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 
 	private Obj3D obj;
+	
+	private Obj3DPart CapacitorCore;
+	private Obj3DPart CapacitorCables;
+	private Obj3DPart Base;
 
 	public PowerCapacitorSixDescriptor(
 			String name,
@@ -30,7 +33,9 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 		this.dischargeTao = dischargeTao;
 		this.obj = obj;
 		if (obj != null) {
-
+			CapacitorCables = obj.getPart("CapacitorCables");
+			CapacitorCore = obj.getPart("CapacitorCore");
+			Base = obj.getPart("Base");
 		}
 
 	}
@@ -70,7 +75,9 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 	}
 
 	void draw() {
-
+		if (null != Base) Base.draw();
+		if (null != CapacitorCables) CapacitorCables.draw();
+		if (null != CapacitorCore) CapacitorCore.draw();
 	}
 
 	@Override

@@ -39,10 +39,7 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 		setUnlocalizedName("TransparentNodeItem");
 	}
 	
-	@Override
-	public int getMetadata (int damageValue) {
-		return damageValue;
-	}
+
 	
 	
 

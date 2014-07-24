@@ -557,24 +557,29 @@ public class SixNode extends Node {
 				b = Block.getBlockFromItem(stack.getItem());
 			
 			boolean accepted = false;
-			if(stack != null){
-				for(ISixNodeCache a : sixNodeCacheList){
-					if(a.accept(stack)){
-						accepted = true;
-						sixNodeCacheBlock = b;
-						sixNodeCacheBlockMeta = (byte) a.getMeta(stack);
-						break;
+			
+			if(Eln.playerManager.get(entityPlayer).getInteractEnable()) 
+			{
+				if(stack != null){
+					for(ISixNodeCache a : sixNodeCacheList){
+						if(a.accept(stack)){
+							accepted = true;
+							sixNodeCacheBlock = b;
+							sixNodeCacheBlockMeta = (byte) a.getMeta(stack);
+							break;
+						}
 					}
 				}
 			}
 			
+
 			/*if(entityPlayer.isSneaking() == false){
 				accepted = false;
 			}*/
 			
 			if (accepted)
 			{
-
+				Utils.println("ACACAC");
 
 						
 				setNeedPublish(true);
