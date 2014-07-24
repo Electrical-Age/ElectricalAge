@@ -103,11 +103,10 @@ public abstract class NodeBase {
 
 	public void notifyNeighbor()
 	{
-		coordonate.world().notifyBlockChange(coordonate.x, coordonate.y, coordonate.z, getBlock());
+		coordonate.world().notifyBlockChange(coordonate.x, coordonate.y, coordonate.z, coordonate.getBlock());
 	}
 
-	public abstract Block getBlock();
-
+	//public abstract Block getBlock();
 	public abstract INodeInfo getInfo();
 
 	public LRDUCubeMask lrduCubeMask = new LRDUCubeMask();

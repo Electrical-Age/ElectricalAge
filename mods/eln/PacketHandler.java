@@ -84,9 +84,9 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 
 		try {
 			switch (stream.readByte()) {
-			case Eln.packetNodeSerialized24bitPosition:
+			/*case Eln.packetNodeSerialized24bitPosition:
 				packetNodeSerialized24bitPosition(stream);
-				break;
+				break;*/
 			case Eln.packetPlayerKey:
 				packetPlayerKey(stream, manager, player);
 				break;
@@ -305,38 +305,5 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 
 	}
 
-	void packetNodeSerialized24bitPosition(DataInputStream stream) {
-		Utils.println("packetNodeSerialized24bitPosition OLD");
-		while (true)
-			;/*
-				* try{ EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP)
-				* player; int x,y,z,dimention; x = stream.readInt(); y =
-				* stream.readInt(); z = stream.readInt(); dimention =
-				* stream.readByte(); Minecraft minecraft =
-				* Minecraft.getMinecraft(); if(clientPlayer.dimension != dimention)
-				* return;
-				* 
-				* while(stream.available() != 0) { int nx,ny,nz; nx = x +
-				* stream.readByte(); ny = y + stream.readByte(); nz = z +
-				* stream.readByte();
-				* 
-				* NodeBlockEntity node; if((node = NodeBlockEntity.getEntity(nx,
-				* ny, nz)) != null) { if(node.getBlockId() == stream.readShort()) {
-				* int streamByteNbrToRead = stream.readByte(); int streamByteLeft =
-				* stream.available(); node.networkUnserialize(stream);
-				* if(streamByteLeft-stream.available() != streamByteNbrToRead) {
-				* Utils.println(
-				* "if(streamByteLeft-stream.available() != streamByteNbrToRead) error"
-				* ); while(true); } } else {
-				* Utils.println("Wrong node UUID warning"); int dataSkipLength
-				* = stream.readByte(); for(int idx = 0;idx< dataSkipLength;idx++) {
-				* stream.readByte(); } } } else {
-				* Utils.println("No node found"); stream.readShort(); int
-				* dataSkipLength = stream.readByte(); for(int idx = 0;idx<
-				* dataSkipLength;idx++) { stream.readByte(); } } } } catch
-				* (IOException e) { 
-				* e.printStackTrace(); }
-				*/
-	}
 
 }

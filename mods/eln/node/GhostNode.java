@@ -11,15 +11,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 
 public abstract class GhostNode extends NodeBase{
-
-
-
-	@Override
-	public Block getBlock() {
-		
-		return Eln.ghostBlock;
-	}
-
 	@Override
 	public boolean mustBeSaved() {
 		

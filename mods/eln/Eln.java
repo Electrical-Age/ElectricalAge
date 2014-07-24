@@ -76,7 +76,6 @@ import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeBlock;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import mods.eln.node.transparent.TransparentNodeEntityWithSiededInv;
 import mods.eln.node.transparent.TransparentNodeItem;
 import mods.eln.ore.OreBlock;
 import mods.eln.ore.OreDescriptor;
@@ -91,6 +90,12 @@ import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
 import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.simplenode.energyconverter.EnergyConverterBlock;
+import mods.eln.simplenode.energyconverter.EnergyConverterEntity;
+import mods.eln.simplenode.energyconverter.EnergyConverterNode;
+import mods.eln.simplenode.test.TestBlock;
+import mods.eln.simplenode.test.TestEntity;
+import mods.eln.simplenode.test.TestNode;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
 import mods.eln.sixnode.diode.DiodeDescriptor;
@@ -317,7 +322,7 @@ public class Eln {
 
 	public static final double networkSerializeValueFactor = 100.0;
 
-	public static final byte packetNodeSerialized24bitPosition = 11;
+	//public static final byte packetNodeSerialized24bitPosition = 11;
 	public static final byte packetNodeSerialized48bitPosition = 12;
 	public static final byte packetNodeRefreshRequest = 13;
 	public static final byte packetPlayerKey = 14;
@@ -548,6 +553,9 @@ public class Eln {
 		NodeManager.registerUuid(sixNodeBlock.getUuid(), SixNode.class);
 		NodeManager.registerUuid(transparentNodeBlock.getUuid(), TransparentNode.class);
 
+		
+		
+		
 		o = Item.getItemFromBlock(sixNodeBlock);
 		sixNodeItem = (SixNodeItem) Item.getItemFromBlock(sixNodeBlock);
 		transparentNodeItem = (TransparentNodeItem) Item.getItemFromBlock(transparentNodeBlock);
@@ -564,9 +572,14 @@ public class Eln {
 			PeripheralHandler.register();
 		}
 
+
+		registerTestBlock();
+		registerEnergyConverter();
+		
 		registerArmor();
 		registerTool();
 		registerOre();
+		
 
 		registerGround(2);
 		registerElectricalSource(3);
@@ -730,6 +743,34 @@ public class Eln {
 		checkRecipe();
 
 		Utils.println("Electrical age init done");
+	}
+
+	EnergyConverterBlock energyConverterBlock;
+	private void registerEnergyConverter(){
+		energyConverterBlock = new EnergyConverterBlock();
+		energyConverterBlock.setCreativeTab(creativeTab).setBlockName("EnergyConverterBlock");
+		GameRegistry.registerBlock(energyConverterBlock, "Eln.EnergyConverterBlock");
+		TileEntity.addMapping(EnergyConverterEntity.class, "Eln.EnergyConverterEntity");
+		LanguageRegistry.addName(energyConverterBlock,"Energy Converter");
+		NodeManager.instance.registerUuid(EnergyConverterNode.getInfoStatic().getUuid(), EnergyConverterNode.class);
+
+		//GameRegistry.registerCustomItemStack("EEnergy Converter", new ItemStack(energyConverterBlock));
+		
+	}
+
+	
+	TestBlock testBlock;
+	
+	private void registerTestBlock() {
+		testBlock = new TestBlock();
+		testBlock.setCreativeTab(creativeTab).setBlockName("TestBlock");
+		GameRegistry.registerBlock(testBlock, "Eln.TestBlock");
+		TileEntity.addMapping(TestEntity.class, "Eln.TestEntity");
+		LanguageRegistry.addName(testBlock,"Test Block");
+		NodeManager.instance.registerUuid(TestNode.getInfoStatic().getUuid(), TestNode.class);
+
+		GameRegistry.registerCustomItemStack("Test Block", new ItemStack(testBlock));
+
 	}
 
 	void checkRecipe() {

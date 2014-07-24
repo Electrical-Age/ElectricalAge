@@ -82,12 +82,7 @@ public abstract class NodeBlock extends BlockContainer{//BlockContainer
 	public int getRenderType() {
 	  return -1;
 	}
-/*
-	@Override  //caca1.5.1
-	public String getTextureFile () {
-		return CommonProxy.BLOCK_PNG;
-	}*/
-	
+
     public int getLightValue(IBlockAccess world, int x, int y, int z) 
     {
     	NodeBlockEntity tileEntity = (NodeBlockEntity) world.getTileEntity(x, y, z);
@@ -95,17 +90,6 @@ public abstract class NodeBlock extends BlockContainer{//BlockContainer
     }
 	
 	
-    public void func_85105_g(World world, int x, int y, int z, int metadata)
-    {
-    	Utils.println("CACATOTAL3");
-        while(true);//DON'tCALL THAT XD	
-    }
-	
-    public void onBlockPlacedBy(World par1World, int x, int y, int z, EntityLiving entityLiving)
-    {
-    	Utils.println("CACATOTAL2");
-    	while(true);
-    }   
     
     //client server
     public boolean onBlockPlacedBy(World world, int x, int y, int z, Direction front,EntityLivingBase entityLiving,int metadata)

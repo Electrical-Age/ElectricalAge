@@ -207,14 +207,6 @@ public class TransparentNode extends Node{
 
 	}
 
- 
-
-
-	@Override
-	public Block getBlock() {
-		
-		return Eln.transparentNodeBlock;
-	}
 
 	
 

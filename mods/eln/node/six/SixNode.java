@@ -679,10 +679,6 @@ public class SixNode extends Node {
 		return false;
 	}
 
-	@Override
-	public Block getBlock() {
-		return Eln.sixNodeBlock;
-	}
 
 	@Override
 	public INodeInfo getInfo() {
