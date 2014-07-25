@@ -10,8 +10,8 @@ import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.ClientProxy;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
+import mods.eln.node.INodeEntity;
 import mods.eln.node.NodeBase;
-import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
 import mods.eln.server.PlayerManager;
 import mods.eln.sound.SoundClient;
@@ -20,6 +20,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.tileentity.TileEntity;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
@@ -166,9 +167,11 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 			z = stream.readInt();
 			dimention = stream.readByte();
 
-			NodeBlockEntity node;
-			if (clientPlayer.dimension == dimention
-					&& (node = NodeBlockEntity.getEntity(x, y, z)) != null) {
+
+			if (clientPlayer.dimension == dimention){
+					TileEntity entity = clientPlayer.worldObj.getTileEntity(x, y, z);
+			if(entity != null && entity instanceof INodeEntity) {
+				INodeEntity node = (INodeEntity)entity;
 				if (node.getNodeUuid().equals(stream.readUTF())) {
 					node.serverPacketUnserialize(stream);
 					if (0 != stream.available()) {
@@ -182,6 +185,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 						stream.readByte();
 					}
 				}
+			}
 			} else {
 				Utils.println("No node found at " + x + " " + y + " " + z);
 				/*stream.readShort();
@@ -206,22 +210,24 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 			z = stream.readInt();
 			dimention = stream.readByte();
 
-			NodeBlockEntity node;
-			if (clientPlayer.dimension == dimention
-					&& (node = NodeBlockEntity.getEntity(x, y, z)) != null) {
-				if (node.getNodeUuid().equals(stream.readUTF())) {
-					node.networkUnserialize(stream);
-					if (0 != stream.available()) {
-						Utils.println("0 != stream.available()");
+			
+			if (clientPlayer.dimension == dimention){
+				TileEntity entity = clientPlayer.worldObj.getTileEntity(x, y, z);
+				if(entity != null && entity instanceof INodeEntity) {
+					INodeEntity node = (INodeEntity)entity;
+					if (node.getNodeUuid().equals(stream.readUTF())) {
+						node.serverPublishUnserialize(stream);
+						if (0 != stream.available()) {
+							Utils.println("0 != stream.available()");
 
+						}
+					} else {
+						Utils.println("Wrong node UUID warning");
+						int dataSkipLength = stream.readByte();
+						for (int idx = 0; idx < dataSkipLength; idx++) {
+							stream.readByte();
+						}
 					}
-				} else {
-					Utils.println("Wrong node UUID warning");
-					int dataSkipLength = stream.readByte();
-					for (int idx = 0; idx < dataSkipLength; idx++) {
-						stream.readByte();
-					}
-				}
 			} else {
 				Utils.println("No node found");
 				/*stream.readShort();
@@ -229,6 +235,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 				for (int idx = 0; idx < dataSkipLength; idx++) {
 					stream.readByte();
 				}*/
+			}
 			}
 		} catch (IOException e) {
 			

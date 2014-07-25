@@ -1,9 +1,11 @@
 package mods.eln.node.simple;
 
 import mods.eln.misc.Coordonate;
+import mods.eln.misc.DescriptorBase;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeManager;
+import mods.eln.simplenode.energyconverter.toic2.ElnToIc2Descriptor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -21,6 +23,17 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 		super(material);
 	}
 
+	String descriptorKey;
+	public SimpleNodeBlock setDescriptorKey(String descriptorKey) {
+		this.descriptorKey = descriptorKey;
+		return this;
+	}
+	
+	public SimpleNodeBlock setDescriptor(DescriptorBase descriptor) {
+		this.descriptorKey = descriptor.descriptorKey;
+		return this;
+	}
+
 	
 	Direction getFrontForPlacement(EntityLivingBase e){
 		return Utils.entityLivingViewDirection(e).getInverse();
@@ -29,6 +42,7 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 	public void onBlockPlacedBy(World w, int x, int y, int z, EntityLivingBase e, ItemStack stack) {
 		if(w.isRemote == false){
 			SimpleNode node = newNode();
+			node.setDescriptorKey(descriptorKey);
 			node.onBlockPlacedBy(new Coordonate(x,y,z,w), getFrontForPlacement(e), e, stack);
 			NodeManager.instance.addNode(node);
 		}

@@ -91,10 +91,9 @@ import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.simplenode.energyconverter.toic2.ElnToIc2Block;
+import mods.eln.simplenode.energyconverter.toic2.ElnToIc2Descriptor;
 import mods.eln.simplenode.energyconverter.toic2.ElnToIc2Entity;
-import mods.eln.simplenode.energyconverter.toic2.ElnToIc2NodeHvu;
-import mods.eln.simplenode.energyconverter.toic2.ElnToIc2NodeLvu;
-import mods.eln.simplenode.energyconverter.toic2.ElnToIc2NodeMvu;
+import mods.eln.simplenode.energyconverter.toic2.ElnToIc2Node;
 import mods.eln.simplenode.test.TestBlock;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
@@ -322,7 +321,7 @@ public class Eln {
 
 	public static final double networkSerializeValueFactor = 100.0;
 
-	//public static final byte packetNodeSerialized24bitPosition = 11;
+	// public static final byte packetNodeSerialized24bitPosition = 11;
 	public static final byte packetNodeSerialized48bitPosition = 12;
 	public static final byte packetNodeRefreshRequest = 13;
 	public static final byte packetPlayerKey = 14;
@@ -388,7 +387,7 @@ public class Eln {
 
 	public static boolean dicThungsten;
 	public static boolean genCooper, genPlumb, genTungsten, genCinnabar;
-	public static String dicTungstenOre,dicTungstenDust,dicTungstenIngot;
+	public static String dicTungstenOre, dicTungstenDust, dicTungstenIngot;
 	public static ArrayList<OreScannerConfigElement> oreScannerConfig = new ArrayList<OreScannerConfigElement>();
 	public static boolean modbusEnable = false;
 
@@ -448,16 +447,16 @@ public class Eln {
 		genCinnabar = false;
 
 		dicThungsten = config.get("dictionary", "tungsten", false).getBoolean(false);
-		if(dicThungsten){
+		if (dicThungsten) {
 			dicTungstenOre = "oreTungsten";
 			dicTungstenDust = "dustTungsten";
 			dicTungstenIngot = "ingotTungsten";
-		}else{
+		} else {
 			dicTungstenOre = "oreElnTungsten";
 			dicTungstenDust = "dustElnTungsten";
-			dicTungstenIngot = "ingotElnTungsten";		
+			dicTungstenIngot = "ingotElnTungsten";
 		}
-		
+
 		incondecentLampLife = config.get("lamp", "incondescentLifeInHours", 8).getDouble(8) * 3600;
 		economicLampLife = config.get("lamp", "economicLifeInHours", 32).getDouble(32) * 3600;
 
@@ -474,6 +473,7 @@ public class Eln {
 
 	public static FMLEventChannel eventChannel;
 	boolean computerCraftReady = false;
+
 	// FMLCommonHandler.instance().bus().register(this);
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
@@ -481,13 +481,13 @@ public class Eln {
 
 		try {
 			Class<?> cc = Class.forName("dan200.computercraft.ComputerCraft");
-			if(cc != null){
+			if (cc != null) {
 				computerCraftReady = true;
 			}
 		} catch (ClassNotFoundException e) {
 
 		}
-		
+
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
 
 		simulator = new Simulator(0.05, 1 / electricalFrequancy, electricalInterSystemOverSampling, 1 / thermalFrequancy);
@@ -546,16 +546,13 @@ public class Eln {
 		GameRegistry.registerBlock(transparentNodeBlock, TransparentNodeItem.class, "Eln.TransparentNode");
 		GameRegistry.registerBlock(oreBlock, OreItem.class, "Eln.Ore");
 		TileEntity.addMapping(TransparentNodeEntity.class, "TransparentNodeEntity");
-		//TileEntity.addMapping(TransparentNodeEntityWithSiededInv.class, "TransparentNodeEntityWSI");
+		// TileEntity.addMapping(TransparentNodeEntityWithSiededInv.class, "TransparentNodeEntityWSI");
 		TileEntity.addMapping(SixNodeEntity.class, "SixNodeEntity");
 		TileEntity.addMapping(LightBlockEntity.class, "LightBlockEntity");
 
 		NodeManager.registerUuid(sixNodeBlock.getNodeUuid(), SixNode.class);
 		NodeManager.registerUuid(transparentNodeBlock.getNodeUuid(), TransparentNode.class);
 
-		
-		
-		
 		o = Item.getItemFromBlock(sixNodeBlock);
 		sixNodeItem = (SixNodeItem) Item.getItemFromBlock(sixNodeBlock);
 		transparentNodeItem = (TransparentNodeItem) Item.getItemFromBlock(transparentNodeBlock);
@@ -568,18 +565,16 @@ public class Eln {
 
 		SixNode.sixNodeCacheList.add(new SixNodeCacheStd());
 
-		if(computerCraftReady){
+		if (computerCraftReady) {
 			PeripheralHandler.register();
 		}
 
-
 		registerTestBlock();
 		registerEnergyConverter();
-		
+
 		registerArmor();
 		registerTool();
 		registerOre();
-		
 
 		registerGround(2);
 		registerElectricalSource(3);
@@ -605,7 +600,7 @@ public class Eln {
 		registerTreeResinCollector(116);
 		registerSixNodeMisc(117);
 		//
-		
+
 		registerPowerComponent(1);
 		registerTransformer(2);
 		registerHeatFurnace(3);
@@ -623,7 +618,6 @@ public class Eln {
 		registerWindTurbine(49);
 		registerThermalDissipatorPassiveAndActive(64);
 		registerTransparentNodeMisc(65);
-
 
 		registerHeatingCorp(1);
 		// registerThermalIsolator(2);
@@ -722,7 +716,7 @@ public class Eln {
 		recipeCompressor();
 		recipePlateMachine();
 		recipemagnetiser();
-		
+
 		recipeECoal();
 
 		proxy.registerRenderers();
@@ -748,64 +742,55 @@ public class Eln {
 	ElnToIc2Block elnToIc2BlockLvu;
 	ElnToIc2Block elnToIc2BlockMvu;
 	ElnToIc2Block elnToIc2BlockHvu;
-	private void registerEnergyConverter(){
-		
+
+	private void registerEnergyConverter() {
 		{
-			String baseName = "ElnToIc2Lvu";
-			String blockName = "eln." + baseName + "Block";
-			String entityName = "eln." + baseName + "Entity";
-			String name = "ELN to IC2 50V converter";
-			
-			elnToIc2BlockLvu = new ElnToIc2Block(ElnToIc2NodeLvu.class);
-			elnToIc2BlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
-			GameRegistry.registerBlock(elnToIc2BlockLvu, blockName);
+			String baseName = "ElnToIc2";
+			String entityName = "eln.ElnToIc2Entity";
+
 			TileEntity.addMapping(ElnToIc2Entity.class, entityName);
-			LanguageRegistry.addName(elnToIc2BlockLvu,name);
-			NodeManager.instance.registerUuid(ElnToIc2NodeLvu.getNodeUuidStatic(), ElnToIc2NodeLvu.class);
+			NodeManager.instance.registerUuid(ElnToIc2Node.getNodeUuidStatic(), ElnToIc2Node.class);
+
+
+
+			{
+				String blockName = "eln." + baseName + "LVUBlock";
+				String name = "ELN to IC2 50V converter";
+				ElnToIc2Descriptor desc = new ElnToIc2Descriptor(baseName + "LVU", LVU, LVP * 3 / 4, 32);
+				elnToIc2BlockLvu = new ElnToIc2Block(desc);
+				elnToIc2BlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
+				GameRegistry.registerBlock(elnToIc2BlockLvu, blockName);
+				LanguageRegistry.addName(elnToIc2BlockLvu, name);
+			}
+			{
+				String blockName = "eln." + baseName + "MVUBlock";
+				String name = "ELN to IC2 200V converter";
+				ElnToIc2Descriptor desc = new ElnToIc2Descriptor(baseName + "MVU", MVU, MVP * 3 / 4, 128);
+				elnToIc2BlockLvu = new ElnToIc2Block(desc);
+				elnToIc2BlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
+				GameRegistry.registerBlock(elnToIc2BlockLvu, blockName);
+				LanguageRegistry.addName(elnToIc2BlockLvu, name);
+			}
+			{
+				String blockName = "eln." + baseName + "HVUBlock";
+				String name = "ELN to IC2 800V converter";
+				ElnToIc2Descriptor desc = new ElnToIc2Descriptor(baseName + "HVU", HVU, HVP * 3 / 4, 512);
+				elnToIc2BlockLvu = new ElnToIc2Block(desc);
+				elnToIc2BlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
+				GameRegistry.registerBlock(elnToIc2BlockLvu, blockName);
+				LanguageRegistry.addName(elnToIc2BlockLvu, name);
+			}
 		}
-		{
-			String baseName = "ElnToIc2Mvu";
-			String blockName = "eln." + baseName + "Block";
-			String entityName = "eln." + baseName + "Entity";
-			String name = "ELN to IC2 200V converter";
-			
-			elnToIc2BlockMvu = new ElnToIc2Block(ElnToIc2NodeMvu.class);
-			elnToIc2BlockMvu.setCreativeTab(creativeTab).setBlockName(blockName);
-			GameRegistry.registerBlock(elnToIc2BlockMvu, blockName);
-			TileEntity.addMapping(ElnToIc2Entity.class, entityName);
-			LanguageRegistry.addName(elnToIc2BlockMvu,name);
-			NodeManager.instance.registerUuid(ElnToIc2NodeMvu.getNodeUuidStatic(), ElnToIc2NodeMvu.class);
-		}
-		{
-			String baseName = "ElnToIc2Hvu";
-			String blockName = "eln." + baseName + "Block";
-			String entityName = "eln." + baseName + "Entity";
-			String name = "ELN to IC2 800V converter";
-			
-			elnToIc2BlockHvu = new ElnToIc2Block(ElnToIc2NodeHvu.class);
-			elnToIc2BlockHvu.setCreativeTab(creativeTab).setBlockName(blockName);
-			GameRegistry.registerBlock(elnToIc2BlockHvu, blockName);
-			TileEntity.addMapping(ElnToIc2Entity.class, entityName);
-			LanguageRegistry.addName(elnToIc2BlockHvu,name);
-			NodeManager.instance.registerUuid(ElnToIc2NodeHvu.getNodeUuidStatic(), ElnToIc2NodeHvu.class);
-		}
-		//GameRegistry.registerCustomItemStack("EEnergy Converter", new ItemStack(energyConverterBlock));
-		
 	}
 
-	
 	TestBlock testBlock;
-	
-	private void registerTestBlock() {
-	/*	testBlock = new TestBlock();
-		testBlock.setCreativeTab(creativeTab).setBlockName("TestBlock");
-		GameRegistry.registerBlock(testBlock, "Eln.TestBlock");
-		TileEntity.addMapping(TestEntity.class, "Eln.TestEntity");
-		LanguageRegistry.addName(testBlock,"Test Block");
-		NodeManager.instance.registerUuid(TestNode.getInfoStatic().getUuid(), TestNode.class);
 
-		GameRegistry.registerCustomItemStack("Test Block", new ItemStack(testBlock));
-*/
+	private void registerTestBlock() {
+		/*
+		 * testBlock = new TestBlock(); testBlock.setCreativeTab(creativeTab).setBlockName("TestBlock"); GameRegistry.registerBlock(testBlock, "Eln.TestBlock"); TileEntity.addMapping(TestEntity.class, "Eln.TestEntity"); LanguageRegistry.addName(testBlock,"Test Block"); NodeManager.instance.registerUuid(TestNode.getInfoStatic().getUuid(), TestNode.class);
+		 * 
+		 * GameRegistry.registerCustomItemStack("Test Block", new ItemStack(testBlock));
+		 */
 	}
 
 	void checkRecipe() {
@@ -1609,68 +1594,61 @@ public class Eln {
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
-		
-		
+
 		{
 			subId = 32;
 
 			name = "Power Capacitor";
 
 			PowerCapacitorSixDescriptor desc = new PowerCapacitorSixDescriptor(
-					name,obj.getObj("PowerElectricPrimitives"),SerieEE.newE6(-2),300
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE6(-2), 300
 					);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
-		
+
 		{
 			subId = 34;
 
 			name = "Power Inductor";
 
 			PowerInductorSixDescriptor desc = new PowerInductorSixDescriptor(
-					name,obj.getObj("PowerElectricPrimitives"),SerieEE.newE12(-1)
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-1)
 					);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
-		
-		
-		
 
 	}
-	
-	
-	
-	void registerPowerComponent(int id){
+
+	void registerPowerComponent(int id) {
 		int subId, completId;
 		String name;
 
-		
 		{
 			subId = 16;
 
 			name = "Power inductor";
 
 			PowerInductorDescriptor desc = new PowerInductorDescriptor(
-					name,null,SerieEE.newE12(-1)
+					name, null, SerieEE.newE12(-1)
 					);
 
 			transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
-		
+
 		{
 			subId = 20;
 
 			name = "Power capacitor";
 
 			PowerCapacitorDescriptor desc = new PowerCapacitorDescriptor(
-					name,null,SerieEE.newE6(-2),300
+					name, null, SerieEE.newE6(-2), 300
 					);
 
 			transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
-		
+
 	}
 
 	void registerSwitch(int id) {
@@ -3602,9 +3580,8 @@ public class Eln {
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
-		
 
-		if(computerCraftReady){
+		if (computerCraftReady) {
 			subId = 4;
 			name = "ComputerCraft Probe";
 
@@ -4377,7 +4354,7 @@ public class Eln {
 		{
 			subId = 52;
 			name = "Dielectric";
-			DielectricItem desc = new DielectricItem(name,LVU);
+			DielectricItem desc = new DielectricItem(name, LVU);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 	}
@@ -5439,8 +5416,6 @@ public class Eln {
 				"  c",
 				Character.valueOf('c'), new ItemStack(Items.iron_ingot));
 
-		
-		
 		addRecipe(findItemStack("Player Filter"),
 				" g",
 				"gc",
@@ -5478,7 +5453,6 @@ public class Eln {
 		maceratorRecipes.addRecipe(new Recipe(findItemStack("Cinnabar Ore"),
 				new ItemStack[] { findItemStack("Cinnabar Dust", 2) }, 2.0 * f));
 
-		
 		maceratorRecipes.addRecipe(new Recipe(findItemStack("Copper Ingot"),
 				new ItemStack[] { findItemStack("Copper Dust", 1) }, 0.5 * f));
 		maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot),
@@ -5490,8 +5464,6 @@ public class Eln {
 		maceratorRecipes.addRecipe(new Recipe(findItemStack("Tungsten Ingot"),
 				new ItemStack[] { findItemStack("Tungsten Dust", 1) }, 0.5 * f));
 
-
-		
 		maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.cobblestone),
 				new ItemStack[] { new ItemStack(Blocks.gravel) }, 1.0 * f));
 		maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.gravel),
@@ -5522,8 +5494,6 @@ public class Eln {
 
 		plateMachineRecipes.addRecipe(new Recipe(new ItemStack(Items.gold_ingot, 4,
 				0), findItemStack("Gold Plate"), 1.0 * f));
-		
-		
 
 	}
 
@@ -5542,7 +5512,7 @@ public class Eln {
 
 		compressorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.log),
 				findItemStack("Tree Resin"), 3000.0));
-			
+
 	}
 
 	void recipemagnetiser() {
@@ -6157,6 +6127,6 @@ public class Eln {
 
 	public double getElnToIc2ConversionRatio() {
 		// TODO Auto-generated method stub
-		return 1.0/3;
+		return 1.0 / 3;
 	}
 }

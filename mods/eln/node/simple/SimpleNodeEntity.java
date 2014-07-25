@@ -1,35 +1,22 @@
 package mods.eln.node.simple;
 
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
-import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Coordonate;
+import mods.eln.misc.DescriptorManager;
 import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
-import mods.eln.node.Node;
-import mods.eln.node.NodeBlockEntity;
+import mods.eln.node.INodeEntity;
+import mods.eln.node.NodeEntityClientSender;
 import mods.eln.node.NodeManager;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.EnumSkyBlock;
 
-public class SimpleNodeEntity extends TileEntity {
+public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity{
 
 	private SimpleNode node;
 
@@ -39,6 +26,10 @@ public class SimpleNodeEntity extends TileEntity {
 		return node;
 	}
 
+	
+	
+	//***************** Wrapping **************************
+	
 	public void onBlockPlacedBy(Direction front, EntityLivingBase entityLiving, int metadata) {
 	
 	}
@@ -93,4 +84,43 @@ public class SimpleNodeEntity extends TileEntity {
 		}
 	}
 
+
+	//***************** Descriptor **************************
+	protected Object getDescriptor(){
+		SimpleNodeBlock b = (SimpleNodeBlock) getBlockType();
+		return DescriptorManager.get(b.descriptorKey);
+	}
+	
+	
+	
+	
+	
+	
+	//***************** Network **************************
+	@Override
+	public void serverPublishUnserialize(DataInputStream stream) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void serverPacketUnserialize(DataInputStream stream) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+    @Override
+    public Packet getDescriptionPacket()
+    {	
+    	SimpleNode node = getNode(); 
+    	if(node == null){
+    		Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
+    		return null;
+    	}
+    	return new S3FPacketCustomPayload(Eln.channelName,node.getPublishPacket().toByteArray());
+    	//return null;
+    }
+
+    
+    public NodeEntityClientSender sender = new NodeEntityClientSender(this, getNodeUuid());
 }

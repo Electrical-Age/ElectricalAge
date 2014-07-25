@@ -4,15 +4,16 @@ import mods.eln.Eln;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 
-public class ElnToIc2NodeLvu extends EnergyConverterElnToOtherNode{
-
-	public ElnToIc2NodeLvu() {
-		conversionRatio = Eln.instance.getElnToIc2ConversionRatio();
-		inStdVoltage = Eln.LVU;
-		inPowerMax = Eln.LVP*3/4;
-		otherOutMax = 32;
-		energyBufferMax = otherOutMax/Eln.instance.getElnToIc2ConversionRatio()*20*2;
-
+public class ElnToIc2Node extends EnergyConverterElnToOtherNode{
+	
+	ElnToIc2Descriptor descriptor;
+	
+	
+	@Override
+	public void initialize() {
+		descriptor = (ElnToIc2Descriptor) getDescriptor();
+		descriptor.applyTo(this);
+		super.initialize();
 	}
 	
 	@Override
@@ -20,7 +21,7 @@ public class ElnToIc2NodeLvu extends EnergyConverterElnToOtherNode{
 		return getNodeUuidStatic();
 	}
 	public static String getNodeUuidStatic() {
-		return "ElnToIc2_LVU";
+		return "ElnToIc2";
 	}
 
 	

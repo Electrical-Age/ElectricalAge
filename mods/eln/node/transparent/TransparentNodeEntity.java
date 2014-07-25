@@ -48,9 +48,9 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
 	}
 
 	@Override
-	public void networkUnserialize(DataInputStream stream) {
+	public void serverPublishUnserialize(DataInputStream stream) {
 
-		super.networkUnserialize(stream);
+		super.serverPublishUnserialize(stream);
 		try {
 			Short id = stream.readShort();
 			if (id == 0)

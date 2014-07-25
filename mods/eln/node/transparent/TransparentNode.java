@@ -134,9 +134,9 @@ public class TransparentNode extends Node{
 
 
 	@Override
-	public void networkSerialize(DataOutputStream stream)  {
+	public void publishSerialize(DataOutputStream stream)  {
 		
-		super.networkSerialize(stream);
+		super.publishSerialize(stream);
 		
 		try {
 			stream.writeShort(this.elementId);

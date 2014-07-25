@@ -79,8 +79,8 @@ public abstract class Node extends NodeBase {
 	
     boolean oldSendedRedstone = false;
 
-    public void networkSerialize(DataOutputStream stream) {
-    	super.networkSerialize(stream);
+    public void publishSerialize(DataOutputStream stream) {
+    	super.publishSerialize(stream);
     	
     	try {
     		boolean redstone = canConnectRedstone();

@@ -3,6 +3,7 @@ package mods.eln.node.simple;
 import java.util.ArrayList;
 
 import mods.eln.Eln;
+import mods.eln.misc.DescriptorManager;
 import mods.eln.misc.Direction;
 import mods.eln.misc.INBTTReady;
 import mods.eln.node.NodeBase;
@@ -19,7 +20,15 @@ import net.minecraft.nbt.NBTTagCompound;
 public abstract class SimpleNode extends NodeBase {
 
 	public EntityPlayerMP removedByPlayer;
+	String descriptorKey;
 
+	void setDescriptorKey(String key) {
+		descriptorKey = key;
+	}
+	protected Object getDescriptor(){
+		return DescriptorManager.get(descriptorKey);
+	}
+	
 	@Override
 	public void initializeFromThat(Direction front, EntityLivingBase entityLiving, ItemStack itemStack) {
 		initialize();
@@ -32,9 +41,6 @@ public abstract class SimpleNode extends NodeBase {
 
 	public abstract void initialize();
 
-	
-	
-	
 	public ArrayList<IProcess> slowProcessList = new ArrayList<IProcess>(4);
 
 	public ArrayList<IProcess> electricalProcessList = new ArrayList<IProcess>(4);
@@ -49,7 +55,7 @@ public abstract class SimpleNode extends NodeBase {
 	public void connectJob()
 	{
 		super.connectJob();
-		
+
 		Eln.simulator.addAllSlowProcess(slowProcessList);
 
 		Eln.simulator.addAllElectricalComponent(electricalComponentList);
@@ -62,13 +68,12 @@ public abstract class SimpleNode extends NodeBase {
 			Eln.simulator.addThermalLoad(load);
 		Eln.simulator.addAllThermalProcess(thermalProcessList);
 	}
-	
+
 	@Override
 	public void disconnectJob()
 	{
 		super.disconnectJob();
 
-		
 		Eln.simulator.removeAllSlowProcess(slowProcessList);
 
 		Eln.simulator.removeAllElectricalComponent(electricalComponentList);
@@ -85,6 +90,9 @@ public abstract class SimpleNode extends NodeBase {
 	public void readFromNBT(NBTTagCompound nbt)
 	{
 		super.readFromNBT(nbt);
+
+		setDescriptorKey(nbt.getString("SNdescriptorKey"));
+
 		for (State electricalLoad : electricalLoadList) {
 			if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).readFromNBT(nbt, "");
 		}
@@ -111,6 +119,9 @@ public abstract class SimpleNode extends NodeBase {
 	public void writeToNBT(NBTTagCompound nbt)
 	{
 		super.writeToNBT(nbt);
+
+		nbt.setString("SNdescriptorKey", descriptorKey);
+
 		for (State electricalLoad : electricalLoadList) {
 			if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).writeToNBT(nbt, "");
 		}

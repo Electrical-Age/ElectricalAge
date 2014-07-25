@@ -14,6 +14,13 @@ import cpw.mods.fml.common.FMLCommonHandler;
 public class ElnToIc2Entity extends EnergyConverterElnToOtherEntity implements IEnergySource{
 
 	@Override
+	public String getNodeUuid() {
+		// TODO Auto-generated method stub
+		return ElnToIc2Node.getNodeUuidStatic();
+	}
+
+
+	@Override
 	public boolean emitsEnergyTo(TileEntity receiver, ForgeDirection direction) {
 		return true;
 	}
@@ -87,5 +94,8 @@ public class ElnToIc2Entity extends EnergyConverterElnToOtherEntity implements I
 	}
 	
 	protected boolean addedToEnet;
+
+
+
 
 }

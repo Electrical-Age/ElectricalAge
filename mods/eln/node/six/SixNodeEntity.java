@@ -49,11 +49,11 @@ public class SixNodeEntity extends NodeBlockEntity {
 	public static final int singleTargetId = 2;
 
 	@Override
-	public void networkUnserialize(DataInputStream stream) {
+	public void serverPublishUnserialize(DataInputStream stream) {
 		
 		Block sixNodeCacheBlockOld = sixNodeCacheBlock;
 
-		super.networkUnserialize(stream);
+		super.serverPublishUnserialize(stream);
 
 		try {
 

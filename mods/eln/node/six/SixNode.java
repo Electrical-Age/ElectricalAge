@@ -314,9 +314,9 @@ public class SixNode extends Node {
 	}
 
 	@Override
-	public void networkSerialize(DataOutputStream stream) {
+	public void publishSerialize(DataOutputStream stream) {
 		
-		super.networkSerialize(stream);
+		super.publishSerialize(stream);
 		try {
 			int idx = 0;
 			stream.writeInt(Block.getIdFromBlock(sixNodeCacheBlock));

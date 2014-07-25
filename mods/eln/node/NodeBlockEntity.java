@@ -54,21 +54,21 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
 
-public abstract class NodeBlockEntity extends TileEntity implements ITileEntitySpawnClient{
+public abstract class NodeBlockEntity extends TileEntity implements ITileEntitySpawnClient,INodeEntity{
 	
 	public static LinkedList<NodeBlockEntity> clientList = new LinkedList<NodeBlockEntity>();
 	
 
-	
-	public abstract String getNodeUuid();
+
 	public NodeBlock getBlock(){
 		return (NodeBlock) getBlockType();
 	}
 	
 	boolean redstone = false;
-	int lastLight = 0xFF; // trololol
+	int lastLight = 0xFF; 
 	boolean firstUnserialize = true;
-	public void networkUnserialize(DataInputStream stream)
+	@Override
+	public void serverPublishUnserialize(DataInputStream stream)
 	{
 
 		int light = 0;
@@ -110,6 +110,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 		
 	}
 	
+	@Override
 	public void serverPacketUnserialize(DataInputStream stream)
 	{
 		
@@ -369,7 +370,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     		Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
     		return null;
     	}
-    	return new S3FPacketCustomPayload(Eln.channelName,node.getPacketNodeSingleSerialized().toByteArray());
+    	return new S3FPacketCustomPayload(Eln.channelName,node.getPublishPacket().toByteArray());
     	//return null;
     }
 

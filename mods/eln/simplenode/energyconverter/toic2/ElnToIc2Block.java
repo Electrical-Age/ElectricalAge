@@ -9,11 +9,14 @@ import net.minecraft.world.World;
 public class ElnToIc2Block extends EnergyConverterElnToOtherBlock{
 
 	private Class nodeClass;
+	private ElnToIc2Descriptor descriptor;
 
-	public ElnToIc2Block(Class nodeClass) {
+	public ElnToIc2Block(ElnToIc2Descriptor descriptor) {
 		super(Material.rock);
-		this.nodeClass = nodeClass;
+		this.descriptor = descriptor;
+		setDescriptor(descriptor);
 	}
+
 
 	@Override
 	public TileEntity createNewTileEntity(World var1, int var2) {
@@ -23,17 +26,7 @@ public class ElnToIc2Block extends EnergyConverterElnToOtherBlock{
 
 	@Override
 	protected SimpleNode newNode() {
-		// TODO Auto-generated method stub
-		try {
-			return (SimpleNode) nodeClass.newInstance();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+		return new ElnToIc2Node();
 	}
 
 }

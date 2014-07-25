@@ -524,7 +524,7 @@ public abstract class NodeBase {
 
 	boolean needNotify = false;
 
-	public void networkSerialize(DataOutputStream stream) {
+	public void publishSerialize(DataOutputStream stream) {
 
 	}
 
@@ -572,7 +572,7 @@ public abstract class NodeBase {
 
 	}
 
-	public ByteArrayOutputStream getPacketNodeSingleSerialized()
+	public ByteArrayOutputStream getPublishPacket()
 	{
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
@@ -589,7 +589,7 @@ public abstract class NodeBase {
 
 			stream.writeUTF(getNodeUuid());
 
-			networkSerialize(stream);
+			publishSerialize(stream);
 
 			return bos;
 		} catch (IOException e) {
@@ -612,7 +612,7 @@ public abstract class NodeBase {
 			if (player.dimension != this.coordonate.dimention) continue;
 			if (!playerManager.isPlayerWatchingChunk(player, coordonate.x / 16, coordonate.z / 16)) continue;
 
-			Utils.sendPacketToClient(getPacketNodeSingleSerialized(), player);
+			Utils.sendPacketToClient(getPublishPacket(), player);
 		}
 		if (needNotify)
 		{
@@ -624,7 +624,7 @@ public abstract class NodeBase {
 
 	public void publishToPlayer(EntityPlayerMP player)
 	{
-		Utils.sendPacketToClient(getPacketNodeSingleSerialized(), player);
+		Utils.sendPacketToClient(getPublishPacket(), player);
 	}
 
 	public void dropItem(ItemStack itemStack)
