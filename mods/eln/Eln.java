@@ -90,12 +90,12 @@ import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.simplenode.energyconverter.EnergyConverterBlock;
-import mods.eln.simplenode.energyconverter.EnergyConverterEntity;
-import mods.eln.simplenode.energyconverter.EnergyConverterNode;
+import mods.eln.simplenode.energyconverter.toic2.ElnToIc2Block;
+import mods.eln.simplenode.energyconverter.toic2.ElnToIc2Entity;
+import mods.eln.simplenode.energyconverter.toic2.ElnToIc2NodeHvu;
+import mods.eln.simplenode.energyconverter.toic2.ElnToIc2NodeLvu;
+import mods.eln.simplenode.energyconverter.toic2.ElnToIc2NodeMvu;
 import mods.eln.simplenode.test.TestBlock;
-import mods.eln.simplenode.test.TestEntity;
-import mods.eln.simplenode.test.TestNode;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
 import mods.eln.sixnode.diode.DiodeDescriptor;
@@ -550,8 +550,8 @@ public class Eln {
 		TileEntity.addMapping(SixNodeEntity.class, "SixNodeEntity");
 		TileEntity.addMapping(LightBlockEntity.class, "LightBlockEntity");
 
-		NodeManager.registerUuid(sixNodeBlock.getUuid(), SixNode.class);
-		NodeManager.registerUuid(transparentNodeBlock.getUuid(), TransparentNode.class);
+		NodeManager.registerUuid(sixNodeBlock.getNodeUuid(), SixNode.class);
+		NodeManager.registerUuid(transparentNodeBlock.getNodeUuid(), TransparentNode.class);
 
 		
 		
@@ -745,15 +745,50 @@ public class Eln {
 		Utils.println("Electrical age init done");
 	}
 
-	EnergyConverterBlock energyConverterBlock;
+	ElnToIc2Block elnToIc2BlockLvu;
+	ElnToIc2Block elnToIc2BlockMvu;
+	ElnToIc2Block elnToIc2BlockHvu;
 	private void registerEnergyConverter(){
-		energyConverterBlock = new EnergyConverterBlock();
-		energyConverterBlock.setCreativeTab(creativeTab).setBlockName("EnergyConverterBlock");
-		GameRegistry.registerBlock(energyConverterBlock, "Eln.EnergyConverterBlock");
-		TileEntity.addMapping(EnergyConverterEntity.class, "Eln.EnergyConverterEntity");
-		LanguageRegistry.addName(energyConverterBlock,"Energy Converter");
-		NodeManager.instance.registerUuid(EnergyConverterNode.getInfoStatic().getUuid(), EnergyConverterNode.class);
-
+		
+		{
+			String baseName = "ElnToIc2Lvu";
+			String blockName = "eln." + baseName + "Block";
+			String entityName = "eln." + baseName + "Entity";
+			String name = "ELN to IC2 50V converter";
+			
+			elnToIc2BlockLvu = new ElnToIc2Block(ElnToIc2NodeLvu.class);
+			elnToIc2BlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
+			GameRegistry.registerBlock(elnToIc2BlockLvu, blockName);
+			TileEntity.addMapping(ElnToIc2Entity.class, entityName);
+			LanguageRegistry.addName(elnToIc2BlockLvu,name);
+			NodeManager.instance.registerUuid(ElnToIc2NodeLvu.getNodeUuidStatic(), ElnToIc2NodeLvu.class);
+		}
+		{
+			String baseName = "ElnToIc2Mvu";
+			String blockName = "eln." + baseName + "Block";
+			String entityName = "eln." + baseName + "Entity";
+			String name = "ELN to IC2 200V converter";
+			
+			elnToIc2BlockMvu = new ElnToIc2Block(ElnToIc2NodeMvu.class);
+			elnToIc2BlockMvu.setCreativeTab(creativeTab).setBlockName(blockName);
+			GameRegistry.registerBlock(elnToIc2BlockMvu, blockName);
+			TileEntity.addMapping(ElnToIc2Entity.class, entityName);
+			LanguageRegistry.addName(elnToIc2BlockMvu,name);
+			NodeManager.instance.registerUuid(ElnToIc2NodeMvu.getNodeUuidStatic(), ElnToIc2NodeMvu.class);
+		}
+		{
+			String baseName = "ElnToIc2Hvu";
+			String blockName = "eln." + baseName + "Block";
+			String entityName = "eln." + baseName + "Entity";
+			String name = "ELN to IC2 800V converter";
+			
+			elnToIc2BlockHvu = new ElnToIc2Block(ElnToIc2NodeHvu.class);
+			elnToIc2BlockHvu.setCreativeTab(creativeTab).setBlockName(blockName);
+			GameRegistry.registerBlock(elnToIc2BlockHvu, blockName);
+			TileEntity.addMapping(ElnToIc2Entity.class, entityName);
+			LanguageRegistry.addName(elnToIc2BlockHvu,name);
+			NodeManager.instance.registerUuid(ElnToIc2NodeHvu.getNodeUuidStatic(), ElnToIc2NodeHvu.class);
+		}
 		//GameRegistry.registerCustomItemStack("EEnergy Converter", new ItemStack(energyConverterBlock));
 		
 	}
@@ -762,7 +797,7 @@ public class Eln {
 	TestBlock testBlock;
 	
 	private void registerTestBlock() {
-		testBlock = new TestBlock();
+	/*	testBlock = new TestBlock();
 		testBlock.setCreativeTab(creativeTab).setBlockName("TestBlock");
 		GameRegistry.registerBlock(testBlock, "Eln.TestBlock");
 		TileEntity.addMapping(TestEntity.class, "Eln.TestEntity");
@@ -770,7 +805,7 @@ public class Eln {
 		NodeManager.instance.registerUuid(TestNode.getInfoStatic().getUuid(), TestNode.class);
 
 		GameRegistry.registerCustomItemStack("Test Block", new ItemStack(testBlock));
-
+*/
 	}
 
 	void checkRecipe() {
@@ -6118,5 +6153,10 @@ public class Eln {
 
 	public ItemStack findItemStack(String name) {
 		return findItemStack(name, 1);
+	}
+
+	public double getElnToIc2ConversionRatio() {
+		// TODO Auto-generated method stub
+		return 1.0/3;
 	}
 }

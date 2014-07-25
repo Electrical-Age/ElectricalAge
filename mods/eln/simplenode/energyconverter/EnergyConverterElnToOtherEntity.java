@@ -12,7 +12,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 import cofh.api.energy.IEnergyHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 
-public class EnergyConverterEntity extends SimpleNodeEntity {
+public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity {
 	
 	
 

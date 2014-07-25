@@ -9,11 +9,9 @@ import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.INodeInfo;
 import mods.eln.node.Node;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
-import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -302,9 +300,9 @@ public class TransparentNode extends Node{
 
 
 	@Override
-	public INodeInfo getInfo() {
+	public String getNodeUuid() {
 		
-		return Eln.transparentNodeBlock;
+		return Eln.transparentNodeBlock.getNodeUuid();
 	}
 
 

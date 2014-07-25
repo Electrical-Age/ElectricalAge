@@ -5,21 +5,16 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import mods.eln.Eln;
-import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.INodeInfo;
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
@@ -234,9 +229,8 @@ public class SixNodeEntity extends NodeBlockEntity {
 	}
 
 	@Override
-	public INodeInfo getInfo() {
-		
-		return Eln.sixNodeBlock;
+	public String getNodeUuid() {
+		return Eln.sixNodeBlock.getNodeUuid();
 	}
 	
 	@Override

@@ -1,29 +1,11 @@
 package mods.eln.node.transparent;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-
-import mods.eln.Eln;
-import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.misc.Direction;
 import mods.eln.misc.FakeSideInventory;
-import mods.eln.misc.LRDU;
-import mods.eln.node.INodeInfo;
 import mods.eln.node.Node;
-import mods.eln.node.NodeBlockEntity;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.World;
 
 public class TransparentNodeEntityWithSiededInv extends TransparentNodeEntity implements ISidedInventory { // boolean[] syncronizedSideEnable = new boolean[6];
 	ISidedInventory getSidedInventory() {

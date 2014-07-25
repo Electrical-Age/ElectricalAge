@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Random;
 
 import mods.eln.Eln;
-import mods.eln.node.INodeInfo;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlock;
 import mods.eln.node.NodeBlockEntity;
@@ -14,12 +13,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-public class TransparentNodeBlock extends NodeBlock implements INodeInfo{
+public class TransparentNodeBlock extends NodeBlock {
 	
 	public TransparentNodeBlock( Material material,
 			Class tileEntityClass) {
@@ -125,8 +123,8 @@ public class TransparentNodeBlock extends NodeBlock implements INodeInfo{
 
 
 
-	@Override
-	public String getUuid() {
+
+	public String getNodeUuid() {
 		
 		return "t";
 	}

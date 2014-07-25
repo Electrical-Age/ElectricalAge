@@ -60,7 +60,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 	
 
 	
-	public abstract INodeInfo getInfo();
+	public abstract String getNodeUuid();
 	public NodeBlock getBlock(){
 		return (NodeBlock) getBlockType();
 	}
@@ -386,7 +386,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 	    	
 	    	stream.writeByte(worldObj.provider.dimensionId);
 	    	
-	    	stream.writeUTF(getInfo().getUuid());
+	    	stream.writeUTF(getNodeUuid());
 	    		    	
 	    	
 		} catch (IOException e) {

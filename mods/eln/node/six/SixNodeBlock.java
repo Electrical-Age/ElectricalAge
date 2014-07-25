@@ -6,7 +6,6 @@ import java.util.Random;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
-import mods.eln.node.INodeInfo;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlock;
 import net.minecraft.block.Block;
@@ -31,7 +30,7 @@ import net.minecraft.world.chunk.Chunk;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class SixNodeBlock extends NodeBlock implements INodeInfo {
+public class SixNodeBlock extends NodeBlock {
 	// public static ArrayList<Integer> repertoriedItemStackId = new ArrayList<Integer>();
 
 	// private IIcon icon;
@@ -482,8 +481,7 @@ public class SixNodeBlock extends NodeBlock implements INodeInfo {
 
 	}
 
-	@Override
-	public String getUuid() {
+	public String getNodeUuid() {
 
 		return "s";
 	}

@@ -1,24 +1,13 @@
 package mods.eln;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler.Sharable;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Iterator;
-
-import org.lwjgl.Sys;
-
-import com.jcraft.jogg.Packet;
 
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.ClientProxy;
-import mods.eln.item.IInteract;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
@@ -27,20 +16,12 @@ import mods.eln.node.NodeManager;
 import mods.eln.server.PlayerManager;
 import mods.eln.sound.SoundClient;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.client.Minecraft;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
-
-import cpw.mods.fml.common.FMLCommonHandler;
-
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent.ClientCustomPacketEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
-import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 
 //public class PacketHandler implements IPacketHandler {
@@ -163,7 +144,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 					stream.readInt(), stream.readInt(), stream.readByte());
 
 			NodeBase node = NodeManager.instance.getNodeFromCoordonate(coordonate);
-			if (node != null && node.getInfo().getUuid().equals(stream.readUTF())) {
+			if (node != null && node.getNodeUuid().equals(stream.readUTF())) {
 				node.networkUnserialize(stream, (EntityPlayerMP) player);
 			} else {
 				Utils.println("packetForNode node found");
@@ -188,7 +169,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 			NodeBlockEntity node;
 			if (clientPlayer.dimension == dimention
 					&& (node = NodeBlockEntity.getEntity(x, y, z)) != null) {
-				if (node.getInfo().getUuid().equals(stream.readUTF())) {
+				if (node.getNodeUuid().equals(stream.readUTF())) {
 					node.serverPacketUnserialize(stream);
 					if (0 != stream.available()) {
 						Utils.println("0 != stream.available()");
@@ -228,7 +209,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 			NodeBlockEntity node;
 			if (clientPlayer.dimension == dimention
 					&& (node = NodeBlockEntity.getEntity(x, y, z)) != null) {
-				if (node.getInfo().getUuid().equals(stream.readUTF())) {
+				if (node.getNodeUuid().equals(stream.readUTF())) {
 					node.networkUnserialize(stream);
 					if (0 != stream.available()) {
 						Utils.println("0 != stream.available()");

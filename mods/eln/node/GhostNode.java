@@ -10,15 +10,14 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 
-public abstract class GhostNode extends NodeBase{
+public abstract class GhostNode extends NodeBase {
 	@Override
 	public boolean mustBeSaved() {
-		
 		return false;
 	}
+
 	@Override
-	public INodeInfo getInfo() {
-		
-		return Eln.ghostBlock;
+	public String getNodeUuid() {
+		return Eln.ghostBlock.getNodeUuid();
 	}
 }

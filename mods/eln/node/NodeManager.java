@@ -143,7 +143,7 @@ public class NodeManager extends WorldSavedData{
 		{
 			if(node.mustBeSaved() == false) continue;
 			NBTTagCompound nbtNode = new NBTTagCompound();
-			nbtNode.setString("tag", node.getInfo().getUuid());
+			nbtNode.setString("tag", node.getNodeUuid());
 			node.writeToNBT(nbtNode);
 			nbt.setTag("n" + nodeCounter++, nbtNode);
 		}

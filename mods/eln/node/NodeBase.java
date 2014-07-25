@@ -107,7 +107,7 @@ public abstract class NodeBase {
 	}
 
 	//public abstract Block getBlock();
-	public abstract INodeInfo getInfo();
+	public abstract String getNodeUuid();
 
 	public LRDUCubeMask lrduCubeMask = new LRDUCubeMask();
 
@@ -539,7 +539,7 @@ public abstract class NodeBase {
 
 			stream.writeByte(coordonate.dimention);
 
-			stream.writeUTF(getInfo().getUuid());
+			stream.writeUTF(getNodeUuid());
 
 		} catch (IOException e) {
 
@@ -587,7 +587,7 @@ public abstract class NodeBase {
 			stream.writeInt(coordonate.z);
 			stream.writeByte(coordonate.dimention);
 
-			stream.writeUTF(getInfo().getUuid());
+			stream.writeUTF(getNodeUuid());
 
 			networkSerialize(stream);
 

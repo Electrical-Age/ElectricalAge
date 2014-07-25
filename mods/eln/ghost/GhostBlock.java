@@ -2,24 +2,16 @@
 	
 	import java.util.Random;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
-import mods.eln.node.INodeInfo;
-import mods.eln.node.NodeBase;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 	
-public class GhostBlock extends Block implements INodeInfo{
+public class GhostBlock extends Block {
 
 	public GhostBlock() {
 		super(Material.iron);
@@ -94,9 +86,7 @@ public class GhostBlock extends Block implements INodeInfo{
 
 
 
-	@Override
-	public String getUuid() {
-		
+	public String getNodeUuid() {	
 		return "g";
 	}
 }

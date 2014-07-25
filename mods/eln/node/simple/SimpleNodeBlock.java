@@ -1,28 +1,16 @@
 package mods.eln.node.simple;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
-import mods.eln.node.INodeInfo;
-import mods.eln.node.Node;
-import mods.eln.node.NodeBase;
-import mods.eln.node.NodeBlock;
-import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
-import mods.eln.node.transparent.TransparentNode;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public abstract class SimpleNodeBlock extends BlockContainer {

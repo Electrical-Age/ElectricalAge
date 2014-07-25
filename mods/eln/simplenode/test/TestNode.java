@@ -1,9 +1,7 @@
 package mods.eln.simplenode.test;
 
-import net.minecraft.block.Block;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.node.INodeInfo;
 import mods.eln.node.simple.SimpleNode;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
@@ -32,20 +30,13 @@ public class TestNode extends SimpleNode{
 	}
 
 	@Override
-	public INodeInfo getInfo() {
+	public String getNodeUuid() {
 		// TODO Auto-generated method stub
-		return getInfoStatic();
+		return getNodeUuidStatic();
 	}
 
-	public static INodeInfo getInfoStatic() {
-		// TODO Auto-generated method stub
-		return new INodeInfo() {
-			@Override
-			public String getUuid() {
-				// TODO Auto-generated method stub
-				return "testNode";
-			}
-		};
+	public static String getNodeUuidStatic() {
+		return "eln.TestNode";
 	}
 
 	NbtElectricalLoad load = new NbtElectricalLoad("load");

@@ -12,7 +12,6 @@ import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.FakeSideInventory;
 import mods.eln.misc.LRDU;
-import mods.eln.node.INodeInfo;
 import mods.eln.node.Node;
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.client.gui.GuiScreen;
@@ -173,9 +172,9 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
 	}
 
 	@Override
-	public INodeInfo getInfo() {
+	public String getNodeUuid() {
 
-		return Eln.transparentNodeBlock;
+		return Eln.transparentNodeBlock.getNodeUuid();
 	}
 
 	@Override

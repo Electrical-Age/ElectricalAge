@@ -1,16 +1,12 @@
 package mods.eln.transparentnode.teleporter;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.item.ItemStack;
-import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.GhostNode;
-import mods.eln.node.INodeInfo;
-import mods.eln.node.NodeBase;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 
 public class TeleporterPowerNode extends GhostNode{
 
