@@ -28,7 +28,6 @@ public class ElnToIc2Block extends EnergyConverterElnToOtherBlock{
 
 	@Override
 	public TileEntity createNewTileEntity(World var1, int var2) {
-		// TODO Auto-generated method stub
 		return new ElnToIc2Entity();
 	}
 

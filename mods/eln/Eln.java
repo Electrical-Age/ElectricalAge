@@ -436,6 +436,9 @@ public class Eln {
 		modbusEnable = config.get("modbus", "enable", false).getBoolean(false);
 		debugEnable = config.get("debug", "enable", false).getBoolean(false);
 
+		ComputerCraftProbeEnable = config.get("compatibility", "ComputerCraftProbeEnable", true).getBoolean(true);
+		ElnToIc2Enable = config.get("compatibility", "ElectricalAgeToIC2", true).getBoolean(true);
+
 		replicatorPop = config.get("entity", "replicatorPop", true).getBoolean(true);
 		replicatorRegistrationId = config.get("entity", "replicatorId", -1).getInt(-1);
 
@@ -474,6 +477,8 @@ public class Eln {
 	public static FMLEventChannel eventChannel;
 	boolean computerCraftReady = false;
 	boolean ic2Ready = false;
+	boolean ComputerCraftProbeEnable;
+	boolean ElnToIc2Enable;
 
 	// FMLCommonHandler.instance().bus().register(this);
 	@EventHandler
@@ -482,7 +487,6 @@ public class Eln {
 
 		computerCraftReady = Utils.isClassLoaded("dan200.computercraft.ComputerCraft");
 		ic2Ready = Utils.isClassLoaded("ic2.core.IC2");
-
 
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
 
@@ -640,6 +644,9 @@ public class Eln {
 		//
 		registerReplicator();
 		//
+
+		recipeEnergyConverter();
+
 		recipeArmor();
 		recipeTool();
 
@@ -740,14 +747,12 @@ public class Eln {
 	ElnToIc2Block elnToIc2BlockHvu;
 
 	private void registerEnergyConverter() {
-		if(ic2Ready){
+		if (ic2Ready && ElnToIc2Enable) {
 			String baseName = "ElnToIc2";
 			String entityName = "eln.ElnToIc2Entity";
 
 			TileEntity.addMapping(ElnToIc2Entity.class, entityName);
 			NodeManager.instance.registerUuid(ElnToIc2Node.getNodeUuidStatic(), ElnToIc2Node.class);
-
-
 
 			{
 				String blockName = "eln." + baseName + "LVUBlock";
@@ -3577,7 +3582,7 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
-		if (computerCraftReady) {
+		if (computerCraftReady && ComputerCraftProbeEnable) {
 			subId = 4;
 			name = "ComputerCraft Probe";
 
@@ -5965,6 +5970,38 @@ public class Eln {
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane));
 
+	}
+
+	void recipeEnergyConverter() {
+		if (ic2Ready && ElnToIc2Enable) {
+			addRecipe(new ItemStack(elnToIc2BlockLvu),
+					"III",
+					"cCR",
+					"III",
+					Character.valueOf('C'), findItemStack("Cheap Chip"),
+					Character.valueOf('c'), findItemStack("Low Voltage Cable"),
+					Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+					Character.valueOf('R'), "ingotCopper");
+
+			addRecipe(new ItemStack(elnToIc2BlockMvu),
+					"III",
+					"cCR",
+					"III",
+					Character.valueOf('C'), findItemStack("Cheap Chip"),
+					Character.valueOf('c'), findItemStack("Medium Voltage Cable"),
+					Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+					Character.valueOf('R'), new ItemStack(Items.iron_ingot));
+
+			addRecipe(new ItemStack(elnToIc2BlockHvu),
+					"III",
+					"cCR",
+					"III",
+					Character.valueOf('C'), findItemStack("Advanced Chip"),
+					Character.valueOf('c'), findItemStack("High Voltage Cable"),
+					Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+					Character.valueOf('R'), new ItemStack(Items.gold_ingot));
+
+		}
 	}
 
 	void recipeArmor()

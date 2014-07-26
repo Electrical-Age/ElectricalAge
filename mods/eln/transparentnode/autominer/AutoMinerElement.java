@@ -22,8 +22,11 @@ import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class AutoMinerElement extends TransparentNodeElement  {
+
+
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this);
 	
 	NbtElectricalLoad inPowerLoad = new NbtElectricalLoad("inPowerLoad");
@@ -168,8 +171,38 @@ public class AutoMinerElement extends TransparentNodeElement  {
 		try {
 			stream.writeShort(slowProcess.pipeLength);
 			stream.writeByte(slowProcess.job.ordinal());
+			stream.writeBoolean(powerOk);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	boolean powerOk = false;
+	public void setPowerOk(boolean b) {
+		if(powerOk != (powerOk = b)){
+			needPublish();
+		}
+	}
+	
+	
+	@Override
+	public void writeToNBT(NBTTagCompound nbt) {
+		// TODO Auto-generated method stub
+		super.writeToNBT(nbt);
+		nbt.setBoolean("powerOk", powerOk);
+	}
+	
+	@Override
+	public void readFromNBT(NBTTagCompound nbt) {
+		// TODO Auto-generated method stub
+		super.readFromNBT(nbt);
+		powerOk = nbt.getBoolean("powerOk");
+	}
+	
+	
+	public static final byte pushLogId = 1;
+	
+	void pushLog(String log){
+		sendStringToAllClient(pushLogId,log);
 	}
 }

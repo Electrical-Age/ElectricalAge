@@ -8,6 +8,7 @@ import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeEntity;
+import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -555,7 +556,13 @@ public class UtilsClient {
 		double x = (c.posX - e.posX), y = (c.posY - e.posY), z = (c.posZ - e.posZ);
 		return Math.sqrt(x * x + y * y + z * z);
 	}
-
+	public static double clientDistanceTo(TransparentNodeEntity t) {
+		if (t == null)
+			return 100000000.0;
+		Entity c = Minecraft.getMinecraft().thePlayer;
+		double x = (c.posX - t.xCoord), y = (c.posY - t.yCoord), z = (c.posZ - t.zCoord);
+		return Math.sqrt(x * x + y * y + z * z);
+	}
 	public static int getLight(World w, int x, int y, int z) {
 		int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.Block, x, y, z);
 		int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, x, y, z) - w.calculateSkylightSubtracted(0f);
@@ -605,4 +612,6 @@ public class UtilsClient {
 		}
 		glListsAllocated.clear();
 	}
+
+
 }

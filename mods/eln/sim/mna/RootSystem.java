@@ -300,7 +300,7 @@ public class RootSystem {
 		boolean privateSystem = roots.getFirst().isPrivateSubSystem();
 		
 		while (roots.isEmpty() == false) {
-			State sExplored = roots.pop();
+			State sExplored = roots.pollFirst();
 			stateSet.add(sExplored);
 			
 			
@@ -328,7 +328,7 @@ public class RootSystem {
 				for(State sNext : c.getConnectedStates()) {
 					if(sNext == null) continue;
 					if(stateSet.contains(sNext)) continue;
-					roots.push(sNext);
+					roots.addLast(sNext);
 				}
 
 			}

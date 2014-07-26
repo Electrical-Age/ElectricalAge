@@ -120,6 +120,8 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 					best.addToRp(lampDescriptor.getR());
 				}
 				lamp.positiveLoad.state = best.powerLoad.state;
+			}else{
+				lamp.positiveLoad.state = 0;
 			}
 			
 			lamp.setIsConnectedToLampSupply(best != null);
