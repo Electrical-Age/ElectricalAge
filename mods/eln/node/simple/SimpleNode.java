@@ -31,11 +31,22 @@ public abstract class SimpleNode extends NodeBase {
 		return DescriptorManager.get(descriptorKey);
 	}
 	
-	public Direction front;
-	
+	private Direction front;
+	public Direction getFront() {
+		return front;
+	}
+	public void setFront(Direction front) {
+		this.front = front;
+		if(applayFrontToMetadata()){
+			coordonate.setMetadata(front.getInt());
+		}
+	}
+	protected boolean applayFrontToMetadata(){
+		return false;
+	}
 	@Override
 	public void initializeFromThat(Direction front, EntityLivingBase entityLiving, ItemStack itemStack) {
-		this.front = front;
+		setFront(front);
 		initialize();
 	}
 

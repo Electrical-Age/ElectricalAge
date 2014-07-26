@@ -4,8 +4,6 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.DescriptorBase;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeManager;
-import mods.eln.simplenode.energyconverter.toic2.ElnToIc2Descriptor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -58,6 +56,11 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 		return null;
 	}
 
+	public SimpleNodeEntity getEntity(World world, int x, int y, int z) {
+		SimpleNodeEntity entity = (SimpleNodeEntity) world.getTileEntity(x, y, z);
+		return entity;
+	}
+
 	@Override
 	public boolean removedByPlayer(World world, EntityPlayer entityPlayer, int x, int y, int z)
 	{
@@ -72,14 +75,16 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 	}
 
 	// client server
-	public boolean onBlockPlacedBy(World world, int x, int y, int z, Direction front, EntityLivingBase entityLiving, int metadata)
+	/*onblockplaced
+	@Override
+	public void onBlockPlacedBy(World world, int x, int y, int z, Direction front, EntityLivingBase entityLiving, int metadata)
 	{
 		SimpleNodeEntity tileEntity = (SimpleNodeEntity) world.getTileEntity(x, y, z);
 		tileEntity.onBlockPlacedBy(front, entityLiving, metadata);
-		return true;
-	}
+	}*/
 
 	// server
+	@Override
 	public void onBlockAdded(World par1World, int x, int y, int z)
 	{
 		if (par1World.isRemote == false)
@@ -90,6 +95,7 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 	}
 
 	// server
+	@Override
 	public void breakBlock(World par1World, int x, int y, int z, Block par5, int par6)
 	{
 		SimpleNodeEntity entity = (SimpleNodeEntity) par1World.getTileEntity(x, y, z);
@@ -108,6 +114,7 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 	}
 
 	// client server
+	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer entityPlayer, int side, float vx, float vy, float vz)
 	{
 		SimpleNodeEntity entity = (SimpleNodeEntity) world.getTileEntity(x, y, z);

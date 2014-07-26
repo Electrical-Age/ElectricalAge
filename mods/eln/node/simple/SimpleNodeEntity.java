@@ -14,6 +14,7 @@ import mods.eln.node.NodeManager;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
@@ -32,12 +33,11 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 	
 	
 	//***************** Wrapping **************************
-	
+	/*
 	public void onBlockPlacedBy(Direction front, EntityLivingBase entityLiving, int metadata) {
 	
 	}
-
-
+*/
 
 	public void onBlockAdded(){
 		/*if (!worldObj.isRemote){
@@ -105,7 +105,9 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 	@Override
 	public void serverPublishUnserialize(DataInputStream stream) {
 		try {
-			front = Direction.fromInt(stream.readByte());
+			if(front != (front = Direction.fromInt(stream.readByte()))){
+				worldObj.markBlockForUpdate(xCoord,yCoord,zCoord);
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

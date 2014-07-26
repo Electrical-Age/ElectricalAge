@@ -1464,4 +1464,16 @@ public class Utils {
 		if(stack == null) return false;
 		return isWrench(stack);
 	}
+
+	public static boolean isClassLoaded(String name) {
+		try {
+			Class<?> cc = Class.forName(name);
+			if (cc != null) {
+				return true;
+			}
+		} catch (ClassNotFoundException e) {
+
+		}
+		return false;
+	}
 }

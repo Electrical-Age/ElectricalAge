@@ -24,7 +24,7 @@ public abstract class EnergyConverterElnToOtherNode extends SimpleNode {
 
 	@Override
 	public int getSideConnectionMask(Direction directionA, LRDU lrduA) {
-		if(directionA == front) return maskElectricalPower;
+		if(directionA == getFront()) return maskElectricalPower;
 		return 0;
 	}
 

@@ -24,5 +24,4 @@ public class ElnToIc2Node extends EnergyConverterElnToOtherNode{
 		return "ElnToIc2";
 	}
 
-	
 }

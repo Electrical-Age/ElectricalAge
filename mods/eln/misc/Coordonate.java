@@ -256,5 +256,8 @@ public class Coordonate implements INBTTReady {
 		w = worldObj;
 		dimention = worldObj.provider.dimensionId;
 	}
+	public void setMetadata(int meta) {
+		world().setBlockMetadataWithNotify(x, y, z, meta, 0);
+	}
 
 }

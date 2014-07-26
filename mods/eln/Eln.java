@@ -473,20 +473,16 @@ public class Eln {
 
 	public static FMLEventChannel eventChannel;
 	boolean computerCraftReady = false;
+	boolean ic2Ready = false;
 
 	// FMLCommonHandler.instance().bus().register(this);
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
 		Object o;
 
-		try {
-			Class<?> cc = Class.forName("dan200.computercraft.ComputerCraft");
-			if (cc != null) {
-				computerCraftReady = true;
-			}
-		} catch (ClassNotFoundException e) {
+		computerCraftReady = Utils.isClassLoaded("dan200.computercraft.ComputerCraft");
+		ic2Ready = Utils.isClassLoaded("ic2.core.IC2");
 
-		}
 
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
 
@@ -744,7 +740,7 @@ public class Eln {
 	ElnToIc2Block elnToIc2BlockHvu;
 
 	private void registerEnergyConverter() {
-		{
+		if(ic2Ready){
 			String baseName = "ElnToIc2";
 			String entityName = "eln.ElnToIc2Entity";
 

@@ -28,7 +28,7 @@ public class ElnToIc2Entity extends EnergyConverterElnToOtherEntity implements I
 			return false;*/
 		if(worldObj.isRemote) return false;
 		SimpleNode n = getNode();
-		return n.front.back() == Direction.from(direction);
+		return n.getFront().back() == Direction.from(direction);
 	}
 
 	@Override
