@@ -44,7 +44,6 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 			SimpleNode node = newNode();
 			node.setDescriptorKey(descriptorKey);
 			node.onBlockPlacedBy(new Coordonate(x,y,z,w), getFrontForPlacement(e), e, stack);
-			NodeManager.instance.addNode(node);
 		}
 	}
 	

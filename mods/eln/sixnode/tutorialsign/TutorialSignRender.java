@@ -25,7 +25,7 @@ public class TutorialSignRender extends SixNodeElementRender {
 	String baliseName;
 	String texts[];
 	
-	RcInterpolator lightInterpol = new RcInterpolator(0.6f);
+	RcInterpolator lightInterpol = new RcInterpolator(0.4f);
 	
 	@Override
 	public void draw() {

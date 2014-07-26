@@ -655,5 +655,7 @@ public abstract class NodeBase {
 	public void globalBoot() {
 
 	}
-
+	public void needPublish() {
+		setNeedPublish(true);
+	}
 }

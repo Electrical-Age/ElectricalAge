@@ -4,6 +4,8 @@ import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySource;
 import ic2.api.info.Info;
+import mods.eln.misc.Direction;
+import mods.eln.node.simple.SimpleNode;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import net.minecraft.tileentity.TileEntity;
@@ -22,7 +24,11 @@ public class ElnToIc2Entity extends EnergyConverterElnToOtherEntity implements I
 
 	@Override
 	public boolean emitsEnergyTo(TileEntity receiver, ForgeDirection direction) {
-		return true;
+		/*if(front == null) 
+			return false;*/
+		if(worldObj.isRemote) return false;
+		SimpleNode n = getNode();
+		return n.front.back() == Direction.from(direction);
 	}
 
 	@Override

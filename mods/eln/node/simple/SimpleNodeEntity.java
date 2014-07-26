@@ -1,6 +1,7 @@
 package mods.eln.node.simple;
 
 import java.io.DataInputStream;
+import java.io.IOException;
 
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
@@ -10,8 +11,10 @@ import mods.eln.misc.Utils;
 import mods.eln.node.INodeEntity;
 import mods.eln.node.NodeEntityClientSender;
 import mods.eln.node.NodeManager;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
@@ -86,7 +89,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
 
 	//***************** Descriptor **************************
-	protected Object getDescriptor(){
+	public Object getDescriptor(){
 		SimpleNodeBlock b = (SimpleNodeBlock) getBlockType();
 		return DescriptorManager.get(b.descriptorKey);
 	}
@@ -97,10 +100,16 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 	
 	
 	//***************** Network **************************
+	
+	public Direction front;
 	@Override
 	public void serverPublishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
-		
+		try {
+			front = Direction.fromInt(stream.readByte());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -123,4 +132,21 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
     
     public NodeEntityClientSender sender = new NodeEntityClientSender(this, getNodeUuid());
+    
+    
+    
+    
+    //*********************** GUI ***************************
+	@Override
+	public Container newContainer(Direction side,EntityPlayer player)
+	{
+		return null;
+	}
+	@Override
+	public GuiScreen newGuiDraw(Direction side,EntityPlayer player)
+	{
+		return null;
+	}
+	
+	
 }

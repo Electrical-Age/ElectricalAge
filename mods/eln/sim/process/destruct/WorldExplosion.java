@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import mods.eln.misc.Coordonate;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 
 public class WorldExplosion implements IDestructable{
 	Object origine;
@@ -23,6 +24,11 @@ public class WorldExplosion implements IDestructable{
 	}
 	
 	
+	public WorldExplosion(EnergyConverterElnToOtherNode e) {
+		this.c = e.coordonate;
+		origine = e;
+	}
+
 	public WorldExplosion cableExplosion(){
 		strength = 1.5f;
 		return this;

@@ -756,7 +756,7 @@ public class Eln {
 			{
 				String blockName = "eln." + baseName + "LVUBlock";
 				String name = "ELN to IC2 50V converter";
-				ElnToIc2Descriptor desc = new ElnToIc2Descriptor(baseName + "LVU", LVU, LVP * 3 / 4, 32);
+				ElnToIc2Descriptor desc = new ElnToIc2Descriptor(baseName + "LVU", LVU, LVP, 32);
 				elnToIc2BlockLvu = new ElnToIc2Block(desc);
 				elnToIc2BlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
 				GameRegistry.registerBlock(elnToIc2BlockLvu, blockName);
@@ -765,7 +765,7 @@ public class Eln {
 			{
 				String blockName = "eln." + baseName + "MVUBlock";
 				String name = "ELN to IC2 200V converter";
-				ElnToIc2Descriptor desc = new ElnToIc2Descriptor(baseName + "MVU", MVU, MVP * 3 / 4, 128);
+				ElnToIc2Descriptor desc = new ElnToIc2Descriptor(baseName + "MVU", MVU, MVP, 128);
 				elnToIc2BlockLvu = new ElnToIc2Block(desc);
 				elnToIc2BlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
 				GameRegistry.registerBlock(elnToIc2BlockLvu, blockName);
@@ -774,7 +774,7 @@ public class Eln {
 			{
 				String blockName = "eln." + baseName + "HVUBlock";
 				String name = "ELN to IC2 800V converter";
-				ElnToIc2Descriptor desc = new ElnToIc2Descriptor(baseName + "HVU", HVU, HVP * 3 / 4, 512);
+				ElnToIc2Descriptor desc = new ElnToIc2Descriptor(baseName + "HVU", HVU, HVP, 512);
 				elnToIc2BlockLvu = new ElnToIc2Block(desc);
 				elnToIc2BlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
 				GameRegistry.registerBlock(elnToIc2BlockLvu, blockName);

@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import org.lwjgl.opengl.GL11;
 
@@ -613,6 +614,19 @@ public enum Direction {
 			break;
 
 
+		}
+	}
+
+	public static Direction from(ForgeDirection direction) {
+		switch(direction){
+		case DOWN: return YN;
+		case EAST:return XP;
+		case NORTH:return ZN;
+		case SOUTH:return ZP;
+		case UP:return YP;
+		case WEST:return XN;
+		default:return YN;
+		
 		}
 	}
 

@@ -1,5 +1,7 @@
 package mods.eln.node.simple;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import mods.eln.Eln;
@@ -29,8 +31,11 @@ public abstract class SimpleNode extends NodeBase {
 		return DescriptorManager.get(descriptorKey);
 	}
 	
+	public Direction front;
+	
 	@Override
 	public void initializeFromThat(Direction front, EntityLivingBase entityLiving, ItemStack itemStack) {
+		this.front = front;
 		initialize();
 	}
 
@@ -41,6 +46,19 @@ public abstract class SimpleNode extends NodeBase {
 
 	public abstract void initialize();
 
+	
+	@Override
+	public void publishSerialize(DataOutputStream stream) {
+		super.publishSerialize(stream);
+		try {
+			stream.writeByte(front.getInt());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
 	public ArrayList<IProcess> slowProcessList = new ArrayList<IProcess>(4);
 
 	public ArrayList<IProcess> electricalProcessList = new ArrayList<IProcess>(4);
@@ -90,6 +108,8 @@ public abstract class SimpleNode extends NodeBase {
 	public void readFromNBT(NBTTagCompound nbt)
 	{
 		super.readFromNBT(nbt);
+		
+		front = Direction.readFromNBT(nbt, "SNfront");
 
 		setDescriptorKey(nbt.getString("SNdescriptorKey"));
 
@@ -119,7 +139,9 @@ public abstract class SimpleNode extends NodeBase {
 	public void writeToNBT(NBTTagCompound nbt)
 	{
 		super.writeToNBT(nbt);
-
+		
+		front.writeToNBT(nbt, "SNfront");
+		
 		nbt.setString("SNdescriptorKey", descriptorKey);
 
 		for (State electricalLoad : electricalLoadList) {

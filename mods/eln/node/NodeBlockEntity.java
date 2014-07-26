@@ -129,10 +129,12 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 	
 	Node node = null;
 	
+	@Override
 	public Container newContainer(Direction side,EntityPlayer player)
 	{
 		return null;
 	}
+	@Override
 	public GuiScreen newGuiDraw(Direction side,EntityPlayer player)
 	{
 		return null;
