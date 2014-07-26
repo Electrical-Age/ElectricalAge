@@ -8,16 +8,16 @@ Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
-map_Kd AutoMinerGUI.png
+map_Kd AutoMinerCore.png
 
-newmtl None_AutoMinerCore.png
+newmtl None_AutoMinerGUI.png
 Ns 0
 Ka 0.000000 0.000000 0.000000
 Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
-map_Kd AutoMinerCore.png
+map_Kd AutoMinerGUI.png
 
 newmtl None_NONE
 Ns 0
