@@ -486,7 +486,8 @@ public class Eln {
 		Object o;
 
 		computerCraftReady = Utils.isClassLoaded("dan200.computercraft.ComputerCraft");
-		ic2Ready = Utils.isClassLoaded("ic2.core.IC2");
+		//ic2Ready = Utils.isClassLoaded("ic2.core.IC2");
+		ic2Ready = false;
 
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
 
