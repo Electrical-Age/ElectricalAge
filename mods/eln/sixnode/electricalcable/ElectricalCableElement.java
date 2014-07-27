@@ -47,7 +47,9 @@ public class ElectricalCableElement extends SixNodeElement {
 		electricalLoad.setCanBeSimplifiedByLine(true);
 		electricalLoadList.add(electricalLoad);
 		thermalLoadList.add(thermalLoad);
-		thermalProcessList.add(heater);
+		thermalSlowProcessList.add(heater);
+		
+		thermalLoad.setAsSlow();
 		
 		slowProcessList.add(thermalWatchdog);
 		thermalWatchdog

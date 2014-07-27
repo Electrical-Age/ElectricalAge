@@ -87,7 +87,7 @@ public class BatteryElement extends TransparentNodeElement  {
 	   	electricalComponentList.add(cutSwitch);
 	   	thermalLoadList.add(thermalLoad);
 	   	electricalProcessList.add(batteryProcess);
-	   	thermalProcessList.add(negativeETProcess);
+	   	thermalFastProcessList.add(negativeETProcess);
 
 	   	slowProcessList.add(batterySlowProcess);
     	slowProcessList.add(inventoryProcess);

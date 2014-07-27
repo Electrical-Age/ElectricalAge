@@ -57,7 +57,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 			logs.removeLast();
 	}
 
-	RenderStorage render = new RenderStorage(8, 130, 24, 24);
+	RenderStorage render = new RenderStorage(10, 130, 24, 24);
 	
 	@Override
 	public void draw() {
@@ -85,12 +85,15 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
 		boolean drawScreen = UtilsClient.clientDistanceTo(tileEntity) < 20 && powerOk;
 		boolean drawRay = drawScreen && job != null;
-		UtilsClient.disableLight();
+
+		UtilsClient.disableCulling();
+		
 		GL11.glPushMatrix();
 		GL11.glTranslatef(-1.57031f, 1.8125f - 1.5f - 0.02f, -0.3125f + 0.02f);
 		GL11.glRotatef(90, 0, 1, 0);
-		UtilsClient.disableCulling();
+
 		if(drawScreen){
+			UtilsClient.disableLight();
 			GL11.glPushMatrix();
 			GL11.glRotatef(180, 0, 1, 0);
 			GL11.glScalef(1/128f, -1/128f, 1);
@@ -100,7 +103,9 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 				idx += 8;
 			}
 			GL11.glPopMatrix();
+			UtilsClient.enableLight();
 		}
+
 		if (drawRay) {
 
 			float raySize = 0.625f - 0.02f * 2;
@@ -110,14 +115,16 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
 			GL11.glTranslatef(-raySize, 0, 0);
 			GL11.glScalef(scale, -scale, 1);
-			render.draw(0.6f);
+			render.draw(0.4f,1.3f,0.8f);
 			
 
 		}
-		UtilsClient.enableCulling();
-		UtilsClient.enableLight();
+
 		GL11.glPopMatrix();
+		UtilsClient.enableCulling();
+
 		descriptor.draw(false, buttonsState, ledsAState, ledsPState);
+
 	}
 
 	boolean powerOk;
@@ -147,7 +154,16 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 			recalcTimeout -= deltaT;
 			if(recalcTimeout < 0){
 				recalcTimeout += 0.5;
-				render.generate(this.tileEntity.getWorldObj(), tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5-pipeLength, tileEntity.zCoord + 0.5, -(float) (Math.PI * 1 / 2), -(float) (Math.PI / 2));
+				float camAlpha;
+				switch (front) {
+				default:
+				case XN: camAlpha = (float)(Math.PI); break;
+				case XP: camAlpha = 0; break;
+				case ZN: camAlpha = (float)(-Math.PI/2); break;
+				case ZP: camAlpha = (float)(Math.PI/2); break;
+
+				}
+				render.generate(this.tileEntity.getWorldObj(), tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5-(Math.max(0, pipeLength-5)), tileEntity.zCoord + 0.5, -(float) (Math.PI * 1 / 2) + camAlpha, -(float) (Math.PI / 2));
 			}
 		}
 	}
@@ -179,7 +195,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 			if(!powerOk){
 				logs.clear();
 				pushLog("BOOT");
-				pushLog("WAITING INSTRUCTION");
+				pushLog("WAITING OPCODE");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

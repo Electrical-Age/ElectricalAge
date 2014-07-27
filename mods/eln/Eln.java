@@ -397,7 +397,7 @@ public class Eln {
 	private boolean replicatorPop;
 
 	public boolean forceOreRegen;
-	public static boolean debugEnable = false;
+	public static boolean debugEnable = false,versionCheckEnable = true;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -435,6 +435,7 @@ public class Eln {
 
 		modbusEnable = config.get("modbus", "enable", false).getBoolean(false);
 		debugEnable = config.get("debug", "enable", false).getBoolean(false);
+		versionCheckEnable = config.get("general", "versionCheckEnable", true).getBoolean(true);
 
 		ComputerCraftProbeEnable = config.get("compatibility", "ComputerCraftProbeEnable", true).getBoolean(true);
 		ElnToIc2Enable = config.get("compatibility", "ElectricalAgeToIC2", true).getBoolean(true);
@@ -2706,9 +2707,9 @@ public class Eln {
 		int subId, completId;
 		String name;
 		double[] lightPower = new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				15, 20, 30, 40, 60 };
+				15, 20, 25, 30, 40 };
 		double[] lightLevel = new double[16];
-		double economicPowerFactor = 0.75;
+		double economicPowerFactor = 0.5;
 		double standardGrowRate = 0.0;
 		for (int idx = 0; idx < 16; idx++) {
 			lightLevel[idx] = (idx + 0.49) / 15.0;
@@ -3861,7 +3862,7 @@ public class Eln {
 			name = "Cheap Electrical Drill";
 
 			descriptor = new ElectricalDrillDescriptor(name,// iconId, name,
-					10, 1000 // double operationTime,double operationEnergy
+					8, 4000 // double operationTime,double operationEnergy
 			);
 			sharedItem.addElement(completId, descriptor);
 		}
@@ -3871,7 +3872,7 @@ public class Eln {
 			name = "Average Electrical Drill";
 
 			descriptor = new ElectricalDrillDescriptor(name,// iconId, name,
-					5, 1500 // double operationTime,double operationEnergy
+					5, 5000 // double operationTime,double operationEnergy
 			);
 			sharedItem.addElement(completId, descriptor);
 		}
@@ -3881,7 +3882,7 @@ public class Eln {
 			name = "Fast Electrical Drill";
 
 			descriptor = new ElectricalDrillDescriptor(name,// iconId, name,
-					2, 2000 // double operationTime,double operationEnergy
+					3, 6000 // double operationTime,double operationEnergy
 			);
 			sharedItem.addElement(completId, descriptor);
 		}
@@ -3946,9 +3947,7 @@ public class Eln {
 					obj.getObj("AutoMiner"),
 					powerLoad, lightCoord, miningCoord,
 					2, 1, 0,
-					MVU,
-					MVU * 1.4,// double nominalVoltage,double maximalVoltage,
-					1500, 0.01,// double nominalPower,double nominalDropFactor,
+					highVoltageCableDescriptor,
 					1, 50// double pipeRemoveTime,double pipeRemoveEnergy
 			);
 
@@ -5199,7 +5198,8 @@ public class Eln {
 				Character.valueOf('D'), findItemStack("Cheap Electrical Drill"),
 				Character.valueOf('d'), new ItemStack(Items.diamond));
 
-		addRecipe(findItemStack("Fast Electrical Drill"), "MCM",
+		addRecipe(findItemStack("Fast Electrical Drill"), 
+				"MCM",
 				" T ",
 				" P ",
 				Character.valueOf('T'), findItemStack("Mining Pipe"),
@@ -6099,18 +6099,7 @@ public class Eln {
 
 		oreScannerConfig.clear();
 
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.coal_ore), 5 / 100f));
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.iron_ore), 15 / 100f));
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.gold_ore), 40 / 100f));
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.lapis_ore), 40 / 100f));
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.redstone_ore), 40 / 100f));
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.diamond_ore), 100 / 100f));
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.emerald_ore), 40 / 100f));
 
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (1 << 12), 10 / 100f));
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (4 << 12), 20 / 100f));
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (5 << 12), 20 / 100f));
-		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (6 << 12), 20 / 100f));
 
 		if (addOtherModOreToXRay) {
 			for (String name : OreDictionary.getOreNames()) {
@@ -6136,6 +6125,19 @@ public class Eln {
 				}
 			}
 		}
+		
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.coal_ore), 5 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.iron_ore), 15 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.gold_ore), 40 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.lapis_ore), 40 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.redstone_ore), 40 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.diamond_ore), 100 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.emerald_ore), 40 / 100f));
+
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (1 << 12), 10 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (4 << 12), 20 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (5 << 12), 20 / 100f));
+		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (6 << 12), 20 / 100f));
 	}
 
 	public static double getSmallRs() {

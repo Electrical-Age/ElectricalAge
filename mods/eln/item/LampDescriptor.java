@@ -91,7 +91,7 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 	public NBTTagCompound getDefaultNBT() {
 		
 		NBTTagCompound nbt = new NBTTagCompound();
-		nbt.setDouble("life", 1.0);
+		nbt.setDouble("life", Utils.rand(0.75, 1.50));
 		return nbt;
 	}
 	
@@ -114,11 +114,21 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
 		//list.add("Socket : " + socket);
-		list.add("Techn  : " + type);
+		list.add("Tech  : " + type);
 		list.add("Light   : " + (int)(nominalLight*15) + " blocks");
 		list.add("Power : " + (int)nominalP + " W");
 		//list.add(Utils.plotOhm("Resistance", this.getR()));
-		list.add(Utils.plotTime("Life    : ",getLifeInTag(itemStack)*nominalLife));
+		list.add(Utils.plotTime("Nominal life : ",nominalLife));
+		if(getLifeInTag(itemStack) > 0.5)
+			list.add("Seem in good condition");
+		else if(getLifeInTag(itemStack) > 0.2)
+			list.add("seems a bit worn");
+		else if(getLifeInTag(itemStack) > 0.1)
+			list.add("Seem in end of life");
+		else 
+			list.add("Seem that can break in the hours");
+
+		//list.add(Utils.plotTime("Life    : ",getLifeInTag(itemStack)*nominalLife));
 		
 	}
 }

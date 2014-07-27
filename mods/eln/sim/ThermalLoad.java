@@ -86,4 +86,14 @@ public class ThermalLoad{
 		
 		return Tc;
 	}
+	
+	
+	boolean isSlow;
+	public boolean isSlow(){
+		return isSlow;
+	}
+	
+	public void setAsSlow(){
+		isSlow = true;
+	}
 }

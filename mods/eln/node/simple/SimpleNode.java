@@ -76,7 +76,8 @@ public abstract class SimpleNode extends NodeBase {
 	public ArrayList<Component> electricalComponentList = new ArrayList<Component>(4);
 	public ArrayList<State> electricalLoadList = new ArrayList<State>(4);
 
-	public ArrayList<IProcess> thermalProcessList = new ArrayList<IProcess>(4);
+	public ArrayList<IProcess> thermalFastProcessList = new ArrayList<IProcess>(4);
+	public ArrayList<IProcess> thermalSlowProcessList = new ArrayList<IProcess>(4);
 	public ArrayList<ThermalConnection> thermalConnectionList = new ArrayList<ThermalConnection>(4);
 	public ArrayList<NbtThermalLoad> thermalLoadList = new ArrayList<NbtThermalLoad>(4);
 
@@ -95,7 +96,8 @@ public abstract class SimpleNode extends NodeBase {
 		Eln.simulator.addAllThermalConnection(thermalConnectionList);
 		for (NbtThermalLoad load : thermalLoadList)
 			Eln.simulator.addThermalLoad(load);
-		Eln.simulator.addAllThermalProcess(thermalProcessList);
+		Eln.simulator.addAllThermalFastProcess(thermalFastProcessList);
+		Eln.simulator.addAllThermalSlowProcess(thermalSlowProcessList);
 	}
 
 	@Override
@@ -113,7 +115,8 @@ public abstract class SimpleNode extends NodeBase {
 		Eln.simulator.removeAllThermalConnection(thermalConnectionList);
 		for (NbtThermalLoad load : thermalLoadList)
 			Eln.simulator.removeThermalLoad(load);
-		Eln.simulator.removeAllThermalProcess(thermalProcessList);
+		Eln.simulator.removeAllThermalFastProcess(thermalFastProcessList);
+		Eln.simulator.removeAllThermalSlowProcess(thermalSlowProcessList);
 	}
 
 	public void readFromNBT(NBTTagCompound nbt)
@@ -142,7 +145,10 @@ public abstract class SimpleNode extends NodeBase {
 		for (IProcess process : electricalProcessList) {
 			if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
 		}
-		for (IProcess process : thermalProcessList) {
+		for (IProcess process : thermalFastProcessList) {
+			if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
+		}
+		for (IProcess process : thermalSlowProcessList) {
 			if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
 		}
 	}
@@ -173,7 +179,10 @@ public abstract class SimpleNode extends NodeBase {
 		for (IProcess process : electricalProcessList) {
 			if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
 		}
-		for (IProcess process : thermalProcessList) {
+		for (IProcess process : thermalFastProcessList) {
+			if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
+		}
+		for (IProcess process : thermalSlowProcessList) {
 			if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
 		}
 

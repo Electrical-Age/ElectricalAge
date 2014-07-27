@@ -52,9 +52,9 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 		furnaceProcess.setGainMin(0.1);
 		
 		thermalLoadList.add(thermalLoad);
-		thermalProcessList.add(furnaceProcess);
+		thermalFastProcessList.add(furnaceProcess);
 		slowProcessList.add(inventoryProcess);
-		thermalProcessList.add(regulator);
+		thermalFastProcessList.add(regulator);
 		electricalLoadList.add(electricalCmdLoad);
 		slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 2.0, 1.0));
 		

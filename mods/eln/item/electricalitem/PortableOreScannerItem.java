@@ -483,7 +483,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		int worldBlocksDim,worldBlocksDim2;
 		
 		public static float[] blockKeyFactor;
-		float[] getBlockKeyFactor(){
+		public static float[] getBlockKeyFactor(){
 			if(blockKeyFactor == null){
 				blockKeyFactor = new float[1024*64];
 				for(int blockId = 0;blockId < 4096;blockId++){
@@ -675,10 +675,10 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		}
 		
 		public void draw(){
-			draw(1f);
+			draw(1f,1f,1f);
 		}
 		
-		public void draw(float light){
+		public void draw(float redFactor,float greenFactor,float blueFactor){
 			long start = System.nanoTime();
 			UtilsClient.disableLight();
 			UtilsClient.disableTexture();
@@ -692,7 +692,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 					//s = screen[screenY][screenX]; GL11.glColor3f(s >= 0 ? s : 0, 0, s < 0.1 ? -s + 0.1f : 0);		
 					//Color c = Color.getHSBColor(Math.max(0,Math.min(1,s)),1,1);
 				//	GL11.glColor3ub((byte)c.getRed(),(byte)c.getGreen(),(byte)c.getBlue());		
-					if(screenX != resWidth) GL11.glColor3f(screenRed[screenY][screenX]*light + noiseRand(), screenGreen[screenY][screenX]*light + noiseRand(), screenBlue[screenY][screenX]*light + noiseRand());
+					if(screenX != resWidth) GL11.glColor3f(screenRed[screenY][screenX]*redFactor + noiseRand(), screenGreen[screenY][screenX]*greenFactor + noiseRand(), screenBlue[screenY][screenX]*blueFactor + noiseRand());
 					GL11.glVertex3f(screenX, screenY, 0);
 					GL11.glVertex3f(screenX, screenY+1, 0);
 					

@@ -47,6 +47,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 	public ArrayList<NbtElectricalLoad> electricalLoadList = new ArrayList<NbtElectricalLoad>(4);
 
 	public ArrayList<IProcess> thermalProcessList = new ArrayList<IProcess>(4);
+	public ArrayList<IProcess> thermalSlowProcessList = new ArrayList<IProcess>(4);
 	public ArrayList<ThermalConnection> thermalConnectionList = new ArrayList<ThermalConnection>(4);
 	public ArrayList<NbtThermalLoad> thermalLoadList = new ArrayList<NbtThermalLoad>(4);
 
@@ -116,7 +117,9 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 		for(IProcess process : electricalProcessList)
 			Eln.simulator.addElectricalProcess(process);
 		for(IProcess process : thermalProcessList)
-			Eln.simulator.addThermalProcess(process);
+			Eln.simulator.addThermalFastProcess(process);
+		for(IProcess process : thermalSlowProcessList)
+			Eln.simulator.addThermalSlowProcess(process);
 
 	}
 
@@ -293,6 +296,11 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 			if(process instanceof INBTTReady)
 				((INBTTReady) process).readFromNBT(nbt, "");
 		}
+		for(IProcess process : thermalSlowProcessList)
+		{
+			if(process instanceof INBTTReady)
+				((INBTTReady) process).readFromNBT(nbt, "");
+		}
 
 	}
 
@@ -339,6 +347,11 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 		{
 			if(process instanceof INBTTReady)
 				((INBTTReady) process).writeToNBT(nbt, "");
+		}		
+		for(IProcess process : thermalSlowProcessList)
+		{
+			if(process instanceof INBTTReady)
+				((INBTTReady) process).writeToNBT(nbt, "");
 		}
 
 	}
@@ -368,7 +381,9 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 		for(IProcess process : electricalProcessList)
 			Eln.simulator.removeElectricalProcess(process);
 		for(IProcess process : thermalProcessList)
-			Eln.simulator.removeThermalProcess(process);
+			Eln.simulator.removeThermalFastProcess(process);
+		for(IProcess process : thermalSlowProcessList)
+			Eln.simulator.removeThermalSlowProcess(process);
 
 	}
 

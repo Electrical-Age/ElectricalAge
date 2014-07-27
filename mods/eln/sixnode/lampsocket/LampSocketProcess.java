@@ -87,6 +87,7 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 	SoundLooper looper;
 	private LampSupplyElement oldLampSupply;
 
+	double updateLifeTimeout = 0,updateLifeTimeoutMax = 5;
 	@Override
 	public void process(double time) {
 		looper.process(time);
@@ -294,26 +295,30 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 			if (invulerabilityTimeLeft != 0 && overFactor > 1.5)
 				overFactor = 1.5;
 
-			double lifeLost = overFactor * deltaT / lampDescriptor.nominalLife;
-
-			lifeLost = Utils.voltageMargeFactorSub(lifeLost);
-
-			if (overFactor >= 1.21) {
-				lifeLost *= overFactor;
-			}
-			// lifeLost *= overFactor;
-			// lifeLost *= overFactor;
-
-			if (SaveConfig.instance.electricalLampAging) {
-				NBTTagCompound lampNbt = lampStack.getTagCompound();
-
-				double life = lampNbt.getDouble("life") - lifeLost;
-				lampNbt.setDouble("life", life);
-
-				if (life < 0)
-				{
-					lamp.inventory.setInventorySlotContents(0, null);
-					light = 0;
+			
+			updateLifeTimeout += deltaT;
+			if(updateLifeTimeout > updateLifeTimeoutMax) {
+				//Utils.println("aging");
+				updateLifeTimeout -= updateLifeTimeoutMax;
+				double lifeLost = overFactor * updateLifeTimeoutMax / lampDescriptor.nominalLife;
+				lifeLost = Utils.voltageMargeFactorSub(lifeLost);
+				if (overFactor >= 1.21) {
+					lifeLost *= overFactor;
+				}
+				// lifeLost *= overFactor;
+				// lifeLost *= overFactor;
+	
+				if (SaveConfig.instance.electricalLampAging) {
+					NBTTagCompound lampNbt = lampStack.getTagCompound();
+	
+					double life = lampNbt.getDouble("life") - lifeLost;
+					lampNbt.setDouble("life", life);
+	
+					if (life < 0)
+					{
+						lamp.inventory.setInventorySlotContents(0, null);
+						light = 0;
+					}
 				}
 			}
 

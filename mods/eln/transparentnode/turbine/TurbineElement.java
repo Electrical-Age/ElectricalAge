@@ -65,7 +65,7 @@ public class TurbineElement extends TransparentNodeElement{
     	slowProcessList.add(turbineSlowProcess);
     	
     	electricalComponentList.add(electricalPowerSourceProcess);
-    	thermalProcessList.add(turbineThermaltProcess);
+    	thermalFastProcessList.add(turbineThermaltProcess);
     
     	
     	WorldExplosion exp = new WorldExplosion(this).machineExplosion();

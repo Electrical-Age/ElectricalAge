@@ -6,6 +6,7 @@ import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.server.SaveConfig;
 import mods.eln.sim.IProcess;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -61,6 +62,9 @@ public class HeatFurnaceInventoryProcess implements IProcess , INBTTReady{
 					//	furnace.furnaceProcess.combustibleEnergy += itemEnergy;
 						combustibleBuffer += itemEnergy;
 						furnace.inventory.decrStackSize(HeatFurnaceContainer.combustibleId, 1);
+						if(combustibleStack.getItem() == Items.lava_bucket){
+							furnace.inventory.setInventorySlotContents(HeatFurnaceContainer.combustibleId, new ItemStack(Items.bucket));
+						}
 					}
 				}
 			}

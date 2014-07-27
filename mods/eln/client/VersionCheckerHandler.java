@@ -3,6 +3,7 @@ package mods.eln.client;
 import java.io.IOException;
 import java.net.URL;
 
+import mods.eln.Eln;
 import mods.eln.misc.Color;
 import mods.eln.misc.I18N;
 import mods.eln.misc.Version;
@@ -121,9 +122,11 @@ public class VersionCheckerHandler {
 			return;
 
 		// Print the current version when the client start a map
-		m.thePlayer.addChatMessage(new ChatComponentText(Version.printColor()));
-		m.thePlayer.addChatMessage(new ChatComponentText(versionMsg));
-
+		if(Eln.instance.versionCheckEnable){
+			m.thePlayer.addChatMessage(new ChatComponentText(Version.printColor()));
+			m.thePlayer.addChatMessage(new ChatComponentText(versionMsg));
+		}
+		
 		FMLCommonHandler.instance().bus().unregister(this);
 		ready = false;
 	}

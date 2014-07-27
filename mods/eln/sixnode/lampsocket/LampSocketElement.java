@@ -43,7 +43,9 @@ public class LampSocketElement extends SixNodeElement {
 		lampProcess.alphaZ = this.socketDescriptor.alphaZBoot;
 		//electricalLoadList.add(positiveLoad);
 		//electricalComponentList.add(lampResistor);
-		thermalLoadList.add(thermalLoad);
+		//thermalLoad.setAsSlow();
+		
+		//thermalLoadList.add(thermalLoad);
 		slowProcessList.add(lampProcess);
 		slowProcessList.add(monsterPopFreeProcess);
 	}
@@ -51,7 +53,7 @@ public class LampSocketElement extends SixNodeElement {
 	public MonsterPopFreeProcess monsterPopFreeProcess = new MonsterPopFreeProcess(sixNode.coordonate, 15);
 	public NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
 	//public NodeElectricalLoad negativeLoad = new NodeElectricalLoad("negativeLoad");
-	public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
+	//public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
 
 	public LampSocketProcess lampProcess = new LampSocketProcess(this);
 	public Resistor lampResistor = new Resistor(positiveLoad, null);
@@ -192,9 +194,7 @@ public class LampSocketElement extends SixNodeElement {
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		if(inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null) return null;
-		if(poweredByLampSupply) return null;
-		return thermalLoad;
+		return null;
 	}
 
 	@Override
@@ -218,7 +218,7 @@ public class LampSocketElement extends SixNodeElement {
 	@Override
 	public String thermoMeterString() {
 		
-		return Utils.plotCelsius("T:", thermalLoad.Tc);
+		return null;
 	}
 
 	@Override
@@ -246,9 +246,7 @@ public class LampSocketElement extends SixNodeElement {
 
 		computeElectricalLoad();
 
-		thermalLoad.Rs = 100000f;
-		thermalLoad.C = 0.5f;
-		thermalLoad.Rp = 5.0f;
+
 
 	}
 

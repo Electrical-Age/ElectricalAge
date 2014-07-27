@@ -31,7 +31,8 @@ public class DiodeElement extends SixNodeElement {
 		super(sixNode, side, descriptor);
 
 		this.descriptor = (DiodeDescriptor) descriptor;
-
+		thermalLoad.setAsSlow();
+		
 		front = LRDU.Left;
 		electricalLoadList.add(anodeLoad);
 		electricalLoadList.add(catodeLoad);
@@ -39,7 +40,7 @@ public class DiodeElement extends SixNodeElement {
 		electricalComponentList.add(resistorSwitch);
 		electricalProcessList.add(diodeProcess);
 		slowProcessList.add(thermalWatchdog.set(thermalLoad).set(this.descriptor.thermal).set(new WorldExplosion(this).cableExplosion()));
-		thermalProcessList.add(heater);
+		thermalSlowProcessList.add(heater);
 	}
 
 	public DiodeDescriptor descriptor;

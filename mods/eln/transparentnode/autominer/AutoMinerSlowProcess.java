@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import mods.eln.Eln;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
+import mods.eln.item.electricalitem.PortableOreScannerItem;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
@@ -188,7 +189,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 				miner.pushLog("PIPE STACK !");
 				break;
 			case none:
-				miner.pushLog("WAITING INST");
+				miner.pushLog("WAITING OPCODE");
 				break;
 			case ore:
 				miner.pushLog("DRILL " + drillCount);
@@ -249,13 +250,13 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 				&& (block) != Blocks.flowing_lava && (block) != Blocks.lava
 				&& (block) != Blocks.obsidian && (block) != Blocks.bedrock;
 	}
-
+	public static final int scannerRadiusStatic = 10;
 	void setupJob() {
 		ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
 		// OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.OreScannerSlotId));
 		MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
 
-		int scannerRadius = 10;
+		int scannerRadius = scannerRadiusStatic;
 		double scannerEnergy = 0;
 
 		World world = miner.node.coordonate.world();
@@ -292,7 +293,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 			if (jobCoord.y < miner.node.coordonate.y - 2) {
 				int depth = (miner.node.coordonate.y - jobCoord.y);
 				double miningRay = depth / 10 + 0.1;
-				miningRay = Math.min(miningRay, 3);
+				miningRay = Math.min(miningRay, 2);
 				if (depth < scannerRadius) scannerRadius = depth + 1;
 				miningRay = Math.min(miningRay, scannerRadius - 2);
 				for (jobCoord.z = miner.node.coordonate.z - scannerRadius; jobCoord.z <= miner.node.coordonate.z + scannerRadius; jobCoord.z++) {
@@ -396,7 +397,8 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 		if (block instanceof BlockOre) return true;
 		if (block instanceof OreBlock) return true;
 		if (block instanceof BlockRedstoneOre) return true;
-
+		if(PortableOreScannerItem.RenderStorage.getBlockKeyFactor()[Block.getIdFromBlock(block) + (coordonate.world().getBlockMetadata(coordonate.x, coordonate.y, coordonate.z)<<12)] != 0) 
+			return true;
 		return false;
 	}
 

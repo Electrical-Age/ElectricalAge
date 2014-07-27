@@ -9,6 +9,7 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
+import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -32,24 +33,24 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 	int ledsACount = 11;
 	int ledsPCount = 8;
 	int deltaX,deltaY,deltaZ;
+	ElectricalCableDescriptor cable;
+	
 	public AutoMinerDescriptor(
 			String name,
 			Obj3D obj,
 			Coordonate[] powerCoord,Coordonate lightCoord,Coordonate miningCoord,
 			int deltaX,int deltaY,int deltaZ,
-			double nominalVoltage, double maximalVoltage,
-			double nominalPower, double nominalDropFactor,
+			ElectricalCableDescriptor cable,
 			double pipeOperationTime, double pipeOperationEnergy
 			) {
 		super(name, AutoMinerElement.class, AutoMinerRender.class);
-		this.nominalVoltage = nominalVoltage;
-		this.maximalVoltage = maximalVoltage;
+		this.nominalVoltage = cable.electricalNominalVoltage;
 		this.pipeOperationTime = pipeOperationTime;
 		this.pipeOperationEnergy = pipeOperationEnergy;
 		pipeOperationPower = pipeOperationEnergy / pipeOperationTime;
 		pipeOperationRp = nominalVoltage * nominalVoltage / pipeOperationPower;
-		
-		Rs = nominalVoltage * nominalVoltage / nominalPower * nominalDropFactor;
+		this.cable = cable;
+
 		
 		this.powerCoord = powerCoord;
 		this.lightCoord = lightCoord;
@@ -94,16 +95,13 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 		
 	}
 
-	double nominalVoltage, maximalVoltage;
+	double nominalVoltage;
 	double pipeOperationTime, pipeOperationEnergy, pipeOperationPower;
 	
 	double pipeOperationRp;
-	double Rs;
-	
-	
-	
+
 	public void applyTo(ElectricalLoad load) {
-		load.setRs(Rs);
+		cable.applyTo(load);
 	}
 	
 	@Override
@@ -123,7 +121,10 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
+		list.add("Excavate on a small radius");
+		list.add("Extract ore on a bigger radius");
+		list.add("10 blocks radius after 10 blocks depth");
+		list.add("Nominal U : " + (int)nominalVoltage);
 	}
 	
 	
@@ -210,4 +211,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 		
 		return deltaZ;
 	}
+	
+	
+
 }
