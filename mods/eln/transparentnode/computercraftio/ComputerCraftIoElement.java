@@ -14,6 +14,7 @@ import mods.eln.sim.nbt.NbtElectricalGateInputOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import net.minecraft.entity.player.EntityPlayer;
 import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
@@ -90,7 +91,7 @@ public class ComputerCraftIoElement extends TransparentNodeElement implements IP
 
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context,
-			int method, Object[] arguments) throws Exception {
+			int method, Object[] arguments) throws LuaException, InterruptedException {
 		int id = -1;
 		if(arguments.length < 1) return null;
 		if(arguments[0] instanceof String == false) return null;
