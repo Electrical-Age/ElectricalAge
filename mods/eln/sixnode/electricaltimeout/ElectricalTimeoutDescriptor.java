@@ -45,7 +45,10 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 	Obj3D obj;
 	Obj3DPart main,rot,led;
 	float rotStart,rotEnd;
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	void draw(float left) {
 		if(main != null) main.draw();
 		if(rot != null) {

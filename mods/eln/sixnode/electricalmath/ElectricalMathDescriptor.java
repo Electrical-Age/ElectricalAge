@@ -47,7 +47,10 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
 	}
 	
 	float alphaOff;
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	void draw(float open,boolean ledOn[]) {
 		if(main != null) main.draw();
 		if(door != null) door.draw((1f - open) * alphaOff, 0f, 1f, 0f);

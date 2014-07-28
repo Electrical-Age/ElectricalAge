@@ -49,7 +49,10 @@ public class LampSupplyDescriptor extends SixNodeDescriptor{
 	}
 	public int range;
 	
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public void setParent(Item item, int damage) {
 		

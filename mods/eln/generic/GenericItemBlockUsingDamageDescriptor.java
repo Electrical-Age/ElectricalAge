@@ -32,9 +32,14 @@ public class GenericItemBlockUsingDamageDescriptor {
 	}
     public void updateIcons(IIconRegister iconRegister)
     {
+    	if(use2DIcon())
         this.iconIndex = iconRegister.registerIcon(iconName);
     }
 	
+	public boolean use2DIcon(){
+		return true;
+	}
+    
 	public IIcon getIcon()
 	{
 		return iconIndex;

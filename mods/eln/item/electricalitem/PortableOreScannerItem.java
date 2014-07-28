@@ -87,6 +87,11 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	static final short stopTime = (short) (1/0.05);
 	static final double minimalEnergyTimeToBoot = 1;
 	
+	
+	public boolean use2DIcon(){
+		return false;
+	}
+	
 	@Override
 	public void onUpdate(ItemStack stack, World world, Entity entity, int par4,
 			boolean par5) {
@@ -263,11 +268,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		return true;
 	}
 	
-	@Override
-	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		
-		return true;
-	}
+
 	/*
 	@Override
 	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {

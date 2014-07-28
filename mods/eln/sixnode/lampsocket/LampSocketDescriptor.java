@@ -56,7 +56,10 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 	public int range;
 	public String modelName;
 	float alphaZMin,alphaZMax,alphaZBoot;
-
+	@Override
+	public boolean use2DIcon() {
+		return useIconEnable;
+	}
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		

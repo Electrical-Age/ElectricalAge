@@ -103,7 +103,10 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 	double nominalVoltage, nominalPower, nominalDropFactor;
 	double maximalVoltage, maximalPower;
 	public float[] pinDistance;
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	public void applyTo(ElectricalLoad load) {
 		load.setRs(electricalRs);
 	}

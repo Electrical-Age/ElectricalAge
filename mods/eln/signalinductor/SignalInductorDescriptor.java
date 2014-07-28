@@ -42,6 +42,10 @@ public class SignalInductorDescriptor extends SixNodeDescriptor{
 		inductor.setL(henri);
 	}
 	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
+	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		// TODO Auto-generated method stub

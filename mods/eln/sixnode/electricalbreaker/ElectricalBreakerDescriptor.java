@@ -40,7 +40,10 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
 		super.setParent(item, damage);
 		Data.addWiring(newItemStack());
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		return true;

@@ -32,7 +32,10 @@ public class WirelessSignalSourceDescriptor extends SixNodeDescriptor{
 		render.draw(factor, distance, e);
 	}
 	
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {

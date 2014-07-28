@@ -101,7 +101,10 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
 		draw(0f);
 	}
 
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {

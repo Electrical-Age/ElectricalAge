@@ -54,10 +54,13 @@ public class GenericItemUsingDamageDescriptor {
 		ItemStack stack = newItemStack(1);
 		list.add(stack);
 	}
-
+	public boolean use2DIcon(){
+		return true;
+	}
 	public void updateIcons(IIconRegister iconRegister)
 	{
-		this.iconIndex = iconRegister.registerIcon(IconName);
+		if(use2DIcon())
+			this.iconIndex = iconRegister.registerIcon(IconName);
 	}
 
 	public IIcon getIcon()
@@ -128,13 +131,13 @@ public class GenericItemUsingDamageDescriptor {
 
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		
-		return false;
+		return ! use2DIcon();
 	}
 
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
 		
-		return false;
+		return ! use2DIcon();
 	}
 
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {

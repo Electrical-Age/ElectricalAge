@@ -33,7 +33,10 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
 			pinDistance = Utils.getSixNodePinDistance(detector);
 		}
 	}
-
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	Obj3D obj;
 
 	void draw(boolean state,EntitySensorFilterDescriptor filter) {

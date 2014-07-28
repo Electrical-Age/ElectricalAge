@@ -41,7 +41,10 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {

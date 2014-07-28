@@ -53,7 +53,10 @@ public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor {
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		 Eln.obj.draw("ElectricFurnace", "furnace");	

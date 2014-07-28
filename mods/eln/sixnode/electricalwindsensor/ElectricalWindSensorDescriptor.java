@@ -55,7 +55,10 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
 			UtilsClient.enableCulling();
 		}
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public void setParent(Item item, int damage) {
 		

@@ -47,7 +47,10 @@ public class WirelessSignalRxDescriptor extends SixNodeDescriptor{
 		
 		return true;
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		

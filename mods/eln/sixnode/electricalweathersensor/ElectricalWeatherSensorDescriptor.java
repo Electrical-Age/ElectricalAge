@@ -54,7 +54,10 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
 		list.add(Eln.SVU/2 + "V -> rain ");
 		list.add(Eln.SVU + "V -> thunder ");
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		return true;

@@ -48,7 +48,10 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 		double uTemp = nominalDielVoltage/Eln.LVU;
 		return serie.getValue(cableCount-1)/uTemp/uTemp;
 	}
-
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	public double getCValue(IInventory inventory) {
 		ItemStack core = inventory.getStackInSlot(PowerCapacitorSixContainer.redId);
 		ItemStack diel = inventory.getStackInSlot(PowerCapacitorSixContainer.dielectricId);

@@ -66,7 +66,10 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
 	public boolean mustHaveFloor() {
 		return false;
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	int rangeMax;
 	double electricalPowerRatioEffStart, electricalPowerRatioEffEnd;
 	double electricalPowerRatioLostOffset, electricalPowerRatioLostPerBlock;

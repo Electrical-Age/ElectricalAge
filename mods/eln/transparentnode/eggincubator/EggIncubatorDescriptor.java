@@ -56,7 +56,10 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 	
 	double nominalVoltage,nominalPower;
 	double Rp;
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {

@@ -55,7 +55,10 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor {
 	}
 	
 	Obj3D obj;
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	enum ObjType{Rot, LedOnOff};
 	ObjType objType;
 

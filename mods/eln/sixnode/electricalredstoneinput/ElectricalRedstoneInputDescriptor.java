@@ -53,7 +53,10 @@ public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor {
 		GL11.glColor4f(light, light, light, 1f);
 		UtilsClient.drawLight(led);
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public void setParent(Item item, int damage) {
 		super.setParent(item, damage);

@@ -51,7 +51,10 @@ public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor {
 	public boolean mustHaveWallFrontInverse() {
 		return true;
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public boolean mustHaveFloor() {
 		return false;

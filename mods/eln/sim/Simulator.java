@@ -204,7 +204,6 @@ public class Simulator /* ,IPacketHandler */{
 	{
 		if (load != null) {
 			mna.addState(load);
-			// electricalLoadList.add(load);
 		}
 
 	}
@@ -213,7 +212,6 @@ public class Simulator /* ,IPacketHandler */{
 	{
 		if (load != null) {
 			mna.removeState(load);
-			// electricalLoadList.remove(load);
 		}
 	}
 

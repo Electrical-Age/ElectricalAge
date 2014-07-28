@@ -52,17 +52,18 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 		
 		if(type == ItemRenderType.INVENTORY)
 			return false;
-		return true;
+		return ! use2DIcon();
 	}
 
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
 		
-		return false;
+		return ! use2DIcon();
 	}
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		if(getIcon() != null)
 		UtilsClient.drawIcon(type,getIcon().getIconName().replace("eln:", "textures/blocks/")+".png");
 	}
 	

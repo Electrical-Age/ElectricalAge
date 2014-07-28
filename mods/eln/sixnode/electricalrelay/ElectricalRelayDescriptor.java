@@ -61,7 +61,10 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
 	void applyTo(ElectricalLoad load) {
 		cable.applyTo(load);
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	void applyTo(Resistor load) {
 		cable.applyTo(load);
 	}

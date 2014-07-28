@@ -106,7 +106,7 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 		return priority;
 	}
 
-
+	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {

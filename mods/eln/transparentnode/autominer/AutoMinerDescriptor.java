@@ -110,7 +110,10 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 		Data.addMachine(newItemStack());
 	}
 	
-
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	
 	@Override
 	public boolean mustHaveFloor() {

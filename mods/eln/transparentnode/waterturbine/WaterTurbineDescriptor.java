@@ -83,7 +83,10 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 		if(wheel != null) wheel.draw(alpha,1f,0f,0f);
 	}
 
-
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	
 	@Override
 	public Direction getFrontFromPlace(Direction side,

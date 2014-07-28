@@ -69,7 +69,10 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 		draw(defaultFero, 1, 4);
 	}
 	
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	void draw(Obj3DPart fero,int priCableNbr,int secCableNbr)
 	{
 		if(main != null) main.draw();

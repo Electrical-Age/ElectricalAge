@@ -20,6 +20,7 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.ITileEntitySpawnClient;
 import mods.eln.sim.PhysicalConstant;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -756,8 +757,7 @@ public class Utils {
 	}
 
 	public static boolean isGameInPause() {
-		// TODOUPDATE
-		return false;
+		return Minecraft.getMinecraft().isGamePaused();
 	}
 
 	public static int getLight(World w, EnumSkyBlock e, int x, int y, int z) {

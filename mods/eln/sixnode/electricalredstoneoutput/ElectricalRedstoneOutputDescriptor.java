@@ -57,7 +57,10 @@ public class ElectricalRedstoneOutputDescriptor extends SixNodeDescriptor {
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;

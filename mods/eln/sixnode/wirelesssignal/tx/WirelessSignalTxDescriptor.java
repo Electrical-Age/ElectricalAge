@@ -28,7 +28,10 @@ public class WirelessSignalTxDescriptor extends SixNodeDescriptor{
 	}
 	int range;
 	
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	public void draw()
 	{
 		if(main != null) main.draw();

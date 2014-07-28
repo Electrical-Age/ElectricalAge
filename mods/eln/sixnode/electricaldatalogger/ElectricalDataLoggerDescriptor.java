@@ -27,7 +27,10 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import com.google.common.base.Function;
 
 public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
-
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	public ElectricalDataLoggerDescriptor(String name, boolean onFloor, String objName, float cr, float cg, float cb) {
 		super(name, ElectricalDataLoggerElement.class, ElectricalDataLoggerRender.class);
 		this.cb = cb;

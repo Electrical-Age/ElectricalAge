@@ -40,7 +40,10 @@ public class TutorialSignDescriptor extends SixNodeDescriptor {
 			GL11.glColor4f(0, 1 * factor, 0 ,alpha);
 		}
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	void draw(float factor) {
 		//GL11.glColor3f(0.8f, 0.8f, 0.8f);
 		if(main != null) main.draw();

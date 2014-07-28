@@ -67,7 +67,10 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 			break;
 		}
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	public BatteryDescriptor(
 				String name, String modelName,
 				ElectricalCableDescriptor cable,

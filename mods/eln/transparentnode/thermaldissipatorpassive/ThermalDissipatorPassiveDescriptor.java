@@ -74,7 +74,10 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
 		
 		return true;
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {

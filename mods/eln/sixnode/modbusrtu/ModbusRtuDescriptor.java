@@ -68,7 +68,10 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 
 	}
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {

@@ -82,7 +82,10 @@ public class PowerInductorDescriptor extends TransparentNodeDescriptor {
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		draw();
 	}
-
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {

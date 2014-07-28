@@ -70,7 +70,10 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor{
 		
 	}
 	
-	
+	@Override
+	public boolean use2DIcon() {
+		return false;
+	}
 	@Override
 	public void setParent(Item item, int damage) {
 		
