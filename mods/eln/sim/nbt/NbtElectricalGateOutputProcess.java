@@ -32,7 +32,8 @@ public class NbtElectricalGateOutputProcess extends Capacitor implements INBTTRe
 	
 	@Override
 	public void simProcessI(SubSystem s) {
-		aPin.state = U;
+		if(highImpedance == false)
+			aPin.state = U;
 		super.simProcessI(s);
 	}
 	
@@ -43,14 +44,14 @@ public class NbtElectricalGateOutputProcess extends Capacitor implements INBTTRe
 	boolean highImpedance = false;
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		setHighImpedance(nbt.getBoolean(name + "highImpedance"));
-		U = nbt.getDouble(name + "U");
+		setHighImpedance(nbt.getBoolean(str + name + "highImpedance"));
+		U = nbt.getDouble(str + name + "U");
 	}
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		nbt.setBoolean(name + "highImpedance", highImpedance);
-		nbt.setDouble(name + "U",U);
+		nbt.setBoolean(str + name + "highImpedance", highImpedance);
+		nbt.setDouble(str + name + "U",U);
 
 	}
 	

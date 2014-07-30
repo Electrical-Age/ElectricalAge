@@ -59,6 +59,7 @@ public abstract class NodeBase {
 	public static final int maskThermalWire = maskWire + maskThermal;
 
 	public static final int maskSignal = (1 << 9);
+	public static final int maskRs485 = (1 << 10);
 
 	public static final int maskColorData = 0xF << 16;
 	public static final int maskColorShift = 16;

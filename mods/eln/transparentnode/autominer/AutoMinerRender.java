@@ -11,6 +11,9 @@ import mods.eln.client.FrameTime;
 import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.PhysicalInterpolator;
+import mods.eln.misc.PhysicalInterpolatorNoRebound;
+import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -59,12 +62,23 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
 	RenderStorage render = new RenderStorage(10, 130, 24, 24);
 	
+	PhysicalInterpolatorNoRebound pipeLengthInterpol = new PhysicalInterpolatorNoRebound(0.4f, 2f, 0.8f);
+	RcInterpolator rotSpeed = new RcInterpolator(1);
+	float pipeAlpha = 0;
 	@Override
 	public void draw() {
 
-		if (pipeLength != 0) {
+
 			GL11.glPushMatrix();
-			for (int idx = pipeLength; idx != 0; idx--) {
+			GL11.glRotatef(pipeAlpha,0,1,0);
+			GL11.glPushMatrix();
+				GL11.glScalef(0.99f, 0.99f, 0.99f);
+				descriptor.pipe.draw();
+			GL11.glPopMatrix();
+
+			int len = (int) pipeLengthInterpol.get();
+			GL11.glTranslatef(0, -(pipeLengthInterpol.get()-len), 0);
+			for (int idx = len+2; idx != 0; idx--) {
 				if (idx != 1) {
 					descriptor.pipe.draw();
 				}
@@ -75,7 +89,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 			}
 			GL11.glPopMatrix();
 
-		}
+		
 
 		for (int idx = 0; idx < this.descriptor.buttonsCount; idx++) {
 			buttonsState[idx] = idx == job.ordinal() && powerOk ? 1 : 0;
@@ -132,6 +146,8 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 	float recalcTimeout = 0;
 	
 	public void refresh(float deltaT) {
+		pipeAlpha += rotSpeed.get()*deltaT;
+		if(pipeAlpha > 360) pipeAlpha -= 360;
 		for (int idx = 0; idx < this.descriptor.ledsACount; idx++) {
 			if (powerOk) {
 				if (Math.random() < 0.2 * deltaT)
@@ -166,6 +182,11 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 				render.generate(this.tileEntity.getWorldObj(), tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5-(Math.max(0, pipeLength-5)), tileEntity.zCoord + 0.5, -(float) (Math.PI * 1 / 2) + camAlpha, -(float) (Math.PI / 2));
 			}
 		}
+		
+		
+		pipeLengthInterpol.step(deltaT);
+		if(pipeLengthInterpol.get() < 0) pipeLengthInterpol.setPos(0);
+		rotSpeed.step(deltaT);
 	}
 
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this);
@@ -177,7 +198,8 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
 	short pipeLength = 0;
 	AutoMinerSlowProcess.jobType job;
-
+	boolean boot = true;
+	
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		super.networkUnserialize(stream);
@@ -186,7 +208,15 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 				recalcTimeout = 0;
 			}
 			if(job != (job = AutoMinerSlowProcess.jobType.values()[stream.readByte()])){
-			//	pushLog(job.toString());
+				switch (job) {
+				case ore:
+					rotSpeed.setTarget(360);
+					break;
+				default:
+					rotSpeed.setTarget(0);
+					break;
+
+				}
 			}
 			powerOk = stream.readBoolean();
 
@@ -197,10 +227,21 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 				pushLog("BOOT");
 				pushLog("WAITING OPCODE");
 			}
+			
+			if(boot){
+				boot = false;
+				pipeLengthInterpol.setPos(pipeLength);
+			}
+			pipeLengthInterpol.setTarget(pipeLength);
+			
+			
+			
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+
 
 	@Override
 	public void serverPacketUnserialize(DataInputStream stream) {

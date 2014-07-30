@@ -1,0 +1,114 @@
+package mods.eln.simplenode.computerprobe;
+
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
+import li.cil.oc.api.network.SimpleComponent;
+import mods.eln.Other;
+import mods.eln.node.simple.SimpleNode;
+import mods.eln.node.simple.SimpleNodeEntity;
+import mods.eln.simplenode.computerprobe.ComputerProbeNode.WirelessTx;
+import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
+import cpw.mods.fml.common.Optional;
+
+@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = Other.modIdOc)
+public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleComponent
+{
+    @Override
+    public String getComponentName() {
+        return "ElnProbe";
+    }
+
+  /*  @Callback
+    @Optional.Method(modid = Other.modIdOc)
+    public Object[] greet(Context context, Arguments args) {
+        return new Object[]{String.format("Hello, %s!", args.checkString(0))};
+    }*/
+
+    @Callback
+    @Optional.Method(modid = Other.modIdOc)
+    public Object[] signalSetDir(Context context, Arguments args) {
+    	ComputerProbeNode n = getNode();
+    	if(n == null) return null;
+    	return n.setDir(context, args);
+    }
+
+    @Callback
+    @Optional.Method(modid = Other.modIdOc)
+    public Object[] signalGetDir(Context context, Arguments args) {
+    	ComputerProbeNode n = getNode();
+    	if(n == null) return null;
+    	return n.getDir(context, args);
+    }
+
+    @Callback
+    @Optional.Method(modid = Other.modIdOc)
+    public Object[] signalSetOut(Context context, Arguments args) {
+    	ComputerProbeNode n = getNode();
+    	if(n == null) return null;
+    	return n.setOut(context, args);
+    }
+
+    @Callback
+    @Optional.Method(modid = Other.modIdOc)
+    public Object[] signalGetOut(Context context, Arguments args) {
+    	ComputerProbeNode n = getNode();
+    	if(n == null) return null;
+    	return n.getOut(context, args);
+    }
+
+    @Callback
+    @Optional.Method(modid = Other.modIdOc)
+    public Object[] signalGetIn(Context context, Arguments args) {
+    	ComputerProbeNode n = getNode();
+    	if(n == null) return null;
+    	return n.getIn(context, args);
+    }
+    
+    @Callback
+    @Optional.Method(modid = Other.modIdOc)
+    public Object[] wirelessSet(Context context, Arguments args) {
+    	ComputerProbeNode n = getNode();
+    	if(n == null) return null;
+    	return n.wirelessTx(context, args);
+    }
+    
+    @Callback
+    @Optional.Method(modid = Other.modIdOc)
+    public Object[] wirelessRemove(Context context, Arguments args) {
+    	ComputerProbeNode n = getNode();
+    	if(n == null) return null;
+    	return n.wirelessTxRemove(context, args);
+    }
+    
+    @Callback
+    @Optional.Method(modid = Other.modIdOc)
+    public Object[] wirelessRemoveAll(Context context, Arguments args) {
+    	ComputerProbeNode n = getNode();
+    	if(n == null) return null;
+    	return n.wirelessTxRemoveAll(context, args);
+    }
+    
+    @Callback
+    @Optional.Method(modid = Other.modIdOc)
+    public Object[] wirelessGet(Context context, Arguments args) {
+    	ComputerProbeNode n = getNode();
+    	if(n == null) return null;
+    	return n.wirelessRx(context, args);
+    }
+    
+    
+   
+    public ComputerProbeNode getNode() {
+    	// TODO Auto-generated method stub
+    	return (ComputerProbeNode) super.getNode();
+    }
+    
+	//return new String[]{"writeDir", "readDir", "writeOut", "readOut", "readIn"};
+    
+	@Override
+	public String getNodeUuid() {
+		return ComputerProbeNode.getNodeUuidStatic();
+	}
+
+}

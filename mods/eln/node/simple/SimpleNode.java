@@ -22,9 +22,9 @@ import net.minecraft.nbt.NBTTagCompound;
 public abstract class SimpleNode extends NodeBase {
 
 	public EntityPlayerMP removedByPlayer;
-	String descriptorKey;
+	String descriptorKey = "";
 
-	void setDescriptorKey(String key) {
+	protected void setDescriptorKey(String key) {
 		descriptorKey = key;
 	}
 	protected Object getDescriptor(){
@@ -159,7 +159,7 @@ public abstract class SimpleNode extends NodeBase {
 		
 		front.writeToNBT(nbt, "SNfront");
 		
-		nbt.setString("SNdescriptorKey", descriptorKey);
+		nbt.setString("SNdescriptorKey", descriptorKey == null ? "" : descriptorKey);
 
 		for (State electricalLoad : electricalLoadList) {
 			if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).writeToNBT(nbt, "");

@@ -46,16 +46,19 @@ public class ElectricalCableElement extends SixNodeElement {
 		colorCare = 1;
 		electricalLoad.setCanBeSimplifiedByLine(true);
 		electricalLoadList.add(electricalLoad);
-		thermalLoadList.add(thermalLoad);
-		thermalSlowProcessList.add(heater);
 		
-		thermalLoad.setAsSlow();
-		
-		slowProcessList.add(thermalWatchdog);
-		thermalWatchdog
-			.set(thermalLoad)
-			.setLimit(this.descriptor.thermalWarmLimit,this.descriptor.thermalCoolLimit)
-			.set(new WorldExplosion(this).cableExplosion());
+		if(this.descriptor.signalWire == false){
+			thermalLoadList.add(thermalLoad);
+			thermalSlowProcessList.add(heater);
+			thermalLoad.setAsSlow();
+			slowProcessList.add(thermalWatchdog);
+			thermalWatchdog
+				.set(thermalLoad)
+				.setLimit(this.descriptor.thermalWarmLimit,this.descriptor.thermalCoolLimit)
+				.set(new WorldExplosion(this).cableExplosion());
+		}
+			
+
 		
 		slowProcessList.add(voltageWatchdog);
 		voltageWatchdog
@@ -97,7 +100,10 @@ public class ElectricalCableElement extends SixNodeElement {
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		return thermalLoad;
+		if(descriptor.signalWire == false)
+			return thermalLoad;
+		else
+			return null;
 	}
 
 	@Override
@@ -107,12 +113,18 @@ public class ElectricalCableElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		return Utils.plotUIP(electricalLoad.getU(), electricalLoad.getI());
+		if(descriptor.signalWire == false)
+			return Utils.plotUIP(electricalLoad.getU(), electricalLoad.getI());
+		else
+			return Utils.plotSignal(electricalLoad.getU(), electricalLoad.getI());
 	}
 
 	@Override
 	public String thermoMeterString() {
-		return Utils.plotCelsius("T", thermalLoad.Tc);
+		if(descriptor.signalWire == false)
+			return Utils.plotCelsius("T", thermalLoad.Tc);
+		else
+			return null;
 	}
 
 	@Override

@@ -86,6 +86,7 @@ public class OreRegenerate {
 	
 	@SubscribeEvent
 	public void chunkLoad(ChunkEvent.Load e) {
+	//	if(e.world.isRemote == false) Utils.println("Chunk loaded !");
 		if(e.world.isRemote == true || (Eln.instance.saveConfig != null && Eln.instance.saveConfig.reGenOre == false)) return;
 		Chunk c = e.getChunk();
 		ChunkRef ref = new ChunkRef(c.xPosition, c.zPosition, c.worldObj.provider.dimensionId);

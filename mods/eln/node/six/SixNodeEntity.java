@@ -254,7 +254,11 @@ public class SixNodeEntity extends NodeBlockEntity {
 			return max;
 		}
 		else{
-			return getNode().isProvidingWeakPower(side);
+			try {
+				return getNode().isProvidingWeakPower(side);
+			} catch (Exception e) {
+				return 0;
+			}	
 		}
 	}
 }

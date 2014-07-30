@@ -90,10 +90,15 @@ import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.simplenode.energyconverter.toic2.ElnToIc2Block;
-import mods.eln.simplenode.energyconverter.toic2.ElnToIc2Descriptor;
-import mods.eln.simplenode.energyconverter.toic2.ElnToIc2Entity;
-import mods.eln.simplenode.energyconverter.toic2.ElnToIc2Node;
+import mods.eln.simplenode.computerprobe.ComputerProbeBlock;
+import mods.eln.simplenode.computerprobe.ComputerProbeEntity;
+import mods.eln.simplenode.computerprobe.ComputerProbeNode;
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock;
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor;
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.ElnDescriptor;
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.Ic2Descriptor;
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import mods.eln.simplenode.test.TestBlock;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
@@ -397,7 +402,7 @@ public class Eln {
 	private boolean replicatorPop;
 
 	public boolean forceOreRegen;
-	public static boolean debugEnable = false,versionCheckEnable = true;
+	public static boolean debugEnable = false, versionCheckEnable = true;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -437,8 +442,8 @@ public class Eln {
 		debugEnable = config.get("debug", "enable", false).getBoolean(false);
 		versionCheckEnable = config.get("general", "versionCheckEnable", true).getBoolean(true);
 
-		ComputerCraftProbeEnable = config.get("compatibility", "ComputerCraftProbeEnable", true).getBoolean(true);
-		ElnToIc2Enable = config.get("compatibility", "ElectricalAgeToIC2", true).getBoolean(true);
+		ComputerProbeEnable = config.get("compatibility", "ComputerProbeEnable", true).getBoolean(true);
+		ElnToOtherEnergyConverterEnable = config.get("compatibility", "ElnToOtherEnergyConverterEnable", true).getBoolean(true);
 
 		replicatorPop = config.get("entity", "replicatorPop", true).getBoolean(true);
 		replicatorRegistrationId = config.get("entity", "replicatorId", -1).getInt(-1);
@@ -473,22 +478,29 @@ public class Eln {
 		thermalFrequancy = config.get("simulation", "thermalFrequancy", 400).getDouble(400);
 
 		config.save();
+
 	}
 
 	public static FMLEventChannel eventChannel;
 	boolean computerCraftReady = false;
-	boolean ic2Ready = false;
-	boolean ComputerCraftProbeEnable;
-	boolean ElnToIc2Enable;
+	boolean ComputerProbeEnable;
+	boolean ElnToOtherEnergyConverterEnable;
 
 	// FMLCommonHandler.instance().bus().register(this);
+
+
+	@EventHandler
+	public void modsLoaded(FMLPostInitializationEvent event) {
+		Other.check();
+
+	}
+
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
 		Object o;
 
 		computerCraftReady = Utils.isClassLoaded("dan200.computercraft.ComputerCraft");
-		ic2Ready = Utils.isClassLoaded("ic2.core.IC2");
-		ic2Ready = false;
+
 
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
 
@@ -573,6 +585,7 @@ public class Eln {
 
 		registerTestBlock();
 		registerEnergyConverter();
+		registerComputer();
 
 		registerArmor();
 		registerTool();
@@ -648,6 +661,7 @@ public class Eln {
 		//
 
 		recipeEnergyConverter();
+		recipeComputerProbe();
 
 		recipeArmor();
 		recipeTool();
@@ -744,48 +758,76 @@ public class Eln {
 		Utils.println("Electrical age init done");
 	}
 
-	ElnToIc2Block elnToIc2BlockLvu;
-	ElnToIc2Block elnToIc2BlockMvu;
-	ElnToIc2Block elnToIc2BlockHvu;
+	EnergyConverterElnToOtherBlock elnToOtherBlockLvu;
+	EnergyConverterElnToOtherBlock elnToOtherBlockMvu;
+	EnergyConverterElnToOtherBlock elnToOtherBlockHvu;
 
 	private void registerEnergyConverter() {
-		if (ic2Ready && ElnToIc2Enable) {
-			String baseName = "ElnToIc2";
-			String entityName = "eln.ElnToIc2Entity";
+		if (ElnToOtherEnergyConverterEnable) {
+			String baseName = "EnergyConverterElnToOther";
+			String entityName = "eln.EnergyConverterElnToOtherEntity";
 
-			TileEntity.addMapping(ElnToIc2Entity.class, entityName);
-			NodeManager.instance.registerUuid(ElnToIc2Node.getNodeUuidStatic(), ElnToIc2Node.class);
+			TileEntity.addMapping(EnergyConverterElnToOtherEntity.class, entityName);
+			NodeManager.instance.registerUuid(EnergyConverterElnToOtherNode.getNodeUuidStatic(), EnergyConverterElnToOtherNode.class);
 
 			{
 				String blockName = "eln." + baseName + "LVUBlock";
-				String name = "ELN to IC2 50V converter";
-				ElnToIc2Descriptor desc = new ElnToIc2Descriptor(baseName + "LVU", LVU, LVP, 32);
-				elnToIc2BlockLvu = new ElnToIc2Block(desc);
-				elnToIc2BlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
-				GameRegistry.registerBlock(elnToIc2BlockLvu, blockName);
-				LanguageRegistry.addName(elnToIc2BlockLvu, name);
+				String name = "ELN to Other 50V converter";
+				ElnDescriptor elnDesc = new ElnDescriptor(LVU, LVP);
+				Ic2Descriptor ic2Desc = new Ic2Descriptor(32, 1);
+				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "LVU", elnDesc,ic2Desc);
+				elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
+				elnToOtherBlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
+				GameRegistry.registerBlock(elnToOtherBlockLvu, blockName);
+				LanguageRegistry.addName(elnToOtherBlockLvu, name);
 			}
 			{
 				String blockName = "eln." + baseName + "MVUBlock";
-				String name = "ELN to IC2 200V converter";
-				ElnToIc2Descriptor desc = new ElnToIc2Descriptor(baseName + "MVU", MVU, MVP, 128);
-				elnToIc2BlockLvu = new ElnToIc2Block(desc);
-				elnToIc2BlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
-				GameRegistry.registerBlock(elnToIc2BlockLvu, blockName);
-				LanguageRegistry.addName(elnToIc2BlockLvu, name);
+				String name = "ELN to Other 200V converter";
+				ElnDescriptor elnDesc = new ElnDescriptor(MVU, MVP);
+				Ic2Descriptor ic2Desc = new Ic2Descriptor( 128, 2);
+				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "MVU",elnDesc,ic2Desc);
+				elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
+				elnToOtherBlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
+				GameRegistry.registerBlock(elnToOtherBlockLvu, blockName);
+				LanguageRegistry.addName(elnToOtherBlockLvu, name);
 			}
 			{
 				String blockName = "eln." + baseName + "HVUBlock";
-				String name = "ELN to IC2 800V converter";
-				ElnToIc2Descriptor desc = new ElnToIc2Descriptor(baseName + "HVU", HVU, HVP, 512);
-				elnToIc2BlockLvu = new ElnToIc2Block(desc);
-				elnToIc2BlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
-				GameRegistry.registerBlock(elnToIc2BlockLvu, blockName);
-				LanguageRegistry.addName(elnToIc2BlockLvu, name);
+				String name = "ELN to Other 800V converter";
+				ElnDescriptor elnDesc = new ElnDescriptor( HVU, HVP);
+				Ic2Descriptor ic2Desc = new Ic2Descriptor(512, 3);
+				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "HVU", elnDesc,ic2Desc);
+				elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
+				elnToOtherBlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
+				GameRegistry.registerBlock(elnToOtherBlockLvu, blockName);
+				LanguageRegistry.addName(elnToOtherBlockLvu, name);
 			}
 		}
 	}
 
+	
+	ComputerProbeBlock computerProbeBlock;
+	
+	private void registerComputer(){
+		if(ComputerProbeEnable){
+			String baseName = "ElnProbe";
+			String entityName = "eln.ElnProbe";
+	
+			TileEntity.addMapping(ComputerProbeEntity.class, entityName);
+			NodeManager.instance.registerUuid(ComputerProbeNode.getNodeUuidStatic(), ComputerProbeNode.class);
+	
+			
+			String blockName = "eln." + baseName;
+			String name = "Eln Computer Probe";
+			computerProbeBlock = new ComputerProbeBlock();
+			computerProbeBlock.setCreativeTab(creativeTab).setBlockName(blockName);
+			GameRegistry.registerBlock(computerProbeBlock, blockName);
+			LanguageRegistry.addName(computerProbeBlock, name);
+		}
+		
+	}
+	
 	TestBlock testBlock;
 
 	private void registerTestBlock() {
@@ -1336,7 +1378,7 @@ public class Eln {
 					"Obselete, must be deleted" // name, description)
 			);
 			desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
-			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+			transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
 
 		{
@@ -1357,7 +1399,7 @@ public class Eln {
 					"the battery" // name, description)
 			);
 			desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
-			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+			transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
 	}
 
@@ -3584,7 +3626,7 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
-		if (computerCraftReady && ComputerCraftProbeEnable) {
+		if (computerCraftReady && ComputerProbeEnable) {
 			subId = 4;
 			name = "ComputerCraft Probe";
 
@@ -3594,7 +3636,7 @@ public class Eln {
 
 					);
 
-			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+			transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
 
 	}
@@ -4710,13 +4752,9 @@ public class Eln {
 				Character.valueOf('p'), new ItemStack(Items.coal, 1, 1),
 				Character.valueOf('I'), "ingotCopper");
 
-		addRecipe(findItemStack("200V Condensator"),
-				"C C",
-				"ppp",
-				"III",
-				Character.valueOf('C'), findItemStack("Medium Voltage Cable"),
-				Character.valueOf('p'), "plateCoal",
-				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
+		/*
+		 * addRecipe(findItemStack("200V Condensator"), "C C", "ppp", "III", Character.valueOf('C'), findItemStack("Medium Voltage Cable"), Character.valueOf('p'), "plateCoal", Character.valueOf('I'), new ItemStack(Items.iron_ingot));
+		 */
 
 	}
 
@@ -5198,7 +5236,7 @@ public class Eln {
 				Character.valueOf('D'), findItemStack("Cheap Electrical Drill"),
 				Character.valueOf('d'), new ItemStack(Items.diamond));
 
-		addRecipe(findItemStack("Fast Electrical Drill"), 
+		addRecipe(findItemStack("Fast Electrical Drill"),
 				"MCM",
 				" T ",
 				" P ",
@@ -5974,8 +6012,8 @@ public class Eln {
 	}
 
 	void recipeEnergyConverter() {
-		if (ic2Ready && ElnToIc2Enable) {
-			addRecipe(new ItemStack(elnToIc2BlockLvu),
+		if (ElnToOtherEnergyConverterEnable) {
+			addRecipe(new ItemStack(elnToOtherBlockLvu),
 					"III",
 					"cCR",
 					"III",
@@ -5984,7 +6022,7 @@ public class Eln {
 					Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 					Character.valueOf('R'), "ingotCopper");
 
-			addRecipe(new ItemStack(elnToIc2BlockMvu),
+			addRecipe(new ItemStack(elnToOtherBlockMvu),
 					"III",
 					"cCR",
 					"III",
@@ -5993,7 +6031,7 @@ public class Eln {
 					Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 					Character.valueOf('R'), new ItemStack(Items.iron_ingot));
 
-			addRecipe(new ItemStack(elnToIc2BlockHvu),
+			addRecipe(new ItemStack(elnToOtherBlockHvu),
 					"III",
 					"cCR",
 					"III",
@@ -6002,6 +6040,20 @@ public class Eln {
 					Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 					Character.valueOf('R'), new ItemStack(Items.gold_ingot));
 
+		}
+	}
+	
+	void recipeComputerProbe(){
+		if(ComputerProbeEnable){
+			addRecipe(new ItemStack(computerProbeBlock),
+					"cIw",
+					"ICI",
+					"WIc",
+					Character.valueOf('C'), findItemStack("Advanced Chip"),
+					Character.valueOf('c'), findItemStack("Signal Cable"),
+					Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+					Character.valueOf('w'), findItemStack("Wireless Signal Receiver"),
+					Character.valueOf('W'), findItemStack("Wireless Signal Transmitter"));			
 		}
 	}
 
@@ -6099,8 +6151,6 @@ public class Eln {
 
 		oreScannerConfig.clear();
 
-
-
 		if (addOtherModOreToXRay) {
 			for (String name : OreDictionary.getOreNames()) {
 				// Utils.println(name + " " +
@@ -6125,7 +6175,7 @@ public class Eln {
 				}
 			}
 		}
-		
+
 		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.coal_ore), 5 / 100f));
 		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.iron_ore), 15 / 100f));
 		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(Blocks.gold_ore), 40 / 100f));
@@ -6161,8 +6211,5 @@ public class Eln {
 		return findItemStack(name, 1);
 	}
 
-	public double getElnToIc2ConversionRatio() {
-		// TODO Auto-generated method stub
-		return 1.0 / 3;
-	}
+
 }

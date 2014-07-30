@@ -18,10 +18,17 @@ import mods.eln.sim.nbt.NbtResistor;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 
-public abstract class EnergyConverterElnToOtherNode extends SimpleNode {
+public class EnergyConverterElnToOtherNode extends SimpleNode {
 
+	EnergyConverterElnToOtherDescriptor descriptor;
 
-
+	@Override
+	protected void setDescriptorKey(String key) {
+		// TODO Auto-generated method stub
+		super.setDescriptorKey(key);
+		descriptor = (EnergyConverterElnToOtherDescriptor) getDescriptor();
+	}
+	
 	@Override
 	public int getSideConnectionMask(Direction directionA, LRDU lrduA) {
 		if(directionA == getFront()) return maskElectricalPower;
@@ -53,6 +60,8 @@ public abstract class EnergyConverterElnToOtherNode extends SimpleNode {
 
 		load.isPrivateSubSystem();
 		
+		descriptor.applyTo(this);
+		
 		
     	WorldExplosion exp = new WorldExplosion(this).machineExplosion();
     	watchdog.set(load).setUNominal(inStdVoltage).set(exp);
@@ -61,12 +70,10 @@ public abstract class EnergyConverterElnToOtherNode extends SimpleNode {
 		connect();
 	}
 	public double energyBuffer = 0;
-	public double conversionRatio = 20/4;
-	public double timeRatio = 20;
-	public double energyBufferMax = 500;
-	public double inStdVoltage = 50;
-	public double inPowerMax = 1000;
-	public double otherOutMax = 32;
+	public double energyBufferMax;
+	public double inStdVoltage;
+	public double inPowerMax;
+	//public double otherOutMax = 32;
 	
 	
 	public double inPowerFactor = 0.5;
@@ -93,16 +100,16 @@ public abstract class EnergyConverterElnToOtherNode extends SimpleNode {
 	}
 	
 	
-	public double getOtherModEnergyBuffer(){
+	public double getOtherModEnergyBuffer(double conversionRatio){
 		return energyBuffer*conversionRatio;
 	}
-	public double getOtherModOutMax(){
-		return Math.min(getOtherModEnergyBuffer(), otherOutMax);
-	}
-	public void drawEnergy(double otherModEnergy){
+
+	public void drawEnergy(double otherModEnergy,double conversionRatio){
 		energyBuffer -= otherModEnergy/conversionRatio;
 	}
-	
+	public double getOtherModOutMax(double otherOutMax,double conversionRatio){
+		return Math.min(getOtherModEnergyBuffer(conversionRatio), otherOutMax);
+	}
 	
 	
 	@Override
@@ -160,6 +167,15 @@ public abstract class EnergyConverterElnToOtherNode extends SimpleNode {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+
+	@Override
+	public String getNodeUuid() {
+		return getNodeUuidStatic();
+	}
+	public static String getNodeUuidStatic() {
+		return "ElnToOther";
 	}
 
 

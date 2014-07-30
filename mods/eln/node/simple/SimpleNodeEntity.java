@@ -3,6 +3,9 @@ package mods.eln.node.simple;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.DescriptorManager;
@@ -26,6 +29,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
 	public SimpleNode getNode() {
 		if (worldObj.isRemote) Utils.fatal();
+		if(this.worldObj == null) return null;
 		if (node == null) node = (SimpleNode) NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
 		return node;
 	}
@@ -75,6 +79,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz){
 		if (!worldObj.isRemote){
+			if (getNode() == null) return false;
 			getNode().onBlockActivated(entityPlayer, side, vx, vy, vz);
 			return true;
 		}
@@ -83,6 +88,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
 	public void onNeighborBlockChange(){
 		if (!worldObj.isRemote){
+			if (getNode() == null) return;
 			getNode().onNeighborBlockChange();
 		}
 	}
@@ -145,6 +151,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 		return null;
 	}
 	@Override
+    @SideOnly(Side.CLIENT)
 	public GuiScreen newGuiDraw(Direction side,EntityPlayer player)
 	{
 		return null;

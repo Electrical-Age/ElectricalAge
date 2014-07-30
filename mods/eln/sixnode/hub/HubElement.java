@@ -40,14 +40,12 @@ public class HubElement extends SixNodeElement {
 			electricalLoadList.add(electricalLoad[idx]);
 		}
 
-		for (int idx = 0; idx < 6; idx++) {
-			connectionGrid[idx] = false;
-		}
+
 
 	}
 
 	NbtElectricalLoad[] electricalLoad = new NbtElectricalLoad[4];
-	boolean[] connectionGrid = new boolean[6];
+	boolean[] connectionGrid = new boolean[]{false,false,false,false,true,true};
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {

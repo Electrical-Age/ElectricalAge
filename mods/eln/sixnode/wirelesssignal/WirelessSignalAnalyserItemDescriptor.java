@@ -47,7 +47,7 @@ public class WirelessSignalAnalyserItemDescriptor extends GenericItemUsingDamage
 				double temp = txStrength.get(oneTx);
 				if(temp < strength) strength = temp;
 			}
-			Utils.addChatMessage(player,entrySet.getKey() + " Strength=" + String.format("%2.1f",strength) +" Value=" +String.format("%2.1fV",aggregator.aggregate(set) * Eln.instance.SVU));
+			Utils.addChatMessage(player,entrySet.getKey() + " Strength=" + String.format("%2.1f",strength) +" Value=" +String.format("%3.0f",aggregator.aggregate(set)*100) + "%");
 
 		}
 		

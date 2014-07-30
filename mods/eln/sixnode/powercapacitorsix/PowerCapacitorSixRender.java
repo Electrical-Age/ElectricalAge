@@ -2,6 +2,8 @@ package mods.eln.sixnode.powercapacitorsix;
 
 import java.io.DataInputStream;
 
+import org.lwjgl.opengl.GL11;
+
 import mods.eln.cable.CableRenderType;
 import mods.eln.misc.Direction;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -25,6 +27,8 @@ public class PowerCapacitorSixRender extends SixNodeElementRender {
 
 	@Override
 	public void draw() {
+		GL11.glRotatef(90, 1, 0, 0);
+		front.glRotateOnX();
 		descriptor.draw();
 	}
 
