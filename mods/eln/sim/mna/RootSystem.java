@@ -57,6 +57,10 @@ public class RootSystem {
 	}
 	public void removeComponent(Component c) {
 		SubSystem system = c.getSubSystem();
+		/*if(c.isAbstracted()){
+			int i = 0;
+			i++;
+		}*/
 		if(system != null){
 			breakSystems(system);
 		}

@@ -97,6 +97,7 @@ import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherBlock;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.ElnDescriptor;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.Ic2Descriptor;
+import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.OcDescriptor;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import mods.eln.simplenode.test.TestBlock;
@@ -775,7 +776,8 @@ public class Eln {
 				String name = "ELN to Other 50V converter";
 				ElnDescriptor elnDesc = new ElnDescriptor(LVU, LVP);
 				Ic2Descriptor ic2Desc = new Ic2Descriptor(32, 1);
-				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "LVU", elnDesc,ic2Desc);
+				OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax*Other.getElnToOcConversionRatio()/Other.getElnToIc2ConversionRatio());
+				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "LVU", elnDesc,ic2Desc,ocDesc);
 				elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
 				GameRegistry.registerBlock(elnToOtherBlockLvu, blockName);
@@ -786,7 +788,8 @@ public class Eln {
 				String name = "ELN to Other 200V converter";
 				ElnDescriptor elnDesc = new ElnDescriptor(MVU, MVP);
 				Ic2Descriptor ic2Desc = new Ic2Descriptor( 128, 2);
-				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "MVU",elnDesc,ic2Desc);
+				OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax*Other.getElnToOcConversionRatio()/Other.getElnToIc2ConversionRatio());
+				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "MVU",elnDesc,ic2Desc,ocDesc);
 				elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
 				GameRegistry.registerBlock(elnToOtherBlockLvu, blockName);
@@ -797,7 +800,8 @@ public class Eln {
 				String name = "ELN to Other 800V converter";
 				ElnDescriptor elnDesc = new ElnDescriptor( HVU, HVP);
 				Ic2Descriptor ic2Desc = new Ic2Descriptor(512, 3);
-				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "HVU", elnDesc,ic2Desc);
+				OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax*Other.getElnToOcConversionRatio()/Other.getElnToIc2ConversionRatio());
+				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "HVU", elnDesc,ic2Desc,ocDesc);
 				elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
 				GameRegistry.registerBlock(elnToOtherBlockLvu, blockName);

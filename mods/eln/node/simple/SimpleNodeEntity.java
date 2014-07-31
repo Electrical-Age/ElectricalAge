@@ -59,6 +59,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 	}
 
 	public void onChunkUnload(){
+		super.onChunkUnload();
 		if (worldObj.isRemote){
 			destructor();
 		}

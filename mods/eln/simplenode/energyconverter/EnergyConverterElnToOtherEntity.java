@@ -6,12 +6,17 @@ import ic2.api.energy.tile.IEnergySource;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
+import li.cil.oc.api.network.SidedEnvironment;
 import mods.eln.Other;
 import mods.eln.misc.Direction;
 import mods.eln.node.simple.SimpleNode;
 import mods.eln.node.simple.SimpleNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.Optional;
@@ -19,11 +24,18 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 
-@Optional.InterfaceList(
-        @Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = Other.modIdIc2)
+@Optional.InterfaceList({
+        @Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = Other.modIdIc2),
+        @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = Other.modIdOc)/*,
+        @Optional.Interface(iface = "li.cil.oc.api.network.SidedEnvironment", modid = Other.modIdOc)*/}
 )
-public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements IEnergySource{
+public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements IEnergySource, Environment/*,SidedEnvironment*/ {
 
+	
+	
+	public EnergyConverterElnToOtherEntity() {
+		if(Other.ocLoaded) getOc().constructor();
+	}
 	
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
@@ -103,6 +115,63 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	
     
     
+    
+    // *****************   OC **********************
+    
+    EnergyConverterElnToOtherFireWallOc oc;
+    
+    
+    @Optional.Method(modid = Other.modIdOc)
+    EnergyConverterElnToOtherFireWallOc getOc(){
+    	if(oc == null) oc = new EnergyConverterElnToOtherFireWallOc(this);
+    	return oc;
+    }
+    
+	@Override
+    @Optional.Method(modid = Other.modIdOc)
+	public Node node() {
+		return getOc().node;
+	}
+
+	@Override
+	@Optional.Method(modid = Other.modIdOc)
+	public void onConnect(Node node) {
+	
+	}
+
+	@Override
+	@Optional.Method(modid = Other.modIdOc)
+	public void onDisconnect(Node node) {
+		
+	}
+
+	@Override
+	@Optional.Method(modid = Other.modIdOc)
+	public void onMessage(Message message) {
+		
+	}
+    
+	/*
+	@Override
+	@Optional.Method(modid = Other.modIdOc)
+	public Node sidedNode(ForgeDirection side) {
+		if(worldObj.isRemote){
+			if(front.back() == Direction.from(side)) return node();
+			return null;
+		}else{
+			if(getNode().getFront().back() == Direction.from(side)) return node();
+			return null;
+		}
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	@Optional.Method(modid = Other.modIdOc)
+	public boolean canConnect(ForgeDirection side) {
+		if(front == null) return false;
+		if(front.back() == Direction.from(side)) return true;
+		return false;
+	}*/
     // *****************     Bridges ****************
     
     
@@ -111,6 +180,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	public void updateEntity() {
 		super.updateEntity();
 		if(Other.ic2Loaded) EnergyConverterElnToOtherFireWallIc2.updateEntity(this);
+		if(Other.ocLoaded) getOc().updateEntity();
 	}
 
 
@@ -123,6 +193,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	public void invalidate() {
 		super.invalidate();
 		if(Other.ic2Loaded) EnergyConverterElnToOtherFireWallIc2.invalidate(this);
+		if(Other.ocLoaded) getOc().invalidate();
 	}
 
 
@@ -130,7 +201,22 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	public void onChunkUnload() {
 		super.onChunkUnload();
 		if(Other.ic2Loaded) EnergyConverterElnToOtherFireWallIc2.onChunkUnload(this);
+		if(Other.ocLoaded) getOc().onChunkUnload();
+	}
+	@Override
+	public void readFromNBT(NBTTagCompound nbt) {
+		// TODO Auto-generated method stub
+		super.readFromNBT(nbt);
+		if(Other.ocLoaded) getOc().readFromNBT(nbt);
+
+	}
+	
+	public void writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		if(Other.ocLoaded) getOc().writeToNBT(nbt);
 	}
 	
 	protected boolean addedToEnet;
+
+
 }
