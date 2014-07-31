@@ -6,6 +6,8 @@ import ic2.api.energy.tile.IEnergySource;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import cofh.api.energy.IEnergyHandler;
+
 import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
@@ -25,11 +27,12 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 
 @Optional.InterfaceList({
-        @Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = Other.modIdIc2),
+    @Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = Other.modIdIc2),
+    @Optional.Interface(iface = "cofh.api.energy.IEnergyHandler", modid = Other.modIdTe),
         @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = Other.modIdOc)/*,
         @Optional.Interface(iface = "li.cil.oc.api.network.SidedEnvironment", modid = Other.modIdOc)*/}
 )
-public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements IEnergySource, Environment/*,SidedEnvironment*/ {
+public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements IEnergySource, Environment,IEnergyHandler/*,SidedEnvironment*/ {
 
 	
 	
@@ -172,6 +175,51 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 		if(front.back() == Direction.from(side)) return true;
 		return false;
 	}*/
+	
+	
+	
+	
+	// ***************        RF **************
+	@Override
+    @Optional.Method(modid = Other.modIdTe)
+	public boolean canConnectEnergy(ForgeDirection from) {
+		if(worldObj.isRemote) return false;
+		SimpleNode n = getNode();
+		return n.getFront().back() == Direction.from(from);
+	}
+
+	@Override
+    @Optional.Method(modid = Other.modIdTe)
+	public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+    @Optional.Method(modid = Other.modIdTe)
+	public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate) {
+		if(worldObj.isRemote) return 0;
+		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) getNode();
+		int extract = (int) Math.min(maxExtract, node.getOtherModEnergyBuffer(Other.getElnToTeConversionRatio()));
+		if(simulate)
+			node.drawEnergy(extract,Other.getElnToTeConversionRatio());
+		
+		return extract;
+	}
+
+	@Override
+    @Optional.Method(modid = Other.modIdTe)
+	public int getEnergyStored(ForgeDirection from) {
+		return 0;
+	}
+
+	@Override
+    @Optional.Method(modid = Other.modIdTe)
+	public int getMaxEnergyStored(ForgeDirection from) {
+		return 0;
+	}
+
+	
     // *****************     Bridges ****************
     
     

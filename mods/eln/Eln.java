@@ -240,6 +240,7 @@ public class Eln {
 
 	public static final String[] objNames = new String[] {
 			"/model/PowerElectricPrimitives/PowerElectricPrimitives.obj",
+			"/model/SimpleLamp/SimpleLamp.obj",
 			"/model/condo200/condo200.obj",
 			"/model/WallClock/WallClock.obj",
 			"/model/TutoPlate/TutoPlate.obj",
@@ -452,6 +453,7 @@ public class Eln {
 		forceOreRegen = config.get("mapGenerate", "forceOreRegen", false).getBoolean(false);
 		genCooper = config.get("mapGenerate", "cooper", true).getBoolean(true);
 		genPlumb = config.get("mapGenerate", "plumb", true).getBoolean(true);
+		genPlumb = config.get("mapGenerate", "lead", genPlumb).getBoolean(genPlumb);
 		genTungsten = config.get("mapGenerate", "tungsten", true).getBoolean(true);
 		genCinnabar = config.get("mapGenerate", "cinnabar", true).getBoolean(true);
 		genCinnabar = false;
@@ -1488,6 +1490,17 @@ public class Eln {
 			name = "Flat Lamp Socket";
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("FlatLamp"), true),
+					LampSocketType.Douille, // LampSocketType
+											// socketType
+					0, 0, 0, 0);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}		
+		{
+			subId = 6;
+
+			name = "Simple Lamp Socket";
+
+			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("SimpleLamp"), true),
 					LampSocketType.Douille, // LampSocketType
 											// socketType
 					0, 0, 0, 0);
@@ -3497,6 +3510,8 @@ public class Eln {
 			g.addElement(0, 1, 0);
 			g.addElement(0, 2, -1);
 			g.addElement(0, 2, 1);
+			g.addElement(0, 3, -1);
+			g.addElement(0, 3, 1);
 			g.addRectangle(0, 0, 1, 3, 0, 0);
 			desc.setGhostGroup(g);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -3832,7 +3847,7 @@ public class Eln {
 
 			descriptor = new GenericItemUsingDamageDescriptor(name);
 			sharedItem.addElement(completId, descriptor);
-			addToOre("ingotRubber", descriptor.newItemStack());
+			addToOre("itemRubber", descriptor.newItemStack());
 		}
 	}
 
@@ -4425,39 +4440,39 @@ public class Eln {
 				"R",
 				"C",
 				Character.valueOf('C'), findItemStack("Iron Cable"),
-				Character.valueOf('R'), "ingotRubber");
+				Character.valueOf('R'), "itemRubber");
 
 		addRecipe(lowVoltageCableDescriptor.newItemStack(1),
 				"R",
 				"C",
 				Character.valueOf('C'), findItemStack("Copper Cable"),
-				Character.valueOf('R'), "ingotRubber");
+				Character.valueOf('R'), "itemRubber");
 
 		addRecipe(meduimVoltageCableDescriptor.newItemStack(1),
 				"R",
 				"C",
 				Character.valueOf('C'), lowVoltageCableDescriptor.newItemStack(1),
-				Character.valueOf('R'), "ingotRubber");
+				Character.valueOf('R'), "itemRubber");
 
 		addRecipe(highVoltageCableDescriptor.newItemStack(1),
 				"R",
 				"C",
 				Character.valueOf('C'), meduimVoltageCableDescriptor.newItemStack(1),
-				Character.valueOf('R'), "ingotRubber");
+				Character.valueOf('R'), "itemRubber");
 
 		addRecipe(signalCableDescriptor.newItemStack(6),
 				"RRR",
 				"CCC",
 				"RRR",
 				Character.valueOf('C'), new ItemStack(Items.iron_ingot),
-				Character.valueOf('R'), "ingotRubber");
+				Character.valueOf('R'), "itemRubber");
 
 		addRecipe(lowVoltageCableDescriptor.newItemStack(6),
 				"RRR",
 				"CCC",
 				"RRR",
 				Character.valueOf('C'), "ingotCopper",
-				Character.valueOf('R'), "ingotRubber");
+				Character.valueOf('R'), "itemRubber");
 
 	}
 
@@ -4510,6 +4525,13 @@ public class Eln {
 				"IGI",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
+		addRecipe(findItemStack("Simple Lamp Socket", 3),
+				" I ",
+				"GGG",
+				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
+
+		
 
 		addRecipe(findItemStack("Suspended Lamp Socket", 2),
 				"I",
@@ -4544,7 +4566,7 @@ public class Eln {
 				" RB",
 				Character.valueOf('R'), new ItemStack(Items.redstone),
 				Character.valueOf('I'), findItemStack("Iron Cable"),
-				Character.valueOf('B'), "ingotRubber");
+				Character.valueOf('B'), "itemRubber");
 
 		addRecipe(findItemStack("10A Diode", 3),
 				" RB",
@@ -4552,7 +4574,7 @@ public class Eln {
 				" RB",
 				Character.valueOf('R'), new ItemStack(Items.redstone),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
-				Character.valueOf('B'), "ingotRubber");
+				Character.valueOf('B'), "itemRubber");
 
 		addRecipe(findItemStack("25A Diode"),
 				"D",
@@ -4564,9 +4586,9 @@ public class Eln {
 
 	void recipeSwitch() {
 		/*
-		 * addRecipe(findItemStack("Signal Switch"), "  I", " I ", "CAC", Character.valueOf('R'), new ItemStack(Items.redstone), Character.valueOf('A'), "ingotRubber", Character.valueOf('I'), findItemStack("Copper Cable"), Character.valueOf('C'), findItemStack("Signal Cable"));
+		 * addRecipe(findItemStack("Signal Switch"), "  I", " I ", "CAC", Character.valueOf('R'), new ItemStack(Items.redstone), Character.valueOf('A'), "itemRubber", Character.valueOf('I'), findItemStack("Copper Cable"), Character.valueOf('C'), findItemStack("Signal Cable"));
 		 * 
-		 * addRecipe(findItemStack("Signal Switch with LED"), " RI", " I ", "CAC", Character.valueOf('R'), new ItemStack(Items.redstone), Character.valueOf('A'), "ingotRubber", Character.valueOf('I'), findItemStack("Copper Cable"), Character.valueOf('C'), findItemStack("Signal Cable"));
+		 * addRecipe(findItemStack("Signal Switch with LED"), " RI", " I ", "CAC", Character.valueOf('R'), new ItemStack(Items.redstone), Character.valueOf('A'), "itemRubber", Character.valueOf('I'), findItemStack("Copper Cable"), Character.valueOf('C'), findItemStack("Signal Cable"));
 		 */
 
 		addRecipe(findItemStack("Low Voltage Switch"),
@@ -4574,7 +4596,7 @@ public class Eln {
 				" I ",
 				"CAC",
 				Character.valueOf('R'), new ItemStack(Items.redstone),
-				Character.valueOf('A'), "ingotRubber",
+				Character.valueOf('A'), "itemRubber",
 				Character.valueOf('I'), findItemStack("Copper Cable"),
 				Character.valueOf('C'), findItemStack("Low Voltage Cable"));
 
@@ -4583,7 +4605,7 @@ public class Eln {
 				" I ",
 				"CAC",
 				Character.valueOf('R'), new ItemStack(Items.redstone),
-				Character.valueOf('A'), "ingotRubber",
+				Character.valueOf('A'), "itemRubber",
 				Character.valueOf('I'), findItemStack("Copper Cable"),
 				Character.valueOf('C'), findItemStack("Medium Voltage Cable"));
 
@@ -4592,7 +4614,7 @@ public class Eln {
 				"AIA",
 				"CAC",
 				Character.valueOf('R'), new ItemStack(Items.redstone),
-				Character.valueOf('A'), "ingotRubber",
+				Character.valueOf('A'), "itemRubber",
 				Character.valueOf('I'), findItemStack("Copper Cable"),
 				Character.valueOf('C'), findItemStack("High Voltage Cable"));
 	}
@@ -4604,7 +4626,7 @@ public class Eln {
 				" I ",
 				"CRC",
 				Character.valueOf('R'), new ItemStack(Items.redstone),
-				Character.valueOf('A'), "ingotRubber",
+				Character.valueOf('A'), "itemRubber",
 				Character.valueOf('I'), findItemStack("Copper Cable"),
 				Character.valueOf('C'), findItemStack("Low Voltage Cable"));
 
@@ -4613,7 +4635,7 @@ public class Eln {
 				" I ",
 				"CRC",
 				Character.valueOf('R'), new ItemStack(Items.redstone),
-				Character.valueOf('A'), "ingotRubber",
+				Character.valueOf('A'), "itemRubber",
 				Character.valueOf('I'), findItemStack("Copper Cable"),
 				Character.valueOf('C'), findItemStack("Medium Voltage Cable"));
 
@@ -4622,7 +4644,7 @@ public class Eln {
 				" I ",
 				"CRC",
 				Character.valueOf('R'), new ItemStack(Items.redstone),
-				Character.valueOf('A'), "ingotRubber",
+				Character.valueOf('A'), "itemRubber",
 				Character.valueOf('I'), findItemStack("Copper Cable"),
 				Character.valueOf('C'), findItemStack("High Voltage Cable"));
 	}
@@ -4694,7 +4716,7 @@ public class Eln {
 				"ImI",
 				"HMH",
 				"IEI",
-				Character.valueOf('I'), "ingotRubber",
+				Character.valueOf('I'), "itemRubber",
 				Character.valueOf('M'), findItemStack("Advanced Machine Block"),
 				Character.valueOf('E'), findItemStack("Medium Voltage Cable"),
 				Character.valueOf('H'), findItemStack("Copper Thermal Cable"),
@@ -4853,7 +4875,7 @@ public class Eln {
 				"III",
 				Character.valueOf('I'), "ingotCopper",
 				Character.valueOf('M'), findItemStack("Electrical Motor"),
-				Character.valueOf('R'), "ingotRubber",
+				Character.valueOf('R'), "itemRubber",
 				Character.valueOf('C'), findItemStack("Copper Thermal Cable"));
 
 		addRecipe(
@@ -4862,7 +4884,7 @@ public class Eln {
 				" D ",
 				Character.valueOf('D'), findItemStack("Small Passive Thermal Dissipator"),
 				Character.valueOf('M'), findItemStack("Electrical Motor"),
-				Character.valueOf('R'), "ingotRubber");
+				Character.valueOf('R'), "itemRubber");
 
 		addRecipe(
 				findItemStack("200V Active Thermal Dissipator"),
@@ -4871,7 +4893,7 @@ public class Eln {
 				"III",
 				Character.valueOf('I'), "ingotCopper",
 				Character.valueOf('M'), findItemStack("Advanced Electrical Motor"),
-				Character.valueOf('R'), "ingotRubber",
+				Character.valueOf('R'), "itemRubber",
 				Character.valueOf('C'), findItemStack("Copper Thermal Cable"));
 
 		addRecipe(
@@ -4880,7 +4902,7 @@ public class Eln {
 				" D ",
 				Character.valueOf('D'), findItemStack("Small Passive Thermal Dissipator"),
 				Character.valueOf('M'), findItemStack("Advanced Electrical Motor"),
-				Character.valueOf('R'), "ingotRubber");
+				Character.valueOf('R'), "itemRubber");
 
 	}
 
@@ -5196,7 +5218,7 @@ public class Eln {
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
 				Character.valueOf('C'), findItemStack("Electrical Probe Chip"),
 				Character.valueOf('E'), new ItemStack(Items.redstone),
-				Character.valueOf('R'), "ingotRubber");
+				Character.valueOf('R'), "itemRubber");
 
 		addRecipe(findItemStack("ThermoMeter"),
 				"RGR",
@@ -5205,7 +5227,7 @@ public class Eln {
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
 				Character.valueOf('C'), findItemStack("Thermal Probe Chip"),
 				Character.valueOf('E'), new ItemStack(Items.redstone),
-				Character.valueOf('R'), "ingotRubber");
+				Character.valueOf('R'), "itemRubber");
 
 		addShapelessRecipe(findItemStack("AllMeter"),
 				findItemStack("MultiMeter"),
@@ -5218,7 +5240,7 @@ public class Eln {
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
 				Character.valueOf('S'), findItemStack("Signal Antenna"),
 				Character.valueOf('E'), new ItemStack(Items.redstone),
-				Character.valueOf('R'), "ingotRubber");
+				Character.valueOf('R'), "itemRubber");
 
 	}
 
@@ -5778,7 +5800,7 @@ public class Eln {
 				"rRr",
 				" r ",
 				Character.valueOf('R'), new ItemStack(Items.redstone),
-				Character.valueOf('r'), "ingotRubber");
+				Character.valueOf('r'), "itemRubber");
 
 		addRecipe(findItemStack("Electrical Anemometer Sensor"),
 				" I ",
@@ -5837,7 +5859,7 @@ public class Eln {
 				" c ",
 				Character.valueOf('M'), findItemStack("Machine Block"),
 				Character.valueOf('c'), findItemStack("Signal Cable"),
-				Character.valueOf('r'), "ingotRubber",
+				Character.valueOf('r'), "itemRubber",
 				Character.valueOf('s'), new ItemStack(Items.stick),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
 
@@ -5847,7 +5869,7 @@ public class Eln {
 				" c ",
 				Character.valueOf('M'), findItemStack("Machine Block"),
 				Character.valueOf('c'), findItemStack("Signal Cable"),
-				Character.valueOf('r'), "ingotRubber",
+				Character.valueOf('r'), "itemRubber",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
 
@@ -5857,7 +5879,7 @@ public class Eln {
 				" c ",
 				Character.valueOf('M'), findItemStack("Machine Block"),
 				Character.valueOf('c'), findItemStack("Signal Cable"),
-				Character.valueOf('r'), "ingotRubber",
+				Character.valueOf('r'), "itemRubber",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
 
@@ -5869,7 +5891,7 @@ public class Eln {
 				Character.valueOf('c'), findItemStack("Signal Cable"),
 				Character.valueOf('C'), findItemStack("Cheap Chip"),
 				Character.valueOf('a'), findItemStack("Signal Antenna"),
-				Character.valueOf('r'), "ingotRubber",
+				Character.valueOf('r'), "itemRubber",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
 
@@ -5881,7 +5903,7 @@ public class Eln {
 				Character.valueOf('c'), findItemStack("Signal Cable"),
 				Character.valueOf('C'), findItemStack("Cheap Chip"),
 				Character.valueOf('a'), findItemStack("Signal Antenna"),
-				Character.valueOf('r'), "ingotRubber",
+				Character.valueOf('r'), "itemRubber",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
 
@@ -5894,7 +5916,7 @@ public class Eln {
 				"RRR",
 				"RGR",
 				"RCR",
-				Character.valueOf('R'), "ingotRubber",
+				Character.valueOf('R'), "itemRubber",
 				Character.valueOf('C'), findItemStack("Cheap Chip"),
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane));
 	}

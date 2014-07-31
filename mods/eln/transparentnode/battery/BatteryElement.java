@@ -79,6 +79,9 @@ public class BatteryElement extends TransparentNodeElement  {
 	   	electricalLoadList.add(cutLoad);
 	   	electricalLoadList.add(positiveLoad);
 	   	electricalLoadList.add(negativeLoad);
+	   	
+	   	electricalComponentList.add(new Resistor(positiveLoad, null));
+	   	electricalComponentList.add(new Resistor(negativeLoad, null));
 	   	//electricalComponentList.add(new Resistor(cutLoad, null).setR(1000));
 	   //	electricalComponentList.add(new Resistor(positiveLoad, null).setR(1000));
 	   	//electricalComponentList.add(new Resistor(negativeLoad, null).setR(1000));

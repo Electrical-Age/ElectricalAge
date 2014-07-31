@@ -16,9 +16,14 @@ public class Other {
 	}
 	public static final String modIdIc2 = "IC2";
 	public static final String modIdOc ="OpenComputers";
+	public static final String modIdTe = "ThermalExpansion";
 
 	public static double getElnToOcConversionRatio() {
 		// TODO Auto-generated method stub
 		return getElnToIc2ConversionRatio()/2.5;
+	}
+	public static double getElnToTeConversionRatio() {
+		// TODO Auto-generated method stub
+		return getElnToIc2ConversionRatio()*4;
 	}
 }
