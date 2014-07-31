@@ -10,6 +10,7 @@ import mods.eln.misc.UtilsClient;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sound.SoundCommand;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -34,6 +35,8 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 	int ledsPCount = 8;
 	int deltaX,deltaY,deltaZ;
 	ElectricalCableDescriptor cable;
+	
+	SoundCommand runningSound;
 	
 	public AutoMinerDescriptor(
 			String name,
@@ -92,7 +95,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 			ledsPStateDefault[idx] = Math.random() > 0.5;
 		}
 		
-		
+		runningSound = new SoundCommand("eln:autominer", 2.13);
 	}
 
 	double nominalVoltage;

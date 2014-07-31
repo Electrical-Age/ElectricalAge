@@ -41,7 +41,7 @@ public class ElnServerPacket extends Packet {
 	  {
 	    try {
 			this.field_149172_a = p_148837_1_.readStringFromBuffer(20);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			
 			e.printStackTrace();
 		}
@@ -53,7 +53,7 @@ public class ElnServerPacket extends Packet {
 	  {
 	    try {
 			p_148840_1_.writeStringToBuffer(this.field_149172_a);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			
 			e.printStackTrace();
 		}

@@ -12,6 +12,8 @@ import mods.eln.misc.Utils;
 import mods.eln.ore.OreBlock;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.lampsocket.LightBlockEntity;
+import mods.eln.sound.SoundCommand;
+import mods.eln.sound.SoundLooper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockOre;
 import net.minecraft.block.BlockRedstoneOre;
@@ -26,8 +28,21 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 
 	AutoMinerElement miner;
 
+	SoundLooper looper;
+	
 	public AutoMinerSlowProcess(AutoMinerElement autoMiner) {
 		this.miner = autoMiner;
+		
+		looper = new SoundLooper(autoMiner) {
+			@Override
+			public SoundCommand mustStart() {
+				if (miner.powerOk &&
+					(job == jobType.ore || job == jobType.pipeAdd || job == jobType.pipeRemove))
+					return miner.descriptor.runningSound.copy();
+				else
+					return null;
+			}
+		};
 	}
 
 	int pipeLength = 0;
@@ -208,6 +223,8 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 		oneJobDone = false;
 		oldJob = job;
 		// Utils.println(job);
+		
+		looper.process(time);
 	}
 	
 	int drillCount = 1;
