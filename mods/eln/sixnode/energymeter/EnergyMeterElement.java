@@ -199,7 +199,7 @@ public class EnergyMeterElement extends SixNodeElement {
 			//	needPublish();
 				break;
 			case clientTimeCounterId:
-				timeCounter = stream.readDouble();
+				timeCounter = 0;
 				needPublish();
 				break;			case clientModId:
 				mod = Mod.valueOf(stream.readUTF());

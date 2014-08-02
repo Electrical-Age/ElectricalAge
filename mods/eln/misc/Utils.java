@@ -1358,7 +1358,6 @@ public class Utils {
 			
 			e.printStackTrace();
 		}
-		System.exit(0);
 	}
 
 	public static Block getBlock(int blockId) {
