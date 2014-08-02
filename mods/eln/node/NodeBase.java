@@ -552,10 +552,15 @@ public abstract class NodeBase {
 	{
 		Utils.sendPacketToClient(bos, player);
 	}
+	
+	
+	public void sendPacketToAllClient(ByteArrayOutputStream bos){
+		sendPacketToAllClient(bos,100000);
+	}
 
-	public void sendPacketToAllClient(ByteArrayOutputStream bos)
+	public void sendPacketToAllClient(ByteArrayOutputStream bos,double range)
 	{
-		Profiler p = new Profiler();
+		//Profiler p = new Profiler();
 
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
@@ -567,6 +572,7 @@ public abstract class NodeBase {
 			PlayerManager playerManager = worldServer.getPlayerManager();
 			if (player.dimension != this.coordonate.dimention) continue;
 			if (!playerManager.isPlayerWatchingChunk(player, coordonate.x / 16, coordonate.z / 16)) continue;
+			if(coordonate.distanceTo(player) > range) continue;
 
 			Utils.sendPacketToClient(bos, player);
 		}

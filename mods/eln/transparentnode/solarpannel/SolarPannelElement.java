@@ -14,6 +14,7 @@ import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.process.PowerSourceBipole;
 import mods.eln.sim.nbt.NbtElectricalLoad;
@@ -61,6 +62,7 @@ public class SolarPannelElement extends TransparentNodeElement{
 		
 		electricalLoadList.add(positiveLoad);
 		electricalLoadList.add(negativeLoad);
+		
 		
 		electricalComponentList.add(positiveSrc);
 		electricalComponentList.add(negativeSrc);

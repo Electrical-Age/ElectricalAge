@@ -58,7 +58,7 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
 
 		Eln.applySmallRs(load);
 
-		load.isPrivateSubSystem();
+		load.setAsPrivate();
 		
 		descriptor.applyTo(this);
 		

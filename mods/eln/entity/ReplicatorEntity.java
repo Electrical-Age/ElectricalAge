@@ -128,6 +128,7 @@ public class ReplicatorEntity extends EntityMob {
 	protected void updateAITick() {
 		
 		super.updateAITick();
+		//setDead();
 //		Utils.print(hunger + " ");
 		hunger += 0.05/hungerTime;
 		if(hunger > 1){
@@ -151,7 +152,7 @@ public class ReplicatorEntity extends EntityMob {
 	}
 	
 	void eatElectricity(double e){
-		hunger = hunger - e/hungerToEnergy;
+		hunger = hunger -  Math.min(0.001,e/hungerToEnergy);
 	}
 	
     protected void applyEntityAttributes()

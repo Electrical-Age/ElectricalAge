@@ -12,8 +12,9 @@ public class BipoleVoltageWatchdog extends ValueWatchdog {
 	}
 
 	public BipoleVoltageWatchdog setUNominal(double UNominal) {
-		this.max = UNominal;
-		this.min = -UNominal;
+		
+		this.max = UNominal*1.3;
+		this.min = -max;
 		this.timeoutReset = UNominal * 0.10 * 5;
 
 		return this;
