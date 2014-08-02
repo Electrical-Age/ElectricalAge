@@ -52,5 +52,13 @@ public abstract class ValueWatchdog implements IProcess {
 	}
 
 	abstract double getValue();
+	
+	
+	public void disable() {
+		this.max = 100000000;
+		this.min = -max;
+		this.timeoutReset = 10000000;
+	}
+	
 
 }

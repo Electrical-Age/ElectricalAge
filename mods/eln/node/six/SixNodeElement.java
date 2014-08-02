@@ -90,6 +90,9 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 	public void sendPacketToAllClient(ByteArrayOutputStream bos) {
 		sixNode.sendPacketToAllClient(bos);
 	}
+	public void sendPacketToAllClient(ByteArrayOutputStream bos,double range) {
+		sixNode.sendPacketToAllClient(bos,range);
+	}
 
 	public void sendPacketToClient(ByteArrayOutputStream bos, EntityPlayerMP player)
 	{

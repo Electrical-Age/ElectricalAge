@@ -1,5 +1,8 @@
 package mods.eln.sim;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -12,6 +15,7 @@ import javax.swing.text.html.parser.Entity;
 
 import com.google.common.primitives.Bytes;
 
+import mods.eln.Eln;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.sim.mna.RootSystem;
@@ -22,9 +26,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerManager;
+import net.minecraft.world.WorldServer;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -33,6 +39,7 @@ import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Type;
 import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
 
 public class Simulator /* ,IPacketHandler */{
@@ -500,6 +507,39 @@ public class Simulator /* ,IPacketHandler */{
 		slowNsStack += System.nanoTime() - stackStart;
 		avgTickTime += 1.0 / 20 * ((int) (System.nanoTime() - startTime) / 1000);
 
+		
+		/*stackStart = System.nanoTime();
+		for(int idx = 0;idx < 100;idx++){
+			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
+			DataOutputStream stream = new DataOutputStream(bos);
+
+			try {
+				
+				for(int idx2 = 0;idx2 < 10;idx2++)
+					stream.writeInt(idx2+0xAAAAAAAA);
+
+			} catch (IOException e) {
+
+				e.printStackTrace();
+			}
+			MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+
+			for (Object obj : server.getConfigurationManager().playerEntityList)
+			{
+
+				EntityPlayerMP player = (EntityPlayerMP) obj;
+				WorldServer worldServer = (WorldServer) MinecraftServer.getServer().worldServerForDimension(player.dimension);
+				PlayerManager playerManager = worldServer.getPlayerManager();
+				Utils.sendPacketToClient(bos, player);
+			}
+			//S3FPacketCustomPayload packet = new S3FPacketCustomPayload(Eln.channelName, bos.toByteArray());
+			//Eln.instance.eventChannel.sendToAll(new FMLProxyPacket(packet));
+		}
+		
+		Utils.println((System.nanoTime() - stackStart)/1000);*/
+		
+		
+		
 		if (++printTimeCounter == 20) {
 
 			printTimeCounter = 0;

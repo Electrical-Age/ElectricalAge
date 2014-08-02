@@ -23,7 +23,7 @@ public class ResistorCurrentWatchdog extends ValueWatchdog{
 		
 		return resistor.getI();
 	}
-	
-	
+
+
 
 }

@@ -89,6 +89,7 @@ import mods.eln.signalinductor.SignalInductorDescriptor;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop;
+import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.simplenode.computerprobe.ComputerProbeBlock;
 import mods.eln.simplenode.computerprobe.ComputerProbeEntity;
@@ -125,6 +126,7 @@ import mods.eln.sixnode.electricalwatch.ElectricalWatchDescriptor;
 import mods.eln.sixnode.electricalweathersensor.ElectricalWeatherSensorDescriptor;
 import mods.eln.sixnode.electricalwindsensor.ElectricalWindSensorDescriptor;
 import mods.eln.sixnode.electricasensor.ElectricalSensorDescriptor;
+import mods.eln.sixnode.energymeter.EnergyMeterDescriptor;
 import mods.eln.sixnode.groundcable.GroundCableDescriptor;
 import mods.eln.sixnode.hub.HubDescriptor;
 import mods.eln.sixnode.lampsocket.LampSocketDescriptor;
@@ -607,7 +609,7 @@ public class Eln {
 		registerElectricalGateSource(95);
 		registerPassiveComponent(96);
 		registerSwitch(97);
-		registerElectricalBreaker(98);
+		registerElectricalManager(98);
 		registerElectricalSensor(100);
 		registerThermalSensor(101);
 		registerElectricalVuMeter(102);
@@ -1654,7 +1656,7 @@ public class Eln {
 					name, 20, lowVoltageCableDescriptor
 					);
 
-			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
 
 		{
@@ -1663,7 +1665,7 @@ public class Eln {
 			name = "Power Capacitor";
 
 			PowerCapacitorSixDescriptor desc = new PowerCapacitorSixDescriptor(
-					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE6(-2), 300
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE6(-2), 60*2000
 					);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1834,17 +1836,25 @@ public class Eln {
 		}
 	}
 
-	void registerElectricalBreaker(int id) {
+	void registerElectricalManager(int id) {
 		int subId, completId;
 		String name;
-		ElectricalBreakerDescriptor desc;
 
 		{
 			subId = 0;
 
 			name = "Electrical Breaker";
 
-			desc = new ElectricalBreakerDescriptor(name, obj.getObj("HighVoltageSwitch"));
+			ElectricalBreakerDescriptor desc = new ElectricalBreakerDescriptor(name, obj.getObj("HighVoltageSwitch"));
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		{
+			subId = 4;
+
+			name = "Energy Meter";
+
+			EnergyMeterDescriptor desc = new EnergyMeterDescriptor(name, obj.getObj("HighVoltageSwitch"));
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -6223,7 +6233,9 @@ public class Eln {
 	public static void applySmallRs(NbtElectricalLoad aLoad) {
 		instance.lowVoltageCableDescriptor.applyTo(aLoad);
 	}
-
+	public static void applySmallRs(Resistor r) {
+		instance.lowVoltageCableDescriptor.applyTo(r);	
+	}
 	public ItemStack findItemStack(String name, int stackSize) {
 		ItemStack stack = GameRegistry.findItemStack("Eln", name, stackSize);
 		if (stack == null) {
@@ -6236,6 +6248,8 @@ public class Eln {
 	public ItemStack findItemStack(String name) {
 		return findItemStack(name, 1);
 	}
+
+
 
 
 }
