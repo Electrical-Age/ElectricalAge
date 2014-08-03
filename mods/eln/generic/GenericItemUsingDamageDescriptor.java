@@ -160,7 +160,7 @@ public class GenericItemUsingDamageDescriptor {
 
 	public float getStrVsBlock(ItemStack stack, Block block)
 	{
-		return 1f;
+		return 0.01f;
 	}
 
 	public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity)

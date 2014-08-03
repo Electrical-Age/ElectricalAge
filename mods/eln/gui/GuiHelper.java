@@ -328,6 +328,8 @@ public class GuiHelper {
             GL11.glEnable(GL12.GL_RESCALE_NORMAL);
         }
     }
+	
+	public static Tessellator tessellator = new Tessellator();
     public void drawGradientRect(int par1, int par2, int par3, int par4, int par5, int par6)
     {
         float f = (float)(par5 >> 24 & 255) / 255.0F;
@@ -343,7 +345,7 @@ public class GuiHelper {
         GL11.glDisable(GL11.GL_ALPHA_TEST);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glShadeModel(GL11.GL_SMOOTH);
-        Tessellator tessellator = Tessellator.instance;
+      //  Tessellator tessellator = Tessellator.instance;
         tessellator.startDrawingQuads();
         tessellator.setColorRGBA_F(f1, f2, f3, f);
         tessellator.addVertex((double)par3, (double)par2, 0);
