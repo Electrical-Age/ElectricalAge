@@ -10,19 +10,26 @@ import net.minecraft.item.ItemStack;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.sound.SoundCommand;
 import mods.eln.wiki.Data;
 
 public class TransformerDescriptor extends TransparentNodeDescriptor {
 	Obj3D obj;
 	Obj3D defaultFeroObj;
+	
+	public float minimalLoadToHum;
+	public SoundCommand highLoadSound;
+	
 	public TransformerDescriptor(
 			String name,
 			Obj3D obj,
-			Obj3D defaultFeroObj
+			Obj3D defaultFeroObj,
+			float minimalLoadToHum
 			) {
 		super(name, TransformerElement.class,TransformerRender.class);
 		this.obj = obj;
 		this.defaultFeroObj = defaultFeroObj;
+		this.minimalLoadToHum = minimalLoadToHum;
 		
 		if(obj != null){
 			main = obj.getPart("main");
@@ -31,6 +38,8 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 		if(defaultFeroObj != null){
 			defaultFero = defaultFeroObj.getPart("fero");
 		}
+		
+		highLoadSound = new SoundCommand("eln:Transformer", 1.6f);
 	}
 	@Override
 	public void setParent(Item item, int damage) {

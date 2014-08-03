@@ -3,6 +3,8 @@ package mods.eln.transparentnode.transformer;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.sun.crypto.provider.DESCipher;
+
 import mods.eln.Eln;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Direction;
@@ -21,6 +23,8 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sound.SoundCommand;
+import mods.eln.sound.SoundLooper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -37,6 +41,11 @@ public class TransformerElement extends TransparentNodeElement {
 
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
 
+	float primaryMaxCurrent = 0;
+	float secondaryMaxCurrent = 0;
+	TransformerDescriptor transformerDescriptor;
+	SoundLooper highLoadSoundLooper;
+	
 	public TransformerElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		electricalLoadList.add(primaryLoad);
@@ -48,6 +57,20 @@ public class TransformerElement extends TransparentNodeElement {
 		slowProcessList.add(voltagePrimaryWatchdog.set(primaryLoad).set(exp));
 		slowProcessList.add(voltageSecondaryWatchdog.set(secondaryLoad).set(exp));
 
+		transformerDescriptor = (TransformerDescriptor)descriptor;
+		highLoadSoundLooper = new SoundLooper(this) {
+			@Override
+			public SoundCommand mustStart() {
+				if (primaryMaxCurrent != 0 && secondaryMaxCurrent != 0) {
+					float load = (float)Math.max(primaryLoad.getI() / primaryMaxCurrent, secondaryLoad.getI() / secondaryMaxCurrent);
+					if (load > transformerDescriptor.minimalLoadToHum)
+						return transformerDescriptor.highLoadSound.copy().mulVolume(0.1f * (load - transformerDescriptor.minimalLoadToHum) / (1 - transformerDescriptor.minimalLoadToHum), 1f).smallRange();
+				} 
+					
+				return null;
+			}
+		};
+		slowProcessList.add(highLoadSoundLooper);
 	}
 
 	VoltageStateWatchDog voltagePrimaryWatchdog = new VoltageStateWatchDog(), voltageSecondaryWatchdog = new VoltageStateWatchDog();
@@ -125,7 +148,7 @@ public class TransformerElement extends TransparentNodeElement {
 		ElectricalCableDescriptor primaryCableDescriptor = null, secondaryCableDescriptor = null;
 
 		// tranformerProcess.setEnable(primaryCable != null && core != null && secondaryCable != null);
-
+	
 		if (primaryCable != null) {
 			primaryCableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(primaryCable);
 		}
@@ -150,15 +173,23 @@ public class TransformerElement extends TransparentNodeElement {
 			coreFactor = coreDescriptor.cableMultiplicator;
 		}
 
-		if (primaryCable == null || core == null)
+		if (primaryCable == null || core == null) {
 			primaryLoad.highImpedance();
-		else
+			primaryMaxCurrent = 0;
+		}
+		else {
 			primaryCableDescriptor.applyTo(primaryLoad, coreFactor);
+			primaryMaxCurrent = (float)primaryCableDescriptor.electricalMaximalCurrent;
+		}
 
-		if (secondaryCable == null || core == null)
+		if (secondaryCable == null || core == null) {
 			secondaryLoad.highImpedance();
-		else
+			secondaryMaxCurrent = 0;
+		}
+		else {
 			secondaryCableDescriptor.applyTo(secondaryLoad, coreFactor);
+			secondaryMaxCurrent = (float)secondaryCableDescriptor.electricalMaximalCurrent;
+		}
 
 		if (primaryCable != null && secondaryCable != null)
 		{
