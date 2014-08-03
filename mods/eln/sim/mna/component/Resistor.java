@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.SubSystem;
+import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.mna.state.State;
 
 import org.apache.commons.math3.linear.RealMatrix;
@@ -28,7 +29,7 @@ public class Resistor extends Bipole {
 		return line != null;
 	}*/
 	
-	private double r = 1000000000.0, rInv = 1/1000000000.0;
+	private double r = MnaConst.highImpedance, rInv = 1/MnaConst.highImpedance;
 
 
 	//public boolean usedAsInterSystem = false;
@@ -60,7 +61,11 @@ public class Resistor extends Bipole {
 	}
 
 	public void highImpedance(){
-		setR(1000000000000.0);
+		setR(MnaConst.highImpedance);
+	}	
+	public Resistor pullDown(){
+		setR(MnaConst.pullDown);
+		return this;
 	}
 	
 	/*@Override

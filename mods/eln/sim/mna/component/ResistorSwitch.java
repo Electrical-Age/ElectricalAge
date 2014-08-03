@@ -2,6 +2,7 @@ package mods.eln.sim.mna.component;
 
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.misc.INBTTReady;
+import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.mna.state.State;
 
 public class ResistorSwitch extends Resistor implements INBTTReady{
@@ -24,7 +25,7 @@ public class ResistorSwitch extends Resistor implements INBTTReady{
 	@Override
 	public Resistor setR(double r) {
 		baseR = r;
-		return super.setR(state ? r : 1000000000.0);
+		return super.setR(state ? r : MnaConst.highImpedance);
 	}
 	
 	

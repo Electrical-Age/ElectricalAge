@@ -2,19 +2,34 @@ package mods.eln.sixnode.electricalmath;
 
 import java.util.List;
 
+import mods.eln.gui.GuiLabel;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.solver.OperatorMapperFunc;
+import mods.eln.solver.Equation.Abs;
+import mods.eln.solver.Equation.BatteryCharge;
+import mods.eln.solver.Equation.Cos;
+import mods.eln.solver.Equation.Derivator;
+import mods.eln.solver.Equation.Integrator;
+import mods.eln.solver.Equation.IntegratorMinMax;
+import mods.eln.solver.Equation.Pid;
+import mods.eln.solver.Equation.RC;
+import mods.eln.solver.Equation.Ramp;
+import mods.eln.solver.Equation.Rs;
+import mods.eln.solver.Equation.Sin;
 import mods.eln.wiki.Data;
+import mods.eln.wiki.GuiVerticalExtender;
+import mods.eln.wiki.ItemDefault.IPlugIn;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 import org.lwjgl.opengl.GL11;
 
-public class ElectricalMathDescriptor extends SixNodeDescriptor {
+public class ElectricalMathDescriptor extends SixNodeDescriptor implements IPlugIn{
 
 	public float[] pinDistance;
 
@@ -102,5 +117,44 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor {
 		
 		list.add("Calculate a output signal from");
 		list.add("3 inputs (A,B,C) and one equation");
+	}
+	@Override
+	public int top(int y, GuiVerticalExtender extender, ItemStack stack) {
+		extender.add(new GuiLabel(6, y,"Can execute following math operator :")); y+=9;
+		extender.add(new GuiLabel(6, y,"  + - * / > < ")); y+=9;
+		y+=9;
+		extender.add(new GuiLabel(6, y,"Can execute following boolean operator :")); y+=9;
+		extender.add(new GuiLabel(6, y,"  & | = ^")); y+=9;
+		y+=9;
+		extender.add(new GuiLabel(6, y,"Can execute following function :")); y+=9;
+		extender.add(new GuiLabel(6, y,"  sin(alpha)")); y+=9;
+		extender.add(new GuiLabel(6, y,"  cos(alpha)")); y+=9;
+		extender.add(new GuiLabel(6, y,"  abs(value)")); y+=9;
+		extender.add(new GuiLabel(6, y,"  ramp(periode)")); y+=9;
+		extender.add(new GuiLabel(6, y,"  rs(reset,set)")); y+=9;
+		extender.add(new GuiLabel(6, y,"  integrate(value,resetTrigger)")); y+=9;
+		extender.add(new GuiLabel(6, y,"  integrate(value,minOutput,maxOutput)")); y+=9;
+		extender.add(new GuiLabel(6, y,"  derivate(value)")); y+=9;
+		extender.add(new GuiLabel(6, y,"  batteryCharge(normalizedBatVoltage)")); y+=9;
+		extender.add(new GuiLabel(6, y,"  rc(tao,value)")); y+=9;
+		extender.add(new GuiLabel(6, y,"  pid(target,hit,p,i,d)")); y+=9;
+		
+		y+=9;
+//		list.add(new OperatorMapperFunc("sin", 1, Sin.class));
+//		list.add(new OperatorMapperFunc("cos", 1, Cos.class));
+//		list.add(new OperatorMapperFunc("abs", 1, Abs.class));
+//		list.add(new OperatorMapperFunc("ramp", 1, Ramp.class));
+//		list.add(new OperatorMapperFunc("integrate", 2, Integrator.class));
+//		list.add(new OperatorMapperFunc("integrate", 3, IntegratorMinMax.class));
+//		list.add(new OperatorMapperFunc("derivate", 1, Derivator.class));
+//		list.add(new OperatorMapperFunc("pid", 5, Pid.class));
+//		list.add(new OperatorMapperFunc("batteryCharge", 1, BatteryCharge.class));
+//		list.add(new OperatorMapperFunc("rs", 2, Rs.class));
+//		list.add(new OperatorMapperFunc("rc", 2, RC.class));
+		return y;
+	}
+	@Override
+	public int bottom(int y, GuiVerticalExtender extender, ItemStack stack) {
+		return y;
 	}
 }

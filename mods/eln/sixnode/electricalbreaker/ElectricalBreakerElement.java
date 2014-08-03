@@ -32,6 +32,11 @@ public class ElectricalBreakerElement extends SixNodeElement {
     	electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
     	electricalComponentList.add(switchResistor);
+    	electricalComponentList.add(new Resistor(bLoad, null).pullDown());
+    	electricalComponentList.add(new Resistor(aLoad, null).pullDown());
+    	    	
+    	
+    	
     	thermalProcessList.add(cutProcess);
 
     	this.descriptor = (ElectricalBreakerDescriptor) descriptor;

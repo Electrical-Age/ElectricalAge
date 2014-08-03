@@ -297,6 +297,7 @@ public class SixNodeBlock extends NodeBlock {
 		else
 		{
 			SixNode sixNode = (SixNode) tileEntity.getNode();
+			if(sixNode == null) return null;
 			booltemp[0] = sixNode.getSideEnable(Direction.XN);
 			booltemp[1] = sixNode.getSideEnable(Direction.XP);
 			booltemp[2] = sixNode.getSideEnable(Direction.YN);

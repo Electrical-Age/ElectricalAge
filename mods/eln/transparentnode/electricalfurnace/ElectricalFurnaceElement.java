@@ -25,6 +25,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalResistor;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
+import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
@@ -144,7 +145,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 		slowRefreshProcess.process(0.05);
 		
 		Eln.instance.lowVoltageCableDescriptor.applyTo(electricalLoad);
-		//electricalLoad.setRs(1000000000000.0);
+		//electricalLoad.setRs(MnaConst.highImpedance);
 
 		
 	//	ItemStack stack = new ItemStack(Item.coal);
@@ -166,7 +167,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 		heatingCorpResistor.setState(powerOn);
 		itemStack = inventory.getStackInSlot(heatingCorpSlotId);
 		if(itemStack == null) {
-			thermalRegulator.setRmin(1000000000.0);
+			thermalRegulator.setRmin(MnaConst.highImpedance);
 			voltageWatchdog.setUNominal(100000);
 		}
 		else {

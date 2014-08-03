@@ -20,6 +20,7 @@ import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
@@ -42,6 +43,8 @@ public class ElectricalSwitchElement extends SixNodeElement {
     	electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
     	electricalComponentList.add(switchResistor);
+    	electricalComponentList.add(new Resistor(bLoad, null).pullDown());
+    	electricalComponentList.add(new Resistor(aLoad, null).pullDown());
 
 
     	this.descriptor = (ElectricalSwitchDescriptor) descriptor;

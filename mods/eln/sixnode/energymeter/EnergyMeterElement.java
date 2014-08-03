@@ -38,6 +38,10 @@ public class EnergyMeterElement extends SixNodeElement {
     	electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
     	electricalComponentList.add(shunt);
+    	electricalComponentList.add(new Resistor(bLoad, null).pullDown());
+    	electricalComponentList.add(new Resistor(aLoad, null).pullDown());
+
+    	
     	slowProcessList.add(slowProcess);
     	
     	WorldExplosion exp = new WorldExplosion(this).cableExplosion();

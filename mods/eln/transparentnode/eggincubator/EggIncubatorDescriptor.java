@@ -8,6 +8,7 @@ import mods.eln.misc.UtilsClient;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
@@ -109,7 +110,7 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 		if(enable)
 			powerLoad.setR(Rp);
 		else
-			powerLoad.setR(1000000000.0);
+			powerLoad.setR(MnaConst.highImpedance);
 	}
 
 	@Override

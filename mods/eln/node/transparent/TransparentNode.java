@@ -148,7 +148,7 @@ public class TransparentNode extends Node{
 
 	}
 
-	public enum FrontType{BlockSide,PlayerView,PlayerViewHorizontal};
+	public enum FrontType{BlockSide,PlayerView,PlayerViewHorizontal, BlockSideInv};
 	
 
 	@Override
