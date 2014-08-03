@@ -2523,6 +2523,8 @@ public class Eln {
 					magnetiserRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+			
+			desc.setRuningSound(new SoundCommand("eln:Motor", 1.6).mulVolume(0.3));
 		}
 
 		{
@@ -2540,6 +2542,8 @@ public class Eln {
 					magnetiserRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+			
+			desc.setRuningSound(new SoundCommand("eln:Motor", 1.6).mulVolume(0.3));
 		}
 	}
 
