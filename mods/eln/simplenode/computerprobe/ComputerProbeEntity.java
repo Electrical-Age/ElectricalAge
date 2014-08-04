@@ -30,7 +30,7 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
     public Object[] signalSetDir(Context context, Arguments args) {
     	ComputerProbeNode n = getNode();
     	if(n == null) return null;
-    	return n.setDir(context, args);
+    	return n.signalSetDir(context, args);
     }
 
     @Callback
@@ -38,7 +38,7 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
     public Object[] signalGetDir(Context context, Arguments args) {
     	ComputerProbeNode n = getNode();
     	if(n == null) return null;
-    	return n.getDir(context, args);
+    	return n.signalGetDir(context, args);
     }
 
     @Callback
@@ -46,7 +46,7 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
     public Object[] signalSetOut(Context context, Arguments args) {
     	ComputerProbeNode n = getNode();
     	if(n == null) return null;
-    	return n.setOut(context, args);
+    	return n.signalSetOut(context, args);
     }
 
     @Callback
@@ -54,7 +54,7 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
     public Object[] signalGetOut(Context context, Arguments args) {
     	ComputerProbeNode n = getNode();
     	if(n == null) return null;
-    	return n.getOut(context, args);
+    	return n.signalGetOut(context, args);
     }
 
     @Callback
@@ -62,7 +62,7 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
     public Object[] signalGetIn(Context context, Arguments args) {
     	ComputerProbeNode n = getNode();
     	if(n == null) return null;
-    	return n.getIn(context, args);
+    	return n.signalGetIn(context, args);
     }
     
     @Callback
@@ -70,7 +70,7 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
     public Object[] wirelessSet(Context context, Arguments args) {
     	ComputerProbeNode n = getNode();
     	if(n == null) return null;
-    	return n.wirelessTx(context, args);
+    	return n.wirelessSet(context, args);
     }
     
     @Callback
@@ -78,7 +78,7 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
     public Object[] wirelessRemove(Context context, Arguments args) {
     	ComputerProbeNode n = getNode();
     	if(n == null) return null;
-    	return n.wirelessTxRemove(context, args);
+    	return n.wirelessRemove(context, args);
     }
     
     @Callback
@@ -86,7 +86,7 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
     public Object[] wirelessRemoveAll(Context context, Arguments args) {
     	ComputerProbeNode n = getNode();
     	if(n == null) return null;
-    	return n.wirelessTxRemoveAll(context, args);
+    	return n.wirelessRemoveAll(context, args);
     }
     
     @Callback
@@ -94,7 +94,7 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
     public Object[] wirelessGet(Context context, Arguments args) {
     	ComputerProbeNode n = getNode();
     	if(n == null) return null;
-    	return n.wirelessRx(context, args);
+    	return n.wirelessGet(context, args);
     }
     
     
