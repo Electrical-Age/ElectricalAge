@@ -1480,4 +1480,8 @@ public class Utils {
 		// TODO Auto-generated method stub
 	 	return plotVolt("U", U) + plotAmpere("I", I) + plotPercent("Value", U/Eln.SVU);
 	}
+	
+	public static float limit(float value, float min, float max) {
+		return Math.max(Math.min(value, max), min);
+	}
 }
