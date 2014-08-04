@@ -487,7 +487,7 @@ public class Eln {
 	}
 
 	public static FMLEventChannel eventChannel;
-	boolean computerCraftReady = false;
+	//boolean computerCraftReady = false;
 	boolean ComputerProbeEnable;
 	boolean ElnToOtherEnergyConverterEnable;
 
@@ -497,6 +497,9 @@ public class Eln {
 	@EventHandler
 	public void modsLoaded(FMLPostInitializationEvent event) {
 		Other.check();
+		if (Other.ccLoaded) {
+			PeripheralHandler.register();
+		}
 
 	}
 
@@ -504,7 +507,7 @@ public class Eln {
 	public void load(FMLInitializationEvent event) {
 		Object o;
 
-		computerCraftReady = Utils.isClassLoaded("dan200.computercraft.ComputerCraft");
+		//computerCraftReady = Utils.isClassLoaded("dan200.computercraft.ComputerCraft");
 
 
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
@@ -584,9 +587,6 @@ public class Eln {
 
 		SixNode.sixNodeCacheList.add(new SixNodeCacheStd());
 
-		if (computerCraftReady) {
-			PeripheralHandler.register();
-		}
 
 		registerTestBlock();
 		registerEnergyConverter();
@@ -3659,7 +3659,7 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
-		if (computerCraftReady && ComputerProbeEnable) {
+		/*if (Other.ccLoaded && ComputerProbeEnable) {
 			subId = 4;
 			name = "ComputerCraft Probe";
 
@@ -3670,7 +3670,7 @@ public class Eln {
 					);
 
 			transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
-		}
+		}*/
 
 	}
 
@@ -4596,6 +4596,22 @@ public class Eln {
 				"D",
 				Character.valueOf('D'), findItemStack("10A Diode"));
 
+		
+		addRecipe(findItemStack("Power Capacitor"),
+				"cPc",
+				"III",
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+				Character.valueOf('c'), findItemStack("Iron Cable"),
+				Character.valueOf('P'), "plateIron");
+		
+		addRecipe(findItemStack("Power Inductor"),
+				" P ",
+				"cIc",
+				"IPI",
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+				Character.valueOf('c'), findItemStack("Copper Cable"),
+				Character.valueOf('P'), "plateIron");
+		
 		//name = "Power Capacitor"
 		//name = "Power Inductor"
 		
@@ -5432,10 +5448,10 @@ public class Eln {
 	void recipePortableCondensator()
 	{
 		addRecipe(findItemStack("Portable Condensator"),
-				"RCR",
-				"wcw",
-				"RCR",
-				Character.valueOf('C'), "plateCoal",
+				"RcR",
+				"wCw",
+				"RcR",
+				Character.valueOf('C'), new ItemStack(Items.redstone),
 				Character.valueOf('R'), "itemRubber",
 				Character.valueOf('w'), findItemStack("Copper Cable"),
 				Character.valueOf('c'), "plateCopper");

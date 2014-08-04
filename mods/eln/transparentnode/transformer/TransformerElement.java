@@ -6,6 +6,7 @@ import java.io.IOException;
 import com.sun.crypto.provider.DESCipher;
 
 import mods.eln.Eln;
+import mods.eln.Other;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
