@@ -100,6 +100,7 @@ public class NodeManager extends WorldSavedData{
 				node.initializeFromNBT();
 				
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 
 		}
@@ -124,11 +125,16 @@ public class NodeManager extends WorldSavedData{
 		//for(Node node : nodeArray)
 		for(NodeBase node : nodesmap.values())
 		{
-			if(node.mustBeSaved() == false) continue;
-			NBTTagCompound nbtNode = new NBTTagCompound();
-			nbtNode.setString("tag", node.getNodeUuid());
-			node.writeToNBT(nbtNode);
-			nbt.setTag("n" + nodeCounter++, nbtNode);
+			try {
+				if(node.mustBeSaved() == false) continue;
+				NBTTagCompound nbtNode = new NBTTagCompound();
+				nbtNode.setString("tag", node.getNodeUuid());
+				node.writeToNBT(nbtNode);
+				nbt.setTag("n" + nodeCounter++, nbtNode);			
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
 		}
 	}
 	
