@@ -177,6 +177,7 @@ import mods.eln.transparentnode.thermaldissipatoractive.ThermalDissipatorActiveD
 import mods.eln.transparentnode.thermaldissipatorpassive.ThermalDissipatorPassiveDescriptor;
 import mods.eln.transparentnode.transformer.TransformerDescriptor;
 import mods.eln.transparentnode.turbine.TurbineDescriptor;
+import mods.eln.transparentnode.turret.TurretDescriptor;
 import mods.eln.transparentnode.waterturbine.WaterTurbineDescriptor;
 import mods.eln.transparentnode.windturbine.WindTurbineDescriptor;
 import mods.eln.wiki.Data;
@@ -323,7 +324,8 @@ public class Eln {
 			"/model/WindTurbineMini/WindTurbineMini.obj",
 			"/model/wirelesssignalrepeater/wirelesssignalrepeater.obj",
 			"/model/wirelesssignalrx/wirelesssignalrx.obj",
-			"/model/wirelesssignaltx/wirelesssignaltx.obj"
+			"/model/wirelesssignaltx/wirelesssignaltx.obj",
+			"/model/Turret/Turret.obj"
 			// "/model/BatteryBigHV/BatteryBigHV.obj"
 
 	};
@@ -638,6 +640,7 @@ public class Eln {
 		registerWindTurbine(49);
 		registerThermalDissipatorPassiveAndActive(64);
 		registerTransparentNodeMisc(65);
+		//registerTurret(66);
 
 		registerHeatingCorp(1);
 		// registerThermalIsolator(2);
@@ -3674,6 +3677,17 @@ public class Eln {
 
 	}
 
+	void registerTurret(int id) {
+		{
+			int subId = 0;
+			String name = "200V Defence turret";
+
+			TurretDescriptor desc = new TurretDescriptor(name, "Turret", "Defence turret WIP");
+
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+	}
+	
 	/*
 	 * void registerMppt(int id) { int subId, completId; String name; MpptDescriptor desc;
 	 * 
