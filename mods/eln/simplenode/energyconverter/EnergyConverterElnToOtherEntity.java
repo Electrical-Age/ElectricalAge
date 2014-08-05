@@ -10,6 +10,7 @@ import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
 import mods.eln.Other;
 import mods.eln.misc.Direction;
+import mods.eln.misc.Utils;
 import mods.eln.node.simple.SimpleNode;
 import mods.eln.node.simple.SimpleNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
@@ -30,7 +31,10 @@ import cpw.mods.fml.relauncher.SideOnly;
 																								 * 
 																								 * @Optional.Interface(iface = "li.cil.oc.api.network.SidedEnvironment", modid = Other.modIdOc)
 																								 */})
-public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements IEnergySource, Environment, IEnergyHandler/*, IPipeConnection, IPowerEmitter *//* ,SidedEnvironment */{
+public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements 
+	IEnergySource,Environment, 
+	IEnergyHandler/* ,SidedEnvironment *//*,
+	ISidedBatteryProvider, IPowerEmitter*//*, IPipeConnection*/{
 
 	public EnergyConverterElnToOtherEntity() {
 		if (Other.ocLoaded) getOc().constructor();
@@ -159,6 +163,8 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	@Override
 	@Optional.Method(modid = Other.modIdTe)
 	public boolean canConnectEnergy(ForgeDirection from) {
+	//	Utils.println("*****canConnectEnergy*****");
+	//	return true;
 		if (worldObj.isRemote) return false;
 		SimpleNode n = getNode();
 		return n.getFront().back() == Direction.from(from);
@@ -167,13 +173,14 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	@Override
 	@Optional.Method(modid = Other.modIdTe)
 	public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate) {
-		// TODO Auto-generated method stub
+	//Utils.println("*****receiveEnergy*****");
 		return 0;
 	}
 
 	@Override
 	@Optional.Method(modid = Other.modIdTe)
 	public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate) {
+		//Utils.println("*****extractEnergy*****");
 		if (worldObj.isRemote) return 0;
 		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) getNode();
 		int extract = (int) Math.min(maxExtract, node.getOtherModEnergyBuffer(Other.getElnToTeConversionRatio()));
@@ -186,12 +193,14 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	@Override
 	@Optional.Method(modid = Other.modIdTe)
 	public int getEnergyStored(ForgeDirection from) {
+		//Utils.println("*****getEnergyStored*****");
 		return 0;
 	}
 
 	@Override
 	@Optional.Method(modid = Other.modIdTe)
 	public int getMaxEnergyStored(ForgeDirection from) {
+		//Utils.println("*****getMaxEnergyStored*****");
 		return 0;
 	}
 
@@ -202,6 +211,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 		super.updateEntity();
 		if (Other.ic2Loaded) EnergyConverterElnToOtherFireWallIc2.updateEntity(this);
 		if (Other.ocLoaded) getOc().updateEntity();
+		if(Other.teLoaded)EnergyConverterElnToOtherFireWallRf.updateEntity(this);
 	}
 
 	public void onLoaded() {

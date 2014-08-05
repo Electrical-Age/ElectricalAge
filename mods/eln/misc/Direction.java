@@ -1,6 +1,5 @@
 package mods.eln.misc;
 
-import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Vec3;
@@ -626,6 +625,19 @@ public enum Direction {
 		case UP:return YP;
 		case WEST:return XN;
 		default:return YN;
+		
+		}
+	}
+
+	public  ForgeDirection toForge() {
+		switch(this){
+		case YN: return ForgeDirection.DOWN;
+		case XP:return ForgeDirection.EAST;
+		case ZN:return ForgeDirection.NORTH;
+		case ZP:return ForgeDirection.SOUTH;
+		case YP:return ForgeDirection.UP;
+		case XN:return ForgeDirection.WEST;
+		default:return ForgeDirection.UNKNOWN;
 		
 		}
 	}

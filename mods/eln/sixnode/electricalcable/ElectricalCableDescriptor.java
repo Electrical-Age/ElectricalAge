@@ -143,9 +143,9 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 		else {
 			//list.add("Low resistor => low power lost");
 			list.add("Nominal usage ->");
-			list.add("  Voltage : " + (int)electricalNominalVoltage + " V");
-			list.add("  Current : " + (int)(electricalNominalPower / electricalNominalVoltage) + " A");
-			list.add("  Power : " + (int)electricalNominalPower + " W");
+			list.add("  Voltage : " + (int)electricalNominalVoltage + "V");
+			list.add(Utils.plotAmpere("  Current :",electricalNominalPower / electricalNominalVoltage));
+			list.add("  Power : " + (int)electricalNominalPower + "W");
 		//	list.add("  Power lost : " + (int)(electricalNominalPowerDropFactor * electricalNominalPower) + " W/Block");
 			list.add(Utils.plotOhm("Serial resistor :", electricalNominalRs * 2));
 		}

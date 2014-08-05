@@ -66,6 +66,7 @@ import mods.eln.misc.series.SerieEE;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
 import mods.eln.node.NodeServer;
+import mods.eln.node.simple.SimpleNodeItem;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeBlock;
 import mods.eln.node.six.SixNodeCacheStd;
@@ -787,7 +788,7 @@ public class Eln {
 				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "LVU", elnDesc,ic2Desc,ocDesc);
 				elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
-				GameRegistry.registerBlock(elnToOtherBlockLvu, blockName);
+				GameRegistry.registerBlock(elnToOtherBlockLvu,SimpleNodeItem.class, blockName);
 				LanguageRegistry.addName(elnToOtherBlockLvu, name);
 			}
 			{
@@ -799,7 +800,7 @@ public class Eln {
 				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "MVU",elnDesc,ic2Desc,ocDesc);
 				elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
-				GameRegistry.registerBlock(elnToOtherBlockLvu, blockName);
+				GameRegistry.registerBlock(elnToOtherBlockLvu,SimpleNodeItem.class, blockName);
 				LanguageRegistry.addName(elnToOtherBlockLvu, name);
 			}
 			{
@@ -811,7 +812,7 @@ public class Eln {
 				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "HVU", elnDesc,ic2Desc,ocDesc);
 				elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
-				GameRegistry.registerBlock(elnToOtherBlockLvu, blockName);
+				GameRegistry.registerBlock(elnToOtherBlockLvu,SimpleNodeItem.class, blockName);
 				LanguageRegistry.addName(elnToOtherBlockLvu, name);
 			}
 		}
@@ -833,7 +834,7 @@ public class Eln {
 			String name = "Eln Computer Probe";
 			computerProbeBlock = new ComputerProbeBlock();
 			computerProbeBlock.setCreativeTab(creativeTab).setBlockName(blockName);
-			GameRegistry.registerBlock(computerProbeBlock, blockName);
+			GameRegistry.registerBlock(computerProbeBlock,SimpleNodeItem.class, blockName);
 			LanguageRegistry.addName(computerProbeBlock, name);
 		}
 		
@@ -1034,7 +1035,7 @@ public class Eln {
 	public static final double SVP = gateOutputCurrent * SVU;
 	public static final double LVP = 1000;
 	public static final double MVP = 2000;
-	public static final double HVP = 4000;
+	public static final double HVP = 5000;
 
 	public static double electricalCableDeltaTMax = 20;
 
@@ -1169,7 +1170,7 @@ public class Eln {
 
 			highVoltageCableDescriptor = desc;
 
-			desc.setPhysicalConstantLikeNormalCable(HVU, HVP, 0.05 / 20,// electricalNominalVoltage,
+			desc.setPhysicalConstantLikeNormalCable(HVU, HVP, 0.025*5/4 / 20,// electricalNominalVoltage,
 																		// electricalNominalPower,
 																		// electricalNominalPowerDrop,
 					HVU * 1.3, HVP * 1.2,// electricalMaximalVoltage,
@@ -1610,7 +1611,7 @@ public class Eln {
 
 					);
 
-			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
 
 		{
@@ -1629,7 +1630,7 @@ public class Eln {
 					sixNodeThermalLoadInitializer.copy(),
 					lowVoltageCableDescriptor);
 
-			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
 
 		{
@@ -1647,7 +1648,7 @@ public class Eln {
 
 					);
 
-			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
 
 		{
@@ -4588,27 +4589,27 @@ public class Eln {
 
 	void recipePassiveComponent() {
 
-		addRecipe(findItemStack("Signal Diode", 4),
-				" RB",
-				"IIR",
-				" RB",
-				Character.valueOf('R'), new ItemStack(Items.redstone),
-				Character.valueOf('I'), findItemStack("Iron Cable"),
-				Character.valueOf('B'), "itemRubber");
-
-		addRecipe(findItemStack("10A Diode", 3),
-				" RB",
-				"IIR",
-				" RB",
-				Character.valueOf('R'), new ItemStack(Items.redstone),
-				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
-				Character.valueOf('B'), "itemRubber");
-
-		addRecipe(findItemStack("25A Diode"),
-				"D",
-				"D",
-				"D",
-				Character.valueOf('D'), findItemStack("10A Diode"));
+//		addRecipe(findItemStack("Signal Diode", 4),
+//				" RB",
+//				"IIR",
+//				" RB",
+//				Character.valueOf('R'), new ItemStack(Items.redstone),
+//				Character.valueOf('I'), findItemStack("Iron Cable"),
+//				Character.valueOf('B'), "itemRubber");
+//
+//		addRecipe(findItemStack("10A Diode", 3),
+//				" RB",
+//				"IIR",
+//				" RB",
+//				Character.valueOf('R'), new ItemStack(Items.redstone),
+//				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+//				Character.valueOf('B'), "itemRubber");
+//
+//		addRecipe(findItemStack("25A Diode"),
+//				"D",
+//				"D",
+//				"D",
+//				Character.valueOf('D'), findItemStack("10A Diode"));
 
 		
 		addRecipe(findItemStack("Power Capacitor"),
