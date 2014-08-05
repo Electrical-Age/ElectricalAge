@@ -16,7 +16,8 @@
    "WINDTURBINE_BIG_SF": {"category": "block","sounds": [{"name": "WINDTURBINE_BIG_SF","stream": false}]},
    "neon_lamp": {"category": "block","sounds": [{"name": "neon_lamp","stream": false}]},
    "Transformer": {"category": "block", "sounds": [{"name": "Transformer", "stream": false}]},
-   "Motor": {"category": "block", "sounds": [{"name": "Motor", "stream": false}]}
+   "Motor": {"category": "block", "sounds": [{"name": "Motor", "stream": false}]},
+   "LaserGun": {"category": "block", "sounds": [{"name": "LaserGun", "stream": false}]}
 }
 
 

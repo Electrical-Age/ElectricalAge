@@ -28,18 +28,17 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		public float gunAimAnimationSpeed;
 		
 		public Properties() {
-			actionAngle = 60;
+			actionAngle = 40;
 			detectionDistance = 12;
 			aimDistance = 15;
 			impulsePower = 2000;
 			gunMinElevation = -40;
 			gunMaxElevation = 80;
-			laserViewLightThreshold = 10;
-			turretSeekAnimationSpeed = 40;
+			turretSeekAnimationSpeed = 30;
 			turretAimAnimationSpeed = 80;
-			gunArmAnimationSpeed = 4;
-			gunDisarmAnimationSpeed = 1;
-			gunAimAnimationSpeed = 150;
+			gunArmAnimationSpeed = 3;
+			gunDisarmAnimationSpeed = 0.75f;
+			gunAimAnimationSpeed = 120;
 		}
 	}
 	
@@ -90,28 +89,19 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		if (holder != null) holder.draw();
 		if (joint != null) joint.draw();
 		GL11.glPushMatrix();
-		GL11.glRotatef(turretAngle, 0f, 1f, 0f);
-
-		if (turret != null) turret.draw();
-		if (sensor != null) UtilsClient.drawLight(sensor);
-
-		GL11.glRotatef(gunAngle, 0f, 0f, 1f);
-		/*GL11.glColor4f(1f, 0f, 0f, 0.2f);
-		UtilsClient.disableLight();
-		UtilsClient.enableBlend();
-		GL11.glBegin(GL11.GL_LINE_STRIP);
-		GL11.glVertex3f(-0.3f, 0.15f, 0f);
-		GL11.glVertex3f(-8f, 0f, 0f);
-		GL11.glEnd();
-		UtilsClient.enableLight();
-		UtilsClient.disableBlend();
-		GL11.glColor3f(1f, 1f, 1f);*/
-		
-		GL11.glTranslatef(0f, 0f, gunPosition / 4f);
-		if (leftGun != null) leftGun.draw();
-		GL11.glTranslatef(0f, 0f, -gunPosition / 2f);
-		if (rightGun != null) rightGun.draw();
-
+			GL11.glRotatef(turretAngle, 0f, 1f, 0f);
+			if (turret != null) turret.draw();
+			if (sensor != null) {
+				float lightIntensity = 0.5f + 0.5f * gunPosition;
+				GL11.glColor3f(lightIntensity, lightIntensity, lightIntensity);
+				UtilsClient.drawLight(sensor);
+				GL11.glColor3f(1f, 1f, 1f);
+			}
+			GL11.glRotatef(gunAngle, 0f, 0f, 1f);
+			GL11.glTranslatef(0f, 0f, gunPosition / 4f);
+			if (leftGun != null) leftGun.draw();
+			GL11.glTranslatef(0f, 0f, -gunPosition / 2f);
+			if (rightGun != null) rightGun.draw();
 		GL11.glPopMatrix();
 	}
 }

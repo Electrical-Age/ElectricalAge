@@ -3,6 +3,8 @@ package mods.eln.transparentnode.turret;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import org.lwjgl.opengl.GL11;
+
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
@@ -17,6 +19,7 @@ public class TurretRender extends TransparentNodeElementRender {
 		super(tileEntity, descriptor);
 		this.descriptor = (TurretDescriptor)descriptor;
 		simulation = new TurretMechanicsSimulation(this.descriptor);
+		//front = front.getInverse();
 	}
 
 	public float getTurretAngle() {
@@ -33,7 +36,10 @@ public class TurretRender extends TransparentNodeElementRender {
 	
 	@Override
 	public void draw() {
-		descriptor.draw(this);
+		GL11.glPushMatrix();
+			front.glRotateXnRef();
+			descriptor.draw(this);
+		GL11.glPopMatrix();
 	}
 	
 	@Override
