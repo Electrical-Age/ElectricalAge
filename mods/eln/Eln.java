@@ -798,10 +798,10 @@ public class Eln {
 				Ic2Descriptor ic2Desc = new Ic2Descriptor( 128, 2);
 				OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax*Other.getElnToOcConversionRatio()/Other.getElnToIc2ConversionRatio());
 				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "MVU",elnDesc,ic2Desc,ocDesc);
-				elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
-				elnToOtherBlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
-				GameRegistry.registerBlock(elnToOtherBlockLvu,SimpleNodeItem.class, blockName);
-				LanguageRegistry.addName(elnToOtherBlockLvu, name);
+				elnToOtherBlockMvu = new EnergyConverterElnToOtherBlock(desc);
+				elnToOtherBlockMvu.setCreativeTab(creativeTab).setBlockName(blockName);
+				GameRegistry.registerBlock(elnToOtherBlockMvu,SimpleNodeItem.class, blockName);
+				LanguageRegistry.addName(elnToOtherBlockMvu, name);
 			}
 			{
 				String blockName = "eln." + baseName + "HVUBlock";
@@ -810,10 +810,10 @@ public class Eln {
 				Ic2Descriptor ic2Desc = new Ic2Descriptor(512, 3);
 				OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax*Other.getElnToOcConversionRatio()/Other.getElnToIc2ConversionRatio());
 				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "HVU", elnDesc,ic2Desc,ocDesc);
-				elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
-				elnToOtherBlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
-				GameRegistry.registerBlock(elnToOtherBlockLvu,SimpleNodeItem.class, blockName);
-				LanguageRegistry.addName(elnToOtherBlockLvu, name);
+				elnToOtherBlockHvu = new EnergyConverterElnToOtherBlock(desc);
+				elnToOtherBlockHvu.setCreativeTab(creativeTab).setBlockName(blockName);
+				GameRegistry.registerBlock(elnToOtherBlockHvu,SimpleNodeItem.class, blockName);
+				LanguageRegistry.addName(elnToOtherBlockHvu, name);
 			}
 		}
 	}
@@ -6115,7 +6115,7 @@ public class Eln {
 					Character.valueOf('C'), findItemStack("Cheap Chip"),
 					Character.valueOf('c'), findItemStack("Medium Voltage Cable"),
 					Character.valueOf('I'), new ItemStack(Items.iron_ingot),
-					Character.valueOf('R'), new ItemStack(Items.iron_ingot));
+					Character.valueOf('R'), dicTungstenIngot);
 
 			addRecipe(new ItemStack(elnToOtherBlockHvu),
 					"III",

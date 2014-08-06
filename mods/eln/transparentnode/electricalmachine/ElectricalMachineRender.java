@@ -30,12 +30,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class ElectricalMachineRender extends TransparentNodeElementRender {
-	TransparentNodeElementInventory inventory = new ElectricalMachineInventory(3, 64, this);
+	TransparentNodeElementInventory inventory;
 
 	ElectricalMachineDescriptor descriptor;
 	public ElectricalMachineRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
 		this.descriptor = (ElectricalMachineDescriptor) descriptor;
+		inventory = new ElectricalMachineInventory(2+this.descriptor.outStackCount, 64, this);
 		drawHandle = this.descriptor.newDrawHandle();
 	}
 

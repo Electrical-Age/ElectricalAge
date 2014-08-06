@@ -3,19 +3,18 @@ package mods.eln.misc;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
+import java.util.List;
 
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderItem;
@@ -23,26 +22,17 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraftforge.client.ClientCommandHandler;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
-import net.minecraftforge.client.MinecraftForgeClient;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
-
-import com.sun.org.apache.bcel.internal.generic.InstructionConstants.Clinit;
 
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 
@@ -627,8 +617,19 @@ public class UtilsClient {
 		}
 		glListsAllocated.clear();
 	}
+
+	public static void showItemTooltip(List src,List dst) {
+		if(src.size() == 0) return;
+		if(showItemTooltip()){
+			dst.addAll(src);
+		}else{
+			dst.add("\u00a7F\u00a7o<hold shift>");
+		}
+	}
 	
-	
+	public static boolean showItemTooltip() {
+		return Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
+	}
 
 
 }

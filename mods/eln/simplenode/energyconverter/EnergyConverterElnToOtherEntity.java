@@ -5,6 +5,8 @@ import ic2.api.energy.tile.IEnergySource;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import buildcraft.api.power.IPowerEmitter;
+
 import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
@@ -26,14 +28,14 @@ import cpw.mods.fml.relauncher.SideOnly;
 @Optional.InterfaceList({
 		@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = Other.modIdIc2),
 		@Optional.Interface(iface = "cofh.api.energy.IEnergyHandler", modid = Other.modIdTe),
-		@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = Other.modIdOc) /*
-																								 * ,
-																								 * 
-																								 * @Optional.Interface(iface = "li.cil.oc.api.network.SidedEnvironment", modid = Other.modIdOc)
-																								 */})
+		@Optional.Interface(iface = "buildcraft.api.power.IPowerEmitter", modid = Other.modIdBuildcraft),
+		@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = Other.modIdOc)})
 public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements 
 	IEnergySource,Environment, 
-	IEnergyHandler/* ,SidedEnvironment *//*,
+	IEnergyHandler,
+	IPowerEmitter
+	
+	/* ,SidedEnvironment *//*,
 	ISidedBatteryProvider, IPowerEmitter*//*, IPipeConnection*/{
 
 	public EnergyConverterElnToOtherEntity() {
@@ -204,6 +206,16 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 		return 0;
 	}
 
+	// ***************** Buildcraft ****************
+	
+	@Override
+	@Optional.Method(modid = Other.modIdBuildcraft)
+	public boolean canEmitPowerFrom(ForgeDirection side) {
+		if (worldObj.isRemote) return false;
+		SimpleNode n = getNode();
+		return n.getFront().back() == Direction.from(side);
+	}
+	
 	// ***************** Bridges ****************
 
 	@Override
@@ -212,6 +224,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 		if (Other.ic2Loaded) EnergyConverterElnToOtherFireWallIc2.updateEntity(this);
 		if (Other.ocLoaded) getOc().updateEntity();
 		if(Other.teLoaded)EnergyConverterElnToOtherFireWallRf.updateEntity(this);
+		if(Other.buildcraftLoaded)EnergyConverterElnToOtherFireWallBuildcraft.updateEntity(this);
 	}
 
 	public void onLoaded() {
@@ -247,16 +260,8 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 
 	protected boolean addedToEnet;
 
-/*	@Override
-	public boolean canEmitPowerFrom(ForgeDirection side) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 
-	@Override
-	public ConnectOverride overridePipeConnection(PipeType type, ForgeDirection with) {
-		// TODO Auto-generated method stub
-		return type == IPipeTile.PipeType.POWER ? ConnectOverride.DEFAULT : ConnectOverride.DISCONNECT;
-	}*/
+
+
 
 }
