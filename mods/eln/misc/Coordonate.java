@@ -9,6 +9,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.DimensionManager;
 import cpw.mods.fml.common.FMLCommonHandler;
 
 public class Coordonate implements INBTTReady {
@@ -31,7 +33,7 @@ public class Coordonate implements INBTTReady {
 	@Override
 	public int hashCode() {
 		
-		return (x + y)*0x10101010;
+		return (x + y)*0x10101010 + z;
 	}
 	
 	
@@ -190,9 +192,15 @@ public class Coordonate implements INBTTReady {
 		return world().getBlockMetadata(x, y, z);
 	}
 	public boolean getBlockExist() {
-		
-		return world().blockExists(x, y, z);
+		World w = DimensionManager.getWorld(dimention);
+		if(w == null) return false;
+		return w.blockExists(x, y, z);
 	}
+	
+	public boolean getWorldExist(){
+		return DimensionManager.getWorld(dimention) != null;
+	}
+	
 	public void copyTo(double[] v) {
 		v[0] = x + 0.5;
 		v[1] = y + 0.5;

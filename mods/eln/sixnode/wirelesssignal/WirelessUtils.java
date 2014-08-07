@@ -178,10 +178,11 @@ public class WirelessUtils {
 				c.x = (int) vx;
 				c.y = (int) vy;
 				c.z = (int) vz;
-				if (c.getBlockExist() == false) return Double.NaN;
-				Block b = c.getBlock();
-				if (b != Blocks.air && b.isOpaqueCube()) {
-					virtualDistance += 2.0;
+				if (c.getBlockExist()){
+					Block b = c.getBlock();
+					if (b != Blocks.air && b.isOpaqueCube()) {
+						virtualDistance += 2.0;
+					}
 				}
 
 			}

@@ -275,8 +275,10 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 
 		int scannerRadius = scannerRadiusStatic;
 		double scannerEnergy = 0;
+		
 
-		World world = miner.node.coordonate.world();
+		
+
 		jobCoord.dimention = miner.node.coordonate.dimention;
 		jobCoord.x = miner.node.coordonate.x;
 		jobCoord.y = miner.node.coordonate.y - pipeLength;
@@ -290,7 +292,9 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 		 * int invFreeCnt = 0; for(int idx = AutoMinerContainer.StorageStartId;idx < AutoMinerContainer.StorageSize + AutoMinerContainer.StorageStartId;idx++){ if(miner.inventory.getStackInSlot(idx) == null){ invFreeCnt++; } } Utils.println(" " + invFreeCnt);
 		 */
 		boolean jobFind = false;
-		if (drill == null) {
+		if(miner.node.coordonate.getBlockExist() == false){
+			setJob(jobType.none);
+		} else if (drill == null) {
 			if (jobCoord.y != miner.node.coordonate.y) {
 				ItemStack pipeStack = miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId);
 				if (pipeStack == null || (pipeStack.stackSize != pipeStack.getMaxStackSize() && pipeStack.stackSize != miner.inventory.getInventoryStackLimit())) {

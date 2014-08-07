@@ -1,5 +1,6 @@
 package mods.eln.misc;
 
+import java.awt.Dimension;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -51,6 +52,7 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
@@ -524,7 +526,19 @@ public class Utils {
 		//GL11.glColor3f(((color>>16) & 0xFF)/255f, ((color>>7) & 0xFF)/255f, ((color>>0) & 0xFF)/255f);
 	}
 
-	public static double getWeather(World world) {
+	/*public static double getWeather(World world) {
+		if(world.isThundering())
+			return 1.0;
+		if(world.isRaining())
+			return 0.5;
+		return 0.0;
+
+	}*/
+	
+	//Into utilsClient To
+	public static double getWeatherNoLoad(int dim){
+		if(getWorldExist(dim) == false) return 0.0;
+		World world = getWorld(dim);
 		if(world.isThundering())
 			return 1.0;
 		if(world.isRaining())
@@ -532,14 +546,30 @@ public class Utils {
 		return 0.0;
 
 	}
-
-	public static double getWind(World world, int y)
-	{
-		float factor = 1f + world.getRainStrength(0) * 0.2f + world.getWeightedThunderStrength(0) * 0.2f;
-		/*if(world.isRaining()) factor *= 1.2;
-		if(world.isThundering()) factor *= 1.25;*/
-		return Math.max(0.0, Eln.instance.wind.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getWeightedThunderStrength(0) * 2f);
+	public static World getWorld(int dim){
+		return FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(dim);
 	}
+
+	public static boolean getWorldExist(int dim){
+		return DimensionManager.getWorld(dim) != null;
+	}
+
+	public static double getWind(int worldId, int y)
+	{
+		if(getWorldExist(worldId) == false){
+			return Math.max(0.0, Eln.instance.wind.getWind(y));
+		}else{
+			World world = getWorld(worldId);
+			float factor = 1f + world.getRainStrength(0) * 0.2f + world.getWeightedThunderStrength(0) * 0.2f;
+			return Math.max(0.0, Eln.instance.wind.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getWeightedThunderStrength(0) * 2f);
+		}
+	}
+	
+//	public static double getWind(World world, int y)
+//	{
+//		float factor = 1f + world.getRainStrength(0) * 0.2f + world.getWeightedThunderStrength(0) * 0.2f;
+//		return Math.max(0.0, Eln.instance.wind.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getWeightedThunderStrength(0) * 2f);
+//	}
 
 	public static void dropItem(ItemStack itemStack, int x, int y, int z, World world)
 	{

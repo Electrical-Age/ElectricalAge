@@ -17,10 +17,10 @@ public class WindProcess implements IProcess,INBTTReady{
 		windVariation += (getTarget() - windHit)*varF*time + (Math.random()*2-1)*0.1*time;
 		windVariation *= (1 - 0.01*time);
 		
-		if(Math.random() < time/400){
+		if(Math.random() < time/1200){
 			newWindTarget();
 		}
-		if( Math.random() < time/40){
+		if( Math.random() < time/120){
 			windTargetNoose = (Math.random()*2-1)*1.2;
 		}
 		

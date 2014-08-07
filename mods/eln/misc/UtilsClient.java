@@ -630,6 +630,13 @@ public class UtilsClient {
 	public static boolean showItemTooltip() {
 		return Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
 	}
+	public static double getWeather(World world) {
+		if(world.isThundering())
+			return 1.0;
+		if(world.isRaining())
+			return 0.5;
+		return 0.0;
 
+	}
 
 }
