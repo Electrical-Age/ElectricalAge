@@ -35,6 +35,8 @@ public class EnergyMeterElement extends SixNodeElement {
 
 	public EnergyMeterElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
+		shunt.mustUseUltraImpedance();
+		
     	electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
     	electricalComponentList.add(shunt);

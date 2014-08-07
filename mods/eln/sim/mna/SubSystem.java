@@ -148,10 +148,12 @@ public class SubSystem {
 			singularMatrix = false;
 		} catch (Exception e) {
 			singularMatrix = true;
-			if(stateCount > 2){
+			if(stateCount > 1){
 				int idx = 0;
 				idx++;
+				Utils.println("//////////SingularMatrix////////////");
 			}
+			
 		}
 
 

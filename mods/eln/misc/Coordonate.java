@@ -54,7 +54,7 @@ public class Coordonate implements INBTTReady {
 		//Minecraft m = Minecraft.getMinecraft();
 		
 		
-		if(w == null) w = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(worldDimension());
+		/*if(w == null) */w = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(worldDimension());
 		return w;
         
 	}

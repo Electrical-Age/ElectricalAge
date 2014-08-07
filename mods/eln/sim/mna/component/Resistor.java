@@ -63,6 +63,11 @@ public class Resistor extends Bipole {
 	public void highImpedance(){
 		setR(MnaConst.highImpedance);
 	}	
+	
+	public void ultraImpedance() {
+		setR(MnaConst.ultraImpedance);
+	}
+
 	public Resistor pullDown(){
 		setR(MnaConst.pullDown);
 		return this;

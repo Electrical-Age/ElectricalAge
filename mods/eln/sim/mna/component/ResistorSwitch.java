@@ -7,7 +7,7 @@ import mods.eln.sim.mna.state.State;
 
 public class ResistorSwitch extends Resistor implements INBTTReady{
 
-	
+	boolean ultraImpedance = false;
 	String name;
 	public ResistorSwitch(String name,State aPin,State bPin) {
 		super(aPin, bPin);
@@ -25,7 +25,7 @@ public class ResistorSwitch extends Resistor implements INBTTReady{
 	@Override
 	public Resistor setR(double r) {
 		baseR = r;
-		return super.setR(state ? r : MnaConst.highImpedance);
+		return super.setR(state ? r : (ultraImpedance ? MnaConst.ultraImpedance : MnaConst.highImpedance));
 	}
 	
 	
@@ -38,14 +38,23 @@ public class ResistorSwitch extends Resistor implements INBTTReady{
 	public void readFromNBT(NBTTagCompound nbt, String str) {
 		str += name;
 		setR(nbt.getDouble(str + "R"));
-		if(Double.isNaN(baseR) || baseR == 0) highImpedance();
+		if(Double.isNaN(baseR) || baseR == 0) {
+			if(ultraImpedance)  ultraImpedance(); else highImpedance();
+		}
 		setState(nbt.getBoolean(str + "State"));
 	}
+
+
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		str += name;
 		nbt.setDouble(str + "R",baseR);
 		nbt.setBoolean(str + "State",getState());
+	}
+
+
+	public void mustUseUltraImpedance() {
+		ultraImpedance = true;
 	}
 }

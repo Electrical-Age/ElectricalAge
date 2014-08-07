@@ -40,6 +40,7 @@ public class ElectricalSwitchElement extends SixNodeElement {
 	public ElectricalSwitchElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 
+		switchResistor.mustUseUltraImpedance();
     	electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
     	electricalComponentList.add(switchResistor);

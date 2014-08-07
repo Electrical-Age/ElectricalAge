@@ -159,7 +159,7 @@ public class ElectricalRelayElement extends SixNodeElement {
 	
 	public void refreshSwitchResistor() {
 		if(switchState == false) {
-			switchResistor.highImpedance();
+			switchResistor.ultraImpedance();
 		}
 		else {
 			descriptor.applyTo(switchResistor);
