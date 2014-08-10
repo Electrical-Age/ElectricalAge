@@ -104,10 +104,12 @@ public class BatteryChargerElement extends SixNodeElement {
 		descriptor.applyTo(powerLoad);
 	}
 	
+	boolean invChanged = false;
 	@Override
 	protected void inventoryChanged() {
 		super.inventoryChanged();
-		needPublish(); 
+		//needPublish(); 
+		invChanged = true;
 	}
 
 	@Override
@@ -245,6 +247,10 @@ public class BatteryChargerElement extends SixNodeElement {
 			
 			if(charged != oldCharged) 
 				needPublish();
+			if(invChanged){
+				invChanged = false;
+				needPublish();
+			}
 		}
 	}
 }

@@ -47,6 +47,8 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 
 	public HeatFurnaceElement(TransparentNode transparentNode,TransparentNodeDescriptor descriptor) {
 		super(transparentNode,descriptor);
+		//this.descriptor.alphaClose = 0;
+		
 		this.descriptor = (HeatFurnaceDescriptor) descriptor;
 		
 		furnaceProcess.setGainMin(0.1);

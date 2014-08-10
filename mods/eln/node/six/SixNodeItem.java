@@ -48,164 +48,58 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 		return damageValue;
 	}
 
-	
-	/** COPYPAST
-	 * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-	 * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
+	/**
+	 * COPYPAST Callback for item usage. If the item does something special on right clicking, he will have one of those. Return True if something happen and false if it don't. This is for ITEMS, not BLOCKS
 	 */
 	/*
-	public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
-	{
-	    int var11 = par3World.getBlockId(par4, par5, par6);
-
-	    if (var11 == Block.snow.blockID)
-	    {
-	        par7 = 1;
-	    }
-	    else if (var11 != Block.vine.blockID && var11 != Block.tallGrass.blockID && var11 != Block.deadBush.blockID
-	            && (Block.blocksList[var11] == null || !Block.blocksList[var11].isBlockReplaceable(par3World, par4, par5, par6)))
-	    {
-	        if (par7 == 0)
-	        {
-	            --par5;
-	        }
-
-	        if (par7 == 1)
-	        {
-	            ++par5;
-	        }
-
-	        if (par7 == 2)
-	        {
-	            --par6;
-	        }
-
-	        if (par7 == 3)
-	        {
-	            ++par6;
-	        }
-
-	        if (par7 == 4)
-	        {
-	            --par4;
-	        }
-
-	        if (par7 == 5)
-	        {
-	            ++par4;
-	        }
-	    }
-
-	    if (par1ItemStack.stackSize == 0)
-	    {
-	        return false;
-	    }
-	    else if (!par2EntityPlayer.canPlayerEdit(par4, par5, par6, par7, par1ItemStack))
-	    {
-	        return false;
-	    }
-	    else if (par5 == 255 && Block.blocksList[getBlockID()].blockMaterial.isSolid())
-	    {
-	        return false;
-	    }
-	    else// // // //TOCOMMENT if (par3World.canPlaceEntityOnSide(this.getBlockID(), par4, par5, par6, false, par7, par2EntityPlayer))
-	    {
-	        Block var12 = Block.blocksList[this.getBlockID()];
-	        int var13 = this.getMetadata(par1ItemStack.getItemDamage());
-	        int var14 = Block.blocksList[this.getBlockID()].func_85104_a(par3World, par4, par5, par6, par7, par8, par9, par10, var13);
-
-	        if (placeBlockAt(par1ItemStack, par2EntityPlayer, par3World, par4, par5, par6, par7, par8, par9, par10, var14))
-	        {
-	            par3World.playSoundEffect((double)((float)par4 + 0.5F), (double)((float)par5 + 0.5F), (double)((float)par6 + 0.5F), var12.stepSound.getPlaceSound(), (var12.stepSound.getVolume() + 1.0F) / 2.0F, var12.stepSound.getPitch() * 0.8F);
-	            --par1ItemStack.stackSize;
-	        }
-
-	        return true;
-	    }
-	   /* else//TOCOMMENT
-	    {
-	        return false;
-	    }*/
-	//  }
-	/**
-	 * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-	 * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
+	 * public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10) { int var11 = par3World.getBlockId(par4, par5, par6);
+	 * 
+	 * if (var11 == Block.snow.blockID) { par7 = 1; } else if (var11 != Block.vine.blockID && var11 != Block.tallGrass.blockID && var11 != Block.deadBush.blockID && (Block.blocksList[var11] == null || !Block.blocksList[var11].isBlockReplaceable(par3World, par4, par5, par6))) { if (par7 == 0) { --par5; }
+	 * 
+	 * if (par7 == 1) { ++par5; }
+	 * 
+	 * if (par7 == 2) { --par6; }
+	 * 
+	 * if (par7 == 3) { ++par6; }
+	 * 
+	 * if (par7 == 4) { --par4; }
+	 * 
+	 * if (par7 == 5) { ++par4; } }
+	 * 
+	 * if (par1ItemStack.stackSize == 0) { return false; } else if (!par2EntityPlayer.canPlayerEdit(par4, par5, par6, par7, par1ItemStack)) { return false; } else if (par5 == 255 && Block.blocksList[getBlockID()].blockMaterial.isSolid()) { return false; } else// // // //TOCOMMENT if (par3World.canPlaceEntityOnSide(this.getBlockID(), par4, par5, par6, false, par7, par2EntityPlayer)) { Block var12 = Block.blocksList[this.getBlockID()]; int var13 = this.getMetadata(par1ItemStack.getItemDamage()); int var14 = Block.blocksList[this.getBlockID()].func_85104_a(par3World, par4, par5, par6, par7, par8, par9, par10, var13);
+	 * 
+	 * if (placeBlockAt(par1ItemStack, par2EntityPlayer, par3World, par4, par5, par6, par7, par8, par9, par10, var14)) { par3World.playSoundEffect((double)((float)par4 + 0.5F), (double)((float)par5 + 0.5F), (double)((float)par6 + 0.5F), var12.stepSound.getPlaceSound(), (var12.stepSound.getVolume() + 1.0F) / 2.0F, var12.stepSound.getPitch() * 0.8F); --par1ItemStack.stackSize; }
+	 * 
+	 * return true; } /* else//TOCOMMENT { return false; }
 	 */
-	
-	/* public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
-	{
-		if(isStackValidToPlace(par1ItemStack) == false) return false;
-	    int i1 = par3World.getBlockId(par4, par5, par6);
+	// }
+	/**
+	 * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return True if something happen and false if it don't. This is for ITEMS, not BLOCKS
+	 */
 
-	    if (i1 == Block.snow.blockID && (par3World.getBlockMetadata(par4, par5, par6) & 7) < 1)
-	    {
-	        par7 = 1;
-	    }
-	    else if (i1 != Block.vine.blockID && i1 != Block.tallGrass.blockID && i1 != Block.deadBush.blockID
-	            && (Block.blocksList[i1] == null || !Block.blocksList[i1].isBlockReplaceable(par3World, par4, par5, par6)))
-	    {
-	        if (par7 == 0)
-	        {
-	            --par5;
-	        }
-
-	        if (par7 == 1)
-	        {
-	            ++par5;
-	        }
-
-	        if (par7 == 2)
-	        {
-	            --par6;
-	        }
-
-	        if (par7 == 3)
-	        {
-	            ++par6;
-	        }
-
-	        if (par7 == 4)
-	        {
-	            --par4;
-	        }
-
-	        if (par7 == 5)
-	        {
-	            ++par4;
-	        }
-	    }
-
-	    if (par1ItemStack.stackSize == 0)
-	    {
-	        return false;
-	    }
-	    else if (!par2EntityPlayer.canPlayerEdit(par4, par5, par6, par7, par1ItemStack))
-	    {
-	        return false;
-	    }
-	    else if (par5 == 255 && Block.blocksList[this.getBlockID()].blockMaterial.isSolid())
-	    {
-	        return false;
-	    }
-	    else//if (par3World.canPlaceEntityOnSide(this.blockID, par4, par5, par6, false, par7, par2EntityPlayer, par1ItemStack))
-	    {
-	        Block block = Block.blocksList[this.getBlockID()];
-	        int j1 = this.getMetadata(par1ItemStack.getItemDamage());
-	        int k1 = Block.blocksList[this.getBlockID()].onBlockPlaced(par3World, par4, par5, par6, par7, par8, par9, par10, j1);
-
-	        if (placeBlockAt(par1ItemStack, par2EntityPlayer, par3World, par4, par5, par6, par7, par8, par9, par10, k1))
-	        {
-	            par3World.playSoundEffect((double)((float)par4 + 0.5F), (double)((float)par5 + 0.5F), (double)((float)par6 + 0.5F), block.stepSound.getPlaceSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F);
-	            --par1ItemStack.stackSize;
-	        }
-
-	        return true;
-	    }
-	/*    else
-	    {
-	        return false;
-	    }*//*
-			}*/
+	/*
+	 * public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10) { if(isStackValidToPlace(par1ItemStack) == false) return false; int i1 = par3World.getBlockId(par4, par5, par6);
+	 * 
+	 * if (i1 == Block.snow.blockID && (par3World.getBlockMetadata(par4, par5, par6) & 7) < 1) { par7 = 1; } else if (i1 != Block.vine.blockID && i1 != Block.tallGrass.blockID && i1 != Block.deadBush.blockID && (Block.blocksList[i1] == null || !Block.blocksList[i1].isBlockReplaceable(par3World, par4, par5, par6))) { if (par7 == 0) { --par5; }
+	 * 
+	 * if (par7 == 1) { ++par5; }
+	 * 
+	 * if (par7 == 2) { --par6; }
+	 * 
+	 * if (par7 == 3) { ++par6; }
+	 * 
+	 * if (par7 == 4) { --par4; }
+	 * 
+	 * if (par7 == 5) { ++par4; } }
+	 * 
+	 * if (par1ItemStack.stackSize == 0) { return false; } else if (!par2EntityPlayer.canPlayerEdit(par4, par5, par6, par7, par1ItemStack)) { return false; } else if (par5 == 255 && Block.blocksList[this.getBlockID()].blockMaterial.isSolid()) { return false; } else//if (par3World.canPlaceEntityOnSide(this.blockID, par4, par5, par6, false, par7, par2EntityPlayer, par1ItemStack)) { Block block = Block.blocksList[this.getBlockID()]; int j1 = this.getMetadata(par1ItemStack.getItemDamage()); int k1 = Block.blocksList[this.getBlockID()].onBlockPlaced(par3World, par4, par5, par6, par7, par8, par9, par10, j1);
+	 * 
+	 * if (placeBlockAt(par1ItemStack, par2EntityPlayer, par3World, par4, par5, par6, par7, par8, par9, par10, k1)) { par3World.playSoundEffect((double)((float)par4 + 0.5F), (double)((float)par5 + 0.5F), (double)((float)par6 + 0.5F), block.stepSound.getPlaceSound(), (block.stepSound.getVolume() + 1.0F) / 2.0F, block.stepSound.getPitch() * 0.8F); --par1ItemStack.stackSize; }
+	 * 
+	 * return true; } /* else { return false; }
+	 *//*
+		 * }
+		 */
 
 	public boolean onItemUse(ItemStack par1ItemStack, EntityPlayer par2EntityPlayer, World par3World, int par4, int par5, int par6, int par7, float par8, float par9, float par10)
 	{
@@ -260,7 +154,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 		{
 			return false;
 		}
-		//if (par3World.canPlaceEntityOnSide(this.field_150939_a, par4, par5, par6, false, par7, par2EntityPlayer, par1ItemStack))
+		// if (par3World.canPlaceEntityOnSide(this.field_150939_a, par4, par5, par6, false, par7, par2EntityPlayer, par1ItemStack))
 		{
 			int i1 = getMetadata(par1ItemStack.getItemDamage());
 			int j1 = this.field_150939_a.onBlockPlaced(par3World, par4, par5, par6, par7, par8, par9, par10, i1);
@@ -274,7 +168,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 			return true;
 		}
 
-		//return false;
+		// return false;
 	}
 
 	/**
@@ -282,7 +176,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 	 */
 
 	// func_150936_a <= canPlaceItemBlockOnSide
-	
+
 	@Override
 	public boolean func_150936_a(World par1World, int x, int y, int z, int par5, EntityPlayer par6EntityPlayer, ItemStack par7ItemStack)
 	{
@@ -291,9 +185,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 		int[] vect = new int[] { x, y, z };
 		Direction.fromIntMinecraftSide(par5).applyTo(vect, 1);
 		SixNodeDescriptor descriptor = getDescriptor(par7ItemStack);
-		if (descriptor.canBePlacedOnSide(par6EntityPlayer, new Coordonate(x, y, z, par1World), Direction.fromIntMinecraftSide(par5).getInverse()) == false)
-		{
-
+		if (descriptor.canBePlacedOnSide(par6EntityPlayer, new Coordonate(x, y, z, par1World), Direction.fromIntMinecraftSide(par5).getInverse()) == false){
 			return false;
 		}
 		if (par1World.getBlock(vect[0], vect[1], vect[2]) == Eln.sixNodeBlock)
@@ -309,10 +201,10 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 		return descriptor != null;
 	}
 
-	/*int getBlockID(){
-		return Block.getIdFromBlock(Block.getBlockFromItem(this));
-	}*/
-	
+	/*
+	 * int getBlockID(){ return Block.getIdFromBlock(Block.getBlockFromItem(this)); }
+	 */
+
 	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata)
 	{
 		if (world.isRemote)
@@ -323,17 +215,17 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 		Direction direction = Direction.fromIntMinecraftSide(side).getInverse();
 		Block blockOld = world.getBlock(x, y, z);
 		SixNodeBlock block = (SixNodeBlock) Block.getBlockFromItem(this);
-		if (blockOld == Blocks.air|| blockOld.isReplaceable(world, x, y, z))
+		if (blockOld == Blocks.air || blockOld.isReplaceable(world, x, y, z))
 		{
-			//blockID = this.getBlockID();
-			
+			// blockID = this.getBlockID();
+
 			Coordonate coord = new Coordonate(x, y, z, world);
 			SixNodeDescriptor descriptor = getDescriptor(stack);
 
 			String error;
 			if ((error = descriptor.checkCanPlace(coord, direction, LRDU.Up)) != null)
 			{
-				Utils.addChatMessage(player,error);
+				Utils.addChatMessage(player, error);
 				return false;
 			}
 
@@ -352,7 +244,6 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 				block.getIfOtherBlockIsSolid(world, x, y, z, direction);
 				block.onBlockPlacedBy(world, x, y, z, Direction.fromIntMinecraftSide(side).getInverse(), player, metadata);
 				return true;
-
 
 			}
 		}
@@ -382,11 +273,9 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 		return false;
 	}
 
-
-
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		
+
 		SixNodeDescriptor desc = getDescriptor(item);
 		if (desc == null)
 			return false;
@@ -396,7 +285,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		
+
 		if (isStackValidToPlace(item) == false)
 			return false;
 		return getDescriptor(item).shouldUseRenderHelper(type, item, helper);
@@ -404,26 +293,27 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		
+
 		if (isStackValidToPlace(item) == false)
 			return false;
 		return getDescriptor(item).shouldUseRenderHelperEln(type, item, helper);
 	}
+
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if (isStackValidToPlace(item) == false)
 			return;
 		Minecraft.getMinecraft().mcProfiler.startSection("SixNodeItem");
 
-		if(shouldUseRenderHelperEln(type, item, null)){
+		if (shouldUseRenderHelperEln(type, item, null)) {
 			switch (type)
 			{
-	
+
 			case ENTITY:
 				GL11.glRotatef(90, 0, 0, 1);
-				//GL11.glTranslatef(0, 1, 0);
+				// GL11.glTranslatef(0, 1, 0);
 				break;
-	
+
 			case EQUIPPED_FIRST_PERSON:
 				GL11.glRotatef(160, 0, 1, 0);
 				GL11.glTranslatef(-0.70f, 1, -0.7f);
@@ -436,7 +326,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 				GL11.glScalef(1.5f, 1.5f, 1.5f);
 				break;
 			case FIRST_PERSON_MAP:
-				//GL11.glTranslatef(0, 1, 0);
+				// GL11.glTranslatef(0, 1, 0);
 				break;
 			case INVENTORY:
 				GL11.glRotatef(-90, 0, 1, 0);
@@ -446,7 +336,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 				break;
 			}
 		}
-		//GL11.glTranslatef(0, 1, 0);
+		// GL11.glTranslatef(0, 1, 0);
 		getDescriptor(item).renderItem(type, item, data);
 
 		Minecraft.getMinecraft().mcProfiler.endSection();
@@ -454,67 +344,38 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 	}
 
 	/*
-	
-	
-	
-	
-	Hashtable<Integer,GenericItemBlockUsingDamageElement> subItemList = new Hashtable<Integer,GenericItemBlockUsingDamageElement>();
-	
-	GenericItemBlockUsingDamageElement defaultElement = null;
-	
-
-	public void setDefaultElement(GenericItemBlockUsingDamageElement element)
-	{
-		defaultElement = element;
-	}
-	
-	
-	public void addElement(int damage,GenericItemBlockUsingDamageElement element)
-	{
-		subItemList.put(damage,element);
-		ItemStack stack = new ItemStack(this, 1, damage);
-		LanguageRegistry.addName(stack,element.name);
-
-	}
-	
-	public GenericItemBlockUsingDamageElement getElement(int damage)
-	{
-		return subItemList.get(damage);
-	}
-	
-	public GenericItemBlockUsingDamageElement getElement(ItemStack itemStack)
-	{
-		if(itemStack.getItem() != this) return defaultElement;
-		return getElement(itemStack.getItemDamage());
-	}
-	
-	 
-	@Override
-	@SideOnly(Side.CLIENT)
-	public int getIconFromDamage(int damage) {
-		return getElement(damage).iconId;
-		
-	}
-	@Override
-	public String getTextureFile () {
-		return CommonProxy.ITEMS_PNG;
-	}
-	@Override
-	public String getItemNameIS(ItemStack itemstack) {
-		return getItemName() + "." + getElement(itemstack).name;
-	}
-	
-	@SideOnly(Side.CLIENT)
-	public void getSubItems(int itemID, CreativeTabs tabs, List list){
-	// You can also take a more direct approach and do each one individual but I prefer the lazy / right way
-		for(Entry<Integer, GenericItemBlockUsingDamageElement> entry : subItemList.entrySet()) 
-		{
-	        list.add(new ItemStack(itemID, 1, entry.getKey()));
-	    }
-	}
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4)
-	{
-		getElement(itemStack).addInformation(itemStack, entityPlayer, list, par4);
-	}*/
+	 * 
+	 * 
+	 * 
+	 * 
+	 * Hashtable<Integer,GenericItemBlockUsingDamageElement> subItemList = new Hashtable<Integer,GenericItemBlockUsingDamageElement>();
+	 * 
+	 * GenericItemBlockUsingDamageElement defaultElement = null;
+	 * 
+	 * 
+	 * public void setDefaultElement(GenericItemBlockUsingDamageElement element) { defaultElement = element; }
+	 * 
+	 * 
+	 * public void addElement(int damage,GenericItemBlockUsingDamageElement element) { subItemList.put(damage,element); ItemStack stack = new ItemStack(this, 1, damage); LanguageRegistry.addName(stack,element.name);
+	 * 
+	 * }
+	 * 
+	 * public GenericItemBlockUsingDamageElement getElement(int damage) { return subItemList.get(damage); }
+	 * 
+	 * public GenericItemBlockUsingDamageElement getElement(ItemStack itemStack) { if(itemStack.getItem() != this) return defaultElement; return getElement(itemStack.getItemDamage()); }
+	 * 
+	 * 
+	 * @Override
+	 * 
+	 * @SideOnly(Side.CLIENT) public int getIconFromDamage(int damage) { return getElement(damage).iconId;
+	 * 
+	 * }
+	 * 
+	 * @Override public String getTextureFile () { return CommonProxy.ITEMS_PNG; }
+	 * 
+	 * @Override public String getItemNameIS(ItemStack itemstack) { return getItemName() + "." + getElement(itemstack).name; }
+	 * 
+	 * @SideOnly(Side.CLIENT) public void getSubItems(int itemID, CreativeTabs tabs, List list){ // You can also take a more direct approach and do each one individual but I prefer the lazy / right way for(Entry<Integer, GenericItemBlockUsingDamageElement> entry : subItemList.entrySet()) { list.add(new ItemStack(itemID, 1, entry.getKey())); } } public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) { getElement(itemStack).addInformation(itemStack, entityPlayer, list, par4); }
+	 */
 
 }

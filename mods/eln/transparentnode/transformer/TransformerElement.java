@@ -49,6 +49,7 @@ public class TransformerElement extends TransparentNodeElement {
 	
 	public TransformerElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
+		
 		electricalLoadList.add(primaryLoad);
 		electricalLoadList.add(secondaryLoad);
 		electricalComponentList.add(primaryVoltageSource);

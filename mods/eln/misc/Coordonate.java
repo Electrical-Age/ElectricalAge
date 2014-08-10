@@ -56,7 +56,12 @@ public class Coordonate implements INBTTReady {
 		//Minecraft m = Minecraft.getMinecraft();
 		
 		
-		/*if(w == null) */w = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(worldDimension());
+		/*if(w == null) *///w = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(worldDimension());
+		
+		
+		if(w == null){
+			return FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(worldDimension());
+		}
 		return w;
         
 	}
@@ -80,7 +85,8 @@ public class Coordonate implements INBTTReady {
 		this.y = y;
 		this.z = z;
 		this.dimention = world.provider.dimensionId;
-		this.w = world;
+		if(world.isRemote)
+			this.w = world;
 	}
 
 	public Coordonate(TileEntity entity)
@@ -89,6 +95,8 @@ public class Coordonate implements INBTTReady {
 		this.y = entity.yCoord;
 		this.z = entity.zCoord;
 		this.dimention = entity.getWorldObj().provider.dimensionId;
+		if(entity.getWorldObj().isRemote)
+			this.w = entity.getWorldObj();
 	}
 	
 	public Coordonate newWithOffset(int x,int y,int z)
@@ -260,8 +268,8 @@ public class Coordonate implements INBTTReady {
 
 	}
 	public void setWorld(World worldObj) {
-		
-		w = worldObj;
+		if(worldObj.isRemote)
+			w = worldObj;
 		dimention = worldObj.provider.dimensionId;
 	}
 	public void setMetadata(int meta) {

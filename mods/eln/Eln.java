@@ -4139,7 +4139,7 @@ public class Eln {
 
 			ElectricalLampItem desc = new ElectricalLampItem(
 					name,
-					10, 8, 30, 15, 5, 50,// int light,int range,
+					10, 8, 20, 15, 5, 50,// int light,int range,
 					6000, 100// , energyStorage,discharg, charge
 			);
 			sharedItemStackOne.addElement(subId + (id << 6), desc);
@@ -4817,17 +4817,17 @@ public class Eln {
 				Character.valueOf('P'), new ItemStack(Items.gold_ingot));
 
 		addRecipe(findItemStack("Single-use Battery"),
-				"Cpp",
-				"CII",
-				"Cpp",
+				"ppp",
+				"III",
+				"ppp",
 				Character.valueOf('C'), findItemStack("Low Voltage Cable"),
 				Character.valueOf('p'), new ItemStack(Items.coal, 1, 0),
 				Character.valueOf('I'), "ingotCopper");
 
 		addRecipe(findItemStack("Single-use Battery"),
-				"Cpp",
-				"CII",
-				"Cpp",
+				"ppp",
+				"III",
+				"ppp",
 				Character.valueOf('C'), findItemStack("Low Voltage Cable"),
 				Character.valueOf('p'), new ItemStack(Items.coal, 1, 1),
 				Character.valueOf('I'), "ingotCopper");
@@ -4873,7 +4873,7 @@ public class Eln {
 				Character.valueOf('C'), findItemStack("Advanced Chip"),
 				Character.valueOf('O'), findItemStack("Ore Scanner"),
 				Character.valueOf('B'), findItemStack("Advanced Machine Block"),
-				Character.valueOf('M'), findItemStack("Electrical Motor"),
+				Character.valueOf('M'), findItemStack("Advanced Electrical Motor"),
 				Character.valueOf('P'), findItemStack("Mining Pipe"));
 	}
 
@@ -5235,7 +5235,7 @@ public class Eln {
 				"RCR",
 				"MIM",
 				"CRC",
-				Character.valueOf('M'), findItemStack("Basic Magnet"),
+				Character.valueOf('M'), findItemStack("Advanced Magnet"),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('R'), new ItemStack(Items.redstone),
 				Character.valueOf('C'), findItemStack("Medium Voltage Cable"));
@@ -5350,7 +5350,7 @@ public class Eln {
 	}
 
 	void recipeTreeResinAndRubber() {
-		for (int idx = 0; idx < 4; idx++) {
+		/*for (int idx = 0; idx < 4; idx++) {
 			addRecipe(findItemStack("Tree Resin Collector"),
 					"W W",
 					" WW",
@@ -5360,8 +5360,15 @@ public class Eln {
 			addRecipe(findItemStack("Tree Resin Collector"),
 					"W W",
 					"WW ", Character.valueOf('W'), new ItemStack(Blocks.planks, 1, idx));
-		}
-
+		}*/
+		addRecipe(findItemStack("Tree Resin Collector"),
+				"W W",
+				"WW ", Character.valueOf('W'), "plankWood");
+		
+		addRecipe(findItemStack("Tree Resin Collector"),
+				"W W",
+				" WW", Character.valueOf('W'), "plankWood");
+		
 	}
 
 	void recipeRawCable() {
@@ -5641,9 +5648,9 @@ public class Eln {
 	}
 
 	void recipemagnetiser() {
-		magnetiserRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot),
+		magnetiserRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot,2),
 				new ItemStack[] { findItemStack("Basic Magnet") }, 5000.0));
-		magnetiserRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", 1),
+		magnetiserRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", 2),
 				new ItemStack[] { findItemStack("Advanced Magnet") }, 15000.0));
 	}
 
@@ -5821,9 +5828,10 @@ public class Eln {
 				findItemStack("Cheap Chip"));
 
 		addRecipe(findItemStack("Signal Processor", 1),
-				" c ",
+				"IcI",
 				"cCc",
-				" c ",
+				"IcI",
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('c'), findItemStack("Signal Cable"),
 				Character.valueOf('C'), findItemStack("Cheap Chip"));
 	}

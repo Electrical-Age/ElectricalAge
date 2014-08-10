@@ -99,7 +99,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 		energyCounter += miner.powerResistor.getP() * time;
 
 		if (job != jobType.none && job != jobType.full && job != jobType.chestFull && job != jobType.done) {
-			if (energyCounter >= energyTarget || (job == jobType.ore && !isReadyToDrill())) {
+			if (energyCounter >= energyTarget || (job == jobType.ore && !isReadyToDrill()) || miner.powerOk == false) {
 				setupJob();
 			}
 
@@ -294,7 +294,9 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 		boolean jobFind = false;
 		if(miner.node.coordonate.getBlockExist() == false){
 			setJob(jobType.none);
-		} else if (drill == null) {
+		}else if(miner.powerOk == false){
+			setJob(jobType.none);
+		}else if (drill == null) {
 			if (jobCoord.y != miner.node.coordonate.y) {
 				ItemStack pipeStack = miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId);
 				if (pipeStack == null || (pipeStack.stackSize != pipeStack.getMaxStackSize() && pipeStack.stackSize != miner.inventory.getInventoryStackLimit())) {
