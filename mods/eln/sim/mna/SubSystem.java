@@ -392,7 +392,11 @@ public class SubSystem {
 
 
 	static public class Th{
-		public double R,U;		
+		public double R,U;	
+		
+		public boolean isHighImpedance(){
+			return R > 1e8;
+		}
 	}
 	
 	public Th getTh(State d,VoltageSource voltageSource) {

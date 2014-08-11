@@ -1,5 +1,7 @@
 package mods.eln.sim.nbt;
 
+import net.minecraft.init.Blocks;
+import mods.eln.Eln;
 import mods.eln.node.NodeBase;
 import mods.eln.sim.BatteryProcess;
 import mods.eln.sim.BatterySlowProcess;
@@ -17,7 +19,6 @@ public class NbtBatterySlowProcess extends BatterySlowProcess {
 
 	@Override
 	public void destroy() {
-		
 		node.physicalSelfDestruction(explosionRadius);
 	}
 

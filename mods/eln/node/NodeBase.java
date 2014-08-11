@@ -183,6 +183,7 @@ public abstract class NodeBase {
 	{
 		if (destructed == true) return;
 		destructed = true;
+		if(Eln.instance.explosionEnable == false) explosionStrength = 0;
 		disconnect();
 		coordonate.world().setBlockToAir(coordonate.x, coordonate.y, coordonate.z);
 		NodeManager.instance.removeNode(this);

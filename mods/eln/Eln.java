@@ -409,6 +409,7 @@ public class Eln {
 	private boolean replicatorPop;
 
 	public boolean forceOreRegen;
+	public boolean explosionEnable;
 	public static boolean debugEnable = false, versionCheckEnable = true;
 
 	@EventHandler
@@ -447,8 +448,13 @@ public class Eln {
 
 		modbusEnable = config.get("modbus", "enable", false).getBoolean(false);
 		debugEnable = config.get("debug", "enable", false).getBoolean(false);
+		
+		explosionEnable = config.get("gameplay", "explosion", true).getBoolean(true);
+		//explosionEnable = false;
 		versionCheckEnable = config.get("general", "versionCheckEnable", true).getBoolean(true);
-
+		
+		
+		
 		ComputerProbeEnable = config.get("compatibility", "ComputerProbeEnable", true).getBoolean(true);
 		ElnToOtherEnergyConverterEnable = config.get("compatibility", "ElnToOtherEnergyConverterEnable", true).getBoolean(true);
 
@@ -1611,7 +1617,7 @@ public class Eln {
 
 					);
 
-			sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
 		{
@@ -1630,7 +1636,7 @@ public class Eln {
 					sixNodeThermalLoadInitializer.copy(),
 					lowVoltageCableDescriptor);
 
-			sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
 		{
@@ -1648,7 +1654,7 @@ public class Eln {
 
 					);
 
-			sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
 		{
@@ -2385,7 +2391,7 @@ public class Eln {
 					maceratorRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-			desc.setRuningSound(new SoundCommand("eln:macerator", 1.5).mulVolume(0.3));
+			desc.setRuningSound(new SoundCommand("eln:macerator", 1.5).mulVolume(0.2));
 		}
 
 		{
@@ -2401,7 +2407,7 @@ public class Eln {
 					maceratorRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-			desc.setRuningSound(new SoundCommand("eln:macerator", 1.5).mulVolume(0.3));
+			desc.setRuningSound(new SoundCommand("eln:macerator", 1.5).mulVolume(0.2));
 		}
 	}
 
@@ -3521,7 +3527,7 @@ public class Eln {
 					3,// int offY,
 					7, 2, 2,// int rayX,int rayY,int rayZ,
 					2, 0.07,// int blockMalusMinCount,double blockMalus
-					"eln:WINDTURBINE_BIG_SF", 2f // Use the wind turbine sound and play at normal volume (1 => 100%)
+					"eln:WINDTURBINE_BIG_SF", 1f // Use the wind turbine sound and play at normal volume (1 => 100%)
 			);
 
 			GhostGroup g = new GhostGroup();
@@ -4589,27 +4595,27 @@ public class Eln {
 
 	void recipePassiveComponent() {
 
-//		addRecipe(findItemStack("Signal Diode", 4),
-//				" RB",
-//				"IIR",
-//				" RB",
-//				Character.valueOf('R'), new ItemStack(Items.redstone),
-//				Character.valueOf('I'), findItemStack("Iron Cable"),
-//				Character.valueOf('B'), "itemRubber");
-//
-//		addRecipe(findItemStack("10A Diode", 3),
-//				" RB",
-//				"IIR",
-//				" RB",
-//				Character.valueOf('R'), new ItemStack(Items.redstone),
-//				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
-//				Character.valueOf('B'), "itemRubber");
-//
-//		addRecipe(findItemStack("25A Diode"),
-//				"D",
-//				"D",
-//				"D",
-//				Character.valueOf('D'), findItemStack("10A Diode"));
+		addRecipe(findItemStack("Signal Diode", 4),
+				" RB",
+				"IIR",
+				" RB",
+				Character.valueOf('R'), new ItemStack(Items.redstone),
+				Character.valueOf('I'), findItemStack("Iron Cable"),
+				Character.valueOf('B'), "itemRubber");
+
+		addRecipe(findItemStack("10A Diode", 3),
+				" RB",
+				"IIR",
+				" RB",
+				Character.valueOf('R'), new ItemStack(Items.redstone),
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+				Character.valueOf('B'), "itemRubber");
+
+		addRecipe(findItemStack("25A Diode"),
+				"D",
+				"D",
+				"D",
+				Character.valueOf('D'), findItemStack("10A Diode"));
 
 		
 		addRecipe(findItemStack("Power Capacitor"),
@@ -5210,7 +5216,7 @@ public class Eln {
 	}
 
 	void recipeDust() {
-		addShapelessRecipe(findItemStack("Alloy Dust", 3),
+		addShapelessRecipe(findItemStack("Alloy Dust", 2),
 				"dustIron",
 				"dustIron",
 				"dustCoal",
@@ -5388,9 +5394,9 @@ public class Eln {
 
 	void recipeBatteryItem() {
 		addRecipe(findItemStack("Portable Battery"),
-				"I",
-				"P",
-				"P",
+				" I ",
+				"IPI",
+				"IPI",
 				Character.valueOf('P'), "ingotLead",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
 		addShapelessRecipe(

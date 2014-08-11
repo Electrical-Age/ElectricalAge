@@ -36,7 +36,8 @@ public class SoundClient {
 		int trackCount = SoundLoader.getTrackCount(p.track);
 		
 		if(trackCount == 1){
-			p.volume -= blockFactor*0.2f;
+			float temp = 1.0f/(1+blockFactor);
+			p.volume *= Math.pow(temp,2);
 			p.volume *= distanceFactor;
 			if(p.volume <= 0) return;
 			
