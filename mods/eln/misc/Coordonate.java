@@ -9,6 +9,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.DimensionManager;
 import cpw.mods.fml.common.FMLCommonHandler;
 
 public class Coordonate implements INBTTReady {
@@ -31,7 +33,7 @@ public class Coordonate implements INBTTReady {
 	@Override
 	public int hashCode() {
 		
-		return (x + y)*0x10101010;
+		return (x + y)*0x10101010 + z;
 	}
 	
 	
@@ -54,7 +56,12 @@ public class Coordonate implements INBTTReady {
 		//Minecraft m = Minecraft.getMinecraft();
 		
 		
-		if(w == null) w = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(worldDimension());
+		/*if(w == null) *///w = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(worldDimension());
+		
+		
+		if(w == null){
+			return FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(worldDimension());
+		}
 		return w;
         
 	}
@@ -78,7 +85,8 @@ public class Coordonate implements INBTTReady {
 		this.y = y;
 		this.z = z;
 		this.dimention = world.provider.dimensionId;
-		this.w = world;
+		if(world.isRemote)
+			this.w = world;
 	}
 
 	public Coordonate(TileEntity entity)
@@ -87,6 +95,8 @@ public class Coordonate implements INBTTReady {
 		this.y = entity.yCoord;
 		this.z = entity.zCoord;
 		this.dimention = entity.getWorldObj().provider.dimensionId;
+		if(entity.getWorldObj().isRemote)
+			this.w = entity.getWorldObj();
 	}
 	
 	public Coordonate newWithOffset(int x,int y,int z)
@@ -190,9 +200,15 @@ public class Coordonate implements INBTTReady {
 		return world().getBlockMetadata(x, y, z);
 	}
 	public boolean getBlockExist() {
-		
-		return world().blockExists(x, y, z);
+		World w = DimensionManager.getWorld(dimention);
+		if(w == null) return false;
+		return w.blockExists(x, y, z);
 	}
+	
+	public boolean getWorldExist(){
+		return DimensionManager.getWorld(dimention) != null;
+	}
+	
 	public void copyTo(double[] v) {
 		v[0] = x + 0.5;
 		v[1] = y + 0.5;
@@ -252,8 +268,8 @@ public class Coordonate implements INBTTReady {
 
 	}
 	public void setWorld(World worldObj) {
-		
-		w = worldObj;
+		if(worldObj.isRemote)
+			w = worldObj;
 		dimention = worldObj.provider.dimensionId;
 	}
 	public void setMetadata(int meta) {

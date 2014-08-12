@@ -54,7 +54,7 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
 	
 	@Override
 	public FrontType getFrontType() {
-		return FrontType.PlayerView;
+		return FrontType.BlockSideInv;
 	}
 	
 	@Override
@@ -77,6 +77,9 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
 	double electricalMaximalVoltage, electricalMaximalPower;
 	double electricalNominalInputR;
 	ElectricalCableDescriptor cable;
+	
+	
+
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {

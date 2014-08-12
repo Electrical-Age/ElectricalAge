@@ -7,14 +7,17 @@ import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 
 public class ElectricalMachineInventory extends TransparentNodeElementInventory {
-	public ElectricalMachineInventory(int size, int stackLimit, TransparentNodeElement TransparentNodeElement) {
-		super(size, stackLimit, TransparentNodeElement);
+	public ElectricalMachineInventory(int size, int stackLimit, ElectricalMachineElement machineElement) {
+		super(size, stackLimit, machineElement);
+		this.machineElement = machineElement;
 	}
 
 	public ElectricalMachineInventory(int size, int stackLimit, TransparentNodeElementRender TransparentnodeRender) {
 		super(size, stackLimit, TransparentnodeRender);
 	}
 
+	ElectricalMachineElement machineElement;
+	
 	ElectricalMachineDescriptor getDescriptor() {
 		if (transparentNodeRender != null) return ((ElectricalMachineRender) transparentNodeRender).descriptor;
 		if (transparentNodeElement != null) return ((ElectricalMachineElement) transparentNodeElement).descriptor;
@@ -25,11 +28,17 @@ public class ElectricalMachineInventory extends TransparentNodeElementInventory 
 	public int[] getAccessibleSlotsFromSide(int side) {
 		// ElectricalMachineDescriptor d = getDescriptor();
 
+		if(transparentNodeElement == null) return new int[0];
+		
 		switch (Direction.fromIntMinecraftSide(side)) {
 		case YP:
-			return new int[] { ElectricalMachineContainer.inSlotId };
+			return new int[] { machineElement.inSlotId };
 		default:
-			return new int[] { ElectricalMachineContainer.outSlotId };
+			int[] slots = new int[machineElement.descriptor.outStackCount];
+			for(int idx = 0;idx < slots.length;idx++){
+				slots[idx] = idx + machineElement.outSlotId;
+			}
+			return slots;
 		}
 
 	}

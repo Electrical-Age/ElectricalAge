@@ -1,6 +1,8 @@
 package mods.eln.sim.process.destruct;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.init.Blocks;
+import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.transparent.TransparentNodeElement;
@@ -47,7 +49,12 @@ public class WorldExplosion implements IDestructable{
 	public void destructImpl() {
 		int i = 0;
 		i++;
-		c.world().createExplosion((Entity)null, c.x,c.y,c.z, strength, true);
+		
+		if(Eln.instance.explosionEnable)
+			c.world().createExplosion((Entity)null, c.x,c.y,c.z, strength, true);
+		else
+			c.world().setBlock(c.x, c.y, c.z, Blocks.air);
+			
 	}
 
 }

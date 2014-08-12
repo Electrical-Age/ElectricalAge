@@ -148,6 +148,9 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 		case BlockSide:
 			front = side;
 			break;
+		case BlockSideInv:
+			front = side.getInverse();
+			break;
 		case PlayerView:
 			front = Utils.entityLivingViewDirection(entityLiving).getInverse();
 			break;

@@ -32,7 +32,7 @@ public class ElectricalWindSensorSlowProcess implements IProcess ,INBTTReady{
 			Coordonate coord = element.sixNode.coordonate;
 
 
-			element.outputGateProcess.setOutputNormalized(Utils.getWind(coord.world(), coord.y)/element.descriptor.windMax);
+			element.outputGateProcess.setOutputNormalized(Utils.getWind(coord.dimention, coord.y)/element.descriptor.windMax);
 			
 		}
 

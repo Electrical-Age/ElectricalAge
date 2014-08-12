@@ -18,7 +18,7 @@ public class ElectricalAlarmSlowProcess implements IProcess {
 	static final double refreshPeriode = 0.25;
 	int soundUuid = Utils.getUuid();
 	boolean oldWarm = false;
-	
+	boolean oldMute = true;
 	@Override
 	public void process(double time) {
 		timeCounter += time;
@@ -35,14 +35,19 @@ public class ElectricalAlarmSlowProcess implements IProcess {
 					soundTimeTimeout = element.descriptor.soundTime;
 				}
 			}
-			if(oldWarm == true && warm == false){
-				element.stop(soundUuid);
-				soundTimeTimeout = 0;
+			if((oldWarm == true && warm == false) || (oldMute == false && element.mute == true)){
+				stopSound();
 			}
 			
 			oldWarm = warm;
+			oldMute = element.mute;
 		}
 		soundTimeTimeout -= time;
 		if(soundTimeTimeout < 0) soundTimeTimeout = 0;
+	}
+	
+	void stopSound(){
+		element.stop(soundUuid);
+		soundTimeTimeout = 0;
 	}
 }

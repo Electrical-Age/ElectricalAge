@@ -37,13 +37,14 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 		return Utils.entityLivingViewDirection(e).getInverse();
 	}
 
+	/*@Override
 	public void onBlockPlacedBy(World w, int x, int y, int z, EntityLivingBase e, ItemStack stack) {
 		if(w.isRemote == false){
 			SimpleNode node = newNode();
 			node.setDescriptorKey(descriptorKey);
 			node.onBlockPlacedBy(new Coordonate(x,y,z,w), getFrontForPlacement(e), e, stack);
 		}
-	}
+	}*/
 	
 	protected abstract SimpleNode newNode();
 

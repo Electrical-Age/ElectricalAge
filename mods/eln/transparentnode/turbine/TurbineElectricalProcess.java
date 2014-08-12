@@ -48,13 +48,15 @@ public class TurbineElectricalProcess implements IProcess,IRootSystemPreStepProc
 		double Ut;
 		if(targetU < th.U){
 			Ut = th.U;
+		}else if(th.isHighImpedance()){
+			Ut = targetU;
 		}else{
 			//double f = descriptor.powerOutPerDeltaU;
 			//Ut = (Math.sqrt(-4*f*th.R*th.U+f*f*th.R*th.R+4*f*targetU*th.R)+2*th.U-f*th.R)/2;	
 			double a = 1/th.R;
 			double b = descriptor.powerOutPerDeltaU - th.U/th.R;
 			double c = -descriptor.powerOutPerDeltaU*targetU;
-			Ut = (-b + Math.sqrt(b*b-4*a*c))/(2*a)+0;
+			Ut = (-b + Math.sqrt(b*b-4*a*c))/(2*a);
 		}
 
 		double i = (Ut - th.U)/th.R;

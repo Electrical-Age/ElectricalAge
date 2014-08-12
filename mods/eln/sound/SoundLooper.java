@@ -3,7 +3,7 @@ package mods.eln.sound;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 
-public abstract class SoundLooper {
+public abstract class SoundLooper implements IProcess {
 
 	public SoundLooper(IPlayer player,boolean couldStop) {
 		if(couldStop) 
@@ -20,6 +20,7 @@ public abstract class SoundLooper {
 	boolean couldStop;
 	int uuid;
 	
+	@Override
 	public void process(double time){
 		
 		SoundCommand track;

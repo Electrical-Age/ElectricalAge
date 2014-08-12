@@ -35,9 +35,15 @@ public class EnergyMeterElement extends SixNodeElement {
 
 	public EnergyMeterElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
+		shunt.mustUseUltraImpedance();
+		
     	electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
     	electricalComponentList.add(shunt);
+    	electricalComponentList.add(new Resistor(bLoad, null).pullDown());
+    	electricalComponentList.add(new Resistor(aLoad, null).pullDown());
+
+    	
     	slowProcessList.add(slowProcess);
     	
     	WorldExplosion exp = new WorldExplosion(this).cableExplosion();
@@ -199,7 +205,7 @@ public class EnergyMeterElement extends SixNodeElement {
 			//	needPublish();
 				break;
 			case clientTimeCounterId:
-				timeCounter = stream.readDouble();
+				timeCounter = 0;
 				needPublish();
 				break;			case clientModId:
 				mod = Mod.valueOf(stream.readUTF());

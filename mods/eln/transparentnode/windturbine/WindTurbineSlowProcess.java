@@ -30,7 +30,7 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 	
 	double getWind()
 	{
-		return Math.abs(localWind + Utils.getWind(turbine.node.coordonate.world(),turbine.node.coordonate.y + turbine.descriptor.offY)) * environementWindFactor;
+		return Math.abs(localWind + Utils.getWind(turbine.node.coordonate.dimention,turbine.node.coordonate.y + turbine.descriptor.offY)) * environementWindFactor;
 	}
 	void setWind(double wind)
 	{
@@ -65,27 +65,32 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 			z2 = coord.z + d.rayZ;
 			
 			int blockBusyCount = -d.blockMalusSubCount;
-			World world = turbine.node.coordonate.world();
-			IChunkProvider chunk = world.getChunkProvider();
 			boolean notInCache = false;
-			for(int x = x1;x<=x2;x++)
-			{
-				for(int y = y1;y<=y2;y++)
+			if(turbine.node.coordonate.getWorldExist() == true){
+				World world = turbine.node.coordonate.world();
+				IChunkProvider chunk = world.getChunkProvider();
+				
+				for(int x = x1;x<=x2;x++)
 				{
-					for(int z = z1;z<=z2;z++)
+					for(int y = y1;y<=y2;y++)
 					{
-						if(world.blockExists(x, y, z) == false) 
+						for(int z = z1;z<=z2;z++)
 						{
-							notInCache = true;
-							break;
-						}
-						if(world.getBlock(x, y, z) != Blocks.air){
-							blockBusyCount++;
-						}
-					}		
+							if(world.blockExists(x, y, z) == false) 
+							{
+								notInCache = true;
+								break;
+							}
+							if(world.getBlock(x, y, z) != Blocks.air){
+								blockBusyCount++;
+							}
+						}		
+						if(notInCache) break;
+					}	
 					if(notInCache) break;
-				}	
-				if(notInCache) break;
+				}
+			}else{
+				notInCache = true;
 			}
 			if(! notInCache)
 			{

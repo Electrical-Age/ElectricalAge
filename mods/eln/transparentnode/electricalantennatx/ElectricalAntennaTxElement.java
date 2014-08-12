@@ -14,10 +14,12 @@ import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtResistor;
 import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxElement;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -32,7 +34,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	NbtElectricalGateOutputProcess signalOutProcess = new NbtElectricalGateOutputProcess("signalOutProcess", signalOut);
 	
 	
-	Resistor powerResistor = new Resistor(powerIn, null);
+	NbtResistor powerResistor = new NbtResistor("powerResistor",powerIn, null);
 	ElectricalAntennaTxElectricalProcess electricalProcess = new ElectricalAntennaTxElectricalProcess(this);
 	
 	LRDU rot = LRDU.Down;
@@ -120,7 +122,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	void calculatePowerInRp() {
 		double cmd = commandIn.getNormalized();
 		if(cmd == 0.0)
-			powerResistor.setR(1000000000.0);
+			powerResistor.setR(MnaConst.highImpedance);
 		else
 			powerResistor.setR(descriptor.electricalNominalInputR / cmd);
 	}

@@ -11,6 +11,7 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.wiki.Data;
@@ -46,7 +47,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 		this.thermalCoolLimit = thermalCoolLimit;
 		this.electricalMaximalVoltage = electricalMaximalVoltage;
 		
-		electricalRp = 1000000000.0;
+		electricalRp = MnaConst.highImpedance;
 		double electricalNorminalI = electricalNominalPower / electricalNominalVoltage;
 		electricalNominalRs = (electricalNominalPower * electricalNominalPowerDropFactor) / electricalNorminalI / electricalNorminalI / 2;
 		electricalRs = electricalNominalRs;
@@ -142,9 +143,9 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 		else {
 			//list.add("Low resistor => low power lost");
 			list.add("Nominal usage ->");
-			list.add("  Voltage : " + (int)electricalNominalVoltage + " V");
-			list.add("  Current : " + (int)(electricalNominalPower / electricalNominalVoltage) + " A");
-			list.add("  Power : " + (int)electricalNominalPower + " W");
+			list.add("  Voltage : " + (int)electricalNominalVoltage + "V");
+			list.add(Utils.plotAmpere("  Current :",electricalNominalPower / electricalNominalVoltage));
+			list.add("  Power : " + (int)electricalNominalPower + "W");
 		//	list.add("  Power lost : " + (int)(electricalNominalPowerDropFactor * electricalNominalPower) + " W/Block");
 			list.add(Utils.plotOhm("Serial resistor :", electricalNominalRs * 2));
 		}

@@ -20,6 +20,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -112,7 +113,7 @@ public class LampSocketRender extends SixNodeElementRender {
 			}
 
 			if (tileEntity.getWorldObj().getSavedLightValue(EnumSkyBlock.Sky, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord) > 3) {
-				float weather = (float) Utils.getWeather(tileEntity.getWorldObj()) * 0.9f + 0.1f;
+				float weather = (float) UtilsClient.getWeather(tileEntity.getWorldObj()) * 0.9f + 0.1f;
 
 				weatherAlphaY += (0.4 - Math.random()) * dt * Math.PI / 0.2 * weather;
 				weatherAlphaZ += (0.4 - Math.random()) * dt * Math.PI / 0.2 * weather;

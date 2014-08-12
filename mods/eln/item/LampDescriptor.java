@@ -80,18 +80,27 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 	}
 	
 	
-	double getLifeInTag(ItemStack stack)
+	public double getLifeInTag(ItemStack stack)
 	{
 		if(stack.hasTagCompound() == false)
 			stack.setTagCompound(getDefaultNBT());
-		return stack.getTagCompound().getDouble("life");
+		if(stack.getTagCompound().hasKey("life"))
+			return stack.getTagCompound().getDouble("life");
+		return Utils.rand(0.75, 1.50);
+			
+	}
+	
+	public void setLifeInTag(ItemStack stack, double life) {
+		if(stack.hasTagCompound() == false)
+			stack.setTagCompound(getDefaultNBT());
+		stack.getTagCompound().setDouble("life", life);
 	}
 	
 	@Override
 	public NBTTagCompound getDefaultNBT() {
 		
 		NBTTagCompound nbt = new NBTTagCompound();
-		nbt.setDouble("life", Utils.rand(0.75, 1.50));
+		//nbt.setDouble("life", Utils.rand(0.75, 1.50));
 		return nbt;
 	}
 	
@@ -119,7 +128,9 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 		list.add("Power : " + (int)nominalP + " W");
 		//list.add(Utils.plotOhm("Resistance", this.getR()));
 		list.add(Utils.plotTime("Nominal life : ",nominalLife));
-		if(getLifeInTag(itemStack) > 0.5)
+		if(itemStack.getTagCompound().hasKey("life") == false)
+			list.add("Seem that nobody has used it before");
+		else if(getLifeInTag(itemStack) > 0.5)
 			list.add("Seem in good condition");
 		else if(getLifeInTag(itemStack) > 0.2)
 			list.add("seems a bit worn");
@@ -131,4 +142,7 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 		//list.add(Utils.plotTime("Life    : ",getLifeInTag(itemStack)*nominalLife));
 		
 	}
+
+
+
 }

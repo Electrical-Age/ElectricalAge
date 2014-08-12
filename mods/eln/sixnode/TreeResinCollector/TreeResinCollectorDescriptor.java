@@ -2,15 +2,6 @@ package mods.eln.sixnode.TreeResinCollector;
 
 import java.util.List;
 
-import org.lwjgl.opengl.GL11;
-
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
@@ -18,6 +9,13 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockLog;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+
+import org.lwjgl.opengl.GL11;
 
 public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 
@@ -104,7 +102,7 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 	public boolean canBePlacedOnSide(EntityPlayer player,Coordonate c,Direction side) {
 		
 		Block b = c.getBlock();
-		if(b!= Blocks.log){
+		if(b instanceof BlockLog == false){
 			Utils.addChatMessage(player,"This block can only be placed on the side of a tree!");
 			return false;
 		}

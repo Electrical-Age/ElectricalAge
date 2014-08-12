@@ -44,7 +44,7 @@ public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor {
 	
 	@Override
 	public FrontType getFrontType() {
-		return FrontType.PlayerView;
+		return FrontType.BlockSideInv;
 	}
 	
 	@Override

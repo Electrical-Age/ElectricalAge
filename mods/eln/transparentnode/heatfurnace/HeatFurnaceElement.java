@@ -15,6 +15,7 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
+import mods.eln.sim.SignalRp;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtFurnaceProcess;
@@ -34,6 +35,7 @@ import net.minecraft.nbt.NBTTagCompound;
 public class HeatFurnaceElement extends TransparentNodeElement{
 	
 	public NbtElectricalGateInput electricalCmdLoad = new NbtElectricalGateInput("electricalCmdLoad",true);
+	//public SignalRp electricalCmdRp = new SignalRp(electricalCmdLoad);
 	public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
 	public NbtFurnaceProcess furnaceProcess = new NbtFurnaceProcess("furnaceProcess",thermalLoad);
 	public HeatFurnaceInventoryProcess inventoryProcess = new HeatFurnaceInventoryProcess(this);
@@ -47,6 +49,8 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 
 	public HeatFurnaceElement(TransparentNode transparentNode,TransparentNodeDescriptor descriptor) {
 		super(transparentNode,descriptor);
+		//this.descriptor.alphaClose = 0;
+		
 		this.descriptor = (HeatFurnaceDescriptor) descriptor;
 		
 		furnaceProcess.setGainMin(0.1);
@@ -56,6 +60,7 @@ public class HeatFurnaceElement extends TransparentNodeElement{
 		slowProcessList.add(inventoryProcess);
 		thermalFastProcessList.add(regulator);
 		electricalLoadList.add(electricalCmdLoad);
+		//electricalComponentList.add(electricalCmdRp);
 		slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 2.0, 1.0));
 		
 		slowProcessList.add(thermalWatchdog);

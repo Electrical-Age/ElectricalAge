@@ -56,6 +56,10 @@ public class ElectricalRelayElement extends SixNodeElement {
     	slowProcessList.add(gateProcess);
     	electricalLoadList.add(gate);
     	
+    	electricalComponentList.add(new Resistor(bLoad, null).pullDown());
+    	electricalComponentList.add(new Resistor(aLoad, null).pullDown());
+
+    	
     	slowProcessList.add(currentWatchDog);
     	slowProcessList.add(voltageWatchDogA);
     	slowProcessList.add(voltageWatchDogB);
@@ -155,7 +159,7 @@ public class ElectricalRelayElement extends SixNodeElement {
 	
 	public void refreshSwitchResistor() {
 		if(switchState == false) {
-			switchResistor.highImpedance();
+			switchResistor.ultraImpedance();
 		}
 		else {
 			descriptor.applyTo(switchResistor);
