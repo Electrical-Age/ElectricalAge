@@ -1,19 +1,18 @@
 package mods.eln.simplenode.energyconverter;
 
-
 import ic2.api.energy.tile.IEnergySource;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import cofh.api.energy.IEnergyHandler;
+import buildcraft.api.power.IPowerEmitter;
 
 import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
-import li.cil.oc.api.network.SidedEnvironment;
 import mods.eln.Other;
 import mods.eln.misc.Direction;
+import mods.eln.misc.Utils;
 import mods.eln.node.simple.SimpleNode;
 import mods.eln.node.simple.SimpleNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
@@ -21,41 +20,44 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
+import cofh.api.energy.IEnergyHandler;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-
 @Optional.InterfaceList({
-    @Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = Other.modIdIc2),
-    @Optional.Interface(iface = "cofh.api.energy.IEnergyHandler", modid = Other.modIdTe),
-        @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = Other.modIdOc)/*,
-        @Optional.Interface(iface = "li.cil.oc.api.network.SidedEnvironment", modid = Other.modIdOc)*/}
-)
-public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements IEnergySource, Environment,IEnergyHandler/*,SidedEnvironment*/ {
+		@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = Other.modIdIc2),
+		@Optional.Interface(iface = "cofh.api.energy.IEnergyHandler", modid = Other.modIdTe),
+		@Optional.Interface(iface = "buildcraft.api.power.IPowerEmitter", modid = Other.modIdBuildcraft),
+		@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = Other.modIdOc)})
+public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements 
+	IEnergySource,Environment, 
+	IEnergyHandler,
+	IPowerEmitter
+	
+	/* ,SidedEnvironment *//*,
+	ISidedBatteryProvider, IPowerEmitter*//*, IPipeConnection*/{
 
-	
-	
 	public EnergyConverterElnToOtherEntity() {
-		if(Other.ocLoaded) getOc().constructor();
+		if (Other.ocLoaded) getOc().constructor();
 	}
-	
+
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 
 		return super.onBlockActivated(entityPlayer, side, vx, vy, vz);
 	}
-	
+
 	@Override
-    @SideOnly(Side.CLIENT)
+	@SideOnly(Side.CLIENT)
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		return new EnergyConverterElnToOtherGui(player, this);
 	}
-	
-	
+
 	float inPowerFactor;
 	boolean hasChanges = false;
 	public float inPowerMax;
+
 	@Override
 	public void serverPublishUnserialize(DataInputStream stream) {
 		// TODO Auto-generated method stub
@@ -63,7 +65,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 		try {
 			inPowerFactor = stream.readFloat();
 			inPowerMax = stream.readFloat();
-			 
+
 			hasChanges = true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -77,61 +79,54 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 		return EnergyConverterElnToOtherNode.getNodeUuidStatic();
 	}
 
-	
+	// ********************IC2********************
 
-    // ********************IC2********************
-	
-	
-
-    @Optional.Method(modid = Other.modIdIc2)
+	@Optional.Method(modid = Other.modIdIc2)
 	@Override
 	public boolean emitsEnergyTo(TileEntity receiver, ForgeDirection direction) {
-		if(worldObj.isRemote) return false;
+		if (worldObj.isRemote) return false;
 		SimpleNode n = getNode();
 		return n.getFront().back() == Direction.from(direction);
 	}
 
-    @Optional.Method(modid = Other.modIdIc2)
-    @Override
+	@Optional.Method(modid = Other.modIdIc2)
+	@Override
 	public double getOfferedEnergy() {
-		if(worldObj.isRemote)return 0;
+		if (worldObj.isRemote) return 0;
 		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) getNode();
-		double pMax = node.getOtherModOutMax(node.descriptor.ic2.outMax,Other.getElnToIc2ConversionRatio());
+		double pMax = node.getOtherModOutMax(node.descriptor.ic2.outMax, Other.getElnToIc2ConversionRatio());
 		return pMax;
 	}
 
-    @Optional.Method(modid = Other.modIdIc2)
-    @Override
+	@Optional.Method(modid = Other.modIdIc2)
+	@Override
 	public void drawEnergy(double amount) {
-		if(worldObj.isRemote);
+		if (worldObj.isRemote)
+		;
 		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) getNode();
-		node.drawEnergy(amount,Other.getElnToIc2ConversionRatio());
+		node.drawEnergy(amount, Other.getElnToIc2ConversionRatio());
 	}
-	
-    @Optional.Method(modid = Other.modIdIc2)
-	//@Override
+
+	@Optional.Method(modid = Other.modIdIc2)
+	// @Override
 	public int getSourceTier() {
 		// TODO Auto-generated method stub
-    	EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) getNode();
+		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) getNode();
 		return node.descriptor.ic2.tier;
 	}
-	
-    
-    
-    
-    // *****************   OC **********************
-    
-    EnergyConverterElnToOtherFireWallOc oc;
-    
-    
-    @Optional.Method(modid = Other.modIdOc)
-    EnergyConverterElnToOtherFireWallOc getOc(){
-    	if(oc == null) oc = new EnergyConverterElnToOtherFireWallOc(this);
-    	return oc;
-    }
-    
+
+	// ***************** OC **********************
+
+	EnergyConverterElnToOtherFireWallOc oc;
+
+	@Optional.Method(modid = Other.modIdOc)
+	EnergyConverterElnToOtherFireWallOc getOc() {
+		if (oc == null) oc = new EnergyConverterElnToOtherFireWallOc(this);
+		return oc;
+	}
+
 	@Override
-    @Optional.Method(modid = Other.modIdOc)
+	@Optional.Method(modid = Other.modIdOc)
 	public Node node() {
 		return getOc().node;
 	}
@@ -139,132 +134,134 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	@Override
 	@Optional.Method(modid = Other.modIdOc)
 	public void onConnect(Node node) {
-	
+
 	}
 
 	@Override
 	@Optional.Method(modid = Other.modIdOc)
 	public void onDisconnect(Node node) {
-		
+
 	}
 
 	@Override
 	@Optional.Method(modid = Other.modIdOc)
 	public void onMessage(Message message) {
-		
-	}
-    
-	/*
-	@Override
-	@Optional.Method(modid = Other.modIdOc)
-	public Node sidedNode(ForgeDirection side) {
-		if(worldObj.isRemote){
-			if(front.back() == Direction.from(side)) return node();
-			return null;
-		}else{
-			if(getNode().getFront().back() == Direction.from(side)) return node();
-			return null;
-		}
+
 	}
 
+	/*
+	 * @Override
+	 * 
+	 * @Optional.Method(modid = Other.modIdOc) public Node sidedNode(ForgeDirection side) { if(worldObj.isRemote){ if(front.back() == Direction.from(side)) return node(); return null; }else{ if(getNode().getFront().back() == Direction.from(side)) return node(); return null; } }
+	 * 
+	 * @Override
+	 * 
+	 * @SideOnly(Side.CLIENT)
+	 * 
+	 * @Optional.Method(modid = Other.modIdOc) public boolean canConnect(ForgeDirection side) { if(front == null) return false; if(front.back() == Direction.from(side)) return true; return false; }
+	 */
+
+	// *************** RF **************
 	@Override
-	@SideOnly(Side.CLIENT)
-	@Optional.Method(modid = Other.modIdOc)
-	public boolean canConnect(ForgeDirection side) {
-		if(front == null) return false;
-		if(front.back() == Direction.from(side)) return true;
-		return false;
-	}*/
-	
-	
-	
-	
-	// ***************        RF **************
-	@Override
-    @Optional.Method(modid = Other.modIdTe)
+	@Optional.Method(modid = Other.modIdTe)
 	public boolean canConnectEnergy(ForgeDirection from) {
-		if(worldObj.isRemote) return false;
+	//	Utils.println("*****canConnectEnergy*****");
+	//	return true;
+		if (worldObj.isRemote) return false;
 		SimpleNode n = getNode();
 		return n.getFront().back() == Direction.from(from);
 	}
 
 	@Override
-    @Optional.Method(modid = Other.modIdTe)
+	@Optional.Method(modid = Other.modIdTe)
 	public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate) {
-		// TODO Auto-generated method stub
+	//Utils.println("*****receiveEnergy*****");
 		return 0;
 	}
 
 	@Override
-    @Optional.Method(modid = Other.modIdTe)
+	@Optional.Method(modid = Other.modIdTe)
 	public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate) {
-		if(worldObj.isRemote) return 0;
+		//Utils.println("*****extractEnergy*****");
+		if (worldObj.isRemote) return 0;
 		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) getNode();
 		int extract = (int) Math.min(maxExtract, node.getOtherModEnergyBuffer(Other.getElnToTeConversionRatio()));
-		if(simulate)
-			node.drawEnergy(extract,Other.getElnToTeConversionRatio());
-		
+		if (simulate)
+			node.drawEnergy(extract, Other.getElnToTeConversionRatio());
+
 		return extract;
 	}
 
 	@Override
-    @Optional.Method(modid = Other.modIdTe)
+	@Optional.Method(modid = Other.modIdTe)
 	public int getEnergyStored(ForgeDirection from) {
+		//Utils.println("*****getEnergyStored*****");
 		return 0;
 	}
 
 	@Override
-    @Optional.Method(modid = Other.modIdTe)
+	@Optional.Method(modid = Other.modIdTe)
 	public int getMaxEnergyStored(ForgeDirection from) {
+		//Utils.println("*****getMaxEnergyStored*****");
 		return 0;
 	}
 
+	// ***************** Buildcraft ****************
 	
-    // *****************     Bridges ****************
-    
-    
+	@Override
+	@Optional.Method(modid = Other.modIdBuildcraft)
+	public boolean canEmitPowerFrom(ForgeDirection side) {
+		if (worldObj.isRemote) return false;
+		SimpleNode n = getNode();
+		return n.getFront().back() == Direction.from(side);
+	}
+	
+	// ***************** Bridges ****************
 
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
-		if(Other.ic2Loaded) EnergyConverterElnToOtherFireWallIc2.updateEntity(this);
-		if(Other.ocLoaded) getOc().updateEntity();
+		if (Other.ic2Loaded) EnergyConverterElnToOtherFireWallIc2.updateEntity(this);
+		if (Other.ocLoaded) getOc().updateEntity();
+		if(Other.teLoaded)EnergyConverterElnToOtherFireWallRf.updateEntity(this);
+		if(Other.buildcraftLoaded)EnergyConverterElnToOtherFireWallBuildcraft.updateEntity(this);
 	}
-
 
 	public void onLoaded() {
-		if(Other.ic2Loaded) EnergyConverterElnToOtherFireWallIc2.onLoaded(this);
+		if (Other.ic2Loaded) EnergyConverterElnToOtherFireWallIc2.onLoaded(this);
 	}
-
 
 	@Override
 	public void invalidate() {
 		super.invalidate();
-		if(Other.ic2Loaded) EnergyConverterElnToOtherFireWallIc2.invalidate(this);
-		if(Other.ocLoaded) getOc().invalidate();
+		if (Other.ic2Loaded) EnergyConverterElnToOtherFireWallIc2.invalidate(this);
+		if (Other.ocLoaded) getOc().invalidate();
 	}
-
 
 	@Override
 	public void onChunkUnload() {
 		super.onChunkUnload();
-		if(Other.ic2Loaded) EnergyConverterElnToOtherFireWallIc2.onChunkUnload(this);
-		if(Other.ocLoaded) getOc().onChunkUnload();
+		if (Other.ic2Loaded) EnergyConverterElnToOtherFireWallIc2.onChunkUnload(this);
+		if (Other.ocLoaded) getOc().onChunkUnload();
 	}
+
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
 		super.readFromNBT(nbt);
-		if(Other.ocLoaded) getOc().readFromNBT(nbt);
+		if (Other.ocLoaded) getOc().readFromNBT(nbt);
 
 	}
-	
+
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
-		if(Other.ocLoaded) getOc().writeToNBT(nbt);
+		if (Other.ocLoaded) getOc().writeToNBT(nbt);
 	}
-	
+
 	protected boolean addedToEnet;
+
+
+
 
 
 }

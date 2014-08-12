@@ -22,7 +22,7 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
 	}
 	
 	double timeCounter = 0;
-	final double periode = 0.2;
+	final double periode = 2;
 	
 
 	@Override

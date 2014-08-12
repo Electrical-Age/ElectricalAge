@@ -29,7 +29,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class ElectricalMachineElement extends TransparentNodeElement implements ElectricalStackMachineProcessObserver {
 
-	TransparentNodeElementInventory inventory = new ElectricalMachineInventory(3, 64, this);
+	TransparentNodeElementInventory inventory;
 
 	NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");	
 	Resistor electricalResistor = new Resistor(electricalLoad,null);	
@@ -45,13 +45,16 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 	ElectricalMachineSlowProcess slowProcess = new ElectricalMachineSlowProcess(this);
 	boolean powerOn = false;
 	ElectricalMachineDescriptor descriptor;
-	
+	public int inSlotId = 0, outSlotId = 0, boosterSlotId = 1;
 	public ElectricalMachineElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		this.descriptor = (ElectricalMachineDescriptor) descriptor;
+		inSlotId += this.descriptor.outStackCount;
+		boosterSlotId += this.descriptor.outStackCount;
+		inventory = new ElectricalMachineInventory(2+this.descriptor.outStackCount, 64, this);
 		
 		slowRefreshProcess = new ElectricalStackMachineProcess(
-				inventory, ElectricalMachineContainer.inSlotId, ElectricalMachineContainer.outSlotId, 1,
+				inventory, inSlotId, outSlotId, this.descriptor.outStackCount,
 				electricalResistor, Double.POSITIVE_INFINITY, this.descriptor.recipe);
 		
 		electricalLoadList.add(electricalLoad);
@@ -82,7 +85,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		return new ElectricalMachineContainer(this.node,player, inventory);
+		return new ElectricalMachineContainer(this.node,player, inventory,descriptor);
 	}
 	
 	@Override
@@ -129,7 +132,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		ItemStack stack;
 		
 		int boosterCount = 0;
-		stack = getInventory().getStackInSlot(ElectricalMachineContainer.boosterSlotId);
+		stack = getInventory().getStackInSlot(boosterSlotId);
 		if(stack != null) {
 			boosterCount = stack.stackSize;
 		}
@@ -160,8 +163,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		if(fPower > 1.9)fPower = 1.9;
 		try {
 			stream.writeByte((int)(fPower * 64));
-			serialiseItemStack(stream, inventory.getStackInSlot(ElectricalMachineContainer.inSlotId));
-			serialiseItemStack(stream, inventory.getStackInSlot(ElectricalMachineContainer.outSlotId));
+			serialiseItemStack(stream, inventory.getStackInSlot(inSlotId));
+			serialiseItemStack(stream, inventory.getStackInSlot(outSlotId));
 			stream.writeFloat((float) slowRefreshProcess.processState());
 			stream.writeFloat((float) slowRefreshProcess.processStatePerSecond());
 			node.lrduCubeMask.getTranslate(front.down()).serialize(stream);

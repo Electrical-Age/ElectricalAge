@@ -9,6 +9,8 @@ import java.util.LinkedList;
 import java.util.ListResourceBundle;
 import java.util.Scanner;
 
+import com.ibm.icu.impl.duration.impl.DataRecord.ESeparatorVariant;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
@@ -46,6 +48,7 @@ public class Equation implements IValue, INBTTReady {
 			list.add(new OperatorMapperFunc("batteryCharge", 1, BatteryCharge.class));
 			list.add(new OperatorMapperFunc("rs", 2, Rs.class));
 			list.add(new OperatorMapperFunc("rc", 2, RC.class));
+			list.add(new OperatorMapperFunc("if", 3, If.class));
 			list.add(new OperatorMapperBracket());
 			staticOperatorList.put(priority++, list);
 		}
@@ -790,6 +793,30 @@ public class Equation implements IValue, INBTTReady {
 		@Override
 		public int getRedstoneCost() {
 			return 3;
+		}
+
+	}
+	public static class If implements IOperator {
+		public double state;
+
+		public IValue condition,thenValue,elseValue;
+
+		@Override
+		public double getValue() {
+			return condition.getValue() > 0.5 ? thenValue.getValue() : elseValue.getValue();
+		}
+
+
+		@Override
+		public void setOperator(IValue[] values) {
+			this.condition = values[0];
+			this.thenValue = values[1];
+			this.elseValue = values[2];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 2;
 		}
 
 	}

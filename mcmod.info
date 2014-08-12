@@ -1,0 +1,10 @@
+[
+   {
+      "modid":"Eln",
+      "name":"Electrical Age",
+      "url":"http://electrical-age.net/",
+      "requiredMods":[
+         "Forge"
+      ]
+   }
+]

@@ -35,7 +35,7 @@ public class ElectricalMachineGuiDraw extends GuiContainerEln {
     ElectricalMachineRender render;
 
     public ElectricalMachineGuiDraw(EntityPlayer player, IInventory inventory, ElectricalMachineRender render) {
-        super(new ElectricalMachineContainer(null, player, inventory));
+        super(new ElectricalMachineContainer(null, player, inventory,render.descriptor));
         this.inventory = (TransparentNodeElementInventory) inventory;
         this.render = render;     
     }
@@ -61,7 +61,7 @@ public class ElectricalMachineGuiDraw extends GuiContainerEln {
 		super.postDraw(f, x, y);
 		
 		//	drawTexturedModalRectEln(94, 33, 177, 14, (int)(22 * render.processState), 15);
-		((GuiHelperContainer)helper).drawProcess(94, 33 - 20 - 2, render.processState);
+		((GuiHelperContainer)helper).drawProcess(67, 33 - 20 -2, render.processState);
 		//draw
 		
 		voltageBar.setVoltage((float)(render.UFactor * render.descriptor.nominalU));

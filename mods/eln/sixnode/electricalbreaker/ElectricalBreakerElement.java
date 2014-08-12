@@ -28,10 +28,17 @@ public class ElectricalBreakerElement extends SixNodeElement {
 
 	public ElectricalBreakerElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
+		
+		
 		front = LRDU.Left;
     	electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
     	electricalComponentList.add(switchResistor);
+    	electricalComponentList.add(new Resistor(bLoad, null).pullDown());
+    	electricalComponentList.add(new Resistor(aLoad, null).pullDown());
+    	    	
+    	
+    	
     	thermalProcessList.add(cutProcess);
 
     	this.descriptor = (ElectricalBreakerDescriptor) descriptor;
@@ -136,7 +143,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 		ItemStack cable = inventory.getStackInSlot(ElectricalBreakerContainer.cableSlotId);
 		ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
 		if(cableDescriptor == null || switchState == false) {
-			switchResistor.highImpedance();
+			switchResistor.ultraImpedance();
 		}
 		else {
 			cableDescriptor.applyTo(switchResistor);

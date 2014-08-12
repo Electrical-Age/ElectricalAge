@@ -3,19 +3,18 @@ package mods.eln.misc;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
+import java.util.List;
 
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderItem;
@@ -23,25 +22,17 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
-import net.minecraftforge.client.MinecraftForgeClient;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL14;
-
-import com.sun.org.apache.bcel.internal.generic.InstructionConstants.Clinit;
 
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 
@@ -60,7 +51,7 @@ public class UtilsClient {
 	}
 
 	public static EntityClientPlayerMP getClientPlayer() {
-		
+
 		return Minecraft.getMinecraft().thePlayer;
 	}
 
@@ -174,12 +165,12 @@ public class UtilsClient {
 	}
 
 	public static void disableTexture() {
-		
+
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 	}
 
 	public static void enableTexture() {
-		
+
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
@@ -203,35 +194,33 @@ public class UtilsClient {
 	public static void enableBlend() {
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		//GL11.glDepthMask(true);
+		// GL11.glDepthMask(true);
 		GL11.glAlphaFunc(GL11.GL_GREATER, 0.02f);
-		//GL11.glDisable(GL11.GL_ALPHA_TEST);
+		// GL11.glDisable(GL11.GL_ALPHA_TEST);
 		/*
-				Utils.println(GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB) + " " 
-						+ GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA) + " " 
-						+ GL11.glGetInteger(GL14.GL_BLEND_DST_RGB) + " " 
-						+ GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA) + " " 
-						+ GL11.glIsEnabled(GL11.GL_BLEND));*/
+		 * Utils.println(GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB) + " " + GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA) + " " + GL11.glGetInteger(GL14.GL_BLEND_DST_RGB) + " " + GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
+		 */
 
-		//Utils.println(GL11.glGetInteger(GL11.GL_BLEND_SRC) + " " + GL11.glGetInteger(GL11.GL_BLEND_DST) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
-		/* GL11.glEnable(2977);
-		 GL11.glEnable(3042);*/
-		//    OpenGlHelper.glBlendFunc(770, 770, 771, 771);
+		// Utils.println(GL11.glGetInteger(GL11.GL_BLEND_SRC) + " " + GL11.glGetInteger(GL11.GL_BLEND_DST) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
+		/*
+		 * GL11.glEnable(2977); GL11.glEnable(3042);
+		 */
+		// OpenGlHelper.glBlendFunc(770, 770, 771, 771);
 	}
 
 	public static void disableBlend() {
 		GL11.glDisable(GL11.GL_BLEND);
-		
-		//GL11.glDepthMask(true);
-		//GL11.glEnable(GL11.GL_ALPHA_TEST);
-		//GL11.glDisable(GL11.GL_BLEND);
-		//GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		//	Utils.println(GL11.glGetInteger(GL11.GL_BLEND_SRC) + " " + GL11.glGetInteger(GL11.GL_BLEND_DST) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
-		//GL11.glBlendFunc(GL11.GL_SRC_COLOR, GL11.GL_ONE_MINUS_SRC_COLOR);
-		//GL11.glBlendFunc(1, 1);
-		//GL11.glDisable(3042);
 
-		//OpenGlHelper.glBlendFunc(1, 1, 1, 1);
+		// GL11.glDepthMask(true);
+		// GL11.glEnable(GL11.GL_ALPHA_TEST);
+		// GL11.glDisable(GL11.GL_BLEND);
+		// GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		// Utils.println(GL11.glGetInteger(GL11.GL_BLEND_SRC) + " " + GL11.glGetInteger(GL11.GL_BLEND_DST) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
+		// GL11.glBlendFunc(GL11.GL_SRC_COLOR, GL11.GL_ONE_MINUS_SRC_COLOR);
+		// GL11.glBlendFunc(1, 1);
+		// GL11.glDisable(3042);
+
+		// OpenGlHelper.glBlendFunc(1, 1, 1, 1);
 	}
 
 	public static void drawIcon(ItemRenderType type) {
@@ -295,9 +284,9 @@ public class UtilsClient {
 		drawIcon(type);
 	}
 
-	/*public static void drawIcon(ItemRenderType type, Icon icon) {
-		drawIcon(type, icon.getIconName());
-	}*/
+	/*
+	 * public static void drawIcon(ItemRenderType type, Icon icon) { drawIcon(type, icon.getIconName()); }
+	 */
 
 	public static void drawEnergyBare(ItemRenderType type, float e) {
 		float x = 13f, y = 15f - e * 14f;
@@ -450,8 +439,8 @@ public class UtilsClient {
 	}
 
 	static public void drawConnectionPinSixNode(LRDU front, float[] dList, float w, float h) {
-		//front.glRotateOnX();
-		//drawConnectionPinSixNode(d[front.toInt()], w, h);
+		// front.glRotateOnX();
+		// drawConnectionPinSixNode(d[front.toInt()], w, h);
 		float d = dList[front.toInt()];
 		d += 0.04f;
 		d *= 0.0625f;
@@ -518,6 +507,11 @@ public class UtilsClient {
 
 	public static void drawItemStack(ItemStack par1ItemStack, int x, int y, String par4Str, boolean gui)
 	{
+		// Block b = Block.getBlockFromItem(par1ItemStack.getItem());
+		// b.rend
+		// ForgeHooksClient.renderInventoryItem(new RenderBlocks(),Minecraft.getMinecraft().getTextureManager(),par1ItemStack,false,0,x,y);
+		// ForgeHooksClient.renderInventoryItem(Minecraft.getMinecraft().bl, engine, item, inColor, zLevel, x, y)
+
 		RenderItem itemRenderer = getItemRender();
 		// GL11.glDisable(3042);
 		if (gui) {
@@ -525,9 +519,9 @@ public class UtilsClient {
 			RenderHelper.enableGUIStandardItemLighting();
 		}
 		// GL11.glTranslatef(0.0F, 0.0F, 32.0F);
-		//ForgeHooksClient.renderInventoryItem(new RenderBlocks(),Minecraft.getMinecraft().getTextureManager(),par1ItemStack,false,0,x,y);
+		// ForgeHooksClient.renderInventoryItem(new RenderBlocks(),Minecraft.getMinecraft().getTextureManager(),par1ItemStack,false,0,x,y);
 		itemRenderer.zLevel = 400.0F;
-		//		ForgeHooksClient.renderInventoryItem(renderBlocks, engine, item, inColor, zLevel, x, y)
+		// ForgeHooksClient.renderInventoryItem(renderBlocks, engine, item, inColor, zLevel, x, y)
 		FontRenderer font = null;
 		if (par1ItemStack != null) {
 			Item i = par1ItemStack.getItem();
@@ -538,7 +532,7 @@ public class UtilsClient {
 		if (font == null)
 			font = mc().fontRenderer;
 		itemRenderer.renderItemAndEffectIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y);
-		//itemRenderer.renderItemOverlayIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y, par4Str);
+		// itemRenderer.renderItemOverlayIntoGUI(font, mc().getTextureManager(), par1ItemStack, x, y, par4Str);
 
 		itemRenderer.zLevel = 0.0F;
 
@@ -547,6 +541,15 @@ public class UtilsClient {
 			GL11.glDisable(32826);
 		}
 
+		if (par1ItemStack.stackSize > 1) {
+			disableDepthTest();
+			// GL11.glPushMatrix();
+			// GL
+			// GL11.glScalef(0.5f, 0.5f, 0.5f);
+			Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("" + par1ItemStack.stackSize, x + 10, y + 9, 0xFFFFFFFF);
+			// GL11.glPopMatrix();
+			enableDepthTest();
+		}
 	}
 
 	public static double clientDistanceTo(Entity e) {
@@ -556,6 +559,7 @@ public class UtilsClient {
 		double x = (c.posX - e.posX), y = (c.posY - e.posY), z = (c.posZ - e.posZ);
 		return Math.sqrt(x * x + y * y + z * z);
 	}
+
 	public static double clientDistanceTo(TransparentNodeEntity t) {
 		if (t == null)
 			return 100000000.0;
@@ -563,6 +567,7 @@ public class UtilsClient {
 		double x = (c.posX - t.xCoord), y = (c.posY - t.yCoord), z = (c.posZ - t.zCoord);
 		return Math.sqrt(x * x + y * y + z * z);
 	}
+
 	public static int getLight(World w, int x, int y, int z) {
 		int b = w.getSkyBlockTypeBrightness(EnumSkyBlock.Block, x, y, z);
 		int s = w.getSkyBlockTypeBrightness(EnumSkyBlock.Sky, x, y, z) - w.calculateSkylightSubtracted(0f);
@@ -582,7 +587,7 @@ public class UtilsClient {
 	{
 		C17PacketCustomPayload packet = new C17PacketCustomPayload(Eln.channelName, bos.toByteArray());
 		Eln.eventChannel.sendToServer(new FMLProxyPacket(packet));
-		//Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new FMLProxyPacket(packet));
+		// Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new FMLProxyPacket(packet));
 	}
 
 	private static int uuid = Integer.MIN_VALUE;
@@ -592,26 +597,46 @@ public class UtilsClient {
 			uuid = Integer.MIN_VALUE;
 		return uuid++;
 	}
-	
-	
+
 	static HashSet<Integer> glListsAllocated = new HashSet<Integer>();
-	public static int glGenListsSafe(){
-		int id =  GL11.glGenLists(1);
+
+	public static int glGenListsSafe() {
+		int id = GL11.glGenLists(1);
 		glListsAllocated.add(id);
 		return id;
 	}
-	
-	public static void glDeleteListsSafe(int id){
+
+	public static void glDeleteListsSafe(int id) {
 		glListsAllocated.remove(id);
 		GL11.glDeleteLists(id, 1);
 	}
-	
-	public static void glDeleteListsAllSafe(){
-		for(Integer id : glListsAllocated){
+
+	public static void glDeleteListsAllSafe() {
+		for (Integer id : glListsAllocated) {
 			GL11.glDeleteLists(id, 1);
 		}
 		glListsAllocated.clear();
 	}
 
+	public static void showItemTooltip(List src,List dst) {
+		if(src.size() == 0) return;
+		if(showItemTooltip()){
+			dst.addAll(src);
+		}else{
+			dst.add("\u00a7F\u00a7o<hold shift>");
+		}
+	}
+	
+	public static boolean showItemTooltip() {
+		return Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
+	}
+	public static double getWeather(World world) {
+		if(world.isThundering())
+			return 1.0;
+		if(world.isRaining())
+			return 0.5;
+		return 0.0;
+
+	}
 
 }

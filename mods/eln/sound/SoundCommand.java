@@ -13,7 +13,7 @@ public class SoundCommand {
 
 
 	public SoundCommand() {
-
+		mediumRange();
 	}
 
 	public SoundCommand(String track) {
@@ -80,7 +80,7 @@ public class SoundCommand {
 		x = c.xCoord + 0.5;
 		y = c.yCoord + 0.5;
 		z = c.zCoord + 0.5;
-		mediumRange();
+		//mediumRange();
 		return this;
 	}
 
@@ -127,7 +127,7 @@ public class SoundCommand {
 	public SoundCommand longRange() {
 		rangeNominal = 8;
 		rangeMax = 48;
-		blockFactor = 0.5f;
+		blockFactor = 0.3f;
 		return this;
 	}
 
@@ -184,5 +184,15 @@ public class SoundCommand {
 		return this;
 	}
 
+	public SoundCommand applyNominalVolume(double nominalVolume) {
+		//this.blockFactor *= nominalVolume;
+		mulVolume(nominalVolume);
+		return this;
+	}
 
+	public SoundCommand mulBlockAttenuation(double factor) {
+		this.blockFactor *= factor;
+		return this;
+	}
+ 
 }

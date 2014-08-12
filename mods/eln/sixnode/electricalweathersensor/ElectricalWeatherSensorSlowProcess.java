@@ -32,14 +32,19 @@ public class ElectricalWeatherSensorSlowProcess implements IProcess, INBTTReady 
 			timeCounter -= refreshPeriode;
 			Coordonate coord = element.sixNode.coordonate;
 
-			World world = coord.world();
 	    	float target = 0f;
-	    	if(world.isRaining()) {
-	    		//float f = Math.max(0f, (float)((premonitionTime - rain * time) / premonitionTime));
-	    		target = 0.5f;
-	    	}
-	    	if(world.isThundering()) {
-	    		target = 1.0f;
+	    	
+	    	if(coord.getWorldExist() == true){
+				World world = coord.world();
+	
+		    	if(world.isRaining()) {
+		    		//float f = Math.max(0f, (float)((premonitionTime - rain * time) / premonitionTime));
+		    		target = 0.5f;
+		    	}
+		    	if(world.isThundering()) {
+		    		target = 1.0f;
+		    	}
+				rc.setTarget(target);
 	    	}
 	    	
 	    /*	int rain = world.getWorldInfo().getRainTime();
@@ -52,7 +57,7 @@ public class ElectricalWeatherSensorSlowProcess implements IProcess, INBTTReady 
 	    	}
 	    	*/
 	    	//Utils.println(target);
-			rc.setTarget(target);
+
 			rc.step((float) time);
 			element.outputGateProcess.setOutputNormalized(rc.get());
 		}

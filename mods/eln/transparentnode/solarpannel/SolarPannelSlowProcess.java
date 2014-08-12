@@ -51,16 +51,22 @@ public class SolarPannelSlowProcess implements IProcess {
 		Coordonate coordonate = solarPannel.node.coordonate;
 		Vec3 v = Utils.getVec05(coordonate);
 		double x = v.xCoord +  solarPannel.descriptor.solarOffsetX,y = v.yCoord + solarPannel.descriptor.solarOffsetY,z = v.zCoord + solarPannel.descriptor.solarOffsetZ;
-		World world = coordonate.world();
+
 
 		double lightAlpha = solarPannel.pannelAlpha - solarAlpha;
 		double light = Math.cos(lightAlpha);
 		
+		
+		if(light < 0.0) light = 0.0;
+		
+		if(coordonate.getWorldExist() == false) return light;
+		
+		World world = coordonate.world();
 		if(world.getWorldInfo().isRaining()) light *= 0.5;
 		if(world.getWorldInfo().isThundering()) light *= 0.5;
 		
 		
-		if(light < 0.0) light = 0.0;
+		
 		
 		
 		
@@ -95,6 +101,7 @@ public class SolarPannelSlowProcess implements IProcess {
 //		Utils.print("count : " + count + "   ");
 		return light;
 	}
+	
 	public static double getSolarAlpha(World world)
 	{
 		double alpha = world.getCelestialAngleRadians(0f);

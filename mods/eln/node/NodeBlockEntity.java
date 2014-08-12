@@ -316,6 +316,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     {
     	if(!worldObj.isRemote)
     	{
+    		if(getNode() == null) return false;
     		getNode().onBlockActivated(entityPlayer, side, vx, vy, vz);
     		return true;
     	}
@@ -330,6 +331,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     {
     	if(!worldObj.isRemote)
     	{
+    		if(getNode() == null) return;
     		getNode().onNeighborBlockChange();
     	}
     }
@@ -421,6 +423,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 			return redstone;
 		else
 		{
+			if(getNode() == null) return false;
 			return getNode().canConnectRedstone(); 
 		}
 	}

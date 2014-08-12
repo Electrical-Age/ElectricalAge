@@ -15,8 +15,10 @@ import mods.eln.sim.mna.misc.ISubSystemProcessI;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.mna.state.VoltageState;
 
+import org.apache.commons.math3.linear.FieldLUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.QRDecomposition;
+import org.apache.commons.math3.linear.RRQRDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 
 public class SubSystem {
@@ -137,7 +139,7 @@ public class SubSystem {
 			c.applyTo(this);
 		}
 		
-
+	//	org.apache.commons.math3.linear.
 		
 		try {
 			//FieldLUDecomposition QRDecomposition  LUDecomposition RRQRDecomposition
@@ -146,6 +148,12 @@ public class SubSystem {
 			singularMatrix = false;
 		} catch (Exception e) {
 			singularMatrix = true;
+			if(stateCount > 1){
+				int idx = 0;
+				idx++;
+				Utils.println("//////////SingularMatrix////////////");
+			}
+			
 		}
 
 
@@ -384,7 +392,11 @@ public class SubSystem {
 
 
 	static public class Th{
-		public double R,U;		
+		public double R,U;	
+		
+		public boolean isHighImpedance(){
+			return R > 1e8;
+		}
 	}
 	
 	public Th getTh(State d,VoltageSource voltageSource) {

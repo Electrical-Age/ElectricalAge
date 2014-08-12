@@ -10,6 +10,7 @@ import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.CommonProxy;
+import mods.eln.misc.UtilsClient;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -149,10 +150,16 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4)
 	{
-		Descriptor desc = getDescriptor(itemStack);
+		/*Descriptor desc = getDescriptor(itemStack);
 		if (desc == null)
 			return;
 		desc.addInformation(itemStack, entityPlayer, list, par4);
+		*/
+		Descriptor desc = getDescriptor(itemStack);
+		if(desc == null) return;
+		List listFromDescriptor = new ArrayList();
+		desc.addInformation(itemStack, entityPlayer, listFromDescriptor, par4);
+		UtilsClient.showItemTooltip(listFromDescriptor,list);
 	}
 
 	/**
