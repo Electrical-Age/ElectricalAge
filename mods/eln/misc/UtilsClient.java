@@ -165,13 +165,13 @@ public class UtilsClient {
 	}
 
 	public static void disableTexture() {
-
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		bindTexture(whiteTexture);
+		//GL11.glDisable(GL11.GL_TEXTURE_2D);
 	}
 
 	public static void enableTexture() {
 
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		//GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
 	public static void disableLight() {
@@ -639,4 +639,8 @@ public class UtilsClient {
 
 	}
 
+	static ResourceLocation whiteTexture;
+	static{
+		whiteTexture= new ResourceLocation("eln","sprites/cable.png");
+	}
 }
