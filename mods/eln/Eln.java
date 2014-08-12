@@ -1687,7 +1687,7 @@ public class Eln {
 			name = "Power Inductor";
 
 			PowerInductorSixDescriptor desc = new PowerInductorSixDescriptor(
-					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-1)
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE6(-1)
 					);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);

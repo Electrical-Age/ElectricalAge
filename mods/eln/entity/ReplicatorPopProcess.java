@@ -30,36 +30,42 @@ public class ReplicatorPopProcess implements IProcess {
 	@Override
 	public void process(double time) {
 		World world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServers[0];
+		
+		int replicatorCount = 0;
+		for(Object o : world.loadedEntityList){
+			if(o instanceof ReplicatorEntity){
+				replicatorCount++;
+				if(replicatorCount > 100){
+					ReplicatorEntity r = (ReplicatorEntity)o;
+					r.setDead();
+				}
+			}
+		}
+
 		if (world.getWorldInfo().isThundering()) {
 	        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();       
-
-		    for (Object obj :  server.getConfigurationManager().playerEntityList){
+		    for (Object obj :  world.playerEntities){
 		    	EntityPlayerMP player = (EntityPlayerMP) obj;
-				if (Math.random() < time * popPerSecondPerPlayer && player.worldObj == world) {
-	
-					while (true) {
-						int x, y, z;				
-						Random rand = new Random();
-						x = (int) (player.posX + Utils.rand(-100,100));
-						z = (int) (player.posZ + Utils.rand(-100,100));
-						y = 2;
-						
-						if(world.blockExists(x, y, z) == false) break;
-						while (world.getBlock(x, y, z) != Blocks.air 
-								|| Utils.getLight(world,EnumSkyBlock.Block,x,y,z) > 6) {
-							y++;
-						}
-						ReplicatorEntity entityliving = new ReplicatorEntity(world);
-						entityliving.setLocationAndAngles(x + 0.5, y, z + 0.5, 0f, 0f);
-						entityliving.rotationYawHead = entityliving.rotationYaw;
-						entityliving.renderYawOffset = entityliving.rotationYaw;
-						world.spawnEntityInWorld(entityliving);
-						entityliving.playLivingSound();
-						entityliving.isSpawnedFromWeather = true;
-						Utils.println("Spawn Replicator at " + x + " " + y + " " + z);					
-	
-						break;
+				if (Math.random() < time * popPerSecondPerPlayer && player.worldObj == world) {	
+					int x, y, z;				
+					Random rand = new Random();
+					x = (int) (player.posX + Utils.rand(-100,100));
+					z = (int) (player.posZ + Utils.rand(-100,100));
+					y = 2;
+					
+					if(world.blockExists(x, y, z) == false) break;
+					while (world.getBlock(x, y, z) != Blocks.air 
+							|| Utils.getLight(world,EnumSkyBlock.Block,x,y,z) > 6) {
+						y++;
 					}
+					ReplicatorEntity entityliving = new ReplicatorEntity(world);
+					entityliving.setLocationAndAngles(x + 0.5, y, z + 0.5, 0f, 0f);
+					entityliving.rotationYawHead = entityliving.rotationYaw;
+					entityliving.renderYawOffset = entityliving.rotationYaw;
+					world.spawnEntityInWorld(entityliving);
+					entityliving.playLivingSound();
+					entityliving.isSpawnedFromWeather = true;
+					Utils.println("Spawn Replicator at " + x + " " + y + " " + z);					
 				}
 			}
 		}
