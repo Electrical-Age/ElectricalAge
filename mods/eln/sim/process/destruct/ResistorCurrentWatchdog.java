@@ -4,13 +4,18 @@ import mods.eln.sim.mna.component.Resistor;
 
 public class ResistorCurrentWatchdog extends ValueWatchdog{
 	Resistor resistor;
+	
+	
+	private ResistorCurrentWatchdog() {
+		// TODO Auto-generated constructor stub
+	}
 
-	public ResistorCurrentWatchdog set(Resistor resistor){
+	private ResistorCurrentWatchdog set(Resistor resistor){
 		this.resistor = resistor;
 		return this;
 	}
 	
-	public ResistorCurrentWatchdog setIAbsMax(double Imax){
+	private ResistorCurrentWatchdog setIAbsMax(double Imax){
 		this.max = Imax;
 		this.min = -max;
 		this.timeoutReset = Imax*0.10*5;

@@ -52,7 +52,7 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 	SimpleNode getNode(World world, int x, int y, int z) {
 		SimpleNodeEntity entity = (SimpleNodeEntity) world.getTileEntity(x, y, z);
 		if (entity != null) {
-			entity.getNode();
+			return entity.getNode();
 		}
 		return null;
 	}

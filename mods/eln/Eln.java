@@ -19,6 +19,7 @@ import mods.eln.generic.genericArmorItem.ArmourType;
 import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
+import mods.eln.ghost.GhostManagerNbt;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.item.CombustionChamber;
 import mods.eln.item.CopperCableDescriptor;
@@ -58,13 +59,13 @@ import mods.eln.misc.LiveDataManager;
 import mods.eln.misc.Obj3DFolder;
 import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
-import mods.eln.misc.TileEntityDestructor;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Version;
 import mods.eln.misc.WindProcess;
 import mods.eln.misc.series.SerieEE;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
+import mods.eln.node.NodeManagerNbt;
 import mods.eln.node.NodeServer;
 import mods.eln.node.simple.SimpleNodeItem;
 import mods.eln.node.six.SixNode;
@@ -82,6 +83,8 @@ import mods.eln.ore.OreBlock;
 import mods.eln.ore.OreDescriptor;
 import mods.eln.ore.OreItem;
 import mods.eln.server.ConsoleListener;
+import mods.eln.server.DelayedBlockRemove;
+import mods.eln.server.DelayedTaskManager;
 import mods.eln.server.OreRegenerate;
 import mods.eln.server.PlayerManager;
 import mods.eln.server.SaveConfig;
@@ -158,7 +161,6 @@ import mods.eln.solver.ISymbole;
 import mods.eln.sound.SoundCommand;
 import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
 import mods.eln.transparentnode.battery.BatteryDescriptor;
-import mods.eln.transparentnode.computercraftio.ComputerCraftIoDescriptor;
 import mods.eln.transparentnode.computercraftio.PeripheralHandler;
 import mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor;
 import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxDescriptor;
@@ -219,8 +221,10 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;
+import cpw.mods.fml.common.event.FMLServerStartedEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.event.FMLServerStoppingEvent;
+import cpw.mods.fml.common.event.FMLServerStoppedEvent;
 import cpw.mods.fml.common.network.FMLEventChannel;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
@@ -350,11 +354,13 @@ public class Eln {
 	public static ClientKeyHandler clientKeyHandler;
 	public static SaveConfig saveConfig;
 	public static GhostManager ghostManager;
+	public static GhostManagerNbt ghostManagerNbt;
 	private static NodeManager nodeManager;
 	public static PlayerManager playerManager;
 	public static ModbusServer modbusServer;
-
+	public static NodeManagerNbt nodeManagerNbt;
 	public static Simulator simulator = null;
+	public static DelayedTaskManager delayedTask;
 	public static ItemEnergyInventoryProcess itemEnergyInventoryProcess;
 	public static CreativeTabs creativeTab;
 
@@ -408,6 +414,7 @@ public class Eln {
 
 	private boolean replicatorPop;
 
+	boolean xRayScannerCanBeCrafted = true;
 	public boolean forceOreRegen;
 	public boolean explosionEnable;
 	public static boolean debugEnable = false, versionCheckEnable = true;
@@ -486,7 +493,10 @@ public class Eln {
 		addOtherModOreToXRay = config.get("xrayscannerconfig", "addOtherModOreToXRay", true).getBoolean(true);
 		xRayScannerRange = (float) config.get("xrayscannerconfig", "rangeInBloc", 5.0).getDouble(5.0);
 		xRayScannerRange = Math.max(Math.min(xRayScannerRange, 10), 4);
+		xRayScannerCanBeCrafted = config.get("xrayscannerconfig", "canBeCrafted", true).getBoolean(true);
 
+		
+		
 		electricalFrequancy = config.get("simulation", "electricalFrequancy", 20).getDouble(20);
 		electricalInterSystemOverSampling = config.get("simulation", "electricalInterSystemOverSampling", 50).getInt(50);
 		thermalFrequancy = config.get("simulation", "thermalFrequancy", 400).getDouble(400);
@@ -522,9 +532,12 @@ public class Eln {
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
 
 		simulator = new Simulator(0.05, 1 / electricalFrequancy, electricalInterSystemOverSampling, 1 / thermalFrequancy);
-
+		nodeManager = new NodeManager("caca");
+		ghostManager = new GhostManager("caca2");
+		delayedTask = new DelayedTaskManager();
+		
 		playerManager = new PlayerManager();
-		tileEntityDestructor = new TileEntityDestructor();
+		//tileEntityDestructor = new TileEntityDestructor();
 
 		oreRegenerate = new OreRegenerate();
 		nodeServer = new NodeServer();
@@ -920,7 +933,7 @@ public class Eln {
 
 	@EventHandler
 	/* Remember to use the right event! */
-	public void onServerStopping(FMLServerStoppingEvent ev) {
+	public void onServerStopped(FMLServerStoppedEvent ev) {
 		TutorialSignElement.resetBalise();
 		modbusServer.destroy();
 		LightBlockEntity.observers.clear();
@@ -928,58 +941,89 @@ public class Eln {
 		TeleporterElement.teleporterList.clear();
 		IWirelessSignalSpot.spots.clear();
 		playerManager.clear();
-		MinecraftServer server = FMLCommonHandler.instance()
-				.getMinecraftServerInstance();
-		WorldServer worldServer = server.worldServers[0];
-		simulator.init();
-		nodeServer.init();
+
+
 		clientLiveDataManager.stop();
-		nodeManager = null;
-		ghostManager = null;
+		nodeManager.clear();
+		ghostManager.clear();
 		saveConfig = null;
 		modbusServer = null;
 		oreRegenerate.clear();
+		
+		
+		
+		delayedTask.clear();
+		DelayedBlockRemove.clear();
+		
+		serverEventListener.clear();
+
+
+		nodeServer.stop();
+
+		simulator.stop();
+
+		//tileEntityDestructor.clear();
+		LampSupplyElement.channelMap.clear();
+		WirelessSignalTxElement.channelMap.clear();
+		
 	}
 
-	public TileEntityDestructor tileEntityDestructor;
+	//public TileEntityDestructor tileEntityDestructor;
 
 	public static WindProcess wind;
 
 	boolean firstStart = true;
 
+	
+	@EventHandler
+	/* Remember to use the right event! */
+	public void onServerStarted(FMLServerStartedEvent ev) {
+		int i = 0;
+		i++;
+	}
+	
+	@EventHandler
+	public void onServerStart(FMLServerAboutToStartEvent ev) {
+		modbusServer = new ModbusServer();
+		TeleporterElement.teleporterList.clear();
+		//tileEntityDestructor.clear();
+		LightBlockEntity.observers.clear();
+		WirelessSignalTxElement.channelMap.clear();
+		LampSupplyElement.channelMap.clear();
+		playerManager.clear();
+		clientLiveDataManager.start();
+		simulator.init();
+		simulator.addSlowProcess(wind = new WindProcess());
+		
+		
+		if (replicatorPop)
+			simulator.addSlowProcess(new ReplicatorPopProcess());
+		simulator.addSlowProcess(itemEnergyInventoryProcess = new ItemEnergyInventoryProcess());
+	}
+	
 	@EventHandler
 	/* Remember to use the right event! */
 	public void onServerStarting(FMLServerStartingEvent ev) {
+
 		{
 			if (firstStart) {
 
 				firstStart = false;
 			}
 
-			modbusServer = new ModbusServer();
-			TeleporterElement.teleporterList.clear();
-			tileEntityDestructor.clear();
-			LightBlockEntity.observers.clear();
-			WirelessSignalTxElement.channelMap.clear();
-			LampSupplyElement.channelMap.clear();
-			playerManager.clear();
-			clientLiveDataManager.start();
+
 			MinecraftServer server = FMLCommonHandler.instance()
 					.getMinecraftServerInstance();
 			WorldServer worldServer = server.worldServers[0];
-			simulator.init();
-			simulator.addSlowProcess(wind = new WindProcess());
-			if (replicatorPop)
-				simulator.addSlowProcess(new ReplicatorPopProcess());
-			simulator.addSlowProcess(itemEnergyInventoryProcess = new ItemEnergyInventoryProcess());
+			
+			
 
-			ghostManager = (GhostManager) worldServer.mapStorage.loadData(
-					GhostManager.class, "GhostManager");
-			if (ghostManager == null) {
-				ghostManager = new GhostManager("GhostManager");
-				worldServer.mapStorage.setData("GhostManager", ghostManager);
+			ghostManagerNbt = (GhostManagerNbt) worldServer.mapStorage.loadData(
+					GhostManagerNbt.class, "GhostManager");
+			if (ghostManagerNbt == null) {
+				ghostManagerNbt = new GhostManagerNbt("GhostManager");
+				worldServer.mapStorage.setData("GhostManager", ghostManagerNbt);
 			}
-			ghostManager.init();
 
 			saveConfig = (SaveConfig) worldServer.mapStorage.loadData(
 					SaveConfig.class, "SaveConfig");
@@ -989,11 +1033,11 @@ public class Eln {
 			}
 			// saveConfig.init();
 
-			nodeManager = (NodeManager) worldServer.mapStorage.loadData(
-					NodeManager.class, "NodeManager");
-			if (nodeManager == null) {
-				nodeManager = new NodeManager("NodeManager");
-				worldServer.mapStorage.setData("NodeManager", nodeManager);
+			nodeManagerNbt = (NodeManagerNbt) worldServer.mapStorage.loadData(
+					NodeManagerNbt.class, "NodeManager");
+			if (nodeManagerNbt == null) {
+				nodeManagerNbt = new NodeManagerNbt("NodeManager");
+				worldServer.mapStorage.setData("NodeManager", nodeManagerNbt);
 			}
 
 			nodeServer.init();
@@ -1009,22 +1053,7 @@ public class Eln {
 		regenOreScannerFactors();
 	}
 
-	@EventHandler
-	public void ServerStopping(FMLServerStoppingEvent ev) {
 
-		serverEventListener.clear();
-		playerManager.clear();
-
-		nodeServer.stop();
-
-		simulator.stop();
-
-		tileEntityDestructor.clear();
-		LightBlockEntity.observers.clear();
-		LampSupplyElement.channelMap.clear();
-		WirelessSignalTxElement.channelMap.clear();
-
-	}
 
 	public CableRenderDescriptor stdCableRenderSignal;
 	public CableRenderDescriptor stdCableRender50V;
@@ -1249,6 +1278,9 @@ public class Eln {
 				1.5 };
 		FunctionTable condoVoltageFunction = new FunctionTable(condoVoltageFunctionTable,
 				6.0 / 5);
+		
+		Utils.printFunction(voltageFunction,-0.2,1.2,0.1);
+		
 		double stdDischargeTime = 4 * 60;
 		double stdU = LVU;
 		double stdP = LVP / 4;
@@ -5432,14 +5464,16 @@ public class Eln {
 				Character.valueOf('M'), findItemStack("Electrical Motor"),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
 
-		addRecipe(findItemStack("X-Ray Scanner"),
-				"PGP",
-				"PCP",
-				"PBP",
-				Character.valueOf('C'), findItemStack("Advanced Chip"),
-				Character.valueOf('B'), findItemStack("Portable Battery"),
-				Character.valueOf('P'), new ItemStack(Items.iron_ingot),
-				Character.valueOf('G'), findItemStack("Ore Scanner"));
+		if(xRayScannerCanBeCrafted){
+			addRecipe(findItemStack("X-Ray Scanner"),
+					"PGP",
+					"PCP",
+					"PBP",
+					Character.valueOf('C'), findItemStack("Advanced Chip"),
+					Character.valueOf('B'), findItemStack("Portable Battery"),
+					Character.valueOf('P'), new ItemStack(Items.iron_ingot),
+					Character.valueOf('G'), findItemStack("Ore Scanner"));
+		}
 
 	}
 

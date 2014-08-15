@@ -175,12 +175,12 @@ public class HubElement extends SixNodeElement {
 					r.setR(getCableDescriptorFromLrdu(lrdu[0]).electricalRs + getCableDescriptorFromLrdu(lrdu[1]).electricalRs);
 					electricalComponentList.add(r);
 					
-					ResistorCurrentWatchdog watchdog = new ResistorCurrentWatchdog();
-					slowProcessList.add(watchdog);
-					watchdog	
+					//ResistorCurrentWatchdog watchdog = new ResistorCurrentWatchdog();
+					//slowProcessList.add(watchdog);
+					/*watchdog	
 						.set(r)
 						.setIAbsMax(Math.min(getCableDescriptorFromLrdu(lrdu[0]).electricalMaximalCurrent, getCableDescriptorFromLrdu(lrdu[1]).electricalMaximalCurrent))
-						.set(exp);
+						.set(exp);*/
 				}
 			}
 		}

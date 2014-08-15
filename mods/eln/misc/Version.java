@@ -14,13 +14,13 @@ public final class Version {
 	public final static int MAJOR = 1;
 
 	/** Minor version code. */
-	public final static int MINOR = 8;
+	public final static int MINOR = 9;
 
 	/**
 	 * Unique version code. Must be a String for annotations. Used to check if a
 	 * new version if available. Each update must increment this number.
 	 */
-	public final static String REVISION = "36";
+	public final static String REVISION = "37";
 
 	public final static String getVersionName() {
 		return String.format("BETA-%d.%d r%s", MAJOR, MINOR, REVISION);

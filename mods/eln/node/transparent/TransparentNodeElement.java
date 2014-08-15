@@ -494,6 +494,10 @@ public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
 		s.play();
 	}
 
+	public void unload() {
+
+	}
+
 /*	protected boolean hasSidedInventory(){
 		return false;
 	}

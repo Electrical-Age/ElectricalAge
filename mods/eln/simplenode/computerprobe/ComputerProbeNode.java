@@ -96,6 +96,16 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 	public void onBreakBlock() {
 		super.onBreakBlock();
 
+		unregister();
+	}
+	
+	@Override
+	public void unload() {
+		super.unload();
+		unregister();
+	}
+	
+	void unregister(){
 		for (WirelessTx tx : wirelessTxMap.values())
 			WirelessSignalTxElement.channelRemove(tx);
 	}

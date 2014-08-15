@@ -7,6 +7,7 @@ import net.minecraft.tileentity.TileEntity;
 public class EnergyConverterElnToOtherFireWallRf {
 	public static void updateEntity(EnergyConverterElnToOtherEntity e){
 		if(e.getWorldObj().isRemote)return;
+		if(e.getNode() == null) return;
 		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) e.getNode();
 		TileEntity tileEntity = node.getFront().getInverse().applyToTileEntity(e);
 		if(tileEntity == null || false == tileEntity instanceof IEnergyHandler)return;

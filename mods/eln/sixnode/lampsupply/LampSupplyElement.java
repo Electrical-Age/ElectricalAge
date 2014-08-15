@@ -174,9 +174,19 @@ public class LampSupplyElement extends SixNodeElement {
 	@Override
 	public void destroy(EntityPlayerMP entityPlayer) {	
 		super.destroy(entityPlayer);
-		channelRemove(this);
+		unregister();
 	}
 
+	
+	@Override
+	public void unload() {
+		super.unload();
+		channelRemove(this);
+	}
+	
+	void unregister(){
+		channelRemove(this);	
+	}
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		
