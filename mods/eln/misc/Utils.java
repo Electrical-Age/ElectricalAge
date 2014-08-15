@@ -1469,4 +1469,13 @@ public class Utils {
 	public static float limit(float value, float min, float max) {
 		return Math.max(Math.min(value, max), min);
 	}
+
+	public static void printFunction(FunctionTable func, double start, double end, double step) {
+		Utils.println("********");
+		double x;
+		for(int idx = 0;(x = start + step*idx) < end+0.00001;idx++){
+			Utils.println(func.getValue(x));
+		}
+		Utils.println("********");
+	}
 }

@@ -4,6 +4,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
+import mods.eln.node.NodeBase;
+import mods.eln.node.NodeManager;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
@@ -47,8 +49,8 @@ public class WorldExplosion implements IDestructable{
 	
 	@Override
 	public void destructImpl() {
-		int i = 0;
-		i++;
+
+		//NodeManager.instance.removeNode(NodeManager.instance.getNodeFromCoordonate(c));
 		
 		if(Eln.instance.explosionEnable)
 			c.world().createExplosion((Entity)null, c.x,c.y,c.z, strength, true);

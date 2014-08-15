@@ -666,4 +666,8 @@ public abstract class NodeBase {
 	public void needPublish() {
 		setNeedPublish(true);
 	}
+
+	public void unload() {
+		disconnect();
+	}
 }

@@ -100,7 +100,6 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
     
    
     public ComputerProbeNode getNode() {
-    	// TODO Auto-generated method stub
     	return (ComputerProbeNode) super.getNode();
     }
     

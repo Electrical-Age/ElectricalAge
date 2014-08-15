@@ -679,4 +679,14 @@ public class SixNode extends Node {
 		}
 	}
 
+	
+	@Override
+	public void unload() {
+		// TODO Auto-generated method stub
+		super.unload();
+		for(SixNodeElement e : sideElementList){
+			if(e == null) continue;
+			e.unload();
+		}
+	}
 }

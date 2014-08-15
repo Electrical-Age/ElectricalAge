@@ -69,10 +69,20 @@ public class WirelessSignalRepeaterElement extends SixNodeElement{
 
 	@Override
 	public void destroy(EntityPlayerMP entityPlayer) {
-		IWirelessSignalSpot.spots.remove(slowProcess);
+		unregister();
 		super.destroy(entityPlayer);
 	}
 
+	
+	@Override
+	public void unload() {
+		super.unload();
+		unregister();
+	}
+	
+	void unregister(){
+		IWirelessSignalSpot.spots.remove(slowProcess);
+	}
 
 	@Override
 	public void initialize() {

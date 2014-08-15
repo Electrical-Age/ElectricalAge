@@ -32,8 +32,12 @@ public class ElectricalBreakerCutProcess implements IProcess,INBTTReady {
 				i++;
 				Utils.println(P);
 			}*/
-			double pMax = Eln.electricalCableDeltaTMax * cable.thermalC;
-			T += Math.min(pMax, P) / cable.thermalC * time;
+			//double pMax = Eln.electricalCableDeltaTMax * cable.thermalC;
+			if(I > 1){
+				int idx = 0;
+				idx++;
+			}
+			T += P / cable.thermalC * time;
 			Tmax = cable.thermalWarmLimit * 0.8;
 		}
 		//Utils.println(T);

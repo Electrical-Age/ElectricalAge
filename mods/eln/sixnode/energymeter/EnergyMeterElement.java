@@ -50,11 +50,11 @@ public class EnergyMeterElement extends SixNodeElement {
     	
     	
     	
-    	slowProcessList.add(currentWatchDog);
+    	//slowProcessList.add(currentWatchDog);
     	slowProcessList.add(voltageWatchDogA);
     	slowProcessList.add(voltageWatchDogB);
     	
-    	currentWatchDog.set(shunt).set(exp);
+    	//currentWatchDog.set(shunt).set(exp);
     	voltageWatchDogA.set(aLoad).set(exp);
     	voltageWatchDogB.set(bLoad).set(exp);
     	this.descriptor = (EnergyMeterDescriptor) descriptor;
@@ -62,7 +62,7 @@ public class EnergyMeterElement extends SixNodeElement {
 
 	VoltageStateWatchDog voltageWatchDogA = new VoltageStateWatchDog();
 	VoltageStateWatchDog voltageWatchDogB = new VoltageStateWatchDog();
-	ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
+	//ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
 	
 	
 	public SlowProcess slowProcess = new SlowProcess();
@@ -165,7 +165,7 @@ public class EnergyMeterElement extends SixNodeElement {
 			
 			voltageWatchDogA.disable();
 			voltageWatchDogB.disable();
-			currentWatchDog.disable();
+		//	currentWatchDog.disable();
 		}
 		else {
 			cableDescriptor.applyTo(aLoad);
@@ -173,7 +173,7 @@ public class EnergyMeterElement extends SixNodeElement {
 			
 			voltageWatchDogA.setUNominalMirror(cableDescriptor.electricalNominalVoltage);
 			voltageWatchDogB.setUNominalMirror(cableDescriptor.electricalNominalVoltage);
-			currentWatchDog.setIAbsMax(cableDescriptor.electricalMaximalCurrent);
+		//	currentWatchDog.setIAbsMax(cableDescriptor.electricalMaximalCurrent);
 		}
 	}
 	

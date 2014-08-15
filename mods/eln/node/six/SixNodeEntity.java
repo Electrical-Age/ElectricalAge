@@ -134,7 +134,9 @@ public class SixNodeEntity extends NodeBlockEntity {
 
 	public Container newContainer(Direction side, EntityPlayer player)
 	{
-		return ((SixNode) getNode()).newContainer(side, player);
+		SixNode n = ((SixNode) getNode());
+		if(n == null) return null;
+		return n.newContainer(side, player);
 	}
 
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player)
@@ -254,11 +256,8 @@ public class SixNodeEntity extends NodeBlockEntity {
 			return max;
 		}
 		else{
-			try {
-				return getNode().isProvidingWeakPower(side);
-			} catch (Exception e) {
-				return 0;
-			}	
+			if(getNode() == null) return 0;
+			return getNode().isProvidingWeakPower(side);
 		}
 	}
 }

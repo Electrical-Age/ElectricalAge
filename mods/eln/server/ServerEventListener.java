@@ -2,11 +2,18 @@ package mods.eln.server;
 
 import java.util.LinkedList;
 
+import mods.eln.Eln;
+import mods.eln.ghost.GhostManager;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
+import mods.eln.node.NodeManager;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.world.WorldEvent.Load;
+import net.minecraftforge.event.world.WorldEvent.Save;
+import net.minecraftforge.event.world.WorldEvent.Unload;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
@@ -21,7 +28,7 @@ public class ServerEventListener {
 	@SubscribeEvent
 	public void tick(ServerTickEvent event) {
 		if(event.phase != Phase.END) return;
-		
+
 		lightningList = lightningListNext;
 		lightningListNext = new LinkedList<EntityLightningBolt>();
 	}
@@ -49,5 +56,24 @@ public class ServerEventListener {
 		}
 		return best;
 	}
-	
+
+	@SubscribeEvent	
+	public void onWorldLoad(Load e){
+		if(e.world.isRemote) return;
+		ElnWorldStorage storage = ElnWorldStorage.forWorld(e.world);
+	}
+	@SubscribeEvent	
+	public void onWorldUnload(Unload e){
+		if(e.world.isRemote) return;
+		NodeManager.instance.unload(e.world.provider.dimensionId);
+		Eln.ghostManager.unload(e.world.provider.dimensionId);
+	}
+		
+	@SubscribeEvent	
+	public void onWorldSave(Save e){
+		if(e.world.isRemote) return;
+		//ElnWorldStorage storage = ElnWorldStorage.forWorld(e.world);
+		int idx = 0;
+		idx++;
+	}
 }

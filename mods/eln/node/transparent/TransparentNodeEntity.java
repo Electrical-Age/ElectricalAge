@@ -96,7 +96,9 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
 
 	public Container newContainer(Direction side, EntityPlayer player)
 	{
-		return ((TransparentNode) getNode()).newContainer(side, player);
+		TransparentNode n = (TransparentNode)getNode();
+		if(n == null) return null;
+		return n.newContainer(side, player);
 	}
 
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player)

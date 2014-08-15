@@ -60,13 +60,13 @@ public class ElectricalRelayElement extends SixNodeElement {
     	electricalComponentList.add(new Resistor(aLoad, null).pullDown());
 
     	
-    	slowProcessList.add(currentWatchDog);
+    	//slowProcessList.add(currentWatchDog);
     	slowProcessList.add(voltageWatchDogA);
     	slowProcessList.add(voltageWatchDogB);
     	
     	WorldExplosion exp = new WorldExplosion(this).cableExplosion();
     	
-    	currentWatchDog.set(switchResistor).setIAbsMax(this.descriptor.cable.electricalMaximalCurrent).set(exp);
+    	//currentWatchDog.set(switchResistor).setIAbsMax(this.descriptor.cable.electricalMaximalCurrent).set(exp);
     	voltageWatchDogA.set(aLoad).setUNominal(this.descriptor.cable.electricalNominalVoltage).set(exp);
     	voltageWatchDogB.set(bLoad).setUNominal(this.descriptor.cable.electricalNominalVoltage).set(exp);
 	}
@@ -80,7 +80,7 @@ public class ElectricalRelayElement extends SixNodeElement {
 	
 	VoltageStateWatchDog voltageWatchDogA = new VoltageStateWatchDog();
 	VoltageStateWatchDog voltageWatchDogB = new VoltageStateWatchDog();
-	ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
+	//ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
 
 	
 
