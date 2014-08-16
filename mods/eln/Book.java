@@ -25,7 +25,7 @@ import cpw.mods.fml.common.gameevent.PlayerEvent;
 		       
 		       NBTTagCompound tag = new NBTTagCompound();
 		       NBTTagList bookPages = new NBTTagList();
-		       bookPages.appendTag(new NBTTagString("Test"));
+		       bookPages.appendTag(new NBTTagString("Test1"));
 		       bookPages.appendTag(new NBTTagString("Test"));
 		       bookPages.appendTag(new NBTTagString("Test"));
 		       bookPages.appendTag(new NBTTagString("Test"));
