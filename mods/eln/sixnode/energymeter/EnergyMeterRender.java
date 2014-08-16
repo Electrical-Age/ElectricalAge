@@ -28,16 +28,21 @@ public class EnergyMeterRender extends SixNodeElementRender {
 	public EnergyMeterRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (EnergyMeterDescriptor) descriptor;
+		
+		for(int idx = 0;idx < energyRc.length;idx++){
+			energyRc[idx] = new RcInterpolator(0.2f);
+		}
 
 	}
-
+	
+	RcInterpolator[] energyRc = new RcInterpolator[7];
 	
 	@Override
 	public void draw() {
 		super.draw();
 		
 		//front.glRotateOnX();	
-		descriptor.draw();			
+		descriptor.draw(energyStack/100.0);			
 	}
 	
 	@Override
@@ -45,6 +50,15 @@ public class EnergyMeterRender extends SixNodeElementRender {
 		double errorComp = error * 1 * deltaT;
 		energyStack += power*deltaT + errorComp;
 		error -= errorComp;
+		
+		double stack = energyStack;
+		for(int idx = 0;idx < energyRc.length;idx++){
+			
+			energyRc[idx].setTarget((float) ((stack) % 10));
+			energyRc[idx].step(deltaT);
+			stack /= 10.0;
+		}
+		
 		
 		timerCouter += deltaT;
 		serverPowerIdTimer += deltaT;

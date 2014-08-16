@@ -94,7 +94,7 @@ public class EnergyMeterGui extends GuiContainerEln {
 				return;
 			}
 			
-			render.clientSetDouble(EnergyMeterElement.clientEnergyStackId,newVoltage);
+			render.clientSetDouble(EnergyMeterElement.clientEnergyStackId,newVoltage*1000);
 		}
 		
 		if(object == resetTimeBt){
