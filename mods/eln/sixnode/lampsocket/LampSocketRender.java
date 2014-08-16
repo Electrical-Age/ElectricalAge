@@ -201,7 +201,11 @@ public class LampSocketRender extends SixNodeElementRender {
 
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		if (cable == null)
+		if (cable == null 
+				|| (lrdu == front && descriptor.cableFront == false)
+				|| (lrdu == front.left() && descriptor.cableLeft == false)
+				|| (lrdu == front.right() && descriptor.cableRight == false)
+				|| (lrdu == front.inverse() && descriptor.cableBack == false))
 			return null;
 		return cable.render;
 	}

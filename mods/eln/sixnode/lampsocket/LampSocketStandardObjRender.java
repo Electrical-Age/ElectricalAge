@@ -12,7 +12,7 @@ import mods.eln.misc.UtilsClient;
 
 public class LampSocketStandardObjRender implements LampSocketObjRender {
 	private Obj3D obj;
-	private Obj3DPart socket,socket_unlightable,socket_lightable;
+	private Obj3DPart socket, socket_unlightable, socket_lightable, lampOn, lampOff;
 	ResourceLocation tOn, tOff;
 	private boolean onOffModel;
 
@@ -21,6 +21,8 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 		this.onOffModel = onOffModel;
 		if (obj != null) {
 			socket = obj.getPart("socket");
+			lampOn = obj.getPart("lampOn");
+			lampOff = obj.getPart("lampOff");
 			socket_unlightable = obj.getPart("socket_unlightable");
 			socket_lightable = obj.getPart("socket_lightable");
 			tOff = obj.getAlternativeTexture(obj.getString("tOff"));
@@ -45,20 +47,20 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 				GL11.glTranslatef(-0.5f, 0f, -1f);
 			}
 		}
-		draw(LRDU.Up, 0, (byte) 0);
+		draw(LRDU.Up, 0, (byte) 0, true);
 	}
 
 	@Override
 	public void draw(LampSocketRender render) {
-		draw(render.front, render.alphaZ, render.light);
+		draw(render.front, render.alphaZ, render.light, render.lampDescriptor != null);
 	}
 
-	public void draw(LRDU front, float alphaZ, byte light) {
+	public void draw(LRDU front, float alphaZ, byte light, boolean hasBulb) {
 		front.glRotateOnX();
 
-		GL11.glDisable(GL11.GL_CULL_FACE);
+		UtilsClient.disableCulling();
 		if (onOffModel == false) {
-			if(socket != null) socket.draw();
+			if (socket != null) socket.draw();
 		}
 		else {
 			//
@@ -68,30 +70,33 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 			else
 				UtilsClient.bindTexture(tOff);
 
-			if(socket_unlightable != null) socket_unlightable.drawNoBind();
-			
+			if (socket_unlightable != null) socket_unlightable.drawNoBind();
+
 			if (light > 8) {
 				UtilsClient.disableLight();
-				float l = (light)/14f;
+				float l = (light) / 14f;
 				GL11.glColor3f(l, l, l);
-				if(socket_lightable != null) socket_lightable.drawNoBind();
+				if (socket_lightable != null) socket_lightable.drawNoBind();
 				GL11.glColor3f(1f, 1f, 1f);
 			}
-			
-			if(socket != null) socket.drawNoBind();
-			
-			if (light > 8) 
+
+			if (hasBulb) {
+				if (light > 8) {
+					if (lampOn != null) lampOn.draw();
+				}
+				else {
+					if (lampOff != null) lampOff.draw();
+				}
+			}
+			if (socket != null) socket.drawNoBind();
+
+			if (light > 8)
 				UtilsClient.enableLight();
 			//
 		}
-		GL11.glEnable(GL11.GL_CULL_FACE);
+		UtilsClient.enableCulling();
 		/*
-		 * GL11.glLineWidth(2f); GL11.glDisable(GL11.GL_TEXTURE_2D);
-		 * GL11.glDisable(GL11.GL_LIGHTING); GL11.glColor3f(1f,1f,1f);
-		 * GL11.glBegin(GL11.GL_LINES); GL11.glVertex3d(0f, 0f, 0f);
-		 * GL11.glVertex3d(Math.cos(alphaZ*Math.PI/180.0),
-		 * Math.sin(alphaZ*Math.PI/180.0),0.0); GL11.glEnd();
-		 * GL11.glEnable(GL11.GL_TEXTURE_2D); GL11.glEnable(GL11.GL_LIGHTING);
+		 * GL11.glLineWidth(2f); GL11.glDisable(GL11.GL_TEXTURE_2D); GL11.glDisable(GL11.GL_LIGHTING); GL11.glColor3f(1f,1f,1f); GL11.glBegin(GL11.GL_LINES); GL11.glVertex3d(0f, 0f, 0f); GL11.glVertex3d(Math.cos(alphaZ*Math.PI/180.0), Math.sin(alphaZ*Math.PI/180.0),0.0); GL11.glEnd(); GL11.glEnable(GL11.GL_TEXTURE_2D); GL11.glEnable(GL11.GL_LIGHTING);
 		 */
 	}
 }

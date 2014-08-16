@@ -56,6 +56,10 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 	public int range;
 	public String modelName;
 	float alphaZMin,alphaZMax,alphaZBoot;
+	public boolean cableFront = true;
+	public boolean cableLeft = true;
+	public boolean cableRight = true;
+	public boolean cableBack = true;
 	@Override
 	public boolean use2DIcon() {
 		return useIconEnable;
