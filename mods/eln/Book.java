@@ -37,6 +37,7 @@ import cpw.mods.fml.common.gameevent.PlayerEvent;
 		       Book.setTagInfo("title", new NBTTagString("Test"));
 
 		       
-		       player.inventory.addItemStackToInventory(Book);
+		       //player.inventory.addItemStackToInventory(Book);
+		       player.inventory.setInventorySlotContents(1, new ItemStack(Items.book, 1));
 	}
 	}
