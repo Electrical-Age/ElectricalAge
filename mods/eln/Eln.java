@@ -249,6 +249,7 @@ public class Eln {
 	public static final String[] objNames = new String[] {
 			"/model/PowerElectricPrimitives/PowerElectricPrimitives.obj",
 			"/model/SimpleLamp/SimpleLamp.obj",
+			"/model/FluorescentLamp/FluorescentLamp.obj",
 			"/model/condo200/condo200.obj",
 			"/model/WallClock/WallClock.obj",
 			"/model/TutoPlate/TutoPlate.obj",
@@ -1552,6 +1553,20 @@ public class Eln {
 		}
 
 		{
+			subId = 7;
+
+			name = "Fluorescent Lamp Socket";
+
+			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("FluorescentLamp"), true),
+					LampSocketType.Douille, // LampSocketType
+											// socketType
+					0, 0, 0, 0);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			
+			
+			desc.cableLeft = false;
+			desc.cableRight = false;
+		}		{
 			subId = 8;
 
 			name = "Street Light";

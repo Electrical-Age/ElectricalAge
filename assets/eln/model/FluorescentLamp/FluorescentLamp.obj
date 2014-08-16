@@ -1,9 +1,5 @@
 # Blender v2.67 (sub 0) OBJ File: 'FluorescentLamp.blend'
 # www.blender.org
-# ===============
-# Author : lambdaShade
-# This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/.
-
 mtllib FluorescentLamp.mtl
 o lampOff
 v 0.093750 0.437500 -0.031250
@@ -201,7 +197,7 @@ f 62/60 64/63 63/65
 f 56/66 54/60 55/62
 f 60/64 59/67 57/65
 f 61/61 62/60 63/65
-o socketLightable
+o socket_lightable
 v 0.066406 0.496094 -0.062500
 v 0.066406 -0.496094 -0.062500
 v 0.066406 0.496094 0.062500
@@ -238,3 +234,57 @@ f 65/80 66/71 71/73
 f 66/82 68/74 72/76
 f 71/83 69/77 65/79
 f 66/71 65/80 68/81
+o Minecraft_2_Edge_Connectivity_Cube.002
+v 0.000000 0.500000 0.500000
+v 0.000000 0.500000 -0.500000
+v 0.000000 -0.500000 -0.500000
+v 0.000000 -0.500000 0.500000
+v 0.500000 0.500000 -0.000000
+v 0.500000 -0.500000 0.000000
+usemtl Material
+s off
+f 73 74 76
+f 74 77 78
+f 73 77 74
+f 75 78 76
+f 77 73 76
+f 74 75 76
+f 75 74 78
+f 78 77 76
+o Minecraft_4_Edge_Connectivity_Cube.001
+v 0.000000 0.500000 0.500000
+v 0.000000 0.500000 -0.500000
+v 0.000000 -0.500000 -0.500000
+v 0.000000 -0.500000 0.500000
+v 0.500000 -0.000000 -0.000000
+usemtl Material
+s off
+f 79 80 82
+f 79 83 80
+f 80 83 81
+f 81 83 82
+f 83 79 82
+f 80 81 82
+o Minecraft_Block_Cube
+v 0.000000 0.500000 0.500000
+v 0.000000 0.500000 -0.500000
+v 0.000000 -0.500000 -0.500000
+v 0.000000 -0.500000 0.500000
+v 1.000000 0.500000 0.500000
+v 1.000000 0.500000 -0.500000
+v 1.000000 -0.500000 -0.500000
+v 1.000000 -0.500000 0.500000
+usemtl Material
+s off
+f 84 85 87
+f 88 91 90
+f 84 88 85
+f 85 89 86
+f 86 90 87
+f 88 84 87
+f 85 86 87
+f 89 88 90
+f 88 89 85
+f 89 90 86
+f 90 91 87
+f 91 88 87
