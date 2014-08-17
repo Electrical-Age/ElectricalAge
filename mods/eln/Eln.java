@@ -249,6 +249,7 @@ public class Eln {
 	public static final String[] objNames = new String[] {
 			"/model/PowerElectricPrimitives/PowerElectricPrimitives.obj",
 			"/model/EnergyMeter/EnergyMeter.obj",
+			"/model/AdvancedEnergyMeter/AdvancedEnergyMeter.obj",
 			"/model/SimpleLamp/SimpleLamp.obj",
 			"/model/FluorescentLamp/FluorescentLamp.obj",
 			"/model/condo200/condo200.obj",
@@ -1912,11 +1913,19 @@ public class Eln {
 
 			name = "Energy Meter";
 
-			EnergyMeterDescriptor desc = new EnergyMeterDescriptor(name, obj.getObj("EnergyMeter"));
+			EnergyMeterDescriptor desc = new EnergyMeterDescriptor(name, obj.getObj("EnergyMeter"),8,0);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
+		{
+			subId = 5;
 
+			name = "Advanced Energy Meter";
+
+			EnergyMeterDescriptor desc = new EnergyMeterDescriptor(name, obj.getObj("AdvancedEnergyMeter"),7,8);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
 	}
 
 	void registerElectricalSensor(int id) {
