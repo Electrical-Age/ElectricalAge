@@ -130,6 +130,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 	}
 
 	@Override
+	@SideOnly(value=Side.CLIENT)
 	public void registerIcons(IIconRegister iconRegister)
 	{
 		for (GenericItemUsingDamageDescriptor descriptor : subItemList.values())

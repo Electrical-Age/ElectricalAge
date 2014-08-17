@@ -36,56 +36,49 @@ public class EnergyMeterElement extends SixNodeElement {
 	public EnergyMeterElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		shunt.mustUseUltraImpedance();
-		
-    	electricalLoadList.add(aLoad);
-    	electricalLoadList.add(bLoad);
-    	electricalComponentList.add(shunt);
-    	electricalComponentList.add(new Resistor(bLoad, null).pullDown());
-    	electricalComponentList.add(new Resistor(aLoad, null).pullDown());
 
-    	
-    	slowProcessList.add(slowProcess);
-    	
-    	WorldExplosion exp = new WorldExplosion(this).cableExplosion();
-    	
-    	
-    	
-    	//slowProcessList.add(currentWatchDog);
-    	slowProcessList.add(voltageWatchDogA);
-    	slowProcessList.add(voltageWatchDogB);
-    	
-    	//currentWatchDog.set(shunt).set(exp);
-    	voltageWatchDogA.set(aLoad).set(exp);
-    	voltageWatchDogB.set(bLoad).set(exp);
-    	this.descriptor = (EnergyMeterDescriptor) descriptor;
+		electricalLoadList.add(aLoad);
+		electricalLoadList.add(bLoad);
+		electricalComponentList.add(shunt);
+		electricalComponentList.add(new Resistor(bLoad, null).pullDown());
+		electricalComponentList.add(new Resistor(aLoad, null).pullDown());
+
+		slowProcessList.add(slowProcess);
+
+		WorldExplosion exp = new WorldExplosion(this).cableExplosion();
+
+		// slowProcessList.add(currentWatchDog);
+		slowProcessList.add(voltageWatchDogA);
+		slowProcessList.add(voltageWatchDogB);
+
+		// currentWatchDog.set(shunt).set(exp);
+		voltageWatchDogA.set(aLoad).set(exp);
+		voltageWatchDogB.set(bLoad).set(exp);
+		this.descriptor = (EnergyMeterDescriptor) descriptor;
 	}
 
 	VoltageStateWatchDog voltageWatchDogA = new VoltageStateWatchDog();
 	VoltageStateWatchDog voltageWatchDogB = new VoltageStateWatchDog();
-	//ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
-	
-	
+	// ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
+
 	public SlowProcess slowProcess = new SlowProcess();
 	public EnergyMeterDescriptor descriptor;
 	public NbtElectricalLoad aLoad = new NbtElectricalLoad("aLoad");
 	public NbtElectricalLoad bLoad = new NbtElectricalLoad("bLoad");
-	public ResistorSwitch shunt = new ResistorSwitch("shunt",aLoad, bLoad);
+	public ResistorSwitch shunt = new ResistorSwitch("shunt", aLoad, bLoad);
 
 	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
 	public float voltageMax = (float) Eln.SVU, voltageMin = 0;
-	
+
 	public SixNodeElementInventory getInventory() {
 		return inventory;
 	}
 
-
-
-
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(front == lrdu) return aLoad;
-		if(front.inverse() == lrdu) return bLoad;
+		if (front == lrdu) return aLoad;
+		if (front.inverse() == lrdu) return bLoad;
 		return null;
 	}
 
@@ -96,9 +89,9 @@ public class EnergyMeterElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(inventory.getStackInSlot(EnergyMeterContainer.cableSlotId) == null) return 0;
-		if(front == lrdu) return NodeBase.maskElectricalAll;
-		if(front.inverse() == lrdu) return NodeBase.maskElectricalAll;
+		if (inventory.getStackInSlot(EnergyMeterContainer.cableSlotId) == null) return 0;
+		if (front == lrdu) return NodeBase.maskElectricalAll;
+		if (front.inverse() == lrdu) return NodeBase.maskElectricalAll;
 
 		return 0;
 	}
@@ -121,65 +114,59 @@ public class EnergyMeterElement extends SixNodeElement {
 			stream.writeUTF(password);
 			stream.writeUTF(mod.toString());
 			stream.writeDouble(timeCounter);
-			//stream.writeDouble(energyStack);
-	    	Utils.serialiseItemStack(stream, inventory.getStackInSlot(EnergyMeterContainer.cableSlotId));
+			// stream.writeDouble(energyStack);
+			Utils.serialiseItemStack(stream, inventory.getStackInSlot(EnergyMeterContainer.cableSlotId));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-
 	public void setSwitchState(boolean state) {
-		if(state == shunt.getState()) return;
-		if(energyStack <= 0 && mod == Mod.ModPrepay) return;
+		if (state == shunt.getState()) return;
+	//	if (energyStack <= 0 && mod == Mod.ModPrepay) return;
 		shunt.setState(state);
 		play(new SoundCommand("random.click").mulVolume(0.3F, 0.6f).smallRange());
 		needPublish();
 	}
-	
 
-
-	
 	@Override
 	public void initialize() {
-		Eln.applySmallRs(shunt);
-    	computeElectricalLoad();
+		computeElectricalLoad();
 	}
 
 	@Override
 	protected void inventoryChanged() {
 		computeElectricalLoad();
-		reconnect();		
+		reconnect();
 	}
-	
+
 	public ElectricalCableDescriptor cableDescriptor = null;
-	
+
 	public void computeElectricalLoad() {
 		ItemStack cable = inventory.getStackInSlot(EnergyMeterContainer.cableSlotId);
-		
-		
+
 		cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
-		if(cableDescriptor == null) {
+		if (cableDescriptor == null) {
 			aLoad.highImpedance();
-			bLoad.highImpedance();	
-			
+			bLoad.highImpedance();
+
 			voltageWatchDogA.disable();
 			voltageWatchDogB.disable();
-		//	currentWatchDog.disable();
+			// currentWatchDog.disable();
 		}
 		else {
 			cableDescriptor.applyTo(aLoad);
 			cableDescriptor.applyTo(bLoad);
-			
+
 			voltageWatchDogA.setUNominalMirror(cableDescriptor.electricalNominalVoltage);
 			voltageWatchDogB.setUNominalMirror(cableDescriptor.electricalNominalVoltage);
-		//	currentWatchDog.setIAbsMax(cableDescriptor.electricalMaximalCurrent);
+			// currentWatchDog.setIAbsMax(cableDescriptor.electricalMaximalCurrent);
 		}
 	}
-	
+
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-    	return onBlockActivatedRotate(entityPlayer);
+		return onBlockActivatedRotate(entityPlayer);
 	}
 
 	public static final byte clientEnergyStackId = 1;
@@ -187,27 +174,24 @@ public class EnergyMeterElement extends SixNodeElement {
 	public static final byte clientPasswordId = 3;
 	public static final byte clientToggleStateId = 4;
 	public static final byte clientTimeCounterId = 5;
-	
-	
-	
-	
-	
+
 	public static final byte serverPowerId = 1;
-	
+
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		super.networkUnserialize(stream);
 		try {
-			switch(stream.readByte()) {
+			switch (stream.readByte()) {
 			case clientEnergyStackId:
 				energyStack = stream.readDouble();
 				slowProcess.publishTimeout = -1;
-			//	needPublish();
+				// needPublish();
 				break;
 			case clientTimeCounterId:
 				timeCounter = 0;
 				needPublish();
-				break;			case clientModId:
+				break;
+			case clientModId:
 				mod = Mod.valueOf(stream.readUTF());
 				needPublish();
 				break;
@@ -218,30 +202,27 @@ public class EnergyMeterElement extends SixNodeElement {
 			case clientToggleStateId:
 				setSwitchState(!shunt.getState());
 				break;
-				
-				
+
 			}
 		} catch (IOException e) {
-			//e.printStackTrace();
+			// e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public boolean hasGui() {
 		return true;
 	}
-	
+
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
 		return new EnergyMeterContainer(player, inventory);
 	}
-	
-	
-	
+
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
-		
+
 		energyStack = nbt.getDouble("energyStack");
 		timeCounter = nbt.getDouble("timeCounter");
 		password = nbt.getString("password");
@@ -251,67 +232,75 @@ public class EnergyMeterElement extends SixNodeElement {
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
-		
-		nbt.setDouble("energyStack",energyStack);
+
+		nbt.setDouble("energyStack", energyStack);
 		nbt.setDouble("timeCounter", timeCounter);
-		nbt.setString("password",password);
+		nbt.setString("password", password);
 
 	}
-	
+
 	String password = "";
 	double energyStack = 0;
 	double timeCounter = 0;
-	enum Mod{ModCounter,ModPrepay};
+
+	enum Mod {
+		ModCounter, ModPrepay
+	};
+
 	Mod mod = Mod.ModCounter;
-	
-	
-	
-	
-	class SlowProcess implements IProcess{
+
+	class SlowProcess implements IProcess {
 		public static final double publishTimeoutReset = 1;
-		public double publishTimeout = Math.random()*publishTimeoutReset;
+		public double publishTimeout = Math.random() * publishTimeoutReset;
 		public double oldEnergyPublish;
+
 		@Override
 		public void process(double time) {
 			timeCounter += time;
-			double p = aLoad.getCurrent()*aLoad.getU();
+			double p = aLoad.getCurrent() * aLoad.getU() * (aLoad.getU() > bLoad.getU() ? 1.0 : -1.0);
+			boolean highImp = false;
 			switch (mod) {
 			case ModCounter:
-				energyStack += p*time;
+				energyStack += p * time;
 				break;
 			case ModPrepay:
-				energyStack -= p*time;
-				if(energyStack < 0){
-					energyStack = 0;
-					setSwitchState(false);
+				energyStack -= p * time;
+				if (energyStack < 0) {
+					// energyStack = 0;
+					// setSwitchState(false);
+					if (p > 0) {
+						highImp = true;
+					}
 				}
 				break;
 			}
 			
+			if(highImp) shunt.ultraImpedance();
+			else Eln.applySmallRs(shunt);
+			
+
 			publishTimeout -= time;
-			if(publishTimeout < 0){
+			if (publishTimeout < 0) {
 				publishTimeout += publishTimeoutReset;
-		    	ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-		        DataOutputStream packet = new DataOutputStream(bos);   	
-		        
+				ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+				DataOutputStream packet = new DataOutputStream(bos);
+
 				preparePacketForClient(packet);
-				
+
 				try {
 					packet.writeByte(serverPowerId);
 					packet.writeDouble(oldEnergyPublish);
-					packet.writeDouble((energyStack - oldEnergyPublish)/publishTimeoutReset);
-					
-					sendPacketToAllClient(bos,10);						
+					packet.writeDouble((energyStack - oldEnergyPublish) / publishTimeoutReset);
+
+					sendPacketToAllClient(bos, 10);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
-
-				
 				oldEnergyPublish = energyStack;
 			}
 		}
-		
+
 	}
 }

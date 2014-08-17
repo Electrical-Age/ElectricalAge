@@ -92,4 +92,7 @@ public class GuiButtonEln extends GuiButton implements IGuiObject{
 		else
 			this.comment.set(line, comment);
 	}
+	public void clearComment() {
+		comment.clear();
+	}
 }

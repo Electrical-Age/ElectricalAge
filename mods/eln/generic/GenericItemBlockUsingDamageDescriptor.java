@@ -9,6 +9,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IIcon;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 public class GenericItemBlockUsingDamageDescriptor {
 	String iconName;
 	IIcon iconIndex;
@@ -30,6 +32,8 @@ public class GenericItemBlockUsingDamageDescriptor {
 	{
 		
 	}
+	
+	@SideOnly(value=Side.CLIENT)
     public void updateIcons(IIconRegister iconRegister)
     {
     	if(use2DIcon())

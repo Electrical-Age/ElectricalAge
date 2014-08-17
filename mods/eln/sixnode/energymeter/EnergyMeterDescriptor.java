@@ -3,6 +3,7 @@ package mods.eln.sixnode.energymeter;
 import java.util.List;
 
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -18,6 +19,7 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 	private Obj3D obj;
 	public Obj3DPart base, comma, powerDisk, textMj, textkj;
 	public Obj3DPart[] numberWheel;
+	public float[] pinDistance;
 
 	public EnergyMeterDescriptor(String name, Obj3D obj) {
 		super(name, EnergyMeterElement.class, EnergyMeterRender.class);
@@ -33,6 +35,8 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 				numberWheel[idx] = obj.getPart("NumberWheel" + idx);
 			}
 		}
+
+		pinDistance = Utils.getSixNodePinDistance(base);
 	}
 
 	float alphaOff, alphaOn, speed;
@@ -65,10 +69,10 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		draw(13896);
+		draw(13896,true);
 	}
 
-	public void draw(double energy) {
+	public void draw(double energy, boolean drawAll) {
 
 		// UtilsClient.disableCulling();
 		base.draw();
@@ -80,44 +84,52 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 		double delta = 0;
 		boolean propagate = true;
 		double oldRot = 0;
-		for (int idx = 0; idx < numberWheel.length; idx++) {
-			double rot = ((energy) % 10) + 0.0;
-			//energy -= rot;
-
-			rot += 0.00; // - (((int) energy/10.0)*10)
-			if (idx == 1) {
-				delta = ((rot) % 1) * 2 - 1;
-				delta *= delta * delta;
-				//delta *= delta * delta;
-				//delta *= delta * delta;
-				delta *= 0.5;
-			} 
-			if (idx != 0) {
-				
-
-				if(propagate){
-					if(rot < 9.5 && rot > 0.5){
-						propagate = false;
+		
+		energy = Math.max(0.0,Math.abs(energy));
+		if(energy < 5) propagate = false;
+		/*if (drawAll)*/ {
+			for (int idx = 0; idx < numberWheel.length; idx++) {
+				if (drawAll) {
+					double rot = ((energy) % 10) + 0.0;
+					// energy -= rot;
+	
+					rot += 0.00; // - (((int) energy/10.0)*10)
+					if (idx == 1) {
+						delta = ((rot) % 1) * 2 - 1;
+						delta *= delta * delta;
+						// delta *= delta * delta;
+						// delta *= delta * delta;
+						delta *= 0.5;
 					}
-					rot = (int) (rot) + delta;
+					if (idx != 0) {
+	
+						if (propagate) {
+							if (rot < 9.5 && rot > 0.5) {
+								propagate = false;
+							}
+							rot = (int) (rot) + delta;
+						}
+						else
+							rot = (int) (rot);
+	
+					}
+	
+					oldRot = rot;
+					// energy += rot;
+					rot *= 36;
+					GL11.glPushMatrix();
+					GL11.glTranslatef(ox, oy, oz);
+					GL11.glRotatef((float) rot, 0f, 0f, 1f);
+					GL11.glTranslatef(-ox, -oy, -oz);
+					numberWheel[idx].draw();
+					GL11.glPopMatrix();
+
+				energy /= 10.0;
 				}
-				else
-					rot = (int) (rot);
-				
-
+				else{
+				//	numberWheel[idx].draw();
+				}
 			}
-
-			oldRot = rot;
-			//energy += rot;
-			rot *= 36;
-			GL11.glPushMatrix();
-			GL11.glTranslatef(ox, oy, oz);
-			GL11.glRotatef((float) rot, 0f, 0f, 1f);
-			GL11.glTranslatef(-ox, -oy, -oz);
-			numberWheel[idx].draw();
-			GL11.glPopMatrix();
-
-			energy /= 10.0;
 		}
 		// UtilsClient.enableCulling();
 	}

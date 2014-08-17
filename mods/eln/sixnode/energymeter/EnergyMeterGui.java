@@ -3,6 +3,7 @@ package mods.eln.sixnode.energymeter;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import mods.eln.gui.GuiButtonEln;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
@@ -21,7 +22,7 @@ public class EnergyMeterGui extends GuiContainerEln {
 		this.render = render;
 	}
 
-	GuiButton stateBt, passwordBt, modBt,setEnergyBt,resetTimeBt;
+	GuiButtonEln stateBt, passwordBt, modBt,setEnergyBt,resetTimeBt;
 	GuiTextFieldEln passwordFeild,energyFeild;
 	EnergyMeterRender render;
 
@@ -44,6 +45,10 @@ public class EnergyMeterGui extends GuiContainerEln {
 		x = 6;
 		y += 28;x = 6;
 		stateBt = newGuiButton(x, y, 70, ""); x += 74;
+	
+		
+
+		
 		modBt = newGuiButton(x, y, 106, "");
 		y += 22;x = 6;
 		energyFeild = newGuiTextField(x, y+4, 70); x += 74;
@@ -121,9 +126,24 @@ public class EnergyMeterGui extends GuiContainerEln {
 		switch (render.mod) {
 		case ModCounter:
 			modBt.displayString = "In counter mod";
+			
+			modBt.clearComment();
+			modBt.setComment(0, "In this mod, it");
+			modBt.setComment(1, "count energy from");
+			modBt.setComment(2, "\u00a74red\u00a7f to \u00a71blue\u00a7f side");
 			break;
 		case ModPrepay:
 			modBt.displayString = "In prepay mod";
+			
+			modBt.clearComment();
+			modBt.setComment(0, "In this mod, it");
+			modBt.setComment(1, "deduct energy from");
+			modBt.setComment(2, "\u00a74red\u00a7f to \u00a71blue\u00a7f side.");
+			modBt.setComment(3, "You must set a initial");
+			modBt.setComment(4, "amout of energy and when");
+			modBt.setComment(5, "the counter hit zero");
+			modBt.setComment(6, "it cut off the line.");
+
 			break;
 		}
 
