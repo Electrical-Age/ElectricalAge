@@ -69,6 +69,7 @@ public class GuiHelper {
 				width, 20,
 				name
 				);
+		o.setHelper(this);
 		objectList.add(o);
 		return o;
 	}

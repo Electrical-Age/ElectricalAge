@@ -68,6 +68,12 @@ public abstract class SixNodeElementRender {
 		GL11.glColor3f(1, 1, 1);
 	}
 
+	public void drawPowerPinWhite(LRDU front, float d[]) {
+		if (UtilsClient.distanceFromClientPlayer(tileEntity) > 20) return;
+		UtilsClient.drawConnectionPinSixNode(front, d, 1.8f, 0.9f);
+	}
+
+	
 	public void drawSignalPin(float d[]) {
 		drawSignalPin(front, d);
 	}

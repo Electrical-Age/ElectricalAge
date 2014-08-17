@@ -2,6 +2,9 @@ package mods.eln.generic;
 
 import java.util.List;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+
 import mods.eln.Eln;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -57,6 +60,7 @@ public class GenericItemUsingDamageDescriptor {
 	public boolean use2DIcon(){
 		return true;
 	}
+	@SideOnly(value=Side.CLIENT)
 	public void updateIcons(IIconRegister iconRegister)
 	{
 		if(use2DIcon())

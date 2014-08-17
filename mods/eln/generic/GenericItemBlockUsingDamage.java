@@ -115,6 +115,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 
 	
 	@Override
+	@SideOnly(value=Side.CLIENT)
     public void registerIcons(IIconRegister iconRegister)
     {
        for(GenericItemBlockUsingDamageDescriptor descriptor : subItemList.values())
