@@ -26,18 +26,18 @@ import cpw.mods.fml.common.gameevent.PlayerEvent;
 		       NBTTagCompound tag = new NBTTagCompound();
 		       NBTTagList bookPages = new NBTTagList();
 		       bookPages.appendTag(new NBTTagString("Test1"));
-		       bookPages.appendTag(new NBTTagString("Test"));
-		       bookPages.appendTag(new NBTTagString("Test"));
-		       bookPages.appendTag(new NBTTagString("Test"));
-		       bookPages.appendTag(new NBTTagString("Test"));
-		       bookPages.appendTag(new NBTTagString("Test"));
-		       bookPages.appendTag(new NBTTagString("Test"));
+		       bookPages.appendTag(new NBTTagString("Test1"));
+		       bookPages.appendTag(new NBTTagString("Test1"));
+		       bookPages.appendTag(new NBTTagString("Test1"));
+		       bookPages.appendTag(new NBTTagString("Test1"));
+		       bookPages.appendTag(new NBTTagString("Test1"));
+		       bookPages.appendTag(new NBTTagString("Test1"));
 		       Book.setTagInfo("pages", bookPages);
 		       Book.setTagInfo("author", new NBTTagString("ShadowWarrior979"));
 		       Book.setTagInfo("title", new NBTTagString("Test"));
 
 		       
 		       //player.inventory.addItemStackToInventory(Book);
-		       player.inventory.setInventorySlotContents(1, new ItemStack(Items.book, 1));
+		       player.inventory.setInventorySlotContents(1, new ItemStack(Items.cookie, 1));
 	}
 	}
