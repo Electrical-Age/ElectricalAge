@@ -17,7 +17,7 @@ import org.lwjgl.opengl.GL11;
 public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
 	private Obj3D obj;
-	public Obj3DPart base, comma, powerDisk, textMj, textkj,signWheel;
+	public Obj3DPart base, comma, powerDisk, textMj, textkj;
 	public Obj3DPart[] numberWheel;
 	public float[] pinDistance;
 
@@ -30,7 +30,6 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 			powerDisk = obj.getPart("PowerDisk");
 			textMj = obj.getPart("TextMj");
 			textkj = obj.getPart("TextkJ");
-			signWheel = obj.getPart("SignWheel");
 			numberWheel = new Obj3DPart[8];
 			for (int idx = 0; idx < numberWheel.length; idx++) {
 				numberWheel[idx] = obj.getPart("NumberWheel" + idx);
@@ -85,20 +84,6 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 		double delta = 0;
 		boolean propagate = true;
 		double oldRot = 0;
-		
-		if(drawAll){
-			double rot;
-			if(energy > 0.5) rot = 0;
-			else if(energy < -0.5) rot = 1;
-			else rot = 0.5-energy;
-			rot *= 36;
-			GL11.glPushMatrix();
-			GL11.glTranslatef(ox, oy, oz);
-			GL11.glRotatef((float) rot, 0f, 0f, 1f);
-			GL11.glTranslatef(-ox, -oy, -oz);
-			signWheel.draw();
-			GL11.glPopMatrix();
-		}
 		
 		energy = Math.max(0.0,Math.abs(energy));
 		if(energy < 5) propagate = false;
