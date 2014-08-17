@@ -1528,7 +1528,7 @@ public class Eln {
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("RobustLamp"), true),
 					LampSocketType.Douille, // LampSocketType
 											// socketType
-					0, 0, 0, 0);
+					3, 0, 0, 0);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -1539,7 +1539,7 @@ public class Eln {
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("FlatLamp"), true),
 					LampSocketType.Douille, // LampSocketType
 											// socketType
-					0, 0, 0, 0);
+					3, 0, 0, 0);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}		
 		{
@@ -1550,7 +1550,7 @@ public class Eln {
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("SimpleLamp"), true),
 					LampSocketType.Douille, // LampSocketType
 											// socketType
-					0, 0, 0, 0);
+					3, 0, 0, 0);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -1562,7 +1562,7 @@ public class Eln {
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("FluorescentLamp"), true),
 					LampSocketType.Douille, // LampSocketType
 											// socketType
-					0, 0, 0, 0);
+					4, 0, 0, 0);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			
 			
@@ -4926,6 +4926,24 @@ public class Eln {
 				"I I",
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
+		
+		
+		addRecipe(findItemStack("Energy Meter"),
+				"IcI",
+				"IRI",
+				"IcI",
+				Character.valueOf('c'), findItemStack("Copper Cable"),
+				Character.valueOf('R'), findItemStack("Cheap Chip"),
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
+		
+		addRecipe(findItemStack("Advanced Energy Meter"),
+				" c ",
+				"PRP",
+				" c ",
+				Character.valueOf('c'), findItemStack("Copper Cable"),
+				Character.valueOf('R'), findItemStack("Advanced Chip"),
+				Character.valueOf('P'), findItemStack("Iron Plate"));
+				
 	}
 
 	void recipeAutoMiner() {

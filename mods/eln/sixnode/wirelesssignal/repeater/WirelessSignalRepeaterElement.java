@@ -11,6 +11,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class WirelessSignalRepeaterElement extends SixNodeElement{
 
@@ -62,6 +63,8 @@ public class WirelessSignalRepeaterElement extends SixNodeElement{
 	}
 
 	
+	
+	
 	@Override
 	public void globalBoot(){
 		slowProcess.process(0.05);
@@ -86,8 +89,17 @@ public class WirelessSignalRepeaterElement extends SixNodeElement{
 
 	@Override
 	public void initialize() {
+		if(fromNbt == false){
+			slowProcess.process(0.05);
+		}
+	}
+	boolean fromNbt = false;
+	
+	@Override
+	public void readFromNBT(NBTTagCompound nbt) {
 		// TODO Auto-generated method stub
-		
+		super.readFromNBT(nbt);
+		fromNbt = true;
 	}
 
 	@Override

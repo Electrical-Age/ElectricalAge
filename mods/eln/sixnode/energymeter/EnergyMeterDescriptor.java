@@ -17,7 +17,7 @@ import org.lwjgl.opengl.GL11;
 public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
 	private Obj3D obj;
-	public Obj3DPart base, comma, powerDisk, textMj, textkj, energySignWheel, timeUnitWheel, energyUnitWheel;
+	public Obj3DPart base, powerDisk, energySignWheel, timeUnitWheel, energyUnitWheel;
 	public Obj3DPart[] energyNumberWheel, timeNumberWheel;
 	public float[] pinDistance;
 
@@ -27,10 +27,7 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 		this.obj = obj;
 		if (obj != null) {
 			base = obj.getPart("Base");
-			comma = obj.getPart("Comma");
 			powerDisk = obj.getPart("PowerDisk");
-			textMj = obj.getPart("TextMj");
-			textkj = obj.getPart("TextkJ");
 			energySignWheel = obj.getPart("EnergySignWheel");
 			timeUnitWheel = obj.getPart("TimeUnitWheel");
 			energyUnitWheel = obj.getPart("EnergyUnitWheel");
@@ -69,25 +66,37 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		if(type == ItemRenderType.INVENTORY) return true;
 		return true;
 	}
 
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		if(type == ItemRenderType.INVENTORY) return true;
 		return true;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		draw(13896, 1511, 1, 0, true);
+		if(type == ItemRenderType.INVENTORY){
+			
+			
+
+			GL11.glRotatef(45, 0, 0, 1);
+			GL11.glRotatef(90, 1, 0, 0);
+			GL11.glRotatef(30, 0, 0, 1);
+			float scal = 2.5f;
+			GL11.glScalef(scal, scal, scal);
+			draw(13896, 1511, 1, 0, false);
+		}else{
+			draw(13896, 1511, 1, 0, true);
+		}
 	}
 
 	public void draw(double energy, double time, int energyUnit, int timeUnit, boolean drawAll) {
 
 		// UtilsClient.disableCulling();
 		base.draw();
-		if (textkj != null) textkj.draw();
-		if (comma != null) comma.draw();
 		powerDisk.draw(-(float) energy, 0f, 1f, 0f);
 
 		{// render energy

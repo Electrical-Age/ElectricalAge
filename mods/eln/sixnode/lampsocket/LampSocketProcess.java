@@ -108,7 +108,7 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 			if (list != null) {
 				for (LampSupplyElement s : list) {
 					float distance = (float) s.sixNode.coordonate.trueDistanceTo(myCoord);
-					if (distance < bestDistance && distance <= s.descriptor.range) {
+					if (distance < bestDistance && distance <= s.getRange()) {
 						bestDistance = distance;
 						best = s;
 					}

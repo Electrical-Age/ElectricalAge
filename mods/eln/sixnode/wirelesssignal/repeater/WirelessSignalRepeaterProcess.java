@@ -29,6 +29,7 @@ public class WirelessSignalRepeaterProcess implements IProcess,IWirelessSignalSp
 	double sleepTimer = 0;
 	IWirelessSignalSpot spot;
 	
+	boolean boot = true;
 
 	@Override
 	public void process(double time) {
@@ -37,6 +38,11 @@ public class WirelessSignalRepeaterProcess implements IProcess,IWirelessSignalSp
 			sleepTimer += Utils.rand(1.2, 2);
 	
 			spot = WirelessUtils.buildSpot(rx.getCoordonate(), null, rx.descriptor.range);	
+		
+			if(boot){
+				boot = false;
+				//IWirelessSignalSpot.spots.add(this);
+			}
 		}
 		
 		
