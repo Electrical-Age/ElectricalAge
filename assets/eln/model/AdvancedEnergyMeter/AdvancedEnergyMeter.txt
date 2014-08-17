@@ -1,0 +1,5 @@
+o PowerDisk
+f originX 0.15
+f originY 0.0
+f originZ 0.0
+f speed 360
