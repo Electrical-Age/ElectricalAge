@@ -10,6 +10,7 @@ import net.minecraft.tileentity.TileEntity;
 public class EnergyConverterElnToOtherFireWallBuildcraft {
 	public static void updateEntity(EnergyConverterElnToOtherEntity e){
 		if(e.getWorldObj().isRemote)return;
+		if(e.getNode() == null) return;
 		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) e.getNode();
 		TileEntity tileEntity = node.getFront().getInverse().applyToTileEntity(e);
 		if(tileEntity == null || false == tileEntity instanceof IPowerReceptor)return;

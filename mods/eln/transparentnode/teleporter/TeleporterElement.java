@@ -131,16 +131,24 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	public void onBreakElement() {
 		
 		super.onBreakElement();
-		teleporterList.remove(this);
+		
 		for(TeleporterPowerNode n : powerNodeList){
 			n.onBreakBlock();
 		}
 		powerNodeList.clear();
-		
+		unregister();
 	}
 	ArrayList<TeleporterPowerNode> powerNodeList = new ArrayList<TeleporterPowerNode>();
 
+	@Override
+	public void unload() {
+		super.unload();
+		unregister();
+	}
 	
+	void unregister(){
+		teleporterList.remove(this);
+	}
 	
 	
 	@Override

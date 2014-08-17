@@ -86,6 +86,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	public boolean emitsEnergyTo(TileEntity receiver, ForgeDirection direction) {
 		if (worldObj.isRemote) return false;
 		SimpleNode n = getNode();
+		if(n == null) return false;
 		return n.getFront().back() == Direction.from(direction);
 	}
 
@@ -93,6 +94,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	@Override
 	public double getOfferedEnergy() {
 		if (worldObj.isRemote) return 0;
+		if(getNode() == null) return 0;
 		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) getNode();
 		double pMax = node.getOtherModOutMax(node.descriptor.ic2.outMax, Other.getElnToIc2ConversionRatio());
 		return pMax;
@@ -101,8 +103,9 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	@Optional.Method(modid = Other.modIdIc2)
 	@Override
 	public void drawEnergy(double amount) {
-		if (worldObj.isRemote)
-		;
+		if (worldObj.isRemote) return;
+		if(getNode() == null) return;
+
 		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) getNode();
 		node.drawEnergy(amount, Other.getElnToIc2ConversionRatio());
 	}
@@ -168,6 +171,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	//	Utils.println("*****canConnectEnergy*****");
 	//	return true;
 		if (worldObj.isRemote) return false;
+		if(getNode() == null) return false;
 		SimpleNode n = getNode();
 		return n.getFront().back() == Direction.from(from);
 	}
@@ -184,6 +188,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate) {
 		//Utils.println("*****extractEnergy*****");
 		if (worldObj.isRemote) return 0;
+		if(getNode() == null) return 0;
 		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) getNode();
 		int extract = (int) Math.min(maxExtract, node.getOtherModEnergyBuffer(Other.getElnToTeConversionRatio()));
 		if (simulate)
@@ -212,6 +217,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	@Optional.Method(modid = Other.modIdBuildcraft)
 	public boolean canEmitPowerFrom(ForgeDirection side) {
 		if (worldObj.isRemote) return false;
+		if(getNode() == null) return false;
 		SimpleNode n = getNode();
 		return n.getFront().back() == Direction.from(side);
 	}

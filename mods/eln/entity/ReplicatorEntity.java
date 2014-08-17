@@ -109,8 +109,8 @@ public class ReplicatorEntity extends EntityMob {
 	public boolean attackEntityAsMob(Entity e) {
 		
 		if(e instanceof ReplicatorEntity){
-			this.hunger -= 0.8;
-			((ReplicatorEntity)e).hunger += 0.8;	
+			this.hunger -= 0.4;
+			((ReplicatorEntity)e).hunger += 0.4;	
 		//	Utils.print("ATTAQUE");
 		}
 		return super.attackEntityAsMob(e);
@@ -248,6 +248,8 @@ public class ReplicatorEntity extends EntityMob {
     	hunger = nbt.getDouble("ElnHunger");
     	isSpawnedFromWeather = nbt.getBoolean("isSpawnedFromWeather");
 
+    	
+    	Utils.println("[Replicator] " + posX + " " + posY + " " + posZ + " " );
     }
     
 	

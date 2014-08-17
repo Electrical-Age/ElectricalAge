@@ -1,0 +1,4 @@
+s tOn FluorescentLamp.png
+s tOff FluorescentLamp.png
+s type noLampDraw
+s cable enable

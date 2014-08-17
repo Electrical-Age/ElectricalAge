@@ -23,6 +23,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
+import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
 
 public class WirelessSignalTxElement extends SixNodeElement implements IWirelessSignalTx{
@@ -161,13 +162,24 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 		return false;
 	}
 
+
 	@Override
 	public void destroy(EntityPlayerMP entityPlayer) {
-		channelRemove(this);
+		unregister();
 		super.destroy(entityPlayer);
 	}
 
 	
+	@Override
+	public void unload() {
+		super.unload();
+		unregister();
+	}
+	
+	void unregister(){
+		channelRemove(this);
+	}
+
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		

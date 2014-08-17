@@ -55,6 +55,7 @@ public class Search extends GuiScreenEln{
 			guiStackList.add(gui);
 			add(gui);
 			idx++;
+			if(idx > 8*7-1) break;
 		}
 	}
 	
@@ -112,7 +113,7 @@ public class Search extends GuiScreenEln{
 	@Override
 	protected GuiHelper newHelper() {
 		
-		return helper = new GuiHelper(this, 176, 166);
+		return helper = new GuiHelper(this, 176, 166+6);
 	}
 
 

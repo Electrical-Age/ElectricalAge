@@ -31,6 +31,7 @@ public class EnergyConverterElnToOtherFireWallOc {
             Network.joinOrCreateNetwork(e);
         }else{
     		if(node != null){
+    			if(e.getNode() == null) return;
     			Connector c = ((Connector) node);
     			EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) e.getNode();
     			double eMax = node.getOtherModEnergyBuffer(Other.getElnToOcConversionRatio());

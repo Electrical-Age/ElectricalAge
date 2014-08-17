@@ -14,6 +14,7 @@ import mods.eln.misc.Utils;
 import mods.eln.node.INodeEntity;
 import mods.eln.node.NodeEntityClientSender;
 import mods.eln.node.NodeManager;
+import mods.eln.server.DelayedBlockRemove;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,9 +29,18 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 	private SimpleNode node;
 
 	public SimpleNode getNode() {
-		if (worldObj.isRemote) Utils.fatal();
+		if (worldObj.isRemote){
+			Utils.fatal();
+			return null;
+		}
 		if(this.worldObj == null) return null;
-		if (node == null) node = (SimpleNode) NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
+		if (node == null){ 
+			node = (SimpleNode) NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
+			if(node == null){
+				DelayedBlockRemove.add(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
+				return null;
+			}
+		}
 		return node;
 	}
 

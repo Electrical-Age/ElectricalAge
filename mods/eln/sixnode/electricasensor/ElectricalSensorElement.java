@@ -54,8 +54,8 @@ public class ElectricalSensorElement extends SixNodeElement {
 			electricalLoadList.add(bLoad);
 			electricalComponentList.add(resistor);
 
-			slowProcessList.add(currentWatchDog);
-			currentWatchDog.set(resistor).set(exp);
+		//	slowProcessList.add(currentWatchDog);
+		//	currentWatchDog.set(resistor).set(exp);
 			
 		}
 		electricalLoadList.add(outputGate);
@@ -67,7 +67,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 	}
 
 	VoltageStateWatchDog voltageWatchDog = new VoltageStateWatchDog();
-	ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
+	//ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
 
 	public ElectricalSensorDescriptor descriptor;
 	public NbtElectricalLoad aLoad, bLoad;
@@ -214,11 +214,11 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 			if(cableDescriptor == null) {
 				if(resistor != null) resistor.highImpedance();
-				currentWatchDog.setIAbsMax(100000);
+			//	currentWatchDog.setIAbsMax(100000);
 				voltageWatchDog.setUNominal(1000000000);
 			} else {
 				if(resistor != null) cableDescriptor.applyTo(resistor, 2);
-				currentWatchDog.setIAbsMax(cableDescriptor.electricalMaximalCurrent);
+			//	currentWatchDog.setIAbsMax(cableDescriptor.electricalMaximalCurrent);
 				voltageWatchDog.setUNominal(cableDescriptor.electricalNominalVoltage);
 			}
 

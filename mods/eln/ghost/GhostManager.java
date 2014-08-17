@@ -29,6 +29,11 @@ public class GhostManager extends WorldSavedData
 	Hashtable<Coordonate, GhostElement> ghostTable = new Hashtable<Coordonate, GhostElement>();
 	Hashtable<Coordonate, GhostObserver> observerTable = new Hashtable<Coordonate, GhostObserver>();
 
+	public void clear(){
+		ghostTable.clear();
+		observerTable.clear();
+	}
+	
 	public void init()
 	{
 		
@@ -131,6 +136,32 @@ public class GhostManager extends WorldSavedData
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		
+		/*for(NBTTagCompound o : Utils.getTags(nbt))
+		{
+			NBTTagCompound tag = (NBTTagCompound) o;
+
+			GhostElement ghost = new GhostElement();
+			ghost.readFromNBT(tag, "");
+			ghostTable.put(ghost.elementCoordonate, ghost);
+		}*/		
+	}
+	@Override
+	public void writeToNBT(NBTTagCompound nbt) {
+		
+	/*	int nodeCounter = 0;
+		
+		for(GhostElement ghost : ghostTable.values())
+		{
+			NBTTagCompound nbtGhost = new NBTTagCompound();
+			ghost.writeToNBT(nbtGhost,"");
+			nbt.setTag("n" + nodeCounter++, nbtGhost);
+		}*/	
+	}
+	
+	
+	
+	public void loadFromNBT(NBTTagCompound nbt) {
+		
 		for(NBTTagCompound o : Utils.getTags(nbt))
 		{
 			NBTTagCompound tag = (NBTTagCompound) o;
@@ -140,20 +171,33 @@ public class GhostManager extends WorldSavedData
 			ghostTable.put(ghost.elementCoordonate, ghost);
 		}		
 	}
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
+
+	public void saveToNBT(NBTTagCompound nbt,int dim) {
 		
 		int nodeCounter = 0;
 		
 		for(GhostElement ghost : ghostTable.values())
 		{
+
+			if(dim != Integer.MIN_VALUE && ghost.elementCoordonate.dimention != dim) continue;
 			NBTTagCompound nbtGhost = new NBTTagCompound();
 			ghost.writeToNBT(nbtGhost,"");
 			nbt.setTag("n" + nodeCounter++, nbtGhost);
 		}		
 	}
+			
 	
+	public void unload(int dimensionId) {
+		Iterator<GhostElement> i = ghostTable.values().iterator();
 		
+		while(i.hasNext()){
+			GhostElement n = i.next();
+			if(n.elementCoordonate.dimention == dimensionId){
+				i.remove();
+			}
+		}
+	}
+	
 	public boolean canCreateGhostAt(World world,int x,int y, int z)
 	{
 		if(world.getChunkProvider().chunkExists(x>>4 , z>>4) == false) return false;

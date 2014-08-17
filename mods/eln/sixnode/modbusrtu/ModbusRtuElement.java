@@ -31,76 +31,69 @@ import net.minecraft.nbt.NBTTagCompound;
 import com.serotonin.modbus4j.ProcessImage;
 import com.serotonin.modbus4j.exception.IllegalDataAddressException;
 
-public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
-	
-	
+public class ModbusRtuElement extends SixNodeElement implements ProcessImage {
+
 	public NbtElectricalGateInputOutput[] ioGate = new NbtElectricalGateInputOutput[4];
 	public NbtElectricalGateOutputProcess[] ioGateProcess = new NbtElectricalGateOutputProcess[4];
 
+	HashMap<Integer, ServerWirelessTxStatus> wirelessTxStatusList = new HashMap<Integer, ServerWirelessTxStatus>();
+	HashMap<Integer, ServerWirelessRxStatus> wirelessRxStatusList = new HashMap<Integer, ServerWirelessRxStatus>();
 
-	HashMap<Integer,ServerWirelessTxStatus> wirelessTxStatusList = new HashMap<Integer,ServerWirelessTxStatus>();
-	HashMap<Integer,ServerWirelessRxStatus> wirelessRxStatusList = new HashMap<Integer,ServerWirelessRxStatus>();
-	
 	ModbusRtuDescriptor descriptor;
-	
-	
+
 	static final int ioStartOffset = 16;
 	static final int ioRange = 8;
 	int station = -1;
-	
-	String name = "";
-	
-	public ModbusRtuElement(SixNode sixNode,Direction side,SixNodeDescriptor descriptor) {
-		super(sixNode,side,descriptor);
 
-		for(int idx = 0;idx < 4;idx++){
-			ioGate[idx] = new NbtElectricalGateInputOutput("ioGate"+idx);
-			ioGateProcess[idx] = new NbtElectricalGateOutputProcess("ioGateProcess"+idx,ioGate[idx]);
-			
+	String name = "";
+
+	public ModbusRtuElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+		super(sixNode, side, descriptor);
+
+		for (int idx = 0; idx < 4; idx++) {
+			ioGate[idx] = new NbtElectricalGateInputOutput("ioGate" + idx);
+			ioGateProcess[idx] = new NbtElectricalGateOutputProcess("ioGateProcess" + idx, ioGate[idx]);
+
 			electricalLoadList.add(ioGate[idx]);
 			electricalComponentList.add(ioGateProcess[idx]);
-			
+
 			ioGateProcess[idx].setHighImpedance(true);
-			
+
 			mapping.add(new modbusAnalogIoSlot(ioStartOffset + idx * ioRange, ioRange, ioGate[idx], ioGateProcess[idx]));
 		}
-		
+
 		slowProcessList.add(new ModbusRtuSlowProcess());
 
-	   	this.descriptor = (ModbusRtuDescriptor) descriptor;
-	   	
-	}
-	
+		this.descriptor = (ModbusRtuDescriptor) descriptor;
 
+	}
 
 	HashMap<String, HashSet<IWirelessSignalTx>> txSet = new HashMap<String, HashSet<IWirelessSignalTx>>();
-	HashMap<IWirelessSignalTx, Double> txStrength = new HashMap<IWirelessSignalTx, Double>();	
-	
-	
-	class ModbusRtuSlowProcess implements IProcess{
+	HashMap<IWirelessSignalTx, Double> txStrength = new HashMap<IWirelessSignalTx, Double>();
+
+	class ModbusRtuSlowProcess implements IProcess {
 		double sleepTimer = 0;
-		
+
 		@Override
 		public void process(double time) {
 			sleepTimer -= time;
-			if(sleepTimer < 0){
+			if (sleepTimer < 0) {
 				sleepTimer += Utils.rand(1.2, 2);
-				
+
 				IWirelessSignalSpot spot = WirelessUtils.buildSpot(getCoordonate(), null, 0);
 				WirelessUtils.getTx(spot, txSet, txStrength);
 			}
-		
+
 			for (ServerWirelessRxStatus rx : wirelessRxStatusList.values()) {
-				if(rx.isConnected() != rx.connected){
-					rx.connected = ! rx.connected;
+				if (rx.isConnected() != rx.connected) {
+					rx.connected = !rx.connected;
 					sendRx1Connected(rx);
 				}
 			}
 		}
-		
+
 	}
-	
-	
+
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
 		return ioGate[lrdu.toInt()];
@@ -113,62 +106,69 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		return NodeBase.maskElectricalGate;	
+		return NodeBase.maskElectricalGate;
 	}
 
-
-	
 	@Override
 	public String multiMeterString() {
-		return null;//Utils.plotUIP(powerLoad.Uc, powerLoad.getCurrent());
+		return null;// Utils.plotUIP(powerLoad.Uc, powerLoad.getCurrent());
 
 	}
-	
+
 	@Override
 	public String thermoMeterString() {
-		return  null;
+		return null;
 	}
 
-	
 	@Override
 	public void initialize() {
 
 		addToServer();
-		//connect();
-    			
+		// connect();
+
 	}
 
 	@Override
 	public void destroy(EntityPlayerMP entityPlayer) {
 		super.destroy(entityPlayer);
+		unregister();
+	}
+
+	@Override
+	public void unload() {
+		// TODO Auto-generated method stub
+		super.unload();
+		unregister();
+	}
+
+	void unregister() {
 		removeFromServer();
-		
+
 		// Remove all TX signals.
-		for(Integer key: wirelessTxStatusList.keySet()) {
+		for (Integer key : wirelessTxStatusList.keySet()) {
 			ServerWirelessTxStatus status = wirelessTxStatusList.get(key);
 			status.delete();
 			wirelessTxStatusList.remove(key);
 		}
 	}
-	
+
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		
+
 		return false;
 	}
-	
+
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		
+
 		super.networkSerialize(stream);
-		
-		
+
 		try {
 			stream.writeInt(station);
 			stream.writeUTF(name);
 		} catch (IOException e) {
-			
+
 			e.printStackTrace();
 		}
 	}
@@ -182,283 +182,267 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 	static final byte serverTxDelete = 7;
 	static final byte serverRxDelete = 8;
 	static final byte serverAllSyncronise = 9;
-	
+
 	static final byte clientAllSyncronise = 1;
 	static final byte clientTx1Syncronise = 2;
 	static final byte clientRx1Syncronise = 3;
 	static final byte clientTxDelete = 4;
 	static final byte clientRxDelete = 5;
 	static final byte clientRx1Connected = 6;
-	
+
 	static final byte ClientModbusActivityEvent = 7;
 	static final byte ClientModbusErrorEvent = 8;
-	
-	
-	void sendTx1Syncronise(WirelessTxStatus tx){
+
+	void sendTx1Syncronise(WirelessTxStatus tx) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-        DataOutputStream packet = new DataOutputStream(bos);   	
-        
+		DataOutputStream packet = new DataOutputStream(bos);
+
 		preparePacketForClient(packet);
-		
+
 		try {
 			packet.writeByte(clientTx1Syncronise);
-			
+
 			tx.writeTo(packet);
 		} catch (IOException e) {
-			
+
 			e.printStackTrace();
 		}
 
-		//TODO
+		// TODO
 
-		sendPacketToAllClient(bos);	
+		sendPacketToAllClient(bos);
 	}
-	
-	void sendRx1Syncronise(WirelessRxStatus rx){
+
+	void sendRx1Syncronise(WirelessRxStatus rx) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-        DataOutputStream packet = new DataOutputStream(bos);   	
-        
+		DataOutputStream packet = new DataOutputStream(bos);
+
 		preparePacketForClient(packet);
-		
+
 		try {
 			packet.writeByte(clientRx1Syncronise);
-			
+
 			rx.writeTo(packet);
 		} catch (IOException e) {
-			
+
 			e.printStackTrace();
 		}
 
-		//TODO
+		// TODO
 
-		sendPacketToAllClient(bos);	
+		sendPacketToAllClient(bos);
 	}
-		
-	void sendRx1Connected(WirelessRxStatus rx){
+
+	void sendRx1Connected(WirelessRxStatus rx) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-        DataOutputStream packet = new DataOutputStream(bos);   	
-        
+		DataOutputStream packet = new DataOutputStream(bos);
+
 		preparePacketForClient(packet);
-		
+
 		try {
 			packet.writeByte(clientRx1Connected);
 			packet.writeInt(rx.uuid);
 			packet.writeBoolean(rx.connected);
 		} catch (IOException e) {
-			
+
 			e.printStackTrace();
 		}
 
-		//TODO
+		// TODO
 
-		sendPacketToAllClient(bos);	
+		sendPacketToAllClient(bos);
 	}
-		
+
 	void onActivity()
 	{
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-        DataOutputStream packet = new DataOutputStream(bos);   	
-        
+		DataOutputStream packet = new DataOutputStream(bos);
+
 		preparePacketForClient(packet);
-		
+
 		try {
 			packet.writeByte(ClientModbusActivityEvent);
 		} catch (IOException e) {
-			
+
 			e.printStackTrace();
 		}
 
-		sendPacketToAllClient(bos);	
+		sendPacketToAllClient(bos);
 	}
-	
+
 	void onError()
 	{
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-        DataOutputStream packet = new DataOutputStream(bos);   	
-        
+		DataOutputStream packet = new DataOutputStream(bos);
+
 		preparePacketForClient(packet);
-		
+
 		try {
 			packet.writeByte(ClientModbusErrorEvent);
 		} catch (IOException e) {
-			
+
 			e.printStackTrace();
 		}
 
-		sendPacketToAllClient(bos);	
+		sendPacketToAllClient(bos);
 	}
-	
+
 	@Override
 	public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
 		super.networkUnserialize(stream, player);
 		try {
-			switch(stream.readByte()){
+			switch (stream.readByte()) {
 			case setStation:
 				setStation(stream.readInt());
 				break;
 			case setName:
-				setName(stream.readUTF());	
+				setName(stream.readUTF());
 				break;
-			case serverTxAdd:
-				{
-					int idx = 0;
-					String name = stream.readUTF();
-					
-					
-					int uuid = 0;
-					/*do{
-						uuid = (int)(Math.random()*100000);
-					}while(wirelessTxStatusList.containsKey(uuid));*/
-					for (ServerWirelessTxStatus tx : wirelessTxStatusList.values()) {
-						uuid = Math.max(uuid, tx.uuid);
-					}
-					uuid++;
-					ServerWirelessTxStatus tx;
-					wirelessTxStatusList.put(uuid,tx = new ServerWirelessTxStatus(name, -1, 0,sixNode.coordonate,uuid, this));					
-				
-					
-					sendTx1Syncronise(tx);
-				}
-				break;
-			case serverRxAdd:
-				{
-					int idx = 0;
-					String name = stream.readUTF();
+			case serverTxAdd: {
+				int idx = 0;
+				String name = stream.readUTF();
 
-					int uuid = 0;
-					/*do{
-						uuid = (int)(Math.random()*100000);
-					}while(wirelessTxStatusList.containsKey(uuid));*/
-					for (ServerWirelessRxStatus rx : wirelessRxStatusList.values()) {
-						uuid = Math.max(uuid, rx.uuid);
-					}
-					uuid++;
-					
-					ServerWirelessRxStatus rx;
-					wirelessRxStatusList.put(uuid,rx = new ServerWirelessRxStatus(name, -1, false,uuid,this));
-				
-					
-					sendRx1Syncronise(rx);
+				int uuid = 0;
+				/*
+				 * do{ uuid = (int)(Math.random()*100000); }while(wirelessTxStatusList.containsKey(uuid));
+				 */
+				for (ServerWirelessTxStatus tx : wirelessTxStatusList.values()) {
+					uuid = Math.max(uuid, tx.uuid);
 				}
+				uuid++;
+				ServerWirelessTxStatus tx;
+				wirelessTxStatusList.put(uuid, tx = new ServerWirelessTxStatus(name, -1, 0, sixNode.coordonate, uuid, this));
+
+				sendTx1Syncronise(tx);
+			}
 				break;
-			case serverTxConfig:
-			{
+			case serverRxAdd: {
+				int idx = 0;
+				String name = stream.readUTF();
+
+				int uuid = 0;
+				/*
+				 * do{ uuid = (int)(Math.random()*100000); }while(wirelessTxStatusList.containsKey(uuid));
+				 */
+				for (ServerWirelessRxStatus rx : wirelessRxStatusList.values()) {
+					uuid = Math.max(uuid, rx.uuid);
+				}
+				uuid++;
+
+				ServerWirelessRxStatus rx;
+				wirelessRxStatusList.put(uuid, rx = new ServerWirelessRxStatus(name, -1, false, uuid, this));
+
+				sendRx1Syncronise(rx);
+			}
+				break;
+			case serverTxConfig: {
 				int uuid = stream.readInt();
 				String name = stream.readUTF();
 				int id = stream.readInt();
 
 				WirelessTxStatus tx = wirelessTxStatusList.get(uuid);
-				if(tx != null){
+				if (tx != null) {
 					tx.setName(name);
 					tx.setId(id);
 					sendTx1Syncronise(tx);
 
 				}
-				
-								
+
 			}
 				break;
-			case serverRxConfig:
-				{
-					int uuid = stream.readInt();
-					String name = stream.readUTF();
-					int id = stream.readInt();
+			case serverRxConfig: {
+				int uuid = stream.readInt();
+				String name = stream.readUTF();
+				int id = stream.readInt();
 
-					WirelessRxStatus rx = wirelessRxStatusList.get(uuid);
-					if(rx != null){
-						rx.setName(name);
-						rx.setId(id);
-						sendRx1Syncronise(rx);
-					}
+				WirelessRxStatus rx = wirelessRxStatusList.get(uuid);
+				if (rx != null) {
+					rx.setName(name);
+					rx.setId(id);
+					sendRx1Syncronise(rx);
 				}
+			}
 				break;
-			case serverTxDelete:
-			{
+			case serverTxDelete: {
 				int uuid = stream.readInt();
 				ServerWirelessTxStatus tx = wirelessTxStatusList.get(uuid);
-				if(tx != null){
+				if (tx != null) {
 					tx.delete();
 					wirelessTxStatusList.remove(tx.uuid);
-					
-			    	ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-			        DataOutputStream packet = new DataOutputStream(bos);   	
-			        
+
+					ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+					DataOutputStream packet = new DataOutputStream(bos);
+
 					preparePacketForClient(packet);
-					
+
 					packet.writeByte(clientTxDelete);
 					packet.writeInt(uuid);
-					//TODO
+					// TODO
 
-					sendPacketToAllClient(bos);					
+					sendPacketToAllClient(bos);
 				}
 			}
 				break;
 			case serverRxDelete:
 				int uuid = stream.readInt();
 				ServerWirelessRxStatus rx = wirelessRxStatusList.get(uuid);
-				if(rx != null){
+				if (rx != null) {
 					rx.delete();
 					wirelessRxStatusList.remove(uuid);
-					
-			    	ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-			        DataOutputStream packet = new DataOutputStream(bos);   	
-			        
+
+					ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+					DataOutputStream packet = new DataOutputStream(bos);
+
 					preparePacketForClient(packet);
-					
+
 					packet.writeByte(clientRxDelete);
 					packet.writeInt(uuid);
-					//TODO
+					// TODO
 
-					sendPacketToAllClient(bos);					
+					sendPacketToAllClient(bos);
 				}
 				break;
-			case serverAllSyncronise:
-				{
-			    	ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-			        DataOutputStream packet = new DataOutputStream(bos);   	
-			        
-					preparePacketForClient(packet);
-					
-					packet.writeByte(clientAllSyncronise);
+			case serverAllSyncronise: {
+				ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+				DataOutputStream packet = new DataOutputStream(bos);
 
-					packet.writeInt(wirelessTxStatusList.size());
-					for (ServerWirelessTxStatus e : wirelessTxStatusList.values()) {
-						e.writeTo(packet);
-					}
-					
-					packet.writeInt(wirelessRxStatusList.size());
-					for (WirelessRxStatus e : wirelessRxStatusList.values()) {
-						e.writeTo(packet);
-					}
+				preparePacketForClient(packet);
 
-					sendPacketToClient(bos, player);
+				packet.writeByte(clientAllSyncronise);
 
+				packet.writeInt(wirelessTxStatusList.size());
+				for (ServerWirelessTxStatus e : wirelessTxStatusList.values()) {
+					e.writeTo(packet);
 				}
+
+				packet.writeInt(wirelessRxStatusList.size());
+				for (WirelessRxStatus e : wirelessRxStatusList.values()) {
+					e.writeTo(packet);
+				}
+
+				sendPacketToClient(bos, player);
+
+			}
 				break;
-				
+
 			}
 		} catch (IOException e) {
-			
+
 			e.printStackTrace();
 		}
-	
-	}
-	/*
-	public String getType() {
-		
-		return "Probe";
-	}
-*/
 
+	}
+
+	/*
+	 * public String getType() {
+	 * 
+	 * return "Probe"; }
+	 */
 
 	private void setName(String name) {
 		this.name = name;
 		needPublish();
 	}
-
-
-
-
 
 	private void setStation(int port) {
 		removeFromServer();
@@ -467,83 +451,79 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 		needPublish();
 	}
 
-
-
-
-
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		
+
 		super.writeToNBT(nbt);
 		nbt.setInteger("station", station);
 		nbt.setString("name", name);
-		
+
 		int idx;
-		
-		nbt.setInteger("txCnt", wirelessTxStatusList.size());	
+
+		nbt.setInteger("txCnt", wirelessTxStatusList.size());
 		idx = 0;
 		for (ServerWirelessTxStatus tx : wirelessTxStatusList.values()) {
-			tx.writeToNBT(nbt,"tx" + idx);		
+			tx.writeToNBT(nbt, "tx" + idx);
 			idx++;
 		}
-		
-		nbt.setInteger("rxCnt", wirelessRxStatusList.size());	
+
+		nbt.setInteger("rxCnt", wirelessRxStatusList.size());
 		idx = 0;
 		for (ServerWirelessRxStatus rx : wirelessRxStatusList.values()) {
-			rx.writeToNBT(nbt,"rx" + idx);		
+			rx.writeToNBT(nbt, "rx" + idx);
 			idx++;
 		}
-		
+
 	}
-	
+
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		
+
 		super.readFromNBT(nbt);
 		station = nbt.getInteger("station");
 		name = nbt.getString("name");
-		
+
 		int cnt;
-		
+
 		cnt = nbt.getInteger("txCnt");
-		for(int idx = 0;idx < cnt;idx++){
-			ServerWirelessTxStatus tx = new ServerWirelessTxStatus(nbt,"tx" + idx,this);
+		for (int idx = 0; idx < cnt; idx++) {
+			ServerWirelessTxStatus tx = new ServerWirelessTxStatus(nbt, "tx" + idx, this);
 			wirelessTxStatusList.put(tx.uuid, tx);
 		}
 		cnt = nbt.getInteger("rxCnt");
-		for(int idx = 0;idx < cnt;idx++){
-			ServerWirelessRxStatus rx = new ServerWirelessRxStatus(nbt,"rx" + idx,this);
+		for (int idx = 0; idx < cnt; idx++) {
+			ServerWirelessRxStatus rx = new ServerWirelessRxStatus(nbt, "rx" + idx, this);
 			wirelessRxStatusList.put(rx.uuid, rx);
 		}
-		
+
 	}
-	
+
 	@Override
 	public boolean hasGui() {
-		
+
 		return true;
 	}
-	
+
 	boolean addedOnServer = false;
-	void addToServer(){
-		if(station != -1){
+
+	void addToServer() {
+		if (station != -1) {
 			addedOnServer = Eln.modbusServer.add(this);
 		}
 	}
-	
-	void removeFromServer(){
-		if(addedOnServer)
+
+	void removeFromServer() {
+		if (addedOnServer)
 			Eln.modbusServer.remove(this);
 		addedOnServer = false;
 	}
 
-
 	ArrayList<IModbusSlot> mapping = new ArrayList<IModbusSlot>();
 	ModbusNullSlot nullSlot = new ModbusNullSlot();
-	
-	IModbusSlot getModbusSlot(int id){
+
+	IModbusSlot getModbusSlot(int id) {
 		for (IModbusSlot slot : mapping) {
-			if(id >= slot.getOffset() && id < slot.getOffset() + slot.getSize()){
+			if (id >= slot.getOffset() && id < slot.getOffset() + slot.getSize()) {
 				onActivity();
 				return slot;
 			}
@@ -551,132 +531,95 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage{
 		onError();
 		return nullSlot;
 	}
-	
 
 	@Override
 	public boolean getCoil(int id) throws IllegalDataAddressException {
-		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		IModbusSlot slot = getModbusSlot(id);
+		id -= slot.getOffset();
 		return slot.getCoil(id);
 	}
 
-
-
-
-
 	@Override
 	public byte getExceptionStatus() {
-		
+
 		return 0;
 	}
-
-
-
-
 
 	@Override
 	public short getHoldingRegister(int id)
 			throws IllegalDataAddressException {
-		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		IModbusSlot slot = getModbusSlot(id);
+		id -= slot.getOffset();
 		return slot.getHoldingRegister(id);
 	}
 
-
-
-
-
 	@Override
 	public boolean getInput(int id) throws IllegalDataAddressException {
-		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		IModbusSlot slot = getModbusSlot(id);
+		id -= slot.getOffset();
 		return slot.getInput(id);
 	}
 
-
-
-
-
 	@Override
 	public short getInputRegister(int id) throws IllegalDataAddressException {
-		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		IModbusSlot slot = getModbusSlot(id);
+		id -= slot.getOffset();
 		return slot.getInputRegister(id);
 	}
 
-
-
-
-
 	@Override
 	public byte[] getReportSlaveIdData() {
-		
+
 		return null;
 	}
 
-
-
-
-
 	@Override
 	public int getSlaveId() {
-		
+
 		return station;
 	}
 
-
-
-
-
 	@Override
 	public void setCoil(int id, boolean value) {
-		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		IModbusSlot slot = getModbusSlot(id);
+		id -= slot.getOffset();
 		slot.setCoil(id, value);
 	}
 
-
-
-
-
 	@Override
 	public void setHoldingRegister(int id, short value) {
-		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		IModbusSlot slot = getModbusSlot(id);
+		id -= slot.getOffset();
 		slot.setHoldingRegister(id, value);
 	}
 
-
-
 	@Override
 	public void setInput(int id, boolean value) {
-		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		IModbusSlot slot = getModbusSlot(id);
+		id -= slot.getOffset();
 		slot.setInput(id, value);
 	}
 
-
-
-
-
 	@Override
 	public void setInputRegister(int id, short value) {
-		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		IModbusSlot slot = getModbusSlot(id);
+		id -= slot.getOffset();
 		slot.setInputRegister(id, value);
 	}
-
-
-
-
 
 	@Override
 	public void writeCoil(int id, boolean value)
 			throws IllegalDataAddressException {
-		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		IModbusSlot slot = getModbusSlot(id);
+		id -= slot.getOffset();
 		slot.writeCoil(id, value);
 	}
-
-
-
-
 
 	@Override
 	public void writeHoldingRegister(int id, short value)
 			throws IllegalDataAddressException {
-		IModbusSlot slot = getModbusSlot(id); id -= slot.getOffset();
+		IModbusSlot slot = getModbusSlot(id);
+		id -= slot.getOffset();
 		slot.writeHoldingRegister(id, value);
 	}
 

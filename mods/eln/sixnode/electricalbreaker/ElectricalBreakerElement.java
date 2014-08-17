@@ -14,6 +14,7 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
+import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
@@ -37,9 +38,9 @@ public class ElectricalBreakerElement extends SixNodeElement {
     	electricalComponentList.add(new Resistor(bLoad, null).pullDown());
     	electricalComponentList.add(new Resistor(aLoad, null).pullDown());
     	    	
+
     	
-    	
-    	thermalProcessList.add(cutProcess);
+    	electricalProcessList.add(cutProcess);
 
     	this.descriptor = (ElectricalBreakerDescriptor) descriptor;
 	}

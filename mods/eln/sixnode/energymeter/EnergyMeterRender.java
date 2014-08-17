@@ -5,6 +5,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import org.lwjgl.opengl.GL11;
+
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -29,79 +31,101 @@ public class EnergyMeterRender extends SixNodeElementRender {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (EnergyMeterDescriptor) descriptor;
 
+		/*for (int idx = 0; idx < energyRc.length; idx++) {
+			energyRc[idx] = new RcInterpolator(0.2f);
+		}*/
+
 	}
 
-	
+	//RcInterpolator[] energyRc = new RcInterpolator[7];
+
 	@Override
 	public void draw() {
 		super.draw();
-		
-		//front.glRotateOnX();	
-		descriptor.draw();			
+
+		descriptor.draw(energyStack / 100.0,UtilsClient.distanceFromClientPlayer(tileEntity) < 20);
+
+		//front.glRotateOnX();
+
+		GL11.glColor3f(0.9f, 0f, 0f);
+		drawPowerPinWhite(front, descriptor.pinDistance);
+		GL11.glColor3f(0f, 0f, 0.9f);
+		drawPowerPinWhite(front.inverse(), descriptor.pinDistance);
+		GL11.glColor3f(1f, 1f, 1f);
 	}
-	
+
 	@Override
 	public void refresh(float deltaT) {
 		double errorComp = error * 1 * deltaT;
-		energyStack += power*deltaT + errorComp;
+		energyStack += power * deltaT + errorComp;
 		error -= errorComp;
-		
+
+		/*double stack = energyStack;
+		for (int idx = 0; idx < energyRc.length; idx++) {
+
+			energyRc[idx].setTarget((float) ((stack) % 10));
+			energyRc[idx].step(deltaT);
+			stack /= 10.0;
+		}*/
+
 		timerCouter += deltaT;
 		serverPowerIdTimer += deltaT;
 	}
-	
+
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
 		return cableRender;
 	}
 
-	double timerCouter,energyStack;
+	double timerCouter, energyStack;
 	boolean switchState;
 	String password;
 	Mod mod;
+
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);
 
 		try {
-			
+
 			switchState = stream.readBoolean();
 			password = stream.readUTF();
 			mod = Mod.valueOf(stream.readUTF());
 			timerCouter = stream.readDouble();
-			//energyStack = stream.readDouble();
+			// energyStack = stream.readDouble();
 			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), ElectricalCableDescriptor.class);
-			
-			if(desc == null)
+
+			if (desc == null)
 				cableRender = null;
 			else
 				cableRender = desc.render;
 		} catch (IOException e) {
 			e.printStackTrace();
-		}	
+		}
 	}
-	
+
 	CableRenderDescriptor cableRender;
 
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		return new EnergyMeterGui(player, inventory, this);
 	}
-	
+
 	double power;
 	double error;
-	double serverPowerIdTimer = EnergyMeterElement.SlowProcess.publishTimeoutReset*34;
+	double serverPowerIdTimer = EnergyMeterElement.SlowProcess.publishTimeoutReset * 34;
+
 	@Override
 	public void serverPacketUnserialize(DataInputStream stream) throws IOException {
 		// TODO Auto-generated method stub
 		super.serverPacketUnserialize(stream);
-		
+
 		switch (stream.readByte()) {
 		case EnergyMeterElement.serverPowerId:
-			if(serverPowerIdTimer > EnergyMeterElement.SlowProcess.publishTimeoutReset*3){
+			if (serverPowerIdTimer > EnergyMeterElement.SlowProcess.publishTimeoutReset * 3) {
 				energyStack = stream.readDouble();
 				error = 0;
-			}else{
+			} else {
 				error = stream.readDouble() - energyStack;
 			}
 			power = stream.readDouble();
@@ -112,7 +136,5 @@ public class EnergyMeterRender extends SixNodeElementRender {
 			break;
 		}
 	}
-
-
 
 }

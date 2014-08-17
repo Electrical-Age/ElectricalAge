@@ -30,6 +30,7 @@ import mods.eln.misc.LRDUCubeMask;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
+import mods.eln.server.DelayedBlockRemove;
 import mods.eln.sim.*;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -343,9 +344,14 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
  
     public Node getNode()
     {
-    	if(worldObj.isRemote)Utils.fatal();
+    	if(worldObj.isRemote){Utils.fatal(); 
+    		return null;
+    	}
     	if(this.worldObj == null) return null;
-    	if(node == null) node = (Node)NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord,this.worldObj));
+    	if(node == null){
+    		node = (Node)NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord,this.worldObj));
+    		if(node == null) DelayedBlockRemove.add(new Coordonate(xCoord, yCoord, zCoord,this.worldObj));
+    	}
     	return node;
     }
     
