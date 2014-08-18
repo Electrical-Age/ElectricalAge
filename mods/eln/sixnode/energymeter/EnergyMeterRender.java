@@ -43,7 +43,9 @@ public class EnergyMeterRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
 
-		descriptor.draw(energyStack / 100.0,UtilsClient.distanceFromClientPlayer(tileEntity) < 20);
+		descriptor.draw(energyStack / Math.pow(10,energyUnit*3-1),timerCouter/(timeUnit == 0 ? 360 : 8640),
+						energyUnit,timeUnit,
+						UtilsClient.distanceFromClientPlayer(tileEntity) < 20);
 
 		//front.glRotateOnX();
 
@@ -68,7 +70,7 @@ public class EnergyMeterRender extends SixNodeElementRender {
 			stack /= 10.0;
 		}*/
 
-		timerCouter += deltaT;
+		timerCouter += deltaT*72;
 		serverPowerIdTimer += deltaT;
 	}
 
@@ -82,6 +84,7 @@ public class EnergyMeterRender extends SixNodeElementRender {
 	String password;
 	Mod mod;
 
+	int energyUnit,timeUnit;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);
@@ -95,6 +98,9 @@ public class EnergyMeterRender extends SixNodeElementRender {
 			// energyStack = stream.readDouble();
 			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), ElectricalCableDescriptor.class);
 
+			
+			energyUnit = stream.readByte();
+			timeUnit = stream.readByte();
 			if (desc == null)
 				cableRender = null;
 			else

@@ -242,13 +242,14 @@ public class Eln {
 	private final static String URL = "http://electrical-age.net";
 	private final static String UPDATE_URL = "https://github.com/Dolu1990/ElectricalAge/releases";
 	private final static String LOGO_FILE = "logo.png";
-	private final static String[] AUTHORS = { "Dolu1990", "lambdaShade", "cm0x4D", "TheBroBeans", "ShadowWarrior979", "DrummingFish" };
+	private final static String[] AUTHORS = { "Dolu1990", "lambdaShade", "cm0x4D", "TheBroBeans", "DrummingFish" };
 
 	public static String channelName = "miaouMod";
 
 	public static final String[] objNames = new String[] {
 			"/model/PowerElectricPrimitives/PowerElectricPrimitives.obj",
 			"/model/EnergyMeter/EnergyMeter.obj",
+			"/model/AdvancedEnergyMeter/AdvancedEnergyMeter.obj",
 			"/model/SimpleLamp/SimpleLamp.obj",
 			"/model/FluorescentLamp/FluorescentLamp.obj",
 			"/model/condo200/condo200.obj",
@@ -1527,7 +1528,7 @@ public class Eln {
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("RobustLamp"), true),
 					LampSocketType.Douille, // LampSocketType
 											// socketType
-					0, 0, 0, 0);
+					3, 0, 0, 0);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
@@ -1538,7 +1539,7 @@ public class Eln {
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("FlatLamp"), true),
 					LampSocketType.Douille, // LampSocketType
 											// socketType
-					0, 0, 0, 0);
+					3, 0, 0, 0);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}		
 		{
@@ -1549,7 +1550,7 @@ public class Eln {
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("SimpleLamp"), true),
 					LampSocketType.Douille, // LampSocketType
 											// socketType
-					0, 0, 0, 0);
+					3, 0, 0, 0);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -1561,7 +1562,7 @@ public class Eln {
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("FluorescentLamp"), true),
 					LampSocketType.Douille, // LampSocketType
 											// socketType
-					0, 0, 0, 0);
+					4, 0, 0, 0);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			
 			
@@ -1912,11 +1913,19 @@ public class Eln {
 
 			name = "Energy Meter";
 
-			EnergyMeterDescriptor desc = new EnergyMeterDescriptor(name, obj.getObj("EnergyMeter"));
+			EnergyMeterDescriptor desc = new EnergyMeterDescriptor(name, obj.getObj("EnergyMeter"),8,0);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
+		{
+			subId = 5;
 
+			name = "Advanced Energy Meter";
+
+			EnergyMeterDescriptor desc = new EnergyMeterDescriptor(name, obj.getObj("AdvancedEnergyMeter"),7,8);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
 	}
 
 	void registerElectricalSensor(int id) {
@@ -4917,6 +4926,24 @@ public class Eln {
 				"I I",
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
+		
+		
+		addRecipe(findItemStack("Energy Meter"),
+				"IcI",
+				"IRI",
+				"IcI",
+				Character.valueOf('c'), findItemStack("Copper Cable"),
+				Character.valueOf('R'), findItemStack("Cheap Chip"),
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
+		
+		addRecipe(findItemStack("Advanced Energy Meter"),
+				" c ",
+				"PRP",
+				" c ",
+				Character.valueOf('c'), findItemStack("Copper Cable"),
+				Character.valueOf('R'), findItemStack("Advanced Chip"),
+				Character.valueOf('P'), findItemStack("Iron Plate"));
+				
 	}
 
 	void recipeAutoMiner() {

@@ -264,4 +264,14 @@ public class LampSupplyElement extends SixNodeElement {
 	public void addToRp(double r) {
 		RpStack += 1 / r;
 	}
+	
+	public int getRange(){
+		return getRange(descriptor,inventory);
+	}
+
+	private int getRange(LampSupplyDescriptor desc,SixNodeElementInventory inventory2) {
+		ItemStack stack = inventory.getStackInSlot(LampSupplyContainer.cableSlotId);
+		if(stack == null) return desc.range;
+		return desc.range + stack.stackSize;
+	}
 }

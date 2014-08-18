@@ -316,5 +316,6 @@ public class LampSocketElement extends SixNodeElement {
 	}
 
 	boolean isConnectedToLampSupply = false;
+	
 
 }

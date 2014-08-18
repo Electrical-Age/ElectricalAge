@@ -20,8 +20,6 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.sim.nbt.NbtResistor;
-import mods.eln.sim.process.destruct.ResistorCurrentWatchdog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
@@ -35,6 +33,7 @@ public class EnergyMeterElement extends SixNodeElement {
 
 	public EnergyMeterElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
+		front = LRDU.Up;
 		shunt.mustUseUltraImpedance();
 
 		electricalLoadList.add(aLoad);
@@ -70,6 +69,8 @@ public class EnergyMeterElement extends SixNodeElement {
 	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
 	public float voltageMax = (float) Eln.SVU, voltageMin = 0;
+	
+	int energyUnit = 1,timeUnit = 0;
 
 	public SixNodeElementInventory getInventory() {
 		return inventory;
@@ -114,8 +115,15 @@ public class EnergyMeterElement extends SixNodeElement {
 			stream.writeUTF(password);
 			stream.writeUTF(mod.toString());
 			stream.writeDouble(timeCounter);
+			
+
+			
 			// stream.writeDouble(energyStack);
 			Utils.serialiseItemStack(stream, inventory.getStackInSlot(EnergyMeterContainer.cableSlotId));
+			
+			
+			stream.writeByte(energyUnit);
+			stream.writeByte(timeUnit);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -174,7 +182,8 @@ public class EnergyMeterElement extends SixNodeElement {
 	public static final byte clientPasswordId = 3;
 	public static final byte clientToggleStateId = 4;
 	public static final byte clientTimeCounterId = 5;
-
+	public static final byte clientEnergyUnitId = 6;
+	public static final byte clientTimeUnitId = 7;
 	public static final byte serverPowerId = 1;
 
 	@Override
@@ -202,7 +211,16 @@ public class EnergyMeterElement extends SixNodeElement {
 			case clientToggleStateId:
 				setSwitchState(!shunt.getState());
 				break;
-
+			case clientEnergyUnitId:
+				energyUnit++;
+				if(energyUnit > 3) energyUnit = 0;
+				needPublish();
+				break;
+			case clientTimeUnitId:
+				timeUnit++;
+				if(timeUnit > 1) timeUnit = 0;
+				needPublish();
+				break;
 			}
 		} catch (IOException e) {
 			// e.printStackTrace();
@@ -227,6 +245,8 @@ public class EnergyMeterElement extends SixNodeElement {
 		timeCounter = nbt.getDouble("timeCounter");
 		password = nbt.getString("password");
 		slowProcess.oldEnergyPublish = energyStack;
+		energyUnit = nbt.getByte("energyUnit");
+		timeUnit = nbt.getByte("timeUnit");
 	}
 
 	@Override
@@ -236,7 +256,8 @@ public class EnergyMeterElement extends SixNodeElement {
 		nbt.setDouble("energyStack", energyStack);
 		nbt.setDouble("timeCounter", timeCounter);
 		nbt.setString("password", password);
-
+		nbt.setByte("energyUnit",(byte) energyUnit);
+		nbt.setByte("timeUnit",(byte) timeUnit);
 	}
 
 	String password = "";
@@ -256,7 +277,7 @@ public class EnergyMeterElement extends SixNodeElement {
 
 		@Override
 		public void process(double time) {
-			timeCounter += time;
+			timeCounter += time*72.0;
 			double p = aLoad.getCurrent() * aLoad.getU() * (aLoad.getU() > bLoad.getU() ? 1.0 : -1.0);
 			boolean highImp = false;
 			switch (mod) {

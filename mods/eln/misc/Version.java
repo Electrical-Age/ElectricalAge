@@ -20,7 +20,7 @@ public final class Version {
 	 * Unique version code. Must be a String for annotations. Used to check if a
 	 * new version if available. Each update must increment this number.
 	 */
-	public final static String REVISION = "37";
+	public final static String REVISION = "39";
 
 	public final static String getVersionName() {
 		return String.format("BETA-%d.%d r%s", MAJOR, MINOR, REVISION);
