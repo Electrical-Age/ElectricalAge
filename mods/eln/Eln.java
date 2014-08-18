@@ -3716,6 +3716,11 @@ public class Eln {
 			g.addRectangle(-2, 0, 0, 1, 1, 1);
 			g.addRectangle(-4, -1, 2, 2, 0, 0);
 			g.addElement(0, 1, 0);
+			//g.addElement(0, 2, 0);
+			g.addElement(-1, 0, 0,ghostBlock,ghostBlock.tFloor);
+		/*	g.addElement(1, 0, 0,ghostBlock,ghostBlock.tLadder);
+			g.addElement(1, 1, 0,ghostBlock,ghostBlock.tLadder);
+			g.addElement(1, 2, 0,ghostBlock,ghostBlock.tLadder);*/
 			g.addRectangle(-3, -3, 0, 1, -1, -1);
 			g.addRectangle(-3, -3, 0, 1, 1, 1);
 			// g.addElement(-4, 0, -1);

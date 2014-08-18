@@ -204,10 +204,16 @@ public class GhostManager extends WorldSavedData
 		if(world.getBlock(x ,y ,z) != Blocks.air && world.getBlock(x ,y ,z).isReplaceable(world, x, y, z) == false) return false;
 		return true;
 	}
-	public void createGhost(Coordonate coordonate,Coordonate observerCoordonate,int UUID)
+	
+	
+	public void createGhost(Coordonate coordonate,Coordonate observerCoordonate,int UUID){
+		createGhost(coordonate, observerCoordonate, UUID, Eln.ghostBlock, GhostBlock.tCube);
+	}
+	
+	public void createGhost(Coordonate coordonate,Coordonate observerCoordonate,int UUID,Block b,int meta)
 	{
 		coordonate.world().setBlockToAir(coordonate.x ,coordonate.y ,coordonate.z);
-		if(coordonate.world().setBlock(coordonate.x ,coordonate.y ,coordonate.z,Eln.ghostBlock))
+		if(coordonate.world().setBlock(coordonate.x ,coordonate.y ,coordonate.z,b,meta,3))
 		{
 			coordonate = new Coordonate(coordonate);
 			GhostElement element = new GhostElement(coordonate,observerCoordonate,UUID);

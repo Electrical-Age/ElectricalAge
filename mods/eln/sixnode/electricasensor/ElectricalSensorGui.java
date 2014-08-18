@@ -55,11 +55,11 @@ public class ElectricalSensorGui extends GuiContainerEln{
 			
 			lowValue = newGuiTextField(x+8 + 50 + 4,y+ (166-84)/2+3, 50);
 	        lowValue.setText(render.lowValue);
-	        lowValue.setComment(new String[]{"Minimum input"});
+	        lowValue.setComment(new String[]{"Probed value","that product","a 0% output"});
 	        
 	        highValue = newGuiTextField(x+8 + 50 + 4,y+ (166-84)/2 -13, 50);
 	        highValue.setText(render.highValue);
-	        highValue.setComment(new String[]{"Maximum input"});
+	        highValue.setComment(new String[]{"Probed value","that product","a 100% output"});
 		}
 		else
 		{
@@ -67,11 +67,11 @@ public class ElectricalSensorGui extends GuiContainerEln{
 			
 			lowValue = newGuiTextField(8, 6+16, 50);
 	        lowValue.setText(render.lowValue);
-	        lowValue.setComment(new String[]{"Minimum input"});
+	        lowValue.setComment(new String[]{"Probed voltage","that product","a 0% output"});
 	        
 	        highValue = newGuiTextField(8,6, 50);
 	        highValue.setText(render.highValue);
-	        highValue.setComment(new String[]{"Maximum input"});
+	        highValue.setComment(new String[]{"Probed voltage","that product","a 100% output"});
 		}
 	}
 	

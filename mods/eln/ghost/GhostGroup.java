@@ -10,6 +10,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
+import net.minecraft.block.Block;
 import net.minecraft.world.World;
 
 
@@ -18,22 +19,30 @@ public class GhostGroup {
 	public GhostGroup() {
 		
 	}
+	
+	
 
 	class GhostGroupElement{
-		public GhostGroupElement(int x,int y, int z) {
+		public GhostGroupElement(int x,int y, int z,Block b,int meta) {
 			this.x = x;
 			this.y = y;
 			this.z = z;
-			
+			this.b = b;
+			this.meta = meta;
 		}
 		int x,y,z;
+		Block b;
+		int meta;
 	}
 	ArrayList<GhostGroupElement> elementList = new ArrayList<GhostGroupElement>();
 
-	
 	public void addElement(int x,int y, int z)
 	{
-		elementList.add(new GhostGroupElement(x, y, z));
+		elementList.add(new GhostGroupElement(x, y, z,Eln.ghostBlock,GhostBlock.tCube));
+	}
+	public void addElement(int x,int y, int z,Block b,int meta)
+	{
+		elementList.add(new GhostGroupElement(x, y, z,b,meta));
 	}
 	
 	
@@ -86,7 +95,7 @@ public class GhostGroup {
 
 		for(GhostGroupElement element : elementList)
 		{
-			Eln.ghostManager.createGhost(coordonate.newWithOffset(element.x,element.y,element.z),observerCoordonate,UUID);
+			Eln.ghostManager.createGhost(coordonate.newWithOffset(element.x,element.y,element.z),observerCoordonate,UUID,element.b,element.meta);
 		}
 		return true;
 	}
@@ -147,7 +156,7 @@ public class GhostGroup {
 				break;
 
 			}
-			other.addElement(x, y, z);
+			other.addElement(x, y, z,element.b,element.meta);
 		}
 		
 

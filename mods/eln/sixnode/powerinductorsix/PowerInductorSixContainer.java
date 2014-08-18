@@ -18,7 +18,7 @@ public class PowerInductorSixContainer extends BasicContainer{
 	
 	public PowerInductorSixContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new GenericItemUsingDamageSlot(inventory, cableId,132,8,25, CopperCableDescriptor.class,SlotSkin.medium,new String[]{"Copper cable Slot","(Increase inductance value)"}),
+				new GenericItemUsingDamageSlot(inventory, cableId,132,8,19, CopperCableDescriptor.class,SlotSkin.medium,new String[]{"Copper cable Slot","(Increase inductance value)"}),
 				new GenericItemUsingDamageSlot(inventory, coreId, 132+20,8,1, FerromagneticCoreDescriptor.class,SlotSkin.medium,new String[]{"Ferromagnetic Core Slot"})
 
 			});

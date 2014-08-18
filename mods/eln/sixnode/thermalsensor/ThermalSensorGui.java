@@ -56,11 +56,11 @@ public class ThermalSensorGui extends GuiContainerEln{
 			
 			lowValue = newGuiTextField(x+8 + 50 + 4-26, y+(166-84)/2+3, 50);
 	        lowValue.setText(render.lowValue);
-	        lowValue.setComment(new String[]{"Minimum input"});
+	        lowValue.setComment(new String[]{"Probed value","that product","a 0% output"});
 	        
 	        highValue = newGuiTextField(x+8 + 50 + 4-26,y+ (166-84)/2 -12, 50);
 	        highValue.setText(render.highValue);
-	        highValue.setComment(new String[]{"Maximum input"});
+	        highValue.setComment(new String[]{"Probed value","that product","a 100% output"});
 		}
 		else
 		{
@@ -69,11 +69,11 @@ public class ThermalSensorGui extends GuiContainerEln{
 			
 			lowValue = newGuiTextField(x+8 + 50 + 4-26, y+(166-84)/2+3, 50);
 	        lowValue.setText(render.lowValue);
-	        lowValue.setComment(new String[]{"Minimum input"});
+	        lowValue.setComment(new String[]{"Probed temperature","that product","a 0% output"});
 	        
 	        highValue = newGuiTextField(x+8 + 50 + 4-26,y+ (166-84)/2 -12, 50);
 	        highValue.setText(render.highValue);
-	        highValue.setComment(new String[]{"Maximum input"});
+	        highValue.setComment(new String[]{"Probed temperature","that product","a 100% output"});
 		}
 	}
 	

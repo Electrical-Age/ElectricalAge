@@ -10,6 +10,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
+import mods.eln.ghost.GhostBlock;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.INBTTReady;
@@ -163,7 +164,7 @@ public abstract class NodeBase {
 		if (block.isReplaceable(w, x, y, z)) return true;
 		if (block == Blocks.air) return true;
 		if (block == Eln.sixNodeBlock) return true;
-		if (block == Eln.ghostBlock) return true;
+		if (block instanceof GhostBlock) return true;
 		if (block == Blocks.torch) return true;
 		if (block == Blocks.redstone_torch) return true;
 		if (block == Blocks.unlit_redstone_torch) return true;

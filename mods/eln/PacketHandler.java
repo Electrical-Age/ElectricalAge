@@ -229,7 +229,7 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 						}
 					}
 			} else {
-				Utils.println("No node found");
+				Utils.println("No node found at " + x + " " + y + " " + z + " " + dimention);
 				/*stream.readShort();
 				int dataSkipLength = stream.readByte();
 				for (int idx = 0; idx < dataSkipLength; idx++) {
