@@ -13,6 +13,7 @@ import mods.eln.misc.Utils;
 import mods.eln.node.INodeEntity;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
+import mods.eln.node.transparent.TransparentNode;
 import mods.eln.server.PlayerManager;
 import mods.eln.sound.SoundClient;
 import mods.eln.sound.SoundCommand;
@@ -187,7 +188,8 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 				}
 			}
 			} else {
-				Utils.println("No node found at " + x + " " + y + " " + z);
+				
+				Utils.println("No node found for " /*+ NodeManager.instance.getNodeFromCoordonate(new Coordonate(x, y, z, dimention)).getClass().getSimpleName()*/ + " " + x + " " + y + " " + z);
 				/*stream.readShort();
 				int dataSkipLength = stream.readByte();
 				for (int idx = 0; idx < dataSkipLength; idx++) {
@@ -229,7 +231,16 @@ public class PacketHandler /*extends SimpleChannelInboundHandler<FMLProxyPacket>
 						}
 					}
 			} else {
-				Utils.println("No node found at " + x + " " + y + " " + z + " " + dimention);
+				
+				String str = "";
+				/*NodeBase nb = NodeManager.instance.getNodeFromCoordonate(new Coordonate(x, y, z, dimention));
+				if(nb != null){
+					if(nb instanceof TransparentNode){
+						str = ((TransparentNode)nb).element.getClass().getSimpleName();
+					}
+				}*/
+				Utils.println("No node found for " + str + " " + x + " " + y + " " + z);
+
 				/*stream.readShort();
 				int dataSkipLength = stream.readByte();
 				for (int idx = 0; idx < dataSkipLength; idx++) {

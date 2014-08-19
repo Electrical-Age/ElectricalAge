@@ -442,4 +442,8 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 		
 	}
 
+	public boolean playerAskToBreak() {
+		return true;
+	}
+
 }

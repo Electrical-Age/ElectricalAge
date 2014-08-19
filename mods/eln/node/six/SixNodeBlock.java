@@ -208,7 +208,7 @@ public class SixNodeBlock extends NodeBlock {
 			sixNode.setNeedPublish(true);
 			return false;
 		}
-		if (false == sixNode.deleteSubBlock((EntityPlayerMP) entityPlayer, Direction.fromIntMinecraftSide(MOP.sideHit))) return false;
+		if (false == sixNode.playerAskToBreakSubBlock((EntityPlayerMP) entityPlayer, Direction.fromIntMinecraftSide(MOP.sideHit))) return false;
 
 		if (sixNode.getIfSideRemain()) return true;
 

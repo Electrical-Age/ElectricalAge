@@ -148,7 +148,18 @@ public class SixNode extends Node {
 	    }*/
 
 	
-	
+	public boolean playerAskToBreakSubBlock(EntityPlayerMP entityPlayer, Direction direction) {
+		
+		if (sideElementList[direction.getInt()] == null)
+			return deleteSubBlock(entityPlayer, direction);
+		
+		if(sideElementList[direction.getInt()].playerAskToBreak()){
+			return deleteSubBlock(entityPlayer, direction);
+		}else{
+			return false;
+		}
+
+	}
 	
 	public boolean deleteSubBlock(EntityPlayerMP entityPlayer, Direction direction) {
 		
@@ -156,11 +167,6 @@ public class SixNode extends Node {
 			return false;
 
 		Utils.println("deleteSubBlock " + " " + direction);
-		/*
-		if(sideElementList[direction.getInt()].dropItems())
-		{	
-			dropItem(new ItemStack(Eln.sixNodeBlock, 1, sideElementIdList[direction.getInt()] + (sideElementList[direction.getInt()].type<<8)));
-		}*/
 
 		disconnect();
 		SixNodeElement e = sideElementList[direction.getInt()];

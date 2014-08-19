@@ -14,6 +14,7 @@ import net.minecraft.block.BlockLog;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.oredict.OreDictionary;
 
 import org.lwjgl.opengl.GL11;
 
@@ -98,11 +99,30 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 	}
 	
 	
+	
+	public static boolean isWood(Block b){
+		for(ItemStack s : OreDictionary.getOres("treeWood")){
+			if(s.getItem() == Item.getItemFromBlock(b)) return true;
+		}
+		for(ItemStack s : OreDictionary.getOres("logWood")){
+			if(s.getItem() == Item.getItemFromBlock(b)) return true;
+		}		
+		
+		
+		return false;
+	}	
+	public static boolean isLeaf(Block b){
+		for(ItemStack s : OreDictionary.getOres("treeLeaves")){
+			if(s.getItem() == Item.getItemFromBlock(b)) return true;
+		}
+		return false;
+	}
+	
 	@Override
 	public boolean canBePlacedOnSide(EntityPlayer player,Coordonate c,Direction side) {
 		
 		Block b = c.getBlock();
-		if(b instanceof BlockLog == false){
+		if(isWood(b) == false){
 			Utils.addChatMessage(player,"This block can only be placed on the side of a tree!");
 			return false;
 		}

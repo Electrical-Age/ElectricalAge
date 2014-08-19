@@ -70,7 +70,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
 
 			GL11.glPushMatrix();
-			GL11.glRotatef(pipeAlpha,0,1,0);
+			GL11.glRotatef(pipeAlpha,0,-1,0);
 			GL11.glPushMatrix();
 				GL11.glScalef(0.99f, 0.99f, 0.99f);
 				descriptor.pipe.draw();

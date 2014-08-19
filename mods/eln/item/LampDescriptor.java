@@ -125,7 +125,8 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 		//list.add("Socket : " + socket);
 		list.add("Tech  : " + type);
 		list.add("Light   : " + (int)(nominalLight*15) + " blocks");
-		list.add("Power : " + (int)nominalP + " W");
+		list.add("Power : " + (int)nominalP + "W");
+		list.add(Utils.plotOhm("Resistance :",getR()));
 		//list.add(Utils.plotOhm("Resistance", this.getR()));
 		list.add(Utils.plotTime("Nominal life : ",nominalLife));
 		if(itemStack.getTagCompound().hasKey("life") == false)

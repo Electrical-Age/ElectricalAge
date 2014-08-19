@@ -62,6 +62,7 @@ public class HeatingCorpElement extends GenericItemUsingDamageDescriptorUpgrade 
 		list.add("Nominal :");
 		list.add(Utils.plotVolt( "  Voltage :", electricalNominalU));
 		list.add(Utils.plotPower("  Power :", electricalNominalP));
+		list.add(Utils.plotOhm("  Resistance :",electricalR));
 	}
 
 
