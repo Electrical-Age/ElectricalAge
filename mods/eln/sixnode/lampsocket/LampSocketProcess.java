@@ -305,7 +305,7 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 					double life = lampDescriptor.getLifeInTag(lampStack) - lifeLost;
 					lampDescriptor.setLifeInTag(lampStack, life);
 
-					if (life < 0)
+					if (life < 0 || overFactor > 3)
 					{
 						lamp.inventory.setInventorySlotContents(0, null);
 						light = 0;

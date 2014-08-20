@@ -267,6 +267,8 @@ public class CableRender {
 					Direction otherDirection = side.getInverse();
 					LRDU otherLRDU = otherDirection.getLRDUGoingTo(sideLrdu).inverse();
 					CableRenderDescriptor render = element.getCableRender(lrdu);
+					if(render == null) 
+						continue; 
 					NodeBlockEntity otherNode =  ((NodeBlockEntity)otherTileEntity);
 					CableRenderDescriptor otherRender = otherNode.getCableRender(otherDirection, otherLRDU);
 					
