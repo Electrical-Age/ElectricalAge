@@ -396,6 +396,7 @@ public class Eln {
 	public double electricalFrequancy, thermalFrequancy;
 	public int electricalInterSystemOverSampling;
 
+	public ElectricalCableDescriptor veryHighVoltageCableDescriptor;
 	public ElectricalCableDescriptor highVoltageCableDescriptor;
 	public ElectricalCableDescriptor signalCableDescriptor;
 	public ElectricalCableDescriptor lowVoltageCableDescriptor;
@@ -1062,6 +1063,7 @@ public class Eln {
 	public CableRenderDescriptor stdCableRender50V;
 	public CableRenderDescriptor stdCableRender200V;
 	public CableRenderDescriptor stdCableRender800V;
+	public CableRenderDescriptor stdCableRender3200V;
 
 	public static double gateOutputCurrent = 0.100;
 	public static final double SVU = 50, SVII = gateOutputCurrent / 50,
@@ -1069,11 +1071,13 @@ public class Eln {
 	public static final double LVU = 50;
 	public static final double MVU = 200;
 	public static final double HVU = 800;
+	public static final double VVU = 3200;
 
 	public static final double SVP = gateOutputCurrent * SVU;
 	public static final double LVP = 1000;
 	public static final double MVP = 2000;
 	public static final double HVP = 5000;
+	public static final double VVP = 15000;
 
 	public static double electricalCableDeltaTMax = 20;
 
@@ -1212,6 +1216,37 @@ public class Eln {
 																		// electricalNominalPower,
 																		// electricalNominalPowerDrop,
 					HVU * 1.3, HVP * 1.2,// electricalMaximalVoltage,
+											// electricalMaximalPower,
+					40,// electricalOverVoltageStartPowerLost,
+					cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+					cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+			// thermalConductivityTao
+			);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+
+		}
+		
+		
+		
+		{
+			subId = 16;
+
+			// highVoltageCableId = subId;
+			name = "Very High Voltage Cable";
+
+			stdCableRender3200V = new CableRenderDescriptor("eln",
+					"sprites/cable.png", 3.95f, 1.95f);
+
+			desc = new ElectricalCableDescriptor(name, stdCableRender3200V,
+					"miaou2", false);
+
+			veryHighVoltageCableDescriptor = desc;
+
+			desc.setPhysicalConstantLikeNormalCable(VVU, VVP, 0.025*5/4 / 20/8,// electricalNominalVoltage,
+																		// electricalNominalPower,
+																		// electricalNominalPowerDrop,
+					VVU * 1.3, VVP * 1.2,// electricalMaximalVoltage,
 											// electricalMaximalPower,
 					40,// electricalOverVoltageStartPowerLost,
 					cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
@@ -1780,13 +1815,29 @@ public class Eln {
 		IFunction function;
 		ElectricalSwitchDescriptor desc;
 
+		
+		{
+			subId = 4;
+
+			name = "Very High Voltage Switch";
+
+			desc = new ElectricalSwitchDescriptor(name, stdCableRender3200V,
+					obj.getObj("HighVoltageSwitch"), VVU, VVP,veryHighVoltageCableDescriptor.electricalRs*2,// nominalVoltage,
+					// nominalPower,
+					// nominalDropFactor,
+					VVU * 1.5, VVP * 1.2,// maximalVoltage, maximalPower
+					cableThermalLoadInitializer.copy(), false);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		
 		{
 			subId = 0;
 
 			name = "High Voltage Switch";
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRender800V,
-					obj.getObj("HighVoltageSwitch"), HVU, HVP, 0.02,// nominalVoltage,
+					obj.getObj("HighVoltageSwitch"), HVU, HVP,highVoltageCableDescriptor.electricalRs*2,// nominalVoltage,
 					// nominalPower,
 					// nominalDropFactor,
 					HVU * 1.5, HVP * 1.2,// maximalVoltage, maximalPower
@@ -1800,7 +1851,7 @@ public class Eln {
 			name = "Low Voltage Switch";
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRender50V,
-					obj.getObj("LowVoltageSwitch"), LVU, LVP, 0.02,// nominalVoltage,
+					obj.getObj("LowVoltageSwitch"), LVU, LVP, lowVoltageCableDescriptor.electricalRs*2,// nominalVoltage,
 					// nominalPower,
 					// nominalDropFactor,
 					LVU * 1.5, LVP * 1.2,// maximalVoltage, maximalPower
@@ -1814,7 +1865,7 @@ public class Eln {
 			name = "Medium Voltage Switch";
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRender200V,
-					obj.getObj("LowVoltageSwitch"), MVU, MVP, 0.02,// nominalVoltage,
+					obj.getObj("LowVoltageSwitch"), MVU, MVP, meduimVoltageCableDescriptor.electricalRs*2,// nominalVoltage,
 					// nominalPower,
 					// nominalDropFactor,
 					MVU * 1.5, MVP * 1.2,// maximalVoltage, maximalPower
@@ -1836,7 +1887,7 @@ public class Eln {
 
 			sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
-
+		// 4 taken
 		{
 			subId = 8;
 
@@ -2217,6 +2268,17 @@ public class Eln {
 			desc = new ElectricalRelayDescriptor(
 					name, obj.getObj("relay800"),
 					highVoltageCableDescriptor);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		{
+			subId = 3;
+
+			name = "Very High Voltage Relay";
+
+			desc = new ElectricalRelayDescriptor(
+					name, obj.getObj("relay800"),
+					veryHighVoltageCableDescriptor);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -4571,6 +4633,14 @@ public class Eln {
 				Character.valueOf('C'), "ingotCopper",
 				Character.valueOf('R'), "itemRubber");
 
+		
+		addRecipe(veryHighVoltageCableDescriptor.newItemStack(6),
+				"RRR",
+				"CCC",
+				"RRR",
+				Character.valueOf('C'), "ingotAlloy",
+				Character.valueOf('R'), "itemRubber");
+
 	}
 
 	void recipeThermalCable() {
@@ -4733,6 +4803,16 @@ public class Eln {
 				Character.valueOf('A'), "itemRubber",
 				Character.valueOf('I'), findItemStack("Copper Cable"),
 				Character.valueOf('C'), findItemStack("High Voltage Cable"));
+
+		addRecipe(findItemStack("Very High Voltage Switch"),
+				"AAI",
+				"AIA",
+				"CAC",
+				Character.valueOf('R'), new ItemStack(Items.redstone),
+				Character.valueOf('A'), "itemRubber",
+				Character.valueOf('I'), findItemStack("Copper Cable"),
+				Character.valueOf('C'), findItemStack("Very High Voltage Cable"));
+
 	}
 
 	void recipeElectricalRelay() {
@@ -4769,6 +4849,17 @@ public class Eln {
 				Character.valueOf('A'), "itemRubber",
 				Character.valueOf('I'), findItemStack("Copper Cable"),
 				Character.valueOf('C'), findItemStack("High Voltage Cable"));
+		
+		addRecipe(findItemStack("Very High Voltage Relay"),
+				"GGG",
+				"OIO",
+				"CRC",
+				Character.valueOf('R'), new ItemStack(Items.redstone),
+				Character.valueOf('O'), new ItemStack(Items.iron_ingot),
+				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
+				Character.valueOf('A'), "itemRubber",
+				Character.valueOf('I'), findItemStack("Copper Cable"),
+				Character.valueOf('C'), findItemStack("Very High Voltage Cable"));
 	}
 
 	void recipeWirelessSignal() {

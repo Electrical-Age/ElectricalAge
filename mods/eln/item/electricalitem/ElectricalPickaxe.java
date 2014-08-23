@@ -23,7 +23,7 @@ public class ElectricalPickaxe extends ElectricalTool {
 	}
 	@Override
 	public float getStrVsBlock(ItemStack stack, Block block) {
-        float value =  block != null && (block.getMaterial() == Material.iron || block.getMaterial() == Material.anvil || block.getMaterial() == Material.rock) ? getStrength(stack) : super.getStrVsBlock(stack, block);
+        float value =  block != null && (block.getMaterial() == Material.iron || block.getMaterial() == Material.glass || block.getMaterial() == Material.anvil || block.getMaterial() == Material.rock) ? getStrength(stack) : super.getStrVsBlock(stack, block);
         for(Block b : blocksEffectiveAgainst){
         	if(b == block){
         		value = getStrength(stack);

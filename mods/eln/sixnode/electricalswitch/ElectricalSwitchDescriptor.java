@@ -33,7 +33,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 
 	public ElectricalSwitchDescriptor(
 			String name, CableRenderDescriptor cableRender, Obj3D obj,
-			double nominalVoltage, double nominalPower, double nominalDropFactor,
+			double nominalVoltage, double nominalPower, double rs,
 			double maximalVoltage, double maximalPower,
 			ThermalLoadInitializer thermal,
 			boolean signalSwitch) {
@@ -42,9 +42,8 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 		this.nominalPower = nominalPower;
 		this.maximalPower = maximalPower;
 		this.maximalVoltage = maximalVoltage;
-		this.nominalDropFactor = nominalDropFactor;
 		this.cableRender = cableRender;
-		electricalRs = nominalVoltage * nominalVoltage / nominalPower * nominalDropFactor / 3;
+		electricalRs = rs/2;
 		this.obj = obj;
 		if(obj != null) {
 			if(main == null) main = obj.getPart("case");
@@ -100,7 +99,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 		Data.addWiring(newItemStack());
 	}
 	
-	double nominalVoltage, nominalPower, nominalDropFactor;
+	double nominalVoltage, nominalPower;
 	double maximalVoltage, maximalPower;
 	public float[] pinDistance;
 	@Override
