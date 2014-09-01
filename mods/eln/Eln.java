@@ -422,6 +422,11 @@ public class Eln {
 	public boolean forceOreRegen;
 	public boolean explosionEnable;
 	public static boolean debugEnable = false, versionCheckEnable = true;
+	
+	public double heatTurbinePowerFactor = 1;
+	public double solarPannelPowerFactor = 1;
+	public double windTurbinePowerFactor = 1;
+	public double waterTurbinePowerFactor = 1;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -461,10 +466,15 @@ public class Eln {
 		debugEnable = config.get("debug", "enable", false).getBoolean(false);
 		
 		explosionEnable = config.get("gameplay", "explosion", true).getBoolean(true);
+		
 		//explosionEnable = false;
 		versionCheckEnable = config.get("general", "versionCheckEnable", true).getBoolean(true);
 		
-		
+		heatTurbinePowerFactor = config.get("balancing", "heatTurbinePowerFactor", 1).getDouble(1);
+		solarPannelPowerFactor = config.get("balancing", "solarPannelPowerFactor", 1).getDouble(1);
+		windTurbinePowerFactor = config.get("balancing", "windTurbinePowerFactor", 1).getDouble(1);
+		waterTurbinePowerFactor = config.get("balancing", "waterTurbinePowerFactor", 1).getDouble(1);
+
 		
 		ComputerProbeEnable = config.get("compatibility", "ComputerProbeEnable", true).getBoolean(true);
 		ElnToOtherEnergyConverterEnable = config.get("compatibility", "ElnToOtherEnergyConverterEnable", true).getBoolean(true);
@@ -2388,7 +2398,7 @@ public class Eln {
 			name = "50V Turbine";
 			double RsFactor = 0.1;
 			double nominalU = LVU;
-			double nominalP = 300;
+			double nominalP = 300*heatTurbinePowerFactor;
 			double nominalDeltaT = 250;
 			TurbineDescriptor desc = new TurbineDescriptor(
 					name,
@@ -2419,7 +2429,7 @@ public class Eln {
 			name = "200V Turbine";
 			double RsFactor = 0.10;
 			double nominalU = MVU;
-			double nominalP = 500;
+			double nominalP = 500*heatTurbinePowerFactor;
 			double nominalDeltaT = 350;
 			TurbineDescriptor desc = new TurbineDescriptor(
 					name,
@@ -2706,7 +2716,7 @@ public class Eln {
 										// solarOffsetX,int solarOffsetY,int
 										// solarOffsetZ,
 					// FunctionTable solarIfSBase,
-					LVSolarU / 4, 65.0,// double electricalUmax,double
+					LVSolarU / 4, 65.0*solarPannelPowerFactor,// double electricalUmax,double
 										// electricalPmax,
 					0.01,// ,double electricalDropFactor
 					Math.PI / 2, Math.PI / 2 // alphaMin alphaMax
@@ -2727,7 +2737,7 @@ public class Eln {
 										// solarOffsetX,int solarOffsetY,int
 										// solarOffsetZ,
 					// FunctionTable solarIfSBase,
-					LVSolarU / 4, 65.0,// double electricalUmax,double
+					LVSolarU / 4, 65.0*solarPannelPowerFactor,// double electricalUmax,double
 										// electricalPmax,
 					0.01,// ,double electricalDropFactor
 					Math.PI / 4, Math.PI / 4 * 3 // alphaMin alphaMax
@@ -3641,7 +3651,7 @@ public class Eln {
 					lowVoltageCableDescriptor,// ElectricalCableDescriptor
 												// cable,
 					PfW,// PfW
-					160, 10,// double nominalPower,double nominalWind,
+					160*windTurbinePowerFactor, 10,// double nominalPower,double nominalWind,
 					LVU * 1.18, 22,// double maxVoltage, double maxWind,
 					3,// int offY,
 					7, 2, 2,// int rayX,int rayY,int rayZ,
@@ -3669,7 +3679,7 @@ public class Eln {
 			WaterTurbineDescriptor desc = new WaterTurbineDescriptor(
 					name, obj.getObj("SmallWaterWheel"), // name,Obj3D obj,
 					lowVoltageCableDescriptor,// ElectricalCableDescriptor
-					30,
+					30*waterTurbinePowerFactor,
 					LVU * 1.18,
 					waterCoord,
 					"eln:water_turbine", 1f
@@ -4697,7 +4707,12 @@ public class Eln {
 				"GGG",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
-
+		
+		addRecipe(findItemStack("Fluorescent Lamp Socket", 3),
+				" I ",
+				"I I",
+				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
 		
 
 		addRecipe(findItemStack("Suspended Lamp Socket", 2),

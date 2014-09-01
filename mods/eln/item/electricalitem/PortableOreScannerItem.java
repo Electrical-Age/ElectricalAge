@@ -499,7 +499,8 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			}
 			
 			for(OreScannerConfigElement c : Eln.instance.oreScannerConfig){
-				blockKeyFactor[c.blockKey] = c.factor;
+				if(c.blockKey < blockKeyFactor.length)
+					blockKeyFactor[c.blockKey] = c.factor;
 			}
 			return blockKeyFactor;
 		}
@@ -621,6 +622,9 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 										blockKey = (blockId + (storage.getExtBlockMetadata(xLocal, yLocal, zLocal) << 12));
 									}
 								}
+							}
+							if(blockKey >= 1024*64){
+								blockKey = 0;
 							}
 							worldBlocks[xInt][yInt][zInt] = (short) blockKey;
 						}
