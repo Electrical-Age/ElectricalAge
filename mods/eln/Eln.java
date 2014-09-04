@@ -1769,7 +1769,7 @@ public class Eln {
 			name = "Power Capacitor";
 
 			PowerCapacitorSixDescriptor desc = new PowerCapacitorSixDescriptor(
-					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE6(-2), 60*2000
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE6(-1), 60*2000
 					);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);

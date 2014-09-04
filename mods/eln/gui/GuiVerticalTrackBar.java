@@ -11,7 +11,7 @@ import net.minecraft.client.gui.GuiButton;
 
 public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 	
-
+	public boolean sliderDrawEnable = true;
     public int width,height,xPosition,yPosition;
 
     public boolean enable = false,visible = true;
@@ -157,7 +157,7 @@ public class GuiVerticalTrackBar extends Gui implements IGuiObject{
 	public void drawBare(float par1, int x, int y)
 	{
 		if(! visible) return;
-
+		if(!sliderDrawEnable) return;
  
 		drawRect(xPosition - 2, getCursorPosition()-2,xPosition + width + 2,getCursorPosition() + 2,0xFF202020);
 		drawRect(xPosition - 1, getCursorPosition()-1,xPosition + width + 1,getCursorPosition() + 1,0xFF606060);

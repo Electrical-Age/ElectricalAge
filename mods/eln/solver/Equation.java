@@ -72,10 +72,14 @@ public class Equation implements IValue, INBTTReady {
 		}
 		{
 			ArrayList<IOperatorMapper> list = new ArrayList<IOperatorMapper>();
-			list.add(new OperatorMapperAB("=", Eguals.class));
-			list.add(new OperatorMapperAB("^", NotEguals.class));
 			list.add(new OperatorMapperAB(">", Bigger.class));
 			list.add(new OperatorMapperAB("<", Smaller.class));
+			staticOperatorList.put(priority++, list);
+		}		
+		{
+			ArrayList<IOperatorMapper> list = new ArrayList<IOperatorMapper>();
+			list.add(new OperatorMapperAB("=", Eguals.class));
+			list.add(new OperatorMapperAB("^", NotEguals.class));
 			list.add(new OperatorMapperAB("&", And.class));
 			list.add(new OperatorMapperAB("|", Or.class));
 			staticOperatorList.put(priority++, list);

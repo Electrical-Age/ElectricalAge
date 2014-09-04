@@ -54,6 +54,9 @@ public class DiodeElement extends SixNodeElement {
 
 	LRDU front;
 
+	
+	
+	
 	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
 	}

@@ -191,7 +191,7 @@ public class TeleporterRender extends TransparentNodeElementRender{
 	
 	float voltage;
 	String name,targetName;
-	float chargePower,chargePowerLast,energyHit/*,energyTarget,chargeRatio*/;
+	float chargePower,chargePowerLast,energyHit,energyTarget;
 	boolean chargePowerNew;
 	byte state;
 	float processRatio;
@@ -211,8 +211,8 @@ public class TeleporterRender extends TransparentNodeElementRender{
 
 			processRatio = stream.readFloat();
 			voltage = (float) (stream.readFloat()/d.cable.electricalNominalVoltage);
-			//energyHit = stream.readFloat();
-			//energyTarget = stream.readFloat();
+			energyHit = stream.readFloat();
+			energyTarget = stream.readFloat();
 
 		} catch (IOException e) {
 			

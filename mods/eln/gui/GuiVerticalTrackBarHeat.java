@@ -9,6 +9,7 @@ public class GuiVerticalTrackBarHeat extends GuiVerticalTrackBar{
 
 	public float temperatureHit = 0;
 
+
 	@Override
 	public void drawBase(float par1, int x, int y) {
 		if(visible == false) return;

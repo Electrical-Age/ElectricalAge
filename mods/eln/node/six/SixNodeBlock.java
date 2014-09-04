@@ -40,6 +40,9 @@ public class SixNodeBlock extends NodeBlock {
 		// setBlockTextureName("eln:air");
 	}
 
+	
+	
+	
 	@Override
 	public void registerBlockIcons(IIconRegister r)
 	{
@@ -55,6 +58,8 @@ public class SixNodeBlock extends NodeBlock {
 			return null;
 	}
 
+
+	
 	public boolean hasVolume(World world, int x, int y, int z) {
 		SixNodeEntity entity = getEntity(world, x, y, z);
 		if (entity == null) return false;

@@ -1,25 +1,14 @@
 package mods.eln.transparentnode.teleporter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import org.lwjgl.opengl.GL11;
-
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.GuiTextFieldEln;
 import mods.eln.gui.GuiVerticalTrackBar;
+import mods.eln.gui.GuiVerticalTrackBarHeat;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.gui.inventory.GuiEditSign;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
 
 public class TeleporterGui extends GuiScreenEln{
 
@@ -31,6 +20,7 @@ public class TeleporterGui extends GuiScreenEln{
 	GuiTextFieldEln name;
 	GuiTextFieldEln target;
 	GuiVerticalTrackBar chargePower;
+	GuiVerticalTrackBarHeat chargeBar;
 	GuiButton start;
 	
 	
@@ -45,10 +35,13 @@ public class TeleporterGui extends GuiScreenEln{
 		name = newGuiTextField(6, 6, 80);
 		target = newGuiTextField(6, 6+20, 80);
 		start = newGuiButton(6,6+20+6+12,80, "Start");
+		
 		chargePower = newGuiVerticalTrackBar(6+80+6, 7, 20, 56);
 		chargePower.setRange(2000, 20000);
 		chargePower.setStepIdMax(20/2*10);
 		
+		chargeBar = newGuiVerticalTrackBarHeat(6+80+6+20+6, 7, 20, 56);
+		chargeBar.sliderDrawEnable = false;
 		
 		name.setText(render.name);
 		target.setText(render.targetName);
@@ -57,6 +50,8 @@ public class TeleporterGui extends GuiScreenEln{
 		name.setComment(0, "Current Transporter");
 		target.setComment(0, "Target Transporter");
 		chargePower.setComment(0, "Power Sink:");
+		
+		
 		
 	}
 	
@@ -90,6 +85,10 @@ public class TeleporterGui extends GuiScreenEln{
 		chargePower.setComment(0, Utils.plotPower("Power Sink:", chargePower.getValue()));
 		start.enabled = render.state == TeleporterElement.StateIdle;
 		
+		chargeBar.setRange(0, render.energyTarget);
+		chargeBar.temperatureHit = render.energyHit;
+		chargeBar.setComment(0,Utils.plotEnergy("Energy need",render.energyTarget));
+		chargeBar.setComment(1,((int)(render.processRatio*100)) + "%");
 	/*	if(render.defaultOutput)
 			toogleDefaultOutput.displayString = "default output is high";
 		else
@@ -98,7 +97,7 @@ public class TeleporterGui extends GuiScreenEln{
 	@Override
 	protected GuiHelper newHelper() {
 		
-		return new GuiHelper(this, 6+80+6+20+6+2, 70);
+		return new GuiHelper(this, 6+80+6+20+6+2+26, 70);
 	}
 
 
