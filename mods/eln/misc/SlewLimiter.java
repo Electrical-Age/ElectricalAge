@@ -29,12 +29,15 @@ public class SlewLimiter {
 	}
 
 	public void setPosition(float position) {
-		target = position;
 		this.position = position;
 	}
 	
 	public boolean targetReached() {
 		return position == target;
+	}
+	
+	public boolean targetReached(float tolerance) {
+		return Math.abs(position - target ) <= tolerance;
 	}
 	
 	public float getPositiveSlewRate() {
