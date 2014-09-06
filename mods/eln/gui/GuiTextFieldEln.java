@@ -67,7 +67,10 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject{
 	}
 	public void setText(float value)
 	{
-		setText( String.format("%3.2f", value));
+		if(Math.abs(value) < 1000)
+			setText( String.format("%3.2f", value));
+		else
+			setText( String.format("%3.0f", value));
 	}
 	public void setText(int value)
 	{
