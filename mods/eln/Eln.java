@@ -1246,7 +1246,7 @@ public class Eln {
 			name = "Very High Voltage Cable";
 
 			stdCableRender3200V = new CableRenderDescriptor("eln",
-					"sprites/cable.png", 3.95f, 1.95f);
+					"sprites/cableVHV.png", 3.95f, 1.95f);
 
 			desc = new ElectricalCableDescriptor(name, stdCableRender3200V,
 					"miaou2", false);
