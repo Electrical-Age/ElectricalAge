@@ -132,7 +132,7 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 		if (lampStack != null)
 		{
 			LampDescriptor lampDescriptor = (LampDescriptor) ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) lampStack.getItem()).getDescriptor(lampStack);
-			
+
 			if (lamp.getCoordonate().getBlockExist() == true && lampDescriptor.vegetableGrowRate != 0.0) {
 				double randTarget = 1.0 / lampDescriptor.vegetableGrowRate * time * (1.0 * light / lampDescriptor.nominalLight / 15.0);
 				if (randTarget > Math.random()) {
@@ -301,16 +301,16 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 				// lifeLost *= overFactor;
 				// lifeLost *= overFactor;
 
+				double life = lampDescriptor.getLifeInTag(lampStack) - lifeLost;
 				if (SaveConfig.instance.electricalLampAging) {
-					double life = lampDescriptor.getLifeInTag(lampStack) - lifeLost;
 					lampDescriptor.setLifeInTag(lampStack, life);
-
-					if (life < 0 || overFactor > 3)
-					{
-						lamp.inventory.setInventorySlotContents(0, null);
-						light = 0;
-					}
 				}
+				if (life < 0 || overFactor > 3)
+				{
+					lamp.inventory.setInventorySlotContents(0, null);
+					light = 0;
+				}
+
 			}
 
 			boot = false;
@@ -327,9 +327,7 @@ public class LampSocketProcess implements IProcess, INBTTReady/*
 
 		lampStackLast = lampStack;
 
-
 		placeSpot(newLight);
-
 
 	}
 
