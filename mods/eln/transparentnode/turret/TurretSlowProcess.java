@@ -20,7 +20,7 @@ public class TurretSlowProcess extends StateMachine {
 	double actualCurrent;
 	
 	public TurretSlowProcess(TurretElement element) {
-        actualCurrent = element.getDescriptor().getProperties().basePower / element.load.getU();
+        actualCurrent = 0;
 		setInitialState(new IdleState());
 		setDebug(true);
 		reset();
@@ -274,8 +274,11 @@ public class TurretSlowProcess extends StateMachine {
 		
 		if(element.coordonate().getBlockExist())
 			super.process(time);
-		
-		element.powerResistor.setR(element.load.getU()/actualCurrent);
+
+        if (actualCurrent == 0 )
+            element.powerResistor.highImpedance();
+        else
+            element.powerResistor.setR(element.load.getU() / actualCurrent);
 	}	
 	
 	private State state = null;
