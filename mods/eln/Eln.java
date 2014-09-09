@@ -674,7 +674,7 @@ public class Eln {
 		registerWindTurbine(49);
 		registerThermalDissipatorPassiveAndActive(64);
 		registerTransparentNodeMisc(65);
-		//registerTurret(66);
+		registerTurret(66);
 
 		registerHeatingCorp(1);
 		// registerThermalIsolator(2);

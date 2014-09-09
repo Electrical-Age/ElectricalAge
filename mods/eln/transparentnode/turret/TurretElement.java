@@ -4,26 +4,43 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
+import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
+import mods.eln.misc.Utils;
+import mods.eln.node.NodeBase;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.nbt.NbtElectricalLoad;
+import mods.eln.sim.nbt.NbtResistor;
 
 public class TurretElement extends TransparentNodeElement {
 	
-	private TurretDescriptor descriptor;
+	TurretDescriptor descriptor;
 	
 	private TurretMechanicsSimulation simulation;
 	
+	public double energyBuffer = 0;
+	public double chargingPower;	
+	
+	NbtElectricalLoad load = new NbtElectricalLoad("load");
+	NbtResistor powerResistor = new NbtResistor("powerResistor", load, null);
+
 	public TurretElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		this.descriptor = (TurretDescriptor)descriptor;
 		slowProcessList.add(new TurretSlowProcess(this));
 		simulation = new TurretMechanicsSimulation((TurretDescriptor)descriptor);
 		slowProcessList.add(simulation);
+		
+		Eln.instance.highVoltageCableDescriptor.applyTo(load);
+		electricalLoadList.add(load);
+		electricalComponentList.add(powerResistor);
+	
 	}
 	
 	public TurretDescriptor getDescriptor() {
@@ -46,10 +63,6 @@ public class TurretElement extends TransparentNodeElement {
 		if (simulation.setGunPosition(position)) needPublish();
 	}
 	
-	public float getGunElevation() {
-		return simulation.getGunPosition();
-	}
-	
 	public void setGunElevation(float elevation) {
 		if (simulation.setGunElevation(elevation)) needPublish();
 	}
@@ -59,8 +72,25 @@ public class TurretElement extends TransparentNodeElement {
 		simulation.setSeekMode(seekModeEnabled);
 	}
 	
+	public void shoot() {
+		if (simulation.shoot()) needPublish();
+	}
+	
+	public boolean isTargetReached() {
+		return simulation.isTargetReached();
+	}
+	
+	public void setEnabled(boolean armed) {
+		if (simulation.setEnabled(armed)) needPublish();
+	}
+	
+	public boolean isEnabled() {
+		return simulation.isEnabled();
+	}
+	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
+		if(side == front.back() && lrdu == LRDU.Down) return load;
 		return null;
 	}
 
@@ -71,12 +101,13 @@ public class TurretElement extends TransparentNodeElement {
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
+		if(side == front.back() && lrdu == LRDU.Down) return NodeBase.maskElectricalPower;
 		return 0;
 	}
 
 	@Override
 	public String multiMeterString(Direction side) {
-		return null;
+		return Utils.plotUIP(load.getU(), load.getI());
 	}
 
 	@Override
@@ -103,8 +134,22 @@ public class TurretElement extends TransparentNodeElement {
     		stream.writeFloat(simulation.getGunTargetPosition());
     		stream.writeFloat(simulation.getGunTargetElevation());
     		stream.writeBoolean(simulation.inSeekMode());
-		} catch (IOException e) {
+    		stream.writeBoolean(simulation.isShooting());
+    		stream.writeBoolean(simulation.isEnabled());
+ 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		nbt.setDouble("energyBuffer", energyBuffer);
+	}
+	
+	@Override
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		energyBuffer = nbt.getDouble("energyBuffer");
 	}
 }

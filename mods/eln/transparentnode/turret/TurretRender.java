@@ -19,7 +19,6 @@ public class TurretRender extends TransparentNodeElementRender {
 		super(tileEntity, descriptor);
 		this.descriptor = (TurretDescriptor)descriptor;
 		simulation = new TurretMechanicsSimulation(this.descriptor);
-		//front = front.getInverse();
 	}
 
 	public float getTurretAngle() {
@@ -32,6 +31,14 @@ public class TurretRender extends TransparentNodeElementRender {
 	
 	public float getGunElevation() {
 		return simulation.getGunElevation();
+	}
+	
+	public boolean isShooting() {
+		return simulation.isShooting();
+	}
+	
+	public boolean isEnabled() {
+		return simulation.isEnabled();
 	}
 	
 	@Override
@@ -56,13 +63,10 @@ public class TurretRender extends TransparentNodeElementRender {
 			simulation.setGunPosition(stream.readFloat());
 			simulation.setGunElevation(stream.readFloat());
 			simulation.setSeekMode(stream.readBoolean());
+			if (stream.readBoolean()) simulation.shoot();
+			simulation.setEnabled(stream.readBoolean());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	@Override
-	public boolean cameraDrawOptimisation() {
-		return true;
 	}
 }

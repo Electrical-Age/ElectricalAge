@@ -7,36 +7,107 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
-import net.minecraft.world.EnumSkyBlock;
+import mods.eln.fsm.CompositeState;
+import mods.eln.fsm.State;
+import mods.eln.fsm.StateMachine;
 import mods.eln.misc.Coordonate;
-import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.misc.Utils;
-import mods.eln.sim.IProcess;
+import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sound.SoundCommand;
 
-public class TurretSlowProcess implements IProcess {
+public class TurretSlowProcess extends StateMachine {
+	
+	double actualCurrent;
 	
 	public TurretSlowProcess(TurretElement element) {
+        actualCurrent = element.getDescriptor().getProperties().basePower / element.load.getU();
+		setInitialState(new IdleState());
+		setDebug(true);
+		reset();
 		this.element = element;
 	}
 
 	private TurretElement element;
 
-	private interface State {
-		void enter();
-		State process(double time);
-		void leave();
+	private class IdleState implements State {
+		@Override
+		public void enter() {
+		}
+
+		@Override
+		public State state(double time) {
+			if (element.load.getU() >= element.getDescriptor().getProperties().minimalVoltage)
+				return new ActiveState();
+			else 
+				return this;
+		}
+
+		@Override
+		public void leave() {
+		}
+	}
+	
+	private class ActiveState extends CompositeState {
+		public ActiveState() {
+			setInitialState(new SeekingState());
+		}
+		
+		@Override
+		public void enter() {
+			element.setEnabled(true);
+            actualCurrent = element.getDescriptor().getProperties().basePower / element.load.getU();
+			super.enter();
+		}
+
+		@Override
+		public State state(double time) {
+			super.state(time);
+			if (element.load.getU() < element.getDescriptor().getProperties().minimalVoltage)
+				return new IdleState();
+			else if (element.load.getU() > element.getDescriptor().getProperties().maximalVoltage)
+				return new DamageState();
+			else 
+				return this;
+		}
+
+		@Override
+		public void leave() {
+			element.setEnabled(false);
+            actualCurrent = 0;
+			super.leave();
+		}
+	}
+	
+	private class DamageState implements State {
+		@Override
+		public void enter() {
+			WorldExplosion explosion = new WorldExplosion(element).machineExplosion();
+			explosion.destructImpl();
+     	}
+
+		@Override
+		public State state(double time) {
+			return new IdleState();
+		}
+
+		@Override
+		public void leave() {
+		}
+		
 	}
 	
 	private class SeekingState implements State {
 		@Override
 		public void enter() {
+            actualCurrent = element.getDescriptor().getProperties().basePower / element.load.getU();
+			element.setGunPosition(0);
+			element.setGunElevation(0);
 			element.setSeekMode(true);
 			element.setTurretAngle(element.getDescriptor().getProperties().actionAngle);
 		}
 
 		@Override
-		public State process(double time) {
+		public State state(double time) {
 			if (element.getTurretAngle() >= element.getDescriptor().getProperties().actionAngle)
 				element.setTurretAngle(-element.getDescriptor().getProperties().actionAngle);
 			else if (element.getTurretAngle() <= -element.getDescriptor().getProperties().actionAngle)
@@ -46,11 +117,31 @@ public class TurretSlowProcess implements IProcess {
 			AxisAlignedBB bb = coord.getAxisAlignedBB((int)element.getDescriptor().getProperties().detectionDistance);
 			List<EntityLivingBase> list = coord.world().getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase entity: list) {
-				float dx = (float)(entity.posX - coord.x - 0.5);
-				float dz = (float)(entity.posZ - coord.z - 0.5);
-				float entityAngle = -(float)Math.toDegrees(Math.atan(dz / dx));
+				double dx = (entity.posX - coord.x - 0.5);
+				double dz = (entity.posZ - coord.z - 0.5);
+				double entityAngle = -Math.toDegrees(Math.atan2(dz, dx));
+				switch (element.front) {
+					case XN:
+						if (entityAngle > 0 )
+							entityAngle -= 180;
+						else
+							entityAngle += 180;
+						break;
+					
+					case ZP:
+						entityAngle += 90;
+						break;
+						
+					case ZN:
+						entityAngle -= 90;
+						break;
+					
+					default:
+						break;
+					
+				}
 				
-				if (Math.abs(entityAngle - element.getTurretAngle()) < 15) {
+				if (Math.abs(entityAngle - element.getTurretAngle()) < 15 && Math.abs(entityAngle) < element.getDescriptor().getProperties().actionAngle) {
 					ArrayList<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, 
 																entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
 					boolean visible = true;
@@ -60,8 +151,8 @@ public class TurretSlowProcess implements IProcess {
 							break;
 						}
 					
-					if (visible && !coord.world().playerEntities.contains(entity)) {
-							return new AimingState(entity);
+					if (visible ) {
+						return new AimingState(entity);
 					}
 				}
 			}
@@ -81,30 +172,51 @@ public class TurretSlowProcess implements IProcess {
 		}
 
 		private EntityLivingBase target;
-		private float aimTime = 0;
 
 		@Override
 		public void enter() {
+            actualCurrent = element.getDescriptor().getProperties().basePower / element.load.getU() +
+                            element.getDescriptor().getProperties().chargeCurrent;
 			element.setGunPosition(1);
 		}
 
 		@Override
-		public State process(double time) {
+		public State state(double time) {
 			if (target.isDead) return new SeekingState();
-			aimTime += time;
-			
+
 			Coordonate coord = element.coordonate();
 			
-			float dx = (float)(target.posX - coord.x - 0.5);
-			float dy = (float)(target.posY + target.getEyeHeight() - coord.y - 0.75);
-			float dz = (float)(target.posZ - coord.z - 0.5);
-			float entityAngle = -(float)Math.toDegrees(Math.atan(dz / dx));
-			float entityAngle2 = -(float)Math.toDegrees(Math.asin(dy / Math.sqrt(dx * dx + dz * dz)));
+			double dx = (float)(target.posX - coord.x - 0.5);
+			double dy = (float)(target.posY + target.getEyeHeight() - coord.y - 0.75);
+			double dz = (float)(target.posZ - coord.z - 0.5);
+			double entityAngle = -Math.toDegrees(Math.atan2(dz, dx));
+			switch (element.front) {
+			case XN:
+				if (entityAngle > 0 )
+					entityAngle -= 180;
+				else
+					entityAngle += 180;
+				break;
+			
+			case ZP:
+				entityAngle += 90;
+				break;
+				
+			case ZN:
+				entityAngle -= 90;
+				break;
+			
+			default:
+				break;
+			
+			}
+			
+			double entityAngle2 = -Math.toDegrees(Math.asin(dy / Math.sqrt(dx * dx + dz * dz)));
 			
 			if (Math.abs(entityAngle) > element.getDescriptor().getProperties().actionAngle) return new SeekingState();
 			
-			element.setTurretAngle(entityAngle);
-			element.setGunElevation(-entityAngle2);
+			element.setTurretAngle((float)entityAngle);
+			element.setGunElevation((float)-entityAngle2);
 			
 			if (Math.abs(target.posX - coord.x) > element.getDescriptor().getProperties().aimDistance || 
 					Math.abs(target.posZ - coord.z) > element.getDescriptor().getProperties().aimDistance )
@@ -116,15 +228,15 @@ public class TurretSlowProcess implements IProcess {
 				if (b.isOpaqueCube()) 
 					return new SeekingState();
 			
-			if (element.getGunPosition() == 1 && aimTime > 0.5f) return new ShootState(target);
+			if (element.getGunPosition() == 1 && element.isTargetReached() &&
+                element.energyBuffer > element.getDescriptor().getProperties().impulseEnergy)
+                return new ShootState(target);
 			
 			return this;
 		}
 
 		@Override
 		public void leave() {
-			element.setGunPosition(0);
-			element.setGunElevation(0);
 		}
 	}
 	
@@ -137,13 +249,14 @@ public class TurretSlowProcess implements IProcess {
 		
 		@Override
 		public void enter() {
-			target.attackEntityFrom(DamageSource.generic, 5.0f);
+			if (target != null) target.attackEntityFrom(new DamageSource("Unknown"), 5);
+			element.shoot();
 			element.play(new SoundCommand("eln:LaserGun"));
 		}
 
 		@Override
-		public State process(double time) {
-			if (target.isDead)
+		public State state(double time) {
+			if (target == null || target.isDead)
 				return new SeekingState();
 			else
 				return new AimingState(target);
@@ -151,22 +264,18 @@ public class TurretSlowProcess implements IProcess {
 
 		@Override
 		public void leave() {
+            element.energyBuffer = 0;
 		}
 	}
 	
 	@Override
 	public void process(double time) {
-		if (state == null) {
-			state = new SeekingState();
-			state.enter();
-		}
+		element.energyBuffer += element.powerResistor.getP() * time;
 		
-		State nextState = state.process(time);
-		if (nextState != null && nextState != state) {
-			state.leave();
-			state = nextState;
-			state.enter();
-		}
+		if(element.coordonate().getBlockExist())
+			super.process(time);
+		
+		element.powerResistor.setR(element.load.getU()/actualCurrent);
 	}	
 	
 	private State state = null;
