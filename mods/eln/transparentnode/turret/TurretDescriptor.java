@@ -95,19 +95,22 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		float gunAngle = render != null ? -render.getGunElevation() : 0;
 		boolean shooting = render != null ? render.isShooting() : false;
 		boolean enabled = render != null ? render.isEnabled() : true;
-		
-		if (holder != null) holder.draw();
+
+        if (holder != null) holder.draw();
 		if (joint != null) joint.draw();
 		GL11.glPushMatrix();
 			GL11.glRotatef(turretAngle, 0f, 1f, 0f);
 			if (turret != null) turret.draw();
 			if (sensor != null) {
 				if (enabled) {
-					float lightIntensity = 0.5f + 0.5f * gunPosition;
-					GL11.glColor3f(lightIntensity, lightIntensity, lightIntensity);
+					if (render != null && render.filter != null )
+                        render.filter.glColor(0.5f + 0.5f * gunPosition);
+                    else
+                        GL11.glColor3f(0.5f, 0.5f, 0.5f);
 					UtilsClient.drawLight(sensor);
 					GL11.glColor3f(1f, 1f, 1f);
 				} else {
+                    GL11.glColor3f(0.5f, 0.5f, 0.5f);
 					sensor.draw();
 				}
 			}

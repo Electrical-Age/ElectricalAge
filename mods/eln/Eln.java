@@ -4576,7 +4576,7 @@ public class Eln {
         {
             subId = 42;
             name = "Animal Filter";
-            EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityAnimal.class, 0f, 0f, 1f);
+            EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityAnimal.class, .3f, .3f, 1f);
             sharedItem.addElement(subId + (id << 6), desc);
         }
 

@@ -19,4 +19,8 @@ public class EntitySensorFilterDescriptor extends GenericItemUsingDamageDescript
 		GL11.glColor3f(r, g, b);
 	}
 
+    public void glColor(float intensity) {
+        GL11.glColor3f(r * intensity, g * intensity, b * intensity);
+    }
+
 }

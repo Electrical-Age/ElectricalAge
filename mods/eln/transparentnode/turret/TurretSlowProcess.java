@@ -117,7 +117,7 @@ public class TurretSlowProcess extends StateMachine {
 			else if (element.getTurretAngle() <= -element.getDescriptor().getProperties().actionAngle)
 				element.setTurretAngle(element.getDescriptor().getProperties().actionAngle);
 
-            Class filterClass = EntityLivingBase.class;
+            Class filterClass = null;
             ItemStack filterStack = element.inventory.getStackInSlot(TurretContainer.filterId);
             if(filterStack != null) {
                 GenericItemUsingDamageDescriptor gen = EntitySensorFilterDescriptor.getDescriptor(filterStack);
@@ -126,6 +126,8 @@ public class TurretSlowProcess extends StateMachine {
                     filterClass = filter.entityClass;
                 }
             }
+            if (filterClass == null)
+                return null;
 
 			Coordonate coord = element.coordonate();
 			AxisAlignedBB bb = coord.getAxisAlignedBB((int)element.getDescriptor().getProperties().detectionDistance);
