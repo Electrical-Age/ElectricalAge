@@ -3,8 +3,12 @@ package mods.eln.transparentnode.turret;
 import java.util.ArrayList;
 import java.util.List;
 
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.item.EntitySensorFilterDescriptor;
+import mods.eln.sixnode.electricalentitysensor.TurretContainer;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import mods.eln.fsm.CompositeState;
@@ -112,10 +116,20 @@ public class TurretSlowProcess extends StateMachine {
 				element.setTurretAngle(-element.getDescriptor().getProperties().actionAngle);
 			else if (element.getTurretAngle() <= -element.getDescriptor().getProperties().actionAngle)
 				element.setTurretAngle(element.getDescriptor().getProperties().actionAngle);
-			
+
+            Class filterClass = EntityLivingBase.class;
+            ItemStack filterStack = element.inventory.getStackInSlot(TurretContainer.filterId);
+            if(filterStack != null) {
+                GenericItemUsingDamageDescriptor gen = EntitySensorFilterDescriptor.getDescriptor(filterStack);
+                if(gen != null && gen instanceof EntitySensorFilterDescriptor) {
+                    EntitySensorFilterDescriptor filter = (EntitySensorFilterDescriptor) gen;
+                    filterClass = filter.entityClass;
+                }
+            }
+
 			Coordonate coord = element.coordonate();
 			AxisAlignedBB bb = coord.getAxisAlignedBB((int)element.getDescriptor().getProperties().detectionDistance);
-			List<EntityLivingBase> list = coord.world().getEntitiesWithinAABB(EntityLivingBase.class, bb);
+			List<EntityLivingBase> list = coord.world().getEntitiesWithinAABB(filterClass, bb);
 			for (EntityLivingBase entity: list) {
 				double dx = (entity.posX - coord.x - 0.5);
 				double dz = (entity.posZ - coord.z - 0.5);

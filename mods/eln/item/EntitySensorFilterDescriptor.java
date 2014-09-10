@@ -2,8 +2,6 @@ package mods.eln.item;
 
 import org.lwjgl.opengl.GL11;
 
-import mods.eln.generic.GenericItemUsingDamageDescriptor;
-
 public class EntitySensorFilterDescriptor extends GenericItemUsingDamageDescriptorUpgrade {
 
 	public Class entityClass;

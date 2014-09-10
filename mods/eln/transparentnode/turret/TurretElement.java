@@ -3,7 +3,12 @@ package mods.eln.transparentnode.turret;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import mods.eln.node.transparent.TransparentNodeElementInventory;
+import mods.eln.sixnode.electricalentitysensor.ElectricalEntitySensorContainer;
+import mods.eln.sixnode.electricalentitysensor.TurretContainer;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
@@ -25,10 +30,11 @@ public class TurretElement extends TransparentNodeElement {
 	private TurretMechanicsSimulation simulation;
 	
 	public double energyBuffer = 0;
-	public double chargingPower;	
-	
+
 	NbtElectricalLoad load = new NbtElectricalLoad("load");
 	NbtResistor powerResistor = new NbtResistor("powerResistor", load, null);
+
+    TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 64, this);
 
 	public TurretElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
@@ -136,6 +142,7 @@ public class TurretElement extends TransparentNodeElement {
     		stream.writeBoolean(simulation.inSeekMode());
     		stream.writeBoolean(simulation.isShooting());
     		stream.writeBoolean(simulation.isEnabled());
+            Utils.serialiseItemStack(stream, inventory.getStackInSlot(TurretContainer.filterId));
  		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -152,4 +159,19 @@ public class TurretElement extends TransparentNodeElement {
 		super.readFromNBT(nbt);
 		energyBuffer = nbt.getDouble("energyBuffer");
 	}
+
+    @Override
+    public boolean hasGui() {
+        return true;
+    }
+
+    @Override
+    public IInventory getInventory() {
+        return inventory;
+    }
+
+    @Override
+    public Container newContainer(Direction side, EntityPlayer player) {
+        return new TurretContainer(player, inventory);
+    }
 }

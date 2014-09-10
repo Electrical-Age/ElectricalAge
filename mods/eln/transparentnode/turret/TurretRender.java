@@ -3,16 +3,25 @@ package mods.eln.transparentnode.turret;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import mods.eln.item.EntitySensorFilterDescriptor;
+import mods.eln.misc.Utils;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
+import mods.eln.misc.Direction;
 
 public class TurretRender extends TransparentNodeElementRender {
 
 	public TurretDescriptor descriptor;
 	public TurretMechanicsSimulation simulation;
+    private TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 1, this);
+    EntitySensorFilterDescriptor filter = null;
 
 	public TurretRender(TransparentNodeEntity tileEntity,
 			TransparentNodeDescriptor descriptor) {
@@ -65,8 +74,16 @@ public class TurretRender extends TransparentNodeElementRender {
 			simulation.setSeekMode(stream.readBoolean());
 			if (stream.readBoolean()) simulation.shoot();
 			simulation.setEnabled(stream.readBoolean());
+            ItemStack filterStack = Utils.unserialiseItemStack(stream);
+            filter = (EntitySensorFilterDescriptor) EntitySensorFilterDescriptor.getDescriptor(filterStack);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+
+    @Override
+    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
+        return new TurretGui(player, inventory, this);
+    }
 }
+
