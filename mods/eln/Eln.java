@@ -190,6 +190,7 @@ import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -4574,7 +4575,7 @@ public class Eln {
 		{
 			subId = 41;
 			name = "Monster Filter";
-			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityMob.class, 1f, 0f, 0f);
+			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, IMob.class, 1f, 0f, 0f);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
         {
