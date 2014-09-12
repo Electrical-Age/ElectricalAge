@@ -18,8 +18,31 @@ public class Other {
 	}
 	public static double getElnToIc2ConversionRatio() {
 		// TODO Auto-generated method stub
-		return 1.0 / 3;
+		//return 1.0 / 3;
+		return ElnToIc2ConversionRatio;
 	}
+	public static double getElnToOcConversionRatio() {
+		// TODO Auto-generated method stub
+		//return getElnToIc2ConversionRatio()/2.5;
+		return ElnToOcConversionRatio;
+	}
+	public static double getElnToTeConversionRatio() {
+		// TODO Auto-generated method stub
+		//return getElnToIc2ConversionRatio()*4;
+		return ElnToTeConversionRatio;
+	}
+	public static double getElnToBuildcraftConversionRatio() {
+		// TODO Auto-generated method stub
+		return ElnToBuildcraftConversionRatio;
+		//return getElnToIc2ConversionRatio()/5*2;
+	}	
+	
+	public static double ElnToIc2ConversionRatio; 
+	public static double ElnToOcConversionRatio; 
+	public static double ElnToTeConversionRatio; 
+	public static double ElnToBuildcraftConversionRatio; 
+	
+	
 	public static final String modIdIc2 = "IC2";
 	public static final String modIdOc ="OpenComputers";
 	public static final String modIdTe = "Eln";
@@ -27,16 +50,5 @@ public class Other {
 	public static final String modIdCc = "ComputerCraft";
 	public static final String modIdBuildcraft = "BuildCraft|Core";
 
-	public static double getElnToOcConversionRatio() {
-		// TODO Auto-generated method stub
-		return getElnToIc2ConversionRatio()/2.5;
-	}
-	public static double getElnToTeConversionRatio() {
-		// TODO Auto-generated method stub
-		return getElnToIc2ConversionRatio()*4;
-	}
-	public static double getElnToBuildcraftConversionRatio() {
-		// TODO Auto-generated method stub
-		return getElnToIc2ConversionRatio()/5*2;
-	}
+
 }

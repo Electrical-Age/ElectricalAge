@@ -190,8 +190,6 @@ import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.monster.EntityMob;
-import net.minecraft.entity.passive.EntityAnimal;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -424,7 +422,7 @@ public class Eln {
 	public boolean forceOreRegen;
 	public boolean explosionEnable;
 	public static boolean debugEnable = false, versionCheckEnable = true;
-	
+
 	public double heatTurbinePowerFactor = 1;
 	public double solarPannelPowerFactor = 1;
 	public double windTurbinePowerFactor = 1;
@@ -466,18 +464,22 @@ public class Eln {
 
 		modbusEnable = config.get("modbus", "enable", false).getBoolean(false);
 		debugEnable = config.get("debug", "enable", false).getBoolean(false);
-		
+
 		explosionEnable = config.get("gameplay", "explosion", true).getBoolean(true);
-		
-		//explosionEnable = false;
+
+		// explosionEnable = false;
 		versionCheckEnable = config.get("general", "versionCheckEnable", true).getBoolean(true);
-		
+
 		heatTurbinePowerFactor = config.get("balancing", "heatTurbinePowerFactor", 1).getDouble(1);
 		solarPannelPowerFactor = config.get("balancing", "solarPannelPowerFactor", 1).getDouble(1);
 		windTurbinePowerFactor = config.get("balancing", "windTurbinePowerFactor", 1).getDouble(1);
 		waterTurbinePowerFactor = config.get("balancing", "waterTurbinePowerFactor", 1).getDouble(1);
 
-		
+		Other.ElnToIc2ConversionRatio = config.get("balancing", "ElnToIndustrialCraftConversionRatio", 1.0 / 3.0).getDouble(1.0 / 3.0);
+		Other.ElnToOcConversionRatio = config.get("balancing", "ElnToOpenComputerConversionRatio", 1.0 / 3.0 / 2.5).getDouble(1.0 / 3.0 / 2.5);
+		Other.ElnToTeConversionRatio = config.get("balancing", "ElnToThermalExpansionConversionRatio", 1.0 / 3.0 * 4).getDouble(1.0 / 3.0 * 4);
+		Other.ElnToBuildcraftConversionRatio = config.get("balancing", "ElnToBuildcraftConversionRatio", 1.0 / 3.0 / 5 * 2).getDouble(1.0 / 3.0 / 5 * 2);
+
 		ComputerProbeEnable = config.get("compatibility", "ComputerProbeEnable", true).getBoolean(true);
 		ElnToOtherEnergyConverterEnable = config.get("compatibility", "ElnToOtherEnergyConverterEnable", true).getBoolean(true);
 
@@ -511,8 +513,6 @@ public class Eln {
 		xRayScannerRange = Math.max(Math.min(xRayScannerRange, 10), 4);
 		xRayScannerCanBeCrafted = config.get("xrayscannerconfig", "canBeCrafted", true).getBoolean(true);
 
-		
-		
 		electricalFrequancy = config.get("simulation", "electricalFrequancy", 20).getDouble(20);
 		electricalInterSystemOverSampling = config.get("simulation", "electricalInterSystemOverSampling", 50).getInt(50);
 		thermalFrequancy = config.get("simulation", "thermalFrequancy", 400).getDouble(400);
@@ -522,12 +522,11 @@ public class Eln {
 	}
 
 	public static FMLEventChannel eventChannel;
-	//boolean computerCraftReady = false;
+	// boolean computerCraftReady = false;
 	boolean ComputerProbeEnable;
 	boolean ElnToOtherEnergyConverterEnable;
 
 	// FMLCommonHandler.instance().bus().register(this);
-
 
 	@EventHandler
 	public void modsLoaded(FMLPostInitializationEvent event) {
@@ -542,8 +541,7 @@ public class Eln {
 	public void load(FMLInitializationEvent event) {
 		Object o;
 
-		//computerCraftReady = Utils.isClassLoaded("dan200.computercraft.ComputerCraft");
-
+		// computerCraftReady = Utils.isClassLoaded("dan200.computercraft.ComputerCraft");
 
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
 
@@ -551,9 +549,9 @@ public class Eln {
 		nodeManager = new NodeManager("caca");
 		ghostManager = new GhostManager("caca2");
 		delayedTask = new DelayedTaskManager();
-		
+
 		playerManager = new PlayerManager();
-		//tileEntityDestructor = new TileEntityDestructor();
+		// tileEntityDestructor = new TileEntityDestructor();
 
 		oreRegenerate = new OreRegenerate();
 		nodeServer = new NodeServer();
@@ -625,7 +623,6 @@ public class Eln {
 
 		SixNode.sixNodeCacheList.add(new SixNodeCacheStd());
 
-
 		registerTestBlock();
 		registerEnergyConverter();
 		registerComputer();
@@ -676,7 +673,7 @@ public class Eln {
 		registerWindTurbine(49);
 		registerThermalDissipatorPassiveAndActive(64);
 		registerTransparentNodeMisc(65);
-		registerTurret(66);
+		// registerTurret(66);
 
 		registerHeatingCorp(1);
 		// registerThermalIsolator(2);
@@ -819,62 +816,60 @@ public class Eln {
 				String name = "ELN to Other 50V converter";
 				ElnDescriptor elnDesc = new ElnDescriptor(LVU, LVP);
 				Ic2Descriptor ic2Desc = new Ic2Descriptor(32, 1);
-				OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax*Other.getElnToOcConversionRatio()/Other.getElnToIc2ConversionRatio());
-				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "LVU", elnDesc,ic2Desc,ocDesc);
+				OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax * Other.getElnToOcConversionRatio() / Other.getElnToIc2ConversionRatio());
+				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "LVU", elnDesc, ic2Desc, ocDesc);
 				elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
-				GameRegistry.registerBlock(elnToOtherBlockLvu,SimpleNodeItem.class, blockName);
+				GameRegistry.registerBlock(elnToOtherBlockLvu, SimpleNodeItem.class, blockName);
 				LanguageRegistry.addName(elnToOtherBlockLvu, name);
 			}
 			{
 				String blockName = "eln." + baseName + "MVUBlock";
 				String name = "ELN to Other 200V converter";
 				ElnDescriptor elnDesc = new ElnDescriptor(MVU, MVP);
-				Ic2Descriptor ic2Desc = new Ic2Descriptor( 128, 2);
-				OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax*Other.getElnToOcConversionRatio()/Other.getElnToIc2ConversionRatio());
-				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "MVU",elnDesc,ic2Desc,ocDesc);
+				Ic2Descriptor ic2Desc = new Ic2Descriptor(128, 2);
+				OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax * Other.getElnToOcConversionRatio() / Other.getElnToIc2ConversionRatio());
+				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "MVU", elnDesc, ic2Desc, ocDesc);
 				elnToOtherBlockMvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockMvu.setCreativeTab(creativeTab).setBlockName(blockName);
-				GameRegistry.registerBlock(elnToOtherBlockMvu,SimpleNodeItem.class, blockName);
+				GameRegistry.registerBlock(elnToOtherBlockMvu, SimpleNodeItem.class, blockName);
 				LanguageRegistry.addName(elnToOtherBlockMvu, name);
 			}
 			{
 				String blockName = "eln." + baseName + "HVUBlock";
 				String name = "ELN to Other 800V converter";
-				ElnDescriptor elnDesc = new ElnDescriptor( HVU, HVP);
+				ElnDescriptor elnDesc = new ElnDescriptor(HVU, HVP);
 				Ic2Descriptor ic2Desc = new Ic2Descriptor(512, 3);
-				OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax*Other.getElnToOcConversionRatio()/Other.getElnToIc2ConversionRatio());
-				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "HVU", elnDesc,ic2Desc,ocDesc);
+				OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax * Other.getElnToOcConversionRatio() / Other.getElnToIc2ConversionRatio());
+				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "HVU", elnDesc, ic2Desc, ocDesc);
 				elnToOtherBlockHvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockHvu.setCreativeTab(creativeTab).setBlockName(blockName);
-				GameRegistry.registerBlock(elnToOtherBlockHvu,SimpleNodeItem.class, blockName);
+				GameRegistry.registerBlock(elnToOtherBlockHvu, SimpleNodeItem.class, blockName);
 				LanguageRegistry.addName(elnToOtherBlockHvu, name);
 			}
 		}
 	}
 
-	
 	ComputerProbeBlock computerProbeBlock;
-	
-	private void registerComputer(){
-		if(ComputerProbeEnable){
+
+	private void registerComputer() {
+		if (ComputerProbeEnable) {
 			String baseName = "ElnProbe";
 			String entityName = "eln.ElnProbe";
-	
+
 			TileEntity.addMapping(ComputerProbeEntity.class, entityName);
 			NodeManager.instance.registerUuid(ComputerProbeNode.getNodeUuidStatic(), ComputerProbeNode.class);
-	
-			
+
 			String blockName = "eln." + baseName;
 			String name = "Eln Computer Probe";
 			computerProbeBlock = new ComputerProbeBlock();
 			computerProbeBlock.setCreativeTab(creativeTab).setBlockName(blockName);
-			GameRegistry.registerBlock(computerProbeBlock,SimpleNodeItem.class, blockName);
+			GameRegistry.registerBlock(computerProbeBlock, SimpleNodeItem.class, blockName);
 			LanguageRegistry.addName(computerProbeBlock, name);
 		}
-		
+
 	}
-	
+
 	TestBlock testBlock;
 
 	private void registerTestBlock() {
@@ -958,51 +953,46 @@ public class Eln {
 		IWirelessSignalSpot.spots.clear();
 		playerManager.clear();
 
-
 		clientLiveDataManager.stop();
 		nodeManager.clear();
 		ghostManager.clear();
 		saveConfig = null;
 		modbusServer = null;
 		oreRegenerate.clear();
-		
-		
-		
+
 		delayedTask.clear();
 		DelayedBlockRemove.clear();
-		
-		serverEventListener.clear();
 
+		serverEventListener.clear();
 
 		nodeServer.stop();
 
 		simulator.stop();
 
-		//tileEntityDestructor.clear();
+		// tileEntityDestructor.clear();
 		LampSupplyElement.channelMap.clear();
 		WirelessSignalTxElement.channelMap.clear();
-		
+
 	}
 
-	//public TileEntityDestructor tileEntityDestructor;
+	// public TileEntityDestructor tileEntityDestructor;
 
 	public static WindProcess wind;
 
 	boolean firstStart = true;
 
-	
 	@EventHandler
 	/* Remember to use the right event! */
 	public void onServerStarted(FMLServerStartedEvent ev) {
 		int i = 0;
 		i++;
 	}
-	
+
 	@EventHandler
 	public void onServerStart(FMLServerAboutToStartEvent ev) {
 		modbusServer = new ModbusServer();
 		TeleporterElement.teleporterList.clear();
-		//tileEntityDestructor.clear();
+		// tileEntityDestructor.clear();
 		LightBlockEntity.observers.clear();
 		WirelessSignalTxElement.channelMap.clear();
 		LampSupplyElement.channelMap.clear();
@@ -1010,13 +1000,12 @@ public class Eln {
 		clientLiveDataManager.start();
 		simulator.init();
 		simulator.addSlowProcess(wind = new WindProcess());
-		
-		
+
 		if (replicatorPop)
 			simulator.addSlowProcess(new ReplicatorPopProcess());
 		simulator.addSlowProcess(itemEnergyInventoryProcess = new ItemEnergyInventoryProcess());
 	}
-	
+
 	@EventHandler
 	/* Remember to use the right event! */
 	public void onServerStarting(FMLServerStartingEvent ev) {
@@ -1027,12 +1016,9 @@ public class Eln {
 				firstStart = false;
 			}
 
-
 			MinecraftServer server = FMLCommonHandler.instance()
 					.getMinecraftServerInstance();
 			WorldServer worldServer = server.worldServers[0];
-			
-			
 
 			ghostManagerNbt = (GhostManagerNbt) worldServer.mapStorage.loadData(
 					GhostManagerNbt.class, "GhostManager");
@@ -1068,8 +1054,6 @@ public class Eln {
 
 		regenOreScannerFactors();
 	}
-
-
 
 	public CableRenderDescriptor stdCableRenderSignal;
 	public CableRenderDescriptor stdCableRender50V;
@@ -1224,9 +1208,9 @@ public class Eln {
 
 			highVoltageCableDescriptor = desc;
 
-			desc.setPhysicalConstantLikeNormalCable(HVU, HVP, 0.025*5/4 / 20,// electricalNominalVoltage,
-																		// electricalNominalPower,
-																		// electricalNominalPowerDrop,
+			desc.setPhysicalConstantLikeNormalCable(HVU, HVP, 0.025 * 5 / 4 / 20,// electricalNominalVoltage,
+					// electricalNominalPower,
+					// electricalNominalPowerDrop,
 					HVU * 1.3, HVP * 1.2,// electricalMaximalVoltage,
 											// electricalMaximalPower,
 					40,// electricalOverVoltageStartPowerLost,
@@ -1238,9 +1222,7 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 
 		}
-		
-		
-		
+
 		{
 			subId = 16;
 
@@ -1255,9 +1237,9 @@ public class Eln {
 
 			veryHighVoltageCableDescriptor = desc;
 
-			desc.setPhysicalConstantLikeNormalCable(VVU, VVP, 0.025*5/4 / 20/8,// electricalNominalVoltage,
-																		// electricalNominalPower,
-																		// electricalNominalPowerDrop,
+			desc.setPhysicalConstantLikeNormalCable(VVU, VVP, 0.025 * 5 / 4 / 20 / 8,// electricalNominalVoltage,
+					// electricalNominalPower,
+					// electricalNominalPowerDrop,
 					VVU * 1.3, VVP * 1.2,// electricalMaximalVoltage,
 											// electricalMaximalPower,
 					40,// electricalOverVoltageStartPowerLost,
@@ -1328,9 +1310,9 @@ public class Eln {
 				1.5 };
 		FunctionTable condoVoltageFunction = new FunctionTable(condoVoltageFunctionTable,
 				6.0 / 5);
-		
-		Utils.printFunction(voltageFunction,-0.2,1.2,0.1);
-		
+
+		Utils.printFunction(voltageFunction, -0.2, 1.2, 0.1);
+
 		double stdDischargeTime = 4 * 60;
 		double stdU = LVU;
 		double stdP = LVP / 4;
@@ -1588,7 +1570,7 @@ public class Eln {
 											// socketType
 					3, 0, 0, 0);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
-		}		
+		}
 		{
 			subId = 6;
 
@@ -1611,11 +1593,11 @@ public class Eln {
 											// socketType
 					4, 0, 0, 0);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
-			
-			
+
 			desc.cableLeft = false;
 			desc.cableRight = false;
-		}		{
+		}
+		{
 			subId = 8;
 
 			name = "Street Light";
@@ -1771,7 +1753,7 @@ public class Eln {
 			name = "Power Capacitor";
 
 			PowerCapacitorSixDescriptor desc = new PowerCapacitorSixDescriptor(
-					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE6(-1), 60*2000
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE6(-1), 60 * 2000
 					);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1827,14 +1809,13 @@ public class Eln {
 		IFunction function;
 		ElectricalSwitchDescriptor desc;
 
-		
 		{
 			subId = 4;
 
 			name = "Very High Voltage Switch";
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRender3200V,
-					obj.getObj("HighVoltageSwitch"), VVU, VVP,veryHighVoltageCableDescriptor.electricalRs*2,// nominalVoltage,
+					obj.getObj("HighVoltageSwitch"), VVU, VVP, veryHighVoltageCableDescriptor.electricalRs * 2,// nominalVoltage,
 					// nominalPower,
 					// nominalDropFactor,
 					VVU * 1.5, VVP * 1.2,// maximalVoltage, maximalPower
@@ -1842,14 +1823,14 @@ public class Eln {
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
-		
+
 		{
 			subId = 0;
 
 			name = "High Voltage Switch";
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRender800V,
-					obj.getObj("HighVoltageSwitch"), HVU, HVP,highVoltageCableDescriptor.electricalRs*2,// nominalVoltage,
+					obj.getObj("HighVoltageSwitch"), HVU, HVP, highVoltageCableDescriptor.electricalRs * 2,// nominalVoltage,
 					// nominalPower,
 					// nominalDropFactor,
 					HVU * 1.5, HVP * 1.2,// maximalVoltage, maximalPower
@@ -1863,7 +1844,7 @@ public class Eln {
 			name = "Low Voltage Switch";
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRender50V,
-					obj.getObj("LowVoltageSwitch"), LVU, LVP, lowVoltageCableDescriptor.electricalRs*2,// nominalVoltage,
+					obj.getObj("LowVoltageSwitch"), LVU, LVP, lowVoltageCableDescriptor.electricalRs * 2,// nominalVoltage,
 					// nominalPower,
 					// nominalDropFactor,
 					LVU * 1.5, LVP * 1.2,// maximalVoltage, maximalPower
@@ -1877,7 +1858,7 @@ public class Eln {
 			name = "Medium Voltage Switch";
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRender200V,
-					obj.getObj("LowVoltageSwitch"), MVU, MVP, meduimVoltageCableDescriptor.electricalRs*2,// nominalVoltage,
+					obj.getObj("LowVoltageSwitch"), MVU, MVP, meduimVoltageCableDescriptor.electricalRs * 2,// nominalVoltage,
 					// nominalPower,
 					// nominalDropFactor,
 					MVU * 1.5, MVP * 1.2,// maximalVoltage, maximalPower
@@ -1976,7 +1957,7 @@ public class Eln {
 
 			name = "Energy Meter";
 
-			EnergyMeterDescriptor desc = new EnergyMeterDescriptor(name, obj.getObj("EnergyMeter"),8,0);
+			EnergyMeterDescriptor desc = new EnergyMeterDescriptor(name, obj.getObj("EnergyMeter"), 8, 0);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -1985,7 +1966,7 @@ public class Eln {
 
 			name = "Advanced Energy Meter";
 
-			EnergyMeterDescriptor desc = new EnergyMeterDescriptor(name, obj.getObj("AdvancedEnergyMeter"),7,8);
+			EnergyMeterDescriptor desc = new EnergyMeterDescriptor(name, obj.getObj("AdvancedEnergyMeter"), 7, 8);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -2400,7 +2381,7 @@ public class Eln {
 			name = "50V Turbine";
 			double RsFactor = 0.1;
 			double nominalU = LVU;
-			double nominalP = 300*heatTurbinePowerFactor;
+			double nominalP = 300 * heatTurbinePowerFactor;
 			double nominalDeltaT = 250;
 			TurbineDescriptor desc = new TurbineDescriptor(
 					name,
@@ -2431,7 +2412,7 @@ public class Eln {
 			name = "200V Turbine";
 			double RsFactor = 0.10;
 			double nominalU = MVU;
-			double nominalP = 500*heatTurbinePowerFactor;
+			double nominalP = 500 * heatTurbinePowerFactor;
 			double nominalDeltaT = 350;
 			TurbineDescriptor desc = new TurbineDescriptor(
 					name,
@@ -2664,7 +2645,7 @@ public class Eln {
 					magnetiserRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-			
+
 			desc.setRuningSound(new SoundCommand("eln:Motor", 1.6).mulVolume(0.3));
 		}
 
@@ -2683,7 +2664,7 @@ public class Eln {
 					magnetiserRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-			
+
 			desc.setRuningSound(new SoundCommand("eln:Motor", 1.6).mulVolume(0.3));
 		}
 	}
@@ -2718,8 +2699,8 @@ public class Eln {
 										// solarOffsetX,int solarOffsetY,int
 										// solarOffsetZ,
 					// FunctionTable solarIfSBase,
-					LVSolarU / 4, 65.0*solarPannelPowerFactor,// double electricalUmax,double
-										// electricalPmax,
+					LVSolarU / 4, 65.0 * solarPannelPowerFactor,// double electricalUmax,double
+					// electricalPmax,
 					0.01,// ,double electricalDropFactor
 					Math.PI / 2, Math.PI / 2 // alphaMin alphaMax
 			);
@@ -2739,8 +2720,8 @@ public class Eln {
 										// solarOffsetX,int solarOffsetY,int
 										// solarOffsetZ,
 					// FunctionTable solarIfSBase,
-					LVSolarU / 4, 65.0*solarPannelPowerFactor,// double electricalUmax,double
-										// electricalPmax,
+					LVSolarU / 4, 65.0 * solarPannelPowerFactor,// double electricalUmax,double
+					// electricalPmax,
 					0.01,// ,double electricalDropFactor
 					Math.PI / 4, Math.PI / 4 * 3 // alphaMin alphaMax
 			);
@@ -3653,7 +3634,7 @@ public class Eln {
 					lowVoltageCableDescriptor,// ElectricalCableDescriptor
 												// cable,
 					PfW,// PfW
-					160*windTurbinePowerFactor, 10,// double nominalPower,double nominalWind,
+					160 * windTurbinePowerFactor, 10,// double nominalPower,double nominalWind,
 					LVU * 1.18, 22,// double maxVoltage, double maxWind,
 					3,// int offY,
 					7, 2, 2,// int rayX,int rayY,int rayZ,
@@ -3681,7 +3662,7 @@ public class Eln {
 			WaterTurbineDescriptor desc = new WaterTurbineDescriptor(
 					name, obj.getObj("SmallWaterWheel"), // name,Obj3D obj,
 					lowVoltageCableDescriptor,// ElectricalCableDescriptor
-					30*waterTurbinePowerFactor,
+					30 * waterTurbinePowerFactor,
 					LVU * 1.18,
 					waterCoord,
 					"eln:water_turbine", 1f
@@ -3790,11 +3771,11 @@ public class Eln {
 			g.addRectangle(-2, 0, 0, 1, 1, 1);
 			g.addRectangle(-4, -1, 2, 2, 0, 0);
 			g.addElement(0, 1, 0);
-			//g.addElement(0, 2, 0);
-			g.addElement(-1, 0, 0,ghostBlock,ghostBlock.tFloor);
-		/*	g.addElement(1, 0, 0,ghostBlock,ghostBlock.tLadder);
-			g.addElement(1, 1, 0,ghostBlock,ghostBlock.tLadder);
-			g.addElement(1, 2, 0,ghostBlock,ghostBlock.tLadder);*/
+			// g.addElement(0, 2, 0);
+			g.addElement(-1, 0, 0, ghostBlock, ghostBlock.tFloor);
+			/*
+			 * g.addElement(1, 0, 0,ghostBlock,ghostBlock.tLadder); g.addElement(1, 1, 0,ghostBlock,ghostBlock.tLadder); g.addElement(1, 2, 0,ghostBlock,ghostBlock.tLadder);
+			 */
 			g.addRectangle(-3, -3, 0, 1, -1, -1);
 			g.addRectangle(-3, -3, 0, 1, 1, 1);
 			// g.addElement(-4, 0, -1);
@@ -3805,18 +3786,15 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
-		/*if (Other.ccLoaded && ComputerProbeEnable) {
-			subId = 4;
-			name = "ComputerCraft Probe";
-
-			ComputerCraftIoDescriptor desc = new ComputerCraftIoDescriptor(
-					name,
-					obj.getObj("passivethermaldissipatora")
-
-					);
-
-			transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
-		}*/
+		/*
+		 * if (Other.ccLoaded && ComputerProbeEnable) { subId = 4; name = "ComputerCraft Probe";
+		 * 
+		 * ComputerCraftIoDescriptor desc = new ComputerCraftIoDescriptor( name, obj.getObj("passivethermaldissipatora")
+		 * 
+		 * );
+		 * 
+		 * transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc); }
+		 */
 
 	}
 
@@ -3830,7 +3808,7 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
-	
+
 	/*
 	 * void registerMppt(int id) { int subId, completId; String name; MpptDescriptor desc;
 	 * 
@@ -4564,7 +4542,7 @@ public class Eln {
 		{
 			subId = 40;
 			name = "Player Filter";
-			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityPlayer.class, 0f, 1f, 0f);
+			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityPlayerMP.class, 0f, 1f, 0f);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
@@ -4573,12 +4551,6 @@ public class Eln {
 			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityMob.class, 1f, 0f, 0f);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
-        {
-            subId = 42;
-            name = "Animal Filter";
-            EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityAnimal.class, .3f, .3f, 1f);
-            sharedItem.addElement(subId + (id << 6), desc);
-        }
 
 		{
 			subId = 48;
@@ -4651,7 +4623,6 @@ public class Eln {
 				Character.valueOf('C'), "ingotCopper",
 				Character.valueOf('R'), "itemRubber");
 
-		
 		addRecipe(veryHighVoltageCableDescriptor.newItemStack(6),
 				"RRR",
 				"CCC",
@@ -4715,13 +4686,12 @@ public class Eln {
 				"GGG",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
-		
+
 		addRecipe(findItemStack("Fluorescent Lamp Socket", 3),
 				" I ",
 				"I I",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
-		
 
 		addRecipe(findItemStack("Suspended Lamp Socket", 2),
 				"I",
@@ -4772,14 +4742,13 @@ public class Eln {
 				"D",
 				Character.valueOf('D'), findItemStack("10A Diode"));
 
-		
 		addRecipe(findItemStack("Power Capacitor"),
 				"cPc",
 				"III",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('c'), findItemStack("Iron Cable"),
 				Character.valueOf('P'), "plateIron");
-		
+
 		addRecipe(findItemStack("Power Inductor"),
 				" P ",
 				"cIc",
@@ -4787,10 +4756,10 @@ public class Eln {
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('P'), "plateIron");
-		
-		//name = "Power Capacitor"
-		//name = "Power Inductor"
-		
+
+		// name = "Power Capacitor"
+		// name = "Power Inductor"
+
 	}
 
 	void recipeSwitch() {
@@ -4872,7 +4841,7 @@ public class Eln {
 				Character.valueOf('A'), "itemRubber",
 				Character.valueOf('I'), findItemStack("Copper Cable"),
 				Character.valueOf('C'), findItemStack("High Voltage Cable"));
-		
+
 		addRecipe(findItemStack("Very High Voltage Relay"),
 				"GGG",
 				"OIO",
@@ -4916,13 +4885,13 @@ public class Eln {
 	}
 
 	void recipeTransformer() {
-		//for (int idx = 0; idx < 4; idx++) {
-			addRecipe(findItemStack("Transformer"),
-					"C C",
-					"III",
-					Character.valueOf('C'), findItemStack("Copper Cable"),
-					Character.valueOf('I'), new ItemStack(Items.iron_ingot));
-		//}
+		// for (int idx = 0; idx < 4; idx++) {
+		addRecipe(findItemStack("Transformer"),
+				"C C",
+				"III",
+				Character.valueOf('C'), findItemStack("Copper Cable"),
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
+		// }
 	}
 
 	void recipeHeatFurnace() {
@@ -5045,8 +5014,7 @@ public class Eln {
 				"I I",
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
-		
-		
+
 		addRecipe(findItemStack("Energy Meter"),
 				"IcI",
 				"IRI",
@@ -5054,7 +5022,7 @@ public class Eln {
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('R'), findItemStack("Cheap Chip"),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
-		
+
 		addRecipe(findItemStack("Advanced Energy Meter"),
 				" c ",
 				"PRP",
@@ -5062,7 +5030,7 @@ public class Eln {
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('R'), findItemStack("Advanced Chip"),
 				Character.valueOf('P'), findItemStack("Iron Plate"));
-				
+
 	}
 
 	void recipeAutoMiner() {
@@ -5123,15 +5091,9 @@ public class Eln {
 				Character.valueOf('I'), "ingotCopper",
 				Character.valueOf('C'), findItemStack("Copper Thermal Cable"));
 
-	/*	addRecipe(
-				findItemStack("Small Active Thermal Dissipator"),
-				"RMR",
-				"I I",
-				"III",
-				Character.valueOf('I'), "ingotCopper",
-				Character.valueOf('M'), findItemStack("Electrical Motor"),
-				Character.valueOf('R'), "itemRubber",
-				Character.valueOf('C'), findItemStack("Copper Thermal Cable"));*/
+		/*
+		 * addRecipe( findItemStack("Small Active Thermal Dissipator"), "RMR", "I I", "III", Character.valueOf('I'), "ingotCopper", Character.valueOf('M'), findItemStack("Electrical Motor"), Character.valueOf('R'), "itemRubber", Character.valueOf('C'), findItemStack("Copper Thermal Cable"));
+		 */
 
 		addRecipe(
 				findItemStack("Small Active Thermal Dissipator"),
@@ -5141,15 +5103,9 @@ public class Eln {
 				Character.valueOf('M'), findItemStack("Electrical Motor"),
 				Character.valueOf('R'), "itemRubber");
 
-	/*	addRecipe(
-				findItemStack("200V Active Thermal Dissipator"),
-				"RMR",
-				"I I",
-				"III",
-				Character.valueOf('I'), "ingotCopper",
-				Character.valueOf('M'), findItemStack("Advanced Electrical Motor"),
-				Character.valueOf('R'), "itemRubber",
-				Character.valueOf('C'), findItemStack("Copper Thermal Cable"));*/
+		/*
+		 * addRecipe( findItemStack("200V Active Thermal Dissipator"), "RMR", "I I", "III", Character.valueOf('I'), "ingotCopper", Character.valueOf('M'), findItemStack("Advanced Electrical Motor"), Character.valueOf('R'), "itemRubber", Character.valueOf('C'), findItemStack("Copper Thermal Cable"));
+		 */
 
 		addRecipe(
 				findItemStack("200V Active Thermal Dissipator"),
@@ -5550,25 +5506,17 @@ public class Eln {
 	}
 
 	void recipeTreeResinAndRubber() {
-		/*for (int idx = 0; idx < 4; idx++) {
-			addRecipe(findItemStack("Tree Resin Collector"),
-					"W W",
-					" WW",
-					Character.valueOf('W'), new ItemStack(Blocks.planks, 1, idx));
-		}
-		for (int idx = 0; idx < 4; idx++) {
-			addRecipe(findItemStack("Tree Resin Collector"),
-					"W W",
-					"WW ", Character.valueOf('W'), new ItemStack(Blocks.planks, 1, idx));
-		}*/
+		/*
+		 * for (int idx = 0; idx < 4; idx++) { addRecipe(findItemStack("Tree Resin Collector"), "W W", " WW", Character.valueOf('W'), new ItemStack(Blocks.planks, 1, idx)); } for (int idx = 0; idx < 4; idx++) { addRecipe(findItemStack("Tree Resin Collector"), "W W", "WW ", Character.valueOf('W'), new ItemStack(Blocks.planks, 1, idx)); }
+		 */
 		addRecipe(findItemStack("Tree Resin Collector"),
 				"W W",
 				"WW ", Character.valueOf('W'), "plankWood");
-		
+
 		addRecipe(findItemStack("Tree Resin Collector"),
 				"W W",
 				" WW", Character.valueOf('W'), "plankWood");
-		
+
 	}
 
 	void recipeRawCable() {
@@ -5626,7 +5574,7 @@ public class Eln {
 				Character.valueOf('M'), findItemStack("Electrical Motor"),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
 
-		if(xRayScannerCanBeCrafted){
+		if (xRayScannerCanBeCrafted) {
 			addRecipe(findItemStack("X-Ray Scanner"),
 					"PGP",
 					"PCP",
@@ -5850,7 +5798,7 @@ public class Eln {
 	}
 
 	void recipemagnetiser() {
-		magnetiserRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot,2),
+		magnetiserRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot, 2),
 				new ItemStack[] { findItemStack("Basic Magnet") }, 5000.0));
 		magnetiserRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", 2),
 				new ItemStack[] { findItemStack("Advanced Magnet") }, 15000.0));
@@ -6338,9 +6286,9 @@ public class Eln {
 
 		}
 	}
-	
-	void recipeComputerProbe(){
-		if(ComputerProbeEnable){
+
+	void recipeComputerProbe() {
+		if (ComputerProbeEnable) {
 			addRecipe(new ItemStack(computerProbeBlock),
 					"cIw",
 					"ICI",
@@ -6349,7 +6297,7 @@ public class Eln {
 					Character.valueOf('c'), findItemStack("Signal Cable"),
 					Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 					Character.valueOf('w'), findItemStack("Wireless Signal Receiver"),
-					Character.valueOf('W'), findItemStack("Wireless Signal Transmitter"));			
+					Character.valueOf('W'), findItemStack("Wireless Signal Transmitter"));
 		}
 	}
 
@@ -6442,7 +6390,7 @@ public class Eln {
 
 	}
 
-	private void regenOreScannerFactors() {
+	public void regenOreScannerFactors() {
 		PortableOreScannerItem.RenderStorage.blockKeyFactor = null;
 
 		oreScannerConfig.clear();
@@ -6493,9 +6441,11 @@ public class Eln {
 	public static void applySmallRs(NbtElectricalLoad aLoad) {
 		instance.lowVoltageCableDescriptor.applyTo(aLoad);
 	}
+
 	public static void applySmallRs(Resistor r) {
-		instance.lowVoltageCableDescriptor.applyTo(r);	
+		instance.lowVoltageCableDescriptor.applyTo(r);
 	}
+
 	public ItemStack findItemStack(String name, int stackSize) {
 		ItemStack stack = GameRegistry.findItemStack("Eln", name, stackSize);
 		if (stack == null) {
@@ -6508,8 +6458,5 @@ public class Eln {
 	public ItemStack findItemStack(String name) {
 		return findItemStack(name, 1);
 	}
-
-
-
 
 }

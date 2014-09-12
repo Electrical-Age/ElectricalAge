@@ -1,5 +1,6 @@
 package mods.eln.client;
 
+import mods.eln.Eln;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -18,6 +19,7 @@ public class ConnectionListener {
 	@SubscribeEvent
 	public void onConnectedToServerEvent(ClientConnectedToServerEvent event) {
 		Utils.println("Connected to server " + FMLCommonHandler.instance().getEffectiveSide());
+		Eln.instance.regenOreScannerFactors();
 	}
 
 	@SubscribeEvent

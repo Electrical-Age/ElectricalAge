@@ -45,7 +45,7 @@ public class WaterTurbineSlowProcess implements IProcess,INBTTReady {
 	double getWaterFactor(){
 		//Block b = turbine.waterCoord.getBlock();
 		double time = 0;
-		if(turbine.waterCoord.getBlockExist() == false){
+		if(turbine.waterCoord.getBlockExist()){
 			Block block = turbine.waterCoord.getBlock();
 			int blockMeta = turbine.waterCoord.getMeta();
 			//Utils.println("WATER : " + b + "    " + turbine.waterCoord.getMeta());
