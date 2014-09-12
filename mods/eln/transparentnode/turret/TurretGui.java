@@ -2,7 +2,6 @@ package mods.eln.transparentnode.turret;
 
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelperContainer;
-import mods.eln.sixnode.electricalentitysensor.TurretContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 

@@ -3,21 +3,20 @@ package mods.eln.transparentnode.turret;
 import java.util.ArrayList;
 import java.util.List;
 
+import mods.eln.fsm.CompositeState;
+import mods.eln.fsm.State;
+import mods.eln.fsm.StateMachine;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.EntitySensorFilterDescriptor;
-import mods.eln.sixnode.electricalentitysensor.TurretContainer;
+import mods.eln.misc.Coordonate;
+import mods.eln.misc.Utils;
+import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sound.SoundCommand;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
-import mods.eln.fsm.CompositeState;
-import mods.eln.fsm.State;
-import mods.eln.fsm.StateMachine;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Utils;
-import mods.eln.sim.process.destruct.WorldExplosion;
-import mods.eln.sound.SoundCommand;
 
 public class TurretSlowProcess extends StateMachine {
 	

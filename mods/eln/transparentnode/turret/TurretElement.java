@@ -3,13 +3,6 @@ package mods.eln.transparentnode.turret;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import mods.eln.node.transparent.TransparentNodeElementInventory;
-import mods.eln.sixnode.electricalentitysensor.ElectricalEntitySensorContainer;
-import mods.eln.sixnode.electricalentitysensor.TurretContainer;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -18,10 +11,15 @@ import mods.eln.node.NodeBase;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtResistor;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class TurretElement extends TransparentNodeElement {
 	

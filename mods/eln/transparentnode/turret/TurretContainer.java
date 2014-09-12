@@ -1,11 +1,9 @@
-package mods.eln.sixnode.electricalentitysensor;
+package mods.eln.transparentnode.turret;
 
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.misc.BasicContainer;
-import mods.eln.node.NodeBase;
-import mods.eln.transparentnode.turret.TurretDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
