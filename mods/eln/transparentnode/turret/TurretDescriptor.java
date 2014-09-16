@@ -12,22 +12,21 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 
 public class TurretDescriptor extends TransparentNodeDescriptor {
 	class Properties {
-		public float actionAngle;
-		public float detectionDistance;
-		public float aimDistance;
-		public float impulseEnergy;
-		public float gunMinElevation;
-		public float gunMaxElevation;
-		public float turretSeekAnimationSpeed;
-		public float turretAimAnimationSpeed;
-		public float gunArmAnimationSpeed;
-		public float gunDisarmAnimationSpeed;
-		public float gunAimAnimationSpeed;
-		public double minimalVoltage;
-        public double maximalVoltage;
-		public double basePower;
-		public double aimingPower;
-        public double chargeCurrent;
+		public final float actionAngle;
+		public final float detectionDistance;
+		public final float aimDistance;
+		public final float impulseEnergy;
+		public final float gunMinElevation;
+		public final float gunMaxElevation;
+		public final float turretSeekAnimationSpeed;
+		public final float turretAimAnimationSpeed;
+		public final float gunArmAnimationSpeed;
+		public final float gunDisarmAnimationSpeed;
+		public final float gunAimAnimationSpeed;
+		public final double minimalVoltage;
+        public final double maximalVoltage;
+		public final double basePower;
+		public final double chargePower;
 		
 		public Properties() {
 			actionAngle = 70;
@@ -41,23 +40,21 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 			gunArmAnimationSpeed = 3;
 			gunDisarmAnimationSpeed = 0.5f;
 			gunAimAnimationSpeed = 100;
-			minimalVoltage = 180;
-            maximalVoltage = 3300;
+			minimalVoltage = 720;
+            maximalVoltage = 1020;
 			basePower = 50;
-			aimingPower = 250;
-            chargeCurrent = 2;
+		    chargePower = 2000;
 		}
 	}
 		
-	private Obj3D obj;
-	private Obj3DPart turret, holder, joint, leftGun, rightGun, sensor, fire;
+	private final Obj3DPart turret, holder, joint, leftGun, rightGun, sensor, fire;
 	
-	private Properties properties;
+	private final Properties properties;
 	
 	public TurretDescriptor(String name, String modelName, String description) {
 		super(name, TurretElement.class, TurretRender.class);
-		
-		obj = Eln.obj.getObj(modelName);
+
+		final Obj3D obj = Eln.obj.getObj(modelName);
 		turret = obj.getPart("Turret");
 		holder = obj.getPart("Holder");
 		joint = obj.getPart("Joint");
@@ -93,8 +90,8 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		float turretAngle = render != null ? render.getTurretAngle() : 0;
 		float gunPosition = render != null ? render.getGunPosition() : 0;
 		float gunAngle = render != null ? -render.getGunElevation() : 0;
-		boolean shooting = render != null ? render.isShooting() : false;
-		boolean enabled = render != null ? render.isEnabled() : true;
+		boolean shooting = render != null && render.isShooting();
+		boolean enabled = render == null || render.isEnabled();
 
         if (holder != null) holder.draw();
 		if (joint != null) joint.draw();
@@ -104,7 +101,10 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 			if (sensor != null) {
 				if (enabled) {
 					if (render != null && render.filter != null )
-                        render.filter.glColor(0.5f + 0.5f * gunPosition);
+                        if (render.filterIsSpare)
+                            render.filter.glInverseColor(0.5f + 0.5f * gunPosition);
+                        else
+                            render.filter.glColor(0.5f + 0.5f * gunPosition);
                     else
                         GL11.glColor3f(0.5f, 0.5f, 0.5f);
 					UtilsClient.drawLight(sensor);

@@ -101,6 +101,7 @@ public class TurretMechanicsSimulation implements IProcess {
 	public boolean setEnabled(boolean enabled) {
 		boolean changed = enabled != this.enabled;
 		this.enabled = enabled;
+        if (!enabled) shootDuration = 0;
 		return changed;
 	}
 	

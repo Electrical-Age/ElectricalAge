@@ -17,13 +17,14 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
+import sun.awt.image.ImagingLib;
 
 public class TurretSlowProcess extends StateMachine {
 	
-	double actualCurrent;
+	double actualPower;
 	
 	public TurretSlowProcess(TurretElement element) {
-        actualCurrent = 0;
+        actualPower = 0;
 		setInitialState(new IdleState());
 		setDebug(true);
 		reset();
@@ -58,7 +59,7 @@ public class TurretSlowProcess extends StateMachine {
 		@Override
 		public void enter() {
 			element.setEnabled(true);
-            actualCurrent = element.getDescriptor().getProperties().basePower / element.load.getU();
+            actualPower = element.getDescriptor().getProperties().basePower;
 			super.enter();
 		}
 
@@ -76,7 +77,7 @@ public class TurretSlowProcess extends StateMachine {
 		@Override
 		public void leave() {
 			element.setEnabled(false);
-            actualCurrent = 0;
+            actualPower = 0;
 			super.leave();
 		}
 	}
@@ -100,9 +101,9 @@ public class TurretSlowProcess extends StateMachine {
 	}
 	
 	private class SeekingState implements State {
-		@Override
+    	@Override
 		public void enter() {
-            actualCurrent = element.getDescriptor().getProperties().basePower / element.load.getU();
+            actualPower = element.getDescriptor().getProperties().basePower;
 			element.setGunPosition(0);
 			element.setGunElevation(0);
 			element.setSeekMode(true);
@@ -125,12 +126,10 @@ public class TurretSlowProcess extends StateMachine {
                     filterClass = filter.entityClass;
                 }
             }
-            if (filterClass == null)
-                return null;
 
 			Coordonate coord = element.coordonate();
 			AxisAlignedBB bb = coord.getAxisAlignedBB((int)element.getDescriptor().getProperties().detectionDistance);
-			List<EntityLivingBase> list = coord.world().getEntitiesWithinAABB(filterClass, bb);
+			List<EntityLivingBase> list = coord.world().getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase entity: list) {
 				double dx = (entity.posX - coord.x - 0.5);
 				double dz = (entity.posZ - coord.z - 0.5);
@@ -155,8 +154,18 @@ public class TurretSlowProcess extends StateMachine {
 						break;
 					
 				}
-				
+
+
+
 				if (Math.abs(entityAngle - element.getTurretAngle()) < 15 && Math.abs(entityAngle) < element.getDescriptor().getProperties().actionAngle) {
+
+                    if (element.filterIsSpare) {
+                        if (filterClass != null && filterClass.isAssignableFrom(entity.getClass())) return null;
+                    }
+                    else {
+                        if (filterClass == null || !filterClass.isAssignableFrom(entity.getClass())) return null;
+                    }
+
 					ArrayList<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, 
 																entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
 					boolean visible = true;
@@ -190,8 +199,8 @@ public class TurretSlowProcess extends StateMachine {
 
 		@Override
 		public void enter() {
-            actualCurrent = element.getDescriptor().getProperties().basePower / element.load.getU() +
-                            element.getDescriptor().getProperties().chargeCurrent;
+            actualPower = element.getDescriptor().getProperties().basePower +
+                            element.chargePower;
 			element.setGunPosition(1);
 		}
 
@@ -290,10 +299,10 @@ public class TurretSlowProcess extends StateMachine {
 		if(element.coordonate().getBlockExist())
 			super.process(time);
 
-        if (actualCurrent == 0 )
+        if (actualPower == 0 )
             element.powerResistor.highImpedance();
         else
-            element.powerResistor.setR(element.load.getU() / actualCurrent);
+            element.powerResistor.setR(element.load.getU() * element.load.getU() / actualPower);
 	}	
 	
 	private State state = null;

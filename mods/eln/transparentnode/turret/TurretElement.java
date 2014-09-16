@@ -1,5 +1,6 @@
 package mods.eln.transparentnode.turret;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
@@ -22,11 +23,16 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class TurretElement extends TransparentNodeElement {
-	
+
+    public static final byte ToggleFilterMeaning = 1;
+    public static final byte UnserializeChargePower = 2;
+
 	TurretDescriptor descriptor;
 	
 	private TurretMechanicsSimulation simulation;
-	
+
+    public double chargePower;
+    public boolean filterIsSpare = false;
 	public double energyBuffer = 0;
 
 	NbtElectricalLoad load = new NbtElectricalLoad("load");
@@ -37,6 +43,7 @@ public class TurretElement extends TransparentNodeElement {
 	public TurretElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		this.descriptor = (TurretDescriptor)descriptor;
+        chargePower = ((TurretDescriptor) descriptor).getProperties().chargePower;
 		slowProcessList.add(new TurretSlowProcess(this));
 		simulation = new TurretMechanicsSimulation((TurretDescriptor)descriptor);
 		slowProcessList.add(simulation);
@@ -141,6 +148,8 @@ public class TurretElement extends TransparentNodeElement {
     		stream.writeBoolean(simulation.isShooting());
     		stream.writeBoolean(simulation.isEnabled());
             Utils.serialiseItemStack(stream, inventory.getStackInSlot(TurretContainer.filterId));
+            stream.writeBoolean(filterIsSpare);
+            stream.writeFloat((float) chargePower);
  		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -149,13 +158,17 @@ public class TurretElement extends TransparentNodeElement {
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
+        nbt.setDouble("chargePower", chargePower);
+        nbt.setBoolean("filterIsSpare", filterIsSpare);
 		nbt.setDouble("energyBuffer", energyBuffer);
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
-		energyBuffer = nbt.getDouble("energyBuffer");
+        chargePower = nbt.getDouble("chargePower");
+        filterIsSpare = nbt.getBoolean("filterIsSpare");
+        energyBuffer = nbt.getDouble("energyBuffer");
 	}
 
     @Override
@@ -171,5 +184,33 @@ public class TurretElement extends TransparentNodeElement {
     @Override
     public Container newContainer(Direction side, EntityPlayer player) {
         return new TurretContainer(player, inventory);
+    }
+
+    @Override
+    public void inventoryChange(IInventory inventory) {
+        super.inventoryChange(inventory);
+        needPublish();
+    }
+
+    @Override
+    public byte networkUnserialize(DataInputStream stream) {
+        byte packetType = super.networkUnserialize(stream);
+        try {
+            switch (packetType) {
+                case ToggleFilterMeaning:
+                    filterIsSpare = !filterIsSpare;
+                    needPublish();
+                    break;
+
+                case UnserializeChargePower:
+                    chargePower = stream.readFloat();
+                    needPublish();
+                    break;
+            }
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+        return unserializeNulldId;
     }
 }

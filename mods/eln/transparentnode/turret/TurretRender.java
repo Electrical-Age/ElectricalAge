@@ -1,6 +1,8 @@
 package mods.eln.transparentnode.turret;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 
 import mods.eln.item.EntitySensorFilterDescriptor;
@@ -18,10 +20,12 @@ import mods.eln.misc.Direction;
 
 public class TurretRender extends TransparentNodeElementRender {
 
-	public TurretDescriptor descriptor;
+    public TurretDescriptor descriptor;
 	public TurretMechanicsSimulation simulation;
     private TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 1, this);
     EntitySensorFilterDescriptor filter = null;
+    boolean filterIsSpare;
+    float chargePower;
 
 	public TurretRender(TransparentNodeEntity tileEntity,
 			TransparentNodeDescriptor descriptor) {
@@ -49,7 +53,28 @@ public class TurretRender extends TransparentNodeElementRender {
 	public boolean isEnabled() {
 		return simulation.isEnabled();
 	}
-	
+
+    public void clientToggleFilterMeaning() {
+        clientSendId(TurretElement.ToggleFilterMeaning);
+    }
+
+    public void clientSetChargePower(float power) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(bos);
+
+            preparePacketForServer(stream);
+
+            stream.writeByte(TurretElement.UnserializeChargePower);
+            stream.writeFloat(power);
+
+            sendPacketToServer(bos);
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+    }
+
 	@Override
 	public void draw() {
 		GL11.glPushMatrix();
@@ -76,6 +101,8 @@ public class TurretRender extends TransparentNodeElementRender {
 			simulation.setEnabled(stream.readBoolean());
             ItemStack filterStack = Utils.unserialiseItemStack(stream);
             filter = (EntitySensorFilterDescriptor) EntitySensorFilterDescriptor.getDescriptor(filterStack);
+            filterIsSpare = stream.readBoolean();
+            chargePower = stream.readFloat();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
