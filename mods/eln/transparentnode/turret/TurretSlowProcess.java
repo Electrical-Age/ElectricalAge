@@ -25,7 +25,6 @@ public class TurretSlowProcess extends StateMachine {
 	public TurretSlowProcess(TurretElement element) {
         actualPower = 0;
 		setInitialState(new IdleState());
-		setDebug(true);
 		reset();
 		this.element = element;
 	}
