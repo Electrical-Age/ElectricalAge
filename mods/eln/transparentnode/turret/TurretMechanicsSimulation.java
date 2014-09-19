@@ -5,13 +5,13 @@ import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 
 public class TurretMechanicsSimulation implements IProcess {
-	private SlewLimiter turretAngle;
-	private SlewLimiter gunPosition;
-	private SlewLimiter gunElevation;
+	private final SlewLimiter turretAngle;
+	private final SlewLimiter gunPosition;
+	private final SlewLimiter gunElevation;
 	private float shootDuration;
 	private boolean enabled;
 	
-	private TurretDescriptor descriptor;
+	private final TurretDescriptor descriptor;
 	
 	public TurretMechanicsSimulation(TurretDescriptor descriptor) {
 		this.descriptor = descriptor;

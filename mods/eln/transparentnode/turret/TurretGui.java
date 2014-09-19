@@ -8,7 +8,7 @@ import net.minecraft.client.gui.GuiButton;
 public class TurretGui extends GuiContainerEln {
     private GuiButton killOrSpareButton;
     private GuiVerticalTrackBar chargePower;
-    private TurretRender render;
+    private final TurretRender render;
 
     public TurretGui(EntityPlayer player, IInventory inventory, TurretRender render) {
         super(new TurretContainer(player, inventory));

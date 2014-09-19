@@ -17,7 +17,10 @@
    "neon_lamp": {"category": "block","sounds": [{"name": "neon_lamp","stream": false}]},
    "Transformer": {"category": "block", "sounds": [{"name": "Transformer", "stream": false}]},
    "Motor": {"category": "block", "sounds": [{"name": "Motor", "stream": false}]},
-   "LaserGun": {"category": "block", "sounds": [{"name": "LaserGun", "stream": false}]}
+   "LaserGun": {"category": "block", "sounds": [{"name": "LaserGun", "stream": false}]},
+   "TurretActivated": {"category": "block", "sounds": [{"name": "TurretActivated", "stream": false}]},
+   "TurretDeactivated": {"category": "block", "sounds": [{"name": "TurretDeactivated", "stream": false}]},
+   "TurretFire": {"category": "block", "sounds": [{"name": "TurretFire", "stream": false}]}
 }
 
 

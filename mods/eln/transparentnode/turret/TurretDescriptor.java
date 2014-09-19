@@ -1,5 +1,6 @@
 package mods.eln.transparentnode.turret;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
 import org.lwjgl.opengl.GL11;
@@ -9,6 +10,8 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
+
+import java.util.List;
 
 public class TurretDescriptor extends TransparentNodeDescriptor {
 	class Properties {
@@ -27,6 +30,7 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
         public final double maximalVoltage;
 		public final double basePower;
 		public final double chargePower;
+        public final double entityDetectionInterval;
 		
 		public Properties() {
 			actionAngle = 70;
@@ -44,6 +48,7 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
             maximalVoltage = 1020;
 			basePower = 50;
 		    chargePower = 2000;
+            entityDetectionInterval = 0.25;
 		}
 	}
 		
@@ -69,8 +74,16 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 	public Properties getProperties() {
 		return properties;
 	}
-	
-	@Override
+
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add("Nominal voltage : 800V");
+        list.add("Standby power : " + (int)getProperties().basePower + "W");
+        list.add("Charge power : 100W...10000W");
+    }
+
+    @Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		return true;
 	}

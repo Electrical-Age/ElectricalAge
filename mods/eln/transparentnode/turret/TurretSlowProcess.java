@@ -17,11 +17,10 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
-import sun.awt.image.ImagingLib;
 
 public class TurretSlowProcess extends StateMachine {
 	
-	double actualPower;
+	private double actualPower;
 	
 	public TurretSlowProcess(TurretElement element) {
         actualPower = 0;
@@ -31,7 +30,7 @@ public class TurretSlowProcess extends StateMachine {
 		this.element = element;
 	}
 
-	private TurretElement element;
+	private final TurretElement element;
 
 	private class IdleState implements State {
 		@Override
@@ -60,6 +59,7 @@ public class TurretSlowProcess extends StateMachine {
 		public void enter() {
 			element.setEnabled(true);
             actualPower = element.getDescriptor().getProperties().basePower;
+            element.play(new SoundCommand("eln:TurretActivated").mulVolume(0.5));
 			super.enter();
 		}
 
@@ -78,6 +78,7 @@ public class TurretSlowProcess extends StateMachine {
 		public void leave() {
 			element.setEnabled(false);
             actualPower = 0;
+            element.play(new SoundCommand("eln:TurretDeactivated").mulVolume(0.5));
 			super.leave();
 		}
 	}
@@ -101,6 +102,8 @@ public class TurretSlowProcess extends StateMachine {
 	}
 	
 	private class SeekingState implements State {
+        private double lastScanWasBefore = 0.;
+
     	@Override
 		public void enter() {
             actualPower = element.getDescriptor().getProperties().basePower;
@@ -117,6 +120,10 @@ public class TurretSlowProcess extends StateMachine {
 			else if (element.getTurretAngle() <= -element.getDescriptor().getProperties().actionAngle)
 				element.setTurretAngle(element.getDescriptor().getProperties().actionAngle);
 
+            lastScanWasBefore += time;
+            if (lastScanWasBefore < element.getDescriptor().getProperties().entityDetectionInterval) return null;
+            lastScanWasBefore = 0;
+
             Class filterClass = null;
             ItemStack filterStack = element.inventory.getStackInSlot(TurretContainer.filterId);
             if(filterStack != null) {
@@ -129,7 +136,8 @@ public class TurretSlowProcess extends StateMachine {
 
 			Coordonate coord = element.coordonate();
 			AxisAlignedBB bb = coord.getAxisAlignedBB((int)element.getDescriptor().getProperties().detectionDistance);
-			List<EntityLivingBase> list = coord.world().getEntitiesWithinAABB(EntityLivingBase.class, bb);
+			@SuppressWarnings("unchecked")
+            List<EntityLivingBase> list = coord.world().getEntitiesWithinAABB(EntityLivingBase.class, bb);
 			for (EntityLivingBase entity: list) {
 				double dx = (entity.posX - coord.x - 0.5);
 				double dz = (entity.posZ - coord.z - 0.5);
@@ -155,9 +163,8 @@ public class TurretSlowProcess extends StateMachine {
 					
 				}
 
-
-
-				if (Math.abs(entityAngle - element.getTurretAngle()) < 15 && Math.abs(entityAngle) < element.getDescriptor().getProperties().actionAngle) {
+				if (Math.abs(entityAngle - element.getTurretAngle()) < 15 &&
+                    Math.abs(entityAngle) < element.getDescriptor().getProperties().actionAngle) {
 
                     if (element.filterIsSpare) {
                         if (filterClass != null && filterClass.isAssignableFrom(entity.getClass())) return null;
@@ -176,6 +183,7 @@ public class TurretSlowProcess extends StateMachine {
 						}
 					
 					if (visible ) {
+                        element.play(new SoundCommand("eln:TurretFire").mulVolume(0.4));
 						return new AimingState(entity);
 					}
 				}
@@ -195,7 +203,7 @@ public class TurretSlowProcess extends StateMachine {
 			this.target = target;
 		}
 
-		private EntityLivingBase target;
+		private final EntityLivingBase target;
 
 		@Override
 		public void enter() {
@@ -207,6 +215,22 @@ public class TurretSlowProcess extends StateMachine {
 		@Override
 		public State state(double time) {
 			if (target.isDead) return new SeekingState();
+
+            Class filterClass = null;
+            ItemStack filterStack = element.inventory.getStackInSlot(TurretContainer.filterId);
+            if(filterStack != null) {
+                GenericItemUsingDamageDescriptor gen = EntitySensorFilterDescriptor.getDescriptor(filterStack);
+                if(gen != null && gen instanceof EntitySensorFilterDescriptor) {
+                    EntitySensorFilterDescriptor filter = (EntitySensorFilterDescriptor) gen;
+                    filterClass = filter.entityClass;
+                }
+            }
+            if (element.filterIsSpare) {
+                if (filterClass != null && filterClass.isAssignableFrom(target.getClass())) return new SeekingState();
+            }
+            else {
+                if (filterClass == null || !filterClass.isAssignableFrom(target.getClass())) return new SeekingState();
+            }
 
 			Coordonate coord = element.coordonate();
 			
@@ -269,7 +293,7 @@ public class TurretSlowProcess extends StateMachine {
 			this.target = target;
 		}
 		
-		private EntityLivingBase target;
+		private final EntityLivingBase target;
 		
 		@Override
 		public void enter() {
@@ -304,6 +328,4 @@ public class TurretSlowProcess extends StateMachine {
         else
             element.powerResistor.setR(element.load.getU() * element.load.getU() / actualPower);
 	}	
-	
-	private State state = null;
 }

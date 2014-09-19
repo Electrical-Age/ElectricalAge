@@ -17,6 +17,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtResistor;
+import mods.eln.sound.SoundCommand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -27,18 +28,18 @@ public class TurretElement extends TransparentNodeElement {
     public static final byte ToggleFilterMeaning = 1;
     public static final byte UnserializeChargePower = 2;
 
-	TurretDescriptor descriptor;
+	private final TurretDescriptor descriptor;
 	
-	private TurretMechanicsSimulation simulation;
+	private final TurretMechanicsSimulation simulation;
 
     public double chargePower;
     public boolean filterIsSpare = false;
 	public double energyBuffer = 0;
 
-	NbtElectricalLoad load = new NbtElectricalLoad("load");
-	NbtResistor powerResistor = new NbtResistor("powerResistor", load, null);
+	final NbtElectricalLoad load = new NbtElectricalLoad("load");
+	final NbtResistor powerResistor = new NbtResistor("powerResistor", load, null);
 
-    TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 64, this);
+    final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 64, this);
 
 	public TurretElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);

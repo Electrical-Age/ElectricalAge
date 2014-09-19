@@ -20,9 +20,9 @@ import mods.eln.misc.Direction;
 
 public class TurretRender extends TransparentNodeElementRender {
 
-    public TurretDescriptor descriptor;
-	public TurretMechanicsSimulation simulation;
-    private TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 1, this);
+    private final TurretDescriptor descriptor;
+	private final TurretMechanicsSimulation simulation;
+    private final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 1, this);
     EntitySensorFilterDescriptor filter = null;
     boolean filterIsSpare;
     float chargePower;
