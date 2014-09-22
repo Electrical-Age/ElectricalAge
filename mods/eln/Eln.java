@@ -115,6 +115,7 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor;
 import mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor;
 import mods.eln.sixnode.electricalentitysensor.ElectricalEntitySensorDescriptor;
+import mods.eln.sixnode.electricalfiredetector.ElectricalFireDetectorDescriptor;
 import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor;
 import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceRenderObj;
 import mods.eln.sixnode.electricallightsensor.ElectricalLightSensorDescriptor;
@@ -336,7 +337,8 @@ public class Eln {
 			"/model/wirelesssignalrepeater/wirelesssignalrepeater.obj",
 			"/model/wirelesssignalrx/wirelesssignalrx.obj",
 			"/model/wirelesssignaltx/wirelesssignaltx.obj",
-			"/model/Turret/Turret.obj"
+			"/model/Turret/Turret.obj",
+            "/model/FireDetector/FireDetector.obj"
 			// "/model/BatteryBigHV/BatteryBigHV.obj"
 
 	};
@@ -2135,6 +2137,15 @@ public class Eln {
 				sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			}
 		}
+        {
+            ElectricalFireDetectorDescriptor desc;
+            {
+                subId = 13; // ??
+                name = "Electrical Fire Detector";
+                desc = new ElectricalFireDetectorDescriptor(name, obj.getObj("FireDetector"), 15);
+                sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            }
+        }
 	}
 
 	void registerElectricalRedstone(int id) {
