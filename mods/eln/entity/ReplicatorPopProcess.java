@@ -9,11 +9,13 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.server.FMLServerHandler;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
@@ -42,17 +44,19 @@ public class ReplicatorPopProcess implements IProcess {
 			}
 		}
 
+		if(world.difficultySetting == EnumDifficulty.PEACEFUL) return;
+		
 		if (world.getWorldInfo().isThundering()) {
 	        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();       
 		    for (Object obj :  world.playerEntities){
 		    	EntityPlayerMP player = (EntityPlayerMP) obj;
-				if (Math.random() < time * popPerSecondPerPlayer && player.worldObj == world) {	
+				if (Math.random()*(world.playerEntities.size()) < time * popPerSecondPerPlayer && player.worldObj == world) {	
 					int x, y, z;				
 					Random rand = new Random();
 					x = (int) (player.posX + Utils.rand(-100,100));
 					z = (int) (player.posZ + Utils.rand(-100,100));
 					y = 2;
-					
+					Utils.println("POP");
 					if(world.blockExists(x, y, z) == false) break;
 					while (world.getBlock(x, y, z) != Blocks.air 
 							|| Utils.getLight(world,EnumSkyBlock.Block,x,y,z) > 6) {
