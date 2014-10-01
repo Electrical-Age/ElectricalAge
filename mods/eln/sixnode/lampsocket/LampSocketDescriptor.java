@@ -1,10 +1,13 @@
 package mods.eln.sixnode.lampsocket;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
+import mods.eln.misc.IConfigSharing;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
@@ -35,6 +38,7 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 		this.alphaZMax = alphaZMax;
 		this.alphaZBoot = alphaZBoot;
 		this.render = render;
+
 
 	}
 	boolean useIconEnable = false;
@@ -113,6 +117,8 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 			}
 		}
 	}
+
+
 }	
 	
 

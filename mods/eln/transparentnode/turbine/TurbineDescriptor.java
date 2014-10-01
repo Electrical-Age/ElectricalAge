@@ -34,7 +34,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 			) 
 	{
 		super(name, TurbineElement.class, TurbineRender.class);
-		double nominalEff =  Math.abs(1 - (0 + PhysicalConstant.Tref)/(nominalDeltaT + PhysicalConstant.Tref));
+		nominalEff =  Math.abs(1 - (0 + PhysicalConstant.Tref)/(nominalDeltaT + PhysicalConstant.Tref));
 		this.TtoU = TtoU;
 		this.PoutToPin = PoutToPin;
 		this.nominalDeltaT = nominalDeltaT;
@@ -55,7 +55,12 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 		{
 			main = obj.getPart("main");
 		}
+		
+		
+
 	}
+	
+	double nominalEff ;
 	Obj3D obj;
 	Obj3DPart main;
 	
@@ -133,6 +138,8 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
+		
+				
 		list.add("Converts heat into electricity.");
 		list.add("Nominal usage ->");
 		list.add("  Delta T : " +  ((int)nominalDeltaT) + "\u00B0C");

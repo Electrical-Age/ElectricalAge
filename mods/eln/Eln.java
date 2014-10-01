@@ -54,6 +54,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.FunctionTableYProtect;
 import mods.eln.misc.I18N;
+import mods.eln.misc.IConfigSharing;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.LiveDataManager;
 import mods.eln.misc.Obj3DFolder;
@@ -190,11 +191,9 @@ import net.minecraft.block.material.Material;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -249,7 +248,8 @@ public class Eln {
 	private final static String[] AUTHORS = { "Dolu1990", "lambdaShade", "cm0x4D", "TheBroBeans", "DrummingFish" };
 
 	public static String channelName = "miaouMod";
-
+	public ArrayList<IConfigSharing> configShared = new ArrayList<IConfigSharing>();
+	
 	public static final String[] objNames = new String[] {
 			"/model/PowerElectricPrimitives/PowerElectricPrimitives.obj",
 			"/model/EnergyMeter/EnergyMeter.obj",
@@ -355,6 +355,8 @@ public class Eln {
 	public static final byte packetForClientNode = 18;
 	public static final byte packetPlaySound = 19;
 	public static final byte packetDestroyUuid = 20;
+	public static final byte packetClientToServerConnection = 21;
+	public static final byte packetServerToClientInfo = 22;
 
 	public static PacketHandler packetHandler;
 	static NodeServer nodeServer;

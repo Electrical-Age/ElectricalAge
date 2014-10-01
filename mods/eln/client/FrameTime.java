@@ -15,6 +15,7 @@ import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
 import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
@@ -77,6 +78,9 @@ public class FrameTime{
 	@SubscribeEvent
 	public void tick(RenderTickEvent event) {
 		if(event.phase != Phase.START) return;
+		
+
+		
 		long nanoTime = System.nanoTime();
 		if(boot) {
 			boot = false;

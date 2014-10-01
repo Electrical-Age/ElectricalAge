@@ -1,8 +1,13 @@
 package mods.eln.item;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.List;
 
+import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.misc.IConfigSharing;
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sixnode.lampsocket.LampSocketType;
@@ -14,7 +19,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 
 
-public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
+public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade implements IConfigSharing
 {
 
 
@@ -63,7 +68,7 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 			break;
 		}
 		
-		
+		Eln.instance.configShared.add(this);
 	}
 	
 	
@@ -128,7 +133,7 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 		list.add("Power : " + (int)nominalP + "W");
 		list.add(Utils.plotOhm("Resistance :",getR()));
 		//list.add(Utils.plotOhm("Resistance", this.getR()));
-		list.add(Utils.plotTime("Nominal life : ",nominalLife));
+		list.add(Utils.plotTime("Nominal life : ",serverNominalLife));
 		if(itemStack.getTagCompound().hasKey("life") == false)
 			list.add("Seem that nobody has used it before");
 		else if(getLifeInTag(itemStack) > 0.5)
@@ -144,6 +149,22 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade
 		
 	}
 
+
+	@Override
+	public void serializeConfig(DataOutputStream stream) throws IOException {
+		// TODO Auto-generated method stub
+		stream.writeDouble(nominalLife);
+	}
+
+
+	@Override
+	public void deserialize(DataInputStream stream) throws IOException {
+		// TODO Auto-generated method stub
+		serverNominalLife = stream.readDouble();
+	}
+
+	
+	double serverNominalLife;
 
 
 }
