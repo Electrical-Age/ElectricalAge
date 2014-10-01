@@ -3,6 +3,8 @@ package mods.eln.sixnode.diode;
 import java.util.List;
 
 import mods.eln.misc.IFunction;
+import mods.eln.misc.Obj3D;
+import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
@@ -16,13 +18,18 @@ import net.minecraft.item.ItemStack;
 
 public class DiodeDescriptor extends SixNodeDescriptor {
 
+    private Obj3DPart base;
+    private Obj3DPart diodeCables;
+    private Obj3DPart diodeCore;
+
 	public DiodeDescriptor(
 			String name,
 			IFunction IfU,
 			double Imax,
 			double stdU,double stdI,
 			ThermalLoadInitializer thermal,
-			ElectricalCableDescriptor cable) {
+			ElectricalCableDescriptor cable,
+            Obj3D obj) {
 		super(name, DiodeElement.class, DiodeRender.class);
 		this.IfU = IfU;
 		
@@ -34,6 +41,10 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 		thermal.setMaximalPower(stdU*stdI*1.2);
 		this.stdI = stdI;
 		this.stdU = stdU;
+
+        base = obj.getPart("Base");
+        diodeCables = obj.getPart("DiodeCables");
+        diodeCore = obj.getPart("DiodeCore");
 	}
 	double stdI, stdU;
 	ElectricalCableDescriptor cable;
@@ -72,5 +83,9 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 		list.add("one way");
 	}
 
-
+    void draw() {
+        if (base != null) base.draw();
+        if (diodeCables != null) diodeCables.draw();
+        if (diodeCore != null) diodeCore.draw();
+    }
 }
