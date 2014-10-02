@@ -37,6 +37,8 @@ public class Equation implements IValue, INBTTReady {
 		int priority = 0;
 		{
 			ArrayList<IOperatorMapper> list = new ArrayList<IOperatorMapper>();
+			list.add(new OperatorMapperFunc("min", 2, Min.class));
+			list.add(new OperatorMapperFunc("max", 2, Max.class));
 			list.add(new OperatorMapperFunc("sin", 1, Sin.class));
 			list.add(new OperatorMapperFunc("cos", 1, Cos.class));
 			list.add(new OperatorMapperFunc("abs", 1, Abs.class));
@@ -726,7 +728,48 @@ public class Equation implements IValue, INBTTReady {
 			return 12;
 		}
 	}
+	public static class Min implements IOperator {
+		public IValue a, b;
 
+		@Override
+		public double getValue() {
+			return Math.min(a.getValue(), b.getValue());
+		}
+
+
+		@Override
+		public void setOperator(IValue[] values) {
+			this.a = values[1];
+			this.b = values[0];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 2;
+		}
+	}
+	
+	public static class Max implements IOperator {
+		public IValue a, b;
+
+		@Override
+		public double getValue() {
+			return Math.max(a.getValue(), b.getValue());
+		}
+
+
+		@Override
+		public void setOperator(IValue[] values) {
+			this.a = values[1];
+			this.b = values[0];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 2;
+		}
+	}
+	
 	public static class Rs implements IOperator, INBTTReady {
 		public boolean state = false;
 

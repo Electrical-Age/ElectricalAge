@@ -128,6 +128,8 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor implements IPlug
 		y+=9;
 		extender.add(new GuiLabel(6, y,"Can execute following function :")); y+=9;
 		extender.add(new GuiLabel(6, y,"  if(condition,then,else)")); y+=9;
+		extender.add(new GuiLabel(6, y,"  min(x,y)")); y+=9;
+		extender.add(new GuiLabel(6, y,"  max(x,y)")); y+=9;
 		extender.add(new GuiLabel(6, y,"  sin(alpha)")); y+=9;
 		extender.add(new GuiLabel(6, y,"  cos(alpha)")); y+=9;
 		extender.add(new GuiLabel(6, y,"  abs(value)")); y+=9;

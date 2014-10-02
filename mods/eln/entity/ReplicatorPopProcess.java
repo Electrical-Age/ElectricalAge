@@ -27,7 +27,7 @@ public class ReplicatorPopProcess implements IProcess {
 
 	}
 	
-	double popPerSecondPerPlayer = 1.0 / 60;
+	public static double popPerSecondPerPlayer = 1.0 / 60;
 
 	@Override
 	public void process(double time) {

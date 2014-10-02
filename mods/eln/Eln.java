@@ -491,6 +491,7 @@ public class Eln {
 		ElnToOtherEnergyConverterEnable = config.get("compatibility", "ElnToOtherEnergyConverterEnable", true).getBoolean(true);
 
 		replicatorPop = config.get("entity", "replicatorPop", true).getBoolean(true);
+		ReplicatorPopProcess.popPerSecondPerPlayer = config.get("entity", "replicatorPopWhenThunderPerSecond", 1.0/120).getDouble(1.0/120);
 		replicatorRegistrationId = config.get("entity", "replicatorId", -1).getInt(-1);
 
 		forceOreRegen = config.get("mapGenerate", "forceOreRegen", false).getBoolean(false);
@@ -742,6 +743,8 @@ public class Eln {
 		recipeThermalSensor();
 		recipeSixNodeMisc();
 
+		
+		recipeTurret();
 		recipeMachine();
 		recipeTransformer();
 		recipeHeatFurnace();
@@ -3840,7 +3843,7 @@ public class Eln {
 	void registerTurret(int id) {
 		{
 			int subId = 0;
-			String name = "200V Defence turret";
+			String name = "800V Defence turret";
 
 			TurretDescriptor desc = new TurretDescriptor(name, "Turret", "Defence turret WIP");
 
@@ -5962,6 +5965,19 @@ public class Eln {
 				Character.valueOf('R'), findItemStack("Advanced Chip"));
 	}
 
+	
+	void recipeTurret(){
+		
+		addRecipe(findItemStack("800V Defence turret", 1),
+				" R ",
+				"CMC",
+				" c ",
+				Character.valueOf('M'), findItemStack("Advanced Machine Block"),
+				Character.valueOf('C'), findItemStack("Advanced Chip"),
+				Character.valueOf('c'), highVoltageCableDescriptor.newItemStack(),
+				Character.valueOf('R'), new ItemStack(Blocks.redstone_block));
+		
+	}
 	void recipeMachine() {
 		addRecipe(findItemStack("50V Macerator", 1),
 				"IRI",
