@@ -26,7 +26,7 @@ public class DiodeRender extends SixNodeElementRender {
 
 	@Override
 	public void draw() {
-        GL11.glRotatef(-90, 1, 0, 0);
+        GL11.glRotatef(180, 1, 0, 0);
         front.glRotateOnX();
         descriptor.draw();
 	}
