@@ -1,7 +1,5 @@
 package mods.eln.misc;
 
-import javax.crypto.spec.PSource;
-
 public class SlewLimiter {
 	private float positiveSlewRate;
 	private float negativeSlewRate;

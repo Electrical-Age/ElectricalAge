@@ -14,6 +14,7 @@ import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sim.PhysicalConstant;
+import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
@@ -70,6 +71,8 @@ public class ThermalSensorRender extends SixNodeElementRender{
 			GenericItemBlockUsingDamageDescriptor desc = ThermalCableDescriptor.getDescriptor(stack);
 			if(desc instanceof ThermalCableDescriptor) cable = (ThermalCableDescriptor) desc;
 			else cable = null;
+            if(desc instanceof ElectricalCableDescriptor) ecable = (ElectricalCableDescriptor) desc;
+            else ecable = null;
 		} catch (IOException e) {
 			
 			e.printStackTrace();
@@ -78,7 +81,8 @@ public class ThermalSensorRender extends SixNodeElementRender{
 	}
 	
 	ThermalCableDescriptor cable;
-	
+	ElectricalCableDescriptor ecable;
+
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		
@@ -97,6 +101,7 @@ public class ThermalSensorRender extends SixNodeElementRender{
 		else
 		{
 			if(front.inverse() == lrdu && cable != null) return cable.render;
+            if(front.inverse() == lrdu && ecable != null) return ecable.render;
 			if(front == lrdu) return  Eln.instance.signalCableDescriptor.render;
 		}
 		return null;

@@ -1,11 +1,7 @@
 package mods.eln.sixnode.thermalsensor;
 
 import mods.eln.Eln;
-import mods.eln.misc.INBTTReady;
 import mods.eln.sim.IProcess;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.nbt.NBTTagCompound;
 
 public class ThermalSensorProcess implements IProcess{
 	ThermalSensorElement sensor;
@@ -18,7 +14,11 @@ public class ThermalSensorProcess implements IProcess{
 	public void process(double time) {
 		if(sensor.typeOfSensor == sensor.temperatureType)
 		{
-			setOutput(sensor.thermalLoad.Tc);
+            if (sensor.isItemThermalCable()) {
+                setOutput(sensor.thermalLoad.Tc);
+            } else if (sensor.isItemElectricalCable()) {
+               // TODO: How to get the cable temperature?
+            }
 		}
 		else if(sensor.typeOfSensor == sensor.powerType)
 		{
@@ -27,7 +27,6 @@ public class ThermalSensorProcess implements IProcess{
 		 
 	}
 
-	
 	void setOutput(double physical)
 	{
 		double U = (physical - sensor.lowValue) / (sensor.highValue - sensor.lowValue) * Eln.SVU;

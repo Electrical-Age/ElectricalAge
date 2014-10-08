@@ -18,6 +18,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
+import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -88,10 +89,9 @@ public class ThermalSensorElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		
 
 		if(front == lrdu) return outputGate;
-		
+
 		return null;
 	}
 
@@ -124,9 +124,11 @@ public class ThermalSensorElement extends SixNodeElement {
 		}
 		else
 		{
-			if(inventory.getStackInSlot(ThermalSensorContainer.cableSlotId) != null){
+			if (isItemThermalCable()){
 				if(front.inverse() == lrdu) return NodeBase.maskThermal;
-			}
+			} else if (isItemElectricalCable()) {
+                if(front.inverse() == lrdu) return NodeBase.maskElectricalAll;
+            }
 			if(front == lrdu) return  NodeBase.maskElectricalOutputGate;
 		}
 		return 0;
@@ -160,12 +162,6 @@ public class ThermalSensorElement extends SixNodeElement {
 		}
 	}
 
-
-
-
-
-
-
 	@Override
 	public void initialize() {
 		
@@ -182,19 +178,27 @@ public class ThermalSensorElement extends SixNodeElement {
 	public void computeElectricalLoad()
 	{
 		ItemStack cable = inventory.getStackInSlot(ThermalSensorContainer.cableSlotId);
-		
-		
-		ThermalCableDescriptor cableDescriptor = (ThermalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
-		if(cableDescriptor == null)
-		{
-			thermalLoad.setHighImpedance();
-		}
-		else
-		{
-			cableDescriptor.setThermalLoad(thermalLoad);
-		}
 
+        SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(cable);
+
+        if (descriptor != null && descriptor.getClass() == ThermalCableDescriptor.class) {
+            ThermalCableDescriptor cableDescriptor = (ThermalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+            cableDescriptor.setThermalLoad(thermalLoad);
+        } else {
+            thermalLoad.setHighImpedance();
+        }
 	}
+
+    boolean isItemThermalCable() {
+        SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(inventory.getStackInSlot(ThermalSensorContainer.cableSlotId));
+        return descriptor != null && descriptor.getClass() == ThermalCableDescriptor.class;
+    }
+
+    boolean isItemElectricalCable() {
+        SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(inventory.getStackInSlot(ThermalSensorContainer.cableSlotId));
+        return descriptor != null && descriptor.getClass() == ElectricalCableDescriptor.class;
+    }
+
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,float vx,float vy,float vz)
 	{
