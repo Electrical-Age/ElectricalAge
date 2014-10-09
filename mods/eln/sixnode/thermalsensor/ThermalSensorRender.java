@@ -40,8 +40,7 @@ public class ThermalSensorRender extends SixNodeElementRender{
 	public void draw() {
 		super.draw();	
 		front.glRotateOnX();
-		descriptor.draw();	
-
+		descriptor.draw(ecable != null);
 	}
 	
 	/*

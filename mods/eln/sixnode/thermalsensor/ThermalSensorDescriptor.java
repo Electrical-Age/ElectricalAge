@@ -22,11 +22,13 @@ public class ThermalSensorDescriptor extends SixNodeDescriptor{
 		this.obj = obj;
 		if(obj != null){
 			main = obj.getPart("main");
+            adapter = obj.getPart("adapter");
 		}
 	}
 	
 	Obj3D obj;
 	Obj3DPart main;
+    Obj3DPart adapter;
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
@@ -55,9 +57,11 @@ public class ThermalSensorDescriptor extends SixNodeDescriptor{
 		Data.addSignal(newItemStack());
 	}
 	
-	void draw()
+	void draw(boolean renderAdapter)
 	{
 		if(main != null) main.draw();
+        if (renderAdapter && adapter != null) adapter.draw();
+
 	}
 
 }
