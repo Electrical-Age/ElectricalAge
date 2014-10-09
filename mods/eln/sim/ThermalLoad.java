@@ -96,4 +96,7 @@ public class ThermalLoad{
 	public void setAsSlow(){
 		isSlow = true;
 	}
+	public void setAsFast(){
+		isSlow = false;
+	}
 }

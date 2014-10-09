@@ -14,11 +14,7 @@ public class ThermalSensorProcess implements IProcess{
 	public void process(double time) {
 		if(sensor.typeOfSensor == sensor.temperatureType)
 		{
-            if (sensor.isItemThermalCable()) {
-                setOutput(sensor.thermalLoad.Tc);
-            } else if (sensor.isItemElectricalCable()) {
-               // TODO: How to get the cable temperature?
-            }
+			setOutput(sensor.thermalLoad.Tc);
 		}
 		else if(sensor.typeOfSensor == sensor.powerType)
 		{
