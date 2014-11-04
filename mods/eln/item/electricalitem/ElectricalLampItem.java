@@ -2,7 +2,6 @@ package mods.eln.item.electricalitem;
 
 import java.util.List;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
@@ -12,11 +11,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
-import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
-import mods.eln.server.PlayerManager;
 import mods.eln.wiki.Data;
 
 public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
@@ -161,15 +159,16 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery{
 	}
 
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 
-		list.add("Discharge speed: " + (int) dischargeMin + "W");
-		list.add(Utils.plotEnergy("Energy Stored:", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
-		list.add("State: " + (getLightState(itemStack) != 0 ? "ON" : "OFF"));
+		list.add(Translator.translate("eln.core.chargespeed")+": " + (int) chargePower + "W");
+		list.add(Utils.plotEnergy(Translator.translate("eln.core.energystored")+":", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
+		list.add(Translator.translate("eln.core.lamp.state")+": " + (getLightState(itemStack) != 0 ? Translator.translate("eln.core.state.on") : Translator.translate("eln.core.state.off")));
 	}
 /*
 	@Override

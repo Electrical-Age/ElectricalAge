@@ -4,6 +4,8 @@ import org.lwjgl.opengl.GL11;
 
 
 
+
+import mods.eln.Translator;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
@@ -18,7 +20,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -83,11 +84,11 @@ public class SolarPannelGuiDraw extends GuiContainerEln {
         vuMeterTemperature.setEnable(! render.hasTracker);
         int sunAlpha = ((int)(180/Math.PI * SolarPannelSlowProcess.getSolarAlpha(render.tileEntity.getWorldObj()))-90);
         
-        vuMeterTemperature.setComment(0,"Solar Panel alpha : " + ((int)(180/Math.PI * vuMeterTemperature.getValue())-90) + "\u00B0");
+        vuMeterTemperature.setComment(0,Translator.translate("eln.core.tile.solarpanel.panelalpha")+": " + ((int)(180/Math.PI * vuMeterTemperature.getValue())-90) + "\u00B0");
         if(Math.abs(sunAlpha)>90)
-        	vuMeterTemperature.setComment(1,"It's the night");
+        	vuMeterTemperature.setComment(1,Translator.translate("eln.core.tile.solarpanel.night"));
         else
-        	vuMeterTemperature.setComment(1,"Sun alpha : " + sunAlpha + "\u00B0");
+        	vuMeterTemperature.setComment(1,Translator.translate("eln.core.tile.solarpanel.sunalpha")+": " + sunAlpha + "\u00B0");
 	}
 	@Override
 	protected void postDraw(float f, int x, int y) {

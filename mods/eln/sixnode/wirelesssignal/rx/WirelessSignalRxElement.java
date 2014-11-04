@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import mods.eln.Translator;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -31,7 +32,7 @@ public class WirelessSignalRxElement extends SixNodeElement{
 	NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess",outputGate);
 	
 
-	public String channel = "Default channel";
+	public String channel = Translator.translate("eln.core.defaultchannel");
 	
 	WirelessSignalRxProcess slowProcess = new WirelessSignalRxProcess(this);
 	

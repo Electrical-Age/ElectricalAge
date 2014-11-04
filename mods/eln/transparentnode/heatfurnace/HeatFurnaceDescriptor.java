@@ -11,6 +11,7 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
@@ -136,13 +137,14 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor{
 	}
 	
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Provides heat when fuelled.");
-		list.add(Utils.plotPower("Power :", nominalPower));
-		list.add(Utils.plotCelsius("Tmax :",thermal.warmLimit));
+		list.add(Translator.translate("eln.core.tile.heatfurnace.hint0"));
+		list.add(Utils.plotPower(Translator.translate("eln.core.power")+":", nominalPower));
+		list.add(Utils.plotCelsius(Translator.translate("eln.core.tmax")+" :",thermal.warmLimit));
 	}
 }

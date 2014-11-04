@@ -1,7 +1,7 @@
 package mods.eln.sixnode.thermalsensor;
 
+import mods.eln.Translator;
 import mods.eln.gui.ISlotSkin.SlotSkin;
-import mods.eln.item.LampSlot;
 import mods.eln.misc.BasicContainer;
 import mods.eln.node.six.SixNodeItemSlot;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
@@ -16,7 +16,7 @@ public class ThermalSensorContainer extends BasicContainer {
 	
 	public ThermalSensorContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new SixNodeItemSlot(inventory,cableSlotId,152,62,1,new Class[]{ThermalCableDescriptor.class, ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{"Cable Slot"})
+				new SixNodeItemSlot(inventory,cableSlotId,152,62,1,new Class[]{ThermalCableDescriptor.class, ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{Translator.translate("eln.core.cable.slot.hint")})
 			});
 		
 		

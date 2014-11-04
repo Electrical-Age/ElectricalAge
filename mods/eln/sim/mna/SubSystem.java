@@ -15,10 +15,8 @@ import mods.eln.sim.mna.misc.ISubSystemProcessI;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.mna.state.VoltageState;
 
-import org.apache.commons.math3.linear.FieldLUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.QRDecomposition;
-import org.apache.commons.math3.linear.RRQRDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 
 public class SubSystem {

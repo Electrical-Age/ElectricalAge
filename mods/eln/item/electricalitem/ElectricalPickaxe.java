@@ -1,6 +1,5 @@
 package mods.eln.item.electricalitem;
 
-import mods.eln.misc.Utils;
 import mods.eln.wiki.Data;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;

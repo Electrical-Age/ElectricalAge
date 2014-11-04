@@ -1,5 +1,6 @@
 package mods.eln.transparentnode.turret;
 
+import mods.eln.Translator;
 import mods.eln.gui.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -25,7 +26,7 @@ public class TurretGui extends GuiContainerEln {
         chargePower.setStepId(99);
         chargePower.setStepIdMax(99);
         chargePower.setRange(100, 10000);
-        chargePower.setComment(0, "Recharge power:");
+        chargePower.setComment(0, Translator.translate("eln.core.rechargepower")+":");
         chargePower.setValue(render.chargePower);
     }
 
@@ -34,9 +35,9 @@ public class TurretGui extends GuiContainerEln {
         super.preDraw(f, x, y);
 
         if (render.filterIsSpare)
-            killOrSpareButton.displayString = "Not attack:";
+            killOrSpareButton.displayString = Translator.translate("eln.core.tile.turret.notattack")+":";
         else
-            killOrSpareButton.displayString = "Attack:";
+            killOrSpareButton.displayString = Translator.translate("eln.core.tile.turret.attack")+":";
 
         chargePower.setComment(1, "" + chargePower.getValue() + " W");
     }

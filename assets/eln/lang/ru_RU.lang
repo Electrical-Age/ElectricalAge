@@ -1,0 +1,555 @@
+#Автор перевода | Translate author: Radviger
+
+#Таб вкладка:
+itemGroup.Eln=Технологический век
+
+#Айтемы | Слитки, пыльки, в общем ресурсы:
+
+eln.core.item.copperingot.name=Медный слиток
+eln.core.item.leadingot.name=Свинцовый слиток
+eln.core.item.tungsteningot.name=Вольфрамовый слиток
+eln.core.item.ferriteingot.name=Ферритовый слиток
+eln.core.item.alloyingot.name=Полуметаллический сплав
+eln.core.item.siliconingot.name=Силиконовый слиток
+
+eln.core.item.copperdust.name=Измельчённая медь
+eln.core.item.irondust.name=Измельчённое железо
+eln.core.item.leaddust.name=Измельчённый свинец
+eln.core.item.tungstendust.name=Измельчённый вольфрам
+eln.core.item.golddust.name=Измельчённое золото
+eln.core.item.coaldust.name=Угольный порошок
+eln.core.item.alloydust.name=Измельчённый полуметалл
+eln.core.item.silicondust.name=Измельчённый силикон
+eln.core.item.cinnabardust.name=Измельчённая киноварь
+eln.core.item.mercury.name=Меркурий
+eln.core.item.treeresin.name=Древесная смола
+eln.core.item.rubber.name=Сырая резина
+
+eln.core.item.copperplate.name=Медная пластина
+eln.core.item.ironplate.name=Железная пластина
+eln.core.item.goldplate.name=Золотая пластина
+eln.core.item.leadplate.name=Свинцовая пластина
+eln.core.item.siliconplate.name=Силиконовая пластина
+eln.core.item.alloyplate.name=Полуметаллическая пластина
+eln.core.item.coalplate.name=Угольная пластина
+
+#Айтемы | Электроника:
+eln.core.item.small50vcopperheatingcorp.name=Слабая медная катушка на 50V
+eln.core.item.50vcopperheatingcorp.name=Мощная медная катушка на 50V
+eln.core.item.small200vcopperheatingcorp.name=Слабая медная катушка на 200V
+eln.core.item.200vcopperheatingcorp.name=Мощная медная катушка на 200V
+
+eln.core.item.small50vironheatingcorp.name=Слабая стальная катушка на 50V
+eln.core.item.50vironheatingcorp.name=Мощная стальная катушка на 50V
+eln.core.item.small200vironheatingcorp.name=Слабая стальная катушка на 200V
+eln.core.item.200vironheatingcorp.name=Мощная стальная катушка на 200V
+
+eln.core.item.small50vtungstenheatingcorp.name=Слабая вольфрамовая катушка на 50V
+eln.core.item.50vtungstenheatingcorp.name=Мощная вольфрамовая катушка на 50V
+eln.core.item.small200vtungstenheatingcorp.name=Слабая вольфрамовая катушка на 200V
+eln.core.item.200vtungstenheatingcorp.name=Мощная вольфрамовая катушка на 200V
+
+eln.core.item.onoffregulator1.name=Контроллер питания 1%
+eln.core.item.onoffregulator10.name=Контроллер питания 10%
+eln.core.item.analogicregulator.name=Аналоговый контроллер
+
+eln.core.item.small50vincandescentlightbulb.name=Маленькая лампа на 50V
+eln.core.item.50vincandescentlightbulb.name=Небольшая лампа на 50V
+eln.core.item.200vincandescentlightbulb.name=Мощная лампа на 200V
+eln.core.item.small50vcarbonincandescentlightbulb.name=Небольшая карбоновая лампа на 50V
+eln.core.item.50vcarbonincandescentlightbulb.name=Карбоновая лампа на 50V
+eln.core.item.50vfarminglamp.name=Ультрофиолетовая лампа на 50V
+eln.core.item.200vfarminglamp.name=Ультрофиолетовая лампа на 200V
+
+eln.core.item.small50veconomiclightbulb.name=Небольшая экономная лампочка на 50V
+eln.core.item.50veconomiclightbulb.name=Экономная лампочка на 50V
+eln.core.item.200veconomiclightbulb.name=Экономная лампочка на 200V
+
+eln.core.item.overheatingprotection.name=Чипсет защиты от перегрева
+eln.core.item.overvoltageprotection.name=Чипсет защиты от перенапряжения
+eln.core.item.combustionchamber.name=Камера сгорания
+eln.core.item.cheapferromagneticcore.name=Ферромагнитное ядро
+eln.core.item.averageferromagneticcore.name=Среднее ферромагнитное ядро
+eln.core.item.optimalferromagneticcore.name=Оптимальное ферромагнитное ядро
+
+eln.core.item.machineblock.name=Машинный корпус
+eln.core.item.advancedmachineblock.name=Прочный машинный корпус
+
+eln.core.item.cheapelectricaldrill.name=Простой электробур
+eln.core.item.averageelectricaldrill.name=Улучшенный электробур
+eln.core.item.fastelectricaldrill.name=Быстрый электобур
+
+eln.core.item.dielectric.name=Диэлектрик
+
+eln.core.item.cheapchip.name=Простой чип
+eln.core.item.advancedchip.name=Усовершенствованный чип
+eln.core.item.electricalprobechip.name=Электрический датчик
+eln.core.item.thermalprobechip.name=Тепловой датчик
+eln.core.item.solartracker.name=Датчик солца
+eln.core.item.electricalmotor.name=Электромотор
+eln.core.item.advancedelectricalmotor.name=Усовершенствованный электромотор
+eln.core.item.basicmagnet.name=Магнит
+eln.core.item.advancedmagnet.name=Мощный магнит
+eln.core.item.signalantenna.name=Антена
+eln.core.item.orescanner.name=Сканер руд
+eln.core.item.miningpipe.name=Бурящая труба
+eln.core.item.machinebooster.name=Ускоритель
+
+eln.core.item.playerfilter.name=Фильтр игроков
+eln.core.item.monsterfilter.name=Фильтр монстров
+eln.core.item.animalfilter.name=Фильтр животных
+
+eln.core.item.copper.name=Медный провод
+eln.core.item.ironcable.name=Стальной провод
+eln.core.item.tungsten.name=Вольфрамовый провод
+
+#Бронь | Обычная:
+item.Copper Helmet.name=Медный шлем
+item.Copper Chestplate.name=Медный нагрудник
+item.Copper Leggings.name=Медные поножи
+item.Copper Boots.name=Медные ботинки
+
+#Бронь | Электрическая:
+item.E-Coal Helmet.name=Углеволоконный шлем
+item.E-Coal Chestplate.name=Углеволоконный нагрудник
+item.E-Coal Leggings.name=Углеволоконные поножи
+item.E-Coal Boots.name=Углеволоконные ботинки
+
+#Инструменты | Обычные:
+eln.core.item.blackbrush.name=Черный валик
+eln.core.item.redbrush.name=Красный валик
+eln.core.item.greenbrush.name=Зелёный валик
+eln.core.item.brownbrush.name=Коричневый валик
+eln.core.item.bluebrush.name=Синий валик
+eln.core.item.purplebrush.name=Фиолетовый валик
+eln.core.item.cyanbrush.name=Бирюзовый валик
+eln.core.item.silverbrush.name=Серый валик
+eln.core.item.graybrush.name=Тёмно-серый валик
+eln.core.item.pinkbrush.name=Розовый валик
+eln.core.item.limebrush.name=Светло-зелёный валик
+eln.core.item.yellowbrush.name=Жёлтый валик
+eln.core.item.lightbluebrush.name=Голубой валик
+eln.core.item.magentabrush.name=Пурпурный валик
+eln.core.item.orangebrush.name=Оранжевый валик
+eln.core.item.whitebrush.name=Белый валик
+
+eln.core.item.wrench.name=Гаечный ключ
+item.Copper Sword.name=Медный меч
+item.Copper Pickaxe.name=Медная кирка
+item.Copper Axe.name=Медный топор
+item.Copper Shovel.name=Медная лопата
+item.Copper Hoe.name=Медная мотыга
+
+#Инструменты | Электрические:
+
+eln.core.item.smallflashlight.name=Фонарик
+eln.core.item.portableelectricalminingdrill.name=Переносной бур
+eln.core.item.portableelectricalaxe.name=Переносная электропила
+eln.core.item.x-rayscanner.name=X-ray сканер
+
+eln.core.item.multimeter.name=Электрометр
+eln.core.item.thermometer.name=Термометр
+eln.core.item.allmeter.name=Мультиметр
+eln.core.item.wirelessanalyser.name=Беспроводной анализатор
+
+eln.core.item.portablebattery.name=Батарейка
+eln.core.item.portablebatterypack.name=Кучка батареек
+eln.core.item.portablecondensator.name=Конденсатор
+eln.core.item.portablecondensatorpack.name=Кучка конденсаторов
+
+#Блоки | Руды:
+
+eln.core.block.copperore.name=Медная руда
+eln.core.block.leadore.name=Свинцовая руда
+eln.core.block.tungstenore.name=Вольфрамовая руда
+eln.core.block.cinnabarore.name=Киноварь
+
+#Блоки | Провода, лампы, выключатели:
+
+eln.core.block.groundcable.name=Заземляющий провод
+eln.core.block.hub.name=Мост
+eln.core.block.electricalsource.name=Источник энергии
+eln.core.block.signalcable.name=Сигнальный провод
+eln.core.block.lowvoltagecable.name=Низковольтный кабель
+eln.core.block.mediumvoltagecable.name=Кабель среднего напряжения
+eln.core.block.highvoltagecable.name=Силовой кабель
+eln.core.block.veryhighvoltagecable.name=Высоковольтный кабель
+eln.core.block.copperthermalcable.name=Медный тепловой кабель
+
+eln.core.block.lampsocketa.name=Люстра
+eln.core.block.lampsocketbprojector.name=Прожектор
+eln.core.block.robustlampsocket.name=Надёжный разъём для лампы
+eln.core.block.flatlampsocket.name=Плоский разъём для лампы
+eln.core.block.simplelampsocket.name=Простой разъём для лампы
+eln.core.block.fluorescentlampsocket.name=Люминесцентый разъём для лампы
+eln.core.block.streetlight.name=Уличный фонарь
+eln.core.block.suspendedlampsocket.name=Подвесной разъём для лампы
+eln.core.block.longsuspendedlampsocket.name=Длинный подвесной разъём для лампы
+
+eln.core.block.lampsupply.name=Контроллер освещения
+
+#Блоки | Машины, акумуляторы, контроллеры:
+
+tile.eln.EnergyConverterElnToOtherLVUBlock.name=Низковольтный коневртер электричества
+tile.eln.EnergyConverterElnToOtherMVUBlock.name=Средний коневртер электричества
+tile.eln.EnergyConverterElnToOtherHVUBlock.name=Высоковольтный коневртер электричества
+
+eln.core.block.tutorialsign.name=Вспомогательная табличка
+eln.core.block.treeresincollector.name=Ящик для сбора смолы
+eln.core.block.electricprobe.name=Электрический датчик
+eln.core.block.electricalanemometersensor.name=Анемометр
+eln.core.block.weak50vbatterycharger.name=Слабый зарядник на 50V
+eln.core.block.50vbatterycharger.name=Зарядник на 50V
+eln.core.block.200vbatterycharger.name=Зарядник на 200V
+eln.core.block.wirelesssignalreceiver.name=Беспроводной приёмник
+eln.core.block.wirelesssignaltransmitter.name=Беспроводной передатчик
+eln.core.block.wirelesssignalrepeater.name=Беспроводной повторитель
+eln.core.block.datalogger.name=Осциллограф
+eln.core.block.lowvoltagerelay.name=Низковольтное реле
+eln.core.block.mediumvoltagerelay.name=Реле среднего напряжения
+eln.core.block.highvoltagerelay.name=Высоковольтное реле
+eln.core.block.veryhighvoltagerelay.name=Трансформаторное реле
+eln.core.block.signaltrimmer.name=Реостат
+eln.core.block.signalswitch.name=Переключатель
+eln.core.block.signalbutton.name=Кнопка
+eln.core.block.wirelessswitch.name=Беспроводной переключатель
+eln.core.block.wirelessbutton.name=Беспроводная кнопка 
+eln.core.block.10adiode.name=Диод на 10 ампер
+eln.core.block.25adiode.name=Диод на 25 ампер
+eln.core.block.signaldiode.name=Сигнальный диод
+eln.core.block.powercapacitor.name=Конденсатор мощности
+eln.core.block.powerinductor.name=Индуктор
+eln.core.block.veryhighvoltageswitch.name=Трансформаторный рычаг
+eln.core.block.highvoltageswitch.name=Высоковольтный рычаг
+eln.core.block.mediumvoltageswitch.name=Рычаг среднего напряжения
+eln.core.block.lowvoltageswitch.name=Рычаг низкого напряжения
+eln.core.block.electricalbreaker.name=Автопрерыватель
+eln.core.block.energymeter.name=Счётчик
+eln.core.block.advancedenergymeter.name=Электрический счётчик
+eln.core.block.electricalprobe.name=Электрический датчик
+eln.core.block.voltageprobe.name=Вольтовой датчик
+eln.core.block.thermalprobe.name=Тепловой датчик
+eln.core.block.temperatureprobe.name=Температурный датчик
+eln.core.block.analogvumeter.name=Аналоговый индикатор
+eln.core.block.ledvumeter.name=Ламповый индикатор
+eln.core.block.nuclearalarm.name=Ядерная сирена
+eln.core.block.standardalarm.name=Сирена
+eln.core.block.electricaldaylightsensor.name=Датчик дня
+eln.core.block.electricallightsensor.name=Датчик света
+eln.core.block.electricalweathersensor.name=Датчик погоды
+eln.core.block.electricalentitysensor.name=Датчик движения
+eln.core.block.electricalfiredetector.name=Датчик огня
+eln.core.block.redstone-to-voltageconverter.name=Датчик редстоун-сигнала
+eln.core.block.voltage-to-redstoneconverter.name=Испускатель редстоун-сигнала
+eln.core.block.electricaltimer.name=Электронный таймер
+eln.core.block.signalprocessor.name=Сигнальный процессор
+eln.core.block.modbusrtu.name=Модульная шина
+eln.core.block.watch.name=Электронные часы
+eln.core.block.transformer.name=Трансформатор
+eln.core.block.stoneheatfurnace.name=Тепловая печь
+eln.core.block.50vturbine.name=Паровая турбина на 50V
+eln.core.block.200vturbine.name=Паровая турбина на 200V
+eln.core.block.lowpowertransmitterantenna.name=Низковольтная электропередающая антена
+eln.core.block.lowpowerreceiverantenna.name=Низковольтная электропринимающая антена
+eln.core.block.mediumpowertransmitterantenna.name=Энергопредающая антена
+eln.core.block.mediumpowerreceiverantenna.name=Энергопринимающая антена
+eln.core.block.highpowertransmitterantenna.name=Высоковольтная электропередающая антена
+eln.core.block.highpowerreceiverantenna.name=Высоковольтная электропринимающая антена
+eln.core.block.costorientedbattery.name=Энергозатратный аккумулятор
+eln.core.block.lifeorientedbattery.name=Долговременный аккумулятор
+eln.core.block.capacityorientedbattery.name=Ёмкий аккумулятор
+eln.core.block.voltageorientedbattery.name=Аккумулятор высокого напряжения
+eln.core.block.currentorientedbattery.name=Аккумулятор сильного тока
+eln.core.block.single-usebattery.name=Одноразовый аккумулятор
+eln.core.block.electricalfurnace.name=Электропечь
+eln.core.block.50vmacerator.name=Дробитель на 50V
+eln.core.block.200vmacerator.name=Дробитель на 200V
+eln.core.block.50vcompressor.name=Компрессор на 50V
+eln.core.block.200vcompressor.name=Компрессор на 200V
+eln.core.block.50vmagnetizer.name=Намагничиватель на 50V
+eln.core.block.200vmagnetizer.name=Намагничиватель на 200V
+eln.core.block.50vplatemachine.name=Пресс машина на 50V
+eln.core.block.200vplatemachine.name=Пресс машина на 200V
+eln.core.block.50veggincubator.name=Инкубатор для яиц
+eln.core.block.autominer.name=Автошахтёр на 800V
+eln.core.block.smallsolarpanel.name=Небольшая солнечная панель
+eln.core.block.smallrotatingsolarpanel.name=Автонастраиваемая солнечная панель
+eln.core.block.windturbine.name=Ветряк
+eln.core.block.waterturbine.name=Водяная турбина
+eln.core.block.smallpassivethermaldissipator.name=Пассивный радиатор
+eln.core.block.smallactivethermaldissipator.name=Активный радиатор
+eln.core.block.200vactivethermaldissipator.name=Активный радиатор на 200V
+eln.core.block.experimentaltransporter.name=Эксперементальный телепортер
+eln.core.block.800vdefenceturret.name=Защитная туррель на 800V
+
+#Хинты и инфо:
+
+eln.core.holdshift=§7Удерживайте §a§oShift §7для деталей
+
+eln.core.style=Стиль
+eln.core.light=Свет
+eln.core.power=Сила тока
+eln.core.celsuis=Температура
+eln.core.voltage=Напряжение
+eln.core.current=Ток
+eln.core.resistance=Сопротивление
+eln.core.nlife=Номинальный срок
+eln.core.life=Срок
+eln.core.npower=Номинальная сила тока
+eln.core.chargepower=Мощность зарядки
+eln.core.rechargepower=Мощность перезарядки
+eln.core.nvoltage=Номанальное напряжение
+eln.core.spower=Мощность в режиме ожидания
+eln.core.voltageout=Выход в вольтах
+eln.core.voltagein=Вход в вольтах
+eln.core.pwout=Выход заряда
+eln.core.pwin=Вход заряда
+eln.core.powerout=Сила тока
+eln.core.delta=Дельта
+eln.core.temperature=Температура
+eln.core.charge=Заряд
+eln.core.cooling=Охлаждение
+eln.core.nusage=Номинальное использование
+eln.core.tmax=Макс. нагрев
+eln.core.vmax=Макс. напряжение
+eln.core.pmax=Макс. сила тока
+eln.core.on=Вкл
+eln.core.off=Выкл
+eln.core.chargedat=заряженный на
+eln.core.fulcharge=Полный заряд
+eln.core.nominal=Номинальное
+eln.core.in=В
+eln.core.tpo=Время на операцию
+eln.core.epo=Энергия на операцию
+
+eln.core.lamp.state=Статус
+eln.core.state.off=Выключен
+eln.core.state.on=Включен
+
+eln.core.item.brush.life=Осталось использований
+
+eln.core.outat=Выход на
+
+eln.core.pos.front=Спереди
+eln.core.pos.vert=Сверху/Снизу
+eln.core.pos.hor=Слева/Справа
+
+eln.core.chargespeed=Скорость зарядки
+eln.core.dischargespeed=Скорость разрядки
+eln.core.energystored=Содержит энергии
+eln.core.energy=Энергия
+eln.core.defaultchannel=Канал по-умолчанию
+eln.core.angle=Угол c
+eln.core.angleto=до
+eln.core.wireless=Беспроводной
+eln.core.new=Новый
+eln.core.blocks=блока(ов)
+eln.core.range=Радиус
+eln.core.efficiency=Эффективность
+eln.core.efficiencyto=-
+eln.core.metersecond=м/с
+eln.core.inductance=§7Индуктивность
+eln.core.unnamed=Без названия
+eln.core.validate=Проверить
+eln.core.add=Добавить
+
+eln.core.tile.lamp.spotrange=Радиус освещения
+eln.core.tile.lamp.status.parallel=Паралельная
+eln.core.tile.lamp.status.serial=Одиночная
+eln.core.tile.lamp.poweredbysupply=Питается от распределителя
+eln.core.tile.lamp.poweredbycable=Питается от кабеля
+eln.core.tile.lamp.cableslotempty=Слот кабеля пуст
+eln.core.tile.lamp.connectedto=подключено к
+eln.core.tile.lamp.notinrange=находится вне зоны досигаемости!
+eln.core.tile.lamp.orientation=Ориентация
+eln.core.tile.turret.attack=Атакует
+eln.core.tile.turret.notattack=Не атакует
+eln.core.tile.modbusrtu.edtid.hint0=Идентификатор станции
+eln.core.tile.modbusrtu.edtname.hint0=Название станции
+eln.core.tile.modbusrtu.chname.hint0=Название канала
+eln.core.tile.modbusrtu.entmodbusid.hint0=Идентификатор модульной шины
+eln.core.tile.antenna.hint0=Беспроводной передатчик энергии
+eln.core.tile.antenna.hint1=Номинальное использование
+eln.core.tile.antenna1.hint0=Беспроводной приёмник энергии
+
+eln.core.tile.elfurnace.hint0=Схожа с обычной печью, но
+eln.core.tile.elfurnace.hint1=для работы требует электричество.
+
+eln.core.tile.capacitor.incrcapacity=(Повышает напряжение)
+eln.core.tile.capacitor.incrvoltage=(Повышает мощность)
+eln.core.tile.inductor.inductance=(Повышает индуктивность)
+eln.core.tile.supply.hint0=По-умолчанию максимальный радиус это
+eln.core.tile.supply.hint1=32 блока, но каждый положенный кабель
+eln.core.tile.supply.hint2=добавляет ещё по одному.
+eln.core.tile.turbine.hint0=Превращяет тепло в электричество.
+eln.core.tile.waterturbine.hint0=Вырабатывает электричество на воде.
+eln.core.tile.waterturbine.nowaterplace=Не хватает места для воды
+eln.core.tile.windturbine.hint0=Вырабатывает электричество засчёт ветра.
+eln.core.tile.windturbine.hint1=Площадь ветра
+eln.core.tile.transformer.hint0=Преобразует входное напряжение и
+eln.core.tile.transformer.hint1=выводит его.
+eln.core.tile.transformer.hint2=Отношение преобразования определяется
+eln.core.tile.transformer.hint3=по колличеству кабеля и по соотношению размеров.
+eln.core.tile.dissipator.hint0=Используется для охлаждения турбины.
+eln.core.tile.supply.hint0=Питает электричеством все лампы
+eln.core.tile.supply.hint1=одного канала.
+eln.core.tile.hub.hint0=Позволяет перекрещивать провода
+eln.core.tile.hub.hint1=не обьединяя их.
+eln.core.tile.grndcable.hint0=Обеспечивает проводимость нулевого вольта.
+eln.core.tile.grndcable.hint1=Может быть использовано для заземления негативных
+eln.core.tile.grndcable.hint2=контактов аккумулятора.
+eln.core.tile.grndcable.hint3=Внутреннее сопротивление
+eln.core.tile.heatfurnace.hint0=Производит электричество при нагревании.
+eln.core.tile.signalcable.hint0=Этот провод адаптирован для
+eln.core.tile.signalcable.hint1=быстрой передачи электросигналов.
+eln.core.tile.signalcable.hint2=Сигнал это электрическая информация,
+eln.core.tile.signalcable.hint3=которая может быть в диапазоне от 0V до 
+eln.core.tile.signalcable.hint4=§eНе пытайтесь передавать электричество.
+eln.core.tile.solarpanel.hint0=Производит электричество засчёт солнечных лучей.
+eln.core.tile.solarpanel.hint1=Может быть ориентирована.
+eln.core.tile.resincollector.hint0=§cЭтот блок может быть установлен только на ствол ростущего дерева!
+eln.core.tile.supply.specifychannel=Укажите канал питания
+eln.core.tile.wireless.specifychannel=Укажите беспроводной канал
+eln.core.tile.transporter.eneeded=Энергии необходимо
+eln.core.tile.transporter.powersink=Уровень мощности
+eln.core.tile.transporter.start=Начать
+eln.core.tile.transporter.crtrs=Этот телепорт
+eln.core.tile.transporter.tgtrs=Конечный телепорт
+eln.core.tile.relay.hint0=Реле имеет возможность
+eln.core.tile.relay.hint1=проводить электричество или нет,
+eln.core.tile.relay.hint2=в зависимости от напряжения входного сигнала.
+eln.core.tile.gatesource.hint0=Испускает напряжение под контролем игрока.
+eln.core.tile.elsensor.hint0=Измеряет напряжение в проводах.
+eln.core.tile.elsensor.hint1=Имеет сигнальный выход.
+eln.core.tile.elsensor.hint2=Может измерять
+eln.core.tile.elsensor.hint3=Вольтаж/Силу тока/Ток
+eln.core.tile.windsensor.hint0=Обеспечивает электрический сигнал,
+eln.core.tile.windsensor.hint1=зависящий от ветра.
+eln.core.tile.windsensor.hint2=Максимальный ветер 
+eln.core.tile.weathersensor.hint0=Обеспечивает электрический сигнал,
+eln.core.tile.weathersensor.hint1=зависящий от погоды.
+eln.core.tile.weathersensor.hint2=солнечно
+eln.core.tile.weathersensor.hint3=дождь
+eln.core.tile.weathersensor.hint4=гроза
+eln.core.tile.vumeter.hint0=Отображает уровень сигнала.
+eln.core.tile.etimeout.hint0=Когда входной сигнал выше это
+eln.core.tile.etimeout.hint1=поддерживает высокий выходной сигнал
+eln.core.tile.etimeout.hint2=в течение определенного времени.
+eln.core.tile.eswitch.hint0=Может вручную прерывать линию электропередач.
+eln.core.tile.diode.hint0=Через диод ток может течь только в одну сторону.
+eln.core.tile.elbreaker.hint0=Защищает электроприботы и машины.
+eln.core.tile.elbreaker.hint1=Отключается, если
+eln.core.tile.elbreaker.hint2=Напряжение превышет проводимость кабеля
+eln.core.tile.elbreaker.hint3=Ток превышет проводимость кабеля
+eln.core.tile.relay.state0=Открыто
+eln.core.tile.relay.state1=Закрыто
+eln.core.tile.breaker.maxvoff=Максимальное напряжение для выключения
+eln.core.tile.breaker.minvoff=Минимальное напряжение для выключения
+eln.core.tile.wirelessreceiver.conn=§2Подключён
+eln.core.tile.wirelessreceiver.unconn=§2Нет соединения
+eln.core.tile.wirelessreceiver.btnb.name=Наибольшее
+eln.core.tile.wirelessreceiver.btnb.hint0=Получать наибольшее значение,
+eln.core.tile.wirelessreceiver.btnb.hint1=распространяемое по каналу.
+eln.core.tile.wirelessreceiver.btns.name=Наименьшее
+eln.core.tile.wirelessreceiver.btns.hint0=Получать нименьшее значение,
+eln.core.tile.wirelessreceiver.btns.hint1=распространяемое по каналу.
+eln.core.tile.wirelessreceiver.btnt.name=Переключать
+eln.core.tile.wirelessreceiver.btnt.hint0=Переключается каждый раз, когда
+eln.core.tile.wirelessreceiver.btnt.hint1=получает сигнал из канала.
+eln.core.tile.wirelessreceiver.btnt.hint2=§7Очень полезно, если вы хотите контролировать
+eln.core.tile.wirelessreceiver.btnt.hint3=§7свет в своём доме несколькими выключателями.
+eln.core.tile.probe.probedvalue=Считанное значение
+eln.core.tile.probe.probedvoltage=Считанное напряжение
+eln.core.tile.probe.probedtemp=Считанная температура
+eln.core.tile.probe.hint0percent=0% вывода
+eln.core.tile.probe.hint1000percent=100% вывода
+eln.core.tile.alaram.button.muted=§eЗвук заглушен
+eln.core.tile.alaram.button.notmuted=§2Звук слышен
+eln.core.tool.wrench.hint0=Может быть использован для настройки
+eln.core.tool.wrench.hint1=некоторых механизмов, а так же взаимозаменяем
+eln.core.tool.wrench.hint2=с ключами из других модов.
+
+eln.core.tool.battey.nocharge=§eНе заряжается
+eln.core.tool.battey.discharge=§cРазряжается
+eln.core.tool.battey.charge=§2Заряжается
+eln.core.tool.battey.charged=§aЗаряжен
+eln.core.machine.autoshutdown=Авто контроль
+eln.core.machine.manshutdown=Ручной контроль
+eln.core.machine.vsupply=Напряжение
+eln.core.machine.psupply=Сила тока
+eln.core.tile.solarpanel.night=§cСейчас ночь
+eln.core.tile.solarpanel.sunalpha=Положение солнца
+eln.core.tile.solarpanel.panelalpha=Положение солнечной панели
+eln.core.datalogger.button.config=§6Настройки
+eln.core.datalogger.button.back=Назад
+eln.core.datalogger.button.reset=Сброс
+eln.core.datalogger.button.pause=Пауза
+eln.core.datalogger.button.continue=Старт
+eln.core.datalogger.button.print=Печать
+eln.core.datalogger.edit.period=Период измерения
+eln.core.datalogger.edit.yaxmax=Макс. по оси Y
+eln.core.datalogger.edit.yaxmin=Мин. по оси Y
+eln.core.counter.edit.chpass=Укажите пароль
+eln.core.counter.edit.enterpass=Введите пароль доступа
+eln.core.counter.edit.energy=Укажите новое значение энергии
+eln.core.counter.button.cntmod.name=В режиме счёта
+eln.core.counter.button.cntmod.hint0=В этом режиме будет считаться
+eln.core.counter.button.cntmod.hint1=энергия, проходящая с
+eln.core.counter.button.cntmod.hint2=§4красной §rстороны в §1синюю§r.
+eln.core.counter.button.prepmod.name=В режиме предоплаты
+eln.core.counter.button.prepmod.hint0=В этом режиме будет отниматься
+eln.core.counter.button.prepmod.hint1=энергия, проходящая с
+eln.core.counter.button.prepmod.hint2=§4красной §rстороны в §1синюю§r.
+eln.core.counter.button.prepmod.hint3=§7Вы должны указать начальное значение
+eln.core.counter.button.prepmod.hint4=§7энергии. Затем, когда счётчик дойдёт
+eln.core.counter.button.prepmod.hint5=§7до нуля - он отрежет линию.
+eln.core.counter.button.energyset.name=Указать счёт
+eln.core.counter.button.energyreset.name=Сбросить счёт
+eln.core.counter.energycount=Энергии насчитано
+eln.core.counter.timecount=Времени прошло
+eln.core.etimer.edit.time.hint0=Количество времени, при котором
+eln.core.etimer.edit.time.hint1=уровень сигнала будет высоким.
+eln.core.etimer.button.set.name=Указать
+eln.core.etimer.button.reset.name=Сбросить
+eln.core.eprocessor.edtformula.hint0=Выводит вольтовую формулу.
+eln.core.eprocessor.edtformula.hint1=Входы - §4A§r,§2B§r,§1C§r
+eln.core.eprocessor.hint0=Ожидание завершения...
+eln.core.eprocessor.hint1=§cНеобходимо уравнение
+eln.core.eprocessor.hint2=§eНеобходимо красной пыли
+eln.core.eprocessor.hint3=§cНеверное уравнение!
+eln.core.tutsign.balisename=Укажите название файла
+eln.core.heatfurnace.btninctrl.name=Внутренний контроль
+eln.core.heatfurnace.btnexctrl.name=Внешний контроль
+eln.core.heatfurnace.takefuel.name=Принимать топливо
+eln.core.heatfurnace.decfuel.name=Не принимать топливо
+eln.core.heatfurnace.gauge.hint0=Температурный датчик
+eln.core.heatfurnace.gauge.hint1=Контрольный датчик на
+eln.core.heatfurnace.gauge.current=Текущая
+eln.core.heatfurnace.gauge.target=Необходимая
+
+eln.core.tile.block.nonenoughspace=§cДля этого блока недостаточно места!
+eln.core.tile.block.cantplaceside=§cДанный блок не может встать на эту сторону!
+
+eln.core.lamp.slot.hint=Слот для лампы
+eln.core.regulator.slot.hint=Слот для регулятора
+eln.core.booster.slot.hint=Слот для ускорителя
+eln.core.coppercable.slot.hint=Слот для медного кабеля
+eln.core.cable.slot.hint=Слот для кабеля
+eln.core.paper.slot.name=Слот для бумаги
+eln.core.redstone.slot.hint=Слот для красной пыли
+eln.core.dielectric.slot.hint=Слот для диэлектрика
+eln.core.ferromagnetic.slot.hint=Слот для ферромагнитного ядра
+eln.core.drill.slot.hint=Слот для головки бура
+eln.core.tracker.slot.hint=Слот для датчика солнца
+eln.core.orescanner.slot.hint=Слот для сканера руды
+eln.core.miningpipe.slot.hint=Слот для бурящей трубы
+eln.core.egg.slot.hint=Слот для яйца
+eln.core.entityfilter.slot.hint=Слот для фильтра существ
+eln.core.heatcorp.slot.hint=Слот для нагревательной катушки
+eln.core.thermisolator.slot.hint=Слот для термального изолятора
+eln.core.battery.slot.hint=Слот для батарейки
+eln.core.slotportbattery.slot.hint=Слот для переносной батарейки
+eln.core.combchamber.slot.hint=Слот для камеры внутр. сгорания
+eln.core.thermisolator.slot.hint=Слот для термального изолятора
+eln.core.regulator.slot.hint=Слот для регулятора
+

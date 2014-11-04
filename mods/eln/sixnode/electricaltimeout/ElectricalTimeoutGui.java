@@ -8,6 +8,7 @@ import java.text.ParseException;
 
 import org.lwjgl.opengl.GL11;
 
+import mods.eln.Translator;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.GuiTextFieldEln;
@@ -36,14 +37,14 @@ public class ElectricalTimeoutGui extends GuiScreenEln {
 	public void initGui() {
 		super.initGui();
 
-        reset = newGuiButton(6, 6, 50, "reset");
-		set = newGuiButton(6, 6 + 20 + 4, 50, "set");
+        reset = newGuiButton(6, 6, 50, Translator.translate("eln.core.etimer.button.reset.name"));
+		set = newGuiButton(6, 6 + 20 + 4, 50, Translator.translate("eln.core.etimer.button.set.name"));
 
 		timeoutValue = newGuiTextField(6, 6 + 20 * 2 + 4 * 2, 50);
 
         timeoutValue.setText(render.timeoutValue);
-        timeoutValue.setComment(0, "The amount of time the");
-        timeoutValue.setComment(1, "output is kept high");
+        timeoutValue.setComment(0, Translator.translate("eln.core.etimer.edit.time.hint0"));
+        timeoutValue.setComment(1, Translator.translate("eln.core.etimer.edit.time.hint1"));
 	}
 
     @Override

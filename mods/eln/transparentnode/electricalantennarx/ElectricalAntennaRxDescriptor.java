@@ -2,6 +2,7 @@ package mods.eln.transparentnode.electricalantennarx;
 
 import java.util.List;
 
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
@@ -84,8 +85,8 @@ public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Wireless power receiver");
-		list.add("Nominal usage");
+		list.add(Translator.translate("eln.core.tile.antenna1.hint0"));
+		list.add(Translator.translate("eln.core.tile.antenna.hint1"));
 		list.add(Utils.plotVolt(" U :", electricalNominalVoltage));
 		list.add(Utils.plotPower(" P :", electricalNominalPower));
 	}

@@ -3,6 +3,7 @@ package mods.eln.sixnode.batterycharger;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import mods.eln.Translator;
 import mods.eln.gui.GuiButtonEln;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
@@ -33,10 +34,10 @@ public class BatteryChargerGui extends GuiContainerEln {
 		super.preDraw(f, x, y);
 		
 		if(render.powerOn) {
-			powerOn.displayString = "Is ON";
+			powerOn.displayString = Translator.translate("eln.core.on");
 		}
 		else {
-			powerOn.displayString = "Is OFF";
+			powerOn.displayString = Translator.translate("eln.core.off");
 		}
 	}
 	

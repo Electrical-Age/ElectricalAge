@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import mods.eln.Translator;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -157,7 +158,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 		return false;
 	}
 
-	String name = "Unnamed", targetName = "Unnamed";
+	String name, targetName = Translator.translate("eln.core.unnamed");
 	double energyHit = 0;
 	double energyTarget = 0;
 	double powerCharge = 2000;

@@ -1,6 +1,6 @@
 package mods.eln.item;
 
-import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.misc.Utils;
 import mods.eln.sixnode.lampsocket.LampSocketType;
@@ -11,7 +11,7 @@ public class LampSlot extends GenericItemUsingDamageSlot{
 	LampSocketType socket;
 	public LampSlot(IInventory inventory, int slot, int x, int y,
 			int stackLimit,LampSocketType socket) {
-		super(inventory, slot, x, y, stackLimit, LampDescriptor.class,SlotSkin.medium,new String[]{"Lamp Slot"});
+		super(inventory, slot, x, y, stackLimit, LampDescriptor.class,SlotSkin.medium,new String[]{Translator.translate("eln.core.lamp.slot.hint")});
 		
 		this.socket = socket;
 		

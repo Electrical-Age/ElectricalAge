@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
 
-
+import mods.eln.Translator;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiScreenEln;
@@ -59,7 +59,7 @@ public class ElectricalGateSourceGui extends GuiScreenEln {
     protected void preDraw(float f, int x, int y) {
     	super.preDraw(f, x, y);
     	if(render.voltageSyncNew) syncVoltage();
-    	voltage.setComment(0, "Output at " + ((int)voltage.getValue() * 2) + "%");
+    	voltage.setComment(0, Translator.translate("eln.core.outat")+" " + ((int)voltage.getValue() * 2) + "%");
     }
 
 	@Override

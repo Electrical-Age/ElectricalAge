@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricaltimeout;
 
 import java.util.List;
 
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
@@ -28,12 +29,13 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 		}
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("When the input signal is high this");
-		list.add("maintains a high output signal");
-		list.add("for a defined time.");
+		list.add(Translator.translate("eln.core.tile.etimeout.hint0"));
+		list.add(Translator.translate("eln.core.tile.etimeout.hint1"));
+		list.add(Translator.translate("eln.core.tile.etimeout.hint2"));
 	}
 	
 	@Override

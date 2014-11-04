@@ -5,6 +5,7 @@ import java.util.List;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientProxy;
 import mods.eln.misc.IFunction;
@@ -75,12 +76,13 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
 		Data.addWiring(newItemStack());
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("The relay has the capability to");
-		list.add("conduct electricity or not,");
-		list.add("depending on the input signal voltage.");
+		list.add(Translator.translate("eln.core.tile.relay.hint0"));
+		list.add(Translator.translate("eln.core.tile.relay.hint1"));
+		list.add(Translator.translate("eln.core.tile.relay.hint2"));
 	}
 	
 	@Override

@@ -3,6 +3,7 @@ package mods.eln.sixnode.electricalbreaker;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import mods.eln.Translator;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
@@ -35,8 +36,8 @@ public class ElectricalBreakerGui extends GuiContainerEln {
         setUmin.setText(render.uMin);
         setUmax.setText(render.uMax);
         
-        setUmin.setComment(0, "Minimum voltage before cutting off");
-        setUmax.setComment(0, "Maximum voltage before cutting off");
+        setUmin.setComment(0, Translator.translate("eln.core.tile.breaker.minvoff"));
+        setUmax.setComment(0, Translator.translate("eln.core.tile.breaker.maxvoff"));
         
 		toogleSwitch = newGuiButton(72 - 2, 58 / 2 - 10, 70, "toogle switch");
 	}
@@ -65,9 +66,9 @@ public class ElectricalBreakerGui extends GuiContainerEln {
     protected void preDraw(float f, int x, int y) {
     	super.preDraw(f, x, y);
     	if(!render.switchState)
-    		toogleSwitch.displayString = "Switch is OFF";
+    		toogleSwitch.displayString = Translator.translate("eln.core.off");
     	else
-    		toogleSwitch.displayString = "Switch is ON";
+    		toogleSwitch.displayString = Translator.translate("eln.core.on");
     }
 
 	@Override

@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import mods.eln.Translator;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Direction;
 import mods.eln.misc.FunctionTable;
@@ -123,19 +124,20 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 	public boolean use2DIcon() {
 		return false;
 	}
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add("Produces power from wind.");
-		list.add(Utils.plotVolt("Voltage:", maxVoltage));
-		list.add(Utils.plotPower("Power:", nominalPower));
-		list.add("Wind area:");
-		list.add("  Front: " + rayX);
-		list.add("  Up/Down: " + rayY);
-		list.add("  Left/Right: " + rayZ);
+		list.add(Translator.translate("eln.core.tile.windturbine.hint0"));
+		list.add(Utils.plotVolt(Translator.translate("eln.core.voltage")+":", maxVoltage));
+		list.add(Utils.plotPower(Translator.translate("eln.core.power")+":", nominalPower));
+		list.add(Translator.translate("eln.core.tile.windturbine.hint1")+":");
+		list.add("	"+Translator.translate("eln.core.pos.front")+": " + rayX);
+		list.add("	"+Translator.translate("eln.core.pos.vert")+": " + rayY);
+		list.add("	"+Translator.translate("eln.core.pos.hor")+": " + rayZ);
 	}
 }
 

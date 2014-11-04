@@ -1,5 +1,6 @@
 package mods.eln.sixnode.electricalentitysensor;
 
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.EntitySensorFilterDescriptor;
@@ -16,7 +17,7 @@ public class ElectricalEntitySensorContainer extends BasicContainer {
 				new GenericItemUsingDamageSlot(inventory, filterId, 184 / 2 - 12, 8, 1,
 												EntitySensorFilterDescriptor.class,
 												SlotSkin.medium,
-												new String[]{"Entity filter slot"}),
+												new String[]{Translator.translate("eln.core.entityfilter.slot.hint")}),
 			});
 	}
 }

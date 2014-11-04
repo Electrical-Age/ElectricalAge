@@ -7,6 +7,7 @@ import java.util.List;
 
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.node.transparent.TransparentNodeEntity;
@@ -623,7 +624,7 @@ public class UtilsClient {
 		if(showItemTooltip()){
 			dst.addAll(src);
 		}else{
-			dst.add("\u00a7F\u00a7o<hold shift>");
+			dst.add(Translator.translate("eln.core.holdshift"));
 		}
 	}
 	

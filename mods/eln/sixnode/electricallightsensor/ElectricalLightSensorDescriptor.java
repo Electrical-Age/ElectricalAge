@@ -49,7 +49,7 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		if(dayLightOnly) {
+		/*if(dayLightOnly) {
 			list.add("Provides an electrical signal");
 			list.add("with strength proportional to");
 			list.add("the amount of daylight.");
@@ -58,7 +58,7 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
 		else {
 			list.add("Provides an electrical signal");
 			list.add("whilst in the presense of light.");		
-		}
+		}*/
 	}
 	
 	@Override

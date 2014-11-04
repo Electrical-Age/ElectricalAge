@@ -11,6 +11,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -40,7 +41,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 
 	
 	
-	public String channel = "Default channel";
+	public String channel = Translator.translate("eln.core.defaultchannel");
 
 	private LightningGlitchProcess lightningGlitchProcess;
 	

@@ -1,5 +1,456 @@
-# ElectricalAge language file (United States - English)
+#Translate author | Автор перевода: Radviger
 
-# Mod info
-mod.name=Electrical Age
-mod.desc=Electricity in your base !
+#Tab:
+itemGroup.Eln=Electrical Age
+
+#Items | Ingots, dusts, overall resources:
+
+eln.core.item.copperingot.name=Copper Ingot
+eln.core.item.leadingot.name=Lead Ingot
+eln.core.item.tungsteningot.name=Tungsten Ingot
+eln.core.item.ferriteingot.name=Ferrite Ingot
+eln.core.item.alloyingot.name=Alloy Ingot
+eln.core.item.siliconingot.name=Silicon Ingot
+
+eln.core.item.copperdust.name=Copper Dust
+eln.core.item.irondust.name=Iron Dust
+eln.core.item.leaddust.name=Lead Dust
+eln.core.item.tungstendust.name=Tungsten Dust
+eln.core.item.golddust.name=Gold Dust
+eln.core.item.coaldust.name=Coal Dust
+eln.core.item.alloydust.name=Alloy Dust
+eln.core.item.silicondust.name=Silicon Dust
+eln.core.item.cinnabardust.name=Cinnabar Dust
+eln.core.item.mercury.name=Mercury
+eln.core.item.treeresin.name=Tree Resin
+eln.core.item.rubber.name=Rubber
+
+eln.core.item.copperplate.name=Copper Plate
+eln.core.item.ironplate.name=Iron Plate
+eln.core.item.goldplate.name=Gold Plate
+eln.core.item.leadplate.name=Lead Plate
+eln.core.item.siliconplate.name=Silicon Plate
+eln.core.item.alloyplate.name=Alloy Plate
+eln.core.item.coalplate.name=Coal Plate
+
+#Items | Electronics:
+eln.core.item.small50vcopperheatingcorp.name=Small 50v Copper Heating Corp
+eln.core.item.50vcopperheatingcorp.name=50v Copper Heating Corp
+eln.core.item.small200vcopperheatingcorp.name=Small 200v Copper Heating Corp
+eln.core.item.200vcopperheatingcorp.name=200v Copper Heating Corp
+
+eln.core.item.small50vironheatingcorp.name=Small 50v Iron Heating Corp
+eln.core.item.50vironheatingcorp.name=50v Heating Corp
+eln.core.item.small200vironheatingcorp.name=Small 200v Iron Heating Corp
+eln.core.item.200vironheatingcorp.name=200v Iron Heating Corp
+
+eln.core.item.small50vtungstenheatingcorp.name=Small 50v Tungsten Heating Corp
+eln.core.item.50vtungstenheatingcorp.name=50v Tungsten Heating Corp
+eln.core.item.small200vtungstenheatingcorp.name=Small 200v Tungsten Heating Corp
+eln.core.item.200vtungstenheatingcorp.name=200v Tungsten Heating Corp
+
+eln.core.item.onoffregulator1.name=On/Off Regulator 1%
+eln.core.item.onoffregulator10.name=On/Off Regulator 10%
+eln.core.item.analogicregulator.name=Analogic Regulator
+
+eln.core.item.small50vincandescentlightbulb.name=Small 50v Incandenscent Light Bulb
+eln.core.item.50vincandescentlightbulb.name=50v Incandenscent Light Bulb
+eln.core.item.200vincandescentlightbulb.name=Small 200v Incandenscent Light Bulb
+eln.core.item.small50vcarbonincandescentlightbulb.name=200v Incandenscent Light Bulb
+eln.core.item.50vcarbonincandescentlightbulb.name=Карбоновая лампа на 50V
+eln.core.item.50vfarminglamp.name=50v Farming Lamp
+eln.core.item.200vfarminglamp.name=200v Farming Lamp
+
+eln.core.item.small50veconomiclightbulb.name=Small 50v Economic Light Bulb
+eln.core.item.50veconomiclightbulb.name=50v Economic Light Bulb
+eln.core.item.200veconomiclightbulb.name=200v Economic Light Bulb
+
+eln.core.item.overheatingprotection.name=Overheating Protection
+eln.core.item.overvoltageprotection.name=Overvoltage Protection
+eln.core.item.combustionchamber.name=Combustion Chamber
+eln.core.item.cheapferromagneticcore.name=Cheap Ferromagnetic Core
+eln.core.item.averageferromagneticcore.name=Average Ferromagnetic Core
+eln.core.item.optimalferromagneticcore.name=Optimal Ferromagnetic Core
+
+eln.core.item.machineblock.name=Machine Block
+eln.core.item.advancedmachineblock.name=Advanced Machine Block
+
+eln.core.item.cheapelectricaldrill.name=Cheap Electrical Drill
+eln.core.item.averageelectricaldrill.name=Average Electrical Drill
+eln.core.item.fastelectricaldrill.name=Fast Electrical Drill
+
+eln.core.item.dielectric.name=Dielectric
+
+eln.core.item.cheapchip.name=Cheap Chip
+eln.core.item.advancedchip.name=Advanced Chip
+eln.core.item.electricalprobechip.name=Electrical Probe Chip
+eln.core.item.thermalprobechip.name=Thermal Probe Chip
+eln.core.item.solartracker.name=Solar Tracker
+eln.core.item.electricalmotor.name=Electrical Motor
+eln.core.item.advancedelectricalmotor.name=Advanced Electrical Motor
+eln.core.item.basicmagnet.name=Basic Magnet
+eln.core.item.advancedmagnet.name=Advanced Magnet
+eln.core.item.signalantenna.name=Signam Antenna
+eln.core.item.orescanner.name=Ore Scanner
+eln.core.item.miningpipe.name=Minimg Pipe
+eln.core.item.machinebooster.name=Machine Booster
+
+eln.core.item.playerfilter.name=Player Filter
+eln.core.item.monsterfilter.name=Monster Filter
+eln.core.item.animalfilter.name=Animal Filter
+
+eln.core.item.coppercable.name=Copper Cable
+eln.core.item.ironcable.name=Iron Cable
+eln.core.item.tungstencable.name=Tungsten Cable
+
+#Armor | Standart:
+item.Copper Helmet.name=Copper Helmer
+item.Copper Chestplate.name=Copper Chestplate
+item.Copper Leggings.name=Copper Leggings
+item.Copper Boots.name=Copper Boots
+
+#Armor | Electric:
+item.E-Coal Helmet.name=E-Coal Helmet
+item.E-Coal Chestplate.name=E-Coal Chestplate
+item.E-Coal Leggings.name=E-Coal Leggings
+item.E-Coal Boots.name=E-Coal Boots
+
+#Tools | Standart:
+eln.core.item.blackbrush.name=Black Brush
+eln.core.item.redbrush.name=Red Brush
+eln.core.item.greenbrush.name=Green Brush
+eln.core.item.brownbrush.name=Brown Brush
+eln.core.item.bluebrush.name=Blue Brush
+eln.core.item.purplebrush.name=Purple Brush
+eln.core.item.cyanbrush.name=Cyan Brush
+eln.core.item.silverbrush.name=Silver Brush
+eln.core.item.graybrush.name=Gray Brush
+eln.core.item.pinkbrush.name=Pink Brush
+eln.core.item.limebrush.name=Lime Brush
+eln.core.item.yellowbrush.name=Yellow Brush
+eln.core.item.lightbluebrush.name=Light Blue Brush
+eln.core.item.magentabrush.name=Magenta Brush
+eln.core.item.orangebrush.name=Orange Brush
+eln.core.item.whitebrush.name=White Brush
+
+eln.core.item.wrench.name=Wrench
+eln.core.item.Copper Sword.name=Copper Sword
+eln.core.item.Copper Pickaxe.name=Copper Pickaxe
+eln.core.item.Copper Axe.name=Copper Axe
+eln.core.item.Copper Shovel.name=Copper Shovel
+eln.core.item.Copper Hoe.name=Copper Hoe
+
+#Tools | Electrical:
+
+eln.core.item.smallflashlight.name=Small Flashlight
+eln.core.item.portableelectricalminingdrill.name=Portable Electrical Drill
+eln.core.item.portableelectricalaxe.name=Portable Electrical Axe
+eln.core.item.x-rayscanner.name=X-Ray Scanner
+
+eln.core.item.multimeter.name=Multimeter
+eln.core.item.thermometer.name=Thermometer
+eln.core.item.allmeter.name=All Meter
+eln.core.item.wirelessanalyser.name=Wireless Analyser
+
+eln.core.item.portablebattery.name=Portable Battery
+eln.core.item.portablebatterypack.name=Portable Battery Pack
+eln.core.item.portablecondensator.name=Portable Condensator
+eln.core.item.portablecondensatorpack.name=Portable Condensator Pack
+
+#Blocks | Ores:
+
+eln.core.block.copperore.name=Copper Ore
+eln.core.block.leadore.name=Lead Ore
+eln.core.block.tungstenore.name=Tungsten Ore
+eln.core.block.cinnabarore.name=Cinnabar Ore
+
+#Blocks | Wires, lamps, switches:
+
+eln.core.block.groundcable.name=Ground Cable
+eln.core.block.hub.name=Hub
+eln.core.block.electricalsource.name=Electrical Source
+eln.core.block.signalcable.name=Signal Cable
+eln.core.block.lowvoltagecable.name=Low Voltage Cable
+eln.core.block.mediumvoltagecable.name=Medium Voltage Cable
+eln.core.block.highvoltagecable.name=High Voltage Cable
+eln.core.block.veryhighvoltagecable.name=Very High Voltage Cable
+eln.core.block.copperthermalcable.name=Copper Thermal Cable
+
+eln.core.block.lampsocketa.name=Lamp Socket A
+eln.core.block.lampsocketbprojector.name=Lamp Socket B Projector
+eln.core.block.robustlampsocket.name=Robust Lamp Socket
+eln.core.block.flatlampsocket.name=Flat Lamp Socket
+eln.core.block.simplelampsocket.name=Simple Lamp Socket
+eln.core.block.fluorescentlampsocket.name=Fluorescent Lamp Socket
+eln.core.block.streetlight.name=Street Light
+eln.core.block.suspendedlampsocket.name=Suspended Lamp Socket
+eln.core.block.longsuspendedlampsocket.name=Long Suspended Lamp Socket
+
+eln.core.block.lampsupply.name=Lamp Supply
+
+#Blocks | Machines, accumulators, controllers:
+
+tile.eln.EnergyConverterElnToOtherLVUBlock.name=Energy Converter Eln To Other LVU
+tile.eln.EnergyConverterElnToOtherMVUBlock.name=Energy Converter Eln To Other MVU
+tile.eln.EnergyConverterElnToOtherHVUBlock.name=Energy Converter Eln To Other HVU
+
+eln.core.block.tutorialsign.name=Tutorial Sign
+eln.core.block.treeresincollector.name=Tree Resin Collector
+eln.core.block.electricprobe.name=Electric Probe
+eln.core.block.electricalanemometersensor.name=Electric anemometer Sensor
+eln.core.block.weak50vbatterycharger.name=Weak 50v Battery Charger
+eln.core.block.50vbatterycharger.name=50v Battery Charger
+eln.core.block.200vbatterycharger.name=200v Battery Charger
+eln.core.block.wirelesssignalreceiver.name=Wireless Signal Receiver
+eln.core.block.wirelesssignaltransmitter.name=Wireless Signal Transmitter
+eln.core.block.wirelesssignalrepeater.name=Wireless Signal Repeater
+eln.core.block.datalogger.name=Data Logger
+eln.core.block.lowvoltagerelay.name=Low Voltage Relay
+eln.core.block.mediumvoltagerelay.name=Medium Voltage Relay
+eln.core.block.highvoltagerelay.name=High Voltage Relay
+eln.core.block.veryhighvoltagerelay.name=Very High Voltage Relay
+eln.core.block.signaltrimmer.name=Signal Trimmer
+eln.core.block.signalswitch.name=Signal Switch
+eln.core.block.signalbutton.name=Signal Button
+eln.core.block.wirelessswitch.name=Wireless Switch
+eln.core.block.wirelessbutton.name=Wireless Button
+eln.core.block.10adiode.name=10a Diode
+eln.core.block.25adiode.name=25a Diode
+eln.core.block.signaldiode.name=Signal Diode
+eln.core.block.powercapacitor.name=Power Capacitor
+eln.core.block.powerinductor.name=Power Inductor
+eln.core.block.veryhighvoltageswitch.name=Very High Voltage Switch
+eln.core.block.highvoltageswitch.name=High Voltage Switch
+eln.core.block.mediumvoltageswitch.name=Medium Voltage Switch
+eln.core.block.lowvoltageswitch.name=Low Voltage Switch
+eln.core.block.electricalbreaker.name=Electrical Breaker
+eln.core.block.energymeter.name=Energy Meter
+eln.core.block.advancedenergymeter.name=Advanced Energy Meter
+eln.core.block.electricalprobe.name=Electrical Probe
+eln.core.block.voltageprobe.name=Voltage Probe
+eln.core.block.thermalprobe.name=Thermal Probe
+eln.core.block.temperatureprobe.name=Themperature Probe
+eln.core.block.analogvumeter.name=Analog Vu Meter
+eln.core.block.ledvumeter.name=Lead Vu Meter
+eln.core.block.nuclearalarm.name=Nuclear Alaram
+eln.core.block.standardalarm.name=Standard Alaram
+eln.core.block.electricaldaylightsensor.name=Electrical Daylight Sensor
+eln.core.block.electricallightsensor.name=Electrical Light Sensor
+eln.core.block.electricalweathersensor.name=Electrical Weather Sensor
+eln.core.block.electricalentitysensor.name=Electrical Entity Sensor
+eln.core.block.electricalfiredetector.name=Electrical Fire Sensor
+eln.core.block.redstone-to-voltageconverter.name=Redstone-to-Voltage Converter
+eln.core.block.voltage-to-redstoneconverter.name=Voltage-to-Redstone Converter
+eln.core.block.electricaltimer.name=Electrical Timer
+eln.core.block.signalprocessor.name=Signal Processor
+eln.core.block.modbusrtu.name=Mod Bus RTU
+eln.core.block.watch.name=Watch
+eln.core.block.transformer.name=Transformer
+eln.core.block.stoneheatfurnace.name=Stone Heat Furcnace
+eln.core.block.50vturbine.name=50v Turbine
+eln.core.block.200vturbine.name=200v Turbine
+eln.core.block.lowpowertransmitterantenna.name=Low Power Transmitter Antenna
+eln.core.block.lowpowerreceiverantenna.name=Low Receiver Transmitter Antenna
+eln.core.block.mediumpowertransmitterantenna.name=Medium Power Transmitter Antenna
+eln.core.block.mediumpowerreceiverantenna.name=Medium Power Receiver Antenna
+eln.core.block.highpowertransmitterantenna.name=High Power Transmitter Antenna
+eln.core.block.highpowerreceiverantenna.name=High Power Receiver Antenna
+eln.core.block.costorientedbattery.name=Cost Oriented Battery
+eln.core.block.lifeorientedbattery.name=Life Oriented Battery
+eln.core.block.capacityorientedbattery.name=Capacity Oriented Battery
+eln.core.block.voltageorientedbattery.name=Voltage Oriented Battery
+eln.core.block.currentorientedbattery.name=Current Oriented Battery
+eln.core.block.single-usebattery.name=Single-Use Battery
+eln.core.block.electricalfurnace.name=Electrical Furnace
+eln.core.block.50vmacerator.name=50v Macerator
+eln.core.block.200vmacerator.name=200v Macerator
+eln.core.block.50vcompressor.name=50v Compressor
+eln.core.block.200vcompressor.name=200v Compressor
+eln.core.block.50vmagnetizer.name=50v Magnetizer
+eln.core.block.200vmagnetizer.name=200v Magnetizer
+eln.core.block.50vplatemachine.name=50v Plate Machine
+eln.core.block.200vplatemachine.name=200v Plate Machine
+eln.core.block.50veggincubator.name=50v Egg Incubator
+eln.core.block.autominer.name=Autominer
+eln.core.block.smallsolarpanel.name=Small Solar Panel
+eln.core.block.smallrotatingsolarpanel.name=Small Rotating Solar Panel
+eln.core.block.windturbine.name=Wind Turbine
+eln.core.block.waterturbine.name=Water Turbine
+eln.core.block.smallpassivethermaldissipator.name=Small Passive Thermal Dissipator
+eln.core.block.smallactivethermaldissipator.name=Small Active Thermal Dissipator
+eln.core.block.200vactivethermaldissipator.name=200v Active Thermal Dissipator
+eln.core.block.experimentaltransporter.name=Experemental Transporter
+eln.core.block.800vdefenceturret.name=800v Defence Turret
+
+#Hints & Info:
+
+eln.core.holdshift=§7Hold §a§oShift §7for detalis
+
+eln.core.style=Style
+eln.core.light=Light
+eln.core.power=Power
+eln.core.voltage=Voltage
+eln.core.current=Current
+eln.core.resistance=Resistance
+eln.core.nlife=Nominal Life
+eln.core.life=Life
+eln.core.npower=Nominal Power
+eln.core.chargepower=Charge Power
+eln.core.rechargepower=Recharge Power
+eln.core.nvoltage=Nominal Voltage
+eln.core.spower=Standby Power
+eln.core.voltageout=Voltage Out
+eln.core.powerout=Power Out
+eln.core.delta=Delta
+eln.core.temperature=Temperature
+eln.core.charge=Charge
+eln.core.cooling=Cooling
+eln.core.nusage=Nominal Usage
+eln.core.tmax=Tmax
+eln.core.vmax=Max Voltage
+eln.core.pmax=Max Power
+eln.core.on=On
+eln.core.off=Off
+eln.core.chargedat=charget at
+eln.core.fulcharge=Full Charge
+eln.core.nominal=Nominal
+
+eln.core.tpo=Time per Operation
+eln.core.epo=Energy per Operation
+
+eln.core.lamp.state=State
+eln.core.state.off=Off
+eln.core.state.on=On
+
+eln.core.item.brush.life=Life
+
+eln.core.outat=Out at
+
+eln.core.pos.front=Frong
+eln.core.pos.vert=Up/Down
+eln.core.pos.hor=Left/Right
+
+eln.core.chargespeed=Charge Speed
+eln.core.dischargespeed=Discharge Speed
+eln.core.energystored=Energy Stored
+eln.core.defaultchannel=Default channel
+eln.core.angle=Angle
+eln.core.angleto=to
+eln.core.blocks=Blocks
+eln.core.range=Range
+eln.core.efficiency=Efficiency
+eln.core.efficiencyto=to
+eln.core.metersecond=m/s
+eln.core.inductance=Inductance
+
+eln.core.tile.lamp.spotrange=Spot Range
+eln.core.tile.lamp.status.parallel=Parallel
+eln.core.tile.lamp.status.serial=Serial
+eln.core.tile.lamp.poweredbysupply=Powered By Supply
+eln.core.tile.lamp.poweredbycable=Powered By Cable
+eln.core.tile.lamp.cableslotempty=Cable Slot Empty
+eln.core.tile.lamp.connectedto=connected to
+eln.core.tile.lamp.notinrange=not in range
+eln.core.tile.lamp.orientation=Orientation
+eln.core.tile.turret.attack=Attack
+eln.core.tile.turret.notattack=Not Attack
+
+eln.core.tile.antenna.hint0=Wireless Energy Transmitter
+eln.core.tile.antenna.hint1=Nominal usage
+eln.core.tile.antenna1.hint0=Wireless Enrgy Receiver
+
+eln.core.tile.elfurnace.hint0=Similar to a vanilla furnace, but
+eln.core.tile.elfurnace.hint1=fow working needs electricity.
+
+eln.core.tile.capacitor.incrcapacity=(Increases voltage)
+eln.core.tile.capacitor.incrvoltage=(Increases power)
+eln.core.tile.inductor.inductance=(Increases the inductance)
+eln.core.tile.supply.hint0=By default, the maximum radius is
+eln.core.tile.supply.hint1=32 blocks, but each installed cable
+eln.core.tile.supply.hint2=adds another one.
+eln.core.tile.turbine.hint0=Converts heat into electricity.
+eln.core.tile.waterturbine.hint0=Produces electricity on the water.
+eln.core.tile.waterturbine.nowaterplace=Not enough space for water
+eln.core.tile.windturbine.hint0=Produces electricity from the wind.
+eln.core.tile.windturbine.hint1=Wind Area
+eln.core.tile.transformer.hint0=Converts the input voltage and
+eln.core.tile.transformer.hint1=displays it.
+eln.core.tile.transformer.hint2=The ratio of conversion is determined
+eln.core.tile.transformer.hint3=on stack of the cables and the ratio of sizes.
+eln.core.tile.dissipator.hint0=Is used for cooling the turbine.
+eln.core.tile.supply.hint0=Supply all lights
+eln.core.tile.supply.hint1=from one channel.
+eln.core.tile.hub.hint0=Allows cross wires
+eln.core.tile.hub.hint1=not combine them.
+eln.core.tile.grndcable.hint0=Provides conductivity of zero voltage.
+eln.core.tile.grndcable.hint1=Can be used to ground negative
+eln.core.tile.grndcable.hint2=battery contacts.
+eln.core.tile.grndcable.hint3=Internal Resistance
+eln.core.tile.heatfurnace.hint0=Produces electricity when heated.
+eln.core.tile.signalcable.hint0=This wire is adapted to
+eln.core.tile.signalcable.hint1=rapid transmission of electrical signals.
+eln.core.tile.signalcable.hint2=The signal is an electrical information
+eln.core.tile.signalcable.hint3=which can range from 0V to
+eln.core.tile.signalcable.hint4=§eDo not attempt to transmit electricity.
+eln.core.tile.solarpanel.hint0=Produces electricity from sunlight.
+eln.core.tile.solarpanel.hint1=Can be oriented.
+eln.core.tile.resincollector.hint0=§cThis block can only be placed on a side of a growing tree!
+eln.core.tile.supply.specifychannel=Specify the channel
+eln.core.tile.wireless.specifychannel=Specify the wireless channel
+eln.core.tile.transporter.eneeded=Energy Needed
+eln.core.tile.transporter.powersink=Power Level
+eln.core.tile.transporter.start=Start
+eln.core.tile.transporter.crtrs=Current Teleport
+eln.core.tile.transporter.tgtrs=Directed Teleport
+eln.core.tile.relay.hint0=The relay has the ability to
+eln.core.tile.relay.hint1=conduct electricity or not,
+eln.core.tile.relay.hint2=depending on the voltage of the input signal.
+eln.core.tile.gatesource.hint0=Emits a voltage controlled by the player.
+eln.core.tile.elsensor.hint0=Measures the voltage in the wires.
+eln.core.tile.elsensor.hint1=Has the signal output.
+eln.core.tile.elsensor.hint2=Can measure
+eln.core.tile.elsensor.hint3=Voltage/Power/Current
+eln.core.tile.windsensor.hint0=Provides an electrical signal,
+eln.core.tile.windsensor.hint1=depends on the wind.
+eln.core.tile.windsensor.hint2=Maximum wind
+eln.core.tile.weathersensor.hint0=Provides an electrical signal
+eln.core.tile.weathersensor.hint1=depending on the weather.
+eln.core.tile.weathersensor.hint2=clear
+eln.core.tile.weathersensor.hint3=rain
+eln.core.tile.weathersensor.hint4=thunder
+eln.core.tile.vumeter.hint0=Displays the signal level.
+eln.core.tile.etimeout.hint0=When the input signal is above
+eln.core.tile.etimeout.hint1=maintains a high output signal
+eln.core.tile.etimeout.hint2=within a certain time.
+eln.core.tile.eswitch.hint0=Can manually interrupt the power line.
+eln.core.tile.diode.hint0=Through the diode current can flow only in one direction.
+eln.core.tile.elbreaker.hint0=Protects appliances and machines.
+eln.core.tile.elbreaker.hint1=Disabled if
+eln.core.tile.elbreaker.hint2=Voltage exceeds the conductivity of the cable
+eln.core.tile.elbreaker.hint3=Current exceeds the conductivity of the cable
+eln.core.tile.relay.state0=Opened
+eln.core.tile.relay.state1=Closed
+
+eln.core.tool.wrench.hint0=Can be used to configure
+eln.core.tool.wrench.hint1=some mechanics and interchangeable
+eln.core.tool.wrench.hint2=with wrenches from other mods.
+
+
+eln.core.lamp.slot.hint=Lamp Slot
+eln.core.regulator.slot.hint=Regulator Slot
+eln.core.booster.slot.hint=Booster Slot
+eln.core.coppercable.slot.hint=Copper Cable Slot
+eln.core.cable.slot.hint=Cable Slot
+eln.core.paper.slot.name=Paper Slot
+eln.core.redstone.slot.hint=Redstone Slot
+eln.core.dielectric.slot.hint=Dielectric Slot
+eln.core.ferromagnetic.slot.hint=Ferromagnetic Core Slot
+eln.core.drill.slot.hint=Drill Slot
+eln.core.tracker.slot.hint=Tracker Slot
+eln.core.orescanner.slot.hint=Orescanner Slot
+eln.core.miningpipe.slot.hint=Mining Pipe Slot
+eln.core.egg.slot.hint=Egg Slot
+eln.core.entityfilter.slot.hint=Entity Filter Slot
+eln.core.heatcorp.slot.hint=Heating Corp Slot
+eln.core.thermisolator.slot.hint=Thermal Isolator Slot
+eln.core.battery.slot.hint=Portable Battery Slot

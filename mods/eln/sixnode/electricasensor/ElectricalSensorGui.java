@@ -1,27 +1,16 @@
 package mods.eln.sixnode.electricasensor;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
-import org.lwjgl.opengl.GL11;
-
+import mods.eln.Translator;
 import mods.eln.gui.GuiContainerEln;
-import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
 import mods.eln.gui.HelperStdContainer;
 import mods.eln.gui.IGuiObject;
-import mods.eln.misc.Utils;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.gui.inventory.GuiEditSign;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 
 public class ElectricalSensorGui extends GuiContainerEln{
@@ -45,33 +34,33 @@ public class ElectricalSensorGui extends GuiContainerEln{
  		
 		if(render.descriptor.voltageOnly == false)
 		{
-			voltageType = newGuiButton(8, 8,50, "Voltage");
-			currentType = newGuiButton(8, 8+24,50, "Current");
-			powerType = newGuiButton(8, 8+48,50, "Power");
+			voltageType = newGuiButton(8, 8,50, Translator.translate("eln.core.voltage"));
+			currentType = newGuiButton(8, 8+24,50, Translator.translate("eln.core.current"));
+			powerType = newGuiButton(8, 8+48,50, Translator.translate("eln.core.power"));
 			dirType = newGuiButton(8+50+4, 8+48, 50, "");
 
 			int x = 0,y = -12;
-			validate = newGuiButton(x+8 + 50 + 4 + 50 + 4,y+ (166-84)/2 - 9,50, "Validate");
+			validate = newGuiButton(x+8 + 50 + 4 + 50 + 4,y+ (166-84)/2 - 9,50, Translator.translate("eln.core.validate"));
 			
 			lowValue = newGuiTextField(x+8 + 50 + 4,y+ (166-84)/2+3, 50);
 	        lowValue.setText(render.lowValue);
-	        lowValue.setComment(new String[]{"Probed value","that product","a 0% output"});
+	        lowValue.setComment(new String[]{Translator.translate("eln.core.tile.probe.probedvalue"),Translator.translate("eln.core.tile.probe.hint0percent")});
 	        
 	        highValue = newGuiTextField(x+8 + 50 + 4,y+ (166-84)/2 -13, 50);
 	        highValue.setText(render.highValue);
-	        highValue.setComment(new String[]{"Probed value","that product","a 100% output"});
+	        highValue.setComment(new String[]{Translator.translate("eln.core.tile.probe.probedvalue"),Translator.translate("eln.core.tile.probe.hint100percent")});
 		}
 		else
 		{
-			validate = newGuiButton(8+50 + 4, 10,50, "Validate");
+			validate = newGuiButton(8+50 + 4, 10,50, Translator.translate("eln.core.validate"));
 			
 			lowValue = newGuiTextField(8, 6+16, 50);
 	        lowValue.setText(render.lowValue);
-	        lowValue.setComment(new String[]{"Probed voltage","that product","a 0% output"});
+	        lowValue.setComment(new String[]{Translator.translate("eln.core.tile.probe.probedvoltage"),Translator.translate("eln.core.tile.probe.hint0percent")});
 	        
 	        highValue = newGuiTextField(8,6, 50);
 	        highValue.setText(render.highValue);
-	        highValue.setComment(new String[]{"Probed voltage","that product","a 100% output"});
+	        highValue.setComment(new String[]{Translator.translate("eln.core.tile.probe.probedvoltage"),Translator.translate("eln.core.tile.probe.hint100percent")});
 		}
 	}
 	

@@ -9,28 +9,21 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import mods.eln.Eln;
-import mods.eln.item.ThermalIsolatorElement;
-import mods.eln.misc.IFunction;
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
-import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.wiki.Data;
-
-import com.google.common.base.Function;
 
 public class ElectricalVuMeterDescriptor extends SixNodeDescriptor {
 
 	public ElectricalVuMeterDescriptor(String name, String objName, boolean onOffOnly) {
 		super(name, ElectricalVuMeterElement.class, ElectricalVuMeterRender.class);
 		this.onOffOnly = onOffOnly;
-		obj = Eln.instance.obj.getObj(objName);
+		obj = Eln.obj.getObj(objName);
 		if(obj != null){
 			if(obj.getString("type").toLowerCase().equals("rot")) {
 				objType = ObjType.Rot;
@@ -97,10 +90,11 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor {
 		}
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Displays the value of a signal.");
+		list.add(Translator.translate("eln.core.tile.vumeter.hint0"));
 	}
 	
 	@Override

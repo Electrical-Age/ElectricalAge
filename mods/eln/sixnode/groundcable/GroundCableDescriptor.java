@@ -6,6 +6,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -36,15 +37,17 @@ public class GroundCableDescriptor extends SixNodeDescriptor{
 		super.setParent(item, damage);
 		Data.addWiring(newItemStack());
 	}
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Provides a zero volt reference.");
-		list.add("Can be used to ground negative");
-		list.add("battery pins.");
-		list.add(Utils.plotOhm("Internal resistance",Eln.getSmallRs()));
+
+		list.add (Translator.translate("eln.core.tile.grndcable.hint0")); 
+		list.add (Translator.translate("eln.core.tile.grndcable.hint1")); 
+		list.add (Translator.translate("eln.core.tile.grndcable.hint2")); 
+		list.add (Utils.plotOhm (Translator.translate("eln.core.tile.grndcable.hint3"), Eln.getSmallRs ()));
 	}
 	
 }

@@ -1,5 +1,6 @@
 package mods.eln.sixnode.electricalmath;
 
+import mods.eln.Translator;
 import mods.eln.gui.ItemStackFilter;
 import mods.eln.gui.SlotFilter;
 import mods.eln.gui.ISlotSkin.SlotSkin;
@@ -17,7 +18,7 @@ public class ElectricalMathContainer extends BasicContainer {
 	
 	public ElectricalMathContainer(NodeBase node, EntityPlayer player, IInventory inventory) {
 		super(player, inventory, new Slot[]{
-				new SlotFilter(inventory, restoneSlotId, 125+27+44/2, 25, 64, new ItemStackFilter[]{new ItemStackFilter(Items.redstone)}, SlotSkin.medium, new String[]{"Redstone Slot"})
+				new SlotFilter(inventory, restoneSlotId, 125+27+44/2, 25, 64, new ItemStackFilter[]{new ItemStackFilter(Items.redstone)}, SlotSkin.medium, new String[]{Translator.translate("eln.core.redstone.slot.hint")})
 			});
 		this.node = node;
 	}

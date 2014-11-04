@@ -122,7 +122,7 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Emit a sonor alarm when");
-		list.add("the input signal is high");
+		/*list.add("Emit a sonor alarm when");
+		list.add("the input signal is high");*/
 	}
 }

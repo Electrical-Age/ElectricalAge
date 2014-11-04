@@ -3,13 +3,13 @@ package mods.eln.item.electricalitem;
 import java.util.List;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
-import mods.eln.server.PlayerManager.PlayerMetadata;
 import mods.eln.wiki.Data;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -51,8 +51,6 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		this.viewYAlpha = viewYAlpha;
 		this.resWidth = resWidth;
 		this.resHeight = resHeight;
-		this.obj = obj;
-		
 		if(obj != null){
 			base = obj.getPart("Base");
 			led = obj.getPart("Led");
@@ -75,8 +73,6 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	double energyStorage, dischargePower, chargePower;
 	float viewRange, viewYAlpha;
 	int resWidth, resHeight;
-	private Obj3D obj;
-
 	Obj3DPart base,led,ledHalo;
 	Obj3DPart textBat[],textRun,textInit;
 	Obj3DPart buttons,screenDamage[],screenLuma;
@@ -97,8 +93,8 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			boolean par5) {
 		if(world.isRemote) return;
 		if(entity instanceof EntityPlayerMP == false) return;
-		PlayerMetadata playerData = Eln.playerManager.get((EntityPlayerMP) entity);
-		double energy = getEnergy(stack);
+		Eln.playerManager.get((EntityPlayerMP) entity);
+		getEnergy(stack);
 		byte state = getState(stack);
 		short counter = getCounter(stack);
 	
@@ -145,7 +141,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		boolean playerInteractRise = true;
 		double energy = getEnergy(s);
 		byte state = getState(s);
-		short counter = getCounter(s);
+		getCounter(s);
 		switch(state){
 		case sIdle:
 			if(playerInteractRise && energy > dischargePower*minimalEnergyTimeToBoot){
@@ -185,13 +181,14 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 
 	
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Discharge speed: " + (int) dischargePower + "W");
-		list.add(Utils.plotEnergy("Energy Stored:", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
+		list.add(Translator.translate("eln.core.dischargespeed")+": " + (int) dischargePower + "W");
+		list.add(Utils.plotEnergy(Translator.translate("eln.core.energystored")+":", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
 	}
 
 
@@ -295,7 +292,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		
 		double energy = getEnergy(item);
 		byte state = getState(item);
-		short counter = getCounter(item);
+		getCounter(item);
 		
 		GL11.glPushMatrix();			 
 			
@@ -369,7 +366,6 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	
 					
 					float scale = 1f/resWidth*0.50f;
-					float p = 1/64f;
 					GL11.glTranslatef(0.90668f, 0.163f, -0.25078f);
 					GL11.glRotatef(270, 1,0, 0);
 					GL11.glRotatef(270, 0,0, 1);
@@ -498,7 +494,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 				}
 			}
 			
-			for(OreScannerConfigElement c : Eln.instance.oreScannerConfig){
+			for(OreScannerConfigElement c : Eln.oreScannerConfig){
 				if(c.blockKey < blockKeyFactor.length)
 					blockKeyFactor[c.blockKey] = c.factor;
 			}
@@ -519,7 +515,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		public void generate(	World w,double posX,double posY,double posZ,
 						float alphaY,float alphaX){
 			float[] blockKeyFactor = getBlockKeyFactor();
-			long start = System.nanoTime();
+			System.nanoTime();
 			
 			//Utils.println(posX + " " + posY + " " + posZ + " " + alphaX + " " + alphaY + " ");
 			
@@ -538,8 +534,6 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 
 
 			for(int screenY = 0;screenY < resHeight;screenY++){
-				int i = 0;
-				i++;
 				for(int screenX = 0;screenX < resWidth;screenX++){
 					float x = (float) (posX - posXint),y = (float) (posY - posYint),z = (float) (posZ - posZint);
 					
@@ -669,8 +663,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 					screenBlue[screenY][screenX] = stackBlue-stackGreen*0f;
 				}				
 			}
-			long end = System.nanoTime();
-			//Utils.println("Generate : " + (end - start)/1000 + "us");
+			System.nanoTime();
 		}
 		
 		
@@ -684,7 +677,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 		}
 		
 		public void draw(float redFactor,float greenFactor,float blueFactor){
-			long start = System.nanoTime();
+			System.nanoTime();
 			UtilsClient.disableLight();
 			UtilsClient.disableTexture();
 			//GL11.glShadeModel(GL11.GL_SMOOTH);
@@ -692,8 +685,6 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			for(int screenY = 0;screenY < resHeight;screenY++){
 				GL11.glBegin(GL11.GL_QUAD_STRIP);
 				for(int screenX = 0;screenX < resWidth+1;screenX++){
-					float s;
-					
 					//s = screen[screenY][screenX]; GL11.glColor3f(s >= 0 ? s : 0, 0, s < 0.1 ? -s + 0.1f : 0);		
 					//Color c = Color.getHSBColor(Math.max(0,Math.min(1,s)),1,1);
 				//	GL11.glColor3ub((byte)c.getRed(),(byte)c.getGreen(),(byte)c.getBlue());		
@@ -728,9 +719,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			UtilsClient.enableTexture();
 			UtilsClient.enableLight();
 			GL11.glColor3f(1f, 1f, 1f);
-			//GL11.glShadeModel(GL11.GL_FLAT);
-			long end = System.nanoTime();
-			//Utils.println("Draw : " + (end - start)/1000 + "us");
+			System.nanoTime();
 		}	
 	}
 	

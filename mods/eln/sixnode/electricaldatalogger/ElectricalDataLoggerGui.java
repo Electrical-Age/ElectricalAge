@@ -8,6 +8,7 @@ import java.text.ParseException;
 
 import org.lwjgl.opengl.GL11;
 
+import mods.eln.Translator;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
@@ -39,7 +40,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	State state = State.display;
 	
 	void displayEntry() {
-		config.displayString = "Config";
+		config.displayString = Translator.translate("eln.core.datalogger.button.config");
 		config.visible = true;
 		pause.visible = true;
 		resetBt.visible = true;
@@ -59,7 +60,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	void configEntry() {	
 		pause.visible = false;
 		config.visible = true;
-		config.displayString = "Return to Display";
+		config.displayString = Translator.translate("eln.core.datalogger.button.back");
 		resetBt.visible = false;
 		printBt.visible = true;
 		voltageType.visible = true;
@@ -78,28 +79,28 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	public void initGui() {
 		super.initGui();
 
-        voltageType = newGuiButton(176 / 2 - 60 - 2, 8 + 20 + 2 - 2, 60, "Voltage");
-        currentType = newGuiButton(176 / 2 + 2, 8 + 20 + 2 - 2, 60, "Current");
-		resetBt = newGuiButton(176 / 2 - 50, 8 + 20 + 2 - 2, 48, "Reset");
-		powerType = newGuiButton(176 / 2 - 60 - 2, 8 + 40 + 4 - 2, 60, "Power");
-		celsuisTyp = newGuiButton(176 / 2 + 2, 8 + 40 + 4 - 2, 60, "Celsuis");
-		percentTyp = newGuiButton(176 / 2 - 60 - 2, 8 + 60 + 6 - 2, 60, "Percent");
-		energyType = newGuiButton(176 / 2 + 2, 8 + 60 + 6 - 2, 60, "Energy");
+        voltageType = newGuiButton(176 / 2 - 60 - 2, 8 + 20 + 2 - 2, 60, Translator.translate("eln.core.voltage"));
+        currentType = newGuiButton(176 / 2 + 2, 8 + 20 + 2 - 2, 60, Translator.translate("eln.core.current"));
+		resetBt = newGuiButton(176 / 2 - 50, 8 + 20 + 2 - 2, 48, Translator.translate("eln.core.datalogger.button.reset"));
+		powerType = newGuiButton(176 / 2 - 60 - 2, 8 + 40 + 4 - 2, 60, Translator.translate("eln.core.power"));
+		celsuisTyp = newGuiButton(176 / 2 + 2, 8 + 40 + 4 - 2, 60, Translator.translate("eln.core.celsuis"));
+		percentTyp = newGuiButton(176 / 2 - 60 - 2, 8 + 60 + 6 - 2, 60, Translator.translate("eln.core.percent"));
+		energyType = newGuiButton(176 / 2 + 2, 8 + 60 + 6 - 2, 60, Translator.translate("eln.core.energy"));
 		config = newGuiButton(176 / 2 - 50, 8 - 2, 100, "");
-		printBt = newGuiButton(176 / 2 - 48 / 2, 123, 48, "Print");
+		printBt = newGuiButton(176 / 2 - 48 / 2, 123, 48, Translator.translate("eln.core.datalogger.button.print"));
 		pause = newGuiButton(176 / 2 + 2, 8 + 20 + 2 - 2, 48, "");
 		
 		samplingPeriode = newGuiTextField(30, 101, 50);
         samplingPeriode.setText(render.log.samplingPeriod);
-        samplingPeriode.setComment(new String[]{"Sampling period"});
+        samplingPeriode.setComment(new String[]{Translator.translate("eln.core.datalogger.edit.period")});
         
         maxValue = newGuiTextField(176 - 50 - 30, 101 - 7, 50);
         maxValue.setText(render.log.maxValue);
-        maxValue.setComment(new String[]{"Y-axis Max"});
+        maxValue.setComment(new String[]{Translator.translate("eln.core.datalogger.edit.yaxmax")});
         
         minValue = newGuiTextField(176 - 50 - 30, 101 + 8, 50);
         minValue.setText(render.log.minValue);
-        minValue.setComment(new String[]{"Y-axis Min"});
+        minValue.setComment(new String[]{Translator.translate("eln.core.datalogger.edit.yaxmin")});
        
         displayEntry();
 	}
@@ -196,9 +197,9 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
     	}
     	
     	if(render.pause)
-    		pause.displayString = "Continue";
+    		pause.displayString = Translator.translate("eln.core.datalogger.button.continue");
     	else
-    		pause.displayString = "Pause";
+    		pause.displayString = Translator.translate("eln.core.datalogger.button.pause");
     	
     	boolean a = inventorySlots.getSlot(ElectricalDataLoggerContainer.paperSlotId).getStack() != null;
     	boolean b = inventorySlots.getSlot(ElectricalDataLoggerContainer.printSlotId).getStack() == null;

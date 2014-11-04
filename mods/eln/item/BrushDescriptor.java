@@ -2,10 +2,8 @@ package mods.eln.item;
 
 import java.util.List;
 
-import cpw.mods.fml.common.registry.GameRegistry;
-
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
-import mods.eln.misc.Utils;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -28,7 +26,7 @@ public class BrushDescriptor  extends GenericItemUsingDamageDescriptor
 		
 		int color = getColor(stack),life = getLife(stack);
 		if(color == 15 && life == 0)
-			return "Empty " + super.getName(stack);
+			return Translator.translate("eln.core.item.emptybrush.name");
 		return super.getName(stack);
 	}
 	
@@ -73,13 +71,14 @@ public class BrushDescriptor  extends GenericItemUsingDamageDescriptor
 	}
 	
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add("Life : " + itemStack.getTagCompound().getInteger("life"));
+		list.add(Translator.translate("eln.core.item.brush.life")+ ": " + itemStack.getTagCompound().getInteger("life"));
 		
 	}
 	

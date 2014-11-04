@@ -1,24 +1,12 @@
 package mods.eln.sixnode.lampsocket;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.util.List;
 
-import org.lwjgl.opengl.GL11;
-
-import mods.eln.Eln;
-import mods.eln.misc.IConfigSharing;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.Obj3D;
-import mods.eln.misc.Utils;
-import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.Translator;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 public class LampSocketDescriptor extends SixNodeDescriptor{
 	public LampSocketType socketType;
@@ -100,6 +88,7 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 		return hasGhostGroup();
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
@@ -110,10 +99,10 @@ public class LampSocketDescriptor extends SixNodeDescriptor{
 		if(range != 0 || alphaZMin != alphaZMax){
 			//list.add("Projector");
 			if(range != 0){
-				list.add("Spot range : " + range + " Blocks");
+				list.add(Translator.translate("eln.core.tile.lamp.spotrange")+": " + range + " "+Translator.translate("eln.core.blocks"));
 			}
 			if(alphaZMin != alphaZMax){
-				list.add("Angle : " + ((int)alphaZMin) + "\u00B0 to " + ((int)alphaZMax) + "\u00B0");
+				list.add(Translator.translate("eln.core.angle")+": " + ((int)alphaZMin) + "\u00B0 "+Translator.translate("eln.core.angleto")+" " + ((int)alphaZMax) + "\u00B0");
 			}
 		}
 	}
