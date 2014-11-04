@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 import org.lwjgl.opengl.GL11;
 
+import mods.eln.Translator;
 import mods.eln.gui.GuiButtonEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiLabel;
@@ -73,7 +74,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 		
 		
 		
-		GuiLabel title = new GuiLabel(2, y, "Modbus RTU");
+		GuiLabel title = new GuiLabel(2, y, Translator.translate("eln.core.block.modbusrtu.name"));
 		extender.add(title);
 		
 		y += 10;
@@ -82,13 +83,13 @@ public class ModbusRtuGui extends GuiScreenEln{
 		if(render.station != -1)
 			station.setText(render.station);
 		station.setObserver(this);
-		station.setComment(0, "Station ID");
+		station.setComment(0, Translator.translate("eln.core.tile.modbusrtu.edtid.hint0"));
 		extender.add(station);
 		
 		name = new GuiTextFieldEln(fontRendererObj,2+station.getWidth() + 12, y, 101,helper);  y+= name.getHeight();
 		name.setText(render.name);
 		name.setObserver(this);
-		name.setComment(0, "Station name");
+		name.setComment(0, Translator.translate("eln.core.tile.modbusrtu.edtname.hint0"));
 		extender.add(name);
 		
 		y += 5;
@@ -96,11 +97,11 @@ public class ModbusRtuGui extends GuiScreenEln{
 				
 		{
 			x = 2;
-			GuiLabel txLabel = new GuiLabel(x, y+6, "Wireless TX");
+			GuiLabel txLabel = new GuiLabel(x, y+6, Translator.translate("eln.core.wireless")+" TX");
 			extender.add(txLabel);
 			
 			x+=65;
-			txAddButton = new GuiButtonEln(x, y, 40, 20, "Add");
+			txAddButton = new GuiButtonEln(x, y, 40, 20, Translator.translate("eln.core.add"));
 			txAddButton.setObserver(this);
 			extender.add(txAddButton);
 			
@@ -123,7 +124,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 			x = 2;
 			GuiTextFieldEln txName = new GuiTextFieldEln(fontRendererObj, x, y+4, 90, helper);
 			txName.setText(tx.name);
-			txName.setComment(0, "Channel name");
+			txName.setComment(0, Translator.translate("eln.core.tile.modbusrtu.chname.hint0"));
 			extender.add(txName);
 			
 			x += txName.getWidth() + 12;
@@ -133,7 +134,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 				txId.setText(tx.id);
 			else
 				txId.setText("");
-			txId.setComment(0, "Modbus ID");
+			txId.setComment(0, Translator.translate("eln.core.tile.modbusrtu.entmodbusid.hint0"));
 			extender.add(txId);
 			
 			x += txId.getWidth() + 12;
@@ -151,9 +152,9 @@ public class ModbusRtuGui extends GuiScreenEln{
 		{
 			x = 2;
 			y += 6;
-			GuiLabel rxLabel = new GuiLabel(x, y+6, "Wireless RX");
+			GuiLabel rxLabel = new GuiLabel(x, y+6, Translator.translate("eln.core.wireless")+" RX");
 			extender.add(rxLabel);
-			rxAddButton = new GuiButtonEln(x+65, y, 40, 20, "Add");
+			rxAddButton = new GuiButtonEln(x+65, y, 40, 20, Translator.translate("eln.core.add"));
 			rxAddButton.setObserver(this);
 			extender.add(rxAddButton);
 					
@@ -178,7 +179,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 			x = 2;
 			GuiTextFieldEln rxName = new GuiTextFieldEln(fontRendererObj, x, y+4, 90, helper);
 			rxName.setText(rx.name);
-			rxName.setComment(0, "Channel name");
+			rxName.setComment(0, Translator.translate("eln.core.tile.modbusrtu.chname.hint0"));
 			extender.add(rxName);
 			
 			x += rxName.getWidth() + 12;
@@ -188,7 +189,7 @@ public class ModbusRtuGui extends GuiScreenEln{
 				rxId.setText(rx.id);
 			else
 				rxId.setText("");
-			rxId.setComment(0, "Modbus ID");
+			rxId.setComment(0, Translator.translate("eln.core.tile.modbusrtu.entmodbusid.hint0"));
 			extender.add(rxId);
 			
 			x += rxId.getWidth() + 12;
@@ -224,9 +225,9 @@ public class ModbusRtuGui extends GuiScreenEln{
     	}else if(object == name){
     		render.clientSetString(ModbusRtuElement.setName, name.getText());
     	}else if(object == txAddButton){
-    		render.clientSetString(ModbusRtuElement.serverTxAdd,"newTX");
+    		render.clientSetString(ModbusRtuElement.serverTxAdd,Translator.translate("eln.core.new")+" TX");
     	}else if(object == rxAddButton){
-    		render.clientSetString(ModbusRtuElement.serverRxAdd,"newRX");
+    		render.clientSetString(ModbusRtuElement.serverRxAdd,Translator.translate("eln.core.new")+" RX");
     	}
 	}
 	
@@ -243,9 +244,9 @@ public class ModbusRtuGui extends GuiScreenEln{
 		for ( WirelessRxStatus rx: render.wirelessRxStatusList.values()) {
 			GuiTextFieldEln name = uuidToRxName.get(rx.uuid);
 			if(rx.connected)
-				name.setComment(1, "\u00a72Connected");
+				name.setComment(1, Translator.translate("eln.core.tile.wirelessreceiver.conn"));
 			else
-				name.setComment(1, "\u00a74Not connected");
+				name.setComment(1, Translator.translate("eln.core.tile.wirelessreceiver.unconn"));
 		}
 
 	}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import mods.eln.Translator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.block.Block;
@@ -100,7 +101,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
     public String getItemStackDisplayName(ItemStack par1ItemStack)
     {
 		Descriptor desc = getDescriptor(par1ItemStack);
-		if(desc == null) return "Unknown";
+		if(desc == null) return Translator.translate("eln.core.block.unknowndesc");
         return desc.getName(par1ItemStack);
     }
 

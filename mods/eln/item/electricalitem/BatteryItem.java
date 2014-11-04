@@ -2,22 +2,18 @@ package mods.eln.item.electricalitem;
 
 import java.util.List;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
-import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
-import mods.eln.server.PlayerManager;
 import mods.eln.wiki.Data;
 
 public class BatteryItem extends GenericItemUsingDamageDescriptor implements IItemEnergyBattery{
@@ -61,14 +57,15 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 
 	
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Charge speed: " + (int) chargePower + "W");
-		list.add("Discharge speed: " + (int) dischargePower + "W");
-		list.add(Utils.plotEnergy("Energy Stored:", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
+		list.add(Translator.translate("eln.core.chargespeed")+": " + (int) chargePower + "W");
+		list.add(Translator.translate("eln.core.dischargespeed")+": " + (int) dischargePower + "W");
+		list.add(Utils.plotEnergy(Translator.translate("eln.core.energystored")+":", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
 	}
 
 

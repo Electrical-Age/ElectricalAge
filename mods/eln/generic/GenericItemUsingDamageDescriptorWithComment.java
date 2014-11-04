@@ -12,6 +12,7 @@ public class GenericItemUsingDamageDescriptorWithComment extends GenericItemUsin
 		this.description = description;
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {

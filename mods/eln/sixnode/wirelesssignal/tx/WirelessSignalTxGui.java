@@ -1,5 +1,6 @@
 package mods.eln.sixnode.wirelesssignal.tx;
 
+import mods.eln.Translator;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.GuiTextFieldEln;
@@ -21,7 +22,7 @@ public class WirelessSignalTxGui extends GuiScreenEln{
 		super.initGui();
 		channel = newGuiTextField(6, 6, 220);
 		channel.setText(render.channel);
-		channel.setComment(0, "Specify the channel");
+		channel.setComment(0, Translator.translate("eln.core.tile.wireless.specifychannel"));
 	}
 	
 	@Override

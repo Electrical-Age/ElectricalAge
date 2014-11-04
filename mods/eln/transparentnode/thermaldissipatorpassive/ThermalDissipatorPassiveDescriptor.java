@@ -3,10 +3,10 @@ package mods.eln.transparentnode.thermaldissipatorpassive;
 import java.util.List;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
-import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.wiki.Data;
@@ -15,7 +15,6 @@ import net.minecraft.item.ItemStack;
 
 public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescriptor {
 	public double thermalRs,thermalRp,thermalC;
-	private Obj3D obj;
 	Obj3DPart main;
 	public ThermalDissipatorPassiveDescriptor(
 			String name,
@@ -33,7 +32,6 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
 		this.nominalP = nominalP;
 		this.nominalT = nominalT;
 		Eln.simulator.checkThermalLoad(thermalRs, thermalRp, thermalC);
-		this.obj = obj;
 		if(obj != null) main = obj.getPart("main");
 	}
 	double warmLimit,coolLimit;
@@ -49,16 +47,17 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
 		Data.addThermal(newItemStack());
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Used for cooling the Turbine.");
-		list.add(Utils.plotCelsius("Tmax :", warmLimit));
-		list.add("Nominal usage ->");
-		list.add(Utils.plotCelsius("  Temperature :", nominalT));
-		list.add(Utils.plotPower("  Cooling :", nominalP));
+		list.add(Translator.translate("eln.core.tile.dissipator.hint0"));
+		list.add(Utils.plotCelsius(Translator.translate("eln.core.tmax")+":", warmLimit));
+		list.add(Translator.translate("eln.core.nusage")+" ->");
+		list.add(Utils.plotCelsius("  "+Translator.translate("eln.core.temperature")+":", nominalT));
+		list.add(Utils.plotPower("  "+Translator.translate("eln.core.cooling")+":", nominalP));
 
 	}
 	

@@ -2,6 +2,7 @@ package mods.eln.sixnode.powerinductorsix;
 
 import org.lwjgl.opengl.GL11;
 
+import mods.eln.Translator;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
@@ -17,7 +18,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -58,7 +58,7 @@ public class PowerInductorSixGui extends GuiContainerEln {
 
 	@Override
 	protected void postDraw(float f, int x, int y) {
-		helper.drawString(8, 12, 0xFF000000, "Inductance : " + Utils.plotValue(render.descriptor.getlValue(render.inventory), "H"));
+		helper.drawString(8, 12, 0xFF000000, Translator.translate("eln.core.inductance")+": " + Utils.plotValue(render.descriptor.getlValue(render.inventory), "H"));
 		super.postDraw(f, x, y);
 	}
 

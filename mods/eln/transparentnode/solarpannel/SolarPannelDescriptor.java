@@ -3,6 +3,7 @@ package mods.eln.transparentnode.solarpannel;
 import java.util.List;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Direction;
@@ -158,16 +159,18 @@ public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 	}
 	
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add("Produces power from daylight.");
-		list.add(Utils.plotVolt("Voltage Max:", electricalUmax));
-		list.add(Utils.plotPower("Power Max:", electricalPmax));
-		if(canRotate) list.add("Can be oriented.");
+		list.add(Translator.translate("eln.core.tile.solarpanel.hint0"));
+		list.add(Utils.plotVolt(Translator.translate("eln.core.vmax")+":", electricalUmax));
+		list.add(Utils.plotPower(Translator.translate("eln.core.pmax")+":", electricalPmax));
+		if(canRotate) list.add(Translator.translate("eln.core.tile.solarpanel.hint1"));
+		
 	}
 	
 	@Override

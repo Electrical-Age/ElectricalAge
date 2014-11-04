@@ -2,13 +2,10 @@ package mods.eln.sixnode.electricalswitch;
 
 import java.util.List;
 
-import org.lwjgl.opengl.Drawable;
 import org.lwjgl.opengl.GL11;
 
-import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.client.ClientProxy;
-import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
@@ -19,15 +16,10 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.wiki.Data;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
-
-import com.google.common.base.Function;
 
 public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 
@@ -174,7 +166,6 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 
 
 			if(lever != null) {
-				float switchDelta;			
 				lever.draw(on * (alphaOn - alphaOff) + alphaOff, 0, 1, 0);
 			}		
 			break;
@@ -190,9 +181,10 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 			return NodeBase.maskElectricalPower;
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Can manually cut off a power line.");
+		list.add(Translator.translate("eln.core.tile.eswitch.hint0"));
 	}
 }

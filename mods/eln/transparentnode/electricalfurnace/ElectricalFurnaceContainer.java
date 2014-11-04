@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.electricalfurnace;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.gui.SlotWithSkin;
@@ -26,8 +27,8 @@ public class ElectricalFurnaceContainer extends BasicContainer implements INodeC
 				new SlotWithSkin(inventory, ElectricalFurnaceElement.outSlotId, 84, 58, SlotSkin.big),
 				new SlotWithSkin(inventory, ElectricalFurnaceElement.inSlotId, 7, 58, SlotSkin.medium),
 				
-				new GenericItemUsingDamageSlot(inventory, 2, 70, 6 + 20 + 6, 1, HeatingCorpElement.class, SlotSkin.medium, new String[]{"Heating Corp Slot"}),
-				new GenericItemUsingDamageSlot(inventory, 3, 80 + 18, -2000, 1, ThermalIsolatorElement.class, SlotSkin.medium, new String[]{"Thermal Isolator Slot"}),
+				new GenericItemUsingDamageSlot(inventory, 2, 70, 6 + 20 + 6, 1, HeatingCorpElement.class, SlotSkin.medium, new String[]{Translator.translate("eln.core.heatcorp.slot.hint")}),
+				new GenericItemUsingDamageSlot(inventory, 3, 80 + 18, -2000, 1, ThermalIsolatorElement.class, SlotSkin.medium, new String[]{Translator.translate("eln.core.thermisolator.slot.hint")}),
 				new RegulatorSlot(inventory, 4, 70 + 18, 6 + 20 + 6, 1, new RegulatorType[]{RegulatorType.onOff, RegulatorType.analog}, SlotSkin.medium)
 				 
 				//new SlotFilter(inventory, 2, 62 + 0, 17 + 18, 1, new ItemStackFilter[]{new ItemStackFilter(Eln.heatingCorpItem)}),

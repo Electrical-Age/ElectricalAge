@@ -1,5 +1,6 @@
 package mods.eln.transparentnode.electricalmachine;
 
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.gui.SlotWithSkin;
@@ -40,7 +41,7 @@ public class ElectricalMachineContainer extends BasicContainer implements INodeC
 		slots[descriptor.outStackCount + 1] = new GenericItemUsingDamageSlot(inventory, descriptor.outStackCount + 1, 8, 12, 5,
 				MachineBoosterDescriptor.class,
 				SlotSkin.medium,
-				new String[]{"Booster Slot"});
+				new String[]{Translator.translate("eln.core.booster.slot.hint")});
 		
 		return slots;
 	}

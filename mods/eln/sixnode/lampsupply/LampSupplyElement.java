@@ -13,6 +13,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -58,7 +59,7 @@ public class LampSupplyElement extends SixNodeElement {
 		return new LampSupplyContainer(player, inventory);
 	}
 
-	public String channel = "Default channel";
+	public String channel = Translator.translate("eln.core.defaultchannel");
 
 
 	public LampSupplyElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {

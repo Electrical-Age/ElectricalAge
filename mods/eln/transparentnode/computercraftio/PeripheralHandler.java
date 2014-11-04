@@ -3,7 +3,6 @@ package mods.eln.transparentnode.computercraftio;
 import mods.eln.misc.Coordonate;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
-import mods.eln.simplenode.computerprobe.ComputerProbeNode;
 import net.minecraft.world.World;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IPeripheral;
@@ -20,11 +19,7 @@ public class PeripheralHandler implements IPeripheralProvider {
 				return (IPeripheral) tn.element;
 			}
 		}*/
-		
-		if (nb instanceof ComputerProbeNode) {
-			IPeripheral p = (IPeripheral) nb;
-			return p;		
-		}
+	
 				
 		return null;
 	}

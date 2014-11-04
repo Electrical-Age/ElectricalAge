@@ -3,6 +3,7 @@ package mods.eln.transparentnode.electricalfurnace;
 import java.util.List;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.misc.IFunction;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -62,10 +63,11 @@ public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor {
 		 Eln.obj.draw("ElectricFurnace", "furnace");	
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Equivalent to a vanilla furnace");
-		list.add("but needs electricity to work.");
+		list.add(Translator.translate("eln.core.tile.elfurnace.hint0"));
+		list.add(Translator.translate("eln.core.tile.elfurnace.hint1"));
 	}
 }

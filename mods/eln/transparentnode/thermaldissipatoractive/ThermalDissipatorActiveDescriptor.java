@@ -3,6 +3,7 @@ package mods.eln.transparentnode.thermaldissipatoractive;
 import java.util.List;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
@@ -110,14 +111,14 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Used for cooling the Turbine.");
-		list.add(Utils.plotCelsius("Tmax :", warmLimit));
-		list.add("Nominal usage ->");
-		list.add(Utils.plotCelsius("  Temperature :", nominalT));
-		list.add(Utils.plotPower("  Cooling :", nominalP));
+		list.add(Translator.translate("eln.core.tile.dissipator.hint0"));
+		list.add(Utils.plotCelsius(Translator.translate("eln.core.tmax")+":", warmLimit));
+		list.add(Translator.translate("eln.core.nusage")+" ->");
+		list.add(Utils.plotCelsius("  "+Translator.translate("eln.core.temperature")+":", nominalT));
+		/*list.add(Utils.plotPower("  Cooling:", nominalP));
 		list.add(Utils.plotVolt("  Fan Voltage :", nominalElectricalU));
 		list.add(Utils.plotPower("  Fan Electrical Power :", electricalNominalP));
-		list.add(Utils.plotPower("  Fan Cooling Power :", nominalElectricalCoolingPower));
+		list.add(Utils.plotPower("  Fan Cooling Power :", nominalElectricalCoolingPower));*/
 
 	}
 }

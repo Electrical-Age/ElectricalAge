@@ -7,6 +7,8 @@ import org.lwjgl.opengl.GL11;
 
 
 
+
+import mods.eln.Translator;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
@@ -26,7 +28,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -59,7 +60,7 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     	vuMeterTemperature.setStepIdMax(800 / 10);
     	vuMeterTemperature.setEnable(true);
     	vuMeterTemperature.setRange(0, 800);
-    	vuMeterTemperature.setComment(new String[]{"Temperature Gauge"});
+    	vuMeterTemperature.setComment(new String[]{Translator.translate("eln.core.heatfurnace.gauge.hint0")});
     	syncVumeter();
     	
     	supplyBar = new GuiVerticalVoltageSupplyBar(167 - 20 - 2, 8, 20, 69, helper);
@@ -75,24 +76,24 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     protected void preDraw(float f, int x, int y) {
     	super.preDraw(f, x, y);
     	if(render.getPowerOn())
-    		buttonGrounded.displayString = "Is ON";
+    		buttonGrounded.displayString = Translator.translate("eln.core.on");
     	else
-    		buttonGrounded.displayString = "Is OFF";
+    		buttonGrounded.displayString = Translator.translate("eln.core.off");
     	
     	if(render.autoShutDown) {
     		buttonGrounded.enabled = false;
-    		autoShutDown.displayString = "Auto Shutdown";
+    		autoShutDown.displayString = Translator.translate("eln.core.machine.autoshutdown");
     	}
     	else {
-    		autoShutDown.displayString = "Manual Shutdown";
+    		autoShutDown.displayString = Translator.translate("eln.core.machine.manshutdown");
     		buttonGrounded.enabled = true;
     	}
     	
         if(render.temperatureTargetSyncNew) syncVumeter();
         vuMeterTemperature.temperatureHit = render.temperature;
         
-        vuMeterTemperature.setComment(1, "Current: " + Utils.plotValue(render.temperature + PhysicalConstant.Tamb, "\u00B0C"));
-        vuMeterTemperature.setComment(2, "Target: " + Utils.plotValue(vuMeterTemperature.getValue() + PhysicalConstant.Tamb, "\u00B0C"));
+        vuMeterTemperature.setComment(1, Translator.translate("eln.core.heatfurnace.gauge.current")+": " + Utils.plotValue(render.temperature + PhysicalConstant.Tamb, "\u00B0C"));
+        vuMeterTemperature.setComment(2, Translator.translate("eln.core.heatfurnace.gauge.target")+": " + Utils.plotValue(vuMeterTemperature.getValue() + PhysicalConstant.Tamb, "\u00B0C"));
     }
     
     @Override

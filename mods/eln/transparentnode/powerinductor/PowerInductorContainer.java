@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.powerinductor;
 
 
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.CopperCableDescriptor;
@@ -18,9 +19,8 @@ public class PowerInductorContainer extends BasicContainer{
 	
 	public PowerInductorContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new GenericItemUsingDamageSlot(inventory, cableId,132,8,19, CopperCableDescriptor.class,SlotSkin.medium,new String[]{"Copper cable Slot","(Increase inductance value)"}),
-				new GenericItemUsingDamageSlot(inventory, coreId, 132+20,8,1, FerromagneticCoreDescriptor.class,SlotSkin.medium,new String[]{"Ferromagnetic Core Slot"})
-
+				new GenericItemUsingDamageSlot(inventory, cableId,132,8,19, CopperCableDescriptor.class,SlotSkin.medium,new String[]{Translator.translate("eln.core.coppercable.slot.hint"),Translator.translate("eln.core.tile.inductor.inductance")}),
+				new GenericItemUsingDamageSlot(inventory, coreId, 132+20,8,1, FerromagneticCoreDescriptor.class,SlotSkin.medium,new String[]{Translator.translate("eln.core.ferromagnetic.slot.hint")})
 			});
 
 	}

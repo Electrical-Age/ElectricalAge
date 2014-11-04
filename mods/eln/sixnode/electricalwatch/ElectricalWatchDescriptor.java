@@ -2,27 +2,12 @@ package mods.eln.sixnode.electricalwatch;
 
 import java.util.List;
 
-import org.lwjgl.opengl.GL11;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
-import mods.eln.Eln;
-import mods.eln.item.EntitySensorFilterDescriptor;
-import mods.eln.item.ThermalIsolatorElement;
-import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
-import mods.eln.misc.UtilsClient;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
-import mods.eln.sim.DiodeProcess;
-import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.ThermalLoadInitializer;
-import mods.eln.wiki.Data;
-
-import com.google.common.base.Function;
 
 public class ElectricalWatchDescriptor extends SixNodeDescriptor {
 

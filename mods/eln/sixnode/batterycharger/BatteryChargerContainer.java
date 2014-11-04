@@ -1,5 +1,6 @@
 package mods.eln.sixnode.batterycharger;
 
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.gui.SlotWithSkinAndComment;
@@ -17,7 +18,7 @@ public class BatteryChargerContainer extends BasicContainer {
 	static class BatterySlot extends SlotWithSkinAndComment {
 
 		public BatterySlot(IInventory par1iInventory, int slot, int x, int y) {
-			super(par1iInventory, slot, x, y, SlotSkin.medium, new String[]{"Battery Slot"});
+			super(par1iInventory, slot, x, y, SlotSkin.medium, new String[]{Translator.translate("eln.core.battery.slot.hint")});
 		}
 		
 		public boolean isItemValid(ItemStack itemStack) {
@@ -45,7 +46,7 @@ public class BatteryChargerContainer extends BasicContainer {
 				new GenericItemUsingDamageSlot(inventory, boosterSlotId, 80 - 18, 6 + 18 / 2, 5,
 						MachineBoosterDescriptor.class,
 						SlotSkin.medium,
-						new String[]{"Booster Slot"})
+						new String[]{Translator.translate("eln.core.booster.slot.hint")})
 			});
 	}
 }

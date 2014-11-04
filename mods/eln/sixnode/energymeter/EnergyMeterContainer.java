@@ -1,5 +1,6 @@
 package mods.eln.sixnode.energymeter;
 
+import mods.eln.Translator;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.misc.BasicContainer;
 import mods.eln.node.six.SixNodeItemSlot;
@@ -14,7 +15,7 @@ public class EnergyMeterContainer extends BasicContainer {
 	
 	public EnergyMeterContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory,new Slot[]{
-				new SixNodeItemSlot(inventory, cableSlotId, 160, 106, 1, new Class[]{ElectricalCableDescriptor.class}, SlotSkin.medium, new String[]{"Electrical Cable Slot"})
+				new SixNodeItemSlot(inventory, cableSlotId, 160, 106, 1, new Class[]{ElectricalCableDescriptor.class}, SlotSkin.medium, new String[]{Translator.translate("eln.core.cable.slot.hint")})
 			});
 	}
 }

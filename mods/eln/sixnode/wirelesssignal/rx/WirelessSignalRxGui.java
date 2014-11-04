@@ -1,6 +1,7 @@
 package mods.eln.sixnode.wirelesssignal.rx;
 
 import net.minecraft.client.gui.GuiButton;
+import mods.eln.Translator;
 import mods.eln.gui.GuiButtonEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiScreenEln;
@@ -46,29 +47,29 @@ public class WirelessSignalRxGui extends GuiScreenEln{
 		super.initGui();
 		channel = newGuiTextField(6, 6, 220);
 		channel.setText(render.channel);
-		channel.setComment(0, "Specify the channel");
+		channel.setComment(0, Translator.translate("eln.core.tile.wireless.specifychannel"));
 		
 		int w = 72;
 		int x = 6;
 		int y = 6+12+4;
-		add(buttonBigger = new AggregatorBt(x,y,w,20,"Biggest",(byte) 0)); x += 2+w;
-		add(buttonSmaller = new AggregatorBt(x,y,w,20,"Smallest",(byte) 1)); x += 2+w;
-		add(buttonToogle = new AggregatorBt(x,y,w,20,"Toggle",(byte) 2)); x += 2+w;
+		add(buttonBigger = new AggregatorBt(x,y,w,20,Translator.translate("eln.core.tile.wirelessreceiver.btnb.name"),(byte) 0)); x += 2+w;
+		add(buttonSmaller = new AggregatorBt(x,y,w,20,Translator.translate("eln.core.tile.wirelessreceiver.btns.name"),(byte) 1)); x += 2+w;
+		add(buttonToogle = new AggregatorBt(x,y,w,20,Translator.translate("eln.core.tile.wirelessreceiver.btnt.name"),(byte) 2)); x += 2+w;
 		
 
 		buttonBigger.setHelper(helper);
-		buttonBigger.setComment(0, "Get the biggest value");
-		buttonBigger.setComment(1, "emitted on the channel");
+		buttonBigger.setComment(0, Translator.translate("eln.core.tile.wirelessreceiver.btnb.hint0"));
+		buttonBigger.setComment(1, Translator.translate("eln.core.tile.wirelessreceiver.btnb.hint1"));
 		
 		buttonSmaller.setHelper(helper);
-		buttonSmaller.setComment(0, "Get the smallest value");
-		buttonSmaller.setComment(1, "emitted on the channel");
+		buttonSmaller.setComment(0, Translator.translate("eln.core.tile.wirelessreceiver.btns.hint0"));
+		buttonSmaller.setComment(1, Translator.translate("eln.core.tile.wirelessreceiver.btns.hint1"));
 		
 		buttonToogle.setHelper(helper);
-		buttonToogle.setComment(0, "toggle the output each time");
-		buttonToogle.setComment(1, "that a emitter rise his value");
-		buttonToogle.setComment(2, "Very useful to connect multiple");
-		buttonToogle.setComment(3, "button to control a light in your house");
+		buttonToogle.setComment(0, Translator.translate("eln.core.tile.wirelessreceiver.btnt.hint0"));
+		buttonToogle.setComment(1, Translator.translate("eln.core.tile.wirelessreceiver.btnt.hint1"));
+		buttonToogle.setComment(2, Translator.translate("eln.core.tile.wirelessreceiver.btnt.hint2"));
+		buttonToogle.setComment(3, Translator.translate("eln.core.tile.wirelessreceiver.btnt.hint3"));
 	}
 	
 	@Override
@@ -80,9 +81,9 @@ public class WirelessSignalRxGui extends GuiScreenEln{
 	@Override
 	protected void preDraw(float f, int x, int y) {
 		if(render.connection)
-			channel.setComment(1, "\u00a72Connected");
+			channel.setComment(1, Translator.translate("eln.core.tile.wirelesstransmitter.conn"));
 		else
-			channel.setComment(1, "\u00a74Unconnected");
+			channel.setComment(1, Translator.translate("eln.core.tile.wirelesstransmitter.unconn"));
 
 
 		super.preDraw(f, x, y);

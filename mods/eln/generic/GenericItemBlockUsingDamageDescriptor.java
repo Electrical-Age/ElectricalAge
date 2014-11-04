@@ -2,6 +2,7 @@ package mods.eln.generic;
 
 import java.util.List;
 
+import mods.eln.Translator;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -50,7 +51,7 @@ public class GenericItemBlockUsingDamageDescriptor {
 	}
 	public String getName(ItemStack stack)
 	{
-		return name;
+		return Translator.translate("eln.core.block."+(name.replaceAll(" ", "")).toLowerCase()+".name");
 	}
 	
 	

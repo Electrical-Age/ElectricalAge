@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Coordonate;
@@ -94,21 +95,21 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 			Coordonate temp = new Coordonate(coord);
 			temp.move(Direction.YN);
 			block = temp.getBlock();
-			if(block == null || ((! block.isOpaqueCube()) && block instanceof BlockHopper == false)) return "You can't place this block at this side";
+			if(block == null || ((! block.isOpaqueCube()) && block instanceof BlockHopper == false)) return Translator.translate("eln.core.tile.block.cantplaceside");
 		}
 		if(mustHaveCeiling())
 		{
 			Coordonate temp = new Coordonate(coord);
 			temp.move(Direction.YP);
 			block = temp.getBlock();
-			if(block == null || ! block.isOpaqueCube()) return "You can't place this block at this side";
+			if(block == null || ! block.isOpaqueCube()) return Translator.translate("eln.core.tile.block.cantplaceside");
 		}
 		if(mustHaveWallFrontInverse())
 		{
 			Coordonate temp = new Coordonate(coord);
 			temp.move(front.getInverse());
 			block = temp.getBlock();
-			if(block == null || ! block.isOpaqueCube()) return "You can't place this block at this side";
+			if(block == null || ! block.isOpaqueCube()) return Translator.translate("eln.core.tile.block.cantplaceside");
 		}
 		if(mustHaveWall())
 		{
@@ -131,11 +132,11 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 			block = temp.getBlock();
 			if(block != null && block.isOpaqueCube()) wall = true;
 			
-			if(! wall) return "You can't place this block at this side";
+			if(! wall) return Translator.translate("eln.core.tile.block.cantplaceside");
 		}
 		
 		GhostGroup ghostGroup = getGhostGroup(front);
-		if(ghostGroup != null && ghostGroup.canBePloted(coord) == false) return "Not enough space for this block";
+		if(ghostGroup != null && ghostGroup.canBePloted(coord) == false) return Translator.translate("eln.core.tile.block.nonenoughspace");
 		return null;
 	}
 

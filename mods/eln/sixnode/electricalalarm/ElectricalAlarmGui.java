@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
 
+import mods.eln.Translator;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.IGuiObject;
@@ -45,9 +46,9 @@ public class ElectricalAlarmGui extends GuiScreenEln {
 	protected void preDraw(float f, int x, int y) {
 		super.preDraw(f, x, y);
 		if(!render.mute)
-			toogleDefaultOutput.displayString = "Sound is not muted";
+			toogleDefaultOutput.displayString = Translator.translate("eln.core.tile.alaram.button.notmuted");
 		else
-			toogleDefaultOutput.displayString = "Sound is muted";
+			toogleDefaultOutput.displayString = Translator.translate("eln.core.tile.alaram.button.muted");
 	}
 	
 	@Override

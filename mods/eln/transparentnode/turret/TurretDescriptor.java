@@ -6,6 +6,7 @@ import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
@@ -75,12 +76,13 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		return properties;
 	}
 
-    @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add("Nominal voltage : 800V");
-        list.add("Standby power : " + (int)getProperties().basePower + "W");
-        list.add("Charge power : 100W...10000W");
+        list.add(Translator.translate("eln.core.nvoltage")+": 800V");
+        list.add(Translator.translate("eln.core.spower")+": " + (int)getProperties().basePower + "W");
+        list.add(Translator.translate("eln.core.chargepower")+": 100W...10000W");
     }
 
     @Override

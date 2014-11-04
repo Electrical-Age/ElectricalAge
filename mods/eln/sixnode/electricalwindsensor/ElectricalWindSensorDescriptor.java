@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalwindsensor;
 
 import java.util.List;
 
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
@@ -18,7 +19,7 @@ import org.lwjgl.opengl.GL11;
 public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
 
 
-	private Obj3DPart baseWall,baseGround,anemometer;
+	private Obj3DPart baseWall,anemometer;
 
 	public float[] pinDistance;
 
@@ -35,7 +36,7 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
 		{
 			
 			baseWall = obj.getPart("base_wall");
-			baseGround = obj.getPart("base_ground");
+			obj.getPart("base_ground");
 			anemometer = obj.getPart("anemometer");
 
 			pinDistance = Utils.getSixNodePinDistance(baseWall);
@@ -65,14 +66,15 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Provides an electrical signal");
-		list.add("dependant on wind.");
-		list.add("Maximal wind is " + Utils.plotValue(windMax, " m/s"));
+		list.add(Translator.translate("eln.core.tile.windsensor.hint0")); 
+		list.add(Translator.translate("eln.core.tile.windsensor.hint1")); 
+		list.add(Translator.translate("eln.core.tile.windsensor.hint2") + Utils.plotValue (windMax, Translator.translate("eln.core.metersecond")));
 	}
 	
 	

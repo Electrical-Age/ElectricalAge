@@ -1,5 +1,6 @@
 package mods.eln.sixnode.electricalwatch;
 
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.electricalitem.BatteryItem;
@@ -16,7 +17,7 @@ public class ElectricalWatchContainer extends BasicContainer {
 				new GenericItemUsingDamageSlot(inventory, batteryId, 184 / 2 - 12, 8, 1,
 												BatteryItem.class,
 												SlotSkin.medium,
-												new String[]{"Portable battery slot"}),
+												new String[]{Translator.translate("eln.core.portbattery.slot.hint")}),
 			});
 	}
 }

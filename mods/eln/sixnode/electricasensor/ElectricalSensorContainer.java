@@ -1,5 +1,6 @@
 package mods.eln.sixnode.electricasensor;
 
+import mods.eln.Translator;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.misc.BasicContainer;
 import mods.eln.node.six.SixNodeItemSlot;
@@ -14,7 +15,7 @@ public class ElectricalSensorContainer extends BasicContainer {
 	
 	public ElectricalSensorContainer(EntityPlayer player, IInventory inventory,ElectricalSensorDescriptor d) {
 		super(player, inventory,new Slot[]{
-				new SixNodeItemSlot(inventory,cableSlotId,152,d.voltageOnly ? 14 : 62,1,new Class[]{ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{"Electrical Cable Slot"})
+				new SixNodeItemSlot(inventory,cableSlotId,152,d.voltageOnly ? 14 : 62,1,new Class[]{ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{Translator.translate("eln.core.cable.slot.hint")})
 			});
 		
 		

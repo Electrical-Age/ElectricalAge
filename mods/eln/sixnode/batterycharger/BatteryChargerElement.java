@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import mods.eln.Translator;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -54,7 +55,7 @@ public class BatteryChargerElement extends SixNodeElement {
 		return new BatteryChargerContainer(player, inventory);
 	}
 	
-	public String channel = "Default channel";
+	public String channel = Translator.translate("eln.core.defaultchannel");
 	
 	public BatteryChargerElement(SixNode sixNode, Direction side,
 			SixNodeDescriptor descriptor) {

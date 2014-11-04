@@ -2,6 +2,7 @@ package mods.eln.item;
 
 import java.util.List;
 
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.sim.ElectricalLoad;
@@ -35,11 +36,12 @@ public class FerromagneticCoreDescriptor  extends GenericItemUsingDamageDescript
 	}
 
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("cableMultiplicator : " + cableMultiplicator);
+		list.add(Translator.translate("eln.core.cableMultiplicator")+": " + cableMultiplicator);
 	}
 }

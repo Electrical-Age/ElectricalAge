@@ -4,6 +4,8 @@ import org.lwjgl.opengl.GL11;
 
 
 
+
+import mods.eln.Translator;
 import mods.eln.gui.GuiButtonEln;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
@@ -19,7 +21,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiContainer;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -80,33 +81,33 @@ public class BatteryGuiDraw extends GuiContainerEln {
     	double energyMiss = render.descriptor.electricalStdEnergy * render.life - render.energy;
     	
     	if(Math.abs(p) < 5) {
-    		str1 = "No charge"; 
+    		str1 = Translator.translate("eln.core.tool.battey.nocharge"); 
     	}
     	else if(p > 0) {
-    		str1 = "Discharge"; 
+    		str1 = Translator.translate("eln.core.tool.battey.discharge"); 
     		str2 = Utils.plotTime("", render.energy / p); 
     	}
     	else if(energyMiss > 0) {
-    		str1 = "Charge"; 
+    		str1 = Translator.translate("eln.core.tool.battey.charge"); 
     		str2 = Utils.plotTime("", -energyMiss / p); 
     	}
     	else {
-    		str1 = "Charged";
+    		str1 = Translator.translate("eln.core.tool.battey.charged");
     	}
     	
     	int xDelta = 70;
     	if(render.descriptor.lifeEnable) {
-    		drawString(8, 8, "Life:");
+    		drawString(8, 8, Translator.translate("eln.core.life")+":");
         	drawString(xDelta, 8, Utils.plotPercent("", render.life));
     	}
-        drawString(8, 17, "Energy:");
+        drawString(8, 17, Translator.translate("eln.core.energy")+":");
         drawString(xDelta, 17,
         		Utils.plotValue(render.energy, "J/") +  Utils.plotValue(render.descriptor.electricalStdEnergy * render.life, "J"));
        
         if(render.power >= 0)
-        	drawString(8, 26, "Power out:");
+        	drawString(8, 26, Translator.translate("eln.core.pwout")+":");
         else
-        	drawString(8, 26, "Power in:");
+        	drawString(8, 26, Translator.translate("eln.core.pwin")+":");
         drawString(xDelta, 26, Utils.plotValue(Math.abs(render.power), "W/")  + Utils.plotValue(render.descriptor.electricalStdP, "W"));
 
         drawString(8, 35, str1);

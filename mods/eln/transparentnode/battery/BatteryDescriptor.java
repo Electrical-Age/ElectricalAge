@@ -2,8 +2,8 @@ package mods.eln.transparentnode.battery;
 
 import java.util.List;
 
-
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.client.ClientProxy;
 import mods.eln.gui.GuiLabel;
 import mods.eln.misc.FunctionTable;
@@ -12,7 +12,6 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
-
 import mods.eln.sim.BatteryProcess;
 import mods.eln.sim.BatterySlowProcess;
 import mods.eln.sim.Simulator;
@@ -197,25 +196,26 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 		return nbt;
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Nominal voltage : " + (int)(electricalU) + "V");
-		list.add("Nominal power : " + (int)(electricalStdP) + "W");
-		list.add("Full charge energy : " + (int)(electricalStdDischargeTime * electricalStdP / 1000) + "KJ");
-		list.add(Utils.plotOhm("Internal resistance :",electricalRs*2));
+		list.add(Translator.translate("eln.core.nvoltage")+": " + (int)(electricalU) + "V");
+		list.add(Translator.translate("eln.core.npower")+": " + (int)(electricalStdP) + "W");
+		list.add(Translator.translate("eln.core.fulcharge")+": " + (int)(electricalStdDischargeTime * electricalStdP / 1000) + "KJ");
+		list.add(Utils.plotOhm(Translator.translate("eln.core.tile.grndcable.hint3")+":",electricalRs*2));
 		//list.add("Capacity : " + Utils.plotValue((electricalQ), "As"));
 		list.add("");
-	   	list.add("Charge : " + (int)(getChargeInTag(itemStack) * 100) + "%");
+	   	list.add(Translator.translate("eln.core.charge")+": " + (int)(getChargeInTag(itemStack) * 100) + "%");
 	   	
 	   	if(lifeEnable)
-	   		list.add("Life : " + (int)(getLifeInTag(itemStack) * 100) + "%");
+	   		list.add(Translator.translate("eln.core.life")+": " + (int)(getLifeInTag(itemStack) * 100) + "%");
 	}
 
 	@Override
 	public String getName(ItemStack stack) {
-		return super.getName(stack) + " charged at " + (int)(getChargeInTag(stack) * 100) + "%";
+		return super.getName(stack) + " "+Translator.translate("eln.core.chargedat")+" " + (int)(getChargeInTag(stack) * 100) + "%";
 	}
 	
 	double getChargeInTag(ItemStack stack) {

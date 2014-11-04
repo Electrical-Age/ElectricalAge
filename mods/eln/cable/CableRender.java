@@ -1,29 +1,15 @@
 package mods.eln.cable;
 
-import java.nio.FloatBuffer;
-
-import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
-
-import mods.eln.CommonProxy;
-import mods.eln.Eln;
 import mods.eln.cable.CableRenderType.CableRenderTypeMethodType;
-import mods.eln.client.ClientProxy;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
-import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
-
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
-
-import com.google.common.base.CaseFormat;
 
 public class CableRender {
 	/*
@@ -35,7 +21,6 @@ public class CableRender {
 	*/
 	
 	public static CableRenderType connectionType(NodeBlockEntity entity,LRDUMask connectedSide,Direction side) {
-		Block block;
 		int x2, y2, z2;
 		CableRenderType connectionTypeBuild = new CableRenderType();
 		TileEntity otherTileEntity;
@@ -159,7 +144,6 @@ public class CableRender {
 	}
 	
 	public static CableRenderType connectionType(SixNodeElementRender element, Direction side) {
-		Block block;
 		int x2, y2, z2;
 		CableRenderType connectionTypeBuild = new CableRenderType();
 		TileEntity otherTileEntity;

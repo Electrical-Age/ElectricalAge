@@ -1,5 +1,6 @@
 package mods.eln.sixnode.lampsocket;
 
+import mods.eln.Translator;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.LampSlot;
 import mods.eln.misc.BasicContainer;
@@ -18,7 +19,7 @@ public class LampSocketContainer extends BasicContainer {
 		super(player, inventory,new Slot[]{
 				new LampSlot(inventory,lampSlotId,70 +  0,57,1,descriptor.socketType),
 				//new SixNodeItemSlot(inventory,0,1,62 + 0,17,new Class[]{ElectricalCableDescriptor.class}),
-				new SixNodeItemSlot(inventory,cableSlotId,70 + 18,57,1,new Class[]{ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{"Electrical Cable Slot"})
+				new SixNodeItemSlot(inventory,cableSlotId,70 + 18,57,1,new Class[]{ElectricalCableDescriptor.class},SlotSkin.medium,new String[]{Translator.translate("eln.core.cable.slot.hint")})
 			});
 		
 		
