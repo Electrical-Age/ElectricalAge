@@ -238,9 +238,10 @@ public class Eln {
 	// Mod information (override from 'mcmod.info' file)
 	protected final static String MODID = "Eln";
 	protected final static String NAME = "Electrical Age";
-	private final static String URL = "http://squareland.ru";
+	private final static String URL = "http://electrical-age.net";
+-	private final static String UPDATE_URL = "https://github.com/Dolu1990/ElectricalAge/releases";
 	private final static String LOGO_FILE = "logo.png";
-	private final static String[] AUTHORS = { "Radviger" };
+	private final static String[] AUTHORS = { "Dolu1990", "lambdaShade", "cm0x4D", "TheBroBeans", "DrummingFish" };
 
 	public static String channelName = "miaouMod";
 	public ArrayList<IConfigSharing> configShared = new ArrayList<IConfigSharing>();
