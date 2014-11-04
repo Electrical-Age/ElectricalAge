@@ -1,5 +1,6 @@
 package mods.eln.sixnode.electricalmath;
 
+import mods.eln.Translator;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
@@ -32,8 +33,8 @@ public class ElectricalMathGui extends GuiContainerEln {
 		expression = newGuiTextField(8, 8, 176 - 16+44);
 		expression.setText(render.expression);
 		expression.setObserver(this);
-		expression.setComment(new String[]{"Output Voltage Formula",
-											"Inputs are \u00a74A \u00a72B \u00a71C"});
+		expression.setComment(new String[]{Translator.translate("eln.core.eprocessor.edtformula.hint0"),
+											Translator.translate("eln.core.eprocessor.edtformula.hint0")});
 	}
 	
 	@Override
@@ -54,19 +55,19 @@ public class ElectricalMathGui extends GuiContainerEln {
 			redNbr = stack.stackSize;
 		if(!expression.getText().equals(render.expression)) {
 			c = 0xFF404040;
-			helper.drawString(8+44/2, 29, c, "Waiting for completion...");
+			helper.drawString(8+44/2, 29, c, Translator.translate("eln.core.eprocessor.hint0"));
 		} else if(expression.getText().equals("")) {
 			c = 0xFF404040;
-			helper.drawString(8+44/2, 29, c, "Needs an equation!");
+			helper.drawString(8+44/2, 29, c, Translator.translate("eln.core.eprocessor.hint1"));
 		} else if(render.equationIsValid) {
 			if(redNbr >= render.redstoneRequired)
 				c = 0xFF108F00;
 			else
 				c = 0xFFFF0000;
-			helper.drawString(8+44/2, 29, c, "Redstone required : " + render.redstoneRequired);
+			helper.drawString(8+44/2, 29, c, Translator.translate("eln.core.eprocessor.hint2")+": " + render.redstoneRequired);
 		} else {
 			c = 0xFFFF0000;
-			helper.drawString(8+44/2, 29, c, "Invalid equation!");
+			helper.drawString(8+44/2, 29, c, Translator.translate("eln.core.eprocessor.hint3"));
 		}
 	}
 }

@@ -2,6 +2,7 @@ package mods.eln.transparentnode.electricalantennatx;
 
 import java.util.List;
 
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
@@ -102,14 +103,15 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
 		GL11.glEnable(GL11.GL_CULL_FACE);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Wireless power transmitter");
-		list.add("Nominal usage");
-		list.add(Utils.plotVolt(" U :", electricalNominalVoltage));
-		list.add(Utils.plotPower(" P :", electricalNominalPower));
-		list.add("Range : " + rangeMax + " Blocks");
-		list.add("Efficiency : " + (int)(electricalPowerRatioEffEnd * 100) + "% to " + (int)(electricalPowerRatioEffStart * 100) + "%" );
+		list.add(Translator.translate("eln.core.tile.antenna.hint0"));
+		list.add(Translator.translate("eln.core.tile.antenna.hint1"));
+		list.add(Utils.plotVolt("	U :", electricalNominalVoltage));
+		list.add(Utils.plotPower("	P :", electricalNominalPower));
+		list.add(Translator.translate("eln.core.range")+": " + rangeMax + " "+Translator.translate("eln.core.blocks"));
+		list.add(Translator.translate("eln.core.efficiency")+": " + (int)(electricalPowerRatioEffEnd * 100) + "% "+Translator.translate("eln.core.efficiencyto")+" " + (int)(electricalPowerRatioEffStart * 100) + "%" );
 	}
 }

@@ -1,44 +1,16 @@
 package mods.eln.sixnode.lampsocket;
 
-import org.lwjgl.opengl.GL11;
-
-
-
+import mods.eln.Translator;
 import mods.eln.gui.GuiContainerEln;
-import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.HelperStdContainer;
 import mods.eln.gui.IGuiObject;
-import mods.eln.misc.Utils;
-import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.six.SixNodeElementInventory;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiTextField;
-
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.gui.inventory.GuiContainerCreative;
-
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerFurnace;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.StatCollector;
-/*
-public class MachineGuiClientExample extends GuiScreen {
-	MachineBlockEntity tileEntity;
-    public MachineGuiClientExample (InventoryPlayer inventoryPlayer,	NodeBlockEntity tileEntity) {
-	    //the container is instanciated and passed to the superclass for handling
-	    super();
-	    this.tileEntity = (MachineBlockEntity) tileEntity;
-	}
-
-}
-*/
 
 public class LampSocketGuiDraw extends GuiContainerEln {
 
@@ -75,7 +47,7 @@ public class LampSocketGuiDraw extends GuiContainerEln {
     
     	buttonGrounded = newGuiButton(x+176/2-30,-2000,60,"");
     	
-    	channel.setComment(0,"Specify the supply channel");
+    	channel.setComment(0,Translator.translate("eln.core.tile.supply.specifychannel"));
     	
     	channel.setText(lampRender.channel);
     	alphaZ  = newGuiVerticalTrackBar(176 - 8 - 20, 8, 20, 69);
@@ -128,25 +100,25 @@ public class LampSocketGuiDraw extends GuiContainerEln {
 		
 		super.preDraw(f, x, y);
 		if(lampRender.grounded)
-			buttonGrounded.displayString = "Parallel";
+			buttonGrounded.displayString = Translator.translate("eln.core.tile.lamp.status.parallel");
 		else
-			buttonGrounded.displayString = "Serial";
+			buttonGrounded.displayString = Translator.translate("eln.core.tile.lamp.status.serial");
 		
 		if(lampRender.poweredByLampSupply){
-			buttonSupplyType.displayString = "Powered by Lamp Supply";
+			buttonSupplyType.displayString = Translator.translate("eln.core.tile.lamp.poweredbysupply");
 			channel.setVisible(true);
 			if(inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null)
-				channel.setComment(1,"\u00a74Cable slot empty");	
+				channel.setComment(1,"\u00a74"+Translator.translate("eln.core.tile.lamp.cableslotempty"));	
 			else if(lampRender.isConnectedToLampSupply)
-				channel.setComment(1,"\u00a72connected to " + lampRender.channel);
+				channel.setComment(1,"\u00a72"+Translator.translate("eln.core.tile.lamp.connectedto")+" " + lampRender.channel);
 			else
-				channel.setComment(1,"\u00a74" +  lampRender.channel + " is not in range!");	
+				channel.setComment(1,"\u00a74" +  lampRender.channel + Translator.translate("eln.core.tile.lamp.notinrange"));	
 		}
 		else{
 			channel.setVisible(false);
-			buttonSupplyType.displayString = "Powered by Cable";
+			buttonSupplyType.displayString = Translator.translate("eln.core.tile.lamp.poweredbycable");
 		}
 		
-		alphaZ.setComment(0, "Orientation: " + (int)alphaZ.getValue()+"\u00B0");
+		alphaZ.setComment(0, Translator.translate("eln.core.tile.lamp.orientation")+": " + (int)alphaZ.getValue()+"\u00B0");
 	}
 }

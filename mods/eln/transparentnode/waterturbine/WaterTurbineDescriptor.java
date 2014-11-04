@@ -7,7 +7,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import mods.eln.ghost.GhostGroup;
+import mods.eln.Translator;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.FunctionTable;
@@ -117,15 +117,16 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 	}
 	
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add("Produces power from water.");
-		list.add(Utils.plotVolt("Voltage:", cable.electricalNominalVoltage));
-		list.add(Utils.plotPower("Power:", nominalPower));
+		list.add(Translator.translate("eln.core.tile.waterturbine.hint0"));
+		list.add(Utils.plotVolt(Translator.translate("eln.core.nvoltage")+":", cable.electricalNominalVoltage));
+		list.add(Utils.plotPower(Translator.translate("eln.core.powerout")+":", nominalPower));
 
 	}
 	
@@ -142,7 +143,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 		
 		String str = super.checkCanPlace(coord, front);
 		if(str != null) return str;
-		if(checkCanPlaceWater(coord, front) == false) return "No place for water";
+		if(checkCanPlaceWater(coord, front) == false) return Translator.translate("eln.core.tile.waterturbine.nowaterplace");
 		return str;
 	}
 	

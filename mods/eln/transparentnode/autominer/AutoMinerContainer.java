@@ -1,5 +1,6 @@
 package mods.eln.transparentnode.autominer;
 
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.gui.SlotWithSkin;
@@ -28,9 +29,9 @@ public class AutoMinerContainer extends BasicContainer /*implements INodeContain
 
 	public static Slot[] newSlots(IInventory inventory) {
 		Slot[] slots = new Slot[StorageStartId + StorageSize];
-		slots[0] = new GenericItemUsingDamageSlot(inventory, electricalDrillSlotId, 134 + 0, 8, 1, ElectricalDrillDescriptor.class, SlotSkin.medium, new String[] { "Drill Slot" });
-		slots[1] = new GenericItemUsingDamageSlot(inventory, 1, 3000, 3000, 1, OreScanner.class, SlotSkin.medium, new String[] { "Ore Scanner Slot" });
-		slots[2] = new GenericItemUsingDamageSlot(inventory, MiningPipeSlotId, 134 + 18, 8, 64, MiningPipeDescriptor.class, SlotSkin.medium, new String[] { "Mining Pipe Slot" });
+		slots[0] = new GenericItemUsingDamageSlot(inventory, electricalDrillSlotId, 134 + 0, 8, 1, ElectricalDrillDescriptor.class, SlotSkin.medium, new String[] { Translator.translate("eln.core.drill.slot.hint") });
+		slots[1] = new GenericItemUsingDamageSlot(inventory, 1, 3000, 3000, 1, OreScanner.class, SlotSkin.medium, new String[] { Translator.translate("eln.core.orescanner.slot.hint") });
+		slots[2] = new GenericItemUsingDamageSlot(inventory, MiningPipeSlotId, 134 + 18, 8, 64, MiningPipeDescriptor.class, SlotSkin.medium, new String[] { Translator.translate("eln.core.miningpipe.slot.hint") });
 
 		int x = 0,y = 2;
 		for(int idx = 0;idx < StorageSize;idx++){

@@ -3,6 +3,7 @@ package mods.eln.sixnode.lampsupply;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import mods.eln.Translator;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
@@ -30,7 +31,7 @@ public class LampSupplyGui extends GuiContainerEln{
 		super.initGui();
 		channel = newGuiTextField(8, 8, 138);
 		channel.setText(render.channel);
-		channel.setComment(0, "Specify the channel to supply");
+		channel.setComment(0, Translator.translate("eln.core.tile.supply.specifychannel"));
 	}
 	
 	@Override

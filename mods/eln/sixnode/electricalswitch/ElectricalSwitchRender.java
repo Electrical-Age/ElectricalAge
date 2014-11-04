@@ -3,26 +3,15 @@ package mods.eln.sixnode.electricalswitch;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import org.lwjgl.opengl.GL11;
-
-import mods.eln.Eln;
-import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.client.ClientProxy;
-import mods.eln.client.FrameTime;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.Obj3D;
 import mods.eln.misc.RcInterpolator;
-import mods.eln.misc.Utils;
-import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
 
 public class ElectricalSwitchRender extends SixNodeElementRender {
 

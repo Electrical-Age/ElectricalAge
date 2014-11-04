@@ -7,6 +7,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -50,15 +51,16 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 	
 	Obj3DPart main,defaultFero,sbire;
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Transforms an input voltage and");
-		list.add("outputs it.");
-		list.add("The transform ratio is defined");
-		list.add("by the cable stacks size ratio.");
+		list.add(Translator.translate("eln.core.tile.transformer.hint0"));
+		list.add(Translator.translate("eln.core.tile.transformer.hint1"));
+		list.add(Translator.translate("eln.core.tile.transformer.hint2"));
+		list.add(Translator.translate("eln.core.tile.transformer.hint3"));
 	}
 	
 	@Override

@@ -2,6 +2,7 @@ package mods.eln.sixnode.batterycharger;
 
 import java.util.List;
 
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -19,7 +20,6 @@ import org.lwjgl.opengl.GL11;
 
 public class BatteryChargerDescriptor extends SixNodeDescriptor {
 
-	private Obj3D obj;
 	Obj3DPart main;
 	public double nominalVoltage;
 	public double nominalPower;
@@ -36,7 +36,6 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 		this.nominalVoltage = nominalVoltage;
 		this.nominalPower = nominalPower;
 		this.Rp = nominalVoltage * nominalVoltage / nominalPower;
-		this.obj = obj;
 		this.cable = cable;
 		if (obj != null) {
 			main = obj.getPart("main");
@@ -115,15 +114,12 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 		
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Can be used to recharge");
-		list.add("some electrical items like");
-		list.add("Flash Light, Xray scanner,");
-		list.add("Portable Pattery ..");
-		list.add(Utils.plotPower("Nominal power", nominalPower));
+		list.add(Utils.plotPower(Translator.translate("eln.core.npower"), nominalPower));
 		//list.add(Utils.plotPower("Maximal power", nominalPower*3));
 	}
 }

@@ -4,6 +4,8 @@ import org.lwjgl.opengl.GL11;
 
 
 
+
+import mods.eln.Translator;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelpText;
 import mods.eln.gui.GuiHelper;
@@ -18,10 +20,8 @@ import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.gui.inventory.GuiContainerCreative;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -71,7 +71,7 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
     	vuMeterHeat.setStepIdMax(98);
     	vuMeterHeat.setEnable(true);
     	vuMeterHeat.setRange(0.0f,980.0f);
-    	vuMeterHeat.setComment(0,"Temperature Gauge");
+    	vuMeterHeat.setComment(0,Translator.translate("eln.core.heatfurnace.gauge.hint0"));
     	syncVumeterHeat();
     	
     	/*
@@ -98,14 +98,14 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
     	
     	super.preDraw(f, x, y);
     	if(!render.controleExternal)
-    		externalControl.displayString = "Internal Control";
+    		externalControl.displayString = Translator.translate("eln.core.heatfurnace.btninctrl.name");
     	else
-    		externalControl.displayString = "External Control";
+    		externalControl.displayString = Translator.translate("eln.core.heatfurnace.btnexctrl.name");
     	//externalControl.displayString = "External control : " + render.controleExternal;
     	if(render.takeFuel)
-    		takeFuel.displayString = "Take Fuel";
+    		takeFuel.displayString = Translator.translate("eln.core.heatfurnace.takefuel.name");
     	else
-    		takeFuel.displayString = "Decline Fuel";
+    		takeFuel.displayString = Translator.translate("eln.core.heatfurnace.decfuel.name");
     	takeFuel.enabled = !render.controleExternal;
     	
     	
@@ -119,13 +119,13 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
         //vuMeterHeat.setVisible(render.controleExternal == false);
 
         vuMeterHeat.setComment(new String[]{});
-        vuMeterHeat.setComment(0,"Temperature Gauge");
-        vuMeterHeat.setComment(1,Utils.plotCelsius("Current:", render.temperature));
+        vuMeterHeat.setComment(0,Translator.translate("eln.core.heatfurnace.gauge.hint0"));
+        vuMeterHeat.setComment(1,Utils.plotCelsius(Translator.translate("eln.core.heatfurnace.gauge.current")+":", render.temperature));
         if(render.controleExternal == false)
-        	vuMeterHeat.setComment(2,Utils.plotCelsius("Target:", vuMeterHeat.getValue()));
-        vuMeterGain.setComment(0,"Control Gauge at " +(int)(vuMeterGain.getValue()*100) + "%");
+        	vuMeterHeat.setComment(2,Utils.plotCelsius(Translator.translate("eln.core.heatfurnace.gauge.target")+":", vuMeterHeat.getValue()));
+        vuMeterGain.setComment(0,Translator.translate("eln.core.heatfurnace.gauge.hint1")+" " +(int)(vuMeterGain.getValue()*100) + "%");
         
-        vuMeterGain.setComment(1, Utils.plotPower("Power:", render.power));
+        vuMeterGain.setComment(1, Utils.plotPower(Translator.translate("eln.core.power")+":", render.power));
     }
     
     @Override

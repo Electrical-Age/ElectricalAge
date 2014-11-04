@@ -1,5 +1,6 @@
 package mods.eln.transparentnode.teleporter;
 
+import mods.eln.Translator;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.GuiTextFieldEln;
@@ -34,7 +35,7 @@ public class TeleporterGui extends GuiScreenEln{
 		
 		name = newGuiTextField(6, 6, 80);
 		target = newGuiTextField(6, 6+20, 80);
-		start = newGuiButton(6,6+20+6+12,80, "Start");
+		start = newGuiButton(6,6+20+6+12,80, Translator.translate("eln.core.tile.transporter.start"));
 		
 		chargePower = newGuiVerticalTrackBar(6+80+6, 7, 20, 56);
 		chargePower.setRange(2000, 20000);
@@ -47,9 +48,9 @@ public class TeleporterGui extends GuiScreenEln{
 		target.setText(render.targetName);
 		chargePower.setValue(render.chargePower);
 		
-		name.setComment(0, "Current Transporter");
-		target.setComment(0, "Target Transporter");
-		chargePower.setComment(0, "Power Sink:");
+		name.setComment(0, Translator.translate("eln.core.tile.transporter.crtrs"));
+		target.setComment(0, Translator.translate("eln.core.tile.transporter.tgtrs"));
+		chargePower.setComment(0, Translator.translate("eln.core.tile.transporter.powersink")+":");
 		
 		
 		
@@ -82,13 +83,13 @@ public class TeleporterGui extends GuiScreenEln{
 			chargePower.setValue(render.chargePower);
 			render.chargePowerNew = false;
 		}
-		chargePower.setComment(0, Utils.plotPower("Power Sink:", chargePower.getValue()));
+		chargePower.setComment(0, Utils.plotPower(Translator.translate("eln.core.tile.transporter.powersink")+":", chargePower.getValue()));
 		start.enabled = render.state == TeleporterElement.StateIdle;
 		
 		chargeBar.setRange(0, render.energyTarget);
 		chargeBar.temperatureHit = render.energyHit;
-		chargeBar.setComment(0,Utils.plotEnergy("Energy need",render.energyTarget));
-		chargeBar.setComment(1,((int)(render.processRatio*100)) + "%");
+		chargeBar.setComment(0,Utils.plotEnergy(Translator.translate("eln.core.tile.transporter.eneeded")+":",render.energyTarget));
+		chargeBar.setComment(1,"\u00a7e"+((int)(render.processRatio*100)) + "%");
 	/*	if(render.defaultOutput)
 			toogleDefaultOutput.displayString = "default output is high";
 		else

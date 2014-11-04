@@ -136,9 +136,9 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add("This block measure a signal");
+		/*list.add("This block measure a signal");
 		list.add("and plot a graph with");
-		list.add("Can store 256 samples.");
+		list.add("Can store 256 samples.");*/
 	}
 }
 /*

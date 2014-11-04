@@ -127,10 +127,10 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Excavate on a small radius");
+		/*list.add("Excavate on a small radius");
 		list.add("Extract ore on a bigger radius");
 		list.add("10 blocks radius after 10 blocks depth");
-		list.add("Nominal U : " + (int)nominalVoltage);
+		list.add("Nominal U : " + (int)nominalVoltage);*/
 	}
 	
 	

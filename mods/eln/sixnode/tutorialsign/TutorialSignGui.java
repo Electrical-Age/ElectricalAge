@@ -8,6 +8,7 @@ import java.text.ParseException;
 
 import org.lwjgl.opengl.GL11;
 
+import mods.eln.Translator;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.GuiTextFieldEln;
@@ -40,7 +41,7 @@ public class TutorialSignGui extends GuiScreenEln {
 		fileName = newGuiTextField(6, 6, 150);
 		fileName.setText(render.baliseName);
 		fileName.setObserver(this);
-		fileName.setComment(new String[]{"Set balise name"});
+		fileName.setComment(new String[]{Translator.translate("eln.core.tutsign.balisename")});
 	}
 	
 	@Override

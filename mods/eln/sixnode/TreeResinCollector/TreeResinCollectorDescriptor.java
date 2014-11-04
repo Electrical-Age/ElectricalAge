@@ -2,6 +2,7 @@ package mods.eln.sixnode.TreeResinCollector;
 
 import java.util.List;
 
+import mods.eln.Translator;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
@@ -94,8 +95,8 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Slowly produces Tree Resin over");
-		list.add("time when placed on a tree.");
+		/*list.add("Slowly produces Tree Resin over");
+		list.add("time when placed on a tree.");*/
 	}
 	
 	
@@ -123,11 +124,11 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 		
 		Block b = c.getBlock();
 		if(isWood(b) == false){
-			Utils.addChatMessage(player,"This block can only be placed on the side of a tree!");
+			Utils.addChatMessage(player,Translator.translate("eln.core.tile.resincollector.hint0"));
 			return false;
 		}
 		if(side.isY()){
-			Utils.addChatMessage(player,"This block can only be placed on the side of a tree!");
+			Utils.addChatMessage(player,Translator.translate("eln.core.tile.resincollector.hint0"));
 			return false;
 		}
 

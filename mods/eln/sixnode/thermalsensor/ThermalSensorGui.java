@@ -8,6 +8,7 @@ import java.text.ParseException;
 
 import org.lwjgl.opengl.GL11;
 
+import mods.eln.Translator;
 import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
@@ -48,32 +49,32 @@ public class ThermalSensorGui extends GuiContainerEln{
 		{
 
 			
-			powerType = newGuiButton( 8, 8,70, "Power");
-	        temperatureType = newGuiButton(176-8-70,8,70, "Temperature");
+			powerType = newGuiButton( 8, 8,70, Translator.translate("eln.core.power"));
+	        temperatureType = newGuiButton(176-8-70,8,70, Translator.translate("eln.core.temperature"));
 
 			int x = -15,y = 13;
-			validate = newGuiButton(x+8 + 50 + 4 + 50 + 4 -26,y+ (166-84)/2 - 8,50, "Validate");
+			validate = newGuiButton(x+8 + 50 + 4 + 50 + 4 -26,y+ (166-84)/2 - 8,50, Translator.translate("eln.core.validate"));
 			
 			lowValue = newGuiTextField(x+8 + 50 + 4-26, y+(166-84)/2+3, 50);
 	        lowValue.setText(render.lowValue);
-	        lowValue.setComment(new String[]{"Probed value","that product","a 0% output"});
+	        lowValue.setComment(new String[]{Translator.translate("eln.core.tile.probe.probedvalue"),Translator.translate("eln.core.tile.probe.hint0percent")});
 	        
 	        highValue = newGuiTextField(x+8 + 50 + 4-26,y+ (166-84)/2 -12, 50);
 	        highValue.setText(render.highValue);
-	        highValue.setComment(new String[]{"Probed value","that product","a 100% output"});
+	        highValue.setComment(new String[]{Translator.translate("eln.core.tile.probe.probedvalue"),Translator.translate("eln.core.tile.probe.hint100percent")});
 		}
 		else
 		{
 			int x = 0,y = 0;
-			validate = newGuiButton(x+8 + 50 + 4 + 50 + 4 -26,y+ (166-84)/2 - 8,50, "Validate");
+			validate = newGuiButton(x+8 + 50 + 4 + 50 + 4 -26,y+ (166-84)/2 - 8,50, Translator.translate("eln.core.validate"));
 			
 			lowValue = newGuiTextField(x+8 + 50 + 4-26, y+(166-84)/2+3, 50);
 	        lowValue.setText(render.lowValue);
-	        lowValue.setComment(new String[]{"Probed temperature","that product","a 0% output"});
+	        lowValue.setComment(new String[]{Translator.translate("eln.core.tile.probe.probedtemp"),Translator.translate("eln.core.tile.probe.hint0percent")});
 	        
 	        highValue = newGuiTextField(x+8 + 50 + 4-26,y+ (166-84)/2 -12, 50);
 	        highValue.setText(render.highValue);
-	        highValue.setComment(new String[]{"Probed temperature","that product","a 100% output"});
+	        highValue.setComment(new String[]{Translator.translate("eln.core.tile.probe.probedtemp"),Translator.translate("eln.core.tile.probe.hint100percent")});
 		}
 	}
 	

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.misc.IConfigSharing;
 import mods.eln.misc.Utils;
@@ -121,6 +122,7 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade imp
 		resistor.setR(getR());
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
@@ -128,22 +130,12 @@ public class LampDescriptor  extends GenericItemUsingDamageDescriptorUpgrade imp
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
 		//list.add("Socket : " + socket);
-		list.add("Tech  : " + type);
-		list.add("Light   : " + (int)(nominalLight*15) + " blocks");
-		list.add("Power : " + (int)nominalP + "W");
-		list.add(Utils.plotOhm("Resistance :",getR()));
+		list.add(Translator.translate("eln.core.style")+": " + type);
+		list.add(Translator.translate("eln.core.light")+": " + (int)(nominalLight*15) + " blocks");
+		list.add(Translator.translate("eln.core.power")+": " + (int)nominalP + "W");
+		list.add(Utils.plotOhm(Translator.translate("eln.core.resistance")+":",getR()));
 		//list.add(Utils.plotOhm("Resistance", this.getR()));
-		list.add(Utils.plotTime("Nominal life : ",serverNominalLife));
-		if(itemStack.getTagCompound().hasKey("life") == false)
-			list.add("Seem that nobody has used it before");
-		else if(getLifeInTag(itemStack) > 0.5)
-			list.add("Seem in good condition");
-		else if(getLifeInTag(itemStack) > 0.2)
-			list.add("seems a bit worn");
-		else if(getLifeInTag(itemStack) > 0.1)
-			list.add("Seem in end of life");
-		else 
-			list.add("Seem that can break in the hours");
+		list.add(Utils.plotTime(Translator.translate("eln.core.nlife")+": ",serverNominalLife));
 
 		//list.add(Utils.plotTime("Life    : ",getLifeInTag(itemStack)*nominalLife));
 		

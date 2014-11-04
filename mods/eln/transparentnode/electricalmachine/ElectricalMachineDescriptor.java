@@ -2,6 +2,7 @@ package mods.eln.transparentnode.electricalmachine;
 
 import java.util.List;
 
+import mods.eln.Translator;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.gui.GuiLabel;
 import mods.eln.misc.Direction;
@@ -87,11 +88,12 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 
 	double maximalU;
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Nominal U : " + nominalU);
-		list.add("Nominal P : " + nominalP);
+		list.add(Translator.translate("eln.core.nominal")+" U : " + nominalU);
+		list.add(Translator.translate("eln.core.nominal")+" P : " + nominalP);
 	}
 
 	public void applyTo(ElectricalLoad load) {

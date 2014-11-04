@@ -51,9 +51,9 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Output value rise when");
+		/*list.add("Output value rise when");
 		list.add("a fire is in range");
-		list.add("Max range : " + (int)maxRange);
+		list.add("Max range : " + (int)maxRange);*/
 	}
 
     @Override

@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.heatfurnace;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.gui.SlotWithSkin;
@@ -29,9 +30,9 @@ public class HeatFurnaceContainer extends BasicContainer implements INodeContain
 		super(player, inventory,new Slot[]{
 				new SlotWithSkinAndComment(inventory,combustibleId,70 ,58,SlotSkin.medium,new String[]{"Fuel Slot"}),
 			//	new RegulatorSlot(inventory,regulatorId,62 +  0,17+18,1,new RegulatorType[]{),
-				new GenericItemUsingDamageSlot(inventory,regulatorId, 8,58,1, IRegulatorDescriptor.class,SlotSkin.medium,new String[]{"Regulator Slot"}),
-				new GenericItemUsingDamageSlot(inventory, isolatorId,8 + 18,-2000,1, ThermalIsolatorElement.class,SlotSkin.medium,new String[]{"Thermal Isolator Slot"}),
-				new GenericItemUsingDamageSlot(inventory, combustrionChamberId,8+ 18,58,descriptor.combustionChamberMax, CombustionChamber.class,SlotSkin.medium,new String[]{"Combustion Chamber Slot"}),
+				new GenericItemUsingDamageSlot(inventory,regulatorId, 8,58,1, IRegulatorDescriptor.class,SlotSkin.medium,new String[]{Translator.translate("eln.core.regulator.slot.hint")}),
+				new GenericItemUsingDamageSlot(inventory, isolatorId,8 + 18,-2000,1, ThermalIsolatorElement.class,SlotSkin.medium,new String[]{Translator.translate("eln.core.thermisolator.slot.hint")}),
+				new GenericItemUsingDamageSlot(inventory, combustrionChamberId,8+ 18,58,descriptor.combustionChamberMax, CombustionChamber.class,SlotSkin.medium,new String[]{Translator.translate("eln.core.combchamber.slot.hint")}),
 			});
 		this.node = node;
 		

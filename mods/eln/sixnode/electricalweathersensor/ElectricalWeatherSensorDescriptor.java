@@ -3,6 +3,7 @@ package mods.eln.sixnode.electricalweathersensor;
 import java.util.List;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
@@ -45,14 +46,15 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
 		Data.addSignal(newItemStack());
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Provides an electrical signal");
-		list.add("dependant on weather type.");
-		list.add("0V -> clear ");
-		list.add(Eln.SVU/2 + "V -> rain ");
-		list.add(Eln.SVU + "V -> thunder ");
+		list.add(Translator.translate("eln.core.tile.weathersensor.hint0"));
+		list.add(Translator.translate("eln.core.tile.weathersensor.hint1"));
+		list.add("0V -> "+Translator.translate("eln.core.tile.weathersensor.hint2"));
+		list.add(Eln.SVU/2 + "V -> "+Translator.translate("eln.core.tile.weathersensor.hint3"));
+		list.add(Eln.SVU + "V -> "+Translator.translate("eln.core.tile.weathersensor.hint4"));
 	}
 	@Override
 	public boolean use2DIcon() {

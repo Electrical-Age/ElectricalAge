@@ -3,6 +3,7 @@ package mods.eln.sixnode.electricalcable;
 import java.util.List;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.misc.Utils;
@@ -12,8 +13,6 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.misc.MnaConst;
-import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -119,15 +118,16 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 	}
 
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		if(signalWire) {
-			list.add("This cable is adapted to");
-			list.add("transport signals quickly.");
-			list.add("A signal is electrical information");
-			list.add("that must be between 0V and " + Eln.SVU + "V.");
-			list.add("Don't try to transport power.");
+			list.add(Translator.translate("eln.core.tile.signalcable.hint0"));
+			list.add(Translator.translate("eln.core.tile.signalcable.hint1"));
+			list.add(Translator.translate("eln.core.tile.signalcable.hint2"));
+			list.add(Translator.translate("eln.core.tile.signalcable.hint3") + Eln.SVU + "V.");
+			list.add(Translator.translate("eln.core.tile.signalcable.hint4"));
 			
 			/*String lol = "";
 			for(int idx = 0; idx < 15; idx++) {
@@ -142,12 +142,12 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 		}
 		else {
 			//list.add("Low resistor => low power lost");
-			list.add("Nominal usage ->");
-			list.add("  Voltage : " + (int)electricalNominalVoltage + "V");
-			list.add(Utils.plotAmpere("  Current :",electricalNominalPower / electricalNominalVoltage));
-			list.add("  Power : " + (int)electricalNominalPower + "W");
+			list.add(Translator.translate("eln.core.nusage")+" ->");
+			list.add("  "+Translator.translate("eln.core.voltage")+": " + (int)electricalNominalVoltage + "V");
+			list.add(Utils.plotAmpere("  "+Translator.translate("eln.core.current")+":",electricalNominalPower / electricalNominalVoltage));
+			list.add("  "+Translator.translate("eln.core.power")+": " + (int)electricalNominalPower + "W");
 		//	list.add("  Power lost : " + (int)(electricalNominalPowerDropFactor * electricalNominalPower) + " W/Block");
-			list.add(Utils.plotOhm("Serial resistor :", electricalNominalRs * 2));
+		//	list.add(Utils.plotOhm("Serial resistor :", electricalNominalRs * 2));
 		}
 	}
 

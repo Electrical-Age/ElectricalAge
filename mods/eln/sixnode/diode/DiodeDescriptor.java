@@ -2,6 +2,7 @@ package mods.eln.sixnode.diode;
 
 import java.util.List;
 
+import mods.eln.Translator;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -96,12 +97,12 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 		resistorSwitch.setR(stdU/stdI);
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("The current can only run");
-		list.add("one way");
+		list.add(Translator.translate("eln.core.tile.diode.hint0"));
 	}
 
     void draw() {

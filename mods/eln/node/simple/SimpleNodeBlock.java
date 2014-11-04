@@ -1,6 +1,5 @@
 package mods.eln.node.simple;
 
-import mods.eln.misc.Coordonate;
 import mods.eln.misc.DescriptorBase;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
@@ -10,7 +9,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 public abstract class SimpleNodeBlock extends BlockContainer {

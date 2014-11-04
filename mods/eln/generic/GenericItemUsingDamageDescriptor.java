@@ -4,8 +4,7 @@ import java.util.List;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-
-import mods.eln.Eln;
+import mods.eln.Translator;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
@@ -42,7 +41,7 @@ public class GenericItemUsingDamageDescriptor {
 		return null;
 	}
 
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4)
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List<?> list, boolean par4)
 	{
 
 	}
@@ -52,7 +51,7 @@ public class GenericItemUsingDamageDescriptor {
 		return s;
 	}
 	
-	public void getSubItems(List list)
+	public void getSubItems(List<ItemStack> list)
 	{
 		ItemStack stack = newItemStack(1);
 		list.add(stack);
@@ -74,9 +73,11 @@ public class GenericItemUsingDamageDescriptor {
 
 	public String getName(ItemStack stack)
 	{
-		return name;
+		String s = Translator.translate(("eln.core.item."+(name.toLowerCase()).replaceAll(" ", ""))+".name");
+		return s;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static GenericItemUsingDamageDescriptor getDescriptor(ItemStack stack)
 	{
 		if (stack == null)
@@ -88,7 +89,7 @@ public class GenericItemUsingDamageDescriptor {
 
 	public static GenericItemUsingDamageDescriptor getDescriptor(
 			ItemStack stack,
-			Class extendClass) {
+			Class<?> extendClass) {
 		GenericItemUsingDamageDescriptor desc = getDescriptor(stack);
 		if (desc == null)
 			return null;

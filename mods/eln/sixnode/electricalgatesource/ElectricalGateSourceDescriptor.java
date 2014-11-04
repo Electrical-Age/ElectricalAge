@@ -1,31 +1,16 @@
 package mods.eln.sixnode.electricalgatesource;
 
-import java.awt.Color;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
-import mods.eln.Eln;
-import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.client.ClientProxy;
-
-import mods.eln.misc.IFunction;
-import mods.eln.misc.Obj3D;
-import mods.eln.misc.Utils;
-import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.UtilsClient;
+import mods.eln.Translator;
 import mods.eln.node.six.SixNodeDescriptor;
-import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
-
-import com.google.common.base.Function;
 
 public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 
@@ -40,12 +25,12 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 		this.onOffOnly = onOffOnly;
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Provides signal voltage");
-		list.add("from user control");
+		list.add(Translator.translate("eln.core.tile.gatesource.hint0"));
 	}
 
 	public void setWithAutoReset() {

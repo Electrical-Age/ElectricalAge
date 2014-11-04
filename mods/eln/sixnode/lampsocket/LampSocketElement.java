@@ -7,6 +7,7 @@ import java.io.IOException;
 import javax.swing.text.MaskFormatter;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -67,7 +68,7 @@ public class LampSocketElement extends SixNodeElement {
 	//ElectricalCableDescriptor cableDescriptor = null;
 	public String channel = lastSocketName;
 
-	public static String lastSocketName = "Default channel";
+	public static String lastSocketName = Translator.translate("eln.core.defaultchannel");
 
 	@Override
 	public IInventory getInventory()

@@ -3,6 +3,7 @@ package mods.eln.transparentnode.turbine;
 import java.util.List;
 
 import mods.eln.Eln;
+import mods.eln.Translator;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.Obj3D;
@@ -133,18 +134,18 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 	}
 	
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-				
-		list.add("Converts heat into electricity.");
-		list.add("Nominal usage ->");
-		list.add("  Delta T : " +  ((int)nominalDeltaT) + "\u00B0C");
-		list.add(Utils.plotVolt("  Voltage out :", nominalU));
-		list.add(Utils.plotPower("  Power out :", nominalP));
+		list.add(Translator.translate("eln.core.tile.turbine.hint0"));
+		list.add(Translator.translate("eln.core.nusage")+" ->");
+		list.add("	"+Translator.translate("eln.core.delta")+" T : " +  ((int)nominalDeltaT) + "\u00B0C");
+		list.add(Utils.plotVolt("	"+Translator.translate("eln.core.voltageout")+":", nominalU));
+		list.add(Utils.plotPower("	"+Translator.translate("eln.core.powerout")+":", nominalP));
 
 	}
 }

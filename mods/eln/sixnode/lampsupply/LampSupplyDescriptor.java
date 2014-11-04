@@ -7,18 +7,15 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
+import mods.eln.Translator;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 
 public class LampSupplyDescriptor extends SixNodeDescriptor{
 
-	private Obj3D obj;
 	Obj3DPart main;
 	private Obj3DPart rot1;
 	private Obj3DPart rot2;
@@ -33,7 +30,6 @@ public class LampSupplyDescriptor extends SixNodeDescriptor{
 			) {
 		super(name, LampSupplyElement.class, LampSupplyRender.class);
 		this.range = range;
-		this.obj = obj;
 		if(obj != null) {
 			main = obj.getPart("main");
 			rot1 = obj.getPart("rot1");
@@ -97,11 +93,12 @@ public class LampSupplyDescriptor extends SixNodeDescriptor{
 	}
 	
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);		
-		list.add("Provide supply to any");
-		list.add("lamp on the same channel");
+		list.add(Translator.translate("eln.core.tile.supply.hint0"));
+		list.add(Translator.translate("eln.core.tile.supply.hint1"));
 	}
 }
