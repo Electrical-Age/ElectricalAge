@@ -3,8 +3,8 @@ package mods.eln.simplenode.computerprobe;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import li.cil.oc.api.network.Arguments;
-import li.cil.oc.api.network.Context;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Context;
 import mods.eln.Eln;
 import mods.eln.Other;
 import mods.eln.misc.Coordonate;

@@ -1,14 +1,11 @@
 package mods.eln.simplenode.computerprobe;
 
-import li.cil.oc.api.network.Arguments;
-import li.cil.oc.api.network.Callback;
-import li.cil.oc.api.network.Context;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.SimpleComponent;
 import mods.eln.Other;
-import mods.eln.node.simple.SimpleNode;
 import mods.eln.node.simple.SimpleNodeEntity;
-import mods.eln.simplenode.computerprobe.ComputerProbeNode.WirelessTx;
-import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import cpw.mods.fml.common.Optional;
 
 @Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = Other.modIdOc)

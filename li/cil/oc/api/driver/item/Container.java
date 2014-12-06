@@ -1,5 +1,6 @@
-package li.cil.oc.api.driver;
+package li.cil.oc.api.driver.item;
 
+import li.cil.oc.api.driver.Item;
 import net.minecraft.item.ItemStack;
 
 /**
@@ -11,18 +12,19 @@ import net.minecraft.item.ItemStack;
  * These drivers will not be queried for environments. The reported tier is the
  * maximum tier supported in the dynamic slot they provide.
  */
-public interface UpgradeContainer extends Item {
+public interface Container extends Item {
     /**
      * The type of slot provided as the dynamic slot. This will usually be
      * for other upgrades, but may be for any type of item component.
      * <p/>
-     * While the driver's own type implicitly has to be 'Upgrade' and could
+     * While the driver's own type implicitly has to be 'Container' and could
      * therefore be used instead, this makes the intention more clear.
      *
      * @param stack the item stack to get the provided slot type for.
      * @return the slot type provided by that dynamic slot upgrade.
+     * @see li.cil.oc.api.driver.item.Slot
      */
-    Slot providedSlot(ItemStack stack);
+    String providedSlot(ItemStack stack);
 
     /**
      * The maximum item tier of the items that can be placed into the slot

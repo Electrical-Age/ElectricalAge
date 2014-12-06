@@ -1,10 +1,13 @@
-package li.cil.oc.api.machine;
+package li.cil.oc.api.internal;
 
-import li.cil.oc.api.Rotatable;
+import li.cil.oc.api.driver.EnvironmentHost;
+import li.cil.oc.api.machine.Machine;
 import li.cil.oc.api.network.Environment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.IFluidTank;
 
 /**
  * This interface allows interaction with robots.
@@ -25,8 +28,15 @@ import net.minecraft.item.ItemStack;
  * Note that there may be no hot-swappable (or even built-in) components or
  * no inventory, depending on the configuration of the robot. The hard-wired
  * components cannot be changed (removed/replaced).
+ * <p/>
+ * This interface is <em>not meant to be implemented</em>, just used.
  */
-public interface Robot extends ISidedInventory, Rotatable {
+public interface Robot extends Environment, EnvironmentHost, Rotatable, ISidedInventory, IFluidHandler {
+    /**
+     * The machine currently hosted by this robot.
+     */
+    Machine machine();
+
     /**
      * Returns the fake player used to represent the robot as an entity for
      * certain actions that require one.
@@ -61,6 +71,11 @@ public interface Robot extends ISidedInventory, Rotatable {
     int inventorySize();
 
     /**
+     * The number of tanks currently installed in the robot.
+     */
+    int tankCount();
+
+    /**
      * Get the item stack in the specified inventory slot.
      * <p/>
      * This operates on the underlying, real inventory, as described in the
@@ -88,6 +103,14 @@ public interface Robot extends ISidedInventory, Rotatable {
     Environment getComponentInSlot(int index);
 
     /**
+     * Get the installed fluid tank with the specified index.
+     *
+     * @param index the index of the tank to get.
+     * @return the tank with the specified index.
+     */
+    IFluidTank getFluidTank(int index);
+
+    /**
      * Gets the index of the currently selected slot in the robot's inventory.
      * <p/>
      * This is the index in the underlying, <em>real</em> inventory. To get
@@ -97,6 +120,13 @@ public interface Robot extends ISidedInventory, Rotatable {
      * @return the index of the currently selected slot.
      */
     int selectedSlot();
+
+    /**
+     * Get the index of the currently selected tank.
+     *
+     * @return the index of the currently selected tank.
+     */
+    int selectedTank();
 
     /**
      * Sends the state of the <em>item</em> in the specified slot to the client
