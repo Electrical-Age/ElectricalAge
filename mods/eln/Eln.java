@@ -6482,6 +6482,8 @@ public class Eln {
 
 		if (addOtherModOreToXRay) {
 			for (String name : OreDictionary.getOreNames()) {
+				if (name == null)
+					continue;
 				// Utils.println(name + " " +
 				// OreDictionary.getOreID(name));
 				if (name.startsWith("ore")) {
