@@ -5,8 +5,6 @@ import ic2.api.energy.tile.IEnergySource;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import buildcraft.api.power.IPowerEmitter;
-
 import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
@@ -28,12 +26,10 @@ import cpw.mods.fml.relauncher.SideOnly;
 @Optional.InterfaceList({
 		@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = Other.modIdIc2),
 		@Optional.Interface(iface = "cofh.api.energy.IEnergyHandler", modid = Other.modIdTe),
-		@Optional.Interface(iface = "buildcraft.api.power.IPowerEmitter", modid = Other.modIdBuildcraft),
 		@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = Other.modIdOc)})
 public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements 
 	IEnergySource,Environment, 
-	IEnergyHandler,
-	IPowerEmitter
+	IEnergyHandler
 	
 	/* ,SidedEnvironment *//*,
 	ISidedBatteryProvider, IPowerEmitter*//*, IPipeConnection*/{
@@ -210,17 +206,6 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 		//Utils.println("*****getMaxEnergyStored*****");
 		return 0;
 	}
-
-	// ***************** Buildcraft ****************
-	
-	@Override
-	@Optional.Method(modid = Other.modIdBuildcraft)
-	public boolean canEmitPowerFrom(ForgeDirection side) {
-		if (worldObj.isRemote) return false;
-		if(getNode() == null) return false;
-		SimpleNode n = getNode();
-		return n.getFront().back() == Direction.from(side);
-	}
 	
 	// ***************** Bridges ****************
 
@@ -230,7 +215,6 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 		if (Other.ic2Loaded) EnergyConverterElnToOtherFireWallIc2.updateEntity(this);
 		if (Other.ocLoaded) getOc().updateEntity();
 		if(Other.teLoaded)EnergyConverterElnToOtherFireWallRf.updateEntity(this);
-		if(Other.buildcraftLoaded)EnergyConverterElnToOtherFireWallBuildcraft.updateEntity(this);
 	}
 
 	public void onLoaded() {
