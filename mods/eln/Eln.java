@@ -529,6 +529,172 @@ public class Eln {
 
 		config.save();
 
+
+
+        //computerCraftReady = Utils.isClassLoaded("dan200.computercraft.ComputerCraft");
+
+
+        eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
+
+        simulator = new Simulator(0.05, 1 / electricalFrequancy, electricalInterSystemOverSampling, 1 / thermalFrequancy);
+        nodeManager = new NodeManager("caca");
+        ghostManager = new GhostManager("caca2");
+        delayedTask = new DelayedTaskManager();
+        
+        playerManager = new PlayerManager();
+        //tileEntityDestructor = new TileEntityDestructor();
+
+        oreRegenerate = new OreRegenerate();
+        nodeServer = new NodeServer();
+        clientLiveDataManager = new LiveDataManager();
+
+        packetHandler = new PacketHandler();
+        // ForgeDummyContainer
+        instance = this;
+
+        NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
+
+        Item itemCreativeTab = new Item()
+                .setUnlocalizedName("eln:elncreativetab")
+                .setTextureName("eln:elncreativetab");
+        GameRegistry.registerItem(itemCreativeTab, "eln.itemCreativeTab");
+        creativeTab = new GenericCreativeTab("Eln", itemCreativeTab);
+
+        oreBlock = (OreBlock) new OreBlock().setCreativeTab(creativeTab).setBlockName("OreEln");
+
+        sharedItem = (SharedItem) new SharedItem()
+                .setCreativeTab(creativeTab).setMaxStackSize(64)
+                .setUnlocalizedName("sharedItem");
+
+        sharedItemStackOne = (SharedItem) new SharedItem()
+                .setCreativeTab(creativeTab).setMaxStackSize(1)
+                .setUnlocalizedName("sharedItemStackOne");
+
+        transparentNodeBlock = (TransparentNodeBlock) new TransparentNodeBlock(
+                Material.iron,
+                TransparentNodeEntity.class)
+                .setCreativeTab(creativeTab)
+                .setBlockTextureName("iron_block");
+        sixNodeBlock = (SixNodeBlock) new SixNodeBlock(
+                Material.plants, SixNodeEntity.class)
+                .setCreativeTab(creativeTab)
+                .setBlockTextureName("iron_block");
+
+        ghostBlock = (GhostBlock) new GhostBlock().setBlockTextureName("iron_block");
+        lightBlock = (LightBlock) new LightBlock();
+        // obj.loadFolder("eln", "/model");
+        for (String path : objNames) {
+            obj.loadObj("eln", path);
+        }
+
+        GameRegistry.registerItem(sharedItem, "Eln.sharedItem");
+        GameRegistry.registerItem(sharedItemStackOne, "Eln.sharedItemStackOne");
+        GameRegistry.registerBlock(ghostBlock, "Eln.ghostBlock");
+        GameRegistry.registerBlock(lightBlock, "Eln.lightBlock");
+        GameRegistry.registerBlock(sixNodeBlock, SixNodeItem.class, "Eln.SixNode");
+        GameRegistry.registerBlock(transparentNodeBlock, TransparentNodeItem.class, "Eln.TransparentNode");
+        GameRegistry.registerBlock(oreBlock, OreItem.class, "Eln.Ore");
+        TileEntity.addMapping(TransparentNodeEntity.class, "TransparentNodeEntity");
+        // TileEntity.addMapping(TransparentNodeEntityWithSiededInv.class, "TransparentNodeEntityWSI");
+        TileEntity.addMapping(SixNodeEntity.class, "SixNodeEntity");
+        TileEntity.addMapping(LightBlockEntity.class, "LightBlockEntity");
+
+        NodeManager.registerUuid(sixNodeBlock.getNodeUuid(), SixNode.class);
+        NodeManager.registerUuid(transparentNodeBlock.getNodeUuid(), TransparentNode.class);
+
+        o = Item.getItemFromBlock(sixNodeBlock);
+        sixNodeItem = (SixNodeItem) Item.getItemFromBlock(sixNodeBlock);
+        transparentNodeItem = (TransparentNodeItem) Item.getItemFromBlock(transparentNodeBlock);
+
+        oreItem = (OreItem) Item.getItemFromBlock(oreBlock);
+        /*
+         * 
+         * int id = 0,subId = 0,completId; String name;
+         */
+
+        SixNode.sixNodeCacheList.add(new SixNodeCacheStd());
+
+
+        registerTestBlock();
+        registerEnergyConverter();
+        registerComputer();
+
+        registerArmor();
+        registerTool();
+        registerOre();
+
+        registerGround(2);
+        registerElectricalSource(3);
+        registerElectricalCable(32);
+        registerThermalCable(48);
+        registerLampSocket(64);
+        registerLampSupply(65);
+        registerBatteryCharger(66);
+        registerWirelessSignal(92);
+        registerElectricalDataLogger(93);
+        registerElectricalRelay(94);
+        registerElectricalGateSource(95);
+        registerPassiveComponent(96);
+        registerSwitch(97);
+        registerElectricalManager(98);
+        registerElectricalSensor(100);
+        registerThermalSensor(101);
+        registerElectricalVuMeter(102);
+        registerElectricalAlarm(103);
+        registerElectricalEnvironementalSensor(104);
+        registerElectricalRedstone(108);
+        registerElectricalGate(109);
+        registerTreeResinCollector(116);
+        registerSixNodeMisc(117);
+        //
+
+        registerPowerComponent(1);
+        registerTransformer(2);
+        registerHeatFurnace(3);
+        registerTurbine(4);
+        registerElectricalAntenna(7);
+        registerBattery(16);
+        registerElectricalFurnace(32);
+        registerMacerator(33);
+        registerCompressor(35);
+        registermagnetiser(36);
+        registerPlateMachine(37);
+        registerEggIncubator(41);
+        registerAutoMiner(42);
+        registerSolarPannel(48);
+        registerWindTurbine(49);
+        registerThermalDissipatorPassiveAndActive(64);
+        registerTransparentNodeMisc(65);
+        registerTurret(66);
+
+        registerHeatingCorp(1);
+        // registerThermalIsolator(2);
+        registerRegulatorItem(3);
+        registerLampItem(4);
+        registerProtection(5);
+        registerCombustionChamber(6);
+        registerFerromagneticCore(7);
+        registerIngot(8);
+        registerDust(9);
+        registerElectricalMotor(10);
+        registerSolarTracker(11);
+        //
+        registerMeter(14);
+        registerElectricalDrill(15);
+        registerOreScanner(16);
+        registerMiningPipe(17);
+        registerTreeResinAndRubber(64);
+        registerRawCable(65);
+        registerBrush(119);
+        registerMiscItem(120);
+        registerElectricalTool(121);
+        registerPortableItem(122);
+        //
+        registerReplicator();
+        //
+
+
+
 	}
 
 	public static FMLEventChannel eventChannel;
@@ -551,168 +717,6 @@ public class Eln {
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
 		Object o;
-
-		//computerCraftReady = Utils.isClassLoaded("dan200.computercraft.ComputerCraft");
-
-
-		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
-
-		simulator = new Simulator(0.05, 1 / electricalFrequancy, electricalInterSystemOverSampling, 1 / thermalFrequancy);
-		nodeManager = new NodeManager("caca");
-		ghostManager = new GhostManager("caca2");
-		delayedTask = new DelayedTaskManager();
-		
-		playerManager = new PlayerManager();
-		//tileEntityDestructor = new TileEntityDestructor();
-
-		oreRegenerate = new OreRegenerate();
-		nodeServer = new NodeServer();
-		clientLiveDataManager = new LiveDataManager();
-
-		packetHandler = new PacketHandler();
-		// ForgeDummyContainer
-		instance = this;
-
-		NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
-
-		Item itemCreativeTab = new Item()
-				.setUnlocalizedName("eln:elncreativetab")
-				.setTextureName("eln:elncreativetab");
-		GameRegistry.registerItem(itemCreativeTab, "eln.itemCreativeTab");
-		creativeTab = new GenericCreativeTab("Eln", itemCreativeTab);
-
-		oreBlock = (OreBlock) new OreBlock().setCreativeTab(creativeTab).setBlockName("OreEln");
-
-		sharedItem = (SharedItem) new SharedItem()
-				.setCreativeTab(creativeTab).setMaxStackSize(64)
-				.setUnlocalizedName("sharedItem");
-
-		sharedItemStackOne = (SharedItem) new SharedItem()
-				.setCreativeTab(creativeTab).setMaxStackSize(1)
-				.setUnlocalizedName("sharedItemStackOne");
-
-		transparentNodeBlock = (TransparentNodeBlock) new TransparentNodeBlock(
-				Material.iron,
-				TransparentNodeEntity.class)
-				.setCreativeTab(creativeTab)
-				.setBlockTextureName("iron_block");
-		sixNodeBlock = (SixNodeBlock) new SixNodeBlock(
-				Material.plants, SixNodeEntity.class)
-				.setCreativeTab(creativeTab)
-				.setBlockTextureName("iron_block");
-
-		ghostBlock = (GhostBlock) new GhostBlock().setBlockTextureName("iron_block");
-		lightBlock = (LightBlock) new LightBlock();
-		// obj.loadFolder("eln", "/model");
-		for (String path : objNames) {
-			obj.loadObj("eln", path);
-		}
-
-		GameRegistry.registerItem(sharedItem, "Eln.sharedItem");
-		GameRegistry.registerItem(sharedItemStackOne, "Eln.sharedItemStackOne");
-		GameRegistry.registerBlock(ghostBlock, "Eln.ghostBlock");
-		GameRegistry.registerBlock(lightBlock, "Eln.lightBlock");
-		GameRegistry.registerBlock(sixNodeBlock, SixNodeItem.class, "Eln.SixNode");
-		GameRegistry.registerBlock(transparentNodeBlock, TransparentNodeItem.class, "Eln.TransparentNode");
-		GameRegistry.registerBlock(oreBlock, OreItem.class, "Eln.Ore");
-		TileEntity.addMapping(TransparentNodeEntity.class, "TransparentNodeEntity");
-		// TileEntity.addMapping(TransparentNodeEntityWithSiededInv.class, "TransparentNodeEntityWSI");
-		TileEntity.addMapping(SixNodeEntity.class, "SixNodeEntity");
-		TileEntity.addMapping(LightBlockEntity.class, "LightBlockEntity");
-
-		NodeManager.registerUuid(sixNodeBlock.getNodeUuid(), SixNode.class);
-		NodeManager.registerUuid(transparentNodeBlock.getNodeUuid(), TransparentNode.class);
-
-		o = Item.getItemFromBlock(sixNodeBlock);
-		sixNodeItem = (SixNodeItem) Item.getItemFromBlock(sixNodeBlock);
-		transparentNodeItem = (TransparentNodeItem) Item.getItemFromBlock(transparentNodeBlock);
-
-		oreItem = (OreItem) Item.getItemFromBlock(oreBlock);
-		/*
-		 * 
-		 * int id = 0,subId = 0,completId; String name;
-		 */
-
-		SixNode.sixNodeCacheList.add(new SixNodeCacheStd());
-
-
-		registerTestBlock();
-		registerEnergyConverter();
-		registerComputer();
-
-		registerArmor();
-		registerTool();
-		registerOre();
-
-		registerGround(2);
-		registerElectricalSource(3);
-		registerElectricalCable(32);
-		registerThermalCable(48);
-		registerLampSocket(64);
-		registerLampSupply(65);
-		registerBatteryCharger(66);
-		registerWirelessSignal(92);
-		registerElectricalDataLogger(93);
-		registerElectricalRelay(94);
-		registerElectricalGateSource(95);
-		registerPassiveComponent(96);
-		registerSwitch(97);
-		registerElectricalManager(98);
-		registerElectricalSensor(100);
-		registerThermalSensor(101);
-		registerElectricalVuMeter(102);
-		registerElectricalAlarm(103);
-		registerElectricalEnvironementalSensor(104);
-		registerElectricalRedstone(108);
-		registerElectricalGate(109);
-		registerTreeResinCollector(116);
-		registerSixNodeMisc(117);
-		//
-
-		registerPowerComponent(1);
-		registerTransformer(2);
-		registerHeatFurnace(3);
-		registerTurbine(4);
-		registerElectricalAntenna(7);
-		registerBattery(16);
-		registerElectricalFurnace(32);
-		registerMacerator(33);
-		registerCompressor(35);
-		registermagnetiser(36);
-		registerPlateMachine(37);
-		registerEggIncubator(41);
-		registerAutoMiner(42);
-		registerSolarPannel(48);
-		registerWindTurbine(49);
-		registerThermalDissipatorPassiveAndActive(64);
-		registerTransparentNodeMisc(65);
-		registerTurret(66);
-
-		registerHeatingCorp(1);
-		// registerThermalIsolator(2);
-		registerRegulatorItem(3);
-		registerLampItem(4);
-		registerProtection(5);
-		registerCombustionChamber(6);
-		registerFerromagneticCore(7);
-		registerIngot(8);
-		registerDust(9);
-		registerElectricalMotor(10);
-		registerSolarTracker(11);
-		//
-		registerMeter(14);
-		registerElectricalDrill(15);
-		registerOreScanner(16);
-		registerMiningPipe(17);
-		registerTreeResinAndRubber(64);
-		registerRawCable(65);
-		registerBrush(119);
-		registerMiscItem(120);
-		registerElectricalTool(121);
-		registerPortableItem(122);
-		//
-		registerReplicator();
-		//
 
 		recipeEnergyConverter();
 		recipeComputerProbe();
