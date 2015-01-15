@@ -1,6 +1,5 @@
 package mods.eln.cable;
 
-import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.util.ResourceLocation;
 

@@ -23,6 +23,8 @@ import cpw.mods.fml.common.FMLCommonHandler;
 
 public class ClientProxy extends CommonProxy {
 
+	public static UuidManager uuidManager;
+	public static SoundClientEventListener soundClientEventListener;
 
 	@Override
 	public void registerRenderers() {
@@ -35,13 +37,14 @@ public class ClientProxy extends CommonProxy {
       	MinecraftForgeClient.registerItemRenderer(Eln.sharedItem, Eln.sharedItem);
       	MinecraftForgeClient.registerItemRenderer(Eln.sharedItemStackOne, Eln.sharedItemStackOne);
 
-       	RenderingRegistry.registerEntityRenderingHandler(ReplicatorEntity.class, new ReplicatorRender(new ModelSilverfish(),(float) 0.3));
+       	RenderingRegistry.registerEntityRenderingHandler(ReplicatorEntity.class, new ReplicatorRender(new ModelSilverfish(), (float) 0.3));
       	      	    	
 		Eln.clientKeyHandler = new ClientKeyHandler();
 		FMLCommonHandler.instance().bus().register(Eln.clientKeyHandler);
 		MinecraftForge.EVENT_BUS.register(new TutorialSignOverlay());
 		uuidManager = new UuidManager();
 		soundClientEventListener = new SoundClientEventListener(uuidManager);
+
 		if(Eln.debugEnable == false){
 			FMLCommonHandler.instance().bus().register(VersionCheckerHandler.getInstance());
 		}
@@ -49,7 +52,4 @@ public class ClientProxy extends CommonProxy {
 		new FrameTime();
 		new ConnectionListener();
 	}
-	public static UuidManager uuidManager;
-	public static SoundClientEventListener soundClientEventListener;
-	
 }

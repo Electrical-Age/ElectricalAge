@@ -115,6 +115,7 @@ public class VersionCheckerHandler {
 
 		final Minecraft m = FMLClientHandler.instance().getClient();
 		final WorldClient world = m.theWorld;
+
 		if (m == null || world == null)
 			return;
 
@@ -122,7 +123,7 @@ public class VersionCheckerHandler {
 			return;
 
 		// Print the current version when the client start a map
-		if(Eln.instance.versionCheckEnable){
+		if(Eln.instance.versionCheckEnable) {
 			m.thePlayer.addChatMessage(new ChatComponentText(Version.printColor()));
 			m.thePlayer.addChatMessage(new ChatComponentText(versionMsg));
 		}

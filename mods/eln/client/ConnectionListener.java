@@ -1,22 +1,18 @@
 package mods.eln.client;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import mods.eln.Eln;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.RenderTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Type;
 import cpw.mods.fml.common.network.FMLNetworkEvent.ClientConnectedToServerEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
-import cpw.mods.fml.relauncher.Side;
+import mods.eln.Eln;
+import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class ConnectionListener {
 
@@ -26,6 +22,7 @@ public class ConnectionListener {
 
 	static boolean newConnection = false;
 	static int timer = 0;
+
 	@SubscribeEvent
 	public void onConnectedToServerEvent(ClientConnectedToServerEvent event) {
 		Utils.println("Connected to server " + FMLCommonHandler.instance().getEffectiveSide());
@@ -60,7 +57,6 @@ public class ConnectionListener {
 			}
 
 			UtilsClient.sendPacketToServer(bos);
-
 		}
 	}
 }
