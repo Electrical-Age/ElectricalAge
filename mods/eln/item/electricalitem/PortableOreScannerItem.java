@@ -499,7 +499,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			}
 			
 			for(OreScannerConfigElement c : Eln.instance.oreScannerConfig){
-				if(c.blockKey < blockKeyFactor.length)
+				if(c.blockKey >= 0 && c.blockKey < blockKeyFactor.length)
 					blockKeyFactor[c.blockKey] = c.factor;
 			}
 			return blockKeyFactor;

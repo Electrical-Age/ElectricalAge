@@ -485,7 +485,7 @@ public class Eln {
 		Other.ElnToIc2ConversionRatio = config.get("balancing", "ElnToIndustrialCraftConversionRatio", 1.0 / 3.0).getDouble(1.0 / 3.0);
 		Other.ElnToOcConversionRatio = config.get("balancing", "ElnToOpenComputerConversionRatio", 1.0 / 3.0 / 2.5).getDouble(1.0 / 3.0 / 2.5);
 		Other.ElnToTeConversionRatio = config.get("balancing", "ElnToThermalExpansionConversionRatio", 1.0 / 3.0 * 4).getDouble(1.0 / 3.0 * 4);
-		Other.ElnToBuildcraftConversionRatio = config.get("balancing", "ElnToBuildcraftConversionRatio", 1.0 / 3.0 / 5 * 2).getDouble(1.0 / 3.0 / 5 * 2);
+	//	Other.ElnToBuildcraftConversionRatio = config.get("balancing", "ElnToBuildcraftConversionRatio", 1.0 / 3.0 / 5 * 2).getDouble(1.0 / 3.0 / 5 * 2);
 
 		ComputerProbeEnable = config.get("compatibility", "ComputerProbeEnable", true).getBoolean(true);
 		ElnToOtherEnergyConverterEnable = config.get("compatibility", "ElnToOtherEnergyConverterEnable", true).getBoolean(true);
@@ -529,27 +529,7 @@ public class Eln {
 
 		config.save();
 
-	}
-
-	public static FMLEventChannel eventChannel;
-	//boolean computerCraftReady = false;
-	boolean ComputerProbeEnable;
-	boolean ElnToOtherEnergyConverterEnable;
-
-	// FMLCommonHandler.instance().bus().register(this);
-
-
-	@EventHandler
-	public void modsLoaded(FMLPostInitializationEvent event) {
-		Other.check();
-		if (Other.ccLoaded) {
-			PeripheralHandler.register();
-		}
-
-	}
-
-	@EventHandler
-	public void load(FMLInitializationEvent event) {
+		
 		Object o;
 
 		//computerCraftReady = Utils.isClassLoaded("dan200.computercraft.ComputerCraft");
@@ -710,6 +690,28 @@ public class Eln {
 		registerMiscItem(120);
 		registerElectricalTool(121);
 		registerPortableItem(122);
+	}
+
+	public static FMLEventChannel eventChannel;
+	//boolean computerCraftReady = false;
+	boolean ComputerProbeEnable;
+	boolean ElnToOtherEnergyConverterEnable;
+
+	// FMLCommonHandler.instance().bus().register(this);
+
+
+	@EventHandler
+	public void modsLoaded(FMLPostInitializationEvent event) {
+		Other.check();
+		if (Other.ccLoaded) {
+			PeripheralHandler.register();
+		}
+
+	}
+
+	@EventHandler
+	public void load(FMLInitializationEvent event) {
+
 		//
 		registerReplicator();
 		//
