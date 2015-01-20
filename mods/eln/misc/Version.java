@@ -1,7 +1,5 @@
 package mods.eln.misc;
 
-
-
 /**
  * Current mod version. Used to check if a new mod version is available. Must be
  * set correctly for each mod release.

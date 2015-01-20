@@ -31,15 +31,13 @@ public class BasicContainer extends Container {
 	protected void bindPlayerInventory(InventoryPlayer inventoryPlayer) {
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 9; j++) {
-				addSlotToContainer(new SlotWithSkin(inventoryPlayer, j + i * 9
-						+ 9, j * 18, i * 18, SlotSkin.medium));
+				addSlotToContainer(new SlotWithSkin(inventoryPlayer, j + i * 9 + 9, j * 18, i * 18, SlotSkin.medium));
 				// 8 + j * 18, 84 + i * 18));
 			}
 		}
 
 		for (int i = 0; i < 9; i++) {
-			addSlotToContainer(new SlotWithSkin(inventoryPlayer, i, i * 18, 58,
-					SlotSkin.medium));
+			addSlotToContainer(new SlotWithSkin(inventoryPlayer, i, i * 18, 58, SlotSkin.medium));
 			// addSlotToContainer(new Slot(inventoryPlayer, i, 8 + i * 18,
 			// 142));
 		}
@@ -59,14 +57,12 @@ public class BasicContainer extends Container {
 			itemstack = itemstack1.copy();
 			int invSize = inventory.getSizeInventory();
 			if (slotId < invSize) {
-				if (!this.mergeItemStack(itemstack1, invSize, inventorySlots.size(), true))
-				{
+				if (!this.mergeItemStack(itemstack1, invSize, inventorySlots.size(), true)) {
 				}
 				// return null;
 				// this.mergeItemStack(itemstack1, invSize, inventorySlots.size(), true);
 			} else {
-				if (!this.mergeItemStack(itemstack1, 0, invSize, true))
-				{
+				if (!this.mergeItemStack(itemstack1, 0, invSize, true)) {
 					if (slotId < invSize + 27) {
 						if (!this.mergeItemStack(itemstack1, invSize + 27, inventorySlots.size(), false)) {
 						}
@@ -82,11 +78,10 @@ public class BasicContainer extends Container {
 			// if (!this.mergeItemStack(itemstack1, 0, inventorySlots.size(), true))
 			// return null;
 			// this.mergeItemStack(itemstack1, slotId, inventorySlots.size(), true);
-			// this.mergeItemStack(itemstack1, 0, slotId-1, true);
+			// this.mergeItemStack(itemstack1, 0, slotId - 1, true);
 
 			if (itemstack1.stackSize == 0) {
 				slot.putStack((ItemStack) null);
-
 			} else {
 				slot.onSlotChanged();
 			}
@@ -94,43 +89,34 @@ public class BasicContainer extends Container {
 
 		// return itemstack;
 		return null;
-
 	}
 
-	protected boolean mergeItemStack(ItemStack par1ItemStack, int par2, int par3, boolean par4)
-	{
+	protected boolean mergeItemStack(ItemStack par1ItemStack, int par2, int par3, boolean par4) {
 		boolean flag1 = false;
 		int k = par2;
 
-		if (par4)
-		{
+		if (par4) {
 			k = par3 - 1;
 		}
 
 		Slot slot;
 		ItemStack itemstack1;
 
-		if (par1ItemStack.isStackable())
-		{
-			while (par1ItemStack.stackSize > 0 && (!par4 && k < par3 || par4 && k >= par2))
-			{
+		if (par1ItemStack.isStackable()) {
+			while (par1ItemStack.stackSize > 0 && (!par4 && k < par3 || par4 && k >= par2)) {
 				slot = (Slot) this.inventorySlots.get(k);
 
 				itemstack1 = slot.getStack();
 
-				if ((slot.isItemValid(par1ItemStack)) && itemstack1 != null && itemstack1.getItem() == par1ItemStack.getItem() && (!par1ItemStack.getHasSubtypes() || par1ItemStack.getItemDamage() == itemstack1.getItemDamage()) && ItemStack.areItemStackTagsEqual(par1ItemStack, itemstack1))
-				{
+				if ((slot.isItemValid(par1ItemStack)) && itemstack1 != null && itemstack1.getItem() == par1ItemStack.getItem() && (!par1ItemStack.getHasSubtypes() || par1ItemStack.getItemDamage() == itemstack1.getItemDamage()) && ItemStack.areItemStackTagsEqual(par1ItemStack, itemstack1)) {
 					int l = itemstack1.stackSize + par1ItemStack.stackSize;
 					int maxSize = Math.min(slot.getSlotStackLimit(), par1ItemStack.getMaxStackSize());
-					if (l <= maxSize)
-					{
+					if (l <= maxSize) {
 						par1ItemStack.stackSize = 0;
 						itemstack1.stackSize = l;
 						slot.onSlotChanged();
 						flag1 = true;
-					}
-					else if (itemstack1.stackSize < maxSize)
-					{
+					} else if (itemstack1.stackSize < maxSize) {
 						par1ItemStack.stackSize -= maxSize - itemstack1.stackSize;
 						itemstack1.stackSize = maxSize;
 						slot.onSlotChanged();
@@ -138,47 +124,35 @@ public class BasicContainer extends Container {
 					}
 				}
 
-				if (par4)
-				{
+				if (par4) {
 					--k;
-				}
-				else
-				{
+				} else {
 					++k;
 				}
 			}
 		}
 
-		if (par1ItemStack.stackSize > 0)
-		{
-			if (par4)
-			{
+		if (par1ItemStack.stackSize > 0) {
+			if (par4) {
 				k = par3 - 1;
-			}
-			else
-			{
+			} else {
 				k = par2;
 			}
 
-			while (!par4 && k < par3 || par4 && k >= par2)
-			{
+			while (!par4 && k < par3 || par4 && k >= par2) {
 				slot = (Slot) this.inventorySlots.get(k);
 				itemstack1 = slot.getStack();
 
-				if (itemstack1 == null && (slot.isItemValid(par1ItemStack)))
-				{
+				if (itemstack1 == null && (slot.isItemValid(par1ItemStack))) {
 					int l = par1ItemStack.stackSize;
 					int maxSize = Math.min(slot.getSlotStackLimit(), par1ItemStack.getMaxStackSize());
-					if (l <= maxSize)
-					{
+					if (l <= maxSize) {
 						slot.putStack(par1ItemStack.copy());
 						slot.onSlotChanged();
 						par1ItemStack.stackSize = 0;
 						flag1 = true;
 						break;
-					}
-					else
-					{
+					} else {
 						par1ItemStack.stackSize -= maxSize;
 						ItemStack newItemStack = par1ItemStack.copy();
 						newItemStack.stackSize = maxSize;
@@ -193,12 +167,9 @@ public class BasicContainer extends Container {
 					// break;
 				}
 
-				if (par4)
-				{
+				if (par4) {
 					--k;
-				}
-				else
-				{
+				} else {
 					++k;
 				}
 			}
@@ -211,10 +182,10 @@ public class BasicContainer extends Container {
 	public ItemStack slotClick(int arg0, int arg1, int arg2, EntityPlayer arg3) {
 		if (arg0 >= this.inventorySlots.size()) {
 			System.out.println("Damned !!! What happen ?");
-			Utils.addChatMessage(arg3, "Damned ! sorry, it's a debug");
-			Utils.addChatMessage(arg3, "message from Electrical age");
-			Utils.addChatMessage(arg3, "Could you send me a message about that ?");
-			Utils.addChatMessage(arg3, "Thanks : D");
+			Utils.addChatMessage(arg3, "Damn! Sorry, this is a debug");
+			Utils.addChatMessage(arg3, "message from Electrical age.");
+			Utils.addChatMessage(arg3, "Could you send me a message about that?");
+			Utils.addChatMessage(arg3, "Thanks :D");
 			return null;
 		}
 		return super.slotClick(arg0, arg1, arg2, arg3);

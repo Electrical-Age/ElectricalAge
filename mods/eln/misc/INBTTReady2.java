@@ -1,6 +1,5 @@
 package mods.eln.misc;
 
-import mods.eln.sim.IProcess;
 import net.minecraft.nbt.NBTTagCompound;
 
 public interface INBTTReady2 {

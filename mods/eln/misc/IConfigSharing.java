@@ -6,5 +6,5 @@ import java.io.IOException;
 
 public interface IConfigSharing {
 	void serializeConfig(DataOutputStream stream) throws IOException;
-	void deserialize(DataInputStream stream)throws IOException;
+	void deserialize(DataInputStream stream) throws IOException;
 }
