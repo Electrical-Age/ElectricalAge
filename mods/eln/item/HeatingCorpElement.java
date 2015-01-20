@@ -2,8 +2,6 @@ package mods.eln.item;
 
 import java.util.List;
 
-
-import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.misc.Utils;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.RegulatorThermalLoadToElectricalResistor;
@@ -20,11 +18,12 @@ public class HeatingCorpElement extends GenericItemUsingDamageDescriptorUpgrade 
 	
 	double electricalR;
 
+	double Umax;
+
 	public HeatingCorpElement(	String name,
 								double electricalNominalU,double electricalNominalP,
 								double electricalMaximalP,
-								ElectricalCableDescriptor cableDescriptor
-								) {
+								ElectricalCableDescriptor cableDescriptor) {
 		super(name);
 		
 		this.electricalNominalU = electricalNominalU;
@@ -32,38 +31,30 @@ public class HeatingCorpElement extends GenericItemUsingDamageDescriptorUpgrade 
 		this.electricalMaximalP = electricalMaximalP;
 		this.cableDescriptor = cableDescriptor;
 		
-		electricalR = electricalNominalU*electricalNominalU/electricalNominalP;
+		electricalR = electricalNominalU * electricalNominalU / electricalNominalP;
 		
 		Umax = Math.sqrt(electricalMaximalP * electricalR);
 	}
-	double Umax;
 /*
-	public void applyTo(ElectricalResistor resistor)
-	{
+	public void applyTo(ElectricalResistor resistor) {
 		resistor.setR(electricalR);
 	}*/
 	
-	public void applyTo(ElectricalLoad load)
-	{
+	public void applyTo(ElectricalLoad load) {
 		cableDescriptor.applyTo(load);
 	}
 	
-	public void applyTo(RegulatorThermalLoadToElectricalResistor regulator)
-	{
+	public void applyTo(RegulatorThermalLoadToElectricalResistor regulator) {
 		regulator.setRmin(electricalR);
 	}
-	
-	
+
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
 		list.add("Nominal :");
 		list.add(Utils.plotVolt( "  Voltage :", electricalNominalU));
 		list.add(Utils.plotPower("  Power :", electricalNominalP));
-		list.add(Utils.plotOhm("  Resistance :",electricalR));
+		list.add(Utils.plotOhm("  Resistance :", electricalR));
 	}
-
-
 }

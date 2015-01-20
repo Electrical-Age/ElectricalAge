@@ -8,5 +8,4 @@ public class CopperCableDescriptor extends GenericItemUsingDamageDescriptor {
 		super(name);
 		// TODO Auto-generated constructor stub
 	}
-
 }
