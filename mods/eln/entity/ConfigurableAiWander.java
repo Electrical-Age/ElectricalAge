@@ -5,8 +5,8 @@ import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.util.Vec3;
 
-public class ConfigurableAiWander extends EntityAIBase
-{
+public class ConfigurableAiWander extends EntityAIBase {
+
     private EntityCreature entity;
     private double xPosition;
     private double yPosition;
@@ -15,10 +15,9 @@ public class ConfigurableAiWander extends EntityAIBase
     
     private int randLimit;
 
-    public ConfigurableAiWander(EntityCreature par1EntityCreature, double par2,int randLimit)
-    {
+    public ConfigurableAiWander(EntityCreature par1EntityCreature, double speed, int randLimit) {
         this.entity = par1EntityCreature;
-        this.speed = par2;
+        this.speed = speed;
         this.setMutexBits(1);
         this.randLimit = randLimit;
     }
@@ -26,26 +25,17 @@ public class ConfigurableAiWander extends EntityAIBase
     /**
      * Returns whether the EntityAIBase should begin execution.
      */
-    public boolean shouldExecute()
-    {
-        if (this.entity.getAge() >= 100)
-        {
+    public boolean shouldExecute() {
+        if (this.entity.getAge() >= 100) {
             return false;
-        }
-        else if (this.entity.getRNG().nextInt(randLimit) != 0)
-        {
+        } else if (this.entity.getRNG().nextInt(randLimit) != 0) {
             return false;
-        }
-        else
-        {
+        } else {
             Vec3 vec3 = RandomPositionGenerator.findRandomTarget(this.entity, 10, 7);
 
-            if (vec3 == null)
-            {
+            if (vec3 == null) {
                 return false;
-            }
-            else
-            {
+            } else {
                 this.xPosition = vec3.xCoord;
                 this.yPosition = vec3.yCoord;
                 this.zPosition = vec3.zCoord;
@@ -57,16 +47,14 @@ public class ConfigurableAiWander extends EntityAIBase
     /**
      * Returns whether an in-progress EntityAIBase should continue executing
      */
-    public boolean continueExecuting()
-    {
+    public boolean continueExecuting() {
         return !this.entity.getNavigator().noPath();
     }
 
     /**
      * Execute a one shot task or start executing a continuous task
      */
-    public void startExecuting()
-    {
+    public void startExecuting() {
         this.entity.getNavigator().tryMoveToXYZ(this.xPosition, this.yPosition, this.zPosition, this.speed);
     }
 }

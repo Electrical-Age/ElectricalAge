@@ -1,6 +1,7 @@
 package mods.eln.fsm;
 
 public class CompositeState extends StateMachine implements State {
+
 	@Override
 	public void enter() {
 		reset();
@@ -16,5 +17,4 @@ public class CompositeState extends StateMachine implements State {
 		process(time);
 		return null;
 	}
-
 }

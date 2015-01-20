@@ -8,5 +8,5 @@ public interface GhostObserver {
 
 	public abstract Coordonate getGhostObserverCoordonate();
 	public abstract void ghostDestroyed(int UUID);
-	public abstract boolean ghostBlockActivated(int UUID,EntityPlayer entityPlayer, Direction side,float vx, float vy, float vz);
+	public abstract boolean ghostBlockActivated(int UUID, EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz);
 }

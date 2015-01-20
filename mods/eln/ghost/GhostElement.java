@@ -7,7 +7,7 @@ import mods.eln.misc.INBTTReady;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class GhostElement implements INBTTReady{
+public class GhostElement implements INBTTReady {
 
 	Coordonate elementCoordonate;
 	Coordonate observatorCoordonate;
@@ -18,10 +18,9 @@ public class GhostElement implements INBTTReady{
 	}
 	
 	public GhostElement() {
-		
 	}
 
-	public GhostElement(Coordonate elementCoordonate,Coordonate observatorCoordonate,int UUID) {
+	public GhostElement(Coordonate elementCoordonate, Coordonate observatorCoordonate, int UUID) {
 		this.elementCoordonate = elementCoordonate;
 		this.observatorCoordonate = observatorCoordonate;
 		this.UUID = UUID;
@@ -36,31 +35,25 @@ public class GhostElement implements INBTTReady{
 		GhostObserver observer = Eln.ghostManager.getObserver(observatorCoordonate);
 		if(observer != null) observer.ghostDestroyed(UUID);
 	}
-	
 
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-			float vx, float vy, float vz) {
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		GhostObserver observer = Eln.ghostManager.getObserver(observatorCoordonate);
-		if(observer != null) return observer.ghostBlockActivated(UUID,entityPlayer, side, vx, vy, vz);
+		if(observer != null) return observer.ghostBlockActivated(UUID, entityPlayer, side, vx, vy, vz);
 		return false;
 	}	 
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		
 		elementCoordonate = new Coordonate(nbt, str + "elemCoord");
-		observatorCoordonate = new Coordonate(nbt,str + "obserCoord");
+		observatorCoordonate = new Coordonate(nbt, str + "obserCoord");
 		UUID = nbt.getInteger(str + "UUID");
 	}
-
-
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		
 		elementCoordonate.writeToNBT(nbt, str + "elemCoord");
-		observatorCoordonate.writeToNBT(nbt,str + "obserCoord");
+		observatorCoordonate.writeToNBT(nbt, str + "obserCoord");
 		nbt.setInteger(str + "UUID", UUID);
 	}
-
 }

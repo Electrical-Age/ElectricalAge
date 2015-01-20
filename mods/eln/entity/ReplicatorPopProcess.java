@@ -1,30 +1,20 @@
 package mods.eln.entity;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Random;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.EntityLiving;
+import cpw.mods.fml.common.FMLCommonHandler;
+import mods.eln.misc.Utils;
+import mods.eln.sim.IProcess;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.ChunkProviderServer;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.server.FMLServerHandler;
-import mods.eln.misc.Utils;
-import mods.eln.node.NodeBase;
-import mods.eln.node.NodeManager;
-import mods.eln.sim.IProcess;
+
+import java.util.Random;
 
 public class ReplicatorPopProcess implements IProcess {
 
 	public ReplicatorPopProcess() {
-
 	}
 	
 	public static double popPerSecondPerPlayer = 1.0 / 60;
@@ -34,10 +24,11 @@ public class ReplicatorPopProcess implements IProcess {
 		World world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServers[0];
 		
 		int replicatorCount = 0;
-		for(Object o : world.loadedEntityList){
-			if(o instanceof ReplicatorEntity){
+
+		for(Object o : world.loadedEntityList) {
+			if(o instanceof ReplicatorEntity) {
 				replicatorCount++;
-				if(replicatorCount > 100){
+				if(replicatorCount > 100) {
 					ReplicatorEntity r = (ReplicatorEntity)o;
 					r.setDead();
 				}
@@ -48,20 +39,22 @@ public class ReplicatorPopProcess implements IProcess {
 		
 		if (world.getWorldInfo().isThundering()) {
 	        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();       
-		    for (Object obj :  world.playerEntities){
+		    for (Object obj :  world.playerEntities) {
 		    	EntityPlayerMP player = (EntityPlayerMP) obj;
 				if (Math.random()*(world.playerEntities.size()) < time * popPerSecondPerPlayer && player.worldObj == world) {	
 					int x, y, z;				
 					Random rand = new Random();
-					x = (int) (player.posX + Utils.rand(-100,100));
-					z = (int) (player.posZ + Utils.rand(-100,100));
+					x = (int) (player.posX + Utils.rand(-100, 100));
+					z = (int) (player.posZ + Utils.rand(-100, 100));
 					y = 2;
 					Utils.println("POP");
+
 					if(world.blockExists(x, y, z) == false) break;
-					while (world.getBlock(x, y, z) != Blocks.air 
-							|| Utils.getLight(world,EnumSkyBlock.Block,x,y,z) > 6) {
+
+					while (world.getBlock(x, y, z) != Blocks.air || Utils.getLight(world, EnumSkyBlock.Block, x, y, z) > 6) {
 						y++;
 					}
+
 					ReplicatorEntity entityliving = new ReplicatorEntity(world);
 					entityliving.setLocationAndAngles(x + 0.5, y, z + 0.5, 0f, 0f);
 					entityliving.rotationYawHead = entityliving.rotationYaw;
@@ -74,7 +67,6 @@ public class ReplicatorPopProcess implements IProcess {
 			}
 		}
 	}
-
 }
 /*		World world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServers[0];
 if (world.getWorldInfo().isThundering()) {
