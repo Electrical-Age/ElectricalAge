@@ -10,6 +10,8 @@ import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
 import mods.eln.entity.ReplicatorEntity;
 import mods.eln.entity.ReplicatorPopProcess;
+import mods.eln.eventhandlers.ElnFMLEventsHandler;
+import mods.eln.eventhandlers.ElnForgeEventsHandler;
 import mods.eln.generic.GenericCreativeTab;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptorWithComment;
@@ -812,6 +814,17 @@ public class Eln {
 		 */
 
 		checkRecipe();
+
+		Achievements.init();
+
+		MinecraftForge.EVENT_BUS.register(new ElnForgeEventsHandler());
+		FMLCommonHandler.instance().bus().register((new ElnFMLEventsHandler()));
+
+		// Temp localisation
+		LanguageRegistry.instance().addStringLocalization("achievement.openGuide", "en_US", "Wiki Power!");
+		LanguageRegistry.instance().addStringLocalization("achievement.openGuide.desc", "en_US", "Press 'X' to open the wiki guide.");
+		LanguageRegistry.instance().addStringLocalization("achievement.craft50VMacerator", "en_US", "Crushing Novice");
+		LanguageRegistry.instance().addStringLocalization("achievement.craft50VMacerator.desc", "en_US", "Craft a 50V Macerator.");
 
 		Utils.println("Electrical age init done");
 	}
@@ -3228,7 +3241,7 @@ public class Eln {
 	public static GenericItemUsingDamageDescriptorWithComment dustTin,
 			dustCopper, dustSilver;
 
-	HashMap<String, ItemStack> dictionnaryOreFromMod = new HashMap<String, ItemStack>();
+	public static HashMap<String, ItemStack> dictionnaryOreFromMod = new HashMap<String, ItemStack>();
 
 	void addToOre(String name, ItemStack ore) {
 		OreDictionary.registerOre(name, ore);
@@ -6533,7 +6546,7 @@ public class Eln {
 	public static void applySmallRs(Resistor r) {
 		instance.lowVoltageCableDescriptor.applyTo(r);	
 	}
-	public ItemStack findItemStack(String name, int stackSize) {
+	public static ItemStack findItemStack(String name, int stackSize) {
 		ItemStack stack = GameRegistry.findItemStack("Eln", name, stackSize);
 		if (stack == null) {
 			stack = dictionnaryOreFromMod.get(name);
