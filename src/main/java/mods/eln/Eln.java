@@ -338,7 +338,8 @@ public class Eln {
 			"/model/wirelesssignalrx/wirelesssignalrx.obj",
 			"/model/wirelesssignaltx/wirelesssignaltx.obj",
 			"/model/Turret/Turret.obj",
-            "/model/FireDetector/FireDetector.obj"
+            "/model/FireDetector/FireDetector.obj",
+			"/model/FlatScreenMonitor/FlatScreenMonitor.obj"
 			// "/model/BatteryBigHV/BatteryBigHV.obj"
 
 	};
@@ -2263,6 +2264,17 @@ public class Eln {
 
 			desc = new ElectricalDataLoggerDescriptor(name, true,
 					"DataloggerCRTFloor", 0f, 1f, 0f);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			ElectricalDataLoggerDescriptor desc;
+			subId = 1;
+
+			name = "Modern Data Logger";
+
+			desc = new ElectricalDataLoggerDescriptor(name, true,
+					"FlatScreenMonitor", 1f, 1f, 0f);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
