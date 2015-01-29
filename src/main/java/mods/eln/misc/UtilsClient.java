@@ -38,6 +38,16 @@ import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 
 public class UtilsClient {
 
+	public static GuiScreen guiLastOpen;
+
+	static boolean lightmapTexUnitTextureEnable;
+
+	protected static RenderItem itemRendererr;
+
+	private static int uuid = Integer.MIN_VALUE;
+
+	static ResourceLocation whiteTexture;
+
 	public static float distanceFromClientPlayer(World world, int xCoord, int yCoord, int zCoord) {
 		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
 
@@ -51,7 +61,6 @@ public class UtilsClient {
 	}
 
 	public static EntityClientPlayerMP getClientPlayer() {
-
 		return Minecraft.getMinecraft().thePlayer;
 	}
 
@@ -71,17 +80,13 @@ public class UtilsClient {
 			disableBilinear();
 	}
 
-	public static GuiScreen guiLastOpen;
-
-	public static void clientOpenGui(GuiScreen gui)
-	{
+	public static void clientOpenGui(GuiScreen gui) {
 		guiLastOpen = gui;
 		EntityClientPlayerMP clientPlayer = (EntityClientPlayerMP) getClientPlayer();
 		clientPlayer.openGui(Eln.instance, GuiHandler.genericOpen, clientPlayer.worldObj, 0, 0, 0);
 	}
 
 	public static void drawHalo(Obj3DPart halo, float r, float g, float b, World w, int x, int y, int z, boolean bilinear) {
-
 		disableLight();
 		enableBlend();
 
@@ -109,7 +114,6 @@ public class UtilsClient {
 	}
 
 	public static void drawHalo(Obj3DPart halo, float distance) {
-
 		disableLight();
 		enableBlend();
 
@@ -136,7 +140,6 @@ public class UtilsClient {
 	}
 
 	public static void drawHalo(Obj3DPart halo, float r, float g, float b, Entity e, boolean bilinear) {
-
 		disableLight();
 		enableBlend();
 
@@ -170,7 +173,6 @@ public class UtilsClient {
 	}
 
 	public static void enableTexture() {
-
 		//GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
@@ -239,8 +241,7 @@ public class UtilsClient {
 			GL11.glVertex3f(16f, 16f, 0f);
 			GL11.glEnd();
 			enableCulling();
-		}
-		else if (type == ItemRenderType.ENTITY) {
+		} else if (type == ItemRenderType.ENTITY) {
 
 			disableCulling();
 			GL11.glBegin(GL11.GL_QUADS);
@@ -254,8 +255,7 @@ public class UtilsClient {
 			GL11.glVertex3f(0.0f, 1f, 0.5f);
 			GL11.glEnd();
 			enableCulling();
-		}
-		else {
+		} else {
 			GL11.glTranslatef(0.5f, -0.3f, 0.5f);
 
 			disableCulling();
@@ -313,40 +313,33 @@ public class UtilsClient {
 
 	}
 
-	public static void bindTextureByName(String par1Str)
-	{
+	public static void bindTextureByName(String par1Str) {
 		// Minecraft.getMinecraft().renderEngine.func_110577_a(new
 		// ResourceLocation(par1Str));
 		Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation("eln", par1Str));
 	}
 
-	public static void bindTexture(ResourceLocation ressource)
-	{
+	public static void bindTexture(ResourceLocation ressource) {
 		// Minecraft.getMinecraft().renderEngine.func_110577_a(new
 		// ResourceLocation(par1Str));
 		Minecraft.getMinecraft().renderEngine.bindTexture(ressource);
 	}
 
-	static boolean lightmapTexUnitTextureEnable;
-
-	public static void ledOnOffColor(boolean on)
-	{
+	public static void ledOnOffColor(boolean on) {
 		if (!on)
 			GL11.glColor3f(0.7f, 0f, 0f);
 		else
 			GL11.glColor3f(0f, 0.7f, 0f);
 	}
 
-	public static Color ledOnOffColorC(boolean on)
-	{
+	public static Color ledOnOffColorC(boolean on) {
 		if (!on)
 			return new Color(0.7f, 0f, 0f);
 		else
 			return new Color(0f, 0.7f, 0f);
 	}
 
-	public static void drawLight(Obj3DPart part)
-	{
+	public static void drawLight(Obj3DPart part) {
 		if (part == null)
 			return;
 		disableLight();
@@ -356,11 +349,9 @@ public class UtilsClient {
 
 		enableLight();
 		disableBlend();
-
 	}
 
 	public static void drawLightNoBind(Obj3DPart part) {
-
 		if (part == null)
 			return;
 		disableLight();
@@ -380,8 +371,7 @@ public class UtilsClient {
 		guiScreen.drawTexturedModalRect(x, y, 0, 0, xSize, ySize);
 	}
 
-	public static void drawLight(Obj3DPart part, float angle, float x, float y, float z)
-	{
+	public static void drawLight(Obj3DPart part, float angle, float x, float y, float z) {
 		if (part == null)
 			return;
 		disableLight();
@@ -391,15 +381,13 @@ public class UtilsClient {
 
 		enableLight();
 		disableBlend();
-
 	}
 
 	public static void glDefaultColor() {
 		GL11.glColor4f(1f, 1f, 1f, 1f);
 	}
 
-	static public void drawEntityItem(EntityItem entityItem, double x, double y, double z, float roty, float scale)
-	{
+	static public void drawEntityItem(EntityItem entityItem, double x, double y, double z, float roty, float scale) {
 		if (entityItem == null)
 			return;
 
@@ -417,11 +405,9 @@ public class UtilsClient {
 		GL11.glScalef(scale, scale, scale);
 		var10.doRender(entityItem, 0, 0, 0, 0, 0);
 		GL11.glPopMatrix();
-
 	}
 
 	static public void drawConnectionPinSixNode(float d, float w, float h) {
-
 		d += 0.1f;
 		d *= 0.0625f;
 		w *= 0.0625f;
@@ -435,7 +421,6 @@ public class UtilsClient {
 		GL11.glVertex3f(-w2, d, h);
 		GL11.glEnd();
 		enableTexture();
-
 	}
 
 	static public void drawConnectionPinSixNode(LRDU front, float[] dList, float w, float h) {
@@ -451,41 +436,37 @@ public class UtilsClient {
 		GL11.glBegin(GL11.GL_QUADS);
 
 		switch (front) {
-		case Left:
-			GL11.glVertex3f(0, -w2, -d);
-			GL11.glVertex3f(0, w2, -d);
-			GL11.glVertex3f(h, w2, -d);
-			GL11.glVertex3f(h, -w2, -d);
-			break;
-		case Right:
-			GL11.glVertex3f(h, -w2, d);
-			GL11.glVertex3f(h, w2, d);
-			GL11.glVertex3f(0, w2, d);
-			GL11.glVertex3f(0, -w2, d);
-			break;
-		case Down:
-			GL11.glVertex3f(h, -d, -w2);
-			GL11.glVertex3f(h, -d, w2);
-			GL11.glVertex3f(0, -d, w2);
-			GL11.glVertex3f(0, -d, -w2);
-			break;
-		case Up:
-			GL11.glVertex3f(0, d, -w2);
-			GL11.glVertex3f(0, d, w2);
-			GL11.glVertex3f(h, d, w2);
-			GL11.glVertex3f(h, d, -w2);
-			break;
-
-		default:
-			break;
+			case Left:
+				GL11.glVertex3f(0, -w2, -d);
+				GL11.glVertex3f(0, w2, -d);
+				GL11.glVertex3f(h, w2, -d);
+				GL11.glVertex3f(h, -w2, -d);
+				break;
+			case Right:
+				GL11.glVertex3f(h, -w2, d);
+				GL11.glVertex3f(h, w2, d);
+				GL11.glVertex3f(0, w2, d);
+				GL11.glVertex3f(0, -w2, d);
+				break;
+			case Down:
+				GL11.glVertex3f(h, -d, -w2);
+				GL11.glVertex3f(h, -d, w2);
+				GL11.glVertex3f(0, -d, w2);
+				GL11.glVertex3f(0, -d, -w2);
+				break;
+			case Up:
+				GL11.glVertex3f(0, d, -w2);
+				GL11.glVertex3f(0, d, w2);
+				GL11.glVertex3f(h, d, w2);
+				GL11.glVertex3f(h, d, -w2);
+				break;
+			default:
+				break;
 		}
 
 		GL11.glEnd();
 		enableTexture();
-
 	}
-
-	protected static RenderItem itemRendererr;
 
 	static RenderItem getItemRender() {
 		if (itemRendererr == null) {
@@ -495,18 +476,15 @@ public class UtilsClient {
 		return itemRendererr;
 	}
 
-	static Minecraft mc()
-	{
+	static Minecraft mc() {
 		return Minecraft.getMinecraft();
 	}
 
 	public static void guiScale() {
 		GL11.glScalef(16f, 16f, 1f);
-
 	}
 
-	public static void drawItemStack(ItemStack par1ItemStack, int x, int y, String par4Str, boolean gui)
-	{
+	public static void drawItemStack(ItemStack par1ItemStack, int x, int y, String par4Str, boolean gui) {
 		// Block b = Block.getBlockFromItem(par1ItemStack.getItem());
 		// b.rend
 		// ForgeHooksClient.renderInventoryItem(new RenderBlocks(),Minecraft.getMinecraft().getTextureManager(),par1ItemStack,false,0,x,y);
@@ -580,17 +558,13 @@ public class UtilsClient {
 
 	public static void enableDepthTest() {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
-
 	}
 
-	public static void sendPacketToServer(ByteArrayOutputStream bos)
-	{
+	public static void sendPacketToServer(ByteArrayOutputStream bos) {
 		C17PacketCustomPayload packet = new C17PacketCustomPayload(Eln.channelName, bos.toByteArray());
 		Eln.eventChannel.sendToServer(new FMLProxyPacket(packet));
 		// Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new FMLProxyPacket(packet));
 	}
-
-	private static int uuid = Integer.MIN_VALUE;
 
 	public static int getUuid() {
 		if (uuid > -1)
@@ -618,11 +592,11 @@ public class UtilsClient {
 		glListsAllocated.clear();
 	}
 
-	public static void showItemTooltip(List src,List dst) {
+	public static void showItemTooltip(List src, List dst) {
 		if(src.size() == 0) return;
-		if(showItemTooltip()){
+		if(showItemTooltip()) {
 			dst.addAll(src);
-		}else{
+		} else {
 			dst.add("\u00a7F\u00a7o<hold shift>");
 		}
 	}
@@ -630,17 +604,16 @@ public class UtilsClient {
 	public static boolean showItemTooltip() {
 		return Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
 	}
+
 	public static double getWeather(World world) {
 		if(world.isThundering())
 			return 1.0;
 		if(world.isRaining())
 			return 0.5;
 		return 0.0;
-
 	}
 
-	static ResourceLocation whiteTexture;
-	static{
+	static {
 		whiteTexture= new ResourceLocation("eln","sprites/cable.png");
 	}
 }

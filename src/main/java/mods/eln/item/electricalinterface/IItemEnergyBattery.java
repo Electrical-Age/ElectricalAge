@@ -3,8 +3,9 @@ package mods.eln.item.electricalinterface;
 import net.minecraft.item.ItemStack;
 
 public interface IItemEnergyBattery {
+
 	//double putEnergy(ItemStack stack,double energy,double time);
-	void setEnergy(ItemStack stack,double value);
+	void setEnergy(ItemStack stack, double value);
 	double getEnergy(ItemStack stack);
 	double getEnergyMax(ItemStack stack);
 	
@@ -13,7 +14,5 @@ public interface IItemEnergyBattery {
 	
 	int getPriority(ItemStack stack);
 	
-	void electricalItemUpdate(ItemStack stack,double time);
-	
-
+	void electricalItemUpdate(ItemStack stack, double time);
 }

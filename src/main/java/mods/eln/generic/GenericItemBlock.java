@@ -1,30 +1,27 @@
 package mods.eln.generic;
 
-import mods.eln.CommonProxy;
 import net.minecraft.block.Block;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
 
 public class GenericItemBlock extends ItemBlock {
+
 	int textureIdOffset;
+
 	public String[] subNames = {
-		"Copper", "Silver",  "Gold"
+		"Copper", "Silver", "Gold"
 	};
 
-	public GenericItemBlock(Block b,int textureIdOffset,String ItemName,String[] subNames) {
+	public GenericItemBlock(Block b,int textureIdOffset, String ItemName, String[] subNames) {
 		super(b);
 		this.textureIdOffset = textureIdOffset;
 		this.subNames = subNames;
 		setHasSubtypes(true);
 		setUnlocalizedName("wireItemBlock");
-		
 	}
+
 	/*
 	@Override//caca1.5.1
-    public int getIconFromDamage(int par1)
-    {
+    public int getIconFromDamage(int par1) {
         return textureIdOffset + par1;
     }
 	@Override
@@ -37,8 +34,7 @@ public class GenericItemBlock extends ItemBlock {
 	public int getMetadata (int damageValue) {
 		return damageValue;
 	}
-	
-	
+
 	/*
 	@Override //caca1.5.1
 	public String getItemNameIS(ItemStack itemstack) {

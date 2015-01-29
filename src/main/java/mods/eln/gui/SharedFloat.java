@@ -1,42 +1,35 @@
 package mods.eln.gui;
 
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
-
-
 public class SharedFloat {
-
-	public SharedFloat(int networkUUID) {
-		this.networkUUID = networkUUID;
-	}
 
 	int networkUUID;
 	boolean syncBoot = true;
 	boolean syncNew = false;
 	float syncValue = 0;
-	
-	public void clientNetworkUnserialize(DataInputStream stream)
-	{
+
+	public SharedFloat(int networkUUID) {
+		this.networkUUID = networkUUID;
+	}
+
+	public void clientNetworkUnserialize(DataInputStream stream) {
 		float readed;
 		try {
 			readed = stream.readFloat();
-			if(syncBoot || (syncValue != readed))
-			{
+			if(syncBoot || (syncValue != readed)) {
 				syncBoot = true;
 				syncValue = readed;
 			}
 			syncBoot = false;
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
 	}
+
 	/*
-	public void clientSend(float value)
-	{
+	public void clientSend(float value) {
         try {
 	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
 	        DataOutputStream stream = new DataOutputStream(bos);   	
@@ -48,9 +41,7 @@ public class SharedFloat {
 			
 			sendPacketToServer(bos);
 		} catch (IOException e) {
-			
 			e.printStackTrace();
-		}        
-        		
+		}
 	}*/
 }

@@ -6,6 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class ItemStackFilter {
+
 	int itemId;
 	int damageMask;
 	int damageValue;

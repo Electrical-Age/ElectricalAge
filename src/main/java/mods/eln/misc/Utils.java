@@ -1,6 +1,5 @@
 package mods.eln.misc;
 
-import java.awt.Dimension;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -61,7 +60,6 @@ import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class Utils {
 
@@ -71,36 +69,41 @@ public class Utils {
 
 	public static Random random = new Random();
 
+	public static final double burnTimeToEnergyFactor = 1.0;
+
+	public static double voltageMageFactor = 0.1;
+
+	private static int uuid = 1;
+
 	public static double rand(double min, double max) {
 		return random.nextDouble() * (max - min) + min;
 	}
 
 	public static void println(String str) {
-		if (Eln.debugEnable == false)
+		if (!Eln.debugEnable)
 			return;
 		System.out.println(str);
 	}
 
 	public static void println(Object str) {
-		if (Eln.debugEnable == false)
+		if (!Eln.debugEnable)
 			return;
 		System.out.println(str.toString());
 	}
 
 	public static void print(String str) {
-		if (Eln.debugEnable == false)
+		if (!Eln.debugEnable)
 			return;
 		System.out.print(str);
 	}
 
 	public static void print(Object str) {
-		if (Eln.debugEnable == false)
+		if (!Eln.debugEnable)
 			return;
 		System.out.print(str.toString());
 	}
 
-	static String floatToStr(double f, int high, int low)
-	{
+	static String floatToStr(double f, int high, int low) {
 		String temp = "";
 		for (int idx = 0; idx < high; idx++)
 			temp = temp + "0";
@@ -111,8 +114,7 @@ public class Utils {
 		String str = new DecimalFormat(temp).format(f);
 		int idx = 0;
 		char[] ch = str.toCharArray();
-		while (true)
-		{
+		while (true) {
 			if (str.length() == idx)
 				break;
 			if (ch[idx] == '.') {
@@ -128,8 +130,7 @@ public class Utils {
 		return new String(ch);
 	}
 
-	public static boolean isTheClass(Object o, Class c)
-	{
+	public static boolean isTheClass(Object o, Class c) {
 		if (o.getClass() == c)
 			return true;
 		for (Class classIterator = o.getClass().getSuperclass(); classIterator != null; classIterator = classIterator.getSuperclass())
@@ -142,19 +143,15 @@ public class Utils {
 		return false;
 	}
 
-	public static boolean hasTheInterface(Object o, Class c)
-	{
-
-		for (Class i : o.getClass().getInterfaces())
-		{
+	public static boolean hasTheInterface(Object o, Class c) {
+		for (Class i : o.getClass().getInterfaces()) {
 			if (i == c)
 				return true;
 		}
 		return false;
 	}
 
-	public static Direction entityLivingViewDirection(EntityLivingBase entityLiving)
-	{
+	public static Direction entityLivingViewDirection(EntityLivingBase entityLiving) {
 		if (entityLiving.rotationPitch > 45)
 			return Direction.YN;
 		if (entityLiving.rotationPitch < -45)
@@ -167,11 +164,9 @@ public class Utils {
 		if (dirx == 1)
 			return Direction.XN;
 		return Direction.ZN;
-
 	}
 
-	public static Direction entityLivingHorizontalViewDirection(EntityLivingBase entityLiving)
-	{
+	public static Direction entityLivingHorizontalViewDirection(EntityLivingBase entityLiving) {
 		int dirx = MathHelper.floor_double((double) (entityLiving.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
 		if (dirx == 3)
 			return Direction.XP;
@@ -180,7 +175,6 @@ public class Utils {
 		if (dirx == 1)
 			return Direction.XN;
 		return Direction.ZN;
-
 	}
 
 	/**
@@ -198,20 +192,15 @@ public class Utils {
 	 * if (var2 instanceof ItemTool && ((ItemTool) var2).getToolMaterialName().equals("WOOD")) return 200; if (var2 instanceof ItemSword && ((ItemSword) var2).func_77825_f().equals("WOOD")) return 200; if (var2 instanceof ItemHoe && ((ItemHoe) var2).func_77842_f().equals("WOOD")) return 200; if (var1 == Item.stick.shiftedIndex) return 100; if (var1 == Item.coal.shiftedIndex) return 1600; if (var1 == Item.bucketLava.shiftedIndex) return 20000; if (var1 == Block.sapling.blockID) return 100; if (var1 == Item.blazeRod.shiftedIndex) return 2400; return GameRegistry.getFuelValue(par0ItemStack); } }
 	 */
 
-	public static final double burnTimeToEnergyFactor = 1.0;
-
-	public static double getItemEnergie(ItemStack par0ItemStack)
-	{
+	public static double getItemEnergie(ItemStack par0ItemStack) {
 		return burnTimeToEnergyFactor * 80000.0 / 1600 * TileEntityFurnace.getItemBurnTime(par0ItemStack);
 	}
 
-	public static double getCoalEnergyReference()
-	{
+	public static double getCoalEnergyReference() {
 		return burnTimeToEnergyFactor * 80000.0;
 	}
 
-	public static byte booleanSideMaskToByte(boolean[] side)
-	{
+	public static byte booleanSideMaskToByte(boolean[] side) {
 		byte b = 0;
 		if (side[0])
 			b |= 1 << 0;
@@ -228,132 +217,103 @@ public class Utils {
 		return b;
 	}
 
-	public static void ByteTobooleanSideMask(byte b, boolean[] side)
-	{
-		for (int idx = 0; idx < 6; idx++)
-		{
+	public static void ByteTobooleanSideMask(byte b, boolean[] side) {
+		for (int idx = 0; idx < 6; idx++) {
 			side[idx] = false;
 			if (((b >> idx) & 1) != 0)
 				side[idx] = true;
 		}
 	}
 
-	public static String plotValue(double value, String unit)
-	{
+	public static String plotValue(double value, String unit) {
 		double valueAbs = Math.abs(value);
-		if (valueAbs < 0.001)
-		{
+		if (valueAbs < 0.001) {
 			return "0" + unit;
 			// return String.format("%1.5f", value*1000)+ "m" + unit;
-		}
-		else if (valueAbs < 0.00999)
-		{
+		} else if (valueAbs < 0.00999) {
 			return String.format("%1.2f", value * 1000) + "m" + unit;
-		}
-		else if (valueAbs < 0.0999)
-		{
+		} else if (valueAbs < 0.0999) {
 			return String.format("%2.1f", value * 1000) + "m" + unit;
-		}
-		else if (valueAbs < 0.999)
-		{
+		} else if (valueAbs < 0.999) {
 			return String.format("%3.0f", value * 1000) + "m" + unit;
-		}
-		else if (valueAbs < 9.99)
-		{
+		} else if (valueAbs < 9.99) {
 			return String.format("%1.2f", value) + "" + unit;
-		}
-		else if (valueAbs < 99.9)
-		{
+		} else if (valueAbs < 99.9) {
 			return String.format("%2.1f", value) + "" + unit;
-		}
-		else if (valueAbs < 999)
-		{
+		} else if (valueAbs < 999) {
 			return String.format("%3.0f", value) + "" + unit;
-		}
-		else if (valueAbs < 9999)
-		{
+		} else if (valueAbs < 9999) {
 			return String.format("%1.2f", value / 1000.0) + "K" + unit;
-		}
-		else if (valueAbs < 99999)
-		{
+		} else if (valueAbs < 99999) {
 			return String.format("%2.1f", value / 1000.0) + "K" + unit;
-		}
-		else// if(value < 1000000)
-		{
+		} else { // if(value < 1000000)
 			return String.format("%3.0f", value / 1000.0) + "K" + unit;
 		}
 	}
 
-	public static String plotVolt(String header, double value)
-	{
-		if (header.equals("") == false)
+	public static String plotVolt(String header, double value) {
+		if (!header.equals(""))
 			header += " ";
 		return header + plotValue(value, "V  ");
 	}
 
-	public static String plotAmpere(String header, double value)
-	{
-		if (header.equals("") == false)
+	public static String plotAmpere(String header, double value) {
+		if (!header.equals(""))
 			header += " ";
 		return header + plotValue(value, "A  ");
 	}
 
-	public static String plotCelsius(String header, double value)
-	{
+	public static String plotCelsius(String header, double value) {
 		value += PhysicalConstant.Tref - PhysicalConstant.TCelsius;
-		if (header.equals("") == false)
+		if (!header.equals(""))
 			header += " ";
 		return header + plotValue(value, "\u00B0C ");
 	}
 
-	public static String plotPercent(String header, double value)
-	{
-		if (header.equals("") == false)
+	public static String plotPercent(String header, double value) {
+		if (!header.equals(""))
 			header += " ";
 		if (value >= 1.0)
 			return header + String.format("%3.0f", value * 100.0) + "%   ";
 		else
 			return header + String.format("%3.1f", value * 100.0) + "%   ";
-
 	}
 
-	public static String plotEnergy(String header, double value)
-	{
-		if (header.equals("") == false)
+	public static String plotEnergy(String header, double value) {
+		if (!header.equals(""))
 			header += " ";
 		return header + plotValue(value, "J  ");
 	}
 
-	public static String plotPower(String header, double value)
-	{
-		if (header.equals("") == false)
+	public static String plotPower(String header, double value) {
+		if (!header.equals(""))
 			header += " ";
 		return header + plotValue(value, "W  ");
 	}
 
-	public static String plotOhm(String header, double value)
-	{
-		if (header.equals("") == false)
+	public static String plotOhm(String header, double value) {
+		if (!header.equals(""))
 			header += " ";
 		return header + plotValue(value, "ohm  ");
 	}
 
-	public static String plotUIP(double U, double I)
-	{
+	public static String plotUIP(double U, double I) {
 		return plotVolt("U", U) + plotAmpere("I", I) + plotPower("P", Math.abs(U * I));
 	}
 
-	public static String plotTime(double value)
-	{
+	public static String plotTime(double value) {
 		String str = "";
+		int h, mn, s;
+
 		if (value == 0.0)
 			return str + "0''";
-		int h, mn, s;
+
 		h = (int) (value / 3600);
 		value = value % 3600;
 		mn = (int) (value / 60);
 		value = value % 60;
 		s = (int) (value / 1);
+
 		if (h != 0)
 			str += h + "h";
 		if (mn != 0)
@@ -363,24 +323,20 @@ public class Utils {
 		return str;
 	}
 
-	public static String plotTime(String header, double value)
-	{
-		if (header.equals("") == false)
+	public static String plotTime(String header, double value) {
+		if (!header.equals(""))
 			header += " ";
 		return header + plotTime(value);
-
 	}
 
 	public static void readFromNBT(NBTTagCompound nbt, String str, IInventory inventory) {
 		NBTTagList var2 = nbt.getTagList(str, 10);
 
-		for (int var3 = 0; var3 < var2.tagCount(); ++var3)
-		{
+		for (int var3 = 0; var3 < var2.tagCount(); ++var3) {
 			NBTTagCompound var4 = (NBTTagCompound) var2.getCompoundTagAt(var3);
 			int var5 = var4.getByte("Slot") & 255;
 
-			if (var5 >= 0 && var5 < inventory.getSizeInventory())
-			{
+			if (var5 >= 0 && var5 < inventory.getSizeInventory()) {
 				inventory.setInventorySlotContents(var5, ItemStack.loadItemStackFromNBT(var4));
 			}
 		}
@@ -389,10 +345,8 @@ public class Utils {
 	public static void writeToNBT(NBTTagCompound nbt, String str, IInventory inventory) {
 		NBTTagList var2 = new NBTTagList();
 
-		for (int var3 = 0; var3 < inventory.getSizeInventory(); ++var3)
-		{
-			if (inventory.getStackInSlot(var3) != null)
-			{
+		for (int var3 = 0; var3 < inventory.getSizeInventory(); ++var3) {
+			if (inventory.getStackInSlot(var3) != null) {
 				NBTTagCompound var4 = new NBTTagCompound();
 				var4.setByte("Slot", (byte) var3);
 				inventory.getStackInSlot(var3).writeToNBT(var4);
@@ -403,8 +357,7 @@ public class Utils {
 		nbt.setTag(str, var2);
 	}
 
-	public static void sendPacketToClient(ByteArrayOutputStream bos, EntityPlayerMP player)
-	{
+	public static void sendPacketToClient(ByteArrayOutputStream bos, EntityPlayerMP player) {
 		// Profiler p = new Profiler();
 		// p.add("A");
 		// ElnServerPacket packet = new ElnServerPacket(Eln.channelName, bos.toByteArray());
@@ -418,7 +371,6 @@ public class Utils {
 		player.playerNetServerHandler.sendPacket(packet);
 
 		// FMLCommonHandler.instance().getMinecraftServerInstance().getEln.eventChannel.sendTo(new FMLProxyPacket(packet),player);
-
 	}
 
 	/*
@@ -434,67 +386,64 @@ public class Utils {
 	// ItemDye.dyeColors[stack.getItemDamage()];
 	// }
 
-	public static void setGlColorFromDye(int damage)
-	{
+	public static void setGlColorFromDye(int damage) {
 		int color = ItemDye.field_150922_c[damage]; // dyeColors
 		float gain = 1.0f;
-		switch (damage)
-		{
-		default:
-			GL11.glColor3f(0.0f * gain, 0.0f * gain, 0.0f * gain);
-			break;
-		case 0:
-			GL11.glColor3f(0.2f * gain, 0.2f * gain, 0.2f * gain);
-			break; // black
-		case 1:
-			GL11.glColor3f(1.0f * gain, 0.0f * gain, 0.0f * gain);
-			break; // red
-		case 2:
-			GL11.glColor3f(0.2f * gain, 0.5f * gain, 0.1f * gain);
-			break; // green
-		case 3:
-			GL11.glColor3f(0.3f * gain, 0.2f * gain, 0.1f * gain);
-			break; // braoun
-		case 4:
-			GL11.glColor3f(0.2f * gain, 0.2f * gain, 1.0f * gain);
-			break; // blue
-		case 5:
-			GL11.glColor3f(0.7f * gain, 0.2f * gain, 1.0f * gain);
-			break; // purple
-		case 6:
-			GL11.glColor3f(0.2f * gain, 0.7f * gain, 0.9f * gain);
-			break;
-		case 7:
-			GL11.glColor3f(0.7f * gain, 0.7f * gain, 0.7f * gain);
-			break;
-		case 8:
-			GL11.glColor3f(0.4f * gain, 0.4f * gain, 0.4f * gain);
-			break;
-		case 9:
-			GL11.glColor3f(1.0f * gain, 0.5f * gain, 0.5f * gain);
-			break;
-		case 10:
-			GL11.glColor3f(0.0f * gain, 1.0f * gain, 0.0f * gain);
-			break;
-		case 11:
-			GL11.glColor3f(0.9f * gain, 0.8f * gain, 0.1f * gain);
-			break;
-		case 12:
-			GL11.glColor3f(0.4f * gain, 0.5f * gain, 1.0f * gain);
-			break;
-		case 13:
-			GL11.glColor3f(0.9f * gain, 0.3f * gain, 0.9f * gain);
-			break;
-		case 14:
-			GL11.glColor3f(1.0f * gain, 0.6f * gain, 0.3f * gain);
-			break;
-		case 15:
-			GL11.glColor3f(1.0f * gain, 1.0f * gain, 1.0f * gain);
-			break;
-
+		switch (damage) {
+			default:
+				GL11.glColor3f(0.0f * gain, 0.0f * gain, 0.0f * gain);
+				break;
+			case 0:
+				GL11.glColor3f(0.2f * gain, 0.2f * gain, 0.2f * gain);
+				break; // black
+			case 1:
+				GL11.glColor3f(1.0f * gain, 0.0f * gain, 0.0f * gain);
+				break; // red
+			case 2:
+				GL11.glColor3f(0.2f * gain, 0.5f * gain, 0.1f * gain);
+				break; // green
+			case 3:
+				GL11.glColor3f(0.3f * gain, 0.2f * gain, 0.1f * gain);
+				break; // braoun
+			case 4:
+				GL11.glColor3f(0.2f * gain, 0.2f * gain, 1.0f * gain);
+				break; // blue
+			case 5:
+				GL11.glColor3f(0.7f * gain, 0.2f * gain, 1.0f * gain);
+				break; // purple
+			case 6:
+				GL11.glColor3f(0.2f * gain, 0.7f * gain, 0.9f * gain);
+				break;
+			case 7:
+				GL11.glColor3f(0.7f * gain, 0.7f * gain, 0.7f * gain);
+				break;
+			case 8:
+				GL11.glColor3f(0.4f * gain, 0.4f * gain, 0.4f * gain);
+				break;
+			case 9:
+				GL11.glColor3f(1.0f * gain, 0.5f * gain, 0.5f * gain);
+				break;
+			case 10:
+				GL11.glColor3f(0.0f * gain, 1.0f * gain, 0.0f * gain);
+				break;
+			case 11:
+				GL11.glColor3f(0.9f * gain, 0.8f * gain, 0.1f * gain);
+				break;
+			case 12:
+				GL11.glColor3f(0.4f * gain, 0.5f * gain, 1.0f * gain);
+				break;
+			case 13:
+				GL11.glColor3f(0.9f * gain, 0.3f * gain, 0.9f * gain);
+				break;
+			case 14:
+				GL11.glColor3f(1.0f * gain, 0.6f * gain, 0.3f * gain);
+				break;
+			case 15:
+				GL11.glColor3f(1.0f * gain, 1.0f * gain, 1.0f * gain);
+				break;
 		}
 
-		// GL11.glColor3f(((color>>16) & 0xFF)/255f, ((color>>7) & 0xFF)/255f, ((color>>0) & 0xFF)/255f);
+		// GL11.glColor3f(((color >> 16) & 0xFF) / 255f, ((color >> 7) & 0xFF) / 255f, ((color >> 0) & 0xFF) / 255f);
 	}
 
 	/*
@@ -505,14 +454,13 @@ public class Utils {
 
 	// Into utilsClient To
 	public static double getWeatherNoLoad(int dim) {
-		if (getWorldExist(dim) == false) return 0.0;
+		if (!getWorldExist(dim)) return 0.0;
 		World world = getWorld(dim);
 		if (world.isThundering())
 			return 1.0;
 		if (world.isRaining())
 			return 0.5;
 		return 0.0;
-
 	}
 
 	public static World getWorld(int dim) {
@@ -523,9 +471,8 @@ public class Utils {
 		return DimensionManager.getWorld(dim) != null;
 	}
 
-	public static double getWind(int worldId, int y)
-	{
-		if (getWorldExist(worldId) == false) {
+	public static double getWind(int worldId, int y) {
+		if (!getWorldExist(worldId)) {
 			return Math.max(0.0, Eln.instance.wind.getWind(y));
 		} else {
 			World world = getWorld(worldId);
@@ -540,12 +487,10 @@ public class Utils {
 	// return Math.max(0.0, Eln.instance.wind.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getWeightedThunderStrength(0) * 2f);
 	// }
 
-	public static void dropItem(ItemStack itemStack, int x, int y, int z, World world)
-	{
+	public static void dropItem(ItemStack itemStack, int x, int y, int z, World world) {
 		if (itemStack == null)
 			return;
-		if (world.getGameRules().getGameRuleBooleanValue("doTileDrops"))
-		{
+		if (world.getGameRules().getGameRuleBooleanValue("doTileDrops")) {
 			float var6 = 0.7F;
 			double var7 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
 			double var9 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
@@ -556,30 +501,23 @@ public class Utils {
 		}
 	}
 
-	public static void dropItem(ItemStack itemStack, Coordonate coordonate)
-	{
+	public static void dropItem(ItemStack itemStack, Coordonate coordonate) {
 		dropItem(itemStack, coordonate.x, coordonate.y, coordonate.z, coordonate.world());
 	}
 
-	public static boolean tryPutStackInInventory(ItemStack stack, IInventory inventory, int start, int count)
-	{
+	public static boolean tryPutStackInInventory(ItemStack stack, IInventory inventory, int start, int count) {
 		if (inventory == null) return false;
-		for (int idx = start; idx < start + count; idx++)
-		{
+		for (int idx = start; idx < start + count; idx++) {
 			ItemStack targetStack = inventory.getStackInSlot(idx);
-			if (targetStack == null)
-			{
+			if (targetStack == null) {
 				inventory.setInventorySlotContents(idx, stack.copy());
 				stack.stackSize = 0;
 				return true;
-			}
-			else if (targetStack.isItemEqual(stack))
-			{
+			} else if (targetStack.isItemEqual(stack)) {
 				int sizeLast = targetStack.stackSize;
 				// inventory.decrStackSize(idx, -stack.stackSize);
 				int transferMax = inventory.getInventoryStackLimit() - targetStack.stackSize;
-				if (transferMax > 0)
-				{
+				if (transferMax > 0) {
 					int transfer = stack.stackSize;
 					if (transfer > transferMax)
 						transfer = transferMax;
@@ -596,44 +534,35 @@ public class Utils {
 		return false;
 	}
 
-	public static boolean canPutStackInInventory(ItemStack[] stackList, IInventory inventory, int[] slotsIdList)
-	{
+	public static boolean canPutStackInInventory(ItemStack[] stackList, IInventory inventory, int[] slotsIdList) {
 		int limit = inventory.getInventoryStackLimit();
 		ItemStack[] outputStack = new ItemStack[slotsIdList.length];
 		ItemStack[] inputStack = new ItemStack[stackList.length];
 
-		for (int idx = 0; idx < outputStack.length; idx++)
-		{
+		for (int idx = 0; idx < outputStack.length; idx++) {
 			if (inventory.getStackInSlot(slotsIdList[idx]) != null)
 				outputStack[idx] = inventory.getStackInSlot(slotsIdList[idx]).copy();
 		}
-		for (int idx = 0; idx < stackList.length; idx++)
-		{
+		for (int idx = 0; idx < stackList.length; idx++) {
 			inputStack[idx] = stackList[idx].copy();
 		}
 
 		boolean oneStackDone;
-		for (ItemStack stack : inputStack)
-		{
+		for (ItemStack stack : inputStack) {
 			// if(stack == null) continue;
 			oneStackDone = false;
-			for (int idx = 0; idx < slotsIdList.length; idx++)
-			{
+			for (int idx = 0; idx < slotsIdList.length; idx++) {
 				ItemStack targetStack = outputStack[idx];
 
-				if (targetStack == null)
-				{
+				if (targetStack == null) {
 					outputStack[idx] = stack;
 					oneStackDone = true;
 					break;
-				}
-				else if (targetStack.isItemEqual(stack))
-				{
+				} else if (targetStack.isItemEqual(stack)) {
 					int sizeLast = targetStack.stackSize;
 					// inventory.decrStackSize(idx, -stack.stackSize);
 					int transferMax = limit - targetStack.stackSize;
-					if (transferMax > 0)
-					{
+					if (transferMax > 0) {
 						int transfer = stack.stackSize;
 						if (transfer > transferMax)
 							transfer = transferMax;
@@ -641,42 +570,34 @@ public class Utils {
 						stack.stackSize -= transfer;
 					}
 
-					if (stack.stackSize == 0)
-					{
+					if (stack.stackSize == 0) {
 						oneStackDone = true;
 						break;
 					}
 				}
 			}
 
-			if (oneStackDone == false)
+			if (!oneStackDone)
 				return false;
 		}
 		return true;
 	}
 
-	public static boolean tryPutStackInInventory(ItemStack[] stackList, IInventory inventory, int[] slotsIdList)
-	{
+	public static boolean tryPutStackInInventory(ItemStack[] stackList, IInventory inventory, int[] slotsIdList) {
 		int limit = inventory.getInventoryStackLimit();
 
-		for (ItemStack stack : stackList)
-		{
-			for (int idx = 0; idx < slotsIdList.length; idx++)
-			{
+		for (ItemStack stack : stackList) {
+			for (int idx = 0; idx < slotsIdList.length; idx++) {
 				ItemStack targetStack = inventory.getStackInSlot(slotsIdList[idx]);
-				if (targetStack == null)
-				{
+				if (targetStack == null) {
 					inventory.setInventorySlotContents(slotsIdList[idx], stack.copy());
 					stack.stackSize = 0;
 					break;
-				}
-				else if (targetStack.isItemEqual(stack))
-				{
+				} else if (targetStack.isItemEqual(stack)) {
 					int sizeLast = targetStack.stackSize;
 					// inventory.decrStackSize(idx, -stack.stackSize);
 					int transferMax = limit - targetStack.stackSize;
-					if (transferMax > 0)
-					{
+					if (transferMax > 0) {
 						int transfer = stack.stackSize;
 						if (transfer > transferMax)
 							transfer = transferMax;
@@ -684,23 +605,17 @@ public class Utils {
 						stack.stackSize -= transfer;
 					}
 
-					if (stack.stackSize == 0)
-					{
+					if (stack.stackSize == 0) {
 						break;
 					}
 				}
 			}
-
 		}
 		return true;
 	}
 
-	public static double voltageMageFactor = 0.1;
-
-	public static double voltageMargeFactorSub(double value)
-	{
-		if (value > 1 + voltageMageFactor)
-		{
+	public static double voltageMargeFactorSub(double value) {
+		if (value > 1 + voltageMageFactor) {
 			return value - voltageMageFactor;
 		}
 		else if (value > 1) {
@@ -713,23 +628,17 @@ public class Utils {
 	 * public static void bindGuiTexture(String string) { Utils.bindTextureByName("/sprites/gui/" + string); }
 	 */
 
-	public static void serialiseItemStack(DataOutputStream stream, ItemStack stack) throws IOException
-	{
-
-		if ((stack) == null)
-		{
+	public static void serialiseItemStack(DataOutputStream stream, ItemStack stack) throws IOException {
+		if ((stack) == null) {
 			stream.writeShort(-1);
 			stream.writeShort(-1);
-		}
-		else
-		{
+		} else {
 			stream.writeShort(Item.getIdFromItem(stack.getItem()));
 			stream.writeShort(stack.getItemDamage());
 		}
 	}
 
-	public static ItemStack unserialiseItemStack(DataInputStream stream) throws IOException
-	{
+	public static ItemStack unserialiseItemStack(DataInputStream stream) throws IOException {
 		short id, damage;
 		id = stream.readShort();
 		damage = stream.readShort();
@@ -738,24 +647,19 @@ public class Utils {
 		return Utils.newItemStack(id, 1, damage);
 	}
 
-	public static EntityItem unserializeItemStackToEntityItem(DataInputStream stream, EntityItem old, TileEntity tileEntity) throws IOException
-	{
+	public static EntityItem unserializeItemStackToEntityItem(DataInputStream stream, EntityItem old, TileEntity tileEntity) throws IOException {
 		short itemId, ItemDamage;
-		if ((itemId = stream.readShort()) == -1)
-		{
+		if ((itemId = stream.readShort()) == -1) {
 			stream.readShort();
 			return null;
 
-		}
-		else
-		{
+		} else {
 			ItemDamage = stream.readShort();
 			if (old == null || Item.getIdFromItem(old.getEntityItem().getItem()) != itemId || old.getEntityItem().getItemDamage() != ItemDamage)
 				return new EntityItem(tileEntity.getWorldObj(), tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5, tileEntity.zCoord + 1.2, Utils.newItemStack(itemId, 1, ItemDamage));
 			else
 				return old;
 		}
-
 	}
 
 	public static boolean isGameInPause() {
@@ -806,7 +710,6 @@ public class Utils {
 		o = w.getTileEntity(x, y, z - 1);
 		if (o != null && o instanceof ITileEntitySpawnClient)
 			((ITileEntitySpawnClient) o).tileEntityNeighborSpawn();
-
 	}
 
 	public static boolean playerHasMeter(EntityPlayer entityPlayer) {
@@ -877,7 +780,6 @@ public class Utils {
 	}
 
 	public static boolean isPlayerAround(World world, AxisAlignedBB axisAlignedBB) {
-
 		return world.getEntitiesWithinAABB(EntityPlayer.class, axisAlignedBB).size() != 0;
 	}
 
@@ -900,18 +802,14 @@ public class Utils {
 	 * public static void drawEnergyBare(float e) { float x = 14f/16f,y = 15f/16f-e*14f/16f; GL11.glColor3f(e, e, 0f); GL11.glDisable(GL11.GL_TEXTURE_2D); GL11.glBegin(GL11.GL_QUADS); GL11.glVertex3f(x+1f/16f,y,0.01f); GL11.glVertex3f(x,y,0f); GL11.glVertex3f(x,15f/16f,0f); GL11.glVertex3f(x+1f/16f,15f/16f,0.01f); GL11.glEnd(); GL11.glEnable(GL11.GL_TEXTURE_2D); GL11.glColor3f(1f, 1f, 1f); }
 	 */
 
-	static public void getItemStack(String name, List list)
-	{
-
+	static public void getItemStack(String name, List list) {
 		Iterator aitem = Item.itemRegistry.iterator();
 		ArrayList<ItemStack> tempList = new ArrayList<ItemStack>(3000);
 		Item item;
 
-		while (aitem.hasNext())
-		{
+		while (aitem.hasNext()) {
 			item = (Item) aitem.next();
-			if (item != null && item.getCreativeTab() != null)
-			{
+			if (item != null && item.getCreativeTab() != null) {
 				item.getSubItems(item, (CreativeTabs) null, tempList);
 			}
 		}
@@ -921,13 +819,10 @@ public class Utils {
 		for (ItemStack itemstack : tempList) {
 			// String s1 = itemstack.getDisplayName();
 
-			if (itemstack.getDisplayName().toLowerCase().contains(s))
-			{
+			if (itemstack.getDisplayName().toLowerCase().contains(s)) {
 				list.add(itemstack);
 			}
-
 		}
-
 	}
 
 	public static Side getSide() {
@@ -948,7 +843,6 @@ public class Utils {
 			return (short) bit;
 		else
 			return (short) (bit >>> 16);
-
 	}
 
 	public static float modbusToFloat(short first, short second) {
@@ -957,7 +851,6 @@ public class Utils {
 	}
 
 	public static boolean areSame(ItemStack stack, ItemStack output) {
-
 		try {
 			if (stack.getItem() == output.getItem() && stack.getItemDamage() == output.getItemDamage()) return true;
 			int[] stackIds = OreDictionary.getOreIDs(stack);
@@ -969,13 +862,11 @@ public class Utils {
 				}
 			}
 		} catch (Exception e) {
-
 		}
 		return false;
 	}
 
 	public static Vec3 getVec05(Coordonate c) {
-
 		return Vec3.createVectorHelper(c.x + (c.x < 0 ? -1 : 1) * 0.5, c.y + (c.y < 0 ? -1 : 1) * 0.5, c.z + (c.z < 0 ? -1 : 1) * 0.5);
 	}
 
@@ -992,7 +883,6 @@ public class Utils {
 	 */
 
 	public static boolean isCreative(EntityPlayerMP entityPlayer) {
-
 		return entityPlayer.theItemInWorldManager.isCreative();
 		/*
 		 * Minecraft m = Minecraft.getMinecraft(); return m.getIntegratedServer().getGameType().isCreative();
@@ -1006,7 +896,6 @@ public class Utils {
 	}
 
 	public static void serverTeleport(Entity e, double x, double y, double z) {
-
 		if (e instanceof EntityPlayerMP)
 			((EntityPlayerMP) e).setPositionAndUpdate(x, y, z);
 		else
@@ -1027,8 +916,9 @@ public class Utils {
 		dy *= normInv;
 		dz *= normInv;
 		double d = 0;
+
 		while (d < norm) {
-			if (Utils.isBlockLoaded(world, x, y, z) == false)
+			if (!Utils.isBlockLoaded(world, x, y, z))
 				continue;
 			Block b = Utils.getBlock(world, x, y, z);
 			if (b != null)
@@ -1055,7 +945,6 @@ public class Utils {
 				return 0;
 			return block.isOpaqueCube() ? 1f : 0f;
 		}
-
 	}
 
 	public static float traceRay(World w, double posX, double posY, double posZ, double targetX, double targetY, double targetZ, TraceRayWeight weight) {
@@ -1086,6 +975,7 @@ public class Utils {
 
 		float stackRed = 0, stackBlue = 0, stackGreen = 0;
 		float d = 0;
+
 		while (d < rangeMax) {
 			float xFloor = MathHelper.floor_float(x);
 			float yFloor = MathHelper.floor_float(y);
@@ -1103,10 +993,12 @@ public class Utils {
 			int zInt = (int) zFloor;
 
 			Block block = Blocks.air;
+
 			if (w.blockExists(xInt + posXint, yInt + posYint, zInt + posZint))
 				block = w.getBlock(xInt + posXint, yInt + posYint, zInt + posZint);
 
 			float dToStack;
+
 			if (d + dBest < rangeMax)
 				dToStack = dBest;
 			else {
@@ -1120,15 +1012,12 @@ public class Utils {
 			z += vz * dBest;
 
 			d += dBest;
-
 		}
 
 		return stackRed;
 	}
 
-	public static boolean isBlockLoaded(World world, double x, double y,
-			double z) {
-
+	public static boolean isBlockLoaded(World world, double x, double y, double z) {
 		return world.blockExists(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
 	}
 
@@ -1153,16 +1042,12 @@ public class Utils {
 			f.setAccessible(true);
 			return f.getInt(o);
 		} catch (IllegalArgumentException e) {
-
 			e.printStackTrace();
 		} catch (SecurityException e) {
-
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-
 			e.printStackTrace();
 		} catch (NoSuchFieldException e) {
-
 			e.printStackTrace();
 		}
 		return 0;
@@ -1171,7 +1056,6 @@ public class Utils {
 	public static ItemStack[][] getItemStackGrid(IRecipe r) {
 		ItemStack[][] stacks = new ItemStack[3][3];
 		try {
-
 			if (r instanceof ShapedRecipes) {
 				ShapedRecipes s = (ShapedRecipes) r;
 				for (int idx2 = 0; idx2 < 3; idx2++) {
@@ -1198,7 +1082,6 @@ public class Utils {
 						if (o instanceof List) {
 							if (o instanceof List && ((List) o).size() > 0)
 								stack = (ItemStack) ((List) o).get(0);
-
 						}
 
 						if (o instanceof ItemStack) {
@@ -1245,7 +1128,6 @@ public class Utils {
 
 	public static ArrayList<ItemStack> getRecipeInputs(IRecipe r) {
 		try {
-
 			ArrayList<ItemStack> stacks = new ArrayList<ItemStack>();
 			if (r instanceof ShapedRecipes) {
 				for (ItemStack stack : ((ShapedRecipes) r).recipeItems) {
@@ -1297,25 +1179,22 @@ public class Utils {
 	}
 
 	public static void addChatMessage(EntityPlayer entityPlayer, String string) {
-
 		entityPlayer.addChatMessage(new ChatComponentText(string));
 	}
 
 	public static ItemStack newItemStack(int i, int size, int damage) {
-
 		return new ItemStack(Item.getItemById(i), size, damage);
 	}
 
 	public static ItemStack newItemStack(Item i, int size, int damage) {
-
 		return new ItemStack(i, size, damage);
 	}
 
 	public static ArrayList<NBTTagCompound> getTags(NBTTagCompound nbt) {
-
 		Object[] set = nbt.func_150296_c().toArray();
 
 		ArrayList<NBTTagCompound> tags = new ArrayList<NBTTagCompound>();
+
 		for (int idx = 0; idx < set.length; idx++) {
 			tags.add(nbt.getCompoundTag((String) set[idx]));
 		}
@@ -1323,7 +1202,7 @@ public class Utils {
 	}
 
 	public static boolean isRemote(IBlockAccess world) {
-		if (world instanceof World == false) {
+		if (!(world instanceof World)) {
 			fatal();
 		}
 		return ((World) world).isRemote;
@@ -1342,35 +1221,29 @@ public class Utils {
 		try {
 			throw new Exception();
 		} catch (Exception e) {
-
 			e.printStackTrace();
 		}
 	}
 
 	public static Block getBlock(int blockId) {
-
 		return Block.getBlockById(blockId);
 	}
 
 	public static void updateSkylight(Chunk chunk) {
-
 		chunk.func_150804_b(false);
 	}
 
 	public static void updateAllLightTypes(World worldObj, int xCoord, int yCoord, int zCoord) {
-
 		worldObj.func_147451_t(xCoord, yCoord, zCoord);
 
 		worldObj.markBlocksDirtyVertical(xCoord, zCoord, 0, 255);
 	}
 
 	public static int getItemId(ItemStack stack) {
-
 		return Item.getIdFromItem(stack.getItem());
 	}
 
 	public static int getItemId(Block block) {
-
 		return Item.getIdFromItem(Item.getItemFromBlock(block));
 	}
 
@@ -1400,7 +1273,7 @@ public class Utils {
 
 	public static File getMapFile(String name) {
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-		String savesAt = server.isDedicatedServer() == false ? "saves/" : "";
+		String savesAt = !server.isDedicatedServer() ? "saves/" : "";
 		File f = server.getFile(savesAt + server.getFolderName() + "/" + name);
 		return f;
 	}
@@ -1416,10 +1289,7 @@ public class Utils {
 	}
 
 	public static void generateHeightMap(Chunk chunk) {
-
 	}
-
-	private static int uuid = 1;
 
 	public static int getUuid() {
 		if (uuid < 1) uuid = 1;
@@ -1431,8 +1301,8 @@ public class Utils {
 	 * 
 	 * return new float[]{obj.zMin*16,obj.zMax*16,obj.yMin*16,obj.yMax*16}; }
 	 */
-	public static float[] getSixNodePinDistance(Obj3DPart obj) {
 
+	public static float[] getSixNodePinDistance(Obj3DPart obj) {
 		return new float[] { Math.abs(obj.zMin * 16), Math.abs(obj.zMax * 16), Math.abs(obj.yMin * 16), Math.abs(obj.yMax * 16) };
 	}
 
@@ -1456,7 +1326,6 @@ public class Utils {
 				return true;
 			}
 		} catch (ClassNotFoundException e) {
-
 		}
 		return false;
 	}
@@ -1473,7 +1342,7 @@ public class Utils {
 	public static void printFunction(FunctionTable func, double start, double end, double step) {
 		Utils.println("********");
 		double x;
-		for(int idx = 0;(x = start + step*idx) < end+0.00001;idx++){
+		for(int idx = 0;(x = start + step * idx) < end + 0.00001; idx++) {
 			Utils.println(func.getValue(x));
 		}
 		Utils.println("********");

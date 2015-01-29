@@ -1,28 +1,21 @@
 package mods.eln.misc;
 
-
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 
-import mods.eln.Eln;
+import java.nio.ByteBuffer;
 
-public class ElnPacket extends Packet
-{ 
+public class ElnPacket extends Packet {
+
 	private String channel;
 	private byte[] data;
-	  public ElnPacket(String channel, ByteBuffer data)
-	  {
-	  //  this(channel, data.array());
-	  }
+
+	public ElnPacket(String channel, ByteBuffer data) {
+		//  this(channel, data.array());
+	}
 	  /*
-	  public ElnPacket(String channel, byte[] data)
-	  {
+	  	public ElnPacket(String channel, byte[] data) {
 		  ByteBuf
 	    this.channel = channel;
 	    this.data = data;
@@ -33,19 +26,16 @@ public class ElnPacket extends Packet
 	  /*
 	@Override
 	public void readPacketData(DataInput datainput) throws IOException {
-		
 	    this.channel = datainput.readUTF();
 	    short size = datainput.readShort();
 	    data = new byte[size];
-	    for(int idx = 0;idx < size;idx++){
+	    for(int idx = 0; idx < size; idx++){
 	    	data[idx] = datainput.readByte();
 	    }
-
 	}
 
 	@Override
 	public void writePacketData(DataOutput dataoutput) throws IOException {
-		
 		dataoutput.writeUTF(channel);
 		dataoutput.writeShort(data.length);
 		dataoutput.write(data);
@@ -54,31 +44,22 @@ public class ElnPacket extends Packet
 	@Override
 	public void processPacket(NetHandler nethandler) {
 		Eln.instance.
-		
 	}
 
 	@Override
 	public int getPacketSize() {
-		
 		return data.length;
 	}*/
 
 	@Override
 	public void processPacket(INetHandler arg0) {
-		
-		
 	}
 
 	@Override
 	public void readPacketData(PacketBuffer arg0) {
-		
-		
 	}
 
 	@Override
 	public void writePacketData(PacketBuffer arg0) {
-		
-		
 	}
-
 }

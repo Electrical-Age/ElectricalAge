@@ -3,25 +3,27 @@ package mods.eln.misc;
 import mods.eln.sim.IProcess;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class WindProcess implements IProcess,INBTTReady{
+public class WindProcess implements IProcess, INBTTReady {
 
 	double windHit = 5;
 	double windTarget = 5;
 	double windVariation = 0;
 	double windTargetNoose = 0;
 	RcInterpolator windTargetFiltred = new RcInterpolator(60);
+
 	@Override
 	public void process(double time) {
 		double varF = 0.01;
-		windHit += windVariation*time;
-		windVariation += (getTarget() - windHit)*varF*time + (Math.random()*2-1)*0.1*time;
-		windVariation *= (1 - 0.01*time);
+		windHit += windVariation * time;
+		windVariation += (getTarget() - windHit) * varF * time + (Math.random() * 2 - 1) * 0.1 * time;
+		windVariation *= (1 - 0.01 * time);
 		
-		if(Math.random() < time/1200){
+		if(Math.random() < time/1200) {
 			newWindTarget();
 		}
-		if( Math.random() < time/120){
-			windTargetNoose = (Math.random()*2-1)*1.2;
+
+		if(Math.random() < time/120) {
+			windTargetNoose = (Math.random() * 2 - 1) * 1.2;
 		}
 		
 		//windLast = windHit;
@@ -31,24 +33,24 @@ public class WindProcess implements IProcess,INBTTReady{
 		windTargetFiltred.step((float) time);
 		
 		//Utils.println("WIND : " + windHit + "  TARGET : " + getTarget());
-		
 	}
 
 	public void newWindTarget() {
-		
-		float next = (float) (Math.pow(Math.random(),3.0)*20);
-		windTarget += (next - windTarget)*0.7;
+		float next = (float) (Math.pow(Math.random(), 3.0) * 20);
+		windTarget += (next - windTarget) * 0.7;
 	}
 
-	public double getTarget(){
+	public double getTarget() {
 		return windTargetNoose + windTargetFiltred.get();
 	}
-	public double getTargetNotFiltred(){
+
+	public double getTargetNotFiltred() {
 		return windTargetNoose + windTargetFiltred.getTarget();
 	}
-	public double getWind(int y){
+
+	public double getWind(int y) {
 		y = Math.min(y, 100);
-		return Math.max(0, windHit * y/100);		
+		return Math.max(0, windHit * y / 100);
 	}
 	
 	@Override
@@ -61,10 +63,9 @@ public class WindProcess implements IProcess,INBTTReady{
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		nbt.setDouble(str + "windHit",windHit);
-		nbt.setDouble(str + "windTarget",windTarget);
-		nbt.setDouble(str + "windVariation",windVariation);
-		nbt.setFloat(str + "windTargetFiltred",windTargetFiltred.get());
+		nbt.setDouble(str + "windHit", windHit);
+		nbt.setDouble(str + "windTarget", windTarget);
+		nbt.setDouble(str + "windVariation", windVariation);
+		nbt.setFloat(str + "windTargetFiltred", windTargetFiltred.get());
 	}
-
 }

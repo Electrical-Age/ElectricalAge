@@ -14,27 +14,30 @@ import cpw.mods.fml.common.FMLCommonHandler;
 
 public class ItemEnergyInventoryProcess implements IProcess {
 
+	static final double energyUpdatePeriod = 0.5;
+	double energyUpdateTimout = energyUpdatePeriod;
+
 	class Element {
+		public ItemStack stack;
+		public IItemEnergyBattery i;
+		public int p;
+
 		public Element(ItemStack stack, IItemEnergyBattery i) {
 			this.stack = stack;
 			this.i = i;
 			p = i.getPriority(stack);
 		}
-
-		public ItemStack stack;
-		public IItemEnergyBattery i;
-		public int p;
 	}
 
 	static class Exclusion {
+		public double timeout;
+		public Object o;
+
 		public Exclusion(double timeout, Object o) {
 			this.timeout = timeout;
 			this.o = o;
 			Utils.println("new");
 		}
-
-		public double timeout;
-		public Object o;
 	}
 
 	LinkedList<Exclusion> exclude = new LinkedList<ItemEnergyInventoryProcess.Exclusion>();
@@ -67,9 +70,6 @@ public class ItemEnergyInventoryProcess implements IProcess {
 		return false;
 	}
 
-	static final double energyUpdatePeriod = 0.5;
-	double energyUpdateTimout = energyUpdatePeriod;
-
 	@Override
 	public void process(double time) {
 		Iterator<Exclusion> ie = exclude.iterator();
@@ -82,15 +82,16 @@ public class ItemEnergyInventoryProcess implements IProcess {
 		}
 
 		energyUpdateTimout -= time;
+
 		if (energyUpdateTimout > 0)
 			return;
 		energyUpdateTimout += energyUpdatePeriod;
 		time = energyUpdatePeriod;
 
-		MinecraftServer server = FMLCommonHandler.instance()
-				.getMinecraftServerInstance();
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
 		ArrayList<Element> list = new ArrayList<Element>();
+
 		for (Object obj : server.getConfigurationManager().playerEntityList) {
 			EntityPlayerMP player = (EntityPlayerMP) obj;
 			list.clear();
@@ -105,6 +106,7 @@ public class ItemEnergyInventoryProcess implements IProcess {
 					list.add(new Element(stack, (IItemEnergyBattery) o));
 				}
 			}
+
 			for (ItemStack stack : player.inventory.mainInventory) {
 				Object o = Utils.getItemObject(stack);
 
@@ -122,22 +124,19 @@ public class ItemEnergyInventoryProcess implements IProcess {
 			if (Eln.saveConfig.infinitPortableBattery) {
 				for (Element e : list) {
 					double chargePower = e.i.getChargePower(e.stack);
-					double energy = Math.min(
-							e.i.getEnergyMax(e.stack),
-							e.i.getEnergy(e.stack)
-									+ e.i.getChargePower(e.stack) * time);
+					double energy = Math.min(e.i.getEnergyMax(e.stack), e.i.getEnergy(e.stack) + e.i.getChargePower(e.stack) * time);
 					e.i.setEnergy(e.stack, energy);
 				}
 			} else {
-
 				boolean rememberDst = false;
 				double rememberDstEToDstMax = 0;
 				while (true) {
 					Element src = getMax(list);
+
 					if (src == null)
 						break;
-					double eFromSrc = Math.min(src.i.getEnergy(src.stack),
-							src.i.getDischagePower(src.stack) * time);
+
+					double eFromSrc = Math.min(src.i.getEnergy(src.stack), src.i.getDischagePower(src.stack) * time);
 					double eStart = eFromSrc;
 
 					boolean done = false;
@@ -149,20 +148,19 @@ public class ItemEnergyInventoryProcess implements IProcess {
 						}
 
 						double eToDstMax;
+
 						if (rememberDst) {
 							eToDstMax = rememberDstEToDstMax;
 							rememberDst = false;
 						} else {
-							eToDstMax = Math.min(dst.i.getEnergyMax(dst.stack)
-									- dst.i.getEnergy(dst.stack),
-									dst.i.getChargePower(dst.stack) * time);
+							eToDstMax = Math.min(dst.i.getEnergyMax(dst.stack) - dst.i.getEnergy(dst.stack), dst.i.getChargePower(dst.stack) * time);
 						}
 
 						double eToDst = Math.min(eFromSrc, eToDstMax);
 						eFromSrc -= eToDst;
-						dst.i.setEnergy(dst.stack, dst.i.getEnergy(dst.stack)
-								+ eToDst);
+						dst.i.setEnergy(dst.stack, dst.i.getEnergy(dst.stack) + eToDst);
 						eToDstMax -= eToDst;
+
 						if (eToDstMax == 0) {
 							list.remove(dst);
 						} else {
@@ -171,8 +169,7 @@ public class ItemEnergyInventoryProcess implements IProcess {
 						}
 					}
 
-					src.i.setEnergy(src.stack, src.i.getEnergy(src.stack)
-							- (eStart - eFromSrc));
+					src.i.setEnergy(src.stack, src.i.getEnergy(src.stack) - (eStart - eFromSrc));
 
 					if (done)
 						break;
@@ -181,13 +178,9 @@ public class ItemEnergyInventoryProcess implements IProcess {
 
 					if (list.size() < 2)
 						break;
-
 				}
-
 			}
-
 		}
-
 	}
 
 	Element getElement(ArrayList<Element> list, int priority) {

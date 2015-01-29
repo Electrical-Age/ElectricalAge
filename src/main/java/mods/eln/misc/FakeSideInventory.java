@@ -4,9 +4,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 
-public class FakeSideInventory implements ISidedInventory{
+public class FakeSideInventory implements ISidedInventory {
+
 	static private FakeSideInventory instance = new FakeSideInventory();
-	public static FakeSideInventory getInstance(){
+
+	public static FakeSideInventory getInstance() {
 		return instance;
 	}
 	
@@ -105,5 +107,4 @@ public class FakeSideInventory implements ISidedInventory{
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 }

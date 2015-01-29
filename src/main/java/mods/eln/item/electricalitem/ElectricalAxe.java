@@ -12,14 +12,10 @@ public class ElectricalAxe extends ElectricalTool {
 	public ElectricalAxe(String name, float strengthOn, float strengthOff,
 			double energyStorage, double energyPerBlock, double chargePower) {
 		super(name, strengthOn, strengthOff, energyStorage, energyPerBlock, chargePower);
-		
-		
-		
 	}
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		
 		super.setParent(item, damage);
 		Data.addPortable(newItemStack());
 	}
@@ -30,5 +26,4 @@ public class ElectricalAxe extends ElectricalTool {
 		Utils.println(value);
         return value;
 	}
-
 }

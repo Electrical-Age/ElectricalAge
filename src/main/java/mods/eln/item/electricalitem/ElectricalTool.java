@@ -1,16 +1,13 @@
 package mods.eln.item.electricalitem;
 
-import java.util.List;
-
-import org.lwjgl.opengl.GL11;
-
+import mods.eln.Eln;
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.item.electricalinterface.IItemEnergyBattery;
+import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -18,21 +15,20 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
-import mods.eln.Eln;
-import mods.eln.generic.GenericItemUsingDamageDescriptor;
-import mods.eln.item.electricalinterface.IItemEnergyBattery;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
-import mods.eln.server.PlayerManager;
 
-public class ElectricalTool extends GenericItemUsingDamageDescriptor implements IItemEnergyBattery{
+import java.util.List;
 
-	public ElectricalTool(
-			String name,
-			float strengthOn,float strengthOff,
-			double energyStorage,double energyPerBlock,double chargePower
-			
-			) {
+public class ElectricalTool extends GenericItemUsingDamageDescriptor implements IItemEnergyBattery {
+
+	int light,range;
+	double energyStorage, energyPerBlock, chargePower;
+
+	float strengthOff,strengthOn;
+
+	ResourceLocation rIcon;
+
+	public ElectricalTool(String name, float strengthOn, float strengthOff,
+			double energyStorage,double energyPerBlock,double chargePower) {
 		super(name);
 
 		this.chargePower = chargePower;
@@ -43,14 +39,7 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 		
 		rIcon = new ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + ".png");
 	}
-	int light,range;
-	double energyStorage, energyPerBlock, chargePower;
 
-	float strengthOff,strengthOn;
-
-
-	
-	ResourceLocation rIcon;
 	@Override
 	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
 		if(entityLiving.worldObj.isRemote) return false;
@@ -58,9 +47,10 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 		Eln.itemEnergyInventoryProcess.addExclusion(this, 2);
 		return super.onEntitySwing(entityLiving, stack);
 	}
+
 	@Override
 	public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity) {	
-		if(getStrVsBlock(stack, block) == strengthOn){
+		if(getStrVsBlock(stack, block) == strengthOn) {
 			double e = getEnergy(stack) - energyPerBlock;
 			if(e < 0) e = 0;
 			setEnergy(stack, e);
@@ -75,7 +65,6 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 	//@Override
 	//public abstract float getStrVsBlock(ItemStack stack, Block block);
 
-	
 	public float getStrength(ItemStack stack){
 		return getEnergy(stack) >= energyPerBlock ? strengthOn : strengthOff;
 	}
@@ -83,23 +72,19 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 	@Override
 	public NBTTagCompound getDefaultNBT() {
 		NBTTagCompound nbt = new NBTTagCompound();
-		nbt.setDouble("energy",0);
-		nbt.setBoolean("powerOn",false);
-		nbt.setInteger("rand", (int) (Math.random()*0xFFFFFFF));
+		nbt.setDouble("energy", 0);
+		nbt.setBoolean("powerOn", false);
+		nbt.setInteger("rand", (int) (Math.random() * 0xFFFFFFF));
 		return nbt;
 	}
-	
 
-	
-	boolean getPowerOn(ItemStack stack)
-	{
+	boolean getPowerOn(ItemStack stack) {
 		return getNbt(stack).getBoolean("powerOn");
 	}
-	void setPowerOn(ItemStack stack,boolean value)
-	{
-		getNbt(stack).setBoolean("powerOn",value);
+
+	void setPowerOn(ItemStack stack,boolean value) {
+		getNbt(stack).setBoolean("powerOn", value);
 	}
-	
 
 	/*
 	@Override
@@ -119,55 +104,43 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 */
 	
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-		
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
 		list.add(Utils.plotEnergy("Energy Stored:", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
 		//list.add("Power button is " + (getPowerOn(itemStack) ? "ON" : "OFF"));
 	}
 
-
-	public double getEnergy(ItemStack stack)
-	{
+	public double getEnergy(ItemStack stack) {
 		return getNbt(stack).getDouble("energy");
 	}
-	public void setEnergy(ItemStack stack,double value)
-	{
-		getNbt(stack).setDouble("energy",value);
+
+	public void setEnergy(ItemStack stack,double value) {
+		getNbt(stack).setDouble("energy", value);
 	}
 
 	@Override
 	public double getEnergyMax(ItemStack stack) {
-		
 		return energyStorage;
 	}
 
 	@Override
 	public double getChargePower(ItemStack stack) {
-		
 		return chargePower;
 	}
 
 	@Override
 	public double getDischagePower(ItemStack stack) {
-		
 		return 0;
 	}
 
 	@Override
 	public int getPriority(ItemStack stack) {
-		
 		return 0;
 	}
 
-
-
-	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		if(type == ItemRenderType.INVENTORY)
 			return false;
 		return true;
@@ -175,21 +148,17 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		
 		return true;
 	}
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {		
 		if(type == ItemRenderType.INVENTORY)		
-			UtilsClient.drawEnergyBare(type,(float) (getEnergy(item)/getEnergyMax(item)));
+			UtilsClient.drawEnergyBare(type, (float) (getEnergy(item) / getEnergyMax(item)));
 		UtilsClient.drawIcon(type,rIcon);
 	}
 
 	@Override
-	public void electricalItemUpdate(ItemStack stack,
-			double time) {
-		
+	public void electricalItemUpdate(ItemStack stack, double time) {
 	}
-
 }
