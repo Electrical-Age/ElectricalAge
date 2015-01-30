@@ -1,33 +1,17 @@
 package mods.eln.sim.mna;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Set;
-
-import javax.naming.LinkLoopException;
-
 import mods.eln.misc.Profiler;
 import mods.eln.misc.Utils;
 import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.mna.component.Component;
-import mods.eln.sim.mna.component.InterSystem;
-import mods.eln.sim.mna.component.InterSystemAbstraction;
-import mods.eln.sim.mna.component.Line;
-import mods.eln.sim.mna.component.Resistor;
-import mods.eln.sim.mna.component.VoltageSource;
+import mods.eln.sim.mna.component.*;
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;
 import mods.eln.sim.mna.misc.ISubSystemProcessFlush;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.mna.state.VoltageState;
 
-public class RootSystem {
+import java.util.*;
 
-	public RootSystem(double dt,int interSystemOverSampling) {
-		this.dt = dt;
-		this.interSystemOverSampling = interSystemOverSampling;
-	}
+public class RootSystem {
 
 	double dt;
 	int interSystemOverSampling;
@@ -39,29 +23,36 @@ public class RootSystem {
 	public HashSet<Component> addComponents = new HashSet<Component>();
 	public HashSet<State> addStates = new HashSet<State>();
 
+	static final int maxSubSystemSize = 40;
 
+	ArrayList<ISubSystemProcessFlush> processF = new ArrayList<ISubSystemProcessFlush>();
 
+	ArrayList<IRootSystemPreStepProcess> processPre = new ArrayList<IRootSystemPreStepProcess>();
+
+	public RootSystem(double dt, int interSystemOverSampling) {
+		this.dt = dt;
+		this.interSystemOverSampling = interSystemOverSampling;
+	}
 
 	public void addComponent(Component c) {
 		addComponents.add(c);
 		c.onAddToRootSystem();
 		
-		for(State s : c.getConnectedStates()){
-			if(s == null) continue;
-			if(s.getSubSystem() != null){
+		for (State s : c.getConnectedStates()) {
+			if (s == null) continue;
+			if (s.getSubSystem() != null) {
 				breakSystems(s.getSubSystem());
 			}
 		}
-
-		
 	}
+
 	public void removeComponent(Component c) {
 		SubSystem system = c.getSubSystem();
-		/*if(c.isAbstracted()){
+		/*if (c.isAbstracted()) {
 			int i = 0;
 			i++;
 		}*/
-		if(system != null){
+		if (system != null) {
 			breakSystems(system);
 		}
 		
@@ -70,22 +61,23 @@ public class RootSystem {
 	}
 
 	public void addState(State s) {
-		for(Component c : (ArrayList<Component>)s.getConnectedComponentsNotAbstracted().clone()){
-			if(c.getSubSystem() != null)
+		for (Component c : (ArrayList<Component>)s.getConnectedComponentsNotAbstracted().clone()) {
+			if (c.getSubSystem() != null)
 				breakSystems(c.getSubSystem());
-		} 
+		}
 		addStates.add(s);
 	}
+
 	public void removeState(State s) {
 		SubSystem system = s.getSubSystem();
-		if(system != null){
+		if (system != null) {
 			breakSystems(system);
 		}
 		addStates.remove(s);
 	}
 
 	public void generate() {
-		if(addComponents.size() != 0 || addStates.size() != 0) {
+		if (addComponents.size() != 0 || addStates.size() != 0) {
 			//generateBreak();
 			//generateBreakLine();
 			Profiler p = new Profiler();
@@ -95,7 +87,8 @@ public class RootSystem {
 			generateInterSystems();
 
 			int stateCnt = 0, componentCnt = 0;
-			for(SubSystem s : systems) {
+
+			for (SubSystem s : systems) {
 				stateCnt += s.states.size();
 				componentCnt += s.component.size();
 			}
@@ -105,48 +98,47 @@ public class RootSystem {
 	}
 
 	private boolean isValidForLine(State s) {
-		if(s.canBeSimplifiedByLine() == false) return false;
+		if (!s.canBeSimplifiedByLine()) return false;
 		ArrayList<Component> sc = s.getConnectedComponentsNotAbstracted();
-		if(sc.size() != 2) return false;
-		for(Component c : sc) {
-			if(false == c instanceof Resistor) { return false; }
+		if (sc.size() != 2) return false;
+		for (Component c : sc) {
+			if (false == c instanceof Resistor) { return false; }
 		}
 
 		return true;
 	}
 	
-	private void generateBreakLine(){
-		
+	private void generateBreakLine() {
 	}
 
 	private void generateLine() {
 		HashSet<State> stateScope = new HashSet<State>();
 		//HashSet<Resistor> resistorScope = new HashSet<Resistor>();
-		for(State s : addStates) {
-			if(isValidForLine(s)) {
+		for (State s : addStates) {
+			if (isValidForLine(s)) {
 				stateScope.add(s);
 			}
 		}
 
-		while (stateScope.isEmpty() == false) {
+		while (!stateScope.isEmpty()) {
 			State sRoot = stateScope.iterator().next();
 
 			State sPtr = sRoot;
 			Resistor rPtr = (Resistor) sPtr.getConnectedComponentsNotAbstracted().get(0);
 			while (true) {
-				for(Component c : sPtr.getConnectedComponentsNotAbstracted()) {
-					if(c != rPtr) {
+				for (Component c : sPtr.getConnectedComponentsNotAbstracted()) {
+					if (c != rPtr) {
 						rPtr = (Resistor) c;
 						break;
 					}
 				}
 				State sNext = null;
 
-				if(sPtr != rPtr.aPin)
+				if (sPtr != rPtr.aPin)
 					sNext = rPtr.aPin;
-				else if(sPtr != rPtr.bPin) sNext = rPtr.bPin;
+				else if (sPtr != rPtr.bPin) sNext = rPtr.bPin;
 
-				if(sNext == null || sNext == sRoot || stateScope.contains(sNext) == false) break;
+				if (sNext == null || sNext == sRoot || stateScope.contains(sNext) == false) break;
 
 				sPtr = sNext;
 			}
@@ -159,8 +151,8 @@ public class RootSystem {
 			while (true) {
 				lineStates.add(sPtr);
 				stateScope.remove(sPtr);
-				for(Component c : sPtr.getConnectedComponentsNotAbstracted()) {
-					if(c != rPtr) {
+				for (Component c : sPtr.getConnectedComponentsNotAbstracted()) {
+					if (c != rPtr) {
 						rPtr = (Resistor) c;
 						break;
 					}
@@ -170,16 +162,16 @@ public class RootSystem {
 
 				State sNext = null;
 
-				if(sPtr != rPtr.aPin)
+				if (sPtr != rPtr.aPin)
 					sNext = rPtr.aPin;
-				else if(sPtr != rPtr.bPin) sNext = rPtr.bPin;
+				else if (sPtr != rPtr.bPin) sNext = rPtr.bPin;
 
-				if(sNext == null || stateScope.contains(sNext) == false) break;
+				if (sNext == null || stateScope.contains(sNext) == false) break;
 
 				sPtr = sNext;
 			}
 			
-			if(lineResistors.getFirst() == lineResistors.getLast()) {
+			if (lineResistors.getFirst() == lineResistors.getLast()) {
 				lineResistors.pop();
 				lineStates.pop();
 			}
@@ -190,13 +182,13 @@ public class RootSystem {
 	}
 
 /*	private void generateBreak() {
-		for(Component c : (HashSet<Component>) addComponents.clone()) {
-			for(State s : c.getConnectedStates()) {
-				if(s == null) continue;
-				if(s.getSubSystem() != null) {
+		for (Component c : (HashSet<Component>) addComponents.clone()) {
+			for (State s : c.getConnectedStates()) {
+				if (s == null) continue;
+				if (s.getSubSystem() != null) {
 					breakSystem(s.getSubSystem());
 				}
-				if(s.isAbstracted()){
+				if (s.isAbstracted()) {
 					s.abstractedBy.breakAbstraction(this);
 				}
 			}
@@ -205,19 +197,19 @@ public class RootSystem {
 
 	private void generateSystems() {
 		LinkedList<State> firstState = new LinkedList<State>();
-		for(State s : addStates){
-			if(s.mustBeFarFromInterSystem()){
+		for (State s : addStates) {
+			if (s.mustBeFarFromInterSystem()) {
 				firstState.add(s);
 			}
 		}
 		
-		for(State s : firstState){
-			if(s.getSubSystem() == null){
+		for (State s : firstState) {
+			if (s.getSubSystem() == null) {
 				buildSubSystem(s);
 			}
 		}
 		
-		while (addStates.isEmpty() == false) {
+		while (!addStates.isEmpty()) {
 			State root = addStates.iterator().next();
 			buildSubSystem(root);
 		}
@@ -227,11 +219,11 @@ public class RootSystem {
 		Iterator<Component> ic = addComponents.iterator();
 		while (ic.hasNext()) {
 			Component c = ic.next();
-			if(!c.canBeReplacedByInterSystem()) {
+			if (!c.canBeReplacedByInterSystem()) {
 				System.out.println("ELN generateInterSystems ERROR");
 			}
 
-			new InterSystemAbstraction(this,(Resistor) c);
+			new InterSystemAbstraction(this, (Resistor) c);
 			
 			ic.remove();
 		}
@@ -242,34 +234,34 @@ public class RootSystem {
 		profiler.add("Generate");
 		generate();
 		profiler.add("interSystem");
-		for(int idx = 0;idx < interSystemOverSampling;idx++){
-			for(IRootSystemPreStepProcess p : processPre){
+		for (int idx = 0; idx < interSystemOverSampling; idx++) {
+			for (IRootSystemPreStepProcess p : processPre) {
 				p.rootSystemPreStepProcess();
 			}
 		}
 		
-	/*	for(SubSystem s : systems) {
-			for(State state : s.states){
+	/*	for (SubSystem s : systems) {
+			for (State state : s.states) {
 				Utils.print(state.state + " ");
 			}
 		}
 		Utils.println("");*/
 		
 		profiler.add("stepCalc");
-		for(SubSystem s : systems) {
+		for (SubSystem s : systems) {
 			s.stepCalc();
 		}
 		profiler.add("stepFlush");
-		for(SubSystem s : systems) {
+		for (SubSystem s : systems) {
 			s.stepFlush();
 		}
 		profiler.add("simProcessFlush");
-		for(ISubSystemProcessFlush p : processF) {
+		for (ISubSystemProcessFlush p : processF) {
 			p.simProcessFlush();
 		}
 		
-	/*	for(SubSystem s : systems) {
-			for(State state : s.states){
+	/*	for (SubSystem s : systems) {
+			for (State state : s.states) {
 				Utils.print(state.state + " ");
 			}
 		}
@@ -280,7 +272,6 @@ public class RootSystem {
 	}
 
 	private void buildSubSystem(State root) {
-
 		Set<Component> componentSet = new HashSet<Component>();
 		Set<State> stateSet = new HashSet<State>();
 
@@ -298,97 +289,88 @@ public class RootSystem {
 		systems.add(subSystem);
 	}
 
-	static final int maxSubSystemSize = 40;
-
 	private void buildSubSystem(LinkedList<State> roots, Set<Component> componentSet, Set<State> stateSet) {
 		boolean privateSystem = roots.getFirst().isPrivateSubSystem();
 		
-		while (roots.isEmpty() == false) {
+		while (!roots.isEmpty()) {
 			State sExplored = roots.pollFirst();
 			stateSet.add(sExplored);
-			
-			
-			
-			for(Component c : sExplored.getConnectedComponentsNotAbstracted()) {
-				if(privateSystem == false && roots.size() + stateSet.size() > maxSubSystemSize && c.canBeReplacedByInterSystem()){
+
+			for (Component c : sExplored.getConnectedComponentsNotAbstracted()) {
+				if (privateSystem == false && roots.size() + stateSet.size() > maxSubSystemSize && c.canBeReplacedByInterSystem()) {
 					continue;
 				}
-				if(componentSet.contains(c)) continue;
+				if (componentSet.contains(c)) continue;
 				boolean noGo = false;
-				for(State sNext : c.getConnectedStates()) {
-					if(sNext == null) continue;
-					if(sNext.getSubSystem() != null) {
+				for (State sNext : c.getConnectedStates()) {
+					if (sNext == null) continue;
+					if (sNext.getSubSystem() != null) {
 						noGo = true;
 						break;
 					}
-					if(sNext.isPrivateSubSystem() != privateSystem){
+					if (sNext.isPrivateSubSystem() != privateSystem) {
 						noGo = true;
 						break;						
 					}
 				}
 				
-				if(noGo) continue;
+				if (noGo) continue;
 				componentSet.add(c);
-				for(State sNext : c.getConnectedStates()) {
-					if(sNext == null) continue;
-					if(stateSet.contains(sNext)) continue;
+				for (State sNext : c.getConnectedStates()) {
+					if (sNext == null) continue;
+					if (stateSet.contains(sNext)) continue;
 					roots.addLast(sNext);
 				}
-
 			}
-
 			//roots = rootsNext;
 		}
 	}/*
 		
-		private void buildSubSystem(State root,boolean withInterSystem, Set<Component> componentSet,Set<State> stateSet) {
-		if(stateSet.size() > maxSubSystemSize) {
+		private void buildSubSystem(State root,boolean withInterSystem, Set<Component> componentSet, Set<State> stateSet) {
+		if (stateSet.size() > maxSubSystemSize) {
 			return;
 		}
-		if(stateSet.contains(root) || findSubSystemWith(root) != null) return;
+		if (stateSet.contains(root) || findSubSystemWith(root) != null) return;
 		stateSet.add(root);
-		for(Component c : root.getConnectedComponents()){
-			if(withInterSystem == false && c.canBeReplacedByInterSystem()) continue;
-			if(componentSet.contains(c)) continue;
+		for (Component c : root.getConnectedComponents()) {
+			if (withInterSystem == false && c.canBeReplacedByInterSystem()) continue;
+			if (componentSet.contains(c)) continue;
 			boolean noGo = false;
-			for(State s : c.getConnectedStates()){
-				if(s == null) continue;
-				if(s.getSubSystem() != null){
+			for (State s : c.getConnectedStates()) {
+				if (s == null) continue;
+				if (s.getSubSystem() != null) {
 					noGo = true;
 					break;
 				}
 			}
-			if(noGo) continue;
+			if (noGo) continue;
 			componentSet.add(c);
-			for(State s : c.getConnectedStates()){
-				if(s == null) continue;
-				buildSubSystem(s,withInterSystem, componentSet, stateSet);
+			for (State s : c.getConnectedStates()) {
+				if (s == null) continue;
+				buildSubSystem(s, withInterSystem, componentSet, stateSet);
 			}
-			
 		}
 		}
 		*/
 
 	private SubSystem findSubSystemWith(State state) {
-		for(SubSystem s : systems) {
-			if(s.containe(state)) return s;
+		for (SubSystem s : systems) {
+			if (s.containe(state)) return s;
 		}
 
 		return null;
 	}
-	
-	
 
 	public void breakSystems(SubSystem sub) {
-		if(sub.breakSystem()){
-			for(SubSystem s : sub.interSystemConnectivity){
+		if (sub.breakSystem()) {
+			for (SubSystem s : sub.interSystemConnectivity) {
 				breakSystems(s);
 			}
-		}	
+		}
 	}
 
 	public static void main(String[] args) {
-		RootSystem s = new RootSystem(0.1,1);
+		RootSystem s = new RootSystem(0.1, 1);
 
 		VoltageState n1, n2;
 		VoltageSource u1;
@@ -418,26 +400,22 @@ public class RootSystem {
 
 		s.addComponent((i01 = new InterSystem()).setR(10).connectTo(n2, n12));
 
-		for(int i = 0; i < 50; i++) {
+		for (int i = 0; i < 50; i++) {
 			s.step();
 		}
 
 		s.addComponent((r13 = new Resistor()).setR(30).connectTo(n12, null));
 
-		for(int i = 0; i < 50; i++) {
+		for (int i = 0; i < 50; i++) {
 			s.step();
 		}
 
 		s.step();
-
 	}
 
 	public int getSubSystemCount() {
-		
 		return systems.size();
 	}
-
-	ArrayList<ISubSystemProcessFlush> processF = new ArrayList<ISubSystemProcessFlush>();
 
 	public void addProcess(ISubSystemProcessFlush p) {
 		processF.add(p);
@@ -447,9 +425,6 @@ public class RootSystem {
 		processF.remove(p);
 	}
 
-
-	ArrayList<IRootSystemPreStepProcess> processPre = new ArrayList<IRootSystemPreStepProcess>();
-
 	public void addProcess(IRootSystemPreStepProcess p) {
 		processPre.add(p);
 	}
@@ -457,11 +432,11 @@ public class RootSystem {
 	public void removeProcess(IRootSystemPreStepProcess p) {
 		processPre.remove(p);
 	}
+
 	public boolean isRegistred(ElectricalLoad load) {
-		// TODO Auto-generated method stub
 		return load.getSubSystem() != null || addStates.contains(load);
 	}
 }
 
-//Ttodo garbadge collector
-//Ghost suprresion
+//TODO garbadge collector
+//TODOGhost suprresion

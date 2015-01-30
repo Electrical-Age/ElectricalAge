@@ -1,46 +1,18 @@
 package mods.eln.sim;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Queue;
-
-import javax.swing.text.html.parser.Entity;
-
-import com.google.common.primitives.Bytes;
-
-import mods.eln.Eln;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeBlockEntity;
 import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.process.destruct.IDestructable;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
-import net.minecraft.client.multiplayer.PlayerControllerMP;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
-import net.minecraft.profiler.Profiler;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerManager;
-import net.minecraft.world.WorldServer;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Type;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
-import cpw.mods.fml.relauncher.Side;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Simulator /* ,IPacketHandler */{
 
@@ -51,15 +23,10 @@ public class Simulator /* ,IPacketHandler */{
 
 	private ArrayList<IProcess> electricalProcessList;
 
-	private ArrayList<IProcess> thermalFastProcessList,thermalSlowProcessList;
+	private ArrayList<IProcess> thermalFastProcessList, thermalSlowProcessList;
 	private ArrayList<ThermalConnection> thermalFastConnectionList, thermalSlowConnectionList;
 	private ArrayList<ThermalLoad> thermalFastLoadList, thermalSlowLoadList;
 	private HashSet<IDestructable> destructableSet;
-
-	public ArrayList<IProcess> getElectricalProcessList()
-	{
-		return electricalProcessList;
-	}
 
 	boolean run;
 
@@ -67,15 +34,28 @@ public class Simulator /* ,IPacketHandler */{
 	int electricalInterSystemOverSampling;
 	int nodeCount = 0;
 
-	public double getMinimalThermalC(double Rs, double Rp)
-	{
+	int simplifyCMin = 0;
+	int simplifyCMax = 100;
+
+	double avgTickTime = 0;
+	long electricalNsStack = 0, thermalFastNsStack = 0, slowNsStack = 0,thermalSlowNsStack = 0;
+
+	double timeout = 0;
+	double electricalTimeout = 0;
+	double thermalTimeout = 0;
+
+	private int printTimeCounter = 0;
+
+	public ArrayList<IProcess> getElectricalProcessList() {
+		return electricalProcessList;
+	}
+
+	public double getMinimalThermalC(double Rs, double Rp) {
 		return thermalPeriod * 3 / ((1 / (1 / Rp + 1 / Rs)));
 	}
 
-	public boolean checkThermalLoad(double thermalRs, double thermalRp, double thermalC)
-	{
-		if (thermalC < getMinimalThermalC(thermalRs, thermalRp))
-		{
+	public boolean checkThermalLoad(double thermalRs, double thermalRp, double thermalC) {
+		if (thermalC < getMinimalThermalC(thermalRs, thermalRp)) {
 			Utils.println("checkThermalLoad ERROR");
 			while (true)
 				;
@@ -84,8 +64,7 @@ public class Simulator /* ,IPacketHandler */{
 		return true;
 	}
 
-	public Simulator(double callPeriod, double electricalPeriod, int electricalInterSystemOverSampling, double thermalPeriod)
-	{
+	public Simulator(double callPeriod, double electricalPeriod, int electricalInterSystemOverSampling, double thermalPeriod) {
 		this.callPeriod = callPeriod;
 		this.electricalPeriod = electricalPeriod;
 		this.electricalInterSystemOverSampling = electricalInterSystemOverSampling;
@@ -111,11 +90,9 @@ public class Simulator /* ,IPacketHandler */{
 		destructableSet = new HashSet<IDestructable>();
 
 		run = false;
-
 	}
 
-	public void init()
-	{
+	public void init() {
 		nodeCount = 0;
 
 		mna = new RootSystem(electricalPeriod, electricalInterSystemOverSampling);
@@ -138,8 +115,7 @@ public class Simulator /* ,IPacketHandler */{
 		run = true;
 	}
 
-	public void stop()
-	{
+	public void stop() {
 		nodeCount = 0;
 
 		mna = null;
@@ -162,8 +138,7 @@ public class Simulator /* ,IPacketHandler */{
 		run = false;
 	}
 
-	public void addElectricalComponent(Component c)
-	{
+	public void addElectricalComponent(Component c) {
 		if (c != null) {
 			mna.addComponent(c);
 			// electricalConnectionList.add(connection);
@@ -172,8 +147,7 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void removeElectricalComponent(Component c)
-	{
+	public void removeElectricalComponent(Component c) {
 		if (c != null) {
 			mna.removeComponent(c);
 
@@ -181,11 +155,9 @@ public class Simulator /* ,IPacketHandler */{
 			// connection.L1.electricalConnections.remove(connection);
 			// connection.L2.electricalConnections.remove(connection);
 		}
-
 	}
 
-	public void addThermalConnection(ThermalConnection connection)
-	{
+	public void addThermalConnection(ThermalConnection connection) {
 		if (connection != null) {
 			if (connection.L1.isSlow() == connection.L2.isSlow()) {
 				if (connection.L1.isSlow())
@@ -199,31 +171,26 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void removeThermalConnection(ThermalConnection connection)
-	{
+	public void removeThermalConnection(ThermalConnection connection) {
 		if (connection != null) {
 			thermalSlowConnectionList.remove(connection);
 			thermalFastConnectionList.remove(connection);
 		}
 	}
 
-	public void addElectricalLoad(State load)
-	{
+	public void addElectricalLoad(State load) {
 		if (load != null) {
 			mna.addState(load);
 		}
-
 	}
 
-	public void removeElectricalLoad(State load)
-	{
+	public void removeElectricalLoad(State load) {
 		if (load != null) {
 			mna.removeState(load);
 		}
 	}
 
-	public void addThermalLoad(ThermalLoad load)
-	{
+	public void addThermalLoad(ThermalLoad load) {
 		if (load != null) {
 			if (load.isSlow())
 				thermalSlowLoadList.add(load);
@@ -232,65 +199,54 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void removeThermalLoad(ThermalLoad load)
-	{
+	public void removeThermalLoad(ThermalLoad load) {
 		if (load != null) {
 			thermalSlowLoadList.remove(load);
 			thermalFastLoadList.remove(load);
 		}
 	}
 
-	public void addSlowProcess(IProcess process)
-	{
+	public void addSlowProcess(IProcess process) {
 		if (process != null) slowProcessList.add(process);
 	}
 
-	public void removeSlowProcess(IProcess process)
-	{
+	public void removeSlowProcess(IProcess process) {
 		if (process != null) slowProcessList.remove(process);
 	}
 
-	public void addSlowPreProcess(IProcess process)
-	{
+	public void addSlowPreProcess(IProcess process) {
 		if (process != null) slowPreProcessList.add(process);
 	}
 
-	public void removeSlowPreProcess(IProcess process)
-	{
+	public void removeSlowPreProcess(IProcess process) {
 		if (process != null) slowPreProcessList.remove(process);
 	}
 
-	public void addElectricalProcess(IProcess process)
-	{
+	public void addElectricalProcess(IProcess process) {
 		if (process != null) electricalProcessList.add(process);
 	}
 
-	public void removeElectricalProcess(IProcess process)
-	{
+	public void removeElectricalProcess(IProcess process) {
 		if (process != null) electricalProcessList.remove(process);
 	}
 
-	public void addThermalFastProcess(IProcess process)
-	{
+	public void addThermalFastProcess(IProcess process) {
 		if (process != null) thermalFastProcessList.add(process);
 	}
 
-	public void removeThermalFastProcess(IProcess process)
-	{
+	public void removeThermalFastProcess(IProcess process) {
 		if (process != null) thermalFastProcessList.remove(process);
 	}
-	public void addThermalSlowProcess(IProcess process)
-	{
+
+	public void addThermalSlowProcess(IProcess process) {
 		if (process != null) thermalSlowProcessList.add(process);
 	}
 
-	public void removeThermalSlowProcess(IProcess process)
-	{
+	public void removeThermalSlowProcess(IProcess process) {
 		if (process != null) thermalSlowProcessList.remove(process);
 	}
 
-	public void addAllElectricalConnection(ArrayList<ElectricalConnection> connection)
-	{
+	public void addAllElectricalConnection(ArrayList<ElectricalConnection> connection) {
 		if (connection != null) {
 			for (ElectricalConnection c : connection) {
 				addElectricalComponent(c);
@@ -298,8 +254,7 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void removeAllElectricalConnection(ArrayList<ElectricalConnection> connection)
-	{
+	public void removeAllElectricalConnection(ArrayList<ElectricalConnection> connection) {
 		if (connection != null) {
 			for (ElectricalConnection c : connection) {
 				removeElectricalComponent(c);
@@ -307,8 +262,7 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void addAllElectricalComponent(ArrayList<Component> cList)
-	{
+	public void addAllElectricalComponent(ArrayList<Component> cList) {
 		if (cList != null) {
 			for (Component c : cList) {
 				addElectricalComponent(c);
@@ -316,8 +270,7 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void removeAllElectricalComponent(ArrayList<Component> cList)
-	{
+	public void removeAllElectricalComponent(ArrayList<Component> cList) {
 		if (cList != null) {
 			for (Component c : cList) {
 				removeElectricalComponent(c);
@@ -325,26 +278,23 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void addAllThermalConnection(ArrayList<ThermalConnection> connection)
-	{
+	public void addAllThermalConnection(ArrayList<ThermalConnection> connection) {
 		if (connection != null) {
-			for(ThermalConnection c : connection){
+			for (ThermalConnection c : connection) {
 				addThermalConnection(c);
 			}
 		}
 	}
 
-	public void removeAllThermalConnection(ArrayList<ThermalConnection> connection)
-	{
+	public void removeAllThermalConnection(ArrayList<ThermalConnection> connection) {
 		if (connection != null) {
-			for(ThermalConnection c : connection){
+			for (ThermalConnection c : connection) {
 				removeThermalConnection(c);
 			}
 		}
 	}
 
-	public void addAllElectricalLoad(ArrayList<ElectricalLoad> load)
-	{
+	public void addAllElectricalLoad(ArrayList<ElectricalLoad> load) {
 		if (load != null) {
 			for (ElectricalLoad l : load) {
 				addElectricalLoad(l);
@@ -352,8 +302,7 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void removeAllElectricalLoad(ArrayList<ElectricalLoad> load)
-	{
+	public void removeAllElectricalLoad(ArrayList<ElectricalLoad> load) {
 		if (load != null) {
 			for (ElectricalLoad l : load) {
 				removeElectricalLoad(l);
@@ -361,74 +310,55 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void addAllThermalLoad(ArrayList<ThermalLoad> load)
-	{
+	public void addAllThermalLoad(ArrayList<ThermalLoad> load) {
 		if (load != null) {
-			for(ThermalLoad c : load){
+			for (ThermalLoad c : load) {
 				addThermalLoad(c);
 			}
 		}
 	}
 
-	public void removeAllThermalLoad(ArrayList<ThermalLoad> load)
-	{
+	public void removeAllThermalLoad(ArrayList<ThermalLoad> load) {
 		if (load != null) {
-			for(ThermalLoad c : load){
+			for (ThermalLoad c : load) {
 				removeThermalLoad(c);
 			}
 		}
 	}
 
-	public void addAllSlowProcess(ArrayList<IProcess> process)
-	{
+	public void addAllSlowProcess(ArrayList<IProcess> process) {
 		if (process != null) slowProcessList.addAll(process);
 	}
 
-	public void removeAllSlowProcess(ArrayList<IProcess> process)
-	{
+	public void removeAllSlowProcess(ArrayList<IProcess> process) {
 		if (process != null) slowProcessList.removeAll(process);
 	}
 
-	public void addAllElectricalProcess(ArrayList<IProcess> process)
-	{
+	public void addAllElectricalProcess(ArrayList<IProcess> process) {
 		if (process != null) electricalProcessList.addAll(process);
 	}
 
-	public void removeAllElectricalProcess(ArrayList<IProcess> process)
-	{
+	public void removeAllElectricalProcess(ArrayList<IProcess> process) {
 		if (process != null) electricalProcessList.removeAll(process);
 	}
 
-	public void addAllThermalFastProcess(ArrayList<IProcess> process)
-	{
+	public void addAllThermalFastProcess(ArrayList<IProcess> process) {
 		if (process != null) thermalFastProcessList.addAll(process);
 	}
 
-	public void removeAllThermalFastProcess(ArrayList<IProcess> process)
-	{
+	public void removeAllThermalFastProcess(ArrayList<IProcess> process) {
 		if (process != null) thermalFastProcessList.removeAll(process);
 	}
-	public void addAllThermalSlowProcess(ArrayList<IProcess> process)
-	{
+
+	public void addAllThermalSlowProcess(ArrayList<IProcess> process) {
 		if (process != null) thermalSlowProcessList.addAll(process);
 	}
 
-	public void removeAllThermalSlowProcess(ArrayList<IProcess> process)
-	{
+	public void removeAllThermalSlowProcess(ArrayList<IProcess> process) {
 		if (process != null) thermalSlowProcessList.removeAll(process);
 	}
 
-	int simplifyCMin = 0;
-	int simplifyCMax = 100;
-
 	// private ArrayList<Double> conectionSerialConductance = new ArrayList<Double>();
-
-	double avgTickTime = 0;
-	long electricalNsStack = 0, thermalFastNsStack = 0, slowNsStack = 0,thermalSlowNsStack = 0;
-
-	double timeout = 0;
-	double electricalTimeout = 0;
-	double thermalTimeout = 0;
 
 	@SubscribeEvent
 	public void tick(ServerTickEvent event) {
@@ -446,7 +376,6 @@ public class Simulator /* ,IPacketHandler */{
 		timeout += callPeriod;
 
 		while (timeout > 0) {
-
 			if (timeout < electricalTimeout && timeout < thermalTimeout) {
 				thermalTimeout -= timeout;
 				electricalTimeout -= timeout;
@@ -478,14 +407,12 @@ public class Simulator /* ,IPacketHandler */{
 				thermalStep(thermalPeriod, thermalFastConnectionList, thermalFastProcessList, thermalFastLoadList);
 
 				thermalFastNsStack += System.nanoTime() - stackStart;
-
 			}
 			thermalTimeout -= dt;
 			electricalTimeout -= dt;
 			timeout -= dt;
 		}
 
-		
 		{
 			stackStart = System.nanoTime();
 			thermalStep(0.05, thermalSlowConnectionList, thermalSlowProcessList, thermalSlowLoadList);
@@ -506,27 +433,21 @@ public class Simulator /* ,IPacketHandler */{
 
 		slowNsStack += System.nanoTime() - stackStart;
 		avgTickTime += 1.0 / 20 * ((int) (System.nanoTime() - startTime) / 1000);
-
 		
 		/*stackStart = System.nanoTime();
-		for(int idx = 0;idx < 100;idx++){
+		for (int idx = 0; idx < 100; idx++) {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
 			DataOutputStream stream = new DataOutputStream(bos);
 
 			try {
-				
-				for(int idx2 = 0;idx2 < 10;idx2++)
+				for (int idx2 = 0; idx2 < 10; idx2++)
 					stream.writeInt(idx2+0xAAAAAAAA);
-
 			} catch (IOException e) {
-
 				e.printStackTrace();
 			}
 			MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
-			for (Object obj : server.getConfigurationManager().playerEntityList)
-			{
-
+			for (Object obj : server.getConfigurationManager().playerEntityList) {
 				EntityPlayerMP player = (EntityPlayerMP) obj;
 				WorldServer worldServer = (WorldServer) MinecraftServer.getServer().worldServerForDimension(player.dimension);
 				PlayerManager playerManager = worldServer.getPlayerManager();
@@ -536,12 +457,9 @@ public class Simulator /* ,IPacketHandler */{
 			//Eln.instance.eventChannel.sendToAll(new FMLProxyPacket(packet));
 		}
 		
-		Utils.println((System.nanoTime() - stackStart)/1000);*/
-		
-		
-		
-		if (++printTimeCounter == 20) {
+		Utils.println((System.nanoTime() - stackStart) / 1000);*/
 
+		if (++printTimeCounter == 20) {
 			printTimeCounter = 0;
 			electricalNsStack /= 20;
 			thermalFastNsStack /= 20;
@@ -560,6 +478,7 @@ public class Simulator /* ,IPacketHandler */{
 					+ "    " + thermalSlowProcessList.size() + " TSP"
 					+ "    " + slowProcessList.size() + " SP"
 					);
+
 			avgTickTime = 0;
 
 			electricalNsStack = 0;
@@ -567,21 +486,14 @@ public class Simulator /* ,IPacketHandler */{
 			slowNsStack = 0;
 			thermalSlowNsStack = 0;
 		}
-
 	}
-
-	private int printTimeCounter = 0;
 
 	public boolean isRegistred(ElectricalLoad load) {
-		// TODO Auto-generated method stub
 		return mna.isRegistred(load);
 	}
-	
-	
-	
-	void thermalStep(double dt,ArrayList<ThermalConnection> connectionList,ArrayList<IProcess> processList,ArrayList<ThermalLoad> loadList){
-		for (ThermalConnection c : connectionList)
-		{
+
+	void thermalStep(double dt, ArrayList<ThermalConnection> connectionList, ArrayList<IProcess> processList, ArrayList<ThermalLoad> loadList) {
+		for (ThermalConnection c : connectionList) {
 			double i;
 			i = (c.L2.Tc - c.L1.Tc) / ((c.L2.Rs + c.L1.Rs));
 			c.L1.PcTemp += i;
@@ -590,14 +502,12 @@ public class Simulator /* ,IPacketHandler */{
 			c.L1.PrsTemp += Math.abs(i);
 			c.L2.PrsTemp += Math.abs(i);
 		}
-		if(processList != null){
-			for (IProcess process : processList)
-			{
+		if (processList != null) {
+			for (IProcess process : processList) {
 				process.process(dt);
 			}
 		}
-		for (ThermalLoad load : loadList)
-		{
+		for (ThermalLoad load : loadList) {
 			load.PcTemp -= load.Tc / load.Rp;
 
 			load.Tc += load.PcTemp * dt / load.C;
@@ -610,5 +520,4 @@ public class Simulator /* ,IPacketHandler */{
 			load.PspTemp = 0;
 		}
 	}
-
 }

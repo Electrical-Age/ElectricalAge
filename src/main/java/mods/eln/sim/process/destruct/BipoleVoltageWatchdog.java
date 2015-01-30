@@ -1,9 +1,9 @@
 package mods.eln.sim.process.destruct;
 
 import mods.eln.sim.mna.component.Bipole;
-import mods.eln.sim.mna.component.Resistor;
 
 public class BipoleVoltageWatchdog extends ValueWatchdog {
+
 	Bipole bipole;
 
 	public BipoleVoltageWatchdog set(Bipole bipole) {
@@ -12,8 +12,7 @@ public class BipoleVoltageWatchdog extends ValueWatchdog {
 	}
 
 	public BipoleVoltageWatchdog setUNominal(double UNominal) {
-		
-		this.max = UNominal*1.3;
+		this.max = UNominal * 1.3;
 		this.min = -max;
 		this.timeoutReset = UNominal * 0.10 * 5;
 

@@ -6,17 +6,16 @@ import mods.eln.sim.mna.component.Resistor;
 
 public class ResistorHeatThermalLoad implements IProcess {
 
+	Resistor r;
+	ThermalLoad load;
+
 	public ResistorHeatThermalLoad(Resistor r, ThermalLoad load) {
 		this.r = r;
 		this.load = load;
 	}
-	
-	Resistor r;
-	ThermalLoad load;
-	
+
 	@Override
 	public void process(double time) {
 		load.movePowerTo(r.getP());
 	}
-
 }

@@ -1,8 +1,5 @@
 package mods.eln.sim.mna.process;
 
-import net.minecraft.nbt.NBTTagCompound;
-import mods.eln.misc.INBTTReady;
-import mods.eln.sim.mna.component.DelayInterSystem2;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;
 import mods.eln.sim.mna.state.State;
@@ -12,9 +9,8 @@ public class TransformerInterSystemProcess implements IRootSystemPreStepProcess 
 	VoltageSource aVoltgeSource, bVoltgeSource;
 
 	double ratio = 1;
-	
 
-	public TransformerInterSystemProcess(State aState, State bState,VoltageSource aVoltgeSource,VoltageSource bVoltgeSource) {
+	public TransformerInterSystemProcess(State aState, State bState, VoltageSource aVoltgeSource, VoltageSource bVoltgeSource) {
 		this.aState = aState;
 		this.bState = bState;
 		this.aVoltgeSource = aVoltgeSource;
@@ -23,20 +19,19 @@ public class TransformerInterSystemProcess implements IRootSystemPreStepProcess 
 
 	@Override
 	public void rootSystemPreStepProcess() {
-		Th a = getTh(aState,aVoltgeSource);
-		Th b = getTh(bState,bVoltgeSource);
+		Th a = getTh(aState, aVoltgeSource);
+		Th b = getTh(bState, bVoltgeSource);
 		
-		double aU = (a.U*b.R+ratio*b.U*a.R) / (b.R + ratio*ratio*a.R);
-		if(Double.isNaN(aU)) {
+		double aU = (a.U * b.R + ratio * b.U * a.R) / (b.R + ratio * ratio * a.R);
+		if (Double.isNaN(aU)) {
 			aU = 0;
 		}
 		
 		aVoltgeSource.setU(aU);
-		bVoltgeSource.setU(aU*ratio);
+		bVoltgeSource.setU(aU * ratio);
 	}
-
 	
-	static class Th{
+	static class Th {
 		double R,U;		
 	}
 	
@@ -54,8 +49,8 @@ public class TransformerInterSystemProcess implements IRootSystemPreStepProcess 
 
 		double Rth = (aU - bU) / (bI - aI);
 		double Uth;
-		//if(Double.isInfinite(d.Rth)) d.Rth = Double.MAX_VALUE;
-		if(Rth > 10000000000000000000.0 || Rth < 0) {
+		//if (Double.isInfinite(d.Rth)) d.Rth = Double.MAX_VALUE;
+		if (Rth > 10000000000000000000.0 || Rth < 0) {
 			Uth = 0;
 			Rth = 10000000000000000000.0;
 		} else {
@@ -71,8 +66,4 @@ public class TransformerInterSystemProcess implements IRootSystemPreStepProcess 
 	public void setRatio(double ratio) {
 		this.ratio = ratio;
 	}
-	
-	
-
-
 }

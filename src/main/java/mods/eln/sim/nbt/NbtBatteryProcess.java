@@ -3,7 +3,6 @@ package mods.eln.sim.nbt;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.BatteryProcess;
-import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.state.VoltageState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -17,10 +16,9 @@ public class NbtBatteryProcess extends BatteryProcess implements INBTTReady {
 	@Override
 	public void readFromNBT(NBTTagCompound nbttagcompound, String str) {
 		Q = nbttagcompound.getDouble(str + "NBP" + "Q");
-		if(Double.isNaN(Q)) Q = 0;
+		if (Double.isNaN(Q)) Q = 0;
 		if (Double.isNaN(life)) life = 1;
 		life = nbttagcompound.getDouble(str + "NBP" + "life");
-
 	}
 
 	@Override
@@ -32,5 +30,4 @@ public class NbtBatteryProcess extends BatteryProcess implements INBTTReady {
 	public void setIMax(double iMax) {
 		this.IMax = iMax;
 	}
-
 }

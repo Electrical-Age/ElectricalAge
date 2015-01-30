@@ -2,7 +2,6 @@ package mods.eln.sim.process.destruct;
 
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
-import mods.eln.sim.mna.state.VoltageState;
 
 public abstract class ValueWatchdog implements IProcess {
 
@@ -21,44 +20,40 @@ public abstract class ValueWatchdog implements IProcess {
 	
 	@Override
 	public void process(double time) {
-		if(boot) {
+		if (boot) {
 			boot = false;
 			timeout = timeoutReset;
 		}
 		double value = getValue();
 		double overflow = Math.max(value - max, min - value);
-		if(overflow > 0){
-			if(joker){
+		if (overflow > 0) {
+			if (joker) {
 				joker = false;
 				overflow = 0;
 			}
-		}else{
+		} else {
 			joker = true;
 		}
 		
 		timeout -= time * overflow * rand;
-		if(timeout > timeoutReset) {
+		if (timeout > timeoutReset) {
 			timeout = timeoutReset;
 		}
-		if(timeout < 0) {
+		if (timeout < 0) {
 			destructable.destructImpl();
 		}
-
 	}
 	
-	public ValueWatchdog set(IDestructable d){
+	public ValueWatchdog set(IDestructable d) {
 		this.destructable = d;
 		return this;
 	}
 
 	abstract double getValue();
-	
-	
+
 	public void disable() {
 		this.max = 100000000;
 		this.min = -max;
 		this.timeoutReset = 10000000;
 	}
-	
-
 }
