@@ -2,7 +2,6 @@ package mods.eln.server;
 
 import mods.eln.Eln;
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -13,18 +12,18 @@ public class ElnWorldStorage extends WorldSavedData {
 
 	private int dim;
 
+    final static String key = "eln.worldStorage";
+
 	public ElnWorldStorage(String str) {
 		super(str);
-
 	}
-
-	final static String key = "eln.worldStorage";
 
 	public static ElnWorldStorage forWorld(World world) {
 		// Retrieves the MyWorldData instance for the given world, creating it if necessary
 		MapStorage storage = world.perWorldStorage;
 		int dim = world.provider.dimensionId;
 		ElnWorldStorage result = (ElnWorldStorage) storage.loadData(ElnWorldStorage.class, key + dim);
+
 		if (result == null) {
 			result = new ElnWorldStorage(key + dim);
 			result.dim = dim;
@@ -44,7 +43,6 @@ public class ElnWorldStorage extends WorldSavedData {
 			Eln.ghostManager.loadFromNBT(nbt.getCompoundTag("ghost"));
 		} catch (Exception e) {
 		}
-
 	}
 
 	@Override

@@ -10,6 +10,17 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 	private DelayInterSystem other;
 	public State pin;
 
+    double impedance, conductance;
+
+    public double[] oldIother = new double[]{0, 0};
+    int doubleBuffer = 0;
+    public boolean thevnaCalc = false;
+    public double thenvaCurrent;
+    public double Rth;
+    public double Uth;
+
+    double iTarget;
+
 	public void set(State pin, DelayInterSystem other) {
 		this.other = other;
 		this.pin = pin;
@@ -29,8 +40,6 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 		super.quitSubSystem();
 	}
 
-	double impedance, conductance;
-
 	@Override
 	public void addedTo(SubSystem s) {
 		super.addedTo(s);
@@ -42,18 +51,11 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 		s.addToA(pin, pin, conductance);
 	}
 
-	public double[] oldIother = new double[] { 0, 0 };
-	int doubleBuffer = 0;
-	public boolean thevnaCalc = false;
-	public double thenvaCurrent;
-	public double Rth;
-	public double Uth;
-
 	/*@Override
 	public void simProcessI(SubSystem s) {
 		if(thevnaCalc == false) {
 			double pinI = 2 * other.getSubSystem().getX(other.pin) * conductance + oldIother[doubleBuffer];
-			//pinI = (pinI*1 - other.oldIother[doubleBuffer]*0);
+			//pinI = (pinI * 1 - other.oldIother[doubleBuffer] * 0);
 			s.addToI(pin, pinI);
 
 			doubleBuffer = (doubleBuffer + 1) & 1;
@@ -65,19 +67,19 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 
 	/*@Override
 	public void simProcessI(SubSystem s) {
-		if(thevnaCalc == false){
+		if (thevnaCalc == false) {
 			double iA = pin.state*conductance + oldIother[doubleBuffer];
 			double iB = other.pin.state*conductance + other.oldIother[doubleBuffer];
-			double iTarget = (iA - iB)/2;
+			double iTarget = (iA - iB) / 2;
 			
-			double aPinI = iTarget - (pin.state + other.pin.state)*0.5*conductance;
+			double aPinI = iTarget - (pin.state + other.pin.state) * 0.5 * conductance;
 			
 			s.addToI(pin, -aPinI);
 			
 			
 			doubleBuffer = (doubleBuffer + 1 ) & 1;
 			oldIother[doubleBuffer]= aPinI;
-		}else{
+		} else {
 			s.addToI(pin, -thenvaCurrent);
 		}
 	}*/
@@ -85,12 +87,12 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 	/*
 	@Override
 	public void simProcessI(SubSystem s) {
-		double iThis = pin.state*conductance + oldIother[doubleBuffer];
-		double iOther = other.pin.state*conductance + other.oldIother[doubleBuffer];
-		double iTarget = (iThis - iOther)/2;
+		double iThis = pin.state * conductance + oldIother[doubleBuffer];
+		double iOther = other.pin.state * conductance + other.oldIother[doubleBuffer];
+		double iTarget = (iThis - iOther) / 2;
 		
 		double pinI = 2 * other.getSubSystem().getX(other.pin) * conductance + oldIother[doubleBuffer];		
-		//pinI = (pinI*1 - other.oldIother[doubleBuffer]*0);
+		//pinI = (pinI * 1 - other.oldIother[doubleBuffer] * 0);
 		s.addToI(pin, pinI);
 		
 		doubleBuffer = (doubleBuffer + 1 ) & 1;
@@ -99,7 +101,6 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 
 	@Override
 	public State[] getConnectedStates() {
-		
 		return new State[] {};
 	}
 
@@ -107,20 +108,17 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 		oldIother[doubleBuffer] = i;
 	}
 
-	double iTarget;
-
 	@Override
 	public void simProcessI(SubSystem s) {
-		if(thevnaCalc == false) {
+		if (!thevnaCalc) {
 			//Thevna delay line
 			
-			if(Math.abs(Rth) < 1000000.0){
+			if (Math.abs(Rth) < 1000000.0) {
 				double uTarget = Uth - Rth * iTarget;
 				double aPinI = iTarget - uTarget * conductance;
 				s.addToI(pin, -aPinI);
-			} 
-			else {
-				double uTarget = other.pin.state*0.5 + pin.state*0.5;
+			} else {
+				double uTarget = other.pin.state * 0.5 + pin.state * 0.5;
 				//uTarget = 0;
 				double aPinI = iTarget - uTarget * conductance;
 				s.addToI(pin, -aPinI);
@@ -175,6 +173,5 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 
 			d.thevnaCalc = false;
 		}
-
 	}
 }

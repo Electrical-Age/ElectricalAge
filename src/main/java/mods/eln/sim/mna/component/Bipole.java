@@ -1,10 +1,10 @@
 package mods.eln.sim.mna.component;
 
 import mods.eln.sim.mna.state.State;
-import mods.eln.sim.mna.state.VoltageState;
 
 public abstract class Bipole extends Component {
-	public State aPin,bPin;
+
+	public State aPin, bPin;
 	
 	public Bipole() {
 	}
@@ -14,7 +14,7 @@ public abstract class Bipole extends Component {
 	}
 	
 	
-	public Bipole connectTo(State aPin,State bPin){
+	public Bipole connectTo(State aPin, State bPin) {
 		breakConnection();
 		
 		this.aPin = aPin;
@@ -25,7 +25,7 @@ public abstract class Bipole extends Component {
 		return this;
 	}
 
-	public Bipole connectGhostTo(State aPin,State bPin){
+	public Bipole connectGhostTo(State aPin, State bPin) {
 		breakConnection();
 		
 		this.aPin = aPin;
@@ -41,14 +41,15 @@ public abstract class Bipole extends Component {
 	
 	@Override
 	public State[] getConnectedStates() {
-		
-		return new State[]{aPin,bPin};
+		return new State[]{aPin, bPin};
 	}
 	
 	public abstract double getCurrent();
-	public double getU(){
+
+	public double getU() {
 		return (aPin == null ? 0 : aPin.state) - (bPin == null ? 0 : bPin.state);
 	}
+
 	public double getBipoleU() {
 		return getU();
 	}

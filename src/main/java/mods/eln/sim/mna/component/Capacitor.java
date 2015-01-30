@@ -6,43 +6,39 @@ import mods.eln.sim.mna.state.State;
 
 public class Capacitor extends Bipole  implements ISubSystemProcessI {
 
-	
+    private double c = 0;
+    double cdt;
+
 	public Capacitor() {
 	}
 	
 	public Capacitor(State aPin,State bPin) {
 		connectTo(aPin, bPin);
 	}
-		
-	
-	
+
 	@Override
 	public double getCurrent() {
-		
 		return 0;
 	}
 
-	public void setC(double c){
+	public void setC(double c) {
 		this.c = c;
 		dirty();
 	}
-	
-	private double c = 0;
-	double cdt;
-	
+
 	@Override
 	public void applyTo(SubSystem s) {
-		cdt = c/s.getDt();
+		cdt = c / s.getDt();
 		
-		s.addToA(aPin,aPin,cdt);
-		s.addToA(aPin,bPin,-cdt);
-		s.addToA(bPin,bPin,cdt);
-		s.addToA(bPin,aPin,-cdt);		
+		s.addToA(aPin, aPin, cdt);
+		s.addToA(aPin, bPin, -cdt);
+		s.addToA(bPin, bPin, cdt);
+		s.addToA(bPin, aPin, -cdt);
 	}
 	
 	@Override
 	public void simProcessI(SubSystem s) {
-		double add = (s.getXSafe(aPin)-s.getXSafe(bPin))*cdt;
+		double add = (s.getXSafe(aPin) - s.getXSafe(bPin)) * cdt;
 		s.addToI(aPin, add);
 		s.addToI(bPin, -add);
 	}
@@ -53,23 +49,19 @@ public class Capacitor extends Bipole  implements ISubSystemProcessI {
 		super.quitSubSystem();
 	}
 
-
 	@Override
 	public void addedTo(SubSystem s) {
 		super.addedTo(s);
 		s.addProcess(this);
 	}
 
-	
-	public double getE(){
+	public double getE() {
 		double u = getU();
-		return u*u*c/2;
+		return u * u * c / 2;
 	}
 
 	public double getC() {
 		// TODO Auto-generated method stub
 		return c;
 	}
-
-
 }

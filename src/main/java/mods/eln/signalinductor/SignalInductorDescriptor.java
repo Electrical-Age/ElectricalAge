@@ -11,20 +11,17 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
+public class SignalInductorDescriptor extends SixNodeDescriptor {
 
-public class SignalInductorDescriptor extends SixNodeDescriptor{
-	public SignalInductorDescriptor(
-			String name,
-			double henri,
-			ElectricalCableDescriptor cable
-			) {
-		super(name, SignalInductorElement.class,SignalInductorRender.class);
+    ElectricalCableDescriptor cable;
+    String descriptor;
+    public double henri;
+
+	public SignalInductorDescriptor(String name, double henri, ElectricalCableDescriptor cable) {
+		super(name, SignalInductorElement.class, SignalInductorRender.class);
 		this.henri = henri;
 		this.cable = cable;
 	}
-	ElectricalCableDescriptor cable;
-	String descriptor;
-	public double henri;
 
 	@Override
 	public void setParent(Item item, int damage) {
@@ -33,23 +30,22 @@ public class SignalInductorDescriptor extends SixNodeDescriptor{
 		Data.addEnergy(newItemStack());
 	}
 
-	public void applyTo(ElectricalLoad load)
-	{
+	public void applyTo(ElectricalLoad load) {
 		cable.applyTo(load);
 	}
-	public void applyTo(Inductor inductor)
-	{
+
+	public void applyTo(Inductor inductor) {
 		inductor.setL(henri);
 	}
+
 	@Override
 	public boolean use2DIcon() {
 		return false;
 	}
+
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
-
 	}
 }

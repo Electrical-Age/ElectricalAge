@@ -64,7 +64,6 @@ public class InterSystemAbstraction implements IAbstractor, IDestructor {
 
 		thevnaCalc = new DelayInterSystem2.ThevnaCalculator(aNewDelay, bNewDelay);
 		root.addProcess(thevnaCalc);
-
 	}
 
 	void calibrate() {
@@ -84,7 +83,6 @@ public class InterSystemAbstraction implements IAbstractor, IDestructor {
 
 	@Override
 	public SubSystem getAbstractorSubSystem() {
-
 		return aSystem;
 	}
 
@@ -105,5 +103,4 @@ public class InterSystemAbstraction implements IAbstractor, IDestructor {
 
 		aSystem.component.add(interSystemResistor);
 	}
-
 }

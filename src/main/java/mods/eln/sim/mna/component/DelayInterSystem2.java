@@ -1,30 +1,23 @@
 package mods.eln.sim.mna.component;
 
-import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;
-import mods.eln.sim.mna.misc.ISubSystemProcessI;
-import mods.eln.sim.mna.state.State;
 
 public class DelayInterSystem2 extends VoltageSource {
 
-	
+    private DelayInterSystem2 other;
+
+    public double Rth;
+    public double Uth;
+
+    public boolean thevnaCalc = false;
 
 	public DelayInterSystem2() {
 		super(null);
-		
 	}
-
-	private DelayInterSystem2 other;
 
 	public void set(DelayInterSystem2 other) {
 		this.other = other;
-
 	}
-
-	public double Rth;
-	public double Uth;
-
-	public boolean thevnaCalc = false;
 
 	public static class ThevnaCalculator implements IRootSystemPreStepProcess {
 		DelayInterSystem2 a, b;
@@ -39,8 +32,8 @@ public class DelayInterSystem2 extends VoltageSource {
 			doJobFor(a);
 			doJobFor(b);
 
-			double U = (a.Uth - b.Uth) * b.Rth / (a.Rth + b .Rth) + b.Uth;
-			if(Double.isNaN(U)){
+			double U = (a.Uth - b.Uth) * b.Rth / (a.Rth + b.Rth) + b.Uth;
+			if (Double.isNaN(U)) {
 				U = 0;
 			}
 			a.setU(U);
@@ -60,7 +53,7 @@ public class DelayInterSystem2 extends VoltageSource {
 
 			d.Rth = (aU - bU) / (bI - aI);
 			//if(Double.isInfinite(d.Rth)) d.Rth = Double.MAX_VALUE;
- 			if(d.Rth > 10000000000000000000.0) {
+ 			if (d.Rth > 10000000000000000000.0) {
 				d.Uth = 0;
 				d.Rth = 10000000000000000000.0;
 			} else {
@@ -68,6 +61,5 @@ public class DelayInterSystem2 extends VoltageSource {
 			}
 			d.setU(originalU);
 		}
-
 	}
 }

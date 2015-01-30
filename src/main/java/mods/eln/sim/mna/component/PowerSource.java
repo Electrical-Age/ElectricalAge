@@ -1,32 +1,31 @@
 package mods.eln.sim.mna.component;
 
-import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.misc.INBTTReady;
-import mods.eln.sim.IProcess;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;
 import mods.eln.sim.mna.state.State;
+import net.minecraft.nbt.NBTTagCompound;
 
-public class PowerSource extends VoltageSource implements IRootSystemPreStepProcess,INBTTReady{
+public class PowerSource extends VoltageSource implements IRootSystemPreStepProcess, INBTTReady {
 	
 	String name;
+
+    double P, Umax, Imax;
 	
 	public PowerSource(String name,State aPin) {
-		super(name,aPin, null);
+		super(name, aPin, null);
 		this.name = name;
 	}
-		
-	
-	public void setP(double P){
+
+	public void setP(double P) {
 		this.P = P;
 	}
 	
-	void setMax(double Umax,double Imax){
+	void setMax(double Umax, double Imax) {
 		this.Umax = Umax;
 		this.Imax = Imax;
 	}
-	
-	
+
 	public void setImax(double imax) {
 		Imax = imax;
 	}
@@ -34,11 +33,11 @@ public class PowerSource extends VoltageSource implements IRootSystemPreStepProc
 	public void setUmax(double umax) {
 		Umax = umax;
 	}
+
 	public double getP() {
 		return P;
 	}
-	double P,Umax,Imax;
-	
+
 	@Override
 	public void quitSubSystem() {
 		getSubSystem().getRoot().removeProcess(this);
@@ -54,18 +53,18 @@ public class PowerSource extends VoltageSource implements IRootSystemPreStepProc
 
 	@Override
 	public void rootSystemPreStepProcess() {
-		SubSystem.Th t = aPin.getSubSystem().getTh(aPin,this);
+		SubSystem.Th t = aPin.getSubSystem().getTh(aPin, this);
 		
-		double U = (Math.sqrt(t.U*t.U+4*P*t.R)+t.U)/2;
-		U =  Math.min(Math.min(U, Umax),t.U+t.R*Imax);
-		if(Double.isNaN(U)) U = 0;
-		if(U < t.U) U = t.U;
+		double U = (Math.sqrt(t.U * t.U + 4 * P * t.R) + t.U) / 2;
+		U =  Math.min(Math.min(U, Umax), t.U + t.R * Imax);
+		if (Double.isNaN(U)) U = 0;
+		if (U < t.U) U = t.U;
 	
 		setU(U);
 	}
 
 	public double getEffectiveP() {
-		return getBipoleU()*getCurrent();
+		return getBipoleU() * getCurrent();
 	}
 
 	@Override
@@ -85,8 +84,8 @@ public class PowerSource extends VoltageSource implements IRootSystemPreStepProc
 		
 		str += name;
 		
-		nbt.setDouble(str + "P",getP());
-		nbt.setDouble(str + "Umax",Umax);
-		nbt.setDouble(str + "Imax",Imax);
+		nbt.setDouble(str + "P", getP());
+		nbt.setDouble(str + "Umax", Umax);
+		nbt.setDouble(str + "Imax", Imax);
 	}
 }

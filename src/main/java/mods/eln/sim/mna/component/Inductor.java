@@ -7,54 +7,50 @@ import mods.eln.sim.mna.misc.ISubSystemProcessI;
 import mods.eln.sim.mna.state.CurrentState;
 import mods.eln.sim.mna.state.State;
 
-public class Inductor extends Bipole  implements ISubSystemProcessI ,INBTTReady{
+public class Inductor extends Bipole implements ISubSystemProcessI, INBTTReady {
 
-	
 	String name;
+
+    private double l = 0;
+    double ldt;
+
+    private CurrentState currentState = new CurrentState();
+
 	public Inductor(String name) {
 		this.name = name;
 	}
 	
-	public Inductor(String name,State aPin,State bPin) {
+	public Inductor(String name, State aPin, State bPin) {
 		super(aPin, bPin);
 		this.name = name;
 	}
-		
-	private CurrentState currentState = new CurrentState();
 
-	
 	@Override
 	public double getCurrent() {
-		
 		return currentState.state;
 	}
 
-	public void setL(double l){
+	public void setL(double l) {
 		this.l = l;
 		dirty();
 	}
-	
-	private double l = 0;
-	double ldt;
-	
+
 	@Override
 	public void applyTo(SubSystem s) {
 		ldt = -l/s.getDt();
 		
-		s.addToA(aPin,currentState,1);
-		s.addToA(bPin,currentState,-1);
-		s.addToA(currentState,aPin,1);
-		s.addToA(currentState,bPin,-1);
-		s.addToA(currentState,currentState,ldt);
-	
+		s.addToA(aPin, currentState, 1);
+		s.addToA(bPin, currentState, -1);
+		s.addToA(currentState, aPin, 1);
+		s.addToA(currentState, bPin, -1);
+		s.addToA(currentState, currentState, ldt);
 	}
 	
 	@Override
 	public void simProcessI(SubSystem s) {
-		s.addToI(currentState, ldt*currentState.state);
+		s.addToI(currentState, ldt * currentState.state);
 	}
-	
-	
+
 	@Override
 	public void quitSubSystem() {
 		subSystem.states.remove(getCurrentState());
@@ -72,8 +68,7 @@ public class Inductor extends Bipole  implements ISubSystemProcessI ,INBTTReady{
 	public CurrentState getCurrentState() {
 		return currentState;
 	}
-	
-	
+
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
 		str += name;
@@ -83,7 +78,7 @@ public class Inductor extends Bipole  implements ISubSystemProcessI ,INBTTReady{
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		str += name;
-		nbt.setDouble(str + "Istate",currentState.state);
+		nbt.setDouble(str + "Istate", currentState.state);
 	}
 
 	public void resetStates() {

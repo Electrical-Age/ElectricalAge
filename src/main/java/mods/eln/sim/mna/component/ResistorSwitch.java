@@ -5,32 +5,32 @@ import mods.eln.misc.INBTTReady;
 import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.mna.state.State;
 
-public class ResistorSwitch extends Resistor implements INBTTReady{
+public class ResistorSwitch extends Resistor implements INBTTReady {
 
 	boolean ultraImpedance = false;
 	String name;
-	public ResistorSwitch(String name,State aPin,State bPin) {
+
+    boolean state = false;
+
+    protected double baseR = 1;
+
+	public ResistorSwitch(String name, State aPin, State bPin) {
 		super(aPin, bPin);
 		this.name = name;
 	}
-	
-	boolean state = false;
-	
-	public void setState(boolean state){
+
+	public void setState(boolean state) {
 		this.state = state;
 		setR(baseR);
 	}
-	
-	protected double baseR = 1;
+
 	@Override
 	public Resistor setR(double r) {
 		baseR = r;
 		return super.setR(state ? r : (ultraImpedance ? MnaConst.ultraImpedance : MnaConst.highImpedance));
 	}
-	
-	
+
 	public boolean getState() {
-		
 		return state;
 	}
 
@@ -38,21 +38,18 @@ public class ResistorSwitch extends Resistor implements INBTTReady{
 	public void readFromNBT(NBTTagCompound nbt, String str) {
 		str += name;
 		setR(nbt.getDouble(str + "R"));
-		if(Double.isNaN(baseR) || baseR == 0) {
-			if(ultraImpedance)  ultraImpedance(); else highImpedance();
+		if (Double.isNaN(baseR) || baseR == 0) {
+			if (ultraImpedance)  ultraImpedance(); else highImpedance();
 		}
 		setState(nbt.getBoolean(str + "State"));
 	}
 
-
-
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		str += name;
-		nbt.setDouble(str + "R",baseR);
-		nbt.setBoolean(str + "State",getState());
+		nbt.setDouble(str + "R", baseR);
+		nbt.setBoolean(str + "State", getState());
 	}
-
 
 	public void mustUseUltraImpedance() {
 		ultraImpedance = true;

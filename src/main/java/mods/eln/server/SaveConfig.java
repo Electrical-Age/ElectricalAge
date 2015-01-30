@@ -4,7 +4,7 @@ import mods.eln.Eln;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.WorldSavedData;
 
-public class SaveConfig extends WorldSavedData{
+public class SaveConfig extends WorldSavedData {
 
 	public static SaveConfig instance;
 	
@@ -14,6 +14,7 @@ public class SaveConfig extends WorldSavedData{
 	public boolean infinitPortableBattery = false;
 
 	public boolean reGenOre = false;
+
 	public SaveConfig(String par1Str) {
 		super(par1Str);
 		instance = this;	
@@ -32,7 +33,6 @@ public class SaveConfig extends WorldSavedData{
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		
 		nbt.setBoolean("heatFurnaceFuel", heatFurnaceFuel);
 		nbt.setBoolean("electricalLampAging", electricalLampAging);
 		nbt.setBoolean("batteryAging", batteryAging);
@@ -41,6 +41,7 @@ public class SaveConfig extends WorldSavedData{
 		
 		Eln.wind.writeToNBT(nbt, "wind");
 	}
+
 	@Override
 	public boolean isDirty() {
 		return true;

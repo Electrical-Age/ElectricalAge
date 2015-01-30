@@ -1,27 +1,20 @@
 package mods.eln.sim.mna.component;
 
-import java.util.ArrayList;
-
-import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.mna.state.State;
 
-import org.apache.commons.math3.linear.RealMatrix;
-
 public class Resistor extends Bipole {
-
 
 	public Resistor() {
 	}
 	
-	public Resistor(State aPin,State bPin) {
+	public Resistor(State aPin, State bPin) {
 		super(aPin, bPin);
 	}
 	
 	//public SubSystem interSystemA, interSystemB;
-	
-	
+
 /*	public Line line = null;
 	public boolean lineReversDir;
 	public boolean isInLine() {
@@ -29,30 +22,32 @@ public class Resistor extends Bipole {
 		return line != null;
 	}*/
 	
-	private double r = MnaConst.highImpedance, rInv = 1/MnaConst.highImpedance;
-
+	private double r = MnaConst.highImpedance, rInv = 1 / MnaConst.highImpedance;
 
 	//public boolean usedAsInterSystem = false;
 
-	
-	public double getRInv(){
+	public double getRInv() {
 		return rInv;
 	}
 	
-	public double getR(){
+	public double getR() {
 		return r;
 	}
-	public double getI(){
+
+	public double getI() {
 		return getCurrent();
-	}	
-	public double getP(){
-		return getU()*getCurrent();
 	}
-	public double getU(){
+
+	public double getP() {
+		return getU() * getCurrent();
+	}
+
+	public double getU() {
 		return (aPin == null ? 0 : aPin.state) - (bPin == null ? 0 : bPin.state);
-	}	
+	}
+
 	public Resistor setR(double r) {
-		if(this.r != r){
+		if (this.r != r) {
 			this.r = r;
 			this.rInv = 1 / r;
 			dirty();
@@ -60,7 +55,7 @@ public class Resistor extends Bipole {
 		return this;
 	}
 
-	public void highImpedance(){
+	public void highImpedance() {
 		setR(MnaConst.highImpedance);
 	}	
 	
@@ -68,19 +63,19 @@ public class Resistor extends Bipole {
 		setR(MnaConst.ultraImpedance);
 	}
 
-	public Resistor pullDown(){
+	public Resistor pullDown() {
 		setR(MnaConst.pullDown);
 		return this;
 	}
 	
 	/*@Override
 	public void dirty() {
-		if(line != null){
+		if (line != null) {
 			line.recalculateR();
 		}
-		if(usedAsInterSystem){
+		if (usedAsInterSystem) {
 			aPin.getSubSystem().breakSystem();
-			if(aPin.getSubSystem() != bPin.getSubSystem()){
+			if (aPin.getSubSystem() != bPin.getSubSystem()) {
 				bPin.getSubSystem().breakSystem();
 			}
 		}
@@ -100,16 +95,14 @@ public class Resistor extends Bipole {
 		s.addToA(bPin, aPin, -rInv);
 	}
 
-	
 	@Override
 	public double getCurrent() {
-		return getU()*rInv;
+		return getU() * rInv;
 		/*if(line == null)
-			return getU()*rInv;
-		else if(lineReversDir)
+			return getU() * rInv;
+		else if (lineReversDir)
 			return -line.getCurrent();
 		else
 			return line.getCurrent();*/
 	}
-
 }
