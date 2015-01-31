@@ -22,7 +22,22 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
 
 	EnergyConverterElnToOtherDescriptor descriptor;
 
-	@Override
+    NbtElectricalLoad load = new NbtElectricalLoad("load");
+    NbtResistor powerInResistor = new NbtResistor("powerInResistor", load, null);
+    ElectricalProcess electricalProcess = new ElectricalProcess();
+    VoltageStateWatchDog watchdog = new VoltageStateWatchDog();
+
+    public double energyBuffer = 0;
+    public double energyBufferMax;
+    public double inStdVoltage;
+    public double inPowerMax;
+    //public double otherOutMax = 32;
+
+    public double inPowerFactor = 0.5;
+
+    public static final byte setInPowerFactor = 1;
+
+    @Override
 	protected void setDescriptorKey(String key) {
 		// TODO Auto-generated method stub
 		super.setDescriptorKey(key);
@@ -31,7 +46,7 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
 	
 	@Override
 	public int getSideConnectionMask(Direction directionA, LRDU lrduA) {
-		if(directionA == getFront()) return maskElectricalPower;
+		if (directionA == getFront()) return maskElectricalPower;
 		return 0;
 	}
 
@@ -45,10 +60,6 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
 		return load;
 	}
 
-	NbtElectricalLoad load = new NbtElectricalLoad("load");
-	NbtResistor powerInResistor = new NbtResistor("powerInResistor", load, null);
-	ElectricalProcess electricalProcess = new ElectricalProcess();
-	VoltageStateWatchDog watchdog = new VoltageStateWatchDog();
 	@Override
 	public void initialize() {
 		electricalLoadList.add(load);
@@ -61,57 +72,47 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
 		load.setAsPrivate();
 		
 		descriptor.applyTo(this);
-		
-		
+
     	WorldExplosion exp = new WorldExplosion(this).machineExplosion();
     	watchdog.set(load).setUNominal(inStdVoltage).set(exp);
 
-		
 		connect();
 	}
-	public double energyBuffer = 0;
-	public double energyBufferMax;
-	public double inStdVoltage;
-	public double inPowerMax;
-	//public double otherOutMax = 32;
-	
-	
-	public double inPowerFactor = 0.5;
 
 	class ElectricalProcess implements IProcess {
 		double timeout = 0;
-		@Override
+
+        @Override
 		public void process(double time) {
-			energyBuffer+=powerInResistor.getP()*time;
+			energyBuffer += powerInResistor.getP() * time;
 			timeout -= time;
-			if(timeout < 0){
+			if (timeout < 0) {
 				timeout = 0.05;
-				double energyMiss = energyBufferMax-energyBuffer;
-				if(energyMiss<= 0){
+				double energyMiss = energyBufferMax - energyBuffer;
+				if (energyMiss<= 0) {
 					powerInResistor.highImpedance();
-				}else{
-					double factor = Math.min(1,energyMiss/energyBufferMax*2);
-					if(factor < 0.005) factor = 0;
-					double inP = factor*inPowerMax*inPowerFactor;
-					powerInResistor.setR(inStdVoltage*inStdVoltage/inP);
+				} else {
+					double factor = Math.min(1, energyMiss / energyBufferMax * 2);
+					if (factor < 0.005) factor = 0;
+					double inP = factor * inPowerMax * inPowerFactor;
+					powerInResistor.setR(inStdVoltage * inStdVoltage / inP);
 				}
 			}
 		}
 	}
-	
-	
-	public double getOtherModEnergyBuffer(double conversionRatio){
+
+	public double getOtherModEnergyBuffer(double conversionRatio) {
 		return energyBuffer*conversionRatio;
 	}
 
-	public void drawEnergy(double otherModEnergy,double conversionRatio){
-		energyBuffer -= otherModEnergy/conversionRatio;
+	public void drawEnergy(double otherModEnergy, double conversionRatio) {
+		energyBuffer -= otherModEnergy / conversionRatio;
 	}
-	public double getOtherModOutMax(double otherOutMax,double conversionRatio){
+
+	public double getOtherModOutMax(double otherOutMax, double conversionRatio) {
 		return Math.min(getOtherModEnergyBuffer(conversionRatio), otherOutMax);
 	}
-	
-	
+
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
@@ -125,15 +126,13 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
 		energyBuffer = nbt.getDouble("energyBuffer");
 		inPowerFactor = nbt.getDouble("inPowerFactor");
 	}
-	
-	
+
 	@Override
 	public boolean hasGui(Direction side) {
 		// TODO Auto-generated method stub
 		return true;
 	}
-	
-	
+
 	@Override
 	public void publishSerialize(DataOutputStream stream) {
 		// TODO Auto-generated method stub
@@ -147,36 +146,31 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
 			e.printStackTrace();
 		}
 	}
-	
-	
-	public static final byte setInPowerFactor = 1;
-	
+
 	@Override
 	public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
 		try {
 			switch (stream.readByte()) {
-			case setInPowerFactor:
-				inPowerFactor = stream.readFloat();
-				needPublish();
-				break;
+                case setInPowerFactor:
+                    inPowerFactor = stream.readFloat();
+                    needPublish();
+                    break;
 
-			default:
-				break;
-			}
+                default:
+                    break;
+            }
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-
 	@Override
 	public String getNodeUuid() {
 		return getNodeUuidStatic();
 	}
-	public static String getNodeUuidStatic() {
+
+    public static String getNodeUuidStatic() {
 		return "ElnToOther";
 	}
-
-
 }

@@ -8,8 +8,10 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 
-public class TestNode extends SimpleNode{
+public class TestNode extends SimpleNode {
 
+    NbtElectricalLoad load = new NbtElectricalLoad("load");
+    Resistor resistor = new Resistor(load, null);
 
 	@Override
 	public int getSideConnectionMask(Direction directionA, LRDU lrduA) {
@@ -39,8 +41,6 @@ public class TestNode extends SimpleNode{
 		return "eln.TestNode";
 	}
 
-	NbtElectricalLoad load = new NbtElectricalLoad("load");
-	Resistor resistor = new Resistor(load, null);
 	@Override
 	public void initialize() {
 		electricalLoadList.add(load);
@@ -48,11 +48,7 @@ public class TestNode extends SimpleNode{
 
 		load.setRs(10);
 		resistor.setR(90);
-		
-		
+
 		connect();
 	}
-	
-	
-	
 }

@@ -18,16 +18,20 @@ import net.minecraft.entity.player.EntityPlayer;
 public class ElectricalAlarmRender extends SixNodeElementRender {
 
 	ElectricalAlarmDescriptor descriptor;
-	public ElectricalAlarmRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+
+    LRDU front;
+
+    RcInterpolator interpol = new RcInterpolator(0.4f);
+
+    float rotAlpha = 0;
+    boolean warm = false;
+    boolean mute = false;
+
+	public ElectricalAlarmRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalAlarmDescriptor) descriptor;
 	}
 
-	LRDU front;
-
-	RcInterpolator interpol = new RcInterpolator(0.4f);
-	
 	@Override
 	public void draw() {
 		super.draw();
@@ -37,25 +41,22 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
 		//front.glRotateOnX();		
 		descriptor.draw(warm, rotAlpha);
 	}
+
 	@Override
 	public void refresh(float deltaT) {
 		interpol.setTarget(warm ? descriptor.rotSpeed : 0f);
 		interpol.step(deltaT);
 		
 		rotAlpha += interpol.get() * deltaT;
-		
 	}
-	
-	float rotAlpha = 0;
-	boolean warm = false;
-	boolean mute = false;
+
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);
 		try {
 			Byte b;
 			b = stream.readByte();
-			front = LRDU.fromInt((b>>4)&3);
+			front = LRDU.fromInt((b >> 4) & 3);
 			warm = (b & 1) != 0 ? true : false;
 			mute = stream.readBoolean();
 			Utils.println("WARM : " + warm);
@@ -71,6 +72,6 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		return new ElectricalAlarmGui(player,this);
+		return new ElectricalAlarmGui(player, this);
 	}
 }

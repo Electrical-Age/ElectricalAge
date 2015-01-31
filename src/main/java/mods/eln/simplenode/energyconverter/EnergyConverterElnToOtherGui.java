@@ -1,34 +1,19 @@
 package mods.eln.simplenode.energyconverter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import org.lwjgl.opengl.GL11;
-
-
-import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.IGuiObject;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.gui.inventory.GuiEditSign;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
 
 public class EnergyConverterElnToOtherGui extends GuiScreenEln {
+
+    EnergyConverterElnToOtherEntity render;
+    GuiVerticalTrackBar voltage;
 
 	public EnergyConverterElnToOtherGui(EntityPlayer player, EnergyConverterElnToOtherEntity render) {
 		this.render = render;
 	}
-
-	EnergyConverterElnToOtherEntity render;
-	GuiVerticalTrackBar voltage;
 
 	@Override
 	public void initGui() {
@@ -50,7 +35,7 @@ public class EnergyConverterElnToOtherGui extends GuiScreenEln {
     @Override
     public void guiObjectEvent(IGuiObject object) {
     	super.guiObjectEvent(object);
-    	if(object == voltage) {
+    	if (object == voltage) {
     		render.sender.clientSendFloat(EnergyConverterElnToOtherNode.setInPowerFactor, voltage.getValue());
     	}
     }
@@ -58,8 +43,8 @@ public class EnergyConverterElnToOtherGui extends GuiScreenEln {
     @Override
     protected void preDraw(float f, int x, int y) {
     	super.preDraw(f, x, y);
-    	if(render.hasChanges) syncVoltage();
-    	voltage.setComment(0, "Input power is limited to  " + (int)(voltage.getValue()*render.inPowerMax) + " W");
+    	if (render.hasChanges) syncVoltage();
+    	voltage.setComment(0, "Input power is limited to  " + (int)(voltage.getValue() * render.inPowerMax) + " W");
     }
 
 	@Override

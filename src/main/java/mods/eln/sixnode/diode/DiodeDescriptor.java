@@ -22,23 +22,29 @@ public class DiodeDescriptor extends SixNodeDescriptor {
     private Obj3DPart diodeCables;
     private Obj3DPart diodeCore;
 
-	public DiodeDescriptor(
-			String name,
-			IFunction IfU,
-			double Imax,
-			double stdU,double stdI,
-			ThermalLoadInitializer thermal,
-			ElectricalCableDescriptor cable,
-            Obj3D obj) {
+    double stdI, stdU;
+    ElectricalCableDescriptor cable;
+    String descriptor;
+    IFunction IfU;
+
+    ThermalLoadInitializer thermal;
+
+	public DiodeDescriptor(String name,
+                           IFunction IfU,
+                           double Imax,
+                           double stdU, double stdI,
+                           ThermalLoadInitializer thermal,
+                           ElectricalCableDescriptor cable, Obj3D obj) {
 		super(name, DiodeElement.class, DiodeRender.class);
-		this.IfU = IfU;
+
+        this.IfU = IfU;
 		
 		//double Umax = 0;
 		//while(IfU.getValue(Umax) < Imax) Umax += 0.01;
 		//double Pmax = Umax * IfU.getValue(Umax);
 		this.cable = cable;
 		this.thermal = thermal;
-		thermal.setMaximalPower(stdU*stdI*1.2);
+		thermal.setMaximalPower(stdU * stdI * 1.2);
 		this.stdI = stdI;
 		this.stdU = stdU;
 
@@ -46,13 +52,7 @@ public class DiodeDescriptor extends SixNodeDescriptor {
         diodeCables = obj.getPart("DiodeCables");
         diodeCore = obj.getPart("DiodeCore");
 	}
-	double stdI, stdU;
-	ElectricalCableDescriptor cable;
-	String descriptor;
-	IFunction IfU;
-	
-	ThermalLoadInitializer thermal;
-	
+
 	@Override
 	public void setParent(Item item, int damage) {
 		super.setParent(item, damage);
@@ -65,8 +65,7 @@ public class DiodeDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
         return true;
     }
 
@@ -97,11 +96,10 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 	}
 	
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("The current can only run");
-		list.add("one way");
+		list.add("one way.");
 	}
 
     void draw() {

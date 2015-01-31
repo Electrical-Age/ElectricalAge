@@ -21,8 +21,18 @@ import net.minecraft.nbt.NBTTagCompound;
 public class ElectricalAlarmElement extends SixNodeElement {
 
 	ElectricalAlarmDescriptor descriptor;
-	public ElectricalAlarmElement(SixNode sixNode, Direction side,
-			SixNodeDescriptor descriptor) {
+
+    public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate", true);
+    public ElectricalAlarmSlowProcess slowProcess = new ElectricalAlarmSlowProcess(this);
+    LRDU front;
+
+    boolean warm = false;
+
+    boolean mute = false;
+
+    public static final byte clientSoundToggle = 1;
+
+    public ElectricalAlarmElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		front = LRDU.Down;
     	electricalLoadList.add(inputGate);
@@ -30,10 +40,6 @@ public class ElectricalAlarmElement extends SixNodeElement {
     	this.descriptor = (ElectricalAlarmDescriptor) descriptor;
 	}
 
-	public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate",true);
-	public ElectricalAlarmSlowProcess slowProcess = new ElectricalAlarmSlowProcess(this);
-	LRDU front;
-	
 	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
 	}
@@ -42,20 +48,20 @@ public class ElectricalAlarmElement extends SixNodeElement {
 	public void readFromNBT(NBTTagCompound nbt ) {
 		super.readFromNBT(nbt);
         byte value = nbt.getByte("front");
-        front = LRDU.fromInt((value>>0) & 0x3);
+        front = LRDU.fromInt((value >> 0) & 0x3);
         mute = nbt.getBoolean("mute");
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
-		nbt.setByte("front", (byte) ((front.toInt()<<0)));
+		nbt.setByte("front", (byte) ((front.toInt() << 0)));
 		nbt.setBoolean("mute", mute);
 	}
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(front == lrdu) return inputGate;
+		if (front == lrdu) return inputGate;
 		return null;
 	}
 
@@ -66,7 +72,7 @@ public class ElectricalAlarmElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu) return NodeBase.maskElectricalInputGate;
+		if (front == lrdu) return NodeBase.maskElectricalInputGate;
 		return 0;
 	}
 
@@ -80,13 +86,11 @@ public class ElectricalAlarmElement extends SixNodeElement {
 		return "";
 	}
 
-	boolean warm = false;
-	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte( (front.toInt()<<4) + (warm ? 1 : 0));
+			stream.writeByte((front.toInt() << 4) + (warm ? 1 : 0));
 			stream.writeBoolean(mute);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -94,7 +98,7 @@ public class ElectricalAlarmElement extends SixNodeElement {
 	}
 
 	public void setWarm(boolean value) {
-		if(warm != value) {
+		if (warm != value) {
 			warm = value;
 			sixNode.recalculateLightValue();
 			needPublish();
@@ -113,7 +117,7 @@ public class ElectricalAlarmElement extends SixNodeElement {
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 
-		if(Utils.isPlayerUsingWrench(entityPlayer)) {
+		if (Utils.isPlayerUsingWrench(entityPlayer)) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);
@@ -124,30 +128,22 @@ public class ElectricalAlarmElement extends SixNodeElement {
 	
 	@Override
 	public boolean hasGui() {
-		
 		return true;
 	}
-	
-	boolean mute = false;
-	
-	public static final byte clientSoundToggle = 1;
+
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		
 		super.networkUnserialize(stream);
 		
 		try {
-			switch(stream.readByte()){
-			case clientSoundToggle:
-				mute = ! mute;
-				needPublish();
-				break;
+			switch(stream.readByte()) {
+			    case clientSoundToggle:
+				    mute = ! mute;
+				    needPublish();
+				    break;
 			}
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
 	}
-	
-
 }

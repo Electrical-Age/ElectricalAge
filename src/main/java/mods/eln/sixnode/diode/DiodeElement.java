@@ -26,8 +26,18 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class DiodeElement extends SixNodeElement {
 
-	public DiodeElement(SixNode sixNode, Direction side,
-			SixNodeDescriptor descriptor) {
+    public DiodeDescriptor descriptor;
+    public NbtElectricalLoad anodeLoad = new NbtElectricalLoad("anodeLoad");
+    public NbtElectricalLoad catodeLoad = new NbtElectricalLoad("catodeLoad");
+    public ResistorSwitch resistorSwitch = new ResistorSwitch("resistorSwitch", anodeLoad, catodeLoad);
+    public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
+    public ResistorHeatThermalLoad heater = new ResistorHeatThermalLoad(resistorSwitch, thermalLoad);
+    public ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
+    public DiodeProcess diodeProcess = new DiodeProcess(resistorSwitch);
+
+    LRDU front;
+
+    public DiodeElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 
 		this.descriptor = (DiodeDescriptor) descriptor;
@@ -43,20 +53,6 @@ public class DiodeElement extends SixNodeElement {
 		thermalSlowProcessList.add(heater);
 	}
 
-	public DiodeDescriptor descriptor;
-	public NbtElectricalLoad anodeLoad = new NbtElectricalLoad("anodeLoad");
-	public NbtElectricalLoad catodeLoad = new NbtElectricalLoad("catodeLoad");
-	public ResistorSwitch resistorSwitch = new ResistorSwitch("resistorSwitch",anodeLoad, catodeLoad);
-	public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
-	public ResistorHeatThermalLoad heater = new ResistorHeatThermalLoad(resistorSwitch, thermalLoad);
-	public ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
-	public DiodeProcess diodeProcess = new DiodeProcess(resistorSwitch);
-
-	LRDU front;
-
-	
-	
-	
 	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
 	}
@@ -76,8 +72,8 @@ public class DiodeElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(front == lrdu) return anodeLoad;
-		if(front.inverse() == lrdu) return catodeLoad;
+		if (front == lrdu) return anodeLoad;
+		if (front.inverse() == lrdu) return catodeLoad;
 		return null;
 	}
 
@@ -88,8 +84,8 @@ public class DiodeElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu) return descriptor.cable.getNodeMask();
-		if(front.inverse() == lrdu) return descriptor.cable.getNodeMask();
+		if (front == lrdu) return descriptor.cable.getNodeMask();
+		if (front.inverse() == lrdu) return descriptor.cable.getNodeMask();
 		return 0;
 	}
 
@@ -112,7 +108,6 @@ public class DiodeElement extends SixNodeElement {
 			stream.writeShort((short) ((catodeLoad.getU()) * NodeBase.networkSerializeUFactor));
 			stream.writeShort((short) (anodeLoad.getCurrent() * NodeBase.networkSerializeIFactor));
 			stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -129,28 +124,27 @@ public class DiodeElement extends SixNodeElement {
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-		if(currentItemStack != null) {
+		if (currentItemStack != null) {
 			Item item = currentItemStack.getItem();
-			/*if(item== Eln.toolsSetItem) {
+			/*if (item== Eln.toolsSetItem) {
 				colorCare = colorCare ^ 1;
 				entityPlayer.addChatMessage("Wire color care " + colorCare);
 				sixNode.reconnect();
 			}
-			if(item == Eln.brushItem) {
-				if(currentItemStack.getItemDamage() < BrushItem.maximalUse) {
+			if (item == Eln.brushItem) {
+				if (currentItemStack.getItemDamage() < BrushItem.maximalUse) {
 					color = currentItemStack.getItemDamage() & 0xF;
 					
 					currentItemStack.setItemDamage(currentItemStack.getItemDamage() + 16);
 					
 					sixNode.reconnect();
-				}
-				else {
+				} else {
 					entityPlayer.addChatMessage("Brush is empty");
 				}
 			}*/
 		}
 		//front = LRDU.fromInt((front.toInt() + 1)&3);
-		if(Utils.isPlayerUsingWrench(entityPlayer)) {
+		if (Utils.isPlayerUsingWrench(entityPlayer)) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);
@@ -158,5 +152,4 @@ public class DiodeElement extends SixNodeElement {
 		}
 		return false;
 	}
-
 }

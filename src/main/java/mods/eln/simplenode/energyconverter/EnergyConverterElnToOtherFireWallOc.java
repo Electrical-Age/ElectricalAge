@@ -7,17 +7,17 @@ import li.cil.oc.api.network.Visibility;
 import mods.eln.Other;
 import mods.eln.misc.Utils;
 import net.minecraft.nbt.NBTTagCompound;
+
 public class EnergyConverterElnToOtherFireWallOc {
+
+    EnergyConverterElnToOtherEntity e;
+    Node node;
+
+    protected boolean addedToNetwork = false;
 
 	public EnergyConverterElnToOtherFireWallOc(EnergyConverterElnToOtherEntity e) {
 		this.e = e;
 	}
-	EnergyConverterElnToOtherEntity e;
-	Node node;
-	
-	
-	
-    protected boolean addedToNetwork = false;
 
     public void updateEntity() {
         // On the first update, try to add our node to nearby networks. We do
@@ -25,44 +25,40 @@ public class EnergyConverterElnToOtherFireWallOc {
         // neighboring tile entities, which isn't possible in validate().
         // We could alternatively check node != null && node.network() == null,
         // but this has somewhat better performance, and makes it clearer.
-    	if(e.getWorldObj().isRemote) return;
+    	if (e.getWorldObj().isRemote) return;
         if (!addedToNetwork) {
         	addedToNetwork = true;
             Network.joinOrCreateNetwork(e);
-        }else{
-    		if(node != null){
-    			if(e.getNode() == null) return;
+        } else {
+    		if (node != null) {
+    			if (e.getNode() == null) return;
     			Connector c = ((Connector) node);
     			EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) e.getNode();
     			double eMax = node.getOtherModEnergyBuffer(Other.getElnToOcConversionRatio());
-    			eMax = Math.min(Math.min(eMax, c.globalBufferSize()-c.globalBuffer()),node.descriptor.oc.outMax);
-    			if(c.tryChangeBuffer(eMax)){
+    			eMax = Math.min(Math.min(eMax, c.globalBufferSize() - c.globalBuffer()), node.descriptor.oc.outMax);
+    			if (c.tryChangeBuffer(eMax)) {
     				node.drawEnergy(eMax,Other.getElnToOcConversionRatio());
     			}
     		}
         }
-    
     }
-
 
     public void onChunkUnload() {
         // Make sure to remove the node from its network when its environment,
         // meaning this tile entity, gets unloaded.
-    	if(e.getWorldObj().isRemote) return;
+    	if (e.getWorldObj().isRemote) return;
         if (node != null) node.remove();
     }
-
 
     public void invalidate() {
         // Make sure to remove the node from its network when its environment,
         // meaning this tile entity, gets unloaded.
-    	if(e.getWorldObj().isRemote) return;
+    	if (e.getWorldObj().isRemote) return;
         if (node != null) node.remove();
     }
 
     // ----------------------------------------------------------------------- //
     public void readFromNBT(final NBTTagCompound nbt) {
-
         // The host check may be superfluous for you. It's just there to allow
         // some special cases, where getNode() returns some node managed by
         // some other instance (for example when you have multiple internal
@@ -76,9 +72,7 @@ public class EnergyConverterElnToOtherFireWallOc {
         }
     }
 
-
     public void writeToNBT(final NBTTagCompound nbt) {
-
         // See readFromNBT() regarding host check.
         if (node != null && node.host() == this) {
             final NBTTagCompound nodeNbt = new NBTTagCompound();
@@ -87,12 +81,8 @@ public class EnergyConverterElnToOtherFireWallOc {
         }
     }
 
-
 	public void constructor() {
 		node = li.cil.oc.api.Network.newNode(e, Visibility.None).withConnector().create();
 		Utils.println("******** C " + node);
 	}
-	
-	
-	
 }

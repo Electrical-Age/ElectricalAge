@@ -5,12 +5,13 @@ import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.info.Info;
 import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.FMLCommonHandler;
+
 public class EnergyConverterElnToOtherFireWallIc2 {
-	/**
+
+    /**
 	 * Forward for the base TileEntity's updateEntity(), used for creating the energy net link.
 	 * Either updateEntity or onLoaded have to be used.
 	 */
-
 	public static void updateEntity(EnergyConverterElnToOtherEntity e) {
 		if (!e.addedToEnet) onLoaded(e);
 	}
@@ -24,7 +25,6 @@ public class EnergyConverterElnToOtherFireWallIc2 {
 				!FMLCommonHandler.instance().getEffectiveSide().isClient() &&
 				Info.isIc2Available()) {
 
-
 			MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(e));
 
 			e.addedToEnet = true;
@@ -35,7 +35,6 @@ public class EnergyConverterElnToOtherFireWallIc2 {
 	 * Forward for the base TileEntity's invalidate(), used for destroying the energy net link.
 	 * Both invalidate and onChunkUnload have to be used.
 	 */
-
 	public static void invalidate(EnergyConverterElnToOtherEntity e) {
 		e.onChunkUnload();
 	}
@@ -44,14 +43,11 @@ public class EnergyConverterElnToOtherFireWallIc2 {
 	 * Forward for the base TileEntity's onChunkUnload(), used for destroying the energy net link.
 	 * Both invalidate and onChunkUnload have to be used.
 	 */
-
 	public static void onChunkUnload(EnergyConverterElnToOtherEntity e) {
-		if (e.addedToEnet &&
-				Info.isIc2Available()) {
+		if (e.addedToEnet && Info.isIc2Available()) {
 			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(e));
 
 			e.addedToEnet = false;
 		}
 	}
-	
 }

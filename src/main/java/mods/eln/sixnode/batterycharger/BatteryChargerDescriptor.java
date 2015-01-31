@@ -21,23 +21,27 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 
 	private Obj3D obj;
 	Obj3DPart main;
+
 	public double nominalVoltage;
 	public double nominalPower;
 	public ElectricalCableDescriptor cable;
 	double Rp;
 	public float[] pinDistance;
 
-	public BatteryChargerDescriptor(
-			String name,
-			Obj3D obj,
-			ElectricalCableDescriptor cable,
-			double nominalVoltage, double nominalPower) {
+    Obj3DPart[] leds = new Obj3DPart[4];
+
+    public BatteryChargerDescriptor(String name,
+                                    Obj3D obj,
+                                    ElectricalCableDescriptor cable,
+                                    double nominalVoltage, double nominalPower) {
 		super(name, BatteryChargerElement.class, BatteryChargerRender.class);
-		this.nominalVoltage = nominalVoltage;
+
+        this.nominalVoltage = nominalVoltage;
 		this.nominalPower = nominalPower;
 		this.Rp = nominalVoltage * nominalVoltage / nominalPower;
 		this.obj = obj;
 		this.cable = cable;
+
 		if (obj != null) {
 			main = obj.getPart("main");
 			for (int idx = 0; idx < 4; idx++) {
@@ -54,8 +58,6 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 		Data.addUtilities(newItemStack());
 	}
 
-	Obj3DPart[] leds = new Obj3DPart[4];
-
 	public void draw(boolean[] presence, boolean[] charged) {
 		if (main != null)
 			main.draw();
@@ -65,8 +67,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 			if (presence != null && presence[idx]) {
 				UtilsClient.ledOnOffColor(charged[idx]);
 				UtilsClient.drawLight(led);
-			}
-			else {
+			} else {
 				GL11.glColor3f(0.2f, 0.2f, 0.2f);
 				led.draw();
 			}
@@ -80,8 +81,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 	}
 	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
 
@@ -105,25 +105,21 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 		cable.applyTo(powerLoad);
 	}
 
-	public void setRp(Resistor powerload, boolean powerOn)
-	{
-		
-		if (powerOn == false)
+	public void setRp(Resistor powerload, boolean powerOn) {
+		if (!powerOn)
 			powerload.highImpedance();
 		else
 			powerload.setR(Rp);
-		
 	}
 
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Can be used to recharge");
-		list.add("some electrical items like");
+		list.add("Can be used to recharge some");
+		list.add("electrical items like the:");
 		list.add("Flash Light, Xray scanner,");
-		list.add("Portable Pattery ..");
+		list.add("Portable Battery ...");
 		list.add(Utils.plotPower("Nominal power", nominalPower));
-		//list.add(Utils.plotPower("Maximal power", nominalPower*3));
+		//list.add(Utils.plotPower("Maximal power", nominalPower * 3));
 	}
 }

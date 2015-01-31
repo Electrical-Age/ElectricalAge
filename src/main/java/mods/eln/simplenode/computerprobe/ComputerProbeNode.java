@@ -38,7 +38,14 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 	public NbtElectricalGateInputOutput[] ioGate = new NbtElectricalGateInputOutput[6];
 	public NbtElectricalGateOutputProcess[] ioGateProcess = new NbtElectricalGateOutputProcess[6];
 
-	@Override
+    double spotTimeout = 0;
+    IWirelessSignalSpot spot;
+    HashMap<String, HashSet<IWirelessSignalTx>> txSet = new HashMap<String, HashSet<IWirelessSignalTx>>();
+    HashMap<IWirelessSignalTx, Double> txStrength = new HashMap<IWirelessSignalTx, Double>();
+
+    HashMap<String, WirelessTx> wirelessTxMap = new HashMap<String, ComputerProbeNode.WirelessTx>();
+
+    @Override
 	public void initialize() {
 		slowProcessList.add(new SlowProcess());
 
@@ -51,7 +58,6 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 
 			ioGateProcess[idx].setHighImpedance(true);
 		}
-
 		connect();
 	}
 
@@ -69,11 +75,6 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 		}
 	}
 
-	double spotTimeout = 0;
-	IWirelessSignalSpot spot;
-	HashMap<String, HashSet<IWirelessSignalTx>> txSet = new HashMap<String, HashSet<IWirelessSignalTx>>();
-	HashMap<IWirelessSignalTx, Double> txStrength = new HashMap<IWirelessSignalTx, Double>();
-
 	double wirelessRead(String channel, String aggregatorName) {
 		if (spot == null) {
 			spot = WirelessUtils.buildSpot(coordonate, null, 0);
@@ -89,7 +90,6 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 		if (aggregatorName.equals("smaller")) aggregator = new SmallerAggregator();
 
 		return aggregator.aggregate(txSet.get(channel));
-
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 		unregister();
 	}
 	
-	void unregister(){
+	void unregister() {
 		for (WirelessTx tx : wirelessTxMap.values())
 			WirelessSignalTxElement.channelRemove(tx);
 	}
@@ -147,7 +147,7 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 	}
 
 	public Object[] signalGetDir(Direction side) {
-		return new Object[] { ioGateProcess[side.getInt()].isHighImpedance() ? "in" : "out" };
+		return new Object[]{ ioGateProcess[side.getInt()].isHighImpedance() ? "in" : "out" };
 	}
 
 	public Object[] signalSetOut(Direction side, double value) {
@@ -156,11 +156,11 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 	}
 
 	public Object[] signalGetOut(Direction side) {
-		return new Object[] { ioGateProcess[side.getInt()].getOutputNormalized() };
+		return new Object[]{ ioGateProcess[side.getInt()].getOutputNormalized() };
 	}
 
 	public Object[] signalGetIn(Direction side) {
-		return new Object[] { ioGate[side.getInt()].getInputNormalized() };
+		return new Object[]{ ioGate[side.getInt()].getInputNormalized() };
 	}
 
 	public Object[] wirelessSet(String channel, double value) {
@@ -279,32 +279,31 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 		try {
 			if (method < 0 || method >= functionNames.length) return null;
 			switch (method) {
-			case 0:
-				return signalSetDir(Direction.valueOf((String) args[0]), args[1].equals("in"));
-			case 1:
-				return signalGetDir(Direction.valueOf((String) args[0]));
-			case 2:
-				return signalSetOut(Direction.valueOf((String) args[0]), (Double) args[1]);
-			case 3:
-				return signalGetOut(Direction.valueOf((String) args[0]));
-			case 4:
-				return signalGetIn(Direction.valueOf((String) args[0]));
-			case 5:
-				return wirelessSet((String) args[0], (Double) args[1]);
-			case 6:
-				return wirelessRemove((String) args[0]);
-			case 7:
-				return wirelessRemoveAll();
-			case 8: {
-				String aggregation = "bigger";
-				if (args.length == 2) aggregation = (String) args[1];
-				return wirelessGet((String) args[0], aggregation);
-			}
+                case 0:
+                    return signalSetDir(Direction.valueOf((String) args[0]), args[1].equals("in"));
+                case 1:
+                    return signalGetDir(Direction.valueOf((String) args[0]));
+                case 2:
+                    return signalSetOut(Direction.valueOf((String) args[0]), (Double) args[1]);
+                case 3:
+                    return signalGetOut(Direction.valueOf((String) args[0]));
+                case 4:
+                    return signalGetIn(Direction.valueOf((String) args[0]));
+                case 5:
+                    return wirelessSet((String) args[0], (Double) args[1]);
+                case 6:
+                    return wirelessRemove((String) args[0]);
+                case 7:
+                    return wirelessRemoveAll();
+                case 8: {
+                    String aggregation = "bigger";
+                    if (args.length == 2) aggregation = (String) args[1];
+                    return wirelessGet((String) args[0], aggregation);
+			    }
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-
 		return null;
 	}
 
@@ -350,8 +349,6 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 		}
 	}
 
-	HashMap<String, WirelessTx> wirelessTxMap = new HashMap<String, ComputerProbeNode.WirelessTx>();
-
 	class WirelessTx implements IWirelessSignalTx {
 		String channel;
 		double value;
@@ -380,5 +377,4 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 			return value;
 		}
 	}
-
 }

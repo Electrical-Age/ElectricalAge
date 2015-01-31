@@ -13,16 +13,15 @@ import org.lwjgl.opengl.GL11;
 
 public class DiodeRender extends SixNodeElementRender {
 
-	public DiodeRender(SixNodeEntity tileEntity, Direction side,
-                       SixNodeDescriptor descriptor) {
+    private DiodeDescriptor descriptor;
+
+    double voltageAnode = 0, voltageCatode = 0, current = 0, temperature = 0;
+    LRDU front;
+
+	public DiodeRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
         this.descriptor = (DiodeDescriptor) descriptor;
 	}
-
-    private DiodeDescriptor descriptor;
-
-	double voltageAnode = 0, voltageCatode = 0, current = 0, temperature = 0;
-	LRDU front;
 
 	@Override
 	public void draw() {
@@ -37,13 +36,13 @@ public class DiodeRender extends SixNodeElementRender {
 		try {
 			Byte b;
 			b = stream.readByte();
-			front = LRDU.fromInt((b>>4)&3);
+			front = LRDU.fromInt((b >> 4) & 3);
 			voltageAnode = stream.readShort() / NodeBase.networkSerializeUFactor;
 			voltageCatode = stream.readShort() / NodeBase.networkSerializeUFactor;
 			current = stream.readShort() / NodeBase.networkSerializeIFactor;
 			temperature = stream.readShort() / NodeBase.networkSerializeTFactor;
 		} catch (IOException e) {
 			e.printStackTrace();
-		}		
+		}
 	}
 }

@@ -27,21 +27,23 @@ import cpw.mods.fml.relauncher.SideOnly;
 		@Optional.Interface(iface = "cofh.api.energy.IEnergyHandler", modid = Other.modIdTe),
 		@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = Other.modIdOc) })
 public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
-		IEnergySource, Environment, IEnergyHandler
+		IEnergySource, Environment, IEnergyHandler /* ,SidedEnvironment, ISidedBatteryProvider, IPowerEmitter, IPipeConnection */ {
 
-/* ,SidedEnvironment *//*
-						 * , ISidedBatteryProvider, IPowerEmitter
-						 *//* , IPipeConnection */{
+    float inPowerFactor;
+    boolean hasChanges = false;
+    public float inPowerMax;
 
-	public EnergyConverterElnToOtherEntity() {
+    EnergyConverterElnToOtherFireWallOc oc;
+
+    protected boolean addedToEnet;
+
+    public EnergyConverterElnToOtherEntity() {
 		if (Other.ocLoaded)
 			getOc().constructor();
 	}
 
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-			float vx, float vy, float vz) {
-
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		return super.onBlockActivated(entityPlayer, side, vx, vy, vz);
 	}
 
@@ -50,10 +52,6 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		return new EnergyConverterElnToOtherGui(player, this);
 	}
-
-	float inPowerFactor;
-	boolean hasChanges = false;
-	public float inPowerMax;
 
 	@Override
 	public void serverPublishUnserialize(DataInputStream stream) {
@@ -124,8 +122,6 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 
 	// ***************** OC **********************
 
-	EnergyConverterElnToOtherFireWallOc oc;
-
 	@Optional.Method(modid = Other.modIdOc)
 	EnergyConverterElnToOtherFireWallOc getOc() {
 		if (oc == null)
@@ -142,19 +138,16 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	@Override
 	@Optional.Method(modid = Other.modIdOc)
 	public void onConnect(Node node) {
-
 	}
 
 	@Override
 	@Optional.Method(modid = Other.modIdOc)
 	public void onDisconnect(Node node) {
-
 	}
 
 	@Override
 	@Optional.Method(modid = Other.modIdOc)
 	public void onMessage(Message message) {
-
 	}
 
 	/*
@@ -191,25 +184,21 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 
 	@Override
 	@Optional.Method(modid = Other.modIdTe)
-	public int receiveEnergy(ForgeDirection from, int maxReceive,
-			boolean simulate) {
+	public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate) {
 		// Utils.println("*****receiveEnergy*****");
 		return 0;
 	}
 
 	@Override
 	@Optional.Method(modid = Other.modIdTe)
-	public int extractEnergy(ForgeDirection from, int maxExtract,
-			boolean simulate) {
+	public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate) {
 		// Utils.println("*****extractEnergy*****");
 		if (worldObj.isRemote)
 			return 0;
 		if (getNode() == null)
 			return 0;
 		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) getNode();
-		int extract = (int) Math
-				.min(maxExtract, node.getOtherModEnergyBuffer(Other
-						.getElnToTeConversionRatio()));
+        int extract = (int) Math.min(maxExtract, node.getOtherModEnergyBuffer(Other.getElnToTeConversionRatio()));
 		if (simulate)
 			node.drawEnergy(extract, Other.getElnToTeConversionRatio());
 
@@ -229,8 +218,6 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 		// Utils.println("*****getMaxEnergyStored*****");
 		return 0;
 	}
-
-
 
 	// ***************** Bridges ****************
 
@@ -274,7 +261,6 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 		super.readFromNBT(nbt);
 		if (Other.ocLoaded)
 			getOc().readFromNBT(nbt);
-
 	}
 
 	public void writeToNBT(NBTTagCompound nbt) {
@@ -282,7 +268,4 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 		if (Other.ocLoaded)
 			getOc().writeToNBT(nbt);
 	}
-
-	protected boolean addedToEnet;
-
 }

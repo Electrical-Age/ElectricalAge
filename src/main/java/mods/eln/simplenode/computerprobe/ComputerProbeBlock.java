@@ -2,19 +2,19 @@ package mods.eln.simplenode.computerprobe;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import mods.eln.node.simple.SimpleNode;
+import mods.eln.node.simple.SimpleNodeBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
-import mods.eln.misc.Direction;
-import mods.eln.node.simple.SimpleNode;
-import mods.eln.node.simple.SimpleNodeBlock;
 
-public class ComputerProbeBlock extends SimpleNodeBlock{
+public class ComputerProbeBlock extends SimpleNodeBlock {
 
-	public ComputerProbeBlock() {
+    private IIcon[] icon = new IIcon[6];
+
+    public ComputerProbeBlock() {
 		super(Material.rock);
 	}
 
@@ -28,20 +28,12 @@ public class ComputerProbeBlock extends SimpleNodeBlock{
 		return new ComputerProbeNode();
 	}
 
-	
-	
 	public IIcon getIcon(int side, int meta) {
 		return icon[side];
-	};
+	}
 
-	
-	
-
-	
-	private IIcon[] icon = new IIcon[6];
     @SideOnly(Side.CLIENT)
-    public void registerBlockIcons(IIconRegister register)
-    {
+    public void registerBlockIcons(IIconRegister register) {
         icon[4] = register.registerIcon("eln:computerprobe_xn");
         icon[5] = register.registerIcon("eln:computerprobe_xp");
         icon[2] = register.registerIcon("eln:computerprobe_zn");

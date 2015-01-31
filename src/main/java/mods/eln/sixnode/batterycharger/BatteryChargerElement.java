@@ -33,18 +33,24 @@ public class BatteryChargerElement extends SixNodeElement {
 	
 	public NbtElectricalLoad powerLoad = new NbtElectricalLoad("powerLoad");
 	public BatteryChargerSlowProcess slowProcess = new BatteryChargerSlowProcess();
-	Resistor powerResistor = new Resistor(powerLoad,null);
-	
-	
+	Resistor powerResistor = new Resistor(powerLoad, null);
+
 	SixNodeElementInventory inventory = new SixNodeElementInventory(5, 64, this);
-	
-	
+
 	VoltageStateWatchDog voltageWatchDog = new VoltageStateWatchDog();
 	ResistorPowerWatchdog powerWatchDog = new ResistorPowerWatchdog();
-	
-	
-	
-	@Override
+
+    public String channel = "Default channel";
+
+    boolean invChanged = false;
+
+    boolean powerOn = false;
+
+    public static final byte toogleCharge = 1;
+
+    byte charged, presence;
+
+    @Override
 	public IInventory getInventory() {
 		return inventory;
 	}
@@ -53,11 +59,8 @@ public class BatteryChargerElement extends SixNodeElement {
 	public Container newContainer(Direction side, EntityPlayer player) {
 		return new BatteryChargerContainer(player, inventory);
 	}
-	
-	public String channel = "Default channel";
-	
-	public BatteryChargerElement(SixNode sixNode, Direction side,
-			SixNodeDescriptor descriptor) {
+
+	public BatteryChargerElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		this.descriptor = (BatteryChargerDescriptor) descriptor;
 		
@@ -67,14 +70,14 @@ public class BatteryChargerElement extends SixNodeElement {
 
 		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
 		slowProcessList.add(voltageWatchDog.set(powerLoad).setUNominal(this.descriptor.nominalVoltage).set(exp));
-		//slowProcessList.add(powerWatchDog.set(powerResistor).setPmax(this.descriptor.nominalPower*3).set(exp));
+		//slowProcessList.add(powerWatchDog.set(powerResistor).setPmax(this.descriptor.nominalPower * 3).set(exp));
 		
 		front = LRDU.Down;
 	}
 	
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(front == lrdu) return powerLoad;
+		if (front == lrdu) return powerLoad;
 		return null;
 	}
 
@@ -85,7 +88,7 @@ public class BatteryChargerElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu) return NodeBase.maskElectricalPower;
+		if (front == lrdu) return NodeBase.maskElectricalPower;
 		return 0;
 	}
 
@@ -104,7 +107,6 @@ public class BatteryChargerElement extends SixNodeElement {
 		descriptor.applyTo(powerLoad);
 	}
 	
-	boolean invChanged = false;
 	@Override
 	protected void inventoryChanged() {
 		super.inventoryChanged();
@@ -113,9 +115,8 @@ public class BatteryChargerElement extends SixNodeElement {
 	}
 
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-			float vx, float vy, float vz) {
-		if(Utils.isPlayerUsingWrench(entityPlayer)) {
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+		if (Utils.isPlayerUsingWrench(entityPlayer)) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);
@@ -124,35 +125,30 @@ public class BatteryChargerElement extends SixNodeElement {
 		return false;
 	}
 
-	boolean powerOn = false;
-	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
 		nbt.setBoolean("powerOn", powerOn);
 		nbt.setDouble("energyCounter", slowProcess.energyCounter);
-
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 		powerOn = nbt.getBoolean( "powerOn");
-		slowProcess.energyCounter = nbt.getDouble( "energyCounter");
+		slowProcess.energyCounter = nbt.getDouble("energyCounter");
 	}
 
-	public static final byte toogleCharge = 1;
-	
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		super.networkUnserialize(stream);
 		
 		try {
 			switch(stream.readByte()) {
-			case toogleCharge:
-				powerOn = ! powerOn;
-				needPublish();
-				break;
+			    case toogleCharge:
+				    powerOn = !powerOn;
+				    needPublish();
+				    break;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -181,41 +177,38 @@ public class BatteryChargerElement extends SixNodeElement {
 			e.printStackTrace();
 		}
 	}
-	
-	byte charged,presence;
-	
+
 	class BatteryChargerSlowProcess implements IProcess {
 		double energyCounter = 0;
 		double timeout = 0;
-		@Override
+
+        @Override
 		public void process(double time) {
 			timeout -= time;
-			if(timeout > 0) return;
+			if (timeout > 0) return;
 			timeout = 1;
 			time = 1;
-			
-			
+
 			byte oldCharged = charged;
 			charged = 0;
 			presence = 0;
-			if(powerOn == false) {
+			if (!powerOn) {
 				descriptor.setRp(powerResistor, false);
-			}
-			else {
+			} else {
 				ItemStack booster = (inventory.getStackInSlot(BatteryChargerContainer.boosterSlotId));
 				double boost = 1.0;
 				double eff = 1.0;
-				if(booster != null) {
+				if (booster != null) {
 					boost = Math.pow(1.25, booster.stackSize);
 					eff = Math.pow(0.9, booster.stackSize);
 				}
 				
 				energyCounter += powerResistor.getP() * time * eff;
 				
-				for(int idx = 0; idx < 4; idx++) {
+				for (int idx = 0; idx < 4; idx++) {
 					ItemStack stack = inventory.getStackInSlot(idx);
 					Object o = Utils.getItemObject(stack);
-					if(o instanceof IItemEnergyBattery){
+					if (o instanceof IItemEnergyBattery) {
 						IItemEnergyBattery b = (IItemEnergyBattery) o;
 						double e = Math.min(Math.min(energyCounter, b.getChargePower(stack) * time * boost), b.getEnergyMax(stack) - b.getEnergy(stack));
 						b.setEnergy(stack, b.getEnergy(stack) + e);
@@ -223,31 +216,29 @@ public class BatteryChargerElement extends SixNodeElement {
 					}
 				}
 				
-				if(energyCounter < descriptor.nominalPower * time * 2 * boost) {
+				if (energyCounter < descriptor.nominalPower * time * 2 * boost) {
 					//double target = descriptor.nominalPower * time * 2;
 					double power = Math.min(descriptor.nominalPower * boost, (descriptor.nominalPower * time * 2 * boost - energyCounter) / time);
-					powerResistor.setR(Math.max(powerLoad.getU() * powerLoad.getU() / power,descriptor.Rp / boost));
-					
-				}
-				else {
+					powerResistor.setR(Math.max(powerLoad.getU() * powerLoad.getU() / power, descriptor.Rp / boost));
+				} else {
 					descriptor.setRp(powerResistor, false);
 				}
 			}
-			for(int idx = 0; idx < 4; idx++) {
+			for (int idx = 0; idx < 4; idx++) {
 				ItemStack stack = inventory.getStackInSlot(idx);
 				Object o = Utils.getItemObject(stack);
-				if(o instanceof IItemEnergyBattery) {
+				if (o instanceof IItemEnergyBattery) {
 					IItemEnergyBattery b = (IItemEnergyBattery) o;
-					if(b.getEnergy(stack) == b.getEnergyMax(stack)){
+					if (b.getEnergy(stack) == b.getEnergyMax(stack)) {
 						charged += 1 << idx;
 					}
 					presence += 1 << idx;
 				}
 			}
 			
-			if(charged != oldCharged) 
+			if (charged != oldCharged)
 				needPublish();
-			if(invChanged){
+			if (invChanged) {
 				invChanged = false;
 				needPublish();
 			}
