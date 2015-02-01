@@ -75,8 +75,12 @@ public class TransparentNodeBlock extends NodeBlock {
 	
     @Override
     public int getDamageValue(World world, int x, int y, int z) {
-    	
-    	return ((TransparentNodeEntity) world.getTileEntity(x, y, z)).getDamageValue( world,  x,  y,  z);
+    	if(world == null)
+    		return 0;
+    	TileEntity tile = world.getTileEntity(x, y, z);
+    	if(tile != null && tile instanceof TransparentNodeEntity)
+    		return ((TransparentNodeEntity) world.getTileEntity(x, y, z)).getDamageValue( world,  x,  y,  z);
+    	return 0;
     }
     
     
