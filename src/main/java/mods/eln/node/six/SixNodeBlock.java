@@ -74,8 +74,10 @@ public class SixNodeBlock extends NodeBlock {
 
 	@Override
 	public int getDamageValue(World world, int x, int y, int z) {
-
-		return ((SixNodeEntity) world.getTileEntity(x, y, z)).getDamageValue(world, x, y, z);
+		if(world == null)
+			return 0;
+		SixNodeEntity entity = getEntity(world, x, y, z);
+		return entity == null ? 0 : entity.getDamageValue(world, x, y, z);
 	}
 
 	SixNodeEntity getEntity(World world, int x, int y, int z)
