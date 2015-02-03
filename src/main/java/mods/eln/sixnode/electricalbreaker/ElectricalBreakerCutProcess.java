@@ -1,39 +1,38 @@
 package mods.eln.sixnode.electricalbreaker;
 
-import mods.eln.Eln;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class ElectricalBreakerCutProcess implements IProcess,INBTTReady {
+
 	ElectricalBreakerElement breaker;
+
+    double T = 0;
 	
 	public ElectricalBreakerCutProcess(ElectricalBreakerElement breaker) {
 		this.breaker = breaker;
 	}
-	
-	double T = 0;
-	
+
 	@Override
 	public void process(double time) {
 		double U = breaker.aLoad.getU();
 		double I = breaker.aLoad.getCurrent();
 		double Tmax = 0;
 		ElectricalCableDescriptor cable = breaker.cableDescriptor;
-		if(cable == null) {
+		if (cable == null) {
 			T = 0;
-		}
-		else {
+		} else {
 			Math.min(I, cable.electricalNominalPower / cable.electricalMaximalVoltage * 10);			
 			double P = I * I * cable.electricalRs * 2 - T / cable.thermalRp * 0.9;
-			/*if(P > 200) {
+			/*if (P > 200) {
 				int i = 0;
 				i++;
 				Utils.println(P);
 			}*/
 			//double pMax = Eln.electricalCableDeltaTMax * cable.thermalC;
-			if(I > 1){
+			if (I > 1) {
 				int idx = 0;
 				idx++;
 			}
@@ -42,7 +41,7 @@ public class ElectricalBreakerCutProcess implements IProcess,INBTTReady {
 		}
 		//Utils.println(T);
 		
-		if(U >= breaker.voltageMax || U < breaker.voltageMin || T > Tmax) {
+		if (U >= breaker.voltageMax || U < breaker.voltageMin || T > Tmax) {
 			breaker.setSwitchState(false);
 		}
 	}

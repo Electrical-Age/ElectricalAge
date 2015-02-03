@@ -1,18 +1,14 @@
 package mods.eln.sixnode.electricaldatalogger;
 
-import java.util.List;
-
-import org.lwjgl.opengl.GL11;
-
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
-import mods.eln.Eln;
-import mods.eln.generic.GenericItemUsingDamageDescriptor;
-import mods.eln.generic.GenericItemUsingDamageSlot;
-import mods.eln.misc.Utils;
+import org.lwjgl.opengl.GL11;
+
+import java.util.List;
 
 public class DataLogsPrintDescriptor extends GenericItemUsingDamageDescriptor {
 
@@ -35,10 +31,12 @@ public class DataLogsPrintDescriptor extends GenericItemUsingDamageDescriptor {
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
+
 	@Override
 	public boolean use2DIcon() {
 		return false;
 	}
+
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		NBTTagCompound nbt = item.getTagCompound();

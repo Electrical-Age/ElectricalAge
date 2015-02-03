@@ -1,38 +1,33 @@
 package mods.eln.sixnode.electricalcable;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
-import org.lwjgl.opengl.GL11;
-
-import cpw.mods.fml.relauncher.Side;
-
-import mods.eln.Eln;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
-import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
+import org.lwjgl.opengl.GL11;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class ElectricalCableRender extends SixNodeElementRender {
 
 	ElectricalCableDescriptor descriptor;
-	
+
+    int color = 0;
+
 	public ElectricalCableRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalCableDescriptor) descriptor;
 	}
 
 //	double voltage = 0, current = 0, temperature = 0;
-	int color = 0;
-	
+
 	public boolean drawCableAuto() {
 		return false;
 	}

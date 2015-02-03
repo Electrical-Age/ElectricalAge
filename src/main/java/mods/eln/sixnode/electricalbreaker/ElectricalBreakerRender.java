@@ -24,14 +24,24 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
 	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 	ElectricalBreakerDescriptor descriptor;
 	long time;
+
+    RcInterpolator interpol;
+
+    float uMin, uMax;
+
+    boolean boot = true;
+    float switchAlpha = 0;
+    public boolean switchState;
+
+    CableRenderDescriptor cableRender;
+
 	public ElectricalBreakerRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalBreakerDescriptor) descriptor;
 		time = System.currentTimeMillis();
 		interpol = new RcInterpolator(this.descriptor.speed);
 	}
-	RcInterpolator interpol;
-	
+
 	@Override
 	public void draw() {
 		super.draw();
@@ -42,9 +52,8 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
 	
 	@Override
 	public void refresh(float deltaT) {
-		interpol.setTarget(switchState ? 1f :0f);	
+		interpol.setTarget(switchState ? 1f : 0f);
 		interpol.step(deltaT);
-		
 	}
 	
 	@Override
@@ -52,12 +61,6 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
 		return cableRender;
 	}
 
-	float uMin, uMax;
-
-	boolean boot = true;
-	float switchAlpha = 0;
-	public boolean switchState;
-	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);
@@ -69,7 +72,7 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
 			
 			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), ElectricalCableDescriptor.class);
 			
-			if(desc == null)
+			if (desc == null)
 				cableRender = null;
 			else
 				cableRender = desc.render;
@@ -77,13 +80,12 @@ public class ElectricalBreakerRender extends SixNodeElementRender {
 			e.printStackTrace();
 		}	
 		
-		if(boot) {
+		if (boot) {
 			interpol.setValue(switchState ? 1f : 0f);
 		}
 		boot = false;
 	}
-	
-	CableRenderDescriptor cableRender;
+
 	public void clientSetVoltageMin(float value) {
         try {
 	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();

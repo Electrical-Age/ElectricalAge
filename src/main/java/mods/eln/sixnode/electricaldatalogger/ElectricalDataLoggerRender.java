@@ -1,39 +1,30 @@
 package mods.eln.sixnode.electricaldatalogger;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import org.lwjgl.opengl.GL11;
-
 import mods.eln.Eln;
-import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.client.ClientProxy;
-
-
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.Obj3D;
-import mods.eln.misc.Utils;
-import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import mods.eln.server.PlayerManager;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class ElectricalDataLoggerRender extends SixNodeElementRender {
 
 	SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
 	ElectricalDataLoggerDescriptor descriptor;
 	long time;
+
+    public boolean pause;
+
+    DataLogs log = new DataLogs(ElectricalDataLoggerElement.logsSizeMax);
+    boolean waitFistSync = true;
+
 	public ElectricalDataLoggerRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalDataLoggerDescriptor) descriptor;
@@ -59,8 +50,6 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
 	}
 	*/
 	
-	public boolean pause;
-	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);
@@ -74,28 +63,25 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
 			e.printStackTrace();
 		}	
 	}
-	
-	DataLogs log = new DataLogs(ElectricalDataLoggerElement.logsSizeMax);
-	boolean waitFistSync = true;
-	
+
 	@Override
 	public void serverPacketUnserialize(DataInputStream stream) throws IOException {
 		byte header = stream.readByte();
 		
 		switch(header) {
-		case ElectricalDataLoggerElement.toClientLogsAdd:
-		case ElectricalDataLoggerElement.toClientLogsClear:
-			if(header == ElectricalDataLoggerElement.toClientLogsClear) {
-				log.reset();
-				waitFistSync = false;
-			}
-			int size = stream.available();
-			while(size != 0) {
-				size--;
-				log.write(stream.readByte());
-			}
-		//	Utils.println(log);
-			break;
+            case ElectricalDataLoggerElement.toClientLogsAdd:
+            case ElectricalDataLoggerElement.toClientLogsClear:
+                if (header == ElectricalDataLoggerElement.toClientLogsClear) {
+                    log.reset();
+                    waitFistSync = false;
+                }
+                int size = stream.available();
+                while (size != 0) {
+                    size--;
+                    log.write(stream.readByte());
+                }
+            //	Utils.println(log);
+                break;
 		}
 	}
 	

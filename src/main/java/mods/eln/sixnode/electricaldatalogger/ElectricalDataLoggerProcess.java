@@ -1,20 +1,15 @@
 package mods.eln.sixnode.electricaldatalogger;
 
+import mods.eln.Eln;
+import mods.eln.sim.IProcess;
+import net.minecraft.item.ItemStack;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import mods.eln.Eln;
-import mods.eln.misc.INBTTReady;
-import mods.eln.misc.Profiler;
-import mods.eln.misc.Utils;
-import mods.eln.sim.IProcess;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-
 public class ElectricalDataLoggerProcess implements IProcess {
+
 	ElectricalDataLoggerElement e;
 	
 	public ElectricalDataLoggerProcess(ElectricalDataLoggerElement e) {
@@ -25,17 +20,17 @@ public class ElectricalDataLoggerProcess implements IProcess {
 	public void process(double time) {
 		//Profiler p = new Profiler();
 		//p.add("A");
-		if(e.pause == false) {
+		if (!e.pause) {
 			e.timeToNextSample -= time;
 			byte value = ((byte)(e.inputGate.getNormalized() * 255.5 - 128));
 			e.sampleStack += value;
 			e.sampleStackNbr++;
 		}
 		//p.add("B");
-		if(e.printToDo) {
+		if (e.printToDo) {
 			ItemStack paperStack = e.inventory.getStackInSlot(ElectricalDataLoggerContainer.paperSlotId);
 			ItemStack printStack = e.inventory.getStackInSlot(ElectricalDataLoggerContainer.printSlotId);
-			if(paperStack != null && printStack == null) {
+			if (paperStack != null && printStack == null) {
 				e.inventory.decrStackSize(ElectricalDataLoggerContainer.paperSlotId, 1);
 				ItemStack print = Eln.instance.dataLogsPrintDescriptor.newItemStack(1);
 				Eln.instance.dataLogsPrintDescriptor.initializeStack(print, e.logs);
@@ -44,7 +39,7 @@ public class ElectricalDataLoggerProcess implements IProcess {
 			e.printToDo = false;
 		}
 		//p.add("C");
-		if(e.timeToNextSample <= 0.0) {
+		if (e.timeToNextSample <= 0.0) {
 			e.timeToNextSample += e.logs.samplingPeriod;
 			byte value = (byte)(e.sampleStack / e.sampleStackNbr);
 			e.sampleStackReset();

@@ -1,19 +1,14 @@
 package mods.eln.sixnode.electricaldatalogger;
 
 import mods.eln.generic.GenericItemUsingDamageSlot;
-import mods.eln.gui.GuiHelper;
+import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.gui.ItemStackFilter;
 import mods.eln.gui.SlotFilter;
-import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.misc.BasicContainer;
-import mods.eln.node.six.SixNodeItemSlot;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 
 public class ElectricalDataLoggerContainer extends BasicContainer {
 

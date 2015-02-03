@@ -1,43 +1,32 @@
 package mods.eln.sixnode.electricaldatalogger;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import mods.eln.gui.GuiContainerEln;
+import mods.eln.gui.GuiHelperContainer;
+import mods.eln.gui.GuiTextFieldEln;
+import mods.eln.gui.GuiTextFieldEln.GuiTextFieldElnObserver;
+import mods.eln.gui.IGuiObject;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
+import org.lwjgl.opengl.GL11;
+
 import java.text.NumberFormat;
 import java.text.ParseException;
 
-import org.lwjgl.opengl.GL11;
-
-import mods.eln.gui.GuiContainerEln;
-import mods.eln.gui.GuiHelper;
-import mods.eln.gui.GuiHelperContainer;
-import mods.eln.gui.GuiTextFieldEln;
-import mods.eln.gui.IGuiObject;
-import mods.eln.gui.GuiTextFieldEln.GuiTextFieldElnObserver;
-import mods.eln.misc.Utils;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.gui.inventory.GuiEditSign;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-
 public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextFieldElnObserver {
+
+    GuiButton resetBt, voltageType, energyType, currentType, powerType, celsuisTyp, percentTyp, config, printBt, pause;
+    GuiTextFieldEln samplingPeriode, maxValue, minValue;
+    ElectricalDataLoggerRender render;
+
+    enum State {display,config}
+    State state = State.display;
 
 	public ElectricalDataLoggerGui(EntityPlayer player, IInventory inventory, ElectricalDataLoggerRender render) {
 		super(new ElectricalDataLoggerContainer(player, inventory));
 		this.render = render;
 	}
 
-	GuiButton resetBt, voltageType, energyType, currentType, powerType, celsuisTyp, percentTyp, config, printBt, pause;
-	GuiTextFieldEln samplingPeriode, maxValue, minValue;
-	ElectricalDataLoggerRender render;
-	
-	enum State {display,config};
-	State state = State.display;
-	
 	void displayEntry() {
 		config.displayString = "Config";
 		config.visible = true;
@@ -108,54 +97,42 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	public void guiObjectEvent(IGuiObject object) {
 		super.guiObjectEvent(object);
 		try {
-	    	if(object == resetBt) {
+	    	if (object == resetBt) {
 	    		render.clientSend(ElectricalDataLoggerElement.resetId);
-	    	}
-	    	else if(object == pause) {
+	    	} else if (object == pause) {
 	    		render.clientSend(ElectricalDataLoggerElement.tooglePauseId);
-	    	}
-	    	else if(object == printBt) {
+	    	} else if (object == printBt) {
 	    		render.clientSend(ElectricalDataLoggerElement.printId);
-	    	}
-	    	else if(object == currentType) {
+	    	} else if (object == currentType) {
 	    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.currentType);
-	    	}
-	    	else if(object == voltageType) {
+	    	} else if (object == voltageType) {
 	    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.voltageType);
-	    	}
-	    	else if(object == energyType) {
+	    	} else if (object == energyType) {
 	    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.energyType);
-	    	}
-	    	else if(object == percentTyp) {
+	    	} else if (object == percentTyp) {
 	    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.percentType);
-	    	}
-	    	else if(object == powerType) {
+	    	} else if (object == powerType) {
 	    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.powerType);
-	    	}
-	    	else if(object == celsuisTyp) {
+	    	} else if (object == celsuisTyp) {
 	    		render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.celsiusType);
-	    	}
-	    	else if(object == config) { 
+	    	} else if (object == config) {
 	    		switch(state) {
-				case config:
-					displayEntry();
-					break;
-				case display:
-					configEntry();
-					break;
-				default:
-					break;
+                    case config:
+                        displayEntry();
+                        break;
+                    case display:
+                        configEntry();
+                        break;
+                    default:
+                        break;
 	    		}
-	    	}
-	    	else if(object == maxValue) {
+	    	} else if (object == maxValue) {
 				render.clientSetFloat(ElectricalDataLoggerElement.setMaxValue, NumberFormat.getInstance().parse(maxValue.getText()).floatValue());
-			}
-			else if(object == minValue) {
+			} else if (object == minValue) {
 				render.clientSetFloat(ElectricalDataLoggerElement.setMinValue, NumberFormat.getInstance().parse(minValue.getText()).floatValue());
-			}
-			else if(object == samplingPeriode) {
+			} else if (object == samplingPeriode) {
 				float value = NumberFormat.getInstance().parse(samplingPeriode.getText()).floatValue();
-				if(value < 0.05f) value = 0.05f;
+				if (value < 0.05f) value = 0.05f;
 				samplingPeriode.setText(value);
 				
 				render.clientSetFloat(ElectricalDataLoggerElement.setSamplingPeriodeId, value);
@@ -175,27 +152,27 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
     	energyType.enabled = true;
     	    	
     	switch(render.log.unitType) {
-    	case DataLogs.currentType:
-    		currentType.enabled = false;
-    		break;
-    	case DataLogs.voltageType:
-    		voltageType.enabled = false;
-    		break;
-    	case DataLogs.powerType:
-    		powerType.enabled = false;
-    		break;
-    	case DataLogs.celsiusType:
-    		celsuisTyp.enabled = false;
-    		break;		
-    	case DataLogs.percentType:
-    		percentTyp.enabled = false;
-    		break;		
-    	case DataLogs.energyType:
-    		energyType.enabled = false;
-    		break;	
+            case DataLogs.currentType:
+                currentType.enabled = false;
+                break;
+            case DataLogs.voltageType:
+                voltageType.enabled = false;
+                break;
+            case DataLogs.powerType:
+                powerType.enabled = false;
+                break;
+            case DataLogs.celsiusType:
+                celsuisTyp.enabled = false;
+                break;
+            case DataLogs.percentType:
+                percentTyp.enabled = false;
+                break;
+            case DataLogs.energyType:
+                energyType.enabled = false;
+                break;
     	}
     	
-    	if(render.pause)
+    	if (render.pause)
     		pause.displayString = "Continue";
     	else
     		pause.displayString = "Pause";
@@ -209,7 +186,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
     protected void postDraw(float f, int x, int y) {
     	super.postDraw(f, x, y);
     	
-    	if(state == State.display) {
+    	if (state == State.display) {
 			GL11.glColor4f(1f, 0f, 0f, 1f);
 			
 	        GL11.glPushMatrix();

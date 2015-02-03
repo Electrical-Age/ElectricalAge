@@ -1,7 +1,5 @@
 package mods.eln.sixnode.electricalcable;
 
-import java.util.List;
-
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
@@ -12,18 +10,36 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.misc.MnaConst;
-import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-public class ElectricalCableDescriptor extends SixNodeDescriptor  {
+import java.util.List;
+
+public class ElectricalCableDescriptor extends SixNodeDescriptor {
 
 	double electricalNominalRs;
 	public double electricalNominalVoltage, electricalNominalPower, electricalNominalPowerDropFactor;
 	public boolean signalWire;
+
+    public double electricalMaximalVoltage,electricalMaximalCurrent;
+    public double electricalRp = Double.POSITIVE_INFINITY, electricalRs = Double.POSITIVE_INFINITY, electricalC = 1;
+    public double thermalRp = 1, thermalRs = 1, thermalC = 1;
+    public double thermalWarmLimit = 100,thermalCoolLimit = -100;
+    double electricalMaximalI;
+    public double electricalRsMin = 0;
+    public double electricalRsPerCelcius = 0;
+
+    public double dielectricBreakOhmPerVolt = 0;
+    public double dielectricBreakOhm = Double.POSITIVE_INFINITY;
+    public double dielectricVoltage = Double.POSITIVE_INFINITY;
+    public double dielectricBreakOhmMin = Double.POSITIVE_INFINITY;
+
+    String description = "todo cable";
+
+    public CableRenderDescriptor render;
+
 	public ElectricalCableDescriptor(String name, CableRenderDescriptor render, String description, boolean signalWire) {
 		super(name, ElectricalCableElement.class, ElectricalCableRender.class);
 	
@@ -37,8 +53,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 			double electricalMaximalVoltage, double electricalMaximalPower,
 			double electricalOverVoltageStartPowerLost,
 			double thermalWarmLimit, double thermalCoolLimit,
-			double thermalNominalHeatTime, double thermalConductivityTao			
-			) {
+			double thermalNominalHeatTime, double thermalConductivityTao) {
 		this.electricalNominalVoltage = electricalNominalVoltage;
 		this.electricalNominalPower = electricalNominalPower;
 		this.electricalNominalPowerDropFactor = electricalNominalPowerDropFactor;
@@ -70,46 +85,32 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 		dielectricBreakOhmMin = dielectricBreakOhm;
 		
 		this.electricalMaximalCurrent = electricalMaximalPower/electricalNominalVoltage;
-	}	
-	public double electricalMaximalVoltage,electricalMaximalCurrent;
-	public double electricalRp = Double.POSITIVE_INFINITY, electricalRs = Double.POSITIVE_INFINITY, electricalC = 1;
-	public double thermalRp = 1, thermalRs = 1, thermalC = 1;
-	public double thermalWarmLimit = 100,thermalCoolLimit = -100;
-	double electricalMaximalI;
-	public double electricalRsMin = 0;
-	public double electricalRsPerCelcius = 0;
-	
-	public double dielectricBreakOhmPerVolt = 0;
-	public double dielectricBreakOhm = Double.POSITIVE_INFINITY;
-	public double dielectricVoltage = Double.POSITIVE_INFINITY;
-	public double dielectricBreakOhmMin = Double.POSITIVE_INFINITY;
-	
-	String description = "todo cable";
-	
-	public CableRenderDescriptor render;
-	
+	}
+
 	@Override
 	public void setParent(Item item, int damage) {
 		super.setParent(item, damage);
 		Data.addWiring(newItemStack());
 		
-		if(signalWire) {
+		if (signalWire) {
 			Data.addSignal(newItemStack());
 		}
 	}
 	
-	public void applyTo(ElectricalLoad electricalLoad,double rsFactor) {
-		electricalLoad.setRs(electricalRs*rsFactor);				
-	}	
+	public void applyTo(ElectricalLoad electricalLoad, double rsFactor) {
+		electricalLoad.setRs(electricalRs * rsFactor);
+	}
+
 	public void applyTo(ElectricalLoad electricalLoad) {
 		applyTo(electricalLoad, 1);
-	}	
+	}
 	
 	public void applyTo(Resistor resistor) {
 		applyTo(resistor, 1);
 	}
-	public void applyTo(Resistor resistor,double factor) {
-		resistor.setR(electricalRs*factor);
+
+	public void applyTo(Resistor resistor, double factor) {
+		resistor.setR(electricalRs * factor);
 	}
 	
 	public void applyTo(ThermalLoad thermalLoad) {
@@ -118,11 +119,10 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 		thermalLoad.Rp = this.thermalRp;		
 	}
 
-
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		if(signalWire) {
+		if (signalWire) {
 			list.add("This cable is adapted to");
 			list.add("transport signals quickly.");
 			list.add("A signal is electrical information");
@@ -130,17 +130,15 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 			list.add("Don't try to transport power.");
 			
 			/*String lol = "";
-			for(int idx = 0; idx < 15; idx++) {
-				if(idx < 10) {
+			for (int idx = 0; idx < 15; idx++) {
+				if (idx < 10) {
 					lol += "\u00a7" + idx + "" +  idx;
-				}
-				else {
+				} else {
 					lol += "\u00a7" + "abcdef".charAt(idx - 10) + "abcdef".charAt(idx - 10);
 				}
 			}
 			list.add(lol);*/
-		}
-		else {
+		} else {
 			//list.add("Low resistor => low power lost");
 			list.add("Nominal usage ->");
 			list.add("  Voltage : " + (int)electricalNominalVoltage + "V");
@@ -151,18 +149,17 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor  {
 		}
 	}
 
-	
 	public int getNodeMask() {
-		if(signalWire)
+		if (signalWire)
 			return NodeBase.maskElectricalGate;
 		else 
 			return NodeBase.maskElectricalPower;
 	}
 
 	public static CableRenderDescriptor getCableRender(ItemStack cable) {
-		if(cable == null) return null;
+		if (cable == null) return null;
 		GenericItemBlockUsingDamageDescriptor desc = ElectricalCableDescriptor.getDescriptor(cable);
-		if(desc instanceof ElectricalCableDescriptor)
+		if (desc instanceof ElectricalCableDescriptor)
 			return ((ElectricalCableDescriptor)desc).render;
 		else 
 			return  null;

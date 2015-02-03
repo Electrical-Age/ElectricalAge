@@ -14,16 +14,16 @@ import net.minecraft.inventory.IInventory;
 
 public class ElectricalBreakerGui extends GuiContainerEln {
 
+    GuiButton toogleSwitch;
+    GuiTextFieldEln setUmin, setUmax;
+    ElectricalBreakerRender render;
+
+    enum SelectedType{none, min, max}
+
 	public ElectricalBreakerGui(EntityPlayer player, IInventory inventory, ElectricalBreakerRender render) {
 		super(new ElectricalBreakerContainer(player, inventory));
 		this.render = render;
 	}
-
-	GuiButton toogleSwitch;
-	GuiTextFieldEln setUmin, setUmax;
-	ElectricalBreakerRender render;
-	
-	enum SelectedType{none,min,max};
 
 	@Override
 	public void initGui() {
@@ -44,19 +44,17 @@ public class ElectricalBreakerGui extends GuiContainerEln {
     @Override
     public void guiObjectEvent(IGuiObject object) {
     	super.guiObjectEvent(object);
-    	if(object == setUmax) {
+    	if (object == setUmax) {
 			try {
 				render.clientSetVoltageMax(NumberFormat.getInstance().parse(setUmax.getText()).floatValue());
 			} catch(ParseException e) {
 			}
-    	}
-    	else if(object == setUmin) {
+    	} else if (object == setUmin) {
 			try {
 				render.clientSetVoltageMin(NumberFormat.getInstance().parse(setUmin.getText()).floatValue());
 			} catch(ParseException e) {
 			}
-    	}
-    	else if(object == toogleSwitch) {
+    	} else if (object == toogleSwitch) {
     		render.clientToogleSwitch();
     	}
     }
@@ -64,7 +62,7 @@ public class ElectricalBreakerGui extends GuiContainerEln {
     @Override
     protected void preDraw(float f, int x, int y) {
     	super.preDraw(f, x, y);
-    	if(!render.switchState)
+    	if (!render.switchState)
     		toogleSwitch.displayString = "Switch is OFF";
     	else
     		toogleSwitch.displayString = "Switch is ON";
