@@ -1,31 +1,31 @@
 package mods.eln.sixnode.electricallightsensor;
 
+import mods.eln.misc.Coordonate;
+import mods.eln.misc.Utils;
+import mods.eln.sim.IProcess;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.Utils;
-import mods.eln.sim.IProcess;
 
 public class ElectricalLightSensorSlowProcess implements IProcess {
+
 	ElectricalLightSensorElement element;
+
+    double timeCounter = 0;
+    static final double refreshPeriode = 0.2;
 	
 	public ElectricalLightSensorSlowProcess(ElectricalLightSensorElement element) {
 		this.element = element;
 	}
-	
-	double timeCounter = 0;
-	static final double refreshPeriode = 0.2;
-	
+
 	@Override
 	public void process(double time) {
 		timeCounter += time;
-		if(timeCounter > refreshPeriode) {
+
+		if (timeCounter > refreshPeriode) {
 			timeCounter -= refreshPeriode;
 			
-			if(element.sixNode.coordonate.getBlockExist() == false)return;
+			if (!element.sixNode.coordonate.getBlockExist()) return;
 			Coordonate coord = element.sixNode.coordonate;
 			//int light = coord.world().getSavedLightValue(EnumSkyBlock.Sky, coord.x, coord.y, coord.z) - coord.world().skylightSubtracted;
 			//	Utils.println("Light : " + light);
@@ -39,8 +39,7 @@ public class ElectricalLightSensorSlowProcess implements IProcess {
 	
 		            if (f < (float)Math.PI) {
 		                f += (0.0F - f) * 0.2F;
-		            }
-		            else {
+		            } else {
 		                f += (((float)Math.PI * 2F) - f) * 0.2F;
 		            }
 	
@@ -57,7 +56,7 @@ public class ElectricalLightSensorSlowProcess implements IProcess {
 		            light = i1;
 		        }
 			//}
-			if(false == element.descriptor.dayLightOnly) {
+			if (!element.descriptor.dayLightOnly) {
 				// light = Math.max(light, (int)(world.getBlockLightValue(coord.x, coord.y, coord.z)));
 				//light = 0;
 				light = Math.max(light, Utils.getLight(world,EnumSkyBlock.Block, coord.x, coord.y, coord.z));

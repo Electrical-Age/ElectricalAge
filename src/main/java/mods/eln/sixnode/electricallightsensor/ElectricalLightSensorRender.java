@@ -11,6 +11,7 @@ import mods.eln.node.six.SixNodeEntity;
 public class ElectricalLightSensorRender extends SixNodeElementRender {
 
 	ElectricalLightSensorDescriptor descriptor;
+
 	public ElectricalLightSensorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalLightSensorDescriptor) descriptor;

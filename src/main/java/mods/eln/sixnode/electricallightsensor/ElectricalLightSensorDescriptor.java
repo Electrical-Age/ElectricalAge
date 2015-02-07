@@ -19,6 +19,9 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
 	private Obj3DPart main;
 	public boolean dayLightOnly;
 	public float[] pinDistance;
+
+    Obj3D obj;
+
 	public ElectricalLightSensorDescriptor(String name, Obj3D obj, boolean dayLightOnly) {
 		super(name, ElectricalLightSensorElement.class, ElectricalLightSensorRender.class);
 		this.obj = obj;
@@ -30,10 +33,8 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
 		}
 	}
 
-	Obj3D obj;
-
 	void draw() {
-		if(main != null) main.draw();
+		if (main != null) main.draw();
 	}
 	
 	@Override
@@ -41,23 +42,23 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
+
 	@Override
 	public boolean use2DIcon() {
 		return false;
 	}
+
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		if(dayLightOnly) {
+		if (dayLightOnly) {
 			list.add("Provides an electrical signal");
 			list.add("with strength proportional to");
 			list.add("the amount of daylight.");
 			list.add("0V at night, " + Eln.SVU + "V at midday.");
-		}
-		else {
+		} else {
 			list.add("Provides an electrical signal");
-			list.add("whilst in the presense of light.");		
+			list.add("whilst in the presence of light.");
 		}
 	}
 	
@@ -67,13 +68,12 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
 	}
 	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
+
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		
 		return true;
 	}
 

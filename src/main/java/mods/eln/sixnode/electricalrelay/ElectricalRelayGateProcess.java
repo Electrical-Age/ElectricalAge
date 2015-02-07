@@ -6,6 +6,7 @@ import mods.eln.sim.nbt.NbtElectricalGateInput;
 public class ElectricalRelayGateProcess extends NodeElectricalGateInputHysteresisProcess {
 
 	ElectricalRelayElement element;
+
 	public ElectricalRelayGateProcess(ElectricalRelayElement element, String name, NbtElectricalGateInput gate) {
 		super(name, gate);
 		this.element = element;

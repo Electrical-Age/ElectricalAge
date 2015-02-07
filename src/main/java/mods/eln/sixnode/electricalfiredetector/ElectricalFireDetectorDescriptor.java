@@ -22,13 +22,14 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
 	public ElectricalFireDetectorDescriptor(String name, Obj3D obj, double maxRange) {
 		super(name, ElectricalFireDetectorElement.class, ElectricalFireDetectorRender.class);
 		this.maxRange = maxRange;
-		if(obj != null) {
+		if (obj != null) {
 			detector = obj.getPart("Detector");
             led = obj.getPart("Led");
 
 			pinDistance = Utils.getSixNodePinDistance(detector);
 		}
 	}
+
 	@Override
 	public boolean use2DIcon() {
 		return false;
@@ -45,14 +46,13 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
                 GL11.glColor3f(1, 1, 1);
             }
         }
-
 	}
 	
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Output value rise when");
-		list.add("a fire is in range");
+		list.add("Output value rises when");
+		list.add("a fire is in range.");
 		list.add("Max range : " + (int)maxRange);
 	}
 
@@ -65,9 +65,9 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
         return true;
     }
+
     @Override
     public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-
         return true;
     }
 

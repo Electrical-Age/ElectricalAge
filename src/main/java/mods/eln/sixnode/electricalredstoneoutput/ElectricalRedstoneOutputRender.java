@@ -14,33 +14,31 @@ import mods.eln.node.six.SixNodeEntity;
 public class ElectricalRedstoneOutputRender extends SixNodeElementRender {
 
 	ElectricalRedstoneOutputDescriptor descriptor;
+
+    float factor;
+    float factorFiltered = 0;
+
+    int redOutput;
+
 	public ElectricalRedstoneOutputRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalRedstoneOutputDescriptor) descriptor;
 	}
 
-	float factor;
-
-
-	float factorFiltred = 0;
-	
 	@Override
 	public void draw() {
 		super.draw();
 
-		drawSignalPin(front.right(),descriptor.pinDistance);
+		drawSignalPin(front.right(), descriptor.pinDistance);
 		
 		descriptor.draw(redOutput);
 	}
 
-	int redOutput;
-	
 	@Override
 	public int isProvidingWeakPower(Direction side) {
 		return redOutput;
 	}
-	
-	
+
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);

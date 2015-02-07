@@ -20,6 +20,12 @@ import net.minecraft.item.ItemStack;
 public class ElectricalEntitySensorRender extends SixNodeElementRender {
 
 	ElectricalEntitySensorDescriptor descriptor;
+
+    boolean state = false;
+    EntitySensorFilterDescriptor filter = null;
+
+    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+
 	public ElectricalEntitySensorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalEntitySensorDescriptor) descriptor;
@@ -28,24 +34,19 @@ public class ElectricalEntitySensorRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
-		drawSignalPin(front.right(),descriptor.pinDistance);
+		drawSignalPin(front.right(), descriptor.pinDistance);
 
-		descriptor.draw(state,filter);
+		descriptor.draw(state, filter);
 	}
 
-	boolean state = false;
-	EntitySensorFilterDescriptor filter = null;
-	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		
 		super.publishUnserialize(stream);
 		try {
 			state = stream.readBoolean();
 			ItemStack filterStack = Utils.unserialiseItemStack(stream);
 			filter = (EntitySensorFilterDescriptor) EntitySensorFilterDescriptor.getDescriptor(filterStack);
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
 	}
@@ -59,7 +60,4 @@ public class ElectricalEntitySensorRender extends SixNodeElementRender {
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		return new ElectricalEntitySensorGui(player, inventory, this);
 	}
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
-	
-	
 }

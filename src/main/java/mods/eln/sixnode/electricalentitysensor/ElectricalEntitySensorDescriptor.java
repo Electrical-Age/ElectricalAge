@@ -22,30 +22,31 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
 	private Obj3DPart detector,haloMask;
 	double maxRange;
 	public float[] pinDistance;
+    Obj3D obj;
+
 	public ElectricalEntitySensorDescriptor(String name, Obj3D obj, double maxRange) {
 		super(name, ElectricalEntitySensorElement.class, ElectricalEntitySensorRender.class);
 		this.obj = obj;
 		this.maxRange = maxRange;
-		if(obj != null) {
+		if (obj != null) {
 			detector = obj.getPart("Detector");
 			haloMask = obj.getPart("HaloMask");
 
 			pinDistance = Utils.getSixNodePinDistance(detector);
 		}
 	}
+
 	@Override
 	public boolean use2DIcon() {
 		return false;
 	}
-	Obj3D obj;
 
 	void draw(boolean state,EntitySensorFilterDescriptor filter) {
-		if(detector != null) detector.draw();
-		if(state){
-			if(filter == null){
+		if (detector != null) detector.draw();
+		if (state) {
+			if (filter == null) {
 				GL11.glColor3f(1f, 1f, 0f);
-			}
-			else{
+			} else {
 				filter.glColor();
 			}
 			UtilsClient.drawLight(haloMask);
@@ -61,8 +62,8 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Output value rise when");
-		list.add("entities move around");
+		list.add("Output value rises when");
+		list.add("entities move around.");
 		list.add("Max range : " + (int)maxRange);
 	}
 	
@@ -75,9 +76,9 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
+
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		
 		return true;
 	}
 

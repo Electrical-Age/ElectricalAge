@@ -18,13 +18,13 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
 	public ElectricalSourceDescriptor(String name, Obj3D obj) {
 		super(name, ElectricalSourceElement.class, ElectricalSourceRender.class);
 		this.obj = obj;
-		if(obj != null) {
+		if (obj != null) {
 			main = obj.getPart("main");
 		}
 	}
 	
 	void draw() {
-		if(main != null) main.draw();
+		if (main != null) main.draw();
 	}
 	
 	@Override
@@ -32,7 +32,9 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Provides a stable voltage source");
 		list.add("without energy/power limitation.");
-		list.add(Utils.plotOhm("Internal resistance :",Eln.instance.lowVoltageCableDescriptor.electricalRs) );
+        list.add("");
+		list.add(Utils.plotOhm("Internal resistance :", Eln.instance.lowVoltageCableDescriptor.electricalRs));
+        list.add("");
 		list.add("Creative block.");
 	}
 }

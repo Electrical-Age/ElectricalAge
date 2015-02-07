@@ -1,38 +1,30 @@
 package mods.eln.sixnode.electricalsource;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
-import javax.management.Descriptor;
-
-import org.lwjgl.opengl.GL11;
-
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class ElectricalSourceRender extends SixNodeElementRender {
 
 	ElectricalSourceDescriptor descriptor;
+
+    double voltage = 0, current = 0;
+    int color = 0;
 
 	public ElectricalSourceRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalSourceDescriptor)descriptor;
 	}
 
-	double voltage = 0,current = 0;
-	int color = 0;
-	
 	@Override
 	public void draw() {
 		super.draw();
@@ -63,9 +55,8 @@ public class ElectricalSourceRender extends SixNodeElementRender {
 	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		if(voltage < Eln.instance.lowVoltageCableDescriptor.electricalMaximalVoltage) return Eln.instance.lowVoltageCableDescriptor.render;
-		if(voltage < Eln.instance.meduimVoltageCableDescriptor.electricalMaximalVoltage) return Eln.instance.meduimVoltageCableDescriptor.render;
+		if (voltage < Eln.instance.lowVoltageCableDescriptor.electricalMaximalVoltage) return Eln.instance.lowVoltageCableDescriptor.render;
+		if (voltage < Eln.instance.meduimVoltageCableDescriptor.electricalMaximalVoltage) return Eln.instance.meduimVoltageCableDescriptor.render;
 		return Eln.instance.highVoltageCableDescriptor.render;
-
 	}
 }

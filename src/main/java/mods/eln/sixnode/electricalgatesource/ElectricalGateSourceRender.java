@@ -1,46 +1,37 @@
 package mods.eln.sixnode.electricalgatesource;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import org.lwjgl.opengl.GL11;
-
 import mods.eln.Eln;
-import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.client.ClientProxy;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.Obj3D;
 import mods.eln.misc.RcInterpolator;
-import mods.eln.misc.Utils;
-import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
-import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
-import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class ElectricalGateSourceRender extends SixNodeElementRender {
 
 	ElectricalGateSourceDescriptor descriptor;
+
+    LRDU front;
+
+    RcInterpolator interpolator;
+
+    float voltageSyncValue = 0;
+    boolean voltageSyncNew = false;
+    boolean boot = true;
 
 	public ElectricalGateSourceRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalGateSourceDescriptor) descriptor;
 		interpolator = new RcInterpolator(this.descriptor.render.speed);
 	}
-
-	LRDU front;
-
-	RcInterpolator interpolator;
 
 	@Override
 	public void draw() {
@@ -56,10 +47,6 @@ public class ElectricalGateSourceRender extends SixNodeElementRender {
 		interpolator.setTarget((float) (voltageSyncValue / Eln.SVU));
 		interpolator.step(deltaT);
 	}
-
-	float voltageSyncValue = 0;
-	boolean voltageSyncNew = false;
-	boolean boot = true;
 
 	@Override
 	public void publishUnserialize(DataInputStream stream) {

@@ -1,41 +1,40 @@
 package mods.eln.sixnode.electricalswitch;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import javax.swing.text.MaskFormatter;
-
-
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.IThermalDestructorDescriptor;
-import mods.eln.node.IVoltageDestructorDescriptor;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.sim.nbt.NbtThermalLoad;
-import mods.eln.sim.process.destruct.ResistorCurrentWatchdog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sound.SoundCommand;
-import mods.eln.sound.SoundServer;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class ElectricalSwitchElement extends SixNodeElement {
+
+    public ElectricalSwitchDescriptor descriptor;
+    public NbtElectricalLoad aLoad = new NbtElectricalLoad("aLoad");
+    public NbtElectricalLoad bLoad = new NbtElectricalLoad("bLoad");
+    public ResistorSwitch switchResistor = new ResistorSwitch("switchRes", aLoad, bLoad);
+
+    VoltageStateWatchDog voltageWatchDogA = new VoltageStateWatchDog();
+    VoltageStateWatchDog voltageWatchDogB = new VoltageStateWatchDog();
+//	ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
+
+    boolean switchState = false;
 
 	public ElectricalSwitchElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
@@ -47,13 +46,10 @@ public class ElectricalSwitchElement extends SixNodeElement {
     	electricalComponentList.add(new Resistor(bLoad, null).pullDown());
     	electricalComponentList.add(new Resistor(aLoad, null).pullDown());
 
-
     	this.descriptor = (ElectricalSwitchDescriptor) descriptor;
     	
     	WorldExplosion exp = new WorldExplosion(this).cableExplosion();
-    	
-    	
-    	
+
     //	slowProcessList.add(currentWatchDog);
     	slowProcessList.add(voltageWatchDogA);
     	slowProcessList.add(voltageWatchDogB);
@@ -63,22 +59,10 @@ public class ElectricalSwitchElement extends SixNodeElement {
     	voltageWatchDogB.set(bLoad).setUNominalMirror(this.descriptor.nominalVoltage).set(exp);
 	}
 
-
-	public ElectricalSwitchDescriptor descriptor;
-	public NbtElectricalLoad aLoad = new NbtElectricalLoad("aLoad");
-	public NbtElectricalLoad bLoad = new NbtElectricalLoad("bLoad");
-	public ResistorSwitch switchResistor = new ResistorSwitch("switchRes",aLoad, bLoad);
-
-	VoltageStateWatchDog voltageWatchDogA = new VoltageStateWatchDog();
-	VoltageStateWatchDog voltageWatchDogB = new VoltageStateWatchDog();
-//	ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
-	
 	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
 	}
-	
-	boolean switchState = false;
-	
+
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
@@ -96,8 +80,8 @@ public class ElectricalSwitchElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(front == lrdu) return aLoad;
-		if(front.inverse() == lrdu) return bLoad;
+		if (front == lrdu) return aLoad;
+		if (front.inverse() == lrdu) return bLoad;
 		return null;
 	}
 
@@ -109,8 +93,8 @@ public class ElectricalSwitchElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu) return descriptor.getNodeMask();
-		if(front.inverse() == lrdu) return descriptor.getNodeMask();
+		if (front == lrdu) return descriptor.getNodeMask();
+		if (front.inverse() == lrdu) return descriptor.getNodeMask();
 
 		return 0;
 	}
@@ -163,13 +147,12 @@ public class ElectricalSwitchElement extends SixNodeElement {
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 		
-		if(Utils.isPlayerUsingWrench(entityPlayer)) {
+		if (Utils.isPlayerUsingWrench(entityPlayer)) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);
 			return true;	
-		}
-		else if(Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) { 
+		} else if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
     		return false;
     	}
     	if(Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) { 
@@ -177,9 +160,8 @@ public class ElectricalSwitchElement extends SixNodeElement {
     	}
     	if(Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
     		return false;
-    	}    
-    	else {
-			setSwitchState(! switchState);
+    	} else {
+			setSwitchState(!switchState);
 			//playSoundEffect("random.click", 0.3F, 0.6F);
 			play(new SoundCommand("random.click").mulVolume(0.3F, 0.6f).smallRange());
 			return true;

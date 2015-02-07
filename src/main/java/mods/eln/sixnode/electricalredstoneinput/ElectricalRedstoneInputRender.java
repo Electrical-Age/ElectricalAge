@@ -14,6 +14,9 @@ import mods.eln.node.six.SixNodeEntity;
 public class ElectricalRedstoneInputRender extends SixNodeElementRender {
 
 	ElectricalRedstoneInputDescriptor descriptor;
+
+    byte redLevel;
+
 	public ElectricalRedstoneInputRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalRedstoneInputDescriptor) descriptor;
@@ -22,14 +25,12 @@ public class ElectricalRedstoneInputRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
-		drawSignalPin(front.right(),descriptor.pinDistance);
+		drawSignalPin(front.right(), descriptor.pinDistance);
 
 		LRDU.Down.glRotateOnX();
 		descriptor.draw(redLevel);
 	}
 
-	byte redLevel;
-	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);

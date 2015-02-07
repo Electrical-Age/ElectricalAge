@@ -18,7 +18,7 @@ public class ElectricalMathContainer extends BasicContainer {
 	public ElectricalMathContainer(NodeBase node, EntityPlayer player, IInventory inventory) {
 		super(player, inventory, new Slot[]{
 				new SlotFilter(inventory, restoneSlotId, 125+27+44/2, 25, 64, new ItemStackFilter[]{new ItemStackFilter(Items.redstone)}, SlotSkin.medium, new String[]{"Redstone Slot"})
-			});
+		});
 		this.node = node;
 	}
 }

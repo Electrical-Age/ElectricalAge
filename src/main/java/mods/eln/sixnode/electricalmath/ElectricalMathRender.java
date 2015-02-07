@@ -22,6 +22,20 @@ import org.lwjgl.opengl.GL11;
 
 public class ElectricalMathRender extends SixNodeElementRender {
 
+    ElectricalMathDescriptor descriptor;
+    Coordonate coord;
+    PhysicalInterpolator interpolator;
+
+    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+
+    String expression;
+
+    public int redstoneRequired;
+    public boolean equationIsValid;
+
+    float ledTime = 0f;
+    boolean[] ledOn = new boolean[8];
+
 	public ElectricalMathRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalMathDescriptor)descriptor;
@@ -30,22 +44,11 @@ public class ElectricalMathRender extends SixNodeElementRender {
 		ledOn[0] = true;
 		ledOn[4] = true;
 	}
-	
-	ElectricalMathDescriptor descriptor;
-	Coordonate coord;
-	PhysicalInterpolator interpolator;
-	
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
-	
+
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		return new ElectricalMathGui(player, inventory, this);
 	}
-	
-	String expression;
-
-	public int redstoneRequired;
-	public boolean equationIsValid;
 
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
@@ -58,14 +61,12 @@ public class ElectricalMathRender extends SixNodeElementRender {
 			e.printStackTrace();
 		}
 	}
-	
-	float ledTime = 0f;
-	
+
 	@Override
 	public void draw() {
 		super.draw();
 		
-		if(UtilsClient.distanceFromClientPlayer(tileEntity) < 15){
+		if (UtilsClient.distanceFromClientPlayer(tileEntity) < 15) {
 			GL11.glColor3f(0, 0, 0);
 			UtilsClient.drawConnectionPinSixNode(front, descriptor.pinDistance, 1.8f, 1.35f);
 			GL11.glColor3f(1, 0, 0);
@@ -76,8 +77,6 @@ public class ElectricalMathRender extends SixNodeElementRender {
 			UtilsClient.drawConnectionPinSixNode(front.left(), descriptor.pinDistance, 1.8f, 1.35f);
 			GL11.glColor3f(1, 1, 1);
 		}
-		
-
 
 		descriptor.draw(interpolator.get(), ledOn);
 	}
@@ -86,27 +85,24 @@ public class ElectricalMathRender extends SixNodeElementRender {
 	public void refresh(float deltaT) {
 		ledTime += deltaT;
 
-		if(ledTime > 0.4) {
-			for(int idx = 1; idx <= 3; idx++){
+		if (ledTime > 0.4) {
+			for (int idx = 1; idx <= 3; idx++){
 				ledOn[idx] =  Math.random() < 0.3; 
 			}
-			for(int idx = 5; idx <= 7; idx++){
+			for (int idx = 5; idx <= 7; idx++){
 				ledOn[idx] =  Math.random() < 0.3; 
 			}
 			ledTime = 0;
 		}
 		
-		if(Utils.isPlayerAround(tileEntity.getWorldObj(), coord.getAxisAlignedBB(0)) == false)
+		if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coord.getAxisAlignedBB(0)))
 			interpolator.setTarget(0f);
 		else
 			interpolator.setTarget(1f);
 		
 		interpolator.step(deltaT);
-		
 	}
-	
-	boolean[] ledOn = new boolean[8];
-	
+
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
 		return Eln.instance.signalCableDescriptor.render;

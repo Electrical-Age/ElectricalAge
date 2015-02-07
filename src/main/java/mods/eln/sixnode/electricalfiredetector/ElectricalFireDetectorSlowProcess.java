@@ -10,19 +10,22 @@ import net.minecraft.block.BlockFire;
 import java.util.ArrayList;
 
 public class ElectricalFireDetectorSlowProcess implements IProcess {
+
 	ElectricalFireDetectorElement element;
 
     boolean firePresent;
     RcInterpolator rc = new RcInterpolator(0.6f);
 
+    double t = 0;
+
 	public ElectricalFireDetectorSlowProcess(ElectricalFireDetectorElement element) {
 		this.element = element;
 	}
 
-    double t = 0;
 	@Override
 	public void process(double time) {
         t += time;
+
         if (t >= element.descriptor.updateInterval) {
             t = 0;
             boolean fireDetected = false;
@@ -67,6 +70,7 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                             Coordonate coord = element.getCoordonate();
                             ArrayList<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5,
                                     detectionBBCenter.x + dx + 0.5, detectionBBCenter.y + dy + 0.5, detectionBBCenter.z + dz + 0.5);
+
                             for (Block b : blockList)
                                 if (b.isOpaqueCube()) {
                                     fireDetected = false;
@@ -78,7 +82,6 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                             }
                         }
                     }
-
             if (firePresent != fireDetected) {
                 firePresent = fireDetected;
                 element.needPublish();

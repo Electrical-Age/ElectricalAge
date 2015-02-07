@@ -19,18 +19,17 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class ElectricalRedstoneOutputElement extends SixNodeElement {
 
+    public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate", true);
+    public ElectricalRedstoneOutputSlowProcess slowProcess = new ElectricalRedstoneOutputSlowProcess(this);
+
+    int redstoneValue = 0;
+
 	public ElectricalRedstoneOutputElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		front = LRDU.Left;
     	electricalLoadList.add(inputGate);
     	slowProcessList.add(slowProcess);
 	}
-
-	public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate",true);
-	public ElectricalRedstoneOutputSlowProcess slowProcess = new ElectricalRedstoneOutputSlowProcess(this);
-
-	
-	int redstoneValue = 0;
 
 	@Override
 	public int isProvidingWeakPower() {
@@ -39,7 +38,7 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
 	
 	public boolean refreshRedstone() { 
 		int newValue = (int)(inputGate.getU() * 15.0 / Eln.SVU + 0.5);
-		if(newValue != redstoneValue) {
+		if (newValue != redstoneValue) {
 			redstoneValue = newValue;
 			notifyNeighbor();
 			needPublish();
@@ -74,7 +73,7 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(front == lrdu.left()) return inputGate;
+		if (front == lrdu.left()) return inputGate;
 		return null;
 	}
 
@@ -85,7 +84,7 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu.left()) return NodeBase.maskElectricalInputGate;
+		if (front == lrdu.left()) return NodeBase.maskElectricalInputGate;
 		return 0;
 	}
 
@@ -115,8 +114,7 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-
-		if(Utils.isPlayerUsingWrench(entityPlayer)) {
+		if (Utils.isPlayerUsingWrench(entityPlayer)) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);

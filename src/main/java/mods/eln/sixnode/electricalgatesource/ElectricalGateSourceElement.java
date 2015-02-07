@@ -1,42 +1,39 @@
 package mods.eln.sixnode.electricalgatesource;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import javax.swing.text.MaskFormatter;
-
 import mods.eln.Eln;
-import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.IThermalDestructorDescriptor;
-import mods.eln.node.IVoltageDestructorDescriptor;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
-import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.sim.nbt.NbtThermalLoad;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import mods.eln.sixnode.lampsocket.LampSocketContainer;
 import mods.eln.sound.SoundCommand;
-import mods.eln.sound.SoundServer;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class ElectricalGateSourceElement extends SixNodeElement {
+
+    public ElectricalGateSourceDescriptor descriptor;
+    public NbtElectricalLoad outputGate = new NbtElectricalLoad("outputGate");
+
+    public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
+
+    public AutoResetProcess autoResetProcess;
+
+    LRDU front;
+
+    public static final byte setVoltagerId = 1;
 
 	public ElectricalGateSourceElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
@@ -53,13 +50,6 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 		}
 	}
 
-	public ElectricalGateSourceDescriptor descriptor;
-	public NbtElectricalLoad outputGate = new NbtElectricalLoad("outputGate");
-
-	public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
-
-	public AutoResetProcess autoResetProcess;
-
 	class AutoResetProcess implements IProcess {
 		double timeout = 0;
 		double timeoutDelay = 0.21;
@@ -74,13 +64,10 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 				timeout -= time;
 			}
 		}
-
 		void reset(){
 			timeout = timeoutDelay;
 		}
 	}
-
-	LRDU front;
 
 	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
@@ -160,11 +147,10 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);
 			return true;
-		}
-		else if (!Utils.playerHasMeter(entityPlayer) && descriptor.onOffOnly) {
+		} else if (!Utils.playerHasMeter(entityPlayer) && descriptor.onOffOnly) {
 			outputGateProcess.state(!outputGateProcess.getOutputOnOff());
 			play(new SoundCommand("random.click").mulVolume(0.3F, 0.6F).smallRange());
-			if(autoResetProcess != null)
+			if (autoResetProcess != null)
 				autoResetProcess.reset();
 			needPublish();
 			return true;
@@ -173,17 +159,15 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 		return false;
 	}
 
-	public static final byte setVoltagerId = 1;
-
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		super.networkUnserialize(stream);
 		try {
 			switch (stream.readByte()) {
-			case setVoltagerId:
-				outputGateProcess.setU(stream.readFloat());
-				needPublish();
-				break;
+                case setVoltagerId:
+                    outputGateProcess.setU(stream.readFloat());
+                    needPublish();
+                    break;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

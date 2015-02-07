@@ -22,6 +22,13 @@ import net.minecraft.inventory.IInventory;
 public class ElectricalEntitySensorElement extends SixNodeElement {
 
 	ElectricalEntitySensorDescriptor descriptor;
+
+    public NbtElectricalGateOutput outputGate = new NbtElectricalGateOutput("outputGate");
+    public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
+    public ElectricalEntitySensorSlowProcess slowProcess = new ElectricalEntitySensorSlowProcess(this);
+
+    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+
 	public ElectricalEntitySensorElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 	
@@ -30,9 +37,6 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
     	slowProcessList.add(slowProcess);
     	this.descriptor = (ElectricalEntitySensorDescriptor) descriptor;
 	}
-	public NbtElectricalGateOutput outputGate = new NbtElectricalGateOutput("outputGate");
-	public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
-	public ElectricalEntitySensorSlowProcess slowProcess = new ElectricalEntitySensorSlowProcess(this);
 
 	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
@@ -40,7 +44,7 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(front == lrdu.left()) return outputGate;
+		if (front == lrdu.left()) return outputGate;
 		return null;
 	}
 
@@ -51,7 +55,7 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu.left()) return NodeBase.maskElectricalOutputGate;
+		if (front == lrdu.left()) return NodeBase.maskElectricalOutputGate;
 		return 0;
 	}
 
@@ -83,9 +87,7 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
 	public IInventory getInventory() {
 		return inventory;
 	}
-	
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
-	
+
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
 		return new ElectricalEntitySensorContainer(player, inventory);
@@ -93,14 +95,12 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
 	
 	@Override
 	protected void inventoryChanged() {
-		
 		super.inventoryChanged();
 		needPublish();
 	}
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		
 		super.networkSerialize(stream);
 		try {
 			stream.writeBoolean(slowProcess.state);

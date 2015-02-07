@@ -1,23 +1,14 @@
 package mods.eln.sixnode.electricalsource;
 
+import mods.eln.gui.GuiHelper;
+import mods.eln.gui.GuiScreenEln;
+import mods.eln.gui.GuiTextFieldEln;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
-
-import org.lwjgl.opengl.GL11;
-
-import mods.eln.gui.GuiHelper;
-import mods.eln.gui.GuiScreenEln;
-import mods.eln.gui.GuiTextFieldEln;
-import mods.eln.gui.GuiTextFieldEln.GuiTextFieldElnObserver;
-import mods.eln.misc.Utils;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiPlayerInfo;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.gui.inventory.GuiEditSign;
 
 public class ElectricalSourceGui extends GuiScreenEln {
 
@@ -38,9 +29,9 @@ public class ElectricalSourceGui extends GuiScreenEln {
 		super.initGui();
 
 		voltage = newGuiTextField(6, 6, 50);
-		voltage.setText((float)render.voltage);
+		voltage.setText((float) render.voltage);
 		voltage.setObserver(this);
-		voltage.setComment(new String[]{"Set the output voltage"});
+		voltage.setComment(new String[]{"Output voltage"});
 	}
 	
 	@Override
@@ -49,7 +40,7 @@ public class ElectricalSourceGui extends GuiScreenEln {
 		
 		try {
 			newVoltage = NumberFormat.getInstance().parse(voltage.getText()).floatValue();
-		} catch(ParseException e) {
+		} catch (ParseException e) {
 			return;
 		}
 		

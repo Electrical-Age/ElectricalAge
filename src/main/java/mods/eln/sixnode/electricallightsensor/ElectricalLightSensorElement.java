@@ -16,6 +16,11 @@ import net.minecraft.entity.player.EntityPlayer;
 public class ElectricalLightSensorElement extends SixNodeElement {
 
 	ElectricalLightSensorDescriptor descriptor;
+
+    public NbtElectricalGateOutput outputGate = new NbtElectricalGateOutput("outputGate");
+    public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
+    public ElectricalLightSensorSlowProcess slowProcess = new ElectricalLightSensorSlowProcess(this);
+
 	public ElectricalLightSensorElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 
@@ -24,10 +29,6 @@ public class ElectricalLightSensorElement extends SixNodeElement {
     	slowProcessList.add(slowProcess);
     	this.descriptor = (ElectricalLightSensorDescriptor) descriptor;
 	}
-	
-	public NbtElectricalGateOutput outputGate = new NbtElectricalGateOutput("outputGate");
-	public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
-	public ElectricalLightSensorSlowProcess slowProcess = new ElectricalLightSensorSlowProcess(this);
 
 	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
@@ -35,7 +36,7 @@ public class ElectricalLightSensorElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(front == lrdu.left()) return outputGate;
+		if (front == lrdu.left()) return outputGate;
 		return null;
 	}
 
@@ -46,7 +47,7 @@ public class ElectricalLightSensorElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu.left()) return NodeBase.maskElectricalOutputGate;
+		if (front == lrdu.left()) return NodeBase.maskElectricalOutputGate;
 		return 0;
 	}
 

@@ -19,7 +19,12 @@ import java.io.IOException;
 public class ElectricalFireDetectorElement extends SixNodeElement {
 
 	ElectricalFireDetectorDescriptor descriptor;
-	public ElectricalFireDetectorElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+
+    public NbtElectricalGateOutput outputGate = new NbtElectricalGateOutput("outputGate");
+    public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
+    public ElectricalFireDetectorSlowProcess slowProcess = new ElectricalFireDetectorSlowProcess(this);
+
+    public ElectricalFireDetectorElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 	
     	electricalLoadList.add(outputGate);
@@ -27,9 +32,6 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
     	slowProcessList.add(slowProcess);
     	this.descriptor = (ElectricalFireDetectorDescriptor) descriptor;
 	}
-	public NbtElectricalGateOutput outputGate = new NbtElectricalGateOutput("outputGate");
-	public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
-	public ElectricalFireDetectorSlowProcess slowProcess = new ElectricalFireDetectorSlowProcess(this);
 
  	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
@@ -37,7 +39,7 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(front == lrdu.left()) return outputGate;
+		if (front == lrdu.left()) return outputGate;
 		return null;
 	}
 
@@ -48,7 +50,7 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu.left()) return NodeBase.maskElectricalOutputGate;
+		if (front == lrdu.left()) return NodeBase.maskElectricalOutputGate;
 		return 0;
 	}
 
@@ -73,12 +75,10 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		
 		super.networkSerialize(stream);
 		try {
 			stream.writeBoolean(slowProcess.firePresent);
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
 	}

@@ -1,34 +1,19 @@
 package mods.eln.sixnode.electricalgatesource;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import org.lwjgl.opengl.GL11;
-
-
-import mods.eln.gui.GuiContainerEln;
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.IGuiObject;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.gui.inventory.GuiEditSign;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
 
 public class ElectricalGateSourceGui extends GuiScreenEln {
+
+    ElectricalGateSourceRender render;
+    GuiVerticalTrackBar voltage;
 
 	public ElectricalGateSourceGui(EntityPlayer player, ElectricalGateSourceRender render) {
 		this.render = render;
 	}
-
-	ElectricalGateSourceRender render;
-	GuiVerticalTrackBar voltage;
 
 	@Override
 	public void initGui() {
@@ -50,7 +35,7 @@ public class ElectricalGateSourceGui extends GuiScreenEln {
     @Override
     public void guiObjectEvent(IGuiObject object) {
     	super.guiObjectEvent(object);
-    	if(object == voltage) {
+    	if (object == voltage) {
     		render.clientSetFloat(ElectricalGateSourceElement.setVoltagerId, voltage.getValue());
     	}
     }
@@ -58,7 +43,7 @@ public class ElectricalGateSourceGui extends GuiScreenEln {
     @Override
     protected void preDraw(float f, int x, int y) {
     	super.preDraw(f, x, y);
-    	if(render.voltageSyncNew) syncVoltage();
+    	if (render.voltageSyncNew) syncVoltage();
     	voltage.setComment(0, "Output at " + ((int)voltage.getValue() * 2) + "%");
     }
 

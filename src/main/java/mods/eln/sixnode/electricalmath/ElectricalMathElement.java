@@ -32,13 +32,25 @@ public class ElectricalMathElement extends SixNodeElement {
 	NbtElectricalGateOutput gateOutput = new NbtElectricalGateOutput("gateOutput");
 	NbtElectricalGateOutputProcess gateOutputProcess = new NbtElectricalGateOutputProcess("gateOutputProcess", gateOutput);
 	
-	NbtElectricalGateInput[] gateInput = new NbtElectricalGateInput[]{new NbtElectricalGateInput("gateA",false), new NbtElectricalGateInput("gateB",false), new NbtElectricalGateInput("gateC",false)};
+	NbtElectricalGateInput[] gateInput = new NbtElectricalGateInput[]{new NbtElectricalGateInput("gateA", false), new NbtElectricalGateInput("gateB", false), new NbtElectricalGateInput("gateC", false)};
 
 	ArrayList<ISymbole> symboleList = new ArrayList<ISymbole>();
 	
 	ElectricalMathElectricalProcess electricalProcess = new ElectricalMathElectricalProcess(this);
 	
 	boolean firstBoot = true;
+
+    boolean sideConnectionEnable[] = new boolean[3];
+    String expression = "";
+    Equation equation;
+    boolean equationIsValid;
+
+    int redstoneRequired;
+    boolean redstoneReady = false;
+
+    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+
+    static final byte setExpressionId = 1;
 	
 	public ElectricalMathElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
@@ -56,11 +68,7 @@ public class ElectricalMathElement extends SixNodeElement {
 		symboleList.add(new GateInputSymbol("C", gateInput[2]));
 		symboleList.add(new DayTime());
 	}
-	
-	boolean sideConnectionEnable[] = new boolean[3];
-	String expression = "";
-	Equation equation;
-	
+
 	class GateInputSymbol implements ISymbole {
 		private String name;
 		private NbtElectricalGateInput gate;
@@ -90,37 +98,35 @@ public class ElectricalMathElement extends SixNodeElement {
 
 		@Override
 		public void process(double time) {
-			if(e.redstoneReady)
+			if (e.redstoneReady)
 				e.gateOutputProcess.setOutputNormalizedSafe(e.equation.getValue(time));
 			else
 				e.gateOutputProcess.setOutputNormalized(0.0);
 		}
 	}
-	
-	boolean equationIsValid;
-	
+
 	void preProcessEquation(String expression) {
 		this.expression = expression;
-		equation = new Equation();//expression, symboleList, 100);
+		equation = new Equation(); //expression, symboleList, 100);
 		equation.setUpDefaultOperatorAndMapper();
 		equation.setIterationLimit(100);
 		equation.addSymbole(symboleList);
 		equation.preProcess(expression);
 		
-		for(int idx = 0; idx < 3; idx++) {
+		for (int idx = 0; idx < 3; idx++) {
 			sideConnectionEnable[idx] = equation.isSymboleUsed(symboleList.get(idx));
 		}
 		this.expression = expression;
 		
 		redstoneRequired = 0;
-		if(equationIsValid = equation.isValid()) {
+		if (equationIsValid = equation.isValid()) {
 			redstoneRequired = equation.getOperatorCount();
 		}
 		checkRedstone();
 	}
 
 	public class DayTime implements ISymbole {
-		
+
 		@Override
 		public double getValue() {
 			return sixNode.coordonate.world().getWorldTime() / (24000.0 - 1.0);
@@ -134,10 +140,10 @@ public class ElectricalMathElement extends SixNodeElement {
 	
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(lrdu == front) return gateOutput;
-		if(lrdu == front.left() && sideConnectionEnable[2]) return gateInput[2];
-		if(lrdu == front.inverse() && sideConnectionEnable[1]) return gateInput[1];
-		if(lrdu == front.right() && sideConnectionEnable[0]) return gateInput[0];
+		if (lrdu == front) return gateOutput;
+		if (lrdu == front.left() && sideConnectionEnable[2]) return gateInput[2];
+		if (lrdu == front.inverse() && sideConnectionEnable[1]) return gateInput[1];
+		if (lrdu == front.right() && sideConnectionEnable[0]) return gateInput[0];
 		return null;
 	}
 	
@@ -148,10 +154,10 @@ public class ElectricalMathElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(lrdu == front) return Node.maskElectricalOutputGate;
-		if(lrdu == front.left() && sideConnectionEnable[2]) return Node.maskElectricalInputGate;
-		if(lrdu == front.inverse() && sideConnectionEnable[1]) return Node.maskElectricalInputGate;
-		if(lrdu == front.right() && sideConnectionEnable[0]) return Node.maskElectricalInputGate;
+		if (lrdu == front) return Node.maskElectricalOutputGate;
+		if (lrdu == front.left() && sideConnectionEnable[2]) return Node.maskElectricalInputGate;
+		if (lrdu == front.inverse() && sideConnectionEnable[1]) return Node.maskElectricalInputGate;
+		if (lrdu == front.right() && sideConnectionEnable[0]) return Node.maskElectricalInputGate;
 		return 0;
 	}
 
@@ -167,8 +173,7 @@ public class ElectricalMathElement extends SixNodeElement {
 
 	@Override
 	public void initialize() {
-		if(firstBoot)
-			preProcessEquation(expression);
+		if(firstBoot) preProcessEquation(expression);
 	}
 	
 	@Override
@@ -176,28 +181,22 @@ public class ElectricalMathElement extends SixNodeElement {
 		super.inventoryChanged();
 		checkRedstone();
 	}
-	
-	int redstoneRequired;
-	
+
 	void checkRedstone() {
 		int redstoneInStack = 0;
 
 		ItemStack stack = inventory.getStackInSlot(ElectricalMathContainer.restoneSlotId);
-		if(stack != null) redstoneInStack = stack.stackSize;
+		if (stack != null) redstoneInStack = stack.stackSize;
 		
 		redstoneReady = redstoneRequired <= redstoneInStack;
 		needPublish();
 	}
-	
-	boolean redstoneReady = false;
-	
+
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		return onBlockActivatedRotate(entityPlayer);
 	}
 
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
-	
 	@Override
 	public IInventory getInventory() {
 		return inventory;
@@ -241,18 +240,16 @@ public class ElectricalMathElement extends SixNodeElement {
 			e.printStackTrace();
 		}
 	}
-	
-	static final byte setExpressionId = 1;
-	
+
 	@Override
 	public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
 		super.networkUnserialize(stream, player);
 		try {
 			switch(stream.readByte()) {
-			case setExpressionId:
-				preProcessEquation(stream.readUTF());
-				reconnect();
-				break;
+                case setExpressionId:
+                    preProcessEquation(stream.readUTF());
+                    reconnect();
+                    break;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

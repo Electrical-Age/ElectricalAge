@@ -21,8 +21,7 @@ public class ElectricalGateSourceRenderObj {
 	private Obj3DPart halo;
 	ObjType objType;
 	float leverTx;
-	
-	
+
 	private float rotAlphaOn, rotAlphaOff;
 	public float speed;
 
@@ -54,38 +53,37 @@ public class ElectricalGateSourceRenderObj {
 			}
 		}
 	}
-	
-	
+
 	public void draw(float factor, float distance, TileEntity e) {
 		switch (objType) {
-		case Button:
-			if (main != null) main.draw();
+            case Button:
+                if (main != null) main.draw();
 
-			GL11.glTranslatef(leverTx * factor, 0f, 0f);
-			if (lever != null) lever.draw();
+                GL11.glTranslatef(leverTx * factor, 0f, 0f);
+                if (lever != null) lever.draw();
 
-			UtilsClient.ledOnOffColor(factor > 0.5f);
-			UtilsClient.disableLight();
-			if (led != null) led.draw();
-			UtilsClient.enableBlend();
+                UtilsClient.ledOnOffColor(factor > 0.5f);
+                UtilsClient.disableLight();
+                if (led != null) led.draw();
+                UtilsClient.enableBlend();
 
-			if (halo != null) {
-				if (e == null)
-					UtilsClient.drawLight(halo);
-				else {
-					Color c = UtilsClient.ledOnOffColorC(factor > 0.5f);
-					UtilsClient.drawHaloNoLightSetup(halo, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, e, false);
-				}
-			}
+                if (halo != null) {
+                    if (e == null)
+                        UtilsClient.drawLight(halo);
+                    else {
+                        Color c = UtilsClient.ledOnOffColorC(factor > 0.5f);
+                        UtilsClient.drawHaloNoLightSetup(halo, c.getRed() / 255f, c.getGreen() / 255f, c.getBlue() / 255f, e, false);
+                    }
+                }
 
-			UtilsClient.disableBlend();
-			UtilsClient.enableLight();
+                UtilsClient.disableBlend();
+                UtilsClient.enableLight();
 
-			break;
-		case Pot:
-			if (main != null) main.draw();
-			if (rot != null) rot.draw(factor * (rotAlphaOn - rotAlphaOff) + rotAlphaOff, 1f, 0f, 0f);
-			break;
+                break;
+            case Pot:
+                if (main != null) main.draw();
+                if (rot != null) rot.draw(factor * (rotAlphaOn - rotAlphaOff) + rotAlphaOff, 1f, 0f, 0f);
+                break;
 		}
 	}
 }
