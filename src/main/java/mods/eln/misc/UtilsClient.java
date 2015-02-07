@@ -586,10 +586,14 @@ public class UtilsClient {
 	}
 
 	public static void glDeleteListsAllSafe() {
-		for (Integer id : glListsAllocated) {
-			GL11.glDeleteLists(id, 1);
-		}
-		glListsAllocated.clear();
+           	try {
+	                for (Integer id : glListsAllocated) {
+	                        GL11.glDeleteLists(id, 1);
+	                }
+	                glListsAllocated.clear();
+              	} catch (Exception e) {
+               		//nic
+               	}
 	}
 
 	public static void showItemTooltip(List src, List dst) {
