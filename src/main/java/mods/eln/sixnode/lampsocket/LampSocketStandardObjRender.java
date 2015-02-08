@@ -1,16 +1,15 @@
 package mods.eln.sixnode.lampsocket;
 
-import org.lwjgl.opengl.GL11;
-
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
-import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import org.lwjgl.opengl.GL11;
 
 public class LampSocketStandardObjRender implements LampSocketObjRender {
+
 	private Obj3D obj;
 	private Obj3DPart socket, socket_unlightable, socket_lightable, lampOn, lampOff;
 	ResourceLocation tOn, tOff;
@@ -38,9 +37,7 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 				GL11.glRotatef(90, 0, -1, 0);
 				GL11.glTranslatef(-1.5f, 0f, 0f);
 			}
-
-		}
-		else if (type == ItemRenderType.EQUIPPED_FIRST_PERSON) {
+		} else if (type == ItemRenderType.EQUIPPED_FIRST_PERSON) {
 			if (descriptor.hasGhostGroup()) {
 				GL11.glScalef(0.3f, 0.3f, 0.3f);
 				GL11.glRotatef(90, 0, -1, 0);
@@ -59,15 +56,13 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 		front.glRotateOnX();
 
 		UtilsClient.disableCulling();
-		if (onOffModel == false) {
+		if (!onOffModel) {
 			if (socket != null) socket.draw();
-		}
-		else {
+		} else {
 			//
 			if (light > 8) {
 				UtilsClient.bindTexture(tOn);
-			}
-			else
+			} else
 				UtilsClient.bindTexture(tOff);
 
 			if (socket_unlightable != null) socket_unlightable.drawNoBind();
@@ -83,8 +78,7 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 			if (hasBulb) {
 				if (light > 8) {
 					if (lampOn != null) lampOn.draw();
-				}
-				else {
+				} else {
 					if (lampOff != null) lampOff.draw();
 				}
 			}

@@ -1,39 +1,17 @@
 package mods.eln.sixnode.lampsocket;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.text.translate.EntityArrays;
-import org.lwjgl.opengl.GL11;
-
-import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.client.ClientProxy;
-import mods.eln.client.FrameTime;
 import mods.eln.item.LampDescriptor;
 import mods.eln.item.LampDescriptor.Type;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
-import mods.eln.node.NodeBase;
-import mods.eln.node.NodeBlockEntity;
+import mods.eln.misc.*;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
@@ -41,50 +19,59 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.EnumSkyBlock;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class LampSocketRender extends SixNodeElementRender {
 
 	LampSocketDescriptor lampSocketDescriptor = null;
 	LampSocketDescriptor descriptor;
 
-	public LampSocketRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+    SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
+    boolean grounded = true;
+    public boolean poweredByLampSupply;
+
+    float pertuVy = 0, pertuPy = 0;
+    float pertuVz = 0, pertuPz = 0;
+    float weatherAlphaZ = 0, weatherAlphaY = 0;
+
+    List entityList = new ArrayList();
+    float entityTimout = 0;
+
+    public String channel;
+    LampDescriptor lampDescriptor = null;
+    float alphaZ;
+    byte light, oldLight = -1;
+
+    public boolean isConnectedToLampSupply;
+
+    ElectricalCableDescriptor cable;
+
+	public LampSocketRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (LampSocketDescriptor) descriptor;
 		lampSocketDescriptor = (LampSocketDescriptor) descriptor;
-		
 	}
-
-	SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
-	boolean grounded = true;
-	public boolean poweredByLampSupply;
 
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		
 		return new LampSocketGuiDraw(player, inventory, this);
 	}
 
 	@Override
 	public IInventory getInventory() {
-		
 		return inventory;
 	}
-
-	float pertuVy = 0, pertuPy = 0;
-	float pertuVz = 0, pertuPz = 0;
-	float weatherAlphaZ = 0, weatherAlphaY = 0;
-
-	List entityList = new ArrayList();
-	float entityTimout = 0;
 
 	@Override
 	public void draw() {
 		super.draw();
 
-
-
 		descriptor.render.draw(this);
-
 	}
 
 	@Override
@@ -137,11 +124,6 @@ public class LampSocketRender extends SixNodeElementRender {
 			pertuPz += pertuVz;
 		}
 	}
-	
-	public String channel;
-	LampDescriptor lampDescriptor = null;
-	float alphaZ;
-	byte light, oldLight = -1;
 
 	void setLight(byte newLight) {
 		light = newLight;
@@ -153,7 +135,6 @@ public class LampSocketRender extends SixNodeElementRender {
 
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		
 		super.publishUnserialize(stream);
 		try {
 			Byte b;
@@ -171,27 +152,18 @@ public class LampSocketRender extends SixNodeElementRender {
 			isConnectedToLampSupply = stream.readBoolean();
 
 			setLight(stream.readByte());
-
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
 	}
 
 	@Override
-	public void serverPacketUnserialize(DataInputStream stream)
-			throws IOException {
-		
+	public void serverPacketUnserialize(DataInputStream stream) throws IOException {
 		super.serverPacketUnserialize(stream);
 		setLight(stream.readByte());
 	}
 
-	public boolean isConnectedToLampSupply;
-
-	ElectricalCableDescriptor cable;
-
-	public boolean getGrounded()
-	{
+	public boolean getGrounded() {
 		return grounded;
 	}
 
@@ -202,16 +174,15 @@ public class LampSocketRender extends SixNodeElementRender {
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
 		if (cable == null 
-				|| (lrdu == front && descriptor.cableFront == false)
-				|| (lrdu == front.left() && descriptor.cableLeft == false)
-				|| (lrdu == front.right() && descriptor.cableRight == false)
-				|| (lrdu == front.inverse() && descriptor.cableBack == false))
+				|| (lrdu == front && !descriptor.cableFront)
+				|| (lrdu == front.left() && !descriptor.cableLeft)
+				|| (lrdu == front.right() && !descriptor.cableRight)
+				|| (lrdu == front.inverse() && !descriptor.cableBack))
 			return null;
 		return cable.render;
 	}
 
-	public void clientSetGrounded(boolean value)
-	{
+	public void clientSetGrounded(boolean value) {
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			DataOutputStream stream = new DataOutputStream(bos);
@@ -223,10 +194,8 @@ public class LampSocketRender extends SixNodeElementRender {
 
 			sendPacketToServer(bos);
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
-
 	}
 
 	@Override

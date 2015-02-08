@@ -12,7 +12,7 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 
-public class GroundCableDescriptor extends SixNodeDescriptor{
+public class GroundCableDescriptor extends SixNodeDescriptor {
 
 	Obj3D obj;
 	Obj3DPart main;
@@ -20,31 +20,27 @@ public class GroundCableDescriptor extends SixNodeDescriptor{
 	public GroundCableDescriptor(String name,Obj3D obj) {
 		super(name, GroundCableElement.class, GroundCableRender.class);
 		this.obj = obj;
-		if(obj != null){
+		if (obj != null) {
 			main = obj.getPart("main");
 		}
 	}
 	
-	void draw()
-	{
-		if(main != null) main.draw();
+	void draw() {
+		if (main != null) main.draw();
 	}
 	
 	@Override
 	public void setParent(Item item, int damage) {
-		
 		super.setParent(item, damage);
 		Data.addWiring(newItemStack());
 	}
+
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-		
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Provides a zero volt reference.");
 		list.add("Can be used to ground negative");
 		list.add("battery pins.");
-		list.add(Utils.plotOhm("Internal resistance",Eln.getSmallRs()));
+		list.add(Utils.plotOhm("Internal resistance : ", Eln.getSmallRs()));
 	}
-	
 }

@@ -16,24 +16,24 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-
 public class GroundCableRender extends SixNodeElementRender{
 
 	GroundCableDescriptor descriptor;
 
-	public GroundCableRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+    //double voltage = 0,current = 0;
+    int color = 0;
+
+    CableRenderDescriptor cableRender;
+
+    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+
+    public GroundCableRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (GroundCableDescriptor) descriptor;
-		
 	}
 
-	//double voltage = 0,current = 0;
-	int color = 0;
-	
 	@Override
 	public void draw() {
-		
 		super.draw();
 		
 		descriptor.draw();			
@@ -41,37 +41,31 @@ public class GroundCableRender extends SixNodeElementRender{
 
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		
 		super.publishUnserialize(stream);
 		try {
 			Byte b;
 			b = stream.readByte();
 			
-			color = (b>>4) & 0xF;
+			color = (b >> 4) & 0xF;
 			
 			ItemStack cableStack = Utils.unserialiseItemStack(stream);
 			ElectricalCableDescriptor desc = (ElectricalCableDescriptor)ElectricalCableDescriptor.getDescriptor(cableStack, ElectricalCableDescriptor.class);
-			if(desc == null)
+
+			if (desc == null)
 				cableRender = Eln.instance.lowVoltageCableDescriptor.render;
 			else
 				cableRender = desc.render;
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
 	}
-	public CableRenderDescriptor getCableRender(mods.eln.misc.LRDU lrdu)
-	{
+
+	public CableRenderDescriptor getCableRender(mods.eln.misc.LRDU lrdu) {
 		return cableRender;
 	}
-	
-	CableRenderDescriptor cableRender;
-	
+
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		
 		return new GroundCableGui(player, inventory, this);
 	}
-
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 }
