@@ -29,13 +29,18 @@ public class PowerCapacitorSixElement extends SixNodeElement {
 	NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
 
 	Capacitor capacitor = new Capacitor(positiveLoad, negativeLoad);
-	Resistor dischargeResistor = new Resistor(positiveLoad,negativeLoad);
+	Resistor dischargeResistor = new Resistor(positiveLoad, negativeLoad);
 	PunkProcess punkProcess = new PunkProcess();
 	BipoleVoltageWatchdog watchdog = new BipoleVoltageWatchdog().set(capacitor);
-	
-	public PowerCapacitorSixElement(SixNode SixNode,Direction side,
-			SixNodeDescriptor descriptor) {
-		super(SixNode,side, descriptor);
+
+    double stdDischargeResistor;
+
+    boolean fromNbt = false;
+
+    SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
+
+    public PowerCapacitorSixElement(SixNode SixNode, Direction side, SixNodeDescriptor descriptor) {
+		super(SixNode, side, descriptor);
 		this.descriptor = (PowerCapacitorSixDescriptor) descriptor;
 
 		electricalLoadList.add(positiveLoad);
@@ -48,20 +53,18 @@ public class PowerCapacitorSixElement extends SixNodeElement {
 		watchdog.set(new WorldExplosion(this).machineExplosion());
 		positiveLoad.setAsMustBeFarFromInterSystem();
 	}
-	
-	
-	
-	class PunkProcess implements IProcess{
+
+	class PunkProcess implements IProcess {
 		double eLeft = 0;
 		double eLegaliseResistor;
 		
 		@Override
 		public void process(double time) {
-			if(eLeft <= 0){
+			if (eLeft <= 0) {
 				eLeft = 0;
 				dischargeResistor.setR(stdDischargeResistor);
-			}else{
-				eLeft -= dischargeResistor.getP()*time;
+			} else {
+				eLeft -= dischargeResistor.getP() * time;
 				dischargeResistor.setR(eLegaliseResistor);
 			}
 		}
@@ -104,50 +107,43 @@ public class PowerCapacitorSixElement extends SixNodeElement {
 		setupPhysical();
 	}
 
-	
 	@Override
 	public void inventoryChanged() {
-		// TODO Auto-generated method stub
 		super.inventoryChanged();
 		setupPhysical();
 	}
-	
-	double stdDischargeResistor;
-	
-	boolean fromNbt = false;
+
 	public void setupPhysical() {
 		double eOld = capacitor.getE();
 		capacitor.setC(descriptor.getCValue(inventory));
-		stdDischargeResistor = descriptor.dischargeTao/capacitor.getC();
+		stdDischargeResistor = descriptor.dischargeTao / capacitor.getC();
 		
 		watchdog.setUNominal(descriptor.getUNominalValue(inventory));
-		punkProcess.eLegaliseResistor = Math.pow(descriptor.getUNominalValue(inventory),2)/400;
+		punkProcess.eLegaliseResistor = Math.pow(descriptor.getUNominalValue(inventory), 2) / 400;
 		
-		if(fromNbt){
+		if (fromNbt) {
 			dischargeResistor.setR(stdDischargeResistor);
 			fromNbt = false;
-		}else{
-			double deltaE = capacitor.getE()-eOld;
+		} else {
+			double deltaE = capacitor.getE() - eOld;
 			punkProcess.eLeft += deltaE;
-			if(deltaE < 0){
+			if (deltaE < 0) {
 				dischargeResistor.setR(stdDischargeResistor);
-			}else{
+			} else {
 				dischargeResistor.setR(punkProcess.eLegaliseResistor);
 			}
-		}	
+		}
 	}
 
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-			float vx, float vy, float vz) {
-
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		return onBlockActivatedRotate(entityPlayer);
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
-		nbt.setDouble("punkELeft",punkProcess.eLeft);
+		nbt.setDouble("punkELeft", punkProcess.eLeft);
 	}
 
 	@Override
@@ -158,8 +154,7 @@ public class PowerCapacitorSixElement extends SixNodeElement {
 		fromNbt = true;
 	}
 
-	public void networkSerialize(java.io.DataOutputStream stream)
-	{
+	public void networkSerialize(java.io.DataOutputStream stream) {
 		super.networkSerialize(stream);
 		/*
 		 * try {
@@ -171,12 +166,8 @@ public class PowerCapacitorSixElement extends SixNodeElement {
 		 */
 	}
 
-
-	SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
-
 	@Override
 	public IInventory getInventory() {
-
 		return inventory;
 	}
 
@@ -189,5 +180,4 @@ public class PowerCapacitorSixElement extends SixNodeElement {
 	public Container newContainer(Direction side, EntityPlayer player) {
 		return new PowerCapacitorSixContainer(player, inventory);
 	}
-
 }

@@ -1,11 +1,9 @@
 package mods.eln.sixnode.modbusrtu;
 
-
 public interface IModbusSlot {
+
 	int getOffset();
 	int getSize();
-
-
 
 	public boolean getCoil(int id);
 	public short getHoldingRegister(int id);
@@ -17,5 +15,4 @@ public interface IModbusSlot {
 	public void setInputRegister(int id, short value);
 	public void writeCoil(int id, boolean value);
 	public void writeHoldingRegister(int id, short value);
-	
 }

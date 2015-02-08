@@ -1,13 +1,11 @@
 package mods.eln.sixnode.modbusrtu;
 
-import mods.eln.Eln;
-
-import com.serotonin.modbus4j.ModbusFactory;
-import com.serotonin.modbus4j.ModbusSlaveSet;
 import com.serotonin.modbus4j.ProcessImage;
 import com.serotonin.modbus4j.exception.ModbusInitException;
+import mods.eln.Eln;
 
 public class ModbusServer {
+
 	private ModbusServerExtended slave;
 
 	public ModbusServer() {
@@ -18,26 +16,24 @@ public class ModbusServer {
 			} catch (Exception e) {
 				// TODO: handle exception
 			}
-
 		}
 	}
 
 	public class ServerThread implements Runnable {
-		public ServerThread(ModbusServerExtended slave) {
+        ModbusServerExtended slave;
+
+        public ServerThread(ModbusServerExtended slave) {
 			this.slave = slave;
 		}
-
-		ModbusServerExtended slave;
 
 		@Override
 		public void run() {
 			/*
-			 * while(true){ int a = 0; a++; }
+			 * while (true){ int a = 0; a++; }
 			 */
 			try {
 				slave.start();
 			} catch (ModbusInitException e) {
-
 				e.printStackTrace();
 			}
 		}
@@ -51,7 +47,6 @@ public class ModbusServer {
 			} catch (Exception e) {
 				// TODO: handle exception
 			}
-
 		}
 	}
 
@@ -64,7 +59,6 @@ public class ModbusServer {
 			} catch (Exception e) {
 				// TODO: handle exception
 			}
-
 		}
 		return true;
 	}
@@ -77,7 +71,6 @@ public class ModbusServer {
 			} catch (Exception e) {
 				// TODO: handle exception
 			}
-
 		}
 	}
 }

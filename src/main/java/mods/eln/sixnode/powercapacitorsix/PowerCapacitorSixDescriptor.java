@@ -21,13 +21,13 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 	private Obj3DPart CapacitorCables;
 	private Obj3DPart Base;
 
-	public PowerCapacitorSixDescriptor(
-			String name,
-			Obj3D obj,
-			ISerie serie,
-			double dischargeTao
+    ISerie serie;
+    public double dischargeTao;
 
-	) {
+	public PowerCapacitorSixDescriptor(String name,
+                                       Obj3D obj,
+                                       ISerie serie,
+                                       double dischargeTao) {
 		super(name, PowerCapacitorSixElement.class, PowerCapacitorSixRender.class);
 		this.serie = serie;
 		this.dischargeTao = dischargeTao;
@@ -37,27 +37,25 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 			CapacitorCore = obj.getPart("CapacitorCore");
 			Base = obj.getPart("Base");
 		}
-
 	}
 
-	ISerie serie;
-	public double dischargeTao;
-
-	public double getCValue(int cableCount,double nominalDielVoltage) {
-		if(cableCount == 0) return 0;
-		double uTemp = nominalDielVoltage/Eln.LVU;
-		return serie.getValue(cableCount-1)/uTemp/uTemp;
+	public double getCValue(int cableCount, double nominalDielVoltage) {
+		if (cableCount == 0) return 0;
+		double uTemp = nominalDielVoltage / Eln.LVU;
+		return serie.getValue(cableCount - 1) / uTemp / uTemp;
 	}
+
 	@Override
 	public boolean use2DIcon() {
 		return false;
 	}
+
 	public double getCValue(IInventory inventory) {
 		ItemStack core = inventory.getStackInSlot(PowerCapacitorSixContainer.redId);
 		ItemStack diel = inventory.getStackInSlot(PowerCapacitorSixContainer.dielectricId);
 		if (core == null || diel == null)
 			return getCValue(0,0);
-		else{
+		else {
 			return getCValue(core.stackSize,getUNominalValue(inventory));
 		}
 	}
@@ -66,13 +64,13 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 		ItemStack diel = inventory.getStackInSlot(PowerCapacitorSixContainer.dielectricId);
 		if (diel == null)
 			return 10000;
-		else{
+		else {
 			DielectricItem desc = (DielectricItem) DielectricItem.getDescriptor(diel);
-			return desc.uNominal*diel.stackSize;
+			return desc.uNominal * diel.stackSize;
 		}
 	}
-	public void setParent(net.minecraft.item.Item item, int damage)
-	{
+
+	public void setParent(net.minecraft.item.Item item, int damage) {
 		super.setParent(item, damage);
 		Data.addEnergy(newItemStack());
 	}
@@ -84,8 +82,7 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 	}
 
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
 
@@ -100,11 +97,7 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 	}
 
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-
 	}
-
 }

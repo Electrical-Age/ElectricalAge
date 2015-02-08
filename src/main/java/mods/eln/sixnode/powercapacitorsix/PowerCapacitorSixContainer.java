@@ -18,11 +18,8 @@ public class PowerCapacitorSixContainer extends BasicContainer {
 
 	public PowerCapacitorSixContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory, new Slot[] {
-				new SlotFilter(inventory, redId, 132, 8, 13, new ItemStackFilter[] { new ItemStackFilter(Items.redstone) }, SlotSkin.medium, new String[] { "Redstone Slot", "(Increase capacity)" }),
-				new GenericItemUsingDamageSlot(inventory, dielectricId, 132 + 20, 8, 20, DielectricItem.class, SlotSkin.medium, new String[] { "Dielectric Slot", "(Increase maximal voltage)" })
-
+				new SlotFilter(inventory, redId, 132, 8, 13, new ItemStackFilter[] { new ItemStackFilter(Items.redstone) }, SlotSkin.medium, new String[] { "Redstone slot", "(Increases capacity)" }),
+				new GenericItemUsingDamageSlot(inventory, dielectricId, 132 + 20, 8, 20, DielectricItem.class, SlotSkin.medium, new String[] { "Dielectric slot", "(Increases maximum voltage)" })
 		});
-
 	}
-
 }
