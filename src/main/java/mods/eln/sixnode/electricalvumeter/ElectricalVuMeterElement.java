@@ -1,16 +1,9 @@
 package mods.eln.sixnode.electricalvumeter;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import javax.swing.text.MaskFormatter;
-
-
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -18,15 +11,19 @@ import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
-import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.sim.nbt.NbtThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class ElectricalVuMeterElement extends SixNodeElement {
+
+    public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate", true);
+    public ElectricalVuMeterSlowProcess slowProcess = new ElectricalVuMeterSlowProcess(this);
+    LRDU front;
+    ElectricalVuMeterDescriptor descriptor;
 
 	public ElectricalVuMeterElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
@@ -35,11 +32,6 @@ public class ElectricalVuMeterElement extends SixNodeElement {
     	electricalLoadList.add(inputGate);
     	slowProcessList.add(slowProcess);
 	}
-
-	public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate",true);
-	public ElectricalVuMeterSlowProcess slowProcess = new ElectricalVuMeterSlowProcess(this);
-	LRDU front;
-	ElectricalVuMeterDescriptor descriptor;
 
 	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
@@ -50,7 +42,6 @@ public class ElectricalVuMeterElement extends SixNodeElement {
 		super.readFromNBT(nbt);
         byte value = nbt.getByte("front");
         front = LRDU.fromInt((value >> 0) & 0x3);
-       
 	}
 
 	@Override
@@ -72,7 +63,7 @@ public class ElectricalVuMeterElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu) return NodeBase.maskElectricalInputGate;
+		if (front == lrdu) return NodeBase.maskElectricalInputGate;
 		return 0;
 	}
 
@@ -105,7 +96,7 @@ public class ElectricalVuMeterElement extends SixNodeElement {
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 
-		if(Utils.isPlayerUsingWrench(entityPlayer)) {
+		if (Utils.isPlayerUsingWrench(entityPlayer)) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);

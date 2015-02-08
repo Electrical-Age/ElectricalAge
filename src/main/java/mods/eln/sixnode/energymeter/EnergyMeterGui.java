@@ -1,34 +1,28 @@
 package mods.eln.sixnode.energymeter;
 
-import java.text.NumberFormat;
-import java.text.ParseException;
-
-import mods.eln.gui.GuiButtonEln;
-import mods.eln.gui.GuiContainerEln;
-import mods.eln.gui.GuiHelperContainer;
-import mods.eln.gui.GuiTextFieldEln;
-import mods.eln.gui.HelperStdContainer;
-import mods.eln.gui.IGuiObject;
+import mods.eln.gui.*;
 import mods.eln.misc.Utils;
 import mods.eln.sixnode.energymeter.EnergyMeterElement.Mod;
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
+
 public class EnergyMeterGui extends GuiContainerEln {
+
+    GuiButtonEln stateBt, passwordBt, modBt, setEnergyBt, resetTimeBt, energyUnitBt, timeUnitBt;
+    GuiTextFieldEln passwordFeild, energyFeild;
+    EnergyMeterRender render;
+
+    enum SelectedType {none, min, max}
+
+    boolean isLogged;
 
 	public EnergyMeterGui(EntityPlayer player, IInventory inventory, EnergyMeterRender render) {
 		super(new EnergyMeterContainer(player, inventory));
 		this.render = render;
 	}
-
-	GuiButtonEln stateBt, passwordBt, modBt, setEnergyBt, resetTimeBt, energyUnitBt, timeUnitBt;
-	GuiTextFieldEln passwordFeild, energyFeild;
-	EnergyMeterRender render;
-
-	enum SelectedType {
-		none, min, max
-	};
 
 	@Override
 	public void initGui() {
@@ -53,8 +47,8 @@ public class EnergyMeterGui extends GuiContainerEln {
 		energyFeild = newGuiTextField(x, y + 4, 70);
 		x += 74;
 		setEnergyBt = newGuiButton(x, y, 106, "Set energy counter");
-		energyFeild.setComment(0, "Enter new energy value");
-		energyFeild.setComment(1, "In KJ");
+		energyFeild.setComment(0, "Enter new energy");
+		energyFeild.setComment(1, "value in KJ");
 		energyFeild.setText("0");
 
 		y += 22;
@@ -66,9 +60,8 @@ public class EnergyMeterGui extends GuiContainerEln {
 		resetTimeBt = newGuiButton(x, y, 106, "Reset time counter");
 		y += 22;
 		x = 6;
-		
-		
-		if(render.descriptor.timeNumberWheel.length == 0){
+
+		if (render.descriptor.timeNumberWheel.length == 0){
 			energyUnitBt.enabled = false;
 			timeUnitBt.enabled = false;
 		}
@@ -93,12 +86,12 @@ public class EnergyMeterGui extends GuiContainerEln {
 
 		if (object == modBt) {
 			switch (render.mod) {
-			case ModCounter:
-				render.clientSetString(EnergyMeterElement.clientModId, Mod.ModPrepay.name());
-				break;
-			case ModPrepay:
-				render.clientSetString(EnergyMeterElement.clientModId, Mod.ModCounter.name());
-				break;
+                case ModCounter:
+                    render.clientSetString(EnergyMeterElement.clientModId, Mod.ModPrepay.name());
+                    break;
+                case ModPrepay:
+                    render.clientSetString(EnergyMeterElement.clientModId, Mod.ModCounter.name());
+                    break;
 			}
 		}
 
@@ -124,8 +117,6 @@ public class EnergyMeterGui extends GuiContainerEln {
 		}
 	}
 
-	boolean isLogged;
-
 	@Override
 	protected void preDraw(float f, int x, int y) {
 		super.preDraw(f, x, y);
@@ -141,58 +132,57 @@ public class EnergyMeterGui extends GuiContainerEln {
 
 		switch (render.mod) {
 		case ModCounter:
-			modBt.displayString = "In counter mod";
+			modBt.displayString = "Counter Mode";
 
 			modBt.clearComment();
-			modBt.setComment(0, "In this mod, it");
-			modBt.setComment(1, "count energy from");
-			modBt.setComment(2, "\u00a74red\u00a7f to \u00a71blue\u00a7f side");
+			modBt.setComment(0, "Measures the energy from");
+			modBt.setComment(1, "\u00a74red\u00a7f to \u00a71blue\u00a7f.");
 			break;
 		case ModPrepay:
-			modBt.displayString = "In prepay mod";
+			modBt.displayString = "Prepay Mode";
 
 			modBt.clearComment();
-			modBt.setComment(0, "In this mod, it");
-			modBt.setComment(1, "deduct energy from");
-			modBt.setComment(2, "\u00a74red\u00a7f to \u00a71blue\u00a7f side.");
-			modBt.setComment(3, "You must set a initial");
-			modBt.setComment(4, "amout of energy and when");
-			modBt.setComment(5, "the counter hit zero");
-			modBt.setComment(6, "it cut off the line.");
+			modBt.setComment(0, "Deducts the energy from");
+			modBt.setComment(1, "\u00a74red\u00a7f to \u00a71blue\u00a7f.");
+            modBt.setComment(2, "");
+            modBt.setComment(3, "You must set an initial");
+			modBt.setComment(4, "amount of energy.");
+			modBt.setComment(5, "When the counter hits zero");
+			modBt.setComment(6, "it cuts off the line.");
 
 			break;
 		}
 
-		if(energyUnitBt != null)
+		if (energyUnitBt != null)
 		switch (render.energyUnit) {
-		case 0:
-			energyUnitBt.displayString = "J";
-			break;
-		case 1:
-			energyUnitBt.displayString = "KJ";
-			break;
-		case 2:
-			energyUnitBt.displayString = "MJ";
-			break;
-		case 3:
-			energyUnitBt.displayString = "GJ";
-			break;
-		default:
-			energyUnitBt.displayString = "??";
-			break;
+            case 0:
+                energyUnitBt.displayString = "J";
+                break;
+            case 1:
+                energyUnitBt.displayString = "KJ";
+                break;
+            case 2:
+                energyUnitBt.displayString = "MJ";
+                break;
+            case 3:
+                energyUnitBt.displayString = "GJ";
+                break;
+            default:
+                energyUnitBt.displayString = "??";
+                break;
 		}
 		
-		if(timeUnitBt != null)
+		if (timeUnitBt != null)
 		switch (render.timeUnit) {
-		case 0:
-			timeUnitBt.displayString = "H";
-			break;
-		case 1:
-			timeUnitBt.displayString = "D";
-			break;
-		default:
-			timeUnitBt.displayString = "??";
-			break;
+            case 0:
+                timeUnitBt.displayString = "H";
+                break;
+            case 1:
+                timeUnitBt.displayString = "D";
+                break;
+            default:
+                timeUnitBt.displayString = "??";
+                break;
 		}		
 		modBt.enabled = isLogged;
 		stateBt.enabled = isLogged;
@@ -204,7 +194,6 @@ public class EnergyMeterGui extends GuiContainerEln {
 
 	@Override
 	protected void postDraw(float f, int x, int y) {
-		// TODO Auto-generated method stub
 		super.postDraw(f, x, y);
 		helper.drawRect(6, 29, helper.xSize - 6, 29 + 1, 0xff404040);
 

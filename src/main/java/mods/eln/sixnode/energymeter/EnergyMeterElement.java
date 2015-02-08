@@ -31,6 +31,41 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class EnergyMeterElement extends SixNodeElement {
 
+    VoltageStateWatchDog voltageWatchDogA = new VoltageStateWatchDog();
+    VoltageStateWatchDog voltageWatchDogB = new VoltageStateWatchDog();
+    // ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
+
+    public SlowProcess slowProcess = new SlowProcess();
+    public EnergyMeterDescriptor descriptor;
+    public NbtElectricalLoad aLoad = new NbtElectricalLoad("aLoad");
+    public NbtElectricalLoad bLoad = new NbtElectricalLoad("bLoad");
+    public ResistorSwitch shunt = new ResistorSwitch("shunt", aLoad, bLoad);
+
+    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+
+    public float voltageMax = (float) Eln.SVU, voltageMin = 0;
+
+    int energyUnit = 1, timeUnit = 0;
+
+    public ElectricalCableDescriptor cableDescriptor = null;
+
+    public static final byte clientEnergyStackId = 1;
+    public static final byte clientModId = 2;
+    public static final byte clientPasswordId = 3;
+    public static final byte clientToggleStateId = 4;
+    public static final byte clientTimeCounterId = 5;
+    public static final byte clientEnergyUnitId = 6;
+    public static final byte clientTimeUnitId = 7;
+    public static final byte serverPowerId = 1;
+
+    String password = "";
+    double energyStack = 0;
+    double timeCounter = 0;
+
+    enum Mod {ModCounter, ModPrepay}
+
+    Mod mod = Mod.ModCounter;
+
 	public EnergyMeterElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		front = LRDU.Up;
@@ -55,22 +90,6 @@ public class EnergyMeterElement extends SixNodeElement {
 		voltageWatchDogB.set(bLoad).set(exp);
 		this.descriptor = (EnergyMeterDescriptor) descriptor;
 	}
-
-	VoltageStateWatchDog voltageWatchDogA = new VoltageStateWatchDog();
-	VoltageStateWatchDog voltageWatchDogB = new VoltageStateWatchDog();
-	// ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
-
-	public SlowProcess slowProcess = new SlowProcess();
-	public EnergyMeterDescriptor descriptor;
-	public NbtElectricalLoad aLoad = new NbtElectricalLoad("aLoad");
-	public NbtElectricalLoad bLoad = new NbtElectricalLoad("bLoad");
-	public ResistorSwitch shunt = new ResistorSwitch("shunt", aLoad, bLoad);
-
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
-
-	public float voltageMax = (float) Eln.SVU, voltageMin = 0;
-	
-	int energyUnit = 1,timeUnit = 0;
 
 	public SixNodeElementInventory getInventory() {
 		return inventory;
@@ -115,13 +134,10 @@ public class EnergyMeterElement extends SixNodeElement {
 			stream.writeUTF(password);
 			stream.writeUTF(mod.toString());
 			stream.writeDouble(timeCounter);
-			
 
-			
 			// stream.writeDouble(energyStack);
 			Utils.serialiseItemStack(stream, inventory.getStackInSlot(EnergyMeterContainer.cableSlotId));
-			
-			
+
 			stream.writeByte(energyUnit);
 			stream.writeByte(timeUnit);
 		} catch (IOException e) {
@@ -148,8 +164,6 @@ public class EnergyMeterElement extends SixNodeElement {
 		reconnect();
 	}
 
-	public ElectricalCableDescriptor cableDescriptor = null;
-
 	public void computeElectricalLoad() {
 		ItemStack cable = inventory.getStackInSlot(EnergyMeterContainer.cableSlotId);
 
@@ -161,8 +175,7 @@ public class EnergyMeterElement extends SixNodeElement {
 			voltageWatchDogA.disable();
 			voltageWatchDogB.disable();
 			// currentWatchDog.disable();
-		}
-		else {
+		} else {
 			cableDescriptor.applyTo(aLoad);
 			cableDescriptor.applyTo(bLoad);
 
@@ -177,50 +190,41 @@ public class EnergyMeterElement extends SixNodeElement {
 		return onBlockActivatedRotate(entityPlayer);
 	}
 
-	public static final byte clientEnergyStackId = 1;
-	public static final byte clientModId = 2;
-	public static final byte clientPasswordId = 3;
-	public static final byte clientToggleStateId = 4;
-	public static final byte clientTimeCounterId = 5;
-	public static final byte clientEnergyUnitId = 6;
-	public static final byte clientTimeUnitId = 7;
-	public static final byte serverPowerId = 1;
-
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		super.networkUnserialize(stream);
 		try {
 			switch (stream.readByte()) {
-			case clientEnergyStackId:
-				energyStack = stream.readDouble();
-				slowProcess.publishTimeout = -1;
-				// needPublish();
-				break;
-			case clientTimeCounterId:
-				timeCounter = 0;
-				needPublish();
-				break;
-			case clientModId:
-				mod = Mod.valueOf(stream.readUTF());
-				needPublish();
-				break;
-			case clientPasswordId:
-				password = stream.readUTF();
-				needPublish();
-				break;
-			case clientToggleStateId:
-				setSwitchState(!shunt.getState());
-				break;
-			case clientEnergyUnitId:
-				energyUnit++;
-				if(energyUnit > 3) energyUnit = 0;
-				needPublish();
-				break;
-			case clientTimeUnitId:
-				timeUnit++;
-				if(timeUnit > 1) timeUnit = 0;
-				needPublish();
-				break;
+                case clientEnergyStackId:
+                    energyStack = stream.readDouble();
+                    slowProcess.publishTimeout = -1;
+                    // needPublish();
+                    break;
+                case clientTimeCounterId:
+                    timeCounter = 0;
+                    needPublish();
+                    break;
+                case clientModId:
+                    mod = Mod.valueOf(stream.readUTF());
+                    needPublish();
+                    break;
+                case clientPasswordId:
+                    password = stream.readUTF();
+                    needPublish();
+                    break;
+                case clientToggleStateId:
+                    setSwitchState(!shunt.getState());
+                    break;
+                case clientEnergyUnitId:
+                    energyUnit++;
+                    if (energyUnit > 3) energyUnit = 0;
+                    needPublish();
+                    break;
+                case clientTimeUnitId:
+                    timeUnit++;
+                    if (timeUnit > 1) timeUnit = 0;
+                    needPublish();
+                    break;
 			}
 		} catch (IOException e) {
 			// e.printStackTrace();
@@ -256,19 +260,9 @@ public class EnergyMeterElement extends SixNodeElement {
 		nbt.setDouble("energyStack", energyStack);
 		nbt.setDouble("timeCounter", timeCounter);
 		nbt.setString("password", password);
-		nbt.setByte("energyUnit",(byte) energyUnit);
-		nbt.setByte("timeUnit",(byte) timeUnit);
+		nbt.setByte("energyUnit", (byte) energyUnit);
+		nbt.setByte("timeUnit", (byte) timeUnit);
 	}
-
-	String password = "";
-	double energyStack = 0;
-	double timeCounter = 0;
-
-	enum Mod {
-		ModCounter, ModPrepay
-	};
-
-	Mod mod = Mod.ModCounter;
 
 	class SlowProcess implements IProcess {
 		public static final double publishTimeoutReset = 1;
@@ -277,28 +271,27 @@ public class EnergyMeterElement extends SixNodeElement {
 
 		@Override
 		public void process(double time) {
-			timeCounter += time*72.0;
+			timeCounter += time * 72.0;
 			double p = aLoad.getCurrent() * aLoad.getU() * (aLoad.getU() > bLoad.getU() ? 1.0 : -1.0);
 			boolean highImp = false;
 			switch (mod) {
-			case ModCounter:
-				energyStack += p * time;
-				break;
-			case ModPrepay:
-				energyStack -= p * time;
-				if (energyStack < 0) {
-					// energyStack = 0;
-					// setSwitchState(false);
-					if (p > 0) {
-						highImp = true;
-					}
-				}
-				break;
+                case ModCounter:
+                    energyStack += p * time;
+                    break;
+                case ModPrepay:
+                    energyStack -= p * time;
+                    if (energyStack < 0) {
+                        // energyStack = 0;
+                        // setSwitchState(false);
+                        if (p > 0) {
+                            highImp = true;
+                        }
+                    }
+                    break;
 			}
 			
-			if(highImp) shunt.ultraImpedance();
+			if (highImp) shunt.ultraImpedance();
 			else Eln.applySmallRs(shunt);
-			
 
 			publishTimeout -= time;
 			if (publishTimeout < 0) {
@@ -318,10 +311,8 @@ public class EnergyMeterElement extends SixNodeElement {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
 				oldEnergyPublish = energyStack;
 			}
 		}
-
 	}
 }

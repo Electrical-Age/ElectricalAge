@@ -15,12 +15,19 @@ import org.lwjgl.opengl.GL11;
 
 public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 
+    Obj3D obj;
+    Obj3DPart main, rot, led;
+    float rotStart, rotEnd;
+
+    String tickSound = null;
+    float tickVolume = 0f;
+
 	public ElectricalTimeoutDescriptor(String name, Obj3D obj) {
 		super(name, ElectricalTimeoutElement.class, ElectricalTimeoutRender.class);
-		if(obj != null) {
+		if (obj != null) {
 			main = obj.getPart("main");
 			rot = obj.getPart("rot");
-			if(rot != null) {
+			if (rot != null) {
 				rotStart = rot.getFloat("rotStart");
 				rotEnd = rot.getFloat("rotEnd");
 			}
@@ -41,31 +48,25 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
-	
-	Obj3D obj;
-	Obj3DPart main,rot,led;
-	float rotStart,rotEnd;
+
 	@Override
 	public boolean use2DIcon() {
 		return false;
 	}
+
 	void draw(float left) {
-		if(main != null) main.draw();
-		if(rot != null) {
+		if (main != null) main.draw();
+		if (rot != null) {
 			rot.draw(rotEnd + (rotStart - rotEnd) * left, 1f, 0f, 0f);
 		}
-		if(led != null) {
+		if (led != null) {
 			UtilsClient.ledOnOffColor(left != 0f);
 			UtilsClient.drawLight(led);
 			GL11.glColor3f(1f, 1f, 1f);
 		}
 	}
-	
-	String tickSound = null;
-	float tickVolume = 0f;
-	
-	public ElectricalTimeoutDescriptor setTickSound(String tickSound, float tickVolume)
-	{
+
+	public ElectricalTimeoutDescriptor setTickSound(String tickSound, float tickVolume) {
 		this.tickSound = tickSound;
 		this.tickVolume = tickVolume;
 		return this;
@@ -80,15 +81,15 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		return true;
 	}
+
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		
 		return true;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		if(type == ItemRenderType.INVENTORY) {
+		if (type == ItemRenderType.INVENTORY) {
 			GL11.glScalef(2.2f, 2.2f, 2.2f);
 		}
 		draw(1f);

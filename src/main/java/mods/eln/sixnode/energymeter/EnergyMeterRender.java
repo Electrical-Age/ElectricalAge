@@ -1,16 +1,8 @@
 package mods.eln.sixnode.energymeter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import org.lwjgl.opengl.GL11;
-
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
-import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -21,11 +13,28 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.energymeter.EnergyMeterElement.Mod;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import org.lwjgl.opengl.GL11;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class EnergyMeterRender extends SixNodeElementRender {
 
 	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 	EnergyMeterDescriptor descriptor;
+
+    double timerCouter, energyStack;
+    boolean switchState;
+    String password;
+    Mod mod;
+
+    int energyUnit, timeUnit;
+
+    CableRenderDescriptor cableRender;
+
+    double power;
+    double error;
+    double serverPowerIdTimer = EnergyMeterElement.SlowProcess.publishTimeoutReset * 34;
 
 	public EnergyMeterRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
@@ -34,7 +43,6 @@ public class EnergyMeterRender extends SixNodeElementRender {
 		/*for (int idx = 0; idx < energyRc.length; idx++) {
 			energyRc[idx] = new RcInterpolator(0.2f);
 		}*/
-
 	}
 
 	//RcInterpolator[] energyRc = new RcInterpolator[7];
@@ -43,8 +51,8 @@ public class EnergyMeterRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
 
-		descriptor.draw(energyStack / Math.pow(10,energyUnit*3-1),timerCouter/(timeUnit == 0 ? 360 : 8640),
-						energyUnit,timeUnit,
+		descriptor.draw(energyStack / Math.pow(10, energyUnit * 3 - 1), timerCouter / (timeUnit == 0 ? 360 : 8640),
+						energyUnit, timeUnit,
 						UtilsClient.distanceFromClientPlayer(tileEntity) < 20);
 
 		//front.glRotateOnX();
@@ -70,7 +78,7 @@ public class EnergyMeterRender extends SixNodeElementRender {
 			stack /= 10.0;
 		}*/
 
-		timerCouter += deltaT*72;
+		timerCouter += deltaT * 72;
 		serverPowerIdTimer += deltaT;
 	}
 
@@ -79,18 +87,11 @@ public class EnergyMeterRender extends SixNodeElementRender {
 		return cableRender;
 	}
 
-	double timerCouter, energyStack;
-	boolean switchState;
-	String password;
-	Mod mod;
-
-	int energyUnit,timeUnit;
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);
 
 		try {
-
 			switchState = stream.readBoolean();
 			password = stream.readUTF();
 			mod = Mod.valueOf(stream.readUTF());
@@ -98,7 +99,6 @@ public class EnergyMeterRender extends SixNodeElementRender {
 			// energyStack = stream.readDouble();
 			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), ElectricalCableDescriptor.class);
 
-			
 			energyUnit = stream.readByte();
 			timeUnit = stream.readByte();
 			if (desc == null)
@@ -110,37 +110,28 @@ public class EnergyMeterRender extends SixNodeElementRender {
 		}
 	}
 
-	CableRenderDescriptor cableRender;
-
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		return new EnergyMeterGui(player, inventory, this);
 	}
 
-	double power;
-	double error;
-	double serverPowerIdTimer = EnergyMeterElement.SlowProcess.publishTimeoutReset * 34;
-
 	@Override
 	public void serverPacketUnserialize(DataInputStream stream) throws IOException {
-		// TODO Auto-generated method stub
 		super.serverPacketUnserialize(stream);
 
 		switch (stream.readByte()) {
-		case EnergyMeterElement.serverPowerId:
-			if (serverPowerIdTimer > EnergyMeterElement.SlowProcess.publishTimeoutReset * 3) {
-				energyStack = stream.readDouble();
-				error = 0;
-			} else {
-				error = stream.readDouble() - energyStack;
-			}
-			power = stream.readDouble();
-			serverPowerIdTimer = 0;
-			break;
-
-		default:
-			break;
+            case EnergyMeterElement.serverPowerId:
+                if (serverPowerIdTimer > EnergyMeterElement.SlowProcess.publishTimeoutReset * 3) {
+                    energyStack = stream.readDouble();
+                    error = 0;
+                } else {
+                    error = stream.readDouble() - energyStack;
+                }
+                power = stream.readDouble();
+                serverPowerIdTimer = 0;
+                break;
+            default:
+                break;
 		}
 	}
-
 }

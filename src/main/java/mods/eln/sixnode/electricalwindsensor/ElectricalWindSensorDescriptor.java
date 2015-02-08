@@ -14,26 +14,25 @@ import net.minecraft.item.ItemStack;
 
 import org.lwjgl.opengl.GL11;
 
+public class ElectricalWindSensorDescriptor extends SixNodeDescriptor {
 
-public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
-
-
-	private Obj3DPart baseWall,baseGround,anemometer;
+	private Obj3DPart baseWall, baseGround, anemometer;
 
 	public float[] pinDistance;
+
+    Obj3D obj;
+
+    public double windMax;
 
 	public ElectricalWindSensorDescriptor(
 			String name,
 			Obj3D obj,
-			double windMax
-			) {
-		super(name, ElectricalWindSensorElement.class,ElectricalWindSensorRender.class);
+			double windMax) {
+		super(name, ElectricalWindSensorElement.class, ElectricalWindSensorRender.class);
 		this.windMax = windMax;
 		this.obj = obj;
 		
-		if(obj != null)
-		{
-			
+		if (obj != null) {
 			baseWall = obj.getPart("base_wall");
 			baseGround = obj.getPart("base_ground");
 			anemometer = obj.getPart("anemometer");
@@ -42,54 +41,46 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor{
 		}
 	}
 
-	Obj3D obj;
-
-	public double windMax;
-
-	void draw(float alpha)
-	{
-		if(baseWall != null) baseWall.draw();
-		if(anemometer != null) {
+	void draw(float alpha) {
+		if (baseWall != null) baseWall.draw();
+		if (anemometer != null) {
 			UtilsClient.disableCulling();
 			anemometer.draw(alpha, 0, 1, 0);
 			UtilsClient.enableCulling();
 		}
 	}
+
 	@Override
 	public boolean use2DIcon() {
 		return false;
 	}
+
 	@Override
 	public void setParent(Item item, int damage) {
-		
 		super.setParent(item, damage);
 		Data.addSignal(newItemStack());
 	}
+
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-		
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Provides an electrical signal");
-		list.add("dependant on wind.");
-		list.add("Maximal wind is " + Utils.plotValue(windMax, " m/s"));
+		list.add("dependant on wind speed.");
+		list.add("Maximum wind speed is " + Utils.plotValue(windMax, " m/s"));
 	}
-	
-	
+
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		
 		return true;
 	}
+
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
+
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		
 		return true;
 	}
 

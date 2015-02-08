@@ -18,14 +18,17 @@ import net.minecraft.inventory.IInventory;
 public class ElectricalWatchElement extends SixNodeElement {
 
 	ElectricalWatchDescriptor descriptor;
+
+    public ElectricalWatchSlowProcess slowProcess = new ElectricalWatchSlowProcess(this);
+
+    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+
 	public ElectricalWatchElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 
     	slowProcessList.add(slowProcess);
     	this.descriptor = (ElectricalWatchDescriptor) descriptor;
 	}
-	public ElectricalWatchSlowProcess slowProcess = new ElectricalWatchSlowProcess(this);
-
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
@@ -71,9 +74,7 @@ public class ElectricalWatchElement extends SixNodeElement {
 	public IInventory getInventory() {
 		return inventory;
 	}
-	
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
-	
+
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
 		return new ElectricalWatchContainer(player, inventory);
@@ -81,20 +82,17 @@ public class ElectricalWatchElement extends SixNodeElement {
 	
 	@Override
 	protected void inventoryChanged() {
-		
 		super.inventoryChanged();
 		needPublish();
 	}
 	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		
 		super.networkSerialize(stream);
 		try {
 			stream.writeBoolean(slowProcess.upToDate);
 			stream.writeLong(slowProcess.oldDate);
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
 	}

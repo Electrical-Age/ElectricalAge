@@ -17,6 +17,10 @@ public class ElectricalTimeoutRender extends SixNodeElementRender {
 
 	ElectricalTimeoutDescriptor descriptor;
 	long time;
+
+    float timeoutValue = 0, timeoutCounter = 0;
+    boolean inputState;
+
 	public ElectricalTimeoutRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalTimeoutDescriptor) descriptor;
@@ -35,9 +39,9 @@ public class ElectricalTimeoutRender extends SixNodeElementRender {
 	
 	@Override
 	public void refresh(float deltaT) {
-		if(inputState == false) {
+		if (!inputState) {
 			timeoutCounter -= deltaT;
-			if(timeoutCounter < 0f) timeoutCounter = 0f;
+			if (timeoutCounter < 0f) timeoutCounter = 0f;
 		}
 	}
 	
@@ -46,9 +50,6 @@ public class ElectricalTimeoutRender extends SixNodeElementRender {
 		return false;
 	}
 
-	float timeoutValue = 0, timeoutCounter = 0;
-	boolean inputState;
-	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);
@@ -68,6 +69,6 @@ public class ElectricalTimeoutRender extends SixNodeElementRender {
 	
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		return new ElectricalTimeoutGui(player,this);
+		return new ElectricalTimeoutGui(player, this);
 	}
 }

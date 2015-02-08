@@ -1,62 +1,40 @@
 package mods.eln.sixnode.electricalwatch;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayerMP;
+import mods.eln.item.electricalitem.BatteryItem;
+import mods.eln.misc.INBTTReady;
+import mods.eln.sim.IProcess;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.World;
-import mods.eln.Eln;
-import mods.eln.generic.GenericItemUsingDamageDescriptor;
-import mods.eln.item.BrushDescriptor;
-import mods.eln.item.ElectricalDrillDescriptor;
-import mods.eln.item.EntitySensorFilterDescriptor;
-import mods.eln.item.MiningPipeDescriptor;
-import mods.eln.item.electricalitem.BatteryItem;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.INBTTReady;
-import mods.eln.misc.RcInterpolator;
-import mods.eln.misc.Utils;
-import mods.eln.sim.IProcess;
-import mods.eln.transparentnode.autominer.AutoMinerContainer;
 
 public class ElectricalWatchSlowProcess implements IProcess, INBTTReady {
+
 	ElectricalWatchElement element;
+
+    boolean upToDate = false;
+    long oldDate = 1379;
 	
 	public ElectricalWatchSlowProcess(ElectricalWatchElement element) {
 		this.element = element;
 	}
-	
-	
-	boolean upToDate = false;
-	long oldDate = 1379;
+
 	@Override
 	public void process(double time) {
 		ItemStack batteryStack = element.inventory.getStackInSlot(ElectricalWatchContainer.batteryId);
 		BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack);
 		double energy;
-		if(battery == null || (energy = battery.getEnergy(batteryStack)) < element.descriptor.powerConsumtion*time*4){
-			if(upToDate == true){
+		if (battery == null || (energy = battery.getEnergy(batteryStack)) < element.descriptor.powerConsumtion * time * 4) {
+			if (upToDate){
 				upToDate = false;
 				oldDate = element.sixNode.coordonate.world().getWorldTime();
-				if(batteryStack != null) battery.setEnergy(batteryStack, 0);
+				if (batteryStack != null) battery.setEnergy(batteryStack, 0);
 				element.needPublish();
 			}
-		}else{
-			if(upToDate == false){
+		} else {
+			if (!upToDate) {
 				upToDate = true;
 				element.needPublish();
 			}
-			battery.setEnergy(batteryStack, energy-element.descriptor.powerConsumtion*time);
+			battery.setEnergy(batteryStack, energy - element.descriptor.powerConsumtion * time);
 		}
 	}
 	

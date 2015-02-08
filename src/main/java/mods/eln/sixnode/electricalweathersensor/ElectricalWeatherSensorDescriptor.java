@@ -20,22 +20,22 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
 	private Obj3DPart main;
 	public float[] pinDistance;
 
+    Obj3D obj;
+
 	public ElectricalWeatherSensorDescriptor(String name, Obj3D obj) {
-		super(name, ElectricalWeatherSensorElement.class,ElectricalWeatherSensorRender.class);
+		super(name, ElectricalWeatherSensorElement.class, ElectricalWeatherSensorRender.class);
 		this.obj = obj;
 		
-		if(obj != null) {
+		if (obj != null) {
 			main = obj.getPart("main");
 
 			pinDistance = Utils.getSixNodePinDistance(main);
 		}
 	}
 
-	Obj3D obj;
-
 	void draw() {
 		UtilsClient.disableCulling();
-		if(main != null) main.draw();
+		if (main != null) main.draw();
 		UtilsClient.enableCulling();
 	}
 	
@@ -50,14 +50,15 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Provides an electrical signal");
 		list.add("dependant on weather type.");
-		list.add("0V -> clear ");
-		list.add(Eln.SVU/2 + "V -> rain ");
-		list.add(Eln.SVU + "V -> thunder ");
+		list.add("0V -> Clear");
+		list.add(Eln.SVU / 2 + "V -> Rain");
+		list.add(Eln.SVU + "V -> Thunder");
 	}
 	@Override
 	public boolean use2DIcon() {
 		return false;
 	}
+
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		return true;
@@ -67,9 +68,9 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
+
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		
 		return true;
 	}
 

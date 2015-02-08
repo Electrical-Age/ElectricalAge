@@ -16,21 +16,20 @@ public class ElectricalWindSensorRender extends SixNodeElementRender {
 
 	ElectricalWindSensorDescriptor descriptor;
 
-	public ElectricalWindSensorRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+    float alpha = 0;
+    float wind = 0;
+
+    RcInterpolator windFilter = new RcInterpolator(5);
+
+	public ElectricalWindSensorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalWindSensorDescriptor) descriptor;
 	}
 
-	float alpha = 0;
-	float wind = 0;
-
-	RcInterpolator windFilter = new RcInterpolator(5);
-
 	@Override
 	public void draw() {
 		super.draw();
-		drawSignalPin(front.right(),new float[]{2,2,2,2});
+		drawSignalPin(front.right(), new float[]{2, 2, 2, 2});
 
 		descriptor.draw(alpha);
 	}
@@ -45,19 +44,16 @@ public class ElectricalWindSensorRender extends SixNodeElementRender {
 
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		
 		return Eln.instance.signalCableDescriptor.render;
 	}
 
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		
 		super.publishUnserialize(stream);
 		try {
 			wind = stream.readFloat();
 			windFilter.setTarget(wind);
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
 	}

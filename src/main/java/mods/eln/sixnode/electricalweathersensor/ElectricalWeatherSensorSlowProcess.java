@@ -1,47 +1,43 @@
 package mods.eln.sixnode.electricalweathersensor;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.World;
-import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.RcInterpolator;
-import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.World;
 
 public class ElectricalWeatherSensorSlowProcess implements IProcess, INBTTReady {
 	
 	ElectricalWeatherSensorElement element;
+
+    double timeCounter = 0;
+    static final double refreshPeriode = 0.2;
+    RcInterpolator rc = new RcInterpolator(3f);
+    final float premonitionTime = 120;
 	
 	public ElectricalWeatherSensorSlowProcess(ElectricalWeatherSensorElement element) {
 		this.element = element;
 	}
-	
-	double timeCounter = 0;
-	static final double refreshPeriode = 0.2;
-	RcInterpolator rc = new RcInterpolator(3f);
-	final float premonitionTime = 120;
-	
+
 	@Override
 	public void process(double time) {
 		timeCounter += time;
-		if(timeCounter > refreshPeriode) {
+
+        if (timeCounter > refreshPeriode) {
 			timeCounter -= refreshPeriode;
 			Coordonate coord = element.sixNode.coordonate;
 
 	    	float target = 0f;
 	    	
-	    	if(coord.getWorldExist() == true){
+	    	if (coord.getWorldExist()) {
 				World world = coord.world();
 	
-		    	if(world.isRaining()) {
+		    	if (world.isRaining()) {
 		    		//float f = Math.max(0f, (float)((premonitionTime - rain * time) / premonitionTime));
 		    		target = 0.5f;
 		    	}
-		    	if(world.isThundering()) {
+		    	if (world.isThundering()) {
 		    		target = 1.0f;
 		    	}
 				rc.setTarget(target);
@@ -50,7 +46,7 @@ public class ElectricalWeatherSensorSlowProcess implements IProcess, INBTTReady 
 	    /*	int rain = world.getWorldInfo().getRainTime();
 	    	int thunder = world.getWorldInfo().getThunderTime();
 	    	
-	    	if(rain < thunder) {
+	    	if (rain < thunder) {
 	    		target = target * (1 - f) + f * 0.5f;
 	    	} else {
 	    		target = target * (1 - f) + f * 1f;

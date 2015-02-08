@@ -1,18 +1,16 @@
 package mods.eln.sixnode.energymeter;
 
-import java.util.List;
-
 import mods.eln.misc.Obj3D;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.Utils;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-
 import org.lwjgl.opengl.GL11;
+
+import java.util.List;
 
 public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
@@ -21,8 +19,9 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 	public Obj3DPart[] energyNumberWheel, timeNumberWheel;
 	public float[] pinDistance;
 
-	public EnergyMeterDescriptor(String name, Obj3D obj,
-			int energyWheelCount, int timeWheelCount) {
+    float alphaOff, alphaOn, speed;
+
+	public EnergyMeterDescriptor(String name, Obj3D obj, int energyWheelCount, int timeWheelCount) {
 		super(name, EnergyMeterElement.class, EnergyMeterRender.class);
 		this.obj = obj;
 		if (obj != null) {
@@ -40,13 +39,10 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 			for (int idx = 0; idx < timeNumberWheel.length; idx++) {
 				timeNumberWheel[idx] = obj.getPart("TimeNumberWheel" + idx);
 			}
-
 		}
 
 		pinDistance = Utils.getSixNodePinDistance(base);
 	}
-
-	float alphaOff, alphaOn, speed;
 
 	@Override
 	public void setParent(Item item, int damage) {
@@ -66,35 +62,31 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		if(type == ItemRenderType.INVENTORY) return true;
+		if (type == ItemRenderType.INVENTORY) return true;
 		return true;
 	}
 
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		if(type == ItemRenderType.INVENTORY) return true;
+		if (type == ItemRenderType.INVENTORY) return true;
 		return true;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		if(type == ItemRenderType.INVENTORY){
-			
-			
-
+		if (type == ItemRenderType.INVENTORY) {
 			GL11.glRotatef(45, 0, 0, 1);
 			GL11.glRotatef(90, 1, 0, 0);
 			GL11.glRotatef(30, 0, 0, 1);
 			float scal = 2.5f;
 			GL11.glScalef(scal, scal, scal);
 			draw(13896, 1511, 1, 0, false);
-		}else{
+		} else {
 			draw(13896, 1511, 1, 0, true);
 		}
 	}
 
 	public void draw(double energy, double time, int energyUnit, int timeUnit, boolean drawAll) {
-
 		// UtilsClient.disableCulling();
 		base.draw();
 		powerDisk.draw(-(float) energy, 0f, 1f, 0f);
@@ -134,27 +126,24 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
 				energy = Math.max(0.0, Math.abs(energy));
 				if (energy < 5) propagate = false;
+
 				for (int idx = 0; idx < energyNumberWheel.length; idx++) {
-
 					double rot = ((energy) % 10) + 0.0;
-
 					rot += 0.00;
+
 					if (idx == 1) {
 						delta = ((rot) % 1) * 2 - 1;
 						delta *= delta * delta;
 						delta *= 0.5;
 					}
 					if (idx != 0) {
-
 						if (propagate) {
 							if (rot < 9.5 && rot > 0.5) {
 								propagate = false;
 							}
 							rot = (int) (rot) + delta;
-						}
-						else
+						} else
 							rot = (int) (rot);
-
 					}
 
 					oldRot = rot;
@@ -167,12 +156,11 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 					GL11.glPopMatrix();
 
 					energy /= 10.0;
-
 				}
 			}
 		}
 
-		if(energyNumberWheel.length != 0){ // Render Times
+		if (energyNumberWheel.length != 0) { // Render Times
 			float ox = 0.20859f, oy = 0.03125f, oz = 0;
 			double delta = 0;
 			boolean propagate = true;
@@ -191,11 +179,11 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
 				time = Math.max(0.0, Math.abs(time));
 				if (time < 5) propagate = false;
+
 				for (int idx = 0; idx < timeNumberWheel.length; idx++) {
-
 					double rot = ((time) % 10) + 0.0;
-
 					rot += 0.00;
+
 					if (idx == 1) {
 						delta = ((rot) % 1) * 2 - 1;
 						delta *= delta * delta;
@@ -204,16 +192,13 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 						delta *= 0.5;
 					}
 					if (idx != 0) {
-
 						if (propagate) {
 							if (rot < 9.5 && rot > 0.5) {
 								propagate = false;
 							}
 							rot = (int) (rot) + delta;
-						}
-						else
+						} else
 							rot = (int) (rot);
-
 					}
 
 					oldRot = rot;
@@ -226,11 +211,9 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 					GL11.glPopMatrix();
 
 					time /= 10.0;
-
 				}
 			}
 		}
-
 		// UtilsClient.enableCulling();
 	}
 

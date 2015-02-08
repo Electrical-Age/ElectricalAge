@@ -22,6 +22,20 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class ElectricalTimeoutElement extends SixNodeElement {
 
+    public ElectricalTimeoutDescriptor descriptor;
+
+    public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate", false);
+    public NbtElectricalGateOutput outputGate = new NbtElectricalGateOutput("outputGate");
+    public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
+
+    public ElectricalTimeoutProcess slowProcess = new ElectricalTimeoutProcess(this);
+
+    double timeOutCounter = 0, timeOutValue = 2;
+
+    public static final byte resetId = 1;
+    public static final byte setTimeOutValueId = 2;
+    public static final byte setId = 3;
+
 	public ElectricalTimeoutElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		front = LRDU.Left;
@@ -33,20 +47,10 @@ public class ElectricalTimeoutElement extends SixNodeElement {
     	this.descriptor = (ElectricalTimeoutDescriptor) descriptor;
 	}
 
-	public ElectricalTimeoutDescriptor descriptor;
-
-	public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate",false);	
-	public NbtElectricalGateOutput outputGate = new NbtElectricalGateOutput("outputGate");	
-	public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
-	
-	public ElectricalTimeoutProcess slowProcess = new ElectricalTimeoutProcess(this);
-	
 	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
 	}
-	
-	double timeOutCounter = 0, timeOutValue = 2;
-	
+
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
@@ -66,8 +70,8 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(front == lrdu) return inputGate;
-		if(front.inverse() == lrdu) return outputGate;
+		if (front == lrdu) return inputGate;
+		if (front.inverse() == lrdu) return outputGate;
 		return null;
 	}
 
@@ -78,8 +82,8 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu) return NodeBase.maskElectricalInputGate;
-		if(front.inverse() == lrdu) return NodeBase.maskElectricalOutputGate;
+		if (front == lrdu) return NodeBase.maskElectricalInputGate;
+		if (front.inverse() == lrdu) return NodeBase.maskElectricalOutputGate;
 		return 0;
 	}
 
@@ -113,20 +117,16 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 		
-		if(Utils.isPlayerUsingWrench(entityPlayer)) {
+		if (Utils.isPlayerUsingWrench(entityPlayer)) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
 			sixNode.setNeedPublish(true);
 			return true;	
 		}
-		//front = LRDU.fromInt((front.toInt() + 1)&3);
+		//front = LRDU.fromInt((front.toInt() + 1) & 3);
     	return false;
 	}
 
-	public static final byte resetId = 1;
-	public static final byte setTimeOutValueId = 2;
-	public static final byte setId = 3;
-	
 	void set() {
 		timeOutCounter = timeOutValue;
 		needPublish();
@@ -142,16 +142,16 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 		super.networkUnserialize(stream);
 		try {
 			switch(stream.readByte()) {
-			case resetId:
-				reset();
-				break;			
-			case setId:
-				set();
-				break;
-			case setTimeOutValueId:
-				timeOutValue = stream.readFloat();
-				needPublish();
-				break;
+                case resetId:
+                    reset();
+                    break;
+                case setId:
+                    set();
+                    break;
+                case setTimeOutValueId:
+                    timeOutValue = stream.readFloat();
+                    needPublish();
+                    break;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

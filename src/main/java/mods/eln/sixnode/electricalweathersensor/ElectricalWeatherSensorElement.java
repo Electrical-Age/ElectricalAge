@@ -16,6 +16,10 @@ import net.minecraft.entity.player.EntityPlayer;
 public class ElectricalWeatherSensorElement extends SixNodeElement {
 
 	ElectricalWeatherSensorDescriptor descriptor;
+
+    public NbtElectricalGateOutput outputGate = new NbtElectricalGateOutput("outputGate");
+    public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
+    public ElectricalWeatherSensorSlowProcess slowProcess = new ElectricalWeatherSensorSlowProcess(this);
 	
 	public ElectricalWeatherSensorElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
@@ -25,10 +29,6 @@ public class ElectricalWeatherSensorElement extends SixNodeElement {
     	slowProcessList.add(slowProcess);
     	this.descriptor = (ElectricalWeatherSensorDescriptor) descriptor;
 	}
-	
-	public NbtElectricalGateOutput outputGate = new NbtElectricalGateOutput("outputGate");
-	public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
-	public ElectricalWeatherSensorSlowProcess slowProcess = new ElectricalWeatherSensorSlowProcess(this);
 
 	public static boolean canBePlacedOnSide(Direction side, int type) {
 		return true;
@@ -36,7 +36,7 @@ public class ElectricalWeatherSensorElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(front == lrdu.left()) return outputGate;
+		if (front == lrdu.left()) return outputGate;
 		return null;
 	}
 
@@ -47,7 +47,7 @@ public class ElectricalWeatherSensorElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu.left()) return NodeBase.maskElectricalOutputGate;
+		if (front == lrdu.left()) return NodeBase.maskElectricalOutputGate;
 		return 0;
 	}
 
