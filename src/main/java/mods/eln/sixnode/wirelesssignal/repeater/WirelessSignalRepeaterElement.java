@@ -13,15 +13,15 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class WirelessSignalRepeaterElement extends SixNodeElement{
+public class WirelessSignalRepeaterElement extends SixNodeElement {
 
-	
 	WirelessSignalRepeaterProcess slowProcess = new WirelessSignalRepeaterProcess(this);
 	
 	WirelessSignalRepeaterDescriptor descriptor;
+
+    boolean fromNbt = false;
 	
-	public WirelessSignalRepeaterElement(SixNode sixNode, Direction side,
-			SixNodeDescriptor descriptor) {
+	public WirelessSignalRepeaterElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		
 		this.descriptor = (WirelessSignalRepeaterDescriptor) descriptor;
@@ -35,25 +35,22 @@ public class WirelessSignalRepeaterElement extends SixNodeElement{
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-
 		return null;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		
 		return null;
 	}
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if(front == lrdu) return NodeBase.maskElectricalOutputGate;
+		if (front == lrdu) return NodeBase.maskElectricalOutputGate;
 		return 0;
 	}
 
 	@Override
 	public String multiMeterString() {
-		
 		return null;
 	}
 
@@ -61,12 +58,9 @@ public class WirelessSignalRepeaterElement extends SixNodeElement{
 	public String thermoMeterString() {
 		return null;
 	}
-
-	
-	
-	
+    
 	@Override
-	public void globalBoot(){
+	public void globalBoot() {
 		slowProcess.process(0.05);
 	}
 
@@ -75,29 +69,26 @@ public class WirelessSignalRepeaterElement extends SixNodeElement{
 		unregister();
 		super.destroy(entityPlayer);
 	}
-
-	
+    
 	@Override
 	public void unload() {
 		super.unload();
 		unregister();
 	}
 	
-	void unregister(){
+	void unregister() {
 		IWirelessSignalSpot.spots.remove(slowProcess);
 	}
 
 	@Override
 	public void initialize() {
-		if(fromNbt == false){
+		if (!fromNbt) {
 			slowProcess.process(0.05);
 		}
 	}
-	boolean fromNbt = false;
-	
+
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
 		super.readFromNBT(nbt);
 		fromNbt = true;
 	}

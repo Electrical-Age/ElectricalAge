@@ -1,31 +1,28 @@
 package mods.eln.sixnode.wirelesssignal.rx;
 
-import java.util.HashMap;
-import java.util.HashSet;
-
-import mods.eln.Eln;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
 import mods.eln.sixnode.wirelesssignal.WirelessUtils;
-import mods.eln.sixnode.wirelesssignal.aggregator.IWirelessSignalAggregator;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class WirelessSignalRxProcess implements IProcess, INBTTReady {
 
 	private WirelessSignalRxElement rx;
 
+    double sleepTimer = 0;
+
+    HashMap<String, HashSet<IWirelessSignalTx>> txSet = new HashMap<String, HashSet<IWirelessSignalTx>>();
+    HashMap<IWirelessSignalTx, Double> txStrength = new HashMap<IWirelessSignalTx, Double>();
+
 	public WirelessSignalRxProcess(WirelessSignalRxElement rx) {
 		this.rx = rx;
-
 	}
-
-	double sleepTimer = 0;
-
-	HashMap<String, HashSet<IWirelessSignalTx>> txSet = new HashMap<String, HashSet<IWirelessSignalTx>>();
-	HashMap<IWirelessSignalTx, Double> txStrength = new HashMap<IWirelessSignalTx, Double>();
 
 	@Override
 	public void process(double time) {
@@ -84,12 +81,9 @@ public class WirelessSignalRxProcess implements IProcess, INBTTReady {
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-
 	}
-
 }

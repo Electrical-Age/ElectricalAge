@@ -23,13 +23,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class WirelessSignalSourceElement extends SixNodeElement implements IWirelessSignalTx{
-
-
-	
-
-	public static HashMap<String, ArrayList<IWirelessSignalTx>> channelMap = new HashMap<String, ArrayList<IWirelessSignalTx>>(); 
-	
+public class WirelessSignalSourceElement extends SixNodeElement implements IWirelessSignalTx {
+    
+	public static HashMap<String, ArrayList<IWirelessSignalTx>> channelMap = new HashMap<String, ArrayList<IWirelessSignalTx>>();
 
 	WirelessSignalSourceDescriptor descriptor;
 	
@@ -38,9 +34,10 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
 	
 	public String channel = "Default channel";
 	private LightningGlitchProcess lightningGlitchProcess;
-	
-	public WirelessSignalSourceElement(SixNode sixNode, Direction side,
-			SixNodeDescriptor descriptor) {
+
+    public static final byte setChannelId = 1;
+
+    public WirelessSignalSourceElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 
 		front = LRDU.Down;
@@ -52,6 +49,7 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
 			autoResetProcess.reset();
 		}
 	}
+    
 	class AutoResetProcess implements IProcess {
 		double timeout = 0;
 		double timeoutDelay = 0.21;
@@ -60,7 +58,7 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
 		public void process(double time) {
 			if (timeout > 0) {
 				if (timeout - time < 0) {
-					if(state){
+					if (state) {
 						state = false;
 						needPublish();
 					}
@@ -69,23 +67,18 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
 			}
 		}
 
-		void reset(){
+		void reset() {
 			timeout = timeoutDelay;
 		}
 	}
-
-
-
-	
+    
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-
 		return null;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		
 		return null;
 	}
 
@@ -101,123 +94,98 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
 
 	@Override
 	public String thermoMeterString() {
-		
 		return null;
 	}
 
 	@Override
 	public void initialize() {
-		
-		
 	}
 
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-			float vx, float vy, float vz) {
-		if(Utils.isPlayerUsingWrench(entityPlayer))
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+		if (Utils.isPlayerUsingWrench(entityPlayer))
 			return false;	
 		
 		state = ! state;
-		if(state && autoResetProcess != null) autoResetProcess.reset();
+		if (state && autoResetProcess != null) autoResetProcess.reset();
 		needPublish();
 		return true;
 	}
-
-	
-	 
+    
 	@Override
 	public void destroy(EntityPlayerMP entityPlayer) {
 		WirelessSignalTxElement.channelRemove(this);
 		super.destroy(entityPlayer);
 	}
-
-	
+    
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		
 		super.writeToNBT(nbt);
 		nbt.setString("channel", channel);
 		nbt.setBoolean("state", state);
 	}
+    
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		
 		WirelessSignalTxElement.channelRemove(this);
 		
 		super.readFromNBT(nbt);
 		channel = nbt.getString("channel");
 		state = nbt.getBoolean("state");
-
-		
+        
 		WirelessSignalTxElement.channelRegister(this);
-		
 	}
 
 	@Override
 	public Coordonate getCoordonate() {
-		
 		return sixNode.coordonate;
 	}
 
 	@Override
 	public int getRange() {
-		
 		return descriptor.range;
 	}
 
 	@Override
 	public String getChannel() {
-		
 		return channel;
 	}
-
-
+    
 	@Override
 	public double getValue() {
-		
 		return (state ? 1.0 : 0.0) + lightningGlitchProcess.glitchOffset;
 	}
-
-
-	
-	public static final byte setChannelId = 1;
+    
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		
 		super.networkUnserialize(stream);
 		
 		try {
-			switch(stream.readByte()){
-			case setChannelId:
-				WirelessSignalTxElement.channelRemove(this);
-				channel = stream.readUTF();
-				needPublish();
-				WirelessSignalTxElement.channelRegister(this);
-				break;
+			switch (stream.readByte()) {
+                case setChannelId:
+                    WirelessSignalTxElement.channelRemove(this);
+                    channel = stream.readUTF();
+                    needPublish();
+                    WirelessSignalTxElement.channelRegister(this);
+                    break;
 			}
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
 	}
 	
 	@Override
 	public boolean hasGui() {
-		
 		return true;
 	}
-	
 
-	
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
-		
 		super.networkSerialize(stream);
 		try {
 			stream.writeUTF(channel);
 			stream.writeBoolean(state);
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
 	}
