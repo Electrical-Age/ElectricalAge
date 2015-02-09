@@ -1,23 +1,12 @@
 package mods.eln.sixnode.tutorialsign;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.text.NumberFormat;
-import java.text.ParseException;
-
-import org.lwjgl.opengl.GL11;
-
 import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.GuiTextFieldEln;
-import mods.eln.gui.GuiTextFieldEln.GuiTextFieldElnObserver;
-import mods.eln.misc.Utils;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiPlayerInfo;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.gui.inventory.GuiEditSign;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class TutorialSignGui extends GuiScreenEln {
 
@@ -45,7 +34,6 @@ public class TutorialSignGui extends GuiScreenEln {
 	
 	@Override
 	public void textFieldNewValue(GuiTextFieldEln textField, String value) {
-
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		    DataOutputStream stream = new DataOutputStream(bos);   	

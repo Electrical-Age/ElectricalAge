@@ -15,40 +15,34 @@ import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.client.Minecraft;
 
-
-public class ThermalCableRender extends SixNodeElementRender{
+public class ThermalCableRender extends SixNodeElementRender {
 
 	ThermalCableDescriptor cableDesciptor;
 
-	public ThermalCableRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+    double temperature = 0;
+    int color = 0;
+
+	public ThermalCableRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.cableDesciptor = (ThermalCableDescriptor) descriptor;
-		
 	}
-
-	double temperature = 0;
-	int color = 0;
-	
+    
 	public boolean drawCableAuto() {
-		
 		return false;
 	}
 	
 	@Override
 	public void draw() {
-		
 		Minecraft.getMinecraft().mcProfiler.startSection("TCable");
 		
 		//ItemStack i = Minecraft.getMinecraft().thePlayer.inventory.armorInventory[3];
 		
-	//	GL11.glDisable(GL11.GL_TEXTURE_2D);
+	    //	GL11.glDisable(GL11.GL_TEXTURE_2D);
 
 /*
-		if(i != null && i.getItem()  == Eln.thermoMeterHelmet)
-		{		
+		if (i != null && i.getItem() == Eln.thermoMeterHelmet) {		
 			double factor = temperature  *MeterItemArmor.getBlockRenderColorFactor(i);
-			GL11.glColor4d(factor, 1.0-factor,0.0, 1.0);
+			GL11.glColor4d(factor, 1.0 - factor, 0.0, 1.0);
 			GL11.glDisable(GL11.GL_LIGHTING);
 			GL11.glDisable(GL11.GL_TEXTURE_2D);	
 		}
@@ -56,13 +50,10 @@ public class ThermalCableRender extends SixNodeElementRender{
 		{
 			Utils.setGlColorFromDye(color);
 		}
-		
-
-		
+        
 		UtilsClient.bindTexture(cableDesciptor.render.cableTexture);
 		glListCall();
-		
-		
+        
 		//GL11.glEnable(GL11.GL_LIGHTING);		
 		//GL11.glEnable(GL11.GL_TEXTURE_2D);		
 		
@@ -71,10 +62,10 @@ public class ThermalCableRender extends SixNodeElementRender{
 
 	@Override
 	public void glListDraw() {
-		CableRender.drawCable(cableDesciptor.render, connectedSide,CableRender.connectionType(this, side));
-		CableRender.drawNode(cableDesciptor.render, connectedSide,CableRender.connectionType(this, side));
-
+		CableRender.drawCable(cableDesciptor.render, connectedSide, CableRender.connectionType(this, side));
+		CableRender.drawNode(cableDesciptor.render, connectedSide, CableRender.connectionType(this, side));
 	}
+    
 	@Override
 	public boolean glListEnable() {
 		return true;	
@@ -82,18 +73,14 @@ public class ThermalCableRender extends SixNodeElementRender{
 	
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		
 		super.publishUnserialize(stream);
 		try {
-			
-
 			Byte b;
 			b = stream.readByte();
 			
-			color = (b>>4) & 0xF;
-			temperature = stream.readShort() /NodeBase.networkSerializeTFactor;
+			color = (b >> 4) & 0xF;
+			temperature = stream.readShort() / NodeBase.networkSerializeTFactor;
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
 	}
@@ -105,7 +92,6 @@ public class ThermalCableRender extends SixNodeElementRender{
 	
 	@Override
 	public int getCableDry(LRDU lrdu) {
-		
 		return color;
 	}
 }

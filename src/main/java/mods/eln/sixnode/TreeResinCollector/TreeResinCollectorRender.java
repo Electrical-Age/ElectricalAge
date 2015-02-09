@@ -9,37 +9,31 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 
-public class TreeResinCollectorRender extends SixNodeElementRender{
+public class TreeResinCollectorRender extends SixNodeElementRender {
 
 	TreeResinCollectorDescriptor descriptor;
-	public TreeResinCollectorRender(SixNodeEntity tileEntity, Direction side,
-			SixNodeDescriptor descriptor) {
+
+    float stock;
+    
+	public TreeResinCollectorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (TreeResinCollectorDescriptor) descriptor;
 	}
-
-	
-	
+    
 	@Override
 	public void draw() {
-		
 		super.draw();
 		
 		LRDU.Down.glRotateOnX();
 		descriptor.draw(stock);
 	}
-	
-	float stock;
-	
+
 	@Override
 	public void publishUnserialize(DataInputStream stream) {
-		
 		super.publishUnserialize(stream);
-		
 		try {
 			stock = stream.readFloat();
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
 	}

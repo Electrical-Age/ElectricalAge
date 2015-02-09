@@ -10,58 +10,50 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-
-public class ThermalSensorDescriptor extends SixNodeDescriptor{
+public class ThermalSensorDescriptor extends SixNodeDescriptor {
+    
 	public boolean temperatureOnly;
-	public ThermalSensorDescriptor(		
-					String name,Obj3D obj,
-					boolean temperatureOnly
-					) {
+
+    Obj3D obj;
+    Obj3DPart main;
+    Obj3DPart adapter;
+    
+	public ThermalSensorDescriptor(String name,
+                                   Obj3D obj, 
+                                   boolean temperatureOnly) {
 		super(name, ThermalSensorElement.class, ThermalSensorRender.class);
 		this.temperatureOnly = temperatureOnly;
 		this.obj = obj;
-		if(obj != null){
+		if (obj != null) {
 			main = obj.getPart("main");
             adapter = obj.getPart("adapter");
 		}
 	}
 	
-	Obj3D obj;
-	Obj3DPart main;
-    Obj3DPart adapter;
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-		
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		if(temperatureOnly){
-			list.add("Probe temperature value on a cable");
-			list.add("Has a signal output");
-		}
-		else
-		{
-			list.add("Probe thermal values on cables");
+		if (temperatureOnly) {
+			list.add("Probe temperature value on a cable.");
+			list.add("Has a signal output.");
+		} else {
+			list.add("Probe thermal values on cables.");
 			list.add("Can measure:");
 			list.add("  Temperature/Power conducted");
-			list.add("Has a signal output");
+			list.add("Has a signal output.");
 		}
-
-		
 	}
+    
 	@Override
 	public void setParent(Item item, int damage) {
-		
 		super.setParent(item, damage);
 		Data.addThermal(newItemStack());
 		Data.addSignal(newItemStack());
 	}
 	
-	void draw(boolean renderAdapter)
-	{
-		if(main != null) main.draw();
+	void draw(boolean renderAdapter) {
+		if (main != null) main.draw();
         if (renderAdapter && adapter != null) adapter.draw();
-
 	}
-
 }

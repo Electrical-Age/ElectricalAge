@@ -1,7 +1,5 @@
 package mods.eln.sixnode.powerinductorsix;
 
-import java.io.DataInputStream;
-
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -27,8 +25,11 @@ public class PowerInductorSixElement extends SixNodeElement {
 
 	Inductor inductor = new Inductor("inductor", positiveLoad, negativeLoad);
 
-	public PowerInductorSixElement(SixNode SixNode, Direction side,
-			SixNodeDescriptor descriptor) {
+    boolean fromNbt = false;
+
+    SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
+
+	public PowerInductorSixElement(SixNode SixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(SixNode, side, descriptor);
 		this.descriptor = (PowerInductorSixDescriptor) descriptor;
 
@@ -77,9 +78,7 @@ public class PowerInductorSixElement extends SixNodeElement {
 		super.inventoryChanged();
 		setupPhysical();
 	}
-
-	boolean fromNbt = false;
-
+    
 	public void setupPhysical() {
 		double rs = descriptor.getRsValue(inventory);
 		inductor.setL(descriptor.getlValue(inventory));
@@ -94,8 +93,7 @@ public class PowerInductorSixElement extends SixNodeElement {
 	}
 
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-			float vx, float vy, float vz) {
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		return onBlockActivatedRotate(entityPlayer);
 	}
 
@@ -110,11 +108,8 @@ public class PowerInductorSixElement extends SixNodeElement {
 		fromNbt = true;
 	}
 
-	SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
-
 	@Override
 	public IInventory getInventory() {
-
 		return inventory;
 	}
 
@@ -127,5 +122,4 @@ public class PowerInductorSixElement extends SixNodeElement {
 	public Container newContainer(Direction side, EntityPlayer player) {
 		return new PowerInductorSixContainer(player, inventory);
 	}
-
 }

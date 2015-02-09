@@ -17,13 +17,19 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class TutorialSignElement extends SixNodeElement {
+    
 	static HashMap<String, String> baliseMap = null;
 
-	public static void resetBalise(){
+    public static final int setTextFileId = 1;
+
+    String baliseName = "";
+
+	public static void resetBalise() {
 		baliseMap = null;
 	}
-	public static String getText(String balise){
-		if(baliseMap == null){		
+    
+	public static String getText(String balise) {
+		if (baliseMap == null) {
 			baliseMap = new HashMap<String, String>();
 			
 		/*
@@ -36,31 +42,27 @@ public class TutorialSignElement extends SixNodeElement {
 				//Node root = doc.getElementById("sign");
 				Node root = doc.getChildNodes().item(0);
 				NodeList nList = root.getChildNodes();
-				for(int idx = 0;idx < nList.getLength();idx++){
+				for (int idx = 0; idx < nList.getLength(); idx++){
 					Node n = nList.item(idx);
 					n.getNamespaceURI();
 				}
 				int i = 0;
-				 
 			} catch (Exception e) {
-
 			}
 */
 			//optional, but recommended
 			//read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
 			//doc.getDocumentElement().normalize();
-			
-		
-			try {
 
+			try {
 				String file = Utils.readMapFile("EA/tutorialSign.txt");
 				String ret;				
-				if(file.contains("\r\n"))
+				if (file.contains("\r\n"))
 					ret = "\r\n";
 				else
 					ret = "\n";					
 				
-				file = file.replaceAll("#"+ret, "#");
+				file = file.replaceAll("#" + ret, "#");
 				file = file.replaceAll(ret + "#", "#");
 
 				String[] split = file.split("#");
@@ -68,47 +70,39 @@ public class TutorialSignElement extends SixNodeElement {
 				boolean first = true;
 				int counter = 0;
 				String baliseTag = "";
-				for(String str : split){
-					if(first) {
+                
+				for (String str : split) {
+					if (first) {
 						first = false;
 						continue;
 					}
-					if(counter == 0){
+					if (counter == 0) {
 						baliseTag = str;
 					}
-					if(counter == 1){
+					if (counter == 1) {
 						baliseMap.put(baliseTag, str);
 					}
 					
 					counter = (counter + 1) & 1;
 				}
-
-				
 			} catch (IOException e) {
-				
 			//	e.printStackTrace();
 			}		
 		}
 		String text = baliseMap.get(balise);
-		if(text == null) return "No assosiated text to this beacon";
+		if (text == null) return "No associated text to this beacon";
 		return text;	
 	}
-	
-	
+    
 	public TutorialSignElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-
 	}
-
-
-	public static final int setTextFileId = 1;
-	
-	String baliseName = "";
-	
-	void setBalise(String name){
+    
+	void setBalise(String name) {
 		baliseName = name;
 		needPublish();
 	}
+    
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
@@ -117,7 +111,7 @@ public class TutorialSignElement extends SixNodeElement {
 	
 /*
 	private void setTextFile(String name) {
-		if(name.matches("^[a-zA-Z0-9]*$") == false){
+		if (name.matches("^[a-zA-Z0-9]*$") == false) {
 			fileName = "OnlyAlphaNumeric";
 			text = "OnlyAlphaNumeric";
 		} else {		
@@ -174,16 +168,14 @@ public class TutorialSignElement extends SixNodeElement {
 		}
 	}
 
-
-
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		super.networkUnserialize(stream);
 		try {
 			switch(stream.readByte()) {
-			case setTextFileId:
-				setBalise(stream.readUTF());
-				break;
+                case setTextFileId:
+                    setBalise(stream.readUTF());
+                    break;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -195,17 +187,12 @@ public class TutorialSignElement extends SixNodeElement {
 		return true;
 	}
 
-
 	@Override
 	public void initialize() {
-		
-		
 	}
-
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		
 		return false;
 	}
 }

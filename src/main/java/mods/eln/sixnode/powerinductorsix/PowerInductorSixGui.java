@@ -1,58 +1,35 @@
 package mods.eln.sixnode.powerinductorsix;
 
-import org.lwjgl.opengl.GL11;
-
 import mods.eln.gui.GuiContainerEln;
-import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
-import mods.eln.gui.GuiVerticalTrackBar;
-import mods.eln.gui.GuiVerticalTrackBarHeat;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.six.SixNodeElementInventory;
-import mods.eln.node.transparent.TransparentNodeElementInventory;
-import mods.eln.sim.mna.component.Inductor;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiContainer;
-
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerFurnace;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.StatCollector;
 
 public class PowerInductorSixGui extends GuiContainerEln {
 
 	private SixNodeElementInventory inventory;
 	PowerInductorSixRender render;
 
-	public PowerInductorSixGui(EntityPlayer player, IInventory inventory, PowerInductorSixRender render)
-	{
+	public PowerInductorSixGui(EntityPlayer player, IInventory inventory, PowerInductorSixRender render) {
 		super(new PowerInductorSixContainer(player, inventory));
 		this.inventory = (SixNodeElementInventory) inventory;
 		this.render = render;
 	}
 
-	public void initGui()
-	{
+	public void initGui() {
 		super.initGui();
 	}
 
 	@Override
 	public void guiObjectEvent(IGuiObject object) {
-
 		super.guiObjectEvent(object);
-
 	}
 
 	@Override
 	protected void preDraw(float f, int x, int y) {
-
 		super.preDraw(f, x, y);
 	}
 
@@ -64,8 +41,6 @@ public class PowerInductorSixGui extends GuiContainerEln {
 
 	@Override
 	protected GuiHelperContainer newHelper() {
-
 		return new GuiHelperContainer(this, 176, 166 - 54, 8, 84 - 54);
 	}
-
 }

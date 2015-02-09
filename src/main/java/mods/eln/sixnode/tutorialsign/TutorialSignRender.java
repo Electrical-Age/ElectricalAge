@@ -12,26 +12,24 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 
 public class TutorialSignRender extends SixNodeElementRender {
-
-	
+    
 	TutorialSignDescriptor descriptor;
+
+    String text;
+    String baliseName;
+    String texts[];
+
+    RcInterpolator lightInterpol = new RcInterpolator(0.4f);
 
 	public TutorialSignRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (TutorialSignDescriptor)descriptor;
 	}
 
-	String text;
-	String baliseName;
-	String texts[];
-	
-	RcInterpolator lightInterpol = new RcInterpolator(0.4f);
-	
 	@Override
 	public void draw() {
 		super.draw();
 		descriptor.draw(lightInterpol.get());
-
 	}
 	
 	@Override
@@ -56,6 +54,4 @@ public class TutorialSignRender extends SixNodeElementRender {
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		return new TutorialSignGui(this);
 	}
-	
-
 }

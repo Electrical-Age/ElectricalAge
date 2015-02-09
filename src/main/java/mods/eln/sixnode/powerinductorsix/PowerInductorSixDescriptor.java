@@ -1,7 +1,5 @@
 package mods.eln.sixnode.powerinductorsix;
 
-import java.util.List;
-
 import mods.eln.Eln;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Obj3D;
@@ -15,17 +13,18 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 
+import java.util.List;
+
 public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 
 	private Obj3D obj;
 	Obj3DPart InductorBaseExtention, InductorCables, InductorCore, Base;
 
-	public PowerInductorSixDescriptor(
-			String name,
-			Obj3D obj,
-			ISerie serie
+    ISerie serie;
 
-	) {
+	public PowerInductorSixDescriptor(String name, 
+                                      Obj3D obj, 
+                                      ISerie serie) {
 		super(name, PowerInductorSixElement.class, PowerInductorSixRender.class);
 		this.serie = serie;
 		this.obj = obj;
@@ -35,11 +34,8 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 			InductorCore = obj.getPart("InductorCore");
 			Base = obj.getPart("Base");
 		}
-
 	}
-
-	ISerie serie;
-
+    
 	public double getlValue(int cableCount) {
 		if (cableCount == 0) return 0;
 		return serie.getValue(cableCount - 1);
@@ -52,10 +48,12 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 		else
 			return getlValue(core.stackSize);
 	}
+    
 	@Override
 	public boolean use2DIcon() {
 		return false;
 	}
+    
 	public double getRsValue(IInventory inventory) {
 		ItemStack core = inventory.getStackInSlot(PowerInductorSixContainer.coreId);
 
@@ -67,15 +65,14 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 		return Eln.instance.lowVoltageCableDescriptor.electricalRs * coreFactor;
 	}
 
-	public void setParent(net.minecraft.item.Item item, int damage)
-	{
+	public void setParent(net.minecraft.item.Item item, int damage) {
 		super.setParent(item, damage);
 		Data.addEnergy(newItemStack());
 	}
 
 	void draw() {
 		//UtilsClient.disableCulling();
-	//	UtilsClient.disableTexture();
+	    //UtilsClient.disableTexture();
 		if (null != Base) Base.draw();
 		if (null != InductorBaseExtention) InductorBaseExtention.draw();
 		if (null != InductorCables) InductorCables.draw();
@@ -83,8 +80,7 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 	}
 
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
 
@@ -99,11 +95,7 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 	}
 
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-
 	}
-
 }
