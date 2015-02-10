@@ -1,22 +1,10 @@
 package mods.eln.transparentnode.autominer;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.util.LinkedList;
-
-import org.lwjgl.opengl.GL11;
-
-import mods.eln.Eln;
-import mods.eln.client.FrameTime;
 import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage;
 import mods.eln.misc.Direction;
-import mods.eln.misc.Obj3D;
-import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.misc.PhysicalInterpolatorNoRebound;
 import mods.eln.misc.RcInterpolator;
-import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
-import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
@@ -24,15 +12,40 @@ import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import org.lwjgl.opengl.GL11;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.util.LinkedList;
 
 public class AutoMinerRender extends TransparentNodeElementRender {
+    
 	AutoMinerDescriptor descriptor;
 	float[] buttonsState;
 	boolean[] ledsAState;
 	boolean[] ledsPState;
 
-	public AutoMinerRender(TransparentNodeEntity tileEntity,
-			TransparentNodeDescriptor descriptor) {
+    RenderStorage render = new RenderStorage(10, 130, 24, 24);
+
+    PhysicalInterpolatorNoRebound pipeLengthInterpol = new PhysicalInterpolatorNoRebound(0.4f, 2f, 0.8f);
+    RcInterpolator rotSpeed = new RcInterpolator(1);
+    float pipeAlpha = 0;
+
+    LinkedList<String> logs = new LinkedList<String>();
+
+    int logSizeMax = 9;
+
+    boolean powerOk;
+
+    float recalcTimeout = 0;
+
+    TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this);
+
+    short pipeLength = 0;
+    AutoMinerSlowProcess.jobType job;
+    boolean boot = true;
+
+    public AutoMinerRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
 		this.descriptor = (AutoMinerDescriptor) descriptor;
 
@@ -52,44 +65,32 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 		}
 	}
 
-	int logSizeMax = 9;
-	LinkedList<String> logs = new LinkedList<String>();
 	private void pushLog(String string) {
 		logs.addFirst(string);
-		if(logs.size() > logSizeMax)
+		if (logs.size() > logSizeMax)
 			logs.removeLast();
 	}
-
-	RenderStorage render = new RenderStorage(10, 130, 24, 24);
-	
-	PhysicalInterpolatorNoRebound pipeLengthInterpol = new PhysicalInterpolatorNoRebound(0.4f, 2f, 0.8f);
-	RcInterpolator rotSpeed = new RcInterpolator(1);
-	float pipeAlpha = 0;
+    
 	@Override
 	public void draw() {
+        GL11.glPushMatrix();
+        GL11.glRotatef(pipeAlpha, 0, -1, 0);
+        GL11.glPushMatrix();
+            GL11.glScalef(0.99f, 0.99f, 0.99f);
+            descriptor.pipe.draw();
+        GL11.glPopMatrix();
 
-
-			GL11.glPushMatrix();
-			GL11.glRotatef(pipeAlpha,0,-1,0);
-			GL11.glPushMatrix();
-				GL11.glScalef(0.99f, 0.99f, 0.99f);
-				descriptor.pipe.draw();
-			GL11.glPopMatrix();
-
-			int len = (int) pipeLengthInterpol.get();
-			GL11.glTranslatef(0, -(pipeLengthInterpol.get()-len), 0);
-			for (int idx = len+2; idx != 0; idx--) {
-				if (idx != 1) {
-					descriptor.pipe.draw();
-				}
-				else {
-					descriptor.head.draw();
-				}
-				GL11.glTranslatef(0, -1f, 0);
-			}
-			GL11.glPopMatrix();
-
-		
+        int len = (int) pipeLengthInterpol.get();
+        GL11.glTranslatef(0, -(pipeLengthInterpol.get() - len), 0);
+        for (int idx = len + 2; idx != 0; idx--) {
+            if (idx != 1) {
+                descriptor.pipe.draw();
+            } else {
+                descriptor.head.draw();
+            }
+            GL11.glTranslatef(0, -1f, 0);
+        }
+        GL11.glPopMatrix();
 
 		for (int idx = 0; idx < this.descriptor.buttonsCount; idx++) {
 			buttonsState[idx] = idx == job.ordinal() && powerOk ? 1 : 0;
@@ -106,14 +107,14 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 		GL11.glTranslatef(-1.57031f, 1.8125f - 1.5f - 0.02f, -0.3125f + 0.02f);
 		GL11.glRotatef(90, 0, 1, 0);
 
-		if(drawScreen){
+		if (drawScreen) {
 			UtilsClient.disableLight();
 			GL11.glPushMatrix();
 			GL11.glRotatef(180, 0, 1, 0);
-			GL11.glScalef(1/128f, -1/128f, 1);
+			GL11.glScalef(1 / 128f, -1 / 128f, 1);
 			int idx = 0;
-			for(String log : logs){
-				Minecraft.getMinecraft().fontRenderer.drawString(idx == 0 ? "> " + log : log, 80,1+idx, 0xFFD0D0D0);
+			for (String log : logs) {
+				Minecraft.getMinecraft().fontRenderer.drawString(idx == 0 ? "> " + log : log, 80, 1 + idx, 0xFFD0D0D0);
 				idx += 8;
 			}
 			GL11.glPopMatrix();
@@ -121,7 +122,6 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 		}
 
 		if (drawRay) {
-
 			float raySize = 0.625f - 0.02f * 2;
 			float scale = 1f / render.resWidth * raySize;
 
@@ -129,25 +129,18 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
 			GL11.glTranslatef(-raySize, 0, 0);
 			GL11.glScalef(scale, -scale, 1);
-			render.draw(0.4f,1.3f,0.8f);
-			
-
+			render.draw(0.4f, 1.3f, 0.8f);
 		}
 
 		GL11.glPopMatrix();
 		UtilsClient.enableCulling();
 
 		descriptor.draw(false, buttonsState, ledsAState, ledsPState);
-
 	}
-
-	boolean powerOk;
-
-	float recalcTimeout = 0;
-	
+    
 	public void refresh(float deltaT) {
-		pipeAlpha += rotSpeed.get()*deltaT;
-		if(pipeAlpha > 360) pipeAlpha -= 360;
+		pipeAlpha += rotSpeed.get() * deltaT;
+		if (pipeAlpha > 360) pipeAlpha -= 360;
 		for (int idx = 0; idx < this.descriptor.ledsACount; idx++) {
 			if (powerOk) {
 				if (Math.random() < 0.2 * deltaT)
@@ -166,101 +159,82 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 			}
 		}
 
-		if(powerOk){
+		if (powerOk) {
 			recalcTimeout -= deltaT;
-			if(recalcTimeout < 0){
+			if (recalcTimeout < 0) {
 				recalcTimeout += 0.5;
 				float camAlpha;
 				switch (front) {
-				default:
-				case XN: camAlpha = (float)(Math.PI); break;
-				case XP: camAlpha = 0; break;
-				case ZN: camAlpha = (float)(-Math.PI/2); break;
-				case ZP: camAlpha = (float)(Math.PI/2); break;
-
+                    default:
+                    case XN: camAlpha = (float)(Math.PI); break;
+                    case XP: camAlpha = 0; break;
+                    case ZN: camAlpha = (float)(-Math.PI / 2); break;
+                    case ZP: camAlpha = (float)(Math.PI / 2); break;
 				}
-				render.generate(this.tileEntity.getWorldObj(), tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5-(Math.max(0, pipeLength-5)), tileEntity.zCoord + 0.5, -(float) (Math.PI * 1 / 2) + camAlpha, -(float) (Math.PI / 2));
+				render.generate(this.tileEntity.getWorldObj(), tileEntity.xCoord + 0.5, tileEntity.yCoord + 0.5 - (Math.max(0, pipeLength-5)), tileEntity.zCoord + 0.5, -(float) (Math.PI * 1 / 2) + camAlpha, -(float) (Math.PI / 2));
 			}
 		}
-		
-		
+        
 		pipeLengthInterpol.step(deltaT);
-		if(pipeLengthInterpol.get() < 0) pipeLengthInterpol.setPos(0);
+		if (pipeLengthInterpol.get() < 0) pipeLengthInterpol.setPos(0);
 		rotSpeed.step(deltaT);
 	}
-
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this);
-
+    
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		return new AutoMinerGuiDraw(player, inventory, this);
 	}
 
-	short pipeLength = 0;
-	AutoMinerSlowProcess.jobType job;
-	boolean boot = true;
-	
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		super.networkUnserialize(stream);
 		try {
-			if(pipeLength != (pipeLength = stream.readShort())){
+			if (pipeLength != (pipeLength = stream.readShort())) {
 				recalcTimeout = 0;
 			}
-			if(job != (job = AutoMinerSlowProcess.jobType.values()[stream.readByte()])){
+			if (job != (job = AutoMinerSlowProcess.jobType.values()[stream.readByte()])) {
 				switch (job) {
-				case ore:
-					rotSpeed.setTarget(360);
-					break;
-				default:
-					rotSpeed.setTarget(0);
-					break;
-
+                    case ore:
+                        rotSpeed.setTarget(360);
+                        break;
+                    default:
+                        rotSpeed.setTarget(0);
+                        break;
 				}
 			}
 			powerOk = stream.readBoolean();
 
-			
-			
-			if(!powerOk){
+			if (!powerOk) {
 				logs.clear();
 				pushLog("BOOT");
 				pushLog("WAITING OPCODE");
 			}
 			
-			if(boot){
+			if (boot) {
 				boot = false;
 				pipeLengthInterpol.setPos(pipeLength);
 			}
 			pipeLengthInterpol.setTarget(pipeLength);
-			
-			
-			
-			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
 
 	@Override
 	public void serverPacketUnserialize(DataInputStream stream) {
 		try {
 			switch (stream.readByte()) {
-			case AutoMinerElement.pushLogId:
-				pushLog(stream.readUTF());
-				break;
-
-			default:
-				break;
+                case AutoMinerElement.pushLogId:
+                    pushLog(stream.readUTF());
+                    break;
+                default:
+                    break;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-		
-	
+
 	@Override
 	public boolean cameraDrawOptimisation() {
 		return false;

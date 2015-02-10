@@ -2,15 +2,17 @@ package mods.eln.sound;
 
 import java.util.ArrayList;
 
-import mods.eln.misc.Coordonate;
-import mods.eln.sound.SoundTrack.Range;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
-
 public class SoundTrack {
 
-	public SoundTrack() {
+    String track;
+    double trackLength;
+    float volume = 1, pitch = 1;
+    float rangeNominal, rangeMax, blockFactor;
+    ArrayList<Integer> uuid = new ArrayList<Integer>();
 
+    enum Range {Small, Mid, Far}
+    
+	public SoundTrack() {
 	}
 
 	public SoundTrack(String track) {
@@ -18,21 +20,13 @@ public class SoundTrack {
 		mediumRange();
 	}
 	
-
-	public SoundTrack(String track,double trackLength) {
+	public SoundTrack(String track, double trackLength) {
 		this.track = track;
 		this.trackLength = trackLength;
 		mediumRange();
 	}
-	
-	String track;
-	double trackLength;
-	float volume = 1, pitch = 1;
-	float rangeNominal, rangeMax, blockFactor;
-	ArrayList<Integer> uuid = new ArrayList<Integer>();
-	
-	
-	public SoundTrack copy(){
+    
+	public SoundTrack copy() {
 		SoundTrack c = new SoundTrack();
 		c.track = track;
 		c.trackLength = trackLength;
@@ -44,27 +38,21 @@ public class SoundTrack {
 		c.uuid = (ArrayList<Integer>) uuid.clone();
 		return c;
 	}
-
-
-
+    
 	void applyRange(Range range) {
 		switch (range) {
-		case Small:
-			smallRange();
-			break;
-		case Far:
-			longRange();
-			break;
-		case Mid:
-		default:
-			mediumRange();
-			break;
+            case Small:
+                smallRange();
+                break;
+            case Far:
+                longRange();
+                break;
+            case Mid:
+            default:
+                mediumRange();
+                break;
 		}
 	}
-
-	enum Range {
-		Small, Mid, Far
-	};
 
 	public SoundTrack mediumRange() {
 		rangeNominal = 4;
@@ -93,7 +81,6 @@ public class SoundTrack {
 		return this;
 	}
 
-	
 	public SoundTrack addUuid(int uuid){
 		this.uuid.add(uuid);
 		return this;

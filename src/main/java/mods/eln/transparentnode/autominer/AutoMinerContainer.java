@@ -13,6 +13,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
 public class AutoMinerContainer extends BasicContainer /*implements INodeContainer*/ {
+    
 	NodeBase node;
 
 	public static final int electricalDrillSlotId = 0;
@@ -21,6 +22,7 @@ public class AutoMinerContainer extends BasicContainer /*implements INodeContain
 	public static final int StorageStartId = 3;
 	public static final int StorageSize = 0;
 	public static final int inventorySize = StorageStartId + StorageSize;
+    
 	public AutoMinerContainer(NodeBase node, EntityPlayer player, IInventory inventory) {
 		super(player, inventory, newSlots(inventory));
 		this.node = node;
@@ -28,15 +30,15 @@ public class AutoMinerContainer extends BasicContainer /*implements INodeContain
 
 	public static Slot[] newSlots(IInventory inventory) {
 		Slot[] slots = new Slot[StorageStartId + StorageSize];
-		slots[0] = new GenericItemUsingDamageSlot(inventory, electricalDrillSlotId, 134 + 0, 8, 1, ElectricalDrillDescriptor.class, SlotSkin.medium, new String[] { "Drill Slot" });
-		slots[1] = new GenericItemUsingDamageSlot(inventory, 1, 3000, 3000, 1, OreScanner.class, SlotSkin.medium, new String[] { "Ore Scanner Slot" });
-		slots[2] = new GenericItemUsingDamageSlot(inventory, MiningPipeSlotId, 134 + 18, 8, 64, MiningPipeDescriptor.class, SlotSkin.medium, new String[] { "Mining Pipe Slot" });
+		slots[0] = new GenericItemUsingDamageSlot(inventory, electricalDrillSlotId, 134 + 0, 8, 1, ElectricalDrillDescriptor.class, SlotSkin.medium, new String[] { "Drill slot" });
+		slots[1] = new GenericItemUsingDamageSlot(inventory, 1, 3000, 3000, 1, OreScanner.class, SlotSkin.medium, new String[] { "Ore Scanner slot" });
+		slots[2] = new GenericItemUsingDamageSlot(inventory, MiningPipeSlotId, 134 + 18, 8, 64, MiningPipeDescriptor.class, SlotSkin.medium, new String[] { "Mining Pipe slot" });
 
-		int x = 0,y = 2;
-		for(int idx = 0;idx < StorageSize;idx++){
-			slots[idx + StorageStartId] = new SlotWithSkin(inventory,StorageStartId + idx,62-18*2 + x*18, 17 + y*18,SlotSkin.medium);
+		int x = 0, y = 2;
+		for (int idx = 0; idx < StorageSize; idx++) {
+			slots[idx + StorageStartId] = new SlotWithSkin(inventory, StorageStartId + idx, 62 - 18 * 2 + x * 18, 17 + y * 18, SlotSkin.medium);
 			x++;
-			if(x == 7){
+			if (x == 7) {
 				x = 0;
 				y++;
 			}

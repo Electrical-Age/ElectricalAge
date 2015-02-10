@@ -26,7 +26,6 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class AutoMinerElement extends TransparentNodeElement  {
 
-
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this);
 	
 	NbtElectricalLoad inPowerLoad = new NbtElectricalLoad("inPowerLoad");
@@ -39,24 +38,26 @@ public class AutoMinerElement extends TransparentNodeElement  {
 	AutoMinerDescriptor descriptor;
 	
 	Coordonate lightCoordonate;
-	
-	public AutoMinerElement(TransparentNode transparentNode,
-			TransparentNodeDescriptor descriptor) {
+
+    VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
+
+    ArrayList<AutoMinerPowerNode> powerNodeList = new ArrayList<AutoMinerPowerNode>();
+
+    boolean powerOk = false;
+
+    public static final byte pushLogId = 1;
+
+    public AutoMinerElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		this.descriptor = (AutoMinerDescriptor) descriptor;
 		electricalLoadList.add(inPowerLoad);
 		electricalComponentList.add(powerResistor);
 		slowProcessList.add(slowProcess);
-
-		
+        
 		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
 		slowProcessList.add(voltageWatchdog.set(inPowerLoad).setUNominal(this.descriptor.nominalVoltage).set(exp));
-
 	}
 
-	VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
-	
-	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
 		return inPowerLoad;
@@ -88,13 +89,13 @@ public class AutoMinerElement extends TransparentNodeElement  {
 		lightCoordonate.applyTransformation(front, node.coordonate);
 		
 		int idx = 0;
-		for(Coordonate c : descriptor.getPowerCoordonate(node.coordonate.world())){
+		for (Coordonate c : descriptor.getPowerCoordonate(node.coordonate.world())) {
 			AutoMinerPowerNode n = new AutoMinerPowerNode();
 			n.setElement(this);
-			c.applyTransformation(front,node.coordonate);
+			c.applyTransformation(front, node.coordonate);
 			
 			Direction dir;
-			if(idx != 0)
+			if (idx != 0)
 				dir = front.left();
 			else
 				dir = front.right();
@@ -113,23 +114,17 @@ public class AutoMinerElement extends TransparentNodeElement  {
 	
 	@Override
 	public void onBreakElement() {
-		
 		super.onBreakElement();
 		slowProcess.onBreakElement();
 	
-		for(AutoMinerPowerNode n : powerNodeList){
+		for (AutoMinerPowerNode n : powerNodeList){
 			n.onBreakBlock();
 		}
 		powerNodeList.clear();
-		
 	}
-	ArrayList<AutoMinerPowerNode> powerNodeList = new ArrayList<AutoMinerPowerNode>();
-
-
+    
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-			float vx, float vy, float vz) {
-
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		return false;
 	}
 
@@ -140,28 +135,24 @@ public class AutoMinerElement extends TransparentNodeElement  {
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		return new AutoMinerContainer(node,player, inventory);
+		return new AutoMinerContainer(node, player, inventory);
 	}
 	
 	@Override
 	public IInventory getInventory() {
 		return inventory;
 	}	
-	
-
-
+    
 	@Override
 	public void ghostDestroyed(int UUID) {
-		if(UUID == descriptor.getGhostGroupUuid()){
+		if (UUID == descriptor.getGhostGroupUuid()) {
 			super.ghostDestroyed(UUID);
 		}
 		slowProcess.ghostDestroyed(UUID);
 	}
 /*
 	@Override
-	public boolean ghostBlockActivated(int UUID, EntityPlayer entityPlayer,
-			Direction side, float vx, float vy, float vz) {
-		
+	public boolean ghostBlockActivated(int UUID, EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		return super.ghostBlockActivated(UUID, entityPlayer, side, vx, vy, vz);
 	}*/
 	
@@ -176,33 +167,26 @@ public class AutoMinerElement extends TransparentNodeElement  {
 			e.printStackTrace();
 		}
 	}
-
-	boolean powerOk = false;
+    
 	public void setPowerOk(boolean b) {
-		if(powerOk != (powerOk = b)){
+		if (powerOk != (powerOk = b)){
 			needPublish();
 		}
 	}
-	
-	
+    
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
 		super.writeToNBT(nbt);
 		nbt.setBoolean("powerOk", powerOk);
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
 		super.readFromNBT(nbt);
 		powerOk = nbt.getBoolean("powerOk");
 	}
-	
-	
-	public static final byte pushLogId = 1;
-	
+
 	void pushLog(String log){
-		sendStringToAllClient(pushLogId,log);
+		sendStringToAllClient(pushLogId, log);
 	}
 }

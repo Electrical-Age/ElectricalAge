@@ -1,22 +1,15 @@
 package mods.eln.solver;
 
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.ListResourceBundle;
-import java.util.Scanner;
-
-import com.ibm.icu.impl.duration.impl.DataRecord.ESeparatorVariant;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.IProcess;
+import net.minecraft.nbt.NBTTagCompound;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 public class Equation implements IValue, INBTTReady {
 
@@ -29,6 +22,15 @@ public class Equation implements IValue, INBTTReady {
 
 	static String staticSeparatorList;
 	String separatorList;
+
+    int iterationLimit;
+    ArrayList<ISymbole> symboleList;
+
+    IValue root;
+
+    ArrayList<IProcess> processList = new ArrayList<IProcess>();
+
+    int operatorCount; // Juste a counter for fun
 
 	static {
 		staticSeparatorList = "+-*&|/^,()<>=";
@@ -56,7 +58,7 @@ public class Equation implements IValue, INBTTReady {
 		}
 		{
 			ArrayList<IOperatorMapper> list = new ArrayList<IOperatorMapper>();
-			// list.add(new OperatorMapperAB("^",Pow.class));
+			// list.add(new OperatorMapperAB("^", Pow.class));
 			staticOperatorList.put(priority++, list);
 		}
 		{
@@ -86,7 +88,6 @@ public class Equation implements IValue, INBTTReady {
 			list.add(new OperatorMapperAB("|", Or.class));
 			staticOperatorList.put(priority++, list);
 		}
-
 	}
 
 	public Equation() {
@@ -117,10 +118,7 @@ public class Equation implements IValue, INBTTReady {
 	public void addSymbole(ArrayList<ISymbole> symboleList) {
 		this.symboleList.addAll(symboleList);
 	}
-
-	int iterationLimit;
-	ArrayList<ISymbole> symboleList;
-
+    
 	public void preProcess(String exp) {
 		int idx;
 		exp = exp.replace(" ", "");
@@ -138,8 +136,7 @@ public class Equation implements IValue, INBTTReady {
 				}
 				list.add(exp.substring(idx, idx + 1));
 
-			}
-			else {
+			} else {
 				stack += exp.charAt(idx);
 			}
 
@@ -162,28 +159,26 @@ public class Equation implements IValue, INBTTReady {
 				if (o instanceof String) {
 					String str = (String) o;
 					boolean find = false;
-					if (find == false)
+					if (!find)
 						for (ISymbole s : symboleList) {
 							if (s.getName().equals(str)) {
 								list.set(idx, s);
 								find = true;
 							}
 						}
-					if (find == false)
+					if (!find)
 						try {
 							double value = Double.parseDouble(str);
 							list.set(idx, new Constant(value));
 							find = true;
 						} catch (NumberFormatException e) {
-
 						}
-					if (find == false) {
+					if (!find) {
 						if (str.equals("PI") || str.equals("pi")) {
 							list.set(idx, new Constant(Math.PI));
 							find = true;
 						}
 					}
-
 				}
 				idx++;
 			}
@@ -232,21 +227,18 @@ public class Equation implements IValue, INBTTReady {
 				}
 
 				idx++;
-
 			}
 		}
 
 		if (list.size() == 1) {
 			if (list.get(0) instanceof IValue) {
 				root = (IValue) list.get(0);
-			}
-			else
+			} else
 				root = null;
 		}
 	}
 
-	int getDepthMax(LinkedList<Object> list)
-	{
+	int getDepthMax(LinkedList<Object> list) {
 		int depth, depthMax;
 		{
 			depthMax = 0;
@@ -264,9 +256,7 @@ public class Equation implements IValue, INBTTReady {
 		}
 		return depthMax;
 	}
-
-	IValue root;
-
+    
 	public double getValue() {
 		if (root == null)
 			return 0.0;
@@ -282,8 +272,7 @@ public class Equation implements IValue, INBTTReady {
 		return root.getValue();
 	}
 
-	public boolean isValid()
-	{
+	public boolean isValid() {
 		return root != null;
 	}
 
@@ -462,7 +451,6 @@ public class Equation implements IValue, INBTTReady {
 
 		@Override
 		public double getValue() {
-
 			return Math.abs(a.getValue());
 		}
 
@@ -482,7 +470,6 @@ public class Equation implements IValue, INBTTReady {
 
 		@Override
 		public double getValue() {
-
 			return Math.sin(a.getValue());
 		}
 
@@ -502,7 +489,6 @@ public class Equation implements IValue, INBTTReady {
 
 		@Override
 		public double getValue() {
-
 			return Math.cos(a.getValue());
 		}
 
@@ -529,7 +515,6 @@ public class Equation implements IValue, INBTTReady {
 
 		@Override
 		public void readFromNBT(NBTTagCompound nbt, String str) {
-
 			counter = nbt.getDouble(str + "counter");
 		}
 
@@ -569,13 +554,11 @@ public class Equation implements IValue, INBTTReady {
 
 		@Override
 		public void readFromNBT(NBTTagCompound nbt, String str) {
-
 			counter = nbt.getDouble(str + "counter");
 		}
 
 		@Override
 		public void writeToNBT(NBTTagCompound nbt, String str) {
-
 			nbt.setDouble(str + "counter", counter);
 		}
 
@@ -609,13 +592,11 @@ public class Equation implements IValue, INBTTReady {
 
 		@Override
 		public void readFromNBT(NBTTagCompound nbt, String str) {
-
 			counter = nbt.getDouble(str + "counter");
 		}
 
 		@Override
 		public void writeToNBT(NBTTagCompound nbt, String str) {
-
 			nbt.setDouble(str + "counter", counter);
 		}
 
@@ -650,14 +631,12 @@ public class Equation implements IValue, INBTTReady {
 
 		@Override
 		public void readFromNBT(NBTTagCompound nbt, String str) {
-
 			old = nbt.getDouble(str + "old");
 			value = nbt.getDouble(str + "value");
 		}
 
 		@Override
 		public void writeToNBT(NBTTagCompound nbt, String str) {
-
 			nbt.setDouble(str + "old", old);
 			nbt.setDouble(str + "value", value);
 		}
@@ -687,7 +666,6 @@ public class Equation implements IValue, INBTTReady {
 
 		@Override
 		public double getValue() {
-
 			return oldError * p.getValue() + iStack * i.getValue() + dValue * d.getValue();
 		}
 
@@ -728,6 +706,7 @@ public class Equation implements IValue, INBTTReady {
 			return 12;
 		}
 	}
+    
 	public static class Min implements IOperator {
 		public IValue a, b;
 
@@ -735,8 +714,7 @@ public class Equation implements IValue, INBTTReady {
 		public double getValue() {
 			return Math.min(a.getValue(), b.getValue());
 		}
-
-
+        
 		@Override
 		public void setOperator(IValue[] values) {
 			this.a = values[1];
@@ -756,8 +734,7 @@ public class Equation implements IValue, INBTTReady {
 		public double getValue() {
 			return Math.max(a.getValue(), b.getValue());
 		}
-
-
+        
 		@Override
 		public void setOperator(IValue[] values) {
 			this.a = values[1];
@@ -843,6 +820,7 @@ public class Equation implements IValue, INBTTReady {
 		}
 
 	}
+    
 	public static class If implements IOperator {
 		public double state;
 
@@ -852,8 +830,7 @@ public class Equation implements IValue, INBTTReady {
 		public double getValue() {
 			return condition.getValue() > 0.5 ? thenValue.getValue() : elseValue.getValue();
 		}
-
-
+        
 		@Override
 		public void setOperator(IValue[] values) {
 			this.condition = values[0];
@@ -910,17 +887,15 @@ public class Equation implements IValue, INBTTReady {
 			return e / eMax;
 		}
 	}
-
-	ArrayList<IProcess> processList = new ArrayList<IProcess>();
-
+    
 	public boolean isSymboleUsed(ISymbole iSymbole) {
-		if (isValid() == false) return false;
+		if (!isValid()) return false;
 		return stringList.contains(iSymbole.getName());
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		if (isValid() == false) return;
+		if (!isValid()) return;
 		int idx = 0;
 		for (INBTTReady o : nbtList) {
 			o.readFromNBT(nbt, str + idx);
@@ -930,18 +905,15 @@ public class Equation implements IValue, INBTTReady {
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		if (isValid() == false) return;
+		if (!isValid()) return;
 		int idx = 0;
 		for (INBTTReady o : nbtList) {
 			o.writeToNBT(nbt, str + idx);
 			idx++;
 		}
 	}
-
-	int operatorCount; // Juste a counter for fun
-
+    
 	public int getOperatorCount() {
-
 		return operatorCount;
 	}
 }

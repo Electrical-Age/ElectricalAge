@@ -6,19 +6,20 @@ import mods.eln.client.IUuidEntity;
 import mods.eln.misc.Utils;
 
 public class SoundClientEntity implements IUuidEntity {
+    
 	public ISound sound;
 	public SoundManager sm;
 	
 	int borneTimer = 5;
 	
-	public SoundClientEntity(SoundManager sm,ISound sound) {
+	public SoundClientEntity(SoundManager sm, ISound sound) {
 		this.sound = sound;
 		this.sm = sm;
 	}
 	
 	@Override
 	public boolean isAlive() {
-		if(borneTimer != 0){
+		if (borneTimer != 0) {
 			borneTimer--;
 			return true;
 		}
@@ -30,5 +31,4 @@ public class SoundClientEntity implements IUuidEntity {
 		Utils.println("Sound deleted");
 		sm.stopSound(sound);		
 	}
-
 }

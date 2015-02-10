@@ -11,7 +11,16 @@ import net.minecraft.world.World;
 
 public class SoundCommand {
 
+    World world;
+    double x, y, z;
+    String track;
+    double trackLength;
+    float volume = 1, pitch = 1;
+    float rangeNominal, rangeMax, blockFactor;
+    ArrayList<Integer> uuid = new ArrayList<Integer>();
 
+    enum Range {Small, Mid, Far}
+    
 	public SoundCommand() {
 		mediumRange();
 	}
@@ -20,7 +29,8 @@ public class SoundCommand {
 		this.track = track;
 		mediumRange();
 	}
-	public SoundCommand(String track,double trackLength) {
+    
+	public SoundCommand(String track, double trackLength) {
 		this.track = track;
 		this.trackLength = trackLength;
 		mediumRange();
@@ -35,16 +45,8 @@ public class SoundCommand {
 		blockFactor = s.blockFactor;
 		uuid = (ArrayList<Integer>) s.uuid.clone();
 	}
-
-	World world;
-	double x, y, z;
-	String track;
-	double trackLength;
-	float volume = 1, pitch = 1;
-	float rangeNominal, rangeMax, blockFactor;
-	ArrayList<Integer> uuid = new ArrayList<Integer>();
-
-	public SoundCommand copy(){
+    
+	public SoundCommand copy() {
 		SoundCommand c = new SoundCommand();
 		c.world = world;
 		c.x = x;
@@ -60,8 +62,7 @@ public class SoundCommand {
 		c.uuid = (ArrayList<Integer>) uuid.clone();
 		return c;
 	}
-
-	
+    
 	public void play() {
 		if (world.isRemote)
 			SoundClient.play(this);
@@ -75,6 +76,7 @@ public class SoundCommand {
 		y = c.y + 0.5;
 		z = c.z + 0.5;
 	}
+    
 	public SoundCommand set(TileEntity c) {
 		world = c.getWorldObj();
 		x = c.xCoord + 0.5;
@@ -83,27 +85,22 @@ public class SoundCommand {
 		//mediumRange();
 		return this;
 	}
-
-
+    
 	void applyRange(Range range) {
 		switch (range) {
-		case Small:
-			smallRange();
-			break;
-		case Far:
-			longRange();
-			break;
-		case Mid:
-		default:
-			mediumRange();
-			break;
+            case Small:
+                smallRange();
+                break;
+            case Far:
+                longRange();
+                break;
+            case Mid:
+            default:
+                mediumRange();
+                break;
 		}
 	}
-
-	enum Range {
-		Small, Mid, Far
-	};
-
+    
 	public SoundCommand mediumRange() {
 		rangeNominal = 4;
 		rangeMax = 16;
@@ -117,6 +114,7 @@ public class SoundCommand {
 		blockFactor = 3;
 		return this;
 	}
+    
 	public SoundCommand verySmallRange() {
 		rangeNominal = 2;
 		rangeMax = 4;
@@ -136,12 +134,12 @@ public class SoundCommand {
 		this.pitch *= pitch;
 		return this;
 	}
-
-	
-	public SoundCommand addUuid(int uuid){
+    
+	public SoundCommand addUuid(int uuid) {
 		this.uuid.add(uuid);
 		return this;
 	}
+    
 	public static SoundCommand fromStream(DataInputStream stream, World w) throws IOException {
 		SoundCommand p = new SoundCommand();
 		p.world = w;
@@ -156,7 +154,7 @@ public class SoundCommand {
 		p.rangeMax = stream.readFloat();
 		p.blockFactor = stream.readFloat();
 		p.uuid = new ArrayList<Integer>();
-		for(int idx = stream.readByte();idx != 0;idx--){
+		for (int idx = stream.readByte(); idx != 0; idx--){
 			p.addUuid(stream.readInt());
 		}
 		return p;
@@ -194,5 +192,4 @@ public class SoundCommand {
 		this.blockFactor *= factor;
 		return this;
 	}
- 
 }
