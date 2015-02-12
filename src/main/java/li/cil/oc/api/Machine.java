@@ -18,7 +18,7 @@ import java.util.Collections;
  * convenience feature to make architectures usable via the built-in CPUs.
  * <p/>
  * Note that these methods should <em>not</em> be called in the pre-init phase,
- * since the {@link li.cil.oc.api.API#machine} may not have been initialized
+ * since the {@link API#machine} may not have been initialized
  * at that time. Only start calling these methods in the init phase or later.
  */
 public final class Machine {

@@ -5,7 +5,7 @@ import net.minecraft.item.ItemStack;
 import java.util.Map;
 
 /**
- * This interface provides access to arguments passed to a {@link Callback}.
+ * This interface provides access to arguments passed to a {@link li.cil.oc.api.machine.Callback}.
  * <p/>
  * It allows checking for the presence of arguments in a uniform manner, taking
  * care of proper type checking based on what can be passed along by Lua.

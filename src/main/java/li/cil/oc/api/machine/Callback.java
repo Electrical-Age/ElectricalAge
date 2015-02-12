@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  * arguments will generate an exception, requesting information and the lookup
  * of said information failing should not.
  *
- * @see Context
+ * @see li.cil.oc.api.machine.Context
  * @see li.cil.oc.api.machine.Arguments
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -73,7 +73,7 @@ public @interface Callback {
      * manner.
      * <p/>
      * Note that the limit does <em>not</em> apply when the method is invoked
-     * via a direct call to {@link li.cil.oc.api.network.Component#invoke(String, Context, Object...)}
+     * via a direct call to {@link li.cil.oc.api.network.Component#invoke(String, li.cil.oc.api.machine.Context, Object...)}
      * from the host side. Also, this limit is per-computer, so the method may
      * be invoked more often than this per tick, if different computers call it.
      * <p/>

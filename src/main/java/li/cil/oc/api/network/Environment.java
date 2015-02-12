@@ -41,8 +41,8 @@ package li.cil.oc.api.network;
  * <p/>
  * To interact with environments from user code you will have to do two things:
  * <ol>
- * <li>Make the environment's {@link #node} a {@link Component} and ensure
- * its {@link Component#visibility} is set to a value where it can
+ * <li>Make the environment's {@link #node} a {@link li.cil.oc.api.network.Component} and ensure
+ * its {@link li.cil.oc.api.network.Component#visibility} is set to a value where it can
  * be seen by computers in the network.</li>
  * <li>Annotate methods in the environment as {@link li.cil.oc.api.machine.Callback}s.</li>
  * </ol>
@@ -103,8 +103,8 @@ public interface Environment {
     /**
      * This is the generic message handler.
      * <p/>
-     * It is called whenever this environments {@link Node} receives a message
-     * that was sent via one of the <tt>send</tt> methods in the {@link Network}
+     * It is called whenever this environments {@link li.cil.oc.api.network.Node} receives a message
+     * that was sent via one of the <tt>send</tt> methods in the {@link li.cil.oc.api.network.Network}
      * or the <tt>Node</tt> itself.
      *
      * @param message the message to handle.

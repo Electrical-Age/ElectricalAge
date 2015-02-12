@@ -19,12 +19,12 @@ import java.util.Collection;
  * needed in that case.
  * <p/>
  * Note that these methods should <em>not</em> be called in the pre-init phase,
- * since the {@link li.cil.oc.api.API#driver} may not have been initialized
+ * since the {@link API#driver} may not have been initialized
  * at that time. Only start calling these methods in the init phase or later.
  *
  * @see Network
- * @see Block
- * @see Item
+ * @see li.cil.oc.api.driver.Block
+ * @see li.cil.oc.api.driver.Item
  */
 public final class Driver {
     /**

@@ -17,7 +17,7 @@ public final class Items {
      * the item.
      * <p/>
      * Note that these methods should <em>not</em> be called in the pre-init phase,
-     * since the {@link li.cil.oc.api.API#items} may not have been initialized
+     * since the {@link API#items} may not have been initialized
      * at that time. Only start calling these methods in the init phase or later.
      *
      * @param name the name of the item to get the descriptor for.

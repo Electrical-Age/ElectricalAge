@@ -34,7 +34,7 @@ public interface Handle {
      *
      * @param into the buffer to read the data into.
      * @return the number of bytes read; -1 if there are no more bytes (EOF).
-     * @throws IOException if the file was opened in writing mode or an
+     * @throws java.io.IOException if the file was opened in writing mode or an
      *                     I/O error occurred or the file was already
      *                     closed.
      */
@@ -48,7 +48,7 @@ public interface Handle {
      *
      * @param to the position in the file to jump to.
      * @return the resulting position in the file.
-     * @throws IOException if the file was opened in write mode.
+     * @throws java.io.IOException if the file was opened in write mode.
      */
     long seek(long to) throws IOException;
 
@@ -58,7 +58,7 @@ public interface Handle {
      * For files opened in read mode this should always throw an exception.
      *
      * @param value the data to write into the file.
-     * @throws IOException if the file was opened in read-only mode, or
+     * @throws java.io.IOException if the file was opened in read-only mode, or
      *                     another I/O error occurred (no more space,
      *                     for example), or the file was already closed.
      */

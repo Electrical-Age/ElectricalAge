@@ -14,7 +14,7 @@ import net.minecraft.inventory.IInventory;
  * </pre>
  * <p/>
  * Server racks <em>do not</em> serve as environment for the computer nodes of
- * servers. That's what the {@link li.cil.oc.api.internal.Server}s are for.
+ * servers. That's what the {@link Server}s are for.
  * <p/>
  * The only purpose is to allow identifying tile entities as server racks
  * via the API, i.e. without having to link against internal classes. This

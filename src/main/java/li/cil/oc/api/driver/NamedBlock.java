@@ -7,7 +7,7 @@ package li.cil.oc.api.driver;
  * <p/>
  * This was previously to be implemented on the driver itself, but that has been
  * deprecated. Implement it in the environment returned from the block driver's
- * {@link Block#createEnvironment(net.minecraft.world.World, int, int, int)}
+ * {@link li.cil.oc.api.driver.Block#createEnvironment(net.minecraft.world.World, int, int, int)}
  * method instead.
  */
 public interface NamedBlock {

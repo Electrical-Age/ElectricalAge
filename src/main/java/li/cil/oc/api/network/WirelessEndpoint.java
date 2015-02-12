@@ -11,7 +11,7 @@ import net.minecraft.world.World;
  * do (and handle or forward them as they see fit).
  * <p/>
  * If the position of the endpoint can change, it must be updated manually via
- * {@link li.cil.oc.api.Network#updateWirelessNetwork(WirelessEndpoint)}.
+ * {@link li.cil.oc.api.Network#updateWirelessNetwork(li.cil.oc.api.network.WirelessEndpoint)}.
  */
 public interface WirelessEndpoint {
     /**

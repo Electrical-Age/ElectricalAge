@@ -10,7 +10,7 @@ package li.cil.oc.api.network;
  * <p/>
  * There are three types of nodes:
  * <ul>
- * <li>{@link Node}, the most basic form.</li>
+ * <li>{@link li.cil.oc.api.network.Node}, the most basic form.</li>
  * <li>{@link Component}, used to expose callbacks to user code.</li>
  * <li>{@link Connector}, used for consuming of producing energy.</li>
  * </ul>
@@ -165,7 +165,7 @@ public interface Network {
     /**
      * Sends a message to all addressed, visible neighbors of the source node.
      * <p/>
-     * Targets are determined using {@link #neighbors(Node)} and additionally
+     * Targets are determined using {@link #neighbors(li.cil.oc.api.network.Node)} and additionally
      * filtered for reachability (so that unreachable nodes are ignored).
      * <p/>
      * Messages should have a unique name to allow differentiating them when
@@ -178,14 +178,14 @@ public interface Network {
      * @param name   the name of the message.
      * @param data   the message to send.
      * @throws IllegalArgumentException if the source node is not in this network.
-     * @see #neighbors(Node)
+     * @see #neighbors(li.cil.oc.api.network.Node)
      */
     void sendToNeighbors(Node source, String name, Object... data);
 
     /**
      * Sends a message to all addressed nodes reachable to the source node.
      * <p/>
-     * Targets are determined using {@link #nodes(Node)}.
+     * Targets are determined using {@link #nodes(li.cil.oc.api.network.Node)}.
      * <p/>
      * Messages should have a unique name to allow differentiating them when
      * handling them in a network node. For example, computers will try to parse
@@ -196,14 +196,14 @@ public interface Network {
      * @param source the node that sends the message.
      * @param data   the message to send.
      * @throws IllegalArgumentException if the source node is not in this network.
-     * @see #nodes(Node)
+     * @see #nodes(li.cil.oc.api.network.Node)
      */
     void sendToReachable(Node source, String name, Object... data);
 
     /**
      * Sends a message to all addressed nodes visible to the source node.
      * <p/>
-     * Targets are determined using {@link #nodes(Node)} and additionally
+     * Targets are determined using {@link #nodes(li.cil.oc.api.network.Node)} and additionally
      * filtered for visibility (so that invisible nodes are ignored).
      * <p/>
      * Note that messages sent this way are <em>only</em> delivered to other
@@ -218,8 +218,8 @@ public interface Network {
      * @param source the node that sends the message.
      * @param data   the message to send.
      * @throws IllegalArgumentException if the source node is not in this network.
-     * @see #nodes(Node)
-     * @see Component#canBeSeenFrom(Node)
+     * @see #nodes(li.cil.oc.api.network.Node)
+     * @see Component#canBeSeenFrom(li.cil.oc.api.network.Node)
      */
     void sendToVisible(Node source, String name, Object... data);
 }

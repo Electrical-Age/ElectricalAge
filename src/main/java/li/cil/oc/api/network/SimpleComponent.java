@@ -2,7 +2,7 @@ package li.cil.oc.api.network;
 
 /**
  * This interface can be used to easily convert tile entities to components,
- * without having to implement {@link li.cil.oc.api.network.Environment}
+ * without having to implement {@link Environment}
  * themselves. The simple implementation will provide no access to OC's internal
  * component network, since you won't have access to the node representing the
  * tile entity. Use this only for simple cases, where you want to expose a

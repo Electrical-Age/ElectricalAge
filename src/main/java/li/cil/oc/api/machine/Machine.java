@@ -148,7 +148,7 @@ public interface Machine extends ManagedEnvironment, Context {
     /**
      * Crashes the computer.
      * <p/>
-     * This is exactly the same as {@link Context#stop()}, except that it also
+     * This is exactly the same as {@link li.cil.oc.api.machine.Context#stop()}, except that it also
      * sets the error message in the machine. This message can be seen when the
      * Analyzer is used on computer cases, for example.
      *
@@ -170,7 +170,7 @@ public interface Machine extends ManagedEnvironment, Context {
     /**
      * Get a list of all methods and their annotations of the specified object.
      * <p/>
-     * The specified object can be either a {@link li.cil.oc.api.machine.Value}
+     * The specified object can be either a {@link Value}
      * or a {@link li.cil.oc.api.network.Environment}. This is useful for
      * custom architectures, to allow providing a list of callback methods to
      * evaluated programs.
@@ -228,7 +228,7 @@ public interface Machine extends ManagedEnvironment, Context {
     /**
      * The list of users registered on this machine.
      * <p/>
-     * This list is used for {@link Context#canInteract(String)}. Exposed for
+     * This list is used for {@link li.cil.oc.api.machine.Context#canInteract(String)}. Exposed for
      * informative purposes only, for example to expose it to user code. Note
      * that the returned array is a copy of the internal representation of the
      * user list. Changing it has no influence on the actual list.

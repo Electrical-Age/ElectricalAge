@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public final class SimpleComponentTickHandler {
     private static final Logger log = LogManager.getLogger("OpenComputers");
 
-    public static final ArrayList<Runnable> pending = new java.util.ArrayList<Runnable>();
+    public static final ArrayList<Runnable> pending = new ArrayList<Runnable>();
 
     public static final SimpleComponentTickHandler Instance = new SimpleComponentTickHandler();
 

@@ -17,7 +17,7 @@ import li.cil.oc.api.network.ManagedEnvironment;
  * and set the visibility to the desired value.
  * <p/>
  * Note that these methods should <em>not</em> be called in the pre-init phase,
- * since the {@link li.cil.oc.api.API#fileSystem} may not have been initialized
+ * since the {@link API#fileSystem} may not have been initialized
  * at that time. Only start calling these methods in the init phase or later.
  */
 public final class FileSystem {
@@ -158,7 +158,7 @@ public final class FileSystem {
     }
 
     /**
-     * Like {@link #asManagedEnvironment(li.cil.oc.api.fs.FileSystem, Label, li.cil.oc.api.driver.EnvironmentHost, String)},
+     * Like {@link #asManagedEnvironment(li.cil.oc.api.fs.FileSystem, li.cil.oc.api.fs.Label, li.cil.oc.api.driver.EnvironmentHost, String)},
      * but creates a read-only label initialized to the specified value.
      *
      * @param fileSystem  the file system to wrap.
@@ -177,7 +177,7 @@ public final class FileSystem {
     }
 
     /**
-     * Like {@link #asManagedEnvironment(li.cil.oc.api.fs.FileSystem, Label, li.cil.oc.api.driver.EnvironmentHost, String)},
+     * Like {@link #asManagedEnvironment(li.cil.oc.api.fs.FileSystem, li.cil.oc.api.fs.Label, li.cil.oc.api.driver.EnvironmentHost, String)},
      * but does not provide a container.
      *
      * @param fileSystem the file system to wrap.
@@ -191,7 +191,7 @@ public final class FileSystem {
     }
 
     /**
-     * Like {@link #asManagedEnvironment(li.cil.oc.api.fs.FileSystem, Label)},
+     * Like {@link #asManagedEnvironment(li.cil.oc.api.fs.FileSystem, li.cil.oc.api.fs.Label)},
      * but creates a read-only label initialized to the specified value.
      *
      * @param fileSystem the file system to wrap.
@@ -205,7 +205,7 @@ public final class FileSystem {
     }
 
     /**
-     * Like {@link #asManagedEnvironment(li.cil.oc.api.fs.FileSystem, Label)},
+     * Like {@link #asManagedEnvironment(li.cil.oc.api.fs.FileSystem, li.cil.oc.api.fs.Label)},
      * but creates an unlabeled file system (i.e. the label can neither be read
      * nor written).
      *

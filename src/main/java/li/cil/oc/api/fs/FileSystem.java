@@ -163,7 +163,7 @@ public interface FileSystem extends Persistable {
      * @param to   the location to move the file or folder to.
      * @return <tt>true</tt> if the object was renamed;
      * <tt>false</tt> otherwise.
-     * @throws FileNotFoundException if the source is not a file or folder.
+     * @throws java.io.FileNotFoundException if the source is not a file or folder.
      */
     boolean rename(String from, String to) throws FileNotFoundException;
 
@@ -206,7 +206,7 @@ public interface FileSystem extends Persistable {
      * @param path the path to the file to open.
      * @param mode the mode in which to open the file.
      * @return the handle to the opened file.
-     * @throws FileNotFoundException if the object is not a file, or
+     * @throws java.io.FileNotFoundException if the object is not a file, or
      *                               the file cannot be opened in the
      *                               specified mode.
      */
@@ -216,7 +216,7 @@ public interface FileSystem extends Persistable {
      * Gets a wrapper for a file previously opened using {@link #open}.
      * <p/>
      * The wrapper allows interaction with the underlying file (stream) based
-     * on the mode it was opened in. See {@link Handle} for more details.
+     * on the mode it was opened in. See {@link li.cil.oc.api.fs.Handle} for more details.
      * <p/>
      * If there is no such handle, this should return <tt>null</tt>, but never
      * throw.
