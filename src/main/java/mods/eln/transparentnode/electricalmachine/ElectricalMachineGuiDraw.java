@@ -1,46 +1,24 @@
 package mods.eln.transparentnode.electricalmachine;
 
-import org.lwjgl.opengl.GL11;
-
-
-
 import mods.eln.gui.GuiContainerEln;
-import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
-import mods.eln.gui.GuiVerticalTrackBar;
-import mods.eln.gui.GuiVerticalTrackBarHeat;
 import mods.eln.gui.GuiVerticalVoltageSupplyBar;
-import mods.eln.gui.GuiVerticalWorkingZoneBar;
-import mods.eln.gui.HelperStdContainer;
-import mods.eln.misc.Utils;
-import mods.eln.node.NodeBlockEntity;
-import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiContainer;
-
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerFurnace;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.StatCollector;
 
 public class ElectricalMachineGuiDraw extends GuiContainerEln {
 
     private TransparentNodeElementInventory inventory;
     ElectricalMachineRender render;
 
+    GuiVerticalVoltageSupplyBar voltageBar;
+
     public ElectricalMachineGuiDraw(EntityPlayer player, IInventory inventory, ElectricalMachineRender render) {
-        super(new ElectricalMachineContainer(null, player, inventory,render.descriptor));
+        super(new ElectricalMachineContainer(null, player, inventory, render.descriptor));
         this.inventory = (TransparentNodeElementInventory) inventory;
         this.render = render;     
     }
-    
-    GuiVerticalVoltageSupplyBar voltageBar;
 
 	@Override
 	public void initGui() {
@@ -61,7 +39,7 @@ public class ElectricalMachineGuiDraw extends GuiContainerEln {
 		super.postDraw(f, x, y);
 		
 		//	drawTexturedModalRectEln(94, 33, 177, 14, (int)(22 * render.processState), 15);
-		((GuiHelperContainer)helper).drawProcess(67, 33 - 20 -2, render.processState);
+		((GuiHelperContainer)helper).drawProcess(67, 33 - 20 - 2, render.processState);
 		//draw
 		
 		voltageBar.setVoltage((float)(render.UFactor * render.descriptor.nominalU));

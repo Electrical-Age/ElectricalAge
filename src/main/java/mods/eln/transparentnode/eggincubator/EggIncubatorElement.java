@@ -30,26 +30,27 @@ import net.minecraft.util.MathHelper;
 public class EggIncubatorElement extends TransparentNodeElement {
 	
 	public NbtElectricalLoad powerLoad = new NbtElectricalLoad("powerLoad");
-	public Resistor powerResistor = new Resistor(powerLoad,null);
+	public Resistor powerResistor = new Resistor(powerLoad, null);
 	TransparentNodeElementInventory inventory = new EggIncubatorInventory(1, 64, this);
 	EggIncubatorProcess slowProcess = new EggIncubatorProcess();
 	EggIncubatorDescriptor descriptor;
-	public EggIncubatorElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
+
+    VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
+
+    double lastVoltagePublish;
+
+    public EggIncubatorElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode,descriptor);
 	   	electricalLoadList.add(powerLoad);
 	   	electricalComponentList.add(powerResistor);
 	   	slowProcessList.add(slowProcess);
-	   	
-	   	
+        
 	   	this.descriptor = (EggIncubatorDescriptor) descriptor;
 	   	
 		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
 		slowProcessList.add(voltageWatchdog.set(powerLoad).setUNominal(this.descriptor.nominalVoltage).set(exp));
 	}
 
-	VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
-	
-	
 	class EggIncubatorProcess implements IProcess, INBTTReady {
 
 		double energy = 5000;
@@ -64,9 +65,9 @@ public class EggIncubatorElement extends TransparentNodeElement {
 		@Override
 		public void process(double time) {
 			energy -= powerResistor.getP() * time;
-			if(inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) != null) {
+			if (inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) != null) {
 				descriptor.setState(powerResistor, true);
-				if(energy <= 0) {
+				if (energy <= 0) {
 					inventory.decrStackSize(EggIncubatorContainer.EggSlotId, 1);
 					EntityChicken chicken = new EntityChicken(node.coordonate.world());
 					chicken.setGrowingAge(-24000);
@@ -82,12 +83,11 @@ public class EggIncubatorElement extends TransparentNodeElement {
 
                 	needPublish();
 				}
-			}
-			else {
+			} else {
 				descriptor.setState(powerResistor, false);
 				resetEnergy();
 			}
-			if(Math.abs(powerLoad.getU() - lastVoltagePublish) / descriptor.nominalVoltage > 0.1) needPublish();
+			if (Math.abs(powerLoad.getU() - lastVoltagePublish) / descriptor.nominalVoltage > 0.1) needPublish();
 		}
 
 		@Override
@@ -103,7 +103,7 @@ public class EggIncubatorElement extends TransparentNodeElement {
 	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		if(lrdu != LRDU.Down) return null;
+		if (lrdu != LRDU.Down) return null;
 		return powerLoad;
 	}
 
@@ -114,7 +114,7 @@ public class EggIncubatorElement extends TransparentNodeElement {
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		if(lrdu == lrdu.Down) {
+		if (lrdu == lrdu.Down) {
 			return NodeBase.maskElectricalPower;	
 		}
 		return 0;
@@ -141,8 +141,7 @@ public class EggIncubatorElement extends TransparentNodeElement {
     }
 	
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-			float vx, float vy, float vz) {
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		return false;
 	}
 	
@@ -164,14 +163,12 @@ public class EggIncubatorElement extends TransparentNodeElement {
 	public IInventory getInventory() {
 		return inventory;
 	}
-	
-	double lastVoltagePublish;
 
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
 		super.networkSerialize(stream);
 		try {
-			if(inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) == null) stream.writeByte(0);
+			if (inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) == null) stream.writeByte(0);
 			else stream.writeByte(inventory.getStackInSlot(EggIncubatorContainer.EggSlotId).stackSize);
 
 			node.lrduCubeMask.getTranslate(front.down()).serialize(stream);

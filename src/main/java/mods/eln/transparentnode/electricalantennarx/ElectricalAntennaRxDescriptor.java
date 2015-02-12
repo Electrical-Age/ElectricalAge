@@ -17,11 +17,18 @@ import org.lwjgl.opengl.GL11;
 
 public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor {
 
-	public ElectricalAntennaRxDescriptor(
-			String name, Obj3D obj,
-			double electricalNominalVoltage, double electricalNominalPower,
-			double electricalMaximalVoltage, double electricalMaximalPower,
-			ElectricalCableDescriptor cable) {
+    Obj3D obj;
+    Obj3DPart main;
+
+    double electricalNominalVoltage, electricalNominalPower;
+    double electricalMaximalVoltage, electricalMaximalPower;
+    double electricalNominalInputR;
+    ElectricalCableDescriptor cable;
+    
+	public ElectricalAntennaRxDescriptor(String name, Obj3D obj, 
+                                         double electricalNominalVoltage, double electricalNominalPower, 
+                                         double electricalMaximalVoltage, double electricalMaximalPower, 
+                                         ElectricalCableDescriptor cable) {
 		super(name, ElectricalAntennaRxElement.class, ElectricalAntennaRxRender.class);
 		this.electricalNominalVoltage = electricalNominalVoltage;
 		this.electricalNominalPower = electricalNominalPower;
@@ -30,12 +37,9 @@ public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor {
 		this.cable = cable;
 		
 		this.obj = obj;
-		if(obj != null) main = obj.getPart("main");
+		if (obj != null) main = obj.getPart("main");
 	}
-	
-	Obj3D obj;
-	Obj3DPart main;
-	
+    
 	@Override	
 	public void setParent(Item item, int damage) {
 		super.setParent(item, damage);
@@ -51,10 +55,12 @@ public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor {
 	public boolean mustHaveWallFrontInverse() {
 		return true;
 	}
+    
 	@Override
 	public boolean use2DIcon() {
 		return false;
 	}
+    
 	@Override
 	public boolean mustHaveFloor() {
 		return false;
@@ -62,7 +68,7 @@ public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor {
 	
 	public void draw() {
 		GL11.glDisable(GL11.GL_CULL_FACE);
-		if(main != null) main.draw();
+		if (main != null) main.draw();
 		GL11.glEnable(GL11.GL_CULL_FACE);
 	}
 	
@@ -84,13 +90,9 @@ public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Wireless power receiver");
+		list.add("Wireless power receiver.");
 		list.add("Nominal usage");
 		list.add(Utils.plotVolt(" U :", electricalNominalVoltage));
 		list.add(Utils.plotPower(" P :", electricalNominalPower));
 	}
-	double electricalNominalVoltage, electricalNominalPower;
-	double electricalMaximalVoltage, electricalMaximalPower;
-	double electricalNominalInputR;
-	ElectricalCableDescriptor cable;
 }

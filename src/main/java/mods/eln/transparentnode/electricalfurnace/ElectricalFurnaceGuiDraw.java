@@ -1,40 +1,19 @@
 package mods.eln.transparentnode.electricalfurnace;
 
-import java.awt.List;
-import java.util.ArrayList;
-
-import org.lwjgl.opengl.GL11;
-
-
-
 import mods.eln.gui.GuiContainerEln;
-import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
-import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.GuiVerticalTrackBarHeat;
 import mods.eln.gui.GuiVerticalVoltageSupplyBar;
 import mods.eln.gui.HelperStdContainer;
-import mods.eln.gui.HelperStdContainerBig;
 import mods.eln.gui.IGuiObject;
 import mods.eln.item.HeatingCorpElement;
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeBlockEntity;
-import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.PhysicalConstant;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiContainer;
-
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerFurnace;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.StatCollector;
 
 public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
 
@@ -74,21 +53,20 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     @Override
     protected void preDraw(float f, int x, int y) {
     	super.preDraw(f, x, y);
-    	if(render.getPowerOn())
+    	if (render.getPowerOn())
     		buttonGrounded.displayString = "Is ON";
     	else
     		buttonGrounded.displayString = "Is OFF";
     	
-    	if(render.autoShutDown) {
+    	if (render.autoShutDown) {
     		buttonGrounded.enabled = false;
     		autoShutDown.displayString = "Auto Shutdown";
-    	}
-    	else {
+    	} else {
     		autoShutDown.displayString = "Manual Shutdown";
     		buttonGrounded.enabled = true;
     	}
     	
-        if(render.temperatureTargetSyncNew) syncVumeter();
+        if (render.temperatureTargetSyncNew) syncVumeter();
         vuMeterTemperature.temperatureHit = render.temperature;
         
         vuMeterTemperature.setComment(1, "Current: " + Utils.plotValue(render.temperature + PhysicalConstant.Tamb, "\u00B0C"));
@@ -98,13 +76,11 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     @Override
     public void guiObjectEvent(IGuiObject object) {
     	super.guiObjectEvent(object);
-    	if(object == buttonGrounded) {
+    	if (object == buttonGrounded) {
     		render.clientSetPowerOn(!render.getPowerOn());
-    	}
-    	else if(object == autoShutDown) {
+    	} else if (object == autoShutDown) {
     		render.clientSendId(ElectricalFurnaceElement.unserializeAutoShutDownId);
-    	}
-    	else if(object == vuMeterTemperature) {
+    	} else if (object == vuMeterTemperature) {
     		render.clientSetTemperatureTarget(vuMeterTemperature.getValue());
     	}
     }
@@ -117,10 +93,9 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
 	    //drawString(8, 6, Utils.plotPower("Consummation", render.heatingCorpResistorP));
 	    
 	    ItemStack stack = render.inventory.getStackInSlot(ElectricalFurnaceElement.heatingCorpSlotId);
-	    if(stack == null) {
+	    if (stack == null) {
 	    	supplyBar.setEnabled(false);
-	    }
-	    else {
+	    } else {
 	    	supplyBar.setEnabled(true);
 	    	HeatingCorpElement desc = (HeatingCorpElement) HeatingCorpElement.getDescriptor(stack);
 	    	supplyBar.setNominalU((float) desc.electricalNominalU);

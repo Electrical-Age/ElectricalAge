@@ -18,14 +18,19 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class ElectricalAntennaRxElement extends TransparentNodeElement{
+public class ElectricalAntennaRxElement extends TransparentNodeElement {
 
 	ElectricalAntennaRxSlowProcess slowProcess = new ElectricalAntennaRxSlowProcess(this);
 	
 	NbtElectricalLoad powerOut = new NbtElectricalLoad("powerOut");
-	NbtElectricalGateInput signalIn = new NbtElectricalGateInput("signalIn",false);
+	NbtElectricalGateInput signalIn = new NbtElectricalGateInput("signalIn", false);
 
-	PowerSource powerSrc = new PowerSource("powerSrc",powerOut);
+	PowerSource powerSrc = new PowerSource("powerSrc", powerOut);
+
+    LRDU rot = LRDU.Up;
+    Coordonate rxCoord = null;
+    ElectricalAntennaRxDescriptor descriptor;
+    
 	public double getSignal() {
 		return signalIn.getBornedU();
 	}
@@ -37,10 +42,7 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement{
 	public void rxDisconnect() {
 		powerSrc.setP(0.0);
 	}
-	
-	LRDU rot = LRDU.Up;
-	Coordonate rxCoord = null;
-	ElectricalAntennaRxDescriptor descriptor;
+
 	public ElectricalAntennaRxElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		slowProcessList.add(slowProcess);
@@ -54,10 +56,10 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement{
 
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		if(front.getInverse() != side.applyLRDU(lrdu)) return null;
+		if (front.getInverse() != side.applyLRDU(lrdu)) return null;
 		
-		if(side == front.applyLRDU(rot.left())) return powerOut;
-		if(side == front.applyLRDU(rot.right())) return signalIn;
+		if (side == front.applyLRDU(rot.left())) return powerOut;
+		if (side == front.applyLRDU(rot.right())) return signalIn;
 		return null;
 	}
 
@@ -68,10 +70,10 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement{
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		if(front.getInverse() != side.applyLRDU(lrdu)) return 0;
+		if (front.getInverse() != side.applyLRDU(lrdu)) return 0;
 		
-		if(side == front.applyLRDU(rot.left())) return NodeBase.maskElectricalPower;
-		if(side == front.applyLRDU(rot.right())) return NodeBase.maskElectricalInputGate;
+		if (side == front.applyLRDU(rot.left())) return NodeBase.maskElectricalPower;
+		if (side == front.applyLRDU(rot.right())) return NodeBase.maskElectricalInputGate;
 		
 		return 0;
 	}
@@ -90,14 +92,13 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement{
 	public void initialize() {
 		descriptor.cable.applyTo(powerOut);
 		powerSrc.setUmax(descriptor.electricalMaximalVoltage * 2);
-		powerSrc.setImax(descriptor.electricalMaximalVoltage*descriptor.electricalMaximalPower*2);
+		powerSrc.setImax(descriptor.electricalMaximalVoltage * descriptor.electricalMaximalPower * 2);
 		connect();
 	}
 
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-			float vx, float vy, float vz) {
-		if(Utils.isPlayerUsingWrench(entityPlayer)) {
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+		if (Utils.isPlayerUsingWrench(entityPlayer)) {
 			rot = rot.getNextClockwise();
 			node.reconnect();
 			return true;	

@@ -22,17 +22,23 @@ import net.minecraft.util.AxisAlignedBB;
 import org.lwjgl.opengl.GL11;
 
 public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
+    
 	Obj3D obj;
 	Obj3D defaultFeroObj;
 	public ElectricalCableDescriptor cable;
 	private Obj3DPart lamp;
 	private EntityItem eggEntity;
 	private Obj3DPart lampf;
-	public EggIncubatorDescriptor(
-			String name,
-			Obj3D obj,
-			ElectricalCableDescriptor cable,
-			double nominalVoltage,double nominalPower) {
+
+    Obj3DPart main;
+
+    double nominalVoltage, nominalPower;
+    double Rp;
+    
+	public EggIncubatorDescriptor(String name, 
+                                  Obj3D obj, 
+                                  ElectricalCableDescriptor cable, 
+                                  double nominalVoltage, double nominalPower) {
 		super(name, EggIncubatorElement.class, EggIncubatorRender.class);
 		this.obj = obj;
 		this.cable = cable;
@@ -40,7 +46,7 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 		this.nominalPower = nominalPower;
 		Rp = nominalVoltage * nominalVoltage / nominalPower;
 		
-		if(obj != null) {
+		if (obj != null) {
 			main = obj.getPart("main");
 			lamp = obj.getPart("lamp");
 			lampf  = obj.getPart("lampf");
@@ -53,23 +59,18 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 		Data.addMachine(newItemStack());
 	}
 	
-	Obj3DPart main;
-	
-	double nominalVoltage,nominalPower;
-	double Rp;
 	@Override
 	public boolean use2DIcon() {
 		return false;
 	}
+    
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 	}
 	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
 	
@@ -84,14 +85,14 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 	}
 	
 	void draw(int eggStackSize, float powerFactor) {
-		if(eggStackSize == 0) powerFactor = 0f;
+		if (eggStackSize == 0) powerFactor = 0f;
 		UtilsClient.disableCulling();
-		if(main != null) main.draw();
-		if(lampf != null) {
+		if (main != null) main.draw();
+		if (lampf != null) {
 			GL11.glColor3f(0.1f, 0.1f, 0.1f);
 			lampf.draw();
 		}
-		if(lamp != null) {
+		if (lamp != null) {
 			UtilsClient.disableLight();
 			UtilsClient.enableBlend();
 			GL11.glColor4f(1f, 0.2f, 0.0f, powerFactor * powerFactor * 0.5f);
@@ -106,18 +107,17 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 		cable.applyTo(powerLoad);
 	}
 	
-	public void setState(Resistor powerLoad,boolean enable) {
-		if(enable)
+	public void setState(Resistor powerLoad, boolean enable) {
+		if (enable)
 			powerLoad.setR(Rp);
 		else
 			powerLoad.setR(MnaConst.highImpedance);
 	}
 
 	@Override
-	public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB,
-			List list, TransparentNodeEntity entity) {
+	public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, TransparentNodeEntity entity) {
 		AxisAlignedBB bb = Blocks.stone.getCollisionBoundingBoxFromPool(entity.getWorldObj(), entity.xCoord, entity.yCoord, entity.zCoord);
 		bb.maxY -= 0.5;
-		if(par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
+		if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
 	}
 }

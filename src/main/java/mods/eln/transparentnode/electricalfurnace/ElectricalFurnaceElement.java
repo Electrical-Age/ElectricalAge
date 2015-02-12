@@ -3,11 +3,9 @@ package mods.eln.transparentnode.electricalfurnace;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.item.HeatingCorpElement;
-import mods.eln.item.ThermalIsolatorElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -20,17 +18,14 @@ import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalResistorHeatThermalLoad;
 import mods.eln.sim.RegulatorThermalLoadToElectricalResistor;
-import mods.eln.sim.RegulatorType;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalResistor;
-import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -49,7 +44,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 	public static final int thermalRegulatorSlotId = 4;
 	
 	NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
-	ResistorSwitch heatingCorpResistor = new ResistorSwitch("heatResistor",electricalLoad, ElectricalLoad.groundLoad);
+	ResistorSwitch heatingCorpResistor = new ResistorSwitch("heatResistor", electricalLoad, ElectricalLoad.groundLoad);
 	
 	NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
 	ThermalResistor smeltResistor = new ThermalResistor(thermalLoad, ThermalLoad.externalLoad);
@@ -59,13 +54,18 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 	ElectricalResistorHeatThermalLoad heatingCorpResistorHeatThermalLoad = new ElectricalResistorHeatThermalLoad(heatingCorpResistor, thermalLoad);
 	ElectricalFurnaceProcess slowRefreshProcess = new ElectricalFurnaceProcess(this);
 	
-
 	boolean powerOn = false;
 	boolean autoShutDown = true;
 	ElectricalFurnaceDescriptor descriptor;
-	
-	public ElectricalFurnaceElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
-		super(transparentNode,descriptor);
+
+    VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
+
+    public static final byte unserializePowerOnId = 1;
+    public static final byte unserializeTemperatureTarget = 2;
+    public static final byte unserializeAutoShutDownId = 3;
+
+    public ElectricalFurnaceElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
+		super(transparentNode, descriptor);
 		this.descriptor = (ElectricalFurnaceDescriptor) descriptor;
 		
 		electricalLoad.setAsPrivate();
@@ -86,9 +86,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
 		slowProcessList.add(voltageWatchdog.set(electricalLoad).set(exp));
 	}
-
-	VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
-	
+    
 	@Override
 	public IInventory getInventory() {
 		return inventory;
@@ -116,7 +114,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		if(side == front.getInverse() && lrdu == LRDU.Down)
+		if (side == front.getInverse() && lrdu == LRDU.Down)
 			return NodeBase.maskElectricalPower;
 		return 0;
 	}
@@ -166,21 +164,19 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 		ItemStack itemStack;
 		heatingCorpResistor.setState(powerOn);
 		itemStack = inventory.getStackInSlot(heatingCorpSlotId);
-		if(itemStack == null) {
+		if (itemStack == null) {
 			thermalRegulator.setRmin(MnaConst.highImpedance);
 			voltageWatchdog.setUNominal(100000);
-		}
-		else {
+		} else {
 			HeatingCorpElement element = ((GenericItemUsingDamage<HeatingCorpElement>)itemStack.getItem()).getDescriptor(itemStack);
 			element.applyTo(thermalRegulator);
 			voltageWatchdog.setUNominal(element.electricalNominalU);
 		}
 		
 		itemStack = inventory.getStackInSlot(thermalRegulatorSlotId);
-		if(itemStack == null) {
+		if (itemStack == null) {
 			thermalRegulator.setNone();
-		}
-		else {
+		} else {
 			IRegulatorDescriptor element = ((GenericItemUsingDamage<IRegulatorDescriptor>)itemStack.getItem()).getDescriptor(itemStack);
 			element.applyTo(thermalRegulator, 500.0, 10.0, 0.1, 0.1);
 		}	
@@ -200,11 +196,10 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 			stream.writeShort((int) thermalLoad.Tc);
 			
 			ItemStack stack;
-			if((stack = inventory.getStackInSlot(inSlotId)) == null) {
+			if ((stack = inventory.getStackInSlot(inSlotId)) == null) {
 				stream.writeShort(-1);
 				stream.writeShort(-1);
-			}
-			else {
+			} else {
 				stream.writeShort(Item.getIdFromItem(stack.getItem()));
 				stream.writeShort(stack.getItemDamage());				
 			}
@@ -215,7 +210,6 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 			stream.writeFloat((float) slowRefreshProcess.processStatePerSecond());
 			
 			stream.writeBoolean(autoShutDown);
-			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}	
@@ -236,36 +230,31 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 	}
 	
 	public void setPowerOn(boolean value) {
-		if(powerOn != value) {
+		if (powerOn != value) {
 			powerOn = value;
 			setPhysicalValue();
 			needPublish();
 		}
 	}
-	
-	public static final byte unserializePowerOnId = 1;
-	public static final byte unserializeTemperatureTarget = 2;
-	public static final byte unserializeAutoShutDownId = 3;
-	
+
 	@Override
 	public byte networkUnserialize(DataInputStream stream) {
-
 		byte packetType = super.networkUnserialize(stream);
 		try {
 			switch(packetType) {
-			case unserializePowerOnId:			
-				setPowerOn(stream.readByte() != 0);
-				break;
-			case unserializeAutoShutDownId:			
-				autoShutDown = ! autoShutDown;
-				needPublish();
-				break;
-			case unserializeTemperatureTarget:
-				thermalRegulator.setTarget(stream.readFloat());
-				needPublish();
-				break;
-			default:
-				return packetType;
+                case unserializePowerOnId:
+                    setPowerOn(stream.readByte() != 0);
+                    break;
+                case unserializeAutoShutDownId:
+                    autoShutDown = ! autoShutDown;
+                    needPublish();
+                    break;
+                case unserializeTemperatureTarget:
+                    thermalRegulator.setTarget(stream.readFloat());
+                    needPublish();
+                    break;
+                default:
+                    return packetType;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -278,5 +267,4 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 		// TODO Auto-generated method stub
 		return true;
 	}*/
-	
 }

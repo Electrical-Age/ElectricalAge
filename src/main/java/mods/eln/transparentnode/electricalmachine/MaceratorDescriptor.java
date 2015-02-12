@@ -4,12 +4,10 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.entity.item.EntityItem;
 import mods.eln.Eln;
-import mods.eln.client.FrameTime;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.RecipesList;
-import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
 import mods.eln.sim.ThermalLoadInitializer;
@@ -17,20 +15,21 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 
 public class MaceratorDescriptor extends ElectricalMachineDescriptor {
 
-	public MaceratorDescriptor(String name, String modelName,
-			double nominalU, double nominalP,
-			double maximalU, ThermalLoadInitializer thermal,
-			ElectricalCableDescriptor cable, RecipesList recipe) {
+    Obj3D obj;
+    Obj3DPart main, rot1, rot2;
+
+    public MaceratorDescriptor(String name, String modelName,
+                               double nominalU, double nominalP, 
+                               double maximalU, ThermalLoadInitializer thermal, 
+                               ElectricalCableDescriptor cable, RecipesList recipe) {
 		super(name, nominalU, nominalP, maximalU, thermal, cable, recipe);
 		obj = Eln.obj.getObj(modelName);
-		if(obj != null) {
+		if (obj != null) {
 			rot1 = obj.getPart("rot1");
 			rot2 = obj.getPart("rot2");
 			main = obj.getPart("main");
 		}
 	}
-	Obj3D obj;
-	Obj3DPart main,rot1,rot2;		
 
 	class MaceratorDescriptorHandle {
 		float counter = 0, itemCounter = 0;
@@ -49,8 +48,7 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
 		main.draw();
 		rot1.draw(handle.counter, 0f, 0f, -1f);
 		rot2.draw(handle.counter, 0f, 0f, 1f);
-		
-	
+
 		//UtilsClient.enableDepthTest();		
 		GL11.glScalef(0.7f, 0.7f, 0.7f);
 		UtilsClient.drawEntityItem(inEntity, 0.0, 0.4f, 0f, handle.itemCounter, 1f);	

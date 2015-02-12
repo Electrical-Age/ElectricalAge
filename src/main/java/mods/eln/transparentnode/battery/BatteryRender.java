@@ -1,12 +1,7 @@
 package mods.eln.transparentnode.battery;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
-import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDUMask;
-import mods.eln.node.NodeBase;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
@@ -14,7 +9,8 @@ import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 
-import org.lwjgl.opengl.GL11;
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class BatteryRender extends TransparentNodeElementRender {
 
@@ -24,6 +20,12 @@ public class BatteryRender extends TransparentNodeElementRender {
 	public BatteryDescriptor descriptor;
 	
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2, 64, this);
+
+    boolean plus, minus;
+
+    LRDUMask lrdu = new LRDUMask();
+
+    float power;
 	
 	public BatteryRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
@@ -36,17 +38,12 @@ public class BatteryRender extends TransparentNodeElementRender {
 		descriptor.draw(plus, minus);
 	}
 
-	boolean plus, minus;
 	/*
 	@Override
 	public GuiContainer newGuiDraw(Direction side, EntityPlayer player) {
 		return new TransformatorGuiDraw(player, inventory, this);
 	}*/
-	
-	LRDUMask lrdu = new LRDUMask();
-	
-	float power;
-	
+
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		super.networkUnserialize(stream);

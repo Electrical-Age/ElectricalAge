@@ -2,27 +2,20 @@ package mods.eln.transparentnode.battery;
 
 import java.util.List;
 
-
 import mods.eln.Eln;
-import mods.eln.client.ClientProxy;
-import mods.eln.gui.GuiLabel;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
-
 import mods.eln.sim.BatteryProcess;
 import mods.eln.sim.BatterySlowProcess;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
-import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
-import mods.eln.wiki.GuiVerticalExtender;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -51,35 +44,47 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	public double IMax;
 	public boolean lifeEnable;
 	private ElectricalCableDescriptor cable;
-	
-	public void draw(boolean plus, boolean minus) {
+
+    Obj3D obj;
+
+    Obj3DPart main, plugPlus, plusMinus, battery;
+
+    int renderType;
+    private String renderSpec;
+
+    public static BatteryDescriptor[] list = new BatteryDescriptor[8];
+
+    public double currentDropVoltage = 1000000, currentDropFactor = 0;
+
+    public void draw(boolean plus, boolean minus) {
 		switch (renderType) {
-		case 0:
-			if(modelPart == null) return;
-			modelPart.draw();			
-			break;
-		case 1:
-			if(main != null) main.draw();
-			if(plugPlus != null && plus) plugPlus.draw();
-			if(plusMinus != null && minus) plusMinus.draw();
-			//if(cables != null) cables.draw();
-			if(battery != null) battery.draw();
-			break;
+            case 0:
+                if (modelPart == null) return;
+                modelPart.draw();			
+                break;
+            case 1:
+                if (main != null) main.draw();
+                if (plugPlus != null && plus) plugPlus.draw();
+                if (plusMinus != null && minus) plusMinus.draw();
+                //if(cables != null) cables.draw();
+                if (battery != null) battery.draw();
+                break;
 		}
 	}
+    
 	@Override
 	public boolean use2DIcon() {
 		return false;
 	}
-	public BatteryDescriptor(
-				String name, String modelName,
-				ElectricalCableDescriptor cable,
-				double startCharge, boolean isRechargable, boolean lifeEnable,
-				FunctionTable UfCharge,
-				double electricalU, double electricalPMax, double electricalDischargeRate,
-				double electricalStdP, double electricalStdDischargeTime, double electricalStdEfficiency, double electricalStdHalfLife,
-				double thermalHeatTime, double thermalWarmLimit, double thermalCoolLimit,
-			  	String description) {
+    
+	public BatteryDescriptor(String name, String modelName, 
+                             ElectricalCableDescriptor cable, 
+                             double startCharge, boolean isRechargable, boolean lifeEnable, 
+                             FunctionTable UfCharge, 
+                             double electricalU, double electricalPMax, double electricalDischargeRate, 
+                             double electricalStdP, double electricalStdDischargeTime, double electricalStdEfficiency, double electricalStdHalfLife, 
+                             double thermalHeatTime, double thermalWarmLimit, double thermalCoolLimit, 
+                             String description) {
 		super(name, BatteryElement.class, BatteryRender.class);
 		this.electricalU = electricalU;
 		this.electricalDischargeRate = electricalDischargeRate;
@@ -102,22 +107,19 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 		
 		electricalStdI = electricalStdP / electricalU;
 		electricalStdEnergy = electricalStdDischargeTime * electricalStdP;
-		
-		
+        
 		electricalQ = electricalStdP * electricalStdDischargeTime / electricalU;
 		electricalQ = 1;
 		double energy = getEnergy(1.0, 1.0);
 		electricalQ *= electricalStdEnergy / energy;
 		electricalRs =  electricalStdP * (1 - electricalStdEfficiency) / electricalStdI / electricalStdI / 2;
 		//electricalRs = cable.electricalRs;
-		electricalRp = Math.min(electricalU * electricalU / electricalStdP / electricalDischargeRate,1000000000.0);
-		
-		
+		electricalRp = Math.min(electricalU * electricalU / electricalStdP / electricalDischargeRate, 1000000000.0);
+        
 		lifeNominalCurrent = electricalStdP / electricalU;
 		lifeNominalLost = 0.5 / electricalStdHalfLife;
 		
-
-		thermalPMax = electricalPMax / electricalU * electricalPMax / electricalU * electricalRs*2;
+		thermalPMax = electricalPMax / electricalU * electricalPMax / electricalU * electricalRs * 2;
 		thermalC = Math.pow(electricalPMax / electricalU, 2) * electricalRs * thermalHeatTime / thermalWarmLimit;
 		thermalRp = thermalWarmLimit / thermalPMax;
 		
@@ -125,28 +127,21 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 		
 		obj = Eln.obj.getObj(modelName);
 		
-		if(obj != null) {
-			if(obj.getString("type").equals("A"))
+		if (obj != null) {
+			if (obj.getString("type").equals("A"))
 				renderType = 0;
-			if(obj.getString("type").equals("B"))
+			if (obj.getString("type").equals("B"))
 				renderType = 1;
 			
 			switch (renderType) {
-			case 0:
-				modelPart = obj.getPart("Battery");
-			case 1:
-				break;
+                case 0:
+                    modelPart = obj.getPart("Battery");
+                case 1:
+                    break;
 			}
 		}
 	}
-	
-	Obj3D obj;
-	
-	Obj3DPart main, plugPlus, plusMinus, battery;
-	
-	int renderType;
-	private String renderSpec;
-	
+
 	@Override
 	public void setParent(Item item, int damage) {
 		super.setParent(item, damage);
@@ -155,7 +150,6 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	
 	public void applyTo(Resistor resistor) {
 		resistor.setR(electricalRp);
-   		
 	}
 	
 	public void applyTo(BatteryProcess battery) {
@@ -168,7 +162,6 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	
 	public void applyTo(ElectricalLoad load, Simulator simulator) {
 		load.setRs(electricalRs);
-
 	}
 	
 	public void applyTo(ThermalLoad load) {
@@ -181,9 +174,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 		process.lifeNominalCurrent = lifeNominalCurrent;
 		process.lifeNominalLost = lifeNominalLost;
 	}
-	
-	public static BatteryDescriptor[] list = new BatteryDescriptor[8];
-	
+
 	public static BatteryDescriptor getDescriptorFrom(ItemStack itemStack) {
 		return list[(itemStack.getItemDamage()) & 0x7];
 	}
@@ -198,8 +189,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	}
 	
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add("Nominal voltage : " + (int)(electricalU) + "V");
 		list.add("Nominal power : " + (int)(electricalStdP) + "W");
@@ -219,13 +209,13 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	}
 	
 	double getChargeInTag(ItemStack stack) {
-		if(stack.hasTagCompound() == false)
+		if (!stack.hasTagCompound())
 			stack.setTagCompound(getDefaultNBT());
 		return stack.getTagCompound().getDouble("charge");
 	}
 	
 	double getLifeInTag(ItemStack stack) {
-		if(stack.hasTagCompound() == false)
+		if (!stack.hasTagCompound())
 			stack.setTagCompound(getDefaultNBT());
 		return stack.getTagCompound().getDouble("life");
 	}
@@ -237,7 +227,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 		double energy = 0;
 		double QperStep = electricalQ * life * charge / stepNbr;
 		
-		for(int step = 0; step < stepNbr; step++) {	
+		for (int step = 0; step < stepNbr; step++) {
 			double voltage = UfCharge.getValue(chargeIntegrator) * electricalU;
 			energy += voltage * QperStep;
 			chargeIntegrator += chargeStep;
@@ -251,8 +241,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	}
 	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
 		return true;
 	}
 	
@@ -263,35 +252,32 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	
 	@Override
 	public boolean onEntityItemUpdate(EntityItem entityItem) {
-		if(entityItem.isBurning()) {
+		if (entityItem.isBurning()) {
 			entityItem.worldObj.createExplosion(entityItem, entityItem.posX, entityItem.posY, entityItem.posZ, 2, true);
 			entityItem.extinguish();
 			entityItem.setDead();	
 		}
 		return false;
 	}
-	
-
-	
+    
 	public void setRenderSpec(String renderSpec) {
 		this.renderSpec = renderSpec;
 		
-		if(obj != null) {
+		if (obj != null) {
 			switch (renderType) {
-			case 0:
-
-			case 1:
-				main = obj.getPart("main");
-				plugPlus = obj.getPart("plugPlus");
-				plusMinus = obj.getPart("plugMinus");
-			//	cables = obj.getPart("cables");
-				battery = obj.getPart("battery_" + renderSpec);
-				break;
+                case 0:
+    
+                case 1:
+                    main = obj.getPart("main");
+                    plugPlus = obj.getPart("plugPlus");
+                    plusMinus = obj.getPart("plugMinus");
+                //	cables = obj.getPart("cables");
+                    battery = obj.getPart("battery_" + renderSpec);
+                    break;
 			}
 		}		
 	}
 
-	public double currentDropVoltage = 1000000, currentDropFactor = 0;
 	public void setCurrentDrop(double currentDropVoltage, double currentDropFactor) {
 		this.currentDropFactor = currentDropFactor;
 		this.currentDropVoltage = currentDropVoltage;

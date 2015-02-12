@@ -15,7 +15,7 @@ public class ElectricalMachineContainer extends BasicContainer implements INodeC
 
 	NodeBase node = null;
 	
-	public ElectricalMachineContainer(NodeBase node, EntityPlayer player, IInventory inventory,ElectricalMachineDescriptor descriptor) {
+	public ElectricalMachineContainer(NodeBase node, EntityPlayer player, IInventory inventory, ElectricalMachineDescriptor descriptor) {
 		super(player, inventory, getSlot(inventory, descriptor));
 		
 		/*super(player, inventory, new Slot[]{
@@ -24,23 +24,21 @@ public class ElectricalMachineContainer extends BasicContainer implements INodeC
 				new GenericItemUsingDamageSlot(inventory, boosterSlotId, 20, 12, 5,
 												MachineBoosterDescriptor.class,
 												SlotSkin.medium,
-												new String[]{"Booster Slot"}),
+												new String[]{"Booster slot"}),
 			});*/
-		
-
 		this.node = node;
 	}
 
-	static Slot[] getSlot(IInventory inventory,ElectricalMachineDescriptor descriptor){
+	static Slot[] getSlot(IInventory inventory, ElectricalMachineDescriptor descriptor) {
 		Slot[] slots = new Slot[2 + descriptor.outStackCount];
-		for(int idx = 0;idx < descriptor.outStackCount;idx++){
-			slots[0 + idx]  = new SlotWithSkin(inventory, 0 + idx, 130-32+idx*18, 12, SlotSkin.medium);
+		for (int idx = 0;idx < descriptor.outStackCount;idx++){
+			slots[0 + idx]  = new SlotWithSkin(inventory, 0 + idx, 130 - 32 + idx * 18, 12, SlotSkin.medium);
 		}
-		slots[descriptor.outStackCount + 0] = new SlotWithSkin(inventory, descriptor.outStackCount + 0, 8+36, 12, SlotSkin.medium);
+		slots[descriptor.outStackCount + 0] = new SlotWithSkin(inventory, descriptor.outStackCount + 0, 8 + 36, 12, SlotSkin.medium);
 		slots[descriptor.outStackCount + 1] = new GenericItemUsingDamageSlot(inventory, descriptor.outStackCount + 1, 8, 12, 5,
 				MachineBoosterDescriptor.class,
 				SlotSkin.medium,
-				new String[]{"Booster Slot"});
+				new String[]{"Booster slot"});
 		
 		return slots;
 	}

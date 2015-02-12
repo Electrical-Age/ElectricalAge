@@ -17,13 +17,23 @@ import org.lwjgl.opengl.GL11;
 
 public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
 
-	public ElectricalAntennaTxDescriptor(
-			String name, Obj3D obj,
-			int rangeMax,
-			double electricalPowerRatioEffStart, double electricalPowerRatioEffEnd,
-			double electricalNominalVoltage, double electricalNominalPower,
-			double electricalMaximalVoltage, double electricalMaximalPower,
-			ElectricalCableDescriptor cable) {
+    Obj3D obj;
+    Obj3DPart main;
+
+    int rangeMax;
+    double electricalPowerRatioEffStart, electricalPowerRatioEffEnd;
+    double electricalPowerRatioLostOffset, electricalPowerRatioLostPerBlock;
+    double electricalNominalVoltage, electricalNominalPower;
+    double electricalMaximalVoltage, electricalMaximalPower;
+    double electricalNominalInputR;
+    ElectricalCableDescriptor cable;
+    
+	public ElectricalAntennaTxDescriptor(String name, Obj3D obj, 
+                                         int rangeMax, 
+                                         double electricalPowerRatioEffStart, double electricalPowerRatioEffEnd, 
+                                         double electricalNominalVoltage, double electricalNominalPower, 
+                                         double electricalMaximalVoltage, double electricalMaximalPower, 
+                                         ElectricalCableDescriptor cable) {
 		super(name, ElectricalAntennaTxElement.class, ElectricalAntennaTxRender.class);
 		this.rangeMax = rangeMax;
 		this.electricalNominalVoltage = electricalNominalVoltage;
@@ -40,7 +50,7 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
 		electricalNominalInputR = electricalNominalVoltage * electricalNominalVoltage / electricalNominalPower;
 		
 		this.obj = obj;
-		if(obj != null) main = obj.getPart("main");
+		if (obj != null) main = obj.getPart("main");
 	}
 	
 	@Override	
@@ -48,10 +58,7 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
 		super.setParent(item, damage);
 		Data.addWiring(newItemStack());
 	}
-	
-	Obj3D obj;
-	Obj3DPart main;
-	
+    
 	@Override
 	public FrontType getFrontType() {
 		return FrontType.BlockSideInv;
@@ -66,21 +73,12 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
 	public boolean mustHaveFloor() {
 		return false;
 	}
+    
 	@Override
 	public boolean use2DIcon() {
 		return false;
 	}
-	int rangeMax;
-	double electricalPowerRatioEffStart, electricalPowerRatioEffEnd;
-	double electricalPowerRatioLostOffset, electricalPowerRatioLostPerBlock;
-	double electricalNominalVoltage, electricalNominalPower;
-	double electricalMaximalVoltage, electricalMaximalPower;
-	double electricalNominalInputR;
-	ElectricalCableDescriptor cable;
-	
-	
 
-	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		return true;
@@ -98,14 +96,14 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
 		
 	public void draw() {
 		GL11.glDisable(GL11.GL_CULL_FACE);
-		if(main != null) main.draw();
+		if (main != null) main.draw();
 		GL11.glEnable(GL11.GL_CULL_FACE);
 	}
 
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Wireless power transmitter");
+		list.add("Wireless power transmitter.");
 		list.add("Nominal usage");
 		list.add(Utils.plotVolt(" U :", electricalNominalVoltage));
 		list.add(Utils.plotPower(" P :", electricalNominalPower));

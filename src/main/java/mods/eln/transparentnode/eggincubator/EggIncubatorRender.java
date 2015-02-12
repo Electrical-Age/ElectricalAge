@@ -25,18 +25,27 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
 
 	TransparentNodeElementInventory inventory = new EggIncubatorInventory(1, 64, this);
 	EggIncubatorDescriptor descriptor;
-	
-	public EggIncubatorRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
+
+    float alpha = 0;
+
+    byte eggStackSize;
+
+    EntityItem egg;
+    public float voltage;
+
+    LRDUMask priConn = new LRDUMask(), secConn = new LRDUMask(), eConn = new LRDUMask();
+    CableRenderType cableRenderType;
+
+    public EggIncubatorRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
 		this.descriptor = (EggIncubatorDescriptor) descriptor;
 	}
 
 	@Override
 	public void draw() {
-		
 		GL11.glPushMatrix();
 		front.glRotateXnRef();
-		if(egg != null) {
+		if (egg != null) {
 			UtilsClient.drawEntityItem(egg, 0.0f, -0.3f, 0.13f, alpha, 0.6f);
 		}
 		descriptor.draw(eggStackSize, (float) (voltage / descriptor.nominalVoltage));
@@ -47,31 +56,22 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
 	@Override
 	public void refresh(float deltaT) {
 		alpha += deltaT * 60;
-		if(alpha >= 360) alpha -= 360;
-
+		if (alpha >= 360) alpha -= 360;
 	}
-	
-	float alpha = 0;
-	
+    
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
 		return new EggIncubatorGuiDraw(player, inventory, this);
 	}
-	
-	byte eggStackSize;
-
-	EntityItem egg;
-	public float voltage;
-	
+    
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		super.networkUnserialize(stream);
 		try {
 			eggStackSize = stream.readByte();
-			if(eggStackSize != 0) {
+			if (eggStackSize != 0) {
 				egg = new EntityItem(this.tileEntity.getWorldObj(), 0, 0, 0, new ItemStack(Items.egg));
-			}
-			else {
+			} else {
 				egg = null;
 			}	
 			eConn.deserialize(stream);
@@ -81,10 +81,7 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
 		}		
 		cableRenderType = null;
 	}
-	
-	LRDUMask priConn = new LRDUMask(), secConn = new LRDUMask(), eConn = new LRDUMask();
-	CableRenderType cableRenderType;
-	
+
 	@Override
 	public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
 		return descriptor.cable.render;

@@ -6,7 +6,8 @@ import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 
-public class ElectricalFurnaceInventory extends TransparentNodeElementInventory{
+public class ElectricalFurnaceInventory extends TransparentNodeElementInventory {
+    
 	public ElectricalFurnaceInventory(int size, int stackLimit, TransparentNodeElement TransparentNodeElement) {
 		super(size, stackLimit, TransparentNodeElement);
 	}
@@ -18,34 +19,31 @@ public class ElectricalFurnaceInventory extends TransparentNodeElementInventory{
 	@Override
 	public int[] getAccessibleSlotsFromSide(int side) {
 		switch (Direction.fromIntMinecraftSide(side)) {
-		case YP:
-			return new int[]{ElectricalFurnaceElement.inSlotId};
-		default:
-			return new int[]{ElectricalFurnaceElement.outSlotId};
+            case YP:
+                return new int[]{ElectricalFurnaceElement.inSlotId};
+            default:
+                return new int[]{ElectricalFurnaceElement.outSlotId};
 		}
 		
 	}
 
-
 	@Override
 	public boolean canInsertItem(int var1, ItemStack var2, int side) {
 		switch (Direction.fromIntMinecraftSide(side)) {
-		case YP:
-			return true;
-		default:
-			return false;
+            case YP:
+                return true;
+            default:
+                return false;
 		}
 	}
 
 	@Override
 	public boolean canExtractItem(int var1, ItemStack var2, int side) {
-
 		switch (Direction.fromIntMinecraftSide(side)) {
-		case YP:
-			return false;
-		default:
-			return true;
+            case YP:
+                return false;
+            default:
+                return true;
 		}
 	}
-
 }

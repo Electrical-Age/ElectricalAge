@@ -4,33 +4,30 @@ import mods.eln.Eln;
 import mods.eln.sim.FurnaceProcess;
 import mods.eln.sim.RegulatorFurnaceProcess;
 
-public class HeatFurnaceThermalProcess extends RegulatorFurnaceProcess{
+public class HeatFurnaceThermalProcess extends RegulatorFurnaceProcess {
+    
 	HeatFurnaceElement element;
-	public HeatFurnaceThermalProcess(String name, FurnaceProcess furnace,HeatFurnaceElement element) {
+    
+	public HeatFurnaceThermalProcess(String name, FurnaceProcess furnace, HeatFurnaceElement element) {
 		super(name, furnace);
 		this.element = element;
 	}	
 
 	@Override
 	public void process(double time) {
-	//	if(element.getControlExternal() == false)
+	//	if (!element.getControlExternal())
 			super.process(time);
 	//	else 
-		if(element.getControlExternal())
-		{
+		if (element.getControlExternal()) {
 			double ratio = element.electricalCmdLoad.getU() / Eln.instance.SVU;
 			
-			if(ratio < 0.1) 
-			{
+			if (ratio < 0.1) {
 				element.setTakeFuel(false);
 				setCmd(0.1);
-			}
-			else
-			{
+			} else {
 				element.setTakeFuel(true);
 				setCmd(ratio);
 			}
-			
 		}
 	}
 }

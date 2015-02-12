@@ -1,32 +1,15 @@
 package mods.eln.transparentnode.battery;
 
-import org.lwjgl.opengl.GL11;
-
-
-
 import mods.eln.gui.GuiButtonEln;
 import mods.eln.gui.GuiContainerEln;
-import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalProgressBar;
 import mods.eln.gui.HelperStdContainer;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Utils;
-import mods.eln.node.NodeBlockEntity;
-import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiContainer;
-
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerFurnace;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.StatCollector;
 
 public class BatteryGuiDraw extends GuiContainerEln {
 
@@ -46,14 +29,14 @@ public class BatteryGuiDraw extends GuiContainerEln {
     	
     	buttonGrounded = newGuiButton(8, 45, 100, "");
     	buttonGrounded.visible = false;
-    	energyBar = newGuiVerticalProgressBar(167-16, 8, 16, 69);
+    	energyBar = newGuiVerticalProgressBar(167 - 16, 8, 16, 69);
         energyBar.setColor(0.2f, 0.5f, 0.8f);
     }
     
     @Override
     public void guiObjectEvent(IGuiObject object) {
     	super.guiObjectEvent(object);
-    	if(buttonGrounded == object) {
+    	if (buttonGrounded == object) {
     		render.clientSetGrounded(!render.grounded);
     	}
     }
@@ -79,23 +62,20 @@ public class BatteryGuiDraw extends GuiContainerEln {
     	double p = render.power;
     	double energyMiss = render.descriptor.electricalStdEnergy * render.life - render.energy;
     	
-    	if(Math.abs(p) < 5) {
+    	if (Math.abs(p) < 5) {
     		str1 = "No charge"; 
-    	}
-    	else if(p > 0) {
+    	} else if (p > 0) {
     		str1 = "Discharge"; 
     		str2 = Utils.plotTime("", render.energy / p); 
-    	}
-    	else if(energyMiss > 0) {
+    	} else if (energyMiss > 0) {
     		str1 = "Charge"; 
     		str2 = Utils.plotTime("", -energyMiss / p); 
-    	}
-    	else {
+    	} else {
     		str1 = "Charged";
     	}
     	
     	int xDelta = 70;
-    	if(render.descriptor.lifeEnable) {
+    	if (render.descriptor.lifeEnable) {
     		drawString(8, 8, "Life:");
         	drawString(xDelta, 8, Utils.plotPercent("", render.life));
     	}
@@ -103,7 +83,7 @@ public class BatteryGuiDraw extends GuiContainerEln {
         drawString(xDelta, 17,
         		Utils.plotValue(render.energy, "J/") +  Utils.plotValue(render.descriptor.electricalStdEnergy * render.life, "J"));
        
-        if(render.power >= 0)
+        if (render.power >= 0)
         	drawString(8, 26, "Power out:");
         else
         	drawString(8, 26, "Power in:");

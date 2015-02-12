@@ -2,44 +2,41 @@ package mods.eln.transparentnode.electricalmachine;
 
 import org.lwjgl.opengl.GL11;
 
-import mods.eln.client.FrameTime;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.RcInterpolator;
-import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.RecipesList;
 import mods.eln.misc.UtilsClient;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import mods.eln.transparentnode.electricalmachine.MaceratorDescriptor.MaceratorDescriptorHandle;
 import net.minecraft.entity.item.EntityItem;
 
 public class CompressorDescriptor extends ElectricalMachineDescriptor {
 
+    float tyOn, tyOff;
+
+    Obj3D obj;
+    Obj3DPart main, move;
+    
 	public CompressorDescriptor(String name, 
-			Obj3D obj,			
-			double nominalU, double nominalP,
-			double maximalU, ThermalLoadInitializer thermal,
-			ElectricalCableDescriptor cable, RecipesList recipe) {
+                                Obj3D obj, 
+                                double nominalU, double nominalP, 
+                                double maximalU, ThermalLoadInitializer thermal, 
+                                ElectricalCableDescriptor cable, RecipesList recipe) {
 		super(name, nominalU, nominalP, maximalU, thermal, cable, recipe);
 		
 		this.obj = obj;
-		if(obj != null) {
+		if (obj != null) {
 			main = obj.getPart("main");
 			move = obj.getPart("move");
-			if(move != null) {
+			if (move != null) {
 				tyOn = move.getFloat("tyon");
 				tyOff = move.getFloat("tyoff");
 			}
 		}		
 	}
-	
-	float tyOn,tyOff;
 
-	Obj3D obj;
-	Obj3DPart main, move;
-	
 	class CompressorDescriptorHandle {
 		RcInterpolator interpolator = new RcInterpolator(0.25f);
 		float itemCounter = 0f;
@@ -60,8 +57,6 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
 		main.draw();
 		GL11.glTranslatef(0f, tyOff + (float)Math.sqrt(handle.interpolator.get()) * (tyOn - tyOff), 0f);
 		move.draw();
-
-		
 	}
 	
 	@Override

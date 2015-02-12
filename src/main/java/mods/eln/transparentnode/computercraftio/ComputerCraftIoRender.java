@@ -4,7 +4,7 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
 
-public class ComputerCraftIoRender extends TransparentNodeElementRender{
+public class ComputerCraftIoRender extends TransparentNodeElementRender {
 
 	ComputerCraftIoDescriptor descriptor;
 	

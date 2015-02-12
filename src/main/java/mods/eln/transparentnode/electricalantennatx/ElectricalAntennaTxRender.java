@@ -1,11 +1,5 @@
 package mods.eln.transparentnode.electricalantennatx;
 
-import java.io.DataInputStream;
-
-import javax.management.Descriptor;
-
-import org.lwjgl.opengl.GL11;
-
 import mods.eln.Eln;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
@@ -17,9 +11,21 @@ import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
+import org.lwjgl.opengl.GL11;
+
+import java.io.DataInputStream;
 
 public class ElectricalAntennaTxRender extends TransparentNodeElementRender {
+    
 	ElectricalAntennaTxDescriptor descriptor;
+
+    LRDUMask maskTemp = new LRDUMask();
+    LRDU rot;
+
+    LRDUMask lrduConnection = new LRDUMask();
+    CableRenderType connectionType;
+    boolean cableRefresh = false;
+    
 	public ElectricalAntennaTxRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
 		this.descriptor = (ElectricalAntennaTxDescriptor) descriptor;
@@ -36,29 +42,22 @@ public class ElectricalAntennaTxRender extends TransparentNodeElementRender {
 		glCableTransforme(front.getInverse());
 		descriptor.cable.bindCableTexture();
 		
-		if(cableRefresh) {
+		if (cableRefresh) {
 			cableRefresh = false;
 			connectionType = CableRender.connectionType(tileEntity, lrduConnection, front.getInverse());
 		}
 		
-		for(LRDU lrdu : LRDU.values()) {
+		for (LRDU lrdu : LRDU.values()) {
 			Utils.setGlColorFromDye(connectionType.otherdry[lrdu.toInt()]);
-			if(lrduConnection.get(lrdu) == false) continue;
+			if (!lrduConnection.get(lrdu)) continue;
 			maskTemp.set(1<<lrdu.toInt());
-			if(lrdu == rot)
+			if (lrdu == rot)
 				CableRender.drawCable(descriptor.cable.render, maskTemp, connectionType);
-			else if(lrdu == rot.left() || lrdu == rot.right())
+			else if (lrdu == rot.left() || lrdu == rot.right())
 				CableRender.drawCable(Eln.instance.signalCableDescriptor.render, maskTemp, connectionType);
 		}
 	}
-	
-	LRDUMask maskTemp = new LRDUMask();
-	LRDU rot;
-	
-	LRDUMask lrduConnection = new LRDUMask();
-	CableRenderType connectionType;
-	boolean cableRefresh = false;
-	
+
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		super.networkUnserialize(stream);
@@ -69,11 +68,11 @@ public class ElectricalAntennaTxRender extends TransparentNodeElementRender {
 	
 	@Override
 	public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
-		if(front.getInverse() != side.applyLRDU(lrdu)) return null;
+		if (front.getInverse() != side.applyLRDU(lrdu)) return null;
 		
-		if(side == front.applyLRDU(rot)) return descriptor.cable.render;
-		if(side == front.applyLRDU(rot.left())) return Eln.instance.signalCableDescriptor.render;
-		if(side == front.applyLRDU(rot.right())) return Eln.instance.signalCableDescriptor.render;
+		if (side == front.applyLRDU(rot)) return descriptor.cable.render;
+		if (side == front.applyLRDU(rot.left())) return Eln.instance.signalCableDescriptor.render;
+		if (side == front.applyLRDU(rot.right())) return Eln.instance.signalCableDescriptor.render;
 		return null;
 	}
 	

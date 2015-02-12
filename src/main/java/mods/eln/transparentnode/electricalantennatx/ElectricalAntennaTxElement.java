@@ -13,7 +13,6 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
@@ -29,11 +28,10 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	ElectricalAntennaTxSlowProcess slowProcess = new ElectricalAntennaTxSlowProcess(this);
 	
 	NbtElectricalLoad powerIn = new NbtElectricalLoad("powerIn");
-	NbtElectricalGateInput commandIn = new NbtElectricalGateInput("commandIn",false);
+	NbtElectricalGateInput commandIn = new NbtElectricalGateInput("commandIn", false);
 	NbtElectricalGateOutput signalOut = new NbtElectricalGateOutput("signalOut");
 	NbtElectricalGateOutputProcess signalOutProcess = new NbtElectricalGateOutputProcess("signalOutProcess", signalOut);
-	
-	
+    
 	NbtResistor powerResistor = new NbtResistor("powerResistor",powerIn, null);
 	ElectricalAntennaTxElectricalProcess electricalProcess = new ElectricalAntennaTxElectricalProcess(this);
 	
@@ -42,6 +40,11 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	boolean placeBoot = true;
 	
 	ElectricalAntennaTxDescriptor descriptor;
+
+    Coordonate rxCoord = null;
+    ElectricalAntennaRxElement rxElement = null;
+    double powerEfficency = 0.0;
+    
 	public ElectricalAntennaTxElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		powerIn.setAsPrivate();
@@ -57,24 +60,20 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 		
 		this.descriptor = (ElectricalAntennaTxDescriptor) descriptor;
 	}
-	
-	Coordonate rxCoord = null;
-	ElectricalAntennaRxElement rxElement = null;
-	double powerEfficency = 0.0;
 
 	public void txDisconnect() {
 		ElectricalAntennaRxElement rx = getRxElement();
 		
-		if(rx != null) rx.rxDisconnect();
+		if (rx != null) rx.rxDisconnect();
 		rxCoord = null;
 		rxElement = null;
 	}
 	
 	ElectricalAntennaRxElement getRxElement() {
-		if(rxCoord == null) return null;
-		if(rxElement == null) {
+		if (rxCoord == null) return null;
+		if (rxElement == null) {
 			NodeBase node = NodeManager.instance.getNodeFromCoordonate(rxCoord);
-			if(node != null && node instanceof TransparentNode && ((TransparentNode)node).element instanceof ElectricalAntennaRxElement)
+			if (node != null && node instanceof TransparentNode && ((TransparentNode)node).element instanceof ElectricalAntennaRxElement)
 				rxElement = (ElectricalAntennaRxElement) ((TransparentNode)node).element;
 			else {
 				rxCoord = null;
@@ -86,11 +85,11 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		if(front.getInverse() != side.applyLRDU(lrdu)) return null;
+		if (front.getInverse() != side.applyLRDU(lrdu)) return null;
 		
-		if(side == front.applyLRDU(rot)) return powerIn;
-		if(side == front.applyLRDU(rot.left())) return signalOut;
-		if(side == front.applyLRDU(rot.right())) return commandIn;
+		if (side == front.applyLRDU(rot)) return powerIn;
+		if (side == front.applyLRDU(rot.left())) return signalOut;
+		if (side == front.applyLRDU(rot.right())) return commandIn;
 		return null;
 	}
 
@@ -101,11 +100,11 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		if(front.getInverse() != side.applyLRDU(lrdu)) return 0;
+		if (front.getInverse() != side.applyLRDU(lrdu)) return 0;
 		
-		if(side == front.applyLRDU(rot)) return NodeBase.maskElectricalPower;
-		if(side == front.applyLRDU(rot.left())) return NodeBase.maskElectricalOutputGate;
-		if(side == front.applyLRDU(rot.right())) return NodeBase.maskElectricalInputGate;
+		if (side == front.applyLRDU(rot)) return NodeBase.maskElectricalPower;
+		if (side == front.applyLRDU(rot.left())) return NodeBase.maskElectricalOutputGate;
+		if (side == front.applyLRDU(rot.right())) return NodeBase.maskElectricalInputGate;
 		return 0;
 	}
 
@@ -121,7 +120,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 
 	void calculatePowerInRp() {
 		double cmd = commandIn.getNormalized();
-		if(cmd == 0.0)
+		if (cmd == 0.0)
 			powerResistor.setR(MnaConst.highImpedance);
 		else
 			powerResistor.setR(descriptor.electricalNominalInputR / cmd);
@@ -135,9 +134,8 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	}
 
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-			float vx, float vy, float vz) {
-		if(Utils.isPlayerUsingWrench(entityPlayer)) {
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+		if (Utils.isPlayerUsingWrench(entityPlayer)) {
 			rot = rot.getNextClockwise();
 			node.reconnect();
 			return true;	
@@ -148,7 +146,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
-		if(nbt.getBoolean("rxCoordValid") == true) {
+		if (nbt.getBoolean("rxCoordValid")) {
 			rxCoord = new Coordonate();
 			rxCoord.readFromNBT(nbt, "rxCoord");
 		}
@@ -159,7 +157,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
-		if(rxCoord == null)
+		if (rxCoord == null)
 			nbt.setBoolean("rxCoordValid", false);
 		else {
 			nbt.setBoolean("rxCoordValid", true);

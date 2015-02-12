@@ -41,13 +41,18 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 	double boosterEfficiency = 1.0 / 1.1;
 	double boosterSpeedUp = 1.25 / boosterEfficiency;
 
-	public ElectricalMachineDescriptor(
-			String name,
-			double nominalU, double nominalP,
-			double maximalU,
-			ThermalLoadInitializer thermal,
-			ElectricalCableDescriptor cable,
-			RecipesList recipe) {
+    SoundCommand runingSound, endSound;
+
+    double maximalU;
+
+    Object defaultHandle = null;
+
+    public ElectricalMachineDescriptor(String name, 
+                                       double nominalU, double nominalP, 
+                                       double maximalU, 
+                                       ThermalLoadInitializer thermal, 
+                                       ElectricalCableDescriptor cable, 
+                                       RecipesList recipe) {
 		super(name, ElectricalMachineElement.class, ElectricalMachineRender.class);
 		
 		outStackCount = 4;
@@ -60,19 +65,18 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 	//	this.maximalP = nominalP*3;
 		//thermal.setMaximalPower(maximalP);
 		this.recipe = recipe;
-		
 	}
-
-	SoundCommand runingSound, endSound;
-
+    
 	public ElectricalMachineDescriptor setRuningSound(SoundCommand runingSound) {
 		this.runingSound = runingSound;
 		return this;
 	}
+    
 	@Override
 	public boolean use2DIcon() {
 		return false;
 	}
+    
 	public ElectricalMachineDescriptor setEndSound(SoundCommand endSound) {
 		this.endSound = endSound;
 		return this;
@@ -84,9 +88,7 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 		recipe.addMachine(newItemStack(1));
 		Data.addMachine(newItemStack(1));
 	}
-
-	double maximalU;
-
+    
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
@@ -114,13 +116,10 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 		return null;
 	}
 
-	Object defaultHandle = null;
-
 	void draw(ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity, float powerFactor, float processState) {
 	}
 
 	void refresh(float deltaT, ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity, float powerFactor, float processState) {
-
 	}
 
 	public boolean powerLrdu(Direction side, Direction front) {
@@ -158,13 +157,11 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 
 	@Override
 	public int top(int y, GuiVerticalExtender extender, ItemStack stack) {
-		
 		return y;
 	}
 
 	@Override
 	public int bottom(int y, GuiVerticalExtender extender, ItemStack stack) {
-
 		int counter = -1;
 
 		extender.add(new GuiLabel(6, y, "Can create:"));

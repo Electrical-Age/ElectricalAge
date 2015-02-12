@@ -18,13 +18,20 @@ import org.lwjgl.opengl.GL11;
 
 public class ElectricalAntennaRxRender extends TransparentNodeElementRender {
 
-	public ElectricalAntennaRxRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
+    ElectricalAntennaRxDescriptor descriptor;
+
+    LRDUMask maskTemp = new LRDUMask();
+    LRDU rot;
+
+    LRDUMask lrduConnection = new LRDUMask();
+    CableRenderType connectionType;
+    boolean cableRefresh = false;
+
+    public ElectricalAntennaRxRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
 		this.descriptor = (ElectricalAntennaRxDescriptor) descriptor;
 	}
 	
-	ElectricalAntennaRxDescriptor descriptor;
-
 	@Override
 	public void draw() {
 		GL11.glPushMatrix();
@@ -36,28 +43,21 @@ public class ElectricalAntennaRxRender extends TransparentNodeElementRender {
 		glCableTransforme(front.getInverse());
 		descriptor.cable.bindCableTexture();
 		
-		if(cableRefresh) {
+		if (cableRefresh) {
 			cableRefresh = false;
 			connectionType = CableRender.connectionType(tileEntity, lrduConnection, front.getInverse());
 		}
 		
-		for(LRDU lrdu : LRDU.values()) {
+		for (LRDU lrdu : LRDU.values()) {
 			Utils.setGlColorFromDye(connectionType.otherdry[lrdu.toInt()]);
-			if(lrduConnection.get(lrdu) == false) continue;
+			if (!lrduConnection.get(lrdu)) continue;
 			maskTemp.set(1<<lrdu.toInt());
 			
 			Direction side = front.getInverse().applyLRDU(lrdu);
 			CableRender.drawCable(getCableRender(side, side.getLRDUGoingTo(front.getInverse())), maskTemp, connectionType);
 		}
 	}
-	
-	LRDUMask maskTemp = new LRDUMask();
-	LRDU rot;
-	
-	LRDUMask lrduConnection = new LRDUMask();
-	CableRenderType connectionType;
-	boolean cableRefresh = false;
-	
+
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
 		super.networkUnserialize(stream);
@@ -68,10 +68,10 @@ public class ElectricalAntennaRxRender extends TransparentNodeElementRender {
 	
 	@Override
 	public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
-		if(front.getInverse() != side.applyLRDU(lrdu)) return null;
+		if (front.getInverse() != side.applyLRDU(lrdu)) return null;
 		
-		if(side == front.applyLRDU(rot.left())) return descriptor.cable.render;
-		if(side == front.applyLRDU(rot.right())) return Eln.instance.signalCableDescriptor.render;
+		if (side == front.applyLRDU(rot.left())) return descriptor.cable.render;
+		if (side == front.applyLRDU(rot.right())) return Eln.instance.signalCableDescriptor.render;
 		return null;
 	}
 	

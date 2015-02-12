@@ -1,6 +1,5 @@
 package mods.eln.transparentnode.battery;
 
-import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.OverHeatingProtectionDescriptor;
