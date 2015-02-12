@@ -22,7 +22,7 @@ group= "com.Miaou.Eln" // http://maven.apache.org/guides/mini/guide-naming-conve
 archivesBaseName = "ElectricalAge_BETA"
 
 minecraft {
-    version = "1.7.10-10.13.2.1240"
+    version = "1.7.10-10.13.2.1291"
     runDir = "eclipse"
 	assetDir = "eclipse/assets"
 	
