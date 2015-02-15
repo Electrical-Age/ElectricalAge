@@ -47,8 +47,7 @@ jar {
 	exclude(['dan200/**','ic2/**','li/**','buildcraft/**'])
 }
 
-processResources
-{
+processResources {
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
@@ -66,7 +65,6 @@ processResources
         exclude 'mcmod.info'
     }
 	
-	
 	from('src/main/java'){
 		exclude '**/*.java' 
 		exclude '**/*.blend' 
@@ -76,7 +74,8 @@ processResources
 		exclude '**/*.wav' 
 		exclude '**/*.m_p' 
 		exclude '**/*.ai' 
-	//from('src/main/libzip'){
 	}
-	//}
 }
+
+// Resource and asset folder path for IntelliJ
+sourceSets { main { output.resourcesDir = output.classesDir } }

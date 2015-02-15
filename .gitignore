@@ -3,4 +3,9 @@
 bin
 build
 eclipse
+
+# IntelliJ
 .idea
+*.iml
+*.ipr
+*.iws
