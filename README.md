@@ -26,7 +26,7 @@ Small and big electrical consumers
 Incredible tools
 > XRay scanner, flashlight, portable mining drill...
 
-Generosity
+Generality
 > Old redstone circuits can be exploited with electrical <-> redstone converters.
 	
 Game lifetime/complexity extended
