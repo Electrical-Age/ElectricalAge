@@ -1,10 +1,15 @@
 package mods.eln;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
+import cpw.mods.fml.common.*;
+import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.Mod.Instance;
+import cpw.mods.fml.common.event.*;
+import cpw.mods.fml.common.network.FMLEventChannel;
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.registry.EntityRegistry;
+import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.registry.LanguageRegistry;
+import cpw.mods.fml.relauncher.Side;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
@@ -12,86 +17,32 @@ import mods.eln.entity.ReplicatorEntity;
 import mods.eln.entity.ReplicatorPopProcess;
 import mods.eln.eventhandlers.ElnFMLEventsHandler;
 import mods.eln.eventhandlers.ElnForgeEventsHandler;
-import mods.eln.generic.GenericCreativeTab;
-import mods.eln.generic.GenericItemUsingDamageDescriptor;
-import mods.eln.generic.GenericItemUsingDamageDescriptorWithComment;
-import mods.eln.generic.SharedItem;
-import mods.eln.generic.genericArmorItem;
+import mods.eln.generic.*;
 import mods.eln.generic.genericArmorItem.ArmourType;
 import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
-import mods.eln.item.BrushDescriptor;
-import mods.eln.item.CombustionChamber;
-import mods.eln.item.CopperCableDescriptor;
-import mods.eln.item.DielectricItem;
-import mods.eln.item.ElectricalDrillDescriptor;
-import mods.eln.item.EntitySensorFilterDescriptor;
-import mods.eln.item.FerromagneticCoreDescriptor;
-import mods.eln.item.HeatingCorpElement;
-import mods.eln.item.ItemAxeEln;
-import mods.eln.item.ItemPickaxeEln;
-import mods.eln.item.LampDescriptor;
-import mods.eln.item.MachineBoosterDescriptor;
-import mods.eln.item.MiningPipeDescriptor;
-import mods.eln.item.OreScanner;
-import mods.eln.item.OverHeatingProtectionDescriptor;
-import mods.eln.item.OverVoltageProtectionDescriptor;
-import mods.eln.item.SolarTrackerDescriptor;
-import mods.eln.item.TreeResin;
+import mods.eln.item.*;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
-import mods.eln.item.electricalitem.BatteryItem;
-import mods.eln.item.electricalitem.ElectricalArmor;
-import mods.eln.item.electricalitem.ElectricalAxe;
-import mods.eln.item.electricalitem.ElectricalLampItem;
-import mods.eln.item.electricalitem.ElectricalPickaxe;
-import mods.eln.item.electricalitem.PortableOreScannerItem;
+import mods.eln.item.electricalitem.*;
 import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage.OreScannerConfigElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.FunctionTable;
-import mods.eln.misc.FunctionTableYProtect;
-import mods.eln.misc.I18N;
-import mods.eln.misc.IConfigSharing;
-import mods.eln.misc.IFunction;
-import mods.eln.misc.LiveDataManager;
-import mods.eln.misc.Obj3DFolder;
-import mods.eln.misc.Recipe;
-import mods.eln.misc.RecipesList;
-import mods.eln.misc.Utils;
-import mods.eln.misc.Version;
-import mods.eln.misc.WindProcess;
+import mods.eln.misc.*;
 import mods.eln.misc.series.SerieEE;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
 import mods.eln.node.NodeManagerNbt;
 import mods.eln.node.NodeServer;
 import mods.eln.node.simple.SimpleNodeItem;
-import mods.eln.node.six.SixNode;
-import mods.eln.node.six.SixNodeBlock;
-import mods.eln.node.six.SixNodeCacheStd;
-import mods.eln.node.six.SixNodeDescriptor;
-import mods.eln.node.six.SixNodeEntity;
-import mods.eln.node.six.SixNodeItem;
-import mods.eln.node.transparent.TransparentNode;
-import mods.eln.node.transparent.TransparentNodeBlock;
-import mods.eln.node.transparent.TransparentNodeDescriptor;
-import mods.eln.node.transparent.TransparentNodeEntity;
-import mods.eln.node.transparent.TransparentNodeItem;
+import mods.eln.node.six.*;
+import mods.eln.node.transparent.*;
 import mods.eln.ore.OreBlock;
 import mods.eln.ore.OreDescriptor;
 import mods.eln.ore.OreItem;
-import mods.eln.server.ConsoleListener;
-import mods.eln.server.DelayedBlockRemove;
-import mods.eln.server.DelayedTaskManager;
-import mods.eln.server.OreRegenerate;
-import mods.eln.server.PlayerManager;
-import mods.eln.server.SaveConfig;
-import mods.eln.server.ServerEventListener;
+import mods.eln.server.*;
 import mods.eln.signalinductor.SignalInductorDescriptor;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoadInitializer;
@@ -137,12 +88,7 @@ import mods.eln.sixnode.electricasensor.ElectricalSensorDescriptor;
 import mods.eln.sixnode.energymeter.EnergyMeterDescriptor;
 import mods.eln.sixnode.groundcable.GroundCableDescriptor;
 import mods.eln.sixnode.hub.HubDescriptor;
-import mods.eln.sixnode.lampsocket.LampSocketDescriptor;
-import mods.eln.sixnode.lampsocket.LampSocketStandardObjRender;
-import mods.eln.sixnode.lampsocket.LampSocketSuspendedObjRender;
-import mods.eln.sixnode.lampsocket.LampSocketType;
-import mods.eln.sixnode.lampsocket.LightBlock;
-import mods.eln.sixnode.lampsocket.LightBlockEntity;
+import mods.eln.sixnode.lampsocket.*;
 import mods.eln.sixnode.lampsupply.LampSupplyDescriptor;
 import mods.eln.sixnode.lampsupply.LampSupplyElement;
 import mods.eln.sixnode.modbusrtu.ModbusRtuDescriptor;
@@ -198,14 +144,9 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
+import net.minecraft.item.*;
 import net.minecraft.item.Item.ToolMaterial;
-import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemArmor.ArmorMaterial;
-import net.minecraft.item.ItemHoe;
-import net.minecraft.item.ItemSpade;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.server.MinecraftServer;
@@ -213,29 +154,13 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.ModContainer;
-import cpw.mods.fml.common.ModMetadata;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;
-import cpw.mods.fml.common.event.FMLServerStartedEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.event.FMLServerStoppedEvent;
-import cpw.mods.fml.common.network.FMLEventChannel;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.registry.EntityRegistry;
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.LanguageRegistry;
-import cpw.mods.fml.relauncher.Side;
+
+import java.util.*;
+import java.util.logging.Logger;
 
 @Mod(modid = Eln.MODID, name = Eln.NAME, version = Version.REVISION)
 // @Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0b")
@@ -251,7 +176,7 @@ public class Eln {
 
 	public static String channelName = "miaouMod";
 	public ArrayList<IConfigSharing> configShared = new ArrayList<IConfigSharing>();
-	
+
 	public static final String[] objNames = new String[] {
 			"/model/PowerElectricPrimitives/PowerElectricPrimitives.obj",
 			"/model/EnergyMeter/EnergyMeter.obj",
@@ -431,8 +356,12 @@ public class Eln {
 	boolean xRayScannerCanBeCrafted = true;
 	public boolean forceOreRegen;
 	public boolean explosionEnable;
-	public static boolean debugEnable = false, versionCheckEnable = true;
-	
+
+	public static boolean debugEnabled = false;  // Read from configuration file. Default is `false`.
+    public static boolean versionCheckEnabled = true; // Read from configuration file. Default is `true`.
+    public static boolean analyticsEnabled = true; // Read from configuration file. Default is `true`.
+	public static String playerUUID = null; // Read from configuration file. Default is `null`.
+
 	public double heatTurbinePowerFactor = 1;
 	public double solarPannelPowerFactor = 1;
 	public double windTurbinePowerFactor = 1;
@@ -473,13 +402,23 @@ public class Eln {
 		config.load();
 
 		modbusEnable = config.get("modbus", "enable", false).getBoolean(false);
-		debugEnable = config.get("debug", "enable", false).getBoolean(false);
-		
+		debugEnabled = config.get("debug", "enable", false).getBoolean(false);
+
 		explosionEnable = config.get("gameplay", "explosion", true).getBoolean(true);
-		
+
 		//explosionEnable = false;
-		versionCheckEnable = config.get("general", "versionCheckEnable", true).getBoolean(true);
-		
+		versionCheckEnabled = config.get("general", "versionCheckEnable", true).getBoolean(true);
+        analyticsEnabled = config.get("general", "analyticsEnable", true).getBoolean(true);
+
+        if(analyticsEnabled) {
+            final Property p = config.get("general", "playerUUID", "");
+            if (p.getString().length() == 0) {
+                playerUUID = UUID.randomUUID().toString();
+                p.set(playerUUID);
+            } else
+                playerUUID = p.getString();
+        }
+
 		heatTurbinePowerFactor = config.get("balancing", "heatTurbinePowerFactor", 1).getDouble(1);
 		solarPannelPowerFactor = config.get("balancing", "solarPannelPowerFactor", 1).getDouble(1);
 		windTurbinePowerFactor = config.get("balancing", "windTurbinePowerFactor", 1).getDouble(1);
@@ -524,15 +463,15 @@ public class Eln {
 		xRayScannerRange = Math.max(Math.min(xRayScannerRange, 10), 4);
 		xRayScannerCanBeCrafted = config.get("xrayscannerconfig", "canBeCrafted", true).getBoolean(true);
 
-		
-		
+
+
 		electricalFrequancy = config.get("simulation", "electricalFrequancy", 20).getDouble(20);
 		electricalInterSystemOverSampling = config.get("simulation", "electricalInterSystemOverSampling", 50).getInt(50);
 		thermalFrequancy = config.get("simulation", "thermalFrequancy", 400).getDouble(400);
 
 		config.save();
 
-		
+
 		Object o;
 
 		//computerCraftReady = Utils.isClassLoaded("dan200.computercraft.ComputerCraft");
@@ -544,7 +483,7 @@ public class Eln {
 		nodeManager = new NodeManager("caca");
 		ghostManager = new GhostManager("caca2");
 		delayedTask = new DelayedTaskManager();
-		
+
 		playerManager = new PlayerManager();
 		//tileEntityDestructor = new TileEntityDestructor();
 
@@ -612,7 +551,7 @@ public class Eln {
 
 		oreItem = (OreItem) Item.getItemFromBlock(oreBlock);
 		/*
-		 * 
+		 *
 		 * int id = 0,subId = 0,completId; String name;
 		 */
 
@@ -748,7 +687,7 @@ public class Eln {
 		recipeThermalSensor();
 		recipeSixNodeMisc();
 
-		
+
 		recipeTurret();
 		recipeMachine();
 		recipeTransformer();
@@ -881,18 +820,18 @@ public class Eln {
 		}
 	}
 
-	
+
 	ComputerProbeBlock computerProbeBlock;
-	
+
 	private void registerComputer(){
 		if(ComputerProbeEnable){
 			String baseName = "ElnProbe";
 			String entityName = "eln.ElnProbe";
-	
+
 			TileEntity.addMapping(ComputerProbeEntity.class, entityName);
 			NodeManager.instance.registerUuid(ComputerProbeNode.getNodeUuidStatic(), ComputerProbeNode.class);
-	
-			
+
+
 			String blockName = "eln." + baseName;
 			String name = "Eln Computer Probe";
 			computerProbeBlock = new ComputerProbeBlock();
@@ -900,15 +839,15 @@ public class Eln {
 			GameRegistry.registerBlock(computerProbeBlock,SimpleNodeItem.class, blockName);
 			LanguageRegistry.addName(computerProbeBlock, name);
 		}
-		
+
 	}
-	
+
 	TestBlock testBlock;
 
 	private void registerTestBlock() {
 		/*
 		 * testBlock = new TestBlock(); testBlock.setCreativeTab(creativeTab).setBlockName("TestBlock"); GameRegistry.registerBlock(testBlock, "Eln.TestBlock"); TileEntity.addMapping(TestEntity.class, "Eln.TestEntity"); LanguageRegistry.addName(testBlock,"Test Block"); NodeManager.instance.registerUuid(TestNode.getInfoStatic().getUuid(), TestNode.class);
-		 * 
+		 *
 		 * GameRegistry.registerCustomItemStack("Test Block", new ItemStack(testBlock));
 		 */
 	}
@@ -970,8 +909,8 @@ public class Eln {
 
 	/*
 	 * @EventHandler public void clientStart(Client event) {
-	 * 
-	 * 
+	 *
+	 *
 	 * }
 	 */
 
@@ -993,12 +932,12 @@ public class Eln {
 		saveConfig = null;
 		modbusServer = null;
 		oreRegenerate.clear();
-		
-		
-		
+
+
+
 		delayedTask.clear();
 		DelayedBlockRemove.clear();
-		
+
 		serverEventListener.clear();
 
 
@@ -1009,7 +948,7 @@ public class Eln {
 		//tileEntityDestructor.clear();
 		LampSupplyElement.channelMap.clear();
 		WirelessSignalTxElement.channelMap.clear();
-		
+
 	}
 
 	//public TileEntityDestructor tileEntityDestructor;
@@ -1018,14 +957,14 @@ public class Eln {
 
 	boolean firstStart = true;
 
-	
+
 	@EventHandler
 	/* Remember to use the right event! */
 	public void onServerStarted(FMLServerStartedEvent ev) {
 		int i = 0;
 		i++;
 	}
-	
+
 	@EventHandler
 	public void onServerStart(FMLServerAboutToStartEvent ev) {
 		modbusServer = new ModbusServer();
@@ -1038,13 +977,13 @@ public class Eln {
 		clientLiveDataManager.start();
 		simulator.init();
 		simulator.addSlowProcess(wind = new WindProcess());
-		
-		
+
+
 		if (replicatorPop)
 			simulator.addSlowProcess(new ReplicatorPopProcess());
 		simulator.addSlowProcess(itemEnergyInventoryProcess = new ItemEnergyInventoryProcess());
 	}
-	
+
 	@EventHandler
 	/* Remember to use the right event! */
 	public void onServerStarting(FMLServerStartingEvent ev) {
@@ -1059,8 +998,8 @@ public class Eln {
 			MinecraftServer server = FMLCommonHandler.instance()
 					.getMinecraftServerInstance();
 			WorldServer worldServer = server.worldServers[0];
-			
-			
+
+
 
 			ghostManagerNbt = (GhostManagerNbt) worldServer.mapStorage.loadData(
 					GhostManagerNbt.class, "GhostManager");
@@ -1266,9 +1205,9 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 
 		}
-		
-		
-		
+
+
+
 		{
 			subId = 16;
 
@@ -1356,9 +1295,9 @@ public class Eln {
 				1.5 };
 		FunctionTable condoVoltageFunction = new FunctionTable(condoVoltageFunctionTable,
 				6.0 / 5);
-		
+
 		Utils.printFunction(voltageFunction,-0.2,1.2,0.1);
-		
+
 		double stdDischargeTime = 4 * 60;
 		double stdU = LVU;
 		double stdP = LVP / 4;
@@ -1616,7 +1555,7 @@ public class Eln {
 											// socketType
 					3, 0, 0, 0);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
-		}		
+		}
 		{
 			subId = 6;
 
@@ -1639,8 +1578,8 @@ public class Eln {
 											// socketType
 					4, 0, 0, 0);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
-			
-			
+
+
 			desc.cableLeft = false;
 			desc.cableRight = false;
 		}		{
@@ -1854,7 +1793,7 @@ public class Eln {
 		IFunction function;
 		ElectricalSwitchDescriptor desc;
 
-		
+
 		{
 			subId = 4;
 
@@ -1869,7 +1808,7 @@ public class Eln {
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
-		
+
 		{
 			subId = 0;
 
@@ -2508,9 +2447,9 @@ public class Eln {
 
 	/*
 	 * void registerIntelligentTransformer(int id) { int subId, completId; String name; { subId = 0; name = "Intelligent Transformer";
-	 * 
+	 *
 	 * TransparentNodeDescriptor desc = new TransparentNodeDescriptor( name, IntelligentTransformerElement.class, IntelligentTransformerRender.class); transparentNodeItem.addDescriptor(subId + (id << 6), desc); }
-	 * 
+	 *
 	 * }
 	 */
 	public ArrayList<ItemStack> furnaceList = new ArrayList<ItemStack>();
@@ -2711,7 +2650,7 @@ public class Eln {
 					magnetiserRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-			
+
 			desc.setRuningSound(new SoundCommand("eln:Motor", 1.6).mulVolume(0.3));
 		}
 
@@ -2730,7 +2669,7 @@ public class Eln {
 					magnetiserRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-			
+
 			desc.setRuningSound(new SoundCommand("eln:Motor", 1.6).mulVolume(0.3));
 		}
 	}
@@ -3877,22 +3816,22 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
-	
+
 	/*
 	 * void registerMppt(int id) { int subId, completId; String name; MpptDescriptor desc;
-	 * 
+	 *
 	 * FunctionTable PoutfPin = new FunctionTable(new double[] { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.08, 1.15, 1.21, 1.26, 1.29 }, 1.5);
-	 * 
+	 *
 	 * { subId = 0; name = "Basic Maximum Power Point Tracker";
-	 * 
+	 *
 	 * desc = new MpptDescriptor(name, -1, LVU * 1.3,// double // inUmin,double // inUmax, 10, LVU * 1.19,// double outUmin,double outUmax,
-	 * 
+	 *
 	 * 500,// double designedPout, PoutfPin,// FunctionTable PoutfPin, 0.01,// electricalLoadDropFactor
-	 * 
+	 *
 	 * 6.0, 0.1,// double inResistorLowHighTime,double // inResistorNormalTime, 0.05,// double inResistorStepFactor, 1.0, 50.0// double inResistorMin,double inResistorMax
-	 * 
+	 *
 	 * );
-	 * 
+	 *
 	 * transparentNodeItem.addDescriptor(subId + (id << 6), desc); } }
 	 */
 	void registerElectricalAntenna(int id) {
@@ -4698,7 +4637,7 @@ public class Eln {
 				Character.valueOf('C'), "ingotCopper",
 				Character.valueOf('R'), "itemRubber");
 
-		
+
 		addRecipe(veryHighVoltageCableDescriptor.newItemStack(6),
 				"RRR",
 				"CCC",
@@ -4762,13 +4701,13 @@ public class Eln {
 				"GGG",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
-		
+
 		addRecipe(findItemStack("Fluorescent Lamp Socket", 3),
 				" I ",
 				"I I",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
-		
+
 
 		addRecipe(findItemStack("Suspended Lamp Socket", 2),
 				"I",
@@ -4819,14 +4758,14 @@ public class Eln {
 				"D",
 				Character.valueOf('D'), findItemStack("10A Diode"));
 
-		
+
 		addRecipe(findItemStack("Power Capacitor"),
 				"cPc",
 				"III",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('c'), findItemStack("Iron Cable"),
 				Character.valueOf('P'), "plateIron");
-		
+
 		addRecipe(findItemStack("Power Inductor"),
 				" P ",
 				"cIc",
@@ -4834,16 +4773,16 @@ public class Eln {
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('P'), "plateIron");
-		
+
 		//name = "Power Capacitor"
 		//name = "Power Inductor"
-		
+
 	}
 
 	void recipeSwitch() {
 		/*
 		 * addRecipe(findItemStack("Signal Switch"), "  I", " I ", "CAC", Character.valueOf('R'), new ItemStack(Items.redstone), Character.valueOf('A'), "itemRubber", Character.valueOf('I'), findItemStack("Copper Cable"), Character.valueOf('C'), findItemStack("Signal Cable"));
-		 * 
+		 *
 		 * addRecipe(findItemStack("Signal Switch with LED"), " RI", " I ", "CAC", Character.valueOf('R'), new ItemStack(Items.redstone), Character.valueOf('A'), "itemRubber", Character.valueOf('I'), findItemStack("Copper Cable"), Character.valueOf('C'), findItemStack("Signal Cable"));
 		 */
 
@@ -4919,7 +4858,7 @@ public class Eln {
 				Character.valueOf('A'), "itemRubber",
 				Character.valueOf('I'), findItemStack("Copper Cable"),
 				Character.valueOf('C'), findItemStack("High Voltage Cable"));
-		
+
 		addRecipe(findItemStack("Very High Voltage Relay"),
 				"GGG",
 				"OIO",
@@ -5092,8 +5031,8 @@ public class Eln {
 				"I I",
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
-		
-		
+
+
 		addRecipe(findItemStack("Energy Meter"),
 				"IcI",
 				"IRI",
@@ -5101,7 +5040,7 @@ public class Eln {
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('R'), findItemStack("Cheap Chip"),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
-		
+
 		addRecipe(findItemStack("Advanced Energy Meter"),
 				" c ",
 				"PRP",
@@ -5109,7 +5048,7 @@ public class Eln {
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('R'), findItemStack("Advanced Chip"),
 				Character.valueOf('P'), findItemStack("Iron Plate"));
-				
+
 	}
 
 	void recipeAutoMiner() {
@@ -5611,11 +5550,11 @@ public class Eln {
 		addRecipe(findItemStack("Tree Resin Collector"),
 				"W W",
 				"WW ", Character.valueOf('W'), "plankWood");
-		
+
 		addRecipe(findItemStack("Tree Resin Collector"),
 				"W W",
 				" WW", Character.valueOf('W'), "plankWood");
-		
+
 	}
 
 	void recipeRawCable() {
@@ -5992,9 +5931,9 @@ public class Eln {
 				Character.valueOf('R'), findItemStack("Advanced Chip"));
 	}
 
-	
+
 	void recipeTurret(){
-		
+
 		addRecipe(findItemStack("800V Defence turret", 1),
 				" R ",
 				"CMC",
@@ -6003,7 +5942,7 @@ public class Eln {
 				Character.valueOf('C'), findItemStack("Advanced Chip"),
 				Character.valueOf('c'), highVoltageCableDescriptor.newItemStack(),
 				Character.valueOf('R'), new ItemStack(Blocks.redstone_block));
-		
+
 	}
 	void recipeMachine() {
 		addRecipe(findItemStack("50V Macerator", 1),
@@ -6398,7 +6337,7 @@ public class Eln {
 
 		}
 	}
-	
+
 	void recipeComputerProbe(){
 		if(ComputerProbeEnable){
 			addRecipe(new ItemStack(computerProbeBlock),
@@ -6409,7 +6348,7 @@ public class Eln {
 					Character.valueOf('c'), findItemStack("Signal Cable"),
 					Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 					Character.valueOf('w'), findItemStack("Wireless Signal Receiver"),
-					Character.valueOf('W'), findItemStack("Wireless Signal Transmitter"));			
+					Character.valueOf('W'), findItemStack("Wireless Signal Transmitter"));
 		}
 	}
 
@@ -6556,7 +6495,7 @@ public class Eln {
 		instance.lowVoltageCableDescriptor.applyTo(aLoad);
 	}
 	public static void applySmallRs(Resistor r) {
-		instance.lowVoltageCableDescriptor.applyTo(r);	
+		instance.lowVoltageCableDescriptor.applyTo(r);
 	}
 	public static ItemStack findItemStack(String name, int stackSize) {
 		ItemStack stack = GameRegistry.findItemStack("Eln", name, stackSize);

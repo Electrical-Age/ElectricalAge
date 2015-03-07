@@ -80,25 +80,25 @@ public class Utils {
 	}
 
 	public static void println(String str) {
-		if (!Eln.debugEnable)
+		if (!Eln.debugEnabled)
 			return;
 		System.out.println(str);
 	}
 
 	public static void println(Object str) {
-		if (!Eln.debugEnable)
+		if (!Eln.debugEnabled)
 			return;
 		System.out.println(str.toString());
 	}
 
 	public static void print(String str) {
-		if (!Eln.debugEnable)
+		if (!Eln.debugEnabled)
 			return;
 		System.out.print(str);
 	}
 
 	public static void print(Object str) {
-		if (!Eln.debugEnable)
+		if (!Eln.debugEnabled)
 			return;
 		System.out.print(str.toString());
 	}

@@ -1,5 +1,8 @@
 package mods.eln.client;
 
+import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.client.registry.RenderingRegistry;
+import cpw.mods.fml.common.FMLCommonHandler;
 import mods.eln.CommonProxy;
 import mods.eln.Eln;
 import mods.eln.entity.ReplicatorEntity;
@@ -13,43 +16,38 @@ import mods.eln.sound.SoundClientEventListener;
 import net.minecraft.client.model.ModelSilverfish;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.common.FMLCommonHandler;
-//import mods.eln.entity.ReplicatorEntity;
-//import mods.eln.entity.ReplicatorModel;
-//import mods.eln.entity.ReplicatorRender;
-//import mods.eln.tutorialsign.TutorialSignOverlay;
 
 public class ClientProxy extends CommonProxy {
 
-	public static UuidManager uuidManager;
-	public static SoundClientEventListener soundClientEventListener;
+    public static UuidManager uuidManager;
+    public static SoundClientEventListener soundClientEventListener;
 
-	@Override
-	public void registerRenderers() {
-		new ClientPacketHandler();
-		ClientRegistry.bindTileEntitySpecialRenderer(SixNodeEntity.class, new SixNodeRender());
-		ClientRegistry.bindTileEntitySpecialRenderer(TransparentNodeEntity.class, new TransparentNodeRender());
-       	
-      	MinecraftForgeClient.registerItemRenderer(Eln.transparentNodeItem, Eln.transparentNodeItem);
-      	MinecraftForgeClient.registerItemRenderer(Eln.sixNodeItem, Eln.sixNodeItem);
-      	MinecraftForgeClient.registerItemRenderer(Eln.sharedItem, Eln.sharedItem);
-      	MinecraftForgeClient.registerItemRenderer(Eln.sharedItemStackOne, Eln.sharedItemStackOne);
+    @Override
+    public void registerRenderers() {
+        new ClientPacketHandler();
+        ClientRegistry.bindTileEntitySpecialRenderer(SixNodeEntity.class, new SixNodeRender());
+        ClientRegistry.bindTileEntitySpecialRenderer(TransparentNodeEntity.class, new TransparentNodeRender());
 
-       	RenderingRegistry.registerEntityRenderingHandler(ReplicatorEntity.class, new ReplicatorRender(new ModelSilverfish(), (float) 0.3));
-      	      	    	
-		Eln.clientKeyHandler = new ClientKeyHandler();
-		FMLCommonHandler.instance().bus().register(Eln.clientKeyHandler);
-		MinecraftForge.EVENT_BUS.register(new TutorialSignOverlay());
-		uuidManager = new UuidManager();
-		soundClientEventListener = new SoundClientEventListener(uuidManager);
+        MinecraftForgeClient.registerItemRenderer(Eln.transparentNodeItem, Eln.transparentNodeItem);
+        MinecraftForgeClient.registerItemRenderer(Eln.sixNodeItem, Eln.sixNodeItem);
+        MinecraftForgeClient.registerItemRenderer(Eln.sharedItem, Eln.sharedItem);
+        MinecraftForgeClient.registerItemRenderer(Eln.sharedItemStackOne, Eln.sharedItemStackOne);
 
-		if(Eln.debugEnable == false){
-			FMLCommonHandler.instance().bus().register(VersionCheckerHandler.getInstance());
-		}
-	//	FMLCommonHandler.instance().bus().register();
-		new FrameTime();
-		new ConnectionListener();
-	}
+        RenderingRegistry.registerEntityRenderingHandler(ReplicatorEntity.class, new ReplicatorRender(new ModelSilverfish(), (float) 0.3));
+
+        Eln.clientKeyHandler = new ClientKeyHandler();
+        FMLCommonHandler.instance().bus().register(Eln.clientKeyHandler);
+        MinecraftForge.EVENT_BUS.register(new TutorialSignOverlay());
+        uuidManager = new UuidManager();
+        soundClientEventListener = new SoundClientEventListener(uuidManager);
+
+        if (Eln.versionCheckEnabled)
+            FMLCommonHandler.instance().bus().register(VersionCheckerHandler.getInstance());
+
+        if (Eln.analyticsEnabled)
+            FMLCommonHandler.instance().bus().register(AnalyticsHandler.getInstance());
+
+        new FrameTime();
+        new ConnectionListener();
+    }
 }
