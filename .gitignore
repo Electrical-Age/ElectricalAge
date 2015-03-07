@@ -1,8 +1,12 @@
 .gradle
+.classpath
+.project
 .settings
 bin
 build
 eclipse
+logs
+config
 
 # IntelliJ
 .idea
