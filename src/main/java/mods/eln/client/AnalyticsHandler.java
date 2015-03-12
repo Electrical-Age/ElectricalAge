@@ -10,11 +10,9 @@ import mods.eln.misc.I18N;
 import mods.eln.misc.Version;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
@@ -29,7 +27,7 @@ import java.io.IOException;
  */
 public class AnalyticsHandler {
 
-    private final static String URL = "http://electrical-age.net/modinfo/ga.html?id=%s&v=%s&l=%s";
+    private final static String URL = "http://mc.electrical-age.net/version.php?id=%s&v=%s&l=%s";
 
     private static AnalyticsHandler instance;
 
@@ -60,11 +58,13 @@ public class AnalyticsHandler {
                     if(repCode != HttpStatus.SC_OK)
                         throw new IOException("HTTP error " + repCode);
 
+                    // Utils.println("URL: " + url);
+
                     response.close();
                     client.close();
 
                 } catch (Exception e) {
-                    String error = "Unable to send analytics data. " + e.getMessage() + ".";
+                    String error = "Unable to send analytics data: " + e.getMessage() + ".";
                     System.err.println(error);
                 }
                 AnalyticsHandler.getInstance().ready = true;
