@@ -9,7 +9,7 @@ public class ElnFMLEventsHandler {
 
     @SubscribeEvent
     public void onCraft(ItemCraftedEvent e) {
-        // Doesn't seem to trigger.
+        //TODO This needs to be fixed. Appears to be automagically triggered by first achievement.
         if (e.crafting == Eln.findItemStack("50V Macerator", 1)) {
             e.player.triggerAchievement(Achievements.craft50VMacerator);
         }
