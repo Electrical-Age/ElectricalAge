@@ -6,6 +6,7 @@ import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.event.*;
 import cpw.mods.fml.common.network.FMLEventChannel;
 import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
@@ -158,6 +159,7 @@ import net.minecraftforge.common.config.Property;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
+import mods.eln.achievepackets.*;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -176,6 +178,7 @@ public class Eln {
 
 	public static String channelName = "miaouMod";
 	public ArrayList<IConfigSharing> configShared = new ArrayList<IConfigSharing>();
+	public static SimpleNetworkWrapper achNetwork;
 
 	public static final String[] objNames = new String[] {
 			"/model/PowerElectricPrimitives/PowerElectricPrimitives.obj",
@@ -369,7 +372,10 @@ public class Eln {
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-
+		
+		achNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("achChannel");
+		achNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
+		
 		ModContainer container = FMLCommonHandler.instance().findContainerFor(this);
 		// LanguageRegistry.instance().loadLanguagesFor(container, Side.CLIENT);
 
@@ -761,7 +767,7 @@ public class Eln {
 		FMLCommonHandler.instance().bus().register((new ElnFMLEventsHandler()));
 
 		// Temp localisation
-		LanguageRegistry.instance().addStringLocalization("achievement.openGuide", "en_US", "Wiki Power! [DOESN'T WORK YET]");
+		LanguageRegistry.instance().addStringLocalization("achievement.openGuide", "en_US", "Wiki Power!");
 		LanguageRegistry.instance().addStringLocalization("achievement.openGuide.desc", "en_US", "Press 'X' to open the wiki guide.");
 		LanguageRegistry.instance().addStringLocalization("achievement.craft50VMacerator", "en_US", "Crushing Novice [DOESN'T WORK YET]");
 		LanguageRegistry.instance().addStringLocalization("achievement.craft50VMacerator.desc", "en_US", "Craft a 50V Macerator.");
