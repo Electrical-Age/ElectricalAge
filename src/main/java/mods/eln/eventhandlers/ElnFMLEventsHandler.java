@@ -11,7 +11,7 @@ public class ElnFMLEventsHandler {
     public void onCraft(ItemCraftedEvent e) {
         // Doesn't seem to trigger.
         if (e.crafting == Eln.findItemStack("50V Macerator", 1)) {
-            e.player.triggerAchievement(Achievements.craft50VMacerator);
+            e.player.addStat(Achievements.craft50VMacerator, 1);
         }
     }
 }
