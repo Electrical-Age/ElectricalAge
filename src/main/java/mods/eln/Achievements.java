@@ -1,7 +1,6 @@
 package mods.eln;
 
 import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
 import net.minecraft.stats.Achievement;
 import net.minecraftforge.common.AchievementPage;
 
@@ -13,8 +12,8 @@ public class Achievements {
     public static AchievementPage achievementPageEln;
 
     public static void init() {
-        openGuide = new Achievement("", "openGuide", 0, 0, Items.book, null);
-        craft50VMacerator = new Achievement("", "craft50VMacerator", 0, 2, (ItemStack) Eln.findItemStack("50V Macerator", 0), openGuide);
+        openGuide = new Achievement("achievement.openGuide", "openGuide", 0, 0, Items.book, null).registerStat();
+        craft50VMacerator = new Achievement("achievement.craft50VMacerator", "craft50VMacerator", 0, 2, Eln.findItemStack("50V Macerator", 0), openGuide).registerStat();
 
         achievementPageEln = new AchievementPage("Electrical Age [WIP]", new Achievement[]{openGuide, craft50VMacerator});
 
