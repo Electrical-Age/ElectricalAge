@@ -769,7 +769,7 @@ public class Eln {
 		// Temp localisation
 		LanguageRegistry.instance().addStringLocalization("achievement.openGuide", "en_US", "Wiki Power!");
 		LanguageRegistry.instance().addStringLocalization("achievement.openGuide.desc", "en_US", "Press 'X' to open the wiki guide.");
-		LanguageRegistry.instance().addStringLocalization("achievement.craft50VMacerator", "en_US", "Crushing Novice [DOESN'T WORK YET]");
+		LanguageRegistry.instance().addStringLocalization("achievement.craft50VMacerator", "en_US", "Crushing Novice");
 		LanguageRegistry.instance().addStringLocalization("achievement.craft50VMacerator.desc", "en_US", "Craft a 50V Macerator.");
 
 		Utils.println("Electrical age init done");
