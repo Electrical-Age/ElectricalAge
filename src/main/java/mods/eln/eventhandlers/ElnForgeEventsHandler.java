@@ -18,7 +18,7 @@ public class ElnForgeEventsHandler {
 
         // Doesn't seem to trigger.
         if (e.gui instanceof Root) {
-            player.addStat(Achievements.openGuide, 1);
+            player.triggerAchievement(Achievements.openGuide);
         }
     }
 }
