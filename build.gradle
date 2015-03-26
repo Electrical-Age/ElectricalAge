@@ -17,7 +17,7 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.9_r47"
+version = "TEST"
 group= "com.Miaou.Eln" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "ElectricalAge_BETA"
 
