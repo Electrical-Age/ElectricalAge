@@ -53,6 +53,7 @@ Source code :
 - metc (website and wiki)
 - DrummingFish (GUI text parsing, testing)
 - TheBroBeans (mod promotion)
+- bloxgate (some achievement fixes; minor tweaks)
 
 ## DEPENDENCIES
 "modbus4j" 1.1 must be added in java path of eclipse project. (Gradle branch requires no setup)
