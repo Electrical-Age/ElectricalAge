@@ -14,5 +14,6 @@ public class ElnFMLEventsHandler {
         if (e.crafting.getDisplayName() == "50V Macerator") {
             Eln.achNetwork.sendToServer(new AchievePacket("craft50VMacerator"));
         }
+        System.out.println(e.crafting.getUnlocalizedName());
     }
 }
