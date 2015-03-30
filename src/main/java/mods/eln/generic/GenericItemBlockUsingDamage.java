@@ -58,7 +58,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 		ItemStack stack = new ItemStack(this, 1, damage);
 		stack.setTagCompound(descriptor.getDefaultNBT());
 		LanguageRegistry.addName(stack, descriptor.name);
-		this.setUnlocalizedName(descriptor.name.replace("", "_"));
+		this.setUnlocalizedName(descriptor.name.replace("", "_").toLowerCase());
 		descriptor.setParent(this, damage);
 	}
 
