@@ -11,9 +11,8 @@ public class ElnFMLEventsHandler {
     public void onCraft(ItemCraftedEvent e) {
         /*TODO Find a better solution for getting the block (different languages will cause this not to work)
 		Isn't there a way to get a block by referencing its class? Need to look into this*/
-        if (e.crafting.getDisplayName() == "50V Macerator") {
+        if (e.crafting.getUnlocalizedName() == "50v_macerator") {
             Eln.achNetwork.sendToServer(new AchievePacket("craft50VMacerator"));
         }
-        System.out.println(e.crafting.getUnlocalizedName());
     }
 }

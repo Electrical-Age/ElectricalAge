@@ -95,6 +95,12 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 		if(desc == null) return "Unknown";
         return desc.getName(par1ItemStack);
     }
+	
+	@Override
+	public String getUnlocalizedName(ItemStack par1ItemStack){
+		Descriptor desc = getDescriptor(par1ItemStack);
+		return desc.name.replaceAll("\\s+","_").toLowerCase();			
+	}
 
 	@Override
     public IIcon getIconFromDamage(int damage) {
