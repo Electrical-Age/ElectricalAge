@@ -2232,7 +2232,7 @@ public class Eln {
 			name = "Modern Data Logger";
 
 			desc = new ElectricalDataLoggerDescriptor(name, true,
-					"FlatScreenMonitor", 1f, 1f, 0f);
+					"FlatScreenMonitor", 0f, 1f, 0f);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}

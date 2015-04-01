@@ -10,8 +10,10 @@ f tz -0.4
 f rx 0
 f ry 0
 f rz 1
-f ra 90
+f ra 0
 
-f mx 1.15 
+f mx 1.15
 f my 1.2
+
+
 

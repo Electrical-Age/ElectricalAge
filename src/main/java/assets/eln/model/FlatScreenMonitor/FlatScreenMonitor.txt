@@ -3,15 +3,13 @@ f sx 0.46666
 f sy 0.35
 f sz 1
 
-f tx 0.78
-f ty -0.34
-f tz -0.12
+f tx 0.81
+f ty -0.33
+f tz -0.075
 
-f rx 0
+f rx 1
 f ry 0
-f rz 1
-f ra 90
-
+f rz 0
+f ra -6
 f mx 1.15
 f my 1.2
-

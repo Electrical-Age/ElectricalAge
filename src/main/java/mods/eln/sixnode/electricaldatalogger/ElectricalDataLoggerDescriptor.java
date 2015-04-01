@@ -50,7 +50,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 				ra = main.getFloat("ra");
 				mx = main.getFloat("mx");
 				my = main.getFloat("my");
-				
+
 				led = obj.getPart("led");
 			}
 		}
@@ -78,10 +78,11 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
         	
         	UtilsClient.glDefaultColor();
 			
-    		GL11.glTranslatef(tx, ty, tz); 	
-    		GL11.glRotatef(ra, rx, ry, rz);  
-        	GL11.glScalef(sx, sy, sz);
-			GL11.glColor4f(1f, 0.5f, 0.0f, 1f);
+    		GL11.glTranslatef(tx, ty, tz);
+            GL11.glRotatef(90f,0f,0f,1f);
+            GL11.glRotatef(ra, rx, ry, rz);
+            GL11.glScalef(sx, sy, sz);
+			GL11.glColor4f(1f, 0.5f, 0f, 1f);
         	log.draw(mx, my, "\u00a76");
         	
         	UtilsClient.glDefaultColor();
