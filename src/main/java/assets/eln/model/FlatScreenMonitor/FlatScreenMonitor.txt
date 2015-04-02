@@ -7,9 +7,9 @@ f tx 0.81
 f ty -0.33
 f tz -0.075
 
-f rx 1
-f ry 0
-f rz 0
-f ra -6
+f rx -0.052
+f ry -0.052
+f rz 0.997
+f ra 90.157
 f mx 1.15
 f my 1.2
