@@ -61,7 +61,7 @@ public class ElectricalMathElement extends SixNodeElement {
 		
 		electricalComponentList.add(gateOutputProcess);
 		
-		slowProcessList.add(electricalProcess);
+		electricalProcessList.add(electricalProcess);
 		
 		symboleList.add(new GateInputSymbol("A", gateInput[0]));
 		symboleList.add(new GateInputSymbol("B", gateInput[1]));

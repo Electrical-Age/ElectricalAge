@@ -62,7 +62,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     	inputGate = new NbtElectricalGateInput("inputGate", false);
 		
 		electricalLoadList.add(inputGate);
-    	slowProcessList.add(slowProcess);
+    	electricalProcessList.add(slowProcess);
     	sampleStackReset();
 	}
 

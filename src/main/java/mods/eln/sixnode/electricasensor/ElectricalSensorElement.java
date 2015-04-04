@@ -72,7 +72,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 		}
 		electricalLoadList.add(outputGate);
 		electricalComponentList.add(outputGateProcess);
-		thermalProcessList.add(slowProcess);
+		electricalProcessList.add(slowProcess);
 
 		slowProcessList.add(voltageWatchDog);
 		voltageWatchDog.set(aLoad).set(exp);

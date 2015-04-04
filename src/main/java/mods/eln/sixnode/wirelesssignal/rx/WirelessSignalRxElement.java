@@ -51,7 +51,7 @@ public class WirelessSignalRxElement extends SixNodeElement {
         
 		electricalLoadList.add(outputGate);
 		electricalComponentList.add(outputGateProcess);	
-		slowProcessList.add(slowProcess);
+		electricalProcessList.add(slowProcess);
 		
 		front = LRDU.Down;
         

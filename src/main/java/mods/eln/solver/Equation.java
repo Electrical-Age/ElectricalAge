@@ -666,7 +666,8 @@ public class Equation implements IValue, INBTTReady {
 
 		@Override
 		public double getValue() {
-			return oldError * p.getValue() + iStack * i.getValue() + dValue * d.getValue();
+            double value = oldError * p.getValue() + iStack + dValue * d.getValue();
+			return value;
 		}
 
 		@Override
@@ -686,9 +687,11 @@ public class Equation implements IValue, INBTTReady {
 		@Override
 		public void process(double time) {
 			double error = target.getValue() - hit.getValue();
-			iStack += error * time;
+			iStack += error * time * i.getValue();
 			dValue = (error - oldError) / time;
 
+            if(iStack > 1) iStack = 1;
+            if(iStack < -1) iStack = -1;
 			oldError = error;
 		}
 

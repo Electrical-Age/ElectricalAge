@@ -40,7 +40,7 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 	}
 
 	public double getCValue(int cableCount, double nominalDielVoltage) {
-		if (cableCount == 0) return 0;
+		if (cableCount == 0) return 1e-6;
 		double uTemp = nominalDielVoltage / Eln.LVU;
 		return serie.getValue(cableCount - 1) / uTemp / uTemp;
 	}

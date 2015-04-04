@@ -52,7 +52,7 @@ public class ElectricalRelayElement extends SixNodeElement {
     	electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
     	electricalComponentList.add(switchResistor);
-    	slowProcessList.add(gateProcess);
+    	electricalProcessList.add(gateProcess);
     	electricalLoadList.add(gate);
     	
     	electricalComponentList.add(new Resistor(bLoad, null).pullDown());
