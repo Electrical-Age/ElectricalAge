@@ -114,7 +114,7 @@ public class DataLogs implements INBTTReady {
 		GL11.glEnd();
 		
 		GL11.glBegin(GL11.GL_QUAD_STRIP);
-			for (int idx = 0; idx < size; idx++) {
+        	for (int idx = 0; idx < size; idx++) {
 				float x = margeX - dx * idx * margeX;
 				float y = margeY - ((int)value[idx] + 128) / 255f * margeY;
 				/*float dy = 0.0f;
@@ -170,9 +170,9 @@ public class DataLogs implements INBTTReady {
 		
 		FontRenderer fontrenderer = Minecraft.getMinecraft().fontRenderer;
 		GL11.glPushMatrix();
-			float scale = 0.01f;	
+			float scale = 0.01f;
 			GL11.glScalef(scale, scale, 1f);
-		//	fontrenderer.drawString("Time", (int)( 0.5f / scale), (int)(0.8f / scale), 0);
+            //fontrenderer.drawString("Time", (int)( 0.5f / scale), (int)(0.8f / scale), 0);
 		
 			fontrenderer.drawString(textHeader + " " + getYstring(1f, maxValue, minValue, unitType), (int)(margeX / scale), (int)(0f / scale), 0);
 			fontrenderer.drawString(textHeader + " " + getYstring(0.5f, maxValue, minValue, unitType), (int)(margeX / scale), (int)((margeY / 2 - 0.05f) / scale), 0);

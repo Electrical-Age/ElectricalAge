@@ -269,7 +269,8 @@ public class Eln {
 			"/model/wirelesssignaltx/wirelesssignaltx.obj",
 			"/model/Turret/Turret.obj",
             "/model/FireDetector/FireDetector.obj",
-			"/model/FlatScreenMonitor/FlatScreenMonitor.obj"
+			"/model/FlatScreenMonitor/FlatScreenMonitor.obj",
+            "/model/IndustrialPanel/IndustrialPanel.obj"
 			// "/model/BatteryBigHV/BatteryBigHV.obj"
 
 	};
@@ -2221,7 +2222,7 @@ public class Eln {
 			name = "Data Logger";
 
 			desc = new ElectricalDataLoggerDescriptor(name, true,
-					"DataloggerCRTFloor", 0f, 1f, 0f);
+					"DataloggerCRTFloor", 1f, 0.5f, 0f, "\u00a76");
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -2232,9 +2233,20 @@ public class Eln {
 			name = "Modern Data Logger";
 
 			desc = new ElectricalDataLoggerDescriptor(name, true,
-					"FlatScreenMonitor", 0f, 1f, 0f);
+					"FlatScreenMonitor", 0.25f, 1f, 0.25f,  "\u00A7a");
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
+
+        {
+            ElectricalDataLoggerDescriptor desc;
+            subId = 2;
+
+            name = "Industrial Data Panel";
+
+            desc = new ElectricalDataLoggerDescriptor(name, false,
+                    "IndustrialPanel", 0.25f, 0.5f, 1f,  "\u00A7f");
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
 	}
 
 	void registerElectricalRelay(int id) {

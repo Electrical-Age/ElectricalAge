@@ -27,13 +27,15 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
     float cr, cg, cb;
 
     public boolean onFloor;
+    private String textColor;
 
-	public ElectricalDataLoggerDescriptor(String name, boolean onFloor, String objName, float cr, float cg, float cb) {
+	public ElectricalDataLoggerDescriptor(String name, boolean onFloor, String objName, float cr, float cg, float cb, String textColor) {
 		super(name, ElectricalDataLoggerElement.class, ElectricalDataLoggerRender.class);
 		this.cb = cb;
 		this.cr = cr;
 		this.cg = cg;
 		this.onFloor = onFloor;
+        this.textColor = textColor;
 		obj = Eln.obj.getObj(objName);
 		if (obj != null) {
 			main = obj.getPart("main");
@@ -77,12 +79,12 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
         	if (led != null) led.draw();
         	
         	UtilsClient.glDefaultColor();
-			
+
     		GL11.glTranslatef(tx, ty, tz);
             GL11.glRotatef(ra, rx, ry, rz);
             GL11.glScalef(sx, sy, sz);
-			GL11.glColor4f(1f, 0.5f, 0f, 1f);
-        	log.draw(mx, my, "\u00a76");
+            GL11.glColor4f(cr, cg, cb, 1);
+        	log.draw(mx, my, textColor);
         	
         	UtilsClient.glDefaultColor();
 
