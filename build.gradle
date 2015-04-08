@@ -92,4 +92,18 @@ processResources {
     }
 }
 
+// Custom task to build and copy the mod Jar to the default local Minecraft folder
+task buildAndCopyJar(dependsOn: 'build', type: Copy) {
+    outputs.upToDateWhen { false } // Force to run this task
 
+    def outDir = "/tmp"
+
+    // FIXME: works only on Windows
+    if (System.getProperty("os.name").toLowerCase().contains('windows')) {
+        outDir = System.getenv("APPDATA")
+    }
+
+    from("build/libs")
+    into(outDir + "/.minecraft/mods")
+    include("*.jar")
+}
