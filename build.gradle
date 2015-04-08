@@ -98,12 +98,13 @@ task buildAndCopyJar(dependsOn: 'build', type: Copy) {
 
     def outDir = "/tmp"
 
-    // FIXME: works only on Windows
+    // FIXME: works not on Linux.
     if (System.getProperty("os.name").toLowerCase().contains('windows')) {
-        outDir = System.getenv("APPDATA")
+        outDir = System.getenv("APPDATA") + "/.minecraft"
+    } else if (System.getProperty("os.name").toLowerCase().contains('os x')) {
+        outDir = System.getProperty("user.home") + "/Library/Application Support/minecraft"
     }
-
     from("build/libs")
-    into(outDir + "/.minecraft/mods")
+    into(outDir + "/mods")
     include("*.jar")
 }
