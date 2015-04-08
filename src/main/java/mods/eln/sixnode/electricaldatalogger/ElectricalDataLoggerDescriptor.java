@@ -100,7 +100,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 	
 	@Override
 	public boolean hasVolume() {
-		return true;
+		return onFloor;
 	}
 
 	@Override
