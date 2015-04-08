@@ -17,18 +17,25 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.0"
-group= "com.Miaou.Eln" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+
+group = "com.Miaou.Eln" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "ElectricalAge_BETA"
+version = "1.0"
+
+sourceSets {
+    main {
+        java { srcDirs = ["$projectDir/src/main/java"] }
+        resources { srcDirs = ["$projectDir/src/main/java/assets/eln"] }
+    }
+}
 
 minecraft {
     version = "1.7.10-10.13.2.1291"
-    runDir = "eclipse"
-	assetDir = "eclipse/assets"
-	
-	srgExtra "PK: org/apache/commons/math3 mods/eln/libs/org/apache/commons/math3"
-	srgExtra "PK: com/serotonin mods/eln/libs/com/serotonin"
-	srgExtra "PK: gnu/io mods/eln/libs/gnu/io"
+    runDir = "run"
+
+    srgExtra "PK: org/apache/commons/math3 mods/eln/libs/org/apache/commons/math3"
+    srgExtra "PK: com/serotonin mods/eln/libs/com/serotonin"
+    srgExtra "PK: gnu/io mods/eln/libs/gnu/io"
 }
 
 
@@ -39,12 +46,12 @@ configurations {
 }
 
 dependencies {
-	external files("libs/commons-math3-3.3.jar","libs/modbus4J.jar","libs/seroUtils.jar")
+    external files("libs/commons-math3-3.3.jar", "libs/modbus4J.jar", "libs/seroUtils.jar")
 }
 
 jar {
     from { configurations.external.collect { it.isDirectory() ? it : zipTree(it) } }
-	exclude(['dan200/**','ic2/**','li/**','buildcraft/**'])
+    exclude(['dan200/**', 'ic2/**', 'li/**', 'buildcraft/**'])
 }
 
 processResources {
@@ -55,27 +62,26 @@ processResources {
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
-                
+
         // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
+        expand 'version': project.version, 'mcversion': project.minecraft.version
     }
-        
+
     // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
-	
-	from('src/main/java'){
-		exclude '**/*.java' 
-		exclude '**/*.blend' 
-		exclude '**/*.blend1' 
-		exclude '**/*.blend2' 
-		exclude '**/*.rar' 
-		exclude '**/*.wav' 
-		exclude '**/*.m_p' 
-		exclude '**/*.ai' 
-	}
+
+    from('src/main/java') {
+        exclude '**/*.java'
+        exclude '**/*.blend'
+        exclude '**/*.blend1'
+        exclude '**/*.blend2'
+        exclude '**/*.rar'
+        exclude '**/*.wav'
+        exclude '**/*.m_p'
+        exclude '**/*.ai'
+    }
 }
 
-// Resource and asset folder path for IntelliJ
-sourceSets { main { output.resourcesDir = output.classesDir } }
+
