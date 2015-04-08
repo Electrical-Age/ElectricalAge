@@ -2241,7 +2241,7 @@ public class Eln {
             ElectricalDataLoggerDescriptor desc;
             subId = 2;
 
-            name = "Industrial Data Panel";
+            name = "Industrial Data Logger";
 
             desc = new ElectricalDataLoggerDescriptor(name, false,
                     "IndustrialPanel", 0.25f, 0.5f, 1f,  "\u00A7f");
