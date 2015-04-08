@@ -17,10 +17,18 @@ buildscript {
 
 apply plugin: 'forge'
 
+def getVersion() {
+    // FIXME: cannot import 'mods.eln.misc.Version' class here ?
+    def version_major = 1
+    def version_minor = 9
+    def version_revision = 47
+
+    return "$version_major.${version_minor}_r$version_revision" // 1.9_r47
+}
 
 group = "com.Miaou.Eln" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "ElectricalAge_BETA"
-version = "1.0"
+version = getVersion()
 
 sourceSets {
     main {
