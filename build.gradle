@@ -17,6 +17,7 @@ buildscript {
 
 apply plugin: 'forge'
 
+
 def getVersion() {
     // FIXME: cannot import 'mods.eln.misc.Version' class here ?
     def version_major = 1
@@ -29,6 +30,8 @@ def getVersion() {
 group = "com.Miaou.Eln" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "ElectricalAge_BETA"
 version = getVersion()
+
+
 
 sourceSets {
     main {
@@ -95,15 +98,17 @@ processResources {
 // Custom task to build and copy the mod Jar to the default local Minecraft folder
 task buildAndCopyJar(dependsOn: 'build', type: Copy) {
     outputs.upToDateWhen { false } // Force to run this task
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE // Overwrite the file if exists
 
-    def outDir = "/tmp"
-
-    // FIXME: works not on Linux.
-    if (System.getProperty("os.name").toLowerCase().contains('windows')) {
+    String outDir = ""
+    final String osName = System.getProperty("os.name").toLowerCase()
+    if (osName.contains('windows'))
         outDir = System.getenv("APPDATA") + "/.minecraft"
-    } else if (System.getProperty("os.name").toLowerCase().contains('os x')) {
+    else if (osName.contains('os x'))
         outDir = System.getProperty("user.home") + "/Library/Application Support/minecraft"
-    }
+    else if (osName.contains('linux'))
+        outDir = System.getProperty("user.home") + "/.minecraft"
+
     from("build/libs")
     into(outDir + "/mods")
     include("*.jar")
