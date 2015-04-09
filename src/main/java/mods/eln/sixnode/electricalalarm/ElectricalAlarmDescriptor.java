@@ -45,7 +45,7 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
 			rot = obj.getPart("rot");
 			lightPart = obj.getPart("light");
 			
-			onTexture = obj.getAlternativeTexture(obj.getString("onTexture"));
+			onTexture = obj.getAlternativeTexture(obj.getString("onTexture"));		// FIXME: parent folder
 			offTexture = obj.getAlternativeTexture(obj.getString("offTexture"));
 			if (rot != null) {
 				rotSpeed = rot.getFloat("speed");

@@ -16,7 +16,6 @@ import org.lwjgl.opengl.GL11;
 
 public class Obj3D {
 
-	String fileName;
 	ArrayList<Vertex> vertex = new ArrayList<Vertex>();
 	ArrayList<Uv> uv = new ArrayList<Uv>();
 
@@ -27,10 +26,11 @@ public class Obj3D {
 	public float xMax = 0, yMax = 0, zMax = 0;
 	public float dimMax, dimMaxInv;
 
-	String mtlName = null;
+	private String dirPath;
 
-	String directory;
-	String mod;
+	// String directory;
+	// String fileName;
+	// String mod;
 
 	public static class FaceGroupe {
 		String mtlName = null;
@@ -275,35 +275,59 @@ public class Obj3D {
 	public Obj3D() {
 	}
 
-	public ResourceLocation getAlternativeTexture(String name) {
-		ResourceLocation resource = new ResourceLocation(mod, directory.substring(1) + name);
-		return resource;
+	public ResourceLocation getAlternativeTexture(String textureFileName) {
+		return new ResourceLocation("eln", "model/" + dirPath + "/" + textureFileName);
 	}
 
-	//	static final String rootDirectory = "/mods/eln/model/";
+	public ResourceLocation getResourceLocation(String name) {
+		return new ResourceLocation("eln", dirPath + name);	// FIXME: test and necessary ?
+	}
 
-	public boolean loadFile(String modName, String path) {
-		int lastSlashId = path.lastIndexOf('/');
-		this.directory = path.substring(0, lastSlashId + 1);
-		this.fileName = path.substring(lastSlashId + 1, path.length());
+
+	private BufferedReader getResourceAsStream(String filePath) {
+		final String path = "assets/eln/" + filePath;
+		try {
+			InputStream in = getClass().getClassLoader().getResourceAsStream(path);
+			return new BufferedReader(new InputStreamReader(in, "UTF-8"));
+		}
+		catch(Exception e) {
+			Utils.println("Unable to load the resource '" + path + "' !");
+			return null;
+		}
+	}
+
+	public boolean loadFile(String filePath) {
+		//int lastSlashId = path.lastIndexOf('/');
+		//this.directory = path.substring(0, lastSlashId + 1);
+		//this.fileName = path.substring(lastSlashId + 1, path.length());
+		//mod = modName;
+
 		Obj3DPart part = null;
 		FaceGroupe fg = null;
-		mod = modName;
+
+		dirPath = filePath.substring(0, filePath.lastIndexOf('/'));
+		String mtlName = null;
+
 		try {
 			//	File f  = Minecraft.getAppDir("../src/minecraft");
 			{
-				Utils.println("getResourceAsStream /assets/" + modName + directory + fileName);
-				InputStream stream = Eln.class.getResourceAsStream("/assets/" + modName + directory + fileName);
+				//Utils.println("getResourceAsStream /assets/" + modName + directory + fileName);
+				/*InputStream stream = Eln.class.getResourceAsStream("/assets/" + modName + directory + fileName);
 				if (stream == null) {
 					Utils.println("obj loading fail");
 					return false;
 				}
 
-				StringBuilder inputStringBuilder = new StringBuilder();
 				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+				*/
+
+				BufferedReader bufferedReader = getResourceAsStream("model/" + filePath);
+				if (bufferedReader == null) {
+					Utils.println("Loading obj failed !");
+					return false;
+				}
 
 				String line;
-
 				while ((line = bufferedReader.readLine()) != null) {
 					String[] words = line.split(" ");
 					if (words[0].equals("o")) {
@@ -338,8 +362,6 @@ public class Obj3D {
 									uvId[idx] = null;
 								}
 							}
-
-							//Utils.println(vertexNbr  + " " +  uvId + " " +  verticeId[0] + " " + verticeId[1] + " " + verticeId[2] + " ");
 							fg.face.add(new Face(verticeId, uvId, new Normal(verticeId[0], verticeId[1], verticeId[2])));
 						} else {
 							Utils.println("obj assert vertexNbr != 3");
@@ -355,15 +377,18 @@ public class Obj3D {
 			}
 			part = null;
 			{
-				Utils.println("getResourceAsStream /assets/" + modName + directory + mtlName);
+				BufferedReader bufferedReader = getResourceAsStream("model/" + dirPath + "/" + mtlName);
+				if (bufferedReader == null) {
+					Utils.println("Loading mtl failed !");
+					return false;
+				}
+				/*Utils.println("getResourceAsStream /assets/" + modName + directory + mtlName);
 				InputStream stream = Eln.class.getResourceAsStream("/assets/" + modName + directory + mtlName);
 				if (stream == null) {
 					Utils.println("mtl loading fail");
 					return false;
 				}
-				StringBuilder inputStringBuilder = new StringBuilder();
-				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-				String mtlName = "";
+				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));*/
 				String line;
 				while ((line = bufferedReader.readLine()) != null) {
 					String[] words = line.split(" ");
@@ -374,7 +399,7 @@ public class Obj3D {
 							for (FaceGroupe faceGroupe : partPtr.faceGroupe) {
 								if (faceGroupe.mtlName != null && faceGroupe.mtlName.equals(mtlName)) {
 									//part = partPtr;
-									faceGroupe.textureResource = new ResourceLocation(modName, directory.substring(1) + words[1]);
+									faceGroupe.textureResource = getResourceLocation(words[1]);	// FIXME: check path
 
 									//Side side = FMLCommonHandler.instance().getEffectiveSide();
 									//if (side == Side.CLIENT)
@@ -396,14 +421,9 @@ public class Obj3D {
 		part = null;
 
 		try {
-			InputStream stream = Eln.class.getResourceAsStream("/assets/" + modName + directory + fileName.replace(".obj", ".txt").replace(".OBJ", ".txt"));
-			if (stream != null) {
-				Utils.println("getResourceAsStream /assets/" + modName + directory + fileName.replace(".obj", ".txt").replace(".OBJ", ".txt"));
-				StringBuilder inputStringBuilder = new StringBuilder();
-				BufferedReader bufferedReader;
-
-				bufferedReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-
+			final String txtPath = filePath.replace(".obj", ".txt").replace(".OBJ", ".txt");
+			BufferedReader bufferedReader = getResourceAsStream("model/" + txtPath);
+			if (bufferedReader != null) {
 				String line;
 				while ((line = bufferedReader.readLine()) != null) {
 					String[] words = line.split(" ");
