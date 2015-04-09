@@ -68,7 +68,8 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
     }
 
 	void draw(DataLogs log, LRDU front) {
-		front.glRotateOnX();
+		if (onFloor) front.glRotateOnX();
+        else GL11.glRotatef(90, 1, 0, 0);
 		//GL11.glDisable(GL11.GL_TEXTURE_2D);
 		if (main != null) main.draw();
 		//GL11.glEnable(GL11.GL_TEXTURE_2D);
