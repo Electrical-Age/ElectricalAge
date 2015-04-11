@@ -46,7 +46,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 		subItemList.put(damage, descriptor);
 		ItemStack stack = new ItemStack(this, 1, damage);
 		stack.setTagCompound(descriptor.getDefaultNBT());
-		LanguageRegistry.addName(stack, descriptor.name);
+		//LanguageRegistry.addName(stack, descriptor.name);
 		orderList.add(damage);
 		descriptors.add(descriptor);
 		descriptor.setParent(this, damage);
@@ -57,7 +57,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 		subItemList.put(damage, descriptor);
 		ItemStack stack = new ItemStack(this, 1, damage);
 		stack.setTagCompound(descriptor.getDefaultNBT());
-		LanguageRegistry.addName(stack, descriptor.name);
+		//LanguageRegistry.addName(stack, descriptor.name);
 		descriptor.setParent(this, damage);
 	}
 
@@ -89,12 +89,12 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 	}
 	*/
 
-	@Override
+	/*@Override
     public String getItemStackDisplayName(ItemStack par1ItemStack) {
 		Descriptor desc = getDescriptor(par1ItemStack);
 		if(desc == null) return "Unknown";
         return desc.getName(par1ItemStack);
-    }
+    }*/
 	
 	@Override
 	public String getUnlocalizedName(ItemStack par1ItemStack){
