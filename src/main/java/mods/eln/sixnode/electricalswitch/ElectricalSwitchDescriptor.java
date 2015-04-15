@@ -159,12 +159,11 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
                 }
                 break;
             case Lever:
-                if (main != null) main.draw();
+                if (main != null)
+					main.draw();
 
-                if(lever != null) {
-                    float switchDelta;
+                if(lever != null)
                     lever.draw(on * (alphaOn - alphaOff) + alphaOff, 0, 1, 0);
-                }
                 break;
             default:
                 break;

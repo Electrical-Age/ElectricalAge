@@ -17,7 +17,7 @@ import java.util.List;
 
 public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
 
-	public float[] pinDistance;
+    public float[] pinDistance;
 
     int light;
     Obj3D obj;
@@ -29,90 +29,86 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
     float soundLevel;
     public float rotSpeed = 0f;
 
-	public ElectricalAlarmDescriptor(String name,
-                                     Obj3D obj,
-                                     int light,
-                                     String soundName, double soundTime, float soundLevel) {
-		super(name, ElectricalAlarmElement.class, ElectricalAlarmRender.class);
-		this.obj = obj;
-		this.soundName = soundName;
-		this.soundTime = soundTime;
-		this.soundLevel = soundLevel;
-		this.light = light;
+    public ElectricalAlarmDescriptor(String name, Obj3D obj, int light, String soundName, double soundTime, float soundLevel) {
+        super(name, ElectricalAlarmElement.class, ElectricalAlarmRender.class);
+        this.obj = obj;
+        this.soundName = soundName;
+        this.soundTime = soundTime;
+        this.soundLevel = soundLevel;
+        this.light = light;
 
-		if (obj != null) {
-			main = obj.getPart("main");
-			rot = obj.getPart("rot");
-			lightPart = obj.getPart("light");
-			
-			onTexture = obj.getAlternativeTexture(obj.getString("onTexture"));		// FIXME: parent folder
-			offTexture = obj.getAlternativeTexture(obj.getString("offTexture"));
-			if (rot != null) {
-				rotSpeed = rot.getFloat("speed");
-			}
-			pinDistance = Utils.getSixNodePinDistance(main);
-		}
-	}
+        if (obj != null) {
+            main = obj.getPart("main");
+            rot = obj.getPart("rot");
+            lightPart = obj.getPart("light");
 
-	@Override
-	public void setParent(Item item, int damage) {
-		super.setParent(item, damage);
-		Data.addUtilities(newItemStack());
-	}
-	
-	void draw(boolean warm, float rotAlpha) {
-		if (warm) UtilsClient.bindTexture(onTexture);
-		else UtilsClient.bindTexture(offTexture);
-		if (main != null) main.drawNoBind();
-		if (rot != null) {
-			GL11.glDisable(GL11.GL_CULL_FACE);
-			GL11.glColor3f(1.0f, 1.0f, 1.0f);
-			if (warm) UtilsClient.disableLight();
-			else GL11.glDisable(GL11.GL_LIGHTING);
-			rot.drawNoBind(rotAlpha, 1f, 0f, 0f);
-			if (warm) UtilsClient.enableLight();
-			else GL11.glEnable(GL11.GL_LIGHTING);
-			GL11.glEnable(GL11.GL_CULL_FACE);
-		}
-		if (lightPart != null) {
-			UtilsClient.drawLightNoBind(lightPart);
-		}
-	}
-
-	@Override
-	public boolean use2DIcon() {
-		return false;
-	}
+            onTexture = obj.getModelResourceLocation(obj.getString("onTexture"));
+            offTexture = obj.getModelResourceLocation(obj.getString("offTexture"));
+            if (rot != null)
+                rotSpeed = rot.getFloat("speed");
+            pinDistance = Utils.getSixNodePinDistance(main);
+        }
+    }
 
     @Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
-	}
+    public void setParent(Item item, int damage) {
+        super.setParent(item, damage);
+        Data.addUtilities(newItemStack());
+    }
 
-	@Override
-	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
-	}
+    void draw(boolean warm, float rotAlpha) {
+        if (warm) UtilsClient.bindTexture(onTexture);
+        else UtilsClient.bindTexture(offTexture);
+        if (main != null) main.drawNoBind();
+        if (rot != null) {
+            GL11.glDisable(GL11.GL_CULL_FACE);
+            GL11.glColor3f(1.0f, 1.0f, 1.0f);
+            if (warm) UtilsClient.disableLight();
+            else GL11.glDisable(GL11.GL_LIGHTING);
+            rot.drawNoBind(rotAlpha, 1f, 0f, 0f);
+            if (warm) UtilsClient.enableLight();
+            else GL11.glEnable(GL11.GL_LIGHTING);
+            GL11.glEnable(GL11.GL_CULL_FACE);
+        }
+        if (lightPart != null) {
+            UtilsClient.drawLightNoBind(lightPart);
+        }
+    }
 
-	@Override
-	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return true;
-	}
-	
-	@Override
-	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		if (type == ItemRenderType.INVENTORY) {
-			GL11.glScalef(1.6f, 1.6f, 1.6f);
-			GL11.glTranslatef(-0.1f, 0.0f, 0f);
-			LRDU.Up.glRotateOnX();
-		}
-		draw(true, 0.0f);
-	}
-	
-	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Emit a sonar alarm when");
-		list.add("the input signal is high.");
-	}
+    @Override
+    public boolean use2DIcon() {
+        return false;
+    }
+
+    @Override
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        return true;
+    }
+
+    @Override
+    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        return true;
+    }
+
+    @Override
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+        return true;
+    }
+
+    @Override
+    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+        if (type == ItemRenderType.INVENTORY) {
+            GL11.glScalef(1.6f, 1.6f, 1.6f);
+            GL11.glTranslatef(-0.1f, 0.0f, 0f);
+            LRDU.Up.glRotateOnX();
+        }
+        draw(true, 0.0f);
+    }
+
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add("Emit a sonar alarm when");
+        list.add("the input signal is high.");
+    }
 }
