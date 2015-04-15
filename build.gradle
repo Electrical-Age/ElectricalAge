@@ -12,31 +12,29 @@ buildscript {
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+        classpath 'de.undercouch:gradle-download-task:1.2'
     }
 }
 
 apply plugin: 'forge'
+apply plugin: 'de.undercouch.download'
+apply plugin: 'java'
 
+targetCompatibility = '1.6'
+sourceCompatibility = '1.6'
 
-def getVersion() {
-    // FIXME: cannot import 'mods.eln.misc.Version' class here ?
-    def version_major = 1
-    def version_minor = 9
-    def version_revision = 47
-
-    return "$version_major.${version_minor}_r$version_revision" // 1.9_r47
-}
-
-group = "com.Miaou.Eln" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "ElectricalAge_BETA"
-version = getVersion()
-
-
+group = GROUP
+archivesBaseName = ARCHIVE_NAME
+version = VERSION
 
 sourceSets {
     main {
-        java { srcDirs = ["$projectDir/src/main/java"] }
-        resources { srcDirs = ["$projectDir/src/main/java/assets/eln"] }
+        java {
+            srcDirs = ['/src/main/java']
+        }
+        resources  {
+            srcDirs = ['src/main/resources/']
+        }
     }
 }
 
@@ -95,11 +93,13 @@ processResources {
     }
 }
 
-// Custom task to build and copy the mod Jar to the default local Minecraft folder
-task buildAndCopyJar(dependsOn: 'build', type: Copy) {
-    outputs.upToDateWhen { false } // Force to run this task
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE // Overwrite the file if exists
+clean{
+    // Saves are NOT deleted
+    delete("${minecraft.runDir}/logs")
+    delete("${minecraft.runDir}/crash-reports")
+}
 
+def getMinecratfDir() {
     String outDir = ""
     final String osName = System.getProperty("os.name").toLowerCase()
     if (osName.contains('windows'))
@@ -108,8 +108,32 @@ task buildAndCopyJar(dependsOn: 'build', type: Copy) {
         outDir = System.getProperty("user.home") + "/Library/Application Support/minecraft"
     else if (osName.contains('linux'))
         outDir = System.getProperty("user.home") + "/.minecraft"
+    return outDir
+}
+
+// Custom task to build and copy the mod Jar to the default local Minecraft folder
+task buildAndCopyJar(dependsOn: 'build', type: Copy) {
+    outputs.upToDateWhen { false } // Force to run this task
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE // Overwrite the file if exists
 
     from("build/libs")
-    into(outDir + "/mods")
+    into(getMinecratfDir() + "/mods")
     include("*.jar")
+}
+
+import de.undercouch.gradle.tasks.download.Download
+
+// Download the tutorial map as a zip file to the local 'run/saves' folder
+task downloadTutoMap(type: Download) {
+    src(MAP_URL)
+    dest(new File(minecraft.runDir + "/saves", MAP_URL.substring(MAP_URL.lastIndexOf("/") + 1, MAP_URL.length())))
+    overwrite true
+}
+
+// Unzip the local tutorial map after downloading it. Overwrite the map content if already exist
+task unzipTutoMap(dependsOn: downloadTutoMap, type: Copy) {
+    outputs.upToDateWhen { false } // Force to run this task
+
+    from zipTree(downloadTutoMap.dest)
+    into(minecraft.runDir + "/saves")
 }
