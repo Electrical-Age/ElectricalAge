@@ -39,7 +39,6 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
 
     @Override
 	protected void setDescriptorKey(String key) {
-		// TODO Auto-generated method stub
 		super.setDescriptorKey(key);
 		descriptor = (EnergyConverterElnToOtherDescriptor) getDescriptor();
 	}
@@ -129,20 +128,17 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
 
 	@Override
 	public boolean hasGui(Direction side) {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
 	@Override
 	public void publishSerialize(DataOutputStream stream) {
-		// TODO Auto-generated method stub
 		super.publishSerialize(stream);
 		
 		try {
 			stream.writeFloat((float) inPowerFactor);
 			stream.writeFloat((float) inPowerMax);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -160,7 +156,6 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
                     break;
             }
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

@@ -15,25 +15,21 @@ public class TestNode extends SimpleNode {
 
 	@Override
 	public int getSideConnectionMask(Direction directionA, LRDU lrduA) {
-		// TODO Auto-generated method stub
 		return maskElectricalPower;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction directionA, LRDU lrduA) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction directionB, LRDU lrduB) {
-		// TODO Auto-generated method stub
 		return load;
 	}
 
 	@Override
 	public String getNodeUuid() {
-		// TODO Auto-generated method stub
 		return getNodeUuidStatic();
 	}
 

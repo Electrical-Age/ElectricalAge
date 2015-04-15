@@ -28,29 +28,17 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
 	TransparentNodeElementRender elementRender = null;
 	short elementRenderId;
 
-	public TransparentNodeEntity()
-	{
 
-	}
-
-	/*
-	 * caca public boolean onBlockActivated(EntityPlayer entityPlayer, Direction direction) {
-	 * 
-	 * //Utils.println("onBlockActivated " + direction);
-	 * 
-	 * return getNode().onBlockActivated(entityPlayer, direction); }
-	 */
 	@Override
 	public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
-
 		if (elementRender == null) return null;
 		return elementRender.getCableRender(side, lrdu);
 	}
 
 	@Override
 	public void serverPublishUnserialize(DataInputStream stream) {
-
 		super.serverPublishUnserialize(stream);
+
 		try {
 			Short id = stream.readShort();
 			if (id == 0)
@@ -195,7 +183,6 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
 
 	@Override
 	public int isProvidingWeakPower(Direction side) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -223,25 +210,21 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
 
 	@Override
 	public int getSizeInventory() {
-		// TODO Auto-generated method stub
 		return getSidedInventory().getSizeInventory();
 	}
 
 	@Override
 	public ItemStack getStackInSlot(int var1) {
-		// TODO Auto-generated method stub
 		return getSidedInventory().getStackInSlot(var1);
 	}
 
 	@Override
 	public ItemStack decrStackSize(int var1, int var2) {
-		// TODO Auto-generated method stub
 		return getSidedInventory().decrStackSize(var1, var2);
 	}
 
 	@Override
 	public ItemStack getStackInSlotOnClosing(int var1) {
-		// TODO Auto-generated method stub
 		return getSidedInventory().getStackInSlotOnClosing(var1);
 	}
 
@@ -252,25 +235,21 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
 
 	@Override
 	public String getInventoryName() {
-		// TODO Auto-generated method stub
 		return getSidedInventory().getInventoryName();
 	}
 
 	@Override
 	public boolean hasCustomInventoryName() {
-		// TODO Auto-generated method stub
 		return getSidedInventory().hasCustomInventoryName();
 	}
 
 	@Override
 	public int getInventoryStackLimit() {
-		// TODO Auto-generated method stub
 		return getSidedInventory().getInventoryStackLimit();
 	}
 
 	@Override
 	public boolean isUseableByPlayer(EntityPlayer var1) {
-		// TODO Auto-generated method stub
 		return getSidedInventory().isUseableByPlayer(var1);
 	}
 
@@ -286,26 +265,21 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
 
 	@Override
 	public boolean isItemValidForSlot(int var1, ItemStack var2) {
-		// TODO Auto-generated method stub
 		return getSidedInventory().isItemValidForSlot(var1, var2);
 	}
 
 	@Override
 	public int[] getAccessibleSlotsFromSide(int var1) {
-		// TODO Auto-generated method stub
 		return getSidedInventory().getAccessibleSlotsFromSide(var1);
 	}
 
 	@Override
 	public boolean canInsertItem(int var1, ItemStack var2, int var3) {
-		// TODO Auto-generated method stub
 		return getSidedInventory().canInsertItem(var1, var2, var3);
 	}
 
 	@Override
 	public boolean canExtractItem(int var1, ItemStack var2, int var3) {
-		// TODO Auto-generated method stub
 		return getSidedInventory().canExtractItem(var1, var2, var3);
 	}
 }
-// && 

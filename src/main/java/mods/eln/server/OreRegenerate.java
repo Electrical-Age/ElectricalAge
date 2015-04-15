@@ -37,7 +37,6 @@ public class OreRegenerate {
 
 		@Override
 		public int hashCode() {
-			// TODO Auto-generated method stub
 			return x * z + (worldId << 20);
 		}
 		

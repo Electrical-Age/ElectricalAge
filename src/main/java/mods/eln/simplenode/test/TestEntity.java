@@ -6,7 +6,6 @@ public class TestEntity extends SimpleNodeEntity {
 
 	@Override
 	public String getNodeUuid() {
-		// TODO Auto-generated method stub
 		return TestNode.getNodeUuidStatic();
 	}
 }

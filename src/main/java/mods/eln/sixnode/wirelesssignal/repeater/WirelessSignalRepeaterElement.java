@@ -95,7 +95,6 @@ public class WirelessSignalRepeaterElement extends SixNodeElement {
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 }

@@ -30,7 +30,6 @@ public class SignalInductorElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		if (front == lrdu) return postiveLoad;
 		if (front.inverse() == lrdu) return negativeLoad;
 		return null;
@@ -38,34 +37,28 @@ public class SignalInductorElement extends SixNodeElement {
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		// TODO Auto-generated method stub4
 		if(front == lrdu) return descriptor.cable.getNodeMask();
 		if(front.inverse() == lrdu) return descriptor.cable.getNodeMask();
-
 		return 0;
 	}
 
 	@Override
 	public String multiMeterString() {
-		// TODO Auto-generated method stub
 		return Utils.plotAmpere("I", inductor.getCurrent());
 	}
 
 	@Override
 	public String thermoMeterString() {
-		// TODO Auto-generated method stub
 		return "";
 	}
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
 		descriptor.applyTo(negativeLoad);
 		descriptor.applyTo(postiveLoad);
 		descriptor.applyTo(inductor);

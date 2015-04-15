@@ -261,10 +261,4 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 		}
 		return unserializeNulldId;
 	}
-	
-/*	@Override
-	protected boolean hasSidedInventory() {
-		// TODO Auto-generated method stub
-		return true;
-	}*/
 }

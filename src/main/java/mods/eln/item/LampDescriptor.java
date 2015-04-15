@@ -23,8 +23,6 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
 	public String name, description;
 	public Type type;
 	public LampSocketType socket;
-	
-	public int textureId;
 
 	public double nominalU, minimalU;
 	public double stableU, stableUNormalised, stableTime, vegetableGrowRate;
@@ -44,7 +42,6 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
 		this.nominalP = nominalP;
 		this.nominalLight = nominalLight;
 		this.nominalLife = nominalLife;
-		//this.description = description;
 		this.vegetableGrowRate = vegetableGrowRate;
 
 		switch (type) {
@@ -90,9 +87,7 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
 	
 	@Override
 	public NBTTagCompound getDefaultNBT() {
-		NBTTagCompound nbt = new NBTTagCompound();
-		//nbt.setDouble("life", Utils.rand(0.75, 1.50));
-		return nbt;
+		return new NBTTagCompound();
 	}
 	
 	@Override
@@ -107,8 +102,7 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
-		//list.add("Socket : " + socket);
+
 		list.add("Tech  : " + type);
 		list.add("Light   : " + (int)(nominalLight * 15) + " blocks");
 		list.add("Power : " + (int)nominalP + "W");
@@ -125,19 +119,15 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
 			list.add("Seem in end of life");
 		else 
 			list.add("Seem that can break in the hours");
-
-		//list.add(Utils.plotTime("Life    : ", getLifeInTag(itemStack) * nominalLife));
 	}
 
 	@Override
 	public void serializeConfig(DataOutputStream stream) throws IOException {
-		// TODO Auto-generated method stub
 		stream.writeDouble(nominalLife);
 	}
 
 	@Override
 	public void deserialize(DataInputStream stream) throws IOException {
-		// TODO Auto-generated method stub
 		serverNominalLife = stream.readDouble();
 	}
 }

@@ -51,6 +51,6 @@ public class Rs485CableElement extends SixNodeElement {
 
 	@Override
 	public void initialize() {
-		// TODO Auto-generated method stub
+
 	}
 }

@@ -438,5 +438,5 @@ public class RootSystem {
 	}
 }
 
-//TODO garbadge collector
-//TODOGhost suprresion
+//TODO: garbadge collector
+//TODO: ghost suprresion

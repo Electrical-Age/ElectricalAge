@@ -438,8 +438,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 	}
 
 	public void unload() {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	public boolean playerAskToBreak() {

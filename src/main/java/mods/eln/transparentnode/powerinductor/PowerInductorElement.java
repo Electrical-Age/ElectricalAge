@@ -85,7 +85,6 @@ public class PowerInductorElement extends TransparentNodeElement {
 
 	@Override
 	public void inventoryChange(IInventory inventory) {
-		// TODO Auto-generated method stub
 		super.inventoryChange(inventory);
 		setupPhysical();
 	}
