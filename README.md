@@ -63,6 +63,7 @@ Others contributors ([see full list here](https://github.com/Dolu1990/Electrical
 - metc (website and wiki)
 - DrummingFish (GUI text parsing, testing)
 - TheBroBeans (mod promotion)
+- bloxgate (some achievement fixes; minor tweaks)
 
 ## LICENSE
 The source code of this mod is licensed under the LGPL V3.0 licence. See http://www.gnu.org/copyleft/lesser.html for more informations.

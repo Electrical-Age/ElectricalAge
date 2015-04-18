@@ -78,9 +78,11 @@ public class VersionCheckerHandler {
                     }
 
                 } catch (Exception e) {
-                    String error = "Unable to check the latest available version.";
+                    final String error = "Unable to check the latest available version.";
                     System.err.println(error);
                     msg = Color.RED + "> " + error;
+
+                    e.printStackTrace();
                 }
 
                 // Ready. Display the message on the client chat.

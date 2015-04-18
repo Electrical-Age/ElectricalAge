@@ -3,3 +3,12 @@
 # Mod info
 mod.name=Electrical Age
 mod.desc=Electricity in your base !
+
+#Machines
+50v_macerator.name=50V Macerator
+
+# Achievements
+achievement.openGuide=Wiki Power
+achievement.openGuide.desc=Open the wiki guide
+achievement.craft50VMacerator=Crushing Novice
+achievement.craft50VMacerator.desc=Craft a 50V Macerator
