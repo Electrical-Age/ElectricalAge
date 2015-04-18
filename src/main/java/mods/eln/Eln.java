@@ -767,12 +767,6 @@ public class Eln {
 		MinecraftForge.EVENT_BUS.register(new ElnForgeEventsHandler());
 		FMLCommonHandler.instance().bus().register((new ElnFMLEventsHandler()));
 
-		// Temp localisation
-		LanguageRegistry.instance().addStringLocalization("achievement.openGuide", "en_US", "Wiki Power!");
-		LanguageRegistry.instance().addStringLocalization("achievement.openGuide.desc", "en_US", "Press 'X' to open the wiki guide.");
-		LanguageRegistry.instance().addStringLocalization("achievement.craft50VMacerator", "en_US", "Crushing Novice");
-		LanguageRegistry.instance().addStringLocalization("achievement.craft50VMacerator.desc", "en_US", "Craft a 50V Macerator.");
-
 		Utils.println("Electrical age init done");
 	}
 
@@ -798,7 +792,7 @@ public class Eln {
 				elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
 				GameRegistry.registerBlock(elnToOtherBlockLvu,SimpleNodeItem.class, blockName);
-				//LanguageRegistry.addName(elnToOtherBlockLvu, name);
+				LanguageRegistry.addName(elnToOtherBlockLvu, name);
 			}
 			{
 				String blockName = "eln." + baseName + "MVUBlock";
@@ -810,7 +804,7 @@ public class Eln {
 				elnToOtherBlockMvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockMvu.setCreativeTab(creativeTab).setBlockName(blockName);
 				GameRegistry.registerBlock(elnToOtherBlockMvu,SimpleNodeItem.class, blockName);
-				//LanguageRegistry.addName(elnToOtherBlockMvu, name);
+				LanguageRegistry.addName(elnToOtherBlockMvu, name);
 			}
 			{
 				String blockName = "eln." + baseName + "HVUBlock";
@@ -822,7 +816,7 @@ public class Eln {
 				elnToOtherBlockHvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockHvu.setCreativeTab(creativeTab).setBlockName(blockName);
 				GameRegistry.registerBlock(elnToOtherBlockHvu,SimpleNodeItem.class, blockName);
-				//LanguageRegistry.addName(elnToOtherBlockHvu, name);
+				LanguageRegistry.addName(elnToOtherBlockHvu, name);
 			}
 		}
 	}
@@ -844,7 +838,7 @@ public class Eln {
 			computerProbeBlock = new ComputerProbeBlock();
 			computerProbeBlock.setCreativeTab(creativeTab).setBlockName(blockName);
 			GameRegistry.registerBlock(computerProbeBlock,SimpleNodeItem.class, blockName);
-			//LanguageRegistry.addName(computerProbeBlock, name);
+			LanguageRegistry.addName(computerProbeBlock, name);
 		}
 
 	}
@@ -3480,28 +3474,28 @@ public class Eln {
 			helmetCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Helmet, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_helmet").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(helmetCopper, "Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(helmetCopper));
-			//LanguageRegistry.addName(helmetCopper, name);
+			LanguageRegistry.addName(helmetCopper, name);
 		}
 		{
 			name = "Copper Chestplate";
 			plateCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Chestplate, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_chestplate").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(plateCopper, "Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(plateCopper));
-			//LanguageRegistry.addName(plateCopper, name);
+			LanguageRegistry.addName(plateCopper, name);
 		}
 		{
 			name = "Copper Leggings";
 			legsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Leggings, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_leggings").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(legsCopper, "Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(legsCopper));
-			//LanguageRegistry.addName(legsCopper, name);
+			LanguageRegistry.addName(legsCopper, name);
 		}
 		{
 			name = "Copper Boots";
 			bootsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Boots, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_boots").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(bootsCopper, "Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(bootsCopper));
-			//LanguageRegistry.addName(bootsCopper, name);
+			LanguageRegistry.addName(bootsCopper, name);
 		}
 
 		int armorPoint;
@@ -3526,7 +3520,7 @@ public class Eln {
 			)).setUnlocalizedName(name).setTextureName("eln:ecoal_helmet").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(helmetECoal, "Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(helmetECoal));
-			//LanguageRegistry.addName(helmetECoal, name);
+			LanguageRegistry.addName(helmetECoal, name);
 		}
 		{
 			name = "E-Coal Chestplate";
@@ -3543,7 +3537,7 @@ public class Eln {
 			)).setUnlocalizedName(name).setTextureName("eln:ecoal_chestplate").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(plateECoal, "Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(plateECoal));
-			//LanguageRegistry.addName(plateECoal, name);
+			LanguageRegistry.addName(plateECoal, name);
 		}
 		{
 			name = "E-Coal Leggings";
@@ -3560,7 +3554,7 @@ public class Eln {
 			)).setUnlocalizedName(name).setTextureName("eln:ecoal_leggings").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(legsECoal, "Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(legsECoal));
-			//LanguageRegistry.addName(legsECoal, name);
+			LanguageRegistry.addName(legsECoal, name);
 		}
 		{
 			name = "E-Coal Boots";
@@ -3577,7 +3571,7 @@ public class Eln {
 			)).setUnlocalizedName(name).setTextureName("eln:ecoal_boots").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(bootsECoal, "Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(bootsECoal));
-			//LanguageRegistry.addName(bootsECoal, name);
+			LanguageRegistry.addName(bootsECoal, name);
 		}
 	}
 
@@ -3589,35 +3583,35 @@ public class Eln {
 			swordCopper = (new ItemSword(ToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_sword").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(swordCopper, "Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(swordCopper));
-			//LanguageRegistry.addName(swordCopper, name);
+			LanguageRegistry.addName(swordCopper, name);
 		}
 		{
 			name = "Copper Hoe";
 			hoeCopper = (new ItemHoe(ToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_hoe").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(hoeCopper, "Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(hoeCopper));
-			//LanguageRegistry.addName(hoeCopper, name);
+			LanguageRegistry.addName(hoeCopper, name);
 		}
 		{
 			name = "Copper Shovel";
 			shovelCopper = (new ItemSpade(ToolMaterial.IRON)).setUnlocalizedName(name).setTextureName("eln:copper_shovel").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(shovelCopper, "Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(shovelCopper));
-			//LanguageRegistry.addName(shovelCopper, name);
+			LanguageRegistry.addName(shovelCopper, name);
 		}
 		{
 			name = "Copper Pickaxe";
 			pickaxeCopper = new ItemPickaxeEln(ToolMaterial.IRON).setUnlocalizedName(name).setTextureName("eln:copper_pickaxe").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(pickaxeCopper, "Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(pickaxeCopper));
-			//LanguageRegistry.addName(pickaxeCopper, name);
+			LanguageRegistry.addName(pickaxeCopper, name);
 		}
 		{
 			name = "Copper Axe";
 			axeCopper = new ItemAxeEln(ToolMaterial.IRON).setUnlocalizedName(name).setTextureName("eln:copper_axe").setCreativeTab(creativeTab);
 			GameRegistry.registerItem(axeCopper, "Eln." + name);
 			GameRegistry.registerCustomItemStack(name, new ItemStack(axeCopper));
-			//LanguageRegistry.addName(axeCopper, name);
+			LanguageRegistry.addName(axeCopper, name);
 		}
 
 	}

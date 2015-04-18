@@ -4,5 +4,5 @@
 mod.name=Electrical Age
 mod.desc=Ajoutez l'électricite dans votre base !
 
-#Machines
-50v_macerator.name=50v Macerateur
+# Machines
+50v_macerator.name=Macérateur 50V

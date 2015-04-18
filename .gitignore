@@ -9,14 +9,6 @@ eclipse
 run
 logs
 config
-saves
-crash-reports
-eula.txt
-*.properties
-usernamecache.json
-options.txt
-world
-*.json
 
 # IntelliJ
 .idea

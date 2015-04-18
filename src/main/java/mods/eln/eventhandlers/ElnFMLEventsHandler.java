@@ -7,12 +7,13 @@ import mods.eln.achievepackets.AchievePacket;
 
 public class ElnFMLEventsHandler {
 
+    private final static AchievePacket p = new AchievePacket("craft50VMacerator");
+
     @SubscribeEvent
+    @SuppressWarnings("unused")
     public void onCraft(ItemCraftedEvent e) {
-        //Got it!
         if (e.crafting.getUnlocalizedName().equals("50v_macerator")) {
-            Eln.achNetwork.sendToServer(new AchievePacket("craft50VMacerator"));
-            System.out.println("Sending achievement packet!");
+            Eln.achNetwork.sendToServer(p);
         }
     }
 }

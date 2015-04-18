@@ -10,11 +10,14 @@ import net.minecraftforge.client.event.GuiOpenEvent;
 
 public class ElnForgeEventsHandler {
 
+    private final static AchievePacket p = new AchievePacket("openWiki");
+
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
+    @SuppressWarnings("unused")
     public void openGuide(GuiOpenEvent e) {
         if (e.gui instanceof Root) {
-            Eln.achNetwork.sendToServer(new AchievePacket("openWiki"));
+            Eln.achNetwork.sendToServer(p);
         }
     }
 }
