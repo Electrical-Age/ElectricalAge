@@ -32,8 +32,8 @@ sourceSets {
         java {
             srcDirs = ['/src/main/java']
         }
-        resources  {
-            srcDirs = ['src/main/resources/']
+        resources {
+            srcDirs = ['src/main/resources']
         }
     }
 }
@@ -61,6 +61,12 @@ dependencies {
 jar {
     from { configurations.external.collect { it.isDirectory() ? it : zipTree(it) } }
     exclude(['dan200/**', 'ic2/**', 'li/**', 'buildcraft/**'])
+
+    // Exclude unused (temp/source) resource files to reduce the size of the release jar
+    exclude(['**/*.ai', '**/*.blend', '**/*.blend1', '**/*.blend2', '**/*.rar', '**/*.wav', '**/*.m_p'])
+
+    // Add README and LICENSE to the release jar
+    from(['README.md', 'LICENSE.md'])
 }
 
 processResources {
@@ -76,25 +82,15 @@ processResources {
         expand 'version': project.version, 'mcversion': project.minecraft.version
     }
 
-    // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
 
-    from('src/main/java') {
-        exclude '**/*.java'
-        exclude '**/*.blend'
-        exclude '**/*.blend1'
-        exclude '**/*.blend2'
-        exclude '**/*.rar'
-        exclude '**/*.wav'
-        exclude '**/*.m_p'
-        exclude '**/*.ai'
-    }
+    exclude('**/temp/**') // Temporary asset folder
 }
 
-clean{
-    // Saves are NOT deleted
+clean {
+    // Clean generated/built files. Saves are NOT deleted.
     delete("${minecraft.runDir}/logs")
     delete("${minecraft.runDir}/crash-reports")
 }
