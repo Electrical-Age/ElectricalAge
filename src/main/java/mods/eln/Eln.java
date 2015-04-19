@@ -6274,7 +6274,7 @@ public class Eln {
 				Character.valueOf('C'), findItemStack("Advanced Chip"),
 				Character.valueOf('I'), "plateIron",
 				Character.valueOf('R'), new ItemStack(Items.redstone),
-				Character.valueOf('R'), new ItemStack(Items.diamond));
+				Character.valueOf('D'), new ItemStack(Items.diamond));
 
 	}
 
