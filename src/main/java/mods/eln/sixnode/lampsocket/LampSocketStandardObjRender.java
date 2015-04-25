@@ -24,8 +24,8 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 			lampOff = obj.getPart("lampOff");
 			socket_unlightable = obj.getPart("socket_unlightable");
 			socket_lightable = obj.getPart("socket_lightable");
-			tOff = obj.getAlternativeTexture(obj.getString("tOff"));
-			tOn = obj.getAlternativeTexture(obj.getString("tOn"));
+			tOff = obj.getModelResourceLocation(obj.getString("tOff"));
+			tOn = obj.getModelResourceLocation(obj.getString("tOn"));
 		}
 	}
 

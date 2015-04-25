@@ -25,7 +25,6 @@ public class SignalInductorDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public void setParent(Item item, int damage) {
-		// TODO Auto-generated method stub
 		super.setParent(item, damage);
 		Data.addEnergy(newItemStack());
 	}
@@ -45,7 +44,6 @@ public class SignalInductorDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		// TODO Auto-generated method stub
 		super.addInformation(itemStack, entityPlayer, list, par4);
 	}
 }

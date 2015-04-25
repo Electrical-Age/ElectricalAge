@@ -61,7 +61,6 @@ public class Capacitor extends Bipole  implements ISubSystemProcessI {
 	}
 
 	public double getC() {
-		// TODO Auto-generated method stub
 		return c;
 	}
 }

@@ -117,13 +117,11 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrduA) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrduB) {
-		// TODO Auto-generated method stub
 		return ioGate[side.getInt()];
 	}
 
@@ -355,25 +353,21 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 
 		@Override
 		public Coordonate getCoordonate() {
-			// TODO Auto-generated method stub
 			return coordonate;
 		}
 
 		@Override
 		public int getRange() {
-			// TODO Auto-generated method stub
 			return Eln.wirelessTxRange;
 		}
 
 		@Override
 		public String getChannel() {
-			// TODO Auto-generated method stub
 			return channel;
 		}
 
 		@Override
 		public double getValue() {
-			// TODO Auto-generated method stub
 			return value;
 		}
 	}

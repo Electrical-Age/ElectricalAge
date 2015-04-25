@@ -64,7 +64,6 @@ public abstract class SimpleNode extends NodeBase {
 		try {
 			stream.writeByte(front.getInt());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

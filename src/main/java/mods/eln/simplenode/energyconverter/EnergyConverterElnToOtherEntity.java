@@ -55,7 +55,6 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 
 	@Override
 	public void serverPublishUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
 		super.serverPublishUnserialize(stream);
 		try {
 			inPowerFactor = stream.readFloat();
@@ -63,14 +62,12 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 
 			hasChanges = true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public String getNodeUuid() {
-		// TODO Auto-generated method stub
 		return EnergyConverterElnToOtherNode.getNodeUuidStatic();
 	}
 
@@ -115,7 +112,6 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	@Optional.Method(modid = Other.modIdIc2)
 	// @Override
 	public int getSourceTier() {
-		// TODO Auto-generated method stub
 		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) getNode();
 		return node.descriptor.ic2.tier;
 	}
@@ -257,7 +253,6 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		// TODO Auto-generated method stub
 		super.readFromNBT(nbt);
 		if (Other.ocLoaded)
 			getOc().readFromNBT(nbt);

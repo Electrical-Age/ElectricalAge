@@ -126,15 +126,13 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 				worldObj.markBlockForUpdate(xCoord,yCoord,zCoord);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void serverPacketUnserialize(DataInputStream stream) {
-		// TODO Auto-generated method stub
-		
+
 	}
 	
     @Override
@@ -146,7 +144,6 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
     		return null;
     	}
     	return new S3FPacketCustomPayload(Eln.channelName,node.getPublishPacket().toByteArray());
-    	//return null;
     }
 
     

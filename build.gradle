@@ -18,26 +18,23 @@ buildscript {
 
 apply plugin: 'forge'
 apply plugin: 'de.undercouch.download'
+apply plugin: 'java'
 
-def mapUrl = 'https://github.com/Dolu1990/ElectricalAge/releases/download/BETA-1.9/ElectricalAge_tutorialMap_BETA-1.9_r41.zip'
+targetCompatibility = '1.6'
+sourceCompatibility = '1.6'
 
-def getVersion() {
-    // FIXME: cannot import 'mods.eln.misc.Version' class here ?
-    def version_major = 1
-    def version_minor = 9
-    def version_revision = 47
-
-    return "$version_major.${version_minor}_r$version_revision" // 1.9_r47
-}
-
-group = "com.Miaou.Eln" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "ElectricalAge_BETA"
-version = getVersion()
+group = GROUP
+archivesBaseName = ARCHIVE_NAME
+version = VERSION
 
 sourceSets {
     main {
-        java { srcDirs = ["$projectDir/src/main/java"] }
-        resources { srcDirs = ["$projectDir/src/main/resources/"] }
+        java {
+            srcDirs = ['/src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
     }
 }
 
@@ -64,6 +61,12 @@ dependencies {
 jar {
     from { configurations.external.collect { it.isDirectory() ? it : zipTree(it) } }
     exclude(['dan200/**', 'ic2/**', 'li/**', 'buildcraft/**'])
+
+    // Exclude unused (temp/source) resource files to reduce the size of the release jar
+    exclude(['**/*.ai', '**/*.blend', '**/*.blend1', '**/*.blend2', '**/*.rar', '**/*.wav', '**/*.m_p'])
+
+    // Add README and LICENSE to the release jar
+    from(['README.md', 'LICENSE.md'])
 }
 
 processResources {
@@ -79,27 +82,17 @@ processResources {
         expand 'version': project.version, 'mcversion': project.minecraft.version
     }
 
-    // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
 
-    from('src/main/java') {
-        exclude '**/*.java'
-        exclude '**/*.blend'
-        exclude '**/*.blend1'
-        exclude '**/*.blend2'
-        exclude '**/*.rar'
-        exclude '**/*.wav'
-        exclude '**/*.m_p'
-        exclude '**/*.ai'
-    }
+    exclude('**/temp/**') // Temporary asset folder
 }
 
-clean{
-    // Saves are NOT deleted
-    delete(minecraft.runDir + "/logs")
-    delete(minecraft.runDir + "/crash-reports")
+clean {
+    // Clean generated/built files. Saves are NOT deleted.
+    delete("${minecraft.runDir}/logs")
+    delete("${minecraft.runDir}/crash-reports")
 }
 
 def getMinecratfDir() {
@@ -128,8 +121,8 @@ import de.undercouch.gradle.tasks.download.Download
 
 // Download the tutorial map as a zip file to the local 'run/saves' folder
 task downloadTutoMap(type: Download) {
-    src(mapUrl)
-    dest(new File(minecraft.runDir + "/saves", mapUrl.substring(mapUrl.lastIndexOf("/") + 1, mapUrl.length())))
+    src(MAP_URL)
+    dest(new File(minecraft.runDir + "/saves", MAP_URL.substring(MAP_URL.lastIndexOf("/") + 1, MAP_URL.length())))
     overwrite true
 }
 

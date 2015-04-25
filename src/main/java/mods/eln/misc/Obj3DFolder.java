@@ -1,18 +1,14 @@
 package mods.eln.misc;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.HashMap;
-
 import mods.eln.misc.Obj3D.Obj3DPart;
+
+import java.util.HashMap;
 
 public class Obj3DFolder {
 
-	HashMap<String, Obj3D> nameToObjHash = new HashMap<String, Obj3D>();
+    HashMap<String, Obj3D> nameToObjHash = new HashMap<String, Obj3D>();
 
-	public void loadFolder(String modName, String folderName) {
+	/* public void loadFolder(String modName, String folderName) {
 
 			URI url;
 			try {
@@ -49,30 +45,31 @@ public class Obj3DFolder {
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
 			}
-		}
+		}*/
 
-	public void loadObj(String modName, String path) {
-		Obj3D obj =  new Obj3D();
-    	if(obj.loadFile(modName,path)) {
-    		String tag =path.replaceAll(".obj", "").replaceAll(".OBJ", "");
-    		tag = tag.substring(tag.lastIndexOf('/')+1, tag.length());
-    		nameToObjHash.put(tag, obj);
-    		Utils.println(path + " loaded");
-    	}
-	}
-	
-	public Obj3D getObj(String obj3DName) {
-		return nameToObjHash.get(obj3DName);
-	}
-	
-	public Obj3DPart getPart(String objName, String partName) {
-		Obj3D obj = getObj(objName);
-		if(obj == null) return null;
-		return obj.getPart(partName);
-	}
+    public void loadObj(String modelPath) {
+		// modelPath is the path inside the model folder with the name of the obj file
+        Obj3D obj = new Obj3D();
+        if (obj.loadFile(modelPath)) {
+            String tag = modelPath.replaceAll(".obj", "").replaceAll(".OBJ", "");
+            tag = tag.substring(tag.lastIndexOf('/') + 1, tag.length());
+            nameToObjHash.put(tag, obj);	// name of the file, without extension
+            Utils.println("Model '"+ modelPath +"' loaded");
+        }
+    }
 
-	public void draw(String objName, String partName) {
-		Obj3DPart part = getPart(objName, partName);
-		if(part != null) part.draw();
-	}
+    public Obj3D getObj(String obj3DName) {
+        return nameToObjHash.get(obj3DName);
+    }
+
+    public Obj3DPart getPart(String objName, String partName) {
+        Obj3D obj = getObj(objName);
+        if (obj == null) return null;
+        return obj.getPart(partName);
+    }
+
+    public void draw(String objName, String partName) {
+        Obj3DPart part = getPart(objName, partName);
+        if (part != null) part.draw();
+    }
 }

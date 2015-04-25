@@ -25,8 +25,8 @@ public class LampSocketSuspendedObjRender implements LampSocketObjRender {
 			socket = obj.getPart("socket");
 			chain = obj.getPart("chain");
 			base = obj.getPart("base");
-			tOff = obj.getAlternativeTexture(obj.getString("tOff"));
-			tOn = obj.getAlternativeTexture(obj.getString("tOn"));
+			tOff = obj.getModelResourceLocation(obj.getString("tOff"));
+			tOn = obj.getModelResourceLocation(obj.getString("tOn"));
 			chainLength = chain.getFloat("length");
 			chainFactor = chain.getFloat("factor");
 			baseLength = base.getFloat("length");

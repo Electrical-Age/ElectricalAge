@@ -40,25 +40,21 @@ public class WirelessSignalRepeaterProcess implements IProcess, IWirelessSignalS
 
 	@Override
 	public HashMap<String, ArrayList<IWirelessSignalTx>> getTx() {
-		// TODO Auto-generated method stub
 		return spot.getTx();
 	}
 
 	@Override
 	public ArrayList<IWirelessSignalSpot> getSpot() {
-		// TODO Auto-generated method stub
 		return spot.getSpot();
 	}
 
 	@Override
 	public Coordonate getCoordonate() {
-		// TODO Auto-generated method stub
 		return rx.getCoordonate();
 	}
 
 	@Override
 	public int getRange() {
-		// TODO Auto-generated method stub
 		return rx.descriptor.range;
 	}
 }

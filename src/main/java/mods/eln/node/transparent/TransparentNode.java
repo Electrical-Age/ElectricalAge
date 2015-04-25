@@ -256,7 +256,6 @@ public class TransparentNode extends Node {
 
 	@Override
 	public void unload() {
-		// TODO Auto-generated method stub
 		super.unload();
 		if (element != null)
 			element.unload();

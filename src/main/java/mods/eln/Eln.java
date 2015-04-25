@@ -162,7 +162,6 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 import mods.eln.achievepackets.*;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 @Mod(modid = Eln.MODID, name = Eln.NAME, version = Version.REVISION)
 // @Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0b")
@@ -173,113 +172,111 @@ public class Eln {
 	protected final static String NAME = "Electrical Age";
 	private final static String URL = "http://electrical-age.net";
 	private final static String UPDATE_URL = "https://github.com/Dolu1990/ElectricalAge/releases";
-	private final static String LOGO_FILE = "logo.png";
 	private final static String[] AUTHORS = { "Dolu1990", "lambdaShade", "cm0x4D", "TheBroBeans", "DrummingFish" };
 
 	public static String channelName = "miaouMod";
 	public ArrayList<IConfigSharing> configShared = new ArrayList<IConfigSharing>();
 	public static SimpleNetworkWrapper achNetwork;
 
-	public static final String[] objNames = new String[] {
-			"/model/PowerElectricPrimitives/PowerElectricPrimitives.obj",
-			"/model/EnergyMeter/EnergyMeter.obj",
-			"/model/AdvancedEnergyMeter/AdvancedEnergyMeter.obj",
-			"/model/SimpleLamp/SimpleLamp.obj",
-			"/model/FluorescentLamp/FluorescentLamp.obj",
-			"/model/condo200/condo200.obj",
-			"/model/WallClock/WallClock.obj",
-			"/model/TutoPlate/TutoPlate.obj",
-			"/model/relay800/relay800.obj",
-			"/model/hub/hub.obj",
-			"/model/electricalweathersensor/electricalweathersensor.obj",
-			"/model/SmallWaterWheel/SmallWaterWheel.obj",
-			"/model/ProximitySensor/ProximitySensor.obj",
-			"/model/FlatLamp/FlatLamp.obj",
-			"/model/AutoMiner/AutoMiner.obj",
-			"/model/Anemometer/Anemometer.obj",
-			"/model/XRayScanner/XRayScanner.obj",
-			"/model/RobustLampSuspended/RobustLampSuspended.obj",
-			"/model/activeThermalDissipatorA/activethermaldissipatora.obj",
-			"/model/200vactiveThermalDissipatorA/200vactivethermaldissipatora.obj",
-			"/model/AlarmMedium/alarmmedium.obj",
-			"/model/BatteryBig/BatteryBig.obj",
-			"/model/batterychargera/batterychargera.obj",
-			"/model/batterychargerb/batterychargerb.obj",
-			"/model/ClassicLampSocket/ClassicLampSocket.obj",
-			"/model/compressora/compressora.obj",
-			"/model/compressorb/compressorb.obj",
-			"/model/DataloggerCRTFloor/DataloggerCRTFloor.obj",
-			"/model/daylightsensor/daylightsensor.obj",
-			"/model/eggIncubator/eggincubator.obj",
-			"/model/ElectricalSensor/electricalsensor.obj",
-			"/model/electricaltimer/electricaltimer.obj",
-			"/model/ElectricFurnace/ElectricFurnace.obj",
-			"/model/eleToRed/eletored.obj",
-			"/model/groundCable/groundcable.obj",
-			"/model/HighCapacityBattery/HighCapacityBattery.obj",
-			"/model/HighCurrentBattery/HighCurrentBattery.obj",
-			"/model/HighVoltageBattery/HighVoltageBattery.obj",
-			"/model/HighVoltageSwitch/HighVoltageSwitch.obj",
-			"/model/lampsupply/lampsupply.obj",
-			"/model/Led/Led.obj",
-			"/model/LedSwitch/ledswitch.obj",
-			"/model/lightsensor/lightsensor.obj",
-			"/model/LongLifeBattery/LongLifeBattery.obj",
-			"/model/LowCostBattery/LowCostBattery.obj",
-			"/model/LowCostBattery2/LowCostBattery2.obj",
-			"/model/LowPowerReceiverAntenna/lowpowerreceiverantenna.obj",
-			"/model/LowPowerTransmitterAntenna/lowpowertransmitterantenna.obj",
-			"/model/LowVoltageSwitch/LowVoltageSwitch.obj",
-			"/model/macerator50V/macerator50V.obj",
-			"/model/maceratora/maceratora.obj",
-			"/model/maceratorb/maceratorb.obj",
-			"/model/magnetizera/magnetizera.obj",
-			"/model/magnetizerb/magnetizerb.obj",
-			"/model/MediumVoltageSwitch/MediumVoltageSwitch.obj",
-			"/model/passiveThermalDissipatorA/passivethermaldissipatora.obj",
-			"/model/plateMachineA/platemachinea.obj",
-			"/model/plateMachineB/platemachineb.obj",
-			"/model/PLC/PLC.obj",
-			"/model/redToEle/redtoele.obj",
-			"/model/RelayBig/RelayBig.obj",
-			"/model/RobustLamp/RobustLamp.obj",
-			"/model/RTU/RTU.obj",
-			"/model/signalsourcepot/signalsourcepot.obj",
-			"/model/smallsolarpannel/smallsolarpannel.obj",
-			"/model/smallsolarpannelrot/smallsolarpannelrot.obj",
-			"/model/SolarPanel2x2/SolarPanel2x2.obj",
-			"/model/stoneCache/stonecache.obj",
-			"/model/StoneFurnace/stonefurnace.obj",
-			"/model/StreetLight/StreetLight.obj",
-			"/model/TemperatureSensor/temperaturesensor.obj",
-			"/model/ThermalSensor/thermalsensor.obj",
-			"/model/transformator/corea/feromagneticcorea.obj",
-			"/model/transformator/transformator.obj",
-			"/model/Transporter/Transporter.obj",
-			"/model/treeresincolector/treeresincolector.obj",
-			"/model/turbine50V/turbine50V.obj",
-			"/model/turbineB/turbineb.obj",
-			"/model/turbineBBlue/turbinebblue.obj",
-			"/model/VoltageSensor/voltagesensor.obj",
-			"/model/voltagesource/voltagesource.obj",
-			"/model/Vumeter/Vumeter.obj",
-			"/model/WindTurbineMini/WindTurbineMini.obj",
-			"/model/wirelesssignalrepeater/wirelesssignalrepeater.obj",
-			"/model/wirelesssignalrx/wirelesssignalrx.obj",
-			"/model/wirelesssignaltx/wirelesssignaltx.obj",
-			"/model/Turret/Turret.obj",
-            "/model/FireDetector/FireDetector.obj",
-			"/model/FlatScreenMonitor/FlatScreenMonitor.obj",
-            "/model/IndustrialPanel/IndustrialPanel.obj"
+	public static final String[] modelPaths = new String[] {
+			"PowerElectricPrimitives/PowerElectricPrimitives.obj",
+			"EnergyMeter/EnergyMeter.obj",
+			"AdvancedEnergyMeter/AdvancedEnergyMeter.obj",
+			"SimpleLamp/SimpleLamp.obj",
+			"FluorescentLamp/FluorescentLamp.obj",
+			"condo200/condo200.obj",
+			"WallClock/WallClock.obj",
+			"TutoPlate/TutoPlate.obj",
+			"relay800/relay800.obj",
+			"hub/hub.obj",
+			"electricalweathersensor/electricalweathersensor.obj",
+			"SmallWaterWheel/SmallWaterWheel.obj",
+			"ProximitySensor/ProximitySensor.obj",
+			"FlatLamp/FlatLamp.obj",
+			"AutoMiner/AutoMiner.obj",
+			"Anemometer/Anemometer.obj",
+			"XRayScanner/XRayScanner.obj",
+			"RobustLampSuspended/RobustLampSuspended.obj",
+			"activeThermalDissipatorA/activethermaldissipatora.obj",
+			"200vactiveThermalDissipatorA/200vactivethermaldissipatora.obj",
+			"AlarmMedium/alarmmedium.obj",
+			"BatteryBig/BatteryBig.obj",
+			"batterychargera/batterychargera.obj",
+			"batterychargerb/batterychargerb.obj",
+			"ClassicLampSocket/ClassicLampSocket.obj",
+			"compressora/compressora.obj",
+			"compressorb/compressorb.obj",
+			"DataloggerCRTFloor/DataloggerCRTFloor.obj",
+			"daylightsensor/daylightsensor.obj",
+			"eggIncubator/eggincubator.obj",
+			"ElectricalSensor/electricalsensor.obj",
+			"electricaltimer/electricaltimer.obj",
+			"ElectricFurnace/ElectricFurnace.obj",
+			"eleToRed/eletored.obj",
+			"groundCable/groundcable.obj",
+			"HighCapacityBattery/HighCapacityBattery.obj",
+			"HighCurrentBattery/HighCurrentBattery.obj",
+			"HighVoltageBattery/HighVoltageBattery.obj",
+			"HighVoltageSwitch/HighVoltageSwitch.obj",
+			"lampsupply/lampsupply.obj",
+			"Led/Led.obj",
+			"LedSwitch/ledswitch.obj",
+			"lightsensor/lightsensor.obj",
+			"LongLifeBattery/LongLifeBattery.obj",
+			"LowCostBattery/LowCostBattery.obj",
+			"LowCostBattery2/LowCostBattery2.obj",
+			"LowPowerReceiverAntenna/lowpowerreceiverantenna.obj",
+			"LowPowerTransmitterAntenna/lowpowertransmitterantenna.obj",
+			"LowVoltageSwitch/LowVoltageSwitch.obj",
+			"macerator50V/macerator50V.obj",
+			"maceratora/maceratora.obj",
+			"maceratorb/maceratorb.obj",
+			"magnetizera/magnetizera.obj",
+			"magnetizerb/magnetizerb.obj",
+			"MediumVoltageSwitch/MediumVoltageSwitch.obj",
+			"passiveThermalDissipatorA/passivethermaldissipatora.obj",
+			"plateMachineA/platemachinea.obj",
+			"plateMachineB/platemachineb.obj",
+			"PLC/PLC.obj",
+			"redToEle/redtoele.obj",
+			"RelayBig/RelayBig.obj",
+			"RobustLamp/RobustLamp.obj",
+			"RTU/RTU.obj",
+			"signalsourcepot/signalsourcepot.obj",
+			"smallsolarpannel/smallsolarpannel.obj",
+			"smallsolarpannelrot/smallsolarpannelrot.obj",
+			"SolarPanel2x2/SolarPanel2x2.obj",
+			"stoneCache/stonecache.obj",
+			"StoneFurnace/stonefurnace.obj",
+			"StreetLight/StreetLight.obj",
+			"TemperatureSensor/temperaturesensor.obj",
+			"ThermalSensor/thermalsensor.obj",
+			"transformator/corea/feromagneticcorea.obj",
+			"transformator/transformator.obj",
+			"Transporter/Transporter.obj",
+			"treeresincolector/treeresincolector.obj",
+			"turbine50V/turbine50V.obj",
+			"turbineB/turbineb.obj",
+			"turbineBBlue/turbinebblue.obj",
+			"VoltageSensor/voltagesensor.obj",
+			"voltagesource/voltagesource.obj",
+			"Vumeter/Vumeter.obj",
+			"WindTurbineMini/WindTurbineMini.obj",
+			"wirelesssignalrepeater/wirelesssignalrepeater.obj",
+			"wirelesssignalrx/wirelesssignalrx.obj",
+			"wirelesssignaltx/wirelesssignaltx.obj",
+			"Turret/Turret.obj",
+            "FireDetector/FireDetector.obj",
+			"FlatScreenMonitor/FlatScreenMonitor.obj",
+            "IndustrialPanel/IndustrialPanel.obj"
 			// "/model/BatteryBigHV/BatteryBigHV.obj"
-
 	};
 
-	public static final double networkSerializeValueFactor = 100.0;
-
+	// public static final double networkSerializeValueFactor = 100.0;
 	// public static final byte packetNodeSerialized24bitPosition = 11;
-	public static final byte packetNodeSerialized48bitPosition = 12;
-	public static final byte packetNodeRefreshRequest = 13;
+	// public static final byte packetNodeSerialized48bitPosition = 12;
+	// public static final byte packetNodeRefreshRequest = 13;
+
 	public static final byte packetPlayerKey = 14;
 	public static final byte packetNodeSingleSerialized = 15;
 	public static final byte packetPublishForNode = 16;
@@ -388,7 +385,6 @@ public class Eln {
 		meta.description = I18N.getString("mod.desc");
 		meta.url = URL;
 		meta.updateUrl = UPDATE_URL;
-		meta.logoFile = "/assets/eln/" + LOGO_FILE;
 		meta.authorList = Arrays.asList(AUTHORS);
 		meta.autogenerated = false; // Force to update from code
 
@@ -532,9 +528,9 @@ public class Eln {
 
 		ghostBlock = (GhostBlock) new GhostBlock().setBlockTextureName("iron_block");
 		lightBlock = (LightBlock) new LightBlock();
-		// obj.loadFolder("eln", "/model");
-		for (String path : objNames) {
-			obj.loadObj("eln", path);
+
+		for (String path : modelPaths) {
+			obj.loadObj(path);
 		}
 
 		GameRegistry.registerItem(sharedItem, "Eln.sharedItem");

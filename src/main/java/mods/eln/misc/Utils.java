@@ -1331,7 +1331,6 @@ public class Utils {
 	}
 
 	public static String plotSignal(double U, double I) {
-		// TODO Auto-generated method stub
 		return plotVolt("U", U) + plotAmpere("I", I) + plotPercent("Value", U / Eln.SVU);
 	}
 
