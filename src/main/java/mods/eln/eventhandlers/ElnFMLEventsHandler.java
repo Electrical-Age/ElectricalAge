@@ -7,11 +7,13 @@ import mods.eln.achievepackets.AchievePacket;
 
 public class ElnFMLEventsHandler {
 
+    private final static AchievePacket p = new AchievePacket("craft50VMacerator");
+
     @SubscribeEvent
+    @SuppressWarnings("unused")
     public void onCraft(ItemCraftedEvent e) {
-        //TODO Find a better solution for getting the block (different languages will cause this not to work)
-        if (e.crafting.getDisplayName() == "50V Macerator") {
-            Eln.achNetwork.sendToServer(new AchievePacket("craft50VMacerator"));
+        if (e.crafting.getUnlocalizedName().equals("50v_macerator")) {
+            Eln.achNetwork.sendToServer(p);
         }
     }
 }

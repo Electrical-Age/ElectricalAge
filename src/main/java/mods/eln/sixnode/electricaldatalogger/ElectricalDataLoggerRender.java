@@ -40,7 +40,10 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
-		descriptor.draw(log, front);
+        if (!descriptor.onFloor) {
+            drawSignalPin(front.inverse(), new float[]{6.37f, 6.37f, 5.67f, 6.12f});
+        }
+        descriptor.draw(log, front);
 	}
 
 	/*

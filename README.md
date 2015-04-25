@@ -1,8 +1,18 @@
-# Minecraft Mod - Codename : ELN
+# ![logo](https://raw.githubusercontent.com/Electrical-Age/electrical-age.github.io/master/img/favicon.ico) Minecraft Mod - Codename : ELN
 
 Website available here: [http://electrical-age.net/](http://electrical-age.net/)
 
-[Official Minecraft forum post](http://www.minecraftforum.net/topic/2741783-172forge-electrical-age-mod-beta-146/) (updated frequently)
+[Official Minecraft forum post](http://www.minecraftforum.net/topic/2741783-172forge-electrical-age-mod-beta-146/) (updated frequently).
+
+### How to get started
+
+Download [the last version of the mod](https://github.com/Dolu1990/ElectricalAge/archive/1.7.2-MNA-gradle.zip) and then run `unzipTutoMap` and `runClient` tasks to start playing on the [tutorial map](https://github.com/Dolu1990/ElectricalAge/releases/download/BETA-1.9/ElectricalAge_tutorialMap_BETA-1.9_r41.zip).
+
+```sh
+git clone https://github.com/Dolu1990/ElectricalAge.git
+cd ElectricalAge
+gradle unzipTutoMap runClient
+```
 
 ## ABOUT
 [ELN](http://electrical-age.net/) is a Minecraft Mod offering the ability to perform large-scale, in-game electrical simulations. Here is some highlighted features:
@@ -32,7 +42,7 @@ Game lifetime/complexity extended
 > A consequent list of new raw materials and items...
 
 ## CURRENT STATE
-Beta. There will be bugs.
+**Beta**. There will be bugs :exclamation:
 Additional objects and enhancements are likely.
 
 ## DEVELOPERS
@@ -49,15 +59,11 @@ Source code :
 - Dolu1990
 - cm0x4D
 
-[Others contributions](https://github.com/Dolu1990/ElectricalAge/graphs/contributors) :
+Others contributors ([see full list here](https://github.com/Dolu1990/ElectricalAge/graphs/contributors)) :
 - metc (website and wiki)
 - DrummingFish (GUI text parsing, testing)
 - TheBroBeans (mod promotion)
-
-## DEPENDENCIES
-"modbus4j" 1.1 must be added in java path of eclipse project. (Gradle branch requires no setup)
-http://sourceforge.net/projects/modbus4j/files/modbus4j/
-(Files : modbus4J.jar + seroUtils.jar)
+- bloxgate (some achievement fixes; minor tweaks)
 
 ## LICENSE
 The source code of this mod is licensed under the LGPL V3.0 licence. See http://www.gnu.org/copyleft/lesser.html for more informations.

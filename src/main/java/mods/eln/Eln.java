@@ -763,12 +763,6 @@ public class Eln {
 		MinecraftForge.EVENT_BUS.register(new ElnForgeEventsHandler());
 		FMLCommonHandler.instance().bus().register((new ElnFMLEventsHandler()));
 
-		// Temp localisation
-		LanguageRegistry.instance().addStringLocalization("achievement.openGuide", "en_US", "Wiki Power!");
-		LanguageRegistry.instance().addStringLocalization("achievement.openGuide.desc", "en_US", "Press 'X' to open the wiki guide.");
-		LanguageRegistry.instance().addStringLocalization("achievement.craft50VMacerator", "en_US", "Crushing Novice");
-		LanguageRegistry.instance().addStringLocalization("achievement.craft50VMacerator.desc", "en_US", "Craft a 50V Macerator.");
-
 		Utils.println("Electrical age init done");
 	}
 
@@ -849,7 +843,7 @@ public class Eln {
 
 	private void registerTestBlock() {
 		/*
-		 * testBlock = new TestBlock(); testBlock.setCreativeTab(creativeTab).setBlockName("TestBlock"); GameRegistry.registerBlock(testBlock, "Eln.TestBlock"); TileEntity.addMapping(TestEntity.class, "Eln.TestEntity"); LanguageRegistry.addName(testBlock,"Test Block"); NodeManager.instance.registerUuid(TestNode.getInfoStatic().getUuid(), TestNode.class);
+		 * testBlock = new TestBlock(); testBlock.setCreativeTab(creativeTab).setBlockName("TestBlock"); GameRegistry.registerBlock(testBlock, "Eln.TestBlock"); TileEntity.addMapping(TestEntity.class, "Eln.TestEntity"); //LanguageRegistry.addName(testBlock,"Test Block"); NodeManager.instance.registerUuid(TestNode.getInfoStatic().getUuid(), TestNode.class);
 		 *
 		 * GameRegistry.registerCustomItemStack("Test Block", new ItemStack(testBlock));
 		 */
@@ -6276,7 +6270,7 @@ public class Eln {
 				Character.valueOf('C'), findItemStack("Advanced Chip"),
 				Character.valueOf('I'), "plateIron",
 				Character.valueOf('R'), new ItemStack(Items.redstone),
-				Character.valueOf('R'), new ItemStack(Items.diamond));
+				Character.valueOf('D'), new ItemStack(Items.diamond));
 
 	}
 
