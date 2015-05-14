@@ -128,7 +128,11 @@ public class LampSocketRender extends SixNodeElementRender {
 	void setLight(byte newLight) {
 		light = newLight;
 		if (lampDescriptor != null && lampDescriptor.type == Type.eco && oldLight != -1 && oldLight < 9 && light >= 9) {
-			play(new SoundCommand("eln:neon_lamp").mulVolume(1, 1f).smallRange());
+			float rand = (float) Math.random();
+			if(rand>0.1f)
+				play(new SoundCommand("eln:neon_lamp").mulVolume(0.7f, 1.0f+(rand/6.0f)).smallRange());
+			else
+				play(new SoundCommand("eln:NEON_LFNOISE").mulVolume(0.2f, 1f).verySmallRange());
 		}
 		oldLight = light;
 	}

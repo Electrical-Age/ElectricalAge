@@ -33,8 +33,9 @@ public class ElectricalWatchRender extends SixNodeElementRender {
 			time = tileEntity.getWorldObj().getWorldTime();
 		else
 			time = oldDate;
-
-		descriptor.draw(time / 12000f + 0.5f, (time % 1000) / 1000f);
+		time += 6000;
+		time %= 24000;
+		descriptor.draw(time / 12000f, (time % 1000) / 1000f, upToDate);
 	}
 
 	@Override

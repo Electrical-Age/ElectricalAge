@@ -208,6 +208,7 @@ public class Eln {
 			"compressorb/compressorb.obj",
 			"DataloggerCRTFloor/DataloggerCRTFloor.obj",
 			"daylightsensor/daylightsensor.obj",
+			"DigitalWallClock/DigitalWallClock.obj",
 			"eggIncubator/eggincubator.obj",
 			"ElectricalSensor/electricalsensor.obj",
 			"electricaltimer/electricaltimer.obj",
@@ -1899,7 +1900,7 @@ public class Eln {
 
 		{
 			subId = 4;
-			name = "Watch";
+			name = "Analog Watch";
 
 			ElectricalWatchDescriptor desc = new ElectricalWatchDescriptor(
 					name,
@@ -1912,8 +1913,22 @@ public class Eln {
 		}
 
 		{
+			subId = 5;
+			name = "Digital Watch";
+
+			ElectricalWatchDescriptor desc = new ElectricalWatchDescriptor(
+					name,
+					obj.getObj("DigitalWallClock"),
+					20000.0 / (3600 * 15)
+
+			);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
 			subId = 8;
-			name = "Tutorial sign";
+			name = "Tutorial Sign";
 
 			TutorialSignDescriptor desc = new TutorialSignDescriptor(
 					name, obj.getObj("TutoPlate"));
@@ -5026,8 +5041,16 @@ public class Eln {
 	}
 
 	private void recipeSixNodeMisc() {
-		addRecipe(findItemStack("Watch"),
+	
+		addRecipe(findItemStack("Analog Watch"),
 				"crc",
+				"III",
+				Character.valueOf('c'), findItemStack("Iron Cable"),
+				Character.valueOf('r'), new ItemStack(Items.redstone),
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
+
+		addRecipe(findItemStack("Digital Watch"),
+				"rcr",
 				"III",
 				Character.valueOf('c'), findItemStack("Iron Cable"),
 				Character.valueOf('r'), new ItemStack(Items.redstone),
