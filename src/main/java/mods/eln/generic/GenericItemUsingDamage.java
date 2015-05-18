@@ -4,6 +4,8 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import mods.eln.Eln;
+import mods.eln.misc.LangFileParser;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -19,6 +21,7 @@ import net.minecraft.world.World;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDescriptor> extends Item implements IGenericItemUsingDamage {
 	public Hashtable<Integer, Descriptor> subItemList = new Hashtable<Integer, Descriptor>();
@@ -86,13 +89,33 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 	public String getItemNameIS(ItemStack itemstack) {
 	return getItemName() + "." + getDescriptor(itemstack).name;
 	}
-	
-	*/
+
+	/*
 	@Override
 	public String getUnlocalizedNameInefficiently(ItemStack par1ItemStack) {
 		return "trololol";
 	}
+	*/
 
+	@Override
+	public String getUnlocalizedName(ItemStack par1ItemStack){
+		Descriptor desc = getDescriptor(par1ItemStack);
+		return desc.name.replaceAll("\\s+","_").toLowerCase();
+	}
+
+	public void populateLangFileKeys(){
+		for(Map.Entry<Integer,Descriptor> item : subItemList.entrySet()){
+			ItemStack stack = new ItemStack(this,1,item.getKey());
+			String key = this.getUnlocalizedNameInefficiently(stack)+".name";
+			String value = getItemStackDisplayName(stack);
+			if(value.equals("") || (value.equals(key)))
+				value = '<'+item.getValue().name+'>';
+			//System.out.println(" > " + key + " | " +  value);
+			Eln.langFile_DefaultKeys.put(key,value);
+		}
+	}
+
+	/*
 	@Override
 	public String getItemStackDisplayName(ItemStack par1ItemStack) {
 		Descriptor desc = getDescriptor(par1ItemStack);
@@ -100,6 +123,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 			return "NullItem";
 		return desc.getName(par1ItemStack);
 	}
+	*/
 
 	public IIcon getIconFromDamage(int damage) {
 		GenericItemUsingDamageDescriptor desc = getDescriptor(damage);

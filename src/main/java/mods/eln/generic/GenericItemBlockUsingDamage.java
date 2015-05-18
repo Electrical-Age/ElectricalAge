@@ -3,7 +3,10 @@ package mods.eln.generic;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
+import mods.eln.Eln;
+import mods.eln.misc.LangFileParser;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.block.Block;
@@ -40,6 +43,18 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 	
 	public void doubleEntry(int src, int dst) {
 		subItemList.put(dst, subItemList.get(src));
+	}
+
+	public void populateLangFileKeys(){
+		for(Map.Entry<Integer,Descriptor> item : subItemList.entrySet()){
+			ItemStack stack = new ItemStack(this,1,item.getKey());
+			String key = this.getUnlocalizedNameInefficiently(stack)+".name";
+			String value = getItemStackDisplayName(stack);
+			if(value.equals("") || (value.equals(key)))
+				value = '<'+item.getValue().getName(stack)+'>';
+			//System.out.println(" > " + key + " | " +  value);
+			Eln.langFile_DefaultKeys.put(key,value);
+		}
 	}
 
 	public void addDescriptor(int damage, Descriptor descriptor) {

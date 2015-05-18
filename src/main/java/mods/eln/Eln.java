@@ -178,6 +178,8 @@ public class Eln {
 	public ArrayList<IConfigSharing> configShared = new ArrayList<IConfigSharing>();
 	public static SimpleNetworkWrapper achNetwork;
 
+	public static HashMap<String,String> langFile_DefaultKeys = new HashMap<String,String>();
+
 	public static final String[] modelPaths = new String[] {
 			"PowerElectricPrimitives/PowerElectricPrimitives.obj",
 			"EnergyMeter/EnergyMeter.obj",
@@ -763,6 +765,11 @@ public class Eln {
 
 		MinecraftForge.EVENT_BUS.register(new ElnForgeEventsHandler());
 		FMLCommonHandler.instance().bus().register((new ElnFMLEventsHandler()));
+
+		sixNodeItem.populateLangFileKeys();
+		transparentNodeItem.populateLangFileKeys();
+		sharedItem.populateLangFileKeys();
+		oreItem.populateLangFileKeys();
 
 		Utils.println("Electrical age init done");
 	}
@@ -3832,7 +3839,7 @@ public class Eln {
 	void registerTurret(int id) {
 		{
 			int subId = 0;
-			String name = "800V Defence turret";
+			String name = "800V Defence Turret";
 
 			TurretDescriptor desc = new TurretDescriptor(name, "Turret", "Defence turret WIP");
 
@@ -5965,7 +5972,7 @@ public class Eln {
 
 	void recipeTurret(){
 
-		addRecipe(findItemStack("800V Defence turret", 1),
+		addRecipe(findItemStack("800V Defence Turret", 1),
 				" R ",
 				"CMC",
 				" c ",
