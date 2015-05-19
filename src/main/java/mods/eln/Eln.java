@@ -170,6 +170,7 @@ public class Eln {
 	// Mod information (override from 'mcmod.info' file)
 	protected final static String MODID = "Eln";
 	protected final static String NAME = "Electrical Age";
+	protected final static String MODDESC = "Electricity in your base !";
 	private final static String URL = "http://electrical-age.net";
 	private final static String UPDATE_URL = "https://github.com/Dolu1990/ElectricalAge/releases";
 	private final static String[] AUTHORS = { "Dolu1990", "lambdaShade", "cm0x4D", "TheBroBeans", "DrummingFish" };
@@ -384,8 +385,8 @@ public class Eln {
 		ModMetadata meta = event.getModMetadata();
 		meta.modId = MODID;
 		meta.version = Version.getVersionName();
-		meta.name = I18N.getString("mod.name");
-		meta.description = I18N.getString("mod.desc");
+		meta.name = NAME;
+		meta.description = I18N.getString("mod.meta.desc");
 		meta.url = URL;
 		meta.updateUrl = UPDATE_URL;
 		meta.authorList = Arrays.asList(AUTHORS);
@@ -769,7 +770,10 @@ public class Eln {
 		sixNodeItem.populateLangFileKeys();
 		transparentNodeItem.populateLangFileKeys();
 		sharedItem.populateLangFileKeys();
+		sharedItemStackOne.populateLangFileKeys();
 		oreItem.populateLangFileKeys();
+		Achievements.populateLangFileKeys();
+		this.populateLangFileCommonKeys();
 
 		Utils.println("Electrical age init done");
 	}
@@ -6548,6 +6552,10 @@ public class Eln {
 		return findItemStack(name, 1);
 	}
 
+	public static void populateLangFileCommonKeys(){
+		//Mod metadatas
+		Eln.langFile_DefaultKeys.put("mod.meta.desc","<"+MODDESC+">");
+	}
 
 
 
