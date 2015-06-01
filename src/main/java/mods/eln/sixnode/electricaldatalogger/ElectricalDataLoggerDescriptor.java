@@ -27,6 +27,8 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 
     float cr, cg, cb;
 
+	float reflc;
+
     public boolean onFloor;
     private String textColor;
 
@@ -54,7 +56,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 				ra = main.getFloat("ra");
 				mx = main.getFloat("mx");
 				my = main.getFloat("my");
-
+				reflc = main.getFloat("reflc");
 				led = obj.getPart("led");
 			}
 		}
@@ -82,7 +84,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 		float rotYaw = Minecraft.getMinecraft().thePlayer.rotationYaw / 360.f;
 		float rotPitch = Minecraft.getMinecraft().thePlayer.rotationPitch / 180.f;
 		float pos = (((float)Minecraft.getMinecraft().thePlayer.posX)-((float)(objPosMX*2)) + ((float)Minecraft.getMinecraft().thePlayer.posZ)-((float)(objPosMZ*2))) / 24.f;
-		GL11.glColor4f(1, 1, 1, 0.8f);
+		GL11.glColor4f(1, 1, 1, reflc);
 		reflection.draw(rotYaw+pos, rotPitch*0.857f);
 		UtilsClient.disableBlend();
 
