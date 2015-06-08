@@ -14,6 +14,7 @@ import mods.eln.sim.BatterySlowProcess;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.item.EntityItem;
@@ -149,7 +150,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	}
 	
 	public void applyTo(Resistor resistor) {
-		resistor.setR(electricalRp);
+		resistor.setR(new Resistance(electricalRp));
 	}
 	
 	public void applyTo(BatteryProcess battery) {

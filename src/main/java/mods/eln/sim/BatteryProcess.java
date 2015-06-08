@@ -2,6 +2,7 @@ package mods.eln.sim;
 
 import mods.eln.misc.FunctionTable;
 import mods.eln.sim.mna.component.VoltageSource;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.mna.state.VoltageState;
 
 public class BatteryProcess implements IProcess {
@@ -30,11 +31,11 @@ public class BatteryProcess implements IProcess {
 	@Override
 	public void process(double time) {
 //		Utils.print("*");
-		Q -= voltageSource.getCurrent() * time;
+		Q -= voltageSource.getCurrent().getValue() * time;
 		
 		double voltage = computeVoltage();
 		
-		voltageSource.setU(voltage);
+		voltageSource.setU(new Voltage(voltage));
 		
 		/*double Cequ = (positiveLoad.getC() * negativeLoad.getC()) / (positiveLoad.getC() + negativeLoad.getC());
 		double QNeeded = (voltage - (positiveLoad.Uc - negativeLoad.Uc)) * Cequ;
@@ -124,6 +125,6 @@ public class BatteryProcess implements IProcess {
 	}
 
 	public double getDischargeCurrent() {
-		return voltageSource.getI();
+		return voltageSource.getI().getValue();
 	}
 }

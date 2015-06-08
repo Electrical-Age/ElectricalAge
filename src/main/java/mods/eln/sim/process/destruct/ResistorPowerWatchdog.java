@@ -21,6 +21,6 @@ public class ResistorPowerWatchdog extends ValueWatchdog {
 	
 	@Override
 	double getValue() {
-		return resistor.getP();
+		return resistor.getP().getValue();
 	}
 }

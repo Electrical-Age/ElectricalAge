@@ -49,7 +49,7 @@ public class SignalInductorElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		return Utils.plotAmpere("I", inductor.getCurrent());
+		return Utils.plotAmpere("I", inductor.getCurrent().getValue());
 	}
 
 	@Override

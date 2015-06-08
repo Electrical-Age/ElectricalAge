@@ -4,6 +4,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.ISubSystemProcessI;
+import mods.eln.sim.mna.primitives.Current;
+import mods.eln.sim.mna.primitives.Inductance;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.mna.state.CurrentState;
 import mods.eln.sim.mna.state.State;
 
@@ -11,8 +14,8 @@ public class Inductor extends Bipole implements ISubSystemProcessI, INBTTReady {
 
 	String name;
 
-    private double l = 0;
-    double ldt;
+    private Inductance l = new Inductance();
+    Resistance ldt;
 
     private CurrentState currentState = new CurrentState();
 
@@ -26,29 +29,29 @@ public class Inductor extends Bipole implements ISubSystemProcessI, INBTTReady {
 	}
 
 	@Override
-	public double getCurrent() {
-		return currentState.state;
+	public Current getCurrent() {
+		return new Current(currentState.state);
 	}
 
-	public void setL(double l) {
+	public void setL(Inductance l) {
 		this.l = l;
 		dirty();
 	}
 
 	@Override
 	public void applyTo(SubSystem s) {
-		ldt = -l/s.getDt();
+		ldt = l.divide(s.getDt()).opposite();
 		
 		s.addToA(aPin, currentState, 1);
 		s.addToA(bPin, currentState, -1);
 		s.addToA(currentState, aPin, 1);
 		s.addToA(currentState, bPin, -1);
-		s.addToA(currentState, currentState, ldt);
+		s.addToA(currentState, currentState, ldt.getValue());
 	}
 	
 	@Override
 	public void simProcessI(SubSystem s) {
-		s.addToI(currentState, ldt * currentState.state);
+		s.addToI(currentState, ldt.getValue() * currentState.state);
 	}
 
 	@Override

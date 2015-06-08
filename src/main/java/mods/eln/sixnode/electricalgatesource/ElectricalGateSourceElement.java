@@ -118,7 +118,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte((front.toInt() << 4));
-			stream.writeFloat((float) outputGateProcess.getU());
+			stream.writeFloat((float) outputGateProcess.getU().getValue());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

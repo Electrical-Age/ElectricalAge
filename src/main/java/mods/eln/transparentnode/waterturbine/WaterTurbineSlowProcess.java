@@ -4,6 +4,7 @@ import mods.eln.misc.INBTTReady;
 import mods.eln.misc.RcRcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
+import mods.eln.sim.mna.primitives.Power;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
@@ -38,7 +39,7 @@ public class WaterTurbineSlowProcess implements IProcess,INBTTReady {
 				filter.step((float) time);
 			}
 		
-			turbine.powerSource.setP(filter.get());
+			turbine.powerSource.setP(new Power(filter.get()));
 		}
 	}
 

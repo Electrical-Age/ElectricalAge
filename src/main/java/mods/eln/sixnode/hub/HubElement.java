@@ -13,6 +13,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
@@ -159,7 +160,7 @@ public class HubElement extends SixNodeElement {
 				
 				if (inventory.getStackInSlot(HubContainer.cableSlotId + lrdu[0].toInt()) != null && inventory.getStackInSlot(HubContainer.cableSlotId + lrdu[1].toInt()) != null) {
 					Resistor r = new Resistor(electricalLoad[lrdu[0].toInt()], electricalLoad[lrdu[1].toInt()]);
-					r.setR(getCableDescriptorFromLrdu(lrdu[0]).electricalRs + getCableDescriptorFromLrdu(lrdu[1]).electricalRs);
+					r.setR(new Resistance(getCableDescriptorFromLrdu(lrdu[0]).electricalRs + getCableDescriptorFromLrdu(lrdu[1]).electricalRs));
 					electricalComponentList.add(r);
 					
 					//ResistorCurrentWatchdog watchdog = new ResistorCurrentWatchdog();

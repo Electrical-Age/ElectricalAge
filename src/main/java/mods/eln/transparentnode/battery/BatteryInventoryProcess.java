@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.battery;
 
 import mods.eln.sim.IProcess;
+import mods.eln.sim.mna.primitives.Resistance;
 
 public class BatteryInventoryProcess implements IProcess {
 
@@ -49,9 +50,9 @@ public class BatteryInventoryProcess implements IProcess {
 		
 		double currentDropPower = (U - battery.descriptor.currentDropVoltage) / battery.descriptor.electricalU * battery.descriptor.currentDropFactor;
 		if (currentDropPower > 0.1) {
-			battery.dischargeResistor.setR(1 / (1 / battery.descriptor.electricalRp + 1 / ((U * U) / currentDropPower)));
+			battery.dischargeResistor.setR(new Resistance(1 / (1 / battery.descriptor.electricalRp + 1 / ((U * U) / currentDropPower))));
 		} else {
-			battery.dischargeResistor.setR(battery.descriptor.electricalRp);
+			battery.dischargeResistor.setR(new Resistance(battery.descriptor.electricalRp));
 		}
 	}
 }

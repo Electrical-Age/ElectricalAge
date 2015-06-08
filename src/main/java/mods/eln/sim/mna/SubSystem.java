@@ -9,8 +9,15 @@ import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.misc.IDestructor;
 import mods.eln.sim.mna.misc.ISubSystemProcessFlush;
 import mods.eln.sim.mna.misc.ISubSystemProcessI;
+import mods.eln.sim.mna.primitives.Conductance;
+import mods.eln.sim.mna.primitives.Current;
+import mods.eln.sim.mna.primitives.Inductance;
+import mods.eln.sim.mna.primitives.Resistance;
+import mods.eln.sim.mna.primitives.Timedelta;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.mna.state.VoltageState;
+
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.QRDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -28,7 +35,7 @@ public class SubSystem {
 
 	RootSystem root;
 
-	double dt;
+	Timedelta dt;
 	boolean matrixValid = false;
 
 	int stateCount;
@@ -49,7 +56,7 @@ public class SubSystem {
 		return root;
 	}
 	
-	public SubSystem(RootSystem root,double dt) {
+	public SubSystem(RootSystem root, Timedelta dt) {
 		this.dt = dt;
 		this.root = root;
 	}
@@ -165,7 +172,7 @@ public class SubSystem {
 		Utils.println(p);
 	}
 
-	public void addToA(State a, State b, double v) {
+	public void addToA(State a, State b, final double v) {
 		if (a == null || b == null)
 			return;
 		A.addToEntry(a.getId(), b.getId(), v);
@@ -285,7 +292,7 @@ public class SubSystem {
 //		s.step();
 //		s.step();
 
-				SubSystem s = new SubSystem(null, 0.1);
+				SubSystem s = new SubSystem(null, new Timedelta(0.1));
 				VoltageState n1, n2, n3, n4, n5;
 				VoltageSource u1;
 				Resistor r1, r2, r3;
@@ -297,11 +304,11 @@ public class SubSystem {
 			//	s.addState(n4 = new VoltageState());
 			//	s.addState(n5 = new VoltageState());
 		
-				s.addComponent((u1 = new VoltageSource("")).setU(1).connectTo(n1, null));
+				s.addComponent((u1 = new VoltageSource("")).setU(new Voltage(1)).connectTo(n1, null));
 		
-				s.addComponent((r1 = new Resistor()).setR(10).connectTo(n1, n2));
-				s.addComponent((d1 = new Delay()).set(1).connectTo(n2, n3));
-				s.addComponent((r2 = new Resistor()).setR(10).connectTo(n3, null));
+				s.addComponent((r1 = new Resistor()).setR(new Resistance(10)).connectTo(n1, n2));
+				s.addComponent((d1 = new Delay()).set(new Resistance(1)).connectTo(n2, n3));
+				s.addComponent((r2 = new Resistor()).setR(new Resistance(10)).connectTo(n3, null));
 				//s.addComponent((d2 = new Delay()).set(10).connectTo(n4, n5));
 				//s.addComponent((r2 = new Resistor()).setR(10).connectTo(n5, null));
 
@@ -324,12 +331,12 @@ public class SubSystem {
 		s.state = value;
 	}
 
-	public double getX(State s) {
-		return s.state;
+	public Resistance getX(State s) {
+		return new Resistance(s.state);
 	}
 
-	public double getXSafe(State bPin) {
-		return bPin == null ? 0 : getX(bPin);
+	public Resistance getXSafe(State bPin) {
+		return bPin == null ? new Resistance() : getX(bPin);
 	}
 
 	public boolean breakSystem() {
@@ -369,38 +376,39 @@ public class SubSystem {
 		processF.remove(p);
 	}
 
-	public double getDt() {
+	public Timedelta getDt() {
 		return dt;
 	}
 
 	static public class Th {
-		public double R, U;
+		public Resistance R;
+		public Voltage U;
 		
 		public boolean isHighImpedance() {
-			return R > 1e8;
+			return R.getValue() > 1e8;
 		}
 	}
 	
 	public Th getTh(State d, VoltageSource voltageSource) {
 		Th th = new Th();
-		double originalU = d.state;
+		Voltage originalU = new Voltage(d.state);
 
-		double aU = 10;
+		Voltage aU = new Voltage(10);
 		voltageSource.setU(aU);
-		double aI = solve(voltageSource.getCurrentState());
+		Current aI = new Current(solve(voltageSource.getCurrentState()));
 
-		double bU = 5;
+		Voltage bU = new Voltage(5);
 		voltageSource.setU(bU);
-		double bI = solve(voltageSource.getCurrentState());
+		Current bI = new Current(solve(voltageSource.getCurrentState()));
 
-		double Rth = (aU - bU) / (bI - aI);
-		double Uth;
+		Resistance Rth = aU.substract(bU).divide(bI.substract(aI));
+		Voltage Uth;
 		//if(Double.isInfinite(d.Rth)) d.Rth = Double.MAX_VALUE;
-		if (Rth > 10000000000000000000.0 || Rth < 0) {
-			Uth = 0;
-			Rth = 10000000000000000000.0;
+		if (Rth.getValue() > 10000000000000000000.0 || Rth.getValue() < 0) {
+			Uth = new Voltage();
+			Rth = new Resistance(10000000000000000000.0);
 		} else {
-			Uth = aU + Rth * aI;
+			Uth = aU.add(Rth.multiply(aI));
 		}
 		voltageSource.setU(originalU);
 		

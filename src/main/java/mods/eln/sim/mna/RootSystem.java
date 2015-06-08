@@ -6,6 +6,9 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.component.*;
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;
 import mods.eln.sim.mna.misc.ISubSystemProcessFlush;
+import mods.eln.sim.mna.primitives.Resistance;
+import mods.eln.sim.mna.primitives.Timedelta;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.mna.state.VoltageState;
 
@@ -13,7 +16,7 @@ import java.util.*;
 
 public class RootSystem {
 
-	double dt;
+	Timedelta dt;
 	int interSystemOverSampling;
 
 	ArrayList<SubSystem> systems = new ArrayList<SubSystem>();
@@ -29,7 +32,7 @@ public class RootSystem {
 
 	ArrayList<IRootSystemPreStepProcess> processPre = new ArrayList<IRootSystemPreStepProcess>();
 
-	public RootSystem(double dt, int interSystemOverSampling) {
+	public RootSystem(Timedelta dt, int interSystemOverSampling) {
 		this.dt = dt;
 		this.interSystemOverSampling = interSystemOverSampling;
 	}
@@ -370,7 +373,7 @@ public class RootSystem {
 	}
 
 	public static void main(String[] args) {
-		RootSystem s = new RootSystem(0.1, 1);
+		RootSystem s = new RootSystem(new Timedelta(0.1), 1);
 
 		VoltageState n1, n2;
 		VoltageSource u1;
@@ -379,10 +382,10 @@ public class RootSystem {
 		s.addState(n1 = new VoltageState());
 		s.addState(n2 = new VoltageState());
 
-		s.addComponent((u1 = new VoltageSource("")).setU(1).connectTo(n1, null));
+		s.addComponent((u1 = new VoltageSource("")).setU(new Voltage(1)).connectTo(n1, null));
 
-		s.addComponent((r1 = new Resistor()).setR(10).connectTo(n1, n2));
-		s.addComponent((r2 = new Resistor()).setR(20).connectTo(n2, null));
+		s.addComponent((r1 = new Resistor()).setR(new Resistance(10)).connectTo(n1, n2));
+		s.addComponent((r2 = new Resistor()).setR(new Resistance(20)).connectTo(n2, null));
 
 		VoltageState n11, n12;
 		VoltageSource u11;
@@ -391,20 +394,20 @@ public class RootSystem {
 		s.addState(n11 = new VoltageState());
 		s.addState(n12 = new VoltageState());
 
-		s.addComponent((u11 = new VoltageSource("")).setU(1).connectTo(n11, null));
+		s.addComponent((u11 = new VoltageSource("")).setU(new Voltage(1)).connectTo(n11, null));
 
-		s.addComponent((r11 = new Resistor()).setR(10).connectTo(n11, n12));
-		s.addComponent((r12 = new Resistor()).setR(30).connectTo(n12, null));
+		s.addComponent((r11 = new Resistor()).setR(new Resistance(10)).connectTo(n11, n12));
+		s.addComponent((r12 = new Resistor()).setR(new Resistance(30)).connectTo(n12, null));
 
 		InterSystem i01;
 
-		s.addComponent((i01 = new InterSystem()).setR(10).connectTo(n2, n12));
+		s.addComponent((i01 = new InterSystem()).setR(new Resistance(10)).connectTo(n2, n12));
 
 		for (int i = 0; i < 50; i++) {
 			s.step();
 		}
 
-		s.addComponent((r13 = new Resistor()).setR(30).connectTo(n12, null));
+		s.addComponent((r13 = new Resistor()).setR(new Resistance(30)).connectTo(n12, null));
 
 		for (int i = 0; i < 50; i++) {
 			s.step();

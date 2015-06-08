@@ -10,6 +10,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.misc.MnaConst;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -110,7 +111,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
 	}
 
 	public void applyTo(Resistor resistor, double factor) {
-		resistor.setR(electricalRs * factor);
+		resistor.setR(new Resistance(electricalRs * factor));
 	}
 	
 	public void applyTo(ThermalLoad thermalLoad) {

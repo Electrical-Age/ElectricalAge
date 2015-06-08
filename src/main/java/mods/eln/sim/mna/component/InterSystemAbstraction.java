@@ -3,6 +3,8 @@ package mods.eln.sim.mna.component;
 import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.IDestructor;
+import mods.eln.sim.mna.primitives.Resistance;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.mna.state.VoltageState;
 
@@ -67,11 +69,11 @@ public class InterSystemAbstraction implements IAbstractor, IDestructor {
 	}
 
 	void calibrate() {
-		double u = (aState.state + bState.state) / 2;
+		Voltage u = new Voltage((aState.state + bState.state) / 2);
 		aNewDelay.setU(u);
 		bNewDelay.setU(u);
 
-		double r = interSystemResistor.getR() / 2;
+		Resistance r = interSystemResistor.getR().multiply(0.5);
 		aNewResistor.setR(r);
 		bNewResistor.setR(r);
 	}

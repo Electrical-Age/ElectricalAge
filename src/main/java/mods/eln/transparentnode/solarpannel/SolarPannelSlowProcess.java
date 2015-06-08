@@ -3,6 +3,7 @@ package mods.eln.transparentnode.solarpannel;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
+import mods.eln.sim.mna.primitives.Power;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
@@ -26,7 +27,7 @@ public class SolarPannelSlowProcess implements IProcess {
 			}
 			else*/
 			{
-				solarPannel.powerSource.setP(solarPannel.descriptor.electricalPmax*getSolarLight());
+				solarPannel.powerSource.setP(new Power(solarPannel.descriptor.electricalPmax*getSolarLight()));
 			}
 			timeCounter += Math.random()*timeCounterRefreshMax/2 + timeCounterRefreshMax/2;
 		}

@@ -11,6 +11,7 @@ import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.ore.OreBlock;
 import mods.eln.sim.IProcess;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sixnode.lampsocket.LightBlockEntity;
 import mods.eln.sound.SoundCommand;
 import mods.eln.sound.SoundLooper;
@@ -98,7 +99,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 			}
 		}
 
-		energyCounter += miner.powerResistor.getP() * time;
+		energyCounter += miner.powerResistor.getP().getValue() * time;
 
 		if (job != jobType.none && job != jobType.full && job != jobType.chestFull && job != jobType.done) {
 			if (energyCounter >= energyTarget || (job == jobType.ore && !isReadyToDrill()) || !miner.powerOk) {
@@ -173,14 +174,14 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                 } else {
                     // double p = drill.nominalPower + (scanner != null ? scanner.OperationEnergy/drill.operationTime : 0);
                     double p = drill.nominalPower;
-                    miner.powerResistor.setR(Math.pow(miner.descriptor.nominalVoltage, 2.0) / p);
+                    miner.powerResistor.setR(new Resistance(Math.pow(miner.descriptor.nominalVoltage, 2.0) / p));
                 }
                 break;
             case pipeAdd:
-                miner.powerResistor.setR(miner.descriptor.pipeOperationRp);
+                miner.powerResistor.setR(new Resistance(miner.descriptor.pipeOperationRp));
                 break;
             case pipeRemove:
-                miner.powerResistor.setR(miner.descriptor.pipeOperationRp);
+                miner.powerResistor.setR(new Resistance(miner.descriptor.pipeOperationRp));
                 break;
 		}
 

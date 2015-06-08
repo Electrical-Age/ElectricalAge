@@ -3,6 +3,9 @@ package mods.eln.sim.mna.component;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.ISubSystemProcessI;
+import mods.eln.sim.mna.primitives.Current;
+import mods.eln.sim.mna.primitives.Power;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.mna.state.CurrentState;
 import mods.eln.sim.mna.state.State;
 import net.minecraft.nbt.NBTTagCompound;
@@ -12,7 +15,7 @@ public class VoltageSource extends Bipole implements ISubSystemProcessI, INBTTRe
 
 	String name;
 
-    double u = 0;
+    Voltage u = new Voltage();
     private CurrentState currentState = new CurrentState();
 
 	public VoltageSource(String name) {
@@ -24,12 +27,12 @@ public class VoltageSource extends Bipole implements ISubSystemProcessI, INBTTRe
 		this.name = name;
 	}
 
-	public VoltageSource setU(double u) {
+	public VoltageSource setU(Voltage u) {
 		this.u = u;
 		return this;
 	}
 	
-	public double getU() {
+	public Voltage getU() {
 		return u;
 	}
 	
@@ -57,16 +60,16 @@ public class VoltageSource extends Bipole implements ISubSystemProcessI, INBTTRe
 
 	@Override
 	public void simProcessI(SubSystem s) {
-		s.addToI(getCurrentState(), u);
+		s.addToI(getCurrentState(), u.getValue());
 	}
 
-	public double getI() {
-		return -getCurrentState().state;
+	public Current getI() {
+		return new Current(-getCurrentState().state);
 	}
 
 	@Override
-	public double getCurrent() {
-		return -getCurrentState().state;
+	public Current getCurrent() {
+		return new Current(-getCurrentState().state);
 	}
 
 	public CurrentState getCurrentState() {
@@ -76,18 +79,18 @@ public class VoltageSource extends Bipole implements ISubSystemProcessI, INBTTRe
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
 		str += name;
-		setU(nbt.getDouble(str + "U"));
+		setU(new Voltage(nbt.getDouble(str + "U")));
 		currentState.state = (nbt.getDouble(str + "Istate"));
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		str += name;
-		nbt.setDouble(str + "U", u);
+		nbt.setDouble(str + "U", u.getValue());
 		nbt.setDouble(str + "Istate", currentState.state);
 	}
 
-	public double getP() {
-		return getU() * getI();
+	public Power getP() {
+		return getU().multiply(getI());
 	}
 }

@@ -6,6 +6,7 @@ import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.component.IAbstractor;
+import mods.eln.sim.mna.primitives.Voltage;
 
 public class State {
 

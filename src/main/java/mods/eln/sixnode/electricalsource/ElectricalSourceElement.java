@@ -13,6 +13,7 @@ import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -46,7 +47,7 @@ public class ElectricalSourceElement extends SixNodeElement {
 		color = b & 0xF;
 		colorCare = (b >> 4) & 1;
 		
-		voltageSource.setU(nbt.getDouble("voltage"));
+		voltageSource.setU(new Voltage(nbt.getDouble("voltage")));
 	}
 	
 	public static boolean canBePlacedOnSide(Direction side, int type) {
@@ -58,7 +59,7 @@ public class ElectricalSourceElement extends SixNodeElement {
  		super.writeToNBT(nbt);
 		nbt.setByte("color", (byte)(color + (colorCare << 4)));
 		
-		nbt.setDouble("voltage", voltageSource.getU());
+		nbt.setDouble("voltage", voltageSource.getU().getValue());
 	}
 
 	@Override
@@ -78,7 +79,7 @@ public class ElectricalSourceElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		return Utils.plotUIP(electricalLoad.getU(), voltageSource.getI());
+		return Utils.plotUIP(electricalLoad.getU(), voltageSource.getI().getValue());
 	}
 	
 	@Override
@@ -91,7 +92,7 @@ public class ElectricalSourceElement extends SixNodeElement {
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte((color << 4));
-	    	stream.writeFloat((float) voltageSource.getU());
+			stream.writeFloat((float) voltageSource.getU().getValue());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -135,7 +136,7 @@ public class ElectricalSourceElement extends SixNodeElement {
 		try {
 			switch(stream.readByte()) {
                 case setVoltageId:
-                    voltageSource.setU(stream.readFloat());
+                    voltageSource.setU(new Voltage(stream.readFloat()));
                     needPublish();
                     break;
 			}

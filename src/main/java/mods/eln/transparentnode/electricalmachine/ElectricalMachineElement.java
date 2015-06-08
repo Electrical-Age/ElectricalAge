@@ -155,8 +155,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 
 	public void networkSerialize(java.io.DataOutputStream stream) {
 		super.networkSerialize(stream);
-		double fPower = electricalResistor.getP() / descriptor.nominalP;
-		if (electricalResistor.getP() < 11) fPower = 0.0;
+		double fPower = electricalResistor.getP().getValue() / descriptor.nominalP;
+		if (electricalResistor.getP().getValue() < 11) fPower = 0.0;
 		if (fPower > 1.9) fPower = 1.9;
 		try {
 			stream.writeByte((int)(fPower * 64));

@@ -5,6 +5,10 @@ import mods.eln.misc.INBTTReady;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;
+import mods.eln.sim.mna.primitives.Current;
+import mods.eln.sim.mna.primitives.Power;
+import mods.eln.sim.mna.primitives.Resistance;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.mna.state.State;
 
 public class PowerSourceBipole implements IRootSystemPreStepProcess, INBTTReady {
@@ -14,7 +18,9 @@ public class PowerSourceBipole implements IRootSystemPreStepProcess, INBTTReady 
 	private State aPin;
 	private State bPin;
 
-	double P, Umax, Imax;
+	Power P;
+	Voltage Umax;
+	Current Imax;
 
 	public PowerSourceBipole(State aPin, State bPin, VoltageSource aSrc, VoltageSource bSrc) {
 		this.aSrc = aSrc;
@@ -23,24 +29,24 @@ public class PowerSourceBipole implements IRootSystemPreStepProcess, INBTTReady 
 		this.bPin = bPin;
 	}
 
-	public void setP(double P) {
+	public void setP(Power P) {
 		this.P = P;
 	}
 	
-	void setMax(double Umax, double Imax) {
+	void setMax(Voltage Umax, Current Imax) {
 		this.Umax = Umax;
 		this.Imax = Imax;
 	}
 
-	public void setImax(double imax) {
+	public void setImax(Current imax) {
 		Imax = imax;
 	}
 	
-	public void setUmax(double umax) {
+	public void setUmax(Voltage umax) {
 		Umax = umax;
 	}
 
-	public double getP() {
+	public Power getP() {
 		return P;
 	}
 
@@ -49,33 +55,33 @@ public class PowerSourceBipole implements IRootSystemPreStepProcess, INBTTReady 
 		SubSystem.Th a = aPin.getSubSystem().getTh(aPin, aSrc);
 		SubSystem.Th b = bPin.getSubSystem().getTh(bPin, bSrc);
 		
-		double Uth = a.U - b.U;
-		double Rth = a.R + b.R;
-		if (Uth >= Umax) {
+		Voltage Uth = a.U.substract(b.U);
+		Resistance Rth = a.R.add(b.R);
+		if (Uth.getValue() >= Umax.getValue()) {
 			aSrc.setU(a.U);
 			bSrc.setU(b.U);			
 		} else {
-			double U = (Math.sqrt(Uth * Uth + 4 * P * Rth) + Uth) / 2;
-			U =  Math.min(Math.min(U, Umax), Uth + Rth * Imax);
-			if (Double.isNaN(U)) U = 0;
+			Voltage U = new Voltage(Math.sqrt(Uth.getValue() * Uth.getValue() + 4 * P.getValue() * Rth.getValue())).add(Uth).multiply(0.5);
+			U =  Voltage.min(Voltage.min(U, Umax), Uth.add(Rth.multiply(Imax)));
+			if (U.isNaN()) U = new Voltage();
 			
-			double I = (Uth - U) / Rth;
-			aSrc.setU(a.U - I * a.R);
-			bSrc.setU(b.U + I * b.R);
+			Current I = Uth.substract(U).divide(Rth);
+			aSrc.setU(a.U.substract(I.multiply(a.R)));
+			bSrc.setU(b.U.add(I.multiply(b.R)));
 		}
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
-		setP(nbt.getDouble(str + "P"));
-		setUmax(nbt.getDouble(str + "Umax"));
-		setImax(nbt.getDouble(str + "Imax"));
+		setP(new Power(nbt.getDouble(str + "P")));
+		setUmax(new Voltage(nbt.getDouble(str + "Umax")));
+		setImax(new Current(nbt.getDouble(str + "Imax")));
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
-		nbt.setDouble(str + "P", getP());
-		nbt.setDouble(str + "Umax", Umax);
-		nbt.setDouble(str + "Imax", Imax);
+		nbt.setDouble(str + "P", getP().getValue());
+		nbt.setDouble(str + "Umax", Umax.getValue());
+		nbt.setDouble(str + "Imax", Imax.getValue());
 	}
 }

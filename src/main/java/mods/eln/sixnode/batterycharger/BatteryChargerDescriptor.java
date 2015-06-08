@@ -8,6 +8,7 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
@@ -109,7 +110,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 		if (!powerOn)
 			powerload.highImpedance();
 		else
-			powerload.setR(Rp);
+			powerload.setR(new Resistance(Rp));
 	}
 
 	@Override

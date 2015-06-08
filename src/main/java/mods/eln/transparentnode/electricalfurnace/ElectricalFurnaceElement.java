@@ -190,7 +190,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 	public void networkSerialize(java.io.DataOutputStream stream) {
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte((powerOn ? 1 : 0) + (heatingCorpResistor.getP() > 5 ? 2 : 0));
+			stream.writeByte((powerOn ? 1 : 0) + (heatingCorpResistor.getP().getValue() > 5 ? 2 : 0));
 			
 			stream.writeShort((int) thermalRegulator.getTarget());
 			stream.writeShort((int) thermalLoad.Tc);
@@ -204,7 +204,7 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 				stream.writeShort(stack.getItemDamage());				
 			}
 			
-			stream.writeShort((int) heatingCorpResistor.getP());
+			stream.writeShort((int) heatingCorpResistor.getP().getValue());
 			stream.writeFloat((float) electricalLoad.getU());
 			stream.writeFloat((float) slowRefreshProcess.processState());
 			stream.writeFloat((float) slowRefreshProcess.processStatePerSecond());

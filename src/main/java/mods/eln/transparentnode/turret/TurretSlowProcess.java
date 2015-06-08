@@ -10,6 +10,7 @@ import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.block.Block;
@@ -317,7 +318,7 @@ public class TurretSlowProcess extends StateMachine {
 	
 	@Override
 	public void process(double time) {
-		element.energyBuffer += element.powerResistor.getP() * time;
+		element.energyBuffer += element.powerResistor.getP().getValue() * time;
 		
 		if(element.coordonate().getBlockExist())
 			super.process(time);
@@ -325,6 +326,6 @@ public class TurretSlowProcess extends StateMachine {
         if (actualPower == 0 )
             element.powerResistor.highImpedance();
         else
-            element.powerResistor.setR(element.load.getU() * element.load.getU() / actualPower);
+            element.powerResistor.setR(new Resistance(element.load.getU() * element.load.getU() / actualPower));
 	}	
 }

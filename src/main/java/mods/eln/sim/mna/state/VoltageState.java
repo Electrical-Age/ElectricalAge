@@ -1,5 +1,7 @@
 package mods.eln.sim.mna.state;
 
+import mods.eln.sim.mna.primitives.Voltage;
+
 public class VoltageState extends State {
 
 	public double getU() {

@@ -4,6 +4,8 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
+import mods.eln.sim.mna.primitives.Power;
+import mods.eln.sim.mna.primitives.Voltage;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -142,8 +144,8 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 		
 		
 		
-		turbine.powerSource.setP(P);	
-		turbine.powerSource.setUmax(d.maxVoltage);
+		turbine.powerSource.setP(new Power(P));
+		turbine.powerSource.setUmax(new Voltage(d.maxVoltage));
 		
 		
 		

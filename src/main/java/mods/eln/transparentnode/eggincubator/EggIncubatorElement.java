@@ -64,7 +64,7 @@ public class EggIncubatorElement extends TransparentNodeElement {
 		
 		@Override
 		public void process(double time) {
-			energy -= powerResistor.getP() * time;
+			energy -= powerResistor.getP().getValue() * time;
 			if (inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) != null) {
 				descriptor.setState(powerResistor, true);
 				if (energy <= 0) {

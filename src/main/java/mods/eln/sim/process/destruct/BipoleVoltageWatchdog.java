@@ -21,6 +21,6 @@ public class BipoleVoltageWatchdog extends ValueWatchdog {
 
 	@Override
 	double getValue() {
-		return bipole.getU();
+		return bipole.getU().getValue();
 	}
 }

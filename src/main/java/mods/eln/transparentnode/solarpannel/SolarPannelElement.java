@@ -16,6 +16,8 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.VoltageSource;
+import mods.eln.sim.mna.primitives.Current;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.mna.process.PowerSourceBipole;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
@@ -125,8 +127,8 @@ public class SolarPannelElement extends TransparentNodeElement{
 	}
 	@Override
 	public void initialize() {
-		powerSource.setUmax(this.descriptor.electricalUmax);
-		powerSource.setImax(this.descriptor.electricalPmax/this.descriptor.electricalUmax * 1.5);
+		powerSource.setUmax(new Voltage(this.descriptor.electricalUmax));
+		powerSource.setImax(new Current(this.descriptor.electricalPmax/this.descriptor.electricalUmax * 1.5));
 		
 		descriptor.applyTo(positiveLoad);
 		descriptor.applyTo(negativeLoad);

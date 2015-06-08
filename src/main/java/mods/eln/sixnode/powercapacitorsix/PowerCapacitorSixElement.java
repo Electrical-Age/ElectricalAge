@@ -14,6 +14,8 @@ import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Capacitor;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Capacitance;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.BipoleVoltageWatchdog;
 import mods.eln.sim.process.destruct.WorldExplosion;
@@ -62,10 +64,10 @@ public class PowerCapacitorSixElement extends SixNodeElement {
 		public void process(double time) {
 			if (eLeft <= 0) {
 				eLeft = 0;
-				dischargeResistor.setR(stdDischargeResistor);
+				dischargeResistor.setR(new Resistance(stdDischargeResistor));
 			} else {
-				eLeft -= dischargeResistor.getP() * time;
-				dischargeResistor.setR(eLegaliseResistor);
+				eLeft -= dischargeResistor.getP().getValue() * time;
+				dischargeResistor.setR(new Resistance(eLegaliseResistor));
 			}
 		}
 	}
@@ -91,7 +93,7 @@ public class PowerCapacitorSixElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		return Utils.plotVolt("U", Math.abs(capacitor.getU())) + Utils.plotAmpere("I", capacitor.getCurrent());
+		return Utils.plotVolt("U", Math.abs(capacitor.getU().getValue())) + Utils.plotAmpere("I", capacitor.getCurrent().getValue());
 	}
 
 	@Override
@@ -114,23 +116,23 @@ public class PowerCapacitorSixElement extends SixNodeElement {
 	}
 
 	public void setupPhysical() {
-		double eOld = capacitor.getE();
-		capacitor.setC(descriptor.getCValue(inventory));
-		stdDischargeResistor = descriptor.dischargeTao / capacitor.getC();
+		double eOld = capacitor.getE().getValue();
+		capacitor.setC(new Capacitance(descriptor.getCValue(inventory)));
+		stdDischargeResistor = descriptor.dischargeTao / capacitor.getC().getValue();
 		
 		watchdog.setUNominal(descriptor.getUNominalValue(inventory));
 		punkProcess.eLegaliseResistor = Math.pow(descriptor.getUNominalValue(inventory), 2) / 400;
 		
 		if (fromNbt) {
-			dischargeResistor.setR(stdDischargeResistor);
+			dischargeResistor.setR(new Resistance(stdDischargeResistor));
 			fromNbt = false;
 		} else {
-			double deltaE = capacitor.getE() - eOld;
+			double deltaE = capacitor.getE().getValue() - eOld;
 			punkProcess.eLeft += deltaE;
 			if (deltaE < 0) {
-				dischargeResistor.setR(stdDischargeResistor);
+				dischargeResistor.setR(new Resistance(stdDischargeResistor));
 			} else {
-				dischargeResistor.setR(punkProcess.eLegaliseResistor);
+				dischargeResistor.setR(new Resistance(punkProcess.eLegaliseResistor));
 			}
 		}
 	}

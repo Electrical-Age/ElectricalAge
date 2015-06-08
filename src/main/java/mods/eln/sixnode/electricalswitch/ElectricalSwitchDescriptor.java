@@ -10,11 +10,13 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -104,7 +106,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 	
 	public void applyTo(Resistor resistor, boolean state) {
 		if (state) {
-			resistor.setR(electricalRs);
+			resistor.setR(new Resistance(electricalRs));
 		} else {
 			resistor.highImpedance();
 		}

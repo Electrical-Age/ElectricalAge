@@ -2,9 +2,16 @@ package mods.eln.sim.mna.component;
 
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.MnaConst;
+import mods.eln.sim.mna.primitives.Conductance;
+import mods.eln.sim.mna.primitives.Current;
+import mods.eln.sim.mna.primitives.Power;
+import mods.eln.sim.mna.primitives.Resistance;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.mna.state.State;
 
 public class Resistor extends Bipole {
+	public static final Resistance highImpedance = new Resistance(MnaConst.highImpedance);
+	static final Resistance ultraImpedance = new Resistance(MnaConst.ultraImpedance);
 
 	public Resistor() {
 	}
@@ -22,49 +29,50 @@ public class Resistor extends Bipole {
 		return line != null;
 	}*/
 	
-	private double r = MnaConst.highImpedance, rInv = 1 / MnaConst.highImpedance;
+	private Resistance r = highImpedance;
+	Conductance rInv = highImpedance.invert();
 
 	//public boolean usedAsInterSystem = false;
 
-	public double getRInv() {
+	public Conductance getRInv() {
 		return rInv;
 	}
 	
-	public double getR() {
+	public Resistance getR() {
 		return r;
 	}
 
-	public double getI() {
+	public Current getI() {
 		return getCurrent();
 	}
 
-	public double getP() {
-		return getU() * getCurrent();
+	public Power getP() {
+		return getU().multiply(getCurrent());
 	}
 
-	public double getU() {
-		return (aPin == null ? 0 : aPin.state) - (bPin == null ? 0 : bPin.state);
+	public Voltage getU() {
+		return new Voltage((aPin == null ? 0 : aPin.state) - (bPin == null ? 0 : bPin.state));
 	}
 
-	public Resistor setR(double r) {
-		if (this.r != r) {
+	public Resistor setR(Resistance r) {
+		if (this.r.getValue() != r.getValue()) {
 			this.r = r;
-			this.rInv = 1 / r;
+			this.rInv = r.invert();
 			dirty();
 		}
 		return this;
 	}
 
 	public void highImpedance() {
-		setR(MnaConst.highImpedance);
+		setR(highImpedance);
 	}	
 	
 	public void ultraImpedance() {
-		setR(MnaConst.ultraImpedance);
+		setR(ultraImpedance);
 	}
 
 	public Resistor pullDown() {
-		setR(MnaConst.pullDown);
+		setR(new Resistance(MnaConst.pullDown));
 		return this;
 	}
 	
@@ -89,15 +97,15 @@ public class Resistor extends Bipole {
 
 	@Override
 	public void applyTo(SubSystem s) {
-		s.addToA(aPin, aPin, rInv);
-		s.addToA(aPin, bPin, -rInv);
-		s.addToA(bPin, bPin, rInv);
-		s.addToA(bPin, aPin, -rInv);
+		s.addToA(aPin, aPin, rInv.getValue());
+		s.addToA(aPin, bPin, -rInv.getValue());
+		s.addToA(bPin, bPin, rInv.getValue());
+		s.addToA(bPin, aPin, -rInv.getValue());
 	}
 
 	@Override
-	public double getCurrent() {
-		return getU() * rInv;
+	public Current getCurrent() {
+		return getU().multiply(rInv);
 		/*if(line == null)
 			return getU() * rInv;
 		else if (lineReversDir)

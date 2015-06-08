@@ -1,6 +1,7 @@
 package mods.eln.sim;
 
 import mods.eln.sim.mna.component.InterSystem;
+import mods.eln.sim.mna.primitives.Resistance;
 
 public class ElectricalConnection extends InterSystem {
 
@@ -13,7 +14,7 @@ public class ElectricalConnection extends InterSystem {
 
 	public void notifyRsChange() {
 		double R = ((ElectricalLoad) aPin).getRs() + ((ElectricalLoad) bPin).getRs();
-		setR(R);	
+		setR(new Resistance(R));
 	}
 
 	@Override

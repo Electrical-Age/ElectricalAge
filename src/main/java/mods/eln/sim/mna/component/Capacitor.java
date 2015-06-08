@@ -2,12 +2,15 @@ package mods.eln.sim.mna.component;
 
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.ISubSystemProcessI;
+import mods.eln.sim.mna.primitives.Capacitance;
+import mods.eln.sim.mna.primitives.Conductance;
+import mods.eln.sim.mna.primitives.Current;
+import mods.eln.sim.mna.primitives.Energy;
 import mods.eln.sim.mna.state.State;
 
 public class Capacitor extends Bipole  implements ISubSystemProcessI {
 
-    private double c = 0;
-    double cdt;
+	private Capacitance c = new Capacitance();
 
 	public Capacitor() {
 	}
@@ -17,28 +20,29 @@ public class Capacitor extends Bipole  implements ISubSystemProcessI {
 	}
 
 	@Override
-	public double getCurrent() {
-		return 0;
+	public Current getCurrent() {
+		return new Current();
 	}
 
-	public void setC(double c) {
+	public void setC(final Capacitance c) {
 		this.c = c;
 		dirty();
 	}
 
 	@Override
 	public void applyTo(SubSystem s) {
-		cdt = c / s.getDt();
+	    Conductance cdt = c.divide(s.getDt());
 		
-		s.addToA(aPin, aPin, cdt);
-		s.addToA(aPin, bPin, -cdt);
-		s.addToA(bPin, bPin, cdt);
-		s.addToA(bPin, aPin, -cdt);
+		s.addToA(aPin, aPin, cdt.getValue());
+		s.addToA(aPin, bPin, -cdt.getValue());
+		s.addToA(bPin, bPin, cdt.getValue());
+		s.addToA(bPin, aPin, -cdt.getValue());
 	}
 	
 	@Override
 	public void simProcessI(SubSystem s) {
-		double add = (s.getXSafe(aPin) - s.getXSafe(bPin)) * cdt;
+		Conductance cdt = c.divide(s.getDt());
+		double add = s.getXSafe(aPin).substract(s.getXSafe(bPin)).multiply(cdt);
 		s.addToI(aPin, add);
 		s.addToI(bPin, -add);
 	}
@@ -55,12 +59,11 @@ public class Capacitor extends Bipole  implements ISubSystemProcessI {
 		s.addProcess(this);
 	}
 
-	public double getE() {
-		double u = getU();
-		return u * u * c / 2;
+	public Energy getE() {
+		return new Energy(getU(), c);
 	}
 
-	public double getC() {
+	public Capacitance getC() {
 		return c;
 	}
 }

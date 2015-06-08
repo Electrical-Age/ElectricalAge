@@ -13,6 +13,9 @@ import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.PowerSource;
+import mods.eln.sim.mna.primitives.Current;
+import mods.eln.sim.mna.primitives.Power;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
@@ -36,11 +39,11 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement {
 	}
 	
 	public void setPowerOut(double power) {
-		powerSrc.setP(power);
+		powerSrc.setP(new Power(power));
 	}
 	
 	public void rxDisconnect() {
-		powerSrc.setP(0.0);
+		powerSrc.setP(new Power(0.0));
 	}
 
 	public ElectricalAntennaRxElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
@@ -91,8 +94,8 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement {
 	@Override
 	public void initialize() {
 		descriptor.cable.applyTo(powerOut);
-		powerSrc.setUmax(descriptor.electricalMaximalVoltage * 2);
-		powerSrc.setImax(descriptor.electricalMaximalVoltage * descriptor.electricalMaximalPower * 2);
+		powerSrc.setUmax(new Voltage(descriptor.electricalMaximalVoltage * 2));
+		powerSrc.setImax(new Current(descriptor.electricalMaximalVoltage * descriptor.electricalMaximalPower * 2));
 		connect();
 	}
 

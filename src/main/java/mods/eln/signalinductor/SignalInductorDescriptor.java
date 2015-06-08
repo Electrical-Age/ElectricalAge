@@ -5,6 +5,7 @@ import java.util.List;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.component.Inductor;
+import mods.eln.sim.mna.primitives.Inductance;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,7 +35,7 @@ public class SignalInductorDescriptor extends SixNodeDescriptor {
 	}
 
 	public void applyTo(Inductor inductor) {
-		inductor.setL(henri);
+		inductor.setL(new Inductance(henri));
 	}
 
 	@Override

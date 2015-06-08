@@ -12,7 +12,7 @@ public class ThermalDissipatorActiveSlowProcess implements IProcess{
 	@Override
 	public void process(double time) {
 		ThermalDissipatorActiveDescriptor descriptor = dissipator.descriptor;
-		double poweredFactor = dissipator.powerResistor.getP() / descriptor.electricalNominalP;
+		double poweredFactor = dissipator.powerResistor.getP().getValue() / descriptor.electricalNominalP;
 		double thermalRp = 1/(1/descriptor.thermalRp + poweredFactor/(descriptor.electricalToThermalRp));
 		dissipator.thermalLoad.setRp(thermalRp);
 		

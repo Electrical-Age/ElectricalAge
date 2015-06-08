@@ -76,7 +76,7 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
 				element.txDisconnect();
 				Coordonate coordCpy = new Coordonate(coord);
 				coordCpy.move(element.front.getInverse());
-				if (element.powerResistor.getP() > 50) {
+				if (element.powerResistor.getP().getValue() > 50) {
 					if (coordCpy.world().blockExists(coordCpy.x, coordCpy.y, coordCpy.z)) {
 						if (coordCpy.getBlock() == Blocks.air) {
 							coordCpy.world().setBlock(coordCpy.x, coordCpy.y, coordCpy.z, Blocks.fire);
@@ -96,11 +96,11 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
 			
 			for (Object o : list) {
 				Entity e = (Entity) o;
-				e.setFire((int) (Math.pow(element.powerResistor.getP() / 100.0, 2) + 0.5));
+				e.setFire((int) (Math.pow(element.powerResistor.getP().getValue() / 100.0, 2) + 0.5));
 			}			
 		}
 		
-		if (element.powerResistor.getP() > element.descriptor.electricalMaximalPower) {
+		if (element.powerResistor.getP().getValue() > element.descriptor.electricalMaximalPower) {
 			element.node.physicalSelfDestruction(2.0f);
 		}
 		if (element.powerIn.getU() > element.descriptor.electricalMaximalVoltage) {
