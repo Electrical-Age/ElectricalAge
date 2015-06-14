@@ -6,14 +6,22 @@ import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeManager;
 import net.minecraft.entity.effect.EntityLightningBolt;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.event.world.WorldEvent.Save;
 import net.minecraftforge.event.world.WorldEvent.Unload;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.LinkedList;
 
 public class ServerEventListener {
@@ -55,10 +63,29 @@ public class ServerEventListener {
 		return best;
 	}
 
+
+	public String getEaWorldSaveName(World w){
+		return Utils.getMapFolder() + "data/electricalAgeWorld" + w.provider.dimensionId +".dat";
+	}
+
 	@SubscribeEvent	
 	public void onWorldLoad(Load e) {
 		if (e.world.isRemote) return;
-		ElnWorldStorage storage = ElnWorldStorage.forWorld(e.world);
+		try {
+			FileInputStream fileStream = new FileInputStream(getEaWorldSaveName(e.world));
+			NBTTagCompound nbt = CompressedStreamTools.readCompressed(fileStream);
+			readFromEaWorldNBT(nbt);
+			fileStream.close();
+		} catch (Exception ex) {
+			try{
+				FileInputStream fileStream = new FileInputStream(getEaWorldSaveName(e.world)+"back");
+				NBTTagCompound nbt = CompressedStreamTools.readCompressed(fileStream);
+				readFromEaWorldNBT(nbt);
+				fileStream.close();
+			} catch (Exception ex2) {
+				ElnWorldStorage storage = ElnWorldStorage.forWorld(e.world);
+			}
+		}
 	}
 
 	@SubscribeEvent	
@@ -71,8 +98,56 @@ public class ServerEventListener {
 	@SubscribeEvent	
 	public void onWorldSave(Save e) {
 		if (e.world.isRemote) return;
+		try {
+			NBTTagCompound nbt = new NBTTagCompound();
+			writeToEaWorldNBT(nbt,e.world.provider.dimensionId);
+
+			File oldBackup = new File(getEaWorldSaveName(e.world)+"back");
+			if(oldBackup.exists()){
+				oldBackup.delete();
+			}
+
+			File oldSave = new File(getEaWorldSaveName(e.world));
+			if(oldSave.exists()){
+				oldSave.renameTo(oldBackup);
+			}
+
+			FileOutputStream fileStream = new FileOutputStream(getEaWorldSaveName(e.world));
+			CompressedStreamTools.writeCompressed(nbt, fileStream);
+			fileStream.flush();
+			fileStream.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
 		//ElnWorldStorage storage = ElnWorldStorage.forWorld(e.world);
 		int idx = 0;
 		idx++;
 	}
+
+
+
+
+	public static void readFromEaWorldNBT(NBTTagCompound nbt) {
+		try {
+			NodeManager.instance.loadFromNbt(nbt.getCompoundTag("nodes"));
+		} catch (Exception e) {
+		}
+		try {
+			Eln.ghostManager.loadFromNBT(nbt.getCompoundTag("ghost"));
+		} catch (Exception e) {
+		}
+	}
+
+	public static void writeToEaWorldNBT(NBTTagCompound nbt,int dim) {
+		try {
+			NodeManager.instance.saveToNbt(Utils.newNbtTagCompund(nbt, "nodes"), dim);
+		} catch (Exception e) {
+		}
+		try {
+			Eln.ghostManager.saveToNBT(Utils.newNbtTagCompund(nbt, "ghost"), dim);
+		} catch (Exception e) {
+		}
+	}
+
 }

@@ -1270,11 +1270,15 @@ public class Utils {
 		nbt.setTag(string, cmp);
 		return cmp;
 	}
+	public static String getMapFolder() {
+		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+		String savesAt = !server.isDedicatedServer() ? "saves/" : "";
+		return savesAt + server.getFolderName() + "/";
+	}
 
 	public static File getMapFile(String name) {
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-		String savesAt = !server.isDedicatedServer() ? "saves/" : "";
-		File f = server.getFile(savesAt + server.getFolderName() + "/" + name);
+		File f = server.getFile(getMapFolder() + name);
 		return f;
 	}
 

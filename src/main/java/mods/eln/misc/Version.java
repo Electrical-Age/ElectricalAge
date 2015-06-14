@@ -12,7 +12,7 @@ public final class Version {
 	public final static int MAJOR = 1;
 
 	/** Minor version code. */
-	public final static int MINOR = 9;
+	public final static int MINOR = 10;
 
 	/**
 	 * Unique version code. Must be a String for annotations. Used to check if a
