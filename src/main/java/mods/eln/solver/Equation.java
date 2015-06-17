@@ -49,6 +49,7 @@ public class Equation implements IValue, INBTTReady {
 			list.add(new OperatorMapperFunc("integrate", 3, IntegratorMinMax.class));
 			list.add(new OperatorMapperFunc("derivate", 1, Derivator.class));
 			list.add(new OperatorMapperFunc("pid", 5, Pid.class));
+			list.add(new OperatorMapperFunc("pid", 7, PidMinMax.class));
 			list.add(new OperatorMapperFunc("batteryCharge", 1, BatteryCharge.class));
 			list.add(new OperatorMapperFunc("rs", 2, Rs.class));
 			list.add(new OperatorMapperFunc("rc", 2, RC.class));
@@ -707,6 +708,26 @@ public class Equation implements IValue, INBTTReady {
 		@Override
 		public int getRedstoneCost() {
 			return 12;
+		}
+	}
+
+	public static class PidMinMax extends Pid{
+		public IValue min,max;
+		@Override
+		public double getValue() {
+			return Math.max(min.getValue(),Math.min(max.getValue(),super.getValue()));
+		}
+
+		@Override
+		public void setOperator(IValue[] values) {
+			super.setOperator(values);
+			min = values[5];
+			max = values[6];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return super.getRedstoneCost() + 2;
 		}
 	}
     

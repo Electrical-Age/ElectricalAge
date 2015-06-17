@@ -2912,14 +2912,14 @@ public class Eln {
 		{
 			subId = 0;
 			completId = subId + (id << 6);
-			element = new RegulatorOnOffDescriptor("On/OFF Regulator 1%",
+			element = new RegulatorOnOffDescriptor("On/OFF Regulator 1 Percent",
 					"onoffregulator", 0.01);
 			sharedItem.addElement(completId, element);
 		}
 		{
 			subId = 1;
 			completId = subId + (id << 6);
-			element = new RegulatorOnOffDescriptor("On/OFF Regulator 10%",
+			element = new RegulatorOnOffDescriptor("On/OFF Regulator 10 Percent",
 					"onoffregulator", 0.1);
 			sharedItem.addElement(completId, element);
 		}
@@ -5262,14 +5262,14 @@ public class Eln {
 
 	void recipeRegulatorItem() {
 
-		addRecipe(findItemStack("On/OFF Regulator 10%", 1),
+		addRecipe(findItemStack("On/OFF Regulator 10 Percent", 1),
 				"R R",
 				" R ",
 				" I ",
 				Character.valueOf('R'), new ItemStack(Items.redstone),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
 
-		addRecipe(findItemStack("On/OFF Regulator 1%", 1),
+		addRecipe(findItemStack("On/OFF Regulator 1 Percent", 1),
 				"RRR",
 				" I ",
 				Character.valueOf('R'), new ItemStack(Items.redstone),

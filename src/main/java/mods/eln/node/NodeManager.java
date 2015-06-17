@@ -20,15 +20,15 @@ import net.minecraft.world.WorldSavedData;
 public class NodeManager extends WorldSavedData {
 	public static NodeManager instance = null;
 
-	HashMap<Coordonate, NodeBase> nodesMap;
-	ArrayList<NodeBase> nodes;
+	private HashMap<Coordonate, NodeBase> nodesMap;
+	private ArrayList<NodeBase> nodes;
 
 	public HashMap<Coordonate, NodeBase> getNodeArray()
 	{
 		return nodesMap;
 	}
 
-	public ArrayList<NodeBase> getNodes() {
+	public  ArrayList<NodeBase> getNodes() {
 		return nodes;
 	}
 
@@ -165,7 +165,12 @@ public class NodeManager extends WorldSavedData {
 
 	public void saveToNbt(NBTTagCompound nbt, int dim) {
 		int nodeCounter = 0;
-		for (NodeBase node : nodesMap.values())
+		ArrayList<NodeBase> nodesCopy = new ArrayList<NodeBase>();
+		nodesCopy.addAll(nodes);
+		System.out.println("WORLD SAVE " + dim);
+		System.out.flush();
+
+		for (NodeBase node : nodesCopy)
 		{
 			try {
 				if (node.mustBeSaved() == false) continue;
@@ -188,6 +193,8 @@ public class NodeManager extends WorldSavedData {
 
 	public void unload(int dimensionId) {
 		Iterator<NodeBase> i = nodes.iterator();
+		System.out.println("WORLD UNLOAD " +dimensionId);
+		System.out.flush();
 
 		while (i.hasNext()) {
 			NodeBase n = i.next();
@@ -198,10 +205,4 @@ public class NodeManager extends WorldSavedData {
 			}
 		}
 	}
-
-
-
-
-
-
 }
