@@ -16,6 +16,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Inductor;
 import mods.eln.sim.mna.component.VoltageSource;
+import mods.eln.sim.mna.primitives.Inductance;
 import mods.eln.sim.mna.process.PowerSourceBipole;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
@@ -65,7 +66,7 @@ public class PowerInductorElement extends TransparentNodeElement {
 
 	@Override
 	public String multiMeterString(Direction side) {
-		return Utils.plotAmpere("I", inductor.getCurrent());
+		return Utils.plotAmpere("I", inductor.getCurrent().getValue());
 	}
 
 	@Override
@@ -94,7 +95,7 @@ public class PowerInductorElement extends TransparentNodeElement {
 	boolean fromNbt = false;
 	public void setupPhysical() {
 		double rs = descriptor.getRsValue(inventory);
-		inductor.setL(descriptor.getlValue(inventory));
+		inductor.setL(new Inductance(descriptor.getlValue(inventory)));
 		positiveLoad.setRs(rs);
 		negativeLoad.setRs(rs);
 		

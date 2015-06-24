@@ -15,6 +15,7 @@ import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.PowerSource;
+import mods.eln.sim.mna.primitives.Current;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -90,7 +91,7 @@ public class WindTurbineElement extends TransparentNodeElement{
 	@Override
 	public void initialize() {
 		setPhysicalValue();
-		powerSource.setImax(descriptor.nominalPower*5/descriptor.maxVoltage);
+		powerSource.setImax(new Current(descriptor.nominalPower*5/descriptor.maxVoltage));
 		connect();
 	}
 
@@ -137,7 +138,7 @@ public class WindTurbineElement extends TransparentNodeElement{
 		super.networkSerialize(stream);
 		try {
 			stream.writeFloat((float) slowProcess.getWind());
-			stream.writeFloat((float) (powerSource.getP()/descriptor.nominalPower));
+			stream.writeFloat((float) (powerSource.getP().getValue()/descriptor.nominalPower));
 		} catch (IOException e) {
 			
 			e.printStackTrace();

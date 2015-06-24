@@ -203,12 +203,12 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 			double lightDouble = 0;
 			switch (lampDescriptor.type) {
                 case Incandescent:
-                    lightDouble = lampDescriptor.nominalLight * (Math.abs(lamp.lampResistor.getU()) - lampDescriptor.minimalU) / (lampDescriptor.nominalU - lampDescriptor.minimalU);
+                    lightDouble = lampDescriptor.nominalLight * (Math.abs(lamp.lampResistor.getU().getValue()) - lampDescriptor.minimalU) / (lampDescriptor.nominalU - lampDescriptor.minimalU);
                     lightDouble = (lightDouble * 16);
 
                     break;
                 case eco:
-                    double U = Math.abs(lamp.lampResistor.getU());
+                    double U = Math.abs(lamp.lampResistor.getU().getValue());
                     if (U < lampDescriptor.minimalU) {
                         stableProb = 0;
                         lightDouble = 0;
@@ -246,7 +246,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 			/*
 			 * double overFactor = (lamp.electricalLoad.Uc-lampDescriptor.minimalU) /(lampDescriptor.nominalU-lampDescriptor.minimalU);
 			 */
-			double overFactor = (lamp.lampResistor.getP()) / (lampDescriptor.nominalP);
+			double overFactor = (lamp.lampResistor.getP().getValue()) / (lampDescriptor.nominalP);
 			if (overFactor < 0)
 				overFactor = 0;
 

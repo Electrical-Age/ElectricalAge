@@ -3,6 +3,10 @@ package mods.eln.sim.mna.component;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;
 import mods.eln.sim.mna.misc.ISubSystemProcessI;
+import mods.eln.sim.mna.primitives.Conductance;
+import mods.eln.sim.mna.primitives.Current;
+import mods.eln.sim.mna.primitives.Resistance;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.mna.state.State;
 
 public class DelayInterSystem extends Component implements ISubSystemProcessI {
@@ -10,25 +14,26 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 	private DelayInterSystem other;
 	public State pin;
 
-    double impedance, conductance;
+    Resistance impedance;
+    Conductance conductance;
 
-    public double[] oldIother = new double[]{0, 0};
+    public Current[] oldIother = new Current[]{new Current(), new Current()};
     int doubleBuffer = 0;
     public boolean thevnaCalc = false;
     public double thenvaCurrent;
-    public double Rth;
-    public double Uth;
+    public Resistance Rth;
+    public Voltage Uth;
 
-    double iTarget;
+    Current iTarget;
 
 	public void set(State pin, DelayInterSystem other) {
 		this.other = other;
 		this.pin = pin;
 	}
 
-	public DelayInterSystem set(double impedance) {
+	public DelayInterSystem set(Resistance impedance) {
 		this.impedance = impedance;
-		this.conductance = 1 / impedance;
+		this.conductance = impedance.invert();
 
 		return this;
 	}
@@ -48,7 +53,7 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 
 	@Override
 	public void applyTo(SubSystem s) {
-		s.addToA(pin, pin, conductance);
+		s.addToA(pin, pin, conductance.getValue());
 	}
 
 	/*@Override
@@ -104,7 +109,7 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 		return new State[] {};
 	}
 
-	public void setInitialCurrent(double i) {
+	public void setInitialCurrent(Current i) {
 		oldIother[doubleBuffer] = i;
 	}
 
@@ -113,15 +118,15 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 		if (!thevnaCalc) {
 			//Thevna delay line
 			
-			if (Math.abs(Rth) < 1000000.0) {
-				double uTarget = Uth - Rth * iTarget;
-				double aPinI = iTarget - uTarget * conductance;
-				s.addToI(pin, -aPinI);
+			if (Math.abs(Rth.getValue()) < 1000000.0) {
+				Voltage uTarget = Uth.substract(Rth.multiply(iTarget));
+				Current aPinI = iTarget.substract(uTarget.multiply(conductance));
+				s.addToI(pin, -aPinI.getValue());
 			} else {
-				double uTarget = other.pin.state * 0.5 + pin.state * 0.5;
+				Voltage uTarget = new Voltage(other.pin.state * 0.5 + pin.state * 0.5);
 				//uTarget = 0;
-				double aPinI = iTarget - uTarget * conductance;
-				s.addToI(pin, -aPinI);
+				Current aPinI = iTarget.substract(uTarget.multiply(conductance));
+				s.addToI(pin, -aPinI.getValue());
 			}
 			
 			/*
@@ -149,27 +154,27 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 		public void rootSystemPreStepProcess() {
 			doJobFor(a);
 			doJobFor(b);
-			double iTarget = (a.Uth - b.Uth) / (a.Rth + b.Rth);
+			Current iTarget = a.Uth.substract(b.Uth).divide(a.Rth.add(b.Rth));
 			a.iTarget = iTarget;
-			b.iTarget = -iTarget;
+			b.iTarget = iTarget.opposite();
 		}
 
 		void doJobFor(DelayInterSystem d) {
 			d.thevnaCalc = true;
 
 			d.thenvaCurrent = 2;
-			double aIs = 2;
-			double aU = d.getSubSystem().solve(d.pin);
+			Current aIs = new Current(2);
+			Voltage aU = new Voltage(d.getSubSystem().solve(d.pin));
 
 			d.thenvaCurrent = 1;
-			double bIs = 1;
-			double bU = d.getSubSystem().solve(d.pin);
+			Current bIs = new Current(1);
+			Voltage bU = new Voltage(d.getSubSystem().solve(d.pin));
 
-			double aC = -(aU * d.conductance + aIs);
-			double bC = -(bU * d.conductance + bIs);
+			Current aC = aU.multiply(d.conductance).add(aIs).opposite();
+			Current bC = bU.multiply(d.conductance).add(bIs).opposite();
 
-			d.Rth = (aU - bU) / (aC - bC);
-			d.Uth = aU - d.Rth * aC;
+			d.Rth = aU.substract(bU).divide(aC.substract(bC));
+			d.Uth = aU.substract(d.Rth.multiply(aC));
 
 			d.thevnaCalc = false;
 		}

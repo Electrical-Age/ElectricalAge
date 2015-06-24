@@ -12,6 +12,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
@@ -81,7 +82,7 @@ public class LampSupplyElement extends SixNodeElement {
 
 		@Override
 		public void process(double time) {
-			loadResistor.setR(1 / RpStack);
+			loadResistor.setR(new Resistance(1 / RpStack));
 			RpStack = 0;
 		}
 	}

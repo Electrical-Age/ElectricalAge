@@ -6,6 +6,7 @@ import mods.eln.node.simple.SimpleNode;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 
 public class TestNode extends SimpleNode {
@@ -43,7 +44,7 @@ public class TestNode extends SimpleNode {
 		electricalComponentList.add(resistor);
 
 		load.setRs(10);
-		resistor.setR(90);
+		resistor.setR(new Resistance(90));
 
 		connect();
 	}

@@ -3,6 +3,7 @@ package mods.eln.sim.nbt;
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.mna.state.State;
 
 public class NbtResistor extends Resistor implements INBTTReady {
@@ -17,12 +18,12 @@ public class NbtResistor extends Resistor implements INBTTReady {
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
 		name += str;
-		setR(nbt.getDouble(str + "R"));
+		setR(new Resistance(nbt.getDouble(str + "R")));
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		name += str;
-		nbt.setDouble(str + "R", getR());
+		nbt.setDouble(str + "R", getR().getValue());
 	}
 }

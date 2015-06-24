@@ -2,6 +2,9 @@ package mods.eln.sim.mna.process;
 
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;
+import mods.eln.sim.mna.primitives.Current;
+import mods.eln.sim.mna.primitives.Resistance;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.mna.state.State;
 
 public class TransformerInterSystemProcess implements IRootSystemPreStepProcess {
@@ -22,39 +25,41 @@ public class TransformerInterSystemProcess implements IRootSystemPreStepProcess 
 		Th a = getTh(aState, aVoltgeSource);
 		Th b = getTh(bState, bVoltgeSource);
 		
-		double aU = (a.U * b.R + ratio * b.U * a.R) / (b.R + ratio * ratio * a.R);
-		if (Double.isNaN(aU)) {
-			aU = 0;
+		Voltage aU = new Voltage((a.U.getValue() * b.R.getValue() + ratio * b.U.getValue() * a.R.getValue()) / 
+				(b.R.getValue() + ratio * ratio * a.R.getValue()));
+		if (aU.isNaN()) {
+			aU = new Voltage();
 		}
 		
 		aVoltgeSource.setU(aU);
-		bVoltgeSource.setU(aU * ratio);
+		bVoltgeSource.setU(aU.multiply(ratio));
 	}
 	
 	static class Th {
-		double R,U;		
+		Resistance R;
+		Voltage U;
 	}
 	
 	Th getTh(State d,VoltageSource voltageSource) {
 		Th th = new Th();
-		double originalU = d.state;
+		Voltage originalU = new Voltage(d.state);
 
-		double aU = 10;
+		Voltage aU = new Voltage(10);
 		voltageSource.setU(aU);
-		double aI = d.getSubSystem().solve(voltageSource.getCurrentState());
+		Current aI = new Current(d.getSubSystem().solve(voltageSource.getCurrentState()));
 
-		double bU = 5;
+		Voltage bU = new Voltage(5);
 		voltageSource.setU(bU);
-		double bI = d.getSubSystem().solve(voltageSource.getCurrentState());
+		Current bI = new Current(d.getSubSystem().solve(voltageSource.getCurrentState()));
 
-		double Rth = (aU - bU) / (bI - aI);
-		double Uth;
+		Resistance Rth = aU.substract(bU).divide(bI.substract(aI));
+		Voltage Uth;
 		//if (Double.isInfinite(d.Rth)) d.Rth = Double.MAX_VALUE;
-		if (Rth > 10000000000000000000.0 || Rth < 0) {
-			Uth = 0;
-			Rth = 10000000000000000000.0;
+		if (Rth.getValue() > 10000000000000000000.0 || Rth.getValue() < 0) {
+			Uth = new Voltage();
+			Rth = new Resistance(10000000000000000000.0);
 		} else {
-			Uth = aU + Rth * aI;
+			Uth = aU.add(Rth.multiply(aI));
 		}
 		voltageSource.setU(originalU);
 		

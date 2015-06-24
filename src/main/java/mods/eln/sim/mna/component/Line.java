@@ -6,6 +6,9 @@ import java.util.LinkedList;
 import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.ISubSystemProcessFlush;
+import mods.eln.sim.mna.primitives.Current;
+import mods.eln.sim.mna.primitives.Resistance;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.mna.state.State;
 
 public class Line extends Resistor implements ISubSystemProcessFlush, IAbstractor {
@@ -30,11 +33,10 @@ public class Line extends Resistor implements ISubSystemProcessFlush, IAbstracto
 	}
 
 	public void recalculateR() {
-		double R = 0;
+		Resistance R = new Resistance();
 		for(Resistor r : resistors) {
-			R += r.getR();
+			R = R.add(r.getR());
 		}
-		
 		setR(R);
 	}
 	
@@ -113,16 +115,16 @@ public class Line extends Resistor implements ISubSystemProcessFlush, IAbstracto
 
 	@Override
 	public void simProcessFlush() {
-		double i = (aPin.state - bPin.state) * getRInv();
-		double u = aPin.state;
+		Current i = new Voltage(aPin.state - bPin.state).multiply(getRInv());
+		Voltage u = new Voltage(aPin.state);
 		Iterator<Resistor> ir = resistors.iterator();
 		Iterator<State> is = states.iterator();
 
         while (is.hasNext()) {
 			State s = is.next();
 			Resistor r = ir.next();
-			u -= r.getR() * i;
-			s.state = u;
+			u = u.substract(r.getR().multiply(i));
+			s.state = u.getValue();
 			//u -= r.getR() * i;
 		}
 	}

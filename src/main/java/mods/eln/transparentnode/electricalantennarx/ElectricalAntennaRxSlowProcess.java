@@ -12,7 +12,7 @@ public class ElectricalAntennaRxSlowProcess implements IProcess {
 	
 	@Override
 	public void process(double time) {
-		if (element.powerSrc.getP() > element.descriptor.electricalMaximalPower) {
+		if (element.powerSrc.getP().getValue() > element.descriptor.electricalMaximalPower) {
 			element.node.physicalSelfDestruction(2.0f);
 		} else if (element.powerOut.getU() > element.descriptor.electricalMaximalVoltage) {
 			element.node.physicalSelfDestruction(2.0f);

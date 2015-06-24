@@ -17,6 +17,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.ResistorPowerWatchdog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
@@ -203,7 +204,7 @@ public class BatteryChargerElement extends SixNodeElement {
 					eff = Math.pow(0.9, booster.stackSize);
 				}
 				
-				energyCounter += powerResistor.getP() * time * eff;
+				energyCounter += powerResistor.getP().getValue() * time * eff;
 				
 				for (int idx = 0; idx < 4; idx++) {
 					ItemStack stack = inventory.getStackInSlot(idx);
@@ -219,7 +220,7 @@ public class BatteryChargerElement extends SixNodeElement {
 				if (energyCounter < descriptor.nominalPower * time * 2 * boost) {
 					//double target = descriptor.nominalPower * time * 2;
 					double power = Math.min(descriptor.nominalPower * boost, (descriptor.nominalPower * time * 2 * boost - energyCounter) / time);
-					powerResistor.setR(Math.max(powerLoad.getU() * powerLoad.getU() / power, descriptor.Rp / boost));
+					powerResistor.setR(new Resistance(Math.max(powerLoad.getU() * powerLoad.getU() / power, descriptor.Rp / boost)));
 				} else {
 					descriptor.setRp(powerResistor, false);
 				}

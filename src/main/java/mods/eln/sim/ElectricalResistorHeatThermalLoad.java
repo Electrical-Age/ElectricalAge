@@ -14,6 +14,6 @@ public class ElectricalResistorHeatThermalLoad implements IProcess {
 
 	@Override
 	public void process(double time) {
-		thermalLoad.PcTemp += electricalResistor.getP();
+		thermalLoad.PcTemp += electricalResistor.getP().getValue();
 	}
 }

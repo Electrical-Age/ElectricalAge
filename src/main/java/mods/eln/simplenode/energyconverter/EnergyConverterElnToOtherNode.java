@@ -13,6 +13,7 @@ import mods.eln.node.simple.SimpleNode;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtResistor;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
@@ -83,7 +84,7 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
 
         @Override
 		public void process(double time) {
-			energyBuffer += powerInResistor.getP() * time;
+			energyBuffer += powerInResistor.getP().getValue() * time;
 			timeout -= time;
 			if (timeout < 0) {
 				timeout = 0.05;
@@ -94,7 +95,7 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
 					double factor = Math.min(1, energyMiss / energyBufferMax * 2);
 					if (factor < 0.005) factor = 0;
 					double inP = factor * inPowerMax * inPowerFactor;
-					powerInResistor.setR(inStdVoltage * inStdVoltage / inP);
+					powerInResistor.setR(new Resistance(inStdVoltage * inStdVoltage / inP));
 				}
 			}
 		}

@@ -17,6 +17,7 @@ import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -41,7 +42,7 @@ public class GroundCableElement extends SixNodeElement {
 	
 		electricalLoadList.add(electricalLoad);
 		electricalComponentList.add(ground);
-		ground.setU(0);
+		ground.setU(new Voltage());
 	}
 
 	@Override

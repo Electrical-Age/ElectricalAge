@@ -7,6 +7,7 @@ import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.RootSystem;
 import mods.eln.sim.mna.component.Component;
+import mods.eln.sim.mna.primitives.Timedelta;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.process.destruct.IDestructable;
 
@@ -72,7 +73,7 @@ public class Simulator /* ,IPacketHandler */{
 
 		FMLCommonHandler.instance().bus().register(this);
 
-		mna = new RootSystem(electricalPeriod, electricalInterSystemOverSampling);
+		mna = new RootSystem(new Timedelta(electricalPeriod), electricalInterSystemOverSampling);
 
 		slowProcessList = new ArrayList<IProcess>();
 		slowPreProcessList = new ArrayList<IProcess>();
@@ -95,7 +96,7 @@ public class Simulator /* ,IPacketHandler */{
 	public void init() {
 		nodeCount = 0;
 
-		mna = new RootSystem(electricalPeriod, electricalInterSystemOverSampling);
+		mna = new RootSystem(new Timedelta(electricalPeriod), electricalInterSystemOverSampling);
 
 		slowProcessList.clear();
 		slowPreProcessList.clear();

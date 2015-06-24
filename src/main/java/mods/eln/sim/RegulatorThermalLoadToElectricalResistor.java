@@ -1,6 +1,7 @@
 package mods.eln.sim;
 
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 
 public class RegulatorThermalLoadToElectricalResistor extends RegulatorProcess {
 
@@ -29,9 +30,9 @@ public class RegulatorThermalLoadToElectricalResistor extends RegulatorProcess {
 		if (cmd <= 0.001) {
 			electricalResistor.highImpedance();
 		} else if (cmd >= 1.0) {
-			electricalResistor.setR(Rmin);
+			electricalResistor.setR(new Resistance(Rmin));
 		} else {
-			electricalResistor.setR(Rmin / cmd);
+			electricalResistor.setR(new Resistance(Rmin / cmd));
 		}
 	}
 }

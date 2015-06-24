@@ -15,6 +15,7 @@ import mods.eln.sim.IProcess;
 import mods.eln.sim.ITimeRemoverObserver;
 import mods.eln.sim.TimeRemover;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sixnode.electricalcable.ElectricalCableElement;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.pathfinding.PathEntity;
@@ -117,11 +118,11 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 		if(distance < 2) {
 			//Utils.println("replicator on cable !");
 			double u = cable.electricalLoad.getU();
-			double nextRp = Math.pow(u / Eln.LVU, -0.3) * u * u / (50);
-			if(resistorLoad.getR() < 0.8*nextRp) {
+			Resistance nextRp = new Resistance(Math.pow(u / Eln.LVU, -0.3) * u * u / (50));
+			if(resistorLoad.getR().getValue() < 0.8*nextRp.getValue()) {
 				entity.attackEntityFrom(DamageSource.magic, 5);
 			} else {
-				entity.eatElectricity(resistorLoad.getP() * 0.05);
+				entity.eatElectricity(resistorLoad.getP().getValue() * 0.05);
 			}
 
 			resistorLoad.setR(nextRp);

@@ -11,6 +11,7 @@ import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Inductor;
+import mods.eln.sim.mna.primitives.Inductance;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -60,7 +61,7 @@ public class PowerInductorSixElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		return Utils.plotVolt("U", Math.abs(inductor.getU())) + Utils.plotAmpere("I", inductor.getCurrent());
+		return Utils.plotVolt("U", Math.abs(inductor.getU().getValue())) + Utils.plotAmpere("I", inductor.getCurrent().getValue());
 	}
 
 	@Override
@@ -81,7 +82,7 @@ public class PowerInductorSixElement extends SixNodeElement {
     
 	public void setupPhysical() {
 		double rs = descriptor.getRsValue(inventory);
-		inductor.setL(descriptor.getlValue(inventory));
+		inductor.setL(new Inductance(descriptor.getlValue(inventory)));
 		positiveLoad.setRs(rs);
 		negativeLoad.setRs(rs);
 

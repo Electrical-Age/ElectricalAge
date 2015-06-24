@@ -4,6 +4,7 @@ import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 
@@ -79,7 +80,7 @@ public class ElectricalStackMachineProcess implements IProcess {
 	}
 
 	public double getPower() {
-		return electricalResistor.getP() * efficiency;
+		return electricalResistor.getP().getValue() * efficiency;
 	}
 	
 	public void smeltInit() {
@@ -93,13 +94,13 @@ public class ElectricalStackMachineProcess implements IProcess {
 			smeltInProcess = true;
 			energyNeeded = recipesList.getRecipe(inventory.getStackInSlot(inputSlotId)).energy;
 			energyCounter = 0.0;
-			electricalResistor.setR(resistorValue / speedUp);
+			electricalResistor.setR(new Resistance(resistorValue / speedUp));
 		}
 	}
 	
 	public void setResistorValue(double value) {
 		resistorValue = value;
-		if (smeltInProcess) electricalResistor.setR(resistorValue / speedUp);
+		if (smeltInProcess) electricalResistor.setR(new Resistance(resistorValue / speedUp));
 	}
 	
     /**

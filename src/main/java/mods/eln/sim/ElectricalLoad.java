@@ -42,7 +42,7 @@ public class ElectricalLoad extends VoltageStateLineReady {
 		double i = 0;
 		for (Component c : getConnectedComponents()) {
 			if (c instanceof Bipole && (!(c instanceof Line)))
-				i += Math.abs(((Bipole)c).getCurrent());
+				i += Math.abs(((Bipole)c).getCurrent().getValue());
 		}
 		return i * 0.5;
 	}

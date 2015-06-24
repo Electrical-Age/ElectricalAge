@@ -1,5 +1,7 @@
 package mods.eln.sim.mna.component;
 
+import mods.eln.sim.mna.primitives.Current;
+import mods.eln.sim.mna.primitives.Voltage;
 import mods.eln.sim.mna.state.State;
 
 public abstract class Bipole extends Component {
@@ -44,13 +46,13 @@ public abstract class Bipole extends Component {
 		return new State[]{aPin, bPin};
 	}
 	
-	public abstract double getCurrent();
+	public abstract Current getCurrent();
 
-	public double getU() {
-		return (aPin == null ? 0 : aPin.state) - (bPin == null ? 0 : bPin.state);
+	public Voltage getU() {
+		return new Voltage((aPin == null ? 0 : aPin.state) - (bPin == null ? 0 : bPin.state));
 	}
 
-	public double getBipoleU() {
+	public Voltage getBipoleU() {
 		return getU();
 	}
 }

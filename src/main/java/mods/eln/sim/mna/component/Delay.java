@@ -2,16 +2,20 @@ package mods.eln.sim.mna.component;
 
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.misc.ISubSystemProcessI;
+import mods.eln.sim.mna.primitives.Conductance;
+import mods.eln.sim.mna.primitives.Current;
+import mods.eln.sim.mna.primitives.Resistance;
+import mods.eln.sim.mna.primitives.Voltage;
 
 public class Delay extends Bipole implements ISubSystemProcessI {
+	Resistance impedance;
+	Conductance conductance;
 
-    double impedance, conductance;
+    Current oldIa, oldIb;
 
-    double oldIa, oldIb;
-
-	public Delay set(double impedance) {
+	public Delay set(Resistance impedance) {
 		this.impedance = impedance;
-		this.conductance = 1 / impedance;
+		this.conductance = impedance.invert();
 		return this;
 	}
 
@@ -23,8 +27,8 @@ public class Delay extends Bipole implements ISubSystemProcessI {
 	
 	@Override
 	public void applyTo(SubSystem s) {
-		s.addToA(aPin, aPin, conductance);
-		s.addToA(bPin, bPin, conductance);
+		s.addToA(aPin, aPin, conductance.getValue());
+		s.addToA(bPin, bPin, conductance.getValue());
 	}
 
 	/*@Override
@@ -41,22 +45,24 @@ public class Delay extends Bipole implements ISubSystemProcessI {
 
 	@Override
 	public void simProcessI(SubSystem s) {
-		double iA = aPin.state*conductance + oldIa;
-		double iB = bPin.state*conductance + oldIb;
-		double iTarget = (iA - iB) / 2;
+		Current iA = new Voltage(aPin.state).multiply(conductance).add(oldIa);
+		Current iB = new Voltage(bPin.state).multiply(conductance).add(oldIb);
+		Current iTarget = iA.substract(iB).multiply(0.5);
 		
-		double aPinI = iTarget - (aPin.state + bPin.state) * 0.5 * conductance;
-		double bPinI = -iTarget - (aPin.state + bPin.state) * 0.5 * conductance;
+		Current aPinI = iTarget.substract(new Voltage(aPin.state).add(
+				new Voltage(bPin.state)).multiply(0.5).multiply(conductance));
+		Current bPinI = iTarget.add(new Voltage(aPin.state).add(new Voltage(bPin.state)
+		        ).multiply(0.5).multiply(conductance)).opposite();
 		
-		s.addToI(aPin, -aPinI);
-		s.addToI(bPin, -bPinI);
+		s.addToI(aPin, -aPinI.getValue());
+		s.addToI(bPin, -bPinI.getValue());
 		
 		oldIa = aPinI;
 		oldIb = bPinI;
 	}	
 
 	@Override
-	public double getCurrent() {
-		return oldIa - oldIb;
+	public Current getCurrent() {
+		return oldIa.substract(oldIb);
 	}
 }

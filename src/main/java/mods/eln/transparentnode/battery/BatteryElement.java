@@ -13,6 +13,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.mna.component.VoltageSource;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.nbt.NbtBatteryProcess;
 import mods.eln.sim.nbt.NbtBatterySlowProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
@@ -171,7 +172,7 @@ public class BatteryElement extends TransparentNodeElement {
 		descriptor.applyTo(thermalLoad);
 		descriptor.applyTo(dischargeResistor);
 		descriptor.applyTo(batterySlowProcess);
-		cutSwitch.setR(descriptor.electricalRs/2);
+		cutSwitch.setR(new Resistance(descriptor.electricalRs/2));
 		cutLoad.setRs(descriptor.electricalRs/2);
 		negativeLoad.setRs(descriptor.electricalRs);
 		if (fromItemStack) {

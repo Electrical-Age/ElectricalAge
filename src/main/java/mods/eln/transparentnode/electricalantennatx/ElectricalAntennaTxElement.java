@@ -13,7 +13,9 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.misc.MnaConst;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
@@ -121,9 +123,9 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	void calculatePowerInRp() {
 		double cmd = commandIn.getNormalized();
 		if (cmd == 0.0)
-			powerResistor.setR(MnaConst.highImpedance);
+			powerResistor.setR(Resistor.highImpedance);
 		else
-			powerResistor.setR(descriptor.electricalNominalInputR / cmd);
+			powerResistor.setR(new Resistance(descriptor.electricalNominalInputR / cmd));
 	}
 	
 	@Override

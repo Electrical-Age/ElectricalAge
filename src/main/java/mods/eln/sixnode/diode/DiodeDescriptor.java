@@ -10,6 +10,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.mna.component.ResistorSwitch;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -92,7 +93,7 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 	}
 	
 	public void applyTo(ResistorSwitch resistorSwitch) {
-		resistorSwitch.setR(stdU/stdI);
+		resistorSwitch.setR(new Resistance(stdU/stdI));
 	}
 	
 	@Override

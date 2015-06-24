@@ -18,7 +18,7 @@ public class ElectricalAntennaTxElectricalProcess implements IProcess {
 		if (rx == null) {
 			element.signalOutProcess.setOutputNormalized(1.0);
 		} else {
-			double powerOut = Math.max(0, element.powerResistor.getP() * element.powerEfficency - 2);
+			double powerOut = Math.max(0, element.powerResistor.getP().getValue() * element.powerEfficency - 2);
 			rx.setPowerOut(powerOut);
 			element.signalOutProcess.setU(rx.getSignal());
 		}

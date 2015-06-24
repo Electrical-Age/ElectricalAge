@@ -14,6 +14,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.MonsterPopFreeProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
@@ -197,7 +198,7 @@ public class LampSocketElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		return Utils.plotVolt("U:", positiveLoad.getU()) + Utils.plotAmpere("I:", lampResistor.getCurrent());
+		return Utils.plotVolt("U:", positiveLoad.getU()) + Utils.plotAmpere("I:", lampResistor.getCurrent().getValue());
 	}
 
 	@Override
@@ -244,7 +245,7 @@ public class LampSocketElement extends SixNodeElement {
 		lampDescriptor = (LampDescriptor) Utils.getItemObject(lamp);
 
 		if (lampDescriptor == null) {
-			lampResistor.setR(Double.POSITIVE_INFINITY);
+			lampResistor.setR(new Resistance(Double.POSITIVE_INFINITY));
 		} else {
 			lampDescriptor.applyTo(lampResistor);
 		}

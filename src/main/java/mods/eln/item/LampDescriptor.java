@@ -9,6 +9,7 @@ import mods.eln.Eln;
 import mods.eln.misc.IConfigSharing;
 import mods.eln.misc.Utils;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sixnode.lampsocket.LampSocketType;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -96,7 +97,7 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
 	}
 	
 	public void applyTo(Resistor resistor) {
-		resistor.setR(getR());
+		resistor.setR(new Resistance(getR()));
 	}
 	
 	@Override

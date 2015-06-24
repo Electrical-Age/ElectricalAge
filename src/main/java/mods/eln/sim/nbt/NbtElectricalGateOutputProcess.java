@@ -5,6 +5,8 @@ import mods.eln.misc.INBTTReady;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.component.Capacitor;
+import mods.eln.sim.mna.primitives.Capacitance;
+import mods.eln.sim.mna.primitives.Voltage;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class NbtElectricalGateOutputProcess extends Capacitor implements INBTTReady {
@@ -24,9 +26,9 @@ public class NbtElectricalGateOutputProcess extends Capacitor implements INBTTRe
 		this.highImpedance = enable;
 		double baseC = Eln.instance.gateOutputCurrent / Eln.instance.electricalFrequancy / Eln.SVU;
 		if (enable) {
-			setC(baseC / 1000);
+			setC(new Capacitance(baseC / 1000));
 		} else {
-			setC(baseC);
+			setC(new Capacitance(baseC));
 		}
 	}
 	
@@ -83,7 +85,7 @@ public class NbtElectricalGateOutputProcess extends Capacitor implements INBTTRe
 		this.U = U;
 	}
 	
-	public double getU() {
-		return U;
+	public Voltage getU() {
+		return new Voltage(U);
 	}
 }

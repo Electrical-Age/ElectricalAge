@@ -1,13 +1,16 @@
 package mods.eln.sim.mna.component;
 
 import mods.eln.sim.mna.misc.IRootSystemPreStepProcess;
+import mods.eln.sim.mna.primitives.Current;
+import mods.eln.sim.mna.primitives.Resistance;
+import mods.eln.sim.mna.primitives.Voltage;
 
 public class DelayInterSystem2 extends VoltageSource {
 
     private DelayInterSystem2 other;
 
-    public double Rth;
-    public double Uth;
+    public Resistance Rth;
+    public Voltage Uth;
 
     public boolean thevnaCalc = false;
 
@@ -32,32 +35,32 @@ public class DelayInterSystem2 extends VoltageSource {
 			doJobFor(a);
 			doJobFor(b);
 
-			double U = (a.Uth - b.Uth) * b.Rth / (a.Rth + b.Rth) + b.Uth;
-			if (Double.isNaN(U)) {
-				U = 0;
+			Voltage U = a.Uth.substract(b.Uth).multiply(b.Rth.divide(a.Rth.add(b.Rth))).add(b.Uth);
+			if (U.isNaN()) {
+				U = new Voltage();
 			}
 			a.setU(U);
 			b.setU(U);
 		}
 
 		void doJobFor(DelayInterSystem2 d) {
-			double originalU = d.getU();
+			Voltage originalU = d.getU();
 
-			double aU = 10;
+			Voltage aU = new Voltage(10);
 			d.setU(aU);
-			double aI = d.getSubSystem().solve(d.getCurrentState());
+			Current aI = new Current(d.getSubSystem().solve(d.getCurrentState()));
 
-			double bU = 5;
+		    Voltage bU = new Voltage(5);
 			d.setU(bU);
-			double bI = d.getSubSystem().solve(d.getCurrentState());
+			Current bI = new Current(d.getSubSystem().solve(d.getCurrentState()));
 
-			d.Rth = (aU - bU) / (bI - aI);
+			d.Rth = aU.substract(bU).divide(bI.substract(aI));
 			//if(Double.isInfinite(d.Rth)) d.Rth = Double.MAX_VALUE;
- 			if (d.Rth > 10000000000000000000.0) {
-				d.Uth = 0;
-				d.Rth = 10000000000000000000.0;
+			if (d.Rth.getValue() > 10000000000000000000.0) {
+				d.Uth = new Voltage();
+				d.Rth = new Resistance(10000000000000000000.0);
 			} else {
-				d.Uth = aU + d.Rth * aI;
+				d.Uth = aU.add(d.Rth.multiply(aI));
 			}
 			d.setU(originalU);
 		}

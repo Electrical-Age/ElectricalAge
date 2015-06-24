@@ -3,6 +3,7 @@ package mods.eln.sim.mna.component;
 import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.mna.misc.MnaConst;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.mna.state.State;
 
 public class ResistorSwitch extends Resistor implements INBTTReady {
@@ -12,7 +13,7 @@ public class ResistorSwitch extends Resistor implements INBTTReady {
 
     boolean state = false;
 
-    protected double baseR = 1;
+    protected Resistance baseR = new Resistance(1);
 
 	public ResistorSwitch(String name, State aPin, State bPin) {
 		super(aPin, bPin);
@@ -25,9 +26,9 @@ public class ResistorSwitch extends Resistor implements INBTTReady {
 	}
 
 	@Override
-	public Resistor setR(double r) {
+	public Resistor setR(Resistance r) {
 		baseR = r;
-		return super.setR(state ? r : (ultraImpedance ? MnaConst.ultraImpedance : MnaConst.highImpedance));
+		return super.setR(state ? r : (ultraImpedance ? Resistor.ultraImpedance : Resistor.highImpedance));
 	}
 
 	public boolean getState() {
@@ -37,8 +38,8 @@ public class ResistorSwitch extends Resistor implements INBTTReady {
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {
 		str += name;
-		setR(nbt.getDouble(str + "R"));
-		if (Double.isNaN(baseR) || baseR == 0) {
+		setR(new Resistance(nbt.getDouble(str + "R")));
+		if (baseR.isNaN() || baseR.getValue() == 0) {
 			if (ultraImpedance)  ultraImpedance(); else highImpedance();
 		}
 		setState(nbt.getBoolean(str + "State"));
@@ -47,7 +48,7 @@ public class ResistorSwitch extends Resistor implements INBTTReady {
 	@Override
 	public void writeToNBT(NBTTagCompound nbt, String str) {
 		str += name;
-		nbt.setDouble(str + "R", baseR);
+		nbt.setDouble(str + "R", baseR.getValue());
 		nbt.setBoolean(str + "State", getState());
 	}
 

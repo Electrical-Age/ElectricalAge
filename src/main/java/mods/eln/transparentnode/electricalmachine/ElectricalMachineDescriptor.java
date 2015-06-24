@@ -14,6 +14,7 @@ import mods.eln.sim.ElectricalStackMachineProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sound.SoundCommand;
 import mods.eln.wiki.Data;
@@ -101,7 +102,7 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 	}
 
 	public void applyTo(Resistor resistor) {
-		resistor.setR(resistorR);
+		resistor.setR(new Resistance(resistorR));
 	}
 
 	public void applyTo(ElectricalStackMachineProcess machine) {

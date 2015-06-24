@@ -17,6 +17,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.PowerSource;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.VoltageSource;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
@@ -154,7 +155,7 @@ public class TurbineElement extends TransparentNodeElement{
 	public void initialize() {
 
 		descriptor.applyTo(inputLoad);
-		inputToTurbinResistor.setR(descriptor.electricalRs*30);
+		inputToTurbinResistor.setR(new Resistance(descriptor.electricalRs*30));
 		
 		descriptor.applyTo(warmLoad);
 		descriptor.applyTo(coolLoad);

@@ -16,6 +16,6 @@ public class ResistorHeatThermalLoad implements IProcess {
 
 	@Override
 	public void process(double time) {
-		load.movePowerTo(r.getP());
+		load.movePowerTo(r.getP().getValue());
 	}
 }

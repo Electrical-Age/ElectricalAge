@@ -18,6 +18,7 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
+import mods.eln.sim.mna.primitives.Resistance;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
@@ -239,7 +240,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 				descriptor.ghostDoorOpen.newRotate(front).plot(node.coordonate, node.coordonate, descriptor.getGhostGroupUuid());
 				break;
 			case StateCharge:
-				powerResistor.setR(Math.pow(descriptor.cable.electricalNominalVoltage, 2) / powerCharge);
+				powerResistor.setR(new Resistance(Math.pow(descriptor.cable.electricalNominalVoltage, 2) / powerCharge));
 				publisher.reconfigure(0.4, 0);
 				break;
 			case StateReserved:
@@ -460,7 +461,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 					//
 					// energyTarget *= 1.0 + Math.pow(distance / 250.0, 0.5);
 
-					energyHit += powerResistor.getP() * time;
+					energyHit += powerResistor.getP().getValue() * time;
 					processRatio = (float) (energyHit / energyTarget);
 
 					if (energyHit >= energyTarget) {
