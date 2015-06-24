@@ -2,13 +2,8 @@ package mods.eln.node;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Random;
 
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -140,6 +135,8 @@ public class NodeManager extends WorldSavedData {
 		return nodes.get(rand.nextInt(nodes.size()));
 	}
 
+
+
 	public void loadFromNbt(NBTTagCompound nbt) {
 		ArrayList<NodeBase> addedNode = new ArrayList<NodeBase>();
 		for (Object o : Utils.getTags(nbt))
@@ -152,7 +149,6 @@ public class NodeManager extends WorldSavedData {
 				addNode(node);
 				addedNode.add(node);
 				node.initializeFromNBT();
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -167,9 +163,6 @@ public class NodeManager extends WorldSavedData {
 		int nodeCounter = 0;
 		ArrayList<NodeBase> nodesCopy = new ArrayList<NodeBase>();
 		nodesCopy.addAll(nodes);
-		System.out.println("WORLD SAVE " + dim);
-		System.out.flush();
-
 		for (NodeBase node : nodesCopy)
 		{
 			try {
@@ -184,6 +177,7 @@ public class NodeManager extends WorldSavedData {
 			}
 
 		}
+
 	}
 
 	public void clear() {
@@ -192,10 +186,8 @@ public class NodeManager extends WorldSavedData {
 	}
 
 	public void unload(int dimensionId) {
-		Iterator<NodeBase> i = nodes.iterator();
-		System.out.println("WORLD UNLOAD " +dimensionId);
-		System.out.flush();
 
+		Iterator<NodeBase> i = nodes.iterator();
 		while (i.hasNext()) {
 			NodeBase n = i.next();
 			if (n.coordonate.dimention == dimensionId) {

@@ -360,10 +360,11 @@ public class Simulator /* ,IPacketHandler */{
 
 	// private ArrayList<Double> conectionSerialConductance = new ArrayList<Double>();
 
+	public boolean pleaseCrash = false;
 	@SubscribeEvent
 	public void tick(ServerTickEvent event) {
 		if (event.phase != Phase.START) return;
-
+		if(pleaseCrash) throw new StackOverflowError();
 		long stackStart;
 
 		long startTime = System.nanoTime();

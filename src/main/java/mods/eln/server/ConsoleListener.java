@@ -4,9 +4,12 @@ import mods.eln.Eln;
 import mods.eln.misc.Color;
 import mods.eln.misc.LangFileParser;
 import mods.eln.misc.Utils;
+import mods.eln.sim.Simulator;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
+
+import java.util.EmptyStackException;
 
 public class ConsoleListener extends CommandBase {
 
@@ -72,6 +75,7 @@ public class ConsoleListener extends CommandBase {
 			else
 				icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_YELLOW+"Unknown status returned."));
 		}
+		//Eln.simulator.pleaseCrash = true;
 	}
 
 	private void printBooleanResult(ICommandSender icommandsender, Boolean ack){
