@@ -114,7 +114,11 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
     @Override
     public String getUnlocalizedName(ItemStack par1ItemStack) {
         Descriptor desc = getDescriptor(par1ItemStack);
-        return desc.name.replaceAll("\\s+", "_").toLowerCase();
+        if (desc == null) {
+            return this.getClass().getName();
+        } else {
+            return desc.name.replaceAll("\\s+", "_").toLowerCase();
+        }
     }
 
     @Override
