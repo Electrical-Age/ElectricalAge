@@ -1,10 +1,7 @@
 package mods.eln.generic;
 
-import java.util.List;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
@@ -18,146 +15,148 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
+import java.util.List;
+
 public class GenericItemUsingDamageDescriptor {
 
-	public String IconName;
-	private IIcon iconIndex;
-	public String name;
+    public String IconName;
+    private IIcon iconIndex;
+    public String name;
 
-	public Item parentItem;
-	public int parentItemDamage;
+    public Item parentItem;
+    public int parentItemDamage;
 
-	public GenericItemUsingDamageDescriptor(String name) {
-		this.IconName = "eln:" + name.replaceAll(" ", "").toLowerCase();
-		this.name = name;
-	}
+    public GenericItemUsingDamageDescriptor(String name) {
+        this.IconName = "eln:" + name.replaceAll(" ", "").toLowerCase();
+        this.name = name;
+    }
 
-	public void changeDefaultIcon(String name) {
-		this.IconName = "eln:" + name.replaceAll(" ", "").toLowerCase();
-	}
+    public void changeDefaultIcon(String name) {
+        this.IconName = "eln:" + name.replaceAll(" ", "").toLowerCase();
+    }
 
-	public NBTTagCompound getDefaultNBT() {
-		return null;
-	}
+    public NBTTagCompound getDefaultNBT() {
+        return null;
+    }
 
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 
-	}
+    }
 
-	public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p) {
-		return s;
-	}
-	
-	public void getSubItems(List list) {
-		ItemStack stack = newItemStack(1);
-		list.add(stack);
-	}
+    public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p) {
+        return s;
+    }
 
-	public boolean use2DIcon() {
-		return true;
-	}
+    public void getSubItems(List list) {
+        ItemStack stack = newItemStack(1);
+        list.add(stack);
+    }
 
-	@SideOnly(value=Side.CLIENT)
-	public void updateIcons(IIconRegister iconRegister) {
-		if(use2DIcon())
-			this.iconIndex = iconRegister.registerIcon(IconName);
-	}
+    public boolean use2DIcon() {
+        return true;
+    }
 
-	public IIcon getIcon() {
-		return iconIndex;
-	}
+    @SideOnly(value = Side.CLIENT)
+    public void updateIcons(IIconRegister iconRegister) {
+        if (use2DIcon())
+            this.iconIndex = iconRegister.registerIcon(IconName);
+    }
 
-	public String getName(ItemStack stack) {
-		return name;
-	}
+    public IIcon getIcon() {
+        return iconIndex;
+    }
 
-	public static GenericItemUsingDamageDescriptor getDescriptor(ItemStack stack) {
-		if (stack == null)
-			return null;
-		if ((stack.getItem() instanceof GenericItemUsingDamage) == false)
-			return null;
-		return ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) stack.getItem()).getDescriptor(stack);
-	}
+    public String getName(ItemStack stack) {
+        return name;
+    }
 
-	public static GenericItemUsingDamageDescriptor getDescriptor(ItemStack stack, Class extendClass) {
-		GenericItemUsingDamageDescriptor desc = getDescriptor(stack);
-		if (desc == null)
-			return null;
-		if (extendClass.isAssignableFrom(desc.getClass()) == false)
-			return null;
-		return desc;
-	}
+    public static GenericItemUsingDamageDescriptor getDescriptor(ItemStack stack) {
+        if (stack == null)
+            return null;
+        if ((stack.getItem() instanceof GenericItemUsingDamage) == false)
+            return null;
+        return ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) stack.getItem()).getDescriptor(stack);
+    }
 
-	public void setParent(Item item, int damage) {
-		this.parentItem = item;
-		this.parentItemDamage = damage;
-	}
+    public static GenericItemUsingDamageDescriptor getDescriptor(ItemStack stack, Class extendClass) {
+        GenericItemUsingDamageDescriptor desc = getDescriptor(stack);
+        if (desc == null)
+            return null;
+        if (extendClass.isAssignableFrom(desc.getClass()) == false)
+            return null;
+        return desc;
+    }
 
-	public ItemStack newItemStack(int size) {
-		ItemStack stack = new ItemStack(parentItem, size, parentItemDamage);
-		stack.setTagCompound(getDefaultNBT());
-		return stack;
-	}
+    public void setParent(Item item, int damage) {
+        this.parentItem = item;
+        this.parentItemDamage = damage;
+    }
 
-	public ItemStack newItemStack() {
-		return newItemStack(1);
-	}
+    public ItemStack newItemStack(int size) {
+        ItemStack stack = new ItemStack(parentItem, size, parentItemDamage);
+        stack.setTagCompound(getDefaultNBT());
+        return stack;
+    }
 
-	public boolean checkSameItemStack(ItemStack stack) {
-		if (stack == null)
-			return false;
-		if (stack.getItem() != parentItem || stack.getItemDamage() != parentItemDamage)
-			return false;
-		return true;
-	}
+    public ItemStack newItemStack() {
+        return newItemStack(1);
+    }
 
-	/**
-	 * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-	 * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
-	 */
-	public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float vx, float vy, float vz) {
-		return false;
-	}
+    public boolean checkSameItemStack(ItemStack stack) {
+        if (stack == null)
+            return false;
+        if (stack.getItem() != parentItem || stack.getItemDamage() != parentItemDamage)
+            return false;
+        return true;
+    }
 
-	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return ! use2DIcon();
-	}
+    /**
+     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
+     * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
+     */
+    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float vx, float vy, float vz) {
+        return false;
+    }
 
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return ! use2DIcon();
-	}
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+        return !use2DIcon();
+    }
 
-	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-	}
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        return !use2DIcon();
+    }
 
-	public void onUpdate(ItemStack stack, World world, Entity entity, int par4, boolean par5) {
-	}
+    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+    }
 
-	protected NBTTagCompound getNbt(ItemStack stack) {
-		NBTTagCompound nbt = stack.getTagCompound();
-		if (nbt == null) {
-			stack.setTagCompound(nbt = getDefaultNBT());
-		}
-		return nbt;
-	}
+    public void onUpdate(ItemStack stack, World world, Entity entity, int par4, boolean par5) {
+    }
 
-	public float getStrVsBlock(ItemStack stack, Block block) {
-		return 0.2f;
-	}
+    protected NBTTagCompound getNbt(ItemStack stack) {
+        NBTTagCompound nbt = stack.getTagCompound();
+        if (nbt == null) {
+            stack.setTagCompound(nbt = getDefaultNBT());
+        }
+        return nbt;
+    }
 
-	public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity) {
-		return false;
-	}
+    public float getStrVsBlock(ItemStack stack, Block block) {
+        return 0.2f;
+    }
 
-	public boolean onDroppedByPlayer(ItemStack item, EntityPlayer player) {
-		return true;
-	}
+    public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity) {
+        return false;
+    }
 
-	public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
-		return false;
-	}
+    public boolean onDroppedByPlayer(ItemStack item, EntityPlayer player) {
+        return true;
+    }
 
-	public boolean onBlockStartBreak(ItemStack itemstack, int x, int y, int z, EntityPlayer player) {
-		return false;
-	}
+    public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
+        return false;
+    }
+
+    public boolean onBlockStartBreak(ItemStack itemstack, int x, int y, int z, EntityPlayer player) {
+        return false;
+    }
 }

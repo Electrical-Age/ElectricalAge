@@ -15,20 +15,20 @@ public class AutoMinerGuiDraw extends GuiContainerEln {
     public AutoMinerGuiDraw(EntityPlayer player, IInventory inventory, AutoMinerRender render) {
         super(new AutoMinerContainer(null, player, inventory));
         this.inventory = (TransparentNodeElementInventory) inventory;
-        this.render = render; 
+        this.render = render;
     }
-    
+
     @Override
     protected void postDraw(float f, int x, int y) {
-    	if (render.job == jobType.chestFull){
-    		drawString( 8, 7, "Chest missing on the");
-    		drawString( 8, 7 + 9, "back of the Auto Miner!");
-    	}
-    	super.postDraw(f, x, y);
+        if (render.job == jobType.chestFull) {
+            drawString(8, 7, "Chest missing on the");
+            drawString(8, 7 + 9, "back of the Auto Miner!");
+        }
+        super.postDraw(f, x, y);
     }
-    
-	@Override
-	protected GuiHelperContainer newHelper() {
-		return new GuiHelperContainer(this, 176, 166 + 18 * 2 - 90, 8, 84 - 90 + 18 * 2);
-	}
+
+    @Override
+    protected GuiHelperContainer newHelper() {
+        return new GuiHelperContainer(this, 176, 166 + 18 * 2 - 90, 8, 84 - 90 + 18 * 2);
+    }
 }

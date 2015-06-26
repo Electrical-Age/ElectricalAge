@@ -8,32 +8,31 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
-public class WaterTurbineContainer extends BasicContainer implements INodeContainer{
+public class WaterTurbineContainer extends BasicContainer implements INodeContainer {
 
-	NodeBase node = null;
+    NodeBase node = null;
 
-	public WaterTurbineContainer(NodeBase node,EntityPlayer player, IInventory inventory) {
-		super(player, inventory,new Slot[]{
-				//new GenericItemUsingDamageSlot(inventory, windRotorSlotId, 62 +  0,17 + 0,1, WindRotorDescriptor.class,SlotSkin.medium,new String[]{"Wind rotor slot"}),
-				//new GenericItemUsingDamageSlot(inventory, dynamoSlotId, 62 +  18,17 + 0,1, DynamoDescriptor.class,SlotSkin.medium,new String[]{"Dynamo slot"})
+    public WaterTurbineContainer(NodeBase node, EntityPlayer player, IInventory inventory) {
+        super(player, inventory, new Slot[]{
+                //new GenericItemUsingDamageSlot(inventory, windRotorSlotId, 62 +  0,17 + 0,1, WindRotorDescriptor.class,SlotSkin.medium,new String[]{"Wind rotor slot"}),
+                //new GenericItemUsingDamageSlot(inventory, dynamoSlotId, 62 +  18,17 + 0,1, DynamoDescriptor.class,SlotSkin.medium,new String[]{"Dynamo slot"})
 
-			});
-		this.node = node;
-		
-	}
+        });
+        this.node = node;
 
-	@Override
-	public NodeBase getNode() {
-		
-		return node;
-	}
+    }
 
-	@Override
-	public int getRefreshRateDivider() {
-		
-		return 4;
-	}
+    @Override
+    public NodeBase getNode() {
 
+        return node;
+    }
+
+    @Override
+    public int getRefreshRateDivider() {
+
+        return 4;
+    }
 
 
 }

@@ -11,6 +11,7 @@ import net.minecraft.inventory.Slot;
 public class TurretContainer extends BasicContainer {
 
     public static final int filterId = 0;
+
     public TurretContainer(EntityPlayer player, IInventory inventory) {
         super(player, inventory, new Slot[]{
                 new GenericItemUsingDamageSlot(inventory, filterId, 184 / 2 - 12, 8, 1,

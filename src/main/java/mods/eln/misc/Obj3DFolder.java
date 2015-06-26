@@ -48,13 +48,13 @@ public class Obj3DFolder {
 		}*/
 
     public void loadObj(String modelPath) {
-		// modelPath is the path inside the model folder with the name of the obj file
+        // modelPath is the path inside the model folder with the name of the obj file
         Obj3D obj = new Obj3D();
         if (obj.loadFile(modelPath)) {
             String tag = modelPath.replaceAll(".obj", "").replaceAll(".OBJ", "");
             tag = tag.substring(tag.lastIndexOf('/') + 1, tag.length());
-            nameToObjHash.put(tag, obj);	// name of the file, without extension
-            Utils.println("Model '"+ modelPath +"' loaded");
+            nameToObjHash.put(tag, obj);    // name of the file, without extension
+            Utils.println("Model '" + modelPath + "' loaded");
         }
     }
 

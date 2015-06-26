@@ -31,16 +31,16 @@ import java.util.HashMap;
 
 public class LampSupplyElement extends SixNodeElement {
 
-	public static HashMap<String, ArrayList<LampSupplyElement>> channelMap = new HashMap<String, ArrayList<LampSupplyElement>>();
+    public static HashMap<String, ArrayList<LampSupplyElement>> channelMap = new HashMap<String, ArrayList<LampSupplyElement>>();
 
-	//NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");
-	public LampSupplyDescriptor descriptor;
+    //NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");
+    public LampSupplyDescriptor descriptor;
 
-	public NbtElectricalLoad powerLoad = new NbtElectricalLoad("powerLoad");
-	public Resistor loadResistor = new Resistor(powerLoad, null);
-	public IProcess lampSupplySlowProcess = new LampSupplySlowProcess();
+    public NbtElectricalLoad powerLoad = new NbtElectricalLoad("powerLoad");
+    public Resistor loadResistor = new Resistor(powerLoad, null);
+    public IProcess lampSupplySlowProcess = new LampSupplySlowProcess();
 
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     public String channel = "Default channel";
 
@@ -51,202 +51,202 @@ public class LampSupplyElement extends SixNodeElement {
     double RpStack = 0;
 
     @Override
-	public IInventory getInventory() {
-		return inventory;
-	}
+    public IInventory getInventory() {
+        return inventory;
+    }
 
-	@Override
-	public Container newContainer(Direction side, EntityPlayer player) {
-		return new LampSupplyContainer(player, inventory);
-	}
+    @Override
+    public Container newContainer(Direction side, EntityPlayer player) {
+        return new LampSupplyContainer(player, inventory);
+    }
 
-	public LampSupplyElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
-		super(sixNode, side, descriptor);
-		electricalLoadList.add(powerLoad);
-		electricalComponentList.add(loadResistor);
-		slowProcessList.add(lampSupplySlowProcess);
-		loadResistor.highImpedance();
-		front = LRDU.Down;
-		this.descriptor = (LampSupplyDescriptor) descriptor;
-		
-		slowProcessList.add(voltageWatchdog);
-		voltageWatchdog
-		 .set(powerLoad)
-		 .set(new WorldExplosion(this).cableExplosion());
-		
-		channelRegister(this);
-	}
+    public LampSupplyElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+        super(sixNode, side, descriptor);
+        electricalLoadList.add(powerLoad);
+        electricalComponentList.add(loadResistor);
+        slowProcessList.add(lampSupplySlowProcess);
+        loadResistor.highImpedance();
+        front = LRDU.Down;
+        this.descriptor = (LampSupplyDescriptor) descriptor;
 
-	class LampSupplySlowProcess implements IProcess {
+        slowProcessList.add(voltageWatchdog);
+        voltageWatchdog
+                .set(powerLoad)
+                .set(new WorldExplosion(this).cableExplosion());
 
-		@Override
-		public void process(double time) {
-			loadResistor.setR(1 / RpStack);
-			RpStack = 0;
-		}
-	}
+        channelRegister(this);
+    }
 
-	static void channelRegister(LampSupplyElement tx) {
-		String channel = tx.channel;
-		ArrayList<LampSupplyElement> list = channelMap.get(channel);
-		if (list == null)
-			channelMap.put(channel, list = new ArrayList<LampSupplyElement>());
-		list.add(tx);
-	}
+    class LampSupplySlowProcess implements IProcess {
 
-	static void channelRemove(LampSupplyElement tx) {
-		String channel = tx.channel;
-		ArrayList<LampSupplyElement> list = channelMap.get(channel);
-		if (list == null) return;
-		list.remove(tx);
-		if (list.size() == 0)
-			channelMap.remove(channel);
-	}
+        @Override
+        public void process(double time) {
+            loadResistor.setR(1 / RpStack);
+            RpStack = 0;
+        }
+    }
 
-	@Override
-	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if (inventory.getStackInSlot(LampSupplyContainer.cableSlotId) == null) return null;
-		if (front == lrdu) return powerLoad;
-		return null;
-	}
+    static void channelRegister(LampSupplyElement tx) {
+        String channel = tx.channel;
+        ArrayList<LampSupplyElement> list = channelMap.get(channel);
+        if (list == null)
+            channelMap.put(channel, list = new ArrayList<LampSupplyElement>());
+        list.add(tx);
+    }
 
-	@Override
-	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		if (inventory.getStackInSlot(LampSupplyContainer.cableSlotId) == null) return null;
-		return null;
-	}
+    static void channelRemove(LampSupplyElement tx) {
+        String channel = tx.channel;
+        ArrayList<LampSupplyElement> list = channelMap.get(channel);
+        if (list == null) return;
+        list.remove(tx);
+        if (list.size() == 0)
+            channelMap.remove(channel);
+    }
 
-	@Override
-	public int getConnectionMask(LRDU lrdu) {
-		if (inventory.getStackInSlot(LampSupplyContainer.cableSlotId) == null) return 0;
-		if (front == lrdu) return NodeBase.maskElectricalPower;
-		return 0;
-	}
+    @Override
+    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+        if (inventory.getStackInSlot(LampSupplyContainer.cableSlotId) == null) return null;
+        if (front == lrdu) return powerLoad;
+        return null;
+    }
 
-	@Override
-	public String multiMeterString() {
-		return Utils.plotUIP(powerLoad.getU(), powerLoad.getCurrent());
-	}
+    @Override
+    public ThermalLoad getThermalLoad(LRDU lrdu) {
+        if (inventory.getStackInSlot(LampSupplyContainer.cableSlotId) == null) return null;
+        return null;
+    }
 
-	@Override
-	public String thermoMeterString() {
-		return null;
-	}
+    @Override
+    public int getConnectionMask(LRDU lrdu) {
+        if (inventory.getStackInSlot(LampSupplyContainer.cableSlotId) == null) return 0;
+        if (front == lrdu) return NodeBase.maskElectricalPower;
+        return 0;
+    }
 
-	@Override
-	public void initialize() {
-		setupFromInventory();
-	}
+    @Override
+    public String multiMeterString() {
+        return Utils.plotUIP(powerLoad.getU(), powerLoad.getCurrent());
+    }
 
-	@Override
-	protected void inventoryChanged() {
-		super.inventoryChanged();
-		sixNode.disconnect();
-		setupFromInventory();
-		sixNode.connect();
-		needPublish();
-	}
+    @Override
+    public String thermoMeterString() {
+        return null;
+    }
 
-	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		if (Utils.isPlayerUsingWrench(entityPlayer)) {
-			front = front.getNextClockwise();
-			sixNode.reconnect();
-			sixNode.setNeedPublish(true);
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public void initialize() {
+        setupFromInventory();
+    }
 
-	@Override
-	public void destroy(EntityPlayerMP entityPlayer) {	
-		super.destroy(entityPlayer);
-		unregister();
-	}
+    @Override
+    protected void inventoryChanged() {
+        super.inventoryChanged();
+        sixNode.disconnect();
+        setupFromInventory();
+        sixNode.connect();
+        needPublish();
+    }
 
-	@Override
-	public void unload() {
-		super.unload();
-		channelRemove(this);
-	}
-	
-	void unregister() {
-		channelRemove(this);	
-	}
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (Utils.isPlayerUsingWrench(entityPlayer)) {
+            front = front.getNextClockwise();
+            sixNode.reconnect();
+            sixNode.setNeedPublish(true);
+            return true;
+        }
+        return false;
+    }
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-		nbt.setString("channel", channel);
-	}
+    @Override
+    public void destroy(EntityPlayerMP entityPlayer) {
+        super.destroy(entityPlayer);
+        unregister();
+    }
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		channelRemove(this);
+    @Override
+    public void unload() {
+        super.unload();
+        channelRemove(this);
+    }
 
-		super.readFromNBT(nbt);
-		channel = nbt.getString("channel");
+    void unregister() {
+        channelRemove(this);
+    }
 
-		channelRegister(this);
-	}
+    @Override
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+        nbt.setString("channel", channel);
+    }
 
-	void setupFromInventory() {
-		ItemStack cableStack = inventory.getStackInSlot(LampSupplyContainer.cableSlotId);
-		if (cableStack != null) {
-			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
-			desc.applyTo(powerLoad);
-			voltageWatchdog.setUNominal(desc.electricalNominalVoltage);
-		} else {
-			voltageWatchdog.setUNominal(10000);
-			powerLoad.highImpedance();
-		}
-	}
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        channelRemove(this);
 
-	@Override
-	public void networkUnserialize(DataInputStream stream) {
-		super.networkUnserialize(stream);
+        super.readFromNBT(nbt);
+        channel = nbt.getString("channel");
 
-		try {
-			switch (stream.readByte()) {
+        channelRegister(this);
+    }
+
+    void setupFromInventory() {
+        ItemStack cableStack = inventory.getStackInSlot(LampSupplyContainer.cableSlotId);
+        if (cableStack != null) {
+            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
+            desc.applyTo(powerLoad);
+            voltageWatchdog.setUNominal(desc.electricalNominalVoltage);
+        } else {
+            voltageWatchdog.setUNominal(10000);
+            powerLoad.highImpedance();
+        }
+    }
+
+    @Override
+    public void networkUnserialize(DataInputStream stream) {
+        super.networkUnserialize(stream);
+
+        try {
+            switch (stream.readByte()) {
                 case setChannelId:
                     channelRemove(this);
                     channel = stream.readUTF();
                     needPublish();
                     channelRegister(this);
                     break;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public boolean hasGui() {
-		return true;
-	}
+    @Override
+    public boolean hasGui() {
+        return true;
+    }
 
-	@Override
-	public void networkSerialize(DataOutputStream stream) {
-		super.networkSerialize(stream);
-		try {
-			stream.writeUTF(channel);
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSupplyContainer.cableSlotId));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public void networkSerialize(DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            stream.writeUTF(channel);
+            Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSupplyContainer.cableSlotId));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	public void addToRp(double r) {
-		RpStack += 1 / r;
-	}
-	
-	public int getRange() {
-		return getRange(descriptor, inventory);
-	}
+    public void addToRp(double r) {
+        RpStack += 1 / r;
+    }
 
-	private int getRange(LampSupplyDescriptor desc, SixNodeElementInventory inventory2) {
-		ItemStack stack = inventory.getStackInSlot(LampSupplyContainer.cableSlotId);
-		if (stack == null) return desc.range;
-		return desc.range + stack.stackSize;
-	}
+    public int getRange() {
+        return getRange(descriptor, inventory);
+    }
+
+    private int getRange(LampSupplyDescriptor desc, SixNodeElementInventory inventory2) {
+        ItemStack stack = inventory.getStackInSlot(LampSupplyContainer.cableSlotId);
+        if (stack == null) return desc.range;
+        return desc.range + stack.stackSize;
+    }
 }

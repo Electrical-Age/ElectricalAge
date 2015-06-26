@@ -5,23 +5,23 @@ import mods.eln.sim.RegulatorType;
 
 public class RegulatorAnalogDescriptor extends IRegulatorDescriptor {
 
-	//double P, I, D;
+    //double P, I, D;
 
-	public RegulatorAnalogDescriptor(String name, String iconName/*,double P,double I,double D*/) {
-		super(name);
-		changeDefaultIcon(iconName);
-		/*this.P = P;
+    public RegulatorAnalogDescriptor(String name, String iconName/*,double P,double I,double D*/) {
+        super(name);
+        changeDefaultIcon(iconName);
+        /*this.P = P;
 		this.D = D;
 		this.I = I;*/
-	}
+    }
 
-	@Override
-	public RegulatorType getType() {
-		return RegulatorType.analog;
-	}
+    @Override
+    public RegulatorType getType() {
+        return RegulatorType.analog;
+    }
 
-	@Override
-	public void applyTo(RegulatorProcess regulator, double workingPoint, double P, double I, double D) {
-		regulator.setAnalog(P, I, D, workingPoint);
-	}
+    @Override
+    public void applyTo(RegulatorProcess regulator, double workingPoint, double P, double I, double D) {
+        regulator.setAnalog(P, I, D, workingPoint);
+    }
 }

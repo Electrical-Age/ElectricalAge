@@ -10,27 +10,27 @@ import net.minecraftforge.common.MinecraftForge;
 import java.util.ArrayList;
 
 public class SoundClientEventListener {
-    
-	UuidManager uuidManager;
-	ArrayList<Integer> currentUuid = null;
-	
+
+    UuidManager uuidManager;
+    ArrayList<Integer> currentUuid = null;
+
     public SoundClientEventListener(UuidManager uuidManager) {
-		this.uuidManager = uuidManager;
-		MinecraftForge.EVENT_BUS.register(this);
-	}
-    
-	@SubscribeEvent
-	public void event(PlaySoundSourceEvent e) {
-		if (currentUuid == null) return;
-		uuidManager.add(currentUuid,new SoundClientEntity(e.manager, e.sound));
-	}
-	
-	static class KillSound {
-		public ISound sound;
-		public SoundManager sm;
-		
-		public void kill() {
-			sm.stopSound(sound);
-		}
-	}
+        this.uuidManager = uuidManager;
+        MinecraftForge.EVENT_BUS.register(this);
+    }
+
+    @SubscribeEvent
+    public void event(PlaySoundSourceEvent e) {
+        if (currentUuid == null) return;
+        uuidManager.add(currentUuid, new SoundClientEntity(e.manager, e.sound));
+    }
+
+    static class KillSound {
+        public ISound sound;
+        public SoundManager sm;
+
+        public void kill() {
+            sm.stopSound(sound);
+        }
+    }
 }

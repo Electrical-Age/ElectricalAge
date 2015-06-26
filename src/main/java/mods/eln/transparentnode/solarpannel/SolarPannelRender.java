@@ -1,10 +1,5 @@
 package mods.eln.transparentnode.solarpannel;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
 import mods.eln.misc.Direction;
@@ -18,125 +13,125 @@ import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class SolarPannelRender extends TransparentNodeElementRender {
 
-	public SolarPannelDescriptor descriptor;
-	private CableRenderType renderPreProcess;
+    public SolarPannelDescriptor descriptor;
+    private CableRenderType renderPreProcess;
 
-	public SolarPannelRender(TransparentNodeEntity tileEntity,
-			TransparentNodeDescriptor descriptor) {
-		super(tileEntity, descriptor);
-		this.descriptor = (SolarPannelDescriptor) descriptor;
-		
-	}
+    public SolarPannelRender(TransparentNodeEntity tileEntity,
+                             TransparentNodeDescriptor descriptor) {
+        super(tileEntity, descriptor);
+        this.descriptor = (SolarPannelDescriptor) descriptor;
 
-	RcInterpolator interpol = new RcInterpolator(1f);
-	boolean boot = true;
+    }
 
-	@Override
-	public void draw() {
+    RcInterpolator interpol = new RcInterpolator(1f);
+    boolean boot = true;
 
-		renderPreProcess = drawCable(Direction.YN, descriptor.cableRender, eConn, renderPreProcess);
+    @Override
+    public void draw() {
 
-		descriptor.draw((float) (interpol.get() * 180 / Math.PI - 90), front);
+        renderPreProcess = drawCable(Direction.YN, descriptor.cableRender, eConn, renderPreProcess);
 
-	}
+        descriptor.draw((float) (interpol.get() * 180 / Math.PI - 90), front);
 
-	@Override
-	public void refresh(float deltaT) {
-		float alpha;
-		if (hasTracker == false)
-		{
-			alpha = (float) descriptor.alphaTrunk(pannelAlphaSyncValue);
-		}
-		else
-		{
-			alpha = (float) descriptor.alphaTrunk(SolarPannelSlowProcess.getSolarAlpha(tileEntity.getWorldObj()));
-		}
-		interpol.setTarget(alpha);
-		if (boot) {
-			boot = false;
-			interpol.setValueFromTarget();
-		}
+    }
 
-		interpol.step(deltaT);
-	}
+    @Override
+    public void refresh(float deltaT) {
+        float alpha;
+        if (hasTracker == false) {
+            alpha = (float) descriptor.alphaTrunk(pannelAlphaSyncValue);
+        } else {
+            alpha = (float) descriptor.alphaTrunk(SolarPannelSlowProcess.getSolarAlpha(tileEntity.getWorldObj()));
+        }
+        interpol.setTarget(alpha);
+        if (boot) {
+            boot = false;
+            interpol.setValueFromTarget();
+        }
 
-	@Override
-	public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
-		return descriptor.cableRender;
-	}
+        interpol.step(deltaT);
+    }
 
-	public boolean pannelAlphaSyncNew = false;
-	public float pannelAlphaSyncValue = -1234;
+    @Override
+    public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
+        return descriptor.cableRender;
+    }
 
-	public boolean hasTracker;
+    public boolean pannelAlphaSyncNew = false;
+    public float pannelAlphaSyncValue = -1234;
 
-	LRDUMask eConn = new LRDUMask();
+    public boolean hasTracker;
 
-	@Override
-	public void networkUnserialize(DataInputStream stream) {
-		
-		super.networkUnserialize(stream);
+    LRDUMask eConn = new LRDUMask();
 
-		short read;
+    @Override
+    public void networkUnserialize(DataInputStream stream) {
 
-		try {
+        super.networkUnserialize(stream);
 
-			Byte b;
+        short read;
 
-			hasTracker = stream.readBoolean();
+        try {
 
-			float pannelAlphaIncoming = stream.readFloat();
+            Byte b;
 
-			if (pannelAlphaIncoming != pannelAlphaSyncValue)
-			{
-				pannelAlphaSyncValue = pannelAlphaIncoming;
-				pannelAlphaSyncNew = true;
-			}
+            hasTracker = stream.readBoolean();
 
-			eConn.deserialize(stream);
+            float pannelAlphaIncoming = stream.readFloat();
 
-			renderPreProcess = null;
+            if (pannelAlphaIncoming != pannelAlphaSyncValue) {
+                pannelAlphaSyncValue = pannelAlphaIncoming;
+                pannelAlphaSyncNew = true;
+            }
 
-		} catch (IOException e) {
-			
-			e.printStackTrace();
-		}
+            eConn.deserialize(stream);
 
-	}
+            renderPreProcess = null;
 
-	public void clientSetPannelAlpha(float value)
-	{
-		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			DataOutputStream stream = new DataOutputStream(bos);
+        } catch (IOException e) {
 
-			preparePacketForServer(stream);
+            e.printStackTrace();
+        }
 
-			stream.writeByte(SolarPannelElement.unserializePannelAlpha);
-			stream.writeFloat(value);
+    }
 
-			sendPacketToServer(bos);
-		} catch (IOException e) {
-			
-			e.printStackTrace();
-		}
+    public void clientSetPannelAlpha(float value) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(bos);
 
-	}
+            preparePacketForServer(stream);
 
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 64, this);
+            stream.writeByte(SolarPannelElement.unserializePannelAlpha);
+            stream.writeFloat(value);
 
-	@Override
-	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		
-		return new SolarPannelGuiDraw(player, inventory, this);
-	}
+            sendPacketToServer(bos);
+        } catch (IOException e) {
 
-	@Override
-	public boolean cameraDrawOptimisation() {
-		
-		return false;
-	}
+            e.printStackTrace();
+        }
+
+    }
+
+    TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 64, this);
+
+    @Override
+    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
+
+        return new SolarPannelGuiDraw(player, inventory, this);
+    }
+
+    @Override
+    public boolean cameraDrawOptimisation() {
+
+        return false;
+    }
 
 }

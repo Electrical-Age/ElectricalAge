@@ -1,8 +1,5 @@
 package mods.eln.sixnode.diode;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -24,6 +21,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class DiodeElement extends SixNodeElement {
 
     public DiodeDescriptor descriptor;
@@ -38,95 +38,95 @@ public class DiodeElement extends SixNodeElement {
     LRDU front;
 
     public DiodeElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
-		super(sixNode, side, descriptor);
+        super(sixNode, side, descriptor);
 
-		this.descriptor = (DiodeDescriptor) descriptor;
-		thermalLoad.setAsSlow();
-		
-		front = LRDU.Left;
-		electricalLoadList.add(anodeLoad);
-		electricalLoadList.add(catodeLoad);
-		thermalLoadList.add(thermalLoad);
-		electricalComponentList.add(resistorSwitch);
-		electricalProcessList.add(diodeProcess);
-		slowProcessList.add(thermalWatchdog.set(thermalLoad).set(this.descriptor.thermal).set(new WorldExplosion(this).cableExplosion()));
-		thermalSlowProcessList.add(heater);
-	}
+        this.descriptor = (DiodeDescriptor) descriptor;
+        thermalLoad.setAsSlow();
 
-	public static boolean canBePlacedOnSide(Direction side, int type) {
-		return true;
-	}
+        front = LRDU.Left;
+        electricalLoadList.add(anodeLoad);
+        electricalLoadList.add(catodeLoad);
+        thermalLoadList.add(thermalLoad);
+        electricalComponentList.add(resistorSwitch);
+        electricalProcessList.add(diodeProcess);
+        slowProcessList.add(thermalWatchdog.set(thermalLoad).set(this.descriptor.thermal).set(new WorldExplosion(this).cableExplosion()));
+        thermalSlowProcessList.add(heater);
+    }
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		byte value = nbt.getByte("front");
-		front = LRDU.fromInt((value >> 0) & 0x3);
-	}
+    public static boolean canBePlacedOnSide(Direction side, int type) {
+        return true;
+    }
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-		nbt.setByte("front", (byte) ((front.toInt() << 0)));
-	}
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
+        byte value = nbt.getByte("front");
+        front = LRDU.fromInt((value >> 0) & 0x3);
+    }
 
-	@Override
-	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if (front == lrdu) return anodeLoad;
-		if (front.inverse() == lrdu) return catodeLoad;
-		return null;
-	}
+    @Override
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+        nbt.setByte("front", (byte) ((front.toInt() << 0)));
+    }
 
-	@Override
-	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		return thermalLoad;
-	}
+    @Override
+    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+        if (front == lrdu) return anodeLoad;
+        if (front.inverse() == lrdu) return catodeLoad;
+        return null;
+    }
 
-	@Override
-	public int getConnectionMask(LRDU lrdu) {
-		if (front == lrdu) return descriptor.cable.getNodeMask();
-		if (front.inverse() == lrdu) return descriptor.cable.getNodeMask();
-		return 0;
-	}
+    @Override
+    public ThermalLoad getThermalLoad(LRDU lrdu) {
+        return thermalLoad;
+    }
 
-	@Override
-	public String multiMeterString() {
-		return Utils.plotVolt("U+:", anodeLoad.getU()) + Utils.plotVolt("U-:", catodeLoad.getU()) + Utils.plotAmpere("I:", anodeLoad.getCurrent());
-	}
+    @Override
+    public int getConnectionMask(LRDU lrdu) {
+        if (front == lrdu) return descriptor.cable.getNodeMask();
+        if (front.inverse() == lrdu) return descriptor.cable.getNodeMask();
+        return 0;
+    }
 
-	@Override
-	public String thermoMeterString() {
-		return Utils.plotCelsius("T:", thermalLoad.Tc);
-	}
+    @Override
+    public String multiMeterString() {
+        return Utils.plotVolt("U+:", anodeLoad.getU()) + Utils.plotVolt("U-:", catodeLoad.getU()) + Utils.plotAmpere("I:", anodeLoad.getCurrent());
+    }
 
-	@Override
-	public void networkSerialize(DataOutputStream stream) {
-		super.networkSerialize(stream);
-		try {
-			stream.writeByte((front.toInt() << 4));
-			stream.writeShort((short) ((anodeLoad.getU()) * NodeBase.networkSerializeUFactor));
-			stream.writeShort((short) ((catodeLoad.getU()) * NodeBase.networkSerializeUFactor));
-			stream.writeShort((short) (anodeLoad.getCurrent() * NodeBase.networkSerializeIFactor));
-			stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public String thermoMeterString() {
+        return Utils.plotCelsius("T:", thermalLoad.Tc);
+    }
 
-	@Override
-	public void initialize() {
-		descriptor.applyTo(catodeLoad);
-		descriptor.applyTo(anodeLoad);
-		descriptor.applyTo(thermalLoad);
-		descriptor.applyTo(resistorSwitch);
-	}
+    @Override
+    public void networkSerialize(DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            stream.writeByte((front.toInt() << 4));
+            stream.writeShort((short) ((anodeLoad.getU()) * NodeBase.networkSerializeUFactor));
+            stream.writeShort((short) ((catodeLoad.getU()) * NodeBase.networkSerializeUFactor));
+            stream.writeShort((short) (anodeLoad.getCurrent() * NodeBase.networkSerializeIFactor));
+            stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-		if (currentItemStack != null) {
-			Item item = currentItemStack.getItem();
-			/*if (item== Eln.toolsSetItem) {
+    @Override
+    public void initialize() {
+        descriptor.applyTo(catodeLoad);
+        descriptor.applyTo(anodeLoad);
+        descriptor.applyTo(thermalLoad);
+        descriptor.applyTo(resistorSwitch);
+    }
+
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        if (currentItemStack != null) {
+            Item item = currentItemStack.getItem();
+            /*if (item== Eln.toolsSetItem) {
 				colorCare = colorCare ^ 1;
 				entityPlayer.addChatMessage("Wire color care " + colorCare);
 				sixNode.reconnect();
@@ -142,14 +142,14 @@ public class DiodeElement extends SixNodeElement {
 					entityPlayer.addChatMessage("Brush is empty");
 				}
 			}*/
-		}
-		//front = LRDU.fromInt((front.toInt() + 1)&3);
-		if (Utils.isPlayerUsingWrench(entityPlayer)) {
-			front = front.getNextClockwise();
-			sixNode.reconnect();
-			sixNode.setNeedPublish(true);
-			return true;
-		}
-		return false;
-	}
+        }
+        //front = LRDU.fromInt((front.toInt() + 1)&3);
+        if (Utils.isPlayerUsingWrench(entityPlayer)) {
+            front = front.getNextClockwise();
+            sixNode.reconnect();
+            sixNode.setNeedPublish(true);
+            return true;
+        }
+        return false;
+    }
 }

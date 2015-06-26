@@ -15,24 +15,24 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor {
     boolean voltageOnly;
     Obj3DPart main;
 
-	public ElectricalSensorDescriptor(		
-					String name,String modelName,
-					boolean voltageOnly) {
+    public ElectricalSensorDescriptor(
+            String name, String modelName,
+            boolean voltageOnly) {
         super(name, ElectricalSensorElement.class, ElectricalSensorRender.class);
         this.voltageOnly = voltageOnly;
         main = Eln.obj.getPart(modelName, "main");
-	}
+    }
 
-	void draw() {
-		if (main != null) main.draw();
-	}
-	
-	@Override
-	public void setParent(Item item, int damage) {
-		super.setParent(item, damage);
-		Data.addSignal(newItemStack());
-	}
-	/*
+    void draw() {
+        if (main != null) main.draw();
+    }
+
+    @Override
+    public void setParent(Item item, int damage) {
+        super.setParent(item, damage);
+        Data.addSignal(newItemStack());
+    }
+    /*
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
@@ -49,18 +49,18 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor {
 		draw();
 	}*/
 
-	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		super.addInformation(itemStack, entityPlayer, list, par4);
-		
-		if (voltageOnly) {
-			list.add("Probe voltage value on a cable.");
-			list.add("Has a signal output.");
-		} else {
-			list.add("Probe electrical values on cables.");
-			list.add("Can measure:");
-			list.add("  Voltage/Power/Current");
-			list.add("Has a signal output.");
-		}
-	}
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+
+        if (voltageOnly) {
+            list.add("Probe voltage value on a cable.");
+            list.add("Has a signal output.");
+        } else {
+            list.add("Probe electrical values on cables.");
+            list.add("Can measure:");
+            list.add("  Voltage/Power/Current");
+            list.add("Has a signal output.");
+        }
+    }
 }

@@ -11,19 +11,19 @@ import java.util.ArrayList;
 
 public class ElectricalFireDetectorSlowProcess implements IProcess {
 
-	ElectricalFireDetectorElement element;
+    ElectricalFireDetectorElement element;
 
     boolean firePresent;
     RcInterpolator rc = new RcInterpolator(0.6f);
 
     double t = 0;
 
-	public ElectricalFireDetectorSlowProcess(ElectricalFireDetectorElement element) {
-		this.element = element;
-	}
+    public ElectricalFireDetectorSlowProcess(ElectricalFireDetectorElement element) {
+        this.element = element;
+    }
 
-	@Override
-	public void process(double time) {
+    @Override
+    public void process(double time) {
         t += time;
 
         if (t >= element.descriptor.updateInterval) {
@@ -89,7 +89,7 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
         }
 
         rc.setTarget(firePresent ? 1 : 0);
-        rc.step((float)time);
+        rc.step((float) time);
         element.outputGateProcess.setOutputNormalized(rc.get());
     }
 }

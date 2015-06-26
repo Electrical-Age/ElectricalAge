@@ -30,11 +30,11 @@ public class Achievements {
         AchievementPage.registerAchievementPage(achievementPageEln);
     }
 
-    public static void populateLangFileKeys(){
-        for(Achievement achievItem : achievList){
+    public static void populateLangFileKeys() {
+        for (Achievement achievItem : achievList) {
             String key = achievItem.statId;
-            String value = '<'+"..."+'>'; //NB: statName of class StatBase is private with no accessor.
-            Eln.langFile_DefaultKeys.put(key,value);
+            String value = '<' + "..." + '>'; //NB: statName of class StatBase is private with no accessor.
+            Eln.langFile_DefaultKeys.put(key, value);
         }
     }
 }

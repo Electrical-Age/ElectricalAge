@@ -1,7 +1,5 @@
 package mods.eln.sixnode.diode;
 
-import java.util.List;
-
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -16,6 +14,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
+import java.util.List;
+
 public class DiodeDescriptor extends SixNodeDescriptor {
 
     private Obj3DPart base;
@@ -29,35 +29,35 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 
     ThermalLoadInitializer thermal;
 
-	public DiodeDescriptor(String name,
+    public DiodeDescriptor(String name,
                            IFunction IfU,
                            double Imax,
                            double stdU, double stdI,
                            ThermalLoadInitializer thermal,
                            ElectricalCableDescriptor cable, Obj3D obj) {
-		super(name, DiodeElement.class, DiodeRender.class);
+        super(name, DiodeElement.class, DiodeRender.class);
 
         this.IfU = IfU;
-		
-		//double Umax = 0;
-		//while(IfU.getValue(Umax) < Imax) Umax += 0.01;
-		//double Pmax = Umax * IfU.getValue(Umax);
-		this.cable = cable;
-		this.thermal = thermal;
-		thermal.setMaximalPower(stdU * stdI * 1.2);
-		this.stdI = stdI;
-		this.stdU = stdU;
+
+        //double Umax = 0;
+        //while(IfU.getValue(Umax) < Imax) Umax += 0.01;
+        //double Pmax = Umax * IfU.getValue(Umax);
+        this.cable = cable;
+        this.thermal = thermal;
+        thermal.setMaximalPower(stdU * stdI * 1.2);
+        this.stdI = stdI;
+        this.stdU = stdU;
 
         base = obj.getPart("Base");
         diodeCables = obj.getPart("DiodeCables");
         diodeCore = obj.getPart("DiodeCore");
-	}
+    }
 
-	@Override
-	public void setParent(Item item, int damage) {
-		super.setParent(item, damage);
-		Data.addEnergy(newItemStack());
-	}
+    @Override
+    public void setParent(Item item, int damage) {
+        super.setParent(item, damage);
+        Data.addEnergy(newItemStack());
+    }
 
     @Override
     public boolean use2DIcon() {
@@ -79,28 +79,28 @@ public class DiodeDescriptor extends SixNodeDescriptor {
         draw();
     }
 
-/*	public void applyTo(DiodeProcess diode) {
-		diode.IfU = IfU;
-	}
-	*/
-	public void applyTo(ThermalLoad load) {
-		thermal.applyTo(load);
-	}
-	
-	public void applyTo(ElectricalLoad load) {
-		cable.applyTo(load);
-	}
-	
-	public void applyTo(ResistorSwitch resistorSwitch) {
-		resistorSwitch.setR(stdU/stdI);
-	}
-	
-	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("The current can only run");
-		list.add("one way.");
-	}
+    /*	public void applyTo(DiodeProcess diode) {
+            diode.IfU = IfU;
+        }
+        */
+    public void applyTo(ThermalLoad load) {
+        thermal.applyTo(load);
+    }
+
+    public void applyTo(ElectricalLoad load) {
+        cable.applyTo(load);
+    }
+
+    public void applyTo(ResistorSwitch resistorSwitch) {
+        resistorSwitch.setR(stdU / stdI);
+    }
+
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add("The current can only run");
+        list.add("one way.");
+    }
 
     void draw() {
         if (base != null) base.draw();

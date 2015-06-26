@@ -10,51 +10,52 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 public class UuidManager {
-	LinkedList<Pair> eList = new LinkedList<Pair>();
-	
-	public static class Pair {
-		Pair(ArrayList<Integer> uuid,IUuidEntity e) {
-			this.uuid = uuid;
-			this.e = e;
-		}
-		ArrayList<Integer> uuid;
-		IUuidEntity e;
-	}
-	
-	public UuidManager() {
-		FMLCommonHandler.instance().bus().register(this);
-	}
-	
-	public void add(ArrayList<Integer> uuid,IUuidEntity e){
-		eList.add(new Pair(uuid, e));
-	}
-	
-	@SubscribeEvent
-	public void tick(TickEvent.ClientTickEvent event) {
-		if(event.phase == Phase.END) return;
+    LinkedList<Pair> eList = new LinkedList<Pair>();
 
-		Iterator<Pair> i = eList.iterator();
+    public static class Pair {
+        Pair(ArrayList<Integer> uuid, IUuidEntity e) {
+            this.uuid = uuid;
+            this.e = e;
+        }
 
-		while(i.hasNext()) {
-			Pair p = i.next();
-			if(!p.e.isAlive()){
-				i.remove();
-			}
-		}
-		//Utils.println(eList.size());
-	}
-	
-	public void kill(int uuid) {
-		Iterator<Pair> i = eList.iterator();
-		while(i.hasNext()) {
-			Pair p = i.next();
-			if(p.uuid == null) continue;
-			for(Integer pUuid : p.uuid){
-				if(pUuid == uuid) {
-					p.e.kill();
-					i.remove();
-				}
-			}
-		}		
-	}
+        ArrayList<Integer> uuid;
+        IUuidEntity e;
+    }
+
+    public UuidManager() {
+        FMLCommonHandler.instance().bus().register(this);
+    }
+
+    public void add(ArrayList<Integer> uuid, IUuidEntity e) {
+        eList.add(new Pair(uuid, e));
+    }
+
+    @SubscribeEvent
+    public void tick(TickEvent.ClientTickEvent event) {
+        if (event.phase == Phase.END) return;
+
+        Iterator<Pair> i = eList.iterator();
+
+        while (i.hasNext()) {
+            Pair p = i.next();
+            if (!p.e.isAlive()) {
+                i.remove();
+            }
+        }
+        //Utils.println(eList.size());
+    }
+
+    public void kill(int uuid) {
+        Iterator<Pair> i = eList.iterator();
+        while (i.hasNext()) {
+            Pair p = i.next();
+            if (p.uuid == null) continue;
+            for (Integer pUuid : p.uuid) {
+                if (pUuid == uuid) {
+                    p.e.kill();
+                    i.remove();
+                }
+            }
+        }
+    }
 }

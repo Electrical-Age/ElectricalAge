@@ -9,18 +9,18 @@ public class ElectricalEntitySensorGui extends GuiContainerEln {
 
     ElectricalEntitySensorRender render;
 
-	public ElectricalEntitySensorGui(EntityPlayer player, IInventory inventory, ElectricalEntitySensorRender render) {
-		super(new ElectricalEntitySensorContainer(player, inventory));
-		this.render = render;
-	}
+    public ElectricalEntitySensorGui(EntityPlayer player, IInventory inventory, ElectricalEntitySensorRender render) {
+        super(new ElectricalEntitySensorContainer(player, inventory));
+        this.render = render;
+    }
 
-	@Override
-	public void initGui() {
-		super.initGui();
-	}
-	
-	@Override
-	protected GuiHelperContainer newHelper() {
-		return new GuiHelperContainer(this, 176, 166 - 52, 8, 84 - 52);
-	}
+    @Override
+    public void initGui() {
+        super.initGui();
+    }
+
+    @Override
+    protected GuiHelperContainer newHelper() {
+        return new GuiHelperContainer(this, 176, 166 - 52, 8, 84 - 52);
+    }
 }

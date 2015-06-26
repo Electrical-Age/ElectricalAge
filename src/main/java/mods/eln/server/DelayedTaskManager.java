@@ -13,30 +13,30 @@ public class DelayedTaskManager {
 
     LinkedList<ITask> tasks = new LinkedList<DelayedTaskManager.ITask>();
 
-	public DelayedTaskManager() {
-		MinecraftForge.EVENT_BUS.register(this);
-		FMLCommonHandler.instance().bus().register(this);
-	}
+    public DelayedTaskManager() {
+        MinecraftForge.EVENT_BUS.register(this);
+        FMLCommonHandler.instance().bus().register(this);
+    }
 
-	public void clear() {
-		tasks.clear();
-	}
-	
-	@SubscribeEvent
-	public void tick(ServerTickEvent event) {
-		if (event.phase != Phase.END) return;
-		ArrayList<ITask> cpy = new ArrayList<DelayedTaskManager.ITask>(tasks);
-		tasks.clear();
-		for (ITask t : cpy) {
-			t.run();
-		}
-	}
-	
-	interface ITask {
-		void run();
-	}
+    public void clear() {
+        tasks.clear();
+    }
 
-	public void add(ITask t) {
-		tasks.add(t);
-	}
+    @SubscribeEvent
+    public void tick(ServerTickEvent event) {
+        if (event.phase != Phase.END) return;
+        ArrayList<ITask> cpy = new ArrayList<DelayedTaskManager.ITask>(tasks);
+        tasks.clear();
+        for (ITask t : cpy) {
+            t.run();
+        }
+    }
+
+    interface ITask {
+        void run();
+    }
+
+    public void add(ITask t) {
+        tasks.add(t);
+    }
 }

@@ -6,36 +6,36 @@ import mods.eln.sim.mna.state.VoltageState;
 
 public class BatteryProcess implements IProcess {
 
-	VoltageState positiveLoad, negativeLoad;
-	public  FunctionTable voltageFunction;
-	public double Q = 0,QNominal = 0;
-	public double uNominal = 0;
-	public double life = 1.0;
-	//public double efficiency = 1.0;
-	
-	public VoltageSource voltageSource;
+    VoltageState positiveLoad, negativeLoad;
+    public FunctionTable voltageFunction;
+    public double Q = 0, QNominal = 0;
+    public double uNominal = 0;
+    public double life = 1.0;
+    //public double efficiency = 1.0;
 
-	public boolean isRechargeable = true;
-	public double IMax = 20;
+    public VoltageSource voltageSource;
 
-	public BatteryProcess(VoltageState positiveLoad, VoltageState negativeLoad, FunctionTable voltageFunction, double IMax, VoltageSource voltageSource) {
-		this.positiveLoad = positiveLoad;
-		this.negativeLoad = negativeLoad;
-		this.voltageFunction = voltageFunction;
+    public boolean isRechargeable = true;
+    public double IMax = 20;
 
-		this.IMax = IMax;
-		this.voltageSource = voltageSource;
-	}
+    public BatteryProcess(VoltageState positiveLoad, VoltageState negativeLoad, FunctionTable voltageFunction, double IMax, VoltageSource voltageSource) {
+        this.positiveLoad = positiveLoad;
+        this.negativeLoad = negativeLoad;
+        this.voltageFunction = voltageFunction;
 
-	@Override
-	public void process(double time) {
+        this.IMax = IMax;
+        this.voltageSource = voltageSource;
+    }
+
+    @Override
+    public void process(double time) {
 //		Utils.print("*");
-		Q -= voltageSource.getCurrent() * time;
-		
-		double voltage = computeVoltage();
-		
-		voltageSource.setU(voltage);
-		
+        Q -= voltageSource.getCurrent() * time;
+
+        double voltage = computeVoltage();
+
+        voltageSource.setU(voltage);
+
 		/*double Cequ = (positiveLoad.getC() * negativeLoad.getC()) / (positiveLoad.getC() + negativeLoad.getC());
 		double QNeeded = (voltage - (positiveLoad.Uc - negativeLoad.Uc)) * Cequ;
 		//Q -= QNeeded > 0 ? QNeeded : QNeeded * efficiency;
@@ -49,46 +49,46 @@ public class BatteryProcess implements IProcess {
 		} else {
 			dischargeCurrentMesure = 0;
 		}*/
-	}
+    }
 
-	double computeVoltage() {
-		double voltage = voltageFunction.getValue(Q / (QNominal * life));
-		return Math.max(0, voltage * uNominal);
-	}
-	
-	public double getQRatio() {
-		return Q / QNominal;
-	}
-	
-	public void changeLife(double newLife) {
-		if (newLife < life) {
-			this.Q *= newLife / life;
-		}
-		life = newLife;
-	}
-	
-	public double getCharge() {
-		return Q / (QNominal * life);
-	}
+    double computeVoltage() {
+        double voltage = voltageFunction.getValue(Q / (QNominal * life));
+        return Math.max(0, voltage * uNominal);
+    }
 
-	public void setCharge(double charge) {
-		Q = QNominal * life * charge;
-	}
+    public double getQRatio() {
+        return Q / QNominal;
+    }
 
-	public double getEnergy() {
-		int stepNbr = 50;
-		double chargeStep = getCharge() / stepNbr;
-		double chargeIntegrator = 0;
-		double energy = 0;
-		double QperStep = QNominal * life * chargeStep;
-		
-		for (int step = 0; step < stepNbr; step++) {
-			double voltage = voltageFunction.getValue(chargeIntegrator) * uNominal;
-			energy += voltage * QperStep;
-			chargeIntegrator += chargeStep;
-		}
-		
-		return energy;
+    public void changeLife(double newLife) {
+        if (newLife < life) {
+            this.Q *= newLife / life;
+        }
+        life = newLife;
+    }
+
+    public double getCharge() {
+        return Q / (QNominal * life);
+    }
+
+    public void setCharge(double charge) {
+        Q = QNominal * life * charge;
+    }
+
+    public double getEnergy() {
+        int stepNbr = 50;
+        double chargeStep = getCharge() / stepNbr;
+        double chargeIntegrator = 0;
+        double energy = 0;
+        double QperStep = QNominal * life * chargeStep;
+
+        for (int step = 0; step < stepNbr; step++) {
+            double voltage = voltageFunction.getValue(chargeIntegrator) * uNominal;
+            energy += voltage * QperStep;
+            chargeIntegrator += chargeStep;
+        }
+
+        return energy;
 		
 		/*double probeU = (positiveLoad.Uc - negativeLoad.Uc);
 		double q = 0, dq = 0.00001;
@@ -101,29 +101,29 @@ public class BatteryProcess implements IProcess {
 			//if (e > 1) break;
 		}
 		return e * life;		*/
-	}
-	
-	public double getEnergyMax() {
-		int stepNbr = 50;
-		double chargeStep = 1.0 / stepNbr;
-		double chargeIntegrator = 0;
-		double energy = 0;
-		double QperStep = QNominal * life * 1.0 / stepNbr;
-		
-		for (int step = 0; step < stepNbr; step++) {
-			double voltage = voltageFunction.getValue(chargeIntegrator) * uNominal;
-			energy += voltage * QperStep;
-			chargeIntegrator += chargeStep;
-		}
-		
-		return energy;
-	}
+    }
 
-	public double getU() {
-		return computeVoltage();
-	}
+    public double getEnergyMax() {
+        int stepNbr = 50;
+        double chargeStep = 1.0 / stepNbr;
+        double chargeIntegrator = 0;
+        double energy = 0;
+        double QperStep = QNominal * life * 1.0 / stepNbr;
 
-	public double getDischargeCurrent() {
-		return voltageSource.getI();
-	}
+        for (int step = 0; step < stepNbr; step++) {
+            double voltage = voltageFunction.getValue(chargeIntegrator) * uNominal;
+            energy += voltage * QperStep;
+            chargeIntegrator += chargeStep;
+        }
+
+        return energy;
+    }
+
+    public double getU() {
+        return computeVoltage();
+    }
+
+    public double getDischargeCurrent() {
+        return voltageSource.getI();
+    }
 }

@@ -1,11 +1,5 @@
 package mods.eln.simplenode.energyconverter;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.nbt.NBTTagCompound;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -17,10 +11,16 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtResistor;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class EnergyConverterElnToOtherNode extends SimpleNode {
 
-	EnergyConverterElnToOtherDescriptor descriptor;
+    EnergyConverterElnToOtherDescriptor descriptor;
 
     NbtElectricalLoad load = new NbtElectricalLoad("load");
     NbtResistor powerInResistor = new NbtResistor("powerInResistor", load, null);
@@ -38,115 +38,115 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
     public static final byte setInPowerFactor = 1;
 
     @Override
-	protected void setDescriptorKey(String key) {
-		super.setDescriptorKey(key);
-		descriptor = (EnergyConverterElnToOtherDescriptor) getDescriptor();
-	}
-	
-	@Override
-	public int getSideConnectionMask(Direction directionA, LRDU lrduA) {
-		if (directionA == getFront()) return maskElectricalPower;
-		return 0;
-	}
+    protected void setDescriptorKey(String key) {
+        super.setDescriptorKey(key);
+        descriptor = (EnergyConverterElnToOtherDescriptor) getDescriptor();
+    }
 
-	@Override
-	public ThermalLoad getThermalLoad(Direction directionA, LRDU lrduA) {
-		return null;
-	}
+    @Override
+    public int getSideConnectionMask(Direction directionA, LRDU lrduA) {
+        if (directionA == getFront()) return maskElectricalPower;
+        return 0;
+    }
 
-	@Override
-	public ElectricalLoad getElectricalLoad(Direction directionB, LRDU lrduB) {
-		return load;
-	}
+    @Override
+    public ThermalLoad getThermalLoad(Direction directionA, LRDU lrduA) {
+        return null;
+    }
 
-	@Override
-	public void initialize() {
-		electricalLoadList.add(load);
-		electricalComponentList.add(powerInResistor);
-		electricalProcessList.add(electricalProcess);
-		slowProcessList.add(watchdog);
+    @Override
+    public ElectricalLoad getElectricalLoad(Direction directionB, LRDU lrduB) {
+        return load;
+    }
 
-		Eln.applySmallRs(load);
+    @Override
+    public void initialize() {
+        electricalLoadList.add(load);
+        electricalComponentList.add(powerInResistor);
+        electricalProcessList.add(electricalProcess);
+        slowProcessList.add(watchdog);
 
-		load.setAsPrivate();
-		
-		descriptor.applyTo(this);
+        Eln.applySmallRs(load);
 
-    	WorldExplosion exp = new WorldExplosion(this).machineExplosion();
-    	watchdog.set(load).setUNominal(inStdVoltage).set(exp);
+        load.setAsPrivate();
 
-		connect();
-	}
+        descriptor.applyTo(this);
 
-	class ElectricalProcess implements IProcess {
-		double timeout = 0;
+        WorldExplosion exp = new WorldExplosion(this).machineExplosion();
+        watchdog.set(load).setUNominal(inStdVoltage).set(exp);
+
+        connect();
+    }
+
+    class ElectricalProcess implements IProcess {
+        double timeout = 0;
 
         @Override
-		public void process(double time) {
-			energyBuffer += powerInResistor.getP() * time;
-			timeout -= time;
-			if (timeout < 0) {
-				timeout = 0.05;
-				double energyMiss = energyBufferMax - energyBuffer;
-				if (energyMiss<= 0) {
-					powerInResistor.highImpedance();
-				} else {
-					double factor = Math.min(1, energyMiss / energyBufferMax * 2);
-					if (factor < 0.005) factor = 0;
-					double inP = factor * inPowerMax * inPowerFactor;
-					powerInResistor.setR(inStdVoltage * inStdVoltage / inP);
-				}
-			}
-		}
-	}
+        public void process(double time) {
+            energyBuffer += powerInResistor.getP() * time;
+            timeout -= time;
+            if (timeout < 0) {
+                timeout = 0.05;
+                double energyMiss = energyBufferMax - energyBuffer;
+                if (energyMiss <= 0) {
+                    powerInResistor.highImpedance();
+                } else {
+                    double factor = Math.min(1, energyMiss / energyBufferMax * 2);
+                    if (factor < 0.005) factor = 0;
+                    double inP = factor * inPowerMax * inPowerFactor;
+                    powerInResistor.setR(inStdVoltage * inStdVoltage / inP);
+                }
+            }
+        }
+    }
 
-	public double getOtherModEnergyBuffer(double conversionRatio) {
-		return energyBuffer*conversionRatio;
-	}
+    public double getOtherModEnergyBuffer(double conversionRatio) {
+        return energyBuffer * conversionRatio;
+    }
 
-	public void drawEnergy(double otherModEnergy, double conversionRatio) {
-		energyBuffer -= otherModEnergy / conversionRatio;
-	}
+    public void drawEnergy(double otherModEnergy, double conversionRatio) {
+        energyBuffer -= otherModEnergy / conversionRatio;
+    }
 
-	public double getOtherModOutMax(double otherOutMax, double conversionRatio) {
-		return Math.min(getOtherModEnergyBuffer(conversionRatio), otherOutMax);
-	}
+    public double getOtherModOutMax(double otherOutMax, double conversionRatio) {
+        return Math.min(getOtherModEnergyBuffer(conversionRatio), otherOutMax);
+    }
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-		nbt.setDouble("energyBuffer", energyBuffer);
-		nbt.setDouble("inPowerFactor", inPowerFactor);
-	}
-	
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		energyBuffer = nbt.getDouble("energyBuffer");
-		inPowerFactor = nbt.getDouble("inPowerFactor");
-	}
+    @Override
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+        nbt.setDouble("energyBuffer", energyBuffer);
+        nbt.setDouble("inPowerFactor", inPowerFactor);
+    }
 
-	@Override
-	public boolean hasGui(Direction side) {
-		return true;
-	}
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
+        energyBuffer = nbt.getDouble("energyBuffer");
+        inPowerFactor = nbt.getDouble("inPowerFactor");
+    }
 
-	@Override
-	public void publishSerialize(DataOutputStream stream) {
-		super.publishSerialize(stream);
-		
-		try {
-			stream.writeFloat((float) inPowerFactor);
-			stream.writeFloat((float) inPowerMax);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public boolean hasGui(Direction side) {
+        return true;
+    }
 
-	@Override
-	public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
-		try {
-			switch (stream.readByte()) {
+    @Override
+    public void publishSerialize(DataOutputStream stream) {
+        super.publishSerialize(stream);
+
+        try {
+            stream.writeFloat((float) inPowerFactor);
+            stream.writeFloat((float) inPowerMax);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
+        try {
+            switch (stream.readByte()) {
                 case setInPowerFactor:
                     inPowerFactor = stream.readFloat();
                     needPublish();
@@ -155,17 +155,17 @@ public class EnergyConverterElnToOtherNode extends SimpleNode {
                 default:
                     break;
             }
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public String getNodeUuid() {
-		return getNodeUuidStatic();
-	}
+    @Override
+    public String getNodeUuid() {
+        return getNodeUuidStatic();
+    }
 
     public static String getNodeUuidStatic() {
-		return "ElnToOther";
-	}
+        return "ElnToOther";
+    }
 }

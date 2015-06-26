@@ -11,44 +11,44 @@ public class ElectricalGateSourceGui extends GuiScreenEln {
     ElectricalGateSourceRender render;
     GuiVerticalTrackBar voltage;
 
-	public ElectricalGateSourceGui(EntityPlayer player, ElectricalGateSourceRender render) {
-		this.render = render;
-	}
+    public ElectricalGateSourceGui(EntityPlayer player, ElectricalGateSourceRender render) {
+        this.render = render;
+    }
 
-	@Override
-	public void initGui() {
-		super.initGui();
+    @Override
+    public void initGui() {
+        super.initGui();
 
-		voltage = newGuiVerticalTrackBar(6, 6 + 2, 20, 50);
-		voltage.setStepIdMax((int)100);
-		voltage.setEnable(true);
-    	voltage.setRange(0f, 50f);
+        voltage = newGuiVerticalTrackBar(6, 6 + 2, 20, 50);
+        voltage.setStepIdMax((int) 100);
+        voltage.setEnable(true);
+        voltage.setRange(0f, 50f);
 
-    	syncVoltage();
-	}
-	
+        syncVoltage();
+    }
+
     public void syncVoltage() {
-    	voltage.setValue(render.voltageSyncValue);
-    	render.voltageSyncNew = false;
+        voltage.setValue(render.voltageSyncValue);
+        render.voltageSyncNew = false;
     }
 
     @Override
     public void guiObjectEvent(IGuiObject object) {
-    	super.guiObjectEvent(object);
-    	if (object == voltage) {
-    		render.clientSetFloat(ElectricalGateSourceElement.setVoltagerId, voltage.getValue());
-    	}
+        super.guiObjectEvent(object);
+        if (object == voltage) {
+            render.clientSetFloat(ElectricalGateSourceElement.setVoltagerId, voltage.getValue());
+        }
     }
 
     @Override
     protected void preDraw(float f, int x, int y) {
-    	super.preDraw(f, x, y);
-    	if (render.voltageSyncNew) syncVoltage();
-    	voltage.setComment(0, "Output at " + ((int)voltage.getValue() * 2) + "%");
+        super.preDraw(f, x, y);
+        if (render.voltageSyncNew) syncVoltage();
+        voltage.setComment(0, "Output at " + ((int) voltage.getValue() * 2) + "%");
     }
 
-	@Override
-	protected GuiHelper newHelper() {
-		return new GuiHelper(this, 12 + 20, 12 + 50 + 4);
-	}
+    @Override
+    protected GuiHelper newHelper() {
+        return new GuiHelper(this, 12 + 20, 12 + 50 + 4);
+    }
 }

@@ -12,49 +12,49 @@ import java.util.HashMap;
 
 public class WirelessSignalRepeaterProcess implements IProcess, IWirelessSignalSpot {
 
-	private WirelessSignalRepeaterElement rx;
+    private WirelessSignalRepeaterElement rx;
 
     double sleepTimer = 0;
     IWirelessSignalSpot spot;
 
     boolean boot = true;
 
-	public WirelessSignalRepeaterProcess(WirelessSignalRepeaterElement rx) {
-		this.rx = rx;
-	}
+    public WirelessSignalRepeaterProcess(WirelessSignalRepeaterElement rx) {
+        this.rx = rx;
+    }
 
-	@Override
-	public void process(double time) {
-		sleepTimer -= time;
-		if (sleepTimer < 0) {
-			sleepTimer += Utils.rand(1.2, 2);
-	
-			spot = WirelessUtils.buildSpot(rx.getCoordonate(), null, rx.descriptor.range);	
-		
-			if (boot) {
-				boot = false;
-				//IWirelessSignalSpot.spots.add(this);
-			}
-		}
-	}
+    @Override
+    public void process(double time) {
+        sleepTimer -= time;
+        if (sleepTimer < 0) {
+            sleepTimer += Utils.rand(1.2, 2);
 
-	@Override
-	public HashMap<String, ArrayList<IWirelessSignalTx>> getTx() {
-		return spot.getTx();
-	}
+            spot = WirelessUtils.buildSpot(rx.getCoordonate(), null, rx.descriptor.range);
 
-	@Override
-	public ArrayList<IWirelessSignalSpot> getSpot() {
-		return spot.getSpot();
-	}
+            if (boot) {
+                boot = false;
+                //IWirelessSignalSpot.spots.add(this);
+            }
+        }
+    }
 
-	@Override
-	public Coordonate getCoordonate() {
-		return rx.getCoordonate();
-	}
+    @Override
+    public HashMap<String, ArrayList<IWirelessSignalTx>> getTx() {
+        return spot.getTx();
+    }
 
-	@Override
-	public int getRange() {
-		return rx.descriptor.range;
-	}
+    @Override
+    public ArrayList<IWirelessSignalSpot> getSpot() {
+        return spot.getSpot();
+    }
+
+    @Override
+    public Coordonate getCoordonate() {
+        return rx.getCoordonate();
+    }
+
+    @Override
+    public int getRange() {
+        return rx.descriptor.range;
+    }
 }

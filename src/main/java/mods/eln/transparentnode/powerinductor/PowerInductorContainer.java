@@ -10,22 +10,20 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
-public class PowerInductorContainer extends BasicContainer{
+public class PowerInductorContainer extends BasicContainer {
 
 
-	static final int cableId = 0;
-	static final int coreId = 1;
-	
-	public PowerInductorContainer(EntityPlayer player, IInventory inventory) {
-		super(player, inventory,new Slot[]{
-				new GenericItemUsingDamageSlot(inventory, cableId,132,8,19, CopperCableDescriptor.class,SlotSkin.medium,new String[]{"Copper cable Slot","(Increase inductance value)"}),
-				new GenericItemUsingDamageSlot(inventory, coreId, 132+20,8,1, FerromagneticCoreDescriptor.class,SlotSkin.medium,new String[]{"Ferromagnetic Core Slot"})
+    static final int cableId = 0;
+    static final int coreId = 1;
 
-			});
+    public PowerInductorContainer(EntityPlayer player, IInventory inventory) {
+        super(player, inventory, new Slot[]{
+                new GenericItemUsingDamageSlot(inventory, cableId, 132, 8, 19, CopperCableDescriptor.class, SlotSkin.medium, new String[]{"Copper cable Slot", "(Increase inductance value)"}),
+                new GenericItemUsingDamageSlot(inventory, coreId, 132 + 20, 8, 1, FerromagneticCoreDescriptor.class, SlotSkin.medium, new String[]{"Ferromagnetic Core Slot"})
 
-	}
+        });
 
-
+    }
 
 
 }

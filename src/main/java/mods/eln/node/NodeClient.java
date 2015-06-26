@@ -1,53 +1,35 @@
 package mods.eln.node;
 
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.EnumSet;
-
-import mods.eln.Eln;
-import mods.eln.sim.ElectricalConnection;
-import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.IProcess;
-import mods.eln.sim.ThermalConnection;
-import mods.eln.sim.ThermalLoad;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
-
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.Type;
-import cpw.mods.fml.relauncher.Side;
 
-public class NodeClient{
-	public static ArrayList<NodeBlockEntity> nodeNeedRefreshList = new ArrayList<NodeBlockEntity>();	
+import java.util.ArrayList;
 
-	public NodeClient()
-	{
-		FMLCommonHandler.instance().bus().register(this);
-	}
-	public void init()
-	{
-		nodeNeedRefreshList.clear();
-	}
-	public void stop()
-	{
-		nodeNeedRefreshList.clear();
-	}
-	
-	public static final int refreshDivider = 5;
-	public int refreshCounter = 0;
-	@SubscribeEvent
-	public void tick(ClientTickEvent event) {
-		if(event.phase != Phase.START) return;
-		/*
+public class NodeClient {
+    public static ArrayList<NodeBlockEntity> nodeNeedRefreshList = new ArrayList<NodeBlockEntity>();
+
+    public NodeClient() {
+        FMLCommonHandler.instance().bus().register(this);
+    }
+
+    public void init() {
+        nodeNeedRefreshList.clear();
+    }
+
+    public void stop() {
+        nodeNeedRefreshList.clear();
+    }
+
+    public static final int refreshDivider = 5;
+    public int refreshCounter = 0;
+
+    @SubscribeEvent
+    public void tick(ClientTickEvent event) {
+        if (event.phase != Phase.START) return;
+        /*
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
         if (server == null) return;
         if(refreshCounter++ < refreshDivider) return;
@@ -94,7 +76,7 @@ public class NodeClient{
 			
 			e.printStackTrace();
 		}*/
-	}
+    }
 
-	
+
 }

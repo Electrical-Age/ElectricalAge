@@ -11,25 +11,25 @@ public class DelayedBlockRemove implements ITask {
 
     Coordonate c;
 
-	private static HashSet<Coordonate> blocks = new HashSet<Coordonate>(); 
-	
-	private DelayedBlockRemove(Coordonate c) {
-		this.c = c;
-	}
+    private static HashSet<Coordonate> blocks = new HashSet<Coordonate>();
 
-	public static void clear() {
-		blocks.clear();
-	}
+    private DelayedBlockRemove(Coordonate c) {
+        this.c = c;
+    }
 
-	public static void add(Coordonate c) {
-		if (blocks.contains(c)) return;
-		blocks.add(c);
-		Eln.delayedTask.add(new DelayedBlockRemove(c));
-	}
+    public static void clear() {
+        blocks.clear();
+    }
 
-	@Override
-	public void run() {
-		blocks.remove(c);
-		c.setBlock(Blocks.air);
-	}
+    public static void add(Coordonate c) {
+        if (blocks.contains(c)) return;
+        blocks.add(c);
+        Eln.delayedTask.add(new DelayedBlockRemove(c));
+    }
+
+    @Override
+    public void run() {
+        blocks.remove(c);
+        c.setBlock(Blocks.air);
+    }
 }

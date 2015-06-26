@@ -24,7 +24,7 @@ import java.io.IOException;
 
 public class ElectricalDataLoggerElement extends SixNodeElement {
 
-	public static final int logsSizeMax = 256;
+    public static final int logsSizeMax = 256;
 
     public int sampleStack, sampleStackNbr;
 
@@ -54,129 +54,129 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     boolean printToDo;
     boolean pause = false;
 
-	public ElectricalDataLoggerElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
-		super(sixNode, side, descriptor);
+    public ElectricalDataLoggerElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+        super(sixNode, side, descriptor);
 
-    	this.descriptor = (ElectricalDataLoggerDescriptor) descriptor;
-		
-    	inputGate = new NbtElectricalGateInput("inputGate", false);
-		
-		electricalLoadList.add(inputGate);
-    	electricalProcessList.add(slowProcess);
-    	sampleStackReset();
-	}
+        this.descriptor = (ElectricalDataLoggerDescriptor) descriptor;
 
-	public static boolean canBePlacedOnSide(Direction side,SixNodeDescriptor descriptor) {
-		if (((ElectricalDataLoggerDescriptor)descriptor).onFloor && side == Direction.YN) return true;
-		return false;
-	}
+        inputGate = new NbtElectricalGateInput("inputGate", false);
 
-	public SixNodeElementInventory getInventory() {
-		return inventory;
-	}
+        electricalLoadList.add(inputGate);
+        electricalProcessList.add(slowProcess);
+        sampleStackReset();
+    }
 
-	public static boolean canBePlacedOnSide(Direction side, int type) {
-		return true;
-	}
+    public static boolean canBePlacedOnSide(Direction side, SixNodeDescriptor descriptor) {
+        if (((ElectricalDataLoggerDescriptor) descriptor).onFloor && side == Direction.YN) return true;
+        return false;
+    }
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
+    public SixNodeElementInventory getInventory() {
+        return inventory;
+    }
+
+    public static boolean canBePlacedOnSide(Direction side, int type) {
+        return true;
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
         byte value = nbt.getByte("front");
         front = LRDU.fromInt((value >> 0) & 0x3);
 
-		logs.readFromNBT(nbt, "logs");
-		pause = nbt.getBoolean("pause");
-		timeToNextSample = nbt.getDouble("timeToNextSample");
-		sampleStack = nbt.getInteger("sampleStack");
-		sampleStackNbr = nbt.getInteger("sampleStackNbr");
-	}
+        logs.readFromNBT(nbt, "logs");
+        pause = nbt.getBoolean("pause");
+        timeToNextSample = nbt.getDouble("timeToNextSample");
+        sampleStack = nbt.getInteger("sampleStack");
+        sampleStackNbr = nbt.getInteger("sampleStackNbr");
+    }
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-		nbt.setByte("front", (byte)(front.toInt() << 0));
-		nbt.setDouble("timeToNextSample", timeToNextSample);
-		nbt.setBoolean("pause", pause);
-		
-		logs.writeToNBT(nbt, "logs");
-		nbt.setInteger("sampleStack", sampleStack);
-		nbt.setInteger("sampleStackNbr", sampleStackNbr);
-	}
+    @Override
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+        nbt.setByte("front", (byte) (front.toInt() << 0));
+        nbt.setDouble("timeToNextSample", timeToNextSample);
+        nbt.setBoolean("pause", pause);
 
-	@Override
-	public ElectricalLoad getElectricalLoad(LRDU lrdu) {	
-		if (front.inverse() == lrdu) return inputGate;
-		return null;
-	}
+        logs.writeToNBT(nbt, "logs");
+        nbt.setInteger("sampleStack", sampleStack);
+        nbt.setInteger("sampleStackNbr", sampleStackNbr);
+    }
 
-	@Override
-	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		return null;
-	}
+    @Override
+    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+        if (front.inverse() == lrdu) return inputGate;
+        return null;
+    }
 
-	@Override
-	public int getConnectionMask(LRDU lrdu) {
-		if (front.inverse() == lrdu) return NodeBase.maskElectricalInputGate;
-		return 0;
-	}
+    @Override
+    public ThermalLoad getThermalLoad(LRDU lrdu) {
+        return null;
+    }
 
-	@Override
-	public String multiMeterString() {
-		return inputGate.plot("In: ");
-	}
+    @Override
+    public int getConnectionMask(LRDU lrdu) {
+        if (front.inverse() == lrdu) return NodeBase.maskElectricalInputGate;
+        return 0;
+    }
 
-	@Override
-	public String thermoMeterString() {
-		return "";
-	}
+    @Override
+    public String multiMeterString() {
+        return inputGate.plot("In: ");
+    }
 
-	@Override
-	public void networkSerialize(DataOutputStream stream) {
-		super.networkSerialize(stream);
-		try {
-			stream.writeByte(logs.unitType);
-			stream.writeBoolean(pause);
-			stream.writeFloat((float) logs.samplingPeriod);
-			stream.writeFloat((float) logs.maxValue);
-			stream.writeFloat((float) logs.minValue);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public String thermoMeterString() {
+        return "";
+    }
 
-	@Override
-	public void initialize() {
-    	computeElectricalLoad();
-	}
+    @Override
+    public void networkSerialize(DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            stream.writeByte(logs.unitType);
+            stream.writeBoolean(pause);
+            stream.writeFloat((float) logs.samplingPeriod);
+            stream.writeFloat((float) logs.maxValue);
+            stream.writeFloat((float) logs.minValue);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	protected void inventoryChanged() {
-		computeElectricalLoad();
-	}
+    @Override
+    public void initialize() {
+        computeElectricalLoad();
+    }
 
-	public void computeElectricalLoad() {
-	}
-	
-	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-		
-		if (Utils.isPlayerUsingWrench(entityPlayer)) {
-			front = front.getNextClockwise();
-			sixNode.reconnect();
-			sixNode.setNeedPublish(true);
-			return true;	
-		}
-    	return false;
-	}
+    @Override
+    protected void inventoryChanged() {
+        computeElectricalLoad();
+    }
 
-	@Override
-	public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
-		super.networkUnserialize(stream);
-		byte header;
-		try {
-			switch(header = stream.readByte()) {
+    public void computeElectricalLoad() {
+    }
+
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+
+        if (Utils.isPlayerUsingWrench(entityPlayer)) {
+            front = front.getNextClockwise();
+            sixNode.reconnect();
+            sixNode.setNeedPublish(true);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void networkUnserialize(DataInputStream stream, EntityPlayerMP player) {
+        super.networkUnserialize(stream);
+        byte header;
+        try {
+            switch (header = stream.readByte()) {
                 case setSamplingPeriodeId:
                     logs.reset();
                     sampleStackReset();
@@ -211,41 +211,41 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
                     pause = !pause;
                     needPublish();
                     break;
-			}
-			
-			if (header == resetId || header == newClientId || header == setSamplingPeriodeId) {
-		    	ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-		        DataOutputStream packet = new DataOutputStream(bos);   	
-		        
-				preparePacketForClient(packet);
-				
-				packet.writeByte(toClientLogsClear);
-				int size = logs.size();
-				for (int idx = size - 1; idx >= 0; idx--) {
-					packet.writeByte(logs.read(idx));
-				}
-				if (header == newClientId)
-					sendPacketToClient(bos, player);
-				else
-					sendPacketToAllClient(bos);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	@Override
-	public boolean hasGui() {
-		return true;
-	}
-	
-	@Override
-	public Container newContainer(Direction side, EntityPlayer player) {
-		return new ElectricalDataLoggerContainer(player, inventory);
-	}
+            }
 
-	public void sampleStackReset() {
-		sampleStack = 0;
-		sampleStackNbr = 0;
-	}
+            if (header == resetId || header == newClientId || header == setSamplingPeriodeId) {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+                DataOutputStream packet = new DataOutputStream(bos);
+
+                preparePacketForClient(packet);
+
+                packet.writeByte(toClientLogsClear);
+                int size = logs.size();
+                for (int idx = size - 1; idx >= 0; idx--) {
+                    packet.writeByte(logs.read(idx));
+                }
+                if (header == newClientId)
+                    sendPacketToClient(bos, player);
+                else
+                    sendPacketToAllClient(bos);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public boolean hasGui() {
+        return true;
+    }
+
+    @Override
+    public Container newContainer(Direction side, EntityPlayer player) {
+        return new ElectricalDataLoggerContainer(player, inventory);
+    }
+
+    public void sampleStackReset() {
+        sampleStack = 0;
+        sampleStackNbr = 0;
+    }
 }

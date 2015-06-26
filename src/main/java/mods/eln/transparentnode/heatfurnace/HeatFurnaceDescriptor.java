@@ -31,96 +31,96 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor {
     double flameEndX, flameEndY, flameEndZ;
     double flameDeltaX, flameDeltaY, flameDeltaZ;
     double flamePopRate;
-    
-	public HeatFurnaceDescriptor(String name, String modelName, 
-                                 double nominalPower, double nominalCombustibleEnergy, 
-                                 int combustionChamberMax, double combustionChamberPower, 
+
+    public HeatFurnaceDescriptor(String name, String modelName,
+                                 double nominalPower, double nominalCombustibleEnergy,
+                                 int combustionChamberMax, double combustionChamberPower,
                                  ThermalLoadInitializerByPowerDrop thermal) {
-		super(name, HeatFurnaceElement.class, HeatFurnaceRender.class);
-		this.thermal = thermal;
-		this.nominalCombustibleEnergy = nominalCombustibleEnergy;
-		this.combustionChamberMax = combustionChamberMax;
-		this.combustionChamberPower = combustionChamberPower;
-		this.nominalPower = nominalPower;
-		obj = Eln.obj.getObj(modelName);
-		if (obj != null) {
-			tiroir = obj.getPart("tiroir");
-			main = obj.getPart("main");
-			
-			if (tiroir != null) {
-				alphaClose = tiroir.getFloat("alphaClose");
-				alphaOpen = tiroir.getFloat("alphaOpen");
-			}
-	
-			if (main != null) {
-				flameStartX = main.getFloat("flameStartX");
-				flameStartY = main.getFloat("flameStartY");
-				flameStartZ = main.getFloat("flameStartZ");
-				
-				flameEndX = main.getFloat("flameEndX");
-				flameEndY = main.getFloat("flameEndY");
-				flameEndZ = main.getFloat("flameEndZ");
-                
-				flameDeltaX = flameEndX - flameStartX;
-				flameDeltaY = flameEndY - flameStartY;
-				flameDeltaZ = flameEndZ - flameStartZ;
-				flamePopRate = main.getFloat("flamePopRate");
-			}
-		}
-		thermal.setMaximalPower(nominalPower);
-	}
-	
-	@Override
-	public boolean use2DIcon() {
-		return false;
-	}
-    
-	@Override
-	public void setParent(Item item, int damage) {
-		super.setParent(item, damage);
-		Data.addThermal(newItemStack());
-	}
-	
-	public void applyTo(ThermalLoad load) {
-		thermal.applyTo(load);
-	}
-    
-	public void applyTo(FurnaceProcess process) {
-		process.nominalCombustibleEnergy = nominalCombustibleEnergy;
-		process.nominalPower = nominalPower;
-	}
-	
-	void draw(float tiroirFactor) {
-		//GL11.glDisable(GL11.GL_T4$5EXTURE_2D);
-		//GL11.glDisable(GL11.GL_CULL_FACE);
-		//GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-	//	GL11.glColor3f(0.5f, 0.5f, 0.5f);
-		if (main != null) main.draw();
-		if (tiroir != null) tiroir.draw(alphaClose + tiroirFactor * (alphaOpen - alphaClose), 0f, 0f, 1f);
-		//GL11.glEnable(GL11.GL_TEXTURE_2D);
-		//GL11.glCullFace(GL11.GL_BACK);
-	}
+        super(name, HeatFurnaceElement.class, HeatFurnaceRender.class);
+        this.thermal = thermal;
+        this.nominalCombustibleEnergy = nominalCombustibleEnergy;
+        this.combustionChamberMax = combustionChamberMax;
+        this.combustionChamberPower = combustionChamberPower;
+        this.nominalPower = nominalPower;
+        obj = Eln.obj.getObj(modelName);
+        if (obj != null) {
+            tiroir = obj.getPart("tiroir");
+            main = obj.getPart("main");
 
-	@Override
-	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return true;
-	}
-	
-	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
-	}
-	
-	@Override
-	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		draw(1.0f);
-	}
+            if (tiroir != null) {
+                alphaClose = tiroir.getFloat("alphaClose");
+                alphaOpen = tiroir.getFloat("alphaOpen");
+            }
 
-	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Provides heat when fuelled.");
-		list.add(Utils.plotPower("Power :", nominalPower));
-		list.add(Utils.plotCelsius("Tmax :", thermal.warmLimit));
-	}
+            if (main != null) {
+                flameStartX = main.getFloat("flameStartX");
+                flameStartY = main.getFloat("flameStartY");
+                flameStartZ = main.getFloat("flameStartZ");
+
+                flameEndX = main.getFloat("flameEndX");
+                flameEndY = main.getFloat("flameEndY");
+                flameEndZ = main.getFloat("flameEndZ");
+
+                flameDeltaX = flameEndX - flameStartX;
+                flameDeltaY = flameEndY - flameStartY;
+                flameDeltaZ = flameEndZ - flameStartZ;
+                flamePopRate = main.getFloat("flamePopRate");
+            }
+        }
+        thermal.setMaximalPower(nominalPower);
+    }
+
+    @Override
+    public boolean use2DIcon() {
+        return false;
+    }
+
+    @Override
+    public void setParent(Item item, int damage) {
+        super.setParent(item, damage);
+        Data.addThermal(newItemStack());
+    }
+
+    public void applyTo(ThermalLoad load) {
+        thermal.applyTo(load);
+    }
+
+    public void applyTo(FurnaceProcess process) {
+        process.nominalCombustibleEnergy = nominalCombustibleEnergy;
+        process.nominalPower = nominalPower;
+    }
+
+    void draw(float tiroirFactor) {
+        //GL11.glDisable(GL11.GL_T4$5EXTURE_2D);
+        //GL11.glDisable(GL11.GL_CULL_FACE);
+        //GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+        //	GL11.glColor3f(0.5f, 0.5f, 0.5f);
+        if (main != null) main.draw();
+        if (tiroir != null) tiroir.draw(alphaClose + tiroirFactor * (alphaOpen - alphaClose), 0f, 0f, 1f);
+        //GL11.glEnable(GL11.GL_TEXTURE_2D);
+        //GL11.glCullFace(GL11.GL_BACK);
+    }
+
+    @Override
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+        return true;
+    }
+
+    @Override
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        return true;
+    }
+
+    @Override
+    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+        draw(1.0f);
+    }
+
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add("Provides heat when fuelled.");
+        list.add(Utils.plotPower("Power :", nominalPower));
+        list.add(Utils.plotCelsius("Tmax :", thermal.warmLimit));
+    }
 }

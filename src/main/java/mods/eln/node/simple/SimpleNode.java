@@ -1,9 +1,5 @@
 package mods.eln.node.simple;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-
 import mods.eln.Eln;
 import mods.eln.misc.DescriptorManager;
 import mods.eln.misc.Direction;
@@ -19,171 +15,176 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+
 public abstract class SimpleNode extends NodeBase {
 
-	public EntityPlayerMP removedByPlayer;
-	String descriptorKey = "";
+    public EntityPlayerMP removedByPlayer;
+    String descriptorKey = "";
 
-	protected void setDescriptorKey(String key) {
-		descriptorKey = key;
-	}
-	protected Object getDescriptor(){
-		return DescriptorManager.get(descriptorKey);
-	}
-	
-	private Direction front;
-	public Direction getFront() {
-		return front;
-	}
-	public void setFront(Direction front) {
-		this.front = front;
-		if(applayFrontToMetadata()){
-			coordonate.setMetadata(front.getInt());
-		}
-	}
-	protected boolean applayFrontToMetadata(){
-		return false;
-	}
-	@Override
-	public void initializeFromThat(Direction front, EntityLivingBase entityLiving, ItemStack itemStack) {
-		setFront(front);
-		initialize();
-	}
+    protected void setDescriptorKey(String key) {
+        descriptorKey = key;
+    }
 
-	@Override
-	public void initializeFromNBT() {
-		initialize();
-	}
+    protected Object getDescriptor() {
+        return DescriptorManager.get(descriptorKey);
+    }
 
-	public abstract void initialize();
+    private Direction front;
 
-	
-	@Override
-	public void publishSerialize(DataOutputStream stream) {
-		super.publishSerialize(stream);
-		try {
-			stream.writeByte(front.getInt());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	
-	public ArrayList<IProcess> slowProcessList = new ArrayList<IProcess>(4);
+    public Direction getFront() {
+        return front;
+    }
 
-	public ArrayList<IProcess> electricalProcessList = new ArrayList<IProcess>(4);
-	public ArrayList<Component> electricalComponentList = new ArrayList<Component>(4);
-	public ArrayList<State> electricalLoadList = new ArrayList<State>(4);
+    public void setFront(Direction front) {
+        this.front = front;
+        if (applayFrontToMetadata()) {
+            coordonate.setMetadata(front.getInt());
+        }
+    }
 
-	public ArrayList<IProcess> thermalFastProcessList = new ArrayList<IProcess>(4);
-	public ArrayList<IProcess> thermalSlowProcessList = new ArrayList<IProcess>(4);
-	public ArrayList<ThermalConnection> thermalConnectionList = new ArrayList<ThermalConnection>(4);
-	public ArrayList<NbtThermalLoad> thermalLoadList = new ArrayList<NbtThermalLoad>(4);
+    protected boolean applayFrontToMetadata() {
+        return false;
+    }
 
-	@Override
-	public void connectJob()
-	{
-		super.connectJob();
+    @Override
+    public void initializeFromThat(Direction front, EntityLivingBase entityLiving, ItemStack itemStack) {
+        setFront(front);
+        initialize();
+    }
 
-		Eln.simulator.addAllSlowProcess(slowProcessList);
+    @Override
+    public void initializeFromNBT() {
+        initialize();
+    }
 
-		Eln.simulator.addAllElectricalComponent(electricalComponentList);
-		for (State load : electricalLoadList)
-			Eln.simulator.addElectricalLoad(load);
-		Eln.simulator.addAllElectricalProcess(electricalProcessList);
+    public abstract void initialize();
 
-		Eln.simulator.addAllThermalConnection(thermalConnectionList);
-		for (NbtThermalLoad load : thermalLoadList)
-			Eln.simulator.addThermalLoad(load);
-		Eln.simulator.addAllThermalFastProcess(thermalFastProcessList);
-		Eln.simulator.addAllThermalSlowProcess(thermalSlowProcessList);
-	}
 
-	@Override
-	public void disconnectJob()
-	{
-		super.disconnectJob();
+    @Override
+    public void publishSerialize(DataOutputStream stream) {
+        super.publishSerialize(stream);
+        try {
+            stream.writeByte(front.getInt());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-		Eln.simulator.removeAllSlowProcess(slowProcessList);
 
-		Eln.simulator.removeAllElectricalComponent(electricalComponentList);
-		for (State load : electricalLoadList)
-			Eln.simulator.removeElectricalLoad(load);
-		Eln.simulator.removeAllElectricalProcess(electricalProcessList);
+    public ArrayList<IProcess> slowProcessList = new ArrayList<IProcess>(4);
 
-		Eln.simulator.removeAllThermalConnection(thermalConnectionList);
-		for (NbtThermalLoad load : thermalLoadList)
-			Eln.simulator.removeThermalLoad(load);
-		Eln.simulator.removeAllThermalFastProcess(thermalFastProcessList);
-		Eln.simulator.removeAllThermalSlowProcess(thermalSlowProcessList);
-	}
+    public ArrayList<IProcess> electricalProcessList = new ArrayList<IProcess>(4);
+    public ArrayList<Component> electricalComponentList = new ArrayList<Component>(4);
+    public ArrayList<State> electricalLoadList = new ArrayList<State>(4);
 
-	public void readFromNBT(NBTTagCompound nbt)
-	{
-		super.readFromNBT(nbt);
-		
-		front = Direction.readFromNBT(nbt, "SNfront");
+    public ArrayList<IProcess> thermalFastProcessList = new ArrayList<IProcess>(4);
+    public ArrayList<IProcess> thermalSlowProcessList = new ArrayList<IProcess>(4);
+    public ArrayList<ThermalConnection> thermalConnectionList = new ArrayList<ThermalConnection>(4);
+    public ArrayList<NbtThermalLoad> thermalLoadList = new ArrayList<NbtThermalLoad>(4);
 
-		setDescriptorKey(nbt.getString("SNdescriptorKey"));
+    @Override
+    public void connectJob() {
+        super.connectJob();
 
-		for (State electricalLoad : electricalLoadList) {
-			if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).readFromNBT(nbt, "");
-		}
+        Eln.simulator.addAllSlowProcess(slowProcessList);
 
-		for (NbtThermalLoad thermalLoad : thermalLoadList) {
-			thermalLoad.readFromNBT(nbt, "");
-		}
+        Eln.simulator.addAllElectricalComponent(electricalComponentList);
+        for (State load : electricalLoadList)
+            Eln.simulator.addElectricalLoad(load);
+        Eln.simulator.addAllElectricalProcess(electricalProcessList);
 
-		for (Component c : electricalComponentList)
-			if (c instanceof INBTTReady)
-				((INBTTReady) c).readFromNBT(nbt, "");
+        Eln.simulator.addAllThermalConnection(thermalConnectionList);
+        for (NbtThermalLoad load : thermalLoadList)
+            Eln.simulator.addThermalLoad(load);
+        Eln.simulator.addAllThermalFastProcess(thermalFastProcessList);
+        Eln.simulator.addAllThermalSlowProcess(thermalSlowProcessList);
+    }
 
-		for (IProcess process : slowProcessList) {
-			if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-		}
-		for (IProcess process : electricalProcessList) {
-			if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-		}
-		for (IProcess process : thermalFastProcessList) {
-			if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-		}
-		for (IProcess process : thermalSlowProcessList) {
-			if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
-		}
-	}
+    @Override
+    public void disconnectJob() {
+        super.disconnectJob();
 
-	public void writeToNBT(NBTTagCompound nbt)
-	{
-		super.writeToNBT(nbt);
-		
-		front.writeToNBT(nbt, "SNfront");
-		
-		nbt.setString("SNdescriptorKey", descriptorKey == null ? "" : descriptorKey);
+        Eln.simulator.removeAllSlowProcess(slowProcessList);
 
-		for (State electricalLoad : electricalLoadList) {
-			if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).writeToNBT(nbt, "");
-		}
+        Eln.simulator.removeAllElectricalComponent(electricalComponentList);
+        for (State load : electricalLoadList)
+            Eln.simulator.removeElectricalLoad(load);
+        Eln.simulator.removeAllElectricalProcess(electricalProcessList);
 
-		for (NbtThermalLoad thermalLoad : thermalLoadList) {
-			thermalLoad.writeToNBT(nbt, "");
-		}
+        Eln.simulator.removeAllThermalConnection(thermalConnectionList);
+        for (NbtThermalLoad load : thermalLoadList)
+            Eln.simulator.removeThermalLoad(load);
+        Eln.simulator.removeAllThermalFastProcess(thermalFastProcessList);
+        Eln.simulator.removeAllThermalSlowProcess(thermalSlowProcessList);
+    }
 
-		for (Component c : electricalComponentList)
-			if (c instanceof INBTTReady)
-				((INBTTReady) c).writeToNBT(nbt, "");
+    public void readFromNBT(NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
 
-		for (IProcess process : slowProcessList) {
-			if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-		}
-		for (IProcess process : electricalProcessList) {
-			if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-		}
-		for (IProcess process : thermalFastProcessList) {
-			if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-		}
-		for (IProcess process : thermalSlowProcessList) {
-			if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
-		}
+        front = Direction.readFromNBT(nbt, "SNfront");
 
-	}
+        setDescriptorKey(nbt.getString("SNdescriptorKey"));
+
+        for (State electricalLoad : electricalLoadList) {
+            if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).readFromNBT(nbt, "");
+        }
+
+        for (NbtThermalLoad thermalLoad : thermalLoadList) {
+            thermalLoad.readFromNBT(nbt, "");
+        }
+
+        for (Component c : electricalComponentList)
+            if (c instanceof INBTTReady)
+                ((INBTTReady) c).readFromNBT(nbt, "");
+
+        for (IProcess process : slowProcessList) {
+            if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
+        }
+        for (IProcess process : electricalProcessList) {
+            if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
+        }
+        for (IProcess process : thermalFastProcessList) {
+            if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
+        }
+        for (IProcess process : thermalSlowProcessList) {
+            if (process instanceof INBTTReady) ((INBTTReady) process).readFromNBT(nbt, "");
+        }
+    }
+
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+
+        front.writeToNBT(nbt, "SNfront");
+
+        nbt.setString("SNdescriptorKey", descriptorKey == null ? "" : descriptorKey);
+
+        for (State electricalLoad : electricalLoadList) {
+            if (electricalLoad instanceof INBTTReady) ((INBTTReady) electricalLoad).writeToNBT(nbt, "");
+        }
+
+        for (NbtThermalLoad thermalLoad : thermalLoadList) {
+            thermalLoad.writeToNBT(nbt, "");
+        }
+
+        for (Component c : electricalComponentList)
+            if (c instanceof INBTTReady)
+                ((INBTTReady) c).writeToNBT(nbt, "");
+
+        for (IProcess process : slowProcessList) {
+            if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
+        }
+        for (IProcess process : electricalProcessList) {
+            if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
+        }
+        for (IProcess process : thermalFastProcessList) {
+            if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
+        }
+        for (IProcess process : thermalSlowProcessList) {
+            if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
+        }
+
+    }
 }

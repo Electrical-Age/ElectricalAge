@@ -19,107 +19,107 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class PowerInductorSixElement extends SixNodeElement {
 
-	PowerInductorSixDescriptor descriptor;
-	NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
-	NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
+    PowerInductorSixDescriptor descriptor;
+    NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
+    NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
 
-	Inductor inductor = new Inductor("inductor", positiveLoad, negativeLoad);
+    Inductor inductor = new Inductor("inductor", positiveLoad, negativeLoad);
 
     boolean fromNbt = false;
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
 
-	public PowerInductorSixElement(SixNode SixNode, Direction side, SixNodeDescriptor descriptor) {
-		super(SixNode, side, descriptor);
-		this.descriptor = (PowerInductorSixDescriptor) descriptor;
+    public PowerInductorSixElement(SixNode SixNode, Direction side, SixNodeDescriptor descriptor) {
+        super(SixNode, side, descriptor);
+        this.descriptor = (PowerInductorSixDescriptor) descriptor;
 
-		electricalLoadList.add(positiveLoad);
-		electricalLoadList.add(negativeLoad);
-		electricalComponentList.add(inductor);
-		positiveLoad.setAsMustBeFarFromInterSystem();
-	}
+        electricalLoadList.add(positiveLoad);
+        electricalLoadList.add(negativeLoad);
+        electricalComponentList.add(inductor);
+        positiveLoad.setAsMustBeFarFromInterSystem();
+    }
 
-	@Override
-	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if (lrdu == front.right()) return positiveLoad;
-		if (lrdu == front.left()) return negativeLoad;
-		return null;
-	}
+    @Override
+    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+        if (lrdu == front.right()) return positiveLoad;
+        if (lrdu == front.left()) return negativeLoad;
+        return null;
+    }
 
-	@Override
-	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		return null;
-	}
+    @Override
+    public ThermalLoad getThermalLoad(LRDU lrdu) {
+        return null;
+    }
 
-	@Override
-	public int getConnectionMask(LRDU lrdu) {
-		if (lrdu == front.right()) return NodeBase.maskElectricalPower;
-		if (lrdu == front.left()) return NodeBase.maskElectricalPower;
-		return 0;
-	}
+    @Override
+    public int getConnectionMask(LRDU lrdu) {
+        if (lrdu == front.right()) return NodeBase.maskElectricalPower;
+        if (lrdu == front.left()) return NodeBase.maskElectricalPower;
+        return 0;
+    }
 
-	@Override
-	public String multiMeterString() {
-		return Utils.plotVolt("U", Math.abs(inductor.getU())) + Utils.plotAmpere("I", inductor.getCurrent());
-	}
+    @Override
+    public String multiMeterString() {
+        return Utils.plotVolt("U", Math.abs(inductor.getU())) + Utils.plotAmpere("I", inductor.getCurrent());
+    }
 
-	@Override
-	public String thermoMeterString() {
-		return null;
-	}
+    @Override
+    public String thermoMeterString() {
+        return null;
+    }
 
-	@Override
-	public void initialize() {
-		setupPhysical();
-	}
+    @Override
+    public void initialize() {
+        setupPhysical();
+    }
 
-	@Override
-	public void inventoryChanged() {
-		super.inventoryChanged();
-		setupPhysical();
-	}
-    
-	public void setupPhysical() {
-		double rs = descriptor.getRsValue(inventory);
-		inductor.setL(descriptor.getlValue(inventory));
-		positiveLoad.setRs(rs);
-		negativeLoad.setRs(rs);
+    @Override
+    public void inventoryChanged() {
+        super.inventoryChanged();
+        setupPhysical();
+    }
 
-		if (fromNbt) {
-			fromNbt = false;
-		} else {
-			inductor.resetStates();
-		}
-	}
+    public void setupPhysical() {
+        double rs = descriptor.getRsValue(inventory);
+        inductor.setL(descriptor.getlValue(inventory));
+        positiveLoad.setRs(rs);
+        negativeLoad.setRs(rs);
 
-	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		return onBlockActivatedRotate(entityPlayer);
-	}
+        if (fromNbt) {
+            fromNbt = false;
+        } else {
+            inductor.resetStates();
+        }
+    }
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-	}
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        return onBlockActivatedRotate(entityPlayer);
+    }
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		fromNbt = true;
-	}
+    @Override
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+    }
 
-	@Override
-	public IInventory getInventory() {
-		return inventory;
-	}
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
+        fromNbt = true;
+    }
 
-	@Override
-	public boolean hasGui() {
-		return true;
-	}
+    @Override
+    public IInventory getInventory() {
+        return inventory;
+    }
 
-	@Override
-	public Container newContainer(Direction side, EntityPlayer player) {
-		return new PowerInductorSixContainer(player, inventory);
-	}
+    @Override
+    public boolean hasGui() {
+        return true;
+    }
+
+    @Override
+    public Container newContainer(Direction side, EntityPlayer player) {
+        return new PowerInductorSixContainer(player, inventory);
+    }
 }

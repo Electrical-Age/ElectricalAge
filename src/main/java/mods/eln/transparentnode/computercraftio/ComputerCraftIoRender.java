@@ -6,14 +6,14 @@ import mods.eln.node.transparent.TransparentNodeEntity;
 
 public class ComputerCraftIoRender extends TransparentNodeElementRender {
 
-	ComputerCraftIoDescriptor descriptor;
-	
-	public ComputerCraftIoRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
-		super(tileEntity, descriptor);
-		this.descriptor = (ComputerCraftIoDescriptor) descriptor;
-	}
+    ComputerCraftIoDescriptor descriptor;
 
-	@Override
-	public void draw() {
-	}
+    public ComputerCraftIoRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
+        super(tileEntity, descriptor);
+        this.descriptor = (ComputerCraftIoDescriptor) descriptor;
+    }
+
+    @Override
+    public void draw() {
+    }
 }

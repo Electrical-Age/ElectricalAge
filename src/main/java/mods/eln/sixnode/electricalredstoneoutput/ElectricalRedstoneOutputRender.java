@@ -1,8 +1,5 @@
 package mods.eln.sixnode.electricalredstoneoutput;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
@@ -11,46 +8,49 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 
+import java.io.DataInputStream;
+import java.io.IOException;
+
 public class ElectricalRedstoneOutputRender extends SixNodeElementRender {
 
-	ElectricalRedstoneOutputDescriptor descriptor;
+    ElectricalRedstoneOutputDescriptor descriptor;
 
     float factor;
     float factorFiltered = 0;
 
     int redOutput;
 
-	public ElectricalRedstoneOutputRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-		super(tileEntity, side, descriptor);
-		this.descriptor = (ElectricalRedstoneOutputDescriptor) descriptor;
-	}
+    public ElectricalRedstoneOutputRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
+        super(tileEntity, side, descriptor);
+        this.descriptor = (ElectricalRedstoneOutputDescriptor) descriptor;
+    }
 
-	@Override
-	public void draw() {
-		super.draw();
+    @Override
+    public void draw() {
+        super.draw();
 
-		drawSignalPin(front.right(), descriptor.pinDistance);
-		
-		descriptor.draw(redOutput);
-	}
+        drawSignalPin(front.right(), descriptor.pinDistance);
 
-	@Override
-	public int isProvidingWeakPower(Direction side) {
-		return redOutput;
-	}
+        descriptor.draw(redOutput);
+    }
 
-	@Override
-	public void publishUnserialize(DataInputStream stream) {
-		super.publishUnserialize(stream);
-		try {
-			redOutput = stream.readByte();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}		
-	}
-	
-	@Override
-	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		return Eln.instance.signalCableDescriptor.render;
-	}
+    @Override
+    public int isProvidingWeakPower(Direction side) {
+        return redOutput;
+    }
+
+    @Override
+    public void publishUnserialize(DataInputStream stream) {
+        super.publishUnserialize(stream);
+        try {
+            redOutput = stream.readByte();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public CableRenderDescriptor getCableRender(LRDU lrdu) {
+        return Eln.instance.signalCableDescriptor.render;
+    }
 }

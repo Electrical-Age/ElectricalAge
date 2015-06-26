@@ -5,7 +5,6 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
-
 import org.lwjgl.opengl.GL11;
 
 public class ItemRender implements IItemRenderer {
@@ -14,25 +13,25 @@ public class ItemRender implements IItemRenderer {
 
     @Override
     public boolean handleRenderType(ItemStack itemStack, ItemRenderType type) {
-            return true;// type == ItemRenderType.INVENTORY || type == ;
+        return true;// type == ItemRenderType.INVENTORY || type == ;
     }
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-            return true;
+        return true;
     }
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack itemStack, Object... data) {
-            FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-          //  GL11.glTranslatef(-0.5f, -0.5f, -0.5f);
- //           Eln.obj.draw("ElectricFurnace", "furnace");
-          //  GL11.glTranslatef(0.5f, 0.5f, 0.5f);
-            // ====================== Render item texture ======================
-           // int iconIndex = itemStack.getIconIndex();
-          //  renderItem.renderTexturedQuad(0, 0, iconIndex % 16 * 16, iconIndex / 16 * 16, 16, 16);
+        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+        //  GL11.glTranslatef(-0.5f, -0.5f, -0.5f);
+        //           Eln.obj.draw("ElectricFurnace", "furnace");
+        //  GL11.glTranslatef(0.5f, 0.5f, 0.5f);
+        // ====================== Render item texture ======================
+        // int iconIndex = itemStack.getIconIndex();
+        //  renderItem.renderTexturedQuad(0, 0, iconIndex % 16 * 16, iconIndex / 16 * 16, 16, 16);
 
-            // ====================== Render OpenGL square shape ======================
+        // ====================== Render OpenGL square shape ======================
          /*   GL11.glDisable(GL11.GL_TEXTURE_2D);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glDepthMask(false);
@@ -50,9 +49,9 @@ public class ItemRender implements IItemRenderer {
             GL11.glDepthMask(true);
             GL11.glDisable(GL11.GL_BLEND);*/
 
-            // ====================== Render text ======================
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
-            String text = Integer.toString(itemStack.getItemDamage());
-         //   fontRenderer.drawStringWithShadow(text, 1, 1, 0xFFFFFF);
+        // ====================== Render text ======================
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        String text = Integer.toString(itemStack.getItemDamage());
+        //   fontRenderer.drawStringWithShadow(text, 1, 1, 0xFFFFFF);
     }
 }

@@ -19,14 +19,14 @@ import java.util.List;
 
 public class ElectricalCableDescriptor extends SixNodeDescriptor {
 
-	double electricalNominalRs;
-	public double electricalNominalVoltage, electricalNominalPower, electricalNominalPowerDropFactor;
-	public boolean signalWire;
+    double electricalNominalRs;
+    public double electricalNominalVoltage, electricalNominalPower, electricalNominalPowerDropFactor;
+    public boolean signalWire;
 
-    public double electricalMaximalVoltage,electricalMaximalCurrent;
+    public double electricalMaximalVoltage, electricalMaximalCurrent;
     public double electricalRp = Double.POSITIVE_INFINITY, electricalRs = Double.POSITIVE_INFINITY, electricalC = 1;
     public double thermalRp = 1, thermalRs = 1, thermalC = 1;
-    public double thermalWarmLimit = 100,thermalCoolLimit = -100;
+    public double thermalWarmLimit = 100, thermalCoolLimit = -100;
     double electricalMaximalI;
     public double electricalRsMin = 0;
     public double electricalRsPerCelcius = 0;
@@ -40,95 +40,95 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
 
     public CableRenderDescriptor render;
 
-	public ElectricalCableDescriptor(String name, CableRenderDescriptor render, String description, boolean signalWire) {
-		super(name, ElectricalCableElement.class, ElectricalCableRender.class);
-	
-		this.description = description;
-		this.render = render;
-		this.signalWire = signalWire;
-	}
+    public ElectricalCableDescriptor(String name, CableRenderDescriptor render, String description, boolean signalWire) {
+        super(name, ElectricalCableElement.class, ElectricalCableRender.class);
 
-	public void setPhysicalConstantLikeNormalCable(
-			double electricalNominalVoltage, double electricalNominalPower, double electricalNominalPowerDropFactor,
-			double electricalMaximalVoltage, double electricalMaximalPower,
-			double electricalOverVoltageStartPowerLost,
-			double thermalWarmLimit, double thermalCoolLimit,
-			double thermalNominalHeatTime, double thermalConductivityTao) {
-		this.electricalNominalVoltage = electricalNominalVoltage;
-		this.electricalNominalPower = electricalNominalPower;
-		this.electricalNominalPowerDropFactor = electricalNominalPowerDropFactor;
-		
-		this.thermalWarmLimit = thermalWarmLimit;
-		this.thermalCoolLimit = thermalCoolLimit;
-		this.electricalMaximalVoltage = electricalMaximalVoltage;
-		
-		electricalRp = MnaConst.highImpedance;
-		double electricalNorminalI = electricalNominalPower / electricalNominalVoltage;
-		electricalNominalRs = (electricalNominalPower * electricalNominalPowerDropFactor) / electricalNorminalI / electricalNorminalI / 2;
-		electricalRs = electricalNominalRs;
-		//electricalC = Eln.simulator.getMinimalElectricalC(electricalNominalRs, electricalRp);
-	
-		electricalMaximalI = electricalMaximalPower / electricalNominalVoltage;
-		double thermalMaximalPowerDissipated = electricalMaximalI * electricalMaximalI * electricalRs * 2;
-		thermalC = thermalMaximalPowerDissipated * thermalNominalHeatTime / (thermalWarmLimit);
-		thermalRp = thermalWarmLimit / thermalMaximalPowerDissipated;
-		thermalRs = thermalConductivityTao / thermalC / 2;
-		
-		Eln.simulator.checkThermalLoad(thermalRs, thermalRp, thermalC);
-		
-		electricalRsMin = electricalNominalRs;
-		electricalRsPerCelcius = 0;
-		
-		dielectricBreakOhmPerVolt = 0.95;
-		dielectricBreakOhm = electricalMaximalVoltage * electricalMaximalVoltage / electricalOverVoltageStartPowerLost;
-		dielectricVoltage = electricalMaximalVoltage;
-		dielectricBreakOhmMin = dielectricBreakOhm;
-		
-		this.electricalMaximalCurrent = electricalMaximalPower/electricalNominalVoltage;
-	}
+        this.description = description;
+        this.render = render;
+        this.signalWire = signalWire;
+    }
 
-	@Override
-	public void setParent(Item item, int damage) {
-		super.setParent(item, damage);
-		Data.addWiring(newItemStack());
-		
-		if (signalWire) {
-			Data.addSignal(newItemStack());
-		}
-	}
-	
-	public void applyTo(ElectricalLoad electricalLoad, double rsFactor) {
-		electricalLoad.setRs(electricalRs * rsFactor);
-	}
+    public void setPhysicalConstantLikeNormalCable(
+            double electricalNominalVoltage, double electricalNominalPower, double electricalNominalPowerDropFactor,
+            double electricalMaximalVoltage, double electricalMaximalPower,
+            double electricalOverVoltageStartPowerLost,
+            double thermalWarmLimit, double thermalCoolLimit,
+            double thermalNominalHeatTime, double thermalConductivityTao) {
+        this.electricalNominalVoltage = electricalNominalVoltage;
+        this.electricalNominalPower = electricalNominalPower;
+        this.electricalNominalPowerDropFactor = electricalNominalPowerDropFactor;
 
-	public void applyTo(ElectricalLoad electricalLoad) {
-		applyTo(electricalLoad, 1);
-	}
-	
-	public void applyTo(Resistor resistor) {
-		applyTo(resistor, 1);
-	}
+        this.thermalWarmLimit = thermalWarmLimit;
+        this.thermalCoolLimit = thermalCoolLimit;
+        this.electricalMaximalVoltage = electricalMaximalVoltage;
 
-	public void applyTo(Resistor resistor, double factor) {
-		resistor.setR(electricalRs * factor);
-	}
-	
-	public void applyTo(ThermalLoad thermalLoad) {
-		thermalLoad.Rs = this.thermalRs;
-		thermalLoad.C = this.thermalC;
-		thermalLoad.Rp = this.thermalRp;		
-	}
+        electricalRp = MnaConst.highImpedance;
+        double electricalNorminalI = electricalNominalPower / electricalNominalVoltage;
+        electricalNominalRs = (electricalNominalPower * electricalNominalPowerDropFactor) / electricalNorminalI / electricalNorminalI / 2;
+        electricalRs = electricalNominalRs;
+        //electricalC = Eln.simulator.getMinimalElectricalC(electricalNominalRs, electricalRp);
 
-	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		super.addInformation(itemStack, entityPlayer, list, par4);
-		if (signalWire) {
-			list.add("This cable is adapted to");
-			list.add("transport signals quickly.");
-			list.add("A signal is electrical information");
-			list.add("that must be between 0V and " + Eln.SVU + "V.");
-			list.add("Don't try to transport power.");
-			
+        electricalMaximalI = electricalMaximalPower / electricalNominalVoltage;
+        double thermalMaximalPowerDissipated = electricalMaximalI * electricalMaximalI * electricalRs * 2;
+        thermalC = thermalMaximalPowerDissipated * thermalNominalHeatTime / (thermalWarmLimit);
+        thermalRp = thermalWarmLimit / thermalMaximalPowerDissipated;
+        thermalRs = thermalConductivityTao / thermalC / 2;
+
+        Eln.simulator.checkThermalLoad(thermalRs, thermalRp, thermalC);
+
+        electricalRsMin = electricalNominalRs;
+        electricalRsPerCelcius = 0;
+
+        dielectricBreakOhmPerVolt = 0.95;
+        dielectricBreakOhm = electricalMaximalVoltage * electricalMaximalVoltage / electricalOverVoltageStartPowerLost;
+        dielectricVoltage = electricalMaximalVoltage;
+        dielectricBreakOhmMin = dielectricBreakOhm;
+
+        this.electricalMaximalCurrent = electricalMaximalPower / electricalNominalVoltage;
+    }
+
+    @Override
+    public void setParent(Item item, int damage) {
+        super.setParent(item, damage);
+        Data.addWiring(newItemStack());
+
+        if (signalWire) {
+            Data.addSignal(newItemStack());
+        }
+    }
+
+    public void applyTo(ElectricalLoad electricalLoad, double rsFactor) {
+        electricalLoad.setRs(electricalRs * rsFactor);
+    }
+
+    public void applyTo(ElectricalLoad electricalLoad) {
+        applyTo(electricalLoad, 1);
+    }
+
+    public void applyTo(Resistor resistor) {
+        applyTo(resistor, 1);
+    }
+
+    public void applyTo(Resistor resistor, double factor) {
+        resistor.setR(electricalRs * factor);
+    }
+
+    public void applyTo(ThermalLoad thermalLoad) {
+        thermalLoad.Rs = this.thermalRs;
+        thermalLoad.C = this.thermalC;
+        thermalLoad.Rp = this.thermalRp;
+    }
+
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        if (signalWire) {
+            list.add("This cable is adapted to");
+            list.add("transport signals quickly.");
+            list.add("A signal is electrical information");
+            list.add("that must be between 0V and " + Eln.SVU + "V.");
+            list.add("Don't try to transport power.");
+
 			/*String lol = "";
 			for (int idx = 0; idx < 15; idx++) {
 				if (idx < 10) {
@@ -138,34 +138,34 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
 				}
 			}
 			list.add(lol);*/
-		} else {
-			//list.add("Low resistor => low power lost");
-			list.add("Nominal usage ->");
-			list.add("  Voltage : " + (int)electricalNominalVoltage + "V");
-			list.add(Utils.plotAmpere("  Current :",electricalNominalPower / electricalNominalVoltage));
-			list.add("  Power : " + (int)electricalNominalPower + "W");
-		//	list.add("  Power lost : " + (int)(electricalNominalPowerDropFactor * electricalNominalPower) + " W/Block");
-			list.add(Utils.plotOhm("Serial resistor :", electricalNominalRs * 2));
-		}
-	}
+        } else {
+            //list.add("Low resistor => low power lost");
+            list.add("Nominal usage ->");
+            list.add("  Voltage : " + (int) electricalNominalVoltage + "V");
+            list.add(Utils.plotAmpere("  Current :", electricalNominalPower / electricalNominalVoltage));
+            list.add("  Power : " + (int) electricalNominalPower + "W");
+            //	list.add("  Power lost : " + (int)(electricalNominalPowerDropFactor * electricalNominalPower) + " W/Block");
+            list.add(Utils.plotOhm("Serial resistor :", electricalNominalRs * 2));
+        }
+    }
 
-	public int getNodeMask() {
-		if (signalWire)
-			return NodeBase.maskElectricalGate;
-		else 
-			return NodeBase.maskElectricalPower;
-	}
+    public int getNodeMask() {
+        if (signalWire)
+            return NodeBase.maskElectricalGate;
+        else
+            return NodeBase.maskElectricalPower;
+    }
 
-	public static CableRenderDescriptor getCableRender(ItemStack cable) {
-		if (cable == null) return null;
-		GenericItemBlockUsingDamageDescriptor desc = ElectricalCableDescriptor.getDescriptor(cable);
-		if (desc instanceof ElectricalCableDescriptor)
-			return ((ElectricalCableDescriptor)desc).render;
-		else 
-			return  null;
-	}
+    public static CableRenderDescriptor getCableRender(ItemStack cable) {
+        if (cable == null) return null;
+        GenericItemBlockUsingDamageDescriptor desc = ElectricalCableDescriptor.getDescriptor(cable);
+        if (desc instanceof ElectricalCableDescriptor)
+            return ((ElectricalCableDescriptor) desc).render;
+        else
+            return null;
+    }
 
-	public void bindCableTexture() {
-		this.render.bindCableTexture();
-	}
+    public void bindCableTexture() {
+        this.render.bindCableTexture();
+    }
 }

@@ -1,48 +1,41 @@
 package mods.eln.transparentnode.solarpannel;
 
 
-import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
-import mods.eln.item.HeatingCorpElement;
 import mods.eln.item.SolarTrackerDescriptor;
-import mods.eln.item.ThermalIsolatorElement;
-import mods.eln.item.regulator.IRegulatorDescriptor;
-import mods.eln.item.regulator.RegulatorSlot;
 import mods.eln.misc.BasicContainer;
 import mods.eln.node.INodeContainer;
 import mods.eln.node.NodeBase;
-import mods.eln.sim.RegulatorType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
-public class SolarPannelContainer extends BasicContainer implements INodeContainer{
+public class SolarPannelContainer extends BasicContainer implements INodeContainer {
 
-	NodeBase node = null;
-	static final int trackerSlotId = 0;
-	
-	public SolarPannelContainer(NodeBase node,EntityPlayer player, IInventory inventory) {
-		super(player, inventory,new Slot[]{
-				new GenericItemUsingDamageSlot(inventory, trackerSlotId, 176/2-20 +  0,35,1, SolarTrackerDescriptor.class,SlotSkin.medium,new String[]{"Solar Tracker Slot"})
+    NodeBase node = null;
+    static final int trackerSlotId = 0;
 
-			});
-		this.node = node;
-		
-	}
+    public SolarPannelContainer(NodeBase node, EntityPlayer player, IInventory inventory) {
+        super(player, inventory, new Slot[]{
+                new GenericItemUsingDamageSlot(inventory, trackerSlotId, 176 / 2 - 20 + 0, 35, 1, SolarTrackerDescriptor.class, SlotSkin.medium, new String[]{"Solar Tracker Slot"})
 
-	@Override
-	public NodeBase getNode() {
-		
-		return node;
-	}
+        });
+        this.node = node;
 
-	@Override
-	public int getRefreshRateDivider() {
-		
-		return 0;
-	}
+    }
 
+    @Override
+    public NodeBase getNode() {
+
+        return node;
+    }
+
+    @Override
+    public int getRefreshRateDivider() {
+
+        return 0;
+    }
 
 
 }

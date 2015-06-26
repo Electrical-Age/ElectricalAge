@@ -24,11 +24,11 @@ public class Obj3D {
 
     private String dirPath;
 
-	public void bindTexture(String texFilename){
-		ResourceLocation textureResource = new ResourceLocation("eln", "model/" + dirPath + "/" + texFilename);
-		UtilsClient.bindTexture(textureResource);
-	}
-	
+    public void bindTexture(String texFilename) {
+        ResourceLocation textureResource = new ResourceLocation("eln", "model/" + dirPath + "/" + texFilename);
+        UtilsClient.bindTexture(textureResource);
+    }
+
     public static class FaceGroup {
         String mtlName = null;
         public ResourceLocation textureResource;
@@ -87,44 +87,44 @@ public class Obj3D {
             if (mode != 0)
                 GL11.glEnd();
         }
-		
-		private void drawVertex(float offsetX, float offsetY) {
-			int mode = 0;
 
-			for (Face f : face) {
-				if (f.vertexNbr != mode) {
-					if (mode != 0)
-						GL11.glEnd();
-					switch (f.vertexNbr) {
-						case 3:
-							GL11.glBegin(GL11.GL_TRIANGLES);
-							break;
-						case 4:
-							GL11.glBegin(GL11.GL_QUADS);
-							break;
-						case 6:
-							//	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
-							break;
-						case 8:
-							//	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
-							break;
-					}
+        private void drawVertex(float offsetX, float offsetY) {
+            int mode = 0;
 
-					mode = f.vertexNbr;
-				}
+            for (Face f : face) {
+                if (f.vertexNbr != mode) {
+                    if (mode != 0)
+                        GL11.glEnd();
+                    switch (f.vertexNbr) {
+                        case 3:
+                            GL11.glBegin(GL11.GL_TRIANGLES);
+                            break;
+                        case 4:
+                            GL11.glBegin(GL11.GL_QUADS);
+                            break;
+                        case 6:
+                            //	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
+                            break;
+                        case 8:
+                            //	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
+                            break;
+                    }
 
-				GL11.glNormal3f(f.normal.x, f.normal.y, f.normal.z);
-				for (int idx = 0; idx < mode; idx++) {
-					if (f.uv[idx] != null)
-						GL11.glTexCoord2f(f.uv[idx].u+offsetX, f.uv[idx].v+offsetY);
-					GL11.glVertex3f(f.vertex[idx].x, f.vertex[idx].y, f.vertex[idx].z);
-				}
-			}
+                    mode = f.vertexNbr;
+                }
 
-			if (mode != 0)
-				GL11.glEnd();
-		}
-		
+                GL11.glNormal3f(f.normal.x, f.normal.y, f.normal.z);
+                for (int idx = 0; idx < mode; idx++) {
+                    if (f.uv[idx] != null)
+                        GL11.glTexCoord2f(f.uv[idx].u + offsetX, f.uv[idx].v + offsetY);
+                    GL11.glVertex3f(f.vertex[idx].x, f.vertex[idx].y, f.vertex[idx].z);
+                }
+            }
+
+            if (mode != 0)
+                GL11.glEnd();
+        }
+
         public void drawNoBind() {
             if (!listReady) {
                 listReady = true;
@@ -222,14 +222,14 @@ public class Obj3D {
             }
             //	Minecraft.getMinecraft().mcProfiler.endSection();
         }
-		
-		public void draw(float texOffsetX, float texOffsetY) {
-			//	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
-			for (FaceGroup fg : faceGroup) {
-				fg.drawVertex(texOffsetX,texOffsetY);
-			}
-			//	Minecraft.getMinecraft().mcProfiler.endSection();
-		}
+
+        public void draw(float texOffsetX, float texOffsetY) {
+            //	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
+            for (FaceGroup fg : faceGroup) {
+                fg.drawVertex(texOffsetX, texOffsetY);
+            }
+            //	Minecraft.getMinecraft().mcProfiler.endSection();
+        }
     }
 
     Hashtable<String, Obj3DPart> nameToPartHash = new Hashtable<String, Obj3DPart>();

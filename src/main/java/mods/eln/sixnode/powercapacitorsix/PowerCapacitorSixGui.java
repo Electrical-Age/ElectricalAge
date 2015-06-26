@@ -16,32 +16,32 @@ public class PowerCapacitorSixGui extends GuiContainerEln {
     public PowerCapacitorSixGui(EntityPlayer player, IInventory inventory, PowerCapacitorSixRender render) {
         super(new PowerCapacitorSixContainer(player, inventory));
         this.inventory = (SixNodeElementInventory) inventory;
-        this.render = render;   
+        this.render = render;
     }
-    
+
     public void initGui() {
-    	super.initGui();
+        super.initGui();
     }
 
-	@Override
-	public void guiObjectEvent(IGuiObject object) {
-		super.guiObjectEvent(object);
-	}
+    @Override
+    public void guiObjectEvent(IGuiObject object) {
+        super.guiObjectEvent(object);
+    }
 
-	@Override
-	protected void preDraw(float f, int x, int y) {
-		super.preDraw(f, x, y);
-	}
-	
-	@Override
-	protected void postDraw(float f, int x, int y) {
-    	helper.drawString(8, 8, 0xFF000000, "Capacity : "  + Utils.plotValue(render.descriptor.getCValue(render.inventory), "F"));
-    	helper.drawString(8, 8 + 8 + 1, 0xFF000000, "Nominal voltage : "  + Utils.plotValue(render.descriptor.getUNominalValue(render.inventory), "V"));
-		super.postDraw(f, x, y);
-	}
+    @Override
+    protected void preDraw(float f, int x, int y) {
+        super.preDraw(f, x, y);
+    }
 
-	@Override
-	protected GuiHelperContainer newHelper() {
-		return new GuiHelperContainer(this, 176, 166 - 54, 8, 84 - 54);
-	}
+    @Override
+    protected void postDraw(float f, int x, int y) {
+        helper.drawString(8, 8, 0xFF000000, "Capacity : " + Utils.plotValue(render.descriptor.getCValue(render.inventory), "F"));
+        helper.drawString(8, 8 + 8 + 1, 0xFF000000, "Nominal voltage : " + Utils.plotValue(render.descriptor.getUNominalValue(render.inventory), "V"));
+        super.postDraw(f, x, y);
+    }
+
+    @Override
+    protected GuiHelperContainer newHelper() {
+        return new GuiHelperContainer(this, 176, 166 - 54, 8, 84 - 54);
+    }
 }

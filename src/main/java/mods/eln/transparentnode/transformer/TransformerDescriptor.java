@@ -1,115 +1,117 @@
 package mods.eln.transparentnode.transformer;
 
-import java.util.List;
-
-import org.lwjgl.opengl.GL11;
-
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sound.SoundCommand;
 import mods.eln.wiki.Data;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import org.lwjgl.opengl.GL11;
+
+import java.util.List;
 
 public class TransformerDescriptor extends TransparentNodeDescriptor {
-	Obj3D obj;
-	Obj3D defaultFeroObj;
-	
-	public float minimalLoadToHum;
-	public SoundCommand highLoadSound;
-	
-	public TransformerDescriptor(
-			String name,
-			Obj3D obj,
-			Obj3D defaultFeroObj,
-			float minimalLoadToHum
-			) {
-		super(name, TransformerElement.class,TransformerRender.class);
-		this.obj = obj;
-		this.defaultFeroObj = defaultFeroObj;
-		this.minimalLoadToHum = minimalLoadToHum;
-		
-		if(obj != null){
-			main = obj.getPart("main");
-			sbire = obj.getPart("sbire");
-		}
-		if(defaultFeroObj != null){
-			defaultFero = defaultFeroObj.getPart("fero");
-		}
-		
-		highLoadSound = new SoundCommand("eln:Transformer", 1.6f);
-	}
-	@Override
-	public void setParent(Item item, int damage) {
-		
-		super.setParent(item, damage);
-		Data.addWiring(newItemStack());
-	}
-	
-	Obj3DPart main,defaultFero,sbire;
-	
-	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-		
-		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Transforms an input voltage and");
-		list.add("outputs it.");
-		list.add("The transform ratio is defined");
-		list.add("by the cable stacks size ratio.");
-	}
-	
-	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		
-		return true;
-	}
-	@Override
-	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		
-		return true;
-	}
-	@Override
-	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		
-		draw(defaultFero, 1, 4);
-	}
-	
-	@Override
-	public boolean use2DIcon() {
-		return false;
-	}
-	void draw(Obj3DPart fero,int priCableNbr,int secCableNbr)
-	{
-		if(main != null) main.draw();
-		if(fero != null){
-			fero.draw();
-			if(priCableNbr != 0){
-				GL11.glPushMatrix();
-					float y = (priCableNbr - 1) * 1f/16f;
-					GL11.glTranslatef(0f, -y, 0f);
-					for(int idx = 0;idx<priCableNbr;idx++){
-						sbire.draw();
-						GL11.glTranslatef(0f, 2f/16f, 0f);
-					}
-				GL11.glPopMatrix();
-			}
-			if(secCableNbr != 0){
-				GL11.glPushMatrix();
-					GL11.glRotatef(180, 0f, 1f, 0f);
-					float y = (secCableNbr - 1) * 1f/16f;
-					GL11.glTranslatef(0f, -y, 0f);
-					for(int idx = 0;idx<secCableNbr;idx++){
-						sbire.draw();
-						GL11.glTranslatef(0f, 2f/16f, 0f);
-					}
-				GL11.glPopMatrix();
-			}
-		
-		}
-	}
+    Obj3D obj;
+    Obj3D defaultFeroObj;
+
+    public float minimalLoadToHum;
+    public SoundCommand highLoadSound;
+
+    public TransformerDescriptor(
+            String name,
+            Obj3D obj,
+            Obj3D defaultFeroObj,
+            float minimalLoadToHum
+    ) {
+        super(name, TransformerElement.class, TransformerRender.class);
+        this.obj = obj;
+        this.defaultFeroObj = defaultFeroObj;
+        this.minimalLoadToHum = minimalLoadToHum;
+
+        if (obj != null) {
+            main = obj.getPart("main");
+            sbire = obj.getPart("sbire");
+        }
+        if (defaultFeroObj != null) {
+            defaultFero = defaultFeroObj.getPart("fero");
+        }
+
+        highLoadSound = new SoundCommand("eln:Transformer", 1.6f);
+    }
+
+    @Override
+    public void setParent(Item item, int damage) {
+
+        super.setParent(item, damage);
+        Data.addWiring(newItemStack());
+    }
+
+    Obj3DPart main, defaultFero, sbire;
+
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
+                               List list, boolean par4) {
+
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add("Transforms an input voltage and");
+        list.add("outputs it.");
+        list.add("The transform ratio is defined");
+        list.add("by the cable stacks size ratio.");
+    }
+
+    @Override
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+                                         ItemRendererHelper helper) {
+
+        return true;
+    }
+
+    @Override
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+
+        return true;
+    }
+
+    @Override
+    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+
+        draw(defaultFero, 1, 4);
+    }
+
+    @Override
+    public boolean use2DIcon() {
+        return false;
+    }
+
+    void draw(Obj3DPart fero, int priCableNbr, int secCableNbr) {
+        if (main != null) main.draw();
+        if (fero != null) {
+            fero.draw();
+            if (priCableNbr != 0) {
+                GL11.glPushMatrix();
+                float y = (priCableNbr - 1) * 1f / 16f;
+                GL11.glTranslatef(0f, -y, 0f);
+                for (int idx = 0; idx < priCableNbr; idx++) {
+                    sbire.draw();
+                    GL11.glTranslatef(0f, 2f / 16f, 0f);
+                }
+                GL11.glPopMatrix();
+            }
+            if (secCableNbr != 0) {
+                GL11.glPushMatrix();
+                GL11.glRotatef(180, 0f, 1f, 0f);
+                float y = (secCableNbr - 1) * 1f / 16f;
+                GL11.glTranslatef(0f, -y, 0f);
+                for (int idx = 0; idx < secCableNbr; idx++) {
+                    sbire.draw();
+                    GL11.glTranslatef(0f, 2f / 16f, 0f);
+                }
+                GL11.glPopMatrix();
+            }
+
+        }
+    }
 
 }

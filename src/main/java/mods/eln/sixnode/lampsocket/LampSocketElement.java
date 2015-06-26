@@ -30,7 +30,7 @@ import java.io.IOException;
 
 public class LampSocketElement extends SixNodeElement {
 
-	LampSocketDescriptor socketDescriptor = null;
+    LampSocketDescriptor socketDescriptor = null;
 
     public MonsterPopFreeProcess monsterPopFreeProcess = new MonsterPopFreeProcess(sixNode.coordonate, 15);
     public NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
@@ -58,46 +58,46 @@ public class LampSocketElement extends SixNodeElement {
     boolean isConnectedToLampSupply = false;
 
     public LampSocketElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
-		super(sixNode, side, descriptor);
-		this.socketDescriptor = (LampSocketDescriptor) descriptor;
+        super(sixNode, side, descriptor);
+        this.socketDescriptor = (LampSocketDescriptor) descriptor;
 
-		lampProcess.alphaZ = this.socketDescriptor.alphaZBoot;
-		//electricalLoadList.add(positiveLoad);
-		//electricalComponentList.add(lampResistor);
-		//thermalLoad.setAsSlow();
-		
-		//thermalLoadList.add(thermalLoad);
-		slowProcessList.add(lampProcess);
-		slowProcessList.add(monsterPopFreeProcess);
-	}
+        lampProcess.alphaZ = this.socketDescriptor.alphaZBoot;
+        //electricalLoadList.add(positiveLoad);
+        //electricalComponentList.add(lampResistor);
+        //thermalLoad.setAsSlow();
 
-	@Override
-	public IInventory getInventory() {
-		return inventory;
-	}
+        //thermalLoadList.add(thermalLoad);
+        slowProcessList.add(lampProcess);
+        slowProcessList.add(monsterPopFreeProcess);
+    }
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		byte value = nbt.getByte("front");
-		front = LRDU.fromInt((value >> 0) & 0x3);
-		grounded = (value & 4) != 0;
+    @Override
+    public IInventory getInventory() {
+        return inventory;
+    }
 
-		setPoweredByLampSupply(nbt.getBoolean("poweredByLampSupply"));
-		channel = nbt.getString("channel");
-	}
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
+        byte value = nbt.getByte("front");
+        front = LRDU.fromInt((value >> 0) & 0x3);
+        grounded = (value & 4) != 0;
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-		nbt.setByte("front", (byte) ((front.toInt() << 0) + (grounded ? 4 : 0)));
-		nbt.setBoolean("poweredByLampSupply", poweredByLampSupply);
-		nbt.setString("channel", channel);
-	}
+        setPoweredByLampSupply(nbt.getBoolean("poweredByLampSupply"));
+        channel = nbt.getString("channel");
+    }
 
-	public void networkUnserialize(DataInputStream stream) {
-		try {
-			switch (stream.readByte()) {
+    @Override
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+        nbt.setByte("front", (byte) ((front.toInt() << 0) + (grounded ? 4 : 0)));
+        nbt.setBoolean("poweredByLampSupply", poweredByLampSupply);
+        nbt.setString("channel", channel);
+    }
+
+    public void networkUnserialize(DataInputStream stream) {
+        try {
+            switch (stream.readByte()) {
                 case setGroundedId:
                     grounded = stream.readByte() != 0 ? true : false;
                     computeElectricalLoad();
@@ -117,168 +117,168 @@ public class LampSocketElement extends SixNodeElement {
                     lastSocketName = channel;
                     needPublish();
                     break;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	private void setPoweredByLampSupply(boolean b) {
-		poweredByLampSupply = b;
-	}
+    private void setPoweredByLampSupply(boolean b) {
+        poweredByLampSupply = b;
+    }
 
-	@Override
-	public void disconnectJob() {
-		super.disconnectJob();
+    @Override
+    public void disconnectJob() {
+        super.disconnectJob();
 
-		electricalLoadList.remove(positiveLoad);
-		electricalComponentList.remove(lampResistor);
-		positiveLoad.state = 0;
-	}
+        electricalLoadList.remove(positiveLoad);
+        electricalComponentList.remove(lampResistor);
+        positiveLoad.state = 0;
+    }
 
-	@Override
-	public void connectJob() {
-		if (!poweredByLampSupply) {
-			electricalLoadList.add(positiveLoad);
-			electricalComponentList.add(lampResistor);
-		}
-		super.connectJob();
-	}
+    @Override
+    public void connectJob() {
+        if (!poweredByLampSupply) {
+            electricalLoadList.add(positiveLoad);
+            electricalComponentList.add(lampResistor);
+        }
+        super.connectJob();
+    }
 
-	@Override
-	protected void inventoryChanged() {
-		computeElectricalLoad();
-		reconnect();
-	}
+    @Override
+    protected void inventoryChanged() {
+        computeElectricalLoad();
+        reconnect();
+    }
 
-	@Override
-	public boolean hasGui() {
-		return true;
-	}
+    @Override
+    public boolean hasGui() {
+        return true;
+    }
 
-	@Override
-	public Container newContainer(Direction side, EntityPlayer player) {
-		return new LampSocketContainer(player, inventory, socketDescriptor);
-	}
+    @Override
+    public Container newContainer(Direction side, EntityPlayer player) {
+        return new LampSocketContainer(player, inventory, socketDescriptor);
+    }
 
-	public static boolean canBePlacedOnSide(Direction side, int type) {
-		return true;
-	}
+    public static boolean canBePlacedOnSide(Direction side, int type) {
+        return true;
+    }
 
-	@Override
-	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if (inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null) return null;
-		if (poweredByLampSupply) return null;
-		
-		if (grounded) return positiveLoad;
+    @Override
+    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+        if (inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null) return null;
+        if (poweredByLampSupply) return null;
 
-		//if (front == lrdu) return positiveLoad;
-		//if (front == lrdu.inverse()) return negativeLoad;
+        if (grounded) return positiveLoad;
 
-		return null;
-	}
+        //if (front == lrdu) return positiveLoad;
+        //if (front == lrdu.inverse()) return negativeLoad;
 
-	@Override
-	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		return null;
-	}
+        return null;
+    }
 
-	@Override
-	public int getConnectionMask(LRDU lrdu) {
-		if (inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null) return 0;
-		if (poweredByLampSupply) return 0;
-		if (grounded) return NodeBase.maskElectricalPower;
+    @Override
+    public ThermalLoad getThermalLoad(LRDU lrdu) {
+        return null;
+    }
 
-		if (front == lrdu) return NodeBase.maskElectricalPower;
-		if (front == lrdu.inverse()) return NodeBase.maskElectricalPower;
+    @Override
+    public int getConnectionMask(LRDU lrdu) {
+        if (inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null) return 0;
+        if (poweredByLampSupply) return 0;
+        if (grounded) return NodeBase.maskElectricalPower;
 
-		return 0;
-	}
+        if (front == lrdu) return NodeBase.maskElectricalPower;
+        if (front == lrdu.inverse()) return NodeBase.maskElectricalPower;
 
-	@Override
-	public String multiMeterString() {
-		return Utils.plotVolt("U:", positiveLoad.getU()) + Utils.plotAmpere("I:", lampResistor.getCurrent());
-	}
+        return 0;
+    }
 
-	@Override
-	public String thermoMeterString() {
-		return null;
-	}
+    @Override
+    public String multiMeterString() {
+        return Utils.plotVolt("U:", positiveLoad.getU()) + Utils.plotAmpere("I:", lampResistor.getCurrent());
+    }
 
-	@Override
-	public void networkSerialize(DataOutputStream stream) {
-		super.networkSerialize(stream);
-		try {
-			stream.writeByte((grounded ? (1 << 6) : 0));
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSocketContainer.lampSlotId));
-			stream.writeFloat((float) lampProcess.alphaZ);
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSocketContainer.cableSlotId));
-			stream.writeBoolean(poweredByLampSupply);
-			stream.writeUTF(channel);
-			stream.writeBoolean(isConnectedToLampSupply);
-			stream.writeByte(lampProcess.light);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public String thermoMeterString() {
+        return null;
+    }
 
-	@Override
-	public void initialize() {
-		computeElectricalLoad();
-	}
+    @Override
+    public void networkSerialize(DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            stream.writeByte((grounded ? (1 << 6) : 0));
+            Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSocketContainer.lampSlotId));
+            stream.writeFloat((float) lampProcess.alphaZ);
+            Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSocketContainer.cableSlotId));
+            stream.writeBoolean(poweredByLampSupply);
+            stream.writeUTF(channel);
+            stream.writeBoolean(isConnectedToLampSupply);
+            stream.writeByte(lampProcess.light);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	public void computeElectricalLoad() {
-		ItemStack lamp = inventory.getStackInSlot(LampSocketContainer.lampSlotId);
-		ItemStack cable = inventory.getStackInSlot(LampSocketContainer.cableSlotId);
+    @Override
+    public void initialize() {
+        computeElectricalLoad();
+    }
 
-		ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
+    public void computeElectricalLoad() {
+        ItemStack lamp = inventory.getStackInSlot(LampSocketContainer.lampSlotId);
+        ItemStack cable = inventory.getStackInSlot(LampSocketContainer.cableSlotId);
 
-		if (cableDescriptor == null) {
-			positiveLoad.highImpedance();
-			//negativeLoad.highImpedance();
-		} else {
-			cableDescriptor.applyTo(positiveLoad);
-			//cableDescriptor.applyTo(negativeLoad, grounded,5);
-		}
+        ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
 
-		lampDescriptor = (LampDescriptor) Utils.getItemObject(lamp);
+        if (cableDescriptor == null) {
+            positiveLoad.highImpedance();
+            //negativeLoad.highImpedance();
+        } else {
+            cableDescriptor.applyTo(positiveLoad);
+            //cableDescriptor.applyTo(negativeLoad, grounded,5);
+        }
 
-		if (lampDescriptor == null) {
-			lampResistor.setR(Double.POSITIVE_INFINITY);
-		} else {
-			lampDescriptor.applyTo(lampResistor);
-		}
-	}
+        lampDescriptor = (LampDescriptor) Utils.getItemObject(lamp);
 
-	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		if (Utils.isPlayerUsingWrench(entityPlayer)) {
-			front = front.getNextClockwise();
-			reconnect();
-			return true;
-		}
+        if (lampDescriptor == null) {
+            lampResistor.setR(Double.POSITIVE_INFINITY);
+        } else {
+            lampDescriptor.applyTo(lampResistor);
+        }
+    }
 
-		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-		if (currentItemStack != null) {
-			Item item = currentItemStack.getItem();
-		}
-		return false;
-	}
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (Utils.isPlayerUsingWrench(entityPlayer)) {
+            front = front.getNextClockwise();
+            reconnect();
+            return true;
+        }
 
-	public int getLightValue() {
-		return lampProcess.getBlockLight();
-	}
+        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        if (currentItemStack != null) {
+            Item item = currentItemStack.getItem();
+        }
+        return false;
+    }
 
-	@Override
-	public void destroy(EntityPlayerMP entityPlayer) {
-		super.destroy(entityPlayer);
-		lampProcess.destructor();
-	}
+    public int getLightValue() {
+        return lampProcess.getBlockLight();
+    }
 
-	void setIsConnectedToLampSupply(boolean value) {
-		if (isConnectedToLampSupply != value) {
-			isConnectedToLampSupply = value;
-			needPublish();
-		}
-	}
+    @Override
+    public void destroy(EntityPlayerMP entityPlayer) {
+        super.destroy(entityPlayer);
+        lampProcess.destructor();
+    }
+
+    void setIsConnectedToLampSupply(boolean value) {
+        if (isConnectedToLampSupply != value) {
+            isConnectedToLampSupply = value;
+            needPublish();
+        }
+    }
 }

@@ -13,20 +13,20 @@ public class GroundCableGui extends GuiContainerEln {
     GuiTextFieldEln setUmin, setUmax;
     GroundCableRender render;
 
-    enum SelectedType{none, min, max}
+    enum SelectedType {none, min, max}
 
-	public GroundCableGui(EntityPlayer player, IInventory inventory, GroundCableRender render) {
-		super(new GroundCableContainer(player, inventory));
-		this.render = render;
-	}
+    public GroundCableGui(EntityPlayer player, IInventory inventory, GroundCableRender render) {
+        super(new GroundCableContainer(player, inventory));
+        this.render = render;
+    }
 
-	@Override
-	public void initGui() {
-		super.initGui();
-	}
+    @Override
+    public void initGui() {
+        super.initGui();
+    }
 
-	@Override
-	protected GuiHelperContainer newHelper() {
-		return new GuiHelperContainer(this, 176, 166 - 52, 8, 84 - 52);
-	}
+    @Override
+    protected GuiHelperContainer newHelper() {
+        return new GuiHelperContainer(this, 176, 166 - 52, 8, 84 - 52);
+    }
 }

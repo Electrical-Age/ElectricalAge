@@ -12,25 +12,25 @@ import org.lwjgl.opengl.GL11;
 
 public class PowerCapacitorSixRender extends SixNodeElementRender {
 
-	public PowerCapacitorSixDescriptor descriptor;
-	private CableRenderType renderPreProcess;
+    public PowerCapacitorSixDescriptor descriptor;
+    private CableRenderType renderPreProcess;
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
 
     public PowerCapacitorSixRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-		super(tileEntity, side, descriptor);
-		this.descriptor = (PowerCapacitorSixDescriptor) descriptor;
-	}
+        super(tileEntity, side, descriptor);
+        this.descriptor = (PowerCapacitorSixDescriptor) descriptor;
+    }
 
-	@Override
-	public void draw() {
-		GL11.glRotatef(90, 1, 0, 0);
-		front.glRotateOnX();
-		descriptor.draw();
-	}
+    @Override
+    public void draw() {
+        GL11.glRotatef(90, 1, 0, 0);
+        front.glRotateOnX();
+        descriptor.draw();
+    }
 
-	@Override
-	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		return new PowerCapacitorSixGui(player, inventory, this);
-	}
+    @Override
+    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
+        return new PowerCapacitorSixGui(player, inventory, this);
+    }
 }

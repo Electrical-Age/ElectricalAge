@@ -16,7 +16,7 @@ import java.io.IOException;
 
 public class LampSupplyRender extends SixNodeElementRender {
 
-	LampSupplyDescriptor descriptor;
+    LampSupplyDescriptor descriptor;
 
     Coordonate coord;
     PhysicalInterpolator interpolator;
@@ -28,57 +28,57 @@ public class LampSupplyRender extends SixNodeElementRender {
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     public LampSupplyRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-		super(tileEntity, side, descriptor);
-		this.descriptor = (LampSupplyDescriptor) descriptor;
-		interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
-		coord = new Coordonate(tileEntity);
-	}
+        super(tileEntity, side, descriptor);
+        this.descriptor = (LampSupplyDescriptor) descriptor;
+        interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
+        coord = new Coordonate(tileEntity);
+    }
 
-	@Override
-	public void draw() {
-		super.draw();
+    @Override
+    public void draw() {
+        super.draw();
 
-		drawPowerPin(new float[] { 4, 4, 5, 5 });
+        drawPowerPin(new float[]{4, 4, 5, 5});
 
-		LRDU.Down.glRotateOnX();
-		descriptor.draw(interpolator.get());
-	}
+        LRDU.Down.glRotateOnX();
+        descriptor.draw(interpolator.get());
+    }
 
-	@Override
-	public void refresh(float deltaT) {
-		if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coord.getAxisAlignedBB(1)))
-			interpolator.setTarget(0f);
-		else
-			interpolator.setTarget(1f);
+    @Override
+    public void refresh(float deltaT) {
+        if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coord.getAxisAlignedBB(1)))
+            interpolator.setTarget(0f);
+        else
+            interpolator.setTarget(1f);
 
-		interpolator.step(deltaT);
-	}
+        interpolator.step(deltaT);
+    }
 
-	@Override
-	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		return cableRender;
-	}
+    @Override
+    public CableRenderDescriptor getCableRender(LRDU lrdu) {
+        return cableRender;
+    }
 
-	@Override
-	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		return new LampSupplyGui(this, player, inventory);
-	}
+    @Override
+    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
+        return new LampSupplyGui(this, player, inventory);
+    }
 
-	@Override
-	public void publishUnserialize(DataInputStream stream) {
-		super.publishUnserialize(stream);
-		try {
-			channel = stream.readUTF();
+    @Override
+    public void publishUnserialize(DataInputStream stream) {
+        super.publishUnserialize(stream);
+        try {
+            channel = stream.readUTF();
 
-			ItemStack cableStack = Utils.unserialiseItemStack(stream);
-			if (cableStack != null) {
-				ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
-				cableRender = desc.render;
-			} else {
-				cableRender = null;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+            ItemStack cableStack = Utils.unserialiseItemStack(stream);
+            if (cableStack != null) {
+                ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
+                cableRender = desc.render;
+            } else {
+                cableRender = null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

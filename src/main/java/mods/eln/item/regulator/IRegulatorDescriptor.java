@@ -6,10 +6,11 @@ import mods.eln.sim.RegulatorType;
 
 public abstract class IRegulatorDescriptor extends GenericItemUsingDamageDescriptorUpgrade {
 
-	public IRegulatorDescriptor(String name) {
-		super(name);
-	}
+    public IRegulatorDescriptor(String name) {
+        super(name);
+    }
 
-	public abstract RegulatorType getType();
-	public abstract void applyTo(RegulatorProcess regulator, double workingPoint, double P, double I, double D);
+    public abstract RegulatorType getType();
+
+    public abstract void applyTo(RegulatorProcess regulator, double workingPoint, double P, double I, double D);
 }

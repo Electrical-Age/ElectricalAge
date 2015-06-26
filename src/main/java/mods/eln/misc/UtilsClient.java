@@ -1,10 +1,6 @@
 package mods.eln.misc;
 
-import java.awt.Color;
-import java.io.ByteArrayOutputStream;
-import java.util.HashSet;
-import java.util.List;
-
+import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -30,11 +26,13 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
+import java.awt.Color;
+import java.io.ByteArrayOutputStream;
+import java.util.HashSet;
+import java.util.List;
 
 public class UtilsClient {
 
@@ -197,7 +195,7 @@ public class UtilsClient {
         GL11.glAlphaFunc(GL11.GL_GREATER, 0.02f);
         // GL11.glDisable(GL11.GL_ALPHA_TEST);
         /*
-		 * Utils.println(GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB) + " " + GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA) + " " + GL11.glGetInteger(GL14.GL_BLEND_DST_RGB) + " " + GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
+         * Utils.println(GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB) + " " + GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA) + " " + GL11.glGetInteger(GL14.GL_BLEND_DST_RGB) + " " + GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
 		 */
 
         // Utils.println(GL11.glGetInteger(GL11.GL_BLEND_SRC) + " " + GL11.glGetInteger(GL11.GL_BLEND_DST) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
