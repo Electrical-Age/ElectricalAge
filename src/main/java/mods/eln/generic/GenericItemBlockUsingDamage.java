@@ -26,68 +26,68 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsingDamageDescriptor> extends ItemBlock {
 
-	public Hashtable<Integer,Descriptor> subItemList = new Hashtable<Integer,Descriptor>();
-	public ArrayList<Integer> orderList = new ArrayList<Integer>();
-	public ArrayList<Descriptor> descriptors = new ArrayList<Descriptor>();
+    public Hashtable<Integer, Descriptor> subItemList = new Hashtable<Integer, Descriptor>();
+    public ArrayList<Integer> orderList = new ArrayList<Integer>();
+    public ArrayList<Descriptor> descriptors = new ArrayList<Descriptor>();
 
-	public Descriptor defaultElement = null;
-	
-	public GenericItemBlockUsingDamage(Block b) {
-		super(b);
-		setHasSubtypes(true);
-	}
-	
-	public void setDefaultElement(Descriptor descriptor) {
-		defaultElement = descriptor;
-	}
-	
-	public void doubleEntry(int src, int dst) {
-		subItemList.put(dst, subItemList.get(src));
-	}
+    public Descriptor defaultElement = null;
 
-	public void populateLangFileKeys(){
-		for(Map.Entry<Integer,Descriptor> item : subItemList.entrySet()){
-			ItemStack stack = new ItemStack(this,1,item.getKey());
-			String key = this.getUnlocalizedNameInefficiently(stack)+".name";
-			String value = getItemStackDisplayName(stack);
-			if(value.equals("") || (value.equals(key)))
-				value = '<'+item.getValue().getName(stack)+'>';
-			//System.out.println(" > " + key + " | " +  value);
-			Eln.langFile_DefaultKeys.put(key,value);
-		}
-	}
+    public GenericItemBlockUsingDamage(Block b) {
+        super(b);
+        setHasSubtypes(true);
+    }
 
-	public void addDescriptor(int damage, Descriptor descriptor) {
-		subItemList.put(damage, descriptor);
-		ItemStack stack = new ItemStack(this, 1, damage);
-		stack.setTagCompound(descriptor.getDefaultNBT());
-		//LanguageRegistry.addName(stack, descriptor.name);
-		orderList.add(damage);
-		descriptors.add(descriptor);
-		descriptor.setParent(this, damage);
-		GameRegistry.registerCustomItemStack(descriptor.name, descriptor.newItemStack(1));
-	}
+    public void setDefaultElement(Descriptor descriptor) {
+        defaultElement = descriptor;
+    }
 
-	public void addWithoutRegistry(int damage, Descriptor descriptor) {
-		subItemList.put(damage, descriptor);
-		ItemStack stack = new ItemStack(this, 1, damage);
-		stack.setTagCompound(descriptor.getDefaultNBT());
-		//LanguageRegistry.addName(stack, descriptor.name);
-		descriptor.setParent(this, damage);
-	}
+    public void doubleEntry(int src, int dst) {
+        subItemList.put(dst, subItemList.get(src));
+    }
 
-	public Descriptor getDescriptor(int damage) {
-		return subItemList.get(damage);
-	}
-	
-	public Descriptor getDescriptor(ItemStack itemStack) {
-		if(itemStack == null) return defaultElement;
-		if(itemStack.getItem() != this) return defaultElement;
-		return getDescriptor(itemStack.getItemDamage());
-	}
+    public void populateLangFileKeys() {
+        for (Map.Entry<Integer, Descriptor> item : subItemList.entrySet()) {
+            ItemStack stack = new ItemStack(this, 1, item.getKey());
+            String key = this.getUnlocalizedNameInefficiently(stack) + ".name";
+            String value = getItemStackDisplayName(stack);
+            if (value.equals("") || (value.equals(key)))
+                value = '<' + item.getValue().getName(stack) + '>';
+            //System.out.println(" > " + key + " | " +  value);
+            Eln.langFile_DefaultKeys.put(key, value);
+        }
+    }
+
+    public void addDescriptor(int damage, Descriptor descriptor) {
+        subItemList.put(damage, descriptor);
+        ItemStack stack = new ItemStack(this, 1, damage);
+        stack.setTagCompound(descriptor.getDefaultNBT());
+        //LanguageRegistry.addName(stack, descriptor.name);
+        orderList.add(damage);
+        descriptors.add(descriptor);
+        descriptor.setParent(this, damage);
+        GameRegistry.registerCustomItemStack(descriptor.name, descriptor.newItemStack(1));
+    }
+
+    public void addWithoutRegistry(int damage, Descriptor descriptor) {
+        subItemList.put(damage, descriptor);
+        ItemStack stack = new ItemStack(this, 1, damage);
+        stack.setTagCompound(descriptor.getDefaultNBT());
+        //LanguageRegistry.addName(stack, descriptor.name);
+        descriptor.setParent(this, damage);
+    }
+
+    public Descriptor getDescriptor(int damage) {
+        return subItemList.get(damage);
+    }
+
+    public Descriptor getDescriptor(ItemStack itemStack) {
+        if (itemStack == null) return defaultElement;
+        if (itemStack.getItem() != this) return defaultElement;
+        return getDescriptor(itemStack.getItemDamage());
+    }
 
 	/*
-	@Override
+    @Override
 	@SideOnly(Side.CLIENT)
 	public int getIconFromDamage(int damage) {
 		return getDescriptor(damage).getIconId();
@@ -110,58 +110,62 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
 		if(desc == null) return "Unknown";
         return desc.getName(par1ItemStack);
     }*/
-	
-	@Override
-	public String getUnlocalizedName(ItemStack par1ItemStack){
-		Descriptor desc = getDescriptor(par1ItemStack);
-		return desc.name.replaceAll("\\s+","_").toLowerCase();			
-	}
 
-	@Override
-    public IIcon getIconFromDamage(int damage) {
-		Descriptor desc = getDescriptor(damage);
-		if(desc == null) return null;
-    	return desc.getIcon();
+    @Override
+    public String getUnlocalizedName(ItemStack par1ItemStack) {
+        Descriptor desc = getDescriptor(par1ItemStack);
+        if (desc == null) {
+            return this.getClass().getName();
+        } else {
+            return desc.name.replaceAll("\\s+", "_").toLowerCase();
+        }
     }
 
-	@Override
-	@SideOnly(value=Side.CLIENT)
+    @Override
+    public IIcon getIconFromDamage(int damage) {
+        Descriptor desc = getDescriptor(damage);
+        if (desc == null) return null;
+        return desc.getIcon();
+    }
+
+    @Override
+    @SideOnly(value = Side.CLIENT)
     public void registerIcons(IIconRegister iconRegister) {
-       for(GenericItemBlockUsingDamageDescriptor descriptor : subItemList.values()) {
-    	   descriptor.updateIcons(iconRegister);
-       }
-    }	
-	
+        for (GenericItemBlockUsingDamageDescriptor descriptor : subItemList.values()) {
+            descriptor.updateIcons(iconRegister);
+        }
+    }
+
     @SideOnly(Side.CLIENT)
     @Override
     public void getSubItems(Item itemID, CreativeTabs tabs, List list) {
-	// You can also take a more direct approach and do each one individual but I prefer the lazy / right way
-    	//for(Entry<Integer, Descriptor> entry : subItemList.entrySet()) 
-    	for(int id : orderList) {
-    		ItemStack stack = Utils.newItemStack(itemID, 1, id);
-    		stack.setTagCompound(subItemList.get(id).getDefaultNBT());
-	        list.add(stack);
-	    }
-	}
+        // You can also take a more direct approach and do each one individual but I prefer the lazy / right way
+        //for(Entry<Integer, Descriptor> entry : subItemList.entrySet())
+        for (int id : orderList) {
+            ItemStack stack = Utils.newItemStack(itemID, 1, id);
+            stack.setTagCompound(subItemList.get(id).getDefaultNBT());
+            list.add(stack);
+        }
+    }
 
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		Descriptor desc = getDescriptor(itemStack);
-		if(desc == null) return;
-		List listFromDescriptor = new ArrayList();
-		desc.addInformation(itemStack, entityPlayer, listFromDescriptor, par4);
-		UtilsClient.showItemTooltip(listFromDescriptor, list);
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+        Descriptor desc = getDescriptor(itemStack);
+        if (desc == null) return;
+        List listFromDescriptor = new ArrayList();
+        desc.addInformation(itemStack, entityPlayer, listFromDescriptor, par4);
+        UtilsClient.showItemTooltip(listFromDescriptor, list);
     }
 
     public boolean onEntityItemUpdate(EntityItem entityItem) {
-        Descriptor desc  = getDescriptor(entityItem.getEntityItem());
-        if(desc != null) return desc.onEntityItemUpdate(entityItem);
+        Descriptor desc = getDescriptor(entityItem.getEntityItem());
+        if (desc != null) return desc.onEntityItemUpdate(entityItem);
         return false;
     }
-    
+
     @Override
     public boolean onItemUseFirst(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
-        Descriptor desc  = getDescriptor(stack);
-        if(desc != null) return desc.onItemUseFirst(stack, player);
+        Descriptor desc = getDescriptor(stack);
+        if (desc != null) return desc.onItemUseFirst(stack, player);
         return false;
     }
 }
