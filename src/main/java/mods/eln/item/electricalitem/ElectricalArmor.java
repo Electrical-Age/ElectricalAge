@@ -129,4 +129,9 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
 	@Override
 	public void electricalItemUpdate(ItemStack stack,double time) {
 	}
+	
+	@Override
+	public int getItemEnchantability() {
+		return 0;
+	}
 }

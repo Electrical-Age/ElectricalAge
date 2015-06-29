@@ -9,6 +9,9 @@ eclipse
 run
 logs
 config
+saves
+*.json
+options.txt
 
 # IntelliJ
 .idea
