@@ -5,6 +5,7 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -15,12 +16,9 @@ import java.util.List;
 public class LampSupplyDescriptor extends SixNodeDescriptor {
 
 	private Obj3D obj;
-	Obj3DPart main;
-	private Obj3DPart rot1;
-	private Obj3DPart rot2;
-	private float rot1AlphaClose;
-	private float rot2AlphaClose;
-	private Obj3DPart led;
+	Obj3DPart base;
+	private Obj3DPart window;
+	private float windowOpenAngle;
 
     public int range;
 
@@ -29,17 +27,11 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
 		this.range = range;
 		this.obj = obj;
 		if (obj != null) {
-			main = obj.getPart("main");
-			rot1 = obj.getPart("rot1");
-			rot2 = obj.getPart("rot2");
-			led = obj.getPart("led");
-			if (rot1 != null) {
-				rot1AlphaClose = rot1.getFloat("alphaClose");
-			}
-			if (rot2 != null) {
-				rot2AlphaClose = rot2.getFloat("alphaClose");
-			}
+			base = obj.getPart("base");
+			window = obj.getPart("window");
 		}
+		if (window != null)
+			windowOpenAngle = window.getFloat("windowOpenAngle");
 	}
 
 	@Override
@@ -54,11 +46,17 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
 	}
 	
 	public void draw(float openFactor) {
-		if (main != null) main.draw();
-		UtilsClient.drawLight(led);
+		if (base != null) base.draw();
+		//UtilsClient.drawLight(led);
 		UtilsClient.disableCulling();
-		if (rot1 != null) rot1.draw((1f - openFactor) * rot1AlphaClose, 0f, 0f, 1f);
-		if (rot2 != null) rot2.draw((1f - openFactor) * rot2AlphaClose, 0f, 0f, 1f);
+		UtilsClient.enableBlend();
+		obj.bindTexture("Glass.png");
+		float rotYaw = Minecraft.getMinecraft().thePlayer.rotationYaw / 360.f;
+		float rotPitch = Minecraft.getMinecraft().thePlayer.rotationPitch / 180.f;
+		float pos = (((float)Minecraft.getMinecraft().thePlayer.posX) + ((float)Minecraft.getMinecraft().thePlayer.posZ)) / 64.f;
+		if (window != null)
+			window.draw((1f - openFactor) * windowOpenAngle, 0f, 0f, 1f, rotYaw + pos + (openFactor*0.5f), rotPitch * 0.65f);
+		UtilsClient.disableBlend();
 		UtilsClient.enableCulling();
 	}
 

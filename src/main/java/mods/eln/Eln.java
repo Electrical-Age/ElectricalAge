@@ -272,7 +272,8 @@ public class Eln {
 			"Turret/Turret.obj",
             "FireDetector/FireDetector.obj",
 			"FlatScreenMonitor/FlatScreenMonitor.obj",
-            "IndustrialPanel/IndustrialPanel.obj"
+            "IndustrialPanel/IndustrialPanel.obj",
+			"DistributionBoard/DistributionBoard.obj"
 			// "/model/BatteryBigHV/BatteryBigHV.obj"
 	};
 
@@ -1654,7 +1655,7 @@ public class Eln {
 			name = "Lamp Supply";
 
 			LampSupplyDescriptor desc = new LampSupplyDescriptor(
-					name, obj.getObj("lampsupply"),
+					name, obj.getObj("DistributionBoard"),
 					32
 					);
 

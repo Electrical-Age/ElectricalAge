@@ -184,6 +184,17 @@ public class Obj3D {
             GL11.glPopMatrix();
         }
 
+        public void draw(float angle, float x, float y, float z, float texOffsetX, float texOffsetY) {
+            GL11.glPushMatrix();
+
+            GL11.glTranslatef(ox, oy, oz);
+            GL11.glRotatef(angle, x, y, z);
+            GL11.glTranslatef(-ox, -oy, -oz);
+            draw(texOffsetX,texOffsetY);
+
+            GL11.glPopMatrix();
+        }
+
         public void draw(float angle, float x, float y, float z, float angle2, float x2, float y2, float z2) {
             GL11.glPushMatrix();
 

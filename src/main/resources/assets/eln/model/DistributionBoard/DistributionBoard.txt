@@ -1,0 +1,5 @@
+o window
+f originX 0.1875
+f originY -0.3125
+f originZ 0.0
+f windowOpenAngle 100
