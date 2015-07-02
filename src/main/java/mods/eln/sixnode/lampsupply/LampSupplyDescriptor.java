@@ -49,6 +49,7 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
 		if (base != null) base.draw();
 		//UtilsClient.drawLight(led);
 		UtilsClient.disableCulling();
+		//UtilsClient.disableDepthTest();
 		UtilsClient.enableBlend();
 		obj.bindTexture("Glass.png");
 		float rotYaw = Minecraft.getMinecraft().thePlayer.rotationYaw / 360.f;
@@ -57,6 +58,7 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
 		if (window != null)
 			window.draw((1f - openFactor) * windowOpenAngle, 0f, 0f, 1f, rotYaw + pos + (openFactor*0.5f), rotPitch * 0.65f);
 		UtilsClient.disableBlend();
+		//UtilsClient.enableDepthTest();
 		UtilsClient.enableCulling();
 	}
 
@@ -78,8 +80,8 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if (type == ItemRenderType.INVENTORY) {
-			GL11.glScalef(1.5f, 1.5f, 1.5f);
-			GL11.glTranslatef(-0.2f, 0.0f, 0f);
+			GL11.glScalef(1.3f, 1.3f, 1.3f);
+			GL11.glTranslatef(-0.45f, 0.0f, 0f);
 		}
 		draw(1f);
 	}
