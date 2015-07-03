@@ -150,6 +150,7 @@ import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.item.ItemArmor.ArmorMaterial;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.WorldServer;
@@ -745,6 +746,11 @@ public class Eln {
 		recipemagnetiser();
 
 		recipeECoal();
+
+		// Register WIP items only on development runs!
+		if ((Boolean)Launch.blackboard.get("fml.deobfuscatedEnvironment")) {
+			registerWipItems();
+		}
 
 		proxy.registerRenderers();
 
@@ -6482,6 +6488,10 @@ public class Eln {
 		// Add mob spawn
 		// EntityRegistry.addSpawn(ReplicatorEntity.class, 1, 1, 2, EnumCreatureType.monster, BiomeGenBase.plains);
 
+	}
+
+	// Registers WIP items.
+	void registerWipItems() {
 	}
 
 	public void regenOreScannerFactors() {
