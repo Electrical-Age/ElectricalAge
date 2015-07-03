@@ -121,6 +121,7 @@ import mods.eln.transparentnode.electricalmachine.CompressorDescriptor;
 import mods.eln.transparentnode.electricalmachine.MaceratorDescriptor;
 import mods.eln.transparentnode.electricalmachine.MagnetizerDescriptor;
 import mods.eln.transparentnode.electricalmachine.PlateMachineDescriptor;
+import mods.eln.transparentnode.fuelgenerator.FuelGeneratorDescriptor;
 import mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor;
 import mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor;
 import mods.eln.transparentnode.powerinductor.PowerInductorDescriptor;
@@ -150,6 +151,7 @@ import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.item.ItemArmor.ArmorMaterial;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.WorldServer;
@@ -273,7 +275,8 @@ public class Eln {
             "FireDetector/FireDetector.obj",
 			"FlatScreenMonitor/FlatScreenMonitor.obj",
             "IndustrialPanel/IndustrialPanel.obj",
-			"DistributionBoard/DistributionBoard.obj"
+			"DistributionBoard/DistributionBoard.obj",
+			"FuelGenerator/FuelGenerator.obj"
 			// "/model/BatteryBigHV/BatteryBigHV.obj"
 	};
 
@@ -640,6 +643,12 @@ public class Eln {
 		registerMiscItem(120);
 		registerElectricalTool(121);
 		registerPortableItem(122);
+
+		// Register WIP items only on development runs!
+		if ((Boolean)Launch.blackboard.get("fml.deobfuscatedEnvironment")) {
+			registerWipItems();
+		}
+
 	}
 
 	public static FMLEventChannel eventChannel;
@@ -6482,6 +6491,19 @@ public class Eln {
 		// Add mob spawn
 		// EntityRegistry.addSpawn(ReplicatorEntity.class, 1, 1, 2, EnumCreatureType.monster, BiomeGenBase.plains);
 
+	}
+
+	// Registers WIP items.
+	void registerWipItems() {
+		int id = 255;
+		int subId;
+		{
+			subId = 1;
+			FuelGeneratorDescriptor descriptor =
+					new FuelGeneratorDescriptor("Fuel Generator", obj.getObj("FuelGenerator"),
+							lowVoltageCableDescriptor, 200, LVU * 1.18,  "eln:water_turbine", 1f);
+			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+		}
 	}
 
 	public void regenOreScannerFactors() {
