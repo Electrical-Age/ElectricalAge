@@ -2,18 +2,16 @@ package mods.eln.transparentnode.windturbine;
 
 import java.util.List;
 
+import mods.eln.misc.*;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import mods.eln.ghost.GhostGroup;
-import mods.eln.misc.Direction;
-import mods.eln.misc.FunctionTable;
-import mods.eln.misc.Obj3D;
-import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
+import org.lwjgl.opengl.GL11;
 
 public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 
@@ -50,6 +48,7 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 		if(obj != null){
 			main = obj.getPart("main");
 			rot = obj.getPart("rot");
+			halo = obj.getPart("halo");
 			if(rot != null){
 				speed = rot.getFloat("speed");
 			}
@@ -70,7 +69,7 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 	}
 	
 	
-	Obj3DPart main,rot;
+	Obj3DPart main,rot,halo;
 	
 	Obj3D obj;
 	public ElectricalCableDescriptor cable;
@@ -84,9 +83,21 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 
 	public FunctionTable PfW;
 	
-	public void draw(float alpha) {
+	public void draw(float alpha, boolean haloState) {
 		if(main != null) main.draw();
 		if(rot != null) rot.draw(alpha,1f,0f,0f);
+		if(halo != null) {
+			if(haloState){
+				UtilsClient.disableLight();
+				UtilsClient.enableBlend();
+				UtilsClient.disableCulling();
+				GL11.glColor3f(1.f, 0.f, 0.f);
+				halo.draw();
+				UtilsClient.enableCulling();
+				UtilsClient.disableBlend();
+				UtilsClient.enableLight();
+			}
+		}
 	}
 
 
@@ -116,7 +127,7 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		objItemScale(obj);
 		Direction.ZN.glRotateXnRef();
-		draw(0f);
+		draw(0f,false);
 	}
 	
 	@Override

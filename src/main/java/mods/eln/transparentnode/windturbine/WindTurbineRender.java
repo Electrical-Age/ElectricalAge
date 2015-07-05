@@ -2,6 +2,7 @@ package mods.eln.transparentnode.windturbine;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.Random;
 
 import mods.eln.client.FrameTime;
 import mods.eln.misc.Coordonate;
@@ -19,12 +20,22 @@ import net.minecraft.entity.player.EntityPlayer;
 
 public class WindTurbineRender extends TransparentNodeElementRender {
 
+	private float haloBlink_OnTime = 0.5f;
+	private float haloBlink_OffTime = 2.5f;
+
 	private boolean soundPlaying = false;
+	private float haloBlinkCounter = 0.f;
+	private boolean haloState = false;
+
+	private Random rand = new Random();
 
 	public WindTurbineRender(TransparentNodeEntity tileEntity,
 			TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
 		this.descriptor = (WindTurbineDescriptor) descriptor;
+		this.haloBlinkCounter = rand.nextFloat()*this.haloBlink_OffTime;
+		this.haloBlink_OffTime += rand.nextFloat()*this.haloBlink_OffTime/15.f;
+		this.haloBlink_OnTime += rand.nextFloat()*this.haloBlink_OnTime/15.f;
 	}
 
 	RcInterpolator powerFactorFilter = new RcInterpolator(2);
@@ -34,7 +45,7 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 	@Override
 	public void draw() {
 		front.glRotateXnRef();
-		descriptor.draw(alpha);
+		descriptor.draw(alpha,haloState);
 	}
 
 	public void refresh(float deltaT) {
@@ -55,6 +66,19 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 			soundPlaying = true;
 		} else {
 			soundPlaying = false;
+		}
+		haloBlinkCounter += deltaT;
+		if(haloState == false) {
+			if (haloBlinkCounter > haloBlink_OffTime) {
+				haloBlinkCounter -= haloBlink_OffTime;
+				haloState = !haloState;
+			}
+		}
+		else{
+			if (haloBlinkCounter > haloBlink_OnTime) {
+				haloBlinkCounter -= haloBlink_OnTime;
+				haloState = !haloState;
+			}
 		}
 
 	}
