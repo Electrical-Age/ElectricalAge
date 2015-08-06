@@ -49,7 +49,7 @@ public class ResistorElement extends SixNodeElement {
         thermalLoad.setAsSlow();
         double thermalC = this.descriptor.thermalMaximalPowerDissipated * this.descriptor.thermalNominalHeatTime / (this.descriptor.thermalWarmLimit);
         double thermalRp = this.descriptor.thermalWarmLimit / this.descriptor.thermalMaximalPowerDissipated;
-        double thermalRs = 0; //thermalConductivityTao / thermalC / 2;
+        double thermalRs = this.descriptor.thermalConductivityTao / thermalC / 2;
         thermalLoad.set(thermalRs, thermalRp, thermalC);
         slowProcessList.add(thermalWatchdog);
         thermalWatchdog

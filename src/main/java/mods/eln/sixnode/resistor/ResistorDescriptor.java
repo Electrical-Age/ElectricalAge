@@ -19,8 +19,8 @@ public class ResistorDescriptor extends SixNodeDescriptor {
 
     public double thermalCoolLimit = -100;
     public double thermalWarmLimit = Eln.cableWarmLimit;
-    public double thermalMaximalPowerDissipated = 500;
-    public double thermalNominalHeatTime = 20;
+    public double thermalMaximalPowerDissipated = 1000;
+    public double thermalNominalHeatTime = 120;
     public double thermalConductivityTao = Eln.cableThermalConductionTao;
     Obj3D.Obj3DPart ResistorBaseExtension, ResistorCore, Base;
     ISerie series;
