@@ -40,7 +40,7 @@ public class TreeResinCollectorBlock extends BlockContainer {
 		if (sideCS == Side.CLIENT) return true;
     	Direction direction = Direction.fromIntMinecraftSide(side);
     	if (direction == Direction.YN || direction == Direction.YP) return false;
-    	Coordonate coord = new Coordonate(x, y, z, world);
+    	Coordinate coord = new Coordinate(x, y, z, world);
     	int blockId = direction.getInverse().getBlockId(coord);
 
     	Block block = Block.blocksList[blockID];

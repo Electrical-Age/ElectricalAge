@@ -3730,7 +3730,7 @@ public class Eln {
 			subId = 16;
 			name = "Water Turbine";
 
-			Coordonate waterCoord = new Coordonate(1, -1, 0, 0);
+			Coordinate waterCoord = new Coordinate(1, -1, 0, 0);
 
 			WaterTurbineDescriptor desc = new WaterTurbineDescriptor(
 					name, obj.getObj("SmallWaterWheel"), // name,Obj3D obj,
@@ -3819,9 +3819,9 @@ public class Eln {
 			subId = 0;
 			name = "Experimental Transporter";
 
-			Coordonate[] powerLoad = new Coordonate[2];
-			powerLoad[0] = new Coordonate(-1, 0, 1, 0);
-			powerLoad[1] = new Coordonate(-1, 0, -1, 0);
+			Coordinate[] powerLoad = new Coordinate[2];
+			powerLoad[0] = new Coordinate(-1, 0, 1, 0);
+			powerLoad[1] = new Coordinate(-1, 0, -1, 0);
 
 			GhostGroup doorOpen = new GhostGroup();
 			doorOpen.addRectangle(-4, -3, 2, 2, 0, 0);
@@ -3832,7 +3832,7 @@ public class Eln {
 			TeleporterDescriptor desc = new TeleporterDescriptor(
 					name, obj.getObj("Transporter"),
 					highVoltageCableDescriptor,
-					new Coordonate(-1, 0, 0, 0), new Coordonate(-1, 1, 0, 0),
+					new Coordinate(-1, 0, 0, 0), new Coordinate(-1, 1, 0, 0),
 					2,// int areaH
 					powerLoad,
 					doorOpen, doorClose
@@ -4221,13 +4221,13 @@ public class Eln {
 			subId = 0;
 			name = "Auto Miner";
 
-			Coordonate[] powerLoad = new Coordonate[2];
-			powerLoad[0] = new Coordonate(-2, -1, 1, 0);
-			powerLoad[1] = new Coordonate(-2, -1, -1, 0);
+			Coordinate[] powerLoad = new Coordinate[2];
+			powerLoad[0] = new Coordinate(-2, -1, 1, 0);
+			powerLoad[1] = new Coordinate(-2, -1, -1, 0);
 
-			Coordonate lightCoord = new Coordonate(-3, 0, 0, 0);
+			Coordinate lightCoord = new Coordinate(-3, 0, 0, 0);
 
-			Coordonate miningCoord = new Coordonate(-1, 0, 1, 0);
+			Coordinate miningCoord = new Coordinate(-1, 0, 1, 0);
 
 			AutoMinerDescriptor desc = new AutoMinerDescriptor(name,
 					obj.getObj("AutoMiner"),

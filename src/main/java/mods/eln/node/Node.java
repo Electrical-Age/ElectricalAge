@@ -1,41 +1,11 @@
 package mods.eln.node;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-
-import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
-import mods.eln.misc.INBTTReady;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.LRDUCubeMask;
-import mods.eln.misc.Utils;
-import mods.eln.sim.ElectricalConnection;
-import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.IProcess;
-import mods.eln.sim.ThermalConnection;
-import mods.eln.sim.ThermalLoad;
-import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerManager;
 import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 
 public abstract class Node extends NodeBase {
 
@@ -48,7 +18,7 @@ public abstract class Node extends NodeBase {
 		if(lastLight != light)
 		{
 			lastLight = light;
-			coordonate.world().updateLightByType(EnumSkyBlock.Block,coordonate.x, coordonate.y, coordonate.z);
+			coordinate.world().updateLightByType(EnumSkyBlock.Block, coordinate.x, coordinate.y, coordinate.z);
 			setNeedPublish(true);
 		}
 		
@@ -98,7 +68,7 @@ public abstract class Node extends NodeBase {
     
     public NodeBlockEntity getEntity()
     {
-    	return (NodeBlockEntity) coordonate.world().getTileEntity(coordonate.x, coordonate.y, coordonate.z);
+    	return (NodeBlockEntity) coordinate.world().getTileEntity(coordinate.x, coordinate.y, coordinate.z);
     }
     
 	public int isProvidingWeakPower(Direction side) {

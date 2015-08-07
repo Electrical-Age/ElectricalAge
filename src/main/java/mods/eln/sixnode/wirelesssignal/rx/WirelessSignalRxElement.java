@@ -1,6 +1,6 @@
 package mods.eln.sixnode.wirelesssignal.rx;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -129,8 +129,8 @@ public class WirelessSignalRxElement extends SixNodeElement {
 	}
 
 	@Override
-	public Coordonate getCoordonate() {
-		return sixNode.coordonate;
+	public Coordinate getCoordonate() {
+		return sixNode.coordinate;
 	}
     
 	@Override

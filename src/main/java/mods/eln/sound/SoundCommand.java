@@ -5,7 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
@@ -70,7 +70,7 @@ public class SoundCommand {
 			SoundServer.play(this);
 	}
 
-	public void set(Coordonate c) {
+	public void set(Coordinate c) {
 		world = c.world();
 		x = c.x + 0.5;
 		y = c.y + 0.5;

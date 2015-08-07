@@ -3,7 +3,7 @@ package mods.eln.sixnode.wirelesssignal;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 
 public interface IWirelessSignalSpot {
     
@@ -11,6 +11,6 @@ public interface IWirelessSignalSpot {
 	
 	HashMap<String, ArrayList<IWirelessSignalTx>> getTx();
 	ArrayList<IWirelessSignalSpot> getSpot();
-	Coordonate getCoordonate();
+	Coordinate getCoordinate();
 	public int getRange();
 }

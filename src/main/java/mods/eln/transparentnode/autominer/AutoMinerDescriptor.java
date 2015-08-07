@@ -1,6 +1,6 @@
 package mods.eln.transparentnode.autominer;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
@@ -19,8 +19,8 @@ import java.util.List;
 
 public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 
-	Coordonate[] powerCoord;
-	Coordonate lightCoord, miningCoord;
+	Coordinate[] powerCoord;
+	Coordinate lightCoord, miningCoord;
 	public Obj3D obj;
 	public Obj3DPart core, gui, lampSocket, lampOff, lampOn, head, pipe;
 	public Obj3DPart buttonFixed;
@@ -43,7 +43,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 	
 	public AutoMinerDescriptor(String name, 
                                Obj3D obj, 
-                               Coordonate[] powerCoord, Coordonate lightCoord, Coordonate miningCoord, 
+                               Coordinate[] powerCoord, Coordinate lightCoord, Coordinate miningCoord,
                                int deltaX, int deltaY, int deltaZ, 
                                ElectricalCableDescriptor cable, 
                                double pipeOperationTime, double pipeOperationEnergy) {
@@ -183,10 +183,10 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 		return true;
 	}
 	
-	public Coordonate[] getPowerCoordonate(World w) {
-		Coordonate[] temp = new Coordonate[powerCoord.length];
+	public Coordinate[] getPowerCoordonate(World w) {
+		Coordinate[] temp = new Coordinate[powerCoord.length];
 		for (int idx = 0; idx < temp.length; idx++){
-			temp[idx] = new Coordonate(powerCoord[idx]);
+			temp[idx] = new Coordinate(powerCoord[idx]);
 			temp[idx].setDimention(w.provider.dimensionId);
 		}
 		return temp;

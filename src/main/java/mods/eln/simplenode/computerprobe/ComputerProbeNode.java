@@ -7,7 +7,7 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Context;
 import mods.eln.Eln;
 import mods.eln.Other;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -77,7 +77,7 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 
 	double wirelessRead(String channel, String aggregatorName) {
 		if (spot == null) {
-			spot = WirelessUtils.buildSpot(coordonate, null, 0);
+			spot = WirelessUtils.buildSpot(coordinate, null, 0);
 			txSet.clear();
 			txStrength.clear();
 			WirelessUtils.getTx(spot, txSet, txStrength);
@@ -352,8 +352,8 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 		double value;
 
 		@Override
-		public Coordonate getCoordonate() {
-			return coordonate;
+		public Coordinate getCoordinate() {
+			return coordinate;
 		}
 
 		@Override

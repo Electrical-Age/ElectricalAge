@@ -4,7 +4,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -37,7 +37,7 @@ public class AutoMinerElement extends TransparentNodeElement  {
 	
 	AutoMinerDescriptor descriptor;
 	
-	Coordonate lightCoordonate;
+	Coordinate lightCoordinate;
 
     VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
 
@@ -85,14 +85,14 @@ public class AutoMinerElement extends TransparentNodeElement  {
 
 	@Override
 	public void initialize() {
-		lightCoordonate = new Coordonate(this.descriptor.lightCoord);
-		lightCoordonate.applyTransformation(front, node.coordonate);
+		lightCoordinate = new Coordinate(this.descriptor.lightCoord);
+		lightCoordinate.applyTransformation(front, node.coordinate);
 		
 		int idx = 0;
-		for (Coordonate c : descriptor.getPowerCoordonate(node.coordonate.world())) {
+		for (Coordinate c : descriptor.getPowerCoordonate(node.coordinate.world())) {
 			AutoMinerPowerNode n = new AutoMinerPowerNode();
 			n.setElement(this);
-			c.applyTransformation(front, node.coordonate);
+			c.applyTransformation(front, node.coordinate);
 			
 			Direction dir;
 			if (idx != 0)

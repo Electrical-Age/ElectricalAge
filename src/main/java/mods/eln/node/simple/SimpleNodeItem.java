@@ -1,6 +1,6 @@
 package mods.eln.node.simple;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
@@ -20,7 +20,7 @@ public class SimpleNodeItem extends ItemBlock {
 		if(world.isRemote == false){
 			node = block.newNode();
 			node.setDescriptorKey(block.descriptorKey);
-			node.onBlockPlacedBy(new Coordonate(x,y,z,world), block.getFrontForPlacement(player), player, stack);
+			node.onBlockPlacedBy(new Coordinate(x,y,z,world), block.getFrontForPlacement(player), player, stack);
 		}
 		
 		if (!world.setBlock(x, y, z, field_150939_a, metadata, 3))

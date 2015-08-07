@@ -2,25 +2,22 @@ package mods.eln.node.transparent;
 
 import java.util.List;
 
+import mods.eln.misc.Coordinate;
 import org.lwjgl.opengl.GL11;
 
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.ghost.GhostGroup;
-import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNode.FrontType;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHopper;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer;
-import net.minecraftforge.client.IRenderContextHandler;
 
 public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescriptor implements IItemRenderer{
 	public Class ElementClass,RenderClass;
@@ -86,47 +83,47 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 	{
 		return false;
 	}
-	public String checkCanPlace(Coordonate coord,Direction front) {
+	public String checkCanPlace(Coordinate coord,Direction front) {
 		Block block;
 		boolean needDestroy = false;
 		if(mustHaveFloor())
 		{
-			Coordonate temp = new Coordonate(coord);
+			Coordinate temp = new Coordinate(coord);
 			temp.move(Direction.YN);
 			block = temp.getBlock();
 			if(block == null || ((! block.isOpaqueCube()) && block instanceof BlockHopper == false)) return "You can't place this block at this side";
 		}
 		if(mustHaveCeiling())
 		{
-			Coordonate temp = new Coordonate(coord);
+			Coordinate temp = new Coordinate(coord);
 			temp.move(Direction.YP);
 			block = temp.getBlock();
 			if(block == null || ! block.isOpaqueCube()) return "You can't place this block at this side";
 		}
 		if(mustHaveWallFrontInverse())
 		{
-			Coordonate temp = new Coordonate(coord);
+			Coordinate temp = new Coordinate(coord);
 			temp.move(front.getInverse());
 			block = temp.getBlock();
 			if(block == null || ! block.isOpaqueCube()) return "You can't place this block at this side";
 		}
 		if(mustHaveWall())
 		{
-			Coordonate temp;
+			Coordinate temp;
 			boolean wall = false;
-			temp = new Coordonate(coord);
+			temp = new Coordinate(coord);
 			temp.move(Direction.XN);
 			block = temp.getBlock();
 			if(block != null && block.isOpaqueCube()) wall = true;
-			temp = new Coordonate(coord);
+			temp = new Coordinate(coord);
 			temp.move(Direction.XP);
 			block = temp.getBlock();
 			if(block != null && block.isOpaqueCube()) wall = true;
-			temp = new Coordonate(coord);
+			temp = new Coordinate(coord);
 			temp.move(Direction.ZN);
 			block = temp.getBlock();
 			if(block != null && block.isOpaqueCube()) wall = true;
-			temp = new Coordonate(coord);
+			temp = new Coordinate(coord);
 			temp.move(Direction.ZP);
 			block = temp.getBlock();
 			if(block != null && block.isOpaqueCube()) wall = true;

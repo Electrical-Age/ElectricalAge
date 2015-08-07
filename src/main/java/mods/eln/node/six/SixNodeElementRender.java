@@ -7,23 +7,19 @@ import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
 
-import mods.eln.Eln;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
 import mods.eln.client.ClientProxy;
-import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.LRDUMask;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.tileentity.TileEntity;
 
 public abstract class SixNodeElementRender {
 	public SixNodeEntity tileEntity;

@@ -1,6 +1,6 @@
 package mods.eln.sixnode.electricalredstoneinput;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 
@@ -19,7 +19,7 @@ public class ElectricalRedstoneInputSlowProcess implements IProcess {
 	@Override
 	public void process(double time) {
 		if (sleepCounter == 0.0) {
-			Coordonate coord = element.sixNode.coordonate;
+			Coordinate coord = element.sixNode.coordinate;
 			int signal = Utils.getRedstoneLevelAround(coord);
 			//Utils.println("Light : " + light);
 			element.outputGateProcess.setOutputNormalized((signal) / 15.0 );

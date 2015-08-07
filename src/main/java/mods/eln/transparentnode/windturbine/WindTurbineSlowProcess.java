@@ -1,6 +1,6 @@
 package mods.eln.transparentnode.windturbine;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
@@ -30,7 +30,7 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 	
 	double getWind()
 	{
-		return Math.abs(localWind + Utils.getWind(turbine.node.coordonate.dimention,turbine.node.coordonate.y + turbine.descriptor.offY)) * environementWindFactor;
+		return Math.abs(localWind + Utils.getWind(turbine.node.coordinate.dimention,turbine.node.coordinate.y + turbine.descriptor.offY)) * environementWindFactor;
 	}
 	void setWind(double wind)
 	{
@@ -55,7 +55,7 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 			int x1 = 0,x2 = 0,y1 = 0,y2 = 0,z1 = 0,z2 = 0;
 
 			
-			Coordonate coord = new Coordonate(turbine.node.coordonate);
+			Coordinate coord = new Coordinate(turbine.node.coordinate);
 			
 			x1 = coord.x - d.rayX;
 			x2 = coord.x + d.rayX;
@@ -66,8 +66,8 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 			
 			int blockBusyCount = -d.blockMalusSubCount;
 			boolean notInCache = false;
-			if(turbine.node.coordonate.getWorldExist() == true){
-				World world = turbine.node.coordonate.world();
+			if(turbine.node.coordinate.getWorldExist() == true){
+				World world = turbine.node.coordinate.world();
 				IChunkProvider chunk = world.getChunkProvider();
 				
 				for(int x = x1;x<=x2;x++)

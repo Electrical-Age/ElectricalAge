@@ -1,24 +1,19 @@
 package mods.eln.node;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.Map.Entry;
 
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Utils;
-import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.WorldSavedData;
 
 public class NodeManager extends WorldSavedData {
 	public static NodeManager instance = null;
 
-	private HashMap<Coordonate, NodeBase> nodesMap;
+	private HashMap<Coordinate, NodeBase> nodesMap;
 	private ArrayList<NodeBase> nodes;
 
-	public HashMap<Coordonate, NodeBase> getNodeArray()
+	public HashMap<Coordinate, NodeBase> getNodeArray()
 	{
 		return nodesMap;
 	}
@@ -43,7 +38,7 @@ public class NodeManager extends WorldSavedData {
 
 	public NodeManager(String par1Str) {
 		super(par1Str);
-		nodesMap = new HashMap<Coordonate, NodeBase>();
+		nodesMap = new HashMap<Coordinate, NodeBase>();
 		nodes = new ArrayList<NodeBase>();
 		instance = this;
 
@@ -52,13 +47,13 @@ public class NodeManager extends WorldSavedData {
 	public void addNode(NodeBase node)
 	{
 		// nodeArray.add(node);
-		if (node.coordonate == null)
+		if (node.coordinate == null)
 		{
-			Utils.println("Null coordonate addnode");
+			Utils.println("Null coordinate addnode");
 			while (true)
 				;
 		}
-		NodeBase old = nodesMap.put(node.coordonate, node);
+		NodeBase old = nodesMap.put(node.coordinate, node);
 		if (old != null) {
 			nodes.remove(old);
 		}
@@ -71,12 +66,12 @@ public class NodeManager extends WorldSavedData {
 	public void removeNode(NodeBase node)
 	{
 		if (node == null) return;
-		nodesMap.remove(node.coordonate);
+		nodesMap.remove(node.coordinate);
 		nodes.remove(node);
 		Utils.println("NodeManager has " + nodesMap.size() + "node");
 	}
 
-	public void removeCoordonate(Coordonate c)
+	public void removeCoordonate(Coordinate c)
 	{
 		// nodeArray.remove(node);
 		NodeBase n = nodesMap.remove(c);
@@ -116,15 +111,15 @@ public class NodeManager extends WorldSavedData {
 		 */
 	}
 
-	public NodeBase getNodeFromCoordonate(Coordonate nodeCoordonate)
+	public NodeBase getNodeFromCoordonate(Coordinate nodeCoordinate)
 	{
 		int idx = 0;
 		idx++;
 		// for(Node node : nodeArray)
 		{
-			// if(nodeCoordonate.equals(node.coordonate)) return node;
+			// if(nodeCoordinate.equals(node.coordinate)) return node;
 		}
-		return nodesMap.get(nodeCoordonate);
+		return nodesMap.get(nodeCoordinate);
 		// return null;
 	}
 
@@ -167,7 +162,7 @@ public class NodeManager extends WorldSavedData {
 		{
 			try {
 				if (node.mustBeSaved() == false) continue;
-				if (dim != Integer.MIN_VALUE && node.coordonate.dimention != dim) continue;
+				if (dim != Integer.MIN_VALUE && node.coordinate.dimention != dim) continue;
 				NBTTagCompound nbtNode = new NBTTagCompound();
 				nbtNode.setString("tag", node.getNodeUuid());
 				node.writeToNBT(nbtNode);
@@ -190,10 +185,10 @@ public class NodeManager extends WorldSavedData {
 		Iterator<NodeBase> i = nodes.iterator();
 		while (i.hasNext()) {
 			NodeBase n = i.next();
-			if (n.coordonate.dimention == dimensionId) {
+			if (n.coordinate.dimention == dimensionId) {
 				n.unload();
 				i.remove();
-				nodesMap.remove(n.coordonate);
+				nodesMap.remove(n.coordinate);
 			}
 		}
 	}

@@ -81,7 +81,7 @@ public class LampSocketRender extends SixNodeElementRender {
 
 			entityTimout -= dt;
 			if (entityTimout < 0) {
-				entityList = tileEntity.getWorldObj().getEntitiesWithinAABB(Entity.class, new Coordonate(tileEntity.xCoord, tileEntity.yCoord - 2, tileEntity.zCoord, tileEntity.getWorldObj()).getAxisAlignedBB(2));
+				entityList = tileEntity.getWorldObj().getEntitiesWithinAABB(Entity.class, new Coordinate(tileEntity.xCoord, tileEntity.yCoord - 2, tileEntity.zCoord, tileEntity.getWorldObj()).getAxisAlignedBB(2));
 				entityTimout = 0.1f;
 			}
 

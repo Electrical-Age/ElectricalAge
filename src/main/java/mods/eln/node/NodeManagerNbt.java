@@ -1,12 +1,5 @@
 package mods.eln.node;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Random;
-
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Utils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.WorldSavedData;
 

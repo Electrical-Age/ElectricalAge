@@ -299,7 +299,7 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage {
                     }
                     uuid++;
                     ServerWirelessTxStatus tx;
-                    wirelessTxStatusList.put(uuid, tx = new ServerWirelessTxStatus(name, -1, 0, sixNode.coordonate, uuid, this));
+                    wirelessTxStatusList.put(uuid, tx = new ServerWirelessTxStatus(name, -1, 0, sixNode.coordinate, uuid, this));
 
                     sendTx1Syncronise(tx);
                 }

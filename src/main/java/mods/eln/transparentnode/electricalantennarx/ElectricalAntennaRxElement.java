@@ -2,7 +2,7 @@ package mods.eln.transparentnode.electricalantennarx;
 
 import java.io.DataOutputStream;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -28,7 +28,7 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement {
 	PowerSource powerSrc = new PowerSource("powerSrc", powerOut);
 
     LRDU rot = LRDU.Up;
-    Coordonate rxCoord = null;
+    Coordinate rxCoord = null;
     ElectricalAntennaRxDescriptor descriptor;
     
 	public double getSignal() {

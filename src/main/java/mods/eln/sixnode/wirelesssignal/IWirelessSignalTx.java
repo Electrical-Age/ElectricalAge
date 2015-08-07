@@ -1,10 +1,10 @@
 package mods.eln.sixnode.wirelesssignal;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 
 public interface IWirelessSignalTx {
     
-	public Coordonate getCoordonate();
+	public Coordinate getCoordinate();
 	
 	public int getRange();
 	public String getChannel();

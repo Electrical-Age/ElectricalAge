@@ -2,7 +2,7 @@ package mods.eln.sixnode.electricalentitysensor;
 
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.EntitySensorFilterDescriptor;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
@@ -48,7 +48,7 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
 			timeCounter -= refreshPeriode;
 			boolean useSpeed = element.descriptor.useEntitySpeed;
 			double speedFactor = element.descriptor.speedFactor;
-			Coordonate coord = element.sixNode.coordonate;
+			Coordinate coord = element.sixNode.coordinate;
 			ItemStack filterStack = element.inventory.getStackInSlot(ElectricalEntitySensorContainer.filterId);
 			
 			Class filterClass = EntityLivingBase.class;

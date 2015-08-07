@@ -6,7 +6,7 @@ import mods.eln.Eln;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
 import mods.eln.item.electricalitem.PortableOreScannerItem;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.ore.OreBlock;
@@ -43,7 +43,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     enum jobType {none, done, full, chestFull, ore, pipeAdd, pipeRemove}
 
     jobType job = jobType.none, oldJob = jobType.none;
-    Coordonate jobCoord = new Coordonate();
+    Coordinate jobCoord = new Coordinate();
     int blinkCounter = 0;
 
     double oreRand = Math.random();
@@ -92,7 +92,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 			blinkCounter = 0;
 			if ((miner.inPowerLoad.getU() / miner.descriptor.nominalVoltage - 0.5) * 3 > Math.random()) {
 				miner.setPowerOk(true);
-				LightBlockEntity.addLight(miner.lightCoordonate, 12, 11);
+				LightBlockEntity.addLight(miner.lightCoordinate, 12, 11);
 			} else {
 				miner.setPowerOk(false);
 			}
@@ -131,7 +131,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         break;
                     case pipeAdd:
                         // miner.pushLog("Pipe " + (pipeLength + 1) + " added");
-                        Eln.ghostManager.createGhost(jobCoord, miner.node.coordonate, jobCoord.y);
+                        Eln.ghostManager.createGhost(jobCoord, miner.node.coordinate, jobCoord.y);
                         miner.inventory.decrStackSize(AutoMinerContainer.MiningPipeSlotId, 1);
 
                         pipeLength++;
@@ -225,14 +225,14 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 	IInventory getDropInventory() {
 		TileEntityChest chestEntity = null;
 		{
-			Coordonate c = new Coordonate(2, -1, 0, miner.world());
+			Coordinate c = new Coordinate(2, -1, 0, miner.world());
 			c.applyTransformation(miner.front, miner.coordonate());
 			if (c.getTileEntity() instanceof TileEntityChest) {
 				chestEntity = (TileEntityChest) c.getTileEntity();
 			}
 		}
 		{
-			Coordonate c = new Coordonate(1, -1, 0, miner.world());
+			Coordinate c = new Coordinate(1, -1, 0, miner.world());
 			c.applyTransformation(miner.front, miner.coordonate());
 			if (c.getTileEntity() instanceof TileEntityChest) {
 				chestEntity = (TileEntityChest) c.getTileEntity();
@@ -245,7 +245,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 		/*
 		 * Direction dir = miner.front; TileEntityChest chestEntity = null;
 		 * 
-		 * for(int idx = 0; idx < 4; idx++) { if(dir.getBlock(miner.node.coordonate) instanceof BlockChest) { chestEntity = (TileEntityChest) dir.getTileEntity(miner.node.coordonate); break; } dir = dir.left(); }
+		 * for(int idx = 0; idx < 4; idx++) { if(dir.getBlock(miner.node.coordinate) instanceof BlockChest) { chestEntity = (TileEntityChest) dir.getTileEntity(miner.node.coordinate); break; } dir = dir.left(); }
 		 */
 
 		/*
@@ -269,12 +269,12 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 		int scannerRadius = scannerRadiusStatic;
 		double scannerEnergy = 0;
 
-		jobCoord.dimention = miner.node.coordonate.dimention;
-		jobCoord.x = miner.node.coordonate.x;
-		jobCoord.y = miner.node.coordonate.y - pipeLength;
-		jobCoord.z = miner.node.coordonate.z;
+		jobCoord.dimention = miner.node.coordinate.dimention;
+		jobCoord.x = miner.node.coordinate.x;
+		jobCoord.y = miner.node.coordinate.y - pipeLength;
+		jobCoord.z = miner.node.coordinate.z;
 		/*
-		 * for (jobCoord.y = miner.node.coordonate.y - 1; jobCoord.y > 0; jobCoord.y--) { GhostElement ghost = Eln.ghostManager.getGhost(jobCoord); if(ghost == null || ghost.getObservatorCoordonate().equals(miner.node.coordonate) != true) { jobCoord.y++; break; } }
+		 * for (jobCoord.y = miner.node.coordinate.y - 1; jobCoord.y > 0; jobCoord.y--) { GhostElement ghost = Eln.ghostManager.getGhost(jobCoord); if(ghost == null || ghost.getObservatorCoordinate().equals(miner.node.coordinate) != true) { jobCoord.y++; break; } }
 		 */
 		// JobCoord at last pipe
 
@@ -282,12 +282,12 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 		 * int invFreeCnt = 0; for (int idx = AutoMinerContainer.StorageStartId;idx < AutoMinerContainer.StorageSize + AutoMinerContainer.StorageStartId;idx++){ if(miner.inventory.getStackInSlot(idx) == null){ invFreeCnt++; } } Utils.println(" " + invFreeCnt);
 		 */
 		boolean jobFind = false;
-		if (!miner.node.coordonate.getBlockExist()){
+		if (!miner.node.coordinate.getBlockExist()){
 			setJob(jobType.none);
 		} else if (!miner.powerOk) {
 			setJob(jobType.none);
 		} else if (drill == null) {
-			if (jobCoord.y != miner.node.coordonate.y) {
+			if (jobCoord.y != miner.node.coordinate.y) {
 				ItemStack pipeStack = miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId);
 				if (pipeStack == null || (pipeStack.stackSize != pipeStack.getMaxStackSize() && pipeStack.stackSize != miner.inventory.getInventoryStackLimit())) {
 					jobFind = true;
@@ -301,17 +301,17 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 			setJob(jobType.chestFull);
 			jobFind = true;
 		} else if (pipe != null) {
-			if (jobCoord.y < miner.node.coordonate.y - 2) {
-				int depth = (miner.node.coordonate.y - jobCoord.y);
+			if (jobCoord.y < miner.node.coordinate.y - 2) {
+				int depth = (miner.node.coordinate.y - jobCoord.y);
 				double miningRay = depth / 10 + 0.1;
 				miningRay = Math.min(miningRay, 2);
 				if (depth < scannerRadius) scannerRadius = depth + 1;
 				miningRay = Math.min(miningRay, scannerRadius - 2);
-				for (jobCoord.z = miner.node.coordonate.z - scannerRadius; jobCoord.z <= miner.node.coordonate.z + scannerRadius; jobCoord.z++) {
-					for (jobCoord.x = miner.node.coordonate.x - scannerRadius; jobCoord.x <= miner.node.coordonate.x + scannerRadius; jobCoord.x++) {
-						double dx = jobCoord.x - miner.node.coordonate.x;
+				for (jobCoord.z = miner.node.coordinate.z - scannerRadius; jobCoord.z <= miner.node.coordinate.z + scannerRadius; jobCoord.z++) {
+					for (jobCoord.x = miner.node.coordinate.x - scannerRadius; jobCoord.x <= miner.node.coordinate.x + scannerRadius; jobCoord.x++) {
+						double dx = jobCoord.x - miner.node.coordinate.x;
 						double dy = 0;
-						double dz = jobCoord.z - miner.node.coordonate.z;
+						double dz = jobCoord.z - miner.node.coordinate.z;
 						double distance = Math.sqrt(dx * dx + dy * dy + dz * dz) * (1);
 						Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
 						if (checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(block))) {
@@ -329,9 +329,9 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 					jobFind = true;
 					setJob(jobType.done);
 				} else {
-					jobCoord.x = miner.node.coordonate.x;
+					jobCoord.x = miner.node.coordinate.x;
 					jobCoord.y--;
-					jobCoord.z = miner.node.coordonate.z;
+					jobCoord.z = miner.node.coordinate.z;
 
 					Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
 					if (block != Blocks.air
@@ -400,12 +400,12 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 		this.job = job;
 	}
 
-	boolean checkIsOre(Coordonate coordonate) {
-		Block block = coordonate.world().getBlock(coordonate.x, coordonate.y, coordonate.z);
+	boolean checkIsOre(Coordinate coordinate) {
+		Block block = coordinate.world().getBlock(coordinate.x, coordinate.y, coordinate.z);
 		if (block instanceof BlockOre) return true;
 		if (block instanceof OreBlock) return true;
 		if (block instanceof BlockRedstoneOre) return true;
-		if (PortableOreScannerItem.RenderStorage.getBlockKeyFactor()[Block.getIdFromBlock(block) + (coordonate.world().getBlockMetadata(coordonate.x, coordonate.y, coordonate.z) << 12)] != 0)
+		if (PortableOreScannerItem.RenderStorage.getBlockKeyFactor()[Block.getIdFromBlock(block) + (coordinate.world().getBlockMetadata(coordinate.x, coordinate.y, coordinate.z) << 12)] != 0)
 			return true;
 		return false;
 	}
@@ -416,18 +416,18 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 
 	void destroyPipe(int jumpY) {
 		dropPipe(jumpY);
-		Eln.ghostManager.removeGhostAndBlockWithObserverAndNotUuid(miner.node.coordonate, miner.descriptor.getGhostGroupUuid());
+		Eln.ghostManager.removeGhostAndBlockWithObserverAndNotUuid(miner.node.coordinate, miner.descriptor.getGhostGroupUuid());
 		pipeLength = 0;
 		miner.needPublish();
 	}
 
 	void dropPipe(int jumpY) {
-		World world = miner.node.coordonate.world();
-		Coordonate coord = new Coordonate(miner.node.coordonate);
+		World world = miner.node.coordinate.world();
+		Coordinate coord = new Coordinate(miner.node.coordinate);
 		/*
-		 * for(coord.y = miner.node.coordonate.y - 1; coord.y > 0; coord.y--) { GhostElement ghost = Eln.ghostManager.getGhost(coord); if(coord.y != jumpY) { if(ghost == null || ghost.getObservatorCoordonate().equals(miner.node.coordonate) != true) { coord.y++; break; } } Utils.dropItem(Eln.miningPipeDescriptor.newItemStack(1), coord); }
+		 * for(coord.y = miner.node.coordinate.y - 1; coord.y > 0; coord.y--) { GhostElement ghost = Eln.ghostManager.getGhost(coord); if(coord.y != jumpY) { if(ghost == null || ghost.getObservatorCoordinate().equals(miner.node.coordinate) != true) { coord.y++; break; } } Utils.dropItem(Eln.miningPipeDescriptor.newItemStack(1), coord); }
 		 */
-		for (coord.y = miner.node.coordonate.y - 1; coord.y >= miner.node.coordonate.y - pipeLength; coord.y--) {
+		for (coord.y = miner.node.coordinate.y - 1; coord.y >= miner.node.coordinate.y - pipeLength; coord.y--) {
 			Utils.dropItem(Eln.miningPipeDescriptor.newItemStack(1), coord);
 		}
 	}

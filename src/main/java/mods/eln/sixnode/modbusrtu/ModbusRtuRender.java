@@ -6,11 +6,8 @@ import java.util.HashMap;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.PhysicalInterpolator;
-import mods.eln.misc.Utils;
+import mods.eln.misc.*;
+import mods.eln.misc.Coordinate;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
@@ -19,7 +16,7 @@ import net.minecraft.entity.player.EntityPlayer;
 
 public class ModbusRtuRender extends SixNodeElementRender {
 
-	Coordonate coord;
+	Coordinate coord;
 	PhysicalInterpolator interpolator;
 	float modbusActivityTimeout = 0;
 	float modbusErrorTimeout = 0;
@@ -40,7 +37,7 @@ public class ModbusRtuRender extends SixNodeElementRender {
 		this.descriptor = (ModbusRtuDescriptor) descriptor;
 
 		interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
-		coord = new Coordonate(tileEntity);
+		coord = new Coordinate(tileEntity);
 	}
 
 	@Override

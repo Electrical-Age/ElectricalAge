@@ -11,13 +11,8 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.ghost.GhostBlock;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.INBTTReady;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.LRDUCubeMask;
-import mods.eln.misc.Profiler;
-import mods.eln.misc.Utils;
+import mods.eln.misc.*;
+import mods.eln.misc.Coordinate;
 import mods.eln.node.six.SixNode;
 import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
@@ -26,7 +21,6 @@ import mods.eln.sim.ThermalConnection;
 import mods.eln.sim.ThermalLoad;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -35,12 +29,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.play.client.C17PacketCustomPayload;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerManager;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
@@ -76,7 +66,7 @@ public abstract class NodeBase {
 
 	public static int teststatic;
 
-	public Coordonate coordonate;
+	public Coordinate coordinate;
 
 	public ArrayList<NodeConnection> nodeConnectionList = new ArrayList<NodeConnection>(4);
 
@@ -105,7 +95,7 @@ public abstract class NodeBase {
 
 	public void notifyNeighbor()
 	{
-		coordonate.world().notifyBlockChange(coordonate.x, coordonate.y, coordonate.z, coordonate.getBlock());
+		coordinate.world().notifyBlockChange(coordinate.x, coordinate.y, coordinate.z, coordinate.getBlock());
 	}
 
 	//public abstract Block getBlock();
@@ -116,15 +106,15 @@ public abstract class NodeBase {
 	public void neighborBlockRead()
 	{
 		int[] vector = new int[3];
-		World world = coordonate.world();
+		World world = coordinate.world();
 
 		neighborOpaque = 0;
 		neighborWrapable = 0;
 		for (Direction direction : Direction.values())
 		{
-			vector[0] = coordonate.x;
-			vector[1] = coordonate.y;
-			vector[2] = coordonate.z;
+			vector[0] = coordinate.x;
+			vector[1] = coordinate.y;
+			vector[2] = coordinate.z;
 
 			direction.applyTo(vector, 1);
 
@@ -132,7 +122,7 @@ public abstract class NodeBase {
 			if (b.isOpaqueCube())
 			;
 			neighborOpaque |= 1 << direction.getInt();
-			if (isBlockWrappable(b, world, coordonate.x, coordonate.y, coordonate.z))
+			if (isBlockWrappable(b, world, coordinate.x, coordinate.y, coordinate.z))
 				neighborWrapable |= 1 << direction.getInt();
 		}
 	}
@@ -175,7 +165,7 @@ public abstract class NodeBase {
 
 	public NodeBase()
 	{
-		coordonate = new Coordonate();
+		coordinate = new Coordinate();
 	}
 
 	boolean destructed = false;
@@ -186,19 +176,19 @@ public abstract class NodeBase {
 		destructed = true;
 		if(Eln.instance.explosionEnable == false) explosionStrength = 0;
 		disconnect();
-		coordonate.world().setBlockToAir(coordonate.x, coordonate.y, coordonate.z);
+		coordinate.world().setBlockToAir(coordinate.x, coordinate.y, coordinate.z);
 		NodeManager.instance.removeNode(this);
 		if (explosionStrength != 0)
 		{
-			coordonate.world().createExplosion((Entity) null, coordonate.x, coordonate.y, coordonate.z, explosionStrength, true);
+			coordinate.world().createExplosion((Entity) null, coordinate.x, coordinate.y, coordinate.z, explosionStrength, true);
 		}
 	}
 
 	// NodeBaseTodo
-	public void onBlockPlacedBy(Coordonate coordonate, Direction front, EntityLivingBase entityLiving, ItemStack itemStack)
+	public void onBlockPlacedBy(Coordinate coordinate, Direction front, EntityLivingBase entityLiving, ItemStack itemStack)
 	{
 		// this.entity = entity;
-		this.coordonate = coordonate;
+		this.coordinate = coordinate;
 		neighborBlockRead();
 		NodeManager.instance.addNode(this);
 
@@ -214,12 +204,12 @@ public abstract class NodeBase {
 	public NodeBase getNeighbor(Direction direction)
 	{
 		int[] position = new int[3];
-		position[0] = coordonate.x;
-		position[1] = coordonate.y;
-		position[2] = coordonate.z;
+		position[0] = coordinate.x;
+		position[1] = coordinate.y;
+		position[2] = coordinate.z;
 		direction.applyTo(position, 1);
-		Coordonate nodeCoordonate = new Coordonate(position[0], position[1], position[2], coordonate.dimention);
-		return NodeManager.instance.getNodeFromCoordonate(nodeCoordonate);
+		Coordinate nodeCoordinate = new Coordinate(position[0], position[1], position[2], coordinate.dimention);
+		return NodeManager.instance.getNodeFromCoordonate(nodeCoordinate);
 	}
 
 	// leaf
@@ -269,7 +259,7 @@ public abstract class NodeBase {
 		}
 		if (hasGui(side))
 		{
-			entityPlayer.openGui(Eln.instance, GuiHandler.nodeBaseOpen + side.getInt(), coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
+			entityPlayer.openGui(Eln.instance, GuiHandler.nodeBaseOpen + side.getInt(), coordinate.world(), coordinate.x, coordinate.y, coordinate.z);
 			return true;
 		}
 
@@ -351,9 +341,9 @@ public abstract class NodeBase {
 			{
 				if (isBlockWrappable(direction))
 				{
-					emptyBlockCoord[0] = coordonate.x;
-					emptyBlockCoord[1] = coordonate.y;
-					emptyBlockCoord[2] = coordonate.z;
+					emptyBlockCoord[0] = coordinate.x;
+					emptyBlockCoord[1] = coordinate.y;
+					emptyBlockCoord[2] = coordinate.z;
 					direction.applyTo(emptyBlockCoord, 1);
 					for (LRDU lrdu : LRDU.values())
 					{
@@ -362,7 +352,7 @@ public abstract class NodeBase {
 						otherBlockCoord[1] = emptyBlockCoord[1];
 						otherBlockCoord[2] = emptyBlockCoord[2];
 						elementSide.applyTo(otherBlockCoord, 1);
-						NodeBase otherNode = NodeManager.instance.getNodeFromCoordonate(new Coordonate(otherBlockCoord[0], otherBlockCoord[1], otherBlockCoord[2], coordonate.dimention));
+						NodeBase otherNode = NodeManager.instance.getNodeFromCoordonate(new Coordinate(otherBlockCoord[0], otherBlockCoord[1], otherBlockCoord[2], coordinate.dimention));
 						if (otherNode == null) continue;
 						Direction otherDirection = elementSide.getInverse();
 						LRDU otherLRDU = otherDirection.getLRDUGoingTo(direction).inverse();
@@ -476,7 +466,7 @@ public abstract class NodeBase {
 	public void readFromNBT(NBTTagCompound nbt)
 	{
 
-		coordonate.readFromNBT(nbt, "c");
+		coordinate.readFromNBT(nbt, "c");
 
 		neighborOpaque = nbt.getByte("NBOpaque");
 		neighborWrapable = nbt.getByte("NBWrap");
@@ -487,7 +477,7 @@ public abstract class NodeBase {
 	public void writeToNBT(NBTTagCompound nbt)
 	{
 
-		coordonate.writeToNBT(nbt, "c");
+		coordinate.writeToNBT(nbt, "c");
 
 		int idx;
 
@@ -536,11 +526,11 @@ public abstract class NodeBase {
 		try {
 			stream.writeByte(Eln.packetForClientNode);
 
-			stream.writeInt(coordonate.x);
-			stream.writeInt(coordonate.y);
-			stream.writeInt(coordonate.z);
+			stream.writeInt(coordinate.x);
+			stream.writeInt(coordinate.y);
+			stream.writeInt(coordinate.z);
 
-			stream.writeByte(coordonate.dimention);
+			stream.writeByte(coordinate.dimention);
 
 			stream.writeUTF(getNodeUuid());
 
@@ -572,9 +562,9 @@ public abstract class NodeBase {
 			EntityPlayerMP player = (EntityPlayerMP) obj;
 			WorldServer worldServer = (WorldServer) MinecraftServer.getServer().worldServerForDimension(player.dimension);
 			PlayerManager playerManager = worldServer.getPlayerManager();
-			if (player.dimension != this.coordonate.dimention) continue;
-			if (!playerManager.isPlayerWatchingChunk(player, coordonate.x / 16, coordonate.z / 16)) continue;
-			if(coordonate.distanceTo(player) > range) continue;
+			if (player.dimension != this.coordinate.dimention) continue;
+			if (!playerManager.isPlayerWatchingChunk(player, coordinate.x / 16, coordinate.z / 16)) continue;
+			if(coordinate.distanceTo(player) > range) continue;
 
 			Utils.sendPacketToClient(bos, player);
 		}
@@ -591,10 +581,10 @@ public abstract class NodeBase {
 
 			stream.writeByte(Eln.packetNodeSingleSerialized);
 
-			stream.writeInt(coordonate.x);
-			stream.writeInt(coordonate.y);
-			stream.writeInt(coordonate.z);
-			stream.writeByte(coordonate.dimention);
+			stream.writeInt(coordinate.x);
+			stream.writeInt(coordinate.y);
+			stream.writeInt(coordinate.z);
+			stream.writeByte(coordinate.dimention);
 
 			stream.writeUTF(getNodeUuid());
 
@@ -618,8 +608,8 @@ public abstract class NodeBase {
 			EntityPlayerMP player = (EntityPlayerMP) obj;
 			WorldServer worldServer = (WorldServer) MinecraftServer.getServer().worldServerForDimension(player.dimension);
 			PlayerManager playerManager = worldServer.getPlayerManager();
-			if (player.dimension != this.coordonate.dimention) continue;
-			if (!playerManager.isPlayerWatchingChunk(player, coordonate.x / 16, coordonate.z / 16)) continue;
+			if (player.dimension != this.coordinate.dimention) continue;
+			if (!playerManager.isPlayerWatchingChunk(player, coordinate.x / 16, coordinate.z / 16)) continue;
 
 			Utils.sendPacketToClient(getPublishPacket(), player);
 		}
@@ -639,15 +629,15 @@ public abstract class NodeBase {
 	public void dropItem(ItemStack itemStack)
 	{
 		if (itemStack == null) return;
-		if (coordonate.world().getGameRules().getGameRuleBooleanValue("doTileDrops"))
+		if (coordinate.world().getGameRules().getGameRuleBooleanValue("doTileDrops"))
 		{
 			float var6 = 0.7F;
-			double var7 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-			double var9 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-			double var11 = (double) (coordonate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-			EntityItem var13 = new EntityItem(coordonate.world(), (double) coordonate.x + var7, (double) coordonate.y + var9, (double) coordonate.z + var11, itemStack);
+			double var7 = (double) (coordinate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
+			double var9 = (double) (coordinate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
+			double var11 = (double) (coordinate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
+			EntityItem var13 = new EntityItem(coordinate.world(), (double) coordinate.x + var7, (double) coordinate.y + var9, (double) coordinate.z + var11, itemStack);
 			var13.delayBeforeCanPickup = 10;
-			coordonate.world().spawnEntityInWorld(var13);
+			coordinate.world().spawnEntityInWorld(var13);
 		}
 	}
 

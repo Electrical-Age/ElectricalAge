@@ -18,7 +18,7 @@ public class LampSupplyRender extends SixNodeElementRender {
 
 	LampSupplyDescriptor descriptor;
 
-    Coordonate coord;
+    Coordinate coord;
     PhysicalInterpolator interpolator;
 
     String channel;
@@ -31,7 +31,7 @@ public class LampSupplyRender extends SixNodeElementRender {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (LampSupplyDescriptor) descriptor;
 		interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
-		coord = new Coordonate(tileEntity);
+		coord = new Coordinate(tileEntity);
 	}
 
 	@Override

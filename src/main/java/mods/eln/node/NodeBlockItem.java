@@ -1,13 +1,7 @@
 package mods.eln.node;
 
-import java.lang.reflect.InvocationTargetException;
-
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
 import net.minecraft.block.Block;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -40,7 +34,7 @@ public class NodeBlockItem extends ItemBlock {
     	
 
     	NodeBase node = (NodeBase) getBlock().newNodeBase();
-		node.onBlockPlacedBy(new Coordonate(x, y, z,world),direction,player,stack);
+		node.onBlockPlacedBy(new Coordinate(x, y, z,world),direction,player,stack);
 		
 		world.setBlock(x, y, z, getBlock(), node.getBlockMetadata(),0x03);//caca1.5.1
     	getBlock().onBlockPlacedBy(world, x, y, z,direction, player,metadata);

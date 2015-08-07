@@ -45,7 +45,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
         return false;
     }
 
-    public boolean canBePlacedOnSide(EntityPlayer player, Coordonate c, Direction side) {
+    public boolean canBePlacedOnSide(EntityPlayer player, Coordinate c, Direction side) {
         return canBePlacedOnSide(player, side);
     }
 
@@ -92,7 +92,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 
     protected Direction[] placeDirection = null;
 
-    public String checkCanPlace(Coordonate coord, Direction direction, LRDU front) {
+    public String checkCanPlace(Coordinate coord, Direction direction, LRDU front) {
         if (placeDirection != null) {
             boolean ok = false;
             for (Direction d : placeDirection) {

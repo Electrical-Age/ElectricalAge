@@ -1,7 +1,7 @@
 package mods.eln.sixnode.wirelesssignal;
 
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import mods.eln.sixnode.wirelesssignal.WirelessUtils.WirelessSignalSpot;
@@ -25,7 +25,7 @@ public class WirelessSignalAnalyserItemDescriptor extends GenericItemUsingDamage
 		if (world.isRemote) return true;
 		Utils.addChatMessage(player, "-------------------");
 		Direction dir = Direction.fromIntMinecraftSide(side);
-		Coordonate c = new Coordonate(x, y, z, world);
+		Coordinate c = new Coordinate(x, y, z, world);
 		c.move(dir);
 		
 		WirelessSignalSpot spot = WirelessUtils.buildSpot(c, null,0);

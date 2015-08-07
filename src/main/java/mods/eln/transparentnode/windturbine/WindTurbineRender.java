@@ -4,17 +4,14 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Random;
 
-import mods.eln.client.FrameTime;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import mods.eln.sound.SoundClient;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 
@@ -55,7 +52,7 @@ public class WindTurbineRender extends TransparentNodeElementRender {
 		alpha += deltaT * descriptor.speed * Math.sqrt(powerFactorFilter.get());
 		if (alpha > 360) alpha -= 360;
 		if (alpha % 120 > 45 && alphaN_1 % 120 <= 45 && soundPlaying == false) {
-			Coordonate coord = coordonate();
+			Coordinate coord = coordonate();
 			this.play(new SoundCommand(descriptor.soundName)
 				.mediumRange()
 				.mulBlockAttenuation(2)

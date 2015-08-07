@@ -5,18 +5,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-
-import cpw.mods.fml.common.registry.LanguageRegistry;
 
 import mods.eln.Eln;
 import mods.eln.ghost.GhostObserver;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.INBTTReady;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.Utils;
-import mods.eln.sim.ElectricalConnection;
+import mods.eln.misc.*;
+import mods.eln.misc.Coordinate;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalConnection;
@@ -26,15 +19,12 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sound.IPlayer;
 import mods.eln.sound.SoundCommand;
-import mods.eln.sound.SoundServer;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 
 public abstract class SixNodeElement implements GhostObserver, IPlayer {
 	//private static Class[] idToClass = new Class[256];
@@ -67,12 +57,12 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 
 	public void play(SoundCommand s) {
 		s.addUuid(getUuid());
-		s.set(sixNode.coordonate);
+		s.set(sixNode.coordinate);
 		s.play();
 	}
 
-	public Coordonate getCoordonate() {
-		return sixNode.coordonate;
+	public Coordinate getCoordonate() {
+		return sixNode.coordinate;
 	}
 
 	protected boolean onBlockActivatedRotate(EntityPlayer entityPlayer)
@@ -230,12 +220,12 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 		}
 
 		if(sixNodeElementDescriptor.hasGhostGroup()) {
-			Eln.ghostManager.removeObserver(sixNode.coordonate);
-			sixNodeElementDescriptor.getGhostGroup(side, front).erase(sixNode.coordonate);
+			Eln.ghostManager.removeObserver(sixNode.coordinate);
+			sixNodeElementDescriptor.getGhostGroup(side, front).erase(sixNode.coordinate);
 		}
 
 		sixNode.dropInventory(getInventory());
-		//	getCoordonate().world().getWorldInfo().
+		//	getCoordinate().world().getWorldInfo().
 		if(Utils.mustDropItem(entityPlayer))
 			sixNode.dropItem(getDropItemStack());
 	}
@@ -395,9 +385,9 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 		return false;
 	}
 
-	public Coordonate getGhostObserverCoordonate()
+	public Coordinate getGhostObserverCoordonate()
 	{
-		return sixNode.coordonate;
+		return sixNode.coordinate;
 
 	}
 

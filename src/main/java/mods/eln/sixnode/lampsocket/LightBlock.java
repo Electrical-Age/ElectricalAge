@@ -1,6 +1,6 @@
 package mods.eln.sixnode.lampsocket;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.sixnode.lampsocket.LightBlockEntity.LightBlockObserver;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
@@ -75,7 +75,7 @@ public class LightBlock extends BlockContainer {
 
 	@Override
 	public void breakBlock(World world, int x, int y, int z, Block arg4, int arg5) {
-		Coordonate coord = new Coordonate(x, y, z, world);
+		Coordinate coord = new Coordinate(x, y, z, world);
 		for(LightBlockObserver o : LightBlockEntity.observers) {
 			o.lightBlockDestructor(coord);
 		}

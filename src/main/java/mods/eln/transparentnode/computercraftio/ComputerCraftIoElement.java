@@ -1,6 +1,6 @@
 package mods.eln.transparentnode.computercraftio;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.NodeBase;
@@ -109,7 +109,7 @@ public class ComputerCraftIoElement extends TransparentNodeElement implements IP
 		if (id == -1) return null;
 		
 		if (remaineStr.length() != 0) {
-			Coordonate c = new Coordonate(this.node.coordonate);
+			Coordinate c = new Coordinate(this.node.coordinate);
 			Direction side = Direction.fromHorizontalIndex(id);	
 			c.move(side);
 			//Utils.println("SUB probe ! " + side + " " + c);

@@ -2,17 +2,13 @@ package mods.eln.transparentnode.waterturbine;
 
 import java.util.List;
 
+import mods.eln.misc.*;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import mods.eln.ghost.GhostGroup;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.FunctionTable;
-import mods.eln.misc.Obj3D;
-import mods.eln.misc.Utils;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
@@ -27,7 +23,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 			ElectricalCableDescriptor cable,
 			double nominalPower,
 			double maxVoltage,
-			Coordonate waterCoord,
+			Coordinate waterCoord,
 			String soundName,
 			float nominalVolume
 			) {
@@ -49,7 +45,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 		}
 	}
 	
-	Coordonate waterCoord;
+	Coordinate waterCoord;
 	
 	public void setParent(net.minecraft.item.Item item, int damage)
 	{
@@ -129,8 +125,8 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 
 	}
 	
-	public Coordonate getWaterCoordonate(World w) {
-		Coordonate coord = new Coordonate(waterCoord);
+	public Coordinate getWaterCoordonate(World w) {
+		Coordinate coord = new Coordinate(waterCoord);
 		coord.setDimention(w.provider.dimensionId);
 		return coord;
 	}
@@ -138,7 +134,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 	
 	
 	@Override
-	public String checkCanPlace(Coordonate coord, Direction front) {
+	public String checkCanPlace(Coordinate coord, Direction front) {
 		
 		String str = super.checkCanPlace(coord, front);
 		if(str != null) return str;
@@ -148,8 +144,8 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 	
 	
 
-	public boolean checkCanPlaceWater(Coordonate coord, Direction front) {
-		Coordonate water = new Coordonate(waterCoord);
+	public boolean checkCanPlaceWater(Coordinate coord, Direction front) {
+		Coordinate water = new Coordinate(waterCoord);
 		water.applyTransformation(front, coord);
 		if(coord.getBlockExist() == false) return true;
 		if(water.getBlock() == Blocks.air || Utils.isWater(water)) return true;

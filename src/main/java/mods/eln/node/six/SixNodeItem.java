@@ -3,7 +3,7 @@ package mods.eln.node.six;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.ghost.GhostGroup;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -87,7 +87,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         int[] vect = new int[]{x, y, z};
         Direction.fromIntMinecraftSide(par5).applyTo(vect, 1);
         SixNodeDescriptor descriptor = getDescriptor(par7ItemStack);
-        if (descriptor.canBePlacedOnSide(par6EntityPlayer, new Coordonate(x, y, z, par1World), Direction.fromIntMinecraftSide(par5).getInverse()) == false) {
+        if (descriptor.canBePlacedOnSide(par6EntityPlayer, new Coordinate(x, y, z, par1World), Direction.fromIntMinecraftSide(par5).getInverse()) == false) {
             return false;
         }
         if (par1World.getBlock(vect[0], vect[1], vect[2]) == Eln.sixNodeBlock)
@@ -115,7 +115,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         if (blockOld == Blocks.air || blockOld.isReplaceable(world, x, y, z)) {
             // blockID = this.getBlockID();
 
-            Coordonate coord = new Coordonate(x, y, z, world);
+            Coordinate coord = new Coordinate(x, y, z, world);
             SixNodeDescriptor descriptor = getDescriptor(stack);
 
             String error;
@@ -131,7 +131,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
             if (block.getIfOtherBlockIsSolid(world, x, y, z, direction)) {
 
                 SixNode sixNode = new SixNode();
-                sixNode.onBlockPlacedBy(new Coordonate(x, y, z, world), direction, player, stack);
+                sixNode.onBlockPlacedBy(new Coordinate(x, y, z, world), direction, player, stack);
                 sixNode.createSubBlock(stack, direction);
 
                 world.setBlock(x, y, z, block, metadata, 0x03);

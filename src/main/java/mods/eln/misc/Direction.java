@@ -379,8 +379,8 @@ public enum Direction {
 		}		
 	}	
 
-	public TileEntity getTileEntity(Coordonate coordonate) {
-		int x = coordonate.x, y = coordonate.y, z = coordonate.z;
+	public TileEntity getTileEntity(Coordinate coordinate) {
+		int x = coordinate.x, y = coordinate.y, z = coordinate.z;
 		switch(this) {
 			case XN: x--;
 				break;
@@ -398,7 +398,7 @@ public enum Direction {
 				break;
 		}
 		
-		return coordonate.world().getTileEntity(x, y, z);
+		return coordinate.world().getTileEntity(x, y, z);
 	}
 
 	public void writeToNBT(NBTTagCompound nbt, String name) {
@@ -505,7 +505,7 @@ public enum Direction {
 		}		
 	}
 
-	public void rotateFromXN(Coordonate p) {
+	public void rotateFromXN(Coordinate p) {
 		int x = p.x, y = p.y, z = p.z;
 		switch(this) {
 			case XN:

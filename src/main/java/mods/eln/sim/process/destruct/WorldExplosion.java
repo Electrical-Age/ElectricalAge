@@ -1,7 +1,7 @@
 package mods.eln.sim.process.destruct;
 
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
@@ -12,10 +12,10 @@ public class WorldExplosion implements IDestructable {
 
 	Object origine;
 
-	Coordonate c;
+	Coordinate c;
 	float strength;
 	
-	public WorldExplosion(Coordonate c) {
+	public WorldExplosion(Coordinate c) {
 		this.c = c;
 	}
 	
@@ -30,7 +30,7 @@ public class WorldExplosion implements IDestructable {
 	}
 
 	public WorldExplosion(EnergyConverterElnToOtherNode e) {
-		this.c = e.coordonate;
+		this.c = e.coordinate;
 		origine = e;
 	}
 

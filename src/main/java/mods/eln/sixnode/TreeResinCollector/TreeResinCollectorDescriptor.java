@@ -1,6 +1,6 @@
 package mods.eln.sixnode.TreeResinCollector;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -107,7 +107,7 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 	}
 	
 	@Override
-	public boolean canBePlacedOnSide(EntityPlayer player, Coordonate c, Direction side) {
+	public boolean canBePlacedOnSide(EntityPlayer player, Coordinate c, Direction side) {
 		Block b = c.getBlock();
 		if (!isWood(b) || side.isY()) {
 			Utils.addChatMessage(player, "This block can only be placed on the side of a tree!");

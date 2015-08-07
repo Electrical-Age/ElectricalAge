@@ -5,12 +5,8 @@ import java.io.IOException;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.PhysicalInterpolator;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
+import mods.eln.misc.*;
+import mods.eln.misc.Coordinate;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
@@ -23,7 +19,7 @@ import org.lwjgl.opengl.GL11;
 public class ElectricalMathRender extends SixNodeElementRender {
 
     ElectricalMathDescriptor descriptor;
-    Coordonate coord;
+    Coordinate coord;
     PhysicalInterpolator interpolator;
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
@@ -40,7 +36,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalMathDescriptor)descriptor;
 		interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
-		coord = new Coordonate(tileEntity);
+		coord = new Coordinate(tileEntity);
 		ledOn[0] = true;
 		ledOn[4] = true;
 	}

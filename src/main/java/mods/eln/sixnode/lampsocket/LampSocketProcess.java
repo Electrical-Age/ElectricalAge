@@ -10,7 +10,7 @@ import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.LampDescriptor;
 import mods.eln.item.LampDescriptor.Type;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.server.SaveConfig;
@@ -48,11 +48,11 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 
     double updateLifeTimeout = 0, updateLifeTimeoutMax = 5;
 
-    Coordonate lbCoord;
+    Coordinate lbCoord;
 
     public LampSocketProcess(LampSocketElement l) {
 		this.lamp = l;
-		lbCoord = new Coordonate(l.sixNode.coordonate);
+		lbCoord = new Coordinate(l.sixNode.coordinate);
 		looper = new SoundLooper(l) {
 			double bzTimeout = 0;
 
@@ -99,13 +99,13 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 			lamp.setIsConnectedToLampSupply(false);
 			oldLampSupply = null;
 		} else {
-			Coordonate myCoord = lamp.sixNode.coordonate;
+			Coordinate myCoord = lamp.sixNode.coordinate;
 			LampSupplyElement best = null;
 			float bestDistance = 10000;
 			ArrayList<LampSupplyElement> list = LampSupplyElement.channelMap.get(lamp.channel);
 			if (list != null) {
 				for (LampSupplyElement s : list) {
-					float distance = (float) s.sixNode.coordonate.trueDistanceTo(myCoord);
+					float distance = (float) s.sixNode.coordinate.trueDistanceTo(myCoord);
 					if (distance < bestDistance && distance <= s.getRange()) {
 						bestDistance = distance;
 						best = s;
@@ -144,7 +144,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 					lamp.front.rotateOnXnLeft(vv);
 					lamp.side.rotateFromXN(vv);
 
-					Coordonate c = new Coordonate(myCoord());
+					Coordinate c = new Coordinate(myCoord());
 
 					for (int idx = 0; idx < lamp.socketDescriptor.range + light; idx++) {
 						// newCoord.move(lamp.side.getInverse());
@@ -324,7 +324,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 		lamp.front.rotateOnXnLeft(vv);
 		lamp.side.rotateFromXN(vv);
 
-		Coordonate newCoord = new Coordonate(myCoord());
+		Coordinate newCoord = new Coordinate(myCoord());
 		for (int idx = 0; idx < lamp.socketDescriptor.range; idx++) {
 			// newCoord.move(lamp.side.getInverse());
 			vp.xCoord += vv.xCoord;
@@ -365,7 +365,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 			setLightAt(newCoord, newLight);
 	}
 
-	public boolean isOpaque(Coordonate coord) {
+	public boolean isOpaque(Coordinate coord) {
 		Block block = coord.getBlock();
 		boolean isNotOpaque = block == Blocks.air || !block.isOpaqueCube();
 		if (block == Blocks.farmland)
@@ -377,9 +377,9 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 		Utils.print("Light published");
 	}
 
-	public void setLightAt(Coordonate coord, int value) {
-		Coordonate oldLbCoord = lbCoord;
-		lbCoord = new Coordonate(coord);
+	public void setLightAt(Coordinate coord, int value) {
+		Coordinate oldLbCoord = lbCoord;
+		lbCoord = new Coordinate(coord);
 		int oldLight = light;
 		boolean same = coord.equals(oldLbCoord);
 		light = value;
@@ -416,8 +416,8 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 		}
 	}
 
-	Coordonate myCoord() {
-		return lamp.sixNode.coordonate;
+	Coordinate myCoord() {
+		return lamp.sixNode.coordinate;
 	}
 
 	public void destructor() {
@@ -456,6 +456,6 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 	}
 	/*
 	 * 
-	 * @Override public void lightBlockDestructor(Coordonate coord) { if(coord.equals(lbCoord)) { light = 0; lbCoord = new Coordonate(myCoord()); //placeSpot(light); } }
+	 * @Override public void lightBlockDestructor(Coordinate coord) { if(coord.equals(lbCoord)) { light = 0; lbCoord = new Coordinate(myCoord()); //placeSpot(light); } }
 	 */
 }

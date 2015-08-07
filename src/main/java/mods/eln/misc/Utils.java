@@ -501,8 +501,8 @@ public class Utils {
 		}
 	}
 
-	public static void dropItem(ItemStack itemStack, Coordonate coordonate) {
-		dropItem(itemStack, coordonate.x, coordonate.y, coordonate.z, coordonate.world());
+	public static void dropItem(ItemStack itemStack, Coordinate coordinate) {
+		dropItem(itemStack, coordinate.x, coordinate.y, coordinate.z, coordinate.world());
 	}
 
 	public static boolean tryPutStackInInventory(ItemStack stack, IInventory inventory, int start, int count) {
@@ -725,7 +725,7 @@ public class Utils {
 		return false;
 	}
 
-	public static int getRedstoneLevelAround(Coordonate coord) {
+	public static int getRedstoneLevelAround(Coordinate coord) {
 		int level = 0;
 		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z));
 		if (level == 15)
@@ -866,7 +866,7 @@ public class Utils {
 		return false;
 	}
 
-	public static Vec3 getVec05(Coordonate c) {
+	public static Vec3 getVec05(Coordinate c) {
 		return Vec3.createVectorHelper(c.x + (c.x < 0 ? -1 : 1) * 0.5, c.y + (c.y < 0 ? -1 : 1) * 0.5, c.z + (c.z < 0 ? -1 : 1) * 0.5);
 	}
 
@@ -1173,7 +1173,7 @@ public class Utils {
 		return world.getWorldTime() / (23999.0);
 	}
 
-	public static boolean isWater(Coordonate waterCoord) {
+	public static boolean isWater(Coordinate waterCoord) {
 		Block block = waterCoord.getBlock();
 		return (block == Blocks.flowing_water || block == Blocks.water);
 	}

@@ -8,7 +8,7 @@ import mods.eln.fsm.State;
 import mods.eln.fsm.StateMachine;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.EntitySensorFilterDescriptor;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sound.SoundCommand;
@@ -133,7 +133,7 @@ public class TurretSlowProcess extends StateMachine {
                 }
             }
 
-			Coordonate coord = element.coordonate();
+			Coordinate coord = element.coordonate();
 			AxisAlignedBB bb = coord.getAxisAlignedBB((int)element.getDescriptor().getProperties().detectionDistance);
 			@SuppressWarnings("unchecked")
             List<EntityLivingBase> list = coord.world().getEntitiesWithinAABB(EntityLivingBase.class, bb);
@@ -231,7 +231,7 @@ public class TurretSlowProcess extends StateMachine {
                 if (filterClass == null || !filterClass.isAssignableFrom(target.getClass())) return new SeekingState();
             }
 
-			Coordonate coord = element.coordonate();
+			Coordinate coord = element.coordonate();
 			
 			double dx = (float)(target.posX - coord.x - 0.5);
 			double dy = (float)(target.posY + target.getEyeHeight() - coord.y - 0.75);

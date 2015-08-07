@@ -4,9 +4,8 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
-import li.cil.oc.api.network.Node;
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeManager;
 import net.minecraft.entity.effect.EntityLightningBolt;
@@ -14,12 +13,10 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.event.world.WorldEvent.Save;
 import net.minecraftforge.event.world.WorldEvent.Unload;
-import org.lwjgl.Sys;
 
 import java.io.*;
 import java.util.HashSet;
@@ -54,7 +51,7 @@ public class ServerEventListener {
         lightningList.clear();
     }
 
-    public double getLightningClosestTo(Coordonate c) {
+    public double getLightningClosestTo(Coordinate c) {
         double best = 10000000;
         for (EntityLightningBolt l : lightningList) {
             if (c.world() != l.worldObj) continue;
