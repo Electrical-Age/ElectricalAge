@@ -51,7 +51,7 @@ public class SolarPannelRender extends TransparentNodeElementRender {
 		}
 		else
 		{
-			alpha = (float) descriptor.alphaTrunk(SolarPannelSlowProcess.getSolarAlpha(tileEntity.getWorldObj()));
+			alpha = (float) descriptor.alphaTrunk(SolarPanelSlowProcess.getSolarAlpha(tileEntity.getWorldObj()));
 		}
 		interpol.setTarget(alpha);
 		if (boot) {
@@ -114,7 +114,7 @@ public class SolarPannelRender extends TransparentNodeElementRender {
 
 			preparePacketForServer(stream);
 
-			stream.writeByte(SolarPannelElement.unserializePannelAlpha);
+			stream.writeByte(SolarPanelElement.unserializePannelAlpha);
 			stream.writeFloat(value);
 
 			sendPacketToServer(bos);

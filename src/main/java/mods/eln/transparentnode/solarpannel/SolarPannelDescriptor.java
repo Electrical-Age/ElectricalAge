@@ -2,7 +2,6 @@ package mods.eln.transparentnode.solarpannel;
 
 import java.util.List;
 
-import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Direction;
@@ -13,7 +12,6 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -40,7 +38,7 @@ public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 			double alphaMin,double alphaMax
 			
 			) {
-		super(name, SolarPannelElement.class,SolarPannelRender.class);
+		super(name, SolarPanelElement.class,SolarPannelRender.class);
 		this.ghostGroup = ghostGroup;
 
 		electricalRs = 	electricalUmax*electricalUmax*electricalDropFactor
@@ -89,7 +87,7 @@ public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 			double alphaMin,double alphaMax
 			
 			) {
-		super(name, SolarPannelElement.class,SolarPannelRender.class);
+		super(name, SolarPanelElement.class,SolarPannelRender.class);
 		this.ghostGroup = ghostGroup;
 		this.diodeIfU = diodeIfUBase.duplicate(electricalUmax,electricalImax);
 		electricalRs = 	electricalUmax*electricalImax*electricalDropFactor

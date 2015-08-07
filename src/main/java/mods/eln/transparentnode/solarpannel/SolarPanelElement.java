@@ -14,7 +14,6 @@ import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.process.PowerSourceBipole;
 import mods.eln.sim.nbt.NbtElectricalLoad;
@@ -23,7 +22,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class SolarPannelElement extends TransparentNodeElement{
+public class SolarPanelElement extends TransparentNodeElement{
 
 	SolarPannelDescriptor descriptor;
 	NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
@@ -35,12 +34,12 @@ public class SolarPannelElement extends TransparentNodeElement{
 	DiodeProcess diode;
 	PowerSourceBipole powerSource;
 	
-	SolarPannelSlowProcess slowProcess = new SolarPannelSlowProcess(this);
+	SolarPanelSlowProcess slowProcess = new SolarPanelSlowProcess(this);
 	
-	public double pannelAlpha = Math.PI/2;
+	public double panelAlpha = Math.PI/2;
 	
-	public SolarPannelElement(TransparentNode transparentNode,
-			TransparentNodeDescriptor descriptor) {
+	public SolarPanelElement(TransparentNode transparentNode,
+							 TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		this.descriptor = (SolarPannelDescriptor) descriptor;
 
@@ -147,14 +146,14 @@ public class SolarPannelElement extends TransparentNodeElement{
 		
 		super.writeToNBT(nbt);
 		powerSource.writeToNBT(nbt, "powerSource");
-		nbt.setDouble("pannelAlpha", pannelAlpha);
+		nbt.setDouble("panelAlpha", panelAlpha);
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		
 		super.readFromNBT(nbt);
 		powerSource.readFromNBT(nbt, "powerSource");
-		pannelAlpha = nbt.getDouble("pannelAlpha");
+		panelAlpha = nbt.getDouble("panelAlpha");
 	}
 
 
@@ -164,7 +163,7 @@ public class SolarPannelElement extends TransparentNodeElement{
 		super.networkSerialize(stream);
 		try {	
 			stream.writeBoolean(inventory.getStackInSlot(SolarPannelContainer.trackerSlotId) != null);
-			stream.writeFloat((float) pannelAlpha);
+			stream.writeFloat((float) panelAlpha);
 			node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
 		} catch (IOException e) {
 			
@@ -180,7 +179,7 @@ public class SolarPannelElement extends TransparentNodeElement{
 			switch(packetType)
 			{
 			case unserializePannelAlpha:			
-				pannelAlpha = stream.readFloat();
+				panelAlpha = stream.readFloat();
 				needPublish();
 				break;
 

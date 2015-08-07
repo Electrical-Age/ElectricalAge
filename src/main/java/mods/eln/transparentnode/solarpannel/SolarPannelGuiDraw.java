@@ -1,31 +1,14 @@
 package mods.eln.transparentnode.solarpannel;
 
-import org.lwjgl.opengl.GL11;
-
-
 
 import mods.eln.gui.GuiContainerEln;
-import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalTrackBar;
-import mods.eln.gui.GuiVerticalTrackBarHeat;
 import mods.eln.gui.IGuiObject;
-import mods.eln.misc.Utils;
-import mods.eln.node.NodeBlockEntity;
-import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiContainer;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerFurnace;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.StatCollector;
 
 
 public class SolarPannelGuiDraw extends GuiContainerEln {
@@ -79,9 +62,9 @@ public class SolarPannelGuiDraw extends GuiContainerEln {
 		
 		super.preDraw(f, x, y);
         if(render.pannelAlphaSyncNew) syncVumeter();
-        //vuMeterTemperature.temperatureHit = (float) (SolarPannelSlowProcess.getSolarAlpha(render.tileEntity.worldObj));
+        //vuMeterTemperature.temperatureHit = (float) (SolarPanelSlowProcess.getSolarAlpha(render.tileEntity.worldObj));
         vuMeterTemperature.setEnable(! render.hasTracker);
-        int sunAlpha = ((int)(180/Math.PI * SolarPannelSlowProcess.getSolarAlpha(render.tileEntity.getWorldObj()))-90);
+        int sunAlpha = ((int)(180/Math.PI * SolarPanelSlowProcess.getSolarAlpha(render.tileEntity.getWorldObj()))-90);
         
         vuMeterTemperature.setComment(0,"Solar Panel alpha : " + ((int)(180/Math.PI * vuMeterTemperature.getValue())-90) + "\u00B0");
         if(Math.abs(sunAlpha)>90)
