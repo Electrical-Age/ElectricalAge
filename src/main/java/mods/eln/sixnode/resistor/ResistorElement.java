@@ -10,6 +10,7 @@ import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.ThermistorProcess;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalLoad;
@@ -31,6 +32,9 @@ public class ResistorElement extends SixNodeElement {
     ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
     NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
     ResistorHeatThermalLoad heater = new ResistorHeatThermalLoad(r, thermalLoad);
+    ThermistorProcess thermistorProcess;
+
+    public double nominalRs = 1;
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
 
@@ -56,6 +60,11 @@ public class ResistorElement extends SixNodeElement {
                 .set(thermalLoad)
                 .setLimit(this.descriptor.thermalWarmLimit, this.descriptor.thermalCoolLimit)
                 .set(new WorldExplosion(this).cableExplosion());
+
+        thermistorProcess = new ThermistorProcess(this, r, thermalLoad, this.descriptor);
+        if (this.descriptor.tempCoef != 0) {
+            slowProcessList.add(thermistorProcess);
+        }
     }
 
     @Override
@@ -100,8 +109,8 @@ public class ResistorElement extends SixNodeElement {
     }
 
     public void setupPhysical() {
-        double rs = descriptor.getRsValue(inventory);
-        r.setR(rs);
+        nominalRs = descriptor.getRsValue(inventory);
+        thermistorProcess.process(0);
     }
 
     @Override

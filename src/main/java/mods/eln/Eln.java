@@ -1781,7 +1781,19 @@ public class Eln {
 			name = "Power Resistor";
 
 			ResistorDescriptor desc = new ResistorDescriptor(
-					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2)
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), 0
+			);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 38;
+
+			name = "Thermistor";
+
+			ResistorDescriptor desc = new ResistorDescriptor(
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), -0.01
 			);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -4835,6 +4847,15 @@ public class Eln {
 				" P ",
 				"c c",
 				"IPI",
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+				Character.valueOf('c'), findItemStack("Copper Cable"),
+				Character.valueOf('P'), "plateCopper");
+
+		addRecipe(findItemStack("Thermistor"),
+				" P ",
+				"csc",
+				"IPI",
+				Character.valueOf('s'), "dustSilicon",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('P'), "plateCopper");

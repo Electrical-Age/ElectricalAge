@@ -22,16 +22,20 @@ public class ResistorDescriptor extends SixNodeDescriptor {
     public double thermalMaximalPowerDissipated = 1000;
     public double thermalNominalHeatTime = 120;
     public double thermalConductivityTao = Eln.cableThermalConductionTao;
+    public double tempCoef;
     Obj3D.Obj3DPart ResistorBaseExtension, ResistorCore, Base;
     ISerie series;
     private Obj3D obj;
 
+
     public ResistorDescriptor(String name,
                               Obj3D obj,
-                              ISerie series) {
+                              ISerie series,
+                              double tempCoef) {
         super(name, ResistorElement.class, ResistorRender.class);
         this.obj = obj;
         this.series = series;
+        this.tempCoef = tempCoef;
         if (obj != null) {
             ResistorBaseExtension = obj.getPart("ResistorBaseExtention");
             ResistorCore = obj.getPart("ResistorCore");
