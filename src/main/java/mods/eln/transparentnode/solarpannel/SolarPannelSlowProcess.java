@@ -12,8 +12,11 @@ public class SolarPannelSlowProcess implements IProcess {
 		this.solarPannel = solarPannel;
 	}
 
+	// How often to update power output, etc.
+	final double timeCounterRefresh = 1;
+	// How long since last update.
 	double timeCounter = 0;
-	final double timeCounterRefreshMax = 0.2; 
+
 	@Override
 	public void process(double time) {
 		timeCounter -= time;
@@ -28,9 +31,8 @@ public class SolarPannelSlowProcess implements IProcess {
 			{
 				solarPannel.powerSource.setP(solarPannel.descriptor.electricalPmax*getSolarLight());
 			}
-			timeCounter += Math.random()*timeCounterRefreshMax/2 + timeCounterRefreshMax/2;
+			timeCounter = timeCounterRefresh;
 		}
-		
 	}
 	
 	public double getSolarLight()
@@ -43,36 +45,33 @@ public class SolarPannelSlowProcess implements IProcess {
 		{
 			solarPannel.pannelAlpha = solarPannel.descriptor.alphaTrunk(solarAlpha);
 		}
-		
-		
-		
 
-		
 		Coordonate coordonate = solarPannel.node.coordonate;
 		Vec3 v = Utils.getVec05(coordonate);
 		double x = v.xCoord +  solarPannel.descriptor.solarOffsetX,y = v.yCoord + solarPannel.descriptor.solarOffsetY,z = v.zCoord + solarPannel.descriptor.solarOffsetZ;
 
-
 		double lightAlpha = solarPannel.pannelAlpha - solarAlpha;
 		double light = Math.cos(lightAlpha);
-		
-		
+
 		if(light < 0.0) light = 0.0;
 		
-		if(coordonate.getWorldExist() == false) return light;
+		if(!coordonate.getWorldExist()) return light;
 		
 		World world = coordonate.world();
 		if(world.getWorldInfo().isRaining()) light *= 0.5;
 		if(world.getWorldInfo().isThundering()) light *= 0.5;
-		
-		
-		
-		
-		
-		
-		double xD = Math.cos(solarAlpha)   , yD = Math.sin(solarAlpha) ;
-		
-		if(Math.abs(xD) > yD)
+
+		double translucency = getTranslucency(solarAlpha, x, y, (int) z, world);
+		light *= translucency;
+//		Utils.print("count : " + count + "   ");
+		return light;
+	}
+
+	private double getTranslucency(double solarAlpha, double x, double y, int z, World world) {
+		double xD = Math.cos(solarAlpha);
+		double yD = Math.sin(solarAlpha) ;
+
+		if (Math.abs(xD) > yD)
 		{
 			xD = Math.signum(xD);
 			yD /= Math.abs(xD);
@@ -80,28 +79,27 @@ public class SolarPannelSlowProcess implements IProcess {
 		else
 		{
 			yD = 1.0;
-			xD /= yD;			
+			xD /= yD;
 		}
 		int count = 0;
-		///world.getChunkProvider().chunkExists(var1, var2)
-		while(world.getChunkProvider().chunkExists(((int)x)>>4, ((int)z)>>4))
+		double translucency = 1.0;
+		while (world.getChunkProvider().chunkExists(((int)x)>>4, z >>4))
 		{
-			double opacity = world.getBlockLightOpacity((int)x, (int)y, (int)z);
-			light *=  (255 - opacity)/255;
-			if(light == 0.0)
+			double opacity = world.getBlockLightOpacity((int)x, (int)y, z);
+			translucency *=  (255 - opacity)/255;
+			if(translucency == 0.0)
 			{
 				break;
 			}
-			
+
 			x += xD;
 			y += yD;
 			count++;
-			if(y > 256.0) break;
+			if (y > 256.0) break;
 		}
-//		Utils.print("count : " + count + "   ");
-		return light;
+		return translucency;
 	}
-	
+
 	public static double getSolarAlpha(World world)
 	{
 		double alpha = world.getCelestialAngleRadians(0f);
