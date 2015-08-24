@@ -18,3 +18,8 @@ options.txt
 *.iml
 *.ipr
 *.iws
+
+# Blender
+*.blend1
+*.blend2
+
