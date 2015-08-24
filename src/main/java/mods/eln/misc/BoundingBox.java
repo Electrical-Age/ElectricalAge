@@ -3,6 +3,7 @@ package mods.eln.misc;
 import com.google.common.base.Objects;
 import net.minecraft.util.Vec3;
 
+
 public class BoundingBox {
     public final Vec3 min, max;
 
