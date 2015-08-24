@@ -234,3 +234,6 @@ cyan_brush.name=Cyan Brush
 coal_dust.name=Coal Dust
 power_resistor.name=Power Resistor
 thermistor.name=Thermistor
+downlink.name=Downlink
+utility_pole.name=Utility Pole
+utility_pole_w/transformer.name=Utility Pole w/transformer
