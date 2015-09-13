@@ -96,6 +96,7 @@ import mods.eln.sixnode.modbusrtu.ModbusRtuDescriptor;
 import mods.eln.sixnode.modbusrtu.ModbusServer;
 import mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor;
 import mods.eln.sixnode.powerinductorsix.PowerInductorSixDescriptor;
+import mods.eln.sixnode.resistor.ResistorDescriptor;
 import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
 import mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor;
 import mods.eln.sixnode.tutorialsign.TutorialSignDescriptor;
@@ -1774,6 +1775,30 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
+		{
+			subId = 36;
+
+			name = "Power Resistor";
+
+			ResistorDescriptor desc = new ResistorDescriptor(
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), 0
+			);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 38;
+
+			name = "Thermistor";
+
+			ResistorDescriptor desc = new ResistorDescriptor(
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), -0.01
+			);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
 	}
 
 	void registerPowerComponent(int id) {
@@ -1803,7 +1828,6 @@ public class Eln {
 
 			transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
-
 	}
 
 	void registerSwitch(int id) {
@@ -4626,6 +4650,7 @@ public class Eln {
 			DielectricItem desc = new DielectricItem(name, LVU);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
+
 	}
 
 	public DataLogsPrintDescriptor dataLogsPrintDescriptor;
@@ -4817,6 +4842,23 @@ public class Eln {
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('P'), "plateIron");
+
+		addRecipe(findItemStack("Power Resistor"),
+				" P ",
+				"c c",
+				"IPI",
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+				Character.valueOf('c'), findItemStack("Copper Cable"),
+				Character.valueOf('P'), "plateCopper");
+
+		addRecipe(findItemStack("Thermistor"),
+				" P ",
+				"csc",
+				"IPI",
+				Character.valueOf('s'), "dustSilicon",
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+				Character.valueOf('c'), findItemStack("Copper Cable"),
+				Character.valueOf('P'), "plateCopper");
 
 		//name = "Power Capacitor"
 		//name = "Power Inductor"
