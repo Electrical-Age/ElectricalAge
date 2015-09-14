@@ -51,28 +51,40 @@ Game lifetime/complexity extended
 > A consequent list of new raw materials and items...
 
 ## CURRENT STATE
-Electrical Age is still in **Beta** :exclamation:
-`Use at your own risk and do map backup often.`
+Electrical Age is still in **Beta**.
+Use at your own risk and do map backup frequently.
 
-## DEVELOPERS
-Concepts :
-- Dolu1990
-- lambdaShade
-- cm0x4D
+## MAIN DEVELOPERS
+- **Dolu1990** (Code guru, concepts, some 3D models)
+- **lambdaShade** (3D models/texturing/graphics maestro, concepts, some sounds and lines of code)
+- **cm0x4D** (Sound engineer, code and 3D models/texturing, concepts)
+- **metc** (Website/Wiki webmaster)
 
-Source code :
-- Dolu1990
+## CONTRIBUTORS
 
-3D models and texturing :
-- lambdaShade
-- Dolu1990
-- cm0x4D
+Code/models :
+- **Svein Ove Aas** (Thermistor, Powerpole, some tweaks)
+- **bloxgate** (some tweaks)
+- **DrummerMC** (bug fix)
+- **ltouroumov** (bug fix)
+- **meelock** (typo fix)
+- **Sukasa** (code enhancement)
+- **DrummingFish** (GUI text parsing, cleaning/refactoring, some tweaks)
 
-Others contributors ([see full list here](https://github.com/Dolu1990/ElectricalAge/graphs/contributors)) :
-- metc (website and wiki)
-- DrummingFish (GUI text parsing, testing)
-- TheBroBeans (mod promotion)
-- bloxgate (some achievement fixes; minor tweaks)
+Languages :
+- **bomdia** (it_IT)
+- **Ahtsm** (zh_CN)
+- **dcbrwn** (ru_RU)
+- **XxCoolGamesxX** (es_ES - deprecated)
+
+Mod promotion :
+- **TheBroBeans** (initial promotor)
+- **don_bruce/BenPlotz** (forum expert, [video tutorials](https://www.youtube.com/channel/UCRYhOQhspQqIBvL8kiDu2Rw))
+- **Baughn** (forum expert)
+- ...
+
+If you contributed to this project in any way and don't are listed here : contact us immediately.
+([See full list here](https://github.com/Dolu1990/ElectricalAge/graphs/contributors))
 
 ## LICENSE
 The source code of this mod is licensed under the LGPL V3.0 licence. See http://www.gnu.org/copyleft/lesser.html for more informations.
