@@ -4864,6 +4864,17 @@ public class Eln {
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('P'), "plateCopper");
 
+		addRecipe(findItemStack("Rheostat"),
+				" R ",
+				" MS",
+				"cmc",
+				Character.valueOf('R'), findItemStack("Power Resistor"),
+				Character.valueOf('c'), findItemStack("Copper Cable"),
+				Character.valueOf('m'), findItemStack("Machine Block"),
+				Character.valueOf('M'), findItemStack("Electrical Motor"),
+				Character.valueOf('S'), findItemStack("Signal Cable")
+		);
+
 		addRecipe(findItemStack("Thermistor"),
 				" P ",
 				"csc",
