@@ -1781,7 +1781,18 @@ public class Eln {
 			name = "Power Resistor";
 
 			ResistorDescriptor desc = new ResistorDescriptor(
-					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), 0
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), 0, false
+			);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 37;
+			name = "Rheostat";
+
+			ResistorDescriptor desc = new ResistorDescriptor(
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), 0, true
 			);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1793,7 +1804,7 @@ public class Eln {
 			name = "Thermistor";
 
 			ResistorDescriptor desc = new ResistorDescriptor(
-					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), -0.01
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), -0.01, false
 			);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
