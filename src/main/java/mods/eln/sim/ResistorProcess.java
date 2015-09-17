@@ -8,14 +8,16 @@ import mods.eln.sixnode.resistor.ResistorElement;
 /**
  * Created by svein on 07/08/15.
  */
-public class ThermistorProcess implements IProcess {
+public class ResistorProcess implements IProcess {
 
     ResistorElement element;
     ResistorDescriptor descriptor;
     Resistor r;
     ThermalLoad thermal;
 
-    public ThermistorProcess(ResistorElement element, Resistor r, ThermalLoad thermal, ResistorDescriptor descriptor) {
+    private double lastR = -1;
+
+    public ResistorProcess(ResistorElement element, Resistor r, ThermalLoad thermal, ResistorDescriptor descriptor) {
         this.element = element;
         this.descriptor = descriptor;
         this.r = r;
@@ -24,9 +26,16 @@ public class ThermistorProcess implements IProcess {
 
     @Override
     public void process(double time) {
-        r.setR(Math.max(
+        double newR = Math.max(
                 MnaConst.noImpedance,
-                element.nominalRs * (1 + descriptor.tempCoef * thermal.Tc)));
+                element.nominalRs * (1 + descriptor.tempCoef * thermal.Tc));
+        if (element.control != null) {
+            newR *= (element.control.getNormalized() + 0.01) / 1.01;
+        }
+        if (newR > lastR * 1.01 || newR < lastR * 0.99) {
+            r.setR(newR);
+            lastR = newR;
+        }
 
 //        /*
 //        * https://en.wikipedia.org/wiki/Thermistor
