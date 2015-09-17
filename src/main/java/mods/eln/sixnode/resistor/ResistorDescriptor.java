@@ -9,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
+import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class ResistorDescriptor extends SixNodeDescriptor {
     public double thermalNominalHeatTime = 120;
     public double thermalConductivityTao = Eln.cableThermalConductionTao;
     public double tempCoef;
-    Obj3D.Obj3DPart ResistorBaseExtension, ResistorCore, ResistorTrack, Base;
+    Obj3D.Obj3DPart ResistorBaseExtension, ResistorCore, ResistorTrack, ResistorWiper, Base;
     ISerie series;
     private Obj3D obj;
 
@@ -43,6 +44,7 @@ public class ResistorDescriptor extends SixNodeDescriptor {
             ResistorBaseExtension = obj.getPart("ResistorBaseExtention");
             ResistorCore = obj.getPart("ResistorCore");
             ResistorTrack = obj.getPart("ResistorTrack");
+            ResistorWiper = obj.getPart("ResistorWiper");
             Base = obj.getPart("Base");
         }
     }
@@ -65,14 +67,20 @@ public class ResistorDescriptor extends SixNodeDescriptor {
         Data.addEnergy(newItemStack());
     }
 
-    void draw() {
+    void draw(float wiperPos) {
         //UtilsClient.disableCulling();
         //UtilsClient.disableTexture();
         if (null != Base) Base.draw();
         if (null != ResistorBaseExtension) ResistorBaseExtension.draw();
         if (null != ResistorCore) ResistorCore.draw();
+
         if (isRheostat) {
+            final float wiperSpread = 0.238f;
+            wiperPos = (wiperPos - 0.5f) * wiperSpread * 2;
             ResistorTrack.draw();
+            GL11.glTranslatef(0, 0, wiperPos);
+            ResistorWiper.draw();
+            // GL11.glTranslatef(-wiperPos, 0, 0);
         }
     }
 
@@ -88,7 +96,7 @@ public class ResistorDescriptor extends SixNodeDescriptor {
 
     @Override
     public void renderItem(IItemRenderer.ItemRenderType type, ItemStack item, Object... data) {
-        draw();
+        draw(0);
     }
 
     @Override

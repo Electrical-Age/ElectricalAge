@@ -35,6 +35,7 @@ public class ResistorProcess implements IProcess {
         if (newR > lastR * 1.01 || newR < lastR * 0.99) {
             r.setR(newR);
             lastR = newR;
+            element.needPublish();
         }
 
 //        /*
