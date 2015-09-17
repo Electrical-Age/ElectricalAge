@@ -59,7 +59,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 
     	this.descriptor = (ElectricalDataLoggerDescriptor) descriptor;
 		
-    	inputGate = new NbtElectricalGateInput("inputGate", false);
+    	inputGate = new NbtElectricalGateInput("inputGate");
 		
 		electricalLoadList.add(inputGate);
     	electricalProcessList.add(slowProcess);

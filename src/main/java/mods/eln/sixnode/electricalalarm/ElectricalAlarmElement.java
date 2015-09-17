@@ -22,7 +22,7 @@ public class ElectricalAlarmElement extends SixNodeElement {
 
 	ElectricalAlarmDescriptor descriptor;
 
-    public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate", true);
+    public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate");
     public ElectricalAlarmSlowProcess slowProcess = new ElectricalAlarmSlowProcess(this);
     LRDU front;
 

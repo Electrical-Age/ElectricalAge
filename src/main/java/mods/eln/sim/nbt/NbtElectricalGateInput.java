@@ -5,11 +5,9 @@ import mods.eln.misc.Utils;
 
 public class NbtElectricalGateInput extends NbtElectricalLoad {
 
-	public NbtElectricalGateInput(String name, boolean withRp) {
+	public NbtElectricalGateInput(String name) {
 		super(name);
 		Eln.instance.signalCableDescriptor.applyTo(this);
-//		if(withRp)
-//			this.setRp(Eln.instance.SVU/Eln.instance.SVII);
 	}
 
 	public String plot(String str) {
