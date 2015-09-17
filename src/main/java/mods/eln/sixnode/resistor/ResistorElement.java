@@ -23,6 +23,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class ResistorElement extends SixNodeElement {
 
     ResistorDescriptor descriptor;
@@ -71,6 +74,17 @@ public class ResistorElement extends SixNodeElement {
         resistorProcess = new ResistorProcess(this, r, thermalLoad, this.descriptor);
         if (this.descriptor.tempCoef != 0 || this.descriptor.isRheostat) {
             slowProcessList.add(resistorProcess);
+        }
+    }
+
+    @Override
+    public void networkSerialize(DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            if (descriptor.isRheostat)
+                stream.writeFloat((float) control.getNormalized());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
