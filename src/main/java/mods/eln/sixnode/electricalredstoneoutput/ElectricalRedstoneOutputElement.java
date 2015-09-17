@@ -19,7 +19,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class ElectricalRedstoneOutputElement extends SixNodeElement {
 
-    public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate", true);
+    public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate");
     public ElectricalRedstoneOutputSlowProcess slowProcess = new ElectricalRedstoneOutputSlowProcess(this);
 
     int redstoneValue = 0;

@@ -28,7 +28,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
     
 	public static HashMap<String, ArrayList<IWirelessSignalTx>> channelMap = new HashMap<String, ArrayList<IWirelessSignalTx>>(); 
 	
-	NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate", false);
+	NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate");
 
 	WirelessSignalTxDescriptor descriptor;
     

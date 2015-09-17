@@ -23,7 +23,7 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement {
 	ElectricalAntennaRxSlowProcess slowProcess = new ElectricalAntennaRxSlowProcess(this);
 	
 	NbtElectricalLoad powerOut = new NbtElectricalLoad("powerOut");
-	NbtElectricalGateInput signalIn = new NbtElectricalGateInput("signalIn", false);
+	NbtElectricalGateInput signalIn = new NbtElectricalGateInput("signalIn");
 
 	PowerSource powerSrc = new PowerSource("powerSrc", powerOut);
 

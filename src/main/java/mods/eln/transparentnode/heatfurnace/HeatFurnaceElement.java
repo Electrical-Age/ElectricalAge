@@ -32,7 +32,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class HeatFurnaceElement extends TransparentNodeElement {
 	
-	public NbtElectricalGateInput electricalCmdLoad = new NbtElectricalGateInput("electricalCmdLoad", true);
+	public NbtElectricalGateInput electricalCmdLoad = new NbtElectricalGateInput("electricalCmdLoad");
 	//public SignalRp electricalCmdRp = new SignalRp(electricalCmdLoad);
 	public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
 	public NbtFurnaceProcess furnaceProcess = new NbtFurnaceProcess("furnaceProcess", thermalLoad);
