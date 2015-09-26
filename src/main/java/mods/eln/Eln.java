@@ -5196,25 +5196,25 @@ public class Eln {
 				Character.valueOf('C'), findItemStack("Optimal Ferromagnetic Core"),
 				Character.valueOf('T'), findItemStack("Transformer")
 		);
-		if (oreNames.contains("sheetPlastic")) {
-			addRecipe(findItemStack("Downlink"),
-					"H H",
-					"PMP",
-					"PPP",
-					Character.valueOf('P'), "sheetPlastic",
-					Character.valueOf('M'), findItemStack("Machine Block"),
-					Character.valueOf('H'), findItemStack("High Voltage Cable")
-			);
-		} else {
-			addRecipe(findItemStack("Downlink"),
-					"H H",
-					"PMP",
-					"PPP",
-					Character.valueOf('P'), "itemRubber",
-					Character.valueOf('M'), findItemStack("Machine Block"),
-					Character.valueOf('H'), findItemStack("High Voltage Cable")
-			);
-		}
+//		if (oreNames.contains("sheetPlastic")) {
+//			addRecipe(findItemStack("Downlink"),
+//					"H H",
+//					"PMP",
+//					"PPP",
+//					Character.valueOf('P'), "sheetPlastic",
+//					Character.valueOf('M'), findItemStack("Machine Block"),
+//					Character.valueOf('H'), findItemStack("High Voltage Cable")
+//			);
+//		} else {
+//			addRecipe(findItemStack("Downlink"),
+//					"H H",
+//					"PMP",
+//					"PPP",
+//					Character.valueOf('P'), "itemRubber",
+//					Character.valueOf('M'), findItemStack("Machine Block"),
+//					Character.valueOf('H'), findItemStack("High Voltage Cable")
+//			);
+//		}
 	}
 
 
