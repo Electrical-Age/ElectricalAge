@@ -9,6 +9,7 @@ import mods.eln.node.NodeManager;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
+import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.item.ItemStack;
@@ -24,8 +25,6 @@ public class GridLink implements INBTTReady {
 
     Coordonate a = new Coordonate(), b = new Coordonate();
 
-    NbtElectricalLoad lineResistor = new NbtElectricalLoad("lr");
-
     boolean connected = false;
     // Drop this if the link is broken.
     ItemStack cable;
@@ -33,10 +32,11 @@ public class GridLink implements INBTTReady {
     private Direction bs;
     private Optional<GridElement> ae = Optional.empty();
     private Optional<GridElement> be = Optional.empty();
-    private ElectricalConnection ar;
-    private ElectricalConnection rb;
+    private ElectricalConnection ab;
+    private double rs = MnaConst.highImpedance;
 
-    public GridLink(Coordonate a, Coordonate b, Direction as, Direction bs, ItemStack cable) {
+    public GridLink(Coordonate a, Coordonate b, Direction as, Direction bs, ItemStack cable, double rs) {
+        this.rs = rs;
         assert a != null && b != null && as != null && bs != null && cable != null;
         this.a = a;
         this.b = b;
@@ -74,10 +74,9 @@ public class GridLink implements INBTTReady {
         }
 
         // Makin' a Link. Where'd Zelda go?
-        GridLink link = new GridLink(a.coordonate(), b.coordonate(), as, bs, cable.newItemStack(cableLength));
-        // Yes, a metre's worth of resistance happens in the element itself.
-        // This calculation is deliberate; there's also slack in the catenary, you see.
-        cable.applyTo(link.lineResistor, cableLength);
+        GridLink link = new GridLink(
+                a.coordonate(), b.coordonate(), as, bs, cable.newItemStack(cableLength),
+                cable.electricalRs * cableLength);
         link.connect();
 
         return true;
@@ -110,12 +109,11 @@ public class GridLink implements INBTTReady {
         ElectricalLoad bLoad = b.getGridElectricalLoad(bs);
         assert aLoad != null;
         assert bLoad != null;
-        lineResistor.setCanBeSimplifiedByLine(true);
+        assert ab == null;
+        ab = new ElectricalConnection(aLoad, bLoad);
+        Eln.simulator.addElectricalComponent(ab);
+        ab.setR(rs);
 
-        ar = new ElectricalConnection(aLoad, lineResistor);
-        rb = new ElectricalConnection(lineResistor, bLoad);
-        Eln.simulator.addElectricalComponent(ar);
-        Eln.simulator.addElectricalComponent(rb);
 
         // Add link to link lists.
         a.gridLinkList.add(this);
@@ -148,8 +146,8 @@ public class GridLink implements INBTTReady {
         GridElement a = getElementFromCoordinate(this.a);
         GridElement b = getElementFromCoordinate(this.b);
 
-        Eln.simulator.removeElectricalComponent(ar);
-        Eln.simulator.removeElectricalComponent(rb);
+        Eln.simulator.removeElectricalComponent(ab);
+        ab = null;
 
         updateElement(a);
         updateElement(b);
@@ -173,8 +171,7 @@ public class GridLink implements INBTTReady {
         b.readFromNBT(nbt, str + "b");
         as = Direction.readFromNBT(nbt, str + "as");
         bs = Direction.readFromNBT(nbt, str + "bs");
-        lineResistor.readFromNBT(nbt, str + "lr");
-        lineResistor.setRs(nbt.getDouble(str + "lrR"));
+        rs = nbt.getDouble(str + "rs");
         cable = ItemStack.loadItemStackFromNBT(nbt);
     }
 
@@ -184,8 +181,7 @@ public class GridLink implements INBTTReady {
         b.writeToNBT(nbt, str + "b");
         as.writeToNBT(nbt, str + "as");
         bs.writeToNBT(nbt, str + "bs");
-        lineResistor.writeToNBT(nbt, str + "lr");
-        nbt.setDouble(str + "lrR", lineResistor.getRs());
+        nbt.setDouble(str + "rs", rs);
         cable.writeToNBT(nbt);
     }
 
