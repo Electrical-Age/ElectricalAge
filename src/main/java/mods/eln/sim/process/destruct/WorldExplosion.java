@@ -14,6 +14,7 @@ public class WorldExplosion implements IDestructable {
 
 	Coordonate c;
 	float strength;
+	String type;
 	
 	public WorldExplosion(Coordonate c) {
 		this.c = c;
@@ -21,16 +22,19 @@ public class WorldExplosion implements IDestructable {
 	
 	public WorldExplosion(SixNodeElement e) {
 		this.c = e.getCoordonate();
+		this.type = e.toString();
 		origine = e;
 	}
 	
 	public WorldExplosion(TransparentNodeElement e) {
 		this.c = e.coordonate();
+		this.type = e.toString();
 		origine = e;
 	}
 
 	public WorldExplosion(EnergyConverterElnToOtherNode e) {
 		this.c = e.coordonate;
+		this.type = e.toString();
 		origine = e;
 	}
 
@@ -52,5 +56,10 @@ public class WorldExplosion implements IDestructable {
 			c.world().createExplosion((Entity)null, c.x, c.y, c.z, strength, true);
 		else
 			c.world().setBlock(c.x, c.y, c.z, Blocks.air);
+	}
+
+	@Override
+	public String describe() {
+		return String.format("%s (%s)", this.type, this.c.toString());
 	}
 }
