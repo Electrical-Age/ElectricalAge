@@ -1,6 +1,7 @@
 package mods.eln.misc;
 
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 
 import java.io.*;
@@ -28,7 +29,7 @@ public class Obj3D {
 		ResourceLocation textureResource = new ResourceLocation("eln", "model/" + dirPath + "/" + texFilename);
 		UtilsClient.bindTexture(textureResource);
 	}
-	
+
     public static class FaceGroup {
         String mtlName = null;
         public ResourceLocation textureResource;
@@ -38,6 +39,29 @@ public class Obj3D {
 
         public void bindTexture() {
             UtilsClient.bindTexture(textureResource);
+        }
+
+        public BoundingBox boundingBox() {
+            float xMin = 0, xMax = 0, yMin = 0, yMax = 0, zMin = 0, zMax = 0;
+            for (Face f : face) {
+                for (Vertex v : f.vertex) {
+                    xMin = xMax = v.x;
+                    yMin = yMax = v.y;
+                    zMin = zMax = v.z;
+                    break;
+                }
+            }
+            for (Face f : face) {
+                for (Vertex v : f.vertex) {
+                    xMin = Math.min(xMin, v.x);
+                    xMax = Math.max(xMax, v.x);
+                    yMin = Math.min(yMin, v.y);
+                    yMax = Math.max(yMax, v.y);
+                    zMin = Math.min(zMin, v.z);
+                    zMax = Math.max(zMax, v.z);
+                }
+            }
+            return new BoundingBox(xMin, xMax, yMin, yMax, zMin, zMax);
         }
 
         public void draw() {
@@ -140,6 +164,7 @@ public class Obj3D {
     }
 
     public class Obj3DPart {
+        // TODO(svein): Profile, see if it makes sense to use vertex arrays.
 
         List<Vertex> vertex;
         List<Uv> uv;
@@ -237,15 +262,25 @@ public class Obj3D {
 		public void draw(float texOffsetX, float texOffsetY) {
 			//	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
 			for (FaceGroup fg : faceGroup) {
-				fg.drawVertex(texOffsetX,texOffsetY);
+				fg.drawVertex(texOffsetX, texOffsetY);
 			}
 			//	Minecraft.getMinecraft().mcProfiler.endSection();
 		}
+
+        // Returns the bounding box of the vertices we'd draw.
+        // TODO(svein): Privatize Obj3DPart, fix up the API, and memoize this.
+        public BoundingBox boundingBox() {
+            BoundingBox box = BoundingBox.mergeIdentity();
+            for (FaceGroup fg : faceGroup) {
+                box = box.merge(fg.boundingBox());
+            }
+            return box;
+        }
     }
 
     Hashtable<String, Obj3DPart> nameToPartHash = new Hashtable<String, Obj3DPart>();
 
-    class Vertex {
+    public class Vertex {
         Vertex(float x, float y, float z) {
             this.x = x;
             this.y = y;

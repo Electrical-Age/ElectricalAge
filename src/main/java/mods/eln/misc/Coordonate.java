@@ -267,4 +267,25 @@ public class Coordonate implements INBTTReady {
 	public void setBlock(Block b) {
 		world().setBlock(x, y, z, b);
 	}
+
+	public int compareTo(Coordonate o) {
+		if (dimention != o.dimention) {
+			return dimention - o.dimention;
+		} else if (x != o.x) {
+			return x - o.x;
+		} else if (y != o.y) {
+			return y - o.y;
+		} else if (z != o.z) {
+			return z - o.z;
+		}
+		return 0;
+	}
+
+	public Coordonate subtract(Coordonate b) {
+		return newWithOffset(-b.x, -b.y, -b.z);
+	}
+
+	public Coordonate negate() {
+		return new Coordonate(-x, -y, -z, dimention);
+	}
 }

@@ -24,6 +24,8 @@ import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
+import mods.eln.gridnode.downlink.DownlinkDescriptor;
+import mods.eln.gridnode.transformer.GridTransformerDescriptor;
 import mods.eln.item.*;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
 import mods.eln.item.electricalitem.*;
@@ -75,6 +77,7 @@ import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor;
 import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceRenderObj;
 import mods.eln.sixnode.electricallightsensor.ElectricalLightSensorDescriptor;
 import mods.eln.sixnode.electricalmath.ElectricalMathDescriptor;
+import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
 import mods.eln.sixnode.electricalredstoneinput.ElectricalRedstoneInputDescriptor;
 import mods.eln.sixnode.electricalredstoneoutput.ElectricalRedstoneOutputDescriptor;
 import mods.eln.sixnode.electricalrelay.ElectricalRelayDescriptor;
@@ -277,7 +280,10 @@ public class Eln {
 			"FlatScreenMonitor/FlatScreenMonitor.obj",
             "IndustrialPanel/IndustrialPanel.obj",
 			"DistributionBoard/DistributionBoard.obj",
-			"FuelGenerator/FuelGenerator.obj"
+			"FuelGenerator/FuelGenerator.obj",
+			"PowerPole/UtilityPole.obj",
+			"PowerPole/DownLink.obj",
+			"PowerPole/Transformer.obj"
 			// "/model/BatteryBigHV/BatteryBigHV.obj"
 	};
 
@@ -340,6 +346,8 @@ public class Eln {
 
 	public double electricalFrequancy, thermalFrequancy;
 	public int electricalInterSystemOverSampling;
+
+	public CopperCableDescriptor copperCableDescriptor;
 
 	public ElectricalCableDescriptor veryHighVoltageCableDescriptor;
 	public ElectricalCableDescriptor highVoltageCableDescriptor;
@@ -644,10 +652,61 @@ public class Eln {
 		registerMiscItem(120);
 		registerElectricalTool(121);
 		registerPortableItem(122);
+		registerGridDevices(123);
 
 		// Register WIP items only on development runs!
 		if ((Boolean)Launch.blackboard.get("fml.deobfuscatedEnvironment")) {
 			registerWipItems();
+		}
+
+	}
+
+	private void registerGridDevices(int id) {
+		int subId;
+		{
+			subId = 2;
+			DownlinkDescriptor descriptor =
+					new DownlinkDescriptor("Downlink", obj.getObj("DownLink"), "textures/wire.png", highVoltageCableDescriptor);
+			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+		}
+		{
+			subId = 3;
+			GridTransformerDescriptor descriptor =
+					new GridTransformerDescriptor("Grid Transformer", obj.getObj("Transformer"), "textures/wire.png", highVoltageCableDescriptor);
+			GhostGroup g = new GhostGroup();
+			g.addElement(1, 0, 0);
+			g.addElement(0, 0, -1);
+			g.addElement(1, 0, -1);
+			g.addElement(1, 1, 0);
+			g.addElement(0, 1, 0);
+			g.addElement(1, 1, -1);
+			g.addElement(0, 1, -1);
+			descriptor.setGhostGroup(g);
+			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+		}
+		{
+			subId = 4;
+			ElectricalPoleDescriptor descriptor =
+					new ElectricalPoleDescriptor("Utility Pole", obj.getObj("UtilityPole"), "textures/wire.png", highVoltageCableDescriptor, false);
+			GhostGroup g = new GhostGroup();
+			g.addElement(0, 1, 0);
+			g.addElement(0, 2, 0);
+			g.addElement(0, 3, 0);
+			//g.addRectangle(-1, 1, 3, 4, -1, 1);
+			descriptor.setGhostGroup(g);
+			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+		}
+		{
+			subId = 5;
+			ElectricalPoleDescriptor descriptor =
+					new ElectricalPoleDescriptor("Utility Pole w/Transformer", obj.getObj("UtilityPole"), "textures/wire.png", highVoltageCableDescriptor, true);
+			GhostGroup g = new GhostGroup();
+			g.addElement(0, 1, 0);
+			g.addElement(0, 2, 0);
+			g.addElement(0, 3, 0);
+			//g.addRectangle(-1, 1, 3, 4, -1, 1);
+			descriptor.setGhostGroup(g);
+			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
 		}
 
 	}
@@ -671,6 +730,13 @@ public class Eln {
 
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
+		HashSet<String> oreNames = new HashSet<String>();
+		{
+			final String[] names = OreDictionary.getOreNames();
+			for (String name : names) {
+				oreNames.add(name);
+			}
+		}
 
 		//
 		registerReplicator();
@@ -755,6 +821,8 @@ public class Eln {
 		recipemagnetiser();
 
 		recipeECoal();
+
+		recipeGridDevices(oreNames);
 
 		proxy.registerRenderers();
 
@@ -4259,14 +4327,13 @@ public class Eln {
 		String name;
 
 		{
-			CopperCableDescriptor descriptor;
 			subId = 0;
 			completId = subId + (id << 6);
 			name = "Copper Cable";
 
-			descriptor = new CopperCableDescriptor(name);
-			sharedItem.addElement(completId, descriptor);
-			Data.addResource(descriptor.newItemStack());
+			copperCableDescriptor = new CopperCableDescriptor(name);
+			sharedItem.addElement(completId, copperCableDescriptor);
+			Data.addResource(copperCableDescriptor.newItemStack());
 		}
 		{
 			GenericItemUsingDamageDescriptor descriptor;
@@ -5091,6 +5158,65 @@ public class Eln {
 		 */
 
 	}
+
+	void recipeGridDevices(HashSet<String> oreNames) {
+		int poleRecipes = 0;
+		for (String oreName : new String[] {
+				"ingotAluminum",
+				"ingotAluminium",
+				"ingotSteel",
+		}) {
+			if (oreNames.contains(oreName)) {
+				addRecipe(findItemStack("Utility Pole"),
+						"WWW",
+						"IWI",
+						" W ",
+						Character.valueOf('W'), "logWood",
+						Character.valueOf('I'), oreName
+				);
+				poleRecipes++;
+			}
+		}
+		if (poleRecipes == 0) {
+			// Really?
+			addRecipe(findItemStack("Utility Pole"),
+					"WWW",
+					"IWI",
+					" W ",
+					Character.valueOf('W'), "logWood",
+					Character.valueOf('I'), "ingotIron"
+			);
+		}
+		addRecipe(findItemStack("Utility Pole w/Transformer"),
+				"HHH",
+				" TC",
+				" PH",
+				Character.valueOf('P'), findItemStack("Utility Pole"),
+				Character.valueOf('H'), findItemStack("High Voltage Cable"),
+				Character.valueOf('C'), findItemStack("Optimal Ferromagnetic Core"),
+				Character.valueOf('T'), findItemStack("Transformer")
+		);
+//		if (oreNames.contains("sheetPlastic")) {
+//			addRecipe(findItemStack("Downlink"),
+//					"H H",
+//					"PMP",
+//					"PPP",
+//					Character.valueOf('P'), "sheetPlastic",
+//					Character.valueOf('M'), findItemStack("Machine Block"),
+//					Character.valueOf('H'), findItemStack("High Voltage Cable")
+//			);
+//		} else {
+//			addRecipe(findItemStack("Downlink"),
+//					"H H",
+//					"PMP",
+//					"PPP",
+//					Character.valueOf('P'), "itemRubber",
+//					Character.valueOf('M'), findItemStack("Machine Block"),
+//					Character.valueOf('H'), findItemStack("High Voltage Cable")
+//			);
+//		}
+	}
+
 
 	void recipeElectricalFurnace() {
 
