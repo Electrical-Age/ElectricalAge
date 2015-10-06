@@ -85,8 +85,10 @@ public abstract class NodeBlock extends BlockContainer{//BlockContainer
 
     public int getLightValue(IBlockAccess world, int x, int y, int z) 
     {
-    	NodeBlockEntity tileEntity = (NodeBlockEntity) world.getTileEntity(x, y, z);
-    	return tileEntity.getLightValue();
+		final TileEntity entity = world.getTileEntity(x, y, z);
+		if (entity == null || !(entity instanceof NodeBlockEntity)) return 0;
+		NodeBlockEntity tileEntity = (NodeBlockEntity) entity;
+		return tileEntity.getLightValue();
     }
 	
 	
