@@ -46,7 +46,7 @@ sourceSets {
 }
 
 minecraft {
-    version = "1.7.10-10.13.2.1291"
+    version = "1.7.10-10.13.4.1566-1.7.10"
     runDir = "run"
 
     srgExtra "PK: org/apache/commons/math3 mods/eln/libs/org/apache/commons/math3"
