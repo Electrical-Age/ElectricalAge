@@ -15,6 +15,10 @@ import net.minecraftforge.client.IItemRenderer;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
+import net.minecraftforge.client.IRenderContextHandler;
+import scala.xml.Elem;
+
+import javax.swing.text.html.parser.Entity;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -22,17 +26,26 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 	public Class ElementClass,RenderClass;
 	protected VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
 
-	public TransparentNodeDescriptor(  String name,
-							 Class ElementClass,Class RenderClass) {
+	public final EntityMetaTag tileEntityMetaTag;
+
+	public TransparentNodeDescriptor(
+			String name,
+			Class ElementClass,
+			Class RenderClass,
+			EntityMetaTag tag) {
 		super( name);
 		this.ElementClass = ElementClass;
 		this.RenderClass = RenderClass;
-		
+		this.tileEntityMetaTag = tag;
 	}
 	
 	
 	protected GhostGroup ghostGroup = null;
-	
+
+	public TransparentNodeDescriptor(String name, Class ElementClass, Class RenderClass) {
+		this(name, ElementClass, RenderClass, EntityMetaTag.Basic);
+	}
+
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		return true;

@@ -1,5 +1,6 @@
 package mods.eln.node.transparent;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Random;
 
@@ -22,7 +23,7 @@ public class TransparentNodeBlock extends NodeBlock {
 	
 	public TransparentNodeBlock( Material material,
 			Class tileEntityClass) {
-		super( material, tileEntityClass, 0);
+		super(material, tileEntityClass, 0);
 		
 	}
 
@@ -124,10 +125,35 @@ public class TransparentNodeBlock extends NodeBlock {
         //Utils.println(list);
     }
 
-
-
-
-
+	@Override
+	public TileEntity createTileEntity(World var1, int meta) {
+		try {
+			for (EntityMetaTag tag : EntityMetaTag.values()) {
+				if (tag.meta == meta) {
+					return (TileEntity)tag.cls.getConstructor().newInstance();
+				}
+			}
+			// Sadly, this will happen a lot with pre-metatag worlds.
+			// Only real fix is to replace the blocks, but there should be no
+			// serious downside to getting the wrong subclass so long as they really
+			// wanted the superclass.
+			System.out.println("Unknown block meta-tag: " + meta);
+			return (TileEntity)EntityMetaTag.Basic.cls.getConstructor().newInstance();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		}
+		while (true);
+	}
 
 	public String getNodeUuid() {
 		

@@ -31,6 +31,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.IFluidHandler;
 
 public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
 
@@ -48,6 +49,7 @@ public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
 	public static final byte unserializeGroundedId = -127;
 	public static final byte unserializeNulldId = -128;
 	TransparentNodeDescriptor transparentNodeDescriptor;
+
 	protected void serialiseItemStack(DataOutputStream stream,ItemStack stack) throws IOException
 	{
 		Utils.serialiseItemStack(stream,stack);
@@ -175,16 +177,18 @@ public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
 		return null;
 	}
 
-	public TransparentNodeElement(TransparentNode transparentNode,TransparentNodeDescriptor descriptor)
+	public TransparentNodeElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor)
 	{
 		this.node = transparentNode;
 		this.transparentNodeDescriptor = descriptor;
 		if(descriptor.hasGhostGroup())Eln.ghostManager.addObserver(this);
 	}
-	
 
-	
-	
+	public IFluidHandler getFluidHandler() {
+		return null;
+	}
+
+
 	public void onNeighborBlockChange() 
 	{
 		checkCanStay(false);
