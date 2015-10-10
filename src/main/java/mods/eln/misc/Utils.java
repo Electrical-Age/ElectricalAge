@@ -291,6 +291,16 @@ public class Utils {
 		return header + plotValue(value, "J  ");
 	}
 
+	public static String plotRads(String header, double value) {
+		if (!header.equals(""))
+			header += " ";
+		return header + plotValue(value, "rad/s ");
+	}
+
+	public static String plotER(double E, double R) {
+		return plotEnergy("E", E) + plotRads("R", R);
+	}
+
 	public static String plotPower(String header, double value) {
 		if (!header.equals(""))
 			header += " ";
