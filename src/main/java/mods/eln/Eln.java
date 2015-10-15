@@ -115,6 +115,7 @@ import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import mods.eln.solver.ConstSymbole;
 import mods.eln.solver.ISymbole;
 import mods.eln.sound.SoundCommand;
+import mods.eln.transparentnode.LargeRheostatDescriptor;
 import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
 import mods.eln.transparentnode.battery.BatteryDescriptor;
 import mods.eln.transparentnode.computercraftio.PeripheralHandler;
@@ -1783,6 +1784,25 @@ public class Eln {
 			);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 39;
+
+			name = "Large Rheostat";
+
+			ThermalDissipatorPassiveDescriptor dissipator = new ThermalDissipatorPassiveDescriptor(
+					name,
+					obj.getObj("LargeRheostat"),
+					1000, -100,// double warmLimit,double coolLimit,
+					4000, 800,// double nominalP,double nominalT,
+					10, 1// double nominalTao,double nominalConnectionDrop
+			);
+			LargeRheostatDescriptor desc = new LargeRheostatDescriptor(
+					name, dissipator, veryHighVoltageCableDescriptor, SerieEE.newE12(0)
+			);
+
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
 	}
@@ -4917,6 +4937,15 @@ public class Eln {
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('P'), "plateCopper");
+
+		addRecipe(findItemStack("Large Rheostat"),
+				"   ",
+				" D ",
+				"CRC",
+				Character.valueOf('R'), findItemStack("Rheostat"),
+				Character.valueOf('C'), findItemStack("Copper Thermal Cable"),
+				Character.valueOf('D'), findItemStack("Small Passive Thermal Dissipator")
+				);
 
 		//name = "Power Capacitor"
 		//name = "Power Inductor"
