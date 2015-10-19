@@ -43,6 +43,8 @@ public class Equation implements IValue, INBTTReady {
 			list.add(new OperatorMapperFunc("max", 2, Max.class));
 			list.add(new OperatorMapperFunc("sin", 1, Sin.class));
 			list.add(new OperatorMapperFunc("cos", 1, Cos.class));
+			list.add(new OperatorMapperFunc("asin", 1, Asin.class));
+			list.add(new OperatorMapperFunc("acos", 1, Acos.class));
 			list.add(new OperatorMapperFunc("abs", 1, Abs.class));
 			list.add(new OperatorMapperFunc("ramp", 1, Ramp.class));
 			list.add(new OperatorMapperFunc("integrate", 2, Integrator.class));
@@ -490,6 +492,46 @@ public class Equation implements IValue, INBTTReady {
 			return 2;
 		}
 	}
+
+	public static class Asin implements IOperator {
+		IValue a;
+
+		@Override
+		public double getValue() {
+			return Math.asin(a.getValue());
+		}
+
+		@Override
+		public void setOperator(IValue[] values) {
+			this.a = values[0];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 2;
+		}
+	}
+
+
+	public static class Acos implements IOperator {
+		IValue a;
+
+		@Override
+		public double getValue() {
+			return Math.acos(a.getValue());
+		}
+
+		@Override
+		public void setOperator(IValue[] values) {
+			this.a = values[0];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 2;
+		}
+	}
+
 
 
 	public static class Pow implements IOperator {
