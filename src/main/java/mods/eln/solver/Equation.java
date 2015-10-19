@@ -48,6 +48,7 @@ public class Equation implements IValue, INBTTReady {
 			list.add(new OperatorMapperFunc("integrate", 2, Integrator.class));
 			list.add(new OperatorMapperFunc("integrate", 3, IntegratorMinMax.class));
 			list.add(new OperatorMapperFunc("derivate", 1, Derivator.class));
+			list.add(new OperatorMapperFunc("pow", 2, Pow.class));
 			list.add(new OperatorMapperFunc("pid", 5, Pid.class));
 			list.add(new OperatorMapperFunc("pid", 7, PidMinMax.class));
 			list.add(new OperatorMapperFunc("batteryCharge", 1, BatteryCharge.class));
@@ -59,7 +60,6 @@ public class Equation implements IValue, INBTTReady {
 		}
 		{
 			ArrayList<IOperatorMapper> list = new ArrayList<IOperatorMapper>();
-			// list.add(new OperatorMapperAB("^", Pow.class));
 			staticOperatorList.put(priority++, list);
 		}
 		{
@@ -395,17 +395,6 @@ public class Equation implements IValue, INBTTReady {
 		}
 	}
 
-	public static class Pow extends OperatorAB {
-		@Override
-		public double getValue() {
-			return Math.pow(a.getValue(), b.getValue());
-		}
-
-		@Override
-		public int getRedstoneCost() {
-			return 1;
-		}
-	}
 
 	public static class Inv implements IOperator {
 		IValue a;
@@ -494,6 +483,27 @@ public class Equation implements IValue, INBTTReady {
 		@Override
 		public void setOperator(IValue[] values) {
 			this.a = values[0];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 2;
+		}
+	}
+
+
+	public static class Pow implements IOperator {
+		IValue a,b;
+
+		@Override
+		public double getValue() {
+			return Math.pow(a.getValue(),b.getValue());
+		}
+
+		@Override
+		public void setOperator(IValue[] values) {
+			this.a = values[0];
+			this.b = values[0];
 		}
 
 		@Override
