@@ -30,7 +30,7 @@ public class ElectricalRelayElement extends SixNodeElement {
     public NbtElectricalLoad aLoad = new NbtElectricalLoad("aLoad");
     public NbtElectricalLoad bLoad = new NbtElectricalLoad("bLoad");
     public Resistor switchResistor = new Resistor(aLoad, bLoad);
-    public NbtElectricalGateInput gate = new NbtElectricalGateInput("gate", true);
+    public NbtElectricalGateInput gate = new NbtElectricalGateInput("gate");
     public ElectricalRelayGateProcess gateProcess = new ElectricalRelayGateProcess(this, "GP", gate);
 
     VoltageStateWatchDog voltageWatchDogA = new VoltageStateWatchDog();

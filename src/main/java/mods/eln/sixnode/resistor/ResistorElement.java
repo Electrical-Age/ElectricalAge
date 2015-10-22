@@ -10,9 +10,10 @@ import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.ThermistorProcess;
+import mods.eln.sim.ResistorProcess;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.misc.MnaConst;
+import mods.eln.sim.nbt.NbtElectricalGateInput;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
@@ -22,6 +23,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class ResistorElement extends SixNodeElement {
 
     ResistorDescriptor descriptor;
@@ -29,10 +33,12 @@ public class ResistorElement extends SixNodeElement {
     NbtElectricalLoad bLoad = new NbtElectricalLoad("bLoad");
     Resistor r = new Resistor(aLoad, bLoad);
 
+    public NbtElectricalGateInput control;
+
     ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
     NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
     ResistorHeatThermalLoad heater = new ResistorHeatThermalLoad(r, thermalLoad);
-    ThermistorProcess thermistorProcess;
+    ResistorProcess resistorProcess;
 
     public double nominalRs = 1;
 
@@ -47,6 +53,10 @@ public class ResistorElement extends SixNodeElement {
         aLoad.setRs(MnaConst.noImpedance);
         bLoad.setRs(MnaConst.noImpedance);
         electricalComponentList.add(r);
+        if (this.descriptor.isRheostat) {
+            control = new NbtElectricalGateInput("control");
+            electricalLoadList.add(control);
+        }
 
         thermalLoadList.add(thermalLoad);
         thermalSlowProcessList.add(heater);
@@ -61,9 +71,20 @@ public class ResistorElement extends SixNodeElement {
                 .setLimit(this.descriptor.thermalWarmLimit, this.descriptor.thermalCoolLimit)
                 .set(new WorldExplosion(this).cableExplosion());
 
-        thermistorProcess = new ThermistorProcess(this, r, thermalLoad, this.descriptor);
-        if (this.descriptor.tempCoef != 0) {
-            slowProcessList.add(thermistorProcess);
+        resistorProcess = new ResistorProcess(this, r, thermalLoad, this.descriptor);
+        if (this.descriptor.tempCoef != 0 || this.descriptor.isRheostat) {
+            slowProcessList.add(resistorProcess);
+        }
+    }
+
+    @Override
+    public void networkSerialize(DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            if (descriptor.isRheostat)
+                stream.writeFloat((float) control.getNormalized());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -71,6 +92,7 @@ public class ResistorElement extends SixNodeElement {
     public ElectricalLoad getElectricalLoad(LRDU lrdu) {
         if (lrdu == front.right()) return aLoad;
         if (lrdu == front.left()) return bLoad;
+        if (lrdu == front) return control;
         return null;
     }
 
@@ -82,6 +104,7 @@ public class ResistorElement extends SixNodeElement {
     @Override
     public int getConnectionMask(LRDU lrdu) {
         if (lrdu == front.right() || lrdu == front.left()) return NodeBase.maskElectricalPower;
+        if (lrdu == front && descriptor.isRheostat) return NodeBase.maskElectricalInputGate;
         return 0;
     }
 
@@ -89,7 +112,8 @@ public class ResistorElement extends SixNodeElement {
     public String multiMeterString() {
         double u = -Math.abs(aLoad.getU() - bLoad.getU());
         double i = Math.abs(r.getI());
-        return Utils.plotOhm(Utils.plotUIP(u, i), r.getR());
+        return Utils.plotOhm(Utils.plotUIP(u, i), r.getR()) +
+                (control != null ? Utils.plotPercent("C", control.getNormalized()) : "");
     }
 
     @Override
@@ -110,7 +134,7 @@ public class ResistorElement extends SixNodeElement {
 
     public void setupPhysical() {
         nominalRs = descriptor.getRsValue(inventory);
-        thermistorProcess.process(0);
+        resistorProcess.process(0);
     }
 
     @Override

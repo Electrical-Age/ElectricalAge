@@ -20,7 +20,7 @@ import java.io.IOException;
 
 public class ElectricalVuMeterElement extends SixNodeElement {
 
-    public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate", true);
+    public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate");
     public ElectricalVuMeterSlowProcess slowProcess = new ElectricalVuMeterSlowProcess(this);
     LRDU front;
     ElectricalVuMeterDescriptor descriptor;

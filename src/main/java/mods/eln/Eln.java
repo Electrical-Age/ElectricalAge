@@ -1781,7 +1781,18 @@ public class Eln {
 			name = "Power Resistor";
 
 			ResistorDescriptor desc = new ResistorDescriptor(
-					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), 0
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), 0, false
+			);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 37;
+			name = "Rheostat";
+
+			ResistorDescriptor desc = new ResistorDescriptor(
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), 0, true
 			);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1793,7 +1804,7 @@ public class Eln {
 			name = "Thermistor";
 
 			ResistorDescriptor desc = new ResistorDescriptor(
-					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), -0.01
+					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), -0.01, false
 			);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -4852,6 +4863,17 @@ public class Eln {
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('P'), "plateCopper");
+
+		addRecipe(findItemStack("Rheostat"),
+				" R ",
+				" MS",
+				"cmc",
+				Character.valueOf('R'), findItemStack("Power Resistor"),
+				Character.valueOf('c'), findItemStack("Copper Cable"),
+				Character.valueOf('m'), findItemStack("Machine Block"),
+				Character.valueOf('M'), findItemStack("Electrical Motor"),
+				Character.valueOf('S'), findItemStack("Signal Cable")
+		);
 
 		addRecipe(findItemStack("Thermistor"),
 				" P ",
