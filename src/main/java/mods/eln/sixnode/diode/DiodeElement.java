@@ -18,7 +18,9 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
+import mods.eln.sim.process.heater.DiodeHeatThermalLoad;
 import mods.eln.sim.process.heater.ResistorHeatThermalLoad;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -31,7 +33,7 @@ public class DiodeElement extends SixNodeElement {
     public NbtElectricalLoad catodeLoad = new NbtElectricalLoad("catodeLoad");
     public ResistorSwitch resistorSwitch = new ResistorSwitch("resistorSwitch", anodeLoad, catodeLoad);
     public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
-    public ResistorHeatThermalLoad heater = new ResistorHeatThermalLoad(resistorSwitch, thermalLoad);
+    public DiodeHeatThermalLoad heater = new DiodeHeatThermalLoad(resistorSwitch, thermalLoad);
     public ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
     public DiodeProcess diodeProcess = new DiodeProcess(resistorSwitch);
 
