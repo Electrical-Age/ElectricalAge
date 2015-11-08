@@ -5,6 +5,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import mods.eln.Eln;
 import mods.eln.ghost.GhostObserver;
@@ -496,6 +498,13 @@ public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
 
 	public void unload() {
 
+	}
+	
+	public Map<String, String> getWaila() {
+		Map<String, String> wailaList = new HashMap<String, String>();
+		wailaList.put("Info", multiMeterString(this.front));
+		return wailaList;
+		
 	}
 
 /*	protected boolean hasSidedInventory(){
