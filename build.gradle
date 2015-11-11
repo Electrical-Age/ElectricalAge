@@ -83,6 +83,10 @@ repositories {
         name = "mobiusstrip"
         url = "http://default.mobiusstrip.eu/maven/"
     }
+    ivy {
+        name = 'MineTweaker3' 
+        artifactPattern = "http://minetweaker3.powerofbytes.com/download/[module]-[classifier]-[revision].[ext]"
+    }
 }
 
 dependencies {
@@ -90,6 +94,7 @@ dependencies {
     shade "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
     shade "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "mcp.mobius.waila:Waila:1.5.11-RC2-NONEI_1.7.10:dev"
+	compile name: 'MineTweaker3', version: '1.7.10-3.0.10B', classifier: 'Dev', ext: 'jar'
 }
 
 jar {
