@@ -6,6 +6,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.nbt.NbtBatteryProcess;
 import mods.eln.transparentnode.battery.BatteryElement;
@@ -22,7 +23,14 @@ public class NodePacketHandler implements IMessageHandler<NodePacket, Transparen
 		Coordonate c = message.coord;
 		NodeBase node = NodeManager.instance.getNodeFromCoordonate(c);
 		TransparentNode tnode = (TransparentNode) node;
-		TransparentNodeElement tNodeElement = tnode.element;
+		TransparentNodeElement tNodeElement;
+		try {
+			tNodeElement = tnode.element;
+		} catch (NullPointerException e) {
+			System.out.println("Invalid node");
+			e.printStackTrace();
+			return null;
+		}
 		Map<String, String> stringMap = tNodeElement.getWaila();
 		return new TransparentNodeReturn(stringMap, c);
 		
