@@ -9,10 +9,10 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 
-public class BatteryElementReturnHandler implements IMessageHandler<BatteryElementReturn, IMessage>{
+public class TransparentNodeReturnHandler implements IMessageHandler<TransparentNodeReturn, IMessage>{
 	
 	@Override
-	public IMessage onMessage(BatteryElementReturn message, MessageContext ctx) {
+	public IMessage onMessage(TransparentNodeReturn message, MessageContext ctx) {
 		Map<String, String> m = message.map;
 		Coordonate c = message.coord;
 		WailaCache.wailaCache.put(c, m);

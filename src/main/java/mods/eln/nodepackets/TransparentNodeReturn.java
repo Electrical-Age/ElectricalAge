@@ -20,14 +20,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 
-public class BatteryElementReturn implements IMessage{
+public class TransparentNodeReturn implements IMessage{
 	
 	public Map<String, String> map;
 	public Coordonate coord;
 	
-	public BatteryElementReturn() {};
+	public TransparentNodeReturn() {};
 	
-	public BatteryElementReturn(Map<String, String> m, Coordonate c) {
+	public TransparentNodeReturn(Map<String, String> m, Coordonate c) {
 		this.map = m;
 		this.coord = c;
 	}

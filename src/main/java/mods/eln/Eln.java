@@ -85,8 +85,8 @@ import mods.eln.node.transparent.TransparentNodeBlock;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.node.transparent.TransparentNodeItem;
-import mods.eln.nodepackets.BatteryElementReturn;
-import mods.eln.nodepackets.BatteryElementReturnHandler;
+import mods.eln.nodepackets.TransparentNodeReturn;
+import mods.eln.nodepackets.TransparentNodeReturnHandler;
 import mods.eln.nodepackets.NodePacket;
 import mods.eln.nodepackets.NodePacketHandler;
 import mods.eln.ore.OreBlock;
@@ -469,7 +469,7 @@ public class Eln {
 		achNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("elnChannel");
 		achNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
 		achNetwork.registerMessage(NodePacketHandler.class, NodePacket.class, 1, Side.SERVER);
-		achNetwork.registerMessage(BatteryElementReturnHandler.class, BatteryElementReturn.class, 2, Side.CLIENT);
+		achNetwork.registerMessage(TransparentNodeReturnHandler.class, TransparentNodeReturn.class, 2, Side.CLIENT);
 		
 		ModContainer container = FMLCommonHandler.instance().findContainerFor(this);
 		// LanguageRegistry.instance().loadLanguagesFor(container, Side.CLIENT);
