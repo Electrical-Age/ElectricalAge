@@ -4,7 +4,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -623,5 +625,12 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	public String getName() {
 
 		return name;
+	}
+	
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> wailaList = new HashMap<String, String>();
+		wailaList.put("Error", "No data available");
+		return wailaList;
 	}
 }
