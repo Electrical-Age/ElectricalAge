@@ -376,6 +376,8 @@ public class Eln {
 	public double solarPannelPowerFactor = 1;
 	public double windTurbinePowerFactor = 1;
 	public double waterTurbinePowerFactor = 1;
+	
+	double stdHalfLife = 2 * Utils.minecraftDay;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -441,6 +443,8 @@ public class Eln {
 		Other.ElnToTeConversionRatio = config.get("balancing", "ElnToThermalExpansionConversionRatio", 1.0 / 3.0 * 4).getDouble(1.0 / 3.0 * 4);
 	//	Other.ElnToBuildcraftConversionRatio = config.get("balancing", "ElnToBuildcraftConversionRatio", 1.0 / 3.0 / 5 * 2).getDouble(1.0 / 3.0 / 5 * 2);
 
+		stdHalfLife = config.get("battery", "batteryHalfLife", 2, "How many days it takes for a battery to decay half way").getDouble(2) * Utils.minecraftDay;
+		
 		ComputerProbeEnable = config.get("compatibility", "ComputerProbeEnable", true).getBoolean(true);
 		ElnToOtherEnergyConverterEnable = config.get("compatibility", "ElnToOtherEnergyConverterEnable", true).getBoolean(true);
 
@@ -1321,7 +1325,6 @@ public class Eln {
 		double stdDischargeTime = 4 * 60;
 		double stdU = LVU;
 		double stdP = LVP / 4;
-		double stdHalfLife = Utils.minecraftDay * 2;
 		double stdEfficiency = 1.0 - 2.0 / 50.0;
 		double condoEfficiency = 1.0 - 2.0 / 50.0;
 
