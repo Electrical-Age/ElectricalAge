@@ -54,21 +54,8 @@ configurations {
     compile.extendsFrom external
 }
 
-repositories {
-    mavenCentral()
-	maven { // The repo from which to get waila
-        name "Mobius Repo"
-        url "http://mobiusstrip.eu/maven"
-    }
-    maven { // the repo from which to get NEI and stuff 
-        name 'CB Repo'
-        url "http://chickenbones.net/maven/"
-    }
-}
-
 dependencies {
     external files("libs/commons-math3-3.3.jar", "libs/modbus4J.jar", "libs/seroUtils.jar")
-	compile  'mcp.mobius.waila:Waila:1.5.10_1.7.10'
 }
 
 jar {

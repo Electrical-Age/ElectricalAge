@@ -18,8 +18,6 @@ import net.minecraft.inventory.IInventory;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FuelGeneratorElement extends TransparentNodeElement {
 
@@ -109,12 +107,5 @@ public class FuelGeneratorElement extends TransparentNodeElement {
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         return false;
-    }
-    
-    @Override
-    public Map<String, String> getWaila() {
-    	Map<String, String> wailaList = new HashMap<String,String>();
-    	wailaList.put("Error", "Data not available");
-    	return wailaList;
     }
 }

@@ -2,9 +2,6 @@ package mods.eln.transparentnode.windturbine;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Map;
 
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -165,12 +162,6 @@ public class WindTurbineElement extends TransparentNodeElement{
 		Utils.println(cableFront);
 	}
 	
-	@Override
-	public Map<String, String> getWaila() {
-		Map<String, String> wailaList = new HashMap<String, String>();
-		DecimalFormat df = new DecimalFormat("#.##");
-		wailaList.put("Voltage", df.format(getElectricalLoad(cableFront.left(), LRDU.Down).getU()));
-		return wailaList;
-	}
+	 
 
 }

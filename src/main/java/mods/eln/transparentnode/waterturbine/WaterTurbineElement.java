@@ -2,9 +2,6 @@ package mods.eln.transparentnode.waterturbine;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Map;
 
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -144,13 +141,7 @@ public class WaterTurbineElement extends TransparentNodeElement{
 	}
 
 
-	@Override
-	public Map<String, String> getWaila() {
-		Map<String, String> wailaList = new HashMap<String, String>();
-		DecimalFormat df = new DecimalFormat("#.##");
-		wailaList.put("Voltage", df.format(getElectricalLoad(front, LRDU.Down).getU()));
-		return wailaList;
-	}
+	
 	
 	 
 
