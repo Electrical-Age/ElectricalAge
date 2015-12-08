@@ -460,7 +460,8 @@ public class Eln {
 	public double solarPannelPowerFactor = 1;
 	public double windTurbinePowerFactor = 1;
 	public double waterTurbinePowerFactor = 1;
-	
+
+	private double stdHalfLife = 2 * Utils.minecraftDay;
 	public static boolean wailaEasy = false;
 
 	@EventHandler
