@@ -1,16 +1,13 @@
 package mods.eln;
 
-import cpw.mods.fml.common.*;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.event.*;
-import cpw.mods.fml.common.network.FMLEventChannel;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import cpw.mods.fml.common.registry.EntityRegistry;
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.LanguageRegistry;
-import cpw.mods.fml.relauncher.Side;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
+import mods.eln.achievepackets.AchievePacket;
+import mods.eln.achievepackets.AchievePacketHandler;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
@@ -18,32 +15,90 @@ import mods.eln.entity.ReplicatorEntity;
 import mods.eln.entity.ReplicatorPopProcess;
 import mods.eln.eventhandlers.ElnFMLEventsHandler;
 import mods.eln.eventhandlers.ElnForgeEventsHandler;
-import mods.eln.generic.*;
+import mods.eln.generic.GenericCreativeTab;
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.generic.GenericItemUsingDamageDescriptorWithComment;
+import mods.eln.generic.SharedItem;
+import mods.eln.generic.genericArmorItem;
 import mods.eln.generic.genericArmorItem.ArmourType;
 import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
-import mods.eln.item.*;
+import mods.eln.item.BrushDescriptor;
+import mods.eln.item.CombustionChamber;
+import mods.eln.item.CopperCableDescriptor;
+import mods.eln.item.DielectricItem;
+import mods.eln.item.ElectricalDrillDescriptor;
+import mods.eln.item.EntitySensorFilterDescriptor;
+import mods.eln.item.FerromagneticCoreDescriptor;
+import mods.eln.item.HeatingCorpElement;
+import mods.eln.item.ItemAxeEln;
+import mods.eln.item.ItemPickaxeEln;
+import mods.eln.item.LampDescriptor;
+import mods.eln.item.MachineBoosterDescriptor;
+import mods.eln.item.MiningPipeDescriptor;
+import mods.eln.item.OreScanner;
+import mods.eln.item.OverHeatingProtectionDescriptor;
+import mods.eln.item.OverVoltageProtectionDescriptor;
+import mods.eln.item.SolarTrackerDescriptor;
+import mods.eln.item.TreeResin;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
-import mods.eln.item.electricalitem.*;
+import mods.eln.item.electricalitem.BatteryItem;
+import mods.eln.item.electricalitem.ElectricalArmor;
+import mods.eln.item.electricalitem.ElectricalAxe;
+import mods.eln.item.electricalitem.ElectricalLampItem;
+import mods.eln.item.electricalitem.ElectricalPickaxe;
+import mods.eln.item.electricalitem.PortableOreScannerItem;
 import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage.OreScannerConfigElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
-import mods.eln.misc.*;
+import mods.eln.misc.Coordonate;
+import mods.eln.misc.Direction;
+import mods.eln.misc.FunctionTable;
+import mods.eln.misc.FunctionTableYProtect;
+import mods.eln.misc.I18N;
+import mods.eln.misc.IConfigSharing;
+import mods.eln.misc.IFunction;
+import mods.eln.misc.LiveDataManager;
+import mods.eln.misc.Obj3DFolder;
+import mods.eln.misc.Recipe;
+import mods.eln.misc.RecipesList;
+import mods.eln.misc.Utils;
+import mods.eln.misc.Version;
+import mods.eln.misc.WindProcess;
 import mods.eln.misc.series.SerieEE;
 import mods.eln.node.NodeBlockEntity;
 import mods.eln.node.NodeManager;
 import mods.eln.node.NodeManagerNbt;
 import mods.eln.node.NodeServer;
 import mods.eln.node.simple.SimpleNodeItem;
-import mods.eln.node.six.*;
-import mods.eln.node.transparent.*;
+import mods.eln.node.six.SixNode;
+import mods.eln.node.six.SixNodeBlock;
+import mods.eln.node.six.SixNodeCacheStd;
+import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeEntity;
+import mods.eln.node.six.SixNodeItem;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeBlock;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeEntity;
+import mods.eln.node.transparent.TransparentNodeItem;
+import mods.eln.nodepackets.TransparentNodeReturn;
+import mods.eln.nodepackets.TransparentNodeReturnHandler;
+import mods.eln.nodepackets.NodePacket;
+import mods.eln.nodepackets.NodePacketHandler;
 import mods.eln.ore.OreBlock;
 import mods.eln.ore.OreDescriptor;
 import mods.eln.ore.OreItem;
-import mods.eln.server.*;
+import mods.eln.server.ConsoleListener;
+import mods.eln.server.DelayedBlockRemove;
+import mods.eln.server.DelayedTaskManager;
+import mods.eln.server.OreRegenerate;
+import mods.eln.server.PlayerManager;
+import mods.eln.server.SaveConfig;
+import mods.eln.server.ServerEventListener;
 import mods.eln.signalinductor.SignalInductorDescriptor;
 import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoadInitializer;
@@ -89,7 +144,12 @@ import mods.eln.sixnode.electricasensor.ElectricalSensorDescriptor;
 import mods.eln.sixnode.energymeter.EnergyMeterDescriptor;
 import mods.eln.sixnode.groundcable.GroundCableDescriptor;
 import mods.eln.sixnode.hub.HubDescriptor;
-import mods.eln.sixnode.lampsocket.*;
+import mods.eln.sixnode.lampsocket.LampSocketDescriptor;
+import mods.eln.sixnode.lampsocket.LampSocketStandardObjRender;
+import mods.eln.sixnode.lampsocket.LampSocketSuspendedObjRender;
+import mods.eln.sixnode.lampsocket.LampSocketType;
+import mods.eln.sixnode.lampsocket.LightBlock;
+import mods.eln.sixnode.lampsocket.LightBlockEntity;
 import mods.eln.sixnode.lampsupply.LampSupplyDescriptor;
 import mods.eln.sixnode.lampsupply.LampSupplyElement;
 import mods.eln.sixnode.modbusrtu.ModbusRtuDescriptor;
@@ -147,9 +207,14 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
 import net.minecraft.item.Item.ToolMaterial;
+import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemArmor.ArmorMaterial;
+import net.minecraft.item.ItemHoe;
+import net.minecraft.item.ItemSpade;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemSword;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.launchwrapper.Launch;
@@ -162,9 +227,28 @@ import net.minecraftforge.common.config.Property;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
-import mods.eln.achievepackets.*;
-
-import java.util.*;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.Mod.Instance;
+import cpw.mods.fml.common.ModContainer;
+import cpw.mods.fml.common.ModMetadata;
+import cpw.mods.fml.common.SidedProxy;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLInterModComms;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;
+import cpw.mods.fml.common.event.FMLServerStartedEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.event.FMLServerStoppedEvent;
+import cpw.mods.fml.common.network.FMLEventChannel;
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import cpw.mods.fml.common.registry.EntityRegistry;
+import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.registry.LanguageRegistry;
+import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid = Eln.MODID, name = Eln.NAME, version = Version.REVISION)
 // @Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0b")
@@ -377,13 +461,15 @@ public class Eln {
 	public double windTurbinePowerFactor = 1;
 	public double waterTurbinePowerFactor = 1;
 	
-	double stdHalfLife = 2 * Utils.minecraftDay;
+	public static boolean wailaEasy = false;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		
-		achNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("achChannel");
+		achNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("elnChannel");
 		achNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
+		achNetwork.registerMessage(NodePacketHandler.class, NodePacket.class, 1, Side.SERVER);
+		achNetwork.registerMessage(TransparentNodeReturnHandler.class, TransparentNodeReturn.class, 2, Side.CLIENT);
 		
 		ModContainer container = FMLCommonHandler.instance().findContainerFor(this);
 		// LanguageRegistry.instance().loadLanguagesFor(container, Side.CLIENT);
@@ -442,7 +528,8 @@ public class Eln {
 		Other.ElnToOcConversionRatio = config.get("balancing", "ElnToOpenComputerConversionRatio", 1.0 / 3.0 / 2.5).getDouble(1.0 / 3.0 / 2.5);
 		Other.ElnToTeConversionRatio = config.get("balancing", "ElnToThermalExpansionConversionRatio", 1.0 / 3.0 * 4).getDouble(1.0 / 3.0 * 4);
 	//	Other.ElnToBuildcraftConversionRatio = config.get("balancing", "ElnToBuildcraftConversionRatio", 1.0 / 3.0 / 5 * 2).getDouble(1.0 / 3.0 / 5 * 2);
-
+		wailaEasy = config.get("balancing", "WailaEasyMode", false).getBoolean(false);
+		
 		stdHalfLife = config.get("battery", "batteryHalfLife", 2, "How many days it takes for a battery to decay half way").getDouble(2) * Utils.minecraftDay;
 		
 		ComputerProbeEnable = config.get("compatibility", "ComputerProbeEnable", true).getBoolean(true);
@@ -789,6 +876,8 @@ public class Eln {
 		oreItem.populateLangFileKeys();
 		Achievements.populateLangFileKeys();
 		this.populateLangFileCommonKeys();
+		
+		FMLInterModComms.sendMessage("Waila", "register", "mods.eln.integration.waila.WailaIntegration.callbackRegister");
 
 		Utils.println("Electrical age init done");
 	}
