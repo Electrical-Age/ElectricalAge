@@ -1,4 +1,4 @@
-# ![logo](https://raw.githubusercontent.com/Electrical-Age/electrical-age.github.io/master/img/favicon.ico) Minecraft Mod - Codename : ELN
+# ![logo](https://raw.githubusercontent.com/Electrical-Age/electrical-age.github.io/master/img/favicon.ico) Minecraft Mod - Codename : ELN [![Build Status](https://travis-ci.org/Dolu1990/ElectricalAge.svg)](https://travis-ci.org/Dolu1990/ElectricalAge)
 
 See the official website [electrical-age.net](http://electrical-age.net/) and [wiki.electrical-age.net](http://wiki.electrical-age.net/).
 
