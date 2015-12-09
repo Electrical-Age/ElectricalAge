@@ -68,6 +68,7 @@ repositories {
 
 dependencies {
     external files("libs/commons-math3-3.3.jar", "libs/modbus4J.jar", "libs/seroUtils.jar")
+	compile  'codechicken:CodeChickenCore:1.7.10-1.0.7.47:universal'
 	compile  'mcp.mobius.waila:Waila:1.5.10_1.7.10'
 }
 
