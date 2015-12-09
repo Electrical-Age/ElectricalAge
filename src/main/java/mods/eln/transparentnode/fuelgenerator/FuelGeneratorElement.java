@@ -97,11 +97,7 @@ public class FuelGeneratorElement extends TransparentNodeElement {
     @Override
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
-        try {
-            stream.writeFloat((float) (powerSource.getP() / descriptor.nominalPower));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
     }
 
     @Override
