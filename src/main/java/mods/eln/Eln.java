@@ -247,6 +247,7 @@ public class Eln {
 			"PLC/PLC.obj",
 			"redToEle/redtoele.obj",
 			"RelayBig/RelayBig.obj",
+			"RelaySmall/RelaySmall.obj",
 			"RobustLamp/RobustLamp.obj",
 			"RTU/RTU.obj",
 			"signalsourcepot/signalsourcepot.obj",
@@ -2363,6 +2364,17 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
+		{
+			subId = 4;
+
+			name = "Signal Relay";
+
+			desc = new ElectricalRelayDescriptor(
+				name, obj.getObj("RelaySmall"),
+				signalCableDescriptor);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
 	}
 
 	void registerElectricalGateSource(int id) {
