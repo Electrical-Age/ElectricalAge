@@ -29,7 +29,7 @@ public class ElectricalSourceRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
 
-		descriptor.draw();
+		descriptor.draw(voltage >= 25);
 	}
 
 	@Override
@@ -55,8 +55,10 @@ public class ElectricalSourceRender extends SixNodeElementRender {
 	
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
+		if (descriptor.isSignalSource()) return Eln.instance.signalCableDescriptor.render;
 		if (voltage < Eln.instance.lowVoltageCableDescriptor.electricalMaximalVoltage) return Eln.instance.lowVoltageCableDescriptor.render;
 		if (voltage < Eln.instance.meduimVoltageCableDescriptor.electricalMaximalVoltage) return Eln.instance.meduimVoltageCableDescriptor.render;
-		return Eln.instance.highVoltageCableDescriptor.render;
+		if (voltage > Eln.instance.highVoltageCableDescriptor.electricalMaximalVoltage)return Eln.instance.highVoltageCableDescriptor.render;
+		return Eln.instance.veryHighVoltageCableDescriptor.render;
 	}
 }

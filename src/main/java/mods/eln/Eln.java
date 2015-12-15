@@ -268,6 +268,7 @@ public class Eln {
 			"turbineBBlue/turbinebblue.obj",
 			"VoltageSensor/voltagesensor.obj",
 			"voltagesource/voltagesource.obj",
+			"signalsource/signalsource.obj",
 			"Vumeter/Vumeter.obj",
 			"WindTurbineMini/WindTurbineMini.obj",
 			"wirelesssignalrepeater/wirelesssignalrepeater.obj",
@@ -1523,10 +1524,18 @@ public class Eln {
 			name = "Electrical Source";
 
 			ElectricalSourceDescriptor desc = new ElectricalSourceDescriptor(
-					name, obj.getObj("voltagesource"));
+					name, obj.getObj("voltagesource"), false);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
+		{
+			subId = 1;
+			name = "Signal Source";
+
+			ElectricalSourceDescriptor desc = new ElectricalSourceDescriptor(
+					name, obj.getObj("signalsource"), true);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
 	}
 
 	void registerLampSocket(int id) {
