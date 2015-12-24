@@ -918,11 +918,11 @@ public class Utils {
 		double d = 0;
 
 		while (d < norm) {
-			if (!Utils.isBlockLoaded(world, x, y, z))
-				continue;
-			Block b = Utils.getBlock(world, x, y, z);
-			if (b != null)
-				blockList.add(b);
+			if (Utils.isBlockLoaded(world, x, y, z)) {
+				Block b = Utils.getBlock(world, x, y, z);
+				if (b != null)
+					blockList.add(b);
+			}
 
 			x += dx;
 			y += dy;
