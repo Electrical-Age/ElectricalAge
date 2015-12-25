@@ -5003,6 +5003,16 @@ public class Eln {
 				Character.valueOf('A'), "itemRubber",
 				Character.valueOf('I'), findItemStack("Copper Cable"),
 				Character.valueOf('C'), findItemStack("Very High Voltage Cable"));
+
+		addRecipe(findItemStack("Signal Relay"),
+			"GGG",
+			"OIO",
+			"CRC",
+			Character.valueOf('R'), new ItemStack(Items.redstone),
+			Character.valueOf('O'), new ItemStack(Items.iron_ingot),
+			Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
+			Character.valueOf('I'), findItemStack("Copper Cable"),
+			Character.valueOf('C'), findItemStack("Signal Cable"));
 	}
 
 	void recipeWirelessSignal() {
