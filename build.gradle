@@ -63,7 +63,7 @@ jar {
     exclude(['dan200/**', 'ic2/**', 'li/**', 'buildcraft/**'])
 
     // Exclude unused (temp/source) resource files to reduce the size of the release jar
-    exclude(['**/*.ai', '**/*.blend', '**/*.blend1', '**/*.blend2', '**/*.rar', '**/*.wav', '**/*.piko', '**/*.m_p'])
+    exclude(['**/*.ai', '**/*.blend', '**/*.blend1', '**/*.blend2', '**/*.xcf', '**/*.rar', '**/*.wav', '**/*.flac', '**/*.m_p', '**/*.piko'])
 
     // Add README and LICENSE to the release jar
     from(['README.md', 'LICENSE.md'])
