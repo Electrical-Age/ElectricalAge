@@ -4,7 +4,7 @@
 
 Electrical Age (ELN) is a Minecraft Mod offering the ability to perform large-scale in-game electrical simulations.
 
-Look at the official project website [electrical-age.net](https://electrical-age.net/) and [the Wiki](http://wiki.electrical-age.net/) to get general infromation. [This official Minecraft forum post](http://www.minecraftforum.net/topic/2741783-172forge-electrical-age-mod-beta-146/) is alos updated frequently.
+Look at the official project website [electrical-age.net](https://electrical-age.net/) and [the Wiki](http://wiki.electrical-age.net/) to get general infromation. [This official Minecraft forum post](http://www.minecraftforum.net/topic/2741783-172forge-electrical-age-mod-beta-146/) is updated frequently.
 
 ## How to get started
 
@@ -94,7 +94,7 @@ Mod promotion:
 The full list of contributors is [available here](https://github.com/Electrical-Age/ElectricalAge/graphs/contributors).
 
 ## LICENSE
-The source code of this mod is licensed under the LGPL V3.0 licence. See http://www.gnu.org/copyleft/lesser.html for more informations.
+The source code of this mod is licensed under the LGPL V3.0 licence. See http://www.gnu.org/copyleft/lesser.html for more information.
 
 All graphics and 3D models are licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/.
 
