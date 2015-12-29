@@ -247,6 +247,7 @@ public class Eln {
 			"PLC/PLC.obj",
 			"redToEle/redtoele.obj",
 			"RelayBig/RelayBig.obj",
+			"RelaySmall/RelaySmall.obj",
 			"RobustLamp/RobustLamp.obj",
 			"RTU/RTU.obj",
 			"signalsourcepot/signalsourcepot.obj",
@@ -267,6 +268,7 @@ public class Eln {
 			"turbineBBlue/turbinebblue.obj",
 			"VoltageSensor/voltagesensor.obj",
 			"voltagesource/voltagesource.obj",
+			"signalsource/signalsource.obj",
 			"Vumeter/Vumeter.obj",
 			"WindTurbineMini/WindTurbineMini.obj",
 			"wirelesssignalrepeater/wirelesssignalrepeater.obj",
@@ -1522,10 +1524,18 @@ public class Eln {
 			name = "Electrical Source";
 
 			ElectricalSourceDescriptor desc = new ElectricalSourceDescriptor(
-					name, obj.getObj("voltagesource"));
+					name, obj.getObj("voltagesource"), false);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
+		{
+			subId = 1;
+			name = "Signal Source";
+
+			ElectricalSourceDescriptor desc = new ElectricalSourceDescriptor(
+					name, obj.getObj("signalsource"), true);
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
 	}
 
 	void registerLampSocket(int id) {
@@ -2363,6 +2373,17 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
+		{
+			subId = 4;
+
+			name = "Signal Relay";
+
+			desc = new ElectricalRelayDescriptor(
+				name, obj.getObj("RelaySmall"),
+				signalCableDescriptor);
+
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
 	}
 
 	void registerElectricalGateSource(int id) {
@@ -4982,6 +5003,16 @@ public class Eln {
 				Character.valueOf('A'), "itemRubber",
 				Character.valueOf('I'), findItemStack("Copper Cable"),
 				Character.valueOf('C'), findItemStack("Very High Voltage Cable"));
+
+		addRecipe(findItemStack("Signal Relay"),
+			"GGG",
+			"OIO",
+			"CRC",
+			Character.valueOf('R'), new ItemStack(Items.redstone),
+			Character.valueOf('O'), new ItemStack(Items.iron_ingot),
+			Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
+			Character.valueOf('I'), findItemStack("Copper Cable"),
+			Character.valueOf('C'), findItemStack("Signal Cable"));
 	}
 
 	void recipeWirelessSignal() {
