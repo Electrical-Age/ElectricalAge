@@ -22,7 +22,7 @@ public class NbtElectricalGateOutputProcess extends Capacitor implements INBTTRe
 		
 	public void setHighImpedance(boolean enable) {
 		this.highImpedance = enable;
-		double baseC = Eln.instance.gateOutputCurrent / Eln.instance.electricalFrequancy / Eln.SVU;
+		double baseC = Eln.instance.gateOutputCurrent / Eln.instance.electricalFrequency / Eln.SVU;
 		if (enable) {
 			setC(baseC / 1000);
 		} else {

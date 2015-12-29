@@ -343,7 +343,7 @@ public class Eln {
 	@SidedProxy(clientSide = "mods.eln.client.ClientProxy", serverSide = "mods.eln.CommonProxy")
 	public static CommonProxy proxy;
 
-	public double electricalFrequancy, thermalFrequancy;
+	public double electricalFrequency, thermalFrequency;
 	public int electricalInterSystemOverSampling;
 
 	public ElectricalCableDescriptor veryHighVoltageCableDescriptor;
@@ -358,7 +358,7 @@ public class Eln {
 	public static Obj3DFolder obj = new Obj3DFolder();
 
 	public static boolean dicThungsten;
-	public static boolean genCooper, genPlumb, genTungsten, genCinnabar;
+	public static boolean genCopper, genLead, genTungsten, genCinnabar;
 	public static String dicTungstenOre, dicTungstenDust, dicTungstenIngot;
 	public static ArrayList<OreScannerConfigElement> oreScannerConfig = new ArrayList<OreScannerConfigElement>();
 	public static boolean modbusEnable = false;
@@ -423,6 +423,21 @@ public class Eln {
 				event.getSuggestedConfigurationFile());
 		config.load();
 
+
+		//Hacks for correct long date typing failures in config file
+		//WARNING/BUG: "renameProperty" changes the type to String! However read functions don't seem to care attention to it, so it's OK... for the moment.
+		if(config.hasKey("lamp", "incondescentLifeInHours"))
+			config.renameProperty("lamp","incondescentLifeInHours","incandescentLifeInHours");
+		if(config.hasKey("mapgenerate", "plumb"))
+			config.renameProperty("mapgenerate","plumb","lead");
+		if(config.hasKey("mapgenerate", "cooper"))
+			config.renameProperty("mapgenerate","cooper","copper");
+		if(config.hasKey("simulation", "electricalFrequancy"))
+			config.renameProperty("simulation","electricalFrequancy","electricalFrequency");
+		if(config.hasKey("simulation", "thermalFrequancy"))
+			config.renameProperty("simulation","thermalFrequancy","thermalFrequency");
+
+
 		modbusEnable = config.get("modbus", "enable", false).getBoolean(false);
 		debugEnabled = config.get("debug", "enable", false).getBoolean(false);
 
@@ -463,9 +478,8 @@ public class Eln {
 		killMonstersAroundLampsRange = config.get("entity", "killMonstersAroundLampsRange", 9).getInt(9);
 
 		forceOreRegen = config.get("mapGenerate", "forceOreRegen", false).getBoolean(false);
-		genCooper = config.get("mapGenerate", "cooper", true).getBoolean(true);
-		genPlumb = config.get("mapGenerate", "plumb", true).getBoolean(true);
-		genPlumb = config.get("mapGenerate", "lead", genPlumb).getBoolean(genPlumb);
+		genCopper = config.get("mapGenerate", "copper", true).getBoolean(true);
+		genLead = config.get("mapGenerate", "lead", true).getBoolean(true);
 		genTungsten = config.get("mapGenerate", "tungsten", true).getBoolean(true);
 		genCinnabar = config.get("mapGenerate", "cinnabar", true).getBoolean(true);
 		genCinnabar = false;
@@ -481,19 +495,18 @@ public class Eln {
 			dicTungstenIngot = "ingotElnTungsten";
 		}
 
-		incondecentLampLife = config.get("lamp", "incondescentLifeInHours", 8).getDouble(8) * 3600;
-		economicLampLife = config.get("lamp", "economicLifeInHours", 32).getDouble(32) * 3600;
+		incandescentLampLife = config.get("lamp", "incandescentLifeInHours", 16.0).getDouble(16.0) * 3600;
+		economicLampLife = config.get("lamp", "economicLifeInHours", 64.0).getDouble(64.0) * 3600;
+		carbonLampLife = config.get("lamp", "carbonLifeInHours", 6.0).getDouble(6.0) * 3600;
 
 		addOtherModOreToXRay = config.get("xrayscannerconfig", "addOtherModOreToXRay", true).getBoolean(true);
 		xRayScannerRange = (float) config.get("xrayscannerconfig", "rangeInBloc", 5.0).getDouble(5.0);
 		xRayScannerRange = Math.max(Math.min(xRayScannerRange, 10), 4);
 		xRayScannerCanBeCrafted = config.get("xrayscannerconfig", "canBeCrafted", true).getBoolean(true);
 
-
-
-		electricalFrequancy = config.get("simulation", "electricalFrequancy", 20).getDouble(20);
+		electricalFrequency = config.get("simulation", "electricalFrequency", 20).getDouble(20);
 		electricalInterSystemOverSampling = config.get("simulation", "electricalInterSystemOverSampling", 50).getInt(50);
-		thermalFrequancy = config.get("simulation", "thermalFrequancy", 400).getDouble(400);
+		thermalFrequency = config.get("simulation", "thermalFrequency", 400).getDouble(400);
 
 		config.save();
 
@@ -505,7 +518,7 @@ public class Eln {
 
 		eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
 
-		simulator = new Simulator(0.05, 1 / electricalFrequancy, electricalInterSystemOverSampling, 1 / thermalFrequancy);
+		simulator = new Simulator(0.05, 1 / electricalFrequency, electricalInterSystemOverSampling, 1 / thermalFrequency);
 		nodeManager = new NodeManager("caca");
 		ghostManager = new GhostManager("caca2");
 		delayedTask = new DelayedTaskManager();
@@ -3042,8 +3055,9 @@ public class Eln {
 
 	}
 
-	double incondecentLampLife;
+	double incandescentLampLife;
 	double economicLampLife;
+	double carbonLampLife;
 
 	void registerLampItem(int id) {
 		int subId, completId;
@@ -3064,7 +3078,7 @@ public class Eln {
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[12], // nominalU,
 																	// nominalP
-					lightLevel[12], incondecentLampLife, standardGrowRate // nominalLight,
+					lightLevel[12], incandescentLampLife, standardGrowRate // nominalLight,
 																			// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -3076,7 +3090,7 @@ public class Eln {
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[14], // nominalU,
 																	// nominalP
-					lightLevel[14], incondecentLampLife, standardGrowRate // nominalLight,
+					lightLevel[14], incandescentLampLife, standardGrowRate // nominalLight,
 																			// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -3088,7 +3102,7 @@ public class Eln {
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, MVU, lightPower[14], // nominalU,
 																	// nominalP
-					lightLevel[14], incondecentLampLife, standardGrowRate // nominalLight,
+					lightLevel[14], incandescentLampLife, standardGrowRate // nominalLight,
 																			// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -3102,7 +3116,7 @@ public class Eln {
 					"incandescentlampcarbon", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[11], // nominalU,
 																	// nominalP
-					lightLevel[11], incondecentLampLife / 3, standardGrowRate // nominalLight,
+					lightLevel[11], carbonLampLife, standardGrowRate // nominalLight,
 			// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -3114,7 +3128,7 @@ public class Eln {
 					"incandescentlampcarbon", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[13], // nominalU,
 																	// nominalP
-					lightLevel[13], incondecentLampLife / 3, standardGrowRate // nominalLight,
+					lightLevel[13], carbonLampLife, standardGrowRate // nominalLight,
 			// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -3163,7 +3177,7 @@ public class Eln {
 			element = new LampDescriptor("50V Farming Lamp",
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, 120, // nominalU, nominalP
-					lightLevel[15], incondecentLampLife, 0.50 // nominalLight,
+					lightLevel[15], incandescentLampLife, 0.50 // nominalLight,
 																// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -3174,7 +3188,7 @@ public class Eln {
 			element = new LampDescriptor("200V Farming Lamp",
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, MVU, 120, // nominalU, nominalP
-					lightLevel[15], incondecentLampLife, 0.50 // nominalLight,
+					lightLevel[15], incandescentLampLife, 0.50 // nominalLight,
 																// nominalLife
 			);
 			sharedItem.addElement(completId, element);
@@ -3267,7 +3281,7 @@ public class Eln {
 																// String
 																// name,int
 																// metadata,
-					30 * (genCooper ? 1 : 0), 6, 10, 0, 80 // int spawnRate,int
+					30 * (genCopper ? 1 : 0), 6, 10, 0, 80 // int spawnRate,int
 															// spawnSizeMin,int
 			// spawnSizeMax,int spawnHeightMin,int
 			// spawnHeightMax
@@ -3286,7 +3300,7 @@ public class Eln {
 																// String
 																// name,int
 																// metadata,
-					8 * (genPlumb ? 1 : 0), 3, 9, 0, 24 // int spawnRate,int
+					8 * (genLead ? 1 : 0), 3, 9, 0, 24 // int spawnRate,int
 														// spawnSizeMin,int
 			// spawnSizeMax,int spawnHeightMin,int
 			// spawnHeightMax
