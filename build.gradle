@@ -20,21 +20,20 @@ apply plugin: 'forge'
 apply plugin: 'de.undercouch.download'
 apply plugin: 'java'
 
-targetCompatibility = '1.6'
-sourceCompatibility = '1.6'
+apply from: 'gradle.properties'
 
 group = GROUP
 archivesBaseName = ARCHIVE_NAME
 version = VERSION
 
+targetCompatibility = '1.6'
+sourceCompatibility = '1.6'
+
 sourceSets {
     main {
-        java {
-            srcDirs = ['src/main/java']
-        }
-        resources {
-            srcDirs = ['src/main/resources']
-        }
+        java.srcDirs = ['src/main/java']
+        resources.srcDirs = ['src/main/resources']
+        resources.excludes = ['*']
     }
 }
 
@@ -72,15 +71,59 @@ jar {
         attributes 'Source-Compatibility': project.sourceCompatibility
         attributes 'Target-Compatibility': project.targetCompatibility
     }
-    
+
+    // Copy libs jar files
     from { configurations.external.collect { it.isDirectory() ? it : zipTree(it) } }
     exclude(['dan200/**', 'ic2/**', 'li/**', 'buildcraft/**'])
 
-    // Exclude unused (temp/source) resource files to reduce the size of the release jar
-    exclude(['**/*.ai', '**/*.blend', '**/*.blend1', '**/*.blend2', '**/*.xcf', '**/*.rar', '**/*.wav', '**/*.flac', '**/*.m_p'])
-
     // Add README and LICENSE to the release jar
     from(['README.md', 'LICENSE.md'])
+
+    // Asset whitelist to copy the required asset files into the release jar.
+    // Ignore files not used in Minecraft to reduce the release jar size.
+    // Copy main files
+    from('src/main/resources/assets/eln/') {
+        include 'logo.png'
+        include 'sounds.json'
+        into 'assets/eln/'
+    }
+
+    // Copy language files
+    from('src/main/resources/assets/eln/lang') {
+        include '*.lang'
+        into 'assets/eln/lang'
+    }
+
+    // Copy model
+    from('src/main/resources/assets/eln/model') {
+        exclude '_Common'
+        exclude '_TEMPLATES'
+        exclude 'export_*.png'
+        include '**/*.mtl'
+        include '**/*.obj'
+        include '**/*.txt'
+        include '**/*.png'
+        into 'assets/eln/model'
+    }
+
+    // Copy sounds
+    from('src/main/resources/assets/eln/sounds') {
+        include '*.ogg'
+        into 'assets/eln/sounds'
+    }
+
+    // Copy sprites
+    from('src/main/resources/assets/eln/sprites') {
+        include '**/*.png'
+        include '**/*.xcf'
+        into 'assets/eln/sprites'
+    }
+
+    // Copy sprites
+    from('src/main/resources/assets/eln/textures') {
+        include '**/*.png'
+        into 'assets/eln/textures'
+    }
 }
 
 processResources {
@@ -95,12 +138,6 @@ processResources {
         // replace version and mcversion
         expand 'version': project.version, 'mcversion': project.minecraft.version
     }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-
-    exclude('**/temp/**') // Temporary asset folder
 }
 
 clean {
@@ -135,8 +172,8 @@ import de.undercouch.gradle.tasks.download.Download
 
 // Download the tutorial map as a zip file to the local 'run/saves' folder
 task downloadTutoMap(type: Download) {
-    src(MAP_URL)
-    dest(new File(minecraft.runDir + "/saves", MAP_URL.substring(MAP_URL.lastIndexOf("/") + 1, MAP_URL.length())))
+    src(MAPURL)
+    dest(new File(minecraft.runDir + "/saves", MAPURL.substring(MAPURL.lastIndexOf("/") + 1, MAPURL.length())))
     overwrite true
 }
 
