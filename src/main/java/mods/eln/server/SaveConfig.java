@@ -11,7 +11,7 @@ public class SaveConfig extends WorldSavedData {
 	public boolean heatFurnaceFuel = true;
 	public boolean electricalLampAging = true;
 	public boolean batteryAging = true;
-	public boolean infinitPortableBattery = false;
+	public boolean infinitePortableBattery = false;
 
 	public boolean reGenOre = false;
 
@@ -25,7 +25,7 @@ public class SaveConfig extends WorldSavedData {
 		heatFurnaceFuel = nbt.getBoolean("heatFurnaceFuel");
 		electricalLampAging = nbt.getBoolean("electricalLampAging");
 		batteryAging = nbt.getBoolean("batteryAging");
-		infinitPortableBattery = nbt.getBoolean("infinitPortableBattery");
+		infinitePortableBattery = nbt.getBoolean("infinitPortableBattery");
 		reGenOre = nbt.getBoolean("reGenOre");
 		
 		Eln.wind.readFromNBT(nbt, "wind");
@@ -36,7 +36,7 @@ public class SaveConfig extends WorldSavedData {
 		nbt.setBoolean("heatFurnaceFuel", heatFurnaceFuel);
 		nbt.setBoolean("electricalLampAging", electricalLampAging);
 		nbt.setBoolean("batteryAging", batteryAging);
-		nbt.setBoolean("infinitPortableBattery", infinitPortableBattery);
+		nbt.setBoolean("infinitPortableBattery", infinitePortableBattery);
 		nbt.setBoolean("reGenOre", reGenOre);
 		
 		Eln.wind.writeToNBT(nbt, "wind");

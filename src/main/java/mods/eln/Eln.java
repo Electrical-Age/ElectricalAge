@@ -96,6 +96,8 @@ import mods.eln.sixnode.modbusrtu.ModbusRtuDescriptor;
 import mods.eln.sixnode.modbusrtu.ModbusServer;
 import mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor;
 import mods.eln.sixnode.powerinductorsix.PowerInductorSixDescriptor;
+import mods.eln.sixnode.powersocket.PowerSocketDescriptor;
+import mods.eln.sixnode.powersocket.PowerSocketElement;
 import mods.eln.sixnode.resistor.ResistorDescriptor;
 import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
 import mods.eln.sixnode.thermalsensor.ThermalSensorDescriptor;
@@ -279,7 +281,8 @@ public class Eln {
 			"FlatScreenMonitor/FlatScreenMonitor.obj",
             "IndustrialPanel/IndustrialPanel.obj",
 			"DistributionBoard/DistributionBoard.obj",
-			"FuelGenerator/FuelGenerator.obj"
+			"FuelGenerator/FuelGenerator.obj",
+			"PowerSocket/PowerSocket.obj"
 			// "/model/BatteryBigHV/BatteryBigHV.obj"
 	};
 
@@ -591,6 +594,8 @@ public class Eln {
 		registerLampSocket(64);
 		registerLampSupply(65);
 		registerBatteryCharger(66);
+		registerPowerSocket(67);
+
 		registerWirelessSignal(92);
 		registerElectricalDataLogger(93);
 		registerElectricalRelay(94);
@@ -694,6 +699,7 @@ public class Eln {
 		recipeThermalCable();
 		recipeLampSocket();
 		recipeLampSupply();
+		recipePowerSocket();
 		recipePassiveComponent();
 		recipeSwitch();
 		recipeWirelessSignal();
@@ -973,6 +979,7 @@ public class Eln {
 
 		//tileEntityDestructor.clear();
 		LampSupplyElement.channelMap.clear();
+		PowerSocketElement.channelMap.clear();
 		WirelessSignalTxElement.channelMap.clear();
 
 	}
@@ -999,6 +1006,7 @@ public class Eln {
 		LightBlockEntity.observers.clear();
 		WirelessSignalTxElement.channelMap.clear();
 		LampSupplyElement.channelMap.clear();
+		PowerSocketElement.channelMap.clear();
 		playerManager.clear();
 		clientLiveDataManager.start();
 		simulator.init();
@@ -1685,6 +1693,32 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
+	}
+
+	void registerPowerSocket(int id) {
+		int subId;
+		String name;
+		PowerSocketDescriptor desc;
+		{
+			subId = 1;
+			name = "50V Power Socket";
+			desc = new PowerSocketDescriptor(
+					subId, name, obj.getObj("PowerSocket"),
+					10 //Range for plugged devices (without obstacles)
+			);
+			desc.setPlaceDirection(new Direction[]{Direction.XP,Direction.XN,Direction.ZP,Direction.ZN});
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		{
+			subId = 2;
+			name = "200V Power Socket";
+			desc = new PowerSocketDescriptor(
+					subId, name, obj.getObj("PowerSocket"),
+					10 //Range for plugged devices (without obstacles)
+			);
+			desc.setPlaceDirection(new Direction[]{Direction.XP,Direction.XN,Direction.ZP,Direction.ZN});
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
 	}
 
 	void registerPassiveComponent(int id) {
@@ -4838,6 +4872,15 @@ public class Eln {
 				Character.valueOf('C'), "ingotCopper",
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
 
+	}
+
+	void recipePowerSocket() {
+		addRecipe(findItemStack("50V Power Socket"), //TODO TBD!
+				"III",
+				"III",
+				"III",
+				Character.valueOf('C'), "ingotCopper",
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
 	}
 
 	void recipePassiveComponent() {

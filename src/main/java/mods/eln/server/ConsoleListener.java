@@ -4,12 +4,9 @@ import mods.eln.Eln;
 import mods.eln.misc.Color;
 import mods.eln.misc.LangFileParser;
 import mods.eln.misc.Utils;
-import mods.eln.sim.Simulator;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
-
-import java.util.EmptyStackException;
 
 public class ConsoleListener extends CommandBase {
 
@@ -38,7 +35,7 @@ public class ConsoleListener extends CommandBase {
 			SaveConfig.instance.batteryAging = (!astring[1].equals("0"));
 			SaveConfig.instance.electricalLampAging = (!astring[1].equals("0"));
 			SaveConfig.instance.heatFurnaceFuel = (!astring[1].equals("0"));
-			SaveConfig.instance.infinitPortableBattery = (astring[1].equals("0"));
+			SaveConfig.instance.infinitePortableBattery = (astring[1].equals("0"));
 			ack = true;
 			printBooleanResult(icommandsender, ack);
 		} else if (a.equals("lampaging")) {

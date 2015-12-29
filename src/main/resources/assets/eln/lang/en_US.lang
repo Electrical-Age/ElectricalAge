@@ -235,3 +235,5 @@ coal_dust.name=Coal Dust
 power_resistor.name=Power Resistor
 thermistor.name=Thermistor
 rheostat.name=Rheostat
+200v_power_socket.name=200V Power Socket
+50v_power_socket.name=50V Power Socket
