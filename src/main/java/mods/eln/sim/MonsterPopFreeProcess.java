@@ -2,6 +2,7 @@ package mods.eln.sim;
 
 import java.util.List;
 
+import mods.eln.Eln;
 import mods.eln.entity.ReplicatorEntity;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
@@ -26,20 +27,24 @@ public class MonsterPopFreeProcess implements IProcess {
 
 	@Override
 	public void process(double time) {
+		//Monster killing must be active before continuing :
+		if(!Eln.instance.killMonstersAroundLamps)
+			return;
+
 		timerCounter += time;
 		if (timerCounter > timerPeriod) {
 			timerCounter -= Utils.rand(1, 1.5) * timerPeriod;
 			List list = coordonate.world().getEntitiesWithinAABB(EntityMob.class, coordonate.getAxisAlignedBB(range + 8));
-			
-			for(Object o : list) {
-				//Utils.println("MonsterPopFreeProcess : in RANGE");
+
+			for (Object o : list) {
+				//Utils.println("MonsterPopFreeProcess : In range");
 				EntityMob mob = (EntityMob) o;
 				if (oldList == null || !oldList.contains(o)) {
 					if (coordonate.distanceTo(mob) < range) {
 						//Utils.println("MonsterPopFreeProcess : Must die");
 						if (!(o instanceof ReplicatorEntity) && !(o instanceof EntityWither) && !(o instanceof EntityEnderman)) {
 							mob.setDead();
-							Utils.println("MonsterPopFreeProcess : dead");
+							Utils.println("MonsterPopFreeProcess : Dead");
 						}
 					}
 				}
@@ -48,7 +53,4 @@ public class MonsterPopFreeProcess implements IProcess {
 		}
 	}
 
-	/*class MobData{
-		EntityMob mob;
-	}*/
 }

@@ -32,7 +32,7 @@ public class LampSocketElement extends SixNodeElement {
 
 	LampSocketDescriptor socketDescriptor = null;
 
-    public MonsterPopFreeProcess monsterPopFreeProcess = new MonsterPopFreeProcess(sixNode.coordonate, 15);
+    public MonsterPopFreeProcess monsterPopFreeProcess = new MonsterPopFreeProcess(sixNode.coordonate, Eln.instance.killMonstersAroundLampsRange);
     public NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
     //public NodeElectricalLoad negativeLoad = new NodeElectricalLoad("negativeLoad");
     //public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");

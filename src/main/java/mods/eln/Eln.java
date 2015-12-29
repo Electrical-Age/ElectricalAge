@@ -381,7 +381,10 @@ public class Eln {
 	public double solarPannelPowerFactor = 1;
 	public double windTurbinePowerFactor = 1;
 	public double waterTurbinePowerFactor = 1;
-	
+
+	public boolean killMonstersAroundLamps;
+	public int killMonstersAroundLampsRange;
+
 	double stdHalfLife = 2 * Utils.minecraftDay;
 
 	@EventHandler
@@ -454,8 +457,10 @@ public class Eln {
 		ElnToOtherEnergyConverterEnable = config.get("compatibility", "ElnToOtherEnergyConverterEnable", true).getBoolean(true);
 
 		replicatorPop = config.get("entity", "replicatorPop", true).getBoolean(true);
-		ReplicatorPopProcess.popPerSecondPerPlayer = config.get("entity", "replicatorPopWhenThunderPerSecond", 1.0/120).getDouble(1.0/120);
+		ReplicatorPopProcess.popPerSecondPerPlayer = config.get("entity", "replicatorPopWhenThunderPerSecond", 1.0/120).getDouble(1.0 / 120);
 		replicatorRegistrationId = config.get("entity", "replicatorId", -1).getInt(-1);
+		killMonstersAroundLamps = config.get("entity", "killMonstersAroundLamps", true).getBoolean(true);
+		killMonstersAroundLampsRange = config.get("entity", "killMonstersAroundLampsRange", 9).getInt(9);
 
 		forceOreRegen = config.get("mapGenerate", "forceOreRegen", false).getBoolean(false);
 		genCooper = config.get("mapGenerate", "cooper", true).getBoolean(true);

@@ -71,6 +71,10 @@ public class ConsoleListener extends CommandBase {
 				icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_RED+"Parsing error: malformed file."));
 			else
 				icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_YELLOW+"Unknown status returned."));
+		} else if (a.equals("killmonstersaroundlamps")){
+			Eln.instance.killMonstersAroundLamps = (!astring[1].equals("0"));
+			printBooleanResult(icommandsender, true);
+			icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_YELLOW+"Warning : Command effective to this game instance only."));
 		}
 		//Eln.simulator.pleaseCrash = true;
 	}
