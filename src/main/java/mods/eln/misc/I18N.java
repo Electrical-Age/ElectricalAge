@@ -13,11 +13,16 @@ public class I18N {
 		return FMLCommonHandler.instance().getCurrentLanguage();
 	}
 
-	public static String getString(String key) {
-		return l.getStringLocalization(key);
+	public static String tr(String key) {
+		return tr(key, getCurrentLanguage());
 	}
 
-	public static String getString(String key, String lang) {
-		return l.getStringLocalization(key, lang);
+	public static String tr(String key, String lang) {
+		String translation = l.getStringLocalization(key, lang);
+		if (translation != null && !"".equals(translation)) {
+			return translation;
+		} else {
+			return key;
+		}
 	}
 }
