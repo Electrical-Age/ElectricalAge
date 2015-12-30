@@ -73,7 +73,8 @@ public class ConsoleListener extends CommandBase {
 				else if (retCode == LangFileParser.RetStatus.ERR__IO_ERROR)
 					icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_RED+"I/O Error."));
 				else if (retCode == LangFileParser.RetStatus.ERR__PARSING_ERROR)
-					icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_RED+"Parsing error: malformed file."));
+					icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_RED+"Parsing error at line "
+						+ retCode.getLineNumber() + ": " + retCode.getLine()));
 				else
 					icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_YELLOW+"Unknown status returned."));
 			} catch (RuntimeException e) {
