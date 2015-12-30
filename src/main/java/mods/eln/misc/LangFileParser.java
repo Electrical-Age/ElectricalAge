@@ -6,6 +6,7 @@ import mods.eln.Eln;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Created by lambdaShade on 14.05.2015.
@@ -38,7 +39,9 @@ public class LangFileParser {
 
     //Parse and complete missing keys in the file pointed by "filepath" (must be full path name).
     public static RetStatus parseAndFillFile(String filepath){
+        int lineNumber = 1;
         try{
+            Map<String,String> existingTranslations = new TreeMap<String, String>();
             File kvFile = new File(filepath);
             Boolean useExistingFile = (kvFile.exists() && kvFile.isFile());
             if(useExistingFile)
@@ -48,7 +51,6 @@ public class LangFileParser {
             if(useExistingFile) {
                 FileReader fileRd = new FileReader(filepath);
                 BufferedReader fileBufRd = new BufferedReader(fileRd);
-                int lineNumber = 1;
                 String line = null;
 
                 //Test first line (header)
@@ -62,6 +64,7 @@ public class LangFileParser {
                 //Parse keys
                 while((line = fileBufRd.readLine()) != null) {
                     lineNumber++;
+
                     // Skip empty lines.
                     if("".equals(line))
                         continue;
@@ -69,7 +72,7 @@ public class LangFileParser {
                     int separatorIdx = line.indexOf("=");
                     int commentSeparatorIdx = line.indexOf("#");
                     //Check for comment or empty line (with spaces/tabs)
-                    if(commentSeparatorIdx != -1)
+                    if(commentSeparatorIdx == -1)
                         commentSeparatorIdx = line.length();
                     if(commentSeparatorIdx < separatorIdx) {
                         for(int cIdx = 0 ; cIdx < commentSeparatorIdx ; cIdx++){
@@ -84,9 +87,9 @@ public class LangFileParser {
                         return RetStatus.ERR__PARSING_ERROR.at(lineNumber, line);
                     }
 
-                    //Key parsing
+                    // Key parsing
                     int startIdx = 0;
-                    while((line.charAt(startIdx)==' ') || (line.charAt(startIdx)=='\t') || (startIdx < separatorIdx))
+                    while(((line.charAt(startIdx)==' ') || (line.charAt(startIdx)=='\t')) && (startIdx < separatorIdx))
                         startIdx++;
                     if(startIdx==separatorIdx)
                         return RetStatus.ERR__PARSING_ERROR.at(lineNumber, line); //Empty key!
@@ -95,7 +98,7 @@ public class LangFileParser {
                         return RetStatus.ERR__PARSING_ERROR.at(lineNumber, line); //Key can't contains one or more space char
                     //Value parsing (if any)
                     String strValue = line.substring(separatorIdx+1);
-                    Eln.langFile_DefaultKeys.put(strKey,strValue);
+                    existingTranslations.put(strKey,strValue);
                 }
                 fileBufRd.close();
             }
@@ -108,14 +111,18 @@ public class LangFileParser {
             fileBufWr.newLine();
 
             for(Map.Entry<String,String> item : Eln.langFile_DefaultKeys.entrySet()) {
-                fileBufWr.write(item.getKey()+"="+item.getValue());
+                String translation = existingTranslations.get(item.getKey());
+                if (translation == null) {
+                    translation = item.getValue();
+                }
+                fileBufWr.write(item.getKey() + "=" + translation);
                 fileBufWr.newLine();
             }
             fileBufWr.flush();
             fileBufWr.close();
         }
         catch(IOException e) {
-            return RetStatus.ERR__IO_ERROR;
+            return RetStatus.ERR__IO_ERROR.at(lineNumber, "-");
         }
 
         return RetStatus.SUCCESS;
