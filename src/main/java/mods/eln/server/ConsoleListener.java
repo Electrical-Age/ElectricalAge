@@ -63,17 +63,22 @@ public class ConsoleListener extends CommandBase {
 			ack = true;
 			printBooleanResult(icommandsender, ack);
 		} else if (a.equals("generatelangfiletemplate")){
-			LangFileParser.RetStatus retCode = LangFileParser.parseAndFillFile(astring[1]);
-			if(retCode == LangFileParser.RetStatus.SUCCESS)
-				icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_GREEN+"Success."));
-			else if (retCode == LangFileParser.RetStatus.ERR__BAD_HEADER)
-				icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_RED+"Error: Existing file has a bad header."));
-			else if (retCode == LangFileParser.RetStatus.ERR__IO_ERROR)
-				icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_RED+"I/O Error."));
-			else if (retCode == LangFileParser.RetStatus.ERR__PARSING_ERROR)
-				icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_RED+"Parsing error: malformed file."));
-			else
-				icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_YELLOW+"Unknown status returned."));
+			try {
+				LangFileParser.RetStatus retCode = LangFileParser.parseAndFillFile(astring[1]);
+
+				if(retCode == LangFileParser.RetStatus.SUCCESS)
+					icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_GREEN+"Success."));
+				else if (retCode == LangFileParser.RetStatus.ERR__BAD_HEADER)
+					icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_RED+"Error: Existing file has a bad header."));
+				else if (retCode == LangFileParser.RetStatus.ERR__IO_ERROR)
+					icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_RED+"I/O Error."));
+				else if (retCode == LangFileParser.RetStatus.ERR__PARSING_ERROR)
+					icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_RED+"Parsing error: malformed file."));
+				else
+					icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_YELLOW+"Unknown status returned."));
+			} catch (RuntimeException e) {
+				icommandsender.addChatMessage(new ChatComponentText(Color.COLOR_DARK_RED + "Runtime Exception: " + e.getMessage()));
+			}
 		}
 		//Eln.simulator.pleaseCrash = true;
 	}
