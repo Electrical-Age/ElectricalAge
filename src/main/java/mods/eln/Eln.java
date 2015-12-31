@@ -173,12 +173,13 @@ import java.util.*;
 // @NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
 	// Mod information (override from 'mcmod.info' file)
-	protected final static String MODID = "Eln";
-	protected final static String NAME = "Electrical Age";
-	protected final static String MODDESC = "Electricity in your base !";
-	private final static String URL = "http://electrical-age.net";
-	private final static String UPDATE_URL = "https://github.com/Dolu1990/ElectricalAge/releases";
-	private final static String[] AUTHORS = { "Dolu1990", "lambdaShade", "cm0x4D", "TheBroBeans", "DrummingFish" };
+	public final static String MODID = "Eln";
+	public final static String NAME = "Electrical Age";
+	public final static String MODDESC = "Electricity in your base !";
+	public final static String URL = "https://electrical-age.net";
+	public final static String UPDATE_URL = "https://github.com/Electrical-Age/ElectricalAge/releases";
+	public final static String SRC_URL = "https://github.com/Electrical-Age";
+	public final static String[] AUTHORS = { "Dolu1990", "lambdaShade", "cm0x4D", "metc", "Baughn"};
 
 	public static String channelName = "miaouMod";
 	public ArrayList<IConfigSharing> configShared = new ArrayList<IConfigSharing>();
@@ -596,7 +597,6 @@ public class Eln {
 
 		SixNode.sixNodeCacheList.add(new SixNodeCacheStd());
 
-
 		registerTestBlock();
 		registerEnergyConverter();
 		registerComputer();
@@ -605,6 +605,9 @@ public class Eln {
 		registerTool();
 		registerOre();
 
+		//SIX NODE REGISTRATION
+		//Sub-UID must be unique in this section only.
+		//============================================
 		registerGround(2);
 		registerElectricalSource(3);
 		registerElectricalCable(32);
@@ -630,8 +633,10 @@ public class Eln {
 		registerElectricalGate(109);
 		registerTreeResinCollector(116);
 		registerSixNodeMisc(117);
-		//
 
+		//TRANSPARENT NODE REGISTRATION
+		//Sub-UID must be unique in this section only.
+		//============================================
 		registerPowerComponent(1);
 		registerTransformer(2);
 		registerHeatFurnace(3);
@@ -651,6 +656,9 @@ public class Eln {
 		registerTransparentNodeMisc(65);
 		registerTurret(66);
 
+		//ITEM REGISTRATION
+		//Sub-UID must be unique in this section only.
+		//============================================
 		registerHeatingCorp(1);
 		// registerThermalIsolator(2);
 		registerRegulatorItem(3);
