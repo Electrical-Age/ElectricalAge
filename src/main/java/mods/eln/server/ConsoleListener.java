@@ -40,6 +40,8 @@ public class ConsoleListener extends CommandBase {
 	public ConsoleListener(){
 		//Visible commands when autocomplete request
 		cmdVisibleList = new ArrayList<String>();
+		cmdVisibleList.add(cmdNameStr_listCmd);
+		cmdVisibleList.add(cmdNameStr_man);
 		cmdVisibleList.add(cmdNameStr_about);
 		cmdVisibleList.add(cmdNameStr_aging);
 		cmdVisibleList.add(cmdNameStr_lampAging);
@@ -294,47 +296,97 @@ public class ConsoleListener extends CommandBase {
 			cprint(ics, strOffsetL0+"Returns help for a given command.");
 			cprint(ics, "");
 			cprint(ics, strOffsetL0+"Parameters :");
-			cprint(ics, strOffsetL1+"@0:bool : Command name to get documentation.");
+			cprint(ics, strOffsetL1+"@0:string : Command name to get documentation.");
 			cprint(ics, "");
-		}
-		else if(cmd.equalsIgnoreCase(cmdNameStr_about)){
-			cprint(ics, strOffsetL0+"Returns useful information on this mod.");
-			cprint(ics, "");
-			cprint(ics, strOffsetL0+"No input parameters.");
-			cprint(ics, "");
-		}
-		/* TODO
-		else if(cmd.equalsIgnoreCase(cmdNameStr_listCmd)){
-
 		}
 		else if(cmd.equalsIgnoreCase(cmdNameStr_about)) {
-
+			cprint(ics, strOffsetL0 + "Returns useful information on this mod.");
+			cprint(ics, "");
+			cprint(ics, strOffsetL0 + "No input parameters.");
+			cprint(ics, "");
+		}
+		else if(cmd.equalsIgnoreCase(cmdNameStr_listCmd)){
+			cprint(ics, strOffsetL0 + "Lists all ELN publicly available commands.");
+			cprint(ics, "");
+			cprint(ics, strOffsetL0 + "No input parameters.");
+			cprint(ics, "");
+		}
+		else if(cmd.equalsIgnoreCase(cmdNameStr_about)) {
+			cprint(ics, strOffsetL0 + "Gives some information about ElectricalAge mod.");
+			cprint(ics, "");
+			cprint(ics, strOffsetL0 + "No input parameters.");
+			cprint(ics, "");
 		}
 		else if(cmd.equalsIgnoreCase(cmdNameStr_aging)){
-
+			cprint(ics, strOffsetL0 + "Enables/disables aging on :");
+			cprint(ics, strOffsetL0 + "- Portable and standards batteries,");
+			cprint(ics, strOffsetL0 + "- Lamps,");
+			cprint(ics, strOffsetL0 + "- Fuel into electrical furnaces.");
+			cprint(ics, strOffsetL0 + "Acts as a combination of the following commands :");
+			cprint(ics, strOffsetL0 + "- "+ cmdNameStr_batteryAging +", "+ cmdNameStr_lampAging +", "+ cmdNameStr_heatFurnaceFuel);
+			cprint(ics, strOffsetL0 + "Changes stored into the map.");
+			cprint(ics, "");
+			cprint(ics, strOffsetL0+"Parameters :");
+			cprint(ics, strOffsetL1+"@0:bool : Aging state (enabled/disabled).");
+			cprint(ics, "");
 		}
 		else if(cmd.equalsIgnoreCase(cmdNameStr_lampAging)){
-
+			cprint(ics, strOffsetL0 + "Enables/disables aging on lamps.");
+			cprint(ics, strOffsetL0 + "Changes stored into the map.");
+			cprint(ics, "");
+			cprint(ics, strOffsetL0+"Parameters :");
+			cprint(ics, strOffsetL1+"@0:bool : Aging state (enabled/disabled).");
+			cprint(ics, "");
 		}
 		else if(cmd.equalsIgnoreCase(cmdNameStr_batteryAging)){
-
+			cprint(ics, strOffsetL0 + "Enables/disables aging on standard batteries.");
+			cprint(ics, strOffsetL0 + "Changes stored into the map.");
+			cprint(ics, "");
+			cprint(ics, strOffsetL0+"Parameters :");
+			cprint(ics, strOffsetL1+"@0:bool : Aging state (enabled/disabled).");
+			cprint(ics, "");
 		}
 		else if(cmd.equalsIgnoreCase(cmdNameStr_heatFurnaceFuel)){
-
+			cprint(ics, strOffsetL0 + "Enables/disables aging on fuel into electrical furnaces.");
+			cprint(ics, strOffsetL0 + "Changes stored into the map.");
+			cprint(ics, "");
+			cprint(ics, strOffsetL0+"Parameters :");
+			cprint(ics, strOffsetL1+"@0:bool : Aging state (enabled/disabled).");
+			cprint(ics, "");
 		}
 		else if(cmd.equalsIgnoreCase(cmdNameStr_newWind)){
-
+			cprint(ics, strOffsetL0 + "Changes progressively the wind to another target amplitude.");
+			cprint(ics, strOffsetL0 + "Changes stored into the map.");
+			cprint(ics, "");
+			cprint(ics, strOffsetL0 + "No input parameters.");
+			cprint(ics, "");
 		}
 		else if(cmd.equalsIgnoreCase(cmdNameStr_regenOre)){
-
+			cprint(ics, strOffsetL0 + "When set, regenerates ELN ores at the next map reload.");
+			cprint(ics, strOffsetL0 + "Changes stored into the map and effective once when set.");
+			cprint(ics, "");
+			cprint(ics, strOffsetL0+"Parameters :");
+			cprint(ics, strOffsetL1+"@0:bool : Regenerate flag (enabled/disabled).");
+			cprint(ics, "");
 		}
 		else if(cmd.equalsIgnoreCase(cmdNameStr_generateLangFileTemplate)){
-
+			cprint(ics, strOffsetL0 + "Generate a new language file or complete an existing one");
+			cprint(ics, strOffsetL0 + "with missing fields.");
+			cprint(ics, "");
+			cprint(ics, strOffsetL0+"Parameters :");
+			cprint(ics, strOffsetL1+"@0:string : full file path.");
+			cprint(ics, "");
 		}
 		else if(cmd.equalsIgnoreCase(cmdNameStr_killMonstersAroundLamps)){
-
+			cprint(ics, strOffsetL0 + "When set, monsters don't spawn around the lamps (default).");
+			cprint(ics, strOffsetL0 + "When clear, leaving lights on in dark zones is recommended...");
+			cprint(ics, strOffsetL0 + "Effective only during this game instance.");
+			cprint(ics, strOffsetL0 + "(See \"Eln.cfg\" for permanent effect.)");
+			cprint(ics, "");
+			cprint(ics, strOffsetL0+"Parameters :");
+			cprint(ics, strOffsetL1+"@0:bool : Enable/disable.");
+			cprint(ics, "");
 		}
-		*/
 		else{
 			cprint(ics, Color.COLOR_DARK_RED + strOffsetL0 + "Error : Unknown/Undocumented command.");
 		}
