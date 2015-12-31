@@ -25,11 +25,11 @@ public final class Version {
 	}
 
 	public final static String print() {
-		return I18N.getString("mod.name") + " " + getVersionName();
+		return I18N.tr("mod.name") + " " + getVersionName();
 	}
 
 	public final static String printColor() {
-		return Color.WHITE + I18N.getString("mod.name") + " version "
+		return Color.WHITE + I18N.tr("mod.name") + " version "
 				+ Color.ORANGE + getVersionName();
 	}
 }

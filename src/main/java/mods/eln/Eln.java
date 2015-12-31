@@ -402,7 +402,7 @@ public class Eln {
 		meta.modId = MODID;
 		meta.version = Version.getVersionName();
 		meta.name = NAME;
-		meta.description = I18N.getString("mod.meta.desc");
+		meta.description = I18N.tr("mod.meta.desc");
 		meta.url = URL;
 		meta.updateUrl = UPDATE_URL;
 		meta.authorList = Arrays.asList(AUTHORS);
@@ -6749,7 +6749,4 @@ public class Eln {
 		//Mod metadatas
 		Eln.langFile_DefaultKeys.put("mod.meta.desc","<"+MODDESC+">");
 	}
-
-
-
 }

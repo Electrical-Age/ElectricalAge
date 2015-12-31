@@ -216,17 +216,21 @@ public class ConsoleListener extends CommandBase {
 			if(!checkArgCount(ics,astring,1))
 				return;
 			cprint(ics, strOffsetL0+"Specified file name: " + Color.COLOR_DARK_GREY + astring[1]);
-			LangFileParser.RetStatus retCode = LangFileParser.parseAndFillFile(astring[1]);
-			if(retCode == LangFileParser.RetStatus.SUCCESS)
-				cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_GREEN + "Success.");
-			else if (retCode == LangFileParser.RetStatus.ERR__BAD_HEADER)
-				cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_RED + "Error: Existing file has a bad header.");
-			else if (retCode == LangFileParser.RetStatus.ERR__IO_ERROR)
-				cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_RED + "I/O Error.");
-			else if (retCode == LangFileParser.RetStatus.ERR__PARSING_ERROR)
-				cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_RED + "Parsing error: malformed file.");
-			else
-				cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_YELLOW + "Unknown status returned.");
+			try {
+				LangFileParser.RetStatus retCode = LangFileParser.parseAndFillFile(astring[1]);
+				if(retCode == LangFileParser.RetStatus.SUCCESS)
+					cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_GREEN + "Success.");
+				else if (retCode == LangFileParser.RetStatus.ERR__BAD_HEADER)
+					cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_RED + "Error: Existing file has a bad header.");
+				else if (retCode == LangFileParser.RetStatus.ERR__IO_ERROR)
+					cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_RED + "I/O Error.");
+				else if (retCode == LangFileParser.RetStatus.ERR__PARSING_ERROR)
+					cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_RED + "Parsing error: malformed file.");
+				else
+					cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_YELLOW + "Unknown status returned.");
+			} catch (RuntimeException e) {
+				cprint(ics, strOffsetL0 + Color.COLOR_DARK_RED + "Runtime Exception: " + e.getMessage());
+			}
 		}
 		else if(cmd.equalsIgnoreCase(cmdNameStr_killMonstersAroundLamps)){
 			cprint(ics, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_YELLOW + cmdNameStr_killMonstersAroundLamps);
