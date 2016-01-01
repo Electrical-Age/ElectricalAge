@@ -179,12 +179,21 @@ public class I18N {
                 for (final String translation : strings.get(sourceFile)) {
                     writer.append(translation).append("=");
 
-                    final String existingTranslation = existingTranslations.get(translation);
+                    final String existingTranslation = existingTranslations.remove(translation);
                     if (existingTranslation != null) {
                         writer.append(existingTranslation);
                     }
 
                     writer.append("\n");
+                }
+            }
+
+            // Add translations from file that were not found in code.
+            if (!existingTranslations.isEmpty()) {
+                writer.append("\n# Existing translations in language file not found in code\n");
+
+                for (Map.Entry<String,String> entry: existingTranslations.entrySet()) {
+                    writer.append(entry.getKey()).append("=").append(entry.getValue()).append("\n");
                 }
             }
 
