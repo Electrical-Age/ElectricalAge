@@ -61,7 +61,7 @@ public class I18N {
 
     private static class SourceCodeParser {
         private static final Pattern JAVA_PATTERN = Pattern.compile("tr\\s*\\(\\s*\"(.*?)\"\\s*[,)]");
-        private static final String MULTIPLE_LOCATIONS = "Appears in multiple source files";
+        private static final String MULTIPLE_LOCATIONS = "Appearing in multiple source files";
 
         public static Map<String, Set<String>> parseSourceFolder(final File file) throws IOException {
             Map<String, Set<String>> strings = new TreeMap<String,Set<String>>();
