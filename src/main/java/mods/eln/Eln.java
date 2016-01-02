@@ -187,106 +187,6 @@ public class Eln {
 
 	public static HashMap<String,String> langFile_DefaultKeys = new HashMap<String,String>();
 
-	public static final String[] modelPaths = new String[] {
-			"PowerElectricPrimitives/PowerElectricPrimitives.obj",
-			"EnergyMeter/EnergyMeter.obj",
-			"AdvancedEnergyMeter/AdvancedEnergyMeter.obj",
-			"SimpleLamp/SimpleLamp.obj",
-			"FluorescentLamp/FluorescentLamp.obj",
-			"condo200/condo200.obj",
-			"WallClock/WallClock.obj",
-			"TutoPlate/TutoPlate.obj",
-			"relay800/relay800.obj",
-			"hub/hub.obj",
-			"electricalweathersensor/electricalweathersensor.obj",
-			"SmallWaterWheel/SmallWaterWheel.obj",
-			"ProximitySensor/ProximitySensor.obj",
-			"FlatLamp/FlatLamp.obj",
-			"AutoMiner/AutoMiner.obj",
-			"Anemometer/Anemometer.obj",
-			"XRayScanner/XRayScanner.obj",
-			"RobustLampSuspended/RobustLampSuspended.obj",
-			"activeThermalDissipatorA/activethermaldissipatora.obj",
-			"200vactiveThermalDissipatorA/200vactivethermaldissipatora.obj",
-			"AlarmMedium/alarmmedium.obj",
-			"BatteryBig/BatteryBig.obj",
-			"batterychargera/batterychargera.obj",
-			"batterychargerb/batterychargerb.obj",
-			"ClassicLampSocket/ClassicLampSocket.obj",
-			"compressora/compressora.obj",
-			"compressorb/compressorb.obj",
-			"DataloggerCRTFloor/DataloggerCRTFloor.obj",
-			"daylightsensor/daylightsensor.obj",
-			"DigitalWallClock/DigitalWallClock.obj",
-			"eggIncubator/eggincubator.obj",
-			"ElectricalSensor/electricalsensor.obj",
-			"electricaltimer/electricaltimer.obj",
-			"ElectricFurnace/ElectricFurnace.obj",
-			"eleToRed/eletored.obj",
-			"groundCable/groundcable.obj",
-			"HighCapacityBattery/HighCapacityBattery.obj",
-			"HighCurrentBattery/HighCurrentBattery.obj",
-			"HighVoltageBattery/HighVoltageBattery.obj",
-			"HighVoltageSwitch/HighVoltageSwitch.obj",
-			"lampsupply/lampsupply.obj",
-			"Led/Led.obj",
-			"LedSwitch/ledswitch.obj",
-			"lightsensor/lightsensor.obj",
-			"LongLifeBattery/LongLifeBattery.obj",
-			"LowCostBattery/LowCostBattery.obj",
-			"LowCostBattery2/LowCostBattery2.obj",
-			"LowPowerReceiverAntenna/lowpowerreceiverantenna.obj",
-			"LowPowerTransmitterAntenna/lowpowertransmitterantenna.obj",
-			"LowVoltageSwitch/LowVoltageSwitch.obj",
-			"macerator50V/macerator50V.obj",
-			"maceratora/maceratora.obj",
-			"maceratorb/maceratorb.obj",
-			"magnetizera/magnetizera.obj",
-			"magnetizerb/magnetizerb.obj",
-			"MediumVoltageSwitch/MediumVoltageSwitch.obj",
-			"passiveThermalDissipatorA/passivethermaldissipatora.obj",
-			"plateMachineA/platemachinea.obj",
-			"plateMachineB/platemachineb.obj",
-			"PLC/PLC.obj",
-			"redToEle/redtoele.obj",
-			"RelayBig/RelayBig.obj",
-			"RelaySmall/RelaySmall.obj",
-			"RobustLamp/RobustLamp.obj",
-			"RTU/RTU.obj",
-			"signalsourcepot/signalsourcepot.obj",
-			"smallsolarpannel/smallsolarpannel.obj",
-			"smallsolarpannelrot/smallsolarpannelrot.obj",
-			"SolarPanel2x2/SolarPanel2x2.obj",
-			"stoneCache/stonecache.obj",
-			"StoneFurnace/stonefurnace.obj",
-			"StreetLight/StreetLight.obj",
-			"TemperatureSensor/temperaturesensor.obj",
-			"ThermalSensor/thermalsensor.obj",
-			"transformator/corea/feromagneticcorea.obj",
-			"transformator/transformator.obj",
-			"Transporter/Transporter.obj",
-			"treeresincolector/treeresincolector.obj",
-			"turbine50V/turbine50V.obj",
-			"turbineB/turbineb.obj",
-			"turbineBBlue/turbinebblue.obj",
-			"VoltageSensor/voltagesensor.obj",
-			"voltagesource/voltagesource.obj",
-			"signalsource/signalsource.obj",
-			"Vumeter/Vumeter.obj",
-			"WindTurbineMini/WindTurbineMini.obj",
-			"wirelesssignalrepeater/wirelesssignalrepeater.obj",
-			"wirelesssignalrx/wirelesssignalrx.obj",
-			"wirelesssignaltx/wirelesssignaltx.obj",
-			"Turret/Turret.obj",
-            "FireDetector/FireDetector.obj",
-			"FlatScreenMonitor/FlatScreenMonitor.obj",
-            "IndustrialPanel/IndustrialPanel.obj",
-			"DistributionBoard/DistributionBoard.obj",
-			"FuelGenerator/FuelGenerator.obj",
-			"PowerSocket/PowerSocket.obj"
-			// "/model/BatteryBigHV/BatteryBigHV.obj"
-	};
-
 	// public static final double networkSerializeValueFactor = 100.0;
 	// public static final byte packetNodeSerialized24bitPosition = 11;
 	// public static final byte packetNodeSerialized48bitPosition = 12;
@@ -566,9 +466,7 @@ public class Eln {
 		ghostBlock = (GhostBlock) new GhostBlock().setBlockTextureName("iron_block");
 		lightBlock = (LightBlock) new LightBlock();
 
-		for (String path : modelPaths) {
-			obj.loadObj(path);
-		}
+		obj.loadAllElnModels();
 
 		GameRegistry.registerItem(sharedItem, "Eln.sharedItem");
 		GameRegistry.registerItem(sharedItemStackOne, "Eln.sharedItemStackOne");
