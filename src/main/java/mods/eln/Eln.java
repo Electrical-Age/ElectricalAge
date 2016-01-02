@@ -165,7 +165,7 @@ import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import mods.eln.achievepackets.*;
-import static mods.eln.misc.I18N.tr;
+import static mods.eln.misc.I18N.*;
 
 import java.util.*;
 
@@ -1660,7 +1660,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "10A Diode";
+			name = ulf("10A Diode");
 
 			function = new FunctionTableYProtect(new double[] { 0.0, 0.1, 0.3,
 					1.0, 2.0, 4.0, 8.0, 12.0 }, 1.0, 0, 100);

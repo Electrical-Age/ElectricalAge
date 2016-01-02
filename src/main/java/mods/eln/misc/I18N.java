@@ -59,8 +59,31 @@ public class I18N {
         return translation;
     }
 
+    /**
+     * This method can be used to mark an unlocalized string in order to add it to the language files.
+     *
+     * @param string    String LITERAL to add to the language files.
+     * @return          The exactly same string.
+     */
+    public static String ul(final String string) {
+        return string;
+    }
+
+    /**
+     * This method can be used to mark an unlocalized forge i18n compatilbe string in order to add it to the language
+     * files.
+     *
+     * @param string    String LITERAL to add to the language files.
+     * @return          The exactly same string.
+     */
+    public static String ulf(final String string) {
+        return string;
+    }
+
     private static class SourceCodeParser {
-        private static final Pattern JAVA_PATTERN = Pattern.compile("tr\\s*\\(\\s*\"(.*?)\"\\s*[,)]");
+        private static final Pattern JAVA_TR_PATTERN = Pattern.compile("tr\\s*\\(\\s*\"(.*?)\"\\s*[,)]");
+        private static final Pattern JAVA_UL_PATTERN = Pattern.compile("ul\\s*\\(\\s*\"(.*?)\"\\s*\\)");
+        private static final Pattern JAVA_ULF_PATTERN = Pattern.compile("ulf\\s*\\(\\s*\"(.*?)\"\\s*\\)");
         private static final String MULTIPLE_LOCATIONS = "Appearing in multiple source files";
 
         public static Map<String, Set<String>> parseSourceFolder(final File file) throws IOException {
@@ -102,9 +125,29 @@ public class I18N {
 
             // Find all matches for Java style translations.
             final Set<String> translations = new TreeSet<String>();
-            final Matcher matcher = JAVA_PATTERN.matcher(content);
-            while (matcher.find()) {
-                String translation = matcher.group(1);
+            final Matcher trMatcher = JAVA_TR_PATTERN.matcher(content);
+            while (trMatcher.find()) {
+                final String translation = trMatcher.group(1);
+                System.out.println("  " + translation);
+
+                if (!isStringAlreadyPresent(translation, strings)) {
+                    translations.add(translation);
+                }
+            }
+
+            final Matcher ulMatcher = JAVA_UL_PATTERN.matcher(content);
+            while (ulMatcher.find()) {
+                final String translation = ulMatcher.group(1);
+                System.out.println("  " + translation);
+
+                if (!isStringAlreadyPresent(translation, strings)) {
+                    translations.add(translation);
+                }
+            }
+
+            final Matcher ulfMatcher = JAVA_ULF_PATTERN.matcher(content);
+            while (ulfMatcher.find()) {
+                final String translation = ulfMatcher.group(1).toLowerCase().replace(' ', '_') + ".name";
                 System.out.println("  " + translation);
 
                 if (!isStringAlreadyPresent(translation, strings)) {
