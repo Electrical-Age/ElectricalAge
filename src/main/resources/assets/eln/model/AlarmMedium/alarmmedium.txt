@@ -1,5 +1,5 @@
-s offTexture AlarmMedium_OFF.PNG
-s onTexture AlarmMedium_ON.PNG
+s offTexture AlarmMedium_OFF.png
+s onTexture AlarmMedium_ON.png
 o rot
 f originX 0.18750
 f originY 0.12500
