@@ -274,8 +274,8 @@ public class Eln {
 	public boolean explosionEnable;
 
 	public static boolean debugEnabled = false;  // Read from configuration file. Default is `false`.
-    public static boolean versionCheckEnabled = true; // Read from configuration file. Default is `true`.
-    public static boolean analyticsEnabled = true; // Read from configuration file. Default is `true`.
+	public static boolean versionCheckEnabled = true; // Read from configuration file. Default is `true`.
+  public static boolean analyticsEnabled = true; // Read from configuration file. Default is `true`.
 	public static String playerUUID = null; // Read from configuration file. Default is `null`.
 
 	public double heatTurbinePowerFactor = 1;
