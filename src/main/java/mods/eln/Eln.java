@@ -570,7 +570,7 @@ public class Eln {
 		for (String path : modelPaths) {
 			obj.loadObj(path);
 		}
-
+		
 		GameRegistry.registerItem(sharedItem, "Eln.sharedItem");
 		GameRegistry.registerItem(sharedItemStackOne, "Eln.sharedItemStackOne");
 		GameRegistry.registerBlock(ghostBlock, "Eln.ghostBlock");
@@ -1510,7 +1510,7 @@ public class Eln {
 
 		{
 			subId = 36;
-			name = "200V Condensator";
+			name = TR_NAME(I18N.Type.NONE, "200V Condensator");
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
 					"condo200", highVoltageCableDescriptor, 0.0, true, false,
@@ -1759,7 +1759,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = ulf("10A Diode");
+			name = TR_NAME(Type.NONE, "10A Diode");
 
 			function = new FunctionTableYProtect(new double[] { 0.0, 0.1, 0.3,
 					1.0, 2.0, 4.0, 8.0, 12.0 }, 1.0, 0, 100);
@@ -2777,7 +2777,7 @@ public class Eln {
 
 		{
 			subId = 4;
-			name = "200V Compressor";
+			name = TR_NAME(Type.NONE, "200V Compressor");
 
 			CompressorDescriptor desc = new CompressorDescriptor(
 					name,// String name,
@@ -2927,7 +2927,7 @@ public class Eln {
 		{
 			subId = 2;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("Small 200V Copper Heating Corp",// iconId,
+			element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 200V Copper Heating Corp"),// iconId,
 																				// name,
 					MVU, 400,// electricalNominalU, electricalNominalP,
 					500,// electricalMaximalP)
@@ -2937,7 +2937,7 @@ public class Eln {
 		{
 			subId = 3;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("200V Copper Heating Corp",// iconId,
+			element = new HeatingCorpElement(TR_NAME(Type.NONE, "200V Copper Heating Corp"),// iconId,
 																		// name,
 					MVU, 600,// electricalNominalU, electricalNominalP,
 					750,// electricalMaximalP)
@@ -3337,7 +3337,7 @@ public class Eln {
 		{
 			id = 6;
 
-			name = "Cinnabar Ore";
+			name = TR_NAME(Type.NONE, "Cinnabar Ore");
 
 			OreDescriptor desc = new OreDescriptor(name, id, // int itemIconId,
 																// String
@@ -3889,7 +3889,7 @@ public class Eln {
 
 		{
 			subId = 34;
-			name = "200V Active Thermal Dissipator";
+			name = TR_NAME(Type.NONE, "200V Active Thermal Dissipator");
 
 			ThermalDissipatorActiveDescriptor desc = new ThermalDissipatorActiveDescriptor(
 					name,
@@ -4222,7 +4222,7 @@ public class Eln {
 		{
 			subId = 4;
 			completId = subId + (id << 6);
-			name = "200V Battery Charger";
+			name = TR_NAME(Type.NONE, "200V Battery Charger");
 
 			descriptor = new BatteryChargerDescriptor(
 					name, obj.getObj("batterychargera"),
@@ -4542,7 +4542,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "Cheap Chip";
+			name = TR_NAME(Type.NONE, "Cheap Chip");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4675,7 +4675,7 @@ public class Eln {
 		}
 		{
 			subId = 23;
-			name = "Advanced Machine Block";
+			name = TR_NAME(Type.NONE, "Advanced Machine Block");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
