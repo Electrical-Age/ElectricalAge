@@ -46,7 +46,12 @@ minecraft {
     srgExtra "PK: gnu/io mods/eln/libs/gnu/io"
 }
 
-
+repositories {
+    ivy {
+        name 'MineTweaker3' 
+		artifactPattern "http://minetweaker3.powerofbytes.com/download/[module]-[classifier]-[revision].[ext]"
+    }
+}
 
 configurations {
     external
@@ -55,6 +60,7 @@ configurations {
 
 dependencies {
     external files("libs/commons-math3-3.3.jar", "libs/modbus4J.jar", "libs/seroUtils.jar")
+	compile name: 'MineTweaker3', version: '1.7.10-3.0.10B', classifier: 'Dev', ext: 'jar'
 }
 
 jar {
