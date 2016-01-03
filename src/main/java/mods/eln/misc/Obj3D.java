@@ -52,78 +52,45 @@ public class Obj3D {
         }
 
         private void drawVertex() {
-            int mode = 0;
-
-            for (Face f : face) {
-                if (f.vertexNbr != mode) {
-                    if (mode != 0)
-                        GL11.glEnd();
-                    switch (f.vertexNbr) {
-                        case 3:
-                            GL11.glBegin(GL11.GL_TRIANGLES);
-                            break;
-                        case 4:
-                            GL11.glBegin(GL11.GL_QUADS);
-                            break;
-                        case 6:
-                            //	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
-                            break;
-                        case 8:
-                            //	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
-                            break;
-                    }
-
-                    mode = f.vertexNbr;
-                }
-
-                GL11.glNormal3f(f.normal.x, f.normal.y, f.normal.z);
-                for (int idx = 0; idx < mode; idx++) {
-                    if (f.uv[idx] != null)
-                        GL11.glTexCoord2f(f.uv[idx].u, f.uv[idx].v);
-                    GL11.glVertex3f(f.vertex[idx].x, f.vertex[idx].y, f.vertex[idx].z);
-                }
-            }
-
-            if (mode != 0)
-                GL11.glEnd();
+            drawVertex(0, 0);
         }
 		
-		private void drawVertex(float offsetX, float offsetY) {
-			int mode = 0;
+        private void drawVertex(float offsetX, float offsetY) {
+          int mode = 0;
 
-			for (Face f : face) {
-				if (f.vertexNbr != mode) {
-					if (mode != 0)
-						GL11.glEnd();
-					switch (f.vertexNbr) {
-						case 3:
-							GL11.glBegin(GL11.GL_TRIANGLES);
-							break;
-						case 4:
-							GL11.glBegin(GL11.GL_QUADS);
-							break;
-						case 6:
-							//	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
-							break;
-						case 8:
-							//	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
-							break;
-					}
+          for (Face f : face) {
+            if (f.vertexNbr != mode) {
+              if (mode != 0)
+                GL11.glEnd();
+              switch (f.vertexNbr) {
+                case 3:
+                  GL11.glBegin(GL11.GL_TRIANGLES);
+                  break;
+                case 4:
+                  GL11.glBegin(GL11.GL_QUADS);
+                  break;
+                case 6:
+                  //	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
+                  break;
+                case 8:
+                  //	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
+                  break;
+              }
 
-					mode = f.vertexNbr;
-				}
+              mode = f.vertexNbr;
+            }
 
-				GL11.glNormal3f(f.normal.x, f.normal.y, f.normal.z);
-				for (int idx = 0; idx < mode; idx++) {
-					if (f.uv[idx] != null)
-						GL11.glTexCoord2f(f.uv[idx].u+offsetX, f.uv[idx].v+offsetY);
-					GL11.glVertex3f(f.vertex[idx].x, f.vertex[idx].y, f.vertex[idx].z);
-				}
-			}
+            GL11.glNormal3f(f.normal.x, f.normal.y, f.normal.z);
+            for (int idx = 0; idx < mode; idx++) {
+              if (f.uv[idx] != null)
+                GL11.glTexCoord2f(f.uv[idx].u+offsetX, f.uv[idx].v+offsetY);
+              GL11.glVertex3f(f.vertex[idx].x, f.vertex[idx].y, f.vertex[idx].z);
+            }
+          }
 
-			if (mode != 0)
-				GL11.glEnd();
-		}
+          if (mode != 0)
+            GL11.glEnd();
+        }
 		
         public void drawNoBind() {
             if (!listReady) {
@@ -329,23 +296,23 @@ public class Obj3D {
         return new ResourceLocation("eln", "model/" + dirPath + "/" + name);
     }
 
+    /**
+     * Load a resource (obj, mtl, txt file) for a model.
+     * @param filePath the path from the "assets/eln" folder
+     * @return the  {@code BufferedReader} or null if the resource does not exist
+     */
     private BufferedReader getResourceAsStream(String filePath) {
         final String path = "assets/eln/" + filePath;
         try {
             InputStream in = getClass().getClassLoader().getResourceAsStream(path);
             return new BufferedReader(new InputStreamReader(in, "UTF-8"));
         } catch (Exception e) {
-            Utils.println("Unable to load the resource '" + path + "' !");
+            // Utils.println("Unable to load the resource '" + path + "' !");
             return null;
         }
     }
 
     public boolean loadFile(String filePath) {
-        //int lastSlashId = path.lastIndexOf('/');
-        //this.directory = path.substring(0, lastSlashId + 1);
-        //this.fileName = path.substring(lastSlashId + 1, path.length());
-        //mod = modName;
-
         Obj3DPart part = null;
         FaceGroup fg = null;
 
@@ -356,7 +323,7 @@ public class Obj3D {
             {
                 BufferedReader bufferedReader = getResourceAsStream("model/" + filePath);
                 if (bufferedReader == null) {
-                    Utils.println("Loading obj failed !");
+                    Utils.println(String.format(" - failed to load obj '%s'", filePath));
                     return false;
                 }
 
@@ -410,7 +377,7 @@ public class Obj3D {
             {
                 BufferedReader bufferedReader = getResourceAsStream("model/" + dirPath + "/" + mtlName);
                 if (bufferedReader == null) {
-                    Utils.println("Loading mtl failed !");
+                    Utils.println(String.format(" - failed to load mtl '%s'", mtlName));
                     return false;
                 }
 
@@ -442,7 +409,10 @@ public class Obj3D {
         try {
             final String txtPath = filePath.replace(".obj", ".txt").replace(".OBJ", ".txt");
             BufferedReader bufferedReader = getResourceAsStream("model/" + txtPath);
-            if (bufferedReader != null) {
+            if (bufferedReader == null) {
+                Utils.println(String.format(" - failed to load txt '%s'", txtPath));
+            }
+            else {
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     String[] words = line.split(" ");
