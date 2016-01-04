@@ -5,9 +5,8 @@
 package mods.eln.server;
 
 import mods.eln.Eln;
-import mods.eln.misc.LangFileParser;
-import mods.eln.misc.Version;
 import mods.eln.misc.Color;
+import mods.eln.misc.Version;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
@@ -215,24 +214,8 @@ public class ConsoleListener extends CommandBase {
 		}
 		else if(cmd.equalsIgnoreCase(cmdNameStr_generateLangFileTemplate)){
 			cprint(ics, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_YELLOW + cmdNameStr_generateLangFileTemplate);
-			if(!checkArgCount(ics,astring,1))
-				return;
-			cprint(ics, strOffsetL0+"Specified file name: " + Color.COLOR_DARK_GREY + astring[1]);
-			try {
-				LangFileParser.RetStatus retCode = LangFileParser.parseAndFillFile(astring[1]);
-				if(retCode == LangFileParser.RetStatus.SUCCESS)
-					cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_GREEN + "Success.");
-				else if (retCode == LangFileParser.RetStatus.ERR__BAD_HEADER)
-					cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_RED + "Error: Existing file has a bad header.");
-				else if (retCode == LangFileParser.RetStatus.ERR__IO_ERROR)
-					cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_RED + "I/O Error.");
-				else if (retCode == LangFileParser.RetStatus.ERR__PARSING_ERROR)
-					cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_RED + "Parsing error: malformed file.");
-				else
-					cprint(ics, strOffsetL0 + "Operation terminated: " + Color.COLOR_DARK_YELLOW + "Unknown status returned.");
-			} catch (RuntimeException e) {
-				cprint(ics, strOffsetL0 + Color.COLOR_DARK_RED + "Runtime Exception: " + e.getMessage());
-			}
+			cprint(ics, strOffsetL0 + "New language system parses source code, see here how to generate language " +
+				"files: https://github.com/Electrical-Age/ElectricalAge");
 		}
 		else if(cmd.equalsIgnoreCase(cmdNameStr_killMonstersAroundLamps)){
 			cprint(ics, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_YELLOW + cmdNameStr_killMonstersAroundLamps);
