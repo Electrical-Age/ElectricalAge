@@ -283,6 +283,8 @@ public class Eln {
 	public double windTurbinePowerFactor = 1;
 	public double waterTurbinePowerFactor = 1;
 
+	public static double cableRsFactor = 1.0;
+
 	public boolean killMonstersAroundLamps;
 	public int killMonstersAroundLampsRange;
 
@@ -408,6 +410,7 @@ public class Eln {
 		electricalFrequency = config.get("simulation", "electricalFrequency", 20).getDouble(20);
 		electricalInterSystemOverSampling = config.get("simulation", "electricalInterSystemOverSampling", 50).getInt(50);
 		thermalFrequency = config.get("simulation", "thermalFrequency", 400).getDouble(400);
+		cableRsFactor = config.get("simulation", "cableRsFactor", 1.0).getDouble(1.0);
 
 		config.save();
 
@@ -1077,7 +1080,7 @@ public class Eln {
 
 			lowVoltageCableDescriptor = desc;
 
-			desc.setPhysicalConstantLikeNormalCable(LVU, LVP, 0.2 / 20,// electricalNominalVoltage,
+			desc.setPhysicalConstantLikeNormalCable(LVU, LVP, 0.2 / 20 * cableRsFactor,// electricalNominalVoltage,
 																		// electricalNominalPower,
 																		// electricalNominalPowerDrop,
 					LVU * 1.3, LVP * 1.2,// electricalMaximalVoltage,
@@ -1121,7 +1124,7 @@ public class Eln {
 
 			meduimVoltageCableDescriptor = desc;
 
-			desc.setPhysicalConstantLikeNormalCable(MVU, MVP, 0.10 / 20,// electricalNominalVoltage,
+			desc.setPhysicalConstantLikeNormalCable(MVU, MVP, 0.10 / 20 * cableRsFactor,// electricalNominalVoltage,
 																		// electricalNominalPower,
 																		// electricalNominalPowerDrop,
 					MVU * 1.3, MVP * 1.2,// electricalMaximalVoltage,
@@ -1149,7 +1152,7 @@ public class Eln {
 
 			highVoltageCableDescriptor = desc;
 
-			desc.setPhysicalConstantLikeNormalCable(HVU, HVP, 0.025*5/4 / 20,// electricalNominalVoltage,
+			desc.setPhysicalConstantLikeNormalCable(HVU, HVP, 0.025*5/4 / 20 * cableRsFactor,// electricalNominalVoltage,
 																		// electricalNominalPower,
 																		// electricalNominalPowerDrop,
 					HVU * 1.3, HVP * 1.2,// electricalMaximalVoltage,
@@ -1180,7 +1183,7 @@ public class Eln {
 
 			veryHighVoltageCableDescriptor = desc;
 
-			desc.setPhysicalConstantLikeNormalCable(VVU, VVP, 0.025*5/4 / 20/8,// electricalNominalVoltage,
+			desc.setPhysicalConstantLikeNormalCable(VVU, VVP, 0.025*5/4 / 20/8 * cableRsFactor,// electricalNominalVoltage,
 																		// electricalNominalPower,
 																		// electricalNominalPowerDrop,
 					VVU * 1.3, VVP * 1.2,// electricalMaximalVoltage,
