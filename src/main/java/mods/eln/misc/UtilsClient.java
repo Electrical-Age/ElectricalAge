@@ -30,7 +30,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import static mods.eln.misc.I18N.tr;
+import static mods.eln.i18n.I18N.tr;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;

@@ -24,6 +24,7 @@ import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
+import mods.eln.i18n.I18N;
 import mods.eln.item.*;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
 import mods.eln.item.electricalitem.*;
