@@ -13,6 +13,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -51,6 +52,7 @@ public class ConsoleListener extends CommandBase {
 		cmdVisibleList.add(cmdNameStr_regenOre);
 		cmdVisibleList.add(cmdNameStr_generateLangFileTemplate);
 		cmdVisibleList.add(cmdNameStr_killMonstersAroundLamps);
+		java.util.Collections.sort(cmdVisibleList);
 	}
 
 	@Override
