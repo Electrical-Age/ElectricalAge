@@ -1,7 +1,7 @@
 # Contributing
 We appreciate any help from the community to improve the mod:
 
-#### Bugs or ideas for new items:
+### Bugs or ideas for new items:
 Did you found a bug or do you have an idea how to improve the mod? We are happy to hear from you...
 
 - [IRC Channel](https://qchat.rizon.net/?channels=electricalage)
