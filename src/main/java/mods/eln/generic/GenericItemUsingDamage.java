@@ -5,7 +5,6 @@ import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
-import mods.eln.misc.LangFileParser;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;

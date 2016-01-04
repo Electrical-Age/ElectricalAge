@@ -6,7 +6,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import mods.eln.Eln;
-import mods.eln.misc.I18N;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Version;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
