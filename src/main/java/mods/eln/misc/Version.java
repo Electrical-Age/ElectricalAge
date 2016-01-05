@@ -1,5 +1,7 @@
 package mods.eln.misc;
 
+import mods.eln.i18n.I18N;
+
 /**
  * Current mod version. Used to check if a new mod version is available. Must be
  * set correctly for each mod release.
