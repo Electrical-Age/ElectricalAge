@@ -166,7 +166,7 @@ import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import mods.eln.achievepackets.*;
-import static mods.eln.misc.I18N.*;
+import static mods.eln.i18n.I18N.*;
 
 import java.util.*;
 
