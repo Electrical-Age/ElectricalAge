@@ -165,6 +165,7 @@ import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import mods.eln.achievepackets.*;
+import static mods.eln.misc.I18N.tr;
 
 import java.util.*;
 
@@ -304,7 +305,7 @@ public class Eln {
 		meta.modId = MODID;
 		meta.version = Version.getVersionName();
 		meta.name = NAME;
-		meta.description = I18N.tr("mod.meta.desc");
+		meta.description = tr("mod.meta.desc");
 		meta.url = URL;
 		meta.updateUrl = UPDATE_URL;
 		meta.authorList = Arrays.asList(AUTHORS);
@@ -6571,7 +6572,7 @@ public class Eln {
 		{
 			subId = 1;
 			FuelGeneratorDescriptor descriptor =
-					new FuelGeneratorDescriptor("Fuel Generator", obj.getObj("FuelGenerator"),
+					new FuelGeneratorDescriptor(tr("Fuel Generator"), obj.getObj("FuelGenerator"),
 							lowVoltageCableDescriptor, 200, LVU * 1.18,  "eln:water_turbine", 1f);
 			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
 		}

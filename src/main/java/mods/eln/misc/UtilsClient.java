@@ -30,6 +30,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
+import static mods.eln.misc.I18N.tr;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -579,7 +580,7 @@ public class UtilsClient {
         if (showItemTooltip()) {
             dst.addAll(src);
         } else {
-            dst.add("\u00a7F\u00a7o<" + I18N.tr("hold shift") + ">");
+            dst.add("\u00a7F\u00a7o<" + tr("hold shift") + ">");
         }
     }
 
