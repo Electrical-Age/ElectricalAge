@@ -24,6 +24,7 @@ import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
+import mods.eln.i18n.I18N;
 import mods.eln.item.*;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
 import mods.eln.item.electricalitem.*;
@@ -165,6 +166,7 @@ import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import mods.eln.achievepackets.*;
+import static mods.eln.i18n.I18N.*;
 
 import java.util.*;
 
@@ -304,7 +306,7 @@ public class Eln {
 		meta.modId = MODID;
 		meta.version = Version.getVersionName();
 		meta.name = NAME;
-		meta.description = I18N.tr("mod.meta.desc");
+		meta.description = tr("mod.meta.desc");
 		meta.url = URL;
 		meta.updateUrl = UPDATE_URL;
 		meta.authorList = Arrays.asList(AUTHORS);
@@ -1410,7 +1412,7 @@ public class Eln {
 
 		{
 			subId = 36;
-			name = "200V Condensator";
+			name = TR_NAME(I18N.Type.NONE, "200V Condensator");
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
 					"condo200", highVoltageCableDescriptor, 0.0, true, false,
@@ -1659,7 +1661,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "10A Diode";
+			name = TR_NAME(Type.NONE, "10A Diode");
 
 			function = new FunctionTableYProtect(new double[] { 0.0, 0.1, 0.3,
 					1.0, 2.0, 4.0, 8.0, 12.0 }, 1.0, 0, 100);
@@ -2677,7 +2679,7 @@ public class Eln {
 
 		{
 			subId = 4;
-			name = "200V Compressor";
+			name = TR_NAME(Type.NONE, "200V Compressor");
 
 			CompressorDescriptor desc = new CompressorDescriptor(
 					name,// String name,
@@ -2827,7 +2829,7 @@ public class Eln {
 		{
 			subId = 2;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("Small 200V Copper Heating Corp",// iconId,
+			element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 200V Copper Heating Corp"),// iconId,
 																				// name,
 					MVU, 400,// electricalNominalU, electricalNominalP,
 					500,// electricalMaximalP)
@@ -2837,7 +2839,7 @@ public class Eln {
 		{
 			subId = 3;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("200V Copper Heating Corp",// iconId,
+			element = new HeatingCorpElement(TR_NAME(Type.NONE, "200V Copper Heating Corp"),// iconId,
 																		// name,
 					MVU, 600,// electricalNominalU, electricalNominalP,
 					750,// electricalMaximalP)
@@ -3237,7 +3239,7 @@ public class Eln {
 		{
 			id = 6;
 
-			name = "Cinnabar Ore";
+			name = TR_NAME(Type.NONE, "Cinnabar Ore");
 
 			OreDescriptor desc = new OreDescriptor(name, id, // int itemIconId,
 																// String
@@ -3789,7 +3791,7 @@ public class Eln {
 
 		{
 			subId = 34;
-			name = "200V Active Thermal Dissipator";
+			name = TR_NAME(Type.NONE, "200V Active Thermal Dissipator");
 
 			ThermalDissipatorActiveDescriptor desc = new ThermalDissipatorActiveDescriptor(
 					name,
@@ -4122,7 +4124,7 @@ public class Eln {
 		{
 			subId = 4;
 			completId = subId + (id << 6);
-			name = "200V Battery Charger";
+			name = TR_NAME(Type.NONE, "200V Battery Charger");
 
 			descriptor = new BatteryChargerDescriptor(
 					name, obj.getObj("batterychargera"),
@@ -4442,7 +4444,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "Cheap Chip";
+			name = TR_NAME(Type.NONE, "Cheap Chip");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4575,7 +4577,7 @@ public class Eln {
 		}
 		{
 			subId = 23;
-			name = "Advanced Machine Block";
+			name = TR_NAME(Type.NONE, "Advanced Machine Block");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -6571,7 +6573,7 @@ public class Eln {
 		{
 			subId = 1;
 			FuelGeneratorDescriptor descriptor =
-					new FuelGeneratorDescriptor("Fuel Generator", obj.getObj("FuelGenerator"),
+					new FuelGeneratorDescriptor(tr("Fuel Generator"), obj.getObj("FuelGenerator"),
 							lowVoltageCableDescriptor, 200, LVU * 1.18,  "eln:water_turbine", 1f);
 			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
 		}
