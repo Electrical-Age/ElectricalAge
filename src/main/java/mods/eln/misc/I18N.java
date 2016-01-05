@@ -26,7 +26,7 @@ public class I18N {
      * <p/>
      * Example: tr("You have %1 lives left", 4);
      * <p/>
-     * IT IS IMPORTANT THAT YOU PASS THE STRING LITERALS AT LEAST ONCE AS THE FIRST PARAMETER TO THIS METHOD!!
+     * IT IS IMPORTANT THAT YOU PASS THE STRING LITERALS AT LEAST ONCE AS THE FIRST PARAMETER TO THIS METHOD or to TR()!
      * Otherwise the translation will not be added to the language files automatically. There is no problem to use the
      * tr() method afterwards using an already registered string in the code using a string variable again.
      * <p/>
@@ -60,30 +60,52 @@ public class I18N {
     }
 
     /**
-     * This method can be used to mark an unlocalized string in order to add it to the language files.
+     * This method can be used to mark an unlocalized string in order to add it to the generated language files.
+     * The method does not actually translate the string - it marks the string literal only to be translated afterwards.
+     * This can be useful in order to add text to the language file which is translated using a string variable with
+     * the method tr().
      *
      * @param string    String LITERAL to add to the language files.
-     * @return          The exactly same string.
+     * @return          Exactly the same string as given.
      */
-    public static String ul(final String string) {
+    public static String TR(final String string) {
         return string;
     }
 
-    /**
-     * This method can be used to mark an unlocalized forge i18n compatilbe string in order to add it to the language
-     * files.
-     *
-     * @param string    String LITERAL to add to the language files.
-     * @return          The exactly same string.
-     */
-    public static String ulf(final String string) {
+    public enum Type {
+        NONE(""),
+        ITEM("item."),
+        TILE("tile."),
+        ACHIEVEMENT("achievement."),
+        ENTITY("entity."),
+        DEATH_ATTACK("death.attack."),
+        ITEM_GROUP("itemGroup."),
+        CONTAINER("container."),
+        BLOCK("block.");
+
+        private final String prefix;
+
+        Type(final String prefix) {
+            this.prefix = prefix;
+        }
+
+        public String getPrefix() {
+            return prefix;
+        }
+    };
+
+    public static String TR_NAME(final Type type, final String string) {
+        return string;
+    }
+
+    public static String TR_DESC(final Type type, final String string) {
         return string;
     }
 
     private static class SourceCodeParser {
-        private static final Pattern JAVA_TR_PATTERN = Pattern.compile("tr\\s*\\(\\s*\"(.*?)\"\\s*[,)]");
-        private static final Pattern JAVA_UL_PATTERN = Pattern.compile("ul\\s*\\(\\s*\"(.*?)\"\\s*\\)");
-        private static final Pattern JAVA_ULF_PATTERN = Pattern.compile("ulf\\s*\\(\\s*\"(.*?)\"\\s*\\)");
+        private static final Pattern JAVA_TR_PATTERN = Pattern.compile("(?:tr|TR)\\s*\\(\\s*\"(.*?)\"\\s*[,)]");
+        private static final Pattern JAVA_FORGE_PATTERN =
+            Pattern.compile("TR_([A-Z]*)\\s*\\(\\s*(?:I18N.)?Type.(.*?)\\s*,\\s\"(.*?)\"\\s*\\)");
         private static final String MULTIPLE_LOCATIONS = "Appearing in multiple source files";
 
         public static Map<String, Set<String>> parseSourceFolder(final File file) throws IOException {
@@ -96,10 +118,10 @@ public class I18N {
         private static void parseSourceFolderRecursive(final File folder, final Map<String, Set<String>> strings)
             throws IOException {
             // Check that arguments are valid.
-            if (folder != null && folder.exists() && strings != null) {
+            if (folder != null && folder.exists()) {
 
                 // Do for each file.
-                for (final File file : folder.listFiles()) {
+                for (final File file: folder.listFiles()) {
 
                     // If the file is a directory, call the method recursively.
                     if (file.isDirectory()) {
@@ -123,41 +145,36 @@ public class I18N {
             // Load file into memory.
             final String content = new Scanner(file).useDelimiter("\\Z").next();
 
+            final Set<String> textsToTranslate = new TreeSet<String>();
+
             // Find all matches for Java style translations.
-            final Set<String> translations = new TreeSet<String>();
             final Matcher trMatcher = JAVA_TR_PATTERN.matcher(content);
             while (trMatcher.find()) {
-                final String translation = trMatcher.group(1);
-                System.out.println("  " + translation);
+                final String textToTranslate = trMatcher.group(1);
+                System.out.println("  " + textToTranslate);
 
-                if (!isStringAlreadyPresent(translation, strings)) {
-                    translations.add(translation);
+                if (!isStringAlreadyPresent(textToTranslate, strings)) {
+                    textsToTranslate.add(textToTranslate);
                 }
             }
 
-            final Matcher ulMatcher = JAVA_UL_PATTERN.matcher(content);
-            while (ulMatcher.find()) {
-                final String translation = ulMatcher.group(1);
-                System.out.println("  " + translation);
+            final Matcher forgeMatcher = JAVA_FORGE_PATTERN.matcher(content);
+            while (forgeMatcher.find()) {
+                final String property = forgeMatcher.group(1).toLowerCase();
+                final Type type = Type.valueOf(forgeMatcher.group(2));
+                final String textToTranslate = type.getPrefix() +
+                    forgeMatcher.group(3).toLowerCase().replace(' ', '_') + "." + property;
 
-                if (!isStringAlreadyPresent(translation, strings)) {
-                    translations.add(translation);
-                }
-            }
+                System.out.println("  " + textToTranslate);
 
-            final Matcher ulfMatcher = JAVA_ULF_PATTERN.matcher(content);
-            while (ulfMatcher.find()) {
-                final String translation = ulfMatcher.group(1).toLowerCase().replace(' ', '_') + ".name";
-                System.out.println("  " + translation);
-
-                if (!isStringAlreadyPresent(translation, strings)) {
-                    translations.add(translation);
+                if (!isStringAlreadyPresent(textToTranslate, strings)) {
+                    textsToTranslate.add(textToTranslate);
                 }
             }
 
             // If there were translations for that file, add the list of translations to the map.
-            if (!translations.isEmpty()) {
-                strings.put(file.getPath(), translations);
+            if (!textsToTranslate.isEmpty()) {
+                strings.put(file.getPath(), textsToTranslate);
             }
         }
 
@@ -198,8 +215,8 @@ public class I18N {
                 writer.append("\n# ").append(sourceFile).append("\n");
 
                 // For each translated string in that source file, add translation text.
-                for (final String translation : strings.get(sourceFile)) {
-                    writer.append(translation).append("=\n");
+                for (final String text2Translate : strings.get(sourceFile)) {
+                    writer.append(text2Translate).append("=\n");
                 }
             }
 
@@ -219,10 +236,10 @@ public class I18N {
                 writer.append("\n# ").append(sourceFile).append("\n");
 
                 // For each translated string in that source file, add translation text.
-                for (final String translation : strings.get(sourceFile)) {
-                    writer.append(translation).append("=");
+                for (final String text2Translate : strings.get(sourceFile)) {
+                    writer.append(text2Translate).append("=");
 
-                    final String existingTranslation = existingTranslations.remove(translation);
+                    final String existingTranslation = existingTranslations.remove(text2Translate);
                     if (existingTranslation != null) {
                         writer.append(existingTranslation);
                     }
