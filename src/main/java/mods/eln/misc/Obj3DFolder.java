@@ -2,7 +2,10 @@ package mods.eln.misc;
 
 import mods.eln.misc.Obj3D.Obj3DPart;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.security.CodeSource;
 import java.util.Enumeration;
@@ -15,30 +18,55 @@ import java.util.jar.JarFile;
  */
 public class Obj3DFolder {
 
-  private HashMap<String, Obj3D> nameToObjHash = new HashMap<String, Obj3D>();
+    private HashMap<String, Obj3D> nameToObjHash = new HashMap<String, Obj3D>();
 
-  /** Load all obj models available in the release mod asset folder. */
-  public void loadAllElnModels() {
+    /** Load all obj models available in the release mod asset folder. */
+    public void loadAllElnModels() {
         try {
             // Find location of electrical age jar file.
             CodeSource codeSource = Obj3DFolder.class.getProtectionDomain().getCodeSource();
             if (codeSource != null) {
                 String jarFilePath = codeSource.getLocation().getPath();
-                jarFilePath = jarFilePath.substring(5, jarFilePath.indexOf("!"));
-                JarFile jarFile = new JarFile(URLDecoder.decode(jarFilePath, "UTF-8"));
-                Enumeration<JarEntry> entries = jarFile.entries();
-                int modelCount = 0;
-                while (entries.hasMoreElements()) {
-                    String filename = entries.nextElement().getName();
-                    if (filename.startsWith("assets/eln/model/") && filename.toLowerCase().endsWith(".obj")) {
-                        filename = filename.substring(filename.indexOf("/model/") + 7, filename.length());
-                        Utils.println(String.format("Loading model %03d '%s'", ++modelCount, filename));
-                        loadObj(filename);
+                if (jarFilePath.contains("!")) {
+                    jarFilePath = jarFilePath.substring(5, jarFilePath.indexOf("!"));
+                    JarFile jarFile = new JarFile(URLDecoder.decode(jarFilePath, "UTF-8"));
+                    Enumeration<JarEntry> entries = jarFile.entries();
+                    int modelCount = 0;
+                    while (entries.hasMoreElements()) {
+                        String filename = entries.nextElement().getName();
+                        if (filename.startsWith("assets/eln/model/") && filename.toLowerCase().endsWith(".obj")) {
+                            filename = filename.substring(filename.indexOf("/model/") + 7, filename.length());
+                            Utils.println(String.format("Loading model %03d '%s'", ++modelCount, filename));
+                            loadObj(filename);
+                        }
                     }
+                } else {
+                    Integer modelCount = 0;
+                    File modelFolder = new File(mods.eln.Eln.class.getResource("/assets/eln/model").toURI());
+                    if (modelFolder.isDirectory()) {
+                        loadModelsRecursive(modelFolder, modelCount);
+                    }
+
                 }
+
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadModelsRecursive(File folder, Integer modelCount) {
+        for (File file: folder.listFiles()) {
+            if (file.isDirectory()) {
+                loadModelsRecursive(file, modelCount);
+            } else if (file.getName().toLowerCase().endsWith(".obj")) {
+                String filename = file.getPath();
+                filename = filename.substring(filename.indexOf("/model/") + 7, filename.length());
+                Utils.println(String.format("Loading model %03d '%s'", ++modelCount, filename));
+                loadObj(filename);
+            }
         }
     }
 
