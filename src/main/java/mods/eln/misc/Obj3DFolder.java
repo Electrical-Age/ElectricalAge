@@ -46,9 +46,7 @@ public class Obj3DFolder {
                     if (modelFolder.isDirectory()) {
                         loadModelsRecursive(modelFolder, modelCount);
                     }
-
                 }
-
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -62,7 +60,7 @@ public class Obj3DFolder {
             if (file.isDirectory()) {
                 loadModelsRecursive(file, modelCount);
             } else if (file.getName().toLowerCase().endsWith(".obj")) {
-                String filename = file.getPath();
+                String filename = file.getPath().replaceAll("\\\\", "/");
                 filename = filename.substring(filename.indexOf("/model/") + 7, filename.length());
                 Utils.println(String.format("Loading model %03d '%s'", ++modelCount, filename));
                 loadObj(filename);
