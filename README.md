@@ -25,6 +25,11 @@ $ cd ElectricalAge
 $ gradle unzipTutoMap runClient
 ```
 
+## Contributing
+We appreciate any help from the community to improve the mod:
+
+You can find more info [here](https://github.com/Electrical-Age/ElectricalAge/blob/1.7.10-MNA/CONTRIBUTING.md)
+
 ## ABOUT
 
 Here is some highlighted features:
