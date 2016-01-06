@@ -21,7 +21,7 @@ electrical_age_[wip]=Electrical Age
 200v_macerator.name=200V Zerkleinerer
 200v_magnetizer.name=200V Magnetisierer
 200v_plate_machine.name=200V Blechpresse
-200v_power_socket.name=
+200v_power_socket.name=200V Steckdose
 200v_tungsten_heating_corp.name=200V Wolfram Heizkörper
 200v_turbine.name=200V Turbine
 25a_diode.name=25A Diode
@@ -38,7 +38,7 @@ electrical_age_[wip]=Electrical Age
 50v_macerator.name=50V Zerkleinerer
 50v_magnetizer.name=50V Magnetisierer
 50v_plate_machine.name=50V Blechpresse
-50v_power_socket.name=
+50v_power_socket.name=50V Steckdose
 50v_tungsten_heating_corp.name=50V Wolfram Heizkörper
 50v_turbine.name=50V Turbine
 800v_defence_turret.name=800V Verteidigungsgeschützturm
@@ -246,7 +246,47 @@ x-ray_scanner.name=Röntenstrahlen-Scanner
 yellow_brush.name=gelber Pinsel
 
 # ./src/main/java/mods/eln/i18n/I18N.java
-you_have_%1$_lives_left=
+you_have_%1$_lives_left=Du hast noch %1$ Leben
+
+# ./src/main/java/mods/eln/item/BrushDescriptor.java
+can_paint_%1$_blocks=kann %1$ Blöcke einfärben
+
+# ./src/main/java/mods/eln/item/CombustionChamber.java
+upgrade_for_the_stone_heat_furnace.=Verbesserung für den Steinofen
+
+# ./src/main/java/mods/eln/item/ElectricalDrillDescriptor.java
+energy_per_operation:_%1$=Energie für einen Arbeitsschritt: %1$
+time_per_operation:_%1$\"=Zeit für einen Arbeitsschritt: %1$
+
+# ./src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
+cable_loss_factor:_%1$=Verlustfaktor: %1$
+
+# ./src/main/java/mods/eln/item/HeatingCorpElement.java
+
+# ./src/main/java/mods/eln/item/LampDescriptor.java
+condition:_bad=schlecht
+condition:_end_of_life=aufgebraucht
+condition:_good=gut
+condition:_new=neu
+condition:_used=benutzt
+nominal_lifetime:_%1$h=Normale Lebensdauer: %1$h
+technology:_%1$=Technologie: %1$
+
+# ./src/main/java/mods/eln/item/OverHeatingProtectionDescriptor.java
+useful_to_prevent_overheating_of=Nützlich um Überhitzung zu vermeiden von
+
+# ./src/main/java/mods/eln/item/OverVoltageProtectionDescriptor.java
+useful_to_prevent_over-voltage_of=Nützlich um Überspannungen zu vermeiden bei
+
+# ./src/main/java/mods/eln/item/SolarTrackerDescriptor.java
+solar_panel_upgrade=Solarpanel-Erweiterung
+
+# ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
+
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
+off=aus
+on=ein
+state:=Zustand:
 
 # ./src/main/java/mods/eln/misc/UtilsClient.java
 hold_shift=Shift drücken
@@ -254,4 +294,104 @@ hold_shift=Shift drücken
 # ./src/main/java/mods/eln/misc/Version.java
 mod.name=Electrical Age
 
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
+can_be_used_to_recharge=Kann benutzt werden um
+electrical_items_like:=elektrische Geräte wie
+flash_light,_x-ray_scanner,=Taschenlampe, Röntgengerät
+nominal_power:_%1$=Nominale Leistung: %1$
+portable_battery_...=oder Betterien zu laden.
+
+# ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
+electrical_current_can_only=Elektrischer Strom durch die
+flow_through_the_diode=Diode nur von Anode zu
+from_anode_to_cathode=Kathode fliessen
+
+# ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmDescriptor.java
+emits_an_acoustic_alarm_if=
+the_input_signal_is_high.=
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
+opens_contact_if:=
+protects_electrical_components=
+
+# ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableDescriptor.java
+a_signal_is_electrical_information=
+cable_is_adapted_to_conduct=
+current:_%1$a=
+electrical_signals.=
+not_adopted_to_transport_power.=
+save_usage_->=
+serial_resistance:_%1$ω=
+which_must_be_between_0v_and_%1$v.=
+
+# ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerDescriptor.java
+electrical_signal_and_plots=
+it_can_store_up_to_256_points.=
+measures_the_voltage_of_an=
+the_data_in_real_time.=
+
+# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
+if_entities_are_moving_around.=
+
+# ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorDescriptor.java
+if_a_fire_has_been_detected.=
+
+# ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
+provides_configurable_signal=
+voltage.=
+
+# ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorDescriptor.java
+0v_at_night,_%1$v_at_"_+_eln.svu_+_"v_at_noon.=
+in_the_presence_of_light.=
+provides_an_electrical_voltage=
+the_intensity_of_daylight.=
+which_is_proportional_to=
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
+3_inputs_(a,_b,_c)_using_an_equation.=
+applicable_boolean_operators:=
+applicable_mathematical_operators:=
+calculates_an_output_signal_from=
+eapplicable_functions:=
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputDescriptor.java
+converts_redstone_signal=
+to_an_electrical_voltage.=
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputDescriptor.java
+converts_electrical_voltage=
+into_a_redstone_signal.=
+
+# ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayDescriptor.java
+a_relay_is_an_electrical=
+contact_that_conducts_electric=
+current_or_not,_depending=
+the_actual_input_signal_voltage.=
+
+# ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
+creative_block.=
+internal_resistance:=
+provides_ab_ideal_voltage_source=
+without_energy_or_power_limitation.=
+
+# ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
+can_break_an_electrical_circuit=
+interrupting_the_current.=
+
+# ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerDescriptor.java
+10_blocks_radius_after_10_blocks_depth.=
+excavates_on_a_small_radius.=
+extracts_ore_on_a_bigger_radius:=
+nominal_u_:_%1$=
+
 # Appearing in multiple source files
+batteries=
+charge_power:_%1$w=Ladeleistung: %1$W
+discharge_power:_%1$w=
+nominal:=
+output_voltage_increases=
+power:_%1$w=
+range:_%1$_blocks=
+resistance:_%1$ω=
+stored_energy:_%1$j_(%2$%)=
+voltage:_%1$v=
