@@ -54,7 +54,7 @@ class SourceCodeParser {
         // Find all matches for Java style translations.
         final Matcher trMatcher = JAVA_TR_PATTERN.matcher(content);
         while (trMatcher.find()) {
-            final String textToTranslate = trMatcher.group(1);
+            final String textToTranslate = trMatcher.group(1).toLowerCase().replace(' ', '_');
             System.out.println("  " + textToTranslate);
 
             if (!isStringAlreadyPresent(textToTranslate, strings)) {

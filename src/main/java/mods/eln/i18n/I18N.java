@@ -36,7 +36,7 @@ public class I18N {
         assert (!text.contains("\n"));
 
         // Try to find the translation for the string using forge API.
-        String translation = languageRegistry.getStringLocalization(text);
+        String translation = languageRegistry.getStringLocalization(text.toLowerCase().replace(' ', '_'));
 
         // If no translation was found, just use the original text.
         if (translation == null || "".equals(translation)) {
@@ -61,7 +61,7 @@ public class I18N {
      * @return          Exactly the same string as given to the method.
      */
     public static String TR(final String string) {
-        return string;
+        return string.toLowerCase().replace(' ', '_');
     }
 
     /**
