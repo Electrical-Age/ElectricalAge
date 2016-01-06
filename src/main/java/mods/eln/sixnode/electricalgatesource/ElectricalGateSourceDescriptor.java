@@ -10,6 +10,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 
 	public boolean onOffOnly;
@@ -30,8 +32,8 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Provides signal voltage");
-		list.add("from user control.");
+		list.add(tr("Provides configurable signal"));
+		list.add(tr("voltage."));
 	}
 
 	public void setWithAutoReset() {

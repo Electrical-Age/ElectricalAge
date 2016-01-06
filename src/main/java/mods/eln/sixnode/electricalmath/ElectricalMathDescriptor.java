@@ -16,6 +16,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalMathDescriptor extends SixNodeDescriptor implements IPlugIn {
 
 	public float[] pinDistance;
@@ -99,20 +101,20 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor implements IPlug
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
-		list.add("Calculates an output signal from");
-		list.add("3 inputs (A, B, C) and one equation.");
+
+		list.add(tr("Calculates an output signal from"));
+		list.add(tr("3 inputs (A, B, C) using an equation."));
 	}
 
 	@Override
 	public int top(int y, GuiVerticalExtender extender, ItemStack stack) {
-		extender.add(new GuiLabel(6, y,"Executable math operators:")); y+=9;
+		extender.add(new GuiLabel(6, y,tr("Applicable mathematical operators:"))); y+=9;
 		extender.add(new GuiLabel(6, y,"  + - * / > < ")); y+=9;
 		y+=9;
-		extender.add(new GuiLabel(6, y,"Executable boolean operators:")); y+=9;
+		extender.add(new GuiLabel(6, y,tr("Applicable boolean operators:"))); y+=9;
 		extender.add(new GuiLabel(6, y,"  & | = ^")); y+=9;
 		y+=9;
-		extender.add(new GuiLabel(6, y,"Executable functions:")); y+=9;
+		extender.add(new GuiLabel(6, y,tr("EApplicable functions:"))); y+=9;
 		extender.add(new GuiLabel(6, y,"  if(condition,then,else)")); y+=9;
 		extender.add(new GuiLabel(6, y,"  min(x,y)")); y+=9;
 		extender.add(new GuiLabel(6, y,"  max(x,y)")); y+=9;

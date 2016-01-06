@@ -8,6 +8,8 @@ import mods.eln.sim.ElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class FerromagneticCoreDescriptor extends GenericItemUsingDamageDescriptorUpgrade {
 
 	public double cableMultiplicator;
@@ -30,6 +32,6 @@ public class FerromagneticCoreDescriptor extends GenericItemUsingDamageDescripto
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("cableMultiplicator : " + cableMultiplicator);
+		list.add(tr("Cable loss factor: %1$", cableMultiplicator));
 	}
 }

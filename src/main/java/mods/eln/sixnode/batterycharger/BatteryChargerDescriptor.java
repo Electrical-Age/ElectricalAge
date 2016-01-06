@@ -17,6 +17,8 @@ import net.minecraft.item.ItemStack;
 
 import org.lwjgl.opengl.GL11;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class BatteryChargerDescriptor extends SixNodeDescriptor {
 
 	private Obj3D obj;
@@ -115,11 +117,11 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Can be used to recharge some");
-		list.add("electrical items like the:");
-		list.add("Flash Light, Xray scanner,");
-		list.add("Portable Battery ...");
-		list.add(Utils.plotPower("Nominal power", nominalPower));
+		list.add(tr("Can be used to recharge"));
+		list.add(tr("electrical items like:"));
+		list.add(tr("Flash Light, X-Ray scanner,"));
+		list.add(tr("Portable Battery ..."));
+		list.add(tr("Nominal power: %1$", nominalPower));
 		//list.add(Utils.plotPower("Maximal power", nominalPower * 3));
 	}
 }

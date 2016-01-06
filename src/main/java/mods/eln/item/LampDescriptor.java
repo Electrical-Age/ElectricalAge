@@ -16,6 +16,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade implements IConfigSharing {
 
 	public enum Type {Incandescent, eco}
@@ -103,22 +105,21 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 
-		list.add("Tech  : " + type);
-		list.add("Light   : " + (int)(nominalLight * 15) + " blocks");
-		list.add("Power : " + (int)nominalP + "W");
-		list.add(Utils.plotOhm("Resistance :", getR()));
-		//list.add(Utils.plotOhm("Resistance", this.getR()));
-		list.add(Utils.plotTime("Nominal life : ", serverNominalLife));
+		list.add(tr("Technology: %1$", type));
+		list.add(tr("Range: %1$ blocks", (int)(nominalLight * 15)));
+		list.add(tr("Power: %1$W", (int)nominalP));
+		list.add(tr("Resistance: %1$Ω", getR()));
+		list.add(tr("Nominal lifetime: %1$h", serverNominalLife));
 		if(!itemStack.getTagCompound().hasKey("life"))
-			list.add("Seem that nobody has used it before");
+			list.add(tr("Condition: New"));
 		else if(getLifeInTag(itemStack) > 0.5)
-			list.add("Seem in good condition");
+			list.add(tr("Condition: Good"));
 		else if(getLifeInTag(itemStack) > 0.2)
-			list.add("seems a bit worn");
+			list.add(tr("Condition: Used"));
 		else if(getLifeInTag(itemStack) > 0.1)
-			list.add("Seem in end of life");
+			list.add(tr("Condition: End of life"));
 		else 
-			list.add("Seem that can break in the hours");
+			list.add(tr("Condition: Bad"));
 	}
 
 	@Override

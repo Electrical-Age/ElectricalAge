@@ -11,6 +11,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
 
 	private Obj3DPart detector;
@@ -51,10 +53,10 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Output value rises when");
-		list.add("a fire is in range.");
-		list.add("Max range : " + (int)maxRange);
-	}
+        list.add(tr("Output voltage increases"));
+        list.add(tr("if a fire has been detected."));
+        list.add(tr("Range: %1$ blocks", (int) maxRange));
+    }
 
     @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {

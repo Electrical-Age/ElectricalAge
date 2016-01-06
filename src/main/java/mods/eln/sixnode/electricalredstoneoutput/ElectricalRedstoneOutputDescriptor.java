@@ -13,6 +13,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalRedstoneOutputDescriptor extends SixNodeDescriptor {
 
 	public float[] pinDistance;
@@ -75,7 +77,7 @@ public class ElectricalRedstoneOutputDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Converts voltage signal");
-		list.add("into redstone signal.");
+		list.add(tr("Converts electrical voltage"));
+		list.add(tr("into a Redstone signal."));
 	}
 }

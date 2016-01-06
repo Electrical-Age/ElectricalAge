@@ -14,6 +14,8 @@ import net.minecraft.item.ItemStack;
 
 import org.lwjgl.opengl.GL11;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
 
 	private Obj3DPart main;
@@ -52,13 +54,13 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		if (dayLightOnly) {
-			list.add("Provides an electrical signal");
-			list.add("with strength proportional to");
-			list.add("the amount of daylight.");
-			list.add("0V at night, " + Eln.SVU + "V at midday.");
+			list.add(tr("Provides an electrical voltage"));
+			list.add(tr("which is proportional to"));
+			list.add(tr("the intensity of daylight."));
+			list.add(tr("0V at night, %1$V at " + Eln.SVU + "V at noon."));
 		} else {
-			list.add("Provides an electrical signal");
-			list.add("whilst in the presence of light.");
+			list.add(tr("Provides an electrical voltage"));
+			list.add(tr("in the presence of light."));
 		}
 	}
 	

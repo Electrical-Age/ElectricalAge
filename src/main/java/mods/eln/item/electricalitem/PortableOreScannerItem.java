@@ -28,6 +28,8 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 import org.lwjgl.opengl.GL11;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor implements IItemEnergyBattery {
 
 	double energyStorage, dischargePower, chargePower;
@@ -171,8 +173,9 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Discharge speed: " + (int) dischargePower + "W");
-		list.add(Utils.plotEnergy("Energy Stored:", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
+		list.add(tr("Discharge power: %1$W", (int) dischargePower));
+		list.add(tr("Stored energy: %1$J (%2$%)", getEnergy(itemStack),
+			(int) (getEnergy(itemStack) / energyStorage * 100) + "%)"));
 	}
 
 	public double getEnergy(ItemStack stack) {

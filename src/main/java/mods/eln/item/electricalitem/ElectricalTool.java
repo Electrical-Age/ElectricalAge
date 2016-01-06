@@ -18,6 +18,8 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalTool extends GenericItemUsingDamageDescriptor implements IItemEnergyBattery {
 
 	int light,range;
@@ -107,7 +109,8 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add(Utils.plotEnergy("Energy Stored:", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
+		list.add(tr("Stored energy: %1$J (%2$%)", getEnergy(itemStack),
+			(int)(getEnergy(itemStack)/energyStorage*100) + "%)"));
 		//list.add("Power button is " + (getPowerOn(itemStack) ? "ON" : "OFF"));
 	}
 

@@ -13,6 +13,8 @@ import net.minecraftforge.common.ISpecialArmor;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalArmor extends genericArmorItem implements IItemEnergyBattery, ISpecialArmor {
 
 	double ratioMax, ratioMaxEnergy, energyPerDamage;
@@ -93,8 +95,9 @@ public class ElectricalArmor extends genericArmorItem implements IItemEnergyBatt
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Charge speed: " + (int) chargePower + "W");
-		list.add(Utils.plotEnergy("Energy Stored:", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
+		list.add(tr("Charge power: %1$W", (int) chargePower));
+		list.add(tr("Stored energy: %1$J (%2$%)", getEnergy(itemStack),
+			(int) (getEnergy(itemStack) / energyStorage * 100)));
 		//list.add("Power button is " + (getPowerOn(itemStack) ? "ON" : "OFF"));
 	}
 

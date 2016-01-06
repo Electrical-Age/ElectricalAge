@@ -9,7 +9,9 @@ import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.List;
 
-public class BrushDescriptor  extends GenericItemUsingDamageDescriptor {
+import static mods.eln.i18n.I18N.tr;
+
+public class BrushDescriptor extends GenericItemUsingDamageDescriptor {
 
 	public BrushDescriptor(String name) {
 		super( name);
@@ -61,7 +63,7 @@ public class BrushDescriptor  extends GenericItemUsingDamageDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add("Life : " + itemStack.getTagCompound().getInteger("life"));
+		list.add(tr("Can paint %1$ blocks", itemStack.getTagCompound().getInteger("life")));
 	}
 	
 	public boolean use(ItemStack stack) {

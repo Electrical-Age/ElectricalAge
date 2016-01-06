@@ -16,6 +16,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class DiodeDescriptor extends SixNodeDescriptor {
 
     private Obj3DPart base;
@@ -98,8 +100,9 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("The current can only run");
-		list.add("one way.");
+		list.add(tr("Electrical current can only"));
+		list.add(tr("flow through the diode"));
+        list.add(tr("from anode to cathode"));
 	}
 
     void draw() {

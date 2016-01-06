@@ -16,6 +16,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 
     Obj3D obj;
@@ -147,10 +149,11 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
-		list.add("This block measures the electrical");
-		list.add("signal and plots a graph with the data.");
-		list.add("Can store 256 samples.");
+
+		list.add(tr("Measures the voltage of an"));
+		list.add(tr("electrical signal and plots"));
+		list.add(tr("the data in real time."));
+		list.add(tr("It can store up to 256 points."));
 	}
 }
 /*

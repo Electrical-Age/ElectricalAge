@@ -17,6 +17,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 
 	Coordonate[] powerCoord;
@@ -121,10 +123,10 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Excavate on a small radius.");
-		list.add("Extract ore on a bigger radius.");
-		list.add("10 blocks radius after 10 blocks depth.");
-		list.add("Nominal U : " + (int)nominalVoltage);
+		list.add(tr("Excavates on a small radius."));
+		list.add(tr("Extracts ore on a bigger radius:"));
+		list.add(tr("10 blocks radius after 10 blocks depth."));
+		list.add(tr("Nominal U : %1$", (int)nominalVoltage));
 	}
 	
 	

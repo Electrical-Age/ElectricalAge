@@ -15,6 +15,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalRelayDescriptor extends SixNodeDescriptor {
 
 	private Obj3DPart relay1;
@@ -71,9 +73,10 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("The relay has the capability to");
-		list.add("conduct electricity or not,");
-		list.add("depending on the input signal voltage.");
+		list.add(tr("A relay is an electrical"));
+		list.add(tr("contact that conducts electric"));
+		list.add(tr("current or not, depending"));
+		list.add(tr("the actual input signal voltage."));
 	}
 	
 	@Override

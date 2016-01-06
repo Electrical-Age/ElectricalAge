@@ -12,6 +12,8 @@ import mods.eln.misc.Utils;
 import mods.eln.node.six.SixNodeDescriptor;
 import org.lwjgl.opengl.GL11;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalSourceDescriptor extends SixNodeDescriptor {
 
 	private Obj3D obj;
@@ -50,11 +52,11 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Provides a stable voltage source");
-		list.add("without energy/power limitation.");
+		list.add(tr("Provides ab ideal voltage source"));
+		list.add(tr("without energy or power limitation."));
+		list.add("");
+		list.add(tr("Internal resistance:", Eln.instance.lowVoltageCableDescriptor.electricalRs));
         list.add("");
-		list.add(Utils.plotOhm("Internal resistance :", Eln.instance.lowVoltageCableDescriptor.electricalRs));
-        list.add("");
-		list.add("Creative block.");
+		list.add(tr("Creative block."));
 	}
 }

@@ -15,6 +15,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
 
     public float[] pinDistance;
@@ -108,7 +110,7 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add("Emit a sonar alarm when");
-        list.add("the input signal is high.");
+        list.add(tr("Emits an acoustic alarm if"));
+        list.add(tr("the input signal is high."));
     }
 }

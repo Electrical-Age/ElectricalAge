@@ -17,6 +17,8 @@ import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalCableDescriptor extends SixNodeDescriptor {
 
 	double electricalNominalRs;
@@ -123,11 +125,11 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		if (signalWire) {
-			list.add("This cable is adapted to");
-			list.add("transport signals quickly.");
-			list.add("A signal is electrical information");
-			list.add("that must be between 0V and " + Eln.SVU + "V.");
-			list.add("Don't try to transport power.");
+			list.add(tr("Cable is adapted to conduct"));
+			list.add(tr("electrical signals."));
+			list.add(tr("A signal is electrical information"));
+			list.add(tr("which must be between 0V and %1$V.", Eln.SVU));
+			list.add(tr("Not adopted to transport power."));
 			
 			/*String lol = "";
 			for (int idx = 0; idx < 15; idx++) {
@@ -140,12 +142,12 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
 			list.add(lol);*/
 		} else {
 			//list.add("Low resistor => low power lost");
-			list.add("Nominal usage ->");
-			list.add("  Voltage : " + (int)electricalNominalVoltage + "V");
-			list.add(Utils.plotAmpere("  Current :",electricalNominalPower / electricalNominalVoltage));
-			list.add("  Power : " + (int)electricalNominalPower + "W");
+			list.add(tr("Save usage ->"));
+			list.add("  " + tr("Voltage: %1$V", (int) electricalNominalVoltage));
+			list.add("  " + tr("Current: %1$A", electricalNominalPower / electricalNominalVoltage));
+			list.add("  " + tr("Power: %1$W", (int) electricalNominalPower));
 		//	list.add("  Power lost : " + (int)(electricalNominalPowerDropFactor * electricalNominalPower) + " W/Block");
-			list.add(Utils.plotOhm("Serial resistor :", electricalNominalRs * 2));
+			list.add("  " + tr("Serial resistance: %1$Ω", electricalNominalRs * 2));
 		}
 	}
 

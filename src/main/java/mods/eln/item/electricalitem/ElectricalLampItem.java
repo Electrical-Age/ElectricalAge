@@ -16,6 +16,8 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalLampItem extends LampItem implements IItemEnergyBattery {
 
 	int lightMin,rangeMin;
@@ -151,9 +153,10 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 
-		list.add("Discharge speed: " + (int) dischargeMin + "W");
-		list.add(Utils.plotEnergy("Energy Stored:", getEnergy(itemStack)) + "(" + (int)(getEnergy(itemStack)/energyStorage*100) + "%)");
-		list.add("State: " + (getLightState(itemStack) != 0 ? "ON" : "OFF"));
+		list.add(tr("Discharge power: %1$W", (int) dischargeMin));
+		list.add(tr("Stored Energy: %1$J (%2$%)", getEnergy(itemStack),
+			(int) (getEnergy(itemStack) / energyStorage * 100)));
+		list.add(tr("State:") + " " + (getLightState(itemStack) != 0 ? tr("On") : tr("Off")));
 	}
 /*
 	@Override

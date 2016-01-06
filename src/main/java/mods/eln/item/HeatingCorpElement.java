@@ -9,6 +9,8 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class HeatingCorpElement extends GenericItemUsingDamageDescriptorUpgrade {
 	
 	public double electricalNominalU;
@@ -52,9 +54,9 @@ public class HeatingCorpElement extends GenericItemUsingDamageDescriptorUpgrade 
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add("Nominal :");
-		list.add(Utils.plotVolt( "  Voltage :", electricalNominalU));
-		list.add(Utils.plotPower("  Power :", electricalNominalP));
-		list.add(Utils.plotOhm("  Resistance :", electricalR));
+		list.add(tr("Nominal:"));
+		list.add("  " + tr("Voltage: %1$V", electricalNominalU));
+		list.add("  " + tr("Power: %1$W", electricalNominalP));
+		list.add("  " + tr("Resistance: %1$Ω", electricalR));
 	}
 }
