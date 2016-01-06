@@ -22,7 +22,7 @@ class LanguageFileGenerator {
 
             // For each translated string in that source file, add translation text.
             for (final String text2Translate : strings.get(sourceFile)) {
-                writer.append(text2Translate).append("=\n");
+                writer.append(text2Translate).append("=").append(text2Translate).append(" # TODO\n");
             }
         }
 
