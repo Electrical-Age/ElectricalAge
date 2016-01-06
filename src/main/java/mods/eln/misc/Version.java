@@ -1,6 +1,6 @@
 package mods.eln.misc;
 
-import mods.eln.i18n.I18N;
+import static mods.eln.i18n.I18N.tr;
 
 /**
  * Current mod version. Used to check if a new mod version is available. Must be
@@ -27,11 +27,11 @@ public final class Version {
 	}
 
 	public final static String print() {
-		return I18N.tr("mod.name") + " " + getVersionName();
+		return tr("mod.name") + " " + getVersionName();
 	}
 
 	public final static String printColor() {
-		return Color.WHITE + I18N.tr("mod.name") + " version "
+		return Color.WHITE + tr("mod.name") + " version "
 				+ Color.ORANGE + getVersionName();
 	}
 }

@@ -1042,7 +1042,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "Signal Cable";
+			name = TR_NAME(Type.NONE, "Signal Cable");
 
 			stdCableRenderSignal = new CableRenderDescriptor("eln",
 					"sprites/cable.png", 0.95f, 0.95f);
@@ -1072,7 +1072,7 @@ public class Eln {
 		{
 			subId = 4;
 
-			name = "Low Voltage Cable";
+			name = TR_NAME(Type.NONE, "Low Voltage Cable");
 
 			stdCableRender50V = new CableRenderDescriptor("eln",
 					"sprites/cable.png", 1.95f, 0.95f);
@@ -1116,7 +1116,7 @@ public class Eln {
 		{
 			subId = 8;
 
-			name = "Medium Voltage Cable";
+			name = TR_NAME(Type.NONE, "Medium Voltage Cable");
 
 			stdCableRender200V = new CableRenderDescriptor("eln",
 					"sprites/cable.png", 2.95f, 0.95f);
@@ -1144,7 +1144,7 @@ public class Eln {
 			subId = 12;
 
 			// highVoltageCableId = subId;
-			name = "High Voltage Cable";
+			name = TR_NAME(Type.NONE, "High Voltage Cable");
 
 			stdCableRender800V = new CableRenderDescriptor("eln",
 					"sprites/cable.png", 3.95f, 1.95f);
@@ -1175,7 +1175,7 @@ public class Eln {
 			subId = 16;
 
 			// highVoltageCableId = subId;
-			name = "Very High Voltage Cable";
+			name = TR_NAME(Type.NONE, "Very High Voltage Cable");
 
 			stdCableRender3200V = new CableRenderDescriptor("eln",
 					"sprites/cableVHV.png", 3.95f, 1.95f);
@@ -1228,7 +1228,7 @@ public class Eln {
 		{
 			subId = 1;
 
-			name = "Copper Thermal Cable";
+			name = TR_NAME(Type.NONE, "Copper Thermal Cable");
 
 			ThermalCableDescriptor desc = new ThermalCableDescriptor(name,
 					1000 - 20, -200, // thermalWarmLimit, thermalCoolLimit,
@@ -1270,7 +1270,7 @@ public class Eln {
 		batteryVoltageFunctionTable = voltageFunction;
 		{
 			subId = 0;
-			name = "Cost Oriented Battery";
+			name = TR_NAME(Type.NONE, "Cost Oriented Battery");
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
 					"BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
@@ -1290,7 +1290,7 @@ public class Eln {
 		}
 		{
 			subId = 1;
-			name = "Capacity Oriented Battery";
+			name = TR_NAME(Type.NONE, "Capacity Oriented Battery");
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
 					"BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction,
@@ -1310,7 +1310,7 @@ public class Eln {
 		}
 		{
 			subId = 2;
-			name = "Voltage Oriented Battery";
+			name = TR_NAME(Type.NONE, "Voltage Oriented Battery");
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
 					"BatteryBig", meduimVoltageCableDescriptor, 0.5, true, true, voltageFunction, stdU * 4,
@@ -1331,7 +1331,7 @@ public class Eln {
 
 		{
 			subId = 3;
-			name = "Current Oriented Battery";
+			name = TR_NAME(Type.NONE, "Current Oriented Battery");
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
 					"BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
@@ -1351,7 +1351,7 @@ public class Eln {
 		}
 		{
 			subId = 4;
-			name = "Life Oriented Battery";
+			name = TR_NAME(Type.NONE, "Life Oriented Battery");
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
 					"BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
@@ -1372,7 +1372,7 @@ public class Eln {
 
 		{
 			subId = 5;
-			name = "Single-use Battery";
+			name = TR_NAME(Type.NONE, "Single-use Battery");
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
 					"BatteryBig", batteryCableDescriptor, 1.0, false, false, voltageFunction, stdU,
@@ -1391,7 +1391,7 @@ public class Eln {
 		}
 		{
 			subId = 32;
-			name = "50V Condensator";
+			name = TR_NAME(Type.NONE, "50V Condensator");
 
 			BatteryDescriptor desc = new BatteryDescriptor(name,
 					"condo200", batteryCableDescriptor, 0.0, true, false,
@@ -1438,14 +1438,14 @@ public class Eln {
 
 		{
 			subId = 0;
-			name = "Ground Cable";
+			name = TR_NAME(Type.NONE, "Ground Cable");
 
 			GroundCableDescriptor desc = new GroundCableDescriptor(name, obj.getObj("groundcable"));
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
 			subId = 8;
-			name = "Hub";
+			name = TR_NAME(Type.NONE, "Hub");
 
 			HubDescriptor desc = new HubDescriptor(name, obj.getObj("hub"));
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1458,7 +1458,7 @@ public class Eln {
 
 		{
 			subId = 0;
-			name = "Electrical Source";
+			name = TR_NAME(Type.NONE, "Electrical Source");
 
 			ElectricalSourceDescriptor desc = new ElectricalSourceDescriptor(
 					name, obj.getObj("voltagesource"), false);
@@ -1467,7 +1467,7 @@ public class Eln {
 
 		{
 			subId = 1;
-			name = "Signal Source";
+			name = TR_NAME(Type.NONE, "Signal Source");
 
 			ElectricalSourceDescriptor desc = new ElectricalSourceDescriptor(
 					name, obj.getObj("signalsource"), true);
@@ -1482,7 +1482,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "Lamp Socket A";
+			name = TR_NAME(Type.NONE, "Lamp Socket A");
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("ClassicLampSocket"), false),
 					LampSocketType.Douille, // LampSocketType
@@ -1494,7 +1494,7 @@ public class Eln {
 		{
 			subId = 1;
 
-			name = "Lamp Socket B Projector";
+			name = TR_NAME(Type.NONE, "Lamp Socket B Projector");
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("ClassicLampSocket"), false),
 					LampSocketType.Douille, // LampSocketType
@@ -1507,7 +1507,7 @@ public class Eln {
 		{
 			subId = 4;
 
-			name = "Robust Lamp Socket";
+			name = TR_NAME(Type.NONE, "Robust Lamp Socket");
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("RobustLamp"), true),
 					LampSocketType.Douille, // LampSocketType
@@ -1518,7 +1518,7 @@ public class Eln {
 		{
 			subId = 5;
 
-			name = "Flat Lamp Socket";
+			name = TR_NAME(Type.NONE, "Flat Lamp Socket");
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("FlatLamp"), true),
 					LampSocketType.Douille, // LampSocketType
@@ -1529,7 +1529,7 @@ public class Eln {
 		{
 			subId = 6;
 
-			name = "Simple Lamp Socket";
+			name = TR_NAME(Type.NONE, "Simple Lamp Socket");
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("SimpleLamp"), true),
 					LampSocketType.Douille, // LampSocketType
@@ -1541,7 +1541,7 @@ public class Eln {
 		{
 			subId = 7;
 
-			name = "Fluorescent Lamp Socket";
+			name = TR_NAME(Type.NONE, "Fluorescent Lamp Socket");
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("FluorescentLamp"), true),
 					LampSocketType.Douille, // LampSocketType
@@ -1555,7 +1555,7 @@ public class Eln {
 		}		{
 			subId = 8;
 
-			name = "Street Light";
+			name = TR_NAME(Type.NONE, "Street Light");
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("StreetLight"), true),
 					LampSocketType.Douille, // LampSocketType
@@ -1573,7 +1573,7 @@ public class Eln {
 		{
 			subId = 12;
 
-			name = "Suspended Lamp Socket";
+			name = TR_NAME(Type.NONE, "Suspended Lamp Socket");
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name,
 					new LampSocketSuspendedObjRender(obj.getObj("RobustLampSuspended"), true, 3),
@@ -1590,7 +1590,7 @@ public class Eln {
 		{
 			subId = 13;
 
-			name = "Long Suspended Lamp Socket";
+			name = TR_NAME(Type.NONE, "Long Suspended Lamp Socket");
 
 			LampSocketDescriptor desc = new LampSocketDescriptor(name,
 					new LampSocketSuspendedObjRender(obj.getObj("RobustLampSuspended"), true, 7),
@@ -1612,7 +1612,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "Lamp Supply";
+			name = TR_NAME(Type.NONE, "Lamp Supply");
 
 			LampSupplyDescriptor desc = new LampSupplyDescriptor(
 					name, obj.getObj("DistributionBoard"),
@@ -1630,7 +1630,7 @@ public class Eln {
 		PowerSocketDescriptor desc;
 		{
 			subId = 1;
-			name = "50V Power Socket";
+			name = TR_NAME(Type.NONE, "50V Power Socket");
 			desc = new PowerSocketDescriptor(
 					subId, name, obj.getObj("PowerSocket"),
 					10 //Range for plugged devices (without obstacles)
@@ -1640,7 +1640,7 @@ public class Eln {
 		}
 		{
 			subId = 2;
-			name = "200V Power Socket";
+			name = TR_NAME(Type.NONE, "200V Power Socket");
 			desc = new PowerSocketDescriptor(
 					subId, name, obj.getObj("PowerSocket"),
 					10 //Range for plugged devices (without obstacles)
@@ -1681,7 +1681,7 @@ public class Eln {
 		{
 			subId = 1;
 
-			name = "25A Diode";
+			name = TR_NAME(Type.NONE, "25A Diode");
 
 			function = new FunctionTableYProtect(new double[] { 0.0, 0.25,
 					0.75, 2.5, 5.0, 10.0, 20.0, 30.0 }, 1.0, 0, 100);
@@ -1701,7 +1701,7 @@ public class Eln {
 		{
 			subId = 8;
 
-			name = "Signal Diode";
+			name = TR_NAME(Type.NONE, "Signal Diode");
 
 			function = baseFunction.duplicate(1.0, 0.1);
 
@@ -1718,7 +1718,7 @@ public class Eln {
 		{
 			subId = 16;
 
-			name = "Signal 20H inductor";
+			name = TR_NAME(Type.NONE, "Signal 20H inductor");
 
 			SignalInductorDescriptor desc = new SignalInductorDescriptor(
 					name, 20, lowVoltageCableDescriptor
@@ -1730,7 +1730,7 @@ public class Eln {
 		{
 			subId = 32;
 
-			name = "Power Capacitor";
+			name = TR_NAME(Type.NONE, "Power Capacitor");
 
 			PowerCapacitorSixDescriptor desc = new PowerCapacitorSixDescriptor(
 					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE6(-1), 60*2000
@@ -1742,7 +1742,7 @@ public class Eln {
 		{
 			subId = 34;
 
-			name = "Power Inductor";
+			name = TR_NAME(Type.NONE, "Power Inductor");
 
 			PowerInductorSixDescriptor desc = new PowerInductorSixDescriptor(
 					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE6(-1)
@@ -1754,7 +1754,7 @@ public class Eln {
 		{
 			subId = 36;
 
-			name = "Power Resistor";
+			name = TR_NAME(Type.NONE, "Power Resistor");
 
 			ResistorDescriptor desc = new ResistorDescriptor(
 					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), 0, false
@@ -1765,7 +1765,7 @@ public class Eln {
 
 		{
 			subId = 37;
-			name = "Rheostat";
+			name = TR_NAME(Type.NONE, "Rheostat");
 
 			ResistorDescriptor desc = new ResistorDescriptor(
 					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), 0, true
@@ -1777,7 +1777,7 @@ public class Eln {
 		{
 			subId = 38;
 
-			name = "Thermistor";
+			name = TR_NAME(Type.NONE, "Thermistor");
 
 			ResistorDescriptor desc = new ResistorDescriptor(
 					name, obj.getObj("PowerElectricPrimitives"), SerieEE.newE12(-2), -0.01, false
@@ -1827,7 +1827,7 @@ public class Eln {
 		{
 			subId = 4;
 
-			name = "Very High Voltage Switch";
+			name = TR_NAME(Type.NONE, "Very High Voltage Switch");
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRender3200V,
 					obj.getObj("HighVoltageSwitch"), VVU, VVP,veryHighVoltageCableDescriptor.electricalRs*2,// nominalVoltage,
@@ -1842,7 +1842,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "High Voltage Switch";
+			name = TR_NAME(Type.NONE, "High Voltage Switch");
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRender800V,
 					obj.getObj("HighVoltageSwitch"), HVU, HVP,highVoltageCableDescriptor.electricalRs*2,// nominalVoltage,
@@ -1856,7 +1856,7 @@ public class Eln {
 		{
 			subId = 1;
 
-			name = "Low Voltage Switch";
+			name = TR_NAME(Type.NONE, "Low Voltage Switch");
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRender50V,
 					obj.getObj("LowVoltageSwitch"), LVU, LVP, lowVoltageCableDescriptor.electricalRs*2,// nominalVoltage,
@@ -1870,7 +1870,7 @@ public class Eln {
 		{
 			subId = 2;
 
-			name = "Medium Voltage Switch";
+			name = TR_NAME(Type.NONE, "Medium Voltage Switch");
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRender200V,
 					obj.getObj("LowVoltageSwitch"), MVU, MVP, meduimVoltageCableDescriptor.electricalRs*2,// nominalVoltage,
@@ -1884,7 +1884,7 @@ public class Eln {
 		{
 			subId = 3;
 
-			name = "Signal Switch";
+			name = TR_NAME(Type.NONE, "Signal Switch");
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRenderSignal,
 					obj.getObj("LowVoltageSwitch"), SVU, SVP, 0.02,// nominalVoltage,
@@ -1899,7 +1899,7 @@ public class Eln {
 		{
 			subId = 8;
 
-			name = "Signal Switch with LED";
+			name = TR_NAME(Type.NONE, "Signal Switch with LED");
 
 			desc = new ElectricalSwitchDescriptor(name, stdCableRenderSignal,
 					obj.getObj("ledswitch"), SVU, SVP, 0.02,// nominalVoltage,
@@ -1919,7 +1919,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "Modbus RTU";
+			name = TR_NAME(Type.NONE, "Modbus RTU");
 
 			ModbusRtuDescriptor desc = new ModbusRtuDescriptor(
 					name,
@@ -1932,7 +1932,7 @@ public class Eln {
 
 		{
 			subId = 4;
-			name = "Analog Watch";
+			name = TR_NAME(Type.NONE, "Analog Watch");
 
 			ElectricalWatchDescriptor desc = new ElectricalWatchDescriptor(
 					name,
@@ -1946,7 +1946,7 @@ public class Eln {
 
 		{
 			subId = 5;
-			name = "Digital Watch";
+			name = TR_NAME(Type.NONE, "Digital Watch");
 
 			ElectricalWatchDescriptor desc = new ElectricalWatchDescriptor(
 					name,
@@ -1960,7 +1960,7 @@ public class Eln {
 
 		{
 			subId = 8;
-			name = "Tutorial Sign";
+			name = TR_NAME(Type.NONE, "Tutorial Sign");
 
 			TutorialSignDescriptor desc = new TutorialSignDescriptor(
 					name, obj.getObj("TutoPlate"));
@@ -1975,7 +1975,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "Electrical Breaker";
+			name = TR_NAME(Type.NONE, "Electrical Breaker");
 
 			ElectricalBreakerDescriptor desc = new ElectricalBreakerDescriptor(name, obj.getObj("HighVoltageSwitch"));
 
@@ -1984,7 +1984,7 @@ public class Eln {
 		{
 			subId = 4;
 
-			name = "Energy Meter";
+			name = TR_NAME(Type.NONE, "Energy Meter");
 
 			EnergyMeterDescriptor desc = new EnergyMeterDescriptor(name, obj.getObj("EnergyMeter"),8,0);
 
@@ -1993,7 +1993,7 @@ public class Eln {
 		{
 			subId = 5;
 
-			name = "Advanced Energy Meter";
+			name = TR_NAME(Type.NONE, "Advanced Energy Meter");
 
 			EnergyMeterDescriptor desc = new EnergyMeterDescriptor(name, obj.getObj("AdvancedEnergyMeter"),7,8);
 
@@ -2009,7 +2009,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "Electrical Probe";
+			name = TR_NAME(Type.NONE, "Electrical Probe");
 
 			desc = new ElectricalSensorDescriptor(name, "electricalsensor",
 					false);
@@ -2019,7 +2019,7 @@ public class Eln {
 		{
 			subId = 1;
 
-			name = "Voltage Probe";
+			name = TR_NAME(Type.NONE, "Voltage Probe");
 
 			desc = new ElectricalSensorDescriptor(name, "voltagesensor", true);
 
@@ -2036,7 +2036,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "Thermal Probe";
+			name = TR_NAME(Type.NONE, "Thermal Probe");
 
 			desc = new ThermalSensorDescriptor(name,
 					obj.getObj("thermalsensor"), false);
@@ -2046,7 +2046,7 @@ public class Eln {
 		{
 			subId = 1;
 
-			name = "Temperature Probe";
+			name = TR_NAME(Type.NONE, "Temperature Probe");
 
 			desc = new ThermalSensorDescriptor(name,
 					obj.getObj("temperaturesensor"), true);
@@ -2062,13 +2062,13 @@ public class Eln {
 		ElectricalVuMeterDescriptor desc;
 		{
 			subId = 0;
-			name = "Analog vuMeter";
+			name = TR_NAME(Type.NONE, "Analog vuMeter");
 			desc = new ElectricalVuMeterDescriptor(name, "Vumeter", false);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
 			subId = 8;
-			name = "LED vuMeter";
+			name = TR_NAME(Type.NONE, "LED vuMeter");
 			desc = new ElectricalVuMeterDescriptor(name, "Led", true);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -2080,14 +2080,14 @@ public class Eln {
 		ElectricalAlarmDescriptor desc;
 		{
 			subId = 0;
-			name = "Nuclear Alarm";
+			name = TR_NAME(Type.NONE, "Nuclear Alarm");
 			desc = new ElectricalAlarmDescriptor(name,
 					obj.getObj("alarmmedium"), 7, "eln:alarma", 11, 1f);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{
 			subId = 1;
-			name = "Standard Alarm";
+			name = TR_NAME(Type.NONE, "Standard Alarm");
 			desc = new ElectricalAlarmDescriptor(name,
 					obj.getObj("alarmmedium"), 7, "eln:smallalarm_critical",
 					1.2, 2f);
@@ -2102,13 +2102,13 @@ public class Eln {
 			ElectricalLightSensorDescriptor desc;
 			{
 				subId = 0;
-				name = "Electrical Daylight Sensor";
+				name = TR_NAME(Type.NONE, "Electrical Daylight Sensor");
 				desc = new ElectricalLightSensorDescriptor(name, obj.getObj("daylightsensor"), true);
 				sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			}
 			{
 				subId = 1;
-				name = "Electrical Light Sensor";
+				name = TR_NAME(Type.NONE, "Electrical Light Sensor");
 				desc = new ElectricalLightSensorDescriptor(name, obj.getObj("lightsensor"), false);
 				sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			}
@@ -2117,7 +2117,7 @@ public class Eln {
 			ElectricalWeatherSensorDescriptor desc;
 			{
 				subId = 4;
-				name = "Electrical Weather Sensor";
+				name = TR_NAME(Type.NONE, "Electrical Weather Sensor");
 				desc = new ElectricalWeatherSensorDescriptor(name, obj.getObj("electricalweathersensor"));
 				sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			}
@@ -2126,7 +2126,7 @@ public class Eln {
 			ElectricalWindSensorDescriptor desc;
 			{
 				subId = 8;
-				name = "Electrical Anemometer Sensor";
+				name = TR_NAME(Type.NONE, "Electrical Anemometer Sensor");
 				desc = new ElectricalWindSensorDescriptor(name, obj.getObj("Anemometer"), 25);
 				sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			}
@@ -2135,7 +2135,7 @@ public class Eln {
 			ElectricalEntitySensorDescriptor desc;
 			{
 				subId = 12;
-				name = "Electrical Entity Sensor";
+				name = TR_NAME(Type.NONE, "Electrical Entity Sensor");
 				desc = new ElectricalEntitySensorDescriptor(name, obj.getObj("ProximitySensor"), 10);
 				sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			}
@@ -2143,8 +2143,8 @@ public class Eln {
         {
             ElectricalFireDetectorDescriptor desc;
             {
-                subId = 13; // ??
-                name = "Electrical Fire Detector";
+                subId = 13;
+                name = TR_NAME(Type.NONE, "Electrical Fire Detector");
                 desc = new ElectricalFireDetectorDescriptor(name, obj.getObj("FireDetector"), 15);
                 sixNodeItem.addDescriptor(subId + (id << 6), desc);
             }
@@ -2157,7 +2157,7 @@ public class Eln {
 		{
 			ElectricalRedstoneInputDescriptor desc;
 			subId = 0;
-			name = "Redstone-to-Voltage Converter";
+			name = TR_NAME(Type.NONE, "Redstone-to-Voltage Converter");
 			desc = new ElectricalRedstoneInputDescriptor(name, obj.getObj("redtoele"));
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -2165,7 +2165,7 @@ public class Eln {
 		{
 			ElectricalRedstoneOutputDescriptor desc;
 			subId = 1;
-			name = "Voltage-to-Redstone Converter";
+			name = TR_NAME(Type.NONE, "Voltage-to-Redstone Converter");
 			desc = new ElectricalRedstoneOutputDescriptor(name,
 					obj.getObj("eletored"));
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -2179,7 +2179,7 @@ public class Eln {
 			ElectricalTimeoutDescriptor desc;
 			subId = 0;
 
-			name = "Electrical Timer";
+			name = TR_NAME(Type.NONE, "Electrical Timer");
 
 			desc = new ElectricalTimeoutDescriptor(name,
 					obj.getObj("electricaltimer"));
@@ -2190,7 +2190,7 @@ public class Eln {
 			ElectricalMathDescriptor desc;
 			subId = 4;
 
-			name = "Signal Processor";
+			name = TR_NAME(Type.NONE, "Signal Processor");
 
 			desc = new ElectricalMathDescriptor(name,
 					obj.getObj("PLC"));
@@ -2207,7 +2207,7 @@ public class Eln {
 			WirelessSignalRxDescriptor desc;
 			subId = 0;
 
-			name = "Wireless Signal Receiver";
+			name = TR_NAME(Type.NONE, "Wireless Signal Receiver");
 
 			desc = new WirelessSignalRxDescriptor(
 					name,
@@ -2221,7 +2221,7 @@ public class Eln {
 			WirelessSignalTxDescriptor desc;
 			subId = 8;
 
-			name = "Wireless Signal Transmitter";
+			name = TR_NAME(Type.NONE, "Wireless Signal Transmitter");
 
 			desc = new WirelessSignalTxDescriptor(
 					name,
@@ -2236,7 +2236,7 @@ public class Eln {
 			WirelessSignalRepeaterDescriptor desc;
 			subId = 16;
 
-			name = "Wireless Signal Repeater";
+			name = TR_NAME(Type.NONE, "Wireless Signal Repeater");
 
 			desc = new WirelessSignalRepeaterDescriptor(
 					name,
@@ -2256,7 +2256,7 @@ public class Eln {
 			ElectricalDataLoggerDescriptor desc;
 			subId = 0;
 
-			name = "Data Logger";
+			name = TR_NAME(Type.NONE, "Data Logger");
 
 			desc = new ElectricalDataLoggerDescriptor(name, true,
 					"DataloggerCRTFloor", 1f, 0.5f, 0f, "\u00a76");
@@ -2267,7 +2267,7 @@ public class Eln {
 			ElectricalDataLoggerDescriptor desc;
 			subId = 1;
 
-			name = "Modern Data Logger";
+			name = TR_NAME(Type.NONE, "Modern Data Logger");
 
 			desc = new ElectricalDataLoggerDescriptor(name, true,
 					"FlatScreenMonitor", 0.25f, 1f, 0.25f,  "\u00A7a");
@@ -2278,7 +2278,7 @@ public class Eln {
             ElectricalDataLoggerDescriptor desc;
             subId = 2;
 
-            name = "Industrial Data Logger";
+            name = TR_NAME(Type.NONE, "Industrial Data Logger");
 
             desc = new ElectricalDataLoggerDescriptor(name, false,
                     "IndustrialPanel", 0.25f, 0.5f, 1f,  "\u00A7f");
@@ -2294,7 +2294,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "Low Voltage Relay";
+			name = TR_NAME(Type.NONE, "Low Voltage Relay");
 
 			desc = new ElectricalRelayDescriptor(
 					name, obj.getObj("RelayBig"),
@@ -2305,7 +2305,7 @@ public class Eln {
 		{
 			subId = 1;
 
-			name = "Medium Voltage Relay";
+			name = TR_NAME(Type.NONE, "Medium Voltage Relay");
 
 			desc = new ElectricalRelayDescriptor(
 					name, obj.getObj("RelayBig"),
@@ -2316,7 +2316,7 @@ public class Eln {
 		{
 			subId = 2;
 
-			name = "High Voltage Relay";
+			name = TR_NAME(Type.NONE, "High Voltage Relay");
 
 			desc = new ElectricalRelayDescriptor(
 					name, obj.getObj("relay800"),
@@ -2327,7 +2327,7 @@ public class Eln {
 		{
 			subId = 3;
 
-			name = "Very High Voltage Relay";
+			name = TR_NAME(Type.NONE, "Very High Voltage Relay");
 
 			desc = new ElectricalRelayDescriptor(
 					name, obj.getObj("relay800"),
@@ -2339,7 +2339,7 @@ public class Eln {
 		{
 			subId = 4;
 
-			name = "Signal Relay";
+			name = TR_NAME(Type.NONE, "Signal Relay");
 
 			desc = new ElectricalRelayDescriptor(
 				name, obj.getObj("RelaySmall"),
@@ -2359,7 +2359,7 @@ public class Eln {
 		{
 			subId = 0;
 
-			name = "Signal Trimmer";
+			name = TR_NAME(Type.NONE, "Signal Trimmer");
 
 			ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, signalsourcepot, false);
 
@@ -2368,7 +2368,7 @@ public class Eln {
 		{
 			subId = 1;
 
-			name = "Signal Switch";
+			name = TR_NAME(Type.NONE, "Signal Switch");
 
 			ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, ledswitch, true);
 
@@ -2377,7 +2377,7 @@ public class Eln {
 		{
 			subId = 8;
 
-			name = "Signal Button";
+			name = TR_NAME(Type.NONE, "Signal Button");
 
 			ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, ledswitch, true);
 			desc.setWithAutoReset();
@@ -2386,7 +2386,7 @@ public class Eln {
 		{
 			subId = 12;
 
-			name = "Wireless Button";
+			name = TR_NAME(Type.NONE, "Wireless Button");
 
 			WirelessSignalSourceDescriptor desc = new WirelessSignalSourceDescriptor(name, ledswitch, wirelessTxRange, true);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -2394,7 +2394,7 @@ public class Eln {
 		{
 			subId = 16;
 
-			name = "Wireless Switch";
+			name = TR_NAME(Type.NONE, "Wireless Switch");
 
 			WirelessSignalSourceDescriptor desc = new WirelessSignalSourceDescriptor(name, ledswitch, wirelessTxRange, false);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -2408,7 +2408,7 @@ public class Eln {
 
 		{
 			subId = 0;
-			name = "Transformer";
+			name = TR_NAME(Type.NONE, "Transformer");
 
 			TransformerDescriptor desc = new TransformerDescriptor(name, obj.getObj("transformator"), obj.getObj("feromagneticcorea"), 0.5f);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -2421,7 +2421,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "Stone Heat Furnace";
+			name = TR_NAME(Type.NONE, "Stone Heat Furnace");
 
 			HeatFurnaceDescriptor desc = new HeatFurnaceDescriptor(name,
 					"stonefurnace", 1000,
@@ -2449,7 +2449,7 @@ public class Eln {
 
 		{
 			subId = 1;
-			name = "50V Turbine";
+			name = TR_NAME(Type.NONE, "50V Turbine");
 			double RsFactor = 0.1;
 			double nominalU = LVU;
 			double nominalP = 300*heatTurbinePowerFactor;
@@ -2480,7 +2480,7 @@ public class Eln {
 
 		{
 			subId = 8;
-			name = "200V Turbine";
+			name = TR_NAME(Type.NONE, "200V Turbine");
 			double RsFactor = 0.10;
 			double nominalU = MVU;
 			double nominalP = 500*heatTurbinePowerFactor;
@@ -2526,7 +2526,7 @@ public class Eln {
 		furnaceList.add(new ItemStack(Blocks.furnace));
 		{
 			subId = 0;
-			name = "Electrical Furnace";
+			name = TR_NAME(Type.NONE, "Electrical Furnace");
 			double[] PfTTable = new double[] { 0, 20, 40, 80, 160, 240, 360,
 					540, 756, 1058.4, 1481.76 };
 
@@ -2564,7 +2564,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "50V Macerator";
+			name = TR_NAME(Type.NONE, "50V Macerator");
 
 			MaceratorDescriptor desc = new MaceratorDescriptor(name,
 					"maceratora", LVU, 200,// double nominalU,double nominalP,
@@ -2579,7 +2579,7 @@ public class Eln {
 
 		{
 			subId = 4;
-			name = "200V Macerator";
+			name = TR_NAME(Type.NONE, "200V Macerator");
 
 			MaceratorDescriptor desc = new MaceratorDescriptor(name,
 					"maceratorb", MVU, 400,// double nominalU,double nominalP,
@@ -2603,7 +2603,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "50V Plate Machine";
+			name = TR_NAME(Type.NONE, "50V Plate Machine");
 
 			PlateMachineDescriptor desc = new PlateMachineDescriptor(
 					name,// String name,
@@ -2621,7 +2621,7 @@ public class Eln {
 
 		{
 			subId = 4;
-			name = "200V Plate Machine";
+			name = TR_NAME(Type.NONE, "200V Plate Machine");
 
 			PlateMachineDescriptor desc = new PlateMachineDescriptor(
 					name,// String name,
@@ -2644,7 +2644,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "50V Egg Incubator";
+			name = TR_NAME(Type.NONE, "50V Egg Incubator");
 
 			EggIncubatorDescriptor desc = new EggIncubatorDescriptor(
 					name, obj.getObj("eggincubator"),
@@ -2661,7 +2661,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "50V Compressor";
+			name = TR_NAME(Type.NONE, "50V Compressor");
 
 			CompressorDescriptor desc = new CompressorDescriptor(
 					name,// String name,
@@ -2704,7 +2704,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "50V Magnetizer";
+			name = TR_NAME(Type.NONE, "50V Magnetizer");
 
 			MagnetizerDescriptor desc = new MagnetizerDescriptor(
 					name,// String name,
@@ -2722,7 +2722,7 @@ public class Eln {
 
 		{
 			subId = 4;
-			name = "200V Magnetizer";
+			name = TR_NAME(Type.NONE, "200V Magnetizer");
 
 			MagnetizerDescriptor desc = new MagnetizerDescriptor(
 					name,// String name,
@@ -2759,7 +2759,7 @@ public class Eln {
 
 		{
 			subId = 1;
-			name = "Small Solar Panel";
+			name = TR_NAME(Type.NONE, "Small Solar Panel");
 
 			ghostGroup = new GhostGroup();
 
@@ -2780,7 +2780,7 @@ public class Eln {
 		}
 		{
 			subId = 2;
-			name = "Small Rotating Solar Panel";
+			name = TR_NAME(Type.NONE, "Small Rotating Solar Panel");
 
 			ghostGroup = new GhostGroup();
 
@@ -2808,7 +2808,7 @@ public class Eln {
 		{
 			subId = 0;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("Small 50V Copper Heating Corp",// iconId,
+			element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 50V Copper Heating Corp"),// iconId,
 																				// name,
 					LVU, 150,// electricalNominalU, electricalNominalP,
 					190,// electricalMaximalP)
@@ -2819,7 +2819,7 @@ public class Eln {
 		{
 			subId = 1;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("50V Copper Heating Corp",// iconId,
+			element = new HeatingCorpElement(TR_NAME(Type.NONE, "50V Copper Heating Corp"),// iconId,
 																		// name,
 					LVU, 250,// electricalNominalU, electricalNominalP,
 					320,// electricalMaximalP)
@@ -2849,7 +2849,7 @@ public class Eln {
 		{
 			subId = 4;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("Small 50V Iron Heating Corp",// iconId,
+			element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 50V Iron Heating Corp"),// iconId,
 																			// name,
 					LVU, 180,// electricalNominalU, electricalNominalP,
 					225,// electricalMaximalP)
@@ -2860,7 +2860,7 @@ public class Eln {
 		{
 			subId = 5;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("50V Iron Heating Corp",// iconId,
+			element = new HeatingCorpElement(TR_NAME(Type.NONE, "50V Iron Heating Corp"),// iconId,
 																		// name,
 					LVU, 375,// electricalNominalU, electricalNominalP,
 					480,// electricalMaximalP)
@@ -2870,7 +2870,7 @@ public class Eln {
 		{
 			subId = 6;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("Small 200V Iron Heating Corp",// iconId,
+			element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 200V Iron Heating Corp"),// iconId,
 																			// name,
 					MVU, 600,// electricalNominalU, electricalNominalP,
 					750,// electricalMaximalP)
@@ -2880,7 +2880,7 @@ public class Eln {
 		{
 			subId = 7;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("200V Iron Heating Corp",// iconId,
+			element = new HeatingCorpElement(TR_NAME(Type.NONE, "200V Iron Heating Corp"),// iconId,
 																		// name,
 					MVU, 900,// electricalNominalU, electricalNominalP,
 					1050,// electricalMaximalP)
@@ -2890,7 +2890,7 @@ public class Eln {
 		{
 			subId = 8;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("Small 50V Tungsten Heating Corp",// iconId,
+			element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 50V Tungsten Heating Corp"),// iconId,
 																				// name,
 					LVU, 240,// electricalNominalU, electricalNominalP,
 					300,// electricalMaximalP)
@@ -2901,7 +2901,7 @@ public class Eln {
 		{
 			subId = 9;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("50V Tungsten Heating Corp",// iconId,
+			element = new HeatingCorpElement(TR_NAME(Type.NONE, "50V Tungsten Heating Corp"),// iconId,
 																			// name,
 					LVU, 500,// electricalNominalU, electricalNominalP,
 					640,// electricalMaximalP)
@@ -2912,7 +2912,7 @@ public class Eln {
 			subId = 10;
 			completId = subId + (id << 6);
 			element = new HeatingCorpElement(
-					"Small 200V Tungsten Heating Corp",// iconId, name,
+				TR_NAME(Type.NONE, "Small 200V Tungsten Heating Corp"),// iconId, name,
 					MVU, 800,// electricalNominalU, electricalNominalP,
 					1000,// electricalMaximalP)
 					meduimVoltageCableDescriptor);
@@ -2921,7 +2921,7 @@ public class Eln {
 		{
 			subId = 11;
 			completId = subId + (id << 6);
-			element = new HeatingCorpElement("200V Tungsten Heating Corp",// iconId,
+			element = new HeatingCorpElement(TR_NAME(Type.NONE, "200V Tungsten Heating Corp"),// iconId,
 																			// name,
 					MVU, 1200,// electricalNominalU, electricalNominalP,
 					1500,// electricalMaximalP)
@@ -2944,14 +2944,14 @@ public class Eln {
 		{
 			subId = 0;
 			completId = subId + (id << 6);
-			element = new RegulatorOnOffDescriptor("On/OFF Regulator 1 Percent",
+			element = new RegulatorOnOffDescriptor(TR_NAME(Type.NONE, "On/OFF Regulator 1 Percent"),
 					"onoffregulator", 0.01);
 			sharedItem.addElement(completId, element);
 		}
 		{
 			subId = 1;
 			completId = subId + (id << 6);
-			element = new RegulatorOnOffDescriptor("On/OFF Regulator 10 Percent",
+			element = new RegulatorOnOffDescriptor(TR_NAME(Type.NONE, "On/OFF Regulator 10 Percent"),
 					"onoffregulator", 0.1);
 			sharedItem.addElement(completId, element);
 		}
@@ -2959,7 +2959,7 @@ public class Eln {
 		{
 			subId = 8;
 			completId = subId + (id << 6);
-			element = new RegulatorAnalogDescriptor("Analogic Regulator",
+			element = new RegulatorAnalogDescriptor(TR_NAME(Type.NONE, "Analogic Regulator"),
 					"Analogicregulator");
 			sharedItem.addElement(completId, element);
 		}
@@ -2985,7 +2985,7 @@ public class Eln {
 		{
 			subId = 0;
 			completId = subId + (id << 6);
-			element = new LampDescriptor("Small 50V Incandescent Light Bulb",
+			element = new LampDescriptor(TR_NAME(Type.NONE, "Small 50V Incandescent Light Bulb"),
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[12], // nominalU,
 																	// nominalP
@@ -2997,7 +2997,7 @@ public class Eln {
 		{
 			subId = 1;
 			completId = subId + (id << 6);
-			element = new LampDescriptor("50V Incandescent Light Bulb",
+			element = new LampDescriptor(TR_NAME(Type.NONE, "50V Incandescent Light Bulb"),
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[14], // nominalU,
 																	// nominalP
@@ -3009,7 +3009,7 @@ public class Eln {
 		{
 			subId = 2;
 			completId = subId + (id << 6);
-			element = new LampDescriptor("200V Incandescent Light Bulb",
+			element = new LampDescriptor(TR_NAME(Type.NONE, "200V Incandescent Light Bulb"),
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, MVU, lightPower[14], // nominalU,
 																	// nominalP
@@ -3023,7 +3023,7 @@ public class Eln {
 			subId = 4;
 			completId = subId + (id << 6);
 			element = new LampDescriptor(
-					"Small 50V Carbon Incandescent Light Bulb",
+				TR_NAME(Type.NONE, "Small 50V Carbon Incandescent Light Bulb"),
 					"incandescentlampcarbon", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[11], // nominalU,
 																	// nominalP
@@ -3035,7 +3035,7 @@ public class Eln {
 		{
 			subId = 5;
 			completId = subId + (id << 6);
-			element = new LampDescriptor("50V Carbon Incandescent Light Bulb",
+			element = new LampDescriptor(TR_NAME(Type.NONE, "50V Carbon Incandescent Light Bulb"),
 					"incandescentlampcarbon", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[13], // nominalU,
 																	// nominalP
@@ -3048,7 +3048,7 @@ public class Eln {
 		{
 			subId = 16;
 			completId = subId + (id << 6);
-			element = new LampDescriptor("Small 50V Economic Light Bulb",
+			element = new LampDescriptor(TR_NAME(Type.NONE, "Small 50V Economic Light Bulb"),
 					"economiclamp", LampDescriptor.Type.eco,
 					LampSocketType.Douille, LVU, lightPower[12]
 							* economicPowerFactor, // nominalU, nominalP
@@ -3060,7 +3060,7 @@ public class Eln {
 		{
 			subId = 17;
 			completId = subId + (id << 6);
-			element = new LampDescriptor("50V Economic Light Bulb",
+			element = new LampDescriptor(TR_NAME(Type.NONE, "50V Economic Light Bulb"),
 					"economiclamp", LampDescriptor.Type.eco,
 					LampSocketType.Douille, LVU, lightPower[14]
 							* economicPowerFactor, // nominalU, nominalP
@@ -3072,7 +3072,7 @@ public class Eln {
 		{
 			subId = 18;
 			completId = subId + (id << 6);
-			element = new LampDescriptor("200V Economic Light Bulb",
+			element = new LampDescriptor(TR_NAME(Type.NONE, "200V Economic Light Bulb"),
 					"economiclamp", LampDescriptor.Type.eco,
 					LampSocketType.Douille, MVU, lightPower[14]
 							* economicPowerFactor, // nominalU, nominalP
@@ -3085,7 +3085,7 @@ public class Eln {
 		{
 			subId = 32;
 			completId = subId + (id << 6);
-			element = new LampDescriptor("50V Farming Lamp",
+			element = new LampDescriptor(TR_NAME(Type.NONE, "50V Farming Lamp"),
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, 120, // nominalU, nominalP
 					lightLevel[15], incandescentLampLife, 0.50 // nominalLight,
@@ -3096,7 +3096,7 @@ public class Eln {
 		{
 			subId = 36;
 			completId = subId + (id << 6);
-			element = new LampDescriptor("200V Farming Lamp",
+			element = new LampDescriptor(TR_NAME(Type.NONE, "200V Farming Lamp"),
 					"incandescentlampiron", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, MVU, 120, // nominalU, nominalP
 					lightLevel[15], incandescentLampLife, 0.50 // nominalLight,
@@ -3116,7 +3116,7 @@ public class Eln {
 			subId = 0;
 			completId = subId + (id << 6);
 			element = new OverHeatingProtectionDescriptor(
-					"Overheating Protection");
+				TR_NAME(Type.NONE, "Overheating Protection"));
 			sharedItem.addElement(completId, element);
 		}
 		{
@@ -3124,7 +3124,7 @@ public class Eln {
 			subId = 1;
 			completId = subId + (id << 6);
 			element = new OverVoltageProtectionDescriptor(
-					"Overvoltage Protection");
+				TR_NAME(Type.NONE, "Overvoltage Protection"));
 			sharedItem.addElement(completId, element);
 		}
 
@@ -3132,12 +3132,11 @@ public class Eln {
 
 	void registerCombustionChamber(int id) {
 		int subId, completId;
-		String name;
 		{
 			CombustionChamber element;
 			subId = 0;
 			completId = subId + (id << 6);
-			element = new CombustionChamber("Combustion Chamber");
+			element = new CombustionChamber(TR_NAME(Type.NONE, "Combustion Chamber"));
 			sharedItem.addElement(completId, element);
 		}
 
@@ -3152,7 +3151,7 @@ public class Eln {
 			subId = 0;
 			completId = subId + (id << 6);
 			element = new FerromagneticCoreDescriptor(
-					"Cheap Ferromagnetic Core", obj.getObj("feromagneticcorea"),// iconId,
+				TR_NAME(Type.NONE, "Cheap Ferromagnetic Core"), obj.getObj("feromagneticcorea"),// iconId,
 																				// name,
 					10);
 			sharedItem.addElement(completId, element);
@@ -3161,7 +3160,7 @@ public class Eln {
 			subId = 1;
 			completId = subId + (id << 6);
 			element = new FerromagneticCoreDescriptor(
-					"Average Ferromagnetic Core", obj.getObj("feromagneticcorea"),// iconId,
+				TR_NAME(Type.NONE, "Average Ferromagnetic Core"), obj.getObj("feromagneticcorea"),// iconId,
 																					// name,
 					4);
 			sharedItem.addElement(completId, element);
@@ -3170,7 +3169,7 @@ public class Eln {
 			subId = 2;
 			completId = subId + (id << 6);
 			element = new FerromagneticCoreDescriptor(
-					"Optimal Ferromagnetic Core", obj.getObj("feromagneticcorea"),// iconId,
+				TR_NAME(Type.NONE, "Optimal Ferromagnetic Core"), obj.getObj("feromagneticcorea"),// iconId,
 																					// name,
 					1);
 			sharedItem.addElement(completId, element);
@@ -3186,7 +3185,7 @@ public class Eln {
 		{
 			id = 1;
 
-			name = "Copper Ore";
+			name = TR_NAME(Type.NONE, "Copper Ore");
 
 			OreDescriptor desc = new OreDescriptor(name, id, // int itemIconId,
 																// String
@@ -3205,7 +3204,7 @@ public class Eln {
 		{
 			id = 4;
 
-			name = "Lead Ore";
+			name = TR_NAME(Type.NONE, "Lead Ore");
 
 			OreDescriptor desc = new OreDescriptor(name, id, // int itemIconId,
 																// String
@@ -3222,7 +3221,7 @@ public class Eln {
 		{
 			id = 5;
 
-			name = "Tungsten Ore";
+			name = TR_NAME(Type.NONE, "Tungsten Ore");
 
 			OreDescriptor desc = new OreDescriptor(name, id, // int itemIconId,
 																// String
@@ -3275,7 +3274,7 @@ public class Eln {
 			subId = 1;
 			completId = subId + (id << 6);
 
-			name = "Copper Dust";
+			name = TR_NAME(Type.NONE, "Copper Dust");
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] {});
@@ -3288,7 +3287,7 @@ public class Eln {
 			subId = 2;
 			completId = subId + (id << 6);
 
-			name = "Iron Dust";
+			name = TR_NAME(Type.NONE, "Iron Dust");
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] {});
@@ -3301,7 +3300,7 @@ public class Eln {
 		{
 			id = 5;
 
-			name = "Lead Dust";
+			name = TR_NAME(Type.NONE, "Lead Dust");
 
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
@@ -3313,7 +3312,7 @@ public class Eln {
 		{
 			id = 6;
 
-			name = "Tungsten Dust";
+			name = TR_NAME(Type.NONE, "Tungsten Dust");
 
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
@@ -3326,7 +3325,7 @@ public class Eln {
 		{
 			id = 7;
 
-			name = "Gold Dust";
+			name = TR_NAME(Type.NONE, "Gold Dust");
 
 			element = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
@@ -3338,7 +3337,7 @@ public class Eln {
 		{
 			id = 8;
 
-			name = "Coal Dust";
+			name = TR_NAME(Type.NONE, "Coal Dust");
 
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
@@ -3350,7 +3349,7 @@ public class Eln {
 		{
 			id = 9;
 
-			name = "Alloy Dust";
+			name = TR_NAME(Type.NONE, "Alloy Dust");
 
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
@@ -3363,7 +3362,7 @@ public class Eln {
 		{
 			id = 10;
 
-			name = "Cinnabar Dust";
+			name = TR_NAME(Type.NONE, "Cinnabar Dust");
 
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
@@ -3388,7 +3387,7 @@ public class Eln {
 			subId = 1;
 			completId = subId + (id << 6);
 
-			name = "Copper Ingot";
+			name = TR_NAME(Type.NONE, "Copper Ingot");
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] {});
@@ -3404,7 +3403,7 @@ public class Eln {
 			subId = 4;
 			completId = subId + (id << 6);
 
-			name = "Lead Ingot";
+			name = TR_NAME(Type.NONE, "Lead Ingot");
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] {});
@@ -3421,7 +3420,7 @@ public class Eln {
 			subId = 5;
 			completId = subId + (id << 6);
 
-			name = "Tungsten Ingot";
+			name = TR_NAME(Type.NONE, "Tungsten Ingot");
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] {});
@@ -3437,7 +3436,7 @@ public class Eln {
 			subId = 6;
 			completId = subId + (id << 6);
 
-			name = "Ferrite Ingot";
+			name = TR_NAME(Type.NONE, "Ferrite Ingot");
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] { "useless", "Realy useless" });
@@ -3453,7 +3452,7 @@ public class Eln {
 			subId = 7;
 			completId = subId + (id << 6);
 
-			name = "Alloy Ingot";
+			name = TR_NAME(Type.NONE, "Alloy Ingot");
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] {});
@@ -3469,7 +3468,7 @@ public class Eln {
 			subId = 8;
 			completId = subId + (id << 6);
 
-			name = "Mercury";
+			name = TR_NAME(Type.NONE, "Mercury");
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] { "useless", "miaou" });
@@ -3492,7 +3491,7 @@ public class Eln {
 			subId = 0;
 			completId = subId + (id << 6);
 
-			name = "Electrical Motor";
+			name = TR_NAME(Type.NONE, "Electrical Motor");
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] {});
@@ -3507,7 +3506,7 @@ public class Eln {
 			subId = 1;
 			completId = subId + (id << 6);
 
-			name = "Advanced Electrical Motor";
+			name = TR_NAME(Type.NONE, "Advanced Electrical Motor");
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
 					new String[] {});
@@ -3682,7 +3681,7 @@ public class Eln {
 		{
 			subId = 0;
 			completId = subId + (id << 6);
-			element = new SolarTrackerDescriptor("Solar Tracker"// iconId, name,
+			element = new SolarTrackerDescriptor(TR_NAME(Type.NONE, "Solar Tracker") // iconId, name,
 
 			);
 			sharedItem.addElement(completId, element);
@@ -3699,7 +3698,7 @@ public class Eln {
 				8.0 / 5.0);
 		{
 			subId = 0;
-			name = "Wind Turbine";
+			name = TR_NAME(Type.NONE, "Wind Turbine");
 
 			WindTurbineDescriptor desc = new WindTurbineDescriptor(
 					name, obj.getObj("WindTurbineMini"), // name,Obj3D obj,
@@ -3727,7 +3726,7 @@ public class Eln {
 
 		{
 			subId = 16;
-			name = "Water Turbine";
+			name = TR_NAME(Type.NONE, "Water Turbine");
 
 			Coordonate waterCoord = new Coordonate(1, -1, 0, 0);
 
@@ -3754,7 +3753,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "Small Passive Thermal Dissipator";
+			name = TR_NAME(Type.NONE, "Small Passive Thermal Dissipator");
 
 			ThermalDissipatorPassiveDescriptor desc = new ThermalDissipatorPassiveDescriptor(
 					name,
@@ -3770,7 +3769,7 @@ public class Eln {
 
 		{
 			subId = 32;
-			name = "Small Active Thermal Dissipator";
+			name = TR_NAME(Type.NONE, "Small Active Thermal Dissipator");
 
 			ThermalDissipatorActiveDescriptor desc = new ThermalDissipatorActiveDescriptor(
 					name,
@@ -3816,7 +3815,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "Experimental Transporter";
+			name = TR_NAME(Type.NONE, "Experimental Transporter");
 
 			Coordonate[] powerLoad = new Coordonate[2];
 			powerLoad[0] = new Coordonate(-1, 0, 1, 0);
@@ -3876,9 +3875,9 @@ public class Eln {
 	void registerTurret(int id) {
 		{
 			int subId = 0;
-			String name = "800V Defence Turret";
+			String name = TR_NAME(Type.NONE, "800V Defence Turret");
 
-			TurretDescriptor desc = new TurretDescriptor(name, "Turret", "Defence turret WIP");
+			TurretDescriptor desc = new TurretDescriptor(name, "Turret", "Defence turret");
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -3908,7 +3907,7 @@ public class Eln {
 
 			subId = 0;
 			ElectricalAntennaTxDescriptor desc;
-			name = "Low Power Transmitter Antenna";
+			name = TR_NAME(Type.NONE, "Low Power Transmitter Antenna");
 			double P = 250;
 			desc = new ElectricalAntennaTxDescriptor(name,
 					obj.getObj("lowpowertransmitterantenna"), 200,// int
@@ -3926,7 +3925,7 @@ public class Eln {
 
 			subId = 1;
 			ElectricalAntennaRxDescriptor desc;
-			name = "Low Power Receiver Antenna";
+			name = TR_NAME(Type.NONE, "Low Power Receiver Antenna");
 			double P = 250;
 			desc = new ElectricalAntennaRxDescriptor(name,
 					obj.getObj("lowpowerreceiverantenna"), LVU, P,// double
@@ -3942,7 +3941,7 @@ public class Eln {
 
 			subId = 2;
 			ElectricalAntennaTxDescriptor desc;
-			name = "Medium Power Transmitter Antenna";
+			name = TR_NAME(Type.NONE, "Medium Power Transmitter Antenna");
 			double P = 1000;
 			desc = new ElectricalAntennaTxDescriptor(name,
 					obj.getObj("lowpowertransmitterantenna"), 250,// int
@@ -3960,7 +3959,7 @@ public class Eln {
 
 			subId = 3;
 			ElectricalAntennaRxDescriptor desc;
-			name = "Medium Power Receiver Antenna";
+			name = TR_NAME(Type.NONE, "Medium Power Receiver Antenna");
 			double P = 1000;
 			desc = new ElectricalAntennaRxDescriptor(name,
 					obj.getObj("lowpowerreceiverantenna"), MVU, P,// double
@@ -3976,7 +3975,7 @@ public class Eln {
 
 			subId = 4;
 			ElectricalAntennaTxDescriptor desc;
-			name = "High Power Transmitter Antenna";
+			name = TR_NAME(Type.NONE, "High Power Transmitter Antenna");
 			double P = 2000;
 			desc = new ElectricalAntennaTxDescriptor(name,
 					obj.getObj("lowpowertransmitterantenna"), 300,// int
@@ -3994,7 +3993,7 @@ public class Eln {
 
 			subId = 5;
 			ElectricalAntennaRxDescriptor desc;
-			name = "High Power Receiver Antenna";
+			name = TR_NAME(Type.NONE, "High Power Receiver Antenna");
 			double P = 2000;
 			desc = new ElectricalAntennaRxDescriptor(name,
 					obj.getObj("lowpowerreceiverantenna"), HVU, P,// double
@@ -4017,28 +4016,28 @@ public class Eln {
 		{
 			subId = 0;
 			completId = subId + (id << 6);
-			element = new GenericItemUsingDamageDescriptor("MultiMeter");
+			element = new GenericItemUsingDamageDescriptor(TR_NAME(Type.NONE, "MultiMeter"));
 			sharedItem.addElement(completId, element);
 			multiMeterElement = element;
 		}
 		{
 			subId = 1;
 			completId = subId + (id << 6);
-			element = new GenericItemUsingDamageDescriptor("ThermoMeter");
+			element = new GenericItemUsingDamageDescriptor(TR_NAME(Type.NONE, "ThermoMeter"));
 			sharedItem.addElement(completId, element);
 			thermoMeterElement = element;
 		}
 		{
 			subId = 2;
 			completId = subId + (id << 6);
-			element = new GenericItemUsingDamageDescriptor("AllMeter");
+			element = new GenericItemUsingDamageDescriptor(TR_NAME(Type.NONE, "AllMeter"));
 			sharedItem.addElement(completId, element);
 			allMeterElement = element;
 		}
 		{
 			subId = 8;
 			completId = subId + (id << 6);
-			element = new WirelessSignalAnalyserItemDescriptor("Wireless Analyser");
+			element = new WirelessSignalAnalyserItemDescriptor(TR_NAME(Type.NONE, "Wireless Analyser"));
 			sharedItem.addElement(completId, element);
 
 		}
@@ -4055,7 +4054,7 @@ public class Eln {
 			TreeResin descriptor;
 			subId = 0;
 			completId = subId + (id << 6);
-			name = "Tree Resin";
+			name = TR_NAME(Type.NONE, "Tree Resin");
 
 			descriptor = new TreeResin(name);
 
@@ -4067,7 +4066,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptor descriptor;
 			subId = 1;
 			completId = subId + (id << 6);
-			name = "Rubber";
+			name = TR_NAME(Type.NONE, "Rubber");
 
 			descriptor = new GenericItemUsingDamageDescriptor(name);
 			sharedItem.addElement(completId, descriptor);
@@ -4083,7 +4082,7 @@ public class Eln {
 		{
 			subId = 0;
 			completId = subId + (id << 6);
-			name = "Tree Resin Collector";
+			name = TR_NAME(Type.NONE, "Tree Resin Collector");
 
 			descriptor = new TreeResinCollectorDescriptor(name, obj.getObj("treeresincolector"));
 			sixNodeItem.addDescriptor(completId, descriptor);
@@ -4098,7 +4097,7 @@ public class Eln {
 		{
 			subId = 0;
 			completId = subId + (id << 6);
-			name = "Weak 50V Battery Charger";
+			name = TR_NAME(Type.NONE, "Weak 50V Battery Charger");
 
 			descriptor = new BatteryChargerDescriptor(
 					name, obj.getObj("batterychargera"),
@@ -4111,7 +4110,7 @@ public class Eln {
 		{
 			subId = 1;
 			completId = subId + (id << 6);
-			name = "50V Battery Charger";
+			name = TR_NAME(Type.NONE, "50V Battery Charger");
 
 			descriptor = new BatteryChargerDescriptor(
 					name, obj.getObj("batterychargera"),
@@ -4144,7 +4143,7 @@ public class Eln {
 		{
 			subId = 0;
 			completId = subId + (id << 6);
-			name = "Cheap Electrical Drill";
+			name = TR_NAME(Type.NONE, "Cheap Electrical Drill");
 
 			descriptor = new ElectricalDrillDescriptor(name,// iconId, name,
 					8, 4000 // double operationTime,double operationEnergy
@@ -4154,7 +4153,7 @@ public class Eln {
 		{
 			subId = 1;
 			completId = subId + (id << 6);
-			name = "Average Electrical Drill";
+			name = TR_NAME(Type.NONE, "Average Electrical Drill");
 
 			descriptor = new ElectricalDrillDescriptor(name,// iconId, name,
 					5, 5000 // double operationTime,double operationEnergy
@@ -4164,7 +4163,7 @@ public class Eln {
 		{
 			subId = 2;
 			completId = subId + (id << 6);
-			name = "Fast Electrical Drill";
+			name = TR_NAME(Type.NONE, "Fast Electrical Drill");
 
 			descriptor = new ElectricalDrillDescriptor(name,// iconId, name,
 					3, 6000 // double operationTime,double operationEnergy
@@ -4182,7 +4181,7 @@ public class Eln {
 		{
 			subId = 0;
 			completId = subId + (id << 6);
-			name = "Ore Scanner";
+			name = TR_NAME(Type.NONE, "Ore Scanner");
 
 			descriptor = new OreScanner(name
 
@@ -4202,7 +4201,7 @@ public class Eln {
 		{
 			subId = 0;
 			completId = subId + (id << 6);
-			name = "Mining Pipe";
+			name = TR_NAME(Type.NONE, "Mining Pipe");
 
 			descriptor = new MiningPipeDescriptor(name// iconId, name
 			);
@@ -4218,7 +4217,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "Auto Miner";
+			name = TR_NAME(Type.NONE, "Auto Miner");
 
 			Coordonate[] powerLoad = new Coordonate[2];
 			powerLoad[0] = new Coordonate(-2, -1, 1, 0);
@@ -4261,7 +4260,7 @@ public class Eln {
 			CopperCableDescriptor descriptor;
 			subId = 0;
 			completId = subId + (id << 6);
-			name = "Copper Cable";
+			name = TR_NAME(Type.NONE, "Copper Cable");
 
 			descriptor = new CopperCableDescriptor(name);
 			sharedItem.addElement(completId, descriptor);
@@ -4271,7 +4270,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptor descriptor;
 			subId = 1;
 			completId = subId + (id << 6);
-			name = "Iron Cable";
+			name = TR_NAME(Type.NONE, "Iron Cable");
 
 			descriptor = new GenericItemUsingDamageDescriptor(name);
 			sharedItem.addElement(completId, descriptor);
@@ -4281,7 +4280,7 @@ public class Eln {
 			GenericItemUsingDamageDescriptor descriptor;
 			subId = 2;
 			completId = subId + (id << 6);
-			name = "Tungsten Cable";
+			name = TR_NAME(Type.NONE, "Tungsten Cable");
 
 			descriptor = new GenericItemUsingDamageDescriptor(name);
 			sharedItem.addElement(completId, descriptor);
@@ -4293,18 +4292,32 @@ public class Eln {
 
 		int subId, completId;
 		BrushDescriptor whiteDesc = null;
-		String name = "";
-		String[] subNames = { "Black", "Red", "Green", "Brown", "Blue",
-				"Purple", "Cyan", "Silver", "Gray", "Pink", "Lime", "Yellow",
-				"Light Blue", "Magenta", "Orange", "White" };
+		String name;
+		String[] subNames = {
+			TR_NAME(Type.NONE, "Black Brush"),
+			TR_NAME(Type.NONE, "Red Brush"),
+			TR_NAME(Type.NONE, "Green Brush"),
+			TR_NAME(Type.NONE, "Brown Brush"),
+			TR_NAME(Type.NONE, "Blue Brush"),
+			TR_NAME(Type.NONE, "Purple Brush"),
+			TR_NAME(Type.NONE, "Cyan Brush"),
+			TR_NAME(Type.NONE, "Silver Brush"),
+			TR_NAME(Type.NONE, "Gray Brush"),
+			TR_NAME(Type.NONE, "Pink Brush"),
+			TR_NAME(Type.NONE, "Lime Brush"),
+			TR_NAME(Type.NONE, "Yellow Brush"),
+			TR_NAME(Type.NONE, "Light Blue Brush"),
+			TR_NAME(Type.NONE, "Magenta Brush"),
+			TR_NAME(Type.NONE, "Orange Brush"),
+			TR_NAME(Type.NONE, "White Brush") };
 		for (int idx = 0; idx < 16; idx++) {
 			subId = idx;
-			name = subNames[idx] + " Brush";
+			name = subNames[idx];
 			BrushDescriptor desc = new BrushDescriptor(name);
 			sharedItem.addElement(subId + (id << 6), desc);
 			whiteDesc = desc;
-
 		}
+
 		ItemStack emptyStack = findItemStack("White Brush");
 		whiteDesc.setLife(emptyStack, 0);
 
@@ -4316,7 +4329,7 @@ public class Eln {
 		}
 
 		for (int idx = 0; idx < 16; idx++) {
-			name = subNames[idx] + " Brush";
+			name = subNames[idx];
 			addShapelessRecipe(findItemStack(name, 1),
 					new ItemStack(Items.dye, 1, idx),
 					emptyStack.copy());
@@ -4330,7 +4343,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "Small Flashlight";
+			name = TR_NAME(Type.NONE, "Small Flashlight");
 
 			ElectricalLampItem desc = new ElectricalLampItem(
 					name,
@@ -4342,7 +4355,7 @@ public class Eln {
 
 		{
 			subId = 8;
-			name = "Portable Electrical Mining Drill";
+			name = TR_NAME(Type.NONE, "Portable Electrical Mining Drill");
 
 			ElectricalPickaxe desc = new ElectricalPickaxe(
 					name,
@@ -4355,7 +4368,7 @@ public class Eln {
 
 		{
 			subId = 12;
-			name = "Portable Electrical Axe";
+			name = TR_NAME(Type.NONE, "Portable Electrical Axe");
 
 			ElectricalAxe desc = new ElectricalAxe(
 					name,
@@ -4373,7 +4386,7 @@ public class Eln {
 		String name;
 		{
 			subId = 0;
-			name = "Portable Battery";
+			name = TR_NAME(Type.NONE, "Portable Battery");
 
 			BatteryItem desc = new BatteryItem(
 					name,
@@ -4386,7 +4399,7 @@ public class Eln {
 
 		{
 			subId = 1;
-			name = "Portable Battery Pack";
+			name = TR_NAME(Type.NONE, "Portable Battery Pack");
 
 			BatteryItem desc = new BatteryItem(
 					name,
@@ -4399,7 +4412,7 @@ public class Eln {
 
 		{
 			subId = 16;
-			name = "Portable Condensator";
+			name = TR_NAME(Type.NONE, "Portable Condensator");
 
 			BatteryItem desc = new BatteryItem(
 					name,
@@ -4411,7 +4424,7 @@ public class Eln {
 		}
 		{
 			subId = 17;
-			name = "Portable Condensator Pack";
+			name = TR_NAME(Type.NONE, "Portable Condensator Pack");
 
 			BatteryItem desc = new BatteryItem(
 					name,
@@ -4424,7 +4437,7 @@ public class Eln {
 
 		{
 			subId = 32;
-			name = "X-Ray Scanner";
+			name = TR_NAME(Type.NONE, "X-Ray Scanner");
 
 			PortableOreScannerItem desc = new PortableOreScannerItem(
 					name, obj.getObj("XRayScanner"),
@@ -4453,7 +4466,7 @@ public class Eln {
 		}
 		{
 			subId = 1;
-			name = "Advanced Chip";
+			name = TR_NAME(Type.NONE, "Advanced Chip");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4462,7 +4475,7 @@ public class Eln {
 		}
 		{
 			subId = 2;
-			name = "Machine Block";
+			name = TR_NAME(Type.NONE, "Machine Block");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4470,7 +4483,7 @@ public class Eln {
 		}
 		{
 			subId = 3;
-			name = "Electrical Probe Chip";
+			name = TR_NAME(Type.NONE, "Electrical Probe Chip");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4478,7 +4491,7 @@ public class Eln {
 		}
 		{
 			subId = 4;
-			name = "Thermal Probe Chip";
+			name = TR_NAME(Type.NONE, "Thermal Probe Chip");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4487,7 +4500,7 @@ public class Eln {
 
 		{
 			subId = 6;
-			name = "Copper Plate";
+			name = TR_NAME(Type.NONE, "Copper Plate");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4496,7 +4509,7 @@ public class Eln {
 		}
 		{
 			subId = 7;
-			name = "Iron Plate";
+			name = TR_NAME(Type.NONE, "Iron Plate");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4505,7 +4518,7 @@ public class Eln {
 		}
 		{
 			subId = 8;
-			name = "Gold Plate";
+			name = TR_NAME(Type.NONE, "Gold Plate");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4514,7 +4527,7 @@ public class Eln {
 		}
 		{
 			subId = 9;
-			name = "Lead Plate";
+			name = TR_NAME(Type.NONE, "Lead Plate");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4523,7 +4536,7 @@ public class Eln {
 		}
 		{
 			subId = 10;
-			name = "Silicon Plate";
+			name = TR_NAME(Type.NONE, "Silicon Plate");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4533,7 +4546,7 @@ public class Eln {
 
 		{
 			subId = 11;
-			name = "Alloy Plate";
+			name = TR_NAME(Type.NONE, "Alloy Plate");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4542,7 +4555,7 @@ public class Eln {
 		}
 		{
 			subId = 12;
-			name = "Coal Plate";
+			name = TR_NAME(Type.NONE, "Coal Plate");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4552,7 +4565,7 @@ public class Eln {
 
 		{
 			subId = 16;
-			name = "Silicon Dust";
+			name = TR_NAME(Type.NONE, "Silicon Dust");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4561,7 +4574,7 @@ public class Eln {
 		}
 		{
 			subId = 17;
-			name = "Silicon Ingot";
+			name = TR_NAME(Type.NONE, "Silicon Ingot");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4571,21 +4584,20 @@ public class Eln {
 
 		{
 			subId = 22;
-			name = "Machine Booster";
+			name = TR_NAME(Type.NONE, "Machine Booster");
 			MachineBoosterDescriptor desc = new MachineBoosterDescriptor(name);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
 			subId = 23;
-			name = TR_NAME(Type.NONE, "Advanced Machine Block");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
-					name, new String[] {});
+				TR_NAME(Type.NONE, "Advanced Machine Block"), new String[] {}); // TODO: Description.
 			sharedItem.addElement(subId + (id << 6), desc);
 			Data.addResource(desc.newItemStack());
 		}
 		{
 			subId = 28;
-			name = "Basic Magnet";
+			name = TR_NAME(Type.NONE, "Basic Magnet");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4593,7 +4605,7 @@ public class Eln {
 		}
 		{
 			subId = 29;
-			name = "Advanced Magnet";
+			name = TR_NAME(Type.NONE, "Advanced Magnet");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4601,7 +4613,7 @@ public class Eln {
 		}
 		{
 			subId = 32;
-			name = "Data Logger Print";
+			name = TR_NAME(Type.NONE, "Data Logger Print");
 			DataLogsPrintDescriptor desc = new DataLogsPrintDescriptor(name);
 			dataLogsPrintDescriptor = desc;
 			sharedItem.addWithoutRegistry(subId + (id << 6), desc);
@@ -4609,7 +4621,7 @@ public class Eln {
 
 		{
 			subId = 33;
-			name = "Signal Antenna";
+			name = TR_NAME(Type.NONE, "Signal Antenna");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] {});
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4618,26 +4630,26 @@ public class Eln {
 
 		{
 			subId = 40;
-			name = "Player Filter";
+			name = TR_NAME(Type.NONE, "Player Filter");
 			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityPlayer.class, 0f, 1f, 0f);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
 			subId = 41;
-			name = "Monster Filter";
+			name = TR_NAME(Type.NONE, "Monster Filter");
 			EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, IMob.class, 1f, 0f, 0f);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
         {
             subId = 42;
-            name = "Animal Filter";
+            name = TR_NAME(Type.NONE, "Animal Filter");
             EntitySensorFilterDescriptor desc = new EntitySensorFilterDescriptor(name, EntityAnimal.class, .3f, .3f, 1f);
             sharedItem.addElement(subId + (id << 6), desc);
         }
 
 		{
 			subId = 48;
-			name = "Wrench";
+			name = TR_NAME(Type.NONE, "Wrench");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
 					name, new String[] { "Electrical age wrench", "Can be used to turn", "some small wall blocks" });
 			sharedItem.addElement(subId + (id << 6), desc);
@@ -4647,7 +4659,7 @@ public class Eln {
 
 		{
 			subId = 52;
-			name = "Dielectric";
+			name = TR_NAME(Type.NONE, "Dielectric");
 			DielectricItem desc = new DielectricItem(name, LVU);
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
@@ -6573,7 +6585,7 @@ public class Eln {
 		{
 			subId = 1;
 			FuelGeneratorDescriptor descriptor =
-					new FuelGeneratorDescriptor(tr("Fuel Generator"), obj.getObj("FuelGenerator"),
+					new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "Fuel Generator"), obj.getObj("FuelGenerator"),
 							lowVoltageCableDescriptor, 200, LVU * 1.18,  "eln:water_turbine", 1f);
 			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
 		}

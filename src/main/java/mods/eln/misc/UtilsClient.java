@@ -580,7 +580,7 @@ public class UtilsClient {
         if (showItemTooltip()) {
             dst.addAll(src);
         } else {
-            dst.add("\u00a7F\u00a7o<" + tr("hold shift") + ">");
+            dst.add("\u00a7F\u00a7o<" + tr("Hold shift") + ">");
         }
     }
 
