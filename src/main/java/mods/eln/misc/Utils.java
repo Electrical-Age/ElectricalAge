@@ -225,30 +225,33 @@ public class Utils {
 		}
 	}
 
-	public static String plotValue(double value, String unit) {
+	public static String plotValue(double value) {
 		double valueAbs = Math.abs(value);
 		if (valueAbs < 0.001) {
-			return "0" + unit;
-			// return String.format("%1.5f", value*1000)+ "m" + unit;
+			return "0";
 		} else if (valueAbs < 0.00999) {
-			return String.format("%1.2f", value * 1000) + "m" + unit;
+			return String.format("%1.2fm", value * 1000);
 		} else if (valueAbs < 0.0999) {
-			return String.format("%2.1f", value * 1000) + "m" + unit;
+			return String.format("%2.1fm", value * 1000);
 		} else if (valueAbs < 0.999) {
-			return String.format("%3.0f", value * 1000) + "m" + unit;
+			return String.format("%3.0fm", value * 1000);
 		} else if (valueAbs < 9.99) {
-			return String.format("%1.2f", value) + "" + unit;
+			return String.format("%1.2f", value);
 		} else if (valueAbs < 99.9) {
-			return String.format("%2.1f", value) + "" + unit;
+			return String.format("%2.1f", value);
 		} else if (valueAbs < 999) {
-			return String.format("%3.0f", value) + "" + unit;
+			return String.format("%3.0f", value);
 		} else if (valueAbs < 9999) {
-			return String.format("%1.2f", value / 1000.0) + "K" + unit;
+			return String.format("%1.2fk", value / 1000.0);
 		} else if (valueAbs < 99999) {
-			return String.format("%2.1f", value / 1000.0) + "K" + unit;
+			return String.format("%2.1fk", value / 1000.0);
 		} else { // if(value < 1000000)
-			return String.format("%3.0f", value / 1000.0) + "K" + unit;
+			return String.format("%3.0fk", value / 1000.0);
 		}
+	}
+
+	public static String plotValue(double value, String unit) {
+		return plotValue(value) + unit;
 	}
 
 	public static String plotVolt(String header, double value) {
