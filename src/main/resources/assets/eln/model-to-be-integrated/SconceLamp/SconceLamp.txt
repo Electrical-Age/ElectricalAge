@@ -1,0 +1,5 @@
+TODO!
+s tOn SconceLamp.png
+s tOff SconceLamp.png
+s type lampDraw
+s cable enable
