@@ -13,6 +13,8 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
 import org.lwjgl.opengl.GL11;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 
 
@@ -139,14 +141,14 @@ public class WindTurbineDescriptor extends TransparentNodeDescriptor {
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
-		list.add("Produces power from wind.");
-		list.add(Utils.plotVolt("Voltage:", maxVoltage));
-		list.add(Utils.plotPower("Power:", nominalPower));
-		list.add("Wind area:");
-		list.add("  Front: " + rayX);
-		list.add("  Up/Down: " + rayY);
-		list.add("  Left/Right: " + rayZ);
+
+		list.add(tr("Generates energy from wind."));
+		list.add(tr("Voltage: %1$V", Utils.plotValue(maxVoltage)));
+		list.add(tr("Power: %1$W", Utils.plotValue(nominalPower)));
+		list.add(tr("Wind area:"));
+		list.add("  " + tr("Front: %1$", rayX));
+		list.add("  " + tr("Up/Down: %1$", rayY));
+		list.add("  " + tr("Left/Right: %1$", rayZ));
 	}
 }
 

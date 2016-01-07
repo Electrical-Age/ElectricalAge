@@ -13,6 +13,8 @@ import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescriptor {
 	public double thermalRs,thermalRp,thermalC;
 	private Obj3D obj;
@@ -54,12 +56,11 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Used for cooling the Turbine.");
-		list.add(Utils.plotCelsius("Tmax :", warmLimit));
-		list.add("Nominal usage ->");
-		list.add(Utils.plotCelsius("  Temperature :", nominalT));
-		list.add(Utils.plotPower("  Cooling :", nominalP));
-
+		list.add(tr("Used to cool down turbines."));
+		list.add(tr("Max. Temperature: %1$°C", Utils.plotValue(warmLimit)));
+		list.add(tr("Nominal usage:"));
+		list.add("  " + tr("Temperature: %1$°C", Utils.plotValue(nominalT)));
+		list.add("  " + tr("Cooling power: %1$W", Utils.plotValue(nominalP)));
 	}
 	
 	

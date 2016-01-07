@@ -13,6 +13,8 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sound.SoundCommand;
 import mods.eln.wiki.Data;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class TransformerDescriptor extends TransparentNodeDescriptor {
 	Obj3D obj;
 	Obj3D defaultFeroObj;
@@ -55,10 +57,10 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Transforms an input voltage and");
-		list.add("outputs it.");
-		list.add("The transform ratio is defined");
-		list.add("by the cable stacks size ratio.");
+		list.add(tr("Transforms an input voltage to"));
+		list.add(tr("an output voltage."));
+		list.add(tr("The voltage ratio is proportional"));
+		list.add(tr("to the cable stacks count ratio."));
 	}
 	
 	@Override

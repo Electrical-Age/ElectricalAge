@@ -18,6 +18,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class TurbineDescriptor extends TransparentNodeDescriptor{
 
 	CableRenderDescriptor eRender;
@@ -138,13 +140,13 @@ public class TurbineDescriptor extends TransparentNodeDescriptor{
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
-				
-		list.add("Converts heat into electricity.");
-		list.add("Nominal usage ->");
-		list.add("  Delta T : " +  ((int)nominalDeltaT) + "\u00B0C");
-		list.add(Utils.plotVolt("  Voltage out :", nominalU));
-		list.add(Utils.plotPower("  Power out :", nominalP));
+
+
+		list.add(tr("Generates electricity using heat."));
+		list.add(tr("Nominal usage:"));
+		list.add("  " + tr("Temperature difference: %1$°C", Utils.plotValue(nominalDeltaT)));
+		list.add("  " + tr("Voltage: %1$V", Utils.plotValue(nominalU)));
+		list.add("  " + tr("Power: %1$W", Utils.plotValue(nominalP)));
 
 	}
 }

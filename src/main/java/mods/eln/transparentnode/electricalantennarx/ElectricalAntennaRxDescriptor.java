@@ -15,6 +15,8 @@ import net.minecraft.item.ItemStack;
 
 import org.lwjgl.opengl.GL11;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor {
 
     Obj3D obj;
@@ -90,9 +92,9 @@ public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Wireless power receiver.");
-		list.add("Nominal usage");
-		list.add(Utils.plotVolt(" U :", electricalNominalVoltage));
-		list.add(Utils.plotPower(" P :", electricalNominalPower));
+		list.add(tr("Wireless energy receiver."));
+		list.add(tr("Nominal usage:"));
+		list.add("  " + tr("Voltage: %1$V", Utils.plotValue(electricalNominalVoltage)));
+		list.add("  " + tr("Power: %1$W", Utils.plotValue(electricalNominalPower)));
 	}
 }

@@ -1,5 +1,6 @@
 package mods.eln.transparentnode.turret;
 
+import mods.eln.misc.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
@@ -12,6 +13,8 @@ import mods.eln.misc.UtilsClient;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 
 import java.util.List;
+
+import static mods.eln.i18n.I18N.tr;
 
 public class TurretDescriptor extends TransparentNodeDescriptor {
 	class Properties {
@@ -78,10 +81,13 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add("Nominal voltage : 800V");
-        list.add("Standby power : " + (int)getProperties().basePower + "W");
-        list.add("Charge power : 100W...10000W");
-    }
+        list.add(tr("Scans for entities and shoots if the"));
+		list.add(tr("entity matches the configurable filter criteria."));
+		list.add(tr("Nominal voltage: %1$V", 800));
+		list.add(tr("Standby power: %1$W", Utils.plotValue(getProperties().basePower)));
+		list.add(tr("Laser charge power: %1$W...%2$kW", 100, 10));
+		list.add(tr("CAUTION: Cables can get quite hot!"));
+	}
 
     @Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {

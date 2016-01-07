@@ -15,6 +15,8 @@ import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class HeatFurnaceDescriptor extends TransparentNodeDescriptor {
 
     Obj3D obj;
@@ -119,8 +121,8 @@ public class HeatFurnaceDescriptor extends TransparentNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Provides heat when fuelled.");
-		list.add(Utils.plotPower("Power :", nominalPower));
-		list.add(Utils.plotCelsius("Tmax :", thermal.warmLimit));
+		list.add(tr("Generates heat when supplied with fuel."));
+		list.add("  " + tr("Nominal Power: %1$", Utils.plotValue(nominalPower)));
+		list.add("  " + tr("Max. Temperature: %1$°C", Utils.plotValue(thermal.warmLimit)));
 	}
 }

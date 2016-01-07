@@ -15,6 +15,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class FuelGeneratorDescriptor extends TransparentNodeDescriptor {
 
     public ElectricalCableDescriptor cable;
@@ -101,8 +103,8 @@ public class FuelGeneratorDescriptor extends TransparentNodeDescriptor {
                                List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
-        list.add("Produces power using all kinds of burnable fuel.");
-        list.add(Utils.plotVolt("Voltage:", cable.electricalNominalVoltage));
-        list.add(Utils.plotPower("Power:", nominalPower));
+        list.add(tr("Produces energy using fuel."));
+        list.add("  " + tr("Nominal Voltage: %1$V", Utils.plotValue(cable.electricalNominalVoltage)));
+        list.add("  " + tr("Nominal Power: %1$W", Utils.plotValue(nominalPower)));
     }
 }

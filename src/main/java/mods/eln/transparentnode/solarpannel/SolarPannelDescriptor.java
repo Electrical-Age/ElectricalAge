@@ -23,6 +23,8 @@ import net.minecraft.util.AxisAlignedBB;
 
 import org.lwjgl.opengl.GL11;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 
 	boolean basicModel;
@@ -163,11 +165,11 @@ public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
-		list.add("Produces power from daylight.");
-		list.add(Utils.plotVolt("Voltage Max:", electricalUmax));
-		list.add(Utils.plotPower("Power Max:", electricalPmax));
-		if(canRotate) list.add("Can be oriented.");
+
+		list.add(tr("Produces power from solar radiation."));
+		list.add("  " + tr("Max. Voltage: %1$V", Utils.plotValue(electricalUmax)));
+		list.add("  " + tr("Max. Power: %1$W", Utils.plotValue(electricalPmax)));
+		if (canRotate) list.add(tr("Can be geared towards the sun."));
 	}
 	
 	@Override

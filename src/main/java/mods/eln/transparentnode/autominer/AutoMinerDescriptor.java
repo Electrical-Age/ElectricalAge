@@ -3,6 +3,7 @@ package mods.eln.transparentnode.autominer;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
@@ -126,7 +127,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 		list.add(tr("Excavates on a small radius."));
 		list.add(tr("Extracts ore on a bigger radius:"));
 		list.add(tr("10 blocks radius after 10 blocks depth."));
-		list.add(tr("Nominal U : %1$", (int)nominalVoltage));
+		list.add(tr("Nominal voltage: %1$V", Utils.plotValue(nominalVoltage)));
 	}
 	
 	

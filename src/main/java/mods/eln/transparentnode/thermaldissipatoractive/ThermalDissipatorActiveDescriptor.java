@@ -15,6 +15,8 @@ import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor {
 	
 	double nominalP, nominalT;
@@ -110,14 +112,14 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Used for cooling the Turbine.");
-		list.add(Utils.plotCelsius("Tmax :", warmLimit));
-		list.add("Nominal usage ->");
-		list.add(Utils.plotCelsius("  Temperature :", nominalT));
-		list.add(Utils.plotPower("  Cooling :", nominalP));
-		list.add(Utils.plotVolt("  Fan Voltage :", nominalElectricalU));
-		list.add(Utils.plotPower("  Fan Electrical Power :", electricalNominalP));
-		list.add(Utils.plotPower("  Fan Cooling Power :", nominalElectricalCoolingPower));
+		list.add(tr("Used to cool down turbines."));
+		list.add(tr("Max. Temperature: %1$°C", Utils.plotValue(warmLimit)));
+		list.add(tr("Nominal usage:"));
+		list.add("  " + tr("Temperature: %1$°C", Utils.plotValue(nominalT)));
+		list.add("  " + tr("Cooling power: %1$W", Utils.plotValue(nominalP)));
+		list.add("  " + tr("Fan voltage: %1$V", Utils.plotValue(nominalElectricalU)));
+		list.add("  " + tr("Fan power consumption: %1$W", Utils.plotValue(electricalNominalP)));
+		list.add("  " + tr("Fan cooling power: %1$W", Utils.plotValue(nominalElectricalCoolingPower)));
 
 	}
 }

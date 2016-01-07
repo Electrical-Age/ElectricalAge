@@ -25,6 +25,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalMachineDescriptor extends TransparentNodeDescriptor implements IPlugIn {
 
 	public RecipesList recipe = new RecipesList();
@@ -92,8 +94,8 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Nominal U : " + nominalU);
-		list.add("Nominal P : " + nominalP);
+		list.add(tr("Nominal Voltage: %1$V", Utils.plotValue(nominalU)));
+		list.add(tr("Nominal Power: %1$W", Utils.plotValue(nominalP)));
 	}
 
 	public void applyTo(ElectricalLoad load) {

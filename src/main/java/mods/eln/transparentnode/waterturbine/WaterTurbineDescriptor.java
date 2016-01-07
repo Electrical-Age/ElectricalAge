@@ -18,6 +18,8 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 
 
@@ -122,12 +124,12 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
-		list.add("Produces power from water.");
-		list.add(Utils.plotVolt("Voltage:", cable.electricalNominalVoltage));
-		list.add(Utils.plotPower("Power:", nominalPower));
 
+		list.add(tr("Generates energy using water stream."));
+		list.add(tr("Voltage: %1$V", Utils.plotValue(cable.electricalNominalVoltage)));
+		list.add(tr("Power: %1$W", Utils.plotValue(nominalPower)));
 	}
+
 	
 	public Coordonate getWaterCoordonate(World w) {
 		Coordonate coord = new Coordonate(waterCoord);

@@ -22,6 +22,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	
 	public double electricalU, electricalDischargeRate;
@@ -191,13 +193,13 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Nominal voltage : " + (int)(electricalU) + "V");
-		list.add("Nominal power : " + (int)(electricalStdP) + "W");
-		list.add("Full charge energy : " + (int)(electricalStdDischargeTime * electricalStdP / 1000) + "KJ");
-		list.add(Utils.plotOhm("Internal resistance :",electricalRs*2));
+		list.add(tr("Nominal voltage: %1$V", Utils.plotValue(electricalU)));
+		list.add(tr("Nominal power: %1$W", Utils.plotValue(electricalStdP)));
+		list.add(tr("Energy capacity: %1$J", Utils.plotValue(electricalStdDischargeTime * electricalStdP / 1000)));
+		list.add(tr("Internal resistance: %1$Ω", Utils.plotValue(electricalRs * 2)));
 		//list.add("Capacity : " + Utils.plotValue((electricalQ), "As"));
 		list.add("");
-	   	list.add("Charge : " + (int)(getChargeInTag(itemStack) * 100) + "%");
+		list.add(tr("Actual charge: %1$%", Utils.plotValue(getChargeInTag(itemStack) * 100)));
 	   	
 	   	if(lifeEnable)
 	   		list.add("Life : " + (int)(getLifeInTag(itemStack) * 100) + "%");

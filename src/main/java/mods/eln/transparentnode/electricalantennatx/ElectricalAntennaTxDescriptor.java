@@ -15,6 +15,8 @@ import net.minecraft.item.ItemStack;
 
 import org.lwjgl.opengl.GL11;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
 
     Obj3D obj;
@@ -103,11 +105,12 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Wireless power transmitter.");
-		list.add("Nominal usage");
-		list.add(Utils.plotVolt(" U :", electricalNominalVoltage));
-		list.add(Utils.plotPower(" P :", electricalNominalPower));
-		list.add("Range : " + rangeMax + " Blocks");
-		list.add("Efficiency : " + (int)(electricalPowerRatioEffEnd * 100) + "% to " + (int)(electricalPowerRatioEffStart * 100) + "%" );
+		list.add(tr("Wireless energy transmitter."));
+		list.add(tr("Nominal usage:"));
+		list.add("  " + tr("Voltage: %1$V", Utils.plotValue(electricalNominalVoltage)));
+		list.add("  " + tr("Power: %1$W", Utils.plotValue(electricalNominalPower)));
+		list.add("  " + tr("Range: %1$ blocks", rangeMax));
+		list.add("  " + tr("Efficiency: %1$% up to %2$%", Utils.plotValue(electricalPowerRatioEffEnd * 100),
+			Utils.plotValue(electricalPowerRatioEffStart * 100)));
 	}
 }
