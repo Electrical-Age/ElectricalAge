@@ -102,18 +102,6 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 		return desc.name.replaceAll("\\s+","_").toLowerCase();
 	}
 
-	public void populateLangFileKeys(){
-		for(Map.Entry<Integer,Descriptor> item : subItemList.entrySet()){
-			ItemStack stack = new ItemStack(this,1,item.getKey());
-			String key = this.getUnlocalizedNameInefficiently(stack)+".name";
-			String value = getItemStackDisplayName(stack);
-			if(value.equals("") || (value.equals(key)))
-				value = '<'+item.getValue().name+'>';
-			//System.out.println(" > " + key + " | " +  value);
-			Eln.langFile_DefaultKeys.put(key,value);
-		}
-	}
-
 	/*
 	@Override
 	public String getItemStackDisplayName(ItemStack par1ItemStack) {

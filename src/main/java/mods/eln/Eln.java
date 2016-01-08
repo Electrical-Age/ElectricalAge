@@ -187,8 +187,6 @@ public class Eln {
 	public ArrayList<IConfigSharing> configShared = new ArrayList<IConfigSharing>();
 	public static SimpleNetworkWrapper achNetwork;
 
-	public static HashMap<String,String> langFile_DefaultKeys = new HashMap<String,String>();
-
 	// public static final double networkSerializeValueFactor = 100.0;
 	// public static final byte packetNodeSerialized24bitPosition = 11;
 	// public static final byte packetNodeSerialized48bitPosition = 12;
@@ -718,14 +716,6 @@ public class Eln {
 
 		MinecraftForge.EVENT_BUS.register(new ElnForgeEventsHandler());
 		FMLCommonHandler.instance().bus().register((new ElnFMLEventsHandler()));
-
-		sixNodeItem.populateLangFileKeys();
-		transparentNodeItem.populateLangFileKeys();
-		sharedItem.populateLangFileKeys();
-		sharedItemStackOne.populateLangFileKeys();
-		oreItem.populateLangFileKeys();
-		Achievements.populateLangFileKeys();
-		this.populateLangFileCommonKeys();
 
 		Utils.println("Electrical age init done");
 	}
@@ -6658,10 +6648,5 @@ public class Eln {
 
 	public ItemStack findItemStack(String name) {
 		return findItemStack(name, 1);
-	}
-
-	public static void populateLangFileCommonKeys(){
-		//Mod metadatas
-		Eln.langFile_DefaultKeys.put("mod.meta.desc","<"+MODDESC+">");
 	}
 }

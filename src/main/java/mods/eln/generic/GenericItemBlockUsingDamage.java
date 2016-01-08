@@ -43,18 +43,6 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
         subItemList.put(dst, subItemList.get(src));
     }
 
-    public void populateLangFileKeys() {
-        for (Map.Entry<Integer, Descriptor> item : subItemList.entrySet()) {
-            ItemStack stack = new ItemStack(this, 1, item.getKey());
-            String key = this.getUnlocalizedNameInefficiently(stack) + ".name";
-            String value = getItemStackDisplayName(stack);
-            if (value.equals("") || (value.equals(key)))
-                value = '<' + item.getValue().getName(stack) + '>';
-            //System.out.println(" > " + key + " | " +  value);
-            Eln.langFile_DefaultKeys.put(key, value);
-        }
-    }
-
     public void addDescriptor(int damage, Descriptor descriptor) {
         subItemList.put(damage, descriptor);
         ItemStack stack = new ItemStack(this, 1, damage);
