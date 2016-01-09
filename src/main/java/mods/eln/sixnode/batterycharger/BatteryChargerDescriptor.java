@@ -1,5 +1,6 @@
 package mods.eln.sixnode.batterycharger;
 
+import java.util.Collections;
 import java.util.List;
 
 import mods.eln.misc.Obj3D;
@@ -117,10 +118,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add(tr("Can be used to recharge"));
-		list.add(tr("electrical items like:"));
-		list.add(tr("Flash Light, X-Ray scanner,"));
-		list.add(tr("Portable Battery ..."));
+		Collections.addAll(list, tr("Can be used to recharge\nelectrical items like:\nFlash Light, X-Ray scanner\nand Portable Battery ...").split("\\\n"));
 		list.add(tr("Nominal power: %1$", nominalPower));
 		//list.add(Utils.plotPower("Maximal power", nominalPower * 3));
 	}

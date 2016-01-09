@@ -1,5 +1,6 @@
 package mods.eln.sixnode.thermalcable;
 
+import java.util.Collections;
 import java.util.List;
 
 import mods.eln.Eln;
@@ -11,6 +12,8 @@ import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+
+import static mods.eln.i18n.I18N.tr;
 
 public class ThermalCableDescriptor extends SixNodeDescriptor {
 
@@ -97,14 +100,12 @@ public class ThermalCableDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
-		list.add(Utils.plotCelsius("Tmax:", thermalWarmLimit));
-		list.add(Utils.plotOhm("Serial Resistance:", thermalRs * 2));
-		list.add(Utils.plotOhm("Parallel Resistance:", thermalRp));
+
+		list.add(tr("Max. temperature: %1$°C", thermalWarmLimit));
+		list.add(tr("Serial resistance: %1$K/W", thermalRs * 2));
+		list.add(tr("Parallel resistance: %1$K/W", thermalRp));
 		list.add("");
-		list.add("Low Serial Resistance");
-		list.add(" => High conductivity");
-		list.add("High Parallel Resistance");
-		list.add(" => Low power dissipation");
+		Collections.addAll(list, tr("Low serial resistance\n => High conductivity.").split("\n"));
+		Collections.addAll(list, tr("High parallel resistance\n =>  => Low power dissipation.").split("\n"));
 	}
 }

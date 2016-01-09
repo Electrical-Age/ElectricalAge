@@ -1,5 +1,6 @@
 package mods.eln.sixnode.electricalbreaker;
 
+import java.util.Collections;
 import java.util.List;
 
 import mods.eln.misc.Obj3D;
@@ -81,9 +82,6 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add(tr("Protects electrical components"));
-		list.add(tr("Opens contact if:"));
-		list.add("- Voltage exceeds a certain level");
-		list.add("- Current exceeds the cable limit");
+		Collections.addAll(list, (tr("Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds the cable limit").split("\n")));
 	}
 }

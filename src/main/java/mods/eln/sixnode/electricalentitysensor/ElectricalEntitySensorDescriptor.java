@@ -1,5 +1,6 @@
 package mods.eln.sixnode.electricalentitysensor;
 
+import java.util.Collections;
 import java.util.List;
 
 import mods.eln.item.EntitySensorFilterDescriptor;
@@ -64,8 +65,7 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add(tr("Output voltage increases"));
-		list.add(tr("if entities are moving around."));
+		Collections.addAll(list, tr("Output voltage increases\nif entities are moving around.").split("\n"));
 		list.add(tr("Range: %1$ blocks", (int) maxRange));
 	}
 	

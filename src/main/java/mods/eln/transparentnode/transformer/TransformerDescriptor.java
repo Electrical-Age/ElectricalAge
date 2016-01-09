@@ -1,5 +1,6 @@
 package mods.eln.transparentnode.transformer;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
@@ -57,10 +58,8 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 			List list, boolean par4) {
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add(tr("Transforms an input voltage to"));
-		list.add(tr("an output voltage."));
-		list.add(tr("The voltage ratio is proportional"));
-		list.add(tr("to the cable stacks count ratio."));
+		Collections.addAll(list, tr("Transforms an input voltage to\nan output voltage.").split("\n"));
+		Collections.addAll(list, tr("The voltage ratio is proportional\nto the cable stacks count ratio.").split("\n"));
 	}
 	
 	@Override

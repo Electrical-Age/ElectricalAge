@@ -14,7 +14,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 import org.lwjgl.opengl.GL11;
 
+import java.util.Collections;
 import java.util.List;
+
+import static mods.eln.i18n.I18N.tr;
 
 public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 
@@ -84,8 +87,7 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Slowly produces Tree Resin over");
-		list.add("time when placed on a tree.");
+		Collections.addAll(list, tr("Produces Tree Resin over\ntime when put on a tree.").split("\n"));
 	}
     
 	public static boolean isWood(Block b) {

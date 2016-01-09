@@ -16,6 +16,8 @@ import org.lwjgl.opengl.GL11;
 import java.awt.*;
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalVuMeterDescriptor extends SixNodeDescriptor {
 
     Obj3D obj;
@@ -94,7 +96,7 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add("Displays the value of a signal.");
+		list.add(tr("Displays the value of a signal."));
 	}
 	
 	@Override

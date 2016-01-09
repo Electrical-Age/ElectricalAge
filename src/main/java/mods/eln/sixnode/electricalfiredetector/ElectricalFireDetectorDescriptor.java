@@ -9,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
+import java.util.Collections;
 import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
@@ -53,8 +54,7 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Output voltage increases"));
-        list.add(tr("if a fire has been detected."));
+        Collections.addAll(list, tr("Output voltage increases\nif a fire has been detected.").split("\n"));
         list.add(tr("Range: %1$ blocks", (int) maxRange));
     }
 

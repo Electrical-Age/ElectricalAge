@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import org.lwjgl.opengl.GL11;
 
+import java.util.Collections;
 import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
@@ -32,8 +33,7 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add(tr("Provides configurable signal"));
-		list.add(tr("voltage."));
+		Collections.addAll(list, tr("Provides configurable signal\nvoltage.").split("\n"));
 	}
 
 	public void setWithAutoReset() {

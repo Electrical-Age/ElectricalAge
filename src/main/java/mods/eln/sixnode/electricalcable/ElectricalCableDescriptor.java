@@ -15,6 +15,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
+import java.util.Collections;
 import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
@@ -125,10 +126,8 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		if (signalWire) {
-			list.add(tr("Cable is adapted to conduct"));
-			list.add(tr("electrical signals."));
-			list.add(tr("A signal is electrical information"));
-			list.add(tr("which must be between 0V and %1$V.", Eln.SVU));
+			Collections.addAll(list, tr("Cable is adapted to conduct\nelectrical signals.").split("\n"));
+			Collections.addAll(list, tr("A signal is electrical information\nwhich must be between 0V and %1$V", Eln.SVU).split("\n"));
 			list.add(tr("Not adopted to transport power."));
 			
 			/*String lol = "";
@@ -142,7 +141,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
 			list.add(lol);*/
 		} else {
 			//list.add("Low resistor => low power lost");
-			list.add(tr("Save usage ->"));
+			list.add(tr("Save usage:"));
 			list.add("  " + tr("Voltage: %1$V", (int) electricalNominalVoltage));
 			list.add("  " + tr("Current: %1$A", electricalNominalPower / electricalNominalVoltage));
 			list.add("  " + tr("Power: %1$W", (int) electricalNominalPower));

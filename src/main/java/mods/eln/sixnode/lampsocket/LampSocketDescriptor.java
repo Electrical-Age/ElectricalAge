@@ -7,6 +7,8 @@ import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class LampSocketDescriptor extends SixNodeDescriptor {
 
 	public LampSocketType socketType;
@@ -92,10 +94,10 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
 		if (range != 0 || alphaZMin != alphaZMax) {
 			//list.add("Projector");
 			if (range != 0){
-				list.add("Spot range : " + range + " Blocks");
+				list.add(tr("Spot range: %1$ blocks", range));
 			}
 			if (alphaZMin != alphaZMax) {
-				list.add("Angle : " + ((int)alphaZMin) + "\u00B0 to " + ((int)alphaZMax) + "\u00B0");
+				list.add(tr("Angle : %1$ ° to %2$°", ((int) alphaZMin), ((int) alphaZMax)));
 			}
 		}
 	}

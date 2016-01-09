@@ -14,6 +14,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
+import java.util.Collections;
 import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
@@ -149,10 +150,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-
-		list.add(tr("Measures the voltage of an"));
-		list.add(tr("electrical signal and plots"));
-		list.add(tr("the data in real time."));
+		Collections.addAll(list, tr("Measures the voltage of an\nelectrical signal and plots\nthe data in real time.").split("\n"));
 		list.add(tr("It can store up to 256 points."));
 	}
 }

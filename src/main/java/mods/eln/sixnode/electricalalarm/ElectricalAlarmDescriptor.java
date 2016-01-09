@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
+import java.util.Collections;
 import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
@@ -110,7 +111,7 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Emits an acoustic alarm if"));
-        list.add(tr("the input signal is high."));
+        Collections.addAll(list, tr("Emits an acoustic alarm if\nthe input signal is high").split("\n"));
+        list.add(tr(""));
     }
 }

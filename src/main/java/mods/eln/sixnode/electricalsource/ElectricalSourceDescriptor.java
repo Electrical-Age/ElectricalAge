@@ -1,7 +1,9 @@
 package mods.eln.sixnode.electricalsource;
 
+import java.util.Collections;
 import java.util.List;
 
+import com.sun.org.apache.xerces.internal.xs.StringList;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -52,10 +54,9 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add(tr("Provides ab ideal voltage source"));
-		list.add(tr("without energy or power limitation."));
+		Collections.addAll(list, tr("Provides ab ideal voltage source\nwithout energy or power limitation.").split("\\\n"));
 		list.add("");
-		list.add(tr("Internal resistance:", Eln.instance.lowVoltageCableDescriptor.electricalRs));
+		list.add(tr("Internal resistance: %1$Ω", Eln.instance.lowVoltageCableDescriptor.electricalRs));
         list.add("");
 		list.add(tr("Creative block."));
 	}

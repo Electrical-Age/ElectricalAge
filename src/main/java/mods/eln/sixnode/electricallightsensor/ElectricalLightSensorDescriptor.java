@@ -1,5 +1,6 @@
 package mods.eln.sixnode.electricallightsensor;
 
+import java.util.Collections;
 import java.util.List;
 
 import mods.eln.Eln;
@@ -54,13 +55,10 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		if (dayLightOnly) {
-			list.add(tr("Provides an electrical voltage"));
-			list.add(tr("which is proportional to"));
-			list.add(tr("the intensity of daylight."));
+			Collections.addAll(list, tr("Provides an electrical voltage\nwhich is proportional to\nthe intensity of daylight.").split("\n"));
 			list.add(tr("0V at night, %1$V at noon.", Eln.SVU));
 		} else {
-			list.add(tr("Provides an electrical voltage"));
-			list.add(tr("in the presence of light."));
+			Collections.addAll(list, tr("Provides an electrical voltage\nin the presence of light.").split("\n"));
 		}
 	}
 	

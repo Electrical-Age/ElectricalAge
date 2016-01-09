@@ -1,5 +1,6 @@
 package mods.eln.sixnode.diode;
 
+import java.util.Collections;
 import java.util.List;
 
 import mods.eln.misc.IFunction;
@@ -100,10 +101,8 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add(tr("Electrical current can only"));
-		list.add(tr("flow through the diode"));
-        list.add(tr("from anode to cathode"));
-	}
+        Collections.addAll(list, tr("Electrical current can only\nflow through the diode\nfrom anode to cathode").split("\\\n"));
+    }
 
     void draw() {
         if (base != null) base.draw();

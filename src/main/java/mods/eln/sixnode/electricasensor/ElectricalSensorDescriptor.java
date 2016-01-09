@@ -8,7 +8,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
+import java.util.Collections;
 import java.util.List;
+
+import static mods.eln.i18n.I18N.tr;
 
 public class ElectricalSensorDescriptor extends SixNodeDescriptor {
 
@@ -52,15 +55,13 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
 		if (voltageOnly) {
-			list.add("Probe voltage value on a cable.");
-			list.add("Has a signal output.");
+			list.add(tr("Measures voltage on cables."));
+			list.add(tr("Has a signal output."));
 		} else {
-			list.add("Probe electrical values on cables.");
-			list.add("Can measure:");
-			list.add("  Voltage/Power/Current");
-			list.add("Has a signal output.");
+			list.add(tr("Measures electrical values on cables."));
+			list.add(tr("Can measure Voltage/Power/Current"));
+			list.add(tr("Has a signal output."));
 		}
 	}
 }

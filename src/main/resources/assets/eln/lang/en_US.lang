@@ -274,10 +274,10 @@ Technology\:_%1$=Technology: %1$
 Used=Used
 
 # ./src/main/java/mods/eln/item/OverHeatingProtectionDescriptor.java
-Useful_to_prevent_overheating_of=Useful to prevent overheating of
+Useful_to_prevent_overheating\nof_Batteries=Useful to prevent overheating\nof Batteries
 
 # ./src/main/java/mods/eln/item/OverVoltageProtectionDescriptor.java
-Useful_to_prevent_over-voltage_of=Useful to prevent over-voltage of
+Useful_to_prevent_over-voltage\nof_Batteries=Useful to prevent over-voltage\nof Batteries
 
 # ./src/main/java/mods/eln/item/SolarTrackerDescriptor.java
 Solar_panel_upgrade=Solar panel upgrade
@@ -296,89 +296,120 @@ Hold_shift=Hold shift
 # ./src/main/java/mods/eln/misc/Version.java
 mod.name=Electrical Age
 
+# ./src/main/java/mods/eln/sixnode/TreeResinCollector/TreeResinCollectorDescriptor.java
+Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Produces Tree Resin over\ntime when put on a tree.
+
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
-Can_be_used_to_recharge=Can be used to recharge
-Flash_Light,_X-Ray_scanner,=Flash Light, X-Ray scanner,
+Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Can be used to recharge\nelectrical items like:\nFlash Light, X-Ray scanner\nand Portable Battery ...
 Nominal_power\:_%1$=Nominal power: %1$
-Portable_Battery_...=Portable Battery ...
-electrical_items_like\:=electrical items like:
 
 # ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
-Electrical_current_can_only=Electrical current can only
-flow_through_the_diode=flow through the diode
-from_anode_to_cathode=from anode to cathode
+Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Electrical current can only\nflow through the diode\nfrom anode to cathode
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmDescriptor.java
-Emits_an_acoustic_alarm_if=Emits an acoustic alarm if
-the_input_signal_is_high.=the input signal is high.
+=
+Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=Emits an acoustic alarm if\nthe input signal is high
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
-Opens_contact_if\:=Opens contact if:
-Protects_electrical_components=Protects electrical components
+Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds the cable limit
 
 # ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableDescriptor.java
-A_signal_is_electrical_information=A signal is electrical information
-Cable_is_adapted_to_conduct=Cable is adapted to conduct
+A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$V=A signal is electrical information\nwhich must be between 0V and %1$V
+Cable_is_adapted_to_conduct\nelectrical_signals.=Cable is adapted to conduct\nelectrical signals.
 Current\:_%1$A=Current: %1$A
 Not_adopted_to_transport_power.=Not adopted to transport power.
-Save_usage_->=Save usage ->
+Save_usage\:=Save usage:
 Serial_resistance\:_%1$Ω=Serial resistance: %1$Ω
-electrical_signals.=electrical signals.
-which_must_be_between_0V_and_%1$V.=which must be between 0V and %1$V.
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerDescriptor.java
 It_can_store_up_to_256_points.=It can store up to 256 points.
-Measures_the_voltage_of_an=Measures the voltage of an
-electrical_signal_and_plots=electrical signal and plots
-the_data_in_real_time.=the data in real time.
+Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Measures the voltage of an\nelectrical signal and plots\nthe data in real time.
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
-if_entities_are_moving_around.=if entities are moving around.
+Output_voltage_increases\nif_entities_are_moving_around.=Output voltage increases\nif entities are moving around.
 
 # ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorDescriptor.java
-if_a_fire_has_been_detected.=if a fire has been detected.
+Output_voltage_increases\nif_a_fire_has_been_detected.=Output voltage increases\nif a fire has been detected.
 
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
-Provides_configurable_signal=Provides configurable signal
-voltage.=voltage.
+Provides_configurable_signal\nvoltage.=Provides configurable signal\nvoltage.
 
 # ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorDescriptor.java
 0V_at_night,_%1$V_at_noon.=0V at night, %1$V at noon.
-Provides_an_electrical_voltage=Provides an electrical voltage
-in_the_presence_of_light.=in the presence of light.
-the_intensity_of_daylight.=the intensity of daylight.
-which_is_proportional_to=which is proportional to
+Provides_an_electrical_voltage\nin_the_presence_of_light.=Provides an electrical voltage\nin the presence of light.
+Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Provides an electrical voltage\nwhich is proportional to\nthe intensity of daylight.
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
-3_inputs_(A,_B,_C)_using_an_equation.=3 inputs (A, B, C) using an equation.
 Applicable_boolean_operators\:=Applicable boolean operators:
 Applicable_functions\:=Applicable functions:
 Applicable_mathematical_operators\:=Applicable mathematical operators:
-Calculates_an_output_signal_from=Calculates an output signal from
+Calculates_an_output_signal_from\n3_inputs_(A,_B,_C)_using_an_equation.=Calculates an output signal from\n3 inputs (A, B, C) using an equation.
 
 # ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputDescriptor.java
-Converts_Redstone_signal=Converts Redstone signal
-to_an_electrical_voltage.=to an electrical voltage.
+Converts_Redstone_signal\nto_an_electrical_voltage.=Converts Redstone signal\nto an electrical voltage.
 
 # ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputDescriptor.java
-Converts_electrical_voltage=Converts electrical voltage
-into_a_Redstone_signal.=into a Redstone signal.
+Converts_electrical_voltage\ninto_a_Redstone_signal.=Converts electrical voltage\ninto a Redstone signal.
 
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayDescriptor.java
-A_relay_is_an_electrical=A relay is an electrical
-contact_that_conducts_electric=contact that conducts electric
-current_or_not,_depending=current or not, depending
-the_actual_input_signal_voltage.=the actual input signal voltage.
+A_relay_is_an_electrical\ncontact_that_conducts_electric\ncurrent_or_not,_depending\nthe_actual_input_signal_voltage.=A relay is an electrical\ncontact that conducts electric\ncurrent or not, depending\nthe actual input signal voltage.
 
 # ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
 Creative_block.=Creative block.
-Internal_resistance\:=Internal resistance:
-Provides_ab_ideal_voltage_source=Provides ab ideal voltage source
-without_energy_or_power_limitation.=without energy or power limitation.
+Provides_ab_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides ab ideal voltage source\nwithout energy or power limitation.
 
 # ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
-Can_break_an_electrical_circuit=Can break an electrical circuit
-interrupting_the_current.=interrupting the current.
+Can_break_an_electrical_circuit\ninterrupting_the_current.=Can break an electrical circuit\ninterrupting the current.
+
+# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
+\"When_the_input_signal_is_high_this\nmaintains_a_high_output_signal\nfor_a_configurable_time.="When the input signal is high this\nmaintains a high output signal\nfor a configurable time.
+
+# ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
+Displays_the_value_of_a_signal.=Displays the value of a signal.
+
+# ./src/main/java/mods/eln/sixnode/electricalweathersensor/ElectricalWeatherSensorDescriptor.java
+Clear\:_%1$V=Clear: %1$V
+Provides_an_electrical_signal\ndepending_the_actual_weather.=Provides an electrical signal\ndepending the actual weather.
+Rain\:_%1$V=Rain: %1$V
+Storm\:_%1$V=Storm: %1$V
+
+# ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
+Maximum_wind_speed_is_%1$m/s=Maximum wind speed is %1$m/s
+Provides_an_electrical_signal\ndependant_on_wind_speed.=Provides an electrical signal\ndependant on wind speed.
+
+# ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorDescriptor.java
+Can_measure_Voltage/Power/Current=Can measure Voltage/Power/Current
+Measures_electrical_values_on_cables.=Measures electrical values on cables.
+Measures_voltage_on_cables.=Measures voltage on cables.
+
+# ./src/main/java/mods/eln/sixnode/groundcable/GroundCableDescriptor.java
+Can_be_used_to_ground_negative\nbattery_pins.=Can be used to ground negative\nbattery pins.
+Provides_a_zero_volt_reference.=Provides a zero volt reference.
+
+# ./src/main/java/mods/eln/sixnode/hub/HubDescriptor.java
+Allows_crossing_cables\non_one_single_block.=Allows crossing cables\non one single block.
+
+# ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketDescriptor.java
+Angle_\:_%1$_°_to_%2$°=Angle : %1$ ° to %2$°
+Spot_range\:_%1$_blocks=Spot range: %1$ blocks
+
+# ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
+Supplies_all_lamps_on_the_channel.=Supplies all lamps on the channel.
+
+# ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketDescriptor.java
+Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in with energy.
+
+# ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
+High_parallel_resistance\n_\=>__\=>_Low_power_dissipation.=High parallel resistance\n =>  => Low power dissipation.
+Low_serial_resistance\n_\=>_High_conductivity.=Low serial resistance\n => High conductivity.
+Parallel_resistance\:_%1$K/W=Parallel resistance: %1$K/W
+Serial_resistance\:_%1$K/W=Serial resistance: %1$K/W
+
+# ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
+Can_measure\:=Can measure:
+Measures_temperature_on_a_cable.=Measures temperature on a cable.
+Measures_thermal_values_on_cables.=Measures thermal values on cables.
+__Temperature/Power_conducted=  Temperature/Power conducted
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerDescriptor.java
 10_blocks_radius_after_10_blocks_depth.=10 blocks radius after 10 blocks depth.
@@ -388,7 +419,6 @@ Extracts_ore_on_a_bigger_radius\:=Extracts ore on a bigger radius:
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryDescriptor.java
 Actual_charge\:_%1$%=Actual charge: %1$%
 Energy_capacity\:_%1$J=Energy capacity: %1$J
-Internal_resistance\:_%1$Ω=Internal resistance: %1$Ω
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxDescriptor.java
 Wireless_energy_receiver.=Wireless energy receiver.
@@ -398,11 +428,10 @@ Efficiency\:_%1$%_up_to_%2$%=Efficiency: %1$% up to %2$%
 Wireless_energy_transmitter.=Wireless energy transmitter.
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceDescriptor.java
-Equivalent_to_a_vanilla_furnace=Equivalent to a vanilla furnace
-but_heats_with_electricity.=but heats with electricity.
+Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Similar to a vanilla furnace,\nbut heats with electricity.
 
 # ./src/main/java/mods/eln/transparentnode/fuelgenerator/FuelGeneratorDescriptor.java
-Produces_energy_using_fuel.=Produces energy using fuel.
+Produces_electricity_using_fuel.=Produces electricity using fuel.
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceDescriptor.java
 Generates_heat_when_supplied_with_fuel.=Generates heat when supplied with fuel.
@@ -419,10 +448,8 @@ Fan_power_consumption\:_%1$W=Fan power consumption: %1$W
 Fan_voltage\:_%1$V=Fan voltage: %1$V
 
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerDescriptor.java
-The_voltage_ratio_is_proportional=The voltage ratio is proportional
-Transforms_an_input_voltage_to=Transforms an input voltage to
-an_output_voltage.=an output voltage.
-to_the_cable_stacks_count_ratio.=to the cable stacks count ratio.
+The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=The voltage ratio is proportional\nto the cable stacks count ratio.
+Transforms_an_input_voltage_to\nan_output_voltage.=Transforms an input voltage to\nan output voltage.
 
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineDescriptor.java
 Generates_electricity_using_heat.=Generates electricity using heat.
@@ -431,9 +458,8 @@ Temperature_difference\:_%1$°C=Temperature difference: %1$°C
 # ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
 CAUTION\:_Cables_can_get_quite_hot!=CAUTION: Cables can get quite hot!
 Laser_charge_power\:_%1$W...%2$kW=Laser charge power: %1$W...%2$kW
-Scans_for_entities_and_shoots_if_the=Scans for entities and shoots if the
+Scans_for_entities_and_shoots_if_the\nentity_matches_the_configurable_filter_criteria.=Scans for entities and shoots if the\nentity matches the configurable filter criteria.
 Standby_power\:_%1$W=Standby power: %1$W
-entity_matches_the_configurable_filter_criteria.=entity matches the configurable filter criteria.
 
 # ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineDescriptor.java
 Generates_energy_using_water_stream.=Generates energy using water stream.
@@ -446,16 +472,16 @@ Up/Down\:_%1$=Up/Down: %1$
 Wind_area\:=Wind area:
 
 # Appearing in multiple source files
-Batteries=Batteries
 Charge_power\:_%1$W=Charge power: %1$W
 Cooling_power\:_%1$W=Cooling power: %1$W
 Discharge_power\:_%1$W=Discharge power: %1$W
+Has_a_signal_output.=Has a signal output.
+Internal_resistance\:_%1$Ω=Internal resistance: %1$Ω
 Max._temperature\:_%1$°C=Max. temperature: %1$°C
 Nominal\:=Nominal:
 Nominal_power\:_%1$W=Nominal power: %1$W
 Nominal_usage\:=Nominal usage:
 Nominal_voltage\:_%1$V=Nominal voltage: %1$V
-Output_voltage_increases=Output voltage increases
 Power\:_%1$W=Power: %1$W
 Range\:_%1$_blocks=Range: %1$ blocks
 Resistance\:_%1$Ω=Resistance: %1$Ω
