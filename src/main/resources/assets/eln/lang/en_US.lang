@@ -365,7 +365,7 @@ Provides_ab_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides a
 Can_break_an_electrical_circuit\ninterrupting_the_current.=Can break an electrical circuit\ninterrupting the current.
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
-\"When_the_input_signal_is_high_this\nmaintains_a_high_output_signal\nfor_a_configurable_time.="When the input signal is high this\nmaintains a high output signal\nfor a configurable time.
+When_the_input_signal_is_high_this\nmaintains_a_high_output_signal\nfor_a_configurable_time.=When the input signal is high this\nmaintains a high output signal\nfor a configurable time.
 
 # ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
 Displays_the_value_of_a_signal.=Displays the value of a signal.
@@ -393,7 +393,7 @@ Provides_a_zero_volt_reference.=Provides a zero volt reference.
 Allows_crossing_cables\non_one_single_block.=Allows crossing cables\non one single block.
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketDescriptor.java
-Angle_\:_%1$_°_to_%2$°=Angle : %1$ ° to %2$°
+Angle\:_%1$°_to_%2$°=Angle: %1$° to %2$°
 Spot_range\:_%1$_blocks=Spot range: %1$ blocks
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
@@ -403,7 +403,7 @@ Supplies_all_lamps_on_the_channel.=Supplies all lamps on the channel.
 Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in with energy.
 
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
-High_parallel_resistance\n_\=>__\=>_Low_power_dissipation.=High parallel resistance\n =>  => Low power dissipation.
+High_parallel_resistance\n_\=>_Low_power_dissipation.=High parallel resistance\n => Low power dissipation.
 Low_serial_resistance\n_\=>_High_conductivity.=Low serial resistance\n => High conductivity.
 Parallel_resistance\:_%1$K_W=Parallel resistance: %1$K/W
 Serial_resistance\:_%1$K_W=Serial resistance: %1$K/W

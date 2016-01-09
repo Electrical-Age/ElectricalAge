@@ -97,7 +97,7 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
 				list.add(tr("Spot range: %1$ blocks", range));
 			}
 			if (alphaZMin != alphaZMax) {
-				list.add(tr("Angle : %1$ ° to %2$°", ((int) alphaZMin), ((int) alphaZMax)));
+				list.add(tr("Angle: %1$° to %2$°", ((int) alphaZMin), ((int) alphaZMax)));
 			}
 		}
 	}

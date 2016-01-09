@@ -2494,7 +2494,7 @@ Build 1.6.1-8.9.0.769-newliquid:
 		MinecraftForge/FML@91ecf711092e1610dd10e77cdd517c3324e62d8d Fix -rel json
 		MinecraftForge/FML@efc369ee83a7b62f605c13e16efad66b63b4bd8c Fix EventHandler annotation.
 		MinecraftForge/FML@fbd57b32641b540d609314d91fd64350d50b9013 Mods are now loaded as resource packs. Vanilla will scan for valid prefixes based on subdirs of 'ass
-		ets' which can then be referenced as ResourceLocations with the "<prefix>:path" notation.
+		ets' which can then be referenced as ResourceLocations with the "<runtimePrefix>:path" notation.
 	LexManos:
 		Updated FML:
 		MinecraftForge/FML@5a97d183dfb13b0f831172a1afef7407347ea7bc Remember to update your patches!!!!
@@ -2508,7 +2508,7 @@ Build 1.6.1-8.9.0.769-newliquid:
 		Start: f1b533ad87ea08d6e62259c59779bcec1636e2fe
 		End: f21cd286ca8e974b75536224a38cc0dacaca8454
 		Updated FML:
-		MinecraftForge/FML@f21cd286ca8e974b75536224a38cc0dacaca8454 Resource packs, part two. FML mods are now resource packs. Vanilla will scan anything under 'assets' and turn it into a resource prefix. Use resourcelocations to look stuff up.
+		MinecraftForge/FML@f21cd286ca8e974b75536224a38cc0dacaca8454 Resource packs, part two. FML mods are now resource packs. Vanilla will scan anything under 'assets' and turn it into a resource runtimePrefix. Use resourcelocations to look stuff up.
 	LexManos: Move resource location resolution down to TextureAtlasSprite and allow for sprites that are not stitched.
 	LexManos: Attempt to gather lastBuild information to fix ChangeLog's off-by-one issue.
 	LexManos:
@@ -2598,7 +2598,7 @@ Build 1.6.1-8.9.0.758:
 		Start: f1b533ad87ea08d6e62259c59779bcec1636e2fe
 		End: f21cd286ca8e974b75536224a38cc0dacaca8454
 		Updated FML:
-		MinecraftForge/FML@f21cd286ca8e974b75536224a38cc0dacaca8454 Resource packs, part two. FML mods are now resource packs. Vanilla will scan anything under 'assets' and turn it into a resource prefix. Use resourcelocations to look stuff up.
+		MinecraftForge/FML@f21cd286ca8e974b75536224a38cc0dacaca8454 Resource packs, part two. FML mods are now resource packs. Vanilla will scan anything under 'assets' and turn it into a resource runtimePrefix. Use resourcelocations to look stuff up.
 
 Build 1.6.1-8.9.0.757:
 	LexManos: Update ChestGenHooks for new Dungeon chest strcture.
@@ -2628,7 +2628,7 @@ Build 1.6.1-8.9.0.755:
 		MinecraftForge/FML@91ecf711092e1610dd10e77cdd517c3324e62d8d Fix -rel json
 		MinecraftForge/FML@efc369ee83a7b62f605c13e16efad66b63b4bd8c Fix EventHandler annotation.
 		MinecraftForge/FML@fbd57b32641b540d609314d91fd64350d50b9013 Mods are now loaded as resource packs. Vanilla will scan for valid prefixes based on subdirs of 'ass
-		ets' which can then be referenced as ResourceLocations with the "<prefix>:path" notation.
+		ets' which can then be referenced as ResourceLocations with the "<runtimePrefix>:path" notation.
 	LexManos:
 		Updated FML:
 		MinecraftForge/FML@5a97d183dfb13b0f831172a1afef7407347ea7bc Remember to update your patches!!!!

@@ -41,7 +41,7 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		Collections.addAll(list, tr("\"When the input signal is high this\nmaintains a high output signal\nfor a configurable time.").split("\n"));
+		Collections.addAll(list, tr("When the input signal is high this\nmaintains a high output signal\nfor a configurable time.").split("\n"));
 	}
 	
 	@Override
