@@ -1,13 +1,18 @@
 # Contributing
-We appreciate any help from the community to improve the mod:
 
-### Bugs or ideas for new items:
-Did you found a bug or do you have an idea how to improve the mod? We are happy to hear from you...
+This is an open source project. We appreciate any help from the community to improve the mod.
+
+### Bugs or ideas for new items
+
+Did you found a bug or do you have an idea how to improve the mod? We are happy to hear from you.
 
 - [IRC Channel](https://qchat.rizon.net/?channels=electricalage)
 - [Bug Tracker](https://github.com/Electrical-Age/ElectricalAge/issues)
 
+Contributions via [pull request](https://github.com/Electrical-Age/ElectricalAge/pulls), and [bug reports](https://github.com/Electrical-Age/ElectricalAge/issues) are welcome! Please submit your pull request to the `1.7.10-MNA` branch and use the GitHub issue tracker to report issues.
+
 ### Translations
+
 Is the mod not available in your language or are some translations missing?
 Well you can change that by adding or modifying a translation:
 
@@ -27,9 +32,10 @@ required if the language file already exists.
 You need first to populate the language file with the actual strings to translate. There is a gradle task for that:
 In the root folder (ElectricalAge), run the following gradle task:  
 ```sh
-gradle updateLanguageFiles
-```  
-Use ```./gradlew``` or ```gradlew``` in place of gradle if you have gradle not installed.
+gradle updateMasterLanguageFile
+```
+
+Use `./gradlew` or `gradlew` in place of gradle if you do not have gradle installed.
 
 - Add the actual translations:  
 Using the text editor of you choice, you can now add translations to the file. The format is rather simple:  
