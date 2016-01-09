@@ -99,7 +99,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 	@Override
 	public String getUnlocalizedName(ItemStack par1ItemStack){
 		Descriptor desc = getDescriptor(par1ItemStack);
-		return desc.name.replaceAll("\\s+","_").toLowerCase();
+		return desc.name.replaceAll("\\s+","_");
 	}
 
 	/*

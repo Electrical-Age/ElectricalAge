@@ -1,15 +1,18 @@
 package mods.eln.i18n;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 class LanguageFileUpdater {
-    private static void updateFile(final File languageFile, final Map<String, Set<String>> stringsToTranslate)
+    private static void updateFile(final File languageFile, final Map<String, Set<TranslationItem>> stringsToTranslate)
         throws IOException {
         // Parse the existing translations from the language file.
-        Map<String, String> existingTranslations = LanguageFileParser.parseFile(languageFile);
+        Properties existingTranslations = new Properties();
+        existingTranslations.load(new FileInputStream(languageFile));
 
         // Update the existing language file.
         LanguageFileGenerator.updateFile(languageFile, stringsToTranslate, existingTranslations);
@@ -28,7 +31,7 @@ class LanguageFileUpdater {
                 System.exit(1);
 
             // Get the strings to translate from the actual source code.
-            Map<String, Set<String>> stringsToTranslate = SourceCodeParser.parseSourceFolder(srcFolder);
+            Map<String, Set<TranslationItem>> stringsToTranslate = SourceCodeParser.parseSourceFolder(srcFolder);
 
             // If a single file is passed to the main method, we just update that particular file.
             if (languageFileOrFolder.isFile()) {

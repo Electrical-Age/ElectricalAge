@@ -114,7 +114,7 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor implements IPlug
 		extender.add(new GuiLabel(6, y,tr("Applicable boolean operators:"))); y+=9;
 		extender.add(new GuiLabel(6, y,"  & | = ^")); y+=9;
 		y+=9;
-		extender.add(new GuiLabel(6, y,tr("EApplicable functions:"))); y+=9;
+		extender.add(new GuiLabel(6, y,tr("Applicable functions:"))); y+=9;
 		extender.add(new GuiLabel(6, y,"  if(condition,then,else)")); y+=9;
 		extender.add(new GuiLabel(6, y,"  min(x,y)")); y+=9;
 		extender.add(new GuiLabel(6, y,"  max(x,y)")); y+=9;

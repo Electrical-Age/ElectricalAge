@@ -113,7 +113,7 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
 		
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add(tr("Used to cool down turbines."));
-		list.add(tr("Max. Temperature: %1$°C", Utils.plotValue(warmLimit)));
+		list.add(tr("Max. temperature: %1$°C", Utils.plotValue(warmLimit)));
 		list.add(tr("Nominal usage:"));
 		list.add("  " + tr("Temperature: %1$°C", Utils.plotValue(nominalT)));
 		list.add("  " + tr("Cooling power: %1$W", Utils.plotValue(nominalP)));

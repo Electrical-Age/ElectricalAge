@@ -13,13 +13,23 @@ public class I18N {
         return FMLCommonHandler.instance().getCurrentLanguage();
     }
 
+    public static String encodeLangKey(final String key) {
+        if (key != null) {
+            return key.replace(' ', '_')
+                .replace("=", "\\=")
+                .replace(":", "\\:")
+                .replace("\n", "\\n");
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Translates the given string. You can pass arguments to the method and reference them in the string using
-     * the placeholders %N$ whereas N is the index of the actual parameter <b>starting at 1</b>. Newlines are not
-     * supported at all, so if you have to translate multiline strings, you have to use tr() for each line separately.
-     * <p/>
+     * the placeholders %N$ whereas N is the index of the actual parameter <b>starting at 1</b>.
+     *
      * Example: tr("You have %1$ lives left", 4);
-     * <p/>
+     *
      * IT IS IMPORTANT THAT YOU PASS THE <b>STRING LITERALS</b> AT LEAST ONCE AS THE FIRST PARAMETER TO THIS METHOD or
      * you call the method TR() with the actual string literal in order to register the translation text automatically!
      * Otherwise the translation will not be added to the language files. There is no problem to use the tr() method
@@ -32,15 +42,15 @@ public class I18N {
      *                  anyway) if no translation is present.
      */
     public static String tr(final String text, Object... objects) {
-        // We can not allow newlines in translated strings.
-        assert (!text.contains("\n"));
-
         // Try to find the translation for the string using forge API.
-        String translation = languageRegistry.getStringLocalization(text.toLowerCase().replace(' ', '_'));
+        String translation = languageRegistry.getStringLocalization(encodeLangKey(text));
 
         // If no translation was found, just use the original text.
         if (translation == null || "".equals(translation)) {
             translation = text;
+        } else {
+            // Replace new line placeholders by real new lines.
+            translation = translation.replace("\\n", "\n");
         }
 
         // Replace placeholders in string by actual string values of the passed objects.
@@ -52,16 +62,16 @@ public class I18N {
     }
 
     /**
-     * This method can be used to mark an unlocalized string in order to add it to the generated language files.
-     * The method does not actually translate the string - it marks the string literal only to be translated afterwards.
-     * A common use case is to add text to the language file which is translated using a string variable with the
+     * This method can be used to mark an unlocalized text in order to add it to the generated language files.
+     * The method does not actually translate the text - it marks the text literal only to be translated afterwards.
+     * A common use case is to add text to the language file which is translated using a text variable with the
      * method tr().
      *
-     * @param string    String LITERAL to add to the language files.
-     * @return          Exactly the same string as given to the method.
+     * @param text    String LITERAL to add to the language files.
+     * @return          Exactly the same text as given to the method.
      */
-    public static String TR(final String string) {
-        return string.toLowerCase().replace(' ', '_');
+    public static String TR(final String text) {
+        return encodeLangKey(text);
     }
 
     /**
@@ -72,65 +82,75 @@ public class I18N {
          * The text to translate is not related to a particular translatable type, so basically only the ".name" suffix
          * is added to the translation key.
          */
-        NONE(""),
+        NONE("", false),
 
         /**
-         * The text to translate is related to an item. The "item." prefix will be added to the translation key.
+         * The text to translate is related to an item. The "item." runtimePrefix will be added to the translation key.
          */
-        ITEM("item."),
+        ITEM("item.", true),
 
         /**
-         * The text to translate is related to a tile. The "tile." prefix will be added to the translation key.
+         * The text to translate is related to a tile. The "tile." runtimePrefix will be added to the translation key.
          */
-        TILE("tile."),
+        TILE("tile.", true),
 
         /**
-         * The text to translate is related to an achievement. The "achievement." prefix will be added to the
+         * The text to translate is related to an achievement. The "achievement." runtimePrefix will be added to the
          * translation key.
          */
-        ACHIEVEMENT("achievement."),
+        ACHIEVEMENT("achievement.", true),
 
         /**
-         * The text to translate is related to an entity. The "entity." prefix will be added to the translation key.
+         * The text to translate is related to an entity. The "entity." runtimePrefix will be added to the translation key.
          */
-        ENTITY("entity."),
+        ENTITY("entity.", true),
 
         /**
-         * The text to translate is related to a death attack. The "death.attack" prefix will be added to the
+         * The text to translate is related to a death attack. The "death.attack" runtimePrefix will be added to the
          * translation key.
          */
-        DEATH_ATTACK("death.attack."),
+        DEATH_ATTACK("death.attack.", true),
 
         /**
-         * The text to translate is related to an item group. The "itemGroup." prefix will be added to the translation
+         * The text to translate is related to an item group. The "itemGroup." runtimePrefix will be added to the translation
          * key.
          */
-        ITEM_GROUP("itemGroup."),
+        ITEM_GROUP("itemGroup.", true),
 
         /**
-         * The text to translate is related to a container. The "container." prefix will be added to the translation
+         * The text to translate is related to a container. The "container." runtimePrefix will be added to the translation
          * key.
          */
-        CONTAINER("container."),
+        CONTAINER("container.", true),
 
         /**
-         * The text to translate is related to an block. The "block." prefix will be added to the translation key.
+         * The text to translate is related to an block. The "block." runtimePrefix will be added to the translation key.
          */
-        BLOCK("block.");
+        BLOCK("block.", true),
+
+        SIX_NODE("eln.sixnode.", false),
+
+        NODE("eln.node.", false);
 
         private final String prefix;
+        private final boolean encodeAtRuntime;
 
-        Type(final String prefix) {
+        Type(final String prefix, boolean encodeAtRuntime) {
             this.prefix = prefix;
+            this.encodeAtRuntime = encodeAtRuntime;
         }
 
         /**
-         * Returns the prefix to use in the language file.
+         * Returns the prefix.
          *
          * @return  Prefix for the type of translatable text.
          */
         public String getPrefix() {
             return prefix;
+        }
+
+        public boolean isEncodedAtRuntime() {
+            return encodeAtRuntime;
         }
     };
 
@@ -138,21 +158,29 @@ public class I18N {
      * Used to register a name to translate. The forge mechanisms are used in order to translate the name.
      *
      * @param type      Type the translatable name is related to.
-     * @param string    String LITERAL to register for translation.
-     * @return          Returns the same string literal, forge will translate the name magically.
+     * @param text      String LITERAL to register for translation.
+     * @return          Returns the same text literal, forge will translate the name magically.
      */
-    public static String TR_NAME(final Type type, final String string) {
-        return string;
+    public static String TR_NAME(final Type type, final String text) {
+        if (type.isEncodedAtRuntime()) {
+            return (new StringBuilder(type.getPrefix())).append(encodeLangKey(text)).append(".name").toString();
+        } else {
+            return text;
+        }
     }
 
     /**
      * Used to register a description to translate. The forge mechanisms are used in order to translate the description.
      *
      * @param type      Type the translatable description is related to.
-     * @param string    String LITERAL to register for translation.
-     * @return          Returns the same string literal, forge will translate the description magically.
+     * @param text      String LITERAL to register for translation.
+     * @return          Returns the same text literal, forge will translate the description magically.
      */
-    public static String TR_DESC(final Type type, final String string) {
-        return string;
+    public static String TR_DESC(final Type type, final String text) {
+        if (type.isEncodedAtRuntime()) {
+            return (new StringBuilder(type.getPrefix())).append(encodeLangKey(text)).append(".desc").toString();
+        } else {
+            return text;
+        }
     }
 }

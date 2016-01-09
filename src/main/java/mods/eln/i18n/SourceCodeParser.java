@@ -12,14 +12,14 @@ class SourceCodeParser {
         Pattern.compile("TR_([A-Z]*)\\s*\\(\\s*(?:I18N.)?Type.(.*?)\\s*,\\s\"(.*?)\"\\s*\\)");
     private static final String MULTIPLE_LOCATIONS = "Appearing in multiple source files";
 
-    public static Map<String, Set<String>> parseSourceFolder(final File file) throws IOException {
-        Map<String, Set<String>> strings = new TreeMap<String,Set<String>>();
-        strings.put(MULTIPLE_LOCATIONS, new TreeSet<String>());
+    public static Map<String, Set<TranslationItem>> parseSourceFolder(final File file) throws IOException {
+        Map<String, Set<TranslationItem>> strings = new TreeMap<String,Set<TranslationItem>>();
+        strings.put(MULTIPLE_LOCATIONS, new TreeSet<TranslationItem>());
         parseSourceFolderRecursive(file, strings);
         return strings;
     }
 
-    private static void parseSourceFolderRecursive(final File folder, final Map<String, Set<String>> strings)
+    private static void parseSourceFolderRecursive(final File folder, final Map<String, Set<TranslationItem>> strings)
         throws IOException {
         // Check that arguments are valid.
         if (folder != null && folder.exists()) {
@@ -45,17 +45,18 @@ class SourceCodeParser {
         }
     }
 
-    private static void parseJavaFile(final File file, final Map<String, Set<String>> strings) throws IOException {
+    private static void parseJavaFile(final File file, final Map<String, Set<TranslationItem>> strings)
+        throws IOException {
         // Load file into memory.
         final String content = new Scanner(file).useDelimiter("\\Z").next();
 
-        final Set<String> textsToTranslate = new TreeSet<String>();
+        final Set<TranslationItem> textsToTranslate = new TreeSet<TranslationItem>();
 
         // Find all matches for Java style translations.
         final Matcher trMatcher = JAVA_TR_PATTERN.matcher(content);
         while (trMatcher.find()) {
-            final String textToTranslate = trMatcher.group(1).toLowerCase().replace(' ', '_');
-            System.out.println("  " + textToTranslate);
+            final TranslationItem textToTranslate = new TranslationItem(trMatcher.group(1));
+            System.out.println("  " + textToTranslate.getKey());
 
             if (!isStringAlreadyPresent(textToTranslate, strings)) {
                 textsToTranslate.add(textToTranslate);
@@ -66,10 +67,11 @@ class SourceCodeParser {
         while (forgeMatcher.find()) {
             final String property = forgeMatcher.group(1).toLowerCase();
             final I18N.Type type = I18N.Type.valueOf(forgeMatcher.group(2));
-            final String textToTranslate = type.getPrefix() +
-                forgeMatcher.group(3).toLowerCase().replace(' ', '_') + "." + property;
+            final String text = forgeMatcher.group(3);
+            final TranslationItem textToTranslate = new TranslationItem(type.getPrefix() +
+                I18N.encodeLangKey(text) + "." + property, text);
 
-            System.out.println("  " + textToTranslate);
+            System.out.println("  " + textToTranslate.getKey());
 
             if (!isStringAlreadyPresent(textToTranslate, strings)) {
                 textsToTranslate.add(textToTranslate);
@@ -82,12 +84,12 @@ class SourceCodeParser {
         }
     }
 
-    private static void parseKotlinFile(final File file, final Map<String, Set<String>> strings) {
+    private static void parseKotlinFile(final File file, final Map<String, Set<TranslationItem>> strings) {
         throw new UnsupportedOperationException();
     }
 
-    private static boolean isStringAlreadyPresent(final String string,
-                                                  final Map<String, Set<String>> strings) {
+    private static boolean isStringAlreadyPresent(final TranslationItem string,
+                                                  final Map<String, Set<TranslationItem>> strings) {
         for (final String fileName: strings.keySet()) {
             if (MULTIPLE_LOCATIONS.equals(fileName)) {
                 if (strings.get(fileName).contains(string))

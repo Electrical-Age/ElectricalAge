@@ -13,15 +13,15 @@ public class Achievements {
     public static AchievementPage achievementPageEln;
 
     public static void init() {
-        openGuide = new Achievement(TR("achievement.open_guide"),
+        openGuide = new Achievement(TR_NAME(Type.ACHIEVEMENT, "Wiki Power"),
             "open_guide", 0, 0, Items.book, null).registerStat();
 
-        TR_DESC(Type.ACHIEVEMENT, "open_guide");
+        TR_DESC(Type.ACHIEVEMENT, "Open the wiki guide");
 
-        craft50VMacerator = new Achievement(TR("achievement.craft_50v_macerator"),
+        craft50VMacerator = new Achievement(TR_NAME(Type.ACHIEVEMENT, "Crushing Novice"),
             "craft_50v_macerator", 0, 2, Eln.findItemStack("50V Macerator", 0), openGuide).registerStat();
 
-        TR_DESC(Type.ACHIEVEMENT, "craft_50v_macerator");
+        TR_DESC(Type.ACHIEVEMENT, "Craft a 50V Macerator");
 
         achievementPageEln = new AchievementPage(tr("Electrical Age [WIP]"),
             openGuide, craft50VMacerator);

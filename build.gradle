@@ -186,8 +186,8 @@ task unzipTutoMap(dependsOn: downloadTutoMap, type: Copy) {
 }
 
 // Update all existing language files.
-task updateLanguageFiles(type: JavaExec, dependsOn: 'classes') {
+task updateMasterLanguageFile(type: JavaExec, dependsOn: 'classes') {
     main = 'mods.eln.i18n.LanguageFileUpdater'
     classpath = sourceSets.main.runtimeClasspath
-    args = ['./src', './src/main/resources/assets/eln/lang']
+    args = ['./src', './src/main/resources/assets/eln/lang/en_US.lang']
 }

@@ -104,7 +104,7 @@ public class FuelGeneratorDescriptor extends TransparentNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         list.add(tr("Produces energy using fuel."));
-        list.add("  " + tr("Nominal Voltage: %1$V", Utils.plotValue(cable.electricalNominalVoltage)));
-        list.add("  " + tr("Nominal Power: %1$W", Utils.plotValue(nominalPower)));
+        list.add("  " + tr("Nominal voltage: %1$V", Utils.plotValue(cable.electricalNominalVoltage)));
+        list.add("  " + tr("Nominal power: %1$W", Utils.plotValue(nominalPower)));
     }
 }

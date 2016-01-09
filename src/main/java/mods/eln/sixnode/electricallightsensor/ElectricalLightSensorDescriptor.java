@@ -57,7 +57,7 @@ public class ElectricalLightSensorDescriptor extends SixNodeDescriptor {
 			list.add(tr("Provides an electrical voltage"));
 			list.add(tr("which is proportional to"));
 			list.add(tr("the intensity of daylight."));
-			list.add(tr("0V at night, %1$V at " + Eln.SVU + "V at noon."));
+			list.add(tr("0V at night, %1$V at noon.", Eln.SVU));
 		} else {
 			list.add(tr("Provides an electrical voltage"));
 			list.add(tr("in the presence of light."));
