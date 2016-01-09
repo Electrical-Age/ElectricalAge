@@ -88,7 +88,6 @@ public class ElectricalWindSensorDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		GL11.glRotatef(270, 0, 1, 0);
 		GL11.glRotatef(270, 1, 0, 0);
 		GL11.glTranslatef(-0.6f, 0f, 0f);
 		
