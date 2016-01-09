@@ -1,4 +1,4 @@
-package mods.eln.transparentnode.solarpannel;
+package mods.eln.transparentnode.solarpanel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -18,15 +18,14 @@ import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 
-public class SolarPannelRender extends TransparentNodeElementRender {
+public class SolarPanelRender extends TransparentNodeElementRender {
 
-	public SolarPannelDescriptor descriptor;
+	public SolarPanelDescriptor descriptor;
 	private CableRenderType renderPreProcess;
 
-	public SolarPannelRender(TransparentNodeEntity tileEntity,
-			TransparentNodeDescriptor descriptor) {
+	public SolarPanelRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
-		this.descriptor = (SolarPannelDescriptor) descriptor;
+		this.descriptor = (SolarPanelDescriptor) descriptor;
 		
 	}
 
@@ -35,11 +34,8 @@ public class SolarPannelRender extends TransparentNodeElementRender {
 
 	@Override
 	public void draw() {
-
 		renderPreProcess = drawCable(Direction.YN, descriptor.cableRender, eConn, renderPreProcess);
-
 		descriptor.draw((float) (interpol.get() * 180 / Math.PI - 90), front);
-
 	}
 
 	@Override
@@ -76,14 +72,9 @@ public class SolarPannelRender extends TransparentNodeElementRender {
 
 	@Override
 	public void networkUnserialize(DataInputStream stream) {
-		
 		super.networkUnserialize(stream);
 
-		short read;
-
 		try {
-
-			Byte b;
 
 			hasTracker = stream.readBoolean();
 
@@ -100,7 +91,6 @@ public class SolarPannelRender extends TransparentNodeElementRender {
 			renderPreProcess = null;
 
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
 
@@ -114,7 +104,7 @@ public class SolarPannelRender extends TransparentNodeElementRender {
 
 			preparePacketForServer(stream);
 
-			stream.writeByte(SolarPannelElement.unserializePannelAlpha);
+			stream.writeByte(SolarPanelElement.unserializePannelAlpha);
 			stream.writeFloat(value);
 
 			sendPacketToServer(bos);
@@ -129,14 +119,11 @@ public class SolarPannelRender extends TransparentNodeElementRender {
 
 	@Override
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		
 		return new SolarPannelGuiDraw(player, inventory, this);
 	}
 
 	@Override
 	public boolean cameraDrawOptimisation() {
-		
 		return false;
 	}
-
 }

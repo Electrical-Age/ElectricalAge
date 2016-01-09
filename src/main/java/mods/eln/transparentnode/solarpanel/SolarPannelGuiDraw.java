@@ -1,44 +1,27 @@
-package mods.eln.transparentnode.solarpannel;
-
-import org.lwjgl.opengl.GL11;
-
+package mods.eln.transparentnode.solarpanel;
 
 
 import mods.eln.gui.GuiContainerEln;
-import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiVerticalTrackBar;
-import mods.eln.gui.GuiVerticalTrackBarHeat;
 import mods.eln.gui.IGuiObject;
-import mods.eln.misc.Utils;
-import mods.eln.node.NodeBlockEntity;
-import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.inventory.GuiContainer;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerFurnace;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.StatCollector;
 
 
 public class SolarPannelGuiDraw extends GuiContainerEln {
 
 	
     private TransparentNodeElementInventory inventory;
-    SolarPannelRender render;
+    SolarPanelRender render;
  
     GuiVerticalTrackBar vuMeterTemperature;
     
-    public SolarPannelGuiDraw(EntityPlayer player, IInventory inventory,SolarPannelRender render)
+    public SolarPannelGuiDraw(EntityPlayer player, IInventory inventory,SolarPanelRender render)
     {
-        super(new SolarPannelContainer(null,player, inventory));
+        super(new SolarPanelContainer(null,player, inventory));
         this.inventory = (TransparentNodeElementInventory) inventory;
         this.render = render;
         

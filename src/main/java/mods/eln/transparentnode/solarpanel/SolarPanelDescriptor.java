@@ -1,8 +1,7 @@
-package mods.eln.transparentnode.solarpannel;
+package mods.eln.transparentnode.solarpanel;
 
 import java.util.List;
 
-import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Direction;
@@ -13,7 +12,6 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeEntity;
-import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,14 +23,14 @@ import org.lwjgl.opengl.GL11;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class SolarPannelDescriptor extends TransparentNodeDescriptor{
+public class SolarPanelDescriptor extends TransparentNodeDescriptor {
 
 	boolean basicModel;
 	private Obj3D obj;
 	private Obj3DPart main;
 	private Obj3DPart panneau;
 	private Obj3DPart foot;
-	public SolarPannelDescriptor(
+	public SolarPanelDescriptor(
 			String name,
 			Obj3D obj,CableRenderDescriptor cableRender,
 			GhostGroup ghostGroup, int solarOffsetX,int solarOffsetY,int solarOffsetZ,
@@ -42,7 +40,7 @@ public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 			double alphaMin,double alphaMax
 			
 			) {
-		super(name, SolarPannelElement.class,SolarPannelRender.class);
+		super(name, SolarPanelElement.class,SolarPanelRender.class);
 		this.ghostGroup = ghostGroup;
 
 		electricalRs = 	electricalUmax*electricalUmax*electricalDropFactor
@@ -81,7 +79,7 @@ public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 	CableRenderDescriptor cableRender;
 	double electricalUmax;
 	double electricalPmax;
-	public SolarPannelDescriptor(
+	public SolarPanelDescriptor(
 			String name,
 			GhostGroup ghostGroup, int solarOffsetX,int solarOffsetY,int solarOffsetZ,
 			FunctionTable diodeIfUBase,
@@ -91,7 +89,7 @@ public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 			double alphaMin,double alphaMax
 			
 			) {
-		super(name, SolarPannelElement.class,SolarPannelRender.class);
+		super(name, SolarPanelElement.class,SolarPanelRender.class);
 		this.ghostGroup = ghostGroup;
 		this.diodeIfU = diodeIfUBase.duplicate(electricalUmax,electricalImax);
 		electricalRs = 	electricalUmax*electricalImax*electricalDropFactor
@@ -161,20 +159,17 @@ public class SolarPannelDescriptor extends TransparentNodeDescriptor{
 	
 	
 	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-			List list, boolean par4) {
-		
+	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 
 		list.add(tr("Produces power from solar radiation."));
-		list.add("  " + tr("Max. Voltage: %1$V", Utils.plotValue(electricalUmax)));
-		list.add("  " + tr("Max. Power: %1$W", Utils.plotValue(electricalPmax)));
+		list.add("  " + tr("Max. voltage: %1$V", Utils.plotValue(electricalUmax)));
+		list.add("  " + tr("Max. power: %1$W", Utils.plotValue(electricalPmax)));
 		if (canRotate) list.add(tr("Can be geared towards the sun."));
 	}
 	
 	@Override
-	public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB,
-			List list, TransparentNodeEntity entity) {
+	public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, TransparentNodeEntity entity) {
 		if(canRotate) {
 			super.addCollisionBoxesToList(par5AxisAlignedBB, list, entity);
 			return;

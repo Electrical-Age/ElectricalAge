@@ -1,4 +1,4 @@
-package mods.eln.transparentnode.solarpannel;
+package mods.eln.transparentnode.solarpanel;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -7,6 +7,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.node.NodeBase;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
@@ -14,7 +15,6 @@ import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.process.PowerSourceBipole;
 import mods.eln.sim.nbt.NbtElectricalLoad;
@@ -23,9 +23,9 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class SolarPannelElement extends TransparentNodeElement{
+public class SolarPanelElement extends TransparentNodeElement{
 
-	SolarPannelDescriptor descriptor;
+	SolarPanelDescriptor descriptor;
 	NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
 	NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
 	VoltageSource positiveSrc = new VoltageSource("posSrc",positiveLoad, null);
@@ -39,10 +39,10 @@ public class SolarPannelElement extends TransparentNodeElement{
 	
 	public double pannelAlpha = Math.PI/2;
 	
-	public SolarPannelElement(TransparentNode transparentNode,
-			TransparentNodeDescriptor descriptor) {
+	public SolarPanelElement(TransparentNode transparentNode,
+													 TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
-		this.descriptor = (SolarPannelDescriptor) descriptor;
+		this.descriptor = (SolarPanelDescriptor) descriptor;
 
 		grounded = false;
 		
@@ -84,7 +84,6 @@ public class SolarPannelElement extends TransparentNodeElement{
 	
 	@Override
 	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		
 		if(lrdu != LRDU.Down) return null;
 		if(side == front.left()) return positiveLoad;
 		if(side == front.right() && ! grounded) return negativeLoad;
@@ -93,36 +92,28 @@ public class SolarPannelElement extends TransparentNodeElement{
 
 	@Override
 	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-		
-		/*if(lrdu != LRDU.Down) return null;
-		if(side == front) return thermalLoad;
-		if(side == front.getInverse() && ! grounded) return thermalLoad;*/
 		return null;			
 	}
 
 	@Override
 	public int getConnectionMask(Direction side, LRDU lrdu) {
-		
 		if(lrdu != LRDU.Down) return 0;
-		if(side == front.left()) return node.maskElectricalPower;
-		if(side == front.right() && ! grounded) return node.maskElectricalPower;
+		if(side == front.left()) return NodeBase.maskElectricalPower;
+		if(side == front.right() && ! grounded) return NodeBase.maskElectricalPower;
 		return 0;		
 	}
 
 	@Override
 	public String multiMeterString(Direction side) {
-	//	if(side == front)return  Utils.plotVolt("U+", positiveLoad.Uc );
-	//	if(side == front.back() && ! grounded)return  Utils.plotVolt("U-", negativeLoad.Uc );
 		return  Utils.plotUIP(positiveLoad.getU()-negativeLoad.getU(), positiveLoad.getCurrent());
 	}
 
 
 	@Override
 	public String thermoMeterString(Direction side) {
-		
-		//return  Utils.plotCelsius("Tbat",thermalLoad.Tc);
 		return "";
 	}
+
 	@Override
 	public void initialize() {
 		powerSource.setUmax(this.descriptor.electricalUmax);
@@ -135,23 +126,19 @@ public class SolarPannelElement extends TransparentNodeElement{
 	}
 
 	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-			float vx, float vy, float vz) {
-		
+	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		return false;
 	}
 	
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
-		
 		super.writeToNBT(nbt);
 		powerSource.writeToNBT(nbt, "powerSource");
 		nbt.setDouble("pannelAlpha", pannelAlpha);
 	}
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		
 		super.readFromNBT(nbt);
 		powerSource.readFromNBT(nbt, "powerSource");
 		pannelAlpha = nbt.getDouble("pannelAlpha");
@@ -163,7 +150,7 @@ public class SolarPannelElement extends TransparentNodeElement{
 	{
 		super.networkSerialize(stream);
 		try {	
-			stream.writeBoolean(inventory.getStackInSlot(SolarPannelContainer.trackerSlotId) != null);
+			stream.writeBoolean(inventory.getStackInSlot(SolarPanelContainer.trackerSlotId) != null);
 			stream.writeFloat((float) pannelAlpha);
 			node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
 		} catch (IOException e) {
@@ -198,21 +185,16 @@ public class SolarPannelElement extends TransparentNodeElement{
 	
 	@Override
 	public IInventory getInventory() {
-		
 		return inventory;
 	}
 	
 	@Override
 	public boolean hasGui() {
-		
-		
 		return descriptor.canRotate;
 	}
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		
-		
-		return new SolarPannelContainer(node, player, inventory);
+		return new SolarPanelContainer(node, player, inventory);
 	}
 	
 }

@@ -1,4 +1,4 @@
-package mods.eln.transparentnode.solarpannel;
+package mods.eln.transparentnode.solarpanel;
 
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
@@ -7,8 +7,8 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class SolarPannelSlowProcess implements IProcess {
-	SolarPannelElement solarPannel;
-	public SolarPannelSlowProcess(SolarPannelElement solarPannel) {
+	SolarPanelElement solarPannel;
+	public SolarPannelSlowProcess(SolarPanelElement solarPannel) {
 		this.solarPannel = solarPannel;
 	}
 
@@ -39,7 +39,7 @@ public class SolarPannelSlowProcess implements IProcess {
 	//	Utils.print("solarAlpha : " + solarAlpha + "  ");
 		if(solarAlpha >= Math.PI) return 0.0;
 		
-		if(solarPannel.inventory.getStackInSlot(SolarPannelContainer.trackerSlotId) != null)
+		if(solarPannel.inventory.getStackInSlot(SolarPanelContainer.trackerSlotId) != null)
 		{
 			solarPannel.pannelAlpha = solarPannel.descriptor.alphaTrunk(solarAlpha);
 		}
