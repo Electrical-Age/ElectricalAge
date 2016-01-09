@@ -18,7 +18,8 @@ public class I18N {
             return key.replace(' ', '_')
                 .replace("=", "\\=")
                 .replace(":", "\\:")
-                .replace("\n", "\\n");
+                .replace("\n", "\\n")
+                .replace("/", "_");
         } else {
             return null;
         }

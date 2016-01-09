@@ -19,7 +19,9 @@ class LanguageFileGenerator {
 
         // For each source file with translations create the file comment.
         for (final String sourceFile : strings.keySet()) {
-            writer.append("\n# ").append(sourceFile).append("\n");
+            // Standardise file paths for every platforms
+            final String sourcePath = sourceFile.replace("\\", "/");
+            writer.append("\n# ").append(sourcePath).append("\n");
 
             // For each translated string in that source file, add translation text.
             for (final TranslationItem text2Translate : strings.get(sourceFile)) {

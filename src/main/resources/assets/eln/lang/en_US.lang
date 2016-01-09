@@ -151,8 +151,8 @@ Modern_Data_Logger.name=Modern Data Logger
 Monster_Filter.name=Monster Filter
 MultiMeter.name=Multimeter
 Nuclear_Alarm.name=Nuclear Alarm
-On/OFF_Regulator_10_Percent.name=On/off Regulator 10%
-On/OFF_Regulator_1_Percent.name=On/off Regulator 1%
+On_OFF_Regulator_10_Percent.name=On/OFF Regulator 10 Percent
+On_OFF_Regulator_1_Percent.name=On/OFF Regulator 1 Percent
 Optimal_Ferromagnetic_Core.name=Optimal Ferromagnetic Core
 Orange_Brush.name=Orange Brush
 Ore_Scanner.name=Ore Scanner
@@ -290,6 +290,9 @@ On=On
 State\:=State:
 Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
 
+# ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
+Regulator_Slot=Regulator Slot
+
 # ./src/main/java/mods/eln/misc/UtilsClient.java
 Hold_shift=Hold shift
 
@@ -374,11 +377,11 @@ Rain\:_%1$V=Rain: %1$V
 Storm\:_%1$V=Storm: %1$V
 
 # ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
-Maximum_wind_speed_is_%1$m/s=Maximum wind speed is %1$m/s
+Maximum_wind_speed_is_%1$m_s=Maximum wind speed is %1$m/s
 Provides_an_electrical_signal\ndependant_on_wind_speed.=Provides an electrical signal\ndependant on wind speed.
 
 # ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorDescriptor.java
-Can_measure_Voltage/Power/Current=Can measure Voltage/Power/Current
+Can_measure_Voltage_Power_Current=Can measure Voltage/Power/Current
 Measures_electrical_values_on_cables.=Measures electrical values on cables.
 Measures_voltage_on_cables.=Measures voltage on cables.
 
@@ -402,14 +405,14 @@ Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in wit
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
 High_parallel_resistance\n_\=>__\=>_Low_power_dissipation.=High parallel resistance\n =>  => Low power dissipation.
 Low_serial_resistance\n_\=>_High_conductivity.=Low serial resistance\n => High conductivity.
-Parallel_resistance\:_%1$K/W=Parallel resistance: %1$K/W
-Serial_resistance\:_%1$K/W=Serial resistance: %1$K/W
+Parallel_resistance\:_%1$K_W=Parallel resistance: %1$K/W
+Serial_resistance\:_%1$K_W=Serial resistance: %1$K/W
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
 Can_measure\:=Can measure:
 Measures_temperature_on_a_cable.=Measures temperature on a cable.
 Measures_thermal_values_on_cables.=Measures thermal values on cables.
-__Temperature/Power_conducted=  Temperature/Power conducted
+__Temperature_Power_conducted=Temperature/Power conducted
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerDescriptor.java
 10_blocks_radius_after_10_blocks_depth.=10 blocks radius after 10 blocks depth.
@@ -427,6 +430,10 @@ Wireless_energy_receiver.=Wireless energy receiver.
 Efficiency\:_%1$%_up_to_%2$%=Efficiency: %1$% up to %2$%
 Wireless_energy_transmitter.=Wireless energy transmitter.
 
+# ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceContainer.java
+Heating_corp_slot=Heating corp slot
+Thermal_isolator_slot=Thermal isolator slot
+
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceDescriptor.java
 Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Similar to a vanilla furnace,\nbut heats with electricity.
 
@@ -436,10 +443,13 @@ Produces_electricity_using_fuel.=Produces electricity using fuel.
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceDescriptor.java
 Generates_heat_when_supplied_with_fuel.=Generates heat when supplied with fuel.
 
-# ./src/main/java/mods/eln/transparentnode/solarpannel/SolarPannelDescriptor.java
+# ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelContainer.java
+Solar_Tracker_Slot=Solar Tracker Slot
+
+# ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelDescriptor.java
 Can_be_geared_towards_the_sun.=Can be geared towards the sun.
-Max._Power\:_%1$W=Max. Power: %1$W
-Max._Voltage\:_%1$V=Max. Voltage: %1$V
+Max._power\:_%1$W=Max. power: %1$W
+Max._voltage\:_%1$V=Max. voltage: %1$V
 Produces_power_from_solar_radiation.=Produces power from solar radiation.
 
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveDescriptor.java
@@ -467,8 +477,8 @@ Generates_energy_using_water_stream.=Generates energy using water stream.
 # ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
 Front\:_%1$=Front: %1$
 Generates_energy_from_wind.=Generates energy from wind.
-Left/Right\:_%1$=Left/Right: %1$
-Up/Down\:_%1$=Up/Down: %1$
+Left_Right\:_%1$=Left/Right: %1$
+Up_Down\:_%1$=Up/Down: %1$
 Wind_area\:=Wind area:
 
 # Appearing in multiple source files
