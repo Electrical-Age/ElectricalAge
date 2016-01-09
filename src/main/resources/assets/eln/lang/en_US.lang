@@ -243,6 +243,7 @@ Wireless_Switch.name=Wireless Switch
 Wrench.name=Wrench
 X-Ray_Scanner.name=X-Ray Scanner
 Yellow_Brush.name=Yellow Brush
+itemGroup.Eln=Electrical Age
 mod.meta.desc=Electricity in your base!
 
 # ./src/main/java/mods/eln/i18n/I18N.java

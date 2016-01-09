@@ -697,7 +697,7 @@ public class Eln {
 
 		proxy.registerRenderers();
 
-		LanguageRegistry.instance().addStringLocalization("itemGroup.Eln", "Electrical Age");
+		TR("itemGroup.Eln");
 
 		try {
 			// elnHttpServer = new ElnHttpServer();
