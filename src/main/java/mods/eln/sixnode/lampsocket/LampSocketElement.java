@@ -34,8 +34,6 @@ public class LampSocketElement extends SixNodeElement {
 
     public MonsterPopFreeProcess monsterPopFreeProcess = new MonsterPopFreeProcess(sixNode.coordonate, Eln.instance.killMonstersAroundLampsRange);
     public NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
-    //public NodeElectricalLoad negativeLoad = new NodeElectricalLoad("negativeLoad");
-    //public NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
 
     public LampSocketProcess lampProcess = new LampSocketProcess(this);
     public Resistor lampResistor = new Resistor(positiveLoad, null);
@@ -46,7 +44,6 @@ public class LampSocketElement extends SixNodeElement {
     SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
 
     LampDescriptor lampDescriptor = null;
-    //ElectricalCableDescriptor cableDescriptor = null;
     public String channel = lastSocketName;
 
     public static String lastSocketName = "Default channel";
@@ -62,11 +59,6 @@ public class LampSocketElement extends SixNodeElement {
 		this.socketDescriptor = (LampSocketDescriptor) descriptor;
 
 		lampProcess.alphaZ = this.socketDescriptor.alphaZBoot;
-		//electricalLoadList.add(positiveLoad);
-		//electricalComponentList.add(lampResistor);
-		//thermalLoad.setAsSlow();
-		
-		//thermalLoadList.add(thermalLoad);
 		slowProcessList.add(lampProcess);
 		slowProcessList.add(monsterPopFreeProcess);
 	}
@@ -99,7 +91,7 @@ public class LampSocketElement extends SixNodeElement {
 		try {
 			switch (stream.readByte()) {
                 case setGroundedId:
-                    grounded = stream.readByte() != 0 ? true : false;
+                    grounded = stream.readByte() != 0;
                     computeElectricalLoad();
                     reconnect();
                     break;
@@ -171,10 +163,6 @@ public class LampSocketElement extends SixNodeElement {
 		if (poweredByLampSupply) return null;
 		
 		if (grounded) return positiveLoad;
-
-		//if (front == lrdu) return positiveLoad;
-		//if (front == lrdu.inverse()) return negativeLoad;
-
 		return null;
 	}
 

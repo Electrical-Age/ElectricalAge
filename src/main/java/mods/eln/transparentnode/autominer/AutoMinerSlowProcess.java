@@ -38,8 +38,6 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 
     boolean oneJobDone = true;
 
-    // static final int pipeGhostUUID = 75;
-
     enum jobType {none, done, full, chestFull, ore, pipeAdd, pipeRemove}
 
     jobType job = jobType.none, oldJob = jobType.none;
@@ -371,29 +369,6 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 
 	void setJob(jobType job) {
 		if (job != this.job) {
-			// switch (job) {
-			// case chestFull:
-			// miner.pushLog("Storage problem");
-			// break;
-			// case done:
-			// miner.pushLog("Done");
-			// break;
-			// case full:
-			// miner.pushLog("Pipe stack full");
-			// break;
-			// case none:
-			// miner.pushLog("Idle");
-			// break;
-			// case ore:
-			// break;
-			// case pipeAdd:
-			// break;
-			// case pipeRemove:
-			// break;
-			// default:
-			// break;
-			//
-			// }
 			miner.needPublish();
 			energyCounter = 0;
 		}

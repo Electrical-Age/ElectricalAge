@@ -129,7 +129,7 @@ import mods.eln.transparentnode.fuelgenerator.FuelGeneratorDescriptor;
 import mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor;
 import mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor;
 import mods.eln.transparentnode.powerinductor.PowerInductorDescriptor;
-import mods.eln.transparentnode.solarpannel.SolarPannelDescriptor;
+import mods.eln.transparentnode.solarpanel.SolarPanelDescriptor;
 import mods.eln.transparentnode.teleporter.TeleporterDescriptor;
 import mods.eln.transparentnode.teleporter.TeleporterElement;
 import mods.eln.transparentnode.thermaldissipatoractive.ThermalDissipatorActiveDescriptor;
@@ -2753,7 +2753,7 @@ public class Eln {
 
 			ghostGroup = new GhostGroup();
 
-			SolarPannelDescriptor desc = new SolarPannelDescriptor(name,// String
+			SolarPanelDescriptor desc = new SolarPanelDescriptor(name,// String
 																		// name,
 					obj.getObj("smallsolarpannel"), null,
 					ghostGroup, 0, 1, 0,// GhostGroup ghostGroup, int
@@ -2774,7 +2774,7 @@ public class Eln {
 
 			ghostGroup = new GhostGroup();
 
-			SolarPannelDescriptor desc = new SolarPannelDescriptor(name,// String
+			SolarPanelDescriptor desc = new SolarPanelDescriptor(name,// String
 																		// name,
 					obj.getObj("smallsolarpannelrot"), lowVoltageCableDescriptor.render,
 					ghostGroup, 0, 1, 0,// GhostGroup ghostGroup, int
