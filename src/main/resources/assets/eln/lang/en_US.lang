@@ -151,8 +151,8 @@ Modern_Data_Logger.name=Modern Data Logger
 Monster_Filter.name=Monster Filter
 MultiMeter.name=Multimeter
 Nuclear_Alarm.name=Nuclear Alarm
-On_OFF_Regulator_10_Percent.name=On/OFF Regulator 10 Percent
-On_OFF_Regulator_1_Percent.name=On/OFF Regulator 1 Percent
+On_OFF_Regulator_10_Percent.name=On/off regulator 10%
+On_OFF_Regulator_1_Percent.name=On/off regulator 1%
 Optimal_Ferromagnetic_Core.name=Optimal Ferromagnetic Core
 Orange_Brush.name=Orange Brush
 Ore_Scanner.name=Ore Scanner
@@ -291,7 +291,7 @@ State\:=State:
 Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
 
 # ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
-Regulator_Slot=Regulator Slot
+Regulator_Slot=Regulator slot
 
 # ./src/main/java/mods/eln/misc/UtilsClient.java
 Hold_shift=Hold shift
@@ -444,7 +444,7 @@ Produces_electricity_using_fuel.=Produces electricity using fuel.
 Generates_heat_when_supplied_with_fuel.=Generates heat when supplied with fuel.
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelContainer.java
-Solar_Tracker_Slot=Solar Tracker Slot
+Solar_Tracker_Slot=Solar tracker slot
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelDescriptor.java
 Can_be_geared_towards_the_sun.=Can be geared towards the sun.
