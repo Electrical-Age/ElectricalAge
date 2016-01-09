@@ -160,6 +160,9 @@ def getMinecratfDir() {
 
 // Custom task to build and copy the mod Jar to the default local Minecraft folder
 task buildAndCopyJar(dependsOn: 'build', type: Copy) {
+    group = 'ELN'
+    description = 'Build and copy the mod Jar to the default local Minecraft folder.'
+
     outputs.upToDateWhen { false } // Force to run this task
     duplicatesStrategy = DuplicatesStrategy.INCLUDE // Overwrite the file if exists
 
@@ -172,6 +175,9 @@ import de.undercouch.gradle.tasks.download.Download
 
 // Download the tutorial map as a zip file to the local 'run/saves' folder
 task downloadTutoMap(type: Download) {
+    group = 'ELN'
+    description = 'Download the tutorial map as a zip file to the local \'run/saves\' folder.'
+
     src(MAPURL)
     dest(new File(minecraft.runDir + "/saves", MAPURL.substring(MAPURL.lastIndexOf("/") + 1, MAPURL.length())))
     overwrite true
@@ -179,14 +185,20 @@ task downloadTutoMap(type: Download) {
 
 // Unzip the local tutorial map after downloading it. Overwrite the map content if already exist
 task unzipTutoMap(dependsOn: downloadTutoMap, type: Copy) {
+    group = 'ELN'
+    description = 'Unzip the local tutorial map after downloading it.'
+
     outputs.upToDateWhen { false } // Force to run this task
 
     from zipTree(downloadTutoMap.dest)
     into(minecraft.runDir + "/saves")
 }
 
-// Update all existing language files.
+// Update the master language file
 task updateMasterLanguageFile(type: JavaExec, dependsOn: 'classes') {
+    group = 'ELN'
+    description = 'Generate or update the master language file.'
+
     main = 'mods.eln.i18n.LanguageFileUpdater'
     classpath = sourceSets.main.runtimeClasspath
     args = ['./src', './src/main/resources/assets/eln/lang/en_US.lang']
