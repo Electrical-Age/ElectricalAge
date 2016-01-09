@@ -1,257 +1,465 @@
 #<ELN_LANGFILE_V1_1>
 
 # ./src/main/java/mods/eln/Achievements.java
-achievement.craft_50v_macerator=Crushing Novice
-achievement.craft_50v_macerator.desc=Craft a 50V Macerator
-achievement.open_guide=Wiki Power
-achievement.open_guide.desc=Open the wiki guide
-electrical_age_[wip]=Electrical Age
+Electrical_Age_[WIP]=Electrical Age [WIP]
+achievement.Craft_a_50V_Macerator.desc=Craft a 50V Macerator
+achievement.Crushing_Novice.name=Crushing Novice
+achievement.Open_the_wiki_guide.desc=Open the wiki guide
+achievement.Wiki_Power.name=Wiki Power
 
 # ./src/main/java/mods/eln/Eln.java
-10a_diode.name=10A Diode
-200v_active_thermal_dissipator.name=200V Active Thermal Dissipator
-200v_battery_charger.name=200V Battery Charger
-200v_compressor.name=200V Compressor
-200v_condensator.name=200V Condensator charged at 0%
-200v_copper_heating_corp.name=200V Copper Heating Corp
-200v_economic_light_bulb.name=200V Economic Light Bulb
-200v_farming_lamp.name=200V Farming Lamp
-200v_incandescent_light_bulb.name=200V Incandescent Light Bulb
-200v_iron_heating_corp.name=200V Iron Heating Corp
-200v_macerator.name=200V Macerator
-200v_magnetizer.name=200V Magnetizer
-200v_plate_machine.name=200V Plate Machine
-200v_power_socket.name=200V Power Socket
-200v_tungsten_heating_corp.name=200V Tungsten Heating Corp
-200v_turbine.name=200V Turbine
-25a_diode.name=25A Diode
-50v_battery_charger.name=50V Battery Charger
-50v_carbon_incandescent_light_bulb.name=50V Carbon Incandescent Light Bulb
-50v_compressor.name=50V Compressor
-50v_condensator.name=50V Condensator charged at 0%
-50v_copper_heating_corp.name=50V Copper Heating Corp
-50v_economic_light_bulb.name=50V Economic Light Bulb
-50v_egg_incubator.name=50V Egg Incubator
-50v_farming_lamp.name=50V Farming Lamp
-50v_incandescent_light_bulb.name=50V Incandescent Light Bulb
-50v_iron_heating_corp.name=50V Iron Heating Corp
-50v_macerator.name=50V Macerator
-50v_magnetizer.name=50V Magnetizer
-50v_plate_machine.name=50V Plate Machine
-50v_power_socket.name=50V Power Socket
-50v_tungsten_heating_corp.name=50V Tungsten Heating Corp
-50v_turbine.name=50V Turbine
-800v_defence_turret.name=800V Defence Turret
-advanced_chip.name=Advanced Chip
-advanced_electrical_motor.name=Advanced Electrical Motor
-advanced_energy_meter.name=Advanced Energy Meter
-advanced_machine_block.name=Advanced Machine Block
-advanced_magnet.name=Advanced Magnet
-allmeter.name=AllMeter
-alloy_dust.name=Alloy Dust
-alloy_ingot.name=Alloy Ingot
-alloy_plate.name=Alloy Plate
-analog_vumeter.name=Analog vuMeter
-analog_watch.name=Analog Watch
-analogic_regulator.name=Analogic Regulator
-animal_filter.name=Animal Filter
-auto_miner.name=Auto Miner
-average_electrical_drill.name=Average Electrical Drill
-average_ferromagnetic_core.name=Average Ferromagnetic Core
-basic_magnet.name=Basic Magnet
-black_brush.name=Black Brush
-blue_brush.name=Blue Brush
-brown_brush.name=Brown Brush
-capacity_oriented_battery.name=Capacity Oriented Battery charged at 50%
-cheap_chip.name=Cheap Chip
-cheap_electrical_drill.name=Cheap Electrical Drill
-cheap_ferromagnetic_core.name=Cheap Ferromagnetic Core
-cinnabar_dust.name=Cinnabar Dust
-cinnabar_ore.name=Cinnabar Ore
-coal_dust.name=Coal Dust
-coal_plate.name=Coal Plate
-combustion_chamber.name=Combustion Chamber
-copper_cable.name=Copper Cable
-copper_dust.name=Copper Dust
-copper_ingot.name=Copper Ingot
-copper_ore.name=Copper Ore
-copper_plate.name=Copper Plate
-copper_thermal_cable.name=Copper Thermal Cable
-cost_oriented_battery.name=Cost Oriented Battery charged at 50%
-current_oriented_battery.name=Current Oriented Battery charged at 50%
-cyan_brush.name=Cyan Brush
-data_logger.name=Data Logger
-data_logger_print.name=Data Logger Print
-dielectric.name=Dielectric
-digital_watch.name=Digital Watch
-electrical_anemometer_sensor.name=Electrical Anemometer Sensor
-electrical_breaker.name=Electrical Breaker
-electrical_daylight_sensor.name=Electrical Daylight Sensor
-electrical_entity_sensor.name=Electrical Entity Sensor
-electrical_fire_detector.name=Electrical Fire Detector
-electrical_furnace.name=Electrical Furnace
-electrical_light_sensor.name=Electrical Light Sensor
-electrical_motor.name=Electrical Motor
-electrical_probe.name=Electrical Probe
-electrical_probe_chip.name=Electrical Probe Chip
-electrical_source.name=Electrical Source
-electrical_timer.name=Electrical Timer
-electrical_weather_sensor.name=Electrical Weather Sensor
-energy_meter.name=Energy Meter
-experimental_transporter.name=Experimental Transporter
-fast_electrical_drill.name=Fast Electrical Drill
-ferrite_ingot.name=Ferrite Ingot
-flat_lamp_socket.name=Flat Lamp Socket
-fluorescent_lamp_socket.name=Fluorescent Lamp Socket
-fuel_generator.name=
-gold_dust.name=Gold Dust
-gold_plate.name=Gold Plate
-gray_brush.name=Gray Brush
-green_brush.name=Green Brush
-ground_cable.name=Ground Cable
-high_power_receiver_antenna.name=High Power Receiver Antenna
-high_power_transmitter_antenna.name=High Power Transmitter Antenna
-high_voltage_cable.name=High Voltage Cable
-high_voltage_relay.name=High Voltage Relay
-high_voltage_switch.name=High Voltage Switch
-hub.name=Hub
-industrial_data_logger.name=Industrial Data Logger
-iron_cable.name=Iron Cable
-iron_dust.name=Iron Dust
-iron_plate.name=Iron Plate
-lamp_socket_a.name=Lamp Socket A
-lamp_socket_b_projector.name=Lamp Socket B Projector
-lamp_supply.name=Lamp Supply
-lead_dust.name=Lead Dust
-lead_ingot.name=Lead Ingot
-lead_ore.name=Lead Ore
-lead_plate.name=Lead Plate
-led_vumeter.name=LED vuMeter
-life_oriented_battery.name=Life Oriented Battery charged at 50%
-light_blue_brush.name=Light Blue Brush
-lime_brush.name=Lime Brush
-long_suspended_lamp_socket.name=Long Suspended Lamp Socket
-low_power_receiver_antenna.name=Low Power Receiver Antenna
-low_power_transmitter_antenna.name=Low Power Transmitter Antenna
-low_voltage_cable.name=Low Voltage Cable
-low_voltage_relay.name=Low Voltage Relay
-low_voltage_switch.name=Low Voltage Switch
-machine_block.name=Machine Block
-machine_booster.name=Machine Booster
-magenta_brush.name=Magenta Brush
-medium_power_receiver_antenna.name=Medium Power Receiver Antenna
-medium_power_transmitter_antenna.name=Medium Power Transmitter Antenna
-medium_voltage_cable.name=Medium Voltage Cable
-medium_voltage_relay.name=Medium Voltage Relay
-medium_voltage_switch.name=Medium Voltage Switch
-mercury.name=Mercury
-mining_pipe.name=Mining Pipe
-mod.meta.desc=Electricity in your base !
-modbus_rtu.name=Modbus RTU
-modern_data_logger.name=Modern Data Logger
-monster_filter.name=Monster Filter
-multimeter.name=MultiMeter
-nuclear_alarm.name=Nuclear Alarm
-on/off_regulator_10_percent.name=
-on/off_regulator_1_percent.name=
-optimal_ferromagnetic_core.name=Optimal Ferromagnetic Core
-orange_brush.name=Orange Brush
-ore_scanner.name=Ore Scanner
-overheating_protection.name=Overheating Protection
-overvoltage_protection.name=Overvoltage Protection
-pink_brush.name=Pink Brush
-player_filter.name=Player Filter
-portable_battery.name=Portable Battery
-portable_battery_pack.name=Portable Battery Pack
-portable_condensator.name=Portable Condensator
-portable_condensator_pack.name=Portable Condensator Pack
-portable_electrical_axe.name=Portable Electrical Axe
-portable_electrical_mining_drill.name=Portable Electrical Mining Drill
-power_capacitor.name=Power capacitor
-power_inductor.name=Power inductor
-power_resistor.name=Power Resistor
-purple_brush.name=Purple Brush
-red_brush.name=Red Brush
-redstone-to-voltage_converter.name=Redstone-to-Voltage Converter
-rheostat.name=Rheostat
-robust_lamp_socket.name=Robust Lamp Socket
-rubber.name=Rubber
-signal_20h_inductor.name=Signal 20H inductor
-signal_antenna.name=Signal Antenna
-signal_button.name=Signal Button
-signal_cable.name=Signal Cable
-signal_diode.name=Signal Diode
-signal_processor.name=Signal Processor
-signal_relay.name=
-signal_source.name=
-signal_switch.name=Signal Switch
-signal_switch_with_led.name=Signal Switch with LED
-signal_trimmer.name=Signal Trimmer
-silicon_dust.name=Silicon Dust
-silicon_ingot.name=Silicon Ingot
-silicon_plate.name=Silicon Plate
-silver_brush.name=Silver Brush
-simple_lamp_socket.name=Simple Lamp Socket
-single-use_battery.name=Single-use Battery charged at 100%
-small_200v_copper_heating_corp.name=Small 200V Copper Heating Corp
-small_200v_iron_heating_corp.name=Small 200V Iron Heating Corp
-small_200v_tungsten_heating_corp.name=Small 200V Tungsten Heating Corp
-small_50v_carbon_incandescent_light_bulb.name=Small 50V Carbon Incandescent Light Bulb
-small_50v_copper_heating_corp.name=Small 50V Copper Heating Corp
-small_50v_economic_light_bulb.name=Small 50V Economic Light Bulb
-small_50v_incandescent_light_bulb.name=Small 50V Incandescent Light Bulb
-small_50v_iron_heating_corp.name=Small 50V Iron Heating Corp
-small_50v_tungsten_heating_corp.name=Small 50V Tungsten Heating Corp
-small_active_thermal_dissipator.name=Small Active Thermal Dissipator
-small_flashlight.name=Small Flashlight
-small_passive_thermal_dissipator.name=Small Passive Thermal Dissipator
-small_rotating_solar_panel.name=Small Rotating Solar Panel
-small_solar_panel.name=Small Solar Panel
-solar_tracker.name=Solar Tracker
-standard_alarm.name=Standard Alarm
-stone_heat_furnace.name=Stone Heat Furnace
-street_light.name=Street Light
-suspended_lamp_socket.name=Suspended Lamp Socket
-temperature_probe.name=Temperature Probe
-thermal_probe.name=Thermal Probe
-thermal_probe_chip.name=Thermal Probe Chip
-thermistor.name=Thermistor
-thermometer.name=ThermoMeter
-transformer.name=Transformer
-tree_resin.name=Tree Resin
-tree_resin_collector.name=Tree Resin Collector
-tungsten_cable.name=Tungsten Cable
-tungsten_dust.name=Tungsten Dust
-tungsten_ingot.name=Tungsten Ingot
-tungsten_ore.name=Tungsten Ore
-tutorial_sign.name=Tutorial Sign
-very_high_voltage_cable.name=Very High Voltage Cable
-very_high_voltage_relay.name=Very High Voltage Relay
-very_high_voltage_switch.name=Very High Voltage Switch
-voltage-to-redstone_converter.name=Voltage-to-Redstone Converter
-voltage_oriented_battery.name=Voltage Oriented Battery charged at 50%
-voltage_probe.name=Voltage Probe
-water_turbine.name=Water Turbine
-weak_50v_battery_charger.name=Weak 50V Battery Charger
-white_brush.name=White Brush
-wind_turbine.name=Wind Turbine
-wireless_analyser.name=Wireless Analyser
-wireless_button.name=Wireless Button
-wireless_signal_receiver.name=Wireless Signal Receiver
-wireless_signal_repeater.name=Wireless Signal Repeater
-wireless_signal_transmitter.name=Wireless Signal Transmitter
-wireless_switch.name=Wireless Switch
-wrench.name=Wrench
-x-ray_scanner.name=X-Ray Scanner
-yellow_brush.name=Yellow Brush
+10A_Diode.name=10A Diode
+200V_Active_Thermal_Dissipator.name=200V Active Thermal Dissipator
+200V_Battery_Charger.name=200V Battery Charger
+200V_Compressor.name=200V Compressor
+200V_Condensator.name=200V Condensator
+200V_Copper_Heating_Corp.name=200V Copper Heating Corp
+200V_Economic_Light_Bulb.name=200V Economic Light Bulb
+200V_Farming_Lamp.name=200V Farming Lamp
+200V_Incandescent_Light_Bulb.name=200V Incandescent Light Bulb
+200V_Iron_Heating_Corp.name=200V Iron Heating Corp
+200V_Macerator.name=200V Macerator
+200V_Magnetizer.name=200V Magnetizer
+200V_Plate_Machine.name=200V Plate Machine
+200V_Power_Socket.name=200V Power Socket
+200V_Tungsten_Heating_Corp.name=200V Tungsten Heating Corp
+200V_Turbine.name=200V Turbine
+25A_Diode.name=25A Diode
+50V_Battery_Charger.name=50V Battery Charger
+50V_Carbon_Incandescent_Light_Bulb.name=50V Carbon Incandescent Light Bulb
+50V_Compressor.name=50V Compressor
+50V_Condensator.name=50V Condensator
+50V_Copper_Heating_Corp.name=50V Copper Heating Corp
+50V_Economic_Light_Bulb.name=50V Economic Light Bulb
+50V_Egg_Incubator.name=50V Egg Incubator
+50V_Farming_Lamp.name=50V Farming Lamp
+50V_Incandescent_Light_Bulb.name=50V Incandescent Light Bulb
+50V_Iron_Heating_Corp.name=50V Iron Heating Corp
+50V_Macerator.name=50V Macerator
+50V_Magnetizer.name=50V Magnetizer
+50V_Plate_Machine.name=50V Plate Machine
+50V_Power_Socket.name=50V Power Socket
+50V_Tungsten_Heating_Corp.name=50V Tungsten Heating Corp
+50V_Turbine.name=50V Turbine
+800V_Defence_Turret.name=800V Defence Turret
+Advanced_Chip.name=Advanced Chip
+Advanced_Electrical_Motor.name=Advanced Electrical Motor
+Advanced_Energy_Meter.name=Advanced Energy Meter
+Advanced_Machine_Block.name=Advanced Machine Block
+Advanced_Magnet.name=Advanced Magnet
+AllMeter.name=Universal-Meter
+Alloy_Dust.name=Alloy Dust
+Alloy_Ingot.name=Alloy Ingot
+Alloy_Plate.name=Alloy Plate
+Analog_Watch.name=Analog watch
+Analog_vuMeter.name=Analog Gauge
+Analogic_Regulator.name=Analogic Regulator
+Animal_Filter.name=Animal Filter
+Auto_Miner.name=Auto Miner
+Average_Electrical_Drill.name=Average Electrical Drill
+Average_Ferromagnetic_Core.name=Average Ferromagnetic Core
+Basic_Magnet.name=Basic Magnet
+Black_Brush.name=Black Brush
+Blue_Brush.name=Blue Brush
+Brown_Brush.name=Brown Brush
+Capacity_Oriented_Battery.name=Capacity Oriented Battery
+Cheap_Chip.name=Cheap Chip
+Cheap_Electrical_Drill.name=Cheap Electrical Drill
+Cheap_Ferromagnetic_Core.name=Cheap Ferromagnetic Core
+Cinnabar_Dust.name=Cinnabar Dust
+Cinnabar_Ore.name=Cinnabar Ore
+Coal_Dust.name=Coal Dust
+Coal_Plate.name=Coal Plate
+Combustion_Chamber.name=Combustion Chamber
+Copper_Cable.name=Copper Cable
+Copper_Dust.name=Copper Dust
+Copper_Ingot.name=Copper Ingot
+Copper_Ore.name=Copper Ore
+Copper_Plate.name=Copper Plate
+Copper_Thermal_Cable.name=Copper Thermal Cable
+Cost_Oriented_Battery.name=Cost Oriented Battery
+Current_Oriented_Battery.name=Current Oriented Battery
+Cyan_Brush.name=Cyan Brush
+Data_Logger.name=Data Logger
+Data_Logger_Print.name=Data Logger Print
+Dielectric.name=Dielectric
+Digital_Watch.name=Digital Watch
+Electrical_Anemometer_Sensor.name=Electrical Anemometer Sensor
+Electrical_Breaker.name=Electrical Breaker
+Electrical_Daylight_Sensor.name=Electrical Daylight Sensor
+Electrical_Entity_Sensor.name=Electrical Entity Sensor
+Electrical_Fire_Detector.name=Electrical Fire Detector
+Electrical_Furnace.name=Electrical Furnace
+Electrical_Light_Sensor.name=Electrical Light Sensor
+Electrical_Motor.name=Electrical Motor
+Electrical_Probe.name=Electrical Probe
+Electrical_Probe_Chip.name=Electrical Probe Chip
+Electrical_Source.name=Electrical Source
+Electrical_Timer.name=Electrical Timer
+Electrical_Weather_Sensor.name=Electrical Weather Sensor
+Energy_Meter.name=Energy Meter
+Experimental_Transporter.name=Experimental Transporter
+Fast_Electrical_Drill.name=Fast Electrical Drill
+Ferrite_Ingot.name=Ferrite Ingot
+Flat_Lamp_Socket.name=Flat Lamp Socket
+Fluorescent_Lamp_Socket.name=Fluorescent Lamp Socket
+Fuel_Generator.name=Fuel Generator
+Gold_Dust.name=Gold Dust
+Gold_Plate.name=Gold Plate
+Gray_Brush.name=Gray Brush
+Green_Brush.name=Green Brush
+Ground_Cable.name=Ground Cable
+High_Power_Receiver_Antenna.name=High Power Receiver Antenna
+High_Power_Transmitter_Antenna.name=High Power Transmitter Antenna
+High_Voltage_Cable.name=High Voltage Cable
+High_Voltage_Relay.name=High Voltage Relay
+High_Voltage_Switch.name=High Voltage Switch
+Hub.name=Hub
+Industrial_Data_Logger.name=Industrial Data Logger
+Iron_Cable.name=Iron Cable
+Iron_Dust.name=Iron Dust
+Iron_Plate.name=Iron Plate
+LED_vuMeter.name=LED vuMeter
+Lamp_Socket_A.name=Lamp Socket A
+Lamp_Socket_B_Projector.name=Lamp Socket B Projector
+Lamp_Supply.name=Lamp Supply
+Lead_Dust.name=Lead Dust
+Lead_Ingot.name=Lead Ingot
+Lead_Ore.name=Lead Ore
+Lead_Plate.name=Lead Plate
+Life_Oriented_Battery.name=Life Oriented Battery
+Light_Blue_Brush.name=Light Blue Brush
+Lime_Brush.name=Lime Brush
+Long_Suspended_Lamp_Socket.name=Long Suspended Lamp Socket
+Low_Power_Receiver_Antenna.name=Low Power Receiver Antenna
+Low_Power_Transmitter_Antenna.name=Low Power Transmitter Antenna
+Low_Voltage_Cable.name=Low Voltage Cable
+Low_Voltage_Relay.name=Low Voltage Relay
+Low_Voltage_Switch.name=Low Voltage Switch
+Machine_Block.name=Machine Block
+Machine_Booster.name=Machine Booster
+Magenta_Brush.name=Magenta Brush
+Medium_Power_Receiver_Antenna.name=Medium Power Receiver Antenna
+Medium_Power_Transmitter_Antenna.name=Medium Power Transmitter Antenna
+Medium_Voltage_Cable.name=Medium Voltage Cable
+Medium_Voltage_Relay.name=Medium Voltage Relay
+Medium_Voltage_Switch.name=Medium Voltage Switch
+Mercury.name=Mercury
+Mining_Pipe.name=Mining Pipe
+Modbus_RTU.name=Modbus RTU
+Modern_Data_Logger.name=Modern Data Logger
+Monster_Filter.name=Monster Filter
+MultiMeter.name=Multimeter
+Nuclear_Alarm.name=Nuclear Alarm
+On/OFF_Regulator_10_Percent.name=On/off Regulator 10%
+On/OFF_Regulator_1_Percent.name=On/off Regulator 1%
+Optimal_Ferromagnetic_Core.name=Optimal Ferromagnetic Core
+Orange_Brush.name=Orange Brush
+Ore_Scanner.name=Ore Scanner
+Overheating_Protection.name=Overheating Protection
+Overvoltage_Protection.name=Overvoltage Protection
+Pink_Brush.name=Pink Brush
+Player_Filter.name=Player Filter
+Portable_Battery.name=Portable Battery
+Portable_Battery_Pack.name=Portable Battery Pack
+Portable_Condensator.name=Portable Condensator
+Portable_Condensator_Pack.name=Portable Condensator Pack
+Portable_Electrical_Axe.name=Portable Electrical Axe
+Portable_Electrical_Mining_Drill.name=Portable Electrical Mining Drill
+Power_Capacitor.name=Power Capacitor
+Power_Inductor.name=Power Inductor
+Power_Resistor.name=Power Resistor
+Purple_Brush.name=Purple Brush
+Red_Brush.name=Red Brush
+Redstone-to-Voltage_Converter.name=Redstone-to-Voltage Converter
+Rheostat.name=Rheostat
+Robust_Lamp_Socket.name=Robust Lamp Socket
+Rubber.name=Rubber
+Signal_20H_inductor.name=Signal 20H inductor
+Signal_Antenna.name=Signal Antenna
+Signal_Button.name=Signal Button
+Signal_Cable.name=Signal Cable
+Signal_Diode.name=Signal Diode
+Signal_Processor.name=Signal Processor
+Signal_Relay.name=Signal Relay
+Signal_Source.name=Signal Source
+Signal_Switch.name=Signal Switch
+Signal_Switch_with_LED.name=Signal Switch with LED
+Signal_Trimmer.name=Signal Trimmer
+Silicon_Dust.name=Silicon Dust
+Silicon_Ingot.name=Silicon Ingot
+Silicon_Plate.name=Silicon Plate
+Silver_Brush.name=Silver Brush
+Simple_Lamp_Socket.name=Simple Lamp Socket
+Single-use_Battery.name=Single-use Battery
+Small_200V_Copper_Heating_Corp.name=Small 200V Copper Heating Corp
+Small_200V_Iron_Heating_Corp.name=Small 200V Iron Heating Corp
+Small_200V_Tungsten_Heating_Corp.name=Small 200V Tungsten Heating Corp
+Small_50V_Carbon_Incandescent_Light_Bulb.name=Small 50V Carbon Incandescent Light Bulb
+Small_50V_Copper_Heating_Corp.name=Small 50V Copper Heating Corp
+Small_50V_Economic_Light_Bulb.name=Small 50V Economic Light Bulb
+Small_50V_Incandescent_Light_Bulb.name=Small 50V Incandescent Light Bulb
+Small_50V_Iron_Heating_Corp.name=Small 50V Iron Heating Corp
+Small_50V_Tungsten_Heating_Corp.name=Small 50V Tungsten Heating Corp
+Small_Active_Thermal_Dissipator.name=Small Active Thermal Dissipator
+Small_Flashlight.name=Small Flashlight
+Small_Passive_Thermal_Dissipator.name=Small Passive Thermal Dissipator
+Small_Rotating_Solar_Panel.name=Small Rotating Solar Panel
+Small_Solar_Panel.name=Small Solar Panel
+Solar_Tracker.name=Solar Tracker
+Standard_Alarm.name=Standard Alarm
+Stone_Heat_Furnace.name=Stone Heat Furnace
+Street_Light.name=Streetlight
+Suspended_Lamp_Socket.name=Suspended Lamp Socket
+Temperature_Probe.name=Temperature Probe
+Thermal_Probe.name=Thermal Probe
+Thermal_Probe_Chip.name=Thermal Probe Chip
+Thermistor.name=Thermistor
+ThermoMeter.name=Thermometer
+Transformer.name=Transformer
+Tree_Resin.name=Tree Resin
+Tree_Resin_Collector.name=Tree Resin Collector
+Tungsten_Cable.name=Tungsten Cable
+Tungsten_Dust.name=Tungsten Dust
+Tungsten_Ingot.name=Tungsten Ingot
+Tungsten_Ore.name=Tungsten Ore
+Tutorial_Sign.name=Tutorial Sign
+Very_High_Voltage_Cable.name=Very High Voltage Cable
+Very_High_Voltage_Relay.name=Very High Voltage Relay
+Very_High_Voltage_Switch.name=Very High Voltage Switch
+Voltage-to-Redstone_Converter.name=Voltage-to-Redstone Converter
+Voltage_Oriented_Battery.name=Voltage Oriented Battery
+Voltage_Probe.name=Voltage Probe
+Water_Turbine.name=Water Turbine
+Weak_50V_Battery_Charger.name=Weak 50V Battery Charger
+White_Brush.name=White Brush
+Wind_Turbine.name=Wind Turbine
+Wireless_Analyser.name=Wireless Analyzer
+Wireless_Button.name=Wireless Button
+Wireless_Signal_Receiver.name=Wireless Signal Receiver
+Wireless_Signal_Repeater.name=Wireless Signal Repeater
+Wireless_Signal_Transmitter.name=Wireless Signal Transmitter
+Wireless_Switch.name=Wireless Switch
+Wrench.name=Wrench
+X-Ray_Scanner.name=X-Ray Scanner
+Yellow_Brush.name=Yellow Brush
+mod.meta.desc=Electricity in your base!
 
 # ./src/main/java/mods/eln/i18n/I18N.java
-you_have_%1$_lives_left=
+You_have_%1$_lives_left=You have %1$ lives left
+
+# ./src/main/java/mods/eln/item/BrushDescriptor.java
+Can_paint_%1$_blocks=Can paint %1$ blocks
+
+# ./src/main/java/mods/eln/item/CombustionChamber.java
+Upgrade_for_the_Stone_Heat_Furnace.=Upgrade for the Stone Heat Furnace.
+
+# ./src/main/java/mods/eln/item/ElectricalDrillDescriptor.java
+Energy_per_operation\:_%1$=Energy per operation: %1$
+Time_per_operation\:_%1$\"=Time per operation: %1$"
+
+# ./src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
+Cable_loss_factor\:_%1$=Cable loss factor: %1$
+
+# ./src/main/java/mods/eln/item/HeatingCorpElement.java
+
+# ./src/main/java/mods/eln/item/LampDescriptor.java
+Bad=Bad
+Condition\:=Condition:
+End_of_life=End of life
+Good=Good
+New=New
+Nominal_lifetime\:_%1$h=Nominal lifetime: %1$h
+Technology\:_%1$=Technology: %1$
+Used=Used
+
+# ./src/main/java/mods/eln/item/OverHeatingProtectionDescriptor.java
+Useful_to_prevent_overheating_of=Useful to prevent overheating of
+
+# ./src/main/java/mods/eln/item/OverVoltageProtectionDescriptor.java
+Useful_to_prevent_over-voltage_of=Useful to prevent over-voltage of
+
+# ./src/main/java/mods/eln/item/SolarTrackerDescriptor.java
+Solar_panel_upgrade=Solar panel upgrade
+
+# ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
+
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
+Off=Off
+On=On
+State\:=State:
+Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
 
 # ./src/main/java/mods/eln/misc/UtilsClient.java
-hold_shift=Hold shift
+Hold_shift=Hold shift
 
 # ./src/main/java/mods/eln/misc/Version.java
 mod.name=Electrical Age
 
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
+Can_be_used_to_recharge=Can be used to recharge
+Flash_Light,_X-Ray_scanner,=Flash Light, X-Ray scanner,
+Nominal_power\:_%1$=Nominal power: %1$
+Portable_Battery_...=Portable Battery ...
+electrical_items_like\:=electrical items like:
+
+# ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
+Electrical_current_can_only=Electrical current can only
+flow_through_the_diode=flow through the diode
+from_anode_to_cathode=from anode to cathode
+
+# ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmDescriptor.java
+Emits_an_acoustic_alarm_if=Emits an acoustic alarm if
+the_input_signal_is_high.=the input signal is high.
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
+Opens_contact_if\:=Opens contact if:
+Protects_electrical_components=Protects electrical components
+
+# ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableDescriptor.java
+A_signal_is_electrical_information=A signal is electrical information
+Cable_is_adapted_to_conduct=Cable is adapted to conduct
+Current\:_%1$A=Current: %1$A
+Not_adopted_to_transport_power.=Not adopted to transport power.
+Save_usage_->=Save usage ->
+Serial_resistance\:_%1$Ω=Serial resistance: %1$Ω
+electrical_signals.=electrical signals.
+which_must_be_between_0V_and_%1$V.=which must be between 0V and %1$V.
+
+# ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerDescriptor.java
+It_can_store_up_to_256_points.=It can store up to 256 points.
+Measures_the_voltage_of_an=Measures the voltage of an
+electrical_signal_and_plots=electrical signal and plots
+the_data_in_real_time.=the data in real time.
+
+# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
+if_entities_are_moving_around.=if entities are moving around.
+
+# ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorDescriptor.java
+if_a_fire_has_been_detected.=if a fire has been detected.
+
+# ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
+Provides_configurable_signal=Provides configurable signal
+voltage.=voltage.
+
+# ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorDescriptor.java
+0V_at_night,_%1$V_at_noon.=0V at night, %1$V at noon.
+Provides_an_electrical_voltage=Provides an electrical voltage
+in_the_presence_of_light.=in the presence of light.
+the_intensity_of_daylight.=the intensity of daylight.
+which_is_proportional_to=which is proportional to
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
+3_inputs_(A,_B,_C)_using_an_equation.=3 inputs (A, B, C) using an equation.
+Applicable_boolean_operators\:=Applicable boolean operators:
+Applicable_functions\:=Applicable functions:
+Applicable_mathematical_operators\:=Applicable mathematical operators:
+Calculates_an_output_signal_from=Calculates an output signal from
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputDescriptor.java
+Converts_Redstone_signal=Converts Redstone signal
+to_an_electrical_voltage.=to an electrical voltage.
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputDescriptor.java
+Converts_electrical_voltage=Converts electrical voltage
+into_a_Redstone_signal.=into a Redstone signal.
+
+# ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayDescriptor.java
+A_relay_is_an_electrical=A relay is an electrical
+contact_that_conducts_electric=contact that conducts electric
+current_or_not,_depending=current or not, depending
+the_actual_input_signal_voltage.=the actual input signal voltage.
+
+# ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
+Creative_block.=Creative block.
+Internal_resistance\:=Internal resistance:
+Provides_ab_ideal_voltage_source=Provides ab ideal voltage source
+without_energy_or_power_limitation.=without energy or power limitation.
+
+# ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
+Can_break_an_electrical_circuit=Can break an electrical circuit
+interrupting_the_current.=interrupting the current.
+
+# ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerDescriptor.java
+10_blocks_radius_after_10_blocks_depth.=10 blocks radius after 10 blocks depth.
+Excavates_on_a_small_radius.=Excavates on a small radius.
+Extracts_ore_on_a_bigger_radius\:=Extracts ore on a bigger radius:
+
+# ./src/main/java/mods/eln/transparentnode/battery/BatteryDescriptor.java
+Actual_charge\:_%1$%=Actual charge: %1$%
+Energy_capacity\:_%1$J=Energy capacity: %1$J
+Internal_resistance\:_%1$Ω=Internal resistance: %1$Ω
+
+# ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxDescriptor.java
+Wireless_energy_receiver.=Wireless energy receiver.
+
+# ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxDescriptor.java
+Efficiency\:_%1$%_up_to_%2$%=Efficiency: %1$% up to %2$%
+Wireless_energy_transmitter.=Wireless energy transmitter.
+
+# ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceDescriptor.java
+Equivalent_to_a_vanilla_furnace=Equivalent to a vanilla furnace
+but_heats_with_electricity.=but heats with electricity.
+
+# ./src/main/java/mods/eln/transparentnode/fuelgenerator/FuelGeneratorDescriptor.java
+Produces_energy_using_fuel.=Produces energy using fuel.
+
+# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceDescriptor.java
+Generates_heat_when_supplied_with_fuel.=Generates heat when supplied with fuel.
+
+# ./src/main/java/mods/eln/transparentnode/solarpannel/SolarPannelDescriptor.java
+Can_be_geared_towards_the_sun.=Can be geared towards the sun.
+Max._Power\:_%1$W=Max. Power: %1$W
+Max._Voltage\:_%1$V=Max. Voltage: %1$V
+Produces_power_from_solar_radiation.=Produces power from solar radiation.
+
+# ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveDescriptor.java
+Fan_cooling_power\:_%1$W=Fan cooling power: %1$W
+Fan_power_consumption\:_%1$W=Fan power consumption: %1$W
+Fan_voltage\:_%1$V=Fan voltage: %1$V
+
+# ./src/main/java/mods/eln/transparentnode/transformer/TransformerDescriptor.java
+The_voltage_ratio_is_proportional=The voltage ratio is proportional
+Transforms_an_input_voltage_to=Transforms an input voltage to
+an_output_voltage.=an output voltage.
+to_the_cable_stacks_count_ratio.=to the cable stacks count ratio.
+
+# ./src/main/java/mods/eln/transparentnode/turbine/TurbineDescriptor.java
+Generates_electricity_using_heat.=Generates electricity using heat.
+Temperature_difference\:_%1$°C=Temperature difference: %1$°C
+
+# ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
+CAUTION\:_Cables_can_get_quite_hot!=CAUTION: Cables can get quite hot!
+Laser_charge_power\:_%1$W...%2$kW=Laser charge power: %1$W...%2$kW
+Scans_for_entities_and_shoots_if_the=Scans for entities and shoots if the
+Standby_power\:_%1$W=Standby power: %1$W
+entity_matches_the_configurable_filter_criteria.=entity matches the configurable filter criteria.
+
+# ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineDescriptor.java
+Generates_energy_using_water_stream.=Generates energy using water stream.
+
+# ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
+Front\:_%1$=Front: %1$
+Generates_energy_from_wind.=Generates energy from wind.
+Left/Right\:_%1$=Left/Right: %1$
+Up/Down\:_%1$=Up/Down: %1$
+Wind_area\:=Wind area:
+
 # Appearing in multiple source files
+Batteries=Batteries
+Charge_power\:_%1$W=Charge power: %1$W
+Cooling_power\:_%1$W=Cooling power: %1$W
+Discharge_power\:_%1$W=Discharge power: %1$W
+Max._temperature\:_%1$°C=Max. temperature: %1$°C
+Nominal\:=Nominal:
+Nominal_power\:_%1$W=Nominal power: %1$W
+Nominal_usage\:=Nominal usage:
+Nominal_voltage\:_%1$V=Nominal voltage: %1$V
+Output_voltage_increases=Output voltage increases
+Power\:_%1$W=Power: %1$W
+Range\:_%1$_blocks=Range: %1$ blocks
+Resistance\:_%1$Ω=Resistance: %1$Ω
+Stored_energy\:_%1$J_(%2$%)=Stored energy: %1$J (%2$%)
+Temperature\:_%1$°C=Temperature: %1$°C
+Used_to_cool_down_turbines.=Used to cool down turbines.
+Voltage\:_%1$V=Voltage: %1$V
