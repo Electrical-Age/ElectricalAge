@@ -1,10 +1,7 @@
 package mods.eln.transparentnode.autominer;
 
 import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage;
-import mods.eln.misc.Direction;
-import mods.eln.misc.PhysicalInterpolatorNoRebound;
-import mods.eln.misc.RcInterpolator;
-import mods.eln.misc.UtilsClient;
+import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
@@ -114,7 +111,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 			GL11.glScalef(1 / 128f, -1 / 128f, 1);
 			int idx = 0;
 			for (String log : logs) {
-				Minecraft.getMinecraft().fontRenderer.drawString(idx == 0 ? "> " + log : log, 80, 1 + idx, 0xFFD0D0D0);
+				Minecraft.getMinecraft().fontRenderer.drawString(idx == 0 ? Color.COLOR_BRIGHT_GREEN+"> "+log.substring(2) : Color.COLOR_DARK_GREEN+log, 80, 1 + idx, 0xFFD0D0D0 /*No effect...*/);
 				idx += 8;
 			}
 			GL11.glPopMatrix();
@@ -206,8 +203,8 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
 			if (!powerOk) {
 				logs.clear();
-				pushLog("BOOT");
-				pushLog("WAITING OPCODE");
+				pushLog("[i] Boot... Done.");
+				pushLog("* Waiting opcode.");
 			}
 			
 			if (boot) {

@@ -189,25 +189,25 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 		if (oneJobDone || oldJob != job) {
 			switch (job) {
                 case chestFull:
-                    miner.pushLog("STORAGE !");
+                    miner.pushLog("* Storage full!");
                     break;
                 case done:
-                    miner.pushLog("SLEEP");
+                    miner.pushLog("- SLEEP");
                     break;
                 case full:
-                    miner.pushLog("PIPE STACK !");
+                    miner.pushLog("* Pipe stack full!");
                     break;
                 case none:
-                    miner.pushLog("WAITING OPCODE");
+                    miner.pushLog("* Waiting opcode.");
                     break;
                 case ore:
-                    miner.pushLog("DRILL " + drillCount);
+                    miner.pushLog("- DRILL #" + drillCount);
                     break;
                 case pipeAdd:
-                    miner.pushLog("ADD PIPE " + (pipeLength + 1));
+                    miner.pushLog("- ADD PIPE #" + (pipeLength + 1));
                     break;
                 case pipeRemove:
-                    miner.pushLog("REMOVE PIPE " + (pipeLength));
+                    miner.pushLog("- REMOVE PIPE #" + (pipeLength));
                     break;
                 default:
                     break;
