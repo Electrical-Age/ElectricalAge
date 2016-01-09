@@ -33,7 +33,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 	float reflc;
 
     public boolean onFloor;
-    private String textColor;
+    public String textColor;
 
 	public ElectricalDataLoggerDescriptor(String name, boolean onFloor, String objName, float cr, float cg, float cb, String textColor) {
 		super(name, ElectricalDataLoggerElement.class, ElectricalDataLoggerRender.class);

@@ -5,6 +5,8 @@ import mods.eln.gui.GuiHelperContainer;
 import mods.eln.gui.GuiTextFieldEln;
 import mods.eln.gui.GuiTextFieldEln.GuiTextFieldElnObserver;
 import mods.eln.gui.IGuiObject;
+import mods.eln.misc.Color;
+import mods.eln.misc.UtilsClient;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -16,7 +18,7 @@ import java.text.ParseException;
 public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextFieldElnObserver {
 
     GuiButton resetBt, voltageType, energyType, currentType, powerType, celsiusType, percentType, config, printBt, pause;
-    GuiTextFieldEln samplingPeriode, maxValue, minValue, yCursorValue;
+    GuiTextFieldEln samplingPeriod, maxValue, minValue, yCursorValue;
     ElectricalDataLoggerRender render;
 
     enum State {display,config}
@@ -38,7 +40,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 		currentType.visible = false;
 		powerType.visible = false;
 		celsiusType.visible = false;
-		samplingPeriode.setVisible(false);
+		samplingPeriod.setVisible(false);
 		maxValue.setVisible(false);
 		minValue.setVisible(false);
 		printBt.visible = true;
@@ -57,7 +59,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 		currentType.visible = true;
 		powerType.visible = true;
 		celsiusType.visible = true;
-		samplingPeriode.setVisible(true);	
+		samplingPeriod.setVisible(true);
 		maxValue.setVisible(true);
 		minValue.setVisible(true);
 		state = State.config;
@@ -67,20 +69,24 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	public void initGui() {
 		super.initGui();
 
-        voltageType = newGuiButton(176 / 2 - 60 - 2, 8 + 20 + 2 - 2, 60, "Voltage [V]");
-        currentType = newGuiButton(176 / 2 + 2, 8 + 20 + 2 - 2, 60, "Current [A]");
-		resetBt = newGuiButton(176 / 2 - 50, 8 + 20 + 2 - 2, 48, "Reset");
-		powerType = newGuiButton(176 / 2 - 60 - 2, 8 + 40 + 4 - 2, 60, "Power [W]");
-		celsiusType = newGuiButton(176 / 2 + 2, 8 + 40 + 4 - 2, 60, "Degrees Celsius [°C]");
-		percentType = newGuiButton(176 / 2 - 60 - 2, 8 + 60 + 6 - 2, 60, "Percent [-]%");
-		energyType = newGuiButton(176 / 2 + 2, 8 + 60 + 6 - 2, 60, "Energy [J]");
 		config = newGuiButton(176 / 2 - 50, 8 - 2, 100, "");
-		printBt = newGuiButton(176 / 2 - 48 / 2, 123, 48, "Print");
+
+		//@devs: Do not translate the following elements. Please.
+        voltageType = newGuiButton(176 / 2 - 75 - 2, 8 + 20 + 2 - 2, 75, "Voltage [V]");
+        currentType = newGuiButton(176 / 2 + 2, 8 + 20 + 2 - 2, 75, "Current [A]");
+		powerType = newGuiButton(176 / 2 - 75 - 2, 8 + 40 + 4 - 2, 75, "Power [W]");
+		celsiusType = newGuiButton(176 / 2 + 2, 8 + 40 + 4 - 2, 75, "Temp. [*C]");
+		percentType = newGuiButton(176 / 2 - 75 - 2, 8 + 60 + 6 - 2, 75, "Percent [-]%");
+		energyType = newGuiButton(176 / 2 + 2, 8 + 60 + 6 - 2, 75, "Energy [J]");
+
+		resetBt = newGuiButton(176 / 2 - 50, 8 + 20 + 2 - 2, 48, "Reset");
 		pause = newGuiButton(176 / 2 + 2, 8 + 20 + 2 - 2, 48, "");
-		
-		samplingPeriode = newGuiTextField(30, 101, 50);
-        samplingPeriode.setText(render.log.samplingPeriod);
-        samplingPeriode.setComment(new String[]{"Sampling period"});
+
+		printBt = newGuiButton(176 / 2 - 48 / 2, 123, 48, "Print");
+
+		samplingPeriod = newGuiTextField(30, 101, 50);
+        samplingPeriod.setText(render.log.samplingPeriod);
+        samplingPeriod.setComment(new String[]{"Sampling period"});
         
         maxValue = newGuiTextField(176 - 50 - 30, 101 - 7, 50);
         maxValue.setText(render.log.maxValue);
@@ -130,10 +136,10 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 				render.clientSetFloat(ElectricalDataLoggerElement.setMaxValue, NumberFormat.getInstance().parse(maxValue.getText()).floatValue());
 			} else if (object == minValue) {
 				render.clientSetFloat(ElectricalDataLoggerElement.setMinValue, NumberFormat.getInstance().parse(minValue.getText()).floatValue());
-			} else if (object == samplingPeriode) {
-				float value = NumberFormat.getInstance().parse(samplingPeriode.getText()).floatValue();
+			} else if (object == samplingPeriod) {
+				float value = NumberFormat.getInstance().parse(samplingPeriod.getText()).floatValue();
 				if (value < 0.05f) value = 0.05f;
-				samplingPeriode.setText(value);
+				samplingPeriod.setText(value);
 				
 				render.clientSetFloat(ElectricalDataLoggerElement.setSamplingPeriodeId, value);
 			}
@@ -173,9 +179,9 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
     	}
     	
     	if (render.pause)
-    		pause.displayString = "Continue";
+    		pause.displayString = Color.COLOR_DARK_YELLOW+"Paused";
     	else
-    		pause.displayString = "Pause";
+    		pause.displayString = Color.COLOR_BRIGHT_GREEN+"Running";
     	
     	boolean a = inventorySlots.getSlot(ElectricalDataLoggerContainer.paperSlotId).getStack() != null;
     	boolean b = inventorySlots.getSlot(ElectricalDataLoggerContainer.printSlotId).getStack() == null;
@@ -185,14 +191,28 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
     @Override
     protected void postDraw(float f, int x, int y) {
     	super.postDraw(f, x, y);
-    	
+    	final float bckrndMargin = 0.05f;
+
     	if (state == State.display) {
-			GL11.glColor4f(1f, 0f, 0f, 1f);
-			
+
 	        GL11.glPushMatrix();
-		        GL11.glTranslatef(guiLeft + 8, guiTop + 60, 0);
-		        GL11.glScalef(50, 50, 1f);
-		        render.log.draw(2.9f, 1.2f, "");
+		        GL11.glTranslatef(guiLeft + 8, guiTop + 53, 0);
+				GL11.glScalef(50, 50, 1f);
+
+				GL11.glColor4f(0.15f, 0.15f, 0.15f, 1.0f);
+				UtilsClient.disableTexture();
+				UtilsClient.disableCulling();
+				GL11.glBegin(GL11.GL_QUADS);
+				GL11.glVertex2f(-bckrndMargin, -bckrndMargin);
+				GL11.glVertex2f(3.2f+bckrndMargin, -bckrndMargin);
+				GL11.glVertex2f(3.2f+bckrndMargin, 1.2f+3*bckrndMargin);
+				GL11.glVertex2f(-bckrndMargin, 1.2f+3*bckrndMargin);
+				GL11.glEnd();
+				UtilsClient.enableCulling();
+				UtilsClient.enableTexture();
+			
+				GL11.glColor4f(render.descriptor.cr, render.descriptor.cg, render.descriptor.cb, 1);
+		        render.log.draw(2.9f, 1.2f, render.descriptor.textColor);
 	        GL11.glPopMatrix();
     	}
     }

@@ -2260,7 +2260,7 @@ public class Eln {
 			name = TR_NAME(Type.NONE, "Modern Data Logger");
 
 			desc = new ElectricalDataLoggerDescriptor(name, true,
-					"FlatScreenMonitor", 0.25f, 1f, 0.25f,  "\u00A7a");
+					"FlatScreenMonitor", 0.0f, 1f, 0.0f,  "\u00A7a");
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
