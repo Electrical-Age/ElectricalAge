@@ -12,6 +12,7 @@ import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.lwjgl.opengl.GL11;
 
 public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 
@@ -93,6 +94,9 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		GL11.glTranslatef(0.0f,0.0f,-0.2f);
+		GL11.glScalef(1.25f,1.25f,1.25f);
+		GL11.glRotatef(-90.f,0.f,1.f,0.f);
 		draw();
 	}
 

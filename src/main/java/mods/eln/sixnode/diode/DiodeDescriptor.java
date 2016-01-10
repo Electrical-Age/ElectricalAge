@@ -16,6 +16,7 @@ import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import org.lwjgl.opengl.GL11;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -79,6 +80,9 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+        GL11.glTranslatef(0.0f, 0.0f, -0.2f);
+        GL11.glScalef(1.25f,1.25f,1.25f);
+        GL11.glRotatef(-90.f,0.f,1.f,0.f);
         draw();
     }
 

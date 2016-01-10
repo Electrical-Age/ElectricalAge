@@ -25,7 +25,7 @@ public class ResistorDescriptor extends SixNodeDescriptor {
     public double thermalNominalHeatTime = 120;
     public double thermalConductivityTao = Eln.cableThermalConductionTao;
     public double tempCoef;
-    Obj3D.Obj3DPart ResistorBaseExtension, ResistorCore, ResistorTrack, ResistorWiper, Base;
+    Obj3D.Obj3DPart ResistorBaseExtension, ResistorCore, ResistorTrack, ResistorWiper, Base, Cables;
     ISerie series;
     private Obj3D obj;
 
@@ -46,6 +46,7 @@ public class ResistorDescriptor extends SixNodeDescriptor {
             ResistorTrack = obj.getPart("ResistorTrack");
             ResistorWiper = obj.getPart("ResistorWiper");
             Base = obj.getPart("Base");
+            Cables = obj.getPart("CapacitorCables");
         }
     }
 
@@ -70,9 +71,13 @@ public class ResistorDescriptor extends SixNodeDescriptor {
     void draw(float wiperPos) {
         //UtilsClient.disableCulling();
         //UtilsClient.disableTexture();
+        //GL11.glRotatef(90, 1, 0, 0);
+
+
         if (null != Base) Base.draw();
         if (null != ResistorBaseExtension) ResistorBaseExtension.draw();
         if (null != ResistorCore) ResistorCore.draw();
+        if (null != Cables) Cables.draw();
 
         if (isRheostat) {
             final float wiperSpread = 0.238f;
@@ -96,6 +101,9 @@ public class ResistorDescriptor extends SixNodeDescriptor {
 
     @Override
     public void renderItem(IItemRenderer.ItemRenderType type, ItemStack item, Object... data) {
+        GL11.glTranslatef(0.0f,0.0f,-0.2f);
+        GL11.glScalef(1.25f,1.25f,1.25f);
+        GL11.glRotatef(-90.f,0.f,1.f,0.f);
         draw(0);
     }
 
