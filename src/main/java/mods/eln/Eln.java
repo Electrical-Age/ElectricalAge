@@ -4789,6 +4789,13 @@ public class Eln {
 				Character.valueOf('G'), findItemStack("Robust Lamp Socket"),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
 
+		addRecipe(findItemStack("Sconce Lamp Socket", 2),
+				"GCG",
+				"GIG",
+				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
+				Character.valueOf('C'), "dustCoal",
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
+
 	}
 
 	void recipeLampSupply() {
@@ -4802,12 +4809,20 @@ public class Eln {
 	}
 
 	void recipePowerSocket() {
-		addRecipe(findItemStack("50V Power Socket"), //TODO TBD!
-				"III",
-				"III",
-				"III",
-				Character.valueOf('C'), "ingotCopper",
-				Character.valueOf('I'), new ItemStack(Items.iron_ingot));
+		addRecipe(findItemStack("50V Power Socket",16),
+				"RUR",
+				"ACA",
+				Character.valueOf('R'), "itemRubber",
+				Character.valueOf('U'), findItemStack("Copper Plate"),
+				Character.valueOf('A'), findItemStack("Alloy Plate"),
+				Character.valueOf('C'), findItemStack("Low Voltage Cable"));
+		addRecipe(findItemStack("200V Power Socket",16),
+				"RUR",
+				"ACA",
+				Character.valueOf('R'), "itemRubber",
+				Character.valueOf('U'), findItemStack("Copper Plate"),
+				Character.valueOf('A'), findItemStack("Alloy Plate"),
+				Character.valueOf('C'), findItemStack("Medium Voltage Cable"));
 	}
 
 	void recipePassiveComponent() {
