@@ -22,6 +22,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.IRenderContextHandler;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescriptor implements IItemRenderer{
 	public Class ElementClass,RenderClass;
 	public TransparentNodeDescriptor(  String name,
@@ -94,21 +96,22 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 			Coordonate temp = new Coordonate(coord);
 			temp.move(Direction.YN);
 			block = temp.getBlock();
-			if(block == null || ((! block.isOpaqueCube()) && block instanceof BlockHopper == false)) return "You can't place this block at this side";
+			if(block == null || ((! block.isOpaqueCube()) && block instanceof BlockHopper == false))
+				return tr("You can't place this block at this side");
 		}
 		if(mustHaveCeiling())
 		{
 			Coordonate temp = new Coordonate(coord);
 			temp.move(Direction.YP);
 			block = temp.getBlock();
-			if(block == null || ! block.isOpaqueCube()) return "You can't place this block at this side";
+			if(block == null || ! block.isOpaqueCube()) return tr("You can't place this block at this side");
 		}
 		if(mustHaveWallFrontInverse())
 		{
 			Coordonate temp = new Coordonate(coord);
 			temp.move(front.getInverse());
 			block = temp.getBlock();
-			if(block == null || ! block.isOpaqueCube()) return "You can't place this block at this side";
+			if(block == null || ! block.isOpaqueCube()) return tr("You can't place this block at this side");
 		}
 		if(mustHaveWall())
 		{
@@ -131,11 +134,11 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 			block = temp.getBlock();
 			if(block != null && block.isOpaqueCube()) wall = true;
 			
-			if(! wall) return "You can't place this block at this side";
+			if(! wall) return tr("You can't place this block at this side");
 		}
 		
 		GhostGroup ghostGroup = getGhostGroup(front);
-		if(ghostGroup != null && ghostGroup.canBePloted(coord) == false) return "Not enough space for this block";
+		if(ghostGroup != null && ghostGroup.canBePloted(coord) == false) return tr("Not enough space for this block");
 		return null;
 	}
 

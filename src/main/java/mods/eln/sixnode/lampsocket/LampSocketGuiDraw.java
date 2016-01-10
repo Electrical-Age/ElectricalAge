@@ -6,6 +6,8 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 
+import static mods.eln.i18n.I18N.tr;
+
 /*
 public class MachineGuiClientExample extends GuiScreen {
 	MachineBlockEntity tileEntity;
@@ -44,10 +46,10 @@ public class LampSocketGuiDraw extends GuiContainerEln {
     	}
     
     	buttonGrounded = newGuiButton(x + 176 / 2 - 30, -2000, 60, "");
-    	
-    	channel.setComment(0, "Specify the supply channel");
-    	
-    	channel.setText(lampRender.channel);
+
+		channel.setComment(0, tr("Specify the supply channel"));
+
+		channel.setText(lampRender.channel);
     	alphaZ  = newGuiVerticalTrackBar(176 - 8 - 20, 8, 20, 69);
     	alphaZ.setRange(lampRender.descriptor.alphaZMin, lampRender.descriptor.alphaZMax);
     	alphaZ.setStepIdMax(200);
@@ -88,24 +90,24 @@ public class LampSocketGuiDraw extends GuiContainerEln {
 	protected void preDraw(float f, int x, int y) {
 		super.preDraw(f, x, y);
 		if (lampRender.grounded)
-			buttonGrounded.displayString = "Parallel";
+			buttonGrounded.displayString = tr("Parallel");
 		else
-			buttonGrounded.displayString = "Serial";
+			buttonGrounded.displayString = tr("Serial");
 		
 		if (lampRender.poweredByLampSupply) {
-			buttonSupplyType.displayString = "Powered by Lamp Supply";
+			buttonSupplyType.displayString = tr("Powered by Lamp Supply");
 			channel.setVisible(true);
 			if (inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null)
-				channel.setComment(1, "\u00a74Cable slot empty");
+				channel.setComment(1, "§4" + tr("Cable slot empty"));
 			else if (lampRender.isConnectedToLampSupply)
-				channel.setComment(1, "\u00a72connected to " + lampRender.channel);
+				channel.setComment(1, "§2" + tr("connected to " + lampRender.channel));
 			else
-				channel.setComment(1, "\u00a74" +  lampRender.channel + " is not in range!");
+				channel.setComment(1, "§4" + tr("%1$ is not in range!", lampRender.channel));
 		} else {
 			channel.setVisible(false);
-			buttonSupplyType.displayString = "Powered by Cable";
+			buttonSupplyType.displayString = tr("Powered by cable");
 		}
-		
-		alphaZ.setComment(0, "Orientation: " + (int)alphaZ.getValue() + "\u00B0");
+
+		alphaZ.setComment(0, tr("Orientation: %1$°", (int) alphaZ.getValue()));
 	}
 }

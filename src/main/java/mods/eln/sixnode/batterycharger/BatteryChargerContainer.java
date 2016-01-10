@@ -12,6 +12,8 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class BatteryChargerContainer extends BasicContainer {
 
     public static final int boosterSlotId = 4;
@@ -19,7 +21,7 @@ public class BatteryChargerContainer extends BasicContainer {
     static class BatterySlot extends SlotWithSkinAndComment {
 
 		public BatterySlot(IInventory par1iInventory, int slot, int x, int y) {
-			super(par1iInventory, slot, x, y, SlotSkin.medium, new String[]{"Battery Slot"});
+			super(par1iInventory, slot, x, y, SlotSkin.medium, new String[]{tr("Battery slot")});
 		}
 		
 		public boolean isItemValid(ItemStack itemStack) {
@@ -38,14 +40,14 @@ public class BatteryChargerContainer extends BasicContainer {
 
 	public BatteryChargerContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory, new Slot[]{
-				new BatterySlot(inventory, 0, 26 - 18 + 0, 6 + 0),
-				new BatterySlot(inventory, 1, 26 - 18 + 18, 6 + 0),
-				new BatterySlot(inventory, 2, 26 - 18 + 0, 6 + 18),
-				new BatterySlot(inventory, 3, 26 - 18 + 18, 6 + 18),
-				new GenericItemUsingDamageSlot(inventory, boosterSlotId, 80 - 18, 6 + 18 / 2, 5,
-						MachineBoosterDescriptor.class,
-						SlotSkin.medium,
-						new String[]{"Booster Slot"})
+			new BatterySlot(inventory, 0, 26 - 18 + 0, 6 + 0),
+			new BatterySlot(inventory, 1, 26 - 18 + 18, 6 + 0),
+			new BatterySlot(inventory, 2, 26 - 18 + 0, 6 + 18),
+			new BatterySlot(inventory, 3, 26 - 18 + 18, 6 + 18),
+			new GenericItemUsingDamageSlot(inventory, boosterSlotId, 80 - 18, 6 + 18 / 2, 5,
+				MachineBoosterDescriptor.class,
+				SlotSkin.medium,
+				new String[]{tr("Booster slot")})
 		});
 	}
 }

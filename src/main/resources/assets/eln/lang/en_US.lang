@@ -97,6 +97,7 @@ Electrical_Probe_Chip.name=Electrical Probe Chip
 Electrical_Source.name=Electrical Source
 Electrical_Timer.name=Electrical Timer
 Electrical_Weather_Sensor.name=Electrical Weather Sensor
+Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Electrical age wrench,\nCan be used to turn\nsmall wall blocks
 Energy_Meter.name=Energy Meter
 Experimental_Transporter.name=Experimental Transporter
 Fast_Electrical_Drill.name=Fast Electrical Drill
@@ -169,12 +170,15 @@ Portable_Electrical_Mining_Drill.name=Portable Electrical Mining Drill
 Power_Capacitor.name=Power Capacitor
 Power_Inductor.name=Power Inductor
 Power_Resistor.name=Power Resistor
+Power_capacitor.name=Power capacitor
+Power_inductor.name=Power inductor
 Purple_Brush.name=Purple Brush
 Red_Brush.name=Red Brush
 Redstone-to-Voltage_Converter.name=Redstone-to-Voltage Converter
 Rheostat.name=Rheostat
 Robust_Lamp_Socket.name=Robust Lamp Socket
 Rubber.name=Rubber
+Sconce_Lamp_Socket.name=Sconce Lamp Socket
 Signal_20H_inductor.name=Signal 20H inductor
 Signal_Antenna.name=Signal Antenna
 Signal_Button.name=Signal Button
@@ -243,6 +247,7 @@ Wireless_Switch.name=Wireless Switch
 Wrench.name=Wrench
 X-Ray_Scanner.name=X-Ray Scanner
 Yellow_Brush.name=Yellow Brush
+entity.EAReplicator.name=Replicator
 item.Copper Axe.name=Copper Axe
 item.Copper Boots.name=Copper Boots
 item.Copper Chestplate.name=Copper Chestplate
@@ -259,11 +264,15 @@ item.E-Coal Leggings.name=E-Coal Leggings
 itemGroup.Eln=Electrical Age
 mod.meta.desc=Electricity in your base!
 tile.eln.ElnProbe.name=Eln Computer Probe
+tile.eln.EnergyConverterElnToOtherHVUBlock.name=800V Electrical Age to other energy exporter
+tile.eln.EnergyConverterElnToOtherLVUBlock.name=50V Electrical Age to other energy exporter
+tile.eln.EnergyConverterElnToOtherMVUBlock.name=200V Electrical Age to other energy exporter
 
 # ./src/main/java/mods/eln/i18n/I18N.java
 You_have_%1$_lives_left=You have %1$ lives left
 
 # ./src/main/java/mods/eln/item/BrushDescriptor.java
+Brush_is_empty=Brush is empty
 Can_paint_%1$_blocks=Can paint %1$ blocks
 
 # ./src/main/java/mods/eln/item/CombustionChamber.java
@@ -288,6 +297,9 @@ Nominal_lifetime\:_%1$h=Nominal lifetime: %1$h
 Technology\:_%1$=Technology: %1$
 Used=Used
 
+# ./src/main/java/mods/eln/item/LampSlot.java
+Lamp_slot=Lamp slot
+
 # ./src/main/java/mods/eln/item/OverHeatingProtectionDescriptor.java
 Useful_to_prevent_overheating\nof_Batteries=Useful to prevent overheating\nof Batteries
 
@@ -306,7 +318,7 @@ State\:=State:
 Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
 
 # ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
-Regulator_Slot=Regulator slot
+Regulator_slot=Regulator slot
 
 # ./src/main/java/mods/eln/misc/UtilsClient.java
 Hold_shift=Hold shift
@@ -314,12 +326,32 @@ Hold_shift=Hold shift
 # ./src/main/java/mods/eln/misc/Version.java
 mod.name=Electrical Age
 
+# ./src/main/java/mods/eln/node/six/SixNodeDescriptor.java
+Can_not_be_placed_at_this_side.=Can not be placed at this side.
+Not_enough_space_for_this_block.=Not enough space for this block.
+You_can't_place_this_block_at_this_side.=You can't place this block at this side.
+
+# ./src/main/java/mods/eln/node/transparent/TransparentNodeDescriptor.java
+Not_enough_space_for_this_block=Not enough space for this block
+You_can't_place_this_block_at_this_side=You can't place this block at this side
+
+# ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
+Input_power_is_limited_to_%1$W=Input power is limited to %1$W
+
 # ./src/main/java/mods/eln/sixnode/TreeResinCollector/TreeResinCollectorDescriptor.java
 Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Produces Tree Resin over\ntime when put on a tree.
+
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerContainer.java
+Battery_slot=Battery slot
+Booster_slot=Booster slot
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
 Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Can be used to recharge\nelectrical items like:\nFlash Light, X-Ray scanner\nand Portable Battery ...
 Nominal_power\:_%1$=Nominal power: %1$
+
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
+Is_off=Is off
+Is_on=Is on
 
 # ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
 Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Electrical current can only\nflow through the diode\nfrom anode to cathode
@@ -328,8 +360,20 @@ Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Elect
 =
 Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=Emits an acoustic alarm if\nthe input signal is high
 
+# ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
+Sound_is_muted=Sound is muted
+Sound_is_not_muted=Sound is not muted
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
+
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
 Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds the cable limit
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerGui.java
+Maximum_voltage_before_cutting_off=Maximum voltage before cutting off
+Minimum_voltage_before_cutting_off=Minimum voltage before cutting off
+Switch_is_off=Switch is off
+Switch_is_on=Switch is on
 
 # ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableDescriptor.java
 A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$V=A signal is electrical information\nwhich must be between 0V and %1$V
@@ -343,6 +387,23 @@ Serial_resistance\:_%1$Ω=Serial resistance: %1$Ω
 It_can_store_up_to_256_points.=It can store up to 256 points.
 Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Measures the voltage of an\nelectrical signal and plots\nthe data in real time.
 
+# ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerGui.java
+Back_to_display=Back to display
+Configuration=Configuration
+Current_[A]=Current [A]
+Energy_[J]=Energy [J]
+Percent_[-]%=Percent [-]%
+Power_[W]=Power [W]
+Print=Print
+Sampling_period=Sampling period
+Temp._[*C]=Temp. [*C]
+Voltage_[V]=Voltage [V]
+Y-axis_Max=Y-axis Max
+Y-axis_Min=Y-axis Min
+
+# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
+Entity_filter_slot=Entity filter slot
+
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
 Output_voltage_increases\nif_entities_are_moving_around.=Output voltage increases\nif entities are moving around.
 
@@ -352,16 +413,30 @@ Output_voltage_increases\nif_a_fire_has_been_detected.=Output voltage increases\
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
 Provides_configurable_signal\nvoltage.=Provides configurable signal\nvoltage.
 
+# ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceGui.java
+Output_at_%1$%=Output at %1$%
+
 # ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorDescriptor.java
 0V_at_night,_%1$V_at_noon.=0V at night, %1$V at noon.
 Provides_an_electrical_voltage\nin_the_presence_of_light.=Provides an electrical voltage\nin the presence of light.
 Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Provides an electrical voltage\nwhich is proportional to\nthe intensity of daylight.
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
+Redstone_slot=Redstone slot
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
 Applicable_boolean_operators\:=Applicable boolean operators:
 Applicable_functions\:=Applicable functions:
 Applicable_mathematical_operators\:=Applicable mathematical operators:
 Calculates_an_output_signal_from\n3_inputs_(A,_B,_C)_using_an_equation.=Calculates an output signal from\n3 inputs (A, B, C) using an equation.
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathGui.java
+%1$_Redstone(s)_required=%1$ Redstone(s) required
+Equation_required!=Equation required!
+Inputs_are=Inputs are
+Invalid_equation!=Invalid equation!
+Output_voltage_formula=Output voltage formula
+Waiting_for_completion...=Waiting for completion...
 
 # ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputDescriptor.java
 Converts_Redstone_signal\nto_an_electrical_voltage.=Converts Redstone signal\nto an electrical voltage.
@@ -372,9 +447,16 @@ Converts_electrical_voltage\ninto_a_Redstone_signal.=Converts electrical voltage
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayDescriptor.java
 A_relay_is_an_electrical\ncontact_that_conducts_electric\ncurrent_or_not,_depending\nthe_actual_input_signal_voltage.=A relay is an electrical\ncontact that conducts electric\ncurrent or not, depending\nthe actual input signal voltage.
 
+# ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayGui.java
+Normally_closed=Normally closed
+Normally_open=Normally open
+
 # ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
 Creative_block.=Creative block.
 Provides_ab_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides ab ideal voltage source\nwithout energy or power limitation.
+
+# ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceGui.java
+Output_voltage=Output voltage
 
 # ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
 Can_break_an_electrical_circuit\ninterrupting_the_current.=Can break an electrical circuit\ninterrupting the current.
@@ -382,8 +464,16 @@ Can_break_an_electrical_circuit\ninterrupting_the_current.=Can break an electric
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
 When_the_input_signal_is_high_this\nmaintains_a_high_output_signal\nfor_a_configurable_time.=When the input signal is high this\nmaintains a high output signal\nfor a configurable time.
 
+# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
+Set=Set
+The_amount_of_time_the=The amount of time the
+output_is_kept_high.=output is kept high.
+
 # ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
 Displays_the_value_of_a_signal.=Displays the value of a signal.
+
+# ./src/main/java/mods/eln/sixnode/electricalwatch/ElectricalWatchContainer.java
+Portable_battery_slot=Portable battery slot
 
 # ./src/main/java/mods/eln/sixnode/electricalweathersensor/ElectricalWeatherSensorDescriptor.java
 Clear\:_%1$V=Clear: %1$V
@@ -400,6 +490,34 @@ Can_measure_Voltage_Power_Current=Can measure Voltage/Power/Current
 Measures_electrical_values_on_cables.=Measures electrical values on cables.
 Measures_voltage_on_cables.=Measures voltage on cables.
 
+# ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorGui.java
+Current=Current
+Measured_value\ncorresponding\na_0%_output.=Measured value\ncorresponding\na 0% output.
+Measured_value\ncorresponding\na_100%_output.=Measured value\ncorresponding\na 100% output.
+Measured_voltage\ncorresponding\na_0%_output=Measured voltage\ncorresponding\na 0% output
+Measured_voltage\ncorresponding\na_100%_output=Measured voltage\ncorresponding\na 100% output
+Power=Power
+Validate=Validate
+Voltage=Voltage
+
+# ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterGui.java
+Change_password=Change password
+Counter_Mode=Counter Mode
+Deducts_the_energy_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Deducts the energy from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.
+Energy_counter\:_%1$J=Energy counter: %1$J
+Enter_new_energy=Enter new energy
+Enter_password=Enter password
+Measures_the_energy_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Measures the energy from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.
+Prepay_Mode=Prepay Mode
+Reset_time_counter=Reset time counter
+Set_energy_counter=Set energy counter
+Time_counter\:=Time counter:
+Try_password=Try password
+You_must_set_an_initial\namount_of_energy.\nWhen_the_counter_hits_zero\nit_opens_the_contact.=You must set an initial\namount of energy.\nWhen the counter hits zero\nit opens the contact.
+is_off=is off
+is_on=is on
+value_in_kJ=value in kJ
+
 # ./src/main/java/mods/eln/sixnode/groundcable/GroundCableDescriptor.java
 Can_be_used_to_ground_negative\nbattery_pins.=Can be used to ground negative\nbattery pins.
 Provides_a_zero_volt_reference.=Provides a zero volt reference.
@@ -411,8 +529,28 @@ Allows_crossing_cables\non_one_single_block.=Allows crossing cables\non one sing
 Angle\:_%1$°_to_%2$°=Angle: %1$° to %2$°
 Spot_range\:_%1$_blocks=Spot range: %1$ blocks
 
+# ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketGuiDraw.java
+%1$_is_not_in_range!=%1$ is not in range!
+Cable_slot_empty=Cable slot empty
+Orientation\:_%1$°=Orientation: %1$°
+Parallel=Parallel
+Powered_by_Lamp_Supply=Powered by Lamp Supply
+Powered_by_cable=Powered by cable
+Serial=Serial
+Specify_the_supply_channel=Specify the supply channel
+
+# ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java
+\"Electrical_Cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.="Electrical Cable slot\nBase range is 32 blocks.\nEach additional cable\nincreases range by one.
+
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
 Supplies_all_lamps_on_the_channel.=Supplies all lamps on the channel.
+
+# ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java
+Biggest=Biggest
+Power_channel_name=Power channel name
+Smallest=Smallest
+Toggle=Toggle
+Wireless_channel_name=Wireless channel name
 
 # ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketDescriptor.java
 Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in with energy.
@@ -500,6 +638,7 @@ Wind_area\:=Wind area:
 Charge_power\:_%1$W=Charge power: %1$W
 Cooling_power\:_%1$W=Cooling power: %1$W
 Discharge_power\:_%1$W=Discharge power: %1$W
+Electrical_cable_slot=Electrical cable slot
 Has_a_signal_output.=Has a signal output.
 Internal_resistance\:_%1$Ω=Internal resistance: %1$Ω
 Max._temperature\:_%1$°C=Max. temperature: %1$°C
@@ -509,8 +648,10 @@ Nominal_usage\:=Nominal usage:
 Nominal_voltage\:_%1$V=Nominal voltage: %1$V
 Power\:_%1$W=Power: %1$W
 Range\:_%1$_blocks=Range: %1$ blocks
+Reset=Reset
 Resistance\:_%1$Ω=Resistance: %1$Ω
 Stored_energy\:_%1$J_(%2$%)=Stored energy: %1$J (%2$%)
 Temperature\:_%1$°C=Temperature: %1$°C
+Toggle_switch=Toggle switch
 Used_to_cool_down_turbines.=Used to cool down turbines.
 Voltage\:_%1$V=Voltage: %1$V

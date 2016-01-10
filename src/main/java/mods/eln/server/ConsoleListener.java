@@ -16,6 +16,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import static mods.eln.i18n.I18N.tr;
+
 
 public class ConsoleListener extends CommandBase {
 
@@ -270,9 +272,9 @@ public class ConsoleListener extends CommandBase {
 
 	private String boolToStr(boolean val){
 		if(val)
-			return "Enabled"; //TODO <translate>
+			return "Enabled";
 		else
-			return "Disabled"; //TODO <translate>
+			return "Disabled";
 	}
 
 	private void commandMan(ICommandSender ics, String cmd) {

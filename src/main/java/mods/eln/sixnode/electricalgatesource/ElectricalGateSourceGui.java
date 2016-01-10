@@ -6,6 +6,8 @@ import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.IGuiObject;
 import net.minecraft.entity.player.EntityPlayer;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalGateSourceGui extends GuiScreenEln {
 
     ElectricalGateSourceRender render;
@@ -44,8 +46,8 @@ public class ElectricalGateSourceGui extends GuiScreenEln {
     protected void preDraw(float f, int x, int y) {
     	super.preDraw(f, x, y);
     	if (render.voltageSyncNew) syncVoltage();
-    	voltage.setComment(0, "Output at " + ((int)voltage.getValue() * 2) + "%");
-    }
+		voltage.setComment(0, tr("Output at %1$%", ((int) voltage.getValue() * 2)));
+	}
 
 	@Override
 	protected GuiHelper newHelper() {

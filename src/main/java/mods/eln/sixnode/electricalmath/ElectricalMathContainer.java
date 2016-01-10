@@ -10,6 +10,8 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalMathContainer extends BasicContainer {
 
 	NodeBase node = null;
@@ -17,7 +19,8 @@ public class ElectricalMathContainer extends BasicContainer {
 	
 	public ElectricalMathContainer(NodeBase node, EntityPlayer player, IInventory inventory) {
 		super(player, inventory, new Slot[]{
-				new SlotFilter(inventory, restoneSlotId, 125+27+44/2, 25, 64, new ItemStackFilter[]{new ItemStackFilter(Items.redstone)}, SlotSkin.medium, new String[]{"Redstone Slot"})
+			new SlotFilter(inventory, restoneSlotId, 125 + 27 + 44 / 2, 25, 64,
+				new ItemStackFilter[]{new ItemStackFilter(Items.redstone)}, SlotSkin.medium, new String[]{tr("Redstone slot")})
 		});
 		this.node = node;
 	}

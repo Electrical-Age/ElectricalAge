@@ -6,6 +6,8 @@ import mods.eln.gui.IGuiObject;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.entity.player.EntityPlayer;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalRelayGui extends GuiScreenEln {
 
     GuiButton toggleDefaultOutput;
@@ -19,7 +21,7 @@ public class ElectricalRelayGui extends GuiScreenEln {
 	public void initGui() {
 		super.initGui();
 
-		toggleDefaultOutput = newGuiButton(6, 32 / 2 - 10, 115, "toggle switch");
+		toggleDefaultOutput = newGuiButton(6, 32 / 2 - 10, 115, tr("Toggle switch"));
 	}
 	
 	@Override
@@ -34,9 +36,9 @@ public class ElectricalRelayGui extends GuiScreenEln {
 	protected void preDraw(float f, int x, int y) {
 		super.preDraw(f, x, y);
 		if (render.defaultOutput)
-			toggleDefaultOutput.displayString = "Normally closed";
+			toggleDefaultOutput.displayString = tr("Normally closed");
 		else
-			toggleDefaultOutput.displayString = "Normally open";
+			toggleDefaultOutput.displayString = tr("Normally open");
 	}
 	
 	@Override

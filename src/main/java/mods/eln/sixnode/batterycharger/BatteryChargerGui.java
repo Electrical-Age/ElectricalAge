@@ -7,6 +7,8 @@ import mods.eln.gui.IGuiObject;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class BatteryChargerGui extends GuiContainerEln {
 
     private BatteryChargerRender render;
@@ -29,9 +31,9 @@ public class BatteryChargerGui extends GuiContainerEln {
 		super.preDraw(f, x, y);
 		
 		if (render.powerOn) {
-			powerOn.displayString = "Is ON";
+			powerOn.displayString = tr("Is on");
 		} else {
-			powerOn.displayString = "Is OFF";
+			powerOn.displayString = tr("Is off");
 		}
 	}
 	

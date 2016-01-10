@@ -8,6 +8,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.IItemRenderer;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor implements IItemRenderer {
     public Class ElementClass, RenderClass;
 
@@ -56,7 +58,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
                     return true;
             }
             // TODO: [translate]
-            Utils.addChatMessage(player, "You can't place this block at this side.");
+            Utils.addChatMessage(player, tr("You can't place this block at this side."));
             return false;
         }
         return true;
@@ -102,11 +104,11 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
                 }
             }
             if (!ok)
-                return "Can not be placed at this side."; // TODO: [translate]
+                return tr("Can not be placed at this side.");
         }
         GhostGroup ghostGroup = getGhostGroup(direction, front);
         if (ghostGroup != null && !ghostGroup.canBePloted(coord))
-            return "Not enough space for this block."; // TODO: [translate]
+            return tr("Not enough space for this block.");
         return null;
     }
 }

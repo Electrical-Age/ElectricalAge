@@ -6,6 +6,8 @@ import mods.eln.gui.GuiVerticalTrackBar;
 import mods.eln.gui.IGuiObject;
 import net.minecraft.entity.player.EntityPlayer;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class EnergyConverterElnToOtherGui extends GuiScreenEln {
 
     EnergyConverterElnToOtherEntity render;
@@ -44,8 +46,8 @@ public class EnergyConverterElnToOtherGui extends GuiScreenEln {
     protected void preDraw(float f, int x, int y) {
     	super.preDraw(f, x, y);
     	if (render.hasChanges) syncVoltage();
-    	voltage.setComment(0, "Input power is limited to  " + (int)(voltage.getValue() * render.inPowerMax) + " W");
-    }
+		voltage.setComment(0, tr("Input power is limited to %1$W", (int) (voltage.getValue() * render.inPowerMax)));
+	}
 
 	@Override
 	protected GuiHelper newHelper() {

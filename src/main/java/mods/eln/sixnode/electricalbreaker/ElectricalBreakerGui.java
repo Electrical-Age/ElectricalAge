@@ -12,6 +12,8 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalBreakerGui extends GuiContainerEln {
 
     GuiButton toogleSwitch;
@@ -34,11 +36,11 @@ public class ElectricalBreakerGui extends GuiContainerEln {
 
         setUmin.setText(render.uMin);
         setUmax.setText(render.uMax);
-        
-        setUmin.setComment(0, "Minimum voltage before cutting off");
-        setUmax.setComment(0, "Maximum voltage before cutting off");
-        
-		toogleSwitch = newGuiButton(72 - 2, 58 / 2 - 10, 70, "toogle switch");
+
+		setUmin.setComment(0, tr("Minimum voltage before cutting off"));
+		setUmax.setComment(0, tr("Maximum voltage before cutting off"));
+
+		toogleSwitch = newGuiButton(72 - 2, 58 / 2 - 10, 70, tr("Toggle switch"));
 	}
     
     @Override
@@ -63,10 +65,10 @@ public class ElectricalBreakerGui extends GuiContainerEln {
     protected void preDraw(float f, int x, int y) {
     	super.preDraw(f, x, y);
     	if (!render.switchState)
-    		toogleSwitch.displayString = "Switch is OFF";
-    	else
-    		toogleSwitch.displayString = "Switch is ON";
-    }
+			toogleSwitch.displayString = tr("Switch is off");
+		else
+			toogleSwitch.displayString = tr("Switch is on");
+	}
 
 	@Override
 	protected GuiHelperContainer newHelper() {

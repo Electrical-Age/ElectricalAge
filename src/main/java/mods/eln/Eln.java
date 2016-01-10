@@ -726,47 +726,43 @@ public class Eln {
 
 	private void registerEnergyConverter() {
 		if (ElnToOtherEnergyConverterEnable) {
-			String baseName = "EnergyConverterElnToOther";
 			String entityName = "eln.EnergyConverterElnToOtherEntity";
 
 			TileEntity.addMapping(EnergyConverterElnToOtherEntity.class, entityName);
 			NodeManager.instance.registerUuid(EnergyConverterElnToOtherNode.getNodeUuidStatic(), EnergyConverterElnToOtherNode.class);
 
 			{
-				String blockName = "eln." + baseName + "LVUBlock";
-				String name = "ELN to Other 50V converter";
+				String blockName = TR_NAME(Type.TILE, "eln.EnergyConverterElnToOtherLVUBlock");
 				ElnDescriptor elnDesc = new ElnDescriptor(LVU, LVP);
 				Ic2Descriptor ic2Desc = new Ic2Descriptor(32, 1);
 				OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax*Other.getElnToOcConversionRatio()/Other.getElnToIc2ConversionRatio());
-				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "LVU", elnDesc,ic2Desc,ocDesc);
+				EnergyConverterElnToOtherDescriptor desc =
+					new EnergyConverterElnToOtherDescriptor("EnergyConverterElnToOtherLVU", elnDesc,ic2Desc,ocDesc);
 				elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockLvu.setCreativeTab(creativeTab).setBlockName(blockName);
 				GameRegistry.registerBlock(elnToOtherBlockLvu,SimpleNodeItem.class, blockName);
-				LanguageRegistry.addName(elnToOtherBlockLvu, name);
 			}
 			{
-				String blockName = "eln." + baseName + "MVUBlock";
-				String name = "ELN to Other 200V converter";
+				String blockName = TR_NAME(Type.TILE, "eln.EnergyConverterElnToOtherMVUBlock");
 				ElnDescriptor elnDesc = new ElnDescriptor(MVU, MVP);
 				Ic2Descriptor ic2Desc = new Ic2Descriptor( 128, 2);
 				OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax*Other.getElnToOcConversionRatio()/Other.getElnToIc2ConversionRatio());
-				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "MVU",elnDesc,ic2Desc,ocDesc);
+				EnergyConverterElnToOtherDescriptor desc =
+					new EnergyConverterElnToOtherDescriptor("EnergyConverterElnToOtherMVU",elnDesc,ic2Desc,ocDesc);
 				elnToOtherBlockMvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockMvu.setCreativeTab(creativeTab).setBlockName(blockName);
 				GameRegistry.registerBlock(elnToOtherBlockMvu,SimpleNodeItem.class, blockName);
-				LanguageRegistry.addName(elnToOtherBlockMvu, name);
 			}
 			{
-				String blockName = "eln." + baseName + "HVUBlock";
-				String name = "ELN to Other 800V converter";
+				String blockName = TR_NAME(Type.TILE, "eln.EnergyConverterElnToOtherHVUBlock");
 				ElnDescriptor elnDesc = new ElnDescriptor( HVU, HVP);
 				Ic2Descriptor ic2Desc = new Ic2Descriptor(512, 3);
 				OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax*Other.getElnToOcConversionRatio()/Other.getElnToIc2ConversionRatio());
-				EnergyConverterElnToOtherDescriptor desc = new EnergyConverterElnToOtherDescriptor(baseName + "HVU", elnDesc,ic2Desc,ocDesc);
+				EnergyConverterElnToOtherDescriptor desc =
+					new EnergyConverterElnToOtherDescriptor("EnergyConverterElnToOtherHVU", elnDesc,ic2Desc,ocDesc);
 				elnToOtherBlockHvu = new EnergyConverterElnToOtherBlock(desc);
 				elnToOtherBlockHvu.setCreativeTab(creativeTab).setBlockName(blockName);
 				GameRegistry.registerBlock(elnToOtherBlockHvu,SimpleNodeItem.class, blockName);
-				LanguageRegistry.addName(elnToOtherBlockHvu, name);
 			}
 		}
 	}
@@ -1793,7 +1789,7 @@ public class Eln {
 		{
 			subId = 16;
 
-			name = "Power inductor";
+			name = TR_NAME(Type.NONE, "Power inductor");
 
 			PowerInductorDescriptor desc = new PowerInductorDescriptor(
 					name, null, SerieEE.newE12(-1)
@@ -1805,7 +1801,7 @@ public class Eln {
 		{
 			subId = 20;
 
-			name = "Power capacitor";
+			name = TR_NAME(Type.NONE, "Power capacitor");
 
 			PowerCapacitorDescriptor desc = new PowerCapacitorDescriptor(
 					name, null, SerieEE.newE6(-2), 300
@@ -3437,7 +3433,7 @@ public class Eln {
 			name = TR_NAME(Type.NONE, "Ferrite Ingot");
 			element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
 																			// name,
-					new String[] { "useless", "Realy useless" });
+					new String[] { "useless", "Really useless" });
 			sharedItem.addElement(completId, element);
 			// GameRegistry.registerCustomItemStack(name,
 			// element.newItemStack(1));
@@ -4636,7 +4632,7 @@ public class Eln {
 			subId = 48;
 			name = TR_NAME(Type.NONE, "Wrench");
 			GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
-					name, new String[] { "Electrical age wrench", "Can be used to turn", "some small wall blocks" });
+					name, TR("Electrical age wrench,\nCan be used to turn\nsmall wall blocks").split("\n"));
 			sharedItem.addElement(subId + (id << 6), desc);
 
 			wrenchItemStack = desc.newItemStack();
@@ -6563,10 +6559,7 @@ public class Eln {
 			replicatorRegistrationId = EntityRegistry.findGlobalUniqueEntityId();
 		Utils.println("Replicator registred at" + replicatorRegistrationId);
 		// Register mob
-		EntityRegistry.registerGlobalEntityID(ReplicatorEntity.class, "EAReplicator", replicatorRegistrationId, redColor, orangeColor);
-
-		// Localize mob name
-		LanguageRegistry.instance().addStringLocalization("entity.EAReplicator.name", "en_US", "Replicator");
+		EntityRegistry.registerGlobalEntityID(ReplicatorEntity.class, TR_NAME(Type.ENTITY, "EAReplicator"), replicatorRegistrationId, redColor, orangeColor);
 
 		ReplicatorEntity.dropList.add(findItemStack("Iron Dust", 1));
 		ReplicatorEntity.dropList.add(findItemStack("Copper Dust", 1));

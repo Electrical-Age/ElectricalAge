@@ -9,6 +9,8 @@ import net.minecraft.inventory.IInventory;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class EnergyMeterGui extends GuiContainerEln {
 
     GuiButtonEln stateBt, passwordBt, modBt, setEnergyBt, resetTimeBt, energyUnitBt, timeUnitBt;
@@ -33,7 +35,7 @@ public class EnergyMeterGui extends GuiContainerEln {
 		passwordFeild = newGuiTextField(x, y + 4, 70);
 		x += 74;
 		passwordBt = newGuiButton(x, y, 106, "");
-		passwordFeild.setComment(0, "Enter password");
+		passwordFeild.setComment(0, tr("Enter password"));
 
 		x = 6;
 		y += 28;
@@ -46,9 +48,9 @@ public class EnergyMeterGui extends GuiContainerEln {
 		x = 6;
 		energyFeild = newGuiTextField(x, y + 4, 70);
 		x += 74;
-		setEnergyBt = newGuiButton(x, y, 106, "Set energy counter");
-		energyFeild.setComment(0, "Enter new energy");
-		energyFeild.setComment(1, "value in KJ");
+		setEnergyBt = newGuiButton(x, y, 106, tr("Set energy counter"));
+		energyFeild.setComment(0, tr("Enter new energy"));
+		energyFeild.setComment(1, tr("value in kJ"));
 		energyFeild.setText("0");
 
 		y += 22;
@@ -57,7 +59,7 @@ public class EnergyMeterGui extends GuiContainerEln {
 		x += 34 + 2;
 		timeUnitBt = newGuiButton(x, y, 34, "");
 		x += 34 + 4;
-		resetTimeBt = newGuiButton(x, y, 106, "Reset time counter");
+		resetTimeBt = newGuiButton(x, y, 106, tr("Reset time counter"));
 		y += 22;
 		x = 6;
 
@@ -121,34 +123,34 @@ public class EnergyMeterGui extends GuiContainerEln {
 	protected void preDraw(float f, int x, int y) {
 		super.preDraw(f, x, y);
 		if (!render.switchState)
-			stateBt.displayString = "is OFF";
+			stateBt.displayString = tr("is off");
 		else
-			stateBt.displayString = "is ON";
+			stateBt.displayString = tr("is on");
 
 		if (isLogged)
-			passwordBt.displayString = "Change password";
+			passwordBt.displayString = tr("Change password");
 		else
-			passwordBt.displayString = "Try password";
+			passwordBt.displayString = tr("Try password");
 
 		switch (render.mod) {
 		case ModCounter:
-			modBt.displayString = "Counter Mode";
+			modBt.displayString = tr("Counter Mode");
 
 			modBt.clearComment();
-			modBt.setComment(0, "Measures the energy from");
-			modBt.setComment(1, "\u00a74red\u00a7f to \u00a71blue\u00a7f.");
+			int lineNumber = 0;
+			for (String line: tr("Measures the energy from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.").split("\n"))
+				modBt.setComment(lineNumber++, line);
 			break;
 		case ModPrepay:
-			modBt.displayString = "Prepay Mode";
+			modBt.displayString = tr("Prepay Mode");
 
 			modBt.clearComment();
-			modBt.setComment(0, "Deducts the energy from");
-			modBt.setComment(1, "\u00a74red\u00a7f to \u00a71blue\u00a7f.");
-            modBt.setComment(2, "");
-            modBt.setComment(3, "You must set an initial");
-			modBt.setComment(4, "amount of energy.");
-			modBt.setComment(5, "When the counter hits zero");
-			modBt.setComment(6, "it cuts off the line.");
+			lineNumber = 0;
+			for (String line: tr("Deducts the energy from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.").split("\n"))
+				modBt.setComment(lineNumber++, line);
+			modBt.setComment(lineNumber++, "");
+			for (String line: tr("You must set an initial\namount of energy.\nWhen the counter hits zero\nit opens the contact.").split("\n"))
+				modBt.setComment(lineNumber++, line);
 
 			break;
 		}
@@ -201,9 +203,9 @@ public class EnergyMeterGui extends GuiContainerEln {
 		helper.drawRect(6, y, helper.xSize - 6, y + 1, 0xff404040);
 
 		y += 3;
-		helper.drawString(6 + 16 / 2, y, 0xff000000, Utils.plotEnergy("Energy counter :", (int) (render.energyStack)));
+		helper.drawString(6 + 16 / 2, y, 0xff000000, tr("Energy counter: %1$J", (int) (render.energyStack)));
 		y += 10;
-		helper.drawString(6 + 16 / 2, y, 0xff000000, Utils.plotTime("Time counter :", (int) (render.timerCouter)));
+		helper.drawString(6 + 16 / 2, y, 0xff000000, tr("Time counter:", (int) (render.timerCouter)));
 	}
 
 	@Override

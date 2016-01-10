@@ -10,6 +10,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalTimeoutGui extends GuiScreenEln {
 
     GuiButton set, reset;
@@ -24,14 +26,14 @@ public class ElectricalTimeoutGui extends GuiScreenEln {
 	public void initGui() {
 		super.initGui();
 
-        reset = newGuiButton(6, 6, 50, "Reset");
-		set = newGuiButton(6, 6 + 20 + 4, 50, "Set");
+		reset = newGuiButton(6, 6, 50, tr("Reset"));
+		set = newGuiButton(6, 6 + 20 + 4, 50, tr("Set"));
 
 		timeoutValue = newGuiTextField(6, 6 + 20 * 2 + 4 * 2, 50);
 
         timeoutValue.setText(render.timeoutValue);
-        timeoutValue.setComment(0, "The amount of time the");
-        timeoutValue.setComment(1, "output is kept high.");
+		timeoutValue.setComment(0, tr("The amount of time the"));
+		timeoutValue.setComment(1, tr("output is kept high."));
 	}
 
     @Override

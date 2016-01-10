@@ -10,7 +10,7 @@ import static mods.eln.i18n.I18N.tr;
 public class RegulatorSlot extends GenericItemUsingDamageSlot {
 
   private RegulatorType[] type;
-  private final static String COMMENT = tr("Regulator Slot");
+  private final static String COMMENT = tr("Regulator slot");
 
   public RegulatorSlot(IInventory inventory, int slot, int x, int y, int stackLimit, RegulatorType[] type, SlotSkin
           skin) {

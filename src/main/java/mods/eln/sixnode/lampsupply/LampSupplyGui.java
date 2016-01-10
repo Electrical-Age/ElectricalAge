@@ -9,6 +9,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class LampSupplyGui extends GuiContainerEln {
 
 
@@ -70,22 +72,25 @@ public class LampSupplyGui extends GuiContainerEln {
             LampSupplyElement.Entry e = render.entries.get(id);
             GuiTextFieldEln powerChannel = newGuiTextField( x, y, 101); x += powerChannel.getWidth() + 12;
             powerChannel.setText(e.powerChannel);
-            powerChannel.setComment(0, "Power channel name");
+            powerChannel.setComment(0, tr("Power channel name"));
             powerMap.put(powerChannel,id);
 
             GuiTextFieldEln wirelessChannel = newGuiTextField( x , y, 101); x += wirelessChannel.getWidth() + 12;
             wirelessChannel.setText(e.wirelessChannel);
-            wirelessChannel.setComment(0, "Wireless channel name");
+            wirelessChannel.setComment(0, tr("Wireless channel name"));
             wirelessMap.put(wirelessChannel,id);
             y += wirelessChannel.getHeight() + 2;
             x = 6;
             int w = 68;
             AggregatorBt buttonBigger, buttonSmaller, buttonToogle;
 
-            add(buttonBigger = new AggregatorBt(x, y, w, 20, "Biggest",id, (byte) 0)); x += 2 + w;
-            add(buttonSmaller = new AggregatorBt(x, y, w, 20, "Smallest",id, (byte) 1)); x += 2 + w;
-            add(buttonToogle = new AggregatorBt(x, y, w, 20, "Toggle",id, (byte) 2)); x += 2 + w;
+            add(buttonBigger = new AggregatorBt(x, y, w, 20, tr("Biggest"),id, (byte) 0)); x += 2 + w;
+            add(buttonSmaller = new AggregatorBt(x, y, w, 20, tr("Smallest"),id, (byte) 1)); x += 2 + w;
+            add(buttonToogle = new AggregatorBt(x, y, w, 20, tr("Toggle"),id, (byte) 2)); x += 2 + w;
             buttonBigger.setHelper(helper);
+
+            // TODO cm0x4d: continue translation here...
+
             buttonBigger.setComment(0, "Gets the biggest value");
             buttonBigger.setComment(1, "emitted on the channel.");
 

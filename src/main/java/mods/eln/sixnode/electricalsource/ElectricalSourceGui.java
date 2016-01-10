@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalSourceGui extends GuiScreenEln {
 
 	GuiTextFieldEln voltage;
@@ -31,7 +33,7 @@ public class ElectricalSourceGui extends GuiScreenEln {
 		voltage = newGuiTextField(6, 6, 50);
 		voltage.setText((float) render.voltage);
 		voltage.setObserver(this);
-		voltage.setComment(new String[]{"Output voltage"});
+		voltage.setComment(new String[]{tr("Output voltage")});
 	}
 	
 	@Override

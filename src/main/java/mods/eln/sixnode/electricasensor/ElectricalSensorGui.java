@@ -8,6 +8,8 @@ import net.minecraft.inventory.IInventory;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalSensorGui extends GuiContainerEln {
 
     GuiButton validate, voltageType, currentType, powerType, dirType;
@@ -24,31 +26,31 @@ public class ElectricalSensorGui extends GuiContainerEln {
 		super.initGui();
 
 		if (!render.descriptor.voltageOnly) {
-			voltageType = newGuiButton(8, 8, 50, "Voltage");
-			currentType = newGuiButton(8, 8 + 24, 50, "Current");
-			powerType = newGuiButton(8, 8 + 48, 50, "Power");
+			voltageType = newGuiButton(8, 8, 50, tr("Voltage"));
+			currentType = newGuiButton(8, 8 + 24, 50, tr("Current"));
+			powerType = newGuiButton(8, 8 + 48, 50, tr("Power"));
 			dirType = newGuiButton(8 + 50 + 4, 8 + 48, 50, "");
 
 			int x = 0, y = -12;
-			validate = newGuiButton(x + 8 + 50 + 4 + 50 + 4, y + (166 - 84) / 2 - 9, 50, "Validate");
+			validate = newGuiButton(x + 8 + 50 + 4 + 50 + 4, y + (166 - 84) / 2 - 9, 50, tr("Validate"));
 			
 			lowValue = newGuiTextField(x + 8 + 50 + 4, y + (166 - 84) / 2 + 3, 50);
 	        lowValue.setText(render.lowValue);
-	        lowValue.setComment(new String[]{"Probed value", "that produces", "a 0% output."});
-	        
-	        highValue = newGuiTextField(x + 8 + 50 + 4, y + (166 - 84) / 2 - 13, 50);
+			lowValue.setComment(tr("Measured value\ncorresponding\na 0% output.").split("\n"));
+
+			highValue = newGuiTextField(x + 8 + 50 + 4, y + (166 - 84) / 2 - 13, 50);
 	        highValue.setText(render.highValue);
-	        highValue.setComment(new String[]{"Probed value", "that produces", "a 100% output."});
+	        highValue.setComment(tr("Measured value\ncorresponding\na 100% output.").split("\n"));
 		} else {
-			validate = newGuiButton(8 + 50 + 4, 10, 50, "Validate");
+			validate = newGuiButton(8 + 50 + 4, 10, 50, tr("Validate"));
 			
 			lowValue = newGuiTextField(8, 6 + 16, 50);
 	        lowValue.setText(render.lowValue);
-	        lowValue.setComment(new String[]{"Probed voltage", "that produces", "a 0% output"});
-	        
-	        highValue = newGuiTextField(8, 6, 50);
+			lowValue.setComment(tr("Measured voltage\ncorresponding\na 0% output").split("\n"));
+
+			highValue = newGuiTextField(8, 6, 50);
 	        highValue.setText(render.highValue);
-	        highValue.setComment(new String[]{"Probed voltage", "that produces", "a 100% output"});
+	        highValue.setComment(tr("Measured voltage\ncorresponding\na 100% output").split("\n"));
 		}
 	}
 

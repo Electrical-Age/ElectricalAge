@@ -15,6 +15,8 @@ import org.lwjgl.opengl.GL11;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextFieldElnObserver {
 
     GuiButton resetBt, voltageType, energyType, currentType, powerType, celsiusType, percentType, config, printBt, pause;
@@ -30,7 +32,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	}
 
 	void displayEntry() {
-		config.displayString = "Config";
+		config.displayString = tr("Configuration");
 		config.visible = true;
 		pause.visible = true;
 		resetBt.visible = true;
@@ -50,7 +52,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 	void configEntry() {	
 		pause.visible = false;
 		config.visible = true;
-		config.displayString = "Return to Display";
+		config.displayString = tr("Back to display");
 		resetBt.visible = false;
 		printBt.visible = true;
 		voltageType.visible = true;
@@ -72,31 +74,31 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 		config = newGuiButton(176 / 2 - 50, 8 - 2, 100, "");
 
 		//@devs: Do not translate the following elements. Please.
-        voltageType = newGuiButton(176 / 2 - 75 - 2, 8 + 20 + 2 - 2, 75, "Voltage [V]");
-        currentType = newGuiButton(176 / 2 + 2, 8 + 20 + 2 - 2, 75, "Current [A]");
-		powerType = newGuiButton(176 / 2 - 75 - 2, 8 + 40 + 4 - 2, 75, "Power [W]");
-		celsiusType = newGuiButton(176 / 2 + 2, 8 + 40 + 4 - 2, 75, "Temp. [*C]");
-		percentType = newGuiButton(176 / 2 - 75 - 2, 8 + 60 + 6 - 2, 75, "Percent [-]%");
-		energyType = newGuiButton(176 / 2 + 2, 8 + 60 + 6 - 2, 75, "Energy [J]");
+		voltageType = newGuiButton(176 / 2 - 75 - 2, 8 + 20 + 2 - 2, 75, tr("Voltage [V]"));
+		currentType = newGuiButton(176 / 2 + 2, 8 + 20 + 2 - 2, 75, tr("Current [A]"));
+		powerType = newGuiButton(176 / 2 - 75 - 2, 8 + 40 + 4 - 2, 75, tr("Power [W]"));
+		celsiusType = newGuiButton(176 / 2 + 2, 8 + 40 + 4 - 2, 75, tr("Temp. [*C]"));
+		percentType = newGuiButton(176 / 2 - 75 - 2, 8 + 60 + 6 - 2, 75, tr("Percent [-]%"));
+		energyType = newGuiButton(176 / 2 + 2, 8 + 60 + 6 - 2, 75, tr("Energy [J]"));
 
-		resetBt = newGuiButton(176 / 2 - 50, 8 + 20 + 2 - 2, 48, "Reset");
+		resetBt = newGuiButton(176 / 2 - 50, 8 + 20 + 2 - 2, 48, tr("Reset"));
 		pause = newGuiButton(176 / 2 + 2, 8 + 20 + 2 - 2, 48, "");
 
-		printBt = newGuiButton(176 / 2 - 48 / 2, 123, 48, "Print");
+		printBt = newGuiButton(176 / 2 - 48 / 2, 123, 48, tr("Print"));
 
 		samplingPeriod = newGuiTextField(30, 101, 50);
         samplingPeriod.setText(render.log.samplingPeriod);
-        samplingPeriod.setComment(new String[]{"Sampling period"});
-        
-        maxValue = newGuiTextField(176 - 50 - 30, 101 - 7, 50);
+		samplingPeriod.setComment(new String[]{tr("Sampling period")});
+
+		maxValue = newGuiTextField(176 - 50 - 30, 101 - 7, 50);
         maxValue.setText(render.log.maxValue);
-        maxValue.setComment(new String[]{"Y-axis Max"});
-        
-        minValue = newGuiTextField(176 - 50 - 30, 101 + 8, 50);
+		maxValue.setComment(new String[]{tr("Y-axis Max")});
+
+		minValue = newGuiTextField(176 - 50 - 30, 101 + 8, 50);
         minValue.setText(render.log.minValue);
-        minValue.setComment(new String[]{"Y-axis Min"});
-       
-        displayEntry();
+		minValue.setComment(new String[]{tr("Y-axis Min")});
+
+		displayEntry();
 	}
 	
     @Override
