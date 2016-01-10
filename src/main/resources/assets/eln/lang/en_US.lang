@@ -2,10 +2,10 @@
 
 # ./src/main/java/mods/eln/Achievements.java
 Electrical_Age_[WIP]=Electrical Age [WIP]
-achievement.Craft_a_50V_Macerator.desc=Craft a 50V Macerator
-achievement.Crushing_Novice.name=Crushing Novice
-achievement.Open_the_wiki_guide.desc=Open the wiki guide
-achievement.Wiki_Power.name=Wiki Power
+achievement.craft_50v_macerator=Crushing Novice
+achievement.craft_50v_macerator.desc=Craft a 50V Macerator
+achievement.open_guide=Wiki Power
+achievement.open_guide.desc=Open the wiki guide
 
 # ./src/main/java/mods/eln/Eln.java
 10A_Diode.name=10A Diode
@@ -243,7 +243,22 @@ Wireless_Switch.name=Wireless Switch
 Wrench.name=Wrench
 X-Ray_Scanner.name=X-Ray Scanner
 Yellow_Brush.name=Yellow Brush
+item.Copper Axe.name=Copper Axe
+item.Copper Boots.name=Copper Boots
+item.Copper Chestplate.name=Copper Chestplate
+item.Copper Helmet.name=Copper Helmet
+item.Copper Hoe.name=Copper Hoe
+item.Copper Leggings.name=Copper Leggings
+item.Copper Pickaxe.name=Copper Pickaxe
+item.Copper Shovel.name=Copper Shovel
+item.Copper Sword.name=Copper Sword
+item.E-Coal Boots.name=E-Coal Boots
+item.E-Coal Chestplate.name=E-Coal Chestplate
+item.E-Coal Helmet.name=E-Coal Helmet
+item.E-Coal Leggings.name=E-Coal Leggings
+itemGroup.Eln=Electrical Age
 mod.meta.desc=Electricity in your base!
+tile.eln.ElnProbe.name=Eln Computer Probe
 
 # ./src/main/java/mods/eln/i18n/I18N.java
 You_have_%1$_lives_left=You have %1$ lives left

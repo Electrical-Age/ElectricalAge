@@ -1,18 +1,16 @@
 package mods.eln.sixnode.electricalsource;
 
-import java.util.Collections;
-import java.util.List;
-
-import com.sun.org.apache.xerces.internal.xs.StringList;
-import mods.eln.misc.UtilsClient;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.Utils;
+import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
+
+import java.util.Collections;
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
