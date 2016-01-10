@@ -584,10 +584,9 @@ public class Eln {
 		registerPortableItem(122);
 
 		// Register WIP items only on development runs!
-		if ((Boolean)Launch.blackboard.get("fml.deobfuscatedEnvironment")) {
+		if (isDevelopmentRun()) {
 			registerWipItems();
 		}
-
 	}
 
 	public static FMLEventChannel eventChannel;
@@ -604,7 +603,6 @@ public class Eln {
 		if (Other.ccLoaded) {
 			PeripheralHandler.register();
 		}
-
 	}
 
 	@EventHandler
@@ -712,7 +710,9 @@ public class Eln {
 
 		checkRecipe();
 
-		Achievements.init();
+		if (isDevelopmentRun()) {
+			Achievements.init();
+		}
 
 		MinecraftForge.EVENT_BUS.register(new ElnForgeEventsHandler());
 		FMLCommonHandler.instance().bus().register((new ElnFMLEventsHandler()));
@@ -6643,5 +6643,9 @@ public class Eln {
 
 	public ItemStack findItemStack(String name) {
 		return findItemStack(name, 1);
+	}
+
+	public boolean isDevelopmentRun() {
+		return (Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 	}
 }
