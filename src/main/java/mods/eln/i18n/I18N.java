@@ -99,41 +99,41 @@ public class I18N {
         /**
          * The text to translate is related to a tile. The "tile." runtimePrefix will be added to the translation key.
          */
-        TILE("tile.", true, false),
+        TILE("tile.", false, false),
 
         /**
          * The text to translate is related to an achievement. The "achievement." runtimePrefix will be added to the
          * translation key.
          */
-        ACHIEVEMENT("achievement.", true, false),
+        ACHIEVEMENT("achievement.", false, false),
 
         /**
          * The text to translate is related to an entity. The "entity." runtimePrefix will be added to the translation key.
          */
-        ENTITY("entity.", true, false),
+        ENTITY("entity.", false, false),
 
         /**
          * The text to translate is related to a death attack. The "death.attack" runtimePrefix will be added to the
          * translation key.
          */
-        DEATH_ATTACK("death.attack.", true, false),
+        DEATH_ATTACK("death.attack.", false, false),
 
         /**
          * The text to translate is related to an item group. The "itemGroup." runtimePrefix will be added to the translation
          * key.
          */
-        ITEM_GROUP("itemGroup.", true, false),
+        ITEM_GROUP("itemGroup.", false, false),
 
         /**
          * The text to translate is related to a container. The "container." runtimePrefix will be added to the translation
          * key.
          */
-        CONTAINER("container.", true, false),
+        CONTAINER("container.", false, false),
 
         /**
          * The text to translate is related to an block. The "block." runtimePrefix will be added to the translation key.
          */
-        BLOCK("block.", true, false),
+        BLOCK("block.", false, false),
 
         SIX_NODE("eln.sixnode.", false, true),
 

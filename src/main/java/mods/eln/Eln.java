@@ -775,20 +775,16 @@ public class Eln {
 	ComputerProbeBlock computerProbeBlock;
 
 	private void registerComputer(){
-		if(ComputerProbeEnable){
-			String baseName = "ElnProbe";
-			String entityName = "eln.ElnProbe";
+		if (ComputerProbeEnable) {
+			String entityName = TR_NAME(Type.TILE, "eln.ElnProbe");
 
 			TileEntity.addMapping(ComputerProbeEntity.class, entityName);
 			NodeManager.instance.registerUuid(ComputerProbeNode.getNodeUuidStatic(), ComputerProbeNode.class);
 
 
-			String blockName = "eln." + baseName;
-			String name = "Eln Computer Probe";
 			computerProbeBlock = new ComputerProbeBlock();
-			computerProbeBlock.setCreativeTab(creativeTab).setBlockName(blockName);
-			GameRegistry.registerBlock(computerProbeBlock,SimpleNodeItem.class, blockName);
-			LanguageRegistry.addName(computerProbeBlock, name);
+			computerProbeBlock.setCreativeTab(creativeTab).setBlockName(entityName);
+			GameRegistry.registerBlock(computerProbeBlock,SimpleNodeItem.class, entityName);
 		}
 
 	}

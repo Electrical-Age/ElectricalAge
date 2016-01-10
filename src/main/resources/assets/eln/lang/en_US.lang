@@ -258,6 +258,7 @@ item.E-Coal Helmet.name=E-Coal Helmet
 item.E-Coal Leggings.name=E-Coal Leggings
 itemGroup.Eln=Electrical Age
 mod.meta.desc=Electricity in your base!
+tile.eln.ElnProbe.name=Eln Computer Probe
 
 # ./src/main/java/mods/eln/i18n/I18N.java
 You_have_%1$_lives_left=You have %1$ lives left
