@@ -124,11 +124,9 @@ public class GroundCableElement extends SixNodeElement {
 				BrushDescriptor brush = (BrushDescriptor) gen;
 				int brushColor = brush.getColor(currentItemStack);
 				if (brushColor != color) {
-					if (brush.use(currentItemStack)) {
+					if (brush.use(currentItemStack,entityPlayer)) {
 						color = brushColor;
 						sixNode.reconnect();
-					} else {
-						Utils.addChatMessage(entityPlayer, "Brush is empty!");
 					}
 				}
 			}

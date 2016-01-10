@@ -1,6 +1,7 @@
 package mods.eln.item;
 
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.misc.Utils;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -66,7 +67,7 @@ public class BrushDescriptor extends GenericItemUsingDamageDescriptor {
 		list.add(tr("Can paint %1$ blocks", itemStack.getTagCompound().getInteger("life")));
 	}
 	
-	public boolean use(ItemStack stack) {
+	public boolean use(ItemStack stack, EntityPlayer entityPlayer) {
 		int life = stack.getTagCompound().getInteger("life");
 		if(life != 0) {
 			if(--life == 0)
@@ -74,6 +75,10 @@ public class BrushDescriptor extends GenericItemUsingDamageDescriptor {
 			stack.getTagCompound().setInteger("life", life);
 			return true;
 		}
+		else
+			Utils.addChatMessage(entityPlayer, tr("Brush is empty"));
 		return false;
 	}
+
+
 }

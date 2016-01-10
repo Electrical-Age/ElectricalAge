@@ -1,5 +1,6 @@
 package mods.eln.sixnode.lampsocket;
 
+import mods.eln.misc.Color;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -95,7 +96,7 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
 			super.renderItem(type, item, data);
 		else {
 			GL11.glScalef(1.25f,1.25f,1.25f);
-			render.draw(this, type);
+			render.draw(this, type, 0.f);
 		}
 	}
 

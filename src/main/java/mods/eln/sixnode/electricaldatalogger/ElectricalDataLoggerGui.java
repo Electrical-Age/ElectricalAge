@@ -210,7 +210,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 				GL11.glEnd();
 				UtilsClient.enableCulling();
 				UtilsClient.enableTexture();
-			
+
 				GL11.glColor4f(render.descriptor.cr, render.descriptor.cg, render.descriptor.cb, 1);
 		        render.log.draw(2.9f, 1.2f, render.descriptor.textColor);
 	        GL11.glPopMatrix();

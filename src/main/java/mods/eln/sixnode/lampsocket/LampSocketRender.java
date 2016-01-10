@@ -47,6 +47,7 @@ public class LampSocketRender extends SixNodeElementRender {
     LampDescriptor lampDescriptor = null;
     float alphaZ;
     byte light, oldLight = -1;
+	int paintColor = 15;
 
     public boolean isConnectedToLampSupply;
 
@@ -71,8 +72,11 @@ public class LampSocketRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw(); //Colored cable only
-		GL11.glRotatef(descriptor.initialRotateDeg,1.f,0.f,0.f);
-		descriptor.render.draw(this);
+
+		GL11.glRotatef(descriptor.initialRotateDeg, 1.f, 0.f, 0.f);
+		if(descriptor.paintable)
+			Utils.setGlColorFromDye(paintColor,2.f);
+		descriptor.render.draw(this, UtilsClient.distanceFromClientPlayer(this.tileEntity));
 	}
 
 	@Override
@@ -157,6 +161,7 @@ public class LampSocketRender extends SixNodeElementRender {
 			isConnectedToLampSupply = stream.readBoolean();
 
 			setLight(stream.readByte());
+			paintColor = stream.readByte();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

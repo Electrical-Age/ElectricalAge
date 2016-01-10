@@ -36,7 +36,7 @@ public class ElectricalCableRender extends SixNodeElementRender {
 	public void draw() {
 		Minecraft.getMinecraft().mcProfiler.startSection("ECable");
 		
-		Utils.setGlColorFromDye(color);
+		Utils.setGlColorFromDye(color,1.0f);
 
 		UtilsClient.bindTexture(descriptor.render.cableTexture);
 		glListCall();

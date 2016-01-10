@@ -389,30 +389,33 @@ public class Utils {
 	// ItemDye.dyeColors[stack.getItemDamage()];
 	// }
 
-	public static void setGlColorFromDye(int damage) {
+	public static void setGlColorFromDye(int damage){
+		setGlColorFromDye(damage,1.0f);
+	}
+
+	public static void setGlColorFromDye(int damage, float gain) {
 		int color = ItemDye.field_150922_c[damage]; // dyeColors
-		float gain = 1.0f;
 		switch (damage) {
 			default:
-				GL11.glColor3f(0.0f * gain, 0.0f * gain, 0.0f * gain);
+				GL11.glColor3f(0.05f * gain, 0.05f * gain, 0.05f * gain);
 				break;
 			case 0:
 				GL11.glColor3f(0.2f * gain, 0.2f * gain, 0.2f * gain);
 				break; // black
 			case 1:
-				GL11.glColor3f(1.0f * gain, 0.0f * gain, 0.0f * gain);
+				GL11.glColor3f(1.0f * gain, 0.05f * gain, 0.05f * gain);
 				break; // red
 			case 2:
 				GL11.glColor3f(0.2f * gain, 0.5f * gain, 0.1f * gain);
 				break; // green
 			case 3:
 				GL11.glColor3f(0.3f * gain, 0.2f * gain, 0.1f * gain);
-				break; // braoun
+				break; // brown
 			case 4:
 				GL11.glColor3f(0.2f * gain, 0.2f * gain, 1.0f * gain);
 				break; // blue
 			case 5:
-				GL11.glColor3f(0.7f * gain, 0.2f * gain, 1.0f * gain);
+				GL11.glColor3f(0.7f * gain, 0.05f * gain, 1.0f * gain);
 				break; // purple
 			case 6:
 				GL11.glColor3f(0.2f * gain, 0.7f * gain, 0.9f * gain);
@@ -427,7 +430,7 @@ public class Utils {
 				GL11.glColor3f(1.0f * gain, 0.5f * gain, 0.5f * gain);
 				break;
 			case 10:
-				GL11.glColor3f(0.0f * gain, 1.0f * gain, 0.0f * gain);
+				GL11.glColor3f(0.05f * gain, 1.0f * gain, 0.05f * gain);
 				break;
 			case 11:
 				GL11.glColor3f(0.9f * gain, 0.8f * gain, 0.1f * gain);

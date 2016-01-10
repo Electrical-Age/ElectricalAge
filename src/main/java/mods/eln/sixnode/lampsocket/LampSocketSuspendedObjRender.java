@@ -34,7 +34,7 @@ public class LampSocketSuspendedObjRender implements LampSocketObjRender {
 	}
 
 	@Override
-	public void draw(LampSocketDescriptor descriptor, ItemRenderType type) {
+	public void draw(LampSocketDescriptor descriptor, ItemRenderType type, double distanceToPlayer) {
 		if (type == ItemRenderType.INVENTORY) {
 			GL11.glScalef(0.5f, 0.5f, 0.5f);
 			GL11.glRotatef(90, 0, 1, 0);
@@ -48,7 +48,7 @@ public class LampSocketSuspendedObjRender implements LampSocketObjRender {
 	}
 
 	@Override
-	public void draw(LampSocketRender render) {
+	public void draw(LampSocketRender render, double distanceToPlayer) {
 		draw(render.front, render.alphaZ, render.light, render.pertuPy, render.pertuPz);
 	}
 

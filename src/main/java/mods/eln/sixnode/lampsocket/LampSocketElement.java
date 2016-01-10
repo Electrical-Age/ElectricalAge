@@ -1,6 +1,8 @@
 package mods.eln.sixnode.lampsocket;
 
 import mods.eln.Eln;
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.item.BrushDescriptor;
 import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -54,6 +56,8 @@ public class LampSocketElement extends SixNodeElement {
 
     boolean isConnectedToLampSupply = false;
 
+	public int paintColor = 15;
+
     public LampSocketElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		this.socketDescriptor = (LampSocketDescriptor) descriptor;
@@ -62,6 +66,7 @@ public class LampSocketElement extends SixNodeElement {
 		slowProcessList.add(lampProcess);
 		slowProcessList.add(monsterPopFreeProcess);
 	}
+
 
 	@Override
 	public IInventory getInventory() {
@@ -77,6 +82,9 @@ public class LampSocketElement extends SixNodeElement {
 
 		setPoweredByLampSupply(nbt.getBoolean("poweredByLampSupply"));
 		channel = nbt.getString("channel");
+
+		byte b = nbt.getByte("color");
+		paintColor = b & 0xF;
 	}
 
 	@Override
@@ -85,6 +93,8 @@ public class LampSocketElement extends SixNodeElement {
 		nbt.setByte("front", (byte) ((front.toInt() << 0) + (grounded ? 4 : 0)));
 		nbt.setBoolean("poweredByLampSupply", poweredByLampSupply);
 		nbt.setString("channel", channel);
+
+		nbt.setByte("color", (byte) (paintColor));
 	}
 
 	public void networkUnserialize(DataInputStream stream) {
@@ -205,6 +215,7 @@ public class LampSocketElement extends SixNodeElement {
 			stream.writeUTF(channel);
 			stream.writeBoolean(isConnectedToLampSupply);
 			stream.writeByte(lampProcess.light);
+			stream.writeByte(paintColor);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -251,7 +262,22 @@ public class LampSocketElement extends SixNodeElement {
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 		if (currentItemStack != null) {
 			Item item = currentItemStack.getItem();
+
+			GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);
+			if (gen != null && gen instanceof BrushDescriptor) {
+				BrushDescriptor brush = (BrushDescriptor) gen;
+				int brushColor = brush.getColor(currentItemStack);
+				if (brushColor != paintColor) {
+					if (brush.use(currentItemStack,entityPlayer)) {
+						paintColor = brushColor;
+						needPublish(); //Sync
+					}
+				}
+			}
+
+			return true;
 		}
+
 		return false;
 	}
 
