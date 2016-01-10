@@ -14,9 +14,15 @@ public class I18N {
     }
 
     public static String encodeLangKey(final String key) {
+        return encodeLangKey(key, true);
+    }
+
+    public static String encodeLangKey(String key, boolean replaceWhitspaces) {
         if (key != null) {
-            return key.replace(' ', '_')
-                .replace("=", "\\=")
+            if (replaceWhitspaces) {
+                key = key.replace(' ', '_');
+            }
+            return key.replace("=", "\\=")
                 .replace(":", "\\:")
                 .replace("\n", "\\n")
                 .replace("/", "_");
@@ -83,62 +89,64 @@ public class I18N {
          * The text to translate is not related to a particular translatable type, so basically only the ".name" suffix
          * is added to the translation key.
          */
-        NONE("", false),
+        NONE("", false, true),
 
         /**
          * The text to translate is related to an item. The "item." runtimePrefix will be added to the translation key.
          */
-        ITEM("item.", true),
+        ITEM("item.", false, false),
 
         /**
          * The text to translate is related to a tile. The "tile." runtimePrefix will be added to the translation key.
          */
-        TILE("tile.", true),
+        TILE("tile.", true, false),
 
         /**
          * The text to translate is related to an achievement. The "achievement." runtimePrefix will be added to the
          * translation key.
          */
-        ACHIEVEMENT("achievement.", true),
+        ACHIEVEMENT("achievement.", true, false),
 
         /**
          * The text to translate is related to an entity. The "entity." runtimePrefix will be added to the translation key.
          */
-        ENTITY("entity.", true),
+        ENTITY("entity.", true, false),
 
         /**
          * The text to translate is related to a death attack. The "death.attack" runtimePrefix will be added to the
          * translation key.
          */
-        DEATH_ATTACK("death.attack.", true),
+        DEATH_ATTACK("death.attack.", true, false),
 
         /**
          * The text to translate is related to an item group. The "itemGroup." runtimePrefix will be added to the translation
          * key.
          */
-        ITEM_GROUP("itemGroup.", true),
+        ITEM_GROUP("itemGroup.", true, false),
 
         /**
          * The text to translate is related to a container. The "container." runtimePrefix will be added to the translation
          * key.
          */
-        CONTAINER("container.", true),
+        CONTAINER("container.", true, false),
 
         /**
          * The text to translate is related to an block. The "block." runtimePrefix will be added to the translation key.
          */
-        BLOCK("block.", true),
+        BLOCK("block.", true, false),
 
-        SIX_NODE("eln.sixnode.", false),
+        SIX_NODE("eln.sixnode.", false, true),
 
-        NODE("eln.node.", false);
+        NODE("eln.node.", false, true);
 
         private final String prefix;
         private final boolean encodeAtRuntime;
+        private final boolean replaceWhitespacesInFile;
 
-        Type(final String prefix, boolean encodeAtRuntime) {
+        Type(final String prefix, boolean encodeAtRuntime, boolean replaceWhitespacesInFile) {
             this.prefix = prefix;
             this.encodeAtRuntime = encodeAtRuntime;
+            this.replaceWhitespacesInFile = replaceWhitespacesInFile;
         }
 
         /**
@@ -152,6 +160,10 @@ public class I18N {
 
         public boolean isEncodedAtRuntime() {
             return encodeAtRuntime;
+        }
+
+        public boolean isWhitespacesInFileReplaced() {
+            return replaceWhitespacesInFile;
         }
     };
 
