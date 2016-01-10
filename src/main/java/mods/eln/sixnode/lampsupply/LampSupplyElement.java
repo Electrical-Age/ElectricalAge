@@ -16,6 +16,13 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
+import mods.eln.sixnode.wirelesssignal.IWirelessSignalTx;
+import mods.eln.sixnode.wirelesssignal.WirelessUtils;
+import mods.eln.sixnode.wirelesssignal.aggregator.BiggerAggregator;
+import mods.eln.sixnode.wirelesssignal.aggregator.IWirelessSignalAggregator;
+import mods.eln.sixnode.wirelesssignal.aggregator.SmallerAggregator;
+import mods.eln.sixnode.wirelesssignal.aggregator.ToogleAggregator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
@@ -28,28 +35,52 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 
 public class LampSupplyElement extends SixNodeElement {
 
-	public static HashMap<String, ArrayList<LampSupplyElement>> channelMap = new HashMap<String, ArrayList<LampSupplyElement>>();
+    public static class PowerSupplyChannelHandle{
+        PowerSupplyChannelHandle(LampSupplyElement element,int id){
+            this.element = element;
+            this.id = id;
+        }
+        public LampSupplyElement element;
+        public int id;
+    }
 
-	//NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");
+	public static HashMap<String, ArrayList<PowerSupplyChannelHandle>> channelMap = new HashMap<String, ArrayList<PowerSupplyChannelHandle>>();
+
 	public LampSupplyDescriptor descriptor;
 
 	public NbtElectricalLoad powerLoad = new NbtElectricalLoad("powerLoad");
-	public Resistor loadResistor = new Resistor(powerLoad, null);
+	public Resistor loadResistor;
 	public IProcess lampSupplySlowProcess = new LampSupplySlowProcess();
 
 	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
-    public String channel = "Default channel";
+
+    static class Entry{
+        Entry(String powerChannel,String wirelessChannel,int aggregator){
+            this.powerChannel = powerChannel;
+            this.wirelessChannel = wirelessChannel;
+            this.aggregator = aggregator;
+        }
+        public String powerChannel;
+        public String wirelessChannel;
+        public int aggregator;
+    }
+    public ArrayList<Entry> entries = new ArrayList<Entry>();
 
     VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
 
-    public static final byte setChannelId = 1;
-
+    public static final byte setPowerName = 1;
+    public static final byte setWirelessName = 2;
+    public static final byte setSelectedAggregator = 3;
     double RpStack = 0;
 
+    boolean[] channelStates;
+    IWirelessSignalAggregator[][] aggregators;
     @Override
 	public IInventory getInventory() {
 		return inventory;
@@ -62,43 +93,96 @@ public class LampSupplyElement extends SixNodeElement {
 
 	public LampSupplyElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
+        this.descriptor = (LampSupplyDescriptor) descriptor;
+        loadResistor = new Resistor(powerLoad, null);
+        electricalComponentList.add(loadResistor);
+        loadResistor.highImpedance();
+
+
 		electricalLoadList.add(powerLoad);
-		electricalComponentList.add(loadResistor);
 		slowProcessList.add(lampSupplySlowProcess);
-		loadResistor.highImpedance();
 		front = LRDU.Down;
-		this.descriptor = (LampSupplyDescriptor) descriptor;
-		
+
+
 		slowProcessList.add(voltageWatchdog);
 		voltageWatchdog
 		 .set(powerLoad)
 		 .set(new WorldExplosion(this).cableExplosion());
-		
-		channelRegister(this);
+        channelStates = new boolean[this.descriptor.channelCount];
+        aggregators = new IWirelessSignalAggregator[this.descriptor.channelCount][3];
+        for(int idx = 0;idx < this.descriptor.channelCount;idx++){
+            channelStates[idx] = false;
+            entries.add(new Entry("","",2));
+
+            aggregators[idx][0] = new BiggerAggregator();
+            aggregators[idx][1] = new SmallerAggregator();
+            aggregators[idx][2] = new ToogleAggregator();
+        }
 	}
 
 	class LampSupplySlowProcess implements IProcess {
+        double sleepTimer = 0;
+
+        HashMap<String, HashSet<IWirelessSignalTx>> txSet = new HashMap<String, HashSet<IWirelessSignalTx>>();
+        HashMap<IWirelessSignalTx, Double> txStrength = new HashMap<IWirelessSignalTx, Double>();
 
 		@Override
 		public void process(double time) {
-			loadResistor.setR(1 / RpStack);
-			RpStack = 0;
+            loadResistor.setR(1 / RpStack);
+            RpStack = 0;
+
+
+
+
+            sleepTimer -= time;
+
+            if (sleepTimer < 0) {
+                sleepTimer += Utils.rand(1.2, 2);
+
+                IWirelessSignalSpot spot = WirelessUtils.buildSpot(LampSupplyElement.this.getCoordonate(), null, 0);
+                WirelessUtils.getTx(spot, txSet, txStrength);
+            }
+
+
+            for(int idx = 0;idx < LampSupplyElement.this.descriptor.channelCount;idx++){
+                Entry e = entries.get(idx);
+                if(e.wirelessChannel.equals("")){
+                    channelStates[idx] = true;
+                }else if(e.wirelessChannel.toLowerCase().equals("true")){
+                    channelStates[idx] = true;
+                }else if(e.wirelessChannel.toLowerCase().equals("false")){
+                    channelStates[idx] = false;
+                }else{
+                    HashSet<IWirelessSignalTx> txs = txSet.get(e.wirelessChannel);
+                    if (txs == null) {
+                        channelStates[idx] = false;
+                    } else {
+                        channelStates[idx]  = LampSupplyElement.this.aggregators[idx][e.aggregator].aggregate(txs) >= 0.5;
+                    }
+                }
+            }
+
 		}
 	}
 
-	static void channelRegister(LampSupplyElement tx) {
-		String channel = tx.channel;
-		ArrayList<LampSupplyElement> list = channelMap.get(channel);
+	static void channelRegister(LampSupplyElement tx,int id,String channel) {
+        if(channel.equals("")) return;
+		ArrayList<PowerSupplyChannelHandle> list = channelMap.get(channel);
 		if (list == null)
-			channelMap.put(channel, list = new ArrayList<LampSupplyElement>());
-		list.add(tx);
+			channelMap.put(channel, list = new ArrayList<PowerSupplyChannelHandle>());
+		list.add(new PowerSupplyChannelHandle(tx,id));
 	}
 
-	static void channelRemove(LampSupplyElement tx) {
-		String channel = tx.channel;
-		ArrayList<LampSupplyElement> list = channelMap.get(channel);
+	static void channelRemove(LampSupplyElement tx,int id,String channel) {
+        if(channel.equals("")) return;
+		ArrayList<PowerSupplyChannelHandle> list = channelMap.get(channel);
 		if (list == null) return;
-		list.remove(tx);
+        Iterator<PowerSupplyChannelHandle> i = list.iterator();
+        while (i.hasNext()) {
+            PowerSupplyChannelHandle e = i.next(); // must be called before you can call i.remove()
+            // Do something
+            if(e.element == tx && e.id == id)i.remove();
+        }
 		if (list.size() == 0)
 			channelMap.remove(channel);
 	}
@@ -167,27 +251,59 @@ public class LampSupplyElement extends SixNodeElement {
 	@Override
 	public void unload() {
 		super.unload();
-		channelRemove(this);
+        unregister();
 	}
 	
 	void unregister() {
-		channelRemove(this);	
+        int idx = 0;
+        for(Entry e : entries)
+            channelRemove(this,idx++,e.powerChannel);
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
-		nbt.setString("channel", channel);
+        int idx = 0;
+        for(Entry e : entries){
+            nbt.setString("entry_p"+idx,e.powerChannel);
+            nbt.setString("entry_w"+idx,e.wirelessChannel);
+            nbt.setBoolean("channelStates" + idx,channelStates[idx]);
+
+            nbt.setInteger("selectedAggregator"+idx,e.aggregator);
+            ((ToogleAggregator)aggregators[idx][2]).writeToNBT(nbt, "toogleAggregator" + idx);
+
+            idx++;
+        }
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
-		channelRemove(this);
+        int idx = 0;
+        for(Entry e : entries){
+            channelRemove(this,idx++,e.powerChannel);
+        }
 
 		super.readFromNBT(nbt);
-		channel = nbt.getString("channel");
+        if(nbt.hasKey("channel")){
+            entries.get(0).powerChannel = nbt.getString("channel");
 
-		channelRegister(this);
+        }else{
+            idx = 0;
+            while(nbt.hasKey("entry_p"+idx)){
+                entries.set(idx, new Entry(nbt.getString("entry_p" + idx), nbt.getString("entry_w" + idx),nbt.getInteger("selectedAggregator"+idx)));
+                channelStates[idx] = nbt.getBoolean("channelStates" + idx);
+
+                ((ToogleAggregator)aggregators[idx][2]).readFromNBT(nbt, "toogleAggregator" + idx);
+
+                idx++;
+            }
+        }
+
+        idx = 0;
+        for(Entry e : entries){
+            channelRegister(this,idx++,e.powerChannel);
+        }
+
 	}
 
 	void setupFromInventory() {
@@ -208,11 +324,27 @@ public class LampSupplyElement extends SixNodeElement {
 
 		try {
 			switch (stream.readByte()) {
-                case setChannelId:
-                    channelRemove(this);
-                    channel = stream.readUTF();
+                case setPowerName: {
+                    int id = stream.readByte();
+                    String newName = stream.readUTF();
+                    channelRemove(this,id,entries.get(id).powerChannel);
+                    entries.get(id).powerChannel = newName;
                     needPublish();
-                    channelRegister(this);
+                    channelRegister(this,id,newName);
+                    break;
+                }
+                case setWirelessName: {
+                    int id = stream.readByte();
+                    String newName = stream.readUTF();
+                    channelRemove(this,id,entries.get(id).wirelessChannel);
+                    entries.get(id).wirelessChannel = newName;
+                    needPublish();
+                    channelRegister(this,id,newName);
+                    break;
+                }
+                case setSelectedAggregator:
+                    entries.get(stream.readByte()).aggregator = stream.readByte();
+                    needPublish();
                     break;
 			}
 		} catch (IOException e) {
@@ -229,7 +361,12 @@ public class LampSupplyElement extends SixNodeElement {
 	public void networkSerialize(DataOutputStream stream) {
 		super.networkSerialize(stream);
 		try {
-			stream.writeUTF(channel);
+            for(Entry e : entries){
+                stream.writeUTF(e.powerChannel);
+                stream.writeUTF(e.wirelessChannel);
+                stream.writeChar(e.aggregator);
+            }
+
 			Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSupplyContainer.cableSlotId));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -239,7 +376,11 @@ public class LampSupplyElement extends SixNodeElement {
 	public void addToRp(double r) {
 		RpStack += 1 / r;
 	}
-	
+
+    public boolean getChannelState(int channel){
+        return channelStates[channel];
+    }
+
 	public int getRange() {
 		return getRange(descriptor, inventory);
 	}

@@ -100,30 +100,31 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 			oldLampSupply = null;
 		} else {
 			Coordonate myCoord = lamp.sixNode.coordonate;
-			LampSupplyElement best = null;
+            LampSupplyElement.PowerSupplyChannelHandle best = null;
 			float bestDistance = 10000;
-			ArrayList<LampSupplyElement> list = LampSupplyElement.channelMap.get(lamp.channel);
+			ArrayList<LampSupplyElement.PowerSupplyChannelHandle> list = LampSupplyElement.channelMap.get(lamp.channel);
 			if (list != null) {
-				for (LampSupplyElement s : list) {
-					float distance = (float) s.sixNode.coordonate.trueDistanceTo(myCoord);
-					if (distance < bestDistance && distance <= s.getRange()) {
+				for (LampSupplyElement.PowerSupplyChannelHandle s : list) {
+					float distance = (float) s.element.sixNode.coordonate.trueDistanceTo(myCoord);
+					if (distance < bestDistance && distance <= s.element.getRange()) {
 						bestDistance = distance;
 						best = s;
 					}
 				}
 			}
-			if (best != null) {
+			if (best != null && best.element.getChannelState(best.id)) {
 				if (lampStack != null) {
 					LampDescriptor lampDescriptor = (LampDescriptor) ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) lampStack.getItem()).getDescriptor(lampStack);
-					best.addToRp(lampDescriptor.getR());
+                    best.element.addToRp(lampDescriptor.getR());
 				}
-				lamp.positiveLoad.state = best.powerLoad.state;
+				lamp.positiveLoad.state = best.element.powerLoad.state;
+                oldLampSupply = best.element;
 			} else {
 				lamp.positiveLoad.state = 0;
+                oldLampSupply = null;
 			}
 
 			lamp.setIsConnectedToLampSupply(best != null);
-			oldLampSupply = best;
 		}
 
 		if (lampStack != null) {

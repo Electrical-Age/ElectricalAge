@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class LampSupplyRender extends SixNodeElementRender {
 
@@ -21,7 +22,8 @@ public class LampSupplyRender extends SixNodeElementRender {
     Coordonate coord;
     PhysicalInterpolator interpolator;
 
-    String channel;
+    public ArrayList<LampSupplyElement.Entry> entries = new ArrayList<LampSupplyElement.Entry>();
+
 
     CableRenderDescriptor cableRender;
 
@@ -32,6 +34,9 @@ public class LampSupplyRender extends SixNodeElementRender {
 		this.descriptor = (LampSupplyDescriptor) descriptor;
 		interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
 		coord = new Coordonate(tileEntity);
+        for(int i = 0;i < ((LampSupplyDescriptor) descriptor).channelCount;i++){
+            entries.add(new LampSupplyElement.Entry("","",2));
+        }
 	}
 
 	@Override
@@ -68,7 +73,11 @@ public class LampSupplyRender extends SixNodeElementRender {
 	public void publishUnserialize(DataInputStream stream) {
 		super.publishUnserialize(stream);
 		try {
-			channel = stream.readUTF();
+            for(LampSupplyElement.Entry e : entries){
+                e.powerChannel = stream.readUTF();
+                e.wirelessChannel = stream.readUTF();
+                e.aggregator = stream.readChar();
+            }
 
 			ItemStack cableStack = Utils.unserialiseItemStack(stream);
 			if (cableStack != null) {

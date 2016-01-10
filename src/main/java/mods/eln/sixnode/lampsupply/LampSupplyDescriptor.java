@@ -22,11 +22,13 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
 	Obj3DPart base;
 	private Obj3DPart window;
 	private float windowOpenAngle;
-
+    public boolean isWireless;
     public int range;
+    public int channelCount = 3;
 
     public LampSupplyDescriptor(String name, Obj3D obj, int range) {
 		super(name, LampSupplyElement.class, LampSupplyRender.class);
+        this.isWireless = isWireless;
 		this.range = range;
 		this.obj = obj;
 		if (obj != null) {
