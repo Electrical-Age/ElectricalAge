@@ -18,6 +18,7 @@ import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.EnumSkyBlock;
+import org.lwjgl.opengl.GL11;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -69,8 +70,8 @@ public class LampSocketRender extends SixNodeElementRender {
 
 	@Override
 	public void draw() {
-		super.draw();
-
+		super.draw(); //Colored cable only
+		GL11.glRotatef(descriptor.initialRotateDeg,1.f,0.f,0.f);
 		descriptor.render.draw(this);
 	}
 

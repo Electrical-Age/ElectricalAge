@@ -242,6 +242,8 @@ public class LampSocketElement extends SixNodeElement {
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
 		if (Utils.isPlayerUsingWrench(entityPlayer)) {
 			front = front.getNextClockwise();
+			if(socketDescriptor.rotateOnlyBy180Deg)
+				front = front.getNextClockwise();
 			reconnect();
 			return true;
 		}

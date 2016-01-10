@@ -4,6 +4,7 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -26,18 +27,33 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
     public boolean cableRight = true;
     public boolean cableBack = true;
 
+	public float initialRotateDeg = 0.f;
+	public boolean rotateOnlyBy180Deg = false;
+
+	public boolean paintable = false;
+
 	public LampSocketDescriptor(String name, LampSocketObjRender render,
 								LampSocketType socketType,
+								boolean paintable,
 								int range,
 								float alphaZMin, float alphaZMax,
 								float alphaZBoot) {
 		super(name, LampSocketElement.class, LampSocketRender.class);
 		this.socketType = socketType;
+		this.paintable = paintable;
 		this.range = range;
 		this.alphaZMin = alphaZMin;
 		this.alphaZMax = alphaZMax;
 		this.alphaZBoot = alphaZBoot;
 		this.render = render;
+	}
+
+	public void setInitialOrientation(float rotateDeg){
+		this.initialRotateDeg = rotateDeg;
+	}
+
+	public void setUserRotationLibertyDegrees(boolean only180){
+		this.rotateOnlyBy180Deg = only180;
 	}
 
 	public void useIcon(boolean enable) {
@@ -77,8 +93,10 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if (useIconEnable)
 			super.renderItem(type, item, data);
-		else
+		else {
+			GL11.glScalef(1.25f,1.25f,1.25f);
 			render.draw(this, type);
+		}
 	}
 
 	@Override
