@@ -40,8 +40,8 @@ public class WirelessSignalRxElement extends SixNodeElement {
 
     public static final byte setChannelId = 1;
     public static final byte setSelectedAggregator = 2;
-
     IWirelessSignalAggregator[] aggregators;
+
     int selectedAggregator = 0;
 
     public WirelessSignalRxElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {

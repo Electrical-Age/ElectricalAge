@@ -4,12 +4,12 @@
 .settings
 .metadata
 bin
-build
+/build
 eclipse
-run
-logs
-config
-saves
+/run
+/logs
+/config
+/saves
 *.json
 options.txt
 

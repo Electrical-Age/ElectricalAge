@@ -1,0 +1,9 @@
+[main]
+host = http://www.transifex.com
+
+[eln.en_uslang]
+file_filter = src/main/resources/assets/eln/lang/<lang>.lang
+source_file = src/main/resources/assets/eln/lang/<lang>.lang
+source_lang = en_US
+type = UNICODEPROPERTIES
+

@@ -14,7 +14,7 @@ public class LampSupplyContainer extends BasicContainer {
 	
 	public LampSupplyContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory, new Slot[]{
-				new SixNodeItemSlot(inventory, cableSlotId, 151, 6, 64, new Class[]{ElectricalCableDescriptor.class}, SlotSkin.medium, new String[]{"Electrical Cable slot", "Base range is 32 blocks.", "Each additional cable", "increases range by one."})
+				new SixNodeItemSlot(inventory, cableSlotId, 184, 144, 64, new Class[]{ElectricalCableDescriptor.class}, SlotSkin.medium, new String[]{"Electrical Cable slot", "Base range is 32 blocks.", "Each additional cable", "increases range by one."})
 			});
 	}
 }
