@@ -2,10 +2,10 @@
 
 # ./src/main/java/mods/eln/Achievements.java
 Electrical_Age_[WIP]=Electrical Age [WIP]
-achievement.Craft a 50V Macerator.desc=Craft a 50V Macerator
-achievement.Crushing Novice.name=Crushing Novice
-achievement.Open the wiki guide.desc=Open the wiki guide
-achievement.Wiki Power.name=Wiki Power
+achievement.craft_50v_macerator=Crushing Novice
+achievement.craft_50v_macerator.desc=Craft a 50V Macerator
+achievement.open_guide=Wiki Power
+achievement.open_guide.desc=Open the wiki guide
 
 # ./src/main/java/mods/eln/Eln.java
 10A_Diode.name=10A Diode

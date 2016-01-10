@@ -105,7 +105,7 @@ public class I18N {
          * The text to translate is related to an achievement. The "achievement." runtimePrefix will be added to the
          * translation key.
          */
-        ACHIEVEMENT("achievement.", false, false),
+        ACHIEVEMENT("achievement.", true, true),
 
         /**
          * The text to translate is related to an entity. The "entity." runtimePrefix will be added to the translation key.
