@@ -166,49 +166,49 @@ public enum Direction {
 		return (dir % 2) * 2 - 1;
 	}
 
-	public void renderBlockFace(int x, int y, float spritDim) {
+	public void renderBlockFace(int x, int y, float spriteDim) {
 		switch(this) {
 			case XN:
 				GL11.glNormal3f(-1.0f, 0.0f, 0.0f);
-				GL11.glTexCoord2f((x + 1) * spritDim, (y + 0) * spritDim); GL11.glVertex3f(-0.5F, 0.5F, 0.5f);
-				GL11.glTexCoord2f((x + 0) * spritDim, (y + 0) * spritDim); GL11.glVertex3f(-0.5F, 0.5F, -0.5f);
-				GL11.glTexCoord2f((x + 0) * spritDim, (y + 1) * spritDim); GL11.glVertex3f(-0.5F, -0.5F, -0.5f);
-				GL11.glTexCoord2f((x + 1) * spritDim, (y + 1) * spritDim); GL11.glVertex3f(-0.5F, -0.5F, 0.5f);
+				GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim); GL11.glVertex3f(-0.5F, 0.5F, 0.5f);
+				GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim); GL11.glVertex3f(-0.5F, 0.5F, -0.5f);
+				GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim); GL11.glVertex3f(-0.5F, -0.5F, -0.5f);
+				GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim); GL11.glVertex3f(-0.5F, -0.5F, 0.5f);
 				break;
 			case XP:
 				GL11.glNormal3f(1.0f, 0.0f, 0.0f);
-				GL11.glTexCoord2f((x + 1) * spritDim, (y + 0) * spritDim); GL11.glVertex3f(0.5F, 0.5F, -0.5f);
-				GL11.glTexCoord2f((x + 0) * spritDim, (y + 0) * spritDim); GL11.glVertex3f(0.5F, 0.5F, 0.5f);
-				GL11.glTexCoord2f((x + 0) * spritDim, (y + 1) * spritDim); GL11.glVertex3f(0.5F, -0.5F, 0.5f);
-				GL11.glTexCoord2f((x + 1) * spritDim, (y + 1) * spritDim); GL11.glVertex3f(0.5F, -0.5F, -0.5f);
+				GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim); GL11.glVertex3f(0.5F, 0.5F, -0.5f);
+				GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim); GL11.glVertex3f(0.5F, 0.5F, 0.5f);
+				GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim); GL11.glVertex3f(0.5F, -0.5F, 0.5f);
+				GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim); GL11.glVertex3f(0.5F, -0.5F, -0.5f);
 				break;
 			case YN:
 				GL11.glNormal3f(0.0f, -1.0f, 0.0f);
-				GL11.glTexCoord2f((x + 0) * spritDim, (y + 0) * spritDim); GL11.glVertex3f(0.5F, -0.5f, -0.5F);
-				GL11.glTexCoord2f((x + 0) * spritDim, (y + 1) * spritDim); GL11.glVertex3f(0.5F, -0.5f, 0.5F);
-				GL11.glTexCoord2f((x + 1) * spritDim, (y + 1) * spritDim); GL11.glVertex3f(-0.5F, -0.5f, 0.5F);
-				GL11.glTexCoord2f((x + 1) * spritDim, (y + 0) * spritDim); GL11.glVertex3f(-0.5F, -0.5f, -0.5F);
+				GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim); GL11.glVertex3f(0.5F, -0.5f, -0.5F);
+				GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim); GL11.glVertex3f(0.5F, -0.5f, 0.5F);
+				GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim); GL11.glVertex3f(-0.5F, -0.5f, 0.5F);
+				GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim); GL11.glVertex3f(-0.5F, -0.5f, -0.5F);
 				break;
 			case YP:
 				GL11.glNormal3f(0.0f, 1.0f, 0.0f);
-				GL11.glTexCoord2f((x + 0) * spritDim, (y + 1) * spritDim); GL11.glVertex3f(-0.5F, 0.5f, -0.5F);
-				GL11.glTexCoord2f((x + 0) * spritDim, (y + 0) * spritDim); GL11.glVertex3f(-0.5F, 0.5f, 0.5F);
-				GL11.glTexCoord2f((x + 1) * spritDim, (y + 0) * spritDim); GL11.glVertex3f(0.5F, 0.5f, 0.5F);
-				GL11.glTexCoord2f((x + 1) * spritDim, (y + 1) * spritDim); GL11.glVertex3f(0.5F, 0.5f, -0.5F);
+				GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim); GL11.glVertex3f(-0.5F, 0.5f, -0.5F);
+				GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim); GL11.glVertex3f(-0.5F, 0.5f, 0.5F);
+				GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim); GL11.glVertex3f(0.5F, 0.5f, 0.5F);
+				GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim); GL11.glVertex3f(0.5F, 0.5f, -0.5F);
 				break;
 			case ZN:
 				GL11.glNormal3f(0.0f, 0.0f, -1.0f);
-				GL11.glTexCoord2f((x + 1) * spritDim, (y + 0) * spritDim); GL11.glVertex3f(-0.5F, 0.5F, -0.5f);
-				GL11.glTexCoord2f((x + 0) * spritDim, (y + 0) * spritDim); GL11.glVertex3f(0.5F, 0.5F, -0.5f);
-				GL11.glTexCoord2f((x + 0) * spritDim, (y + 1) * spritDim); GL11.glVertex3f(0.5F, -0.5F, -0.5f);
-				GL11.glTexCoord2f((x + 1) * spritDim, (y + 1) * spritDim); GL11.glVertex3f(-0.5F, -0.5F, -0.5f);
+				GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim); GL11.glVertex3f(-0.5F, 0.5F, -0.5f);
+				GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim); GL11.glVertex3f(0.5F, 0.5F, -0.5f);
+				GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim); GL11.glVertex3f(0.5F, -0.5F, -0.5f);
+				GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim); GL11.glVertex3f(-0.5F, -0.5F, -0.5f);
 				break;
 			case ZP:
 				GL11.glNormal3f(0.0f, 0.0f, 1.0f);
-				GL11.glTexCoord2f((x + 1) * spritDim, (y + 0) * spritDim); GL11.glVertex3f(0.5F, 0.5F, 0.5f);
-				GL11.glTexCoord2f((x + 0) * spritDim, (y + 0) * spritDim); GL11.glVertex3f(-0.5F, 0.5F, 0.5f);
-				GL11.glTexCoord2f((x + 0) * spritDim, (y + 1) * spritDim); GL11.glVertex3f(-0.5F, -0.5F, 0.5f);
-				GL11.glTexCoord2f((x + 1) * spritDim, (y + 1) * spritDim); GL11.glVertex3f(0.5F, -0.5F, 0.5f);
+				GL11.glTexCoord2f((x + 1) * spriteDim, (y + 0) * spriteDim); GL11.glVertex3f(0.5F, 0.5F, 0.5f);
+				GL11.glTexCoord2f((x + 0) * spriteDim, (y + 0) * spriteDim); GL11.glVertex3f(-0.5F, 0.5F, 0.5f);
+				GL11.glTexCoord2f((x + 0) * spriteDim, (y + 1) * spriteDim); GL11.glVertex3f(-0.5F, -0.5F, 0.5f);
+				GL11.glTexCoord2f((x + 1) * spriteDim, (y + 1) * spriteDim); GL11.glVertex3f(0.5F, -0.5F, 0.5f);
 				break;
 			default:
 				break;

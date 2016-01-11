@@ -1495,6 +1495,7 @@ public class Eln {
 					LampSocketType.Douille, // LampSocketType
 					false,
 					3, 0, 0, 0);
+			desc.setInitialOrientation(-90.f);
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 		{

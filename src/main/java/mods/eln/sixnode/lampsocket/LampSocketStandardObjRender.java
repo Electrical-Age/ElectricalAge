@@ -24,7 +24,7 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 			socket_unlightable = obj.getPart("socket_unlightable");
 			socket_lightable = obj.getPart("socket_lightable");
 			lightAlphaPlane = obj.getPart("lightAlpha");
-			lightAlphaPlaneNoDepth = obj.getPart("lightAlpha"); //TODO: Separate
+			lightAlphaPlaneNoDepth = obj.getPart("lightAlphaNoDepth");
 			tOff = obj.getModelResourceLocation(obj.getString("tOff"));
 			tOn = obj.getModelResourceLocation(obj.getString("tOn"));
 		}
@@ -94,16 +94,17 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 		UtilsClient.enableBlend();
 		UtilsClient.disableLight();
 
-		float coeff = (float)distanceToPlayer;
-		coeff = /*1.5f*/2.0f-coeff;
-		if(coeff > 0.0f) {
-			UtilsClient.enableCulling();
-			UtilsClient.disableDepthTest(); //Beautiful effect, but overlay the whole render (i.e. through wall) : so distance limited.
-			GL11.glColor4f(1.f, 1.f, 1.f, light * 0.06667f * coeff);
-			if (lightAlphaPlaneNoDepth != null)
+		if (lightAlphaPlaneNoDepth != null){
+			float coeff = /*1.5f*/2.0f - (float)distanceToPlayer;
+			if (coeff > 0.0f) {
+				UtilsClient.enableCulling();
+				UtilsClient.disableDepthTest(); //Beautiful effect, but overlay the whole render (i.e. through wall) : so distance limited.
+				GL11.glColor4f(1.f, 1.f, 1.f, light * 0.06667f * coeff);
+
 				lightAlphaPlaneNoDepth.draw();
-			UtilsClient.enableDepthTest();
-			UtilsClient.disableCulling();
+				UtilsClient.enableDepthTest();
+				UtilsClient.disableCulling();
+			}
 		}
 
 		GL11.glColor4f(1.f, 0.98f, 0.92f, light * 0.06667f);

@@ -26,4 +26,4 @@ Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
-map_Kd E:\MINEDEV\EAGIT\ElectricalAge\ElectricalAge\src\main\resources\assets\eln\textures\items\incandescentlampcarbon.png
+map_Kd ..\textures\items\incandescentlampcarbon.png
