@@ -3,7 +3,6 @@ package mods.eln.sixnode.electricalcable;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
-import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
@@ -128,7 +127,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
 		if (signalWire) {
 			Collections.addAll(list, tr("Cable is adapted to conduct\nelectrical signals.").split("\n"));
 			Collections.addAll(list, tr("A signal is electrical information\nwhich must be between 0V and %1$V", Eln.SVU).split("\n"));
-			list.add(tr("Not adopted to transport power."));
+			list.add(tr("Not adapted to transport power."));
 			
 			/*String lol = "";
 			for (int idx = 0; idx < 15; idx++) {

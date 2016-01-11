@@ -57,7 +57,6 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
                 if (d == side)
                     return true;
             }
-            // TODO: [translate]
             Utils.addChatMessage(player, tr("You can't place this block at this side"));
             return false;
         }
