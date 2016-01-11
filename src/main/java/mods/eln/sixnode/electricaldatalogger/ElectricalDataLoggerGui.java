@@ -92,11 +92,11 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
 
 		maxValue = newGuiTextField(176 - 50 - 30, 101 - 7, 50);
         maxValue.setText(render.log.maxValue);
-		maxValue.setComment(new String[]{tr("Y-axis Max")});
+		maxValue.setComment(new String[]{tr("Y-axis max")});
 
 		minValue = newGuiTextField(176 - 50 - 30, 101 + 8, 50);
         minValue.setText(render.log.minValue);
-		minValue.setComment(new String[]{tr("Y-axis Min")});
+		minValue.setComment(new String[]{tr("Y-axis min")});
 
 		displayEntry();
 	}
