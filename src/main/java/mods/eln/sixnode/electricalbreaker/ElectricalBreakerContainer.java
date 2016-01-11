@@ -16,7 +16,8 @@ public class ElectricalBreakerContainer extends BasicContainer {
 	
 	public ElectricalBreakerContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory, new Slot[]{
-			new SixNodeItemSlot(inventory, cableSlotId, 150, 21, 1, new Class[]{ElectricalCableDescriptor.class}, SlotSkin.medium, new String[]{tr("Electrical cable slot")})
+			new SixNodeItemSlot(inventory, cableSlotId, 150, 21, 1, new Class[]{ElectricalCableDescriptor.class},
+				SlotSkin.medium, new String[]{tr("Electrical cable slot")})
 		});
 	}
 }
