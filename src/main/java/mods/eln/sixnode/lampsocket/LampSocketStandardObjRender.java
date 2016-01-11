@@ -94,13 +94,17 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 		UtilsClient.enableBlend();
 		UtilsClient.disableLight();
 
-		UtilsClient.disableDepthTest(); //Beautiful effect, but overlay the whole render (i.e. through wall) : so distance limited.
 		float coeff = (float)distanceToPlayer;
-		coeff = Math.max(/*1.5f*/2.f-coeff,0.f);
-		GL11.glColor4f(1.f, 1.f, 1.f, light * 0.06667f * coeff);
-		if (lightAlphaPlaneNoDepth != null)
-			lightAlphaPlaneNoDepth.draw();
-		UtilsClient.enableDepthTest();
+		coeff = /*1.5f*/2.0f-coeff;
+		if(coeff > 0.0f) {
+			UtilsClient.enableCulling();
+			UtilsClient.disableDepthTest(); //Beautiful effect, but overlay the whole render (i.e. through wall) : so distance limited.
+			GL11.glColor4f(1.f, 1.f, 1.f, light * 0.06667f * coeff);
+			if (lightAlphaPlaneNoDepth != null)
+				lightAlphaPlaneNoDepth.draw();
+			UtilsClient.enableDepthTest();
+			UtilsClient.disableCulling();
+		}
 
 		GL11.glColor4f(1.f, 0.98f, 0.92f, light * 0.06667f);
 		if (lightAlphaPlane != null)
@@ -108,7 +112,7 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 
 		UtilsClient.enableLight();
 		UtilsClient.disableBlend();
-		
+
 		UtilsClient.enableCulling();
 		/*
 		 * GL11.glLineWidth(2f); GL11.glDisable(GL11.GL_TEXTURE_2D); GL11.glDisable(GL11.GL_LIGHTING); GL11.glColor3f(1f,1f,1f); GL11.glBegin(GL11.GL_LINES); GL11.glVertex3d(0f, 0f, 0f); GL11.glVertex3d(Math.cos(alphaZ*Math.PI/180.0), Math.sin(alphaZ*Math.PI/180.0),0.0); GL11.glEnd(); GL11.glEnable(GL11.GL_TEXTURE_2D); GL11.glEnable(GL11.GL_LIGHTING);
