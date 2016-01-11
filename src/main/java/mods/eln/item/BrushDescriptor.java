@@ -76,7 +76,7 @@ public class BrushDescriptor extends GenericItemUsingDamageDescriptor {
 			return true;
 		}
 		else
-			Utils.addChatMessage(entityPlayer, tr("Brush is empty"));
+			Utils.addChatMessage(entityPlayer, tr("Brush is dry"));
 		return false;
 	}
 
