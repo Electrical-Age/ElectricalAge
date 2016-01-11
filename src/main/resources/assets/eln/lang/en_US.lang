@@ -449,7 +449,7 @@ Normally_open=Normally open
 
 # ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
 Creative_block.=Creative block.
-Provides_ab_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides ab ideal voltage source\nwithout energy or power limitation.
+Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides an ideal voltage source\nwithout energy or power limitation.
 
 # ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceGui.java
 Output_voltage=Output voltage
