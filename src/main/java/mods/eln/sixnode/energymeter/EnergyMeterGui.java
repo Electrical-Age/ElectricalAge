@@ -1,7 +1,6 @@
 package mods.eln.sixnode.energymeter;
 
 import mods.eln.gui.*;
-import mods.eln.misc.Utils;
 import mods.eln.sixnode.energymeter.EnergyMeterElement.Mod;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -149,7 +148,7 @@ public class EnergyMeterGui extends GuiContainerEln {
 			for (String line: tr("Deducts the energy from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.").split("\n"))
 				modBt.setComment(lineNumber++, line);
 			modBt.setComment(lineNumber++, "");
-			for (String line: tr("You must set an initial\namount of energy.\nWhen the counter hits zero\nit opens the contact.").split("\n"))
+			for (String line: tr("You can set an initial\namount of energy.\nWhen the counter arrives at 0\nthe contact will be opened.").split("\n"))
 				modBt.setComment(lineNumber++, line);
 
 			break;
