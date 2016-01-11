@@ -33,7 +33,7 @@ public class ElectricalTimeoutGui extends GuiScreenEln {
 
         timeoutValue.setText(render.timeoutValue);
 
-		timeoutValue.setComment(tr("The amount of time the\noutput is kept high.").split("\n"));
+		timeoutValue.setComment(tr("The time interval the\noutput is kept high.").split("\n"));
 	}
 
     @Override

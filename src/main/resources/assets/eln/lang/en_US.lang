@@ -272,7 +272,7 @@ tile.eln.EnergyConverterElnToOtherMVUBlock.name=200V Electrical Age to other ene
 You_have_%1$_lives_left=You have %1$ lives left
 
 # ./src/main/java/mods/eln/item/BrushDescriptor.java
-Brush_is_empty=Brush is empty
+Brush_is_dry=Brush is dry
 Can_paint_%1$_blocks=Can paint %1$ blocks
 
 # ./src/main/java/mods/eln/item/CombustionChamber.java
@@ -449,11 +449,11 @@ Output_voltage=Output voltage
 Can_break_an_electrical_circuit\ninterrupting_the_current.=Can break an electrical circuit\ninterrupting the current.
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
-When_the_input_signal_is_high_this\nmaintains_a_high_output_signal\nfor_a_configurable_time.=When the input signal is high this\nmaintains a high output signal\nfor a configurable time.
+Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=Upon application of a high signal,\nthe timer maintains the output high for\na configurable interval. Can be re-triggered.
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
 Set=Set
-The_amount_of_time_the\noutput_is_kept_high.=The amount of time the\noutput is kept high.
+The_time_interval_the\noutput_is_kept_high.=The time interval the\noutput is kept high.
 
 # ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
 Displays_the_value_of_a_signal.=Displays the value of a signal.
@@ -485,23 +485,22 @@ Voltage=Voltage
 # ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterGui.java
 Change_password=Change password
 Counter_Mode=Counter Mode
-Deducts_the_energy_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Deducts the energy from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.
+Counts_the_energy_conducted_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Counts the energy conducted from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.
 Energy_counter\:_%1$J=Energy counter: %1$J
 Enter_new_energy=Enter new energy
 Enter_password=Enter password
-Measures_the_energy_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Measures the energy from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.
 Prepay_Mode=Prepay Mode
 Reset_time_counter=Reset time counter
 Set_energy_counter=Set energy counter
 Time_counter\:=Time counter:
 Try_password=Try password
-You_must_set_an_initial\namount_of_energy.\nWhen_the_counter_hits_zero\nit_opens_the_contact.=You must set an initial\namount of energy.\nWhen the counter hits zero\nit opens the contact.
+You_can_set_an_initial\namount_of_available_energy.\nWhen_the_counter_arrives_at_0\nthe_contact_will_be_opened.=You can set an initial\namount of available energy.\nWhen the counter arrives at 0\nthe contact will be opened.
 is_off=is off
 is_on=is on
 value_in_kJ=value in kJ
 
 # ./src/main/java/mods/eln/sixnode/groundcable/GroundCableDescriptor.java
-Can_be_used_to_ground_negative\nbattery_pins.=Can be used to ground negative\nbattery pins.
+Can_be_used_to_set_a_point_of_an\nelectrical_network_to_0V_potential.\nFor_example_to_ground_negative_battery_contacts.=Can be used to set a point of an\nelectrical network to 0V potential.\nFor example to ground negative battery contacts.
 Provides_a_zero_volt_reference.=Provides a zero volt reference.
 
 # ./src/main/java/mods/eln/sixnode/hub/HubDescriptor.java
@@ -522,7 +521,7 @@ Serial=Serial
 Specify_the_supply_channel=Specify the supply channel
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java
-Electrical_Cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Electrical Cable slot\nBase range is 32 blocks.\nEach additional cable\nincreases range by one.
+Electrical_cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Electrical cable slot\nBase range is 32 blocks.\nEach additional cable\nincreases range by one.
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
 Supplies_all_lamps_on_the_channel.=Supplies all lamps on the channel.

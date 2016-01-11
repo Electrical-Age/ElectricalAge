@@ -137,7 +137,7 @@ public class EnergyMeterGui extends GuiContainerEln {
 
 			modBt.clearComment();
 			int lineNumber = 0;
-			for (String line: tr("Measures the energy from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.").split("\n"))
+			for (String line: tr("Counts the energy conducted from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.").split("\n"))
 				modBt.setComment(lineNumber++, line);
 			break;
 		case ModPrepay:
@@ -145,10 +145,10 @@ public class EnergyMeterGui extends GuiContainerEln {
 
 			modBt.clearComment();
 			lineNumber = 0;
-			for (String line: tr("Deducts the energy from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.").split("\n"))
+			for (String line: tr("Counts the energy conducted from\n\u00a74red\u00a7f to \u00a71blue\u00a7f.").split("\n"))
 				modBt.setComment(lineNumber++, line);
 			modBt.setComment(lineNumber++, "");
-			for (String line: tr("You can set an initial\namount of energy.\nWhen the counter arrives at 0\nthe contact will be opened.").split("\n"))
+			for (String line: tr("You can set an initial\namount of available energy.\nWhen the counter arrives at 0\nthe contact will be opened.").split("\n"))
 				modBt.setComment(lineNumber++, line);
 
 			break;

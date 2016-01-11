@@ -1,8 +1,5 @@
 package mods.eln.sixnode.electricaltimeout;
 
-import java.util.Collections;
-import java.util.List;
-
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
@@ -11,8 +8,10 @@ import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-
 import org.lwjgl.opengl.GL11;
+
+import java.util.Collections;
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -41,7 +40,7 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		Collections.addAll(list, tr("When the input signal is high this\nmaintains a high output signal\nfor a configurable time.").split("\n"));
+		Collections.addAll(list, tr("Upon application of a high signal,\nthe timer maintains the output high for\na configurable interval. Can be re-triggered.").split("\n"));
 	}
 	
 	@Override

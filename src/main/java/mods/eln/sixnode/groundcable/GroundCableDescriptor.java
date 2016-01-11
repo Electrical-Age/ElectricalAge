@@ -1,17 +1,16 @@
 package mods.eln.sixnode.groundcable;
 
-import java.util.Collections;
-import java.util.List;
-
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
-import mods.eln.misc.Utils;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+
+import java.util.Collections;
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -42,7 +41,7 @@ public class GroundCableDescriptor extends SixNodeDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add(tr("Provides a zero volt reference."));
-		Collections.addAll(list, tr("Can be used to ground negative\nbattery pins.").split("\n"));
+		Collections.addAll(list, tr("Can be used to set a point of an\nelectrical network to 0V potential.\nFor example to ground negative battery contacts.").split("\n"));
 		list.add(tr("Internal resistance: %1$Ω", Eln.getSmallRs()));
 	}
 }
