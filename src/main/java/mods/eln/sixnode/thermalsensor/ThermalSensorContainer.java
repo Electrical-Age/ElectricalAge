@@ -9,13 +9,17 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ThermalSensorContainer extends BasicContainer {
 
 	public static final int cableSlotId = 0;
 	
 	public ThermalSensorContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory, new Slot[]{
-				new SixNodeItemSlot(inventory, cableSlotId, 152, 62, 1, new Class[]{ThermalCableDescriptor.class, ElectricalCableDescriptor.class}, SlotSkin.medium, new String[]{"Cable slot"})
+				new SixNodeItemSlot(inventory, cableSlotId, 152, 62, 1, new Class[]{ThermalCableDescriptor.class,
+					ElectricalCableDescriptor.class}, SlotSkin.medium,
+					new String[]{tr("Cable slot")})
 			});
 	}
 }

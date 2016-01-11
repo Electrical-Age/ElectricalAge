@@ -166,7 +166,7 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 	public int bottom(int y, GuiVerticalExtender extender, ItemStack stack) {
 		int counter = -1;
 
-		extender.add(new GuiLabel(6, y, "Can create:"));
+		extender.add(new GuiLabel(6, y, tr("Can create:")));
 		y += 12;
 		for (Recipe r : recipe.getRecipes()) {
 			if (counter == 0)
@@ -186,7 +186,7 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 			extender.add(new GuiItemStack(x, y, r.getOutputCopy()[0], extender.helper));
 			
 			x += 22;
-			extender.add(new GuiLabel(x, y+4, Utils.plotEnergy("Cost", r.energy)));
+			extender.add(new GuiLabel(x, y+4, Utils.plotEnergy(tr("Cost"), r.energy)));
 			
 			counter = (counter + 1) % 1;
 		}

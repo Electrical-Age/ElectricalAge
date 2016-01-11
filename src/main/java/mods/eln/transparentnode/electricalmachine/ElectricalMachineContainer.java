@@ -11,6 +11,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalMachineContainer extends BasicContainer implements INodeContainer {
 
 	NodeBase node = null;
@@ -38,7 +40,7 @@ public class ElectricalMachineContainer extends BasicContainer implements INodeC
 		slots[descriptor.outStackCount + 1] = new GenericItemUsingDamageSlot(inventory, descriptor.outStackCount + 1, 8, 12, 5,
 				MachineBoosterDescriptor.class,
 				SlotSkin.medium,
-				new String[]{"Booster slot"});
+				new String[]{tr("Booster slot")});
 		
 		return slots;
 	}

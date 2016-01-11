@@ -87,27 +87,23 @@ public class LampSupplyGui extends GuiContainerEln {
             add(buttonBigger = new AggregatorBt(x, y, w, 20, tr("Biggest"),id, (byte) 0)); x += 2 + w;
             add(buttonSmaller = new AggregatorBt(x, y, w, 20, tr("Smallest"),id, (byte) 1)); x += 2 + w;
             add(buttonToogle = new AggregatorBt(x, y, w, 20, tr("Toggle"),id, (byte) 2)); x += 2 + w;
+
             buttonBigger.setHelper(helper);
-
-            // TODO cm0x4d: continue translation here...
-
-            buttonBigger.setComment(0, "Gets the biggest value");
-            buttonBigger.setComment(1, "emitted on the channel.");
+            int lineNumber = 0;
+            for (String line: tr("Uses the biggest\nvalue on the channel.").split("\n"))
+                buttonBigger.setComment(lineNumber++, line);
 
             buttonSmaller.setHelper(helper);
-            buttonSmaller.setComment(0, "Gets the smallest value");
-            buttonSmaller.setComment(1, "emitted on the channel.");
+            lineNumber = 0;
+            for (String line: tr("Uses the smallest\nvalue on the channel.").split("\n"))
+                buttonSmaller.setComment(lineNumber++, line);
 
             buttonToogle.setHelper(helper);
-            buttonToogle.setComment(0, "Toggle the output each time");
-            buttonToogle.setComment(1, "an emitter's value rises.");
-            buttonToogle.setComment(2, "Very useful to connect multiple");
-            buttonToogle.setComment(3, "buttons to control a light in your house.");
+            lineNumber = 0;
+            for (String line: tr("Toggles the output each time\nan emitter's value rises.\nUseful to allow multiple buttons\nto control the same light.").split("\n"))
+                buttonToogle.setComment(lineNumber++, line);
             y += buttonToogle.height + 6;
         }
-
-
-
 	}
 	
 	@Override

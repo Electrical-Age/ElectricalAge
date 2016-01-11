@@ -28,6 +28,8 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.StatCollector;
 
+import static mods.eln.i18n.I18N.tr;
+
 
 public class PowerInductorGui extends GuiContainerEln {
 
@@ -66,7 +68,7 @@ public class PowerInductorGui extends GuiContainerEln {
 	
 	@Override
 	protected void postDraw(float f, int x, int y) {
-    	helper.drawString(8, 12, 0xFF000000, "Inductance : "  + Utils.plotValue(render.descriptor.getlValue(render.inventory),"H"));
+		helper.drawString(8, 12, 0xFF000000, tr("Inductance: %1$H", Utils.plotValue(render.descriptor.getlValue(render.inventory))));
 		super.postDraw(f, x, y);
 	}
 

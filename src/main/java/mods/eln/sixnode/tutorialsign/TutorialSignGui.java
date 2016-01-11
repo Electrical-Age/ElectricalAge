@@ -8,6 +8,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class TutorialSignGui extends GuiScreenEln {
 
 	GuiTextFieldEln fileName;
@@ -29,7 +31,7 @@ public class TutorialSignGui extends GuiScreenEln {
 		fileName = newGuiTextField(6, 6, 150);
 		fileName.setText(render.baliseName);
 		fileName.setObserver(this);
-		fileName.setComment(new String[]{"Set balise name"});
+		fileName.setComment(new String[]{tr("Set beacon name")});
 	}
 	
 	@Override

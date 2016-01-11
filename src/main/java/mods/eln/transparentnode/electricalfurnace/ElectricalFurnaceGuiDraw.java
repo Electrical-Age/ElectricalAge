@@ -15,6 +15,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
 
     private TransparentNodeElementInventory inventory;
@@ -38,7 +40,7 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     	vuMeterTemperature.setStepIdMax(800 / 10);
     	vuMeterTemperature.setEnable(true);
     	vuMeterTemperature.setRange(0, 800);
-    	vuMeterTemperature.setComment(new String[]{"Temperature Gauge"});
+    	vuMeterTemperature.setComment(new String[]{tr("Temperature gauge")});
     	syncVumeter();
     	
     	supplyBar = new GuiVerticalVoltageSupplyBar(167 - 20 - 2, 8, 20, 69, helper);
@@ -54,24 +56,24 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     protected void preDraw(float f, int x, int y) {
     	super.preDraw(f, x, y);
     	if (render.getPowerOn())
-    		buttonGrounded.displayString = "Is ON";
+    		buttonGrounded.displayString = tr("Is on");
     	else
-    		buttonGrounded.displayString = "Is OFF";
-    	
-    	if (render.autoShutDown) {
+			buttonGrounded.displayString = tr("Is OFF");
+
+		if (render.autoShutDown) {
     		buttonGrounded.enabled = false;
-    		autoShutDown.displayString = "Auto Shutdown";
-    	} else {
-    		autoShutDown.displayString = "Manual Shutdown";
-    		buttonGrounded.enabled = true;
+			autoShutDown.displayString = tr("Auto shutdown");
+		} else {
+			autoShutDown.displayString = tr("Manual shutdown");
+			buttonGrounded.enabled = true;
     	}
     	
         if (render.temperatureTargetSyncNew) syncVumeter();
         vuMeterTemperature.temperatureHit = render.temperature;
-        
-        vuMeterTemperature.setComment(1, "Current: " + Utils.plotValue(render.temperature + PhysicalConstant.Tamb, "\u00B0C"));
-        vuMeterTemperature.setComment(2, "Target: " + Utils.plotValue(vuMeterTemperature.getValue() + PhysicalConstant.Tamb, "\u00B0C"));
-    }
+
+		vuMeterTemperature.setComment(1, tr("Current: %1$°C", Utils.plotValue(render.temperature + PhysicalConstant.Tamb)));
+		vuMeterTemperature.setComment(2, tr("Target: %1$°C", Utils.plotValue(vuMeterTemperature.getValue() + PhysicalConstant.Tamb)));
+	}
     
     @Override
     public void guiObjectEvent(IGuiObject object) {

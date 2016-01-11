@@ -5,6 +5,8 @@ import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.GuiTextFieldEln;
 import mods.eln.gui.IGuiObject;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class WirelessSignalTxGui extends GuiScreenEln {
 
 	GuiTextFieldEln channel;
@@ -19,7 +21,7 @@ public class WirelessSignalTxGui extends GuiScreenEln {
 		super.initGui();
 		channel = newGuiTextField(6, 6, 220);
 		channel.setText(render.channel);
-		channel.setComment(0, "Specify the channel");
+		channel.setComment(0, tr("Specify the channel"));
 	}
 	
 	@Override

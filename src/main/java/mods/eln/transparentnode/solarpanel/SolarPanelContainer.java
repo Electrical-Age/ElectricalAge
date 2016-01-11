@@ -19,7 +19,9 @@ public class SolarPanelContainer extends BasicContainer implements INodeContaine
 
   public SolarPanelContainer(NodeBase node, EntityPlayer player, IInventory inventory) {
     super(player, inventory, new Slot[]{
-            new GenericItemUsingDamageSlot(inventory, trackerSlotId, 176 / 2 - 20, 35, 1, SolarTrackerDescriptor.class, SlotSkin.medium, new String[]{tr("Solar Tracker Slot")})
+            new GenericItemUsingDamageSlot(inventory, trackerSlotId, 176 / 2 - 20, 35, 1,
+                SolarTrackerDescriptor.class, SlotSkin.medium,
+                new String[]{tr("Solar tracker slot")})
 
     });
     this.node = node;

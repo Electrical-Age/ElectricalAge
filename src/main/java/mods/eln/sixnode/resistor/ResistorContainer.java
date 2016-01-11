@@ -8,6 +8,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
+import static mods.eln.i18n.I18N.tr;
+
 /**
  * Created by svein on 05/08/15.
  */
@@ -16,7 +18,9 @@ public class ResistorContainer extends BasicContainer {
 
     public ResistorContainer(EntityPlayer player, IInventory inventory) {
         super(player, inventory, new Slot[]{
-                new SlotFilter(inventory, coreId, 132, 8, 64, ItemStackFilter.OreDict("dustCoal"), ISlotSkin.SlotSkin.medium, new String[]{"Coal dust slot", "(Sets resistance)"})
+            new SlotFilter(inventory, coreId, 132, 8, 64, ItemStackFilter.OreDict("dustCoal"),
+                ISlotSkin.SlotSkin.medium,
+                new String[]{tr("Coal dust slot"), tr("(Sets resistance)")})
         });
     }
 }

@@ -12,6 +12,8 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class HeatFurnaceGuiDraw extends GuiContainerEln {
     
     private TransparentNodeElementInventory inventory;
@@ -43,8 +45,8 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
     	vuMeterHeat.setStepIdMax(98);
     	vuMeterHeat.setEnable(true);
     	vuMeterHeat.setRange(0.0f, 980.0f);
-    	vuMeterHeat.setComment(0, "Temperature Gauge");
-    	syncVumeterHeat();
+		vuMeterHeat.setComment(0, tr("Temperature Gauge"));
+		syncVumeterHeat();
     	
     	/*
     	GuiHelpText help = new GuiHelpText(0, 0, helper);
@@ -67,15 +69,15 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
     protected void preDraw(float f, int x, int y) {
     	super.preDraw(f, x, y);
     	if (!render.controleExternal)
-    		externalControl.displayString = "Internal Control";
-    	else
-    		externalControl.displayString = "External Control";
+			externalControl.displayString = tr("Internal control");
+		else
+    		externalControl.displayString = tr("External control");
     	//externalControl.displayString = "External control : " + render.controleExternal;
     	if (render.takeFuel)
-    		takeFuel.displayString = "Take Fuel";
-    	else
-    		takeFuel.displayString = "Decline Fuel";
-    	takeFuel.enabled = !render.controleExternal;
+			takeFuel.displayString = tr("Take fuel");
+		else
+			takeFuel.displayString = tr("Decline fuel");
+		takeFuel.enabled = !render.controleExternal;
     	
     	
         vuMeterGain.setEnable(inventory.getStackInSlot(HeatFurnaceContainer.regulatorId) == null && !render.controleExternal);            
@@ -88,14 +90,14 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
         //vuMeterHeat.setVisible(render.controleExternal == false);
 
         vuMeterHeat.setComment(new String[]{});
-        vuMeterHeat.setComment(0, "Temperature Gauge");
-        vuMeterHeat.setComment(1, Utils.plotCelsius("Current:", render.temperature));
-        if (!render.controleExternal)
+		vuMeterHeat.setComment(0, tr("Temperature Gauge"));
+		vuMeterHeat.setComment(1, tr("Current: %1$°C", Utils.plotValue(render.temperature)));
+		if (!render.controleExternal)
         	vuMeterHeat.setComment(2, Utils.plotCelsius("Target:", vuMeterHeat.getValue()));
-        vuMeterGain.setComment(0, "Control Gauge at " +(int)(vuMeterGain.getValue() * 100) + "%");
-        
-        vuMeterGain.setComment(1, Utils.plotPower("Power:", render.power));
-    }
+		vuMeterGain.setComment(0, tr("Control Gauge at %1$%", (int) (vuMeterGain.getValue()) * 100));
+
+		vuMeterGain.setComment(1, tr("Power: %1$W", render.power));
+	}
     
     @Override
     public void guiObjectEvent(IGuiObject object) {

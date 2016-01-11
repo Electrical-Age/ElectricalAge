@@ -318,7 +318,6 @@ State\:=State:
 Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
 
 # ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
-Regulator_slot=Regulator slot
 
 # ./src/main/java/mods/eln/misc/UtilsClient.java
 Hold_shift=Hold shift
@@ -340,10 +339,10 @@ Input_power_is_limited_to_%1$W=Input power is limited to %1$W
 
 # ./src/main/java/mods/eln/sixnode/TreeResinCollector/TreeResinCollectorDescriptor.java
 Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Produces Tree Resin over\ntime when put on a tree.
+This_block_can_only_be_placed_on_the_side_of_a_tree!=This block can only be placed on the side of a tree!
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerContainer.java
 Battery_slot=Battery slot
-Booster_slot=Booster slot
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
 Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Can be used to recharge\nelectrical items like:\nFlash Light, X-Ray scanner\nand Portable Battery ...
@@ -351,7 +350,6 @@ Nominal_power\:_%1$=Nominal power: %1$
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
 Is_off=Is off
-Is_on=Is on
 
 # ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
 Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Electrical current can only\nflow through the diode\nfrom anode to cathode
@@ -402,7 +400,6 @@ Y-axis_Max=Y-axis Max
 Y-axis_Min=Y-axis Min
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
-Entity_filter_slot=Entity filter slot
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
 Output_voltage_increases\nif_entities_are_moving_around.=Output voltage increases\nif entities are moving around.
@@ -422,7 +419,6 @@ Provides_an_electrical_voltage\nin_the_presence_of_light.=Provides an electrical
 Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Provides an electrical voltage\nwhich is proportional to\nthe intensity of daylight.
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
-Redstone_slot=Redstone slot
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
 Applicable_boolean_operators\:=Applicable boolean operators:
@@ -492,12 +488,10 @@ Measures_voltage_on_cables.=Measures voltage on cables.
 
 # ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorGui.java
 Current=Current
-Measured_value\ncorresponding\na_0%_output.=Measured value\ncorresponding\na 0% output.
-Measured_value\ncorresponding\na_100%_output.=Measured value\ncorresponding\na 100% output.
-Measured_voltage\ncorresponding\na_0%_output=Measured voltage\ncorresponding\na 0% output
-Measured_voltage\ncorresponding\na_100%_output=Measured voltage\ncorresponding\na 100% output
-Power=Power
-Validate=Validate
+Measured_value\ncorresponding\nto_0%_output.=Measured value\ncorresponding\nto 0% output.
+Measured_value\ncorresponding\nto_100%_output.=Measured value\ncorresponding\nto 100% output.
+Measured_voltage\ncorresponding\nto_0%_output=Measured voltage\ncorresponding\nto 0% output
+Measured_voltage\ncorresponding\nto_100%_output=Measured voltage\ncorresponding\nto 100% output
 Voltage=Voltage
 
 # ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterGui.java
@@ -546,14 +540,38 @@ Specify_the_supply_channel=Specify the supply channel
 Supplies_all_lamps_on_the_channel.=Supplies all lamps on the channel.
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java
-Biggest=Biggest
 Power_channel_name=Power channel name
-Smallest=Smallest
-Toggle=Toggle
 Wireless_channel_name=Wireless channel name
+
+# ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuGui.java
+Add=Add
+Channel_name=Channel name
+Modbus_ID=Modbus ID
+Modbus_RTU=Modbus RTU
+Not_connected=Not connected
+Station_ID=Station ID
+Station_name=Station name
+Wireless_RX=Wireless RX
+Wireless_TX=Wireless TX
+
+# ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixContainer.java
+(Increases_maximum_voltage)=(Increases maximum voltage)
+
+# ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixGui.java
+
+# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixContainer.java
+
+# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixGui.java
 
 # ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketDescriptor.java
 Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in with energy.
+
+# ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketGui.java
+Specify_the_device_to_supply_through_this_socket.=Specify the device to supply through this socket.
+
+# ./src/main/java/mods/eln/sixnode/resistor/ResistorContainer.java
+(Sets_resistance)=(Sets resistance)
+Coal_dust_slot=Coal dust slot
 
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
 High_parallel_resistance\n_\=>_Low_power_dissipation.=High parallel resistance\n => Low power dissipation.
@@ -561,20 +579,64 @@ Low_serial_resistance\n_\=>_High_conductivity.=Low serial resistance\n => High c
 Parallel_resistance\:_%1$K_W=Parallel resistance: %1$K/W
 Serial_resistance\:_%1$K_W=Serial resistance: %1$K/W
 
+# ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorContainer.java
+Cable_slot=Cable slot
+
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
 Can_measure\:=Can measure:
 Measures_temperature_on_a_cable.=Measures temperature on a cable.
 Measures_thermal_values_on_cables.=Measures thermal values on cables.
 __Temperature_Power_conducted=Temperature/Power conducted
 
+# ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorGui.java
+Measured_temperature\ncorresponding\nto_0%_output=Measured temperature\ncorresponding\nto 0% output
+Measured_temperature\ncorresponding\nto_100%_output=Measured temperature\ncorresponding\nto 100% output
+Measured_value\ncorresponding\nto_0%_output=Measured value\ncorresponding\nto 0% output
+Measured_value\ncorresponding\nto_100%_output=Measured value\ncorresponding\nto 100% output
+Temperature=Temperature
+
+# ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignElement.java
+No_text_associated_to_this_beacon=No text associated to this beacon
+
+# ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignGui.java
+Set_beacon_name=Set beacon name
+
+# ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
+Unconnected=Unconnected
+
+# ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
+Drill_slot=Drill slot
+Mining_pipe_slot=Mining pipe slot
+Ore_scanner_slot=Ore scanner slot
+
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerDescriptor.java
-10_blocks_radius_after_10_blocks_depth.=10 blocks radius after 10 blocks depth.
-Excavates_on_a_small_radius.=Excavates on a small radius.
-Extracts_ore_on_a_bigger_radius\:=Extracts ore on a bigger radius:
+Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radius_after_10_blocks_depth.=Excavates on a small radius.\nExtracts ore on a bigger radius:\n10 blocks radius after 10 blocks depth.
+
+# ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerGuiDraw.java
+Chest_missing_on_the\nback_of_the_auto_miner!=Chest missing on the\nback of the auto miner!
+
+# ./src/main/java/mods/eln/transparentnode/battery/BatteryContainer.java
+Overheating_protection=Overheating protection
+Overvoltage_protection=Overvoltage protection
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryDescriptor.java
 Actual_charge\:_%1$%=Actual charge: %1$%
 Energy_capacity\:_%1$J=Energy capacity: %1$J
+_charged_at_%1$%=charged at %1$%
+
+# ./src/main/java/mods/eln/transparentnode/battery/BatteryGuiDraw.java
+Charge=Charge
+Charged=Charged
+Discharge=Discharge
+Energy\:=Energy:
+Energy\:_=Energy: 
+Life\:=Life:
+No_charge=No charge
+Power_in\:=Power in:
+Power_out\:=Power out:
+
+# ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorContainer.java
+Egg_slot=Egg slot
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxDescriptor.java
 Wireless_energy_receiver.=Wireless energy receiver.
@@ -585,19 +647,43 @@ Wireless_energy_transmitter.=Wireless energy transmitter.
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceContainer.java
 Heating_corp_slot=Heating corp slot
-Thermal_isolator_slot=Thermal isolator slot
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceDescriptor.java
 Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Similar to a vanilla furnace,\nbut heats with electricity.
 
+# ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceGuiDraw.java
+Auto_shutdown=Auto shutdown
+Is_OFF=Is OFF
+Manual_shutdown=Manual shutdown
+Target\:_%1$°C=Target: %1$°C
+Temperature_gauge=Temperature gauge
+
+# ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
+Cost=Cost
+
 # ./src/main/java/mods/eln/transparentnode/fuelgenerator/FuelGeneratorDescriptor.java
 Produces_electricity_using_fuel.=Produces electricity using fuel.
+
+# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceContainer.java
+Combustion_chamber_slot=Combustion chamber slot
+Fuel_slot=Fuel slot
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceDescriptor.java
 Generates_heat_when_supplied_with_fuel.=Generates heat when supplied with fuel.
 
+# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceGuiDraw.java
+Control_Gauge_at_%1$%=Control Gauge at %1$%
+Decline_fuel=Decline fuel
+External_control=External control
+Internal_control=Internal control
+Take_fuel=Take fuel
+Temperature_Gauge=Temperature Gauge
+
+# ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
+(Increases_maximal_voltage)=(Increases maximal voltage)
+
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelContainer.java
-Solar_Tracker_Slot=Solar tracker slot
+Solar_tracker_slot=Solar tracker slot
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelDescriptor.java
 Can_be_geared_towards_the_sun.=Can be geared towards the sun.
@@ -605,10 +691,26 @@ Max._power\:_%1$W=Max. power: %1$W
 Max._voltage\:_%1$V=Max. voltage: %1$V
 Produces_power_from_solar_radiation.=Produces power from solar radiation.
 
+# ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPannelGuiDraw.java
+It_is_night=It is night
+Solar_Panel_alpha\:_%1$°=Solar Panel alpha: %1$°
+Sun_alpha\:_%1$°=Sun alpha: %1$°
+
+# ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterGui.java
+Destination_transporter=Destination transporter
+Power_consumption\:=Power consumption:
+Power_consumption\:_%1$W=Power consumption: %1$W
+Required_energy\:_%1$J=Required energy: %1$J
+Start=Start
+Transporter_name=Transporter name
+
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveDescriptor.java
 Fan_cooling_power\:_%1$W=Fan cooling power: %1$W
 Fan_power_consumption\:_%1$W=Fan power consumption: %1$W
 Fan_voltage\:_%1$V=Fan voltage: %1$V
+
+# ./src/main/java/mods/eln/transparentnode/transformer/TransformerContainer.java
+Ferromagnetic_sore_slot=Ferromagnetic sore slot
 
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerDescriptor.java
 The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=The voltage ratio is proportional\nto the cable stacks count ratio.
@@ -624,8 +726,14 @@ Laser_charge_power\:_%1$W...%2$kW=Laser charge power: %1$W...%2$kW
 Scans_for_entities_and_shoots_if_the\nentity_matches_the_configurable_filter_criteria.=Scans for entities and shoots if the\nentity matches the configurable filter criteria.
 Standby_power\:_%1$W=Standby power: %1$W
 
+# ./src/main/java/mods/eln/transparentnode/turret/TurretGui.java
+Attack\:=Attack:
+Do_not_attack\:=Do not attack:
+Recharge_power\:=Recharge power:
+
 # ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineDescriptor.java
 Generates_energy_using_water_stream.=Generates energy using water stream.
+No_place_for_water_turbine!=No place for water turbine!
 
 # ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
 Front\:_%1$=Front: %1$
@@ -634,24 +742,73 @@ Left_Right\:_%1$=Left/Right: %1$
 Up_Down\:_%1$=Up/Down: %1$
 Wind_area\:=Wind area:
 
+# ./src/main/java/mods/eln/wiki/Data.java
+Energy=Energy
+Light=Light
+Machine=Machine
+Ore=Ore
+Portable=Portable
+Resource=Resource
+Signal=Signal
+Thermal=Thermal
+Upgrade=Upgrade
+Utilities=Utilities
+Wiring=Wiring
+
+# ./src/main/java/mods/eln/wiki/Default.java
+Previous=Previous
+
+# ./src/main/java/mods/eln/wiki/ItemDefault.java
+Can_be_used_to_craft\:=Can be used to craft:
+Cannot_be_crafted!=Cannot be crafted!
+Cost_%1$J=Cost %1$J
+Created_by\:=Created by:
+Is_not_a_crafting_material!=Is not a crafting material!
+Recipe\:=Recipe:
+
 # Appearing in multiple source files
+(Increases_capacity)=(Increases capacity)
+(Increases_inductance_value)=(Increases inductance value)
+Biggest=Biggest
+Booster_slot=Booster slot
+Can_create\:=Can create:
+Capacity\:_%1$F=Capacity: %1$F
 Charge_power\:_%1$W=Charge power: %1$W
+Connected=Connected
 Cooling_power\:_%1$W=Cooling power: %1$W
+Copper_cable_slot=Copper cable slot
+Current\:_%1$°C=Current: %1$°C
+Dielectric_slot=Dielectric slot
 Discharge_power\:_%1$W=Discharge power: %1$W
 Electrical_cable_slot=Electrical cable slot
+Entity_filter_slot=Entity filter slot
+Ferromagnetic_core_slot=Ferromagnetic core slot
 Has_a_signal_output.=Has a signal output.
+Inductance\:_%1$H=Inductance: %1$H
 Internal_resistance\:_%1$Ω=Internal resistance: %1$Ω
+Is_on=Is on
 Max._temperature\:_%1$°C=Max. temperature: %1$°C
 Nominal\:=Nominal:
 Nominal_power\:_%1$W=Nominal power: %1$W
 Nominal_usage\:=Nominal usage:
 Nominal_voltage\:_%1$V=Nominal voltage: %1$V
+Power=Power
 Power\:_%1$W=Power: %1$W
 Range\:_%1$_blocks=Range: %1$ blocks
+Redstone_slot=Redstone slot
+Regulator_slot=Regulator slot
 Reset=Reset
 Resistance\:_%1$Ω=Resistance: %1$Ω
+Smallest=Smallest
+Specify_the_channel=Specify the channel
 Stored_energy\:_%1$J_(%2$%)=Stored energy: %1$J (%2$%)
 Temperature\:_%1$°C=Temperature: %1$°C
+Thermal_isolator_slot=Thermal isolator slot
+Toggle=Toggle
 Toggle_switch=Toggle switch
+Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Toggles the output each time\nan emitter's value rises.\nUseful to allow multiple buttons\nto control the same light.
 Used_to_cool_down_turbines.=Used to cool down turbines.
+Uses_the_biggest\nvalue_on_the_channel.=Uses the biggest\nvalue on the channel.
+Uses_the_smallest\nvalue_on_the_channel.=Uses the smallest\nvalue on the channel.
+Validate=Validate
 Voltage\:_%1$V=Voltage: %1$V

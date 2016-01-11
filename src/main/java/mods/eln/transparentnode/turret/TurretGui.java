@@ -5,6 +5,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.client.gui.GuiButton;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class TurretGui extends GuiContainerEln {
     private GuiButton killOrSpareButton;
     private GuiVerticalTrackBar chargePower;
@@ -25,7 +27,7 @@ public class TurretGui extends GuiContainerEln {
         chargePower.setStepId(99);
         chargePower.setStepIdMax(99);
         chargePower.setRange(100, 10000);
-        chargePower.setComment(0, "Recharge power:");
+        chargePower.setComment(0, tr("Recharge power:"));
         chargePower.setValue(render.chargePower);
     }
 
@@ -34,11 +36,11 @@ public class TurretGui extends GuiContainerEln {
         super.preDraw(f, x, y);
 
         if (render.filterIsSpare)
-            killOrSpareButton.displayString = "Not attack:";
+            killOrSpareButton.displayString = tr("Do not attack:");
         else
-            killOrSpareButton.displayString = "Attack:";
+            killOrSpareButton.displayString = tr("Attack:");
 
-        chargePower.setComment(1, "" + chargePower.getValue() + " W");
+        chargePower.setComment(1, "" + chargePower.getValue() + "W");
     }
 
     @Override

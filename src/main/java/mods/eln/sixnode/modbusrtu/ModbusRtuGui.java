@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ModbusRtuGui extends GuiScreenEln {
 
     ModbusRtuRender render;
@@ -53,7 +55,7 @@ public class ModbusRtuGui extends GuiScreenEln {
 		extender = new GuiVerticalExtender(6, 6, helper.xSize - 12, helper.ySize - 12, helper);
 		add(extender);
 
-		GuiLabel title = new GuiLabel(2, y, "Modbus RTU");
+		GuiLabel title = new GuiLabel(2, y, tr("Modbus RTU"));
 		extender.add(title);
 		
 		y += 10;
@@ -62,13 +64,13 @@ public class ModbusRtuGui extends GuiScreenEln {
 		if (render.station != -1)
 			station.setText(render.station);
 		station.setObserver(this);
-		station.setComment(0, "Station ID");
+		station.setComment(0, tr("Station ID"));
 		extender.add(station);
 		
 		name = new GuiTextFieldEln(fontRendererObj,2+station.getWidth() + 12, y, 101,helper);  y+= name.getHeight();
 		name.setText(render.name);
 		name.setObserver(this);
-		name.setComment(0, "Station name");
+		name.setComment(0, tr("Station name"));
 		extender.add(name);
 		
 		y += 5;
@@ -76,11 +78,11 @@ public class ModbusRtuGui extends GuiScreenEln {
 				
 		{
 			x = 2;
-			GuiLabel txLabel = new GuiLabel(x, y + 6, "Wireless TX");
+			GuiLabel txLabel = new GuiLabel(x, y + 6, tr("Wireless TX"));
 			extender.add(txLabel);
 			
 			x += 65;
-			txAddButton = new GuiButtonEln(x, y, 40, 20, "Add");
+			txAddButton = new GuiButtonEln(x, y, 40, 20, tr("Add"));
 			txAddButton.setObserver(this);
 			extender.add(txAddButton);
 			
@@ -105,7 +107,7 @@ public class ModbusRtuGui extends GuiScreenEln {
 			x = 2;
 			GuiTextFieldEln txName = new GuiTextFieldEln(fontRendererObj, x, y + 4, 90, helper);
 			txName.setText(tx.name);
-			txName.setComment(0, "Channel name");
+			txName.setComment(0, tr("Channel name"));
 			extender.add(txName);
 			
 			x += txName.getWidth() + 12;
@@ -115,7 +117,7 @@ public class ModbusRtuGui extends GuiScreenEln {
 				txId.setText(tx.id);
 			else
 				txId.setText("");
-			txId.setComment(0, "Modbus ID");
+			txId.setComment(0, tr("Modbus ID"));
 			extender.add(txId);
 			
 			x += txId.getWidth() + 12;
@@ -132,9 +134,9 @@ public class ModbusRtuGui extends GuiScreenEln {
 		{
 			x = 2;
 			y += 6;
-			GuiLabel rxLabel = new GuiLabel(x, y + 6, "Wireless RX");
+			GuiLabel rxLabel = new GuiLabel(x, y + 6, tr("Wireless RX"));
 			extender.add(rxLabel);
-			rxAddButton = new GuiButtonEln(x + 65, y, 40, 20, "Add");
+			rxAddButton = new GuiButtonEln(x + 65, y, 40, 20, tr("Add"));
 			rxAddButton.setObserver(this);
 			extender.add(rxAddButton);
 
@@ -159,7 +161,7 @@ public class ModbusRtuGui extends GuiScreenEln {
 			x = 2;
 			GuiTextFieldEln rxName = new GuiTextFieldEln(fontRendererObj, x, y + 4, 90, helper);
 			rxName.setText(rx.name);
-			rxName.setComment(0, "Channel name");
+			rxName.setComment(0, tr("Channel name"));
 			extender.add(rxName);
 			
 			x += rxName.getWidth() + 12;
@@ -169,7 +171,7 @@ public class ModbusRtuGui extends GuiScreenEln {
 				rxId.setText(rx.id);
 			else
 				rxId.setText("");
-			rxId.setComment(0, "Modbus ID");
+			rxId.setComment(0, tr("Modbus ID"));
 			extender.add(rxId);
 			
 			x += rxId.getWidth() + 12;
@@ -220,9 +222,9 @@ public class ModbusRtuGui extends GuiScreenEln {
 		for (WirelessRxStatus rx: render.wirelessRxStatusList.values()) {
 			GuiTextFieldEln name = uuidToRxName.get(rx.uuid);
 			if (rx.connected)
-				name.setComment(1, "\u00a72Connected");
+				name.setComment(1, "\u00a72" + tr("Connected"));
 			else
-				name.setComment(1, "\u00a74Not connected");
+				name.setComment(1, "\u00a74" + tr("Not connected"));
 		}
 	}
 

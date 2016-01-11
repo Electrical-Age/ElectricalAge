@@ -1,29 +1,19 @@
 package mods.eln.wiki;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.management.Descriptor;
-
-import cpw.mods.fml.common.registry.GameRegistry;
-
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.CraftingManager;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipes;
-import net.minecraft.item.crafting.ShapelessRecipes;
-import net.minecraftforge.oredict.ShapedOreRecipe;
-import mods.eln.gui.GuiButtonEln;
-import mods.eln.gui.GuiHelper;
 import mods.eln.gui.GuiLabel;
-import mods.eln.gui.GuiScreenEln;
 import mods.eln.gui.IGuiObject;
 import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
 import mods.eln.misc.Utils;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.IRecipe;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static mods.eln.i18n.I18N.tr;
 
 public class ItemDefault extends Default {
 	public static interface IPlugIn {
@@ -95,11 +85,11 @@ public class ItemDefault extends Default {
 			}
 			int counter = 0;
 			if(recipeOutList.size() == 0) {
-				extender.add(new GuiLabel(6, y, "Is not craftable!"));
+				extender.add(new GuiLabel(6, y, tr("Cannot be crafted!")));
 				y += 12;
 			}
 			else {
-				extender.add(new GuiLabel(6, y, "Recipe:"));
+				extender.add(new GuiLabel(6, y, tr("Recipe:")));
 				y += 12;
 
 				counter = -1;
@@ -123,11 +113,11 @@ public class ItemDefault extends Default {
 			}
 
 			if(recipeInList.size() == 0) {
-				extender.add(new GuiLabel(6, y, "Is not a crafting material!"));
+				extender.add(new GuiLabel(6, y, tr("Is not a crafting material!")));
 				y += 12;
 			}
 			else {
-				extender.add(new GuiLabel(6, y, "Can craft:"));
+				extender.add(new GuiLabel(6, y, tr("Can be used to craft:")));
 				y += 12;
 				counter = -1;
 				for(IRecipe r : recipeInList) {
@@ -162,7 +152,7 @@ public class ItemDefault extends Default {
 					//extender.add(new GuiLabel(6, y, "Can't Product"));
 				}
 				else {
-					extender.add(new GuiLabel(6, y, "Can create:"));
+					extender.add(new GuiLabel(6, y, tr("Can create:")));
 					y += 12;
 					for(Recipe r : list) {
 						if(counter == 0) y += (int) (18 * 1.3);
@@ -179,7 +169,7 @@ public class ItemDefault extends Default {
 						extender.add(new GuiItemStack(x, y, r.getOutputCopy()[0], helper));
 
 						x += 22;
-						extender.add(new GuiLabel(x, y + 4, Utils.plotEnergy("Cost", r.energy)));
+						extender.add(new GuiLabel(x, y + 4, tr("Cost %1$J", r.energy)));
 
 						counter = (counter + 1) % 1;
 					}
@@ -193,7 +183,7 @@ public class ItemDefault extends Default {
 					//extender.add(new GuiLabel(6, y, "Can't Product"));
 				}
 				else {
-					extender.add(new GuiLabel(6, y, "Is created by:"));
+					extender.add(new GuiLabel(6, y, tr("Created by:")));
 					y += 12;
 					for(Recipe r : list) {
 						if(counter == 0) y += (int) (18 * 1.3);
@@ -210,7 +200,7 @@ public class ItemDefault extends Default {
 						extender.add(new GuiItemStack(x, y, r.getOutputCopy()[0], helper));
 
 						x += 22;
-						extender.add(new GuiLabel(x, y + 4, Utils.plotEnergy("Cost", r.energy)));
+						extender.add(new GuiLabel(x, y + 4, tr("Cost %1$J", r.energy)));
 
 						counter = (counter + 1) % 1;
 					}

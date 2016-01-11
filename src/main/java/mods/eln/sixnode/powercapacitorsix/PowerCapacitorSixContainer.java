@@ -11,6 +11,8 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class PowerCapacitorSixContainer extends BasicContainer {
 
 	static final int redId = 0;
@@ -18,8 +20,13 @@ public class PowerCapacitorSixContainer extends BasicContainer {
 
 	public PowerCapacitorSixContainer(EntityPlayer player, IInventory inventory) {
 		super(player, inventory, new Slot[] {
-				new SlotFilter(inventory, redId, 132, 8, 13, new ItemStackFilter[] { new ItemStackFilter(Items.redstone) }, SlotSkin.medium, new String[] { "Redstone slot", "(Increases capacity)" }),
-				new GenericItemUsingDamageSlot(inventory, dielectricId, 132 + 20, 8, 20, DielectricItem.class, SlotSkin.medium, new String[] { "Dielectric slot", "(Increases maximum voltage)" })
+				new SlotFilter(inventory, redId, 132, 8, 13,
+					new ItemStackFilter[] { new ItemStackFilter(Items.redstone) },
+					SlotSkin.medium,
+					new String[] { tr("Redstone slot"), tr("(Increases capacity)")}),
+				new GenericItemUsingDamageSlot(inventory, dielectricId, 132 + 20, 8, 20, DielectricItem.class,
+					SlotSkin.medium,
+					new String[] { tr("Dielectric slot"), tr("(Increases maximum voltage)") })
 		});
 	}
 }

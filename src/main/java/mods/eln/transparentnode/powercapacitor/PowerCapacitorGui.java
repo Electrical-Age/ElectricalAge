@@ -28,6 +28,8 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.StatCollector;
 
+import static mods.eln.i18n.I18N.tr;
+
 
 public class PowerCapacitorGui extends GuiContainerEln {
 
@@ -66,8 +68,8 @@ public class PowerCapacitorGui extends GuiContainerEln {
 	
 	@Override
 	protected void postDraw(float f, int x, int y) {
-    	helper.drawString(8, 8, 0xFF000000, "Inductance : "  + Utils.plotValue(render.descriptor.getCValue(render.inventory),"F"));
-    	helper.drawString(8, 8+8+1, 0xFF000000, "Nominal voltage : "  + Utils.plotValue(render.descriptor.getUNominalValue(render.inventory),"V"));
+		helper.drawString(8, 8, 0xFF000000, tr("Capacity: %1$F", Utils.plotValue(render.descriptor.getCValue(render.inventory))));
+		helper.drawString(8, 8 + 8 + 1, 0xFF000000, tr("Nominal voltage: %1$V", Utils.plotValue(render.descriptor.getUNominalValue(render.inventory))));
 		super.postDraw(f, x, y);
 	}
 

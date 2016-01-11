@@ -7,6 +7,8 @@ import mods.eln.gui.IGuiObject;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class PowerSocketGui extends GuiContainerEln {
 
 	final static int maxDeviceCount = 3;
@@ -26,7 +28,7 @@ public class PowerSocketGui extends GuiContainerEln {
 		for(int idx = 0 ; idx < maxDeviceCount ; idx ++){
 			devices[idx] = newGuiTextField(8, 8+idx*16, 138);
 			devices[idx].setText(render.channel);
-			devices[idx].setComment(0, "Specify the device to supply through this socket.");
+			devices[idx].setComment(0, tr("Specify the device to supply through this socket."));
 		}
 	}
 	

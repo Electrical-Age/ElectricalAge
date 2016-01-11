@@ -207,7 +207,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 
 	@Override
 	public String getName(ItemStack stack) {
-		return super.getName(stack) + " charged at " + (int)(getChargeInTag(stack) * 100) + "%";
+		return super.getName(stack) + tr(" charged at %1$%", (int)(getChargeInTag(stack) * 100));
 	}
 	
 	double getChargeInTag(ItemStack stack) {

@@ -144,7 +144,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 		
 		String str = super.checkCanPlace(coord, front);
 		if(str != null) return str;
-		if(checkCanPlaceWater(coord, front) == false) return "No place for water";
+		if(checkCanPlaceWater(coord, front) == false) return tr("No place for water turbine!");
 		return str;
 	}
 	

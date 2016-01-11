@@ -8,6 +8,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class TurretContainer extends BasicContainer {
 
     public static final int filterId = 0;
@@ -16,7 +18,7 @@ public class TurretContainer extends BasicContainer {
                 new GenericItemUsingDamageSlot(inventory, filterId, 184 / 2 - 12, 8, 1,
                         EntitySensorFilterDescriptor.class,
                         SlotSkin.medium,
-                        new String[]{"Entity filter slot"}),
+                        new String[]{tr("Entity filter slot")}),
         });
     }
 }

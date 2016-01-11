@@ -16,6 +16,8 @@ import mods.eln.sim.ThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class TutorialSignElement extends SixNodeElement {
     
 	static HashMap<String, String> baliseMap = null;
@@ -90,7 +92,7 @@ public class TutorialSignElement extends SixNodeElement {
 			}		
 		}
 		String text = baliseMap.get(balise);
-		if (text == null) return "No associated text to this beacon";
+		if (text == null) return tr("No text associated to this beacon");
 		return text;	
 	}
     

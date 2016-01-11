@@ -10,6 +10,8 @@ import mods.eln.misc.Utils;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.entity.player.EntityPlayer;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class TeleporterGui extends GuiScreenEln{
 
 	public TeleporterGui(EntityPlayer player,TeleporterRender render) {
@@ -34,7 +36,7 @@ public class TeleporterGui extends GuiScreenEln{
 		
 		name = newGuiTextField(6, 6, 80);
 		target = newGuiTextField(6, 6+20, 80);
-		start = newGuiButton(6,6+20+6+12,80, "Start");
+		start = newGuiButton(6, 6 + 20 + 6 + 12, 80, tr("Start"));
 		
 		chargePower = newGuiVerticalTrackBar(6+80+6, 7, 20, 56);
 		chargePower.setRange(2000, 20000);
@@ -46,13 +48,10 @@ public class TeleporterGui extends GuiScreenEln{
 		name.setText(render.name);
 		target.setText(render.targetName);
 		chargePower.setValue(render.chargePower);
-		
-		name.setComment(0, "Current Transporter");
-		target.setComment(0, "Target Transporter");
-		chargePower.setComment(0, "Power Sink:");
-		
-		
-		
+
+		name.setComment(0, tr("Transporter name"));
+		target.setComment(0, tr("Destination transporter"));
+		chargePower.setComment(0, tr("Power consumption:"));
 	}
 	
 	@Override
@@ -82,12 +81,12 @@ public class TeleporterGui extends GuiScreenEln{
 			chargePower.setValue(render.chargePower);
 			render.chargePowerNew = false;
 		}
-		chargePower.setComment(0, Utils.plotPower("Power Sink:", chargePower.getValue()));
+		chargePower.setComment(0, tr("Power consumption: %1$W", chargePower.getValue()));
 		start.enabled = render.state == TeleporterElement.StateIdle;
 		
 		chargeBar.setRange(0, render.energyTarget);
 		chargeBar.temperatureHit = render.energyHit;
-		chargeBar.setComment(0,Utils.plotEnergy("Energy need",render.energyTarget));
+		chargeBar.setComment(0, tr("Required energy: %1$J", render.energyTarget));
 		chargeBar.setComment(1,((int)(render.processRatio*100)) + "%");
 	/*	if(render.defaultOutput)
 			toogleDefaultOutput.displayString = "default output is high";

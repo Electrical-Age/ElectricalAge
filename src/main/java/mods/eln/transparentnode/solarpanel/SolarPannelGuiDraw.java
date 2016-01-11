@@ -10,6 +10,8 @@ import mods.eln.node.transparent.TransparentNodeElementInventory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 
+import static mods.eln.i18n.I18N.tr;
+
 
 public class SolarPannelGuiDraw extends GuiContainerEln {
 
@@ -65,12 +67,12 @@ public class SolarPannelGuiDraw extends GuiContainerEln {
         //vuMeterTemperature.temperatureHit = (float) (SolarPannelSlowProcess.getSolarAlpha(render.tileEntity.worldObj));
         vuMeterTemperature.setEnable(! render.hasTracker);
         int sunAlpha = ((int)(180/Math.PI * SolarPannelSlowProcess.getSolarAlpha(render.tileEntity.getWorldObj()))-90);
-        
-        vuMeterTemperature.setComment(0,"Solar Panel alpha : " + ((int)(180/Math.PI * vuMeterTemperature.getValue())-90) + "\u00B0");
-        if(Math.abs(sunAlpha)>90)
-        	vuMeterTemperature.setComment(1,"It's the night");
+
+		vuMeterTemperature.setComment(0, tr("Solar Panel alpha: %1$°", ((int) (180 / Math.PI * vuMeterTemperature.getValue()) - 90)));
+		if(Math.abs(sunAlpha)>90)
+        	vuMeterTemperature.setComment(1, tr("It is night"));
         else
-        	vuMeterTemperature.setComment(1,"Sun alpha : " + sunAlpha + "\u00B0");
+			vuMeterTemperature.setComment(1, tr("Sun alpha: %1$°", sunAlpha));
 	}
 	@Override
 	protected void postDraw(float f, int x, int y) {

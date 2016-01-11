@@ -16,6 +16,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
+import java.util.Collections;
 import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
@@ -124,9 +125,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add(tr("Excavates on a small radius."));
-		list.add(tr("Extracts ore on a bigger radius:"));
-		list.add(tr("10 blocks radius after 10 blocks depth."));
+		Collections.addAll(list, tr("Excavates on a small radius.\nExtracts ore on a bigger radius:\n10 blocks radius after 10 blocks depth.").split("\n"));
 		list.add(tr("Nominal voltage: %1$V", Utils.plotValue(nominalVoltage)));
 	}
 	

@@ -8,6 +8,8 @@ import mods.eln.node.six.SixNodeElementInventory;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 
+import static mods.eln.i18n.I18N.tr;
+
 public class ResistorGui extends GuiContainerEln {
 
     ResistorRender render;
@@ -35,7 +37,7 @@ public class ResistorGui extends GuiContainerEln {
 
     @Override
     protected void postDraw(float f, int x, int y) {
-        helper.drawString(8, 12, 0xFF000000, "Resistance : " + Utils.plotValue(render.descriptor.getRsValue(render.inventory), "Ohm"));
+        helper.drawString(8, 12, 0xFF000000, tr("Resistance: %1$Ω", Utils.plotValue(render.descriptor.getRsValue(render.inventory))));
         super.postDraw(f, x, y);
     }
 
