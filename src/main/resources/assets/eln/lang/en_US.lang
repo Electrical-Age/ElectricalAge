@@ -279,8 +279,8 @@ Can_paint_%1$_blocks=Can paint %1$ blocks
 Upgrade_for_the_Stone_Heat_Furnace.=Upgrade for the Stone Heat Furnace.
 
 # ./src/main/java/mods/eln/item/ElectricalDrillDescriptor.java
-Energy_per_operation\:_%1$=Energy per operation: %1$
-Time_per_operation\:_%1$\"=Time per operation: %1$"
+Energy_per_operation\:_%1$J=Energy per operation: %1$J
+Time_per_operation\:_%1$s=Time per operation: %1$s
 
 # ./src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
 Cable_loss_factor\:_%1$=Cable loss factor: %1$
@@ -326,13 +326,6 @@ Hold_shift=Hold shift
 mod.name=Electrical Age
 
 # ./src/main/java/mods/eln/node/six/SixNodeDescriptor.java
-Can_not_be_placed_at_this_side.=Can not be placed at this side.
-Not_enough_space_for_this_block.=Not enough space for this block.
-You_can't_place_this_block_at_this_side.=You can't place this block at this side.
-
-# ./src/main/java/mods/eln/node/transparent/TransparentNodeDescriptor.java
-Not_enough_space_for_this_block=Not enough space for this block
-You_can't_place_this_block_at_this_side=You can't place this block at this side
 
 # ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
 Input_power_is_limited_to_%1$W=Input power is limited to %1$W
@@ -346,7 +339,6 @@ Battery_slot=Battery slot
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
 Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Can be used to recharge\nelectrical items like:\nFlash Light, X-Ray scanner\nand Portable Battery ...
-Nominal_power\:_%1$=Nominal power: %1$
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
 Is_off=Is off
@@ -377,7 +369,7 @@ Switch_is_on=Switch is on
 A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$V=A signal is electrical information\nwhich must be between 0V and %1$V
 Cable_is_adapted_to_conduct\nelectrical_signals.=Cable is adapted to conduct\nelectrical signals.
 Current\:_%1$A=Current: %1$A
-Not_adopted_to_transport_power.=Not adopted to transport power.
+Not_adapted_to_transport_power.=Not adapted to transport power.
 Save_usage\:=Save usage:
 Serial_resistance\:_%1$Ω=Serial resistance: %1$Ω
 
@@ -396,8 +388,8 @@ Print=Print
 Sampling_period=Sampling period
 Temp._[*C]=Temp. [*C]
 Voltage_[V]=Voltage [V]
-Y-axis_Max=Y-axis Max
-Y-axis_Min=Y-axis Min
+Y-axis_max=Y-axis max
+Y-axis_min=Y-axis min
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
 
@@ -462,8 +454,7 @@ When_the_input_signal_is_high_this\nmaintains_a_high_output_signal\nfor_a_config
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
 Set=Set
-The_amount_of_time_the=The amount of time the
-output_is_kept_high.=output is kept high.
+The_amount_of_time_the\noutput_is_kept_high.=The amount of time the\noutput is kept high.
 
 # ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
 Displays_the_value_of_a_signal.=Displays the value of a signal.
@@ -584,7 +575,7 @@ Cable_slot=Cable slot
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
 Can_measure\:=Can measure:
-Measures_temperature_on_a_cable.=Measures temperature on a cable.
+Measures_temperature_of_a_cable.=Measures temperature of a cable.
 Measures_thermal_values_on_cables.=Measures thermal values on cables.
 __Temperature_Power_conducted=Temperature/Power conducted
 
@@ -792,6 +783,7 @@ Nominal\:=Nominal:
 Nominal_power\:_%1$W=Nominal power: %1$W
 Nominal_usage\:=Nominal usage:
 Nominal_voltage\:_%1$V=Nominal voltage: %1$V
+Not_enough_space_for_this_block=Not enough space for this block
 Power=Power
 Power\:_%1$W=Power: %1$W
 Range\:_%1$_blocks=Range: %1$ blocks
@@ -812,3 +804,4 @@ Uses_the_biggest\nvalue_on_the_channel.=Uses the biggest\nvalue on the channel.
 Uses_the_smallest\nvalue_on_the_channel.=Uses the smallest\nvalue on the channel.
 Validate=Validate
 Voltage\:_%1$V=Voltage: %1$V
+You_can't_place_this_block_at_this_side=You can't place this block at this side

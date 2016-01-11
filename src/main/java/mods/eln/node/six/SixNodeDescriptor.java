@@ -103,7 +103,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
                 }
             }
             if (!ok)
-                return tr("Can not be placed at this side");
+                return tr("You can't place this block at this side");
         }
         GhostGroup ghostGroup = getGhostGroup(direction, front);
         if (ghostGroup != null && !ghostGroup.canBePloted(coord))

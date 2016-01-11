@@ -32,8 +32,8 @@ public class ElectricalTimeoutGui extends GuiScreenEln {
 		timeoutValue = newGuiTextField(6, 6 + 20 * 2 + 4 * 2, 50);
 
         timeoutValue.setText(render.timeoutValue);
-		timeoutValue.setComment(0, tr("The amount of time the"));
-		timeoutValue.setComment(1, tr("output is kept high."));
+
+		timeoutValue.setComment(tr("The amount of time the\noutput is kept high.").split("\n"));
 	}
 
     @Override
