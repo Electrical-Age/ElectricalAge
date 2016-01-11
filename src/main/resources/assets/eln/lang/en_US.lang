@@ -522,7 +522,7 @@ Serial=Serial
 Specify_the_supply_channel=Specify the supply channel
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java
-\"Electrical_Cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.="Electrical Cable slot\nBase range is 32 blocks.\nEach additional cable\nincreases range by one.
+Electrical_Cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Electrical Cable slot\nBase range is 32 blocks.\nEach additional cable\nincreases range by one.
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
 Supplies_all_lamps_on_the_channel.=Supplies all lamps on the channel.
@@ -674,8 +674,8 @@ Produces_power_from_solar_radiation.=Produces power from solar radiation.
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPannelGuiDraw.java
 It_is_night=It is night
-Solar_Panel_alpha\:_%1$°=Solar Panel alpha: %1$°
-Sun_alpha\:_%1$°=Sun alpha: %1$°
+Solar_panel_angle\:_%1$°=Solar panel angle: %1$°
+Sun_angle\:_%1$°=Sun angle: %1$°
 
 # ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterGui.java
 Destination_transporter=Destination transporter
@@ -689,9 +689,6 @@ Transporter_name=Transporter name
 Fan_cooling_power\:_%1$W=Fan cooling power: %1$W
 Fan_power_consumption\:_%1$W=Fan power consumption: %1$W
 Fan_voltage\:_%1$V=Fan voltage: %1$V
-
-# ./src/main/java/mods/eln/transparentnode/transformer/TransformerContainer.java
-Ferromagnetic_sore_slot=Ferromagnetic sore slot
 
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerDescriptor.java
 The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=The voltage ratio is proportional\nto the cable stacks count ratio.
@@ -749,7 +746,8 @@ Recipe\:=Recipe:
 
 # Appearing in multiple source files
 (Increases_capacity)=(Increases capacity)
-(Increases_inductance_value)=(Increases inductance value)
+(Increases_inductance)=(Increases inductance)
+Actual\:_%1$°C=Actual: %1$°C
 Biggest=Biggest
 Booster_slot=Booster slot
 Can_create\:=Can create:
@@ -758,7 +756,6 @@ Charge_power\:_%1$W=Charge power: %1$W
 Connected=Connected
 Cooling_power\:_%1$W=Cooling power: %1$W
 Copper_cable_slot=Copper cable slot
-Current\:_%1$°C=Current: %1$°C
 Dielectric_slot=Dielectric slot
 Discharge_power\:_%1$W=Discharge power: %1$W
 Electrical_cable_slot=Electrical cable slot
