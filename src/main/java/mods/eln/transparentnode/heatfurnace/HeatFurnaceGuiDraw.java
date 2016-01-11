@@ -45,7 +45,7 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
     	vuMeterHeat.setStepIdMax(98);
     	vuMeterHeat.setEnable(true);
     	vuMeterHeat.setRange(0.0f, 980.0f);
-		vuMeterHeat.setComment(0, tr("Temperature Gauge"));
+		vuMeterHeat.setComment(0, tr("Temperature gauge"));
 		syncVumeterHeat();
     	
     	/*
@@ -90,11 +90,11 @@ public class HeatFurnaceGuiDraw extends GuiContainerEln {
         //vuMeterHeat.setVisible(render.controleExternal == false);
 
         vuMeterHeat.setComment(new String[]{});
-		vuMeterHeat.setComment(0, tr("Temperature Gauge"));
+		vuMeterHeat.setComment(0, tr("Temperature gauge"));
 		vuMeterHeat.setComment(1, tr("Current: %1$°C", Utils.plotValue(render.temperature)));
 		if (!render.controleExternal)
-        	vuMeterHeat.setComment(2, Utils.plotCelsius("Target:", vuMeterHeat.getValue()));
-		vuMeterGain.setComment(0, tr("Control Gauge at %1$%", (int) (vuMeterGain.getValue()) * 100));
+        	vuMeterHeat.setComment(2, Utils.plotCelsius("Set point:", vuMeterHeat.getValue()));
+		vuMeterGain.setComment(0, tr("Control gauge at %1$%", (int) (vuMeterGain.getValue()) * 100));
 
 		vuMeterGain.setComment(1, tr("Power: %1$W", render.power));
 	}
