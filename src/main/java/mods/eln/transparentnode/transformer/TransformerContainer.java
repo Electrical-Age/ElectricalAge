@@ -1,6 +1,5 @@
 package mods.eln.transparentnode.transformer;
 
-import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageSlot;
 import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.item.FerromagneticCoreDescriptor;
@@ -29,7 +28,7 @@ public class TransformerContainer extends BasicContainer {
 					new String[]{tr("Electrical cable slot")}),
 				new GenericItemUsingDamageSlot(inventory,ferromagneticSlotId,58 + (100-58)/2 + 0,30,1,
 					new Class[]{FerromagneticCoreDescriptor.class},SlotSkin.medium,
-					new String[]{tr("Ferromagnetic sore slot")})
+					new String[]{tr("Ferromagnetic core slot")})
 			
 				//	new SlotFilter(inventory,1,62 + 18,17,1,new ItemStackFilter[]{new ItemStackFilter(Eln.sixNodeBlock,0xFF,Eln.electricalCableId)})
 			});

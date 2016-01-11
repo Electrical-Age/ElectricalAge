@@ -22,7 +22,7 @@ public class PowerInductorContainer extends BasicContainer{
 		super(player, inventory, new Slot[]{
 			new GenericItemUsingDamageSlot(inventory, cableId, 132, 8, 19, CopperCableDescriptor.class,
 				SlotSkin.medium,
-				new String[]{tr("Copper cable slot"), tr("(Increases inductance value)")}),
+				new String[]{tr("Copper cable slot"), tr("(Increases inductance)")}),
 			new GenericItemUsingDamageSlot(inventory, coreId, 132 + 20, 8, 1, FerromagneticCoreDescriptor.class,
 				SlotSkin.medium,
 				new String[]{tr("Ferromagnetic core slot")})});
