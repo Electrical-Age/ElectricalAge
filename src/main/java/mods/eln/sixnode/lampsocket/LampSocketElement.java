@@ -273,9 +273,8 @@ public class LampSocketElement extends SixNodeElement {
 						needPublish(); //Sync
 					}
 				}
+				return true;
 			}
-
-			return true;
 		}
 
 		return false;
