@@ -36,11 +36,11 @@ public class ElectricalSensorGui extends GuiContainerEln {
 			
 			lowValue = newGuiTextField(x + 8 + 50 + 4, y + (166 - 84) / 2 + 3, 50);
 	        lowValue.setText(render.lowValue);
-			lowValue.setComment(tr("Measured value\ncorresponding\nto 0% output.").split("\n"));
+			lowValue.setComment(tr("Measured value\ncorresponding\nto 0% output").split("\n"));
 
 			highValue = newGuiTextField(x + 8 + 50 + 4, y + (166 - 84) / 2 - 13, 50);
 	        highValue.setText(render.highValue);
-	        highValue.setComment(tr("Measured value\ncorresponding\nto 100% output.").split("\n"));
+	        highValue.setComment(tr("Measured value\ncorresponding\nto 100% output").split("\n"));
 		} else {
 			validate = newGuiButton(8 + 50 + 4, 10, 50, tr("Validate"));
 			

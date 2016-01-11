@@ -80,7 +80,7 @@ public class WirelessSignalRxGui extends GuiScreenEln {
 		if (render.connection)
 			channel.setComment(1, "\u00a72" + tr("Connected"));
 		else
-			channel.setComment(1, "\u00a74" + tr("Unconnected"));
+			channel.setComment(1, "\u00a74" + tr("Not connected"));
 
 		super.preDraw(f, x, y);
 	}

@@ -341,7 +341,6 @@ Battery_slot=Battery slot
 Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Can be used to recharge\nelectrical items like:\nFlash Light, X-Ray scanner\nand Portable Battery ...
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
-Is_off=Is off
 
 # ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
 Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Electrical current can only\nflow through the diode\nfrom anode to cathode
@@ -479,8 +478,6 @@ Measures_voltage_on_cables.=Measures voltage on cables.
 
 # ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorGui.java
 Current=Current
-Measured_value\ncorresponding\nto_0%_output.=Measured value\ncorresponding\nto 0% output.
-Measured_value\ncorresponding\nto_100%_output.=Measured value\ncorresponding\nto 100% output.
 Measured_voltage\ncorresponding\nto_0%_output=Measured voltage\ncorresponding\nto 0% output
 Measured_voltage\ncorresponding\nto_100%_output=Measured voltage\ncorresponding\nto 100% output
 Voltage=Voltage
@@ -539,7 +536,6 @@ Add=Add
 Channel_name=Channel name
 Modbus_ID=Modbus ID
 Modbus_RTU=Modbus RTU
-Not_connected=Not connected
 Station_ID=Station ID
 Station_name=Station name
 Wireless_RX=Wireless RX
@@ -575,15 +571,13 @@ Cable_slot=Cable slot
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
 Can_measure\:=Can measure:
-Measures_temperature_of_a_cable.=Measures temperature of a cable.
+Measures_temperature_of_cables.=Measures temperature of cables.
 Measures_thermal_values_on_cables.=Measures thermal values on cables.
 __Temperature_Power_conducted=Temperature/Power conducted
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorGui.java
 Measured_temperature\ncorresponding\nto_0%_output=Measured temperature\ncorresponding\nto 0% output
 Measured_temperature\ncorresponding\nto_100%_output=Measured temperature\ncorresponding\nto 100% output
-Measured_value\ncorresponding\nto_0%_output=Measured value\ncorresponding\nto 0% output
-Measured_value\ncorresponding\nto_100%_output=Measured value\ncorresponding\nto 100% output
 Temperature=Temperature
 
 # ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignElement.java
@@ -593,7 +587,6 @@ No_text_associated_to_this_beacon=No text associated to this beacon
 Set_beacon_name=Set beacon name
 
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
-Unconnected=Unconnected
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
 Drill_slot=Drill slot
@@ -620,7 +613,7 @@ Charge=Charge
 Charged=Charged
 Discharge=Discharge
 Energy\:=Energy:
-Energy\:_=Energy: 
+Energy\:_%1$=Energy: %1$
 Life\:=Life:
 No_charge=No charge
 Power_in\:=Power in:
@@ -644,10 +637,8 @@ Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Similar to a vanilla 
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceGuiDraw.java
 Auto_shutdown=Auto shutdown
-Is_OFF=Is OFF
 Manual_shutdown=Manual shutdown
-Target\:_%1$°C=Target: %1$°C
-Temperature_gauge=Temperature gauge
+Set_point\:_%1$°C=Set point: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
 Cost=Cost
@@ -663,12 +654,11 @@ Fuel_slot=Fuel slot
 Generates_heat_when_supplied_with_fuel.=Generates heat when supplied with fuel.
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceGuiDraw.java
-Control_Gauge_at_%1$%=Control Gauge at %1$%
+Control_gauge_at_%1$%=Control gauge at %1$%
 Decline_fuel=Decline fuel
 External_control=External control
 Internal_control=Internal control
 Take_fuel=Take fuel
-Temperature_Gauge=Temperature Gauge
 
 # ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
 (Increases_maximal_voltage)=(Increases maximal voltage)
@@ -777,12 +767,16 @@ Ferromagnetic_core_slot=Ferromagnetic core slot
 Has_a_signal_output.=Has a signal output.
 Inductance\:_%1$H=Inductance: %1$H
 Internal_resistance\:_%1$Ω=Internal resistance: %1$Ω
+Is_off=Is off
 Is_on=Is on
 Max._temperature\:_%1$°C=Max. temperature: %1$°C
+Measured_value\ncorresponding\nto_0%_output=Measured value\ncorresponding\nto 0% output
+Measured_value\ncorresponding\nto_100%_output=Measured value\ncorresponding\nto 100% output
 Nominal\:=Nominal:
 Nominal_power\:_%1$W=Nominal power: %1$W
 Nominal_usage\:=Nominal usage:
 Nominal_voltage\:_%1$V=Nominal voltage: %1$V
+Not_connected=Not connected
 Not_enough_space_for_this_block=Not enough space for this block
 Power=Power
 Power\:_%1$W=Power: %1$W
@@ -795,6 +789,7 @@ Smallest=Smallest
 Specify_the_channel=Specify the channel
 Stored_energy\:_%1$J_(%2$%)=Stored energy: %1$J (%2$%)
 Temperature\:_%1$°C=Temperature: %1$°C
+Temperature_gauge=Temperature gauge
 Thermal_isolator_slot=Thermal isolator slot
 Toggle=Toggle
 Toggle_switch=Toggle switch

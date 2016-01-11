@@ -58,7 +58,7 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
     	if (render.getPowerOn())
     		buttonGrounded.displayString = tr("Is on");
     	else
-			buttonGrounded.displayString = tr("Is OFF");
+			buttonGrounded.displayString = tr("Is off");
 
 		if (render.autoShutDown) {
     		buttonGrounded.enabled = false;
@@ -72,7 +72,7 @@ public class ElectricalFurnaceGuiDraw extends GuiContainerEln {
         vuMeterTemperature.temperatureHit = render.temperature;
 
 		vuMeterTemperature.setComment(1, tr("Current: %1$°C", Utils.plotValue(render.temperature + PhysicalConstant.Tamb)));
-		vuMeterTemperature.setComment(2, tr("Target: %1$°C", Utils.plotValue(vuMeterTemperature.getValue() + PhysicalConstant.Tamb)));
+		vuMeterTemperature.setComment(2, tr("Set point: %1$°C", Utils.plotValue(vuMeterTemperature.getValue() + PhysicalConstant.Tamb)));
 	}
     
     @Override
