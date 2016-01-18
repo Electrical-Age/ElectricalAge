@@ -18,6 +18,7 @@ import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.mna.component.Transformer;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.process.TransformerInterSystemProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
@@ -35,11 +36,11 @@ public class TransformerElement extends TransparentNodeElement {
 	public NbtElectricalLoad primaryLoad = new NbtElectricalLoad("primaryLoad");
 	public NbtElectricalLoad secondaryLoad = new NbtElectricalLoad("secondaryLoad");
 
-	public VoltageSource primaryVoltageSource = new VoltageSource("primaryVoltageSource", primaryLoad, null);
-	public VoltageSource secondaryVoltageSource = new VoltageSource("secondaryVoltageSource", secondaryLoad, null);
+	//public VoltageSource primaryVoltageSource = new VoltageSource("primaryVoltageSource", primaryLoad, null);
+	//public VoltageSource secondaryVoltageSource = new VoltageSource("secondaryVoltageSource", secondaryLoad, null);
 
-	public TransformerInterSystemProcess interSystemProcess = new TransformerInterSystemProcess(primaryLoad, secondaryLoad, primaryVoltageSource, secondaryVoltageSource);
-
+//	public TransformerInterSystemProcess interSystemProcess = new TransformerInterSystemProcess(primaryLoad, secondaryLoad, primaryVoltageSource, secondaryVoltageSource);
+    public Transformer transformer = new Transformer(primaryLoad,secondaryLoad);
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
 
 	float primaryMaxCurrent = 0;
@@ -52,9 +53,9 @@ public class TransformerElement extends TransparentNodeElement {
 		
 		electricalLoadList.add(primaryLoad);
 		electricalLoadList.add(secondaryLoad);
-		electricalComponentList.add(primaryVoltageSource);
-		electricalComponentList.add(secondaryVoltageSource);
-
+		//electricalComponentList.add(primaryVoltageSource);
+		//electricalComponentList.add(secondaryVoltageSource);
+        electricalComponentList.add(transformer);
 		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
 		slowProcessList.add(voltagePrimaryWatchdog.set(primaryLoad).set(exp));
 		slowProcessList.add(voltageSecondaryWatchdog.set(secondaryLoad).set(exp));
@@ -80,12 +81,12 @@ public class TransformerElement extends TransparentNodeElement {
 	@Override
 	public void disconnectJob() {
 		super.disconnectJob();
-		Eln.simulator.mna.removeProcess(interSystemProcess);
+	//	Eln.simulator.mna.removeProcess(interSystemProcess);
 	}
 
 	@Override
 	public void connectJob() {
-		Eln.simulator.mna.addProcess(interSystemProcess);
+		//Eln.simulator.mna.addProcess(interSystemProcess);
 		super.connectJob();
 	}
 
@@ -122,11 +123,11 @@ public class TransformerElement extends TransparentNodeElement {
 
 	@Override
 	public String multiMeterString(Direction side) {
-		if (side == front.left()) return Utils.plotVolt("UP+:", primaryLoad.getU()) + Utils.plotAmpere("IP+:", primaryLoad.getCurrent());
-		if (side == front.right()) return Utils.plotVolt("US+:", secondaryLoad.getU()) + Utils.plotAmpere("IS+:", secondaryLoad.getCurrent());
+		if (side == front.left()) return Utils.plotVolt("UP+:", primaryLoad.getU()) + Utils.plotAmpere("IP+:", -primaryLoad.getCurrent());
+		if (side == front.right()) return Utils.plotVolt("US+:", secondaryLoad.getU()) + Utils.plotAmpere("IS+:", -secondaryLoad.getCurrent());
 
-		return Utils.plotVolt("UP+:", primaryLoad.getU()) + Utils.plotAmpere("IP+:", primaryLoad.getCurrent())
-				+ Utils.plotVolt("  US+:", secondaryLoad.getU()) + Utils.plotAmpere("IS+:", secondaryLoad.getCurrent());
+		return Utils.plotVolt("UP+:", primaryLoad.getU()) + Utils.plotAmpere("IP+:", transformer.aCurrentState.state)
+            + Utils.plotVolt("  US+:", secondaryLoad.getU()) + Utils.plotAmpere("IS+:", transformer.bCurrentState.state);
 
 	}
 
@@ -195,14 +196,14 @@ public class TransformerElement extends TransparentNodeElement {
 
 		if (primaryCable != null && secondaryCable != null)
 		{
-			interSystemProcess.setRatio(1.0 * secondaryCable.stackSize / primaryCable.stackSize);
+			transformer.setRatio(1.0 * secondaryCable.stackSize / primaryCable.stackSize);
 			/*
 			 * tranformerProcess.setIMax( 2 * primaryCableDescriptor.electricalNominalPower / primaryCableDescriptor.electricalNominalVoltage, 2 * secondaryCableDescriptor.electricalNominalPower / secondaryCableDescriptor.electricalNominalVoltage);
 			 */
 		}
 		else
 		{
-			interSystemProcess.setRatio(1);
+            transformer.setRatio(1);
 			// tranformerProcess.setIMax(
 		}
 	}
