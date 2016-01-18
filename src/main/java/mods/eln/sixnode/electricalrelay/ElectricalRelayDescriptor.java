@@ -96,8 +96,9 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if (type == ItemRenderType.INVENTORY) {
 			super.renderItem(type, item, data);
+		} else {
+			draw(0f);
 		}
-		draw(0f);
 	}
 	
 	void draw(float factor) {
