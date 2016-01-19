@@ -56,6 +56,7 @@ public class TransformerRender extends TransparentNodeElementRender{
 	
 	byte primaryStackSize,secondaryStackSize;
 	CableRenderDescriptor priRender,secRender;
+	public boolean isIsolator;
 	
 	Obj3DPart feroPart;
 	@Override
@@ -99,6 +100,7 @@ public class TransformerRender extends TransparentNodeElementRender{
 			
 			}
 			cableRenderType = null;
+			isIsolator = stream.readBoolean();
 			
 		} catch (IOException e) {
 			

@@ -1,5 +1,6 @@
 package mods.eln.transparentnode.transformer;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
@@ -31,22 +32,25 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 
 public class TransformerElement extends TransparentNodeElement {
 	public NbtElectricalLoad primaryLoad = new NbtElectricalLoad("primaryLoad");
 	public NbtElectricalLoad secondaryLoad = new NbtElectricalLoad("secondaryLoad");
 
-	//public VoltageSource primaryVoltageSource = new VoltageSource("primaryVoltageSource", primaryLoad, null);
-	//public VoltageSource secondaryVoltageSource = new VoltageSource("secondaryVoltageSource", secondaryLoad, null);
+	public VoltageSource primaryVoltageSource = new VoltageSource("primaryVoltageSource");
+	public VoltageSource secondaryVoltageSource = new VoltageSource("secondaryVoltageSource");
 
-//	public TransformerInterSystemProcess interSystemProcess = new TransformerInterSystemProcess(primaryLoad, secondaryLoad, primaryVoltageSource, secondaryVoltageSource);
-    public Transformer transformer = new Transformer(primaryLoad,secondaryLoad);
+	public TransformerInterSystemProcess interSystemProcess = new TransformerInterSystemProcess(primaryLoad, secondaryLoad, primaryVoltageSource, secondaryVoltageSource);
+    public Transformer transformer = new Transformer();
+
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
 
 	float primaryMaxCurrent = 0;
 	float secondaryMaxCurrent = 0;
 	TransformerDescriptor transformerDescriptor;
 	SoundLooper highLoadSoundLooper;
+	boolean isIsolator = false;
 	
 	public TransformerElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
@@ -55,7 +59,7 @@ public class TransformerElement extends TransparentNodeElement {
 		electricalLoadList.add(secondaryLoad);
 		//electricalComponentList.add(primaryVoltageSource);
 		//electricalComponentList.add(secondaryVoltageSource);
-        electricalComponentList.add(transformer);
+        //electricalComponentList.add(transformer);
 		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
 		slowProcessList.add(voltagePrimaryWatchdog.set(primaryLoad).set(exp));
 		slowProcessList.add(voltageSecondaryWatchdog.set(secondaryLoad).set(exp));
@@ -81,12 +85,14 @@ public class TransformerElement extends TransparentNodeElement {
 	@Override
 	public void disconnectJob() {
 		super.disconnectJob();
-	//	Eln.simulator.mna.removeProcess(interSystemProcess);
+		if(isIsolator)
+			Eln.simulator.mna.removeProcess(interSystemProcess);
 	}
 
 	@Override
 	public void connectJob() {
-		//Eln.simulator.mna.addProcess(interSystemProcess);
+		if(isIsolator)
+			Eln.simulator.mna.addProcess(interSystemProcess);
 		super.connectJob();
 	}
 
@@ -138,8 +144,8 @@ public class TransformerElement extends TransparentNodeElement {
 
 	@Override
 	public void initialize() {
+		applyIsolation();
 		computeInventory();
-
 		connect();
 	}
 
@@ -197,14 +203,37 @@ public class TransformerElement extends TransparentNodeElement {
 		if (primaryCable != null && secondaryCable != null)
 		{
 			transformer.setRatio(1.0 * secondaryCable.stackSize / primaryCable.stackSize);
+			interSystemProcess.setRatio(1.0 * secondaryCable.stackSize / primaryCable.stackSize);
 			/*
 			 * tranformerProcess.setIMax( 2 * primaryCableDescriptor.electricalNominalPower / primaryCableDescriptor.electricalNominalVoltage, 2 * secondaryCableDescriptor.electricalNominalPower / secondaryCableDescriptor.electricalNominalVoltage);
 			 */
 		}
 		else
 		{
-            transformer.setRatio(1);
+			transformer.setRatio(1);
+			interSystemProcess.setRatio(1);
 			// tranformerProcess.setIMax(
+		}
+	}
+
+
+	public void applyIsolation(){
+		electricalComponentList.remove(transformer);
+		electricalComponentList.remove(primaryVoltageSource);
+		electricalComponentList.remove(secondaryVoltageSource);
+		primaryLoad.remove(primaryVoltageSource);
+		secondaryLoad.remove(secondaryVoltageSource);
+		primaryLoad.remove(transformer);
+		secondaryLoad.remove(transformer);
+
+		if(isIsolator) {
+			primaryVoltageSource.connectTo(primaryLoad,null);
+			secondaryVoltageSource.connectTo(secondaryLoad,null);
+			electricalComponentList.add(primaryVoltageSource);
+			electricalComponentList.add(secondaryVoltageSource);
+		}else {
+			transformer.connectTo(primaryLoad,secondaryLoad);
+			electricalComponentList.add(transformer);
 		}
 	}
 
@@ -253,6 +282,21 @@ public class TransformerElement extends TransparentNodeElement {
 		computeInventory();
 		reconnect();
 	}
+	public static final byte toogleIsIsolator = 0x1;
+
+	@Override
+	public byte networkUnserialize(DataInputStream stream) {
+		switch(super.networkUnserialize(stream)) {
+			case toogleIsIsolator:
+				disconnect();
+				isIsolator = ! isIsolator;
+				applyIsolation();
+				reconnect();
+				needPublish();
+				break;
+		}
+		return 0;
+	}
 
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
@@ -273,9 +317,23 @@ public class TransformerElement extends TransparentNodeElement {
 			Utils.serialiseItemStack(stream, inventory.getStackInSlot(TransformerContainer.secondaryCableSlotId));
 
 			node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
+			stream.writeBoolean(isIsolator);
 		} catch (IOException e) {
 
 			e.printStackTrace();
 		}
+	}
+
+
+	@Override
+	public void writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		nbt.setBoolean("isIsolated",isIsolator);
+	}
+
+	@Override
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		isIsolator = nbt.getBoolean("isIsolated");
 	}
 }
