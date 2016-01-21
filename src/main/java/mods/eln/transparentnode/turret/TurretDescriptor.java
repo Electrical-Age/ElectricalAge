@@ -91,7 +91,7 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 
     @Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 	
 	@Override
