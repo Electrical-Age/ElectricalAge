@@ -1,7 +1,5 @@
 package mods.eln.item.electricalitem;
 
-import java.util.List;
-
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
@@ -20,13 +18,15 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
-
 import org.lwjgl.opengl.GL11;
+
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -36,6 +36,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 	float viewRange, viewYAlpha;
 	int resWidth, resHeight;
 	private Obj3D obj;
+	private final ResourceLocation iconResource;
 
 	Obj3DPart base, led, ledHalo;
 	Obj3DPart textBat[], textRun, textInit;
@@ -78,6 +79,8 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			buttons = obj.getPart("Buttons");
 			screenLuma = obj.getPart("ScreenLuma");
 		}
+
+		iconResource = new ResourceLocation("eln", "textures/items/x-rayscanner.png");
 	}
 
 	public boolean use2DIcon() {
@@ -295,20 +298,10 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 					GL11.glTranslatef(0.0f, 1, -0.2f);
 					break;
 				case INVENTORY:
-					/*GL11.glRotatef(130, 0, 0, 1);
-					GL11.glRotatef(140, 1, 0, 0);
-					GL11.glRotatef(-20, 0, 1, 0);
-					GL11.glScalef(1.6f,1.6f,1.6f);
-					GL11.glTranslatef(-0.2f, 0.7f, -0.0f);*/
-					GL11.glTranslatef(3, 14f, -15f);
-					GL11.glScalef(14f, 14f, 14f);
-					GL11.glRotatef(45, 0, 1, 0);
-
-					GL11.glRotatef(90, 0, 1, 0);
-					GL11.glRotatef(-135, 0, 0, 1);
-				
-					e = null;
-					break;
+					UtilsClient.drawIcon(type, iconResource);
+					GL11.glPopMatrix();
+					return;
+					
 				case FIRST_PERSON_MAP:
 					e = null;//(Entity)data[0];
 					break;
