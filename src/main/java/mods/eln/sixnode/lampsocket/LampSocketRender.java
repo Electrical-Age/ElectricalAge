@@ -74,8 +74,6 @@ public class LampSocketRender extends SixNodeElementRender {
 		super.draw(); //Colored cable only
 
 		GL11.glRotatef(descriptor.initialRotateDeg, 1.f, 0.f, 0.f);
-		if(descriptor.paintable)
-			Utils.setGlColorFromDye(paintColor,2.f);
 		descriptor.render.draw(this, UtilsClient.distanceFromClientPlayer(this.tileEntity));
 	}
 

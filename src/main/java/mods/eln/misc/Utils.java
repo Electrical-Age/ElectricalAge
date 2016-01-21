@@ -448,8 +448,61 @@ public class Utils {
 				GL11.glColor3f(1.0f * gain, 1.0f * gain, 1.0f * gain);
 				break;
 		}
-
 		// GL11.glColor3f(((color >> 16) & 0xFF) / 255f, ((color >> 7) & 0xFF) / 255f, ((color >> 0) & 0xFF) / 255f);
+	}
+
+	public static void setGlColorFromLamp(int colorIdx) {
+		switch (colorIdx) {
+			default:
+			case 15: //White
+				GL11.glColor3f(1.0f, 1.0f, 1.0f);
+				break;
+			case 0: //Black
+				GL11.glColor3f(0.25f, 0.25f, 0.25f);
+				break;
+			case 1: //Red
+				GL11.glColor3f(1.0f, 0.5f, 0.5f);
+				break;
+			case 2: //Green
+				GL11.glColor3f(0.5f, 1.0f, 0.5f);
+				break;
+			case 3: //Brown
+				GL11.glColor3f(0.5647f, 0.36f, 0.36f);
+				break;
+			case 4: //Blue
+				GL11.glColor3f(0.5f, 0.5f, 1.0f);
+				break;
+			case 5: //Purple
+				GL11.glColor3f(0.78125f, 0.46666f, 1.0f);
+				break;
+			case 6: //Cyan
+				GL11.glColor3f(0.5f, 1.0f, 1.0f);
+				break;
+			case 7: //Silver
+				GL11.glColor3f(0.75f, 0.75f, 0.75f);
+				break;
+			case 8: //Gray
+				GL11.glColor3f(0.5f, 0.5f, 0.5f);
+				break;
+			case 9: //Pink
+				GL11.glColor3f(1.0f, 0.5f, 0.65882f);
+				break;
+			case 10: //Lime
+				GL11.glColor3f(0.75f, 1.0f, 0.5f);
+				break;
+			case 11: //Yellow
+				GL11.glColor3f(1.0f, 1.0f, 0.5f);
+				break;
+			case 12: //Light Blue
+				GL11.glColor3f(0.5f, 0.75f, 1.0f);
+				break;
+			case 13: //Magenta
+				GL11.glColor3f(1.0f, 0.5f, 1.0f);
+				break;
+			case 14: //Orange
+				GL11.glColor3f(1.0f, 0.80f, 0.5f);
+				break;
+		}
 	}
 
 	/*

@@ -322,7 +322,6 @@ public class CableRender {
 		//GL11.glDisable(GL11.GL_TEXTURE);
 		//if(connection.mask != 0) return;
 		float tx, ty;
-		//GL11.glColor3b(wireColor.getRedByte(), wireColor.getGreenByte(), wireColor.getBlueByte());
 		{
 			float left0 = -deltaStart, right0 = deltaStart, up0 = deltaStart, down0 = -deltaStart;
 			

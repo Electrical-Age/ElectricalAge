@@ -2,7 +2,6 @@ package mods.eln.sixnode.lampsocket;
 
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import org.lwjgl.opengl.GL11;
@@ -45,28 +44,32 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 				GL11.glTranslatef(-0.5f, 0f, -1f);
 			}
 		}
-		draw(LRDU.Up, 0, (byte) 0, true, distanceToPlayer);
+		draw(LRDU.Up, 0, (byte) 0, true, 15, distanceToPlayer);
 	}
 
 	@Override
 	public void draw(LampSocketRender render, double distanceToPlayer) {
-		draw(render.front, render.alphaZ, render.light, render.lampDescriptor != null, distanceToPlayer);
+		int color = 15;
+		if(render.descriptor.paintable)
+			color = render.paintColor;
+		draw(render.front, render.alphaZ, render.light, render.lampDescriptor != null, color, distanceToPlayer);
 	}
 
-	public void draw(LRDU front, float alphaZ, byte light, boolean hasBulb, double distanceToPlayer) {
+	public void draw(LRDU front, float alphaZ, byte light, boolean hasBulb, int color, double distanceToPlayer) {
 		front.glRotateOnX();
 
 		UtilsClient.disableCulling();
 
+		Utils.setGlColorFromLamp(color);
 		if (!onOffModel) {
 			if (socket != null) socket.draw();
 		} else {
 			//
 			if (light > 8) {
 				UtilsClient.bindTexture(tOn);
-			} else
+			} else {
 				UtilsClient.bindTexture(tOff);
-
+			}
 			if (socket_unlightable != null) socket_unlightable.drawNoBind();
 
 			if (light > 8) {
@@ -107,9 +110,10 @@ public class LampSocketStandardObjRender implements LampSocketObjRender {
 			}
 		}
 
-		GL11.glColor4f(1.f, 0.98f, 0.92f, light * 0.06667f);
-		if (lightAlphaPlane != null)
-				lightAlphaPlane.draw();
+		if (lightAlphaPlane != null) {
+			GL11.glColor4f(1.f, 0.98f, 0.92f, light * 0.06667f);
+			lightAlphaPlane.draw();
+		}
 
 		UtilsClient.enableLight();
 		UtilsClient.disableBlend();
