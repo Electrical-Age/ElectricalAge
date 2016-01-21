@@ -84,7 +84,13 @@ public class LampSocketElement extends SixNodeElement {
 		channel = nbt.getString("channel");
 
 		byte b = nbt.getByte("color");
-		paintColor = b & 0xF;
+		if(socketDescriptor.paintable)
+			paintColor = b & 0xF;
+		else{
+			//For avoid existing lamps just set paintable to be drawn black (0) by default.
+			//Of course, maps need to be loaded with this code before set an already existing lamp paintable.
+			paintColor = 0x0F;
+		}
 	}
 
 	@Override
@@ -93,7 +99,6 @@ public class LampSocketElement extends SixNodeElement {
 		nbt.setByte("front", (byte) ((front.toInt() << 0) + (grounded ? 4 : 0)));
 		nbt.setBoolean("poweredByLampSupply", poweredByLampSupply);
 		nbt.setString("channel", channel);
-
 		nbt.setByte("color", (byte) (paintColor));
 	}
 
