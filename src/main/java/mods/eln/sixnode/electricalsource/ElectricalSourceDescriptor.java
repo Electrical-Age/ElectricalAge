@@ -58,4 +58,22 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
         list.add("");
 		list.add(tr("Creative block."));
 	}
+
+	@Override
+	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+		return true;//type != ItemRenderType.INVENTORY;
+	}
+
+	@Override
+	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		if (type != ItemRenderType.INVENTORY) {
+			GL11.glPushMatrix();
+			GL11.glTranslatef(0.8f,0.3f,0.2f);
+			GL11.glRotatef(150, 0,0,1);
+			draw(false);
+			GL11.glPopMatrix();
+		} else {
+			super.renderItem(type, item, data);
+		}
+	}
 }
