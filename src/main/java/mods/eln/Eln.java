@@ -402,6 +402,7 @@ public class Eln {
 		incandescentLampLife = config.get("lamp", "incandescentLifeInHours", 16.0).getDouble(16.0) * 3600;
 		economicLampLife = config.get("lamp", "economicLifeInHours", 64.0).getDouble(64.0) * 3600;
 		carbonLampLife = config.get("lamp", "carbonLifeInHours", 6.0).getDouble(6.0) * 3600;
+		ledLampLife = config.get("lamp", "ledLifeInHours", 512.0).getDouble(512.0) * 3600;
 
 		addOtherModOreToXRay = config.get("xrayscannerconfig", "addOtherModOreToXRay", true).getBoolean(true);
 		xRayScannerRange = (float) config.get("xrayscannerconfig", "rangeInBloc", 5.0).getDouble(5.0);
@@ -2965,6 +2966,7 @@ public class Eln {
 	double incandescentLampLife;
 	double economicLampLife;
 	double carbonLampLife;
+	double ledLampLife;
 
 	void registerLampItem(int id) {
 		int subId, completId;
@@ -3097,6 +3099,28 @@ public class Eln {
 					LampSocketType.Douille, MVU, 120, // nominalU, nominalP
 					lightLevel[15], incandescentLampLife, 0.50 // nominalLight,
 																// nominalLife
+			);
+			sharedItem.addElement(completId, element);
+		}
+		{
+			subId = 37;
+			completId = subId + (id << 6);
+			element = new LampDescriptor(TR_NAME(Type.NONE, "50V LED Bulb"),
+				"ledlamp-50v", LampDescriptor.Type.LED,
+				LampSocketType.Douille, LVU, lightPower[14] / 2, // nominalU, nominalP
+				lightLevel[14], ledLampLife, standardGrowRate // nominalLight,
+				// nominalLife
+			);
+			sharedItem.addElement(completId, element);
+		}
+		{
+			subId = 38;
+			completId = subId + (id << 6);
+			element = new LampDescriptor(TR_NAME(Type.NONE, "200V LED Bulb"),
+				"ledlamp-200v", LampDescriptor.Type.LED,
+				LampSocketType.Douille, MVU, lightPower[14] / 2, // nominalU, nominalP
+				lightLevel[14], ledLampLife, standardGrowRate // nominalLight,
+				// nominalLife
 			);
 			sharedItem.addElement(completId, element);
 		}

@@ -1,10 +1,5 @@
 package mods.eln.item;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.List;
-
 import mods.eln.Eln;
 import mods.eln.misc.IConfigSharing;
 import mods.eln.misc.Utils;
@@ -16,11 +11,16 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.List;
+
 import static mods.eln.i18n.I18N.tr;
 
 public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade implements IConfigSharing {
 
-	public enum Type {Incandescent, eco}
+	public enum Type {Incandescent, eco, LED}
 	public double nominalP,nominalLight, nominalLife;
 	public String name, description;
 	public Type type;
@@ -55,6 +55,9 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
 				minimalU = nominalU * 0.5;
 				stableU = nominalU * stableUNormalised;
 				stableTime = 4;
+				break;
+			case LED:
+				minimalU = nominalU * 0.75;
 				break;
 			default:
 				break;

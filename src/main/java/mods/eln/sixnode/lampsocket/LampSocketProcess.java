@@ -1,10 +1,5 @@
 package mods.eln.sixnode.lampsocket;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
@@ -24,6 +19,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObserver*/ {
 
@@ -204,10 +204,11 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 			double lightDouble = 0;
 			switch (lampDescriptor.type) {
                 case Incandescent:
+				case LED:
                     lightDouble = lampDescriptor.nominalLight * (Math.abs(lamp.lampResistor.getU()) - lampDescriptor.minimalU) / (lampDescriptor.nominalU - lampDescriptor.minimalU);
                     lightDouble = (lightDouble * 16);
-
                     break;
+
                 case eco:
                     double U = Math.abs(lamp.lampResistor.getU());
                     if (U < lampDescriptor.minimalU) {
@@ -227,6 +228,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                         }
                     }
                     break;
+
                 default:
                     break;
 			}
