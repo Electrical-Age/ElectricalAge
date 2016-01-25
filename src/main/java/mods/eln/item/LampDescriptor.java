@@ -3,6 +3,7 @@ package mods.eln.item;
 import mods.eln.Eln;
 import mods.eln.misc.IConfigSharing;
 import mods.eln.misc.Utils;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sixnode.lampsocket.LampSocketType;
 import mods.eln.wiki.Data;
@@ -50,20 +51,24 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
 			case Incandescent:
 				minimalU = nominalU * 0.5;
 				break;
+
 			case eco:
 				stableUNormalised = 0.75;
 				minimalU = nominalU * 0.5;
 				stableU = nominalU * stableUNormalised;
 				stableTime = 4;
 				break;
+
 			case LED:
 				minimalU = nominalU * 0.75;
 				break;
+
 			default:
 				break;
 		}
 		
 		Eln.instance.configShared.add(this);
+		voltageLevelColor = VoltageLevelColor.fromVoltage(nominalU);
 	}
 	
 	@Override

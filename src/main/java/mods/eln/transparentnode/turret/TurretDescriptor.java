@@ -1,16 +1,16 @@
 package mods.eln.transparentnode.turret;
 
-import mods.eln.misc.Utils;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-
-import org.lwjgl.opengl.GL11;
-
 import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
+import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -91,18 +91,32 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 
     @Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return type != ItemRenderType.INVENTORY;
-	}
-	
-	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
 		return true;
 	}
 	
 	@Override
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		return type != ItemRenderType.INVENTORY;
+	}
+
+	@Override
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		return type != ItemRenderType.INVENTORY;
+	}
+
+	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		draw(null);
+		switch (type) {
+			case INVENTORY:
+			case FIRST_PERSON_MAP:
+				VoltageLevelColor.HighVoltage.drawIconBackground(type);
+				UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/blocks/800vdefenceturret.png"));
+				super.renderItem(type, item, data);
+				break;
+
+			default:
+				draw(null);
+		}
 	}
 	
 	public void draw(TurretRender render) {

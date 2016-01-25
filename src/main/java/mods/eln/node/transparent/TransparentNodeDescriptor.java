@@ -1,9 +1,5 @@
 package mods.eln.node.transparent;
 
-import java.util.List;
-
-import org.lwjgl.opengl.GL11;
-
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Coordonate;
@@ -13,18 +9,18 @@ import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNode.FrontType;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHopper;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer;
-import net.minecraftforge.client.IRenderContextHandler;
+import org.lwjgl.opengl.GL11;
+
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescriptor implements IItemRenderer{
+public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescriptor implements IItemRenderer {
 	public Class ElementClass,RenderClass;
 	public TransparentNodeDescriptor(  String name,
 							 Class ElementClass,Class RenderClass) {
@@ -39,19 +35,22 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		
 		return false;
 	}
+
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
 		
 		return false;
 	}
+
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		return true;
+	}
+
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		
-		
 	}
 	
 	public void objItemScale(Obj3D obj)

@@ -3,6 +3,7 @@ package mods.eln.sixnode.diode;
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
@@ -55,6 +56,10 @@ public class DiodeDescriptor extends SixNodeDescriptor {
         base = obj.getPart("Base");
         diodeCables = obj.getPart("DiodeCables");
         diodeCore = obj.getPart("DiodeCore");
+
+        if (cable.signalWire) {
+            voltageLevelColor = VoltageLevelColor.SignalVoltage;
+        }
 	}
 
 	@Override

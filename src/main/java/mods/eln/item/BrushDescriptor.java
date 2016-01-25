@@ -19,12 +19,11 @@ import static mods.eln.i18n.I18N.tr;
 public class BrushDescriptor extends GenericItemUsingDamageDescriptor {
 
 	private final ResourceLocation icon;
-	private final ResourceLocation dryOverlay;
+	private static ResourceLocation dryOverlay = new ResourceLocation("eln", "textures/items/brushdryoverlay.png");
 
 	public BrushDescriptor(String name) {
 		super( name);
 		icon = new ResourceLocation("eln", "textures/items/" + name.toLowerCase().replace(" ", "") + ".png");
-		dryOverlay = new ResourceLocation("eln", "textures/items/brush-dry-overlay.png");
 	}
 
 	@Override

@@ -1,13 +1,13 @@
 package mods.eln.item;
 
-import java.util.List;
-
-import mods.eln.misc.Utils;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.RegulatorThermalLoadToElectricalResistor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -36,6 +36,8 @@ public class HeatingCorpElement extends GenericItemUsingDamageDescriptorUpgrade 
 		electricalR = electricalNominalU * electricalNominalU / electricalNominalP;
 		
 		Umax = Math.sqrt(electricalMaximalP * electricalR);
+
+		voltageLevelColor = VoltageLevelColor.fromVoltage(electricalNominalU);
 	}
 /*
 	public void applyTo(ElectricalResistor resistor) {

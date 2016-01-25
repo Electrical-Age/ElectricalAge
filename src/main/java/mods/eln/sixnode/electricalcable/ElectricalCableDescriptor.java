@@ -3,6 +3,7 @@ package mods.eln.sixnode.electricalcable;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
@@ -48,6 +49,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
 		this.description = description;
 		this.render = render;
 		this.signalWire = signalWire;
+
 	}
 
 	public void setPhysicalConstantLikeNormalCable(
@@ -87,6 +89,8 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
 		dielectricBreakOhmMin = dielectricBreakOhm;
 		
 		this.electricalMaximalCurrent = electricalMaximalPower/electricalNominalVoltage;
+
+		voltageLevelColor = VoltageLevelColor.fromCable(this);
 	}
 
 	@Override

@@ -1,10 +1,9 @@
 package mods.eln.generic;
 
-import java.util.List;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-
+import mods.eln.misc.UtilsClient;
+import mods.eln.misc.VoltageLevelColor;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
@@ -14,21 +13,29 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IIcon;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
+
+import java.util.List;
 
 public class GenericItemUsingDamageDescriptor {
 
 	public String IconName;
 	private IIcon iconIndex;
 	public String name;
+	public VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
 
 	public Item parentItem;
 	public int parentItemDamage;
 
 	public GenericItemUsingDamageDescriptor(String name) {
-		this.IconName = "eln:" + name.replaceAll(" ", "").toLowerCase();
+		this(name, name);
+	}
+
+	public GenericItemUsingDamageDescriptor(String name, String iconName) {
+		this.IconName = "eln:" + iconName.replaceAll(" ", "").toLowerCase();
 		this.name = name;
 	}
 
@@ -120,7 +127,7 @@ public class GenericItemUsingDamageDescriptor {
 	}
 
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return ! use2DIcon();
+		return voltageLevelColor != VoltageLevelColor.None || !use2DIcon();
 	}
 
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
@@ -128,6 +135,14 @@ public class GenericItemUsingDamageDescriptor {
 	}
 
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+		if (getIcon() == null)
+			return;
+
+		voltageLevelColor.drawIconBackground(type);
+
+		// remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
+		String icon = getIcon().getIconName().substring(4);
+		UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/items/" + icon + ".png"));
 	}
 
 	public void onUpdate(ItemStack stack, World world, Entity entity, int par4, boolean par5) {

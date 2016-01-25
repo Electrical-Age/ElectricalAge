@@ -3,6 +3,7 @@ package mods.eln.sixnode.electricalrelay;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.component.Resistor;
@@ -50,6 +51,8 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
                 r1rOn = relay1.getFloat("rOn");
             }
         }
+
+		voltageLevelColor = VoltageLevelColor.fromCable(cable);
 	}
 
 	void applyTo(ElectricalLoad load) {

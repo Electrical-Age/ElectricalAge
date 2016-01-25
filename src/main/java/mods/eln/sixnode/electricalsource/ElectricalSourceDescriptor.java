@@ -4,6 +4,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -61,19 +62,32 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return true;//type != ItemRenderType.INVENTORY;
+		return true;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		if (type != ItemRenderType.INVENTORY) {
-			GL11.glPushMatrix();
-			GL11.glTranslatef(0.8f,0.3f,0.2f);
-			GL11.glRotatef(150, 0,0,1);
-			draw(false);
-			GL11.glPopMatrix();
-		} else {
-			super.renderItem(type, item, data);
+		switch (type) {
+			case ENTITY:
+				draw(false);
+				break;
+
+			case EQUIPPED:
+			case EQUIPPED_FIRST_PERSON:
+				GL11.glPushMatrix();
+				GL11.glTranslatef(0.8f,0.3f,0.2f);
+				GL11.glRotatef(150, 0,0,1);
+				draw(false);
+				GL11.glPopMatrix();
+				break;
+
+			case INVENTORY:
+			case FIRST_PERSON_MAP:
+				if (signalSource) {
+					VoltageLevelColor.SignalVoltage.drawIconBackground(type);
+				}
+				super.renderItem(type, item, data);
+				break;
 		}
 	}
 }

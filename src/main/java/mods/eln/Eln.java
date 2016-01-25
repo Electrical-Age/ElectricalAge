@@ -2984,7 +2984,7 @@ public class Eln {
 			subId = 0;
 			completId = subId + (id << 6);
 			element = new LampDescriptor(TR_NAME(Type.NONE, "Small 50V Incandescent Light Bulb"),
-					"incandescentlamp-iron-50v", LampDescriptor.Type.Incandescent,
+					"incandescentironlamp", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[12], // nominalU,
 																	// nominalP
 					lightLevel[12], incandescentLampLife, standardGrowRate // nominalLight,
@@ -2996,7 +2996,7 @@ public class Eln {
 			subId = 1;
 			completId = subId + (id << 6);
 			element = new LampDescriptor(TR_NAME(Type.NONE, "50V Incandescent Light Bulb"),
-					"incandescentlamp-iron-50v", LampDescriptor.Type.Incandescent,
+					"incandescentironlamp", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[14], // nominalU,
 																	// nominalP
 					lightLevel[14], incandescentLampLife, standardGrowRate // nominalLight,
@@ -3008,7 +3008,7 @@ public class Eln {
 			subId = 2;
 			completId = subId + (id << 6);
 			element = new LampDescriptor(TR_NAME(Type.NONE, "200V Incandescent Light Bulb"),
-					"incandescentlamp-iron-200v", LampDescriptor.Type.Incandescent,
+					"incandescentironlamp", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, MVU, lightPower[14], // nominalU,
 																	// nominalP
 					lightLevel[14], incandescentLampLife, standardGrowRate // nominalLight,
@@ -3022,7 +3022,7 @@ public class Eln {
 			completId = subId + (id << 6);
 			element = new LampDescriptor(
 				TR_NAME(Type.NONE, "Small 50V Carbon Incandescent Light Bulb"),
-					"incandescentlamp-carbon-50v", LampDescriptor.Type.Incandescent,
+					"incandescentcarbonlamp", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[11], // nominalU,
 																	// nominalP
 					lightLevel[11], carbonLampLife, standardGrowRate // nominalLight,
@@ -3034,7 +3034,7 @@ public class Eln {
 			subId = 5;
 			completId = subId + (id << 6);
 			element = new LampDescriptor(TR_NAME(Type.NONE, "50V Carbon Incandescent Light Bulb"),
-					"incandescentlamp-carbon-50v", LampDescriptor.Type.Incandescent,
+					"incandescentcarbonlamp", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, lightPower[13], // nominalU,
 																	// nominalP
 					lightLevel[13], carbonLampLife, standardGrowRate // nominalLight,
@@ -3047,7 +3047,7 @@ public class Eln {
 			subId = 16;
 			completId = subId + (id << 6);
 			element = new LampDescriptor(TR_NAME(Type.NONE, "Small 50V Economic Light Bulb"),
-					"economiclamp-50v", LampDescriptor.Type.eco,
+					"fluorescentlamp", LampDescriptor.Type.eco,
 					LampSocketType.Douille, LVU, lightPower[12]
 							* economicPowerFactor, // nominalU, nominalP
 					lightLevel[12], economicLampLife, standardGrowRate // nominalLight,
@@ -3059,7 +3059,7 @@ public class Eln {
 			subId = 17;
 			completId = subId + (id << 6);
 			element = new LampDescriptor(TR_NAME(Type.NONE, "50V Economic Light Bulb"),
-					"economiclamp-50v", LampDescriptor.Type.eco,
+					"fluorescentlamp", LampDescriptor.Type.eco,
 					LampSocketType.Douille, LVU, lightPower[14]
 							* economicPowerFactor, // nominalU, nominalP
 					lightLevel[14], economicLampLife, standardGrowRate // nominalLight,
@@ -3071,7 +3071,7 @@ public class Eln {
 			subId = 18;
 			completId = subId + (id << 6);
 			element = new LampDescriptor(TR_NAME(Type.NONE, "200V Economic Light Bulb"),
-					"economiclamp-200v", LampDescriptor.Type.eco,
+					"fluorescentlamp", LampDescriptor.Type.eco,
 					LampSocketType.Douille, MVU, lightPower[14]
 							* economicPowerFactor, // nominalU, nominalP
 					lightLevel[14], economicLampLife, standardGrowRate // nominalLight,
@@ -3084,7 +3084,7 @@ public class Eln {
 			subId = 32;
 			completId = subId + (id << 6);
 			element = new LampDescriptor(TR_NAME(Type.NONE, "50V Farming Lamp"),
-					"farminglamp-50v", LampDescriptor.Type.Incandescent,
+					"farminglamp", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, LVU, 120, // nominalU, nominalP
 					lightLevel[15], incandescentLampLife, 0.50 // nominalLight,
 																// nominalLife
@@ -3095,7 +3095,7 @@ public class Eln {
 			subId = 36;
 			completId = subId + (id << 6);
 			element = new LampDescriptor(TR_NAME(Type.NONE, "200V Farming Lamp"),
-					"farminglamp-200v", LampDescriptor.Type.Incandescent,
+					"farminglamp", LampDescriptor.Type.Incandescent,
 					LampSocketType.Douille, MVU, 120, // nominalU, nominalP
 					lightLevel[15], incandescentLampLife, 0.50 // nominalLight,
 																// nominalLife
@@ -3106,7 +3106,7 @@ public class Eln {
 			subId = 37;
 			completId = subId + (id << 6);
 			element = new LampDescriptor(TR_NAME(Type.NONE, "50V LED Bulb"),
-				"ledlamp-50v", LampDescriptor.Type.LED,
+				"ledlamp", LampDescriptor.Type.LED,
 				LampSocketType.Douille, LVU, lightPower[14] / 2, // nominalU, nominalP
 				lightLevel[14], ledLampLife, standardGrowRate // nominalLight,
 				// nominalLife
@@ -3117,7 +3117,7 @@ public class Eln {
 			subId = 38;
 			completId = subId + (id << 6);
 			element = new LampDescriptor(TR_NAME(Type.NONE, "200V LED Bulb"),
-				"ledlamp-200v", LampDescriptor.Type.LED,
+				"ledlamp", LampDescriptor.Type.LED,
 				LampSocketType.Douille, MVU, lightPower[14] / 2, // nominalU, nominalP
 				lightLevel[14], ledLampLife, standardGrowRate // nominalLight,
 				// nominalLife
