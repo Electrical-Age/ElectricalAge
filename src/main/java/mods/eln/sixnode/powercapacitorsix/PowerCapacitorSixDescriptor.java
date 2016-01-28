@@ -1,7 +1,5 @@
 package mods.eln.sixnode.powercapacitorsix;
 
-import java.util.List;
-
 import mods.eln.Eln;
 import mods.eln.item.DielectricItem;
 import mods.eln.misc.Obj3D;
@@ -13,6 +11,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
+
+import java.util.List;
 
 public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 
@@ -48,7 +48,7 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
 
 	public double getCValue(IInventory inventory) {
@@ -84,7 +84,7 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
@@ -94,10 +94,14 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		GL11.glTranslatef(0.0f,0.0f,-0.2f);
-		GL11.glScalef(1.25f,1.25f,1.25f);
-		GL11.glRotatef(-90.f,0.f,1.f,0.f);
-		draw();
+		if (type != ItemRenderType.INVENTORY) {
+			GL11.glTranslatef(0.0f, 0.0f, -0.2f);
+			GL11.glScalef(1.25f, 1.25f, 1.25f);
+			GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
+			draw();
+		} else {
+			super.renderItem(type, item, data);
+		}
 	}
 
 	@Override
