@@ -24,7 +24,9 @@ public class PowerCapacitorSixRender extends SixNodeElementRender {
 
 	@Override
 	public void draw() {
-		descriptor.draw();
+        GL11.glRotatef(90, 1, 0, 0);
+        front.glRotateOnX();
+        descriptor.draw();
 	}
 
 	@Override
