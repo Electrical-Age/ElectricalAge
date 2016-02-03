@@ -2358,7 +2358,8 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Signal Trimmer");
 
-			ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, signalsourcepot, false);
+			ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, signalsourcepot, false,
+				"trimmer");
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -2367,7 +2368,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Signal Switch");
 
-			ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, ledswitch, true);
+			ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, ledswitch, true, "switch");
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -2376,7 +2377,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Signal Button");
 
-			ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, ledswitch, true);
+			ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, ledswitch, true, "button");
 			desc.setWithAutoReset();
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
