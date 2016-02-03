@@ -20,6 +20,12 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
         this.RenderClass = RenderClass;
     }
 
+    public SixNodeDescriptor(String name, Class ElementClass, Class RenderClass, String iconName) {
+        super(name, iconName);
+        this.ElementClass = ElementClass;
+        this.RenderClass = RenderClass;
+    }
+
     @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
         return true;
