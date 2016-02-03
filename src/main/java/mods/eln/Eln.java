@@ -5504,6 +5504,22 @@ public class Eln {
 				Character.valueOf('F'), dicTungstenIngot,
 				Character.valueOf('S'), findItemStack("Medium Voltage Cable"));
 
+		addRecipe(findItemStack("50V LED Bulb", 2),
+			"GGG",
+			"SSS",
+			" C ",
+			Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
+			Character.valueOf('S'), findItemStack("Silicon Ingot"),
+			Character.valueOf('C'), findItemStack("Low Voltage Cable"));
+
+		addRecipe(findItemStack("200V LED Bulb", 2),
+			"GGG",
+			"SSS",
+			" C ",
+			Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
+			Character.valueOf('S'), findItemStack("Silicon Ingot"),
+			Character.valueOf('C'), findItemStack("Medium Voltage Cable"));
+
 	}
 
 	void recipeProtection() {
