@@ -1974,7 +1974,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Electrical Breaker");
 
-			ElectricalBreakerDescriptor desc = new ElectricalBreakerDescriptor(name, obj.getObj("HighVoltageSwitch"));
+			ElectricalBreakerDescriptor desc = new ElectricalBreakerDescriptor(name, obj.getObj("ElectricalBreaker"));
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}

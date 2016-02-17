@@ -1,0 +1,8 @@
+s type lever
+o lever
+f originX 0
+f originY 0
+f originZ -0.10
+f alphaOff 10
+f alphaOn -10
+f speed 0.05
