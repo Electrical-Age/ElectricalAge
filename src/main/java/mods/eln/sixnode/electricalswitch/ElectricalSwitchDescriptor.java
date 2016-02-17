@@ -90,7 +90,11 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 		
 		pinDistance = Utils.getSixNodePinDistance(main);
 
-		voltageLevelColor = VoltageLevelColor.fromVoltage(nominalVoltage);
+		if (signalSwitch) {
+			voltageLevelColor = VoltageLevelColor.SignalVoltage;
+		} else {
+			voltageLevelColor = VoltageLevelColor.fromVoltage(nominalVoltage);
+		}
 	}
 
 	@Override
