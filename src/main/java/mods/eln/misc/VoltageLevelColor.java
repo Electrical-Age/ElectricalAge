@@ -7,6 +7,7 @@ import net.minecraftforge.client.IItemRenderer;
 
 public enum VoltageLevelColor {
     None(null),
+    Neutral("neutral"),
     SignalVoltage("signal"),
     LowVoltage("low"),
     MediumVoltage("medium"),

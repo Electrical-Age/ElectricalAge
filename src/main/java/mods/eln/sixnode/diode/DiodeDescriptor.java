@@ -59,6 +59,8 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 
         if (cable.signalWire) {
             voltageLevelColor = VoltageLevelColor.SignalVoltage;
+        } else {
+            voltageLevelColor = VoltageLevelColor.Neutral;
         }
 	}
 

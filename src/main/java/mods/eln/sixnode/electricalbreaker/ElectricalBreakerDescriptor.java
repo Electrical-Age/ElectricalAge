@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalbreaker;
 
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,7 +35,9 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
 				alphaOff = lever.getFloat("alphaOff");
 				alphaOn = lever.getFloat("alphaOn");
 			}
-		}			
+		}
+
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
 
 	@Override	
