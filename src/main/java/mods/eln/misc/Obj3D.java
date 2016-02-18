@@ -4,12 +4,11 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Obj3D {
+    private Timer updateTimer = null;
+    private boolean locked = false;
 
     List<Vertex> vertex = new ArrayList<Vertex>();
     List<Uv> uv = new ArrayList<Uv>();
@@ -126,6 +125,16 @@ public class Obj3D {
             this.uv = uv;
         }
 
+        void clear() {
+            faceGroup.clear();
+            xMin = 0;
+            yMin = 0;
+            zMin = 0;
+            xMax = 0;
+            yMax = 0;
+            zMax = 0;
+        }
+
         void addVertex(Vertex v) {
             vertex.add(v);
             xMin = Math.min(xMin, v.x);
@@ -141,6 +150,8 @@ public class Obj3D {
         }
 
         public void draw(float angle, float x, float y, float z) {
+            if (locked) return;
+
             GL11.glPushMatrix();
 
             GL11.glTranslatef(ox, oy, oz);
@@ -152,6 +163,8 @@ public class Obj3D {
         }
 
         public void draw(float angle, float x, float y, float z, float texOffsetX, float texOffsetY) {
+            if (locked) return;
+
             GL11.glPushMatrix();
 
             GL11.glTranslatef(ox, oy, oz);
@@ -163,6 +176,8 @@ public class Obj3D {
         }
 
         public void draw(float angle, float x, float y, float z, float angle2, float x2, float y2, float z2) {
+            if (locked) return;
+
             GL11.glPushMatrix();
 
             GL11.glTranslatef(ox, oy, oz);
@@ -177,6 +192,8 @@ public class Obj3D {
         }
 
         public void drawNoBind(float angle, float x, float y, float z) {
+            if (locked) return;
+
             GL11.glPushMatrix();
 
             GL11.glTranslatef(ox, oy, oz);
@@ -188,12 +205,16 @@ public class Obj3D {
         }
 
         public void drawNoBind() {
+            if (locked) return;
+
             for (FaceGroup fg : faceGroup) {
                 fg.drawNoBind();
             }
         }
 
         public void draw() {
+            if (locked) return;
+
             //	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
             for (FaceGroup fg : faceGroup) {
                 fg.draw();
@@ -202,6 +223,8 @@ public class Obj3D {
         }
 		
 		public void draw(float texOffsetX, float texOffsetY) {
+            if (locked) return;
+
 			//	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
 			for (FaceGroup fg : faceGroup) {
 				fg.drawVertex(texOffsetX,texOffsetY);
@@ -312,9 +335,25 @@ public class Obj3D {
         }
     }
 
-    public boolean loadFile(String filePath) {
+    public boolean loadFile(final String filePath) {
+        return loadFile(filePath, false);
+    }
+
+    public boolean loadFile(final String filePath, boolean reload) {
         Obj3DPart part = null;
         FaceGroup fg = null;
+
+        if (reload) {
+            locked = true;
+            vertex.clear();
+            uv.clear();
+            xMax = 0;
+            yMin = 0;
+            zMin = 0;
+            xMax = 0;
+            yMax = 0;
+            zMax = 0;
+        }
 
         dirPath = filePath.substring(0, filePath.lastIndexOf('/'));
         String mtlName = null;
@@ -331,8 +370,19 @@ public class Obj3D {
                 while ((line = bufferedReader.readLine()) != null) {
                     String[] words = line.split(" ");
                     if (words[0].equals("o")) {
-                        part = new Obj3DPart(vertex, uv);
-                        nameToPartHash.put(words[1], part);
+                        if (reload) {
+                            part = nameToPartHash.get(words[1]);
+                            if (part != null) {
+                                part.clear();
+                            } else {
+                                part = new Obj3DPart(vertex, uv);
+                                nameToPartHash.put(words[1], part);
+                            }
+                        } else {
+                            part = new Obj3DPart(vertex, uv);
+                            nameToPartHash.put(words[1], part);
+                        }
+
                     } else if (words[0].equals("v")) {
                         Vertex v = new Vertex(Float.parseFloat(words[1]), Float.parseFloat(words[2]), Float.parseFloat(words[3]));
                         part.addVertex(v);
@@ -436,6 +486,18 @@ public class Obj3D {
                         }
                     } else if (words[0].equals("s")) {
                         nameToStringHash.put(words[1], words[2]);
+                    } else if (!reload && words.length == 2 && words[0].equals("r")) {
+                        int refresh = Integer.parseInt(words[1]);
+                        if (refresh != 0) {
+                            updateTimer = new Timer();
+                            updateTimer.scheduleAtFixedRate(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    Utils.println("Reloading model data from " + filePath);
+                                    loadFile(filePath, true);
+                                }
+                            }, refresh, refresh);
+                        }
                     }
                 }
             }
@@ -451,6 +513,11 @@ public class Obj3D {
 
         dimMax = Math.max(Math.max(xMax, yMax), zMax);
         dimMaxInv = 1.0f / dimMax;
+
+        if (reload) {
+            locked = false;
+        }
+
         return true;
     }
 
