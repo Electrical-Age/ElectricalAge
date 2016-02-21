@@ -9,9 +9,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL44;
 
 import java.util.List;
+import java.util.Locale;
 
 public class ElectricalWatchDescriptor extends SixNodeDescriptor {
 
@@ -28,7 +28,7 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
 		super(name, ElectricalWatchElement.class, ElectricalWatchRender.class);
 		this.obj = obj;
 		this.powerConsumtion = powerConsumtion;
-		kind = Kind.valueOf(obj.getString("type").toUpperCase());
+		kind = Kind.valueOf(obj.getString("type").toUpperCase(Locale.ROOT));
 		if (obj != null) {
 			if (kind == Kind.ANALOG) {
 				base = obj.getPart("base");
