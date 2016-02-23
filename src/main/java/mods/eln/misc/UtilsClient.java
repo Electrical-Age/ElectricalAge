@@ -277,6 +277,8 @@ public class UtilsClient {
     }
 
     public static void drawEnergyBare(ItemRenderType type, float e) {
+        drawIcon(type, new ResourceLocation("eln", "sprites/portablebatteryoverlay.png"));
+
         float x = 13f, y = 14f - e * 12f;
         GL11.glDisable(GL11.GL_TEXTURE_2D);
 
