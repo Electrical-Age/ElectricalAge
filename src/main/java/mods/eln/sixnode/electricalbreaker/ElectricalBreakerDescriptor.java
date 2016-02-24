@@ -75,7 +75,7 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
 	}
 	
 	public void draw(float on, float distance) {
-		if (main != null)main.draw();
+		if (main != null) main.draw();
 		if (lever != null) {
 			lever.draw(on * (alphaOn - alphaOff) + alphaOff, 0, 1, 0);
 		}		
