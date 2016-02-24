@@ -3,6 +3,7 @@ package mods.eln.sixnode.groundcable;
 import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -25,6 +26,7 @@ public class GroundCableDescriptor extends SixNodeDescriptor {
 		if (obj != null) {
 			main = obj.getPart("main");
 		}
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
 	
 	void draw() {

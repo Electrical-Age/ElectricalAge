@@ -2,6 +2,7 @@ package mods.eln.sixnode.hub;
 
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,6 +30,7 @@ public class HubDescriptor extends SixNodeDescriptor {
 				connection[idx] = obj.getPart("con" + idx);
 			}
 		}
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
 	
 	void draw(boolean[] connectionGrid) {
