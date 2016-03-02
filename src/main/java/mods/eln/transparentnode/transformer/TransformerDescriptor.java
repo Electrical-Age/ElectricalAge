@@ -2,6 +2,7 @@ package mods.eln.transparentnode.transformer;
 
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sound.SoundCommand;
 import mods.eln.wiki.Data;
@@ -42,6 +43,7 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 		}
 		
 		highLoadSound = new SoundCommand("eln:Transformer", 1.6f);
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
 	@Override
 	public void setParent(Item item, int damage) {
@@ -67,11 +69,15 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 	}
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return type != ItemRenderType.INVENTORY;
+		return true;//type != ItemRenderType.INVENTORY;
 	}
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		draw(defaultFero, 1, 4);
+		if (type == ItemRenderType.INVENTORY) {
+			super.renderItem(type, item, data);
+		} else {
+			draw(defaultFero, 1, 4);
+		}
 	}
 	
 	@Override
