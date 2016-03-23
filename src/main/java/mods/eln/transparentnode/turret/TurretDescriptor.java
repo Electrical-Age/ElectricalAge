@@ -9,7 +9,6 @@ import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
@@ -73,6 +72,7 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		fire = obj.getPart("Fire");
 		
 		properties = new Properties();
+		voltageLevelColor = VoltageLevelColor.HighVoltage;
 	}
 	
 	public Properties getProperties() {
@@ -89,7 +89,12 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		list.add(tr("CAUTION: Cables can get quite hot!"));
 	}
 
-    @Override
+	@Override
+	public boolean use2DIcon() {
+		return true;
+	}
+
+	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		return true;
 	}
@@ -106,17 +111,10 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		switch (type) {
-			case INVENTORY:
-			case FIRST_PERSON_MAP:
-				VoltageLevelColor.HighVoltage.drawIconBackground(type);
-				UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/blocks/800vdefenceturret.png"));
-				super.renderItem(type, item, data);
-				break;
-
-			default:
-				draw(null);
-		}
+		if (type == ItemRenderType.INVENTORY)
+			super.renderItem(type, item, data);
+		else
+			draw(null);
 	}
 	
 	public void draw(TurretRender render) {

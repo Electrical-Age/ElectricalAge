@@ -69,7 +69,7 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 	}
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return true;//type != ItemRenderType.INVENTORY;
+		return true;
 	}
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
