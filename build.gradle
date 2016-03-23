@@ -9,16 +9,20 @@ buildscript {
             name = "sonatype"
             url = "https://oss.sonatype.org/content/repositories/snapshots/"
         }
+        jcenter()
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
         classpath 'de.undercouch:gradle-download-task:1.2'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
     }
 }
 
 apply plugin: 'forge'
 apply plugin: 'de.undercouch.download'
 apply plugin: 'java'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
 
 apply from: 'gradle.properties'
 
@@ -45,8 +49,6 @@ minecraft {
     srgExtra "PK: com/serotonin mods/eln/libs/com/serotonin"
     srgExtra "PK: gnu/io mods/eln/libs/gnu/io"
 }
-
-
 
 configurations {
     external
@@ -202,4 +204,31 @@ task updateMasterLanguageFile(type: JavaExec, dependsOn: 'classes') {
     main = 'mods.eln.i18n.LanguageFileUpdater'
     classpath = sourceSets.main.runtimeClasspath
     args = ['./src', './src/main/resources/assets/eln/lang/en_US.lang']
+}
+
+publishing {
+    publications {
+        mod(MavenPublication) {
+            from components.java
+            groupId GROUP
+            artifactId ARCHIVE_NAME
+            version VERSION
+        }
+    }
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    publications = ['mod']
+    pkg {
+        repo = 'eln'
+        name = 'ElectricalAge'
+        userOrg = 'electrical-age'
+        licenses = ['LGPL V3.0', 'CC BY-NC-SA 3.0']
+        vcsUrl = 'https://github.com/Electrical-Age/ElectricalAge.git'
+        version {
+            name = VERSION
+        }
+    }
 }
