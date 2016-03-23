@@ -4,6 +4,7 @@ import mods.eln.Eln;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.mna.misc.MnaConst;
@@ -34,6 +35,8 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 			InductorCore = obj.getPart("InductorCore");
 			Base = obj.getPart("Base");
 		}
+
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
     
 	public double getlValue(int cableCount) {

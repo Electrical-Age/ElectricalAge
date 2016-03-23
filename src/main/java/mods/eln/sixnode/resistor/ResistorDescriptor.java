@@ -2,6 +2,7 @@ package mods.eln.sixnode.resistor;
 
 import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
@@ -48,6 +49,7 @@ public class ResistorDescriptor extends SixNodeDescriptor {
             Base = obj.getPart("Base");
             Cables = obj.getPart("CapacitorCables");
         }
+        voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
     @Override

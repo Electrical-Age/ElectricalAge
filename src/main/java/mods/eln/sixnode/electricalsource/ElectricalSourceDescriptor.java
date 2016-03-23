@@ -30,6 +30,8 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
 			led = obj.getPart("led");
 		}
 		this.signalSource = signalSource;
+
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
 
 	public boolean isSignalSource() {

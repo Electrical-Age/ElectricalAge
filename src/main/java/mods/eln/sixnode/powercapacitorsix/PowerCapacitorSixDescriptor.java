@@ -4,6 +4,7 @@ import mods.eln.Eln;
 import mods.eln.item.DielectricItem;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
@@ -38,6 +39,8 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 			CapacitorCore = obj.getPart("CapacitorCore");
 			Base = obj.getPart("Base");
 		}
+
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
 
 	public double getCValue(int cableCount, double nominalDielVoltage) {
