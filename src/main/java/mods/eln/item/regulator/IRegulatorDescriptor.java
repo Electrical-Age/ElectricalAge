@@ -1,12 +1,14 @@
 package mods.eln.item.regulator;
 
 import mods.eln.item.GenericItemUsingDamageDescriptorUpgrade;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.sim.RegulatorProcess;
 
 public abstract class IRegulatorDescriptor extends GenericItemUsingDamageDescriptorUpgrade {
 
   public IRegulatorDescriptor(String name) {
     super(name);
+    voltageLevelColor = VoltageLevelColor.Neutral;
   }
 
   public enum RegulatorType {Manual, None, OnOff, Analog}

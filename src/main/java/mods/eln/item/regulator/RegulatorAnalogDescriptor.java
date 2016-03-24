@@ -1,7 +1,8 @@
 package mods.eln.item.regulator;
 
 import mods.eln.sim.RegulatorProcess;
-import static mods.eln.item.regulator.IRegulatorDescriptor.RegulatorType.*;
+
+import static mods.eln.item.regulator.IRegulatorDescriptor.RegulatorType.Analog;
 
 public class RegulatorAnalogDescriptor extends IRegulatorDescriptor {
 
