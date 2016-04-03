@@ -1,0 +1,798 @@
+#<ELN_LANGFILE_V1_1>
+
+# ./src/main/java/mods/eln/Achievements.java
+Electrical_Age_[WIP]=Elektrik Çağı [WIP]
+# achievement.craft_50v_macerator=Crushing Novice
+# achievement.craft_50v_macerator.desc=Craft a 50V Macerator
+# achievement.open_guide=Wiki Power
+# achievement.open_guide.desc=Open the wiki guide
+
+# ./src/main/java/mods/eln/Eln.java
+10A_Diode.name=10A Diyot
+200V_Active_Thermal_Dissipator.name=200V Aktif Termal Dağıtıcı
+200V_Battery_Charger.name=200V Şarj Aleti
+200V_Compressor.name=200V Kompresör
+200V_Condensator.name=200V Condensator
+200V_Copper_Heating_Corp.name=200V Bakır Isıtma Çubuğu
+200V_Economic_Light_Bulb.name=200V Ekonomik Ampul
+200V_Farming_Lamp.name=200V Tarım Lambası
+200V_Incandescent_Light_Bulb.name=200V Akkor Ampul
+200V_Iron_Heating_Corp.name=200V Demir Isıtma Çubuğu
+200V_Macerator.name=200V Macerator
+200V_Magnetizer.name=200V Mıknatıslayıcı
+200V_Plate_Machine.name=200V Plaka Makinesi
+200V_Power_Socket.name=200V Güç Soketi
+200V_Tungsten_Heating_Corp.name=200V Tungsten Isıtma Çubuğu
+200V_Turbine.name=200V Türbin
+25A_Diode.name=25A Diyot
+50V_Battery_Charger.name=50V Şarj Aleti
+50V_Carbon_Incandescent_Light_Bulb.name=Karbon Akkor Ampul
+50V_Compressor.name=50V Kompresör
+50V_Condensator.name=50V Condensator
+50V_Copper_Heating_Corp.name=50V Bakır Isıtma Çubuğu
+50V_Economic_Light_Bulb.name=50V Ekonomik Ampul
+50V_Egg_Incubator.name=50V Kuluçka Makinesi
+50V_Farming_Lamp.name=50V Tasarruflu Lamba
+50V_Incandescent_Light_Bulb.name=50V Akkor Ampul
+50V_Iron_Heating_Corp.name=50V Demir Isıtma Çubuğu
+50V_Macerator.name=50V Macerator
+50V_Magnetizer.name=50V Mıknatıslayıcı
+50V_Plate_Machine.name=50V Plaka Makinesi
+50V_Power_Socket.name=50V Güç Soketi
+50V_Tungsten_Heating_Corp.name=50V Tungsten Isıtma Çubuğu
+50V_Turbine.name=50V Türbin
+800V_Defence_Turret.name=800V Savunma Tareti
+Advanced_Chip.name=Gelişmiş Çip
+Advanced_Electrical_Motor.name=Gelişmiş Elektrik Motoru
+Advanced_Energy_Meter.name=Gelişmiş Enerji Ölçer
+Advanced_Machine_Block.name=Gelişmiş Makine Bloğu
+Advanced_Magnet.name=Gelişmiş Mıknatıs
+AllMeter.name=Evrensel Ölçer
+Alloy_Dust.name=Alaşım Toz
+Alloy_Ingot.name=Alaşım Külçe
+Alloy_Plate.name=Alaşım Plaka
+Analog_Watch.name=Analog Saat
+Analog_vuMeter.name=Analog Ölçü
+Analogic_Regulator.name=Analojik Regülatörü
+Animal_Filter.name=Hayvan Filtresi
+Auto_Miner.name=Otomatik Madenci
+Average_Electrical_Drill.name=Ortalama Elektrikli Matkap
+Average_Ferromagnetic_Core.name=Ortalama Ferromanyetik Çekirdek
+Basic_Magnet.name=Basit Mıknatıs
+Black_Brush.name=Siyah Fırça
+Blue_Brush.name=Mavi Fırça
+Brown_Brush.name=Kahverengi Fırça
+Capacity_Oriented_Battery.name=Kapasite Odaklı Batarya
+Cheap_Chip.name=Ucuz Çip
+Cheap_Electrical_Drill.name=Ucuz Elektrikli Matkap
+Cheap_Ferromagnetic_Core.name=Ucuz Ferromanyetik Çekirdek
+Cinnabar_Dust.name=Zincifre Tozu
+Cinnabar_Ore.name=Zincifre Cevheri
+Coal_Dust.name=Kömür Tozu
+Coal_Plate.name=Kömür Plaka
+Combustion_Chamber.name=Yanma Odası
+Copper_Cable.name=Bakır Kablo
+Copper_Dust.name=Bakır Tozu
+Copper_Ingot.name=Bakır Külçe
+Copper_Ore.name=Bakır Cevheri
+Copper_Plate.name=Bakır Plaka
+Copper_Thermal_Cable.name=Bakır Termal Kablo
+Cost_Oriented_Battery.name=Maliyet Odaklı Batarya
+Current_Oriented_Battery.name=Akım Orantılı Batarya
+Cyan_Brush.name=Açık Mavi Fırça
+Data_Logger.name=Veri Kaydedici
+Data_Logger_Print.name=Veri Kaydedici Baskısı
+Dielectric.name=Yalıtkan
+Digital_Watch.name=Dijital Saat
+Electrical_Anemometer_Sensor.name=Elektrik Anemometre Sensörü
+Electrical_Breaker.name=Elektrik Kesici
+Electrical_Daylight_Sensor.name=Elektrik Günışığı Sensörü
+Electrical_Entity_Sensor.name=Elektrik Entity Sensörü
+Electrical_Fire_Detector.name=Electrik Yangın Dedektörü
+Electrical_Furnace.name=Elektrikli Fırın
+Electrical_Light_Sensor.name=Elektrik Işık Sensörü
+Electrical_Motor.name=Elektrik Motoru
+Electrical_Probe.name=Elektrik Sondası
+Electrical_Probe_Chip.name=Elektrik Sona Çipi
+Electrical_Source.name=Elektrik Kaynağı
+Electrical_Timer.name=Elektrik Sayacı
+Electrical_Weather_Sensor.name=Elektrik Hava Sensörü
+# Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Electrical age wrench,\nCan be used to turn\nsmall wall blocks
+Energy_Meter.name=Enerji Ölçer
+Experimental_Transporter.name=Deneysel Taşıyıcı
+Fast_Electrical_Drill.name=Hızlı Elektrikli Matkap
+Ferrite_Ingot.name=Ferrit Külçesi
+Flat_Lamp_Socket.name=Düz Lamba Soketi
+Fluorescent_Lamp_Socket.name=Florasan Lamba Soketi
+Fuel_Generator.name=Yakıt Jeneratörü
+Gold_Dust.name=Altın Tozu
+Gold_Plate.name=Altın Plaka
+Gray_Brush.name=Gri Fırça
+Green_Brush.name=Yeşil Fırça
+Ground_Cable.name=Topraklama Kablosu
+High_Power_Receiver_Antenna.name=Yüksek Güçlü Alıcı Anten
+High_Power_Transmitter_Antenna.name=Yüksek Güçlü Verici Anten
+High_Voltage_Cable.name=Yüksek Gerilim Kablosu
+High_Voltage_Relay.name=Yüksek Gerilim Rölesi
+High_Voltage_Switch.name=Yüksek Gerilim Anahtarı
+Hub.name=Merkez
+Industrial_Data_Logger.name=Endüstriyel Veri Kaydedici
+Iron_Cable.name=Demir Kablo
+Iron_Dust.name=Demir Tozu
+Iron_Plate.name=Demir Plaka
+LED_vuMeter.name=LED vuMeter
+Lamp_Socket_A.name=Lamba Soket A
+Lamp_Socket_B_Projector.name=Lamba Soket B Projektör
+Lamp_Supply.name=Lamba Besleme
+Lead_Dust.name=Kurşun Tozu
+Lead_Ingot.name=Kurşun Külçesi
+Lead_Ore.name=Kurşun Cevheri
+Lead_Plate.name=Kurşun Plaka
+Life_Oriented_Battery.name=Ömür Odaklı Pil
+Light_Blue_Brush.name=Açık Mavi Fırça
+Lime_Brush.name=Açık Yeşil Fırça
+Long_Suspended_Lamp_Socket.name=Uzun Asma Lamba Soketi
+Low_Power_Receiver_Antenna.name=Düşük Güç Alıcı Anten
+Low_Power_Transmitter_Antenna.name=Low Power Receiver Antenna
+Low_Voltage_Cable.name=Düşük Gerilim Kablosu
+Low_Voltage_Relay.name=Düşük Gerilim Rölesi
+Low_Voltage_Switch.name=Düşük Gerilim Anahtarı
+Machine_Block.name=Makine Bloğu
+Machine_Booster.name=Makine Hızlandırıcı
+Magenta_Brush.name=Magenta Fırça
+Medium_Power_Receiver_Antenna.name=Orta Güç Alıcı Anten
+Medium_Power_Transmitter_Antenna.name=Orta Güç Verici Anten
+Medium_Voltage_Cable.name=Orta Gerilim Kablosu
+Medium_Voltage_Relay.name=Orta Gerilim Rölesi
+Medium_Voltage_Switch.name=Orta Gerilim Anahtarı
+Mercury.name=Merkür
+Mining_Pipe.name=Madencilik Borusu
+Modbus_RTU.name=Modbus RTU
+Modern_Data_Logger.name=Modern Veri Kaydedici
+Monster_Filter.name=Canavar Filtresi
+MultiMeter.name=Çoklu Ölçer
+Nuclear_Alarm.name=Nükleer Alarm
+# On_OFF_Regulator_10_Percent.name=On/off regulator 10%
+# On_OFF_Regulator_1_Percent.name=On/off regulator 1%
+Optimal_Ferromagnetic_Core.name=Optimal Ferromanyetik Çekirdek
+Orange_Brush.name=Turuncu Fırça
+Ore_Scanner.name=Cevher Tarayıcı
+Overheating_Protection.name=Aşırı Isınma Koruması
+Overvoltage_Protection.name=Aşırı Gerilim Koruması
+Pink_Brush.name=Pembe Fırça
+Player_Filter.name=Oyuncu Filtresi
+Portable_Battery.name=Taşınabilir Pil
+Portable_Battery_Pack.name=Taşınabilir Pil Paketi
+Portable_Condensator.name=Taşınabilir Condensator
+Portable_Condensator_Pack.name=Taşınabilir Condensator Paketi
+Portable_Electrical_Axe.name=Taşınabilir Elektrikli Balta
+Portable_Electrical_Mining_Drill.name=Taşınabilir Elektrikli Matkap
+Power_Capacitor.name=Güç Kapasitörü
+Power_Inductor.name=Güç Endüktörü
+Power_Resistor.name=Güç Direnci
+# Power_capacitor.name=Power capacitor
+# Power_inductor.name=Power inductor
+Purple_Brush.name=Mor Fırça
+Red_Brush.name=Kırmızı Fırça
+Redstone-to-Voltage_Converter.name=Kızıltaş Gerilim Dönüştürücü
+Rheostat.name=Reosta
+Robust_Lamp_Socket.name=Sağlam Lamba Soketi
+Rubber.name=Kauçuk
+# Sconce_Lamp_Socket.name=Sconce Lamp Socket
+Signal_20H_inductor.name=Sinyal 20H İndüktörü
+Signal_Antenna.name=Sinyal Anteni
+Signal_Button.name=Sinyal Tuşu
+Signal_Cable.name=Sinyal Kablosu
+Signal_Diode.name=Sinyal Diyotu
+Signal_Processor.name=Sinyal İşlemcisi
+Signal_Relay.name=Sinyal Rölesi
+Signal_Source.name=Sinyak Kaynağı
+Signal_Switch.name=Sinyal Anahtarı
+Signal_Switch_with_LED.name=LED'li Sinyal Anahtarı
+Signal_Trimmer.name=Sinyal Giyotini
+Silicon_Dust.name=Silikon Tozu
+Silicon_Ingot.name=Silikon Külçe
+Silicon_Plate.name=Silikon Plaka
+Silver_Brush.name=Gümüş Fırça
+Simple_Lamp_Socket.name=Basit Lamba Soketi
+Single-use_Battery.name=Tek Kulanımlık Batarya
+Small_200V_Copper_Heating_Corp.name=Küçük 200V Bakır Isıtma Çubuğu
+Small_200V_Iron_Heating_Corp.name=Küçük 200V Demir Isıtma Çubuğu
+Small_200V_Tungsten_Heating_Corp.name=Küçük 200V Tunsten Isıtma Çubuğu
+Small_50V_Carbon_Incandescent_Light_Bulb.name=Küçük 50V Karbon Akkor Ampul
+Small_50V_Copper_Heating_Corp.name=Küçük 50V Bakır Isıtma Çubuğu
+Small_50V_Economic_Light_Bulb.name=Küçük 50V Ekonomik Ampul
+Small_50V_Incandescent_Light_Bulb.name=Küçük 50V Akkor Ampul
+Small_50V_Iron_Heating_Corp.name=Küçük 50V Demir Isıtma Çubuğu
+Small_50V_Tungsten_Heating_Corp.name=Küçük 50V Tungsten Isıtma Çubuğu
+Small_Active_Thermal_Dissipator.name=Küçük Aktfi Termal Dağıtıcı
+Small_Flashlight.name=Küçük Elfeneri
+Small_Passive_Thermal_Dissipator.name=Küçük Pasif Termal Dağıtıcı
+Small_Rotating_Solar_Panel.name=Küçük Döner Güneş Paneli
+Small_Solar_Panel.name=Küçük Güneş Paneli
+Solar_Tracker.name=Küçük Takipçi
+Standard_Alarm.name=Standart Alarm
+Stone_Heat_Furnace.name=Taş Isı Fırını
+Street_Light.name=Sokak Lambası
+Suspended_Lamp_Socket.name=Asma Lamba Soketi
+Temperature_Probe.name=Sıcaklık Sondası
+Thermal_Probe.name=Termal Sonda
+Thermal_Probe_Chip.name=Termal Sonda Çipi
+Thermistor.name=Termistör
+ThermoMeter.name=Termometre
+Transformer.name=Dönüştürücü
+Tree_Resin.name=Ağaç Özü
+Tree_Resin_Collector.name=Ağaç Özü Toplayıcısı
+Tungsten_Cable.name=Tungsten Kablo
+Tungsten_Dust.name=Tungsten Tozu
+Tungsten_Ingot.name=Tungsten Külçe
+Tungsten_Ore.name=Tungsten Cevheri
+Tutorial_Sign.name=Öğretici Tabelası
+Very_High_Voltage_Cable.name=Çok Yüksek Gerilim Kablosu
+Very_High_Voltage_Relay.name=Çok Yüksek Gerilim Rölesi
+Very_High_Voltage_Switch.name=Çok Yüksek Gerilim Anahtarı
+Voltage-to-Redstone_Converter.name=Gerilim Kızıltaş Dönüştürücü
+Voltage_Oriented_Battery.name=Voltaj Odaklı Batarya
+Voltage_Probe.name=Gerilim Sondası
+Water_Turbine.name=Su Türbini
+Weak_50V_Battery_Charger.name=Zayıf 50V Şarj Aleti
+White_Brush.name=Beyaz Fırça
+Wind_Turbine.name=Rüzgar Türbini
+Wireless_Analyser.name=Kablosuz Analizör
+Wireless_Button.name=Kablosuz Tuş
+Wireless_Signal_Receiver.name=Kablosuz Sinyal Alıcı
+Wireless_Signal_Repeater.name=Kablosuz Sinyal Tekrarlayıcı
+Wireless_Signal_Transmitter.name=Kablosuz Sinyal Verici
+Wireless_Switch.name=Kablosuz Anahtar
+Wrench.name=İngiliz Anahtarı
+X-Ray_Scanner.name=X-Ray Tarayıcı
+Yellow_Brush.name=Sarı Fırça
+# entity.EAReplicator.name=Replicator
+# item.Copper Axe.name\=Copper Axe
+# item.Copper Axe.name\=Copper Axe
+# item.Copper Axe.name\=Copper Axe
+# item.Copper Axe.name\=Copper Axe
+# item.Copper Axe.name\=Copper Axe
+# item.Copper Axe.name\=Copper Axe
+# item.Copper Axe.name\=Copper Axe
+# item.Copper Axe.name\=Copper Axe
+# item.Copper Axe.name\=Copper Axe
+# item.E-Coal Boots.name\=E-Coal Boots
+# item.E-Coal Boots.name\=E-Coal Boots
+# item.E-Coal Boots.name\=E-Coal Boots
+# item.E-Coal Boots.name\=E-Coal Boots
+itemGroup.Eln=Elektrik Çağı
+mod.meta.desc=Elektrik evinizde\!
+# tile.eln.ElnProbe.name=Eln Computer Probe
+# tile.eln.EnergyConverterElnToOtherHVUBlock.name=800V Electrical Age to other energy exporter
+# tile.eln.EnergyConverterElnToOtherLVUBlock.name=50V Electrical Age to other energy exporter
+# tile.eln.EnergyConverterElnToOtherMVUBlock.name=200V Electrical Age to other energy exporter
+
+# ./src/main/java/mods/eln/i18n/I18N.java
+You_have_%1$_lives_left=You have %1$ lives left
+
+# ./src/main/java/mods/eln/item/BrushDescriptor.java
+# Brush_is_dry=Brush is dry
+Can_paint_%1$_blocks=Can paint %1$ blocks
+
+# ./src/main/java/mods/eln/item/CombustionChamber.java
+Upgrade_for_the_Stone_Heat_Furnace.=Taş Isı Fırını için yükseltin.
+
+# ./src/main/java/mods/eln/item/ElectricalDrillDescriptor.java
+# Energy_per_operation\:_%1$J=Energy per operation\: %1$J
+# Time_per_operation\:_%1$s=Time per operation\: %1$s
+
+# ./src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
+Cable_loss_factor\:_%1$=Cable loss factor\: %1$
+
+# ./src/main/java/mods/eln/item/HeatingCorpElement.java
+
+# ./src/main/java/mods/eln/item/LampDescriptor.java
+Bad=Kötü
+Condition\:=Komdisyon\:
+End_of_life=Ömür bitişi
+Good=İyi
+New=Yeni
+Nominal_lifetime\:_%1$h=Nominal lifetime\: %1$h
+Technology\:_%1$=Technology\: %1$
+Used=Kullanılmış
+
+# ./src/main/java/mods/eln/item/LampSlot.java
+# Lamp_slot=Lamp slot
+
+# ./src/main/java/mods/eln/item/OverHeatingProtectionDescriptor.java
+Useful_to_prevent_overheating\nof_Batteries=Bataryaların aşırı ısınmasını önlemek için kullanışlı
+
+# ./src/main/java/mods/eln/item/OverVoltageProtectionDescriptor.java
+Useful_to_prevent_over-voltage\nof_Batteries=Bataryaları aşırı gerlimden korumak için kullanışlı
+
+# ./src/main/java/mods/eln/item/SolarTrackerDescriptor.java
+Solar_panel_upgrade=Güneş paneli yükseltme
+
+# ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
+
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
+Off=Kapalı
+On=Açık
+State\:=Durum\:
+Stored_Energy\:_%1$J_(%2$%)=Stored Energy\: %1$J (%2$%)
+
+# ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
+
+# ./src/main/java/mods/eln/misc/UtilsClient.java
+Hold_shift=Shift'e basılı tut
+
+# ./src/main/java/mods/eln/misc/Version.java
+mod.name=Elektrik Çağı
+
+# ./src/main/java/mods/eln/node/six/SixNodeDescriptor.java
+
+# ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
+# Input_power_is_limited_to_%1$W=Input power is limited to %1$W
+
+# ./src/main/java/mods/eln/sixnode/TreeResinCollector/TreeResinCollectorDescriptor.java
+Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Ağaca koyulduğunda Ağaç Özü üretir.
+# This_block_can_only_be_placed_on_the_side_of_a_tree!=This block can only be placed on the side of a tree\!
+
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerContainer.java
+# Battery_slot=Battery slot
+
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
+Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Elektrik öğeleri şarj etmek için de kullanılabilir\: Örn. Elfeneri, X-Ray Tarayıcı ve Taşınabilir Pil ...
+
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
+
+# ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
+Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Elektrik akımı, yalnızca eksiden artıya gidebilir
+
+# ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmDescriptor.java
+=
+Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=Giriş sinyali yüksek ise bir akustik alarm verir
+
+# ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
+# Sound_is_muted=Sound is muted
+# Sound_is_not_muted=Sound is not muted
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
+Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Gerilim belli bir seviyeyi aştığında\: Elektrik bileşenleri korur
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerGui.java
+# Maximum_voltage_before_cutting_off=Maximum voltage before cutting off
+# Minimum_voltage_before_cutting_off=Minimum voltage before cutting off
+# Switch_is_off=Switch is off
+# Switch_is_on=Switch is on
+
+# ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableDescriptor.java
+A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$V=A signal is electrical information which must be between 0V and %1$V
+Cable_is_adapted_to_conduct\nelectrical_signals.=Kablo elektrik sinyallerini iletmek üzere adapte edilir.
+Current\:_%1$A=Current\: %1$A
+# Not_adapted_to_transport_power.=Not adapted to transport power.
+Save_usage\:=Kullanımı kaydet\:
+Serial_resistance\:_%1$Ω=Serial resistance\: %1$Ω
+
+# ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerDescriptor.java
+It_can_store_up_to_256_points.=Bu 256 puan kadar saklayabilir.
+Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Bir elektrik sinyali voltajını ölçme ve gerçek zamanlı veri arsa.
+
+# ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerGui.java
+# Back_to_display=Back to display
+# Configuration=Configuration
+# Current_[A]=Current [A]
+# Energy_[J]=Energy [J]
+# Percent_[-]%=Percent [-]%
+# Power_[W]=Power [W]
+# Print=Print
+# Sampling_period=Sampling period
+# Temp._[*C]=Temp. [*C]
+# Voltage_[V]=Voltage [V]
+# Y-axis_max=Y-axis max
+# Y-axis_min=Y-axis min
+
+# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
+
+# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
+Output_voltage_increases\nif_entities_are_moving_around.=Eğer entity'ler hareket ediyorsa, çıkış gerilimini arttırır.
+
+# ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorDescriptor.java
+# Output_voltage_increases\nif_a_fire_has_been_detected.=Output voltage increases\nif a fire has been detected.
+
+# ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
+# Provides_configurable_signal\nvoltage.=Provides configurable signal\nvoltage.
+
+# ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceGui.java
+# Output_at_%1$%=Output at %1$%
+
+# ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorDescriptor.java
+0V_at_night,_%1$V_at_noon.=0V at night, %1$V at noon.
+# Provides_an_electrical_voltage\nin_the_presence_of_light.=Provides an electrical voltage\nin the presence of light.
+# Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Provides an electrical voltage\nwhich is proportional to\nthe intensity of daylight.
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
+Applicable_boolean_operators\:=Uygulanabilir boolean operatörleri\:
+Applicable_functions\:=Uygulanabilir fonksiyonlar\:
+Applicable_mathematical_operators\:=Uygulanabilir matematiksel operatörler\:
+# Calculates_an_output_signal_from\n3_inputs_(A,_B,_C)_using_an_equation.=Calculates an output signal from\n3 inputs (A, B, C) using an equation.
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathGui.java
+# %1$_Redstone(s)_required=%1$ Redstone(s) required
+# Equation_required!=Equation required\!
+# Inputs_are=Inputs are
+# Invalid_equation!=Invalid equation\!
+# Output_voltage_formula=Output voltage formula
+# Waiting_for_completion...=Waiting for completion...
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputDescriptor.java
+# Converts_Redstone_signal\nto_an_electrical_voltage.=Converts Redstone signal\nto an electrical voltage.
+
+# ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputDescriptor.java
+# Converts_electrical_voltage\ninto_a_Redstone_signal.=Converts electrical voltage\ninto a Redstone signal.
+
+# ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayDescriptor.java
+# A_relay_is_an_electrical\ncontact_that_conducts_electric\ncurrent_or_not,_depending\nthe_actual_input_signal_voltage.=A relay is an electrical\ncontact that conducts electric\ncurrent or not, depending\nthe actual input signal voltage.
+
+# ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayGui.java
+# Normally_closed=Normally closed
+# Normally_open=Normally open
+
+# ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
+Creative_block.=Yanlızca Yaratıcı mod.
+# Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides an ideal voltage source\nwithout energy or power limitation.
+
+# ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceGui.java
+# Output_voltage=Output voltage
+
+# ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
+# Can_break_an_electrical_circuit\ninterrupting_the_current.=Can break an electrical circuit\ninterrupting the current.
+
+# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
+# Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=Upon application of a high signal,\nthe timer maintains the output high for\na configurable interval. Can be re-triggered.
+
+# ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutGui.java
+# Set=Set
+# The_time_interval_the\noutput_is_kept_high.=The time interval the\noutput is kept high.
+
+# ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
+# Displays_the_value_of_a_signal.=Displays the value of a signal.
+
+# ./src/main/java/mods/eln/sixnode/electricalwatch/ElectricalWatchContainer.java
+# Portable_battery_slot=Portable battery slot
+
+# ./src/main/java/mods/eln/sixnode/electricalweathersensor/ElectricalWeatherSensorDescriptor.java
+# Clear\:_%1$V=Clear\: %1$V
+# Provides_an_electrical_signal\ndepending_the_actual_weather.=Provides an electrical signal\ndepending the actual weather.
+# Rain\:_%1$V=Rain\: %1$V
+# Storm\:_%1$V=Storm\: %1$V
+
+# ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
+# Maximum_wind_speed_is_%1$m_s=Maximum wind speed is %1$m/s
+# Provides_an_electrical_signal\ndependant_on_wind_speed.=Provides an electrical signal\ndependant on wind speed.
+
+# ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorDescriptor.java
+# Can_measure_Voltage_Power_Current=Can measure Voltage/Power/Current
+# Measures_electrical_values_on_cables.=Measures electrical values on cables.
+# Measures_voltage_on_cables.=Measures voltage on cables.
+
+# ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorGui.java
+# Current=Current
+# Measured_voltage\ncorresponding\nto_0%_output=Measured voltage\ncorresponding\nto 0% output
+# Measured_voltage\ncorresponding\nto_100%_output=Measured voltage\ncorresponding\nto 100% output
+# Voltage=Voltage
+
+# ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterGui.java
+# Change_password=Change password
+# Counter_Mode=Counter Mode
+# Counts_the_energy_conducted_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Counts the energy conducted from\n\\u00a74red\\u00a7f to \\u00a71blue\\u00a7f.
+# Energy_counter\:_%1$J=Energy counter\: %1$J
+# Enter_new_energy=Enter new energy
+# Enter_password=Enter password
+# Prepay_Mode=Prepay Mode
+# Reset_time_counter=Reset time counter
+# Set_energy_counter=Set energy counter
+# Time_counter\:=Time counter\:
+# Try_password=Try password
+# You_can_set_an_initial\namount_of_available_energy.\nWhen_the_counter_arrives_at_0\nthe_contact_will_be_opened.=You can set an initial\namount of available energy.\nWhen the counter arrives at 0\nthe contact will be opened.
+# is_off=is off
+# is_on=is on
+# value_in_kJ=value in kJ
+
+# ./src/main/java/mods/eln/sixnode/groundcable/GroundCableDescriptor.java
+# Can_be_used_to_set_a_point_of_an\nelectrical_network_to_0V_potential.\nFor_example_to_ground_negative_battery_contacts.=Can be used to set a point of an\nelectrical network to 0V potential.\nFor example to ground negative battery contacts.
+# Provides_a_zero_volt_reference.=Provides a zero volt reference.
+
+# ./src/main/java/mods/eln/sixnode/hub/HubDescriptor.java
+# Allows_crossing_cables\non_one_single_block.=Allows crossing cables\non one single block.
+
+# ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketDescriptor.java
+# Angle\:_%1$°_to_%2$°=Angle\: %1$° to %2$°
+# Spot_range\:_%1$_blocks=Spot range\: %1$ blocks
+
+# ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketGuiDraw.java
+# %1$_is_not_in_range!=%1$ is not in range\!
+# Cable_slot_empty=Cable slot empty
+# Orientation\:_%1$°=Orientation\: %1$°
+# Parallel=Parallel
+# Powered_by_Lamp_Supply=Powered by Lamp Supply
+# Powered_by_cable=Powered by cable
+# Serial=Serial
+# Specify_the_supply_channel=Specify the supply channel
+
+# ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java
+# Electrical_cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Electrical cable slot\nBase range is 32 blocks.\nEach additional cable\nincreases range by one.
+
+# ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
+# Supplies_all_lamps_on_the_channel.=Supplies all lamps on the channel.
+
+# ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyGui.java
+# Power_channel_name=Power channel name
+# Wireless_channel_name=Wireless channel name
+
+# ./src/main/java/mods/eln/sixnode/modbusrtu/ModbusRtuGui.java
+# Add=Add
+# Channel_name=Channel name
+# Modbus_ID=Modbus ID
+Modbus_RTU=Modbus RTU
+# Station_ID=Station ID
+# Station_name=Station name
+# Wireless_RX=Wireless RX
+# Wireless_TX=Wireless TX
+
+# ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixContainer.java
+# (Increases_maximum_voltage)=(Increases maximum voltage)
+
+# ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixGui.java
+
+# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixContainer.java
+
+# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixGui.java
+
+# ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketDescriptor.java
+# Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in with energy.
+
+# ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketGui.java
+# Specify_the_device_to_supply_through_this_socket.=Specify the device to supply through this socket.
+
+# ./src/main/java/mods/eln/sixnode/resistor/ResistorContainer.java
+# (Sets_resistance)=(Sets resistance)
+# Coal_dust_slot=Coal dust slot
+
+# ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
+# High_parallel_resistance\n_\=>_Low_power_dissipation.=High parallel resistance\n \=> Low power dissipation.
+# Low_serial_resistance\n_\=>_High_conductivity.=Low serial resistance\n \=> High conductivity.
+# Parallel_resistance\:_%1$K_W=Parallel resistance\: %1$K/W
+# Serial_resistance\:_%1$K_W=Serial resistance\: %1$K/W
+
+# ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorContainer.java
+# Cable_slot=Cable slot
+
+# ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorDescriptor.java
+# Can_measure\:=Can measure\:
+# Measures_temperature_of_cables.=Measures temperature of cables.
+# Measures_thermal_values_on_cables.=Measures thermal values on cables.
+# __Temperature_Power_conducted=Temperature/Power conducted
+
+# ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorGui.java
+# Measured_temperature\ncorresponding\nto_0%_output=Measured temperature\ncorresponding\nto 0% output
+# Measured_temperature\ncorresponding\nto_100%_output=Measured temperature\ncorresponding\nto 100% output
+# Temperature=Temperature
+
+# ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignElement.java
+# No_text_associated_to_this_beacon=No text associated to this beacon
+
+# ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignGui.java
+# Set_beacon_name=Set beacon name
+
+# ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
+
+# ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
+# Drill_slot=Drill slot
+# Mining_pipe_slot=Mining pipe slot
+# Ore_scanner_slot=Ore scanner slot
+
+# ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerDescriptor.java
+# Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radius_after_10_blocks_depth.=Excavates on a small radius.\nExtracts ore on a bigger radius\:\n10 blocks radius after 10 blocks depth.
+
+# ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerGuiDraw.java
+# Chest_missing_on_the\nback_of_the_auto_miner!=Chest missing on the\nback of the auto miner\!
+
+# ./src/main/java/mods/eln/transparentnode/battery/BatteryContainer.java
+# Overheating_protection=Overheating protection
+# Overvoltage_protection=Overvoltage protection
+
+# ./src/main/java/mods/eln/transparentnode/battery/BatteryDescriptor.java
+Actual_charge\:_%1$%=Actual charge\: %1$%
+Energy_capacity\:_%1$J=Energy capacity\: %1$J
+# _charged_at_%1$%=charged at %1$%
+
+# ./src/main/java/mods/eln/transparentnode/battery/BatteryGuiDraw.java
+# Charge=Charge
+# Charged=Charged
+# Discharge=Discharge
+# Energy\:=Energy\:
+# Energy\:_%1$=Energy\: %1$
+# Life\:=Life\:
+# No_charge=No charge
+# Power_in\:=Power in\:
+# Power_out\:=Power out\:
+
+# ./src/main/java/mods/eln/transparentnode/eggincubator/EggIncubatorContainer.java
+# Egg_slot=Egg slot
+
+# ./src/main/java/mods/eln/transparentnode/electricalantennarx/ElectricalAntennaRxDescriptor.java
+Wireless_energy_receiver.=Kablosuz enerji alıcısı.
+
+# ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxDescriptor.java
+Efficiency\:_%1$%_up_to_%2$%=Efficiency\: %1$% up to %2$%
+Wireless_energy_transmitter.=Kablosuz enerji verici.
+
+# ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceContainer.java
+# Heating_corp_slot=Heating corp slot
+
+# ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceDescriptor.java
+# Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Similar to a vanilla furnace,\nbut heats with electricity.
+
+# ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceGuiDraw.java
+# Auto_shutdown=Auto shutdown
+# Manual_shutdown=Manual shutdown
+# Set_point\:_%1$°C=Set point\: %1$°C
+
+# ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
+# Cost=Cost
+
+# ./src/main/java/mods/eln/transparentnode/fuelgenerator/FuelGeneratorDescriptor.java
+# Produces_electricity_using_fuel.=Produces electricity using fuel.
+
+# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceContainer.java
+# Combustion_chamber_slot=Combustion chamber slot
+# Fuel_slot=Fuel slot
+
+# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceDescriptor.java
+Generates_heat_when_supplied_with_fuel.=Yakıt temin edildiğinde ısı üretir.
+
+# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceGuiDraw.java
+# Control_gauge_at_%1$%=Control gauge at %1$%
+# Decline_fuel=Decline fuel
+# External_control=External control
+# Internal_control=Internal control
+# Take_fuel=Take fuel
+
+# ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
+# (Increases_maximal_voltage)=(Increases maximal voltage)
+
+# ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelContainer.java
+# Solar_tracker_slot=Solar tracker slot
+
+# ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelDescriptor.java
+Can_be_geared_towards_the_sun.=Güneşe dönük olabilir.
+# Max._power\:_%1$W=Max. power\: %1$W
+# Max._voltage\:_%1$V=Max. voltage\: %1$V
+Produces_power_from_solar_radiation.=Güneş ışınlarından güç üretir.
+
+# ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPannelGuiDraw.java
+# It_is_night=It is night
+# Solar_panel_angle\:_%1$°=Solar panel angle\: %1$°
+# Sun_angle\:_%1$°=Sun angle\: %1$°
+
+# ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterGui.java
+# Destination_transporter=Destination transporter
+# Power_consumption\:=Power consumption\:
+# Power_consumption\:_%1$W=Power consumption\: %1$W
+# Required_energy\:_%1$J=Required energy\: %1$J
+# Start=Start
+# Transporter_name=Transporter name
+
+# ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveDescriptor.java
+Fan_cooling_power\:_%1$W=Fan cooling power\: %1$W
+Fan_power_consumption\:_%1$W=Fan power consumption\: %1$W
+Fan_voltage\:_%1$V=Fan voltage\: %1$V
+
+# ./src/main/java/mods/eln/transparentnode/transformer/TransformerDescriptor.java
+# The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=The voltage ratio is proportional\nto the cable stacks count ratio.
+# Transforms_an_input_voltage_to\nan_output_voltage.=Transforms an input voltage to\nan output voltage.
+
+# ./src/main/java/mods/eln/transparentnode/turbine/TurbineDescriptor.java
+Generates_electricity_using_heat.=Isı kullanılarak elektrik üretir.
+Temperature_difference\:_%1$°C=Temperature difference\: %1$°C
+
+# ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
+CAUTION\:_Cables_can_get_quite_hot!=DİKKAT\: Kablolar oldukça fazla ısınabilir\!
+Laser_charge_power\:_%1$W...%2$kW=Laser charge power\: %1$W...%2$kW
+# Scans_for_entities_and_shoots_if_the\nentity_matches_the_configurable_filter_criteria.=Scans for entities and shoots if the\nentity matches the configurable filter criteria.
+Standby_power\:_%1$W=Standby power\: %1$W
+
+# ./src/main/java/mods/eln/transparentnode/turret/TurretGui.java
+# Attack\:=Attack\:
+# Do_not_attack\:=Do not attack\:
+# Recharge_power\:=Recharge power\:
+
+# ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineDescriptor.java
+Generates_energy_using_water_stream.=Su akışı kullanarak enerji üretir.
+# No_place_for_water_turbine!=No place for water turbine\!
+
+# ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
+Front\:_%1$=Front\: %1$
+Generates_energy_from_wind.=Rüzgardan enerji üretir.
+# Left_Right\:_%1$=Left/Right\: %1$
+# Up_Down\:_%1$=Up/Down\: %1$
+Wind_area\:=Rüzgar alanı\:
+
+# ./src/main/java/mods/eln/wiki/Data.java
+# Energy=Energy
+# Light=Light
+# Machine=Machine
+# Ore=Ore
+# Portable=Portable
+# Resource=Resource
+# Signal=Signal
+# Thermal=Thermal
+# Upgrade=Upgrade
+# Utilities=Utilities
+# Wiring=Wiring
+
+# ./src/main/java/mods/eln/wiki/Default.java
+# Previous=Previous
+
+# ./src/main/java/mods/eln/wiki/ItemDefault.java
+# Can_be_used_to_craft\:=Can be used to craft\:
+# Cannot_be_crafted!=Cannot be crafted\!
+# Cost_%1$J=Cost %1$J
+# Created_by\:=Created by\:
+# Is_not_a_crafting_material!=Is not a crafting material\!
+# Recipe\:=Recipe\:
+
+# Appearing in multiple source files
+# (Increases_capacity)=(Increases capacity)
+# (Increases_inductance)=(Increases inductance)
+# Actual\:_%1$°C=Actual\: %1$°C
+# Biggest=Biggest
+# Booster_slot=Booster slot
+# Can_create\:=Can create\:
+# Capacity\:_%1$F=Capacity\: %1$F
+Charge_power\:_%1$W=Charge power\: %1$W
+# Connected=Connected
+Cooling_power\:_%1$W=Cooling power\: %1$W
+# Copper_cable_slot=Copper cable slot
+# Dielectric_slot=Dielectric slot
+Discharge_power\:_%1$W=Discharge power\: %1$W
+# Electrical_cable_slot=Electrical cable slot
+# Entity_filter_slot=Entity filter slot
+# Ferromagnetic_core_slot=Ferromagnetic core slot
+# Has_a_signal_output.=Has a signal output.
+# Inductance\:_%1$H=Inductance\: %1$H
+Internal_resistance\:_%1$Ω=Internal resistance\: %1$Ω
+# Is_off=Is off
+# Is_on=Is on
+Max._temperature\:_%1$°C=Max. temperature\: %1$°C
+# Measured_value\ncorresponding\nto_0%_output=Measured value\ncorresponding\nto 0% output
+# Measured_value\ncorresponding\nto_100%_output=Measured value\ncorresponding\nto 100% output
+Nominal\:=Sembolik\:
+Nominal_power\:_%1$W=Nominal power\: %1$W
+Nominal_usage\:=Sembolik kullanım\:
+Nominal_voltage\:_%1$V=Nominal voltage\: %1$V
+# Not_connected=Not connected
+# Not_enough_space_for_this_block=Not enough space for this block
+# Power=Power
+Power\:_%1$W=Power\: %1$W
+Range\:_%1$_blocks=Range\: %1$ blocks
+# Redstone_slot=Redstone slot
+# Regulator_slot=Regulator slot
+# Reset=Reset
+Resistance\:_%1$Ω=Resistance\: %1$Ω
+# Smallest=Smallest
+# Specify_the_channel=Specify the channel
+Stored_energy\:_%1$J_(%2$%)=Stored energy\: %1$J (%2$%)
+Temperature\:_%1$°C=Temperature\: %1$°C
+# Temperature_gauge=Temperature gauge
+# Thermal_isolator_slot=Thermal isolator slot
+# Toggle=Toggle
+# Toggle_switch=Toggle switch
+# Toggles_the_output_each_time\nan_emitter's_value_rises.\nUseful_to_allow_multiple_buttons\nto_control_the_same_light.=Toggles the output each time\nan emitter's value rises.\nUseful to allow multiple buttons\nto control the same light.
+Used_to_cool_down_turbines.=Türbinlerin soğuması için kullanılır.
+# Uses_the_biggest\nvalue_on_the_channel.=Uses the biggest\nvalue on the channel.
+# Uses_the_smallest\nvalue_on_the_channel.=Uses the smallest\nvalue on the channel.
+# Validate=Validate
+Voltage\:_%1$V=Voltage\: %1$V
+# You_can't_place_this_block_at_this_side=You can't place this block at this side
