@@ -13,7 +13,7 @@ then
   ./gradlew updateMasterLanguageFile
 
   echo "Submitting the generated translation source file to Transifex"
-  pip install transifex-client
+  # pip install transifex-client
   # Write .transifexrc file
   echo "[https://www.transifex.com]
 hostname = https://www.transifex.com
