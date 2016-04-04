@@ -78,6 +78,8 @@ public class WirelessUtils {
 						strength = b.getRange() - getVirtualDistance(b.getCoordonate(), from.getCoordonate(), b.getCoordonate().trueDistanceTo(from.getCoordonate()));
 					getTx(b, txSet, txStrength, spotSet, false, strength);
 					spots.remove(best);
+				} else if(best == null) {
+					break;
 				} else {
 					IWirelessSignalTx tx = (IWirelessSignalTx) best;
 
