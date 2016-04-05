@@ -32,7 +32,7 @@ import java.util.HashMap;
 //TODO Copy-pasted from LampSupply. PowerSocket behavior must be implemented.
 public class PowerSocketElement extends SixNodeElement {
 
-	public static HashMap<String, ArrayList<PowerSocketElement>> channelMap = new HashMap<String, ArrayList<PowerSocketElement>>();
+	public static final HashMap<String, ArrayList<PowerSocketElement>> channelMap = new HashMap<String, ArrayList<PowerSocketElement>>();
 
 	//NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");
 	public PowerSocketDescriptor descriptor;

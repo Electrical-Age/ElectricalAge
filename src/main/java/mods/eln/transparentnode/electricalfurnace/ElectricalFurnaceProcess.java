@@ -12,7 +12,7 @@ public class ElectricalFurnaceProcess implements IProcess {
 	ElectricalFurnaceElement furnace;
 	TransparentNodeElementInventory inventory;
 
-    public static double energyNeededPerSmelt = 1000;
+    public static final double energyNeededPerSmelt = 1000;
 
     ItemStack itemStackInOld = null;
 

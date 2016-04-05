@@ -54,7 +54,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
     int renderType;
     private String renderSpec;
 
-    public static BatteryDescriptor[] list = new BatteryDescriptor[8];
+    public static final BatteryDescriptor[] list = new BatteryDescriptor[8];
 
     public double currentDropVoltage = 1000000, currentDropFactor = 0;
 

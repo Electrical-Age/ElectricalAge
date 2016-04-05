@@ -63,15 +63,15 @@ import cpw.mods.fml.relauncher.Side;
 
 public class Utils {
 
-	public static Object d[] = new Object[5];
+	public static final Object[] d = new Object[5];
 
-	public static double minecraftDay = 60 * 24;
+	public static final double minecraftDay = 60 * 24;
 
-	public static Random random = new Random();
+	public static final Random random = new Random();
 
 	public static final double burnTimeToEnergyFactor = 1.0;
 
-	public static double voltageMageFactor = 0.1;
+	public static final double voltageMageFactor = 0.1;
 
 	private static int uuid = 1;
 

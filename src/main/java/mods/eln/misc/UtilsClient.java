@@ -551,7 +551,7 @@ public class UtilsClient {
         return uuid++;
     }
 
-    static HashSet<Integer> glListsAllocated = new HashSet<Integer>();
+    static final HashSet<Integer> glListsAllocated = new HashSet<Integer>();
 
     public static int glGenListsSafe() {
         int id = GL11.glGenLists(1);

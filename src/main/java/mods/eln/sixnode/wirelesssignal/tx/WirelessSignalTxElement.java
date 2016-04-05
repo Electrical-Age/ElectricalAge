@@ -26,7 +26,7 @@ import java.util.HashMap;
 
 public class WirelessSignalTxElement extends SixNodeElement implements IWirelessSignalTx {
     
-	public static HashMap<String, ArrayList<IWirelessSignalTx>> channelMap = new HashMap<String, ArrayList<IWirelessSignalTx>>(); 
+	public static final HashMap<String, ArrayList<IWirelessSignalTx>> channelMap = new HashMap<String, ArrayList<IWirelessSignalTx>>(); 
 	
 	NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate");
 

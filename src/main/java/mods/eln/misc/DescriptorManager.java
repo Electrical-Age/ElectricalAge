@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public class DescriptorManager {
 
-	static HashMap<Object, Object> map = new HashMap<Object, Object>();
+	static final HashMap<Object, Object> map = new HashMap<Object, Object>();
 	
 	public static void put(Object key, Object value){
 		map.put(key, value);

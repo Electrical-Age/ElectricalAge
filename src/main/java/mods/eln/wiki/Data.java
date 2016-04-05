@@ -8,7 +8,7 @@ import java.util.HashMap;
 import static mods.eln.i18n.I18N.tr;
 
 public class Data {
-	public static HashMap<String, ArrayList<ItemStack>> groupes = new HashMap<String, ArrayList<ItemStack>>();
+	public static final HashMap<String, ArrayList<ItemStack>> groupes = new HashMap<String, ArrayList<ItemStack>>();
 	
 	public static void add(String str,ItemStack stack){
 		ArrayList<ItemStack> groupe;

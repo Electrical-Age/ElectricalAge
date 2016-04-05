@@ -38,7 +38,7 @@ public enum Direction {
 	 */
 	ZP(5);
 
-	static Direction[] intToDir = {XN, XP, YN, YP, ZN, ZP};
+	static final Direction[] intToDir = {XN, XP, YN, YP, ZN, ZP};
 
 	int dir;
 

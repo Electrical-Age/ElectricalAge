@@ -17,10 +17,10 @@ public class Equation implements IValue, INBTTReady {
 
 	ArrayList<INBTTReady> nbtList = new ArrayList<INBTTReady>();
 
-	static HashMap<Integer, ArrayList<IOperatorMapper>> staticOperatorList;
+	static final HashMap<Integer, ArrayList<IOperatorMapper>> staticOperatorList;
 	HashMap<Integer, ArrayList<IOperatorMapper>> operatorList;
 
-	static String staticSeparatorList;
+	static final String staticSeparatorList;
 	String separatorList;
 
     int iterationLimit;

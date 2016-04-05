@@ -11,7 +11,7 @@ public class DelayedBlockRemove implements ITask {
 
     Coordonate c;
 
-	private static HashSet<Coordonate> blocks = new HashSet<Coordonate>(); 
+	private static final HashSet<Coordonate> blocks = new HashSet<Coordonate>(); 
 	
 	private DelayedBlockRemove(Coordonate c) {
 		this.c = c;

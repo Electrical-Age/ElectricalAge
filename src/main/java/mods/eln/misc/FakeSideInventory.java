@@ -6,7 +6,7 @@ import net.minecraft.item.ItemStack;
 
 public class FakeSideInventory implements ISidedInventory {
 
-    static private FakeSideInventory instance = new FakeSideInventory();
+    static private final FakeSideInventory instance = new FakeSideInventory();
 
     public static FakeSideInventory getInstance() {
         return instance;

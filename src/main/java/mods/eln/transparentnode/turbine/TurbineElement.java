@@ -29,7 +29,7 @@ import net.minecraft.inventory.IInventory;
 public class TurbineElement extends TransparentNodeElement{
 
 	private static final double[]  voltageFunctionTable = {0.000,0.5,0.8,0.9,0.95,1.0,1.1,1.2};
-	private static FunctionTable voltageFunction = new FunctionTable(voltageFunctionTable,1.2);
+	private static final FunctionTable voltageFunction = new FunctionTable(voltageFunctionTable,1.2);
 
 	public NbtElectricalLoad inputLoad = new NbtElectricalLoad("inputLoad");
 	public NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");

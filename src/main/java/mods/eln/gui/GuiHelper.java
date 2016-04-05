@@ -19,11 +19,11 @@ public class GuiHelper {
 	public GuiScreen screen;
 	public int xSize,ySize;
 	ResourceLocation background;
-	static ResourceLocation helperTexture = new ResourceLocation("eln","sprites/gui/helpertexture.png");
+	static final ResourceLocation helperTexture = new ResourceLocation("eln","sprites/gui/helpertexture.png");
 
 	static final ResourceLocation slotSkin = new ResourceLocation("textures/gui/container/furnace.png");
 
-	public static Tessellator tessellator = new Tessellator();
+	public static final Tessellator tessellator = new Tessellator();
 
 	public GuiHelper(GuiScreen screen, int xSize, int ySize, String backgroundName) {
 		this.screen = screen;

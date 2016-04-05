@@ -56,7 +56,7 @@ import net.minecraft.world.WorldServer;
 
 public abstract class NodeBlockEntity extends TileEntity implements ITileEntitySpawnClient, INodeEntity {
 
-    public static LinkedList<NodeBlockEntity> clientList = new LinkedList<NodeBlockEntity>();
+    public static final LinkedList<NodeBlockEntity> clientList = new LinkedList<NodeBlockEntity>();
 
 
     public NodeBlock getBlock() {

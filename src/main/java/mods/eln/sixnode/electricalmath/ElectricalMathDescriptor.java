@@ -29,7 +29,7 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor implements IPlug
 
     float alphaOff;
 
-    static boolean[] ledDefault = {true, false, true, false, true, true, true, false};
+    static final boolean[] ledDefault = {true, false, true, false, true, true, true, false};
 
 	public ElectricalMathDescriptor(String name, Obj3D obj) {
 		super(name, ElectricalMathElement.class, ElectricalMathRender.class);

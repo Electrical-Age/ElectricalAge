@@ -18,7 +18,7 @@ public class LightBlockEntity extends TileEntity {
 
     ArrayList<LightHandle> lightList = new ArrayList<LightHandle>();
 
-    public static ArrayList<LightBlockObserver> observers = new ArrayList<LightBlockObserver>();
+    public static final ArrayList<LightBlockObserver> observers = new ArrayList<LightBlockObserver>();
 
     static void addObserver(LightBlockObserver observer) {
 		observers.add(observer);
