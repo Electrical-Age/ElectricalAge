@@ -75,6 +75,9 @@ public class Utils {
 
 	private static int uuid = 1;
 
+	private Utils() {
+	}
+
 	public static double rand(double min, double max) {
 		return random.nextDouble() * (max - min) + min;
 	}

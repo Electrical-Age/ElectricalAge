@@ -8,6 +8,9 @@ import java.util.Properties;
 import java.util.Set;
 
 class LanguageFileUpdater {
+    private LanguageFileUpdater() {
+    }
+
     private static void updateFile(final File languageFile, final Map<String, Set<TranslationItem>> stringsToTranslate)
         throws IOException {
         // Parse the existing translations from the language file.

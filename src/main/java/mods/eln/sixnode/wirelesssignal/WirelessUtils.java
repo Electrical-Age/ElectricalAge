@@ -13,6 +13,9 @@ import java.util.Map.Entry;
 
 public class WirelessUtils {
 
+	private WirelessUtils() {
+	}
+
 	public static void getTx(IWirelessSignalSpot root, HashMap<String, HashSet<IWirelessSignalTx>> txSet, HashMap<IWirelessSignalTx, Double> txStrength) {
 		HashSet<IWirelessSignalSpot> spotSet = new HashSet<IWirelessSignalSpot>();
 		txSet.clear();

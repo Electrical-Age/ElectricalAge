@@ -9,11 +9,20 @@
 if [ "$TRAVIS_REPO_SLUG" == "Electrical-Age/ElectricalAge" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_BRANCH" == "1.7.10-MNA" ]
 then
 
+  echo "Installing the transifex client"
+  python --version
+  pip --version
+  pip install --upgrade pip
+  pip --version
+  
+  # See https://github.com/transifex/transifex-client/issues/113  
+  # pip install transifex-client
+  pip install git+git://github.com/transifex/transifex-client.git@master
+
   echo "Generating the latest language source file"
   ./gradlew updateMasterLanguageFile
 
   echo "Submitting the generated translation source file to Transifex"
-  # pip install transifex-client
   # Write .transifexrc file
   echo "[https://www.transifex.com]
 hostname = https://www.transifex.com

@@ -13,6 +13,8 @@ import net.minecraft.tileentity.TileEntity;
 import org.lwjgl.opengl.GL11;
 
 public class CableRender {
+	private CableRender() {
+	}
 	/*
 	static final int connectionStandard = 0;	
 	static final int connectionInternal = 1;
