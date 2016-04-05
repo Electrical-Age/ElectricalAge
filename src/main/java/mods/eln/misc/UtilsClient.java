@@ -576,7 +576,7 @@ public class UtilsClient {
     }
 
     public static void showItemTooltip(List src, List dst) {
-        if (src.size() == 0) return;
+        if (src.isEmpty()) return;
         if (showItemTooltip()) {
             dst.addAll(src);
         } else {

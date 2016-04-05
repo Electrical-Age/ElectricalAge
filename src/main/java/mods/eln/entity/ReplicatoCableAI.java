@@ -52,7 +52,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 	public boolean shouldExecute() {
 		//Utils.println("LookingForCableAi");
 		ArrayList<NodeBase> nodes = NodeManager.instance.getNodes();
-		if(nodes.size() == 0) return false;
+		if(nodes.isEmpty()) return false;
 		for(int idx = 0; idx < lookingPerUpdate; idx++) {
 			NodeBase node = nodes.get(rand.nextInt(nodes.size()));
 			double distance = node.coordonate.distanceTo(entity);

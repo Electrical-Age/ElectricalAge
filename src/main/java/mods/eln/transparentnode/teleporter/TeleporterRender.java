@@ -127,7 +127,7 @@ public class TeleporterRender extends TransparentNodeElementRender{
 				d.scr1_cables.draw();
 				d.scr2_transporter.draw();
 				
-				if(tileEntity.getWorldObj().getEntitiesWithinAABB(Entity.class, d.getBB(c, front)).size() != 0 )
+				if(!tileEntity.getWorldObj().getEntitiesWithinAABB(Entity.class, d.getBB(c, front)).isEmpty())
 					d.scr3_userin.draw();
 				
 				if(doorState)

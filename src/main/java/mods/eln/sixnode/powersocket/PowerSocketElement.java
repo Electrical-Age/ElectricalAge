@@ -100,7 +100,7 @@ public class PowerSocketElement extends SixNodeElement {
 		ArrayList<PowerSocketElement> list = channelMap.get(channel);
 		if (list == null) return;
 		list.remove(tx);
-		if (list.size() == 0)
+		if (list.isEmpty())
 			channelMap.remove(channel);
 	}
 

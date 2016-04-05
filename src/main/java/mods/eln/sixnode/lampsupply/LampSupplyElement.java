@@ -183,7 +183,7 @@ public class LampSupplyElement extends SixNodeElement {
             // Do something
             if(e.element == tx && e.id == id)i.remove();
         }
-		if (list.size() == 0)
+		if (list.isEmpty())
 			channelMap.remove(channel);
 	}
 
