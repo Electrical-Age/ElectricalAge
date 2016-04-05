@@ -171,12 +171,12 @@ public final class ComputerCraftAPI
         findCC();
         if( computerCraft_getDefaultBundledRedstoneOutput != null )
         {
-            try {
-                return ((Integer)computerCraft_getDefaultBundledRedstoneOutput.invoke( null, world, x, y, z, side )).intValue();
-            } catch (Exception e){
-                // It failed
-            }
-        }
+			try {
+				return ((Integer)computerCraft_getDefaultBundledRedstoneOutput.invoke( null, world, x, y, z, side )).intValue();
+			} catch (Exception e){
+				// It failed
+			}
+		}
         return -1;
     }
 

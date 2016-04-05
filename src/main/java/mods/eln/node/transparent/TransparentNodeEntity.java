@@ -190,18 +190,16 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
 		if (worldObj.isRemote) {
 			if(elementRender == null) return FakeSideInventory.getInstance();
 			IInventory i = elementRender.getInventory();
-			if (i != null) {
-				if (i instanceof ISidedInventory)
-					return (ISidedInventory) i;
+			if (i != null && i instanceof ISidedInventory) {
+				return (ISidedInventory) i;
 			}
 		} else {
 			Node node = getNode();
 			if (node != null && node instanceof TransparentNode) {
 				TransparentNode tn = (TransparentNode)node;
 				IInventory i = tn.getInventory(null);;
-				if (i != null) {
-					if (i instanceof ISidedInventory)
-						return (ISidedInventory) i;
+				if (i != null && i instanceof ISidedInventory) {
+					return (ISidedInventory) i;
 				}
 			}
 		}

@@ -83,12 +83,10 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject {
 	}
 
     public boolean textboxKeyTyped(char par1, int par2) {
-        if (getEnabled() && this.isFocused()) {
-        	if(par1 == '\r') {
-        		setFocused(false);
-        		return true;
-        	}
-        }
+        if (getEnabled() && this.isFocused() && par1 == '\r') {
+			setFocused(false);
+			return true;
+		}
         return super.textboxKeyTyped(par1, par2);
     }
 

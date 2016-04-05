@@ -13,8 +13,8 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 
-install:
-  - pip install transifex-client
+python:
+  - "3.5"
 
 after_success:
   - ./script/transifex.sh

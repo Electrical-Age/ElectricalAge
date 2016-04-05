@@ -52,10 +52,9 @@ public class SixNode extends Node {
 	public boolean canConnectRedstone() {
 		for (SixNodeElement element : sideElementList)
 		{
-			if (element != null)
+			if (element != null && element.canConnectRedstone())
 			{
-				if (element.canConnectRedstone())
-					return true;
+				return true;
 			}
 		}
 		return false;
@@ -548,16 +547,14 @@ public class SixNode extends Node {
 			
 			boolean accepted = false;
 			
-			if(Eln.playerManager.get(entityPlayer).getInteractEnable()) 
+			if(Eln.playerManager.get(entityPlayer).getInteractEnable() && stack != null) 
 			{
-				if(stack != null){
-					for(ISixNodeCache a : sixNodeCacheList){
-						if(a.accept(stack)){
-							accepted = true;
-							sixNodeCacheBlock = b;
-							sixNodeCacheBlockMeta = (byte) a.getMeta(stack);
-							break;
-						}
+				for(ISixNodeCache a : sixNodeCacheList){
+					if(a.accept(stack)){
+						accepted = true;
+						sixNodeCacheBlock = b;
+						sixNodeCacheBlockMeta = (byte) a.getMeta(stack);
+						break;
 					}
 				}
 			}
