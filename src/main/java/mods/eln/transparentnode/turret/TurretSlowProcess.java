@@ -172,7 +172,7 @@ public class TurretSlowProcess extends StateMachine {
                         if (filterClass == null || !filterClass.isAssignableFrom(entity.getClass())) return null;
                     }
 
-					ArrayList<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, 
+					List<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, 
 																entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
 					boolean visible = true;
 					for (Block b: blockList)
@@ -269,7 +269,7 @@ public class TurretSlowProcess extends StateMachine {
 					Math.abs(target.posZ - coord.z) > element.getDescriptor().getProperties().aimDistance )
 				return new SeekingState();
 			
-			ArrayList<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, 
+			List<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, 
 					target.posX, target.posY + target.getEyeHeight(), target.posZ);
 			for (Block b: blockList)
 				if (b.isOpaqueCube()) 

@@ -8,6 +8,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 public class DelayedTaskManager {
 
@@ -25,7 +26,7 @@ public class DelayedTaskManager {
 	@SubscribeEvent
 	public void tick(ServerTickEvent event) {
 		if (event.phase != Phase.END) return;
-		ArrayList<ITask> cpy = new ArrayList<DelayedTaskManager.ITask>(tasks);
+		List<ITask> cpy = new ArrayList<DelayedTaskManager.ITask>(tasks);
 		tasks.clear();
 		for (ITask t : cpy) {
 			t.run();

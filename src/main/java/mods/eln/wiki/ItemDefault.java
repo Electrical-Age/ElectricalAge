@@ -55,8 +55,8 @@ public class ItemDefault extends Default {
 
 			if(plugIn != null) y = plugIn.top(y, extender, stack);
 
-			ArrayList<IRecipe> recipeOutList = new ArrayList<IRecipe>();
-			ArrayList<IRecipe> recipeInList = new ArrayList<IRecipe>();
+			List<IRecipe> recipeOutList = new ArrayList<IRecipe>();
+			List<IRecipe> recipeInList = new ArrayList<IRecipe>();
 			if(stack != null) {
 				List list = CraftingManager.getInstance().getRecipeList();
 				for(Object o : list) {
@@ -147,7 +147,7 @@ public class ItemDefault extends Default {
 
 			{
 				counter = -1;
-				ArrayList<Recipe> list = RecipesList.getGlobalRecipeWithInput(stack);
+				List<Recipe> list = RecipesList.getGlobalRecipeWithInput(stack);
 				if(list.size() == 0) {
 					//extender.add(new GuiLabel(6, y, "Can't Product"));
 				}
@@ -178,7 +178,7 @@ public class ItemDefault extends Default {
 			}
 			{
 				counter = -1;
-				ArrayList<Recipe> list = RecipesList.getGlobalRecipeWithOutput(stack);
+				List<Recipe> list = RecipesList.getGlobalRecipeWithOutput(stack);
 				if(list.size() == 0) {
 					//extender.add(new GuiLabel(6, y, "Can't Product"));
 				}

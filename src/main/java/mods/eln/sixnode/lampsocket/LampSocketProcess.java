@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamage;
@@ -102,7 +103,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 			Coordonate myCoord = lamp.sixNode.coordonate;
             LampSupplyElement.PowerSupplyChannelHandle best = null;
 			float bestDistance = 10000;
-			ArrayList<LampSupplyElement.PowerSupplyChannelHandle> list = LampSupplyElement.channelMap.get(lamp.channel);
+			List<LampSupplyElement.PowerSupplyChannelHandle> list = LampSupplyElement.channelMap.get(lamp.channel);
 			if (list != null) {
 				for (LampSupplyElement.PowerSupplyChannelHandle s : list) {
 					float distance = (float) s.element.sixNode.coordonate.trueDistanceTo(myCoord);

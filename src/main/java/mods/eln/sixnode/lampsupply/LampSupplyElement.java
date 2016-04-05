@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 public class LampSupplyElement extends SixNodeElement {
 
@@ -175,7 +176,7 @@ public class LampSupplyElement extends SixNodeElement {
 
 	static void channelRemove(LampSupplyElement tx,int id,String channel) {
         if(channel.equals("")) return;
-		ArrayList<PowerSupplyChannelHandle> list = channelMap.get(channel);
+		List<PowerSupplyChannelHandle> list = channelMap.get(channel);
 		if (list == null) return;
         Iterator<PowerSupplyChannelHandle> i = list.iterator();
         while (i.hasNext()) {

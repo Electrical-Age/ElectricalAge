@@ -10,6 +10,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -89,7 +90,7 @@ public class ModbusRtuGui extends GuiScreenEln {
 			y += 20;
 		}
 
-		ArrayList<WirelessTxStatus> tempListTx = new ArrayList<WirelessTxStatus>(render.wirelessTxStatusList.values());
+		List<WirelessTxStatus> tempListTx = new ArrayList<WirelessTxStatus>(render.wirelessTxStatusList.values());
 
 		while (tempListTx.size() != 0) {
 			int smaller = Integer.MAX_VALUE;
@@ -143,7 +144,7 @@ public class ModbusRtuGui extends GuiScreenEln {
 			y += 20;
 		}
 		
-		ArrayList<WirelessRxStatus> tempListRx = new ArrayList<WirelessRxStatus>(render.wirelessRxStatusList.values());
+		List<WirelessRxStatus> tempListRx = new ArrayList<WirelessRxStatus>(render.wirelessRxStatusList.values());
 
         while (tempListRx.size() != 0) {
 			int smaller = Integer.MAX_VALUE;

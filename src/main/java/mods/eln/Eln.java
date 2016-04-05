@@ -312,7 +312,7 @@ public class Eln {
 
 		Utils.println(Version.print());
 
-		ArrayList<ISymbole> symboleList = new ArrayList<ISymbole>();
+		List<ISymbole> symboleList = new ArrayList<ISymbole>();
 		symboleList.add(new ConstSymbole("A", 0.1));
 		symboleList.add(new ConstSymbole("B", 0.2));
 		symboleList.add(new ConstSymbole("C", 0.3));

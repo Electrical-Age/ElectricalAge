@@ -1,6 +1,7 @@
 package mods.eln.entity;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import mods.eln.Eln;
@@ -51,7 +52,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
 	@Override
 	public boolean shouldExecute() {
 		//Utils.println("LookingForCableAi");
-		ArrayList<NodeBase> nodes = NodeManager.instance.getNodes();
+		List<NodeBase> nodes = NodeManager.instance.getNodes();
 		if(nodes.size() == 0) return false;
 		for(int idx = 0; idx < lookingPerUpdate; idx++) {
 			NodeBase node = nodes.get(rand.nextInt(nodes.size()));

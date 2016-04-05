@@ -3,6 +3,7 @@ package mods.eln.item.electricalinterface;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 import mods.eln.Eln;
 import mods.eln.misc.Utils;
@@ -183,7 +184,7 @@ public class ItemEnergyInventoryProcess implements IProcess {
 		}
 	}
 
-	Element getElement(ArrayList<Element> list, int priority) {
+	Element getElement(List<Element> list, int priority) {
 
 		for (Element e : list) {
 			if (priority == e.p) {
@@ -193,7 +194,7 @@ public class ItemEnergyInventoryProcess implements IProcess {
 		return null;
 	}
 
-	Element getMin(ArrayList<Element> list) {
+	Element getMin(List<Element> list) {
 		Element find = null;
 		for (Element e : list) {
 			if (find == null || find.p > e.p) {
@@ -203,7 +204,7 @@ public class ItemEnergyInventoryProcess implements IProcess {
 		return find;
 	}
 
-	Element getMax(ArrayList<Element> list) {
+	Element getMax(List<Element> list) {
 		Element find = null;
 		for (Element e : list) {
 			if (find == null || find.p < e.p) {

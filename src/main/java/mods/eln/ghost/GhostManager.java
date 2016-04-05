@@ -21,8 +21,8 @@ public class GhostManager extends WorldSavedData {
 		super(par1Str);
 	}
 
-	Hashtable<Coordonate, GhostElement> ghostTable = new Hashtable<Coordonate, GhostElement>();
-	Hashtable<Coordonate, GhostObserver> observerTable = new Hashtable<Coordonate, GhostObserver>();
+	Map<Coordonate, GhostElement> ghostTable = new Hashtable<Coordonate, GhostElement>();
+	Map<Coordonate, GhostObserver> observerTable = new Hashtable<Coordonate, GhostObserver>();
 
 	public void clear() {
 		ghostTable.clear();

@@ -138,7 +138,7 @@ public class NodeManager extends WorldSavedData {
 
 
 	public void loadFromNbt(NBTTagCompound nbt) {
-		ArrayList<NodeBase> addedNode = new ArrayList<NodeBase>();
+		List<NodeBase> addedNode = new ArrayList<NodeBase>();
 		for (Object o : Utils.getTags(nbt))
 		{
 			NBTTagCompound tag = (NBTTagCompound) o;
@@ -161,7 +161,7 @@ public class NodeManager extends WorldSavedData {
 
 	public void saveToNbt(NBTTagCompound nbt, int dim) {
 		int nodeCounter = 0;
-		ArrayList<NodeBase> nodesCopy = new ArrayList<NodeBase>();
+		List<NodeBase> nodesCopy = new ArrayList<NodeBase>();
 		nodesCopy.addAll(nodes);
 		for (NodeBase node : nodesCopy)
 		{
