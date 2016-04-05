@@ -47,7 +47,7 @@ public class ElectricalVuMeterElement extends SixNodeElement {
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
-		nbt.setByte("front", (byte)((front.toInt() << 0)));
+		nbt.setByte("front", (byte) (front.toInt() << 0));
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class ElectricalVuMeterElement extends SixNodeElement {
 	public void networkSerialize(DataOutputStream stream) {
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte((front.toInt() << 4));
+			stream.writeByte(front.toInt() << 4);
 	    	stream.writeFloat((float)(inputGate.getU() / Eln.instance.SVU));
 		} catch (IOException e) {
 			e.printStackTrace();

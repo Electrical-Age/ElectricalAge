@@ -119,7 +119,7 @@ public class ElectricalCableElement extends SixNodeElement {
 	public void networkSerialize(DataOutputStream stream) {
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte((color << 4));
+			stream.writeByte(color << 4);
 	    /*	stream.writeShort((short) (electricalLoad.Uc * NodeBase.networkSerializeUFactor));
 	    	stream.writeShort((short) (electricalLoad.getCurrent() * NodeBase.networkSerializeIFactor));
 	    	stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));*/

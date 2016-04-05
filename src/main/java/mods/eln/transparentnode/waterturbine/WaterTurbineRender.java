@@ -55,7 +55,7 @@ public class WaterTurbineRender extends TransparentNodeElementRender {
 
 		// Utils.println(powerFactorFilter.get());
 		float alphaN_1 = alpha;
-		alpha += deltaT * descriptor.speed * (powerFactorFilter.get());
+		alpha += deltaT * descriptor.speed * powerFactorFilter.get();
 		if (alpha > 360)
 			alpha -= 360;
 		if (alpha < 0)

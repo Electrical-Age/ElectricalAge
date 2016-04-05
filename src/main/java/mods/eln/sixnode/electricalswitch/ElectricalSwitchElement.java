@@ -74,7 +74,7 @@ public class ElectricalSwitchElement extends SixNodeElement {
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
-		nbt.setByte("front", (byte)((front.toInt() << 0)));
+		nbt.setByte("front", (byte) (front.toInt() << 0));
 		nbt.setBoolean("switchState", switchState);
 	}
 
@@ -115,8 +115,8 @@ public class ElectricalSwitchElement extends SixNodeElement {
 		super.networkSerialize(stream);
 		try {
 			stream.writeBoolean(switchState);
-	    	stream.writeShort((short)((aLoad.getU()) * NodeBase.networkSerializeUFactor));
-	    	stream.writeShort((short)((bLoad.getU()) * NodeBase.networkSerializeUFactor));
+	    	stream.writeShort((short)(aLoad.getU() * NodeBase.networkSerializeUFactor));
+	    	stream.writeShort((short)(bLoad.getU() * NodeBase.networkSerializeUFactor));
 	    	stream.writeShort((short)(aLoad.getCurrent() * NodeBase.networkSerializeIFactor));
 	    	//stream.writeShort((short)(thermalLoad.Tc * NodeBase.networkSerializeTFactor));
 	    	stream.writeShort(0);

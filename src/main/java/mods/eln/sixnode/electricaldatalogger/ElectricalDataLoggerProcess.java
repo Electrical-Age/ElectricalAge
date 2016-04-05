@@ -22,7 +22,7 @@ public class ElectricalDataLoggerProcess implements IProcess {
 		//p.add("A");
 		if (!e.pause) {
 			e.timeToNextSample -= time;
-			byte value = ((byte)(e.inputGate.getNormalized() * 255.5 - 128));
+			byte value = (byte) (e.inputGate.getNormalized() * 255.5 - 128);
 			e.sampleStack += value;
 			e.sampleStackNbr++;
 		}

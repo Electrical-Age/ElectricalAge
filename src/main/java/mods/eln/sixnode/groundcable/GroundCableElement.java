@@ -97,7 +97,7 @@ public class GroundCableElement extends SixNodeElement {
 	public void networkSerialize(DataOutputStream stream) {
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte((color << 4));
+			stream.writeByte(color << 4);
 			Utils.serialiseItemStack(stream, inventory.getStackInSlot(GroundCableContainer.cableSlotId));
 		} catch (IOException e) {
 			e.printStackTrace();

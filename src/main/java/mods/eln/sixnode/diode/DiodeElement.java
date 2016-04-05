@@ -69,7 +69,7 @@ public class DiodeElement extends SixNodeElement {
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
-		nbt.setByte("front", (byte) ((front.toInt() << 0)));
+		nbt.setByte("front", (byte) (front.toInt() << 0));
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class DiodeElement extends SixNodeElement {
 	public void networkSerialize(DataOutputStream stream) {
 		super.networkSerialize(stream);
 		try {
-			stream.writeByte((front.toInt() << 4));
+			stream.writeByte(front.toInt() << 4);
 			stream.writeShort((short) ((anodeLoad.getU()) * NodeBase.networkSerializeUFactor));
 			stream.writeShort((short) ((catodeLoad.getU()) * NodeBase.networkSerializeUFactor));
 			stream.writeShort((short) (anodeLoad.getCurrent() * NodeBase.networkSerializeIFactor));
