@@ -196,7 +196,7 @@ public class SixNode extends Node {
 
 		sixNodeCacheBlock = Block.getBlockById(nbt.getInteger("cacheBlockId"));
 		sixNodeCacheBlockMeta = nbt.getByte("cacheBlockMeta");
-		int idx = 0;
+		int idx;
 		for (idx = 0; idx < 6; idx++)
 		{
 

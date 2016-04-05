@@ -155,7 +155,7 @@ public class PacketHandler {
 
     void packetForClientNode(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
         EntityPlayer clientPlayer = (EntityPlayer) player;
-        int x = 0, y = 0, z = 0, dimention = 0;
+        int x, y, z, dimention;
         try {
 
             x = stream.readInt();

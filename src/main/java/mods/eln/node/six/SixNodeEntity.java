@@ -60,7 +60,7 @@ public class SixNodeEntity extends NodeBlockEntity {
 			sixNodeCacheBlock = Block.getBlockById(stream.readInt());
 			sixNodeCacheBlockMeta = stream.readByte();
 
-			int idx = 0;
+			int idx;
 			for (idx = 0; idx < 6; idx++){
 				short id = stream.readShort();
 				if (id == 0){

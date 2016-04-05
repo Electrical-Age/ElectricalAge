@@ -83,7 +83,7 @@ public class ItemDefault extends Default {
 
 				}
 			}
-			int counter = 0;
+			int counter;
 			if(recipeOutList.size() == 0) {
 				extender.add(new GuiLabel(6, y, tr("Cannot be crafted!")));
 				y += 12;

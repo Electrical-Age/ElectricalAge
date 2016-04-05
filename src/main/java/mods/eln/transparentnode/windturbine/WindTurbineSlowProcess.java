@@ -52,7 +52,7 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 		{
 			environementTimeCounter += environementTimeCounterReset*(0.75 + Math.random()*0.5);
 			
-			int x1 = 0,x2 = 0,y1 = 0,y2 = 0,z1 = 0,z2 = 0;
+			int x1,x2,y1,y2,z1,z2;
 
 			
 			Coordonate coord = new Coordonate(turbine.node.coordonate);
@@ -128,7 +128,7 @@ public class WindTurbineSlowProcess implements IProcess,INBTTReady {
 		
 
 		localWind = 0;
-		double P = 0;
+		double P;
 		double wind = getWind();
 		
 		if(wind > d.maxWind)

@@ -26,7 +26,7 @@ public class WirelessSignalRxProcess implements IProcess, INBTTReady {
 
 	@Override
 	public void process(double time) {
-		double output = 0;
+		double output;
 		sleepTimer -= time;
 
 		if (sleepTimer < 0) {

@@ -394,7 +394,6 @@ public class Utils {
 	}
 
 	public static void setGlColorFromDye(int damage, float gain) {
-		int color = ItemDye.field_150922_c[damage]; // dyeColors
 		switch (damage) {
 			default:
 				GL11.glColor3f(0.05f * gain, 0.05f * gain, 0.05f * gain);
@@ -573,7 +572,6 @@ public class Utils {
 				stack.stackSize = 0;
 				return true;
 			} else if (targetStack.isItemEqual(stack)) {
-				int sizeLast = targetStack.stackSize;
 				// inventory.decrStackSize(idx, -stack.stackSize);
 				int transferMax = inventory.getInventoryStackLimit() - targetStack.stackSize;
 				if (transferMax > 0) {
@@ -618,7 +616,6 @@ public class Utils {
 					oneStackDone = true;
 					break;
 				} else if (targetStack.isItemEqual(stack)) {
-					int sizeLast = targetStack.stackSize;
 					// inventory.decrStackSize(idx, -stack.stackSize);
 					int transferMax = limit - targetStack.stackSize;
 					if (transferMax > 0) {
@@ -653,7 +650,6 @@ public class Utils {
 					stack.stackSize = 0;
 					break;
 				} else if (targetStack.isItemEqual(stack)) {
-					int sizeLast = targetStack.stackSize;
 					// inventory.decrStackSize(idx, -stack.stackSize);
 					int transferMax = limit - targetStack.stackSize;
 					if (transferMax > 0) {
@@ -1032,7 +1028,7 @@ public class Utils {
 
 		float vxInv = 1f / vx, vyInv = 1f / vy, vzInv = 1f / vz;
 
-		float stackRed = 0, stackBlue = 0, stackGreen = 0;
+		float stackRed = 0;
 		float d = 0;
 
 		while (d < rangeMax) {
@@ -1199,7 +1195,6 @@ public class Utils {
 				}
 			}
 			if (r instanceof ShapedOreRecipe) {
-				ShapedOreRecipe rr = (ShapedOreRecipe) r;
 				for (Object o : ((ShapedOreRecipe) r).getInput()) {
 					if (o instanceof List) {
 						stacks.addAll(((List) o));
@@ -1211,7 +1206,6 @@ public class Utils {
 				}
 			}
 			if (r instanceof ShapelessOreRecipe) {
-				ShapelessOreRecipe rr = (ShapelessOreRecipe) r;
 				for (Object o : ((ShapelessOreRecipe) r).getInput()) {
 					if (o instanceof List) {
 						stacks.addAll(((List) o));
