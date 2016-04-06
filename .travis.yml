@@ -14,7 +14,10 @@ cache:
     - $HOME/.gradle/wrapper/
 
 install:
-  - pip install transifex-client
+  - pip install git+git://github.com/transifex/transifex-client.git@master
+
+# See https://github.com/transifex/transifex-client/issues/113  
+# - pip install transifex-client
 
 after_success:
   - ./script/transifex.sh
