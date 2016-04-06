@@ -1,15 +1,14 @@
 package mods.eln.signalinductor;
 
-import java.util.List;
-
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.component.Inductor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+
+import java.util.List;
 
 public class SignalInductorDescriptor extends SixNodeDescriptor {
 
@@ -26,7 +25,7 @@ public class SignalInductorDescriptor extends SixNodeDescriptor {
 	@Override
 	public void setParent(Item item, int damage) {
 		super.setParent(item, damage);
-		Data.addEnergy(newItemStack());
+		//Data.addEnergy(newItemStack());
 	}
 
 	public void applyTo(ElectricalLoad load) {
