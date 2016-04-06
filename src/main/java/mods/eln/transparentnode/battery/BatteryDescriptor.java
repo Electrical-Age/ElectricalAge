@@ -1,18 +1,13 @@
 package mods.eln.transparentnode.battery;
 
-import java.util.List;
-
 import mods.eln.Eln;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
-import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.BatteryProcess;
-import mods.eln.sim.BatterySlowProcess;
-import mods.eln.sim.Simulator;
-import mods.eln.sim.ThermalLoad;
+import mods.eln.sim.*;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
@@ -21,6 +16,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -76,7 +73,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
     
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
     
 	public BatteryDescriptor(String name, String modelName, 
@@ -142,6 +139,9 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
                     break;
 			}
 		}
+
+		voltageLevelColor = VoltageLevelColor.fromVoltage(electricalU);
+		changeDefaultIcon("battery");
 	}
 
 	@Override
@@ -244,12 +244,16 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		draw(true,true);
+		if (type == ItemRenderType.INVENTORY) {
+			super.renderItem(type, item, data);
+		} else {
+			draw(true, true);
+		}
 	}
 	
 	@Override

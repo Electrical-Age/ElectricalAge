@@ -70,7 +70,7 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		rightGun = obj.getPart("RightGun");
 		sensor = obj.getPart("Sensor");
 		fire = obj.getPart("Fire");
-		
+
 		properties = new Properties();
 		voltageLevelColor = VoltageLevelColor.HighVoltage;
 	}

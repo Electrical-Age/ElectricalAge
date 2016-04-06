@@ -1,10 +1,7 @@
 package mods.eln.sixnode.electricalalarm;
 
-import mods.eln.misc.LRDU;
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -51,6 +48,9 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
                 rotSpeed = rot.getFloat("speed");
             pinDistance = Utils.getSixNodePinDistance(main);
         }
+
+        voltageLevelColor = VoltageLevelColor.SignalVoltage;
+        changeDefaultIcon("electricalalarm");
     }
 
     @Override
@@ -80,17 +80,17 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
 
     @Override
     public boolean use2DIcon() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
     public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
@@ -101,9 +101,7 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         if (type == ItemRenderType.INVENTORY) {
-            GL11.glScalef(1.6f, 1.6f, 1.6f);
-            GL11.glTranslatef(-0.1f, 0.0f, 0f);
-            LRDU.Up.glRotateOnX();
+            super.renderItem(type, item, data);
         }
         draw(true, 0.0f);
     }

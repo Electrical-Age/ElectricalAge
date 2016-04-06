@@ -141,8 +141,9 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if (type == ItemRenderType.INVENTORY) {
 			super.renderItem(type, item, data);
+		} else {
+			if (main != null) main.draw();
 		}
-		if (main != null) main.draw();
 	}
 	
 	@Override
