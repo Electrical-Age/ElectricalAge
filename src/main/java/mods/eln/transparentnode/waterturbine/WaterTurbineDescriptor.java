@@ -1,29 +1,21 @@
 package mods.eln.transparentnode.waterturbine;
 
-import java.util.List;
-
+import mods.eln.misc.*;
+import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.wiki.Data;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import mods.eln.ghost.GhostGroup;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.FunctionTable;
-import mods.eln.misc.Obj3D;
-import mods.eln.misc.Utils;
-import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.node.transparent.TransparentNodeDescriptor;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import mods.eln.wiki.Data;
+
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
 public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
-
-
-
 	public WaterTurbineDescriptor(
 			String name,Obj3D obj,
 			ElectricalCableDescriptor cable,
@@ -49,6 +41,8 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 			generator = obj.getPart("Generator");
 			speed = 60;
 		}
+
+		voltageLevelColor = VoltageLevelColor.LowVoltage;
 	}
 	
 	Coordonate waterCoord;
@@ -87,7 +81,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
 	
 	@Override
@@ -108,14 +102,18 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
 		
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		objItemScale(obj);
-		Direction.ZN.glRotateXnRef();
-		draw(0f);
+		if (type == ItemRenderType.INVENTORY) {
+			super.renderItem(type, item, data);
+		} else {
+			objItemScale(obj);
+			Direction.ZN.glRotateXnRef();
+			draw(0f);
+		}
 	}
 	
 	

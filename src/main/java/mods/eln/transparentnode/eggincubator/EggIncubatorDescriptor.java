@@ -1,10 +1,9 @@
 package mods.eln.transparentnode.eggincubator;
 
-import java.util.List;
-
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.sim.mna.component.Resistor;
@@ -18,8 +17,9 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
-
 import org.lwjgl.opengl.GL11;
+
+import java.util.List;
 
 public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
     
@@ -51,6 +51,8 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 			lamp = obj.getPart("lamp");
 			lampf  = obj.getPart("lampf");
 		}
+
+		voltageLevelColor = VoltageLevelColor.fromCable(cable);
 	}
 	
 	@Override
@@ -61,7 +63,7 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 	
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
     
 	@Override
@@ -71,7 +73,7 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 	
 	@Override
@@ -81,7 +83,11 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		draw(0, 1f);
+		if (type == ItemRenderType.INVENTORY) {
+			super.renderItem(type, item, data);
+		} else {
+			draw(0, 1f);
+		}
 	}
 	
 	void draw(int eggStackSize, float powerFactor) {
