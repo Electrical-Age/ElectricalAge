@@ -3,6 +3,7 @@ package mods.eln.sixnode.electricalwatch;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -44,6 +45,8 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
 				digits[0] = obj.getPart("digit0");
 			}
 		}
+
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
 
 	void draw(float hour, float min, boolean isEnergyAvailable) {
@@ -110,7 +113,7 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -120,17 +123,21 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
 	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		GL11.glRotatef(90,1,0,0);
-		draw(0.1f, 0.2f, true);
+		if (type == ItemRenderType.INVENTORY) {
+			super.renderItem(type, item, data);
+		} else {
+			GL11.glRotatef(90, 1, 0, 0);
+			draw(0.1f, 0.2f, true);
+		}
 	}
 }
