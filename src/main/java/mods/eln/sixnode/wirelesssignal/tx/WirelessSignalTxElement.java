@@ -94,7 +94,7 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 		ArrayList<IWirelessSignalTx> list = channelMap.get(channel);
 		if (list == null) return;
 		list.remove(tx);
-		if (list.size() == 0)
+		if (list.isEmpty())
 			channelMap.remove(channel);
 	}
     

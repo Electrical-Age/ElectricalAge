@@ -91,7 +91,7 @@ public class ModbusRtuGui extends GuiScreenEln {
 
 		ArrayList<WirelessTxStatus> tempListTx = new ArrayList<WirelessTxStatus>(render.wirelessTxStatusList.values());
 
-		while (tempListTx.size() != 0) {
+		while (!tempListTx.isEmpty()) {
 			int smaller = Integer.MAX_VALUE;
 			WirelessTxStatus best = null;
 			for (WirelessTxStatus tx : tempListTx) {
@@ -145,7 +145,7 @@ public class ModbusRtuGui extends GuiScreenEln {
 		
 		ArrayList<WirelessRxStatus> tempListRx = new ArrayList<WirelessRxStatus>(render.wirelessRxStatusList.values());
 
-        while (tempListRx.size() != 0) {
+        while (!tempListRx.isEmpty()) {
 			int smaller = Integer.MAX_VALUE;
 			WirelessRxStatus best = null;
 			for (WirelessRxStatus rx : tempListRx) {

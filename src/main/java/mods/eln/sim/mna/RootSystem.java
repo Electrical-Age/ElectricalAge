@@ -77,7 +77,7 @@ public class RootSystem {
 	}
 
 	public void generate() {
-		if (addComponents.size() != 0 || addStates.size() != 0) {
+		if (!addComponents.isEmpty() || !addStates.isEmpty()) {
 			//generateBreak();
 			//generateBreakLine();
 			Profiler p = new Profiler();

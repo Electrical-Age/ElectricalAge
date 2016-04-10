@@ -59,7 +59,7 @@ public class Line extends Resistor implements ISubSystemProcessFlush, IAbstracto
 	}*/
 	
 	public static void newLine(RootSystem root, LinkedList<Resistor> resistors, LinkedList<State> states) {
-		if(resistors.size() == 0) {
+		if(resistors.isEmpty()) {
 		} else if (resistors.size() == 1) {
 			//root.addComponent(resistors.getFirst());
 		} else {

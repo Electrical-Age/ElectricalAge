@@ -84,7 +84,7 @@ public class ItemDefault extends Default {
 				}
 			}
 			int counter = 0;
-			if(recipeOutList.size() == 0) {
+			if(recipeOutList.isEmpty()) {
 				extender.add(new GuiLabel(6, y, tr("Cannot be crafted!")));
 				y += 12;
 			}
@@ -112,7 +112,7 @@ public class ItemDefault extends Default {
 				y += 70;
 			}
 
-			if(recipeInList.size() == 0) {
+			if(recipeInList.isEmpty()) {
 				extender.add(new GuiLabel(6, y, tr("Is not a crafting material!")));
 				y += 12;
 			}
@@ -148,7 +148,7 @@ public class ItemDefault extends Default {
 			{
 				counter = -1;
 				ArrayList<Recipe> list = RecipesList.getGlobalRecipeWithInput(stack);
-				if(list.size() == 0) {
+				if(list.isEmpty()) {
 					//extender.add(new GuiLabel(6, y, "Can't Product"));
 				}
 				else {
@@ -179,7 +179,7 @@ public class ItemDefault extends Default {
 			{
 				counter = -1;
 				ArrayList<Recipe> list = RecipesList.getGlobalRecipeWithOutput(stack);
-				if(list.size() == 0) {
+				if(list.isEmpty()) {
 					//extender.add(new GuiLabel(6, y, "Can't Product"));
 				}
 				else {

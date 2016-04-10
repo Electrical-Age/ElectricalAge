@@ -136,7 +136,7 @@ public class LightBlockEntity extends TileEntity {
 	public void updateEntity() {
 		if (worldObj.isRemote) return;
 		
-		if (lightList.size() == 0) {
+		if (lightList.isEmpty()) {
 		//	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
 			worldObj.setBlockToAir(xCoord, yCoord, zCoord);
 			//worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);

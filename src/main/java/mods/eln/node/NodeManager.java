@@ -131,7 +131,7 @@ public class NodeManager extends WorldSavedData {
 	Random rand = new Random();
 
 	public NodeBase getRandomNode() {
-		if (nodes.size() == 0) return null;
+		if (nodes.isEmpty()) return null;
 		return nodes.get(rand.nextInt(nodes.size()));
 	}
 

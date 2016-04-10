@@ -57,7 +57,7 @@ public class OreRegenerate {
 	public void tick(ServerTickEvent event) {
 		if (event.phase != Phase.START) return;
 		for(int idx = 0; idx < 1; idx++){
-			if (jobs.size() != 0) {
+			if (!jobs.isEmpty()) {
 				ChunkRef j = jobs.pollLast();
 				if (!Eln.instance.saveConfig.reGenOre && !Eln.instance.forceOreRegen) return;
 
