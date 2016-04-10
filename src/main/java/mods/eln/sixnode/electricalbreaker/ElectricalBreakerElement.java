@@ -83,7 +83,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
-		nbt.setByte("front", (byte) ((front.toInt() << 0)));
+		nbt.setByte("front", (byte) (front.toInt() << 0));
 		nbt.setBoolean("switchState", switchState);
 		nbt.setFloat("voltageMax", voltageMax);
         nbt.setFloat("voltageMin", voltageMin);
@@ -125,8 +125,8 @@ public class ElectricalBreakerElement extends SixNodeElement {
 		super.networkSerialize(stream);
 		try {
 			stream.writeBoolean(switchState);
-	    	stream.writeFloat((voltageMax));
-	    	stream.writeFloat((voltageMin));
+	    	stream.writeFloat(voltageMax);
+	    	stream.writeFloat(voltageMin);
 
 	    	Utils.serialiseItemStack(stream, inventory.getStackInSlot(ElectricalBreakerContainer.cableSlotId));
 		} catch (IOException e) {

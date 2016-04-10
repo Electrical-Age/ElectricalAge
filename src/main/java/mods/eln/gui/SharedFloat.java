@@ -18,7 +18,7 @@ public class SharedFloat {
 		float readed;
 		try {
 			readed = stream.readFloat();
-			if(syncBoot || (syncValue != readed)) {
+			if(syncBoot || syncValue != readed) {
 				syncBoot = true;
 				syncValue = readed;
 			}

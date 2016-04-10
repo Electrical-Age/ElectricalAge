@@ -178,7 +178,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	}
 
 	public static BatteryDescriptor getDescriptorFrom(ItemStack itemStack) {
-		return list[(itemStack.getItemDamage()) & 0x7];
+		return list[itemStack.getItemDamage() & 0x7];
 	}
 	
 	@Override

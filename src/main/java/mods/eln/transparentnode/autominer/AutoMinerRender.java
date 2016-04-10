@@ -163,7 +163,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 				float camAlpha;
 				switch (front) {
                     default:
-                    case XN: camAlpha = (float)(Math.PI); break;
+                    case XN: camAlpha = (float) Math.PI; break;
                     case XP: camAlpha = 0; break;
                     case ZN: camAlpha = (float)(-Math.PI / 2); break;
                     case ZP: camAlpha = (float)(Math.PI / 2); break;

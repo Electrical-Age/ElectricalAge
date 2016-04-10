@@ -715,7 +715,7 @@ public class Eln {
 		}
 
 		MinecraftForge.EVENT_BUS.register(new ElnForgeEventsHandler());
-		FMLCommonHandler.instance().bus().register((new ElnFMLEventsHandler()));
+		FMLCommonHandler.instance().bus().register(new ElnFMLEventsHandler());
 
 		Utils.println("Electrical age init done");
 	}

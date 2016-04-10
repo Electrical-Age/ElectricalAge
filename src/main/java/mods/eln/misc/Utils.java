@@ -688,7 +688,7 @@ public class Utils {
 	 */
 
 	public static void serialiseItemStack(DataOutputStream stream, ItemStack stack) throws IOException {
-		if ((stack) == null) {
+		if (stack == null) {
 			stream.writeShort(-1);
 			stream.writeShort(-1);
 		} else {
@@ -1202,7 +1202,7 @@ public class Utils {
 				ShapedOreRecipe rr = (ShapedOreRecipe) r;
 				for (Object o : ((ShapedOreRecipe) r).getInput()) {
 					if (o instanceof List) {
-						stacks.addAll(((List) o));
+						stacks.addAll((List) o);
 					}
 
 					if (o instanceof ItemStack) {
@@ -1214,7 +1214,7 @@ public class Utils {
 				ShapelessOreRecipe rr = (ShapelessOreRecipe) r;
 				for (Object o : ((ShapelessOreRecipe) r).getInput()) {
 					if (o instanceof List) {
-						stacks.addAll(((List) o));
+						stacks.addAll((List) o);
 					}
 
 					if (o instanceof ItemStack) {

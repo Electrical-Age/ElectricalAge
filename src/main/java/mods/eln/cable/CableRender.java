@@ -104,7 +104,7 @@ public class CableRender {
 					Direction otherDirection = side.getInverse();
 					LRDU otherLRDU = otherDirection.getLRDUGoingTo(sideLrdu).inverse();
 					CableRenderDescriptor render = entity.getCableRender(sideLrdu, sideLrdu.getLRDUGoingTo(side));
-					NodeBlockEntity otherNode = ((NodeBlockEntity)otherTileEntity);
+					NodeBlockEntity otherNode = (NodeBlockEntity)otherTileEntity;
 					CableRenderDescriptor otherRender = otherNode.getCableRender(otherDirection, otherLRDU);
 
 					if(render == null) {
@@ -262,7 +262,7 @@ public class CableRender {
 
 					if(render == null)
 						continue; 
-					NodeBlockEntity otherNode =  ((NodeBlockEntity)otherTileEntity);
+					NodeBlockEntity otherNode = (NodeBlockEntity)otherTileEntity;
 					CableRenderDescriptor otherRender = otherNode.getCableRender(otherDirection, otherLRDU);
 					
 					if(otherRender == null) {

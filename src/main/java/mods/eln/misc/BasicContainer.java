@@ -108,7 +108,7 @@ public class BasicContainer extends Container {
 
 				itemstack1 = slot.getStack();
 
-				if ((slot.isItemValid(par1ItemStack)) && itemstack1 != null && itemstack1.getItem() == par1ItemStack.getItem() && (!par1ItemStack.getHasSubtypes() || par1ItemStack.getItemDamage() == itemstack1.getItemDamage()) && ItemStack.areItemStackTagsEqual(par1ItemStack, itemstack1)) {
+				if (slot.isItemValid(par1ItemStack) && itemstack1 != null && itemstack1.getItem() == par1ItemStack.getItem() && (!par1ItemStack.getHasSubtypes() || par1ItemStack.getItemDamage() == itemstack1.getItemDamage()) && ItemStack.areItemStackTagsEqual(par1ItemStack, itemstack1)) {
 					int l = itemstack1.stackSize + par1ItemStack.stackSize;
 					int maxSize = Math.min(slot.getSlotStackLimit(), par1ItemStack.getMaxStackSize());
 					if (l <= maxSize) {
@@ -143,7 +143,7 @@ public class BasicContainer extends Container {
 				slot = (Slot) this.inventorySlots.get(k);
 				itemstack1 = slot.getStack();
 
-				if (itemstack1 == null && (slot.isItemValid(par1ItemStack))) {
+				if (itemstack1 == null && slot.isItemValid(par1ItemStack)) {
 					int l = par1ItemStack.stackSize;
 					int maxSize = Math.min(slot.getSlotStackLimit(), par1ItemStack.getMaxStackSize());
 					if (l <= maxSize) {
