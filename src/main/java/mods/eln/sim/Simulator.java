@@ -13,20 +13,22 @@ import mods.eln.sim.process.destruct.IDestructable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Simulator /* ,IPacketHandler */{
 
 	public RootSystem mna;
 
 	private ArrayList<IProcess> slowProcessList;
-	private ArrayList<IProcess> slowPreProcessList;
+	private List<IProcess> slowPreProcessList;
 
 	private ArrayList<IProcess> electricalProcessList;
 
 	private ArrayList<IProcess> thermalFastProcessList, thermalSlowProcessList;
 	private ArrayList<ThermalConnection> thermalFastConnectionList, thermalSlowConnectionList;
 	private ArrayList<ThermalLoad> thermalFastLoadList, thermalSlowLoadList;
-	private HashSet<IDestructable> destructableSet;
+	private Set<IDestructable> destructableSet;
 
 	boolean run;
 
@@ -246,7 +248,7 @@ public class Simulator /* ,IPacketHandler */{
 		if (process != null) thermalSlowProcessList.remove(process);
 	}
 
-	public void addAllElectricalConnection(ArrayList<ElectricalConnection> connection) {
+	public void addAllElectricalConnection(Iterable<ElectricalConnection> connection) {
 		if (connection != null) {
 			for (ElectricalConnection c : connection) {
 				addElectricalComponent(c);
@@ -254,7 +256,7 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void removeAllElectricalConnection(ArrayList<ElectricalConnection> connection) {
+	public void removeAllElectricalConnection(Iterable<ElectricalConnection> connection) {
 		if (connection != null) {
 			for (ElectricalConnection c : connection) {
 				removeElectricalComponent(c);
@@ -262,7 +264,7 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void addAllElectricalComponent(ArrayList<Component> cList) {
+	public void addAllElectricalComponent(Iterable<Component> cList) {
 		if (cList != null) {
 			for (Component c : cList) {
 				addElectricalComponent(c);
@@ -270,7 +272,7 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void removeAllElectricalComponent(ArrayList<Component> cList) {
+	public void removeAllElectricalComponent(Iterable<Component> cList) {
 		if (cList != null) {
 			for (Component c : cList) {
 				removeElectricalComponent(c);
@@ -278,7 +280,7 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void addAllThermalConnection(ArrayList<ThermalConnection> connection) {
+	public void addAllThermalConnection(Iterable<ThermalConnection> connection) {
 		if (connection != null) {
 			for (ThermalConnection c : connection) {
 				addThermalConnection(c);
@@ -286,7 +288,7 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void removeAllThermalConnection(ArrayList<ThermalConnection> connection) {
+	public void removeAllThermalConnection(Iterable<ThermalConnection> connection) {
 		if (connection != null) {
 			for (ThermalConnection c : connection) {
 				removeThermalConnection(c);
@@ -294,7 +296,7 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void addAllElectricalLoad(ArrayList<ElectricalLoad> load) {
+	public void addAllElectricalLoad(Iterable<ElectricalLoad> load) {
 		if (load != null) {
 			for (ElectricalLoad l : load) {
 				addElectricalLoad(l);
@@ -302,7 +304,7 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void removeAllElectricalLoad(ArrayList<ElectricalLoad> load) {
+	public void removeAllElectricalLoad(Iterable<ElectricalLoad> load) {
 		if (load != null) {
 			for (ElectricalLoad l : load) {
 				removeElectricalLoad(l);
@@ -310,7 +312,7 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void addAllThermalLoad(ArrayList<ThermalLoad> load) {
+	public void addAllThermalLoad(Iterable<ThermalLoad> load) {
 		if (load != null) {
 			for (ThermalLoad c : load) {
 				addThermalLoad(c);
@@ -318,7 +320,7 @@ public class Simulator /* ,IPacketHandler */{
 		}
 	}
 
-	public void removeAllThermalLoad(ArrayList<ThermalLoad> load) {
+	public void removeAllThermalLoad(Iterable<ThermalLoad> load) {
 		if (load != null) {
 			for (ThermalLoad c : load) {
 				removeThermalLoad(c);
@@ -493,7 +495,7 @@ public class Simulator /* ,IPacketHandler */{
 		return mna.isRegistred(load);
 	}
 
-	void thermalStep(double dt, ArrayList<ThermalConnection> connectionList, ArrayList<IProcess> processList, ArrayList<ThermalLoad> loadList) {
+	void thermalStep(double dt, Iterable<ThermalConnection> connectionList, Iterable<IProcess> processList, Iterable<ThermalLoad> loadList) {
 		for (ThermalConnection c : connectionList) {
 			double i;
 			i = (c.L2.Tc - c.L1.Tc) / ((c.L2.Rs + c.L1.Rs));

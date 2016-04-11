@@ -10,6 +10,7 @@ import java.net.URLDecoder;
 import java.security.CodeSource;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -18,7 +19,7 @@ import java.util.jar.JarFile;
  */
 public class Obj3DFolder {
 
-    private HashMap<String, Obj3D> nameToObjHash = new HashMap<String, Obj3D>();
+    private Map<String, Obj3D> nameToObjHash = new HashMap<String, Obj3D>();
 
     /** Load all obj models available in the release mod asset folder. */
     public void loadAllElnModels() {

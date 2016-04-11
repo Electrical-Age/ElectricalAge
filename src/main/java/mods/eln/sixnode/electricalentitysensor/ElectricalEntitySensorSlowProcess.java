@@ -72,7 +72,7 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
 				Vec3 lastPos;
 				if ((lastPos = lastEPos.get(e)) != null) {
 					double weight = 0.4;
-					ArrayList<Block> blockList = Utils.traceRay(world, coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ);
+					List<Block> blockList = Utils.traceRay(world, coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ);
 					boolean view = true;
 
 					for (Block b : blockList) {

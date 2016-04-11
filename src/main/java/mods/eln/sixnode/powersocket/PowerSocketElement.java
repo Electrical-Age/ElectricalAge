@@ -28,6 +28,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 //TODO Copy-pasted from LampSupply. PowerSocket behavior must be implemented.
 public class PowerSocketElement extends SixNodeElement {
@@ -97,7 +98,7 @@ public class PowerSocketElement extends SixNodeElement {
 
 	static void channelRemove(PowerSocketElement tx) {
 		String channel = tx.channel;
-		ArrayList<PowerSocketElement> list = channelMap.get(channel);
+		List<PowerSocketElement> list = channelMap.get(channel);
 		if (list == null) return;
 		list.remove(tx);
 		if (list.isEmpty())

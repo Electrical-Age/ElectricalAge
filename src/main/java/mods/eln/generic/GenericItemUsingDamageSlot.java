@@ -6,6 +6,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class GenericItemUsingDamageSlot extends SlotWithSkin implements ISlotWithComment {
 
@@ -58,7 +59,7 @@ public class GenericItemUsingDamageSlot extends SlotWithSkin implements ISlotWit
     }
 
 	@Override
-	public void getComment(ArrayList<String> list) {
+	public void getComment(List<String> list) {
 		for(String str : comment)
 			list.add(str);
 	}
