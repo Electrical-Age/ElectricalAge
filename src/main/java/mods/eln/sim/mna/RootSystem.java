@@ -23,7 +23,7 @@ public class RootSystem {
 	public HashSet<Component> addComponents = new HashSet<Component>();
 	public HashSet<State> addStates = new HashSet<State>();
 
-	static final int maxSubSystemSize = 40;
+	static final int maxSubSystemSize = 100;
 
 	ArrayList<ISubSystemProcessFlush> processF = new ArrayList<ISubSystemProcessFlush>();
 

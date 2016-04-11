@@ -4,7 +4,6 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import mods.eln.Eln;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -20,7 +19,6 @@ import net.minecraft.world.World;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 
 public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDescriptor> extends Item implements IGenericItemUsingDamage {
 	public Hashtable<Integer, Descriptor> subItemList = new Hashtable<Integer, Descriptor>();
@@ -99,7 +97,11 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 	@Override
 	public String getUnlocalizedName(ItemStack par1ItemStack){
 		Descriptor desc = getDescriptor(par1ItemStack);
-		return desc.name.replaceAll("\\s+","_");
+		if (desc != null && desc.name != null) {
+			return desc.name.replaceAll("\\s+", "_");
+		} else {
+			return null;
+		}
 	}
 
 	/*
