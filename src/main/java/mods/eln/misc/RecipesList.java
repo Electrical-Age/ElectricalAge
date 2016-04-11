@@ -12,7 +12,7 @@ import net.minecraft.item.crafting.FurnaceRecipes;
 
 public class RecipesList {
 
-	public static ArrayList<RecipesList> listOfList = new ArrayList<RecipesList>();
+	public static final ArrayList<RecipesList> listOfList = new ArrayList<RecipesList>();
 	
 	private ArrayList<Recipe> recipeList = new ArrayList<Recipe>();
 	private ArrayList<ItemStack> machineList = new ArrayList<ItemStack>();

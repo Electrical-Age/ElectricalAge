@@ -183,7 +183,7 @@ public class Eln {
 	public final static String SRC_URL = "https://github.com/Electrical-Age";
 	public final static String[] AUTHORS = { "Dolu1990", "lambdaShade", "cm0x4D", "metc", "Baughn"};
 
-	public static String channelName = "miaouMod";
+	public static final String channelName = "miaouMod";
 	public ArrayList<IConfigSharing> configShared = new ArrayList<IConfigSharing>();
 	public static SimpleNetworkWrapper achNetwork;
 
@@ -256,12 +256,12 @@ public class Eln {
 
 	public OreRegenerate oreRegenerate;
 
-	public static Obj3DFolder obj = new Obj3DFolder();
+	public static final Obj3DFolder obj = new Obj3DFolder();
 
 	public static boolean dicThungsten;
 	public static boolean genCopper, genLead, genTungsten, genCinnabar;
 	public static String dicTungstenOre, dicTungstenDust, dicTungstenIngot;
-	public static ArrayList<OreScannerConfigElement> oreScannerConfig = new ArrayList<OreScannerConfigElement>();
+	public static final ArrayList<OreScannerConfigElement> oreScannerConfig = new ArrayList<OreScannerConfigElement>();
 	public static boolean modbusEnable = false;
 
 	float xRayScannerRange;
@@ -989,7 +989,7 @@ public class Eln {
 	public CableRenderDescriptor stdCableRender800V;
 	public CableRenderDescriptor stdCableRender3200V;
 
-	public static double gateOutputCurrent = 0.100;
+	public static final double gateOutputCurrent = 0.100;
 	public static final double SVU = 50, SVII = gateOutputCurrent / 50,
 			SVUinv = 1.0 / SVU;
 	public static final double LVU = 50;
@@ -1003,7 +1003,7 @@ public class Eln {
 	public static final double HVP = 5000;
 	public static final double VVP = 15000;
 
-	public static double electricalCableDeltaTMax = 20;
+	public static final double electricalCableDeltaTMax = 20;
 
 	public static final double cableHeatingTime = 30;
 	public static final double cableWarmLimit = 130;
@@ -3253,7 +3253,7 @@ public class Eln {
 	public static GenericItemUsingDamageDescriptorWithComment dustTin,
 			dustCopper, dustSilver;
 
-	public static HashMap<String, ItemStack> dictionnaryOreFromMod = new HashMap<String, ItemStack>();
+	public static final HashMap<String, ItemStack> dictionnaryOreFromMod = new HashMap<String, ItemStack>();
 
 	void addToOre(String name, ItemStack ore) {
 		OreDictionary.registerOre(name, ore);

@@ -69,5 +69,5 @@ public final class Machine {
      * The built-in Lua architecture. This will be set to the native Lua
      * implementation when possible, to the LuaJ fallback, otherwise.
      */
-    public static Class<? extends Architecture> LuaArchitecture = null;
+    public static final Class<? extends Architecture> LuaArchitecture = null;
 }

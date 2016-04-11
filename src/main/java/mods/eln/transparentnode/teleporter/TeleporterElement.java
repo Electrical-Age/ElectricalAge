@@ -39,7 +39,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	TeleporterSlowProcess slowProcess = new TeleporterSlowProcess();
 
 	NodePeriodicPublishProcess publisher;
-	static public ArrayList<ITeleporter> teleporterList = new ArrayList<ITeleporter>();
+	static public final ArrayList<ITeleporter> teleporterList = new ArrayList<ITeleporter>();
 
 	public TeleporterElement(TransparentNode transparentNode,
 			TransparentNodeDescriptor descriptor) {

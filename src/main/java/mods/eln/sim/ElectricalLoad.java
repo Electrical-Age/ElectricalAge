@@ -9,7 +9,7 @@ import mods.eln.sim.mna.state.VoltageStateLineReady;
 
 public class ElectricalLoad extends VoltageStateLineReady {
 	
-	public static State groundLoad = null;
+	public static final State groundLoad = null;
 
 	private double Rs = MnaConst.highImpedance;
 

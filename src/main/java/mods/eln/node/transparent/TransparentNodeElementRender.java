@@ -216,7 +216,7 @@ public abstract class TransparentNodeElementRender {
 		return null;
 	}
 	
-	static LRDUMask maskTempDraw = new LRDUMask();
+	static final LRDUMask maskTempDraw = new LRDUMask();
 	
 	public CableRenderType drawCable(Direction side,CableRenderDescriptor render,LRDUMask connection,CableRenderType renderPreProcess)
 	{
