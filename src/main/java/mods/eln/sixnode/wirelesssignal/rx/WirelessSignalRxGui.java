@@ -52,7 +52,7 @@ public class WirelessSignalRxGui extends GuiScreenEln {
 		int y = 6 + 12 + 4;
 		add(buttonBigger = new AggregatorBt(x, y, w, 20, tr("Biggest"), (byte) 0)); x += 2 + w;
 		add(buttonSmaller = new AggregatorBt(x, y, w, 20, tr("Smallest"), (byte) 1)); x += 2 + w;
-		add(buttonToogle = new AggregatorBt(x, y, w, 20, tr("Toggle"), (byte) 2)); x += 2 + w;
+		add(buttonToogle = new AggregatorBt(x, y, w, 20, tr("Toggle"), (byte) 2));
 
 		buttonBigger.setHelper(helper);
 		int lineNumber = 0;

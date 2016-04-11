@@ -628,7 +628,6 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 			for(int screenY = 0; screenY < resHeight; screenY++) {
 				GL11.glBegin(GL11.GL_QUAD_STRIP);
 				for(int screenX = 0; screenX < resWidth + 1; screenX++){
-					float s;
 					
 					//s = screen[screenY][screenX]; GL11.glColor3f(s >= 0 ? s : 0, 0, s < 0.1 ? -s + 0.1f : 0);		
 					//Color c = Color.getHSBColor(Math.max(0, Math.min(1, s)), 1, 1);

@@ -43,7 +43,6 @@ public class ReplicatorPopProcess implements IProcess {
 		    	EntityPlayerMP player = (EntityPlayerMP) obj;
 				if (Math.random()*(world.playerEntities.size()) < time * popPerSecondPerPlayer && player.worldObj == world) {	
 					int x, y, z;				
-					Random rand = new Random();
 					x = (int) (player.posX + Utils.rand(-100, 100));
 					z = (int) (player.posZ + Utils.rand(-100, 100));
 					y = 2;
