@@ -300,7 +300,7 @@ public class GuiHelper {
         GL11.glEnable(GL11.GL_TEXTURE_2D);
     }
 
-	public int getHoveringTextWidth(ArrayList<String> comment, FontRenderer fontRenderer) {
+	public int getHoveringTextWidth(List<String> comment, FontRenderer fontRenderer) {
 		int strWidth = 0;
 		for(String str : comment) {
 			int size = fontRenderer.getStringWidth(str);
@@ -309,7 +309,7 @@ public class GuiHelper {
 		return strWidth +5;
 	}
 
-	public int getHoveringTextHeight(ArrayList<String> comment,FontRenderer fontRenderer) {
+	public int getHoveringTextHeight(List<String> comment, FontRenderer fontRenderer) {
 		return comment.size() * 9 - 4;
 	}
 	

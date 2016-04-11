@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 public class WirelessUtils {
@@ -29,7 +31,7 @@ public class WirelessUtils {
 		spotSet.add(from);
 		
 		if (!isRoot) {
-			for (ArrayList<IWirelessSignalTx> txs : from.getTx().values()) {
+			for (List<IWirelessSignalTx> txs : from.getTx().values()) {
 				for (IWirelessSignalTx tx : txs) {
 					if (isRoot)
 						strength = tx.getRange() - getVirtualDistance(tx.getCoordonate(), from.getCoordonate(), tx.getCoordonate().trueDistanceTo(from.getCoordonate()));
@@ -88,7 +90,7 @@ public class WirelessUtils {
 		}
 	}
 
-	private static void addTo(IWirelessSignalTx tx, double strength, HashMap<String, HashSet<IWirelessSignalTx>> reg, HashMap<IWirelessSignalTx, Double> txStrength) {
+	private static void addTo(IWirelessSignalTx tx, double strength, Map<String, HashSet<IWirelessSignalTx>> reg, Map<IWirelessSignalTx, Double> txStrength) {
 		String channel = tx.getChannel();
 		HashSet<IWirelessSignalTx> ch = reg.get(channel);
 		if (ch != null && ch.contains(tx)) return;
@@ -120,7 +122,7 @@ public class WirelessUtils {
 		if (channel != null) {
 			ArrayList<IWirelessSignalTx> inRangeTx = new ArrayList<IWirelessSignalTx>();
 			
-			ArrayList<IWirelessSignalTx> sameChannelTx = WirelessSignalTxElement.channelMap.get(channel);
+			List<IWirelessSignalTx> sameChannelTx = WirelessSignalTxElement.channelMap.get(channel);
 			if (sameChannelTx != null) {
 				for (IWirelessSignalTx tx : sameChannelTx) {
 					if (isInRange(tx.getCoordonate(), c, tx.getRange())) {

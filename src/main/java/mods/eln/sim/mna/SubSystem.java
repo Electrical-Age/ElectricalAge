@@ -17,10 +17,11 @@ import org.apache.commons.math3.linear.RealMatrix;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 public class SubSystem {
 	public ArrayList<Component> component = new ArrayList<Component>();
-	public ArrayList<State> states = new ArrayList<State>();
+	public List<State> states = new ArrayList<State>();
 	public LinkedList<IDestructor> breakDestructor = new LinkedList<IDestructor>();
 	public ArrayList<SubSystem> interSystemConnectivity = new ArrayList<SubSystem>();
 	ArrayList<ISubSystemProcessI> processI = new ArrayList<ISubSystemProcessI>();

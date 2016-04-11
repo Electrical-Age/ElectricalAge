@@ -1,6 +1,7 @@
 package mods.eln.gui;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -22,7 +23,7 @@ public class SlotWithSkinAndComment extends Slot implements ISlotSkin, ISlotWith
 	}
 
 	@Override
-	public void getComment(ArrayList<String> list) {
+	public void getComment(List<String> list) {
 		for(String str : comment)
 			list.add(str);
 	}

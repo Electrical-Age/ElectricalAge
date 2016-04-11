@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ItemStackFilter {
 
@@ -39,7 +40,7 @@ public class ItemStackFilter {
 	}
 
 	public static ItemStackFilter[] OreDict(String name) {
-		final ArrayList<ItemStack> ores = OreDictionary.getOres(name);
+		final List<ItemStack> ores = OreDictionary.getOres(name);
 		ItemStackFilter[] filters = new ItemStackFilter[ores.size()];
 		for (int i = 0; i < ores.size(); i++) {
 			filters[i] = new ItemStackFilter(ores.get(i).getItem(), 0xff, ores.get(i).getItemDamage());

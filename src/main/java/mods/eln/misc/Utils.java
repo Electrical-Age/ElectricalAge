@@ -862,7 +862,7 @@ public class Utils {
 
 	static public void getItemStack(String name, List list) {
 		Iterator aitem = Item.itemRegistry.iterator();
-		ArrayList<ItemStack> tempList = new ArrayList<ItemStack>(3000);
+		List<ItemStack> tempList = new ArrayList<ItemStack>(3000);
 		Item item;
 
 		while (aitem.hasNext()) {
@@ -1246,7 +1246,7 @@ public class Utils {
 		return new ItemStack(i, size, damage);
 	}
 
-	public static ArrayList<NBTTagCompound> getTags(NBTTagCompound nbt) {
+	public static List<NBTTagCompound> getTags(NBTTagCompound nbt) {
 		Object[] set = nbt.func_150296_c().toArray();
 
 		ArrayList<NBTTagCompound> tags = new ArrayList<NBTTagCompound>();

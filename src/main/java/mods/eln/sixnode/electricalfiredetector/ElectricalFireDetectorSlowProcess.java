@@ -8,6 +8,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockFire;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ElectricalFireDetectorSlowProcess implements IProcess {
 
@@ -68,7 +69,7 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                             fireDetected = true;
 
                             Coordonate coord = element.getCoordonate();
-                            ArrayList<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5,
+                            List<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5,
                                     detectionBBCenter.x + dx + 0.5, detectionBBCenter.y + dy + 0.5, detectionBBCenter.z + dz + 0.5);
 
                             for (Block b : blockList)

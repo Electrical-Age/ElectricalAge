@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.autominer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import mods.eln.Eln;
 import mods.eln.item.ElectricalDrillDescriptor;
@@ -115,7 +116,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         //
                         Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
                         int meta = jobCoord.world().getBlockMetadata(jobCoord.x, jobCoord.y, jobCoord.z);
-                        ArrayList<ItemStack> drop = block.getDrops(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0);
+                        List<ItemStack> drop = block.getDrops(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0);
 
                         for (ItemStack stack : drop) {
                             drop(stack);

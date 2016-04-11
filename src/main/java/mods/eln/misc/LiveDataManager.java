@@ -7,6 +7,8 @@ import cpw.mods.fml.common.gameevent.TickEvent.RenderTickEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 public class LiveDataManager {
@@ -46,12 +48,12 @@ public class LiveDataManager {
 		return data;
 	}
 	
-	HashMap<Object,Element> map = new HashMap<Object, LiveDataManager.Element>();
+	Map<Object,Element> map = new HashMap<Object, LiveDataManager.Element>();
 	
 	@SubscribeEvent
 	public void tick(RenderTickEvent event) {
 		if(event.phase != Phase.START) return;
-		ArrayList<Object> keyToRemove = new ArrayList<Object>();
+		List<Object> keyToRemove = new ArrayList<Object>();
 		for(Entry<Object, Element> entry : map.entrySet()){
 			Element e = entry.getValue();
 			e.timeout--;

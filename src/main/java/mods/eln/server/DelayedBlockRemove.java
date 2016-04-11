@@ -6,12 +6,13 @@ import mods.eln.server.DelayedTaskManager.ITask;
 import net.minecraft.init.Blocks;
 
 import java.util.HashSet;
+import java.util.Set;
 
 public class DelayedBlockRemove implements ITask {
 
     Coordonate c;
 
-	private static HashSet<Coordonate> blocks = new HashSet<Coordonate>(); 
+	private static Set<Coordonate> blocks = new HashSet<Coordonate>(); 
 	
 	private DelayedBlockRemove(Coordonate c) {
 		this.c = c;

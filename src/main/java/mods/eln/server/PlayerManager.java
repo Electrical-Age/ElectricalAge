@@ -9,11 +9,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Map.Entry;
 
 public class PlayerManager {
 
-	private Hashtable<EntityPlayerMP, PlayerMetadata> metadataHash = new Hashtable<EntityPlayerMP, PlayerMetadata>();
+	private Map<EntityPlayerMP, PlayerMetadata> metadataHash = new Hashtable<EntityPlayerMP, PlayerMetadata>();
 
     public PlayerManager() {
         FMLCommonHandler.instance().bus().register(this);

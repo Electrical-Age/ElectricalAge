@@ -20,7 +20,7 @@ public class RootSystem {
 
 	//public HashMap<Component, IDestructor> componentDestructor = new HashMap<Component, IDestructor>();
 
-	public HashSet<Component> addComponents = new HashSet<Component>();
+	public Set<Component> addComponents = new HashSet<Component>();
 	public HashSet<State> addStates = new HashSet<State>();
 
 	static final int maxSubSystemSize = 100;
@@ -99,7 +99,7 @@ public class RootSystem {
 
 	private boolean isValidForLine(State s) {
 		if (!s.canBeSimplifiedByLine()) return false;
-		ArrayList<Component> sc = s.getConnectedComponentsNotAbstracted();
+		List<Component> sc = s.getConnectedComponentsNotAbstracted();
 		if (sc.size() != 2) return false;
 		for (Component c : sc) {
 			if (false == c instanceof Resistor) { return false; }
@@ -112,7 +112,7 @@ public class RootSystem {
 	}
 
 	private void generateLine() {
-		HashSet<State> stateScope = new HashSet<State>();
+		Set<State> stateScope = new HashSet<State>();
 		//HashSet<Resistor> resistorScope = new HashSet<Resistor>();
 		for (State s : addStates) {
 			if (isValidForLine(s)) {
