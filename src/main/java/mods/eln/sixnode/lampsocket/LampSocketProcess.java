@@ -385,9 +385,8 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 		boolean same = coord.equals(oldLbCoord);
 		light = value;
 
-		if (!same) {
-			if (oldLbCoord.equals(myCoord()))
-				lamp.sixNode.recalculateLightValue();
+		if (!same && oldLbCoord.equals(myCoord())) {
+			lamp.sixNode.recalculateLightValue();
 			/*
 			 * else LightBlockEntity.removeLight(oldLbCoord, oldLight);
 			 */

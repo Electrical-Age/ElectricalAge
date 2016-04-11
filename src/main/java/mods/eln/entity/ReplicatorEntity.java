@@ -75,14 +75,11 @@ public class ReplicatorEntity extends EntityMob {
         //setDead();
         hunger += 0.05 / hungerTime;
 
-        if (hunger > 1) {
-            if (Math.random() < 0.05 / 5)
-                attackEntityFrom(DamageSource.starve, 1);
+        if (hunger > 1 && Math.random() < 0.05 / 5) {
+            attackEntityFrom(DamageSource.starve, 1);
         }
-        if (hunger < 0.5) {
-            if (Math.random() * 10 < 0.05) {
-                heal(1f);
-            }
+        if (hunger < 0.5 && Math.random() * 10 < 0.05) {
+            heal(1f);
         }
         if (hunger < hungerToDuplicate) {
             ReplicatorEntity entityliving = new ReplicatorEntity(this.worldObj);

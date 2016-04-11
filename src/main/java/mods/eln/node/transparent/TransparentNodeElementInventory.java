@@ -141,8 +141,8 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
 		for(int idx = 0;idx < 6;idx++){
 			int[] lol = getAccessibleSlotsFromSide(idx);
 			for(int hohoho : lol){
-				if(hohoho == i){
-					if(canInsertItem(i, itemstack, idx)) return true;
+				if(hohoho == i && canInsertItem(i, itemstack, idx)){
+					return true;
 				}
 			}
 		}

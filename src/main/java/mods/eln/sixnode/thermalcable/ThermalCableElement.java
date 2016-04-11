@@ -120,11 +120,9 @@ public class ThermalCableElement extends SixNodeElement {
 			if (gen != null && gen instanceof BrushDescriptor) {
 				BrushDescriptor brush = (BrushDescriptor) gen;
 				int brushColor = brush.getColor(currentItemStack);
-				if (brushColor != color) {
-					if (brush.use(currentItemStack,entityPlayer)) {
-						color = brushColor;
-						sixNode.reconnect();
-					}
+				if (brushColor != color && brush.use(currentItemStack,entityPlayer)) {
+					color = brushColor;
+					sixNode.reconnect();
 				}
 			}
 		}

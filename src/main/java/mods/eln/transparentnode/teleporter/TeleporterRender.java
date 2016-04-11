@@ -110,8 +110,7 @@ public class TeleporterRender extends TransparentNodeElementRender{
 				
 				
 				for(int idx = 2;idx < 10;idx++){
-					if(ledCounter == 0){
-						if(Math.random() < 0.3)
+					if(ledCounter == 0 && Math.random() < 0.3){
 						ledState[idx] = ! ledState[idx];
 					}
 					if(ledState[idx])

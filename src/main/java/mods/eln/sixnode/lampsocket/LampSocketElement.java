@@ -272,11 +272,9 @@ public class LampSocketElement extends SixNodeElement {
 			if (gen != null && gen instanceof BrushDescriptor) {
 				BrushDescriptor brush = (BrushDescriptor) gen;
 				int brushColor = brush.getColor(currentItemStack);
-				if (brushColor != paintColor) {
-					if (brush.use(currentItemStack,entityPlayer)) {
-						paintColor = brushColor;
-						needPublish(); //Sync
-					}
+				if (brushColor != paintColor && brush.use(currentItemStack,entityPlayer)) {
+					paintColor = brushColor;
+					needPublish(); //Sync
 				}
 				return true;
 			}

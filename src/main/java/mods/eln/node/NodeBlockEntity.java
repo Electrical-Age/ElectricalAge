@@ -213,9 +213,8 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
 
     public void onBlockAdded() {
-        if (!worldObj.isRemote) {
-            if (getNode() == null)
-                worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+        if (!worldObj.isRemote && getNode() == null) {
+            worldObj.setBlockToAir(xCoord, yCoord, zCoord);
         }
     }
 

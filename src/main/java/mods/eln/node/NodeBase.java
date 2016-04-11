@@ -233,38 +233,34 @@ public abstract class NodeBase {
 
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz)
 	{
-		if (!entityPlayer.worldObj.isRemote)
+		if (!entityPlayer.worldObj.isRemote && entityPlayer.getCurrentEquippedItem() != null)
 		{
-			if (entityPlayer.getCurrentEquippedItem() != null)
+			if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
 			{
-				if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
-				{
-					String str = multiMeterString(side);
-					if (str != null)
-						Utils.addChatMessage(entityPlayer, str);
-					return true;
-				}
-				if (Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
-				{
-					String str = thermoMeterString(side);
-					if (str != null)
-						Utils.addChatMessage(entityPlayer, str);
-					return true;
-				}
-				if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
-				{
-					String str1 = multiMeterString(side);
-					String str2 = thermoMeterString(side);
-					String str = "";
-					if (str1 != null)
-						str += str1;
-					if (str2 != null)
-						str += str2;
-					if (str.equals("") == false)
-						Utils.addChatMessage(entityPlayer, str);
-					return true;
-				}
-
+				String str = multiMeterString(side);
+				if (str != null)
+					Utils.addChatMessage(entityPlayer, str);
+				return true;
+			}
+			if (Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
+			{
+				String str = thermoMeterString(side);
+				if (str != null)
+					Utils.addChatMessage(entityPlayer, str);
+				return true;
+			}
+			if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem()))
+			{
+				String str1 = multiMeterString(side);
+				String str2 = thermoMeterString(side);
+				String str = "";
+				if (str1 != null)
+					str += str1;
+				if (str2 != null)
+					str += str2;
+				if (str.equals("") == false)
+					Utils.addChatMessage(entityPlayer, str);
+				return true;
 			}
 		}
 		if (hasGui(side))
