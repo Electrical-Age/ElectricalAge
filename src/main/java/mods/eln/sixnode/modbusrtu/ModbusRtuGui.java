@@ -279,7 +279,7 @@ public class ModbusRtuGui extends GuiScreenEln {
 		@Override
 		public void guiObjectEvent(IGuiObject object) {
 			String nameStr = name.getText();
-			int idInt = -1;
+			int idInt;
 			try {
 				idInt = Integer.parseInt(id.getText());
 			} catch (NumberFormatException e) {
@@ -350,7 +350,7 @@ public class ModbusRtuGui extends GuiScreenEln {
 		@Override
 		public void guiObjectEvent(IGuiObject object) {
 			String nameStr = name.getText();
-			int idInt = -1;
+			int idInt;
 			try {
 				idInt = Integer.parseInt(id.getText());
 			} catch (NumberFormatException e) {

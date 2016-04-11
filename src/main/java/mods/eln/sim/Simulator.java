@@ -384,7 +384,7 @@ public class Simulator /* ,IPacketHandler */{
 				break;
 			}
 
-			double dt = 0;
+			double dt;
 
 			if (electricalTimeout <= thermalTimeout) {
 				dt = electricalTimeout;

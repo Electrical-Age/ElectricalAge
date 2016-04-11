@@ -268,7 +268,6 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 			Utils.readFromNBT(nbt, "inv", inv);
 		}
 
-		idx = 0;
 		for(NbtElectricalLoad electricalLoad : electricalLoadList)
 		{
 			electricalLoad.readFromNBT(nbt, "");
@@ -320,7 +319,6 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer {
 			Utils.writeToNBT(nbt, "inv", inv);
 		}
 
-		idx = 0;
 		for(NbtElectricalLoad electricalLoad : electricalLoadList)
 		{
 			electricalLoad.writeToNBT(nbt, "");

@@ -60,7 +60,7 @@ public class BatteryGuiDraw extends GuiContainerEln {
     @Override
     protected void postDraw(float f, int x, int y) {
     	super.postDraw(f, x, y);
-    	String str1 = "", str2 = "";
+    	String str1, str2 = "";
     	
     	double p = render.power;
     	double energyMiss = render.descriptor.electricalStdEnergy * render.life - render.energy;

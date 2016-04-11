@@ -128,7 +128,7 @@ public class TreeResinCollectorElement extends SixNodeElement {
 		double productPerSeconde = getProductPerSecond();
 		double product = getProduct(productPerSeconde);
 
-		int productI = 0;
+		int productI;
 		if (product > occupancyMax) {
 			productI = (int) occupancyMax;
 			timeFromLastActivated = 0;

@@ -146,7 +146,6 @@ public class Equation implements IValue, INBTTReady {
 		if (stack != "") {
 			list.add(stack);
 			stringList.add(stack);
-			stack = "";
 		}
 
 		int depthMax = getDepthMax(list);
@@ -177,7 +176,6 @@ public class Equation implements IValue, INBTTReady {
 					if (!find) {
 						if (str.equals("PI") || str.equals("pi")) {
 							list.set(idx, new Constant(Math.PI));
-							find = true;
 						}
 					}
 				}
@@ -872,7 +870,7 @@ public class Equation implements IValue, INBTTReady {
 	public static class BatteryCharge implements IOperator {
 		public BatteryCharge() {
 			FunctionTable uFq = Eln.instance.batteryVoltageFunctionTable;
-			double q = 0, dq = 0.01;
+			double q, dq = 0.01;
 			eMax = 0;
 			q = 0;
 			while (q <= 1.0) {
