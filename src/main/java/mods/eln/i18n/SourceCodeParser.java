@@ -12,6 +12,9 @@ class SourceCodeParser {
         Pattern.compile("TR_([A-Z]*)\\s*\\(\\s*(?:I18N.)?Type.(.*?)\\s*,\\s\"(.*?)\"\\s*\\)");
     private static final String MULTIPLE_LOCATIONS = "Appearing in multiple source files";
 
+    private SourceCodeParser() {
+    }
+
     public static Map<String, Set<TranslationItem>> parseSourceFolder(final File file) throws IOException {
         Map<String, Set<TranslationItem>> strings = new TreeMap<String,Set<TranslationItem>>();
         strings.put(MULTIPLE_LOCATIONS, new TreeSet<TranslationItem>());

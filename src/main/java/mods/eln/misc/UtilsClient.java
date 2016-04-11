@@ -49,6 +49,9 @@ public class UtilsClient {
 
     final static ResourceLocation whiteTexture = new ResourceLocation("eln", "sprites/cable.png");
 
+    private UtilsClient() {
+    }
+
     public static float distanceFromClientPlayer(World world, int xCoord, int yCoord, int zCoord) {
         EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
 

@@ -8,6 +8,9 @@ import java.util.Set;
 public final class SideTracker {
     private static final Set<Thread> serverThreads = Collections.newSetFromMap(new java.util.WeakHashMap<Thread, Boolean>());
 
+    private SideTracker() {
+    }
+
     public static void addServerThread() {
         serverThreads.add(Thread.currentThread());
     }
