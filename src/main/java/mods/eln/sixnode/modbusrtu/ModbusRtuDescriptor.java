@@ -3,6 +3,7 @@ package mods.eln.sixnode.modbusrtu;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -33,6 +34,8 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
 				alphaOff = door.getFloat("alphaOff");
 			}
 		}
+
+		voltageLevelColor = VoltageLevelColor.SignalVoltage;
 	}
 
 	@Override
@@ -48,12 +51,12 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
@@ -63,13 +66,17 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		GL11.glTranslatef(-0.3f, -0.1f, 0f);
-		draw(0.7f, false, false);
+		if (type == ItemRenderType.INVENTORY) {
+			super.renderItem(type, item, data);
+		} else {
+			GL11.glTranslatef(-0.3f, -0.1f, 0f);
+			draw(0.7f, false, false);
+		}
 	}
 	
 	void draw(float open, boolean activityLed, boolean errorLed) {

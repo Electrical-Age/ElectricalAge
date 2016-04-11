@@ -1,20 +1,20 @@
 package mods.eln.sixnode.electricalweathersensor;
 
-import java.util.Collections;
-import java.util.List;
-
 import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-
 import org.lwjgl.opengl.GL11;
+
+import java.util.Collections;
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -34,6 +34,8 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
 
 			pinDistance = Utils.getSixNodePinDistance(main);
 		}
+
+		voltageLevelColor = VoltageLevelColor.SignalVoltage;
 	}
 
 	void draw() {
@@ -58,7 +60,7 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
 	}
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -68,17 +70,21 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
 	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		GL11.glScalef(2f, 2f, 2f);
-		draw();
+		if (type == ItemRenderType.INVENTORY) {
+			super.renderItem(type, item, data);
+		} else {
+			GL11.glScalef(2f, 2f, 2f);
+			draw();
+		}
 	}
 }

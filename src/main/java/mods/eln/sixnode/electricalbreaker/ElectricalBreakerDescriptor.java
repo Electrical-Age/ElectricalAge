@@ -1,17 +1,16 @@
 package mods.eln.sixnode.electricalbreaker;
 
-import java.util.Collections;
-import java.util.List;
-
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-import org.lwjgl.opengl.GL11;
+import java.util.Collections;
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -36,7 +35,9 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
 				alphaOff = lever.getFloat("alphaOff");
 				alphaOn = lever.getFloat("alphaOn");
 			}
-		}			
+		}
+
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
 
 	@Override	
@@ -47,7 +48,7 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -57,24 +58,25 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
 	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		if (type == ItemRenderType.INVENTORY) GL11.glScalef(1.8f, 1.8f, 1.8f);
+		if (type == ItemRenderType.INVENTORY) /*GL11.glScalef(1.8f, 1.8f, 1.8f);*/ {
+			super.renderItem(type, item, data);
+		} else
 		draw(0f, 0f);
 	}
 	
 	public void draw(float on, float distance) {
-		if (main != null)main.draw();
+		if (main != null) main.draw();
 		if (lever != null) {
-			float switchDelta;			
 			lever.draw(on * (alphaOn - alphaOff) + alphaOff, 0, 1, 0);
 		}		
 	}

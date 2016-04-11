@@ -1,17 +1,18 @@
 package mods.eln.sixnode.thermalcable;
 
-import java.util.Collections;
-import java.util.List;
-
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Utils;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+
+import java.util.Collections;
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -60,6 +61,7 @@ public class ThermalCableDescriptor extends SixNodeDescriptor {
 			Utils.println("Bad thermalCable setup");
 			while(true);
 		}
+		voltageLevelColor = VoltageLevelColor.Thermal;
 	}
 	
 	public void addToData(boolean enable) {

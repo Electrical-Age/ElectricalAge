@@ -2,6 +2,7 @@ package mods.eln.sixnode.thermalsensor;
 
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -30,6 +31,7 @@ public class ThermalSensorDescriptor extends SixNodeDescriptor {
 			main = obj.getPart("main");
             adapter = obj.getPart("adapter");
 		}
+		voltageLevelColor = VoltageLevelColor.SignalVoltage;
 	}
 	
 	@Override

@@ -22,8 +22,16 @@ public class GenericItemBlockUsingDamageDescriptor {
     public int parentItemDamage;
 
     public GenericItemBlockUsingDamageDescriptor(String name) {
-        this.iconName = "eln:" + name.replaceAll(" ", "").toLowerCase();
+        this(name, name);
+    }
+
+    public GenericItemBlockUsingDamageDescriptor(String name, String iconName) {
+        this.iconName = "eln:" + iconName.replaceAll(" ", "").toLowerCase();
         this.name = name;
+    }
+
+    public void changeDefaultIcon(String name) {
+        this.iconName = "eln:" + name.replaceAll(" ", "").toLowerCase();
     }
 
     public NBTTagCompound getDefaultNBT() {

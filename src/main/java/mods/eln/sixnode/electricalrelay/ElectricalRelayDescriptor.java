@@ -3,6 +3,7 @@ package mods.eln.sixnode.electricalrelay;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.component.Resistor;
@@ -50,6 +51,8 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
                 r1rOn = relay1.getFloat("rOn");
             }
         }
+
+		voltageLevelColor = VoltageLevelColor.fromCable(cable);
 	}
 
 	void applyTo(ElectricalLoad load) {
@@ -58,7 +61,7 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
 
 	void applyTo(Resistor load) {
@@ -76,10 +79,10 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		Collections.addAll(list, tr("A relay is an electrical\ncontact that conducts electric\ncurrent or not, depending\nthe actual input signal voltage.").split("\n"));
 	}
-	
+
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 	
 	@Override
@@ -89,17 +92,16 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if (type == ItemRenderType.INVENTORY) {
-			GL11.glRotatef(-90, 0f, 1f, 0f);
-			GL11.glTranslatef(-0.3f, 0.0f,0f);
-			GL11.glScalef(1.5f, 1.5f, 1.5f);
+			super.renderItem(type, item, data);
+		} else {
+			draw(0f);
 		}
-		draw(0f);
 	}
 	
 	void draw(float factor) {

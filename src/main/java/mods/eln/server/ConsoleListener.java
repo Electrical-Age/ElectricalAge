@@ -11,10 +11,7 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -143,7 +140,7 @@ public class ConsoleListener extends CommandBase {
 		}
 		else if(cmd.equalsIgnoreCase(cmdNameStr_about)) {
 			cprint(ics, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_YELLOW + cmdNameStr_about);
-			cprint(ics, strOffsetL0+Eln.NAME+" - Codename "+Eln.MODID.toUpperCase());
+			cprint(ics, strOffsetL0+Eln.NAME+" - Codename "+Eln.MODID.toUpperCase(Locale.ROOT));
 			cprint(ics, strOffsetL0+"V"+String.valueOf(Version.MAJOR)+'.'+String.valueOf(Version.MINOR)+" r"+Version.REVISION);
 			String authorsStr = "";
 			for(int idx = 0 ; idx < Eln.AUTHORS.length ; idx++)

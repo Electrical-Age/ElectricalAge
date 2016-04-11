@@ -5,6 +5,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
@@ -49,6 +50,8 @@ public class FuelGeneratorDescriptor extends TransparentNodeDescriptor {
         if (obj != null) {
             main = obj.getPart("main");
         }
+
+        voltageLevelColor = VoltageLevelColor.LowVoltage;
     }
 
     public void setParent(net.minecraft.item.Item item, int damage) {
@@ -67,7 +70,7 @@ public class FuelGeneratorDescriptor extends TransparentNodeDescriptor {
 
     @Override
     public boolean use2DIcon() {
-        return false;
+        return true;
     }
 
     @Override
@@ -84,18 +87,22 @@ public class FuelGeneratorDescriptor extends TransparentNodeDescriptor {
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
                                          ItemRendererHelper helper) {
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        objItemScale(obj);
-        GL11.glPushMatrix();
-        Direction.ZP.glRotateXnRef();
-        GL11.glTranslatef(0, -1, 0);
-        GL11.glScalef(0.6f, 0.6f, 0.6f);
-        draw();
-        GL11.glPopMatrix();
+        if (type == ItemRenderType.INVENTORY) {
+            super.renderItem(type, item, data);
+        } else {
+            objItemScale(obj);
+            GL11.glPushMatrix();
+            Direction.ZP.glRotateXnRef();
+            GL11.glTranslatef(0, -1, 0);
+            GL11.glScalef(0.6f, 0.6f, 0.6f);
+            draw();
+            GL11.glPopMatrix();
+        }
     }
 
     @Override

@@ -18,3 +18,4 @@ python:
 
 after_success:
   - ./script/transifex.sh
+  - if [ "$TRAVIS_BRANCH" == "1.7.10-MNA" ]; then ./gradlew bintrayUpload; fi

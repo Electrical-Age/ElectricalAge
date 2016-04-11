@@ -1,16 +1,17 @@
 package mods.eln.transparentnode.turret;
 
-import mods.eln.misc.Utils;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-
-import org.lwjgl.opengl.GL11;
-
 import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.wiki.Data;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -71,12 +72,19 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		rightGun = obj.getPart("RightGun");
 		sensor = obj.getPart("Sensor");
 		fire = obj.getPart("Fire");
-		
+
 		properties = new Properties();
+		voltageLevelColor = VoltageLevelColor.HighVoltage;
 	}
 	
 	public Properties getProperties() {
 		return properties;
+	}
+
+	@Override
+	public void setParent(Item item, int damage) {
+		super.setParent(item, damage);
+		Data.addMachine(newItemStack());
 	}
 
     @Override
@@ -89,20 +97,32 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		list.add(tr("CAUTION: Cables can get quite hot!"));
 	}
 
-    @Override
+	@Override
+	public boolean use2DIcon() {
+		return true;
+	}
+
+	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
 		return true;
 	}
 	
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		return true;
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		return type != ItemRenderType.INVENTORY;
 	}
-	
+
+	@Override
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		return type != ItemRenderType.INVENTORY;
+	}
+
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		draw(null);
+		if (type == ItemRenderType.INVENTORY)
+			super.renderItem(type, item, data);
+		else
+			draw(null);
 	}
 	
 	public void draw(TurretRender render) {

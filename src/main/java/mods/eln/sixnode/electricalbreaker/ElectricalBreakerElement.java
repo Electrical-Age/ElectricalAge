@@ -49,7 +49,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 	public ElectricalBreakerElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 
-		front = LRDU.Left;
+		front = LRDU.Down;
     	electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
     	electricalComponentList.add(switchResistor);

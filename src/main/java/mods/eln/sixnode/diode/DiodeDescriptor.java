@@ -1,11 +1,9 @@
 package mods.eln.sixnode.diode;
 
-import java.util.Collections;
-import java.util.List;
-
 import mods.eln.misc.IFunction;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
@@ -17,6 +15,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
+
+import java.util.Collections;
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -55,6 +56,12 @@ public class DiodeDescriptor extends SixNodeDescriptor {
         base = obj.getPart("Base");
         diodeCables = obj.getPart("DiodeCables");
         diodeCore = obj.getPart("DiodeCore");
+
+        if (cable.signalWire) {
+            voltageLevelColor = VoltageLevelColor.SignalVoltage;
+        } else {
+            voltageLevelColor = VoltageLevelColor.Neutral;
+        }
 	}
 
 	@Override
@@ -65,12 +72,12 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 
     @Override
     public boolean use2DIcon() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
@@ -79,11 +86,20 @@ public class DiodeDescriptor extends SixNodeDescriptor {
     }
 
     @Override
+    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        return type != ItemRenderType.INVENTORY;
+    }
+
+    @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        GL11.glTranslatef(0.0f, 0.0f, -0.2f);
-        GL11.glScalef(1.25f,1.25f,1.25f);
-        GL11.glRotatef(-90.f,0.f,1.f,0.f);
-        draw();
+        if (type == ItemRenderType.INVENTORY) {
+            super.renderItem(type, item, data);
+        } else {
+            GL11.glTranslatef(0.0f, 0.0f, -0.2f);
+            GL11.glScalef(1.25f,1.25f,1.25f);
+            GL11.glRotatef(-90.f,0.f,1.f,0.f);
+            draw();
+        }
     }
 
 /*	public void applyTo(DiodeProcess diode) {

@@ -1,18 +1,18 @@
 package mods.eln.transparentnode.transformer;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.lwjgl.opengl.GL11;
-
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sound.SoundCommand;
 import mods.eln.wiki.Data;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import org.lwjgl.opengl.GL11;
+
+import java.util.Collections;
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -43,6 +43,7 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 		}
 		
 		highLoadSound = new SoundCommand("eln:Transformer", 1.6f);
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
 	@Override
 	public void setParent(Item item, int damage) {
@@ -61,27 +62,27 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 		Collections.addAll(list, tr("Transforms an input voltage to\nan output voltage.").split("\n"));
 		Collections.addAll(list, tr("The voltage ratio is proportional\nto the cable stacks count ratio.").split("\n"));
 	}
-	
+
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		
-		return true;
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		return type != ItemRenderType.INVENTORY;
 	}
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		
 		return true;
 	}
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		
-		draw(defaultFero, 1, 4);
+		if (type == ItemRenderType.INVENTORY) {
+			super.renderItem(type, item, data);
+		} else {
+			draw(defaultFero, 1, 4);
+		}
 	}
 	
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
 	void draw(Obj3DPart fero,int priCableNbr,int secCableNbr)
 	{

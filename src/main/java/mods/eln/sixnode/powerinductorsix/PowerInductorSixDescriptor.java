@@ -4,7 +4,7 @@ import mods.eln.Eln;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.UtilsClient;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.mna.misc.MnaConst;
@@ -35,6 +35,8 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 			InductorCore = obj.getPart("InductorCore");
 			Base = obj.getPart("Base");
 		}
+
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
     
 	public double getlValue(int cableCount) {
@@ -52,7 +54,7 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
     
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
     
 	public double getRsValue(IInventory inventory) {
@@ -82,7 +84,7 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
@@ -92,10 +94,14 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		GL11.glTranslatef(0.0f, 0.0f, -0.2f);
-		GL11.glScalef(1.25f,1.25f,1.25f);
-		GL11.glRotatef(-90.f,0.f,1.f,0.f);
-		draw();
+		if (type != ItemRenderType.INVENTORY) {
+			GL11.glTranslatef(0.0f, 0.0f, -0.2f);
+			GL11.glScalef(1.25f, 1.25f, 1.25f);
+			GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
+			draw();
+		} else {
+			super.renderItem(type, item, data);
+		}
 	}
 
 	@Override

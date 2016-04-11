@@ -1,15 +1,5 @@
 package mods.eln.node.transparent;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-
-import org.lwjgl.opengl.GL11;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-
-import mods.eln.CommonProxy;
-import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.Coordonate;
@@ -18,16 +8,11 @@ import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlock;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer;
-import net.minecraftforge.event.entity.minecart.MinecartUpdateEvent;
+import org.lwjgl.opengl.GL11;
 
 public class TransparentNodeItem extends GenericItemBlockUsingDamage<TransparentNodeDescriptor> implements IItemRenderer{
 
@@ -101,32 +86,36 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 		return getDescriptor(item).shouldUseRenderHelper(type, item, helper);
 	}
 
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		return getDescriptor(item).shouldUseRenderHelperEln(type, item, helper);
+	}
+
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		Minecraft.getMinecraft().mcProfiler.startSection("TransparentNodeItem");
-		
-		switch(type)
-		{
-		case ENTITY:
-			GL11.glTranslatef(0.00f, 0.3f, 0.0f);
-			break;
-		case EQUIPPED_FIRST_PERSON:
-			GL11.glTranslatef(0.50f, 1, 0.5f);
-			break;
-		case EQUIPPED:
-			GL11.glTranslatef(0.50f, 1, 0.5f);
-			break;
-		case FIRST_PERSON_MAP:
-			break;
-		case INVENTORY:
-			GL11.glRotatef(90, 0, 1, 0);
-			break;
-		default:
-			break;
+
+		if (shouldUseRenderHelperEln(type, item, null)) {
+			switch (type) {
+				case ENTITY:
+					GL11.glTranslatef(0.00f, 0.3f, 0.0f);
+					break;
+				case EQUIPPED_FIRST_PERSON:
+					GL11.glTranslatef(0.50f, 1, 0.5f);
+					break;
+				case EQUIPPED:
+					GL11.glTranslatef(0.50f, 1, 0.5f);
+					break;
+				case FIRST_PERSON_MAP:
+					break;
+				case INVENTORY:
+					GL11.glRotatef(90, 0, 1, 0);
+					break;
+				default:
+					break;
+			}
 		}
 		getDescriptor(item).renderItem(type, item, data);
 		
 		Minecraft.getMinecraft().mcProfiler.endSection();
-
 	}	
 }

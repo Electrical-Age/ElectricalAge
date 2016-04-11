@@ -10,6 +10,10 @@ public class GenericItemUsingDamageDescriptorUpgrade extends GenericItemUsingDam
 		super(name);
 	}
 
+	public GenericItemUsingDamageDescriptorUpgrade(String name, String iconName) {
+		super(name, iconName);
+	}
+
 	@Override
 	public void setParent(Item item, int damage) {
 		super.setParent(item, damage);

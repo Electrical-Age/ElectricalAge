@@ -3,6 +3,7 @@ package mods.eln.sixnode.energymeter;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -42,6 +43,8 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 		}
 
 		pinDistance = Utils.getSixNodePinDistance(base);
+
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
 
 	@Override
@@ -52,7 +55,7 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -62,25 +65,25 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		if (type == ItemRenderType.INVENTORY) return true;
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		if (type == ItemRenderType.INVENTORY) return true;
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if (type == ItemRenderType.INVENTORY) {
+			super.renderItem(type, item, data);
+		/*
 			GL11.glRotatef(45, 0, 0, 1);
 			GL11.glRotatef(90, 1, 0, 0);
 			GL11.glRotatef(30, 0, 0, 1);
 			float scal = 2.5f;
 			GL11.glScalef(scal, scal, scal);
-			draw(13896, 1511, 1, 0, false);
+			draw(13896, 1511, 1, 0, false);*/
 		} else {
 			draw(13896, 1511, 1, 0, true);
 		}

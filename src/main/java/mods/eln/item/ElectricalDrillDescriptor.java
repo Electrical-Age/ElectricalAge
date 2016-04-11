@@ -1,5 +1,6 @@
 package mods.eln.item;
 
+import mods.eln.misc.VoltageLevelColor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
@@ -17,6 +18,7 @@ public class ElectricalDrillDescriptor extends GenericItemUsingDamageDescriptorU
 		this.OperationEnergy = operationEnergy;
 		this.operationTime = operationTime;
 		nominalPower = operationEnergy / operationTime;
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
 
 	@Override

@@ -1,11 +1,8 @@
 package mods.eln.sixnode.electricaldatalogger;
 
 import mods.eln.Eln;
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.client.Minecraft;
@@ -67,11 +64,13 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 		if (onFloor) {
 			setPlaceDirection(Direction.YN);
 		}
+
+		voltageLevelColor = VoltageLevelColor.SignalVoltage;
 	}
 
     @Override
     public boolean use2DIcon() {
-        return false;
+        return true;
     }
 
 	void draw(DataLogs log, LRDU front, int objPosMX, int objPosMZ) {
@@ -130,21 +129,21 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if (type == ItemRenderType.INVENTORY) {
-			GL11.glRotatef(-90, 0f, 1f, 0f);
-			GL11.glTranslatef(-0.4f, 0f, 0f);
+			super.renderItem(type, item, data);
+		} else {
+			if (main != null) main.draw();
 		}
-		if (main != null) main.draw();
 	}
 	
 	@Override

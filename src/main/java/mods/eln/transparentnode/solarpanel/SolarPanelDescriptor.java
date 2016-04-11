@@ -1,15 +1,9 @@
 package mods.eln.transparentnode.solarpanel;
 
-import java.util.List;
-
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.ghost.GhostGroup;
-import mods.eln.misc.Direction;
-import mods.eln.misc.FunctionTable;
-import mods.eln.misc.IFunction;
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.sim.ElectricalLoad;
@@ -18,8 +12,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
-
 import org.lwjgl.opengl.GL11;
+
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -64,6 +59,8 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
 		this.cableRender = cableRender;
 		
 		canRotate = alphaMax != alphaMin;
+
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
 	
 	
@@ -74,7 +71,7 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
 	}
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
 	CableRenderDescriptor cableRender;
 	double electricalUmax;
@@ -144,20 +141,21 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
 		
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		
 		return true;
 	}
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		
-		draw((float) alphaMin,Direction.XN);
+		if (type == ItemRenderType.INVENTORY) {
+			super.renderItem(type, item, data);
+		} else {
+			draw((float) alphaMin, Direction.XN);
+		}
 	}
-	
-	
+
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);

@@ -2,6 +2,7 @@ package mods.eln.sixnode.resistor;
 
 import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
@@ -48,11 +49,12 @@ public class ResistorDescriptor extends SixNodeDescriptor {
             Base = obj.getPart("Base");
             Cables = obj.getPart("CapacitorCables");
         }
+        voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
     @Override
     public boolean use2DIcon() {
-        return false;
+        return true;
     }
 
     public double getRsValue(IInventory inventory) {
@@ -91,7 +93,7 @@ public class ResistorDescriptor extends SixNodeDescriptor {
 
     @Override
     public boolean shouldUseRenderHelper(IItemRenderer.ItemRenderType type, ItemStack item, IItemRenderer.ItemRendererHelper helper) {
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
@@ -101,10 +103,14 @@ public class ResistorDescriptor extends SixNodeDescriptor {
 
     @Override
     public void renderItem(IItemRenderer.ItemRenderType type, ItemStack item, Object... data) {
-        GL11.glTranslatef(0.0f,0.0f,-0.2f);
-        GL11.glScalef(1.25f,1.25f,1.25f);
-        GL11.glRotatef(-90.f,0.f,1.f,0.f);
-        draw(0);
+        if (type != ItemRenderType.INVENTORY) {
+            GL11.glTranslatef(0.0f, 0.0f, -0.2f);
+            GL11.glScalef(1.25f, 1.25f, 1.25f);
+            GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
+            draw(0);
+        } else {
+            super.renderItem(type, item, data);
+        }
     }
 
     @Override

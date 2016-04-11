@@ -1,17 +1,15 @@
 package mods.eln.transparentnode.powercapacitor;
 
-import java.util.List;
-
 import mods.eln.Eln;
 import mods.eln.item.DielectricItem;
-import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
-import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+
+import java.util.List;
 
 public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
 
@@ -68,7 +66,7 @@ public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
 	public void setParent(net.minecraft.item.Item item, int damage)
 	{
 		super.setParent(item, damage);
-		Data.addEnergy(newItemStack());
+		//Data.addEnergy(newItemStack());
 	}
 
 	void draw() {

@@ -1,31 +1,27 @@
 package mods.eln.node.transparent;
 
-import java.util.List;
-
-import org.lwjgl.opengl.GL11;
-
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.ghost.GhostGroup;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.Obj3D;
-import mods.eln.misc.Utils;
+import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNode.FrontType;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHopper;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer;
-import net.minecraftforge.client.IRenderContextHandler;
+import org.lwjgl.opengl.GL11;
+
+import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescriptor implements IItemRenderer{
+public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescriptor implements IItemRenderer {
 	public Class ElementClass,RenderClass;
+	protected VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
+
 	public TransparentNodeDescriptor(  String name,
 							 Class ElementClass,Class RenderClass) {
 		super( name);
@@ -39,19 +35,28 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		
-		return false;
+		return true;
 	}
+
 	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-			ItemRendererHelper helper) {
-		
-		return false;
+	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		return (type == ItemRenderType.INVENTORY) ? false : !use2DIcon();
 	}
+
+	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+		return !use2DIcon();
+	}
+
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		
-		
+		if (getIcon() == null)
+			return;
+
+		voltageLevelColor.drawIconBackground(type);
+
+		// remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
+		String icon = getIcon().getIconName().substring(4);
+		UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/blocks/" + icon + ".png"));
 	}
 	
 	public void objItemScale(Obj3D obj)

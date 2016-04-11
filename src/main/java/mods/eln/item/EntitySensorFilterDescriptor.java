@@ -1,5 +1,6 @@
 package mods.eln.item;
 
+import mods.eln.misc.VoltageLevelColor;
 import org.lwjgl.opengl.GL11;
 
 public class EntitySensorFilterDescriptor extends GenericItemUsingDamageDescriptorUpgrade {
@@ -14,6 +15,7 @@ public class EntitySensorFilterDescriptor extends GenericItemUsingDamageDescript
 		this.r = r;
 		this.g = g;
 		this.b = b;
+		voltageLevelColor = VoltageLevelColor.Neutral;
 	}
 
 	public void glColor() {

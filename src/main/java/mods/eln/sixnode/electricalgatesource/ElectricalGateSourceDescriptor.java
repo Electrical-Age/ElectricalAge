@@ -1,5 +1,6 @@
 package mods.eln.sixnode.electricalgatesource;
 
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,10 +25,13 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
     float leverTx;
     ElectricalGateSourceRenderObj render;
 
-	public ElectricalGateSourceDescriptor(String name, ElectricalGateSourceRenderObj render, boolean onOffOnly) {
-		super(name, ElectricalGateSourceElement.class, ElectricalGateSourceRender.class);
+	public ElectricalGateSourceDescriptor(String name, ElectricalGateSourceRenderObj render, boolean onOffOnly,
+										  String iconName) {
+		super(name, ElectricalGateSourceElement.class, ElectricalGateSourceRender.class, iconName);
 		this.render = render;
 		this.onOffOnly = onOffOnly;
+
+		voltageLevelColor = VoltageLevelColor.SignalVoltage;
 	}
 
 	@Override
@@ -46,7 +50,7 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -57,7 +61,7 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
@@ -67,13 +71,17 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		GL11.glScalef(1.5f, 1.5f, 1.5f);
-		if (type == ItemRenderType.INVENTORY) GL11.glScalef(1.5f, 1.5f, 1.5f);
-		draw(0f, 1f, null);
+		if (type != ItemRenderType.INVENTORY) {
+			GL11.glScalef(1.5f, 1.5f, 1.5f);
+			//if (type == ItemRenderType.INVENTORY) GL11.glScalef(1.5f, 1.5f, 1.5f);
+			draw(0f, 1f, null);
+		} else {
+			super.renderItem(type, item, data);
+		}
 	}
 }

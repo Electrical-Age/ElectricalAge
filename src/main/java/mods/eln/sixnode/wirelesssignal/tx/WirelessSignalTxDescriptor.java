@@ -2,6 +2,7 @@ package mods.eln.sixnode.wirelesssignal.tx;
 
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.item.Item;
@@ -22,11 +23,13 @@ public class WirelessSignalTxDescriptor extends SixNodeDescriptor {
 		this.range = range;
 		this.obj = obj;
 		if (obj != null) main = obj.getPart("main");
+
+		voltageLevelColor = VoltageLevelColor.SignalVoltage;
 	}
 	
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
     
 	public void draw() {
@@ -35,7 +38,7 @@ public class WirelessSignalTxDescriptor extends SixNodeDescriptor {
     
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
     
 	@Override
@@ -51,19 +54,19 @@ public class WirelessSignalTxDescriptor extends SixNodeDescriptor {
     
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if (type == ItemRenderType.INVENTORY) {
-			GL11.glScalef(2.8f, 2.8f, 2.8f);
-			GL11.glTranslatef(-0.1f, 0.0f, 0f);
+			super.renderItem(type, item, data);
+		} else {
+			if (type == ItemRenderType.ENTITY) {
+				//	GL11.glTranslatef(1.0f, 0f, 0f);
+				GL11.glScalef(2.8f, 2.8f, 2.8f);
+			}
+			draw();
 		}
-		if (type == ItemRenderType.ENTITY) {
-		//	GL11.glTranslatef(1.0f, 0f, 0f);
-			GL11.glScalef(2.8f, 2.8f, 2.8f);
-		}
-		draw();
 	}
 }

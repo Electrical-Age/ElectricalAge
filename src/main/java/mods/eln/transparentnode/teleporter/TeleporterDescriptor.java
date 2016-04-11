@@ -1,22 +1,15 @@
 package mods.eln.transparentnode.teleporter;
 
+import mods.eln.ghost.GhostGroup;
+import mods.eln.misc.*;
+import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.wiki.Data;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
-import mods.eln.ghost.GhostGroup;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.Obj3D;
-import mods.eln.misc.Utils;
-import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.UtilsClient;
-import mods.eln.node.GhostNode;
-import mods.eln.node.transparent.TransparentNodeDescriptor;
-import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import mods.eln.wiki.Data;
 
 public class TeleporterDescriptor extends TransparentNodeDescriptor{
 
@@ -72,6 +65,8 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor{
 		this.ghostDoorClose = ghostDoorClose;
 		this.ghostDoorOpen = ghostDoorOpen;
 		this.lightCoordonate = lightCoordonate;
+
+		voltageLevelColor = VoltageLevelColor.HighVoltage;
 	}
 
 	public GhostGroup ghostDoorOpen,ghostDoorClose;
@@ -135,8 +130,9 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor{
 	float chargeVolume = 0;
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
+
 	public TeleporterDescriptor setChargeSound(String sound, float volume) {
 		chargeSound = sound;
 		chargeVolume = volume;
@@ -146,26 +142,28 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor{
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		
 		return true;
 	}
 	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
 			ItemRendererHelper helper) {
-		
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		objItemScale(obj);
-		main.draw();
-		ext_control.draw();
-		ext_power.draw();
-		UtilsClient.disableCulling();
-		door_out.draw();
-		UtilsClient.enableCulling();
-		indoor_open.draw();
+		if (type == ItemRenderType.INVENTORY) {
+			super.renderItem(type, item, data);
+		} else {
+			objItemScale(obj);
+			main.draw();
+			ext_control.draw();
+			ext_power.draw();
+			UtilsClient.disableCulling();
+			door_out.draw();
+			UtilsClient.enableCulling();
+			indoor_open.draw();
+		}
 	}
 }

@@ -3,6 +3,7 @@ package mods.eln.sixnode.electricaltimeout;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -35,6 +36,8 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 			}
 			led  = obj.getPart("led");
 		}
+
+		voltageLevelColor = VoltageLevelColor.SignalVoltage;
 	}
 
 	@Override
@@ -51,7 +54,7 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
 
 	void draw(float left) {
@@ -74,7 +77,7 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 	
 	@Override
@@ -84,13 +87,13 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
 		if (type == ItemRenderType.INVENTORY) {
-			GL11.glScalef(2.2f, 2.2f, 2.2f);
+			super.renderItem(type, item, data);
 		}
 		draw(1f);
 	}

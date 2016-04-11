@@ -4,6 +4,7 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -33,6 +34,8 @@ public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor {
 
 			pinDistance = Utils.getSixNodePinDistance(main);
 		}
+
+		voltageLevelColor = VoltageLevelColor.SignalVoltage;
 	}
 
 	void draw(int redstone) {
@@ -46,7 +49,7 @@ public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean use2DIcon() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -63,7 +66,7 @@ public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor {
 	
 	@Override
 	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 	
 	@Override
@@ -73,12 +76,15 @@ public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
+		return type != ItemRenderType.INVENTORY;
 	}
 	
 	@Override
 	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		if (type == ItemRenderType.INVENTORY) GL11.glScalef(2.8f, 2.8f, 2.8f);
-		draw(15);
+		if (type == ItemRenderType.INVENTORY) {
+			super.renderItem(type, item, data);
+		} else {
+			draw(15);
+		}
 	}
 }
