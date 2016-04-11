@@ -27,7 +27,7 @@ public class NodeManager extends WorldSavedData {
 		return nodes;
 	}
 
-	public static HashMap<String, Class> UUIDToClass = new HashMap<String, Class>();
+	public static final HashMap<String, Class> UUIDToClass = new HashMap<String, Class>();
 
 	public static void registerUuid(String uuid, Class classType)
 	{

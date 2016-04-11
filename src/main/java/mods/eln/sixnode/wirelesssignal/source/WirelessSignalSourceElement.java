@@ -25,7 +25,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class WirelessSignalSourceElement extends SixNodeElement implements IWirelessSignalTx {
     
-	public static HashMap<String, ArrayList<IWirelessSignalTx>> channelMap = new HashMap<String, ArrayList<IWirelessSignalTx>>();
+	public static final HashMap<String, ArrayList<IWirelessSignalTx>> channelMap = new HashMap<String, ArrayList<IWirelessSignalTx>>();
 
 	WirelessSignalSourceDescriptor descriptor;
 	

@@ -16,7 +16,7 @@ public class LRDUMask {
 		this.mask = mask;
 	}
 
-	public static LRDUMask[] array = {new LRDUMask(1), new LRDUMask(2), new LRDUMask(4), new LRDUMask(8)};
+	public static final LRDUMask[] array = {new LRDUMask(1), new LRDUMask(2), new LRDUMask(4), new LRDUMask(8)};
 
 	public boolean left() { return (mask & 1) != 0;}
 	public boolean right() { return (mask & 2) != 0;}

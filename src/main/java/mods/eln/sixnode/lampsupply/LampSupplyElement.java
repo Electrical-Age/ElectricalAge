@@ -50,7 +50,7 @@ public class LampSupplyElement extends SixNodeElement {
         public int id;
     }
 
-	public static HashMap<String, ArrayList<PowerSupplyChannelHandle>> channelMap = new HashMap<String, ArrayList<PowerSupplyChannelHandle>>();
+	public static final HashMap<String, ArrayList<PowerSupplyChannelHandle>> channelMap = new HashMap<String, ArrayList<PowerSupplyChannelHandle>>();
 
 	public LampSupplyDescriptor descriptor;
 

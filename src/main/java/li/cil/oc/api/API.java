@@ -13,9 +13,9 @@ public class API {
     public static final String ID_OWNER = "OpenComputers|Core";
     public static final String VERSION = "4.2.4";
 
-    public static DriverAPI driver = null;
-    public static FileSystemAPI fileSystem = null;
-    public static ItemAPI items = null;
-    public static MachineAPI machine = null;
-    public static NetworkAPI network = null;
+    public static final DriverAPI driver = null;
+    public static final FileSystemAPI fileSystem = null;
+    public static final ItemAPI items = null;
+    public static final MachineAPI machine = null;
+    public static final NetworkAPI network = null;
 }

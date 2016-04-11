@@ -28,7 +28,7 @@ public class ReplicatorEntity extends EntityMob {
     double hungerToDuplicate = -energyToDuplicate / hungerToEnergy;
     double hungerToCanibal = 0.6;
 
-    public static ArrayList<ItemStack> dropList = new ArrayList<ItemStack>();
+    public static final ArrayList<ItemStack> dropList = new ArrayList<ItemStack>();
 
     public ReplicatorEntity(World par1World) {
         super(par1World);

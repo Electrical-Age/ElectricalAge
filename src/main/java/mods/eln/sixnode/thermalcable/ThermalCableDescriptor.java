@@ -30,7 +30,7 @@ public class ThermalCableDescriptor extends SixNodeDescriptor {
 
     public CableRenderDescriptor render;
 
-    public static ThermalCableDescriptor[] list = new ThermalCableDescriptor[256];
+    public static final ThermalCableDescriptor[] list = new ThermalCableDescriptor[256];
     
 	public ThermalCableDescriptor(String name,
 		 	double thermalWarmLimit, double thermalCoolLimit,

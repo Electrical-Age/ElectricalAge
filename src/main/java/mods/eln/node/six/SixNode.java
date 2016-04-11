@@ -30,7 +30,7 @@ import net.minecraft.world.chunk.Chunk;
 
 public class SixNode extends Node {
 
-	public static ArrayList<ISixNodeCache> sixNodeCacheList = new ArrayList<ISixNodeCache>();
+	public static final ArrayList<ISixNodeCache> sixNodeCacheList = new ArrayList<ISixNodeCache>();
 
 	public SixNodeElement sideElementList[] = new SixNodeElement[6];
 	public int sideElementIdList[] = new int[6];

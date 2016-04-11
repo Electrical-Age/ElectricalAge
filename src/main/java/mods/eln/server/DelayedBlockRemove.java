@@ -12,7 +12,7 @@ public class DelayedBlockRemove implements ITask {
 
     Coordonate c;
 
-	private static Set<Coordonate> blocks = new HashSet<Coordonate>(); 
+	private static final Set<Coordonate> blocks = new HashSet<Coordonate>();
 	
 	private DelayedBlockRemove(Coordonate c) {
 		this.c = c;

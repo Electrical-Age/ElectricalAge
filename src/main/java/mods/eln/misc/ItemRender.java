@@ -10,7 +10,7 @@ import org.lwjgl.opengl.GL11;
 
 public class ItemRender implements IItemRenderer {
 
-    private static RenderItem renderItem = new RenderItem();
+    private static final RenderItem renderItem = new RenderItem();
 
     @Override
     public boolean handleRenderType(ItemStack itemStack, ItemRenderType type) {
