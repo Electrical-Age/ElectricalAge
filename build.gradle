@@ -242,3 +242,5 @@ bintray {
         }
     }
 }
+
+idea { module { inheritOutputDirs = true } }
