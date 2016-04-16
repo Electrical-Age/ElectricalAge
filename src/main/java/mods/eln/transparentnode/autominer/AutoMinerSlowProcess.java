@@ -122,7 +122,14 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                             drop(stack);
                         }
 
-                        jobCoord.world().setBlockToAir(jobCoord.x, jobCoord.y, jobCoord.z);
+						// Use cobblestone instead of air, everywhere except the mining shaft.
+						// This is so mobs won't spawn excessively.
+						int xDist = jobCoord.x - miner.node.coordonate.x, zDist = jobCoord.z - miner.node.coordonate.z;
+						if (xDist * xDist + zDist * zDist > 25) {
+							jobCoord.world().setBlock(jobCoord.x, jobCoord.y, jobCoord.z, Blocks.cobblestone);
+						} else {
+							jobCoord.world().setBlockToAir(jobCoord.x, jobCoord.y, jobCoord.z);
+						}
 
                         energyCounter -= energyTarget;
                         oreRand = Math.random();
