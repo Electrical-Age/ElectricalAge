@@ -10,6 +10,6 @@ with xlibs; stdenv.mkDerivation {
   buildInputs = [ gradle jdk ];
 
   shellHook = ''
-    export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:${stdenv.cc.cc}/lib:${libX11}/lib/:${libXext}/lib/:${libXcursor}/lib/:${libXrandr}/lib/:${libXxf86vm}/lib/:${mesa}/lib/:${openal}/lib/
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${stdenv.cc.cc}/lib:${libX11}/lib/:${libXext}/lib/:${libXcursor}/lib/:${libXrandr}/lib/:${libXxf86vm}/lib/:${mesa}/lib/:${openal}/lib/
   '';
 }
