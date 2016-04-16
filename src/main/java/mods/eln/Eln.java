@@ -283,6 +283,7 @@ public class Eln {
 	public double solarPannelPowerFactor = 1;
 	public double windTurbinePowerFactor = 1;
 	public double waterTurbinePowerFactor = 1;
+	public int autominerRange = 10;
 
 	public static double cableRsFactor = 1.0;
 
@@ -364,6 +365,7 @@ public class Eln {
 		solarPannelPowerFactor = config.get("balancing", "solarPannelPowerFactor", 1).getDouble(1);
 		windTurbinePowerFactor = config.get("balancing", "windTurbinePowerFactor", 1).getDouble(1);
 		waterTurbinePowerFactor = config.get("balancing", "waterTurbinePowerFactor", 1).getDouble(1);
+		autominerRange = config.get("balancing", "autominerRange", 10, "Maximum horizontal distance from autominer that will be mined").getInt(10);
 
 		Other.ElnToIc2ConversionRatio = config.get("balancing", "ElnToIndustrialCraftConversionRatio", 1.0 / 3.0).getDouble(1.0 / 3.0);
 		Other.ElnToOcConversionRatio = config.get("balancing", "ElnToOpenComputerConversionRatio", 1.0 / 3.0 / 2.5).getDouble(1.0 / 3.0 / 2.5);

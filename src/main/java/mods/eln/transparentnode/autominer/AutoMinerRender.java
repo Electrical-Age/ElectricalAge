@@ -1,5 +1,6 @@
 package mods.eln.transparentnode.autominer;
 
+import mods.eln.Eln;
 import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage;
 import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -22,7 +23,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 	boolean[] ledsAState;
 	boolean[] ledsPState;
 
-    RenderStorage render = new RenderStorage(10, 130, 24, 24);
+    RenderStorage render = new RenderStorage(Eln.instance.autominerRange, 130, 24, 24);
 
     PhysicalInterpolatorNoRebound pipeLengthInterpol = new PhysicalInterpolatorNoRebound(0.4f, 2f, 0.8f);
     RcInterpolator rotSpeed = new RcInterpolator(1);
