@@ -24,9 +24,9 @@ public class TurretGui extends GuiContainerEln {
         killOrSpareButton = newGuiButton(11, 6, 60, "");
 
         chargePower = newGuiVerticalTrackBar(106, 8, 20, 35);
-        chargePower.setStepId(99);
-        chargePower.setStepIdMax(99);
-        chargePower.setRange(100, 10000);
+        chargePower.setStepId(49);
+        chargePower.setStepIdMax(49);
+        chargePower.setRange(100, 5000);
         chargePower.setComment(0, tr("Recharge power:"));
         chargePower.setValue(render.chargePower);
     }

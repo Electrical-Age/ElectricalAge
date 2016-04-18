@@ -41,7 +41,7 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 			actionAngle = 70;
 			detectionDistance = 12;
 			aimDistance = 15;
-			impulseEnergy = 2000;
+			impulseEnergy = 1000;
 			gunMinElevation = -40;
 			gunMaxElevation = 70;
 			turretSeekAnimationSpeed = 40;
@@ -49,10 +49,10 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 			gunArmAnimationSpeed = 3;
 			gunDisarmAnimationSpeed = 0.5f;
 			gunAimAnimationSpeed = 100;
-			minimalVoltage = 720;
-            maximalVoltage = 1020;
-			basePower = 50;
-		    chargePower = 2000;
+			minimalVoltage = 600;
+			maximalVoltage = 1050;
+			basePower = 25;
+		    chargePower = 1000;
             entityDetectionInterval = 0.25;
 		}
 	}

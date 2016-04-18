@@ -1,8 +1,5 @@
 package mods.eln.transparentnode.turret;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import mods.eln.fsm.CompositeState;
 import mods.eln.fsm.State;
 import mods.eln.fsm.StateMachine;
@@ -18,6 +15,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 
+import java.util.List;
+
 public class TurretSlowProcess extends StateMachine {
 	
 	private double actualPower;
@@ -32,16 +31,26 @@ public class TurretSlowProcess extends StateMachine {
 	private final TurretElement element;
 
 	private class IdleState implements State {
+        private double setupDelay = 5.0;
+
 		@Override
 		public void enter() {
+            setupDelay = 5.0;
 		}
 
 		@Override
 		public State state(double time) {
-			if (element.load.getU() >= element.getDescriptor().getProperties().minimalVoltage)
-				return new ActiveState();
-			else 
-				return this;
+
+            if (element.load.getU() >= element.getDescriptor().getProperties().minimalVoltage) {
+                setupDelay -= time;
+                if (setupDelay <= 0) {
+                    return new ActiveState();
+                } else {
+                    return this;
+                }
+            } else {
+                return this;
+            }
 		}
 
 		@Override
