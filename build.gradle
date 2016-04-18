@@ -217,6 +217,8 @@ publishing {
     }
 }
 
+bintrayUpload {}.dependsOn(build)
+
 bintray {
     user = System.getenv('BINTRAY_USER')
     key = System.getenv('BINTRAY_KEY')
