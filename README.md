@@ -4,13 +4,13 @@
 
 Electrical Age (ELN) is a Minecraft Mod offering the ability to perform large-scale in-game electrical simulations.
 
-Look at the official project website [electrical-age.net](https://electrical-age.net/) and [the Wiki](http://wiki.electrical-age.net/) to get general infromation. [This official Minecraft forum post](http://www.minecraftforum.net/topic/2741783-172forge-electrical-age-mod-beta-146/) is updated frequently.
+Look at the official project website [electrical-age.net](https://electrical-age.net/) and [the Wiki](http://wiki.electrical-age.net/) to get general information. [This official Minecraft forum post](http://www.minecraftforum.net/topic/2741783-172forge-electrical-age-mod-beta-146/) is updated frequently.
 
 ## How to get started
 
 **ElectricalAge is Minecraft 1.7.10 compatible only. Forge is needed.**
 
-1. Download the [last mod release](https://github.com/Electrical-Age/ElectricalAge/releases/download/BETA-1.10/ElectricalAge_BETA-1.10_r50.jar) (other versions are availbale [here](https://github.com/Electrical-Age/ElectricalAge/releases)). Copy the Jar file to the `.minecraft/mods/` directory (or related folder depending on your platform).
+1. Download the [last mod release](https://github.com/Electrical-Age/ElectricalAge/releases/download/BETA-1.10/ElectricalAge_BETA-1.10_r50.jar) (other versions are available [here](https://github.com/Electrical-Age/ElectricalAge/releases)). Copy the Jar file to the `.minecraft/mods/` directory (or related folder depending on your platform).
 2. Get started with the tutorial map or start playing on the offical demonstration map. The two official maps can be [downloaded from here](https://github.com/Electrical-Age/ElectricalAge/releases/download/BETA-1.10/ElectricalAge_tutorialMap_BETA-1.9_r41.zip). They must be copied to the `.minecraft/saves/` (or related) directory.
 3. Launch Minecraft using the `1.7.10-Forge` profile, select the tutorial map and enjoy!
 
