@@ -87,6 +87,10 @@ public abstract class SixNodeElementRender {
 
 	boolean needRedraw;
 
+    public void newConnectionType(CableRenderType connectionType){
+
+    }
+
 	public void draw()
 	{
 		// Minecraft.getMinecraft().mcProfiler.startSection("SixNodeRender");
@@ -94,6 +98,7 @@ public abstract class SixNodeElementRender {
 		{
 			needRedraw = false;
 			connectionType = CableRender.connectionType(this, side);
+            newConnectionType(connectionType);
 			if (drawCableAuto())
 			{
 				for (int idx = 0; idx < 4; idx++)

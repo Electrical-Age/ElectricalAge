@@ -116,7 +116,7 @@ public class CableRender {
 						
 					if(otherRender == null) {
 						connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend;
-						connectionTypeBuild.param[lrdu.dir] = render.heightPixel;
+						connectionTypeBuild.endAt[lrdu.dir] = render.heightPixel;
 						connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection, otherLRDU);
 						connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection, otherLRDU);
 					//	=  += (connectionExtend + (render.heightPixel<<4))<<(lrdu.dir*8) ;
@@ -126,7 +126,7 @@ public class CableRender {
 					if(render.width == otherRender.width) {
 						if(sideLrdu.getInt() > otherDirection.getInt()) {
 							connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend;
-							connectionTypeBuild.param[lrdu.dir] = otherRender.heightPixel;
+							connectionTypeBuild.endAt[lrdu.dir] = otherRender.heightPixel;
 							//connectionTypeBuild += (connectionExtend + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
 						}
 						connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection, otherLRDU);
@@ -135,7 +135,7 @@ public class CableRender {
 					}					
 					if(render.width < otherRender.width) {
 						connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend;
-						connectionTypeBuild.param[lrdu.dir] = otherRender.heightPixel;
+						connectionTypeBuild.endAt[lrdu.dir] = otherRender.heightPixel;
 						connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection, otherLRDU);
 						connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection, otherLRDU);
 						//connectionTypeBuild += (connectionExtend + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
@@ -174,7 +174,7 @@ public class CableRender {
 				if(render.width == otherRender.width) {
 					if(side.getInt() > sideLrdu.getInt()) {
 						connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Internal;
-						connectionTypeBuild.param[lrdu.dir] = otherRender.heightPixel;
+						connectionTypeBuild.endAt[lrdu.dir] = otherRender.heightPixel;
 						//connectionTypeBuild += (connectionInternal + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
 					}
 					connectionTypeBuild.otherdry[lrdu.dir] = otherElement.getCableDry(otherLRDU);
@@ -184,7 +184,7 @@ public class CableRender {
 
 				if(render.width < otherRender.width) {
 					connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Internal;
-					connectionTypeBuild.param[lrdu.dir] = otherRender.heightPixel;
+					connectionTypeBuild.endAt[lrdu.dir] = otherRender.heightPixel;
 					connectionTypeBuild.otherdry[lrdu.dir] = otherElement.getCableDry(otherLRDU);
 					connectionTypeBuild.otherRender[lrdu.dir] = otherElement.getCableRender(otherLRDU);
 					//connectionTypeBuild += (connectionInternal + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
@@ -269,7 +269,7 @@ public class CableRender {
 					
 					if(otherRender == null) {
 						connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend;
-						connectionTypeBuild.param[lrdu.dir] = render.heightPixel;
+						connectionTypeBuild.endAt[lrdu.dir] = render.heightPixel;
 						connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection, otherLRDU);
 						connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection, otherLRDU);
 						//connectionTypeBuild += (connectionExtend + (render.heightPixel<<4))<<(lrdu.dir*8) ;
@@ -279,7 +279,7 @@ public class CableRender {
 					if(render.width == otherRender.width) {
 						if(sideLrdu.getInt() > otherDirection.getInt()) {
 							connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend;
-							connectionTypeBuild.param[lrdu.dir] = otherRender.heightPixel;
+							connectionTypeBuild.endAt[lrdu.dir] = otherRender.heightPixel;
 							///connectionTypeBuild += (connectionExtend + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
 						}
 						connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection, otherLRDU);
@@ -288,7 +288,7 @@ public class CableRender {
 					}					
 					if(render.width < otherRender.width) {
 						connectionTypeBuild.method[lrdu.dir] = CableRenderTypeMethodType.Etend;
-						connectionTypeBuild.param[lrdu.dir] = otherRender.heightPixel;
+						connectionTypeBuild.endAt[lrdu.dir] = otherRender.heightPixel;
 						connectionTypeBuild.otherdry[lrdu.dir] = otherNode.getCableDry(otherDirection, otherLRDU);
 						connectionTypeBuild.otherRender[lrdu.dir] = otherNode.getCableRender(otherDirection, otherLRDU);
 						//connectionTypeBuild += (connectionExtend + (otherRender.heightPixel<<4))<<(lrdu.dir*8);
@@ -325,59 +325,60 @@ public class CableRender {
 		//if(connection.mask != 0) return;
 		float tx, ty;
 		{
-			float left0 = -deltaStart, right0 = deltaStart, up0 = deltaStart, down0 = -deltaStart;
-			
+            float endLeft = -deltaStart, endRight = deltaStart, endUp = deltaStart, endDown = -deltaStart;
+            float startdLeft = -connectionType.startAt[0], startRight = connectionType.startAt[1], startUp = connectionType.startAt[2], startDown = -connectionType.startAt[3];
+
 			if(connection.mask == 0 & deltaStart >= 0f) {
-				left0 = -cable.widthDiv2 - 3.0f / 16.0f;
-				right0 = cable.widthDiv2 + 3.0f / 16.0f;
-				down0 = -cable.widthDiv2 - 3.0f / 16.0f;
-				up0 = cable.widthDiv2 + 3.0f / 16.0f;
+				endLeft = -cable.widthDiv2 - 3.0f / 16.0f;
+				endRight = cable.widthDiv2 + 3.0f / 16.0f;
+				endDown = -cable.widthDiv2 - 3.0f / 16.0f;
+				endUp = cable.widthDiv2 + 3.0f / 16.0f;
 			} else {
 				if(connection.get(LRDU.Left)) {
-					left0 = -0.5f;
+					endLeft = -0.5f;
 				}
 				if(connection.get(LRDU.Right)) {
-					right0 = 0.5f;
+					endRight = 0.5f;
 				}
 				if(connection.get(LRDU.Down)) {
-					down0 = -0.5f;
+					endDown = -0.5f;
 				}
 				if(connection.get(LRDU.Up)) {
-					up0 = 0.5f;
+					endUp = 0.5f;
 				}		
 			}
 			
 			switch(connectionType.method[0]) {
-			case Internal: left0 += (connectionType.param[0]) / 16.0; 			
+			case Internal: endLeft += (connectionType.endAt[0]) / 16.0;
 				break;
-			case Etend:	left0 -= (connectionType.param[0]) / 16.0; 	
+			case Etend:	endLeft -= (connectionType.endAt[0]) / 16.0;
 				break;
 			default:
 				break;
 			}
 			
 			switch(connectionType.method[1]) {
-			case Internal: right0 -= (connectionType.param[1]) / 16.0; 					
+			case Internal: endRight -= (connectionType.endAt[1]) / 16.0;
 				break;
-			case Etend:	right0 += (connectionType.param[1]) / 16.0; 			
+			case Etend:	endRight += (connectionType.endAt[1]) / 16.0;
 				break;
 			default:
 				break;
 			}
 			
 			switch(connectionType.method[2]) {
-			case Internal: down0 += (connectionType.param[2]) / 16.0; 				
+			case Internal: endDown += (connectionType.endAt[2]) / 16.0;
 				break;
-			case Etend:	down0 -= (connectionType.param[2]) / 16.0; 			
+			case Etend:	endDown -= (connectionType.endAt[2]) / 16.0;
 				break;
 			default:
 				break;
 			}
 			
 			switch(connectionType.method[3]) {
-			case Internal: up0 -= (connectionType.param[3]) / 16.0; 					
+			case Internal: endUp -= (connectionType.endAt[3]) / 16.0;
 				break;
-			case Etend:	up0 += (connectionType.param[3]) / 16.0; 	
+			case Etend:	endUp += (connectionType.endAt[3]) / 16.0;
 				break;
 			default:
 				break;
@@ -388,64 +389,100 @@ public class CableRender {
 
 		//	Utils.bindTextureByName(cable.cableTexture);
 
-			if((left0 < -cable.widthDiv2 || right0 > cable.widthDiv2) && right0 > left0) {
+			if(endLeft < startdLeft) {
 				GL11.glBegin(GL11.GL_QUAD_STRIP);
 					GL11.glNormal3f(0f, 1f, 0f);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + left0); 	GL11.glVertex3f(0, cable.widthDiv2, left0);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + right0);   		GL11.glVertex3f(0, cable.widthDiv2, right0);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + left0);					GL11.glVertex3f(height, cable.widthDiv2, left0);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + right0);					GL11.glVertex3f(height, cable.widthDiv2, right0);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + endLeft); 	                        GL11.glVertex3f(0, cable.widthDiv2, endLeft);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + startdLeft);   		GL11.glVertex3f(0, cable.widthDiv2, startdLeft);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + endLeft);					                    GL11.glVertex3f(height, cable.widthDiv2, endLeft);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + startdLeft);					GL11.glVertex3f(height, cable.widthDiv2, startdLeft);
 					GL11.glNormal3f(1f, 0f, 0f);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + left0);					GL11.glVertex3f(height, -cable.widthDiv2, left0);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + right0);					GL11.glVertex3f(height, -cable.widthDiv2, right0);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + endLeft);					                    GL11.glVertex3f(height, -cable.widthDiv2, endLeft);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + startdLeft);					GL11.glVertex3f(height, -cable.widthDiv2, startdLeft);
 					GL11.glNormal3f(0f, -1f, 0f);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f - height, ty + left0);		GL11.glVertex3f(0, -cable.widthDiv2, left0);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f - height, ty + right0);	GL11.glVertex3f(0, -cable.widthDiv2, right0);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f - height, ty + endLeft);		                    GL11.glVertex3f(0, -cable.widthDiv2, endLeft);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f - height, ty + startdLeft);	        GL11.glVertex3f(0, -cable.widthDiv2, startdLeft);
 				GL11.glEnd();
+
+
 				GL11.glBegin(GL11.GL_QUADS);
 					GL11.glNormal3f(0f, 0f, -1f);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + left0 - height);		GL11.glVertex3f(0, -cable.widthDiv2,left0);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + left0 - height);		GL11.glVertex3f(0, cable.widthDiv2, left0);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + left0);						GL11.glVertex3f(height, cable.widthDiv2, left0);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + left0);						GL11.glVertex3f(height, -cable.widthDiv2, left0);
-		
-					GL11.glNormal3f(0f, 0f, 1f);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + right0);						GL11.glVertex3f(height, -cable.widthDiv2, right0);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + right0);						GL11.glVertex3f(height, cable.widthDiv2, right0);			
-					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + right0 + height);		GL11.glVertex3f(0, cable.widthDiv2, right0);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + right0 + height);		GL11.glVertex3f(0, -cable.widthDiv2, right0);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + endLeft - height);		GL11.glVertex3f(0, -cable.widthDiv2,endLeft);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + endLeft - height);		GL11.glVertex3f(0, cable.widthDiv2, endLeft);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + endLeft);						GL11.glVertex3f(height, cable.widthDiv2, endLeft);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + endLeft);						GL11.glVertex3f(height, -cable.widthDiv2, endLeft);
 				GL11.glEnd();
 			}
-		
-			if((down0 < -cable.widthDiv2 || up0 > cable.widthDiv2) & down0 < up0) {
+
+            if(endRight > startRight) {
+                GL11.glBegin(GL11.GL_QUAD_STRIP);
+                GL11.glNormal3f(0f, 1f, 0f);
+                GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + startRight); 	GL11.glVertex3f(0, cable.widthDiv2, startRight);
+                GL11.glTexCoord2f(tx + (cable.widthDiv2 + height) * 0.5f, ty + endRight);   		GL11.glVertex3f(0, cable.widthDiv2, endRight);
+                GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + startRight);					GL11.glVertex3f(height, cable.widthDiv2, startRight);
+                GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + endRight);					GL11.glVertex3f(height, cable.widthDiv2, endRight);
+                GL11.glNormal3f(1f, 0f, 0f);
+                GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + startRight);					GL11.glVertex3f(height, -cable.widthDiv2, startRight);
+                GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + endRight);					GL11.glVertex3f(height, -cable.widthDiv2, endRight);
+                GL11.glNormal3f(0f, -1f, 0f);
+                GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f - height, ty + startRight);		GL11.glVertex3f(0, -cable.widthDiv2, startRight);
+                GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f - height, ty + endRight);	GL11.glVertex3f(0, -cable.widthDiv2, endRight);
+                GL11.glEnd();
+
+                GL11.glBegin(GL11.GL_QUADS);
+                GL11.glNormal3f(0f, 0f, 1f);
+                GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + endRight);						GL11.glVertex3f(height, -cable.widthDiv2, endRight);
+                GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + endRight);						GL11.glVertex3f(height, cable.widthDiv2, endRight);
+                GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + endRight + height);		GL11.glVertex3f(0, cable.widthDiv2, endRight);
+                GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + endRight + height);		GL11.glVertex3f(0, -cable.widthDiv2, endRight);
+                GL11.glEnd();
+            }
+			if(endDown < startDown) {
 				GL11.glBegin(GL11.GL_QUAD_STRIP);
 					GL11.glNormal3f(0f, 0f, -1f);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2 - height) * 0.5f, ty + down0);	GL11.glVertex3f(0, down0,-cable.widthDiv2);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2 - height) * 0.5f, ty + up0);   GL11.glVertex3f(0, up0, -cable.widthDiv2);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + down0); 				GL11.glVertex3f(height, down0, -cable.widthDiv2);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + up0); 					GL11.glVertex3f(height, up0, -cable.widthDiv2);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2 - height) * 0.5f, ty + endDown);	GL11.glVertex3f(0, endDown,-cable.widthDiv2);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2 - height) * 0.5f, ty + startDown);   GL11.glVertex3f(0, startDown, -cable.widthDiv2);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + endDown); 				GL11.glVertex3f(height, endDown, -cable.widthDiv2);
+					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + startDown); 					GL11.glVertex3f(height, startDown, -cable.widthDiv2);
 					GL11.glNormal3f(1f, 0f, 0f);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + down0);				GL11.glVertex3f(height, down0, cable.widthDiv2);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + up0);   				GL11.glVertex3f(height, up0, cable.widthDiv2);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + endDown);				GL11.glVertex3f(height, endDown, cable.widthDiv2);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + startDown);   				GL11.glVertex3f(height, startDown, cable.widthDiv2);
 					GL11.glNormal3f(0f, 0f, 1f);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2+ height) * 0.5f, ty + down0);	GL11.glVertex3f(0, down0, cable.widthDiv2);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2+ height) * 0.5f, ty + up0);	GL11.glVertex3f(0, up0, cable.widthDiv2);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2+ height) * 0.5f, ty + endDown);	GL11.glVertex3f(0, endDown, cable.widthDiv2);
+					GL11.glTexCoord2f(tx + (cable.widthDiv2+ height) * 0.5f, ty + startDown);	GL11.glVertex3f(0, startDown, cable.widthDiv2);
 				GL11.glEnd();
-				
-				GL11.glBegin(GL11.GL_QUADS);
-					GL11.glNormal3f(0f, 1f, 0f);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + up0 + height);	GL11.glVertex3f(0, up0, -cable.widthDiv2);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + up0 + height);	GL11.glVertex3f(0, up0, cable.widthDiv2);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + up0);					GL11.glVertex3f(height, up0, cable.widthDiv2);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + up0); 					GL11.glVertex3f(height, up0, -cable.widthDiv2);
-					
-					GL11.glNormal3f(0f, -1f, 0f);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + down0);				GL11.glVertex3f(height, down0, -cable.widthDiv2);
-					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + down0);				GL11.glVertex3f(height, down0, cable.widthDiv2);					
-					GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + down0 - height);	GL11.glVertex3f(0, down0, cable.widthDiv2);
-					GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + down0 - height);	GL11.glVertex3f(0, down0, -cable.widthDiv2);
+
+                GL11.glBegin(GL11.GL_QUADS);
+                GL11.glNormal3f(0f, -1f, 0f);
+                GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + endDown);				GL11.glVertex3f(height, endDown, -cable.widthDiv2);
+                GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + endDown);				GL11.glVertex3f(height, endDown, cable.widthDiv2);
+                GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + endDown - height);	GL11.glVertex3f(0, endDown, cable.widthDiv2);
+                GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + endDown - height);	GL11.glVertex3f(0, endDown, -cable.widthDiv2);
 				GL11.glEnd();
 			}
+            if(endUp > startUp) {
+                GL11.glBegin(GL11.GL_QUAD_STRIP);
+                GL11.glNormal3f(0f, 0f, -1f);
+                GL11.glTexCoord2f(tx - (cable.widthDiv2 - height) * 0.5f, ty + startUp);	GL11.glVertex3f(0, startUp,-cable.widthDiv2);
+                GL11.glTexCoord2f(tx - (cable.widthDiv2 - height) * 0.5f, ty + endUp);   GL11.glVertex3f(0, endUp, -cable.widthDiv2);
+                GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + startUp); 				GL11.glVertex3f(height, startUp, -cable.widthDiv2);
+                GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + endUp); 					GL11.glVertex3f(height, endUp, -cable.widthDiv2);
+                GL11.glNormal3f(1f, 0f, 0f);
+                GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + startUp);				GL11.glVertex3f(height, startUp, cable.widthDiv2);
+                GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + endUp);   				GL11.glVertex3f(height, endUp, cable.widthDiv2);
+                GL11.glNormal3f(0f, 0f, 1f);
+                GL11.glTexCoord2f(tx + (cable.widthDiv2+ height) * 0.5f, ty + startUp);	GL11.glVertex3f(0, startUp, cable.widthDiv2);
+                GL11.glTexCoord2f(tx + (cable.widthDiv2+ height) * 0.5f, ty + endUp);	GL11.glVertex3f(0, endUp, cable.widthDiv2);
+                GL11.glEnd();
+
+                GL11.glBegin(GL11.GL_QUADS);
+                GL11.glNormal3f(0f, 1f, 0f);
+                GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + endUp + height);	GL11.glVertex3f(0, endUp, -cable.widthDiv2);
+                GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + endUp + height);	GL11.glVertex3f(0, endUp, cable.widthDiv2);
+                GL11.glTexCoord2f(tx + (cable.widthDiv2) * 0.5f, ty + endUp);					GL11.glVertex3f(height, endUp, cable.widthDiv2);
+                GL11.glTexCoord2f(tx - (cable.widthDiv2) * 0.5f, ty + endUp); 					GL11.glVertex3f(height, endUp, -cable.widthDiv2);
+                GL11.glEnd();
+            }
 		}
 	}
 		

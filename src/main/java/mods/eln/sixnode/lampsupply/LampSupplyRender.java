@@ -1,6 +1,7 @@
 package mods.eln.sixnode.lampsupply;
 
 import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.cable.CableRenderType;
 import mods.eln.misc.*;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
@@ -90,4 +91,11 @@ public class LampSupplyRender extends SixNodeElementRender {
 			e.printStackTrace();
 		}
 	}
+
+    @Override
+    public void newConnectionType(CableRenderType connectionType){
+        for(int idx = 0;idx < 4;idx++){
+            connectionType.startAt[idx] = 5/16f;
+        }
+    }
 }
