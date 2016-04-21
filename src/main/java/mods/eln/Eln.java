@@ -115,6 +115,7 @@ import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import mods.eln.solver.ConstSymbole;
 import mods.eln.solver.ISymbole;
 import mods.eln.sound.SoundCommand;
+import mods.eln.transparentnode.LargeRheostatDescriptor;
 import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
 import mods.eln.transparentnode.battery.BatteryDescriptor;
 import mods.eln.transparentnode.computercraftio.PeripheralHandler;
@@ -283,6 +284,7 @@ public class Eln {
 	public double solarPannelPowerFactor = 1;
 	public double windTurbinePowerFactor = 1;
 	public double waterTurbinePowerFactor = 1;
+	public int autominerRange = 10;
 
 	public static double cableRsFactor = 1.0;
 
@@ -364,6 +366,7 @@ public class Eln {
 		solarPannelPowerFactor = config.get("balancing", "solarPannelPowerFactor", 1).getDouble(1);
 		windTurbinePowerFactor = config.get("balancing", "windTurbinePowerFactor", 1).getDouble(1);
 		waterTurbinePowerFactor = config.get("balancing", "waterTurbinePowerFactor", 1).getDouble(1);
+		autominerRange = config.get("balancing", "autominerRange", 10, "Maximum horizontal distance from autominer that will be mined").getInt(10);
 
 		Other.ElnToIc2ConversionRatio = config.get("balancing", "ElnToIndustrialCraftConversionRatio", 1.0 / 3.0).getDouble(1.0 / 3.0);
 		Other.ElnToOcConversionRatio = config.get("balancing", "ElnToOpenComputerConversionRatio", 1.0 / 3.0 / 2.5).getDouble(1.0 / 3.0 / 2.5);
@@ -1781,6 +1784,25 @@ public class Eln {
 			);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 39;
+
+			name = "Large Rheostat";
+
+			ThermalDissipatorPassiveDescriptor dissipator = new ThermalDissipatorPassiveDescriptor(
+					name,
+					obj.getObj("LargeRheostat"),
+					1000, -100,// double warmLimit,double coolLimit,
+					4000, 800,// double nominalP,double nominalT,
+					10, 1// double nominalTao,double nominalConnectionDrop
+			);
+			LargeRheostatDescriptor desc = new LargeRheostatDescriptor(
+					name, dissipator, veryHighVoltageCableDescriptor, SerieEE.newE12(0)
+			);
+
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
 	}
@@ -4915,6 +4937,15 @@ public class Eln {
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('P'), "plateCopper");
+
+		addRecipe(findItemStack("Large Rheostat"),
+				"   ",
+				" D ",
+				"CRC",
+				Character.valueOf('R'), findItemStack("Rheostat"),
+				Character.valueOf('C'), findItemStack("Copper Thermal Cable"),
+				Character.valueOf('D'), findItemStack("Small Passive Thermal Dissipator")
+				);
 
 		//name = "Power Capacitor"
 		//name = "Power Inductor"

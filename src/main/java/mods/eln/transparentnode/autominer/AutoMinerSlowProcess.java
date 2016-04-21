@@ -49,8 +49,6 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 
     int drillCount = 1;
 
-    public static final int scannerRadiusStatic = 10;
-
     public AutoMinerSlowProcess(AutoMinerElement autoMiner) {
 		this.miner = autoMiner;
 		
@@ -122,7 +120,14 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                             drop(stack);
                         }
 
-                        jobCoord.world().setBlockToAir(jobCoord.x, jobCoord.y, jobCoord.z);
+						// Use cobblestone instead of air, everywhere except the mining shaft.
+						// This is so mobs won't spawn excessively.
+						int xDist = jobCoord.x - miner.node.coordonate.x, zDist = jobCoord.z - miner.node.coordonate.z;
+						if (xDist * xDist + zDist * zDist > 25) {
+							jobCoord.world().setBlock(jobCoord.x, jobCoord.y, jobCoord.z, Blocks.cobblestone);
+						} else {
+							jobCoord.world().setBlockToAir(jobCoord.x, jobCoord.y, jobCoord.z);
+						}
 
                         energyCounter -= energyTarget;
                         oreRand = Math.random();
@@ -265,7 +270,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 		// OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.OreScannerSlotId));
 		MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
 
-		int scannerRadius = scannerRadiusStatic;
+		int scannerRadius = Eln.instance.autominerRange;
 		double scannerEnergy = 0;
 
 		jobCoord.dimention = miner.node.coordonate.dimention;
@@ -311,7 +316,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 						double dx = jobCoord.x - miner.node.coordonate.x;
 						double dy = 0;
 						double dz = jobCoord.z - miner.node.coordonate.z;
-						double distance = Math.sqrt(dx * dx + dy * dy + dz * dz) * (1);
+						double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 						Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
 						if (checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(block))) {
 							jobFind = true;
