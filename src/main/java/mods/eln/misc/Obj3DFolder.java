@@ -78,6 +78,9 @@ public class Obj3DFolder {
         if (obj.loadFile(modelPath)) {
             String tag = modelPath.replaceAll(".obj", "").replaceAll(".OBJ", "");
             tag = tag.substring(tag.lastIndexOf('/') + 1, tag.length());
+            if (nameToObjHash.containsKey(tag)) {
+                Utils.println("Double load of model " + tag);
+            }
             nameToObjHash.put(tag, obj);	// name of the file, without extension
             Utils.println(String.format(" - model '%s' loaded", modelPath));
         }

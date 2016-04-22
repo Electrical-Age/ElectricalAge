@@ -38,8 +38,8 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
 		this.obj = obj;
 		if(obj != null) main = obj.getPart("main");
 	}
-	double warmLimit,coolLimit;
-	double nominalP, nominalT;
+	public double warmLimit,coolLimit;
+	public double nominalP, nominalT;
 	public void applyTo(ThermalLoad load)
 	{
 		load.set(thermalRs, thermalRp, thermalC);
