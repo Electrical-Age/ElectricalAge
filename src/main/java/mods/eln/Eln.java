@@ -291,7 +291,8 @@ public class Eln {
 	public boolean killMonstersAroundLamps;
 	public int killMonstersAroundLampsRange;
 
-	double stdHalfLife = 2 * Utils.minecraftDay;
+	double stdBatteryHalfLife = 2 * Utils.minecraftDay;
+	double batteryCapacityFactor = 1.;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -373,7 +374,8 @@ public class Eln {
 		Other.ElnToTeConversionRatio = config.get("balancing", "ElnToThermalExpansionConversionRatio", 1.0 / 3.0 * 4).getDouble(1.0 / 3.0 * 4);
 	//	Other.ElnToBuildcraftConversionRatio = config.get("balancing", "ElnToBuildcraftConversionRatio", 1.0 / 3.0 / 5 * 2).getDouble(1.0 / 3.0 / 5 * 2);
 
-		stdHalfLife = config.get("battery", "batteryHalfLife", 2, "How many days it takes for a battery to decay half way").getDouble(2) * Utils.minecraftDay;
+		stdBatteryHalfLife = config.get("battery", "batteryHalfLife", 2, "How many days it takes for a battery to decay half way").getDouble(2) * Utils.minecraftDay;
+		batteryCapacityFactor = config.get("balancing", "batteryCapacityFactor", 1.).getDouble(1.);
 		
 		ComputerProbeEnable = config.get("compatibility", "ComputerProbeEnable", true).getBoolean(true);
 		ElnToOtherEnergyConverterEnable = config.get("compatibility", "ElnToOtherEnergyConverterEnable", true).getBoolean(true);
@@ -1263,7 +1265,7 @@ public class Eln {
 					"BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
 					stdP * 1.2, 0.000, // electricalU,
 										// electricalPMax,electricalDischargeRate
-					stdP, stdDischargeTime, stdEfficiency, stdHalfLife, // electricalStdP,
+					stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
 					// electricalStdDischargeTime,
 					// electricalStdEfficiency,
 					// electricalStdHalfLife,
@@ -1283,7 +1285,7 @@ public class Eln {
 					"BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction,
 					stdU / 4, stdP / 2 * 1.2, 0.000, // electricalU,
 														// electricalPMax,electricalDischargeRate
-					stdP / 2, stdDischargeTime * 8, stdEfficiency, stdHalfLife, // electricalStdP,
+					stdP / 2, stdDischargeTime * 8 * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
 					// electricalStdDischargeTime,
 					// electricalStdEfficiency,
 					// electricalStdHalfLife,
@@ -1303,7 +1305,7 @@ public class Eln {
 					"BatteryBig", meduimVoltageCableDescriptor, 0.5, true, true, voltageFunction, stdU * 4,
 					stdP * 1.2, 0.000, // electricalU,
 										// electricalPMax,electricalDischargeRate
-					stdP, stdDischargeTime, stdEfficiency, stdHalfLife, // electricalStdP,
+					stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
 					// electricalStdDischargeTime,
 					// electricalStdEfficiency,
 					// electricalStdHalfLife,
@@ -1324,7 +1326,7 @@ public class Eln {
 					"BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
 					stdP * 1.2 * 4, 0.000, // electricalU,
 											// electricalPMax,electricalDischargeRate
-					stdP * 4, stdDischargeTime / 6, stdEfficiency, stdHalfLife, // electricalStdP,
+					stdP * 4, stdDischargeTime / 6 * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
 					// electricalStdDischargeTime,
 					// electricalStdEfficiency,
 					// electricalStdHalfLife,
@@ -1344,7 +1346,7 @@ public class Eln {
 					"BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
 					stdP * 1.2, 0.000, // electricalU,
 										// electricalPMax,electricalDischargeRate
-					stdP, stdDischargeTime, stdEfficiency, stdHalfLife * 8, // electricalStdP,
+					stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
 					// electricalStdDischargeTime,
 					// electricalStdEfficiency,
 					// electricalStdHalfLife,
@@ -1365,7 +1367,7 @@ public class Eln {
 					"BatteryBig", batteryCableDescriptor, 1.0, false, false, voltageFunction, stdU,
 					stdP * 1.2 * 2, 0.000, // electricalU,
 											// electricalPMax,electricalDischargeRate
-					stdP * 2, stdDischargeTime, stdEfficiency, stdHalfLife * 8, // electricalStdP,
+					stdP * 2, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
 					// electricalStdDischargeTime,
 					// electricalStdEfficiency,
 					// electricalStdHalfLife,
@@ -1385,7 +1387,7 @@ public class Eln {
 					condoVoltageFunction,
 					stdU, stdP * 1.2 * 8, 0.005, // electricalU,//
 													// electricalPMax,electricalDischargeRate
-					stdP * 8, 4, condoEfficiency, stdHalfLife, // electricalStdP,
+					stdP * 8, 4, condoEfficiency, stdBatteryHalfLife, // electricalStdP,
 					// electricalStdDischargeTime,
 					// electricalStdEfficiency,
 					// electricalStdHalfLife,
@@ -1406,7 +1408,7 @@ public class Eln {
 					condoVoltageFunction,
 					MVU, MVP * 1.5, 0.005, // electricalU,//
 											// electricalPMax,electricalDischargeRate
-					MVP, 4, condoEfficiency, stdHalfLife, // electricalStdP,
+					MVP, 4, condoEfficiency, stdBatteryHalfLife, // electricalStdP,
 					// electricalStdDischargeTime,
 					// electricalStdEfficiency,
 					// electricalStdHalfLife,
