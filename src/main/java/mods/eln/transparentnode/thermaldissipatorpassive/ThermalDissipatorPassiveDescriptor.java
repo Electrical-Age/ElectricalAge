@@ -1,23 +1,22 @@
 package mods.eln.transparentnode.thermaldissipatorpassive;
 
-import java.util.List;
-
 import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
-import mods.eln.node.IThermalDestructorDescriptor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
+import java.util.List;
+
 import static mods.eln.i18n.I18N.tr;
 
 public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescriptor {
 	public double thermalRs,thermalRp,thermalC;
-	private Obj3D obj;
+	public Obj3D obj;
 	Obj3DPart main;
 	public ThermalDissipatorPassiveDescriptor(
 			String name,
