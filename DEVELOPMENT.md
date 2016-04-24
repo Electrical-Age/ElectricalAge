@@ -1,7 +1,7 @@
 ## Development
 
 The default branch for the Electrical Age source repository on github is **"master"**, while there is another important
-branch called **"deleop"**. Each of them serves his own purpose.
+branch called **"develop"**. Each of them serves his own purpose.
 
 ### master branch
 The **"master"** branch is a stable branch, and gets updated only on releases. Whenever people checkout the **"master"**
