@@ -316,7 +316,7 @@ public class CableRender {
 	}
 
 	public static void drawCable(CableRenderDescriptor cable, LRDUMask connection, CableRenderType connectionType) {
-		drawCable(cable, connection, connectionType, cable.widthDiv2 / 2f);
+		drawCable(cable, connection, connectionType, 0f);
 	}
 
 	public static void drawCable(CableRenderDescriptor cable, LRDUMask connection, CableRenderType connectionType, float deltaStart) {
@@ -335,7 +335,7 @@ public class CableRender {
 				endUp = cable.widthDiv2 + 3.0f / 16.0f;
 			} else {
 				if(connection.get(LRDU.Left)) {
-					endLeft = -0.5f;
+						endLeft = -0.5f;
 				}
 				if(connection.get(LRDU.Right)) {
 					endRight = 0.5f;
