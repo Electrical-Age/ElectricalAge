@@ -30,7 +30,7 @@ public class BatteryProcess implements IProcess {
 	@Override
 	public void process(double time) {
 //		Utils.print("*");
-		Q -= voltageSource.getCurrent() * time;
+		Q -= voltageSource.getCurrent() * time / QNominal;
 		
 		double voltage = computeVoltage();
 		
@@ -52,27 +52,27 @@ public class BatteryProcess implements IProcess {
 	}
 
 	double computeVoltage() {
-		double voltage = voltageFunction.getValue(Q / (QNominal * life));
+		double voltage = voltageFunction.getValue(Q / life);
 		return Math.max(0, voltage * uNominal);
 	}
 	
 	public double getQRatio() {
-		return Q / QNominal;
+		return Q;
 	}
 	
 	public void changeLife(double newLife) {
 		if (newLife < life) {
-			this.Q *= newLife / life;
+			Q *= newLife / life;
 		}
 		life = newLife;
 	}
 	
 	public double getCharge() {
-		return Q / (QNominal * life);
+		return Q / life;
 	}
 
 	public void setCharge(double charge) {
-		Q = QNominal * life * charge;
+		Q = life * charge;
 	}
 
 	public double getEnergy() {

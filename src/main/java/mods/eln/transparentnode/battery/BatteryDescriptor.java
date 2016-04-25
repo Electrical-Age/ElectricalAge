@@ -155,9 +155,9 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	}
 	
 	public void applyTo(BatteryProcess battery) {
-		// Avoid that batteries are overcharged at boot if factor is changed in Eln.cfg.
-		if (battery.Q > electricalQ) {
-			battery.Q = electricalQ;
+		// Convert old battery absolute charge in Coulomb to to fraction of battery capacity.
+		if (battery.Q > 1.1) {
+			battery.Q /= electricalQ;
 		}
 		battery.QNominal = electricalQ;
 		battery.uNominal = electricalU;
