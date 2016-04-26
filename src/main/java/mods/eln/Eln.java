@@ -2535,7 +2535,7 @@ public class Eln {
 		{
 			subId = 9;
 			SteamTurbineDescriptor desc = new SteamTurbineDescriptor(
-					TR_NAME(Type.BLOCK, "Steam Turbine"),
+					TR_NAME(Type.NONE, "Steam Turbine"),
 					obj.getObj("Turbine")
 			);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -2546,7 +2546,7 @@ public class Eln {
 			float nominalRads = 800, nominalU = 3200;
 			float nominalP = 4000;
 			GeneratorDescriptor desc = new GeneratorDescriptor(
-					TR_NAME(Type.BLOCK, "Generator"),
+					TR_NAME(Type.NONE, "Generator"),
 					obj.getObj("Generator"),
 					highVoltageCableDescriptor,
 					nominalRads, nominalU,
