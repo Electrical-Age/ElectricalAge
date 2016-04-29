@@ -105,7 +105,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor: Transpa
 
     override fun getElectricalLoad(side: Direction, lrdu: LRDU): ElectricalLoad? {
         if (lrdu != LRDU.Down) return null
-        if (side == front) return positiveLoad
+        if (side == front || side == front.inverse) return positiveLoad
         return null
     }
 
@@ -113,13 +113,13 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor: Transpa
 
     override fun getConnectionMask(side: Direction, lrdu: LRDU): Int {
         if (lrdu != LRDU.Down) return 0
-        if (side == front) return NodeBase.maskElectricalPower
+        if (side == front || side == front.inverse) return NodeBase.maskElectricalPower
         return 0
     }
 
     override fun multiMeterString(side: Direction) = Utils.plotVolt("U+:", positiveLoad.u) +
             Utils.plotAmpere("I+:", positiveLoad.current) +
-            Utils.plotPercent("Fill level:", tankLevel)
+            Utils.plotPercent("Fuel level:", tankLevel)
 
 
     override fun thermoMeterString(side: Direction): String? = null

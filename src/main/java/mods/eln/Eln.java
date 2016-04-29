@@ -6695,8 +6695,15 @@ public class Eln {
 		{
 			subId = 1;
 			FuelGeneratorDescriptor descriptor =
-					new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "Fuel Generator"), obj.getObj("FuelGenerator"),
+					new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "50V Fuel Generator"), obj.getObj("FuelGenerator50V"),
 							lowVoltageCableDescriptor, 200, LVU * 1.18, 10.0);
+			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+		}
+		{
+			subId = 2;
+			FuelGeneratorDescriptor descriptor =
+				new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "200V Fuel Generator"), obj.getObj("FuelGenerator200V"),
+					meduimVoltageCableDescriptor, 400, MVU * 1.02, 10.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
 		}
 	}
