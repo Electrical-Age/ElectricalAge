@@ -18,6 +18,7 @@ achievement.open_guide.desc=Open the wiki guide
 200V_Farming_Lamp.name=200V Farming Lamp
 200V_Incandescent_Light_Bulb.name=200V Incandescent Light Bulb
 200V_Iron_Heating_Corp.name=200V Iron Heating Corp
+200V_LED_Bulb.name=200V LED Bulb
 200V_Macerator.name=200V Macerator
 200V_Magnetizer.name=200V Magnetizer
 200V_Plate_Machine.name=200V Plate Machine
@@ -35,6 +36,7 @@ achievement.open_guide.desc=Open the wiki guide
 50V_Farming_Lamp.name=50V Farming Lamp
 50V_Incandescent_Light_Bulb.name=50V Incandescent Light Bulb
 50V_Iron_Heating_Corp.name=50V Iron Heating Corp
+50V_LED_Bulb.name=50V LED Bulb
 50V_Macerator.name=50V Macerator
 50V_Magnetizer.name=50V Magnetizer
 50V_Plate_Machine.name=50V Plate Machine
@@ -105,6 +107,7 @@ Ferrite_Ingot.name=Ferrite Ingot
 Flat_Lamp_Socket.name=Flat Lamp Socket
 Fluorescent_Lamp_Socket.name=Fluorescent Lamp Socket
 Fuel_Generator.name=Fuel Generator
+Generator.name=Generator
 Gold_Dust.name=Gold Dust
 Gold_Plate.name=Gold Plate
 Gray_Brush.name=Gray Brush
@@ -212,6 +215,7 @@ Small_Rotating_Solar_Panel.name=Small Rotating Solar Panel
 Small_Solar_Panel.name=Small Solar Panel
 Solar_Tracker.name=Solar Tracker
 Standard_Alarm.name=Standard Alarm
+Steam_Turbine.name=Steam Turbine
 Stone_Heat_Furnace.name=Stone Heat Furnace
 Street_Light.name=Streetlight
 Suspended_Lamp_Socket.name=Suspended Lamp Socket
@@ -317,15 +321,13 @@ On=On
 State\:=State:
 Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
 
-# ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
-
 # ./src/main/java/mods/eln/misc/UtilsClient.java
 Hold_shift=Hold shift
 
 # ./src/main/java/mods/eln/misc/Version.java
 mod.name=Electrical Age
 
-# ./src/main/java/mods/eln/node/six/SixNodeDescriptor.java
+# ./src/main/java/mods/eln/node/transparent/TransparentNodeDescriptor.java
 
 # ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
 Input_power_is_limited_to_%1$W=Input power is limited to %1$W
@@ -352,8 +354,6 @@ Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=Emits an acoustic alarm if\
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
 Sound_is_muted=Sound is muted
 Sound_is_not_muted=Sound is not muted
-
-# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
 Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds the cable limit
@@ -408,8 +408,6 @@ Output_at_%1$%=Output at %1$%
 0V_at_night,_%1$V_at_noon.=0V at night, %1$V at noon.
 Provides_an_electrical_voltage\nin_the_presence_of_light.=Provides an electrical voltage\nin the presence of light.
 Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Provides an electrical voltage\nwhich is proportional to\nthe intensity of daylight.
-
-# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
 Applicable_boolean_operators\:=Applicable boolean operators:
@@ -499,6 +497,8 @@ is_off=is off
 is_on=is on
 value_in_kJ=value in kJ
 
+# ./src/main/java/mods/eln/sixnode/groundcable/GroundCableContainer.java
+
 # ./src/main/java/mods/eln/sixnode/groundcable/GroundCableDescriptor.java
 Can_be_used_to_set_a_point_of_an\nelectrical_network_to_0V_potential.\nFor_example_to_ground_negative_battery_contacts.=Can be used to set a point of an\nelectrical network to 0V potential.\nFor example to ground negative battery contacts.
 Provides_a_zero_volt_reference.=Provides a zero volt reference.
@@ -559,6 +559,8 @@ Specify_the_device_to_supply_through_this_socket.=Specify the device to supply t
 (Sets_resistance)=(Sets resistance)
 Coal_dust_slot=Coal dust slot
 
+# ./src/main/java/mods/eln/sixnode/resistor/ResistorGui.java
+
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
 High_parallel_resistance\n_\=>_Low_power_dissipation.=High parallel resistance\n => Low power dissipation.
 Low_serial_resistance\n_\=>_High_conductivity.=Low serial resistance\n => High conductivity.
@@ -585,7 +587,10 @@ No_text_associated_to_this_beacon=No text associated to this beacon
 # ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignGui.java
 Set_beacon_name=Set beacon name
 
-# ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
+# ./src/main/java/mods/eln/sixnode/wirelesssignal/tx/WirelessSignalTxGui.java
+
+# ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
+Nom._Resistance\:_%1$=Nom. Resistance: %1$
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
 Drill_slot=Drill slot

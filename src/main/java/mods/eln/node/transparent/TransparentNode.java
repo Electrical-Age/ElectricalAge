@@ -19,6 +19,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fluids.IFluidHandler;
 
 public class TransparentNode extends Node {
 
@@ -111,6 +112,10 @@ public class TransparentNode extends Node {
 		return element.thermoMeterString(side);
 	}
 
+	public IFluidHandler getFluidHandler() {
+		return element.getFluidHandler();
+	}
+
 	@Override
 	public void publishSerialize(DataOutputStream stream) {
 
@@ -169,9 +174,7 @@ public class TransparentNode extends Node {
 
 	@Override
 	public void initializeFromNBT() {
-
 		element.initialize();
-
 	}
 
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz)
@@ -200,7 +203,7 @@ public class TransparentNode extends Node {
 
 	@Override
 	public int getBlockMetadata() {
-		return (((int) (element.getLightOpacity() * 3)) & 3)/* + element.tileEntityMetaTag() */;
+		return element.transparentNodeDescriptor.tileEntityMetaTag.meta;
 	}
 
 	@Override

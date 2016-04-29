@@ -12,6 +12,7 @@ import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
+import mods.eln.node.transparent.*;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
@@ -40,7 +41,7 @@ public class SolarPanelElement extends TransparentNodeElement{
 	public double pannelAlpha = Math.PI/2;
 	
 	public SolarPanelElement(TransparentNode transparentNode,
-													 TransparentNodeDescriptor descriptor) {
+							 TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		this.descriptor = (SolarPanelDescriptor) descriptor;
 
