@@ -129,7 +129,7 @@ import mods.eln.transparentnode.electricalmachine.CompressorDescriptor;
 import mods.eln.transparentnode.electricalmachine.MaceratorDescriptor;
 import mods.eln.transparentnode.electricalmachine.MagnetizerDescriptor;
 import mods.eln.transparentnode.electricalmachine.PlateMachineDescriptor;
-import mods.eln.transparentnode.fuelgenerator.FuelGeneratorDescriptor;
+import mods.eln.transparentnode.FuelGeneratorDescriptor;
 import mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor;
 import mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor;
 import mods.eln.transparentnode.powerinductor.PowerInductorDescriptor;
@@ -6696,7 +6696,7 @@ public class Eln {
 			subId = 1;
 			FuelGeneratorDescriptor descriptor =
 					new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "Fuel Generator"), obj.getObj("FuelGenerator"),
-							lowVoltageCableDescriptor, 200, LVU * 1.18,  "eln:water_turbine", 1f);
+							lowVoltageCableDescriptor, 200, LVU * 1.18, 10.0);
 			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
 		}
 	}
