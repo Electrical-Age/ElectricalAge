@@ -120,6 +120,8 @@ import mods.eln.solver.ISymbole;
 import mods.eln.sound.SoundCommand;
 import mods.eln.transparentnode.FuelGeneratorDescriptor;
 import mods.eln.transparentnode.LargeRheostatDescriptor;
+import mods.eln.transparentnode.RealityPylonChunkManager;
+import mods.eln.transparentnode.RealityPylonDescriptor;
 import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
 import mods.eln.transparentnode.battery.BatteryDescriptor;
 import mods.eln.transparentnode.computercraftio.PeripheralHandler;
@@ -164,6 +166,7 @@ import net.minecraft.launchwrapper.Launch;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -290,6 +293,9 @@ public class Eln {
 	public double fuelGeneratorPowerFactor = 1;
 	public int autominerRange = 10;
 
+	public int realityPylonMaxPower;
+	public int realityPylonDays;
+
 	public static double cableRsFactor = 1.0;
 
 	public boolean killMonstersAroundLamps;
@@ -377,6 +383,9 @@ public class Eln {
 		Other.ElnToOcConversionRatio = config.get("balancing", "ElnToOpenComputerConversionRatio", 1.0 / 3.0 / 2.5).getDouble(1.0 / 3.0 / 2.5);
 		Other.ElnToTeConversionRatio = config.get("balancing", "ElnToThermalExpansionConversionRatio", 1.0 / 3.0 * 4).getDouble(1.0 / 3.0 * 4);
 	//	Other.ElnToBuildcraftConversionRatio = config.get("balancing", "ElnToBuildcraftConversionRatio", 1.0 / 3.0 / 5 * 2).getDouble(1.0 / 3.0 / 5 * 2);
+
+		realityPylonMaxPower = config.get("realityPylon", "realityPylonMaxPower", 10000, "Maximum power usage of the reality pylon, in watts").getInt(10000);
+		realityPylonDays = config.get("realityPylon", "realityPylonDays", 0, "Number of real-life days to reach 95% of max power, on a logistical curve. 0 disables the mechanic and makes it always use max power.").getInt(0);
 
 		stdHalfLife = config.get("battery", "batteryHalfLife", 2, "How many days it takes for a battery to decay half way").getDouble(2) * Utils.minecraftDay;
 		
@@ -574,6 +583,7 @@ public class Eln {
 		registerTransparentNodeMisc(65);
 		registerTurret(66);
 		registerFuelGenerator(67);
+		registerRealityPylon(68);
 
 		//ITEM REGISTRATION
 		//Sub-UID must be unique in this section only.
@@ -605,6 +615,9 @@ public class Eln {
 		if (isDevelopmentRun()) {
 			registerWipItems();
 		}
+
+		// Register for chunkloading.
+		ForgeChunkManager.setForcedChunkLoadingCallback(this, RealityPylonChunkManager.INSTANCE);
 	}
 
 	public static FMLEventChannel eventChannel;
@@ -2602,6 +2615,18 @@ public class Eln {
 					nominalP,
 					sixNodeThermalLoadInitializer.copy()
 			);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+	}
+
+	void registerRealityPylon(int id) {
+		int subId;
+		{
+			subId = 0;
+
+			RealityPylonDescriptor desc = new RealityPylonDescriptor(
+					TR_NAME(Type.NONE, "Reality_Pylon"),
+					obj.getObj("RealityPylon"));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}

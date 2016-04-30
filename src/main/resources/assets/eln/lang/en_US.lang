@@ -176,6 +176,7 @@ Power_Resistor.name=Power Resistor
 Power_capacitor.name=Power capacitor
 Power_inductor.name=Power inductor
 Purple_Brush.name=Purple Brush
+Reality_Pylon.name=Reality Pylon
 Red_Brush.name=Red Brush
 Redstone-to-Voltage_Converter.name=Redstone-to-Voltage Converter
 Rheostat.name=Rheostat

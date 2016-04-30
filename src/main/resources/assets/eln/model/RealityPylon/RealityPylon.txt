@@ -1,0 +1,11 @@
+o main
+f originX 0.0
+f originY 0.5
+f originZ 0.0
+o marble
+f originX 0.0
+f originY 0.73
+f originZ 0.0
+f originX2 0.05
+f originY2 0.05
+f originZ2 0.05
