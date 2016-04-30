@@ -57,6 +57,7 @@ public class Equation implements IValue, INBTTReady {
 			list.add(new OperatorMapperFunc("rs", 2, Rs.class));
 			list.add(new OperatorMapperFunc("rc", 2, RC.class));
 			list.add(new OperatorMapperFunc("if", 3, If.class));
+			list.add(new OperatorMapperFunc("scale", 5, Scale.class));
 			list.add(new OperatorMapperBracket());
 			staticOperatorList.put(priority++, list);
 		}
@@ -956,6 +957,38 @@ public class Equation implements IValue, INBTTReady {
 			}
 
 			return e / eMax;
+		}
+	}
+
+	/**
+	 * Rescale input values.
+	 *
+	 * scale(X, in0, in1, out0, out1) = (X - in0) / (in1 - in0) * (out1 - out0) + out0
+	 */
+	public static class Scale implements IOperator {
+		private IValue x, in0, in1, out0, out1;
+
+		@Override
+		public void setOperator(IValue[] values) {
+			x = values[0];
+			in0 = values[1];
+			in1 = values[2];
+			out0 = values[3];
+			out1 = values[4];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 5;
+		}
+
+		@Override
+		public double getValue() {
+			double xv = x.getValue(),
+					in0v = in0.getValue(), in1v = in1.getValue(),
+					out0v = out0.getValue(), out1v = out1.getValue();
+
+			return (xv - in0v) / (in1v - in0v) * (out1v - out0v) + out0v;
 		}
 	}
     
