@@ -110,7 +110,7 @@ public class ElectricalMathElement extends SixNodeElement {
 		equation = new Equation(); //expression, symboleList, 100);
 		equation.setUpDefaultOperatorAndMapper();
 		equation.setIterationLimit(100);
-		equation.addSymbole(symboleList);
+		equation.addSymbol(symboleList);
 		equation.preProcess(expression);
 		
 		for (int idx = 0; idx < 3; idx++) {

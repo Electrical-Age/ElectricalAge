@@ -24,7 +24,7 @@ public class Equation implements IValue, INBTTReady {
 	String separatorList;
 
     int iterationLimit;
-    ArrayList<ISymbole> symboleList;
+    ArrayList<ISymbole> symbolList;
 
     IValue root;
 
@@ -96,8 +96,7 @@ public class Equation implements IValue, INBTTReady {
 	public Equation() {
 		operatorList = new HashMap<Integer, ArrayList<IOperatorMapper>>();
 		separatorList = "";
-		symboleList = new ArrayList<ISymbole>();
-		int iterationLimit = 100;
+		symbolList = new ArrayList<ISymbole>();
 	}
 
 	public void setUpDefaultOperatorAndMapper() {
@@ -118,8 +117,8 @@ public class Equation implements IValue, INBTTReady {
 		this.iterationLimit = iterationLimit;
 	}
 
-	public void addSymbole(ArrayList<ISymbole> symboleList) {
-		this.symboleList.addAll(symboleList);
+	public void addSymbol(ArrayList<ISymbole> symbolList) {
+		this.symbolList.addAll(symbolList);
 	}
     
 	public void preProcess(String exp) {
@@ -162,7 +161,7 @@ public class Equation implements IValue, INBTTReady {
 					String str = (String) o;
 					boolean find = false;
 					if (!find)
-						for (ISymbole s : symboleList) {
+						for (ISymbole s : symbolList) {
 							if (s.getName().equals(str)) {
 								list.set(idx, s);
 								find = true;
@@ -896,8 +895,6 @@ public class Equation implements IValue, INBTTReady {
 	}
     
 	public static class If implements IOperator {
-		public double state;
-
 		public IValue condition,thenValue,elseValue;
 
 		@Override
