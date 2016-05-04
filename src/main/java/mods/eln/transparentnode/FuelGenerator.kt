@@ -6,6 +6,7 @@ import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
 import mods.eln.node.NodePeriodicPublishProcess
+import mods.eln.node.published
 import mods.eln.node.transparent.*
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
@@ -114,12 +115,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor: Transpa
     internal var descriptor = descriptor as FuelGeneratorDescriptor
     internal val fuel = FluidRegistry.getFluid("fuel") ?: FluidRegistry.getFluid("lava")
     internal var tankLevel = 0.0
-    internal var on = false
-        get() = field
-        set(value) {
-            field = value
-            needPublish()
-        }
+    internal var on by published(false)
     internal var voltageGracePeriod = 0.0
 
     init {
