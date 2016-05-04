@@ -42,8 +42,9 @@ public class AutoMinerRender extends TransparentNodeElementRender {
     short pipeLength = 0;
     AutoMinerSlowProcess.jobType job;
     boolean boot = true;
+	public boolean silkTouch = false;
 
-    public AutoMinerRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
+	public AutoMinerRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
 		super(tileEntity, descriptor);
 		this.descriptor = (AutoMinerDescriptor) descriptor;
 
@@ -201,6 +202,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 				}
 			}
 			powerOk = stream.readBoolean();
+			silkTouch = stream.readBoolean();
 
 			if (!powerOk) {
 				logs.clear();

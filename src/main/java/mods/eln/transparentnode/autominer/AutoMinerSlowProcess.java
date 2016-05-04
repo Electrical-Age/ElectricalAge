@@ -38,8 +38,9 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     int workY;
 
     boolean oneJobDone = true;
+	boolean silkTouch = false;
 
-    enum jobType {none, done, full, chestFull, ore, pipeAdd, pipeRemove}
+	enum jobType {none, done, full, chestFull, ore, pipeAdd, pipeRemove}
 
     jobType job = jobType.none, oldJob = jobType.none;
     Coordonate jobCoord = new Coordonate();
@@ -63,7 +64,11 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 			}
 		};
 	}
-    
+
+	void toggleSilkTouch() {
+		silkTouch = !silkTouch;
+	}
+
 	boolean isReadyToDrill() {
 		ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
 		if (drill == null) return false;
@@ -114,11 +119,15 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         //
                         Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
                         int meta = jobCoord.world().getBlockMetadata(jobCoord.x, jobCoord.y, jobCoord.z);
-                        List<ItemStack> drop = block.getDrops(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0);
+						if (silkTouch) {
+							drop(new ItemStack(block, 1, meta));
+						} else {
+							List<ItemStack> drop = block.getDrops(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0);
 
-                        for (ItemStack stack : drop) {
-                            drop(stack);
-                        }
+							for (ItemStack stack : drop) {
+								drop(stack);
+							}
+						}
 
 						// Use cobblestone instead of air, everywhere except the mining shaft.
 						// This is so mobs won't spawn excessively.
@@ -177,6 +186,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                 } else {
                     // double p = drill.nominalPower + (scanner != null ? scanner.OperationEnergy/drill.operationTime : 0);
                     double p = drill.nominalPower;
+					if (silkTouch) p *= 3;
                     miner.powerResistor.setR(Math.pow(miner.descriptor.nominalVoltage, 2.0) / p);
                 }
                 break;
@@ -360,6 +370,8 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 		switch (job) {
             case ore:
                 energyTarget = drill.OperationEnergy + scannerEnergy;
+				// Copied from Mekanism. Note that the power demand is tripled, so in effect this doubles time.
+				if (silkTouch) energyTarget *= 6;
                 break;
             case pipeAdd:
                 energyTarget = miner.descriptor.pipeOperationEnergy;

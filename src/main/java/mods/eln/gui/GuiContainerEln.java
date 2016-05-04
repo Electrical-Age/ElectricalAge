@@ -56,7 +56,7 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
 	}
 
 	public GuiButtonEln newGuiButton(int x, int y, int width, String name) {
-		GuiButtonEln o =  helper.newGuiButton(x, y, width,name);
+		GuiButtonEln o = helper.newGuiButton(x, y, width,name);
 		o.setObserver(this);
 		return o;		
 	}
