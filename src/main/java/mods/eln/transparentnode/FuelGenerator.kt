@@ -12,6 +12,8 @@ import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.PowerSource
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
+import mods.eln.sound.SoundCommand
+import mods.eln.sound.SoundLooper
 import mods.eln.wiki.Data
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
@@ -198,6 +200,17 @@ class FuelGeneratorRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
 }
 
 class FuelGeneratorSlowProcess(internal val generator: FuelGeneratorElement): IProcess {
+    val looper = object: SoundLooper(generator) {
+        override fun mustStart(): SoundCommand? {
+            if (generator.powerSource.p > 0) {
+                val pitch = 0.9 + 0.2 * generator.positiveLoad.u / generator.descriptor.maxVoltage
+                return SoundCommand("eln:FuelGenerator", 1.6).smallRange().mulVolume(0.8f, pitch.toFloat());
+            } else {
+                return null;
+            }
+        }
+    }
+
     override fun process(time: Double) {
         generator.tankLevel = Math.max(0.0, generator.tankLevel - time *
                 generator.powerSource.effectiveP / generator.descriptor.tankEnergyCapacity)
@@ -207,5 +220,7 @@ class FuelGeneratorSlowProcess(internal val generator: FuelGeneratorElement): IP
         } else {
             generator.powerSource.p = 0.0
         }
+
+        looper.process(time);
     }
 }
