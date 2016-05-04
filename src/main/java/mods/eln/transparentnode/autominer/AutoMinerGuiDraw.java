@@ -27,7 +27,7 @@ public class AutoMinerGuiDraw extends GuiContainerEln {
     @Override
     public void initGui() {
         super.initGui();
-        silkTouch = newGuiButton(50, 6, 80, tr("Silk touch"));
+        silkTouch = newGuiButton(7, 6, 122, tr("Silk touch"));
         silkTouch.setComment(0, tr("Halves speed, triples power draw"));
     }
 
