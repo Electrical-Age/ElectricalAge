@@ -673,6 +673,7 @@ public class Eln {
 		recipeBatteryCharger();
 		recipeTransporter();
 		recipeWindTurbine();
+		recipeFuelGenerator();
 
 		recipeGeneral();
 		recipeHeatingCorp();
@@ -5341,6 +5342,26 @@ public class Eln {
 				Character.valueOf('B'), findItemStack("Machine Block"),
 				Character.valueOf('M'), findItemStack("Electrical Motor"));
 
+	}
+
+	void recipeFuelGenerator() {
+		addRecipe(findItemStack("50V Fuel Generator"),
+			"III",
+			" B ",
+			"CMC",
+			Character.valueOf('I'), "plateIron",
+			Character.valueOf('B'), findItemStack("Machine Block"),
+			Character.valueOf('C'), findItemStack("Low Voltage Cable"),
+			Character.valueOf('M'), findItemStack("Electrical Motor"));
+
+		addRecipe(findItemStack("200V Fuel Generator"),
+			"III",
+			" B ",
+			"CMC",
+			Character.valueOf('I'), "plateIron",
+			Character.valueOf('B'), findItemStack("Advanced Machine Block"),
+			Character.valueOf('C'), findItemStack("Medium Voltage Cable"),
+			Character.valueOf('M'), findItemStack("Advanced Electrical Motor"));
 	}
 
 	void recipeSolarPannel() {
