@@ -20,7 +20,8 @@
    "LaserGun": {"category": "block", "sounds": [{"name": "LaserGun", "stream": false}]},
    "TurretActivated": {"category": "block", "sounds": [{"name": "TurretActivated", "stream": false}]},
    "TurretDeactivated": {"category": "block", "sounds": [{"name": "TurretDeactivated", "stream": false}]},
-   "TurretFire": {"category": "block", "sounds": [{"name": "TurretFire", "stream": false}]}
+   "TurretFire": {"category": "block", "sounds": [{"name": "TurretFire", "stream": false}]},
+   "FuelGenerator": {"category": "block", "sounds": [{"name": "FuelGenerator", "stream": false}]}
 }
 
 

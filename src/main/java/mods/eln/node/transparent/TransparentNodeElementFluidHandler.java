@@ -9,9 +9,11 @@ import net.minecraftforge.fluids.*;
  * Use one of these if you want your block to support Forge fluids!
  *
  * See the steam turbine for an example.
+ *
+ * TODO: This is not really related to transparent nodes and could probably used with other items too - should we
+ * create a package fluid in eln that contains all fluid related code?
  */
 public class TransparentNodeElementFluidHandler implements IFluidHandler, INBTTReady {
-
     private Fluid filter;
     FluidTank tank;
 

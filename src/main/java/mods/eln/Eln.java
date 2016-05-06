@@ -117,6 +117,7 @@ import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import mods.eln.solver.ConstSymbole;
 import mods.eln.solver.ISymbole;
 import mods.eln.sound.SoundCommand;
+import mods.eln.transparentnode.FuelGeneratorDescriptor;
 import mods.eln.transparentnode.LargeRheostatDescriptor;
 import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
 import mods.eln.transparentnode.battery.BatteryDescriptor;
@@ -129,7 +130,6 @@ import mods.eln.transparentnode.electricalmachine.CompressorDescriptor;
 import mods.eln.transparentnode.electricalmachine.MaceratorDescriptor;
 import mods.eln.transparentnode.electricalmachine.MagnetizerDescriptor;
 import mods.eln.transparentnode.electricalmachine.PlateMachineDescriptor;
-import mods.eln.transparentnode.fuelgenerator.FuelGeneratorDescriptor;
 import mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor;
 import mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor;
 import mods.eln.transparentnode.powerinductor.PowerInductorDescriptor;
@@ -286,6 +286,7 @@ public class Eln {
 	public double solarPannelPowerFactor = 1;
 	public double windTurbinePowerFactor = 1;
 	public double waterTurbinePowerFactor = 1;
+	public double fuelGeneratorPowerFactor = 1;
 	public int autominerRange = 10;
 
 	public static double cableRsFactor = 1.0;
@@ -368,6 +369,7 @@ public class Eln {
 		solarPannelPowerFactor = config.get("balancing", "solarPannelPowerFactor", 1).getDouble(1);
 		windTurbinePowerFactor = config.get("balancing", "windTurbinePowerFactor", 1).getDouble(1);
 		waterTurbinePowerFactor = config.get("balancing", "waterTurbinePowerFactor", 1).getDouble(1);
+		fuelGeneratorPowerFactor = config.get("balancing", "fuelGeneratorPowerFactor", 1).getDouble(1);
 		autominerRange = config.get("balancing", "autominerRange", 10, "Maximum horizontal distance from autominer that will be mined").getInt(10);
 
 		Other.ElnToIc2ConversionRatio = config.get("balancing", "ElnToIndustrialCraftConversionRatio", 1.0 / 3.0).getDouble(1.0 / 3.0);
@@ -408,6 +410,9 @@ public class Eln {
 		economicLampLife = config.get("lamp", "economicLifeInHours", 64.0).getDouble(64.0) * 3600;
 		carbonLampLife = config.get("lamp", "carbonLifeInHours", 6.0).getDouble(6.0) * 3600;
 		ledLampLife = config.get("lamp", "ledLifeInHours", 512.0).getDouble(512.0) * 3600;
+
+		fuelGeneratorTankCapacity = config.get("fuelGenerator",
+			"tankCapacityInSecondsAtNominalPower", 20 * 60).getDouble(20 * 60);
 
 		addOtherModOreToXRay = config.get("xrayscannerconfig", "addOtherModOreToXRay", true).getBoolean(true);
 		xRayScannerRange = (float) config.get("xrayscannerconfig", "rangeInBloc", 5.0).getDouble(5.0);
@@ -564,6 +569,7 @@ public class Eln {
 		registerThermalDissipatorPassiveAndActive(64);
 		registerTransparentNodeMisc(65);
 		registerTurret(66);
+		registerFuelGenerator(67);
 
 		//ITEM REGISTRATION
 		//Sub-UID must be unique in this section only.
@@ -667,6 +673,7 @@ public class Eln {
 		recipeBatteryCharger();
 		recipeTransporter();
 		recipeWindTurbine();
+		recipeFuelGenerator();
 
 		recipeGeneral();
 		recipeHeatingCorp();
@@ -3805,6 +3812,27 @@ public class Eln {
 
 	}
 
+	private double fuelGeneratorTankCapacity = 20 * 60;
+
+	void registerFuelGenerator(int id) {
+		int subId;
+		{
+			subId = 1;
+			FuelGeneratorDescriptor descriptor =
+				new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "50V Fuel Generator"), obj.getObj("FuelGenerator50V"),
+					lowVoltageCableDescriptor, fuelGeneratorPowerFactor * 300, LVU * 1.05, fuelGeneratorTankCapacity);
+			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+		}
+		{
+			subId = 2;
+			FuelGeneratorDescriptor descriptor =
+				new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "200V Fuel Generator"), obj.getObj("FuelGenerator200V"),
+					meduimVoltageCableDescriptor, fuelGeneratorPowerFactor * 1500, MVU * 1.05,
+					fuelGeneratorTankCapacity);
+			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+		}
+	}
+
 	void registerThermalDissipatorPassiveAndActive(int id) {
 		int subId, completId;
 		String name;
@@ -5316,6 +5344,28 @@ public class Eln {
 
 	}
 
+	void recipeFuelGenerator() {
+		addRecipe(findItemStack("50V Fuel Generator"),
+			"III",
+			" BA",
+			"CMC",
+			Character.valueOf('I'), "plateIron",
+			Character.valueOf('B'), findItemStack("Machine Block"),
+			Character.valueOf('A'), findItemStack("Analogic Regulator"),
+			Character.valueOf('C'), findItemStack("Low Voltage Cable"),
+			Character.valueOf('M'), findItemStack("Electrical Motor"));
+
+		addRecipe(findItemStack("200V Fuel Generator"),
+			"III",
+			" BA",
+			"CMC",
+			Character.valueOf('I'), "plateIron",
+			Character.valueOf('B'), findItemStack("Advanced Machine Block"),
+			Character.valueOf('A'), findItemStack("Analogic Regulator"),
+			Character.valueOf('C'), findItemStack("Medium Voltage Cable"),
+			Character.valueOf('M'), findItemStack("Advanced Electrical Motor"));
+	}
+
 	void recipeSolarPannel() {
 		addRecipe(findItemStack("Small Solar Panel"),
 				"III",
@@ -6690,15 +6740,6 @@ public class Eln {
 
 	// Registers WIP items.
 	void registerWipItems() {
-		int id = 255;
-		int subId;
-		{
-			subId = 1;
-			FuelGeneratorDescriptor descriptor =
-					new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "Fuel Generator"), obj.getObj("FuelGenerator"),
-							lowVoltageCableDescriptor, 200, LVU * 1.18,  "eln:water_turbine", 1f);
-			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
-		}
 	}
 
 	public void regenOreScannerFactors() {
