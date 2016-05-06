@@ -5347,19 +5347,21 @@ public class Eln {
 	void recipeFuelGenerator() {
 		addRecipe(findItemStack("50V Fuel Generator"),
 			"III",
-			" B ",
+			" BA",
 			"CMC",
 			Character.valueOf('I'), "plateIron",
 			Character.valueOf('B'), findItemStack("Machine Block"),
+			Character.valueOf('A'), findItemStack("Analogic Regulator"),
 			Character.valueOf('C'), findItemStack("Low Voltage Cable"),
 			Character.valueOf('M'), findItemStack("Electrical Motor"));
 
 		addRecipe(findItemStack("200V Fuel Generator"),
 			"III",
-			" B ",
+			" BA",
 			"CMC",
 			Character.valueOf('I'), "plateIron",
 			Character.valueOf('B'), findItemStack("Advanced Machine Block"),
+			Character.valueOf('A'), findItemStack("Analogic Regulator"),
 			Character.valueOf('C'), findItemStack("Medium Voltage Cable"),
 			Character.valueOf('M'), findItemStack("Advanced Electrical Motor"));
 	}
