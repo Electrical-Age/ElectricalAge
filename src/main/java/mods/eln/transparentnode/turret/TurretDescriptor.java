@@ -32,6 +32,7 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		public final float gunDisarmAnimationSpeed;
 		public final float gunAimAnimationSpeed;
 		public final double minimalVoltage;
+		public final double minimalVoltageHysteresisFactor;
         public final double maximalVoltage;
 		public final double basePower;
 		public final double chargePower;
@@ -50,6 +51,7 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 			gunDisarmAnimationSpeed = 0.5f;
 			gunAimAnimationSpeed = 100;
 			minimalVoltage = 600;
+			minimalVoltageHysteresisFactor = 0.1;
 			maximalVoltage = 1050;
 			basePower = 25;
 		    chargePower = 1000;
@@ -61,7 +63,7 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 	
 	private final Properties properties;
 	
-	public TurretDescriptor(String name, String modelName, String description) {
+	public TurretDescriptor(String name, String modelName) {
 		super(name, TurretElement.class, TurretRender.class);
 
 		final Obj3D obj = Eln.obj.getObj(modelName);
@@ -155,7 +157,7 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 			}
 			GL11.glRotatef(gunAngle, 0f, 0f, 1f);
 			
-			GL11.glColor4f(.6f, .8f, 1f, .6f);
+			GL11.glColor4f(.6f, .8f, 1f, .4f);
 			if (shooting && fire != null) UtilsClient.drawLight(fire);
 			GL11.glColor4f(1f, 1f, 1f, 1f);
 			

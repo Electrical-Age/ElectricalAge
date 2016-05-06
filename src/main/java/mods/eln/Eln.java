@@ -3934,7 +3934,7 @@ public class Eln {
 			int subId = 0;
 			String name = TR_NAME(Type.NONE, "800V Defence Turret");
 
-			TurretDescriptor desc = new TurretDescriptor(name, "Turret", "Defence turret");
+			TurretDescriptor desc = new TurretDescriptor(name, "Turret");
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}

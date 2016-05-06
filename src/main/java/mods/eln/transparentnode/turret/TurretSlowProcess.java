@@ -16,9 +16,10 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 
 import java.util.List;
+import java.util.Random;
 
 public class TurretSlowProcess extends StateMachine {
-	
+	private static final Random rand = new Random();
 	private double actualPower;
 	
 	public TurretSlowProcess(TurretElement element) {
@@ -31,31 +32,21 @@ public class TurretSlowProcess extends StateMachine {
 	private final TurretElement element;
 
 	private class IdleState implements State {
-        private double setupDelay = 5.0;
-
 		@Override
-		public void enter() {
-            setupDelay = 5.0;
-		}
+		public void enter() {}
 
 		@Override
 		public State state(double time) {
-
-            if (element.load.getU() >= element.getDescriptor().getProperties().minimalVoltage) {
-                setupDelay -= time;
-                if (setupDelay <= 0) {
-                    return new ActiveState();
-                } else {
-                    return this;
-                }
+            if (element.load.getU() >= element.getDescriptor().getProperties().minimalVoltage *
+				(1.0 + element.getDescriptor().getProperties().minimalVoltageHysteresisFactor)) {
+				return new ActiveState();
             } else {
                 return this;
             }
 		}
 
 		@Override
-		public void leave() {
-		}
+		public void leave() {}
 	}
 	
 	private class ActiveState extends CompositeState {
@@ -74,8 +65,9 @@ public class TurretSlowProcess extends StateMachine {
 		@Override
 		public State state(double time) {
 			super.state(time);
-			if (element.load.getU() < element.getDescriptor().getProperties().minimalVoltage)
-				return new IdleState();
+			if (element.load.getU() < element.getDescriptor().getProperties().minimalVoltage *
+				(1.0 - element.getDescriptor().getProperties().minimalVoltageHysteresisFactor))
+				return new WaitState();
 			else if (element.load.getU() > element.getDescriptor().getProperties().maximalVoltage)
 				return new DamageState();
 			else 
@@ -108,7 +100,26 @@ public class TurretSlowProcess extends StateMachine {
 		}
 		
 	}
-	
+
+	private class WaitState implements State {
+		private double delay = 5.0;
+		@Override
+		public void enter() {}
+
+		@Override
+		public State state(double time) {
+			delay -= time;
+			if (delay <= 0.0) {
+				return new IdleState();
+			} else {
+				return this;
+			}
+		}
+
+		@Override
+		public void leave() {}
+	}
+
 	private class SeekingState implements State {
         private double lastScanWasBefore = 0.;
 
