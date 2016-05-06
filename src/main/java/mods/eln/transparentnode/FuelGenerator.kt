@@ -88,12 +88,12 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
         IItemRenderer.ItemRenderType.INVENTORY -> super.renderItem(type, item, *data)
         else -> {
             objItemScale(obj)
-            GL11.glPushMatrix()
-            Direction.ZP.glRotateXnRef()
-            GL11.glTranslatef(0f, -1f, 0f)
-            GL11.glScalef(0.6f, 0.6f, 0.6f)
-            draw()
-            GL11.glPopMatrix()
+            preserveMatrix {
+                Direction.ZP.glRotateXnRef()
+                GL11.glTranslatef(0f, -1f, 0f)
+                GL11.glScalef(0.6f, 0.6f, 0.6f)
+                draw()
+            }
         }
     }
 
