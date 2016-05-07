@@ -65,6 +65,9 @@ import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.O
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import mods.eln.simplenode.test.TestBlock;
+import mods.eln.sixnode.And;
+import mods.eln.sixnode.LogicGateDescriptor;
+import mods.eln.sixnode.Not;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
 import mods.eln.sixnode.diode.DiodeDescriptor;
@@ -547,6 +550,7 @@ public class Eln {
 		registerElectricalGate(109);
 		registerTreeResinCollector(116);
 		registerSixNodeMisc(117);
+		registerLogicalGate(118);
 
 		//TRANSPARENT NODE REGISTRATION
 		//Sub-UID must be unique in this section only.
@@ -2430,6 +2434,13 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
+	}
+
+	private void registerLogicalGate(int id) {
+		sixNodeItem.addDescriptor(0 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "NOT Chip"), obj.getObj("LogicGates"), "NOT", new Not()));
+		sixNodeItem.addDescriptor(1 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "AND Chip"), obj.getObj("LogicGates"), "AND", new And()));
 	}
 
 	void registerTransformer(int id) {
