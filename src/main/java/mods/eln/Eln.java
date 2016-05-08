@@ -65,9 +65,6 @@ import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.O
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import mods.eln.simplenode.test.TestBlock;
-import mods.eln.sixnode.And;
-import mods.eln.sixnode.LogicGateDescriptor;
-import mods.eln.sixnode.Not;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
 import mods.eln.sixnode.diode.DiodeDescriptor;
@@ -99,6 +96,7 @@ import mods.eln.sixnode.hub.HubDescriptor;
 import mods.eln.sixnode.lampsocket.*;
 import mods.eln.sixnode.lampsupply.LampSupplyDescriptor;
 import mods.eln.sixnode.lampsupply.LampSupplyElement;
+import mods.eln.sixnode.logicgate.*;
 import mods.eln.sixnode.modbusrtu.ModbusRtuDescriptor;
 import mods.eln.sixnode.modbusrtu.ModbusServer;
 import mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor;
@@ -2437,10 +2435,35 @@ public class Eln {
 	}
 
 	private void registerLogicalGate(int id) {
+		Obj3D model = obj.getObj("LogicGates");
 		sixNodeItem.addDescriptor(0 + (id << 6),
-			new LogicGateDescriptor(TR_NAME(Type.NONE, "NOT Chip"), obj.getObj("LogicGates"), "NOT", new Not()));
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "NOT Chip"),model, "NOT", Not.class));
+
 		sixNodeItem.addDescriptor(1 + (id << 6),
-			new LogicGateDescriptor(TR_NAME(Type.NONE, "AND Chip"), obj.getObj("LogicGates"), "AND", new And()));
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "AND Chip"), model, "AND", And.class));
+		sixNodeItem.addDescriptor(2 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "NAND Chip"), model, "NAND", Nand.class));
+
+		sixNodeItem.addDescriptor(3 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "OR Chip"), model, "OR", Or.class));
+		sixNodeItem.addDescriptor(4 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "NOR Chip"), model, "NOR", Nor.class));
+
+		sixNodeItem.addDescriptor(5 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "XOR Chip"), model, "XOR", Xor.class));
+		sixNodeItem.addDescriptor(6 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "XNOR Chip"), model, "XNOR", XNor.class));
+
+		// TODO: PAL
+
+		// TODO: Schmitt-Trigger
+
+		sixNodeItem.addDescriptor(9 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "D Flip-Flop Chip"), model, "DFF", DFlipFlop.class));
+
+		// TODO: Oscillator
+
+		// TODO: Maybe T and JK Flip Flops might be useful...
 	}
 
 	void registerTransformer(int id) {
