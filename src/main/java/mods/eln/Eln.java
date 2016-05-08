@@ -2456,12 +2456,15 @@ public class Eln {
 
 		// TODO: PAL
 
-		// TODO: Schmitt-Trigger
+		sixNodeItem.addDescriptor(8 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "Schmitt-Trigger Chip"), model, "SCHMITT",
+				SchmittTrigger.class));
 
 		sixNodeItem.addDescriptor(9 + (id << 6),
 			new LogicGateDescriptor(TR_NAME(Type.NONE, "D Flip-Flop Chip"), model, "DFF", DFlipFlop.class));
 
-		// TODO: Oscillator
+		sixNodeItem.addDescriptor(10 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "Oscillator Chip"), model, "OSC", Oscillator.class));
 
 		// TODO: Maybe T and JK Flip Flops might be useful...
 	}
