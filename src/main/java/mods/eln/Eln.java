@@ -2454,7 +2454,8 @@ public class Eln {
 		sixNodeItem.addDescriptor(6 + (id << 6),
 			new LogicGateDescriptor(TR_NAME(Type.NONE, "XNOR Chip"), model, "XNOR", XNor.class));
 
-		// TODO: PAL
+		sixNodeItem.addDescriptor(7 + (id << 6),
+			new PalDescriptor(TR_NAME(Type.NONE, "PAL Chip"), model));
 
 		sixNodeItem.addDescriptor(8 + (id << 6),
 			new LogicGateDescriptor(TR_NAME(Type.NONE, "Schmitt Trigger Chip"), model, "SCHMITT",
@@ -2466,7 +2467,8 @@ public class Eln {
 		sixNodeItem.addDescriptor(10 + (id << 6),
 			new LogicGateDescriptor(TR_NAME(Type.NONE, "Oscillator Chip"), model, "OSC", Oscillator.class));
 
-		// TODO: Maybe T and JK Flip Flops might be useful...
+		sixNodeItem.addDescriptor(11 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "JK Flip Flop Chip"), model, "JKFF", JKFlipFlop.class));
 	}
 
 	void registerTransformer(int id) {
