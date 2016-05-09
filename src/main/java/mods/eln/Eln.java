@@ -424,6 +424,8 @@ public class Eln {
 		thermalFrequency = config.get("simulation", "thermalFrequency", 400).getDouble(400);
 		cableRsFactor = config.get("simulation", "cableRsFactor", 1.0).getDouble(1.0);
 
+		wirelessTxRange = config.get("wireless", "txRange", 32).getInt();
+
 		config.save();
 
 
@@ -1028,7 +1030,7 @@ public class Eln {
 	public static final ThermalLoadInitializer sixNodeThermalLoadInitializer = new ThermalLoadInitializer(
 			cableWarmLimit, -100, cableHeatingTime, 1000);
 
-	public static final int wirelessTxRange = 32;
+	public static int wirelessTxRange = 32;
 
 	void registerElectricalCable(int id) {
 		int subId, completId;
