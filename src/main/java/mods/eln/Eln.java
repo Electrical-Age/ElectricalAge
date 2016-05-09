@@ -2457,11 +2457,11 @@ public class Eln {
 		// TODO: PAL
 
 		sixNodeItem.addDescriptor(8 + (id << 6),
-			new LogicGateDescriptor(TR_NAME(Type.NONE, "Schmitt-Trigger Chip"), model, "SCHMITT",
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "Schmitt Trigger Chip"), model, "SCHMITT",
 				SchmittTrigger.class));
 
 		sixNodeItem.addDescriptor(9 + (id << 6),
-			new LogicGateDescriptor(TR_NAME(Type.NONE, "D Flip-Flop Chip"), model, "DFF", DFlipFlop.class));
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "D Flip Flop Chip"), model, "DFF", DFlipFlop.class));
 
 		sixNodeItem.addDescriptor(10 + (id << 6),
 			new LogicGateDescriptor(TR_NAME(Type.NONE, "Oscillator Chip"), model, "OSC", Oscillator.class));

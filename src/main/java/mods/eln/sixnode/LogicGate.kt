@@ -3,10 +3,7 @@ package mods.eln.sixnode.logicgate
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.i18n.I18N.tr
-import mods.eln.misc.Direction
-import mods.eln.misc.LRDU
-import mods.eln.misc.Obj3D
-import mods.eln.misc.Utils
+import mods.eln.misc.*
 import mods.eln.node.Node
 import mods.eln.node.six.*
 import mods.eln.sim.ElectricalLoad
@@ -27,6 +24,7 @@ class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, funct
     init {
         pins[0] = obj?.getPart("Output")
         for (i in 1..function.inputCount) pins[i] = obj?.getPart("Input$i")
+        voltageLevelColor = VoltageLevelColor.SignalVoltage
     }
 
     fun draw() {
