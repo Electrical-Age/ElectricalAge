@@ -62,7 +62,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 		}
 		
 		if (onFloor) {
-			setPlaceDirection(Direction.YN);
+			//setPlaceDirection(Direction.YN);
 		}
 
 		voltageLevelColor = VoltageLevelColor.SignalVoltage;
@@ -151,6 +151,18 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		Collections.addAll(list, tr("Measures the voltage of an\nelectrical signal and plots\nthe data in real time.").split("\n"));
 		list.add(tr("It can store up to 256 points."));
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		switch (side) {
+			case YN:
+			case YP:
+				return side.getLRDUGoingTo(Utils.entityLivingHorizontalViewDirection(player)).inverse();
+
+			default:
+				return super.getFrontFromPlace(side, player);
+		}
 	}
 }
 /*
