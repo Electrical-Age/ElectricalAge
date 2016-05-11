@@ -121,6 +121,15 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
     }
 
     public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
-        return LRDU.Up;
+        switch (side) {
+            case YN:
+            case YP:
+                Direction viewDirection = Utils.entityLivingHorizontalViewDirection(player);
+                LRDU front = side.getLRDUGoingTo(viewDirection);
+                return front;
+
+            default:
+                return LRDU.Up;
+        }
     }
 }
