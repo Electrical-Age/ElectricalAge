@@ -10,6 +10,7 @@ import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import org.lwjgl.opengl.GL11;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -41,9 +42,17 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
         if (!descriptor.onFloor) {
-            drawSignalPin(front.inverse(), new float[]{6.37f, 6.37f, 5.67f, 6.12f});
+			if (side.isY()) {
+				GL11.glPushMatrix();
+				front.glRotateOnX();
+				GL11.glRotatef(90, 1, 0, 0);
+				drawSignalPin(LRDU.Right, new float[]{0, 5.67f, 0, 0});
+				GL11.glPopMatrix();
+			} else {
+				drawSignalPin(front.inverse(), new float[]{6.37f, 6.37f, 5.67f, 6.12f});
+			}
         }
-        descriptor.draw(log, front, this.tileEntity.xCoord, this.tileEntity.zCoord);
+        descriptor.draw(log, side, front, this.tileEntity.xCoord, this.tileEntity.zCoord);
 	}
 
 	/*
