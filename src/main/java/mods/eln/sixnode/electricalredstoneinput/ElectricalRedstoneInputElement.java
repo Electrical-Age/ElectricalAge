@@ -1,8 +1,5 @@
 package mods.eln.sixnode.electricalredstoneinput;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -19,6 +16,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class ElectricalRedstoneInputElement extends SixNodeElement {
 
 	ElectricalRedstoneInputDescriptor descriptor;
@@ -31,8 +31,7 @@ public class ElectricalRedstoneInputElement extends SixNodeElement {
 
 	public ElectricalRedstoneInputElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-		front = LRDU.Left;
-    	electricalLoadList.add(outputGate);
+		electricalLoadList.add(outputGate);
     	electricalComponentList.add(outputGateProcess);
     	slowProcessList.add(slowProcess);
     	this.descriptor = (ElectricalRedstoneInputDescriptor) descriptor;

@@ -1,8 +1,5 @@
 package mods.eln.sixnode.electricalredstoneoutput;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -17,6 +14,9 @@ import mods.eln.sim.nbt.NbtElectricalGateInput;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class ElectricalRedstoneOutputElement extends SixNodeElement {
 
     public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate");
@@ -26,8 +26,7 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
 
 	public ElectricalRedstoneOutputElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-		front = LRDU.Left;
-    	electricalLoadList.add(inputGate);
+		electricalLoadList.add(inputGate);
     	slowProcessList.add(slowProcess);
 	}
 

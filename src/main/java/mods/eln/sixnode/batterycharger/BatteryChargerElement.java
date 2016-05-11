@@ -1,9 +1,5 @@
 package mods.eln.sixnode.batterycharger;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -26,6 +22,10 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class BatteryChargerElement extends SixNodeElement {
 
@@ -71,8 +71,6 @@ public class BatteryChargerElement extends SixNodeElement {
 		WorldExplosion exp = new WorldExplosion(this).machineExplosion();
 		slowProcessList.add(voltageWatchDog.set(powerLoad).setUNominal(this.descriptor.nominalVoltage).set(exp));
 		//slowProcessList.add(powerWatchDog.set(powerResistor).setPmax(this.descriptor.nominalPower * 3).set(exp));
-		
-		front = LRDU.Down;
 	}
 	
 	@Override

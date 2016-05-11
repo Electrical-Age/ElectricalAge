@@ -1,10 +1,13 @@
 package mods.eln.sixnode.wirelesssignal.repeater;
 
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
@@ -74,5 +77,10 @@ public class WirelessSignalRepeaterDescriptor extends SixNodeDescriptor {
 			UtilsClient.ledOnOffColor(connection);
 			UtilsClient.drawLight(led);
 		}*/
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		return LRDU.Down;
 	}
 }

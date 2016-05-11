@@ -119,4 +119,8 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
             return tr("Not enough space for this block");
         return null;
     }
+
+    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+        return LRDU.Up;
+    }
 }
