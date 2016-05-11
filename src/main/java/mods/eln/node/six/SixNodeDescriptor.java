@@ -126,7 +126,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
             case YP:
                 Direction viewDirection = Utils.entityLivingHorizontalViewDirection(player);
                 LRDU front = side.getLRDUGoingTo(viewDirection);
-                return front;
+                return side == Direction.YN ? front : front.inverse();
 
             default:
                 return LRDU.Up;
