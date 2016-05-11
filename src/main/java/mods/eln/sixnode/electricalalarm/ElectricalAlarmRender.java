@@ -1,8 +1,5 @@
 package mods.eln.sixnode.electricalalarm;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
@@ -14,6 +11,10 @@ import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import org.lwjgl.opengl.GL11;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class ElectricalAlarmRender extends SixNodeElementRender {
 
@@ -36,9 +37,14 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
 		
-		drawSignalPin(front,descriptor.pinDistance);
 
-		//front.glRotateOnX();		
+		if (side.isY()) {
+			front.glRotateOnX();
+			GL11.glRotatef(90, 1, 0, 0);
+			drawSignalPin(LRDU.Down, descriptor.pinDistance);
+		} else {
+			drawSignalPin(front, descriptor.pinDistance);
+		}
 		descriptor.draw(warm, rotAlpha);
 	}
 
