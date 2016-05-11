@@ -1,8 +1,5 @@
 package mods.eln.sixnode.diode;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -19,12 +16,13 @@ import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sim.process.heater.DiodeHeatThermalLoad;
-import mods.eln.sim.process.heater.ResistorHeatThermalLoad;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class DiodeElement extends SixNodeElement {
 
@@ -37,15 +35,12 @@ public class DiodeElement extends SixNodeElement {
     public ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
     public DiodeProcess diodeProcess = new DiodeProcess(resistorSwitch);
 
-    LRDU front;
-
     public DiodeElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 
 		this.descriptor = (DiodeDescriptor) descriptor;
 		thermalLoad.setAsSlow();
 		
-		front = LRDU.Left;
 		electricalLoadList.add(anodeLoad);
 		electricalLoadList.add(catodeLoad);
 		thermalLoadList.add(thermalLoad);
