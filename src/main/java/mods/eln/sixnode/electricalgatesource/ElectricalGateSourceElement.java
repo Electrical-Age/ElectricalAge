@@ -31,15 +31,11 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 
     public AutoResetProcess autoResetProcess;
 
-    LRDU front;
-
     public static final byte setVoltagerId = 1;
 
 	public ElectricalGateSourceElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		this.descriptor = (ElectricalGateSourceDescriptor) descriptor;
-
-		front = LRDU.Left;
 
 		electricalLoadList.add(outputGate);
 		electricalComponentList.add(outputGateProcess);
