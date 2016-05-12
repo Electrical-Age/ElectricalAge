@@ -1,11 +1,8 @@
 package mods.eln.sixnode.electricalvumeter;
 
 import mods.eln.Eln;
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
-import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -14,7 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
@@ -124,5 +121,10 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor {
 		} else {
 			draw(0.0f, 1f, null);
 		}
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		return super.getFrontFromPlace(side, player).inverse();
 	}
 }
