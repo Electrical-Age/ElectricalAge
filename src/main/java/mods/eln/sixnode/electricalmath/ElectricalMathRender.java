@@ -1,24 +1,18 @@
 package mods.eln.sixnode.electricalmath;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.PhysicalInterpolator;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
+import mods.eln.misc.*;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
-
 import org.lwjgl.opengl.GL11;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class ElectricalMathRender extends SixNodeElementRender {
 
@@ -65,17 +59,28 @@ public class ElectricalMathRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
-		
+
+		float[] pinDistances = null;
+		if (side.isY()) {
+			pinDistances = front.rotate4PinDistances(descriptor.pinDistance);
+		} else {
+			pinDistances = descriptor.pinDistance;
+		}
+
 		if (UtilsClient.distanceFromClientPlayer(tileEntity) < 15) {
 			GL11.glColor3f(0, 0, 0);
-			UtilsClient.drawConnectionPinSixNode(front, descriptor.pinDistance, 1.8f, 1.35f);
+			UtilsClient.drawConnectionPinSixNode(front, pinDistances, 1.8f, 1.35f);
 			GL11.glColor3f(1, 0, 0);
-			UtilsClient.drawConnectionPinSixNode(front.right(), descriptor.pinDistance, 1.8f, 1.35f);
+			UtilsClient.drawConnectionPinSixNode(front.right(), pinDistances, 1.8f, 1.35f);
 			GL11.glColor3f(0, 1, 0);
-			UtilsClient.drawConnectionPinSixNode(front.inverse(), descriptor.pinDistance, 1.8f, 1.35f);
+			UtilsClient.drawConnectionPinSixNode(front.inverse(), pinDistances, 1.8f, 1.35f);
 			GL11.glColor3f(0, 0, 1);
-			UtilsClient.drawConnectionPinSixNode(front.left(), descriptor.pinDistance, 1.8f, 1.35f);
+			UtilsClient.drawConnectionPinSixNode(front.left(), pinDistances, 1.8f, 1.35f);
 			GL11.glColor3f(1, 1, 1);
+		}
+
+		if (side.isY()) {
+			front.left().glRotateOnX();
 		}
 
 		descriptor.draw(interpolator.get(), ledOn);

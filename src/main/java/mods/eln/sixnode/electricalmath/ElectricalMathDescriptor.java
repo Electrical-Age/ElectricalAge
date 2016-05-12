@@ -1,11 +1,8 @@
 package mods.eln.sixnode.electricalmath;
 
 import mods.eln.gui.GuiLabel;
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
-import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import mods.eln.wiki.GuiVerticalExtender;
@@ -155,5 +152,10 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor implements IPlug
 	@Override
 	public int bottom(int y, GuiVerticalExtender extender, ItemStack stack) {
 		return y;
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		return super.getFrontFromPlace(side, player);
 	}
 }
