@@ -225,6 +225,6 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
-		return LRDU.Up;
+		return super.getFrontFromPlace(side, player);
 	}
 }
