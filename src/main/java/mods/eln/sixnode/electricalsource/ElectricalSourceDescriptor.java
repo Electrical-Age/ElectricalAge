@@ -1,10 +1,8 @@
 package mods.eln.sixnode.electricalsource;
 
 import mods.eln.Eln;
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.UtilsClient;
-import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -90,6 +88,15 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
 				}
 				super.renderItem(type, item, data);
 				break;
+		}
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		if (signalSource) {
+			return super.getFrontFromPlace(side, player).left();
+		} else {
+			return super.getFrontFromPlace(side, player);
 		}
 	}
 }
