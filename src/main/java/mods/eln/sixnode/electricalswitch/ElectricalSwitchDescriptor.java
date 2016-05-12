@@ -1,11 +1,8 @@
 package mods.eln.sixnode.electricalswitch;
 
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
-import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
@@ -148,7 +145,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 	public void draw(float on, float distance, TileEntity e) {
 		switch (objType) {
             case Button:
-                if (main != null)main.draw();
+                if (main != null) main.draw();
 
                 GL11.glTranslatef(leverTx * on, 0f, 0f);
                 if (lever != null) lever.draw();
@@ -195,5 +192,14 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		Collections.addAll(list, tr("Can break an electrical circuit\ninterrupting the current.").split("\n"));
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		if (signalSwitch) {
+			return super.getFrontFromPlace(side, player);
+		} else {
+			return super.getFrontFromPlace(side, player).inverse();
+		}
 	}
 }
