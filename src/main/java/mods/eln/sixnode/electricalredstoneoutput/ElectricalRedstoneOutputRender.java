@@ -1,8 +1,5 @@
 package mods.eln.sixnode.electricalredstoneoutput;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
@@ -10,6 +7,9 @@ import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class ElectricalRedstoneOutputRender extends SixNodeElementRender {
 
@@ -30,7 +30,7 @@ public class ElectricalRedstoneOutputRender extends SixNodeElementRender {
 		super.draw();
 
 		drawSignalPin(front.right(), descriptor.pinDistance);
-		
+
 		descriptor.draw(redOutput);
 	}
 
