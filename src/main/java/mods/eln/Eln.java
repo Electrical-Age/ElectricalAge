@@ -96,6 +96,7 @@ import mods.eln.sixnode.hub.HubDescriptor;
 import mods.eln.sixnode.lampsocket.*;
 import mods.eln.sixnode.lampsupply.LampSupplyDescriptor;
 import mods.eln.sixnode.lampsupply.LampSupplyElement;
+import mods.eln.sixnode.logicgate.*;
 import mods.eln.sixnode.modbusrtu.ModbusRtuDescriptor;
 import mods.eln.sixnode.modbusrtu.ModbusServer;
 import mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor;
@@ -549,6 +550,7 @@ public class Eln {
 		registerElectricalGate(109);
 		registerTreeResinCollector(116);
 		registerSixNodeMisc(117);
+		registerLogicalGate(118);
 
 		//TRANSPARENT NODE REGISTRATION
 		//Sub-UID must be unique in this section only.
@@ -2432,6 +2434,43 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
+	}
+
+	private void registerLogicalGate(int id) {
+		Obj3D model = obj.getObj("LogicGates");
+		sixNodeItem.addDescriptor(0 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "NOT Chip"),model, "NOT", Not.class));
+
+		sixNodeItem.addDescriptor(1 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "AND Chip"), model, "AND", And.class));
+		sixNodeItem.addDescriptor(2 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "NAND Chip"), model, "NAND", Nand.class));
+
+		sixNodeItem.addDescriptor(3 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "OR Chip"), model, "OR", Or.class));
+		sixNodeItem.addDescriptor(4 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "NOR Chip"), model, "NOR", Nor.class));
+
+		sixNodeItem.addDescriptor(5 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "XOR Chip"), model, "XOR", Xor.class));
+		sixNodeItem.addDescriptor(6 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "XNOR Chip"), model, "XNOR", XNor.class));
+
+		sixNodeItem.addDescriptor(7 + (id << 6),
+			new PalDescriptor(TR_NAME(Type.NONE, "PAL Chip"), model));
+
+		sixNodeItem.addDescriptor(8 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "Schmitt Trigger Chip"), model, "SCHMITT",
+				SchmittTrigger.class));
+
+		sixNodeItem.addDescriptor(9 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "D Flip Flop Chip"), model, "DFF", DFlipFlop.class));
+
+		sixNodeItem.addDescriptor(10 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "Oscillator Chip"), model, "OSC", Oscillator.class));
+
+		sixNodeItem.addDescriptor(11 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "JK Flip Flop Chip"), model, "JKFF", JKFlipFlop.class));
 	}
 
 	void registerTransformer(int id) {
