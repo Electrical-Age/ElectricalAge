@@ -12,6 +12,7 @@ eclipse
 /saves
 *.json
 options.txt
+/out
 
 # IntelliJ
 .idea
