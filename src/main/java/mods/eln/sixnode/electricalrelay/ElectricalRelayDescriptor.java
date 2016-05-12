@@ -114,6 +114,6 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
-		return LRDU.Left;
+		return super.getFrontFromPlace(side, player).left();
 	}
 }
