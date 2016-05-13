@@ -1,6 +1,8 @@
 package mods.eln.sixnode.resistor;
 
 import mods.eln.Eln;
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.misc.series.ISerie;
@@ -116,5 +118,10 @@ public class ResistorDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
+    }
+
+    @Override
+    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+        return super.getFrontFromPlace(side, player).left();
     }
 }

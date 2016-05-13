@@ -1,12 +1,9 @@
 package mods.eln.sixnode.wirelesssignal.source;
 
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceRenderObj;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -67,10 +64,5 @@ public class WirelessSignalSourceDescriptor extends SixNodeDescriptor {
 			GL11.glScalef(1.5f, 1.5f, 1.5f);
 			draw(0f, 1f, null);
 		}
-	}
-
-	@Override
-	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
-		return LRDU.Down;
 	}
 }

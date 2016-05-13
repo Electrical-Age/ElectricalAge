@@ -75,6 +75,6 @@ public class WirelessSignalRxDescriptor extends SixNodeDescriptor {
 
 	@Override
 	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
-		return LRDU.Down;
+		return super.getFrontFromPlace(side, player).inverse();
 	}
 }

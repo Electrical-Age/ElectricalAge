@@ -25,8 +25,6 @@ public class WirelessSignalRepeaterRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
-
-		// drawSignalPin(new float[] { 2, 2, 2, 2 });
 		front.glRotateOnX();
 		descriptor.draw();
 	}
