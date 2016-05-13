@@ -1,13 +1,7 @@
 package mods.eln.sixnode.modbusrtu;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-
+import com.serotonin.modbus4j.ProcessImage;
+import com.serotonin.modbus4j.exception.IllegalDataAddressException;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -28,8 +22,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 
-import com.serotonin.modbus4j.ProcessImage;
-import com.serotonin.modbus4j.exception.IllegalDataAddressException;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class ModbusRtuElement extends SixNodeElement implements ProcessImage {
 
@@ -173,7 +172,16 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage {
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		return false;
+		if (Utils.isPlayerUsingWrench(entityPlayer)) {
+			if (side.isY()) {
+				front = front.getNextClockwise();
+				sixNode.reconnect();
+				sixNode.setNeedPublish(true);
+			}
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@Override
