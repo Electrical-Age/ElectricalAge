@@ -30,8 +30,6 @@ public class WirelessSignalRepeaterElement extends SixNodeElement {
 
 		slowProcessList.add(slowProcess);
 		
-		front = LRDU.Down;
-
 		IWirelessSignalSpot.spots.add(slowProcess);
 	}
 

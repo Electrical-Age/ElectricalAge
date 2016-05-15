@@ -42,7 +42,6 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 		super(sixNode, side, descriptor);
 		electricalLoadList.add(inputGate);
 		slowProcessList.add(lightningGlitchProcess = new LightningGlitchProcess(getCoordonate()));
-		front = LRDU.Down;
 		this.descriptor = (WirelessSignalTxDescriptor) descriptor;
 		channelRegister(this);
 	}

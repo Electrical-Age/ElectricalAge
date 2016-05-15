@@ -1,9 +1,5 @@
 package mods.eln.sixnode.electricaltimeout;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -19,6 +15,10 @@ import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class ElectricalTimeoutElement extends SixNodeElement {
 
@@ -38,8 +38,7 @@ public class ElectricalTimeoutElement extends SixNodeElement {
 
 	public ElectricalTimeoutElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-		front = LRDU.Left;
-    	electricalLoadList.add(inputGate);
+		electricalLoadList.add(inputGate);
     	electricalLoadList.add(outputGate);
     	electricalComponentList.add(outputGateProcess);
     	thermalProcessList.add(slowProcess);

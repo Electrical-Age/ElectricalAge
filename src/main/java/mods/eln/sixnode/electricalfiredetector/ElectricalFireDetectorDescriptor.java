@@ -1,10 +1,7 @@
 package mods.eln.sixnode.electricalfiredetector;
 
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
-import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -92,5 +89,10 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
             GL11.glScalef(2f, 2f, 2f);
             draw(false);
         }
+    }
+
+    @Override
+    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+        return super.getFrontFromPlace(side, player).right();
     }
 }

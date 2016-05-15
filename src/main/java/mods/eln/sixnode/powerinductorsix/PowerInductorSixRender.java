@@ -8,7 +8,6 @@ import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
-import org.lwjgl.opengl.GL11;
 
 public class PowerInductorSixRender extends SixNodeElementRender {
 
@@ -24,8 +23,7 @@ public class PowerInductorSixRender extends SixNodeElementRender {
 
 	@Override
 	public void draw() {
-		GL11.glRotatef(90, 1, 0, 0);
-		front.glRotateOnX();
+		front.left().glRotateOnX();
 		descriptor.draw();
 	}
 

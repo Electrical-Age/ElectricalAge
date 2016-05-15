@@ -1,8 +1,5 @@
 package mods.eln.sixnode.electricalwatch;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
 import mods.eln.misc.Direction;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementInventory;
@@ -10,6 +7,9 @@ import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class ElectricalWatchRender extends SixNodeElementRender {
 
@@ -35,6 +35,9 @@ public class ElectricalWatchRender extends SixNodeElementRender {
 			time = oldDate;
 		time += 6000;
 		time %= 24000;
+
+		front.glRotateOnX();
+
 		descriptor.draw(time / 12000f, (time % 1000) / 1000f, upToDate);
 	}
 

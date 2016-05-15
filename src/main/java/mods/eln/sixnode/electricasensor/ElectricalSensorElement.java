@@ -53,7 +53,6 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 	public ElectricalSensorElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-		//front = LRDU.Left;
 		this.descriptor = (ElectricalSensorDescriptor) descriptor;
 
 		aLoad = new NbtElectricalLoad("aLoad");

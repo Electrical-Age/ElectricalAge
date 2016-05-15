@@ -48,8 +48,7 @@ public class ElectricalRelayElement extends SixNodeElement {
 
     	this.descriptor = (ElectricalRelayDescriptor) descriptor;
     	
-		front = LRDU.Left;
-    	electricalLoadList.add(aLoad);
+		electricalLoadList.add(aLoad);
     	electricalLoadList.add(bLoad);
     	electricalComponentList.add(switchResistor);
     	electricalProcessList.add(gateProcess);

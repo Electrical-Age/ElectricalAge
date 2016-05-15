@@ -1,8 +1,5 @@
 package mods.eln.sixnode.electricalredstoneinput;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
@@ -10,6 +7,9 @@ import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class ElectricalRedstoneInputRender extends SixNodeElementRender {
 
@@ -27,7 +27,12 @@ public class ElectricalRedstoneInputRender extends SixNodeElementRender {
 		super.draw();
 		drawSignalPin(front.right(), descriptor.pinDistance);
 
-		LRDU.Down.glRotateOnX();
+		if (side.isY()) {
+			front.right().glRotateOnX();
+		} else {
+			LRDU.Down.glRotateOnX();
+		}
+
 		descriptor.draw(redLevel);
 	}
 

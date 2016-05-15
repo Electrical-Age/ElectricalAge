@@ -22,14 +22,12 @@ public class ElectricalVuMeterElement extends SixNodeElement {
 
     public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate");
     public ElectricalVuMeterSlowProcess slowProcess = new ElectricalVuMeterSlowProcess(this);
-    LRDU front;
     ElectricalVuMeterDescriptor descriptor;
 
 	public ElectricalVuMeterElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 		this.descriptor = (ElectricalVuMeterDescriptor) descriptor;
-		front = LRDU.Down;
-    	electricalLoadList.add(inputGate);
+		electricalLoadList.add(inputGate);
     	slowProcessList.add(slowProcess);
 	}
 

@@ -1,13 +1,12 @@
 package mods.eln.misc;
 
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.Vec3;
+import org.lwjgl.opengl.GL11;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.Vec3;
-
-import org.lwjgl.opengl.GL11;
 
 /**
  * Represents the 6 possible directions along the axis of a block.
@@ -105,6 +104,24 @@ public enum LRDU {
 		}
 	}
 
+	public float[] rotate4PinDistances(float [] distances) {
+		if (distances.length != 4 ) return distances;
+		switch (this) {
+			case Left:
+				return new float[] {distances[3], distances[2], distances[0], distances[1]};
+
+			case Down:
+				return new float[] {distances[1], distances[0], distances[3], distances[2]};
+
+			case Right:
+				return new float[] {distances[2], distances[3], distances[1], distances[0]};
+
+			case Up:
+			default:
+				return distances;
+		}
+	}
+
 	public LRDU getNextClockwise() {
 		switch (this) {
 			case Down: return Left;
@@ -199,7 +216,7 @@ public enum LRDU {
 			e.printStackTrace();
 		}
 	}
-	
+
 	static public LRDU deserialize(DataInputStream stream) {
 		try {
 			return fromInt(stream.readByte());

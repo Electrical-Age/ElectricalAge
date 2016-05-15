@@ -2,6 +2,8 @@ package mods.eln.sixnode.powerinductorsix;
 
 import mods.eln.Eln;
 import mods.eln.item.FerromagneticCoreDescriptor;
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
@@ -107,5 +109,10 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		return super.getFrontFromPlace(side, player).left();
 	}
 }

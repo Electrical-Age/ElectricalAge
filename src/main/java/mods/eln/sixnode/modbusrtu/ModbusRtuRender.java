@@ -1,21 +1,17 @@
 package mods.eln.sixnode.modbusrtu;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.util.HashMap;
-
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.PhysicalInterpolator;
-import mods.eln.misc.Utils;
+import mods.eln.misc.*;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.util.HashMap;
 
 public class ModbusRtuRender extends SixNodeElementRender {
 
@@ -47,7 +43,11 @@ public class ModbusRtuRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
 
-		LRDU.Down.glRotateOnX();
+        if (side.isY()) {
+            front.inverse().glRotateOnX();
+        } else {
+            LRDU.Down.glRotateOnX();
+        }
 
 		descriptor.draw(interpolator.get(), modbusActivityTimeout > 0, modbusErrorTimeout > 0);
 	}

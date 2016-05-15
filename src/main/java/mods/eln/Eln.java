@@ -2352,7 +2352,7 @@ public class Eln {
 			name = TR_NAME(Type.NONE, "High Voltage Relay");
 
 			desc = new ElectricalRelayDescriptor(
-					name, obj.getObj("relay800"),
+					name, obj.getObj("relayBig"),
 					highVoltageCableDescriptor);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -2363,7 +2363,7 @@ public class Eln {
 			name = TR_NAME(Type.NONE, "Very High Voltage Relay");
 
 			desc = new ElectricalRelayDescriptor(
-					name, obj.getObj("relay800"),
+					name, obj.getObj("relayBig"),
 					veryHighVoltageCableDescriptor);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);

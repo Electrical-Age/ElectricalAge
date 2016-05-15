@@ -38,7 +38,11 @@ public class ElectricalGateSourceRender extends SixNodeElementRender {
 		super.draw();
 		drawSignalPin(front, new float[] { 3, 3, 3, 3 });
 
-		LRDU.Down.glRotateOnX();
+		if (side.isY()) {
+			front.glRotateOnX();
+		} else {
+			LRDU.Down.glRotateOnX();
+		}
 		descriptor.draw(interpolator.get(), UtilsClient.distanceFromClientPlayer(this.tileEntity), tileEntity);
 	}
 

@@ -1,8 +1,5 @@
 package mods.eln.sixnode.hub;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
@@ -14,6 +11,9 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class HubRender extends SixNodeElementRender {
 
@@ -35,7 +35,7 @@ public class HubRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
-		descriptor.draw(connectionGrid);			
+		descriptor.draw(connectionGrid);
 	}
 
 	@Override

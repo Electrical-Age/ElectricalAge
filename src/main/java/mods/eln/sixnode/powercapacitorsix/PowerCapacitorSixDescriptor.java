@@ -2,6 +2,8 @@ package mods.eln.sixnode.powercapacitorsix;
 
 import mods.eln.Eln;
 import mods.eln.item.DielectricItem;
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
@@ -110,5 +112,10 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		return super.getFrontFromPlace(side, player).left();
 	}
 }

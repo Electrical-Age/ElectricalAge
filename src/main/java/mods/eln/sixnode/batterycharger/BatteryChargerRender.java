@@ -44,13 +44,17 @@ public class BatteryChargerRender extends SixNodeElementRender {
 	public void draw() {	
 		super.draw();
 
+		drawPowerPin(descriptor.pinDistance);
+
+		if (side.isY()) {
+			front.right().glRotateOnX();
+		}
+
 		drawEntityItem(b[0], 0.1875, 0.15625, 0.15625, alpha, 0.2f);
 		drawEntityItem(b[1], 0.1875, 0.15625, -0.15625, alpha, 0.2f);
 		drawEntityItem(b[2], 0.1875, -0.15625, 0.15625, alpha, 0.2f);
 		drawEntityItem(b[3], 0.1875, -0.15625, -0.15625, alpha, 0.2f);
 
-		drawPowerPin(descriptor.pinDistance);
-		
 		descriptor.draw(batteryPresence, charged);
 	}
 

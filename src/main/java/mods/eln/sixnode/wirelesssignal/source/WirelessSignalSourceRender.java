@@ -34,7 +34,6 @@ public class WirelessSignalSourceRender extends SixNodeElementRender {
 	@Override
 	public void draw() {
 		super.draw();
-		LRDU.Down.glRotateOnX();
 		descriptor.draw(interpolator.get(), UtilsClient.distanceFromClientPlayer(this.tileEntity), tileEntity);
 	}
 	

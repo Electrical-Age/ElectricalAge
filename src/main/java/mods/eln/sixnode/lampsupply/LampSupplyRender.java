@@ -44,9 +44,15 @@ public class LampSupplyRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
 
-		drawPowerPin(new float[] { 4, 4, 5, 5 });
+		float[] pinDistances = new float[] { 4.98f, 4.98f, 5.98f, 5.98f};
 
-		LRDU.Down.glRotateOnX();
+		if (side.isY()) {
+			drawPowerPin(front.rotate4PinDistances(pinDistances));
+			front.glRotateOnX();
+		} else {
+			drawPowerPin(pinDistances);
+			LRDU.Down.glRotateOnX();
+		}
 		descriptor.draw(interpolator.get());
 	}
 

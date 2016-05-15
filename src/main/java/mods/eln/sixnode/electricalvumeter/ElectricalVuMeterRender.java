@@ -34,6 +34,10 @@ public class ElectricalVuMeterRender extends SixNodeElementRender {
 		super.draw();
 		drawSignalPin(front, descriptor.pinDistance);
 
+		if (side.isY()) {
+			front.right().glRotateOnX();
+		}
+
 		descriptor.draw(descriptor.onOffOnly ? interpolator.getTarget() : interpolator.get(), UtilsClient.distanceFromClientPlayer(tileEntity), tileEntity);
 	}
 

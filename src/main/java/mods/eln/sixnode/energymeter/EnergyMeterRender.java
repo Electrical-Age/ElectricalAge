@@ -51,16 +51,24 @@ public class EnergyMeterRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
 
+		GL11.glPushMatrix();
+
+		float[] pinDistances = descriptor.pinDistance;
+		if (side.isY()) {
+			pinDistances = front.rotate4PinDistances(pinDistances);
+			front.left().glRotateOnX();
+		}
+
 		descriptor.draw(energyStack / Math.pow(10, energyUnit * 3 - 1), timerCouter / (timeUnit == 0 ? 360 : 8640),
 						energyUnit, timeUnit,
 						UtilsClient.distanceFromClientPlayer(tileEntity) < 20);
 
-		//front.glRotateOnX();
+		GL11.glPopMatrix();
 
 		GL11.glColor3f(0.9f, 0f, 0f);
-		drawPowerPinWhite(front, descriptor.pinDistance);
+		drawPowerPinWhite(front, pinDistances);
 		GL11.glColor3f(0f, 0f, 0.9f);
-		drawPowerPinWhite(front.inverse(), descriptor.pinDistance);
+		drawPowerPinWhite(front.inverse(), pinDistances);
 		GL11.glColor3f(1f, 1f, 1f);
 	}
 

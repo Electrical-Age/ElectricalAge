@@ -1,6 +1,8 @@
 package mods.eln.sixnode.groundcable;
 
 import mods.eln.Eln;
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
@@ -45,5 +47,10 @@ public class GroundCableDescriptor extends SixNodeDescriptor {
 		list.add(tr("Provides a zero volt reference."));
 		Collections.addAll(list, tr("Can be used to set a point of an\nelectrical network to 0V potential.\nFor example to ground negative battery contacts.").split("\n"));
 		list.add(tr("Internal resistance: %1$Ω", Eln.getSmallRs()));
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		return super.getFrontFromPlace(side, player).left();
 	}
 }
