@@ -44,8 +44,7 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
         if (!descriptor.onFloor) {
 			if (side.isY()) {
 				GL11.glPushMatrix();
-				front.glRotateOnX();
-				GL11.glRotatef(90, 1, 0, 0);
+				front.right().glRotateOnX();
 				drawSignalPin(LRDU.Right, new float[]{0, 5.67f, 0, 0});
 				GL11.glPopMatrix();
 			} else {

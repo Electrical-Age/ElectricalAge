@@ -153,9 +153,4 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor implements IPlug
 	public int bottom(int y, GuiVerticalExtender extender, ItemStack stack) {
 		return y;
 	}
-
-	@Override
-	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
-		return super.getFrontFromPlace(side, player);
-	}
 }

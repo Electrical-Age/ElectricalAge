@@ -11,7 +11,6 @@ import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
-import org.lwjgl.opengl.GL11;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -39,8 +38,7 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
 		
 
 		if (side.isY()) {
-			front.glRotateOnX();
-			GL11.glRotatef(90, 1, 0, 0);
+			front.right().glRotateOnX();
 			drawSignalPin(LRDU.Down, descriptor.pinDistance);
 		} else {
 			drawSignalPin(front, descriptor.pinDistance);

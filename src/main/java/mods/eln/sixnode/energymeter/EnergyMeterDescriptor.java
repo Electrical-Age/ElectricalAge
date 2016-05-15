@@ -222,9 +222,4 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 	}
-
-	@Override
-	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
-		return super.getFrontFromPlace(side, player);
-	}
 }

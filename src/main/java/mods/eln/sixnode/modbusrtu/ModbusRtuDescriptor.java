@@ -116,9 +116,4 @@ public class ModbusRtuDescriptor extends SixNodeDescriptor {
 			}
 		}
 	}
-
-	@Override
-	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
-		return super.getFrontFromPlace(side, player);
-	}
 }

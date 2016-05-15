@@ -1,7 +1,5 @@
 package mods.eln.sixnode.lampsocket;
 
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -120,10 +118,5 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
 				list.add(tr("Angle: %1$° to %2$°", ((int) alphaZMin), ((int) alphaZMax)));
 			}
 		}
-	}
-
-	@Override
-	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
-		return super.getFrontFromPlace(side, player);
 	}
 }
