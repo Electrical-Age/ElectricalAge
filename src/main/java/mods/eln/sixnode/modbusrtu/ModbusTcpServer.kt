@@ -46,7 +46,7 @@ class ModbusTcpServer(port: Int = 1502) {
         private fun handle(output: OutputStream) {
             while (inputBuffer.hasRemaining()) {
                 val transactionId = inputBuffer.short
-                if (inputBuffer.short == 0.toShort()) {
+                if (inputBuffer.short.equals(0)) {
                     val remaining = inputBuffer.short
                     if (inputBuffer.remaining() >= remaining) {
                         val slaveAddress = inputBuffer.get()
@@ -56,12 +56,12 @@ class ModbusTcpServer(port: Int = 1502) {
                         val slave = slaves[slaveAddress.toInt()]
                         if (slave != null) {
                             synchronized(slave) {
-                                when (functionCode) {
-                                    0x01.toByte() -> readCoils(slave, response)
-                                    0x02.toByte() -> readDiscreteInputs(slave, response)
-                                    0x04.toByte() -> readInputRegisters(slave, response)
-                                    0x05.toByte() -> writeSingleCoil(slave, response)
-                                    0x06.toByte() -> writeSingleRegister(slave, response)
+                                when (functionCode.toInt()) {
+                                    0x01 -> readCoils(slave, response)
+                                    0x02 -> readDiscreteInputs(slave, response)
+                                    0x04 -> readInputRegisters(slave, response)
+                                    0x05 -> writeSingleCoil(slave, response)
+                                    0x06 -> writeSingleRegister(slave, response)
                                     else -> {
                                         response.put((0x80 + functionCode).toByte()).put(0x01.toByte())
                                         inputBuffer.position(inputBuffer.position() + remaining - 2)
@@ -72,8 +72,7 @@ class ModbusTcpServer(port: Int = 1502) {
                             response.put((0x80 + functionCode).toByte()).put(0x0B.toByte())
                             inputBuffer.position(inputBuffer.position() + remaining - 2)
                         }
-                        response.putShort(4, (response.position() - 6).toShort())
-                        response.flip()
+                        response.putShort(4, (response.position() - 6).toShort()).flip()
                         output.write(response.array(), 0, response.remaining())
                         output.flush()
                     } else {
@@ -91,7 +90,7 @@ class ModbusTcpServer(port: Int = 1502) {
 
             try {
                 // TODO: Support for multiple coils...
-                if (quantity == 1.toShort()) {
+                if (quantity.equals(1)) {
                     val value = slave.getCoil(address.toInt());
                     response.put(0x01.toByte()).put(1.toByte()).put((if (value) 1 else 0).toByte())
                     return
@@ -106,7 +105,7 @@ class ModbusTcpServer(port: Int = 1502) {
 
             try {
                 // TODO: Support for multiple inputs...
-                if (quantity == 1.toShort()) {
+                if (quantity.equals(1)) {
                     val value = slave.getInput(address.toInt());
                     response.put(0x02.toByte()).put(1.toByte()).put((if (value) 1 else 0).toByte())
                     return
@@ -120,12 +119,13 @@ class ModbusTcpServer(port: Int = 1502) {
             val quantity = inputBuffer.short
 
             try {
-                // TODO: Support for multiple inputs registers...
-                if (quantity == 1.toShort()) {
-                    val value = slave.getInputRegister(address.toInt());
-                    response.put(0x04.toByte()).put(2.toByte()).putShort(value)
-                    return
+                val data = Array<Short>(quantity.toInt(), { 0 })
+                for (i in 0..quantity - 1) {
+                    data[i] = slave.getInputRegister(address.toInt() + i)
                 }
+                response.put(0x04.toByte()).put((quantity * 2).toByte())
+                data.forEach { response.putShort(it) }
+                return
             } catch (e: IllegalAddressException) {}
             response.put((0x84.toByte())).put(0x02.toByte())
         }
@@ -167,8 +167,13 @@ class ModbusTcpServer(port: Int = 1502) {
     }).start()
 
     fun add(slave: IModbusSlave): Boolean {
-        slaves.put(slave.slaveId, slave)
-        return true
+        val id = slave.slaveId
+        if (!slaves.containsKey(id)) {
+            slaves.put(slave.slaveId, slave)
+            return true
+        } else {
+            return false
+        }
     }
 
     fun remove(slave: IModbusSlave) = slaves.remove(slave.slaveId)
