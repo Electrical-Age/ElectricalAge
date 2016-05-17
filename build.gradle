@@ -64,7 +64,7 @@ repositories {
 }
 
 dependencies {
-    external files("libs/commons-math3-3.3.jar", "libs/modbus4J.jar", "libs/seroUtils.jar")
+    external files("libs/commons-math3-3.3.jar")
     external "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
     external "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }

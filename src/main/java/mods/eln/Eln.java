@@ -98,7 +98,7 @@ import mods.eln.sixnode.lampsupply.LampSupplyDescriptor;
 import mods.eln.sixnode.lampsupply.LampSupplyElement;
 import mods.eln.sixnode.logicgate.*;
 import mods.eln.sixnode.modbusrtu.ModbusRtuDescriptor;
-import mods.eln.sixnode.modbusrtu.ModbusServer;
+import mods.eln.sixnode.modbusrtu.ModbusTcpServer;
 import mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor;
 import mods.eln.sixnode.powerinductorsix.PowerInductorSixDescriptor;
 import mods.eln.sixnode.powersocket.PowerSocketDescriptor;
@@ -216,7 +216,7 @@ public class Eln {
 	public static GhostManagerNbt ghostManagerNbt;
 	private static NodeManager nodeManager;
 	public static PlayerManager playerManager;
-	public static ModbusServer modbusServer;
+	public static ModbusTcpServer modbusServer;
 	public static NodeManagerNbt nodeManagerNbt;
 	public static Simulator simulator = null;
 	public static DelayedTaskManager delayedTask;
@@ -930,7 +930,7 @@ public class Eln {
 
 	@EventHandler
 	public void onServerStart(FMLServerAboutToStartEvent ev) {
-		modbusServer = new ModbusServer();
+		modbusServer = new ModbusTcpServer();
 		TeleporterElement.teleporterList.clear();
 		//tileEntityDestructor.clear();
 		LightBlockEntity.observers.clear();
