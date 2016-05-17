@@ -8,9 +8,9 @@ interface Publishable {
 }
 
 class published<T>(var value: T) : ReadWriteProperty<Publishable, T> {
-    override fun getValue(receiver: Publishable, property: KProperty<*>): T = value
-    override fun setValue(receiver: Publishable, property: KProperty<*>, newValue: T) {
-        value = newValue
-        receiver.needPublish()
+    override fun getValue(thisRef: Publishable, property: KProperty<*>): T = this.value
+    override fun setValue(thisRef: Publishable, property: KProperty<*>, value: T) {
+        this.value = value
+        thisRef.needPublish()
     }
 }
