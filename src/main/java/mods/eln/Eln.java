@@ -1803,7 +1803,7 @@ public class Eln {
 		{
 			subId = 39;
 
-			name = "Large Rheostat";
+			name = TR_NAME(Type.NONE, "Large Rheostat");
 
 			ThermalDissipatorPassiveDescriptor dissipator = new ThermalDissipatorPassiveDescriptor(
 					name,
