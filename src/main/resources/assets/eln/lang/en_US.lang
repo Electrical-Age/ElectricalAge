@@ -16,6 +16,7 @@ achievement.open_guide.desc=Open the wiki guide
 200V_Copper_Heating_Corp.name=200V Copper Heating Corp
 200V_Economic_Light_Bulb.name=200V Economic Light Bulb
 200V_Farming_Lamp.name=200V Farming Lamp
+200V_Fuel_Generator.name=200V Fuel Generator
 200V_Incandescent_Light_Bulb.name=200V Incandescent Light Bulb
 200V_Iron_Heating_Corp.name=200V Iron Heating Corp
 200V_LED_Bulb.name=200V LED Bulb
@@ -34,6 +35,7 @@ achievement.open_guide.desc=Open the wiki guide
 50V_Economic_Light_Bulb.name=50V Economic Light Bulb
 50V_Egg_Incubator.name=50V Egg Incubator
 50V_Farming_Lamp.name=50V Farming Lamp
+50V_Fuel_Generator.name=50V Fuel Generator
 50V_Incandescent_Light_Bulb.name=50V Incandescent Light Bulb
 50V_Iron_Heating_Corp.name=50V Iron Heating Corp
 50V_LED_Bulb.name=50V LED Bulb
@@ -44,6 +46,7 @@ achievement.open_guide.desc=Open the wiki guide
 50V_Tungsten_Heating_Corp.name=50V Tungsten Heating Corp
 50V_Turbine.name=50V Turbine
 800V_Defence_Turret.name=800V Defence Turret
+AND_Chip.name=AND Chip
 Advanced_Chip.name=Advanced Chip
 Advanced_Electrical_Motor.name=Advanced Electrical Motor
 Advanced_Energy_Meter.name=Advanced Energy Meter
@@ -82,6 +85,7 @@ Copper_Thermal_Cable.name=Copper Thermal Cable
 Cost_Oriented_Battery.name=Cost Oriented Battery
 Current_Oriented_Battery.name=Current Oriented Battery
 Cyan_Brush.name=Cyan Brush
+D_Flip_Flop_Chip.name=D Flip Flop Chip
 Data_Logger.name=Data Logger
 Data_Logger_Print.name=Data Logger Print
 Dielectric.name=Dielectric
@@ -106,7 +110,6 @@ Fast_Electrical_Drill.name=Fast Electrical Drill
 Ferrite_Ingot.name=Ferrite Ingot
 Flat_Lamp_Socket.name=Flat Lamp Socket
 Fluorescent_Lamp_Socket.name=Fluorescent Lamp Socket
-Fuel_Generator.name=Fuel Generator
 Generator.name=Generator
 Gold_Dust.name=Gold Dust
 Gold_Plate.name=Gold Plate
@@ -123,10 +126,12 @@ Industrial_Data_Logger.name=Industrial Data Logger
 Iron_Cable.name=Iron Cable
 Iron_Dust.name=Iron Dust
 Iron_Plate.name=Iron Plate
+JK_Flip_Flop_Chip.name=JK Flip Flop Chip
 LED_vuMeter.name=LED vuMeter
 Lamp_Socket_A.name=Lamp Socket A
 Lamp_Socket_B_Projector.name=Lamp Socket B Projector
 Lamp_Supply.name=Lamp Supply
+Large_Rheostat.name=Large Rheostat
 Lead_Dust.name=Lead Dust
 Lead_Ingot.name=Lead Ingot
 Lead_Ore.name=Lead Ore
@@ -154,14 +159,20 @@ Modbus_RTU.name=Modbus RTU
 Modern_Data_Logger.name=Modern Data Logger
 Monster_Filter.name=Monster Filter
 MultiMeter.name=Multimeter
+NAND_Chip.name=NAND Chip
+NOR_Chip.name=NOR Chip
+NOT_Chip.name=NOT Chip
 Nuclear_Alarm.name=Nuclear Alarm
+OR_Chip.name=OR Chip
 On_OFF_Regulator_10_Percent.name=On/off regulator 10%
 On_OFF_Regulator_1_Percent.name=On/off regulator 1%
 Optimal_Ferromagnetic_Core.name=Optimal Ferromagnetic Core
 Orange_Brush.name=Orange Brush
 Ore_Scanner.name=Ore Scanner
+Oscillator_Chip.name=Oscillator Chip
 Overheating_Protection.name=Overheating Protection
 Overvoltage_Protection.name=Overvoltage Protection
+PAL_Chip.name=PAL Chip
 Pink_Brush.name=Pink Brush
 Player_Filter.name=Player Filter
 Portable_Battery.name=Portable Battery
@@ -181,6 +192,7 @@ Redstone-to-Voltage_Converter.name=Redstone-to-Voltage Converter
 Rheostat.name=Rheostat
 Robust_Lamp_Socket.name=Robust Lamp Socket
 Rubber.name=Rubber
+Schmitt_Trigger_Chip.name=Schmitt Trigger Chip
 Sconce_Lamp_Socket.name=Sconce Lamp Socket
 Signal_20H_inductor.name=Signal 20H inductor
 Signal_Antenna.name=Signal Antenna
@@ -250,6 +262,8 @@ Wireless_Signal_Transmitter.name=Wireless Signal Transmitter
 Wireless_Switch.name=Wireless Switch
 Wrench.name=Wrench
 X-Ray_Scanner.name=X-Ray Scanner
+XNOR_Chip.name=XNOR Chip
+XOR_Chip.name=XOR Chip
 Yellow_Brush.name=Yellow Brush
 entity.EAReplicator.name=Replicator
 item.Copper Axe.name=Copper Axe
@@ -331,6 +345,9 @@ mod.name=Electrical Age
 
 # ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
 Input_power_is_limited_to_%1$W=Input power is limited to %1$W
+
+# ./src/main/java/mods/eln/sixnode/LogicGate.kt
+_O\:_= O: 
 
 # ./src/main/java/mods/eln/sixnode/TreeResinCollector/TreeResinCollectorDescriptor.java
 Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Produces Tree Resin over\ntime when put on a tree.
@@ -468,6 +485,7 @@ Storm\:_%1$V=Storm: %1$V
 # ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
 Maximum_wind_speed_is_%1$m_s=Maximum wind speed is %1$m/s
 Provides_an_electrical_signal\ndependant_on_wind_speed.=Provides an electrical signal\ndependant on wind speed.
+You_can't_place_this_block_on_the_floor_or_the_ceiling=You can't place this block on the floor or the ceiling
 
 # ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorDescriptor.java
 Can_measure_Voltage_Power_Current=Can measure Voltage/Power/Current
@@ -589,6 +607,11 @@ Set_beacon_name=Set beacon name
 
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/tx/WirelessSignalTxGui.java
 
+# ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
+Nominal_power\:_%1$_W=Nominal power: %1$ W
+Nominal_voltage\:_%1$_V=Nominal voltage: %1$ V
+Produces_electricity_using_fuel.=Produces electricity using fuel.
+
 # ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
 Nom._Resistance\:_%1$=Nom. Resistance: %1$
 
@@ -602,6 +625,10 @@ Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radiu
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerGuiDraw.java
 Chest_missing_on_the\nback_of_the_auto_miner!=Chest missing on the\nback of the auto miner!
+Halves_speed,_triples_power_draw=Halves speed, triples power draw
+Silk_Touch_Off=Silk Touch Off
+Silk_Touch_On=Silk Touch On
+Silk_touch=Silk touch
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryContainer.java
 Overheating_protection=Overheating protection
@@ -646,9 +673,6 @@ Set_point\:_%1$°C=Set point: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
 Cost=Cost
-
-# ./src/main/java/mods/eln/transparentnode/fuelgenerator/FuelGeneratorDescriptor.java
-Produces_electricity_using_fuel.=Produces electricity using fuel.
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceContainer.java
 Combustion_chamber_slot=Combustion chamber slot
