@@ -16,8 +16,10 @@ achievement.open_guide.desc=Открыть внутреигровую Вики
 200V_Copper_Heating_Corp.name=Медный нагревательный элемент на 200В
 200V_Economic_Light_Bulb.name=Энергосберегающая лампочка на 200В
 200V_Farming_Lamp.name=Фермерская лампа на 200В
+200V_Fuel_Generator.name=200V Fuel Generator
 200V_Incandescent_Light_Bulb.name=Лампа накаливания на 200В
 200V_Iron_Heating_Corp.name=Железный нагревательный элемент на 200В
+200V_LED_Bulb.name=200V LED Bulb
 200V_Macerator.name=Дробитель на 200В
 200V_Magnetizer.name=Намагничиватель на 200В
 200V_Plate_Machine.name=Прокатный стан на 200В
@@ -33,8 +35,10 @@ achievement.open_guide.desc=Открыть внутреигровую Вики
 50V_Economic_Light_Bulb.name=Энергосберегающая лампочка на 50В
 50V_Egg_Incubator.name=Инкубатор яиц на 50В
 50V_Farming_Lamp.name=Фермерская лампа на 50В
+50V_Fuel_Generator.name=50V Fuel Generator
 50V_Incandescent_Light_Bulb.name=Лампа накаливания на 50В
 50V_Iron_Heating_Corp.name=Железный нагревательный элемент на 50В
+50V_LED_Bulb.name=50V LED Bulb
 50V_Macerator.name=Дробитель на 50В
 50V_Magnetizer.name=Намагничиватель на 50В
 50V_Plate_Machine.name=Прокатный стан на 50В
@@ -42,6 +46,7 @@ achievement.open_guide.desc=Открыть внутреигровую Вики
 50V_Tungsten_Heating_Corp.name=Вольфрамовый нагревательный элемент на 50В
 50V_Turbine.name=Тепловая турбина на 50В
 800V_Defence_Turret.name=Защитная турель на 800В
+AND_Chip.name=AND Chip
 Advanced_Chip.name=Продвинутая микросхема
 Advanced_Electrical_Motor.name=Продвинутый электромотор
 Advanced_Energy_Meter.name=Продвинутый счетчик
@@ -80,6 +85,7 @@ Copper_Thermal_Cable.name=Медный теплопровод
 Cost_Oriented_Battery.name=Дешевый аккумулятор
 Current_Oriented_Battery.name=Мощный аккумулятор
 Cyan_Brush.name=Бирюзовая кисточка
+D_Flip_Flop_Chip.name=D Flip Flop Chip
 Data_Logger.name=Осциллограф
 Data_Logger_Print.name=Распечаток осциллографа
 Dielectric.name=Диэлектрик
@@ -104,7 +110,7 @@ Fast_Electrical_Drill.name=Качественная насадка для бур
 Ferrite_Ingot.name=Слиток феррита
 Flat_Lamp_Socket.name=Плоский плафон
 Fluorescent_Lamp_Socket.name=Люминесцентный плафон
-Fuel_Generator.name=Топливный генератор
+Generator.name=Generator
 Gold_Dust.name=Распыленное золото
 Gold_Plate.name=Золотая пластина
 Gray_Brush.name=Серая кисточка
@@ -120,6 +126,7 @@ Industrial_Data_Logger.name=Продвинутый осциллограф
 Iron_Cable.name=Железный провод
 Iron_Dust.name=Распыленное железо
 Iron_Plate.name=Железная пластина
+JK_Flip_Flop_Chip.name=JK Flip Flop Chip
 LED_vuMeter.name=Светодиодный индикатор
 Lamp_Socket_A.name=Люстра
 Lamp_Socket_B_Projector.name=Прожектор
@@ -151,14 +158,20 @@ Modbus_RTU.name=Modbus RTU
 Modern_Data_Logger.name=Современный осциллограф
 Monster_Filter.name=Фильтр враждебных существ
 MultiMeter.name=Мультиметр
+NAND_Chip.name=NAND Chip
+NOR_Chip.name=NOR Chip
+NOT_Chip.name=NOT Chip
 Nuclear_Alarm.name=Ядерная сирена
+OR_Chip.name=OR Chip
 On_OFF_Regulator_10_Percent.name=Автоматическое реле на 10%
 On_OFF_Regulator_1_Percent.name=Автоматическое реле на 1%
 Optimal_Ferromagnetic_Core.name=Оптимальное ферромагнитное ядро
 Orange_Brush.name=Оранжевая кисточка
 Ore_Scanner.name=Сканер руд
+Oscillator_Chip.name=Oscillator Chip
 Overheating_Protection.name=Защита от перегрева
 Overvoltage_Protection.name=Защита от перенапряжения
+PAL_Chip.name=PAL Chip
 Pink_Brush.name=Розовая кисточка
 Player_Filter.name=Фильтр игроков
 Portable_Battery.name=Карманная батарейка
@@ -178,6 +191,7 @@ Redstone-to-Voltage_Converter.name=Приемщик редстоун-сигна�
 Rheostat.name=Реостат
 Robust_Lamp_Socket.name=Прочный плафон
 Rubber.name=Резина
+Schmitt_Trigger_Chip.name=Schmitt Trigger Chip
 Sconce_Lamp_Socket.name=Плафон-канделябр
 Signal_20H_inductor.name=Сигнальная катушка индуктивности на 20H
 Signal_Antenna.name=Сигнальная антенна
@@ -212,6 +226,7 @@ Small_Rotating_Solar_Panel.name=Небольшая настраиваемая с
 Small_Solar_Panel.name=Небольшая солнечная батарея
 Solar_Tracker.name=Отслеживатель солнца
 Standard_Alarm.name=Обыкновенная сирена
+Steam_Turbine.name=Steam Turbine
 Stone_Heat_Furnace.name=Каменная тепловая печь
 Street_Light.name=Уличный фонарь
 Suspended_Lamp_Socket.name=Удлиненный подвесной плафон
@@ -246,6 +261,8 @@ Wireless_Signal_Transmitter.name=Сигнальный передатчик
 Wireless_Switch.name=Беспроводной сигнальный переключатель
 Wrench.name=Гаечный ключ
 X-Ray_Scanner.name=Рентген-сканер
+XNOR_Chip.name=XNOR Chip
+XOR_Chip.name=XOR Chip
 Yellow_Brush.name=Желтая кисточка
 entity.EAReplicator.name=Репликатор
 item.Copper Axe.name\=Медный топор
@@ -329,6 +346,9 @@ mod.name=Electrical Age
 
 # ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
 Input_power_is_limited_to_%1$W=Входная мощность ограничена до %1$Вт
+
+# ./src/main/java/mods/eln/sixnode/LogicGate.kt
+_O\:_= O\:
 
 # ./src/main/java/mods/eln/sixnode/TreeResinCollector/TreeResinCollectorDescriptor.java
 Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Если висит на дереве, то\nсо временем производит \nкаучук.
@@ -470,6 +490,7 @@ Storm\:_%1$V=Буря\: %1$В
 # ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
 Maximum_wind_speed_is_%1$m_s=Максимальная скорость ветра - %1$м/с
 Provides_an_electrical_signal\ndependant_on_wind_speed.=Испускает электрический\nсигнал, зависящий от силы\nветра.
+You_can't_place_this_block_on_the_floor_or_the_ceiling=You can't place this block on the floor or the ceiling
 
 # ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorDescriptor.java
 Can_measure_Voltage_Power_Current=Может измерять напряжение, мощность и силу тока.
@@ -587,6 +608,14 @@ Set_beacon_name=Имя подсказки
 
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
 
+# ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
+Nominal_power\:_%1$_W=Nominal power\: %1$ W
+Nominal_voltage\:_%1$_V=Nominal voltage\: %1$ V
+Produces_electricity_using_fuel.=Производит электричество сжигая топливо.
+
+# ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
+Nom._Resistance\:_%1$=Nom. Resistance\: %1$
+
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
 Drill_slot=Слот для наконечника для бура
 Mining_pipe_slot=Слот для удлинителя шахтерского бура
@@ -597,6 +626,10 @@ Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radiu
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerGuiDraw.java
 Chest_missing_on_the\nback_of_the_auto_miner!=Отсутствует сундук для\nресурсов\!
+Halves_speed,_triples_power_draw=Halves speed, triples power draw
+Silk_Touch_Off=Silk Touch Off
+Silk_Touch_On=Silk Touch On
+Silk_touch=Silk touch
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryContainer.java
 Overheating_protection=Защита от перегрева
@@ -641,9 +674,6 @@ Set_point\:_%1$°C=Контрольная точка\: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
 Cost=Затраты
-
-# ./src/main/java/mods/eln/transparentnode/fuelgenerator/FuelGeneratorDescriptor.java
-Produces_electricity_using_fuel.=Производит электричество сжигая топливо.
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceContainer.java
 Combustion_chamber_slot=Слот для камеры внутреннего сгорания

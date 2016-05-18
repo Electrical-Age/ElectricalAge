@@ -16,8 +16,10 @@ achievement.open_guide.desc=Abrir la guía desde el escritorio
 200V_Copper_Heating_Corp.name=200V Generador de calor de Cobre
 200V_Economic_Light_Bulb.name=200V Bombilla económica
 200V_Farming_Lamp.name=200V Lámpara agrícola
+200V_Fuel_Generator.name=200V Fuel Generator
 200V_Incandescent_Light_Bulb.name=200V Bombilla incandescente
 200V_Iron_Heating_Corp.name=200V Generador de calor de Hierro
+200V_LED_Bulb.name=200V LED Bulb
 200V_Macerator.name=200V Macerador
 200V_Magnetizer.name=200V Magnetizador
 200V_Plate_Machine.name=200V Placa de la máquina
@@ -33,8 +35,10 @@ achievement.open_guide.desc=Abrir la guía desde el escritorio
 50V_Economic_Light_Bulb.name=50V Bombilla económica
 50V_Egg_Incubator.name=50V Incubadora de huevo
 50V_Farming_Lamp.name=50V Lámpara agrícola
+50V_Fuel_Generator.name=50V Fuel Generator
 50V_Incandescent_Light_Bulb.name=50V Bombilla incandescente
 50V_Iron_Heating_Corp.name=50V Generador de calor de Hierro
+50V_LED_Bulb.name=50V LED Bulb
 50V_Macerator.name=50V Macerador
 50V_Magnetizer.name=50V Magnetizador
 50V_Plate_Machine.name=50V Lámina de máquina
@@ -42,6 +46,7 @@ achievement.open_guide.desc=Abrir la guía desde el escritorio
 50V_Tungsten_Heating_Corp.name=50V Generador de calor de Tungsteno
 50V_Turbine.name=50V Turbina
 800V_Defence_Turret.name=800V Defensa torreta
+AND_Chip.name=AND Chip
 Advanced_Chip.name=Chip avanzado
 Advanced_Electrical_Motor.name=Motor de calor avanzado
 Advanced_Energy_Meter.name=Medidor de energía avanzada
@@ -80,6 +85,7 @@ Copper_Thermal_Cable.name=Cable térmico de Cobre
 Cost_Oriented_Battery.name=Cargador de batería
 Current_Oriented_Battery.name=Cargador de batería funcional
 Cyan_Brush.name=Pincel cián
+D_Flip_Flop_Chip.name=D Flip Flop Chip
 Data_Logger.name=Datos registrados
 Data_Logger_Print.name=Impresora
 Dielectric.name=Dieléctrico
@@ -104,7 +110,7 @@ Fast_Electrical_Drill.name=Taladro rápido eléctrico
 Ferrite_Ingot.name=Lingote de Ferrita
 Flat_Lamp_Socket.name=Enchufe de lámpara plano
 Fluorescent_Lamp_Socket.name=Enchufe de lámpara fluorescente
-Fuel_Generator.name=Generador de Fuel
+Generator.name=Generator
 Gold_Dust.name=Polvo de Oro
 Gold_Plate.name=Láminas de Oro
 Gray_Brush.name=Pincel gris
@@ -120,6 +126,7 @@ Industrial_Data_Logger.name=Pantalla industrial de datos
 Iron_Cable.name=Cable de Hierro
 Iron_Dust.name=Polvo de Hierro
 Iron_Plate.name=Lámina de Hierro
+JK_Flip_Flop_Chip.name=JK Flip Flop Chip
 LED_vuMeter.name=Indicador de volumen de LED
 Lamp_Socket_A.name=Lámpara
 Lamp_Socket_B_Projector.name=Portalámparas
@@ -151,14 +158,20 @@ Modbus_RTU.name=Modbus RTU
 Modern_Data_Logger.name=Pantalla mejorada
 Monster_Filter.name=Filtro de mounstros
 MultiMeter.name=Multímetro
+NAND_Chip.name=NAND Chip
+NOR_Chip.name=NOR Chip
+NOT_Chip.name=NOT Chip
 Nuclear_Alarm.name=Alarma nuclear
+OR_Chip.name=OR Chip
 On_OFF_Regulator_10_Percent.name=Encendido/Apagado regulador 10%
 On_OFF_Regulator_1_Percent.name=Encendido/Apagado regulador 1%
 Optimal_Ferromagnetic_Core.name=Núcleo ferromagnético óptimo
 Orange_Brush.name=Pincel naranja
 Ore_Scanner.name=Escaner de minerales
+Oscillator_Chip.name=Oscillator Chip
 Overheating_Protection.name=Protección contra sobrecalentamientos
 Overvoltage_Protection.name=Protección contra sobrevoltaje
+PAL_Chip.name=PAL Chip
 Pink_Brush.name=Pincel rosa
 Player_Filter.name=Filtro de jugador
 Portable_Battery.name=Batería Portátil
@@ -178,6 +191,7 @@ Redstone-to-Voltage_Converter.name=Convertidor de Redstone a voltios
 Rheostat.name=Reóstato
 Robust_Lamp_Socket.name=Portalámparas robusto
 Rubber.name=Caucho
+Schmitt_Trigger_Chip.name=Schmitt Trigger Chip
 Sconce_Lamp_Socket.name=Enchufe de candelabro de pared
 Signal_20H_inductor.name=Inductor de señal de 20H
 Signal_Antenna.name=Señal de Antena
@@ -212,6 +226,7 @@ Small_Rotating_Solar_Panel.name=Panel solar pequeño rotatorio
 Small_Solar_Panel.name=Panel solar pequeño
 Solar_Tracker.name=Rastreadora solar
 Standard_Alarm.name=Alarma estándar
+Steam_Turbine.name=Steam Turbine
 Stone_Heat_Furnace.name=Horno de calor de Piedra
 Street_Light.name=Luz de calle
 Suspended_Lamp_Socket.name=Lampara aérea
@@ -246,6 +261,8 @@ Wireless_Signal_Transmitter.name=Transmisor de señal inalámbrico
 Wireless_Switch.name=Interruptor inalámbrico
 Wrench.name=Llave inglesa
 X-Ray_Scanner.name=Escaner de Rayos X
+XNOR_Chip.name=XNOR Chip
+XOR_Chip.name=XOR Chip
 Yellow_Brush.name=Pincel amarillo
 entity.EAReplicator.name=Replicador
 item.Copper Axe.name\=Hacha de Cobre
@@ -329,6 +346,9 @@ mod.name=Edad eléctrica
 
 # ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
 Input_power_is_limited_to_%1$W=La entrada de poder está limitada a %1$W
+
+# ./src/main/java/mods/eln/sixnode/LogicGate.kt
+_O\:_= O\:
 
 # ./src/main/java/mods/eln/sixnode/TreeResinCollector/TreeResinCollectorDescriptor.java
 Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Produce resina de árbol sobre\ntiempo cuando está colocado en un árbol.
@@ -470,6 +490,7 @@ Storm\:_%1$V=Storm\: %1$V
 # ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
 Maximum_wind_speed_is_%1$m_s=Velocidad máxima del viento es %1$m/s
 Provides_an_electrical_signal\ndependant_on_wind_speed.=Proporciona una señal eléctrica\nque depende de la velocidad del viento.
+You_can't_place_this_block_on_the_floor_or_the_ceiling=You can't place this block on the floor or the ceiling
 
 # ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorDescriptor.java
 Can_measure_Voltage_Power_Current=Puede medir tensión / potencia / corriente
@@ -587,6 +608,14 @@ Set_beacon_name=Nombre del conjunto de beacon
 
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
 
+# ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
+Nominal_power\:_%1$_W=Nominal power\: %1$ W
+Nominal_voltage\:_%1$_V=Nominal voltage\: %1$ V
+Produces_electricity_using_fuel.=Produce electricidad usando combustible.
+
+# ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
+Nom._Resistance\:_%1$=Nom. Resistance\: %1$
+
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
 Drill_slot=Ranura del taladro
 Mining_pipe_slot=Ranura de tubería de minería
@@ -597,6 +626,10 @@ Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radiu
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerGuiDraw.java
 Chest_missing_on_the\nback_of_the_auto_miner!=Chest missing on the\nback of the auto miner\!
+Halves_speed,_triples_power_draw=Halves speed, triples power draw
+Silk_Touch_Off=Silk Touch Off
+Silk_Touch_On=Silk Touch On
+Silk_touch=Silk touch
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryContainer.java
 Overheating_protection=Overheating protection
@@ -641,9 +674,6 @@ Set_point\:_%1$°C=Punto fijo\: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
 Cost=Coste
-
-# ./src/main/java/mods/eln/transparentnode/fuelgenerator/FuelGeneratorDescriptor.java
-Produces_electricity_using_fuel.=Produce electricidad usando combustible.
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceContainer.java
 Combustion_chamber_slot=Ranura cámara de combustión

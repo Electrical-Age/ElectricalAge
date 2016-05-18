@@ -8,7 +8,7 @@ achievement.open_guide=Wiki Power
 achievement.open_guide.desc=Open the wiki guide
 
 # ./src/main/java/mods/eln/Eln.java
-10A_Diode.name=10A Diode
+10A_Diode.name=10A Dioda
 200V_Active_Thermal_Dissipator.name=200V Active Thermal Dissipator
 200V_Battery_Charger.name=200V Battery Charger
 200V_Compressor.name=200V Compressor
