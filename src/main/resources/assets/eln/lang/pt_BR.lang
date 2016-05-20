@@ -131,6 +131,7 @@ LED_vuMeter.name=Medidor vuMeter
 Lamp_Socket_A.name=Socket de Lâmpada A
 Lamp_Socket_B_Projector.name=Soquete De Lâmpada B Projetora
 Lamp_Supply.name=Alimentação De Lâmpadas
+Large_Rheostat.name=Large Rheostat
 Lead_Dust.name=Pó de Chumbo
 Lead_Ingot.name=Barra de Chumbo
 Lead_Ore.name=Mineiro de Chumbo

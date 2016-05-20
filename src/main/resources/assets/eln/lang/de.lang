@@ -131,6 +131,7 @@ LED_vuMeter.name=LED-Anzeige
 Lamp_Socket_A.name=Lampenfassung Model A
 Lamp_Socket_B_Projector.name=Spotlampe Model B
 Lamp_Supply.name=Lampen-Verteilschrank
+Large_Rheostat.name=Grosser Regelwiderstand
 Lead_Dust.name=Bleistaub
 Lead_Ingot.name=Bleibarren
 Lead_Ore.name=Bleierz

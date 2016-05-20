@@ -131,6 +131,7 @@ LED_vuMeter.name=Kontrolka
 Lamp_Socket_A.name=Lampa punktowa
 Lamp_Socket_B_Projector.name=Lampa punktowa kierowana
 Lamp_Supply.name=Rozdzielnia oświetlenia
+Large_Rheostat.name=Large Rheostat
 Lead_Dust.name=Sproszkowany ołów
 Lead_Ingot.name=Sztabka ołowiu
 Lead_Ore.name=Ruda ołowiu

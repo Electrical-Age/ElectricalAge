@@ -131,6 +131,7 @@ LED_vuMeter.name=LED指示灯
 Lamp_Socket_A.name=灯座(圆盘式)
 Lamp_Socket_B_Projector.name=灯座(圆盘式,高级)
 Lamp_Supply.name=无线照明控制盒
+Large_Rheostat.name=Large Rheostat
 Lead_Dust.name=铅粉
 Lead_Ingot.name=铅锭
 Lead_Ore.name=铅矿石

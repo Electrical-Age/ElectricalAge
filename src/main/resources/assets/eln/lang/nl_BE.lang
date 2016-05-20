@@ -131,6 +131,7 @@ LED_vuMeter.name=LED vuMeter
 Lamp_Socket_A.name=Lamp Socket A
 Lamp_Socket_B_Projector.name=Lamp Socket B Projector
 Lamp_Supply.name=Lamp Supply
+Large_Rheostat.name=Large Rheostat
 Lead_Dust.name=Lead Dust
 Lead_Ingot.name=Lead Ingot
 Lead_Ore.name=Lead Ore

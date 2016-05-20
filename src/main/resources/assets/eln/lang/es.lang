@@ -131,6 +131,7 @@ LED_vuMeter.name=Indicador de volumen de LED
 Lamp_Socket_A.name=Lámpara
 Lamp_Socket_B_Projector.name=Portalámparas
 Lamp_Supply.name=Suministro de lámpara
+Large_Rheostat.name=Large Rheostat
 Lead_Dust.name=Polvo de Plomo
 Lead_Ingot.name=Lingote de Plomo
 Lead_Ore.name=Mena de Plomo

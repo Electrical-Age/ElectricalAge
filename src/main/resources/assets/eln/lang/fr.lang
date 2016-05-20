@@ -131,6 +131,7 @@ LED_vuMeter.name=vuMètre LED
 Lamp_Socket_A.name=Douille de lampe A
 Lamp_Socket_B_Projector.name=Douille de lampe B Projectrice
 Lamp_Supply.name=Alimentation de lampe
+Large_Rheostat.name=Large Rheostat
 Lead_Dust.name=Poudre de plomb
 Lead_Ingot.name=Lingot de plomb
 Lead_Ore.name=Minerai de plomb

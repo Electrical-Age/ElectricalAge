@@ -16,10 +16,10 @@ achievement.open_guide.desc=Open de wiki handleiding
 200V_Copper_Heating_Corp.name=200V Koperen Verhittingsspoel
 200V_Economic_Light_Bulb.name=200V Spaarlamp
 200V_Farming_Lamp.name=200V Boerderijlamp
-200V_Fuel_Generator.name=200V Fuel Generator
+200V_Fuel_Generator.name=200V Brandstofgenerator
 200V_Incandescent_Light_Bulb.name=200V Gloeilamp
 200V_Iron_Heating_Corp.name=200V Ijzeren Verhittingsspoel
-200V_LED_Bulb.name=200V LED Bulb
+200V_LED_Bulb.name=200V LED Lamp
 200V_Macerator.name=200V Versnipperaar
 200V_Magnetizer.name=200V Magnetiseringsunit
 200V_Plate_Machine.name=200V Platenwals
@@ -35,10 +35,10 @@ achievement.open_guide.desc=Open de wiki handleiding
 50V_Economic_Light_Bulb.name=50V Spaarlamp
 50V_Egg_Incubator.name=50V Broedlamp
 50V_Farming_Lamp.name=50V Boerderij lamp
-50V_Fuel_Generator.name=50V Fuel Generator
+50V_Fuel_Generator.name=50V Brandstofgenerator
 50V_Incandescent_Light_Bulb.name=50V Gloeilamp
 50V_Iron_Heating_Corp.name=50V Ijzeren Verhittingsspoel
-50V_LED_Bulb.name=50V LED Bulb
+50V_LED_Bulb.name=50V LED Lamp
 50V_Macerator.name=50V Versnipperaar
 50V_Magnetizer.name=50V Magnetiseringsunit
 50V_Plate_Machine.name=50V Platenwals
@@ -131,6 +131,7 @@ LED_vuMeter.name=LED vuMeter
 Lamp_Socket_A.name=Lamp Socket A
 Lamp_Socket_B_Projector.name=Lamp Socket B Projector
 Lamp_Supply.name=Lamp Voeiding
+Large_Rheostat.name=Grote Potentiometer
 Lead_Dust.name=Lood Stof
 Lead_Ingot.name=Loden Staaf
 Lead_Ore.name=Looderts
@@ -191,7 +192,7 @@ Redstone-to-Voltage_Converter.name=Redstone-naar-Spanning Omzetter
 Rheostat.name=Potentiometer
 Robust_Lamp_Socket.name=Robuuste Lamp Socket
 Rubber.name=Rubber
-Schmitt_Trigger_Chip.name=Schmitt Trigger Chip
+Schmitt_Trigger_Chip.name=Schmitt-trigger Chip
 Sconce_Lamp_Socket.name=Wandverlichting Socket
 Signal_20H_inductor.name=Signaal 20H Smoorspoel
 Signal_Antenna.name=Signaalantenne
@@ -226,7 +227,7 @@ Small_Rotating_Solar_Panel.name=Klein Roterend Zonnepaneel
 Small_Solar_Panel.name=Klein Zonnepaneel
 Solar_Tracker.name=Zon Tracker
 Standard_Alarm.name=Standaardalarm
-Steam_Turbine.name=Steam Turbine
+Steam_Turbine.name=Stoomturbine
 Stone_Heat_Furnace.name=Stenen Hitteoven
 Street_Light.name=Lantaarn
 Suspended_Lamp_Socket.name=Hangende Lamp Socket
@@ -490,7 +491,7 @@ Storm\:_%1$V=Storm\: %1$V
 # ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
 Maximum_wind_speed_is_%1$m_s=Maximale windsnelheid is %1$m/s
 Provides_an_electrical_signal\ndependant_on_wind_speed.=Geeft een elektrisch signaal\nafhankelijk van de windsnelheid.
-You_can't_place_this_block_on_the_floor_or_the_ceiling=You can't place this block on the floor or the ceiling
+You_can't_place_this_block_on_the_floor_or_the_ceiling=Je kunt dit blok niet op de vloer of het plafond plaatsen
 
 # ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorDescriptor.java
 Can_measure_Voltage_Power_Current=Kan Voltage/Vermogen/Stroom meten
@@ -609,12 +610,12 @@ Set_beacon_name=Stel baken naam in
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
 
 # ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
-Nominal_power\:_%1$_W=Nominal power\: %1$ W
-Nominal_voltage\:_%1$_V=Nominal voltage\: %1$ V
+Nominal_power\:_%1$_W=Norminaal vermogen\: %1$ W
+Nominal_voltage\:_%1$_V=Nominale spanning\: %1$ V
 Produces_electricity_using_fuel.=Genereert elektriciteit met brandstof.
 
 # ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
-Nom._Resistance\:_%1$=Nom. Resistance\: %1$
+Nom._Resistance\:_%1$=Nom. weerstand\: %1$
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
 Drill_slot=Boor Slot
@@ -626,10 +627,10 @@ Excavates_on_a_small_radius.\nExtracts_ore_on_a_bigger_radius\:\n10_blocks_radiu
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerGuiDraw.java
 Chest_missing_on_the\nback_of_the_auto_miner!=Kist mist aan de achterkant \nvan de automatische graver.
-Halves_speed,_triples_power_draw=Halves speed, triples power draw
-Silk_Touch_Off=Silk Touch Off
-Silk_Touch_On=Silk Touch On
-Silk_touch=Silk touch
+Halves_speed,_triples_power_draw=Halveert snelheid, verdrievoudigd energieverbruik
+Silk_Touch_Off=Zijden Streling Uit
+Silk_Touch_On=Zijden Streling Aan
+Silk_touch=Zijden Streling
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryContainer.java
 Overheating_protection=Bescherming Tegen Oververhitting

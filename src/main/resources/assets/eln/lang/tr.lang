@@ -131,6 +131,7 @@ LED_vuMeter.name=LED vuMeter
 Lamp_Socket_A.name=Lamba Soket A
 Lamp_Socket_B_Projector.name=Lamba Soket B Projektör
 Lamp_Supply.name=Lamba Besleme
+Large_Rheostat.name=Large Rheostat
 Lead_Dust.name=Kurşun Tozu
 Lead_Ingot.name=Kurşun Külçesi
 Lead_Ore.name=Kurşun Cevheri

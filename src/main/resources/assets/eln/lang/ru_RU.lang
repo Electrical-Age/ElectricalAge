@@ -131,6 +131,7 @@ LED_vuMeter.name=Цифровой измеритель сигнала
 Lamp_Socket_A.name=Люстра А
 Lamp_Socket_B_Projector.name=Люстра В
 Lamp_Supply.name=Щиток освещения
+Large_Rheostat.name=Large Rheostat
 Lead_Dust.name=Измельченный свинец
 Lead_Ingot.name=Свинцовый слиток
 Lead_Ore.name=Свинцовая руда
