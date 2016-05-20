@@ -614,11 +614,6 @@ Nominal_power\:_%1$_W=Nominal power: %1$ W
 Nominal_voltage\:_%1$_V=Nominal voltage: %1$ V
 Produces_electricity_using_fuel.=Produces electricity using fuel.
 
-# ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
-Nominal_power\:_%1$_W=Nominal power: %1$ W
-Nominal_voltage\:_%1$_V=Nominal voltage: %1$ V
-Produces_electricity_using_fuel.=Produces electricity using fuel.
-
 # ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
 Nom._Resistance\:_%1$=Nom. Resistance: %1$
 
