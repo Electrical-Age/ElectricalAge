@@ -1,11 +1,5 @@
 package mods.eln.node.six;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -27,6 +21,12 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.chunk.Chunk;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 public class SixNode extends Node {
 
@@ -86,7 +86,7 @@ public class SixNode extends Node {
 		lrduElementMask.clear();
 	}
 
-	public boolean createSubBlock(ItemStack itemStack, Direction direction) {
+	public boolean createSubBlock(ItemStack itemStack, Direction direction, EntityPlayer player) {
 		
 		SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(itemStack);
 		if (sideElementList[direction.getInt()] != null)
@@ -99,6 +99,7 @@ public class SixNode extends Node {
 			sideElementIdList[direction.getInt()] = 0;
 
 			disconnect();
+			sideElementList[direction.getInt()].front = descriptor.getFrontFromPlace(direction, player);
 			sideElementList[direction.getInt()].initialize();
 			sideElementIdList[direction.getInt()] = itemStack.getItemDamage();
 

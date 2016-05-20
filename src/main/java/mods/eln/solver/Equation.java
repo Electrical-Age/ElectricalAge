@@ -24,7 +24,7 @@ public class Equation implements IValue, INBTTReady {
 	String separatorList;
 
     int iterationLimit;
-    ArrayList<ISymbole> symboleList;
+    ArrayList<ISymbole> symbolList;
 
     IValue root;
 
@@ -43,23 +43,26 @@ public class Equation implements IValue, INBTTReady {
 			list.add(new OperatorMapperFunc("max", 2, Max.class));
 			list.add(new OperatorMapperFunc("sin", 1, Sin.class));
 			list.add(new OperatorMapperFunc("cos", 1, Cos.class));
+			list.add(new OperatorMapperFunc("asin", 1, Asin.class));
+			list.add(new OperatorMapperFunc("acos", 1, Acos.class));
 			list.add(new OperatorMapperFunc("abs", 1, Abs.class));
 			list.add(new OperatorMapperFunc("ramp", 1, Ramp.class));
 			list.add(new OperatorMapperFunc("integrate", 2, Integrator.class));
 			list.add(new OperatorMapperFunc("integrate", 3, IntegratorMinMax.class));
 			list.add(new OperatorMapperFunc("derivate", 1, Derivator.class));
+			list.add(new OperatorMapperFunc("pow", 2, Pow.class));
 			list.add(new OperatorMapperFunc("pid", 5, Pid.class));
 			list.add(new OperatorMapperFunc("pid", 7, PidMinMax.class));
 			list.add(new OperatorMapperFunc("batteryCharge", 1, BatteryCharge.class));
 			list.add(new OperatorMapperFunc("rs", 2, Rs.class));
 			list.add(new OperatorMapperFunc("rc", 2, RC.class));
 			list.add(new OperatorMapperFunc("if", 3, If.class));
+			list.add(new OperatorMapperFunc("scale", 5, Scale.class));
 			list.add(new OperatorMapperBracket());
 			staticOperatorList.put(priority++, list);
 		}
 		{
 			ArrayList<IOperatorMapper> list = new ArrayList<IOperatorMapper>();
-			// list.add(new OperatorMapperAB("^", Pow.class));
 			staticOperatorList.put(priority++, list);
 		}
 		{
@@ -94,8 +97,7 @@ public class Equation implements IValue, INBTTReady {
 	public Equation() {
 		operatorList = new HashMap<Integer, ArrayList<IOperatorMapper>>();
 		separatorList = "";
-		symboleList = new ArrayList<ISymbole>();
-		int iterationLimit = 100;
+		symbolList = new ArrayList<ISymbole>();
 	}
 
 	public void setUpDefaultOperatorAndMapper() {
@@ -116,8 +118,8 @@ public class Equation implements IValue, INBTTReady {
 		this.iterationLimit = iterationLimit;
 	}
 
-	public void addSymbole(ArrayList<ISymbole> symboleList) {
-		this.symboleList.addAll(symboleList);
+	public void addSymbol(ArrayList<ISymbole> symbolList) {
+		this.symbolList.addAll(symbolList);
 	}
     
 	public void preProcess(String exp) {
@@ -160,7 +162,7 @@ public class Equation implements IValue, INBTTReady {
 					String str = (String) o;
 					boolean find = false;
 					if (!find)
-						for (ISymbole s : symboleList) {
+						for (ISymbole s : symbolList) {
 							if (s.getName().equals(str)) {
 								list.set(idx, s);
 								find = true;
@@ -395,17 +397,6 @@ public class Equation implements IValue, INBTTReady {
 		}
 	}
 
-	public static class Pow extends OperatorAB {
-		@Override
-		public double getValue() {
-			return Math.pow(a.getValue(), b.getValue());
-		}
-
-		@Override
-		public int getRedstoneCost() {
-			return 1;
-		}
-	}
 
 	public static class Inv implements IOperator {
 		IValue a;
@@ -494,6 +485,67 @@ public class Equation implements IValue, INBTTReady {
 		@Override
 		public void setOperator(IValue[] values) {
 			this.a = values[0];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 2;
+		}
+	}
+
+	public static class Asin implements IOperator {
+		IValue a;
+
+		@Override
+		public double getValue() {
+			return Math.asin(a.getValue());
+		}
+
+		@Override
+		public void setOperator(IValue[] values) {
+			this.a = values[0];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 2;
+		}
+	}
+
+
+	public static class Acos implements IOperator {
+		IValue a;
+
+		@Override
+		public double getValue() {
+			return Math.acos(a.getValue());
+		}
+
+		@Override
+		public void setOperator(IValue[] values) {
+			this.a = values[0];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 2;
+		}
+	}
+
+
+
+	public static class Pow implements IOperator {
+		IValue a,b;
+
+		@Override
+		public double getValue() {
+			return Math.pow(a.getValue(),b.getValue());
+		}
+
+		@Override
+		public void setOperator(IValue[] values) {
+			this.a = values[0];
+			this.b = values[1];
 		}
 
 		@Override
@@ -844,8 +896,6 @@ public class Equation implements IValue, INBTTReady {
 	}
     
 	public static class If implements IOperator {
-		public double state;
-
 		public IValue condition,thenValue,elseValue;
 
 		@Override
@@ -907,6 +957,38 @@ public class Equation implements IValue, INBTTReady {
 			}
 
 			return e / eMax;
+		}
+	}
+
+	/**
+	 * Rescale input values.
+	 *
+	 * scale(X, in0, in1, out0, out1) = (X - in0) / (in1 - in0) * (out1 - out0) + out0
+	 */
+	public static class Scale implements IOperator {
+		private IValue x, in0, in1, out0, out1;
+
+		@Override
+		public void setOperator(IValue[] values) {
+			x = values[0];
+			in0 = values[1];
+			in1 = values[2];
+			out0 = values[3];
+			out1 = values[4];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 5;
+		}
+
+		@Override
+		public double getValue() {
+			double xv = x.getValue(),
+					in0v = in0.getValue(), in1v = in1.getValue(),
+					out0v = out0.getValue(), out1v = out1.getValue();
+
+			return (xv - in0v) / (in1v - in0v) * (out1v - out0v) + out0v;
 		}
 	}
     

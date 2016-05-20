@@ -1,6 +1,8 @@
 package mods.eln.sixnode.electricasensor;
 
 import mods.eln.Eln;
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -65,5 +67,10 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor {
 			list.add(tr("Can measure Voltage/Power/Current"));
 			list.add(tr("Has a signal output."));
 		}
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		return super.getFrontFromPlace(side, player).inverse();
 	}
 }

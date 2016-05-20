@@ -1,9 +1,7 @@
 package mods.eln.sixnode.electricaltimeout;
 
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.UtilsClient;
-import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -96,5 +94,10 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
 			super.renderItem(type, item, data);
 		}
 		draw(1f);
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		return super.getFrontFromPlace(side, player).right();
 	}
 }

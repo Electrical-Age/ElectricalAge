@@ -33,6 +33,8 @@ import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage.OreScan
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
+import mods.eln.mechanical.GeneratorDescriptor;
+import mods.eln.mechanical.SteamTurbineDescriptor;
 import mods.eln.misc.*;
 import mods.eln.misc.series.SerieEE;
 import mods.eln.node.NodeBlockEntity;
@@ -94,8 +96,9 @@ import mods.eln.sixnode.hub.HubDescriptor;
 import mods.eln.sixnode.lampsocket.*;
 import mods.eln.sixnode.lampsupply.LampSupplyDescriptor;
 import mods.eln.sixnode.lampsupply.LampSupplyElement;
+import mods.eln.sixnode.logicgate.*;
 import mods.eln.sixnode.modbusrtu.ModbusRtuDescriptor;
-import mods.eln.sixnode.modbusrtu.ModbusServer;
+import mods.eln.sixnode.modbusrtu.ModbusTcpServer;
 import mods.eln.sixnode.powercapacitorsix.PowerCapacitorSixDescriptor;
 import mods.eln.sixnode.powerinductorsix.PowerInductorSixDescriptor;
 import mods.eln.sixnode.powersocket.PowerSocketDescriptor;
@@ -115,6 +118,8 @@ import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import mods.eln.solver.ConstSymbole;
 import mods.eln.solver.ISymbole;
 import mods.eln.sound.SoundCommand;
+import mods.eln.transparentnode.FuelGeneratorDescriptor;
+import mods.eln.transparentnode.LargeRheostatDescriptor;
 import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
 import mods.eln.transparentnode.battery.BatteryDescriptor;
 import mods.eln.transparentnode.computercraftio.PeripheralHandler;
@@ -126,7 +131,6 @@ import mods.eln.transparentnode.electricalmachine.CompressorDescriptor;
 import mods.eln.transparentnode.electricalmachine.MaceratorDescriptor;
 import mods.eln.transparentnode.electricalmachine.MagnetizerDescriptor;
 import mods.eln.transparentnode.electricalmachine.PlateMachineDescriptor;
-import mods.eln.transparentnode.fuelgenerator.FuelGeneratorDescriptor;
 import mods.eln.transparentnode.heatfurnace.HeatFurnaceDescriptor;
 import mods.eln.transparentnode.powercapacitor.PowerCapacitorDescriptor;
 import mods.eln.transparentnode.powerinductor.PowerInductorDescriptor;
@@ -212,7 +216,7 @@ public class Eln {
 	public static GhostManagerNbt ghostManagerNbt;
 	private static NodeManager nodeManager;
 	public static PlayerManager playerManager;
-	public static ModbusServer modbusServer;
+	public static ModbusTcpServer modbusServer;
 	public static NodeManagerNbt nodeManagerNbt;
 	public static Simulator simulator = null;
 	public static DelayedTaskManager delayedTask;
@@ -283,6 +287,8 @@ public class Eln {
 	public double solarPannelPowerFactor = 1;
 	public double windTurbinePowerFactor = 1;
 	public double waterTurbinePowerFactor = 1;
+	public double fuelGeneratorPowerFactor = 1;
+	public int autominerRange = 10;
 
 	public static double cableRsFactor = 1.0;
 
@@ -364,6 +370,8 @@ public class Eln {
 		solarPannelPowerFactor = config.get("balancing", "solarPannelPowerFactor", 1).getDouble(1);
 		windTurbinePowerFactor = config.get("balancing", "windTurbinePowerFactor", 1).getDouble(1);
 		waterTurbinePowerFactor = config.get("balancing", "waterTurbinePowerFactor", 1).getDouble(1);
+		fuelGeneratorPowerFactor = config.get("balancing", "fuelGeneratorPowerFactor", 1).getDouble(1);
+		autominerRange = config.get("balancing", "autominerRange", 10, "Maximum horizontal distance from autominer that will be mined").getInt(10);
 
 		Other.ElnToIc2ConversionRatio = config.get("balancing", "ElnToIndustrialCraftConversionRatio", 1.0 / 3.0).getDouble(1.0 / 3.0);
 		Other.ElnToOcConversionRatio = config.get("balancing", "ElnToOpenComputerConversionRatio", 1.0 / 3.0 / 2.5).getDouble(1.0 / 3.0 / 2.5);
@@ -404,6 +412,9 @@ public class Eln {
 		carbonLampLife = config.get("lamp", "carbonLifeInHours", 6.0).getDouble(6.0) * 3600;
 		ledLampLife = config.get("lamp", "ledLifeInHours", 512.0).getDouble(512.0) * 3600;
 
+		fuelGeneratorTankCapacity = config.get("fuelGenerator",
+			"tankCapacityInSecondsAtNominalPower", 20 * 60).getDouble(20 * 60);
+
 		addOtherModOreToXRay = config.get("xrayscannerconfig", "addOtherModOreToXRay", true).getBoolean(true);
 		xRayScannerRange = (float) config.get("xrayscannerconfig", "rangeInBloc", 5.0).getDouble(5.0);
 		xRayScannerRange = Math.max(Math.min(xRayScannerRange, 10), 4);
@@ -413,6 +424,8 @@ public class Eln {
 		electricalInterSystemOverSampling = config.get("simulation", "electricalInterSystemOverSampling", 50).getInt(50);
 		thermalFrequency = config.get("simulation", "thermalFrequency", 400).getDouble(400);
 		cableRsFactor = config.get("simulation", "cableRsFactor", 1.0).getDouble(1.0);
+
+		wirelessTxRange = config.get("wireless", "txRange", 32).getInt();
 
 		config.save();
 
@@ -481,6 +494,7 @@ public class Eln {
 		GameRegistry.registerBlock(transparentNodeBlock, TransparentNodeItem.class, "Eln.TransparentNode");
 		GameRegistry.registerBlock(oreBlock, OreItem.class, "Eln.Ore");
 		TileEntity.addMapping(TransparentNodeEntity.class, "TransparentNodeEntity");
+		TileEntity.addMapping(TransparentNodeEntityWithFluid.class, "TransparentNodeEntityWF");
 		// TileEntity.addMapping(TransparentNodeEntityWithSiededInv.class, "TransparentNodeEntityWSI");
 		TileEntity.addMapping(SixNodeEntity.class, "SixNodeEntity");
 		TileEntity.addMapping(LightBlockEntity.class, "LightBlockEntity");
@@ -536,6 +550,7 @@ public class Eln {
 		registerElectricalGate(109);
 		registerTreeResinCollector(116);
 		registerSixNodeMisc(117);
+		registerLogicalGate(118);
 
 		//TRANSPARENT NODE REGISTRATION
 		//Sub-UID must be unique in this section only.
@@ -558,6 +573,7 @@ public class Eln {
 		registerThermalDissipatorPassiveAndActive(64);
 		registerTransparentNodeMisc(65);
 		registerTurret(66);
+		registerFuelGenerator(67);
 
 		//ITEM REGISTRATION
 		//Sub-UID must be unique in this section only.
@@ -661,6 +677,7 @@ public class Eln {
 		recipeBatteryCharger();
 		recipeTransporter();
 		recipeWindTurbine();
+		recipeFuelGenerator();
 
 		recipeGeneral();
 		recipeHeatingCorp();
@@ -913,7 +930,7 @@ public class Eln {
 
 	@EventHandler
 	public void onServerStart(FMLServerAboutToStartEvent ev) {
-		modbusServer = new ModbusServer();
+		modbusServer = new ModbusTcpServer();
 		TeleporterElement.teleporterList.clear();
 		//tileEntityDestructor.clear();
 		LightBlockEntity.observers.clear();
@@ -1015,7 +1032,7 @@ public class Eln {
 	public static final ThermalLoadInitializer sixNodeThermalLoadInitializer = new ThermalLoadInitializer(
 			cableWarmLimit, -100, cableHeatingTime, 1000);
 
-	public static final int wirelessTxRange = 32;
+	public static int wirelessTxRange = 32;
 
 	void registerElectricalCable(int id) {
 		int subId, completId;
@@ -1783,6 +1800,25 @@ public class Eln {
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
+		{
+			subId = 39;
+
+			name = TR_NAME(Type.NONE, "Large Rheostat");
+
+			ThermalDissipatorPassiveDescriptor dissipator = new ThermalDissipatorPassiveDescriptor(
+					name,
+					obj.getObj("LargeRheostat"),
+					1000, -100,// double warmLimit,double coolLimit,
+					4000, 800,// double nominalP,double nominalT,
+					10, 1// double nominalTao,double nominalConnectionDrop
+			);
+			LargeRheostatDescriptor desc = new LargeRheostatDescriptor(
+					name, dissipator, veryHighVoltageCableDescriptor, SerieEE.newE12(0)
+			);
+
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
 	}
 
 	void registerPowerComponent(int id) {
@@ -2400,6 +2436,43 @@ public class Eln {
 
 	}
 
+	private void registerLogicalGate(int id) {
+		Obj3D model = obj.getObj("LogicGates");
+		sixNodeItem.addDescriptor(0 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "NOT Chip"),model, "NOT", Not.class));
+
+		sixNodeItem.addDescriptor(1 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "AND Chip"), model, "AND", And.class));
+		sixNodeItem.addDescriptor(2 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "NAND Chip"), model, "NAND", Nand.class));
+
+		sixNodeItem.addDescriptor(3 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "OR Chip"), model, "OR", Or.class));
+		sixNodeItem.addDescriptor(4 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "NOR Chip"), model, "NOR", Nor.class));
+
+		sixNodeItem.addDescriptor(5 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "XOR Chip"), model, "XOR", Xor.class));
+		sixNodeItem.addDescriptor(6 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "XNOR Chip"), model, "XNOR", XNor.class));
+
+		sixNodeItem.addDescriptor(7 + (id << 6),
+			new PalDescriptor(TR_NAME(Type.NONE, "PAL Chip"), model));
+
+		sixNodeItem.addDescriptor(8 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "Schmitt Trigger Chip"), model, "SCHMITT",
+				SchmittTrigger.class));
+
+		sixNodeItem.addDescriptor(9 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "D Flip Flop Chip"), model, "DFF", DFlipFlop.class));
+
+		sixNodeItem.addDescriptor(10 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "Oscillator Chip"), model, "OSC", Oscillator.class));
+
+		sixNodeItem.addDescriptor(11 + (id << 6),
+			new LogicGateDescriptor(TR_NAME(Type.NONE, "JK Flip Flop Chip"), model, "JKFF", JKFlipFlop.class));
+	}
+
 	void registerTransformer(int id) {
 		int subId, completId;
 		String name;
@@ -2507,6 +2580,30 @@ public class Eln {
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
+		{
+			subId = 9;
+			SteamTurbineDescriptor desc = new SteamTurbineDescriptor(
+					TR_NAME(Type.NONE, "Steam Turbine"),
+					obj.getObj("Turbine")
+			);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 10;
+			float nominalRads = 800, nominalU = 3200;
+			float nominalP = 4000;
+			GeneratorDescriptor desc = new GeneratorDescriptor(
+					TR_NAME(Type.NONE, "Generator"),
+					obj.getObj("Generator"),
+					highVoltageCableDescriptor,
+					nominalRads, nominalU,
+					nominalP / (nominalU / 25),
+					nominalP,
+					sixNodeThermalLoadInitializer.copy()
+			);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
 	}
 
 	/*
@@ -3756,6 +3853,27 @@ public class Eln {
 
 	}
 
+	private double fuelGeneratorTankCapacity = 20 * 60;
+
+	void registerFuelGenerator(int id) {
+		int subId;
+		{
+			subId = 1;
+			FuelGeneratorDescriptor descriptor =
+				new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "50V Fuel Generator"), obj.getObj("FuelGenerator50V"),
+					lowVoltageCableDescriptor, fuelGeneratorPowerFactor * 300, LVU * 1.05, fuelGeneratorTankCapacity);
+			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+		}
+		{
+			subId = 2;
+			FuelGeneratorDescriptor descriptor =
+				new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "200V Fuel Generator"), obj.getObj("FuelGenerator200V"),
+					meduimVoltageCableDescriptor, fuelGeneratorPowerFactor * 1500, MVU * 1.05,
+					fuelGeneratorTankCapacity);
+			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+		}
+	}
+
 	void registerThermalDissipatorPassiveAndActive(int id) {
 		int subId, completId;
 		String name;
@@ -3885,7 +4003,7 @@ public class Eln {
 			int subId = 0;
 			String name = TR_NAME(Type.NONE, "800V Defence Turret");
 
-			TurretDescriptor desc = new TurretDescriptor(name, "Turret", "Defence turret");
+			TurretDescriptor desc = new TurretDescriptor(name, "Turret");
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -4916,6 +5034,15 @@ public class Eln {
 				Character.valueOf('c'), findItemStack("Copper Cable"),
 				Character.valueOf('P'), "plateCopper");
 
+		addRecipe(findItemStack("Large Rheostat"),
+				"   ",
+				" D ",
+				"CRC",
+				Character.valueOf('R'), findItemStack("Rheostat"),
+				Character.valueOf('C'), findItemStack("Copper Thermal Cable"),
+				Character.valueOf('D'), findItemStack("Small Passive Thermal Dissipator")
+				);
+
 		//name = "Power Capacitor"
 		//name = "Power Inductor"
 
@@ -5095,7 +5222,23 @@ public class Eln {
 				Character.valueOf('E'), findItemStack("Medium Voltage Cable"),
 				Character.valueOf('H'), findItemStack("Copper Thermal Cable"),
 				Character.valueOf('m'), findItemStack("Advanced Electrical Motor"));
-
+		addRecipe(findItemStack("Generator"),
+				"mmm",
+				"ama",
+				" ME",
+				Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
+				Character.valueOf('M'), findItemStack("Advanced Machine Block"),
+				Character.valueOf('a'), "ingotAluminum",
+				Character.valueOf('E'), findItemStack("High Voltage Cable")
+		);
+		addRecipe(findItemStack("Steam Turbine"),
+				" a ",
+				"aAa",
+				" M ",
+				Character.valueOf('a'), "ingotAluminum",
+				Character.valueOf('A'), "blockAluminum",
+				Character.valueOf('M'), findItemStack("Advanced Machine Block")
+		);
 	}
 
 	void recipeBattery() {
@@ -5240,6 +5383,28 @@ public class Eln {
 				Character.valueOf('B'), findItemStack("Machine Block"),
 				Character.valueOf('M'), findItemStack("Electrical Motor"));
 
+	}
+
+	void recipeFuelGenerator() {
+		addRecipe(findItemStack("50V Fuel Generator"),
+			"III",
+			" BA",
+			"CMC",
+			Character.valueOf('I'), "plateIron",
+			Character.valueOf('B'), findItemStack("Machine Block"),
+			Character.valueOf('A'), findItemStack("Analogic Regulator"),
+			Character.valueOf('C'), findItemStack("Low Voltage Cable"),
+			Character.valueOf('M'), findItemStack("Electrical Motor"));
+
+		addRecipe(findItemStack("200V Fuel Generator"),
+			"III",
+			" BA",
+			"CMC",
+			Character.valueOf('I'), "plateIron",
+			Character.valueOf('B'), findItemStack("Advanced Machine Block"),
+			Character.valueOf('A'), findItemStack("Analogic Regulator"),
+			Character.valueOf('C'), findItemStack("Medium Voltage Cable"),
+			Character.valueOf('M'), findItemStack("Advanced Electrical Motor"));
 	}
 
 	void recipeSolarPannel() {
@@ -6616,15 +6781,6 @@ public class Eln {
 
 	// Registers WIP items.
 	void registerWipItems() {
-		int id = 255;
-		int subId;
-		{
-			subId = 1;
-			FuelGeneratorDescriptor descriptor =
-					new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "Fuel Generator"), obj.getObj("FuelGenerator"),
-							lowVoltageCableDescriptor, 200, LVU * 1.18,  "eln:water_turbine", 1f);
-			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
-		}
 	}
 
 	public void regenOreScannerFactors() {

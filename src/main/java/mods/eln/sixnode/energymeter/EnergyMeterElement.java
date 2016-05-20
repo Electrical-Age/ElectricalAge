@@ -1,10 +1,5 @@
 package mods.eln.sixnode.energymeter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -28,6 +23,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class EnergyMeterElement extends SixNodeElement {
 
@@ -68,7 +68,6 @@ public class EnergyMeterElement extends SixNodeElement {
 
 	public EnergyMeterElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-		front = LRDU.Up;
 		shunt.mustUseUltraImpedance();
 
 		electricalLoadList.add(aLoad);

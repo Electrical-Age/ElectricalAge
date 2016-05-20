@@ -1,18 +1,9 @@
 package mods.eln.node.transparent;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-
 import mods.eln.Eln;
 import mods.eln.ghost.GhostObserver;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.INBTTReady;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.Utils;
+import mods.eln.misc.*;
+import mods.eln.node.Publishable;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalConnection;
@@ -31,8 +22,15 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.IFluidHandler;
 
-public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+
+public abstract class TransparentNodeElement implements  GhostObserver, IPlayer, Publishable {
 
 	public ArrayList<IProcess> slowProcessList  = new ArrayList<IProcess>(4);
 
@@ -48,6 +46,7 @@ public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
 	public static final byte unserializeGroundedId = -127;
 	public static final byte unserializeNulldId = -128;
 	TransparentNodeDescriptor transparentNodeDescriptor;
+
 	protected void serialiseItemStack(DataOutputStream stream,ItemStack stack) throws IOException
 	{
 		Utils.serialiseItemStack(stream,stack);
@@ -175,16 +174,18 @@ public abstract class TransparentNodeElement implements  GhostObserver,IPlayer{
 		return null;
 	}
 
-	public TransparentNodeElement(TransparentNode transparentNode,TransparentNodeDescriptor descriptor)
+	public TransparentNodeElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor)
 	{
 		this.node = transparentNode;
 		this.transparentNodeDescriptor = descriptor;
 		if(descriptor.hasGhostGroup())Eln.ghostManager.addObserver(this);
 	}
-	
 
-	
-	
+	public IFluidHandler getFluidHandler() {
+		return null;
+	}
+
+
 	public void onNeighborBlockChange() 
 	{
 		checkCanStay(false);

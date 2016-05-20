@@ -1,9 +1,5 @@
 package mods.eln.sixnode.thermalsensor;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -25,6 +21,10 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class ThermalSensorElement extends SixNodeElement {
 
     public ThermalSensorDescriptor descriptor;
@@ -35,7 +35,6 @@ public class ThermalSensorElement extends SixNodeElement {
     public ThermalSensorProcess slowProcess = new ThermalSensorProcess(this);
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
-    LRDU front;
 
     static final byte powerType = 0, temperatureType = 1;
     int typeOfSensor = temperatureType;
@@ -46,7 +45,6 @@ public class ThermalSensorElement extends SixNodeElement {
     
 	public ThermalSensorElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-		front = LRDU.Left;
 		thermalLoadList.add(thermalLoad);
 		electricalLoadList.add(outputGate);
 		electricalComponentList.add(outputGateProcess);

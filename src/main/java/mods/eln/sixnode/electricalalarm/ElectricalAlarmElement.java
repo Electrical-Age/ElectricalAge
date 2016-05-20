@@ -1,9 +1,5 @@
 package mods.eln.sixnode.electricalalarm;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -18,13 +14,16 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class ElectricalAlarmElement extends SixNodeElement {
 
 	ElectricalAlarmDescriptor descriptor;
 
     public NbtElectricalGateInput inputGate = new NbtElectricalGateInput("inputGate");
     public ElectricalAlarmSlowProcess slowProcess = new ElectricalAlarmSlowProcess(this);
-    LRDU front;
 
     boolean warm = false;
 
@@ -34,8 +33,7 @@ public class ElectricalAlarmElement extends SixNodeElement {
 
     public ElectricalAlarmElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
-		front = LRDU.Down;
-    	electricalLoadList.add(inputGate);
+		electricalLoadList.add(inputGate);
     	slowProcessList.add(slowProcess);
     	this.descriptor = (ElectricalAlarmDescriptor) descriptor;
 	}

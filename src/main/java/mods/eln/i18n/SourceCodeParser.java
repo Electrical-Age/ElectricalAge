@@ -87,8 +87,9 @@ class SourceCodeParser {
         }
     }
 
-    private static void parseKotlinFile(final File file, final Map<String, Set<TranslationItem>> strings) {
-        throw new UnsupportedOperationException();
+    private static void parseKotlinFile(final File file, final Map<String, Set<TranslationItem>> strings) throws IOException {
+        // TODO: This is unlikely to work perfectly. It'll do for now.
+        parseJavaFile(file, strings);
     }
 
     private static boolean isStringAlreadyPresent(final TranslationItem string,

@@ -102,9 +102,8 @@ public class LampSupplyElement extends SixNodeElement {
 
 		electricalLoadList.add(powerLoad);
 		slowProcessList.add(lampSupplySlowProcess);
-		front = LRDU.Down;
 
-
+		
 		slowProcessList.add(voltageWatchdog);
 		voltageWatchdog
 		 .set(powerLoad)

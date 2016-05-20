@@ -68,7 +68,6 @@ public class PowerSocketElement extends SixNodeElement {
 		electricalComponentList.add(loadResistor);
 		slowProcessList.add(PowerSocketSlowProcess);
 		loadResistor.highImpedance();
-		front = LRDU.Down;
 		this.descriptor = (PowerSocketDescriptor) descriptor;
 
 		slowProcessList.add(voltageWatchdog);

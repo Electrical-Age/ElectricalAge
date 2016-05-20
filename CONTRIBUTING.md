@@ -9,51 +9,66 @@ Did you found a bug or do you have an idea how to improve the mod? We are happy 
 - [IRC Channel](https://qchat.rizon.net/?channels=electricalage)
 - [Bug Tracker](https://github.com/Electrical-Age/ElectricalAge/issues)
 
-Contributions via [pull request](https://github.com/Electrical-Age/ElectricalAge/pulls), and [bug reports](https://github.com/Electrical-Age/ElectricalAge/issues) are welcome! Please submit your pull request to the `1.7.10-MNA` branch and use the GitHub issue tracker to report issues.
+Contributions via [pull request](https://github.com/Electrical-Age/ElectricalAge/pulls),
+and [bug reports](https://github.com/Electrical-Age/ElectricalAge/issues) are welcome!
+Please submit your pull request to the `develop` branch and use the GitHub issue tracker to report issues.
 
 ### Translations
 
 Is the mod not available in your language or are some translations missing?
 Well you can change that by adding or modifying a translation:
 
-- First you need to [Download](https://github.com/Electrical-Age/ElectricalAge/archive/1.7.10-MNA.zip)
-or clone the Electrical Age source code:  
-```sh
-git clone https://github.com/Electrical-Age/ElectricalAge.git
-```
-
-- Create the new language file:  
-If you add a new translation, create a new language file In the folder
-*ElectricalAge/src/main/resources/assets/eln/lang* by using the UTF language symbol as the name of the file and the
-file extension *.lang*. So for example the language file name for German would be *de_DE.lang*. This step is not
-required if the language file already exists.
-
-- Fill or update the language file:  
-You need first to populate the language file with the actual strings to translate. There is a gradle task for that:
-In the root folder (ElectricalAge), run the following gradle task:  
-```sh
-gradle updateMasterLanguageFile
-```
-
-Use `./gradlew` or `gradlew` in place of gradle if you do not have gradle installed.
-
-- Add the actual translations:  
-Using the text editor of you choice, you can now add translations to the file. The format is rather simple:  
-
-```
-#<ELN_LANGFILE_V1_1>
-
-# ./src/main/java/mods/eln/Eln.java
-mod.meta.desc=<TRANSLATION>
-
-# ./src/main/java/mods/eln/misc/UtilsClient.java
-hold shift=<TRANSLATION>
-```
+We use Transifex as localization platform. Create an account and ask to join the
+[ELN Team](https://www.transifex.com/electrical-age/eln/) on Transifex to translate the mod into your language. No
+coding skills are required at all.
 
 Some translation strings might contain placeholders for runtime arguments in order to include numbers or other runtime
 objects into the sentence. These are identified by **%N$** whereas *N* is the number of the argument in the argument
 list (at runtime). A translation string should include these placeholders too at the appropriate position in the text.
 
-- Contribute the translation file:  
-You can either create a pull request with the new language file or just create an issue with the new language file as
-attachment in order to make the translation available to everyone.
+# Development
+
+The default branch for the Electrical Age source repository on github is **"master"**, while there is another important
+branch called **"develop"**. Each of them serves his own purpose.
+
+### master branch
+The **"master"** branch is a stable branch, and gets updated only on releases. Whenever people checkout the **"master"**
+branch, they get the source code of the latest release of the Electrical Age mod.
+
+### develop branch
+The **"develop"** branch, is where commits during development are integrated into. It is where the Electrical Age team
+pushes or merges their actual changes together and where contributions from the community (Pull requests) are
+integrated into the development version of the mod. Anyone who wish to try the cutting edge version of Electrical Age
+can download the develop branch and build the mod himself.
+
+Pull requests are always merged into the **"develop"** branch. If you are willing to contribute, make sure sending us
+pull requests against the develop branch but not the *master* branch. Attention, **"develop"** is not the default branch
+on github, so you need to pull and checkout the development branch before atually starting your development.
+
+
+### GIT Flow
+They are named *master* and *develop* because most of the core developers adapt the git flow convention when working
+on Electrical Age. When working on a feature that is likely taking quite some time to finish, a local feature branch is
+created, and not necessarily pushed to the github. This way, when there are pending pull requests, they do not have to
+wait too long, since they can be merged into develop branch first.
+
+An introduction of git-flow can be found [here](http://nvie.com/posts/a-successful-git-branching-model/) or
+[here](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).
+
+You do not necessarily have to adopt git-flow for yourself in order to contribute to the mod, as long as your changes
+ use the branch **"develop"** as a base and the pull request is against the **"development"** branch, we will be able
+  to integrate your changes easily.
+
+#### In short for EA:
+
+- Features get developed on **feature branches**, either in your local repository or pushed to github. Feature branches
+can be rebased.
+- Once ready, **feature branches** are PR'd to **develop**.
+- When the EA team wants to make a release, **develop** is branched into a **release branch**. Any necessary
+stabilization works happen there; **develop** is never frozen, and efforts to PR in **feature branches** should not
+stop just because a release is happening.
+- When a release is made, the **release branch** is pushed to **master** and **master** is tagged at that point.
+- If hotfixes need to be made, then they can be made on the **release branch**. Anything that also applies to the
+**development branch** is first committed there, then cherry-picked to the **release branch**. The **release branch**
+is then pushed to **master** (again), and tagged (again), going from e.g. 0.52.0 to 0.52.1.
+- **develop**, **master** and the **release branches** are all protected; no rebasing happens there.

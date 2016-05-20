@@ -38,8 +38,9 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     int workY;
 
     boolean oneJobDone = true;
+	boolean silkTouch = false;
 
-    enum jobType {none, done, full, chestFull, ore, pipeAdd, pipeRemove}
+	enum jobType {none, done, full, chestFull, ore, pipeAdd, pipeRemove}
 
     jobType job = jobType.none, oldJob = jobType.none;
     Coordonate jobCoord = new Coordonate();
@@ -48,8 +49,6 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     double oreRand = Math.random();
 
     int drillCount = 1;
-
-    public static final int scannerRadiusStatic = 10;
 
     public AutoMinerSlowProcess(AutoMinerElement autoMiner) {
 		this.miner = autoMiner;
@@ -65,7 +64,11 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 			}
 		};
 	}
-    
+
+	void toggleSilkTouch() {
+		silkTouch = !silkTouch;
+	}
+
 	boolean isReadyToDrill() {
 		ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
 		if (drill == null) return false;
@@ -116,13 +119,24 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         //
                         Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
                         int meta = jobCoord.world().getBlockMetadata(jobCoord.x, jobCoord.y, jobCoord.z);
-                        List<ItemStack> drop = block.getDrops(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0);
+						if (silkTouch) {
+							drop(new ItemStack(block, 1, meta));
+						} else {
+							List<ItemStack> drop = block.getDrops(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0);
 
-                        for (ItemStack stack : drop) {
-                            drop(stack);
-                        }
+							for (ItemStack stack : drop) {
+								drop(stack);
+							}
+						}
 
-                        jobCoord.world().setBlockToAir(jobCoord.x, jobCoord.y, jobCoord.z);
+						// Use cobblestone instead of air, everywhere except the mining shaft.
+						// This is so mobs won't spawn excessively.
+						int xDist = jobCoord.x - miner.node.coordonate.x, zDist = jobCoord.z - miner.node.coordonate.z;
+						if (xDist * xDist + zDist * zDist > 25) {
+							jobCoord.world().setBlock(jobCoord.x, jobCoord.y, jobCoord.z, Blocks.cobblestone);
+						} else {
+							jobCoord.world().setBlockToAir(jobCoord.x, jobCoord.y, jobCoord.z);
+						}
 
                         energyCounter -= energyTarget;
                         oreRand = Math.random();
@@ -172,6 +186,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                 } else {
                     // double p = drill.nominalPower + (scanner != null ? scanner.OperationEnergy/drill.operationTime : 0);
                     double p = drill.nominalPower;
+					if (silkTouch) p *= 3;
                     miner.powerResistor.setR(Math.pow(miner.descriptor.nominalVoltage, 2.0) / p);
                 }
                 break;
@@ -265,7 +280,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 		// OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.OreScannerSlotId));
 		MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
 
-		int scannerRadius = scannerRadiusStatic;
+		int scannerRadius = Eln.instance.autominerRange;
 		double scannerEnergy = 0;
 
 		jobCoord.dimention = miner.node.coordonate.dimention;
@@ -311,7 +326,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 						double dx = jobCoord.x - miner.node.coordonate.x;
 						double dy = 0;
 						double dz = jobCoord.z - miner.node.coordonate.z;
-						double distance = Math.sqrt(dx * dx + dy * dy + dz * dz) * (1);
+						double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 						Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
 						if (checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(block))) {
 							jobFind = true;
@@ -355,6 +370,8 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 		switch (job) {
             case ore:
                 energyTarget = drill.OperationEnergy + scannerEnergy;
+				// Copied from Mekanism. Note that the power demand is tripled, so in effect this doubles time.
+				if (silkTouch) energyTarget *= 6;
                 break;
             case pipeAdd:
                 energyTarget = miner.descriptor.pipeOperationEnergy;

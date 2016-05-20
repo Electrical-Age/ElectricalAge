@@ -21,7 +21,11 @@ public class ElectricalLightSensorRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
 		drawSignalPin(front.right(),descriptor.pinDistance);
-		
+
+		if (side.isY()) {
+			front.glRotateOnX();
+		}
+
 		descriptor.draw();
 	}
 

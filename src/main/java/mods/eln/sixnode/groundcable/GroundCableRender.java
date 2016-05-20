@@ -1,8 +1,5 @@
 package mods.eln.sixnode.groundcable;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
@@ -15,6 +12,9 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class GroundCableRender extends SixNodeElementRender{
 
@@ -35,7 +35,11 @@ public class GroundCableRender extends SixNodeElementRender{
 	@Override
 	public void draw() {
 		super.draw();
-		
+
+		if (side.isY()) {
+			front.glRotateOnX();
+		}
+
 		descriptor.draw();			
 	}
 

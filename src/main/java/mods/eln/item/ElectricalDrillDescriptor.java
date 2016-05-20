@@ -11,7 +11,8 @@ import static mods.eln.i18n.I18N.tr;
 public class ElectricalDrillDescriptor extends GenericItemUsingDamageDescriptorUpgrade {
 
 	public double nominalPower;
-	public double operationTime, OperationEnergy;
+	public double operationTime;
+	public double OperationEnergy;
 
 	public ElectricalDrillDescriptor(String name, double operationTime, double operationEnergy) {
 		super(name);

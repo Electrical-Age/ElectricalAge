@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalgatesource;
 
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
@@ -83,5 +85,10 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 		} else {
 			super.renderItem(type, item, data);
 		}
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		return super.getFrontFromPlace(side, player).inverse();
 	}
 }

@@ -29,6 +29,8 @@ public class ElectricalSourceRender extends SixNodeElementRender {
 	public void draw() {
 		super.draw();
 
+		front.glRotateOnX();
+
 		descriptor.draw(voltage >= 25);
 	}
 

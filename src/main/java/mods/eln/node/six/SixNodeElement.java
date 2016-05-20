@@ -1,22 +1,9 @@
 package mods.eln.node.six;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import cpw.mods.fml.common.registry.LanguageRegistry;
-
 import mods.eln.Eln;
 import mods.eln.ghost.GhostObserver;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.INBTTReady;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.Utils;
-import mods.eln.sim.ElectricalConnection;
+import mods.eln.misc.*;
+import mods.eln.node.Publishable;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalConnection;
@@ -26,17 +13,20 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtThermalLoad;
 import mods.eln.sound.IPlayer;
 import mods.eln.sound.SoundCommand;
-import mods.eln.sound.SoundServer;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 
-public abstract class SixNodeElement implements GhostObserver, IPlayer {
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+
+public abstract class SixNodeElement implements GhostObserver, IPlayer, Publishable {
 	//private static Class[] idToClass = new Class[256];
 	//private static Class[] idToRenderClass = new Class[256];
 

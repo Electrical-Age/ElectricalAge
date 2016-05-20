@@ -1,10 +1,7 @@
 package mods.eln.transparentnode.turret;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import mods.eln.Eln;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -17,11 +14,15 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtResistor;
-import mods.eln.sound.SoundCommand;
+import mods.eln.sixnode.lampsocket.LightBlockEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class TurretElement extends TransparentNodeElement {
 
@@ -85,6 +86,10 @@ public class TurretElement extends TransparentNodeElement {
 	}
 	
 	public void shoot() {
+		Coordonate lightSourceCoordinate = new Coordonate();
+		lightSourceCoordinate.copyFrom(coordonate());
+		lightSourceCoordinate.move(front);
+		LightBlockEntity.addLight(lightSourceCoordinate, 25, 2);
 		if (simulation.shoot()) needPublish();
 	}
 	

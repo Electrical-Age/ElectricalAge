@@ -1,6 +1,5 @@
 package mods.eln.sixnode.lampsocket;
 
-import mods.eln.misc.Color;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;

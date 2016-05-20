@@ -1,5 +1,6 @@
 package mods.eln.transparentnode.autominer;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,10 +10,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.transparent.TransparentNode;
-import mods.eln.node.transparent.TransparentNodeDescriptor;
-import mods.eln.node.transparent.TransparentNodeElement;
-import mods.eln.node.transparent.TransparentNodeElementInventory;
+import mods.eln.node.transparent.*;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
@@ -45,9 +43,12 @@ public class AutoMinerElement extends TransparentNodeElement  {
 
     boolean powerOk = false;
 
+	// Network IDs.
     public static final byte pushLogId = 1;
+	public static final byte toggleSilkTouch = 2;
 
-    public AutoMinerElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
+
+	public AutoMinerElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		this.descriptor = (AutoMinerDescriptor) descriptor;
 		electricalLoadList.add(inPowerLoad);
@@ -163,6 +164,7 @@ public class AutoMinerElement extends TransparentNodeElement  {
 			stream.writeShort(slowProcess.pipeLength);
 			stream.writeByte(slowProcess.job.ordinal());
 			stream.writeBoolean(powerOk);
+			stream.writeBoolean(slowProcess.silkTouch);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -178,15 +180,31 @@ public class AutoMinerElement extends TransparentNodeElement  {
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
 		nbt.setBoolean("powerOk", powerOk);
+		nbt.setBoolean("silkTouch", slowProcess.silkTouch);
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 		powerOk = nbt.getBoolean("powerOk");
+		slowProcess.silkTouch = nbt.getBoolean("silkTouch");
 	}
 
 	void pushLog(String log){
 		sendStringToAllClient(pushLogId, log);
+	}
+
+	@Override
+	public byte networkUnserialize(DataInputStream stream) {
+		byte packetType = super.networkUnserialize(stream);
+		switch (packetType) {
+			case toggleSilkTouch:
+				slowProcess.toggleSilkTouch();
+				needPublish();
+				break;
+			default:
+				return packetType;
+		}
+		return unserializeNulldId;
 	}
 }

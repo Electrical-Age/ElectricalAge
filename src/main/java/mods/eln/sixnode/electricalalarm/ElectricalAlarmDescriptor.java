@@ -112,4 +112,9 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
         Collections.addAll(list, tr("Emits an acoustic alarm if\nthe input signal is high").split("\n"));
         list.add(tr(""));
     }
+
+    @Override
+    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+        return super.getFrontFromPlace(side, player).inverse();
+    }
 }

@@ -1,18 +1,7 @@
 package mods.eln.misc;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.relauncher.Side;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.generic.GenericItemUsingDamage;
@@ -31,7 +20,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.item.crafting.IRecipe;
@@ -55,11 +43,15 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
-
 import org.lwjgl.opengl.GL11;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
+import java.io.*;
+import java.lang.reflect.Field;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 public class Utils {
 
@@ -289,6 +281,16 @@ public class Utils {
 		if (!header.equals(""))
 			header += " ";
 		return header + plotValue(value, "J  ");
+	}
+
+	public static String plotRads(String header, double value) {
+		if (!header.equals(""))
+			header += " ";
+		return header + plotValue(value, "rad/s ");
+	}
+
+	public static String plotER(double E, double R) {
+		return plotEnergy("E", E) + plotRads("R", R);
 	}
 
 	public static String plotPower(String header, double value) {
@@ -1395,6 +1397,10 @@ public class Utils {
 	}
 
 	public static float limit(float value, float min, float max) {
+		return Math.max(Math.min(value, max), min);
+	}
+
+	public static double limit(double value, double min, double max) {
 		return Math.max(Math.min(value, max), min);
 	}
 

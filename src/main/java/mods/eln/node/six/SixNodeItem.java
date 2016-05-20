@@ -132,7 +132,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 
                 SixNode sixNode = new SixNode();
                 sixNode.onBlockPlacedBy(new Coordonate(x, y, z, world), direction, player, stack);
-                sixNode.createSubBlock(stack, direction);
+                sixNode.createSubBlock(stack, direction, player);
 
                 world.setBlock(x, y, z, block, metadata, 0x03);
                 block.getIfOtherBlockIsSolid(world, x, y, z, direction);
@@ -148,7 +148,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
                 return false;
             }
             if (sixNode.getSideEnable(direction) == false && block.getIfOtherBlockIsSolid(world, x, y, z, direction)) {
-                sixNode.createSubBlock(stack, direction);
+                sixNode.createSubBlock(stack, direction, player);
                 block.onBlockPlacedBy(world, x, y, z, Direction.fromIntMinecraftSide(side).getInverse(), player, metadata);
                 return true;
             }

@@ -1,11 +1,5 @@
 package mods.eln.sixnode.wirelesssignal.source;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -22,6 +16,12 @@ import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement.LightningGlitc
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class WirelessSignalSourceElement extends SixNodeElement implements IWirelessSignalTx {
     
@@ -40,7 +40,6 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
     public WirelessSignalSourceElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 
-		front = LRDU.Down;
 		this.descriptor = (WirelessSignalSourceDescriptor) descriptor;
 		WirelessSignalTxElement.channelRegister(this);
 		slowProcessList.add(lightningGlitchProcess = new LightningGlitchProcess(getCoordonate()));

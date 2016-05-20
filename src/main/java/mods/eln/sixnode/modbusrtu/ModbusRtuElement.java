@@ -1,13 +1,5 @@
 package mods.eln.sixnode.modbusrtu;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -28,10 +20,15 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 
-import com.serotonin.modbus4j.ProcessImage;
-import com.serotonin.modbus4j.exception.IllegalDataAddressException;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
-public class ModbusRtuElement extends SixNodeElement implements ProcessImage {
+public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
 
 	public NbtElectricalGateInputOutput[] ioGate = new NbtElectricalGateInputOutput[4];
 	public NbtElectricalGateOutputProcess[] ioGateProcess = new NbtElectricalGateOutputProcess[4];
@@ -173,7 +170,16 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage {
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		return false;
+		if (Utils.isPlayerUsingWrench(entityPlayer)) {
+			if (side.isY()) {
+				front = front.getNextClockwise();
+				sixNode.reconnect();
+				sixNode.setNeedPublish(true);
+			}
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@Override
@@ -505,41 +511,24 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage {
 	}
 
 	@Override
-	public boolean getCoil(int id) throws IllegalDataAddressException {
+	public boolean getCoil(int id) throws IllegalAddressException {
 		IModbusSlot slot = getModbusSlot(id);
 		id -= slot.getOffset();
 		return slot.getCoil(id);
 	}
 
 	@Override
-	public byte getExceptionStatus() {
-		return 0;
-	}
-
-	@Override
-	public short getHoldingRegister(int id) throws IllegalDataAddressException {
-		IModbusSlot slot = getModbusSlot(id);
-		id -= slot.getOffset();
-		return slot.getHoldingRegister(id);
-	}
-
-	@Override
-	public boolean getInput(int id) throws IllegalDataAddressException {
+	public boolean getInput(int id) throws IllegalAddressException {
 		IModbusSlot slot = getModbusSlot(id);
 		id -= slot.getOffset();
 		return slot.getInput(id);
 	}
 
 	@Override
-	public short getInputRegister(int id) throws IllegalDataAddressException {
+	public short getInputRegister(int id) throws IllegalAddressException {
 		IModbusSlot slot = getModbusSlot(id);
 		id -= slot.getOffset();
 		return slot.getInputRegister(id);
-	}
-
-	@Override
-	public byte[] getReportSlaveIdData() {
-		return null;
 	}
 
 	@Override
@@ -559,33 +548,5 @@ public class ModbusRtuElement extends SixNodeElement implements ProcessImage {
 		IModbusSlot slot = getModbusSlot(id);
 		id -= slot.getOffset();
 		slot.setHoldingRegister(id, value);
-	}
-
-	@Override
-	public void setInput(int id, boolean value) {
-		IModbusSlot slot = getModbusSlot(id);
-		id -= slot.getOffset();
-		slot.setInput(id, value);
-	}
-
-	@Override
-	public void setInputRegister(int id, short value) {
-		IModbusSlot slot = getModbusSlot(id);
-		id -= slot.getOffset();
-		slot.setInputRegister(id, value);
-	}
-
-	@Override
-	public void writeCoil(int id, boolean value) throws IllegalDataAddressException {
-		IModbusSlot slot = getModbusSlot(id);
-		id -= slot.getOffset();
-		slot.writeCoil(id, value);
-	}
-
-	@Override
-	public void writeHoldingRegister(int id, short value) throws IllegalDataAddressException {
-		IModbusSlot slot = getModbusSlot(id);
-		id -= slot.getOffset();
-		slot.writeHoldingRegister(id, value);
 	}
 }

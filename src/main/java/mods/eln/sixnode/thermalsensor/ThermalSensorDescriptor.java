@@ -1,5 +1,7 @@
 package mods.eln.sixnode.thermalsensor;
 
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
@@ -59,5 +61,10 @@ public class ThermalSensorDescriptor extends SixNodeDescriptor {
 	void draw(boolean renderAdapter) {
 		if (main != null) main.draw();
         if (renderAdapter && adapter != null) adapter.draw();
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		return super.getFrontFromPlace(side, player).inverse();
 	}
 }

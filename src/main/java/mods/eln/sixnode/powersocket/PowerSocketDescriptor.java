@@ -1,5 +1,7 @@
 package mods.eln.sixnode.powersocket;
 
+import mods.eln.misc.Direction;
+import mods.eln.misc.LRDU;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.VoltageLevelColor;
@@ -93,5 +95,10 @@ public class PowerSocketDescriptor extends SixNodeDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		Collections.addAll(list, tr("Supplies any device\nplugged in with energy.").split("\n"));
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		return LRDU.Down;
 	}
 }

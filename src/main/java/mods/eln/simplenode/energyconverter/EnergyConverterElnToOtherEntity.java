@@ -112,6 +112,7 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 	// @Override
 	public int getSourceTier() {
 		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) getNode();
+		if (node == null) return 0;
 		return node.descriptor.ic2.tier;
 	}
 
@@ -193,8 +194,8 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 		if (getNode() == null)
 			return 0;
 		EnergyConverterElnToOtherNode node = (EnergyConverterElnToOtherNode) getNode();
-        int extract = (int) Math.min(maxExtract, node.getOtherModEnergyBuffer(Other.getElnToTeConversionRatio()));
-		if (simulate)
+        int extract = Math.max(0, Math.min(maxExtract, (int)node.getOtherModEnergyBuffer(Other.getElnToTeConversionRatio())));
+		if (!simulate)
 			node.drawEnergy(extract, Other.getElnToTeConversionRatio());
 
 		return extract;

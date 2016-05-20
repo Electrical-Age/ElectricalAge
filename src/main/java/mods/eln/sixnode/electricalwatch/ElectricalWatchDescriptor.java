@@ -1,9 +1,7 @@
 package mods.eln.sixnode.electricalwatch;
 
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.UtilsClient;
-import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -139,5 +137,10 @@ public class ElectricalWatchDescriptor extends SixNodeDescriptor {
 			GL11.glRotatef(90, 1, 0, 0);
 			draw(0.1f, 0.2f, true);
 		}
+	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		return super.getFrontFromPlace(side, player).left();
 	}
 }

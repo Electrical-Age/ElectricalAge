@@ -1,4 +1,5 @@
 buildscript {
+    ext.kotlin_version = '1.0.1-2'
     repositories {
         mavenCentral()
         maven {
@@ -15,9 +16,11 @@ buildscript {
         classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
         classpath 'de.undercouch:gradle-download-task:1.2'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
+apply plugin: 'kotlin'
 apply plugin: 'forge'
 apply plugin: 'de.undercouch.download'
 apply plugin: 'java'
@@ -38,11 +41,12 @@ sourceSets {
         java.srcDirs = ['src/main/java']
         resources.srcDirs = ['src/main/resources']
         resources.excludes = ['*']
+        kotlin.srcDirs = ['src/main/java']
     }
 }
 
 minecraft {
-    version = "1.7.10-10.13.2.1291"
+    version = "1.7.10-10.13.4.1566-1.7.10"
     runDir = "run"
 
     srgExtra "PK: org/apache/commons/math3 mods/eln/libs/org/apache/commons/math3"
@@ -55,8 +59,14 @@ configurations {
     compile.extendsFrom external
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
-    external files("libs/commons-math3-3.3.jar", "libs/modbus4J.jar", "libs/seroUtils.jar")
+    external files("libs/commons-math3-3.3.jar")
+    external "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
+    external "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
 jar {
@@ -234,3 +244,5 @@ bintray {
         }
     }
 }
+
+idea { module { inheritOutputDirs = true } }

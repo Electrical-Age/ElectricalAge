@@ -1,22 +1,14 @@
 package mods.eln.transparentnode.powerinductor;
 
 import java.io.DataInputStream;
-import java.io.IOException;
 
-import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.transparent.TransparentNode;
-import mods.eln.node.transparent.TransparentNodeDescriptor;
-import mods.eln.node.transparent.TransparentNodeElement;
-import mods.eln.node.transparent.TransparentNodeElementInventory;
-import mods.eln.sim.DiodeProcess;
+import mods.eln.node.transparent.*;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Inductor;
-import mods.eln.sim.mna.component.VoltageSource;
-import mods.eln.sim.mna.process.PowerSourceBipole;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;

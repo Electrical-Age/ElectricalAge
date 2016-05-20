@@ -53,8 +53,6 @@ public class WirelessSignalRxElement extends SixNodeElement {
 		electricalComponentList.add(outputGateProcess);	
 		electricalProcessList.add(slowProcess);
 		
-		front = LRDU.Down;
-        
 		aggregators = new IWirelessSignalAggregator[3];
 		aggregators[0] = new BiggerAggregator();
 		aggregators[1] = new SmallerAggregator();

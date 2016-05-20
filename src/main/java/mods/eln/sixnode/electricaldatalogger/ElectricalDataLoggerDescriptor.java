@@ -73,9 +73,9 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
         return true;
     }
 
-	void draw(DataLogs log, LRDU front, int objPosMX, int objPosMZ) {
-		if (onFloor) front.glRotateOnX();
-        else GL11.glRotatef(90, 1, 0, 0);
+	void draw(DataLogs log, Direction side, LRDU front, int objPosMX, int objPosMZ) {
+		if (onFloor || side.isY()) front.glRotateOnX();
+        if (!onFloor) GL11.glRotatef(90, 1, 0, 0);
 		//GL11.glDisable(GL11.GL_TEXTURE_2D);
 		if (main != null) main.draw();
 		//GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -152,8 +152,18 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 		Collections.addAll(list, tr("Measures the voltage of an\nelectrical signal and plots\nthe data in real time.").split("\n"));
 		list.add(tr("It can store up to 256 points."));
 	}
+
+	@Override
+	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+		LRDU front = super.getFrontFromPlace(side, player);
+		if (onFloor) {
+			return front.inverse();
+		} else {
+			if (side.isY()) {
+				return front.left();
+			} else {
+				return front;
+			}
+		}
+	}
 }
-/*
- * 	        	GL11.glScalef(1f, -1f, 1f);
-	        	GL11.glTranslatef(0.1f, -0.5f, 0.5f);
-	        	GL11.glRotatef(90, 0f, 1f, 0f);  */
