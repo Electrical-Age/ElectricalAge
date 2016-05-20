@@ -70,6 +70,9 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
             draw()
         }
     }
+
+    override fun getFrontFromPlace(side: Direction?, player: EntityPlayer?): LRDU? =
+            super.getFrontFromPlace(side, player).left()
 }
 
 open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor):
