@@ -36,6 +36,7 @@ import mods.eln.item.regulator.RegulatorOnOffDescriptor;
 import mods.eln.mechanical.GasTurbineDescriptor;
 import mods.eln.mechanical.GeneratorDescriptor;
 import mods.eln.mechanical.SteamTurbineDescriptor;
+import mods.eln.mechanical.StraightJointDescriptor;
 import mods.eln.misc.*;
 import mods.eln.misc.series.SerieEE;
 import mods.eln.node.NodeBlockEntity;
