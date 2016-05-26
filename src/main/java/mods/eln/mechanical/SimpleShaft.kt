@@ -64,7 +64,10 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
 
     override fun draw() {
         front.glRotateXnRef()
-        desc.draw(angle)
+        if (front == Direction.XP || front == Direction.ZP)
+            desc.draw(angle)
+        else
+            desc.draw(-angle);
     }
 
     override fun refresh(deltaT: Float) {
