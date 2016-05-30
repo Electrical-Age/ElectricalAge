@@ -73,7 +73,7 @@ Use at your own risk and do map backup frequently.
 
 Code/models:
 
-- **Svein Ove Aas** (Thermistor, Powerpole, some tweaks)
+- **Svein Ove Aas** (Baughn/Vaughn) (Turbine, Generator, Thermistor, pole-based power grid, some tweaks)
 - **bloxgate** (some tweaks)
 - **DrummerMC** (bug fix)
 - **ltouroumov** (bug fix)
@@ -93,6 +93,7 @@ Mod promotion:
 - **TheBroBeans** (initial promotor)
 - **don_bruce/BenPlotz** (forum expert, [video tutorials](https://www.youtube.com/channel/UCRYhOQhspQqIBvL8kiDu2Rw))
 - **Baughn** (forum expert)
+- **Vaughn** (ditto, reddit)
 - ...
 
 The full list of contributors is [available here](https://github.com/Electrical-Age/ElectricalAge/graphs/contributors).
