@@ -1,8 +1,12 @@
 package mods.eln.mechanical
 
 import mods.eln.misc.*
+import mods.eln.node.NodeBase
 import mods.eln.node.transparent.*
+import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
+import mods.eln.sim.nbt.NbtElectricalGateInput
+import mods.eln.sim.nbt.NbtElectricalLoad
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
@@ -71,13 +75,14 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
 class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) :
         SimpleShaftElement(node, desc_) {
     val desc = desc_ as SteamTurbineDescriptor
-//    val fluid = FluidRegistry.getFluid(desc.fluidType) ?: FluidRegistry.getFluid("lava")
-    val fluid = FluidRegistry.getFluid("lava")
+    val fluid = FluidRegistry.getFluid(desc.fluidType) ?: FluidRegistry.getFluid("lava")
 
     val tank = TransparentNodeElementFluidHandler(1000)
     var steamRate = 0f
     var efficiency = 0.0
     val turbineSlowProcess = TurbineSlowProcess()
+
+    internal val throttle = NbtElectricalGateInput("throttle")
 
     inner class TurbineSlowProcess: IProcess, INBTTReady {
         val rc = RcInterpolator(desc.inertia)
@@ -87,7 +92,7 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
         var consumptionFixup = 0f
 
         override fun process(time: Double) {
-            val target = desc.fluidConsumption * time.toFloat()
+            val target = (desc.fluidConsumption * time * throttle.normalized).toFloat()
             val drain = Math.ceil((target - consumptionFixup).toDouble()).toFloat()
             val drained = tank.drain(ForgeDirection.DOWN, drain.toInt(), true)?.amount?.toFloat() ?: 0f
             val usable = drained + consumptionFixup
@@ -114,13 +119,18 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
     init {
         slowProcessList.add(turbineSlowProcess)
         tank.setFilter(fluid)
+
+        electricalLoadList.add(throttle)
     }
 
     override fun getFluidHandler() = tank
 
-    override fun getElectricalLoad(side: Direction?, lrdu: LRDU?) = null
+    override fun getElectricalLoad(side: Direction, lrdu: LRDU) = throttle
     override fun getThermalLoad(side: Direction?, lrdu: LRDU?) = null
-    override fun getConnectionMask(side: Direction?, lrdu: LRDU?) = 0
+    override fun getConnectionMask(side: Direction, lrdu: LRDU): Int {
+        if (lrdu == LRDU.Down && (side == front || side == front.back())) return NodeBase.maskElectricalGate
+        return 0
+    }
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
 
     override fun thermoMeterString(side: Direction?) =  Utils.plotPercent(" Eff:", efficiency) + steamRate.toString() + "mB/s"
@@ -137,4 +147,9 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
     }
 }
 
-class TurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {}
+class TurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {
+    override fun draw() {
+        super.draw()
+        // TODO: Actually, no, do wire drawing in the base class. And stuff.
+    }
+}
