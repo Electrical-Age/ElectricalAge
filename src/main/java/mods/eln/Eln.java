@@ -5251,6 +5251,16 @@ public class Eln {
 				Character.valueOf('A'), "blockAluminum",
 				Character.valueOf('M'), findItemStack("Advanced Machine Block")
 		);
+		addRecipe(findItemStack("Gas Turbine"),
+				"msH",
+				"sSs",
+				" M ",
+				Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
+				Character.valueOf('H'), findItemStack("Copper Thermal Cable"),
+				Character.valueOf('s'), "ingotSteel",
+				Character.valueOf('S'), "blockSteel",
+				Character.valueOf('M'), findItemStack("Advanced Machine Block")
+		);
 	}
 
 	void recipeBattery() {
