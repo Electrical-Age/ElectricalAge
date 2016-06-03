@@ -3,37 +3,34 @@ package mods.eln.mechanical
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
 import mods.eln.node.transparent.*
-import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
 import mods.eln.sim.nbt.NbtElectricalGateInput
-import mods.eln.sim.nbt.NbtElectricalLoad
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraftforge.common.util.ForgeDirection
 import net.minecraftforge.fluids.FluidRegistry
 
-open class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
+abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
         SimpleShaftDescriptor(baseName, TurbineElement::class, TurbineRender::class, EntityMetaTag.Fluid) {
     // Overall time for steam input changes to take effect, in seconds.
-    open val inertia = 20f
+    abstract val inertia: Float
     // Optimal steam consumed per second, mB.
     // Computed to equal a single 36LP Railcraft boiler, or half of a 36HP.
-    open val fluidConsumption = 7200f
+    abstract val fluidConsumption: Float
     // Joules per mB, at optimal turbine speed.
     // Computed to equal what you'd get from Railcraft steam engines, plus a small
     // bonus because you're using Electrical Age you crazy person you.
     // This pretty much fills up a VHV line. The generator drag gives us a bit of leeway.
     // TODO: This should be tied into the config options.
-    open val fluidPower = 2.2f
+    abstract val fluidPower: Float
     // Well, this is a *steam* turbine.
     // TODO: Factor out into an abstract turbine descriptor.
-    open val fluidDescription = "Steam"
-    open val fluidType = "steam"
+    abstract val fluidDescription: String
+    abstract val fluidTypes: Array<String>
     // Width of the efficiency curve.
     // <1 means "Can't be started without power".
-    open val efficiencyCurve = 1.1
-
+    abstract val efficiencyCurve: Double
     val optimalRads = absoluteMaximumShaftSpeed * 0.8f
 
     override val obj = obj
@@ -47,35 +44,71 @@ open class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
     )
 
     override fun addInformation(stack: ItemStack, player: EntityPlayer, list: MutableList<String>, par4: Boolean) {
-        list.add("Converts steam into mechanical energy.")
+        list.add("Converts ${fluidDescription} into mechanical energy.")
         list.add("Nominal usage ->")
-        list.add("  ${fluidDescription} input: ${fluidConsumption} mB/s")
+        list.add("  ${fluidDescription.capitalize()} input: ${fluidConsumption} mB/s")
         list.add(Utils.plotPower("  Power out: ", (fluidConsumption * fluidPower).toDouble()))
         list.add(Utils.plotRads("  Optimal rads: ", optimalRads))
         list.add(Utils.plotRads("Max rads:  ", absoluteMaximumShaftSpeed))
     }
 }
 
+class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
+        TurbineDescriptor(baseName, obj) {
+    // Steam turbines are for baseload.
+    override val inertia = 20f
+    // Computed to equal a single 36LP Railcraft boiler, or half of a 36HP.
+    override val fluidConsumption = 7200f
+    // Computed to equal what you'd get from Railcraft steam engines, plus a small
+    // bonus because you're using Electrical Age you crazy person you.
+    // This pretty much fills up a VHV line. The generator drag gives us a bit of leeway.
+    // TODO: This should be tied into the config options.
+    override val fluidPower = 2.2f
+    // TODO: Factor out into an abstract turbine descriptor.
+    override val fluidDescription = "steam"
+    override val fluidTypes = arrayOf("steam")
+    // Steam turbines can, just barely, be started without power.
+    override val efficiencyCurve = 1.1
+}
+
 class GasTurbineDescriptor(basename: String, obj: Obj3D) :
-        SteamTurbineDescriptor(basename, obj) {
+        TurbineDescriptor(basename, obj) {
     // The main benefit of gas turbines.
     override val inertia = 5f;
-    // 1B in 3 minutes at max power.
-    override val fluidConsumption = 1000f / 180f
-    // Computed to equal a single 27LP Railcraft boiler. This makes gas turbines slightly less
+    // Going with 8kW for this thing.
+    val targetPower = 8000f
+    // Computed to equal a single 18LP Railcraft boiler. This makes it 80% as efficient
+    // as the steam turbine. At some point in the future you'll be able to recover the rest
+    // by using the heat output, which doesn't currently exist.
+    override val fluidPower = 1280f  // J/mB
+    override val fluidConsumption = targetPower / fluidPower
+    // Computed to equal a single 18LP Railcraft boiler. This makes gas turbines slightly less
     // efficient than going through steam, though at some point in the future you'll be able
-    // to recover the rest by using the heat output. Which doesn't exist right now.
-    // In short, it's 8.1kW.
-    override val fluidPower = 8100f / fluidConsumption
-    override val fluidDescription = "Gasoline"
-    override val fluidType = "fuel"
+    // to recover the rest by using the heat output. Which doesn't exist right now. To be
+    // precise, 80% as efficient.
+    override val fluidDescription = "gasoline"
+    override val fluidTypes = arrayOf(
+            // Various gasoline equivalents, and light oils a small turbine can reasonably burn.
+            // These are all pretty close to each other in energy content.
+            "fuel",  // Buildcraft
+            "rc ethanol",  // RotaryCraft
+            "biofuel",  // Minefactory Reloaded
+            "bioethanol",  // Forestry
+            "biodiesel",  // Immersive Engineering
+            "kerosene",  // PneumaticCraft
+            "lpg",  // PneumaticCraft
+            "fuelgc",  // GalactiCraft
+            "naturalgas",  // Magneticraft
+            "lightoil"  // Magneticraft
+    )
+    // Gas turbines need to be spun up before working.
     override val efficiencyCurve = 0.9
 }
 
 class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) :
         SimpleShaftElement(node, desc_) {
-    val desc = desc_ as SteamTurbineDescriptor
-    val fluid = FluidRegistry.getFluid(desc.fluidType) ?: FluidRegistry.getFluid("lava")
+    val desc = desc_ as TurbineDescriptor
+    val fluids = desc.fluidTypes.map { FluidRegistry.getFluid(it) }.filterNotNull().toTypedArray()
 
     val tank = TransparentNodeElementFluidHandler(1000)
     var steamRate = 0f
@@ -118,7 +151,12 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
 
     init {
         slowProcessList.add(turbineSlowProcess)
-        tank.setFilter(fluid)
+
+        tank.setFilter(if (fluids.isNotEmpty()) {
+            fluids
+        } else {
+            arrayOf(FluidRegistry.LAVA)
+        })
 
         electricalLoadList.add(throttle)
     }
