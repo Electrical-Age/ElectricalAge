@@ -30,7 +30,9 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
     abstract val fluidTypes: Array<String>
     // Width of the efficiency curve.
     // <1 means "Can't be started without power".
-    abstract val efficiencyCurve: Double
+    abstract val efficiencyCurve: Float
+    // If efficiency is below this fraction, do nothing.
+    open val efficiencyCutoff = 0f
     val optimalRads = absoluteMaximumShaftSpeed * 0.8f
 
     override val obj = obj
@@ -68,7 +70,7 @@ class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
     override val fluidDescription = "steam"
     override val fluidTypes = arrayOf("steam")
     // Steam turbines can, just barely, be started without power.
-    override val efficiencyCurve = 1.1
+    override val efficiencyCurve = 1.1f
 }
 
 class GasTurbineDescriptor(basename: String, obj: Obj3D) :
@@ -101,8 +103,10 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
             "naturalgas",  // Magneticraft
             "lightoil"  // Magneticraft
     )
-    // Gas turbines need to be spun up before working.
-    override val efficiencyCurve = 0.9
+    // Gas turbines have a fairly wide efficiency range.
+    override val efficiencyCurve = 2.0f
+    // But need to be spun up before working.
+    override val efficiencyCutoff = 0.5f
 }
 
 class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) :
@@ -112,7 +116,7 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
 
     val tank = TransparentNodeElementFluidHandler(1000)
     var steamRate = 0f
-    var efficiency = 0.0
+    var efficiency = 0f
     val turbineSlowProcess = TurbineSlowProcess()
 
     internal val throttle = NbtElectricalGateInput("throttle")
@@ -125,7 +129,17 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
         var consumptionFixup = 0f
 
         override fun process(time: Double) {
-            val target = (desc.fluidConsumption * time * throttle.normalized).toFloat()
+            // Do anything at all?
+            val target: Float
+            val computedEfficiency = Math.pow(Math.cos((shaft.rads - desc.optimalRads) / (desc.optimalRads * desc.efficiencyCurve) * Math.PI / 2), 3.0)
+            if (computedEfficiency >= desc.efficiencyCutoff) {
+                efficiency = computedEfficiency.toFloat()
+                target = (desc.fluidConsumption * time * throttle.normalized).toFloat()
+            } else {
+                efficiency = 0f
+                target = 0f
+            }
+
             val drain = Math.ceil((target - consumptionFixup).toDouble()).toFloat()
             val drained = tank.drain(ForgeDirection.DOWN, drain.toInt(), true)?.amount?.toFloat() ?: 0f
             val usable = drained + consumptionFixup
@@ -135,7 +149,7 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
             rc.target = actual / time.toFloat()
             rc.step(time.toFloat())
             steamRate = rc.get()
-            efficiency = Math.pow(Math.cos((shaft.rads - desc.optimalRads) / (desc.optimalRads * desc.efficiencyCurve) * Math.PI / 2), 3.0)
+
             val power = steamRate * desc.fluidPower * efficiency
             shaft.energy += power * time.toFloat()
         }
@@ -171,7 +185,7 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
     }
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
 
-    override fun thermoMeterString(side: Direction?) =  Utils.plotPercent(" Eff:", efficiency) + steamRate.toString() + "mB/s"
+    override fun thermoMeterString(side: Direction?) =  Utils.plotPercent(" Eff:", efficiency.toDouble()) + steamRate.toString() + "mB/s"
 
     override fun writeToNBT(nbt: NBTTagCompound) {
         super.writeToNBT(nbt)
