@@ -33,6 +33,7 @@ import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage.OreScan
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
+import mods.eln.mechanical.GasTurbineDescriptor;
 import mods.eln.mechanical.GeneratorDescriptor;
 import mods.eln.mechanical.SteamTurbineDescriptor;
 import mods.eln.misc.*;
@@ -2603,6 +2604,15 @@ public class Eln {
 					nominalP / (nominalU / 25),
 					nominalP,
 					sixNodeThermalLoadInitializer.copy()
+			);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 11;
+			GasTurbineDescriptor desc = new GasTurbineDescriptor(
+					TR_NAME(Type.NONE, "Gas Turbine"),
+					obj.getObj("GasTurbine")
 			);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
