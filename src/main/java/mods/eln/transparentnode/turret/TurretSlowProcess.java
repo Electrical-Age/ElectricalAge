@@ -1,5 +1,7 @@
 package mods.eln.transparentnode.turret;
 
+import com.mojang.authlib.GameProfile;
+import cpw.mods.fml.common.FMLCommonHandler;
 import mods.eln.fsm.CompositeState;
 import mods.eln.fsm.State;
 import mods.eln.fsm.StateMachine;
@@ -14,14 +16,25 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.common.util.FakePlayerFactory;
 
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 public class TurretSlowProcess extends StateMachine {
 	private static final Random rand = new Random();
 	private double actualPower;
-	
+
+	private static final DamageSource turretDamage = new DamageSource("Laser");
+	FakePlayer fakePlayer = FakePlayerFactory.get(
+			FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(0),
+			new GameProfile(
+				UUID.fromString("60165e3d-cf6e-4813-8cc4-fbccc177b8d5"), "[Eln]"));
+	DamageSource playerizedTurretDamage = new EntityDamageSource("Laser", fakePlayer);
+
 	public TurretSlowProcess(TurretElement element) {
         actualPower = 0;
 		setInitialState(new IdleState());
@@ -313,10 +326,10 @@ public class TurretSlowProcess extends StateMachine {
 		}
 		
 		private final EntityLivingBase target;
-		
+
 		@Override
 		public void enter() {
-			if (target != null) target.attackEntityFrom(new DamageSource("Unknown"), 5);
+			if (target != null) target.attackEntityFrom(playerizedTurretDamage, 5);
 			element.shoot();
 			element.play(new SoundCommand("eln:LaserGun"));
 		}
