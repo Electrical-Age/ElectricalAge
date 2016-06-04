@@ -1,22 +1,26 @@
 package mods.eln.transparentnode.turret;
 
+import mods.eln.item.EntitySensorFilterDescriptor;
+import mods.eln.misc.Direction;
+import mods.eln.misc.Utils;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
+import mods.eln.node.transparent.TransparentNodeElementRender;
+import mods.eln.node.transparent.TransparentNodeEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Vec3;
+import org.lwjgl.opengl.GL11;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
-import mods.eln.item.EntitySensorFilterDescriptor;
-import mods.eln.misc.Utils;
-import mods.eln.node.transparent.TransparentNodeElementInventory;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
-
-import mods.eln.node.transparent.TransparentNodeDescriptor;
-import mods.eln.node.transparent.TransparentNodeElementRender;
-import mods.eln.node.transparent.TransparentNodeEntity;
-import mods.eln.misc.Direction;
 
 public class TurretRender extends TransparentNodeElementRender {
 
@@ -26,6 +30,9 @@ public class TurretRender extends TransparentNodeElementRender {
     EntitySensorFilterDescriptor filter = null;
     boolean filterIsSpare;
     float chargePower;
+
+	private ItemStack skull;
+	EntityItem skullEnt;
 
 	public TurretRender(TransparentNodeEntity tileEntity,
 			TransparentNodeDescriptor descriptor) {
@@ -79,7 +86,7 @@ public class TurretRender extends TransparentNodeElementRender {
 	public void draw() {
 		GL11.glPushMatrix();
 			front.glRotateXnRef();
-			descriptor.draw(this);
+			descriptor.draw(this, skullEnt);
 		GL11.glPopMatrix();
 	}
 	
@@ -103,6 +110,10 @@ public class TurretRender extends TransparentNodeElementRender {
             filter = (EntitySensorFilterDescriptor) EntitySensorFilterDescriptor.getDescriptor(filterStack);
             filterIsSpare = stream.readBoolean();
             chargePower = stream.readFloat();
+			skull = Utils.unserialiseItemStack(stream);
+			if (skull != null) {
+				skullEnt = new EntityItem(Minecraft.getMinecraft().theWorld, 0D, 0D, 0D, skull);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

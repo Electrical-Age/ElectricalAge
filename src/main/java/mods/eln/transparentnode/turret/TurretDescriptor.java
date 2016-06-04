@@ -1,16 +1,17 @@
 package mods.eln.transparentnode.turret;
 
 import mods.eln.Eln;
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
-import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.wiki.Data;
+import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
@@ -37,8 +38,9 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		public final double basePower;
 		public final double chargePower;
         public final double entityDetectionInterval;
+		public final Vec3 skullLocation;
 		
-		public Properties() {
+		public Properties(Obj3DPart turret, Obj3DPart sensor) {
 			actionAngle = 70;
 			detectionDistance = 12;
 			aimDistance = 15;
@@ -56,6 +58,14 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 			basePower = 25;
 		    chargePower = 1000;
             entityDetectionInterval = 0.25;
+
+			final BoundingBox tbb = turret.boundingBox();
+			final BoundingBox sbb = sensor.boundingBox();
+			skullLocation = Vec3.createVectorHelper(
+					tbb.min.xCoord,
+					tbb.max.yCoord - (tbb.max.yCoord - sbb.centre().yCoord) / 2,
+					tbb.centre().zCoord
+			);
 		}
 	}
 		
@@ -75,7 +85,7 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		sensor = obj.getPart("Sensor");
 		fire = obj.getPart("Fire");
 
-		properties = new Properties();
+		properties = new Properties(turret, sensor);
 		voltageLevelColor = VoltageLevelColor.HighVoltage;
 	}
 	
@@ -96,6 +106,7 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		list.add(tr("Nominal voltage: %1$V", 800));
 		list.add(tr("Standby power: %1$W", Utils.plotValue(getProperties().basePower)));
 		list.add(tr("Laser charge power: %1$W...%2$kW", 100, 10));
+		list.add(tr("Add a skull to give it a dash of personality."));
 		list.add(tr("CAUTION: Cables can get quite hot!"));
 	}
 
@@ -124,10 +135,10 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		if (type == ItemRenderType.INVENTORY)
 			super.renderItem(type, item, data);
 		else
-			draw(null);
+			draw(null, null);
 	}
 	
-	public void draw(TurretRender render) {
+	public void draw(TurretRender render, EntityItem skullEnt) {
 		float turretAngle = render != null ? render.getTurretAngle() : 0;
 		float gunPosition = render != null ? render.getGunPosition() : 0;
 		float gunAngle = render != null ? -render.getGunElevation() : 0;
@@ -138,6 +149,18 @@ public class TurretDescriptor extends TransparentNodeDescriptor {
 		if (joint != null) joint.draw();
 		GL11.glPushMatrix();
 			GL11.glRotatef(turretAngle, 0f, 1f, 0f);
+			if (skullEnt != null) {
+				GL11.glPushMatrix();
+				final Vec3 loc = getProperties().skullLocation;
+				skullEnt.hoverStart = 0.0F;
+				RenderItem.renderInFrame = true;
+				GL11.glTranslatef((float)loc.xCoord, (float)loc.yCoord, (float)loc.zCoord);
+				GL11.glRotatef(90, 0, 1, 0);
+				GL11.glScalef(0.35f, 0.35f, 0.35f);
+				RenderManager.instance.renderEntityWithPosYaw(skullEnt, 0.0D, 0.0D, 0.0D, 0.0F, 0.0F);
+				RenderItem.renderInFrame = false;
+				GL11.glPopMatrix();
+			}
 			if (turret != null) turret.draw();
 			if (sensor != null) {
 				if (enabled) {

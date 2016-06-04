@@ -18,6 +18,8 @@ import mods.eln.sixnode.lampsocket.LightBlockEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemSkull;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.DataInputStream;
@@ -37,6 +39,8 @@ public class TurretElement extends TransparentNodeElement {
     public boolean filterIsSpare = false;
 	public double energyBuffer = 0;
 
+	ItemStack skull = null;
+
 	final NbtElectricalLoad load = new NbtElectricalLoad("load");
 	final NbtResistor powerResistor = new NbtResistor("powerResistor", load, null);
 
@@ -53,7 +57,6 @@ public class TurretElement extends TransparentNodeElement {
 		Eln.instance.highVoltageCableDescriptor.applyTo(load);
 		electricalLoadList.add(load);
 		electricalComponentList.add(powerResistor);
-	
 	}
 	
 	public TurretDescriptor getDescriptor() {
@@ -140,6 +143,14 @@ public class TurretElement extends TransparentNodeElement {
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
+		if (skull != null) return false;
+		final ItemStack stack = entityPlayer.getCurrentEquippedItem();
+		if (stack == null) return false;
+		if (stack.getItem() instanceof ItemSkull) {
+			skull = stack.splitStack(1);
+			needPublish();
+			return true;
+		}
 		return false;
 	}
 	
@@ -156,6 +167,7 @@ public class TurretElement extends TransparentNodeElement {
             Utils.serialiseItemStack(stream, inventory.getStackInSlot(TurretContainer.filterId));
             stream.writeBoolean(filterIsSpare);
             stream.writeFloat((float) chargePower);
+			Utils.serialiseItemStack(stream, skull);
  		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -167,6 +179,7 @@ public class TurretElement extends TransparentNodeElement {
         nbt.setDouble("chargePower", chargePower);
         nbt.setBoolean("filterIsSpare", filterIsSpare);
 		nbt.setDouble("energyBuffer", energyBuffer);
+		if (skull != null) Utils.writeToNBT(nbt, "skull", skull);
 	}
 	
 	@Override
@@ -175,6 +188,9 @@ public class TurretElement extends TransparentNodeElement {
         chargePower = nbt.getDouble("chargePower");
         filterIsSpare = nbt.getBoolean("filterIsSpare");
         energyBuffer = nbt.getDouble("energyBuffer");
+		if (nbt.hasKey("skull")) {
+			skull = ItemStack.loadItemStackFromNBT(nbt.getCompoundTag("skull"));
+		}
 	}
 
     @Override
@@ -192,7 +208,13 @@ public class TurretElement extends TransparentNodeElement {
         return new TurretContainer(player, inventory);
     }
 
-    @Override
+	@Override
+	public void onBreakElement() {
+		super.onBreakElement();
+		node.dropItem(skull);
+	}
+
+	@Override
     public void inventoryChange(IInventory inventory) {
         super.inventoryChange(inventory);
         needPublish();
