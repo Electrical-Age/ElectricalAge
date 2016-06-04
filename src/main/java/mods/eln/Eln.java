@@ -268,6 +268,7 @@ public class Eln {
 	public static String dicTungstenOre, dicTungstenDust, dicTungstenIngot;
 	public static final ArrayList<OreScannerConfigElement> oreScannerConfig = new ArrayList<OreScannerConfigElement>();
 	public static boolean modbusEnable = false;
+	public static int modbusPort;
 
 	float xRayScannerRange;
 	boolean addOtherModOreToXRay;
@@ -349,6 +350,7 @@ public class Eln {
 
 
 		modbusEnable = config.get("modbus", "enable", false).getBoolean(false);
+		modbusPort = config.get("modbus", "port", 1502).getInt(1502);
 		debugEnabled = config.get("debug", "enable", false).getBoolean(false);
 
 		explosionEnable = config.get("gameplay", "explosion", true).getBoolean(true);
@@ -930,7 +932,7 @@ public class Eln {
 
 	@EventHandler
 	public void onServerStart(FMLServerAboutToStartEvent ev) {
-		modbusServer = new ModbusTcpServer();
+		modbusServer = new ModbusTcpServer(modbusPort);
 		TeleporterElement.teleporterList.clear();
 		//tileEntityDestructor.clear();
 		LightBlockEntity.observers.clear();
