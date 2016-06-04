@@ -2,6 +2,8 @@ package mods.eln.sixnode.modbusrtu
 
 import mods.eln.Eln
 import java.io.OutputStream
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.nio.ByteBuffer
@@ -13,13 +15,17 @@ class ModbusTcpServer(port: Int = 1502) {
         private val OutputBufferSize = InputBufferSize
     }
 
-    private val server = ServerSocket(port)
+    private var server = ServerSocket()
     private val connections: MutableList<ConnectionHandler> = ArrayList()
     private val slaves = TreeMap<Int, IModbusSlave>()
 
     init {
         if (Eln.modbusEnable) {
+            server.bind(InetSocketAddress(port))
             start()
+        }
+        else {
+            server.close()
         }
     }
 
