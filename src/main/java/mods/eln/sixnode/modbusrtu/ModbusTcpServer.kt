@@ -1,11 +1,9 @@
 package mods.eln.sixnode.modbusrtu
 
 import mods.eln.Eln
+import mods.eln.misc.Utils
 import java.io.OutputStream
-import java.net.InetAddress
-import java.net.InetSocketAddress
-import java.net.ServerSocket
-import java.net.Socket
+import java.net.*
 import java.nio.ByteBuffer
 import java.util.*
 
@@ -15,13 +13,19 @@ class ModbusTcpServer(port: Int = 1502) {
         private val OutputBufferSize = InputBufferSize
     }
 
-    private var server = ServerSocket()
+    private val server = ServerSocket()
     private val connections: MutableList<ConnectionHandler> = ArrayList()
     private val slaves = TreeMap<Int, IModbusSlave>()
 
     init {
         if (Eln.modbusEnable) {
-            server.bind(InetSocketAddress(port))
+            try {
+                server.bind(InetSocketAddress(port))
+            } catch (e: BindException){
+                Utils.println("Exception while binding Modbus RTU Server. Modbus server disabled!")
+                server.close()
+                e.printStackTrace();
+            }
             start()
         }
         else {
