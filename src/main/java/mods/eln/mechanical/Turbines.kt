@@ -134,7 +134,8 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
             val computedEfficiency = Math.pow(Math.cos((shaft.rads - desc.optimalRads) / (desc.optimalRads * desc.efficiencyCurve) * Math.PI / 2), 3.0)
             if (computedEfficiency >= desc.efficiencyCutoff) {
                 efficiency = computedEfficiency.toFloat()
-                target = (desc.fluidConsumption * time * throttle.normalized).toFloat()
+                val th = if (throttle.connectedComponents.count() > 0) throttle.normalized else 1.0
+                target = (desc.fluidConsumption * time * th).toFloat()
             } else {
                 efficiency = 0f
                 target = 0f
