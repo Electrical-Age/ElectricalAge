@@ -365,6 +365,12 @@ public class Utils {
 		nbt.setTag(str, var2);
 	}
 
+	public static void writeToNBT(NBTTagCompound nbt, String str, ItemStack stack) {
+		NBTTagCompound tag = new NBTTagCompound();
+		stack.writeToNBT(tag);
+		nbt.setTag(str, tag);
+	}
+
 	public static void sendPacketToClient(ByteArrayOutputStream bos, EntityPlayerMP player) {
 		// Profiler p = new Profiler();
 		// p.add("A");
