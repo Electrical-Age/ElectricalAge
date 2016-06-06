@@ -108,9 +108,10 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		
-		list.add(tr("Stored energy: %1$J (%2$%)", getEnergy(itemStack),
-			(int)(getEnergy(itemStack)/energyStorage*100)));
+
+		if (itemStack != null)
+			list.add(tr("Stored energy: %1$J (%2$%)", getEnergy(itemStack),
+					(int)(getEnergy(itemStack)/energyStorage*100)));
 		//list.add("Power button is " + (getPowerOn(itemStack) ? "ON" : "OFF"));
 	}
 

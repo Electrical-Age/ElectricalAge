@@ -72,7 +72,8 @@ public class BrushDescriptor extends GenericItemUsingDamageDescriptor {
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		
-		list.add(tr("Can paint %1$ blocks", itemStack.getTagCompound().getInteger("life")));
+		if (itemStack != null)
+			list.add(tr("Can paint %1$ blocks", itemStack.getTagCompound().getInteger("life")));
 	}
 	
 	public boolean use(ItemStack stack, EntityPlayer entityPlayer) {
