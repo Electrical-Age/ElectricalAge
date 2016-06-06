@@ -13,6 +13,7 @@ eclipse
 *.json
 options.txt
 /out
+/classes
 
 # IntelliJ
 .idea
