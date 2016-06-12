@@ -11,13 +11,12 @@ then
 
   echo "Installing the transifex client"
   python --version
-  pip --version
   pip install --upgrade pip
   pip --version
   
+  # Transifex-client version 0.12.1 is required
   # See https://github.com/transifex/transifex-client/issues/113  
-  # pip install transifex-client
-  pip install git+git://github.com/transifex/transifex-client.git@master
+  pip install transifex-client --upgrade
 
   echo "Generating the latest language source file"
   ./gradlew updateMasterLanguageFile
