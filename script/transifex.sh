@@ -6,7 +6,7 @@
 # This script is called after every successful build on Travis CI.
 # It relies on $TRANSIFEX_PASSWORD being set in .travis.yml
 
-if [ "$TRAVIS_REPO_SLUG" == "Electrical-Age/ElectricalAge" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_BRANCH" == "1.7.10-MNA" ]
+if [ "$TRAVIS_REPO_SLUG" == "Electrical-Age/ElectricalAge" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_BRANCH" == "develop" ]
 then
 
   echo "Installing the transifex client"
@@ -18,7 +18,7 @@ then
   # See https://github.com/transifex/transifex-client/issues/113  
   pip install transifex-client --upgrade
 
-  echo "Generating the latest language source file"
+  echo "Generating the latest language source file from the develop branch"
   ./gradlew updateMasterLanguageFile
 
   echo "Submitting the generated translation source file to Transifex"
@@ -30,4 +30,7 @@ token =
 username = metc" > ~/.transifexrc
   
   tx push --source --translations -l en_us --no-interactive --skip
+
+else
+  echo "Ignore Transifex update..."
 fi
