@@ -1,5 +1,10 @@
 language: java
 
+dist: trusty
+
+python:
+  - "3.5"
+
 env:
   global:
     # $TRANSIFEX_PASSWORD for Transifex (travis encrypt)
@@ -12,9 +17,6 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
-
-python:
-  - "3.5"
 
 after_success:
   - ./script/transifex.sh
