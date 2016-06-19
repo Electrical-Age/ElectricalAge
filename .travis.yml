@@ -2,8 +2,14 @@ language: java
 
 dist: trusty
 
+# Container-based infrastructure
+sudo: false
+
 python:
   - "3.5"
+
+install:
+  - pip install --upgrade pip
 
 env:
   global:
