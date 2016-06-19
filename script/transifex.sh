@@ -11,8 +11,6 @@ then
 
   echo "Installing the transifex client"
   python --version
-  pip install 'requests[security]'
-  pip install --upgrade pip
   pip --version
   
   # Transifex-client version 0.12.1 is required

@@ -3,13 +3,13 @@ language: java
 dist: trusty
 
 # Container-based infrastructure
-sudo: false
+# sudo: false
 
 python:
   - "3.5"
 
 install:
-  - pip install --upgrade pip
+  - pip install 'requests[security]'
 
 env:
   global:
