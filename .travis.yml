@@ -3,13 +3,15 @@ language: java
 dist: trusty
 
 # Container-based infrastructure
-# sudo: false
+sudo: false
 
-python:
-  - "3.5"
-
+# Install python dependencies in the home directory (no sudo access)
+# Transifex-client version 0.12.1 is required
+# See https://github.com/transifex/transifex-client/issues/113  
 install:
-  - pip install 'requests[security]'
+  - echo "Installing the Transifex client"
+  - pip install --user 'requests[security]'
+  - pip install --user transifex-client 
 
 env:
   global:
@@ -23,6 +25,7 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    - $HOME/.cache/pip
 
 after_success:
   - ./script/transifex.sh
