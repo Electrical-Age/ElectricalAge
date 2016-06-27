@@ -6800,18 +6800,22 @@ public class Eln {
 					for (ItemStack stack : OreDictionary.getOres(name)) {
 						int id = Utils.getItemId(stack) + 4096 * stack.getItem().getMetadata(stack.getItemDamage());
 						// Utils.println(OreDictionary.getOreID(name));
-						boolean find = false;
-						for (OreScannerConfigElement c : oreScannerConfig) {
-							if (c.blockKey == id) {
-								find = true;
-								break;
-							}
-						}
+						addBlockToXRay(id);
+					}
+				}
+			}
 
-						if (!find) {
-							Utils.println(id + " added to xRay (other mod)");
-							oreScannerConfig.add(new OreScannerConfigElement(id, 0.15f));
-						}
+			// TerraFirmaCraft & related.
+			Block tfcOres[] = {
+					GameRegistry.findBlock("terrafirmacraft", "Ore1"),
+					GameRegistry.findBlock("terrafirmacraft", "Ore2"),
+					GameRegistry.findBlock("terrafirmacraft", "Ore3"),
+					GameRegistry.findBlock("tfctech", "Ore4")
+			};
+			for (int meta = 0; meta < 16; meta++) {
+				for (Block ore : tfcOres) {
+					if (ore != null) {
+						addBlockToXRay(Block.getIdFromBlock(ore) + 4096 * meta);
 					}
 				}
 			}
@@ -6829,6 +6833,21 @@ public class Eln {
 		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (4 << 12), 20 / 100f));
 		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (5 << 12), 20 / 100f));
 		oreScannerConfig.add(new OreScannerConfigElement(Block.getIdFromBlock(this.oreBlock) + (6 << 12), 20 / 100f));
+	}
+
+	private void addBlockToXRay(int id) {
+		boolean find = false;
+		for (OreScannerConfigElement c : oreScannerConfig) {
+            if (c.blockKey == id) {
+                find = true;
+                break;
+            }
+        }
+
+		if (!find) {
+            Utils.println(id + " added to xRay (other mod)");
+            oreScannerConfig.add(new OreScannerConfigElement(id, 0.15f));
+        }
 	}
 
 	public static double getSmallRs() {
