@@ -6530,6 +6530,22 @@ public class Eln {
 				Character.valueOf('R'), "itemRubber",
 				Character.valueOf('C'), "circuitBasic",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane));
+
+		addRecipe(findItemStack("Modern Data Logger", 1),
+			"RRR",
+			"RGR",
+			"RCR",
+			Character.valueOf('R'), "itemRubber",
+			Character.valueOf('C'), "circuitAdvanced",
+			Character.valueOf('G'), new ItemStack(Blocks.glass_pane));
+
+		addRecipe(findItemStack("Industrial Data Logger", 1),
+			"RRR",
+			"GGG",
+			"RCR",
+			Character.valueOf('R'), "itemRubber",
+			Character.valueOf('C'), "circuitAdvanced",
+			Character.valueOf('G'), new ItemStack(Blocks.glass_pane));
 	}
 
 	private void recipeSixNodeCache()
