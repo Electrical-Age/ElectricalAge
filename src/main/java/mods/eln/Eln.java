@@ -189,7 +189,7 @@ public class Eln {
 
 	public static final String channelName = "miaouMod";
 	public ArrayList<IConfigSharing> configShared = new ArrayList<IConfigSharing>();
-	public static SimpleNetworkWrapper achNetwork;
+	public static SimpleNetworkWrapper elnNetwork;
 
 	// public static final double networkSerializeValueFactor = 100.0;
 	// public static final byte packetNodeSerialized24bitPosition = 11;
@@ -297,11 +297,13 @@ public class Eln {
 
 	double stdHalfLife = 2 * Utils.minecraftDay;
 
+	public static boolean wailaEasyMode = false;
+
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		
-		achNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("achChannel");
-		achNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
+		elnNetwork = NetworkRegistry.INSTANCE.newSimpleChannel(this.channelName);
+		elnNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
 		
 		ModContainer container = FMLCommonHandler.instance().findContainerFor(this);
 		// LanguageRegistry.instance().loadLanguagesFor(container, Side.CLIENT);

@@ -13,7 +13,7 @@ public class ElnFMLEventsHandler {
     @SuppressWarnings("unused")
     public void onCraft(ItemCraftedEvent e) {
         if (e.crafting.getUnlocalizedName().toLowerCase().equals("50v_macerator")) {
-            Eln.achNetwork.sendToServer(p);
+            Eln.elnNetwork.sendToServer(p);
         }
     }
 }

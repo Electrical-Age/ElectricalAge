@@ -17,7 +17,7 @@ public class ElnForgeEventsHandler {
     @SuppressWarnings("unused")
     public void openGuide(GuiOpenEvent e) {
         if (e.gui instanceof Root) {
-            Eln.achNetwork.sendToServer(p);
+            Eln.elnNetwork.sendToServer(p);
         }
     }
 }
