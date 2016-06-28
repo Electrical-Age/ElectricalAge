@@ -430,6 +430,8 @@ public class Eln {
 
 		wirelessTxRange = config.get("wireless", "txRange", 32).getInt();
 
+		wailaEasyMode = config.get("balancing", "wailaEasyMode", false, "Display detailed WAILA info on batteries").getBoolean(false);
+
 		config.save();
 
 
