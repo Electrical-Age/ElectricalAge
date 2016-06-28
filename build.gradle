@@ -61,12 +61,21 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven {
+        name = "codechicken"
+        url = "http://chickenbones.net/maven"
+    }
+    maven {
+        name = "mobiusstrip"
+        url = "http://mobiusstrip.eu/maven/"
+    }
 }
 
 dependencies {
     external files("libs/commons-math3-3.3.jar")
     external "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
     external "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "mcp.mobius.waila:Waila:1.5.11-RC2-NONEI_1.7.10"
 }
 
 jar {
