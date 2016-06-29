@@ -56,8 +56,8 @@ public class I18N {
         if (translation == null || "".equals(translation)) {
             translation = text;
         } else {
-            // Replace new line placeholders by real new lines.
-            translation = translation.replace("\\n", "\n");
+            // Replace placeholders .
+            translation = translation.replace("\\n", "\n").replace("\\:", ":");
         }
 
         // Replace placeholders in string by actual string values of the passed objects.

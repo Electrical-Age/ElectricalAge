@@ -51,8 +51,10 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 		super.addInformation(itemStack, entityPlayer, list, par4);
 		list.add(tr("Charge power: %1$W", (int) chargePower));
 		list.add(tr("Discharge power: %1$W", (int) dischargePower));
-		list.add(tr("Stored energy: %1$J (%2$%)", getEnergy(itemStack),
-			(int)(getEnergy(itemStack) / energyStorage * 100)));
+		if (itemStack != null) {
+			list.add(tr("Stored energy: %1$J (%2$%)", getEnergy(itemStack),
+					(int) (getEnergy(itemStack) / energyStorage * 100)));
+		}
 	}
 
 	public double getEnergy(ItemStack stack) {

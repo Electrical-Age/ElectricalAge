@@ -78,8 +78,12 @@ class ShaftNetwork(): INBTTReady {
         assert(from in elements)
         val neighbours = getNeighbours(from)
         for (neighbour in neighbours) {
-            if (neighbour.shaft != this) {
-                mergeShafts(neighbour.shaft)
+            if (neighbour.elemment.shaft != this) {
+                mergeShafts(neighbour.elemment.shaft)
+
+                // Inform the neighbour and the element itself that its shaft connectivity has changed.
+                neighbour.elemment.connectedOnSide(neighbour.side.inverse)
+                from.connectedOnSide(neighbour.side)
             }
         }
     }
@@ -96,6 +100,12 @@ class ShaftNetwork(): INBTTReady {
         // At the moment there's no better way to figure this out than by exhaustively walking it to check for
         // partitions. Basically fine, as they don't get very large, but a possible target for optimization later on.
         rebuildNetwork()
+
+        // Inform all directly involved shafts about the change in connections.
+        for (neighbour in getNeighbours(from)) {
+            neighbour.elemment.disconnectedOnSide(neighbour.side.inverse)
+            from.disconnectedOnSide(neighbour.side)
+        }
     }
 
     /**
@@ -119,9 +129,9 @@ class ShaftNetwork(): INBTTReady {
                 next.shaft = shaft
                 val neighbours = getNeighbours(next)
                 for (neighbour in neighbours) {
-                    if (unseen.contains(neighbour)) {
-                        unseen.remove(neighbour)
-                        queue.add(neighbour)
+                    if (unseen.contains(neighbour.elemment)) {
+                        unseen.remove(neighbour.elemment)
+                        queue.add(neighbour.elemment)
                     }
                 }
             }
@@ -130,17 +140,17 @@ class ShaftNetwork(): INBTTReady {
         }
     }
 
-    private fun getNeighbours(from: ShaftElement): ArrayList<ShaftElement> {
+    private fun getNeighbours(from: ShaftElement): ArrayList<ShaftNeighbour> {
         val c = Coordonate()
-        val ret = ArrayList<ShaftElement>(6)
+        val ret = ArrayList<ShaftNeighbour>(6)
         for (dir in from.shaftConnectivity) {
             c.copyFrom(from.coordonate())
             c.move(dir)
             val to = NodeManager.instance!!.getTransparentNodeFromCoordinate(c)
             if (to is ShaftElement) {
                 for (dir2 in to.shaftConnectivity) {
-                    if (dir2.getInverse() == dir) {
-                        ret.add(to)
+                    if (dir2.inverse == dir) {
+                        ret.add(ShaftNeighbour(dir, to))
                         break
                     }
                 }
@@ -170,8 +180,17 @@ interface ShaftElement {
     }
 
     fun needPublish()
+
+    fun connectedOnSide(direction: Direction) {}
+
+    fun disconnectedOnSide(direction: Direction) {}
 }
 
 fun createShaftWatchdog(shaftElement: ShaftElement): ShaftSpeedWatchdog {
     return ShaftSpeedWatchdog(shaftElement, absoluteMaximumShaftSpeed)
 }
+
+data class ShaftNeighbour(
+    val side: Direction,
+    val elemment: ShaftElement
+)

@@ -118,16 +118,18 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
 		list.add(tr("Power: %1$W", (int)nominalP));
 		list.add(tr("Resistance: %1$Ω", getR()));
 		list.add(tr("Nominal lifetime: %1$h", serverNominalLife));
-		if(!itemStack.getTagCompound().hasKey("life"))
-			list.add(tr("Condition:") + " " + tr("New"));
-		else if(getLifeInTag(itemStack) > 0.5)
-			list.add(tr("Condition:") + " " + tr("Good"));
-		else if(getLifeInTag(itemStack) > 0.2)
-			list.add(tr("Condition:") + " " + tr("Used"));
-		else if(getLifeInTag(itemStack) > 0.1)
-			list.add(tr("Condition:") + " " + tr("End of life"));
-		else 
-			list.add(tr("Condition:") + " " + tr("Bad"));
+		if (itemStack != null) {
+			if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey("life"))
+				list.add(tr("Condition:") + " " + tr("New"));
+			else if (getLifeInTag(itemStack) > 0.5)
+				list.add(tr("Condition:") + " " + tr("Good"));
+			else if (getLifeInTag(itemStack) > 0.2)
+				list.add(tr("Condition:") + " " + tr("Used"));
+			else if (getLifeInTag(itemStack) > 0.1)
+				list.add(tr("Condition:") + " " + tr("End of life"));
+			else
+				list.add(tr("Condition:") + " " + tr("Bad"));
+		}
 	}
 
 	@Override

@@ -21,7 +21,7 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     abstract val static: Array<out Obj3D.Obj3DPart>
     abstract val rotating: Array<out Obj3D.Obj3DPart>
 
-    fun draw(angle: Double) {
+    open fun draw(angle: Double) {
         for (part in static) {
             part.draw()
         }
@@ -64,7 +64,10 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
 
     override fun draw() {
         front.glRotateXnRef()
-        desc.draw(angle)
+        if (front == Direction.XP || front == Direction.ZP)
+            desc.draw(angle)
+        else
+            desc.draw(-angle);
     }
 
     override fun refresh(deltaT: Float) {

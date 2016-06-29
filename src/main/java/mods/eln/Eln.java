@@ -34,7 +34,9 @@ import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
 import mods.eln.mechanical.GeneratorDescriptor;
+import mods.eln.mechanical.JointHubDescriptor;
 import mods.eln.mechanical.SteamTurbineDescriptor;
+import mods.eln.mechanical.StraightJointDescriptor;
 import mods.eln.misc.*;
 import mods.eln.misc.series.SerieEE;
 import mods.eln.node.NodeBlockEntity;
@@ -268,6 +270,7 @@ public class Eln {
 	public static String dicTungstenOre, dicTungstenDust, dicTungstenIngot;
 	public static final ArrayList<OreScannerConfigElement> oreScannerConfig = new ArrayList<OreScannerConfigElement>();
 	public static boolean modbusEnable = false;
+	public static int modbusPort;
 
 	float xRayScannerRange;
 	boolean addOtherModOreToXRay;
@@ -349,6 +352,7 @@ public class Eln {
 
 
 		modbusEnable = config.get("modbus", "enable", false).getBoolean(false);
+		modbusPort = config.get("modbus", "port", 1502).getInt(1502);
 		debugEnabled = config.get("debug", "enable", false).getBoolean(false);
 
 		explosionEnable = config.get("gameplay", "explosion", true).getBoolean(true);
@@ -930,7 +934,7 @@ public class Eln {
 
 	@EventHandler
 	public void onServerStart(FMLServerAboutToStartEvent ev) {
-		modbusServer = new ModbusTcpServer();
+		modbusServer = new ModbusTcpServer(modbusPort);
 		TeleporterElement.teleporterList.clear();
 		//tileEntityDestructor.clear();
 		LightBlockEntity.observers.clear();
@@ -2602,6 +2606,24 @@ public class Eln {
 					nominalP,
 					sixNodeThermalLoadInitializer.copy()
 			);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 11;
+
+			StraightJointDescriptor desc = new StraightJointDescriptor(
+				TR_NAME(Type.NONE, "Straight joint"),
+				obj.getObj("StraightJoint"));
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 12;
+
+			JointHubDescriptor desc = new JointHubDescriptor(
+				TR_NAME(Type.NONE, "Joint hub"),
+				obj.getObj("JointHub"));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
@@ -6528,6 +6550,22 @@ public class Eln {
 				Character.valueOf('R'), "itemRubber",
 				Character.valueOf('C'), "circuitBasic",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane));
+
+		addRecipe(findItemStack("Modern Data Logger", 1),
+			"RRR",
+			"RGR",
+			"RCR",
+			Character.valueOf('R'), "itemRubber",
+			Character.valueOf('C'), "circuitAdvanced",
+			Character.valueOf('G'), new ItemStack(Blocks.glass_pane));
+
+		addRecipe(findItemStack("Industrial Data Logger", 1),
+			"RRR",
+			"GGG",
+			"RCR",
+			Character.valueOf('R'), "itemRubber",
+			Character.valueOf('C'), "circuitAdvanced",
+			Character.valueOf('G'), new ItemStack(Blocks.glass_pane));
 	}
 
 	private void recipeSixNodeCache()
