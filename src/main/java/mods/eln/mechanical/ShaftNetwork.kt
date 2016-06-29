@@ -78,12 +78,12 @@ class ShaftNetwork(): INBTTReady {
         assert(from in elements)
         val neighbours = getNeighbours(from)
         for (neighbour in neighbours) {
-            if (neighbour.second.shaft != this) {
-                mergeShafts(neighbour.second.shaft)
+            if (neighbour.elemment.shaft != this) {
+                mergeShafts(neighbour.elemment.shaft)
 
                 // Inform the neighbour and the element itself that its shaft connectivity has changed.
-                neighbour.second.connectedOnSide(neighbour.first.inverse)
-                from.connectedOnSide(neighbour.first)
+                neighbour.elemment.connectedOnSide(neighbour.side.inverse)
+                from.connectedOnSide(neighbour.side)
             }
         }
     }
@@ -103,8 +103,8 @@ class ShaftNetwork(): INBTTReady {
 
         // Inform all directly involved shafts about the change in connections.
         for (neighbour in getNeighbours(from)) {
-            neighbour.second.disconnectedOnSide(neighbour.first.inverse)
-            from.disconnectedOnSide(neighbour.first)
+            neighbour.elemment.disconnectedOnSide(neighbour.side.inverse)
+            from.disconnectedOnSide(neighbour.side)
         }
     }
 
@@ -129,9 +129,9 @@ class ShaftNetwork(): INBTTReady {
                 next.shaft = shaft
                 val neighbours = getNeighbours(next)
                 for (neighbour in neighbours) {
-                    if (unseen.contains(neighbour.second)) {
-                        unseen.remove(neighbour.second)
-                        queue.add(neighbour.second)
+                    if (unseen.contains(neighbour.elemment)) {
+                        unseen.remove(neighbour.elemment)
+                        queue.add(neighbour.elemment)
                     }
                 }
             }
@@ -140,17 +140,17 @@ class ShaftNetwork(): INBTTReady {
         }
     }
 
-    private fun getNeighbours(from: ShaftElement): ArrayList<Pair<Direction,ShaftElement>> {
+    private fun getNeighbours(from: ShaftElement): ArrayList<ShaftNeighbour> {
         val c = Coordonate()
-        val ret = ArrayList<Pair<Direction,ShaftElement>>(6)
+        val ret = ArrayList<ShaftNeighbour>(6)
         for (dir in from.shaftConnectivity) {
             c.copyFrom(from.coordonate())
             c.move(dir)
             val to = NodeManager.instance!!.getTransparentNodeFromCoordinate(c)
             if (to is ShaftElement) {
                 for (dir2 in to.shaftConnectivity) {
-                    if (dir2.getInverse() == dir) {
-                        ret.add(Pair<Direction,ShaftElement>(dir, to))
+                    if (dir2.inverse == dir) {
+                        ret.add(ShaftNeighbour(dir, to))
                         break
                     }
                 }
@@ -189,3 +189,8 @@ interface ShaftElement {
 fun createShaftWatchdog(shaftElement: ShaftElement): ShaftSpeedWatchdog {
     return ShaftSpeedWatchdog(shaftElement, absoluteMaximumShaftSpeed)
 }
+
+data class ShaftNeighbour(
+    val side: Direction,
+    val elemment: ShaftElement
+)
