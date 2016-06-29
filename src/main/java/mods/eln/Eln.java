@@ -34,6 +34,7 @@ import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
 import mods.eln.mechanical.GeneratorDescriptor;
+import mods.eln.mechanical.JointHubDescriptor;
 import mods.eln.mechanical.SteamTurbineDescriptor;
 import mods.eln.mechanical.StraightJointDescriptor;
 import mods.eln.misc.*;
@@ -2612,8 +2613,17 @@ public class Eln {
 			subId = 11;
 
 			StraightJointDescriptor desc = new StraightJointDescriptor(
-				TR_NAME(Type.NONE, "Straight mechanical joint"),
+				TR_NAME(Type.NONE, "Straight joint"),
 				obj.getObj("StraightJoint"));
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 12;
+
+			JointHubDescriptor desc = new JointHubDescriptor(
+				TR_NAME(Type.NONE, "Joint hub"),
+				obj.getObj("JointHub"));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
