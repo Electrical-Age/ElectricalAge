@@ -78,11 +78,11 @@ class ShaftNetwork(): INBTTReady {
         assert(from in elements)
         val neighbours = getNeighbours(from)
         for (neighbour in neighbours) {
-            if (neighbour.elemment.shaft != this) {
-                mergeShafts(neighbour.elemment.shaft)
+            if (neighbour.element.shaft != this) {
+                mergeShafts(neighbour.element.shaft)
 
                 // Inform the neighbour and the element itself that its shaft connectivity has changed.
-                neighbour.elemment.connectedOnSide(neighbour.side.inverse)
+                neighbour.element.connectedOnSide(neighbour.side.inverse)
                 from.connectedOnSide(neighbour.side)
             }
         }
@@ -103,7 +103,7 @@ class ShaftNetwork(): INBTTReady {
 
         // Inform all directly involved shafts about the change in connections.
         for (neighbour in getNeighbours(from)) {
-            neighbour.elemment.disconnectedOnSide(neighbour.side.inverse)
+            neighbour.element.disconnectedOnSide(neighbour.side.inverse)
             from.disconnectedOnSide(neighbour.side)
         }
     }
@@ -129,9 +129,9 @@ class ShaftNetwork(): INBTTReady {
                 next.shaft = shaft
                 val neighbours = getNeighbours(next)
                 for (neighbour in neighbours) {
-                    if (unseen.contains(neighbour.elemment)) {
-                        unseen.remove(neighbour.elemment)
-                        queue.add(neighbour.elemment)
+                    if (unseen.contains(neighbour.element)) {
+                        unseen.remove(neighbour.element)
+                        queue.add(neighbour.element)
                     }
                 }
             }
@@ -192,5 +192,5 @@ fun createShaftWatchdog(shaftElement: ShaftElement): ShaftSpeedWatchdog {
 
 data class ShaftNeighbour(
     val side: Direction,
-    val elemment: ShaftElement
+    val element: ShaftElement
 )

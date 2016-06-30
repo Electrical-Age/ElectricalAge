@@ -2612,11 +2612,16 @@ public class Eln {
 					TR_NAME(Type.NONE, "Gas Turbine"),
 					obj.getObj("GasTurbine")
 			);
+			subId = 12;
+
+			StraightJointDescriptor desc = new StraightJointDescriptor(
+				TR_NAME(Type.NONE, "Straight joint"),
+				obj.getObj("StraightJoint"));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
 		{
-			subId = 12;
+			subId = 13;
 
 			JointHubDescriptor desc = new JointHubDescriptor(
 				TR_NAME(Type.NONE, "Joint hub"),
@@ -2625,11 +2630,20 @@ public class Eln {
 		}
 
 		{
-			subId = 13;
+			subId = 14;
 
 			FlywheelDescriptor desc = new FlywheelDescriptor(
 				TR_NAME(Type.NONE, "Flywheel"),
 				obj.getObj("Flywheel"));
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 15;
+
+			TachometerDescriptor desc = new TachometerDescriptor(
+				TR_NAME(Type.NONE, "Tachometer"),
+				obj.getObj("StraightJoint"));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}

@@ -15,7 +15,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 
 class JointHubDescriptor(baseName : String, obj : Obj3D): SimpleShaftDescriptor(baseName,
-        JointHubElement::class, JointHubRender::class, EntityMetaTag.Fluid) {
+        JointHubElement::class, JointHubRender::class, EntityMetaTag.Basic) {
     override val obj = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = emptyArray<Obj3D.Obj3DPart>()

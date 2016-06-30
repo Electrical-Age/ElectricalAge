@@ -10,8 +10,8 @@ import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
 import net.minecraft.entity.player.EntityPlayer
 
-class StraightJointDescriptor(baseName : String, obj : Obj3D): SimpleShaftDescriptor(baseName,
-        StraightJointElement::class, ShaftRender::class, EntityMetaTag.Fluid) {
+open class StraightJointDescriptor(baseName : String, obj : Obj3D): SimpleShaftDescriptor(baseName,
+        StraightJointElement::class, ShaftRender::class, EntityMetaTag.Basic) {
     override val obj = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = arrayOf(obj.getPart("Shaft"))
