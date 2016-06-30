@@ -33,11 +33,7 @@ import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage.OreScan
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
-import mods.eln.mechanical.GasTurbineDescriptor;
-import mods.eln.mechanical.GeneratorDescriptor;
-import mods.eln.mechanical.JointHubDescriptor;
-import mods.eln.mechanical.SteamTurbineDescriptor;
-import mods.eln.mechanical.StraightJointDescriptor;
+import mods.eln.mechanical.*;
 import mods.eln.misc.*;
 import mods.eln.misc.series.SerieEE;
 import mods.eln.node.NodeBlockEntity;
@@ -2625,6 +2621,15 @@ public class Eln {
 			JointHubDescriptor desc = new JointHubDescriptor(
 				TR_NAME(Type.NONE, "Joint hub"),
 				obj.getObj("JointHub"));
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 13;
+
+			FlywheelDescriptor desc = new FlywheelDescriptor(
+				TR_NAME(Type.NONE, "Flywheel"),
+				obj.getObj("Flywheel"));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}

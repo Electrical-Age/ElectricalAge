@@ -17,7 +17,7 @@ class StraightJointDescriptor(baseName : String, obj : Obj3D): SimpleShaftDescri
     override val rotating = arrayOf(obj.getPart("Shaft"))
 }
 
-class StraightJointElement(node : TransparentNode, desc_ : TransparentNodeDescriptor): SimpleShaftElement(node, desc_) {
+open class StraightJointElement(node : TransparentNode, desc_ : TransparentNodeDescriptor): SimpleShaftElement(node, desc_) {
     override val shaftMass = 0.5
 
     override fun getElectricalLoad(side: Direction?, lrdu: LRDU?): ElectricalLoad? = null
