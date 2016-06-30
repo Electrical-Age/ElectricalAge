@@ -2643,7 +2643,7 @@ public class Eln {
 
 			TachometerDescriptor desc = new TachometerDescriptor(
 				TR_NAME(Type.NONE, "Tachometer"),
-				obj.getObj("StraightJoint"));
+				obj.getObj("Tachometer"));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}

@@ -26,7 +26,7 @@ open class TachometerElement(node : TransparentNode, desc_ : TransparentNodeDesc
     private val outputGate = NbtElectricalGateOutput("rpmOutput")
     private val outputGateProcess = NbtElectricalGateOutputProcess("rpmOutputProcess", outputGate)
     private val outputGateSlowProcess = IProcess {
-        outputGateProcess.setOutputNormalizedSafe(this.shaft.rads / 50)
+        outputGateProcess.setOutputNormalizedSafe(this.shaft.rads / 50) // TODO: Make configurable
     }
 
     init {
@@ -50,3 +50,5 @@ open class TachometerElement(node : TransparentNode, desc_ : TransparentNodeDesc
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float,
                                   vz: Float): Boolean = false
 }
+
+// TODO: Custom render that draws the signal cable.
