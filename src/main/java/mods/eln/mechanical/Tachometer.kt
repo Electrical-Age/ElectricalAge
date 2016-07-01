@@ -1,21 +1,27 @@
 package mods.eln.mechanical
 
+import mods.eln.Eln
+import mods.eln.cable.CableRenderType
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
+import mods.eln.misc.LRDUMask
 import mods.eln.misc.Obj3D
 import mods.eln.node.NodeBase
 import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
+import mods.eln.node.transparent.TransparentNodeEntity
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
 import net.minecraft.entity.player.EntityPlayer
+import java.io.DataInputStream
+import java.io.DataOutputStream
 
 class TachometerDescriptor(baseName : String, obj : Obj3D): SimpleShaftDescriptor(baseName,
-        TachometerElement::class, ShaftRender::class, EntityMetaTag.Basic) {
+        TachometerElement::class, TachometerRender::class, EntityMetaTag.Basic) {
     override val obj = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = arrayOf(obj.getPart("Shaft"))
@@ -49,6 +55,24 @@ open class TachometerElement(node : TransparentNode, desc_ : TransparentNodeDesc
 
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float,
                                   vz: Float): Boolean = false
+
+    override fun networkSerialize(stream: DataOutputStream) {
+        super.networkSerialize(stream)
+        node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream)
+    }
 }
 
-// TODO: Custom render that draws the signal cable.
+class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {
+    private var renderPreProcess: CableRenderType? = null
+    private val connections = LRDUMask()
+
+    override fun draw() {
+        renderPreProcess = drawCable(Direction.YN, Eln.instance.stdCableRenderSignal, connections, renderPreProcess)
+        super.draw()
+    }
+
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+        connections.deserialize(stream)
+    }
+}
