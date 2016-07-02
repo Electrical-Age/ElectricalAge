@@ -2,6 +2,11 @@ package mods.eln.mechanical
 
 import mods.eln.Eln
 import mods.eln.cable.CableRenderType
+import mods.eln.gui.GuiHelper
+import mods.eln.gui.GuiScreenEln
+import mods.eln.gui.GuiTextFieldEln
+import mods.eln.gui.IGuiObject
+import mods.eln.i18n.I18N
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
 import mods.eln.misc.LRDUMask
@@ -16,9 +21,16 @@ import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
+import net.minecraft.client.gui.GuiButton
+import net.minecraft.client.gui.GuiScreen
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.nbt.NBTTagCompound
+import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import java.io.IOException
+import java.text.NumberFormat
+import java.text.ParseException
 
 class TachometerDescriptor(baseName : String, obj : Obj3D): SimpleShaftDescriptor(baseName,
         TachometerElement::class, TachometerRender::class, EntityMetaTag.Basic) {
@@ -28,11 +40,20 @@ class TachometerDescriptor(baseName : String, obj : Obj3D): SimpleShaftDescripto
 }
 
 open class TachometerElement(node : TransparentNode, desc_ : TransparentNodeDescriptor): SimpleShaftElement(node, desc_) {
+    companion object {
+        val SetRangeEventId = 1
+
+        val DefaultMinRads = 0.0f
+        val DefaultMaxRads = 52.36f
+    }
+
     override val shaftMass = 0.5
     private val outputGate = NbtElectricalGateOutput("rpmOutput")
     private val outputGateProcess = NbtElectricalGateOutputProcess("rpmOutputProcess", outputGate)
+    private var minRads = DefaultMinRads
+    private var maxRads = DefaultMaxRads
     private val outputGateSlowProcess = IProcess {
-        outputGateProcess.setOutputNormalizedSafe(this.shaft.rads / 50) // TODO: Make configurable
+        outputGateProcess.setOutputNormalizedSafe((this.shaft.rads - minRads) / (maxRads - minRads))
     }
 
     init {
@@ -59,12 +80,43 @@ open class TachometerElement(node : TransparentNode, desc_ : TransparentNodeDesc
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream)
         node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream)
+        stream.writeFloat(minRads)
+        stream.writeFloat(maxRads)
+    }
+
+    override fun hasGui(): Boolean = true
+
+    override fun networkUnserialize(stream: DataInputStream?): Byte {
+        val type = super.networkUnserialize(stream)
+        when (type.toInt()) {
+            SetRangeEventId -> {
+                minRads = stream?.readFloat() ?: DefaultMinRads
+                maxRads = stream?.readFloat() ?: DefaultMaxRads
+                needPublish()
+                return unserializeNulldId
+            }
+        }
+        return type
+    }
+
+    override fun readFromNBT(nbt: NBTTagCompound) {
+        super.readFromNBT(nbt)
+        minRads = nbt.getFloat("minRads")
+        maxRads = nbt.getFloat("maxRads")
+    }
+
+    override fun writeToNBT(nbt: NBTTagCompound) {
+        super.writeToNBT(nbt)
+        nbt.setFloat("minRads", minRads)
+        nbt.setFloat("maxRads", maxRads)
     }
 }
 
 class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {
     private var renderPreProcess: CableRenderType? = null
     private val connections = LRDUMask()
+    internal var minRads = TachometerElement.DefaultMinRads
+    internal var maxRads = TachometerElement.DefaultMaxRads
 
     override fun draw() {
         renderPreProcess = drawCable(Direction.YN, Eln.instance.stdCableRenderSignal, connections, renderPreProcess)
@@ -74,5 +126,54 @@ class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)
         connections.deserialize(stream)
+        minRads = stream.readFloat()
+        maxRads = stream.readFloat()
+    }
+
+    override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? = TachometerGui(this)
+}
+
+class TachometerGui(val render: TachometerRender): GuiScreenEln() {
+    val validate: GuiButton by lazy { newGuiButton(82, 12, 80, I18N.tr("Validate")) }
+    val lowValue: GuiTextFieldEln by lazy { newGuiTextField(8, 24, 70) }
+    val highValue: GuiTextFieldEln by lazy { newGuiTextField(8, 8, 70) }
+
+    override fun newHelper(): GuiHelper? = GuiHelper(this, 169, 44)
+
+    override fun initGui() {
+        super.initGui()
+        validate.enabled = true
+        lowValue.setComment(I18N.tr("RPM corresponding\nto 0% output").split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray())
+        highValue.setComment(I18N.tr("RPM corresponding\nto 100% output").split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray())
+        lowValue.setText(render.minRads * 30f / Math.PI.toFloat())
+        highValue.setText(render.maxRads * 30f / Math.PI.toFloat())
+    }
+
+    override fun guiObjectEvent(`object`: IGuiObject?) {
+        super.guiObjectEvent(`object`)
+        if (`object` === validate) {
+
+            try {
+                val minRads = NumberFormat.getInstance().parse(lowValue.text).toFloat() * Math.PI.toFloat() / 30.0f
+                val maxRads = NumberFormat.getInstance().parse(highValue.text).toFloat() * Math.PI.toFloat() / 30.0f
+
+                try {
+                    val bos = ByteArrayOutputStream()
+                    val stream = DataOutputStream(bos)
+
+                    render.preparePacketForServer(stream)
+
+                    stream.writeByte(TachometerElement.SetRangeEventId)
+                    stream.writeFloat(minRads)
+                    stream.writeFloat(maxRads)
+
+                    render.sendPacketToServer(bos)
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+
+            } catch (e: ParseException) {
+            }
+        }
     }
 }
