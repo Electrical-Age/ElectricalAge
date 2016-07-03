@@ -22,11 +22,10 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
     // Computed to equal what you'd get from Railcraft steam engines, plus a small
     // bonus because you're using Electrical Age you crazy person you.
     // This pretty much fills up a VHV line. The generator drag gives us a bit of leeway.
-    // TODO: This should be tied into the config options.
     abstract val fluidPower: Float
-    // Well, this is a *steam* turbine.
-    // TODO: Factor out into an abstract turbine descriptor.
+    // How we describe the fluid in the tooltip.
     abstract val fluidDescription: String
+    // The fluids actually accepted.
     abstract val fluidTypes: Array<String>
     // Width of the efficiency curve.
     // <1 means "Can't be started without power".
@@ -66,7 +65,6 @@ class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
     // This pretty much fills up a VHV line. The generator drag gives us a bit of leeway.
     // TODO: This should be tied into the config options.
     override val fluidPower = 2.2f
-    // TODO: Factor out into an abstract turbine descriptor.
     override val fluidDescription = "steam"
     override val fluidTypes = arrayOf("steam")
     // Steam turbines can, just barely, be started without power.
