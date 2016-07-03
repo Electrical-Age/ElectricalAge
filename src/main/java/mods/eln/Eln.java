@@ -5836,7 +5836,7 @@ public class Eln {
 				Character.valueOf('T'), findItemStack("Mining Pipe"),
 				Character.valueOf('C'), "circuitBasic",
 				Character.valueOf('M'), findItemStack("Electrical Motor"),
-				Character.valueOf('P'), new ItemStack(Items.iron_pickaxe));
+				Character.valueOf('P'), "gemDiamond");
 
 		addRecipe(findItemStack("Average Electrical Drill"),
 				"RCR",
@@ -5849,11 +5849,11 @@ public class Eln {
 		addRecipe(findItemStack("Fast Electrical Drill"),
 				"MCM",
 				" T ",
-				" P ",
+				" d ",
 				Character.valueOf('T'), findItemStack("Mining Pipe"),
 				Character.valueOf('C'), "circuitAdvanced",
 				Character.valueOf('M'), findItemStack("Advanced Electrical Motor"),
-				Character.valueOf('P'), new ItemStack(Items.diamond_pickaxe));
+				Character.valueOf('d'), "gemDiamond");
 
 	}
 
@@ -5950,7 +5950,7 @@ public class Eln {
 				" T ",
 				"IMI",
 				"IBI",
-				Character.valueOf('T'), new ItemStack(Items.iron_axe),
+				Character.valueOf('T'), "itemAxe",
 				Character.valueOf('B'), findItemStack("Portable Battery"),
 				Character.valueOf('M'), findItemStack("Electrical Motor"),
 				Character.valueOf('I'), "ingotIron");
