@@ -87,20 +87,7 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
     // to recover the rest by using the heat output. Which doesn't exist right now. To be
     // precise, 80% as efficient.
     override val fluidDescription = "gasoline"
-    override val fluidTypes = arrayOf(
-            // Various gasoline equivalents, and light oils a small turbine can reasonably burn.
-            // These are all pretty close to each other in energy content.
-            "fuel",  // Buildcraft
-            "rc ethanol",  // RotaryCraft
-            "biofuel",  // Minefactory Reloaded
-            "bioethanol",  // Forestry
-            "biodiesel",  // Immersive Engineering
-            "kerosene",  // PneumaticCraft
-            "lpg",  // PneumaticCraft
-            "fuelgc",  // GalactiCraft
-            "naturalgas",  // Magneticraft
-            "lightoil"  // Magneticraft
-    )
+    override val fluidTypes = gasolineList + gasList
     // Gas turbines have a fairly wide efficiency range.
     override val efficiencyCurve = 2.0f
     // But need to be spun up before working.
@@ -110,7 +97,6 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
 class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) :
         SimpleShaftElement(node, desc_) {
     val desc = desc_ as TurbineDescriptor
-    val fluids = desc.fluidTypes.map { FluidRegistry.getFluid(it) }.filterNotNull().toTypedArray()
 
     val tank = TransparentNodeElementFluidHandler(1000)
     var steamRate = 0f
@@ -163,14 +149,9 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
     }
 
     init {
+        val fluids = fluidListToFluids(if (desc.fluidTypes.isEmpty()) arrayOf("lava") else desc.fluidTypes)
+        tank.setFilter(fluids)
         slowProcessList.add(turbineSlowProcess)
-
-        tank.setFilter(if (fluids.isNotEmpty()) {
-            fluids
-        } else {
-            arrayOf(FluidRegistry.LAVA)
-        })
-
         electricalLoadList.add(throttle)
     }
 
