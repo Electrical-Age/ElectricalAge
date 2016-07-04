@@ -2615,7 +2615,7 @@ public class Eln {
 			subId = 12;
 
 			StraightJointDescriptor desc = new StraightJointDescriptor(
-				TR_NAME(Type.NONE, "Straight joint"),
+				TR_NAME(Type.NONE, "Joint"),
 				obj.getObj("StraightJoint"));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -5305,6 +5305,40 @@ public class Eln {
 					Character.valueOf('M'), findItemStack("Advanced Machine Block")
 			);
 		}
+
+		addRecipe(findItemStack("Joint"),
+			"aaa",
+			" m ",
+			" m ",
+			Character.valueOf('a'), "ingotAlloy",
+			Character.valueOf('m'), findItemStack("Machine Block")
+		);
+
+		addRecipe(findItemStack("Joint hub"),
+			"aaa",
+			"aaa",
+			" m ",
+			Character.valueOf('a'), "ingotAlloy",
+			Character.valueOf('m'), findItemStack("Machine Block")
+		);
+
+		addRecipe(findItemStack("Flywheel"),
+			"sss",
+			"sms",
+			"sss",
+			Character.valueOf('s'), "ingotIron",
+			Character.valueOf('m'), findItemStack("Machine Block")
+		);
+
+		addRecipe(findItemStack("Tachometer"),
+			"aaa",
+			"pm ",
+			"cm ",
+			Character.valueOf('a'), "ingotAlloy",
+			Character.valueOf('m'), findItemStack("Machine Block"),
+			Character.valueOf('p'), findItemStack("Electrical Probe Chip"),
+			Character.valueOf('c'), findItemStack("Signal Cable")
+		);
 	}
 
 	void recipeBattery() {
