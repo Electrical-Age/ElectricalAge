@@ -1,5 +1,7 @@
 package mods.eln.mechanical
 
+import mods.eln.Eln
+import mods.eln.cable.CableRenderDescriptor
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
 import mods.eln.node.transparent.*
@@ -180,8 +182,5 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
 }
 
 class TurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {
-    override fun draw() {
-        super.draw()
-        // TODO: Actually, no, do wire drawing in the base class. And stuff.
-    }
+    override val cableRender = Eln.instance.stdCableRenderSignal
 }

@@ -1,9 +1,9 @@
 package mods.eln.mechanical
 
-import mods.eln.misc.Direction
-import mods.eln.misc.Obj3D
-import mods.eln.misc.Utils
-import mods.eln.misc.preserveMatrix
+import mods.eln.cable.CableRender
+import mods.eln.cable.CableRenderDescriptor
+import mods.eln.cable.CableRenderType
+import mods.eln.misc.*
 import mods.eln.node.transparent.*
 import mods.eln.sim.process.destruct.WorldExplosion
 import net.minecraft.item.ItemStack
@@ -56,18 +56,62 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     override fun use2DIcon() = false
 }
 
-open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): TransparentNodeElementRender(entity, desc) {
+abstract class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): TransparentNodeElementRender(entity, desc) {
     private val desc = desc as SimpleShaftDescriptor
     var rads = 0.0
     var logRads = 0.0
     var angle = 0.0
+    // Cable drawing:
+    val eConn = LRDUMask()
+    val mask = LRDUMask()
+    var connectionType: CableRenderType? = null
+    abstract val cableRender : CableRenderDescriptor
+    var cableRefresh = true
 
+    init {
+        mask.set(LRDU.Down, true)
+    }
+
+    /**
+     * By default, call the descriptor's draw function and nothing else.
+     */
     override fun draw() {
-        front.glRotateXnRef()
-        if (front == Direction.XP || front == Direction.ZP)
-            desc.draw(angle)
-        else
-            desc.draw(-angle);
+        draw {}
+    }
+
+    /**
+     * But, optionally, do some more drawing in the block context.
+     */
+    fun draw(extra: () -> Unit) {
+        preserveMatrix {
+            front.glRotateXnRef()
+            if (front == Direction.XP || front == Direction.ZP)
+                desc.draw(angle)
+            else
+                desc.draw(-angle);
+
+            extra()
+        }
+
+        if (cableRender != null) {
+            preserveMatrix {
+                if (cableRefresh) {
+                    cableRefresh = false;
+                    connectionType = CableRender.connectionType(tileEntity, eConn, front.down())
+                }
+
+                glCableTransforme(front.down());
+                cableRender.bindCableTexture();
+
+                for (lrdu in LRDU.values()) {
+                    Utils.setGlColorFromDye(connectionType!!.otherdry[lrdu.toInt()])
+                    if (!eConn.get(lrdu)) continue
+                    if (lrdu != front.down().getLRDUGoingTo(front) && lrdu.inverse() != front.down().getLRDUGoingTo(front)) continue
+                    mask.set(1.shl(lrdu.ordinal))
+                    CableRender.drawCable(cableRender, mask, connectionType)
+                }
+            }
+        }
     }
 
     override fun refresh(deltaT: Float) {
@@ -79,6 +123,8 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
         super.networkUnserialize(stream)
         rads = stream.readFloat().toDouble()
         logRads = Math.log(rads + 1) / Math.log(1.2)
+        eConn.deserialize(stream)
+        cableRefresh = true
     }
 }
 
@@ -108,6 +154,8 @@ abstract class SimpleShaftElement(node : TransparentNode, desc_: TransparentNode
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream);
         stream.writeFloat(shaft.rads.toFloat())
+        // For cables.
+        node.lrduCubeMask.getTranslate(front.down()).serialize(stream)
     }
 
     override fun writeToNBT(nbt: NBTTagCompound) {
