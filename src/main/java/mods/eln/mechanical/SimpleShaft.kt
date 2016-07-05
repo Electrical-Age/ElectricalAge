@@ -65,7 +65,7 @@ abstract class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeD
     val eConn = LRDUMask()
     val mask = LRDUMask()
     var connectionType: CableRenderType? = null
-    abstract val cableRender : CableRenderDescriptor
+    abstract val cableRender : CableRenderDescriptor?
     var cableRefresh = true
 
     init {
@@ -101,7 +101,7 @@ abstract class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeD
                 }
 
                 glCableTransforme(front.down());
-                cableRender.bindCableTexture();
+                cableRender!!.bindCableTexture();
 
                 for (lrdu in LRDU.values()) {
                     Utils.setGlColorFromDye(connectionType!!.otherdry[lrdu.toInt()])
