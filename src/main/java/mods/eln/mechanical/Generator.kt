@@ -1,10 +1,7 @@
 package mods.eln.mechanical
 
 import mods.eln.Eln
-import mods.eln.cable.CableRender
 import mods.eln.cable.CableRenderDescriptor
-import mods.eln.cable.CableRenderType
-import java.awt.Color
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
 import mods.eln.node.transparent.EntityMetaTag
@@ -26,6 +23,7 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import org.lwjgl.opengl.GL11
+import java.awt.Color
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
@@ -83,11 +81,7 @@ class GeneratorDescriptor(
 class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescriptor): ShaftRender(entity, desc_) {
     val entity = entity
 
-    var cableRefresh = true
-    val eConn = LRDUMask()
-    val mask = LRDUMask()
-    var connectionType: CableRenderType? = null
-    val cableRender = Eln.instance.stdCableRender3200V
+    override val cableRender = Eln.instance.stdCableRender3200V
     val desc = desc_ as GeneratorDescriptor
 
     val ledColors: Array<Color> = arrayOf(
@@ -109,10 +103,6 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
             RED
     )
 
-    init {
-        mask.set(LRDU.Down, true)
-    }
-
     fun calcPower(power: Double) {
         if (power < 0) {
             for (i in 1..6) {
@@ -129,36 +119,15 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
         }
     }
 
-
     override fun draw() {
-        preserveMatrix {
-            super.draw()
-            // Draw the LEDs.
+        draw {
             ledColors.forEachIndexed { i, color ->
                 GL11.glColor3f(
                         color.red / 255f,
                         color.green / 255f,
                         color.blue / 255f
                 )
-                desc.powerLights.get(i).draw()
-            }
-        }
-
-        preserveMatrix {
-            if (cableRefresh) {
-                cableRefresh = false;
-                connectionType = CableRender.connectionType(tileEntity, eConn, front.down())
-            }
-
-            glCableTransforme(front.down());
-            cableRender.bindCableTexture();
-
-            for (lrdu in LRDU.values()) {
-                Utils.setGlColorFromDye(connectionType!!.otherdry[lrdu.toInt()])
-                if (!eConn.get(lrdu)) continue
-                if (lrdu != front.down().getLRDUGoingTo(front) && lrdu.inverse() != front.down().getLRDUGoingTo(front)) continue
-                mask.set(1.shl(lrdu.ordinal))
-                CableRender.drawCable(cableRender, mask, connectionType)
+                desc.powerLights[i].draw()
             }
         }
     }
@@ -171,8 +140,6 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
 
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)
-        eConn.deserialize(stream)
-        cableRefresh = true
         calcPower(stream.readDouble())
     }
 
@@ -304,7 +271,6 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
 
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream)
-        node.lrduCubeMask.getTranslate(front.down()).serialize(stream)
         stream.writeDouble(lastE)
     }
 }

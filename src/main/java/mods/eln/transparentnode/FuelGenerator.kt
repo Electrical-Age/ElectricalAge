@@ -58,6 +58,8 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
     internal val switch = obj?.getPart("switch")
     internal val cableRenderDescriptor = cable.render
 
+    internal val fuels = gasolineList
+
     init {
         voltageLevelColor = VoltageLevelColor.fromCable(cable)
     }
@@ -101,20 +103,21 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
                                 list: MutableList<String>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
 
-        list.add(tr("Produces electricity using fuel."))
+        list.add(tr("Produces electricity using gasoline."))
         list.add("  " + tr("Nominal voltage: %1$ V", Utils.plotValue(cable.electricalNominalVoltage)))
         list.add("  " + tr("Nominal power: %1$ W", Utils.plotValue(nominalPower)))
     }
 }
 
-class FuelGeneratorElement(transparentNode: TransparentNode, descriptor: TransparentNodeDescriptor):
-        TransparentNodeElement(transparentNode, descriptor) {
+class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: TransparentNodeDescriptor):
+        TransparentNodeElement(transparentNode, descriptor_) {
     internal var positiveLoad = NbtElectricalLoad("positiveLoad")
     internal var powerSource = PowerSource("powerSource", positiveLoad)
     internal var slowProcess = FuelGeneratorSlowProcess(this)
-    internal var descriptor = descriptor as FuelGeneratorDescriptor
-    internal val fuel = FluidRegistry.getFluid("fuel") ?: FluidRegistry.getFluid("lava")
+    internal var descriptor = descriptor_ as FuelGeneratorDescriptor
+    internal val fuels = fluidListToFluids(descriptor.fuels).map { it.id }
     internal var tankLevel = 0.0
+    internal var tankFluid = FluidRegistry.getFluid("lava").id
     internal var on by published(false)
     internal var voltageGracePeriod = 0.0
 
@@ -170,7 +173,8 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor: Transpa
                 val deltaLevel = 1.0 / FuelGeneratorDescriptor.TankCapacityInBuckets;
                 if (tankLevel <= 1.0 - deltaLevel) {
                     val fluidStack = FluidContainerRegistry.getFluidForFilledItem(bucket)
-                    if (fluidStack != null && fluidStack.fluidID == fuel.id) {
+                    if (fluidStack != null && (fluidStack.fluidID == tankFluid || tankLevel <= 0.0) &&
+                            fluidStack.fluidID in fuels) {
                         tankLevel += deltaLevel;
                         if (player != null && !player.capabilities.isCreativeMode) {
                             val emptyBucket = FluidContainerRegistry.drainFluidContainer(bucket);

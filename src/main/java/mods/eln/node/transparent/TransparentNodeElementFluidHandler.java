@@ -14,7 +14,7 @@ import net.minecraftforge.fluids.*;
  * create a package fluid in eln that contains all fluid related code?
  */
 public class TransparentNodeElementFluidHandler implements IFluidHandler, INBTTReady {
-    private Fluid filter;
+    private Fluid[] whitelist;
     FluidTank tank;
 
     /**
@@ -26,15 +26,24 @@ public class TransparentNodeElementFluidHandler implements IFluidHandler, INBTTR
         tank = new FluidTank(tankSize);
     }
 
-    public void setFilter(Fluid filter) {
-        assert filter != null;
-        this.filter = filter;
+    public void setFilter(Fluid[] whitelist) {
+        assert whitelist != null;
+        this.whitelist = whitelist;
     }
 
     @Override
     public int fill(ForgeDirection from, FluidStack resource, boolean doFill) {
-        if (filter != null && resource.getFluid().getID() != filter.getID()) return 0;
-        return tank.fill(resource, doFill);
+        if (whitelist == null || tank.getFluidAmount() > 0) {
+            return tank.fill(resource, doFill);
+        } else {
+            int resourceId = resource.getFluidID();
+            for (int i = 0; i < whitelist.length; i++) {
+                if (whitelist[i].getID() == resourceId) {
+                    return tank.fill(resource, doFill);
+                }
+            }
+        }
+        return 0;
     }
 
     @Override
@@ -52,8 +61,17 @@ public class TransparentNodeElementFluidHandler implements IFluidHandler, INBTTR
 
     @Override
     public boolean canFill(ForgeDirection from, Fluid fluid) {
-        if (filter != null && fluid.getID() != filter.getID()) return false;
-        return true;
+        int fluidId = fluid.getID();
+        if (tank.getFluidAmount() > 0) {
+            return tank.getFluid().getFluidID() == fluidId;
+        } else {
+            for (int i = 0; i < whitelist.length; i++) {
+                if (whitelist[i].getID() == fluidId) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

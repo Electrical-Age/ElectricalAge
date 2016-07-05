@@ -33,6 +33,7 @@ import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage.OreScan
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
+import mods.eln.mechanical.GasTurbineDescriptor;
 import mods.eln.mechanical.GeneratorDescriptor;
 import mods.eln.mechanical.SteamTurbineDescriptor;
 import mods.eln.misc.*;
@@ -2603,6 +2604,15 @@ public class Eln {
 					nominalP / (nominalU / 25),
 					nominalP,
 					sixNodeThermalLoadInitializer.copy()
+			);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 11;
+			GasTurbineDescriptor desc = new GasTurbineDescriptor(
+					TR_NAME(Type.NONE, "Gas Turbine"),
+					obj.getObj("GasTurbine")
 			);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
@@ -5241,6 +5251,30 @@ public class Eln {
 				Character.valueOf('A'), "blockAluminum",
 				Character.valueOf('M'), findItemStack("Advanced Machine Block")
 		);
+		// TODO(Baughn): Factor this into a builder.
+		if (OreDictionary.doesOreNameExist("ingotSteel") && OreDictionary.doesOreNameExist("blockSteel")) {
+			addRecipe(findItemStack("Gas Turbine"),
+					"msH",
+					"sSs",
+					" M ",
+					Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
+					Character.valueOf('H'), findItemStack("Copper Thermal Cable"),
+					Character.valueOf('s'), "ingotSteel",
+					Character.valueOf('S'), "blockSteel",
+					Character.valueOf('M'), findItemStack("Advanced Machine Block")
+			);
+		} else {
+			addRecipe(findItemStack("Gas Turbine"),
+					"msH",
+					"sSs",
+					" M ",
+					Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
+					Character.valueOf('H'), findItemStack("Copper Thermal Cable"),
+					Character.valueOf('s'), "ingotIron",
+					Character.valueOf('S'), "blockIron",
+					Character.valueOf('M'), findItemStack("Advanced Machine Block")
+			);
+		}
 	}
 
 	void recipeBattery() {
