@@ -1,6 +1,7 @@
 package mods.eln.mechanical
 
 import mods.eln.Eln
+import mods.eln.cable.CableRenderDescriptor
 import mods.eln.cable.CableRenderType
 import mods.eln.gui.GuiHelper
 import mods.eln.gui.GuiScreenEln
@@ -113,6 +114,7 @@ open class TachometerElement(node : TransparentNode, desc_ : TransparentNodeDesc
 }
 
 class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {
+    override val cableRender: CableRenderDescriptor? = null
     private var renderPreProcess: CableRenderType? = null
     private val connections = LRDUMask()
     internal var minRads = TachometerElement.DefaultMinRads

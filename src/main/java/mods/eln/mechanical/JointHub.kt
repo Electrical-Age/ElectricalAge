@@ -1,5 +1,6 @@
 package mods.eln.mechanical
 
+import mods.eln.cable.CableRenderDescriptor
 import mods.eln.misc.*
 import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
@@ -105,6 +106,7 @@ class JointHubElement(node : TransparentNode, desc_ : TransparentNodeDescriptor)
 }
 
 class JointHubRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {
+    override val cableRender: CableRenderDescriptor? = null
     val desc = desc as JointHubDescriptor
     val connectedSides = DirectionSet()
 
