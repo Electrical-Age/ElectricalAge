@@ -2609,9 +2609,14 @@ public class Eln {
 		{
 			subId = 11;
 			GasTurbineDescriptor desc = new GasTurbineDescriptor(
-					TR_NAME(Type.NONE, "Gas Turbine"),
-					obj.getObj("GasTurbine")
+				TR_NAME(Type.NONE, "Gas Turbine"),
+				obj.getObj("GasTurbine")
 			);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+
+		}
+
+		{
 			subId = 12;
 
 			StraightJointDescriptor desc = new StraightJointDescriptor(
