@@ -5328,10 +5328,11 @@ public class Eln {
 		);
 
 		addRecipe(findItemStack("Flywheel"),
-			"iii",
-			"imi",
-			"iii",
+			"iIi",
+			"ImI",
+			"iIi",
 			Character.valueOf('i'), "ingotIron",
+			Character.valueOf('I'), "blockIron",
 			Character.valueOf('m'), findItemStack("Machine Block")
 		);
 
