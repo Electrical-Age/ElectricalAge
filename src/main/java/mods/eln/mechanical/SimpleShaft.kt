@@ -21,7 +21,7 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     abstract val static: Array<out Obj3D.Obj3DPart>
     abstract val rotating: Array<out Obj3D.Obj3DPart>
 
-    fun draw(angle: Double) {
+    open fun draw(angle: Double) {
         for (part in static) {
             part.draw()
         }
@@ -56,7 +56,7 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     override fun use2DIcon() = false
 }
 
-abstract class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): TransparentNodeElementRender(entity, desc) {
+open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): TransparentNodeElementRender(entity, desc) {
     private val desc = desc as SimpleShaftDescriptor
     var rads = 0.0
     var logRads = 0.0
@@ -65,7 +65,7 @@ abstract class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeD
     val eConn = LRDUMask()
     val mask = LRDUMask()
     var connectionType: CableRenderType? = null
-    abstract val cableRender : CableRenderDescriptor
+    open val cableRender: CableRenderDescriptor? = null
     var cableRefresh = true
 
     init {
@@ -101,7 +101,7 @@ abstract class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeD
                 }
 
                 glCableTransforme(front.down());
-                cableRender.bindCableTexture();
+                cableRender!!.bindCableTexture();
 
                 for (lrdu in LRDU.values()) {
                     Utils.setGlColorFromDye(connectionType!!.otherdry[lrdu.toInt()])

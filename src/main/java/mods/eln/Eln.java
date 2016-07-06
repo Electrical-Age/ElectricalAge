@@ -33,9 +33,7 @@ import mods.eln.item.electricalitem.PortableOreScannerItem.RenderStorage.OreScan
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.item.regulator.RegulatorAnalogDescriptor;
 import mods.eln.item.regulator.RegulatorOnOffDescriptor;
-import mods.eln.mechanical.GasTurbineDescriptor;
-import mods.eln.mechanical.GeneratorDescriptor;
-import mods.eln.mechanical.SteamTurbineDescriptor;
+import mods.eln.mechanical.*;
 import mods.eln.misc.*;
 import mods.eln.misc.series.SerieEE;
 import mods.eln.node.NodeBlockEntity;
@@ -2611,9 +2609,46 @@ public class Eln {
 		{
 			subId = 11;
 			GasTurbineDescriptor desc = new GasTurbineDescriptor(
-					TR_NAME(Type.NONE, "Gas Turbine"),
-					obj.getObj("GasTurbine")
+				TR_NAME(Type.NONE, "Gas Turbine"),
+				obj.getObj("GasTurbine")
 			);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+
+		}
+
+		{
+			subId = 12;
+
+			StraightJointDescriptor desc = new StraightJointDescriptor(
+				TR_NAME(Type.NONE, "Joint"),
+				obj.getObj("StraightJoint"));
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 13;
+
+			JointHubDescriptor desc = new JointHubDescriptor(
+				TR_NAME(Type.NONE, "Joint hub"),
+				obj.getObj("JointHub"));
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 14;
+
+			FlywheelDescriptor desc = new FlywheelDescriptor(
+				TR_NAME(Type.NONE, "Flywheel"),
+				obj.getObj("Flywheel"));
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 15;
+
+			TachometerDescriptor desc = new TachometerDescriptor(
+				TR_NAME(Type.NONE, "Tachometer"),
+				obj.getObj("Tachometer"));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 	}
@@ -5275,6 +5310,41 @@ public class Eln {
 					Character.valueOf('M'), findItemStack("Advanced Machine Block")
 			);
 		}
+
+		addRecipe(findItemStack("Joint"),
+			"   ",
+			"iii",
+			" m ",
+			Character.valueOf('i'), "ingotIron",
+			Character.valueOf('m'), findItemStack("Machine Block")
+		);
+
+		addRecipe(findItemStack("Joint hub"),
+			" i ",
+			"iii",
+			" m ",
+			Character.valueOf('i'), "ingotIron",
+			Character.valueOf('m'), findItemStack("Machine Block")
+		);
+
+		addRecipe(findItemStack("Flywheel"),
+			"iIi",
+			"ImI",
+			"iIi",
+			Character.valueOf('i'), "ingotIron",
+			Character.valueOf('I'), "blockIron",
+			Character.valueOf('m'), findItemStack("Machine Block")
+		);
+
+		addRecipe(findItemStack("Tachometer"),
+			"p  ",
+			"iii",
+			"cm ",
+			Character.valueOf('i'), "ingotIron",
+			Character.valueOf('m'), findItemStack("Machine Block"),
+			Character.valueOf('p'), findItemStack("Electrical Probe Chip"),
+			Character.valueOf('c'), findItemStack("Signal Cable")
+		);
 	}
 
 	void recipeBattery() {
