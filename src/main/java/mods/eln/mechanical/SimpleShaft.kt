@@ -56,7 +56,7 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     override fun use2DIcon() = false
 }
 
-abstract class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): TransparentNodeElementRender(entity, desc) {
+open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): TransparentNodeElementRender(entity, desc) {
     private val desc = desc as SimpleShaftDescriptor
     var rads = 0.0
     var logRads = 0.0
@@ -65,7 +65,7 @@ abstract class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeD
     val eConn = LRDUMask()
     val mask = LRDUMask()
     var connectionType: CableRenderType? = null
-    abstract val cableRender : CableRenderDescriptor?
+    open val cableRender: CableRenderDescriptor? = null
     var cableRefresh = true
 
     init {
