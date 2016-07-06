@@ -5312,34 +5312,34 @@ public class Eln {
 		}
 
 		addRecipe(findItemStack("Joint"),
-			"aaa",
+			"   ",
+			"iii",
 			" m ",
-			" m ",
-			Character.valueOf('a'), "ingotAlloy",
+			Character.valueOf('i'), "ingotIron",
 			Character.valueOf('m'), findItemStack("Machine Block")
 		);
 
 		addRecipe(findItemStack("Joint hub"),
-			"aaa",
-			"aaa",
+			" i ",
+			"iii",
 			" m ",
-			Character.valueOf('a'), "ingotAlloy",
+			Character.valueOf('i'), "ingotIron",
 			Character.valueOf('m'), findItemStack("Machine Block")
 		);
 
 		addRecipe(findItemStack("Flywheel"),
-			"sss",
-			"sms",
-			"sss",
-			Character.valueOf('s'), "ingotIron",
+			"iii",
+			"imi",
+			"iii",
+			Character.valueOf('i'), "ingotIron",
 			Character.valueOf('m'), findItemStack("Machine Block")
 		);
 
 		addRecipe(findItemStack("Tachometer"),
-			"aaa",
-			"pm ",
+			"p  ",
+			"iii",
 			"cm ",
-			Character.valueOf('a'), "ingotAlloy",
+			Character.valueOf('i'), "ingotIron",
 			Character.valueOf('m'), findItemStack("Machine Block"),
 			Character.valueOf('p'), findItemStack("Electrical Probe Chip"),
 			Character.valueOf('c'), findItemStack("Signal Cable")
