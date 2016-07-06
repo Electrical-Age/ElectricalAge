@@ -93,9 +93,15 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 	public void networkSerialize(DataOutputStream stream) {
 		super.networkSerialize(stream);
 		try {
+			stream.writeBoolean(true);
 			stream.writeBoolean(firePresent);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public boolean hasGui() {
+		return false;//descriptor.batteryPowered;
 	}
 }
