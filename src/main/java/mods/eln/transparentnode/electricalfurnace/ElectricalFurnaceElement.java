@@ -2,6 +2,7 @@ package mods.eln.transparentnode.electricalfurnace;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.*;
 
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamage;
@@ -257,5 +258,15 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 			e.printStackTrace();
 		}
 		return unserializeNulldId;
+	}
+
+	@Override
+	public Map<String, String> getWaila(){
+		Map<String, String> info = new HashMap<String, String>();
+		info.put("Temperature", Utils.plotCelsius("", thermalLoad.Tc));
+		if(inventory.getStackInSlot(heatingCorpSlotId) != null) {
+			info.put("Heating Element", inventory.getStackInSlot(heatingCorpSlotId).getDisplayName());
+		}
+		return info;
 	}
 }

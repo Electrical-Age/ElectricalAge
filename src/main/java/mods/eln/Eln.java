@@ -10,8 +10,7 @@ import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
-import mods.eln.achievepackets.AchievePacket;
-import mods.eln.achievepackets.AchievePacketHandler;
+import mods.eln.packets.*;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
@@ -302,8 +301,11 @@ public class Eln {
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		
-		elnNetwork = NetworkRegistry.INSTANCE.newSimpleChannel(this.channelName);
+		elnNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("eln");
 		elnNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
+		elnNetwork.registerMessage(TransparentNodeRequestPacketHandler.class, TransparentNodeRequestPacket.class, 1, Side.SERVER);
+		elnNetwork.registerMessage(NodeReturnPacketHandler.class, NodeReturnPacket.class, 2, Side.CLIENT);
+
 		
 		ModContainer container = FMLCommonHandler.instance().findContainerFor(this);
 		// LanguageRegistry.instance().loadLanguagesFor(container, Side.CLIENT);
@@ -740,6 +742,8 @@ public class Eln {
 
 		MinecraftForge.EVENT_BUS.register(new ElnForgeEventsHandler());
 		FMLCommonHandler.instance().bus().register(new ElnFMLEventsHandler());
+
+		FMLInterModComms.sendMessage("Waila", "register", "mods.eln.integration.waila.WailaIntegration.callbackRegister");
 
 		Utils.println("Electrical age init done");
 	}

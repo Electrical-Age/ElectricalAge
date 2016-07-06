@@ -174,6 +174,12 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     override fun getInventory() = inventory
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
     override fun newContainer(side: Direction?, player: EntityPlayer?) = ResistorContainer(player, inventory)
+
+    override fun getWaila(): Map<String, String> {
+        var info = mutableMapOf<String, String>()
+        info.put("Resistance", Utils.plotValue(resistor.r, "\u03A9"))
+        return info
+    }
 }
 
 class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) :
@@ -225,6 +231,7 @@ class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDe
     override fun newGuiDraw(side: Direction, player: EntityPlayer): GuiScreen {
         return LargeRheostatGUI(player, inventory, this)
     }
+
 }
 
 class LargeRheostatGUI(player: EntityPlayer, inventory: IInventory, internal var render: LargeRheostatRender) :

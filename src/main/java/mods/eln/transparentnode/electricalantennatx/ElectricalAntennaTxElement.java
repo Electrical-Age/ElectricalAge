@@ -1,7 +1,10 @@
 package mods.eln.transparentnode.electricalantennatx;
 
 import java.io.DataOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
+import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -193,5 +196,16 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 		super.networkSerialize(stream);
 		rot.serialize(stream);
 		node.lrduCubeMask.getTranslate(front.getInverse()).serialize(stream);
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		info.put("Transmitting", commandIn.getNormalized() > 0 ? "Yes" : "No");
+		info.put("Efficency", Utils.plotPercent("", powerEfficency));
+		if (Eln.wailaEasyMode) {
+			info.put("Power", Utils.plotPower("", powerIn.getI() * powerIn.getU()));
+		}
+		return info;
 	}
 }

@@ -17,6 +17,9 @@ import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class WindTurbineElement extends TransparentNodeElement {
     private final NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
@@ -111,5 +114,13 @@ public class WindTurbineElement extends TransparentNodeElement {
         super.readFromNBT(nbt);
         cableFront = Direction.readFromNBT(nbt, "cableFront");
         Utils.println(cableFront);
+    }
+
+    @Override
+    public Map<String, String> getWaila(){
+        Map<String, String> wailaList = new HashMap<String, String>();
+        DecimalFormat format = new DecimalFormat("#.##");
+        wailaList.put("Voltage", format.format(getElectricalLoad(cableFront.left(), LRDU.Down).getU()));
+        return wailaList;
     }
 }

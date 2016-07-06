@@ -1113,6 +1113,23 @@ public class Utils {
 		return 0;
 	}
 
+	public static <T> double readPrivateDouble(Object o, String feildName) {
+		try {
+			Field f = o.getClass().getDeclaredField(feildName);
+			f.setAccessible(true);
+			return f.getDouble(o);
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
 	public static ItemStack[][] getItemStackGrid(IRecipe r) {
 		ItemStack[][] stacks = new ItemStack[3][3];
 		try {

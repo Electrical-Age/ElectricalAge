@@ -2,6 +2,9 @@ package mods.eln.transparentnode.solarpanel;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
@@ -196,6 +199,16 @@ public class SolarPanelElement extends TransparentNodeElement{
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
 		return new SolarPanelContainer(node, player, inventory);
+	}
+
+	@Override
+	public Map<String, String> getWaila(){
+		Map<String, String> info = new HashMap<String, String>();
+		DecimalFormat format = new DecimalFormat("#.##");
+		info.put("Sun Angle", format.format(((slowProcess.getSolarAlpha()) * (180/Math.PI)) - 90) + "\u00B0");
+		info.put("Panel Angle", format.format((pannelAlpha * (180/Math.PI)) - 90) + "\u00B0");
+		info.put("Light", (slowProcess.getSolarLight() != 0 ? "Yes" : "No"));
+		return info;
 	}
 	
 }

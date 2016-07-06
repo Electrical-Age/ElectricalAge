@@ -29,6 +29,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class TransparentNodeElement implements  GhostObserver, IPlayer, Publishable {
 
@@ -506,4 +508,10 @@ public abstract class TransparentNodeElement implements  GhostObserver, IPlayer,
 		return hasSidedInventory() ? 0x4 : 0;
 	}
 	*/
+
+	public Map<String, String> getWaila(){
+		Map<String, String> wailaList = new HashMap<String, String>();
+		wailaList.put("Info", multiMeterString(this.front));
+		return wailaList;
+	}
 }

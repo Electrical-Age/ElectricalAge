@@ -3,7 +3,7 @@ package mods.eln.eventhandlers;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.ItemCraftedEvent;
 import mods.eln.Eln;
-import mods.eln.achievepackets.AchievePacket;
+import mods.eln.packets.AchievePacket;
 
 public class ElnFMLEventsHandler {
 

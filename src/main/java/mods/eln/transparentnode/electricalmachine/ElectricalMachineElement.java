@@ -1,7 +1,11 @@
 package mods.eln.transparentnode.electricalmachine;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
+import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -185,5 +189,17 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		needPublish();
 		if (descriptor.endSound != null)
 			play(descriptor.endSound);
+	}
+
+	@Override
+	public Map<String, String> getWaila(){
+		Map<String, String> info = new HashMap<String, String>();
+		DecimalFormat format = new DecimalFormat("#.##");
+		info.put("Power Used", Utils.plotPower("", slowRefreshProcess.getPower()));
+		info.put("Voltage", Utils.plotVolt("", electricalLoad.getU()));
+		if(Eln.wailaEasyMode) {
+			info.put("Power Provided", Utils.plotPower("", electricalLoad.getI() * electricalLoad.getU()));
+		}
+		return info;
 	}
 }

@@ -23,6 +23,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TurretElement extends TransparentNodeElement {
 
@@ -215,8 +217,17 @@ public class TurretElement extends TransparentNodeElement {
             }
         } catch (IOException e) {
 
+
+
             e.printStackTrace();
         }
         return unserializeNulldId;
     }
+
+	@Override
+	public Map<String, String> getWaila(){
+		Map<String, String> info = new HashMap<String, String>();
+		info.put("Charge Rate", Utils.plotPower("", chargePower));
+		return info;
+	}
 }
