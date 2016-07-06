@@ -175,7 +175,8 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
                     val fluidStack = FluidContainerRegistry.getFluidForFilledItem(bucket)
                     if (fluidStack != null && (fluidStack.fluidID == tankFluid || tankLevel <= 0.0) &&
                             fluidStack.fluidID in fuels) {
-                        tankLevel += deltaLevel;
+                        tankFluid = fluidStack.fluidID
+                        tankLevel += deltaLevel
                         if (player != null && !player.capabilities.isCreativeMode) {
                             val emptyBucket = FluidContainerRegistry.drainFluidContainer(bucket);
                             val slot = player.inventory.currentItem
