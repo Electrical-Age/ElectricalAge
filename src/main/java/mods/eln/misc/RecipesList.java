@@ -1,6 +1,7 @@
 package mods.eln.misc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import mods.eln.Eln;
 import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
+import net.minecraftforge.oredict.OreDictionary;
 //import mods.eln.electricalfurnace.ElectricalFurnaceProcess;
 
 public class RecipesList {
@@ -32,6 +34,72 @@ public class RecipesList {
 	public void addRecipe(Recipe recipe) {
 		recipeList.add(recipe);
 		recipe.setMachineList(machineList);
+	}
+	
+	public void addRecipe(String input, ItemStack[] output, double energy) {
+		addRecipe(input, 1, output, energy);
+	}
+	
+	public void addRecipe(String input, ItemStack output, double energy) {
+		addRecipe(input, 1, output, energy);
+	}
+	
+	public void addRecipe(String input, int inputQuant, ItemStack[] output, double energy) {
+		ArrayList<ItemStack> ores = OreDictionary.getOres(input);
+		
+		for (ItemStack inputStack : ores) {
+			inputStack.stackSize = inputQuant;
+			addRecipe(new Recipe(inputStack, output, energy));
+		}
+	}
+	
+	public void addRecipe(String input, int inputQuant, ItemStack output, double energy) {
+		ArrayList<ItemStack> ores = OreDictionary.getOres(input);
+		
+		for (ItemStack inputStack : ores) {
+			inputStack.stackSize = inputQuant;
+			addRecipe(new Recipe(inputStack, output, energy));
+		}
+	}
+	
+	public void addRecipe(String input, int inputQuant, String[] output, double energy) {
+		int[] quants = new int[output.length];
+		for (int i = 0; i < output.length; i++) {
+			quants[i] = 1;
+		}
+		addRecipe(input, inputQuant, output, quants, energy);
+	}
+	
+	public void addRecipe(String input, int inputQuant, String[] output, int[] outputQuant, double energy) {
+		ArrayList<ItemStack> ores = OreDictionary.getOres(input);
+		ItemStack[] drops = new ItemStack[output.length];
+		
+		for (int i = 0; i < output.length; i++) {
+			ArrayList<ItemStack> matches = OreDictionary.getOres(output[i]);
+			if (matches.size() > 0) {
+				drops[i] = matches.get(0);
+				drops[i].stackSize = outputQuant[i];
+			}
+		}
+		
+		for (ItemStack inputStack : ores) {
+			inputStack.stackSize = inputQuant;
+			addRecipe(new Recipe(inputStack, drops, energy));
+		}
+	}
+	
+	public void addRecipe(String input, int inputQuant, String output, double energy) {
+		addRecipe(input, inputQuant, output, 1, energy);
+	}
+	
+	public void addRecipe(String input, int inputQuant, String output, int outputQuant, double energy) {
+		ArrayList<ItemStack> drops = OreDictionary.getOres(output);
+		ItemStack drop = null;
+		if (drops.size() > 0) {
+			drop = drops.get(0);
+			drop.stackSize = outputQuant;
+		}
+		addRecipe(input, inputQuant, drop, energy);
 	}
 	
 	public void addMachine(ItemStack machine) {

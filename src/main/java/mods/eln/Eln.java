@@ -6132,78 +6132,86 @@ public class Eln {
 
 	void recipeMacerator() {
 		float f = 4000;
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("Copper Ore"),
-				new ItemStack[] { findItemStack("Copper Dust", 2) }, 1.0 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("Iron Ore"),
-				new ItemStack[] { findItemStack("Iron Dust", 2) }, 1.5 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("Gold Ore"),
-				new ItemStack[] { findItemStack("Gold Dust", 2) }, 3.0 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("Lead Ore"),
-				new ItemStack[] { findItemStack("Lead Dust", 2) }, 2.0 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("Tungsten Ore"),
-				new ItemStack[] { findItemStack("Tungsten Dust", 2) }, 2.0 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("gemCoal"),
-				new ItemStack[] { findItemStack("Coal Dust", 2) }, 1.0 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("gemCharcoal"),
-				new ItemStack[] { findItemStack("Coal Dust", 2) }, 1.0 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("sand"),
-				new ItemStack[] { findItemStack("Silicon Dust", 1) }, 3.0 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("Cinnabar Ore"),
-				new ItemStack[] { findItemStack("Cinnabar Dust", 2) }, 2.0 * f));
+		maceratorRecipes.addRecipe("oreCopper",
+				new ItemStack[] { findItemStack("Copper Dust", 2) }, 1.0 * f);
+		
+		maceratorRecipes.addRecipe("oreIron",
+				new ItemStack[] { findItemStack("Iron Dust", 2) }, 1.5 * f);
+		
+		maceratorRecipes.addRecipe("oreGold",
+				new ItemStack[] { findItemStack("Gold Dust", 2) }, 3.0 * f);
+		
+		maceratorRecipes.addRecipe("oreLead",
+				new ItemStack[] { findItemStack("Lead Dust", 2) }, 2.0 * f);
+		
+		maceratorRecipes.addRecipe(dicTungstenOre,
+				new ItemStack[] { findItemStack("Tungsten Dust", 2) }, 2.0 * f);
+		
+		maceratorRecipes.addRecipe("gemCoal",
+				new ItemStack[] { findItemStack("Coal Dust", 2) }, 1.0 * f);
+		
+		maceratorRecipes.addRecipe("gemCharcoal",
+				new ItemStack[] { findItemStack("Coal Dust", 2) }, 1.0 * f);
+		
+		maceratorRecipes.addRecipe("sand",
+				new ItemStack[] { findItemStack("Silicon Dust", 1) }, 3.0 * f);
+		
+		maceratorRecipes.addRecipe("oreCinnabar",
+				new ItemStack[] { findItemStack("Cinnabar Dust", 2) }, 2.0 * f);
+		
 
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("ingotCopper"),
-				new ItemStack[] { findItemStack("Copper Dust", 1) }, 0.5 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("ingotIron"),
-				new ItemStack[] { findItemStack("Iron Dust", 1) }, 0.5 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("ingotGold"),
-				new ItemStack[] { findItemStack("Gold Dust", 1) }, 0.5 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("ingotLead"),
-				new ItemStack[] { findItemStack("Lead Dust", 1) }, 0.5 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("Tungsten Ingot"),
-				new ItemStack[] { findItemStack("Tungsten Dust", 1) }, 0.5 * f));
+		maceratorRecipes.addRecipe("ingotCopper",
+				new ItemStack[] { findItemStack("Copper Dust", 1) }, 0.5 * f);
+		maceratorRecipes.addRecipe("ingotIron",
+				new ItemStack[] { findItemStack("Iron Dust", 1) }, 0.5 * f);
+		maceratorRecipes.addRecipe("ingotGold",
+				new ItemStack[] { findItemStack("Gold Dust", 1) }, 0.5 * f);
+		maceratorRecipes.addRecipe("ingotLead",
+				new ItemStack[] { findItemStack("Lead Dust", 1) }, 0.5 * f);
+		
+		maceratorRecipes.addRecipe(dicTungstenIngot,
+				new ItemStack[] { findItemStack("Tungsten Dust", 1) }, 0.5 * f);
 
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("cobblestone"),
-				new ItemStack[] { new ItemStack(Blocks.gravel) }, 1.0 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("blockGravel"),
-				new ItemStack[] { new ItemStack(Items.flint) }, 1.0 * f));
+		maceratorRecipes.addRecipe("cobblestone",
+				new ItemStack[] { new ItemStack(Blocks.gravel) }, 1.0 * f);
+		maceratorRecipes.addRecipe("blockGravel",
+				new ItemStack[] { new ItemStack(Items.flint) }, 1.0 * f);
 
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("blockDirt"),
-				new ItemStack[] { new ItemStack(Blocks.sand) }, 1.0 * f));
+		maceratorRecipes.addRecipe("blockDirt",
+				new ItemStack[] { new ItemStack(Blocks.sand) }, 1.0 * f);
 	}
 
 	void recipePlateMachine() {
 		float f = 10000;
-		plateMachineRecipes.addRecipe(new Recipe(
-				findItemStack("ingotCopper", 4),
-				findItemStack("Copper Plate"), 1.0 * f));
+		plateMachineRecipes.addRecipe("ingotCopper", 4,
+				findItemStack("Copper Plate"), 1.0 * f);
 
-		plateMachineRecipes.addRecipe(new Recipe(findItemStack("ingotLead", 4),
-				findItemStack("Lead Plate"), 1.0 * f));
+		plateMachineRecipes.addRecipe("ingotLead", 4,
+				findItemStack("Lead Plate"), 1.0 * f);
 
-		plateMachineRecipes.addRecipe(new Recipe(
-				findItemStack("Silicon Ingot", 4),
-				findItemStack("Silicon Plate"), 1.0 * f));
+		plateMachineRecipes.addRecipe("ingotSilicon", 4,
+				findItemStack("Silicon Plate"), 1.0 * f);
 
-		plateMachineRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", 4),
-				findItemStack("Alloy Plate"), 1.0 * f));
+		plateMachineRecipes.addRecipe("ingotAlloy", 4,
+				findItemStack("Alloy Plate"), 1.0 * f);
 
-		plateMachineRecipes.addRecipe(new Recipe(findItemStack("ingotIron", 4),
-				 findItemStack("Iron Plate"), 1.0 * f));
+		plateMachineRecipes.addRecipe("ingotIron", 4,
+				 findItemStack("Iron Plate"), 1.0 * f);
 
-		plateMachineRecipes.addRecipe(new Recipe(findItemStack("ingotGold", 4),
-				findItemStack("Gold Plate"), 1.0 * f));
+		plateMachineRecipes.addRecipe("ingotGold", 4,
+				findItemStack("Gold Plate"), 1.0 * f);
 
 	}
 
 	void recipeCompressor() {
-		compressorRecipes.addRecipe(new Recipe(findItemStack("plateCoal", 4),
-				new ItemStack[] { findItemStack("gemDiamond") }, 80000.0));
+		compressorRecipes.addRecipe("plateCoal", 4,
+				"gemDiamond", 80000.0);
 		// extractorRecipes.addRecipe(new
 		// Recipe("dustCinnabar",new
 		// ItemStack[]{findItemStack("Purified Cinnabar Dust",1)}, 1000.0));
 
-		compressorRecipes.addRecipe(new Recipe(findItemStack("dustCoal", 4),
-				findItemStack("Coal Plate"), 4000.0));
+		compressorRecipes.addRecipe("dustCoal", 4,
+				findItemStack("Coal Plate"), 4000.0);
 
 		compressorRecipes.addRecipe(new Recipe(findItemStack("sand"),
 				findItemStack("Dielectric"), 2000.0));
@@ -6214,10 +6222,10 @@ public class Eln {
 	}
 
 	void recipemagnetiser() {
-		magnetiserRecipes.addRecipe(new Recipe(findItemStack("ingotIron", 2),
-				new ItemStack[] { findItemStack("Basic Magnet") }, 5000.0));
-		magnetiserRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", 2),
-				new ItemStack[] { findItemStack("Advanced Magnet") }, 15000.0));
+		magnetiserRecipes.addRecipe("ingotIron", 2,
+				findItemStack("Basic Magnet") , 5000.0);
+		magnetiserRecipes.addRecipe("ingotAlloy", 2,
+				findItemStack("Advanced Magnet") , 15000.0);
 	}
 
 	void recipeFurnace() {
@@ -6898,7 +6906,10 @@ public class Eln {
 		if (stack == null) {
 			stack = dictionnaryOreFromMod.get(name);
 			if (stack == null) {
-				stack = new ItemStack(GameData.getItemRegistry().getObjectById(OreDictionary.getOreID(name)));	
+				ArrayList<ItemStack> entries = OreDictionary.getOres(name);
+				if (entries != null && entries.size() > 0) {
+					stack = entries.get(0);	
+				}
 				if (stack == null) {
 					return null;
 				}
