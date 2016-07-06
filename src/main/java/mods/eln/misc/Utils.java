@@ -337,6 +337,12 @@ public class Utils {
 		return header + plotTime(value);
 	}
 
+	public static String plotBuckets(String header, double buckets) {
+		if (!header.equals(""))
+			header += " ";
+		return header + plotValue(buckets, "B ");
+	}
+
 	public static void readFromNBT(NBTTagCompound nbt, String str, IInventory inventory) {
 		NBTTagList var2 = nbt.getTagList(str, 10);
 

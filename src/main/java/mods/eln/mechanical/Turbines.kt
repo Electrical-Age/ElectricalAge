@@ -179,6 +179,17 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
         tank.readFromNBT(nbt, "tank")
         turbineSlowProcess.readFromNBT(nbt, "proc")
     }
+
+    override fun getWaila(): Map<String, String> {
+        var info = mutableMapOf<String, String>()
+        info.put("Speed", Utils.plotRads("", shaft.rads))
+        info.put("Energy", Utils.plotEnergy("", shaft.energy))
+        if(Eln.wailaEasyMode){
+            info.put("Efficency", Utils.plotPercent("", efficiency.toDouble()))
+            info.put("Fuel usage", Utils.plotBuckets("", steamRate/1000.0) + "/s")
+        }
+        return info
+    }
 }
 
 class TurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {

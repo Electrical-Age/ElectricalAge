@@ -273,4 +273,16 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
         super.networkSerialize(stream)
         stream.writeDouble(lastE)
     }
+
+    override fun getWaila(): Map<String, String> {
+        var info = mutableMapOf<String, String>()
+        info.put("Energy", Utils.plotEnergy("", shaft.energy))
+        info.put("Speed", Utils.plotRads("", shaft.rads))
+        if(Eln.wailaEasyMode){
+            info.put("Voltage", Utils.plotVolt("", electricalPowerSource.getU()))
+            info.put("Current", Utils.plotAmpere("", electricalPowerSource.getI()))
+            info.put("Temperature", Utils.plotCelsius("", thermal.t))
+        }
+        return info
+    }
 }
