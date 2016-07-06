@@ -18,12 +18,14 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
 
 	private Obj3DPart detector;
     private Obj3DPart led;
+    boolean batteryPowered;
 	double maxRange;
 	public float[] pinDistance;
     final double updateInterval = 0.5;
 
-	public ElectricalFireDetectorDescriptor(String name, Obj3D obj, double maxRange) {
+	public ElectricalFireDetectorDescriptor(String name, Obj3D obj, double maxRange, boolean batteryPowered) {
 		super(name, ElectricalFireDetectorElement.class, ElectricalFireDetectorRender.class);
+        this.batteryPowered = batteryPowered;
 		this.maxRange = maxRange;
 		if (obj != null) {
 			detector = obj.getPart("Detector");

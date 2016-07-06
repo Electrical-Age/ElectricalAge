@@ -2179,10 +2179,19 @@ public class Eln {
             {
                 subId = 13;
                 name = TR_NAME(Type.NONE, "Electrical Fire Detector");
-                desc = new ElectricalFireDetectorDescriptor(name, obj.getObj("FireDetector"), 15);
+                desc = new ElectricalFireDetectorDescriptor(name, obj.getObj("FireDetector"), 15, false);
                 sixNodeItem.addDescriptor(subId + (id << 6), desc);
             }
         }
+		{
+			ElectricalFireDetectorDescriptor desc;
+			{
+				subId = 14;
+				name = TR_NAME(Type.NONE, "Battery powered Fire Detector");
+				desc = new ElectricalFireDetectorDescriptor(name, obj.getObj("FireDetector"), 15, true);
+				sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			}
+		}
 	}
 
 	void registerElectricalRedstone(int id) {
