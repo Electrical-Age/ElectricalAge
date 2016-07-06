@@ -6858,19 +6858,21 @@ public class Eln {
 				// OreDictionary.getOreID(name));
 				if (name.startsWith("ore")) {
 					for (ItemStack stack : OreDictionary.getOres(name)) {
-						int id = Utils.getItemId(stack) + 4096 * stack.getItem().getMetadata(stack.getItemDamage());
+						int itemId = Utils.getItemId(stack);
+						int dmg = stack.getItemDamage();
+						int key = itemId + 4096 * dmg;
 						// Utils.println(OreDictionary.getOreID(name));
 						boolean find = false;
 						for (OreScannerConfigElement c : oreScannerConfig) {
-							if (c.blockKey == id) {
+							if (c.blockKey == key) {
 								find = true;
-								break;
+								continue;
 							}
 						}
 
 						if (!find) {
-							Utils.println(id + " added to xRay (other mod)");
-							oreScannerConfig.add(new OreScannerConfigElement(id, 0.15f));
+							Utils.println(stack.getDisplayName() + " : " + itemId +":" + dmg + " - added to xRay (other mod): " + stack.getUnlocalizedName() + "  -  " + name + " - " + key);
+							oreScannerConfig.add(new OreScannerConfigElement(key, 0.15f));
 						}
 					}
 				}
