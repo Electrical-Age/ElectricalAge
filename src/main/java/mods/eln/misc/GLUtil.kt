@@ -8,8 +8,12 @@ import org.lwjgl.opengl.GL11
 
 
 inline fun<T> preserveMatrix(body: () -> T): T {
-    GL11.glPushMatrix()
-    val ret = body()
-    GL11.glPopMatrix()
+    val ret: T
+    try {
+        GL11.glPushMatrix()
+        ret = body()
+    } finally {
+        GL11.glPopMatrix()
+    }
     return ret
 }
