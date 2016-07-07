@@ -61,12 +61,17 @@ configurations {
 
 repositories {
     mavenCentral()
+    ivy {
+        name 'MineTweaker3'
+        artifactPattern "http://minetweaker3.powerofbytes.com/download/[module]-[classifier]-[revision].[ext]"
+    }
 }
 
 dependencies {
     external files("libs/commons-math3-3.3.jar")
     external "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
     external "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile name: 'MineTweaker3', version: '1.7.10-3.0.10B', classifier: 'Dev', ext: 'jar'
 }
 
 jar {
