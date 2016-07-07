@@ -14,6 +14,7 @@ import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -114,7 +115,12 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 		return descriptor.batteryPowered;
 	}
 
-	@Override
+    @Override
+    public IInventory getInventory() {
+        return inventory;
+    }
+
+    @Override
 	protected void inventoryChanged() {
 		super.inventoryChanged();
 		needPublish();
