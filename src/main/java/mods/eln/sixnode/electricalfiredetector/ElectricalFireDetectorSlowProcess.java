@@ -1,5 +1,6 @@
 package mods.eln.sixnode.electricalfiredetector;
 
+import mods.eln.item.electricalitem.BatteryItem;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
@@ -8,6 +9,7 @@ import mods.eln.sound.SoundCommand;
 import mods.eln.sound.SoundLooper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFire;
+import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
@@ -40,8 +42,25 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
 
 	@Override
 	public void process(double time) {
-        t += time;
+        if (element.descriptor.batteryPowered) {
+            ItemStack batteryStack = element.inventory.getStackInSlot(ElectricalFireDetectorContainer.Companion.getBatteryId());
+            BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack);
+            double energy;
+            if (battery == null || (energy = battery.getEnergy(batteryStack)) < element.descriptor.PowerComsumption * time * 4) {
+                boolean changed = element.powered;
+                element.powered = false;
+                if (changed) element.needPublish();
+            } else {
+                boolean changed = !element.powered;
+                element.powered = true;
+                if (changed) element.needPublish();
+                battery.setEnergy(batteryStack, energy - element.descriptor.PowerComsumption * time);
+            }
+        }
 
+        if (!element.powered) return;
+
+        t += time;
         if (t >= element.descriptor.updateInterval) {
             t = 0;
             boolean fireDetected = false;

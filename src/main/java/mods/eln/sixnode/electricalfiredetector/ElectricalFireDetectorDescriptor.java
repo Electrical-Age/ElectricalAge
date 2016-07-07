@@ -22,6 +22,7 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
 	double maxRange;
 	public float[] pinDistance;
     final double updateInterval = 0.5;
+    static final double PowerComsumption = 20000.0 / (3600 * 40);
 
 	public ElectricalFireDetectorDescriptor(String name, Obj3D obj, double maxRange, boolean batteryPowered) {
 		super(name, ElectricalFireDetectorElement.class, ElectricalFireDetectorRender.class);

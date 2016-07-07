@@ -5,8 +5,11 @@ import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.node.six.SixNodeDescriptor;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.node.six.SixNodeElementRender;
 import mods.eln.node.six.SixNodeEntity;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.entity.player.EntityPlayer;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -19,15 +22,24 @@ public class ElectricalFireDetectorRender extends SixNodeElementRender {
     boolean firePresent = false;
 	boolean ledOn = false;
 
+	SixNodeElementInventory inventory;
+
 	public ElectricalFireDetectorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
 		super(tileEntity, side, descriptor);
 		this.descriptor = (ElectricalFireDetectorDescriptor) descriptor;
+
+		if (this.descriptor.batteryPowered) {
+			inventory = new SixNodeElementInventory(1, 64, this);
+		}
 	}
 
 	@Override
 	public void draw() {
 		super.draw();
-		drawSignalPin(front.right(), descriptor.pinDistance);
+
+		if (!descriptor.batteryPowered) {
+			drawSignalPin(front.right(), descriptor.pinDistance);
+		}
 
 		descriptor.draw(ledOn);
 	}
@@ -62,5 +74,10 @@ public class ElectricalFireDetectorRender extends SixNodeElementRender {
 	@Override
 	public CableRenderDescriptor getCableRender(LRDU lrdu) {
 		return Eln.instance.signalCableDescriptor.render;
+	}
+
+	@Override
+	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
+		return new ElectricalFireDetectorGui(player, inventory,  this);
 	}
 }

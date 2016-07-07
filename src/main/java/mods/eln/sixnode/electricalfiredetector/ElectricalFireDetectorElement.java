@@ -7,11 +7,13 @@ import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -26,7 +28,10 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
     public NbtElectricalGateOutputProcess outputGateProcess;
     public ElectricalFireDetectorSlowProcess slowProcess;
 
+	public boolean powered;
 	public boolean firePresent = false;
+
+	SixNodeElementInventory inventory;
 
     public ElectricalFireDetectorElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
@@ -36,10 +41,14 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 		slowProcess = new ElectricalFireDetectorSlowProcess(this);
 
 		if (!this.descriptor.batteryPowered) {
+			powered = true;
 			outputGate = new NbtElectricalGateOutput("outputGate");
 			outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
 			electricalLoadList.add(outputGate);
 			electricalComponentList.add(outputGateProcess);
+		} else {
+			powered = false;
+			inventory = new SixNodeElementInventory(1, 64, this);
 		}
 
     	slowProcessList.add(slowProcess);
@@ -93,7 +102,7 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 	public void networkSerialize(DataOutputStream stream) {
 		super.networkSerialize(stream);
 		try {
-			stream.writeBoolean(true);
+			stream.writeBoolean(powered);
 			stream.writeBoolean(firePresent);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -102,6 +111,17 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 
 	@Override
 	public boolean hasGui() {
-		return false;//descriptor.batteryPowered;
+		return descriptor.batteryPowered;
 	}
+
+	@Override
+	protected void inventoryChanged() {
+		super.inventoryChanged();
+		needPublish();
+	}
+
+    @Override
+    public Container newContainer(Direction side, EntityPlayer player) {
+        return new ElectricalFireDetectorContainer(player, inventory);
+    }
 }
