@@ -35,7 +35,11 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
 			pinDistance = Utils.getSixNodePinDistance(detector);
 		}
 
-        voltageLevelColor = VoltageLevelColor.SignalVoltage;
+        if (batteryPowered) {
+            voltageLevelColor = VoltageLevelColor.Neutral;
+        } else {
+            voltageLevelColor = VoltageLevelColor.SignalVoltage;
+        }
 	}
 
     @Override
@@ -65,7 +69,11 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Output voltage increases\nif a fire has been detected.").split("\n"));
+        if (batteryPowered) {
+            Collections.addAll(list, tr("Battery powered buzzer \nactivated in presence of fire.").split("\n"));
+        } else {
+            Collections.addAll(list, tr("Output voltage increases\nif a fire has been detected.").split("\n"));
+        }
         list.add(tr("Range: %1$ blocks", (int) maxRange));
     }
 

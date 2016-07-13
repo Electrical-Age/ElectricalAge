@@ -2187,7 +2187,7 @@ public class Eln {
 			ElectricalFireDetectorDescriptor desc;
 			{
 				subId = 14;
-				name = TR_NAME(Type.NONE, "Battery powered Fire Detector");
+				name = TR_NAME(Type.NONE, "Electrical Fire Buzzer");
 				desc = new ElectricalFireDetectorDescriptor(name, obj.getObj("FireDetector"), 15, true);
 				sixNodeItem.addDescriptor(subId + (id << 6), desc);
 			}
@@ -6539,6 +6539,23 @@ public class Eln {
 				" G ",
 				Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
 				Character.valueOf('R'), new ItemStack(Items.redstone));
+
+		addRecipe(findItemStack("Electrical Fire Detector"),
+				"cbr",
+			    "p p",
+			    "r r",
+				Character.valueOf('c'), findItemStack("Signal Cable"),
+				Character.valueOf('b'), "circuitBasic",
+				Character.valueOf('r'), "itemRubber",
+				Character.valueOf('p'), "plateCopper");
+
+		addRecipe(findItemStack("Electrical Fire Buzzer"),
+			"rar",
+			"p p",
+			"r r",
+			Character.valueOf('a'), "circuitAdvanced",
+			Character.valueOf('r'), "itemRubber",
+			Character.valueOf('p'), "plateCopper");
 	}
 
 	private void recipeElectricalVuMeter() {
