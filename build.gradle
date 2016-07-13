@@ -52,8 +52,6 @@ minecraft {
     // TODO(Baughn): After moving to 1.10, this should be replaced with the shadow plugin,
     // e.g. as used in https://github.com/Emberwalker/Laundarray/blob/master/build.gradle
     srgExtra "PK: org/apache/commons/math3 mods/eln/libs/org/apache/commons/math3"
-    srgExtra "PK: com/serotonin mods/eln/libs/com/serotonin"
-    srgExtra "PK: gnu/io mods/eln/libs/gnu/io"
 }
 
 configurations {
