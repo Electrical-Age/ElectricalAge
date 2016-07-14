@@ -15,9 +15,11 @@ import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateInput
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
+import mods.eln.wiki.Data
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraftforge.client.IItemRenderer
@@ -73,6 +75,11 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
 
     override fun getFrontFromPlace(side: Direction?, player: EntityPlayer?): LRDU? =
             super.getFrontFromPlace(side, player).left()
+
+    override fun setParent(item: Item?, damage: Int) {
+        super.setParent(item, damage)
+        Data.addSignal(newItemStack())
+    }
 }
 
 open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor):
@@ -161,6 +168,8 @@ open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: S
     override fun getThermalLoad(lrdu: LRDU?): ThermalLoad? = null
     override fun thermoMeterString(): String? = null
     override fun initialize() {}
+
+
 }
 
 open class LogicGateRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor):
