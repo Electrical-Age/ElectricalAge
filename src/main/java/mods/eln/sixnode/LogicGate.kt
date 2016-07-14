@@ -15,9 +15,11 @@ import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateInput
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
+import mods.eln.wiki.Data
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraftforge.client.IItemRenderer
@@ -73,6 +75,18 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
 
     override fun getFrontFromPlace(side: Direction?, player: EntityPlayer?): LRDU? =
             super.getFrontFromPlace(side, player).left()
+
+    override fun setParent(item: Item?, damage: Int) {
+        super.setParent(item, damage)
+        Data.addSignal(newItemStack())
+    }
+
+    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>?, par4: Boolean) {
+        super.addInformation(itemStack, entityPlayer, list, par4)
+        if (list != null) {
+            function.infos.split("\n").forEach { list.add(it) }
+        }
+    }
 }
 
 open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor):
@@ -161,6 +175,8 @@ open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: S
     override fun getThermalLoad(lrdu: LRDU?): ThermalLoad? = null
     override fun thermoMeterString(): String? = null
     override fun initialize() {}
+
+
 }
 
 open class LogicGateRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor):
@@ -185,6 +201,7 @@ open class LogicGateRender(entity: SixNodeEntity, side: Direction, descriptor: S
 abstract class LogicFunction: INBTTReady {
     open val hasState = false
     abstract val inputCount: Int
+    abstract val infos: String
 
     private fun Double.toDigital() = if (this <= 0.2) false
     else if (this >= 0.6) true
@@ -201,47 +218,64 @@ abstract class LogicFunction: INBTTReady {
 
 class Not: LogicFunction() {
     override val inputCount = 1
+    override val infos =
+            tr("Inverts the input signal.\nOutputs a voltage representing the\nopposite logic-level to its input.")
 
     override fun process(inputs: List<Boolean?>): Boolean = !(inputs[0] ?: false)
 }
 
 open class And: LogicFunction() {
     override val inputCount = 3
+    override val infos =
+            tr("Implements logical conjunction.\nA 1 (high) output results only if all of\nthe three inputs to the AND gate are 1 (high).")
 
     override fun process(inputs: List<Boolean?>): Boolean =
             (inputs[0] ?: true) && (inputs[1] ?: true) && (inputs[2] ?: true)
 }
 
 class Nand: And() {
+    override val infos =
+            tr("Its output is complement (inverted)\nto that of the AND gate.")
+
     override fun process(inputs: List<Boolean?>): Boolean = !super.process(inputs);
 }
 
 open class Or: LogicFunction() {
     override val inputCount = 3
+    override val infos =
+            tr("Implements logical disjunction.\nA 1 (high) output results if at least\none input to the gate is 1 (high).")
 
     override fun process(inputs: List<Boolean?>): Boolean =
             (inputs[0] ?: false) || (inputs[1] ?: false) || (inputs[2] ?: false)
 }
 
 class Nor: Or() {
+    override val infos =
+            tr("Its output is complement (inverted)\nto that of the OR gate.")
+
     override fun process(inputs: List<Boolean?>): Boolean = !super.process(inputs)
 }
 
 open class Xor: LogicFunction() {
     override val inputCount = 3
+    override val infos =
+            tr("Implements an exclusive or.\nAn output of 1 (high) results if one or\nall three inputs to the gate are 1 (high).")
 
     override fun process(inputs: List<Boolean?>): Boolean =
             (inputs[0] ?: false) xor (inputs[1] ?: false) xor (inputs[2] ?: false)
 }
 
 class XNor: Xor() {
+    override val infos = tr("Its output is complement (inverted)\nto that of the XOR gate.")
+
     override fun process(inputs: List<Boolean?>): Boolean = !super.process(inputs)
 }
 
 class SchmittTrigger: LogicFunction() {
     override val hasState = true
     override val inputCount = 1
-
+    override val infos =
+            tr("If the input voltage is lower than 10V, the\noutput is 0 (low), if the output is bigger or\nequal to 30V, the output will be 1 (high). For\nall voltages in between, the output does not change.")
     private var state = false
 
     override fun process(inputs: Array<Double?>): Boolean {
@@ -269,7 +303,8 @@ class SchmittTrigger: LogicFunction() {
 class Oscillator: LogicFunction() {
     override val hasState = true
     override val inputCount = 1
-
+    override val infos =
+            tr("Outputs a rectangular signal which's frequency\ndepends to the input voltage. The higher the\ninput voltage - the higher the frequency.")
     private var ramp = 0.0
     private var state = false
 
@@ -329,12 +364,16 @@ abstract class TriggeredLogicFunction(private val triggerIndex: Int): LogicFunct
 
 class DFlipFlop: TriggeredLogicFunction(1) {
     override val inputCount = 2
+    override val infos =
+            tr("The D flip-flop captures the value\nof the D-input at a rising edge\nportion of the clock cycle.")
 
     override fun onRisingEdge(inputs: List<Boolean?>, state: Boolean): Boolean = inputs[0] ?: false
 }
 
 class JKFlipFlop: TriggeredLogicFunction(0) {
     override val inputCount = 3
+    override val infos =
+            tr("If the input J is 1 (high) and K is 0 (low)\nduring a clock pulse, the output becomes 1 (high).\nIf J is 0 (low) and K is 1 (high) during the pulse,\nthe output becomes 0 (low). If both inputs are 0 (low)\nduring the clock pulse, the state is maintained. If both\ninputs are 1 (high) the input is toggled if a rising edge\nwas detected at the clock input.")
 
     override fun onRisingEdge(inputs: List<Boolean?>, state: Boolean): Boolean =
             when (Pair(inputs[1] ?: true, inputs[2] ?: true)) {
@@ -444,7 +483,8 @@ class PalGui(val render: PalRender): GuiScreenEln() {
 
 class Pal: LogicFunction() {
     override val inputCount = 3
-
+    override val infos =
+            tr("A Programmable Array Logic (PAL) is a programmable\nlogic device semiconductors used to  implement any logic\nfunction in only one digital circuit. The function is\nstateless, which means that no intermediate state is saved.")
     val truthTable = Array(8, { false })
 
     private operator fun Boolean.times(factor: Int): Int = if (this) factor else 0
