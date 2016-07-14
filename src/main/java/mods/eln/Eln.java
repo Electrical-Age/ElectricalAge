@@ -551,7 +551,7 @@ public class Eln {
 		registerElectricalGate(109);
 		registerTreeResinCollector(116);
 		registerSixNodeMisc(117);
-		registerLogicalGate(118);
+		registerLogicalGates(118);
 
 		//TRANSPARENT NODE REGISTRATION
 		//Sub-UID must be unique in this section only.
@@ -664,6 +664,7 @@ public class Eln {
 
 		recipeTurret();
 		recipeMachine();
+		recipeLogicGates();
 		recipeTransformer();
 		recipeHeatFurnace();
 		recipeTurbine();
@@ -2437,7 +2438,7 @@ public class Eln {
 
 	}
 
-	private void registerLogicalGate(int id) {
+	private void registerLogicalGates(int id) {
 		Obj3D model = obj.getObj("LogicGates");
 		sixNodeItem.addDescriptor(0 + (id << 6),
 			new LogicGateDescriptor(TR_NAME(Type.NONE, "NOT Chip"),model, "NOT", Not.class));
@@ -5225,6 +5226,102 @@ public class Eln {
 				Character.valueOf('C'), "circuitBasic",
 				Character.valueOf('S'), findItemStack("Signal Antenna"));
 
+	}
+
+	void recipeLogicGates() {
+		addRecipe(findItemStack("NOT Chip"),
+			"   ",
+			"cCr",
+			"   ",
+			Character.valueOf('C'), "circuitBasic",
+			Character.valueOf('r'), new ItemStack(Items.redstone),
+			Character.valueOf('c'), findItemStack("Copper Cable"));
+
+		addRecipe(findItemStack("AND Chip"),
+			" c ",
+			"cCc",
+			" c ",
+			Character.valueOf('C'), "circuitBasic",
+			Character.valueOf('c'), findItemStack("Copper Cable"));
+
+		addRecipe(findItemStack("NAND Chip"),
+			" c ",
+			"cCr",
+			" c ",
+			Character.valueOf('C'), "circuitBasic",
+			Character.valueOf('r'), new ItemStack(Items.redstone),
+			Character.valueOf('c'), findItemStack("Copper Cable"));
+
+		addRecipe(findItemStack("OR Chip"),
+			" r ",
+			"rCr",
+			" r ",
+			Character.valueOf('C'), "circuitBasic",
+			Character.valueOf('r'), new ItemStack(Items.redstone));
+
+		addRecipe(findItemStack("NOR Chip"),
+			" r ",
+			"rCc",
+			" r ",
+			Character.valueOf('C'), "circuitBasic",
+			Character.valueOf('r'), new ItemStack(Items.redstone),
+			Character.valueOf('c'), findItemStack("Copper Cable"));
+
+		addRecipe(findItemStack("XOR Chip"),
+			" rr",
+			"rCr",
+			" rr",
+			Character.valueOf('C'), "circuitBasic",
+			Character.valueOf('r'), new ItemStack(Items.redstone));
+
+		addRecipe(findItemStack("XNOR Chip"),
+			" rr",
+			"rCc",
+			" rr",
+			Character.valueOf('C'), "circuitBasic",
+			Character.valueOf('r'), new ItemStack(Items.redstone),
+			Character.valueOf('c'), findItemStack("Copper Cable"));
+
+		addRecipe(findItemStack("PAL Chip"),
+			"rcr",
+			"cCc",
+			"rcr",
+			Character.valueOf('C'), "circuitAdvanced",
+			Character.valueOf('r'), new ItemStack(Items.redstone),
+			Character.valueOf('c'), findItemStack("Copper Cable"));
+
+		addRecipe(findItemStack("Schmitt Trigger Chip"),
+			"   ",
+			"cCc",
+			"   ",
+			Character.valueOf('C'), "circuitAdvanced",
+			Character.valueOf('r'), new ItemStack(Items.redstone),
+			Character.valueOf('c'), findItemStack("Copper Cable"));
+
+		addRecipe(findItemStack("D Flip Flop Chip"),
+			"   ",
+			"cCc",
+			" p ",
+			Character.valueOf('C'), "circuitAdvanced",
+			Character.valueOf('p'), findItemStack("Copper Plate"),
+			Character.valueOf('c'), findItemStack("Copper Cable"));
+
+		addRecipe(findItemStack("Oscillator Chip"),
+			"pdp",
+			"cCc",
+			"   ",
+			Character.valueOf('C'), "circuitAdvanced",
+			Character.valueOf('p'), findItemStack("Copper Plate"),
+			Character.valueOf('c'), findItemStack("Copper Cable"),
+			Character.valueOf('d'), findItemStack("Dielectric"));
+
+		addRecipe(findItemStack("JK Flip Flop Chip"),
+			" p ",
+			"cCc",
+			" p ",
+			Character.valueOf('C'), "circuitAdvanced",
+			Character.valueOf('p'), findItemStack("Copper Plate"),
+			Character.valueOf('c'), findItemStack("Copper Cable"));
 	}
 
 	void recipeTransformer() {
