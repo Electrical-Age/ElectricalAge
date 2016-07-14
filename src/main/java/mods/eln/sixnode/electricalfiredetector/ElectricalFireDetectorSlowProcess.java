@@ -1,32 +1,66 @@
 package mods.eln.sixnode.electricalfiredetector;
 
+import mods.eln.item.electricalitem.BatteryItem;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
+import mods.eln.sound.SoundCommand;
+import mods.eln.sound.SoundLooper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFire;
+import net.minecraft.item.ItemStack;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ElectricalFireDetectorSlowProcess implements IProcess {
 
 	ElectricalFireDetectorElement element;
 
-    boolean firePresent;
-    RcInterpolator rc = new RcInterpolator(0.6f);
+    RcInterpolator rc;
+    SoundLooper soundLooper;
 
     double t = 0;
 
-	public ElectricalFireDetectorSlowProcess(ElectricalFireDetectorElement element) {
+	public ElectricalFireDetectorSlowProcess(final ElectricalFireDetectorElement element) {
 		this.element = element;
+        if (!element.descriptor.batteryPowered) {
+            rc = new RcInterpolator(0.6f);
+        } else {
+            soundLooper = new SoundLooper(element) {
+                @Override
+                public SoundCommand mustStart() {
+                    if (element.firePresent) {
+                        return new SoundCommand("eln:FireAlarm", 0.4);
+                    } else {
+                        return null;
+                    }
+                }
+            };
+        }
 	}
 
 	@Override
 	public void process(double time) {
-        t += time;
+        if (element.descriptor.batteryPowered) {
+            ItemStack batteryStack = element.inventory.getStackInSlot(ElectricalFireDetectorContainer.Companion.getBatteryId());
+            BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack);
+            double energy;
+            if (battery == null || (energy = battery.getEnergy(batteryStack)) < element.descriptor.PowerComsumption * time * 4) {
+                boolean changed = element.powered;
+                element.powered = false;
+                if (changed) element.needPublish();
+            } else {
+                boolean changed = !element.powered;
+                element.powered = true;
+                if (changed) element.needPublish();
+                battery.setEnergy(batteryStack, energy - element.descriptor.PowerComsumption * time);
+            }
+        }
 
+        if (!element.powered) return;
+
+        t += time;
         if (t >= element.descriptor.updateInterval) {
             t = 0;
             boolean fireDetected = false;
@@ -83,14 +117,18 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                             }
                         }
                     }
-            if (firePresent != fireDetected) {
-                firePresent = fireDetected;
+            if (element.firePresent != fireDetected) {
+                element.firePresent = fireDetected;
                 element.needPublish();
             }
         }
 
-        rc.setTarget(firePresent ? 1 : 0);
-        rc.step((float)time);
-        element.outputGateProcess.setOutputNormalized(rc.get());
+        if (element.descriptor.batteryPowered) {
+            soundLooper.process(time);
+        } else {
+            rc.setTarget(element.firePresent ? 1 : 0);
+            rc.step((float) time);
+            element.outputGateProcess.setOutputNormalized(rc.get());
+        }
     }
 }

@@ -18,12 +18,15 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
 
 	private Obj3DPart detector;
     private Obj3DPart led;
+    boolean batteryPowered;
 	double maxRange;
 	public float[] pinDistance;
     final double updateInterval = 0.5;
+    static final double PowerComsumption = 20000.0 / (3600 * 40);
 
-	public ElectricalFireDetectorDescriptor(String name, Obj3D obj, double maxRange) {
+	public ElectricalFireDetectorDescriptor(String name, Obj3D obj, double maxRange, boolean batteryPowered) {
 		super(name, ElectricalFireDetectorElement.class, ElectricalFireDetectorRender.class);
+        this.batteryPowered = batteryPowered;
 		this.maxRange = maxRange;
 		if (obj != null) {
 			detector = obj.getPart("Detector");
@@ -32,7 +35,11 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
 			pinDistance = Utils.getSixNodePinDistance(detector);
 		}
 
-        voltageLevelColor = VoltageLevelColor.SignalVoltage;
+        if (batteryPowered) {
+            voltageLevelColor = VoltageLevelColor.Neutral;
+        } else {
+            voltageLevelColor = VoltageLevelColor.SignalVoltage;
+        }
 	}
 
     @Override
@@ -62,7 +69,11 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Output voltage increases\nif a fire has been detected.").split("\n"));
+        if (batteryPowered) {
+            Collections.addAll(list, tr("Battery powered buzzer \nactivated in presence of fire.").split("\n"));
+        } else {
+            Collections.addAll(list, tr("Output voltage increases\nif a fire has been detected.").split("\n"));
+        }
         list.add(tr("Range: %1$ blocks", (int) maxRange));
     }
 
