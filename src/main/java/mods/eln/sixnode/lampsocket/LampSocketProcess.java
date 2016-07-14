@@ -265,7 +265,8 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 				overFactor = 1.5;
 
 			updateLifeTimeout += deltaT;
-			if (updateLifeTimeout > updateLifeTimeoutMax) {
+			if (updateLifeTimeout > updateLifeTimeoutMax &&
+				!(lampDescriptor.type == Type.LED && Eln.ledLampInfiniteLife)) {
 				// Utils.println("aging");
 				updateLifeTimeout -= updateLifeTimeoutMax;
 				double lifeLost = overFactor * updateLifeTimeoutMax / lampDescriptor.nominalLife;
