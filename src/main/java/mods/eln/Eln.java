@@ -412,6 +412,7 @@ public class Eln {
 		economicLampLife = config.get("lamp", "economicLifeInHours", 64.0).getDouble(64.0) * 3600;
 		carbonLampLife = config.get("lamp", "carbonLifeInHours", 6.0).getDouble(6.0) * 3600;
 		ledLampLife = config.get("lamp", "ledLifeInHours", 512.0).getDouble(512.0) * 3600;
+		ledLampInfiniteLife = config.get("lamp", "infiniteLedLife", false).getBoolean();
 
 		fuelGeneratorTankCapacity = config.get("fuelGenerator",
 			"tankCapacityInSecondsAtNominalPower", 20 * 60).getDouble(20 * 60);
@@ -3112,6 +3113,7 @@ public class Eln {
 	double economicLampLife;
 	double carbonLampLife;
 	double ledLampLife;
+	public static boolean ledLampInfiniteLife = false;
 
 	void registerLampItem(int id) {
 		int subId, completId;
