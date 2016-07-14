@@ -5295,7 +5295,6 @@ public class Eln {
 			"cCc",
 			"   ",
 			Character.valueOf('C'), "circuitAdvanced",
-			Character.valueOf('r'), new ItemStack(Items.redstone),
 			Character.valueOf('c'), findItemStack("Copper Cable"));
 
 		addRecipe(findItemStack("D Flip Flop Chip"),
