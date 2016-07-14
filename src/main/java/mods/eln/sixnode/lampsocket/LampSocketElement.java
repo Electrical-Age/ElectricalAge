@@ -1,6 +1,7 @@
 package mods.eln.sixnode.lampsocket;
 
 import mods.eln.Eln;
+import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.item.LampDescriptor;
@@ -22,7 +23,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -266,17 +266,32 @@ public class LampSocketElement extends SixNodeElement {
 
 		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 		if (currentItemStack != null) {
-			Item item = currentItemStack.getItem();
-
-			GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);
-			if (gen != null && gen instanceof BrushDescriptor) {
-				BrushDescriptor brush = (BrushDescriptor) gen;
-				int brushColor = brush.getColor(currentItemStack);
-				if (brushColor != paintColor && brush.use(currentItemStack,entityPlayer)) {
-					paintColor = brushColor;
-					needPublish(); //Sync
+			GenericItemUsingDamageDescriptor itemDescriptor = GenericItemUsingDamageDescriptor.getDescriptor(currentItemStack);
+			if (itemDescriptor != null) {
+				if (itemDescriptor instanceof BrushDescriptor) {
+					BrushDescriptor brush = (BrushDescriptor) itemDescriptor;
+					int brushColor = brush.getColor(currentItemStack);
+					if (brushColor != paintColor && brush.use(currentItemStack,entityPlayer)) {
+						paintColor = brushColor;
+						needPublish(); //Sync
+					}
+					return true;
+				} else if (itemDescriptor instanceof LampDescriptor && inventory.getStackInSlot(0) == null) {
+					currentItemStack.stackSize -= 1;
+					inventory.setInventorySlotContents(0, itemDescriptor.newItemStack());
+					needPublish();
+					return true;
 				}
-				return true;
+			} else {
+				GenericItemBlockUsingDamageDescriptor blockDescriptor = GenericItemBlockUsingDamageDescriptor.getDescriptor(currentItemStack);
+				if (blockDescriptor != null) {
+					if (blockDescriptor instanceof ElectricalCableDescriptor && inventory.getStackInSlot(1) == null) {
+						currentItemStack.stackSize -= 1;
+						inventory.setInventorySlotContents(1, blockDescriptor.newItemStack());
+						reconnect();
+						return true;
+					}
+				}
 			}
 		}
 
