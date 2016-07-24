@@ -58,18 +58,20 @@ public class VersionCheckerHandler {
 
                     // Read the last stable version
                     JsonObject stable = j.get("stable").getAsJsonObject();
-                    int rev = stable.get("version_revision").getAsInt();
-                    int currentRev = Integer.valueOf(Version.REVISION);
+                    int uniqueVersion = 1000000 * stable.get("version_major").getAsInt() +
+                        1000 * stable.get("version_minor").getAsInt() + stable.get("version_revision").getAsInt();
+                    int currentUniqueVersion = Version.UNIQUE_VERSION;
 
                     // New stable version
-                    if (rev > currentRev) {
+                    if (uniqueVersion > currentUniqueVersion) {
                         int major = stable.get("version_major").getAsInt();
                         int minor = stable.get("version_minor").getAsInt();
-                        msg = String.format(Color.GREEN + "> New stable version available: BETA-%d.%d r%d" + " - please upgrade !",
-                                major, minor, rev);
+                        int revision = stable.get("version_revision").getAsInt();
+                        msg = String.format(Color.GREEN + "> New stable version available: %d.%d.%d" + " - please upgrade !",
+                                major, minor, revision);
                     }
                     // No update
-                    else if (rev == currentRev) {
+                    else if (uniqueVersion == currentUniqueVersion) {
                         msg = "> No update available (last stable version)";
                     }
                     // DEV version (not stable)
