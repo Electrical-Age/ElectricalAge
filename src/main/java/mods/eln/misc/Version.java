@@ -39,4 +39,8 @@ public final class Version {
 		return Color.WHITE + tr("mod.name") + " version "
 				+ Color.ORANGE + getVersionName();
 	}
+
+	public static void main(String... args) {
+		System.out.print(getVersionName());
+	}
 }
