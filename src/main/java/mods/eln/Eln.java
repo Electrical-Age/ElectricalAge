@@ -175,7 +175,7 @@ import java.util.*;
 
 import static mods.eln.i18n.I18N.*;
 
-@Mod(modid = Eln.MODID, name = Eln.NAME, version = Version.REVISION)
+@Mod(modid = Eln.MODID, name = Eln.NAME, version = Version.VERSION_STRING)
 // @Mod(modid = "Eln", name = "Electrical Age", version = "BETA-1.2.0b")
 // @NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = { "miaouMod" }, packetHandler = PacketHandler.class)
 public class Eln {
