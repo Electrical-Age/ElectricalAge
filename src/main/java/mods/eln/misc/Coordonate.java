@@ -229,10 +229,10 @@ public class Coordonate implements INBTTReady {
 	}
 
 	public double trueDistanceTo(Coordonate c) {
-		int dx = x - c.x;
-		int dy = y - c.y;
-		int dz = z - c.z;
-		return Math.sqrt(dx * dx + dy * dy + dz * dz) ;
+		long dx = x - c.x;
+		long dy = y - c.y;
+		long dz = z - c.z;
+		return Math.sqrt(dx * dx + dy * dy + dz * dz);
 	}
 
 	public void setDimention(int dimention) {
