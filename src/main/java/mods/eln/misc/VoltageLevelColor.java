@@ -4,6 +4,7 @@ import mods.eln.Eln;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.IItemRenderer;
+import org.lwjgl.opengl.GL11;
 
 public enum VoltageLevelColor {
     None(null),
@@ -53,6 +54,34 @@ public enum VoltageLevelColor {
             }
         } else {
             return None;
+        }
+    }
+
+    public void setGLColor() {
+        switch (this) {
+            case None:
+                break;
+
+            case SignalVoltage:
+                GL11.glColor3f(.80f, .87f, .82f);
+                break;
+
+            case LowVoltage:
+                GL11.glColor3f(.55f, .84f, .68f);
+                break;
+
+            case MediumVoltage:
+                GL11.glColor3f(.55f, .74f, .85f);
+                break;
+
+            case HighVoltage:
+                GL11.glColor3f(.96f, .80f, .56f);
+                break;
+
+            case VeryHighVoltage:
+                GL11.glColor3f(.86f, .58f, .55f);
+                break;
+
         }
     }
 }

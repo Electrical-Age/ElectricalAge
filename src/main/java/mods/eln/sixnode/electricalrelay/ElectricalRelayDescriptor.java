@@ -22,6 +22,7 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
 	private Obj3DPart relay1;
 	private Obj3DPart relay0;
 	private Obj3DPart main;
+	private Obj3DPart backplate;
 	private Obj3D obj;
 
     ElectricalCableDescriptor cable;
@@ -38,6 +39,7 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
             main = obj.getPart("main");
             relay0 = obj.getPart("relay0");
             relay1 = obj.getPart("relay1");
+			backplate = obj.getPart("backplate");
 
             if (relay0 != null) {
                 r0rOff = relay0.getFloat("rOff");
@@ -109,6 +111,10 @@ public class ElectricalRelayDescriptor extends SixNodeDescriptor {
 		if (main != null) main.draw();
 		if (relay0 != null) relay0.draw(factor * (r0rOn - r0rOff) + r0rOff, 0f, 0f, 1f);
 		if (relay1 != null) relay1.draw(factor * (r1rOn - r1rOff) + r1rOff, 0f, 0f, 1f);
+		GL11.glPushMatrix();
+		voltageLevelColor.setGLColor();
+		if (backplate != null) backplate.draw();
+		GL11.glPopMatrix();
 		UtilsClient.enableCulling();
 	}
 
