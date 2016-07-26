@@ -60,6 +60,7 @@ public enum VoltageLevelColor {
     public void setGLColor() {
         switch (this) {
             case None:
+            case Neutral:
                 break;
 
             case SignalVoltage:
