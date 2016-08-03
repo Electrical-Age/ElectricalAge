@@ -14,24 +14,33 @@ public final class Version {
 	public final static int MAJOR = 1;
 
 	/** Minor version code. */
-	public final static int MINOR = 11;
+	public final static int MINOR = 12;
+
+	/** Revision version code. */
+	public final static int REVISION = 0;
 
 	/**
 	 * Unique version code. Must be a String for annotations. Used to check if a
 	 * new version if available. Each update must increment this number.
 	 */
-	public final static String REVISION = "52";
+	public final static int UNIQUE_VERSION = 1000000 * MAJOR + 1000 * MINOR + REVISION;
 
-	public final static String getVersionName() {
-		return String.format("BETA-%d.%d r%s", MAJOR, MINOR, REVISION);
+	public final static String VERSION_STRING = "" + MAJOR + "." + MINOR + "." + REVISION;
+
+	public static String getVersionName() {
+		return VERSION_STRING;
 	}
 
-	public final static String print() {
+	public static String print() {
 		return tr("mod.name") + " " + getVersionName();
 	}
 
 	public final static String printColor() {
 		return Color.WHITE + tr("mod.name") + " version "
 				+ Color.ORANGE + getVersionName();
+	}
+
+	public static void main(String... args) {
+		System.out.print(getVersionName());
 	}
 }
