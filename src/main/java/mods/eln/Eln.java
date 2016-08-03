@@ -64,6 +64,7 @@ import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.O
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import mods.eln.simplenode.test.TestBlock;
+import mods.eln.sixnode.ElectricalFuseHolderDescriptor;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
 import mods.eln.sixnode.diode.DiodeDescriptor;
@@ -2034,6 +2035,46 @@ public class Eln {
 			EnergyMeterDescriptor desc = new EnergyMeterDescriptor(name, obj.getObj("AdvancedEnergyMeter"),7,8);
 
 			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		{
+			subId = 6;
+
+			name = TR_NAME(Type.NONE, "Electrical Fuse Holder");
+
+			ElectricalFuseHolderDescriptor desc = new ElectricalFuseHolderDescriptor(name, obj.getObj("ElectricalFuse"));
+			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+		{
+			subId = 7;
+
+			name = TR_NAME(Type.NONE, "Lead Fuse for low voltage cables");
+
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, LVP / LVU);
+			sharedItem.addElement(subId + (id << 6), desc);
+		}
+		{
+			subId = 8;
+
+			name = TR_NAME(Type.NONE, "Lead Fuse for medium voltage cables");
+
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, MVP / MVU);
+			sharedItem.addElement(subId + (id << 6), desc);
+		}
+		{
+			subId = 9;
+
+			name = TR_NAME(Type.NONE, "Lead Fuse for high voltage cables");
+
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, HVP / HVU);
+			sharedItem.addElement(subId + (id << 6), desc);
+		}
+		{
+			subId = 10;
+
+			name = TR_NAME(Type.NONE, "Lead Fuse for very high voltage cables");
+
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, VVP / VVU);
+			sharedItem.addElement(subId + (id << 6), desc);
 		}
 	}
 
