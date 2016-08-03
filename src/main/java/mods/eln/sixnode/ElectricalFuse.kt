@@ -18,6 +18,7 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraftforge.client.IItemRenderer
+import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
@@ -61,8 +62,10 @@ class ElectricalFuseHolderDescriptor(name: String, private val obj: Obj3D):
     fun draw(type: VoltageLevelColor = VoltageLevelColor.None, ok: Boolean = false) {
         case?.draw()
         if (type != VoltageLevelColor.None) {
+            type.setGLColor()
             fuseType?.draw()
-            if (ok) {
+            GL11.glColor3f(1f, 1f, 1f)
+           if (ok) {
                 fuseOk?.draw()
             }
             fuse?.draw()
