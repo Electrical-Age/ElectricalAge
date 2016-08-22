@@ -8,10 +8,13 @@ import mods.eln.misc.*
 import mods.eln.node.NodeBase
 import mods.eln.node.six.*
 import mods.eln.sim.ElectricalLoad
-import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.Resistor
 import mods.eln.sim.nbt.NbtElectricalLoad
+import mods.eln.sim.nbt.NbtThermalLoad
+import mods.eln.sim.process.destruct.IDestructable
+import mods.eln.sim.process.destruct.ThermalLoadWatchDog
+import mods.eln.sim.process.heater.ResistorHeatThermalLoad
 import mods.eln.wiki.Data
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.Item
@@ -55,17 +58,17 @@ class ElectricalFuseHolderDescriptor(name: String, private val obj: Obj3D):
         if (type == IItemRenderer.ItemRenderType.INVENTORY) {
             super.renderItem(type, item, *data)
         } else {
-            draw()
+            draw(0f)
         }
     }
 
-    fun draw(type: VoltageLevelColor = VoltageLevelColor.None, ok: Boolean = false) {
+    fun draw(maxCurrent: Float) {
         case?.draw()
-        if (type != VoltageLevelColor.None) {
-            type.setGLColor()
+        if (maxCurrent != 0f) {
+            VoltageLevelColor.fromMaxCurrent(maxCurrent.toDouble()).setGLColor()
             fuseType?.draw()
             GL11.glColor3f(1f, 1f, 1f)
-           if (ok) {
+           if (maxCurrent > 0) {
                 fuseOk?.draw()
             }
             fuse?.draw()
@@ -84,27 +87,24 @@ class ElectricalFuseHolderDescriptor(name: String, private val obj: Obj3D):
 }
 
 class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor):
-        SixNodeElement(sixNode, side, descriptor) {
-    val descriptor = descriptor as ElectricalFuseHolderDescriptor
-    val aLoad = NbtElectricalLoad("aLoad")
-    val bLoad = NbtElectricalLoad("bLoad")
-    val fuseResistor = Resistor(aLoad, bLoad)
+        SixNodeElement(sixNode, side, descriptor), IDestructable {
+    private val aLoad = NbtElectricalLoad("aLoad")
+    private val bLoad = NbtElectricalLoad("bLoad")
+    private val fuseResistor = Resistor(aLoad, bLoad)
+    private val thermalLoad = NbtThermalLoad("thermalLoad")
+    private val fuseMelting = ResistorHeatThermalLoad(fuseResistor, thermalLoad)
+    private var thermalWatchdog = ThermalLoadWatchDog()
 
-    var fuseMaxCurrent = 0.0
+    var installedFuse: ElectricalFuseDescriptor? = null
         set(value) {
             if (value == field) return
             field = value
+            thermalLoad.Tc = 0.0
+            thermalWatchdog.reset()
             refreshSwitchResistor()
             needPublish()
         }
 
-    var fuseOk = false
-        set(ok) {
-            if (ok == field) return
-            field = ok
-            refreshSwitchResistor()
-            needPublish()
-        }
     internal var nbtBoot = false
 
     init {
@@ -113,22 +113,25 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
         electricalComponentList.add(fuseResistor)
         electricalComponentList.add(Resistor(bLoad, null).pullDown())
         electricalComponentList.add(Resistor(aLoad, null).pullDown())
-        electricalProcessList.add(IProcess {
-            // TODO: This algorithm is pretty lame, but will work for the  first tests...
-            if (fuseMaxCurrent != 0.0 && fuseOk && Math.abs(fuseResistor.i) > fuseMaxCurrent) {
-                fuseOk = false
-                refreshSwitchResistor()
-                needPublish()
-            }
-        });
+        thermalLoadList.add(thermalLoad)
+        thermalProcessList.add(fuseMelting)
+        thermalLoad.setAsFast()
+        slowProcessList.add(thermalWatchdog)
+        thermalWatchdog.set(thermalLoad).setLimit(Eln.cableWarmLimit, -100.0).set(this)
     }
 
     override fun readFromNBT(nbt: NBTTagCompound?) {
         super.readFromNBT(nbt)
         if (nbt != null) {
             front = LRDU.readFromNBT(nbt, "front")
-            fuseMaxCurrent = nbt.getDouble("fuseMaxCurrent")
-            fuseOk = nbt.getBoolean("fuseOk")
+
+            val fuseCompound = nbt.getTag("fuse") as? NBTTagCompound
+            if (fuseCompound != null) {
+                val fuseStack = ItemStack.loadItemStackFromNBT(fuseCompound)
+                if (fuseStack != null) {
+                    installedFuse = GenericItemUsingDamageDescriptorUpgrade.getDescriptor(fuseStack) as? ElectricalFuseDescriptor
+                }
+            }
         }
         nbtBoot = true
     }
@@ -137,8 +140,12 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
         super.writeToNBT(nbt)
         if (nbt != null) {
             front.writeToNBT(nbt, "front")
-            nbt.setDouble("fuseMaxCurrent", fuseMaxCurrent)
-            nbt.setBoolean("fuseOk", fuseOk)
+
+            if (installedFuse != null) {
+                val fuseCompaound = NBTTagCompound()
+                installedFuse!!.newItemStack().writeToNBT(fuseCompaound)
+                nbt.setTag("fuse", fuseCompaound)
+            }
         }
     }
 
@@ -156,16 +163,15 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
         else -> 0
     }
 
-    override fun multiMeterString(): String = Utils.plotAmpere("I:", aLoad.current)
+    override fun multiMeterString(): String? = Utils.plotAmpere("I:", Math.abs(aLoad.current))
 
-    override fun thermoMeterString(): String? = ""
+    override fun thermoMeterString(): String? = Utils.plotCelsius("T:", thermalLoad.t)
 
     override fun networkSerialize(stream: DataOutputStream?) {
         super.networkSerialize(stream)
         if (stream != null) {
             try {
-                stream.writeFloat(fuseMaxCurrent.toFloat())
-                stream.writeBoolean(fuseOk)
+                stream.writeFloat((installedFuse?.maxCurrent ?: 0.0).toFloat())
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -173,10 +179,14 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
     }
 
     fun refreshSwitchResistor() {
-        if (fuseMaxCurrent == 0.0 || !fuseOk) {
+        val maxCurrent = installedFuse?.maxCurrent ?: 0.0
+        if (maxCurrent <= 0.0) {
             fuseResistor.ultraImpedance()
         } else {
-            fuseResistor.r = 0.01 // TODO: What resistance should we use here?
+            val thermalMaximalPowerDissipated = maxCurrent * maxCurrent * 0.01
+            thermalLoad.C = thermalMaximalPowerDissipated * (Eln.cableHeatingTime / 2.0) / Eln.cableWarmLimit
+            thermalLoad.Rp = Eln.cableWarmLimit / thermalMaximalPowerDissipated
+            fuseResistor.r = 0.01
         }
     }
 
@@ -185,33 +195,49 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
     }
 
     fun computeElectricalLoad() {
-        if (!nbtBoot) fuseOk = false
-        nbtBoot = false
-
         Eln.instance.veryHighVoltageCableDescriptor.applyTo(aLoad)
         Eln.instance.veryHighVoltageCableDescriptor.applyTo(bLoad)
         refreshSwitchResistor()
     }
 
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
-        val currentItemStack = entityPlayer?.currentEquippedItem
-
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             front = front.nextClockwise
             sixNode.reconnect()
             return true
         }
 
-        val itemstack = entityPlayer?.currentEquippedItem
-        val fuseDescritor = GenericItemUsingDamageDescriptorUpgrade.getDescriptor(itemstack) as? ElectricalFuseDescriptor
-        if (fuseDescritor != null && itemstack?.stackSize ?: 0 > 0) {
-            fuseMaxCurrent = fuseDescritor.maxCurrent
-            fuseOk = true
-            refreshSwitchResistor()
-            return true;
+        var takenOutFuse: ElectricalFuseDescriptor? = null
+        val itemStack = entityPlayer?.currentEquippedItem
+        val fuseDescriptor = GenericItemUsingDamageDescriptorUpgrade.getDescriptor(itemStack) as? ElectricalFuseDescriptor
+        if (itemStack != null) {
+            if (fuseDescriptor != null && itemStack.stackSize > 0) {
+                // The player puts in a new lead fuse.
+                itemStack.stackSize--
+                takenOutFuse = installedFuse
+                installedFuse = fuseDescriptor
+            }
+        } else {
+            // The player takes out the fuse and does not install a new one at all.
+            takenOutFuse = installedFuse
+            installedFuse = null
         }
 
-        return false
+        // What do we do with the fuse just taken out?
+        if (takenOutFuse != null) {
+            // Not perfect, but works...
+            entityPlayer?.entityDropItem(takenOutFuse.newItemStack(), 1f)
+        }
+
+        return takenOutFuse != null || fuseDescriptor != null
+    }
+
+    override fun destructImpl() {
+        installedFuse = ElectricalFuseDescriptor.BlownFuse
+    }
+
+    override fun describe(): String {
+        return "Fuse";
     }
 }
 
@@ -219,18 +245,16 @@ class ElectricalFuseHolderRender(tileEntity: SixNodeEntity, side: Direction, des
         SixNodeElementRender(tileEntity, side, descriptor) {
     private val descriptor = descriptor as ElectricalFuseHolderDescriptor
     private var fuseMaxCurrent = 0f
-    private var fuseOk = false
 
     override fun draw() {
         front.right().glRotateOnX()
-        descriptor.draw(VoltageLevelColor.fromMaxCurrent(fuseMaxCurrent.toDouble()), fuseOk)
+        descriptor.draw(fuseMaxCurrent)
     }
 
     override fun publishUnserialize(stream: DataInputStream?) {
         super.publishUnserialize(stream)
         if (stream != null) {
             fuseMaxCurrent = stream.readFloat()
-            fuseOk = stream.readBoolean()
         }
     }
 }
