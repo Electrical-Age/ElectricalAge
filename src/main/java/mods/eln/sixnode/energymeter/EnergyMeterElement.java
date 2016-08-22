@@ -244,6 +244,11 @@ public class EnergyMeterElement extends SixNodeElement {
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 
+		try {
+			mod = Mod.valueOf(nbt.getString("mode"));
+		} catch (Exception e) {
+			mod = Mod.ModCounter;
+		}
 		energyStack = nbt.getDouble("energyStack");
 		timeCounter = nbt.getDouble("timeCounter");
 		password = nbt.getString("password");
@@ -256,6 +261,7 @@ public class EnergyMeterElement extends SixNodeElement {
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
 
+		nbt.setString("mode", mod.toString());
 		nbt.setDouble("energyStack", energyStack);
 		nbt.setDouble("timeCounter", timeCounter);
 		nbt.setString("password", password);
