@@ -155,11 +155,17 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	}
 	
 	public void applyTo(BatteryProcess battery) {
-		battery.QNominal = electricalQ;
 		battery.uNominal = electricalU;
+		battery.QNominal = electricalQ;
 		battery.voltageFunction = UfCharge;
 		battery.isRechargeable = isRechargable;
 		//battery.efficiency = electricalStdEfficiency;
+
+		// Convert old battery absolute charge in Coulomb to to fraction of battery capacity if the capacity is
+		// very small and the output voltage is more than a quarter of the nominal voltage.
+		if (battery.Q > 1.5 && battery.getU() > (battery.uNominal / 4)) {
+			battery.Q /= electricalQ;
+		}
 	}
 	
 	public void applyTo(ElectricalLoad load, Simulator simulator) {
