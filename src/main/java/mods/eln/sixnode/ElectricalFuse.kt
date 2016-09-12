@@ -237,7 +237,7 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
     }
 
     override fun describe(): String {
-        return "Fuse";
+        return "Fuse Holder";
     }
 }
 

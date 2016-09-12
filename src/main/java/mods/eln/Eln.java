@@ -653,6 +653,7 @@ public class Eln {
 		recipeElectricalDataLogger();
 		recipeElectricalGateSource();
 		recipeElectricalBreaker();
+		recipeFuses();
 		recipeElectricalVuMeter();
 		recipeElectricalEnvironnementalSensor();
 		recipeElectricalRedstone();
@@ -2083,7 +2084,7 @@ public class Eln {
 
 			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, -1, obj.getObj("ElectricalFuse"));
 			ElectricalFuseDescriptor.Companion.setBlownFuse(desc);
-			sharedItem.addElement(subId + (id << 6), desc);
+			sharedItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
 	}
 
@@ -6548,6 +6549,7 @@ public class Eln {
 				Character.valueOf('R'), new ItemStack(Blocks.redstone_block));
 
 	}
+
 	void recipeMachine() {
 		addRecipe(findItemStack("50V Macerator", 1),
 				"IRI",
@@ -6737,6 +6739,36 @@ public class Eln {
 				Character.valueOf('c'), findItemStack("Overvoltage Protection"),
 				Character.valueOf('C'), findItemStack("Overheating Protection"),
 				Character.valueOf('r'), findItemStack("High Voltage Relay"));
+
+	}
+
+	private void recipeFuses() {
+
+		addRecipe(findItemStack("Electrical Fuse Holder", 1),
+			"i",
+			" ",
+			"i",
+			Character.valueOf('i'), new ItemStack(Items.iron_ingot));
+
+		addRecipe(findItemStack("Lead Fuse for low voltage cables", 4),
+			"rcr",
+			Character.valueOf('r'), findItemStack("itemRubber"),
+			Character.valueOf('c'), findItemStack("Low Voltage Cable"));
+
+		addRecipe(findItemStack("Lead Fuse for medium voltage cables", 4),
+			"rcr",
+			Character.valueOf('r'), findItemStack("itemRubber"),
+			Character.valueOf('c'), findItemStack("Medium Voltage Cable"));
+
+		addRecipe(findItemStack("Lead Fuse for high voltage cables", 4),
+			"rcr",
+			Character.valueOf('r'), findItemStack("itemRubber"),
+			Character.valueOf('c'), findItemStack("High Voltage Cable"));
+
+		addRecipe(findItemStack("Lead Fuse for very high voltage cables", 4),
+			"rcr",
+			Character.valueOf('r'), findItemStack("itemRubber"),
+			Character.valueOf('c'), findItemStack("Very High Voltage Cable"));
 
 	}
 
