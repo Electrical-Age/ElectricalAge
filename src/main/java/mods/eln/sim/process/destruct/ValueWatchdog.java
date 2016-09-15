@@ -60,4 +60,8 @@ public abstract class ValueWatchdog implements IProcess {
 		this.min = -max;
 		this.timeoutReset = 10000000;
 	}
+
+	public void reset() {
+		boot = true;
+	}
 }
