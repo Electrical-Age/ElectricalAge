@@ -301,7 +301,7 @@ public class Eln {
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		
-		elnNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("eln");
+		elnNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("electrical-age");
 		elnNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
 		elnNetwork.registerMessage(TransparentNodeRequestPacketHandler.class, TransparentNodeRequestPacket.class, 1, Side.SERVER);
 		elnNetwork.registerMessage(NodeReturnPacketHandler.class, NodeReturnPacket.class, 2, Side.CLIENT);
@@ -432,7 +432,7 @@ public class Eln {
 
 		wirelessTxRange = config.get("wireless", "txRange", 32).getInt();
 
-		wailaEasyMode = config.get("balancing", "wailaEasyMode", false, "Display detailed WAILA info on batteries").getBoolean(false);
+		wailaEasyMode = config.get("balancing", "wailaEasyMode", false, "Display more detailed WAILA info on some machines").getBoolean(false);
 
 		config.save();
 

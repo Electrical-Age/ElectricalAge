@@ -35,8 +35,8 @@ class TransparentNodeHandler : IWailaDataProvider{
         } catch(e: Exception){
             //This is probably just it complaining about the cache returning null. Should be safe to ignore.
         }
-        for(entry: Map.Entry<String, String> in tipMap!!.asSequence()){
-            currenttip!! += (entry.key + ": " + SpecialChars.WHITE + entry.value)
+        for((key, value) in tipMap!!.asSequence()){
+            currenttip!! += (key + ": " + SpecialChars.WHITE + value)
         }
         return currenttip
     }
