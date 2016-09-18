@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -206,5 +208,14 @@ public class AutoMinerElement extends TransparentNodeElement  {
 				return packetType;
 		}
 		return unserializeNulldId;
+	}
+
+	@Override
+	public Map<String, String> getWaila(){
+		//Why are you even looking at this part of the machine... it's literally the part the drill comes out of.
+		Map<String, String> info = new HashMap<String, String>();
+		info.put("Silk Touch", slowProcess.silkTouch ? "Yes" : "No");
+		info.put("Depth", Utils.plotValue(slowProcess.pipeLength, "m "));
+		return info;
 	}
 }

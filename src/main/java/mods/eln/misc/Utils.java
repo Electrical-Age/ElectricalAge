@@ -337,6 +337,12 @@ public class Utils {
 		return header + plotTime(value);
 	}
 
+	public static String plotBuckets(String header, double buckets) {
+		if (!header.equals(""))
+			header += " ";
+		return header + plotValue(buckets, "B ");
+	}
+
 	public static void readFromNBT(NBTTagCompound nbt, String str, IInventory inventory) {
 		NBTTagList var2 = nbt.getTagList(str, 10);
 
@@ -1101,6 +1107,23 @@ public class Utils {
 			Field f = o.getClass().getDeclaredField(feildName);
 			f.setAccessible(true);
 			return f.getInt(o);
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	public static <T> double readPrivateDouble(Object o, String feildName) {
+		try {
+			Field f = o.getClass().getDeclaredField(feildName);
+			f.setAccessible(true);
+			return f.getDouble(o);
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (SecurityException e) {

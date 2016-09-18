@@ -1,5 +1,6 @@
 package mods.eln.mechanical
 
+import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.misc.*
 import mods.eln.node.transparent.EntityMetaTag
@@ -102,6 +103,13 @@ class JointHubElement(node : TransparentNode, desc_ : TransparentNodeDescriptor)
     override fun readFromNBT(nbt: NBTTagCompound) {
         super.readFromNBT(nbt)
         connectedSides.readFromNBT(nbt, "connectedSides")
+    }
+
+    override fun getWaila(): Map<String, String> {
+        var info = mutableMapOf<String, String>()
+        info.put("Speed", Utils.plotRads("", shaft.rads))
+        info.put("Energy", Utils.plotEnergy("", shaft.energy))
+        return info
     }
 }
 

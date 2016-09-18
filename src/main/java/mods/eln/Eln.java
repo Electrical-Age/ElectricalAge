@@ -10,8 +10,7 @@ import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
-import mods.eln.achievepackets.AchievePacket;
-import mods.eln.achievepackets.AchievePacketHandler;
+import mods.eln.packets.*;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
@@ -190,7 +189,7 @@ public class Eln {
 
 	public static final String channelName = "miaouMod";
 	public ArrayList<IConfigSharing> configShared = new ArrayList<IConfigSharing>();
-	public static SimpleNetworkWrapper achNetwork;
+	public static SimpleNetworkWrapper elnNetwork;
 
 	// public static final double networkSerializeValueFactor = 100.0;
 	// public static final byte packetNodeSerialized24bitPosition = 11;
@@ -299,11 +298,16 @@ public class Eln {
 	double stdBatteryHalfLife = 2 * Utils.minecraftDay;
 	double batteryCapacityFactor = 1.;
 
+	public static boolean wailaEasyMode = false;
+
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		
-		achNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("achChannel");
-		achNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
+		elnNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("electrical-age");
+		elnNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
+		elnNetwork.registerMessage(TransparentNodeRequestPacketHandler.class, TransparentNodeRequestPacket.class, 1, Side.SERVER);
+		elnNetwork.registerMessage(NodeReturnPacketHandler.class, NodeReturnPacket.class, 2, Side.CLIENT);
+
 		
 		ModContainer container = FMLCommonHandler.instance().findContainerFor(this);
 		// LanguageRegistry.instance().loadLanguagesFor(container, Side.CLIENT);
@@ -431,6 +435,8 @@ public class Eln {
 		cableRsFactor = config.get("simulation", "cableRsFactor", 1.0).getDouble(1.0);
 
 		wirelessTxRange = config.get("wireless", "txRange", 32).getInt();
+
+		wailaEasyMode = config.get("balancing", "wailaEasyMode", false, "Display more detailed WAILA info on some machines").getBoolean(false);
 
 		config.save();
 
@@ -742,6 +748,8 @@ public class Eln {
 
 		MinecraftForge.EVENT_BUS.register(new ElnForgeEventsHandler());
 		FMLCommonHandler.instance().bus().register(new ElnFMLEventsHandler());
+
+		FMLInterModComms.sendMessage("Waila", "register", "mods.eln.integration.waila.WailaIntegration.callbackRegister");
 
 		Utils.println("Electrical age init done");
 	}

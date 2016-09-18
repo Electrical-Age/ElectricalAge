@@ -26,6 +26,7 @@ import net.minecraftforge.fluids.FluidRegistry
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
+import java.text.DecimalFormat
 
 class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal val cable: ElectricalCableDescriptor,
                               internal val nominalPower: Double, internal val maxVoltage: Double,
@@ -218,6 +219,14 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
         super.writeToNBT(nbt)
         nbt?.setDouble("tankLevel", tankLevel)
         nbt?.setBoolean("on", on)
+    }
+
+    override fun getWaila(): Map<String,String>{
+        var info = mutableMapOf<String,String>()
+        val format = DecimalFormat("#.##")
+        info.put("Fuel level", Utils.plotPercent("", tankLevel))
+        info.put("Voltage", format.format(positiveLoad.u) + "v")
+        return info
     }
 }
 

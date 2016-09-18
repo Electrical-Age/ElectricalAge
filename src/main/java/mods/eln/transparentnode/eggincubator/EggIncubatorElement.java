@@ -2,6 +2,8 @@ package mods.eln.transparentnode.eggincubator;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import mods.eln.misc.Direction;
 import mods.eln.misc.INBTTReady;
@@ -175,5 +177,13 @@ public class EggIncubatorElement extends TransparentNodeElement {
 			e.printStackTrace();
 		}
 		lastVoltagePublish = powerLoad.getU();
+	}
+
+	@Override
+	public Map<String, String> getWaila(){
+		Map<String, String> info = new HashMap<String, String>();
+		//This feels a bit hacky. Maybe there's a better way?
+		info.put("Has Egg", powerResistor.getR() == descriptor.Rp ? "Yes" : "No");
+		return info;
 	}
 }

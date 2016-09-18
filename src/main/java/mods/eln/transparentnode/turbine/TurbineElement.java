@@ -1,6 +1,8 @@
 package mods.eln.transparentnode.turbine;
 
 import java.io.DataOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
@@ -206,5 +208,15 @@ public class TurbineElement extends TransparentNodeElement{
 		
 		super.networkSerialize(stream);
 		node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
+	}
+
+	@Override
+	public Map<String, String> getWaila(){
+		Map<String, String> info = new HashMap<String, String>();
+		info.put("Nominal \u0394T", (warmLoad.Tc - coolLoad.Tc == descriptor.nominalDeltaT ? "Yes" : "No"));
+		if(Eln.wailaEasyMode){
+			info.put("\u0394T", Utils.plotCelsius("", warmLoad.Tc - coolLoad.Tc));
+		}
+		return info;
 	}
 }

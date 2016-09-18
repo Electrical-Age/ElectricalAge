@@ -3,6 +3,9 @@ package mods.eln.transparentnode.heatfurnace;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.misc.Direction;
@@ -237,5 +240,14 @@ public class HeatFurnaceElement extends TransparentNodeElement {
 		super.readFromNBT(nbt);
 		takeFuel = nbt.getBoolean("takeFuel");
 		controlExternal = nbt.getBoolean("controlExternal");
+	}
+
+	@Override
+	public Map<String, String> getWaila(){
+		Map<String, String> info = new HashMap<String, String>();
+		DecimalFormat format = new DecimalFormat("#.#");
+		info.put("Temperature", Utils.plotCelsius("", thermalLoad.Tc));
+		info.put("Target Temp", Utils.plotCelsius("", regulator.getTarget()));
+		return info;
 	}
 }

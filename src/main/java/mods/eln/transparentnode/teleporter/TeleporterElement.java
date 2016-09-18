@@ -3,8 +3,11 @@ package mods.eln.transparentnode.teleporter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -623,5 +626,16 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	public String getName() {
 
 		return name;
+	}
+
+	@Override
+	public Map<String, String> getWaila(){
+		Map<String, String> info = new HashMap<String, String>();
+		DecimalFormat format = new DecimalFormat("#.##");
+		info.put("Destination", targetName);
+		info.put("Distance", format.format(getTeleportCoordonate().trueDistanceTo(getTarget(targetName).getTeleportCoordonate())) + "m");
+		info.put("Power required", format.format(energyTarget) + "J");
+		info.put("Charge rate", powerCharge + "W");
+		return info;
 	}
 }

@@ -18,6 +18,8 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
+import java.util.Map;
+
 public class ComputerCraftIoElement extends TransparentNodeElement implements IPeripheral {
 	
 	public NbtElectricalGateInputOutput[] ioGate = new NbtElectricalGateInputOutput[4];
@@ -159,5 +161,10 @@ public class ComputerCraftIoElement extends TransparentNodeElement implements IP
 	@Override
 	public boolean equals(IPeripheral other) {
 		return other == this;
-	}    
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		return null;
+	}
 }

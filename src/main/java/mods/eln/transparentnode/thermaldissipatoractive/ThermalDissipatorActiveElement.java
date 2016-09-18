@@ -2,7 +2,10 @@ package mods.eln.transparentnode.thermaldissipatoractive;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -118,7 +121,15 @@ public class ThermalDissipatorActiveElement extends TransparentNodeElement{
 	}
 	public float lastPowerFactor;
 	
-	
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		if(Eln.wailaEasyMode){
+			info.put("Temperature", Utils.plotCelsius("", thermalLoad.Tc));
+			info.put("Thermal Power", Utils.plotPower("", thermalLoad.getPower()));
+		}
+		return info;
+	}
 
 
 }

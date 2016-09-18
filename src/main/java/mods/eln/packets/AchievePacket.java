@@ -1,4 +1,4 @@
-package mods.eln.achievepackets;
+package mods.eln.packets;
 
 import io.netty.buffer.ByteBuf;
 import cpw.mods.fml.common.network.ByteBufUtils;

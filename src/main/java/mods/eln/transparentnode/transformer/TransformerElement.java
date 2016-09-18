@@ -1,16 +1,15 @@
 package mods.eln.transparentnode.transformer;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import mods.eln.Eln;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.transparent.*;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Transformer;
@@ -27,6 +26,13 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TransformerElement extends TransparentNodeElement {
 	public NbtElectricalLoad primaryLoad = new NbtElectricalLoad("primaryLoad");
@@ -329,5 +335,22 @@ public class TransformerElement extends TransparentNodeElement {
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 		isIsolator = nbt.getBoolean("isIsolated");
+	}
+
+	@Override
+	public Map<String, String> getWaila(){
+		Map<String, String> info = new HashMap<String, String>();
+		DecimalFormat format = new DecimalFormat("#.##");
+		info.put("Ratio", format.format(Utils.readPrivateDouble(transformer, "ratio")));
+		FerromagneticCoreDescriptor core = (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId));
+		if(core != null){
+			info.put("Core Factor", format.format(core.cableMultiplicator));
+		}
+		info.put("Isolated", isIsolator ? "Yes" : "No");
+		if(Eln.wailaEasyMode){
+			info.put("Voltage+", Utils.plotVolt("", primaryLoad.getU()));
+			info.put("Voltage-", Utils.plotVolt("", secondaryLoad.getU()));
+		}
+		return info;
 	}
 }

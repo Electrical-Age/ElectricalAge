@@ -1,5 +1,6 @@
 package mods.eln.transparentnode.battery;
 
+import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -24,6 +25,9 @@ import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BatteryElement extends TransparentNodeElement {
 
@@ -246,4 +250,25 @@ public class BatteryElement extends TransparentNodeElement {
 		nbt.setDouble("life", 1.0);
 		return nbt;
 	}*/
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> wailaList = new HashMap<String, String>();
+		DecimalFormat df = new DecimalFormat("#.##");
+		String charge, energy, life, voltage, current = "";
+		NbtBatteryProcess p = batteryProcess;
+		charge = df.format(p.getCharge() * 100.0) + "%";
+		energy = df.format(p.getEnergy() / 1000.0) + "kJ";
+		life = df.format(p.life * 100.0) + "%";
+		voltage = df.format(p.getU()) + "v";
+		current = df.format(p.getDischargeCurrent())+"a";
+		wailaList.put("Charge", charge);
+		wailaList.put("Energy", energy);
+		wailaList.put("Life", life);
+		if(Eln.wailaEasyMode){
+			wailaList.put("Voltage", voltage);
+			wailaList.put("Current", current);
+		}
+		return wailaList;
+	}
 }

@@ -3,6 +3,7 @@ package mods.eln.mechanical
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
 import mods.eln.misc.Obj3D
+import mods.eln.misc.Utils
 import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
@@ -30,4 +31,11 @@ open class StraightJointElement(node : TransparentNode, desc_ : TransparentNodeD
 
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float,
                                   vz: Float): Boolean = false
+
+    override fun getWaila(): Map<String, String> {
+        var info = mutableMapOf<String, String>()
+        info.put("Speed", Utils.plotRads("", shaft.rads))
+        info.put("Energy", Utils.plotEnergy("", shaft.energy))
+        return info
+    }
 }

@@ -2,6 +2,7 @@ package mods.eln.transparentnode.thermaldissipatorpassive;
 
 
 
+import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -18,6 +19,9 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ThermalDissipatorPassiveElement extends TransparentNodeElement{
 	ThermalDissipatorPassiveDescriptor descriptor;
@@ -103,6 +107,16 @@ public class ThermalDissipatorPassiveElement extends TransparentNodeElement{
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		if(Eln.wailaEasyMode){
+			info.put("Temperature", Utils.plotCelsius("", thermalLoad.Tc));
+			info.put("Thermal Power", Utils.plotPower("", thermalLoad.getPower()));
+		}
+		return info;
 	}
 
 }

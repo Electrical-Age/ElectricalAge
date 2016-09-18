@@ -111,6 +111,10 @@ open class TachometerElement(node : TransparentNode, desc_ : TransparentNodeDesc
         nbt.setFloat("minRads", minRads)
         nbt.setFloat("maxRads", maxRads)
     }
+
+    override fun getWaila(): Map<String, String> {
+        return mapOf()
+    }
 }
 
 class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {
