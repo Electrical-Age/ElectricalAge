@@ -16,6 +16,7 @@ val dieselList = arrayOf(
  */
 val gasolineList = arrayOf(
         // Various gasoline equivalents, and light oils a small turbine can reasonably burn.
+        "syngas", // Advanced Generators
         "fuel", // Buildcraft
         "rc ethanol", // RotaryCraft
         "biofuel", // Minefactory Reloaded
