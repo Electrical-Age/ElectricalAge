@@ -45,7 +45,7 @@ open class TachometerElement(node : TransparentNode, desc_ : TransparentNodeDesc
         val SetRangeEventId = 1
 
         val DefaultMinRads = 0.0f
-        val DefaultMaxRads = 52.36f
+        val DefaultMaxRads = 1000f
     }
 
     override val shaftMass = 0.5
@@ -149,10 +149,10 @@ class TachometerGui(val render: TachometerRender): GuiScreenEln() {
     override fun initGui() {
         super.initGui()
         validate.enabled = true
-        lowValue.setComment(I18N.tr("RPM corresponding\nto 0% output").split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray())
-        highValue.setComment(I18N.tr("RPM corresponding\nto 100% output").split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray())
-        lowValue.setText(render.minRads * 30f / Math.PI.toFloat())
-        highValue.setText(render.maxRads * 30f / Math.PI.toFloat())
+        lowValue.setComment(I18N.tr("Rads/s corresponding\nto 0% output").split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray())
+        highValue.setComment(I18N.tr("Rads/s corresponding\nto 100% output").split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray())
+        lowValue.setText(render.minRads)
+        highValue.setText(render.maxRads)
     }
 
     override fun guiObjectEvent(`object`: IGuiObject?) {
@@ -160,8 +160,8 @@ class TachometerGui(val render: TachometerRender): GuiScreenEln() {
         if (`object` === validate) {
 
             try {
-                val minRads = NumberFormat.getInstance().parse(lowValue.text).toFloat() * Math.PI.toFloat() / 30.0f
-                val maxRads = NumberFormat.getInstance().parse(highValue.text).toFloat() * Math.PI.toFloat() / 30.0f
+                val minRads = NumberFormat.getInstance().parse(lowValue.text).toFloat()
+                val maxRads = NumberFormat.getInstance().parse(highValue.text).toFloat()
 
                 try {
                     val bos = ByteArrayOutputStream()
