@@ -65,6 +65,7 @@ Average_Electrical_Drill.name=Average Electrical Drill
 Average_Ferromagnetic_Core.name=Average Ferromagnetic Core
 Basic_Magnet.name=Basic Magnet
 Black_Brush.name=Black Brush
+Blown_Lead_Fuse.name=Blown Lead Fuse
 Blue_Brush.name=Blue Brush
 Brown_Brush.name=Brown Brush
 Capacity_Oriented_Battery.name=Capacity Oriented Battery
@@ -94,8 +95,10 @@ Electrical_Anemometer_Sensor.name=Electrical Anemometer Sensor
 Electrical_Breaker.name=Electrical Breaker
 Electrical_Daylight_Sensor.name=Electrical Daylight Sensor
 Electrical_Entity_Sensor.name=Electrical Entity Sensor
+Electrical_Fire_Buzzer.name=Electrical Fire Buzzer
 Electrical_Fire_Detector.name=Electrical Fire Detector
 Electrical_Furnace.name=Electrical Furnace
+Electrical_Fuse_Holder.name=Electrical Fuse Holder
 Electrical_Light_Sensor.name=Electrical Light Sensor
 Electrical_Motor.name=Electrical Motor
 Electrical_Probe.name=Electrical Probe
@@ -110,6 +113,8 @@ Fast_Electrical_Drill.name=Fast Electrical Drill
 Ferrite_Ingot.name=Ferrite Ingot
 Flat_Lamp_Socket.name=Flat Lamp Socket
 Fluorescent_Lamp_Socket.name=Fluorescent Lamp Socket
+Flywheel.name=Flywheel
+Gas_Turbine.name=Gas Turbine
 Generator.name=Generator
 Gold_Dust.name=Gold Dust
 Gold_Plate.name=Gold Plate
@@ -127,12 +132,18 @@ Iron_Cable.name=Iron Cable
 Iron_Dust.name=Iron Dust
 Iron_Plate.name=Iron Plate
 JK_Flip_Flop_Chip.name=JK Flip Flop Chip
+Joint.name=Joint
+Joint_hub.name=Joint hub
 LED_vuMeter.name=LED vuMeter
 Lamp_Socket_A.name=Lamp Socket A
 Lamp_Socket_B_Projector.name=Lamp Socket B Projector
 Lamp_Supply.name=Lamp Supply
 Large_Rheostat.name=Large Rheostat
 Lead_Dust.name=Lead Dust
+Lead_Fuse_for_high_voltage_cables.name=Lead Fuse for high voltage cables
+Lead_Fuse_for_low_voltage_cables.name=Lead Fuse for low voltage cables
+Lead_Fuse_for_medium_voltage_cables.name=Lead Fuse for medium voltage cables
+Lead_Fuse_for_very_high_voltage_cables.name=Lead Fuse for very high voltage cables
 Lead_Ingot.name=Lead Ingot
 Lead_Ore.name=Lead Ore
 Lead_Plate.name=Lead Plate
@@ -231,6 +242,7 @@ Steam_Turbine.name=Steam Turbine
 Stone_Heat_Furnace.name=Stone Heat Furnace
 Street_Light.name=Streetlight
 Suspended_Lamp_Socket.name=Suspended Lamp Socket
+Tachometer.name=Tachometer
 Temperature_Probe.name=Temperature Probe
 Thermal_Probe.name=Thermal Probe
 Thermal_Probe_Chip.name=Thermal Probe Chip
@@ -333,7 +345,9 @@ Solar_panel_upgrade=Solar panel upgrade
 State\:=State:
 Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
 
-# ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
+# ./src/main/java/mods/eln/mechanical/Tachometer.kt
+Rads_s_corresponding\nto_0%_output=Rads/s corresponding\nto 0% output
+Rads_s_corresponding\nto_100%_output=Rads/s corresponding\nto 100% output
 
 # ./src/main/java/mods/eln/misc/UtilsClient.java
 Hold_shift=Hold shift
@@ -341,12 +355,27 @@ Hold_shift=Hold shift
 # ./src/main/java/mods/eln/misc/Version.java
 mod.name=Electrical Age
 
-# ./src/main/java/mods/eln/node/six/SixNodeDescriptor.java
+# ./src/main/java/mods/eln/node/transparent/TransparentNodeDescriptor.java
 
 # ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
 Input_power_is_limited_to_%1$W=Input power is limited to %1$W
 
+# ./src/main/java/mods/eln/sixnode/ElectricalFuse.kt
+Protects_electrical_components.\nFuse_melts_if_current_exceeds_the\nfuse_limit=Protects electrical components.\nFuse melts if current exceeds the\nfuse limit
+
 # ./src/main/java/mods/eln/sixnode/LogicGate.kt
+A_Programmable_Array_Logic_(PAL)_is_a_programmable\nlogic_device_semiconductors_used_to__implement_any_logic\nfunction_in_only_one_digital_circuit._The_function_is\nstateless,_which_means_that_no_intermediate_state_is_saved.=A Programmable Array Logic (PAL) is a programmable\nlogic device semiconductors used to  implement any logic\nfunction in only one digital circuit. The function is\nstateless, which means that no intermediate state is saved.
+If_the_input_J_is_1_(high)_and_K_is_0_(low)\nduring_a_clock_pulse,_the_output_becomes_1_(high).\nIf_J_is_0_(low)_and_K_is_1_(high)_during_the_pulse,\nthe_output_becomes_0_(low)._If_both_inputs_are_0_(low)\nduring_the_clock_pulse,_the_state_is_maintained._If_both\ninputs_are_1_(high)_the_input_is_toggled_if_a_rising_edge\nwas_detected_at_the_clock_input.=If the input J is 1 (high) and K is 0 (low)\nduring a clock pulse, the output becomes 1 (high).\nIf J is 0 (low) and K is 1 (high) during the pulse,\nthe output becomes 0 (low). If both inputs are 0 (low)\nduring the clock pulse, the state is maintained. If both\ninputs are 1 (high) the input is toggled if a rising edge\nwas detected at the clock input.
+If_the_input_voltage_is_lower_than_10V,_the\noutput_is_0_(low),_if_the_output_is_bigger_or\nequal_to_30V,_the_output_will_be_1_(high)._For\nall_voltages_in_between,_the_output_does_not_change.=If the input voltage is lower than 10V, the\noutput is 0 (low), if the output is bigger or\nequal to 30V, the output will be 1 (high). For\nall voltages in between, the output does not change.
+Implements_an_exclusive_or.\nAn_output_of_1_(high)_results_if_one_or\nall_three_inputs_to_the_gate_are_1_(high).=Implements an exclusive or.\nAn output of 1 (high) results if one or\nall three inputs to the gate are 1 (high).
+Implements_logical_conjunction.\nA_1_(high)_output_results_only_if_all_of\nthe_three_inputs_to_the_AND_gate_are_1_(high).=Implements logical conjunction.\nA 1 (high) output results only if all of\nthe three inputs to the AND gate are 1 (high).
+Implements_logical_disjunction.\nA_1_(high)_output_results_if_at_least\none_input_to_the_gate_is_1_(high).=Implements logical disjunction.\nA 1 (high) output results if at least\none input to the gate is 1 (high).
+Inverts_the_input_signal.\nOutputs_a_voltage_representing_the\nopposite_logic-level_to_its_input.=Inverts the input signal.\nOutputs a voltage representing the\nopposite logic-level to its input.
+Its_output_is_complement_(inverted)\nto_that_of_the_AND_gate.=Its output is complement (inverted)\nto that of the AND gate.
+Its_output_is_complement_(inverted)\nto_that_of_the_OR_gate.=Its output is complement (inverted)\nto that of the OR gate.
+Its_output_is_complement_(inverted)\nto_that_of_the_XOR_gate.=Its output is complement (inverted)\nto that of the XOR gate.
+Outputs_a_rectangular_signal_which's_frequency\ndepends_to_the_input_voltage._The_higher_the\ninput_voltage_-_the_higher_the_frequency.=Outputs a rectangular signal which's frequency\ndepends to the input voltage. The higher the\ninput voltage - the higher the frequency.
+The_D_flip-flop_captures_the_value\nof_the_D-input_at_a_rising_edge\nportion_of_the_clock_cycle.=The D flip-flop captures the value\nof the D-input at a rising edge\nportion of the clock cycle.
 _O\:_= O: 
 
 # ./src/main/java/mods/eln/sixnode/TreeResinCollector/TreeResinCollectorDescriptor.java
@@ -359,8 +388,6 @@ Battery_slot=Battery slot
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerDescriptor.java
 Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nand_Portable_Battery_...=Can be used to recharge\nelectrical items like:\nFlash Light, X-Ray scanner\nand Portable Battery ...
 
-# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
-
 # ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
 Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Electrical current can only\nflow through the diode\nfrom anode to cathode
 
@@ -371,8 +398,6 @@ Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=Emits an acoustic alarm if\
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
 Sound_is_muted=Sound is muted
 Sound_is_not_muted=Sound is not muted
-
-# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
 Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds the cable limit
@@ -409,13 +434,17 @@ Voltage_[V]=Voltage [V]
 Y-axis_max=Y-axis max
 Y-axis_min=Y-axis min
 
-# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
-
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
 Output_voltage_increases\nif_entities_are_moving_around.=Output voltage increases\nif entities are moving around.
 
+# ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorContainer.kt
+
 # ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorDescriptor.java
+Battery_powered_buzzer_\nactivated_in_presence_of_fire.=Battery powered buzzer \nactivated in presence of fire.
 Output_voltage_increases\nif_a_fire_has_been_detected.=Output voltage increases\nif a fire has been detected.
+
+# ./src/main/java/mods/eln/sixnode/electricalfiredetector/ElectricalFireDetectorElement.java
+Fire_detected\:_=Fire detected: 
 
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceDescriptor.java
 Provides_configurable_signal\nvoltage.=Provides configurable signal\nvoltage.
@@ -427,8 +456,6 @@ Output_at_%1$%=Output at %1$%
 0V_at_night,_%1$V_at_noon.=0V at night, %1$V at noon.
 Provides_an_electrical_voltage\nin_the_presence_of_light.=Provides an electrical voltage\nin the presence of light.
 Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Provides an electrical voltage\nwhich is proportional to\nthe intensity of daylight.
-
-# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
 Applicable_boolean_operators\:=Applicable boolean operators:
@@ -476,9 +503,6 @@ The_time_interval_the\noutput_is_kept_high.=The time interval the\noutput is kep
 
 # ./src/main/java/mods/eln/sixnode/electricalvumeter/ElectricalVuMeterDescriptor.java
 Displays_the_value_of_a_signal.=Displays the value of a signal.
-
-# ./src/main/java/mods/eln/sixnode/electricalwatch/ElectricalWatchContainer.java
-Portable_battery_slot=Portable battery slot
 
 # ./src/main/java/mods/eln/sixnode/electricalweathersensor/ElectricalWeatherSensorDescriptor.java
 Clear\:_%1$V=Clear: %1$V
@@ -563,12 +587,6 @@ Wireless_TX=Wireless TX
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixContainer.java
 (Increases_maximum_voltage)=(Increases maximum voltage)
 
-# ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixGui.java
-
-# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixContainer.java
-
-# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixGui.java
-
 # ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketDescriptor.java
 Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in with energy.
 
@@ -578,6 +596,8 @@ Specify_the_device_to_supply_through_this_socket.=Specify the device to supply t
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorContainer.java
 (Sets_resistance)=(Sets resistance)
 Coal_dust_slot=Coal dust slot
+
+# ./src/main/java/mods/eln/sixnode/resistor/ResistorGui.java
 
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
 High_parallel_resistance\n_\=>_Low_power_dissipation.=High parallel resistance\n => Low power dissipation.
@@ -607,10 +627,12 @@ Set_beacon_name=Set beacon name
 
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
 
+# ./src/main/java/mods/eln/sixnode/wirelesssignal/tx/WirelessSignalTxGui.java
+
 # ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
 Nominal_power\:_%1$_W=Nominal power: %1$ W
 Nominal_voltage\:_%1$_V=Nominal voltage: %1$ V
-Produces_electricity_using_fuel.=Produces electricity using fuel.
+Produces_electricity_using_gasoline.=Produces electricity using gasoline.
 
 # ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
 Nom._Resistance\:_%1$=Nom. Resistance: %1$
@@ -669,6 +691,8 @@ Auto_shutdown=Auto shutdown
 Manual_shutdown=Manual shutdown
 Set_point\:_%1$°C=Set point: %1$°C
 
+# ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineContainer.java
+
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
 Cost=Cost
 
@@ -688,6 +712,12 @@ Take_fuel=Take fuel
 
 # ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
 (Increases_maximal_voltage)=(Increases maximal voltage)
+
+# ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorGui.java
+
+# ./src/main/java/mods/eln/transparentnode/powerinductor/PowerInductorContainer.java
+
+# ./src/main/java/mods/eln/transparentnode/powerinductor/PowerInductorGui.java
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelContainer.java
 Solar_tracker_slot=Solar tracker slot
@@ -716,6 +746,10 @@ Fan_cooling_power\:_%1$W=Fan cooling power: %1$W
 Fan_power_consumption\:_%1$W=Fan power consumption: %1$W
 Fan_voltage\:_%1$V=Fan voltage: %1$V
 
+# ./src/main/java/mods/eln/transparentnode/thermaldissipatorpassive/ThermalDissipatorPassiveDescriptor.java
+
+# ./src/main/java/mods/eln/transparentnode/transformer/TransformerContainer.java
+
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerDescriptor.java
 The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=The voltage ratio is proportional\nto the cable stacks count ratio.
 Transforms_an_input_voltage_to\nan_output_voltage.=Transforms an input voltage to\nan output voltage.
@@ -723,6 +757,8 @@ Transforms_an_input_voltage_to\nan_output_voltage.=Transforms an input voltage t
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineDescriptor.java
 Generates_electricity_using_heat.=Generates electricity using heat.
 Temperature_difference\:_%1$°C=Temperature difference: %1$°C
+
+# ./src/main/java/mods/eln/transparentnode/turret/TurretContainer.java
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
 CAUTION\:_Cables_can_get_quite_hot!=CAUTION: Cables can get quite hot!
@@ -803,6 +839,7 @@ Not_connected=Not connected
 Not_enough_space_for_this_block=Not enough space for this block
 Off=Off
 On=On
+Portable_battery_slot=Portable battery slot
 Power=Power
 Power\:_%1$W=Power: %1$W
 Range\:_%1$_blocks=Range: %1$ blocks
