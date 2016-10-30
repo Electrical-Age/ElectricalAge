@@ -45,7 +45,7 @@ sourceSets {
 }
 
 minecraft {
-    version = "1.7.10-10.13.4.1566-1.7.10"
+    version = "1.7.10-10.13.4.1614-1.7.10"
     runDir = "run"
 
     // TODO(Baughn): After moving to 1.10, this should be replaced with the shadow plugin,
