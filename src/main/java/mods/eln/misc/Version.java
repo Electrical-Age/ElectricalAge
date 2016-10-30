@@ -11,13 +11,13 @@ import static mods.eln.i18n.I18N.tr;
 public final class Version {
 
 	/** Major version code. */
-	public final static int MAJOR = 1;
+	public final static int MAJOR = Integer.parseInt("@MAJORVERSION@");
 
 	/** Minor version code. */
-	public final static int MINOR = 12;
+	public final static int MINOR = Integer.parseInt("@MINORVERSION@");
 
 	/** Revision version code. */
-	public final static int REVISION = 0;
+	public final static int REVISION = Integer.parseInt("@REVISION@");
 
 	/**
 	 * Unique version code. Must be a String for annotations. Used to check if a

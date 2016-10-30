@@ -31,6 +31,7 @@ apply from: 'gradle.properties'
 
 group = GROUP
 archivesBaseName = ARCHIVE_NAME
+version = MAJORVERSION + "." + MINORVERSION + "." + REVISION
 
 targetCompatibility = '1.6'
 sourceCompatibility = '1.6'
@@ -51,6 +52,12 @@ minecraft {
     // TODO(Baughn): After moving to 1.10, this should be replaced with the shadow plugin,
     // e.g. as used in https://github.com/Emberwalker/Laundarray/blob/master/build.gradle
     srgExtra "PK: org/apache/commons/math3 mods/eln/libs/org/apache/commons/math3"
+
+    replaceIn "Version.java"
+    replace "@VERSION@", project.version
+    replace "@MAJORVERSION@", MAJORVERSION
+    replace "@MINORVERSION@", MINORVERSION
+    replace "@REVISION@", REVISION
 }
 
 configurations {
@@ -176,20 +183,6 @@ def getMinecratfDir() {
         outDir = System.getProperty("user.home") + "/.minecraft"
     return outDir
 }
-
-task readVersion(type: JavaExec, dependsOn: classes) {
-    classpath configurations.runtime, sourceSets.main.output
-    main = "mods.eln.misc.Version"
-    standardOutput = new ByteArrayOutputStream()
-    doLast {
-        project.setVersion(standardOutput.toString())
-        jar.manifest {
-            attributes 'Implementation-Version': project.version
-        }
-    }
-}
-
-jar.dependsOn('readVersion')
 
 // Custom task to build and copy the mod Jar to the default local Minecraft folder
 task buildAndCopyJar(dependsOn: 'build', type: Copy) {
