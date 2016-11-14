@@ -127,23 +127,22 @@ public abstract class GridRender extends TransparentNodeElementRender {
 
             // Four points at the starting pole.
             Vec3 previous[] = spread(start, catenary[0]);
-            final World worldObj = tileEntity.getWorldObj();
             for (int i = 0; i < catenary.length - 1; i++) {
                 // Some more points at intermediate junctions.
                 Vec3 next[] = spread(catenary[i], catenary[i + 1]);
-                drawBox(worldObj, previous, next);
+                drawBox(previous, next);
                 previous = next;
             }
             // Finally, at the ending pole. We'll just translate the second-to-last points to fit.
             Vec3 last[] = translate(previous, catenary[catenary.length - 2].subtract(catenary[catenary.length - 1]));
-            drawBox(worldObj, previous, last);
+            drawBox(previous, last);
 
             glEnd();
             glEndList();
         }
 
-        private void drawBox(World world, Vec3[] a, Vec3[] b) {
-            Vec3 v[] = new Vec3[]{a[0], a[1], a[2], a[3], b[0], b[1], b[2], b[3]};
+        private void drawBox(Vec3[] from, Vec3[] to) {
+            Vec3 v[] = new Vec3[]{from[0], from[1], from[2], from[3], to[0], to[1], to[2], to[3]};
 
             // Figure out the lighting.
 //            Vec3 middle = Vec3.createVectorHelper(0, 0, 0);
@@ -160,12 +159,8 @@ public abstract class GridRender extends TransparentNodeElementRender {
             for (int i = 0; i < box.length; i++) {
                 final int bc = box[i] - 1;
                 glTexCoord2f(boxTex[bc * 2], boxTex[bc * 2 + 1]);
-                vertex(v[bc]);
+                glVertex3f((float)v[bc].xCoord, (float)v[bc].yCoord, (float)v[bc].zCoord);
             }
-        }
-
-        private void vertex(Vec3 vec3) {
-            glVertex3d(vec3.xCoord, vec3.yCoord, vec3.zCoord);
         }
 
         private Vec3[] translate(Vec3[] start, Vec3 delta) {
