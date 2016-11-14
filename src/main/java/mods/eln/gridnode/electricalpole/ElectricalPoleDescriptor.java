@@ -20,9 +20,12 @@ public class ElectricalPoleDescriptor extends GridDescriptor {
         this.includeTransformer = includeTransformer;
         transformerParts = new Obj3D.Obj3DPart[]{
                 obj.getPart("transformer"),
-                obj.getPart("wire"),
                 obj.getPart("cables"),
+                obj.getPart("foot")
         };
+        for (int i = 0; i < transformerParts.length; i++) {
+            assert(transformerParts[i] != null);
+        }
     }
 
     @Override

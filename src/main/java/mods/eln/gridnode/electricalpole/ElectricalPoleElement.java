@@ -21,6 +21,8 @@ import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad;
 import mods.eln.sound.SoundCommand;
 import mods.eln.sound.SoundLooper;
 
+import java.io.DataOutputStream;
+
 // TODO: I should probably just make the transformer variant a subclass.
 public class ElectricalPoleElement extends GridElement {
     public NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
@@ -164,4 +166,9 @@ public class ElectricalPoleElement extends GridElement {
         interSystemProcess.setRatio(0.25);
     }
 
+    @Override
+    public void networkSerialize(DataOutputStream stream) {
+        super.networkSerialize(stream);
+        node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
+    }
 }
