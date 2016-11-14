@@ -626,24 +626,24 @@ public class Eln {
 		int subId;
 		{
 			subId = 2;
-			DownlinkDescriptor descriptor =
-					new DownlinkDescriptor("Downlink", obj.getObj("DownLink"), "textures/wire.png", highVoltageCableDescriptor);
-			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+//			DownlinkDescriptor descriptor =
+//					new DownlinkDescriptor("Downlink", obj.getObj("DownLink"), "textures/wire.png", highVoltageCableDescriptor);
+//			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
 		}
 		{
 			subId = 3;
-			GridTransformerDescriptor descriptor =
-					new GridTransformerDescriptor("Grid Transformer", obj.getObj("Transformer"), "textures/wire.png", highVoltageCableDescriptor);
-			GhostGroup g = new GhostGroup();
-			g.addElement(1, 0, 0);
-			g.addElement(0, 0, -1);
-			g.addElement(1, 0, -1);
-			g.addElement(1, 1, 0);
-			g.addElement(0, 1, 0);
-			g.addElement(1, 1, -1);
-			g.addElement(0, 1, -1);
-			descriptor.setGhostGroup(g);
-			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+//			GridTransformerDescriptor descriptor =
+//					new GridTransformerDescriptor("Grid Transformer", obj.getObj("Transformer"), "textures/wire.png", highVoltageCableDescriptor);
+//			GhostGroup g = new GhostGroup();
+//			g.addElement(1, 0, 0);
+//			g.addElement(0, 0, -1);
+//			g.addElement(1, 0, -1);
+//			g.addElement(1, 1, 0);
+//			g.addElement(0, 1, 0);
+//			g.addElement(1, 1, -1);
+//			g.addElement(0, 1, -1);
+//			descriptor.setGhostGroup(g);
+//			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
 		}
 		{
 			subId = 4;
