@@ -125,18 +125,22 @@ public abstract class GridRender extends TransparentNodeElementRender {
             glNewList(list, GL_COMPILE);
             glBegin(GL_TRIANGLES);
 
-            // Four points at the starting pole.
-            Vec3 previous[] = spread(start, catenary[0]);
-            for (int i = 0; i < catenary.length - 1; i++) {
-                // Some more points at intermediate junctions.
-                Vec3 next[] = spread(catenary[i], catenary[i + 1]);
-                drawBox(previous, next);
-                previous = next;
+            if (start.xCoord == end.xCoord && start.zCoord == end.zCoord) {
+                // Poles right on top of each other? No catenaries here.
+                drawBox(spread(start, end), spread(end, start));
+            } else {
+                // Four points at the starting pole.
+                Vec3 previous[] = spread(start, catenary[0]);
+                for (int i = 0; i < catenary.length - 1; i++) {
+                    // Some more points at intermediate junctions.
+                    Vec3 next[] = spread(catenary[i], catenary[i + 1]);
+                    drawBox(previous, next);
+                    previous = next;
+                }
+                // Finally, at the ending pole. We'll just translate the second-to-last points to fit.
+                Vec3 last[] = translate(previous, catenary[catenary.length - 2].subtract(catenary[catenary.length - 1]));
+                drawBox(previous, last);
             }
-            // Finally, at the ending pole. We'll just translate the second-to-last points to fit.
-            Vec3 last[] = translate(previous, catenary[catenary.length - 2].subtract(catenary[catenary.length - 1]));
-            drawBox(previous, last);
-
             glEnd();
             glEndList();
         }
@@ -180,6 +184,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
             // We don't care what r is, so long as it's linearly independent of delta.
             final Vec3 r = delta.normalize();
             r.rotateAroundY(1);
+            r.rotateAroundX(1);
             // This gives us one vector which is perpendicular to delta.
             final Vec3 x1 = multiply(delta.crossProduct(r).normalize(), cableWidth);
             // And this, another, perpendicular to delta and x1.
@@ -203,15 +208,9 @@ public abstract class GridRender extends TransparentNodeElementRender {
 
         // This function borrowed from Immersive Engineering. Check them out!
         private Vec3[] getConnectionCatenary(Vec3 start, Vec3 end) {
-            // We don't have any vertical lines, possibly ever, but definitely not right now.
-            final boolean vertical = false;
-
             // TODO: Thermal heating.
             final double slack = 1.005;
             final int vertices = 16;
-
-            if (vertical)
-                return new Vec3[]{Vec3.createVectorHelper(end.xCoord, end.yCoord, end.zCoord)};
 
             double dx = (end.xCoord) - (start.xCoord);
             double dy = (end.yCoord) - (start.yCoord);
