@@ -9,6 +9,10 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 
+import static org.lwjgl.opengl.GL11.glPopMatrix;
+import static org.lwjgl.opengl.GL11.glPushMatrix;
+import static org.lwjgl.opengl.GL11.glRotatef;
+
 /**
  * Created by svein on 22/08/15.
  */
@@ -18,30 +22,43 @@ public class GridDescriptor extends TransparentNodeDescriptor {
     public final ArrayList<Obj3D.Obj3DPart> gnd = new ArrayList<Obj3D.Obj3DPart>();
     protected final String cableTexture;
     private final Obj3D obj;
-    private final Obj3D.Obj3DPart main;
+//    private final Obj3D.Obj3DPart main;
+
+    protected ArrayList<Obj3D.Obj3DPart> static_parts = new ArrayList<Obj3D.Obj3DPart>();
+    protected ArrayList<Obj3D.Obj3DPart> rotating_parts = new ArrayList<Obj3D.Obj3DPart>();
 
     public GridDescriptor(String name, Obj3D obj, Class ElementClass, Class RenderClass, String cableTexture, ElectricalCableDescriptor cableDescriptor) {
         super(name, ElementClass, RenderClass);
         this.obj = obj;
         this.cableDescriptor = cableDescriptor;
-        this.main = obj.getPart("main");
+
+        rotating_parts.add(obj.getPart("main"));
         for (int i = 0; ; i++) {
             Obj3D.Obj3DPart plus = obj.getPart("p" + i);
             Obj3D.Obj3DPart gnd = obj.getPart("g" + i);
             if (plus == null || gnd == null) break;
+            rotating_parts.add(plus);
+            rotating_parts.add(gnd);
             this.plus.add(plus);
             this.gnd.add(gnd);
         }
         this.cableTexture = cableTexture;
     }
 
-    public void draw() {
-        main.draw();
-        for (Obj3D.Obj3DPart p : plus) {
-            p.draw();
+    public void draw(float idealRenderingAngle) {
+        final boolean fixed = rotationIsFixed();
+        if (!fixed) {
+            glPushMatrix();
+            glRotatef(idealRenderingAngle, 0, 1, 0);
         }
-        for (Obj3D.Obj3DPart m : gnd) {
-            m.draw();
+        for (Obj3D.Obj3DPart part : rotating_parts) {
+            part.draw();
+        }
+        if (!fixed) {
+            glPopMatrix();
+        }
+        for (Obj3D.Obj3DPart part : static_parts) {
+            part.draw();
         }
     }
 
@@ -52,7 +69,7 @@ public class GridDescriptor extends TransparentNodeDescriptor {
         GL11.glPushMatrix();
         GL11.glTranslatef(0, -1, 0);
         GL11.glScalef(0.6f, 0.6f, 0.6f);
-        draw();
+        draw(0);
         GL11.glPopMatrix();
     }
 

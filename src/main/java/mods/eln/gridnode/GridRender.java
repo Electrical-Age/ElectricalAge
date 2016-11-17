@@ -1,5 +1,6 @@
 package mods.eln.gridnode;
 
+import mods.eln.misc.Obj3D;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
@@ -32,10 +33,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
 
     @Override
     public void draw() {
-        glPushMatrix();
-        glRotatef(idealRenderingAngle, 0, 1, 0);
-        descriptor.draw();
-        glPopMatrix();
+        descriptor.draw(idealRenderingAngle);
 
         UtilsClient.bindTexture(cableTexture);
         // TODO: Try not to need this. (How? Math.)

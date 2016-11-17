@@ -10,31 +10,16 @@ import mods.eln.sound.SoundCommand;
  */
 public class ElectricalPoleDescriptor extends GridDescriptor {
     public final float minimalLoadToHum = 0.2f;
-    final boolean includeTransformer;
     public SoundCommand highLoadSound = new SoundCommand("eln:Transformer", 1.6f);
-
-    private Obj3D.Obj3DPart[] transformerParts;
+    public final boolean includeTransformer;
 
     public ElectricalPoleDescriptor(String name, Obj3D obj, String cableTexture, ElectricalCableDescriptor cableDescriptor, boolean includeTransformer) {
         super(name, obj, ElectricalPoleElement.class, ElectricalPoleRender.class, cableTexture, cableDescriptor);
         this.includeTransformer = includeTransformer;
-        transformerParts = new Obj3D.Obj3DPart[]{
-                obj.getPart("transformer"),
-                obj.getPart("cables"),
-                obj.getPart("foot")
-        };
-        for (int i = 0; i < transformerParts.length; i++) {
-            assert(transformerParts[i] != null);
-        }
-    }
-
-    @Override
-    public void draw() {
-        super.draw();
         if (includeTransformer) {
-            for (Obj3D.Obj3DPart transformerPart : transformerParts) {
-                transformerPart.draw();
-            }
+            rotating_parts.add(obj.getPart("transformer"));
+            rotating_parts.add(obj.getPart("cables"));
+            static_parts.add(obj.getPart("foot"));
         }
     }
 }
