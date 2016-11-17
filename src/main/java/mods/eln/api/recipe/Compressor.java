@@ -2,14 +2,14 @@ package mods.eln.api.recipe;
 
 import java.util.ArrayList;
 
-import mods.eln.Eln;
+import mods.eln.api.Misc;
 import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
 import net.minecraft.item.ItemStack;
 
 public class Compressor implements IELNMachine{
-	private static RecipesList recipes = Eln.instance.compressorRecipes;
-	
+	private static RecipesList recipes = (RecipesList) Misc.getRecipeList("compressorRecipes");
+
 	/**
 	 * Adds a new recipe to the compressor
 	 * @param input an ItemStack representing the input of the recipe
