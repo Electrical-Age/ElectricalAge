@@ -4,13 +4,14 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import mods.eln.Eln;
+import mods.eln.api.Misc;
 import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
 import net.minecraft.item.ItemStack;
 
 public class Macerator implements IELNMachine{
-	
-	private static RecipesList recipes = Eln.instance.maceratorRecipes;
+
+	private static RecipesList recipes = (RecipesList) Misc.getRecipeList("maceratorRecipes");
 	
 	/**
 	 * Adds a new recipe to the macerator
