@@ -1,8 +1,11 @@
-package mods.eln.misc;
+package mods.eln.api.recipe;
 
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
+
+import mods.eln.misc.Utils;
+import net.minecraft.item.ItemStack;
 
 public class Recipe {
 

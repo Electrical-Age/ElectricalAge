@@ -3,7 +3,7 @@ package mods.eln.transparentnode.electricalmachine;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.gui.GuiLabel;
 import mods.eln.misc.Direction;
-import mods.eln.misc.Recipe;
+import mods.eln.api.recipe.Recipe;
 import mods.eln.misc.RecipesList;
 import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNodeDescriptor;

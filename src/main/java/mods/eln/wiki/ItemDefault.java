@@ -2,7 +2,7 @@ package mods.eln.wiki;
 
 import mods.eln.gui.GuiLabel;
 import mods.eln.gui.IGuiObject;
-import mods.eln.misc.Recipe;
+import mods.eln.api.recipe.Recipe;
 import mods.eln.misc.RecipesList;
 import mods.eln.misc.Utils;
 import net.minecraft.client.gui.GuiScreen;
