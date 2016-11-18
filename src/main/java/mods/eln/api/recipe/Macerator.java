@@ -1,11 +1,8 @@
 package mods.eln.api.recipe;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-import mods.eln.Eln;
 import mods.eln.api.Misc;
-import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
 import net.minecraft.item.ItemStack;
 

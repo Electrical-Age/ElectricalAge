@@ -3,7 +3,6 @@ package mods.eln.api.recipe;
 import java.util.ArrayList;
 
 import net.minecraft.item.ItemStack;
-import mods.eln.misc.Recipe;
 import mods.eln.misc.RecipesList;
 
 /**
