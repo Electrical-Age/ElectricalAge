@@ -2,6 +2,8 @@ package mods.eln.transparentnode.electricalmachine;
 
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.api.recipe.RecipesList;
+import mods.eln.misc.UtilsClient;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.item.EntityItem;

@@ -4,7 +4,7 @@ import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.RcInterpolator;
-import mods.eln.misc.RecipesList;
+import mods.eln.api.recipe.RecipesList;
 import mods.eln.misc.UtilsClient;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;

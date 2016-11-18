@@ -1,10 +1,14 @@
-package mods.eln.misc;
+package mods.eln.api.recipe;
 
 import mods.eln.Eln;
-import mods.eln.api.recipe.Recipe;
-import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess;
+import mods.eln.api.Misc;
+import mods.eln.misc.Utils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 
 import java.util.ArrayList;
 import java.util.Iterator;
