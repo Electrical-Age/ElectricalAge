@@ -3,7 +3,6 @@ package mods.eln.api.recipe;
 import java.util.ArrayList;
 
 import mods.eln.api.Misc;
-import mods.eln.misc.RecipesList;
 import net.minecraft.item.ItemStack;
 
 public class Macerator implements IELNMachine{

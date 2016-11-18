@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import mods.eln.api.Misc;
 import net.minecraft.item.ItemStack;
-import mods.eln.misc.RecipesList;
 
 public class Magnetizer implements IELNMachine{
 	private static RecipesList recipes = (RecipesList) Misc.getRecipeList("magnetiserRecipes");
