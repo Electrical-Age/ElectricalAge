@@ -2,7 +2,7 @@ package mods.eln.api.recipe;
 
 import mods.eln.Eln;
 import mods.eln.api.Misc;
-import mods.eln.misc.Utils;
+import mods.eln.api.Utilities;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 
@@ -42,6 +42,18 @@ public class RecipesList {
     public void addMachine(ItemStack machine) {
         machineList.add(machine);
     }
+	public ArrayList<Recipe> getRecipeFromOutput(ItemStack output) {
+		ArrayList<Recipe> list = new ArrayList<Recipe>();
+		for(Recipe r : recipeList) {
+			for(ItemStack stack : r.getOutputCopy()) {
+				if(Utilities.areSame(stack, output)) {
+					list.add(r);
+					break;
+				}
+			}
+		}
+		return list;
+	}
 
     public Recipe getRecipe(ItemStack input) {
         for (Recipe r : recipeList) {
