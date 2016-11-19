@@ -63,7 +63,9 @@ import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.O
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import mods.eln.simplenode.test.TestBlock;
+import mods.eln.sixnode.AnalogChipDescriptor;
 import mods.eln.sixnode.ElectricalFuseHolderDescriptor;
+import mods.eln.sixnode.OpAmp;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
 import mods.eln.sixnode.diode.DiodeDescriptor;
@@ -560,6 +562,7 @@ public class Eln {
 		registerTreeResinCollector(116);
 		registerSixNodeMisc(117);
 		registerLogicalGates(118);
+		registerAnalogChips(124);
 
 		//TRANSPARENT NODE REGISTRATION
 		//Sub-UID must be unique in this section only.
@@ -2542,6 +2545,12 @@ public class Eln {
 
 		sixNodeItem.addDescriptor(11 + (id << 6),
 			new LogicGateDescriptor(TR_NAME(Type.NONE, "JK Flip Flop Chip"), model, "JKFF", JKFlipFlop.class));
+	}
+
+	private void registerAnalogChips(int id) {
+		Obj3D model = obj.getObj("LogicGates");
+		sixNodeItem.addDescriptor(0 + (id << 6),
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "OpAmp"), model, "NOT", OpAmp.class));
 	}
 
 	void registerTransformer(int id) {
