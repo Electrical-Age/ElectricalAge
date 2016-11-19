@@ -2,6 +2,10 @@ package mods.eln.sixnode
 
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
+import mods.eln.gui.GuiHelper
+import mods.eln.gui.GuiScreenEln
+import mods.eln.gui.GuiVerticalTrackBar
+import mods.eln.gui.IGuiObject
 import mods.eln.i18n.I18N
 import mods.eln.misc.*
 import mods.eln.node.Node
@@ -13,16 +17,21 @@ import mods.eln.sim.nbt.NbtElectricalGateInput
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
 import mods.eln.wiki.Data
+import net.minecraft.client.gui.GuiScreen
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraftforge.client.IItemRenderer
 import org.lwjgl.opengl.GL11
+import java.io.ByteArrayOutputStream
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.IOException
 
 open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
                                 functionClass: Class<out AnalogFunction>,
-                               elementClass: Class<out AnalogChipElement>, renderClass: Class<out AnalogChipRender>):
+                                elementClass: Class<out AnalogChipElement>, renderClass: Class<out AnalogChipRender>):
         SixNodeDescriptor(name, elementClass, renderClass) {
     private val case = obj?.getPart("Case")
     private val top = obj?.getPart(functionName)
@@ -218,9 +227,14 @@ class PIDRegulator: AnalogFunction() {
     override val inputCount = 2
     override val infos = "TODO"
 
-    private var Kp = 1.0
-    private var Ki = 0.0
-    private var Kd = 0.0
+    internal var Kp = 1.0
+    internal var Ki = 0.0
+        set(value) {
+            field = value
+            errorIntegral = 0.0
+        }
+
+    internal var Kd = 0.0
 
     private var lastError = 0.0
     private var errorIntegral = 0.0
@@ -233,6 +247,121 @@ class PIDRegulator: AnalogFunction() {
         lastError = error
         return result
     }
+}
+
+class PIDRegulatorElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor):
+        AnalogChipElement(node, side, sixNodeDescriptor) {
+    companion object {
+        val KpParameterChangedEvent = 1
+        val KiParameterChangedEvent = 2
+        val KdParameterChangerEvent = 3
+    }
+
+    override fun hasGui() = true
+
+    override fun networkSerialize(stream: DataOutputStream?) {
+        super.networkSerialize(stream)
+        try {
+            with((function as PIDRegulator)) {
+                stream?.writeFloat(Kp.toFloat())
+                stream?.writeFloat(Ki.toFloat())
+                stream?.writeFloat(Kd.toFloat())
+            }
+        } catch(e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun networkUnserialize(stream: DataInputStream?) {
+        super.networkUnserialize(stream)
+        try {
+            when (stream?.readByte()?.toInt()) {
+                KpParameterChangedEvent -> (function as PIDRegulator).Kp = stream?.readFloat()?.toDouble() ?: 0.0
+                KiParameterChangedEvent -> (function as PIDRegulator).Ki = stream?.readFloat()?.toDouble() ?: 0.0
+                KdParameterChangerEvent -> (function as PIDRegulator).Kd = stream?.readFloat()?.toDouble() ?: 0.0
+            }
+            needPublish()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
+
+class PIDRegulatorRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor):
+        AnalogChipRender(entity, side, descriptor) {
+    internal var Kp = 1f
+    internal var Ki = 0f
+    internal var Kd = 0f
+
+    override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? {
+        return PIDRegulatorGui(this)
+    }
+
+    override fun publishUnserialize(stream: DataInputStream?) {
+        super.publishUnserialize(stream)
+        try {
+            Kp = stream?.readFloat() ?: 1f
+            Ki = stream?.readFloat() ?: 0f
+            Kd = stream?.readFloat() ?: 0f
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
+
+class PIDRegulatorGui(val render: PIDRegulatorRender): GuiScreenEln() {
+    var KpBar: GuiVerticalTrackBar? = null
+    var KiBar: GuiVerticalTrackBar? = null
+    var KdBar: GuiVerticalTrackBar? = null
+
+    override fun initGui() {
+        super.initGui()
+
+        KpBar = newGuiVerticalTrackBar(10, 10, 20, 80)
+        KpBar?.setRange(0f, 20f)
+        KpBar?.value = render.Kp
+        KiBar = newGuiVerticalTrackBar(40, 10, 20, 80)
+        KiBar?.value = render.Ki
+        KdBar = newGuiVerticalTrackBar(70, 10, 20, 80)
+        KdBar?.value = render.Kd
+    }
+
+    override fun preDraw(f: Float, x: Int, y: Int) {
+        super.preDraw(f, x, y)
+        KpBar?.setComment(0, KpBar?.value.toString())
+        KiBar?.setComment(0, KiBar?.value.toString())
+        KdBar?.setComment(0, KdBar?.value.toString())
+    }
+
+    override fun guiObjectEvent(`object`: IGuiObject?) {
+        try {
+            val bos = ByteArrayOutputStream()
+            val stream = DataOutputStream(bos)
+
+            render.preparePacketForServer(stream)
+
+            when (`object`) {
+                KpBar -> {
+                    stream.writeByte(PIDRegulatorElement.KpParameterChangedEvent)
+                    stream.writeFloat(KpBar?.value ?: 0f)
+                }
+                KiBar -> {
+                    stream.writeByte(PIDRegulatorElement.KiParameterChangedEvent)
+                    stream.writeFloat(KiBar?.value ?: 0f)
+                }
+                KdBar -> {
+                    stream.writeByte(PIDRegulatorElement.KdParameterChangerEvent)
+                    stream.writeFloat(KdBar?.value ?: 0f)
+                } else -> return
+            }
+
+            render.sendPacketToServer(bos)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun newHelper() = GuiHelper(this, 160, 110, "pal.png")
 }
 
 class Sum: AnalogFunction() {

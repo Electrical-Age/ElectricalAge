@@ -63,9 +63,7 @@ import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.O
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import mods.eln.simplenode.test.TestBlock;
-import mods.eln.sixnode.AnalogChipDescriptor;
-import mods.eln.sixnode.ElectricalFuseHolderDescriptor;
-import mods.eln.sixnode.OpAmp;
+import mods.eln.sixnode.*;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
 import mods.eln.sixnode.diode.DiodeDescriptor;
@@ -2551,6 +2549,10 @@ public class Eln {
 		Obj3D model = obj.getObj("LogicGates");
 		sixNodeItem.addDescriptor(0 + (id << 6),
 			new AnalogChipDescriptor(TR_NAME(Type.NONE, "OpAmp"), model, "NOT", OpAmp.class));
+
+		sixNodeItem.addDescriptor(1 + (id << 6),
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "PID Regulator"), model, "NOT",
+				PIDRegulator.class, PIDRegulatorElement.class, PIDRegulatorRender.class));
 	}
 
 	void registerTransformer(int id) {
