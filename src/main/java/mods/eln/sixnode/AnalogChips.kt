@@ -2,10 +2,7 @@ package mods.eln.sixnode
 
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
-import mods.eln.gui.GuiHelper
-import mods.eln.gui.GuiScreenEln
-import mods.eln.gui.GuiVerticalTrackBar
-import mods.eln.gui.IGuiObject
+import mods.eln.gui.*
 import mods.eln.i18n.I18N
 import mods.eln.misc.*
 import mods.eln.node.Node
@@ -246,6 +243,20 @@ class PIDRegulator: AnalogFunction() {
         lastError = error
         return result
     }
+
+    override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
+        Kp = nbt?.getDouble("Kp") ?: 1.0
+        Ki = nbt?.getDouble("Ki") ?: 0.0
+        Kd = nbt?.getDouble("Kd") ?: 0.0
+        errorIntegral = nbt?.getDouble("errorIntegral") ?: 0.0
+    }
+
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+        nbt?.setDouble("Kp", Kp)
+        nbt?.setDouble("Ki", Ki)
+        nbt?.setDouble("Kd", Kd)
+        nbt?.setDouble("errorIntegral", errorIntegral)
+    }
 }
 
 class PIDRegulatorElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor):
@@ -261,7 +272,7 @@ class PIDRegulatorElement(node: SixNode, side: Direction, sixNodeDescriptor: Six
     override fun networkSerialize(stream: DataOutputStream?) {
         super.networkSerialize(stream)
         try {
-            with((function as PIDRegulator)) {
+            with(function as PIDRegulator) {
                 stream?.writeFloat(Kp.toFloat())
                 stream?.writeFloat(Ki.toFloat())
                 stream?.writeFloat(Kd.toFloat())
@@ -363,51 +374,139 @@ class PIDRegulatorGui(val render: PIDRegulatorRender): GuiScreenEln() {
     override fun newHelper() = GuiHelper(this, 214, 118, "pid.png")
 }
 
-class Sum: AnalogFunction() {
-    override val inputCount = 3
-    override val infos = "TODO"
-
-    override fun process(inputs: Array<Double?>, deltaTime: Double): Double =
-            (inputs[0] ?: 0.0) + (inputs[1] ?: 0.0) + (inputs[2] ?: 0.0)
-}
-
-class Diff: AnalogFunction() {
-    override val inputCount = 2
-    override val infos = "TODO"
-
-    override fun process(inputs: Array<Double?>, deltaTime: Double): Double = (inputs[0] ?: 0.0) - (inputs[1] ?: 0.0)
-}
-
-class VCO: AnalogFunction() {
+open class VoltageControlledSawtoothOscillator: AnalogFunction() {
+    override val hasState = true
     override val inputCount = 1
     override val infos = "TODO"
 
+    private var out = 0.0
+
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
-        // TODO
-        return 0.0
+        out += Math.pow(50.0, (inputs[0] ?: 0.0) / 50) * 2 * deltaTime
+        if (out > Eln.SVU) {
+            out = 0.0
+        }
+        return out
+    }
+
+    override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
+        out = nbt?.getDouble("out") ?: 0.0
+    }
+
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+        nbt?.setDouble("out", out)
     }
 }
 
-class VCA: AnalogFunction() {
+class VoltageControlledSineOscillator: VoltageControlledSawtoothOscillator() {
+    override fun process(inputs: Array<Double?>, deltaTime: Double) =
+            25.0 + 25.0 * Math.sin(Math.PI * super.process(inputs, deltaTime) / 25.0)
+}
+
+class Amplifier: AnalogFunction() {
+    override val hasState = true
+    override val inputCount = 1
+    override val infos = "TODO"
+
+    internal var gain = 1.0
+
+    override fun process(inputs: Array<Double?>, deltaTime: Double) = gain * (inputs[0] ?: 0.0)
+
+    override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
+        gain = nbt?.getDouble("gain") ?: 1.0
+    }
+
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+        nbt?.setDouble("gain", gain)
+    }
+}
+
+class AmplifierElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor):
+        AnalogChipElement(node, side, sixNodeDescriptor) {
+
+    companion object {
+        val GainChangedEvent = 1
+    }
+
+    override fun hasGui() = true
+
+    override fun networkSerialize(stream: DataOutputStream?) {
+        super.networkSerialize(stream)
+
+        try {
+            with(function as Amplifier) {
+                stream?.writeFloat(gain.toFloat())
+            }
+        } catch(e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun networkUnserialize(stream: DataInputStream?) {
+        super.networkUnserialize(stream)
+
+        try {
+            when (stream?.readByte()?.toInt()) {
+                GainChangedEvent -> (function as Amplifier).gain = stream?.readFloat()?.toDouble() ?: 0.0
+            }
+            needPublish()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
+
+class AmplifierRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor):
+        AnalogChipRender(entity, side, descriptor) {
+    internal var gain = 1f
+
+    override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? {
+        return AmplifierGui(this)
+    }
+
+    override fun publishUnserialize(stream: DataInputStream?) {
+        super.publishUnserialize(stream)
+        try {
+            gain = stream?.readFloat() ?: 1f
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
+
+class AmplifierGui(val render: AmplifierRender): GuiScreenEln() {
+    var gainTF: GuiTextFieldEln? = null
+
+    override fun initGui() {
+        super.initGui()
+
+        gainTF = newGuiTextField(6, 6, 50)
+        gainTF?.setComment(0, I18N.TR("Gain"))
+        gainTF?.setText(render.gain)
+        gainTF?.setObserver { textField, text ->
+            try {
+                val bos = ByteArrayOutputStream()
+                val stream = DataOutputStream(bos)
+
+                render.preparePacketForServer(stream)
+
+                stream.writeByte(AmplifierElement.GainChangedEvent)
+                stream.writeFloat(text.toFloat())
+
+                render.sendPacketToServer(bos)
+            } catch (e: NumberFormatException) {
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    override fun newHelper() = GuiHelper(this, 62, 24)
+}
+
+class VoltageControlledAmplifier: AnalogFunction() {
     override val inputCount = 2
     override val infos = "TODO"
 
-    override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
-        // TODO
-        return 0.0
-    }
-}
-
-class DAC: AnalogFunction() {
-    override val inputCount = 3
-    override val infos = "TODO"
-
-    override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
-        val digitalInputs = inputs.toDigital()
-        var output = 0.0
-        if (digitalInputs[2] ?: false) output += 13.0 * Eln.SVU / 24.0
-        if (digitalInputs[1] ?: false) output += 7.0 * Eln.SVU / 24.0
-        if (digitalInputs[0] ?: false) output += 4.0 * Eln.SVU / 24.0
-        return output
-    }
+    override fun process(inputs: Array<Double?>, deltaTime: Double) = (inputs[1] ?: 5.0) / 5.0 * (inputs[0] ?: 0.0)
 }

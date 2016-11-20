@@ -2546,13 +2546,30 @@ public class Eln {
 	}
 
 	private void registerAnalogChips(int id) {
+		id <<= 6;
+
 		Obj3D model = obj.getObj("LogicGates");
-		sixNodeItem.addDescriptor(0 + (id << 6),
+		sixNodeItem.addDescriptor(id + 0,
 			new AnalogChipDescriptor(TR_NAME(Type.NONE, "OpAmp"), model, "NOT", OpAmp.class));
 
-		sixNodeItem.addDescriptor(1 + (id << 6),
-			new AnalogChipDescriptor(TR_NAME(Type.NONE, "PID Regulator"), model, "NOT",
+		sixNodeItem.addDescriptor(id + 1, new AnalogChipDescriptor(TR_NAME(Type.NONE, "PID Regulator"), model, "NOT",
 				PIDRegulator.class, PIDRegulatorElement.class, PIDRegulatorRender.class));
+
+		sixNodeItem.addDescriptor(id + 2,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage Controller Sawtooth Oscillator"), model, "NOT",
+				VoltageControlledSawtoothOscillator.class));
+
+		sixNodeItem.addDescriptor(id + 3,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage Controller Sine Oscillator"), model, "NOT",
+				VoltageControlledSineOscillator.class));
+
+		sixNodeItem.addDescriptor(id + 4,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Amplifier"), model, "NOT",
+				Amplifier.class, AmplifierElement.class, AmplifierRender.class));
+
+		sixNodeItem.addDescriptor(id + 5,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage Controlled Amplifier"), model, "NOT",
+				VoltageControlledAmplifier.class));
 	}
 
 	void registerTransformer(int id) {
