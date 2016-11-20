@@ -233,7 +233,6 @@ class PIDRegulator: AnalogFunction() {
             field = value
             errorIntegral = 0.0
         }
-
     internal var Kd = 0.0
 
     private var lastError = 0.0
@@ -317,12 +316,12 @@ class PIDRegulatorGui(val render: PIDRegulatorRender): GuiScreenEln() {
     override fun initGui() {
         super.initGui()
 
-        KpBar = newGuiVerticalTrackBar(10, 10, 20, 80)
+        KpBar = newGuiVerticalTrackBar(10, 20, 20, 80)
         KpBar?.setRange(0f, 20f)
         KpBar?.value = render.Kp
-        KiBar = newGuiVerticalTrackBar(40, 10, 20, 80)
+        KiBar = newGuiVerticalTrackBar(40, 20, 20, 80)
         KiBar?.value = render.Ki
-        KdBar = newGuiVerticalTrackBar(70, 10, 20, 80)
+        KdBar = newGuiVerticalTrackBar(70, 20, 20, 80)
         KdBar?.value = render.Kd
     }
 
@@ -361,7 +360,7 @@ class PIDRegulatorGui(val render: PIDRegulatorRender): GuiScreenEln() {
         }
     }
 
-    override fun newHelper() = GuiHelper(this, 160, 110, "pal.png")
+    override fun newHelper() = GuiHelper(this, 214, 118, "pid.png")
 }
 
 class Sum: AnalogFunction() {
