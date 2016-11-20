@@ -7,7 +7,8 @@ import mcp.mobius.waila.api.IWailaRegistrar
 object WailaIntegration {
 
     @JvmStatic
-    fun callbackRegister(registrar: IWailaRegistrar){
+    fun callbackRegister(registrar: IWailaRegistrar) {
         registrar.registerBodyProvider(TransparentNodeHandler(), mods.eln.node.transparent.TransparentNodeBlock::class.java)
+        registrar.registerBodyProvider(GhostNodeHandler(), mods.eln.ghost.GhostBlock::class.java)
     }
 }

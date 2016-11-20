@@ -5,6 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
+import mods.eln.packets.GhostNodeRequestPacket;
 import mods.eln.packets.TransparentNodeRequestPacket;
 
 import java.util.Map;
@@ -26,4 +27,16 @@ public class WailaCache {
                         }
                     }
             );
+
+    public static LoadingCache<Coordonate, Map<String, String>> ghostNodes = CacheBuilder.newBuilder()
+        .maximumSize(200)
+        .expireAfterWrite(1, TimeUnit.MINUTES)
+        .build(
+            new CacheLoader<Coordonate, Map<String, String>>() {
+                public Map<String, String> load(Coordonate key) throws Exception {
+                    Eln.elnNetwork.sendToServer(new GhostNodeRequestPacket(key));
+                    return null;
+                }
+            }
+        );
 }

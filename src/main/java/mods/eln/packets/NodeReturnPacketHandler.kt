@@ -12,7 +12,11 @@ class NodeReturnPacketHandler : IMessageHandler<NodeReturnPacket, IMessage> {
     override fun onMessage(message: NodeReturnPacket?, ctx: MessageContext?): IMessage? {
         val map = message!!.map
         val coord = message.coord
-        WailaCache.nodes.put(coord, map)
+        if (message.isGhost) {
+            WailaCache.ghostNodes.put(coord, map)
+        } else {
+            WailaCache.nodes.put(coord, map)
+        }
         return null
     }
 }

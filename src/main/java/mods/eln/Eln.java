@@ -305,7 +305,7 @@ public class Eln {
 		elnNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
 		elnNetwork.registerMessage(TransparentNodeRequestPacketHandler.class, TransparentNodeRequestPacket.class, 1, Side.SERVER);
 		elnNetwork.registerMessage(NodeReturnPacketHandler.class, NodeReturnPacket.class, 2, Side.CLIENT);
-
+		elnNetwork.registerMessage(GhostNodeRequestPacketHandler.class, GhostNodeRequestPacket.class, 3, Side.SERVER);
 		
 		ModContainer container = FMLCommonHandler.instance().findContainerFor(this);
 		// LanguageRegistry.instance().loadLanguagesFor(container, Side.CLIENT);
