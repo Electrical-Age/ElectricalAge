@@ -9,7 +9,10 @@ object WailaIntegration {
     @JvmStatic
     fun callbackRegister(registrar: IWailaRegistrar) {
         val transparentNodeHandler = TransparentNodeHandler()
+        val ghostNodeHandler = GhostNodeWailaProvider(transparentNodeHandler)
         registrar.registerBodyProvider(transparentNodeHandler, mods.eln.node.transparent.TransparentNodeBlock::class.java)
-        registrar.registerBodyProvider(GhostNodeHandler(transparentNodeHandler), mods.eln.ghost.GhostBlock::class.java)
+        registrar.registerHeadProvider(ghostNodeHandler, mods.eln.ghost.GhostBlock::class.java)
+        registrar.registerBodyProvider(ghostNodeHandler, mods.eln.ghost.GhostBlock::class.java)
+        registrar.registerStackProvider(ghostNodeHandler, mods.eln.ghost.GhostBlock::class.java)
     }
 }

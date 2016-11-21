@@ -4,9 +4,11 @@ import cpw.mods.fml.common.network.ByteBufUtils
 import cpw.mods.fml.common.network.simpleimpl.IMessage
 import io.netty.buffer.ByteBuf
 import mods.eln.misc.Coordonate
+import net.minecraft.item.ItemStack
 
-class GhostNodeResponsePacket(var coord: Coordonate = Coordonate(0, 0, 0 ,0),
-                              var realCoord: Coordonate = Coordonate(0, 0, 0 ,0)): IMessage {
+class GhostNodeWailaResponsePacket(var coord: Coordonate = Coordonate(0, 0, 0 ,0),
+                                   var realCoord: Coordonate = Coordonate(0, 0, 0 ,0),
+                                   var itemStack: ItemStack? = null): IMessage {
 
     private fun Coordonate.write(buf: ByteBuf?) {
         if (buf != null) {
@@ -29,10 +31,12 @@ class GhostNodeResponsePacket(var coord: Coordonate = Coordonate(0, 0, 0 ,0),
     override fun fromBytes(buf: ByteBuf?) {
         coord.read(buf)
         realCoord.read(buf)
+        itemStack = ByteBufUtils.readItemStack(buf)
     }
 
     override fun toBytes(buf: ByteBuf?) {
         coord.write(buf)
         realCoord.write(buf)
+        ByteBufUtils.writeItemStack(buf, itemStack)
     }
 }

@@ -5,7 +5,7 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage
 import io.netty.buffer.ByteBuf
 import mods.eln.misc.Coordonate
 
-open class GhostNodeRequestPacket: IMessage {
+open class GhostNodeWailaRequestPacket : IMessage {
     lateinit var coord: Coordonate
 
     constructor() {}
