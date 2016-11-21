@@ -17,7 +17,7 @@ public class Macerator implements IELNMachine{
 	 */
 	public void addRecipe(ItemStack input, ItemStack[] output, double energy){
 		if(input == null || output == null || energy < 0){
-			System.out.println("Unable to add recipe: invalid arguments");
+			throw new IllegalArgumentException("Invalid Arguments");
 		}
 		if(output.length > 4){
 			throw new IllegalArgumentException("Too many recipe outputs: " + output.length);
