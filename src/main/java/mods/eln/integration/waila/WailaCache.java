@@ -28,12 +28,12 @@ public class WailaCache {
                     }
             );
 
-    public static LoadingCache<Coordonate, Map<String, String>> ghostNodes = CacheBuilder.newBuilder()
-        .maximumSize(200)
+    public static LoadingCache<Coordonate, Coordonate> ghostNodes = CacheBuilder.newBuilder()
+        .maximumSize(1000)
         .expireAfterWrite(1, TimeUnit.MINUTES)
         .build(
-            new CacheLoader<Coordonate, Map<String, String>>() {
-                public Map<String, String> load(Coordonate key) throws Exception {
+            new CacheLoader<Coordonate, Coordonate>() {
+                public Coordonate load(Coordonate key) throws Exception {
                     Eln.elnNetwork.sendToServer(new GhostNodeRequestPacket(key));
                     return null;
                 }

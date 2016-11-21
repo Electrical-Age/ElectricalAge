@@ -9,20 +9,18 @@ import java.util.*
 /**
  * Created by Gregory Maddra on 2016-06-27.
  */
-class NodeReturnPacket : IMessage{
+class TransparentNodeResponsePacket : IMessage{
 
     lateinit var map: Map<String, String>
     lateinit var coord: Coordonate
-    var isGhost = false
 
     constructor(){
 
     }
 
-    constructor(m: Map<String, String>, c: Coordonate, ghost: Boolean = false){
+    constructor(m: Map<String, String>, c: Coordonate){
         map = m
         coord = c
-        isGhost = ghost
     }
 
     override fun fromBytes(buf: ByteBuf?) {
@@ -39,9 +37,6 @@ class NodeReturnPacket : IMessage{
         val y = ByteBufUtils.readVarInt(buf, 5)
         val z = ByteBufUtils.readVarInt(buf, 5)
         val w = ByteBufUtils.readVarInt(buf, 5)
-        try {
-            isGhost = buf?.readBoolean() ?: false
-        } catch (e: IndexOutOfBoundsException) {}
         coord = Coordonate(x, y, z, w)
         val i1 = keys.iterator()
         val i2 = values.iterator()
@@ -64,6 +59,5 @@ class NodeReturnPacket : IMessage{
         ByteBufUtils.writeVarInt(buf, coord.y, 5)
         ByteBufUtils.writeVarInt(buf, coord.z, 5)
         ByteBufUtils.writeVarInt(buf, coord.dimention, 5)
-        buf?.writeBoolean(isGhost)
     }
 }

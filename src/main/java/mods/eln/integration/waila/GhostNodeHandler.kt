@@ -4,10 +4,7 @@ import cpw.mods.fml.common.Optional
 import mcp.mobius.waila.api.IWailaConfigHandler
 import mcp.mobius.waila.api.IWailaDataAccessor
 import mcp.mobius.waila.api.IWailaDataProvider
-import mcp.mobius.waila.api.SpecialChars
-import mods.eln.Eln
 import mods.eln.misc.Coordonate
-import mods.eln.packets.GhostNodeRequestPacket
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.item.ItemStack
@@ -16,28 +13,20 @@ import net.minecraft.tileentity.TileEntity
 import net.minecraft.world.World
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
-class GhostNodeHandler : IWailaDataProvider {
+class GhostNodeHandler(private val transparentNodeHandler: TransparentNodeHandler): IWailaDataProvider {
     companion object {
         var updateTime = Minecraft.getSystemTime()
     }
 
     override fun getWailaBody(itemStack: ItemStack?, currenttip: MutableList<String>?, accessor: IWailaDataAccessor?, config: IWailaConfigHandler?): MutableList<String>? {
-        var tipMap: Map<String, String>? = mapOf()
-        val coord = accessor!!.position
-        val nodeCoord = Coordonate(coord.blockX, coord.blockY, coord.blockZ, accessor.world)
-        if(Minecraft.getSystemTime() - GhostNodeHandler.updateTime > 2000){
-            Eln.elnNetwork.sendToServer(GhostNodeRequestPacket(Coordonate(nodeCoord)))
-            GhostNodeHandler.updateTime = Minecraft.getSystemTime()
-        }
-        try {
-            tipMap = WailaCache.ghostNodes.get(nodeCoord)
-        } catch(e: Exception){
-            //This is probably just it complaining about the cache returning null. Should be safe to ignore.
-        }
-        for((key, value) in tipMap!!.asSequence()){
-            currenttip!! += (key + ": " + SpecialChars.WHITE + value)
-        }
-        return currenttip
+        var pos = accessor!!.position
+        val coord = Coordonate(pos.blockX, pos.blockY, pos.blockZ, accessor.world)
+        val realCoord = WailaCache.ghostNodes.get(coord)
+        pos.blockX = realCoord.x
+        pos.blockY = realCoord.y
+        pos.blockZ = realCoord.z
+
+        return transparentNodeHandler.getWailaBody(itemStack, currenttip, accessor, config)
     }
 
     override fun getWailaStack(accessor: IWailaDataAccessor?, config: IWailaConfigHandler?): ItemStack? {

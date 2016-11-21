@@ -10,13 +10,13 @@ import net.minecraft.nbt.NBTTagCompound
 /**
  * Created by Gregory Maddra on 2016-06-27.
  */
-class TransparentNodeRequestPacketHandler : IMessageHandler<TransparentNodeRequestPacket, NodeReturnPacket> {
+class TransparentNodeRequestPacketHandler : IMessageHandler<TransparentNodeRequestPacket, TransparentNodeResponsePacket> {
 
     companion object{
         var nodeData = NBTTagCompound()
     }
 
-    override fun onMessage(message: TransparentNodeRequestPacket?, ctx: MessageContext?): NodeReturnPacket? {
+    override fun onMessage(message: TransparentNodeRequestPacket?, ctx: MessageContext?): TransparentNodeResponsePacket? {
         val c = message!!.coord
         val node = NodeManager.instance.getNodeFromCoordonate(c) as TransparentNode
         var stringMap: Map<String, String>
@@ -27,7 +27,7 @@ class TransparentNodeRequestPacketHandler : IMessageHandler<TransparentNodeReque
             e.printStackTrace()
             return null
         }
-        return NodeReturnPacket(stringMap, c)
+        return TransparentNodeResponsePacket(stringMap, c)
     }
 
 }
