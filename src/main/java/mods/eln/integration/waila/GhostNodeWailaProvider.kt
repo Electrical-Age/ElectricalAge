@@ -1,5 +1,6 @@
 package mods.eln.integration.waila
 
+import com.google.common.cache.CacheLoader
 import cpw.mods.fml.common.Optional
 import mcp.mobius.waila.api.IWailaConfigHandler
 import mcp.mobius.waila.api.IWailaDataAccessor
@@ -50,7 +51,7 @@ class GhostNodeWailaProvider(private val transparentNodeHandler: TransparentNode
         }
         try {
             ghostData = WailaCache.ghostNodes.get(coord)
-        } catch(e: Exception) {}
+        } catch(e: CacheLoader.InvalidCacheLoadException) {}
 
         return ghostData
     }
