@@ -9,17 +9,17 @@ import mods.eln.node.transparent.TransparentNode
 import net.minecraft.item.ItemStack
 
 class GhostNodeWailaRequestPacketHandler : IMessageHandler<GhostNodeWailaRequestPacket, GhostNodeWailaResponsePacket> {
-    override fun onMessage(message: GhostNodeWailaRequestPacket?, ctx: MessageContext?): GhostNodeWailaResponsePacket? {
-        val realCoord = Eln.ghostManager.getGhost(message!!.coord)?.observatorCoordonate
+    override fun onMessage(message: GhostNodeWailaRequestPacket, ctx: MessageContext?): GhostNodeWailaResponsePacket {
+        val realCoord = Eln.ghostManager.getGhost(message.coord)?.observatorCoordonate
         var itemStack: ItemStack? = null
 
         if (realCoord != null) {
-            val node = NodeManager.instance.getNodeFromCoordonate(realCoord) as TransparentNode
+            val node = NodeManager.instance.getNodeFromCoordonate(realCoord) as? TransparentNode
             if (node != null) {
                 itemStack = node.element.descriptor.newItemStack()
             }
         }
 
-        return GhostNodeWailaResponsePacket(message!!.coord, realCoord ?: Coordonate(0, 0, 0 ,0), itemStack)
+        return GhostNodeWailaResponsePacket(message.coord, realCoord ?: Coordonate(0, 0, 0 ,0), itemStack)
     }
 }

@@ -12,6 +12,7 @@ import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.tileentity.TileEntity
+import net.minecraft.util.MovingObjectPosition
 import net.minecraft.world.World
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
@@ -20,7 +21,27 @@ class GhostNodeWailaProvider(private val transparentNodeHandler: TransparentNode
         var updateTime = Minecraft.getSystemTime()
     }
 
-    private fun getGhostData(coord: Coordonate): GhostNodeWailaData? {
+    private class WailaDataAccessorProxy(val accessor: IWailaDataAccessor, val coord: Coordonate): IWailaDataAccessor {
+        override fun getPlayer() = accessor.player
+        override fun getStack() = accessor.stack
+        override fun getPosition() = MovingObjectPosition(coord.x, coord.y, coord.z, accessor.position.sideHit,
+                accessor.position.hitVec)
+        override fun getSide() = accessor.side
+        override fun getBlockID() = accessor.blockID
+        override fun getPartialFrame() = accessor.partialFrame
+        override fun getMetadata() = accessor.metadata
+        override fun getBlockQualifiedName() = accessor.blockQualifiedName
+        override fun getRenderingPosition() = accessor.renderingPosition
+        override fun getNBTData() = accessor.nbtData
+        override fun getTileEntity() = accessor.tileEntity
+        override fun getWorld() = coord.world()
+        override fun getBlock() = accessor.block
+        override fun getNBTInteger(tag: NBTTagCompound?, keyname: String?) = accessor.getNBTInteger(tag, keyname)
+    }
+
+    private fun getGhostData(accessor: IWailaDataAccessor): GhostNodeWailaData? {
+        val coord = Coordonate(accessor.position.blockX, accessor.position.blockY, accessor.position.blockZ,
+                accessor.world)
         var ghostData: GhostNodeWailaData? = null
 
         if (Minecraft.getSystemTime() - GhostNodeWailaProvider.updateTime > 2000) {
@@ -34,49 +55,29 @@ class GhostNodeWailaProvider(private val transparentNodeHandler: TransparentNode
         return ghostData
     }
 
-    override fun getWailaBody(itemStack: ItemStack?, currenttip: MutableList<String>?, accessor: IWailaDataAccessor?,
+    override fun getWailaBody(itemStack: ItemStack?, currenttip: MutableList<String>?, accessor: IWailaDataAccessor,
                               config: IWailaConfigHandler?): MutableList<String>? {
-        val pos = accessor!!.position
-        val ghostData = getGhostData(Coordonate(pos.blockX, pos.blockY, pos.blockZ, accessor.world))
-
-        if (ghostData != null) {
-            val realCoord = ghostData.realCoord
-            pos.blockX = realCoord.x
-            pos.blockY = realCoord.y
-            pos.blockZ = realCoord.z
-
-            return transparentNodeHandler.getWailaBody(itemStack, currenttip, accessor, config)
+        val realCoord = getGhostData(accessor)?.realCoord
+        return if (realCoord != null) {
+            transparentNodeHandler.getWailaBody(itemStack, currenttip, WailaDataAccessorProxy(accessor, realCoord), config)
         } else {
-            return currenttip
+            currenttip
         }
     }
 
-    override fun getWailaStack(accessor: IWailaDataAccessor?, config: IWailaConfigHandler?): ItemStack? {
-        val pos = accessor!!.position
-        val ghostData = getGhostData(Coordonate(pos.blockX, pos.blockY, pos.blockZ, accessor.world))
+    override fun getWailaStack(accessor: IWailaDataAccessor, config: IWailaConfigHandler?): ItemStack? =
+            getGhostData(accessor)?.itemStack
 
-        if (ghostData != null) {
-            return ghostData.itemStack
-        } else {
-            return null
-        }
-    }
-
-    override fun getWailaTail(itemStack: ItemStack?, currenttip: MutableList<String>?, accessor: IWailaDataAccessor?,
-                              config: IWailaConfigHandler?): MutableList<String>? {
-        return currenttip
-    }
+    override fun getWailaTail(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor,
+                              config: IWailaConfigHandler?) = currenttip
 
     override fun getNBTData(player: EntityPlayerMP?, te: TileEntity?, tag: NBTTagCompound?,
                             world: World?, x: Int, y: Int, z: Int): NBTTagCompound? = null
 
-    override fun getWailaHead(itemStack: ItemStack?, currenttip: MutableList<String>?, accessor: IWailaDataAccessor?,
-                              config: IWailaConfigHandler?): MutableList<String>? {
-        val itemStack = getWailaStack(accessor, config)
-        if (itemStack != null) {
-            return mutableListOf("§f${itemStack.displayName}")
-        } else {
-            return currenttip
-        }
+    override fun getWailaHead(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor,
+                              config: IWailaConfigHandler?): MutableList<String> = if (itemStack != null) {
+            mutableListOf("§f${itemStack.displayName}")
+    } else {
+        currenttip
     }
 }
