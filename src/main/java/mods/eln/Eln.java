@@ -10,6 +10,7 @@ import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
+import mods.eln.api.Utilities;
 import mods.eln.api.recipe.Recipe;
 import mods.eln.api.recipe.RecipesList;
 import mods.eln.packets.*;
@@ -949,21 +950,21 @@ public class Eln {
         }
     }
 
-    boolean aRecipeExist(ItemStack stack) {
-        if (stack == null)
-            return false;
-        List list = CraftingManager.getInstance().getRecipeList();
-        for (Object o : list) {
-            if (o instanceof IRecipe) {
-                IRecipe r = (IRecipe) o;
-                if (r.getRecipeOutput() == null)
-                    continue;
-                if (Utils.areSame(stack, r.getRecipeOutput()))
-                    return true;
-            }
-        }
-        return false;
-    }
+	boolean aRecipeExist(ItemStack stack) {
+		if (stack == null)
+			return false;
+		List list = CraftingManager.getInstance().getRecipeList();
+		for (Object o : list) {
+			if (o instanceof IRecipe) {
+				IRecipe r = (IRecipe) o;
+				if (r.getRecipeOutput() == null)
+					continue;
+				if (Utilities.areSame(stack, r.getRecipeOutput()))
+					return true;
+			}
+		}
+		return false;
+	}
 
     // ElnHttpServer elnHttpServer;
 
