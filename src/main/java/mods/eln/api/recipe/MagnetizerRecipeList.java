@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import mods.eln.api.Misc;
 import net.minecraft.item.ItemStack;
 
-public class PlateMachine implements IELNMachine{
-	private static RecipesList recipes = (RecipesList) Misc.getRecipeList("plateMachineRecipes");
+public class MagnetizerRecipeList implements IELNMachineRecipeList {
+	private static RecipesList recipes = (RecipesList) Misc.getRecipeList("magnetiserRecipes");
 	
 	/**
-	 * Adds a new recipe to the plate machine
+	 * Adds a new recipe to the magnetizer
 	 * @param input an ItemStack representing the input of the recipe
 	 * @param output an ItemStack[] representing the outputs of the recipe
 	 * @param energy a double representing the energy cost of the recipe in J.
@@ -40,7 +40,7 @@ public class PlateMachine implements IELNMachine{
 	}
 	
 	/**
-	 * Removes a recipe from the plate machine
+	 * Removes a recipe from the magnetizer
 	 * @param input an ItemStack representing the input of the recipe
 	 */
 	public void removeRecipe(ItemStack input){
@@ -53,7 +53,7 @@ public class PlateMachine implements IELNMachine{
 	}
 	
 	/**
-	 * Removes recipes from the plate machine by their output ItemStacks
+	 * Removes recipes from the magnetizer by their output ItemStacks
 	 * @param output the ItemStack who's recipes will be removed
 	 */
 	public void removeRecipeByOutput(ItemStack output){
@@ -68,7 +68,7 @@ public class PlateMachine implements IELNMachine{
 	}
 	
 	/**
-	 * Returns all recipes from the plate machine
+	 * Returns all recipes from the magnetizer
 	 * @return an ArrayList<Recipe> of all the machine's recipes
 	 */
 	public ArrayList<Recipe> getRecipes(){

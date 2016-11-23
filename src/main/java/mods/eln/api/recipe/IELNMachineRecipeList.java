@@ -9,7 +9,7 @@ import net.minecraft.item.ItemStack;
  * @author bloxgate
  *
  */
-public interface IELNMachine {
+public interface IELNMachineRecipeList {
 
 	public static RecipesList recipeList = null;
 	

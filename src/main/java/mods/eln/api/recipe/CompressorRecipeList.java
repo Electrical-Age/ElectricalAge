@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import mods.eln.api.Misc;
 import net.minecraft.item.ItemStack;
 
-public class Compressor implements IELNMachine{
+public class CompressorRecipeList implements IELNMachineRecipeList {
 	private static RecipesList recipes = (RecipesList) Misc.getRecipeList("compressorRecipes");
 
 	/**
