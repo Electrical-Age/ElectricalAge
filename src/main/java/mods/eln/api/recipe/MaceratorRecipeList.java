@@ -5,14 +5,15 @@ import java.util.ArrayList;
 import mods.eln.api.Misc;
 import net.minecraft.item.ItemStack;
 
-public class Magnetizer implements IELNMachine{
-	private static RecipesList recipes = (RecipesList) Misc.getRecipeList("magnetiserRecipes");
+public class MaceratorRecipeList implements IELNMachineRecipeList {
+
+	private static RecipesList recipes = (RecipesList) Misc.getRecipeList("maceratorRecipes");
 	
 	/**
-	 * Adds a new recipe to the magnetizer
+	 * Adds a new recipe to the macerator
 	 * @param input an ItemStack representing the input of the recipe
-	 * @param output an ItemStack[] representing the outputs of the recipe
-	 * @param energy a double representing the energy cost of the recipe in J.
+	 * @param output an ItemStack[] with up to 4 items, containing the output of the recipe
+	 * @param energy a double representing the energy cost of the recipe in J
 	 */
 	public void addRecipe(ItemStack input, ItemStack[] output, double energy){
 		if(input == null || output == null || energy < 0){
@@ -25,10 +26,12 @@ public class Magnetizer implements IELNMachine{
 			energy = 0.001;
 		}
 		Recipe recipe = new Recipe(input, output, energy);
+		System.out.println("Added recipe to macerator!");
 		recipes.addRecipe(recipe);
 	}
 	
-	public void addRecipe(ItemStack input, ItemStack output, double energy){
+	@Override
+	public void addRecipe(ItemStack input, ItemStack output, double energy) {
 		if(input == null || output == null || energy < 0){
 			throw new IllegalArgumentException("Invalid Inputs");
 		}
@@ -37,10 +40,11 @@ public class Magnetizer implements IELNMachine{
 		}
 		Recipe recipe = new Recipe(input, output, energy);
 		recipes.addRecipe(recipe);
+		System.out.println("Added recipe to macerator!");
 	}
 	
 	/**
-	 * Removes a recipe from the magnetizer
+	 * Removes a recipe from the macerator
 	 * @param input an ItemStack representing the input of the recipe
 	 */
 	public void removeRecipe(ItemStack input){
@@ -53,12 +57,12 @@ public class Magnetizer implements IELNMachine{
 	}
 	
 	/**
-	 * Removes recipes from the magnetizer by their output ItemStacks
+	 * Removes recipes from the macerator by their output ItemStacks
 	 * @param output the ItemStack who's recipes will be removed
 	 */
 	public void removeRecipeByOutput(ItemStack output){
 		if (output == null){
-			System.out.println("Unable to remove recipe: invalid output ItemStack");
+			System.out.println("Unable to remove recipe: invalid output ItemStack[]");
 			return; 
 		}
 		ArrayList<Recipe> r = recipes.getRecipeFromOutput(output);
@@ -68,10 +72,11 @@ public class Magnetizer implements IELNMachine{
 	}
 	
 	/**
-	 * Returns all recipes from the magnetizer
+	 * Returns all recipes from the macerator
 	 * @return an ArrayList<Recipe> of all the machine's recipes
 	 */
 	public ArrayList<Recipe> getRecipes(){
 		return recipes.getRecipes();
 	}
+
 }
