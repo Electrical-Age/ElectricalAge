@@ -2548,27 +2548,27 @@ public class Eln {
 	private void registerAnalogChips(int id) {
 		id <<= 6;
 
-		Obj3D model = obj.getObj("LogicGates");
+		Obj3D model = obj.getObj("AnalogChips");
 		sixNodeItem.addDescriptor(id + 0,
-			new AnalogChipDescriptor(TR_NAME(Type.NONE, "OpAmp"), model, "NOT", OpAmp.class));
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "OpAmp"), model, "OP", OpAmp.class));
 
-		sixNodeItem.addDescriptor(id + 1, new AnalogChipDescriptor(TR_NAME(Type.NONE, "PID Regulator"), model, "NOT",
+		sixNodeItem.addDescriptor(id + 1, new AnalogChipDescriptor(TR_NAME(Type.NONE, "PID Regulator"), model, "PID",
 				PIDRegulator.class, PIDRegulatorElement.class, PIDRegulatorRender.class));
 
 		sixNodeItem.addDescriptor(id + 2,
-			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage Controller Sawtooth Oscillator"), model, "NOT",
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage Controller Sawtooth Oscillator"), model, "VCO-SAW",
 				VoltageControlledSawtoothOscillator.class));
 
 		sixNodeItem.addDescriptor(id + 3,
-			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage Controller Sine Oscillator"), model, "NOT",
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage Controller Sine Oscillator"), model, "VCO-SIN",
 				VoltageControlledSineOscillator.class));
 
 		sixNodeItem.addDescriptor(id + 4,
-			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Amplifier"), model, "NOT",
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Amplifier"), model, "AMP",
 				Amplifier.class, AmplifierElement.class, AmplifierRender.class));
 
 		sixNodeItem.addDescriptor(id + 5,
-			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage Controlled Amplifier"), model, "NOT",
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage Controlled Amplifier"), model, "VCA",
 				VoltageControlledAmplifier.class));
 	}
 
