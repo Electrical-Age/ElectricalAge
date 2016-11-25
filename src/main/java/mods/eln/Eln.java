@@ -2570,6 +2570,10 @@ public class Eln {
 		sixNodeItem.addDescriptor(id + 5,
 			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage Controlled Amplifier"), model, "VCA",
 				VoltageControlledAmplifier.class));
+
+		sixNodeItem.addDescriptor(id + 6,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Summing Unit"), model, "SUM",
+				SummingUnit.class, SummingUnitElement.class, SummingUnitRender.class));
 	}
 
 	void registerTransformer(int id) {

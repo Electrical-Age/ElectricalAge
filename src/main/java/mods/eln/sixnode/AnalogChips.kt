@@ -13,6 +13,7 @@ import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateInput
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
+import mods.eln.sixnode.SummingUnitElement.Companion.GainChangedEvents
 import mods.eln.wiki.Data
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.entity.player.EntityPlayer
@@ -303,9 +304,7 @@ class PIDRegulatorRender(entity: SixNodeEntity, side: Direction, descriptor: Six
     internal var Ki = 0f
     internal var Kd = 0f
 
-    override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? {
-        return PIDRegulatorGui(this)
-    }
+    override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? = PIDRegulatorGui(this)
 
     override fun publishUnserialize(stream: DataInputStream?) {
         super.publishUnserialize(stream)
@@ -460,9 +459,7 @@ class AmplifierRender(entity: SixNodeEntity, side: Direction, descriptor: SixNod
         AnalogChipRender(entity, side, descriptor) {
     internal var gain = 1f
 
-    override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? {
-        return AmplifierGui(this)
-    }
+    override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? = AmplifierGui(this)
 
     override fun publishUnserialize(stream: DataInputStream?) {
         super.publishUnserialize(stream)
@@ -475,7 +472,7 @@ class AmplifierRender(entity: SixNodeEntity, side: Direction, descriptor: SixNod
 }
 
 class AmplifierGui(val render: AmplifierRender): GuiScreenEln() {
-    var gainTF: GuiTextFieldEln? = null
+    private var gainTF: GuiTextFieldEln? = null
 
     override fun initGui() {
         super.initGui()
@@ -509,4 +506,116 @@ class VoltageControlledAmplifier: AnalogFunction() {
     override val infos = "TODO"
 
     override fun process(inputs: Array<Double?>, deltaTime: Double) = (inputs[1] ?: 5.0) / 5.0 * (inputs[0] ?: 0.0)
+}
+
+class SummingUnit() : AnalogFunction() {
+    override val hasState = true
+    override val inputCount = 3
+    override val infos = "TOTO"
+
+    internal val gains = arrayOf(1.0, 1.0, 1.0)
+
+    override fun process(inputs: Array<Double?>, deltaTime: Double) =
+            gains[0] * (inputs[0] ?: 0.0) + gains[1] * (inputs[1] ?: 0.0) + gains[2] * (inputs[2] ?: 0.0)
+
+    override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
+        for (i in gains.indices) {
+            gains[i] = nbt?.getDouble("gain$i") ?: 1.0
+        }
+    }
+
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+        for (i in gains.indices) {
+            nbt?.setDouble("gain$i", gains[i])
+        }
+    }
+}
+
+class SummingUnitElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor):
+        AnalogChipElement(node, side, sixNodeDescriptor) {
+
+    companion object {
+        val GainChangedEvents = arrayOf(1, 2, 3)
+    }
+
+    override fun hasGui() = true
+
+    override fun networkSerialize(stream: DataOutputStream?) {
+        super.networkSerialize(stream)
+
+        try {
+            with(function as SummingUnit) {
+                gains.forEach {
+                    stream?.writeFloat(it.toFloat())
+                }
+            }
+        } catch(e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun networkUnserialize(stream: DataInputStream?) {
+        super.networkUnserialize(stream)
+
+        try {
+            when (stream?.readByte()?.toInt()) {
+                GainChangedEvents[0] -> (function as SummingUnit).gains[0] = stream?.readFloat()?.toDouble() ?: 1.0
+                GainChangedEvents[1] -> (function as SummingUnit).gains[1] = stream?.readFloat()?.toDouble() ?: 1.0
+                GainChangedEvents[2] -> (function as SummingUnit).gains[2] = stream?.readFloat()?.toDouble() ?: 1.0
+            }
+            needPublish()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
+
+class SummingUnitRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor):
+        AnalogChipRender(entity, side, descriptor) {
+    internal var gains = floatArrayOf(1f, 1f, 1f)
+
+    override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? = SummingUnitGui(this)
+
+    override fun publishUnserialize(stream: DataInputStream?) {
+        super.publishUnserialize(stream)
+        try {
+            for (i in gains.indices) { gains[i] = stream?.readFloat() ?: 1f }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
+
+class SummingUnitGui(val render: SummingUnitRender): GuiScreenEln() {
+    private var gainTFs = arrayOfNulls<GuiTextFieldEln>(3)
+
+    override fun initGui() {
+        super.initGui()
+
+        for (i in gainTFs.indices) {
+            gainTFs[i] = newGuiTextField(6, 6 + 20 * i, 50)
+            gainTFs[i]?.setText(render.gains[i])
+            gainTFs[i]?.setObserver { textField, text ->
+                try {
+                    val bos = ByteArrayOutputStream()
+                    val stream = DataOutputStream(bos)
+
+                    render.preparePacketForServer(stream)
+
+                    stream.writeByte(GainChangedEvents[i])
+                    stream.writeFloat(text.toFloat())
+
+                    render.sendPacketToServer(bos)
+                } catch (e: NumberFormatException) {
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        gainTFs[0]?.setComment(0, I18N.TR("Gain for input \u00a741"))
+        gainTFs[1]?.setComment(0, I18N.TR("Gain for input \u00a722"))
+        gainTFs[2]?.setComment(0, I18N.TR("Gain for input \u00a713"))
+    }
+
+    override fun newHelper() = GuiHelper(this, 62, 64)
 }
