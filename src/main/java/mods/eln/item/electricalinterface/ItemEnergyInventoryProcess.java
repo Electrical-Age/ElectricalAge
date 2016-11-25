@@ -1,22 +1,22 @@
 package mods.eln.item.electricalinterface;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
+import cpw.mods.fml.common.FMLCommonHandler;
 import mods.eln.Eln;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
-import cpw.mods.fml.common.FMLCommonHandler;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ItemEnergyInventoryProcess implements IProcess {
 
-	static final double energyUpdatePeriod = 0.5;
-	double energyUpdateTimout = energyUpdatePeriod;
+	private static final double energyUpdatePeriod = 0.5;
+	private double energyUpdateTimout = energyUpdatePeriod;
 
 	class Element {
 		public ItemStack stack;

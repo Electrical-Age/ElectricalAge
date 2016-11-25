@@ -48,7 +48,7 @@ class LanguageFileUpdater {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.exit(1);
+            Runtime.getRuntime().exit(1);
         }
     }
 }
