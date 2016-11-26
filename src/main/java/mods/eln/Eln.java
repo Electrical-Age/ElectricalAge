@@ -2556,11 +2556,11 @@ public class Eln {
 				PIDRegulator.class, PIDRegulatorElement.class, PIDRegulatorRender.class));
 
 		sixNodeItem.addDescriptor(id + 2,
-			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage Controller Sawtooth Oscillator"), model, "VCO-SAW",
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage controlled sawtooth oscillator"), model, "VCO-SAW",
 				VoltageControlledSawtoothOscillator.class));
 
 		sixNodeItem.addDescriptor(id + 3,
-			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage Controller Sine Oscillator"), model, "VCO-SIN",
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage controlled sine oscillator"), model, "VCO-SIN",
 				VoltageControlledSineOscillator.class));
 
 		sixNodeItem.addDescriptor(id + 4,
@@ -2568,11 +2568,11 @@ public class Eln {
 				Amplifier.class, AmplifierElement.class, AmplifierRender.class));
 
 		sixNodeItem.addDescriptor(id + 5,
-			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage Controlled Amplifier"), model, "VCA",
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage controlled amplifier"), model, "VCA",
 				VoltageControlledAmplifier.class));
 
 		sixNodeItem.addDescriptor(id + 6,
-			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Summing Unit"), model, "SUM",
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Configurable summing unit"), model, "SUM",
 				SummingUnit.class, SummingUnitElement.class, SummingUnitRender.class));
 	}
 
