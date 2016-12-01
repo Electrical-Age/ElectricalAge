@@ -214,7 +214,7 @@ abstract class AnalogFunction: INBTTReady {
 
 class OpAmp: AnalogFunction() {
     override val inputCount = 2
-    override val infos = "TODO"
+    override val infos = I18N.TR("Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or a configurable amplifier.")
 
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double =
             10000 * ((inputs[0] ?: 0.0) - (inputs[1] ?: 0.0))
@@ -223,7 +223,7 @@ class OpAmp: AnalogFunction() {
 class PIDRegulator: AnalogFunction() {
     override val hasState = true
     override val inputCount = 2
-    override val infos = "TODO"
+    override val infos = I18N.TR("Proportional–integral–derivative controller. A PID\ncontroller continuously calculates an error value as\nthe difference between a desired setpoint and a measured\nprocess variable and applies a correction based on\nproportional, integral, and derivative terms.")
 
     internal var Kp = 1.0
     internal var Ki = 0.0
@@ -376,7 +376,7 @@ class PIDRegulatorGui(val render: PIDRegulatorRender): GuiScreenEln() {
 open class VoltageControlledSawtoothOscillator: AnalogFunction() {
     override val hasState = true
     override val inputCount = 1
-    override val infos = "TODO"
+    override val infos = I18N.TR("A voltage-controlled oscillator or VCO is\nan electronic oscillator whose oscillation\nfrequency is controlled by a voltage input.")
 
     private var out = 0.0
 
@@ -405,7 +405,7 @@ class VoltageControlledSineOscillator: VoltageControlledSawtoothOscillator() {
 class Amplifier: AnalogFunction() {
     override val hasState = true
     override val inputCount = 1
-    override val infos = "TODO"
+    override val infos = I18N.TR("An amplifier increases the voltage\nof an input signal by a configurable\ngain and outputs that voltage.")
 
     internal var gain = 1.0
 
@@ -503,7 +503,7 @@ class AmplifierGui(val render: AmplifierRender): GuiScreenEln() {
 
 class VoltageControlledAmplifier: AnalogFunction() {
     override val inputCount = 2
-    override val infos = "TODO"
+    override val infos = I18N.TR("A voltage-controlled amplifier (VCA)\nis an electronic amplifier that varies\nits gain depending on the control voltage.")
 
     override fun process(inputs: Array<Double?>, deltaTime: Double) = (inputs[1] ?: 5.0) / 5.0 * (inputs[0] ?: 0.0)
 }
@@ -511,7 +511,7 @@ class VoltageControlledAmplifier: AnalogFunction() {
 class SummingUnit() : AnalogFunction() {
     override val hasState = true
     override val inputCount = 3
-    override val infos = "TOTO"
+    override val infos = I18N.TR("The summing unit outputs the sum of\nthe tree wighted inputs at it's output.The\ngain for each input can be configured.")
 
     internal val gains = arrayOf(1.0, 1.0, 1.0)
 
