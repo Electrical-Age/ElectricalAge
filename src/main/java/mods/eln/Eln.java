@@ -66,7 +66,7 @@ import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.O
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import mods.eln.simplenode.test.TestBlock;
-import mods.eln.sixnode.ElectricalFuseHolderDescriptor;
+import mods.eln.sixnode.*;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
 import mods.eln.sixnode.diode.DiodeDescriptor;
@@ -566,6 +566,7 @@ public class Eln {
 		registerTreeResinCollector(116);
 		registerSixNodeMisc(117);
 		registerLogicalGates(118);
+		registerAnalogChips(124);
 
 		//TRANSPARENT NODE REGISTRATION
 		//Sub-UID must be unique in this section only.
@@ -2608,6 +2609,37 @@ public class Eln {
 
 		sixNodeItem.addDescriptor(11 + (id << 6),
 			new LogicGateDescriptor(TR_NAME(Type.NONE, "JK Flip Flop Chip"), model, "JKFF", JKFlipFlop.class));
+	}
+
+	private void registerAnalogChips(int id) {
+		id <<= 6;
+
+		Obj3D model = obj.getObj("AnalogChips");
+		sixNodeItem.addDescriptor(id + 0,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "OpAmp"), model, "OP", OpAmp.class));
+
+		sixNodeItem.addDescriptor(id + 1, new AnalogChipDescriptor(TR_NAME(Type.NONE, "PID Regulator"), model, "PID",
+				PIDRegulator.class, PIDRegulatorElement.class, PIDRegulatorRender.class));
+
+		sixNodeItem.addDescriptor(id + 2,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage controlled sawtooth oscillator"), model, "VCO-SAW",
+				VoltageControlledSawtoothOscillator.class));
+
+		sixNodeItem.addDescriptor(id + 3,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage controlled sine oscillator"), model, "VCO-SIN",
+				VoltageControlledSineOscillator.class));
+
+		sixNodeItem.addDescriptor(id + 4,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Amplifier"), model, "AMP",
+				Amplifier.class, AmplifierElement.class, AmplifierRender.class));
+
+		sixNodeItem.addDescriptor(id + 5,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage controlled amplifier"), model, "VCA",
+				VoltageControlledAmplifier.class));
+
+		sixNodeItem.addDescriptor(id + 6,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Configurable summing unit"), model, "SUM",
+				SummingUnit.class, SummingUnitElement.class, SummingUnitRender.class));
 	}
 
 	void registerTransformer(int id) {
