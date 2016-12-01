@@ -163,6 +163,7 @@ import net.minecraft.item.ItemArmor.ArmorMaterial;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LogWrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.WorldServer;
@@ -688,6 +689,7 @@ public class Eln {
 		if (Other.ccLoaded) {
 			PeripheralHandler.register();
 		}
+		recipeMaceratorModOres();
 	}
 
 	@EventHandler
@@ -6560,6 +6562,43 @@ public class Eln {
 
 		maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.dirt),
 				new ItemStack[] { new ItemStack(Blocks.sand) }, 1.0 * f));
+	}
+
+	private void recipeMaceratorModOres() {
+		float f = 4000;
+
+		// AE2:
+		recipeMaceratorModOre(f * 3f, "oreCertusQuartz", "dustCertusQuartz", 3);
+		recipeMaceratorModOre(f * 1.5f, "crystalCertusQuartz", "dustCertusQuartz", 1);
+		recipeMaceratorModOre(f * 3f, "oreNetherQuartz", "dustNetherQuartz", 3);
+		recipeMaceratorModOre(f * 1.5f, "crystalNetherQuartz", "dustNetherQuartz", 1);
+		recipeMaceratorModOre(f * 1.5f, "crystalFluix", "dustFluix", 1);
+	}
+
+	private void recipeMaceratorModOre(float f, String inputName, String outputName, int outputCount) {
+		if (!OreDictionary.doesOreNameExist(inputName)) {
+			LogWrapper.info("No entries for oredict: " + inputName);
+			return;
+		}
+		if (!OreDictionary.doesOreNameExist(outputName)) {
+			LogWrapper.info("No entries for oredict: " + outputName);
+			return;
+		}
+		ArrayList<ItemStack> inOres = OreDictionary.getOres(inputName);
+		ArrayList<ItemStack> outOres = OreDictionary.getOres(outputName);
+		if (inOres.size() == 0) {
+			LogWrapper.info("No ores in oredict entry: " + inputName);
+		}
+		if (outOres.size() == 0) {
+			LogWrapper.info("No ores in oredict entry: " + outputName);
+			return;
+		}
+		ItemStack output = outOres.get(0).copy();
+		output.stackSize = outputCount;
+		LogWrapper.info("Adding mod recipe from " + inputName + " to " + outputName);
+		for (ItemStack input : inOres) {
+			maceratorRecipes.addRecipe(new Recipe(input, output, f));
+		}
 	}
 
 	void recipePlateMachine() {
