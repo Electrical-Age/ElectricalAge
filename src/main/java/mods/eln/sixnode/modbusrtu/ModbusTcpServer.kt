@@ -3,7 +3,10 @@ package mods.eln.sixnode.modbusrtu
 import mods.eln.Eln
 import mods.eln.misc.Utils
 import java.io.OutputStream
-import java.net.*
+import java.net.BindException
+import java.net.InetSocketAddress
+import java.net.ServerSocket
+import java.net.Socket
 import java.nio.ByteBuffer
 import java.util.*
 
@@ -24,7 +27,7 @@ class ModbusTcpServer(port: Int = 1502) {
             } catch (e: BindException){
                 Utils.println("Exception while binding Modbus RTU Server. Modbus server disabled!")
                 server.close()
-                e.printStackTrace();
+                e.printStackTrace()
             }
             start()
         }
@@ -48,7 +51,7 @@ class ModbusTcpServer(port: Int = 1502) {
                     handle(socket.outputStream)
                     inputBuffer.flip()
                 } else {
-                    socket.close();
+                    socket.close()
                 }
             }
         }).start()
@@ -56,7 +59,7 @@ class ModbusTcpServer(port: Int = 1502) {
         private fun handle(output: OutputStream) {
             while (inputBuffer.hasRemaining()) {
                 val transactionId = inputBuffer.short
-                if (inputBuffer.short.equals(0)) {
+                if (inputBuffer.short == 0.toShort()) {
                     val remaining = inputBuffer.short
                     if (inputBuffer.remaining() >= remaining) {
                         val slaveAddress = inputBuffer.get()
@@ -86,10 +89,10 @@ class ModbusTcpServer(port: Int = 1502) {
                         output.write(response.array(), 0, response.remaining())
                         output.flush()
                     } else {
-                        return;
+                        return
                     }
                 } else {
-                    return;
+                    return
                 }
             }
         }
@@ -100,8 +103,8 @@ class ModbusTcpServer(port: Int = 1502) {
 
             try {
                 // TODO: Support for multiple coils...
-                if (quantity.equals(1)) {
-                    val value = slave.getCoil(address.toInt());
+                if (quantity == 1.toShort()) {
+                    val value = slave.getCoil(address.toInt())
                     response.put(0x01.toByte()).put(1.toByte()).put((if (value) 1 else 0).toByte())
                     return
                 }
@@ -115,8 +118,8 @@ class ModbusTcpServer(port: Int = 1502) {
 
             try {
                 // TODO: Support for multiple inputs...
-                if (quantity.equals(1)) {
-                    val value = slave.getInput(address.toInt());
+                if (quantity == 1.toShort()) {
+                    val value = slave.getInput(address.toInt())
                     response.put(0x02.toByte()).put(1.toByte()).put((if (value) 1 else 0).toByte())
                     return
                 }
@@ -169,7 +172,7 @@ class ModbusTcpServer(port: Int = 1502) {
 
     fun start() = Thread(Runnable {
         while (!server.isClosed) {
-            val socket = server.accept();
+            val socket = server.accept()
             if (socket != null) {
                 connections.add(ConnectionHandler(socket))
             }
@@ -189,7 +192,7 @@ class ModbusTcpServer(port: Int = 1502) {
     fun remove(slave: IModbusSlave) = slaves.remove(slave.slaveId)
 
     fun destroy() {
-        server.close();
+        server.close()
         connections.forEach { it.destroy() }
     }
 }
