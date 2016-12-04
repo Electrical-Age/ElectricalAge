@@ -6,4 +6,4 @@ import net.minecraft.item.ItemStack
 
 data class GhostNodeWailaData(val realCoord: Coordonate,
                               val itemStack: ItemStack?,
-                              val type: Byte = GhostNodeWailaResponsePacket.UNKNOWN_TYPE)
+                              val realType: Byte = GhostNodeWailaResponsePacket.UNKNOWN_TYPE)

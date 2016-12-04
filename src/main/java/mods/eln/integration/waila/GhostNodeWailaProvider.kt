@@ -62,7 +62,7 @@ class GhostNodeWailaProvider(private val transparentNodeHandler: TransparentNode
         val ghostData = getGhostData(accessor)
         val realCoord = ghostData?.realCoord
         return if (ghostData != null && realCoord != null) {
-            return when (ghostData.type) {
+            return when (ghostData.realType) {
                 GhostNodeWailaResponsePacket.TRANSPARENT_BLOCK_TYPE -> transparentNodeHandler.getWailaBody(itemStack, currenttip, WailaDataAccessorProxy(accessor, realCoord), config)
                 GhostNodeWailaResponsePacket.SIXNODE_TYPE -> currenttip // TODO:...
                 else -> currenttip

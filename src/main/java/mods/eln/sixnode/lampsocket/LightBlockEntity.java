@@ -153,7 +153,7 @@ public class LightBlockEntity extends TileEntity {
 			if (light < l.value) light = l.value;
 			
 			l.timeout--;
-			if (l.timeout == 0) {
+			if (l.timeout <= 0) {
 				iterator.remove();
 			}
 		}	
