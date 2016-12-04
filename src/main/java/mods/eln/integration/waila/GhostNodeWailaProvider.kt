@@ -8,6 +8,7 @@ import mcp.mobius.waila.api.IWailaDataProvider
 import mods.eln.Eln
 import mods.eln.misc.Coordonate
 import mods.eln.packets.GhostNodeWailaRequestPacket
+import mods.eln.packets.GhostNodeWailaResponsePacket
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.item.ItemStack
@@ -58,9 +59,14 @@ class GhostNodeWailaProvider(private val transparentNodeHandler: TransparentNode
 
     override fun getWailaBody(itemStack: ItemStack?, currenttip: MutableList<String>?, accessor: IWailaDataAccessor,
                               config: IWailaConfigHandler?): MutableList<String>? {
-        val realCoord = getGhostData(accessor)?.realCoord
-        return if (realCoord != null) {
-            transparentNodeHandler.getWailaBody(itemStack, currenttip, WailaDataAccessorProxy(accessor, realCoord), config)
+        val ghostData = getGhostData(accessor)
+        val realCoord = ghostData?.realCoord
+        return if (ghostData != null && realCoord != null) {
+            return when (ghostData.type) {
+                GhostNodeWailaResponsePacket.TRANSPARENT_BLOCK_TYPE -> transparentNodeHandler.getWailaBody(itemStack, currenttip, WailaDataAccessorProxy(accessor, realCoord), config)
+                GhostNodeWailaResponsePacket.SIXNODE_TYPE -> currenttip // TODO:...
+                else -> currenttip
+            }
         } else {
             currenttip
         }
