@@ -16,7 +16,7 @@ import java.util.Iterator;
 
 public class LightBlockEntity extends TileEntity {
 
-    ArrayList<LightHandle> lightList = new ArrayList<LightHandle>();
+    private ArrayList<LightHandle> lightList = new ArrayList<LightHandle>();
 
     public static final ArrayList<LightBlockObserver> observers = new ArrayList<LightBlockObserver>();
 
@@ -37,12 +37,12 @@ public class LightBlockEntity extends TileEntity {
         byte value;
         int timeout;
 
-		public LightHandle() {
+		LightHandle() {
 			value = 0;
 			timeout = 0;
 		}
 
-		public LightHandle(byte value,int timeout) {
+		LightHandle(byte value,int timeout) {
 			this.value = value;
 			this.timeout = timeout;
 		}
@@ -60,7 +60,7 @@ public class LightBlockEntity extends TileEntity {
 		}
 	}
 	
-	void addLight(int light, int timeout) {
+	private void addLight(int light, int timeout) {
 		lightList.add(new LightHandle((byte) light, timeout));
 		lightManager();
 	}
@@ -120,7 +120,7 @@ public class LightBlockEntity extends TileEntity {
 		return light;
 	}*/
 	
-	void lightManager() {
+	private void lightManager() {
 		/*if (lightList.size() == 0) {
 			worldObj.setBlock(xCoord, yCoord, zCoord, 0);
 		} else {
@@ -153,7 +153,7 @@ public class LightBlockEntity extends TileEntity {
 			if (light < l.value) light = l.value;
 			
 			l.timeout--;
-			if (l.timeout == 0) {
+			if (l.timeout <= 0) {
 				iterator.remove();
 			}
 		}	

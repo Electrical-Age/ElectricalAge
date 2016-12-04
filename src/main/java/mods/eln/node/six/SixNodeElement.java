@@ -25,6 +25,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class SixNodeElement implements GhostObserver, IPlayer, Publishable {
 	//private static Class[] idToClass = new Class[256];
@@ -433,4 +435,9 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, Publisha
 		return true;
 	}
 
+	public Map<String, String> getWaila(){
+		Map<String, String> wailaList = new HashMap<String, String>();
+		wailaList.put("Info", multiMeterString());
+		return wailaList;
+	}
 }
