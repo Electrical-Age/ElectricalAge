@@ -6,11 +6,8 @@ import mcp.mobius.waila.api.IWailaConfigHandler
 import mcp.mobius.waila.api.IWailaDataAccessor
 import mcp.mobius.waila.api.IWailaDataProvider
 import mcp.mobius.waila.api.SpecialChars
-import mods.eln.Eln
 import mods.eln.misc.Coordonate
 import mods.eln.misc.Direction
-import mods.eln.packets.SixNodeWailaRequestPacket
-import net.minecraft.client.Minecraft
 import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
@@ -19,21 +16,12 @@ import net.minecraft.world.World
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
 class SixNodeWailaProvider: IWailaDataProvider {
-    companion object {
-        var updateTime = Minecraft.getSystemTime()
-    }
-
     private fun getSixData(accessor: IWailaDataAccessor): Map<String, String>? {
         val coord = Coordonate(accessor.position.blockX, accessor.position.blockY, accessor.position.blockZ,
                 accessor.world)
         val side = Direction.from(accessor.side)
         var sixData: Map<String, String>? = null
-
-        if (Minecraft.getSystemTime() - SixNodeWailaProvider.updateTime > 2000) {
-            Eln.elnNetwork.sendToServer(SixNodeWailaRequestPacket(coord, side))
-            SixNodeWailaProvider.updateTime = Minecraft.getSystemTime()
-        }
-        try {
+    try {
             sixData = WailaCache.sixNodes.get(SixNodeCoordonate(coord, side))
         } catch(e: CacheLoader.InvalidCacheLoadException) {}
 

@@ -30,8 +30,8 @@ public class WailaCache {
         );
 
     public static LoadingCache<SixNodeCoordonate, Map<String, String>> sixNodes = CacheBuilder.newBuilder()
-        .maximumSize(1000)
-        .expireAfterWrite(1, TimeUnit.MINUTES)
+        .maximumSize(200)
+        .expireAfterWrite(5, TimeUnit.SECONDS)
         .build(
             new CacheLoader<SixNodeCoordonate, Map<String, String>>() {
                 public Map<String, String> load(SixNodeCoordonate key) throws Exception {
@@ -42,7 +42,7 @@ public class WailaCache {
         );
 
     public static LoadingCache<Coordonate, GhostNodeWailaData> ghostNodes = CacheBuilder.newBuilder()
-        .maximumSize(1000)
+        .maximumSize(200)
         .expireAfterWrite(1, TimeUnit.MINUTES)
         .build(
             new CacheLoader<Coordonate, GhostNodeWailaData>() {

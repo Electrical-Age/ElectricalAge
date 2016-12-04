@@ -22,10 +22,6 @@ import net.minecraft.world.World
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
 class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNodeHandler,
                              private val sixNodeProvider: SixNodeWailaProvider): IWailaDataProvider {
-    companion object {
-        var updateTime = Minecraft.getSystemTime()
-    }
-
     private class WailaDataAccessorProxy(val accessor: IWailaDataAccessor, val coord: Coordonate,
                                          val side: Direction? = null): IWailaDataAccessor {
         override fun getPlayer() = accessor.player
@@ -49,11 +45,6 @@ class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNod
         val coord = Coordonate(accessor.position.blockX, accessor.position.blockY, accessor.position.blockZ,
                 accessor.world)
         var ghostData: GhostNodeWailaData? = null
-
-        if (Minecraft.getSystemTime() - GhostNodeWailaProvider.updateTime > 2000) {
-            Eln.elnNetwork.sendToServer(GhostNodeWailaRequestPacket(coord))
-            GhostNodeWailaProvider.updateTime = Minecraft.getSystemTime()
-        }
         try {
             ghostData = WailaCache.ghostNodes.get(coord)
         } catch(e: CacheLoader.InvalidCacheLoadException) {}
