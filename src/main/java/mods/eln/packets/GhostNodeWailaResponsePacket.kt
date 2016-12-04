@@ -4,12 +4,14 @@ import cpw.mods.fml.common.network.ByteBufUtils
 import cpw.mods.fml.common.network.simpleimpl.IMessage
 import io.netty.buffer.ByteBuf
 import mods.eln.misc.Coordonate
+import mods.eln.misc.Direction
 import net.minecraft.item.ItemStack
 
 class GhostNodeWailaResponsePacket(var coord: Coordonate = Coordonate(0, 0, 0 ,0),
                                    var realCoord: Coordonate = Coordonate(0, 0, 0 ,0),
                                    var itemStack: ItemStack? = null,
-                                   var type: Byte = UNKNOWN_TYPE): IMessage {
+                                   var type: Byte = UNKNOWN_TYPE,
+                                   var realSide: Direction = Direction.XN): IMessage {
 
     companion object {
         val UNKNOWN_TYPE: Byte = 0
@@ -40,6 +42,7 @@ class GhostNodeWailaResponsePacket(var coord: Coordonate = Coordonate(0, 0, 0 ,0
         realCoord.read(buf)
         itemStack = ByteBufUtils.readItemStack(buf)
         type = buf?.readByte() ?: UNKNOWN_TYPE
+        realSide = Direction.fromInt(buf?.readInt() ?: 0)
     }
 
     override fun toBytes(buf: ByteBuf?) {
@@ -47,5 +50,6 @@ class GhostNodeWailaResponsePacket(var coord: Coordonate = Coordonate(0, 0, 0 ,0
         realCoord.write(buf)
         ByteBufUtils.writeItemStack(buf, itemStack)
         buf?.writeByte(type.toInt())
+        buf?.writeInt(realSide.int)
     }
 }

@@ -9,8 +9,8 @@ object WailaIntegration {
     @JvmStatic
     fun callbackRegister(registrar: IWailaRegistrar) {
         val transparentNodeProvider = TransparentNodeHandler()
-        val ghostNodeProvider = GhostNodeWailaProvider(transparentNodeProvider)
         val sixNodeProvider = SixNodeWailaProvider()
+        val ghostNodeProvider = GhostNodeWailaProvider(transparentNodeProvider, sixNodeProvider)
 
         registrar.registerBodyProvider(transparentNodeProvider, mods.eln.node.transparent.TransparentNodeBlock::class.java)
 
