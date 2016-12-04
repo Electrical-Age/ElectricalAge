@@ -8,7 +8,7 @@ import mods.eln.misc.Coordonate
 /**
  * Created by Gregory Maddra on 2016-06-27.
  */
-class TransparentNodeRequestPacket : IMessage{
+open class TransparentNodeRequestPacket : IMessage{
 
     lateinit var coord: Coordonate
 

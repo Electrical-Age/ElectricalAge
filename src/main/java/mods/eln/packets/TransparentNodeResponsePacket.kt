@@ -9,7 +9,7 @@ import java.util.*
 /**
  * Created by Gregory Maddra on 2016-06-27.
  */
-class TransparentNodeResponsePacket : IMessage{
+open class TransparentNodeResponsePacket : IMessage{
 
     lateinit var map: Map<String, String>
     lateinit var coord: Coordonate
@@ -40,7 +40,7 @@ class TransparentNodeResponsePacket : IMessage{
         coord = Coordonate(x, y, z, w)
         val i1 = keys.iterator()
         val i2 = values.iterator()
-        var localmap = HashMap<String, String>()
+        val localmap = HashMap<String, String>()
         while (i1.hasNext() && i2.hasNext()){
             localmap.put(i1.next(), i2.next())
         }
