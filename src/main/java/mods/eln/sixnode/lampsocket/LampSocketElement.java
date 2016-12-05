@@ -29,6 +29,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LampSocketElement extends SixNodeElement {
 
@@ -201,6 +203,13 @@ public class LampSocketElement extends SixNodeElement {
 	@Override
 	public String multiMeterString() {
 		return Utils.plotVolt("U:", positiveLoad.getU()) + Utils.plotAmpere("I:", lampResistor.getCurrent());
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+
+		return info;
 	}
 
 	@Override

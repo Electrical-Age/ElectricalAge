@@ -1,6 +1,7 @@
 package mods.eln.sixnode.energymeter;
 
 import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -28,6 +29,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EnergyMeterElement extends SixNodeElement {
 
@@ -118,6 +121,25 @@ public class EnergyMeterElement extends SixNodeElement {
 	@Override
 	public String multiMeterString() {
 		return Utils.plotVolt("Ua:", aLoad.getU()) + Utils.plotVolt("Ub:", bLoad.getU()) + Utils.plotVolt("I:", aLoad.getCurrent());
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.TR("Power"), Utils.plotPower("", aLoad.getU() * aLoad.getI()));
+		switch (mod) {
+			case ModCounter:
+				info.put(I18N.TR("Mode"), I18N.TR("Counter"));
+				info.put(I18N.TR("Energy"), Utils.plotEnergy("", energyStack));
+				break;
+
+			case ModPrepay:
+				info.put(I18N.TR("Mode"), I18N.TR("Prepay"));
+				info.put(I18N.TR("Energy left"), Utils.plotEnergy("", energyStack));
+				break;
+		}
+
+		return info;
 	}
 
 	@Override
