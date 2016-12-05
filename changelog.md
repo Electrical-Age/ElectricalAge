@@ -1,6 +1,6 @@
 ## 1.13.0
 
-![Power station](http://i.imgur.com/BdrK2dG.jpg)
+![Power station](https://madoka.brage.info/baughn/BdrK2dG.jpg)
 
 Let's call this the "Power grid" release.
 
