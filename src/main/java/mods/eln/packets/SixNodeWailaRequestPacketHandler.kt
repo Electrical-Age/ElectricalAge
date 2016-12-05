@@ -14,7 +14,7 @@ class SixNodeWailaRequestPacketHandler : IMessageHandler<SixNodeWailaRequestPack
         if (node != null) {
             val element = node.getElement(side)
             if (element != null) {
-                stringMap = element.waila.filter { it.value != null }
+                stringMap = element.waila?.filter { it.value != null } ?: emptyMap()
             }
         }
         return SixNodeWailaResponsePacket(coord, side, stringMap)

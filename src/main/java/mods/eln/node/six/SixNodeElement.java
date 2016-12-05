@@ -20,6 +20,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -435,6 +436,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, Publisha
 		return true;
 	}
 
+	@Nullable
 	public Map<String, String> getWaila(){
 		Map<String, String> wailaList = new HashMap<String, String>();
 		wailaList.put("Info", multiMeterString());
