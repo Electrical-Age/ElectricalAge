@@ -123,8 +123,7 @@ public class ElectricalBreakerElement extends SixNodeElement {
 		info.put(I18N.TR("Contact"), switchState ? I18N.TR("Closed") : I18N.TR("Open"));
 		info.put(I18N.TR("Current"), Utils.plotAmpere("", aLoad.getCurrent()));
 		if (Eln.wailaEasyMode) {
-			info.put(I18N.TR("Voltage 1"), Utils.plotVolt("", aLoad.getU()));
-			info.put(I18N.TR("Voltage 2"), Utils.plotVolt("", bLoad.getU()));
+			info.put(I18N.TR("Voltages"), Utils.plotVolt("", aLoad.getU()) + Utils.plotVolt(" ", bLoad.getU()));
 		}
 		return info;
 	}
