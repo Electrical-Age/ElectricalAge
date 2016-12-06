@@ -20,13 +20,20 @@ import java.util.concurrent.TimeUnit;
 public class WailaCache {
 
     public static LoadingCache<Coordonate, Map<String, String>> nodes = CacheBuilder.newBuilder()
-        .maximumSize(1000)
-        .expireAfterWrite(1, TimeUnit.MINUTES)
+        .maximumSize(20)
+        .refreshAfterWrite(2, TimeUnit.SECONDS)
         .build(
             new CacheLoader<Coordonate, Map<String, String>>() {
                 public Map<String, String> load(Coordonate key) throws Exception {
                     Eln.elnNetwork.sendToServer(new TransparentNodeRequestPacket(key));
                     return null;
+                }
+
+                @Override
+                public ListenableFuture<Map<String, String>> reload(Coordonate key,
+                                                                    Map<String, String> oldValue) throws Exception {
+                    load(key);
+                    return Futures.immediateFuture(oldValue);
                 }
             }
         );
@@ -42,7 +49,8 @@ public class WailaCache {
                 }
 
                 @Override
-                public ListenableFuture<Map<String, String>> reload(SixNodeCoordonate key, Map<String, String> oldValue) throws Exception {
+                public ListenableFuture<Map<String, String>> reload(SixNodeCoordonate key,
+                                                                    Map<String, String> oldValue) throws Exception {
                     load(key);
                     return Futures.immediateFuture(oldValue);
                 }
@@ -60,7 +68,8 @@ public class WailaCache {
                 }
 
                 @Override
-                public ListenableFuture<GhostNodeWailaData> reload(Coordonate key, GhostNodeWailaData oldValue) throws Exception {
+                public ListenableFuture<GhostNodeWailaData> reload(Coordonate key,
+                                                                   GhostNodeWailaData oldValue) throws Exception {
                     load(key);
                     return Futures.immediateFuture(oldValue);
                 }

@@ -31,7 +31,7 @@ class SixNodeWailaProvider: IWailaDataProvider {
     override fun getWailaBody(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor,
                               config: IWailaConfigHandler?): MutableList<String> {
         getSixData(accessor)?.forEach {
-            currenttip.add(it.key + ": " + SpecialChars.WHITE + it.value)
+            currenttip.add("${it.key}: ${SpecialChars.WHITE}${it.value}")
         }
 
         return currenttip

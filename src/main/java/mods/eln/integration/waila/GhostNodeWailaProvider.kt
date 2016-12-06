@@ -6,12 +6,9 @@ import mcp.mobius.waila.api.IWailaConfigHandler
 import mcp.mobius.waila.api.IWailaDataAccessor
 import mcp.mobius.waila.api.IWailaDataProvider
 import mcp.mobius.waila.api.SpecialChars
-import mods.eln.Eln
 import mods.eln.misc.Coordonate
 import mods.eln.misc.Direction
-import mods.eln.packets.GhostNodeWailaRequestPacket
 import mods.eln.packets.GhostNodeWailaResponsePacket
-import net.minecraft.client.Minecraft
 import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
@@ -20,7 +17,7 @@ import net.minecraft.util.MovingObjectPosition
 import net.minecraft.world.World
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
-class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNodeHandler,
+class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNodeWailaProvider,
                              private val sixNodeProvider: SixNodeWailaProvider): IWailaDataProvider {
     private class WailaDataAccessorProxy(val accessor: IWailaDataAccessor, val coord: Coordonate,
                                          val side: Direction? = null): IWailaDataAccessor {
