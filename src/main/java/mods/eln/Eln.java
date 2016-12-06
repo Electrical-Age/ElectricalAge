@@ -2042,7 +2042,11 @@ public class Eln {
 
 					);
 
-			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			if (modbusEnable) {
+				sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			} else {
+				sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
+			}
 		}
 
 		{
