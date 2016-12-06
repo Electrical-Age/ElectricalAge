@@ -3,6 +3,7 @@ package mods.eln.sixnode.lampsocket;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.i18n.I18N;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Direction;
@@ -208,7 +209,23 @@ public class LampSocketElement extends SixNodeElement {
 	@Override
 	public Map<String, String> getWaila() {
 		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.TR("Power consumption"), Utils.plotPower("", lampResistor.getI() * lampResistor.getU()));
+		if (lampDescriptor != null) {
+			info.put(I18N.TR("Bulb"), lampDescriptor.name);
+		} else {
+			info.put(I18N.TR("Bulb"), I18N.TR("None"));
+		}
+		if (Eln.wailaEasyMode) {
+			if (poweredByLampSupply) {
+				info.put(I18N.TR("Channel"), channel);
+			}
+			info.put(I18N.TR("Voltage"), Utils.plotVolt("", positiveLoad.getU()));
+			ItemStack lampStack = inventory.getStackInSlot(0);
+			if (lampStack != null) {
+				info.put(I18N.TR("Life"), Utils.plotValue(lampDescriptor.getLifeInTag(lampStack)));
+			}
 
+		}
 		return info;
 	}
 

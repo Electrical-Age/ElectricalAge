@@ -1,6 +1,7 @@
 package mods.eln.sixnode.thermalsensor;
 
 import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -24,6 +25,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ThermalSensorElement extends SixNodeElement {
 
@@ -122,6 +125,24 @@ public class ThermalSensorElement extends SixNodeElement {
 	@Override
 	public String multiMeterString() {
 		return ""; // Utils.plotUIP(electricalLoad.Uc, electricalLoad.getCurrent());
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.TR("Output voltage"), Utils.plotVolt("", outputGate.getU()));
+		if (Eln.wailaEasyMode) {
+			switch (typeOfSensor) {
+				case temperatureType:
+					info.put(I18N.TR("Measured temperature"), Utils.plotCelsius("", thermalLoad.getT()));
+					break;
+
+				case powerType:
+					info.put(I18N.TR("Measured thermic power"), Utils.plotPower("", thermalLoad.getPower()));
+					break;
+			}
+		}
+		return info;
 	}
 
 	@Override

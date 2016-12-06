@@ -1,5 +1,7 @@
 package mods.eln.sixnode.resistor;
 
+import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -23,8 +25,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 
+import javax.annotation.Nullable;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ResistorElement extends SixNodeElement {
 
@@ -114,6 +119,19 @@ public class ResistorElement extends SixNodeElement {
         double i = Math.abs(r.getI());
         return Utils.plotOhm(Utils.plotUIP(u, i), r.getR()) +
                 (control != null ? Utils.plotPercent("C", control.getNormalized()) : "");
+    }
+
+    @Nullable
+    @Override
+    public Map<String, String> getWaila() {
+        Map<String, String> info = new HashMap<String, String>();
+        info.put(I18N.TR("Resistance"), Utils.plotValue(r.getR(), "Ω"));
+        info.put(I18N.TR("Voltage drop"), Utils.plotVolt("", Math.abs(r.getU())));
+        if (Eln.wailaEasyMode) {
+            info.put(I18N.TR("Current"), Utils.plotAmpere("", Math.abs(r.getI())));
+
+        }
+        return info;
     }
 
     @Override

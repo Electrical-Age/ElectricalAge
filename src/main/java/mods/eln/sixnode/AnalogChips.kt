@@ -1,5 +1,6 @@
 package mods.eln.sixnode
 
+import mcp.mobius.waila.api.SpecialChars
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.*
@@ -150,6 +151,10 @@ open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: 
         return builder.toString()
     }
 
+    override fun getWaila(): MutableMap<String,String> = function.getWaila(
+            inputPins.map { if (it != null && it.connectedComponents.count() > 0) it.u else null }.toTypedArray(),
+            outputPin.u)
+
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             front = front.nextClockwise
@@ -196,6 +201,10 @@ open class AnalogChipRender(entity: SixNodeEntity, side: Direction, descriptor: 
 }
 
 abstract class AnalogFunction: INBTTReady {
+    companion object {
+        val inputColors = arrayOf(SpecialChars.RED, SpecialChars.GREEN, SpecialChars.BLUE)
+    }
+
     open val hasState = false
     abstract val inputCount: Int
     abstract val infos: String
@@ -207,6 +216,11 @@ abstract class AnalogFunction: INBTTReady {
     internal fun Array<Double?>.toDigital(): List<Boolean?> = this.map { it?.toDigital() }
 
     abstract fun process(inputs: Array<Double?>, deltaTime: Double): Double
+
+    open fun getWaila(inputs: Array<Double?>, output: Double) = mutableMapOf(
+            Pair("Inputs", (1..inputCount).map {"${inputColors[it - 1]}${Utils.plotVolt("", inputs[it -1] ?: 0.0)}"}.joinToString(" ")),
+            Pair("Output", Utils.plotVolt("", output))
+    )
 
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {}
     override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {}
@@ -236,7 +250,6 @@ class PIDRegulator: AnalogFunction() {
     private var lastError = 0.0
     private var errorIntegral = 0.0
 
-
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
         val error = (inputs[0] ?: 0.0) - (inputs[1] ?: 0.0)
         errorIntegral += error * deltaTime
@@ -257,6 +270,12 @@ class PIDRegulator: AnalogFunction() {
         nbt?.setDouble("Ki", Ki)
         nbt?.setDouble("Kd", Kd)
         nbt?.setDouble("errorIntegral", errorIntegral)
+    }
+
+    override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
+        val info = super.getWaila(inputs, output)
+        info[I18N.TR("Params")] = "Kp = $Kp, Ki = $Ki, Kd = $Kd"
+        return info
     }
 }
 
@@ -418,6 +437,12 @@ class Amplifier: AnalogFunction() {
     override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
         nbt?.setDouble("gain", gain)
     }
+
+    override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
+        val info = super.getWaila(inputs, output)
+        info["Gain"] = Utils.plotValue(gain)
+        return info
+    }
 }
 
 class AmplifierElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor):
@@ -506,6 +531,12 @@ class VoltageControlledAmplifier: AnalogFunction() {
     override val infos = I18N.TR("A voltage-controlled amplifier (VCA)\nis an electronic amplifier that varies\nits gain depending on the control voltage.")
 
     override fun process(inputs: Array<Double?>, deltaTime: Double) = (inputs[1] ?: 5.0) / 5.0 * (inputs[0] ?: 0.0)
+
+    override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
+        val info = super.getWaila(inputs, output)
+        info["Gain"] = Utils.plotValue((inputs[1] ?: 5.0) / 5.0)
+        return info
+    }
 }
 
 class SummingUnit() : AnalogFunction() {
@@ -528,6 +559,12 @@ class SummingUnit() : AnalogFunction() {
         for (i in gains.indices) {
             nbt?.setDouble("gain$i", gains[i])
         }
+    }
+
+    override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
+        val info = super.getWaila(inputs, output)
+        info["Gains"] = (0..2).map { "${inputColors[it]}${Utils.plotValue(gains[it])}" }.joinToString(" ")
+        return info
     }
 }
 

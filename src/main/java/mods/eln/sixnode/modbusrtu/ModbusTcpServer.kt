@@ -3,10 +3,7 @@ package mods.eln.sixnode.modbusrtu
 import mods.eln.Eln
 import mods.eln.misc.Utils
 import java.io.OutputStream
-import java.net.BindException
-import java.net.InetSocketAddress
-import java.net.ServerSocket
-import java.net.Socket
+import java.net.*
 import java.nio.ByteBuffer
 import java.util.*
 
@@ -35,6 +32,21 @@ class ModbusTcpServer(port: Int = 1502) {
             server.close()
         }
     }
+
+    val available: Boolean
+        get() = server.isBound
+
+    val host: String
+        get() {
+            val address = (server.localSocketAddress as? InetSocketAddress)?.address?.hostAddress ?: "-"
+            return when (address) {
+                "0.0.0.0" -> InetAddress.getLocalHost().hostAddress
+                else -> address
+            }
+        }
+
+    val port: Int
+        get() = server.localPort
 
     private inner class ConnectionHandler(val socket: Socket) {
         private val inputBuffer = ByteBuffer.allocate(InputBufferSize)
