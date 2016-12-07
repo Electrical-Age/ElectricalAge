@@ -5,6 +5,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
+import mods.eln.sixnode.electricalwatch.ElectricalWatchContainer;
 import mods.eln.sound.SoundCommand;
 import mods.eln.sound.SoundLooper;
 import net.minecraft.block.Block;
@@ -39,6 +40,16 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
             };
         }
 	}
+
+    double getBatteryLevel() {
+        ItemStack batteryStack = element.inventory.getStackInSlot(ElectricalWatchContainer.batteryId);
+        BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack);
+        if (battery != null) {
+            return battery.getEnergy(batteryStack) / battery.getEnergyMax(batteryStack);
+        } else {
+            return 0;
+        }
+    }
 
 	@Override
 	public void process(double time) {
