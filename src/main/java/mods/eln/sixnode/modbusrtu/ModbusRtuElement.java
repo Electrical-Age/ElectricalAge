@@ -142,10 +142,10 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
 	public Map<String, String> getWaila() {
 		Map<String, String> info = new HashMap<String, String>();
 		if (Eln.modbusEnable) {
-			info.put(I18N.TR("Modbus TCP"), Eln.modbusServer.getHost() + ":" + Eln.modbusServer.getPort());
-			info.put(I18N.TR("Modbus Unit ID"), String.valueOf(station));
+			info.put(I18N.tr("Modbus TCP"), Eln.modbusServer.getHost() + ":" + Eln.modbusServer.getPort());
+			info.put(I18N.tr("Modbus Unit ID"), String.valueOf(station));
 		} else {
-			info.put("X_X", I18N.TR("Modbus is disabled, enable it in Eln.cfg"));
+			info.put("X_X", I18N.tr("Modbus is disabled, enable it in Eln.cfg"));
 		}
 		return info;
 	}

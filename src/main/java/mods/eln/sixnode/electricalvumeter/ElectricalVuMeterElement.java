@@ -76,7 +76,7 @@ public class ElectricalVuMeterElement extends SixNodeElement {
 	@Override
 	public Map<String, String> getWaila() {
 		Map<String, String> info = new HashMap<String, String>();
-		info.put(I18N.TR("Input"), inputGate.stateHigh() ? I18N.TR("ON") : I18N.TR("OFF"));
+		info.put(I18N.tr("Input"), inputGate.stateHigh() ? I18N.tr("ON") : I18N.tr("OFF"));
 		return info;
 	}
 

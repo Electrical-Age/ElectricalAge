@@ -103,11 +103,11 @@ public class PowerCapacitorSixElement extends SixNodeElement {
 	@Override
 	public Map<String, String> getWaila() {
 		Map<String, String> info = new HashMap<String, String>();
-		info.put(I18N.TR("Capacity"), Utils.plotValue(capacitor.getC(), "F"));
-		info.put(I18N.TR("Charge"), Utils.plotEnergy("", capacitor.getE()));
+		info.put(I18N.tr("Capacity"), Utils.plotValue(capacitor.getC(), "F"));
+		info.put(I18N.tr("Charge"), Utils.plotEnergy("", capacitor.getE()));
 		if (Eln.wailaEasyMode) {
-			info.put(I18N.TR("Voltage drop"), Utils.plotVolt("", Math.abs(capacitor.getU())));
-			info.put(I18N.TR("Current"), Utils.plotAmpere("", Math.abs(capacitor.getCurrent())));
+			info.put(I18N.tr("Voltage drop"), Utils.plotVolt("", Math.abs(capacitor.getU())));
+			info.put(I18N.tr("Current"), Utils.plotAmpere("", Math.abs(capacitor.getCurrent())));
 
 		}
 		return info;

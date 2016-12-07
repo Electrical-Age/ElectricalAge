@@ -86,9 +86,9 @@ public class ElectricalAlarmElement extends SixNodeElement {
 	@Override
 	public Map<String, String> getWaila() {
 		Map<String,String> info = new HashMap<String,String>();
-		info.put(I18N.TR("Engaged"), inputGate.stateHigh() ? I18N.TR("Yes") : I18N.TR("No"));
+		info.put(I18N.tr("Engaged"), inputGate.stateHigh() ? I18N.tr("Yes") : I18N.tr("No"));
 		if (Eln.wailaEasyMode) {
-			info.put(I18N.TR("Input Voltage"), Utils.plotVolt("", inputGate.getU()));
+			info.put(I18N.tr("Input Voltage"), Utils.plotVolt("", inputGate.getU()));
 		}
 		return info;
 	}

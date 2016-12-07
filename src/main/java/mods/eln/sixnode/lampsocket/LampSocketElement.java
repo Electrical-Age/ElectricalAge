@@ -209,20 +209,20 @@ public class LampSocketElement extends SixNodeElement {
 	@Override
 	public Map<String, String> getWaila() {
 		Map<String, String> info = new HashMap<String, String>();
-		info.put(I18N.TR("Power consumption"), Utils.plotPower("", lampResistor.getI() * lampResistor.getU()));
+		info.put(I18N.tr("Power consumption"), Utils.plotPower("", lampResistor.getI() * lampResistor.getU()));
 		if (lampDescriptor != null) {
-			info.put(I18N.TR("Bulb"), lampDescriptor.name);
+			info.put(I18N.tr("Bulb"), lampDescriptor.name);
 		} else {
-			info.put(I18N.TR("Bulb"), I18N.TR("None"));
+			info.put(I18N.tr("Bulb"), I18N.tr("None"));
 		}
 		if (Eln.wailaEasyMode) {
 			if (poweredByLampSupply) {
-				info.put(I18N.TR("Channel"), channel);
+				info.put(I18N.tr("Channel"), channel);
 			}
-			info.put(I18N.TR("Voltage"), Utils.plotVolt("", positiveLoad.getU()));
+			info.put(I18N.tr("Voltage"), Utils.plotVolt("", positiveLoad.getU()));
 			ItemStack lampStack = inventory.getStackInSlot(0);
 			if (lampStack != null) {
-				info.put(I18N.TR("Life"), Utils.plotValue(lampDescriptor.getLifeInTag(lampStack)));
+				info.put(I18N.tr("Life"), Utils.plotValue(lampDescriptor.getLifeInTag(lampStack)));
 			}
 
 		}

@@ -217,13 +217,13 @@ public class LampSupplyElement extends SixNodeElement {
 		for (int i = 0; i < 3; ++i) {
 			Entry e = entries.get(i);
 			if (!e.powerChannel.isEmpty()) {
-				info.put(I18N.TR("Channel") + " " + (i + 1), e.powerChannel + " = " +
+				info.put(I18N.tr("Channel") + " " + (i + 1), e.powerChannel + " = " +
 					(channelStates[i] ? SpecialChars.GREEN + "ON" : SpecialChars.RED + "OFF"));
 			}
 		}
-		info.put(I18N.TR("Total power"), Utils.plotPower("", powerLoad.getU() * powerLoad.getI()));
+		info.put(I18N.tr("Total power"), Utils.plotPower("", powerLoad.getU() * powerLoad.getI()));
 		if (Eln.wailaEasyMode) {
-			info.put(I18N.TR("Voltage"), Utils.plotVolt("", powerLoad.getU()));
+			info.put(I18N.tr("Voltage"), Utils.plotVolt("", powerLoad.getU()));
 		}
 		return info;
 	}

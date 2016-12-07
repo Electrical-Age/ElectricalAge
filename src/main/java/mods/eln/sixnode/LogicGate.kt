@@ -213,9 +213,9 @@ abstract class LogicFunction: INBTTReady {
 
     protected fun Double?.toDigitalString(): String = when {
         this == null -> "-"
-        this >= 0.6 -> I18N.TR("ON")
-        this <= 0.2 -> I18N.TR("OFF")
-        else -> I18N.TR("UNDEF")
+        this >= 0.6 -> I18N.tr("ON")
+        this <= 0.2 -> I18N.tr("OFF")
+        else -> I18N.tr("UNDEF")
     }
 
     private fun Array<Double?>.toDigital(): List<Boolean?> = this.map { it?.toDigital() }

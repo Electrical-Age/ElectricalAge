@@ -57,7 +57,7 @@ public class ElectricalWatchElement extends SixNodeElement {
 	@Override
 	public Map<String, String> getWaila() {
 		Map<String, String> info = new HashMap<String, String>();
-		info.put(I18N.TR("Battery level"), Utils.plotPercent("", slowProcess.getBatteryLevel()));
+		info.put(I18N.tr("Battery level"), Utils.plotPercent("", slowProcess.getBatteryLevel()));
 		return info;
 	}
 

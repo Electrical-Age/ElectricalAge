@@ -130,15 +130,15 @@ public class ThermalSensorElement extends SixNodeElement {
 	@Override
 	public Map<String, String> getWaila() {
 		Map<String, String> info = new HashMap<String, String>();
-		info.put(I18N.TR("Output voltage"), Utils.plotVolt("", outputGate.getU()));
+		info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
 		if (Eln.wailaEasyMode) {
 			switch (typeOfSensor) {
 				case temperatureType:
-					info.put(I18N.TR("Measured temperature"), Utils.plotCelsius("", thermalLoad.getT()));
+					info.put(I18N.tr("Measured temperature"), Utils.plotCelsius("", thermalLoad.getT()));
 					break;
 
 				case powerType:
-					info.put(I18N.TR("Measured thermic power"), Utils.plotPower("", thermalLoad.getPower()));
+					info.put(I18N.tr("Measured thermic power"), Utils.plotPower("", thermalLoad.getPower()));
 					break;
 			}
 		}

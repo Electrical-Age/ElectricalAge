@@ -116,13 +116,13 @@ public class ElectricalCableElement extends SixNodeElement {
 		Map<String,String> info = new HashMap<String,String>();
 
 		if (descriptor.signalWire) {
-			info.put(I18N.TR("Signal Voltage"), Utils.plotVolt("", electricalLoad.getU()));
+			info.put(I18N.tr("Signal Voltage"), Utils.plotVolt("", electricalLoad.getU()));
 		} else {
-			info.put(I18N.TR("Current"), Utils.plotAmpere("", electricalLoad.getI()));
-			info.put(I18N.TR("Temperature"), Utils.plotCelsius("", thermalLoad.getT()));
+			info.put(I18N.tr("Current"), Utils.plotAmpere("", electricalLoad.getI()));
+			info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.getT()));
 			if (Eln.wailaEasyMode) {
-				info.put(I18N.TR("Voltage"), Utils.plotVolt("", electricalLoad.getU()));
-				info.put(I18N.TR("Power"), Utils.plotPower("", electricalLoad.getU() * electricalLoad.getI()));
+				info.put(I18N.tr("Voltage"), Utils.plotVolt("", electricalLoad.getU()));
+				info.put(I18N.tr("Power"), Utils.plotPower("", electricalLoad.getU() * electricalLoad.getI()));
 			}
 		}
 

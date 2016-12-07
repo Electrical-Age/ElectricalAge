@@ -174,12 +174,12 @@ public class ElectricalMathElement extends SixNodeElement {
 	@Override
 	public Map<String, String> getWaila() {
 		Map<String, String> info = new HashMap<String, String>();
-		info.put(I18N.TR("Equation"), expression);
-		info.put(I18N.TR("Input voltages"),
+		info.put(I18N.tr("Equation"), expression);
+		info.put(I18N.tr("Input voltages"),
 			Utils.plotVolt(SpecialChars.RED, gateInput[0].getU()) +
 			Utils.plotVolt(SpecialChars.GREEN, gateInput[1].getU()) +
 		    Utils.plotVolt(SpecialChars.BLUE, gateInput[2].getU()));
-		info.put(I18N.TR("Output voltage"), Utils.plotVolt("", gateOutput.getU()));
+		info.put(I18N.tr("Output voltage"), Utils.plotVolt("", gateOutput.getU()));
 		return info;
 	}
 
