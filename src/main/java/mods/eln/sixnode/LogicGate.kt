@@ -334,7 +334,7 @@ class Oscillator: LogicFunction() {
     }
 
     override fun getWaila(inputs: Array<Double?>, output: Double) = mutableMapOf(
-            Pair("Inputs", "AnalogFunction.inputColors[0] ${inputs[0] ?: 0}"),
+            Pair("Inputs", "${AnalogFunction.inputColors[0]} ${Utils.plotVolt("", inputs[0] ?: 0.0)}"),
             Pair("Output", output.toDigitalString())
     )
 
