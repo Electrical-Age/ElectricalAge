@@ -217,7 +217,7 @@ public class AutoMinerElement extends TransparentNodeElement  {
 	@Override
 	public Map<String, String> getWaila(){
 		Map<String, String> info = new HashMap<String, String>();
-		info.put(I18N.tr("Silk Touch"), slowProcess.silkTouch ? I18N.tr("Yes") : I18N.tr("No"));
+		info.put(I18N.tr("Silk touch"), slowProcess.silkTouch ? I18N.tr("Yes") : I18N.tr("No"));
 		info.put(I18N.tr("Depth"), Utils.plotValue(slowProcess.pipeLength, "m "));
 		return info;
 	}

@@ -1,6 +1,9 @@
 package mods.eln.transparentnode.turret;
 
 import mods.eln.Eln;
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.i18n.I18N;
+import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -15,9 +18,12 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.nbt.NbtResistor;
 import mods.eln.sixnode.lampsocket.LightBlockEntity;
+import net.minecraft.entity.monster.IMob;
+import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.DataInputStream;
@@ -227,7 +233,40 @@ public class TurretElement extends TransparentNodeElement {
 	@Override
 	public Map<String, String> getWaila(){
 		Map<String, String> info = new HashMap<String, String>();
-		info.put("Charge Rate", Utils.plotPower("", chargePower));
+		info.put(I18N.tr("Charge power"), Utils.plotPower("", chargePower));
+
+		ItemStack filterStack = inventory.getStackInSlot(TurretContainer.filterId);
+		if(filterStack != null) {
+			GenericItemUsingDamageDescriptor gen = EntitySensorFilterDescriptor.getDescriptor(filterStack);
+			if (gen != null && gen instanceof EntitySensorFilterDescriptor) {
+				EntitySensorFilterDescriptor filter = (EntitySensorFilterDescriptor) gen;
+				String target = I18N.tr("Shoot ");
+				if (filterIsSpare) {
+					target += "not ";
+				}
+				if (filter.entityClass == EntityPlayer.class) {
+					target += I18N.tr("players");
+				} else if (filter.entityClass == IMob.class) {
+					target += I18N.tr("monsters");
+				} else if (filter.entityClass == EntityAnimal.class) {
+					target += I18N.tr("animals");
+				} else {
+					target += I18N.tr("??");
+				}
+				info.put(I18N.tr("Target"), target);
+			}
+		} else {
+			if (filterIsSpare) {
+				info.put(I18N.tr("Target"), I18N.tr("Shoot everything"));
+			} else {
+				info.put(I18N.tr("Target"), I18N.tr("Shoot nothing"));
+			}
+		}
+
+		if (Eln.wailaEasyMode) {
+			info.put(I18N.tr("Charge level"),
+				Utils.plotPercent("", energyBuffer / descriptor.getProperties().impulseEnergy));
+		}
 		return info;
 	}
 }
