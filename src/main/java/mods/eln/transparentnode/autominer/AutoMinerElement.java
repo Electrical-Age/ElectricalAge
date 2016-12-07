@@ -1,18 +1,15 @@
 package mods.eln.transparentnode.autominer;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.transparent.*;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
@@ -23,6 +20,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AutoMinerElement extends TransparentNodeElement  {
 
@@ -212,10 +216,9 @@ public class AutoMinerElement extends TransparentNodeElement  {
 
 	@Override
 	public Map<String, String> getWaila(){
-		//Why are you even looking at this part of the machine... it's literally the part the drill comes out of.
 		Map<String, String> info = new HashMap<String, String>();
-		info.put("Silk Touch", slowProcess.silkTouch ? "Yes" : "No");
-		info.put("Depth", Utils.plotValue(slowProcess.pipeLength, "m "));
+		info.put(I18N.tr("Silk Touch"), slowProcess.silkTouch ? I18N.tr("Yes") : I18N.tr("No"));
+		info.put(I18N.tr("Depth"), Utils.plotValue(slowProcess.pipeLength, "m "));
 		return info;
 	}
 }
