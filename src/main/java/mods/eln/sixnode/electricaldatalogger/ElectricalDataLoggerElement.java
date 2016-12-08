@@ -105,7 +105,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 	}
 
 	@Override
-	public ElectricalLoad getElectricalLoad(LRDU lrdu) {	
+	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
 		if (front.inverse() == lrdu) return inputGate;
 		return null;
 	}
