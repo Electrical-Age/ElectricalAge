@@ -75,7 +75,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 
 	void draw(DataLogs log, Direction side, LRDU front, int objPosMX, int objPosMZ) {
 		if (onFloor || side.isY()) front.glRotateOnX();
-        if (!onFloor) GL11.glRotatef(90, 1, 0, 0);
+        if (!onFloor && side.isNotY()) GL11.glRotatef(90, 1, 0, 0);
 		//GL11.glDisable(GL11.GL_TEXTURE_2D);
 		if (main != null) main.draw();
 		//GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -159,11 +159,7 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
 		if (onFloor) {
 			return front.inverse();
 		} else {
-			if (side.isY()) {
-				return front.left();
-			} else {
-				return front;
-			}
+			return front;
 		}
 	}
 }
