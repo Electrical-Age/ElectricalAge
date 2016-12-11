@@ -5,6 +5,7 @@ import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.GuiHelper
 import mods.eln.gui.GuiScreenEln
 import mods.eln.gui.IGuiObject
+import mods.eln.i18n.I18N
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.node.Node
@@ -15,6 +16,7 @@ import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateInput
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
+import mods.eln.sixnode.AnalogFunction
 import mods.eln.wiki.Data
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.gui.GuiScreen
@@ -151,6 +153,10 @@ open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: S
         return builder.toString()
     }
 
+    override fun getWaila(): MutableMap<String,String> = function.getWaila(
+            inputPins.map { if (it != null && it.connectedComponents.count() > 0) it.normalized else null }.toTypedArray(),
+            outputPin.u / Eln.SVU)
+
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             front = front.nextClockwise
@@ -175,8 +181,6 @@ open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: S
     override fun getThermalLoad(lrdu: LRDU?): ThermalLoad? = null
     override fun thermoMeterString(): String? = null
     override fun initialize() {}
-
-
 }
 
 open class LogicGateRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor):
@@ -207,10 +211,22 @@ abstract class LogicFunction: INBTTReady {
     else if (this >= 0.6) true
     else Math.random() > 0.5
 
+    protected fun Double?.toDigitalString(): String = when {
+        this == null -> "-"
+        this >= 0.6 -> I18N.tr("ON")
+        this <= 0.2 -> I18N.tr("OFF")
+        else -> I18N.tr("UNDEF")
+    }
+
     private fun Array<Double?>.toDigital(): List<Boolean?> = this.map { it?.toDigital() }
 
     open fun process(inputs: Array<Double?>): Boolean = process(inputs.toDigital())
     open fun process(inputs: List<Boolean?>): Boolean = false
+
+    open fun getWaila(inputs: Array<Double?>, output: Double) = mutableMapOf(
+            Pair("Inputs", (1..inputCount).map {"${AnalogFunction.inputColors[it - 1]}${inputs[it -1].toDigitalString()}"}.joinToString(" ")),
+            Pair("Output", output.toDigitalString())
+    )
 
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {}
     override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {}
@@ -316,6 +332,11 @@ class Oscillator: LogicFunction() {
         }
         return state
     }
+
+    override fun getWaila(inputs: Array<Double?>, output: Double) = mutableMapOf(
+            Pair("Inputs", "${AnalogFunction.inputColors[0]} ${Utils.plotVolt("", inputs[0] ?: 0.0)}"),
+            Pair("Output", output.toDigitalString())
+    )
 
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
         ramp = nbt?.getDouble(str + "ramp") ?: 0.0
@@ -490,10 +511,7 @@ class Pal: LogicFunction() {
     private operator fun Boolean.times(factor: Int): Int = if (this) factor else 0
 
     private fun Array<Boolean>.toInt(): Int {
-        var value = 0
-        for (i in 0..this.count() -1) {
-            if (this[i]) value += 1.shl(i)
-        }
+        val value = (0..this.count() -1).filter { this[it] }.sumBy { 1.shl(it) }
         return value
     }
 

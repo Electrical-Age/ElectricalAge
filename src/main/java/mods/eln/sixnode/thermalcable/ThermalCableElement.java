@@ -1,9 +1,7 @@
 package mods.eln.sixnode.thermalcable;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.i18n.I18N;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -21,6 +19,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+
+import javax.annotation.Nullable;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ThermalCableElement extends SixNodeElement {
 
@@ -83,6 +87,16 @@ public class ThermalCableElement extends SixNodeElement {
 	@Override
 	public String multiMeterString() {
 		return "";
+	}
+
+	@Nullable
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String,String> info = new HashMap<String,String>();
+
+		info.put(I18N.tr("Thermic power"), Utils.plotPower("", thermalLoad.getPower()));
+		info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.getT()));
+		return info;
 	}
 
 	@Override

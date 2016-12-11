@@ -1,5 +1,6 @@
 package mods.eln.sixnode
 
+import mcp.mobius.waila.api.SpecialChars
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.*
@@ -150,6 +151,10 @@ open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: 
         return builder.toString()
     }
 
+    override fun getWaila(): MutableMap<String,String> = function.getWaila(
+            inputPins.map { if (it != null && it.connectedComponents.count() > 0) it.u else null }.toTypedArray(),
+            outputPin.u)
+
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             front = front.nextClockwise
@@ -196,6 +201,10 @@ open class AnalogChipRender(entity: SixNodeEntity, side: Direction, descriptor: 
 }
 
 abstract class AnalogFunction: INBTTReady {
+    companion object {
+        val inputColors = arrayOf(SpecialChars.RED, SpecialChars.GREEN, SpecialChars.BLUE)
+    }
+
     open val hasState = false
     abstract val inputCount: Int
     abstract val infos: String
@@ -208,13 +217,18 @@ abstract class AnalogFunction: INBTTReady {
 
     abstract fun process(inputs: Array<Double?>, deltaTime: Double): Double
 
+    open fun getWaila(inputs: Array<Double?>, output: Double) = mutableMapOf(
+            Pair("Inputs", (1..inputCount).map {"${inputColors[it - 1]}${Utils.plotVolt("", inputs[it -1] ?: 0.0)}"}.joinToString(" ")),
+            Pair("Output", Utils.plotVolt("", output))
+    )
+
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {}
     override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {}
 }
 
 class OpAmp: AnalogFunction() {
     override val inputCount = 2
-    override val infos = I18N.TR("Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or a configurable amplifier.")
+    override val infos = I18N.tr("Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or a configurable amplifier.")
 
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double =
             10000 * ((inputs[0] ?: 0.0) - (inputs[1] ?: 0.0))
@@ -223,7 +237,7 @@ class OpAmp: AnalogFunction() {
 class PIDRegulator: AnalogFunction() {
     override val hasState = true
     override val inputCount = 2
-    override val infos = I18N.TR("Proportional–integral–derivative controller. A PID\ncontroller continuously calculates an error value as\nthe difference between a desired setpoint and a measured\nprocess variable and applies a correction based on\nproportional, integral, and derivative terms.")
+    override val infos = I18N.tr("Proportional–integral–derivative controller. A PID\ncontroller continuously calculates an error value as\nthe difference between a desired setpoint and a measured\nprocess variable and applies a correction based on\nproportional, integral, and derivative terms.")
 
     internal var Kp = 1.0
     internal var Ki = 0.0
@@ -235,7 +249,6 @@ class PIDRegulator: AnalogFunction() {
 
     private var lastError = 0.0
     private var errorIntegral = 0.0
-
 
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
         val error = (inputs[0] ?: 0.0) - (inputs[1] ?: 0.0)
@@ -257,6 +270,12 @@ class PIDRegulator: AnalogFunction() {
         nbt?.setDouble("Ki", Ki)
         nbt?.setDouble("Kd", Kd)
         nbt?.setDouble("errorIntegral", errorIntegral)
+    }
+
+    override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
+        val info = super.getWaila(inputs, output)
+        info[I18N.tr("Params")] = "Kp = $Kp, Ki = $Ki, Kd = $Kd"
+        return info
     }
 }
 
@@ -376,7 +395,7 @@ class PIDRegulatorGui(val render: PIDRegulatorRender): GuiScreenEln() {
 open class VoltageControlledSawtoothOscillator: AnalogFunction() {
     override val hasState = true
     override val inputCount = 1
-    override val infos = I18N.TR("A voltage-controlled oscillator or VCO is\nan electronic oscillator whose oscillation\nfrequency is controlled by a voltage input.")
+    override val infos = I18N.tr("A voltage-controlled oscillator or VCO is\nan electronic oscillator whose oscillation\nfrequency is controlled by a voltage input.")
 
     private var out = 0.0
 
@@ -405,7 +424,7 @@ class VoltageControlledSineOscillator: VoltageControlledSawtoothOscillator() {
 class Amplifier: AnalogFunction() {
     override val hasState = true
     override val inputCount = 1
-    override val infos = I18N.TR("An amplifier increases the voltage\nof an input signal by a configurable\ngain and outputs that voltage.")
+    override val infos = I18N.tr("An amplifier increases the voltage\nof an input signal by a configurable\ngain and outputs that voltage.")
 
     internal var gain = 1.0
 
@@ -417,6 +436,12 @@ class Amplifier: AnalogFunction() {
 
     override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
         nbt?.setDouble("gain", gain)
+    }
+
+    override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
+        val info = super.getWaila(inputs, output)
+        info["Gain"] = Utils.plotValue(gain)
+        return info
     }
 }
 
@@ -478,7 +503,7 @@ class AmplifierGui(val render: AmplifierRender): GuiScreenEln() {
         super.initGui()
 
         gainTF = newGuiTextField(6, 6, 50)
-        gainTF?.setComment(0, I18N.TR("Gain"))
+        gainTF?.setComment(0, I18N.tr("Gain"))
         gainTF?.setText(render.gain)
         gainTF?.setObserver { textField, text ->
             try {
@@ -503,15 +528,21 @@ class AmplifierGui(val render: AmplifierRender): GuiScreenEln() {
 
 class VoltageControlledAmplifier: AnalogFunction() {
     override val inputCount = 2
-    override val infos = I18N.TR("A voltage-controlled amplifier (VCA)\nis an electronic amplifier that varies\nits gain depending on the control voltage.")
+    override val infos = I18N.tr("A voltage-controlled amplifier (VCA)\nis an electronic amplifier that varies\nits gain depending on the control voltage.")
 
     override fun process(inputs: Array<Double?>, deltaTime: Double) = (inputs[1] ?: 5.0) / 5.0 * (inputs[0] ?: 0.0)
+
+    override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
+        val info = super.getWaila(inputs, output)
+        info["Gain"] = Utils.plotValue((inputs[1] ?: 5.0) / 5.0)
+        return info
+    }
 }
 
 class SummingUnit() : AnalogFunction() {
     override val hasState = true
     override val inputCount = 3
-    override val infos = I18N.TR("The summing unit outputs the sum of\nthe tree wighted inputs at it's output.The\ngain for each input can be configured.")
+    override val infos = I18N.tr("The summing unit outputs the sum of\nthe tree wighted inputs at it's output.The\ngain for each input can be configured.")
 
     internal val gains = arrayOf(1.0, 1.0, 1.0)
 
@@ -528,6 +559,12 @@ class SummingUnit() : AnalogFunction() {
         for (i in gains.indices) {
             nbt?.setDouble("gain$i", gains[i])
         }
+    }
+
+    override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
+        val info = super.getWaila(inputs, output)
+        info["Gains"] = (0..2).map { "${inputColors[it]}${Utils.plotValue(gains[it])}" }.joinToString(" ")
+        return info
     }
 }
 
@@ -612,9 +649,9 @@ class SummingUnitGui(val render: SummingUnitRender): GuiScreenEln() {
                 }
             }
         }
-        gainTFs[0]?.setComment(0, I18N.TR("Gain for input \u00a741"))
-        gainTFs[1]?.setComment(0, I18N.TR("Gain for input \u00a722"))
-        gainTFs[2]?.setComment(0, I18N.TR("Gain for input \u00a713"))
+        gainTFs[0]?.setComment(0, I18N.tr("Gain for input \u00a741"))
+        gainTFs[1]?.setComment(0, I18N.tr("Gain for input \u00a722"))
+        gainTFs[2]?.setComment(0, I18N.tr("Gain for input \u00a713"))
     }
 
     override fun newHelper() = GuiHelper(this, 62, 64)

@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalsource;
 
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.i18n.I18N;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -22,6 +23,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ElectricalSourceElement extends SixNodeElement {
 
@@ -86,7 +89,18 @@ public class ElectricalSourceElement extends SixNodeElement {
 	public String multiMeterString() {
 		return Utils.plotUIP(electricalLoad.getU(), voltageSource.getI());
 	}
-	
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.tr("Voltage"), Utils.plotVolt("", electricalLoad.getU()));
+		info.put(I18N.tr("Current"), Utils.plotAmpere("", electricalLoad.getCurrent()));
+		if (Eln.wailaEasyMode) {
+			info.put(I18N.tr("Power"), Utils.plotPower("", electricalLoad.getU() * electricalLoad.getI()));
+		}
+		return info;
+	}
+
 	@Override
 	public String thermoMeterString() {
 		return "";

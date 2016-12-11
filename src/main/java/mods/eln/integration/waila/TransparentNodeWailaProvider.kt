@@ -1,14 +1,12 @@
 package mods.eln.integration.waila
 
+import com.google.common.cache.CacheLoader
 import cpw.mods.fml.common.Optional
 import mcp.mobius.waila.api.IWailaConfigHandler
 import mcp.mobius.waila.api.IWailaDataAccessor
 import mcp.mobius.waila.api.IWailaDataProvider
 import mcp.mobius.waila.api.SpecialChars
-import mods.eln.Eln
 import mods.eln.misc.Coordonate
-import mods.eln.packets.TransparentNodeRequestPacket
-import net.minecraft.client.Minecraft
 import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
@@ -16,28 +14,17 @@ import net.minecraft.tileentity.TileEntity
 import net.minecraft.world.World
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
-class TransparentNodeHandler : IWailaDataProvider{
-
-    companion object {
-        var updateTime = Minecraft.getSystemTime()
-    }
-
-    override fun getWailaBody(itemStack: ItemStack?, currenttip: MutableList<String>?, accessor: IWailaDataAccessor?, config: IWailaConfigHandler?): MutableList<String>? {
-        var tipMap: Map<String, String>? = mapOf()
-        val coord = accessor!!.position
-        val nodeCoord = Coordonate(coord.blockX, coord.blockY, coord.blockZ, accessor.world)
-        if(Minecraft.getSystemTime() - updateTime > 2000){
-            Eln.elnNetwork.sendToServer(TransparentNodeRequestPacket(Coordonate(nodeCoord)))
-            updateTime = Minecraft.getSystemTime()
-        }
+class TransparentNodeWailaProvider : IWailaDataProvider{
+    override fun getWailaBody(itemStack: ItemStack?, currenttip: MutableList<String>,
+                              accessor: IWailaDataAccessor, config: IWailaConfigHandler?): MutableList<String>? {
+        val coord = Coordonate(accessor.position.blockX, accessor.position.blockY, accessor.position.blockZ,
+                accessor.world)
         try {
-            tipMap = WailaCache.nodes.get(nodeCoord)
-        } catch(e: Exception){
+            WailaCache.nodes.get(coord)?.forEach { currenttip.add("${it.key}: ${SpecialChars.WHITE}${it.value}") }
+        } catch(e: CacheLoader.InvalidCacheLoadException){
             //This is probably just it complaining about the cache returning null. Should be safe to ignore.
         }
-        for((key, value) in tipMap!!.asSequence()){
-            currenttip!! += (key + ": " + SpecialChars.WHITE + value)
-        }
+
         return currenttip
     }
 

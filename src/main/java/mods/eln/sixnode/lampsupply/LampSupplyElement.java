@@ -1,5 +1,8 @@
 package mods.eln.sixnode.lampsupply;
 
+import mcp.mobius.waila.api.SpecialChars;
+import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -33,11 +36,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class LampSupplyElement extends SixNodeElement {
 
@@ -210,6 +209,23 @@ public class LampSupplyElement extends SixNodeElement {
 	@Override
 	public String multiMeterString() {
 		return Utils.plotUIP(powerLoad.getU(), powerLoad.getCurrent());
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		for (int i = 0; i < 3; ++i) {
+			Entry e = entries.get(i);
+			if (!e.powerChannel.isEmpty()) {
+				info.put(I18N.tr("Channel") + " " + (i + 1), e.powerChannel + " = " +
+					(channelStates[i] ? SpecialChars.GREEN + "ON" : SpecialChars.RED + "OFF"));
+			}
+		}
+		info.put(I18N.tr("Total power"), Utils.plotPower("", powerLoad.getU() * powerLoad.getI()));
+		if (Eln.wailaEasyMode) {
+			info.put(I18N.tr("Voltage"), Utils.plotVolt("", powerLoad.getU()));
+		}
+		return info;
 	}
 
 	@Override

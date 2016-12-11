@@ -1,10 +1,14 @@
 package mods.eln.transparentnode.battery;
 
 import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
-import mods.eln.node.transparent.*;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.NodeVoltageState;
 import mods.eln.sim.ThermalLoad;
@@ -25,7 +29,6 @@ import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -254,20 +257,12 @@ public class BatteryElement extends TransparentNodeElement {
 	@Override
 	public Map<String, String> getWaila() {
 		Map<String, String> wailaList = new HashMap<String, String>();
-		DecimalFormat df = new DecimalFormat("#.##");
-		String charge, energy, life, voltage, current = "";
-		NbtBatteryProcess p = batteryProcess;
-		charge = df.format(p.getCharge() * 100.0) + "%";
-		energy = df.format(p.getEnergy() / 1000.0) + "kJ";
-		life = df.format(p.life * 100.0) + "%";
-		voltage = df.format(p.getU()) + "v";
-		current = df.format(p.getDischargeCurrent())+"a";
-		wailaList.put("Charge", charge);
-		wailaList.put("Energy", energy);
-		wailaList.put("Life", life);
-		if(Eln.wailaEasyMode){
-			wailaList.put("Voltage", voltage);
-			wailaList.put("Current", current);
+		wailaList.put(I18N.tr("Charge"), Utils.plotPercent("", batteryProcess.getCharge()));
+		wailaList.put(I18N.tr("Energy"), Utils.plotEnergy("", batteryProcess.getEnergy()));
+		wailaList.put(I18N.tr("Life"), Utils.plotPercent("", batteryProcess.life));
+		if (Eln.wailaEasyMode) {
+			wailaList.put(I18N.tr("Voltage"), Utils.plotVolt("", batteryProcess.getU()));
+			wailaList.put(I18N.tr("Current"), Utils.plotAmpere("", batteryProcess.getDischargeCurrent()));
 		}
 		return wailaList;
 	}

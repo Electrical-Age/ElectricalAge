@@ -1,6 +1,7 @@
 package mods.eln.sixnode.electricalredstoneoutput;
 
 import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -16,6 +17,8 @@ import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ElectricalRedstoneOutputElement extends SixNodeElement {
 
@@ -90,6 +93,14 @@ public class ElectricalRedstoneOutputElement extends SixNodeElement {
 	@Override
 	public String multiMeterString() {
 		return Utils.plotVolt("U:", inputGate.getU()) + Utils.plotAmpere("I:", inputGate.getCurrent()) ;
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.tr("Redstone value"), Utils.plotValue(redstoneValue));
+		info.put(I18N.tr("Input voltage"), Utils.plotVolt("", inputGate.getU()));
+		return info;
 	}
 
 	@Override

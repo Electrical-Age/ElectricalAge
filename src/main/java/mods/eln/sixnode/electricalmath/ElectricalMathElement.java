@@ -1,12 +1,10 @@
 package mods.eln.sixnode.electricalmath;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-
+import mcp.mobius.waila.api.SpecialChars;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
+import mods.eln.misc.Utils;
 import mods.eln.node.Node;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -26,6 +24,13 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ElectricalMathElement extends SixNodeElement {
 
@@ -163,7 +168,19 @@ public class ElectricalMathElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		return null;
+		return Utils.plotVolt("Uout:", gateOutput.getU()) + Utils.plotAmpere("Iout:", gateOutput.getCurrent());
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.tr("Equation"), expression);
+		info.put(I18N.tr("Input voltages"),
+			Utils.plotVolt(SpecialChars.RED, gateInput[0].getU()) +
+			Utils.plotVolt(SpecialChars.GREEN, gateInput[1].getU()) +
+		    Utils.plotVolt(SpecialChars.BLUE, gateInput[2].getU()));
+		info.put(I18N.tr("Output voltage"), Utils.plotVolt("", gateOutput.getU()));
+		return info;
 	}
 
 	@Override

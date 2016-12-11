@@ -1,10 +1,7 @@
 package mods.eln.transparentnode.electricalantennatx;
 
-import java.io.DataOutputStream;
-import java.util.HashMap;
-import java.util.Map;
-
 import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -17,14 +14,14 @@ import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.misc.MnaConst;
-import mods.eln.sim.nbt.NbtElectricalGateInput;
-import mods.eln.sim.nbt.NbtElectricalGateOutput;
-import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
-import mods.eln.sim.nbt.NbtElectricalLoad;
-import mods.eln.sim.nbt.NbtResistor;
+import mods.eln.sim.nbt.*;
 import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxElement;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.DataOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ElectricalAntennaTxElement extends TransparentNodeElement{
 
@@ -201,10 +198,10 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement{
 	@Override
 	public Map<String, String> getWaila() {
 		Map<String, String> info = new HashMap<String, String>();
-		info.put("Transmitting", commandIn.getNormalized() > 0 ? "Yes" : "No");
-		info.put("Efficency", Utils.plotPercent("", powerEfficency));
+		info.put(I18N.tr("Transmitting"), commandIn.getNormalized() > 0 ? "Yes" : "No");
+		info.put(I18N.tr("Efficiency"), Utils.plotPercent("", powerEfficency));
 		if (Eln.wailaEasyMode) {
-			info.put("Power", Utils.plotPower("", powerIn.getI() * powerIn.getU()));
+			info.put(I18N.tr("Power"), Utils.plotPower("", powerIn.getI() * powerIn.getU()));
 		}
 		return info;
 	}

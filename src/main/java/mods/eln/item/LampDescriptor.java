@@ -23,7 +23,6 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
 
 	public enum Type {Incandescent, eco, LED}
 	public double nominalP,nominalLight, nominalLife;
-	public String name, description;
 	public Type type;
 	public LampSocketType socket;
 
