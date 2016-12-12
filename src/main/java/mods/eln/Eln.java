@@ -10,7 +10,6 @@ import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
-import mods.eln.packets.*;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
@@ -24,10 +23,8 @@ import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
-import mods.eln.i18n.I18N;
-import mods.eln.gridnode.downlink.DownlinkDescriptor;
 import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
-import mods.eln.gridnode.transformer.GridTransformerDescriptor;
+import mods.eln.i18n.I18N;
 import mods.eln.item.*;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
 import mods.eln.item.electricalitem.*;
@@ -48,6 +45,7 @@ import mods.eln.node.transparent.*;
 import mods.eln.ore.OreBlock;
 import mods.eln.ore.OreDescriptor;
 import mods.eln.ore.OreItem;
+import mods.eln.packets.*;
 import mods.eln.server.*;
 import mods.eln.signalinductor.SignalInductorDescriptor;
 import mods.eln.sim.Simulator;
@@ -2650,7 +2648,7 @@ public class Eln {
 
 		{
 			subId = 0;
-			name = TR_NAME(Type.NONE, "Transformer");
+			name = TR_NAME(Type.NONE, "DC-DC Converter");
 
 			TransformerDescriptor desc = new TransformerDescriptor(name, obj.getObj("transformator"), obj.getObj("feromagneticcorea"), 0.5f);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -5494,7 +5492,7 @@ public class Eln {
 
 	void recipeTransformer() {
 		//for (int idx = 0; idx < 4; idx++) {
-			addRecipe(findItemStack("Transformer"),
+			addRecipe(findItemStack("DC-DC Converter"),
 					"C C",
 					"III",
 					Character.valueOf('C'), findItemStack("Copper Cable"),
@@ -5696,7 +5694,6 @@ public class Eln {
 					"WWW",
 					"IWI",
 					" W ",
-					Character.valueOf('W'), "logWood",
 					Character.valueOf('I'), "ingotIron"
 			);
 		}
@@ -5707,7 +5704,7 @@ public class Eln {
 				Character.valueOf('P'), findItemStack("Utility Pole"),
 				Character.valueOf('H'), findItemStack("High Voltage Cable"),
 				Character.valueOf('C'), findItemStack("Optimal Ferromagnetic Core"),
-				Character.valueOf('T'), findItemStack("Transformer")
+				Character.valueOf('T'), findItemStack("DC-DC Converter")
 		);
 //		if (oreNames.contains("sheetPlastic")) {
 //			addRecipe(findItemStack("Downlink"),
