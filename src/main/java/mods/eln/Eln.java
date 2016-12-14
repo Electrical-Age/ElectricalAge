@@ -119,6 +119,7 @@ import mods.eln.solver.ConstSymbole;
 import mods.eln.solver.ISymbole;
 import mods.eln.sound.SoundCommand;
 import mods.eln.transparentnode.FuelGeneratorDescriptor;
+import mods.eln.transparentnode.FuelHeatFurnaceDescriptor;
 import mods.eln.transparentnode.LargeRheostatDescriptor;
 import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
 import mods.eln.transparentnode.battery.BatteryDescriptor;
@@ -2663,7 +2664,7 @@ public class Eln {
 	}
 
 	void registerHeatFurnace(int id) {
-		int subId, completId;
+		int subId;
 		String name;
 		{
 			subId = 0;
@@ -2679,6 +2680,15 @@ public class Eln {
 							// combustionChamberPower,
 					new ThermalLoadInitializerByPowerDrop(780, -100, 10, 2) // thermal
 			);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 1;
+			name = TR_NAME(Type.NONE, "Fuel Heat Furnace");
+
+			FuelHeatFurnaceDescriptor desc = new FuelHeatFurnaceDescriptor(name,
+				obj.getObj("FuelHeater"), 1000);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
