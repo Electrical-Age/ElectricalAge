@@ -7,6 +7,7 @@ import mods.eln.misc.INBTTReady;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.misc.MnaConst;
@@ -51,10 +52,9 @@ public class GridLink implements INBTTReady {
 
     public static GridElement getElementFromCoordinate(Coordonate coord) {
         if (coord == null) return null;
-        NodeBase base = NodeManager.instance.getNodeFromCoordonate(coord);
-        TransparentNode node = (TransparentNode) base;
-        if (node != null && node.element instanceof GridElement) {
-            return (GridElement) node.element;
+        TransparentNodeElement element = NodeManager.instance.getTransparentNodeFromCoordinate(coord);
+        if (element instanceof GridElement) {
+            return (GridElement)element;
         } else {
             return null;
         }
