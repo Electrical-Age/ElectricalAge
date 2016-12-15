@@ -88,29 +88,6 @@ public class LightBlockEntity extends TileEntity {
 		Utils.println("Assert void replaceLight(int oldLight, int newLight)");
 	}*/
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-		int idx = 0;
-		for(LightHandle l : lightList) {
-			l.writeToNBT(nbt, "light" + idx);
-			idx++;
-		}
-		nbt.setInteger("lightNbr", lightList.size());
-	}
-	
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		int size = nbt.getInteger("lightNbr");
-		for (int idx = 0; idx < size; idx++){
-			LightHandle l = new LightHandle();
-			l.readFromNBT(nbt, "light" + idx);
-			lightList.add(l);
-			idx++;
-		}
-	}
-	
 	/*
 	int getLight() {
 		int light = 0;
