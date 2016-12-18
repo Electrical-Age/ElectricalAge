@@ -661,7 +661,7 @@ public class Eln {
 		{
 			subId = 5;
 			ElectricalPoleDescriptor descriptor =
-					new ElectricalPoleDescriptor("Utility Pole w/Transformer", obj.getObj("UtilityPole"), "textures/wire.png", highVoltageCableDescriptor, true);
+					new ElectricalPoleDescriptor("Utility Pole w/DC-DC Converter", obj.getObj("UtilityPole"), "textures/wire.png", highVoltageCableDescriptor, true);
 			GhostGroup g = new GhostGroup();
 			g.addElement(0, 1, 0);
 			g.addElement(0, 2, 0);
@@ -5697,7 +5697,7 @@ public class Eln {
 					Character.valueOf('I'), "ingotIron"
 			);
 		}
-		addRecipe(findItemStack("Utility Pole w/Transformer"),
+		addRecipe(findItemStack("Utility Pole w/DC-DC Converter"),
 				"HHH",
 				" TC",
 				" PH",
