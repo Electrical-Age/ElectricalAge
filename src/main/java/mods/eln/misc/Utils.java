@@ -792,8 +792,7 @@ public class Utils {
 	}
 
 	public static int getRedstoneLevelAround(Coordonate coord, Direction side) {
-		int level = 0;
-		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z));
+		int level = coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z);
 		if (level >= 15) return 15;
 
 		side = side.getInverse();
@@ -828,33 +827,6 @@ public class Utils {
 				if (level >= 15) return 15;
 				level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y - 1, coord.z, side.toSideValue()));
 		}
-
-		return level;
-	}
-
-	public static int getRedstoneLevelAround(World w, int x, int y, int z) {
-		int level = 0;
-		level = Math.max(level, w.getStrongestIndirectPower(x, y, z));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, w.getStrongestIndirectPower(x + 1, y, z));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, w.getStrongestIndirectPower(x, y + 1, z));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, w.getStrongestIndirectPower(x, y - 1, z));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, w.getStrongestIndirectPower(x, y, z + 1));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, w.getStrongestIndirectPower(x, y, z - 1));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, w.getStrongestIndirectPower(x, y, z));
-		if (level == 15)
-			return 15;
 
 		return level;
 	}
