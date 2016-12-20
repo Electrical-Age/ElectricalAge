@@ -592,6 +592,8 @@ public class Eln {
 		registerTransparentNodeMisc(65);
 		registerTurret(66);
 		registerFuelGenerator(67);
+		registerGridDevices(123);
+
 
 		//ITEM REGISTRATION
 		//Sub-UID must be unique in this section only.
@@ -618,7 +620,7 @@ public class Eln {
 		registerMiscItem(120);
 		registerElectricalTool(121);
 		registerPortableItem(122);
-		registerGridDevices(123);
+		registerFuelBurners(124);
 
 		// Register WIP items only on development runs!
 		if (isDevelopmentRun()) {
@@ -4807,6 +4809,15 @@ public class Eln {
 			);
 			sharedItemStackOne.addElement(subId + (id << 6), desc);
 		}
+	}
+
+	private void registerFuelBurners(int id) {
+		sharedItemStackOne.addElement(0 + (id << 6),
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Small Fuel Burner"), 2000));
+		sharedItemStackOne.addElement(1 + (id << 6),
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Medium Fuel Burner"), 5000));
+		sharedItemStackOne.addElement(2 + (id << 6),
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Big Fuel Burner"), 10000));
 	}
 
 	void registerMiscItem(int id) {
