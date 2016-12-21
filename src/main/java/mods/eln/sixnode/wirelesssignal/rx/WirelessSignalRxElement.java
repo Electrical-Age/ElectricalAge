@@ -1,6 +1,5 @@
 package mods.eln.sixnode.wirelesssignal.rx;
 
-import mcp.mobius.waila.api.SpecialChars;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -90,7 +89,7 @@ public class WirelessSignalRxElement extends SixNodeElement {
 	@Override
 	public Map<String, String> getWaila() {
 		Map<String, String> info = new HashMap<String, String>();
-		info.put(I18N.tr("Channel"), (connection ? SpecialChars.GREEN : SpecialChars.RED) + channel);
+		info.put(I18N.tr("Channel"), (connection ? "\u00A7a" : "\u00A7c") + channel);
 		info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
 		return info;
 	}
