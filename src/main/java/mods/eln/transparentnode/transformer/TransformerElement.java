@@ -1,6 +1,5 @@
 package mods.eln.transparentnode.transformer;
 
-import mcp.mobius.waila.api.SpecialChars;
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.item.FerromagneticCoreDescriptor;
@@ -350,8 +349,8 @@ public class TransformerElement extends TransparentNodeElement {
 			if(core != null){
 				info.put(I18N.tr("Core factor"), Utils.plotValue(core.cableMultiplicator));
 			}
-			info.put("Voltages", SpecialChars.GREEN + Utils.plotVolt("", primaryLoad.getU()) + " " +
-				SpecialChars.YELLOW + Utils.plotVolt("", secondaryLoad.getU()));
+			info.put("Voltages", "\u00A7a" + Utils.plotVolt("", primaryLoad.getU()) + " " +
+				"\u00A7e" + Utils.plotVolt("", secondaryLoad.getU()));
 		}
 		return info;
 	}
