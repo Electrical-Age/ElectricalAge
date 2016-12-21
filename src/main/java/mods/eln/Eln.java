@@ -4813,11 +4813,11 @@ public class Eln {
 
 	private void registerFuelBurners(int id) {
 		sharedItemStackOne.addElement(0 + (id << 6),
-			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Small Fuel Burner"), 2000));
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Small Fuel Burner"), 2000, 2));
 		sharedItemStackOne.addElement(1 + (id << 6),
-			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Medium Fuel Burner"), 5000));
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Medium Fuel Burner"), 5000, 1));
 		sharedItemStackOne.addElement(2 + (id << 6),
-			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Big Fuel Burner"), 10000));
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Big Fuel Burner"), 10000, 0));
 	}
 
 	void registerMiscItem(int id) {

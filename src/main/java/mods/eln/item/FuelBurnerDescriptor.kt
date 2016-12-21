@@ -6,7 +6,7 @@ import mods.eln.misc.VoltageLevelColor
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 
-class FuelBurnerDescriptor(name: String, val  producedHeatPower: Double) : GenericItemUsingDamageDescriptorUpgrade(name) {
+class FuelBurnerDescriptor(name: String, val  producedHeatPower: Double, val type: Int) : GenericItemUsingDamageDescriptorUpgrade(name) {
     init {
         voltageLevelColor = VoltageLevelColor.Neutral
     }
