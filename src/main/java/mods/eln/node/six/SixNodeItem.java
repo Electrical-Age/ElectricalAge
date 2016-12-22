@@ -124,11 +124,10 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
                 return false;
             }
 
-            GhostGroup ghostgroup = descriptor.getGhostGroup(direction, LRDU.Up);
-            if (ghostgroup != null)
-                ghostgroup.plot(coord, coord, descriptor.getGhostGroupUuid());
-
             if (block.getIfOtherBlockIsSolid(world, x, y, z, direction)) {
+                GhostGroup ghostgroup = descriptor.getGhostGroup(direction, LRDU.Up);
+                if (ghostgroup != null)
+                    ghostgroup.plot(coord, coord, descriptor.getGhostGroupUuid());
 
                 SixNode sixNode = new SixNode();
                 sixNode.onBlockPlacedBy(new Coordonate(x, y, z, world), direction, player, stack);

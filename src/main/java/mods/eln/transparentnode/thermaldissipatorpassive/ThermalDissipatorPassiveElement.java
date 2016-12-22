@@ -1,8 +1,8 @@
 package mods.eln.transparentnode.thermaldissipatorpassive;
 
 
-
 import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -112,9 +112,9 @@ public class ThermalDissipatorPassiveElement extends TransparentNodeElement{
 	@Override
 	public Map<String, String> getWaila() {
 		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
 		if(Eln.wailaEasyMode){
-			info.put("Temperature", Utils.plotCelsius("", thermalLoad.Tc));
-			info.put("Thermal Power", Utils.plotPower("", thermalLoad.getPower()));
+			info.put(I18N.tr("Thermal power"), Utils.plotPower("", thermalLoad.getPower()));
 		}
 		return info;
 	}

@@ -1,19 +1,16 @@
 package mods.eln.transparentnode.heatfurnace;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Map;
-
+import mods.eln.i18n.I18N;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodePeriodicPublishProcess;
-import mods.eln.node.transparent.*;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
@@ -26,6 +23,12 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /* 5s/item @ 500 C
  */
@@ -245,9 +248,8 @@ public class HeatFurnaceElement extends TransparentNodeElement {
 	@Override
 	public Map<String, String> getWaila(){
 		Map<String, String> info = new HashMap<String, String>();
-		DecimalFormat format = new DecimalFormat("#.#");
-		info.put("Temperature", Utils.plotCelsius("", thermalLoad.Tc));
-		info.put("Target Temp", Utils.plotCelsius("", regulator.getTarget()));
+		info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
+		info.put(I18N.tr("Set temperature"), Utils.plotCelsius("", regulator.getTarget()));
 		return info;
 	}
 }

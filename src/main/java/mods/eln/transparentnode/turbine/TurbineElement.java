@@ -1,16 +1,16 @@
 package mods.eln.transparentnode.turbine;
 
-import java.io.DataOutputStream;
-import java.util.HashMap;
-import java.util.Map;
-
 import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.transparent.*;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
@@ -23,6 +23,10 @@ import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+
+import java.io.DataOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TurbineElement extends TransparentNodeElement{
 
@@ -213,9 +217,12 @@ public class TurbineElement extends TransparentNodeElement{
 	@Override
 	public Map<String, String> getWaila(){
 		Map<String, String> info = new HashMap<String, String>();
-		info.put("Nominal \u0394T", (warmLoad.Tc - coolLoad.Tc == descriptor.nominalDeltaT ? "Yes" : "No"));
+		info.put(I18N.tr("Nominal") + " \u0394T",
+			(warmLoad.Tc - coolLoad.Tc == descriptor.nominalDeltaT ? I18N.tr("Yes") : I18N.tr("No")));
+		info.put(I18N.tr("Generated power"), Utils.plotPower("", electricalPowerSourceProcess.getP()));
 		if(Eln.wailaEasyMode){
 			info.put("\u0394T", Utils.plotCelsius("", warmLoad.Tc - coolLoad.Tc));
+			info.put(I18N.tr("Voltage"), Utils.plotVolt("", electricalPowerSourceProcess.getU()));
 		}
 		return info;
 	}

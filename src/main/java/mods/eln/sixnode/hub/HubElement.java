@@ -26,6 +26,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 public class HubElement extends SixNodeElement {
 
@@ -90,6 +91,11 @@ public class HubElement extends SixNodeElement {
 	public String multiMeterString() {
 		return "";// Utils.plotVolt("U:", electricalLoad.Uc) +
 					// Utils.plotAmpere("I:", electricalLoad.getCurrent());
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		return null;
 	}
 
 	@Override

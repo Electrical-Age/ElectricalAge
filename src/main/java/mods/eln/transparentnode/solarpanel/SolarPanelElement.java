@@ -1,12 +1,7 @@
 package mods.eln.transparentnode.solarpanel;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Map;
-
 import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -15,7 +10,6 @@ import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
-import mods.eln.node.transparent.*;
 import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
@@ -26,6 +20,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SolarPanelElement extends TransparentNodeElement{
 
@@ -204,10 +203,12 @@ public class SolarPanelElement extends TransparentNodeElement{
 	@Override
 	public Map<String, String> getWaila(){
 		Map<String, String> info = new HashMap<String, String>();
-		DecimalFormat format = new DecimalFormat("#.##");
-		info.put("Sun Angle", format.format(((slowProcess.getSolarAlpha()) * (180/Math.PI)) - 90) + "\u00B0");
-		info.put("Panel Angle", format.format((pannelAlpha * (180/Math.PI)) - 90) + "\u00B0");
-		info.put("Light", (slowProcess.getSolarLight() != 0 ? "Yes" : "No"));
+		info.put(I18N.tr("Sun angle"), Utils.plotValue(((slowProcess.getSolarAlpha()) * (180/Math.PI)) - 90, "\u00B0"));
+		info.put(I18N.tr("Panel angle"), Utils.plotValue((pannelAlpha * (180/Math.PI)) - 90, "\u00B0"));
+		info.put(I18N.tr("Producing energy"), (slowProcess.getSolarLight() != 0 ? "Yes" : "No"));
+		if (Eln.wailaEasyMode) {
+			info.put(I18N.tr("Produced power"), Utils.plotPower("", powerSource.getP()));
+		}
 		return info;
 	}
 	

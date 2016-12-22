@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalfiredetector;
 
+import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -18,6 +20,8 @@ import net.minecraft.inventory.IInventory;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -83,6 +87,19 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 		} else {
 			return Utils.plotVolt("U:", outputGate.getU()) + Utils.plotAmpere("I:", outputGate.getCurrent());
 		}
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.tr("Fire present"), firePresent ? I18N.tr("Yes") : I18N.tr("No"));
+		if (Eln.wailaEasyMode) {
+			info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
+		}
+		if (descriptor.batteryPowered) {
+			info.put(I18N.tr("Battery level"), Utils.plotPercent("", slowProcess.getBatteryLevel()));
+		}
+		return info;
 	}
 
 	@Override

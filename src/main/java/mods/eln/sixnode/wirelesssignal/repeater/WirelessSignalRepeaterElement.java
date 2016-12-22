@@ -10,10 +10,12 @@ import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+
+import javax.annotation.Nullable;
+import java.util.Map;
 
 public class WirelessSignalRepeaterElement extends SixNodeElement {
 
@@ -51,6 +53,12 @@ public class WirelessSignalRepeaterElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
+		return null;
+	}
+
+	@Nullable
+	@Override
+	public Map<String, String> getWaila() {
 		return null;
 	}
 

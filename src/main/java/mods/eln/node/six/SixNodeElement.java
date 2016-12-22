@@ -20,11 +20,14 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
+import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class SixNodeElement implements GhostObserver, IPlayer, Publishable {
 	//private static Class[] idToClass = new Class[256];
@@ -433,4 +436,10 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, Publisha
 		return true;
 	}
 
+	@Nullable
+	public Map<String, String> getWaila(){
+		Map<String, String> wailaList = new HashMap<String, String>();
+		wailaList.put("Info", multiMeterString());
+		return wailaList;
+	}
 }

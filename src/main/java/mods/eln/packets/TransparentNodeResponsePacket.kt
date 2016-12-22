@@ -9,7 +9,7 @@ import java.util.*
 /**
  * Created by Gregory Maddra on 2016-06-27.
  */
-class NodeReturnPacket : IMessage{
+open class TransparentNodeResponsePacket : IMessage{
 
     lateinit var map: Map<String, String>
     lateinit var coord: Coordonate

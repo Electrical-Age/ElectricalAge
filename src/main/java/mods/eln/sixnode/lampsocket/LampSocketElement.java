@@ -3,6 +3,7 @@ package mods.eln.sixnode.lampsocket;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.i18n.I18N;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Direction;
@@ -29,6 +30,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LampSocketElement extends SixNodeElement {
 
@@ -201,6 +204,29 @@ public class LampSocketElement extends SixNodeElement {
 	@Override
 	public String multiMeterString() {
 		return Utils.plotVolt("U:", positiveLoad.getU()) + Utils.plotAmpere("I:", lampResistor.getCurrent());
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.tr("Power consumption"), Utils.plotPower("", lampResistor.getI() * lampResistor.getU()));
+		if (lampDescriptor != null) {
+			info.put(I18N.tr("Bulb"), lampDescriptor.name);
+		} else {
+			info.put(I18N.tr("Bulb"), I18N.tr("None"));
+		}
+		if (Eln.wailaEasyMode) {
+			if (poweredByLampSupply) {
+				info.put(I18N.tr("Channel"), channel);
+			}
+			info.put(I18N.tr("Voltage"), Utils.plotVolt("", positiveLoad.getU()));
+			ItemStack lampStack = inventory.getStackInSlot(0);
+			if (lampStack != null) {
+				info.put(I18N.tr("Life"), Utils.plotValue(lampDescriptor.getLifeInTag(lampStack)));
+			}
+
+		}
+		return info;
 	}
 
 	@Override

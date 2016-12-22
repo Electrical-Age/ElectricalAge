@@ -1,14 +1,6 @@
 package mods.eln.transparentnode.teleporter;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -33,6 +25,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TeleporterElement extends TransparentNodeElement implements ITeleporter {
 
@@ -631,11 +631,11 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 	@Override
 	public Map<String, String> getWaila(){
 		Map<String, String> info = new HashMap<String, String>();
-		DecimalFormat format = new DecimalFormat("#.##");
-		info.put("Destination", targetName);
-		info.put("Distance", format.format(getTeleportCoordonate().trueDistanceTo(getTarget(targetName).getTeleportCoordonate())) + "m");
-		info.put("Power required", format.format(energyTarget) + "J");
-		info.put("Charge rate", powerCharge + "W");
+		info.put(I18N.tr("Destination"), targetName);
+		info.put(I18N.tr("Distance"),
+			Utils.plotValue(getTeleportCoordonate().trueDistanceTo(getTarget(targetName).getTeleportCoordonate()), "m"));
+		info.put(I18N.tr("Required energy"), Utils.plotEnergy("", energyTarget));
+		info.put(I18N.tr("Charge power"), Utils.plotPower("", powerCharge));
 		return info;
 	}
 }

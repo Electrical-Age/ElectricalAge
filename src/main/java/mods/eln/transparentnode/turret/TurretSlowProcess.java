@@ -296,7 +296,7 @@ public class TurretSlowProcess extends StateMachine {
 					return new SeekingState();
 			
 			if (element.getGunPosition() == 1 && element.isTargetReached() &&
-                element.energyBuffer > element.getDescriptor().getProperties().impulseEnergy)
+                element.energyBuffer >= element.getDescriptor().getProperties().impulseEnergy)
                 return new ShootState(target);
 			
 			return this;
@@ -337,12 +337,18 @@ public class TurretSlowProcess extends StateMachine {
 	
 	@Override
 	public void process(double time) {
+		double MaximalEnergy = element.getDescriptor().getProperties().impulseEnergy;
 		element.energyBuffer += element.powerResistor.getP() * time;
-		
+		boolean full = element.energyBuffer > MaximalEnergy;
+
+		if (full) {
+			element.energyBuffer = MaximalEnergy;
+		}
+
 		if(element.coordonate().getBlockExist())
 			super.process(time);
 
-        if (actualPower == 0 )
+        if (actualPower == 0 || full)
             element.powerResistor.highImpedance();
         else
             element.powerResistor.setR(element.load.getU() * element.load.getU() / actualPower);

@@ -17,6 +17,16 @@ public class ElectricalWatchSlowProcess implements IProcess, INBTTReady {
 		this.element = element;
 	}
 
+	double getBatteryLevel() {
+		ItemStack batteryStack = element.inventory.getStackInSlot(ElectricalWatchContainer.batteryId);
+		BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack);
+		if (battery != null) {
+			return battery.getEnergy(batteryStack) / battery.getEnergyMax(batteryStack);
+		} else {
+			return 0;
+		}
+	}
+
 	@Override
 	public void process(double time) {
 		ItemStack batteryStack = element.inventory.getStackInSlot(ElectricalWatchContainer.batteryId);

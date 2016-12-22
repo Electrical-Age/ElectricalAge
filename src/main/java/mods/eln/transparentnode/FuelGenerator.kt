@@ -2,6 +2,7 @@ package mods.eln.transparentnode
 
 import mods.eln.Eln
 import mods.eln.cable.CableRenderType
+import mods.eln.i18n.I18N
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
@@ -26,7 +27,6 @@ import net.minecraftforge.fluids.FluidRegistry
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
-import java.text.DecimalFormat
 
 class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal val cable: ElectricalCableDescriptor,
                               internal val nominalPower: Double, internal val maxVoltage: Double,
@@ -221,13 +221,12 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
         nbt?.setBoolean("on", on)
     }
 
-    override fun getWaila(): Map<String,String>{
-        var info = mutableMapOf<String,String>()
-        val format = DecimalFormat("#.##")
-        info.put("Fuel level", Utils.plotPercent("", tankLevel))
-        info.put("Voltage", format.format(positiveLoad.u) + "v")
-        return info
-    }
+    override fun getWaila(): Map<String,String> = mutableMapOf(
+            Pair(I18N.tr("State"), if (on) I18N.tr("ON") else I18N.tr("OFF")),
+            Pair(I18N.tr("Fuel level"), Utils.plotPercent("", tankLevel)),
+            Pair(I18N.tr("Generated power"), Utils.plotPower("", powerSource.effectiveP)),
+            Pair(I18N.tr("Voltage"), Utils.plotVolt("", powerSource.u))
+    )
 }
 
 class FuelGeneratorRender(tileEntity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor):

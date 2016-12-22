@@ -1,6 +1,7 @@
 package mods.eln.sixnode.electricalgatesource;
 
 import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -21,6 +22,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ElectricalGateSourceElement extends SixNodeElement {
 
@@ -102,6 +105,13 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 	@Override
 	public String multiMeterString() {
 		return Utils.plotUIP(outputGate.getU(), outputGate.getCurrent());
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
+		return info;
 	}
 
 	@Override

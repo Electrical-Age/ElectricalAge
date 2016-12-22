@@ -1,6 +1,7 @@
 package mods.eln.sixnode.modbusrtu;
 
 import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -20,6 +21,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 
+import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -27,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
 
@@ -132,6 +135,19 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
 	@Override
 	public String multiMeterString() {
 		return null; // Utils.plotUIP(powerLoad.Uc, powerLoad.getCurrent());
+	}
+
+	@Nullable
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		if (Eln.modbusEnable) {
+			info.put(I18N.tr("Modbus TCP"), Eln.modbusServer.getHost() + ":" + Eln.modbusServer.getPort());
+			info.put(I18N.tr("Modbus Unit ID"), String.valueOf(station));
+		} else {
+			info.put("X_X", I18N.tr("Modbus is disabled, enable it in Eln.cfg"));
+		}
+		return info;
 	}
 
 	@Override

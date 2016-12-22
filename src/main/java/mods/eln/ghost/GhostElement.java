@@ -40,7 +40,7 @@ public class GhostElement implements INBTTReady {
 		GhostObserver observer = Eln.ghostManager.getObserver(observatorCoordonate);
 		if(observer != null) return observer.ghostBlockActivated(UUID, entityPlayer, side, vx, vy, vz);
 		return false;
-	}	 
+	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt, String str) {

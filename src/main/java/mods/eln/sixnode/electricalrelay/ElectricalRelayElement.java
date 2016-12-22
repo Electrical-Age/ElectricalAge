@@ -1,5 +1,7 @@
 package mods.eln.sixnode.electricalrelay;
 
+import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -23,6 +25,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ElectricalRelayElement extends SixNodeElement {
 
@@ -113,6 +117,18 @@ public class ElectricalRelayElement extends SixNodeElement {
 	@Override
 	public String multiMeterString() {
 		return Utils.plotVolt("Ua:", aLoad.getU()) + Utils.plotVolt("Ub:", bLoad.getU()) + Utils.plotAmpere("I:", aLoad.getCurrent());
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.tr("Position"), switchState ? I18N.tr("Closed") : I18N.tr("Open"));
+		info.put(I18N.tr("Current"), Utils.plotAmpere("", aLoad.getCurrent()));
+		if (Eln.wailaEasyMode) {
+			info.put(I18N.tr("Default position"), defaultOutput ? I18N.tr("Closed") : I18N.tr("Open"));
+			info.put(I18N.tr("Voltages"), Utils.plotVolt("", aLoad.getU()) + Utils.plotVolt(" ", bLoad.getU()));
+		}
+		return info;
 	}
 
 	@Override
