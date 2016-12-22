@@ -2,6 +2,7 @@ package mods.eln.sim.nbt;
 
 import mods.eln.Eln;
 import mods.eln.misc.INBTTReady;
+import mods.eln.misc.Utils;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.SubSystem;
 import mods.eln.sim.mna.component.Capacitor;
@@ -82,7 +83,13 @@ public class NbtElectricalGateOutputProcess extends Capacitor implements INBTTRe
 	public void setU(double U) {
 		this.U = U;
 	}
-	
+
+	public void setUSafe(double value) {
+		value = Utils.limit(value, 0, Eln.SVU);
+		if (Double.isNaN(value)) value = 0.0;
+		U = value;
+	}
+
 	public double getU() {
 		return U;
 	}

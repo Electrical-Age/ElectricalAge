@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.transformer;
 
 import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.item.FerromagneticCoreDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -30,7 +31,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -340,16 +340,17 @@ public class TransformerElement extends TransparentNodeElement {
 	@Override
 	public Map<String, String> getWaila(){
 		Map<String, String> info = new HashMap<String, String>();
-		DecimalFormat format = new DecimalFormat("#.##");
-		info.put("Ratio", format.format(Utils.readPrivateDouble(transformer, "ratio")));
-		FerromagneticCoreDescriptor core = (FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId));
-		if(core != null){
-			info.put("Core Factor", format.format(core.cableMultiplicator));
-		}
-		info.put("Isolated", isIsolator ? "Yes" : "No");
+		info.put(I18N.tr("Ratio"), Utils.plotValue(transformer.getRatio()));
+		info.put(I18N.tr("Isolated"), isIsolator ? I18N.tr("Yes") : I18N.tr("No"));
 		if(Eln.wailaEasyMode){
-			info.put("Voltage+", Utils.plotVolt("", primaryLoad.getU()));
-			info.put("Voltage-", Utils.plotVolt("", secondaryLoad.getU()));
+			FerromagneticCoreDescriptor core =
+				(FerromagneticCoreDescriptor) FerromagneticCoreDescriptor.getDescriptor(
+					inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId));
+			if(core != null){
+				info.put(I18N.tr("Core factor"), Utils.plotValue(core.cableMultiplicator));
+			}
+			info.put("Voltages", "\u00A7a" + Utils.plotVolt("", primaryLoad.getU()) + " " +
+				"\u00A7e" + Utils.plotVolt("", secondaryLoad.getU()));
 		}
 		return info;
 	}

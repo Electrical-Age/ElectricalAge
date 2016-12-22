@@ -1,5 +1,6 @@
 package mods.eln.sixnode.wirelesssignal.rx;
 
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -19,9 +20,12 @@ import mods.eln.sixnode.wirelesssignal.aggregator.ToogleAggregator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
+import javax.annotation.Nullable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class WirelessSignalRxElement extends SixNodeElement {
 
@@ -79,6 +83,15 @@ public class WirelessSignalRxElement extends SixNodeElement {
 	@Override
 	public String multiMeterString() {
 		return outputGate.plot("Output gate");
+	}
+
+	@Nullable
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.tr("Channel"), (connection ? "\u00A7a" : "\u00A7c") + channel);
+		info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
+		return info;
 	}
 
 	@Override

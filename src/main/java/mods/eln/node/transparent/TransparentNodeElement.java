@@ -49,6 +49,10 @@ public abstract class TransparentNodeElement implements  GhostObserver, IPlayer,
 	public static final byte unserializeNulldId = -128;
 	TransparentNodeDescriptor transparentNodeDescriptor;
 
+	public TransparentNodeDescriptor getDescriptor() {
+		return transparentNodeDescriptor;
+	}
+
 	protected void serialiseItemStack(DataOutputStream stream,ItemStack stack) throws IOException
 	{
 		Utils.serialiseItemStack(stream,stack);

@@ -1,6 +1,7 @@
 package mods.eln.sixnode.wirelesssignal.tx;
 
 import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -18,11 +19,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 
+import javax.annotation.Nullable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class WirelessSignalTxElement extends SixNodeElement implements IWirelessSignalTx {
     
@@ -117,6 +120,15 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
 	@Override
 	public String multiMeterString() {
 		return inputGate.plot("Input gate");
+	}
+
+	@Nullable
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.tr("Channel"), channel);
+		info.put(I18N.tr("Input voltage"), Utils.plotVolt("", inputGate.getU()));
+		return info;
 	}
 
 	@Override

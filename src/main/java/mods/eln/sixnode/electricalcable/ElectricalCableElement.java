@@ -1,6 +1,8 @@
 package mods.eln.sixnode.electricalcable;
 
+import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.i18n.I18N;
 import mods.eln.item.BrushDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -24,6 +26,8 @@ import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ElectricalCableElement extends SixNodeElement {
 
@@ -105,6 +109,23 @@ public class ElectricalCableElement extends SixNodeElement {
 			return Utils.plotUIP(electricalLoad.getU(), electricalLoad.getI());
 		else
 			return Utils.plotSignal(electricalLoad.getU(), electricalLoad.getI());
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String,String> info = new HashMap<String,String>();
+
+		if (descriptor.signalWire) {
+			info.put(I18N.tr("Signal Voltage"), Utils.plotVolt("", electricalLoad.getU()));
+		} else {
+			info.put(I18N.tr("Current"), Utils.plotAmpere("", electricalLoad.getI()));
+			info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.getT()));
+			if (Eln.wailaEasyMode) {
+				info.put(I18N.tr("Voltage"), Utils.plotVolt("", electricalLoad.getU()));
+			}
+		}
+
+		return info;
 	}
 
 	@Override

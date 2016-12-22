@@ -1,7 +1,6 @@
 package mods.eln.sim.mna.component;
 
 import mods.eln.sim.mna.SubSystem;
-import mods.eln.sim.mna.misc.ISubSystemProcessI;
 import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.mna.state.CurrentState;
 import mods.eln.sim.mna.state.State;
@@ -21,6 +20,9 @@ public class Transformer extends Bipole  {
         this.ratio = ratio;
     }
 
+    public double getRatio() {
+        return ratio;
+    }
 	
 	private double r = MnaConst.highImpedance, rInv = 1 / MnaConst.highImpedance;
 

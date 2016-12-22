@@ -1,23 +1,19 @@
 package mods.eln.transparentnode.electricalfurnace;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.util.*;
-
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamage;
+import mods.eln.i18n.I18N;
 import mods.eln.item.HeatingCorpElement;
 import mods.eln.item.regulator.IRegulatorDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
-import mods.eln.node.transparent.*;
-import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.ElectricalResistorHeatThermalLoad;
-import mods.eln.sim.RegulatorThermalLoadToElectricalResistor;
-import mods.eln.sim.ThermalLoad;
-import mods.eln.sim.ThermalResistor;
+import mods.eln.node.transparent.TransparentNode;
+import mods.eln.node.transparent.TransparentNodeDescriptor;
+import mods.eln.node.transparent.TransparentNodeElement;
+import mods.eln.node.transparent.TransparentNodeElementInventory;
+import mods.eln.sim.*;
 import mods.eln.sim.mna.component.ResistorSwitch;
 import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalLoad;
@@ -30,6 +26,11 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ElectricalFurnaceElement extends TransparentNodeElement {
 
@@ -263,9 +264,11 @@ public class ElectricalFurnaceElement extends TransparentNodeElement {
 	@Override
 	public Map<String, String> getWaila(){
 		Map<String, String> info = new HashMap<String, String>();
-		info.put("Temperature", Utils.plotCelsius("", thermalLoad.Tc));
+		info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
 		if(inventory.getStackInSlot(heatingCorpSlotId) != null) {
-			info.put("Heating Element", inventory.getStackInSlot(heatingCorpSlotId).getDisplayName());
+			info.put(I18N.tr("Heating element"), inventory.getStackInSlot(heatingCorpSlotId).getDisplayName());
+		} else {
+			info.put(I18N.tr("Heating element"), I18N.tr("None"));
 		}
 		return info;
 	}

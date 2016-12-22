@@ -165,6 +165,14 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
 
     override fun multiMeterString(): String? = Utils.plotAmpere("I:", Math.abs(aLoad.current))
 
+    override fun getWaila(): MutableMap<String, String> {
+        val infos = mutableMapOf(Pair(I18N.tr("Current"), Utils.plotAmpere("", Math.abs(aLoad.current))))
+        if (Eln.wailaEasyMode) {
+            infos[I18N.tr("Fuse temperature")] = Utils.plotCelsius("", thermalLoad.t)
+        }
+        return infos
+    }
+
     override fun thermoMeterString(): String? = Utils.plotCelsius("T:", thermalLoad.t)
 
     override fun networkSerialize(stream: DataOutputStream?) {

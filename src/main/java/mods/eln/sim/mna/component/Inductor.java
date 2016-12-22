@@ -30,9 +30,18 @@ public class Inductor extends Bipole implements ISubSystemProcessI, INBTTReady {
 		return currentState.state;
 	}
 
+	public double getL() {
+		return l;
+	}
+
 	public void setL(double l) {
 		this.l = l;
 		dirty();
+	}
+
+	public double getE() {
+		final double i = getCurrent();
+		return i * i * l / 2;
 	}
 
 	@Override

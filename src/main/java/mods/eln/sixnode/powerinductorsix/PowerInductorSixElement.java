@@ -1,5 +1,7 @@
 package mods.eln.sixnode.powerinductorsix;
 
+import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -16,6 +18,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
+
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PowerInductorSixElement extends SixNodeElement {
 
@@ -61,6 +67,19 @@ public class PowerInductorSixElement extends SixNodeElement {
 	@Override
 	public String multiMeterString() {
 		return Utils.plotVolt("U", Math.abs(inductor.getU())) + Utils.plotAmpere("I", inductor.getCurrent());
+	}
+
+	@Nullable
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.tr("Inductance"), Utils.plotValue(inductor.getL(), "H"));
+		info.put(I18N.tr("Charge"), Utils.plotEnergy("", inductor.getE()));
+		if (Eln.wailaEasyMode) {
+			info.put(I18N.tr("Voltage drop"), Utils.plotVolt("", Math.abs(inductor.getU())));
+			info.put(I18N.tr("Current"), Utils.plotAmpere("", Math.abs(inductor.getCurrent())));
+		}
+		return info;
 	}
 
 	@Override

@@ -10,7 +10,6 @@ import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
-import mods.eln.packets.*;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
@@ -24,6 +23,7 @@ import mods.eln.ghost.GhostBlock;
 import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
+import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
 import mods.eln.i18n.I18N;
 import mods.eln.item.*;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
@@ -45,6 +45,7 @@ import mods.eln.node.transparent.*;
 import mods.eln.ore.OreBlock;
 import mods.eln.ore.OreDescriptor;
 import mods.eln.ore.OreItem;
+import mods.eln.packets.*;
 import mods.eln.server.*;
 import mods.eln.signalinductor.SignalInductorDescriptor;
 import mods.eln.sim.Simulator;
@@ -63,7 +64,7 @@ import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherDescriptor.O
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherEntity;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import mods.eln.simplenode.test.TestBlock;
-import mods.eln.sixnode.ElectricalFuseHolderDescriptor;
+import mods.eln.sixnode.*;
 import mods.eln.sixnode.TreeResinCollector.TreeResinCollectorDescriptor;
 import mods.eln.sixnode.batterycharger.BatteryChargerDescriptor;
 import mods.eln.sixnode.diode.DiodeDescriptor;
@@ -160,6 +161,7 @@ import net.minecraft.item.ItemArmor.ArmorMaterial;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LogWrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.WorldServer;
@@ -249,6 +251,8 @@ public class Eln {
 	public double electricalFrequency, thermalFrequency;
 	public int electricalInterSystemOverSampling;
 
+	public CopperCableDescriptor copperCableDescriptor;
+
 	public ElectricalCableDescriptor veryHighVoltageCableDescriptor;
 	public ElectricalCableDescriptor highVoltageCableDescriptor;
 	public ElectricalCableDescriptor signalCableDescriptor;
@@ -304,9 +308,12 @@ public class Eln {
 		elnNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("electrical-age");
 		elnNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
 		elnNetwork.registerMessage(TransparentNodeRequestPacketHandler.class, TransparentNodeRequestPacket.class, 1, Side.SERVER);
-		elnNetwork.registerMessage(NodeReturnPacketHandler.class, NodeReturnPacket.class, 2, Side.CLIENT);
+		elnNetwork.registerMessage(TransparentNodeResponsePacketHandler.class, TransparentNodeResponsePacket.class, 2, Side.CLIENT);
+		elnNetwork.registerMessage(GhostNodeWailaRequestPacketHandler.class, GhostNodeWailaRequestPacket.class, 3, Side.SERVER);
+		elnNetwork.registerMessage(GhostNodeWailaResponsePacketHandler.class, GhostNodeWailaResponsePacket.class, 4, Side.CLIENT);
+		elnNetwork.registerMessage(SixNodeWailaRequestPacketHandler.class, SixNodeWailaRequestPacket.class, 5, Side.SERVER);
+		elnNetwork.registerMessage(SixNodeWailaResponsePacketHandler.class, SixNodeWailaResponsePacket.class, 6, Side.CLIENT);
 
-		
 		ModContainer container = FMLCommonHandler.instance().findContainerFor(this);
 		// LanguageRegistry.instance().loadLanguagesFor(container, Side.CLIENT);
 
@@ -376,7 +383,7 @@ public class Eln {
 		windTurbinePowerFactor = config.get("balancing", "windTurbinePowerFactor", 1).getDouble(1);
 		waterTurbinePowerFactor = config.get("balancing", "waterTurbinePowerFactor", 1).getDouble(1);
 		fuelGeneratorPowerFactor = config.get("balancing", "fuelGeneratorPowerFactor", 1).getDouble(1);
-		autominerRange = config.get("balancing", "autominerRange", 10, "Maximum horizontal distance from autominer that will be mined").getInt(10);
+		autominerRange = config.get("balancing", "autominerRange", 10, "Maximum horizontal distance from autominer that will be mined. Modpack devs: Consider increasing this for larger packs.").getInt(10);
 
 		Other.ElnToIc2ConversionRatio = config.get("balancing", "ElnToIndustrialCraftConversionRatio", 1.0 / 3.0).getDouble(1.0 / 3.0);
 		Other.ElnToOcConversionRatio = config.get("balancing", "ElnToOpenComputerConversionRatio", 1.0 / 3.0 / 2.5).getDouble(1.0 / 3.0 / 2.5);
@@ -560,6 +567,7 @@ public class Eln {
 		registerTreeResinCollector(116);
 		registerSixNodeMisc(117);
 		registerLogicalGates(118);
+		registerAnalogChips(124);
 
 		//TRANSPARENT NODE REGISTRATION
 		//Sub-UID must be unique in this section only.
@@ -609,11 +617,62 @@ public class Eln {
 		registerMiscItem(120);
 		registerElectricalTool(121);
 		registerPortableItem(122);
+		registerGridDevices(123);
 
 		// Register WIP items only on development runs!
 		if (isDevelopmentRun()) {
 			registerWipItems();
 		}
+	}
+
+	private void registerGridDevices(int id) {
+		int subId;
+		{
+			subId = 2;
+//			DownlinkDescriptor descriptor =
+//					new DownlinkDescriptor("Downlink", obj.getObj("DownLink"), "textures/wire.png", highVoltageCableDescriptor);
+//			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+		}
+		{
+			subId = 3;
+//			GridTransformerDescriptor descriptor =
+//					new GridTransformerDescriptor("Grid Transformer", obj.getObj("Transformer"), "textures/wire.png", highVoltageCableDescriptor);
+//			GhostGroup g = new GhostGroup();
+//			g.addElement(1, 0, 0);
+//			g.addElement(0, 0, -1);
+//			g.addElement(1, 0, -1);
+//			g.addElement(1, 1, 0);
+//			g.addElement(0, 1, 0);
+//			g.addElement(1, 1, -1);
+//			g.addElement(0, 1, -1);
+//			descriptor.setGhostGroup(g);
+//			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+		}
+		{
+			subId = 4;
+			ElectricalPoleDescriptor descriptor =
+					new ElectricalPoleDescriptor("Utility Pole", obj.getObj("UtilityPole"), "textures/wire.png", highVoltageCableDescriptor, false);
+			GhostGroup g = new GhostGroup();
+			g.addElement(0, 1, 0);
+			g.addElement(0, 2, 0);
+			g.addElement(0, 3, 0);
+			//g.addRectangle(-1, 1, 3, 4, -1, 1);
+			descriptor.setGhostGroup(g);
+			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+		}
+		{
+			subId = 5;
+			ElectricalPoleDescriptor descriptor =
+					new ElectricalPoleDescriptor("Utility Pole w/Transformer", obj.getObj("UtilityPole"), "textures/wire.png", highVoltageCableDescriptor, true);
+			GhostGroup g = new GhostGroup();
+			g.addElement(0, 1, 0);
+			g.addElement(0, 2, 0);
+			g.addElement(0, 3, 0);
+			//g.addRectangle(-1, 1, 3, 4, -1, 1);
+			descriptor.setGhostGroup(g);
+			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+		}
+
 	}
 
 	public static FMLEventChannel eventChannel;
@@ -630,10 +689,18 @@ public class Eln {
 		if (Other.ccLoaded) {
 			PeripheralHandler.register();
 		}
+		recipeMaceratorModOres();
 	}
 
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
+		HashSet<String> oreNames = new HashSet<String>();
+		{
+			final String[] names = OreDictionary.getOreNames();
+			for (String name : names) {
+				oreNames.add(name);
+			}
+		}
 
 		//
 		registerReplicator();
@@ -722,6 +789,8 @@ public class Eln {
 		recipemagnetiser();
 
 		recipeECoal();
+
+		recipeGridDevices(oreNames);
 
 		proxy.registerRenderers();
 
@@ -1973,7 +2042,11 @@ public class Eln {
 
 					);
 
-			sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			if (modbusEnable) {
+				sixNodeItem.addDescriptor(subId + (id << 6), desc);
+			} else {
+				sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
+			}
 		}
 
 		{
@@ -2542,6 +2615,37 @@ public class Eln {
 
 		sixNodeItem.addDescriptor(11 + (id << 6),
 			new LogicGateDescriptor(TR_NAME(Type.NONE, "JK Flip Flop Chip"), model, "JKFF", JKFlipFlop.class));
+	}
+
+	private void registerAnalogChips(int id) {
+		id <<= 6;
+
+		Obj3D model = obj.getObj("AnalogChips");
+		sixNodeItem.addDescriptor(id + 0,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "OpAmp"), model, "OP", OpAmp.class));
+
+		sixNodeItem.addDescriptor(id + 1, new AnalogChipDescriptor(TR_NAME(Type.NONE, "PID Regulator"), model, "PID",
+				PIDRegulator.class, PIDRegulatorElement.class, PIDRegulatorRender.class));
+
+		sixNodeItem.addDescriptor(id + 2,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage controlled sawtooth oscillator"), model, "VCO-SAW",
+				VoltageControlledSawtoothOscillator.class));
+
+		sixNodeItem.addDescriptor(id + 3,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage controlled sine oscillator"), model, "VCO-SIN",
+				VoltageControlledSineOscillator.class));
+
+		sixNodeItem.addDescriptor(id + 4,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Amplifier"), model, "AMP",
+				Amplifier.class, AmplifierElement.class, AmplifierRender.class));
+
+		sixNodeItem.addDescriptor(id + 5,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Voltage controlled amplifier"), model, "VCA",
+				VoltageControlledAmplifier.class));
+
+		sixNodeItem.addDescriptor(id + 6,
+			new AnalogChipDescriptor(TR_NAME(Type.NONE, "Configurable summing unit"), model, "SUM",
+				SummingUnit.class, SummingUnitElement.class, SummingUnitRender.class));
 	}
 
 	void registerTransformer(int id) {
@@ -4501,14 +4605,13 @@ public class Eln {
 		String name;
 
 		{
-			CopperCableDescriptor descriptor;
 			subId = 0;
 			completId = subId + (id << 6);
 			name = TR_NAME(Type.NONE, "Copper Cable");
 
-			descriptor = new CopperCableDescriptor(name);
-			sharedItem.addElement(completId, descriptor);
-			Data.addResource(descriptor.newItemStack());
+			copperCableDescriptor = new CopperCableDescriptor(name);
+			sharedItem.addElement(completId, copperCableDescriptor);
+			Data.addResource(copperCableDescriptor.newItemStack());
 		}
 		{
 			GenericItemUsingDamageDescriptor descriptor;
@@ -5573,6 +5676,65 @@ public class Eln {
 
 	}
 
+	void recipeGridDevices(HashSet<String> oreNames) {
+		int poleRecipes = 0;
+		for (String oreName : new String[] {
+				"ingotAluminum",
+				"ingotAluminium",
+				"ingotSteel",
+		}) {
+			if (oreNames.contains(oreName)) {
+				addRecipe(findItemStack("Utility Pole"),
+						"WWW",
+						"IWI",
+						" W ",
+						Character.valueOf('W'), "logWood",
+						Character.valueOf('I'), oreName
+				);
+				poleRecipes++;
+			}
+		}
+		if (poleRecipes == 0) {
+			// Really?
+			addRecipe(findItemStack("Utility Pole"),
+					"WWW",
+					"IWI",
+					" W ",
+					Character.valueOf('W'), "logWood",
+					Character.valueOf('I'), "ingotIron"
+			);
+		}
+		addRecipe(findItemStack("Utility Pole w/Transformer"),
+				"HHH",
+				" TC",
+				" PH",
+				Character.valueOf('P'), findItemStack("Utility Pole"),
+				Character.valueOf('H'), findItemStack("High Voltage Cable"),
+				Character.valueOf('C'), findItemStack("Optimal Ferromagnetic Core"),
+				Character.valueOf('T'), findItemStack("Transformer")
+		);
+//		if (oreNames.contains("sheetPlastic")) {
+//			addRecipe(findItemStack("Downlink"),
+//					"H H",
+//					"PMP",
+//					"PPP",
+//					Character.valueOf('P'), "sheetPlastic",
+//					Character.valueOf('M'), findItemStack("Machine Block"),
+//					Character.valueOf('H'), findItemStack("High Voltage Cable")
+//			);
+//		} else {
+//			addRecipe(findItemStack("Downlink"),
+//					"H H",
+//					"PMP",
+//					"PPP",
+//					Character.valueOf('P'), "itemRubber",
+//					Character.valueOf('M'), findItemStack("Machine Block"),
+//					Character.valueOf('H'), findItemStack("High Voltage Cable")
+//			);
+//		}
+	}
+
+
 	void recipeElectricalFurnace() {
 
 		addRecipe(findItemStack("Electrical Furnace"),
@@ -6404,6 +6566,43 @@ public class Eln {
 
 		maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.dirt),
 				new ItemStack[] { new ItemStack(Blocks.sand) }, 1.0 * f));
+	}
+
+	private void recipeMaceratorModOres() {
+		float f = 4000;
+
+		// AE2:
+		recipeMaceratorModOre(f * 3f, "oreCertusQuartz", "dustCertusQuartz", 3);
+		recipeMaceratorModOre(f * 1.5f, "crystalCertusQuartz", "dustCertusQuartz", 1);
+		recipeMaceratorModOre(f * 3f, "oreNetherQuartz", "dustNetherQuartz", 3);
+		recipeMaceratorModOre(f * 1.5f, "crystalNetherQuartz", "dustNetherQuartz", 1);
+		recipeMaceratorModOre(f * 1.5f, "crystalFluix", "dustFluix", 1);
+	}
+
+	private void recipeMaceratorModOre(float f, String inputName, String outputName, int outputCount) {
+		if (!OreDictionary.doesOreNameExist(inputName)) {
+			LogWrapper.info("No entries for oredict: " + inputName);
+			return;
+		}
+		if (!OreDictionary.doesOreNameExist(outputName)) {
+			LogWrapper.info("No entries for oredict: " + outputName);
+			return;
+		}
+		ArrayList<ItemStack> inOres = OreDictionary.getOres(inputName);
+		ArrayList<ItemStack> outOres = OreDictionary.getOres(outputName);
+		if (inOres.size() == 0) {
+			LogWrapper.info("No ores in oredict entry: " + inputName);
+		}
+		if (outOres.size() == 0) {
+			LogWrapper.info("No ores in oredict entry: " + outputName);
+			return;
+		}
+		ItemStack output = outOres.get(0).copy();
+		output.stackSize = outputCount;
+		LogWrapper.info("Adding mod recipe from " + inputName + " to " + outputName);
+		for (ItemStack input : inOres) {
+			maceratorRecipes.addRecipe(new Recipe(input, output, f));
+		}
 	}
 
 	void recipePlateMachine() {

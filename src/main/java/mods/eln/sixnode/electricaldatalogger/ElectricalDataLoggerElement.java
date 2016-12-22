@@ -1,5 +1,6 @@
 package mods.eln.sixnode.electricaldatalogger;
 
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -21,6 +22,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ElectricalDataLoggerElement extends SixNodeElement {
 
@@ -105,7 +108,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 	}
 
 	@Override
-	public ElectricalLoad getElectricalLoad(LRDU lrdu) {	
+	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
 		if (front.inverse() == lrdu) return inputGate;
 		return null;
 	}
@@ -124,6 +127,13 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
 	@Override
 	public String multiMeterString() {
 		return inputGate.plot("In: ");
+	}
+
+	@Override
+	public Map<String, String> getWaila() {
+		Map<String, String> info = new HashMap<String, String>();
+		info.put(I18N.tr("Input"), Utils.plotVolt("", inputGate.getU()));
+		return info;
 	}
 
 	@Override

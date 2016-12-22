@@ -3,6 +3,7 @@ package mods.eln.transparentnode
 import mods.eln.gui.GuiContainerEln
 import mods.eln.gui.GuiHelperContainer
 import mods.eln.gui.HelperStdContainer
+import mods.eln.i18n.I18N
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.misc.series.SerieEE
@@ -175,11 +176,11 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
     override fun newContainer(side: Direction?, player: EntityPlayer?) = ResistorContainer(player, inventory)
 
-    override fun getWaila(): Map<String, String> {
-        var info = mutableMapOf<String, String>()
-        info.put("Resistance", Utils.plotValue(resistor.r, "\u03A9"))
-        return info
-    }
+    override fun getWaila(): Map<String, String> = mutableMapOf(
+            Pair(I18N.tr("Resistance"), Utils.plotOhm("", resistor.r)),
+            Pair(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.t)),
+            Pair(I18N.tr("Power loss"), Utils.plotPower("", resistor.p))
+    )
 }
 
 class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) :
