@@ -19,7 +19,7 @@ public class ThermalSensorGui extends GuiContainerEln {
     ThermalSensorRender render;
     
 	public ThermalSensorGui(EntityPlayer player, IInventory inventory,ThermalSensorRender render) {
-		super(new ThermalSensorContainer(player, inventory));
+		super(new ThermalSensorContainer(player, inventory, render.descriptor.temperatureOnly));
 		this.render = render;
 	}
 
