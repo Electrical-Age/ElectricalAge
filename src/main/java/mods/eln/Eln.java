@@ -2690,7 +2690,7 @@ public class Eln {
 			name = TR_NAME(Type.NONE, "Fuel Heat Furnace");
 
 			FuelHeatFurnaceDescriptor desc = new FuelHeatFurnaceDescriptor(name,
-				obj.getObj("FuelHeater"), 1000);
+				obj.getObj("FuelHeater"), new ThermalLoadInitializerByPowerDrop(780, -100, 10, 2));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 

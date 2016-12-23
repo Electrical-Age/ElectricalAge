@@ -226,7 +226,7 @@ public class HeatFurnaceElement extends TransparentNodeElement {
 			regulator.applyTo(this.regulator, 500.0, 10.0, 0.1, 0.1);
 		//	furnace.regulator.target = 240;
 		} else {
-			regulator.setManuel();
+			regulator.setManual();
 		}	
 	}
 	
