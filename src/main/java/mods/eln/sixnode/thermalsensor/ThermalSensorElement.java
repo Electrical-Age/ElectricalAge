@@ -258,6 +258,6 @@ public class ThermalSensorElement extends SixNodeElement {
 
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		return new ThermalSensorContainer(player, inventory);
+		return new ThermalSensorContainer(player, inventory, descriptor.temperatureOnly);
 	}
 }
