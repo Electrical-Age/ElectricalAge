@@ -8,7 +8,7 @@ class Synchronizable<T>(initialValue: T) {
             return field
         }
         set(newValue) {
-            pending = newValue != value
-            value = newValue
+            pending = newValue != field
+            field = newValue
         }
 }
