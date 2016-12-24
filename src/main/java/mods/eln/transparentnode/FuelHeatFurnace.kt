@@ -1,6 +1,8 @@
 package mods.eln.transparentnode
 
 import mods.eln.Eln
+import mods.eln.fluid.PreciseElementFluidHandler
+import mods.eln.fluid.FuelRegistry
 import mods.eln.generic.GenericItemUsingDamage
 import mods.eln.generic.GenericItemUsingDamageSlot
 import mods.eln.gui.*
@@ -92,7 +94,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     private val thermalLoad = NbtThermalLoad("thermalLoad")
     private val controlLoad = NbtElectricalGateInput("commandLoad")
 
-    private val tank = TransparentNodeElementFluidHandler(200)
+    private val tank = PreciseElementFluidHandler(1000)
 
     private val inventory_ = TransparentNodeElementInventory(2, 1, this)
 
@@ -121,6 +123,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             }
             super.process(time)
 
+
             // TODO: Actually consume fuel.
             furnaceProcess.combustibleEnergy = 80000.0
         }
@@ -138,7 +141,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         slowProcessList.add(NodePeriodicPublishProcess(transparentNode, 2.0, 1.0))
         slowProcessList.add(thermalWatchdog)
 
-        tank.setFilter(fluidListToFluids(dieselList + gasolineList))
+        tank.setFilter(FuelRegistry.fluidListToFluids(FuelRegistry.gasolineList + FuelRegistry.dieselList))
 
         thermalWatchdog.set(thermalLoad).setLimit((descriptor as FuelHeatFurnaceDescriptor).thermal)
                 .set(WorldExplosion(this).machineExplosion())
