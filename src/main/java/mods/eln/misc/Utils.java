@@ -302,7 +302,7 @@ public class Utils {
 	public static String plotOhm(String header, double value) {
 		if (!header.equals(""))
 			header += " ";
-		return header + plotValue(value, "ohm  ");
+		return header + plotValue(value, "Ω  ");
 	}
 
 	public static String plotUIP(double U, double I) {
