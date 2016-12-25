@@ -199,21 +199,20 @@ public class BatteryDescriptor extends TransparentNodeDescriptor  {
 	@Override
 	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
 		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add(tr("Nominal voltage: %1$V", Utils.plotValue(electricalU)));
-		list.add(tr("Nominal power: %1$W", Utils.plotValue(electricalStdP)));
-		list.add(tr("Energy capacity: %1$J", Utils.plotValue(electricalStdDischargeTime * electricalStdP / 1000)));
-		list.add(tr("Internal resistance: %1$Ω", Utils.plotValue(electricalRs * 2)));
-		//list.add("Capacity : " + Utils.plotValue((electricalQ), "As"));
+		list.add(Utils.plotVolt(tr("Nominal voltage: "), electricalU));
+		list.add(Utils.plotPower(tr("Nominal power: "), electricalStdP));
+		list.add(Utils.plotEnergy(tr("Energy capacity: "), electricalStdDischargeTime * electricalStdP));
+		list.add(Utils.plotOhm(tr("Internal resistance: "), electricalRs * 2));
 		list.add("");
-		list.add(tr("Actual charge: %1$%", Utils.plotValue(getChargeInTag(itemStack) * 100)));
+		list.add(Utils.plotPercent(tr("Actual charge: "), getChargeInTag(itemStack)));
 	   	
 	   	if(lifeEnable)
-	   		list.add("Life : " + (int)(getLifeInTag(itemStack) * 100) + "%");
+	   		list.add(Utils.plotPercent(tr("Life : "), getLifeInTag(itemStack)));
 	}
 
 	@Override
 	public String getName(ItemStack stack) {
-		return super.getName(stack) + tr(" charged at %1$%", (int)(getChargeInTag(stack) * 100));
+		return super.getName(stack) + Utils.plotPercent(tr(" charged at "), getChargeInTag(stack));
 	}
 	
 	double getChargeInTag(ItemStack stack) {
