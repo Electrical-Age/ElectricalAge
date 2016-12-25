@@ -1,8 +1,8 @@
 package mods.eln.transparentnode
 
 import mods.eln.Eln
-import mods.eln.fluid.PreciseElementFluidHandler
 import mods.eln.fluid.FuelRegistry
+import mods.eln.fluid.PreciseElementFluidHandler
 import mods.eln.generic.GenericItemUsingDamage
 import mods.eln.generic.GenericItemUsingDamageSlot
 import mods.eln.gui.*
@@ -35,7 +35,8 @@ import java.io.DataOutputStream
 import java.util.*
 
 class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: ThermalLoadInitializerByPowerDrop) :
-        TransparentNodeDescriptor(name, FuelHeatFurnaceElement::class.java, FuelHeatFurnaceRender::class.java) {
+        TransparentNodeDescriptor(name, FuelHeatFurnaceElement::class.java, FuelHeatFurnaceRender::class.java,
+                EntityMetaTag.Fluid) {
     private val main = model.getPart("Main")
     private val burners = arrayOf(model.getPart("BurnerA"), model.getPart("BurnerB"), model.getPart("BurnerC"))
     private val powerLED = model.getPart("PowerLED")
