@@ -5538,23 +5538,43 @@ public class Eln {
 				Character.valueOf('E'), findItemStack("Medium Voltage Cable"),
 				Character.valueOf('H'), findItemStack("Copper Thermal Cable"),
 				Character.valueOf('m'), findItemStack("Advanced Electrical Motor"));
-		addRecipe(findItemStack("Generator"),
-				"mmm",
-				"ama",
-				" ME",
-				Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
-				Character.valueOf('M'), findItemStack("Advanced Machine Block"),
-				Character.valueOf('a'), "ingotAluminum",
-				Character.valueOf('E'), findItemStack("High Voltage Cable")
-		);
-		addRecipe(findItemStack("Steam Turbine"),
-				" a ",
-				"aAa",
-				" M ",
-				Character.valueOf('a'), "ingotAluminum",
-				Character.valueOf('A'), "blockAluminum",
-				Character.valueOf('M'), findItemStack("Advanced Machine Block")
-		);
+		if (OreDictionary.doesOreNameExist("ingotAluminum") && OreDictionary.doesOreNameExist("blockAluminum")) {
+			addRecipe(findItemStack("Generator"),
+					"mmm",
+					"ama",
+					" ME",
+					Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
+					Character.valueOf('M'), findItemStack("Advanced Machine Block"),
+					Character.valueOf('a'), "ingotAluminum",
+					Character.valueOf('E'), findItemStack("High Voltage Cable")
+			);
+			addRecipe(findItemStack("Steam Turbine"),
+					" a ",
+					"aAa",
+					" M ",
+					Character.valueOf('a'), "ingotAluminum",
+					Character.valueOf('A'), "blockAluminum",
+					Character.valueOf('M'), findItemStack("Advanced Machine Block")
+			);
+		} else {
+			addRecipe(findItemStack("Generator"),
+					"mmm",
+					"ama",
+					" ME",
+					Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
+					Character.valueOf('M'), findItemStack("Advanced Machine Block"),
+					Character.valueOf('a'), "ingotIron",
+					Character.valueOf('E'), findItemStack("High Voltage Cable")
+			);
+			addRecipe(findItemStack("Steam Turbine"),
+					" a ",
+					"aAa",
+					" M ",
+					Character.valueOf('a'), "ingotIron",
+					Character.valueOf('A'), "blockIron",
+					Character.valueOf('M'), findItemStack("Advanced Machine Block")
+			);
+		}
 		// TODO(Baughn): Factor this into a builder.
 		if (OreDictionary.doesOreNameExist("ingotSteel") && OreDictionary.doesOreNameExist("blockSteel")) {
 			addRecipe(findItemStack("Gas Turbine"),
