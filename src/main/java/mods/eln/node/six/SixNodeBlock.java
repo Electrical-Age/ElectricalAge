@@ -1,8 +1,7 @@
 package mods.eln.node.six;
 
-import java.util.List;
-import java.util.Random;
-
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
@@ -27,8 +26,9 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+
+import java.util.List;
+import java.util.Random;
 
 public class SixNodeBlock extends NodeBlock {
 	// public static ArrayList<Integer> repertoriedItemStackId = new ArrayList<Integer>();
@@ -40,9 +40,20 @@ public class SixNodeBlock extends NodeBlock {
 		// setBlockTextureName("eln:air");
 	}
 
-	
-	
-	
+
+	@Override
+	public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z, EntityPlayer player) {
+		SixNodeEntity entity = (SixNodeEntity) world.getTileEntity(x, y, z);
+		if (entity != null) {
+			SixNodeElementRender render = entity.elementRenderList[Direction.fromIntMinecraftSide(target.sideHit).getInt()];
+			if (render != null) {
+				return render.sixNodeDescriptor.newItemStack();
+			}
+		}
+
+		return super.getPickBlock(target, world, x, y, z, player);
+	}
+
 	@Override
 	public void registerBlockIcons(IIconRegister r)
 	{
