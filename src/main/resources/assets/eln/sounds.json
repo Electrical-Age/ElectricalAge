@@ -24,7 +24,8 @@
    "FuelGenerator": {"category": "block", "sounds": [{"name": "FuelGenerator", "stream": false}]},
    "FireAlarm": {"category": "block", "sounds": [{"name": "FireAlarm", "stream": false}]},
    "fuelheatfurnace": {"category": "block", "sounds": [{"name": "fuelheatfurnace", "stream": false}]},
-   "generator": {"category": "block","sounds": [{"name": "generator","stream": false}]}
+   "generator": {"category": "block","sounds": [{"name": "generator","stream": false}]},
+   "turbine": {"category": "block","sounds": [{"name": "turbine","stream": false}]}
 }
 
 
