@@ -20,6 +20,8 @@ import mods.eln.sim.process.destruct.ThermalLoadWatchDog
 import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
+import mods.eln.sound.SoundCommand
+import mods.eln.sound.SoundLooper
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import org.lwjgl.opengl.GL11
@@ -47,6 +49,7 @@ class GeneratorDescriptor(
     val nominalP = nominalP
     val nominalU = nominalU
     val generationEfficiency = 0.95
+    val sound = SoundCommand("eln:generator")
 
     init {
         thermalLoadInitializer.setMaximalPower(nominalP.toDouble() * (1 - generationEfficiency))
@@ -154,7 +157,7 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
     internal val inputToPositiveResistor = Resistor(inputLoad, positiveLoad)
     internal val electricalPowerSource = VoltageSource("PowerSource", positiveLoad, null)
     internal val electricalProcess = GeneratorElectricalProcess()
-    internal val shaftProcess = GeneratorShaftProcess()
+    internal val shaftProcess = GeneratorShaftProcess(this)
 
     internal val thermal = NbtThermalLoad("thermal")
     internal val heater: ElectricalLoadHeatThermalLoad
@@ -180,7 +183,6 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
         heater = ElectricalLoadHeatThermalLoad(inputLoad, thermal)
         thermalFastProcessList.add(heater)
 
-        // TODO: Add whine. Sound's good.
         // TODO: Add running lights. (More. Electrical sparks, perhaps?)
         // TODO: Add the thermal explosions—there should be some.
     }
@@ -211,9 +213,22 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
         }
     }
 
-    inner class GeneratorShaftProcess: IProcess {
+    inner class GeneratorShaftProcess(generatorElement: GeneratorElement) : IProcess {
+        private var powerFraction = 0.0f
+
+        val soundLooper = object : SoundLooper(generatorElement) {
+            override fun mustStart(): SoundCommand? {
+                val pitch = shaft.rads / absoluteMaximumShaftSpeed
+                if (pitch < 0.05) return null;
+                return desc.sound.copy().mulVolume(Math.abs(powerFraction) + 0.05f, pitch.toFloat())
+            }
+        }
+
         override fun process(time: Double) {
-            var E = electricalPowerSource.getP() * time
+            val p = electricalPowerSource.p
+            powerFraction = (p / desc.nominalP).toFloat()
+            soundLooper.process(time)
+            var E = p * time
             if (E < 0)
                 E *= 0.75  // Not a very efficient motor.
             maybePublishE(E / time)
