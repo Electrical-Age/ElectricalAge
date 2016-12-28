@@ -11,6 +11,8 @@ import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeEntity
 import mods.eln.sim.IProcess
 import mods.eln.sim.nbt.NbtElectricalGateInput
+import mods.eln.sound.SoundCommand
+import mods.eln.sound.SoundLooper
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
@@ -38,6 +40,8 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
     // If efficiency is below this fraction, do nothing.
     open val efficiencyCutoff = 0f
     val optimalRads = absoluteMaximumShaftSpeed * 0.8f
+    // Each turbine gets its own sound.
+    abstract val sound: SoundCommand
 
     override val obj = obj
     override val static = arrayOf(
@@ -74,6 +78,7 @@ class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
     override val fluidTypes = arrayOf("steam")
     // Steam turbines can, just barely, be started without power.
     override val efficiencyCurve = 1.1f
+    override val sound = SoundCommand("eln:turbine").mulVolume(1f, 0.5f)
 }
 
 class GasTurbineDescriptor(basename: String, obj: Obj3D) :
@@ -97,6 +102,7 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
     override val efficiencyCurve = 2.0f
     // But need to be spun up before working.
     override val efficiencyCutoff = 0.5f
+    override val sound = SoundCommand("eln:turbine")
 }
 
 class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) :
@@ -106,12 +112,23 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
     val tank = ElementFluidHandler(1000)
     var steamRate = 0f
     var efficiency = 0f
-    val turbineSlowProcess = TurbineSlowProcess()
+    val turbineSlowProcess = TurbineSlowProcess(this)
 
     internal val throttle = NbtElectricalGateInput("throttle")
 
-    inner class TurbineSlowProcess: IProcess, INBTTReady {
+    inner class TurbineSlowProcess(turbineElement: TurbineElement) : IProcess, INBTTReady {
         val rc = RcInterpolator(desc.inertia)
+
+        val soundLooper = object : SoundLooper(turbineElement) {
+            override fun mustStart(): SoundCommand? {
+                val pitch = shaft.rads / absoluteMaximumShaftSpeed
+                if (pitch < 0.05) return null
+                return desc.sound.copy().mulVolume(
+                        rc.get() / desc.fluidConsumption,
+                        pitch.toFloat()
+                )
+            }
+        }
 
         // Fixup for only being able to grab 1 mB at a time.
         // This represents fluid that was drained in a previous tick, but not used.
