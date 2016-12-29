@@ -143,8 +143,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		double speedUp = Math.pow(descriptor.boosterSpeedUp, boosterCount);
 		slowRefreshProcess.setEfficiency(Math.pow(descriptor.boosterEfficiency, boosterCount));
 		slowRefreshProcess.setSpeedUp(speedUp);
-		slowRefreshProcess.smeltInit();
-		
+
 		//descriptor.applyTo(thermalLoad);
 		descriptor.applyTo(electricalLoad);
 		descriptor.applyTo(slowRefreshProcess);
