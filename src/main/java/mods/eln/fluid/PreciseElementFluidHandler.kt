@@ -24,4 +24,12 @@ class PreciseElementFluidHandler(tankSize: Int) : ElementFluidHandler(tankSize) 
         fixup = Math.max(0.0, available - demand)
         return actual
     }
+
+    fun drainEnergy(energy: Double) : Double {
+        val heatValue = FuelRegistry.heatEnergyPerMilliBucket(tank.fluid?.getFluid())
+        return if (heatValue > 0)
+            heatValue * drain(energy / heatValue)
+        else
+            0.0
+    }
 }
