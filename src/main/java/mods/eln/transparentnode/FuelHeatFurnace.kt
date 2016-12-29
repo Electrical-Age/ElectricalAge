@@ -15,10 +15,9 @@ import mods.eln.item.regulator.RegulatorSlot
 import mods.eln.misc.*
 import mods.eln.node.*
 import mods.eln.node.transparent.*
-import mods.eln.sim.RegulatorFurnaceProcess
+import mods.eln.sim.RegulatorProcess
 import mods.eln.sim.ThermalLoadInitializerByPowerDrop
 import mods.eln.sim.nbt.NbtElectricalGateInput
-import mods.eln.sim.nbt.NbtFurnaceProcess
 import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog
 import mods.eln.sim.process.destruct.WorldExplosion
@@ -95,7 +94,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     private val thermalLoad = NbtThermalLoad("thermalLoad")
     private val controlLoad = NbtElectricalGateInput("commandLoad")
 
-    private val tank = PreciseElementFluidHandler(1000)
+    private val tank = PreciseElementFluidHandler(25)
 
     private val inventory_ = TransparentNodeElementInventory(2, 1, this)
 
@@ -105,11 +104,13 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     private var manualControl by published(0.0)
     private var setTemperature by published(0.0)
 
-    private val furnaceProcess = NbtFurnaceProcess("furnace", thermalLoad)
-    private val controlProcess = object : RegulatorFurnaceProcess("controller", furnaceProcess) {
+    private var heaterControlValue = 0.0
+    private var actualHeatPower = 0.0
+
+    private val controlProcess = object : RegulatorProcess("controller") {
         override fun process(time: Double) {
             val burnerItemStack = inventory.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot)
-            furnaceProcess.nominalPower = if (mainSwitch)
+            val nominalPower = if (mainSwitch)
                 ((burnerItemStack?.item as? GenericItemUsingDamage<*>)?.getDescriptor(burnerItemStack) as? FuelBurnerDescriptor)?.producedHeatPower ?: 0.0
             else
                 0.0
@@ -124,20 +125,22 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
             }
             super.process(time)
 
+            val availableEnergy = tank.drainEnergy(heaterControlValue * nominalPower * time)
+            actualHeatPower = availableEnergy / time
+            thermalLoad.PcTemp += actualHeatPower
+        }
 
-            // TODO: Actually consume fuel.
-            furnaceProcess.combustibleEnergy = 80000.0
+        override fun getHit() = thermalLoad.Tc
+        override fun setCmd(cmd: Double) {
+            heaterControlValue = cmd
         }
     }
 
     private val thermalWatchdog = ThermalLoadWatchDog()
 
     init {
-        furnaceProcess.setGainMin(0.0)
-
         thermalLoadList.add(thermalLoad)
-        thermalFastProcessList.add(furnaceProcess)
-        slowProcessList.add(controlProcess)
+        thermalFastProcessList.add(controlProcess)
         electricalLoadList.add(controlLoad)
         slowProcessList.add(NodePeriodicPublishProcess(transparentNode, 2.0, 1.0))
         slowProcessList.add(thermalWatchdog)
@@ -174,7 +177,6 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
 
     override fun initialize() {
         (descriptor as FuelHeatFurnaceDescriptor).thermal.applyTo(thermalLoad)
-        furnaceProcess.nominalCombustibleEnergy = 80000.0   // TODO: This should depend on the actual used fuel
         inventoryChange(inventory_)
         connect()
     }
@@ -185,9 +187,9 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         super.networkSerialize(stream)
         stream.writeBoolean(externalControlled)
         stream.writeBoolean(mainSwitch)
-        stream.writeFloat(furnaceProcess.gain.toFloat())
+        stream.writeFloat(heaterControlValue.toFloat())
         stream.writeFloat(setTemperature.toFloat())
-        stream.writeFloat(furnaceProcess.p.toFloat())
+        stream.writeFloat(actualHeatPower.toFloat())
         stream.writeFloat(thermalLoad.Tc.toFloat())
 
     }
@@ -216,8 +218,10 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         tank.writeToNBT(nbt, "tank")
         nbt.setBoolean("externalControlled", externalControlled)
         nbt.setBoolean("mainSwitch", mainSwitch)
+        nbt.setDouble("heaterControlValue", heaterControlValue)
         nbt.setDouble("manualControl", manualControl)
         nbt.setDouble("setTemperature", setTemperature)
+        nbt.setDouble("actualHeatPower", actualHeatPower)
     }
 
     override fun readFromNBT(nbt: NBTTagCompound) {
@@ -225,8 +229,10 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         tank.readFromNBT(nbt, "tank")
         externalControlled = nbt.getBoolean("externalControlled")
         mainSwitch = nbt.getBoolean("mainSwitch")
+        heaterControlValue = nbt.getDouble("heaterControlValue")
         manualControl = nbt.getDouble("manualControl")
         setTemperature = nbt.getDouble("setTemperature")
+        actualHeatPower = nbt.getDouble("actualHeatPower")
     }
 
     override fun hasGui() = true
@@ -321,7 +327,7 @@ class FuelHeatFurnaceGui(player: EntityPlayer, val inventory: IInventory, val re
 
         manualControl = newGuiVerticalTrackBar(144, 8, 20, 69)
         manualControl.setStepIdMax((0.9f / 0.01f).toInt())
-        manualControl.setRange(0.1f, 1f)
+        manualControl.setRange(0f, 1f)
         manualControl.value = render.manualControl.value
 
         setTemperature = newGuiVerticalTrackBarHeat(116, 8, 20, 69)
