@@ -303,7 +303,7 @@ public class Eln {
 
 	public static boolean wailaEasyMode = false;
 
-	public static double fuelHeatValueFactor = 0.00001;	// TODO: Usable default!
+	public static double fuelHeatValueFactor = 0.0000675;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -446,7 +446,7 @@ public class Eln {
 
 		wailaEasyMode = config.get("balancing", "wailaEasyMode", false, "Display more detailed WAILA info on some machines").getBoolean(false);
 
-		fuelHeatValueFactor = config.get("balancing", "fuelHeatValueFactor", 0.0001,
+		fuelHeatValueFactor = config.get("balancing", "fuelHeatValueFactor", 0.0000675,
 			"Factor to apply when converting real word heat values to Minecraft heat values (1mB = 1l).").getDouble();
 
 		config.save();
