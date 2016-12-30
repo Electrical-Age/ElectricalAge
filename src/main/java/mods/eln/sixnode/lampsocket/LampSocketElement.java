@@ -1,7 +1,6 @@
 package mods.eln.sixnode.lampsocket;
 
 import mods.eln.Eln;
-import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
 import mods.eln.item.BrushDescriptor;
@@ -13,7 +12,7 @@ import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
-import mods.eln.node.six.SixNodeElementInventory;
+import mods.eln.node.six.SixNodeElementInventoryWithAutoInsertion;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.MonsterPopFreeProcess;
 import mods.eln.sim.ThermalLoad;
@@ -46,7 +45,8 @@ public class LampSocketElement extends SixNodeElement {
     boolean poweredByLampSupply = true;
     boolean grounded = true;
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
+    SixNodeElementInventoryWithAutoInsertion inventory = (new SixNodeElementInventoryWithAutoInsertion(2, 64, this))
+		.accept(0, LampDescriptor.class).accept(1, ElectricalCableDescriptor.class);
 
     LampDescriptor lampDescriptor = null;
     public String channel = lastSocketName;
@@ -302,26 +302,11 @@ public class LampSocketElement extends SixNodeElement {
 						needPublish(); //Sync
 					}
 					return true;
-				} else if (itemDescriptor instanceof LampDescriptor && inventory.getStackInSlot(0) == null) {
-					currentItemStack.stackSize -= 1;
-					inventory.setInventorySlotContents(0, itemDescriptor.newItemStack());
-					needPublish();
-					return true;
-				}
-			} else {
-				GenericItemBlockUsingDamageDescriptor blockDescriptor = GenericItemBlockUsingDamageDescriptor.getDescriptor(currentItemStack);
-				if (blockDescriptor != null) {
-					if (blockDescriptor instanceof ElectricalCableDescriptor && inventory.getStackInSlot(1) == null) {
-						currentItemStack.stackSize -= 1;
-						inventory.setInventorySlotContents(1, blockDescriptor.newItemStack());
-						reconnect();
-						return true;
-					}
 				}
 			}
 		}
 
-		return false;
+		return inventory.take(entityPlayer.getCurrentEquippedItem());
 	}
 
 	public int getLightValue() {
