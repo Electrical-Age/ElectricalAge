@@ -46,7 +46,8 @@ public class LampSocketElement extends SixNodeElement {
     boolean grounded = true;
 
     SixNodeElementInventoryWithAutoInsertion inventory = (new SixNodeElementInventoryWithAutoInsertion(2, 64, this))
-		.accept(0, LampDescriptor.class).accept(1, ElectricalCableDescriptor.class);
+		.acceptIfEmpty(0, LampDescriptor.class)
+		.acceptIfEmpty(1, ElectricalCableDescriptor.class);
 
     LampDescriptor lampDescriptor = null;
     public String channel = lastSocketName;
