@@ -92,15 +92,29 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
     private val bLoad = NbtElectricalLoad("bLoad")
     private val fuseResistor = Resistor(aLoad, bLoad)
     private val thermalLoad = NbtThermalLoad("thermalLoad")
-    private val fuseMelting = ResistorHeatThermalLoad(fuseResistor, thermalLoad)
+    private val fuseMelting = object : ResistorHeatThermalLoad(fuseResistor, thermalLoad) {
+        var graceTime = 0.0
+
+        override fun process(time: Double) {
+            if (graceTime <= 0) super.process(time)
+            else graceTime -= time
+        }
+    }
     private var thermalWatchdog = ThermalLoadWatchDog()
 
     var installedFuse: ElectricalFuseDescriptor? = null
         set(value) {
             if (value == field) return
             field = value
-            thermalLoad.Tc = 0.0
+            with (thermalLoad) {
+                Tc = 0.0
+                PcTemp = 0.0
+                Pc = 0.0
+                Prs = 0.0
+                Psp = 0.0
+            }
             thermalWatchdog.reset()
+            fuseMelting.graceTime = 0.25
             refreshSwitchResistor()
             needPublish()
         }
