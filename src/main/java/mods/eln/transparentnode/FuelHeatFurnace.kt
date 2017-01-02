@@ -22,12 +22,16 @@ import mods.eln.sim.nbt.NbtThermalLoad
 import mods.eln.sim.process.destruct.ThermalLoadWatchDog
 import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.wiki.Data
+import net.minecraft.client.Minecraft
+import net.minecraft.client.audio.ISound
+import net.minecraft.client.audio.ITickableSound
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.IInventory
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.util.ResourceLocation
 import net.minecraftforge.client.IItemRenderer
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -272,7 +276,56 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
     var setTemperature = Synchronizable(0f)
 
     var heatPower = 0f
+        set(value) {
+            val changed = field != value
+
+            field = value
+
+            if (changed) {
+                val sm = Minecraft.getMinecraft().soundHandler
+                if (value > 0) {
+                    if (!sm.isSoundPlaying(sound))
+                        sm.playSound(sound)
+                } else {
+                    if (sm.isSoundPlaying(sound))
+                        sm.stopSound(sound)
+                }
+            }
+        }
     var actualTemperature = 0f
+
+    val sound = object : ITickableSound {
+        override fun getPitch() = 0.5f + heatPower / 20000f
+
+        override fun getXPosF() = tileEntity.xCoord.toFloat()
+        override fun getYPosF() = tileEntity.yCoord.toFloat()
+        override fun getZPosF() = tileEntity.zCoord.toFloat()
+
+        override fun getPositionedSoundLocation() = ResourceLocation("eln:fuelheatfurnace")
+
+        override fun getVolume() = 0.5f
+
+        override fun getRepeatDelay() = 0
+
+        override fun getAttenuationType() = ISound.AttenuationType.LINEAR
+
+        override fun canRepeat() = true
+
+        override fun isDonePlaying(): Boolean {
+            return false
+        }
+
+        override fun update() {
+            val toto = 5
+        }
+    }
+
+    override fun destructor() {
+        val sm = Minecraft.getMinecraft().soundHandler
+
+        if (sm.isSoundPlaying(sound))
+            sm.stopSound(sound)
+    }
 
     override fun draw() {
         front.glRotateXnRef()

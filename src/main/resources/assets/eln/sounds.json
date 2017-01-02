@@ -22,7 +22,8 @@
    "TurretDeactivated": {"category": "block", "sounds": [{"name": "TurretDeactivated", "stream": false}]},
    "TurretFire": {"category": "block", "sounds": [{"name": "TurretFire", "stream": false}]},
    "FuelGenerator": {"category": "block", "sounds": [{"name": "FuelGenerator", "stream": false}]},
-   "FireAlarm": {"category": "block", "sounds": [{"name": "FireAlarm", "stream": false}]}
+   "FireAlarm": {"category": "block", "sounds": [{"name": "FireAlarm", "stream": false}]},
+   "fuelheatfurnace": {"category": "block", "sounds": [{"name": "fuelheatfurnace", "stream": false}]}
 }
 
 
