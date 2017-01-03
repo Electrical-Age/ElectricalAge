@@ -8,6 +8,7 @@ import mods.eln.misc.*;
 import mods.eln.sound.LoopedSound;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -266,13 +267,17 @@ public abstract class TransparentNodeElementRender {
 	protected void addLoopedSound(final LoopedSound loopedSound) {
 		if (!loopedSoundList.contains(loopedSound)) {
 			loopedSoundList.add(loopedSound);
-			Minecraft.getMinecraft().getSoundHandler().playSound(loopedSound);
+			SoundHandler sh = Minecraft.getMinecraft().getSoundHandler();
+			if (!sh.isSoundPlaying(loopedSound))
+				sh.playSound(loopedSound);
 		}
 	}
 
 	protected void removeLoopedSound(final LoopedSound loopedSound) {
 		if (loopedSoundList.contains(loopedSound)) {
-			Minecraft.getMinecraft().getSoundHandler().stopSound(loopedSound);
+			SoundHandler sh = Minecraft.getMinecraft().getSoundHandler();
+			if (sh.isSoundPlaying(loopedSound))
+				sh.stopSound(loopedSound);
 			loopedSoundList.remove(loopedSound);
 		}
 	}
@@ -282,8 +287,11 @@ public abstract class TransparentNodeElementRender {
 		if(usedUuid())
 			ClientProxy.uuidManager.kill(uuid);
 
-		for (LoopedSound loopedSound: loopedSoundList)
-			Minecraft.getMinecraft().getSoundHandler().stopSound(loopedSound);
+		for (LoopedSound loopedSound: loopedSoundList) {
+			SoundHandler sh = Minecraft.getMinecraft().getSoundHandler();
+			if (sh.isSoundPlaying(loopedSound))
+				sh.stopSound(loopedSound);
+		}
 	}
 
 	public void refresh(float deltaT) {
