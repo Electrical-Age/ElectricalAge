@@ -1,35 +1,25 @@
 package mods.eln.node.transparent;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import org.lwjgl.opengl.GL11;
-import org.omg.CORBA.REBIND;
-
-
-import mods.eln.Eln;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
 import mods.eln.client.ClientProxy;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.LRDUMask;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
+import mods.eln.misc.*;
+import mods.eln.sound.LoopedSound;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
+import org.lwjgl.opengl.GL11;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class TransparentNodeElementRender {
 	public TransparentNodeEntity tileEntity;
@@ -272,11 +262,30 @@ public abstract class TransparentNodeElementRender {
 		s.play();
 	}
 
+	private final List<LoopedSound> loopedSoundList = new ArrayList<LoopedSound>();
+	protected void addLoopedSound(final LoopedSound loopedSound) {
+		if (!loopedSoundList.contains(loopedSound)) {
+			loopedSoundList.add(loopedSound);
+			Minecraft.getMinecraft().getSoundHandler().playSound(loopedSound);
+		}
+	}
+
+	protected void removeLoopedSound(final LoopedSound loopedSound) {
+		if (loopedSoundList.contains(loopedSound)) {
+			Minecraft.getMinecraft().getSoundHandler().stopSound(loopedSound);
+			loopedSoundList.remove(loopedSound);
+		}
+	}
+
 	public void destructor()
 	{
 		if(usedUuid())
 			ClientProxy.uuidManager.kill(uuid);
+
+		for (LoopedSound loopedSound: loopedSoundList)
+			Minecraft.getMinecraft().getSoundHandler().stopSound(loopedSound);
 	}
+
 	public void refresh(float deltaT) {
 		
 		
