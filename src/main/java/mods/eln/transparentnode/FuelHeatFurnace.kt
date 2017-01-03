@@ -3,7 +3,6 @@ package mods.eln.transparentnode
 import mods.eln.Eln
 import mods.eln.fluid.FuelRegistry
 import mods.eln.fluid.PreciseElementFluidHandler
-import mods.eln.generic.GenericItemUsingDamage
 import mods.eln.generic.GenericItemUsingDamageSlot
 import mods.eln.gui.*
 import mods.eln.gui.ISlotSkin.SlotSkin
@@ -110,9 +109,8 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
 
     private val controlProcess = object : RegulatorProcess("controller") {
         override fun process(time: Double) {
-            val burnerItemStack = inventory.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot)
             val nominalPower = if (mainSwitch)
-                ((burnerItemStack?.item as? GenericItemUsingDamage<*>)?.getDescriptor(burnerItemStack) as? FuelBurnerDescriptor)?.producedHeatPower ?: 0.0
+                FuelBurnerDescriptor.getDescriptor(inventory.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot))?.producedHeatPower ?: 0.0
             else
                 0.0
 
@@ -133,7 +131,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
 
         override fun getHit() = thermalLoad.Tc
         override fun setCmd(cmd: Double) {
-            heaterControlValue = cmd
+            heaterControlValue = Math.max(0.0, cmd)
         }
     }
 
@@ -172,7 +170,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
 
     override fun getFluidHandler() = tank
 
-    override fun multiMeterString(side: Direction?) = "" // TODO...
+    override fun multiMeterString(side: Direction?) = Utils.plotPower("P:", thermalLoad.power)
 
     override fun thermoMeterString(side: Direction)=  Utils.plotCelsius("T:", thermalLoad.Tc)
 
@@ -192,7 +190,6 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         stream.writeFloat(setTemperature.toFloat())
         stream.writeFloat(actualHeatPower.toFloat())
         stream.writeFloat(thermalLoad.Tc.toFloat())
-
     }
 
     override fun networkUnserialize(stream: DataInputStream): Byte {
@@ -241,7 +238,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     override fun getWaila(): MutableMap<String, String> {
         val info = HashMap<String, String>()
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc))
-        // TODO info.put(I18N.tr("Set temperature"), Utils.plotCelsius("", regulator.getTarget()))
+        info.put(I18N.tr("Power"), Utils.plotPower("", thermalLoad.power))
         return info
     }
 
@@ -275,7 +272,6 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
     var heatPower = 0f
         set(value) {
             val changed = field != value
-
             field = value
 
             if (changed) {
@@ -289,16 +285,15 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
     var actualTemperature = 0f
 
     val sound = object : LoopedSound("eln:fuelheatfurnace", coordonate()) {
-        override fun getPitch() = 0.5f + heatPower / 20000f
-        override fun getVolume() = 0.5f
+        override fun getPitch() = FuelBurnerDescriptor.getDescriptor(inventory.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot))?.soundPitch ?: 1f
+        override fun getVolume() = 0.01f + 0.0001f * heatPower
     }
 
     override fun draw() {
         front.glRotateXnRef()
 
-        val burnerItemStack = inventory.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot)
         (transparentNodedescriptor as FuelHeatFurnaceDescriptor).draw(
-                ((burnerItemStack?.item as? GenericItemUsingDamage<*>)?.getDescriptor(burnerItemStack) as? FuelBurnerDescriptor)?.type,
+                FuelBurnerDescriptor.getDescriptor(inventory.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot))?.type,
                 mainSwitch, heatPower != 0f)
     }
 
@@ -313,6 +308,8 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
         heatPower = stream.readFloat()
         actualTemperature = stream.readFloat()
     }
+
+    override fun getInventory() = inventory
 }
 
 class FuelHeatFurnaceContainer(val base: NodeBase?, player: EntityPlayer, inventory: IInventory) :
