@@ -110,7 +110,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     private val controlProcess = object : RegulatorProcess("controller") {
         override fun process(time: Double) {
             val nominalPower = if (mainSwitch)
-                FuelBurnerDescriptor.getDescriptor(inventory.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot))?.producedHeatPower ?: 0.0
+                FuelBurnerDescriptor.getDescriptor(inventory_.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot))?.producedHeatPower ?: 0.0
             else
                 0.0
 
@@ -190,6 +190,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         stream.writeFloat(setTemperature.toFloat())
         stream.writeFloat(actualHeatPower.toFloat())
         stream.writeFloat(thermalLoad.Tc.toFloat())
+        stream.writeInt(FuelBurnerDescriptor.getDescriptor(inventory_.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot))?.type ?: -1)
     }
 
     override fun networkUnserialize(stream: DataInputStream): Byte {
@@ -263,6 +264,7 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
         TransparentNodeElementRender(tileEntity, descriptor) {
     private val inventory = TransparentNodeElementInventory(2, 1, this)
 
+    var type: Int? = null
     var externalControlled = false
     var mainSwitch = false
 
@@ -285,16 +287,13 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
     var actualTemperature = 0f
 
     val sound = object : LoopedSound("eln:fuelheatfurnace", coordonate()) {
-        override fun getPitch() = FuelBurnerDescriptor.getDescriptor(inventory.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot))?.soundPitch ?: 1f
+        override fun getPitch() = FuelBurnerDescriptor.pitchForType(type)
         override fun getVolume() = 0.01f + 0.0001f * heatPower
     }
 
     override fun draw() {
         front.glRotateXnRef()
-
-        (transparentNodedescriptor as FuelHeatFurnaceDescriptor).draw(
-                FuelBurnerDescriptor.getDescriptor(inventory.getStackInSlot(FuelHeatFurnaceContainer.FuelBurnerSlot))?.type,
-                mainSwitch, heatPower != 0f)
+        (transparentNodedescriptor as FuelHeatFurnaceDescriptor).draw(type, mainSwitch, heatPower != 0f)
     }
 
     override fun newGuiDraw(side: Direction?, player: EntityPlayer) = FuelHeatFurnaceGui(player, inventory, this)
@@ -307,6 +306,12 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
         setTemperature.value = stream.readFloat()
         heatPower = stream.readFloat()
         actualTemperature = stream.readFloat()
+        type = stream.readInt().let { type ->
+            when(type) {
+                -1 -> null
+                else -> type
+            }
+        }
     }
 
     override fun getInventory() = inventory
