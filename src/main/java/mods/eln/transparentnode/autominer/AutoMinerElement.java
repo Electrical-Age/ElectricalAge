@@ -1,6 +1,7 @@
 package mods.eln.transparentnode.autominer;
 
 import mods.eln.i18n.I18N;
+import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
@@ -34,7 +35,8 @@ public class AutoMinerElement extends TransparentNodeElement  {
 
 	AutoAcceptInventoryProxy accpetingInventory =
 		(new AutoAcceptInventoryProxy(new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this)))
-		.acceptIfIncrement(2, MiningPipeDescriptor.class);
+			.acceptIfIncrement(2, MiningPipeDescriptor.class)
+			.acceptIfEmpty(0, ElectricalDrillDescriptor.class);
 
 
 	NbtElectricalLoad inPowerLoad = new NbtElectricalLoad("inPowerLoad");
