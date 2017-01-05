@@ -35,7 +35,7 @@ public class AutoMinerElement extends TransparentNodeElement  {
 
 	AutoAcceptInventoryProxy accpetingInventory =
 		(new AutoAcceptInventoryProxy(new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this)))
-			.acceptIfIncrement(2, MiningPipeDescriptor.class)
+			.acceptIfIncrement(2, 64, MiningPipeDescriptor.class)
 			.acceptIfEmpty(0, ElectricalDrillDescriptor.class);
 
 

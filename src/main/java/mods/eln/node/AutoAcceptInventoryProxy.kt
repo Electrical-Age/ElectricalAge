@@ -6,26 +6,26 @@ import net.minecraft.inventory.IInventory
 import net.minecraft.item.ItemStack
 
 class AutoAcceptInventoryProxy(val inventory: IInventory) {
-    private abstract class ItemAcceptor(val index: Int, val acceptedItems: Array<out Class<out Any>> ) {
+    private abstract class ItemAcceptor(val index: Int) {
         abstract fun take(itemStack: ItemStack?, inventory: IInventory) : Boolean
     }
 
-    private open class ItemAcceptorIfEmpty(index: Int, acceptedItems: Array<out Class<out Any>>)
-        : ItemAcceptor(index, acceptedItems) {
+    private open class ItemAcceptorIfEmpty(index: Int, val acceptedItems: Array<out Class<out Any>>)
+        : ItemAcceptor(index) {
         override fun take(itemStack: ItemStack?, inventory: IInventory) : Boolean {
             if (inventory.getStackInSlot(index) == null) {
-                GenericItemUsingDamageDescriptor.getDescriptor(itemStack)?.let {
-                    if (acceptedItems.contains(it.javaClass)) {
+                GenericItemUsingDamageDescriptor.getDescriptor(itemStack)?.let { desc ->
+                    if (acceptedItems.any { it.isAssignableFrom(desc.javaClass) }) {
                         itemStack!!.stackSize -= 1
-                        inventory.setInventorySlotContents(index, it.newItemStack())
+                        inventory.setInventorySlotContents(index, desc.newItemStack())
                         return true
                     }
                 }
 
-                GenericItemBlockUsingDamageDescriptor.getDescriptor(itemStack)?.let {
-                    if (acceptedItems.contains(it.javaClass)) {
+                GenericItemBlockUsingDamageDescriptor.getDescriptor(itemStack)?.let { desc ->
+                    if (acceptedItems.any { it.isAssignableFrom(desc.javaClass) }) {
                         itemStack!!.stackSize -= 1
-                        inventory.setInventorySlotContents(index, it.newItemStack())
+                        inventory.setInventorySlotContents(index, desc.newItemStack())
                         return true
                     }
                 }
@@ -35,12 +35,14 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
         }
     }
 
-    private open class ItemAcceptorIfIncrement(index: Int, acceptedItems: Array<out Class<out Any>>)
+    private open class ItemAcceptorIfIncrement(index: Int, val maxItems: Int, acceptedItems: Array<out Class<out Any>>)
         : ItemAcceptorIfEmpty(index, acceptedItems) {
         override fun take(itemStack: ItemStack?, inventory: IInventory) : Boolean {
             if (super.take(itemStack, inventory)) return true
 
             val existingStack = inventory.getStackInSlot(index)
+            if (existingStack?.stackSize ?: 0 >= maxItems) return false
+
             val existingItemDescriptor = GenericItemUsingDamageDescriptor.getDescriptor(existingStack)
             val itemDescriptor = GenericItemUsingDamageDescriptor.getDescriptor(itemStack)
 
@@ -63,8 +65,8 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
         }
     }
 
-    private class ItemAcceptorAlways(index: Int, acceptedItems: Array<out Class<out Any>>)
-        : ItemAcceptorIfIncrement(index, acceptedItems) {
+    private class ItemAcceptorAlways(index: Int, maxItems: Int, acceptedItems: Array<out Class<out Any>>)
+        : ItemAcceptorIfIncrement(index, maxItems, acceptedItems) {
         override fun take(itemStack: ItemStack?, inventory: IInventory) : Boolean {
             if (super.take(itemStack, inventory)) return true
 
@@ -99,16 +101,16 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
         return this
     }
 
-    fun acceptIfIncrement(index: Int, vararg types: Class<out Any>) : AutoAcceptInventoryProxy {
+    fun acceptIfIncrement(index: Int, maxItems: Int, vararg types: Class<out Any>) : AutoAcceptInventoryProxy {
         if (index >= 0 && index < itemAcceptors.count()) {
-            itemAcceptors[index] = ItemAcceptorIfIncrement(index, types)
+            itemAcceptors[index] = ItemAcceptorIfIncrement(index, maxItems, types)
         }
         return this
     }
 
-    fun acceptAlways(index: Int, vararg types: Class<out Any>) : AutoAcceptInventoryProxy {
+    fun acceptAlways(index: Int, maxItems: Int, vararg types: Class<out Any>) : AutoAcceptInventoryProxy {
         if (index >= 0 && index < itemAcceptors.count()) {
-            itemAcceptors[index] = ItemAcceptorAlways(index, types)
+            itemAcceptors[index] = ItemAcceptorAlways(index, maxItems, types)
         }
         return this
     }
