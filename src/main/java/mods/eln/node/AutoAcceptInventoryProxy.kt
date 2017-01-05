@@ -1,13 +1,11 @@
-package mods.eln.node.six
+package mods.eln.node
 
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor
 import mods.eln.generic.GenericItemUsingDamageDescriptor
 import net.minecraft.inventory.IInventory
 import net.minecraft.item.ItemStack
 
-class SixNodeElementInventoryWithAutoInsertion(size: Int, stackLimit: Int, element: SixNodeElement) :
-        SixNodeElementInventory(size, stackLimit, element) {
-
+class AutoAcceptInventoryProxy(val inventory: IInventory) {
     private abstract class ItemAcceptor(val index: Int, val acceptedItems: Array<out Class<out Any>> ) {
         abstract fun take(itemStack: ItemStack?, inventory: IInventory) : Boolean
     }
@@ -92,28 +90,28 @@ class SixNodeElementInventoryWithAutoInsertion(size: Int, stackLimit: Int, eleme
         }
     }
 
-    private val itemAcceptors: Array<ItemAcceptor?> = arrayOfNulls(size)
+    private val itemAcceptors: Array<ItemAcceptor?> = arrayOfNulls(inventory.sizeInventory)
 
-    fun acceptIfEmpty(index: Int, vararg types: Class<out Any>) : SixNodeElementInventoryWithAutoInsertion {
+    fun acceptIfEmpty(index: Int, vararg types: Class<out Any>) : AutoAcceptInventoryProxy {
         if (index >= 0 && index < itemAcceptors.count()) {
             itemAcceptors[index] = ItemAcceptorIfEmpty(index, types)
         }
         return this
     }
 
-    fun acceptIfIncrement(index: Int, vararg types: Class<out Any>) : SixNodeElementInventoryWithAutoInsertion {
+    fun acceptIfIncrement(index: Int, vararg types: Class<out Any>) : AutoAcceptInventoryProxy {
         if (index >= 0 && index < itemAcceptors.count()) {
             itemAcceptors[index] = ItemAcceptorIfIncrement(index, types)
         }
         return this
     }
 
-    fun acceptAlways(index: Int, vararg types: Class<out Any>) : SixNodeElementInventoryWithAutoInsertion {
+    fun acceptAlways(index: Int, vararg types: Class<out Any>) : AutoAcceptInventoryProxy {
         if (index >= 0 && index < itemAcceptors.count()) {
             itemAcceptors[index] = ItemAcceptorAlways(index, types)
         }
         return this
     }
 
-    fun take(itemStack: ItemStack?) = itemAcceptors.filterNotNull().any { it.take(itemStack, this) }
+    fun take(itemStack: ItemStack?) = itemAcceptors.filterNotNull().any { it.take(itemStack, inventory) }
 }

@@ -8,11 +8,12 @@ import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.node.AutoAcceptInventoryProxy;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
-import mods.eln.node.six.SixNodeElementInventoryWithAutoInsertion;
+import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.MonsterPopFreeProcess;
 import mods.eln.sim.ThermalLoad;
@@ -45,7 +46,8 @@ public class LampSocketElement extends SixNodeElement {
     boolean poweredByLampSupply = true;
     boolean grounded = true;
 
-    SixNodeElementInventoryWithAutoInsertion inventory = (new SixNodeElementInventoryWithAutoInsertion(2, 64, this))
+    private AutoAcceptInventoryProxy acceptingInventory =
+		(new AutoAcceptInventoryProxy(new SixNodeElementInventory(2, 64, this)))
 		.acceptIfEmpty(0, LampDescriptor.class)
 		.acceptIfEmpty(1, ElectricalCableDescriptor.class);
 
@@ -74,7 +76,7 @@ public class LampSocketElement extends SixNodeElement {
 
 	@Override
 	public IInventory getInventory() {
-		return inventory;
+    	return acceptingInventory.getInventory();
 	}
 
 	@Override
@@ -169,7 +171,7 @@ public class LampSocketElement extends SixNodeElement {
 
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		return new LampSocketContainer(player, inventory, socketDescriptor);
+		return new LampSocketContainer(player, acceptingInventory.getInventory(), socketDescriptor);
 	}
 
 	public static boolean canBePlacedOnSide(Direction side, int type) {
@@ -178,7 +180,7 @@ public class LampSocketElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if (inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null) return null;
+		if (acceptingInventory.getInventory().getStackInSlot(LampSocketContainer.cableSlotId) == null) return null;
 		if (poweredByLampSupply) return null;
 		
 		if (grounded) return positiveLoad;
@@ -192,7 +194,7 @@ public class LampSocketElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if (inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null) return 0;
+		if (acceptingInventory.getInventory().getStackInSlot(LampSocketContainer.cableSlotId) == null) return 0;
 		if (poweredByLampSupply) return 0;
 		if (grounded) return NodeBase.maskElectricalPower;
 
@@ -221,7 +223,7 @@ public class LampSocketElement extends SixNodeElement {
 				info.put(I18N.tr("Channel"), channel);
 			}
 			info.put(I18N.tr("Voltage"), Utils.plotVolt("", positiveLoad.getU()));
-			ItemStack lampStack = inventory.getStackInSlot(0);
+			ItemStack lampStack = acceptingInventory.getInventory().getStackInSlot(0);
 			if (lampStack != null) {
 				info.put(I18N.tr("Life"), Utils.plotValue(lampDescriptor.getLifeInTag(lampStack)));
 			}
@@ -240,9 +242,9 @@ public class LampSocketElement extends SixNodeElement {
 		super.networkSerialize(stream);
 		try {
 			stream.writeByte((grounded ? (1 << 6) : 0));
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSocketContainer.lampSlotId));
+			Utils.serialiseItemStack(stream, acceptingInventory.getInventory().getStackInSlot(LampSocketContainer.lampSlotId));
 			stream.writeFloat((float) lampProcess.alphaZ);
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSocketContainer.cableSlotId));
+			Utils.serialiseItemStack(stream, acceptingInventory.getInventory().getStackInSlot(LampSocketContainer.cableSlotId));
 			stream.writeBoolean(poweredByLampSupply);
 			stream.writeUTF(channel);
 			stream.writeBoolean(isConnectedToLampSupply);
@@ -259,8 +261,8 @@ public class LampSocketElement extends SixNodeElement {
 	}
 
 	public void computeElectricalLoad() {
-		ItemStack lamp = inventory.getStackInSlot(LampSocketContainer.lampSlotId);
-		ItemStack cable = inventory.getStackInSlot(LampSocketContainer.cableSlotId);
+		ItemStack lamp = acceptingInventory.getInventory().getStackInSlot(LampSocketContainer.lampSlotId);
+		ItemStack cable = acceptingInventory.getInventory().getStackInSlot(LampSocketContainer.cableSlotId);
 
 		ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
 
@@ -307,7 +309,7 @@ public class LampSocketElement extends SixNodeElement {
 			}
 		}
 
-		return inventory.take(entityPlayer.getCurrentEquippedItem());
+		return acceptingInventory.take(entityPlayer.getCurrentEquippedItem());
 	}
 
 	public int getLightValue() {
