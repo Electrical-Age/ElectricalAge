@@ -1,5 +1,7 @@
 package mods.eln.node.transparent;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
@@ -264,21 +266,11 @@ public abstract class TransparentNodeElementRender {
 	}
 
 	private final List<LoopedSound> loopedSoundList = new ArrayList<LoopedSound>();
-	protected void addLoopedSound(final LoopedSound loopedSound) {
-		if (!loopedSoundList.contains(loopedSound)) {
-			loopedSoundList.add(loopedSound);
-			SoundHandler sh = Minecraft.getMinecraft().getSoundHandler();
-			if (!sh.isSoundPlaying(loopedSound))
-				sh.playSound(loopedSound);
-		}
-	}
 
-	protected void removeLoopedSound(final LoopedSound loopedSound) {
-		if (loopedSoundList.contains(loopedSound)) {
-			SoundHandler sh = Minecraft.getMinecraft().getSoundHandler();
-			if (sh.isSoundPlaying(loopedSound))
-				sh.stopSound(loopedSound);
-			loopedSoundList.remove(loopedSound);
+	@SideOnly(Side.CLIENT)
+	protected void addLoopedSound(final LoopedSound loopedSound) {
+		if (loopedSound.getActive() && !loopedSoundList.contains(loopedSound)) {
+			loopedSoundList.add(loopedSound);
 		}
 	}
 
@@ -288,14 +280,15 @@ public abstract class TransparentNodeElementRender {
 			ClientProxy.uuidManager.kill(uuid);
 
 		for (LoopedSound loopedSound: loopedSoundList) {
-			SoundHandler sh = Minecraft.getMinecraft().getSoundHandler();
-			if (sh.isSoundPlaying(loopedSound))
-				sh.stopSound(loopedSound);
+			loopedSound.setActive(false);
 		}
 	}
 
 	public void refresh(float deltaT) {
-		
-		
+		SoundHandler sh = Minecraft.getMinecraft().getSoundHandler();
+		for (LoopedSound loopedSound : loopedSoundList) {
+			if (!sh.isSoundPlaying(loopedSound))
+				sh.playSound(loopedSound);
+		}
 	}
 }

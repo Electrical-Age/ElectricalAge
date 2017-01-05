@@ -29,6 +29,7 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraftforge.client.IItemRenderer
+import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
@@ -59,16 +60,21 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
         }
 
         if (on) {
+            GL11.glColor3f(0f, 1f, 0f)
             UtilsClient.drawLight(powerLED)
         } else {
+            GL11.glColor3f(0f, 0.5f, 0f)
             powerLED?.draw()
         }
 
         if (heating) {
+            GL11.glColor3f(1f, 0f, 0f)
             UtilsClient.drawLight(heatLED)
         } else {
+            GL11.glColor3f(0.5f, 0f, 0f)
             heatLED?.draw()
         }
+        GL11.glColor3f(1f, 1f, 1f)
     }
 
     override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?) = true
@@ -239,7 +245,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
     override fun getWaila(): MutableMap<String, String> {
         val info = HashMap<String, String>()
         info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc))
-        info.put(I18N.tr("Power"), Utils.plotPower("", thermalLoad.power))
+        info.put(I18N.tr("Power"), Utils.plotPower("", actualHeatPower))
         return info
     }
 
@@ -272,23 +278,15 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
     var setTemperature = Synchronizable(0f)
 
     var heatPower = 0f
-        set(value) {
-            val changed = field != value
-            field = value
-
-            if (changed) {
-                if (value > 0) {
-                    addLoopedSound(sound)
-                } else {
-                    removeLoopedSound(sound)
-                }
-            }
-        }
     var actualTemperature = 0f
 
     val sound = object : LoopedSound("eln:fuelheatfurnace", coordonate()) {
         override fun getPitch() = FuelBurnerDescriptor.pitchForType(type)
-        override fun getVolume() = 0.01f + 0.0001f * heatPower
+        override fun getVolume() = if (heatPower > 0) 0.01f + 0.0001f * heatPower else 0f
+    }
+
+    init {
+        addLoopedSound(sound)
     }
 
     override fun draw() {
@@ -321,8 +319,8 @@ class FuelHeatFurnaceContainer(val base: NodeBase?, player: EntityPlayer, invent
         BasicContainer(player, inventory,
                 arrayOf(GenericItemUsingDamageSlot(inventory, FuelBurnerSlot, 26, 58, 1, FuelBurnerDescriptor::class.java,
                         SlotSkin.medium, arrayOf(I18N.tr("Fuel burner slot"))),
-                        RegulatorSlot(inventory, RegulatorSlot, 8, 58, 1, arrayOf(RegulatorType.OnOff, RegulatorType.Analog),
-                                SlotSkin.medium))), INodeContainer {
+                        RegulatorSlot(inventory, RegulatorSlot, 8, 58, 1, arrayOf(RegulatorType.Analog),
+                                SlotSkin.medium, I18N.tr("Analog regulator slot")))), INodeContainer {
     companion object {
         val FuelBurnerSlot = 0
         val RegulatorSlot = 1
