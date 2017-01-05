@@ -70,7 +70,24 @@ class SixNodeElementInventoryWithAutoInsertion(size: Int, stackLimit: Int, eleme
         override fun take(itemStack: ItemStack?, inventory: IInventory) : Boolean {
             if (super.take(itemStack, inventory)) return true
 
-            // TODO: Implement.
+            // TODO: What do we do with the item that is actually in the slot? For the moment it just disappears.
+
+            GenericItemUsingDamageDescriptor.getDescriptor(itemStack)?.let {
+                if (acceptedItems.contains(it.javaClass)) {
+                    itemStack!!.stackSize -= 1
+                    inventory.setInventorySlotContents(index, it.newItemStack())
+                    return true
+                }
+            }
+
+            GenericItemBlockUsingDamageDescriptor.getDescriptor(itemStack)?.let {
+                if (acceptedItems.contains(it.javaClass)) {
+                    itemStack!!.stackSize -= 1
+                    inventory.setInventorySlotContents(index, it.newItemStack())
+                    return true
+                }
+            }
+
             return false
         }
     }
