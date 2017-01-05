@@ -114,4 +114,11 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
     }
 
     fun take(itemStack: ItemStack?) = itemAcceptors.filterNotNull().any { it.take(itemStack, inventory) }
+
+    fun take(itemStack: ItemStack?, publishable: Publishable? = null) =
+            if (take(itemStack)) {
+                publishable?.needPublish()
+                true
+            } else
+                false
 }

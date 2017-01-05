@@ -2,9 +2,11 @@ package mods.eln.transparentnode.solarpanel;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.item.SolarTrackerDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.node.AutoAcceptInventoryProxy;
 import mods.eln.node.NodeBase;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -130,9 +132,8 @@ public class SolarPanelElement extends TransparentNodeElement{
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		return false;
+		return descriptor.canRotate && inventory.take(entityPlayer.getCurrentEquippedItem(), this);
 	}
-	
 	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
@@ -153,7 +154,7 @@ public class SolarPanelElement extends TransparentNodeElement{
 	{
 		super.networkSerialize(stream);
 		try {	
-			stream.writeBoolean(inventory.getStackInSlot(SolarPanelContainer.trackerSlotId) != null);
+			stream.writeBoolean(getInventory().getStackInSlot(SolarPanelContainer.trackerSlotId) != null);
 			stream.writeFloat((float) pannelAlpha);
 			node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
 		} catch (IOException e) {
@@ -183,12 +184,14 @@ public class SolarPanelElement extends TransparentNodeElement{
 		}
 		return unserializeNulldId;
 	}
-	
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1 , 64, this);
-	
+
+	private final AutoAcceptInventoryProxy inventory =
+		(new AutoAcceptInventoryProxy(new TransparentNodeElementInventory(1 , 64, this)))
+		.acceptIfEmpty(0, SolarTrackerDescriptor.class);
+
 	@Override
 	public IInventory getInventory() {
-		return inventory;
+		return inventory.getInventory();
 	}
 	
 	@Override
@@ -197,7 +200,7 @@ public class SolarPanelElement extends TransparentNodeElement{
 	}
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		return new SolarPanelContainer(node, player, inventory);
+		return new SolarPanelContainer(node, player, inventory.getInventory());
 	}
 
 	@Override
