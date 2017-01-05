@@ -7,6 +7,8 @@ import net.minecraft.util.ResourceLocation
 
 abstract class LoopedSound(val sample: String, val coord: Coordonate,
                            val attentuationType: ISound.AttenuationType = ISound.AttenuationType.LINEAR) : ITickableSound {
+    var active = true
+
     override final fun getPositionedSoundLocation() = ResourceLocation(sample)
     override final fun getXPosF() = coord.x.toFloat() + 0.5f
     override final fun getYPosF() = coord.y.toFloat() + 0.5f
@@ -16,7 +18,7 @@ abstract class LoopedSound(val sample: String, val coord: Coordonate,
 
     override fun getPitch() = 1f
     override fun getVolume() = 1f
-    override fun isDonePlaying() = false
+    override fun isDonePlaying() = !active
 
     override fun getRepeatDelay() = 0
     override fun update() {}
