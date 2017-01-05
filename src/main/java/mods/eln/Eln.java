@@ -291,6 +291,7 @@ public class Eln {
 	public double windTurbinePowerFactor = 1;
 	public double waterTurbinePowerFactor = 1;
 	public double fuelGeneratorPowerFactor = 1;
+	public double fuelHeatFurnacePowerFactor = 1;
 	public int autominerRange = 10;
 
 	public static double cableRsFactor = 1.0;
@@ -386,6 +387,7 @@ public class Eln {
 		windTurbinePowerFactor = config.get("balancing", "windTurbinePowerFactor", 1).getDouble(1);
 		waterTurbinePowerFactor = config.get("balancing", "waterTurbinePowerFactor", 1).getDouble(1);
 		fuelGeneratorPowerFactor = config.get("balancing", "fuelGeneratorPowerFactor", 1).getDouble(1);
+		fuelHeatFurnacePowerFactor = config.get("balancing", "fuelHeatFurnacePowerFactor", 1.0).getDouble();
 		autominerRange = config.get("balancing", "autominerRange", 10, "Maximum horizontal distance from autominer that will be mined").getInt(10);
 
 		Other.ElnToIc2ConversionRatio = config.get("balancing", "ElnToIndustrialCraftConversionRatio", 1.0 / 3.0).getDouble(1.0 / 3.0);
@@ -4818,11 +4820,11 @@ public class Eln {
 
 	private void registerFuelBurners(int id) {
 		sharedItemStackOne.addElement(0 + (id << 6),
-			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Small Fuel Burner"), 5000, 2, 1.6f));
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Small Fuel Burner"), 5000 * fuelHeatFurnacePowerFactor, 2, 1.6f));
 		sharedItemStackOne.addElement(1 + (id << 6),
-			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Medium Fuel Burner"), 10000, 1, 1.4f));
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Medium Fuel Burner"), 10000 * fuelHeatFurnacePowerFactor, 1, 1.4f));
 		sharedItemStackOne.addElement(2 + (id << 6),
-			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Big Fuel Burner"), 25000, 0, 1f));
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Big Fuel Burner"), 25000 * fuelHeatFurnacePowerFactor, 0, 1f));
 	}
 
 	void registerMiscItem(int id) {
