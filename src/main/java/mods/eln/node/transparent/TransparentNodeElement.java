@@ -3,7 +3,8 @@ package mods.eln.node.transparent;
 import mods.eln.Eln;
 import mods.eln.ghost.GhostObserver;
 import mods.eln.misc.*;
-import mods.eln.node.Publishable;
+import mods.eln.node.IInventoryChangeListener;
+import mods.eln.node.IPublishable;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalConnection;
@@ -32,7 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class TransparentNodeElement implements  GhostObserver, IPlayer, Publishable {
+public abstract class TransparentNodeElement implements  GhostObserver, IPlayer, IPublishable, IInventoryChangeListener {
 
 	public ArrayList<IProcess> slowProcessList  = new ArrayList<IProcess>(4);
 
@@ -443,11 +444,8 @@ public abstract class TransparentNodeElement implements  GhostObserver, IPlayer,
     	node.disconnect();
     }
     
-    
-    public void inventoryChange(IInventory inventory)
-    {
-    	
-    }
+    @Override
+    public void inventoryChange(IInventory inventory) {}
     
 	public float getLightOpacity() {
 		

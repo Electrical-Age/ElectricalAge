@@ -7,6 +7,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.AutoAcceptInventoryProxy;
+import mods.eln.node.IPublishable;
 import mods.eln.node.NodeBase;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -132,7 +133,7 @@ public class SolarPanelElement extends TransparentNodeElement{
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		return descriptor.canRotate && inventory.take(entityPlayer.getCurrentEquippedItem(), this);
+		return descriptor.canRotate && inventory.take(entityPlayer.getCurrentEquippedItem(), (IPublishable) this);
 	}
 	
 	@Override
