@@ -14,7 +14,12 @@ public class RegulatorSlot extends GenericItemUsingDamageSlot {
 
   public RegulatorSlot(IInventory inventory, int slot, int x, int y, int stackLimit, RegulatorType[] type, SlotSkin
           skin) {
-    super(inventory, slot, x, y, stackLimit, IRegulatorDescriptor.class, skin, new String[]{COMMENT});
+    this(inventory, slot, x, y, stackLimit, type, skin, COMMENT);
+  }
+
+  public RegulatorSlot(IInventory inventory, int slot, int x, int y, int stackLimit, RegulatorType[] type, SlotSkin
+      skin, final String comment) {
+    super(inventory, slot, x, y, stackLimit, IRegulatorDescriptor.class, skin, new String[]{comment});
     this.type = type;
   }
 
