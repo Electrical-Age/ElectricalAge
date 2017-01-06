@@ -33,7 +33,7 @@ public class Equation implements IValue, INBTTReady {
     int operatorCount; // Juste a counter for fun
 
 	static {
-		staticSeparatorList = "+-*&|/^,()<>=";
+		staticSeparatorList = "+-*&|/^,()<>=!";
 		staticOperatorList = new HashMap<Integer, ArrayList<IOperatorMapper>>();
 
 		int priority = 0;
@@ -68,6 +68,7 @@ public class Equation implements IValue, INBTTReady {
 		{
 			ArrayList<IOperatorMapper> list = new ArrayList<IOperatorMapper>();
 			list.add(new OperatorMapperA("-", Inv.class));
+			list.add(new OperatorMapperA("!", Not.class));
 			list.add(new OperatorMapperAB("*", Mul.class));
 			list.add(new OperatorMapperAB("/", Div.class));
 			staticOperatorList.put(priority++, list);
@@ -409,6 +410,25 @@ public class Equation implements IValue, INBTTReady {
 		@Override
 		public void setOperator(IValue[] values) {
 			this.a = values[0];
+		}
+
+		@Override
+		public int getRedstoneCost() {
+			return 1;
+		}
+	}
+
+	public static class Not implements IOperator {
+		IValue a;
+
+		@Override
+		public double getValue() {
+			return 1.0 - a.getValue();
+		}
+
+		@Override
+		public void setOperator(IValue[] values) {
+			a = values[0];
 		}
 
 		@Override
