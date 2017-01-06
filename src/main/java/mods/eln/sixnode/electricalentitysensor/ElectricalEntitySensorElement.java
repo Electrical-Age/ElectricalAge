@@ -2,9 +2,11 @@ package mods.eln.sixnode.electricalentitysensor;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.item.EntitySensorFilterDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.node.AutoAcceptInventoryProxy;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -31,7 +33,8 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
     public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
     public ElectricalEntitySensorSlowProcess slowProcess = new ElectricalEntitySensorSlowProcess(this);
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+    private AutoAcceptInventoryProxy inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this)))
+		.acceptAlways(0, 1, new AutoAcceptInventoryProxy.SimpleItemDropper(sixNode), EntitySensorFilterDescriptor.class);
 
 	public ElectricalEntitySensorElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
@@ -89,7 +92,8 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		return onBlockActivatedRotate(entityPlayer);
+		if (onBlockActivatedRotate(entityPlayer)) return true;
+		return inventory.take(entityPlayer.getCurrentEquippedItem());
 	}
 
 	@Override
@@ -99,12 +103,12 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
 	
 	@Override
 	public IInventory getInventory() {
-		return inventory;
+		return inventory.getInventory();
 	}
 
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		return new ElectricalEntitySensorContainer(player, inventory);
+		return new ElectricalEntitySensorContainer(player, inventory.getInventory());
 	}
 	
 	@Override
@@ -118,7 +122,7 @@ public class ElectricalEntitySensorElement extends SixNodeElement {
 		super.networkSerialize(stream);
 		try {
 			stream.writeBoolean(slowProcess.state);
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(ElectricalEntitySensorContainer.filterId));
+			Utils.serialiseItemStack(stream, getInventory().getStackInSlot(ElectricalEntitySensorContainer.filterId));
 		} catch (IOException e) {
 			
 			e.printStackTrace();
