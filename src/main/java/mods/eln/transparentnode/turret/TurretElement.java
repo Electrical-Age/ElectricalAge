@@ -51,7 +51,7 @@ public class TurretElement extends TransparentNodeElement {
 
     final AutoAcceptInventoryProxy acceptingInventory =
 		(new AutoAcceptInventoryProxy(new TransparentNodeElementInventory(1, 64, this)))
-		.acceptAlways(0, 1, EntitySensorFilterDescriptor.class);
+		.acceptAlways(0, 1, new AutoAcceptInventoryProxy.SimpleItemDropper(node), EntitySensorFilterDescriptor.class);
 
 	public TurretElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);

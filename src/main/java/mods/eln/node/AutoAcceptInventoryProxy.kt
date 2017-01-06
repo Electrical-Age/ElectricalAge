@@ -6,6 +6,16 @@ import net.minecraft.inventory.IInventory
 import net.minecraft.item.ItemStack
 
 class AutoAcceptInventoryProxy(val inventory: IInventory) {
+    interface ExistingItemHandler {
+        fun handleExistingInventoryItem(itemStack: ItemStack)
+    }
+
+    class SimpleItemDropper(val node: NodeBase) : ExistingItemHandler {
+        override fun handleExistingInventoryItem(itemStack: ItemStack) {
+            node.dropItem(itemStack)
+        }
+    }
+
     private abstract class ItemAcceptor(val index: Int) {
         abstract fun take(itemStack: ItemStack?, inventory: IInventory) : Boolean
     }
@@ -65,7 +75,8 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
         }
     }
 
-    private class ItemAcceptorAlways(index: Int, maxItems: Int, acceptedItems: Array<out Class<out Any>>)
+    private class ItemAcceptorAlways(index: Int, maxItems: Int, acceptedItems: Array<out Class<out Any>>,
+                                     val existingItemHandler: ExistingItemHandler?)
         : ItemAcceptorIfIncrement(index, maxItems, acceptedItems) {
         override fun take(itemStack: ItemStack?, inventory: IInventory) : Boolean {
             if (super.take(itemStack, inventory)) return true
@@ -75,6 +86,7 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
             GenericItemUsingDamageDescriptor.getDescriptor(itemStack)?.let {
                 if (acceptedItems.contains(it.javaClass)) {
                     itemStack!!.stackSize -= 1
+                    existingItemHandler?.handleExistingInventoryItem(inventory.getStackInSlot(index))
                     inventory.setInventorySlotContents(index, it.newItemStack())
                     return true
                 }
@@ -83,6 +95,7 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
             GenericItemBlockUsingDamageDescriptor.getDescriptor(itemStack)?.let {
                 if (acceptedItems.contains(it.javaClass)) {
                     itemStack!!.stackSize -= 1
+                    existingItemHandler?.handleExistingInventoryItem(inventory.getStackInSlot(index))
                     inventory.setInventorySlotContents(index, it.newItemStack())
                     return true
                 }
@@ -108,9 +121,10 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
         return this
     }
 
-    fun acceptAlways(index: Int, maxItems: Int, vararg types: Class<out Any>) : AutoAcceptInventoryProxy {
+    fun acceptAlways(index: Int, maxItems: Int, existingItemHandler: ExistingItemHandler?,
+                     vararg types: Class<out Any>) : AutoAcceptInventoryProxy {
         if (index >= 0 && index < itemAcceptors.count()) {
-            itemAcceptors[index] = ItemAcceptorAlways(index, maxItems, types)
+            itemAcceptors[index] = ItemAcceptorAlways(index, maxItems, types, existingItemHandler)
         }
         return this
     }
