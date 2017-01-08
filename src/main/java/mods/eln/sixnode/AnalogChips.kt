@@ -1,6 +1,5 @@
 package mods.eln.sixnode
 
-import mcp.mobius.waila.api.SpecialChars
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.*
@@ -202,7 +201,7 @@ open class AnalogChipRender(entity: SixNodeEntity, side: Direction, descriptor: 
 
 abstract class AnalogFunction: INBTTReady {
     companion object {
-        val inputColors = arrayOf(SpecialChars.RED, SpecialChars.GREEN, SpecialChars.BLUE)
+        val inputColors = arrayOf("§c", "§a", "§9")
     }
 
     open val hasState = false

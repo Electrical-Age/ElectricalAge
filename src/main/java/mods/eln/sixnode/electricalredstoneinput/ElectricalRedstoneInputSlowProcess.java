@@ -22,7 +22,7 @@ public class ElectricalRedstoneInputSlowProcess implements IProcess {
 			Coordonate coord = element.sixNode.coordonate;
 
 			// TODO: Ignore the value of a signal to redstone converter if it is connected to this converted directly.
-			int signal = Utils.getRedstoneLevelAround(coord);
+			int signal = Utils.getRedstoneLevelAround(coord, element.side);
 			//Utils.println("Light : " + light);
 			element.outputGateProcess.setOutputNormalized((signal) / 15.0 );
 			if (signal != oldSignal) {

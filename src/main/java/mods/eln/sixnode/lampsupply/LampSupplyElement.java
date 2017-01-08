@@ -1,6 +1,5 @@
 package mods.eln.sixnode.lampsupply;
 
-import mcp.mobius.waila.api.SpecialChars;
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
@@ -218,7 +217,7 @@ public class LampSupplyElement extends SixNodeElement {
 			Entry e = entries.get(i);
 			if (!e.powerChannel.isEmpty()) {
 				info.put(I18N.tr("Channel") + " " + (i + 1), e.powerChannel + " = " +
-					(channelStates[i] ? SpecialChars.GREEN + "ON" : SpecialChars.RED + "OFF"));
+					(channelStates[i] ? "\u00A7aON" : "\u00A7cOFF"));
 			}
 		}
 		info.put(I18N.tr("Total power"), Utils.plotPower("", powerLoad.getU() * powerLoad.getI()));

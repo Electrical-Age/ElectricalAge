@@ -302,7 +302,7 @@ public class Utils {
 	public static String plotOhm(String header, double value) {
 		if (!header.equals(""))
 			header += " ";
-		return header + plotValue(value, "ohm  ");
+		return header + plotValue(value, "Ω  ");
 	}
 
 	public static String plotUIP(double U, double I) {
@@ -791,56 +791,42 @@ public class Utils {
 		return false;
 	}
 
-	public static int getRedstoneLevelAround(Coordonate coord) {
-		int level = 0;
-		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x + 1, coord.y, coord.z));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y + 1, coord.z));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y - 1, coord.z));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z + 1));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z - 1));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z));
-		if (level == 15)
-			return 15;
+	public static int getRedstoneLevelAround(Coordonate coord, Direction side) {
+		int level = coord.world().getStrongestIndirectPower(coord.x, coord.y, coord.z);
+		if (level >= 15) return 15;
 
-		return level;
-	}
+		side = side.getInverse();
+		switch (side) {
+			case YN:
+			case YP:
+				level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x + 1, coord.y, coord.z, side.toSideValue()));
+				if (level >= 15) return 15;
+				level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x - 1, coord.y, coord.z, side.toSideValue()));
+				if (level >= 15) return 15;
+				level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y, coord.z + 1, side.toSideValue()));
+				if (level >= 15) return 15;
+				level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y, coord.z - 1, side.toSideValue()));
 
-	public static int getRedstoneLevelAround(World w, int x, int y, int z) {
-		int level = 0;
-		level = Math.max(level, w.getStrongestIndirectPower(x, y, z));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, w.getStrongestIndirectPower(x + 1, y, z));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, w.getStrongestIndirectPower(x, y + 1, z));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, w.getStrongestIndirectPower(x, y - 1, z));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, w.getStrongestIndirectPower(x, y, z + 1));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, w.getStrongestIndirectPower(x, y, z - 1));
-		if (level == 15)
-			return 15;
-		level = Math.max(level, w.getStrongestIndirectPower(x, y, z));
-		if (level == 15)
-			return 15;
+			case XN:
+			case XP:
+				level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y + 1, coord.z, side.toSideValue()));
+				if (level >= 15) return 15;
+				level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y - 1, coord.z, side.toSideValue()));
+				if (level >= 15) return 15;
+				level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y, coord.z + 1, side.toSideValue()));
+				if (level >= 15) return 15;
+				level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y, coord.z - 1, side.toSideValue()));
+
+			case ZN:
+			case ZP:
+				level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x + 1, coord.y, coord.z, side.toSideValue()));
+				if (level >= 15) return 15;
+				level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x - 1, coord.y, coord.z, side.toSideValue()));
+				if (level >= 15) return 15;
+				level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y + 1, coord.z, side.toSideValue()));
+				if (level >= 15) return 15;
+				level = Math.max(level, coord.world().getIndirectPowerLevelTo(coord.x, coord.y - 1, coord.z, side.toSideValue()));
+		}
 
 		return level;
 	}

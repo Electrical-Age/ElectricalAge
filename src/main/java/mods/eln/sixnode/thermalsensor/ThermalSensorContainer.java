@@ -15,10 +15,11 @@ public class ThermalSensorContainer extends BasicContainer {
 
 	public static final int cableSlotId = 0;
 	
-	public ThermalSensorContainer(EntityPlayer player, IInventory inventory) {
+	public ThermalSensorContainer(EntityPlayer player, IInventory inventory, boolean acceptsElectricalCable) {
 		super(player, inventory, new Slot[]{
-				new SixNodeItemSlot(inventory, cableSlotId, 152, 62, 1, new Class[]{ThermalCableDescriptor.class,
-					ElectricalCableDescriptor.class}, SlotSkin.medium,
+				new SixNodeItemSlot(inventory, cableSlotId, 152, 62, 1, acceptsElectricalCable ?
+					new Class[]{ThermalCableDescriptor.class, ElectricalCableDescriptor.class} :
+					new Class[] {ThermalCableDescriptor.class}, SlotSkin.medium,
 					new String[]{tr("Cable slot")})
 			});
 	}

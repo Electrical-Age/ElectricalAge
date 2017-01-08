@@ -2144,7 +2144,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Lead Fuse for low voltage cables");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, LVP / LVU, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, lowVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
@@ -2152,7 +2152,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Lead Fuse for medium voltage cables");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, MVP / MVU, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, meduimVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
@@ -2160,7 +2160,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Lead Fuse for high voltage cables");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, HVP / HVU, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, highVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
@@ -2168,7 +2168,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Lead Fuse for very high voltage cables");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, VVP / VVU, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, veryHighVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
@@ -2176,7 +2176,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Blown Lead Fuse");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, -1, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, null, obj.getObj("ElectricalFuse"));
 			ElectricalFuseDescriptor.Companion.setBlownFuse(desc);
 			sharedItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
@@ -5582,41 +5582,27 @@ public class Eln {
 				" ME",
 				Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
 				Character.valueOf('M'), findItemStack("Advanced Machine Block"),
-				Character.valueOf('a'), "ingotAluminum",
+				Character.valueOf('a'), firstExistingOre("ingotAluminum", "ingotIron"),
 				Character.valueOf('E'), findItemStack("High Voltage Cable")
 		);
 		addRecipe(findItemStack("Steam Turbine"),
 				" a ",
 				"aAa",
 				" M ",
-				Character.valueOf('a'), "ingotAluminum",
-				Character.valueOf('A'), "blockAluminum",
+				Character.valueOf('a'), firstExistingOre("ingotAluminum", "ingotIron"),
+				Character.valueOf('A'), firstExistingOre("blockAluminum", "blockIron"),
 				Character.valueOf('M'), findItemStack("Advanced Machine Block")
 		);
-		// TODO(Baughn): Factor this into a builder.
-		if (OreDictionary.doesOreNameExist("ingotSteel") && OreDictionary.doesOreNameExist("blockSteel")) {
-			addRecipe(findItemStack("Gas Turbine"),
-					"msH",
-					"sSs",
-					" M ",
-					Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
-					Character.valueOf('H'), findItemStack("Copper Thermal Cable"),
-					Character.valueOf('s'), "ingotSteel",
-					Character.valueOf('S'), "blockSteel",
-					Character.valueOf('M'), findItemStack("Advanced Machine Block")
-			);
-		} else {
-			addRecipe(findItemStack("Gas Turbine"),
-					"msH",
-					"sSs",
-					" M ",
-					Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
-					Character.valueOf('H'), findItemStack("Copper Thermal Cable"),
-					Character.valueOf('s'), "ingotIron",
-					Character.valueOf('S'), "blockIron",
-					Character.valueOf('M'), findItemStack("Advanced Machine Block")
-			);
-		}
+		addRecipe(findItemStack("Gas Turbine"),
+				"msH",
+				"sSs",
+				" M ",
+				Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
+				Character.valueOf('H'), findItemStack("Copper Thermal Cable"),
+				Character.valueOf('s'), firstExistingOre("ingotSteel", "ingotIron"),
+				Character.valueOf('S'), firstExistingOre("blockSteel", "blockIron"),
+				Character.valueOf('M'), findItemStack("Advanced Machine Block")
+		);
 
 		addRecipe(findItemStack("Joint"),
 			"   ",
@@ -7446,6 +7432,16 @@ public class Eln {
 
 	public ItemStack findItemStack(String name) {
 		return findItemStack(name, 1);
+	}
+
+	public String firstExistingOre(String... oreNames) {
+		for (String oreName: oreNames) {
+			if (OreDictionary.doesOreNameExist(oreName)) {
+				return oreName;
+			}
+		}
+
+		return "";
 	}
 
 	public boolean isDevelopmentRun() {
