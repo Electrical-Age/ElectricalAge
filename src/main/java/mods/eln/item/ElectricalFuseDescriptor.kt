@@ -3,13 +3,14 @@ package mods.eln.item
 import mods.eln.misc.Obj3D
 import mods.eln.misc.VoltageLevelColor
 import mods.eln.misc.preserveMatrix
+import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import mods.eln.wiki.Data
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraftforge.client.IItemRenderer
 import org.lwjgl.opengl.GL11
 
-class ElectricalFuseDescriptor(name: String, val maxCurrent: Double, obj: Obj3D?):
+class ElectricalFuseDescriptor(name: String, val cableDescriptor: ElectricalCableDescriptor?, obj: Obj3D?):
         GenericItemUsingDamageDescriptorUpgrade(name) {
 
     companion object {
@@ -21,9 +22,9 @@ class ElectricalFuseDescriptor(name: String, val maxCurrent: Double, obj: Obj3D?
     private val fuse = obj?.getPart("Fuse")
 
     init {
-        if (maxCurrent != -1.0) {
+        if (cableDescriptor != null) {
             changeDefaultIcon("electricalfuse")
-            voltageLevelColor = VoltageLevelColor.fromMaxCurrent(maxCurrent)
+            voltageLevelColor = VoltageLevelColor.fromCable(cableDescriptor)
         } else {
             changeDefaultIcon("blownelectricalfuse")
             voltageLevelColor = VoltageLevelColor.Neutral
@@ -46,7 +47,7 @@ class ElectricalFuseDescriptor(name: String, val maxCurrent: Double, obj: Obj3D?
                         fuseType.draw()
                         GL11.glColor3f(1f, 1f, 1f)
                     }
-                    if (maxCurrent != 0.0) {
+                    if (cableDescriptor != null) {
                         fuseOk?.draw()
                     }
                     fuse?.draw()
