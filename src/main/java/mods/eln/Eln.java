@@ -2131,7 +2131,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Lead Fuse for low voltage cables");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, LVP / LVU, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, lowVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
@@ -2139,7 +2139,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Lead Fuse for medium voltage cables");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, MVP / MVU, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, meduimVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
@@ -2147,7 +2147,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Lead Fuse for high voltage cables");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, HVP / HVU, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, highVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
@@ -2155,7 +2155,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Lead Fuse for very high voltage cables");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, VVP / VVU, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, veryHighVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
@@ -2163,7 +2163,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Blown Lead Fuse");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, -1, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, null, obj.getObj("ElectricalFuse"));
 			ElectricalFuseDescriptor.Companion.setBlownFuse(desc);
 			sharedItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
