@@ -627,7 +627,7 @@ public class Eln {
 		registerMiscItem(120);
 		registerElectricalTool(121);
 		registerPortableItem(122);
-		registerFuelBurners(124);
+		registerFuelBurnerItem(124);
 
 		// Register WIP items only on development runs!
 		if (isDevelopmentRun()) {
@@ -797,10 +797,13 @@ public class Eln {
 		recipeCompressor();
 		recipePlateMachine();
 		recipemagnetiser();
+		recipeFuelBurnerItem();
 
 		recipeECoal();
 
 		recipeGridDevices(oreNames);
+
+
 
 		proxy.registerRenderers();
 
@@ -4818,7 +4821,7 @@ public class Eln {
 		}
 	}
 
-	private void registerFuelBurners(int id) {
+	private void registerFuelBurnerItem(int id) {
 		sharedItemStackOne.addElement(0 + (id << 6),
 			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Small Fuel Burner"), 5000 * fuelHeatFurnacePowerFactor, 2, 1.6f));
 		sharedItemStackOne.addElement(1 + (id << 6),
@@ -5543,6 +5546,13 @@ public class Eln {
 				Character.valueOf('i'), findItemStack("Copper Thermal Cable"),
 				Character.valueOf('I'), findItemStack("Combustion Chamber"));
 
+		addRecipe(findItemStack("Fuel Heat Furnace"),
+				"IcI",
+				"I I",
+				"IiI",
+				Character.valueOf('c'), findItemStack("Cheap Chip"),
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+				Character.valueOf('i'), findItemStack("Copper Thermal Cable"));
 	}
 
 	void recipeTurbine() {
@@ -6680,6 +6690,29 @@ public class Eln {
 				new ItemStack[] { findItemStack("Basic Magnet") }, 5000.0));
 		magnetiserRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", 2),
 				new ItemStack[] { findItemStack("Advanced Magnet") }, 15000.0));
+	}
+
+	void recipeFuelBurnerItem() {
+		addRecipe(findItemStack("Small Fuel Burner"),
+			"   ",
+			" Cc",
+			"   ",
+			Character.valueOf('C'), findItemStack("Combustion Chamber"),
+			Character.valueOf('c'), findItemStack("Copper Thermal Cable"));
+
+		addRecipe(findItemStack("Medium Fuel Burner"),
+			"   ",
+			" Cc",
+			"   ",
+			Character.valueOf('C'), findItemStack("Combustion Chamber", 2),
+			Character.valueOf('c'), findItemStack("Copper Thermal Cable"));
+
+		addRecipe(findItemStack("Medium Fuel Burner"),
+			"   ",
+			" Cc",
+			"   ",
+			Character.valueOf('C'), findItemStack("Combustion Chamber", 4),
+			Character.valueOf('c'), findItemStack("Copper Thermal Cable"));
 	}
 
 	void recipeFurnace() {
