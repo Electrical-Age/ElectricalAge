@@ -802,8 +802,6 @@ public class Eln {
 
 		recipeGridDevices(oreNames);
 
-
-
 		proxy.registerRenderers();
 
 		TR("itemGroup.Eln");
@@ -5547,9 +5545,11 @@ public class Eln {
 
 		addRecipe(findItemStack("Fuel Heat Furnace"),
 				"IcI",
-				"I I",
+				"mCI",
 				"IiI",
 				Character.valueOf('c'), findItemStack("Cheap Chip"),
+				Character.valueOf('m'), findItemStack("Electrical Motor"),
+				Character.valueOf('C'), new ItemStack(Items.cauldron),
 				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
 				Character.valueOf('i'), findItemStack("Copper Thermal Cable"));
 	}
