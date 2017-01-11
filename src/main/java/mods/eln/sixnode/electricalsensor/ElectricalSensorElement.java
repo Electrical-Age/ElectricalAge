@@ -5,6 +5,8 @@ import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.node.AutoAcceptInventoryProxy;
+import mods.eln.node.IInventoryChangeListener;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -20,6 +22,7 @@ import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -42,7 +45,8 @@ public class ElectricalSensorElement extends SixNodeElement {
 
     public Resistor resistor;
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+    private AutoAcceptInventoryProxy inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this)))
+		.acceptIfEmpty(0, ElectricalCableDescriptor.class);
 
     static final byte dirNone = 0, dirAB = 1, dirBA = 2;
     byte dirType = dirNone;
@@ -80,8 +84,8 @@ public class ElectricalSensorElement extends SixNodeElement {
 		voltageWatchDog.set(aLoad).set(exp);
 	}
 
-	public SixNodeElementInventory getInventory() {
-		return inventory;
+	public IInventory getInventory() {
+		return inventory.getInventory();
 	}
 
 	public static boolean canBePlacedOnSide(Direction side, int type) {
@@ -129,7 +133,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		boolean cable = inventory.getStackInSlot(ElectricalSensorContainer.cableSlotId) != null;
+		boolean cable = getInventory().getStackInSlot(ElectricalSensorContainer.cableSlotId) != null;
 		if (!descriptor.voltageOnly) {
 			if (front.left() == lrdu && cable) return NodeBase.maskElectricalAll;
 			if (front.right() == lrdu && cable) return NodeBase.maskElectricalAll;
@@ -184,7 +188,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 			stream.writeFloat(lowValue);
 			stream.writeFloat(highValue);
 			stream.writeByte(dirType);
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(ElectricalSensorContainer.cableSlotId));
+			Utils.serialiseItemStack(stream, getInventory().getStackInSlot(ElectricalSensorContainer.cableSlotId));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -207,7 +211,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 	public void computeElectricalLoad() {
 		//if (!descriptor.voltageOnly)
 		{
-			ItemStack cable = inventory.getStackInSlot(ElectricalSensorContainer.cableSlotId);
+			ItemStack cable = getInventory().getStackInSlot(ElectricalSensorContainer.cableSlotId);
 			ElectricalCableDescriptor cableDescriptor = (ElectricalCableDescriptor) Eln.sixNodeItem.getDescriptor(cable);
 
 			if (cableDescriptor == null) {
@@ -224,8 +228,6 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-
 		if (Utils.isPlayerUsingWrench(entityPlayer)) {
 			front = front.getNextClockwise();
 			sixNode.reconnect();
@@ -233,8 +235,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 			return true;
 		}
 
-		//front = LRDU.fromInt((front.toInt() + 1) & 3);
-		return false;
+		return inventory.take(entityPlayer.getCurrentEquippedItem(), (IInventoryChangeListener) this);
 	}
 
 	@Override
@@ -269,6 +270,6 @@ public class ElectricalSensorElement extends SixNodeElement {
 
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		return new ElectricalSensorContainer(player, inventory, descriptor);
+		return new ElectricalSensorContainer(player, inventory.getInventory(), descriptor);
 	}
 }

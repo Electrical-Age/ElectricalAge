@@ -5,6 +5,8 @@ import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.node.AutoAcceptInventoryProxy;
+import mods.eln.node.IInventoryChangeListener;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -56,7 +58,8 @@ public class LampSupplyElement extends SixNodeElement {
 	public Resistor loadResistor;
 	public IProcess lampSupplySlowProcess = new LampSupplySlowProcess();
 
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+	private AutoAcceptInventoryProxy inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this)))
+			.acceptIfIncrement(0, 64, ElectricalCableDescriptor.class);
 
 
     static class Entry{
@@ -82,12 +85,12 @@ public class LampSupplyElement extends SixNodeElement {
     IWirelessSignalAggregator[][] aggregators;
     @Override
 	public IInventory getInventory() {
-		return inventory;
+		return inventory.getInventory();
 	}
 
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		return new LampSupplyContainer(player, inventory);
+		return new LampSupplyContainer(player, inventory.getInventory());
 	}
 
 	public LampSupplyElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
@@ -187,20 +190,19 @@ public class LampSupplyElement extends SixNodeElement {
 
 	@Override
 	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if (inventory.getStackInSlot(LampSupplyContainer.cableSlotId) == null) return null;
+		if (getInventory().getStackInSlot(LampSupplyContainer.cableSlotId) == null) return null;
 		if (front == lrdu) return powerLoad;
 		return null;
 	}
 
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		if (inventory.getStackInSlot(LampSupplyContainer.cableSlotId) == null) return null;
 		return null;
 	}
 
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
-		if (inventory.getStackInSlot(LampSupplyContainer.cableSlotId) == null) return 0;
+		if (getInventory().getStackInSlot(LampSupplyContainer.cableSlotId) == null) return 0;
 		if (front == lrdu) return NodeBase.maskElectricalPower;
 		return 0;
 	}
@@ -254,7 +256,8 @@ public class LampSupplyElement extends SixNodeElement {
 			sixNode.setNeedPublish(true);
 			return true;
 		}
-		return false;
+
+		return inventory.take(entityPlayer.getCurrentEquippedItem(), (IInventoryChangeListener) this);
 	}
 
 	@Override
@@ -322,7 +325,7 @@ public class LampSupplyElement extends SixNodeElement {
 	}
 
 	void setupFromInventory() {
-		ItemStack cableStack = inventory.getStackInSlot(LampSupplyContainer.cableSlotId);
+		ItemStack cableStack = getInventory().getStackInSlot(LampSupplyContainer.cableSlotId);
 		if (cableStack != null) {
 			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
 			desc.applyTo(powerLoad);
@@ -382,7 +385,7 @@ public class LampSupplyElement extends SixNodeElement {
                 stream.writeChar(e.aggregator);
             }
 
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(LampSupplyContainer.cableSlotId));
+			Utils.serialiseItemStack(stream, getInventory().getStackInSlot(LampSupplyContainer.cableSlotId));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -397,11 +400,11 @@ public class LampSupplyElement extends SixNodeElement {
     }
 
 	public int getRange() {
-		return getRange(descriptor, inventory);
+		return getRange(descriptor, inventory.getInventory());
 	}
 
-	private int getRange(LampSupplyDescriptor desc, SixNodeElementInventory inventory2) {
-		ItemStack stack = inventory.getStackInSlot(LampSupplyContainer.cableSlotId);
+	private int getRange(LampSupplyDescriptor desc, IInventory inventory2) {
+		ItemStack stack = getInventory().getStackInSlot(LampSupplyContainer.cableSlotId);
 		if (stack == null) return desc.range;
 		return desc.range + stack.stackSize;
 	}
