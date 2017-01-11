@@ -84,7 +84,7 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
         list.add(I18N.tr("Generates heat when supplied with fuel."))
-        //TODO list.add("  " + I18N.tr("Max. temperature: %1$°C", Utils.plotValue(thermal.warmLimit)))
+        list.add(Utils.plotCelsius(I18N.tr("  Max. temperature: "), thermal.warmLimit))
     }
 }
 
