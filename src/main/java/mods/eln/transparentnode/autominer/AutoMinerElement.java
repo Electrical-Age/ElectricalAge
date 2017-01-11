@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class AutoMinerElement extends TransparentNodeElement  {
 
-	AutoAcceptInventoryProxy accpetingInventory =
+	AutoAcceptInventoryProxy inventory =
 		(new AutoAcceptInventoryProxy(new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this)))
 			.acceptIfIncrement(2, 64, MiningPipeDescriptor.class)
 			.acceptIfEmpty(0, ElectricalDrillDescriptor.class);
@@ -139,7 +139,7 @@ public class AutoMinerElement extends TransparentNodeElement  {
     
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		return accpetingInventory.take(entityPlayer.getCurrentEquippedItem());
+		return inventory.take(entityPlayer.getCurrentEquippedItem());
 	}
 
 	@Override
@@ -149,12 +149,12 @@ public class AutoMinerElement extends TransparentNodeElement  {
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		return new AutoMinerContainer(node, player, accpetingInventory.getInventory());
+		return new AutoMinerContainer(node, player, inventory.getInventory());
 	}
 	
 	@Override
 	public IInventory getInventory() {
-		return accpetingInventory.getInventory();
+		return inventory.getInventory();
 	}	
     
 	@Override
