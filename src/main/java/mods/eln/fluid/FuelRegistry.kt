@@ -8,7 +8,7 @@ object FuelRegistry {
     /**
      * Diesel is a refined, heavy fuel, can only be used by the fuel heat furnace for the moment.
      *
-     * The values represent the heating value (energy) for 1l of the fuel IRL.
+     * The values represent the heating value (energy) for 1L of the fuel IRL.
      */
     private val dieselFuels = mapOf(
             "biodiesel" to 32560000.0,  // Immersive Engineering, density = 0.88 kg/l, heating value = 37 MJ/kg
@@ -20,7 +20,7 @@ object FuelRegistry {
      * Gasoline-equivalents: Light oils, the type which can reasonably be burned by internal combustion engines or gas turbines.
      * The ones on this list are all pretty close to each other in energy content.
      *
-     * The values represent the heating value (energy) for 1l of the fuel IRL.
+     * The values represent the heating value (energy) for 1L of the fuel IRL.
      */
     private val gasolineFuels = mapOf(
             "fuel" to 31570000.0,       // Buildcraft, density = 0.77 kg/l, heating value = 41 MJ/kg
@@ -37,16 +37,32 @@ object FuelRegistry {
     /**
      * Burnable gases. Gas turbine is still happy, fuel generator is not.
      *
-     * The values represent the heating value (energy) for 1l of the fuel IRL.
+     * The values represent the heating value (energy) for 1L of the fuel IRL.
      */
     private val gasFuels = mapOf(
             "naturalgas" to 36000.0,    // Magneticraft, heating value = 36 MJ/m3
             "syngas" to 20000.0         // Advanced Generators, heating value = 20 MJ/m3
-    )
+    ).mapValues {
+        // Multiplied by 1000 because Minecraft gases are -- heavily pressurized.
+        it.value * 1000
+    }
     val gasList = gasFuels.keys.toTypedArray()
 
+    /**
+     * Steam. The value represents the heating value (energy) for 1L of steam IRL.
+     *
+     * We assume a density of 1g/L to harmonize with other mods.
+     */
+    private val steam = mapOf(
+            "steam" to 2.257  // Heat of vaporization: 2.257 J/g
+    ).mapValues {
+        // Unusually, the commonly accepted value (2.2) is pretty much correct. Undo the usual mapping.
+        it.value / Eln.fuelHeatValueFactor
+    }
+    val steamList = steam.keys.toTypedArray()
+
     // All fuels together.
-    private val allFuels = dieselFuels + gasolineFuels + gasFuels
+    private val allFuels = dieselFuels + gasolineFuels + gasFuels + steam
 
     fun fluidListToFluids(fluidNames: Array<String>) =
             fluidNames.map { FluidRegistry.getFluid(it) }.filterNotNull().toTypedArray()
