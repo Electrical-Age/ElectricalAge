@@ -20,9 +20,6 @@ import mods.eln.sim.process.destruct.ThermalLoadWatchDog
 import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
-import mods.eln.sound.LoopedSound
-import mods.eln.sound.SoundCommand
-import mods.eln.sound.SoundLooper
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import org.lwjgl.opengl.GL11
