@@ -1,11 +1,10 @@
 package mods.eln.mechanical
 
 import mods.eln.Eln
-import mods.eln.fluid.ElementFluidHandler
 import mods.eln.fluid.FuelRegistry
+import mods.eln.fluid.PreciseElementFluidHandler
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
-import mods.eln.node.Publishable
 import mods.eln.node.published
 import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
@@ -13,12 +12,9 @@ import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.node.transparent.TransparentNodeEntity
 import mods.eln.sim.IProcess
 import mods.eln.sim.nbt.NbtElectricalGateInput
-import mods.eln.sound.SoundCommand
-import mods.eln.sound.SoundLooper
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.common.util.ForgeDirection
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
@@ -112,7 +108,7 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
         SimpleShaftElement(node, desc_) {
     val desc = desc_ as TurbineDescriptor
 
-    val tank = ElementFluidHandler(1000)
+    val tank = PreciseElementFluidHandler(1000)
     var steamRate = 0f
     var efficiency = 0f
     val turbineSlowProcess = TurbineSlowProcess()
@@ -123,10 +119,6 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
 
     inner class TurbineSlowProcess() : IProcess, INBTTReady {
         val rc = RcInterpolator(desc.inertia)
-
-        // Fixup for only being able to grab 1 mB at a time.
-        // This represents fluid that was drained in a previous tick, but not used.
-        var consumptionFixup = 0f
 
         override fun process(time: Double) {
             // Do anything at all?
@@ -141,13 +133,9 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
                 target = 0f
             }
 
-            val drain = Math.ceil((target - consumptionFixup).toDouble()).toFloat()
-            val drained = tank.drain(ForgeDirection.DOWN, drain.toInt(), true)?.amount?.toFloat() ?: 0f
-            val usable = drained + consumptionFixup
-            val actual = if (usable < target) usable else target
-            consumptionFixup = Math.max(0f, usable - target)
+            val drained = tank.drain(target.toDouble()).toFloat()
 
-            rc.target = actual / time.toFloat()
+            rc.target = drained / time.toFloat()
             rc.step(time.toFloat())
             steamRate = rc.get()
 
