@@ -24,8 +24,6 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     // If you set this you should also set volumeSetting in render.
     // (Otherwise it'll stick to 100% volume.)
     internal open val sound: String? = null
-    internal open val soundVolume = 1f
-    internal open val soundPitch = 1f
 
     open fun draw(angle: Double) {
         for (part in static) {
@@ -78,8 +76,8 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     var volumeSetting = 1f
 
     inner private class ShaftSoundLooper(sound: String, coord: Coordonate) : LoopedSound(sound, coord) {
-        override fun getPitch() = Math.max(0.05, rads / absoluteMaximumShaftSpeed).toFloat() * desc.soundPitch
-        override fun getVolume() = volumeSetting * desc.soundVolume
+        override fun getPitch() = Math.max(0.05, rads / absoluteMaximumShaftSpeed).toFloat()
+        override fun getVolume() = volumeSetting
     }
 
     init {
