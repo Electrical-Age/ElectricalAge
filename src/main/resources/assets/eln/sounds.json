@@ -27,5 +27,3 @@
    "generator": {"category": "block","sounds": [{"name": "generator","stream": false}]},
    "turbine": {"category": "block","sounds": [{"name": "turbine","stream": false}]}
 }
-
-
