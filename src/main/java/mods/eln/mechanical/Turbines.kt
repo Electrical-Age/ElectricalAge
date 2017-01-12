@@ -76,8 +76,7 @@ class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
     override val fluidTypes = arrayOf("steam")
     // Steam turbines can, just barely, be started without power.
     override val efficiencyCurve = 1.1f
-    override val sound = "eln:turbine"
-    override val soundPitch = 0.5f
+    override val sound = "eln:steam_turbine"
 }
 
 class GasTurbineDescriptor(basename: String, obj: Obj3D) :
@@ -101,7 +100,7 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
     override val efficiencyCurve = 2.0f
     // But need to be spun up before working.
     override val efficiencyCutoff = 0.5f
-    override val sound = "eln:turbine"
+    override val sound = "eln:gas_turbine"
 }
 
 class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) :
