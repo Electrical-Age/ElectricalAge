@@ -5,6 +5,8 @@ import mods.eln.fluid.ElementFluidHandler
 import mods.eln.fluid.FuelRegistry
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
+import mods.eln.node.Publishable
+import mods.eln.node.published
 import mods.eln.node.transparent.EntityMetaTag
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
@@ -17,6 +19,8 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraftforge.common.util.ForgeDirection
+import java.io.DataInputStream
+import java.io.DataOutputStream
 
 abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
         SimpleShaftDescriptor(baseName, TurbineElement::class, TurbineRender::class, EntityMetaTag.Fluid) {
@@ -40,8 +44,6 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
     // If efficiency is below this fraction, do nothing.
     open val efficiencyCutoff = 0f
     val optimalRads = absoluteMaximumShaftSpeed * 0.8f
-    // Each turbine gets its own sound.
-    abstract val sound: SoundCommand
 
     override val obj = obj
     override val static = arrayOf(
@@ -78,7 +80,8 @@ class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
     override val fluidTypes = arrayOf("steam")
     // Steam turbines can, just barely, be started without power.
     override val efficiencyCurve = 1.1f
-    override val sound = SoundCommand("eln:turbine").mulVolume(1f, 0.5f)
+    override val sound = "eln:turbine"
+    override val soundPitch = 0.5f
 }
 
 class GasTurbineDescriptor(basename: String, obj: Obj3D) :
@@ -102,7 +105,7 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
     override val efficiencyCurve = 2.0f
     // But need to be spun up before working.
     override val efficiencyCutoff = 0.5f
-    override val sound = SoundCommand("eln:turbine")
+    override val sound = "eln:turbine"
 }
 
 class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) :
@@ -112,23 +115,14 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
     val tank = ElementFluidHandler(1000)
     var steamRate = 0f
     var efficiency = 0f
-    val turbineSlowProcess = TurbineSlowProcess(this)
+    val turbineSlowProcess = TurbineSlowProcess()
 
     internal val throttle = NbtElectricalGateInput("throttle")
 
-    inner class TurbineSlowProcess(turbineElement: TurbineElement) : IProcess, INBTTReady {
-        val rc = RcInterpolator(desc.inertia)
+    internal var volume: Float by published(0f)
 
-        val soundLooper = object : SoundLooper(turbineElement) {
-            override fun mustStart(): SoundCommand? {
-                val pitch = shaft.rads / absoluteMaximumShaftSpeed
-                if (pitch < 0.05) return null
-                return desc.sound.copy().mulVolume(
-                        rc.get() / desc.fluidConsumption,
-                        pitch.toFloat()
-                )
-            }
-        }
+    inner class TurbineSlowProcess() : IProcess, INBTTReady {
+        val rc = RcInterpolator(desc.inertia)
 
         // Fixup for only being able to grab 1 mB at a time.
         // This represents fluid that was drained in a previous tick, but not used.
@@ -159,6 +153,8 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
 
             val power = steamRate * desc.fluidPower * efficiency
             shaft.energy += power * time.toFloat()
+
+            volume = power / (desc.fluidConsumption * desc.fluidPower)
         }
 
         override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
@@ -210,8 +206,18 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
         }
         return info
     }
+
+    override fun networkSerialize(stream: DataOutputStream) {
+        super.networkSerialize(stream)
+        stream.writeFloat(volume)
+    }
 }
 
 class TurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {
     override val cableRender = Eln.instance.stdCableRenderSignal
+
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+        volumeSetting = stream.readFloat()
+    }
 }

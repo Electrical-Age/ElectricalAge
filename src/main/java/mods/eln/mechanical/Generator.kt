@@ -20,6 +20,7 @@ import mods.eln.sim.process.destruct.ThermalLoadWatchDog
 import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
+import mods.eln.sound.LoopedSound
 import mods.eln.sound.SoundCommand
 import mods.eln.sound.SoundLooper
 import net.minecraft.entity.player.EntityPlayer
@@ -49,7 +50,7 @@ class GeneratorDescriptor(
     val nominalP = nominalP
     val nominalU = nominalU
     val generationEfficiency = 0.95
-    val sound = SoundCommand("eln:generator")
+    override val sound = "eln:generator"
 
     init {
         thermalLoadInitializer.setMaximalPower(nominalP.toDouble() * (1 - generationEfficiency))
@@ -140,12 +141,12 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
 		return null
 	}
 
-
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)
-        calcPower(stream.readDouble())
+        val power = stream.readDouble()
+        calcPower(power)
+        volumeSetting = 0.05f + Math.abs(power / desc.nominalP).toFloat()
     }
-
 }
 
 class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
@@ -157,7 +158,7 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
     internal val inputToPositiveResistor = Resistor(inputLoad, positiveLoad)
     internal val electricalPowerSource = VoltageSource("PowerSource", positiveLoad, null)
     internal val electricalProcess = GeneratorElectricalProcess()
-    internal val shaftProcess = GeneratorShaftProcess(this)
+    internal val shaftProcess = GeneratorShaftProcess()
 
     internal val thermal = NbtThermalLoad("thermal")
     internal val heater: ElectricalLoadHeatThermalLoad
@@ -213,21 +214,12 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
         }
     }
 
-    inner class GeneratorShaftProcess(generatorElement: GeneratorElement) : IProcess {
+    inner class GeneratorShaftProcess() : IProcess {
         private var powerFraction = 0.0f
-
-        val soundLooper = object : SoundLooper(generatorElement) {
-            override fun mustStart(): SoundCommand? {
-                val pitch = shaft.rads / absoluteMaximumShaftSpeed
-                if (pitch < 0.05) return null;
-                return desc.sound.copy().mulVolume(Math.abs(powerFraction) + 0.05f, pitch.toFloat())
-            }
-        }
 
         override fun process(time: Double) {
             val p = electricalPowerSource.p
             powerFraction = (p / desc.nominalP).toFloat()
-            soundLooper.process(time)
             var E = p * time
             if (E < 0)
                 E *= 0.75  // Not a very efficient motor.
@@ -282,7 +274,6 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
         return false
     }
-
 
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream)
