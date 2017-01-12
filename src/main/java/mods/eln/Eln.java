@@ -6689,15 +6689,15 @@ public class Eln {
 		addRecipe(findItemStack("Medium Fuel Burner"),
 			"   ",
 			" Cc",
-			"   ",
-			Character.valueOf('C'), findItemStack("Combustion Chamber", 2),
+			" C ",
+			Character.valueOf('C'), findItemStack("Combustion Chamber"),
 			Character.valueOf('c'), findItemStack("Copper Thermal Cable"));
 
 		addRecipe(findItemStack("Medium Fuel Burner"),
 			"   ",
-			" Cc",
-			"   ",
-			Character.valueOf('C'), findItemStack("Combustion Chamber", 4),
+			"CCc",
+			"CC ",
+			Character.valueOf('C'), findItemStack("Combustion Chamber"),
 			Character.valueOf('c'), findItemStack("Copper Thermal Cable"));
 	}
 
