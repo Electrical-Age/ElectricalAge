@@ -663,7 +663,7 @@ public class Eln {
 		{
 			subId = 5;
 			ElectricalPoleDescriptor descriptor =
-					new ElectricalPoleDescriptor("Utility Pole w/Transformer", obj.getObj("UtilityPole"), "textures/wire.png", highVoltageCableDescriptor, true);
+					new ElectricalPoleDescriptor("Utility Pole w/DC-DC Converter", obj.getObj("UtilityPole"), "textures/wire.png", highVoltageCableDescriptor, true);
 			GhostGroup g = new GhostGroup();
 			g.addElement(0, 1, 0);
 			g.addElement(0, 2, 0);
@@ -2654,7 +2654,7 @@ public class Eln {
 
 		{
 			subId = 0;
-			name = TR_NAME(Type.NONE, "Transformer");
+			name = TR_NAME(Type.NONE, "DC-DC Converter");
 
 			TransformerDescriptor desc = new TransformerDescriptor(name, obj.getObj("transformator"), obj.getObj("feromagneticcorea"), 0.5f);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -5498,7 +5498,7 @@ public class Eln {
 
 	void recipeTransformer() {
 		//for (int idx = 0; idx < 4; idx++) {
-			addRecipe(findItemStack("Transformer"),
+			addRecipe(findItemStack("DC-DC Converter"),
 					"C C",
 					"III",
 					Character.valueOf('C'), findItemStack("Copper Cable"),
@@ -5686,18 +5686,17 @@ public class Eln {
 					"WWW",
 					"IWI",
 					" W ",
-					Character.valueOf('W'), "logWood",
 					Character.valueOf('I'), "ingotIron"
 			);
 		}
-		addRecipe(findItemStack("Utility Pole w/Transformer"),
+		addRecipe(findItemStack("Utility Pole w/DC-DC Converter"),
 				"HHH",
 				" TC",
 				" PH",
 				Character.valueOf('P'), findItemStack("Utility Pole"),
 				Character.valueOf('H'), findItemStack("High Voltage Cable"),
 				Character.valueOf('C'), findItemStack("Optimal Ferromagnetic Core"),
-				Character.valueOf('T'), findItemStack("Transformer")
+				Character.valueOf('T'), findItemStack("DC-DC Converter")
 		);
 //		if (oreNames.contains("sheetPlastic")) {
 //			addRecipe(findItemStack("Downlink"),
