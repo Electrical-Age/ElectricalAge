@@ -119,6 +119,7 @@ import mods.eln.solver.ConstSymbole;
 import mods.eln.solver.ISymbole;
 import mods.eln.sound.SoundCommand;
 import mods.eln.transparentnode.FuelGeneratorDescriptor;
+import mods.eln.transparentnode.FuelHeatFurnaceDescriptor;
 import mods.eln.transparentnode.LargeRheostatDescriptor;
 import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
 import mods.eln.transparentnode.battery.BatteryDescriptor;
@@ -290,6 +291,7 @@ public class Eln {
 	public double windTurbinePowerFactor = 1;
 	public double waterTurbinePowerFactor = 1;
 	public double fuelGeneratorPowerFactor = 1;
+	public double fuelHeatFurnacePowerFactor = 1;
 	public int autominerRange = 10;
 
 	public static double cableRsFactor = 1.0;
@@ -301,6 +303,8 @@ public class Eln {
 	double batteryCapacityFactor = 1.;
 
 	public static boolean wailaEasyMode = false;
+
+	public static double fuelHeatValueFactor = 0.0000675;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -383,7 +387,8 @@ public class Eln {
 		windTurbinePowerFactor = config.get("balancing", "windTurbinePowerFactor", 1).getDouble(1);
 		waterTurbinePowerFactor = config.get("balancing", "waterTurbinePowerFactor", 1).getDouble(1);
 		fuelGeneratorPowerFactor = config.get("balancing", "fuelGeneratorPowerFactor", 1).getDouble(1);
-		autominerRange = config.get("balancing", "autominerRange", 10, "Maximum horizontal distance from autominer that will be mined. Modpack devs: Consider increasing this for larger packs.").getInt(10);
+		fuelHeatFurnacePowerFactor = config.get("balancing", "fuelHeatFurnacePowerFactor", 1.0).getDouble();
+		autominerRange = config.get("balancing", "autominerRange", 10, "Maximum horizontal distance from autominer that will be mined").getInt(10);
 
 		Other.ElnToIc2ConversionRatio = config.get("balancing", "ElnToIndustrialCraftConversionRatio", 1.0 / 3.0).getDouble(1.0 / 3.0);
 		Other.ElnToOcConversionRatio = config.get("balancing", "ElnToOpenComputerConversionRatio", 1.0 / 3.0 / 2.5).getDouble(1.0 / 3.0 / 2.5);
@@ -442,6 +447,9 @@ public class Eln {
 		wirelessTxRange = config.get("wireless", "txRange", 32).getInt();
 
 		wailaEasyMode = config.get("balancing", "wailaEasyMode", false, "Display more detailed WAILA info on some machines").getBoolean(false);
+
+		fuelHeatValueFactor = config.get("balancing", "fuelHeatValueFactor", 0.0000675,
+			"Factor to apply when converting real word heat values to Minecraft heat values (1mB = 1l).").getDouble();
 
 		config.save();
 
@@ -591,6 +599,8 @@ public class Eln {
 		registerTransparentNodeMisc(65);
 		registerTurret(66);
 		registerFuelGenerator(67);
+		registerGridDevices(123);
+
 
 		//ITEM REGISTRATION
 		//Sub-UID must be unique in this section only.
@@ -617,7 +627,7 @@ public class Eln {
 		registerMiscItem(120);
 		registerElectricalTool(121);
 		registerPortableItem(122);
-		registerGridDevices(123);
+		registerFuelBurnerItem(124);
 
 		// Register WIP items only on development runs!
 		if (isDevelopmentRun()) {
@@ -787,6 +797,7 @@ public class Eln {
 		recipeCompressor();
 		recipePlateMachine();
 		recipemagnetiser();
+		recipeFuelBurnerItem();
 
 		recipeECoal();
 
@@ -2663,7 +2674,7 @@ public class Eln {
 	}
 
 	void registerHeatFurnace(int id) {
-		int subId, completId;
+		int subId;
 		String name;
 		{
 			subId = 0;
@@ -2679,6 +2690,15 @@ public class Eln {
 							// combustionChamberPower,
 					new ThermalLoadInitializerByPowerDrop(780, -100, 10, 2) // thermal
 			);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 1;
+			name = TR_NAME(Type.NONE, "Fuel Heat Furnace");
+
+			FuelHeatFurnaceDescriptor desc = new FuelHeatFurnaceDescriptor(name,
+				obj.getObj("FuelHeater"), new ThermalLoadInitializerByPowerDrop(780, -100, 10, 2));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -4799,6 +4819,15 @@ public class Eln {
 		}
 	}
 
+	private void registerFuelBurnerItem(int id) {
+		sharedItemStackOne.addElement(0 + (id << 6),
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Small Fuel Burner"), 5000 * fuelHeatFurnacePowerFactor, 2, 1.6f));
+		sharedItemStackOne.addElement(1 + (id << 6),
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Medium Fuel Burner"), 10000 * fuelHeatFurnacePowerFactor, 1, 1.4f));
+		sharedItemStackOne.addElement(2 + (id << 6),
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Big Fuel Burner"), 25000 * fuelHeatFurnacePowerFactor, 0, 1f));
+	}
+
 	void registerMiscItem(int id) {
 		int subId, completId;
 		String name;
@@ -5515,6 +5544,15 @@ public class Eln {
 				Character.valueOf('i'), findItemStack("Copper Thermal Cable"),
 				Character.valueOf('I'), findItemStack("Combustion Chamber"));
 
+		addRecipe(findItemStack("Fuel Heat Furnace"),
+				"IcI",
+				"mCI",
+				"IiI",
+				Character.valueOf('c'), findItemStack("Cheap Chip"),
+				Character.valueOf('m'), findItemStack("Electrical Motor"),
+				Character.valueOf('C'), new ItemStack(Items.cauldron),
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+				Character.valueOf('i'), findItemStack("Copper Thermal Cable"));
 	}
 
 	void recipeTurbine() {
@@ -6637,6 +6675,29 @@ public class Eln {
 				new ItemStack[] { findItemStack("Basic Magnet") }, 5000.0));
 		magnetiserRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", 2),
 				new ItemStack[] { findItemStack("Advanced Magnet") }, 15000.0));
+	}
+
+	void recipeFuelBurnerItem() {
+		addRecipe(findItemStack("Small Fuel Burner"),
+			"   ",
+			" Cc",
+			"   ",
+			Character.valueOf('C'), findItemStack("Combustion Chamber"),
+			Character.valueOf('c'), findItemStack("Copper Thermal Cable"));
+
+		addRecipe(findItemStack("Medium Fuel Burner"),
+			"   ",
+			" Cc",
+			" C ",
+			Character.valueOf('C'), findItemStack("Combustion Chamber"),
+			Character.valueOf('c'), findItemStack("Copper Thermal Cable"));
+
+		addRecipe(findItemStack("Medium Fuel Burner"),
+			"   ",
+			"CCc",
+			"CC ",
+			Character.valueOf('C'), findItemStack("Combustion Chamber"),
+			Character.valueOf('c'), findItemStack("Copper Thermal Cable"));
 	}
 
 	void recipeFurnace() {

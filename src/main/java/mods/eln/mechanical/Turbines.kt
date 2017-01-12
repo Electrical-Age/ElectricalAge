@@ -1,17 +1,20 @@
 package mods.eln.mechanical
 
 import mods.eln.Eln
-import mods.eln.cable.CableRenderDescriptor
+import mods.eln.fluid.ElementFluidHandler
+import mods.eln.fluid.FuelRegistry
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
-import mods.eln.node.transparent.*
+import mods.eln.node.transparent.EntityMetaTag
+import mods.eln.node.transparent.TransparentNode
+import mods.eln.node.transparent.TransparentNodeDescriptor
+import mods.eln.node.transparent.TransparentNodeEntity
 import mods.eln.sim.IProcess
 import mods.eln.sim.nbt.NbtElectricalGateInput
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraftforge.common.util.ForgeDirection
-import net.minecraftforge.fluids.FluidRegistry
 
 abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
         SimpleShaftDescriptor(baseName, TurbineElement::class, TurbineRender::class, EntityMetaTag.Fluid) {
@@ -89,7 +92,7 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
     // to recover the rest by using the heat output. Which doesn't exist right now. To be
     // precise, 80% as efficient.
     override val fluidDescription = "gasoline"
-    override val fluidTypes = gasolineList + gasList
+    override val fluidTypes = FuelRegistry.gasolineList + FuelRegistry.gasList
     // Gas turbines have a fairly wide efficiency range.
     override val efficiencyCurve = 2.0f
     // But need to be spun up before working.
@@ -100,7 +103,7 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
         SimpleShaftElement(node, desc_) {
     val desc = desc_ as TurbineDescriptor
 
-    val tank = TransparentNodeElementFluidHandler(1000)
+    val tank = ElementFluidHandler(1000)
     var steamRate = 0f
     var efficiency = 0f
     val turbineSlowProcess = TurbineSlowProcess()
@@ -151,7 +154,7 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
     }
 
     init {
-        val fluids = fluidListToFluids(if (desc.fluidTypes.isEmpty()) arrayOf("lava") else desc.fluidTypes)
+        val fluids = FuelRegistry.fluidListToFluids(if (desc.fluidTypes.isEmpty()) arrayOf("lava") else desc.fluidTypes)
         tank.setFilter(fluids)
         slowProcessList.add(turbineSlowProcess)
         electricalLoadList.add(throttle)

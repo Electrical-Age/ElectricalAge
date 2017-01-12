@@ -1,4 +1,4 @@
-package mods.eln.node.transparent;
+package mods.eln.fluid;
 
 import mods.eln.misc.INBTTReady;
 import net.minecraft.nbt.NBTTagCompound;
@@ -9,11 +9,8 @@ import net.minecraftforge.fluids.*;
  * Use one of these if you want your block to support Forge fluids!
  *
  * See the steam turbine for an example.
- *
- * TODO: This is not really related to transparent nodes and could probably used with other items too - should we
- * create a package fluid in eln that contains all fluid related code?
  */
-public class TransparentNodeElementFluidHandler implements IFluidHandler, INBTTReady {
+public class ElementFluidHandler implements IFluidHandler, INBTTReady {
     private Fluid[] whitelist;
     FluidTank tank;
 
@@ -22,7 +19,7 @@ public class TransparentNodeElementFluidHandler implements IFluidHandler, INBTTR
      *
      * @param tankSize Tank size, in mB.
      */
-    public TransparentNodeElementFluidHandler(int tankSize) {
+    public ElementFluidHandler(int tankSize) {
         tank = new FluidTank(tankSize);
     }
 
