@@ -293,10 +293,14 @@ public class Utils {
 		return plotEnergy("E", E) + plotRads("R", R);
 	}
 
+	public static String plotPower(double value) {
+		return plotValue(value, "W  ");
+	}
+
 	public static String plotPower(String header, double value) {
 		if (!header.equals(""))
 			header += " ";
-		return header + plotValue(value, "W  ");
+		return header + plotPower(value);
 	}
 
 	public static String plotOhm(String header, double value) {
