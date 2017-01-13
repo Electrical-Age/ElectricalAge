@@ -98,9 +98,9 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
     override val fluidDescription = "gasoline"
     // It runs on puns.
     override val fluidTypes = FuelRegistry.gasolineList + FuelRegistry.gasList
-    // Gas turbines have a fairly wide efficiency range.
-    override val efficiencyCurve = 2.0f
-    // But need to be spun up before working.
+    // Gas turbines are finicky about turbine speed.
+    override val efficiencyCurve = 0.5f
+    // And need to be spun up before working.
     override val efficiencyCutoff = 0.5f
     override val sound = "eln:gas_turbine"
 }
