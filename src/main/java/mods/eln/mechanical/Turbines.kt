@@ -35,6 +35,16 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
     // If efficiency is below this fraction, do nothing.
     open val efficiencyCutoff = 0f
     val optimalRads = absoluteMaximumShaftSpeed * 0.8f
+    // Power stats
+    val power: List<Double> by lazy {
+        fluidTypes.map { FuelRegistry.heatEnergyPerMilliBucket(it) * fluidConsumption }
+    }
+    val maxFluidPower: Double by lazy {
+        power.max() ?: 0.0
+    }
+    val minFluidPower: Double by lazy {
+        power.min() ?: 0.0
+    }
 
     override val obj = obj
     override val static = arrayOf(
@@ -47,16 +57,15 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
     )
 
     override fun addInformation(stack: ItemStack, player: EntityPlayer, list: MutableList<String>, par4: Boolean) {
-        val power = fluidTypes.map { FuelRegistry.heatEnergyPerMilliBucket(it) * fluidConsumption }
         list.add("Converts ${fluidDescription} into mechanical energy.")
         list.add("Nominal usage ->")
         list.add("  ${fluidDescription.capitalize()} input: ${fluidConsumption} mB/s")
         if (power.isEmpty()) {
-            list.add("  No valid fluids for this turbine")
+            list.add("  No valid fluids for this turbine!")
         } else if (power.size == 1) {
             list.add(Utils.plotPower("  Power out: ", power[0]))
         } else {
-            list.add("  Power out: ${Utils.plotPower(power.min() ?: 0.0)}- ${Utils.plotPower(power.max() ?: 0.0)}")
+            list.add("  Power out: ${Utils.plotPower(minFluidPower)}- ${Utils.plotPower(maxFluidPower)}")
         }
         list.add(Utils.plotRads("  Optimal rads: ", optimalRads))
         list.add(Utils.plotRads("Max rads:  ", absoluteMaximumShaftSpeed))
@@ -119,22 +128,22 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
             if (computedEfficiency >= desc.efficiencyCutoff) {
                 efficiency = computedEfficiency.toFloat()
                 val th = if (throttle.connectedComponents.count() > 0) throttle.normalized else 1.0
-                target = (desc.fluidConsumption * time * th).toFloat()
+                target = (desc.fluidConsumption * th).toFloat()
             } else {
                 efficiency = 0f
                 target = 0f
             }
 
-            val drained = tank.drain(target.toDouble()).toFloat()
+            val drained = tank.drain(target * time).toFloat()
 
-            rc.target = drained / time.toFloat()
+            rc.target = (drained / time).toFloat()
             rc.step(time.toFloat())
             fluidRate = rc.get()
 
             val power = fluidRate * tank.heatEnergyPerMilliBucket * efficiency
             shaft.energy += power * time.toFloat()
 
-            volume = fluidRate / desc.fluidConsumption
+            volume = power / desc.maxFluidPower.toFloat()
         }
 
         override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
