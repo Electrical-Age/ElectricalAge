@@ -30,6 +30,7 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
     }
 
     public float getHeatEnergyPerMilliBucket() {
+        if (fluid_heat_mb == 0 && tank.getFluid() != null) setHeatEnergyPerMilliBucket(tank.getFluid().getFluid());
         return fluid_heat_mb;
     }
 
