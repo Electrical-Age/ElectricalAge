@@ -282,7 +282,7 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
 
     val sound = object : LoopedSound("eln:fuelheatfurnace", coordonate()) {
         override fun getPitch() = FuelBurnerDescriptor.pitchForType(type)
-        override fun getVolume() = if (heatPower > 0) 0.01f + 0.0001f * heatPower else 0f
+        override fun getVolume() = if (heatPower > 0) 0.01f + 0.00001f * heatPower else 0f
     }
 
     init {
