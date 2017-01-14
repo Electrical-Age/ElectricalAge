@@ -23,7 +23,8 @@
    "TurretFire": {"category": "block", "sounds": [{"name": "TurretFire", "stream": false}]},
    "FuelGenerator": {"category": "block", "sounds": [{"name": "FuelGenerator", "stream": false}]},
    "FireAlarm": {"category": "block", "sounds": [{"name": "FireAlarm", "stream": false}]},
-   "fuelheatfurnace": {"category": "block", "sounds": [{"name": "fuelheatfurnace", "stream": false}]}
+   "fuelheatfurnace": {"category": "block", "sounds": [{"name": "fuelheatfurnace", "stream": false}]},
+   "generator": {"category": "block","sounds": [{"name": "generator","stream": false}]},
+   "gas_turbine": {"category": "block","sounds": [{"name": "gas_turbine","stream": false}]},
+   "steam_turbine": {"category": "block","sounds": [{"name": "steam_turbine","stream": false}]}
 }
-
-

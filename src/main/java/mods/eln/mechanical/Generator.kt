@@ -47,6 +47,7 @@ class GeneratorDescriptor(
     val nominalP = nominalP
     val nominalU = nominalU
     val generationEfficiency = 0.95
+    override val sound = "eln:generator"
 
     init {
         thermalLoadInitializer.setMaximalPower(nominalP.toDouble() * (1 - generationEfficiency))
@@ -137,12 +138,12 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
 		return null
 	}
 
-
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)
-        calcPower(stream.readDouble())
+        val power = stream.readDouble()
+        calcPower(power)
+        volumeSetting = 0.05f + Math.abs(power / desc.nominalP).toFloat()
     }
-
 }
 
 class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
@@ -180,7 +181,6 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
         heater = ElectricalLoadHeatThermalLoad(inputLoad, thermal)
         thermalFastProcessList.add(heater)
 
-        // TODO: Add whine. Sound's good.
         // TODO: Add running lights. (More. Electrical sparks, perhaps?)
         // TODO: Add the thermal explosions—there should be some.
     }
@@ -211,9 +211,13 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
         }
     }
 
-    inner class GeneratorShaftProcess: IProcess {
+    inner class GeneratorShaftProcess() : IProcess {
+        private var powerFraction = 0.0f
+
         override fun process(time: Double) {
-            var E = electricalPowerSource.getP() * time
+            val p = electricalPowerSource.p
+            powerFraction = (p / desc.nominalP).toFloat()
+            var E = p * time
             if (E < 0)
                 E *= 0.75  // Not a very efficient motor.
             maybePublishE(E / time)
@@ -267,7 +271,6 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
         return false
     }
-
 
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream)

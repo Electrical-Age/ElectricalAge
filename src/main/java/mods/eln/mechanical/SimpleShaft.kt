@@ -6,6 +6,7 @@ import mods.eln.cable.CableRenderType
 import mods.eln.misc.*
 import mods.eln.node.transparent.*
 import mods.eln.sim.process.destruct.WorldExplosion
+import mods.eln.sound.LoopedSound
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraftforge.client.IItemRenderer
@@ -20,6 +21,9 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     abstract val obj: Obj3D
     abstract val static: Array<out Obj3D.Obj3DPart>
     abstract val rotating: Array<out Obj3D.Obj3DPart>
+    // If you set this you should also set volumeSetting in render.
+    // (Otherwise it'll stick to 100% volume.)
+    internal open val sound: String? = null
 
     open fun draw(angle: Double) {
         for (part in static) {
@@ -67,6 +71,24 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     var connectionType: CableRenderType? = null
     open val cableRender: CableRenderDescriptor? = null
     var cableRefresh = true
+    // Sound:
+    private val soundLooper: ShaftSoundLooper?
+    var volumeSetting = 1f
+
+    inner private class ShaftSoundLooper(sound: String, coord: Coordonate) : LoopedSound(sound, coord) {
+        override fun getPitch() = Math.max(0.05, rads / absoluteMaximumShaftSpeed).toFloat()
+        override fun getVolume() = volumeSetting
+    }
+
+    init {
+        val sound = this.desc.sound
+        if (sound != null) {
+            soundLooper = ShaftSoundLooper(sound, coordonate())
+            addLoopedSound(soundLooper)
+        } else {
+            soundLooper = null
+        }
+    }
 
     init {
         mask.set(LRDU.Down, true)

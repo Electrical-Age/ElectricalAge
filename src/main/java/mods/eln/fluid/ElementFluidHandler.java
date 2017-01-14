@@ -12,6 +12,7 @@ import net.minecraftforge.fluids.*;
  */
 public class ElementFluidHandler implements IFluidHandler, INBTTReady {
     private Fluid[] whitelist;
+    private float fluid_heat_mb = 0;
     FluidTank tank;
 
     /**
@@ -28,19 +29,34 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
         this.whitelist = whitelist;
     }
 
+    public float getHeatEnergyPerMilliBucket() {
+        if (fluid_heat_mb == 0 && tank.getFluid() != null) setHeatEnergyPerMilliBucket(tank.getFluid().getFluid());
+        return fluid_heat_mb;
+    }
+
+    private void setHeatEnergyPerMilliBucket(Fluid fluid) {
+        fluid_heat_mb = (float) FuelRegistry.INSTANCE.heatEnergyPerMilliBucket(fluid);
+    }
+
     @Override
     public int fill(ForgeDirection from, FluidStack resource, boolean doFill) {
-        if (whitelist == null || tank.getFluidAmount() > 0) {
+        if (tank.getFluidAmount() > 0) {
+            // No change in type of fluid.
+            return tank.fill(resource, doFill);
+        } else if (whitelist == null) {
+            // May have a different fluid.
+            setHeatEnergyPerMilliBucket(resource.getFluid());
             return tank.fill(resource, doFill);
         } else {
             int resourceId = resource.getFluidID();
             for (int i = 0; i < whitelist.length; i++) {
                 if (whitelist[i].getID() == resourceId) {
+                    setHeatEnergyPerMilliBucket(resource.getFluid());
                     return tank.fill(resource, doFill);
                 }
             }
+            return 0;
         }
-        return 0;
     }
 
     @Override
@@ -84,6 +100,7 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
     @Override
     public void readFromNBT(NBTTagCompound nbt, String str) {
         tank.readFromNBT(nbt.getCompoundTag(str + "tank"));
+        fluid_heat_mb = nbt.getFloat(str + "fhm");
     }
 
     @Override
@@ -91,5 +108,6 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
         NBTTagCompound t = new NBTTagCompound();
         tank.writeToNBT(t);
         nbt.setTag(str + "tank", t);
+        nbt.setFloat(str + "fhm", fluid_heat_mb);
     }
 }
