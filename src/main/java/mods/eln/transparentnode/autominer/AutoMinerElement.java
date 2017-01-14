@@ -30,29 +30,26 @@ import java.util.Map;
 
 public class AutoMinerElement extends TransparentNodeElement  {
 
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this);
+	final TransparentNodeElementInventory inventory =
+		new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this);
 	
-	NbtElectricalLoad inPowerLoad = new NbtElectricalLoad("inPowerLoad");
-	AutoMinerSlowProcess slowProcess = new AutoMinerSlowProcess(this);
-	Resistor powerResistor = new Resistor(inPowerLoad,null);
+	final NbtElectricalLoad inPowerLoad = new NbtElectricalLoad("inPowerLoad");
+	private final AutoMinerSlowProcess slowProcess = new AutoMinerSlowProcess(this);
+	final Resistor powerResistor = new Resistor(inPowerLoad,null);
 
-	//VoltageWatchdogProcessForInventoryItemDamageSingleLoad electricalDrillWatchDog = new VoltageWatchdogProcessForInventoryItemDamageSingleLoad(inventory, AutoMinerContainer.electricalDrillSlotId, inPowerLoad);
-	//VoltageWatchdogProcessForInventoryItemDamageSingleLoad electricalScannerWatchDog = new VoltageWatchdogProcessForInventoryItemDamageSingleLoad(inventory, AutoMinerContainer.OreScannerSlotId, inPowerLoad);
-	
-	AutoMinerDescriptor descriptor;
+	final AutoMinerDescriptor descriptor;
 	
 	Coordonate lightCoordonate;
 
-    VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
+    private final VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
 
-    ArrayList<AutoMinerPowerNode> powerNodeList = new ArrayList<AutoMinerPowerNode>();
+    private final ArrayList<AutoMinerPowerNode> powerNodeList = new ArrayList<AutoMinerPowerNode>();
 
     boolean powerOk = false;
 
 	// Network IDs.
     public static final byte pushLogId = 1;
 	public static final byte toggleSilkTouch = 2;
-
 
 	public AutoMinerElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
@@ -107,7 +104,6 @@ public class AutoMinerElement extends TransparentNodeElement  {
 			else
 				dir = front.right();
 			
-			//dir = front;
 			n.onBlockPlacedBy(c, dir, null, null);
 			
 			powerNodeList.add(n);
@@ -142,7 +138,7 @@ public class AutoMinerElement extends TransparentNodeElement  {
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		return new AutoMinerContainer(node, player, inventory);
+		return new AutoMinerContainer(player, inventory);
 	}
 	
 	@Override
@@ -155,14 +151,9 @@ public class AutoMinerElement extends TransparentNodeElement  {
 		if (UUID == descriptor.getGhostGroupUuid()) {
 			super.ghostDestroyed(UUID);
 		}
-		slowProcess.ghostDestroyed(UUID);
+		slowProcess.ghostDestroyed();
 	}
-/*
-	@Override
-	public boolean ghostBlockActivated(int UUID, EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		return super.ghostBlockActivated(UUID, entityPlayer, side, vx, vy, vz);
-	}*/
-	
+
 	@Override
 	public void networkSerialize(DataOutputStream stream) {
 		super.networkSerialize(stream);
