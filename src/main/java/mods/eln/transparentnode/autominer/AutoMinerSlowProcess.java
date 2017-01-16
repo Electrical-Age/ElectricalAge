@@ -8,6 +8,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import mods.eln.ore.OreBlock;
+import mods.eln.ore.OreRegistry;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.lampsocket.LightBlockEntity;
 import net.minecraft.block.Block;
@@ -18,6 +19,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.world.World;
 
 import java.util.List;
 
@@ -333,7 +335,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         }
     }
 
-    private void setJob(jobType job) {
+    void setJob(jobType job) {
         if (job != this.job) {
             miner.needPublish();
             energyCounter = 0;
@@ -341,13 +343,13 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         this.job = job;
     }
 
-    private boolean checkIsOre(Coordonate coordonate) {
+    boolean checkIsOre(Coordonate coordonate) {
         Block block = coordonate.world().getBlock(coordonate.x, coordonate.y, coordonate.z);
+        if (OreRegistry.INSTANCE.isOre(block)) return true;
         if (block instanceof BlockOre) return true;
         if (block instanceof OreBlock) return true;
         if (block instanceof BlockRedstoneOre) return true;
-        if (PortableOreScannerItem.RenderStorage.getBlockKeyFactor()[Block.getIdFromBlock(block) +
-            (coordonate.world().getBlockMetadata(coordonate.x, coordonate.y, coordonate.z) << 12)] != 0)
+        if (PortableOreScannerItem.RenderStorage.getBlockKeyFactor()[Block.getIdFromBlock(block) + (coordonate.world().getBlockMetadata(coordonate.x, coordonate.y, coordonate.z) << 12)] != 0)
             return true;
         return false;
     }
@@ -356,14 +358,15 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         destroyPipe();
     }
 
-    private void destroyPipe() {
+    void destroyPipe() {
         dropPipe();
         Eln.ghostManager.removeGhostAndBlockWithObserverAndNotUuid(miner.node.coordonate, miner.descriptor.getGhostGroupUuid());
         pipeLength = 0;
         miner.needPublish();
     }
 
-    private void dropPipe() {
+    void dropPipe() {
+        World world = miner.node.coordonate.world();
         Coordonate coord = new Coordonate(miner.node.coordonate);
         for (coord.y = miner.node.coordonate.y - 1; coord.y >= miner.node.coordonate.y - pipeLength; coord.y--) {
             Utils.dropItem(Eln.miningPipeDescriptor.newItemStack(1), coord);
