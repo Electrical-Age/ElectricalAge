@@ -2876,7 +2876,7 @@ public class Eln {
 					maceratorRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-			desc.setRuningSound(new SoundCommand("eln:macerator", 1.5).mulVolume(0.2));
+			desc.setRunningSound("eln:macerator");
 		}
 
 		{
@@ -2892,7 +2892,7 @@ public class Eln {
 					maceratorRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-			desc.setRuningSound(new SoundCommand("eln:macerator", 1.5).mulVolume(0.2));
+			desc.setRunningSound("eln:macerator");
 		}
 	}
 
@@ -2976,7 +2976,7 @@ public class Eln {
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 
-			desc.setRuningSound(new SoundCommand("eln:compressor", 1.6).mulVolume(0.3));
+			desc.setRunningSound("eln:compressor");
 		}
 
 		{
@@ -2994,7 +2994,7 @@ public class Eln {
 					compressorRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-			desc.setRuningSound(new SoundCommand("eln:compressor", 1.6).mulVolume(0.3));
+			desc.setRunningSound("eln:compressor");
 		}
 	}
 
@@ -3019,7 +3019,7 @@ public class Eln {
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 
-			desc.setRuningSound(new SoundCommand("eln:Motor", 1.6).mulVolume(0.3));
+			desc.setRunningSound("eln:Motor");
 		}
 
 		{
@@ -3038,7 +3038,7 @@ public class Eln {
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 
-			desc.setRuningSound(new SoundCommand("eln:Motor", 1.6).mulVolume(0.3));
+			desc.setRunningSound("eln:Motor");
 		}
 	}
 
