@@ -1,29 +1,27 @@
 package mods.eln.node.six;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import org.lwjgl.opengl.GL11;
-
-import mods.eln.Eln;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
 import mods.eln.client.ClientProxy;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.LRDUMask;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
+import mods.eln.misc.*;
+import mods.eln.sound.LoopedSound;
 import mods.eln.sound.SoundCommand;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.tileentity.TileEntity;
+import org.lwjgl.opengl.GL11;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class SixNodeElementRender {
 	public SixNodeEntity tileEntity;
@@ -220,6 +218,10 @@ public abstract class SixNodeElementRender {
 		UtilsClient.glDeleteListsSafe(cableList[1]);
 		UtilsClient.glDeleteListsSafe(cableList[2]);
 		UtilsClient.glDeleteListsSafe(cableList[3]);
+
+		for (LoopedSound loopedSound: loopedSoundList) {
+			loopedSound.setActive(false);
+		}
 	}
 
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player)
@@ -402,8 +404,20 @@ public abstract class SixNodeElementRender {
 		needRedraw = true;
 	}
 
-	public void refresh(float deltaT) {
+	private final List<LoopedSound> loopedSoundList = new ArrayList<LoopedSound>();
 
+	@SideOnly(Side.CLIENT)
+	protected void addLoopedSound(final LoopedSound loopedSound) {
+		if (loopedSound.getActive() && !loopedSoundList.contains(loopedSound)) {
+			loopedSoundList.add(loopedSound);
+		}
 	}
 
+	public void refresh(float deltaT) {
+		SoundHandler sh = Minecraft.getMinecraft().getSoundHandler();
+		for (LoopedSound loopedSound : loopedSoundList) {
+			if (!sh.isSoundPlaying(loopedSound))
+				sh.playSound(loopedSound);
+		}
+	}
 }
