@@ -3,25 +3,18 @@ package mods.eln.transparentnode.autominer;
 import mods.eln.Eln;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
-import mods.eln.item.electricalitem.PortableOreScannerItem;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
-import mods.eln.ore.OreBlock;
-import mods.eln.ore.OreRegistry;
+import mods.eln.ore.OreUtilities;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.lampsocket.LightBlockEntity;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockOre;
-import net.minecraft.block.BlockRedstoneOre;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.world.World;
-
-import java.util.List;
 
 public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 
@@ -94,17 +87,8 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                 switch (job) {
                     case ore:
                         drillCount++;
-
-                        Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
-                        int meta = jobCoord.world().getBlockMetadata(jobCoord.x, jobCoord.y, jobCoord.z);
-                        if (silkTouch) {
-                            drop(new ItemStack(block, 1, meta));
-                        } else {
-                            List<ItemStack> drop = block.getDrops(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0);
-
-                            for (ItemStack stack : drop) {
-                                drop(stack);
-                            }
+                        for (ItemStack stack : OreUtilities.INSTANCE.getBlockDrops(silkTouch, jobCoord)) {
+                            drop(stack);
                         }
 
                         // Use cobblestone instead of air, everywhere except the mining shaft.
@@ -221,18 +205,18 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         return chestEntity;
     }
 
-    private void drop(ItemStack stack) {
+    public void drop(ItemStack stack) {
         Utils.tryPutStackInInventory(stack, getDropInventory(), 0, 36);
     }
 
-    private boolean isMinable(Block block) {
+    boolean isMinable(Block block) {
         return block != Blocks.air
             && (block) != Blocks.flowing_water && (block) != Blocks.water
             && (block) != Blocks.flowing_lava && (block) != Blocks.lava
             && (block) != Blocks.obsidian && (block) != Blocks.bedrock;
     }
 
-    private void setupJob() {
+    void setupJob() {
         ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
         // OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.OreScannerSlotId));
         MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
@@ -244,7 +228,6 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         jobCoord.x = miner.node.coordonate.x;
         jobCoord.y = miner.node.coordonate.y - pipeLength;
         jobCoord.z = miner.node.coordonate.z;
-
         boolean jobFind = false;
         if (!miner.node.coordonate.getBlockExist()) {
             setJob(jobType.none);
@@ -278,7 +261,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         double dz = jobCoord.z - miner.node.coordonate.z;
                         double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
                         Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
-                        if (checkIsOre(jobCoord) || (distance > 0.1 && distance < miningRay && isMinable(block))) {
+                        if ((OreUtilities.INSTANCE.isOre(jobCoord)) || (distance > 0.1 && distance < miningRay && isMinable(block))) {
                             jobFind = true;
                             setJob(jobType.ore);
                             break;
@@ -343,17 +326,6 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         this.job = job;
     }
 
-    boolean checkIsOre(Coordonate coordonate) {
-        Block block = coordonate.world().getBlock(coordonate.x, coordonate.y, coordonate.z);
-        if (OreRegistry.INSTANCE.isOre(block)) return true;
-        if (block instanceof BlockOre) return true;
-        if (block instanceof OreBlock) return true;
-        if (block instanceof BlockRedstoneOre) return true;
-        if (PortableOreScannerItem.RenderStorage.getBlockKeyFactor()[Block.getIdFromBlock(block) + (coordonate.world().getBlockMetadata(coordonate.x, coordonate.y, coordonate.z) << 12)] != 0)
-            return true;
-        return false;
-    }
-
     public void onBreakElement() {
         destroyPipe();
     }
@@ -366,7 +338,6 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     }
 
     void dropPipe() {
-        World world = miner.node.coordonate.world();
         Coordonate coord = new Coordonate(miner.node.coordonate);
         for (coord.y = miner.node.coordonate.y - 1; coord.y >= miner.node.coordonate.y - pipeLength; coord.y--) {
             Utils.dropItem(Eln.miningPipeDescriptor.newItemStack(1), coord);
