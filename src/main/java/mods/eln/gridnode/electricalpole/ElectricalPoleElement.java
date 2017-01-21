@@ -18,10 +18,9 @@ import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad;
-import mods.eln.sound.SoundCommand;
-import mods.eln.sound.SoundLooper;
 
 import java.io.DataOutputStream;
+import java.io.IOException;
 
 // TODO: I should probably just make the transformer variant a subclass.
 public class ElectricalPoleElement extends GridElement {
@@ -37,7 +36,6 @@ public class ElectricalPoleElement extends GridElement {
     ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
     VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
     float secondaryMaxCurrent = 0;
-    SoundLooper highLoadSoundLooper;
     VoltageStateWatchDog voltageSecondaryWatchdog;
 
     public ElectricalPoleElement(TransparentNode node, TransparentNodeDescriptor descriptor) {
@@ -87,19 +85,6 @@ public class ElectricalPoleElement extends GridElement {
             electricalComponentList.add(primaryVoltageSource);
             electricalComponentList.add(secondaryVoltageSource);
             slowProcessList.add(voltageSecondaryWatchdog.set(secondaryLoad).set(exp));
-
-            highLoadSoundLooper = new SoundLooper(this) {
-                @Override
-                public SoundCommand mustStart() {
-                    if (secondaryMaxCurrent != 0) {
-                        float load = (float) (secondaryLoad.getI() / secondaryMaxCurrent);
-                        if (load > desc.minimalLoadToHum)
-                            return desc.highLoadSound.copy().mulVolume(0.2f * (load - desc.minimalLoadToHum) / (1 - desc.minimalLoadToHum), 1f).smallRange();
-                    }
-                    return null;
-                }
-            };
-            slowProcessList.add(highLoadSoundLooper);
         }
     }
 
@@ -170,5 +155,10 @@ public class ElectricalPoleElement extends GridElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
+        try {
+            stream.writeFloat((float) (secondaryLoad.getI() / secondaryMaxCurrent));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
