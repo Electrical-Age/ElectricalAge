@@ -16,11 +16,11 @@ import net.minecraft.world.World
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
 class SixNodeWailaProvider: IWailaDataProvider {
-    private fun getSixData(accessor: IWailaDataAccessor): Map<String, String>? {
+    private fun getSixData(accessor: IWailaDataAccessor): SixNodeWailaData? {
         val coord = Coordonate(accessor.position.blockX, accessor.position.blockY, accessor.position.blockZ,
                 accessor.world)
         val side = Direction.from(accessor.side)
-        var sixData: Map<String, String>? = null
+        var sixData: SixNodeWailaData? = null
     try {
             sixData = WailaCache.sixNodes.get(SixNodeCoordonate(coord, side))
         } catch(e: CacheLoader.InvalidCacheLoadException) {}
@@ -30,14 +30,15 @@ class SixNodeWailaProvider: IWailaDataProvider {
 
     override fun getWailaBody(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor,
                               config: IWailaConfigHandler?): MutableList<String> {
-        getSixData(accessor)?.forEach {
+        getSixData(accessor)?.data?.forEach {
             currenttip.add("${it.key}: ${SpecialChars.WHITE}${it.value}")
         }
 
         return currenttip
     }
 
-    override fun getWailaStack(accessor: IWailaDataAccessor?, config: IWailaConfigHandler?): ItemStack? = null
+    override fun getWailaStack(accessor: IWailaDataAccessor, config: IWailaConfigHandler?): ItemStack?
+            = getSixData(accessor)?.itemStack
 
     override fun getWailaTail(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor?,
                               config: IWailaConfigHandler?): MutableList<String> = currenttip
@@ -45,6 +46,10 @@ class SixNodeWailaProvider: IWailaDataProvider {
     override fun getNBTData(player: EntityPlayerMP?, te: TileEntity?, tag: NBTTagCompound?, world: World?,
                             x: Int, y: Int, z: Int): NBTTagCompound?= null
 
-    override fun getWailaHead(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor?,
-                              config: IWailaConfigHandler?): MutableList<String> = currenttip
+    override fun getWailaHead(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor,
+                              config: IWailaConfigHandler?): MutableList<String> = if (itemStack != null) {
+        mutableListOf("${SpecialChars.WHITE}${itemStack.displayName}")
+    } else {
+        currenttip
+    }
 }

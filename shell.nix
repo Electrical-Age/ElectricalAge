@@ -9,7 +9,9 @@ with xlibs; stdenv.mkDerivation {
 
   buildInputs = [ gradle jdk ];
 
-  libraries = stdenv.lib.makeLibraryPath [ stdenv.cc.cc libX11 libXext libXcursor libXrandr libXxf86vm mesa openal ];
+  libraries = stdenv.lib.makeLibraryPath [
+    stdenv.cc.cc libX11 libXext libXcursor libXrandr libXxf86vm mesa openal libpulseaudio
+  ];
 
   shellHook = ''
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$libraries

@@ -119,6 +119,7 @@ import mods.eln.solver.ConstSymbole;
 import mods.eln.solver.ISymbole;
 import mods.eln.sound.SoundCommand;
 import mods.eln.transparentnode.FuelGeneratorDescriptor;
+import mods.eln.transparentnode.FuelHeatFurnaceDescriptor;
 import mods.eln.transparentnode.LargeRheostatDescriptor;
 import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
 import mods.eln.transparentnode.battery.BatteryDescriptor;
@@ -290,6 +291,7 @@ public class Eln {
 	public double windTurbinePowerFactor = 1;
 	public double waterTurbinePowerFactor = 1;
 	public double fuelGeneratorPowerFactor = 1;
+	public double fuelHeatFurnacePowerFactor = 1;
 	public int autominerRange = 10;
 
 	public static double cableRsFactor = 1.0;
@@ -301,6 +303,8 @@ public class Eln {
 	double batteryCapacityFactor = 1.;
 
 	public static boolean wailaEasyMode = false;
+
+	public static double fuelHeatValueFactor = 0.0000675;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -383,7 +387,8 @@ public class Eln {
 		windTurbinePowerFactor = config.get("balancing", "windTurbinePowerFactor", 1).getDouble(1);
 		waterTurbinePowerFactor = config.get("balancing", "waterTurbinePowerFactor", 1).getDouble(1);
 		fuelGeneratorPowerFactor = config.get("balancing", "fuelGeneratorPowerFactor", 1).getDouble(1);
-		autominerRange = config.get("balancing", "autominerRange", 10, "Maximum horizontal distance from autominer that will be mined. Modpack devs: Consider increasing this for larger packs.").getInt(10);
+		fuelHeatFurnacePowerFactor = config.get("balancing", "fuelHeatFurnacePowerFactor", 1.0).getDouble();
+		autominerRange = config.get("balancing", "autominerRange", 10, "Maximum horizontal distance from autominer that will be mined").getInt(10);
 
 		Other.ElnToIc2ConversionRatio = config.get("balancing", "ElnToIndustrialCraftConversionRatio", 1.0 / 3.0).getDouble(1.0 / 3.0);
 		Other.ElnToOcConversionRatio = config.get("balancing", "ElnToOpenComputerConversionRatio", 1.0 / 3.0 / 2.5).getDouble(1.0 / 3.0 / 2.5);
@@ -442,6 +447,9 @@ public class Eln {
 		wirelessTxRange = config.get("wireless", "txRange", 32).getInt();
 
 		wailaEasyMode = config.get("balancing", "wailaEasyMode", false, "Display more detailed WAILA info on some machines").getBoolean(false);
+
+		fuelHeatValueFactor = config.get("balancing", "fuelHeatValueFactor", 0.0000675,
+			"Factor to apply when converting real word heat values to Minecraft heat values (1mB = 1l).").getDouble();
 
 		config.save();
 
@@ -591,6 +599,8 @@ public class Eln {
 		registerTransparentNodeMisc(65);
 		registerTurret(66);
 		registerFuelGenerator(67);
+		registerGridDevices(123);
+
 
 		//ITEM REGISTRATION
 		//Sub-UID must be unique in this section only.
@@ -617,7 +627,7 @@ public class Eln {
 		registerMiscItem(120);
 		registerElectricalTool(121);
 		registerPortableItem(122);
-		registerGridDevices(123);
+		registerFuelBurnerItem(124);
 
 		// Register WIP items only on development runs!
 		if (isDevelopmentRun()) {
@@ -663,7 +673,7 @@ public class Eln {
 		{
 			subId = 5;
 			ElectricalPoleDescriptor descriptor =
-					new ElectricalPoleDescriptor("Utility Pole w/Transformer", obj.getObj("UtilityPole"), "textures/wire.png", highVoltageCableDescriptor, true);
+					new ElectricalPoleDescriptor("Utility Pole w/DC-DC Converter", obj.getObj("UtilityPole"), "textures/wire.png", highVoltageCableDescriptor, true);
 			GhostGroup g = new GhostGroup();
 			g.addElement(0, 1, 0);
 			g.addElement(0, 2, 0);
@@ -787,6 +797,7 @@ public class Eln {
 		recipeCompressor();
 		recipePlateMachine();
 		recipemagnetiser();
+		recipeFuelBurnerItem();
 
 		recipeECoal();
 
@@ -2131,7 +2142,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Lead Fuse for low voltage cables");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, LVP / LVU, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, lowVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
@@ -2139,7 +2150,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Lead Fuse for medium voltage cables");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, MVP / MVU, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, meduimVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
@@ -2147,7 +2158,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Lead Fuse for high voltage cables");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, HVP / HVU, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, highVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
@@ -2155,7 +2166,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Lead Fuse for very high voltage cables");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, VVP / VVU, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, veryHighVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
 			sharedItem.addElement(subId + (id << 6), desc);
 		}
 		{
@@ -2163,7 +2174,7 @@ public class Eln {
 
 			name = TR_NAME(Type.NONE, "Blown Lead Fuse");
 
-			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, -1, obj.getObj("ElectricalFuse"));
+			ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, null, obj.getObj("ElectricalFuse"));
 			ElectricalFuseDescriptor.Companion.setBlownFuse(desc);
 			sharedItem.addWithoutRegistry(subId + (id << 6), desc);
 		}
@@ -2654,7 +2665,7 @@ public class Eln {
 
 		{
 			subId = 0;
-			name = TR_NAME(Type.NONE, "Transformer");
+			name = TR_NAME(Type.NONE, "DC-DC Converter");
 
 			TransformerDescriptor desc = new TransformerDescriptor(name, obj.getObj("transformator"), obj.getObj("feromagneticcorea"), 0.5f);
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -2663,7 +2674,7 @@ public class Eln {
 	}
 
 	void registerHeatFurnace(int id) {
-		int subId, completId;
+		int subId;
 		String name;
 		{
 			subId = 0;
@@ -2679,6 +2690,15 @@ public class Eln {
 							// combustionChamberPower,
 					new ThermalLoadInitializerByPowerDrop(780, -100, 10, 2) // thermal
 			);
+			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+		}
+
+		{
+			subId = 1;
+			name = TR_NAME(Type.NONE, "Fuel Heat Furnace");
+
+			FuelHeatFurnaceDescriptor desc = new FuelHeatFurnaceDescriptor(name,
+				obj.getObj("FuelHeater"), new ThermalLoadInitializerByPowerDrop(780, -100, 10, 2));
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -4799,6 +4819,15 @@ public class Eln {
 		}
 	}
 
+	private void registerFuelBurnerItem(int id) {
+		sharedItemStackOne.addElement(0 + (id << 6),
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Small Fuel Burner"), 5000 * fuelHeatFurnacePowerFactor, 2, 1.6f));
+		sharedItemStackOne.addElement(1 + (id << 6),
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Medium Fuel Burner"), 10000 * fuelHeatFurnacePowerFactor, 1, 1.4f));
+		sharedItemStackOne.addElement(2 + (id << 6),
+			new FuelBurnerDescriptor(I18N.TR_NAME(Type.NONE, "Big Fuel Burner"), 25000 * fuelHeatFurnacePowerFactor, 0, 1f));
+	}
+
 	void registerMiscItem(int id) {
 		int subId, completId;
 		String name;
@@ -5498,7 +5527,7 @@ public class Eln {
 
 	void recipeTransformer() {
 		//for (int idx = 0; idx < 4; idx++) {
-			addRecipe(findItemStack("Transformer"),
+			addRecipe(findItemStack("DC-DC Converter"),
 					"C C",
 					"III",
 					Character.valueOf('C'), findItemStack("Copper Cable"),
@@ -5515,6 +5544,15 @@ public class Eln {
 				Character.valueOf('i'), findItemStack("Copper Thermal Cable"),
 				Character.valueOf('I'), findItemStack("Combustion Chamber"));
 
+		addRecipe(findItemStack("Fuel Heat Furnace"),
+				"IcI",
+				"mCI",
+				"IiI",
+				Character.valueOf('c'), findItemStack("Cheap Chip"),
+				Character.valueOf('m'), findItemStack("Electrical Motor"),
+				Character.valueOf('C'), new ItemStack(Items.cauldron),
+				Character.valueOf('I'), new ItemStack(Items.iron_ingot),
+				Character.valueOf('i'), findItemStack("Copper Thermal Cable"));
 	}
 
 	void recipeTurbine() {
@@ -5544,41 +5582,27 @@ public class Eln {
 				" ME",
 				Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
 				Character.valueOf('M'), findItemStack("Advanced Machine Block"),
-				Character.valueOf('a'), "ingotAluminum",
+				Character.valueOf('a'), firstExistingOre("ingotAluminum", "ingotIron"),
 				Character.valueOf('E'), findItemStack("High Voltage Cable")
 		);
 		addRecipe(findItemStack("Steam Turbine"),
 				" a ",
 				"aAa",
 				" M ",
-				Character.valueOf('a'), "ingotAluminum",
-				Character.valueOf('A'), "blockAluminum",
+				Character.valueOf('a'), firstExistingOre("ingotAluminum", "ingotIron"),
+				Character.valueOf('A'), firstExistingOre("blockAluminum", "blockIron"),
 				Character.valueOf('M'), findItemStack("Advanced Machine Block")
 		);
-		// TODO(Baughn): Factor this into a builder.
-		if (OreDictionary.doesOreNameExist("ingotSteel") && OreDictionary.doesOreNameExist("blockSteel")) {
-			addRecipe(findItemStack("Gas Turbine"),
-					"msH",
-					"sSs",
-					" M ",
-					Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
-					Character.valueOf('H'), findItemStack("Copper Thermal Cable"),
-					Character.valueOf('s'), "ingotSteel",
-					Character.valueOf('S'), "blockSteel",
-					Character.valueOf('M'), findItemStack("Advanced Machine Block")
-			);
-		} else {
-			addRecipe(findItemStack("Gas Turbine"),
-					"msH",
-					"sSs",
-					" M ",
-					Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
-					Character.valueOf('H'), findItemStack("Copper Thermal Cable"),
-					Character.valueOf('s'), "ingotIron",
-					Character.valueOf('S'), "blockIron",
-					Character.valueOf('M'), findItemStack("Advanced Machine Block")
-			);
-		}
+		addRecipe(findItemStack("Gas Turbine"),
+				"msH",
+				"sSs",
+				" M ",
+				Character.valueOf('m'), findItemStack("Advanced Electrical Motor"),
+				Character.valueOf('H'), findItemStack("Copper Thermal Cable"),
+				Character.valueOf('s'), firstExistingOre("ingotSteel", "ingotIron"),
+				Character.valueOf('S'), firstExistingOre("blockSteel", "blockIron"),
+				Character.valueOf('M'), findItemStack("Advanced Machine Block")
+		);
 
 		addRecipe(findItemStack("Joint"),
 			"   ",
@@ -5700,18 +5724,17 @@ public class Eln {
 					"WWW",
 					"IWI",
 					" W ",
-					Character.valueOf('W'), "logWood",
 					Character.valueOf('I'), "ingotIron"
 			);
 		}
-		addRecipe(findItemStack("Utility Pole w/Transformer"),
+		addRecipe(findItemStack("Utility Pole w/DC-DC Converter"),
 				"HHH",
 				" TC",
 				" PH",
 				Character.valueOf('P'), findItemStack("Utility Pole"),
 				Character.valueOf('H'), findItemStack("High Voltage Cable"),
 				Character.valueOf('C'), findItemStack("Optimal Ferromagnetic Core"),
-				Character.valueOf('T'), findItemStack("Transformer")
+				Character.valueOf('T'), findItemStack("DC-DC Converter")
 		);
 //		if (oreNames.contains("sheetPlastic")) {
 //			addRecipe(findItemStack("Downlink"),
@@ -6654,6 +6677,29 @@ public class Eln {
 				new ItemStack[] { findItemStack("Advanced Magnet") }, 15000.0));
 	}
 
+	void recipeFuelBurnerItem() {
+		addRecipe(findItemStack("Small Fuel Burner"),
+			"   ",
+			" Cc",
+			"   ",
+			Character.valueOf('C'), findItemStack("Combustion Chamber"),
+			Character.valueOf('c'), findItemStack("Copper Thermal Cable"));
+
+		addRecipe(findItemStack("Medium Fuel Burner"),
+			"   ",
+			" Cc",
+			" C ",
+			Character.valueOf('C'), findItemStack("Combustion Chamber"),
+			Character.valueOf('c'), findItemStack("Copper Thermal Cable"));
+
+		addRecipe(findItemStack("Medium Fuel Burner"),
+			"   ",
+			"CCc",
+			"CC ",
+			Character.valueOf('C'), findItemStack("Combustion Chamber"),
+			Character.valueOf('c'), findItemStack("Copper Thermal Cable"));
+	}
+
 	void recipeFurnace() {
 
 		ItemStack in;
@@ -7385,6 +7431,16 @@ public class Eln {
 
 	public ItemStack findItemStack(String name) {
 		return findItemStack(name, 1);
+	}
+
+	public String firstExistingOre(String... oreNames) {
+		for (String oreName: oreNames) {
+			if (OreDictionary.doesOreNameExist(oreName)) {
+				return oreName;
+			}
+		}
+
+		return "";
 	}
 
 	public boolean isDevelopmentRun() {

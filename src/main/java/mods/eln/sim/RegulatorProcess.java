@@ -14,7 +14,7 @@ public abstract class RegulatorProcess implements IProcess, INBTTReady {
 	boolean boot = true;
 	String name;
 	
-	public void setManuel() {
+	public void setManual() {
 		type = RegulatorType.Manual;
 	}
 	

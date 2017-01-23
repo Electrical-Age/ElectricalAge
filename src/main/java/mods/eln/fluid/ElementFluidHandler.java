@@ -1,4 +1,4 @@
-package mods.eln.node.transparent;
+package mods.eln.fluid;
 
 import mods.eln.misc.INBTTReady;
 import net.minecraft.nbt.NBTTagCompound;
@@ -9,12 +9,10 @@ import net.minecraftforge.fluids.*;
  * Use one of these if you want your block to support Forge fluids!
  *
  * See the steam turbine for an example.
- *
- * TODO: This is not really related to transparent nodes and could probably used with other items too - should we
- * create a package fluid in eln that contains all fluid related code?
  */
-public class TransparentNodeElementFluidHandler implements IFluidHandler, INBTTReady {
+public class ElementFluidHandler implements IFluidHandler, INBTTReady {
     private Fluid[] whitelist;
+    private float fluid_heat_mb = 0;
     FluidTank tank;
 
     /**
@@ -22,7 +20,7 @@ public class TransparentNodeElementFluidHandler implements IFluidHandler, INBTTR
      *
      * @param tankSize Tank size, in mB.
      */
-    public TransparentNodeElementFluidHandler(int tankSize) {
+    public ElementFluidHandler(int tankSize) {
         tank = new FluidTank(tankSize);
     }
 
@@ -31,19 +29,34 @@ public class TransparentNodeElementFluidHandler implements IFluidHandler, INBTTR
         this.whitelist = whitelist;
     }
 
+    public float getHeatEnergyPerMilliBucket() {
+        if (fluid_heat_mb == 0 && tank.getFluid() != null) setHeatEnergyPerMilliBucket(tank.getFluid().getFluid());
+        return fluid_heat_mb;
+    }
+
+    private void setHeatEnergyPerMilliBucket(Fluid fluid) {
+        fluid_heat_mb = (float) FuelRegistry.INSTANCE.heatEnergyPerMilliBucket(fluid);
+    }
+
     @Override
     public int fill(ForgeDirection from, FluidStack resource, boolean doFill) {
-        if (whitelist == null || tank.getFluidAmount() > 0) {
+        if (tank.getFluidAmount() > 0) {
+            // No change in type of fluid.
+            return tank.fill(resource, doFill);
+        } else if (whitelist == null) {
+            // May have a different fluid.
+            setHeatEnergyPerMilliBucket(resource.getFluid());
             return tank.fill(resource, doFill);
         } else {
             int resourceId = resource.getFluidID();
             for (int i = 0; i < whitelist.length; i++) {
                 if (whitelist[i].getID() == resourceId) {
+                    setHeatEnergyPerMilliBucket(resource.getFluid());
                     return tank.fill(resource, doFill);
                 }
             }
+            return 0;
         }
-        return 0;
     }
 
     @Override
@@ -87,6 +100,7 @@ public class TransparentNodeElementFluidHandler implements IFluidHandler, INBTTR
     @Override
     public void readFromNBT(NBTTagCompound nbt, String str) {
         tank.readFromNBT(nbt.getCompoundTag(str + "tank"));
+        fluid_heat_mb = nbt.getFloat(str + "fhm");
     }
 
     @Override
@@ -94,5 +108,6 @@ public class TransparentNodeElementFluidHandler implements IFluidHandler, INBTTR
         NBTTagCompound t = new NBTTagCompound();
         tank.writeToNBT(t);
         nbt.setTag(str + "tank", t);
+        nbt.setFloat(str + "fhm", fluid_heat_mb);
     }
 }

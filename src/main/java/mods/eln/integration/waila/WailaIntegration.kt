@@ -18,6 +18,8 @@ object WailaIntegration {
         registrar.registerBodyProvider(ghostNodeProvider, mods.eln.ghost.GhostBlock::class.java)
         registrar.registerStackProvider(ghostNodeProvider, mods.eln.ghost.GhostBlock::class.java)
 
+        registrar.registerHeadProvider(sixNodeProvider, mods.eln.node.six.SixNodeBlock::class.java)
         registrar.registerBodyProvider(sixNodeProvider, mods.eln.node.six.SixNodeBlock::class.java)
+        registrar.registerStackProvider(sixNodeProvider, mods.eln.node.six.SixNodeBlock::class.java)
     }
 }
