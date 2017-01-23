@@ -1,10 +1,13 @@
 package mods.eln.transparentnode.autominer;
 
 import mods.eln.i18n.I18N;
+import mods.eln.item.ElectricalDrillDescriptor;
+import mods.eln.item.MiningPipeDescriptor;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.node.AutoAcceptInventoryProxy;
 import mods.eln.node.NodeBase;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -30,8 +33,12 @@ import java.util.Map;
 
 public class AutoMinerElement extends TransparentNodeElement  {
 
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this);
-	
+	AutoAcceptInventoryProxy inventory =
+		(new AutoAcceptInventoryProxy(new TransparentNodeElementInventory(AutoMinerContainer.inventorySize, 64, this)))
+			.acceptIfIncrement(2, 64, MiningPipeDescriptor.class)
+			.acceptIfEmpty(0, ElectricalDrillDescriptor.class);
+
+
 	NbtElectricalLoad inPowerLoad = new NbtElectricalLoad("inPowerLoad");
 	AutoMinerSlowProcess slowProcess = new AutoMinerSlowProcess(this);
 	Resistor powerResistor = new Resistor(inPowerLoad,null);
@@ -132,7 +139,7 @@ public class AutoMinerElement extends TransparentNodeElement  {
     
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		return false;
+		return inventory.take(entityPlayer.getCurrentEquippedItem());
 	}
 
 	@Override
@@ -142,12 +149,12 @@ public class AutoMinerElement extends TransparentNodeElement  {
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		return new AutoMinerContainer(node, player, inventory);
+		return new AutoMinerContainer(node, player, inventory.getInventory());
 	}
 	
 	@Override
 	public IInventory getInventory() {
-		return inventory;
+		return inventory.getInventory();
 	}	
     
 	@Override

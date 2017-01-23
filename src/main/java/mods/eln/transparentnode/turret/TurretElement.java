@@ -8,6 +8,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.node.AutoAcceptInventoryProxy;
 import mods.eln.node.NodeBase;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -48,7 +49,9 @@ public class TurretElement extends TransparentNodeElement {
 	final NbtElectricalLoad load = new NbtElectricalLoad("load");
 	final NbtResistor powerResistor = new NbtResistor("powerResistor", load, null);
 
-    final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 64, this);
+    final AutoAcceptInventoryProxy acceptingInventory =
+		(new AutoAcceptInventoryProxy(new TransparentNodeElementInventory(1, 64, this)))
+		.acceptAlways(0, 1, new AutoAcceptInventoryProxy.SimpleItemDropper(node), EntitySensorFilterDescriptor.class);
 
 	public TurretElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
@@ -148,7 +151,7 @@ public class TurretElement extends TransparentNodeElement {
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
 			float vx, float vy, float vz) {
-		return false;
+		return acceptingInventory.take(entityPlayer.getCurrentEquippedItem());
 	}
 	
 	@Override
@@ -161,7 +164,7 @@ public class TurretElement extends TransparentNodeElement {
     		stream.writeBoolean(simulation.inSeekMode());
     		stream.writeBoolean(simulation.isShooting());
     		stream.writeBoolean(simulation.isEnabled());
-            Utils.serialiseItemStack(stream, inventory.getStackInSlot(TurretContainer.filterId));
+            Utils.serialiseItemStack(stream, acceptingInventory.getInventory().getStackInSlot(TurretContainer.filterId));
             stream.writeBoolean(filterIsSpare);
             stream.writeFloat((float) chargePower);
  		} catch (IOException e) {
@@ -192,12 +195,12 @@ public class TurretElement extends TransparentNodeElement {
 
     @Override
     public IInventory getInventory() {
-        return inventory;
+        return acceptingInventory.getInventory();
     }
 
     @Override
     public Container newContainer(Direction side, EntityPlayer player) {
-        return new TurretContainer(player, inventory);
+        return new TurretContainer(player, acceptingInventory.getInventory());
     }
 
     @Override
@@ -235,7 +238,7 @@ public class TurretElement extends TransparentNodeElement {
 		Map<String, String> info = new HashMap<String, String>();
 		info.put(I18N.tr("Charge power"), Utils.plotPower("", chargePower));
 
-		ItemStack filterStack = inventory.getStackInSlot(TurretContainer.filterId);
+		ItemStack filterStack = acceptingInventory.getInventory().getStackInSlot(TurretContainer.filterId);
 		if(filterStack != null) {
 			GenericItemUsingDamageDescriptor gen = EntitySensorFilterDescriptor.getDescriptor(filterStack);
 			if (gen != null && gen instanceof EntitySensorFilterDescriptor) {

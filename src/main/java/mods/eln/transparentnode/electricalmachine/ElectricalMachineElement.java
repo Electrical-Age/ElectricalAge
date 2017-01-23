@@ -2,9 +2,12 @@ package mods.eln.transparentnode.electricalmachine;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.item.MachineBoosterDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.node.AutoAcceptInventoryProxy;
+import mods.eln.node.IInventoryChangeListener;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodePeriodicPublishProcess;
 import mods.eln.node.transparent.TransparentNode;
@@ -32,6 +35,7 @@ import java.util.Map;
 public class ElectricalMachineElement extends TransparentNodeElement implements ElectricalStackMachineProcessObserver {
 
 	TransparentNodeElementInventory inventory;
+	AutoAcceptInventoryProxy booterAccepter;
 
 	NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");	
 	Resistor electricalResistor = new Resistor(electricalLoad,null);	
@@ -59,6 +63,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		inSlotId += this.descriptor.outStackCount;
 		boosterSlotId += this.descriptor.outStackCount;
 		inventory = new ElectricalMachineInventory(2 + this.descriptor.outStackCount, 64, this);
+		booterAccepter = new AutoAcceptInventoryProxy(inventory)
+			.acceptIfIncrement(this.descriptor.outStackCount + 1, 5, MachineBoosterDescriptor.class);
 		
 		slowRefreshProcess = new ElectricalStackMachineProcess(
 				inventory, inSlotId, outSlotId, this.descriptor.outStackCount,
@@ -154,7 +160,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		return false;
+		return booterAccepter.take(entityPlayer.getCurrentEquippedItem(), (IInventoryChangeListener) this);
 	}
 
 	public void networkSerialize(java.io.DataOutputStream stream) {

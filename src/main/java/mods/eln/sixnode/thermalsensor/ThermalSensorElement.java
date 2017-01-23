@@ -5,6 +5,8 @@ import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.node.AutoAcceptInventoryProxy;
+import mods.eln.node.IInventoryChangeListener;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -19,6 +21,7 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.thermalcable.ThermalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -37,7 +40,7 @@ public class ThermalSensorElement extends SixNodeElement {
     public NbtElectricalGateOutputProcess outputGateProcess = new NbtElectricalGateOutputProcess("outputGateProcess", outputGate);
     public ThermalSensorProcess slowProcess = new ThermalSensorProcess(this);
 
-    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+    AutoAcceptInventoryProxy inventory;
 
     static final byte powerType = 0, temperatureType = 1;
     int typeOfSensor = temperatureType;
@@ -54,10 +57,18 @@ public class ThermalSensorElement extends SixNodeElement {
 		slowProcessList.add(slowProcess);
 
 		this.descriptor = (ThermalSensorDescriptor) descriptor;
+
+		if (this.descriptor.temperatureOnly) {
+			 inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this)))
+				.acceptIfEmpty(0, ThermalCableDescriptor.class, ElectricalCableDescriptor.class);
+		} else {
+			inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this)))
+				.acceptIfEmpty(0, ThermalCableDescriptor.class);
+		}
 	}
     
-	public SixNodeElementInventory getInventory() {
-		return inventory;
+	public IInventory getInventory() {
+		return inventory.getInventory();
 	}
 
 	public static boolean canBePlacedOnSide(Direction side, int type) {
@@ -93,7 +104,7 @@ public class ThermalSensorElement extends SixNodeElement {
 	@Override
 	public ThermalLoad getThermalLoad(LRDU lrdu) {
 		if (!descriptor.temperatureOnly) {
-			if (inventory.getStackInSlot(ThermalSensorContainer.cableSlotId) != null) {
+			if (getInventory().getStackInSlot(ThermalSensorContainer.cableSlotId) != null) {
 				if (front.left() == lrdu) return thermalLoad;
 				if (front.right() == lrdu) return thermalLoad;
 			}
@@ -106,7 +117,7 @@ public class ThermalSensorElement extends SixNodeElement {
 	@Override
 	public int getConnectionMask(LRDU lrdu) {
 		if (!descriptor.temperatureOnly) {
-			if (inventory.getStackInSlot(ThermalSensorContainer.cableSlotId) != null) {
+			if (getInventory().getStackInSlot(ThermalSensorContainer.cableSlotId) != null) {
 				if (front.left() == lrdu) return NodeBase.maskThermal;
 				if (front.right() == lrdu) return NodeBase.maskThermal;
 			}
@@ -124,7 +135,7 @@ public class ThermalSensorElement extends SixNodeElement {
 
 	@Override
 	public String multiMeterString() {
-		return ""; // Utils.plotUIP(electricalLoad.Uc, electricalLoad.getCurrent());
+		return "";
 	}
 
 	@Override
@@ -138,7 +149,7 @@ public class ThermalSensorElement extends SixNodeElement {
 					break;
 
 				case powerType:
-					info.put(I18N.tr("Measured thermic power"), Utils.plotPower("", thermalLoad.getPower()));
+					info.put(I18N.tr("Measured thermal power"), Utils.plotPower("", thermalLoad.getPower()));
 					break;
 			}
 		}
@@ -157,7 +168,7 @@ public class ThermalSensorElement extends SixNodeElement {
 			stream.writeByte((front.toInt() << 4) + typeOfSensor);
 			stream.writeFloat(lowValue);
 			stream.writeFloat(highValue);
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(ThermalSensorContainer.cableSlotId));
+			Utils.serialiseItemStack(stream, getInventory().getStackInSlot(ThermalSensorContainer.cableSlotId));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -177,7 +188,7 @@ public class ThermalSensorElement extends SixNodeElement {
 	}
 
 	public void computeElectricalLoad() {
-		ItemStack cable = inventory.getStackInSlot(ThermalSensorContainer.cableSlotId);
+		ItemStack cable = getInventory().getStackInSlot(ThermalSensorContainer.cableSlotId);
 
 		SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(cable);
 		if (descriptor == null) return;
@@ -196,12 +207,12 @@ public class ThermalSensorElement extends SixNodeElement {
 	}
 
 	boolean isItemThermalCable() {
-		SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(inventory.getStackInSlot(ThermalSensorContainer.cableSlotId));
+		SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(getInventory().getStackInSlot(ThermalSensorContainer.cableSlotId));
 		return descriptor != null && descriptor.getClass() == ThermalCableDescriptor.class;
 	}
 
 	boolean isItemElectricalCable() {
-		SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(inventory.getStackInSlot(ThermalSensorContainer.cableSlotId));
+		SixNodeDescriptor descriptor = Eln.sixNodeItem.getDescriptor(getInventory().getStackInSlot(ThermalSensorContainer.cableSlotId));
 		return descriptor != null && descriptor.getClass() == ElectricalCableDescriptor.class;
 	}
 
@@ -222,12 +233,8 @@ public class ThermalSensorElement extends SixNodeElement {
 		}
 		if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
 			return false;
-		} else {
-			// setSwitchState(true);
-			// return true;
 		}
-		// front = LRDU.fromInt((front.toInt()+1)&3);
-		return false;
+		return inventory.take(entityPlayer.getCurrentEquippedItem(), (IInventoryChangeListener) this);
 	}
 
 	@Override
@@ -258,6 +265,6 @@ public class ThermalSensorElement extends SixNodeElement {
 
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		return new ThermalSensorContainer(player, inventory, descriptor.temperatureOnly);
+		return new ThermalSensorContainer(player, inventory.getInventory(), descriptor.temperatureOnly);
 	}
 }

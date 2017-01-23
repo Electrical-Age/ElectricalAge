@@ -2,10 +2,13 @@ package mods.eln.sixnode.batterycharger;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.item.MachineBoosterDescriptor;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.node.AutoAcceptInventoryProxy;
+import mods.eln.node.IPublishable;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -39,7 +42,12 @@ public class BatteryChargerElement extends SixNodeElement {
 	public BatteryChargerSlowProcess slowProcess = new BatteryChargerSlowProcess();
 	Resistor powerResistor = new Resistor(powerLoad, null);
 
-	SixNodeElementInventory inventory = new SixNodeElementInventory(5, 64, this);
+	AutoAcceptInventoryProxy inventory = (new AutoAcceptInventoryProxy(new SixNodeElementInventory(5, 64, this)))
+		.acceptIfEmpty(0, IItemEnergyBattery.class)
+		.acceptIfEmpty(1, IItemEnergyBattery.class)
+		.acceptIfEmpty(2, IItemEnergyBattery.class)
+		.acceptIfEmpty(3, IItemEnergyBattery.class)
+		.acceptIfIncrement(4, 5, MachineBoosterDescriptor.class);
 
 	VoltageStateWatchDog voltageWatchDog = new VoltageStateWatchDog();
 	ResistorPowerWatchdog powerWatchDog = new ResistorPowerWatchdog();
@@ -56,12 +64,12 @@ public class BatteryChargerElement extends SixNodeElement {
 
     @Override
 	public IInventory getInventory() {
-		return inventory;
+		return inventory.getInventory();
 	}
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		return new BatteryChargerContainer(player, inventory);
+		return new BatteryChargerContainer(player, inventory.getInventory());
 	}
 
 	public BatteryChargerElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
@@ -135,7 +143,7 @@ public class BatteryChargerElement extends SixNodeElement {
 			sixNode.setNeedPublish(true);
 			return true;	
 		}
-		return false;
+		return inventory.take(entityPlayer.getCurrentEquippedItem(), (IPublishable) this);
 	}
 
 	@Override
@@ -179,10 +187,10 @@ public class BatteryChargerElement extends SixNodeElement {
 		try {
 			stream.writeBoolean(powerOn);
 			stream.writeFloat((float) powerLoad.getU());
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(0));
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(1));
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(2));
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(3));
+			Utils.serialiseItemStack(stream, getInventory().getStackInSlot(0));
+			Utils.serialiseItemStack(stream, getInventory().getStackInSlot(1));
+			Utils.serialiseItemStack(stream, getInventory().getStackInSlot(2));
+			Utils.serialiseItemStack(stream, getInventory().getStackInSlot(3));
 			
 			stream.writeByte(charged);
 			stream.writeByte(presence);
@@ -208,7 +216,7 @@ public class BatteryChargerElement extends SixNodeElement {
 			if (!powerOn) {
 				descriptor.setRp(powerResistor, false);
 			} else {
-				ItemStack booster = (inventory.getStackInSlot(BatteryChargerContainer.boosterSlotId));
+				ItemStack booster = (getInventory().getStackInSlot(BatteryChargerContainer.boosterSlotId));
 				double boost = 1.0;
 				double eff = 1.0;
 				if (booster != null) {
@@ -219,7 +227,7 @@ public class BatteryChargerElement extends SixNodeElement {
 				energyCounter += powerResistor.getP() * time * eff;
 				
 				for (int idx = 0; idx < 4; idx++) {
-					ItemStack stack = inventory.getStackInSlot(idx);
+					ItemStack stack = getInventory().getStackInSlot(idx);
 					Object o = Utils.getItemObject(stack);
 					if (o instanceof IItemEnergyBattery) {
 						IItemEnergyBattery b = (IItemEnergyBattery) o;
@@ -238,7 +246,7 @@ public class BatteryChargerElement extends SixNodeElement {
 				}
 			}
 			for (int idx = 0; idx < 4; idx++) {
-				ItemStack stack = inventory.getStackInSlot(idx);
+				ItemStack stack = getInventory().getStackInSlot(idx);
 				Object o = Utils.getItemObject(stack);
 				if (o instanceof IItemEnergyBattery) {
 					IItemEnergyBattery b = (IItemEnergyBattery) o;

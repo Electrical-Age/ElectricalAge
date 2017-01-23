@@ -17,7 +17,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -49,7 +48,7 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
 			boolean useSpeed = element.descriptor.useEntitySpeed;
 			double speedFactor = element.descriptor.speedFactor;
 			Coordonate coord = element.sixNode.coordonate;
-			ItemStack filterStack = element.inventory.getStackInSlot(ElectricalEntitySensorContainer.filterId);
+			ItemStack filterStack = element.getInventory().getStackInSlot(ElectricalEntitySensorContainer.filterId);
 			
 			Class filterClass = EntityLivingBase.class;
 

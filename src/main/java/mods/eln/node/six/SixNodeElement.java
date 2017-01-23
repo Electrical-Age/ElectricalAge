@@ -3,7 +3,8 @@ package mods.eln.node.six;
 import mods.eln.Eln;
 import mods.eln.ghost.GhostObserver;
 import mods.eln.misc.*;
-import mods.eln.node.Publishable;
+import mods.eln.node.IInventoryChangeListener;
+import mods.eln.node.IPublishable;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalConnection;
@@ -29,7 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class SixNodeElement implements GhostObserver, IPlayer, Publishable {
+public abstract class SixNodeElement implements GhostObserver, IPlayer, IPublishable, IInventoryChangeListener {
 	//private static Class[] idToClass = new Class[256];
 	//private static Class[] idToRenderClass = new Class[256];
 
@@ -53,10 +54,12 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, Publisha
 		return 0;
 	}
 
-	protected void inventoryChanged() {
-		
-
+	@Override
+	public void inventoryChange(IInventory inventory) {
+		inventoryChanged();
 	}
+
+	protected void inventoryChanged() {}
 
 	public void play(SoundCommand s) {
 		s.addUuid(getUuid());

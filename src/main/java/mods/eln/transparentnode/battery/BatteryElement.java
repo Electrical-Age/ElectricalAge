@@ -2,9 +2,12 @@ package mods.eln.transparentnode.battery;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.item.OverHeatingProtectionDescriptor;
+import mods.eln.item.OverVoltageProtectionDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.node.AutoAcceptInventoryProxy;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
@@ -54,7 +57,10 @@ public class BatteryElement extends TransparentNodeElement {
 	
 	NbtBatterySlowProcess batterySlowProcess = new NbtBatterySlowProcess(node, batteryProcess, thermalLoad);
 
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2, 64, this);
+	AutoAcceptInventoryProxy inventory =
+		(new AutoAcceptInventoryProxy(new TransparentNodeElementInventory(2, 64, this)))
+		.acceptIfEmpty(0, OverVoltageProtectionDescriptor.class)
+		.acceptIfEmpty(1, OverHeatingProtectionDescriptor.class);
 
     boolean fromNBT = false;
 
@@ -102,15 +108,15 @@ public class BatteryElement extends TransparentNodeElement {
 
     @Override
     public IInventory getInventory() {
-        return inventory;
+        return inventory.getInventory();
     }
 
 	public boolean hasOverVoltageProtection() {
-		return inventory.getStackInSlot(0) != null;
+		return getInventory().getStackInSlot(0) != null;
 	}
 	
 	public boolean hasOverHeatingProtection() {
-		return inventory.getStackInSlot(1) != null;
+		return getInventory().getStackInSlot(1) != null;
 	}
 	
 	@Override
@@ -192,7 +198,7 @@ public class BatteryElement extends TransparentNodeElement {
 	
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		return false;
+		return inventory.take(entityPlayer.getCurrentEquippedItem());
 	}
 	
 	@Override
@@ -215,7 +221,7 @@ public class BatteryElement extends TransparentNodeElement {
 	
 	@Override
 	public Container newContainer(Direction side, EntityPlayer player) {
-		return new BatteryContainer(this.node, player, inventory);
+		return new BatteryContainer(this.node, player, getInventory());
 	}
 
 	@Override

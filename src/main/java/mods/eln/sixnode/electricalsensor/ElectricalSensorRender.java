@@ -1,4 +1,4 @@
-package mods.eln.sixnode.electricasensor;
+package mods.eln.sixnode.electricalsensor;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
