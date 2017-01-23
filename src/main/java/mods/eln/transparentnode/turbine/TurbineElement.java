@@ -44,7 +44,6 @@ public class TurbineElement extends TransparentNodeElement{
 	public VoltageSource electricalPowerSourceProcess = new VoltageSource("PowerSource",positiveLoad,null); 
 	public TurbineThermalProcess turbineThermaltProcess = new TurbineThermalProcess(this);
 	public TurbineElectricalProcess turbineElectricalProcess = new TurbineElectricalProcess(this);
-	public TurbineSlowProcess turbineSlowProcess = new TurbineSlowProcess(this);
 	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 1, this);
 	
 	
@@ -64,8 +63,7 @@ public class TurbineElement extends TransparentNodeElement{
     	
     
     	//electricalProcessList.add(turbineElectricalProcess);
-    	slowProcessList.add(turbineSlowProcess);
-    	
+
     	electricalComponentList.add(electricalPowerSourceProcess);
     	thermalFastProcessList.add(turbineThermaltProcess);
     
