@@ -2720,27 +2720,10 @@ public class Eln {
 			double nominalU = LVU;
 			double nominalP = 300*heatTurbinePowerFactor;
 			double nominalDeltaT = 250;
-			TurbineDescriptor desc = new TurbineDescriptor(
-					name,
-					"turbineb",
-					"Miaouuuu turbine",// int iconId, String name,String
-										// description,
-					lowVoltageCableDescriptor.render,
-					TtoU.duplicate(nominalDeltaT, nominalU),
-					PoutToPin.duplicate(nominalP, nominalP), nominalDeltaT,
-					nominalU,
-					nominalP,
-					nominalP / 40,// double nominalDeltaT, double
-									// nominalU,nominalP,double nominalPowerLost
-					nominalU * 1.3,
-					lowVoltageCableDescriptor.electricalRs * RsFactor,
-					lowVoltageCableDescriptor.electricalRp,
-					lowVoltageCableDescriptor.electricalC / RsFactor,// ElectricalCableDescriptor
-																		// electricalCable,
-					25.0, nominalDeltaT / 40, // double thermalC,double
-												// DeltaTForInput
-					nominalP / (nominalU / 25),
-					new SoundCommand("eln:heat_turbine_50v", 2).mulVolume(1.5).mulVolume(2));
+			TurbineDescriptor desc = new TurbineDescriptor(name, "turbineb", lowVoltageCableDescriptor.render,
+				TtoU.duplicate(nominalDeltaT, nominalU), PoutToPin.duplicate(nominalP, nominalP), nominalDeltaT,
+				nominalU, nominalP, nominalP / 40, lowVoltageCableDescriptor.electricalRs * RsFactor, 25.0,
+				nominalDeltaT / 40, nominalP / (nominalU / 25), "eln:heat_turbine_50v");
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -2751,27 +2734,10 @@ public class Eln {
 			double nominalU = MVU;
 			double nominalP = 500*heatTurbinePowerFactor;
 			double nominalDeltaT = 350;
-			TurbineDescriptor desc = new TurbineDescriptor(
-					name,
-					"turbinebblue",
-					"Miaouuuu turbine",// int iconId, String name,String
-										// description,
-					meduimVoltageCableDescriptor.render,
-					TtoU.duplicate(nominalDeltaT, nominalU),
-					PoutToPin.duplicate(nominalP, nominalP), nominalDeltaT,
-					nominalU,
-					nominalP,
-					nominalP / 40,// double nominalDeltaT, double
-									// nominalU,nominalP,double nominalPowerLost
-					nominalU * 1.3,
-					meduimVoltageCableDescriptor.electricalRs * RsFactor,
-					meduimVoltageCableDescriptor.electricalRp,
-					meduimVoltageCableDescriptor.electricalC / RsFactor,// ElectricalCableDescriptor
-																		// electricalCable,
-					50.0, nominalDeltaT / 40, // double thermalC,double
-												// DeltaTForInput
-					nominalP / (nominalU / 25),
-					new SoundCommand("eln:heat_turbine_200v", 2).mulVolume(2));
+			TurbineDescriptor desc = new TurbineDescriptor(name,"turbinebblue", meduimVoltageCableDescriptor.render,
+				TtoU.duplicate(nominalDeltaT, nominalU), PoutToPin.duplicate(nominalP, nominalP), nominalDeltaT,
+				nominalU, nominalP, nominalP / 40, meduimVoltageCableDescriptor.electricalRs * RsFactor, 50.0,
+				nominalDeltaT / 40, nominalP / (nominalU / 25), "eln:heat_turbine_200v");
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 		}
 
@@ -2910,7 +2876,7 @@ public class Eln {
 					maceratorRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-			desc.setRuningSound(new SoundCommand("eln:macerator", 1.5).mulVolume(0.2));
+			desc.setRunningSound("eln:macerator");
 		}
 
 		{
@@ -2926,7 +2892,7 @@ public class Eln {
 					maceratorRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-			desc.setRuningSound(new SoundCommand("eln:macerator", 1.5).mulVolume(0.2));
+			desc.setRunningSound("eln:macerator");
 		}
 	}
 
@@ -3010,7 +2976,7 @@ public class Eln {
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 
-			desc.setRuningSound(new SoundCommand("eln:compressor", 1.6).mulVolume(0.3));
+			desc.setRunningSound("eln:compressor");
 		}
 
 		{
@@ -3028,7 +2994,7 @@ public class Eln {
 					compressorRecipes);
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-			desc.setRuningSound(new SoundCommand("eln:compressor", 1.6).mulVolume(0.3));
+			desc.setRunningSound("eln:compressor");
 		}
 	}
 
@@ -3053,7 +3019,7 @@ public class Eln {
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 
-			desc.setRuningSound(new SoundCommand("eln:Motor", 1.6).mulVolume(0.3));
+			desc.setRunningSound("eln:Motor");
 		}
 
 		{
@@ -3072,7 +3038,7 @@ public class Eln {
 
 			transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 
-			desc.setRuningSound(new SoundCommand("eln:Motor", 1.6).mulVolume(0.3));
+			desc.setRunningSound("eln:Motor");
 		}
 	}
 

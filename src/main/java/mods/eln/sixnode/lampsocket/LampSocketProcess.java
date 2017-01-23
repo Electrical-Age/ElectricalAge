@@ -11,8 +11,6 @@ import mods.eln.misc.Utils;
 import mods.eln.server.SaveConfig;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.lampsupply.LampSupplyElement;
-import mods.eln.sound.SoundCommand;
-import mods.eln.sound.SoundLooper;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -43,7 +41,6 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 
     double vp[] = new double[3];
 
-    SoundLooper looper;
     private LampSupplyElement oldLampSupply;
 
     double updateLifeTimeout = 0, updateLifeTimeoutMax = 5;
@@ -53,46 +50,10 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
     public LampSocketProcess(LampSocketElement l) {
 		this.lamp = l;
 		lbCoord = new Coordonate(l.sixNode.coordonate);
-		looper = new SoundLooper(l) {
-			double bzTimeout = 0;
-
-			SoundCommand bzzzz = new SoundCommand("eln:NEON_LFNOISE", 0.5).mulVolume(0.12).smallRange();
-
-			@Override
-			public SoundCommand mustStart() {
-				ItemStack lampStack = lamp.inventory.getStackInSlot(0);
-				LampDescriptor lampDescriptor = null;
-
-				if (lampStack != null) {
-					lampDescriptor = (LampDescriptor) ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) lampStack.getItem()).getDescriptor(lampStack);
-				}
-
-				if (lampDescriptor != null && lampDescriptor.type == Type.eco) {
-					if (bzTimeout != 0 && bzTimeout < 2) {
-						// Utils.println("bz");
-						// return bzzzz.copy();
-					}
-				}
-				// Utils.println("nbz");
-				return null;
-			}
-
-			@Override
-			public void process(double time) {
-				if (light <= 5)
-					bzTimeout = 0;
-				else
-					bzTimeout += time;
-
-				super.process(time);
-			}
-		};
 	}
 
 	@Override
 	public void process(double time) {
-		looper.process(time);
-
 		ItemStack lampStack = lamp.inventory.getStackInSlot(0);
 
 		if (!lamp.poweredByLampSupply || lamp.inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null) {
