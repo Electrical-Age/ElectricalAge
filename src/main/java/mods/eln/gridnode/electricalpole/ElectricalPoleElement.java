@@ -6,6 +6,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
+import mods.eln.node.NodePeriodicPublishProcess;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
@@ -85,6 +86,9 @@ public class ElectricalPoleElement extends GridElement {
             electricalComponentList.add(primaryVoltageSource);
             electricalComponentList.add(secondaryVoltageSource);
             slowProcessList.add(voltageSecondaryWatchdog.set(secondaryLoad).set(exp));
+
+            // Publish load from time to time.
+            slowProcessList.add(new NodePeriodicPublishProcess(node, 1.0, 0.5));
         }
     }
 
@@ -156,7 +160,11 @@ public class ElectricalPoleElement extends GridElement {
         super.networkSerialize(stream);
         node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
         try {
-            stream.writeFloat((float) (secondaryLoad.getI() / secondaryMaxCurrent));
+            if (secondaryMaxCurrent != 0) {
+                stream.writeFloat((float) (secondaryLoad.getI() / secondaryMaxCurrent));
+            } else {
+                stream.writeFloat(0f);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
