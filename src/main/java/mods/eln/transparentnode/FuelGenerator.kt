@@ -16,9 +16,9 @@ import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.PowerSource
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
-import mods.eln.sound.SoundCommand
-import mods.eln.sound.SoundLooper
+import mods.eln.sound.LoopedSound
 import mods.eln.wiki.Data
+import net.minecraft.client.audio.ISound
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
@@ -126,7 +126,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
     init {
         electricalLoadList.add(positiveLoad)
         electricalComponentList.add(powerSource)
-        slowProcessList.add(NodePeriodicPublishProcess(transparentNode, 2.0, 2.0))
+        slowProcessList.add(NodePeriodicPublishProcess(transparentNode, 1.0, 0.5))
         slowProcessList.add(slowProcess)
     }
 
@@ -166,6 +166,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
         super.networkSerialize(stream)
         node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream)
         stream.writeBoolean(on)
+        stream.writeFloat((positiveLoad.u / descriptor.maxVoltage).toFloat())
     }
 
     override fun onBlockActivated(player: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
@@ -236,9 +237,15 @@ class FuelGeneratorRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
     private var renderPreProcess: CableRenderType? = null
     private val eConn = LRDUMask()
     private var on = false
+    private var voltageRatio = SlewLimiter(1f)
+    private val sound = object: LoopedSound("eln:FuelGenerator", coordonate(), ISound.AttenuationType.LINEAR) {
+        override fun getVolume() = if (on) 0.2f else 0f
+        override fun getPitch() = 0.75f + 1f * voltageRatio.position
+    }
 
     init {
         this.descriptor = descriptor as FuelGeneratorDescriptor
+        addLoopedSound(sound)
     }
 
     override fun draw() {
@@ -252,23 +259,22 @@ class FuelGeneratorRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)
         eConn.deserialize(stream)
-        on = stream.readBoolean()
+        val on_ = stream.readBoolean()
+        voltageRatio.target = stream.readFloat()
+        if (on_ != on) {
+            voltageRatio.position = voltageRatio.target
+        }
+        on = on_
         renderPreProcess = null
+    }
+
+    override fun refresh(deltaT: Float) {
+        super.refresh(deltaT)
+        voltageRatio.step(deltaT)
     }
 }
 
 class FuelGeneratorSlowProcess(internal val generator: FuelGeneratorElement): IProcess {
-    val soundLooper = object: SoundLooper(generator) {
-        override fun mustStart(): SoundCommand? {
-            if (generator.on) {
-                val pitch = 0.9 + 0.3 * generator.positiveLoad.u / generator.descriptor.maxVoltage
-                return SoundCommand("eln:FuelGenerator", 1.6).mulVolume(0.2f, pitch.toFloat());
-            } else {
-                return null;
-            }
-        }
-    }
-
     override fun process(time: Double) {
         if (generator.on) {
             val power = Math.max(generator.powerSource.effectiveP,
@@ -294,7 +300,5 @@ class FuelGeneratorSlowProcess(internal val generator: FuelGeneratorElement): IP
         } else {
             generator.powerSource.p = 0.0
         }
-
-        soundLooper.process(time);
     }
 }
