@@ -33,7 +33,7 @@ public class ElectricalPoleRender extends GridRender {
                 @Override
                 public float getVolume() {
                     if (load.getPosition() > ElectricalPoleRender.this.descriptor.minimalLoadToHum)
-                        return 0.2f * (load.getPosition() - ElectricalPoleRender.this.descriptor.minimalLoadToHum) /
+                        return 0.05f * (load.getPosition() - ElectricalPoleRender.this.descriptor.minimalLoadToHum) /
                             (1 - ElectricalPoleRender.this.descriptor.minimalLoadToHum);
                     else
                         return 0f;
