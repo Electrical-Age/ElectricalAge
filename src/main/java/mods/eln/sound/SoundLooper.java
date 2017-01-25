@@ -3,6 +3,7 @@ package mods.eln.sound;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 
+@Deprecated
 public abstract class SoundLooper implements IProcess {
 
     IPlayer player;
