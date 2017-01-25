@@ -6,8 +6,6 @@ import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.electricalwatch.ElectricalWatchContainer;
-import mods.eln.sound.SoundCommand;
-import mods.eln.sound.SoundLooper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFire;
 import net.minecraft.item.ItemStack;
@@ -19,7 +17,6 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
 	ElectricalFireDetectorElement element;
 
     RcInterpolator rc;
-    SoundLooper soundLooper;
 
     double t = 0;
 
@@ -27,17 +24,6 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
 		this.element = element;
         if (!element.descriptor.batteryPowered) {
             rc = new RcInterpolator(0.6f);
-        } else {
-            soundLooper = new SoundLooper(element) {
-                @Override
-                public SoundCommand mustStart() {
-                    if (element.firePresent) {
-                        return new SoundCommand("eln:FireAlarm", 0.4);
-                    } else {
-                        return null;
-                    }
-                }
-            };
         }
 	}
 
@@ -134,9 +120,7 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
             }
         }
 
-        if (element.descriptor.batteryPowered) {
-            soundLooper.process(time);
-        } else {
+        if (!element.descriptor.batteryPowered) {
             rc.setTarget(element.firePresent ? 1 : 0);
             rc.step((float) time);
             element.outputGateProcess.setOutputNormalized(rc.get());
