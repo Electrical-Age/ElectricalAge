@@ -59,4 +59,10 @@ public class ElectricalPoleRender extends GridRender {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void refresh(float deltaT) {
+        super.refresh(deltaT);
+        load.step(deltaT);
+    }
 }
