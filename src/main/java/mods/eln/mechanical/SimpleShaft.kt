@@ -73,14 +73,16 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     var cableRefresh = true
     // Sound:
     private val soundLooper: ShaftSoundLooper?
-    var volumeSetting = 1f
+    val volumeSetting = SlewLimiter(0.5f)
 
     inner private class ShaftSoundLooper(sound: String, coord: Coordonate) : LoopedSound(sound, coord) {
         override fun getPitch() = Math.max(0.05, rads / absoluteMaximumShaftSpeed).toFloat()
-        override fun getVolume() = volumeSetting
+        override fun getVolume() = volumeSetting.position
     }
 
     init {
+        volumeSetting.target = 1f
+        volumeSetting.position = 0f
         val sound = this.desc.sound
         if (sound != null) {
             soundLooper = ShaftSoundLooper(sound, coordonate())
@@ -139,6 +141,7 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     override fun refresh(deltaT: Float) {
         super.refresh(deltaT)
         angle += logRads * deltaT
+        volumeSetting.step(deltaT)
     }
 
     override fun networkUnserialize(stream: DataInputStream) {

@@ -206,6 +206,6 @@ class TurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescript
 
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)
-        volumeSetting = stream.readFloat()
+        volumeSetting.target = stream.readFloat()
     }
 }
