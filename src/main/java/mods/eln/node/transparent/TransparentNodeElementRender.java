@@ -8,9 +8,8 @@ import mods.eln.cable.CableRenderType;
 import mods.eln.client.ClientProxy;
 import mods.eln.misc.*;
 import mods.eln.sound.LoopedSound;
+import mods.eln.sound.LoopedSoundManager;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -21,8 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class TransparentNodeElementRender {
 	public TransparentNodeEntity tileEntity;
@@ -265,13 +262,11 @@ public abstract class TransparentNodeElementRender {
 		s.play();
 	}
 
-	private final List<LoopedSound> loopedSoundList = new ArrayList<LoopedSound>();
+	private LoopedSoundManager loopedSoundManager = new LoopedSoundManager();
 
 	@SideOnly(Side.CLIENT)
 	protected void addLoopedSound(final LoopedSound loopedSound) {
-		if (loopedSound.getActive() && !loopedSoundList.contains(loopedSound)) {
-			loopedSoundList.add(loopedSound);
-		}
+		loopedSoundManager.add(loopedSound);
 	}
 
 	public void destructor()
@@ -279,16 +274,10 @@ public abstract class TransparentNodeElementRender {
 		if(usedUuid())
 			ClientProxy.uuidManager.kill(uuid);
 
-		for (LoopedSound loopedSound: loopedSoundList) {
-			loopedSound.setActive(false);
-		}
+		loopedSoundManager.dispose();
 	}
 
 	public void refresh(float deltaT) {
-		SoundHandler sh = Minecraft.getMinecraft().getSoundHandler();
-		for (LoopedSound loopedSound : loopedSoundList) {
-			if (!sh.isSoundPlaying(loopedSound))
-				sh.playSound(loopedSound);
-		}
+		loopedSoundManager.process(deltaT);
 	}
 }
