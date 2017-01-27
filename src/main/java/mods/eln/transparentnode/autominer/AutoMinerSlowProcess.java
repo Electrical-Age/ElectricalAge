@@ -1,8 +1,5 @@
 package mods.eln.transparentnode.autominer;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import mods.eln.Eln;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
@@ -24,6 +21,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.world.World;
+
+import java.util.List;
 
 public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 
@@ -70,7 +69,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 	}
 
 	boolean isReadyToDrill() {
-		ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
+		ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
 		if (drill == null) return false;
 		return isStorageReady();
 	}
@@ -87,8 +86,8 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 
 	@Override
 	public void process(double time) {
-		ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
-		MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
+		ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
+		MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
 
 		if (++blinkCounter >= 9) {
 			blinkCounter = 0;
@@ -145,7 +144,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                     case pipeAdd:
                         // miner.pushLog("Pipe " + (pipeLength + 1) + " added");
                         Eln.ghostManager.createGhost(jobCoord, miner.node.coordonate, jobCoord.y);
-                        miner.inventory.decrStackSize(AutoMinerContainer.MiningPipeSlotId, 1);
+                        miner.getInventory().decrStackSize(AutoMinerContainer.MiningPipeSlotId, 1);
 
                         pipeLength++;
                         miner.needPublish();
@@ -156,10 +155,10 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                     case pipeRemove:
                         // miner.pushLog("Pipe " + pipeLength + " removed");
                         Eln.ghostManager.removeGhostAndBlock(jobCoord);
-                        if (miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId) == null) {
-                            miner.inventory.setInventorySlotContents(AutoMinerContainer.MiningPipeSlotId, Eln.miningPipeDescriptor.newItemStack(1));
+                        if (miner.getInventory().getStackInSlot(AutoMinerContainer.MiningPipeSlotId) == null) {
+                            miner.getInventory().setInventorySlotContents(AutoMinerContainer.MiningPipeSlotId, Eln.miningPipeDescriptor.newItemStack(1));
                         } else {
-                            miner.inventory.decrStackSize(AutoMinerContainer.MiningPipeSlotId, -1);
+                            miner.getInventory().decrStackSize(AutoMinerContainer.MiningPipeSlotId, -1);
                         }
 
                         pipeLength--;
@@ -276,9 +275,9 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 	}
     
 	void setupJob() {
-		ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
+		ElectricalDrillDescriptor drill = (ElectricalDrillDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getStackInSlot(AutoMinerContainer.electricalDrillSlotId));
 		// OreScanner scanner = (OreScanner) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.OreScannerSlotId));
-		MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
+		MiningPipeDescriptor pipe = (MiningPipeDescriptor) ElectricalDrillDescriptor.getDescriptor(miner.getInventory().getStackInSlot(AutoMinerContainer.MiningPipeSlotId));
 
 		int scannerRadius = Eln.instance.autominerRange;
 		double scannerEnergy = 0;
@@ -302,8 +301,8 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
 			setJob(jobType.none);
 		} else if (drill == null) {
 			if (jobCoord.y != miner.node.coordonate.y) {
-				ItemStack pipeStack = miner.inventory.getStackInSlot(AutoMinerContainer.MiningPipeSlotId);
-				if (pipeStack == null || (pipeStack.stackSize != pipeStack.getMaxStackSize() && pipeStack.stackSize != miner.inventory.getInventoryStackLimit())) {
+				ItemStack pipeStack = miner.getInventory().getStackInSlot(AutoMinerContainer.MiningPipeSlotId);
+				if (pipeStack == null || (pipeStack.stackSize != pipeStack.getMaxStackSize() && pipeStack.stackSize != miner.getInventory().getInventoryStackLimit())) {
 					jobFind = true;
 					setJob(jobType.pipeRemove);
 				} else {

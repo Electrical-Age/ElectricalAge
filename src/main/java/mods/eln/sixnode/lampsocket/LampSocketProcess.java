@@ -60,7 +60,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 
 			@Override
 			public SoundCommand mustStart() {
-				ItemStack lampStack = lamp.inventory.getStackInSlot(0);
+				ItemStack lampStack = lamp.getInventory().getStackInSlot(0);
 				LampDescriptor lampDescriptor = null;
 
 				if (lampStack != null) {
@@ -93,9 +93,9 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 	public void process(double time) {
 		looper.process(time);
 
-		ItemStack lampStack = lamp.inventory.getStackInSlot(0);
+		ItemStack lampStack = lamp.getInventory().getStackInSlot(0);
 
-		if (!lamp.poweredByLampSupply || lamp.inventory.getStackInSlot(LampSocketContainer.cableSlotId) == null) {
+		if (!lamp.poweredByLampSupply || lamp.getInventory().getStackInSlot(LampSocketContainer.cableSlotId) == null) {
 			lamp.setIsConnectedToLampSupply(false);
 			oldLampSupply = null;
 		} else {
@@ -282,7 +282,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 					lampDescriptor.setLifeInTag(lampStack, life);
 				}
 				if (life < 0 || overFactor > 3) {
-					lamp.inventory.setInventorySlotContents(0, null);
+					lamp.getInventory().setInventorySlotContents(0, null);
 					light = 0;
 				}
 

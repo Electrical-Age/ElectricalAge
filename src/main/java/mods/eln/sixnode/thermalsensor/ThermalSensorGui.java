@@ -2,7 +2,7 @@ package mods.eln.sixnode.thermalsensor;
 
 import mods.eln.gui.*;
 import mods.eln.sim.PhysicalConstant;
-import mods.eln.sixnode.electricasensor.ElectricalSensorElement;
+import mods.eln.sixnode.electricalsensor.ElectricalSensorElement;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;

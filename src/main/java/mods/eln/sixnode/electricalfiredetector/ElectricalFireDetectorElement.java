@@ -2,9 +2,12 @@ package mods.eln.sixnode.electricalfiredetector;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.item.electricalitem.BatteryItem;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
+import mods.eln.node.AutoAcceptInventoryProxy;
+import mods.eln.node.IInventoryChangeListener;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -36,9 +39,9 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 	public boolean powered;
 	public boolean firePresent = false;
 
-	SixNodeElementInventory inventory;
+	private AutoAcceptInventoryProxy inventory;
 
-    public ElectricalFireDetectorElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+	public ElectricalFireDetectorElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
 		super(sixNode, side, descriptor);
 
 		this.descriptor = (ElectricalFireDetectorDescriptor) descriptor;
@@ -53,7 +56,8 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 			electricalComponentList.add(outputGateProcess);
 		} else {
 			powered = false;
-			inventory = new SixNodeElementInventory(1, 64, this);
+			inventory = new AutoAcceptInventoryProxy(new SixNodeElementInventory(1, 64, this))
+				.acceptIfEmpty(0, BatteryItem.class);
 		}
 
     	slowProcessList.add(slowProcess);
@@ -113,7 +117,8 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 
 	@Override
 	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		return onBlockActivatedRotate(entityPlayer);
+		if (onBlockActivatedRotate(entityPlayer)) return true;
+		return inventory.take(entityPlayer.getCurrentEquippedItem(), (IInventoryChangeListener) this);
 	}
 
 	@Override
@@ -134,7 +139,7 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 
     @Override
     public IInventory getInventory() {
-        return inventory;
+        return inventory.getInventory();
     }
 
     @Override
@@ -145,6 +150,6 @@ public class ElectricalFireDetectorElement extends SixNodeElement {
 
     @Override
     public Container newContainer(Direction side, EntityPlayer player) {
-        return new ElectricalFireDetectorContainer(player, inventory);
+        return new ElectricalFireDetectorContainer(player, inventory.getInventory());
     }
 }
