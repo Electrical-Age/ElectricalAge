@@ -1,0 +1,8 @@
+o doorfridge
+f originX -0.3125
+f originY 0
+f originZ -0.4375
+o doorfreezer
+f originX -0.3125
+f originY 0
+f originZ -0.4375
