@@ -1,13 +1,11 @@
 package mods.eln.gridnode;
 
-import mods.eln.misc.Obj3D;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -246,6 +244,5 @@ public abstract class GridRender extends TransparentNodeElementRender {
         public void destroy() {
             glDeleteLists(list, 1);
         }
-
     }
 }

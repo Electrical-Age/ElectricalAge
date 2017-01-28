@@ -142,7 +142,7 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
         super.networkUnserialize(stream)
         val power = stream.readDouble()
         calcPower(power)
-        volumeSetting = 0.05f + Math.abs(power / desc.nominalP).toFloat()
+        volumeSetting .target = 0.05f + Math.abs(power / desc.nominalP).toFloat() / 4f
     }
 }
 

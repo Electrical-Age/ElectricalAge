@@ -6,8 +6,7 @@ import mods.eln.node.transparent.TransparentNodeElementRender;
 import net.minecraft.item.ItemStack;
 
 public class ElectricalMachineInventory extends TransparentNodeElementInventory {
-
-    ElectricalMachineElement machineElement;
+    private ElectricalMachineElement machineElement;
 
     public ElectricalMachineInventory(int size, int stackLimit, ElectricalMachineElement machineElement) {
 		super(size, stackLimit, machineElement);
@@ -17,7 +16,6 @@ public class ElectricalMachineInventory extends TransparentNodeElementInventory 
 	public ElectricalMachineInventory(int size, int stackLimit, TransparentNodeElementRender TransparentnodeRender) {
 		super(size, stackLimit, TransparentnodeRender);
 	}
-
 	
 	ElectricalMachineDescriptor getDescriptor() {
 		if (transparentNodeRender != null) return ((ElectricalMachineRender) transparentNodeRender).descriptor;
@@ -27,8 +25,6 @@ public class ElectricalMachineInventory extends TransparentNodeElementInventory 
 
 	@Override
 	public int[] getAccessibleSlotsFromSide(int side) {
-		// ElectricalMachineDescriptor d = getDescriptor();
-
 		if (transparentNodeElement == null) return new int[0];
 		
 		switch (Direction.fromIntMinecraftSide(side)) {

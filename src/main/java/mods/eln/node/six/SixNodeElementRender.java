@@ -1,29 +1,24 @@
 package mods.eln.node.six;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import org.lwjgl.opengl.GL11;
-
-import mods.eln.Eln;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
 import mods.eln.client.ClientProxy;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.LRDUMask;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
+import mods.eln.misc.*;
+import mods.eln.sound.LoopedSound;
+import mods.eln.sound.LoopedSoundManager;
 import mods.eln.sound.SoundCommand;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.tileentity.TileEntity;
+import org.lwjgl.opengl.GL11;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public abstract class SixNodeElementRender {
 	public SixNodeEntity tileEntity;
@@ -220,6 +215,8 @@ public abstract class SixNodeElementRender {
 		UtilsClient.glDeleteListsSafe(cableList[1]);
 		UtilsClient.glDeleteListsSafe(cableList[2]);
 		UtilsClient.glDeleteListsSafe(cableList[3]);
+
+		loopedSoundManager.dispose();
 	}
 
 	public GuiScreen newGuiDraw(Direction side, EntityPlayer player)
@@ -402,8 +399,14 @@ public abstract class SixNodeElementRender {
 		needRedraw = true;
 	}
 
-	public void refresh(float deltaT) {
+	private LoopedSoundManager loopedSoundManager = new LoopedSoundManager();
 
+	@SideOnly(Side.CLIENT)
+	protected void addLoopedSound(final LoopedSound loopedSound) {
+		loopedSoundManager.add(loopedSound);
 	}
 
+	public void refresh(float deltaT) {
+		loopedSoundManager.process(deltaT);
+	}
 }

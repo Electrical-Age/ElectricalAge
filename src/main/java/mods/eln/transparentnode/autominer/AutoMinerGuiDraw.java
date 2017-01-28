@@ -11,13 +11,12 @@ import net.minecraft.inventory.IInventory;
 import static mods.eln.i18n.I18N.tr;
 
 public class AutoMinerGuiDraw extends GuiContainerEln {
-
     private static final String SK_TOUCH = tr("Silk Touch");
-    private AutoMinerRender render;
+    private final AutoMinerRender render;
     private GuiButtonEln silkTouch;
 
     public AutoMinerGuiDraw(EntityPlayer player, IInventory inventory, AutoMinerRender render) {
-        super(new AutoMinerContainer(null, player, inventory));
+        super(new AutoMinerContainer(player, inventory));
         this.render = render;
     }
 

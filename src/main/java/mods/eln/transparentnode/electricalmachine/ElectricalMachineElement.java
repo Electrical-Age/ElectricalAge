@@ -33,30 +33,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ElectricalMachineElement extends TransparentNodeElement implements ElectricalStackMachineProcessObserver {
+    private final TransparentNodeElementInventory inventory;
+    AutoAcceptInventoryProxy booterAccepter;
 
-	TransparentNodeElementInventory inventory;
-	AutoAcceptInventoryProxy booterAccepter;
+    private final NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
+    final Resistor electricalResistor = new Resistor(electricalLoad, null);
 
-	NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");	
-	Resistor electricalResistor = new Resistor(electricalLoad,null);	
+    private final ElectricalStackMachineProcess slowRefreshProcess;
 	
-	//NodeThermalLoad thermalLoad = new NodeThermalLoad("thermalLoad");
+    private final ElectricalMachineSlowProcess slowProcess = new ElectricalMachineSlowProcess(this);
+    private boolean powerOn = false;
+    final ElectricalMachineDescriptor descriptor;
+    public int inSlotId = 0;
+    public final int outSlotId = 0;
+    private int boosterSlotId = 1;
 	
-	ElectricalStackMachineProcess slowRefreshProcess;
+    private final VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
 	
-	//ElectricalResistorHeatThermalLoad heatingProcess = new ElectricalResistorHeatThermalLoad(electricalResistor, thermalLoad);
-	
-	//VoltageWatchdogProcessForInventoryItemBlockDamageSingleLoad motorWatchdog = new VoltageWatchdogProcessForInventoryItemBlockDamageSingleLoad(inventory, motorSlotId, electricalLoad);
-	
-	ElectricalMachineSlowProcess slowProcess = new ElectricalMachineSlowProcess(this);
-	boolean powerOn = false;
-	ElectricalMachineDescriptor descriptor;
-	public int inSlotId = 0, outSlotId = 0, boosterSlotId = 1;
-
-    VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
-
-    double efficiency = 1.0;
-
     public ElectricalMachineElement(TransparentNode transparentNode, TransparentNodeDescriptor descriptor) {
 		super(transparentNode, descriptor);
 		this.descriptor = (ElectricalMachineDescriptor) descriptor;
@@ -72,9 +65,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		
 		electricalLoadList.add(electricalLoad);
 		electricalComponentList.add(electricalResistor);
-		//thermalLoadList.add(thermalLoad);
 		slowProcessList.add(slowRefreshProcess);
-		//thermalProcessList.add(heatingProcess);
 		slowProcessList.add(slowProcess);
 		slowRefreshProcess.setObserver(this);
 		slowProcessList.add(new NodePeriodicPublishProcess(transparentNode, 2, 1));
@@ -138,7 +129,7 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		needPublish();
 	}
 	
-	public void setPhysicalValue() {
+    private void setPhysicalValue() {
 		ItemStack stack;
 		
 		int boosterCount = 0;
@@ -150,12 +141,8 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		slowRefreshProcess.setEfficiency(Math.pow(descriptor.boosterEfficiency, boosterCount));
 		slowRefreshProcess.setSpeedUp(speedUp);
 
-		//descriptor.applyTo(thermalLoad);
 		descriptor.applyTo(electricalLoad);
 		descriptor.applyTo(slowRefreshProcess);
-
-		//thermalLoad.setRp(thermalLoad.Rp / speedUp);
-		//electricalLoad.setRp(electricalLoad.getRp() / Math.pow(descriptor.boosterSpeedUp, boosterCount));
 	}
 
 	@Override
@@ -169,13 +156,13 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 		if (electricalResistor.getP() < 11) fPower = 0.0;
 		if (fPower > 1.9) fPower = 1.9;
 		try {
-			stream.writeByte((int)(fPower * 64));
+            stream.writeByte((int) (fPower * 64));
 			serialiseItemStack(stream, inventory.getStackInSlot(inSlotId));
 			serialiseItemStack(stream, inventory.getStackInSlot(outSlotId));
 			stream.writeFloat((float) slowRefreshProcess.processState());
 			stream.writeFloat((float) slowRefreshProcess.processStatePerSecond());
 			node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
-			stream.writeFloat((float)(electricalLoad.getU() / descriptor.nominalU));
+            stream.writeFloat((float) (electricalLoad.getU() / descriptor.nominalU));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -201,11 +188,11 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
 	}
 
 	@Override
-	public Map<String, String> getWaila(){
+    public Map<String, String> getWaila() {
 		Map<String, String> info = new HashMap<String, String>();
 		info.put(I18N.tr("Power consumption"), Utils.plotPower("", slowRefreshProcess.getPower()));
 		info.put(I18N.tr("Voltage"), Utils.plotVolt("", electricalLoad.getU()));
-		if(Eln.wailaEasyMode) {
+        if (Eln.wailaEasyMode) {
 			info.put(I18N.tr("Power provided"), Utils.plotPower("", electricalLoad.getI() * electricalLoad.getU()));
 		}
 		return info;
