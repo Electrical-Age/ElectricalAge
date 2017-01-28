@@ -16,31 +16,31 @@ import static mods.eln.i18n.I18N.tr;
 
 public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
 
-	private Obj3DPart detector;
+    private Obj3DPart detector;
     private Obj3DPart led;
     boolean batteryPowered;
-	double maxRange;
-	public float[] pinDistance;
+    double maxRange;
+    public float[] pinDistance;
     final double updateInterval = 0.5;
     static final double PowerComsumption = 20000.0 / (3600 * 40);
 
-	public ElectricalFireDetectorDescriptor(String name, Obj3D obj, double maxRange, boolean batteryPowered) {
-		super(name, ElectricalFireDetectorElement.class, ElectricalFireDetectorRender.class);
+    public ElectricalFireDetectorDescriptor(String name, Obj3D obj, double maxRange, boolean batteryPowered) {
+        super(name, ElectricalFireDetectorElement.class, ElectricalFireDetectorRender.class);
         this.batteryPowered = batteryPowered;
-		this.maxRange = maxRange;
-		if (obj != null) {
-			detector = obj.getPart("Detector");
+        this.maxRange = maxRange;
+        if (obj != null) {
+            detector = obj.getPart("Detector");
             led = obj.getPart("Led");
 
-			pinDistance = Utils.getSixNodePinDistance(detector);
-		}
+            pinDistance = Utils.getSixNodePinDistance(detector);
+        }
 
         if (batteryPowered) {
             voltageLevelColor = VoltageLevelColor.Neutral;
         } else {
             voltageLevelColor = VoltageLevelColor.SignalVoltage;
         }
-	}
+    }
 
     @Override
     public void setParent(Item item, int damage) {
@@ -48,13 +48,13 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
-	@Override
-	public boolean use2DIcon() {
-		return true;
-	}
+    @Override
+    public boolean use2DIcon() {
+        return true;
+    }
 
-	void draw(boolean firePresent) {
-		if (detector != null) detector.draw();
+    void draw(boolean firePresent) {
+        if (detector != null) detector.draw();
         if (led != null) {
             if (firePresent) {
                 UtilsClient.drawLight(led);
@@ -64,11 +64,11 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
                 GL11.glColor3f(1, 1, 1);
             }
         }
-	}
-	
-	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		super.addInformation(itemStack, entityPlayer, list, par4);
+    }
+
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
         if (batteryPowered) {
             Collections.addAll(list, tr("Battery powered buzzer \nactivated in presence of fire.").split("\n"));
         } else {

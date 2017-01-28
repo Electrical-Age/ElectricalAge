@@ -10,23 +10,23 @@ import mods.eln.node.six.SixNodeEntity;
 
 public class ElectricalWeatherSensorRender extends SixNodeElementRender {
 
-	ElectricalWeatherSensorDescriptor descriptor;
-	
-	public ElectricalWeatherSensorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-		super(tileEntity, side, descriptor);
-		this.descriptor = (ElectricalWeatherSensorDescriptor) descriptor;
-	}
+    ElectricalWeatherSensorDescriptor descriptor;
 
-	@Override
-	public void draw() {
-		super.draw();
-		drawSignalPin(front.right(),descriptor.pinDistance);
+    public ElectricalWeatherSensorRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
+        super(tileEntity, side, descriptor);
+        this.descriptor = (ElectricalWeatherSensorDescriptor) descriptor;
+    }
 
-		descriptor.draw();
-	}
+    @Override
+    public void draw() {
+        super.draw();
+        drawSignalPin(front.right(), descriptor.pinDistance);
 
-	@Override
-	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		return Eln.instance.signalCableDescriptor.render;
-	}
+        descriptor.draw();
+    }
+
+    @Override
+    public CableRenderDescriptor getCableRender(LRDU lrdu) {
+        return Eln.instance.signalCableDescriptor.render;
+    }
 }

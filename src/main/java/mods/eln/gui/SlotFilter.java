@@ -5,32 +5,32 @@ import net.minecraft.item.ItemStack;
 
 public class SlotFilter extends SlotWithSkinAndComment {
 
-	ItemStackFilter[] itemStackFilter;
-	int stackLimit;
+    ItemStackFilter[] itemStackFilter;
+    int stackLimit;
 
-	public SlotFilter(IInventory par1iInventory, int slot, int x, int y,
-			int stackLimit, ItemStackFilter[] itemStackFilter, SlotSkin skin, String[] comment) {
-		super(par1iInventory, slot, x, y, skin, comment);
-		
-		this.stackLimit = stackLimit;
-		this.itemStackFilter = itemStackFilter;
-	}
+    public SlotFilter(IInventory par1iInventory, int slot, int x, int y,
+                      int stackLimit, ItemStackFilter[] itemStackFilter, SlotSkin skin, String[] comment) {
+        super(par1iInventory, slot, x, y, skin, comment);
 
-	/**
-	 * Check if the stack is a valid item for this slot. Always true beside for
-	 * the armor slots.
-	 */
-	public boolean isItemValid(ItemStack itemStack) {
-		for (ItemStackFilter filter : itemStackFilter) {
-			if (filter.tryItemStack(itemStack))
-				return true;
-		}
-		return false;
-	}
+        this.stackLimit = stackLimit;
+        this.itemStackFilter = itemStackFilter;
+    }
 
-	@Override
-	public int getSlotStackLimit() {
-		// return super.getSlotStackLimit();
-		return stackLimit;
-	}
+    /**
+     * Check if the stack is a valid item for this slot. Always true beside for
+     * the armor slots.
+     */
+    public boolean isItemValid(ItemStack itemStack) {
+        for (ItemStackFilter filter : itemStackFilter) {
+            if (filter.tryItemStack(itemStack))
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int getSlotStackLimit() {
+        // return super.getSlotStackLimit();
+        return stackLimit;
+    }
 }

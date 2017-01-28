@@ -16,47 +16,47 @@ import java.io.IOException;
 
 public class ConnectionListener {
 
-	public ConnectionListener() {
-		FMLCommonHandler.instance().bus().register(this);
-	}
+    public ConnectionListener() {
+        FMLCommonHandler.instance().bus().register(this);
+    }
 
-	static boolean newConnection = false;
-	static int timer = 0;
+    static boolean newConnection = false;
+    static int timer = 0;
 
-	@SubscribeEvent
-	public void onConnectedToServerEvent(ClientConnectedToServerEvent event) {
-		Utils.println("Connected to server " + FMLCommonHandler.instance().getEffectiveSide());
-		Eln.instance.regenOreScannerFactors();
+    @SubscribeEvent
+    public void onConnectedToServerEvent(ClientConnectedToServerEvent event) {
+        Utils.println("Connected to server " + FMLCommonHandler.instance().getEffectiveSide());
+        Eln.instance.regenOreScannerFactors();
 
-		timer = 20;
-		newConnection = true;
-	}
+        timer = 20;
+        newConnection = true;
+    }
 
-	@SubscribeEvent
-	public void onDisconnectedFromServerEvent(ClientDisconnectionFromServerEvent event) {
-		Utils.println("Disconnected from server " + FMLCommonHandler.instance().getEffectiveSide());
-		UtilsClient.glDeleteListsAllSafe();
-	}
+    @SubscribeEvent
+    public void onDisconnectedFromServerEvent(ClientDisconnectionFromServerEvent event) {
+        Utils.println("Disconnected from server " + FMLCommonHandler.instance().getEffectiveSide());
+        UtilsClient.glDeleteListsAllSafe();
+    }
 
-	@SubscribeEvent
-	public void tick(ClientTickEvent event) {
-		if (event.type != Type.CLIENT) return;
+    @SubscribeEvent
+    public void tick(ClientTickEvent event) {
+        if (event.type != Type.CLIENT) return;
 
-		if (newConnection) {
-			if(timer-- != 0) return;
-			
-			newConnection = false;
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
-			DataOutputStream stream = new DataOutputStream(bos);
+        if (newConnection) {
+            if (timer-- != 0) return;
 
-			try {
-				stream.writeByte(Eln.packetClientToServerConnection);
-			} catch (IOException e) {
+            newConnection = false;
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+            DataOutputStream stream = new DataOutputStream(bos);
 
-				e.printStackTrace();
-			}
+            try {
+                stream.writeByte(Eln.packetClientToServerConnection);
+            } catch (IOException e) {
 
-			UtilsClient.sendPacketToServer(bos);
-		}
-	}
+                e.printStackTrace();
+            }
+
+            UtilsClient.sendPacketToServer(bos);
+        }
+    }
 }

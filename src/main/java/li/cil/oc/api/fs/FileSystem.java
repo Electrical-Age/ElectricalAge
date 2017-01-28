@@ -207,8 +207,8 @@ public interface FileSystem extends Persistable {
      * @param mode the mode in which to open the file.
      * @return the handle to the opened file.
      * @throws java.io.FileNotFoundException if the object is not a file, or
-     *                               the file cannot be opened in the
-     *                               specified mode.
+     *                                       the file cannot be opened in the
+     *                                       specified mode.
      */
     int open(String path, Mode mode) throws FileNotFoundException;
 

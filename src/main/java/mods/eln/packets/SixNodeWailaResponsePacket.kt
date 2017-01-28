@@ -6,13 +6,13 @@ import mods.eln.misc.Coordonate
 import mods.eln.misc.Direction
 import net.minecraft.item.ItemStack
 
-class SixNodeWailaResponsePacket: TransparentNodeResponsePacket {
+class SixNodeWailaResponsePacket : TransparentNodeResponsePacket {
     lateinit var side: Direction
     var itemStack: ItemStack? = null
 
     constructor() {}
 
-    constructor(coord: Coordonate, side: Direction, itemStack: ItemStack?, data: Map<String,String>): super(data, coord) {
+    constructor(coord: Coordonate, side: Direction, itemStack: ItemStack?, data: Map<String, String>) : super(data, coord) {
         this.side = side
         this.itemStack = itemStack
     }

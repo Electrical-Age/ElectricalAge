@@ -16,7 +16,7 @@ class SourceCodeParser {
     }
 
     public static Map<String, Set<TranslationItem>> parseSourceFolder(final File file) throws IOException {
-        Map<String, Set<TranslationItem>> strings = new TreeMap<String,Set<TranslationItem>>();
+        Map<String, Set<TranslationItem>> strings = new TreeMap<String, Set<TranslationItem>>();
         strings.put(MULTIPLE_LOCATIONS, new TreeSet<TranslationItem>());
         parseSourceFolderRecursive(file, strings);
         return strings;
@@ -28,7 +28,7 @@ class SourceCodeParser {
         if (folder != null && folder.exists()) {
 
             // Do for each file.
-            for (final File file: folder.listFiles()) {
+            for (final File file : folder.listFiles()) {
 
                 // If the file is a directory, call the method recursively.
                 if (file.isDirectory()) {
@@ -94,7 +94,7 @@ class SourceCodeParser {
 
     private static boolean isStringAlreadyPresent(final TranslationItem string,
                                                   final Map<String, Set<TranslationItem>> strings) {
-        for (final String fileName: strings.keySet()) {
+        for (final String fileName : strings.keySet()) {
             if (MULTIPLE_LOCATIONS.equals(fileName)) {
                 if (strings.get(fileName).contains(string))
                     return true;

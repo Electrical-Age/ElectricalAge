@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL11
  */
 
 
-inline fun<T> preserveMatrix(body: () -> T): T {
+inline fun <T> preserveMatrix(body: () -> T): T {
     val ret: T
     try {
         GL11.glPushMatrix()

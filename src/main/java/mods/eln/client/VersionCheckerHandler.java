@@ -68,7 +68,7 @@ public class VersionCheckerHandler {
                         int minor = stable.get("version_minor").getAsInt();
                         int revision = stable.get("version_revision").getAsInt();
                         msg = String.format(Color.GREEN + "> New stable version available: %d.%d.%d" + " - please upgrade !",
-                                major, minor, revision);
+                            major, minor, revision);
                     }
                     // No update
                     else if (uniqueVersion == currentUniqueVersion) {

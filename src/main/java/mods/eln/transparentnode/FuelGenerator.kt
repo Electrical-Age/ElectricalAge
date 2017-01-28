@@ -32,7 +32,7 @@ import java.io.DataOutputStream
 class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal val cable: ElectricalCableDescriptor,
                               internal val nominalPower: Double, internal val maxVoltage: Double,
                               tankCapacityInSecondsAtNominalPower: Double)
-: TransparentNodeDescriptor(name, FuelGeneratorElement::class.java, FuelGeneratorRender::class.java) {
+    : TransparentNodeDescriptor(name, FuelGeneratorElement::class.java, FuelGeneratorRender::class.java) {
     companion object {
         internal fun EfficiencyFactorVsLoadFactor(loadFactor: Double) = when (Utils.limit(loadFactor, 0.0, 1.5)) {
             in 0.0..0.1 -> 1.375
@@ -85,10 +85,10 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
     override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
 
     override fun shouldUseRenderHelper(
-            type: IItemRenderer.ItemRenderType, item: ItemStack,
-            helper: IItemRenderer.ItemRendererHelper) = type != IItemRenderer.ItemRenderType.INVENTORY
+        type: IItemRenderer.ItemRenderType, item: ItemStack,
+        helper: IItemRenderer.ItemRendererHelper) = type != IItemRenderer.ItemRenderType.INVENTORY
 
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) = when(type) {
+    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) = when (type) {
         IItemRenderer.ItemRenderType.INVENTORY -> super.renderItem(type, item, *data)
         else -> {
             objItemScale(obj)
@@ -111,8 +111,8 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
     }
 }
 
-class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: TransparentNodeDescriptor):
-        TransparentNodeElement(transparentNode, descriptor_) {
+class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: TransparentNodeDescriptor) :
+    TransparentNodeElement(transparentNode, descriptor_) {
     internal var positiveLoad = NbtElectricalLoad("positiveLoad")
     internal var powerSource = PowerSource("powerSource", positiveLoad)
     internal var slowProcess = FuelGeneratorSlowProcess(this)
@@ -130,8 +130,8 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
         slowProcessList.add(slowProcess)
     }
 
-    override fun getElectricalLoad(side: Direction, lrdu: LRDU): ElectricalLoad? = when(lrdu) {
-        LRDU.Down -> when(side) {
+    override fun getElectricalLoad(side: Direction, lrdu: LRDU): ElectricalLoad? = when (lrdu) {
+        LRDU.Down -> when (side) {
             front, front.inverse -> positiveLoad
             else -> null
         }
@@ -140,8 +140,8 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
 
     override fun getThermalLoad(side: Direction, lrdu: LRDU): ThermalLoad? = null
 
-    override fun getConnectionMask(side: Direction, lrdu: LRDU): Int = when(lrdu) {
-        LRDU.Down -> when(side) {
+    override fun getConnectionMask(side: Direction, lrdu: LRDU): Int = when (lrdu) {
+        LRDU.Down -> when (side) {
             front, front.inverse -> NodeBase.maskElectricalPower
             else -> 0
         }
@@ -149,8 +149,8 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
     }
 
     override fun multiMeterString(side: Direction) = Utils.plotVolt("U+:", positiveLoad.u) +
-            Utils.plotAmpere("I+:", positiveLoad.current) +
-            Utils.plotPercent("Fuel level:", tankLevel)
+        Utils.plotAmpere("I+:", positiveLoad.current) +
+        Utils.plotPercent("Fuel level:", tankLevel)
 
 
     override fun thermoMeterString(side: Direction): String? = null
@@ -177,7 +177,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
                 if (tankLevel <= 1.0 - deltaLevel) {
                     val fluidStack = FluidContainerRegistry.getFluidForFilledItem(bucket)
                     if (fluidStack != null && (fluidStack.fluidID == tankFluid || tankLevel <= 0.0) &&
-                            fluidStack.fluidID in fuels) {
+                        fluidStack.fluidID in fuels) {
                         tankFluid = fluidStack.fluidID
                         tankLevel += deltaLevel
                         if (player != null && !player.capabilities.isCreativeMode) {
@@ -223,22 +223,22 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
         nbt?.setBoolean("on", on)
     }
 
-    override fun getWaila(): Map<String,String> = mutableMapOf(
-            Pair(I18N.tr("State"), if (on) I18N.tr("ON") else I18N.tr("OFF")),
-            Pair(I18N.tr("Fuel level"), Utils.plotPercent("", tankLevel)),
-            Pair(I18N.tr("Generated power"), Utils.plotPower("", powerSource.effectiveP)),
-            Pair(I18N.tr("Voltage"), Utils.plotVolt("", powerSource.u))
+    override fun getWaila(): Map<String, String> = mutableMapOf(
+        Pair(I18N.tr("State"), if (on) I18N.tr("ON") else I18N.tr("OFF")),
+        Pair(I18N.tr("Fuel level"), Utils.plotPercent("", tankLevel)),
+        Pair(I18N.tr("Generated power"), Utils.plotPower("", powerSource.effectiveP)),
+        Pair(I18N.tr("Voltage"), Utils.plotVolt("", powerSource.u))
     )
 }
 
-class FuelGeneratorRender(tileEntity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor):
-        TransparentNodeElementRender(tileEntity, descriptor) {
+class FuelGeneratorRender(tileEntity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) :
+    TransparentNodeElementRender(tileEntity, descriptor) {
     internal var descriptor: FuelGeneratorDescriptor
     private var renderPreProcess: CableRenderType? = null
     private val eConn = LRDUMask()
     private var on = false
     private var voltageRatio = SlewLimiter(1f)
-    private val sound = object: LoopedSound("eln:FuelGenerator", coordonate(), ISound.AttenuationType.LINEAR) {
+    private val sound = object : LoopedSound("eln:FuelGenerator", coordonate(), ISound.AttenuationType.LINEAR) {
         override fun getVolume() = if (on) 0.2f else 0f
         override fun getPitch() = 0.75f + 1f * voltageRatio.position
     }
@@ -274,14 +274,14 @@ class FuelGeneratorRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
     }
 }
 
-class FuelGeneratorSlowProcess(internal val generator: FuelGeneratorElement): IProcess {
+class FuelGeneratorSlowProcess(internal val generator: FuelGeneratorElement) : IProcess {
     override fun process(time: Double) {
         if (generator.on) {
             val power = Math.max(generator.powerSource.effectiveP,
-                    generator.descriptor.nominalPower * FuelGeneratorDescriptor.MinimalLoadFractionOfNominalPower)
+                generator.descriptor.nominalPower * FuelGeneratorDescriptor.MinimalLoadFractionOfNominalPower)
             generator.tankLevel = Math.max(0.0, generator.tankLevel - time *
-                    FuelGeneratorDescriptor.EfficiencyFactorVsLoadFactor(power / generator.descriptor.nominalPower) *
-                    power / generator.descriptor.tankEnergyCapacity)
+                FuelGeneratorDescriptor.EfficiencyFactorVsLoadFactor(power / generator.descriptor.nominalPower) *
+                power / generator.descriptor.tankEnergyCapacity)
 
             if (generator.tankLevel <= 0) {
                 generator.on = false;
@@ -290,7 +290,7 @@ class FuelGeneratorSlowProcess(internal val generator: FuelGeneratorElement): IP
             if (generator.voltageGracePeriod > 0) {
                 generator.voltageGracePeriod -= time;
             } else if (generator.positiveLoad.u <
-                    FuelGeneratorDescriptor.GeneratorBailOutVoltageRatio * generator.descriptor.maxVoltage) {
+                FuelGeneratorDescriptor.GeneratorBailOutVoltageRatio * generator.descriptor.maxVoltage) {
                 generator.on = false;
             }
         }

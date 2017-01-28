@@ -7,11 +7,11 @@ import mods.eln.misc.Coordonate
 import mods.eln.misc.Direction
 import net.minecraft.item.ItemStack
 
-class GhostNodeWailaResponsePacket(var coord: Coordonate = Coordonate(0, 0, 0 ,0),
-                                   var realCoord: Coordonate = Coordonate(0, 0, 0 ,0),
+class GhostNodeWailaResponsePacket(var coord: Coordonate = Coordonate(0, 0, 0, 0),
+                                   var realCoord: Coordonate = Coordonate(0, 0, 0, 0),
                                    var itemStack: ItemStack? = null,
                                    var type: Byte = UNKNOWN_TYPE,
-                                   var realSide: Direction = Direction.XN): IMessage {
+                                   var realSide: Direction = Direction.XN) : IMessage {
 
     companion object {
         val UNKNOWN_TYPE: Byte = 0

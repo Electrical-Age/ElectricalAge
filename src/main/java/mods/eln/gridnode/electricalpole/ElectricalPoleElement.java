@@ -55,9 +55,9 @@ public class ElectricalPoleElement extends GridElement {
         thermalLoad.setAsSlow();
         slowProcessList.add(thermalWatchdog);
         thermalWatchdog
-                .set(thermalLoad)
-                .setLimit(desc.cableDescriptor.thermalWarmLimit, desc.cableDescriptor.thermalCoolLimit)
-                .set(new WorldExplosion(this).cableExplosion());
+            .set(thermalLoad)
+            .setLimit(desc.cableDescriptor.thermalWarmLimit, desc.cableDescriptor.thermalCoolLimit)
+            .set(new WorldExplosion(this).cableExplosion());
 
         slowProcessList.add(voltageWatchdog);
         // Electrical poles can handle higher voltages, due to air insulation.
@@ -70,9 +70,9 @@ public class ElectricalPoleElement extends GridElement {
             exp = new WorldExplosion(this).cableExplosion();
         }
         voltageWatchdog
-                .set(electricalLoad)
-                .setUMaxMin(desc.cableDescriptor.electricalNominalVoltage * 16)
-                .set(exp);
+            .set(electricalLoad)
+            .setUMaxMin(desc.cableDescriptor.electricalNominalVoltage * 16)
+            .set(exp);
 
         if (desc.includeTransformer) {
             secondaryLoad = new NbtElectricalLoad("secondaryLoad");
@@ -110,7 +110,7 @@ public class ElectricalPoleElement extends GridElement {
     public String multiMeterString(Direction side) {
         if (desc.includeTransformer) {
             return Utils.plotVolt("GridU:", electricalLoad.getU()) + Utils.plotAmpere("GridP:", electricalLoad.getCurrent())
-                    + Utils.plotVolt("  GroundU:", secondaryLoad.getU()) + Utils.plotAmpere("GroundP:", secondaryLoad.getCurrent());
+                + Utils.plotVolt("  GroundU:", secondaryLoad.getU()) + Utils.plotAmpere("GroundP:", secondaryLoad.getCurrent());
         } else {
             return super.multiMeterString(side);
         }

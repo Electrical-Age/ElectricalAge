@@ -4,7 +4,7 @@ import mods.eln.generic.GenericItemUsingDamageDescriptor;
 
 public class CopperCableDescriptor extends GenericItemUsingDamageDescriptor {
 
-	public CopperCableDescriptor(String name) {
-		super(name);
-	}
+    public CopperCableDescriptor(String name) {
+        super(name);
+    }
 }

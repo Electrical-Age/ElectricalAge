@@ -15,8 +15,8 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import kotlin.reflect.KClass
 
-abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNodeElement>, render: KClass<out TransparentNodeElementRender>, tag: EntityMetaTag):
-        TransparentNodeDescriptor(name, elm.java, render.java, tag) {
+abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNodeElement>, render: KClass<out TransparentNodeElementRender>, tag: EntityMetaTag) :
+    TransparentNodeDescriptor(name, elm.java, render.java, tag) {
 
     abstract val obj: Obj3D
     abstract val static: Array<out Obj3D.Obj3DPart>
@@ -60,7 +60,7 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     override fun use2DIcon() = false
 }
 
-open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): TransparentNodeElementRender(entity, desc) {
+open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : TransparentNodeElementRender(entity, desc) {
     private val desc = desc as SimpleShaftDescriptor
     var rads = 0.0
     var logRads = 0.0
@@ -153,8 +153,8 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     }
 }
 
-abstract class SimpleShaftElement(node : TransparentNode, desc_: TransparentNodeDescriptor) :
-        TransparentNodeElement(node, desc_), ShaftElement {
+abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
+    TransparentNodeElement(node, desc_), ShaftElement {
     override val shaftMass = 5.0
     override var shaft = ShaftNetwork(this)
 

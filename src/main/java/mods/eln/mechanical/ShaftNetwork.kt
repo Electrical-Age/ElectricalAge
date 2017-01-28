@@ -18,7 +18,7 @@ val defaultDrag = 0.02
 /**
  * Represents the connection between all blocks that are part of the same shaft network.
  */
-class ShaftNetwork(): INBTTReady {
+class ShaftNetwork() : INBTTReady {
     val elements = HashSet<ShaftElement>()
 
     constructor(first: ShaftElement) : this() {
@@ -28,13 +28,13 @@ class ShaftNetwork(): INBTTReady {
     // Aggregate properties of the (current) shaft:
     val shapeFactor = 0.5
     val mass: Double
-      get() {
-          var sum = 0.0
-          for (e in elements) {
-              sum += e.shaftMass
-          }
-          return sum
-      }
+        get() {
+            var sum = 0.0
+            for (e in elements) {
+                sum += e.shaftMass
+            }
+            return sum
+        }
     var rads = 0.0
     var radsLastPublished = rads
 

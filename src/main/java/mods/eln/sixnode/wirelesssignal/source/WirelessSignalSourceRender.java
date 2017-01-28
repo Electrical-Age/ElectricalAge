@@ -16,8 +16,8 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 public class WirelessSignalSourceRender extends SixNodeElementRender {
-    
-	WirelessSignalSourceDescriptor descriptor;
+
+    WirelessSignalSourceDescriptor descriptor;
 
     RcInterpolator interpolator;
 
@@ -25,42 +25,42 @@ public class WirelessSignalSourceRender extends SixNodeElementRender {
     boolean state = false;
 
     public WirelessSignalSourceRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-		super(tileEntity, side, descriptor);
-		this.descriptor = (WirelessSignalSourceDescriptor) descriptor;
-		
-		interpolator = new RcInterpolator(this.descriptor.render.speed);
-	}
-    
-	@Override
-	public void draw() {
-		super.draw();
-		descriptor.draw(interpolator.get(), UtilsClient.distanceFromClientPlayer(this.tileEntity), tileEntity);
-	}
-	
-	@Override
-	public void refresh(float deltaT) {
-		interpolator.setTarget((float) ((state ? 1 : 0)));
-		interpolator.step(deltaT);
-	}
-	
-	@Override
-	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		return Eln.instance.signalCableDescriptor.render;
-	}
-    
-	@Override
-	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		return new WirelessSignalSourceGui(this);
-	}
+        super(tileEntity, side, descriptor);
+        this.descriptor = (WirelessSignalSourceDescriptor) descriptor;
 
-	@Override
-	public void publishUnserialize(DataInputStream stream) {
-		super.publishUnserialize(stream);
-		try {
-			channel = stream.readUTF();
-			state = stream.readBoolean();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        interpolator = new RcInterpolator(this.descriptor.render.speed);
+    }
+
+    @Override
+    public void draw() {
+        super.draw();
+        descriptor.draw(interpolator.get(), UtilsClient.distanceFromClientPlayer(this.tileEntity), tileEntity);
+    }
+
+    @Override
+    public void refresh(float deltaT) {
+        interpolator.setTarget((float) ((state ? 1 : 0)));
+        interpolator.step(deltaT);
+    }
+
+    @Override
+    public CableRenderDescriptor getCableRender(LRDU lrdu) {
+        return Eln.instance.signalCableDescriptor.render;
+    }
+
+    @Override
+    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
+        return new WirelessSignalSourceGui(this);
+    }
+
+    @Override
+    public void publishUnserialize(DataInputStream stream) {
+        super.publishUnserialize(stream);
+        try {
+            channel = stream.readUTF();
+            state = stream.readBoolean();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -3,9 +3,9 @@
  * of its functionality.
  */
 @cpw.mods.fml.common.API(
-        owner = API.ID_OWNER,
-        provides = "OpenComputersAPI|Event",
-        apiVersion = API.VERSION)
+    owner = API.ID_OWNER,
+    provides = "OpenComputersAPI|Event",
+    apiVersion = API.VERSION)
 package li.cil.oc.api.event;
 
 import li.cil.oc.api.API;

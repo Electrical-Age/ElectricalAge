@@ -13,44 +13,44 @@ import java.io.IOException;
 
 public class ElectricalRedstoneOutputRender extends SixNodeElementRender {
 
-	ElectricalRedstoneOutputDescriptor descriptor;
+    ElectricalRedstoneOutputDescriptor descriptor;
 
     float factor;
     float factorFiltered = 0;
 
     int redOutput;
 
-	public ElectricalRedstoneOutputRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-		super(tileEntity, side, descriptor);
-		this.descriptor = (ElectricalRedstoneOutputDescriptor) descriptor;
-	}
+    public ElectricalRedstoneOutputRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
+        super(tileEntity, side, descriptor);
+        this.descriptor = (ElectricalRedstoneOutputDescriptor) descriptor;
+    }
 
-	@Override
-	public void draw() {
-		super.draw();
+    @Override
+    public void draw() {
+        super.draw();
 
-		drawSignalPin(front.right(), descriptor.pinDistance);
+        drawSignalPin(front.right(), descriptor.pinDistance);
 
-		descriptor.draw(redOutput);
-	}
+        descriptor.draw(redOutput);
+    }
 
-	@Override
-	public int isProvidingWeakPower(Direction side) {
-		return redOutput;
-	}
+    @Override
+    public int isProvidingWeakPower(Direction side) {
+        return redOutput;
+    }
 
-	@Override
-	public void publishUnserialize(DataInputStream stream) {
-		super.publishUnserialize(stream);
-		try {
-			redOutput = stream.readByte();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}		
-	}
-	
-	@Override
-	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		return Eln.instance.signalCableDescriptor.render;
-	}
+    @Override
+    public void publishUnserialize(DataInputStream stream) {
+        super.publishUnserialize(stream);
+        try {
+            redOutput = stream.readByte();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public CableRenderDescriptor getCableRender(LRDU lrdu) {
+        return Eln.instance.signalCableDescriptor.render;
+    }
 }

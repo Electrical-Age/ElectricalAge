@@ -15,12 +15,12 @@ import java.util.HashMap;
 
 public class ModbusRtuRender extends SixNodeElementRender {
 
-	Coordonate coord;
-	PhysicalInterpolator interpolator;
-	float modbusActivityTimeout = 0;
-	float modbusErrorTimeout = 0;
+    Coordonate coord;
+    PhysicalInterpolator interpolator;
+    float modbusActivityTimeout = 0;
+    float modbusErrorTimeout = 0;
 
-	ModbusRtuDescriptor descriptor;
+    ModbusRtuDescriptor descriptor;
 
     HashMap<Integer, WirelessTxStatus> wirelessTxStatusList = new HashMap<Integer, WirelessTxStatus>();
     HashMap<Integer, WirelessRxStatus> wirelessRxStatusList = new HashMap<Integer, WirelessRxStatus>();
@@ -32,16 +32,16 @@ public class ModbusRtuRender extends SixNodeElementRender {
     boolean rxTxChange = false;
 
     public ModbusRtuRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-		super(tileEntity, side, descriptor);
-		this.descriptor = (ModbusRtuDescriptor) descriptor;
+        super(tileEntity, side, descriptor);
+        this.descriptor = (ModbusRtuDescriptor) descriptor;
 
-		interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
-		coord = new Coordonate(tileEntity);
-	}
+        interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
+        coord = new Coordonate(tileEntity);
+    }
 
-	@Override
-	public void draw() {
-		super.draw();
+    @Override
+    public void draw() {
+        super.draw();
 
         if (side.isY()) {
             front.inverse().glRotateOnX();
@@ -49,46 +49,46 @@ public class ModbusRtuRender extends SixNodeElementRender {
             LRDU.Down.glRotateOnX();
         }
 
-		descriptor.draw(interpolator.get(), modbusActivityTimeout > 0, modbusErrorTimeout > 0);
-	}
+        descriptor.draw(interpolator.get(), modbusActivityTimeout > 0, modbusErrorTimeout > 0);
+    }
 
-	@Override
-	public void refresh(float deltaT) {
-		if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coord.getAxisAlignedBB(0)))
-			interpolator.setTarget(0f);
-		else
-			interpolator.setTarget(1f);
+    @Override
+    public void refresh(float deltaT) {
+        if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coord.getAxisAlignedBB(0)))
+            interpolator.setTarget(0f);
+        else
+            interpolator.setTarget(1f);
 
-		interpolator.step(deltaT);
+        interpolator.step(deltaT);
 
-		if (modbusActivityTimeout > 0)
-			modbusActivityTimeout -= deltaT;
+        if (modbusActivityTimeout > 0)
+            modbusActivityTimeout -= deltaT;
 
-		if (modbusErrorTimeout > 0)
-			modbusErrorTimeout -= deltaT;
-	}
+        if (modbusErrorTimeout > 0)
+            modbusErrorTimeout -= deltaT;
+    }
 
-	@Override
-	public void publishUnserialize(DataInputStream stream) {
-		super.publishUnserialize(stream);
+    @Override
+    public void publishUnserialize(DataInputStream stream) {
+        super.publishUnserialize(stream);
 
-		try {
-			station = stream.readInt();
-			name = stream.readUTF();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        try {
+            station = stream.readInt();
+            name = stream.readUTF();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-		if (boot)
-			clientSend(ModbusRtuElement.serverAllSyncronise);
-		boot = false;
-	}
+        if (boot)
+            clientSend(ModbusRtuElement.serverAllSyncronise);
+        boot = false;
+    }
 
-	@Override
-	public void serverPacketUnserialize(DataInputStream stream) throws IOException {
-		super.serverPacketUnserialize(stream);
+    @Override
+    public void serverPacketUnserialize(DataInputStream stream) throws IOException {
+        super.serverPacketUnserialize(stream);
 
-		switch (stream.readByte()) {
+        switch (stream.readByte()) {
             case ModbusRtuElement.clientAllSyncronise: {
                 wirelessTxStatusList.clear();
                 for (int idx = stream.readInt(); idx > 0; idx--) {
@@ -105,31 +105,31 @@ public class ModbusRtuRender extends SixNodeElementRender {
 
                 rxTxChange = true;
             }
-                break;
+            break;
             case ModbusRtuElement.clientTx1Syncronise: {
                 WirelessTxStatus newTx = new WirelessTxStatus();
                 newTx.readFrom(stream);
                 wirelessTxStatusList.put(newTx.uuid, newTx);
                 rxTxChange = true;
             }
-                break;
+            break;
             case ModbusRtuElement.clientRx1Syncronise: {
                 WirelessRxStatus newRx = new WirelessRxStatus();
                 newRx.readFrom(stream);
                 wirelessRxStatusList.put(newRx.uuid, newRx);
                 rxTxChange = true;
             }
-                break;
+            break;
             case ModbusRtuElement.clientTxDelete: {
                 wirelessTxStatusList.remove(stream.readInt());
                 rxTxChange = true;
             }
-                break;
+            break;
             case ModbusRtuElement.clientRxDelete: {
                 wirelessRxStatusList.remove(stream.readInt());
                 rxTxChange = true;
             }
-                break;
+            break;
             case ModbusRtuElement.clientRx1Connected:
                 WirelessRxStatus rx = wirelessRxStatusList.get(stream.readInt());
                 if (rx != null) {
@@ -142,15 +142,15 @@ public class ModbusRtuRender extends SixNodeElementRender {
             case ModbusRtuElement.ClientModbusErrorEvent:
                 modbusErrorTimeout = 1f;
                 break;
-		}
-	}
+        }
+    }
 
-	@Override
-	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		return new ModbusRtuGui(player, this);
-	}
+    @Override
+    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
+        return new ModbusRtuGui(player, this);
+    }
 
-	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		return Eln.instance.signalCableDescriptor.render;
-	}
+    public CableRenderDescriptor getCableRender(LRDU lrdu) {
+        return Eln.instance.signalCableDescriptor.render;
+    }
 }

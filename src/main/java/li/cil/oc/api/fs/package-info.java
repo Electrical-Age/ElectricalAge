@@ -14,9 +14,9 @@
  * from computers).
  */
 @cpw.mods.fml.common.API(
-        owner = API.ID_OWNER,
-        provides = "OpenComputersAPI|FileSystem",
-        apiVersion = API.VERSION)
+    owner = API.ID_OWNER,
+    provides = "OpenComputersAPI|FileSystem",
+    apiVersion = API.VERSION)
 package li.cil.oc.api.fs;
 
 import li.cil.oc.api.API;

@@ -113,7 +113,7 @@ public class GridTransformerElement extends GridElement {
             return Utils.plotVolt("US+:", secondaryLoad.getU()) + Utils.plotAmpere("IS+:", secondaryLoad.getCurrent());
 
         return Utils.plotVolt("UP+:", primaryLoad.getU()) + Utils.plotAmpere("IP+:", primaryLoad.getCurrent())
-                + Utils.plotVolt("  US+:", secondaryLoad.getU()) + Utils.plotAmpere("IS+:", secondaryLoad.getCurrent());
+            + Utils.plotVolt("  US+:", secondaryLoad.getU()) + Utils.plotAmpere("IS+:", secondaryLoad.getCurrent());
     }
 
     @Override

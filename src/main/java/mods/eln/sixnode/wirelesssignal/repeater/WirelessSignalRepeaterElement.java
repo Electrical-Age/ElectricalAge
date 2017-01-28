@@ -19,96 +19,96 @@ import java.util.Map;
 
 public class WirelessSignalRepeaterElement extends SixNodeElement {
 
-	WirelessSignalRepeaterProcess slowProcess = new WirelessSignalRepeaterProcess(this);
-	
-	WirelessSignalRepeaterDescriptor descriptor;
+    WirelessSignalRepeaterProcess slowProcess = new WirelessSignalRepeaterProcess(this);
+
+    WirelessSignalRepeaterDescriptor descriptor;
 
     boolean fromNbt = false;
-	
-	public WirelessSignalRepeaterElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
-		super(sixNode, side, descriptor);
-		
-		this.descriptor = (WirelessSignalRepeaterDescriptor) descriptor;
 
-		slowProcessList.add(slowProcess);
-		
-		IWirelessSignalSpot.spots.add(slowProcess);
-	}
+    public WirelessSignalRepeaterElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+        super(sixNode, side, descriptor);
 
-	@Override
-	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		return null;
-	}
+        this.descriptor = (WirelessSignalRepeaterDescriptor) descriptor;
 
-	@Override
-	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		return null;
-	}
+        slowProcessList.add(slowProcess);
 
-	@Override
-	public int getConnectionMask(LRDU lrdu) {
-		if (front == lrdu) return NodeBase.maskElectricalOutputGate;
-		return 0;
-	}
+        IWirelessSignalSpot.spots.add(slowProcess);
+    }
 
-	@Override
-	public String multiMeterString() {
-		return null;
-	}
+    @Override
+    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+        return null;
+    }
 
-	@Nullable
-	@Override
-	public Map<String, String> getWaila() {
-		return null;
-	}
+    @Override
+    public ThermalLoad getThermalLoad(LRDU lrdu) {
+        return null;
+    }
 
-	@Override
-	public String thermoMeterString() {
-		return null;
-	}
-    
-	@Override
-	public void globalBoot() {
-		slowProcess.process(0.05);
-	}
+    @Override
+    public int getConnectionMask(LRDU lrdu) {
+        if (front == lrdu) return NodeBase.maskElectricalOutputGate;
+        return 0;
+    }
 
-	@Override
-	public void destroy(EntityPlayerMP entityPlayer) {
-		unregister();
-		super.destroy(entityPlayer);
-	}
-    
-	@Override
-	public void unload() {
-		super.unload();
-		unregister();
-	}
-	
-	void unregister() {
-		IWirelessSignalSpot.spots.remove(slowProcess);
-	}
+    @Override
+    public String multiMeterString() {
+        return null;
+    }
 
-	@Override
-	public void initialize() {
-		if (!fromNbt) {
-			slowProcess.process(0.05);
-		}
-	}
+    @Nullable
+    @Override
+    public Map<String, String> getWaila() {
+        return null;
+    }
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		fromNbt = true;
-	}
+    @Override
+    public String thermoMeterString() {
+        return null;
+    }
 
-	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		if (Utils.isPlayerUsingWrench(entityPlayer)) {
-			front = front.getNextClockwise();
-			sixNode.reconnect();
-			sixNode.setNeedPublish(true);
-			return true;	
-		}
-		return false;
-	}
+    @Override
+    public void globalBoot() {
+        slowProcess.process(0.05);
+    }
+
+    @Override
+    public void destroy(EntityPlayerMP entityPlayer) {
+        unregister();
+        super.destroy(entityPlayer);
+    }
+
+    @Override
+    public void unload() {
+        super.unload();
+        unregister();
+    }
+
+    void unregister() {
+        IWirelessSignalSpot.spots.remove(slowProcess);
+    }
+
+    @Override
+    public void initialize() {
+        if (!fromNbt) {
+            slowProcess.process(0.05);
+        }
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
+        fromNbt = true;
+    }
+
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (Utils.isPlayerUsingWrench(entityPlayer)) {
+            front = front.getNextClockwise();
+            sixNode.reconnect();
+            sixNode.setNeedPublish(true);
+            return true;
+        }
+        return false;
+    }
 }

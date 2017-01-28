@@ -109,10 +109,12 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
     }
 
     void draw(ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity,
-              float powerFactor, float processState) {}
+              float powerFactor, float processState) {
+    }
 
     void refresh(float deltaT, ElectricalMachineRender render, Object handleO, EntityItem inEntity,
-                 EntityItem outEntity, float powerFactor, float processState) {}
+                 EntityItem outEntity, float powerFactor, float processState) {
+    }
 
     public boolean powerLrdu(Direction side, Direction front) {
         return true;

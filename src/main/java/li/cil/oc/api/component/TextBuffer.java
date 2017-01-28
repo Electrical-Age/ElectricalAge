@@ -357,8 +357,8 @@ public interface TextBuffer extends ManagedEnvironment, Persistable {
      * values.
      *
      * @param column the horizontal index.
-     * @param row the vertical index.
-     * @param text the text to write.
+     * @param row    the vertical index.
+     * @param text   the text to write.
      */
     void rawSetText(int column, int row, char[][] text);
 
@@ -379,8 +379,8 @@ public interface TextBuffer extends ManagedEnvironment, Persistable {
      * values.
      *
      * @param column the horizontal index.
-     * @param row the vertical index.
-     * @param color the foreground color data to write.
+     * @param row    the vertical index.
+     * @param color  the foreground color data to write.
      */
     void rawSetForeground(int column, int row, int[][] color);
 
@@ -401,8 +401,8 @@ public interface TextBuffer extends ManagedEnvironment, Persistable {
      * values.
      *
      * @param column the horizontal index.
-     * @param row the vertical index.
-     * @param color the background color data to write.
+     * @param row    the vertical index.
+     * @param color  the background color data to write.
      */
     void rawSetBackground(int column, int row, int[][] color);
 
@@ -560,19 +560,27 @@ public interface TextBuffer extends ManagedEnvironment, Persistable {
 
     // TODO Remove deprecated overloads in 1.5.
 
-    /** @deprecated Use the floating-point variant instead. */
+    /**
+     * @deprecated Use the floating-point variant instead.
+     */
     @Deprecated
     void mouseDown(int x, int y, int button, EntityPlayer player);
 
-    /** @deprecated Use the floating-point variant instead. */
+    /**
+     * @deprecated Use the floating-point variant instead.
+     */
     @Deprecated
     void mouseDrag(int x, int y, int button, EntityPlayer player);
 
-    /** @deprecated Use the floating-point variant instead. */
+    /**
+     * @deprecated Use the floating-point variant instead.
+     */
     @Deprecated
     void mouseUp(int x, int y, int button, EntityPlayer player);
 
-    /** @deprecated Use the floating-point variant instead. */
+    /**
+     * @deprecated Use the floating-point variant instead.
+     */
     @Deprecated
     void mouseScroll(int x, int y, int delta, EntityPlayer player);
 

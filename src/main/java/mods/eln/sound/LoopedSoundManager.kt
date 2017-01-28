@@ -22,7 +22,8 @@ class LoopedSoundManager(val updateInterval: Float = 0.5f) {
                 if (!soundHandler.isSoundPlaying(it)) {
                     try {
                         soundHandler.playSound(it)
-                    } catch (e: IllegalArgumentException) {}
+                    } catch (e: IllegalArgumentException) {
+                    }
                 }
             }
 

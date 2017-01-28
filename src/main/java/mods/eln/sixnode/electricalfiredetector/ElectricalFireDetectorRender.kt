@@ -27,9 +27,9 @@ class ElectricalFireDetectorRender(tileEntity: SixNodeEntity, side: Direction, d
     init {
         if (this.descriptor.batteryPowered) {
             inventory = SixNodeElementInventory(1, 64, this)
-            addLoopedSound(object: LoopedSound("eln:FireAlarm",
-                    Coordonate(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, tileEntity.worldObj),
-                    ISound.AttenuationType.LINEAR) {
+            addLoopedSound(object : LoopedSound("eln:FireAlarm",
+                Coordonate(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, tileEntity.worldObj),
+                ISound.AttenuationType.LINEAR) {
                 override fun getVolume() = if (firePresent) 1f else 0f
             })
         } else {

@@ -33,16 +33,16 @@ import java.util.List;
 //TODO Copy-pasted from LampSupply. PowerSocket behavior must be implemented.
 public class PowerSocketElement extends SixNodeElement {
 
-	public static final HashMap<String, ArrayList<PowerSocketElement>> channelMap = new HashMap<String, ArrayList<PowerSocketElement>>();
+    public static final HashMap<String, ArrayList<PowerSocketElement>> channelMap = new HashMap<String, ArrayList<PowerSocketElement>>();
 
-	//NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");
-	public PowerSocketDescriptor descriptor;
+    //NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");
+    public PowerSocketDescriptor descriptor;
 
-	public NbtElectricalLoad powerLoad = new NbtElectricalLoad("powerLoad");
-	public Resistor loadResistor = new Resistor(powerLoad, null);
-	public IProcess PowerSocketSlowProcess = new PowerSocketSlowProcess();
+    public NbtElectricalLoad powerLoad = new NbtElectricalLoad("powerLoad");
+    public Resistor loadResistor = new Resistor(powerLoad, null);
+    public IProcess PowerSocketSlowProcess = new PowerSocketSlowProcess();
 
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     public String channel = "Default channel";
 
@@ -53,201 +53,201 @@ public class PowerSocketElement extends SixNodeElement {
     double RpStack = 0;
 
     @Override
-	public IInventory getInventory() {
-		return inventory;
-	}
+    public IInventory getInventory() {
+        return inventory;
+    }
 
-	@Override
-	public Container newContainer(Direction side, EntityPlayer player) {
-		return new PowerSocketContainer(player, inventory);
-	}
+    @Override
+    public Container newContainer(Direction side, EntityPlayer player) {
+        return new PowerSocketContainer(player, inventory);
+    }
 
-	public PowerSocketElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
-		super(sixNode, side, descriptor);
-		electricalLoadList.add(powerLoad);
-		electricalComponentList.add(loadResistor);
-		slowProcessList.add(PowerSocketSlowProcess);
-		loadResistor.highImpedance();
-		this.descriptor = (PowerSocketDescriptor) descriptor;
+    public PowerSocketElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+        super(sixNode, side, descriptor);
+        electricalLoadList.add(powerLoad);
+        electricalComponentList.add(loadResistor);
+        slowProcessList.add(PowerSocketSlowProcess);
+        loadResistor.highImpedance();
+        this.descriptor = (PowerSocketDescriptor) descriptor;
 
-		slowProcessList.add(voltageWatchdog);
-		voltageWatchdog
-		 .set(powerLoad)
-		 .set(new WorldExplosion(this).cableExplosion());
+        slowProcessList.add(voltageWatchdog);
+        voltageWatchdog
+            .set(powerLoad)
+            .set(new WorldExplosion(this).cableExplosion());
 
-		channelRegister(this);
-	}
+        channelRegister(this);
+    }
 
-	class PowerSocketSlowProcess implements IProcess {
+    class PowerSocketSlowProcess implements IProcess {
 
-		@Override
-		public void process(double time) {
-			loadResistor.setR(1 / RpStack);
-			RpStack = 0;
-		}
-	}
+        @Override
+        public void process(double time) {
+            loadResistor.setR(1 / RpStack);
+            RpStack = 0;
+        }
+    }
 
-	static void channelRegister(PowerSocketElement tx) {
-		String channel = tx.channel;
-		ArrayList<PowerSocketElement> list = channelMap.get(channel);
-		if (list == null)
-			channelMap.put(channel, list = new ArrayList<PowerSocketElement>());
-		list.add(tx);
-	}
+    static void channelRegister(PowerSocketElement tx) {
+        String channel = tx.channel;
+        ArrayList<PowerSocketElement> list = channelMap.get(channel);
+        if (list == null)
+            channelMap.put(channel, list = new ArrayList<PowerSocketElement>());
+        list.add(tx);
+    }
 
-	static void channelRemove(PowerSocketElement tx) {
-		String channel = tx.channel;
-		List<PowerSocketElement> list = channelMap.get(channel);
-		if (list == null) return;
-		list.remove(tx);
-		if (list.isEmpty())
-			channelMap.remove(channel);
-	}
+    static void channelRemove(PowerSocketElement tx) {
+        String channel = tx.channel;
+        List<PowerSocketElement> list = channelMap.get(channel);
+        if (list == null) return;
+        list.remove(tx);
+        if (list.isEmpty())
+            channelMap.remove(channel);
+    }
 
-	@Override
-	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if (inventory.getStackInSlot(PowerSocketContainer.cableSlotId) == null) return null;
-		if (front == lrdu) return powerLoad;
-		return null;
-	}
+    @Override
+    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+        if (inventory.getStackInSlot(PowerSocketContainer.cableSlotId) == null) return null;
+        if (front == lrdu) return powerLoad;
+        return null;
+    }
 
-	@Override
-	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		if (inventory.getStackInSlot(PowerSocketContainer.cableSlotId) == null) return null;
-		return null;
-	}
+    @Override
+    public ThermalLoad getThermalLoad(LRDU lrdu) {
+        if (inventory.getStackInSlot(PowerSocketContainer.cableSlotId) == null) return null;
+        return null;
+    }
 
-	@Override
-	public int getConnectionMask(LRDU lrdu) {
-		if (inventory.getStackInSlot(PowerSocketContainer.cableSlotId) == null) return 0;
-		if (front == lrdu) return NodeBase.maskElectricalPower;
-		return 0;
-	}
+    @Override
+    public int getConnectionMask(LRDU lrdu) {
+        if (inventory.getStackInSlot(PowerSocketContainer.cableSlotId) == null) return 0;
+        if (front == lrdu) return NodeBase.maskElectricalPower;
+        return 0;
+    }
 
-	@Override
-	public String multiMeterString() {
-		return Utils.plotUIP(powerLoad.getU(), powerLoad.getCurrent());
-	}
+    @Override
+    public String multiMeterString() {
+        return Utils.plotUIP(powerLoad.getU(), powerLoad.getCurrent());
+    }
 
-	@Override
-	public String thermoMeterString() {
-		return null;
-	}
+    @Override
+    public String thermoMeterString() {
+        return null;
+    }
 
-	@Override
-	public void initialize() {
-		setupFromInventory();
-	}
+    @Override
+    public void initialize() {
+        setupFromInventory();
+    }
 
-	@Override
-	protected void inventoryChanged() {
-		super.inventoryChanged();
-		sixNode.disconnect();
-		setupFromInventory();
-		sixNode.connect();
-		needPublish();
-	}
+    @Override
+    protected void inventoryChanged() {
+        super.inventoryChanged();
+        sixNode.disconnect();
+        setupFromInventory();
+        sixNode.connect();
+        needPublish();
+    }
 
-	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		if (Utils.isPlayerUsingWrench(entityPlayer)) {
-			front = front.getNextClockwise();
-			sixNode.reconnect();
-			sixNode.setNeedPublish(true);
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (Utils.isPlayerUsingWrench(entityPlayer)) {
+            front = front.getNextClockwise();
+            sixNode.reconnect();
+            sixNode.setNeedPublish(true);
+            return true;
+        }
+        return false;
+    }
 
-	@Override
-	public void destroy(EntityPlayerMP entityPlayer) {
-		super.destroy(entityPlayer);
-		unregister();
-	}
+    @Override
+    public void destroy(EntityPlayerMP entityPlayer) {
+        super.destroy(entityPlayer);
+        unregister();
+    }
 
-	@Override
-	public void unload() {
-		super.unload();
-		channelRemove(this);
-	}
+    @Override
+    public void unload() {
+        super.unload();
+        channelRemove(this);
+    }
 
-	void unregister() {
-		channelRemove(this);
-	}
+    void unregister() {
+        channelRemove(this);
+    }
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-		nbt.setString("channel", channel);
-	}
+    @Override
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+        nbt.setString("channel", channel);
+    }
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		channelRemove(this);
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        channelRemove(this);
 
-		super.readFromNBT(nbt);
-		channel = nbt.getString("channel");
+        super.readFromNBT(nbt);
+        channel = nbt.getString("channel");
 
-		channelRegister(this);
-	}
+        channelRegister(this);
+    }
 
-	void setupFromInventory() {
-		ItemStack cableStack = inventory.getStackInSlot(PowerSocketContainer.cableSlotId);
-		if (cableStack != null) {
-			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
-			desc.applyTo(powerLoad);
-			voltageWatchdog.setUNominal(desc.electricalNominalVoltage);
-		} else {
-			voltageWatchdog.setUNominal(10000);
-			powerLoad.highImpedance();
-		}
-	}
+    void setupFromInventory() {
+        ItemStack cableStack = inventory.getStackInSlot(PowerSocketContainer.cableSlotId);
+        if (cableStack != null) {
+            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack);
+            desc.applyTo(powerLoad);
+            voltageWatchdog.setUNominal(desc.electricalNominalVoltage);
+        } else {
+            voltageWatchdog.setUNominal(10000);
+            powerLoad.highImpedance();
+        }
+    }
 
-	@Override
-	public void networkUnserialize(DataInputStream stream) {
-		super.networkUnserialize(stream);
+    @Override
+    public void networkUnserialize(DataInputStream stream) {
+        super.networkUnserialize(stream);
 
-		try {
-			switch (stream.readByte()) {
+        try {
+            switch (stream.readByte()) {
                 case setChannelId:
                     channelRemove(this);
                     channel = stream.readUTF();
                     needPublish();
                     channelRegister(this);
                     break;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public boolean hasGui() {
-		return true;
-	}
+    @Override
+    public boolean hasGui() {
+        return true;
+    }
 
-	@Override
-	public void networkSerialize(DataOutputStream stream) {
-		super.networkSerialize(stream);
-		try {
-			stream.writeUTF(channel);
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(PowerSocketContainer.cableSlotId));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public void networkSerialize(DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            stream.writeUTF(channel);
+            Utils.serialiseItemStack(stream, inventory.getStackInSlot(PowerSocketContainer.cableSlotId));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	public void addToRp(double r) {
-		RpStack += 1 / r;
-	}
+    public void addToRp(double r) {
+        RpStack += 1 / r;
+    }
 
-	public int getRange() {
-		return getRange(descriptor, inventory);
-	}
+    public int getRange() {
+        return getRange(descriptor, inventory);
+    }
 
-	private int getRange(PowerSocketDescriptor desc, SixNodeElementInventory inventory2) {
-		ItemStack stack = inventory.getStackInSlot(PowerSocketContainer.cableSlotId);
-		if (stack == null) return desc.range;
-		return desc.range + stack.stackSize;
-	}
+    private int getRange(PowerSocketDescriptor desc, SixNodeElementInventory inventory2) {
+        ItemStack stack = inventory.getStackInSlot(PowerSocketContainer.cableSlotId);
+        if (stack == null) return desc.range;
+        return desc.range + stack.stackSize;
+    }
 }

@@ -15,20 +15,20 @@ import static mods.eln.i18n.I18N.tr;
 
 public class PowerCapacitorContainer extends BasicContainer {
 
-	static final int redId = 0;
-	static final int dielectricId = 1;
+    static final int redId = 0;
+    static final int dielectricId = 1;
 
-	public PowerCapacitorContainer(EntityPlayer player, IInventory inventory) {
-		super(player, inventory, new Slot[] {
-				new SlotFilter(inventory, redId, 132, 8, 13,
-					new ItemStackFilter[] { new ItemStackFilter(Items.redstone) },
-					SlotSkin.medium, new String[] { tr("Redstone slot"), tr("(Increases capacity)") }),
-				new GenericItemUsingDamageSlot(inventory, dielectricId, 132 + 20, 8, 20,
-					DielectricItem.class, SlotSkin.medium,
-					new String[] { tr("Dielectric slot"), tr("(Increases maximal voltage)") })
+    public PowerCapacitorContainer(EntityPlayer player, IInventory inventory) {
+        super(player, inventory, new Slot[]{
+            new SlotFilter(inventory, redId, 132, 8, 13,
+                new ItemStackFilter[]{new ItemStackFilter(Items.redstone)},
+                SlotSkin.medium, new String[]{tr("Redstone slot"), tr("(Increases capacity)")}),
+            new GenericItemUsingDamageSlot(inventory, dielectricId, 132 + 20, 8, 20,
+                DielectricItem.class, SlotSkin.medium,
+                new String[]{tr("Dielectric slot"), tr("(Increases maximal voltage)")})
 
-		});
+        });
 
-	}
+    }
 
 }

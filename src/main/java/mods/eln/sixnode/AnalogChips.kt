@@ -29,8 +29,8 @@ import java.io.IOException
 
 open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
                                 functionClass: Class<out AnalogFunction>,
-                                elementClass: Class<out AnalogChipElement>, renderClass: Class<out AnalogChipRender>):
-        SixNodeDescriptor(name, elementClass, renderClass) {
+                                elementClass: Class<out AnalogChipElement>, renderClass: Class<out AnalogChipRender>) :
+    SixNodeDescriptor(name, elementClass, renderClass) {
     private val case = obj?.getPart("Case")
     private val top = obj?.getPart(functionName)
     private val pins = arrayOfNulls<Obj3D.Obj3DPart>(4)
@@ -44,8 +44,9 @@ open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
         voltageLevelColor = VoltageLevelColor.SignalVoltage
     }
 
-    constructor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out AnalogFunction>):
-    this(name, obj, functionName, functionClass, AnalogChipElement::class.java, AnalogChipRender::class.java) {}
+    constructor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out AnalogFunction>) :
+        this(name, obj, functionName, functionClass, AnalogChipElement::class.java, AnalogChipRender::class.java) {
+    }
 
     fun draw() {
         pins.forEach { it?.draw() }
@@ -56,10 +57,11 @@ open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
     override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?): Boolean = true
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
                                        helper: IItemRenderer.ItemRendererHelper?): Boolean =
-            type != IItemRenderer.ItemRenderType.INVENTORY
+        type != IItemRenderer.ItemRenderType.INVENTORY
+
     override fun shouldUseRenderHelperEln(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
                                           helper: IItemRenderer.ItemRendererHelper?): Boolean =
-            type != IItemRenderer.ItemRenderType.INVENTORY
+        type != IItemRenderer.ItemRenderType.INVENTORY
 
     override fun renderItem(type: IItemRenderer.ItemRenderType?, item: ItemStack?, vararg data: Any?) {
         if (type == IItemRenderer.ItemRenderType.INVENTORY) {
@@ -73,7 +75,7 @@ open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
     }
 
     override fun getFrontFromPlace(side: Direction?, player: EntityPlayer?): LRDU? =
-            super.getFrontFromPlace(side, player).left()
+        super.getFrontFromPlace(side, player).left()
 
     override fun setParent(item: Item?, damage: Int) {
         super.setParent(item, damage)
@@ -88,8 +90,8 @@ open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
     }
 }
 
-open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor):
-        SixNodeElement(node, side, sixNodeDescriptor) {
+open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor) :
+    SixNodeElement(node, side, sixNodeDescriptor) {
     private val descriptor = sixNodeDescriptor as AnalogChipDescriptor
 
     private val outputPin = NbtElectricalGateOutput("output")
@@ -97,8 +99,8 @@ open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: 
     private val inputPins = arrayOfNulls<NbtElectricalGateInput>(3)
 
     protected val function: AnalogFunction =
-            if (descriptor.function.hasState) descriptor.function.javaClass.newInstance()
-            else descriptor.function
+        if (descriptor.function.hasState) descriptor.function.javaClass.newInstance()
+        else descriptor.function
 
     init {
         electricalLoadList.add(outputPin)
@@ -150,9 +152,9 @@ open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: 
         return builder.toString()
     }
 
-    override fun getWaila(): MutableMap<String,String> = function.getWaila(
-            inputPins.map { if (it != null && it.connectedComponents.count() > 0) it.u else null }.toTypedArray(),
-            outputPin.u)
+    override fun getWaila(): MutableMap<String, String> = function.getWaila(
+        inputPins.map { if (it != null && it.connectedComponents.count() > 0) it.u else null }.toTypedArray(),
+        outputPin.u)
 
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
@@ -180,8 +182,8 @@ open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: 
     override fun initialize() {}
 }
 
-open class AnalogChipRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor):
-        SixNodeElementRender(entity, side, descriptor) {
+open class AnalogChipRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    SixNodeElementRender(entity, side, descriptor) {
     private val descriptor = descriptor as AnalogChipDescriptor
 
     override fun draw() {
@@ -190,7 +192,7 @@ open class AnalogChipRender(entity: SixNodeEntity, side: Direction, descriptor: 
         descriptor.draw()
     }
 
-    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor? = when(lrdu) {
+    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor? = when (lrdu) {
         front -> Eln.instance.signalCableDescriptor.render
         front.inverse() -> if (descriptor.function.inputCount >= 1) Eln.instance.signalCableDescriptor.render else null
         front.left() -> if (descriptor.function.inputCount >= 2) Eln.instance.signalCableDescriptor.render else null
@@ -199,7 +201,7 @@ open class AnalogChipRender(entity: SixNodeEntity, side: Direction, descriptor: 
     }
 }
 
-abstract class AnalogFunction: INBTTReady {
+abstract class AnalogFunction : INBTTReady {
     companion object {
         val inputColors = arrayOf("§c", "§a", "§9")
     }
@@ -217,23 +219,23 @@ abstract class AnalogFunction: INBTTReady {
     abstract fun process(inputs: Array<Double?>, deltaTime: Double): Double
 
     open fun getWaila(inputs: Array<Double?>, output: Double) = mutableMapOf(
-            Pair("Inputs", (1..inputCount).map {"${inputColors[it - 1]}${Utils.plotVolt("", inputs[it -1] ?: 0.0)}"}.joinToString(" ")),
-            Pair("Output", Utils.plotVolt("", output))
+        Pair("Inputs", (1..inputCount).map { "${inputColors[it - 1]}${Utils.plotVolt("", inputs[it - 1] ?: 0.0)}" }.joinToString(" ")),
+        Pair("Output", Utils.plotVolt("", output))
     )
 
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {}
     override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {}
 }
 
-class OpAmp: AnalogFunction() {
+class OpAmp : AnalogFunction() {
     override val inputCount = 2
     override val infos = I18N.tr("Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or a configurable amplifier.")
 
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double =
-            10000 * ((inputs[0] ?: 0.0) - (inputs[1] ?: 0.0))
+        10000 * ((inputs[0] ?: 0.0) - (inputs[1] ?: 0.0))
 }
 
-class PIDRegulator: AnalogFunction() {
+class PIDRegulator : AnalogFunction() {
     override val hasState = true
     override val inputCount = 2
     override val infos = I18N.tr("Proportional–integral–derivative controller. A PID\ncontroller continuously calculates an error value as\nthe difference between a desired setpoint and a measured\nprocess variable and applies a correction based on\nproportional, integral, and derivative terms.")
@@ -278,8 +280,8 @@ class PIDRegulator: AnalogFunction() {
     }
 }
 
-class PIDRegulatorElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor):
-        AnalogChipElement(node, side, sixNodeDescriptor) {
+class PIDRegulatorElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor) :
+    AnalogChipElement(node, side, sixNodeDescriptor) {
     companion object {
         val KpParameterChangedEvent = 1
         val KiParameterChangedEvent = 2
@@ -316,8 +318,8 @@ class PIDRegulatorElement(node: SixNode, side: Direction, sixNodeDescriptor: Six
     }
 }
 
-class PIDRegulatorRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor):
-        AnalogChipRender(entity, side, descriptor) {
+class PIDRegulatorRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    AnalogChipRender(entity, side, descriptor) {
     internal var Kp = 1f
     internal var Ki = 0f
     internal var Kd = 0f
@@ -336,7 +338,7 @@ class PIDRegulatorRender(entity: SixNodeEntity, side: Direction, descriptor: Six
     }
 }
 
-class PIDRegulatorGui(val render: PIDRegulatorRender): GuiScreenEln() {
+class PIDRegulatorGui(val render: PIDRegulatorRender) : GuiScreenEln() {
     var KpBar: GuiVerticalTrackBar? = null
     var KiBar: GuiVerticalTrackBar? = null
     var KdBar: GuiVerticalTrackBar? = null
@@ -380,7 +382,8 @@ class PIDRegulatorGui(val render: PIDRegulatorRender): GuiScreenEln() {
                 KdBar -> {
                     stream.writeByte(PIDRegulatorElement.KdParameterChangerEvent)
                     stream.writeFloat(KdBar?.value ?: 0f)
-                } else -> return
+                }
+                else -> return
             }
 
             render.sendPacketToServer(bos)
@@ -392,7 +395,7 @@ class PIDRegulatorGui(val render: PIDRegulatorRender): GuiScreenEln() {
     override fun newHelper() = GuiHelper(this, 214, 118, "pid.png")
 }
 
-open class VoltageControlledSawtoothOscillator: AnalogFunction() {
+open class VoltageControlledSawtoothOscillator : AnalogFunction() {
     override val hasState = true
     override val inputCount = 1
     override val infos = I18N.tr("A voltage-controlled oscillator or VCO is\nan electronic oscillator whose oscillation\nfrequency is controlled by a voltage input.")
@@ -416,12 +419,12 @@ open class VoltageControlledSawtoothOscillator: AnalogFunction() {
     }
 }
 
-class VoltageControlledSineOscillator: VoltageControlledSawtoothOscillator() {
+class VoltageControlledSineOscillator : VoltageControlledSawtoothOscillator() {
     override fun process(inputs: Array<Double?>, deltaTime: Double) =
-            25.0 + 25.0 * Math.sin(Math.PI * super.process(inputs, deltaTime) / 25.0)
+        25.0 + 25.0 * Math.sin(Math.PI * super.process(inputs, deltaTime) / 25.0)
 }
 
-class Amplifier: AnalogFunction() {
+class Amplifier : AnalogFunction() {
     override val hasState = true
     override val inputCount = 1
     override val infos = I18N.tr("An amplifier increases the voltage\nof an input signal by a configurable\ngain and outputs that voltage.")
@@ -445,8 +448,8 @@ class Amplifier: AnalogFunction() {
     }
 }
 
-class AmplifierElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor):
-        AnalogChipElement(node, side, sixNodeDescriptor) {
+class AmplifierElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor) :
+    AnalogChipElement(node, side, sixNodeDescriptor) {
 
     companion object {
         val GainChangedEvent = 1
@@ -480,8 +483,8 @@ class AmplifierElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNod
     }
 }
 
-class AmplifierRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor):
-        AnalogChipRender(entity, side, descriptor) {
+class AmplifierRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    AnalogChipRender(entity, side, descriptor) {
     internal var gain = 1f
 
     override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? = AmplifierGui(this)
@@ -496,7 +499,7 @@ class AmplifierRender(entity: SixNodeEntity, side: Direction, descriptor: SixNod
     }
 }
 
-class AmplifierGui(val render: AmplifierRender): GuiScreenEln() {
+class AmplifierGui(val render: AmplifierRender) : GuiScreenEln() {
     private var gainTF: GuiTextFieldEln? = null
 
     override fun initGui() {
@@ -526,7 +529,7 @@ class AmplifierGui(val render: AmplifierRender): GuiScreenEln() {
     override fun newHelper() = GuiHelper(this, 62, 24)
 }
 
-class VoltageControlledAmplifier: AnalogFunction() {
+class VoltageControlledAmplifier : AnalogFunction() {
     override val inputCount = 2
     override val infos = I18N.tr("A voltage-controlled amplifier (VCA)\nis an electronic amplifier that varies\nits gain depending on the control voltage.")
 
@@ -547,7 +550,7 @@ class SummingUnit() : AnalogFunction() {
     internal val gains = arrayOf(1.0, 1.0, 1.0)
 
     override fun process(inputs: Array<Double?>, deltaTime: Double) =
-            gains[0] * (inputs[0] ?: 0.0) + gains[1] * (inputs[1] ?: 0.0) + gains[2] * (inputs[2] ?: 0.0)
+        gains[0] * (inputs[0] ?: 0.0) + gains[1] * (inputs[1] ?: 0.0) + gains[2] * (inputs[2] ?: 0.0)
 
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
         for (i in gains.indices) {
@@ -568,8 +571,8 @@ class SummingUnit() : AnalogFunction() {
     }
 }
 
-class SummingUnitElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor):
-        AnalogChipElement(node, side, sixNodeDescriptor) {
+class SummingUnitElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor) :
+    AnalogChipElement(node, side, sixNodeDescriptor) {
 
     companion object {
         val GainChangedEvents = arrayOf(1, 2, 3)
@@ -607,8 +610,8 @@ class SummingUnitElement(node: SixNode, side: Direction, sixNodeDescriptor: SixN
     }
 }
 
-class SummingUnitRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor):
-        AnalogChipRender(entity, side, descriptor) {
+class SummingUnitRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    AnalogChipRender(entity, side, descriptor) {
     internal var gains = floatArrayOf(1f, 1f, 1f)
 
     override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? = SummingUnitGui(this)
@@ -616,14 +619,16 @@ class SummingUnitRender(entity: SixNodeEntity, side: Direction, descriptor: SixN
     override fun publishUnserialize(stream: DataInputStream?) {
         super.publishUnserialize(stream)
         try {
-            for (i in gains.indices) { gains[i] = stream?.readFloat() ?: 1f }
+            for (i in gains.indices) {
+                gains[i] = stream?.readFloat() ?: 1f
+            }
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
 }
 
-class SummingUnitGui(val render: SummingUnitRender): GuiScreenEln() {
+class SummingUnitGui(val render: SummingUnitRender) : GuiScreenEln() {
     private var gainTFs = arrayOfNulls<GuiTextFieldEln>(3)
 
     override fun initGui() {

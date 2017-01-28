@@ -1,10 +1,5 @@
 package mods.eln.sixnode.tutorialsign;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.HashMap;
-
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -16,24 +11,29 @@ import mods.eln.sim.ThermalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+
 import static mods.eln.i18n.I18N.tr;
 
 public class TutorialSignElement extends SixNodeElement {
-    
-	static HashMap<String, String> baliseMap = null;
+
+    static HashMap<String, String> baliseMap = null;
 
     public static final int setTextFileId = 1;
 
     String baliseName = "";
 
-	public static void resetBalise() {
-		baliseMap = null;
-	}
-    
-	public static String getText(String balise) {
-		if (baliseMap == null) {
-			baliseMap = new HashMap<String, String>();
-			
+    public static void resetBalise() {
+        baliseMap = null;
+    }
+
+    public static String getText(String balise) {
+        if (baliseMap == null) {
+            baliseMap = new HashMap<String, String>();
+
 		/*
 			try {
 				File fXmlFile = Utils.getMapFile("EA/tutorialSign.xml");
@@ -52,64 +52,64 @@ public class TutorialSignElement extends SixNodeElement {
 			} catch (Exception e) {
 			}
 */
-			//optional, but recommended
-			//read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
-			//doc.getDocumentElement().normalize();
+            //optional, but recommended
+            //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
+            //doc.getDocumentElement().normalize();
 
-			try {
-				String file = Utils.readMapFile("EA/tutorialSign.txt");
-				String ret;				
-				if (file.contains("\r\n"))
-					ret = "\r\n";
-				else
-					ret = "\n";					
-				
-				file = file.replaceAll("#" + ret, "#");
-				file = file.replaceAll(ret + "#", "#");
+            try {
+                String file = Utils.readMapFile("EA/tutorialSign.txt");
+                String ret;
+                if (file.contains("\r\n"))
+                    ret = "\r\n";
+                else
+                    ret = "\n";
 
-				String[] split = file.split("#");
-				
-				boolean first = true;
-				int counter = 0;
-				String baliseTag = "";
-                
-				for (String str : split) {
-					if (first) {
-						first = false;
-						continue;
-					}
-					if (counter == 0) {
-						baliseTag = str;
-					}
-					if (counter == 1) {
-						baliseMap.put(baliseTag, str);
-					}
-					
-					counter = (counter + 1) & 1;
-				}
-			} catch (IOException e) {
-			//	e.printStackTrace();
-			}		
-		}
-		String text = baliseMap.get(balise);
-		if (text == null) return tr("No text associated to this beacon");
-		return text;	
-	}
-    
-	public TutorialSignElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
-		super(sixNode, side, descriptor);
-	}
-    
-	void setBalise(String name) {
-		baliseName = name;
-		needPublish();
-	}
-    
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		setBalise(nbt.getString("baliseName"));
-	}
+                file = file.replaceAll("#" + ret, "#");
+                file = file.replaceAll(ret + "#", "#");
+
+                String[] split = file.split("#");
+
+                boolean first = true;
+                int counter = 0;
+                String baliseTag = "";
+
+                for (String str : split) {
+                    if (first) {
+                        first = false;
+                        continue;
+                    }
+                    if (counter == 0) {
+                        baliseTag = str;
+                    }
+                    if (counter == 1) {
+                        baliseMap.put(baliseTag, str);
+                    }
+
+                    counter = (counter + 1) & 1;
+                }
+            } catch (IOException e) {
+                //	e.printStackTrace();
+            }
+        }
+        String text = baliseMap.get(balise);
+        if (text == null) return tr("No text associated to this beacon");
+        return text;
+    }
+
+    public TutorialSignElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+        super(sixNode, side, descriptor);
+    }
+
+    void setBalise(String name) {
+        baliseName = name;
+        needPublish();
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
+        setBalise(nbt.getString("baliseName"));
+    }
 	
 /*
 	private void setTextFile(String name) {
@@ -128,73 +128,73 @@ public class TutorialSignElement extends SixNodeElement {
 	}*/
 
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
- 		super.writeToNBT(nbt);
- 		nbt.setString("baliseName", baliseName);
-	}
+    @Override
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+        nbt.setString("baliseName", baliseName);
+    }
 
-	@Override
-	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		return null;
-	}
+    @Override
+    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+        return null;
+    }
 
-	@Override
-	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		return null;
-	}
+    @Override
+    public ThermalLoad getThermalLoad(LRDU lrdu) {
+        return null;
+    }
 
-	@Override
-	public int getConnectionMask(LRDU lrdu) {
-		return 0;
-	}
+    @Override
+    public int getConnectionMask(LRDU lrdu) {
+        return 0;
+    }
 
-	@Override
-	public String multiMeterString() {
-		return "";
-	}
-	
-	@Override
-	public String thermoMeterString() {
-		return "";
-	}
+    @Override
+    public String multiMeterString() {
+        return "";
+    }
 
-	@Override
-	public void networkSerialize(DataOutputStream stream) {
-		super.networkSerialize(stream);
-		try {
-			stream.writeUTF(baliseName);
-			stream.writeUTF(getText(baliseName));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public String thermoMeterString() {
+        return "";
+    }
 
-	@Override
-	public void networkUnserialize(DataInputStream stream) {
-		super.networkUnserialize(stream);
-		try {
-			switch(stream.readByte()) {
+    @Override
+    public void networkSerialize(DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            stream.writeUTF(baliseName);
+            stream.writeUTF(getText(baliseName));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void networkUnserialize(DataInputStream stream) {
+        super.networkUnserialize(stream);
+        try {
+            switch (stream.readByte()) {
                 case setTextFileId:
                     setBalise(stream.readUTF());
                     break;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	@Override
-	public boolean hasGui() {
-		return true;
-	}
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public void initialize() {
-	}
+    @Override
+    public boolean hasGui() {
+        return true;
+    }
 
-	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		return false;
-	}
+    @Override
+    public void initialize() {
+    }
+
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        return false;
+    }
 }

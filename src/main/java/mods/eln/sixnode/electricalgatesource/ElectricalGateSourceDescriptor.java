@@ -18,77 +18,78 @@ import static mods.eln.i18n.I18N.tr;
 
 public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 
-	public boolean onOffOnly;
+    public boolean onOffOnly;
 
-	public boolean autoReset = false;
+    public boolean autoReset = false;
 
     enum ObjType {Pot, Button}
+
     ObjType objType;
     float leverTx;
     ElectricalGateSourceRenderObj render;
 
-	public ElectricalGateSourceDescriptor(String name, ElectricalGateSourceRenderObj render, boolean onOffOnly,
-										  String iconName) {
-		super(name, ElectricalGateSourceElement.class, ElectricalGateSourceRender.class, iconName);
-		this.render = render;
-		this.onOffOnly = onOffOnly;
+    public ElectricalGateSourceDescriptor(String name, ElectricalGateSourceRenderObj render, boolean onOffOnly,
+                                          String iconName) {
+        super(name, ElectricalGateSourceElement.class, ElectricalGateSourceRender.class, iconName);
+        this.render = render;
+        this.onOffOnly = onOffOnly;
 
-		voltageLevelColor = VoltageLevelColor.SignalVoltage;
-	}
+        voltageLevelColor = VoltageLevelColor.SignalVoltage;
+    }
 
-	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		super.addInformation(itemStack, entityPlayer, list, par4);
-		Collections.addAll(list, tr("Provides configurable signal\nvoltage.").split("\n"));
-	}
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        Collections.addAll(list, tr("Provides configurable signal\nvoltage.").split("\n"));
+    }
 
-	public void setWithAutoReset() {
-		autoReset = true;
-	}
+    public void setWithAutoReset() {
+        autoReset = true;
+    }
 
-	void draw(float factor, float distance, TileEntity e) {
-		render.draw(factor, distance, e);
-	}
+    void draw(float factor, float distance, TileEntity e) {
+        render.draw(factor, distance, e);
+    }
 
-	@Override
-	public boolean use2DIcon() {
-		return true;
-	}
+    @Override
+    public boolean use2DIcon() {
+        return true;
+    }
 
-	@Override
-	public void setParent(Item item, int damage) {
-		super.setParent(item, damage);
-		Data.addSignal(newItemStack());
-	}
+    @Override
+    public void setParent(Item item, int damage) {
+        super.setParent(item, damage);
+        Data.addSignal(newItemStack());
+    }
 
-	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return type != ItemRenderType.INVENTORY;
-	}
+    @Override
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        return type != ItemRenderType.INVENTORY;
+    }
 
-	@Override
-	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return true;
-	}
+    @Override
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+        return true;
+    }
 
-	@Override
-	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return type != ItemRenderType.INVENTORY;
-	}
+    @Override
+    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        return type != ItemRenderType.INVENTORY;
+    }
 
-	@Override
-	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		if (type != ItemRenderType.INVENTORY) {
-			GL11.glScalef(1.5f, 1.5f, 1.5f);
-			//if (type == ItemRenderType.INVENTORY) GL11.glScalef(1.5f, 1.5f, 1.5f);
-			draw(0f, 1f, null);
-		} else {
-			super.renderItem(type, item, data);
-		}
-	}
+    @Override
+    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+        if (type != ItemRenderType.INVENTORY) {
+            GL11.glScalef(1.5f, 1.5f, 1.5f);
+            //if (type == ItemRenderType.INVENTORY) GL11.glScalef(1.5f, 1.5f, 1.5f);
+            draw(0f, 1f, null);
+        } else {
+            super.renderItem(type, item, data);
+        }
+    }
 
-	@Override
-	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
-		return super.getFrontFromPlace(side, player).inverse();
-	}
+    @Override
+    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+        return super.getFrontFromPlace(side, player).inverse();
+    }
 }

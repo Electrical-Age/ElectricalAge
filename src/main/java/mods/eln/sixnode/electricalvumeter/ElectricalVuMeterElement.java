@@ -27,89 +27,89 @@ public class ElectricalVuMeterElement extends SixNodeElement {
     public ElectricalVuMeterSlowProcess slowProcess = new ElectricalVuMeterSlowProcess(this);
     ElectricalVuMeterDescriptor descriptor;
 
-	public ElectricalVuMeterElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
-		super(sixNode, side, descriptor);
-		this.descriptor = (ElectricalVuMeterDescriptor) descriptor;
-		electricalLoadList.add(inputGate);
-    	slowProcessList.add(slowProcess);
-	}
+    public ElectricalVuMeterElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+        super(sixNode, side, descriptor);
+        this.descriptor = (ElectricalVuMeterDescriptor) descriptor;
+        electricalLoadList.add(inputGate);
+        slowProcessList.add(slowProcess);
+    }
 
-	public static boolean canBePlacedOnSide(Direction side, int type) {
-		return true;
-	}
-	
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
+    public static boolean canBePlacedOnSide(Direction side, int type) {
+        return true;
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
         byte value = nbt.getByte("front");
         front = LRDU.fromInt((value >> 0) & 0x3);
-	}
+    }
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-		nbt.setByte("front", (byte) (front.toInt() << 0));
-	}
+    @Override
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+        nbt.setByte("front", (byte) (front.toInt() << 0));
+    }
 
-	@Override
-	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if(front == lrdu) return inputGate;
-		return null;
-	}
+    @Override
+    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+        if (front == lrdu) return inputGate;
+        return null;
+    }
 
-	@Override
-	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		return null;
-	}
+    @Override
+    public ThermalLoad getThermalLoad(LRDU lrdu) {
+        return null;
+    }
 
-	@Override
-	public int getConnectionMask(LRDU lrdu) {
-		if (front == lrdu) return NodeBase.maskElectricalInputGate;
-		return 0;
-	}
+    @Override
+    public int getConnectionMask(LRDU lrdu) {
+        if (front == lrdu) return NodeBase.maskElectricalInputGate;
+        return 0;
+    }
 
-	@Override
-	public String multiMeterString() {
-		return Utils.plotVolt("U:", inputGate.getU()) + Utils.plotAmpere("I:", inputGate.getCurrent());
-	}
+    @Override
+    public String multiMeterString() {
+        return Utils.plotVolt("U:", inputGate.getU()) + Utils.plotAmpere("I:", inputGate.getCurrent());
+    }
 
-	@Override
-	public Map<String, String> getWaila() {
-		Map<String, String> info = new HashMap<String, String>();
-		info.put(I18N.tr("Input"), inputGate.stateHigh() ? I18N.tr("ON") : I18N.tr("OFF"));
-		return info;
-	}
+    @Override
+    public Map<String, String> getWaila() {
+        Map<String, String> info = new HashMap<String, String>();
+        info.put(I18N.tr("Input"), inputGate.stateHigh() ? I18N.tr("ON") : I18N.tr("OFF"));
+        return info;
+    }
 
-	@Override
-	public String thermoMeterString() {
-		return "";
-	}
+    @Override
+    public String thermoMeterString() {
+        return "";
+    }
 
-	@Override
-	public void networkSerialize(DataOutputStream stream) {
-		super.networkSerialize(stream);
-		try {
-			stream.writeByte(front.toInt() << 4);
-	    	stream.writeFloat((float)(inputGate.getU() / Eln.instance.SVU));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public void networkSerialize(DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            stream.writeByte(front.toInt() << 4);
+            stream.writeFloat((float) (inputGate.getU() / Eln.instance.SVU));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public void initialize() {
-	}
+    @Override
+    public void initialize() {
+    }
 
-	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 
-		if (Utils.isPlayerUsingWrench(entityPlayer)) {
-			front = front.getNextClockwise();
-			sixNode.reconnect();
-			sixNode.setNeedPublish(true);
-			return true;	
-		}
-		return false;
-	}
+        if (Utils.isPlayerUsingWrench(entityPlayer)) {
+            front = front.getNextClockwise();
+            sixNode.reconnect();
+            sixNode.setNeedPublish(true);
+            return true;
+        }
+        return false;
+    }
 }

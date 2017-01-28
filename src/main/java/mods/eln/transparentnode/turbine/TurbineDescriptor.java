@@ -80,7 +80,7 @@ public class TurbineDescriptor extends TransparentNodeDescriptor {
     }
 
     void draw() {
-       if (main != null) main.draw();
+        if (main != null) main.draw();
     }
 
     @Override

@@ -283,7 +283,7 @@ public class TransformerElement extends TransparentNodeElement {
             float load = 0f;
             if (primaryMaxCurrent != 0 && secondaryMaxCurrent != 0) {
                 load = Utils.limit((float) Math.max(primaryLoad.getI() / primaryMaxCurrent,
-                    secondaryLoad.getI() / secondaryMaxCurrent),0f, 1f);
+                    secondaryLoad.getI() / secondaryMaxCurrent), 0f, 1f);
             }
             stream.writeFloat(load);
 

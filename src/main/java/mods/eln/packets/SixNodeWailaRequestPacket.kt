@@ -4,12 +4,12 @@ import io.netty.buffer.ByteBuf
 import mods.eln.misc.Coordonate
 import mods.eln.misc.Direction
 
-class SixNodeWailaRequestPacket: TransparentNodeRequestPacket {
+class SixNodeWailaRequestPacket : TransparentNodeRequestPacket {
     lateinit var side: Direction
 
     constructor() {}
 
-    constructor(coord: Coordonate, side: Direction): super(coord) {
+    constructor(coord: Coordonate, side: Direction) : super(coord) {
         this.side = side
     }
 

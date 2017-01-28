@@ -10,8 +10,8 @@ import net.minecraft.item.ItemStack
 import net.minecraftforge.client.IItemRenderer
 import org.lwjgl.opengl.GL11
 
-class ElectricalFuseDescriptor(name: String, val cableDescriptor: ElectricalCableDescriptor?, obj: Obj3D?):
-        GenericItemUsingDamageDescriptorUpgrade(name) {
+class ElectricalFuseDescriptor(name: String, val cableDescriptor: ElectricalCableDescriptor?, obj: Obj3D?) :
+    GenericItemUsingDamageDescriptorUpgrade(name) {
 
     companion object {
         var BlownFuse: ElectricalFuseDescriptor? = null

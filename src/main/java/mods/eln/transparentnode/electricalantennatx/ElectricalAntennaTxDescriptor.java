@@ -29,94 +29,94 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
     double electricalMaximalVoltage, electricalMaximalPower;
     double electricalNominalInputR;
     ElectricalCableDescriptor cable;
-    
-	public ElectricalAntennaTxDescriptor(String name, Obj3D obj, 
-                                         int rangeMax, 
-                                         double electricalPowerRatioEffStart, double electricalPowerRatioEffEnd, 
-                                         double electricalNominalVoltage, double electricalNominalPower, 
-                                         double electricalMaximalVoltage, double electricalMaximalPower, 
+
+    public ElectricalAntennaTxDescriptor(String name, Obj3D obj,
+                                         int rangeMax,
+                                         double electricalPowerRatioEffStart, double electricalPowerRatioEffEnd,
+                                         double electricalNominalVoltage, double electricalNominalPower,
+                                         double electricalMaximalVoltage, double electricalMaximalPower,
                                          ElectricalCableDescriptor cable) {
-		super(name, ElectricalAntennaTxElement.class, ElectricalAntennaTxRender.class);
-		this.rangeMax = rangeMax;
-		this.electricalNominalVoltage = electricalNominalVoltage;
-		this.electricalNominalPower = electricalNominalPower;
-		this.electricalMaximalVoltage = electricalMaximalVoltage;
-		this.electricalMaximalPower = electricalMaximalPower;
-		this.electricalPowerRatioEffStart = electricalPowerRatioEffStart;
-		this.electricalPowerRatioEffEnd = electricalPowerRatioEffEnd;
-		this.cable = cable;
-		
-		electricalPowerRatioLostOffset = 1.0 - electricalPowerRatioEffStart;
-		electricalPowerRatioLostPerBlock = (electricalPowerRatioEffStart - electricalPowerRatioEffEnd) / rangeMax;
-		
-		electricalNominalInputR = electricalNominalVoltage * electricalNominalVoltage / electricalNominalPower;
-		
-		this.obj = obj;
-		if (obj != null) main = obj.getPart("main");
+        super(name, ElectricalAntennaTxElement.class, ElectricalAntennaTxRender.class);
+        this.rangeMax = rangeMax;
+        this.electricalNominalVoltage = electricalNominalVoltage;
+        this.electricalNominalPower = electricalNominalPower;
+        this.electricalMaximalVoltage = electricalMaximalVoltage;
+        this.electricalMaximalPower = electricalMaximalPower;
+        this.electricalPowerRatioEffStart = electricalPowerRatioEffStart;
+        this.electricalPowerRatioEffEnd = electricalPowerRatioEffEnd;
+        this.cable = cable;
 
-		changeDefaultIcon("electricalantennatx");
-		voltageLevelColor = VoltageLevelColor.fromVoltage(electricalNominalVoltage);
-	}
-	
-	@Override	
-	public void setParent(Item item, int damage) {
-		super.setParent(item, damage);
-		Data.addWiring(newItemStack());
-	}
-    
-	@Override
-	public FrontType getFrontType() {
-		return FrontType.BlockSideInv;
-	}
-	
-	@Override
-	public boolean mustHaveWallFrontInverse() {
-		return true;
-	}
-	
-	@Override
-	public boolean mustHaveFloor() {
-		return false;
-	}
-    
-	@Override
-	public boolean use2DIcon() {
-		return true;
-	}
+        electricalPowerRatioLostOffset = 1.0 - electricalPowerRatioEffStart;
+        electricalPowerRatioLostPerBlock = (electricalPowerRatioEffStart - electricalPowerRatioEffEnd) / rangeMax;
 
-	@Override
-	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return true;
-	}
-	
-	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return type != ItemRenderType.INVENTORY;
-	}
-	
-	@Override
-	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		if (type == ItemRenderType.INVENTORY)
-			super.renderItem(type, item, data);
-		else
-			draw();
-	}	
-		
-	public void draw() {
-		GL11.glDisable(GL11.GL_CULL_FACE);
-		if (main != null) main.draw();
-		GL11.glEnable(GL11.GL_CULL_FACE);
-	}
+        electricalNominalInputR = electricalNominalVoltage * electricalNominalVoltage / electricalNominalPower;
 
-	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		super.addInformation(itemStack, entityPlayer, list, par4);
-		list.add(tr("Wireless energy transmitter."));
-		list.add(tr("Nominal usage:"));
-		list.add("  " + tr("Voltage: %1$V", Utils.plotValue(electricalNominalVoltage)));
-		list.add("  " + tr("Power: %1$W", Utils.plotValue(electricalNominalPower)));
-		list.add("  " + tr("Range: %1$ blocks", rangeMax));
-		list.add("  " + tr("Efficiency: %1$% up to %2$%", Utils.plotValue(electricalPowerRatioEffEnd * 100),
-			Utils.plotValue(electricalPowerRatioEffStart * 100)));
-	}
+        this.obj = obj;
+        if (obj != null) main = obj.getPart("main");
+
+        changeDefaultIcon("electricalantennatx");
+        voltageLevelColor = VoltageLevelColor.fromVoltage(electricalNominalVoltage);
+    }
+
+    @Override
+    public void setParent(Item item, int damage) {
+        super.setParent(item, damage);
+        Data.addWiring(newItemStack());
+    }
+
+    @Override
+    public FrontType getFrontType() {
+        return FrontType.BlockSideInv;
+    }
+
+    @Override
+    public boolean mustHaveWallFrontInverse() {
+        return true;
+    }
+
+    @Override
+    public boolean mustHaveFloor() {
+        return false;
+    }
+
+    @Override
+    public boolean use2DIcon() {
+        return true;
+    }
+
+    @Override
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+        return true;
+    }
+
+    @Override
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        return type != ItemRenderType.INVENTORY;
+    }
+
+    @Override
+    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+        if (type == ItemRenderType.INVENTORY)
+            super.renderItem(type, item, data);
+        else
+            draw();
+    }
+
+    public void draw() {
+        GL11.glDisable(GL11.GL_CULL_FACE);
+        if (main != null) main.draw();
+        GL11.glEnable(GL11.GL_CULL_FACE);
+    }
+
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        list.add(tr("Wireless energy transmitter."));
+        list.add(tr("Nominal usage:"));
+        list.add("  " + tr("Voltage: %1$V", Utils.plotValue(electricalNominalVoltage)));
+        list.add("  " + tr("Power: %1$W", Utils.plotValue(electricalNominalPower)));
+        list.add("  " + tr("Range: %1$ blocks", rangeMax));
+        list.add("  " + tr("Efficiency: %1$% up to %2$%", Utils.plotValue(electricalPowerRatioEffEnd * 100),
+            Utils.plotValue(electricalPowerRatioEffStart * 100)));
+    }
 }
