@@ -265,9 +265,10 @@ public class Eln {
 
     public static final Obj3DFolder obj = new Obj3DFolder();
 
-    public static boolean dicThungsten;
+    public static boolean oredictTungsten, oredictChips;
     public static boolean genCopper, genLead, genTungsten, genCinnabar;
-    public static String dicTungstenOre, dicTungstenDust, dicTungstenIngot;
+    public static String dictTungstenOre, dictTungstenDust, dictTungstenIngot;
+    public static String dictCheapChip, dictAdvancedChip;
     public static final ArrayList<OreScannerConfigElement> oreScannerConfig = new ArrayList<OreScannerConfigElement>();
     public static boolean modbusEnable = false;
     public static int modbusPort;
@@ -414,15 +415,23 @@ public class Eln {
         genCinnabar = config.get("mapGenerate", "cinnabar", true).getBoolean(true);
         genCinnabar = false;
 
-        dicThungsten = config.get("dictionary", "tungsten", false).getBoolean(false);
-        if (dicThungsten) {
-            dicTungstenOre = "oreTungsten";
-            dicTungstenDust = "dustTungsten";
-            dicTungstenIngot = "ingotTungsten";
+        oredictTungsten = config.get("dictionary", "tungsten", false).getBoolean(false);
+        if (oredictTungsten) {
+            dictTungstenOre = "oreTungsten";
+            dictTungstenDust = "dustTungsten";
+            dictTungstenIngot = "ingotTungsten";
         } else {
-            dicTungstenOre = "oreElnTungsten";
-            dicTungstenDust = "dustElnTungsten";
-            dicTungstenIngot = "ingotElnTungsten";
+            dictTungstenOre = "oreElnTungsten";
+            dictTungstenDust = "dustElnTungsten";
+            dictTungstenIngot = "ingotElnTungsten";
+        }
+        oredictChips = config.get("dictionary", "chips", true).getBoolean(true);
+        if (oredictChips) {
+            dictCheapChip = "circuitBasic";
+            dictAdvancedChip = "circuitAdvanced";
+        } else {
+            dictCheapChip = "circuitElnBasic";
+            dictAdvancedChip = "circuitElnAdvanced";
         }
 
         incandescentLampLife = config.get("lamp", "incandescentLifeInHours", 16.0).getDouble(16.0) * 3600;
@@ -3555,7 +3564,7 @@ public class Eln {
                 // spawnHeightMax
             );
             oreItem.addDescriptor(id, desc);
-            addToOre(dicTungstenOre, desc.newItemStack());
+            addToOre(dictTungstenOre, desc.newItemStack());
         }
         {
             id = 6;
@@ -3641,7 +3650,7 @@ public class Eln {
                 new String[]{});
             sharedItem.addElement(id, element);
             Data.addResource(element.newItemStack());
-            addToOre(dicTungstenDust, element.newItemStack());
+            addToOre(dictTungstenDust, element.newItemStack());
         }
 
         {
@@ -3751,7 +3760,7 @@ public class Eln {
             // element.newItemStack(1));
             tungstenIngot = element;
             Data.addResource(element.newItemStack());
-            addToOre(dicTungstenIngot, element.newItemStack());
+            addToOre(dictTungstenIngot, element.newItemStack());
         }
 
         {
@@ -4800,7 +4809,7 @@ public class Eln {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             Data.addResource(desc.newItemStack());
-            OreDictionary.registerOre("circuitBasic", desc.newItemStack());
+            OreDictionary.registerOre(dictCheapChip, desc.newItemStack());
         }
         {
             subId = 1;
@@ -4809,7 +4818,7 @@ public class Eln {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             Data.addResource(desc.newItemStack());
-            OreDictionary.registerOre("circuitAdvanced", desc.newItemStack());
+            OreDictionary.registerOre(dictAdvancedChip, desc.newItemStack());
         }
         {
             subId = 2;
@@ -5370,7 +5379,7 @@ public class Eln {
             "ICI",
             Character.valueOf('R'), new ItemStack(Items.redstone),
             Character.valueOf('I'), new ItemStack(Items.iron_ingot),
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('S'), findItemStack("Signal Antenna"));
 
         addRecipe(findItemStack("Wireless Signal Repeater"),
@@ -5379,7 +5388,7 @@ public class Eln {
             "ICI",
             Character.valueOf('R'), new ItemStack(Items.redstone),
             Character.valueOf('I'), new ItemStack(Items.iron_ingot),
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('S'), findItemStack("Signal Antenna"));
 
         addRecipe(findItemStack("Wireless Signal Receiver"),
@@ -5387,7 +5396,7 @@ public class Eln {
             "ICI",
             Character.valueOf('R'), new ItemStack(Items.redstone),
             Character.valueOf('I'), new ItemStack(Items.iron_ingot),
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('S'), findItemStack("Signal Antenna"));
 
     }
@@ -5397,7 +5406,7 @@ public class Eln {
             "   ",
             "cCr",
             "   ",
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('r'), new ItemStack(Items.redstone),
             Character.valueOf('c'), findItemStack("Copper Cable"));
 
@@ -5405,14 +5414,14 @@ public class Eln {
             " c ",
             "cCc",
             " c ",
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('c'), findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("NAND Chip"),
             " c ",
             "cCr",
             " c ",
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('r'), new ItemStack(Items.redstone),
             Character.valueOf('c'), findItemStack("Copper Cable"));
 
@@ -5420,14 +5429,14 @@ public class Eln {
             " r ",
             "rCr",
             " r ",
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('r'), new ItemStack(Items.redstone));
 
         addRecipe(findItemStack("NOR Chip"),
             " r ",
             "rCc",
             " r ",
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('r'), new ItemStack(Items.redstone),
             Character.valueOf('c'), findItemStack("Copper Cable"));
 
@@ -5435,14 +5444,14 @@ public class Eln {
             " rr",
             "rCr",
             " rr",
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('r'), new ItemStack(Items.redstone));
 
         addRecipe(findItemStack("XNOR Chip"),
             " rr",
             "rCc",
             " rr",
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('r'), new ItemStack(Items.redstone),
             Character.valueOf('c'), findItemStack("Copper Cable"));
 
@@ -5450,7 +5459,7 @@ public class Eln {
             "rcr",
             "cCc",
             "rcr",
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('r'), new ItemStack(Items.redstone),
             Character.valueOf('c'), findItemStack("Copper Cable"));
 
@@ -5458,14 +5467,14 @@ public class Eln {
             "   ",
             "cCc",
             "   ",
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('c'), findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("D Flip Flop Chip"),
             "   ",
             "cCc",
             " p ",
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('p'), findItemStack("Copper Plate"),
             Character.valueOf('c'), findItemStack("Copper Cable"));
 
@@ -5473,7 +5482,7 @@ public class Eln {
             "pdp",
             "cCc",
             "   ",
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('p'), findItemStack("Copper Plate"),
             Character.valueOf('c'), findItemStack("Copper Cable"),
             Character.valueOf('d'), findItemStack("Dielectric"));
@@ -5482,7 +5491,7 @@ public class Eln {
             " p ",
             "cCc",
             " p ",
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('p'), findItemStack("Copper Plate"),
             Character.valueOf('c'), findItemStack("Copper Cable"));
     }
@@ -5760,7 +5769,7 @@ public class Eln {
             "IRI",
             "IcI",
             Character.valueOf('c'), findItemStack("Copper Cable"),
-            Character.valueOf('R'), "circuitBasic",
+            Character.valueOf('R'), dictCheapChip,
             Character.valueOf('I'), new ItemStack(Items.iron_ingot));
 
         addRecipe(findItemStack("Advanced Energy Meter"),
@@ -5768,7 +5777,7 @@ public class Eln {
             "PRP",
             " c ",
             Character.valueOf('c'), findItemStack("Copper Cable"),
-            Character.valueOf('R'), "circuitAdvanced",
+            Character.valueOf('R'), dictAdvancedChip,
             Character.valueOf('P'), findItemStack("Iron Plate"));
 
     }
@@ -5778,7 +5787,7 @@ public class Eln {
             "MCM",
             "BOB",
             " P ",
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('O'), findItemStack("Ore Scanner"),
             Character.valueOf('B'), findItemStack("Advanced Machine Block"),
             Character.valueOf('M'), findItemStack("Advanced Electrical Motor"),
@@ -5983,7 +5992,7 @@ public class Eln {
             " I ",
             Character.valueOf('R'), new ItemStack(Items.redstone),
             Character.valueOf('I'), new ItemStack(Items.iron_ingot),
-            Character.valueOf('C'), "circuitBasic");
+            Character.valueOf('C'), dictCheapChip);
     }
 
     void recipeLampItem() {
@@ -5995,7 +6004,7 @@ public class Eln {
             "GFG",
             " S ",
             Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
-            Character.valueOf('F'), dicTungstenIngot,
+            Character.valueOf('F'), dictTungstenIngot,
             Character.valueOf('S'), findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("50V Incandescent Light Bulb", 4),
@@ -6003,7 +6012,7 @@ public class Eln {
             "GFG",
             " S ",
             Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
-            Character.valueOf('F'), dicTungstenIngot,
+            Character.valueOf('F'), dictTungstenIngot,
             Character.valueOf('S'), findItemStack("Low Voltage Cable"));
 
         addRecipe(findItemStack("200V Incandescent Light Bulb", 4),
@@ -6011,7 +6020,7 @@ public class Eln {
             "GFG",
             " S ",
             Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
-            Character.valueOf('F'), dicTungstenIngot,
+            Character.valueOf('F'), dictTungstenIngot,
             Character.valueOf('S'), findItemStack("Medium Voltage Cable"));
 
         // CARBON
@@ -6078,7 +6087,7 @@ public class Eln {
             "FFF",
             "GSG",
             Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
-            Character.valueOf('F'), dicTungstenIngot,
+            Character.valueOf('F'), dictTungstenIngot,
             Character.valueOf('S'), findItemStack("Low Voltage Cable"));
 
         addRecipe(findItemStack("200V Farming Lamp", 2),
@@ -6086,7 +6095,7 @@ public class Eln {
             "FFF",
             "GSG",
             Character.valueOf('G'), new ItemStack(Blocks.glass_pane),
-            Character.valueOf('F'), dicTungstenIngot,
+            Character.valueOf('F'), dictTungstenIngot,
             Character.valueOf('S'), findItemStack("Medium Voltage Cable"));
 
         addRecipe(findItemStack("50V LED Bulb", 2),
@@ -6112,13 +6121,13 @@ public class Eln {
         addRecipe(findItemStack("Overvoltage Protection", 4),
             "SCD",
             Character.valueOf('S'), findItemStack("Electrical Probe Chip"),
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('D'), new ItemStack(Items.redstone));
 
         addRecipe(findItemStack("Overheating Protection", 4),
             "SCD",
             Character.valueOf('S'), findItemStack("Thermal Probe Chip"),
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('D'), new ItemStack(Items.redstone));
 
     }
@@ -6160,7 +6169,7 @@ public class Eln {
             "dustIron",
             "dustIron",
             "dustCoal",
-            dicTungstenDust);
+            dictTungstenDust);
 
     }
 
@@ -6251,7 +6260,7 @@ public class Eln {
             " T ",
             " P ",
             Character.valueOf('T'), findItemStack("Mining Pipe"),
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('M'), findItemStack("Electrical Motor"),
             Character.valueOf('P'), new ItemStack(Items.iron_pickaxe));
 
@@ -6259,7 +6268,7 @@ public class Eln {
             "RCR",
             " D ",
             " d ", Character.valueOf('R'), Items.redstone,
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('D'), findItemStack("Cheap Electrical Drill"),
             Character.valueOf('d'), new ItemStack(Items.diamond));
 
@@ -6268,7 +6277,7 @@ public class Eln {
             " T ",
             " P ",
             Character.valueOf('T'), findItemStack("Mining Pipe"),
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('M'), findItemStack("Advanced Electrical Motor"),
             Character.valueOf('P'), new ItemStack(Items.diamond_pickaxe));
 
@@ -6280,7 +6289,7 @@ public class Eln {
             "IGI",
             "RCR",
             "IGI",
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('R'), new ItemStack(Items.redstone),
             Character.valueOf('I'), new ItemStack(Items.iron_ingot),
             Character.valueOf('G'), new ItemStack(Items.gold_ingot));
@@ -6328,7 +6337,7 @@ public class Eln {
 
         addRecipe(findItemStack("Tungsten Cable", 6),
             "III",
-            Character.valueOf('I'), dicTungstenIngot);
+            Character.valueOf('I'), dictTungstenIngot);
 
     }
 
@@ -6377,7 +6386,7 @@ public class Eln {
                 "PGP",
                 "PCP",
                 "PBP",
-                Character.valueOf('C'), "circuitAdvanced",
+                Character.valueOf('C'), dictAdvancedChip,
                 Character.valueOf('B'), findItemStack("Portable Battery"),
                 Character.valueOf('P'), new ItemStack(Items.iron_ingot),
                 Character.valueOf('G'), findItemStack("Ore Scanner"));
@@ -6390,27 +6399,27 @@ public class Eln {
             "PPP",
             "PCP",
             Character.valueOf('P'), "plateCoal",
-            Character.valueOf('C'), "circuitAdvanced");
+            Character.valueOf('C'), dictAdvancedChip);
         addRecipe(findItemStack("E-Coal Boots"),
             " C ",
             "P P",
             "P P",
             Character.valueOf('P'), "plateCoal",
-            Character.valueOf('C'), "circuitAdvanced");
+            Character.valueOf('C'), dictAdvancedChip);
 
         addRecipe(findItemStack("E-Coal Chestplate"),
             "P P",
             "PCP",
             "PPP",
             Character.valueOf('P'), "plateCoal",
-            Character.valueOf('C'), "circuitAdvanced");
+            Character.valueOf('C'), dictAdvancedChip);
 
         addRecipe(findItemStack("E-Coal Leggings"),
             "PPP",
             "PCP",
             "P P",
             Character.valueOf('P'), "plateCoal",
-            Character.valueOf('C'), "circuitAdvanced");
+            Character.valueOf('C'), dictAdvancedChip);
 
     }
 
@@ -6441,7 +6450,7 @@ public class Eln {
             "LRL",
             "RCR",
             "LRL",
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('L'), "ingotSilicon",
             Character.valueOf('R'), new ItemStack(Items.redstone));
 
@@ -6486,7 +6495,7 @@ public class Eln {
             "c",
             "m",
             Character.valueOf('m'), findItemStack("Electrical Motor"),
-            Character.valueOf('c'), "circuitAdvanced");
+            Character.valueOf('c'), dictAdvancedChip);
 
         addRecipe(findItemStack("Wrench"),
             " c ",
@@ -6746,7 +6755,7 @@ public class Eln {
             " R ",
             Character.valueOf('M'), findItemStack("Advanced Machine Block"),
             Character.valueOf('C'), findItemStack("High Voltage Cable"),
-            Character.valueOf('R'), "circuitAdvanced");
+            Character.valueOf('R'), dictAdvancedChip);
     }
 
 
@@ -6757,7 +6766,7 @@ public class Eln {
             "CMC",
             " c ",
             Character.valueOf('M'), findItemStack("Advanced Machine Block"),
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('c'), highVoltageCableDescriptor.newItemStack(),
             Character.valueOf('R'), new ItemStack(Blocks.redstone_block));
 
@@ -6778,7 +6787,7 @@ public class Eln {
             "DMD",
             "IcI",
             Character.valueOf('M'), findItemStack("Advanced Machine Block"),
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('c'), findItemStack("Advanced Electrical Motor"),
             Character.valueOf('D'), new ItemStack(Items.diamond),
             Character.valueOf('I'), "ingotAlloy");
@@ -6797,7 +6806,7 @@ public class Eln {
             "DMD",
             "IcI",
             Character.valueOf('M'), findItemStack("Advanced Machine Block"),
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('c'), findItemStack("Advanced Electrical Motor"),
             Character.valueOf('D'), "plateAlloy",
             Character.valueOf('I'), "ingotAlloy");
@@ -6816,7 +6825,7 @@ public class Eln {
             "DMD",
             "DcD",
             Character.valueOf('M'), findItemStack("Advanced Machine Block"),
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('c'), findItemStack("Advanced Electrical Motor"),
             Character.valueOf('D'), "plateAlloy",
             Character.valueOf('I'), "ingotAlloy");
@@ -6835,7 +6844,7 @@ public class Eln {
             "cMc",
             "III",
             Character.valueOf('M'), findItemStack("Advanced Machine Block"),
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('c'), findItemStack("Advanced Electrical Motor"),
             Character.valueOf('I'), "ingotAlloy");
 
@@ -6845,7 +6854,7 @@ public class Eln {
 
         addShapelessRecipe(findItemStack("Electrical Timer"),
             new ItemStack(Items.repeater),
-            "circuitBasic");
+            dictCheapChip);
 
         addRecipe(findItemStack("Signal Processor", 1),
             "IcI",
@@ -6853,7 +6862,7 @@ public class Eln {
             "IcI",
             Character.valueOf('I'), new ItemStack(Items.iron_ingot),
             Character.valueOf('c'), findItemStack("Signal Cable"),
-            Character.valueOf('C'), "circuitBasic");
+            Character.valueOf('C'), dictCheapChip);
     }
 
     private void recipeElectricalRedstone() {
@@ -6861,13 +6870,13 @@ public class Eln {
         addRecipe(findItemStack("Redstone-to-Voltage Converter", 1),
             "TCS",
             Character.valueOf('S'), findItemStack("Signal Cable"),
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('T'), new ItemStack(Blocks.redstone_torch));
 
         addRecipe(findItemStack("Voltage-to-Redstone Converter", 1),
             "CTR",
             Character.valueOf('R'), new ItemStack(Items.redstone),
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('T'), new ItemStack(Blocks.redstone_torch));
 
     }
@@ -6908,7 +6917,7 @@ public class Eln {
             "p p",
             "r r",
             Character.valueOf('c'), findItemStack("Signal Cable"),
-            Character.valueOf('b'), "circuitBasic",
+            Character.valueOf('b'), dictCheapChip,
             Character.valueOf('r'), "itemRubber",
             Character.valueOf('p'), "plateCopper");
 
@@ -6916,7 +6925,7 @@ public class Eln {
             "rar",
             "p p",
             "r r",
-            Character.valueOf('a'), "circuitAdvanced",
+            Character.valueOf('a'), dictAdvancedChip,
             Character.valueOf('r'), "itemRubber",
             Character.valueOf('p'), "plateCopper");
     }
@@ -7023,7 +7032,7 @@ public class Eln {
             " r ",
             Character.valueOf('M'), findItemStack("Machine Block"),
             Character.valueOf('c'), findItemStack("Signal Cable"),
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('a'), findItemStack("Signal Antenna"),
             Character.valueOf('r'), "itemRubber",
             Character.valueOf('I'), new ItemStack(Items.iron_ingot),
@@ -7035,7 +7044,7 @@ public class Eln {
             " R ",
             Character.valueOf('M'), findItemStack("Machine Block"),
             Character.valueOf('c'), findItemStack("Signal Cable"),
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('a'), findItemStack("Signal Antenna"),
             Character.valueOf('r'), "itemRubber",
             Character.valueOf('I'), new ItemStack(Items.iron_ingot),
@@ -7051,7 +7060,7 @@ public class Eln {
             "RGR",
             "RCR",
             Character.valueOf('R'), "itemRubber",
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('G'), new ItemStack(Blocks.glass_pane));
 
         addRecipe(findItemStack("Modern Data Logger", 1),
@@ -7059,7 +7068,7 @@ public class Eln {
             "RGR",
             "RCR",
             Character.valueOf('R'), "itemRubber",
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('G'), new ItemStack(Blocks.glass_pane));
 
         addRecipe(findItemStack("Industrial Data Logger", 1),
@@ -7067,7 +7076,7 @@ public class Eln {
             "GGG",
             "RCR",
             Character.valueOf('R'), "itemRubber",
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('G'), new ItemStack(Blocks.glass_pane));
     }
 
@@ -7100,7 +7109,7 @@ public class Eln {
             "R i",
             "CI ",
             "R i",
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('i'), new ItemStack(Items.iron_ingot),
             Character.valueOf('I'), "plateIron",
             Character.valueOf('R'), new ItemStack(Items.redstone));
@@ -7108,7 +7117,7 @@ public class Eln {
             "i  ",
             " IC",
             "i  ",
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('I'), "plateIron",
             Character.valueOf('i'), new ItemStack(Items.iron_ingot),
             Character.valueOf('R'), new ItemStack(Items.redstone));
@@ -7116,15 +7125,15 @@ public class Eln {
             "c I",
             "CI ",
             "c I",
-            Character.valueOf('C'), "circuitAdvanced",
-            Character.valueOf('c'), "circuitBasic",
+            Character.valueOf('C'), dictAdvancedChip,
+            Character.valueOf('c'), dictCheapChip,
             Character.valueOf('I'), "plateIron",
             Character.valueOf('R'), new ItemStack(Items.redstone));
         addRecipe(findItemStack("Medium Power Receiver Antenna", 1),
             "I  ",
             " IC",
             "I  ",
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('I'), "plateIron",
             Character.valueOf('R'), new ItemStack(Items.redstone));
 
@@ -7132,15 +7141,15 @@ public class Eln {
             "C I",
             "CI ",
             "C I",
-            Character.valueOf('C'), "circuitAdvanced",
-            Character.valueOf('c'), "circuitBasic",
+            Character.valueOf('C'), dictAdvancedChip,
+            Character.valueOf('c'), dictCheapChip,
             Character.valueOf('I'), "plateIron",
             Character.valueOf('R'), new ItemStack(Items.redstone));
         addRecipe(findItemStack("High Power Receiver Antenna", 1),
             "I D",
             " IC",
             "I D",
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('I'), "plateIron",
             Character.valueOf('R'), new ItemStack(Items.redstone),
             Character.valueOf('D'), new ItemStack(Items.diamond));
@@ -7159,7 +7168,7 @@ public class Eln {
             "RIR",
             "ICI",
             "RcR",
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('c'), findItemStack("Low Voltage Cable"),
             Character.valueOf('I'), new ItemStack(Items.iron_ingot),
             Character.valueOf('R'), new ItemStack(Items.redstone));
@@ -7168,7 +7177,7 @@ public class Eln {
             "RIR",
             "ICI",
             "RcR",
-            Character.valueOf('C'), "circuitAdvanced",
+            Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('c'), findItemStack("Medium Voltage Cable"),
             Character.valueOf('I'), new ItemStack(Items.iron_ingot),
             Character.valueOf('R'), new ItemStack(Items.redstone));
@@ -7180,7 +7189,7 @@ public class Eln {
             "IGG",
             "E G",
             "CII",
-            Character.valueOf('C'), "circuitBasic",
+            Character.valueOf('C'), dictCheapChip,
             Character.valueOf('E'), findItemStack("Small 50V Tungsten Heating Corp"),
             Character.valueOf('I'), new ItemStack(Items.iron_ingot),
             Character.valueOf('G'), new ItemStack(Blocks.glass_pane));
@@ -7193,7 +7202,7 @@ public class Eln {
                 "III",
                 "cCR",
                 "III",
-                Character.valueOf('C'), "circuitBasic",
+                Character.valueOf('C'), dictCheapChip,
                 Character.valueOf('c'), findItemStack("Low Voltage Cable"),
                 Character.valueOf('I'), new ItemStack(Items.iron_ingot),
                 Character.valueOf('R'), "ingotCopper");
@@ -7202,16 +7211,16 @@ public class Eln {
                 "III",
                 "cCR",
                 "III",
-                Character.valueOf('C'), "circuitBasic",
+                Character.valueOf('C'), dictCheapChip,
                 Character.valueOf('c'), findItemStack("Medium Voltage Cable"),
                 Character.valueOf('I'), new ItemStack(Items.iron_ingot),
-                Character.valueOf('R'), dicTungstenIngot);
+                Character.valueOf('R'), dictTungstenIngot);
 
             addRecipe(new ItemStack(elnToOtherBlockHvu),
                 "III",
                 "cCR",
                 "III",
-                Character.valueOf('C'), "circuitAdvanced",
+                Character.valueOf('C'), dictAdvancedChip,
                 Character.valueOf('c'), findItemStack("High Voltage Cable"),
                 Character.valueOf('I'), new ItemStack(Items.iron_ingot),
                 Character.valueOf('R'), new ItemStack(Items.gold_ingot));
@@ -7225,7 +7234,7 @@ public class Eln {
                 "cIw",
                 "ICI",
                 "WIc",
-                Character.valueOf('C'), "circuitAdvanced",
+                Character.valueOf('C'), dictAdvancedChip,
                 Character.valueOf('c'), findItemStack("Signal Cable"),
                 Character.valueOf('I'), new ItemStack(Items.iron_ingot),
                 Character.valueOf('w'), findItemStack("Wireless Signal Receiver"),
