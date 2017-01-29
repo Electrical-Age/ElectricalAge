@@ -38,7 +38,7 @@ class FridgeRender(entity: TransparentNodeEntity, descriptor: TransparentNodeDes
     var open = 0f
 
     override fun draw() {
-        front.glRotateZnRef()
+        front.left().glRotateZnRef()
         descriptor.draw(open)
     }
 

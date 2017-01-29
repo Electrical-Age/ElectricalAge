@@ -2863,7 +2863,10 @@ public class Eln {
         }
         // Utils.smeltRecipeList.addMachine(new ItemStack(Blocks.furnace));
 
-        transparentNodeItem.addDescriptor((id << 6) + 1, new FridgeDescriptor("Fridge", obj.getObj("Fridge")));
+        // Fridge
+        FridgeDescriptor fridgeDescriptor = new FridgeDescriptor(TR_NAME(Type.NONE, "Fridge"), obj.getObj("Fridge"));
+        fridgeDescriptor.setGhostGroup(new GhostGroup().addElement(0, 1, 0));
+        transparentNodeItem.addDescriptor((id << 6) + 1, fridgeDescriptor);
     }
 
     public ElectricalFurnaceDescriptor electricalFurnace;
