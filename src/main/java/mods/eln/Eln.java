@@ -118,6 +118,7 @@ import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import mods.eln.solver.ConstSymbole;
 import mods.eln.solver.ISymbole;
 import mods.eln.sound.SoundCommand;
+import mods.eln.transparentnode.FridgeDescriptor;
 import mods.eln.transparentnode.FuelGeneratorDescriptor;
 import mods.eln.transparentnode.FuelHeatFurnaceDescriptor;
 import mods.eln.transparentnode.LargeRheostatDescriptor;
@@ -595,7 +596,7 @@ public class Eln {
         registerTurbine(4);
         registerElectricalAntenna(7);
         registerBattery(16);
-        registerElectricalFurnace(32);
+        registerDomesticAppliances(32);
         registerMacerator(33);
         registerCompressor(35);
         registermagnetiser(36);
@@ -2827,7 +2828,7 @@ public class Eln {
 	 */
     public ArrayList<ItemStack> furnaceList = new ArrayList<ItemStack>();
 
-    void registerElectricalFurnace(int id) {
+    void registerDomesticAppliances(int id) {
         int subId, completId;
         String name;
         furnaceList.add(new ItemStack(Blocks.furnace));
@@ -2861,6 +2862,8 @@ public class Eln {
             // Utils.smeltRecipeList.addMachine(desc.newItemStack());
         }
         // Utils.smeltRecipeList.addMachine(new ItemStack(Blocks.furnace));
+
+        transparentNodeItem.addDescriptor((id << 6) + 1, new FridgeDescriptor("Fridge", obj.getObj("Fridge")));
     }
 
     public ElectricalFurnaceDescriptor electricalFurnace;
