@@ -31,12 +31,14 @@ public class GhostGroup {
 
     ArrayList<GhostGroupElement> elementList = new ArrayList<GhostGroupElement>();
 
-    public void addElement(int x, int y, int z) {
+    public GhostGroup addElement(int x, int y, int z) {
         elementList.add(new GhostGroupElement(x, y, z, Eln.ghostBlock, GhostBlock.tCube));
+        return this;
     }
 
-    public void addElement(int x, int y, int z, Block block, int meta) {
+    public GhostGroup addElement(int x, int y, int z, Block block, int meta) {
         elementList.add(new GhostGroupElement(x, y, z, block, meta));
+        return this;
     }
 
     public void removeElement(int x, int y, int z) {
