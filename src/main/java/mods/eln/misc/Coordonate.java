@@ -154,6 +154,12 @@ public class Coordonate implements INBTTReady {
         }
     }
 
+    public Coordonate moved(Direction dir) {
+        Coordonate coord = new Coordonate(this);
+        coord.move(dir);
+        return coord;
+    }
+
     public Block getBlock() {
         return world().getBlock(x, y, z);
     }
