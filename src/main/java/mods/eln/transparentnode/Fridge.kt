@@ -11,6 +11,8 @@ import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.nbt.NbtResistor
+import mods.eln.sound.LoopedSound
+import net.minecraft.client.audio.ISound
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.IInventory
 import net.minecraft.inventory.Slot
@@ -75,6 +77,12 @@ class FridgeRender(entity: TransparentNodeEntity, descriptor: TransparentNodeDes
     private val inventory = TransparentNodeElementInventory(36, 1, this)
 
     private var open = PhysicalInterpolator(0.4f, 8f, 0.4f, 0f)
+
+    init {
+        addLoopedSound(object: LoopedSound("eln:Fridge", coord, ISound.AttenuationType.LINEAR) {
+            override fun getVolume() = 0.01f
+        })
+    }
 
     override fun draw() {
         front.left().glRotateZnRef()

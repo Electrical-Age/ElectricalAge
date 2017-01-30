@@ -250,5 +250,14 @@
                 "stream": false
             }
         ]
+    },
+    "Fridge": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "Fridge",
+                "stream": false
+            }
+        ]
     }
 }
