@@ -2863,10 +2863,20 @@ public class Eln {
         }
         // Utils.smeltRecipeList.addMachine(new ItemStack(Blocks.furnace));
 
-        // Fridge
-        FridgeDescriptor fridgeDescriptor = new FridgeDescriptor(TR_NAME(Type.NONE, "Fridge"), obj.getObj("Fridge"));
-        fridgeDescriptor.setGhostGroup(new GhostGroup().addElement(0, 1, 0));
-        transparentNodeItem.addDescriptor((id << 6) + 1, fridgeDescriptor);
+        // Fridges
+        FridgeDescriptor fridgeDescriptor50V = new FridgeDescriptor(
+            TR_NAME(Type.NONE, "50V Fridge"),
+            obj.getObj("Fridge"),
+            lowVoltageCableDescriptor);
+        fridgeDescriptor50V.setGhostGroup(new GhostGroup().addElement(0, 1, 0));
+        transparentNodeItem.addDescriptor((id << 6) + 1, fridgeDescriptor50V);
+
+        FridgeDescriptor fridgeDescriptor200V = new FridgeDescriptor(
+            TR_NAME(Type.NONE, "200V Fridge"),
+            obj.getObj("Fridge"),
+            meduimVoltageCableDescriptor);
+        fridgeDescriptor200V.setGhostGroup(new GhostGroup().addElement(0, 1, 0));
+        transparentNodeItem.addDescriptor((id << 6) + 2, fridgeDescriptor200V);
     }
 
     public ElectricalFurnaceDescriptor electricalFurnace;

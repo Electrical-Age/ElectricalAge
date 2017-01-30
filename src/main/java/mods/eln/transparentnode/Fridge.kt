@@ -1,5 +1,6 @@
 package mods.eln.transparentnode
 
+import mods.eln.cable.CableRenderType
 import mods.eln.gui.GuiContainerEln
 import mods.eln.gui.GuiHelperContainer
 import mods.eln.gui.ISlotSkin.SlotSkin
@@ -11,13 +12,16 @@ import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.nbt.NbtResistor
+import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import mods.eln.sound.LoopedSound
 import net.minecraft.client.audio.ISound
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.IInventory
 import net.minecraft.inventory.Slot
+import java.io.DataInputStream
+import java.io.DataOutputStream
 
-class FridgeDescriptor(name: String, obj: Obj3D) :
+class FridgeDescriptor(name: String, obj: Obj3D, internal val cable: ElectricalCableDescriptor) :
         TransparentNodeDescriptor(name, FridgeElement::class.java, FridgeRender::class.java) {
     val main: Obj3D.Obj3DPart = obj.getPart("core")
     val fridgeDoor: Obj3D.Obj3DPart = obj.getPart("doorfridge")
@@ -43,7 +47,14 @@ class FridgeElement(node: TransparentNode, descriptor: TransparentNodeDescriptor
     }
 
     override fun initialize() {
+        (descriptor as FridgeDescriptor).cable.applyTo(load)
         connect()
+    }
+
+    override fun networkSerialize(stream: DataOutputStream) {
+        super.networkSerialize(stream)
+        node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
+
     }
 
     override fun getConnectionMask(side: Direction, lrdu: LRDU) = when (side) {
@@ -71,12 +82,11 @@ class FridgeElement(node: TransparentNode, descriptor: TransparentNodeDescriptor
 class FridgeRender(entity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) :
         TransparentNodeElementRender(entity, descriptor) {
     private val descriptor = descriptor as FridgeDescriptor
-
     private val coord = Coordonate(entity)
-
     private val inventory = TransparentNodeElementInventory(36, 1, this)
-
     private var open = PhysicalInterpolator(0.4f, 8f, 0.4f, 0f)
+    private var cableRender: CableRenderType? = null
+    private var connections = LRDUMask()
 
     init {
         addLoopedSound(object: LoopedSound("eln:Fridge", coord, ISound.AttenuationType.LINEAR) {
@@ -84,7 +94,13 @@ class FridgeRender(entity: TransparentNodeEntity, descriptor: TransparentNodeDes
         })
     }
 
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+        connections.deserialize(stream)
+    }
+
     override fun draw() {
+        cableRender = drawCable(Direction.YN, descriptor.cable.render, connections, cableRender)
         front.left().glRotateZnRef()
         descriptor.draw(open.get())
     }
