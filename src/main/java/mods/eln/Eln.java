@@ -2662,6 +2662,10 @@ public class Eln {
         sixNodeItem.addDescriptor(id + 6,
             new AnalogChipDescriptor(TR_NAME(Type.NONE, "Configurable summing unit"), model, "SUM",
                 SummingUnit.class, SummingUnitElement.class, SummingUnitRender.class));
+
+        sixNodeItem.addDescriptor(id + 7,
+            new AnalogChipDescriptor(TR_NAME(Type.NONE, "Sample and hold"), model, "SAH",
+                SampleAndHold.class));
     }
 
     void registerTransformer(int id) {

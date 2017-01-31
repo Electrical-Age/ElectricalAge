@@ -542,7 +542,7 @@ class VoltageControlledAmplifier : AnalogFunction() {
     }
 }
 
-class SummingUnit() : AnalogFunction() {
+class SummingUnit : AnalogFunction() {
     override val hasState = true
     override val inputCount = 3
     override val infos = I18N.tr("The summing unit outputs the sum of\nthe tree wighted inputs at it's output.The\ngain for each input can be configured.")
@@ -660,4 +660,28 @@ class SummingUnitGui(val render: SummingUnitRender) : GuiScreenEln() {
     }
 
     override fun newHelper() = GuiHelper(this, 62, 64)
+}
+
+class SampleAndHold : AnalogFunction() {
+    override val inputCount = 2
+    override val infos = "TODO"
+    private var clock = false
+    private var value = 0.0
+
+    override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
+        val clock = inputs[1] ?: 0.0 > 0.5
+        if (clock && !this.clock) value = inputs[0] ?: 0.0
+        this.clock = clock
+        return value
+    }
+
+    override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
+        clock = nbt?.getBoolean("clock") ?: false
+        value = nbt?.getDouble("value") ?: 0.0
+    }
+
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+        nbt?.setBoolean("clock", clock)
+        nbt?.setDouble("value", value)
+    }
 }
