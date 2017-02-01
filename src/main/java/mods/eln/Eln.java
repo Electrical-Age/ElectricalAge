@@ -541,7 +541,7 @@ public class Eln {
 
         oreItem = (OreItem) Item.getItemFromBlock(oreBlock);
         /*
-		 *
+         *
 		 * int id = 0,subId = 0,completId; String name;
 		 */
 
@@ -6032,7 +6032,7 @@ public class Eln {
 
     }
 
-        void recipeRegulatorItem() {
+    void recipeRegulatorItem() {
 
         addRecipe(findItemStack("On/OFF Regulator 10 Percent", 1),
             "R R",
