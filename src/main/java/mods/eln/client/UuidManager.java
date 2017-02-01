@@ -54,6 +54,7 @@ public class UuidManager {
                 if (pUuid == uuid) {
                     p.e.kill();
                     i.remove();
+                    break;
                 }
             }
         }
