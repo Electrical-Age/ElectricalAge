@@ -2928,8 +2928,8 @@ public class Eln {
                 plateMachineRecipes);
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+            desc.setRunningSound("eln:plate_machine");
 
-            desc.setEndSound(new SoundCommand("eln:plate_machine"));
         }
 
         {
@@ -2947,7 +2947,8 @@ public class Eln {
                 plateMachineRecipes);
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-            desc.setEndSound(new SoundCommand("eln:plate_machine"));
+            desc.setRunningSound("eln:plate_machine");
+
         }
     }
 
@@ -2987,7 +2988,8 @@ public class Eln {
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 
-            desc.setRunningSound("eln:compressor");
+            desc.setRunningSound("eln:compressor_run");
+            desc.setEndSound(new SoundCommand("eln:compressor_end"));
         }
 
         {
@@ -3005,7 +3007,8 @@ public class Eln {
                 compressorRecipes);
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-            desc.setRunningSound("eln:compressor");
+            desc.setRunningSound("eln:compressor_run");
+            desc.setEndSound(new SoundCommand("eln:compressor_end"));
         }
     }
 
