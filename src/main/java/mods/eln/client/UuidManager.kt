@@ -4,26 +4,21 @@ import cpw.mods.fml.common.FMLCommonHandler
 import cpw.mods.fml.common.eventhandler.SubscribeEvent
 import cpw.mods.fml.common.gameevent.TickEvent
 import cpw.mods.fml.common.gameevent.TickEvent.Phase
-import mods.eln.misc.Utils
-import net.minecraft.launchwrapper.LogWrapper.log
 import java.util.*
 
 class UuidManager {
     internal val entities = HashMap <Int, IUuidEntity>()
+    internal val uuids = HashMap <IUuidEntity, ArrayList<Int>>()
 
     init {
         FMLCommonHandler.instance().bus().register(this)
     }
 
     fun add(uuid: ArrayList<Int>, e: IUuidEntity) {
-        if (uuid.size != 1) {
-            Utils.fatal()
+        uuid.forEach {
+            entities.put(it, e)
+            uuids.getOrPut(e, { ArrayList() }).add(it)
         }
-        val uuid = uuid.single()
-        if (entities.containsKey(uuid)) {
-            Utils.fatal()
-        }
-        entities.put(uuid, e)
     }
 
     @SubscribeEvent
@@ -35,12 +30,16 @@ class UuidManager {
         while (i.hasNext()) {
             val p = i.next()
             if (!p.value.isAlive) {
+                uuids.remove(p.value)
                 i.remove()
             }
         }
     }
 
     fun kill(uuid: Int) {
-        entities.remove(uuid)?.kill()
+        entities.remove(uuid)?.apply {
+            kill()
+            uuids.remove(this)?.forEach { entities.remove(it) }
+        }
     }
 }
