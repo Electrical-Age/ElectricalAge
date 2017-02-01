@@ -759,7 +759,7 @@ public class Eln {
 
         recipeTurret();
         recipeMachine();
-        recipeLogicGates();
+        recipeChips();
         recipeTransformer();
         recipeHeatFurnace();
         recipeTurbine();
@@ -5405,7 +5405,7 @@ public class Eln {
 
     }
 
-    void recipeLogicGates() {
+    void recipeChips() {
         addRecipe(findItemStack("NOT Chip"),
             "   ",
             "cCr",
@@ -5498,6 +5498,63 @@ public class Eln {
             Character.valueOf('C'), dictAdvancedChip,
             Character.valueOf('p'), findItemStack("Copper Plate"),
             Character.valueOf('c'), findItemStack("Copper Cable"));
+
+
+        addRecipe(findItemStack("Amplifier"),
+            "  r",
+            "cCc",
+            "   ",
+            Character.valueOf('r'), new ItemStack(Items.redstone),
+            Character.valueOf('c'), findItemStack("Copper Cable"),
+            Character.valueOf('C'), dictAdvancedChip);
+
+        addRecipe(findItemStack("OpAmp"),
+            "  r",
+            "cCc",
+            " c ",
+            Character.valueOf('r'), new ItemStack(Items.redstone),
+            Character.valueOf('c'), findItemStack("Copper Cable"),
+            Character.valueOf('C'), dictAdvancedChip);
+
+        addRecipe(findItemStack("Configurable summing unit"),
+            " cr",
+            "cCc",
+            " c ",
+            Character.valueOf('r'), new ItemStack(Items.redstone),
+            Character.valueOf('c'), findItemStack("Copper Cable"),
+            Character.valueOf('C'), dictAdvancedChip);
+
+        addRecipe(findItemStack("Sample and hold"),
+            " rr",
+            "cCc",
+            " c ",
+            Character.valueOf('r'), new ItemStack(Items.redstone),
+            Character.valueOf('c'), findItemStack("Copper Cable"),
+            Character.valueOf('C'), dictAdvancedChip);
+
+        addRecipe(findItemStack("Voltage controlled sine oscillator"),
+            "rrr",
+            "cCc",
+            "   ",
+            Character.valueOf('r'), new ItemStack(Items.redstone),
+            Character.valueOf('c'), findItemStack("Copper Cable"),
+            Character.valueOf('C'), dictAdvancedChip);
+
+        addRecipe(findItemStack("Voltage controlled sawtooth oscillator"),
+            "   ",
+            "cCc",
+            "rrr",
+            Character.valueOf('r'), new ItemStack(Items.redstone),
+            Character.valueOf('c'), findItemStack("Copper Cable"),
+            Character.valueOf('C'), dictAdvancedChip);
+
+        addRecipe(findItemStack("PID Regulator"),
+            "rrr",
+            "cCc",
+            "rcr",
+            Character.valueOf('r'), new ItemStack(Items.redstone),
+            Character.valueOf('c'), findItemStack("Copper Cable"),
+            Character.valueOf('C'), dictAdvancedChip);
     }
 
     void recipeTransformer() {
@@ -5975,7 +6032,7 @@ public class Eln {
 
     }
 
-    void recipeRegulatorItem() {
+        void recipeRegulatorItem() {
 
         addRecipe(findItemStack("On/OFF Regulator 10 Percent", 1),
             "R R",
