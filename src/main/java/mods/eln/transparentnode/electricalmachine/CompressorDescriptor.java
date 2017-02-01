@@ -39,6 +39,16 @@ public class CompressorDescriptor extends ElectricalMachineDescriptor {
     }
 
     @Override
+    public float volumeForRunningSound(float processState, float powerFactor) {
+        if (processState < 0.1)
+            return 0f;
+        else if (processState < 0.3)
+            return super.volumeForRunningSound(processState, powerFactor) * (processState - 0.1f) * 5f;
+        else
+            return super.volumeForRunningSound(processState, powerFactor);
+    }
+
+    @Override
     void draw(ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity,
               float powerFactor, float processState) {
         CompressorDescriptorHandle handle = (CompressorDescriptorHandle) handleO;

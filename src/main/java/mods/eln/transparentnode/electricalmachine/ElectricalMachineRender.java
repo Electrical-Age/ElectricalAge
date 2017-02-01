@@ -35,7 +35,7 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
 
     float UFactor;
 
-    public ElectricalMachineRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
+    public ElectricalMachineRender(TransparentNodeEntity tileEntity, final TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
         this.descriptor = (ElectricalMachineDescriptor) descriptor;
         inventory = new ElectricalMachineInventory(2 + this.descriptor.outStackCount, 64, this);
@@ -50,11 +50,7 @@ public class ElectricalMachineRender extends TransparentNodeElementRender {
 
                 @Override
                 public float getVolume() {
-                    if (powerFactor >= 0.3) {
-                        return 0.3f * powerFactor;
-                    } else {
-                        return 0f;
-                    }
+                    return ElectricalMachineRender.this.descriptor.volumeForRunningSound(processState, powerFactor);
                 }
             });
         }

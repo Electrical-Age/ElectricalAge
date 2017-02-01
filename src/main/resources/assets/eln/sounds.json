@@ -62,11 +62,20 @@
             }
         ]
     },
-    "compressor": {
+    "compressor_run": {
         "category": "block",
         "sounds": [
             {
-                "name": "compressor",
+                "name": "compressor_run",
+                "stream": false
+            }
+        ]
+    },
+    "compressor_end": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "compressor_end",
                 "stream": false
             }
         ]

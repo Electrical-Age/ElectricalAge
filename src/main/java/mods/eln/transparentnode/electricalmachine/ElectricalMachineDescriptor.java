@@ -74,6 +74,13 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
         return this;
     }
 
+    public float volumeForRunningSound(float processState, float powerFactor) {
+        if (powerFactor >= 0.3)
+            return 0.3f * powerFactor;
+        else
+            return 0f;
+    }
+
     @Override
     public void setParent(Item item, int damage) {
         super.setParent(item, damage);
