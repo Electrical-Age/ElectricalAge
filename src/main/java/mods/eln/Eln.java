@@ -6724,7 +6724,7 @@ public class Eln {
             Character.valueOf('C'), findItemStack("Combustion Chamber"),
             Character.valueOf('c'), findItemStack("Copper Thermal Cable"));
 
-        addRecipe(findItemStack("Medium Fuel Burner"),
+        addRecipe(findItemStack("Big Fuel Burner"),
             "   ",
             "CCc",
             "CC ",
