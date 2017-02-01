@@ -306,6 +306,7 @@ public class Eln {
     public static boolean wailaEasyMode = false;
 
     public static double fuelHeatValueFactor = 0.0000675;
+    private int plateConversionRatio;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -395,6 +396,7 @@ public class Eln {
         Other.ElnToOcConversionRatio = config.get("balancing", "ElnToOpenComputerConversionRatio", 1.0 / 3.0 / 2.5).getDouble(1.0 / 3.0 / 2.5);
         Other.ElnToTeConversionRatio = config.get("balancing", "ElnToThermalExpansionConversionRatio", 1.0 / 3.0 * 4).getDouble(1.0 / 3.0 * 4);
         //	Other.ElnToBuildcraftConversionRatio = config.get("balancing", "ElnToBuildcraftConversionRatio", 1.0 / 3.0 / 5 * 2).getDouble(1.0 / 3.0 / 5 * 2);
+        plateConversionRatio = config.get("balancing", "platesPerIngot", 1).getInt(1);
 
         stdBatteryHalfLife = config.get("battery", "batteryHalfLife", 2, "How many days it takes for a battery to decay half way").getDouble(2) * Utils.minecraftDay;
         batteryCapacityFactor = config.get("balancing", "batteryCapacityFactor", 1.).getDouble(1.);
@@ -6600,23 +6602,23 @@ public class Eln {
     void recipePlateMachine() {
         float f = 10000;
         plateMachineRecipes.addRecipe(new Recipe(
-            findItemStack("Copper Ingot", 4),
+            findItemStack("Copper Ingot", plateConversionRatio),
             findItemStack("Copper Plate"), 1.0 * f));
 
-        plateMachineRecipes.addRecipe(new Recipe(findItemStack("Lead Ingot", 4),
+        plateMachineRecipes.addRecipe(new Recipe(findItemStack("Lead Ingot", plateConversionRatio),
             findItemStack("Lead Plate"), 1.0 * f));
 
         plateMachineRecipes.addRecipe(new Recipe(
             findItemStack("Silicon Ingot", 4),
             findItemStack("Silicon Plate"), 1.0 * f));
 
-        plateMachineRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", 4),
+        plateMachineRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", plateConversionRatio),
             findItemStack("Alloy Plate"), 1.0 * f));
 
-        plateMachineRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot, 4,
+        plateMachineRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot, plateConversionRatio,
             0), findItemStack("Iron Plate"), 1.0 * f));
 
-        plateMachineRecipes.addRecipe(new Recipe(new ItemStack(Items.gold_ingot, 4,
+        plateMachineRecipes.addRecipe(new Recipe(new ItemStack(Items.gold_ingot, plateConversionRatio,
             0), findItemStack("Gold Plate"), 1.0 * f));
 
     }
