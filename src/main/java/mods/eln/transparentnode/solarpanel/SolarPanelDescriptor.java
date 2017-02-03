@@ -23,8 +23,7 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
     boolean basicModel;
     private Obj3D obj;
     private Obj3DPart main;
-    private Obj3DPart panneau;
-    private Obj3DPart foot;
+    private Obj3DPart panel;
 
     public SolarPanelDescriptor(
         String name,
@@ -53,8 +52,7 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
         this.obj = obj;
         if (obj != null) {
             main = obj.getPart("main");
-            panneau = obj.getPart("panneau");
-            foot = obj.getPart("foot");
+            panel = obj.getPart("panel");
         }
 
         this.cableRender = cableRender;
@@ -127,13 +125,12 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
 
 
     void draw(float alpha, Direction front) {
-        if (foot != null) foot.draw();
-        if (panneau != null) {
+        if (panel != null) {
             GL11.glPushMatrix();
-            panneau.draw(alpha, 0f, 0f, 1f);
+            panel.draw(alpha, 0f, 0f, 1f);
             GL11.glPopMatrix();
         }
-        front.glRotateXnRef();
+        front.glRotateZnRef();
         if (main != null) main.draw();
     }
 
