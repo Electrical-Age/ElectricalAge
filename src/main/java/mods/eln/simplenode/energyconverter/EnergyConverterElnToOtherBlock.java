@@ -21,7 +21,7 @@ public class EnergyConverterElnToOtherBlock extends SimpleNodeBlock {
     private IIcon sideIcon;
 
     public EnergyConverterElnToOtherBlock(EnergyConverterElnToOtherDescriptor descriptor) {
-        super(Material.rock);
+        super(Material.packedIce);
         this.descriptor = descriptor;
         setDescriptor(descriptor);
     }
