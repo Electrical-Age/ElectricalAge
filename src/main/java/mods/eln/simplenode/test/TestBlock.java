@@ -9,7 +9,7 @@ import net.minecraft.world.World;
 public class TestBlock extends SimpleNodeBlock {
 
     public TestBlock() {
-        super(Material.rock);
+        super(Material.packedIce);
     }
 
     @Override

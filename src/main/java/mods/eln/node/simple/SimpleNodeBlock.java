@@ -13,7 +13,6 @@ import net.minecraft.world.World;
 
 public abstract class SimpleNodeBlock extends BlockContainer {
 
-
     protected SimpleNodeBlock(Material material) {
         super(material);
     }
@@ -61,15 +60,14 @@ public abstract class SimpleNodeBlock extends BlockContainer {
     }
 
     @Override
-    public boolean removedByPlayer(World world, EntityPlayer entityPlayer, int x, int y, int z) {
+    public boolean removedByPlayer(World world, EntityPlayer entityPlayer, int x, int y, int z, boolean willHarvest) {
         if (!world.isRemote) {
             SimpleNode node = getNode(world, x, y, z);
             if (node != null) {
                 node.removedByPlayer = (EntityPlayerMP) entityPlayer;
             }
         }
-        return super.removedByPlayer(world, entityPlayer, x, y, z);
-
+        return super.removedByPlayer(world, entityPlayer, x, y, z, willHarvest);
     }
 
     // client server
