@@ -6,6 +6,7 @@ import mods.eln.gui.*
 import mods.eln.i18n.I18N
 import mods.eln.misc.*
 import mods.eln.node.Node
+import mods.eln.node.Synchronizable
 import mods.eln.node.six.*
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
@@ -683,5 +684,140 @@ class SampleAndHold : AnalogFunction() {
     override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
         nbt?.setBoolean("clock", clock)
         nbt?.setDouble("value", value)
+    }
+}
+
+class Filter: AnalogFunction() {
+    companion object {
+        private fun sinc(x: Double) = when {
+            x > -1.0E-5 && x < 1.0E-5 -> 1.0
+            else -> Math.sin(x) / x
+        }
+
+        private fun Double.factorial(): Double = when (this) {
+            1.0 -> 1.0
+            else -> this * (this - 1.0).factorial()
+        }
+
+        private fun Double.bessel() = 1.0 + (1..10).sumByDouble {
+            Math.pow(Math.pow(this / 2.0, it.toDouble()) / it.toDouble().factorial(), 2.0)
+        }
+
+        internal fun firLowPassCoefficients(omega: Double, numCoefficients: Int = 16) = Array(numCoefficients, {
+            omega * sinc(omega * (it - (numCoefficients - 1).toDouble() / 2.0) * Math.PI)
+        })
+
+        internal fun applyKaiserWindow(coefficients: Array<Double>, beta: Double): Array<Double> {
+            coefficients.indices.forEach {
+                val dm = (coefficients.size + 1).toDouble()
+                val arg = beta * Math.sqrt(1.0 - Math.pow(((2 *it + 2).toDouble() - dm) / dm, 2.0))
+                coefficients[it] *= arg.bessel() / beta.bessel()
+            }
+            return coefficients
+        }
+
+        private fun Array<Double>.firFilterStep(input: Double, coefficients: Array<Double>): Double {
+            (this.size - 1 downTo 1).forEach { this[it] = this[it - 1] }
+            this[0] = input
+            return this.foldIndexed(0.0, { i, y, x -> y + (coefficients.getOrElse(i, { 0.0 })) * x })
+        }
+    }
+
+    override val inputCount = 1
+    override val infos = "TODO"
+
+    internal var coefficients: Array<Double> = firLowPassCoefficients(0.5, 17)
+    private var data = Array(17, { 0.0 })
+
+    override fun process(inputs: Array<Double?>, deltaTime: Double) = data.firFilterStep(inputs[0] ?: 0.0, coefficients)
+}
+
+class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor) :
+    AnalogChipElement(node, side, sixNodeDescriptor) {
+
+    companion object {
+        val OmegaChangedEvents = 1
+    }
+
+    private var omega = Eln.instance.electricalFrequency / 2.0
+        set(value) {
+            field = value
+            (function as Filter).coefficients = Filter.applyKaiserWindow(
+                Filter.firLowPassCoefficients(field / Eln.instance.electricalFrequency), 3.2)
+        }
+
+    override fun hasGui() = true
+
+    override fun networkSerialize(stream: DataOutputStream?) {
+        super.networkSerialize(stream)
+
+        try {
+            stream?.writeFloat(omega.toFloat())
+        } catch(e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+
+        try {
+            when (stream?.readByte()?.toInt()) {
+                OmegaChangedEvents -> omega = stream.readFloat().toDouble()
+            }
+            needPublish()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
+
+class FilterRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    AnalogChipRender(entity, side, descriptor) {
+    internal var omega = Synchronizable(0.5f)
+
+    override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? = FilterGui(this)
+
+    override fun publishUnserialize(stream: DataInputStream) {
+        super.publishUnserialize(stream)
+        try {
+            omega.value = stream.readFloat()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
+
+class FilterGui(private var render: FilterRender) : GuiScreenEln() {
+    private var omega: GuiVerticalTrackBar? = null
+
+    override fun initGui() {
+        super.initGui()
+
+        omega = newGuiVerticalTrackBar(6, 6 + 2, 20, 50)
+        omega?.apply {
+            setStepIdMax(40)
+            setEnable(true)
+            setRange(0f, Eln.instance.electricalFrequency.toFloat())
+            value = render.omega.value
+        }
+    }
+
+    override fun guiObjectEvent(`object`: IGuiObject) {
+        super.guiObjectEvent(`object`)
+        if (`object` === omega) {
+            render.clientSetFloat(FilterElement.OmegaChangedEvents, omega!!.value)
+        }
+    }
+
+    override fun preDraw(f: Float, x: Int, y: Int) {
+        super.preDraw(f, x, y)
+        if (render.omega.pending) omega?.value = render.omega.value
+        omega?.setComment(0, I18N.tr("Cut-off frequency %1$ Hz",
+            omega?.value ?: 0.5f * Eln.instance.electricalFrequency))
+    }
+
+    override fun newHelper(): GuiHelper {
+        return GuiHelper(this, 12 + 20, 12 + 50 + 4)
     }
 }
