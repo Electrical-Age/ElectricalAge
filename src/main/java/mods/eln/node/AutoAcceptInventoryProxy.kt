@@ -2,6 +2,7 @@ package mods.eln.node
 
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor
 import mods.eln.generic.GenericItemUsingDamageDescriptor
+import mods.eln.item.electricalitem.BatteryItem
 import net.minecraft.inventory.IInventory
 import net.minecraft.item.ItemStack
 
@@ -26,8 +27,10 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
             if (inventory.getStackInSlot(index) == null) {
                 GenericItemUsingDamageDescriptor.getDescriptor(itemStack)?.let { desc ->
                     if (acceptedItems.any { it.isAssignableFrom(desc.javaClass) }) {
+                        val newItemStack = desc.newItemStack()
+                        (desc as? BatteryItem)?.let { it.setEnergy(newItemStack, it.getEnergy(itemStack)) }
                         itemStack!!.stackSize -= 1
-                        inventory.setInventorySlotContents(index, desc.newItemStack())
+                        inventory.setInventorySlotContents(index, newItemStack)
                         return true
                     }
                 }
