@@ -20,6 +20,7 @@ import static mods.eln.i18n.I18N.tr;
 
 public class SolarPanelDescriptor extends TransparentNodeDescriptor {
 
+    final Coordonate groundCoordinate;
     boolean basicModel;
     private Obj3D obj;
     private Obj3DPart main;
@@ -29,13 +30,13 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
         String name,
         Obj3D obj, CableRenderDescriptor cableRender,
         GhostGroup ghostGroup, int solarOffsetX, int solarOffsetY, int solarOffsetZ,
-        //FunctionTable solarIfSBase,
-        double electricalUmax, double electricalPmax,
+        Coordonate groundCoordinate, double electricalUmax, double electricalPmax,
         double electricalDropFactor,
         double alphaMin, double alphaMax
 
     ) {
         super(name, SolarPanelElement.class, SolarPanelRender.class);
+        this.groundCoordinate = groundCoordinate;
         this.ghostGroup = ghostGroup;
 
         electricalRs = electricalUmax * electricalUmax * electricalDropFactor
@@ -77,38 +78,10 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
     double electricalUmax;
     double electricalPmax;
 
-    public SolarPanelDescriptor(
-        String name,
-        GhostGroup ghostGroup, int solarOffsetX, int solarOffsetY, int solarOffsetZ,
-        FunctionTable diodeIfUBase,
-        FunctionTable solarIfSBase,
-        double electricalUmax, double electricalImax,
-        double electricalDropFactor,
-        double alphaMin, double alphaMax
-
-    ) {
-        super(name, SolarPanelElement.class, SolarPanelRender.class);
-        this.ghostGroup = ghostGroup;
-        this.diodeIfU = diodeIfUBase.duplicate(electricalUmax, electricalImax);
-        electricalRs = electricalUmax * electricalImax * electricalDropFactor
-            / electricalImax / electricalImax / 2.0;
-        //	this.efficiency = efficiency;
-        this.solarIfS = solarIfSBase.duplicate(1.0, electricalImax);
-        this.solarOffsetX = solarOffsetX;
-        this.solarOffsetY = solarOffsetY;
-        this.solarOffsetZ = solarOffsetZ;
-        this.alphaMax = alphaMax;
-        this.alphaMin = alphaMin;
-        basicModel = false;
-        canRotate = alphaMax != alphaMin;
-    }
-
     int solarOffsetX, solarOffsetY, solarOffsetZ;
     double alphaMin, alphaMax;
     //double efficiency;
     double electricalRs;
-    IFunction diodeIfU;
-    FunctionTable solarIfS;
 
     boolean canRotate;
 

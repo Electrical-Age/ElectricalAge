@@ -3,9 +3,7 @@ package mods.eln.transparentnode.solarpanel;
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.item.SolarTrackerDescriptor;
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.Utils;
+import mods.eln.misc.*;
 import mods.eln.node.AutoAcceptInventoryProxy;
 import mods.eln.node.IPublishable;
 import mods.eln.node.NodeBase;
@@ -26,6 +24,7 @@ import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,6 +43,7 @@ public class SolarPanelElement extends TransparentNodeElement {
     SolarPannelSlowProcess slowProcess = new SolarPannelSlowProcess(this);
 
     public double pannelAlpha = Math.PI / 2;
+    private GhostPowerNode groundNode = null;
 
     public SolarPanelElement(TransparentNode transparentNode,
                              TransparentNodeDescriptor descriptor) {
@@ -91,8 +91,13 @@ public class SolarPanelElement extends TransparentNodeElement {
     @Override
     public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
         if (lrdu != LRDU.Down) return null;
-        if (side == front.left()) return positiveLoad;
-        if (side == front.right() && !grounded) return negativeLoad;
+        if (groundNode == null) {
+            // Single-tile solar panel.
+            if (side == front.left()) return positiveLoad;
+            if (side == front.right() && !grounded) return negativeLoad;
+        } else {
+            return positiveLoad;
+        }
         return null;
     }
 
@@ -104,8 +109,13 @@ public class SolarPanelElement extends TransparentNodeElement {
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu != LRDU.Down) return 0;
-        if (side == front.left()) return NodeBase.maskElectricalPower;
-        if (side == front.right() && !grounded) return NodeBase.maskElectricalPower;
+        if (groundNode == null) {
+            // Single-tile solar panel.
+            if (side == front.left()) return NodeBase.maskElectricalPower;
+            if (side == front.right() && !grounded) return NodeBase.maskElectricalPower;
+        } else {
+            if (side == front) return NodeBase.maskElectricalPower;
+        }
         return 0;
     }
 
@@ -113,7 +123,6 @@ public class SolarPanelElement extends TransparentNodeElement {
     public String multiMeterString(Direction side) {
         return Utils.plotUIP(positiveLoad.getU() - negativeLoad.getU(), positiveLoad.getCurrent());
     }
-
 
     @Override
     public String thermoMeterString(Direction side) {
@@ -128,7 +137,19 @@ public class SolarPanelElement extends TransparentNodeElement {
         descriptor.applyTo(positiveLoad);
         descriptor.applyTo(negativeLoad);
 
+        if (descriptor.groundCoordinate != null) {
+            GhostPowerNode n = new GhostPowerNode(node.coordonate, front, descriptor.groundCoordinate, negativeLoad);
+            n.initialize();
+            groundNode = n;
+        }
+
         connect();
+    }
+
+    @Override
+    public void onBreakElement() {
+        super.onBreakElement();
+        groundNode.onBreakBlock();
     }
 
     @Override

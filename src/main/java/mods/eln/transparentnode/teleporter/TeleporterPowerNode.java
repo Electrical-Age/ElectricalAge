@@ -49,6 +49,4 @@ public class TeleporterPowerNode extends GhostNode {
     }
 
     TeleporterElement e;
-
-
 }
