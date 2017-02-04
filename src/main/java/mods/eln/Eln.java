@@ -3136,6 +3136,27 @@ public class Eln {
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
+        {
+            subId = 4;
+            name = TR_NAME(Type.NONE, "2x3 Rotating Solar Panel");
+
+            Coordonate groundCoordinate = new Coordonate(1, 0, 0, 0);
+
+            ghostGroup = new GhostGroup();
+            ghostGroup.addRectangle(0, 1, 0, 0, -1, 1);
+            ghostGroup.removeElement(0, 0, 0);
+
+            SolarPanelDescriptor desc = new SolarPanelDescriptor(name,
+                obj.getObj("bigSolarPanelrot"), meduimVoltageCableDescriptor.render,
+                ghostGroup, 1, 1, 1,
+                groundCoordinate,
+                LVSolarU * 2, solarPanelBasePower * solarPanelPowerFactor * 8,
+                0.01,
+                Math.PI / 8 * 3, Math.PI / 8 * 5
+            );
+
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
     }
 
     void registerHeatingCorp(int id) {
@@ -5947,7 +5968,13 @@ public class Eln {
                 Character.valueOf('P'), findItemStack("Small Solar Panel"),
                 Character.valueOf('I'), metal);
         }
-
+        addRecipe(findItemStack("2x3 Rotating Solar Panel"),
+            "ISI",
+            "IMI",
+            "I I",
+            Character.valueOf('S'), findItemStack("2x3 Solar Panel"),
+            Character.valueOf('M'), findItemStack("Electrical Motor"),
+            Character.valueOf('I'), new ItemStack(Items.iron_ingot));
     }
 
     void recipeThermalDissipatorPassiveAndActive() {

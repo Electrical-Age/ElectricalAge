@@ -8,6 +8,7 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.wiki.Data;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -96,21 +97,29 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
         return alpha;
     }
 
+    @Override
+    public Direction getFrontFromPlace(Direction side, EntityLivingBase entityLiving) {
+        if (canRotate && groundCoordinate != null) {
+            // That is, if this isn't a 1x1 panel.
+            return Direction.ZN;
+        } else {
+            return super.getFrontFromPlace(side, entityLiving);
+        }
+    }
 
     void draw(float alpha, Direction front) {
-        if (panel != null) {
-            GL11.glPushMatrix();
-            panel.draw(alpha, 0f, 0f, 1f);
-            GL11.glPopMatrix();
-        }
         front.glRotateZnRef();
+        GL11.glTranslatef(0, 0, main.getFloat("offZ"));
         if (main != null) main.draw();
+        if (panel != null) {
+            front.glRotateZnRefInv();
+            panel.draw(alpha, 0f, 0f, 1f);
+        }
     }
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
                                          ItemRendererHelper helper) {
-
         return type != ItemRenderType.INVENTORY;
     }
 

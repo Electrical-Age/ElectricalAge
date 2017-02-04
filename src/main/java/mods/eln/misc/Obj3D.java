@@ -174,7 +174,7 @@ public class Obj3D {
         }
 
         public float getFloat(String name) {
-            return nameToFloatHash.get(name);
+            return nameToFloatHash.getOrDefault(name, 0f);
         }
 
         public void draw(float angle, float x, float y, float z) {

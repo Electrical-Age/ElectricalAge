@@ -3,7 +3,10 @@ package mods.eln.transparentnode.solarpanel;
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.item.SolarTrackerDescriptor;
-import mods.eln.misc.*;
+import mods.eln.misc.Direction;
+import mods.eln.misc.GhostPowerNode;
+import mods.eln.misc.LRDU;
+import mods.eln.misc.Utils;
 import mods.eln.node.AutoAcceptInventoryProxy;
 import mods.eln.node.IPublishable;
 import mods.eln.node.NodeBase;
@@ -17,6 +20,7 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.process.PowerSourceBipole;
 import mods.eln.sim.nbt.NbtElectricalLoad;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -24,7 +28,6 @@ import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,7 +45,7 @@ public class SolarPanelElement extends TransparentNodeElement {
 
     SolarPannelSlowProcess slowProcess = new SolarPannelSlowProcess(this);
 
-    public double pannelAlpha = Math.PI / 2;
+    public double panelAlpha = Math.PI / 2;
     private GhostPowerNode groundNode = null;
 
     public SolarPanelElement(TransparentNode transparentNode,
@@ -162,14 +165,14 @@ public class SolarPanelElement extends TransparentNodeElement {
     public void writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         powerSource.writeToNBT(nbt, "powerSource");
-        nbt.setDouble("pannelAlpha", pannelAlpha);
+        nbt.setDouble("panelAlpha", panelAlpha);
     }
 
     @Override
     public void readFromNBT(NBTTagCompound nbt) {
         super.readFromNBT(nbt);
         powerSource.readFromNBT(nbt, "powerSource");
-        pannelAlpha = nbt.getDouble("pannelAlpha");
+        panelAlpha = nbt.getDouble("panelAlpha");
     }
 
 
@@ -177,7 +180,7 @@ public class SolarPanelElement extends TransparentNodeElement {
         super.networkSerialize(stream);
         try {
             stream.writeBoolean(getInventory().getStackInSlot(SolarPanelContainer.trackerSlotId) != null);
-            stream.writeFloat((float) pannelAlpha);
+            stream.writeFloat((float) panelAlpha);
             node.lrduCubeMask.getTranslate(Direction.YN).serialize(stream);
         } catch (IOException e) {
 
@@ -193,7 +196,7 @@ public class SolarPanelElement extends TransparentNodeElement {
         try {
             switch (packetType) {
                 case unserializePannelAlpha:
-                    pannelAlpha = stream.readFloat();
+                    panelAlpha = stream.readFloat();
                     needPublish();
                     break;
 
@@ -230,7 +233,7 @@ public class SolarPanelElement extends TransparentNodeElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
         info.put(I18N.tr("Sun angle"), Utils.plotValue(((slowProcess.getSolarAlpha()) * (180 / Math.PI)) - 90, "\u00B0"));
-        info.put(I18N.tr("Panel angle"), Utils.plotValue((pannelAlpha * (180 / Math.PI)) - 90, "\u00B0"));
+        info.put(I18N.tr("Panel angle"), Utils.plotValue((panelAlpha * (180 / Math.PI)) - 90, "\u00B0"));
         info.put(I18N.tr("Producing energy"), (slowProcess.getSolarLight() != 0 ? "Yes" : "No"));
         if (Eln.wailaEasyMode) {
             info.put(I18N.tr("Produced power"), Utils.plotPower("", powerSource.getP()));
