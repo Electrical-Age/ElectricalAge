@@ -149,7 +149,8 @@ public class SolarPanelElement extends TransparentNodeElement {
     @Override
     public void onBreakElement() {
         super.onBreakElement();
-        groundNode.onBreakBlock();
+        if (groundNode != null)
+            groundNode.onBreakBlock();
     }
 
     @Override
