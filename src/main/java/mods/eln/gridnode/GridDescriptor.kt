@@ -15,7 +15,7 @@ import org.lwjgl.opengl.GL11.*
 /**
  * Created by svein on 22/08/15.
  */
-open class GridDescriptor(name: String, private val obj: Obj3D, ElementClass: Class<*>, RenderClass: Class<*>, val cableTexture: String, val cableDescriptor: ElectricalCableDescriptor) : TransparentNodeDescriptor(name, ElementClass, RenderClass) {
+open class GridDescriptor(name: String, private val obj: Obj3D, ElementClass: Class<*>, RenderClass: Class<*>, val cableTexture: String, val cableDescriptor: ElectricalCableDescriptor, val connectRange: Int) : TransparentNodeDescriptor(name, ElementClass, RenderClass) {
     val plus = ArrayList<Obj3D.Obj3DPart>()
     val gnd = ArrayList<Obj3D.Obj3DPart>()
     //    private final Obj3D.Obj3DPart main;

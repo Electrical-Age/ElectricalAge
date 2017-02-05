@@ -7,4 +7,4 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 /**
  * Created by svein on 24/08/15.
  */
-class DownlinkDescriptor(name: String, obj: Obj3D, cableTexture: String, cableDescriptor: ElectricalCableDescriptor) : GridDescriptor(name, obj, DownlinkElement::class.java, DownlinkRender::class.java, cableTexture, cableDescriptor)
+class DownlinkDescriptor(name: String, obj: Obj3D, cableTexture: String, cableDescriptor: ElectricalCableDescriptor) : GridDescriptor(name, obj, DownlinkElement::class.java, DownlinkRender::class.java, cableTexture, cableDescriptor, 8)
