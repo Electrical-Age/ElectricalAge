@@ -5856,16 +5856,19 @@ public class Eln {
 
         // I don't care what you think, if your modpack lacks steel then you don't *need* this much power.
         // Feel free to add alternate non-iron recipes, though. Here, or by minetweaker.
-        for (String blockType : new String[]{
-            "blockAluminum",
-            "blockAluminium",
-            "blockSteel"
+        for (String type : new String[]{
+            "Aluminum",
+            "Aluminium",
+            "Steel"
         }) {
+            String blockType = "block" + type;
+            String ingotType = "ingot" + type;
             if (oreNames.contains(blockType)) {
                 addRecipe(findItemStack("Transmission Tower"),
-                    "BBB",
-                    "mBm",
+                    "ii ",
+                    "mi ",
                     " B ",
+                    Character.valueOf('i'), ingotType,
                     Character.valueOf('B'), blockType,
                     Character.valueOf('m'), findItemStack("Machine Block"));
             }
