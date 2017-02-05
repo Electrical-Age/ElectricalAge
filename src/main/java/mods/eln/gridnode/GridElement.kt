@@ -66,7 +66,9 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             val distance = other.coordonate().trueDistanceTo(this.coordonate())
             val cableLength = Math.ceil(distance).toInt()
             val range = Math.min(connectRange, other.connectRange)
-            if (stack.stackSize < distance) {
+            val stackSize = entityPlayer.totalItemsCarried(stack)
+
+            if (stackSize < distance) {
                 Utils.addChatMessage(entityPlayer, "You need $cableLength units of cable")
             } else if (distance > range) {
                 Utils.addChatMessage(entityPlayer, "Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks")
@@ -77,7 +79,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             } else {
                 if (GridLink.addLink(this, other, side, p!!.right, cable, cableLength)) {
                     Utils.addChatMessage(entityPlayer, "Added connection")
-                    stack.splitStack(cableLength)
+                    entityPlayer.removeMultipleItems(stack, cableLength)
                 } else {
                     Utils.addChatMessage(entityPlayer, "Already connected")
                 }
@@ -129,11 +131,9 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
     override fun writeToNBT(nbt: NBTTagCompound) {
         super.writeToNBT(nbt)
 
-        var i: Int? = 0
         val gridLinks = Utils.newNbtTagCompund(nbt, "gridLinks")
-        for (link in gridLinkList) {
-            link.writeToNBT(Utils.newNbtTagCompund(gridLinks, i!!.toString()), "")
-            i++
+        for ((i, link) in gridLinkList.withIndex()) {
+            link.writeToNBT(Utils.newNbtTagCompund(gridLinks, i.toString()), "")
         }
     }
 
@@ -199,11 +199,9 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             while (i < 128) {
                 // Check a half-circle.
                 val angle = Math.PI * i / 128.0
-                var error = 0.0
-                for (a in angles) {
-                    val err = Math.abs(Math.sin(angle - a))
-                    error += err * err * err
-                }
+                val error = angles
+                    .map { Math.abs(Math.sin(angle - it)) }
+                    .sumByDouble { it * it * it }
                 if (error < optErr) {
                     optAngle = angle
                     optErr = error
@@ -220,12 +218,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             stream.writeFloat(idealRenderingAngle)
             // Each wire pair should be drawn by exactly one node.
             // Check for which ones it's this one.
-            val ourLinks = ArrayList<GridLink>()
-            for (link in gridLinkList) {
-                if (link.a == coordonate()/* && link.connected*/) {
-                    ourLinks.add(link)
-                }
-            }
+            val ourLinks = gridLinkList.filter { it.a == coordonate()/* && link.connected*/ }
             // The renderer needs to know, for each catenary:
             // - Vec3 of the starting point.
             // - Vec3 of the end point.
