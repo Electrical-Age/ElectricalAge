@@ -694,13 +694,13 @@ class Filter: AnalogFunction() {
             else -> Math.sin(x) / x
         }
 
-        private fun Double.factorial(): Double = when (this) {
-            1.0 -> 1.0
-            else -> this * (this - 1.0).factorial()
+        private fun Int.factorial(): Int = when (this) {
+            1 -> 1
+            else -> this * (this - 1).factorial()
         }
 
         private fun Double.bessel() = 1.0 + (1..10).sumByDouble {
-            Math.pow(Math.pow(this / 2.0, it.toDouble()) / it.toDouble().factorial(), 2.0)
+            Math.pow(Math.pow(this / 2.0, it.toDouble()) / it.factorial().toDouble(), 2.0)
         }
 
         internal fun firLowPassCoefficients(omega: Double, numCoefficients: Int = 16) = Array(numCoefficients, {
