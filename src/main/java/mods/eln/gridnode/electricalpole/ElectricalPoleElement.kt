@@ -32,7 +32,8 @@ data class Transformer(
     val voltageSecondaryWatchdog: VoltageStateWatchDog
 )
 
-class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) : GridElement(node, descriptor, 24) {
+class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDescriptor)
+    : GridElement(node, descriptor, (descriptor as GridDescriptor).connectRange) {
     private val desc = descriptor as ElectricalPoleDescriptor
 
     var electricalLoad = NbtElectricalLoad("electricalLoad")

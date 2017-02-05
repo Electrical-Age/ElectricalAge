@@ -7,7 +7,12 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 /**
  * Created by svein on 07/08/15.
  */
-class ElectricalPoleDescriptor(name: String, obj: Obj3D, cableTexture: String, cableDescriptor: ElectricalCableDescriptor, val includeTransformer: Boolean) : GridDescriptor(name, obj, ElectricalPoleElement::class.java, ElectricalPoleRender::class.java, cableTexture, cableDescriptor) {
+class ElectricalPoleDescriptor(name: String,
+                               obj: Obj3D, cableTexture: String,
+                               cableDescriptor: ElectricalCableDescriptor,
+                               val includeTransformer: Boolean,
+                               connectRange: Int)
+    : GridDescriptor(name, obj, ElectricalPoleElement::class.java, ElectricalPoleRender::class.java, cableTexture, cableDescriptor, connectRange) {
     val minimalLoadToHum = 0.2f
 
     init {
