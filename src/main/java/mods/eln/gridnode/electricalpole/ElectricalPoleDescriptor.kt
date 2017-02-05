@@ -11,7 +11,7 @@ class ElectricalPoleDescriptor(name: String,
                                obj: Obj3D, cableTexture: String,
                                cableDescriptor: ElectricalCableDescriptor,
                                val includeTransformer: Boolean,
-                               connectRange: Int)
+                               connectRange: Int, val voltageLimit: Double)
     : GridDescriptor(name, obj, ElectricalPoleElement::class.java, ElectricalPoleRender::class.java, cableTexture, cableDescriptor, connectRange) {
     val minimalLoadToHum = 0.2f
 

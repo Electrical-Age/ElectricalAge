@@ -18,7 +18,6 @@ import org.lwjgl.opengl.GL11.*
 open class GridDescriptor(name: String, private val obj: Obj3D, ElementClass: Class<*>, RenderClass: Class<*>, val cableTexture: String, val cableDescriptor: ElectricalCableDescriptor, val connectRange: Int) : TransparentNodeDescriptor(name, ElementClass, RenderClass) {
     val plus = ArrayList<Obj3D.Obj3DPart>()
     val gnd = ArrayList<Obj3D.Obj3DPart>()
-    //    private final Obj3D.Obj3DPart main;
 
     protected var static_parts = ArrayList<Obj3D.Obj3DPart>()
     protected var rotating_parts = ArrayList<Obj3D.Obj3DPart>()

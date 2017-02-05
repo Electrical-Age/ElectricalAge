@@ -679,7 +679,8 @@ public class Eln {
                     "textures/wire.png",
                     highVoltageCableDescriptor,
                     false,
-                    24);
+                    24,
+                    12800);
             GhostGroup g = new GhostGroup();
             g.addElement(0, 1, 0);
             g.addElement(0, 2, 0);
@@ -697,7 +698,8 @@ public class Eln {
                     "textures/wire.png",
                     highVoltageCableDescriptor,
                     true,
-                    24);
+                    24,
+                    12800);
             GhostGroup g = new GhostGroup();
             g.addElement(0, 1, 0);
             g.addElement(0, 2, 0);
@@ -714,7 +716,8 @@ public class Eln {
                     "textures/wire.png",
                     highVoltageCableDescriptor,
                     false,
-                    96);
+                    96,
+                    51200);
             GhostGroup g = new GhostGroup();
             g.addRectangle(-1, 1, 0, 0, -1, 1);
             g.addRectangle(0, 0, 1, 8, 0, 0);
