@@ -11,10 +11,13 @@ class ElectricalPoleDescriptor(name: String, obj: Obj3D, cableTexture: String, c
     val minimalLoadToHum = 0.2f
 
     init {
+        obj.getPart("foot")?.let {
+            static_parts.add(it)
+        }
         if (includeTransformer) {
-            rotating_parts.add(obj.getPart("trafo"))
-            rotating_parts.add(obj.getPart("cables"))
-            static_parts.add(obj.getPart("foot"))
+            arrayOf("trafo", "cables").forEach {
+                obj.getPart(it)?.let { rotating_parts.add(it) }
+            }
         }
     }
 }

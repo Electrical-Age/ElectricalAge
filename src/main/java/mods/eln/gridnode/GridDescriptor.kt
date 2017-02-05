@@ -24,7 +24,6 @@ open class GridDescriptor(name: String, private val obj: Obj3D, ElementClass: Cl
     protected var rotating_parts = ArrayList<Obj3D.Obj3DPart>()
 
     init {
-
         rotating_parts.add(obj.getPart("main"))
         var i = 0
         while (true) {

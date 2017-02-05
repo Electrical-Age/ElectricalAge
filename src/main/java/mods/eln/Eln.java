@@ -694,7 +694,29 @@ public class Eln {
             descriptor.setGhostGroup(g);
             transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
         }
-
+        {
+            subId = 6;
+            ElectricalPoleDescriptor descriptor =
+                new ElectricalPoleDescriptor("Transmission Tower",
+                    obj.getObj("TransmissionTower"),
+                    "textures/wire.png",
+                    highVoltageCableDescriptor,
+                    false);
+            GhostGroup g = new GhostGroup();
+            g.addRectangle(-1, 1, 0, 0, -1, 1);
+            g.addRectangle(0, 0, 1, 8, 0, 0);
+            g.removeElement(0, 0, 0);
+            descriptor.setGhostGroup(g);
+            transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+        }
+        {
+            subId = 7;
+            // Reserved for T2.5 poles.
+        }
+        {
+            subId = 8;
+            // Grid transformer!
+        }
     }
 
     public static FMLEventChannel eventChannel;
@@ -5818,6 +5840,24 @@ public class Eln {
             Character.valueOf('C'), findItemStack("Optimal Ferromagnetic Core"),
             Character.valueOf('T'), findItemStack("DC-DC Converter")
         );
+
+        // I don't care what you think, if your modpack lacks steel then you don't *need* this much power.
+        // Feel free to add alternate non-iron recipes, though. Here, or by minetweaker.
+        for (String blockType : new String[]{
+            "blockAluminum",
+            "blockAluminium",
+            "blockSteel"
+        }) {
+            if (oreNames.contains(blockType)) {
+                addRecipe(findItemStack("Transmission Tower"),
+                    "BBB",
+                    "mBm",
+                    " B ",
+                    Character.valueOf('B'), blockType,
+                    Character.valueOf('m'), findItemStack("Machine Block"));
+            }
+        }
+
 //		if (oreNames.contains("sheetPlastic")) {
 //			addRecipe(findItemStack("Downlink"),
 //					"H H",
