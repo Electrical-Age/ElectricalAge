@@ -23,7 +23,8 @@ fun EntityPlayer.removeMultipleItems(stack: ItemStack, count: Int) {
     assert(count <= totalItemsCarried(stack))
     var left = count
     try {
-        inventory.mainInventory.forEachIndexed { i, invStack ->
+        inventory.mainInventory.indices.reversed().forEach { i ->
+            val invStack = inventory.mainInventory[i]
             if (invStack?.isItemEqual(stack) ?: false) {
                 left -= invStack.splitStack(Math.min(invStack.stackSize, left)).stackSize
                 assert(invStack.stackSize >= 0)
