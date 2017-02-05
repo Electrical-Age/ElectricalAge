@@ -74,7 +74,7 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
         }
         voltageWatchdog
                 .set(electricalLoad)
-                .setUMaxMin(desc.cableDescriptor.electricalNominalVoltage * 16)
+                .setUMaxMin(desc.voltageLimit)
                 .set(exp)
 
         if (desc.includeTransformer) {
@@ -151,7 +151,7 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
 
     override fun initialize() {
         trafo?.apply {
-            voltageSecondaryWatchdog.setUNominal(3200.0)
+            voltageSecondaryWatchdog.setUNominal(Eln.instance.veryHighVoltageCableDescriptor.electricalNominalVoltage)
             secondaryMaxCurrent = desc.cableDescriptor.electricalMaximalCurrent.toFloat()
             interSystemProcess.setRatio(0.25)
         }
