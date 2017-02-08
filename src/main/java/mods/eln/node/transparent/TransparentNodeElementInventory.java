@@ -109,8 +109,7 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
 
     @Override
     public void markDirty() {
-
-        if (transparentNodeElement != null) {
+        if (transparentNodeElement != null && !transparentNodeElement.node.isDestructing()) {
             transparentNodeElement.inventoryChange(this);
         }
     }

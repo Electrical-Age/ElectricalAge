@@ -137,7 +137,7 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
 
     @Override
     public void markDirty() {
-        if (null != sixNodeElement) {
+        if (sixNodeElement != null && !sixNodeElement.sixNode.isDestructing()) {
             sixNodeElement.inventoryChanged();
         }
     }

@@ -98,6 +98,9 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, IPublish
     }
 
     public void connectJob() {
+        // If we are about to destruct ourselves, do not add any elements to the simulation anymore.
+        if (sixNode != null && sixNode.isDestructing()) return;
+
         Eln.simulator.addAllElectricalComponent(electricalComponentList);
         Eln.simulator.addAllThermalConnection(thermalConnectionList);
 

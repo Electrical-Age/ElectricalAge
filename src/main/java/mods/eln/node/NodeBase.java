@@ -153,6 +153,10 @@ public abstract class NodeBase {
 
     boolean destructed = false;
 
+    public boolean isDestructing() {
+        return destructed;
+    }
+
     public void physicalSelfDestruction(float explosionStrength) {
         if (destructed == true) return;
         destructed = true;
@@ -193,7 +197,7 @@ public abstract class NodeBase {
 
     // leaf
     public void onBreakBlock() {
-
+        destructed = true;
         disconnect();
         NodeManager.instance.removeNode(this);
         Utils.println("Node::onBreakBlock()");

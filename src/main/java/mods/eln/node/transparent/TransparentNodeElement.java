@@ -59,6 +59,9 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
     public void connectJob() {
+        // If we are about to destruct ourselves, do not add any elements to the simulation anymore.
+        if (node != null && node.isDestructing()) return;
+        
         Eln.simulator.addAllSlowProcess(slowProcessList);
 
         Eln.simulator.addAllElectricalComponent(electricalComponentList);
