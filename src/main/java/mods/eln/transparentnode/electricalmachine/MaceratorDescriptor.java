@@ -1,11 +1,12 @@
 package mods.eln.transparentnode.electricalmachine;
 
 import mods.eln.Eln;
+import mods.eln.api.recipe.RecipesList;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Obj3D;
-import mods.eln.misc.RcInterpolator;
-import mods.eln.api.recipe.RecipesList;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.RcInterpolator;
+import mods.eln.misc.UtilsClient;
 import mods.eln.sim.ThermalLoadInitializer;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.item.EntityItem;
@@ -26,11 +27,6 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
             rot2 = obj.getPart("rot2");
             main = obj.getPart("main");
         }
-    }
-
-    class MaceratorDescriptorHandle {
-        float counter = 0, itemCounter = 0;
-        final RcInterpolator interpolator = new RcInterpolator(0.5f);
     }
 
     @Override
@@ -70,5 +66,10 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
     @Override
     public boolean powerLrdu(Direction side, Direction front) {
         return side != front && side != front.getInverse();
+    }
+
+    class MaceratorDescriptorHandle {
+        final RcInterpolator interpolator = new RcInterpolator(0.5f);
+        float counter = 0, itemCounter = 0;
     }
 }

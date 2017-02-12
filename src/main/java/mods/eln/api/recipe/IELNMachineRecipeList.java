@@ -1,8 +1,8 @@
 package mods.eln.api.recipe;
 
-import java.util.ArrayList;
-
 import net.minecraft.item.ItemStack;
+
+import java.util.ArrayList;
 
 /**
  * Interface for ELN machines to use in the API
@@ -11,18 +11,16 @@ import net.minecraft.item.ItemStack;
  */
 public interface IELNMachineRecipeList {
 
-	public static RecipesList recipeList = null;
-	
-	public void addRecipe(ItemStack input, ItemStack[] output, double energy) throws IllegalArgumentException;
-	
-	public void addRecipe(ItemStack input, ItemStack output, double energy) throws IllegalArgumentException;
-	
-	public void removeRecipe(ItemStack input);
-	
-	public void removeRecipeByOutput(ItemStack output);
-	
-	public ArrayList<Recipe> getRecipes();
-	
-	
-	
+
+    void addRecipe(ItemStack input, ItemStack[] output, double energy) throws IllegalArgumentException;
+
+    void addRecipe(ItemStack input, ItemStack output, double energy) throws IllegalArgumentException;
+
+    void removeRecipe(ItemStack input);
+
+    void removeRecipeByOutput(ItemStack output);
+
+    ArrayList<Recipe> getRecipes();
+
+
 }
