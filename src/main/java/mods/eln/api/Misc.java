@@ -1,7 +1,5 @@
 package mods.eln.api;
 
-import java.lang.reflect.Field;
-
 /**
  * Created by Gregory Maddra on 2016-11-16.
  */
@@ -11,11 +9,8 @@ public class Misc {
         try {
             Class<?> Eln = getEln();
             Object instanceObject = getElnInstance(Eln);
-            Object recipeList = Eln.getDeclaredField(list).get(instanceObject);
-            return recipeList;
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+            return Eln != null ? Eln.getDeclaredField(list).get(instanceObject) : null;
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
         return null;
@@ -25,11 +20,7 @@ public class Misc {
         try {
             Class<?> ElectricalFurnaceProcess = Class.forName("mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceProcess");
             return ElectricalFurnaceProcess.getDeclaredField("energyNeededPerSmelt").getDouble(null);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
         return 0D;
@@ -46,9 +37,7 @@ public class Misc {
     public static Object getElnInstance(Class<?> Eln){
         try {
             return Eln.getDeclaredField("instance").get(null);
-        } catch (NoSuchFieldException e) {
-            return null;
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             return null;
         }
     }

@@ -4,11 +4,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
 /**
- * Created by Gregory Maddra on 2016-11-18.
+ * Utilities
+ * @author Gregory Maddra
+ * 2016-11-18
  */
 public class Utilities {
 
@@ -20,9 +21,7 @@ public class Utilities {
             modifiers = modifiers & ~Modifier.FINAL;
             modifiersField.setAccessible(true);
             modifiersField.setInt(field, modifiers);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
 
@@ -39,7 +38,7 @@ public class Utilities {
                     if (i == j) return true;
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         return false;
     }

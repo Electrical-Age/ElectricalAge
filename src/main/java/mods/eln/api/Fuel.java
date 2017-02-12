@@ -24,15 +24,11 @@ public class Fuel {
 		catch(ClassNotFoundException e){
 			FMLLog.warning("ELN isn't loaded. Someone just tried to use its API.");
 			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		}
-		return 0;
-	}
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 
     /**
      * Add a fuel to the gasoline fuels list (turbine and fuel generator).
@@ -50,11 +46,7 @@ public class Fuel {
 			newArray[newArray.length - 1] = name;
 			gasolineList.set(null, newArray);
             return true;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
         return false;
@@ -76,11 +68,7 @@ public class Fuel {
             newList[newList.length - 1] = name;
             gasList.set(null, newList);
             return true;
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
         return false;
