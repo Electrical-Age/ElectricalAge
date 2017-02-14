@@ -21,7 +21,6 @@ class LoopedSoundManager(val updateInterval: Float = 0.5f) {
             loops.forEach {
                 if (it.volume > 0 && it.pitch > 0 && !soundHandler.isSoundPlaying(it)) {
                     try {
-                        System.out.println("Initializing " + it)
                         soundHandler.playSound(it)
                     } catch (e: IllegalArgumentException) {
                         System.out.println(e)
