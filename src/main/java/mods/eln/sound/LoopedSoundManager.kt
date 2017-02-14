@@ -19,10 +19,12 @@ class LoopedSoundManager(val updateInterval: Float = 0.5f) {
         if (remaining <= 0) {
             val soundHandler = Minecraft.getMinecraft().soundHandler
             loops.forEach {
-                if (!soundHandler.isSoundPlaying(it)) {
+                if (it.volume > 0 && it.pitch > 0 && !soundHandler.isSoundPlaying(it)) {
                     try {
+                        System.out.println("Initializing " + it)
                         soundHandler.playSound(it)
                     } catch (e: IllegalArgumentException) {
+                        System.out.println(e)
                     }
                 }
             }
