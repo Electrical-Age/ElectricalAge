@@ -1,7 +1,6 @@
 package mods.eln.misc;
 
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 
 import java.io.*;
@@ -24,10 +23,10 @@ public class Obj3D {
 
     private String dirPath;
 
-	public void bindTexture(String texFilename){
-		ResourceLocation textureResource = new ResourceLocation("eln", "model/" + dirPath + "/" + texFilename);
-		UtilsClient.bindTexture(textureResource);
-	}
+    public void bindTexture(String texFilename) {
+        ResourceLocation textureResource = new ResourceLocation("eln", "model/" + dirPath + "/" + texFilename);
+        UtilsClient.bindTexture(textureResource);
+    }
 
     public static class FaceGroup {
         String mtlName = null;
@@ -106,7 +105,7 @@ public class Obj3D {
                 GL11.glNormal3f(f.normal.x, f.normal.y, f.normal.z);
                 for (int idx = 0; idx < mode; idx++) {
                     if (f.uv[idx] != null)
-                        GL11.glTexCoord2f(f.uv[idx].u+offsetX, f.uv[idx].v+offsetY);
+                        GL11.glTexCoord2f(f.uv[idx].u + offsetX, f.uv[idx].v + offsetY);
                     GL11.glVertex3f(f.vertex[idx].x, f.vertex[idx].y, f.vertex[idx].z);
                 }
             }
@@ -198,7 +197,7 @@ public class Obj3D {
             GL11.glTranslatef(ox, oy, oz);
             GL11.glRotatef(angle, x, y, z);
             GL11.glTranslatef(-ox, -oy, -oz);
-            draw(texOffsetX,texOffsetY);
+            draw(texOffsetX, texOffsetY);
 
             GL11.glPopMatrix();
         }
@@ -250,15 +249,15 @@ public class Obj3D {
             //	Minecraft.getMinecraft().mcProfiler.endSection();
         }
 
-		public void draw(float texOffsetX, float texOffsetY) {
+        public void draw(float texOffsetX, float texOffsetY) {
             if (locked) return;
 
-			//	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
-			for (FaceGroup fg : faceGroup) {
-				fg.drawVertex(texOffsetX,texOffsetY);
-			}
-			//	Minecraft.getMinecraft().mcProfiler.endSection();
-		}
+            //	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
+            for (FaceGroup fg : faceGroup) {
+                fg.drawVertex(texOffsetX, texOffsetY);
+            }
+            //	Minecraft.getMinecraft().mcProfiler.endSection();
+        }
 
         // Returns the bounding box of the vertices we'd draw.
         public BoundingBox boundingBox() {
@@ -361,6 +360,7 @@ public class Obj3D {
 
     /**
      * Load a resource (obj, mtl, txt file) for a model.
+     *
      * @param filePath the path from the "assets/eln" folder
      * @return the  {@code BufferedReader} or null if the resource does not exist
      */
@@ -434,7 +434,7 @@ public class Obj3D {
                         zMax = Math.max(zMax, v.z);
                     } else if (words[0].equals("vt")) {
                         part.uv.add(new Uv(Float.parseFloat(words[1]),
-                                1 - Float.parseFloat(words[2])));
+                            1 - Float.parseFloat(words[2])));
                     } else if (words[0].equals("f")) {
                         int vertexNbr = words.length - 1;
                         if (vertexNbr == 3) {
@@ -501,8 +501,7 @@ public class Obj3D {
             BufferedReader bufferedReader = getResourceAsStream("model/" + txtPath);
             if (bufferedReader == null) {
                 Utils.println(String.format(" - failed to load txt '%s'", txtPath));
-            }
-            else {
+            } else {
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     String[] words = line.split(" ");

@@ -11,8 +11,8 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ResistorProcess;
+import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
@@ -72,9 +72,9 @@ public class ResistorElement extends SixNodeElement {
         thermalLoad.set(thermalRs, thermalRp, thermalC);
         slowProcessList.add(thermalWatchdog);
         thermalWatchdog
-                .set(thermalLoad)
-                .setLimit(this.descriptor.thermalWarmLimit, this.descriptor.thermalCoolLimit)
-                .set(new WorldExplosion(this).cableExplosion());
+            .set(thermalLoad)
+            .setLimit(this.descriptor.thermalWarmLimit, this.descriptor.thermalCoolLimit)
+            .set(new WorldExplosion(this).cableExplosion());
 
         resistorProcess = new ResistorProcess(this, r, thermalLoad, this.descriptor);
         if (this.descriptor.tempCoef != 0 || this.descriptor.isRheostat) {
@@ -118,7 +118,7 @@ public class ResistorElement extends SixNodeElement {
         double u = -Math.abs(aLoad.getU() - bLoad.getU());
         double i = Math.abs(r.getI());
         return Utils.plotOhm(Utils.plotUIP(u, i), r.getR()) +
-                (control != null ? Utils.plotPercent("C", control.getNormalized()) : "");
+            (control != null ? Utils.plotPercent("C", control.getNormalized()) : "");
     }
 
     @Nullable

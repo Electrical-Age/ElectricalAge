@@ -35,8 +35,8 @@ import java.io.DataOutputStream
 import java.util.*
 
 class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: ThermalLoadInitializerByPowerDrop) :
-        TransparentNodeDescriptor(name, FuelHeatFurnaceElement::class.java, FuelHeatFurnaceRender::class.java,
-                EntityMetaTag.Fluid) {
+    TransparentNodeDescriptor(name, FuelHeatFurnaceElement::class.java, FuelHeatFurnaceRender::class.java,
+        EntityMetaTag.Fluid) {
     private val main = model.getPart("Main")
     private val burners = arrayOf(model.getPart("BurnerA"), model.getPart("BurnerB"), model.getPart("BurnerC"))
     private val powerLED = model.getPart("PowerLED")
@@ -79,7 +79,7 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
 
     override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?) = true
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?, helper: IItemRenderer.ItemRendererHelper?) = true
-    override fun renderItem(type: IItemRenderer.ItemRenderType?, item: ItemStack?, vararg data: Any?)= draw()
+    override fun renderItem(type: IItemRenderer.ItemRenderType?, item: ItemStack?, vararg data: Any?) = draw()
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
@@ -89,7 +89,7 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
 }
 
 class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: TransparentNodeDescriptor) :
-        TransparentNodeElement(transparentNode, descriptor) {
+    TransparentNodeElement(transparentNode, descriptor) {
     companion object {
         val ExternalControlledToggleEvent: Byte = 0
         val MainSwitchToggleEvent: Byte = 1
@@ -153,7 +153,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         tank.setFilter(FuelRegistry.fluidListToFluids(FuelRegistry.gasolineList + FuelRegistry.dieselList))
 
         thermalWatchdog.set(thermalLoad).setLimit((descriptor as FuelHeatFurnaceDescriptor).thermal)
-                .set(WorldExplosion(this).machineExplosion())
+            .set(WorldExplosion(this).machineExplosion())
     }
 
     override fun getElectricalLoad(side: Direction?, lrdu: LRDU?) = when {
@@ -178,7 +178,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
 
     override fun multiMeterString(side: Direction?) = Utils.plotPower("P:", thermalLoad.power)
 
-    override fun thermoMeterString(side: Direction)=  Utils.plotCelsius("T:", thermalLoad.Tc)
+    override fun thermoMeterString(side: Direction) = Utils.plotCelsius("T:", thermalLoad.Tc)
 
     override fun initialize() {
         (descriptor as FuelHeatFurnaceDescriptor).thermal.applyTo(thermalLoad)
@@ -267,7 +267,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
 }
 
 class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) :
-        TransparentNodeElementRender(tileEntity, descriptor) {
+    TransparentNodeElementRender(tileEntity, descriptor) {
     private val inventory = TransparentNodeElementInventory(2, 1, this)
 
     var type: Int? = null
@@ -282,7 +282,7 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
 
     val sound = object : LoopedSound("eln:fuelheatfurnace", coordonate()) {
         override fun getPitch() = FuelBurnerDescriptor.pitchForType(type)
-        override fun getVolume() = if (heatPower > 0) 0.01f + 0.0001f * heatPower else 0f
+        override fun getVolume() = if (heatPower > 0) 0.01f + 0.00001f * heatPower else 0f
     }
 
     init {
@@ -305,7 +305,7 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
         heatPower = stream.readFloat()
         actualTemperature = stream.readFloat()
         type = stream.readInt().let { type ->
-            when(type) {
+            when (type) {
                 -1 -> null
                 else -> type
             }
@@ -316,22 +316,23 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
 }
 
 class FuelHeatFurnaceContainer(val base: NodeBase?, player: EntityPlayer, inventory: IInventory) :
-        BasicContainer(player, inventory,
-                arrayOf(GenericItemUsingDamageSlot(inventory, FuelBurnerSlot, 26, 58, 1, FuelBurnerDescriptor::class.java,
-                        SlotSkin.medium, arrayOf(I18N.tr("Fuel burner slot"))),
-                        RegulatorSlot(inventory, RegulatorSlot, 8, 58, 1, arrayOf(RegulatorType.Analog),
-                                SlotSkin.medium, I18N.tr("Analog regulator slot")))), INodeContainer {
+    BasicContainer(player, inventory,
+        arrayOf(GenericItemUsingDamageSlot(inventory, FuelBurnerSlot, 26, 58, 1, FuelBurnerDescriptor::class.java,
+            SlotSkin.medium, arrayOf(I18N.tr("Fuel burner slot"))),
+            RegulatorSlot(inventory, RegulatorSlot, 8, 58, 1, arrayOf(RegulatorType.Analog),
+                SlotSkin.medium, I18N.tr("Analog regulator slot")))), INodeContainer {
     companion object {
         val FuelBurnerSlot = 0
         val RegulatorSlot = 1
     }
+
     override fun getNode() = base
 
     override fun getRefreshRateDivider() = 1
 }
 
 class FuelHeatFurnaceGui(player: EntityPlayer, val inventory: IInventory, val render: FuelHeatFurnaceRender) :
-        GuiContainerEln(FuelHeatFurnaceContainer(null, player, inventory)) {
+    GuiContainerEln(FuelHeatFurnaceContainer(null, player, inventory)) {
     lateinit var externalControlled: GuiButton
     lateinit var mainSwitch: GuiButton
 
@@ -373,7 +374,7 @@ class FuelHeatFurnaceGui(player: EntityPlayer, val inventory: IInventory, val re
             manualControl.value = render.manualControl.value
         }
         manualControl.setEnable(inventory.getStackInSlot(FuelHeatFurnaceContainer.RegulatorSlot) == null &&
-                !render.externalControlled)
+            !render.externalControlled)
         manualControl.setComment(0, I18N.tr("Control value at %1$", Utils.plotPercent("", manualControl.value.toDouble())))
         manualControl.setComment(1, I18N.tr("Heat Power: %1$", Utils.plotPower("", render.heatPower.toDouble())))
 
@@ -381,7 +382,7 @@ class FuelHeatFurnaceGui(player: EntityPlayer, val inventory: IInventory, val re
             setTemperature.value = render.setTemperature.value
         }
         setTemperature.setEnable(inventory.getStackInSlot(FuelHeatFurnaceContainer.RegulatorSlot) != null &&
-                !render.externalControlled)
+            !render.externalControlled)
         setTemperature.temperatureHit = Math.max(0f, render.actualTemperature)
         setTemperature.setComment(0, I18N.tr("Temperature"))
         setTemperature.setComment(1, I18N.tr("Actual: %1$", Utils.plotCelsius("", render.actualTemperature.toDouble())))

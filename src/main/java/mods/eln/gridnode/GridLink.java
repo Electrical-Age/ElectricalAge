@@ -4,14 +4,11 @@ import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.INBTTReady;
-import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
-import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.sim.ElectricalConnection;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.mna.misc.MnaConst;
-import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -54,7 +51,7 @@ public class GridLink implements INBTTReady {
         if (coord == null) return null;
         TransparentNodeElement element = NodeManager.instance.getTransparentNodeFromCoordinate(coord);
         if (element instanceof GridElement) {
-            return (GridElement)element;
+            return (GridElement) element;
         } else {
             return null;
         }
@@ -75,8 +72,8 @@ public class GridLink implements INBTTReady {
 
         // Makin' a Link. Where'd Zelda go?
         GridLink link = new GridLink(
-                a.coordonate(), b.coordonate(), as, bs, cable.newItemStack(cableLength),
-                cable.electricalRs * cableLength);
+            a.coordonate(), b.coordonate(), as, bs, cable.newItemStack(cableLength),
+            cable.electricalRs * cableLength);
         link.connect();
 
         return true;

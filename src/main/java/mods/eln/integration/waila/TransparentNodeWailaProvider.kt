@@ -14,14 +14,14 @@ import net.minecraft.tileentity.TileEntity
 import net.minecraft.world.World
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
-class TransparentNodeWailaProvider : IWailaDataProvider{
+class TransparentNodeWailaProvider : IWailaDataProvider {
     override fun getWailaBody(itemStack: ItemStack?, currenttip: MutableList<String>,
                               accessor: IWailaDataAccessor, config: IWailaConfigHandler?): MutableList<String>? {
         val coord = Coordonate(accessor.position.blockX, accessor.position.blockY, accessor.position.blockZ,
-                accessor.world)
+            accessor.world)
         try {
             WailaCache.nodes.get(coord)?.forEach { currenttip.add("${it.key}: ${SpecialChars.WHITE}${it.value}") }
-        } catch(e: CacheLoader.InvalidCacheLoadException){
+        } catch(e: CacheLoader.InvalidCacheLoadException) {
             //This is probably just it complaining about the cache returning null. Should be safe to ignore.
         }
 

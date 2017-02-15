@@ -16,37 +16,37 @@ import java.util.List;
 
 public class OreBlock extends Block {
 
-	public OreBlock() {
-		super(Material.rock); //Parameters: Block ID, Block material
-	/*	setTextureFile("/TutorialGFX/Blocks.png"); //The texture file used
+    public OreBlock() {
+        super(Material.rock); //Parameters: Block ID, Block material
+    /*	setTextureFile("/TutorialGFX/Blocks.png"); //The texture file used
 		setBlockName("DeverionXBlockOre"); //The incode block name
 		setCreativeTab(eln.c.tabGems); //The tab it appears in*/
-		setHardness(3.0F); //The block hardness
-		setResistance(5.0F); //The explosion resistance
-	}
+        setHardness(3.0F); //The block hardness
+        setResistance(5.0F); //The explosion resistance
+    }
 	/*//caca1.5.1
 	public int getBlockTextureFromSideAndMetadata(int i,int j){
 		return Eln.oreItem.getDescriptor(j).getBlockIconId(i, j);
 	}*/
-	
-	public int damageDropped(int i) { //Makes sure pick block works right
-	    return i;
-	}
 
-	@Override
-	public void getSubBlocks(Item i, CreativeTabs tab, List l) { //Puts all sub blocks into the creative inventory
-		Eln.oreItem.getSubItems(i, tab, l);
-	}
+    public int damageDropped(int i) { //Makes sure pick block works right
+        return i;
+    }
+
+    @Override
+    public void getSubBlocks(Item i, CreativeTabs tab, List l) { //Puts all sub blocks into the creative inventory
+        Eln.oreItem.getSubItems(i, tab, l);
+    }
 
     @Override
     @SideOnly(Side.CLIENT)
     public IIcon getIcon(int par1, int par2) {
-    	OreDescriptor desc = Eln.oreItem.getDescriptor(par2);
-    	if(desc == null) return null;
-    	return desc.getBlockIconId(par1, par2);
+        OreDescriptor desc = Eln.oreItem.getDescriptor(par2);
+        if (desc == null) return null;
+        return desc.getBlockIconId(par1, par2);
     }
 
-	public ArrayList<ItemStack> getBlockDropped(World w, int x, int y, int z, int meta, int fortune) { //Specifies the block drop
+    public ArrayList<ItemStack> getBlockDropped(World w, int x, int y, int z, int meta, int fortune) { //Specifies the block drop
 	/*	ArrayList<ItemStack> list = new ArrayList<ItemStack>(); //The list of items
 		
 		list.add(new ItemStack(meta == 0 ? TutorialMain.ruby : TutorialMain.metaGem,1,meta == 0 ? 0 : meta-1)); //One guaranteed
@@ -58,10 +58,10 @@ public class OreBlock extends Block {
 		}
 		
 		return list; //Returns the finished list :)*/
-    	OreDescriptor desc = Eln.oreItem.getDescriptor(meta);
-    	if(desc == null) return new ArrayList<ItemStack>();
-		return desc.getBlockDropped(fortune);
-	}
+        OreDescriptor desc = Eln.oreItem.getDescriptor(meta);
+        if (desc == null) return new ArrayList<ItemStack>();
+        return desc.getBlockDropped(fortune);
+    }
 
 	/*//caca1.5.1
 	@Override
@@ -70,10 +70,10 @@ public class OreBlock extends Block {
 	}
 	*/
 
-	@Override
-	public void breakBlock(World par1World, int par2, int par3, int par4, Block par5, int par6) {
-		super.breakBlock(par1World, par2, par3, par4, par5, par6);
-		if(par1World.isRemote) return;
+    @Override
+    public void breakBlock(World par1World, int par2, int par3, int par4, Block par5, int par6) {
+        super.breakBlock(par1World, par2, par3, par4, par5, par6);
+        if (par1World.isRemote) return;
 		/*
 		
 		ArrayList<ItemStack> list = Eln.oreItem.getDescriptor(par6).getBlockDropped(0);
@@ -85,5 +85,5 @@ public class OreBlock extends Block {
 			}
 		}
 	*/
-	}
+    }
 }

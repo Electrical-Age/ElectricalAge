@@ -18,13 +18,14 @@ import net.minecraft.world.World
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
 class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNodeWailaProvider,
-                             private val sixNodeProvider: SixNodeWailaProvider): IWailaDataProvider {
+                             private val sixNodeProvider: SixNodeWailaProvider) : IWailaDataProvider {
     private class WailaDataAccessorProxy(val accessor: IWailaDataAccessor, val coord: Coordonate,
-                                         val side: Direction? = null): IWailaDataAccessor {
+                                         val side: Direction? = null) : IWailaDataAccessor {
         override fun getPlayer() = accessor.player
         override fun getStack() = accessor.stack
         override fun getPosition() = MovingObjectPosition(coord.x, coord.y, coord.z, accessor.position.sideHit,
-                accessor.position.hitVec)
+            accessor.position.hitVec)
+
         override fun getSide() = if (side != null) side.toForge() else accessor.side
         override fun getBlockID() = accessor.blockID
         override fun getPartialFrame() = accessor.partialFrame
@@ -40,11 +41,12 @@ class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNod
 
     private fun getGhostData(accessor: IWailaDataAccessor): GhostNodeWailaData? {
         val coord = Coordonate(accessor.position.blockX, accessor.position.blockY, accessor.position.blockZ,
-                accessor.world)
+            accessor.world)
         var ghostData: GhostNodeWailaData? = null
         try {
             ghostData = WailaCache.ghostNodes.get(coord)
-        } catch(e: CacheLoader.InvalidCacheLoadException) {}
+        } catch(e: CacheLoader.InvalidCacheLoadException) {
+        }
 
         return ghostData
     }
@@ -57,10 +59,10 @@ class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNod
             return when (ghostData.realType) {
                 GhostNodeWailaResponsePacket.TRANSPARENT_BLOCK_TYPE ->
                     transparentNodeProvider.getWailaBody(itemStack, currenttip,
-                            WailaDataAccessorProxy(accessor, realCoord), config)
+                        WailaDataAccessorProxy(accessor, realCoord), config)
                 GhostNodeWailaResponsePacket.SIXNODE_TYPE ->
                     sixNodeProvider.getWailaBody(itemStack, currenttip,
-                            WailaDataAccessorProxy(accessor, realCoord, ghostData.realSide), config)
+                        WailaDataAccessorProxy(accessor, realCoord, ghostData.realSide), config)
                 else -> currenttip
             }
         } else {
@@ -69,7 +71,7 @@ class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNod
     }
 
     override fun getWailaStack(accessor: IWailaDataAccessor, config: IWailaConfigHandler?): ItemStack? =
-            getGhostData(accessor)?.itemStack
+        getGhostData(accessor)?.itemStack
 
     override fun getWailaTail(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor,
                               config: IWailaConfigHandler?) = currenttip
@@ -79,7 +81,7 @@ class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNod
 
     override fun getWailaHead(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor,
                               config: IWailaConfigHandler?): MutableList<String> = if (itemStack != null) {
-            mutableListOf("${SpecialChars.WHITE}${itemStack.displayName}")
+        mutableListOf("${SpecialChars.WHITE}${itemStack.displayName}")
     } else {
         currenttip
     }

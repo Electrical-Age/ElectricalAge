@@ -4,8 +4,8 @@ import mods.eln.node.simple.SimpleNodeEntity;
 
 public class TestEntity extends SimpleNodeEntity {
 
-	@Override
-	public String getNodeUuid() {
-		return TestNode.getNodeUuidStatic();
-	}
+    @Override
+    public String getNodeUuid() {
+        return TestNode.getNodeUuidStatic();
+    }
 }

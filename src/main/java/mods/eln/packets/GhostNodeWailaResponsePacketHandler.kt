@@ -14,7 +14,7 @@ class GhostNodeWailaResponsePacketHandler : IMessageHandler<GhostNodeWailaRespon
     override fun onMessage(message: GhostNodeWailaResponsePacket, ctx: MessageContext?): IMessage? {
         if (!message.realCoord.isNull()) {
             WailaCache.ghostNodes.put(message.coord, GhostNodeWailaData(message.realCoord, message.itemStack,
-                    message.type, message.realSide))
+                message.type, message.realSide))
         }
 
         return null

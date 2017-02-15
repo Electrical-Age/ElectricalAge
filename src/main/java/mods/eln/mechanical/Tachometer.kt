@@ -33,14 +33,14 @@ import java.io.IOException
 import java.text.NumberFormat
 import java.text.ParseException
 
-class TachometerDescriptor(baseName : String, obj : Obj3D): SimpleShaftDescriptor(baseName,
-        TachometerElement::class, TachometerRender::class, EntityMetaTag.Basic) {
+class TachometerDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
+    TachometerElement::class, TachometerRender::class, EntityMetaTag.Basic) {
     override val obj = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = arrayOf(obj.getPart("Shaft"))
 }
 
-open class TachometerElement(node : TransparentNode, desc_ : TransparentNodeDescriptor): SimpleShaftElement(node, desc_) {
+open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : SimpleShaftElement(node, desc_) {
     companion object {
         val SetRangeEventId = 1
 
@@ -67,7 +67,7 @@ open class TachometerElement(node : TransparentNode, desc_ : TransparentNodeDesc
 
     override fun getThermalLoad(side: Direction?, lrdu: LRDU?): ThermalLoad? = null
 
-    override fun getConnectionMask(side: Direction?, lrdu: LRDU?): Int = if (side == front|| side == front.inverse) {
+    override fun getConnectionMask(side: Direction?, lrdu: LRDU?): Int = if (side == front || side == front.inverse) {
         NodeBase.maskElectricalOutputGate
     } else {
         0
@@ -117,7 +117,7 @@ open class TachometerElement(node : TransparentNode, desc_ : TransparentNodeDesc
     }
 }
 
-class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {
+class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
     override val cableRender: CableRenderDescriptor? = null
     private var renderPreProcess: CableRenderType? = null
     private val connections = LRDUMask()
@@ -139,7 +139,7 @@ class TachometerRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? = TachometerGui(this)
 }
 
-class TachometerGui(val render: TachometerRender): GuiScreenEln() {
+class TachometerGui(val render: TachometerRender) : GuiScreenEln() {
     val validate: GuiButton by lazy { newGuiButton(82, 12, 80, I18N.tr("Validate")) }
     val lowValue: GuiTextFieldEln by lazy { newGuiTextField(8, 24, 70) }
     val highValue: GuiTextFieldEln by lazy { newGuiTextField(8, 8, 70) }

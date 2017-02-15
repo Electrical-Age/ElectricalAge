@@ -17,7 +17,7 @@ import java.io.IOException;
 
 public class ElectricalAlarmRender extends SixNodeElementRender {
 
-	ElectricalAlarmDescriptor descriptor;
+    ElectricalAlarmDescriptor descriptor;
 
     LRDU front;
 
@@ -27,55 +27,55 @@ public class ElectricalAlarmRender extends SixNodeElementRender {
     boolean warm = false;
     boolean mute = false;
 
-	public ElectricalAlarmRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-		super(tileEntity, side, descriptor);
-		this.descriptor = (ElectricalAlarmDescriptor) descriptor;
-	}
+    public ElectricalAlarmRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
+        super(tileEntity, side, descriptor);
+        this.descriptor = (ElectricalAlarmDescriptor) descriptor;
+    }
 
-	@Override
-	public void draw() {
-		super.draw();
-		
+    @Override
+    public void draw() {
+        super.draw();
 
-		if (side.isY()) {
-			front.right().glRotateOnX();
-			drawSignalPin(LRDU.Down, descriptor.pinDistance);
-		} else {
-			drawSignalPin(front, descriptor.pinDistance);
-		}
-		descriptor.draw(warm, rotAlpha);
-	}
 
-	@Override
-	public void refresh(float deltaT) {
-		interpol.setTarget(warm ? descriptor.rotSpeed : 0f);
-		interpol.step(deltaT);
-		
-		rotAlpha += interpol.get() * deltaT;
-	}
+        if (side.isY()) {
+            front.right().glRotateOnX();
+            drawSignalPin(LRDU.Down, descriptor.pinDistance);
+        } else {
+            drawSignalPin(front, descriptor.pinDistance);
+        }
+        descriptor.draw(warm, rotAlpha);
+    }
 
-	@Override
-	public void publishUnserialize(DataInputStream stream) {
-		super.publishUnserialize(stream);
-		try {
-			Byte b;
-			b = stream.readByte();
-			front = LRDU.fromInt((b >> 4) & 3);
-			warm = (b & 1) != 0 ? true : false;
-			mute = stream.readBoolean();
-			Utils.println("WARM : " + warm);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	@Override
-	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		return Eln.instance.signalCableDescriptor.render;
-	}
-	
-	@Override
-	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		return new ElectricalAlarmGui(player, this);
-	}
+    @Override
+    public void refresh(float deltaT) {
+        interpol.setTarget(warm ? descriptor.rotSpeed : 0f);
+        interpol.step(deltaT);
+
+        rotAlpha += interpol.get() * deltaT;
+    }
+
+    @Override
+    public void publishUnserialize(DataInputStream stream) {
+        super.publishUnserialize(stream);
+        try {
+            Byte b;
+            b = stream.readByte();
+            front = LRDU.fromInt((b >> 4) & 3);
+            warm = (b & 1) != 0 ? true : false;
+            mute = stream.readBoolean();
+            Utils.println("WARM : " + warm);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public CableRenderDescriptor getCableRender(LRDU lrdu) {
+        return Eln.instance.signalCableDescriptor.render;
+    }
+
+    @Override
+    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
+        return new ElectricalAlarmGui(player, this);
+    }
 }

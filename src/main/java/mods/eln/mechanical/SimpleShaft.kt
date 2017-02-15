@@ -15,8 +15,8 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import kotlin.reflect.KClass
 
-abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNodeElement>, render: KClass<out TransparentNodeElementRender>, tag: EntityMetaTag):
-        TransparentNodeDescriptor(name, elm.java, render.java, tag) {
+abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNodeElement>, render: KClass<out TransparentNodeElementRender>, tag: EntityMetaTag) :
+    TransparentNodeDescriptor(name, elm.java, render.java, tag) {
 
     abstract val obj: Obj3D
     abstract val static: Array<out Obj3D.Obj3DPart>
@@ -60,7 +60,7 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     override fun use2DIcon() = false
 }
 
-open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): TransparentNodeElementRender(entity, desc) {
+open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : TransparentNodeElementRender(entity, desc) {
     private val desc = desc as SimpleShaftDescriptor
     var rads = 0.0
     var logRads = 0.0
@@ -73,14 +73,16 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     var cableRefresh = true
     // Sound:
     private val soundLooper: ShaftSoundLooper?
-    var volumeSetting = 1f
+    val volumeSetting = SlewLimiter(0.5f)
 
     inner private class ShaftSoundLooper(sound: String, coord: Coordonate) : LoopedSound(sound, coord) {
         override fun getPitch() = Math.max(0.05, rads / absoluteMaximumShaftSpeed).toFloat()
-        override fun getVolume() = volumeSetting
+        override fun getVolume() = volumeSetting.position
     }
 
     init {
+        volumeSetting.target = 1f
+        volumeSetting.position = 0f
         val sound = this.desc.sound
         if (sound != null) {
             soundLooper = ShaftSoundLooper(sound, coordonate())
@@ -139,6 +141,7 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     override fun refresh(deltaT: Float) {
         super.refresh(deltaT)
         angle += logRads * deltaT
+        volumeSetting.step(deltaT)
     }
 
     override fun networkUnserialize(stream: DataInputStream) {
@@ -150,8 +153,8 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     }
 }
 
-abstract class SimpleShaftElement(node : TransparentNode, desc_: TransparentNodeDescriptor) :
-        TransparentNodeElement(node, desc_), ShaftElement {
+abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
+    TransparentNodeElement(node, desc_), ShaftElement {
     override val shaftMass = 5.0
     override var shaft = ShaftNetwork(this)
 

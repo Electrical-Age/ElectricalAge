@@ -8,34 +8,33 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 public class SimpleNodeItem extends ItemBlock {
-	SimpleNodeBlock block;
-	public SimpleNodeItem(Block b) {
-		super(b);
-		block = (SimpleNodeBlock) b;
-	}
+    SimpleNodeBlock block;
 
-	@Override
-	public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata) {
-		SimpleNode node = null;
-		if(world.isRemote == false){
-			node = block.newNode();
-			node.setDescriptorKey(block.descriptorKey);
-			node.onBlockPlacedBy(new Coordonate(x,y,z,world), block.getFrontForPlacement(player), player, stack);
-		}
-		
-		if (!world.setBlock(x, y, z, field_150939_a, metadata, 3))
-		{
-			if(node != null)node.onBreakBlock();
-			return false;
-		}
+    public SimpleNodeItem(Block b) {
+        super(b);
+        block = (SimpleNodeBlock) b;
+    }
 
-		
-		if (world.getBlock(x, y, z) == field_150939_a)
-		{
-			field_150939_a.onBlockPlacedBy(world, x, y, z, player, stack);
-			field_150939_a.onPostBlockPlaced(world, x, y, z, metadata);
-		}
+    @Override
+    public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata) {
+        SimpleNode node = null;
+        if (world.isRemote == false) {
+            node = block.newNode();
+            node.setDescriptorKey(block.descriptorKey);
+            node.onBlockPlacedBy(new Coordonate(x, y, z, world), block.getFrontForPlacement(player), player, stack);
+        }
 
-		return true;
-	}
+        if (!world.setBlock(x, y, z, field_150939_a, metadata, 3)) {
+            if (node != null) node.onBreakBlock();
+            return false;
+        }
+
+
+        if (world.getBlock(x, y, z) == field_150939_a) {
+            field_150939_a.onBlockPlacedBy(world, x, y, z, player, stack);
+            field_150939_a.onPostBlockPlaced(world, x, y, z, metadata);
+        }
+
+        return true;
+    }
 }

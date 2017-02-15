@@ -34,24 +34,24 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 
     ThermalLoadInitializer thermal;
 
-	public DiodeDescriptor(String name,
+    public DiodeDescriptor(String name,
                            IFunction IfU,
                            double Imax,
                            double stdU, double stdI,
                            ThermalLoadInitializer thermal,
                            ElectricalCableDescriptor cable, Obj3D obj) {
-		super(name, DiodeElement.class, DiodeRender.class);
+        super(name, DiodeElement.class, DiodeRender.class);
 
         this.IfU = IfU;
-		
-		//double Umax = 0;
-		//while(IfU.getValue(Umax) < Imax) Umax += 0.01;
-		//double Pmax = Umax * IfU.getValue(Umax);
-		this.cable = cable;
-		this.thermal = thermal;
-		thermal.setMaximalPower(stdU * stdI * 1.2);
-		this.stdI = stdI;
-		this.stdU = stdU;
+
+        //double Umax = 0;
+        //while(IfU.getValue(Umax) < Imax) Umax += 0.01;
+        //double Pmax = Umax * IfU.getValue(Umax);
+        this.cable = cable;
+        this.thermal = thermal;
+        thermal.setMaximalPower(stdU * stdI * 1.2);
+        this.stdI = stdI;
+        this.stdU = stdU;
 
         base = obj.getPart("Base");
         diodeCables = obj.getPart("DiodeCables");
@@ -62,13 +62,13 @@ public class DiodeDescriptor extends SixNodeDescriptor {
         } else {
             voltageLevelColor = VoltageLevelColor.Neutral;
         }
-	}
+    }
 
-	@Override
-	public void setParent(Item item, int damage) {
-		super.setParent(item, damage);
-		Data.addEnergy(newItemStack());
-	}
+    @Override
+    public void setParent(Item item, int damage) {
+        super.setParent(item, damage);
+        Data.addEnergy(newItemStack());
+    }
 
     @Override
     public boolean use2DIcon() {
@@ -96,31 +96,31 @@ public class DiodeDescriptor extends SixNodeDescriptor {
             super.renderItem(type, item, data);
         } else {
             GL11.glTranslatef(0.0f, 0.0f, -0.2f);
-            GL11.glScalef(1.25f,1.25f,1.25f);
-            GL11.glRotatef(-90.f,0.f,1.f,0.f);
+            GL11.glScalef(1.25f, 1.25f, 1.25f);
+            GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
             draw();
         }
     }
 
-/*	public void applyTo(DiodeProcess diode) {
-		diode.IfU = IfU;
-	}
-	*/
-	public void applyTo(ThermalLoad load) {
-		thermal.applyTo(load);
-	}
-	
-	public void applyTo(ElectricalLoad load) {
-		cable.applyTo(load);
-	}
-	
-	public void applyTo(ResistorSwitch resistorSwitch) {
-		resistorSwitch.setR(stdU/stdI);
-	}
-	
-	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		super.addInformation(itemStack, entityPlayer, list, par4);
+    /*	public void applyTo(DiodeProcess diode) {
+            diode.IfU = IfU;
+        }
+        */
+    public void applyTo(ThermalLoad load) {
+        thermal.applyTo(load);
+    }
+
+    public void applyTo(ElectricalLoad load) {
+        cable.applyTo(load);
+    }
+
+    public void applyTo(ResistorSwitch resistorSwitch) {
+        resistorSwitch.setR(stdU / stdI);
+    }
+
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Electrical current can only\nflow through the diode\nfrom anode to cathode").split("\\\n"));
     }
 

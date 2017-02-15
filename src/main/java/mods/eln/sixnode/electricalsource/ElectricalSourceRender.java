@@ -15,52 +15,55 @@ import java.io.IOException;
 
 public class ElectricalSourceRender extends SixNodeElementRender {
 
-	ElectricalSourceDescriptor descriptor;
+    ElectricalSourceDescriptor descriptor;
 
     double voltage = 0, current = 0;
     int color = 0;
 
-	public ElectricalSourceRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-		super(tileEntity, side, descriptor);
-		this.descriptor = (ElectricalSourceDescriptor)descriptor;
-	}
+    public ElectricalSourceRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
+        super(tileEntity, side, descriptor);
+        this.descriptor = (ElectricalSourceDescriptor) descriptor;
+    }
 
-	@Override
-	public void draw() {
-		super.draw();
+    @Override
+    public void draw() {
+        super.draw();
 
-		front.glRotateOnX();
+        front.glRotateOnX();
 
-		descriptor.draw(voltage >= 25);
-	}
+        descriptor.draw(voltage >= 25);
+    }
 
-	@Override
-	public void publishUnserialize(DataInputStream stream) {
-		super.publishUnserialize(stream);
-		try {
-			Byte b;
-			b = stream.readByte();
-			
-			color = (b >> 4) & 0xF;
-			voltage = stream.readFloat();
+    @Override
+    public void publishUnserialize(DataInputStream stream) {
+        super.publishUnserialize(stream);
+        try {
+            Byte b;
+            b = stream.readByte();
 
-			needRedrawCable();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+            color = (b >> 4) & 0xF;
+            voltage = stream.readFloat();
 
-	@Override
-	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		return new ElectricalSourceGui(this);
-	}
-	
-	@Override
-	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		if (descriptor.isSignalSource()) return Eln.instance.signalCableDescriptor.render;
-		if (voltage < Eln.instance.lowVoltageCableDescriptor.electricalMaximalVoltage) return Eln.instance.lowVoltageCableDescriptor.render;
-		if (voltage < Eln.instance.meduimVoltageCableDescriptor.electricalMaximalVoltage) return Eln.instance.meduimVoltageCableDescriptor.render;
-		if (voltage > Eln.instance.highVoltageCableDescriptor.electricalMaximalVoltage)return Eln.instance.highVoltageCableDescriptor.render;
-		return Eln.instance.veryHighVoltageCableDescriptor.render;
-	}
+            needRedrawCable();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
+        return new ElectricalSourceGui(this);
+    }
+
+    @Override
+    public CableRenderDescriptor getCableRender(LRDU lrdu) {
+        if (descriptor.isSignalSource()) return Eln.instance.signalCableDescriptor.render;
+        if (voltage < Eln.instance.lowVoltageCableDescriptor.electricalMaximalVoltage)
+            return Eln.instance.lowVoltageCableDescriptor.render;
+        if (voltage < Eln.instance.meduimVoltageCableDescriptor.electricalMaximalVoltage)
+            return Eln.instance.meduimVoltageCableDescriptor.render;
+        if (voltage > Eln.instance.highVoltageCableDescriptor.electricalMaximalVoltage)
+            return Eln.instance.highVoltageCableDescriptor.render;
+        return Eln.instance.veryHighVoltageCableDescriptor.render;
+    }
 }

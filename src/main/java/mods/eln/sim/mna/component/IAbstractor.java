@@ -4,7 +4,7 @@ import mods.eln.sim.mna.SubSystem;
 
 public interface IAbstractor {
 
-	void dirty(Component component);
+    void dirty(Component component);
 
-	SubSystem getAbstractorSubSystem();
+    SubSystem getAbstractorSubSystem();
 }

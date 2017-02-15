@@ -48,8 +48,8 @@ public interface Component extends Node {
      * the node. Trying to set it to a higher value will generate an exception.
      *
      * @throws IllegalArgumentException if the specified value is
-     *                                            more visible than the node's
-     *                                            reachability.
+     *                                  more visible than the node's
+     *                                  reachability.
      */
     void setVisibility(Visibility value);
 

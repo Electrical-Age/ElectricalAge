@@ -5,7 +5,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.util.*
 
-class DirectionSet: TreeSet<Direction>() {
+class DirectionSet : TreeSet<Direction>() {
     private fun Int.setBit(position: Int): Int = this or (1 shl position)
     private fun Int.isBitSet(position: Int): Boolean = this and (1 shl position) != 0
 

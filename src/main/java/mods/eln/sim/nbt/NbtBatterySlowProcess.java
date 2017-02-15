@@ -7,16 +7,16 @@ import mods.eln.sim.ThermalLoad;
 
 public class NbtBatterySlowProcess extends BatterySlowProcess {
 
-	NodeBase node;
-	float explosionRadius = 2;
-	
-	public NbtBatterySlowProcess(NodeBase node, BatteryProcess batteryProcess, ThermalLoad thermalLoad) {
-		super(batteryProcess, thermalLoad);
-		this.node = node;
-	}
+    NodeBase node;
+    float explosionRadius = 2;
 
-	@Override
-	public void destroy() {
-		node.physicalSelfDestruction(explosionRadius);
-	}
+    public NbtBatterySlowProcess(NodeBase node, BatteryProcess batteryProcess, ThermalLoad thermalLoad) {
+        super(batteryProcess, thermalLoad);
+        this.node = node;
+    }
+
+    @Override
+    public void destroy() {
+        node.physicalSelfDestruction(explosionRadius);
+    }
 }

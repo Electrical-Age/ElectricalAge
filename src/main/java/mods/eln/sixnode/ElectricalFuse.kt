@@ -24,8 +24,8 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
-class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D):
-        SixNodeDescriptor(name, ElectricalFuseHolderElement::class.java, ElectricalFuseHolderRender::class.java) {
+class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
+    SixNodeDescriptor(name, ElectricalFuseHolderElement::class.java, ElectricalFuseHolderRender::class.java) {
     private val case = obj.getPart("Case")
     private val fuse = obj.getPart("Fuse")
     private val fuseType = obj.getPart("FuseType")
@@ -46,11 +46,11 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D):
 
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
                                        helper: IItemRenderer.ItemRendererHelper?) =
-            type != IItemRenderer.ItemRenderType.INVENTORY
+        type != IItemRenderer.ItemRenderType.INVENTORY
 
     override fun shouldUseRenderHelperEln(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
                                           helper: IItemRenderer.ItemRendererHelper?) =
-            type != IItemRenderer.ItemRenderType.INVENTORY
+        type != IItemRenderer.ItemRenderType.INVENTORY
 
     override fun renderItem(type: IItemRenderer.ItemRenderType?, item: ItemStack?, vararg data: Any?) {
         if (type == IItemRenderer.ItemRenderType.INVENTORY) {
@@ -66,7 +66,7 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D):
             VoltageLevelColor.fromCable(installedFuse.cableDescriptor).setGLColor()
             fuseType?.draw()
             GL11.glColor3f(1f, 1f, 1f)
-           if (installedFuse.cableDescriptor != null) {
+            if (installedFuse.cableDescriptor != null) {
                 fuseOk?.draw()
             }
             fuse?.draw()
@@ -81,11 +81,11 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D):
     }
 
     override fun getFrontFromPlace(side: Direction, player: EntityPlayer) =
-            super.getFrontFromPlace(side, player).inverse()
+        super.getFrontFromPlace(side, player).inverse()
 }
 
-class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor):
-        SixNodeElement(sixNode, side, descriptor) {
+class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor) :
+    SixNodeElement(sixNode, side, descriptor) {
     private val aLoad = NbtElectricalLoad("aLoad")
     private val bLoad = NbtElectricalLoad("bLoad")
     private val fuseResistor = Resistor(aLoad, bLoad)
@@ -156,7 +156,7 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
         }
     }
 
-    override fun getElectricalLoad(lrdu: LRDU?): ElectricalLoad? = when(lrdu) {
+    override fun getElectricalLoad(lrdu: LRDU?): ElectricalLoad? = when (lrdu) {
         front -> aLoad
         front.inverse() -> bLoad
         else -> null
@@ -164,7 +164,7 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
 
     override fun getThermalLoad(lrdu: LRDU?): ThermalLoad? = null
 
-    override fun getConnectionMask(lrdu: LRDU?): Int = when(lrdu) {
+    override fun getConnectionMask(lrdu: LRDU?): Int = when (lrdu) {
         front -> NodeBase.maskElectricalAll
         front.inverse() -> NodeBase.maskElectricalAll
         else -> 0
@@ -236,8 +236,8 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
     }
 }
 
-class ElectricalFuseHolderRender(tileEntity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor):
-        SixNodeElementRender(tileEntity, side, descriptor) {
+class ElectricalFuseHolderRender(tileEntity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    SixNodeElementRender(tileEntity, side, descriptor) {
     private val descriptor = descriptor as ElectricalFuseHolderDescriptor
     private var installedFuse: ElectricalFuseDescriptor? = null
 

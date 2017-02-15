@@ -2,20 +2,20 @@ package mods.eln.sim;
 
 public class RegulatorFurnaceProcess extends RegulatorProcess {
 
-	FurnaceProcess furnace;
+    FurnaceProcess furnace;
 
-	public RegulatorFurnaceProcess(String name, FurnaceProcess furnace) {
-		super(name);
-		this.furnace = furnace;
-	}
+    public RegulatorFurnaceProcess(String name, FurnaceProcess furnace) {
+        super(name);
+        this.furnace = furnace;
+    }
 
-	@Override
-	protected double getHit() {
-		return furnace.load.Tc;
-	}
+    @Override
+    protected double getHit() {
+        return furnace.load.Tc;
+    }
 
-	@Override
-	protected void setCmd(double cmd) {
-		furnace.setGain(cmd);		
-	}
+    @Override
+    protected void setCmd(double cmd) {
+        furnace.setGain(cmd);
+    }
 }

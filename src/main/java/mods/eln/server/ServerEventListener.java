@@ -4,7 +4,6 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
-import li.cil.oc.api.network.Node;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
@@ -14,14 +13,13 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.event.world.WorldEvent.Save;
 import net.minecraftforge.event.world.WorldEvent.Unload;
-import org.lwjgl.Sys;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.HashSet;
 import java.util.LinkedList;
 
@@ -68,7 +66,9 @@ public class ServerEventListener {
     public String getEaWorldSaveName(World w) {
         return Utils.getMapFolder() + "data/electricalAgeWorld" + w.provider.dimensionId + ".dat";
     }
+
     public HashSet<Integer> loadedWorlds = new HashSet<Integer>();
+
     @SubscribeEvent
     public void onWorldLoad(Load e) {
         if (e.world.isRemote) return;
@@ -106,7 +106,7 @@ public class ServerEventListener {
     @SubscribeEvent
     public void onWorldSave(Save e) {
         if (e.world.isRemote) return;
-        if(!loadedWorlds.contains(e.world.provider.dimensionId)) {
+        if (!loadedWorlds.contains(e.world.provider.dimensionId)) {
             //System.out.println("I hate you minecraft");
             return;
         }

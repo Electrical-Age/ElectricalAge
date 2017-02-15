@@ -19,7 +19,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 
 abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
-        SimpleShaftDescriptor(baseName, TurbineElement::class, TurbineRender::class, EntityMetaTag.Fluid) {
+    SimpleShaftDescriptor(baseName, TurbineElement::class, TurbineRender::class, EntityMetaTag.Fluid) {
     // Overall time for steam input changes to take effect, in seconds.
     abstract val inertia: Float
     // Optimal fluid consumed per second, mB.
@@ -48,12 +48,12 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
 
     override val obj = obj
     override val static = arrayOf(
-            obj.getPart("Cowl"),
-            obj.getPart("Stand")
+        obj.getPart("Cowl"),
+        obj.getPart("Stand")
     )
     override val rotating = arrayOf(
-            obj.getPart("Shaft"),
-            obj.getPart("Fan")
+        obj.getPart("Shaft"),
+        obj.getPart("Fan")
     )
 
     override fun addInformation(stack: ItemStack, player: EntityPlayer, list: MutableList<String>, par4: Boolean) {
@@ -73,7 +73,7 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
 }
 
 class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
-        TurbineDescriptor(baseName, obj) {
+    TurbineDescriptor(baseName, obj) {
     // Steam turbines are for baseload.
     override val inertia = 20f
     // Computed to equal a single 36LP Railcraft boiler, or half of a 36HP.
@@ -89,7 +89,7 @@ class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
 }
 
 class GasTurbineDescriptor(basename: String, obj: Obj3D) :
-        TurbineDescriptor(basename, obj) {
+    TurbineDescriptor(basename, obj) {
     // The main benefit of gas turbines.
     override val inertia = 5f
     // Provides about 8kW of power, given gasoline.
@@ -105,8 +105,8 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
     override val sound = "eln:gas_turbine"
 }
 
-class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) :
-        SimpleShaftElement(node, desc_) {
+class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
+    SimpleShaftElement(node, desc_) {
     val desc = desc_ as TurbineDescriptor
 
     val tank = PreciseElementFluidHandler(desc.fluidConsumption.toInt())
@@ -169,15 +169,17 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
         if (lrdu == LRDU.Down && (side == front || side == front.back())) return NodeBase.maskElectricalGate
         return 0
     }
+
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
 
-    override fun thermoMeterString(side: Direction?) =  Utils.plotPercent(" Eff:", efficiency.toDouble()) + fluidRate.toString() + "mB/s"
+    override fun thermoMeterString(side: Direction?) = Utils.plotPercent(" Eff:", efficiency.toDouble()) + fluidRate.toString() + "mB/s"
 
     override fun writeToNBT(nbt: NBTTagCompound) {
         super.writeToNBT(nbt)
         tank.writeToNBT(nbt, "tank")
         turbineSlowProcess.writeToNBT(nbt, "proc")
     }
+
     override fun readFromNBT(nbt: NBTTagCompound) {
         super.readFromNBT(nbt)
         tank.readFromNBT(nbt, "tank")
@@ -188,9 +190,9 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
         var info = mutableMapOf<String, String>()
         info.put("Speed", Utils.plotRads("", shaft.rads))
         info.put("Energy", Utils.plotEnergy("", shaft.energy))
-        if(Eln.wailaEasyMode){
+        if (Eln.wailaEasyMode) {
             info.put("Efficency", Utils.plotPercent("", efficiency.toDouble()))
-            info.put("Fuel usage", Utils.plotBuckets("", fluidRate /1000.0) + "/s")
+            info.put("Fuel usage", Utils.plotBuckets("", fluidRate / 1000.0) + "/s")
         }
         return info
     }
@@ -201,11 +203,11 @@ class TurbineElement(node : TransparentNode, desc_ : TransparentNodeDescriptor) 
     }
 }
 
-class TurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {
+class TurbineRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
     override val cableRender = Eln.instance.stdCableRenderSignal
 
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)
-        volumeSetting = stream.readFloat()
+        volumeSetting.target = stream.readFloat()
     }
 }

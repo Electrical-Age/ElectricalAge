@@ -13,46 +13,46 @@ import java.util.HashSet;
 
 public class WirelessSignalRxProcess implements IProcess, INBTTReady {
 
-	private WirelessSignalRxElement rx;
+    private WirelessSignalRxElement rx;
 
     double sleepTimer = 0;
 
     HashMap<String, HashSet<IWirelessSignalTx>> txSet = new HashMap<String, HashSet<IWirelessSignalTx>>();
     HashMap<IWirelessSignalTx, Double> txStrength = new HashMap<IWirelessSignalTx, Double>();
 
-	public WirelessSignalRxProcess(WirelessSignalRxElement rx) {
-		this.rx = rx;
-	}
+    public WirelessSignalRxProcess(WirelessSignalRxElement rx) {
+        this.rx = rx;
+    }
 
-	@Override
-	public void process(double time) {
-		double output;
-		sleepTimer -= time;
+    @Override
+    public void process(double time) {
+        double output;
+        sleepTimer -= time;
 
-		if (sleepTimer < 0) {
-			sleepTimer += Utils.rand(1.2, 2);
+        if (sleepTimer < 0) {
+            sleepTimer += Utils.rand(1.2, 2);
 
-			IWirelessSignalSpot spot = WirelessUtils.buildSpot(rx.getCoordonate(), rx.channel, 0);
-			WirelessUtils.getTx(spot, txSet, txStrength);
-		}
+            IWirelessSignalSpot spot = WirelessUtils.buildSpot(rx.getCoordonate(), rx.channel, 0);
+            WirelessUtils.getTx(spot, txSet, txStrength);
+        }
 
-		HashSet<IWirelessSignalTx> txs = txSet.get(rx.channel);
-		if (txs == null) {
-			output = 0;
-			rx.setConnection(false);
-		} else {
-			output = rx.getAggregator().aggregate(txs);
-			rx.setConnection(true);
-		}
+        HashSet<IWirelessSignalTx> txs = txSet.get(rx.channel);
+        if (txs == null) {
+            output = 0;
+            rx.setConnection(false);
+        } else {
+            output = rx.getAggregator().aggregate(txs);
+            rx.setConnection(true);
+        }
 
-		rx.outputGateProcess.setOutputNormalized(output);
-	}
+        rx.outputGateProcess.setOutputNormalized(output);
+    }
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
-	}
+    @Override
+    public void readFromNBT(NBTTagCompound nbt, String str) {
+    }
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
-	}
+    @Override
+    public void writeToNBT(NBTTagCompound nbt, String str) {
+    }
 }

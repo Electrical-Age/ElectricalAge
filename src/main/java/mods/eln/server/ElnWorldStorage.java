@@ -1,16 +1,9 @@
 package mods.eln.server;
 
-import mods.eln.Eln;
-import mods.eln.misc.Utils;
-import mods.eln.node.NodeManager;
-import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
 import net.minecraft.world.storage.MapStorage;
-
-import java.io.File;
-import java.io.FileOutputStream;
 
 public class ElnWorldStorage extends WorldSavedData {
 
@@ -47,7 +40,7 @@ public class ElnWorldStorage extends WorldSavedData {
     @Override
     public void writeToNBT(NBTTagCompound nbt) {
         nbt.setInteger("dim", dim);
-        ServerEventListener.writeToEaWorldNBT(nbt,dim);
+        ServerEventListener.writeToEaWorldNBT(nbt, dim);
     }
 
     @Override

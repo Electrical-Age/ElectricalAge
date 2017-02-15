@@ -39,122 +39,122 @@ public class GroundCableElement extends SixNodeElement {
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
-	public GroundCableElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
-		super(sixNode, side, descriptor);
-	
-		electricalLoadList.add(electricalLoad);
-		electricalComponentList.add(ground);
-		ground.setU(0);
-	}
+    public GroundCableElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+        super(sixNode, side, descriptor);
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		byte b = nbt.getByte( "color");
-		color = b & 0xF;
-		colorCare = (b >> 4) & 1;
-	}
+        electricalLoadList.add(electricalLoad);
+        electricalComponentList.add(ground);
+        ground.setU(0);
+    }
 
-	public static boolean canBePlacedOnSide(Direction side, int type) {
-		return true;
-	}
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
+        byte b = nbt.getByte("color");
+        color = b & 0xF;
+        colorCare = (b >> 4) & 1;
+    }
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-		nbt.setByte("color", (byte) (color + (colorCare << 4)));
-	}
+    public static boolean canBePlacedOnSide(Direction side, int type) {
+        return true;
+    }
 
-	@Override
-	public IInventory getInventory() {
-		return inventory;
-	}
+    @Override
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+        nbt.setByte("color", (byte) (color + (colorCare << 4)));
+    }
 
-	@Override
-	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		return electricalLoad;
-	}
-	
-	@Override
-	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		return null;
-	}
+    @Override
+    public IInventory getInventory() {
+        return inventory;
+    }
 
-	@Override
-	public int getConnectionMask(LRDU lrdu) {
-		//if (inventory.getStackInSlot(GroundCableContainer.cableSlotId) == null) return 0;
-		return NodeBase.maskElectricalPower + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);
-	}
+    @Override
+    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+        return electricalLoad;
+    }
 
-	@Override
-	public String multiMeterString() {
-		return Utils.plotVolt("U:", electricalLoad.getU()) + Utils.plotAmpere("I:", electricalLoad.getCurrent());
-	}
+    @Override
+    public ThermalLoad getThermalLoad(LRDU lrdu) {
+        return null;
+    }
 
-	@Override
-	public Map<String, String> getWaila() {
-		Map<String, String> info = new HashMap<String, String>();
-		info.put(I18N.tr("Current"), Utils.plotAmpere("", electricalLoad.getI()));
-		return info;
-	}
+    @Override
+    public int getConnectionMask(LRDU lrdu) {
+        //if (inventory.getStackInSlot(GroundCableContainer.cableSlotId) == null) return 0;
+        return NodeBase.maskElectricalPower + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);
+    }
 
-	@Override
-	public String thermoMeterString() {
-		return"";
-	}
+    @Override
+    public String multiMeterString() {
+        return Utils.plotVolt("U:", electricalLoad.getU()) + Utils.plotAmpere("I:", electricalLoad.getCurrent());
+    }
 
-	@Override
-	public void networkSerialize(DataOutputStream stream) {
-		super.networkSerialize(stream);
-		try {
-			stream.writeByte(color << 4);
-			Utils.serialiseItemStack(stream, inventory.getStackInSlot(GroundCableContainer.cableSlotId));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public Map<String, String> getWaila() {
+        Map<String, String> info = new HashMap<String, String>();
+        info.put(I18N.tr("Current"), Utils.plotAmpere("", electricalLoad.getI()));
+        return info;
+    }
 
-	@Override
-	public void initialize() {
-		Eln.applySmallRs(electricalLoad);
-	}
+    @Override
+    public String thermoMeterString() {
+        return "";
+    }
 
-	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-		if (Utils.isPlayerUsingWrench(entityPlayer)) {
-			colorCare = colorCare ^ 1;
-			Utils.addChatMessage(entityPlayer, "Wire color care " + colorCare);
-			sixNode.reconnect();
-		} else if (currentItemStack != null) {
-			Item item = currentItemStack.getItem();
+    @Override
+    public void networkSerialize(DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            stream.writeByte(color << 4);
+            Utils.serialiseItemStack(stream, inventory.getStackInSlot(GroundCableContainer.cableSlotId));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-			GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);
-			if (gen != null && gen instanceof BrushDescriptor) {
-				BrushDescriptor brush = (BrushDescriptor) gen;
-				int brushColor = brush.getColor(currentItemStack);
-				if (brushColor != color && brush.use(currentItemStack,entityPlayer)) {
-					color = brushColor;
-					sixNode.reconnect();
-				}
-			}
-		}
-		return false;
-	}
+    @Override
+    public void initialize() {
+        Eln.applySmallRs(electricalLoad);
+    }
 
-	@Override
-	protected void inventoryChanged() {
-		super.inventoryChanged();
-		reconnect();
-	}
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        if (Utils.isPlayerUsingWrench(entityPlayer)) {
+            colorCare = colorCare ^ 1;
+            Utils.addChatMessage(entityPlayer, "Wire color care " + colorCare);
+            sixNode.reconnect();
+        } else if (currentItemStack != null) {
+            Item item = currentItemStack.getItem();
 
-	@Override
-	public boolean hasGui() {
-		return true;
-	}
+            GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);
+            if (gen != null && gen instanceof BrushDescriptor) {
+                BrushDescriptor brush = (BrushDescriptor) gen;
+                int brushColor = brush.getColor(currentItemStack);
+                if (brushColor != color && brush.use(currentItemStack, entityPlayer)) {
+                    color = brushColor;
+                    sixNode.reconnect();
+                }
+            }
+        }
+        return false;
+    }
 
-	@Override
-	public Container newContainer(Direction side, EntityPlayer player) {
-		return new GroundCableContainer(player, inventory);
-	}
+    @Override
+    protected void inventoryChanged() {
+        super.inventoryChanged();
+        reconnect();
+    }
+
+    @Override
+    public boolean hasGui() {
+        return true;
+    }
+
+    @Override
+    public Container newContainer(Direction side, EntityPlayer player) {
+        return new GroundCableContainer(player, inventory);
+    }
 }

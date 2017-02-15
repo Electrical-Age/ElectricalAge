@@ -35,8 +35,8 @@ public interface Handle {
      * @param into the buffer to read the data into.
      * @return the number of bytes read; -1 if there are no more bytes (EOF).
      * @throws java.io.IOException if the file was opened in writing mode or an
-     *                     I/O error occurred or the file was already
-     *                     closed.
+     *                             I/O error occurred or the file was already
+     *                             closed.
      */
     int read(byte[] into) throws IOException;
 
@@ -59,8 +59,8 @@ public interface Handle {
      *
      * @param value the data to write into the file.
      * @throws java.io.IOException if the file was opened in read-only mode, or
-     *                     another I/O error occurred (no more space,
-     *                     for example), or the file was already closed.
+     *                             another I/O error occurred (no more space,
+     *                             for example), or the file was already closed.
      */
     void write(byte[] value) throws IOException;
 }

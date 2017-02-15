@@ -32,7 +32,7 @@ public interface ManagedPeripheral {
      * @param args    the arguments to pass to the method.
      * @return the result of calling the method. Same as for callbacks.
      * @throws NoSuchMethodException if there is no method with the
-     *                                         specified name.
+     *                               specified name.
      */
     Object[] invoke(String method, Context context, Arguments args) throws Exception;
 }

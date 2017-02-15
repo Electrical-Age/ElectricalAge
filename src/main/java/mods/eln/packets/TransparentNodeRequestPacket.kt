@@ -8,15 +8,15 @@ import mods.eln.misc.Coordonate
 /**
  * Created by Gregory Maddra on 2016-06-27.
  */
-open class TransparentNodeRequestPacket : IMessage{
+open class TransparentNodeRequestPacket : IMessage {
 
     lateinit var coord: Coordonate
 
-    constructor(){
+    constructor() {
 
     }
 
-    constructor(c: Coordonate){
+    constructor(c: Coordonate) {
         coord = c
     }
 

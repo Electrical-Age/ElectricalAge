@@ -43,15 +43,15 @@ public class DownlinkElement extends GridElement {
         thermalLoad.setAsSlow();
         slowProcessList.add(thermalWatchdog);
         thermalWatchdog
-                .set(thermalLoad)
-                .setLimit(desc.cableDescriptor.thermalWarmLimit, desc.cableDescriptor.thermalCoolLimit)
-                .set(new WorldExplosion(this).cableExplosion());
+            .set(thermalLoad)
+            .setLimit(desc.cableDescriptor.thermalWarmLimit, desc.cableDescriptor.thermalCoolLimit)
+            .set(new WorldExplosion(this).cableExplosion());
 
         slowProcessList.add(voltageWatchdog);
         voltageWatchdog
-                .set(electricalLoad)
-                .setUMaxMin(desc.cableDescriptor.electricalNominalVoltage * 16)
-                .set(new WorldExplosion(this).cableExplosion());
+            .set(electricalLoad)
+            .setUMaxMin(desc.cableDescriptor.electricalNominalVoltage * 16)
+            .set(new WorldExplosion(this).cableExplosion());
 
     }
 

@@ -1,13 +1,11 @@
 package mods.eln.gridnode;
 
-import mods.eln.misc.Obj3D;
 import mods.eln.misc.UtilsClient;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -93,21 +91,21 @@ public abstract class GridRender extends TransparentNodeElementRender {
 
         final Vec3 origin = Vec3.createVectorHelper(0, 0, 0);
         final int box[] = {
-                3, 7, 5, 3, 5, 1,
-                4, 8, 6, 4, 6, 2,
-                1, 6, 5, 1, 2, 6,
-                3, 8, 7, 3, 4, 8
+            3, 7, 5, 3, 5, 1,
+            4, 8, 6, 4, 6, 2,
+            1, 6, 5, 1, 2, 6,
+            3, 8, 7, 3, 4, 8
         };
         // Maps box coordinates (above) to texture coordinates.
         final int boxTex[] = {
-                0, 0, // 1
-                0, 1, // 2
-                0, 1, // 3
-                0, 0, // 4
-                1, 0, // 5
-                1, 1, // 6
-                1, 1, // 7
-                1, 0, // 8
+            0, 0, // 1
+            0, 1, // 2
+            0, 1, // 3
+            0, 0, // 4
+            1, 0, // 5
+            1, 1, // 6
+            1, 1, // 7
+            1, 0, // 8
         };
         private final double cableWidth = 0.05;
 
@@ -161,7 +159,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
             for (int i = 0; i < box.length; i++) {
                 final int bc = box[i] - 1;
                 glTexCoord2f(boxTex[bc * 2], boxTex[bc * 2 + 1]);
-                glVertex3f((float)v[bc].xCoord, (float)v[bc].yCoord, (float)v[bc].zCoord);
+                glVertex3f((float) v[bc].xCoord, (float) v[bc].yCoord, (float) v[bc].zCoord);
             }
         }
 
@@ -198,9 +196,9 @@ public abstract class GridRender extends TransparentNodeElementRender {
 
         Vec3 multiply(Vec3 a, double b) {
             return Vec3.createVectorHelper(
-                    a.xCoord * b,
-                    a.yCoord * b,
-                    a.zCoord * b
+                a.xCoord * b,
+                a.yCoord * b,
+                a.zCoord * b
             );
         }
 
@@ -246,6 +244,5 @@ public abstract class GridRender extends TransparentNodeElementRender {
         public void destroy() {
             glDeleteLists(list, 1);
         }
-
     }
 }

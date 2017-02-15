@@ -32,9 +32,9 @@ public final class StaticSimpleEnvironment {
         if (!nodes.containsKey(self)) {
             final String name = self.getComponentName();
             nodes.put(self, Network.
-                    newNode(self, Visibility.Network).
-                    withComponent(name).
-                    create());
+                newNode(self, Visibility.Network).
+                withComponent(name).
+                create());
         }
         return nodes.get(self);
     }

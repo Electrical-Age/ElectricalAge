@@ -9,9 +9,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 
-import static org.lwjgl.opengl.GL11.glPopMatrix;
-import static org.lwjgl.opengl.GL11.glPushMatrix;
-import static org.lwjgl.opengl.GL11.glRotatef;
+import static org.lwjgl.opengl.GL11.*;
 
 /**
  * Created by svein on 22/08/15.

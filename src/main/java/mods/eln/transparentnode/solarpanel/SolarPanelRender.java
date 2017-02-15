@@ -1,10 +1,5 @@
 package mods.eln.transparentnode.solarpanel;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
 import mods.eln.misc.Direction;
@@ -18,112 +13,112 @@ import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class SolarPanelRender extends TransparentNodeElementRender {
 
-	public SolarPanelDescriptor descriptor;
-	private CableRenderType renderPreProcess;
+    public SolarPanelDescriptor descriptor;
+    private CableRenderType renderPreProcess;
 
-	public SolarPanelRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
-		super(tileEntity, descriptor);
-		this.descriptor = (SolarPanelDescriptor) descriptor;
-		
-	}
+    public SolarPanelRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
+        super(tileEntity, descriptor);
+        this.descriptor = (SolarPanelDescriptor) descriptor;
 
-	RcInterpolator interpol = new RcInterpolator(1f);
-	boolean boot = true;
+    }
 
-	@Override
-	public void draw() {
-		renderPreProcess = drawCable(Direction.YN, descriptor.cableRender, eConn, renderPreProcess);
-		descriptor.draw((float) (interpol.get() * 180 / Math.PI - 90), front);
-	}
+    RcInterpolator interpol = new RcInterpolator(1f);
+    boolean boot = true;
 
-	@Override
-	public void refresh(float deltaT) {
-		float alpha;
-		if (hasTracker == false)
-		{
-			alpha = (float) descriptor.alphaTrunk(pannelAlphaSyncValue);
-		}
-		else
-		{
-			alpha = (float) descriptor.alphaTrunk(SolarPannelSlowProcess.getSolarAlpha(tileEntity.getWorldObj()));
-		}
-		interpol.setTarget(alpha);
-		if (boot) {
-			boot = false;
-			interpol.setValueFromTarget();
-		}
+    @Override
+    public void draw() {
+        renderPreProcess = drawCable(Direction.YN, descriptor.cableRender, eConn, renderPreProcess);
+        descriptor.draw((float) (interpol.get() * 180 / Math.PI - 90), front);
+    }
 
-		interpol.step(deltaT);
-	}
+    @Override
+    public void refresh(float deltaT) {
+        float alpha;
+        if (hasTracker == false) {
+            alpha = (float) descriptor.alphaTrunk(pannelAlphaSyncValue);
+        } else {
+            alpha = (float) descriptor.alphaTrunk(SolarPannelSlowProcess.getSolarAlpha(tileEntity.getWorldObj()));
+        }
+        interpol.setTarget(alpha);
+        if (boot) {
+            boot = false;
+            interpol.setValueFromTarget();
+        }
 
-	@Override
-	public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
-		return descriptor.cableRender;
-	}
+        interpol.step(deltaT);
+    }
 
-	public boolean pannelAlphaSyncNew = false;
-	public float pannelAlphaSyncValue = -1234;
+    @Override
+    public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
+        return descriptor.cableRender;
+    }
 
-	public boolean hasTracker;
+    public boolean pannelAlphaSyncNew = false;
+    public float pannelAlphaSyncValue = -1234;
 
-	LRDUMask eConn = new LRDUMask();
+    public boolean hasTracker;
 
-	@Override
-	public void networkUnserialize(DataInputStream stream) {
-		super.networkUnserialize(stream);
+    LRDUMask eConn = new LRDUMask();
 
-		try {
+    @Override
+    public void networkUnserialize(DataInputStream stream) {
+        super.networkUnserialize(stream);
 
-			hasTracker = stream.readBoolean();
+        try {
 
-			float pannelAlphaIncoming = stream.readFloat();
+            hasTracker = stream.readBoolean();
 
-			if (pannelAlphaIncoming != pannelAlphaSyncValue)
-			{
-				pannelAlphaSyncValue = pannelAlphaIncoming;
-				pannelAlphaSyncNew = true;
-			}
+            float pannelAlphaIncoming = stream.readFloat();
 
-			eConn.deserialize(stream);
+            if (pannelAlphaIncoming != pannelAlphaSyncValue) {
+                pannelAlphaSyncValue = pannelAlphaIncoming;
+                pannelAlphaSyncNew = true;
+            }
 
-			renderPreProcess = null;
+            eConn.deserialize(stream);
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+            renderPreProcess = null;
 
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-	public void clientSetPannelAlpha(float value)
-	{
-		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			DataOutputStream stream = new DataOutputStream(bos);
+    }
 
-			preparePacketForServer(stream);
+    public void clientSetPannelAlpha(float value) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            DataOutputStream stream = new DataOutputStream(bos);
 
-			stream.writeByte(SolarPanelElement.unserializePannelAlpha);
-			stream.writeFloat(value);
+            preparePacketForServer(stream);
 
-			sendPacketToServer(bos);
-		} catch (IOException e) {
-			
-			e.printStackTrace();
-		}
+            stream.writeByte(SolarPanelElement.unserializePannelAlpha);
+            stream.writeFloat(value);
 
-	}
+            sendPacketToServer(bos);
+        } catch (IOException e) {
 
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 64, this);
+            e.printStackTrace();
+        }
 
-	@Override
-	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		return new SolarPannelGuiDraw(player, inventory, this);
-	}
+    }
 
-	@Override
-	public boolean cameraDrawOptimisation() {
-		return false;
-	}
+    TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(1, 64, this);
+
+    @Override
+    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
+        return new SolarPannelGuiDraw(player, inventory, this);
+    }
+
+    @Override
+    public boolean cameraDrawOptimisation() {
+        return false;
+    }
 }

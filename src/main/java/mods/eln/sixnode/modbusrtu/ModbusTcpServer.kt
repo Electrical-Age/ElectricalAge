@@ -8,7 +8,7 @@ import java.nio.ByteBuffer
 import java.util.*
 
 class ModbusTcpServer(port: Int = 1502) {
-    companion object{
+    companion object {
         private val InputBufferSize = 256
         private val OutputBufferSize = InputBufferSize
     }
@@ -21,14 +21,13 @@ class ModbusTcpServer(port: Int = 1502) {
         if (Eln.modbusEnable) {
             try {
                 server.bind(InetSocketAddress(port))
-            } catch (e: BindException){
+            } catch (e: BindException) {
                 Utils.println("Exception while binding Modbus RTU Server. Modbus server disabled!")
                 server.close()
                 e.printStackTrace()
             }
             start()
-        }
-        else {
+        } else {
             server.close()
         }
     }
@@ -77,7 +76,7 @@ class ModbusTcpServer(port: Int = 1502) {
                         val slaveAddress = inputBuffer.get()
                         val functionCode = inputBuffer.get()
                         val response = ByteBuffer.allocate(OutputBufferSize)
-                                .putShort(transactionId).putShort(0).putShort(0).put(slaveAddress)
+                            .putShort(transactionId).putShort(0).putShort(0).put(slaveAddress)
                         val slave = slaves[slaveAddress.toInt()]
                         if (slave != null) {
                             synchronized(slave) {
@@ -120,7 +119,8 @@ class ModbusTcpServer(port: Int = 1502) {
                     response.put(0x01.toByte()).put(1.toByte()).put((if (value) 1 else 0).toByte())
                     return
                 }
-            } catch (e: IllegalAddressException) {}
+            } catch (e: IllegalAddressException) {
+            }
             response.put((0x81.toByte())).put(0x02.toByte())
         }
 
@@ -135,7 +135,8 @@ class ModbusTcpServer(port: Int = 1502) {
                     response.put(0x02.toByte()).put(1.toByte()).put((if (value) 1 else 0).toByte())
                     return
                 }
-            } catch (e: IllegalAddressException) {}
+            } catch (e: IllegalAddressException) {
+            }
             response.put((0x82.toByte())).put(0x02.toByte())
         }
 
@@ -151,7 +152,8 @@ class ModbusTcpServer(port: Int = 1502) {
                 response.put(0x04.toByte()).put((quantity * 2).toByte())
                 data.forEach { response.putShort(it) }
                 return
-            } catch (e: IllegalAddressException) {}
+            } catch (e: IllegalAddressException) {
+            }
             response.put((0x84.toByte())).put(0x02.toByte())
         }
 
@@ -163,7 +165,8 @@ class ModbusTcpServer(port: Int = 1502) {
                 slave.setCoil(address.toInt(), value == 0xFF00.toShort())
                 response.put(0x05.toByte()).putShort(address).putShort(value)
                 return
-            } catch (e: IllegalAddressException) {}
+            } catch (e: IllegalAddressException) {
+            }
             response.put((0x85.toByte())).put(0x02.toByte())
         }
 
@@ -175,7 +178,8 @@ class ModbusTcpServer(port: Int = 1502) {
                 slave.setHoldingRegister(address.toInt(), value)
                 response.put(0x06.toByte()).putShort(address).putShort(value)
                 return
-            } catch (e: IllegalAddressException) {}
+            } catch (e: IllegalAddressException) {
+            }
             response.put((0x86.toByte())).put(0x02.toByte())
         }
 

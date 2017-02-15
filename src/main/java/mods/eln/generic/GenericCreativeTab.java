@@ -7,16 +7,16 @@ import net.minecraft.item.Item;
 
 public class GenericCreativeTab extends CreativeTabs {
 
-	public Item item;
+    public Item item;
 
-	public GenericCreativeTab(String label, Item item) {
-		super(label);
-		this.item = item;
-	}
+    public GenericCreativeTab(String label, Item item) {
+        super(label);
+        this.item = item;
+    }
 
-	@Override
-	@SideOnly(Side.CLIENT)
-	public Item getTabIconItem() {
-		return (item);
-	}
+    @Override
+    @SideOnly(Side.CLIENT)
+    public Item getTabIconItem() {
+        return (item);
+    }
 }

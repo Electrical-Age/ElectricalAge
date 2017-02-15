@@ -18,87 +18,87 @@ import static mods.eln.i18n.I18N.tr;
 
 public class PowerSocketDescriptor extends SixNodeDescriptor {
 
-	private Obj3D obj;
-	private Obj3DPart base;
-	private Obj3DPart socket;
-	private int subID;
+    private Obj3D obj;
+    private Obj3DPart base;
+    private Obj3DPart socket;
+    private int subID;
 
     public int range;
 
     public PowerSocketDescriptor(int subID, String name, Obj3D obj, int range) {
-		super(name, PowerSocketElement.class, PowerSocketRender.class);
-		this.subID = subID;
-		this.range = range;
-		this.obj = obj;
-		if (obj != null) {
-			base = obj.getPart("SocketBase");
-			switch (subID) {
-				case 1:
-					socket = obj.getPart("Socket50V");
-					voltageLevelColor = VoltageLevelColor.LowVoltage;
-					break;
-				case 2:
-					socket = obj.getPart("Socket200V");
-					voltageLevelColor = VoltageLevelColor.MediumVoltage;
-					break;
-				default:
-					socket = null;
-			}
-		}
+        super(name, PowerSocketElement.class, PowerSocketRender.class);
+        this.subID = subID;
+        this.range = range;
+        this.obj = obj;
+        if (obj != null) {
+            base = obj.getPart("SocketBase");
+            switch (subID) {
+                case 1:
+                    socket = obj.getPart("Socket50V");
+                    voltageLevelColor = VoltageLevelColor.LowVoltage;
+                    break;
+                case 2:
+                    socket = obj.getPart("Socket200V");
+                    voltageLevelColor = VoltageLevelColor.MediumVoltage;
+                    break;
+                default:
+                    socket = null;
+            }
+        }
 
-	}
+    }
 
-	@Override
-	public boolean use2DIcon() {
-		return true;
-	}
+    @Override
+    public boolean use2DIcon() {
+        return true;
+    }
 
-	@Override
-	public void setParent(Item item, int damage) {
-		super.setParent(item, damage);
-		Data.addLight(newItemStack(1));
-	}
-	
-	public void draw() {
-		//GL11.glRotatef(90.f,1.f,0.f,0.f);
-		if(base != null)
-			base.draw();
-		if(socket != null)
-			socket.draw();
-	}
+    @Override
+    public void setParent(Item item, int damage) {
+        super.setParent(item, damage);
+        Data.addLight(newItemStack(1));
+    }
 
-	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return type != ItemRenderType.INVENTORY;
-	}
-	
-	@Override
-	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return true;
-	}
+    public void draw() {
+        //GL11.glRotatef(90.f,1.f,0.f,0.f);
+        if (base != null)
+            base.draw();
+        if (socket != null)
+            socket.draw();
+    }
 
-	@Override
-	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return type != ItemRenderType.INVENTORY;
-	}
+    @Override
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        return type != ItemRenderType.INVENTORY;
+    }
 
-	@Override
-	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		if (type == ItemRenderType.INVENTORY) {
-			super.renderItem(type, item, data);
-		} else {
-			draw();
-		}
-	}
+    @Override
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+        return true;
+    }
 
-	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		super.addInformation(itemStack, entityPlayer, list, par4);
-		Collections.addAll(list, tr("Supplies any device\nplugged in with energy.").split("\n"));
-	}
+    @Override
+    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        return type != ItemRenderType.INVENTORY;
+    }
 
-	@Override
-	public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
-		return LRDU.Down;
-	}
+    @Override
+    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+        if (type == ItemRenderType.INVENTORY) {
+            super.renderItem(type, item, data);
+        } else {
+            draw();
+        }
+    }
+
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        Collections.addAll(list, tr("Supplies any device\nplugged in with energy.").split("\n"));
+    }
+
+    @Override
+    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+        return LRDU.Down;
+    }
 }
