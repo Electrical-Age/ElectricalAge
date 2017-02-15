@@ -2,7 +2,7 @@ package mods.eln.sim.process.destruct
 
 import mods.eln.mechanical.ShaftElement
 
-class ShaftSpeedWatchdog(shaftElement: ShaftElement, max: Double): ValueWatchdog() {
+class ShaftSpeedWatchdog(shaftElement: ShaftElement, max: Double) : ValueWatchdog() {
     val shaftElement = shaftElement
 
     init {

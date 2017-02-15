@@ -28,7 +28,7 @@ import java.util.Map;
 
 public class ThermalCableElement extends SixNodeElement {
 
-	ThermalCableDescriptor descriptor;
+    ThermalCableDescriptor descriptor;
 
     NbtThermalLoad thermalLoad = new NbtThermalLoad("thermalLoad");
 
@@ -36,110 +36,110 @@ public class ThermalCableElement extends SixNodeElement {
 
     int color = 0;
     int colorCare = 1;
-	
-	public ThermalCableElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
-		super(sixNode, side, descriptor);
-		this.descriptor = (ThermalCableDescriptor) descriptor;
-				
-		thermalLoadList.add(thermalLoad);
-		
-		slowProcessList.add(thermalWatchdog);
-		
-		thermalWatchdog
-		 .set(thermalLoad)
-		 .setLimit(this.descriptor.thermalWarmLimit, this.descriptor.thermalCoolLimit)
-		 .set(new WorldExplosion(this).cableExplosion());
-	}
-    
-	public static boolean canBePlacedOnSide(Direction side, int type) {
-		return true;
-	}
-    
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		byte b = nbt.getByte("color");
-		color = b & 0xF;
-		colorCare = (b >> 4) & 1;
-	}
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-		nbt.setByte("color", (byte) (color + (colorCare << 4)));
-	}
+    public ThermalCableElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+        super(sixNode, side, descriptor);
+        this.descriptor = (ThermalCableDescriptor) descriptor;
 
-	@Override
-	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		return null;
-	}
+        thermalLoadList.add(thermalLoad);
 
-	@Override
-	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		return thermalLoad;
-	}
+        slowProcessList.add(thermalWatchdog);
 
-	@Override
-	public int getConnectionMask(LRDU lrdu) {
-		return NodeBase.maskThermalWire + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);
-	}
+        thermalWatchdog
+            .set(thermalLoad)
+            .setLimit(this.descriptor.thermalWarmLimit, this.descriptor.thermalCoolLimit)
+            .set(new WorldExplosion(this).cableExplosion());
+    }
 
-	@Override
-	public String multiMeterString() {
-		return "";
-	}
+    public static boolean canBePlacedOnSide(Direction side, int type) {
+        return true;
+    }
 
-	@Nullable
-	@Override
-	public Map<String, String> getWaila() {
-		Map<String,String> info = new HashMap<String,String>();
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
+        byte b = nbt.getByte("color");
+        color = b & 0xF;
+        colorCare = (b >> 4) & 1;
+    }
 
-		info.put(I18N.tr("Thermic power"), Utils.plotPower("", thermalLoad.getPower()));
-		info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.getT()));
-		return info;
-	}
+    @Override
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+        nbt.setByte("color", (byte) (color + (colorCare << 4)));
+    }
 
-	@Override
-	public String thermoMeterString() {
-		return Utils.plotCelsius("T", thermalLoad.Tc) + Utils.plotPower("P", thermalLoad.getPower());
-	}
+    @Override
+    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+        return null;
+    }
 
-	@Override
-	public void networkSerialize(DataOutputStream stream) {
-		super.networkSerialize(stream);
-		try {
-			stream.writeByte( (color << 4));
-	    	stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public ThermalLoad getThermalLoad(LRDU lrdu) {
+        return thermalLoad;
+    }
 
-	@Override
-	public void initialize() {
-		descriptor.setThermalLoad(thermalLoad);
-	}
+    @Override
+    public int getConnectionMask(LRDU lrdu) {
+        return NodeBase.maskThermalWire + (color << NodeBase.maskColorShift) + (colorCare << NodeBase.maskColorCareShift);
+    }
 
-	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-		if (Utils.isPlayerUsingWrench(entityPlayer)) {
-			colorCare = colorCare ^ 1;
-			Utils.addChatMessage(entityPlayer, "Wire color care " + colorCare);
-			sixNode.reconnect();
-		} else if (currentItemStack != null) {
-			Item item = currentItemStack.getItem();
+    @Override
+    public String multiMeterString() {
+        return "";
+    }
 
-			GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);
-			if (gen != null && gen instanceof BrushDescriptor) {
-				BrushDescriptor brush = (BrushDescriptor) gen;
-				int brushColor = brush.getColor(currentItemStack);
-				if (brushColor != color && brush.use(currentItemStack,entityPlayer)) {
-					color = brushColor;
-					sixNode.reconnect();
-				}
-			}
-		}
-		return false;
-	}
+    @Nullable
+    @Override
+    public Map<String, String> getWaila() {
+        Map<String, String> info = new HashMap<String, String>();
+
+        info.put(I18N.tr("Thermic power"), Utils.plotPower("", thermalLoad.getPower()));
+        info.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.getT()));
+        return info;
+    }
+
+    @Override
+    public String thermoMeterString() {
+        return Utils.plotCelsius("T", thermalLoad.Tc) + Utils.plotPower("P", thermalLoad.getPower());
+    }
+
+    @Override
+    public void networkSerialize(DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            stream.writeByte((color << 4));
+            stream.writeShort((short) (thermalLoad.Tc * NodeBase.networkSerializeTFactor));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void initialize() {
+        descriptor.setThermalLoad(thermalLoad);
+    }
+
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        if (Utils.isPlayerUsingWrench(entityPlayer)) {
+            colorCare = colorCare ^ 1;
+            Utils.addChatMessage(entityPlayer, "Wire color care " + colorCare);
+            sixNode.reconnect();
+        } else if (currentItemStack != null) {
+            Item item = currentItemStack.getItem();
+
+            GenericItemUsingDamageDescriptor gen = BrushDescriptor.getDescriptor(currentItemStack);
+            if (gen != null && gen instanceof BrushDescriptor) {
+                BrushDescriptor brush = (BrushDescriptor) gen;
+                int brushColor = brush.getColor(currentItemStack);
+                if (brushColor != color && brush.use(currentItemStack, entityPlayer)) {
+                    color = brushColor;
+                    sixNode.reconnect();
+                }
+            }
+        }
+        return false;
+    }
 }

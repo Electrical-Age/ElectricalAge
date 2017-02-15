@@ -6,14 +6,14 @@ import mods.eln.sim.RegulatorProcess;
 
 public abstract class IRegulatorDescriptor extends GenericItemUsingDamageDescriptorUpgrade {
 
-  public IRegulatorDescriptor(String name) {
-    super(name);
-    voltageLevelColor = VoltageLevelColor.Neutral;
-  }
+    public IRegulatorDescriptor(String name) {
+        super(name);
+        voltageLevelColor = VoltageLevelColor.Neutral;
+    }
 
-  public enum RegulatorType {Manual, None, OnOff, Analog}
+    public enum RegulatorType {Manual, None, OnOff, Analog}
 
-  public abstract RegulatorType getType();
+    public abstract RegulatorType getType();
 
-  public abstract void applyTo(RegulatorProcess regulator, double workingPoint, double P, double I, double D);
+    public abstract void applyTo(RegulatorProcess regulator, double workingPoint, double P, double I, double D);
 }

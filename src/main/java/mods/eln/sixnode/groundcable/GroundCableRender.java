@@ -16,9 +16,9 @@ import net.minecraft.item.ItemStack;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-public class GroundCableRender extends SixNodeElementRender{
+public class GroundCableRender extends SixNodeElementRender {
 
-	GroundCableDescriptor descriptor;
+    GroundCableDescriptor descriptor;
 
     //double voltage = 0,current = 0;
     int color = 0;
@@ -28,48 +28,48 @@ public class GroundCableRender extends SixNodeElementRender{
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
     public GroundCableRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-		super(tileEntity, side, descriptor);
-		this.descriptor = (GroundCableDescriptor) descriptor;
-	}
+        super(tileEntity, side, descriptor);
+        this.descriptor = (GroundCableDescriptor) descriptor;
+    }
 
-	@Override
-	public void draw() {
-		super.draw();
+    @Override
+    public void draw() {
+        super.draw();
 
-		if (side.isY()) {
-			front.glRotateOnX();
-		}
+        if (side.isY()) {
+            front.glRotateOnX();
+        }
 
-		descriptor.draw();			
-	}
+        descriptor.draw();
+    }
 
-	@Override
-	public void publishUnserialize(DataInputStream stream) {
-		super.publishUnserialize(stream);
-		try {
-			Byte b;
-			b = stream.readByte();
-			
-			color = (b >> 4) & 0xF;
-			
-			ItemStack cableStack = Utils.unserialiseItemStack(stream);
-			ElectricalCableDescriptor desc = (ElectricalCableDescriptor)ElectricalCableDescriptor.getDescriptor(cableStack, ElectricalCableDescriptor.class);
+    @Override
+    public void publishUnserialize(DataInputStream stream) {
+        super.publishUnserialize(stream);
+        try {
+            Byte b;
+            b = stream.readByte();
 
-			if (desc == null)
-				cableRender = Eln.instance.lowVoltageCableDescriptor.render;
-			else
-				cableRender = desc.render;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+            color = (b >> 4) & 0xF;
 
-	public CableRenderDescriptor getCableRender(mods.eln.misc.LRDU lrdu) {
-		return cableRender;
-	}
+            ItemStack cableStack = Utils.unserialiseItemStack(stream);
+            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(cableStack, ElectricalCableDescriptor.class);
 
-	@Override
-	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		return new GroundCableGui(player, inventory, this);
-	}
+            if (desc == null)
+                cableRender = Eln.instance.lowVoltageCableDescriptor.render;
+            else
+                cableRender = desc.render;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public CableRenderDescriptor getCableRender(mods.eln.misc.LRDU lrdu) {
+        return cableRender;
+    }
+
+    @Override
+    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
+        return new GroundCableGui(player, inventory, this);
+    }
 }

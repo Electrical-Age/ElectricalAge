@@ -13,38 +13,38 @@ public class TestNode extends SimpleNode {
     NbtElectricalLoad load = new NbtElectricalLoad("load");
     Resistor resistor = new Resistor(load, null);
 
-	@Override
-	public int getSideConnectionMask(Direction directionA, LRDU lrduA) {
-		return maskElectricalPower;
-	}
+    @Override
+    public int getSideConnectionMask(Direction directionA, LRDU lrduA) {
+        return maskElectricalPower;
+    }
 
-	@Override
-	public ThermalLoad getThermalLoad(Direction directionA, LRDU lrduA) {
-		return null;
-	}
+    @Override
+    public ThermalLoad getThermalLoad(Direction directionA, LRDU lrduA) {
+        return null;
+    }
 
-	@Override
-	public ElectricalLoad getElectricalLoad(Direction directionB, LRDU lrduB) {
-		return load;
-	}
+    @Override
+    public ElectricalLoad getElectricalLoad(Direction directionB, LRDU lrduB) {
+        return load;
+    }
 
-	@Override
-	public String getNodeUuid() {
-		return getNodeUuidStatic();
-	}
+    @Override
+    public String getNodeUuid() {
+        return getNodeUuidStatic();
+    }
 
-	public static String getNodeUuidStatic() {
-		return "eln.TestNode";
-	}
+    public static String getNodeUuidStatic() {
+        return "eln.TestNode";
+    }
 
-	@Override
-	public void initialize() {
-		electricalLoadList.add(load);
-		electricalComponentList.add(resistor);
+    @Override
+    public void initialize() {
+        electricalLoadList.add(load);
+        electricalComponentList.add(resistor);
 
-		load.setRs(10);
-		resistor.setR(90);
+        load.setRs(10);
+        resistor.setR(90);
 
-		connect();
-	}
+        connect();
+    }
 }

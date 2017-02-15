@@ -15,202 +15,202 @@ import java.util.List;
 
 public class ItemEnergyInventoryProcess implements IProcess {
 
-	private static final double energyUpdatePeriod = 0.5;
-	private double energyUpdateTimout = energyUpdatePeriod;
+    private static final double energyUpdatePeriod = 0.5;
+    private double energyUpdateTimout = energyUpdatePeriod;
 
-	class Element {
-		public ItemStack stack;
-		public IItemEnergyBattery i;
-		public int p;
+    class Element {
+        public ItemStack stack;
+        public IItemEnergyBattery i;
+        public int p;
 
-		public Element(ItemStack stack, IItemEnergyBattery i) {
-			this.stack = stack;
-			this.i = i;
-			p = i.getPriority(stack);
-		}
-	}
+        public Element(ItemStack stack, IItemEnergyBattery i) {
+            this.stack = stack;
+            this.i = i;
+            p = i.getPriority(stack);
+        }
+    }
 
-	static class Exclusion {
-		public double timeout;
-		public Object o;
+    static class Exclusion {
+        public double timeout;
+        public Object o;
 
-		public Exclusion(double timeout, Object o) {
-			this.timeout = timeout;
-			this.o = o;
-			Utils.println("new");
-		}
-	}
+        public Exclusion(double timeout, Object o) {
+            this.timeout = timeout;
+            this.o = o;
+            Utils.println("new");
+        }
+    }
 
-	LinkedList<Exclusion> exclude = new LinkedList<ItemEnergyInventoryProcess.Exclusion>();
+    LinkedList<Exclusion> exclude = new LinkedList<ItemEnergyInventoryProcess.Exclusion>();
 
-	// HashMap<Object, Double> exclude = new HashMap<Object, Double>();
+    // HashMap<Object, Double> exclude = new HashMap<Object, Double>();
 
-	public void addExclusion(Object o, double timeout) {
-		Exclusion exclusion = null;
-		for (Exclusion e : exclude) {
-			if (e.o == o) {
-				exclusion = e;
-			}
-		}
+    public void addExclusion(Object o, double timeout) {
+        Exclusion exclusion = null;
+        for (Exclusion e : exclude) {
+            if (e.o == o) {
+                exclusion = e;
+            }
+        }
 
-		if (exclusion == null) {
-			exclusion = new Exclusion(timeout, o);
-			exclude.add(exclusion);
-		}
+        if (exclusion == null) {
+            exclusion = new Exclusion(timeout, o);
+            exclude.add(exclusion);
+        }
 
-		exclusion.timeout = timeout;
-	}
+        exclusion.timeout = timeout;
+    }
 
-	boolean isExcluded(Object o) {
-		for (Exclusion e : exclude) {
-			if (e.o == o) {
-				Utils.println("Exclude");
-				return true;
-			}
-		}
-		return false;
-	}
+    boolean isExcluded(Object o) {
+        for (Exclusion e : exclude) {
+            if (e.o == o) {
+                Utils.println("Exclude");
+                return true;
+            }
+        }
+        return false;
+    }
 
-	@Override
-	public void process(double time) {
-		Iterator<Exclusion> ie = exclude.iterator();
-		while (ie.hasNext()) {
-			Exclusion e = ie.next();
-			e.timeout -= 0.05;
-			if (e.timeout < 0) {
-				ie.remove();
-			}
-		}
+    @Override
+    public void process(double time) {
+        Iterator<Exclusion> ie = exclude.iterator();
+        while (ie.hasNext()) {
+            Exclusion e = ie.next();
+            e.timeout -= 0.05;
+            if (e.timeout < 0) {
+                ie.remove();
+            }
+        }
 
-		energyUpdateTimout -= time;
+        energyUpdateTimout -= time;
 
-		if (energyUpdateTimout > 0)
-			return;
-		energyUpdateTimout += energyUpdatePeriod;
-		time = energyUpdatePeriod;
+        if (energyUpdateTimout > 0)
+            return;
+        energyUpdateTimout += energyUpdatePeriod;
+        time = energyUpdatePeriod;
 
-		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
-		ArrayList<Element> list = new ArrayList<Element>();
+        ArrayList<Element> list = new ArrayList<Element>();
 
-		for (Object obj : server.getConfigurationManager().playerEntityList) {
-			EntityPlayerMP player = (EntityPlayerMP) obj;
-			list.clear();
+        for (Object obj : server.getConfigurationManager().playerEntityList) {
+            EntityPlayerMP player = (EntityPlayerMP) obj;
+            list.clear();
 
-			for (ItemStack stack : player.inventory.armorInventory) {
+            for (ItemStack stack : player.inventory.armorInventory) {
 
-				Object o = Utils.getItemObject(stack);
+                Object o = Utils.getItemObject(stack);
 
-				if (o instanceof IItemEnergyBattery) {
-					if (isExcluded(o))
-						continue;
-					list.add(new Element(stack, (IItemEnergyBattery) o));
-				}
-			}
+                if (o instanceof IItemEnergyBattery) {
+                    if (isExcluded(o))
+                        continue;
+                    list.add(new Element(stack, (IItemEnergyBattery) o));
+                }
+            }
 
-			for (ItemStack stack : player.inventory.mainInventory) {
-				Object o = Utils.getItemObject(stack);
+            for (ItemStack stack : player.inventory.mainInventory) {
+                Object o = Utils.getItemObject(stack);
 
-				if (o instanceof IItemEnergyBattery) {
-					if (isExcluded(o))
-						continue;
-					list.add(new Element(stack, (IItemEnergyBattery) o));
-				}
-			}
+                if (o instanceof IItemEnergyBattery) {
+                    if (isExcluded(o))
+                        continue;
+                    list.add(new Element(stack, (IItemEnergyBattery) o));
+                }
+            }
 
-			for (Element e : list) {
-				e.i.electricalItemUpdate(e.stack, energyUpdatePeriod);
-			}
+            for (Element e : list) {
+                e.i.electricalItemUpdate(e.stack, energyUpdatePeriod);
+            }
 
-			if (Eln.saveConfig.infinitePortableBattery) {
-				for (Element e : list) {
-					double chargePower = e.i.getChargePower(e.stack);
-					double energy = Math.min(e.i.getEnergyMax(e.stack), e.i.getEnergy(e.stack) + e.i.getChargePower(e.stack) * time);
-					e.i.setEnergy(e.stack, energy);
-				}
-			} else {
-				boolean rememberDst = false;
-				double rememberDstEToDstMax = 0;
-				while (true) {
-					Element src = getMax(list);
+            if (Eln.saveConfig.infinitePortableBattery) {
+                for (Element e : list) {
+                    double chargePower = e.i.getChargePower(e.stack);
+                    double energy = Math.min(e.i.getEnergyMax(e.stack), e.i.getEnergy(e.stack) + e.i.getChargePower(e.stack) * time);
+                    e.i.setEnergy(e.stack, energy);
+                }
+            } else {
+                boolean rememberDst = false;
+                double rememberDstEToDstMax = 0;
+                while (true) {
+                    Element src = getMax(list);
 
-					if (src == null)
-						break;
+                    if (src == null)
+                        break;
 
-					double eFromSrc = Math.min(src.i.getEnergy(src.stack), src.i.getDischagePower(src.stack) * time);
-					double eStart = eFromSrc;
+                    double eFromSrc = Math.min(src.i.getEnergy(src.stack), src.i.getDischagePower(src.stack) * time);
+                    double eStart = eFromSrc;
 
-					boolean done = false;
-					while (eFromSrc != 0) {
-						Element dst = getMin(list);
-						if (dst.p == src.p) {
-							done = true;
-							break;
-						}
+                    boolean done = false;
+                    while (eFromSrc != 0) {
+                        Element dst = getMin(list);
+                        if (dst.p == src.p) {
+                            done = true;
+                            break;
+                        }
 
-						double eToDstMax;
+                        double eToDstMax;
 
-						if (rememberDst) {
-							eToDstMax = rememberDstEToDstMax;
-							rememberDst = false;
-						} else {
-							eToDstMax = Math.min(dst.i.getEnergyMax(dst.stack) - dst.i.getEnergy(dst.stack), dst.i.getChargePower(dst.stack) * time);
-						}
+                        if (rememberDst) {
+                            eToDstMax = rememberDstEToDstMax;
+                            rememberDst = false;
+                        } else {
+                            eToDstMax = Math.min(dst.i.getEnergyMax(dst.stack) - dst.i.getEnergy(dst.stack), dst.i.getChargePower(dst.stack) * time);
+                        }
 
-						double eToDst = Math.min(eFromSrc, eToDstMax);
-						eFromSrc -= eToDst;
-						dst.i.setEnergy(dst.stack, dst.i.getEnergy(dst.stack) + eToDst);
-						eToDstMax -= eToDst;
+                        double eToDst = Math.min(eFromSrc, eToDstMax);
+                        eFromSrc -= eToDst;
+                        dst.i.setEnergy(dst.stack, dst.i.getEnergy(dst.stack) + eToDst);
+                        eToDstMax -= eToDst;
 
-						if (eToDstMax == 0) {
-							list.remove(dst);
-						} else {
-							rememberDst = true;
-							rememberDstEToDstMax = eToDstMax;
-						}
-					}
+                        if (eToDstMax == 0) {
+                            list.remove(dst);
+                        } else {
+                            rememberDst = true;
+                            rememberDstEToDstMax = eToDstMax;
+                        }
+                    }
 
-					src.i.setEnergy(src.stack, src.i.getEnergy(src.stack) - (eStart - eFromSrc));
+                    src.i.setEnergy(src.stack, src.i.getEnergy(src.stack) - (eStart - eFromSrc));
 
-					if (done)
-						break;
+                    if (done)
+                        break;
 
-					list.remove(src);
+                    list.remove(src);
 
-					if (list.size() < 2)
-						break;
-				}
-			}
-		}
-	}
+                    if (list.size() < 2)
+                        break;
+                }
+            }
+        }
+    }
 
-	Element getElement(List<Element> list, int priority) {
+    Element getElement(List<Element> list, int priority) {
 
-		for (Element e : list) {
-			if (priority == e.p) {
-				return e;
-			}
-		}
-		return null;
-	}
+        for (Element e : list) {
+            if (priority == e.p) {
+                return e;
+            }
+        }
+        return null;
+    }
 
-	Element getMin(List<Element> list) {
-		Element find = null;
-		for (Element e : list) {
-			if (find == null || find.p > e.p) {
-				find = e;
-			}
-		}
-		return find;
-	}
+    Element getMin(List<Element> list) {
+        Element find = null;
+        for (Element e : list) {
+            if (find == null || find.p > e.p) {
+                find = e;
+            }
+        }
+        return find;
+    }
 
-	Element getMax(List<Element> list) {
-		Element find = null;
-		for (Element e : list) {
-			if (find == null || find.p < e.p) {
-				find = e;
-			}
-		}
-		return find;
-	}
+    Element getMax(List<Element> list) {
+        Element find = null;
+        for (Element e : list) {
+            if (find == null || find.p < e.p) {
+                find = e;
+            }
+        }
+        return find;
+    }
 }

@@ -4,7 +4,7 @@ import net.minecraft.item.ItemAxe;
 
 public class ItemAxeEln extends ItemAxe {
 
-	public ItemAxeEln(ToolMaterial arg0) {
-		super(arg0);
-	}
+    public ItemAxeEln(ToolMaterial arg0) {
+        super(arg0);
+    }
 }

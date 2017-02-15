@@ -12,8 +12,6 @@ import mods.eln.sim.mna.process.TransformerInterSystemProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
-import mods.eln.sound.SoundCommand;
-import mods.eln.sound.SoundLooper;
 import net.minecraft.util.Vec3;
 
 /**
@@ -28,7 +26,7 @@ public class GridTransformerElement extends GridElement {
     GridTransformerDescriptor desc;
     float primaryMaxCurrent = 0;
     float secondaryMaxCurrent = 0;
-    SoundLooper highLoadSoundLooper;
+    //SoundLooper highLoadSoundLooper;
 
     VoltageStateWatchDog voltagePrimaryWatchdog = new VoltageStateWatchDog(), voltageSecondaryWatchdog = new VoltageStateWatchDog();
 
@@ -49,6 +47,7 @@ public class GridTransformerElement extends GridElement {
         desc.cableDescriptor.applyTo(primaryLoad);
         desc.cableDescriptor.applyTo(secondaryLoad, 4);
 
+        /* TODO: Do looping on client.
         highLoadSoundLooper = new SoundLooper(this) {
             @Override
             public SoundCommand mustStart() {
@@ -60,7 +59,7 @@ public class GridTransformerElement extends GridElement {
                 return null;
             }
         };
-        slowProcessList.add(highLoadSoundLooper);
+        slowProcessList.add(highLoadSoundLooper);*/
     }
 
     @Override
@@ -114,7 +113,7 @@ public class GridTransformerElement extends GridElement {
             return Utils.plotVolt("US+:", secondaryLoad.getU()) + Utils.plotAmpere("IS+:", secondaryLoad.getCurrent());
 
         return Utils.plotVolt("UP+:", primaryLoad.getU()) + Utils.plotAmpere("IP+:", primaryLoad.getCurrent())
-                + Utils.plotVolt("  US+:", secondaryLoad.getU()) + Utils.plotAmpere("IS+:", secondaryLoad.getCurrent());
+            + Utils.plotVolt("  US+:", secondaryLoad.getU()) + Utils.plotAmpere("IS+:", secondaryLoad.getCurrent());
     }
 
     @Override

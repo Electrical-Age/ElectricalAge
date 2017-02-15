@@ -1,42 +1,35 @@
 package mods.eln.node;
 
-import java.lang.reflect.InvocationTargetException;
-
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
 import net.minecraft.block.Block;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 public class NodeBlockItem extends ItemBlock {
 
-	public NodeBlockItem(Block b) {
-		super(b);
-		setUnlocalizedName("NodeBlockItem");
-	}
+    public NodeBlockItem(Block b) {
+        super(b);
+        setUnlocalizedName("NodeBlockItem");
+    }
 
-	
-	@Override
-	public int getMetadata (int damageValue) {
-		return damageValue;
-	}
-	
-	
-	/*int getBlockID(){
-		return Block.getIdFromBlock(getBlock());
-	}*/
-	NodeBlock getBlock(){
-		return (NodeBlock) Block.getBlockFromItem(this);
-	}
 
-    public boolean placeBlockAt(ItemStack stack, EntityLivingBase player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata)
-    {
+    @Override
+    public int getMetadata(int damageValue) {
+        return damageValue;
+    }
+
+
+    /*int getBlockID(){
+        return Block.getIdFromBlock(getBlock());
+    }*/
+    NodeBlock getBlock() {
+        return (NodeBlock) Block.getBlockFromItem(this);
+    }
+
+    public boolean placeBlockAt(ItemStack stack, EntityLivingBase player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata) {
     /*	if(world.isRemote) return false;
-    	Direction direction = Direction.fromIntMinecraftSide(side).getInverse();
+        Direction direction = Direction.fromIntMinecraftSide(side).getInverse();
     	
 
     	NodeBase node = (NodeBase) getBlock().newNodeBase();
@@ -47,7 +40,7 @@ public class NodeBlockItem extends ItemBlock {
     	
     	node.checkCanStay(true);
     	*/
-    	return false;
+        return false;
 
     }
 }

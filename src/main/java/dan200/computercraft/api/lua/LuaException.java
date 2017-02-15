@@ -9,23 +9,19 @@ package dan200.computercraft.api.lua;
 /**
  * An exception representing an error in Lua, like that raised by the error() function
  */
-public class LuaException extends Exception
-{
+public class LuaException extends Exception {
     private final int m_level;
 
-    public LuaException( String message )
-    {
-        this( message, 1 );
+    public LuaException(String message) {
+        this(message, 1);
     }
 
-    public LuaException( String message, int level )
-    {
-        super( message );
+    public LuaException(String message, int level) {
+        super(message);
         m_level = level;
     }
 
-    public int getLevel()
-    {
+    public int getLevel() {
         return m_level;
     }
 }

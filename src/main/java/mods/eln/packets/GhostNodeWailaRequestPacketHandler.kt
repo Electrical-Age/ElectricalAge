@@ -32,7 +32,7 @@ class GhostNodeWailaRequestPacketHandler : IMessageHandler<GhostNodeWailaRequest
             }
         }
 
-        return GhostNodeWailaResponsePacket(message.coord, realCoord ?: Coordonate(0, 0, 0 ,0), itemStack, type,
-                realSide)
+        return GhostNodeWailaResponsePacket(message.coord, realCoord ?: Coordonate(0, 0, 0, 0), itemStack, type,
+            realSide)
     }
 }

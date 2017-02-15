@@ -15,7 +15,7 @@ class SixNodeWailaResponsePacketHandler : IMessageHandler<SixNodeWailaResponsePa
     override fun onMessage(message: SixNodeWailaResponsePacket, ctx: MessageContext?): IMessage? {
         if (!message.coord.isNull()) {
             WailaCache.sixNodes.put(SixNodeCoordonate(message.coord, message.side),
-                    SixNodeWailaData(message.itemStack, message.map))
+                SixNodeWailaData(message.itemStack, message.map))
         }
 
         return null

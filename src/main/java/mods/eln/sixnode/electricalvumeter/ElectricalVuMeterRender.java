@@ -15,64 +15,64 @@ import java.io.IOException;
 
 public class ElectricalVuMeterRender extends SixNodeElementRender {
 
-	ElectricalVuMeterDescriptor descriptor;
+    ElectricalVuMeterDescriptor descriptor;
 
     PhysicalInterpolator interpolator;
     float factor;
     LRDU front;
 
     boolean boot = true;
-	
-	public ElectricalVuMeterRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-		super(tileEntity, side, descriptor);
-		this.descriptor = (ElectricalVuMeterDescriptor) descriptor;
-		interpolator = new PhysicalInterpolator(0.4f, 2.0f, 1.5f, 0.2f);
-	}
 
-	@Override
-	public void draw() {
-		super.draw();
-		drawSignalPin(front, descriptor.pinDistance);
+    public ElectricalVuMeterRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
+        super(tileEntity, side, descriptor);
+        this.descriptor = (ElectricalVuMeterDescriptor) descriptor;
+        interpolator = new PhysicalInterpolator(0.4f, 2.0f, 1.5f, 0.2f);
+    }
 
-		if (side.isY()) {
-			front.right().glRotateOnX();
-		}
+    @Override
+    public void draw() {
+        super.draw();
+        drawSignalPin(front, descriptor.pinDistance);
 
-		descriptor.draw(descriptor.onOffOnly ? interpolator.getTarget() : interpolator.get(), UtilsClient.distanceFromClientPlayer(tileEntity), tileEntity);
-	}
+        if (side.isY()) {
+            front.right().glRotateOnX();
+        }
 
-	@Override
-	public void refresh(float deltaT) {
-		interpolator.step(deltaT);
-	}
-	
-	@Override
-	public boolean cameraDrawOptimisation() {
-		return false;
-	}
+        descriptor.draw(descriptor.onOffOnly ? interpolator.getTarget() : interpolator.get(), UtilsClient.distanceFromClientPlayer(tileEntity), tileEntity);
+    }
 
-	@Override
-	public void publishUnserialize(DataInputStream stream) {
-		super.publishUnserialize(stream);
-		try {
-			Byte b;
-			b = stream.readByte();
-			front = LRDU.fromInt((b >> 4) & 3);
-			if (boot) {
-				interpolator.setPos(stream.readFloat());
-			} else {
-				interpolator.setTarget(stream.readFloat());
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}		
-		if (boot) {
-			boot = false;
-		}
-	}
-	
-	@Override
-	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		return Eln.instance.signalCableDescriptor.render;
-	}
+    @Override
+    public void refresh(float deltaT) {
+        interpolator.step(deltaT);
+    }
+
+    @Override
+    public boolean cameraDrawOptimisation() {
+        return false;
+    }
+
+    @Override
+    public void publishUnserialize(DataInputStream stream) {
+        super.publishUnserialize(stream);
+        try {
+            Byte b;
+            b = stream.readByte();
+            front = LRDU.fromInt((b >> 4) & 3);
+            if (boot) {
+                interpolator.setPos(stream.readFloat());
+            } else {
+                interpolator.setTarget(stream.readFloat());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (boot) {
+            boot = false;
+        }
+    }
+
+    @Override
+    public CableRenderDescriptor getCableRender(LRDU lrdu) {
+        return Eln.instance.signalCableDescriptor.render;
+    }
 }

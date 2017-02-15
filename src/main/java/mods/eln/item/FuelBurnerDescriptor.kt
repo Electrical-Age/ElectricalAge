@@ -7,8 +7,8 @@ import mods.eln.misc.VoltageLevelColor
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 
-class FuelBurnerDescriptor(name: String, val  producedHeatPower: Double, val type: Int, val soundPitch: Float) :
-        GenericItemUsingDamageDescriptorUpgrade(name) {
+class FuelBurnerDescriptor(name: String, val producedHeatPower: Double, val type: Int, val soundPitch: Float) :
+    GenericItemUsingDamageDescriptorUpgrade(name) {
     companion object {
         private val descriptors: MutableMap<Int, FuelBurnerDescriptor> = mutableMapOf()
 
@@ -17,7 +17,7 @@ class FuelBurnerDescriptor(name: String, val  producedHeatPower: Double, val typ
         fun pitchForType(type: Int?) = descriptors.get(type ?: -1)?.soundPitch ?: 1f
 
         fun getDescriptor(itemStack: ItemStack?) =
-                (itemStack?.item as? GenericItemUsingDamage<*>)?.getDescriptor(itemStack) as? FuelBurnerDescriptor
+            (itemStack?.item as? GenericItemUsingDamage<*>)?.getDescriptor(itemStack) as? FuelBurnerDescriptor
     }
 
     init {

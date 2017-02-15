@@ -32,8 +32,8 @@ import java.io.DataOutputStream
 import java.io.IOException
 
 open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out LogicFunction>,
-                               elementClass: Class<out LogicGateElement>, renderClass: Class<out LogicGateRender>):
-        SixNodeDescriptor(name, elementClass, renderClass) {
+                               elementClass: Class<out LogicGateElement>, renderClass: Class<out LogicGateRender>) :
+    SixNodeDescriptor(name, elementClass, renderClass) {
     private val case = obj?.getPart("Case")
     private val top = obj?.getPart(functionName)
     private val pins = arrayOfNulls<Obj3D.Obj3DPart>(4)
@@ -47,8 +47,9 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
         voltageLevelColor = VoltageLevelColor.SignalVoltage
     }
 
-    constructor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out LogicFunction>):
-        this(name, obj, functionName, functionClass, LogicGateElement::class.java, LogicGateRender::class.java) {}
+    constructor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out LogicFunction>) :
+        this(name, obj, functionName, functionClass, LogicGateElement::class.java, LogicGateRender::class.java) {
+    }
 
     fun draw() {
         pins.forEach { it?.draw() }
@@ -59,10 +60,11 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
     override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?): Boolean = true
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
                                        helper: IItemRenderer.ItemRendererHelper?): Boolean =
-            type != IItemRenderer.ItemRenderType.INVENTORY
+        type != IItemRenderer.ItemRenderType.INVENTORY
+
     override fun shouldUseRenderHelperEln(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
                                           helper: IItemRenderer.ItemRendererHelper?): Boolean =
-            type != IItemRenderer.ItemRenderType.INVENTORY
+        type != IItemRenderer.ItemRenderType.INVENTORY
 
     override fun renderItem(type: IItemRenderer.ItemRenderType?, item: ItemStack?, vararg data: Any?) {
         if (type == IItemRenderer.ItemRenderType.INVENTORY) {
@@ -76,7 +78,7 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
     }
 
     override fun getFrontFromPlace(side: Direction?, player: EntityPlayer?): LRDU? =
-            super.getFrontFromPlace(side, player).left()
+        super.getFrontFromPlace(side, player).left()
 
     override fun setParent(item: Item?, damage: Int) {
         super.setParent(item, damage)
@@ -91,8 +93,8 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
     }
 }
 
-open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor):
-        SixNodeElement(node, side, sixNodeDescriptor) {
+open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor) :
+    SixNodeElement(node, side, sixNodeDescriptor) {
     private val descriptor = sixNodeDescriptor as LogicGateDescriptor
 
     private val outputPin = NbtElectricalGateOutput("output")
@@ -125,12 +127,12 @@ open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: S
     }
 
     override fun getElectricalLoad(lrdu: LRDU?): ElectricalLoad? = when (lrdu) {
-            front -> outputPin
-            front.inverse() -> inputPins[0]
-            front.left() -> inputPins[1]
-            front.right() -> inputPins[2]
-            else -> null
-        }
+        front -> outputPin
+        front.inverse() -> inputPins[0]
+        front.left() -> inputPins[1]
+        front.right() -> inputPins[2]
+        else -> null
+    }
 
     override fun getConnectionMask(lrdu: LRDU?): Int = when (lrdu) {
         front -> Node.maskElectricalOutputGate;
@@ -153,9 +155,9 @@ open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: S
         return builder.toString()
     }
 
-    override fun getWaila(): MutableMap<String,String> = function.getWaila(
-            inputPins.map { if (it != null && it.connectedComponents.count() > 0) it.normalized else null }.toTypedArray(),
-            outputPin.u / Eln.SVU)
+    override fun getWaila(): MutableMap<String, String> = function.getWaila(
+        inputPins.map { if (it != null && it.connectedComponents.count() > 0) it.normalized else null }.toTypedArray(),
+        outputPin.u / Eln.SVU)
 
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
@@ -183,8 +185,8 @@ open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: S
     override fun initialize() {}
 }
 
-open class LogicGateRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor):
-        SixNodeElementRender(entity, side, descriptor) {
+open class LogicGateRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    SixNodeElementRender(entity, side, descriptor) {
     private val descriptor = descriptor as LogicGateDescriptor
 
     override fun draw() {
@@ -193,7 +195,7 @@ open class LogicGateRender(entity: SixNodeEntity, side: Direction, descriptor: S
         descriptor.draw()
     }
 
-    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor? = when(lrdu) {
+    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor? = when (lrdu) {
         front -> Eln.instance.signalCableDescriptor.render
         front.inverse() -> if (descriptor.function.inputCount >= 1) Eln.instance.signalCableDescriptor.render else null
         front.left() -> if (descriptor.function.inputCount >= 2) Eln.instance.signalCableDescriptor.render else null
@@ -202,7 +204,7 @@ open class LogicGateRender(entity: SixNodeEntity, side: Direction, descriptor: S
     }
 }
 
-abstract class LogicFunction: INBTTReady {
+abstract class LogicFunction : INBTTReady {
     open val hasState = false
     abstract val inputCount: Int
     abstract val infos: String
@@ -224,74 +226,74 @@ abstract class LogicFunction: INBTTReady {
     open fun process(inputs: List<Boolean?>): Boolean = false
 
     open fun getWaila(inputs: Array<Double?>, output: Double) = mutableMapOf(
-            Pair("Inputs", (1..inputCount).map {"${AnalogFunction.inputColors[it - 1]}${inputs[it -1].toDigitalString()}"}.joinToString(" ")),
-            Pair("Output", output.toDigitalString())
+        Pair("Inputs", (1..inputCount).map { "${AnalogFunction.inputColors[it - 1]}${inputs[it - 1].toDigitalString()}" }.joinToString(" ")),
+        Pair("Output", output.toDigitalString())
     )
 
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {}
     override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {}
 }
 
-class Not: LogicFunction() {
+class Not : LogicFunction() {
     override val inputCount = 1
     override val infos =
-            tr("Inverts the input signal.\nOutputs a voltage representing the\nopposite logic-level to its input.")
+        tr("Inverts the input signal.\nOutputs a voltage representing the\nopposite logic-level to its input.")
 
     override fun process(inputs: List<Boolean?>): Boolean = !(inputs[0] ?: false)
 }
 
-open class And: LogicFunction() {
+open class And : LogicFunction() {
     override val inputCount = 3
     override val infos =
-            tr("Implements logical conjunction.\nA 1 (high) output results only if all of\nthe three inputs to the AND gate are 1 (high).")
+        tr("Implements logical conjunction.\nA 1 (high) output results only if all of\nthe three inputs to the AND gate are 1 (high).")
 
     override fun process(inputs: List<Boolean?>): Boolean =
-            (inputs[0] ?: true) && (inputs[1] ?: true) && (inputs[2] ?: true)
+        (inputs[0] ?: true) && (inputs[1] ?: true) && (inputs[2] ?: true)
 }
 
-class Nand: And() {
+class Nand : And() {
     override val infos =
-            tr("Its output is complement (inverted)\nto that of the AND gate.")
+        tr("Its output is complement (inverted)\nto that of the AND gate.")
 
     override fun process(inputs: List<Boolean?>): Boolean = !super.process(inputs);
 }
 
-open class Or: LogicFunction() {
+open class Or : LogicFunction() {
     override val inputCount = 3
     override val infos =
-            tr("Implements logical disjunction.\nA 1 (high) output results if at least\none input to the gate is 1 (high).")
+        tr("Implements logical disjunction.\nA 1 (high) output results if at least\none input to the gate is 1 (high).")
 
     override fun process(inputs: List<Boolean?>): Boolean =
-            (inputs[0] ?: false) || (inputs[1] ?: false) || (inputs[2] ?: false)
+        (inputs[0] ?: false) || (inputs[1] ?: false) || (inputs[2] ?: false)
 }
 
-class Nor: Or() {
+class Nor : Or() {
     override val infos =
-            tr("Its output is complement (inverted)\nto that of the OR gate.")
+        tr("Its output is complement (inverted)\nto that of the OR gate.")
 
     override fun process(inputs: List<Boolean?>): Boolean = !super.process(inputs)
 }
 
-open class Xor: LogicFunction() {
+open class Xor : LogicFunction() {
     override val inputCount = 3
     override val infos =
-            tr("Implements an exclusive or.\nAn output of 1 (high) results if one or\nall three inputs to the gate are 1 (high).")
+        tr("Implements an exclusive or.\nAn output of 1 (high) results if one or\nall three inputs to the gate are 1 (high).")
 
     override fun process(inputs: List<Boolean?>): Boolean =
-            (inputs[0] ?: false) xor (inputs[1] ?: false) xor (inputs[2] ?: false)
+        (inputs[0] ?: false) xor (inputs[1] ?: false) xor (inputs[2] ?: false)
 }
 
-class XNor: Xor() {
+class XNor : Xor() {
     override val infos = tr("Its output is complement (inverted)\nto that of the XOR gate.")
 
     override fun process(inputs: List<Boolean?>): Boolean = !super.process(inputs)
 }
 
-class SchmittTrigger: LogicFunction() {
+class SchmittTrigger : LogicFunction() {
     override val hasState = true
     override val inputCount = 1
     override val infos =
-            tr("If the input voltage is lower than 10V, the\noutput is 0 (low), if the output is bigger or\nequal to 30V, the output will be 1 (high). For\nall voltages in between, the output does not change.")
+        tr("If the input voltage is lower than 10V, the\noutput is 0 (low), if the output is bigger or\nequal to 30V, the output will be 1 (high). For\nall voltages in between, the output does not change.")
     private var state = false
 
     override fun process(inputs: Array<Double?>): Boolean {
@@ -316,11 +318,11 @@ class SchmittTrigger: LogicFunction() {
     }
 }
 
-class Oscillator: LogicFunction() {
+class Oscillator : LogicFunction() {
     override val hasState = true
     override val inputCount = 1
     override val infos =
-            tr("Outputs a rectangular signal which's frequency\ndepends to the input voltage. The higher the\ninput voltage - the higher the frequency.")
+        tr("Outputs a rectangular signal which's frequency\ndepends to the input voltage. The higher the\ninput voltage - the higher the frequency.")
     private var ramp = 0.0
     private var state = false
 
@@ -334,8 +336,8 @@ class Oscillator: LogicFunction() {
     }
 
     override fun getWaila(inputs: Array<Double?>, output: Double) = mutableMapOf(
-            Pair("Inputs", "${AnalogFunction.inputColors[0]} ${Utils.plotVolt("", inputs[0] ?: 0.0)}"),
-            Pair("Output", output.toDigitalString())
+        Pair("Inputs", "${AnalogFunction.inputColors[0]} ${Utils.plotVolt("", inputs[0] ?: 0.0)}"),
+        Pair("Output", output.toDigitalString())
     )
 
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
@@ -349,7 +351,7 @@ class Oscillator: LogicFunction() {
     }
 }
 
-abstract class TriggeredLogicFunction(private val triggerIndex: Int): LogicFunction() {
+abstract class TriggeredLogicFunction(private val triggerIndex: Int) : LogicFunction() {
     override final val hasState = true
 
     private var trigger = false
@@ -383,33 +385,33 @@ abstract class TriggeredLogicFunction(private val triggerIndex: Int): LogicFunct
     }
 }
 
-class DFlipFlop: TriggeredLogicFunction(1) {
+class DFlipFlop : TriggeredLogicFunction(1) {
     override val inputCount = 2
     override val infos =
-            tr("The D flip-flop captures the value\nof the D-input at a rising edge\nportion of the clock cycle.")
+        tr("The D flip-flop captures the value\nof the D-input at a rising edge\nportion of the clock cycle.")
 
     override fun onRisingEdge(inputs: List<Boolean?>, state: Boolean): Boolean = inputs[0] ?: false
 }
 
-class JKFlipFlop: TriggeredLogicFunction(0) {
+class JKFlipFlop : TriggeredLogicFunction(0) {
     override val inputCount = 3
     override val infos =
-            tr("If the input J is 1 (high) and K is 0 (low)\nduring a clock pulse, the output becomes 1 (high).\nIf J is 0 (low) and K is 1 (high) during the pulse,\nthe output becomes 0 (low). If both inputs are 0 (low)\nduring the clock pulse, the state is maintained. If both\ninputs are 1 (high) the input is toggled if a rising edge\nwas detected at the clock input.")
+        tr("If the input J is 1 (high) and K is 0 (low)\nduring a clock pulse, the output becomes 1 (high).\nIf J is 0 (low) and K is 1 (high) during the pulse,\nthe output becomes 0 (low). If both inputs are 0 (low)\nduring the clock pulse, the state is maintained. If both\ninputs are 1 (high) the input is toggled if a rising edge\nwas detected at the clock input.")
 
     override fun onRisingEdge(inputs: List<Boolean?>, state: Boolean): Boolean =
-            when (Pair(inputs[1] ?: true, inputs[2] ?: true)) {
-        Pair(true, false) -> true
-        Pair(false, true) -> false
-        Pair(true, true) -> !state
-        else -> state
-    }
+        when (Pair(inputs[1] ?: true, inputs[2] ?: true)) {
+            Pair(true, false) -> true
+            Pair(false, true) -> false
+            Pair(true, true) -> !state
+            else -> state
+        }
 }
 
-class PalDescriptor(name: String, obj: Obj3D?): LogicGateDescriptor(name, obj, "PAL", Pal::class.java,
-        PalElement::class.java, PalRender::class.java) {}
+class PalDescriptor(name: String, obj: Obj3D?) : LogicGateDescriptor(name, obj, "PAL", Pal::class.java,
+    PalElement::class.java, PalRender::class.java) {}
 
-class PalElement(node: SixNode, side: Direction, descriptor: SixNodeDescriptor):
-        LogicGateElement(node, side, descriptor) {
+class PalElement(node: SixNode, side: Direction, descriptor: SixNodeDescriptor) :
+    LogicGateElement(node, side, descriptor) {
     companion object {
         val TruthTablePositionClickedEvent = 1
     }
@@ -444,8 +446,8 @@ class PalElement(node: SixNode, side: Direction, descriptor: SixNodeDescriptor):
     }
 }
 
-class PalRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor):
-        LogicGateRender(entity, side, descriptor) {
+class PalRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    LogicGateRender(entity, side, descriptor) {
     val truthTable = Array(8, { false })
 
     override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? {
@@ -464,7 +466,7 @@ class PalRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescr
     }
 }
 
-class PalGui(val render: PalRender): GuiScreenEln() {
+class PalGui(val render: PalRender) : GuiScreenEln() {
     val buttons = arrayOfNulls<GuiButton>(8)
 
     override fun initGui() {
@@ -502,29 +504,29 @@ class PalGui(val render: PalRender): GuiScreenEln() {
     override fun newHelper(): GuiHelper? = GuiHelper(this, 160, 110, "pal.png")
 }
 
-class Pal: LogicFunction() {
+class Pal : LogicFunction() {
     override val inputCount = 3
     override val infos =
-            tr("A Programmable Array Logic (PAL) is a programmable\nlogic device semiconductors used to  implement any logic\nfunction in only one digital circuit. The function is\nstateless, which means that no intermediate state is saved.")
+        tr("A Programmable Array Logic (PAL) is a programmable\nlogic device semiconductors used to  implement any logic\nfunction in only one digital circuit. The function is\nstateless, which means that no intermediate state is saved.")
     val truthTable = Array(8, { false })
 
     private operator fun Boolean.times(factor: Int): Int = if (this) factor else 0
 
     private fun Array<Boolean>.toInt(): Int {
-        val value = (0..this.count() -1).filter { this[it] }.sumBy { 1.shl(it) }
+        val value = (0..this.count() - 1).filter { this[it] }.sumBy { 1.shl(it) }
         return value
     }
 
     private fun Array<Boolean>.fromInt(value: Int) {
-        for (i in 0..this.count() -1) {
+        for (i in 0..this.count() - 1) {
             this[i] = (value and 1.shl(i)) != 0
         }
     }
 
     override fun process(inputs: List<Boolean?>): Boolean =
-            truthTable[(inputs[0] ?: false) * 4 +
-                    (inputs[2] ?: false) * 2 +
-                    ((inputs[2] ?: false) xor (inputs[1] ?: false)) * 1]
+        truthTable[(inputs[0] ?: false) * 4 +
+            (inputs[2] ?: false) * 2 +
+            ((inputs[2] ?: false) xor (inputs[1] ?: false)) * 1]
 
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
         truthTable.fromInt(nbt?.getInteger(str + "truthTable") ?: 0)

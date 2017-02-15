@@ -29,15 +29,15 @@ import java.io.DataOutputStream
 
 
 class GeneratorDescriptor(
-        name: String,
-        obj: Obj3D,
-        cable: ElectricalCableDescriptor,
-        nominalRads: Float,
-        nominalU: Float,
-        powerOutPerDeltaU: Float,
-        nominalP: Float,
-        thermalLoadInitializer: ThermalLoadInitializer):
-        SimpleShaftDescriptor(name, GeneratorElement::class, GeneratorRender::class, EntityMetaTag.Basic) {
+    name: String,
+    obj: Obj3D,
+    cable: ElectricalCableDescriptor,
+    nominalRads: Float,
+    nominalU: Float,
+    powerOutPerDeltaU: Float,
+    nominalP: Float,
+    thermalLoadInitializer: ThermalLoadInitializer) :
+    SimpleShaftDescriptor(name, GeneratorElement::class, GeneratorRender::class, EntityMetaTag.Basic) {
 
     val RtoU = LinearFunction(0f, 0f, nominalRads, nominalU)
     val cable = cable
@@ -55,18 +55,18 @@ class GeneratorDescriptor(
 
     override val obj = obj
     override val static = arrayOf(
-            obj.getPart("Cowl"),
-            obj.getPart("Stand")
+        obj.getPart("Cowl"),
+        obj.getPart("Stand")
     ).requireNoNulls()
     override val rotating = arrayOf(obj.getPart("Shaft")).requireNoNulls()
     val powerLights = arrayOf(
-            obj.getPart("LED_0"),
-            obj.getPart("LED_1"),
-            obj.getPart("LED_2"),
-            obj.getPart("LED_3"),
-            obj.getPart("LED_4"),
-            obj.getPart("LED_5"),
-            obj.getPart("LED_6")
+        obj.getPart("LED_0"),
+        obj.getPart("LED_1"),
+        obj.getPart("LED_2"),
+        obj.getPart("LED_3"),
+        obj.getPart("LED_4"),
+        obj.getPart("LED_5"),
+        obj.getPart("LED_6")
     ).requireNoNulls()
 
     override fun addInformation(stack: ItemStack, player: EntityPlayer, list: MutableList<String>, par4: Boolean) {
@@ -79,29 +79,29 @@ class GeneratorDescriptor(
     }
 }
 
-class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescriptor): ShaftRender(entity, desc_) {
+class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescriptor) : ShaftRender(entity, desc_) {
     val entity = entity
 
     override val cableRender = Eln.instance.stdCableRender3200V
     val desc = desc_ as GeneratorDescriptor
 
     val ledColors: Array<Color> = arrayOf(
-            java.awt.Color.black,
-            java.awt.Color.black,
-            java.awt.Color.black,
-            java.awt.Color.black,
-            java.awt.Color.black,
-            java.awt.Color.black,
-            java.awt.Color.black
+        java.awt.Color.black,
+        java.awt.Color.black,
+        java.awt.Color.black,
+        java.awt.Color.black,
+        java.awt.Color.black,
+        java.awt.Color.black,
+        java.awt.Color.black
     )
     val ledColorBase: Array<HSLColor> = arrayOf(
-            GREEN,
-            GREEN,
-            GREEN,
-            GREEN,
-            YELLOW,
-            RED,
-            RED
+        GREEN,
+        GREEN,
+        GREEN,
+        GREEN,
+        YELLOW,
+        RED,
+        RED
     )
 
     fun calcPower(power: Double) {
@@ -124,30 +124,30 @@ class GeneratorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescr
         draw {
             ledColors.forEachIndexed { i, color ->
                 GL11.glColor3f(
-                        color.red / 255f,
-                        color.green / 255f,
-                        color.blue / 255f
+                    color.red / 255f,
+                    color.green / 255f,
+                    color.blue / 255f
                 )
                 desc.powerLights[i].draw()
             }
         }
     }
 
-	override fun getCableRender(side: Direction, lrdu: LRDU): CableRenderDescriptor? {
+    override fun getCableRender(side: Direction, lrdu: LRDU): CableRenderDescriptor? {
         if (lrdu == LRDU.Down && side == front) return Eln.instance.stdCableRender3200V
-		return null
-	}
+        return null
+    }
 
     override fun networkUnserialize(stream: DataInputStream) {
         super.networkUnserialize(stream)
         val power = stream.readDouble()
         calcPower(power)
-        volumeSetting = 0.05f + Math.abs(power / desc.nominalP).toFloat()
+        volumeSetting.target = 0.05f + Math.abs(power / desc.nominalP).toFloat() / 4f
     }
 }
 
-class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
-        SimpleShaftElement(node, desc_) {
+class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
+    SimpleShaftElement(node, desc_) {
     val desc = desc_ as GeneratorDescriptor
 
     internal val inputLoad = NbtElectricalLoad("inputLoad")
@@ -185,7 +185,7 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
         // TODO: Add the thermal explosions—there should be some.
     }
 
-    inner class GeneratorElectricalProcess: IProcess, IRootSystemPreStepProcess {
+    inner class GeneratorElectricalProcess : IProcess, IRootSystemPreStepProcess {
         override fun process(time: Double) {
             val targetU = desc.RtoU.getValue(shaft.rads)
 
@@ -281,7 +281,7 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor):
         var info = mutableMapOf<String, String>()
         info.put("Energy", Utils.plotEnergy("", shaft.energy))
         info.put("Speed", Utils.plotRads("", shaft.rads))
-        if(Eln.wailaEasyMode){
+        if (Eln.wailaEasyMode) {
             info.put("Voltage", Utils.plotVolt("", electricalPowerSource.getU()))
             info.put("Current", Utils.plotAmpere("", electricalPowerSource.getI()))
             info.put("Temperature", Utils.plotCelsius("", thermal.t))

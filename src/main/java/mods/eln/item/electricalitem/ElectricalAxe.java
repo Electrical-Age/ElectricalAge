@@ -9,21 +9,21 @@ import net.minecraft.item.ItemStack;
 
 public class ElectricalAxe extends ElectricalTool {
 
-	public ElectricalAxe(String name, float strengthOn, float strengthOff,
-			double energyStorage, double energyPerBlock, double chargePower) {
-		super(name, strengthOn, strengthOff, energyStorage, energyPerBlock, chargePower);
-	}
-	
-	@Override
-	public void setParent(Item item, int damage) {
-		super.setParent(item, damage);
-		Data.addPortable(newItemStack());
-	}
-	
-	@Override
-	public float getStrVsBlock(ItemStack stack, Block block) {
-        float value =   block != null && (block.getMaterial() == Material.wood || block.getMaterial() == Material.plants || block.getMaterial() == Material.vine) ? getStrength(stack) : super.getStrVsBlock(stack, block);
-		Utils.println(value);
+    public ElectricalAxe(String name, float strengthOn, float strengthOff,
+                         double energyStorage, double energyPerBlock, double chargePower) {
+        super(name, strengthOn, strengthOff, energyStorage, energyPerBlock, chargePower);
+    }
+
+    @Override
+    public void setParent(Item item, int damage) {
+        super.setParent(item, damage);
+        Data.addPortable(newItemStack());
+    }
+
+    @Override
+    public float getStrVsBlock(ItemStack stack, Block block) {
+        float value = block != null && (block.getMaterial() == Material.wood || block.getMaterial() == Material.plants || block.getMaterial() == Material.vine) ? getStrength(stack) : super.getStrVsBlock(stack, block);
+        Utils.println(value);
         return value;
-	}
+    }
 }

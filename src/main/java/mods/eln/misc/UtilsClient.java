@@ -55,8 +55,8 @@ public class UtilsClient {
         EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
 
         return (float) Math.sqrt((xCoord - player.posX) * (xCoord - player.posX)
-                + (yCoord - player.posY) * (yCoord - player.posY)
-                + (zCoord - player.posZ) * (zCoord - player.posZ));
+            + (yCoord - player.posY) * (yCoord - player.posY)
+            + (zCoord - player.posZ) * (zCoord - player.posZ));
     }
 
     public static float distanceFromClientPlayer(SixNodeEntity tileEntity) {
@@ -200,7 +200,7 @@ public class UtilsClient {
         GL11.glAlphaFunc(GL11.GL_GREATER, 0.02f);
         // GL11.glDisable(GL11.GL_ALPHA_TEST);
         /*
-		 * Utils.println(GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB) + " " + GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA) + " " + GL11.glGetInteger(GL14.GL_BLEND_DST_RGB) + " " + GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
+         * Utils.println(GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB) + " " + GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA) + " " + GL11.glGetInteger(GL14.GL_BLEND_DST_RGB) + " " + GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
 		 */
 
         // Utils.println(GL11.glGetInteger(GL11.GL_BLEND_SRC) + " " + GL11.glGetInteger(GL11.GL_BLEND_DST) + " " + GL11.glIsEnabled(GL11.GL_BLEND));

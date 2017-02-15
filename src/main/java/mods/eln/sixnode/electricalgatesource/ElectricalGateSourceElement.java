@@ -36,152 +36,153 @@ public class ElectricalGateSourceElement extends SixNodeElement {
 
     public static final byte setVoltagerId = 1;
 
-	public ElectricalGateSourceElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
-		super(sixNode, side, descriptor);
-		this.descriptor = (ElectricalGateSourceDescriptor) descriptor;
+    public ElectricalGateSourceElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
+        super(sixNode, side, descriptor);
+        this.descriptor = (ElectricalGateSourceDescriptor) descriptor;
 
-		electricalLoadList.add(outputGate);
-		electricalComponentList.add(outputGateProcess);
+        electricalLoadList.add(outputGate);
+        electricalComponentList.add(outputGateProcess);
 
-		if (this.descriptor.autoReset) {
-			slowProcessList.add(autoResetProcess = new AutoResetProcess());
-			autoResetProcess.reset();
-		}
-	}
+        if (this.descriptor.autoReset) {
+            slowProcessList.add(autoResetProcess = new AutoResetProcess());
+            autoResetProcess.reset();
+        }
+    }
 
-	class AutoResetProcess implements IProcess {
-		double timeout = 0;
-		double timeoutDelay = 0.21;
+    class AutoResetProcess implements IProcess {
+        double timeout = 0;
+        double timeoutDelay = 0.21;
 
-		@Override
-		public void process(double time) {
-			if (timeout > 0) {
-				if (timeout - time < 0) {
-					outputGateProcess.setOutputNormalized(0);
-					needPublish();
-				}
-				timeout -= time;
-			}
-		}
-		void reset(){
-			timeout = timeoutDelay;
-		}
-	}
+        @Override
+        public void process(double time) {
+            if (timeout > 0) {
+                if (timeout - time < 0) {
+                    outputGateProcess.setOutputNormalized(0);
+                    needPublish();
+                }
+                timeout -= time;
+            }
+        }
 
-	public static boolean canBePlacedOnSide(Direction side, int type) {
-		return true;
-	}
+        void reset() {
+            timeout = timeoutDelay;
+        }
+    }
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		byte value = nbt.getByte("front");
-		front = LRDU.fromInt((value >> 0) & 0x3);
-	}
+    public static boolean canBePlacedOnSide(Direction side, int type) {
+        return true;
+    }
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-		nbt.setByte("front", (byte) ((front.toInt() << 0)));
-	}
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
+        byte value = nbt.getByte("front");
+        front = LRDU.fromInt((value >> 0) & 0x3);
+    }
 
-	@Override
-	public ElectricalLoad getElectricalLoad(LRDU lrdu) {
-		if (front == lrdu) return outputGate;
-		return null;
-	}
+    @Override
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+        nbt.setByte("front", (byte) ((front.toInt() << 0)));
+    }
 
-	@Override
-	public ThermalLoad getThermalLoad(LRDU lrdu) {
-		return null;
-	}
+    @Override
+    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+        if (front == lrdu) return outputGate;
+        return null;
+    }
 
-	@Override
-	public int getConnectionMask(LRDU lrdu) {
-		if (front == lrdu) return NodeBase.maskElectricalOutputGate;
-		return 0;
-	}
+    @Override
+    public ThermalLoad getThermalLoad(LRDU lrdu) {
+        return null;
+    }
 
-	@Override
-	public String multiMeterString() {
-		return Utils.plotUIP(outputGate.getU(), outputGate.getCurrent());
-	}
+    @Override
+    public int getConnectionMask(LRDU lrdu) {
+        if (front == lrdu) return NodeBase.maskElectricalOutputGate;
+        return 0;
+    }
 
-	@Override
-	public Map<String, String> getWaila() {
-		Map<String, String> info = new HashMap<String, String>();
-		info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
-		return info;
-	}
+    @Override
+    public String multiMeterString() {
+        return Utils.plotUIP(outputGate.getU(), outputGate.getCurrent());
+    }
 
-	@Override
-	public String thermoMeterString() {
-		return "";
-	}
+    @Override
+    public Map<String, String> getWaila() {
+        Map<String, String> info = new HashMap<String, String>();
+        info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
+        return info;
+    }
 
-	@Override
-	public void networkSerialize(DataOutputStream stream) {
-		super.networkSerialize(stream);
-		try {
-			stream.writeByte(front.toInt() << 4);
-			stream.writeFloat((float) outputGateProcess.getU());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public String thermoMeterString() {
+        return "";
+    }
 
-	@Override
-	public void initialize() {
-		Eln.instance.signalCableDescriptor.applyTo(outputGate);
-		computeElectricalLoad();
-	}
+    @Override
+    public void networkSerialize(DataOutputStream stream) {
+        super.networkSerialize(stream);
+        try {
+            stream.writeByte(front.toInt() << 4);
+            stream.writeFloat((float) outputGateProcess.getU());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	protected void inventoryChanged() {
-		computeElectricalLoad();
-	}
+    @Override
+    public void initialize() {
+        Eln.instance.signalCableDescriptor.applyTo(outputGate);
+        computeElectricalLoad();
+    }
 
-	public void computeElectricalLoad() {
-	}
+    @Override
+    protected void inventoryChanged() {
+        computeElectricalLoad();
+    }
 
-	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-		ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+    public void computeElectricalLoad() {
+    }
 
-		if (Utils.isPlayerUsingWrench(entityPlayer)) {
-			front = front.getNextClockwise();
-			sixNode.reconnect();
-			sixNode.setNeedPublish(true);
-			return true;
-		} else if (!Utils.playerHasMeter(entityPlayer) && descriptor.onOffOnly) {
-			outputGateProcess.state(!outputGateProcess.getOutputOnOff());
-			play(new SoundCommand("random.click").mulVolume(0.3F, 0.6F).smallRange());
-			if (autoResetProcess != null)
-				autoResetProcess.reset();
-			needPublish();
-			return true;
-		}
-		// front = LRDU.fromInt((front.toInt() + 1)&3);
-		return false;
-	}
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 
-	@Override
-	public void networkUnserialize(DataInputStream stream) {
-		super.networkUnserialize(stream);
-		try {
-			switch (stream.readByte()) {
+        if (Utils.isPlayerUsingWrench(entityPlayer)) {
+            front = front.getNextClockwise();
+            sixNode.reconnect();
+            sixNode.setNeedPublish(true);
+            return true;
+        } else if (!Utils.playerHasMeter(entityPlayer) && descriptor.onOffOnly) {
+            outputGateProcess.state(!outputGateProcess.getOutputOnOff());
+            play(new SoundCommand("random.click").mulVolume(0.3F, 0.6F).smallRange());
+            if (autoResetProcess != null)
+                autoResetProcess.reset();
+            needPublish();
+            return true;
+        }
+        // front = LRDU.fromInt((front.toInt() + 1)&3);
+        return false;
+    }
+
+    @Override
+    public void networkUnserialize(DataInputStream stream) {
+        super.networkUnserialize(stream);
+        try {
+            switch (stream.readByte()) {
                 case setVoltagerId:
                     outputGateProcess.setU(stream.readFloat());
                     needPublish();
                     break;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public boolean hasGui() {
-		return !descriptor.onOffOnly;
-	}
+    @Override
+    public boolean hasGui() {
+        return !descriptor.onOffOnly;
+    }
 }

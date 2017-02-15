@@ -20,8 +20,8 @@ import java.io.IOException;
 
 public class EnergyMeterRender extends SixNodeElementRender {
 
-	SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
-	EnergyMeterDescriptor descriptor;
+    SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
+    EnergyMeterDescriptor descriptor;
 
     double timerCouter, energyStack;
     boolean switchState;
@@ -36,47 +36,47 @@ public class EnergyMeterRender extends SixNodeElementRender {
     double error;
     double serverPowerIdTimer = EnergyMeterElement.SlowProcess.publishTimeoutReset * 34;
 
-	public EnergyMeterRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
-		super(tileEntity, side, descriptor);
-		this.descriptor = (EnergyMeterDescriptor) descriptor;
+    public EnergyMeterRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
+        super(tileEntity, side, descriptor);
+        this.descriptor = (EnergyMeterDescriptor) descriptor;
 
 		/*for (int idx = 0; idx < energyRc.length; idx++) {
-			energyRc[idx] = new RcInterpolator(0.2f);
+            energyRc[idx] = new RcInterpolator(0.2f);
 		}*/
-	}
+    }
 
-	//RcInterpolator[] energyRc = new RcInterpolator[7];
+    //RcInterpolator[] energyRc = new RcInterpolator[7];
 
-	@Override
-	public void draw() {
-		super.draw();
+    @Override
+    public void draw() {
+        super.draw();
 
-		GL11.glPushMatrix();
+        GL11.glPushMatrix();
 
-		float[] pinDistances = descriptor.pinDistance;
-		if (side.isY()) {
-			pinDistances = front.rotate4PinDistances(pinDistances);
-			front.left().glRotateOnX();
-		}
+        float[] pinDistances = descriptor.pinDistance;
+        if (side.isY()) {
+            pinDistances = front.rotate4PinDistances(pinDistances);
+            front.left().glRotateOnX();
+        }
 
-		descriptor.draw(energyStack / Math.pow(10, energyUnit * 3 - 1), timerCouter / (timeUnit == 0 ? 360 : 8640),
-						energyUnit, timeUnit,
-						UtilsClient.distanceFromClientPlayer(tileEntity) < 20);
+        descriptor.draw(energyStack / Math.pow(10, energyUnit * 3 - 1), timerCouter / (timeUnit == 0 ? 360 : 8640),
+            energyUnit, timeUnit,
+            UtilsClient.distanceFromClientPlayer(tileEntity) < 20);
 
-		GL11.glPopMatrix();
+        GL11.glPopMatrix();
 
-		GL11.glColor3f(0.9f, 0f, 0f);
-		drawPowerPinWhite(front, pinDistances);
-		GL11.glColor3f(0f, 0f, 0.9f);
-		drawPowerPinWhite(front.inverse(), pinDistances);
-		GL11.glColor3f(1f, 1f, 1f);
-	}
+        GL11.glColor3f(0.9f, 0f, 0f);
+        drawPowerPinWhite(front, pinDistances);
+        GL11.glColor3f(0f, 0f, 0.9f);
+        drawPowerPinWhite(front.inverse(), pinDistances);
+        GL11.glColor3f(1f, 1f, 1f);
+    }
 
-	@Override
-	public void refresh(float deltaT) {
-		double errorComp = error * 1 * deltaT;
-		energyStack += power * deltaT + errorComp;
-		error -= errorComp;
+    @Override
+    public void refresh(float deltaT) {
+        double errorComp = error * 1 * deltaT;
+        energyStack += power * deltaT + errorComp;
+        error -= errorComp;
 
 		/*double stack = energyStack;
 		for (int idx = 0; idx < energyRc.length; idx++) {
@@ -86,48 +86,48 @@ public class EnergyMeterRender extends SixNodeElementRender {
 			stack /= 10.0;
 		}*/
 
-		timerCouter += deltaT * 72;
-		serverPowerIdTimer += deltaT;
-	}
+        timerCouter += deltaT * 72;
+        serverPowerIdTimer += deltaT;
+    }
 
-	@Override
-	public CableRenderDescriptor getCableRender(LRDU lrdu) {
-		return cableRender;
-	}
+    @Override
+    public CableRenderDescriptor getCableRender(LRDU lrdu) {
+        return cableRender;
+    }
 
-	@Override
-	public void publishUnserialize(DataInputStream stream) {
-		super.publishUnserialize(stream);
+    @Override
+    public void publishUnserialize(DataInputStream stream) {
+        super.publishUnserialize(stream);
 
-		try {
-			switchState = stream.readBoolean();
-			password = stream.readUTF();
-			mod = Mod.valueOf(stream.readUTF());
-			timerCouter = stream.readDouble();
-			// energyStack = stream.readDouble();
-			ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), ElectricalCableDescriptor.class);
+        try {
+            switchState = stream.readBoolean();
+            password = stream.readUTF();
+            mod = Mod.valueOf(stream.readUTF());
+            timerCouter = stream.readDouble();
+            // energyStack = stream.readDouble();
+            ElectricalCableDescriptor desc = (ElectricalCableDescriptor) ElectricalCableDescriptor.getDescriptor(Utils.unserialiseItemStack(stream), ElectricalCableDescriptor.class);
 
-			energyUnit = stream.readByte();
-			timeUnit = stream.readByte();
-			if (desc == null)
-				cableRender = null;
-			else
-				cableRender = desc.render;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+            energyUnit = stream.readByte();
+            timeUnit = stream.readByte();
+            if (desc == null)
+                cableRender = null;
+            else
+                cableRender = desc.render;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		return new EnergyMeterGui(player, inventory, this);
-	}
+    @Override
+    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
+        return new EnergyMeterGui(player, inventory, this);
+    }
 
-	@Override
-	public void serverPacketUnserialize(DataInputStream stream) throws IOException {
-		super.serverPacketUnserialize(stream);
+    @Override
+    public void serverPacketUnserialize(DataInputStream stream) throws IOException {
+        super.serverPacketUnserialize(stream);
 
-		switch (stream.readByte()) {
+        switch (stream.readByte()) {
             case EnergyMeterElement.serverPowerId:
                 if (serverPowerIdTimer > EnergyMeterElement.SlowProcess.publishTimeoutReset * 3) {
                     energyStack = stream.readDouble();
@@ -140,6 +140,6 @@ public class EnergyMeterRender extends SixNodeElementRender {
                 break;
             default:
                 break;
-		}
-	}
+        }
+    }
 }

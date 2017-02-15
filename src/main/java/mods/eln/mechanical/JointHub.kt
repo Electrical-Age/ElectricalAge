@@ -1,6 +1,5 @@
 package mods.eln.mechanical
 
-import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.misc.*
 import mods.eln.node.transparent.EntityMetaTag
@@ -16,8 +15,8 @@ import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class JointHubDescriptor(baseName : String, obj : Obj3D): SimpleShaftDescriptor(baseName,
-        JointHubElement::class, JointHubRender::class, EntityMetaTag.Basic) {
+class JointHubDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor(baseName,
+    JointHubElement::class, JointHubRender::class, EntityMetaTag.Basic) {
     override val obj = obj
     override val static = arrayOf(obj.getPart("Stand"), obj.getPart("Cowl"))
     override val rotating = emptyArray<Obj3D.Obj3DPart>()
@@ -62,7 +61,7 @@ class JointHubDescriptor(baseName : String, obj : Obj3D): SimpleShaftDescriptor(
     override fun getFrontFromPlace(side: Direction?, entityLiving: EntityLivingBase?): Direction? = Direction.XP
 }
 
-class JointHubElement(node : TransparentNode, desc_ : TransparentNodeDescriptor): SimpleShaftElement(node, desc_) {
+class JointHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : SimpleShaftElement(node, desc_) {
     override val shaftMass = 0.5
     private var connectedSides = DirectionSet()
 
@@ -113,7 +112,7 @@ class JointHubElement(node : TransparentNode, desc_ : TransparentNodeDescriptor)
     }
 }
 
-class JointHubRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor): ShaftRender(entity, desc) {
+class JointHubRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : ShaftRender(entity, desc) {
     override val cableRender: CableRenderDescriptor? = null
     val desc = desc as JointHubDescriptor
     val connectedSides = DirectionSet()

@@ -15,15 +15,16 @@ import net.minecraft.tileentity.TileEntity
 import net.minecraft.world.World
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaDataProvider", modid = "Waila")
-class SixNodeWailaProvider: IWailaDataProvider {
+class SixNodeWailaProvider : IWailaDataProvider {
     private fun getSixData(accessor: IWailaDataAccessor): SixNodeWailaData? {
         val coord = Coordonate(accessor.position.blockX, accessor.position.blockY, accessor.position.blockZ,
-                accessor.world)
+            accessor.world)
         val side = Direction.from(accessor.side)
         var sixData: SixNodeWailaData? = null
-    try {
+        try {
             sixData = WailaCache.sixNodes.get(SixNodeCoordonate(coord, side))
-        } catch(e: CacheLoader.InvalidCacheLoadException) {}
+        } catch(e: CacheLoader.InvalidCacheLoadException) {
+        }
 
         return sixData
     }
@@ -38,13 +39,13 @@ class SixNodeWailaProvider: IWailaDataProvider {
     }
 
     override fun getWailaStack(accessor: IWailaDataAccessor, config: IWailaConfigHandler?): ItemStack?
-            = getSixData(accessor)?.itemStack
+        = getSixData(accessor)?.itemStack
 
     override fun getWailaTail(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor?,
                               config: IWailaConfigHandler?): MutableList<String> = currenttip
 
     override fun getNBTData(player: EntityPlayerMP?, te: TileEntity?, tag: NBTTagCompound?, world: World?,
-                            x: Int, y: Int, z: Int): NBTTagCompound?= null
+                            x: Int, y: Int, z: Int): NBTTagCompound? = null
 
     override fun getWailaHead(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor,
                               config: IWailaConfigHandler?): MutableList<String> = if (itemStack != null) {

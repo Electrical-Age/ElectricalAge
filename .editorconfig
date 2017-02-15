@@ -1,0 +1,20 @@
+# EditorConfig, EditorConfig, EditorConfig: http://editorconfig.org
+#
+# For IDEA & GitHub this is automatically applied.
+#
+# Eclipse: See https://github.com/ncjones/editorconfig-eclipse#readme
+# Emacs: See https://github.com/editorconfig/editorconfig-emacs#readme
+#
+# Or just read the instructions on http://editorconfig.org
+
+root = true
+
+# Always use unix-style newlines and utf-8.
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+
+# Use a common indentation style for all our code.
+indent_style = space
+indent_size = 4

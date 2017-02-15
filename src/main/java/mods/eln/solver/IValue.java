@@ -1,5 +1,5 @@
 package mods.eln.solver;
 
 public interface IValue {
-	public abstract double getValue();
+    public abstract double getValue();
 }

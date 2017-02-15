@@ -40,7 +40,7 @@ class LanguageFileUpdater {
             if (languageFileOrFolder.isFile()) {
                 updateFile(languageFileOrFolder, stringsToTranslate);
             } else if (languageFileOrFolder.isDirectory()) {
-                for (File file: languageFileOrFolder.listFiles()) {
+                for (File file : languageFileOrFolder.listFiles()) {
                     if (file.getName().endsWith(".lang") && !file.getName().startsWith("_")) {
                         updateFile(file, stringsToTranslate);
                     }

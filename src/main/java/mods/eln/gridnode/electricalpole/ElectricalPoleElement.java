@@ -6,6 +6,7 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
+import mods.eln.node.NodePeriodicPublishProcess;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
@@ -18,10 +19,9 @@ import mods.eln.sim.process.destruct.ThermalLoadWatchDog;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad;
-import mods.eln.sound.SoundCommand;
-import mods.eln.sound.SoundLooper;
 
 import java.io.DataOutputStream;
+import java.io.IOException;
 
 // TODO: I should probably just make the transformer variant a subclass.
 public class ElectricalPoleElement extends GridElement {
@@ -37,7 +37,6 @@ public class ElectricalPoleElement extends GridElement {
     ThermalLoadWatchDog thermalWatchdog = new ThermalLoadWatchDog();
     VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
     float secondaryMaxCurrent = 0;
-    SoundLooper highLoadSoundLooper;
     VoltageStateWatchDog voltageSecondaryWatchdog;
 
     public ElectricalPoleElement(TransparentNode node, TransparentNodeDescriptor descriptor) {
@@ -56,9 +55,9 @@ public class ElectricalPoleElement extends GridElement {
         thermalLoad.setAsSlow();
         slowProcessList.add(thermalWatchdog);
         thermalWatchdog
-                .set(thermalLoad)
-                .setLimit(desc.cableDescriptor.thermalWarmLimit, desc.cableDescriptor.thermalCoolLimit)
-                .set(new WorldExplosion(this).cableExplosion());
+            .set(thermalLoad)
+            .setLimit(desc.cableDescriptor.thermalWarmLimit, desc.cableDescriptor.thermalCoolLimit)
+            .set(new WorldExplosion(this).cableExplosion());
 
         slowProcessList.add(voltageWatchdog);
         // Electrical poles can handle higher voltages, due to air insulation.
@@ -71,9 +70,9 @@ public class ElectricalPoleElement extends GridElement {
             exp = new WorldExplosion(this).cableExplosion();
         }
         voltageWatchdog
-                .set(electricalLoad)
-                .setUMaxMin(desc.cableDescriptor.electricalNominalVoltage * 16)
-                .set(exp);
+            .set(electricalLoad)
+            .setUMaxMin(desc.cableDescriptor.electricalNominalVoltage * 16)
+            .set(exp);
 
         if (desc.includeTransformer) {
             secondaryLoad = new NbtElectricalLoad("secondaryLoad");
@@ -88,18 +87,8 @@ public class ElectricalPoleElement extends GridElement {
             electricalComponentList.add(secondaryVoltageSource);
             slowProcessList.add(voltageSecondaryWatchdog.set(secondaryLoad).set(exp));
 
-            highLoadSoundLooper = new SoundLooper(this) {
-                @Override
-                public SoundCommand mustStart() {
-                    if (secondaryMaxCurrent != 0) {
-                        float load = (float) (secondaryLoad.getI() / secondaryMaxCurrent);
-                        if (load > desc.minimalLoadToHum)
-                            return desc.highLoadSound.copy().mulVolume(0.2f * (load - desc.minimalLoadToHum) / (1 - desc.minimalLoadToHum), 1f).smallRange();
-                    }
-                    return null;
-                }
-            };
-            slowProcessList.add(highLoadSoundLooper);
+            // Publish load from time to time.
+            slowProcessList.add(new NodePeriodicPublishProcess(node, 1.0, 0.5));
         }
     }
 
@@ -121,7 +110,7 @@ public class ElectricalPoleElement extends GridElement {
     public String multiMeterString(Direction side) {
         if (desc.includeTransformer) {
             return Utils.plotVolt("GridU:", electricalLoad.getU()) + Utils.plotAmpere("GridP:", electricalLoad.getCurrent())
-                    + Utils.plotVolt("  GroundU:", secondaryLoad.getU()) + Utils.plotAmpere("GroundP:", secondaryLoad.getCurrent());
+                + Utils.plotVolt("  GroundU:", secondaryLoad.getU()) + Utils.plotAmpere("GroundP:", secondaryLoad.getCurrent());
         } else {
             return super.multiMeterString(side);
         }
@@ -170,5 +159,14 @@ public class ElectricalPoleElement extends GridElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
+        try {
+            if (secondaryMaxCurrent != 0) {
+                stream.writeFloat((float) (secondaryLoad.getI() / secondaryMaxCurrent));
+            } else {
+                stream.writeFloat(0f);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

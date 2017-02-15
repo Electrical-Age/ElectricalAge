@@ -1,13 +1,12 @@
 package mods.eln.gui;
 
 import net.minecraft.client.gui.Gui;
-import net.minecraft.util.ResourceLocation;
 
 /**
  * Checkbox item for GUI (WIP)
  *
  * @author lambdaShade
- * @date   15.04.2015
+ * @date 15.04.2015
  */
 
 public class GuiCheckbox extends Gui implements IGuiObject {
@@ -18,7 +17,7 @@ public class GuiCheckbox extends Gui implements IGuiObject {
     static ResourceLocation reslocBitmapCheckboxOn = new ResourceLocation("eln","sprites/gui/checkbox_on.png");
     static ResourceLocation reslocBitmapCheckboxOnSel = new ResourceLocation("eln","sprites/gui/checkbox_onsel.png");
 	*/
-	
+
     @Override
     public void idraw(int x, int y, float f) {
 

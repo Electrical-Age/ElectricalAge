@@ -21,123 +21,124 @@ import static mods.eln.i18n.I18N.tr;
 
 public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade implements IConfigSharing {
 
-	public enum Type {Incandescent, eco, LED}
-	public double nominalP,nominalLight, nominalLife;
-	public Type type;
-	public LampSocketType socket;
+    public enum Type {Incandescent, eco, LED}
 
-	public double nominalU, minimalU;
-	public double stableU, stableUNormalised, stableTime, vegetableGrowRate;
+    public double nominalP, nominalLight, nominalLife;
+    public Type type;
+    public LampSocketType socket;
 
-	double serverNominalLife;
-	
-	public LampDescriptor(	
-			String name,String iconName,
-			Type type, LampSocketType socket,
-			double nominalU, double nominalP, double nominalLight, double nominalLife,
-			double vegetableGrowRate) {
-		super(name);
-		changeDefaultIcon(iconName);
-		this.type = type;
-		this.socket = socket;
-		this.nominalU = nominalU;
-		this.nominalP = nominalP;
-		this.nominalLight = nominalLight;
-		this.nominalLife = nominalLife;
-		this.vegetableGrowRate = vegetableGrowRate;
+    public double nominalU, minimalU;
+    public double stableU, stableUNormalised, stableTime, vegetableGrowRate;
 
-		switch (type) {
-			case Incandescent:
-				minimalU = nominalU * 0.5;
-				break;
+    double serverNominalLife;
 
-			case eco:
-				stableUNormalised = 0.75;
-				minimalU = nominalU * 0.5;
-				stableU = nominalU * stableUNormalised;
-				stableTime = 4;
-				break;
+    public LampDescriptor(
+        String name, String iconName,
+        Type type, LampSocketType socket,
+        double nominalU, double nominalP, double nominalLight, double nominalLife,
+        double vegetableGrowRate) {
+        super(name);
+        changeDefaultIcon(iconName);
+        this.type = type;
+        this.socket = socket;
+        this.nominalU = nominalU;
+        this.nominalP = nominalP;
+        this.nominalLight = nominalLight;
+        this.nominalLife = nominalLife;
+        this.vegetableGrowRate = vegetableGrowRate;
 
-			case LED:
-				minimalU = nominalU * 0.75;
-				break;
+        switch (type) {
+            case Incandescent:
+                minimalU = nominalU * 0.5;
+                break;
 
-			default:
-				break;
-		}
-		
-		Eln.instance.configShared.add(this);
-		voltageLevelColor = VoltageLevelColor.fromVoltage(nominalU);
-	}
-	
-	@Override
-	public void setParent(Item item, int damage) {
-		super.setParent(item, damage);
-		Data.addLight(newItemStack());
-	}
-	
-	public double getR() {
-		return nominalU * nominalU / nominalP;
-	}
+            case eco:
+                stableUNormalised = 0.75;
+                minimalU = nominalU * 0.5;
+                stableU = nominalU * stableUNormalised;
+                stableTime = 4;
+                break;
 
-	public double getLifeInTag(ItemStack stack) {
-		if(!stack.hasTagCompound())
-			stack.setTagCompound(getDefaultNBT());
-		if(stack.getTagCompound().hasKey("life"))
-			return stack.getTagCompound().getDouble("life");
-		return Utils.rand(0.75, 1.50);
-	}
-	
-	public void setLifeInTag(ItemStack stack, double life) {
-		if(!stack.hasTagCompound())
-			stack.setTagCompound(getDefaultNBT());
-		stack.getTagCompound().setDouble("life", life);
-	}
-	
-	@Override
-	public NBTTagCompound getDefaultNBT() {
-		return new NBTTagCompound();
-	}
-	
-	@Override
-	public ItemStack newItemStack(int size) {
-		return super.newItemStack(size);
-	}
-	
-	public void applyTo(Resistor resistor) {
-		resistor.setR(getR());
-	}
-	
-	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		super.addInformation(itemStack, entityPlayer, list, par4);
+            case LED:
+                minimalU = nominalU * 0.75;
+                break;
 
-		list.add(tr("Technology: %1$", type));
-		list.add(tr("Range: %1$ blocks", (int)(nominalLight * 15)));
-		list.add(tr("Power: %1$W", (int)nominalP));
-		list.add(tr("Resistance: %1$Ω", getR()));
-		list.add(tr("Nominal lifetime: %1$h", serverNominalLife));
-		if (itemStack != null) {
-			if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey("life"))
-				list.add(tr("Condition:") + " " + tr("New"));
-			else if (getLifeInTag(itemStack) > 0.5)
-				list.add(tr("Condition:") + " " + tr("Good"));
-			else if (getLifeInTag(itemStack) > 0.2)
-				list.add(tr("Condition:") + " " + tr("Used"));
-			else if (getLifeInTag(itemStack) > 0.1)
-				list.add(tr("Condition:") + " " + tr("End of life"));
-			else
-				list.add(tr("Condition:") + " " + tr("Bad"));
-		}
-	}
+            default:
+                break;
+        }
 
-	@Override
-	public void serializeConfig(DataOutputStream stream) throws IOException {
-		stream.writeDouble(nominalLife);
-	}
+        Eln.instance.configShared.add(this);
+        voltageLevelColor = VoltageLevelColor.fromVoltage(nominalU);
+    }
 
-	@Override
-	public void deserialize(DataInputStream stream) throws IOException {
-		serverNominalLife = stream.readDouble();
-	}
+    @Override
+    public void setParent(Item item, int damage) {
+        super.setParent(item, damage);
+        Data.addLight(newItemStack());
+    }
+
+    public double getR() {
+        return nominalU * nominalU / nominalP;
+    }
+
+    public double getLifeInTag(ItemStack stack) {
+        if (!stack.hasTagCompound())
+            stack.setTagCompound(getDefaultNBT());
+        if (stack.getTagCompound().hasKey("life"))
+            return stack.getTagCompound().getDouble("life");
+        return Utils.rand(0.75, 1.50);
+    }
+
+    public void setLifeInTag(ItemStack stack, double life) {
+        if (!stack.hasTagCompound())
+            stack.setTagCompound(getDefaultNBT());
+        stack.getTagCompound().setDouble("life", life);
+    }
+
+    @Override
+    public NBTTagCompound getDefaultNBT() {
+        return new NBTTagCompound();
+    }
+
+    @Override
+    public ItemStack newItemStack(int size) {
+        return super.newItemStack(size);
+    }
+
+    public void applyTo(Resistor resistor) {
+        resistor.setR(getR());
+    }
+
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+
+        list.add(tr("Technology: %1$", type));
+        list.add(tr("Range: %1$ blocks", (int) (nominalLight * 15)));
+        list.add(tr("Power: %1$W", (int) nominalP));
+        list.add(tr("Resistance: %1$Ω", getR()));
+        list.add(tr("Nominal lifetime: %1$h", serverNominalLife));
+        if (itemStack != null) {
+            if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey("life"))
+                list.add(tr("Condition:") + " " + tr("New"));
+            else if (getLifeInTag(itemStack) > 0.5)
+                list.add(tr("Condition:") + " " + tr("Good"));
+            else if (getLifeInTag(itemStack) > 0.2)
+                list.add(tr("Condition:") + " " + tr("Used"));
+            else if (getLifeInTag(itemStack) > 0.1)
+                list.add(tr("Condition:") + " " + tr("End of life"));
+            else
+                list.add(tr("Condition:") + " " + tr("Bad"));
+        }
+    }
+
+    @Override
+    public void serializeConfig(DataOutputStream stream) throws IOException {
+        stream.writeDouble(nominalLife);
+    }
+
+    @Override
+    public void deserialize(DataInputStream stream) throws IOException {
+        serverNominalLife = stream.readDouble();
+    }
 }

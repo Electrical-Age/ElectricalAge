@@ -7,8 +7,8 @@ import mods.eln.sim.mna.state.State;
 
 public class DelayInterSystem extends Component implements ISubSystemProcessI {
 
-	private DelayInterSystem other;
-	public State pin;
+    private DelayInterSystem other;
+    public State pin;
 
     double impedance, conductance;
 
@@ -21,38 +21,38 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 
     double iTarget;
 
-	public void set(State pin, DelayInterSystem other) {
-		this.other = other;
-		this.pin = pin;
-	}
+    public void set(State pin, DelayInterSystem other) {
+        this.other = other;
+        this.pin = pin;
+    }
 
-	public DelayInterSystem set(double impedance) {
-		this.impedance = impedance;
-		this.conductance = 1 / impedance;
+    public DelayInterSystem set(double impedance) {
+        this.impedance = impedance;
+        this.conductance = 1 / impedance;
 
-		return this;
-	}
+        return this;
+    }
 
-	@Override
-	public void quitSubSystem() {
-		subSystem.removeProcess(this);
+    @Override
+    public void quitSubSystem() {
+        subSystem.removeProcess(this);
 
-		super.quitSubSystem();
-	}
+        super.quitSubSystem();
+    }
 
-	@Override
-	public void addedTo(SubSystem s) {
-		super.addedTo(s);
-		s.addProcess(this);
-	}
+    @Override
+    public void addedTo(SubSystem s) {
+        super.addedTo(s);
+        s.addProcess(this);
+    }
 
-	@Override
-	public void applyTo(SubSystem s) {
-		s.addToA(pin, pin, conductance);
-	}
+    @Override
+    public void applyTo(SubSystem s) {
+        s.addToA(pin, pin, conductance);
+    }
 
 	/*@Override
-	public void simProcessI(SubSystem s) {
+    public void simProcessI(SubSystem s) {
 		if(thevnaCalc == false) {
 			double pinI = 2 * other.getSubSystem().getX(other.pin) * conductance + oldIother[doubleBuffer];
 			//pinI = (pinI * 1 - other.oldIother[doubleBuffer] * 0);
@@ -99,30 +99,30 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 		other.oldIother[doubleBuffer]= -pinI;
 	}*/
 
-	@Override
-	public State[] getConnectedStates() {
-		return new State[] {};
-	}
+    @Override
+    public State[] getConnectedStates() {
+        return new State[]{};
+    }
 
-	public void setInitialCurrent(double i) {
-		oldIother[doubleBuffer] = i;
-	}
+    public void setInitialCurrent(double i) {
+        oldIother[doubleBuffer] = i;
+    }
 
-	@Override
-	public void simProcessI(SubSystem s) {
-		if (!thevnaCalc) {
-			//Thevna delay line
-			
-			if (Math.abs(Rth) < 1000000.0) {
-				double uTarget = Uth - Rth * iTarget;
-				double aPinI = iTarget - uTarget * conductance;
-				s.addToI(pin, -aPinI);
-			} else {
-				double uTarget = other.pin.state * 0.5 + pin.state * 0.5;
-				//uTarget = 0;
-				double aPinI = iTarget - uTarget * conductance;
-				s.addToI(pin, -aPinI);
-			}
+    @Override
+    public void simProcessI(SubSystem s) {
+        if (!thevnaCalc) {
+            //Thevna delay line
+
+            if (Math.abs(Rth) < 1000000.0) {
+                double uTarget = Uth - Rth * iTarget;
+                double aPinI = iTarget - uTarget * conductance;
+                s.addToI(pin, -aPinI);
+            } else {
+                double uTarget = other.pin.state * 0.5 + pin.state * 0.5;
+                //uTarget = 0;
+                double aPinI = iTarget - uTarget * conductance;
+                s.addToI(pin, -aPinI);
+            }
 			
 			/*
 			//STD delay line
@@ -132,46 +132,46 @@ public class DelayInterSystem extends Component implements ISubSystemProcessI {
 			doubleBuffer = (doubleBuffer + 1) & 1;
 			other.oldIother[doubleBuffer] = -pinI;*/
 
-		} else {
-			s.addToI(pin, -thenvaCurrent);
-		}
-	}
+        } else {
+            s.addToI(pin, -thenvaCurrent);
+        }
+    }
 
-	public static class ThevnaCalculator implements IRootSystemPreStepProcess {
-		DelayInterSystem a, b;
+    public static class ThevnaCalculator implements IRootSystemPreStepProcess {
+        DelayInterSystem a, b;
 
-		public ThevnaCalculator(DelayInterSystem a, DelayInterSystem b) {
-			this.a = a;
-			this.b = b;
-		}
+        public ThevnaCalculator(DelayInterSystem a, DelayInterSystem b) {
+            this.a = a;
+            this.b = b;
+        }
 
-		@Override
-		public void rootSystemPreStepProcess() {
-			doJobFor(a);
-			doJobFor(b);
-			double iTarget = (a.Uth - b.Uth) / (a.Rth + b.Rth);
-			a.iTarget = iTarget;
-			b.iTarget = -iTarget;
-		}
+        @Override
+        public void rootSystemPreStepProcess() {
+            doJobFor(a);
+            doJobFor(b);
+            double iTarget = (a.Uth - b.Uth) / (a.Rth + b.Rth);
+            a.iTarget = iTarget;
+            b.iTarget = -iTarget;
+        }
 
-		void doJobFor(DelayInterSystem d) {
-			d.thevnaCalc = true;
+        void doJobFor(DelayInterSystem d) {
+            d.thevnaCalc = true;
 
-			d.thenvaCurrent = 2;
-			double aIs = 2;
-			double aU = d.getSubSystem().solve(d.pin);
+            d.thenvaCurrent = 2;
+            double aIs = 2;
+            double aU = d.getSubSystem().solve(d.pin);
 
-			d.thenvaCurrent = 1;
-			double bIs = 1;
-			double bU = d.getSubSystem().solve(d.pin);
+            d.thenvaCurrent = 1;
+            double bIs = 1;
+            double bU = d.getSubSystem().solve(d.pin);
 
-			double aC = -(aU * d.conductance + aIs);
-			double bC = -(bU * d.conductance + bIs);
+            double aC = -(aU * d.conductance + aIs);
+            double bC = -(bU * d.conductance + bIs);
 
-			d.Rth = (aU - bU) / (aC - bC);
-			d.Uth = aU - d.Rth * aC;
+            d.Rth = (aU - bU) / (aC - bC);
+            d.Uth = aU - d.Rth * aC;
 
-			d.thevnaCalc = false;
-		}
-	}
+            d.thevnaCalc = false;
+        }
+    }
 }

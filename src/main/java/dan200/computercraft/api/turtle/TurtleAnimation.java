@@ -6,8 +6,7 @@
 
 package dan200.computercraft.api.turtle;
 
-public enum TurtleAnimation
-{
+public enum TurtleAnimation {
     None,
     MoveForward,
     MoveBack,

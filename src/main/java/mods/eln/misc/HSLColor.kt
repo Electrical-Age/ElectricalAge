@@ -319,7 +319,7 @@ class HSLColor {
 
             //  Calculate the Saturation
 
-            var s : Float
+            var s: Float
 
             if (max == min)
                 s = 0f
@@ -388,7 +388,7 @@ class HSLColor {
             svar /= 100f
             lvar /= 100f
 
-            var q : Float
+            var q: Float
 
             if (lvar < 0.5)
                 q = lvar * (1 + svar)

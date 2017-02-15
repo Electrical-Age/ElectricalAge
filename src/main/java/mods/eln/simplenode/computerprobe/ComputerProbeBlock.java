@@ -15,22 +15,22 @@ public class ComputerProbeBlock extends SimpleNodeBlock {
     private IIcon[] icon = new IIcon[6];
 
     public ComputerProbeBlock() {
-		super(Material.rock);
-	}
+        super(Material.packedIce);
+    }
 
-	@Override
-	public TileEntity createNewTileEntity(World var1, int var2) {
-		return new ComputerProbeEntity();
-	}
+    @Override
+    public TileEntity createNewTileEntity(World var1, int var2) {
+        return new ComputerProbeEntity();
+    }
 
-	@Override
-	protected SimpleNode newNode() {
-		return new ComputerProbeNode();
-	}
+    @Override
+    protected SimpleNode newNode() {
+        return new ComputerProbeNode();
+    }
 
-	public IIcon getIcon(int side, int meta) {
-		return icon[side];
-	}
+    public IIcon getIcon(int side, int meta) {
+        return icon[side];
+    }
 
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister register) {

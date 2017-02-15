@@ -9,31 +9,31 @@ import static mods.eln.i18n.I18N.tr;
 
 public class WirelessSignalSourceGui extends GuiScreenEln {
 
-	GuiTextFieldEln channel;
-	private WirelessSignalSourceRender render;
+    GuiTextFieldEln channel;
+    private WirelessSignalSourceRender render;
 
-	public WirelessSignalSourceGui(WirelessSignalSourceRender render) {
-		this.render = render;
-	}
-	
-	@Override
-	public void initGui() {
-		super.initGui();
-		channel = newGuiTextField(6, 6, 220);
-		channel.setText(render.channel);
-		channel.setComment(0, tr("Specify the channel"));
-	}
-	
-	@Override
-	protected GuiHelper newHelper() {
-		return new GuiHelper(this, 220 + 12, 12 + 12);
-	}
+    public WirelessSignalSourceGui(WirelessSignalSourceRender render) {
+        this.render = render;
+    }
 
-	@Override
-	public void guiObjectEvent(IGuiObject object) {
-		if (object == channel) {
-			render.clientSetString(WirelessSignalSourceElement.setChannelId, channel.getText());
-		}
-		super.guiObjectEvent(object);
-	}
+    @Override
+    public void initGui() {
+        super.initGui();
+        channel = newGuiTextField(6, 6, 220);
+        channel.setText(render.channel);
+        channel.setComment(0, tr("Specify the channel"));
+    }
+
+    @Override
+    protected GuiHelper newHelper() {
+        return new GuiHelper(this, 220 + 12, 12 + 12);
+    }
+
+    @Override
+    public void guiObjectEvent(IGuiObject object) {
+        if (object == channel) {
+            render.clientSetString(WirelessSignalSourceElement.setChannelId, channel.getText());
+        }
+        super.guiObjectEvent(object);
+    }
 }

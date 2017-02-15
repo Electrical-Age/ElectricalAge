@@ -35,7 +35,7 @@ import java.io.DataOutputStream
 // TODO: Make the whole thing brighter when it heats up, not just redder.
 
 class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPassiveDescriptor, val cable: ElectricalCableDescriptor, val series: SerieEE) :
-        TransparentNodeDescriptor(name, LargeRheostatElement::class.java, LargeRheostatRender::class.java) {
+    TransparentNodeDescriptor(name, LargeRheostatElement::class.java, LargeRheostatRender::class.java) {
 
     fun getRsValue(inventory: IInventory): Double {
         val core = inventory.getStackInSlot(ResistorContainer.coreId) ?: return series.getValue(0)
@@ -59,7 +59,7 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
 }
 
 class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
-        TransparentNodeElement(node, desc_) {
+    TransparentNodeElement(node, desc_) {
     val desc = desc_ as LargeRheostatDescriptor
 
     var nominalRs = 1.0
@@ -89,7 +89,7 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
         thermalFastProcessList.add(heater)
         slowProcessList.add(thermalWatchdog)
         thermalWatchdog.set(thermalLoad).setTMax(desc.dissipator.warmLimit)
-                .set(WorldExplosion(this).machineExplosion())
+            .set(WorldExplosion(this).machineExplosion())
     }
 
     inner class ControlProcess() : IProcess {
@@ -155,7 +155,7 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     }
 
     override fun thermoMeterString(side: Direction) =
-            Utils.plotCelsius("T: ", thermalLoad.Tc) + Utils.plotPower("P: ", thermalLoad.power)
+        Utils.plotCelsius("T: ", thermalLoad.Tc) + Utils.plotPower("P: ", thermalLoad.power)
 
     override fun initialize() {
         desc.dissipator.applyTo(thermalLoad)
@@ -177,14 +177,14 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     override fun newContainer(side: Direction?, player: EntityPlayer?) = ResistorContainer(player, inventory)
 
     override fun getWaila(): Map<String, String> = mutableMapOf(
-            Pair(I18N.tr("Resistance"), Utils.plotOhm("", resistor.r)),
-            Pair(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.t)),
-            Pair(I18N.tr("Power loss"), Utils.plotPower("", resistor.p))
+        Pair(I18N.tr("Resistance"), Utils.plotOhm("", resistor.r)),
+        Pair(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.t)),
+        Pair(I18N.tr("Power loss"), Utils.plotPower("", resistor.p))
     )
 }
 
 class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) :
-        TransparentNodeElementRender(entity, desc) {
+    TransparentNodeElementRender(entity, desc) {
     val desc = desc as LargeRheostatDescriptor
     val inventory = TransparentNodeElementInventory(1, 64, this)
 
@@ -236,7 +236,7 @@ class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDe
 }
 
 class LargeRheostatGUI(player: EntityPlayer, inventory: IInventory, internal var render: LargeRheostatRender) :
-        GuiContainerEln(ResistorContainer(player, inventory)) {
+    GuiContainerEln(ResistorContainer(player, inventory)) {
 
     override fun postDraw(f: Float, x: Int, y: Int) {
         helper.drawString(8, 12, -16777216, tr("Nom. Resistance: %1$", Utils.plotValue(render.desc.getRsValue(render.inventory), "Ohm")))

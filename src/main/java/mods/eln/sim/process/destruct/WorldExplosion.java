@@ -10,56 +10,56 @@ import net.minecraft.init.Blocks;
 
 public class WorldExplosion implements IDestructable {
 
-	Object origine;
+    Object origine;
 
-	Coordonate c;
-	float strength;
-	String type;
-	
-	public WorldExplosion(Coordonate c) {
-		this.c = c;
-	}
-	
-	public WorldExplosion(SixNodeElement e) {
-		this.c = e.getCoordonate();
-		this.type = e.toString();
-		origine = e;
-	}
-	
-	public WorldExplosion(TransparentNodeElement e) {
-		this.c = e.coordonate();
-		this.type = e.toString();
-		origine = e;
-	}
+    Coordonate c;
+    float strength;
+    String type;
 
-	public WorldExplosion(EnergyConverterElnToOtherNode e) {
-		this.c = e.coordonate;
-		this.type = e.toString();
-		origine = e;
-	}
+    public WorldExplosion(Coordonate c) {
+        this.c = c;
+    }
 
-	public WorldExplosion cableExplosion() {
-		strength = 1.5f;
-		return this;
-	}
+    public WorldExplosion(SixNodeElement e) {
+        this.c = e.getCoordonate();
+        this.type = e.toString();
+        origine = e;
+    }
 
-	public WorldExplosion machineExplosion() {
-		strength = 3;
-		return this;
-	}
+    public WorldExplosion(TransparentNodeElement e) {
+        this.c = e.coordonate();
+        this.type = e.toString();
+        origine = e;
+    }
 
-	@Override
-	public void destructImpl() {
-		//NodeManager.instance.removeNode(NodeManager.instance.getNodeFromCoordonate(c));
-		
-		if (Eln.instance.explosionEnable)
-			c.world().createExplosion((Entity)null, c.x, c.y, c.z, strength, true);
-		else
-			c.world().setBlock(c.x, c.y, c.z, Blocks.air);
-	}
+    public WorldExplosion(EnergyConverterElnToOtherNode e) {
+        this.c = e.coordonate;
+        this.type = e.toString();
+        origine = e;
+    }
 
-	@Override
-	public String describe() {
-		return String.format("%s (%s)", this.type, this.c.toString());
-	}
+    public WorldExplosion cableExplosion() {
+        strength = 1.5f;
+        return this;
+    }
+
+    public WorldExplosion machineExplosion() {
+        strength = 3;
+        return this;
+    }
+
+    @Override
+    public void destructImpl() {
+        //NodeManager.instance.removeNode(NodeManager.instance.getNodeFromCoordonate(c));
+
+        if (Eln.instance.explosionEnable)
+            c.world().createExplosion((Entity) null, c.x, c.y, c.z, strength, true);
+        else
+            c.world().setBlock(c.x, c.y, c.z, Blocks.air);
+    }
+
+    @Override
+    public String describe() {
+        return String.format("%s (%s)", this.type, this.c.toString());
+    }
 }

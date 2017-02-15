@@ -7,7 +7,7 @@ import net.minecraftforge.fluids.*;
 
 /**
  * Use one of these if you want your block to support Forge fluids!
- *
+ * <p>
  * See the steam turbine for an example.
  */
 public class ElementFluidHandler implements IFluidHandler, INBTTReady {
@@ -61,10 +61,10 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
 
     @Override
     public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain) {
-       if (resource.isFluidEqual(tank.getFluid()))
-           return tank.drain(resource.amount, doDrain);
-       else
-           return null;
+        if (resource.isFluidEqual(tank.getFluid()))
+            return tank.drain(resource.amount, doDrain);
+        else
+            return null;
     }
 
     @Override

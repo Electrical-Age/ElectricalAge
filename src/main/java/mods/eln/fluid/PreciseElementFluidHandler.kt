@@ -16,7 +16,7 @@ class PreciseElementFluidHandler(tankSize: Int) : ElementFluidHandler(tankSize) 
         nbt.setDouble(str + "fixup", fixup)
     }
 
-    fun drain(demand: Double) : Double {
+    fun drain(demand: Double): Double {
         val drain = Math.ceil(demand - fixup)
         val drained = drain(ForgeDirection.DOWN, drain.toInt(), true)?.amount?.toDouble() ?: 0.0
         val available = fixup + drained
@@ -25,7 +25,7 @@ class PreciseElementFluidHandler(tankSize: Int) : ElementFluidHandler(tankSize) 
         return actual
     }
 
-    fun drainEnergy(energy: Double) : Double {
+    fun drainEnergy(energy: Double): Double {
         val heatValue = FuelRegistry.heatEnergyPerMilliBucket(tank.fluid?.getFluid())
         return if (heatValue > 0)
             heatValue * drain(energy / heatValue)

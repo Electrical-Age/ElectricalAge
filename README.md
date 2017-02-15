@@ -10,14 +10,16 @@ Look at the official project website [electrical-age.net](https://electrical-age
 
 **ElectricalAge is Minecraft 1.7.10 compatible only. Forge is needed.**
 
-1. Download the [last mod release](https://github.com/Electrical-Age/ElectricalAge/releases/download/BETA-1.10/ElectricalAge_BETA-1.10_r50.jar) (other versions are available [here](https://github.com/Electrical-Age/ElectricalAge/releases)). Copy the Jar file to the `.minecraft/mods/` directory (or related folder depending on your platform).
+1. Download the [last mod release](https://minecraft.curseforge.com/projects/electrical-age) (other versions are available through the same link). Copy the Jar file to the `.minecraft/mods/` directory (or related folder depending on your platform).
 2. Get started with the tutorial map or start playing on the offical demonstration map. The two official maps can be [downloaded from here](https://github.com/Electrical-Age/ElectricalAge/releases/download/BETA-1.10/ElectricalAge_tutorialMap_BETA-1.9_r41.zip). They must be copied to the `.minecraft/saves/` (or related) directory.
 3. Launch Minecraft using the `1.7.10-Forge` profile, select the tutorial map and enjoy!
+
+Or add it with the Curse launcher.
 
 ### Building from source
 
 Alternatively, you can compile and launch the current development version.
-[Download](https://github.com/Electrical-Age/ElectricalAge/archive/1.7.10-MNA.zip) or clone the `1.7.10-MNA` branch. Then build and launch the tutorial map using Gradle:
+[Download](https://github.com/Electrical-Age/ElectricalAge/archive/develop.zip) or clone the `develop` branch. Then build and launch the tutorial map using Gradle:
 
 ```sh
 $ git clone https://github.com/Electrical-Age/ElectricalAge.git
@@ -65,15 +67,15 @@ Use at your own risk and do map backup frequently.
 ## MAIN DEVELOPERS
 
 - **Dolu1990** (Code guru, concepts, some 3D models)
-- **lambdaShade** (3D models/texturing/graphics maestro, concepts, some sounds and lines of code)
+- **Svein Ove Aas, aka. Baughn** (Code, some 3D models, concepts)
 - **cm0x4D** (Sound engineer, code and 3D models/texturing, concepts)
+- **lambdaShade** (3D models/texturing/graphics maestro, concepts, some sounds and lines of code)
 - **metc** (Website/Wiki webmaster)
 
 ## MAIN CONTRIBUTORS
 
 Code/models:
 
-- **Svein Ove Aas** (Thermistor, Powerpole, some tweaks)
 - **bloxgate** (some tweaks)
 - **DrummerMC** (bug fix)
 - **ltouroumov** (bug fix)

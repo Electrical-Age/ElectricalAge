@@ -15,19 +15,19 @@ import java.io.DataInputStream;
 @Sharable
 public class ClientPacketHandler {
 
-	public ClientPacketHandler() {
-		//FMLCommonHandler.instance().bus().register(this);
-		Eln.eventChannel.register(this);
-	}
+    public ClientPacketHandler() {
+        //FMLCommonHandler.instance().bus().register(this);
+        Eln.eventChannel.register(this);
+    }
 
-	@SubscribeEvent
-	public void onClientPacket(ClientCustomPacketEvent event) {
-		//Utils.println("onClientPacket");
-		FMLProxyPacket packet = event.packet;
-		DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
-		NetworkManager manager = event.manager;
-		EntityPlayer player = Minecraft.getMinecraft().thePlayer; // EntityClientPlayerMP
+    @SubscribeEvent
+    public void onClientPacket(ClientCustomPacketEvent event) {
+        //Utils.println("onClientPacket");
+        FMLProxyPacket packet = event.packet;
+        DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
+        NetworkManager manager = event.manager;
+        EntityPlayer player = Minecraft.getMinecraft().thePlayer; // EntityClientPlayerMP
 
-		Eln.packetHandler.packetRx(stream, manager, player);
-	}
+        Eln.packetHandler.packetRx(stream, manager, player);
+    }
 }
