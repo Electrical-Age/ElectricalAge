@@ -5,12 +5,14 @@ import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
+import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -49,7 +51,14 @@ public class GhostBlock extends Block {
 
                 break;
             default:
-                super.addCollisionBoxesToList(world, x, y, z, par5AxisAlignedBB, list, entity);
+                GhostElement element = getElement(world, x, y, z);
+                Coordonate coord = element == null ? null : element.observatorCoordonate;
+                TileEntity te = coord == null ? null : coord.getTileEntity();
+                if (te != null && te instanceof TransparentNodeEntity) {
+                    ((TransparentNodeEntity) te).addCollisionBoxesToList(par5AxisAlignedBB, list, element.elementCoordonate);
+                } else {
+                    super.addCollisionBoxesToList(world, x, y, z, par5AxisAlignedBB, list, entity);
+                }
                 break;
         }
     }

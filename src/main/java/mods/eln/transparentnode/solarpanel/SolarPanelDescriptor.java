@@ -13,6 +13,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -148,12 +149,12 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
-    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, TransparentNodeEntity entity) {
+    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, World world, int x, int y, int z) {
         if (canRotate) {
-            super.addCollisionBoxesToList(par5AxisAlignedBB, list, entity);
+            super.addCollisionBoxesToList(par5AxisAlignedBB, list, world, x, y, z);
             return;
         }
-        AxisAlignedBB bb = Blocks.stone.getCollisionBoundingBoxFromPool(entity.getWorldObj(), entity.xCoord, entity.yCoord, entity.zCoord);
+        AxisAlignedBB bb = Blocks.stone.getCollisionBoundingBoxFromPool(world, x, y, z);
         bb.maxY -= 0.5;
         if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
     }

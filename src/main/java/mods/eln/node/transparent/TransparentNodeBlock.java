@@ -115,7 +115,7 @@ public class TransparentNodeBlock extends NodeBlock {
         if (tileEntity == null || (tileEntity instanceof TransparentNodeEntity == false)) {
             super.addCollisionBoxesToList(world, x, y, z, par5AxisAlignedBB, list, entity);
         } else {
-            ((TransparentNodeEntity) tileEntity).addCollisionBoxesToList(par5AxisAlignedBB, list);
+            ((TransparentNodeEntity) tileEntity).addCollisionBoxesToList(par5AxisAlignedBB, list, null);
         }
         //Utils.println(list);
     }
