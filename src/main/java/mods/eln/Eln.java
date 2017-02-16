@@ -5961,12 +5961,14 @@ public class Eln {
             Character.valueOf('I'), new ItemStack(Items.iron_ingot));
 
         for (String metal : new String[] { "blockSteel", "blockAluminum", "blockAluminium" }) {
-            addRecipe(findItemStack("2x3 Solar Panel"),
-                "PPP",
-                "PPP",
-                "I I",
-                Character.valueOf('P'), findItemStack("Small Solar Panel"),
-                Character.valueOf('I'), metal);
+            for (String panel : new String[] {"Small Solar Panel", "Small Rotating Solar Panel"}) {
+                addRecipe(findItemStack(panel),
+                    "PPP",
+                    "PPP",
+                    "I I",
+                    Character.valueOf('P'), findItemStack("Small Solar Panel"),
+                    Character.valueOf('I'), metal);
+            }
         }
         addRecipe(findItemStack("2x3 Rotating Solar Panel"),
             "ISI",
