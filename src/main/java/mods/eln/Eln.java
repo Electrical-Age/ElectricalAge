@@ -4879,6 +4879,7 @@ public class Eln {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             Data.addResource(desc.newItemStack());
+            addToOre("casingMachine", desc.newItemStack());
         }
         {
             subId = 3;
@@ -4993,6 +4994,7 @@ public class Eln {
                 TR_NAME(Type.NONE, "Advanced Machine Block"), new String[]{}); // TODO: Description.
             sharedItem.addElement(subId + (id << 6), desc);
             Data.addResource(desc.newItemStack());
+            addToOre("casingMachineAdvanced", desc.newItemStack());
         }
         {
             subId = 28;
@@ -5960,13 +5962,13 @@ public class Eln {
             Character.valueOf('M'), findItemStack("Electrical Motor"),
             Character.valueOf('I'), new ItemStack(Items.iron_ingot));
 
-        for (String metal : new String[] { "blockSteel", "blockAluminum", "blockAluminium" }) {
+        for (String metal : new String[] { "blockSteel", "blockAluminum", "blockAluminium", "casingMachineAdvanced" }) {
             for (String panel : new String[] {"Small Solar Panel", "Small Rotating Solar Panel"}) {
-                addRecipe(findItemStack(panel),
+                addRecipe(findItemStack("2x3 Solar Panel"),
                     "PPP",
                     "PPP",
                     "I I",
-                    Character.valueOf('P'), findItemStack("Small Solar Panel"),
+                    Character.valueOf('P'), findItemStack(panel),
                     Character.valueOf('I'), metal);
             }
         }
