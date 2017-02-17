@@ -18,6 +18,7 @@ import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.event.world.WorldEvent.Save;
 import net.minecraftforge.event.world.WorldEvent.Unload;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.HashSet;
@@ -80,7 +81,9 @@ public class ServerEventListener {
             fileStream.close();
         } catch (Exception ex) {
             try {
-                FileInputStream fileStream = new FileInputStream(getEaWorldSaveName(e.world) + "back");
+                String name = getEaWorldSaveName(e.world) + ".bak";
+                FileInputStream fileStream = new FileInputStream(name);
+                System.out.println("Using BACKUP Electrical Age save: " + name);
                 NBTTagCompound nbt = CompressedStreamTools.readCompressed(fileStream);
                 readFromEaWorldNBT(nbt);
                 fileStream.close();
@@ -114,20 +117,21 @@ public class ServerEventListener {
             NBTTagCompound nbt = new NBTTagCompound();
             writeToEaWorldNBT(nbt, e.world.provider.dimensionId);
 
-//            File oldBackup = new File(getEaWorldSaveName(e.world) + "back");
-//            if (oldBackup.exists()) {
-//                oldBackup.delete();
-//            }
-//
-//            File oldSave = new File(getEaWorldSaveName(e.world));
-//            if (oldSave.exists()) {
-//                oldSave.renameTo(oldBackup);
-//            }
+            String worldSaveName = getEaWorldSaveName(e.world);
+            String tempSaveName = worldSaveName + ".tmp";
+            String backupSaveName = worldSaveName + ".bak";
+            File failedSave = new File(tempSaveName);
+            if (failedSave.exists()) {
+                failedSave.delete();
+            }
 
-            FileOutputStream fileStream = new FileOutputStream(getEaWorldSaveName(e.world));
+            FileOutputStream fileStream = new FileOutputStream(tempSaveName);
             CompressedStreamTools.writeCompressed(nbt, fileStream);
             fileStream.flush();
             fileStream.close();
+
+            new File(worldSaveName).renameTo(new File(backupSaveName));
+            new File(tempSaveName).renameTo(new File(worldSaveName));
         } catch (Exception ex) {
             ex.printStackTrace();
         }
