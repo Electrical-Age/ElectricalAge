@@ -27,6 +27,8 @@ achievement.open_guide.desc=Open the wiki guide
 200V_Tungsten_Heating_Corp.name=200V Tungsten Heating Corp
 200V_Turbine.name=200V Turbine
 25A_Diode.name=25A Diode
+2x3_Rotating_Solar_Panel.name=2x3 Rotating Solar Panel
+2x3_Solar_Panel.name=2x3 Solar Panel
 50V_Battery_Charger.name=50V Battery Charger
 50V_Carbon_Incandescent_Light_Bulb.name=50V Carbon Incandescent Light Bulb
 50V_Compressor.name=50V Compressor
@@ -211,6 +213,7 @@ Redstone-to-Voltage_Converter.name=Redstone-to-Voltage Converter
 Rheostat.name=Rheostat
 Robust_Lamp_Socket.name=Robust Lamp Socket
 Rubber.name=Rubber
+Sample_and_hold.name=Sample and hold
 Schmitt_Trigger_Chip.name=Schmitt Trigger Chip
 Sconce_Lamp_Socket.name=Sconce Lamp Socket
 Signal_20H_inductor.name=Signal 20H inductor
@@ -356,11 +359,13 @@ Solar_panel_upgrade=Solar panel upgrade
 
 # ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
 
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalArmor.java
+
 # ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
 State\:=State:
 Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
 
-# ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalTool.java
 
 # ./src/main/java/mods/eln/mechanical/Tachometer.kt
 Rads_s_corresponding\nto_0%_output=Rads/s corresponding\nto 0% output
@@ -388,7 +393,8 @@ Gain_for_input_\u00a741=Gain for input \u00a741
 Operational_Amplifier_-_DC_coupled\nhigh-gain_voltage_amplifier_with\ndifferential_input._Can_be_used_to\ncompare_voltages_or_a_configurable_amplifier.=Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or a configurable amplifier.
 Params=Params
 Proportional–integral–derivative_controller._A_PID\ncontroller_continuously_calculates_an_error_value_as\nthe_difference_between_a_desired_setpoint_and_a_measured\nprocess_variable_and_applies_a_correction_based_on\nproportional,_integral,_and_derivative_terms.=Proportional–integral–derivative controller. A PID\ncontroller continuously calculates an error value as\nthe difference between a desired setpoint and a measured\nprocess variable and applies a correction based on\nproportional, integral, and derivative terms.
-The_summing_unit_outputs_the_sum_of\nthe_tree_wighted_inputs_at_it's_output.The\ngain_for_each_input_can_be_configured.=The summing unit outputs the sum of\nthe tree wighted inputs at it's output.The\ngain for each input can be configured.
+Samples_the_voltage_of_a_varying_analog_signal_when\nthe_clock_input_changes_from_0_to_1_and_holds_its\noutput_voltage_at_a_constant_level_until_next_clock_pulse.\nYou_can_see_it_as_an_analog_D-Flipflop.=Samples the voltage of a varying analog signal when\nthe clock input changes from 0 to 1 and holds its\noutput voltage at a constant level until next clock pulse.\nYou can see it as an analog D-Flipflop.
+The_summing_unit_outputs_the_sum_of\nthe_three_weighted_inputs.The\ngain_for_each_input_can_be_configured.=The summing unit outputs the sum of\nthe three weighted inputs.The\ngain for each input can be configured.
 
 # ./src/main/java/mods/eln/sixnode/ElectricalFuse.kt
 Protects_electrical_components.\nFuse_melts_if_current_exceeds_the\nfuse_limit=Protects electrical components.\nFuse melts if current exceeds the\nfuse limit
@@ -421,8 +427,6 @@ Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nan
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerElement.java
 Charge_Current=Charge Current
 
-# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
-
 # ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
 Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Electrical current can only\nflow through the diode\nfrom anode to cathode
 
@@ -440,8 +444,6 @@ Input_Voltage=Input Voltage
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
 Sound_is_muted=Sound is muted
 Sound_is_not_muted=Sound is not muted
-
-# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
 Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds the cable limit
@@ -470,8 +472,6 @@ Signal_Voltage=Signal Voltage
 It_can_store_up_to_256_points.=It can store up to 256 points.
 Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Measures the voltage of an\nelectrical signal and plots\nthe data in real time.
 
-# ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerElement.java
-
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerGui.java
 Back_to_display=Back to display
 Configuration=Configuration
@@ -485,8 +485,6 @@ Temp._[*C]=Temp. [*C]
 Voltage_[V]=Voltage [V]
 Y-axis_max=Y-axis max
 Y-axis_min=Y-axis min
-
-# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
 Output_voltage_increases\nif_entities_are_moving_around.=Output voltage increases\nif entities are moving around.
@@ -517,8 +515,6 @@ Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_dayli
 
 # ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorElement.java
 Light_level=Light level
-
-# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
 Applicable_boolean_operators\:=Applicable boolean operators:
@@ -558,12 +554,28 @@ Default_position=Default position
 Normally_closed=Normally closed
 Normally_open=Normally open
 
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorDescriptor.java
+Can_measure_Voltage_Power_Current=Can measure Voltage/Power/Current
+Measures_electrical_values_on_cables.=Measures electrical values on cables.
+Measures_voltage_on_cables.=Measures voltage on cables.
+
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorElement.java
+Measured_current=Measured current
+Measured_power=Measured power
+Measured_voltage=Measured voltage
+
+# ./src/main/java/mods/eln/sixnode/electricalsensor/ElectricalSensorGui.java
+Measured_voltage\ncorresponding\nto_0%_output=Measured voltage\ncorresponding\nto 0% output
+Measured_voltage\ncorresponding\nto_100%_output=Measured voltage\ncorresponding\nto 100% output
+
 # ./src/main/java/mods/eln/sixnode/electricalsource/ElectricalSourceDescriptor.java
 Creative_block.=Creative block.
 Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides an ideal voltage source\nwithout energy or power limitation.
 
 # ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
 Can_break_an_electrical_circuit\ninterrupting_the_current.=Can break an electrical circuit\ninterrupting the current.
+
+# ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
 Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=Upon application of a high signal,\nthe timer maintains the output high for\na configurable interval. Can be re-triggered.
@@ -589,20 +601,6 @@ Storm\:_%1$V=Storm: %1$V
 Maximum_wind_speed_is_%1$m_s=Maximum wind speed is %1$m/s
 Provides_an_electrical_signal\ndependant_on_wind_speed.=Provides an electrical signal\ndependant on wind speed.
 You_can't_place_this_block_on_the_floor_or_the_ceiling=You can't place this block on the floor or the ceiling
-
-# ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorDescriptor.java
-Can_measure_Voltage_Power_Current=Can measure Voltage/Power/Current
-Measures_electrical_values_on_cables.=Measures electrical values on cables.
-Measures_voltage_on_cables.=Measures voltage on cables.
-
-# ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorElement.java
-Measured_current=Measured current
-Measured_power=Measured power
-Measured_voltage=Measured voltage
-
-# ./src/main/java/mods/eln/sixnode/electricasensor/ElectricalSensorGui.java
-Measured_voltage\ncorresponding\nto_0%_output=Measured voltage\ncorresponding\nto 0% output
-Measured_voltage\ncorresponding\nto_100%_output=Measured voltage\ncorresponding\nto 100% output
 
 # ./src/main/java/mods/eln/sixnode/energymeter/EnergyMeterElement.java
 Counter=Counter
@@ -685,14 +683,8 @@ Wireless_TX=Wireless TX
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixElement.java
 Capacity=Capacity
 
-# ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixGui.java
-
-# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixContainer.java
-
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixElement.java
 Inductance=Inductance
-
-# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixGui.java
 
 # ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketDescriptor.java
 Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in with energy.
@@ -703,8 +695,6 @@ Specify_the_device_to_supply_through_this_socket.=Specify the device to supply t
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorContainer.java
 (Sets_resistance)=(Sets resistance)
 Coal_dust_slot=Coal dust slot
-
-# ./src/main/java/mods/eln/sixnode/resistor/ResistorElement.java
 
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
 High_parallel_resistance\n_\=>_Low_power_dissipation.=High parallel resistance\n => Low power dissipation.
@@ -726,7 +716,7 @@ __Temperature_Power_conducted=Temperature/Power conducted
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorElement.java
 Measured_temperature=Measured temperature
-Measured_thermic_power=Measured thermic power
+Measured_thermal_power=Measured thermal power
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorGui.java
 Measured_temperature\ncorresponding\nto_0%_output=Measured temperature\ncorresponding\nto 0% output
@@ -738,7 +728,7 @@ No_text_associated_to_this_beacon=No text associated to this beacon
 # ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignGui.java
 Set_beacon_name=Set beacon name
 
-# ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
+# ./src/main/java/mods/eln/sixnode/wirelesssignal/tx/WirelessSignalTxGui.java
 
 # ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
 Fuel_level=Fuel level
@@ -790,7 +780,9 @@ Internal_resistance\:_=Internal resistance:
 Life_\:_=Life : 
 Nominal_power\:_=Nominal power: 
 Nominal_voltage\:_=Nominal voltage: 
-_charged_at_= charged at 
+_charged_at_=charged at 
+
+# ./src/main/java/mods/eln/transparentnode/battery/BatteryElement.java
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryGuiDraw.java
 Charged=Charged
@@ -838,6 +830,8 @@ Auto_shutdown=Auto shutdown
 Manual_shutdown=Manual shutdown
 Set_point\:_%1$°C=Set point: %1$°C
 
+# ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineContainer.java
+
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
 Cost=Cost
 
@@ -858,6 +852,12 @@ Take_fuel=Take fuel
 
 # ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
 (Increases_maximal_voltage)=(Increases maximal voltage)
+
+# ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorGui.java
+
+# ./src/main/java/mods/eln/transparentnode/powerinductor/PowerInductorContainer.java
+
+# ./src/main/java/mods/eln/transparentnode/powerinductor/PowerInductorGui.java
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelContainer.java
 Solar_tracker_slot=Solar tracker slot
@@ -898,6 +898,8 @@ Fan_voltage\:_%1$V=Fan voltage: %1$V
 
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveElement.java
 
+# ./src/main/java/mods/eln/transparentnode/transformer/TransformerContainer.java
+
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerDescriptor.java
 The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=The voltage ratio is proportional\nto the cable stacks count ratio.
 Transforms_an_input_voltage_to\nan_output_voltage.=Transforms an input voltage to\nan output voltage.
@@ -913,6 +915,8 @@ Temperature_difference\:_%1$°C=Temperature difference: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineElement.java
 Nominal=Nominal
+
+# ./src/main/java/mods/eln/transparentnode/turret/TurretContainer.java
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
 CAUTION\:_Cables_can_get_quite_hot!=CAUTION: Cables can get quite hot!
@@ -940,14 +944,14 @@ Recharge_power\:=Recharge power:
 Generates_energy_using_water_stream.=Generates energy using water stream.
 No_place_for_water_turbine!=No place for water turbine!
 
-# ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineElement.java
-
 # ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
 Front\:_%1$=Front: %1$
 Generates_energy_from_wind.=Generates energy from wind.
 Left_Right\:_%1$=Left/Right: %1$
 Up_Down\:_%1$=Up/Down: %1$
 Wind_area\:=Wind area:
+
+# ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineElement.java
 
 # ./src/main/java/mods/eln/wiki/Data.java
 Light=Light
