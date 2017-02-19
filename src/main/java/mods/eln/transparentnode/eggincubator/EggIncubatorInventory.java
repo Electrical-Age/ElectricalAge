@@ -17,7 +17,7 @@ public class EggIncubatorInventory extends TransparentNodeElementInventory {
 
     @Override
     public int[] getAccessibleSlotsFromSide(int side) {
-        return new int[]{EggIncubatorContainer.EggSlotId};
+        return new int[]{EggIncubatorContainer.Companion.getEggSlotId()};
     }
 
     @Override

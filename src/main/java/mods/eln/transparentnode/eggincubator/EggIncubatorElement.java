@@ -70,10 +70,10 @@ public class EggIncubatorElement extends TransparentNodeElement {
         @Override
         public void process(double time) {
             energy -= powerResistor.getP() * time;
-            if (inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) != null) {
+            if (inventory.getStackInSlot(EggIncubatorContainer.Companion.getEggSlotId()) != null) {
                 descriptor.setState(powerResistor, true);
                 if (energy <= 0) {
-                    inventory.decrStackSize(EggIncubatorContainer.EggSlotId, 1);
+                    inventory.decrStackSize(EggIncubatorContainer.Companion.getEggSlotId(), 1);
                     EntityChicken chicken = new EntityChicken(node.coordonate.world());
                     chicken.setGrowingAge(-24000);
                     EntityLiving entityliving = (EntityLiving) chicken;
@@ -173,8 +173,8 @@ public class EggIncubatorElement extends TransparentNodeElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            if (inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) == null) stream.writeByte(0);
-            else stream.writeByte(inventory.getStackInSlot(EggIncubatorContainer.EggSlotId).stackSize);
+            if (inventory.getStackInSlot(EggIncubatorContainer.Companion.getEggSlotId()) == null) stream.writeByte(0);
+            else stream.writeByte(inventory.getStackInSlot(EggIncubatorContainer.Companion.getEggSlotId()).stackSize);
 
             node.lrduCubeMask.getTranslate(front.down()).serialize(stream);
 
@@ -188,7 +188,7 @@ public class EggIncubatorElement extends TransparentNodeElement {
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
-        info.put(I18N.tr("Has egg"), inventory.getStackInSlot(EggIncubatorContainer.EggSlotId) != null ?
+        info.put(I18N.tr("Has egg"), inventory.getStackInSlot(EggIncubatorContainer.Companion.getEggSlotId()) != null ?
             I18N.tr("Yes") : I18N.tr("No"));
         if (Eln.wailaEasyMode) {
             info.put(I18N.tr("Power consumption"), Utils.plotPower("", powerResistor.getP()));

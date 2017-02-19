@@ -201,7 +201,7 @@ public class ElectricalMathElement extends SixNodeElement {
     void checkRedstone() {
         int redstoneInStack = 0;
 
-        ItemStack stack = inventory.getStackInSlot(ElectricalMathContainer.restoneSlotId);
+        ItemStack stack = inventory.getStackInSlot(ElectricalMathContainer.Companion.getRestoneSlotId());
         if (stack != null) redstoneInStack = stack.stackSize;
 
         redstoneReady = redstoneRequired <= redstoneInStack;

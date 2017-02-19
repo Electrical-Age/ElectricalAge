@@ -6,51 +6,54 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraftforge.oredict.OreDictionary
 
+data class ItemFilter(val itemId: Int, val damageMask: Int, val damageValue: Int)
+
 class ItemStackFilter {
 
-    internal var itemId: Int = 0
-    internal var damageMask: Int = 0
-    internal var damageValue: Int = 0
+    private var whitelist: Array<ItemFilter>
 
-    constructor(item: Item, damageMask: Int, damageValue: Int) {
-        this.itemId = Item.getIdFromItem(item)
-        this.damageMask = damageMask
-        this.damageValue = damageValue
+    constructor(item: Item, damageMask: Int = 0, damageValue: Int = 0) {
+        whitelist = arrayOf(ItemFilter(
+            Item.getIdFromItem(item),
+            damageMask,
+            damageValue))
     }
 
-    constructor(block: Block, damageMask: Int, damageValue: Int) {
-        this.itemId = Utils.getItemId(block)
-        this.damageMask = damageMask
-        this.damageValue = damageValue
+    constructor(block: Block, damageMask: Int = 0, damageValue: Int = 0) {
+        whitelist = arrayOf(ItemFilter(
+            Utils.getItemId(block),
+            damageMask,
+            damageValue))
     }
 
-    constructor(item: Item) {
-        this.itemId = Item.getIdFromItem(item)
-        this.damageMask = 0
-        this.damageValue = 0
+    constructor(oreName: String) {
+        whitelist = OreDictionary.getOres(oreName).map {
+            ItemFilter(Item.getIdFromItem(it.item), 0xff, it.itemDamage)
+        }.toTypedArray()
     }
 
-    constructor(block: Block) {
-        this.itemId = Utils.getItemId(block)
-        this.damageMask = 0
-        this.damageValue = 0
-    }
-
-    fun tryItemStack(itemStack: ItemStack): Boolean {// caca1.5.1
-        if (Utils.getItemId(itemStack) != itemId)
-            return false
-        if (itemStack.itemDamage and damageMask != damageValue)
-            return false
-        return true
-    }
-
-    companion object {
-
-        fun OreDict(name: String): Array<ItemStackFilter> {
-            val ores = OreDictionary.getOres(name)
-            return ores.map {
-                ItemStackFilter(it.item, 0xff, it.itemDamage)
-            }.toTypedArray()
+    fun tryItemStack(itemStack: ItemStack): Boolean {
+        return whitelist.any {
+            Utils.getItemId(itemStack) == it.itemId && (itemStack.itemDamage and it.damageMask) == it.damageValue
         }
+    }
+
+    fun add(oreName: String) = apply {
+        whitelist = whitelist.plus(ItemStackFilter(oreName).whitelist)
+    }
+
+    fun add(item: Item, damageMask: Int = 0, damageValue: Int = 0) = apply {
+        whitelist = whitelist.plus(ItemStackFilter(item, damageMask, damageValue).whitelist)
+    }
+
+    fun add(block: Block, damageMask: Int = 0, damageValue: Int = 0) = apply {
+        whitelist = whitelist.plus(ItemStackFilter(block, damageMask, damageValue).whitelist)
+    }
+
+    /**
+     * De-duplicates the whitelist. Use if you suspect there may be duplicates.
+     */
+    fun optimize() {
+        whitelist = whitelist.distinct().toTypedArray()
     }
 }

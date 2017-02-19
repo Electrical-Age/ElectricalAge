@@ -122,7 +122,7 @@ public class PowerCapacitorElement extends TransparentNodeElement {
     public void setupPhysical() {
         double eOld = capacitor.getE();
         capacitor.setC(descriptor.getCValue(inventory));
-        stdDischargeResistor = descriptor.dischargeTao / capacitor.getC();
+        stdDischargeResistor = descriptor.getDischargeTao() / capacitor.getC();
 
         watchdog.setUNominal(descriptor.getUNominalValue(inventory));
         punkProcess.eLegaliseResistor = Math.pow(descriptor.getUNominalValue(inventory), 2) / 400;

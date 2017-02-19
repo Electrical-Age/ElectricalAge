@@ -173,7 +173,7 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     override fun hasGui() = true
     override fun getInventory() = inventory
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
-    override fun newContainer(side: Direction?, player: EntityPlayer?) = ResistorContainer(player, inventory)
+    override fun newContainer(side: Direction?, player: EntityPlayer) = ResistorContainer(player, inventory)
 
     override fun getWaila(): Map<String, String> = mutableMapOf(
         Pair(I18N.tr("Resistance"), Utils.plotOhm("", resistor.r)),

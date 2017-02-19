@@ -28,9 +28,9 @@ public class ResistorProcess implements IProcess {
     public void process(double time) {
         double newR = Math.max(
             MnaConst.noImpedance,
-            element.nominalRs * (1 + descriptor.tempCoef * thermal.Tc));
-        if (element.control != null) {
-            newR *= (element.control.getNormalized() + 0.01) / 1.01;
+            element.getNominalRs() * (1 + descriptor.getTempCoef() * thermal.Tc));
+        if (element.getControl() != null) {
+            newR *= (element.getControl().getNormalized() + 0.01) / 1.01;
         }
         if (newR > lastR * 1.01 || newR < lastR * 0.99) {
             r.setR(newR);

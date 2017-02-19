@@ -37,7 +37,7 @@ public class ResistorGui extends GuiContainerEln {
 
     @Override
     protected void postDraw(float f, int x, int y) {
-        helper.drawString(8, 12, 0xFF000000, tr("Resistance: %1$Ω", Utils.plotValue(render.descriptor.getRsValue(render.inventory))));
+        helper.drawString(8, 12, 0xFF000000, tr("Resistance: %1$Ω", Utils.plotValue(render.getDescriptor().getRsValue(render.getInventory()))));
         super.postDraw(f, x, y);
     }
 
