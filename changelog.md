@@ -174,3 +174,7 @@ As always, we will grant wiki editing access to anyone who shows up
 - Fixed NPE in the WAILA code for fire buzzers.
 
 - Misc. typo fixes.
+
+- Fixed the probable cause of Minecraft crashes sometimes destroying all placed Eln items.
+
+  We still recommend taking backups, but I feel good about this one.
