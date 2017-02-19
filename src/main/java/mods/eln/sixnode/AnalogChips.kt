@@ -545,7 +545,7 @@ class VoltageControlledAmplifier : AnalogFunction() {
 class SummingUnit : AnalogFunction() {
     override val hasState = true
     override val inputCount = 3
-    override val infos = I18N.tr("The summing unit outputs the sum of\nthe tree wighted inputs at it's output.The\ngain for each input can be configured.")
+    override val infos = I18N.tr("The summing unit outputs the sum of\nthe three weighted inputs.The\ngain for each input can be configured.")
 
     internal val gains = arrayOf(1.0, 1.0, 1.0)
 
