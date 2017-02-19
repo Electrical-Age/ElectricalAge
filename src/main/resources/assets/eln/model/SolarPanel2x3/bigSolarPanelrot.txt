@@ -1,4 +1,6 @@
 o panel
 f originX 0.0
-f originY 0.0
+f originY 0.4
 f originZ 0.0
+o main
+f offZ 0.5

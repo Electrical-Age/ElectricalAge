@@ -77,7 +77,8 @@ public class GhostGroup {
         if (canBePloted(coordonate.world(), coordonate.x, coordonate.y, coordonate.z) == false) return false;
 
         for (GhostGroupElement element : elementList) {
-            Eln.ghostManager.createGhost(coordonate.newWithOffset(element.x, element.y, element.z), observerCoordonate, UUID, element.block, element.meta);
+            Coordonate offsetCoordonate = coordonate.newWithOffset(element.x, element.y, element.z);
+            Eln.ghostManager.createGhost(offsetCoordonate, observerCoordonate, UUID, element.block, element.meta);
         }
         return true;
     }

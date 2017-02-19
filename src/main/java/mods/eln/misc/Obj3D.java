@@ -1,6 +1,7 @@
 package mods.eln.misc;
 
 import net.minecraft.util.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import java.io.*;
@@ -173,7 +174,7 @@ public class Obj3D {
         }
 
         public float getFloat(String name) {
-            return nameToFloatHash.get(name);
+            return nameToFloatHash.getOrDefault(name, 0f);
         }
 
         public void draw(float angle, float x, float y, float z) {
@@ -364,15 +365,27 @@ public class Obj3D {
      * @param filePath the path from the "assets/eln" folder
      * @return the  {@code BufferedReader} or null if the resource does not exist
      */
-    private BufferedReader getResourceAsStream(String filePath) {
-        final String path = "assets/eln/" + filePath;
-        try {
-            InputStream in = getClass().getClassLoader().getResourceAsStream(path);
-            return new BufferedReader(new InputStreamReader(in, "UTF-8"));
-        } catch (Exception e) {
-            // Utils.println("Unable to load the resource '" + path + "' !");
-            return null;
+    @Nullable
+    private BufferedReader getResourceAsStream(String filePath, boolean trySource) {
+        BufferedReader reader = null;
+        if (trySource) {
+            final String path = "../src/main/resources/assets/eln/" + filePath;
+            try {
+                reader = new BufferedReader(new FileReader(path));
+            } catch (FileNotFoundException e) {
+                System.out.println(e);
+            }
         }
+        if (reader == null) {
+            final String path = "assets/eln/" + filePath;
+            try {
+                InputStream in = getClass().getClassLoader().getResourceAsStream(path);
+                reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
+        return reader;
     }
 
     public boolean loadFile(final String filePath) {
@@ -400,7 +413,7 @@ public class Obj3D {
 
         try {
             {
-                BufferedReader bufferedReader = getResourceAsStream("model/" + filePath);
+                BufferedReader bufferedReader = getResourceAsStream("model/" + filePath, reload);
                 if (bufferedReader == null) {
                     Utils.println(String.format(" - failed to load obj '%s'", filePath));
                     return false;
@@ -465,7 +478,7 @@ public class Obj3D {
             }
 
             {
-                BufferedReader bufferedReader = getResourceAsStream("model/" + dirPath + "/" + mtlName);
+                BufferedReader bufferedReader = getResourceAsStream("model/" + dirPath + "/" + mtlName, reload);
                 if (bufferedReader == null) {
                     Utils.println(String.format(" - failed to load mtl '%s'", mtlName));
                     return false;
@@ -498,7 +511,7 @@ public class Obj3D {
 
         try {
             final String txtPath = filePath.replace(".obj", ".txt").replace(".OBJ", ".txt");
-            BufferedReader bufferedReader = getResourceAsStream("model/" + txtPath);
+            BufferedReader bufferedReader = getResourceAsStream("model/" + txtPath, reload);
             if (bufferedReader == null) {
                 Utils.println(String.format(" - failed to load txt '%s'", txtPath));
             } else {

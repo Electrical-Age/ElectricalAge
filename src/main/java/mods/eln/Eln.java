@@ -189,6 +189,7 @@ public class Eln {
     public final static String[] AUTHORS = {"Dolu1990", "lambdaShade", "cm0x4D", "metc", "Baughn"};
 
     public static final String channelName = "miaouMod";
+    public static final double solarPanelBasePower = 65.0;
     public ArrayList<IConfigSharing> configShared = new ArrayList<IConfigSharing>();
     public static SimpleNetworkWrapper elnNetwork;
 
@@ -288,7 +289,7 @@ public class Eln {
     public static String playerUUID = null; // Read from configuration file. Default is `null`.
 
     public double heatTurbinePowerFactor = 1;
-    public double solarPannelPowerFactor = 1;
+    public double solarPanelPowerFactor = 1;
     public double windTurbinePowerFactor = 1;
     public double waterTurbinePowerFactor = 1;
     public double fuelGeneratorPowerFactor = 1;
@@ -385,7 +386,7 @@ public class Eln {
         }
 
         heatTurbinePowerFactor = config.get("balancing", "heatTurbinePowerFactor", 1).getDouble(1);
-        solarPannelPowerFactor = config.get("balancing", "solarPannelPowerFactor", 1).getDouble(1);
+        solarPanelPowerFactor = config.get("balancing", "solarPanelPowerFactor", 1).getDouble(1);
         windTurbinePowerFactor = config.get("balancing", "windTurbinePowerFactor", 1).getDouble(1);
         waterTurbinePowerFactor = config.get("balancing", "waterTurbinePowerFactor", 1).getDouble(1);
         fuelGeneratorPowerFactor = config.get("balancing", "fuelGeneratorPowerFactor", 1).getDouble(1);
@@ -604,7 +605,7 @@ public class Eln {
         registerPlateMachine(37);
         registerEggIncubator(41);
         registerAutoMiner(42);
-        registerSolarPannel(48);
+        registerSolarPanel(48);
         registerWindTurbine(49);
         registerThermalDissipatorPassiveAndActive(64);
         registerTransparentNodeMisc(65);
@@ -768,7 +769,7 @@ public class Eln {
         recipeBattery();
         recipeElectricalFurnace();
         recipeAutoMiner();
-        recipeSolarPannel();
+        recipeSolarPanel();
 
         recipeThermalDissipatorPassiveAndActive();
         recipeElectricalAntenna();
@@ -3056,7 +3057,7 @@ public class Eln {
         }
     }
 
-    void registerSolarPannel(int id) {
+    void registerSolarPanel(int id) {
         int subId, completId;
         GhostGroup ghostGroup;
         String name;
@@ -3086,7 +3087,7 @@ public class Eln {
                 // solarOffsetX,int solarOffsetY,int
                 // solarOffsetZ,
                 // FunctionTable solarIfSBase,
-                LVSolarU / 4, 65.0 * solarPannelPowerFactor,// double electricalUmax,double
+                null, LVSolarU / 4, 65.0 * solarPanelPowerFactor,// double electricalUmax,double
                 // electricalPmax,
                 0.01,// ,double electricalDropFactor
                 Math.PI / 2, Math.PI / 2 // alphaMin alphaMax
@@ -3107,11 +3108,53 @@ public class Eln {
                 // solarOffsetX,int solarOffsetY,int
                 // solarOffsetZ,
                 // FunctionTable solarIfSBase,
-                LVSolarU / 4, 65.0 * solarPannelPowerFactor,// double electricalUmax,double
+                null, LVSolarU / 4, solarPanelBasePower * solarPanelPowerFactor,// double electricalUmax,double
                 // electricalPmax,
                 0.01,// ,double electricalDropFactor
                 Math.PI / 4, Math.PI / 4 * 3 // alphaMin alphaMax
             );
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 3;
+            name = TR_NAME(Type.NONE, "2x3 Solar Panel");
+
+            Coordonate groundCoordinate = new Coordonate(1, 0, 0, 0);
+
+            ghostGroup = new GhostGroup();
+            ghostGroup.addRectangle(0, 1, 0, 0, -1, 1);
+            ghostGroup.removeElement(0, 0, 0);
+
+            SolarPanelDescriptor desc = new SolarPanelDescriptor(name,
+                obj.getObj("bigSolarPanel"), meduimVoltageCableDescriptor.render,
+                ghostGroup, 1, 1, 0,
+                groundCoordinate,
+                LVSolarU * 2, solarPanelBasePower * solarPanelPowerFactor * 8,
+                0.01,
+                Math.PI / 2, Math.PI / 2
+            );
+
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 4;
+            name = TR_NAME(Type.NONE, "2x3 Rotating Solar Panel");
+
+            Coordonate groundCoordinate = new Coordonate(1, 0, 0, 0);
+
+            ghostGroup = new GhostGroup();
+            ghostGroup.addRectangle(0, 1, 0, 0, -1, 1);
+            ghostGroup.removeElement(0, 0, 0);
+
+            SolarPanelDescriptor desc = new SolarPanelDescriptor(name,
+                obj.getObj("bigSolarPanelrot"), meduimVoltageCableDescriptor.render,
+                ghostGroup, 1, 1, 1,
+                groundCoordinate,
+                LVSolarU * 2, solarPanelBasePower * solarPanelPowerFactor * 8,
+                0.01,
+                Math.PI / 8 * 3, Math.PI / 8 * 5
+            );
+
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
     }
@@ -4836,6 +4879,7 @@ public class Eln {
                 name, new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             Data.addResource(desc.newItemStack());
+            addToOre("casingMachine", desc.newItemStack());
         }
         {
             subId = 3;
@@ -4950,6 +4994,7 @@ public class Eln {
                 TR_NAME(Type.NONE, "Advanced Machine Block"), new String[]{}); // TODO: Description.
             sharedItem.addElement(subId + (id << 6), desc);
             Data.addResource(desc.newItemStack());
+            addToOre("casingMachineAdvanced", desc.newItemStack());
         }
         {
             subId = 28;
@@ -5901,7 +5946,7 @@ public class Eln {
             Character.valueOf('M'), findItemStack("Advanced Electrical Motor"));
     }
 
-    void recipeSolarPannel() {
+    void recipeSolarPanel() {
         addRecipe(findItemStack("Small Solar Panel"),
             "III",
             "CSC",
@@ -5917,6 +5962,23 @@ public class Eln {
             Character.valueOf('M'), findItemStack("Electrical Motor"),
             Character.valueOf('I'), new ItemStack(Items.iron_ingot));
 
+        for (String metal : new String[] { "blockSteel", "blockAluminum", "blockAluminium", "casingMachineAdvanced" }) {
+            for (String panel : new String[] {"Small Solar Panel", "Small Rotating Solar Panel"}) {
+                addRecipe(findItemStack("2x3 Solar Panel"),
+                    "PPP",
+                    "PPP",
+                    "I I",
+                    Character.valueOf('P'), findItemStack(panel),
+                    Character.valueOf('I'), metal);
+            }
+        }
+        addRecipe(findItemStack("2x3 Rotating Solar Panel"),
+            "ISI",
+            "IMI",
+            "I I",
+            Character.valueOf('S'), findItemStack("2x3 Solar Panel"),
+            Character.valueOf('M'), findItemStack("Electrical Motor"),
+            Character.valueOf('I'), new ItemStack(Items.iron_ingot));
     }
 
     void recipeThermalDissipatorPassiveAndActive() {

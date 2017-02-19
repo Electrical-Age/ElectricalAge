@@ -53,7 +53,7 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
         if (ghostgroup != null) ghostgroup.plot(coord, coord, descriptor.getGhostGroupUuid());
 
         TransparentNode node = new TransparentNode();
-        node.onBlockPlacedBy(new Coordonate(x, y, z, world), front, player, stack);
+        node.onBlockPlacedBy(coord, front, player, stack);
 
         world.setBlock(x, y, z, Block.getBlockFromItem(this), node.getBlockMetadata(), 0x03);//caca1.5.1
         ((NodeBlock) Block.getBlockFromItem(this)).onBlockPlacedBy(world, x, y, z, direction, player, metadata);

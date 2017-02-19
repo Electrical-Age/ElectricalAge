@@ -644,4 +644,31 @@ public enum Direction {
                 return ForgeDirection.UNKNOWN;
         }
     }
+
+    public void glRotateZnRefInv() {
+        switch (this) {
+            case XN:
+                GL11.glRotatef(-90f, 0f, 1f, 0f);
+                break;
+            case XP:
+                GL11.glRotatef(-90f, 0f, -1f, 0f);
+                break;
+            case YN:
+                GL11.glRotatef(-90f, 1f, 0f, 0f);
+                GL11.glScalef(1f, -1, 1f);
+                break;
+            case YP:
+                GL11.glRotatef(-90f, 1f, 0f, 0f);
+                GL11.glScalef(1f, 1f, 1f);
+                break;
+            case ZN:
+                //GL11.glRotatef(90f, 0f, -1f, 0f);
+                break;
+            case ZP:
+                GL11.glRotatef(-180f, 0f, 1f, 0f);
+                break;
+            default:
+                break;
+        }
+    }
 }

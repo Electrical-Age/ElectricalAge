@@ -100,7 +100,6 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
 
     @Override
     public boolean hasGui() {
-
         return true;
     }
 

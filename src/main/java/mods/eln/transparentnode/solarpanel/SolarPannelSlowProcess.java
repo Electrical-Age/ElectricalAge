@@ -40,7 +40,7 @@ public class SolarPannelSlowProcess implements IProcess {
         if (solarAlpha >= Math.PI) return 0.0;
 
         if (solarPannel.getInventory().getStackInSlot(SolarPanelContainer.trackerSlotId) != null) {
-            solarPannel.pannelAlpha = solarPannel.descriptor.alphaTrunk(solarAlpha);
+            solarPannel.panelAlpha = solarPannel.descriptor.alphaTrunk(solarAlpha);
         }
 
 
@@ -49,7 +49,7 @@ public class SolarPannelSlowProcess implements IProcess {
         double x = v.xCoord + solarPannel.descriptor.solarOffsetX, y = v.yCoord + solarPannel.descriptor.solarOffsetY, z = v.zCoord + solarPannel.descriptor.solarOffsetZ;
 
 
-        double lightAlpha = solarPannel.pannelAlpha - solarAlpha;
+        double lightAlpha = solarPannel.panelAlpha - solarAlpha;
         double light = Math.cos(lightAlpha);
 
 
