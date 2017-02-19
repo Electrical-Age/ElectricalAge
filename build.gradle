@@ -234,6 +234,8 @@ task updateMasterLanguageFile(type: JavaExec, dependsOn: 'classes') {
     args = ['./src', './src/main/resources/assets/eln/lang/en_US.lang']
 }
 
+jar.dependsOn(updateMasterLanguageFile)
+
 publishing {
     publications {
         mod(MavenPublication) {
