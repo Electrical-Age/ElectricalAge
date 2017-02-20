@@ -663,6 +663,7 @@ class SummingUnitGui(val render: SummingUnitRender) : GuiScreenEln() {
 }
 
 class SampleAndHold : AnalogFunction() {
+    override val hasState = true
     override val inputCount = 2
     override val infos = I18N.tr("Samples the voltage of a varying analog signal when\nthe clock input changes from 0 to 1 and holds its\noutput voltage at a constant level until next clock pulse.\nYou can see it as an analog D-Flipflop.")
     private var clock = false
