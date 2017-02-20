@@ -20,7 +20,7 @@ class ElectricalPoleDescriptor(name: String,
             static_parts.add(it)
         }
         if (includeTransformer) {
-            arrayOf("trafo", "cables").forEach {
+            arrayOf("transformer", "cables").forEach {
                 obj.getPart(it)?.let { rotating_parts.add(it) }
             }
         }
