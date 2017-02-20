@@ -55,7 +55,8 @@ object FuelRegistry {
      * We assume a density of 1g/L to harmonize with other mods.
      */
     private val steam = mapOf(
-        "steam" to 2.257  // Heat of vaporization: 2.257 J/g
+        "steam" to 2.257,  // Heat of vaporization: 2.257 J/g
+        "ic2steam" to 2.257  // Ditto, this is still steam. IC2 doesn't want to use other mods' steam.
     ).mapValues {
         // Unusually, the commonly accepted value (2.2) is pretty much correct. Undo the usual mapping.
         it.value / Eln.fuelHeatValueFactor
