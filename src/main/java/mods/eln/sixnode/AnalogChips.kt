@@ -46,8 +46,7 @@ open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
     }
 
     constructor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out AnalogFunction>) :
-        this(name, obj, functionName, functionClass, AnalogChipElement::class.java, AnalogChipRender::class.java) {
-    }
+        this(name, obj, functionName, functionClass, AnalogChipElement::class.java, AnalogChipRender::class.java)
 
     fun draw() {
         pins.forEach { it?.draw() }
@@ -85,9 +84,7 @@ open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>?, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
-        if (list != null) {
-            function.infos.split("\n").forEach { list.add(it) }
-        }
+        if (list != null) function.infos.split("\n").forEach { list.add(it) }
     }
 }
 
@@ -230,7 +227,7 @@ abstract class AnalogFunction : INBTTReady {
 
 class OpAmp : AnalogFunction() {
     override val inputCount = 2
-    override val infos = I18N.tr("Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or a configurable amplifier.")
+    override val infos: String = I18N.tr("Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or as configurable amplifier.")
 
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double =
         10000 * ((inputs[0] ?: 0.0) - (inputs[1] ?: 0.0))
@@ -688,62 +685,45 @@ class SampleAndHold : AnalogFunction() {
 }
 
 class Filter: AnalogFunction() {
-    companion object {
-        private fun sinc(x: Double) = when {
-            x > -1.0E-5 && x < 1.0E-5 -> 1.0
-            else -> Math.sin(x) / x
-        }
+    override val hasState = true
+    override val inputCount = 1
+    override val infos = I18N.tr("Lowpass filter - Passes signals with a\nfrequency lower than a certain cutoff frequency\nand attenuates signals with frequencies higher\nthan the cutoff frequency.")
 
-        private fun Int.factorial(): Int = when (this) {
-            1 -> 1
-            else -> this * (this - 1).factorial()
-        }
+    internal var feedback = 2.0 * Math.PI * 5.0
+    private var output = 0.0
 
-        private fun Double.bessel() = 1.0 + (1..10).sumByDouble {
-            Math.pow(Math.pow(this / 2.0, it.toDouble()) / it.factorial().toDouble(), 2.0)
-        }
+    override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
+        output = Utils.limit(output + ((inputs[0] ?: 0.0) - output) * feedback * deltaTime, 0.0, 50.0)
+        return output
+    }
 
-        internal fun firLowPassCoefficients(omega: Double, numCoefficients: Int = 16) = Array(numCoefficients, {
-            omega * sinc(omega * (it - (numCoefficients - 1).toDouble() / 2.0) * Math.PI)
-        })
-
-        internal fun applyKaiserWindow(coefficients: Array<Double>, beta: Double): Array<Double> {
-            coefficients.indices.forEach {
-                val dm = (coefficients.size + 1).toDouble()
-                val arg = beta * Math.sqrt(1.0 - Math.pow(((2 *it + 2).toDouble() - dm) / dm, 2.0))
-                coefficients[it] *= arg.bessel() / beta.bessel()
-            }
-            return coefficients
-        }
-
-        private fun Array<Double>.firFilterStep(input: Double, coefficients: Array<Double>): Double {
-            (this.size - 1 downTo 1).forEach { this[it] = this[it - 1] }
-            this[0] = input
-            return this.foldIndexed(0.0, { i, y, x -> y + (coefficients.getOrElse(i, { 0.0 })) * x })
+    override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
+        nbt?.apply {
+            feedback = getDouble("feedback")
+            output = getDouble("output")
         }
     }
 
-    override val inputCount = 1
-    override val infos = "TODO"
-
-    internal var coefficients: Array<Double> = firLowPassCoefficients(0.5, 17)
-    private var data = Array(17, { 0.0 })
-
-    override fun process(inputs: Array<Double?>, deltaTime: Double) = data.firFilterStep(inputs[0] ?: 0.0, coefficients)
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+        nbt?.apply {
+            setDouble("feedback", feedback)
+            setDouble("output", output)
+        }
+    }
 }
 
 class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor) :
     AnalogChipElement(node, side, sixNodeDescriptor) {
 
     companion object {
-        val OmegaChangedEvents = 1
+        val CutOffFrequencyChangedEvents = 1
     }
 
-    private var omega = Eln.instance.electricalFrequency / 2.0
+    private var cutOffFrequency = Eln.instance.electricalFrequency / 4.0
+        get() = (function as Filter).feedback / (2.0 * Math.PI)
         set(value) {
             field = value
-            (function as Filter).coefficients = Filter.applyKaiserWindow(
-                Filter.firLowPassCoefficients(field / Eln.instance.electricalFrequency), 3.2)
+            (function as Filter).feedback = 2.0 * Math.PI * field
         }
 
     override fun hasGui() = true
@@ -752,7 +732,7 @@ class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDe
         super.networkSerialize(stream)
 
         try {
-            stream?.writeFloat(omega.toFloat())
+            stream?.writeFloat(cutOffFrequency.toFloat())
         } catch(e: IOException) {
             e.printStackTrace()
         }
@@ -762,8 +742,8 @@ class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDe
         super.networkUnserialize(stream)
 
         try {
-            when (stream?.readByte()?.toInt()) {
-                OmegaChangedEvents -> omega = stream.readFloat().toDouble()
+            when (stream.readByte().toInt()) {
+                CutOffFrequencyChangedEvents -> cutOffFrequency = stream.readFloat().toDouble()
             }
             needPublish()
         } catch (e: IOException) {
@@ -774,14 +754,14 @@ class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDe
 
 class FilterRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
     AnalogChipRender(entity, side, descriptor) {
-    internal var omega = Synchronizable(0.5f)
+    internal var cutOffFrequency = Synchronizable(Eln.instance.electricalFrequency.toFloat() / 4f)
 
     override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? = FilterGui(this)
 
     override fun publishUnserialize(stream: DataInputStream) {
         super.publishUnserialize(stream)
         try {
-            omega.value = stream.readFloat()
+            cutOffFrequency.value = stream.readFloat()
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -789,32 +769,32 @@ class FilterRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDe
 }
 
 class FilterGui(private var render: FilterRender) : GuiScreenEln() {
-    private var omega: GuiVerticalTrackBar? = null
+    private var freq: GuiVerticalTrackBar? = null
 
     override fun initGui() {
         super.initGui()
 
-        omega = newGuiVerticalTrackBar(6, 6 + 2, 20, 50)
-        omega?.apply {
+        freq = newGuiVerticalTrackBar(6, 6 + 2, 20, 50)
+        freq?.apply {
             setStepIdMax(40)
             setEnable(true)
-            setRange(0f, Eln.instance.electricalFrequency.toFloat())
-            value = render.omega.value
+            setRange(0f, Eln.instance.electricalFrequency.toFloat() / 4f)
+            value = render.cutOffFrequency.value
         }
     }
 
     override fun guiObjectEvent(`object`: IGuiObject) {
         super.guiObjectEvent(`object`)
-        if (`object` === omega) {
-            render.clientSetFloat(FilterElement.OmegaChangedEvents, omega!!.value)
+        if (`object` === freq) {
+            render.clientSetFloat(FilterElement.CutOffFrequencyChangedEvents, freq!!.value)
         }
     }
 
     override fun preDraw(f: Float, x: Int, y: Int) {
         super.preDraw(f, x, y)
-        if (render.omega.pending) omega?.value = render.omega.value
-        omega?.setComment(0, I18N.tr("Cut-off frequency %1$ Hz",
-            omega?.value ?: 0.5f * Eln.instance.electricalFrequency))
+        if (render.cutOffFrequency.pending) freq?.value = render.cutOffFrequency.value
+        freq?.setComment(0, I18N.tr("Cut-off frequency %1$ Hz",
+            freq?.value ?: Eln.instance.electricalFrequency / 4f))
     }
 
     override fun newHelper(): GuiHelper {

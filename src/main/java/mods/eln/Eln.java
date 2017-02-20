@@ -2670,7 +2670,7 @@ public class Eln {
                 SampleAndHold.class));
 
         sixNodeItem.addDescriptor(id + 8,
-            new AnalogChipDescriptor(TR_NAME(Type.NONE, "Mutifunctional filter"), model, "SAH",
+            new AnalogChipDescriptor(TR_NAME(Type.NONE, "Lowpass filter"), model, "LPF",
                 Filter.class, FilterElement.class, FilterRender.class));
     }
 
