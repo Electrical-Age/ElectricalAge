@@ -98,6 +98,11 @@ public class Utils {
         System.out.print(str.toString());
     }
 
+    public static void print(String format, Object... data) {
+        if (!Eln.debugEnabled) return;
+        print(String.format(format, data));
+    }
+
     static String floatToStr(double f, int high, int low) {
         String temp = "";
         for (int idx = 0; idx < high; idx++)

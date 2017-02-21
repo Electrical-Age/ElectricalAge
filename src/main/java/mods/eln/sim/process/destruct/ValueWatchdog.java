@@ -1,6 +1,5 @@
 package mods.eln.sim.process.destruct;
 
-import cpw.mods.fml.common.FMLLog;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 
@@ -41,7 +40,7 @@ public abstract class ValueWatchdog implements IProcess {
             timeout = timeoutReset;
         }
         if (timeout < 0) {
-            FMLLog.info("%s destroying %s",
+            Utils.print("%s destroying %s",
                 getClass().getName(),
                 destructable.describe());
             destructable.destructImpl();
