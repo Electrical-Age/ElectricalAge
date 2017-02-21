@@ -769,16 +769,14 @@ class FilterRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDe
 }
 
 class FilterGui(private var render: FilterRender) : GuiScreenEln() {
-    private var freq: GuiVerticalTrackBar? = null
+    private var freq: GuiVerticalCustomValuesBar? = null
 
     override fun initGui() {
         super.initGui()
 
-        freq = newGuiVerticalTrackBar(6, 6 + 2, 20, 50)
+        freq = newGuiVerticalCustomValuesBar(6, 6 + 2, 20, 50, GuiVerticalCustomValuesBar.logarithmicScale(-3, 4 * 3))
         freq?.apply {
-            setStepIdMax(40)
             setEnable(true)
-            setRange(0f, Eln.instance.electricalFrequency.toFloat() / 4f)
             value = render.cutOffFrequency.value
         }
     }
@@ -792,9 +790,11 @@ class FilterGui(private var render: FilterRender) : GuiScreenEln() {
 
     override fun preDraw(f: Float, x: Int, y: Int) {
         super.preDraw(f, x, y)
-        if (render.cutOffFrequency.pending) freq?.value = render.cutOffFrequency.value
+        if (render.cutOffFrequency.pending) {
+            freq?.value = render.cutOffFrequency.value
+        }
         freq?.setComment(0, I18N.tr("Cut-off frequency %1$ Hz",
-            freq?.value ?: Eln.instance.electricalFrequency / 4f))
+            String.format("%1.3f", freq?.value ?: Eln.instance.electricalFrequency / 4f)))
     }
 
     override fun newHelper(): GuiHelper {
