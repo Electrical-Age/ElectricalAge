@@ -1,8 +1,8 @@
 package mods.eln.packets
 
-import cpw.mods.fml.common.FMLLog
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler
 import cpw.mods.fml.common.network.simpleimpl.MessageContext
+import mods.eln.misc.Utils
 import mods.eln.node.NodeManager
 import mods.eln.node.transparent.TransparentNode
 
@@ -18,7 +18,7 @@ class TransparentNodeRequestPacketHandler : IMessageHandler<TransparentNodeReque
             try {
                 stringMap = node.element.waila
             } catch (e: NullPointerException) {
-                FMLLog.getLogger().warn("Attempted to get WAILA info for an invalid node!")
+                Utils.print("Attempted to get WAILA info for an invalid node!")
                 e.printStackTrace()
                 return null
             }
