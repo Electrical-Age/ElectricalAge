@@ -1,3 +1,15 @@
+## 1.14.1
+
+### Features
+
+- IC2 steam should now work in the steam turbine. You won't get distilled water back, mind you.
+
+### Bugfixes
+
+- Some debug-prints were not marked as debug, and could spam players under certain circumstances.
+
+- The Sample-and-Hold chip had a single global sample across all chips.
+
 ## 1.14.0
 
 ![Fuel Heat Furnace](https://i.imgur.com/BaaoHiY.png)
