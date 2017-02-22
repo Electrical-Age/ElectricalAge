@@ -26,8 +26,8 @@ import java.util.LinkedList;
 
 public class ServerEventListener {
 
-    LinkedList<EntityLightningBolt> lightningListNext = new LinkedList<EntityLightningBolt>();
-    LinkedList<EntityLightningBolt> lightningList = new LinkedList<EntityLightningBolt>();
+    private LinkedList<EntityLightningBolt> lightningListNext = new LinkedList<EntityLightningBolt>();
+    private LinkedList<EntityLightningBolt> lightningList = new LinkedList<EntityLightningBolt>();
 
     public ServerEventListener() {
         MinecraftForge.EVENT_BUS.register(this);
@@ -64,11 +64,11 @@ public class ServerEventListener {
     }
 
 
-    public String getEaWorldSaveName(World w) {
+    private String getEaWorldSaveName(World w) {
         return Utils.getMapFolder() + "data/electricalAgeWorld" + w.provider.dimensionId + ".dat";
     }
 
-    public HashSet<Integer> loadedWorlds = new HashSet<Integer>();
+    private HashSet<Integer> loadedWorlds = new HashSet<Integer>();
 
     @SubscribeEvent
     public void onWorldLoad(Load e) {
@@ -138,14 +138,10 @@ public class ServerEventListener {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-
-        //ElnWorldStorage storage = ElnWorldStorage.forWorld(e.world);
-        int idx = 0;
-        idx++;
     }
 
 
-    public static void readFromEaWorldNBT(NBTTagCompound nbt) {
+    static void readFromEaWorldNBT(NBTTagCompound nbt) {
         try {
             NodeManager.instance.loadFromNbt(nbt.getCompoundTag("nodes"));
         } catch (Exception e) {
@@ -158,7 +154,7 @@ public class ServerEventListener {
         }
     }
 
-    public static void writeToEaWorldNBT(NBTTagCompound nbt, int dim) {
+    static void writeToEaWorldNBT(NBTTagCompound nbt, int dim) {
         try {
             NodeManager.instance.saveToNbt(Utils.newNbtTagCompund(nbt, "nodes"), dim);
         } catch (Exception e) {
