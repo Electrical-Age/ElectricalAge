@@ -64,10 +64,6 @@ public class ServerEventListener {
     }
 
 
-    private String getEaWorldSaveName(World w) {
-        return Utils.getMapFolder() + "data/electricalAgeWorld" + w.provider.dimensionId + ".dat";
-    }
-
     private HashSet<Integer> loadedWorlds = new HashSet<Integer>();
 
     @SubscribeEvent
@@ -138,7 +134,7 @@ public class ServerEventListener {
 
     private void replaceFile(Path from, Path to) throws IOException {
         try {
-            Files.move(from, to, StandardCopyOption.ATOMIC_MOVE);
+            Files.move(from, to, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
         } catch (AtomicMoveNotSupportedException e) {
             Files.move(from, to, StandardCopyOption.REPLACE_EXISTING);
         }
@@ -182,6 +178,10 @@ public class ServerEventListener {
             worldSave = FileSystems.getDefault().getPath(saveName);
             tempSave = FileSystems.getDefault().getPath(saveName + ".tmp");
             backupSave = FileSystems.getDefault().getPath(saveName + ".bak");
+        }
+
+        private String getEaWorldSaveName(World w) {
+            return Utils.getMapFolder() + "data/electricalAgeWorld" + w.provider.dimensionId + ".dat";
         }
     }
 }
