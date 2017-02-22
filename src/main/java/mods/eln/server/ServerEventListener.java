@@ -14,6 +14,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.event.world.WorldEvent.Load;
 import net.minecraftforge.event.world.WorldEvent.Save;
 import net.minecraftforge.event.world.WorldEvent.Unload;
@@ -74,17 +75,18 @@ public class ServerEventListener {
     public void onWorldLoad(Load e) {
         if (e.world.isRemote) return;
         loadedWorlds.add(e.world.provider.dimensionId);
+        FileNames fileNames = new FileNames(e);
+
         try {
-            FileInputStream fileStream = new FileInputStream(getEaWorldSaveName(e.world));
+            FileInputStream fileStream = new FileInputStream(fileNames.worldSaveName);
             NBTTagCompound nbt = CompressedStreamTools.readCompressed(fileStream);
             readFromEaWorldNBT(nbt);
             fileStream.close();
         } catch (Exception ex) {
             try {
                 ex.printStackTrace();
-                String name = getEaWorldSaveName(e.world) + ".bak";
-                FileInputStream fileStream = new FileInputStream(name);
-                System.out.println("Using BACKUP Electrical Age save: " + name);
+                FileInputStream fileStream = new FileInputStream(fileNames.backupSaveName);
+                System.out.println("Using BACKUP Electrical Age save: " + fileNames.backupSaveName);
                 NBTTagCompound nbt = CompressedStreamTools.readCompressed(fileStream);
                 readFromEaWorldNBT(nbt);
                 fileStream.close();
@@ -120,9 +122,11 @@ public class ServerEventListener {
             NBTTagCompound nbt = new NBTTagCompound();
             writeToEaWorldNBT(nbt, e.world.provider.dimensionId);
 
-            String worldSaveName = getEaWorldSaveName(e.world);
-            String tempSaveName = worldSaveName + ".tmp";
-            String backupSaveName = worldSaveName + ".bak";
+            FileNames fileNames = new FileNames(e);
+            String tempSaveName = fileNames.tempSaveName;
+            String worldSaveName = fileNames.worldSaveName;
+            String backupSaveName = fileNames.backupSaveName;
+
             File failedSave = new File(tempSaveName);
             if (failedSave.exists()) {
                 failedSave.delete();
@@ -168,4 +172,15 @@ public class ServerEventListener {
 
     }
 
+    private class FileNames {
+        final String worldSaveName;
+        final String tempSaveName;
+        final String backupSaveName;
+
+        FileNames(WorldEvent e) {
+            worldSaveName = getEaWorldSaveName(e.world);
+            tempSaveName = worldSaveName + ".tmp";
+            backupSaveName = worldSaveName + ".bak";
+        }
+    }
 }
