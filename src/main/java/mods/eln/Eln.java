@@ -24,6 +24,7 @@ import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
 import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
+import mods.eln.gridnode.transformer.GridTransformerDescriptor;
 import mods.eln.i18n.I18N;
 import mods.eln.item.*;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
@@ -657,18 +658,18 @@ public class Eln {
         }
         {
             subId = 3;
-//			GridTransformerDescriptor descriptor =
-//					new GridTransformerDescriptor("Grid Transformer", obj.getObj("Transformer"), "textures/wire.png", highVoltageCableDescriptor);
-//			GhostGroup g = new GhostGroup();
-//			g.addElement(1, 0, 0);
-//			g.addElement(0, 0, -1);
-//			g.addElement(1, 0, -1);
-//			g.addElement(1, 1, 0);
-//			g.addElement(0, 1, 0);
-//			g.addElement(1, 1, -1);
-//			g.addElement(0, 1, -1);
-//			descriptor.setGhostGroup(g);
-//			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+			GridTransformerDescriptor descriptor =
+					new GridTransformerDescriptor("Grid Transformer", obj.getObj("GridConverter"), "textures/wire.png", highVoltageCableDescriptor);
+			GhostGroup g = new GhostGroup();
+			g.addElement(1, 0, 0);
+			g.addElement(0, 0, -1);
+			g.addElement(1, 0, -1);
+			g.addElement(1, 1, 0);
+			g.addElement(0, 1, 0);
+			g.addElement(1, 1, -1);
+			g.addElement(0, 1, -1);
+			descriptor.setGhostGroup(g);
+			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
         }
         {
             subId = 4;
@@ -728,10 +729,6 @@ public class Eln {
         {
             subId = 7;
             // Reserved for T2.5 poles.
-        }
-        {
-            subId = 8;
-            // Grid transformer!
         }
     }
 

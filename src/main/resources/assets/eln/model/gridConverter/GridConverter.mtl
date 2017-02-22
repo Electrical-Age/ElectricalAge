@@ -1,5 +1,5 @@
 # Blender MTL File: 'GridConverter.blend'
-# Material Count: 7
+# Material Count: 8
 
 newmtl Material.003
 Ns 96.078431
@@ -75,3 +75,11 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd GridConverter02.png
+
+newmtl None
+Ns 0
+Ka 0.000000 0.000000 0.000000
+Kd 0.8 0.8 0.8
+Ks 0.8 0.8 0.8
+d 1
+illum 2

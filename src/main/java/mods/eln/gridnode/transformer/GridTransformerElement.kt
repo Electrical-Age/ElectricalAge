@@ -20,7 +20,7 @@ import net.minecraft.util.Vec3
 class GridTransformerElement
 //TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
 
-(node: TransparentNode, descriptor: TransparentNodeDescriptor) : GridElement(node, descriptor, 4) {
+(node: TransparentNode, descriptor: TransparentNodeDescriptor) : GridElement(node, descriptor, 8) {
     var primaryLoad = NbtElectricalLoad("primaryLoad")
     var secondaryLoad = NbtElectricalLoad("secondaryLoad")
     var primaryVoltageSource = VoltageSource("primaryVoltageSource", primaryLoad, null)

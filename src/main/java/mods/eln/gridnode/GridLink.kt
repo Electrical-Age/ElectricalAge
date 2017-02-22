@@ -191,16 +191,12 @@ class GridLink : INBTTReady {
 
         fun addLink(a: GridElement, b: GridElement, `as`: Direction, bs: Direction, cable: ElectricalCableDescriptor, cableLength: Int): Boolean {
             // Check if these two nodes are already linked.
-            for (link in a.gridLinkList) {
-                if (link.links(a, b)) {
-                    return false
-                }
-            }
-            for (link in b.gridLinkList) {
-                if (link.links(a, b)) {
-                    return false
-                }
-            }
+            a.gridLinkList
+                .filter { it.links(a, b) }
+                .forEach { return false }
+            b.gridLinkList
+                .filter { it.links(a, b) }
+                .forEach { return false }
 
             // Makin' a Link. Where'd Zelda go?
             val link = GridLink(

@@ -15,5 +15,6 @@ class GridTransformerDescriptor(name: String, obj: Obj3D, cableTexture: String, 
     override fun rotationIsFixed(): Boolean {
         return true
     }
+
 }
 
