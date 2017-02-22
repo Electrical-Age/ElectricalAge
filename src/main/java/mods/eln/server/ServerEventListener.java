@@ -125,7 +125,8 @@ public class ServerEventListener {
             Files.write(fileNames.tempSave, bytes.toByteArray());
 
             // Replace backup save with old save, and old save with new one.
-            replaceFile(fileNames.worldSave, fileNames.backupSave);
+            if (Files.exists(fileNames.worldSave))
+                replaceFile(fileNames.worldSave, fileNames.backupSave);
             replaceFile(fileNames.tempSave, fileNames.worldSave);
         } catch (Exception ex) {
             ex.printStackTrace();
