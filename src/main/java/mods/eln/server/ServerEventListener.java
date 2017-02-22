@@ -84,10 +84,13 @@ public class ServerEventListener {
                 String name = getEaWorldSaveName(e.world) + ".bak";
                 FileInputStream fileStream = new FileInputStream(name);
                 System.out.println("Using BACKUP Electrical Age save: " + name);
+                ex.printStackTrace();
                 NBTTagCompound nbt = CompressedStreamTools.readCompressed(fileStream);
                 readFromEaWorldNBT(nbt);
                 fileStream.close();
             } catch (Exception ex2) {
+                System.out.println("Failed to read backup save!");
+                ex2.printStackTrace();
                 ElnWorldStorage storage = ElnWorldStorage.forWorld(e.world);
             }
         }
