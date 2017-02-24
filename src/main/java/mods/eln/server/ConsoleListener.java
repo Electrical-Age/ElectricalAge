@@ -104,7 +104,13 @@ public class ConsoleListener extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender ics, String[] astring) {
-        String cmd = astring[0];
+        String cmd;
+
+        if (astring.length >= 1) {
+            cmd = astring[0];
+        } else {
+            cmd = "ls";
+        }
 
         if (cmd.isEmpty()) { //Will normally never append.
             return;
