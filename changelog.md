@@ -1,3 +1,15 @@
+## 1.14.2
+
+### Bugfixes
+
+- Fixed a world-destroying bug in the saving code, which only affected Windows.
+
+  If you've been affected, see
+  https://github.com/Electrical-Age/ElectricalAge/issues/673 for a possible
+  recovery method.
+  
+- Typing /eln without a parameter will now list the commands.
+
 ## 1.14.1
 
 ### Features
