@@ -5564,6 +5564,16 @@ public class Eln {
             Character.valueOf('r'), new ItemStack(Items.redstone),
             Character.valueOf('c'), findItemStack("Copper Cable"),
             Character.valueOf('C'), dictAdvancedChip);
+
+        addRecipe(findItemStack("Lowpass filter"),
+            "CdC",
+            "cDc",
+            " s ",
+            Character.valueOf('d'), findItemStack("Dielectric"),
+            Character.valueOf('c'), findItemStack("Copper Cable"),
+            Character.valueOf('C'), findItemStack("Copper Plate"),
+            Character.valueOf('D'), findItemStack("Coal Dust"),
+            Character.valueOf('s'), dictCheapChip);
     }
 
     void recipeTransformer() {
