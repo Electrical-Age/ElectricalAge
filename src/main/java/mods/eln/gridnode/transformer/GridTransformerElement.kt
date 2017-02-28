@@ -2,17 +2,21 @@ package mods.eln.gridnode.transformer
 
 import mods.eln.Eln
 import mods.eln.gridnode.GridElement
-import mods.eln.misc.*
+import mods.eln.misc.Direction
+import mods.eln.misc.LRDU
+import mods.eln.misc.Utils
 import mods.eln.node.NodePeriodicPublishProcess
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.sim.ElectricalLoad
-import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.VoltageSource
 import mods.eln.sim.mna.process.TransformerInterSystemProcess
 import mods.eln.sim.nbt.NbtElectricalLoad
+import mods.eln.sim.nbt.NbtThermalLoad
+import mods.eln.sim.process.destruct.ThermalLoadWatchDog
 import mods.eln.sim.process.destruct.VoltageStateWatchDog
 import mods.eln.sim.process.destruct.WorldExplosion
+import mods.eln.sim.process.heater.ElectricalLoadHeatThermalLoad
 import net.minecraft.util.Vec3
 import java.io.DataOutputStream
 
@@ -29,17 +33,39 @@ class GridTransformerElement(node: TransparentNode, descriptor: TransparentNodeD
     internal val secondaryVoltage = desc.cableDescriptor.electricalNominalVoltage * 16
     internal val primaryVoltage = secondaryVoltage * 4
 
-    internal var voltagePrimaryWatchdog = VoltageStateWatchDog().apply { setUNominal(primaryVoltage) }
-    internal var voltageSecondaryWatchdog = VoltageStateWatchDog().apply { setUNominal(secondaryVoltage) }
+    internal val explosion = WorldExplosion(this).machineExplosion()
+
+    internal var voltagePrimaryWatchdog = VoltageStateWatchDog().apply {
+        setUNominal(primaryVoltage)
+        set(primaryLoad)
+        set(explosion)
+        slowProcessList.add(this)
+    }
+    internal var voltageSecondaryWatchdog = VoltageStateWatchDog().apply {
+        setUNominal(secondaryVoltage)
+        set(secondaryLoad)
+        set(explosion)
+        slowProcessList.add(this)
+    }
+
+    internal val thermalLoad = NbtThermalLoad("thermal").apply {
+        desc.cableDescriptor.applyTo(this)
+        setAsSlow()
+        slowProcessList.add(ElectricalLoadHeatThermalLoad(secondaryLoad, this))
+        thermalLoadList.add(this)
+    }
+    internal val thermalWatchdog = ThermalLoadWatchDog().apply {
+        setLimit(desc.cableDescriptor.thermalWarmLimit, desc.cableDescriptor.thermalCoolLimit)
+        set(thermalLoad)
+        set(explosion)
+        slowProcessList.add(this)
+    }
 
     init {
         electricalLoadList.add(primaryLoad)
         electricalLoadList.add(secondaryLoad)
         electricalComponentList.add(primaryVoltageSource)
         electricalComponentList.add(secondaryVoltageSource)
-        val exp = WorldExplosion(this).machineExplosion()
-        slowProcessList.add(voltagePrimaryWatchdog.set(primaryLoad).set(exp))
-        slowProcessList.add(voltageSecondaryWatchdog.set(secondaryLoad).set(exp))
 
         desc.cableDescriptor.applyTo(primaryLoad, 4.0)
         desc.cableDescriptor.applyTo(secondaryLoad)
@@ -88,9 +114,7 @@ class GridTransformerElement(node: TransparentNode, descriptor: TransparentNodeD
         return getElectricalLoad(side, LRDU.Down)
     }
 
-    override fun getThermalLoad(side: Direction, lrdu: LRDU): ThermalLoad? {
-        return null
-    }
+    override fun getThermalLoad(side: Direction, lrdu: LRDU) = thermalLoad
 
     override fun multiMeterString(side: Direction): String {
         if (side == front.up())
@@ -100,14 +124,6 @@ class GridTransformerElement(node: TransparentNode, descriptor: TransparentNodeD
 
         return (Utils.plotVolt("UP+:", primaryLoad.u) + Utils.plotAmpere("IP+:", primaryLoad.current)
             + Utils.plotVolt("  US+:", secondaryLoad.u) + Utils.plotAmpere("IS+:", secondaryLoad.current))
-    }
-
-    override fun thermoMeterString(side: Direction): String? {
-        return null
-    }
-
-    override fun initialize() {
-        super.initialize()
     }
 
     override fun networkSerialize(stream: DataOutputStream) {

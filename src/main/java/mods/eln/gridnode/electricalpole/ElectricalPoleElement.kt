@@ -65,7 +65,6 @@ class ElectricalPoleElement(node: TransparentNode, descriptor: TransparentNodeDe
         slowProcessList.add(voltageWatchdog)
         // Electrical poles can handle higher voltages, due to air insulation.
         // This puts utility poles at 4 * Very High Voltage.
-        // There'll be a second tier of pole later, handling 16x.
         val exp: WorldExplosion
         if (desc.includeTransformer) {
             exp = WorldExplosion(this).machineExplosion()
