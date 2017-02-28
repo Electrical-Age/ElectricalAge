@@ -21,9 +21,6 @@ import java.util.HashMap
 import java.util.HashSet
 import java.util.UUID
 
-/**
- * Created by svein on 22/08/15.
- */
 abstract class GridElement(transparentNode: TransparentNode, descriptor: TransparentNodeDescriptor, internal var connectRange: Int) : TransparentNodeElement(transparentNode, descriptor) {
     var gridLinkList = HashSet<GridLink>()
     var gridLinksBooting = HashSet<GridLink>()

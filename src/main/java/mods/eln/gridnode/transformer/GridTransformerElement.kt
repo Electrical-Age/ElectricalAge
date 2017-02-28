@@ -14,19 +14,13 @@ import mods.eln.sim.process.destruct.VoltageStateWatchDog
 import mods.eln.sim.process.destruct.WorldExplosion
 import net.minecraft.util.Vec3
 
-/**
- * Created by svein on 07/08/15.
- */
-class GridTransformerElement
-//TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
-
-(node: TransparentNode, descriptor: TransparentNodeDescriptor) : GridElement(node, descriptor, 8) {
+class GridTransformerElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) : GridElement(node, descriptor, 8) {
     var primaryLoad = NbtElectricalLoad("primaryLoad")
     var secondaryLoad = NbtElectricalLoad("secondaryLoad")
     var primaryVoltageSource = VoltageSource("primaryVoltageSource", primaryLoad, null)
     var secondaryVoltageSource = VoltageSource("secondaryVoltageSource", secondaryLoad, null)
     var interSystemProcess = TransformerInterSystemProcess(primaryLoad, secondaryLoad, primaryVoltageSource, secondaryVoltageSource)
-    internal var desc: GridTransformerDescriptor
+    internal var desc: GridTransformerDescriptor = descriptor as GridTransformerDescriptor
     internal var primaryMaxCurrent = 0f
     internal var secondaryMaxCurrent = 0f
     //SoundLooper highLoadSoundLooper;
@@ -35,7 +29,6 @@ class GridTransformerElement
     internal var voltageSecondaryWatchdog = VoltageStateWatchDog()
 
     init {
-        desc = descriptor as GridTransformerDescriptor
 
         electricalLoadList.add(primaryLoad)
         electricalLoadList.add(secondaryLoad)

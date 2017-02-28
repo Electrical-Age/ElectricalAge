@@ -74,19 +74,19 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
         } catch (e: IOException) {
             e.printStackTrace()
         }
-
     }
 
     override fun cameraDrawOptimisation(): Boolean {
         return false
     }
 
-    private inner class Catenary// TODO: Lighting and such should not be the same across the entire cable.
+    private inner class Catenary
+    // TODO: Lighting and such should not be the same across the entire cable.
     // Probably need make physical "cable" blocks, to make minecraft cooperate.
     // The individual blocks should do the rendering.
     // ...later. Much later.
     internal constructor(start: Vec3, end: Vec3) {
-        internal val list: Int
+        internal val list: Int = glGenLists(1)
 
         internal val origin = Vec3.createVectorHelper(0.0, 0.0, 0.0)
         internal val box = intArrayOf(3, 7, 5, 3, 5, 1, 4, 8, 6, 4, 6, 2, 1, 6, 5, 1, 2, 6, 3, 8, 7, 3, 4, 8)
@@ -105,7 +105,6 @@ abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: Transpa
             // These are the central vertices of the catenary.
             val catenary = getConnectionCatenary(start, end)
 
-            list = glGenLists(1)
             glNewList(list, GL_COMPILE)
             glBegin(GL_TRIANGLES)
 

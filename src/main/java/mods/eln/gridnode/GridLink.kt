@@ -79,7 +79,6 @@ class GridLink : INBTTReady {
         Eln.simulator.addElectricalComponent(ab)
         ab!!.r = rs
 
-
         // Add link to link lists.
         a.gridLinkList.add(this)
         b.gridLinkList.add(this)
