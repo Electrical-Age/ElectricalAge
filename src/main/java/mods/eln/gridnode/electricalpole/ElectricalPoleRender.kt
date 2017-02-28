@@ -13,9 +13,6 @@ import net.minecraft.client.audio.ISound
 import java.io.DataInputStream
 import java.io.IOException
 
-/**
- * Created by svein on 07/08/15.
- */
 class ElectricalPoleRender(entity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) : GridRender(entity, descriptor) {
 
     internal var cableRenderType: CableRenderType? = null
