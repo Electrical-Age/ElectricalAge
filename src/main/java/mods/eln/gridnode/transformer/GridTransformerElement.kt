@@ -21,12 +21,16 @@ class GridTransformerElement(node: TransparentNode, descriptor: TransparentNodeD
     var secondaryVoltageSource = VoltageSource("secondaryVoltageSource", secondaryLoad, null)
     var interSystemProcess = TransformerInterSystemProcess(primaryLoad, secondaryLoad, primaryVoltageSource, secondaryVoltageSource)
     internal var desc: GridTransformerDescriptor = descriptor as GridTransformerDescriptor
-    internal var primaryMaxCurrent = 0f
-    internal var secondaryMaxCurrent = 0f
+    internal var primaryMaxCurrent = desc.cableDescriptor.electricalMaximalCurrent.toFloat()
+    internal var secondaryMaxCurrent = desc.cableDescriptor.electricalMaximalCurrent.toFloat()
     //SoundLooper highLoadSoundLooper;
 
-    internal var voltagePrimaryWatchdog = VoltageStateWatchDog()
-    internal var voltageSecondaryWatchdog = VoltageStateWatchDog()
+    // Primary is the T2 coupling, secondary is the lower-voltage T1 coupling.
+    internal val secondaryVoltage = desc.cableDescriptor.electricalNominalVoltage * 16
+    internal val primaryVoltage = secondaryVoltage * 4
+
+    internal var voltagePrimaryWatchdog = VoltageStateWatchDog().apply { setUNominal(primaryVoltage) }
+    internal var voltageSecondaryWatchdog = VoltageStateWatchDog().apply { setUNominal(secondaryVoltage) }
 
     init {
 
@@ -38,8 +42,10 @@ class GridTransformerElement(node: TransparentNode, descriptor: TransparentNodeD
         slowProcessList.add(voltagePrimaryWatchdog.set(primaryLoad).set(exp))
         slowProcessList.add(voltageSecondaryWatchdog.set(secondaryLoad).set(exp))
 
-        desc.cableDescriptor.applyTo(primaryLoad)
-        desc.cableDescriptor.applyTo(secondaryLoad, 4.0)
+        desc.cableDescriptor.applyTo(primaryLoad, 4.0)
+        desc.cableDescriptor.applyTo(secondaryLoad)
+
+        interSystemProcess.setRatio(0.25)
 
         /* TODO: Do looping on client.
         highLoadSoundLooper = new SoundLooper(this) {
@@ -113,24 +119,7 @@ class GridTransformerElement(node: TransparentNode, descriptor: TransparentNodeD
     }
 
     override fun initialize() {
-        computeInventory()
         super.initialize()
-    }
-
-    fun computeInventory() {
-        // TODO: Maybe later actually *have* an inventory, and all that stuff.
-        // For now it'll just be a fixed 1:4.
-        // Factoring out the common parts of the two transformers would also be nice!
-        // God I miss mixins.
-        // Can I have mixins?
-        // Maybe later.
-
-        voltagePrimaryWatchdog.setUNominal(12800.0)
-        voltageSecondaryWatchdog.setUNominal((12800 * 4).toDouble())
-        primaryMaxCurrent = desc.cableDescriptor.electricalMaximalCurrent.toFloat()
-        secondaryMaxCurrent = desc.cableDescriptor.electricalMaximalCurrent.toFloat()
-
-        interSystemProcess.setRatio(0.25)
     }
 
     override fun getLightOpacity(): Float {
