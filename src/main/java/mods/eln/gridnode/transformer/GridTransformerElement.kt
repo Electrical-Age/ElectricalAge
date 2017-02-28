@@ -71,18 +71,23 @@ class GridTransformerElement(node: TransparentNode, descriptor: TransparentNodeD
     }
 
     override fun getElectricalLoad(side: Direction, lrdu: LRDU): ElectricalLoad? {
-        if (lrdu != LRDU.Down) return null
-        if (side == front.up()) return primaryLoad
-        return secondaryLoad
+        return when (side) {
+            front.left() -> primaryLoad
+            front.right() -> secondaryLoad
+            else -> null
+        }
     }
 
     // TODO: Factor this against super.
     public override fun getCablePoint(side: Direction, i: Int): Vec3 {
         if (i >= 2) throw AssertionError("Invalid cable point index")
-        val idx = if (side == front.up()) 1 else 0
+        val idx = when (side) {
+            front.left() -> 1
+            front.right() -> 0
+            else -> throw AssertionError("Invalid connection side")
+        }
         val part = (if (i == 0) desc.plus else desc.gnd)[idx]
-        val bb = part.boundingBox()
-        return bb.centre()
+        return part.boundingBox().centre()
     }
 
     override fun getGridElectricalLoad(side: Direction): ElectricalLoad? {

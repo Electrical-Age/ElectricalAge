@@ -4,6 +4,7 @@ import mods.eln.Eln
 import mods.eln.misc.Coordonate
 import mods.eln.misc.Direction
 import mods.eln.misc.INBTTReady
+import mods.eln.misc.UserError
 import mods.eln.node.NodeManager
 import mods.eln.node.transparent.TransparentNodeElement
 import mods.eln.sim.ElectricalConnection
@@ -72,8 +73,9 @@ class GridLink : INBTTReady {
         // Add link to simulator.
         val aLoad = a.getGridElectricalLoad(`as`)
         val bLoad = b.getGridElectricalLoad(bs)
-        assert(aLoad != null)
-        assert(bLoad != null)
+        if (aLoad == null || bLoad == null) {
+            throw UserError("Invalid connection side")
+        }
         assert(ab == null)
         ab = ElectricalConnection(aLoad, bLoad)
         Eln.simulator.addElectricalComponent(ab)
@@ -188,22 +190,17 @@ class GridLink : INBTTReady {
             }
         }
 
-        fun addLink(a: GridElement, b: GridElement, `as`: Direction, bs: Direction, cable: ElectricalCableDescriptor, cableLength: Int): Boolean {
+        fun addLink(a: GridElement, b: GridElement, `as`: Direction, bs: Direction, cable: ElectricalCableDescriptor, cableLength: Int) {
             // Check if these two nodes are already linked.
-            a.gridLinkList
+            (a.gridLinkList + b.gridLinkList)
                 .filter { it.links(a, b) }
-                .forEach { return false }
-            b.gridLinkList
-                .filter { it.links(a, b) }
-                .forEach { return false }
+                .forEach { throw UserError("Already Connected") }
 
             // Makin' a Link. Where'd Zelda go?
             val link = GridLink(
                     a.coordonate(), b.coordonate(), `as`, bs, cable.newItemStack(cableLength),
                     cable.electricalRs * cableLength)
             link.connect()
-
-            return true
         }
     }
 }

@@ -74,11 +74,12 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             } else if (!this.validLOS(other)) {
                 Utils.addChatMessage(entityPlayer, "Cannot connect, no line of sight")
             } else {
-                if (GridLink.addLink(this, other, side, p!!.right, cable, cableLength)) {
+                try {
+                    GridLink.addLink(this, other, side, p!!.right, cable, cableLength)
                     Utils.addChatMessage(entityPlayer, "Added connection")
                     entityPlayer.removeMultipleItems(stack, cableLength)
-                } else {
-                    Utils.addChatMessage(entityPlayer, "Already connected")
+                } catch (e: UserError) {
+                    Utils.addChatMessage(entityPlayer, e.message)
                 }
             }
             pending.remove(uuid)
