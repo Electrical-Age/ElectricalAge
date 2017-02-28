@@ -659,7 +659,7 @@ public class Eln {
         {
             subId = 3;
 			GridTransformerDescriptor descriptor =
-					new GridTransformerDescriptor("Grid Transformer", obj.getObj("GridConverter"), "textures/wire.png", highVoltageCableDescriptor);
+					new GridTransformerDescriptor("Grid DC-DC Converter", obj.getObj("GridConverter"), "textures/wire.png", highVoltageCableDescriptor);
 			GhostGroup g = new GhostGroup();
 			g.addElement(1, 0, 0);
 			g.addElement(0, 0, -1);
@@ -5871,6 +5871,13 @@ public class Eln {
                     Character.valueOf('i'), ingotType,
                     Character.valueOf('B'), blockType,
                     Character.valueOf('m'), findItemStack("Machine Block"));
+                addRecipe(findItemStack("Grid DC-DC Converter"),
+                    "i i",
+                    "mtm",
+                    "imi",
+                    Character.valueOf('i'), ingotType,
+                    Character.valueOf('t'), findItemStack("DC-DC Converter"),
+                    Character.valueOf('m'), findItemStack("Advanced Machine Block"));
             }
         }
 
