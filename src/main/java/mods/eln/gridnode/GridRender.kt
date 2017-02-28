@@ -13,9 +13,6 @@ import java.util.ArrayList
 
 import org.lwjgl.opengl.GL11.*
 
-/**
- * Created by svein on 25/08/15.
- */
 abstract class GridRender(tileEntity: TransparentNodeEntity, descriptor: TransparentNodeDescriptor) : TransparentNodeElementRender(tileEntity, descriptor) {
     private val descriptor: GridDescriptor
     private val cableTexture: ResourceLocation

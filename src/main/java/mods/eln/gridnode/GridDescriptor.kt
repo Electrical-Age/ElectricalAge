@@ -2,6 +2,7 @@ package mods.eln.gridnode
 
 import mods.eln.misc.Direction
 import mods.eln.misc.Obj3D
+import mods.eln.misc.preserveMatrix
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import net.minecraft.item.ItemStack
@@ -38,16 +39,11 @@ open class GridDescriptor(name: String, private val obj: Obj3D, ElementClass: Cl
     }
 
     fun draw(idealRenderingAngle: Float) {
-        val fixed = rotationIsFixed()
-        if (!fixed) {
-            glPushMatrix()
+        preserveMatrix {
             glRotatef(idealRenderingAngle, 0f, 1f, 0f)
-        }
-        for (part in rotating_parts) {
-            part.draw()
-        }
-        if (!fixed) {
-            glPopMatrix()
+            for (part in rotating_parts) {
+                part.draw()
+            }
         }
         for (part in static_parts) {
             part.draw()
