@@ -3,6 +3,7 @@ package mods.eln.gridnode.transformer
 import mods.eln.Eln
 import mods.eln.gridnode.GridElement
 import mods.eln.misc.*
+import mods.eln.node.NodePeriodicPublishProcess
 import mods.eln.node.transparent.TransparentNode
 import mods.eln.node.transparent.TransparentNodeDescriptor
 import mods.eln.sim.ElectricalLoad
@@ -13,6 +14,7 @@ import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.process.destruct.VoltageStateWatchDog
 import mods.eln.sim.process.destruct.WorldExplosion
 import net.minecraft.util.Vec3
+import java.io.DataOutputStream
 
 class GridTransformerElement(node: TransparentNode, descriptor: TransparentNodeDescriptor) : GridElement(node, descriptor, 8) {
     var primaryLoad = NbtElectricalLoad("primaryLoad")
@@ -21,9 +23,7 @@ class GridTransformerElement(node: TransparentNode, descriptor: TransparentNodeD
     var secondaryVoltageSource = VoltageSource("secondaryVoltageSource", secondaryLoad, null)
     var interSystemProcess = TransformerInterSystemProcess(primaryLoad, secondaryLoad, primaryVoltageSource, secondaryVoltageSource)
     internal var desc: GridTransformerDescriptor = descriptor as GridTransformerDescriptor
-    internal var primaryMaxCurrent = desc.cableDescriptor.electricalMaximalCurrent.toFloat()
-    internal var secondaryMaxCurrent = desc.cableDescriptor.electricalMaximalCurrent.toFloat()
-    //SoundLooper highLoadSoundLooper;
+    internal var maxCurrent = desc.cableDescriptor.electricalMaximalCurrent.toFloat()
 
     // Primary is the T2 coupling, secondary is the lower-voltage T1 coupling.
     internal val secondaryVoltage = desc.cableDescriptor.electricalNominalVoltage * 16
@@ -33,7 +33,6 @@ class GridTransformerElement(node: TransparentNode, descriptor: TransparentNodeD
     internal var voltageSecondaryWatchdog = VoltageStateWatchDog().apply { setUNominal(secondaryVoltage) }
 
     init {
-
         electricalLoadList.add(primaryLoad)
         electricalLoadList.add(secondaryLoad)
         electricalComponentList.add(primaryVoltageSource)
@@ -47,19 +46,8 @@ class GridTransformerElement(node: TransparentNode, descriptor: TransparentNodeD
 
         interSystemProcess.setRatio(0.25)
 
-        /* TODO: Do looping on client.
-        highLoadSoundLooper = new SoundLooper(this) {
-            @Override
-            public SoundCommand mustStart() {
-                if (primaryMaxCurrent != 0 && secondaryMaxCurrent != 0) {
-                    float load = (float) Math.max(primaryLoad.getI() / primaryMaxCurrent, secondaryLoad.getI() / secondaryMaxCurrent);
-                    if (load > desc.minimalLoadToHum)
-                        return desc.highLoadSound.copy().mulVolume(0.2f * (load - desc.minimalLoadToHum) / (1 - desc.minimalLoadToHum), 1f).smallRange();
-                }
-                return null;
-            }
-        };
-        slowProcessList.add(highLoadSoundLooper);*/
+        // Publish load from time to time.
+        slowProcessList.add(NodePeriodicPublishProcess(node, 1.0, 0.5))
     }
 
     override fun getConnectionMask(side: Direction, lrdu: LRDU): Int {
@@ -120,6 +108,11 @@ class GridTransformerElement(node: TransparentNode, descriptor: TransparentNodeD
 
     override fun initialize() {
         super.initialize()
+    }
+
+    override fun networkSerialize(stream: DataOutputStream) {
+        super.networkSerialize(stream)
+        stream.writeFloat((secondaryLoad.current / maxCurrent).toFloat())
     }
 
     override fun getLightOpacity(): Float {
