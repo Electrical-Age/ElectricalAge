@@ -105,10 +105,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
 
     override fun initialize() {
     }
-
-    override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
 }
-
 
 
 class ScannerRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) : SixNodeElementRender(entity, side, descriptor) {

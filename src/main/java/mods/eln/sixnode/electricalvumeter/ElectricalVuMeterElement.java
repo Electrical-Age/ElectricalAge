@@ -99,17 +99,4 @@ public class ElectricalVuMeterElement extends SixNodeElement {
     @Override
     public void initialize() {
     }
-
-    @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            front = front.getNextClockwise();
-            sixNode.reconnect();
-            sixNode.setNeedPublish(true);
-            return true;
-        }
-        return false;
-    }
 }

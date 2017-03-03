@@ -209,11 +209,6 @@ public class ElectricalMathElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return onBlockActivatedRotate(entityPlayer);
-    }
-
-    @Override
     public IInventory getInventory() {
         return inventory;
     }

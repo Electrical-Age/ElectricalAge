@@ -141,17 +141,6 @@ public class WirelessSignalTxElement extends SixNodeElement implements IWireless
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            front = front.getNextClockwise();
-            sixNode.reconnect();
-            sixNode.setNeedPublish(true);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public void destroy(EntityPlayerMP entityPlayer) {
         unregister();
         super.destroy(entityPlayer);
