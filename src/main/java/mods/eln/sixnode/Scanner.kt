@@ -13,6 +13,8 @@ import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.IInventory
+import net.minecraft.inventory.ISidedInventory
+import net.minecraftforge.common.util.ForgeDirection
 import net.minecraftforge.fluids.IFluidHandler
 
 /**
@@ -34,21 +36,32 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
     val output = NbtElectricalGateOutput("signal")
     val outputProcess = NbtElectricalGateOutputProcess("signalP", output)
 
-    val scannedCoord = Coordonate(1, 0, 0, 0).apply {
-        applyTransformation(side.down(), coordonate)
-    }
+    val forgeSide: ForgeDirection = side.inverse.toForge()
 
     val updater = IProcess {
+        val scannedCoord = Coordonate(coordonate).apply {
+            move(side.applyLRDU(front))
+        }
         val te = scannedCoord.tileEntity
         // TODO: Throttling.
         val out: Double
         if (te is IFluidHandler) {
-            val info = te.getTankInfo(side.inverse.toForge())
+            val info = te.getTankInfo(forgeSide)
             out = info.sumByDouble {
                 (it.fluid?.amount ?: 0).toDouble() / it.capacity
             } / info.size
+        } else if (te is ISidedInventory) {
+            var sum = 0
+            var limit = 0
+            te.getAccessibleSlotsFromSide(forgeSide.ordinal).forEach {
+                sum += te.getStackInSlot(it)?.stackSize ?: 0
+                limit += te.inventoryStackLimit
+            }
+            out = sum.toDouble() / limit
         } else if (te is IInventory) {
-            val sum = (0..te.sizeInventory - 1).sumBy { te.getStackInSlot(it)?.stackSize ?: 0 }
+            val sum = (0..te.sizeInventory - 1).sumBy {
+                te.getStackInSlot(it)?.stackSize ?: 0
+            }
             out = sum.toDouble() / te.inventoryStackLimit / te.sizeInventory
         } else {
             out = scannedCoord.block.lightValue / 15.0
