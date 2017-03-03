@@ -715,8 +715,8 @@ class Filter: AnalogFunction() {
 class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor) :
     AnalogChipElement(node, side, sixNodeDescriptor) {
 
-    companion object {
-        val CutOffFrequencyChangedEvents = 1
+    enum class Event(val value: Byte) {
+        CUTOFF_FREQUENCY_CHANGED(1)
     }
 
     private var cutOffFrequency = Eln.instance.electricalFrequency / 4.0
@@ -742,8 +742,8 @@ class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDe
         super.networkUnserialize(stream)
 
         try {
-            when (stream.readByte().toInt()) {
-                CutOffFrequencyChangedEvents -> cutOffFrequency = stream.readFloat().toDouble()
+            when (stream.readByte()) {
+                Event.CUTOFF_FREQUENCY_CHANGED.value -> cutOffFrequency = stream.readFloat().toDouble()
             }
             needPublish()
         } catch (e: IOException) {
@@ -784,7 +784,7 @@ class FilterGui(private var render: FilterRender) : GuiScreenEln() {
     override fun guiObjectEvent(`object`: IGuiObject) {
         super.guiObjectEvent(`object`)
         if (`object` === freq) {
-            render.clientSetFloat(FilterElement.CutOffFrequencyChangedEvents, freq!!.value)
+            render.clientSetFloat(FilterElement.Event.CUTOFF_FREQUENCY_CHANGED.value.toInt(), freq!!.value)
         }
     }
 
