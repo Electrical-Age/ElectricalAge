@@ -750,7 +750,7 @@ public class Eln {
         recipeElectricalBreaker();
         recipeFuses();
         recipeElectricalVuMeter();
-        recipeElectricalEnvironnementalSensor();
+        recipeElectricalEnvironmentalSensor();
         recipeElectricalRedstone();
         recipeElectricalGate();
         recipeElectricalAlarm();
@@ -7018,7 +7018,7 @@ public class Eln {
 
     }
 
-    private void recipeElectricalEnvironnementalSensor() {
+    private void recipeElectricalEnvironmentalSensor() {
         addShapelessRecipe(findItemStack("Electrical Daylight Sensor"),
             new ItemStack(Blocks.daylight_detector),
             findItemStack("Redstone-to-Voltage Converter"));
@@ -7065,6 +7065,11 @@ public class Eln {
             Character.valueOf('a'), dictAdvancedChip,
             Character.valueOf('r'), "itemRubber",
             Character.valueOf('p'), "plateCopper");
+
+        addShapelessRecipe(findItemStack("Scanner"),
+            new ItemStack(Items.comparator),
+            dictAdvancedChip);
+
     }
 
     private void recipeElectricalVuMeter() {
