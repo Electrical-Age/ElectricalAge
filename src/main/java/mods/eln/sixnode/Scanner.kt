@@ -8,8 +8,6 @@ import mods.eln.node.six.*
 import mods.eln.sim.IProcess
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
-import net.minecraft.block.BlockRedstoneComparator
-import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.IInventory
 import net.minecraft.inventory.ISidedInventory
 import net.minecraft.tileentity.TileEntity
@@ -43,10 +41,12 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         }
         val te = scannedCoord.tileEntity
         // TODO: Throttling.
-        val out = if (te != null) {
-            scanTileEntity(te)
-        } else {
-            scanBlock(scannedCoord)
+        var out = 0.0
+        if (te != null) {
+            out = scanTileEntity(te)
+        }
+        if (out == 0.0) {
+            out = scanBlock(scannedCoord)
         }
         outputProcess.outputNormalized = out
     }
@@ -84,7 +84,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
             }
             return sum.toDouble() / te.inventoryStackLimit / te.sizeInventory
         } else {
-            return 2.0/3.0
+            return 0.0
         }
     }
 
