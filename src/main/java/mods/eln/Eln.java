@@ -2345,6 +2345,15 @@ public class Eln {
                 sixNodeItem.addDescriptor(subId + (id << 6), desc);
             }
         }
+        {
+            ScannerDescriptor desc;
+            {
+                subId = 15;
+                name = TR_NAME(Type.NONE, "Scanner");
+                desc = new ScannerDescriptor(name, obj.getObj("scanner"));
+                sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            }
+        }
     }
 
     void registerElectricalRedstone(int id) {
