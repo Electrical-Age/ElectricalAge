@@ -11,9 +11,11 @@ import mods.eln.node.six.*
 import mods.eln.sim.IProcess
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
+import net.minecraft.block.BlockRedstoneComparator
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.IInventory
 import net.minecraft.inventory.ISidedInventory
+import net.minecraft.tileentity.TileEntity
 import net.minecraftforge.common.util.ForgeDirection
 import net.minecraftforge.fluids.IFluidHandler
 
@@ -44,10 +46,27 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         }
         val te = scannedCoord.tileEntity
         // TODO: Throttling.
-        val out: Double
+        val out = if (te != null) {
+            scanTileEntity(te)
+        } else {
+            scanBlock(scannedCoord)
+        }
+        outputProcess.outputNormalized = out
+    }
+
+    private fun scanBlock(scannedCoord: Coordonate): Double {
+        val block = scannedCoord.block
+        if (block.hasComparatorInputOverride()) {
+            return block.getComparatorInputOverride(coordonate.world(), coordonate.x, coordonate.y, coordonate.z, forgeSide.ordinal) / 15.0
+        } else {
+            return block.lightValue / 15.0
+        }
+    }
+
+    private fun scanTileEntity(te: TileEntity): Double {
         if (te is IFluidHandler) {
             val info = te.getTankInfo(forgeSide)
-            out = info.sumByDouble {
+            return info.sumByDouble {
                 (it.fluid?.amount ?: 0).toDouble() / it.capacity
             } / info.size
         } else if (te is ISidedInventory) {
@@ -57,16 +76,13 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
                 sum += te.getStackInSlot(it)?.stackSize ?: 0
                 limit += te.inventoryStackLimit
             }
-            out = sum.toDouble() / limit
+            return sum.toDouble() / limit
         } else if (te is IInventory) {
             val sum = (0..te.sizeInventory - 1).sumBy {
                 te.getStackInSlot(it)?.stackSize ?: 0
             }
-            out = sum.toDouble() / te.inventoryStackLimit / te.sizeInventory
-        } else {
-            out = scannedCoord.block.lightValue / 15.0
+            return sum.toDouble() / te.inventoryStackLimit / te.sizeInventory
         }
-        outputProcess.outputNormalized = out
     }
 
     init {
