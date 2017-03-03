@@ -137,7 +137,7 @@ public class BatteryChargerElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (super.onBlockActivated(entityPlayer, side, vx, vy, vz)) {
+        if (onBlockActivatedRotate(entityPlayer)) {
             return true;
         } else {
             return inventory.take(entityPlayer.getCurrentEquippedItem(), (IPublishable) this);

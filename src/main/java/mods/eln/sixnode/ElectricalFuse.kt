@@ -205,7 +205,7 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
     }
 
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
-        if (super.onBlockActivated(entityPlayer, side, vx, vy, vz)) return true
+        if (onBlockActivatedRotate(entityPlayer)) return true
 
         var takenOutFuse: ElectricalFuseDescriptor? = null
         val itemStack = entityPlayer?.currentEquippedItem

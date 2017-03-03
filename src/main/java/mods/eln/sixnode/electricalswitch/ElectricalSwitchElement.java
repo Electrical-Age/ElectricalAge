@@ -159,7 +159,7 @@ public class ElectricalSwitchElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (super.onBlockActivated(entityPlayer, side, vx, vy, vz)) return true;
+        if (onBlockActivatedRotate(entityPlayer)) return true;
         ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 
         if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {

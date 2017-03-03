@@ -124,7 +124,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
     }
 
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
-        if (super.onBlockActivated(entityPlayer, side, vx, vy, vz)) return true
+        if (onBlockActivatedRotate(entityPlayer)) return true
         mode = when (mode) {
             ScanMode.SIMPLE -> ScanMode.SLOTS
             ScanMode.SLOTS -> ScanMode.SIMPLE

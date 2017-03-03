@@ -149,7 +149,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 
-        if (super.onBlockActivated(entityPlayer, side, vx, vy, vz)) {
+        if (onBlockActivatedRotate(entityPlayer)) {
             return true;
         } else if (!Utils.playerHasMeter(entityPlayer) && descriptor.onOffOnly) {
             outputGateProcess.state(!outputGateProcess.getOutputOnOff());
