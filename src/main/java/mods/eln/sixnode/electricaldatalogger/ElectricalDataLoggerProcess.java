@@ -28,13 +28,13 @@ public class ElectricalDataLoggerProcess implements IProcess {
         }
         //p.add("B");
         if (e.printToDo) {
-            ItemStack paperStack = e.inventory.getStackInSlot(ElectricalDataLoggerContainer.paperSlotId);
-            ItemStack printStack = e.inventory.getStackInSlot(ElectricalDataLoggerContainer.printSlotId);
+            ItemStack paperStack = e.inventory.getStackInSlot(ElectricalDataLoggerContainer.Companion.getPaperSlotId());
+            ItemStack printStack = e.inventory.getStackInSlot(ElectricalDataLoggerContainer.Companion.getPrintSlotId());
             if (paperStack != null && printStack == null) {
-                e.inventory.decrStackSize(ElectricalDataLoggerContainer.paperSlotId, 1);
+                e.inventory.decrStackSize(ElectricalDataLoggerContainer.Companion.getPaperSlotId(), 1);
                 ItemStack print = Eln.instance.dataLogsPrintDescriptor.newItemStack(1);
                 Eln.instance.dataLogsPrintDescriptor.initializeStack(print, e.logs);
-                e.inventory.setInventorySlotContents(ElectricalDataLoggerContainer.printSlotId, print);
+                e.inventory.setInventorySlotContents(ElectricalDataLoggerContainer.Companion.getPrintSlotId(), print);
             }
             e.printToDo = false;
         }

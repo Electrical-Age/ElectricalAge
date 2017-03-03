@@ -50,7 +50,7 @@ public class ElectricalMathGui extends GuiContainerEln {
         super.postDraw(f, x, y);
         int c;
         int redNbr = 0;
-        ItemStack stack = render.inventory.getStackInSlot(ElectricalMathContainer.restoneSlotId);
+        ItemStack stack = render.inventory.getStackInSlot(ElectricalMathContainer.Companion.getRestoneSlotId());
 
         if (stack != null)
             redNbr = stack.stackSize;

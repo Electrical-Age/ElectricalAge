@@ -186,8 +186,8 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
         else
             pause.displayString = Color.COLOR_BRIGHT_GREEN + "Running";
 
-        boolean a = inventorySlots.getSlot(ElectricalDataLoggerContainer.paperSlotId).getStack() != null;
-        boolean b = inventorySlots.getSlot(ElectricalDataLoggerContainer.printSlotId).getStack() == null;
+        boolean a = inventorySlots.getSlot(ElectricalDataLoggerContainer.Companion.getPaperSlotId()).getStack() != null;
+        boolean b = inventorySlots.getSlot(ElectricalDataLoggerContainer.Companion.getPrintSlotId()).getStack() == null;
         printBt.enabled = a && b;
     }
 

@@ -43,7 +43,6 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
         return series.getValue(core.stackSize)
     }
 
-    // TODO: Show the wiper somehow.
     fun draw(position: Float = 0f) {
         dissipator.draw()
         GL11.glRotatef((1f - position) * 300f, 0f, 1f, 0f)
@@ -174,7 +173,7 @@ class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescript
     override fun hasGui() = true
     override fun getInventory() = inventory
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float) = false
-    override fun newContainer(side: Direction?, player: EntityPlayer?) = ResistorContainer(player, inventory)
+    override fun newContainer(side: Direction?, player: EntityPlayer) = ResistorContainer(player, inventory)
 
     override fun getWaila(): Map<String, String> = mutableMapOf(
         Pair(I18N.tr("Resistance"), Utils.plotOhm("", resistor.r)),
@@ -218,7 +217,7 @@ class LargeRheostatRender(entity: TransparentNodeEntity, desc: TransparentNodeDe
         val temp = stream.readFloat() + 273
         val c = BlackBodyTemperature(temp)
         val p = BlackBodyPower(temp)
-        var bbc = c * (p / desc.dissipator.nominalP.toFloat())
+        val bbc = c * (p / desc.dissipator.nominalP.toFloat())
         color = (bbc + baseColor).normalize()
 
         if (positionAnimator.target == -1f) {
