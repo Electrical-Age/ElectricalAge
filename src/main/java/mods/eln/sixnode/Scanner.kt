@@ -2,10 +2,7 @@ package mods.eln.sixnode
 
 import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
-import mods.eln.misc.Coordonate
-import mods.eln.misc.Direction
-import mods.eln.misc.LRDU
-import mods.eln.misc.Obj3D
+import mods.eln.misc.*
 import mods.eln.node.NodeBase
 import mods.eln.node.six.*
 import mods.eln.sim.IProcess
@@ -105,9 +102,9 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         else -> 0
     }
 
-    override fun multiMeterString() = ""
+    override fun multiMeterString() = Utils.plotPercent("", outputProcess.outputNormalized)
 
-    override fun thermoMeterString() = ""
+    override fun thermoMeterString() = null
 
     override fun initialize() {
     }
