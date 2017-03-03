@@ -58,8 +58,12 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         val block = scannedCoord.block
         if (block.hasComparatorInputOverride()) {
             return block.getComparatorInputOverride(coordonate.world(), coordonate.x, coordonate.y, coordonate.z, forgeSide.ordinal) / 15.0
+        } else if (block.isOpaqueCube) {
+            return 1.0
+        } else if (block.isAir(coordonate.world(), coordonate.x, coordonate.y, coordonate.z)) {
+            return 0.0
         } else {
-            return block.lightValue / 15.0
+            return 1.0/3.0
         }
     }
 
@@ -82,6 +86,8 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
                 te.getStackInSlot(it)?.stackSize ?: 0
             }
             return sum.toDouble() / te.inventoryStackLimit / te.sizeInventory
+        } else {
+            return 2.0/3.0
         }
     }
 
