@@ -21,7 +21,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 public class TransformerRender extends TransparentNodeElementRender {
-    private final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
+    private final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(4, 64, this);
     private final TransformerDescriptor descriptor;
 
     private SlewLimiter load = new SlewLimiter(0.5f);

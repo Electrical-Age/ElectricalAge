@@ -44,7 +44,7 @@ public class TransformerElement extends TransparentNodeElement {
         new TransformerInterSystemProcess(primaryLoad, secondaryLoad, primaryVoltageSource, secondaryVoltageSource);
     private final Transformer transformer = new Transformer();
 
-    private final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
+    private final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(4, 64, this);
 
     private float primaryMaxCurrent = 0;
     private float secondaryMaxCurrent = 0;
