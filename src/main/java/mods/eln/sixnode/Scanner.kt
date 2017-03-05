@@ -13,9 +13,12 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.IInventory
 import net.minecraft.inventory.ISidedInventory
 import net.minecraft.item.ItemStack
+import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.tileentity.TileEntity
 import net.minecraftforge.common.util.ForgeDirection
 import net.minecraftforge.fluids.IFluidHandler
+import java.io.DataInputStream
+import java.io.DataOutputStream
 
 /**
  * A comparator-alike. It doesn't "compare" anything, though.
@@ -23,9 +26,11 @@ import net.minecraftforge.fluids.IFluidHandler
 class ScannerDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, ScannerElement::class.java, ScannerRender::class.java) {
 
     val main = obj.getPart("main")!!
+    val leds = arrayOf("LED_0", "LED_1").map { obj.getPart(it) }.requireNoNulls()
 
-    fun draw() {
+    fun draw(mode: ScanMode) {
         main.draw()
+        leds[mode.value.toInt()].draw()
     }
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
@@ -38,8 +43,13 @@ class ScannerDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, Scan
     }
 }
 
-enum class ScanMode {
-    SIMPLE, SLOTS
+enum class ScanMode(val value: Byte) {
+    SIMPLE(0), SLOTS(1);
+
+    companion object {
+        private val map = ScanMode.values().associateBy(ScanMode::value);
+        fun fromByte(type: Byte) = map[type]
+    }
 }
 
 class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor) : SixNodeElement(sixNode, side, descriptor) {
@@ -125,6 +135,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
 
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
         if (onBlockActivatedRotate(entityPlayer)) return true
+        if (entityPlayer.isHoldingMeter()) return false
         mode = when (mode) {
             ScanMode.SIMPLE -> ScanMode.SLOTS
             ScanMode.SLOTS -> ScanMode.SIMPLE
@@ -141,22 +152,45 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         else -> 0
     }
 
-    override fun multiMeterString() = "Mode: ${tr(mode.name.toLowerCase().capitalize())}, Value: ${Utils.plotPercent("", outputProcess.outputNormalized)}"
+    override fun multiMeterString(): String {
+        return "Mode: ${tr(mode.name.toLowerCase().capitalize())}, Value: ${Utils.plotPercent("", outputProcess.outputNormalized)}"
+    }
 
-    override fun thermoMeterString() = null
+    override fun thermoMeterString() = ""
 
     override fun initialize() {
+    }
+
+    override fun networkSerialize(stream: DataOutputStream) {
+        super.networkSerialize(stream)
+        stream.writeByte(mode.value.toInt())
+    }
+
+    override fun writeToNBT(nbt: NBTTagCompound) {
+        super.writeToNBT(nbt)
+        nbt.setByte("mode", mode.value)
+    }
+
+    override fun readFromNBT(nbt: NBTTagCompound) {
+        super.readFromNBT(nbt)
+        mode = ScanMode.fromByte(nbt.getByte("mode"))!!
     }
 }
 
 
 class ScannerRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) : SixNodeElementRender(entity, side, descriptor) {
     val desc = descriptor as ScannerDescriptor
+    var mode = ScanMode.SIMPLE
 
     override fun draw() {
         super.draw()
         front.glRotateOnX()
-        desc.draw()
+        desc.draw(mode)
+    }
+
+    override fun publishUnserialize(stream: DataInputStream) {
+        super.publishUnserialize(stream)
+        mode = ScanMode.fromByte(stream.readByte())!!
     }
 
     override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor = Eln.instance.signalCableDescriptor.render

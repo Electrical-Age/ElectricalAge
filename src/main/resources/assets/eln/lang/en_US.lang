@@ -214,6 +214,7 @@ Rheostat.name=Rheostat
 Robust_Lamp_Socket.name=Robust Lamp Socket
 Rubber.name=Rubber
 Sample_and_hold.name=Sample and hold
+Scanner.name=Scanner
 Schmitt_Trigger_Chip.name=Schmitt Trigger Chip
 Sconce_Lamp_Socket.name=Sconce Lamp Socket
 Signal_20H_inductor.name=Signal 20H inductor
