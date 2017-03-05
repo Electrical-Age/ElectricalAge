@@ -224,7 +224,7 @@ public class ThermalSensorElement extends SixNodeElement {
         if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
             return false;
         }
-        if (Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+        if (Eln.thermometerElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
             return false;
         }
         if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
