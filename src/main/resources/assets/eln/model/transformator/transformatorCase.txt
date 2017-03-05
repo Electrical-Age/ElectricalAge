@@ -1,6 +1,11 @@
-=================================================
-Model created by AMIDIBOSS
-Additional textures by Adk
-Special thanks to cm0x4D for idea and support
-=================================================
-Objects visible when non-cased (standard)
+# =============================================
+# Model created by AMIDIBOSS
+# Additional textures by Adk
+# Special thanks to cm0x4D for idea and support
+# =============================================
+# Objects visible when non-cased (standard)
+
+o Door
+f originX -0.38618
+f originY 0.0
+f originZ 0.49296

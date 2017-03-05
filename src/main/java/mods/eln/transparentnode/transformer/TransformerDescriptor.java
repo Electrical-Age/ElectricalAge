@@ -71,7 +71,7 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
         if (type == ItemRenderType.INVENTORY) {
             super.renderItem(type, item, data);
         } else {
-            draw(defaultFero, 1, 4, false);
+            draw(defaultFero, 1, 4, false, 0f);
         }
     }
 
@@ -80,7 +80,7 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
         return true;
     }
 
-    void draw(Obj3DPart fero, int priCableNbr, int secCableNbr, boolean hasCasing) {
+    void draw(Obj3DPart fero, int priCableNbr, int secCableNbr, boolean hasCasing, float doorOpen) {
         if (main != null) main.draw();
         if (fero != null) {
             fero.draw();
@@ -110,7 +110,7 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 
         if (hasCasing) {
             if (casing != null) casing.draw();
-            if (casingDoor != null) casingDoor.draw();
+            if (casingDoor != null) casingDoor.draw(doorOpen * 90, 0f, 1f, 0f);
         }
     }
 }

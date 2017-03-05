@@ -518,7 +518,9 @@ public class Obj3D {
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     String[] words = line.split(" ");
-                    if (words[0].equals("o")) {
+                    if (words[0].equals("#")) {
+                        // # is a comment - ignore line.
+                    } else if (words[0].equals("o")) {
                         part = nameToPartHash.get(words[1]);
                     } else if (words[0].equals("f")) {
                         if (words[1].equals("originX")) {

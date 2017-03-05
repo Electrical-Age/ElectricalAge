@@ -39,13 +39,16 @@ public class TransformerRender extends TransparentNodeElementRender {
                     return 0f;
             }
         });
+
+        coordinate = new Coordonate(tileEntity);
+        doorOpen = new PhysicalInterpolator(0.4f, 4.0f, 0.9f, 0.05f);
     }
 
     @Override
     public void draw() {
         GL11.glPushMatrix();
         front.glRotateXnRef();
-        descriptor.draw(feroPart, primaryStackSize, secondaryStackSize, hasCasing);
+        descriptor.draw(feroPart, primaryStackSize, secondaryStackSize, hasCasing, doorOpen.get());
         GL11.glPopMatrix();
         cableRenderType = drawCable(front.down(), priRender, priConn, cableRenderType);
         cableRenderType = drawCable(front.down(), secRender, secConn, cableRenderType);
@@ -64,6 +67,9 @@ public class TransformerRender extends TransparentNodeElementRender {
 
     private Obj3DPart feroPart;
     private boolean hasCasing = false;
+
+    private final Coordonate coordinate;
+    private final PhysicalInterpolator doorOpen;
 
     @Override
     public void networkUnserialize(DataInputStream stream) {
@@ -142,5 +148,13 @@ public class TransformerRender extends TransparentNodeElementRender {
     public void refresh(float deltaT) {
         super.refresh(deltaT);
         load.step(deltaT);
+
+        if (hasCasing) {
+            if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coordinate.moved(front).getAxisAlignedBB(0)))
+                doorOpen.setTarget(0f);
+            else
+                doorOpen.setTarget(1f);
+            doorOpen.step(deltaT);
+        }
     }
 }
