@@ -2679,7 +2679,8 @@ public class Eln {
             subId = 0;
             name = TR_NAME(Type.NONE, "DC-DC Converter");
 
-            TransformerDescriptor desc = new TransformerDescriptor(name, obj.getObj("transformator"), obj.getObj("feromagneticcorea"), 0.5f);
+            TransformerDescriptor desc = new TransformerDescriptor(name, obj.getObj("transformator"),
+                obj.getObj("feromagneticcorea"), obj.getObj("transformatorCase"), 0.5f);
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
 
