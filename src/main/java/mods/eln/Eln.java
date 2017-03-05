@@ -2672,7 +2672,7 @@ public class Eln {
     }
 
     void registerTransformer(int id) {
-        int subId, completId;
+        int subId;
         String name;
 
         {
@@ -5066,6 +5066,7 @@ public class Eln {
             sharedItem.addElement(subId + (id << 6), desc);
         }
 
+        sharedItem.addElement(53 + (id << 6), new CaseItemDescriptor(TR_NAME(Type.NONE, "Casing")));
     }
 
     public DataLogsPrintDescriptor dataLogsPrintDescriptor;
