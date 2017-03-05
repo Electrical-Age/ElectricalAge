@@ -56,11 +56,11 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         val targetSide: ForgeDirection = appliedLRDU.inverse.toForge()
         val te = scannedCoord.tileEntity
         // TODO: Throttling.
-        var out = -1.0
+        var out: Double? = null
         if (te != null) {
             out = scanTileEntity(te, targetSide)
         }
-        if (out == -1.0) {
+        if (out == null) {
             out = scanBlock(scannedCoord, targetSide)
         }
         outputProcess.outputNormalized = out
@@ -85,7 +85,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         }
     }
 
-    private fun scanTileEntity(te: TileEntity, targetSide: ForgeDirection): Double {
+    private fun scanTileEntity(te: TileEntity, targetSide: ForgeDirection): Double? {
         if (te is IFluidHandler) {
             val info = te.getTankInfo(targetSide)
             return info.sumByDouble {
@@ -119,7 +119,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
             }
             return sum / te.inventoryStackLimit / te.sizeInventory
         } else {
-            return -1.0
+            return null
         }
     }
 
