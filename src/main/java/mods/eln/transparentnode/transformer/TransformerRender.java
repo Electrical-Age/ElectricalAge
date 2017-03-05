@@ -45,7 +45,7 @@ public class TransformerRender extends TransparentNodeElementRender {
     public void draw() {
         GL11.glPushMatrix();
         front.glRotateXnRef();
-        descriptor.draw(feroPart, primaryStackSize, secondaryStackSize);
+        descriptor.draw(feroPart, primaryStackSize, secondaryStackSize, hasCasing);
         GL11.glPopMatrix();
         cableRenderType = drawCable(front.down(), priRender, priConn, cableRenderType);
         cableRenderType = drawCable(front.down(), secRender, secConn, cableRenderType);
@@ -63,6 +63,7 @@ public class TransformerRender extends TransparentNodeElementRender {
     public boolean isIsolator;
 
     private Obj3DPart feroPart;
+    private boolean hasCasing = false;
 
     @Override
     public void networkUnserialize(DataInputStream stream) {
@@ -108,6 +109,7 @@ public class TransformerRender extends TransparentNodeElementRender {
             isIsolator = stream.readBoolean();
 
             load.setTarget(stream.readFloat());
+            hasCasing = stream.readBoolean();
 
         } catch (IOException e) {
             e.printStackTrace();

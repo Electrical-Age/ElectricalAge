@@ -286,6 +286,7 @@ public class TransformerElement extends TransparentNodeElement {
                     secondaryLoad.getI() / secondaryMaxCurrent), 0f, 1f);
             }
             stream.writeFloat(load);
+            stream.writeBoolean(inventory.getStackInSlot(3) != null);
 
         } catch (IOException e) {
 
