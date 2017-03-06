@@ -5569,11 +5569,11 @@ public class Eln {
             "CdC",
             "cDc",
             " s ",
-            Character.valueOf('d'), findItemStack("Dielectric"),
-            Character.valueOf('c'), findItemStack("Copper Cable"),
-            Character.valueOf('C'), findItemStack("Copper Plate"),
-            Character.valueOf('D'), findItemStack("Coal Dust"),
-            Character.valueOf('s'), dictCheapChip);
+            'd', findItemStack("Dielectric"),
+            'c', findItemStack("Copper Cable"),
+            'C', findItemStack("Copper Plate"),
+            'D', findItemStack("Coal Dust"),
+            's', dictCheapChip);
     }
 
     void recipeTransformer() {
