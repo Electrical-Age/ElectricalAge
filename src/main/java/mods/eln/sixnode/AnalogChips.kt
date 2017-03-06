@@ -6,6 +6,7 @@ import mods.eln.gui.*
 import mods.eln.i18n.I18N
 import mods.eln.misc.*
 import mods.eln.node.Node
+import mods.eln.node.Synchronizable
 import mods.eln.node.six.*
 import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
@@ -45,8 +46,7 @@ open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
     }
 
     constructor(name: String, obj: Obj3D?, functionName: String, functionClass: Class<out AnalogFunction>) :
-        this(name, obj, functionName, functionClass, AnalogChipElement::class.java, AnalogChipRender::class.java) {
-    }
+        this(name, obj, functionName, functionClass, AnalogChipElement::class.java, AnalogChipRender::class.java)
 
     fun draw() {
         pins.forEach { it?.draw() }
@@ -84,9 +84,7 @@ open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>?, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
-        if (list != null) {
-            function.infos.split("\n").forEach { list.add(it) }
-        }
+        if (list != null) function.infos.split("\n").forEach { list.add(it) }
     }
 }
 
@@ -218,7 +216,7 @@ abstract class AnalogFunction : INBTTReady {
 
 class OpAmp : AnalogFunction() {
     override val inputCount = 2
-    override val infos = I18N.tr("Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or a configurable amplifier.")
+    override val infos: String = I18N.tr("Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or as configurable amplifier.")
 
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double =
         10000 * ((inputs[0] ?: 0.0) - (inputs[1] ?: 0.0))
@@ -673,5 +671,123 @@ class SampleAndHold : AnalogFunction() {
     override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
         nbt?.setBoolean("clock", clock)
         nbt?.setDouble("value", value)
+    }
+}
+
+class Filter: AnalogFunction() {
+    override val hasState = true
+    override val inputCount = 1
+    override val infos = I18N.tr("Lowpass filter - Passes signals with a\nfrequency lower than a certain cutoff frequency\nand attenuates signals with frequencies higher\nthan the cutoff frequency.")
+
+    internal var feedback = 2.0 * Math.PI * 5.0
+    private var output = 0.0
+
+    override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
+        output = Utils.limit(output + ((inputs[0] ?: 0.0) - output) * feedback * deltaTime, 0.0, 50.0)
+        return output
+    }
+
+    override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
+        nbt?.apply {
+            feedback = getDouble("feedback")
+            output = getDouble("output")
+        }
+    }
+
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+        nbt?.apply {
+            setDouble("feedback", feedback)
+            setDouble("output", output)
+        }
+    }
+}
+
+class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor) :
+    AnalogChipElement(node, side, sixNodeDescriptor) {
+
+    enum class Event(val value: Byte) {
+        CUTOFF_FREQUENCY_CHANGED(1)
+    }
+
+    private var cutOffFrequency = Eln.instance.electricalFrequency / 4.0
+        get() = (function as Filter).feedback / (2.0 * Math.PI)
+        set(value) {
+            field = value
+            (function as Filter).feedback = 2.0 * Math.PI * field
+        }
+
+    override fun hasGui() = true
+
+    override fun networkSerialize(stream: DataOutputStream?) {
+        super.networkSerialize(stream)
+
+        try {
+            stream?.writeFloat(cutOffFrequency.toFloat())
+        } catch(e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+
+        try {
+            when (stream.readByte()) {
+                Event.CUTOFF_FREQUENCY_CHANGED.value -> cutOffFrequency = stream.readFloat().toDouble()
+            }
+            needPublish()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
+
+class FilterRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor) :
+    AnalogChipRender(entity, side, descriptor) {
+    internal var cutOffFrequency = Synchronizable(Eln.instance.electricalFrequency.toFloat() / 4f)
+
+    override fun newGuiDraw(side: Direction?, player: EntityPlayer?): GuiScreen? = FilterGui(this)
+
+    override fun publishUnserialize(stream: DataInputStream) {
+        super.publishUnserialize(stream)
+        try {
+            cutOffFrequency.value = stream.readFloat()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
+
+class FilterGui(private var render: FilterRender) : GuiScreenEln() {
+    private var freq: GuiVerticalCustomValuesBar? = null
+
+    override fun initGui() {
+        super.initGui()
+
+        freq = newGuiVerticalCustomValuesBar(6, 6 + 2, 20, 50, GuiVerticalCustomValuesBar.logarithmicScale(-3, 4 * 3))
+        freq?.apply {
+            setEnable(true)
+            value = render.cutOffFrequency.value
+        }
+    }
+
+    override fun guiObjectEvent(`object`: IGuiObject) {
+        super.guiObjectEvent(`object`)
+        if (`object` === freq) {
+            render.clientSetFloat(FilterElement.Event.CUTOFF_FREQUENCY_CHANGED.value.toInt(), freq!!.value)
+        }
+    }
+
+    override fun preDraw(f: Float, x: Int, y: Int) {
+        super.preDraw(f, x, y)
+        if (render.cutOffFrequency.pending) {
+            freq?.value = render.cutOffFrequency.value
+        }
+        freq?.setComment(0, I18N.tr("Cut-off frequency %1$ Hz",
+            String.format("%1.3f", freq?.value ?: Eln.instance.electricalFrequency / 4f)))
+    }
+
+    override fun newHelper(): GuiHelper {
+        return GuiHelper(this, 12 + 20, 12 + 50 + 4)
     }
 }

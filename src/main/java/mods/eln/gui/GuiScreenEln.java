@@ -40,6 +40,12 @@ public abstract class GuiScreenEln extends GuiScreen implements GuiTextFieldElnO
         return o;
     }
 
+    public GuiVerticalCustomValuesBar newGuiVerticalCustomValuesBar(int x, int y, int width, int height, Float[] values) {
+        GuiVerticalCustomValuesBar o = helper.newGuiVerticalCustomValuesBar(x, y, width, height, values);
+        o.setObserver(this);
+        return o;
+    }
+
     @Override
     protected void keyTyped(char key, int code) {
         helper.keyTyped(key, code);

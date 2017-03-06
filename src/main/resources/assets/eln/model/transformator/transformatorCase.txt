@@ -1,0 +1,6 @@
+=================================================
+Model created by AMIDIBOSS
+Additional textures by Adk
+Special thanks to cm0x4D for idea and support
+=================================================
+Objects visible when non-cased (standard)
