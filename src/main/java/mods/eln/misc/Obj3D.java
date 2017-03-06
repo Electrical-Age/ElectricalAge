@@ -1,5 +1,6 @@
 package mods.eln.misc;
 
+import cpw.mods.fml.common.FMLLog;
 import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -516,7 +517,9 @@ public class Obj3D {
                 Utils.println(String.format(" - failed to load txt '%s'", txtPath));
             } else {
                 String line;
+                int lineNumber = 0;
                 while ((line = bufferedReader.readLine()) != null) {
+                    ++lineNumber;
                     String[] words = line.split(" ");
                     if (words[0].startsWith("#")) {
                         // # is a comment - ignore line.
@@ -552,6 +555,9 @@ public class Obj3D {
                                 }
                             }, refresh, refresh);
                         }
+                    } else {
+                        FMLLog.warning("Invalid syntax in EA model text file %1$s on line %2$d: %3$s",
+                            txtPath, lineNumber, line);
                     }
                 }
             }
