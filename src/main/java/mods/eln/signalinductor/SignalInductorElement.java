@@ -63,9 +63,4 @@ public class SignalInductorElement extends SixNodeElement {
         descriptor.applyTo(postiveLoad);
         descriptor.applyTo(inductor);
     }
-
-    @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return super.onBlockActivatedRotate(entityPlayer);
-    }
 }

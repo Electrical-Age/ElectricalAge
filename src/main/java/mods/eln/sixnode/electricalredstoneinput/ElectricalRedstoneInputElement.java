@@ -120,6 +120,7 @@ public class ElectricalRedstoneInputElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (onBlockActivatedRotate(entityPlayer)) return true;
         ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
         if (currentItemStack != null) {
             Item item = currentItemStack.getItem();
@@ -139,13 +140,6 @@ public class ElectricalRedstoneInputElement extends SixNodeElement {
 					entityPlayer.addChatMessage("Brush is empty");
 				}
 			}*/
-        }
-        //front = LRDU.fromInt((front.toInt() + 1) & 3);
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            front = front.getNextClockwise();
-            sixNode.reconnect();
-            sixNode.setNeedPublish(true);
-            return true;
         }
         return false;
     }

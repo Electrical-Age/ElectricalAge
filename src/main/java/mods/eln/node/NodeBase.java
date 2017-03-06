@@ -211,7 +211,7 @@ public abstract class NodeBase {
                     Utils.addChatMessage(entityPlayer, str);
                 return true;
             }
-            if (Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+            if (Eln.thermometerElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
                 String str = thermoMeterString(side);
                 if (str != null)
                     Utils.addChatMessage(entityPlayer, str);

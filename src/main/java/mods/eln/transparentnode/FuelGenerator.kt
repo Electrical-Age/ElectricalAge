@@ -191,7 +191,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
                 }
             } else {
                 if (Eln.multiMeterElement.checkSameItemStack(player?.currentEquippedItem) ||
-                    Eln.thermoMeterElement.checkSameItemStack(player?.currentEquippedItem) ||
+                    Eln.thermometerElement.checkSameItemStack(player?.currentEquippedItem) ||
                     Eln.allMeterElement.checkSameItemStack(player?.currentEquippedItem)) {
                     return false
                 }

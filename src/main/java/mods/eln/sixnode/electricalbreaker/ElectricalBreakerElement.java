@@ -200,32 +200,6 @@ public class ElectricalBreakerElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            front = front.getNextClockwise();
-            sixNode.reconnect();
-
-            return true;
-        } else if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
-            return false;
-        }
-
-        if (Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
-            return false;
-        }
-        if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
-            return false;
-        } else {
-            //setSwitchState(true);
-            //return true;
-        }
-        //front = LRDU.fromInt((front.toInt() + 1)&3);
-        return false;
-    }
-
-    @Override
     public void networkUnserialize(DataInputStream stream) {
         super.networkUnserialize(stream);
         try {

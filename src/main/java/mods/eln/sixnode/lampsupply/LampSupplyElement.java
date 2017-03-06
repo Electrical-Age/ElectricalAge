@@ -252,12 +252,7 @@ public class LampSupplyElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            front = front.getNextClockwise();
-            sixNode.reconnect();
-            sixNode.setNeedPublish(true);
-            return true;
-        }
+        if (onBlockActivatedRotate(entityPlayer)) return true;
 
         return inventory.take(entityPlayer.getCurrentEquippedItem(), (IInventoryChangeListener) this);
     }

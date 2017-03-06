@@ -112,11 +112,6 @@ public class PowerInductorSixElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return onBlockActivatedRotate(entityPlayer);
-    }
-
-    @Override
     public void writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
     }

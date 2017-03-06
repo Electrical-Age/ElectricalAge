@@ -224,8 +224,19 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, IPublish
             sixNode.dropItem(getDropItemStack());
     }
 
-    public abstract boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-                                             float vx, float vy, float vz);
+    /**
+     * Called when a player right-clicks the SixNode.
+     * @param entityPlayer Player.
+     * @param side Something to do with player viewpoint?
+     * @param vx Ditto?
+     * @param vy ?
+     * @param vz ?
+     * @return True if we've done something, otherwise false.
+     */
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
+                                             float vx, float vy, float vz) {
+        return onBlockActivatedRotate(entityPlayer);
+    }
 
 	/*
     public void onBreakElement()
