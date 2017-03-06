@@ -154,17 +154,6 @@ open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: 
         inputPins.map { if (it != null && it.connectedComponents.count() > 0) it.u else null }.toTypedArray(),
         outputPin.u)
 
-    override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            front = front.nextClockwise
-            sixNode.reconnect()
-            needPublish()
-            return true
-        } else {
-            return false
-        }
-    }
-
     override fun readFromNBT(nbt: NBTTagCompound?) {
         super.readFromNBT(nbt)
         function.readFromNBT(nbt, "function")

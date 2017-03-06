@@ -786,16 +786,9 @@ public class Utils {
     }
 
     public static boolean playerHasMeter(EntityPlayer entityPlayer) {
-        if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
-            return true;
-        }
-        if (Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
-            return true;
-        }
-        if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
-            return true;
-        }
-        return false;
+        return Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())
+            || Eln.thermometerElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())
+            || Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem());
     }
 
     public static int getRedstoneLevelAround(Coordonate coord, Direction side) {

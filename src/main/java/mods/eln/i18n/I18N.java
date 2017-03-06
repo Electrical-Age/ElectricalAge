@@ -13,11 +13,11 @@ public class I18N {
         return FMLCommonHandler.instance().getCurrentLanguage();
     }
 
-    public static String encodeLangKey(final String key) {
+    static String encodeLangKey(final String key) {
         return encodeLangKey(key, true);
     }
 
-    public static String encodeLangKey(String key, boolean replaceWhitspaces) {
+    static String encodeLangKey(String key, boolean replaceWhitspaces) {
         if (key != null) {
             if (replaceWhitspaces) {
                 key = key.replace(' ', '_');
@@ -166,8 +166,6 @@ public class I18N {
             return replaceWhitespacesInFile;
         }
     }
-
-    ;
 
     /**
      * Used to register a name to translate. The forge mechanisms are used in order to translate the name.

@@ -15,7 +15,7 @@ class SourceCodeParser {
     private SourceCodeParser() {
     }
 
-    public static Map<String, Set<TranslationItem>> parseSourceFolder(final File file) throws IOException {
+    static Map<String, Set<TranslationItem>> parseSourceFolder(final File file) throws IOException {
         Map<String, Set<TranslationItem>> strings = new TreeMap<String, Set<TranslationItem>>();
         strings.put(MULTIPLE_LOCATIONS, new TreeSet<TranslationItem>());
         parseSourceFolderRecursive(file, strings);

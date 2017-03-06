@@ -207,11 +207,6 @@ public class EnergyMeterElement extends SixNodeElement {
     }
 
     @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return onBlockActivatedRotate(entityPlayer);
-    }
-
-    @Override
     public void networkUnserialize(DataInputStream stream) {
         super.networkUnserialize(stream);
         try {
