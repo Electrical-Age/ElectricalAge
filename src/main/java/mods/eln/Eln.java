@@ -2643,14 +2643,15 @@ public class Eln {
     }
 
     private void registerTransformer(int id) {
-        int subId, completId;
+        int subId;
         String name;
 
         {
             subId = 0;
             name = TR_NAME(Type.NONE, "DC-DC Converter");
 
-            TransformerDescriptor desc = new TransformerDescriptor(name, obj.getObj("transformator"), obj.getObj("feromagneticcorea"), 0.5f);
+            TransformerDescriptor desc = new TransformerDescriptor(name, obj.getObj("transformator"),
+                obj.getObj("feromagneticcorea"), obj.getObj("transformatorCase"), 0.5f);
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
 
@@ -5001,6 +5002,7 @@ public class Eln {
             sharedItem.addElement(subId + (id << 6), desc);
         }
 
+        sharedItem.addElement(53 + (id << 6), new CaseItemDescriptor(TR_NAME(Type.NONE, "Casing")));
     }
 
     public DataLogsPrintDescriptor dataLogsPrintDescriptor;
@@ -6545,6 +6547,12 @@ public class Eln {
             " g",
             'g', new ItemStack(Blocks.glass_pane),
             'c', new ItemStack(Items.dye, 1, 1));
+
+        addRecipe(findItemStack("Casing", 8),
+            "ppp",
+            "p p",
+            "ppp",
+            'p', findItemStack("Iron Plate"));
 
     }
 

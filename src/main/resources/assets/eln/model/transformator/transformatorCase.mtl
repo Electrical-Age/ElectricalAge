@@ -1,5 +1,5 @@
 # Blender MTL File: 'transformatorCase.blend'
-# Material Count: 6
+# Material Count: 4
 
 newmtl Material
 Ns 96.078431
@@ -20,18 +20,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd case.png
-
-newmtl Material.001_transformator
-Ns 96.078431
-Ka 1.000000 1.000000 1.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.000000
-d 1.000000
-illum 2
-map_Kd transformator.png
+map_Kd transformatorCase.png
 
 newmtl None
 Ns 0
@@ -40,21 +29,12 @@ Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
-map_Kd case.png
 
-newmtl None_NONE
+newmtl None_case.png
 Ns 0
 Ka 0.000000 0.000000 0.000000
 Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
-
-newmtl None_transformator
-Ns 0
-Ka 0.000000 0.000000 0.000000
-Kd 0.8 0.8 0.8
-Ks 0.8 0.8 0.8
-d 1
-illum 2
-map_Kd transformator.png
+map_Kd transformatorCase.png
