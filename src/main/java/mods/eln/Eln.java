@@ -2669,6 +2669,10 @@ public class Eln {
         sixNodeItem.addDescriptor(id + 7,
             new AnalogChipDescriptor(TR_NAME(Type.NONE, "Sample and hold"), model, "SAH",
                 SampleAndHold.class));
+
+        sixNodeItem.addDescriptor(id + 8,
+            new AnalogChipDescriptor(TR_NAME(Type.NONE, "Lowpass filter"), model, "LPF",
+                Filter.class, FilterElement.class, FilterRender.class));
     }
 
     void registerTransformer(int id) {
@@ -5605,6 +5609,16 @@ public class Eln {
             Character.valueOf('r'), new ItemStack(Items.redstone),
             Character.valueOf('c'), findItemStack("Copper Cable"),
             Character.valueOf('C'), dictAdvancedChip);
+
+        addRecipe(findItemStack("Lowpass filter"),
+            "CdC",
+            "cDc",
+            " s ",
+            'd', findItemStack("Dielectric"),
+            'c', findItemStack("Copper Cable"),
+            'C', findItemStack("Copper Plate"),
+            'D', findItemStack("Coal Dust"),
+            's', dictCheapChip);
     }
 
     void recipeTransformer() {

@@ -75,6 +75,13 @@ public class GuiHelper {
         return o;
     }
 
+    public GuiVerticalCustomValuesBar newGuiVerticalCustomValuesBar(int x, int y, int width, int height, Float[] values) {
+        GuiVerticalCustomValuesBar o;
+        o = new GuiVerticalCustomValuesBar(screen.width / 2 - xSize / 2 + x, screen.height / 2 - ySize / 2 + y, width, height, this, values);
+        objectList.add(o);
+        return o;
+    }
+
 	/*public void drawHoveringText(List list, int x, int y, FontRenderer fontRenderer, GuiContainerEln cont) {
         drawHoveringText(list, screen.width / 2 - xSize / 2 + x, screen.height / 2 - ySize / 2 + y, Minecraft.getMinecraft().fontRenderer);
 	}*/
