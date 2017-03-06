@@ -6647,7 +6647,7 @@ public class Eln {
             Character.valueOf('g'), new ItemStack(Blocks.glass_pane),
             Character.valueOf('c'), new ItemStack(Items.dye, 1, 1));
 
-        addRecipe(findItemStack("Casing"),
+        addRecipe(findItemStack("Casing", 8),
             "ppp",
             "p p",
             "ppp",
