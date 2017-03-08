@@ -1680,12 +1680,12 @@ public class Eln {
         // TODO: Modern street light.
 
         sixNodeItem.addDescriptor(15 + (id << 6),
-            new EmergencyLampDescriptor(TR_NAME(Type.NONE, "50V Emergency light"), LVU, 10 * 60 * 10,
-                obj.getObj("EmergencyExitLighting")));
+            new EmergencyLampDescriptor(TR_NAME(Type.NONE, "50V Emergency lamp"),
+                lowVoltageCableDescriptor, 10 * 60 * 10, 10, 5, 6, obj.getObj("EmergencyExitLighting")));
 
         sixNodeItem.addDescriptor(16 + (id << 6),
-            new EmergencyLampDescriptor(TR_NAME(Type.NONE, "200V Emergency light"), LVU, 10 * 60 * 20,
-                obj.getObj("EmergencyExitLighting")));
+            new EmergencyLampDescriptor(TR_NAME(Type.NONE, "200V Emergency lamp"),
+                meduimVoltageCableDescriptor, 10 * 60 * 20, 25, 10, 8, obj.getObj("EmergencyExitLighting")));
     }
 
     private void registerLampSupply(int id) {
