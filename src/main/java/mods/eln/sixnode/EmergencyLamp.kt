@@ -1,13 +1,18 @@
 package mods.eln.sixnode
 
+import mods.eln.gui.*
+import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.node.Node
+import mods.eln.node.NodePeriodicPublishProcess
+import mods.eln.node.published
 import mods.eln.node.six.*
 import mods.eln.sim.IProcess
 import mods.eln.sim.mna.component.ResistorSwitch
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import mods.eln.sixnode.lampsupply.LampSupplyElement
+import net.minecraft.client.gui.GuiButton
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
@@ -69,6 +74,11 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
 class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescriptor)
     : SixNodeElement(sixNode, side, descriptor) {
 
+    enum class Event(val value: Byte) {
+        TOGGLE_POWERED_BY_CABLE(1),
+        SET_CHANNEL(2)
+    }
+
     val desc = descriptor as EmergencyLampDescriptor
     val load = NbtElectricalLoad("load")
     val chargingResistor = ResistorSwitch("chargingResistor", load, null)
@@ -78,28 +88,40 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
             field = value
             sixNode.lightValue = if (value) desc.lightLevel else 0
         }
-    var charge = 0.0
+    var charge = desc.batteryCapacity / 2
     var poweredByCable = false
+        set(value) {
+            val changed = field != value
+            field = value
+            if (changed) {
+                reconnect()
+                needPublish()
+                if (value) isConnectedToLampSupply = false
+            }
+        }
+
+    var channel by published("Default channel")
+    var isConnectedToLampSupply by published(false)
 
     val process = IProcess { deltaT ->
         if (!poweredByCable) {
-            val myCoord = sixNode.coordonate
-            var best: LampSupplyElement.PowerSupplyChannelHandle? = null
-            var bestDistance = 10000f
-            val list = LampSupplyElement.channelMap["Default channel"]
-            if (list != null) {
-                for (s in list) {
-                    val distance = s.element.sixNode.coordonate.trueDistanceTo(myCoord).toFloat()
-                    if (distance < bestDistance && distance <= s.element.range) {
-                        bestDistance = distance
-                        best = s
-                    }
+            var closestPowerSupply: LampSupplyElement.PowerSupplyChannelHandle? = null
+            var closestDistance = 10000f
+
+            LampSupplyElement.channelMap[channel]?.forEach {
+                val distance = it.element.sixNode.coordonate.trueDistanceTo(sixNode.coordonate).toFloat()
+                if (distance < closestDistance && distance <= it.element.range) {
+                    closestDistance = distance
+                    closestPowerSupply = it
                 }
             }
-            if (best != null && best.element.getChannelState(best.id)) {
-                best.element.addToRp(chargingResistor.r)
-                load.state = best.element.powerLoad.state
+
+            if (closestPowerSupply != null && closestPowerSupply!!.element.getChannelState(closestPowerSupply!!.id)) {
+                isConnectedToLampSupply = true
+                closestPowerSupply!!.element.addToRp(chargingResistor.r)
+                load.state = closestPowerSupply!!.element.powerLoad.state
             } else {
+                isConnectedToLampSupply = false
                 load.state = 0.0
             }
         }
@@ -131,6 +153,7 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
         electricalLoadList.add(load)
         electricalComponentList.add(chargingResistor)
         slowProcessList.add(process)
+        slowProcessList.add(NodePeriodicPublishProcess(sixNode, 2.0, 0.5))
     }
 
     override fun getConnectionMask(lrdu: LRDU) = if (poweredByCable && (lrdu == front.left() || lrdu == front.right()))
@@ -149,27 +172,49 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
 
     override fun networkSerialize(stream: DataOutputStream) {
         super.networkSerialize(stream)
+        stream.writeFloat(charge.toFloat() / desc.batteryCapacity.toFloat())
         stream.writeBoolean(on)
+        stream.writeBoolean(poweredByCable)
+        stream.writeUTF(channel)
+        stream.writeBoolean(isConnectedToLampSupply)
+    }
+
+    override fun networkUnserialize(stream: DataInputStream) {
+        super.networkUnserialize(stream)
+        when (stream.readByte()) {
+            Event.TOGGLE_POWERED_BY_CABLE.value -> poweredByCable = !poweredByCable
+            Event.SET_CHANNEL.value -> channel = stream.readUTF()
+        }
     }
 
     override fun readFromNBT(nbt: NBTTagCompound) {
         super.readFromNBT(nbt)
         on = nbt.getBoolean("on")
         charge = nbt.getDouble("charge")
+        poweredByCable = nbt.getBoolean("poweredByCable")
+        channel = nbt.getString("channel")
     }
 
     override fun writeToNBT(nbt: NBTTagCompound) {
         super.writeToNBT(nbt)
         nbt.setBoolean("on", on)
         nbt.setDouble("charge", charge)
+        nbt.setBoolean("poweredByCable", poweredByCable)
+        nbt.setString("channel", channel)
     }
+
+    override fun hasGui() = true
 }
 
 class EmergencyLampRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor)
     : SixNodeElementRender(entity, side, descriptor) {
 
     val desc = descriptor as EmergencyLampDescriptor
+    var charge = 0f
     var on = false
+    var poweredByCable = false
+    var channel = "Default channel"
+    var isConnectedToLampSupply = false
 
     override fun draw() {
         super.draw()
@@ -179,6 +224,58 @@ class EmergencyLampRender(entity: SixNodeEntity, side: Direction, descriptor: Si
 
     override fun publishUnserialize(stream: DataInputStream) {
         super.publishUnserialize(stream)
+        charge = stream.readFloat()
         on = stream.readBoolean()
+        poweredByCable = stream.readBoolean()
+        channel = stream.readUTF()
+        isConnectedToLampSupply = stream.readBoolean()
+    }
+
+    override fun newGuiDraw(side: Direction?, player: EntityPlayer?) = EmergencyLampGui(this)
+}
+
+class EmergencyLampGui(private var render: EmergencyLampRender)
+    : GuiScreenEln() {
+    private var buttonSupplyType: GuiButton? = null
+    private var channel: GuiTextFieldEln? = null
+    private var charge: GuiVerticalProgressBar? = null
+
+    override fun initGui() {
+        super.initGui()
+        buttonSupplyType = newGuiButton(18, 12, 140, "")
+        channel = newGuiTextField(19, 38, 138)
+        channel!!.setComment(0, tr("Specify the supply channel"))
+        channel!!.text = render.channel
+        charge = newGuiVerticalProgressBar(166, 12, 16, 39)
+        charge!!.setColor(0.2f, 0.5f, 0.8f)
+    }
+
+    override fun guiObjectEvent(`object`: IGuiObject) {
+        super.guiObjectEvent(`object`)
+        if (`object` === buttonSupplyType) {
+            render.clientSend(EmergencyLampElement.Event.TOGGLE_POWERED_BY_CABLE.value.toInt())
+        } else if (`object` === channel) {
+            render.clientSetString(EmergencyLampElement.Event.SET_CHANNEL.value, channel!!.text)
+        }
+    }
+
+    override fun newHelper(): GuiHelperContainer = GuiHelperContainer(this, 196, 64, 8, 84)
+
+    override fun preDraw(f: Float, x: Int, y: Int) {
+        super.preDraw(f, x, y)
+
+        if (!render.poweredByCable) {
+            buttonSupplyType!!.displayString = tr("Powered by Lamp Supply")
+            channel!!.visible = true
+            if (render.isConnectedToLampSupply)
+                channel!!.setComment(1, "§2" + tr("connected to " + render.channel))
+            else
+                channel!!.setComment(1, "§4" + tr("%1$ is not in range!", render.channel))
+        } else {
+            channel!!.visible = false
+            buttonSupplyType!!.displayString = tr("Powered by cable")
+        }
+        charge!!.setValue(render.charge)
+        charge!!.setComment(0, Utils.plotPercent("Charge: ", render.charge.toDouble()))
     }
 }
