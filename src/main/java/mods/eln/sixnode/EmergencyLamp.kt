@@ -7,8 +7,10 @@ import mods.eln.sim.IProcess
 import mods.eln.sim.mna.component.ResistorSwitch
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
+import mods.eln.sixnode.lampsupply.LampSupplyElement
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
+import net.minecraft.nbt.NBTTagCompound
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -20,6 +22,8 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
     val mainCeiling: Obj3D.Obj3DPart = model.getPart("coreCeil")
     val lightCeiling: Obj3D.Obj3DPart = model.getPart("lightCeil")
     val mainWall: Obj3D.Obj3DPart = model.getPart("coreWall")
+    val mainWallR: Obj3D.Obj3DPart = model.getPart("coreWallR")
+    val mainWallL: Obj3D.Obj3DPart = model.getPart("coreWallL")
     val lightWall: Obj3D.Obj3DPart = model.getPart("lightWall")
 
     init {
@@ -27,7 +31,7 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
         changeDefaultIcon("emergencylamp")
     }
 
-    fun draw(onCeiling: Boolean = false, on: Boolean = false) {
+    fun draw(onCeiling: Boolean = false, on: Boolean = false, mirrorSign: Boolean = false) {
         if (onCeiling) {
             if (on)
                 preserveMatrix {
@@ -41,11 +45,15 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
             if (on)
                 preserveMatrix {
                     UtilsClient.drawLight(mainWall)
+                    UtilsClient.drawLight(if (mirrorSign) mainWallL else mainWallR)
                     GL11.glColor3f(0.3f, 0.3f, 0.3f)
                     UtilsClient.drawLight(lightWall)
                 }
             else
-                mainWall.draw()
+                preserveMatrix {
+                    mainWall.draw()
+                    (if (mirrorSign) mainWallL else mainWallR).draw()
+                }
         }
     }
 
@@ -71,8 +79,31 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
             sixNode.lightValue = if (value) desc.lightLevel else 0
         }
     var charge = 0.0
+    var poweredByCable = false
 
     val process = IProcess { deltaT ->
+        if (!poweredByCable) {
+            val myCoord = sixNode.coordonate
+            var best: LampSupplyElement.PowerSupplyChannelHandle? = null
+            var bestDistance = 10000f
+            val list = LampSupplyElement.channelMap["Default channel"]
+            if (list != null) {
+                for (s in list) {
+                    val distance = s.element.sixNode.coordonate.trueDistanceTo(myCoord).toFloat()
+                    if (distance < bestDistance && distance <= s.element.range) {
+                        bestDistance = distance
+                        best = s
+                    }
+                }
+            }
+            if (best != null && best.element.getChannelState(best.id)) {
+                best.element.addToRp(chargingResistor.r)
+                load.state = best.element.powerLoad.state
+            } else {
+                load.state = 0.0
+            }
+        }
+
         if (chargingResistor.u > 0.5 * desc.cable.electricalNominalVoltage) {
             on = false
             if (charge < desc.batteryCapacity) {
@@ -102,15 +133,11 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
         slowProcessList.add(process)
     }
 
-    override fun networkSerialize(stream: DataOutputStream) {
-        super.networkSerialize(stream)
-        stream.writeBoolean(on)
-    }
+    override fun getConnectionMask(lrdu: LRDU) = if (poweredByCable && (lrdu == front.left() || lrdu == front.right()))
+        Node.maskElectricalPower
+    else
+        0
 
-    override fun getConnectionMask(lrdu: LRDU) = when (lrdu) {
-        front.left(), front.right() -> Node.maskElectricalPower
-        else -> 0
-    }
     override fun getElectricalLoad(lrdu: LRDU) = load
     override fun getThermalLoad(lrdu: LRDU) = null
     override fun multiMeterString() = "TODO"
@@ -119,6 +146,23 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
         "State" to if (on) "discharging" else "charging",
         "Charge" to Utils.plotPercent("", charge / (sixNodeElementDescriptor as EmergencyLampDescriptor).batteryCapacity)
     )
+
+    override fun networkSerialize(stream: DataOutputStream) {
+        super.networkSerialize(stream)
+        stream.writeBoolean(on)
+    }
+
+    override fun readFromNBT(nbt: NBTTagCompound) {
+        super.readFromNBT(nbt)
+        on = nbt.getBoolean("on")
+        charge = nbt.getDouble("charge")
+    }
+
+    override fun writeToNBT(nbt: NBTTagCompound) {
+        super.writeToNBT(nbt)
+        nbt.setBoolean("on", on)
+        nbt.setDouble("charge", charge)
+    }
 }
 
 class EmergencyLampRender(entity: SixNodeEntity, side: Direction, descriptor: SixNodeDescriptor)
@@ -130,7 +174,7 @@ class EmergencyLampRender(entity: SixNodeEntity, side: Direction, descriptor: Si
     override fun draw() {
         super.draw()
         front.glRotateOnX()
-        desc.draw(side == Direction.YP, on)
+        desc.draw(side == Direction.YP, on, front == LRDU.Up)
     }
 
     override fun publishUnserialize(stream: DataInputStream) {
