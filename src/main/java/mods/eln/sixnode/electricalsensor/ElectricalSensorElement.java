@@ -85,7 +85,10 @@ public class ElectricalSensorElement extends SixNodeElement {
     }
 
     public IInventory getInventory() {
-        return inventory.getInventory();
+        if (inventory != null)
+            return inventory.getInventory();
+        else
+            return null;
     }
 
     public static boolean canBePlacedOnSide(Direction side, int type) {
