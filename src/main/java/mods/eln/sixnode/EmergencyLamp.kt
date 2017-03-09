@@ -82,7 +82,13 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>,
                                 par4: Boolean) {
-        // TODO...
+        with(list) {
+            add("As long as power is provided, the internal battery")
+            add("is charged and the lamp is off. On a power failure,")
+            add("the lamp turns on and runs on batteries.")
+            add(Utils.plotVolt("Nominal voltage:", cable.electricalNominalVoltage))
+            add(Utils.plotEnergy("Battery capacity:", batteryCapacity))
+        }
     }
 }
 
