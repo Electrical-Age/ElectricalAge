@@ -181,10 +181,19 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
 
     override fun getElectricalLoad(lrdu: LRDU) = load
     override fun getThermalLoad(lrdu: LRDU) = null
-    override fun multiMeterString() = "TODO"
+    override fun multiMeterString() = buildString {
+        append(Utils.plotVolt("U:", load.u))
+        append(Utils.plotAmpere("I:", load.i))
+        append(Utils.plotPercent("Charge:", charge / (sixNodeElementDescriptor as EmergencyLampDescriptor).batteryCapacity))
+    }
     override fun thermoMeterString() = ""
-    override fun getWaila() = mapOf( // TODO: Improve.
-        "State" to if (on) "discharging" else "charging",
+    override fun getWaila() = mapOf(
+        "State" to when {
+            on -> "On"
+            chargingResistor.state -> "Charging..."
+            charge <= 0.0 -> "Batteries empty"
+            else -> "Fully charged"
+        },
         "Charge" to Utils.plotPercent("", charge / (sixNodeElementDescriptor as EmergencyLampDescriptor).batteryCapacity)
     )
 
