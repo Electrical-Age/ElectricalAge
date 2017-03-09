@@ -1,5 +1,6 @@
 package mods.eln.sixnode
 
+import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.*
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
@@ -232,6 +233,11 @@ class EmergencyLampRender(entity: SixNodeEntity, side: Direction, descriptor: Si
     }
 
     override fun newGuiDraw(side: Direction?, player: EntityPlayer?) = EmergencyLampGui(this)
+
+    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor? = if (poweredByCable) when(lrdu) {
+        front.left(), front.right() -> desc.cable.render
+        else -> null
+    } else null
 }
 
 class EmergencyLampGui(private var render: EmergencyLampRender)
