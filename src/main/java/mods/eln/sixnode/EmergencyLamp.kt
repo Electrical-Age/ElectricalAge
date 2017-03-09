@@ -157,10 +157,11 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
         slowProcessList.add(NodePeriodicPublishProcess(sixNode, 2.0, 0.5))
     }
 
-    override fun getConnectionMask(lrdu: LRDU) = if (poweredByCable && (lrdu == front.left() || lrdu == front.right()))
-        Node.maskElectricalPower
-    else
-        0
+    override fun getConnectionMask(lrdu: LRDU) = when {
+        side == Direction.YP -> Node.maskElectricalPower
+        poweredByCable && (lrdu == front.left() || lrdu == front.right()) -> Node.maskElectricalPower
+        else -> 0
+    }
 
     override fun getElectricalLoad(lrdu: LRDU) = load
     override fun getThermalLoad(lrdu: LRDU) = null
@@ -234,8 +235,9 @@ class EmergencyLampRender(entity: SixNodeEntity, side: Direction, descriptor: Si
 
     override fun newGuiDraw(side: Direction?, player: EntityPlayer?) = EmergencyLampGui(this)
 
-    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor? = if (poweredByCable) when(lrdu) {
-        front.left(), front.right() -> desc.cable.render
+    override fun getCableRender(lrdu: LRDU?): CableRenderDescriptor? = if (poweredByCable) when {
+        side == Direction.YP -> desc.cable.render
+        lrdu == front.left() || lrdu == front.right() -> desc.cable.render
         else -> null
     } else null
 }
