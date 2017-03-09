@@ -161,7 +161,7 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
     }
 
     override fun getConnectionMask(lrdu: LRDU) = when {
-        side == Direction.YP -> Node.maskElectricalPower
+        poweredByCable && side == Direction.YP -> Node.maskElectricalPower
         poweredByCable && (lrdu == front.left() || lrdu == front.right()) -> Node.maskElectricalPower
         else -> 0
     }
