@@ -26,6 +26,7 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
     : SixNodeDescriptor(name, EmergencyLampElement::class.java, EmergencyLampRender::class.java) {
 
     val mainCeiling: Obj3D.Obj3DPart = model.getPart("coreCeil")
+    val panelCeiling: Obj3D.Obj3DPart = model.getPart("panelCeil")
     val lightCeiling: Obj3D.Obj3DPart = model.getPart("lightCeil")
     val mainWall: Obj3D.Obj3DPart = model.getPart("coreWall")
     val mainWallR: Obj3D.Obj3DPart = model.getPart("coreWallR")
@@ -39,14 +40,16 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
 
     fun draw(onCeiling: Boolean = false, on: Boolean = false, mirrorSign: Boolean = false) {
         if (onCeiling) {
+            mainCeiling.draw()
+
             if (on)
                 preserveMatrix {
-                    UtilsClient.drawLight(mainCeiling)
+                    UtilsClient.drawLight(panelCeiling)
                     GL11.glColor3f(0.3f, 0.3f, 0.3f)
                     UtilsClient.drawLight(lightCeiling)
                 }
             else
-                mainCeiling.draw()
+                panelCeiling.draw()
         } else {
             if (on)
                 preserveMatrix {
