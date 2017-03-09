@@ -1680,11 +1680,11 @@ public class Eln {
         // TODO: Modern street light.
 
         sixNodeItem.addDescriptor(15 + (id << 6),
-            new EmergencyLampDescriptor(TR_NAME(Type.NONE, "50V Emergency lamp"),
+            new EmergencyLampDescriptor(TR_NAME(Type.NONE, "50V Emergency Lamp"),
                 lowVoltageCableDescriptor, 10 * 60 * 10, 10, 5, 6, obj.getObj("EmergencyExitLighting")));
 
         sixNodeItem.addDescriptor(16 + (id << 6),
-            new EmergencyLampDescriptor(TR_NAME(Type.NONE, "200V Emergency lamp"),
+            new EmergencyLampDescriptor(TR_NAME(Type.NONE, "200V Emergency Lamp"),
                 meduimVoltageCableDescriptor, 10 * 60 * 20, 25, 10, 8, obj.getObj("EmergencyExitLighting")));
     }
 
@@ -5156,6 +5156,23 @@ public class Eln {
             'C', "dustCoal",
             'I', new ItemStack(Items.iron_ingot));
 
+        addRecipe(findItemStack("50V Emergency Lamp"),
+            "cbc",
+            " l ",
+            " g ",
+            'c', findItemStack("Low Voltage Cable"),
+            'b', findItemStack("Portable Battery Pack"),
+            'l', findItemStack("50V LED Bulb"),
+            'g', new ItemStack(Blocks.glass_pane));
+
+        addRecipe(findItemStack("200V Emergency Lamp"),
+            "cbc",
+            " l ",
+            " g ",
+            'c', findItemStack("Medium Voltage Cable"),
+            'b', findItemStack("Portable Battery Pack"),
+            'l', findItemStack("200V LED Bulb"),
+            'g', new ItemStack(Blocks.glass_pane));
     }
 
     private void recipeLampSupply() {
