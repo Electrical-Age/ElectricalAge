@@ -2,6 +2,7 @@ package mods.eln.sixnode
 
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.*
+import mods.eln.i18n.I18N
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.node.Node
@@ -68,6 +69,14 @@ class EmergencyLampDescriptor(name: String, val cable: ElectricalCableDescriptor
 
     override fun getFrontFromPlace(side: Direction?, player: EntityPlayer?)
         = super.getFrontFromPlace(side, player).inverse()
+
+    override fun canBePlacedOnSide(player: EntityPlayer?, side: Direction?): Boolean {
+        if (side == Direction.YN) {
+            Utils.addChatMessage(player, I18N.tr("Emergency lamp can not be placed on ground."))
+            return false
+        } else
+            return true
+    }
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>,
                                 par4: Boolean) {
