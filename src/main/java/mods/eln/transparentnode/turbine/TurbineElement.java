@@ -129,7 +129,7 @@ public class TurbineElement extends TransparentNodeElement {
             return Utils.plotCelsius("T+:", warmLoad.Tc) + Utils.plotPower("P+:", warmLoad.getPower());
         if (side == front.right())
             return Utils.plotCelsius("T-:", coolLoad.Tc) + Utils.plotPower("P-:", coolLoad.getPower());
-        return Utils.plotCelsius("T:", warmLoad.Tc - coolLoad.Tc);
+        return Utils.plotCelsius("dT:", warmLoad.Tc - coolLoad.Tc) + Utils.plotPercent("Eff:", turbineThermaltProcess.getEfficiency());
 
     }
 

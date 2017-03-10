@@ -9,8 +9,14 @@ import mods.eln.sim.mna.component.VoltageSource;
 public class TurbineThermalProcess implements IProcess {
     private final TurbineElement turbine;
 
+    private double efficiency = 0.0;
+
     public TurbineThermalProcess(TurbineElement t) {
         this.turbine = t;
+    }
+
+    public double getEfficiency() {
+        return efficiency;
     }
 
     @Override
@@ -19,14 +25,14 @@ public class TurbineThermalProcess implements IProcess {
 
         VoltageSource src = turbine.electricalPowerSourceProcess;
 
-        double eff = Math.abs(1 - (turbine.coolLoad.Tc + PhysicalConstant.Tref) / (turbine.warmLoad.Tc + PhysicalConstant.Tref));
-        if (eff < 0.05) eff = 0.05;
+        efficiency = Math.abs(1 - (turbine.coolLoad.Tc + PhysicalConstant.Tref) / (turbine.warmLoad.Tc + PhysicalConstant.Tref));
+        if (efficiency < 0.05) efficiency = 0.05;
 
         double E = src.getP() * time / Eln.instance.heatTurbinePowerFactor;
 
         double Pout = E / time;
-        double Pin = descriptor.PoutToPin.getValue(Pout) / eff;
+        double Pin = descriptor.PoutToPin.getValue(Pout) / efficiency;
         turbine.warmLoad.movePowerTo(-Pin);
-        turbine.coolLoad.movePowerTo(Pin * (1 - eff));
+        turbine.coolLoad.movePowerTo(Pin * (1 - efficiency));
     }
 }
