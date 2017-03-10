@@ -45,6 +45,7 @@ public class BrushDescriptor extends GenericItemUsingDamageDescriptor {
     }
 
     public int getLife(ItemStack stack) {
+        if (stack == null || stack.getTagCompound() == null) return 32;
         return stack.getTagCompound().getInteger("life");
     }
 
