@@ -86,7 +86,10 @@ public class ElectricalWatchElement extends SixNodeElement {
 
     @Override
     public IInventory getInventory() {
-        return inventory.getInventory();
+        if (inventory != null)
+            return inventory.getInventory();
+        else
+            return null;
     }
 
     @Override
