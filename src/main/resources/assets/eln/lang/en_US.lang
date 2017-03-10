@@ -15,6 +15,7 @@ achievement.open_guide.desc=Open the wiki guide
 200V_Condensator.name=200V Capacitor
 200V_Copper_Heating_Corp.name=200V Copper Heating Corp
 200V_Economic_Light_Bulb.name=200V Economic Light Bulb
+200V_Emergency_Lamp.name=200V Emergency Lamp
 200V_Farming_Lamp.name=200V Farming Lamp
 200V_Fuel_Generator.name=200V Fuel Generator
 200V_Incandescent_Light_Bulb.name=200V Incandescent Light Bulb
@@ -36,6 +37,7 @@ achievement.open_guide.desc=Open the wiki guide
 50V_Copper_Heating_Corp.name=50V Copper Heating Corp
 50V_Economic_Light_Bulb.name=50V Economic Light Bulb
 50V_Egg_Incubator.name=50V Egg Incubator
+50V_Emergency_Lamp.name=50V Emergency Lamp
 50V_Farming_Lamp.name=50V Farming Lamp
 50V_Fuel_Generator.name=50V Fuel Generator
 50V_Incandescent_Light_Bulb.name=50V Incandescent Light Bulb
@@ -73,6 +75,7 @@ Blown_Lead_Fuse.name=Blown Lead Fuse
 Blue_Brush.name=Blue Brush
 Brown_Brush.name=Brown Brush
 Capacity_Oriented_Battery.name=Capacity Oriented Battery
+Casing.name=Casing
 Cheap_Chip.name=Cheap Chip
 Cheap_Electrical_Drill.name=Cheap Electrical Drill
 Cheap_Ferromagnetic_Core.name=Cheap Ferromagnetic Core
@@ -163,6 +166,7 @@ Low_Power_Transmitter_Antenna.name=Low Power Transmitter Antenna
 Low_Voltage_Cable.name=Low Voltage Cable
 Low_Voltage_Relay.name=Low Voltage Relay
 Low_Voltage_Switch.name=Low Voltage Switch
+Lowpass_filter.name=Lowpass filter
 Machine_Block.name=Machine Block
 Machine_Booster.name=Machine Booster
 Magenta_Brush.name=Magenta Brush
@@ -260,7 +264,7 @@ Temperature_Probe.name=Temperature Probe
 Thermal_Probe.name=Thermal Probe
 Thermal_Probe_Chip.name=Thermal Probe Chip
 Thermistor.name=Thermistor
-ThermoMeter.name=Thermometer
+Thermometer.name=Thermometer
 Tree_Resin.name=Tree Resin
 Tree_Resin_Collector.name=Tree Resin Collector
 Tungsten_Cable.name=Tungsten Cable
@@ -320,6 +324,9 @@ You_have_%1$_lives_left=You have %1$ lives left
 Brush_is_dry=Brush is dry
 Can_paint_%1$_blocks=Can paint %1$ blocks
 
+# ./src/main/java/mods/eln/item/CaseItemDescriptor.kt
+Can_be_used_to_encase_EA_items_that_support_it=Can be used to encase EA items that support it
+
 # ./src/main/java/mods/eln/item/CombustionChamber.java
 Upgrade_for_the_Stone_Heat_Furnace.=Upgrade for the Stone Heat Furnace.
 
@@ -360,13 +367,11 @@ Solar_panel_upgrade=Solar panel upgrade
 
 # ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
 
-# ./src/main/java/mods/eln/item/electricalitem/ElectricalArmor.java
-
 # ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
 State\:=State:
 Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
 
-# ./src/main/java/mods/eln/item/electricalitem/ElectricalTool.java
+# ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
 
 # ./src/main/java/mods/eln/mechanical/Tachometer.kt
 Rads_s_corresponding\nto_0%_output=Rads/s corresponding\nto 0% output
@@ -387,11 +392,13 @@ Input_power_is_limited_to_%1$W=Input power is limited to %1$W
 A_voltage-controlled_amplifier_(VCA)\nis_an_electronic_amplifier_that_varies\nits_gain_depending_on_the_control_voltage.=A voltage-controlled amplifier (VCA)\nis an electronic amplifier that varies\nits gain depending on the control voltage.
 A_voltage-controlled_oscillator_or_VCO_is\nan_electronic_oscillator_whose_oscillation\nfrequency_is_controlled_by_a_voltage_input.=A voltage-controlled oscillator or VCO is\nan electronic oscillator whose oscillation\nfrequency is controlled by a voltage input.
 An_amplifier_increases_the_voltage\nof_an_input_signal_by_a_configurable\ngain_and_outputs_that_voltage.=An amplifier increases the voltage\nof an input signal by a configurable\ngain and outputs that voltage.
+Cut-off_frequency_%1$_Hz=Cut-off frequency %1$ Hz
 Gain=Gain
 Gain_for_input_\u00a713=Gain for input \u00a713
 Gain_for_input_\u00a722=Gain for input \u00a722
 Gain_for_input_\u00a741=Gain for input \u00a741
-Operational_Amplifier_-_DC_coupled\nhigh-gain_voltage_amplifier_with\ndifferential_input._Can_be_used_to\ncompare_voltages_or_a_configurable_amplifier.=Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or a configurable amplifier.
+Lowpass_filter_-_Passes_signals_with_a\nfrequency_lower_than_a_certain_cutoff_frequency\nand_attenuates_signals_with_frequencies_higher\nthan_the_cutoff_frequency.=Lowpass filter - Passes signals with a\nfrequency lower than a certain cutoff frequency\nand attenuates signals with frequencies higher\nthan the cutoff frequency.
+Operational_Amplifier_-_DC_coupled\nhigh-gain_voltage_amplifier_with\ndifferential_input._Can_be_used_to\ncompare_voltages_or_as_configurable_amplifier.=Operational Amplifier - DC coupled\nhigh-gain voltage amplifier with\ndifferential input. Can be used to\ncompare voltages or as configurable amplifier.
 Params=Params
 Proportional–integral–derivative_controller._A_PID\ncontroller_continuously_calculates_an_error_value_as\nthe_difference_between_a_desired_setpoint_and_a_measured\nprocess_variable_and_applies_a_correction_based_on\nproportional,_integral,_and_derivative_terms.=Proportional–integral–derivative controller. A PID\ncontroller continuously calculates an error value as\nthe difference between a desired setpoint and a measured\nprocess variable and applies a correction based on\nproportional, integral, and derivative terms.
 Samples_the_voltage_of_a_varying_analog_signal_when\nthe_clock_input_changes_from_0_to_1_and_holds_its\noutput_voltage_at_a_constant_level_until_next_clock_pulse.\nYou_can_see_it_as_an_analog_D-Flipflop.=Samples the voltage of a varying analog signal when\nthe clock input changes from 0 to 1 and holds its\noutput voltage at a constant level until next clock pulse.\nYou can see it as an analog D-Flipflop.
@@ -399,6 +406,8 @@ The_summing_unit_outputs_the_sum_of\nthe_three_weighted_inputs.The\ngain_for_eac
 
 # ./src/main/java/mods/eln/sixnode/ElectricalFuse.kt
 Protects_electrical_components.\nFuse_melts_if_current_exceeds_the\nfuse_limit=Protects electrical components.\nFuse melts if current exceeds the\nfuse limit
+
+# ./src/main/java/mods/eln/sixnode/EmergencyLamp.kt
 
 # ./src/main/java/mods/eln/sixnode/LogicGate.kt
 A_Programmable_Array_Logic_(PAL)_is_a_programmable\nlogic_device_semiconductors_used_to__implement_any_logic\nfunction_in_only_one_digital_circuit._The_function_is\nstateless,_which_means_that_no_intermediate_state_is_saved.=A Programmable Array Logic (PAL) is a programmable\nlogic device semiconductors used to  implement any logic\nfunction in only one digital circuit. The function is\nstateless, which means that no intermediate state is saved.
@@ -415,6 +424,13 @@ Outputs_a_rectangular_signal_which's_frequency\ndepends_to_the_input_voltage._Th
 The_D_flip-flop_captures_the_value\nof_the_D-input_at_a_rising_edge\nportion_of_the_clock_cycle.=The D flip-flop captures the value\nof the D-input at a rising edge\nportion of the clock cycle.
 UNDEF=UNDEF
 
+# ./src/main/java/mods/eln/sixnode/Scanner.kt
+-_For_inventories,_outputs_either_total_fill_or_fraction_of_slots_with_any_items.=- For inventories, outputs either total fill or fraction of slots with any items.
+-_For_tanks,_outputs_fill_percentage.=- For tanks, outputs fill percentage.
+Otherwise_behaves_as_a_vanilla_comparator.=Otherwise behaves as a vanilla comparator.
+Right-click_to_change_mode.=Right-click to change mode.
+Scans_blocks_to_produce_signals.=Scans blocks to produce signals.
+
 # ./src/main/java/mods/eln/sixnode/TreeResinCollector/TreeResinCollectorDescriptor.java
 Produces_Tree_Resin_over\ntime_when_put_on_a_tree.=Produces Tree Resin over\ntime when put on a tree.
 This_block_can_only_be_placed_on_the_side_of_a_tree!=This block can only be placed on the side of a tree!
@@ -427,6 +443,8 @@ Can_be_used_to_recharge\nelectrical_items_like\:\nFlash_Light,_X-Ray_scanner\nan
 
 # ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerElement.java
 Charge_Current=Charge Current
+
+# ./src/main/java/mods/eln/sixnode/batterycharger/BatteryChargerGui.java
 
 # ./src/main/java/mods/eln/sixnode/diode/DiodeDescriptor.java
 Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Electrical current can only\nflow through the diode\nfrom anode to cathode
@@ -445,6 +463,8 @@ Input_Voltage=Input Voltage
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
 Sound_is_muted=Sound is muted
 Sound_is_not_muted=Sound is not muted
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
 Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds the cable limit
@@ -473,6 +493,8 @@ Signal_Voltage=Signal Voltage
 It_can_store_up_to_256_points.=It can store up to 256 points.
 Measures_the_voltage_of_an\nelectrical_signal_and_plots\nthe_data_in_real_time.=Measures the voltage of an\nelectrical signal and plots\nthe data in real time.
 
+# ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerElement.java
+
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerGui.java
 Back_to_display=Back to display
 Configuration=Configuration
@@ -486,6 +508,8 @@ Temp._[*C]=Temp. [*C]
 Voltage_[V]=Voltage [V]
 Y-axis_max=Y-axis max
 Y-axis_min=Y-axis min
+
+# ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalentitysensor/ElectricalEntitySensorDescriptor.java
 Output_voltage_increases\nif_entities_are_moving_around.=Output voltage increases\nif entities are moving around.
@@ -516,6 +540,8 @@ Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_dayli
 
 # ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorElement.java
 Light_level=Light level
+
+# ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathDescriptor.java
 Applicable_boolean_operators\:=Applicable boolean operators:
@@ -575,8 +601,6 @@ Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides a
 
 # ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
 Can_break_an_electrical_circuit\ninterrupting_the_current.=Can break an electrical circuit\ninterrupting the current.
-
-# ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
 Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=Upon application of a high signal,\nthe timer maintains the output high for\na configurable interval. Can be re-triggered.
@@ -641,14 +665,10 @@ Spot_range\:_%1$_blocks=Spot range: %1$ blocks
 Bulb=Bulb
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketGuiDraw.java
-%1$_is_not_in_range!=%1$ is not in range!
 Cable_slot_empty=Cable slot empty
 Orientation\:_%1$°=Orientation: %1$°
 Parallel=Parallel
-Powered_by_Lamp_Supply=Powered by Lamp Supply
-Powered_by_cable=Powered by cable
 Serial=Serial
-Specify_the_supply_channel=Specify the supply channel
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyContainer.java
 Electrical_cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Electrical cable slot\nBase range is 32 blocks.\nEach additional cable\nincreases range by one.
@@ -684,8 +704,14 @@ Wireless_TX=Wireless TX
 # ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixElement.java
 Capacity=Capacity
 
+# ./src/main/java/mods/eln/sixnode/powercapacitorsix/PowerCapacitorSixGui.java
+
+# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixContainer.java
+
 # ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixElement.java
 Inductance=Inductance
+
+# ./src/main/java/mods/eln/sixnode/powerinductorsix/PowerInductorSixGui.java
 
 # ./src/main/java/mods/eln/sixnode/powersocket/PowerSocketDescriptor.java
 Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in with energy.
@@ -696,6 +722,8 @@ Specify_the_device_to_supply_through_this_socket.=Specify the device to supply t
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorContainer.java
 (Sets_resistance)=(Sets resistance)
 Coal_dust_slot=Coal dust slot
+
+# ./src/main/java/mods/eln/sixnode/resistor/ResistorElement.java
 
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
 High_parallel_resistance\n_\=>_Low_power_dissipation.=High parallel resistance\n => Low power dissipation.
@@ -729,7 +757,7 @@ No_text_associated_to_this_beacon=No text associated to this beacon
 # ./src/main/java/mods/eln/sixnode/tutorialsign/TutorialSignGui.java
 Set_beacon_name=Set beacon name
 
-# ./src/main/java/mods/eln/sixnode/wirelesssignal/tx/WirelessSignalTxGui.java
+# ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
 
 # ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
 Fuel_level=Fuel level
@@ -783,8 +811,6 @@ Nominal_power\:_=Nominal power:
 Nominal_voltage\:_=Nominal voltage: 
 _charged_at_=charged at 
 
-# ./src/main/java/mods/eln/transparentnode/battery/BatteryElement.java
-
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryGuiDraw.java
 Charged=Charged
 Discharge=Discharge
@@ -831,8 +857,6 @@ Auto_shutdown=Auto shutdown
 Manual_shutdown=Manual shutdown
 Set_point\:_%1$°C=Set point: %1$°C
 
-# ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineContainer.java
-
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
 Cost=Cost
 
@@ -853,12 +877,6 @@ Take_fuel=Take fuel
 
 # ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorContainer.java
 (Increases_maximal_voltage)=(Increases maximal voltage)
-
-# ./src/main/java/mods/eln/transparentnode/powercapacitor/PowerCapacitorGui.java
-
-# ./src/main/java/mods/eln/transparentnode/powerinductor/PowerInductorContainer.java
-
-# ./src/main/java/mods/eln/transparentnode/powerinductor/PowerInductorGui.java
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelContainer.java
 Solar_tracker_slot=Solar tracker slot
@@ -900,6 +918,7 @@ Fan_voltage\:_%1$V=Fan voltage: %1$V
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveElement.java
 
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerContainer.java
+Casing_slot=Casing slot
 
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerDescriptor.java
 The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=The voltage ratio is proportional\nto the cable stacks count ratio.
@@ -916,8 +935,6 @@ Temperature_difference\:_%1$°C=Temperature difference: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineElement.java
 Nominal=Nominal
-
-# ./src/main/java/mods/eln/transparentnode/turret/TurretContainer.java
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
 CAUTION\:_Cables_can_get_quite_hot!=CAUTION: Cables can get quite hot!
@@ -945,14 +962,14 @@ Recharge_power\:=Recharge power:
 Generates_energy_using_water_stream.=Generates energy using water stream.
 No_place_for_water_turbine!=No place for water turbine!
 
+# ./src/main/java/mods/eln/transparentnode/waterturbine/WaterTurbineElement.java
+
 # ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
 Front\:_%1$=Front: %1$
 Generates_energy_from_wind.=Generates energy from wind.
 Left_Right\:_%1$=Left/Right: %1$
 Up_Down\:_%1$=Up/Down: %1$
 Wind_area\:=Wind area:
-
-# ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineElement.java
 
 # ./src/main/java/mods/eln/wiki/Data.java
 Light=Light
@@ -978,6 +995,7 @@ Is_not_a_crafting_material!=Is not a crafting material!
 Recipe\:=Recipe:
 
 # Appearing in multiple source files
+%1$_is_not_in_range!=%1$ is not in range!
 (Increases_capacity)=(Increases capacity)
 (Increases_inductance)=(Increases inductance)
 Actual\:_%1$°C=Actual: %1$°C
@@ -1036,6 +1054,8 @@ Position=Position
 Power=Power
 Power\:_%1$W=Power: %1$W
 Power_consumption=Power consumption
+Powered_by_Lamp_Supply=Powered by Lamp Supply
+Powered_by_cable=Powered by cable
 Produced_power=Produced power
 Range\:_%1$_blocks=Range: %1$ blocks
 Redstone_slot=Redstone slot
@@ -1046,6 +1066,7 @@ Resistance=Resistance
 Resistance\:_%1$Ω=Resistance: %1$Ω
 Smallest=Smallest
 Specify_the_channel=Specify the channel
+Specify_the_supply_channel=Specify the supply channel
 Stored_energy\:_%1$J_(%2$%)=Stored energy: %1$J (%2$%)
 Temperature=Temperature
 Temperature\:_%1$°C=Temperature: %1$°C
