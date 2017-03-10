@@ -8,7 +8,6 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.AutoAcceptInventoryProxy;
-import mods.eln.node.IPublishable;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -143,7 +142,7 @@ public class BatteryChargerElement extends SixNodeElement {
         if (onBlockActivatedRotate(entityPlayer)) {
             return true;
         } else {
-            return inventory.take(entityPlayer.getCurrentEquippedItem(), (IPublishable) this);
+            return inventory.take(entityPlayer.getCurrentEquippedItem(), this, true, false);
         }
     }
 

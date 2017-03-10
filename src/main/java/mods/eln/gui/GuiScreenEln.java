@@ -46,6 +46,12 @@ public abstract class GuiScreenEln extends GuiScreen implements GuiTextFieldElnO
         return o;
     }
 
+    public GuiVerticalProgressBar newGuiVerticalProgressBar(int x, int y, int width, int height) {
+        GuiVerticalProgressBar o = helper.newGuiVerticalProgressBar(x, y, width, height);
+
+        return o;
+    }
+
     @Override
     protected void keyTyped(char key, int code) {
         helper.keyTyped(key, code);

@@ -294,9 +294,9 @@ class PIDRegulatorElement(node: SixNode, side: Direction, sixNodeDescriptor: Six
         super.networkUnserialize(stream)
         try {
             when (stream?.readByte()?.toInt()) {
-                KpParameterChangedEvent -> (function as PIDRegulator).Kp = stream?.readFloat()?.toDouble() ?: 0.0
-                KiParameterChangedEvent -> (function as PIDRegulator).Ki = stream?.readFloat()?.toDouble() ?: 0.0
-                KdParameterChangerEvent -> (function as PIDRegulator).Kd = stream?.readFloat()?.toDouble() ?: 0.0
+                KpParameterChangedEvent -> (function as PIDRegulator).Kp = stream.readFloat().toDouble()
+                KiParameterChangedEvent -> (function as PIDRegulator).Ki = stream.readFloat().toDouble()
+                KdParameterChangerEvent -> (function as PIDRegulator).Kd = stream.readFloat().toDouble()
             }
             needPublish()
         } catch (e: IOException) {
@@ -461,7 +461,7 @@ class AmplifierElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNod
 
         try {
             when (stream?.readByte()?.toInt()) {
-                GainChangedEvent -> (function as Amplifier).gain = stream?.readFloat()?.toDouble() ?: 0.0
+                GainChangedEvent -> (function as Amplifier).gain = stream.readFloat().toDouble()
             }
             needPublish()
         } catch (e: IOException) {
@@ -495,7 +495,7 @@ class AmplifierGui(val render: AmplifierRender) : GuiScreenEln() {
         gainTF = newGuiTextField(6, 6, 50)
         gainTF?.setComment(0, I18N.tr("Gain"))
         gainTF?.setText(render.gain)
-        gainTF?.setObserver { textField, text ->
+        gainTF?.setObserver { _, text ->
             try {
                 val bos = ByteArrayOutputStream()
                 val stream = DataOutputStream(bos)
@@ -586,9 +586,9 @@ class SummingUnitElement(node: SixNode, side: Direction, sixNodeDescriptor: SixN
 
         try {
             when (stream?.readByte()?.toInt()) {
-                GainChangedEvents[0] -> (function as SummingUnit).gains[0] = stream?.readFloat()?.toDouble() ?: 1.0
-                GainChangedEvents[1] -> (function as SummingUnit).gains[1] = stream?.readFloat()?.toDouble() ?: 1.0
-                GainChangedEvents[2] -> (function as SummingUnit).gains[2] = stream?.readFloat()?.toDouble() ?: 1.0
+                GainChangedEvents[0] -> (function as SummingUnit).gains[0] = stream.readFloat().toDouble()
+                GainChangedEvents[1] -> (function as SummingUnit).gains[1] = stream.readFloat().toDouble()
+                GainChangedEvents[2] -> (function as SummingUnit).gains[2] = stream.readFloat().toDouble()
             }
             needPublish()
         } catch (e: IOException) {
@@ -624,7 +624,7 @@ class SummingUnitGui(val render: SummingUnitRender) : GuiScreenEln() {
         for (i in gainTFs.indices) {
             gainTFs[i] = newGuiTextField(6, 6 + 20 * i, 50)
             gainTFs[i]?.setText(render.gains[i])
-            gainTFs[i]?.setObserver { textField, text ->
+            gainTFs[i]?.setObserver { _, text ->
                 try {
                     val bos = ByteArrayOutputStream()
                     val stream = DataOutputStream(bos)
