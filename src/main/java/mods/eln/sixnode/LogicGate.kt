@@ -421,8 +421,8 @@ class PalElement(node: SixNode, side: Direction, descriptor: SixNodeDescriptor) 
         try {
             when (stream?.readByte()?.toInt()) {
                 TruthTablePositionClickedEvent -> {
-                    val position = stream?.readInt()
-                    if (position != null && position >= 0 && position < 8) {
+                    val position = stream.readInt()
+                    if (position in 0..7) {
                         val truthTable = (function as Pal).truthTable
                         truthTable[position] = !truthTable[position]
                         needPublish()

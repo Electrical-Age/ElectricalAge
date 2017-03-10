@@ -6,7 +6,6 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.AutoAcceptInventoryProxy;
-import mods.eln.node.IInventoryChangeListener;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -254,7 +253,7 @@ public class LampSupplyElement extends SixNodeElement {
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
 
-        return inventory.take(entityPlayer.getCurrentEquippedItem(), (IInventoryChangeListener) this);
+        return inventory.take(entityPlayer.getCurrentEquippedItem(), this, false, true);
     }
 
     @Override

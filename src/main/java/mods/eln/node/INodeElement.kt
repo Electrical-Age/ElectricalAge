@@ -2,6 +2,8 @@ package mods.eln.node
 
 import net.minecraft.inventory.IInventory
 
-interface IInventoryChangeListener {
+interface INodeElement {
+    fun needPublish()
+    fun reconnect()
     fun inventoryChange(inventory: IInventory?)
 }

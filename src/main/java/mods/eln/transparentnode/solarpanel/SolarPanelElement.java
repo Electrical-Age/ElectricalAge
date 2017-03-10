@@ -8,7 +8,6 @@ import mods.eln.misc.GhostPowerNode;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.AutoAcceptInventoryProxy;
-import mods.eln.node.IPublishable;
 import mods.eln.node.NodeBase;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
@@ -20,7 +19,6 @@ import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.process.PowerSourceBipole;
 import mods.eln.sim.nbt.NbtElectricalLoad;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -158,7 +156,7 @@ public class SolarPanelElement extends TransparentNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return descriptor.canRotate && inventory.take(entityPlayer.getCurrentEquippedItem(), (IPublishable) this);
+        return descriptor.canRotate && inventory.take(entityPlayer.getCurrentEquippedItem(), this, true, false);
     }
 
     @Override
