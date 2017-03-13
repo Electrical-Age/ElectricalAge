@@ -31,7 +31,8 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
         }
         if (casing != null) {
             this.casing = casing.getPart("Case");
-            casingDoor = casing.getPart("Door");
+            casingDoorR = casing.getPart("DoorR");
+            casingDoorL = casing.getPart("DoorL");
         }
 
         voltageLevelColor = VoltageLevelColor.Neutral;
@@ -47,7 +48,8 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
     private Obj3DPart defaultFero;
     private Obj3DPart sbire;
     private Obj3DPart casing;
-    private Obj3DPart casingDoor;
+    private Obj3DPart casingDoorR;
+    private Obj3DPart casingDoorL;
 
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
@@ -110,7 +112,8 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
 
         if (hasCasing) {
             if (casing != null) casing.draw();
-            if (casingDoor != null) casingDoor.draw(doorOpen * 90, 0f, 1f, 0f);
+            if (casingDoorR != null) casingDoorR.draw(doorOpen * 90, 0f, 1f, 0f);
+            if (casingDoorL != null) casingDoorL.draw(-doorOpen * 90, 0f, 1f, 0f);
         }
     }
 }
