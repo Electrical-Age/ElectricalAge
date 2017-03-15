@@ -1676,8 +1676,25 @@ public class Eln {
             desc.cameraOpt = false;
             desc.useIcon(true);
         }
+        {
+            subId = 14;
 
-        // TODO: Modern street light.
+            name = TR_NAME(Type.NONE, "Modern Street Light");
+
+            LampSocketDescriptor desc = new LampSocketDescriptor(name, new LampSocketStandardObjRender(obj.getObj("ModernStreetLight"), true),
+                LampSocketType.Douille, // LampSocketType
+                false,
+                0, 0, 0, 0, false);
+            desc.setPlaceDirection(Direction.YN);
+            GhostGroup g = new GhostGroup();
+            g.addElement(1, 0, 0);
+            g.addElement(2, 0, 0);
+            g.addElement(3, 0, 0);
+            g.addElement(3, 1, 0);
+            desc.setGhostGroup(g);
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            desc.cameraOpt = false;
+        }
 
         sixNodeItem.addDescriptor(15 + (id << 6),
             new EmergencyLampDescriptor(TR_NAME(Type.NONE, "50V Emergency Lamp"),

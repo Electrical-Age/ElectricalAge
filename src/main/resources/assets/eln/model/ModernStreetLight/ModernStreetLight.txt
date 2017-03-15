@@ -1,0 +1,4 @@
+s tOn ModernStreetLightON.png
+s tOff ModernStreetLightOFF.png
+s type noLampDraw
+s cable enable

@@ -20,7 +20,6 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
     public boolean cameraOpt = true;
 
     public int range;
-    public String modelName;
     float alphaZMin, alphaZMax, alphaZBoot;
     public boolean cableFront = true;
     public boolean cableLeft = true;
@@ -31,13 +30,14 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
     public boolean rotateOnlyBy180Deg = false;
 
     public boolean paintable = false;
+    final boolean turnable;
 
     public LampSocketDescriptor(String name, LampSocketObjRender render,
                                 LampSocketType socketType,
                                 boolean paintable,
                                 int range,
                                 float alphaZMin, float alphaZMax,
-                                float alphaZBoot) {
+                                float alphaZBoot, boolean canBeTurned) {
         super(name, LampSocketElement.class, LampSocketRender.class);
         this.socketType = socketType;
         this.paintable = paintable;
@@ -46,6 +46,16 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
         this.alphaZMax = alphaZMax;
         this.alphaZBoot = alphaZBoot;
         this.render = render;
+        this.turnable = canBeTurned;
+    }
+
+    public LampSocketDescriptor(String name, LampSocketObjRender render,
+                                LampSocketType socketType,
+                                boolean paintable,
+                                int range,
+                                float alphaZMin, float alphaZMax,
+                                float alphaZBoot) {
+        this(name, render, socketType, paintable, range, alphaZMin, alphaZMax, alphaZBoot, true);
     }
 
     public void setInitialOrientation(float rotateDeg) {
