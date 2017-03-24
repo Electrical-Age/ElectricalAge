@@ -308,6 +308,8 @@ public class Eln {
     public static double fuelHeatValueFactor = 0.0000675;
     private int plateConversionRatio;
 
+    public static boolean avoidSymbols = false;
+
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
 
@@ -455,6 +457,8 @@ public class Eln {
 
         fuelHeatValueFactor = config.get("balancing", "fuelHeatValueFactor", 0.0000675,
             "Factor to apply when converting real word heat values to Minecraft heat values (1mB = 1l).").getDouble();
+
+        Eln.avoidSymbols = config.get("gameplay", "avoidSymbols", false).getBoolean();
 
         config.save();
 
