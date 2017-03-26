@@ -2550,7 +2550,8 @@ public class Eln {
 
             name = TR_NAME(Type.NONE, "Signal Switch");
 
-            ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, ledswitch, true, "switch");
+            ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, ledswitch, true,
+                Eln.noSymbols ? "signalswitch" : "switch");
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
         }
