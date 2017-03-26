@@ -5,7 +5,6 @@ import mods.eln.ghost.GhostGroup;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
-import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.EntityLivingBase;
@@ -62,7 +61,7 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
 
         canRotate = alphaMax != alphaMin;
 
-        voltageLevelColor = VoltageLevelColor.Neutral;
+        voltageLevelColor = VoltageLevelColor.fromVoltage(electricalUmax);
     }
 
 
