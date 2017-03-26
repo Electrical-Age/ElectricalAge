@@ -37,13 +37,16 @@ import java.io.DataOutputStream
 class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPassiveDescriptor, val cable: ElectricalCableDescriptor, val series: SerieEE) :
     TransparentNodeDescriptor(name, LargeRheostatElement::class.java, LargeRheostatRender::class.java) {
 
+    init {
+        voltageLevelColor = VoltageLevelColor.Neutral
+    }
+
     fun getRsValue(inventory: IInventory): Double {
         val core = inventory.getStackInSlot(ResistorContainer.coreId) ?: return series.getValue(0)
 
         return series.getValue(core.stackSize)
     }
 
-    // TODO: Show the wiper somehow.
     fun draw(position: Float = 0f) {
         dissipator.draw()
         GL11.glRotatef((1f - position) * 300f, 0f, 1f, 0f)
@@ -51,11 +54,12 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
     }
 
     override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
-    override fun use2DIcon() = false
+    override fun use2DIcon() = true
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack,
-                                       helper: IItemRenderer.ItemRendererHelper) = true
+                                       helper: IItemRenderer.ItemRendererHelper) = type != IItemRenderer.ItemRenderType.INVENTORY
 
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) = draw()
+    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) =
+        if (type != IItemRenderer.ItemRenderType.INVENTORY) draw() else super.renderItem(type, item, *data)
 }
 
 class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
