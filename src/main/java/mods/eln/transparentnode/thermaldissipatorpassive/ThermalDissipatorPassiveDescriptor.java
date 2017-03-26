@@ -4,6 +4,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.wiki.Data;
@@ -37,6 +38,8 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
         Eln.simulator.checkThermalLoad(thermalRs, thermalRp, thermalC);
         this.obj = obj;
         if (obj != null) main = obj.getPart("main");
+
+        voltageLevelColor = VoltageLevelColor.Thermal;
     }
 
     public double warmLimit, coolLimit;
@@ -71,25 +74,26 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
 
     @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-
         return true;
     }
 
     @Override
     public boolean use2DIcon() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
                                          ItemRendererHelper helper) {
-
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-
-        draw();
+        if (type == ItemRenderType.INVENTORY) {
+            super.renderItem(type, item, data);
+        } else {
+            draw();
+        }
     }
 }

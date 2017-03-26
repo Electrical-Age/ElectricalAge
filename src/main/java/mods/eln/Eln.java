@@ -4158,7 +4158,7 @@ public class Eln {
                 MVU, 60,// double nominalElectricalU,double
                 // electricalNominalP,
                 1200,// double nominalElectricalCoolingPower,
-                lowVoltageCableDescriptor,// ElectricalCableDescriptor
+                meduimVoltageCableDescriptor,// ElectricalCableDescriptor
                 // cableDescriptor,
                 130, -100,// double warmLimit,double coolLimit,
                 200, 30,// double nominalP,double nominalT,
