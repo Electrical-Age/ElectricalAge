@@ -21,7 +21,7 @@ public enum VoltageLevelColor {
     }
 
     public void drawIconBackground(IItemRenderer.ItemRenderType type) {
-        if (voltageLevel != null &&
+        if (!Eln.noVoltageBackground && voltageLevel != null &&
             type == IItemRenderer.ItemRenderType.INVENTORY || type == IItemRenderer.ItemRenderType.FIRST_PERSON_MAP) {
             UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/voltages/" + voltageLevel + ".png"));
         }
