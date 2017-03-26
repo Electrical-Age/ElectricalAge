@@ -1,10 +1,7 @@
 package mods.eln.sixnode.TreeResinCollector;
 
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.Utils;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.block.Block;
@@ -37,6 +34,8 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
                 emptyS = fill.getFloat("emptyS");
             }
         }
+
+        voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
     void draw(float factor) {
@@ -52,7 +51,7 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 
     @Override
     public boolean use2DIcon() {
-        return false;
+        return true;
     }
 
     @Override
@@ -63,7 +62,7 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
@@ -73,15 +72,16 @@ public class TreeResinCollectorDescriptor extends SixNodeDescriptor {
 
     @Override
     public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         if (type == ItemRenderType.INVENTORY) {
-            GL11.glScalef(2f, 2f, 2f);
+            super.renderItem(type, item, data);
+        } else {
+            draw(0.0f);
         }
-        draw(0.0f);
     }
 
     @Override
