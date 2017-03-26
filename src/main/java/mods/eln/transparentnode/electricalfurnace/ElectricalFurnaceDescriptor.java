@@ -2,6 +2,7 @@ package mods.eln.transparentnode.electricalfurnace;
 
 import mods.eln.Eln;
 import mods.eln.misc.IFunction;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.wiki.Data;
@@ -26,6 +27,8 @@ public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor {
         this.PfT = PfT;
         this.thermalPlostfT = thermalPlostfT;
         this.thermalC = thermalC;
+
+        voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
     public void applyTo(ThermalLoad load) {
@@ -51,17 +54,21 @@ public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor {
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
     public boolean use2DIcon() {
-        return false;
+        return true;
     }
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        Eln.obj.draw("ElectricFurnace", "furnace");
+        if (type == ItemRenderType.INVENTORY) {
+            super.renderItem(type, item, data);
+        } else {
+            Eln.obj.draw("ElectricFurnace", "furnace");
+        }
     }
 
     @Override
