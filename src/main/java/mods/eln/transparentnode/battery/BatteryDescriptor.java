@@ -141,7 +141,6 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
         }
 
         voltageLevelColor = VoltageLevelColor.fromVoltage(electricalU);
-        changeDefaultIcon("battery");
     }
 
     @Override
