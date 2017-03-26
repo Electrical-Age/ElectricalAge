@@ -1664,7 +1664,6 @@ public class Eln {
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
             desc.cameraOpt = false;
-            desc.useIcon(true);
         }
         {
             subId = 13;
@@ -1680,7 +1679,6 @@ public class Eln {
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
             desc.cameraOpt = false;
-            desc.useIcon(true);
         }
 
         // TODO: Modern street light.
