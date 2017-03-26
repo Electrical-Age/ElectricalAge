@@ -29,7 +29,11 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
         }
         this.signalSource = signalSource;
 
-        voltageLevelColor = VoltageLevelColor.Neutral;
+        if (signalSource) {
+          voltageLevelColor = VoltageLevelColor.SignalVoltage;
+        } else {
+            voltageLevelColor = VoltageLevelColor.Neutral;
+        }
     }
 
     public boolean isSignalSource() {
