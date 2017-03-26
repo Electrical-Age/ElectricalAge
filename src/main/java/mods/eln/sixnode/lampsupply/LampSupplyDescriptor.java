@@ -1,17 +1,13 @@
 package mods.eln.sixnode.lampsupply;
 
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -36,13 +32,16 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
             base = obj.getPart("base");
             window = obj.getPart("window");
         }
-        if (window != null)
+        if (window != null) {
             windowOpenAngle = window.getFloat("windowOpenAngle");
+        }
+
+        voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
     @Override
     public boolean use2DIcon() {
-        return false;
+        return true;
     }
 
     @Override
@@ -70,7 +69,7 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
@@ -80,16 +79,16 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
 
     @Override
     public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         if (type == ItemRenderType.INVENTORY) {
-            GL11.glScalef(1.3f, 1.3f, 1.3f);
-            GL11.glTranslatef(-0.45f, 0.0f, 0f);
+            super.renderItem(type, item, data);
+        } else {
+            draw(1f);
         }
-        draw(1f);
     }
 
     @Override
