@@ -3,6 +3,7 @@ package mods.eln.sixnode.tutorialsign;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -23,6 +24,8 @@ public class TutorialSignDescriptor extends SixNodeDescriptor {
             light = obj.getPart("light");
             halo = obj.getPart("halo");
         }
+
+        voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
     void setupColor(float factor, float alpha) {
@@ -39,7 +42,7 @@ public class TutorialSignDescriptor extends SixNodeDescriptor {
 
     @Override
     public boolean use2DIcon() {
-        return false;
+        return true;
     }
 
     void draw(float factor) {
@@ -63,7 +66,7 @@ public class TutorialSignDescriptor extends SixNodeDescriptor {
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
@@ -73,15 +76,16 @@ public class TutorialSignDescriptor extends SixNodeDescriptor {
 
     @Override
     public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        /*if (type == ItemRenderType.INVENTORY) {
-			GL11.glScalef(2.2f, 2.2f, 2.2f);
-		}*/
-        draw(1f);
+        if (type == ItemRenderType.INVENTORY) {
+			super.renderItem(type, item, data);
+		} else {
+            draw(1f);
+        }
     }
 
     @Override
