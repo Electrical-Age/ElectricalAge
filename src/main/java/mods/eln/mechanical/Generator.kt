@@ -51,6 +51,8 @@ class GeneratorDescriptor(
 
     init {
         thermalLoadInitializer.setMaximalPower(nominalP.toDouble() * (1 - generationEfficiency))
+
+        voltageLevelColor = VoltageLevelColor.VeryHighVoltage
     }
 
     override val obj = obj
