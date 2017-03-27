@@ -21,7 +21,7 @@ class FuelBurnerDescriptor(name: String, val producedHeatPower: Double, val type
     }
 
     init {
-        voltageLevelColor = VoltageLevelColor.Neutral
+        voltageLevelColor = VoltageLevelColor.Thermal
         FuelBurnerDescriptor.descriptors[type] = this
     }
 
