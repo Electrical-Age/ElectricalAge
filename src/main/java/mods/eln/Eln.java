@@ -459,8 +459,8 @@ public class Eln {
         fuelHeatValueFactor = config.get("balancing", "fuelHeatValueFactor", 0.0000675,
             "Factor to apply when converting real word heat values to Minecraft heat values (1mB = 1l).").getDouble();
 
-        Eln.noSymbols = config.get("gameplay", "noSymbols", false).getBoolean();
-        Eln.noVoltageBackground = config.get("gameplay", "noVoltageBackground", false).getBoolean();
+        Eln.noSymbols = config.get("general", "noSymbols", false).getBoolean();
+        Eln.noVoltageBackground = config.get("general", "noVoltageBackground", false).getBoolean();
 
         config.save();
 
