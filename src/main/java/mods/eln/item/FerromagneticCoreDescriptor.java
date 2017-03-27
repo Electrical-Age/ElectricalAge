@@ -2,7 +2,6 @@ package mods.eln.item;
 
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.VoltageLevelColor;
 import mods.eln.sim.ElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -24,7 +23,6 @@ public class FerromagneticCoreDescriptor extends GenericItemUsingDamageDescripto
             feroPart = obj.getPart("fero");
         }
         this.cableMultiplicator = cableMultiplicator;
-        voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
     public void applyTo(ElectricalLoad load) {
