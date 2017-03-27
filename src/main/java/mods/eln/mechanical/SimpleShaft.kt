@@ -25,6 +25,10 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     // (Otherwise it'll stick to 100% volume.)
     internal open val sound: String? = null
 
+    init {
+        voltageLevelColor = VoltageLevelColor.Neutral
+    }
+
     open fun draw(angle: Double) {
         for (part in static) {
             part.draw()
