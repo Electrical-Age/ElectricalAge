@@ -62,13 +62,17 @@ public class GridDescriptor extends TransparentNodeDescriptor {
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        objItemScale(obj);
-        Direction.ZN.glRotateXnRef();
-        GL11.glPushMatrix();
-        GL11.glTranslatef(0, -1, 0);
-        GL11.glScalef(0.6f, 0.6f, 0.6f);
-        draw(0);
-        GL11.glPopMatrix();
+        if (type == ItemRenderType.INVENTORY) {
+            super.renderItem(type, item, data);
+        } else {
+            GL11.glPushMatrix();
+            objItemScale(obj);
+            Direction.ZN.glRotateXnRef();
+            GL11.glTranslatef(0, -1, 0);
+            GL11.glScalef(0.6f, 0.6f, 0.6f);
+            draw(0);
+            GL11.glPopMatrix();
+        }
     }
 
     @Override
@@ -79,12 +83,12 @@ public class GridDescriptor extends TransparentNodeDescriptor {
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
                                          ItemRendererHelper helper) {
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
     public boolean use2DIcon() {
-        return false;
+        return true;
     }
 
     public boolean rotationIsFixed() {

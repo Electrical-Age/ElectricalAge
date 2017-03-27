@@ -14,6 +14,7 @@ public enum VoltageLevelColor {
     MediumVoltage("medium"),
     HighVoltage("high"),
     VeryHighVoltage("veryhigh"),
+    Grid("grid"),
     Thermal("thermal");
 
     VoltageLevelColor(final String voltageLevel) {
