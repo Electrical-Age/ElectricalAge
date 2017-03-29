@@ -21,7 +21,7 @@ public class ElectricalPoleDescriptor extends GridDescriptor {
             static_parts.add(obj.getPart("foot"));
         }
 
-        changeDefaultIcon(name.replaceAll("/", ""));
+        setDefaultIcon(name.replaceAll("/", ""));
         voltageLevelColor = VoltageLevelColor.Grid;
     }
 }

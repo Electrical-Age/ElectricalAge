@@ -54,7 +54,7 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
         super(name, ElectricalSwitchElement.class, ElectricalSwitchRender.class);
 
         if (!Eln.noSymbols) {
-            changeDefaultIcon("switch");
+            setDefaultIcon("switch");
         }
 
         this.nominalVoltage = nominalVoltage;

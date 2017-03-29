@@ -27,11 +27,11 @@ public class GenericItemBlockUsingDamageDescriptor {
     }
 
     public GenericItemBlockUsingDamageDescriptor(String name, String iconName) {
-        changeDefaultIcon(iconName);
+        setDefaultIcon(iconName);
         this.name = name;
     }
 
-    public void changeDefaultIcon(String name) {
+    public void setDefaultIcon(String name) {
         String iconName = name.replaceAll(" ", "").toLowerCase();
 
         if (Eln.noSymbols &&

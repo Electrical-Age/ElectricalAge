@@ -38,7 +38,7 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
         double nominalU, double nominalP, double nominalLight, double nominalLife,
         double vegetableGrowRate) {
         super(name);
-        changeDefaultIcon(iconName);
+        setDefaultIcon(iconName);
         this.type = type;
         this.socket = socket;
         this.nominalU = nominalU;

@@ -35,11 +35,11 @@ public class GenericItemUsingDamageDescriptor {
     }
 
     public GenericItemUsingDamageDescriptor(String name, String iconName) {
-        this.IconName = "eln:" + iconName.replaceAll(" ", "").toLowerCase();
+        setDefaultIcon(iconName);
         this.name = name;
     }
 
-    public void changeDefaultIcon(String name) {
+    public void setDefaultIcon(String name) {
         this.IconName = "eln:" + name.replaceAll(" ", "").toLowerCase();
     }
 
