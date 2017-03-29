@@ -68,11 +68,6 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     void draw(DataLogs log, Direction side, LRDU front, int objPosMX, int objPosMZ) {
         if (onFloor || side.isY()) front.glRotateOnX();
         if (!onFloor && side.isNotY()) GL11.glRotatef(90, 1, 0, 0);

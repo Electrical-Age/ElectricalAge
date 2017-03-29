@@ -66,7 +66,6 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper) =
         type != IItemRenderer.ItemRenderType.INVENTORY
-    override fun use2DIcon() = true
 }
 
 open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : TransparentNodeElementRender(entity, desc) {

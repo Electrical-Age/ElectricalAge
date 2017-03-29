@@ -89,11 +89,6 @@ public class BrushDescriptor extends GenericItemUsingDamageDescriptor {
     }
 
     @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
-    @Override
     public boolean handleRenderType(ItemStack item, IItemRenderer.ItemRenderType type) {
         return type == IItemRenderer.ItemRenderType.INVENTORY;
     }

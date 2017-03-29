@@ -57,11 +57,6 @@ public class ElectricalMathDescriptor extends SixNodeDescriptor implements IPlug
         Data.addSignal(newItemStack());
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     void draw(float open, boolean ledOn[]) {
         if (main != null) main.draw();
         if (door != null) door.draw((1f - open) * alphaOff, 0f, 1f, 0f);

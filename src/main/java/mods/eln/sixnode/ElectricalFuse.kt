@@ -40,8 +40,6 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
         Data.addWiring(newItemStack())
     }
 
-    override fun use2DIcon() = true
-
     override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?) = true
 
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?,

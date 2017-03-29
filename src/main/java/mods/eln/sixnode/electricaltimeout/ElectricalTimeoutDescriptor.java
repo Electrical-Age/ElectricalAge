@@ -50,11 +50,6 @@ public class ElectricalTimeoutDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     void draw(float left) {
         if (main != null) main.draw();
         if (rot != null) {

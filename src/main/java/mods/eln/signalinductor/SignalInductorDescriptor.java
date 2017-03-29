@@ -37,11 +37,6 @@ public class SignalInductorDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public boolean use2DIcon() {
-        return false;
-    }
-
-    @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
     }

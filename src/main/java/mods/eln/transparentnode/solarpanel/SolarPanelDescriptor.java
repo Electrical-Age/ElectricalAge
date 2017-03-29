@@ -70,11 +70,6 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
         Data.addEnergy(newItemStack());
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     CableRenderDescriptor cableRender;
     double electricalUmax;
     double electricalPmax;

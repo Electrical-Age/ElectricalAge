@@ -60,11 +60,6 @@ public class ElectricalVuMeterDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     void draw(float factor, float distance, TileEntity entity) {
         if (factor < 0.0) factor = 0.0f;
         if (factor > 1.0) factor = 1.0f;

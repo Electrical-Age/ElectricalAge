@@ -63,11 +63,6 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
         return this;
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     public ElectricalMachineDescriptor setEndSound(SoundCommand endSound) {
         this.endSound = endSound;
         return this;

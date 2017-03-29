@@ -54,7 +54,6 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
     }
 
     override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
-    override fun use2DIcon() = true
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack,
                                        helper: IItemRenderer.ItemRendererHelper) = type != IItemRenderer.ItemRenderType.INVENTORY
 

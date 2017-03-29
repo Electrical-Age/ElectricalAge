@@ -80,8 +80,6 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
         }
     }
 
-    override fun use2DIcon() = true
-
     override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
 
     override fun shouldUseRenderHelper(

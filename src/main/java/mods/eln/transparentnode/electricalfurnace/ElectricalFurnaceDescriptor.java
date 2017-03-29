@@ -58,11 +58,6 @@ public class ElectricalFurnaceDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
-    @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         if (type == ItemRenderType.INVENTORY) {
             super.renderItem(type, item, data);

@@ -51,12 +51,7 @@ public class GenericItemBlockUsingDamageDescriptor {
 
     @SideOnly(value = Side.CLIENT)
     public void updateIcons(IIconRegister iconRegister) {
-        if (use2DIcon())
-            this.iconIndex = iconRegister.registerIcon("eln:" + iconName);
-    }
-
-    public boolean use2DIcon() {
-        return true;
+        this.iconIndex = iconRegister.registerIcon("eln:" + iconName);
     }
 
     public IIcon getIcon() {

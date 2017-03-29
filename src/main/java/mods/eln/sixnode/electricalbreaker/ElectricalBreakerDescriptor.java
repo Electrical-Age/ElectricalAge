@@ -49,11 +49,6 @@ public class ElectricalBreakerDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
-    @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
         return true;
     }

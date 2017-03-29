@@ -47,8 +47,6 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
         voltageLevelColor = VoltageLevelColor.Thermal
     }
 
-    override fun use2DIcon() = true
-
     override fun setParent(item: Item, damage: Int) {
         super.setParent(item, damage)
         Data.addThermal(newItemStack())

@@ -130,11 +130,6 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor {
     String chargeSound = null;
     float chargeVolume = 0;
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     public TeleporterDescriptor setChargeSound(String sound, float volume) {
         chargeSound = sound;
         chargeVolume = volume;

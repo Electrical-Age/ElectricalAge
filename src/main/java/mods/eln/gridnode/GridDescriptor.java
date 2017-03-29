@@ -86,11 +86,6 @@ public class GridDescriptor extends TransparentNodeDescriptor {
         return type != ItemRenderType.INVENTORY;
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     public boolean rotationIsFixed() {
         return false;
     }

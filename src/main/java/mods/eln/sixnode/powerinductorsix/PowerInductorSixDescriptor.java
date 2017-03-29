@@ -54,11 +54,6 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
             return getlValue(core.stackSize);
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     public double getRsValue(IInventory inventory) {
         ItemStack core = inventory.getStackInSlot(PowerInductorSixContainer.coreId);
 

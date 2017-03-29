@@ -108,11 +108,6 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
         Data.addWiring(newItemStack());
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     public void applyTo(ElectricalLoad load) {
         load.setRs(electricalRs);
     }

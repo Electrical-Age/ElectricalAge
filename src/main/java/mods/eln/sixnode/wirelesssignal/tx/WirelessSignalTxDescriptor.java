@@ -30,11 +30,6 @@ public class WirelessSignalTxDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     public void draw() {
         if (main != null) main.draw();
     }
