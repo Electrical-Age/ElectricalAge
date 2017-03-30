@@ -2,6 +2,7 @@ package mods.eln.generic;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import mods.eln.Eln;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -26,12 +27,19 @@ public class GenericItemBlockUsingDamageDescriptor {
     }
 
     public GenericItemBlockUsingDamageDescriptor(String name, String iconName) {
-        this.iconName = "eln:" + iconName.replaceAll(" ", "").toLowerCase();
+        setDefaultIcon(iconName);
         this.name = name;
     }
 
-    public void changeDefaultIcon(String name) {
-        this.iconName = "eln:" + name.replaceAll(" ", "").toLowerCase();
+    public void setDefaultIcon(String name) {
+        String iconName = name.replaceAll(" ", "").toLowerCase();
+
+        if (Eln.noSymbols &&
+            getClass().getClassLoader().getResource("assets/eln/textures/blocks/" + iconName + "-ni.png") != null) {
+            this.iconName = iconName + "-ni";
+        } else {
+            this.iconName = iconName;
+        }
     }
 
     public NBTTagCompound getDefaultNBT() {
@@ -43,12 +51,7 @@ public class GenericItemBlockUsingDamageDescriptor {
 
     @SideOnly(value = Side.CLIENT)
     public void updateIcons(IIconRegister iconRegister) {
-        if (use2DIcon())
-            this.iconIndex = iconRegister.registerIcon(iconName);
-    }
-
-    public boolean use2DIcon() {
-        return true;
+        this.iconIndex = iconRegister.registerIcon("eln:" + iconName);
     }
 
     public IIcon getIcon() {

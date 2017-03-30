@@ -10,7 +10,7 @@ public class RegulatorOnOffDescriptor extends IRegulatorDescriptor {
 
     public RegulatorOnOffDescriptor(String name, String iconName, double hysteresis) {
         super(name);
-        changeDefaultIcon(iconName);
+        setDefaultIcon(iconName);
         this.hysteresis = hysteresis;
     }
 

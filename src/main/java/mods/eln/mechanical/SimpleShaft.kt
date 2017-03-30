@@ -25,6 +25,10 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     // (Otherwise it'll stick to 100% volume.)
     internal open val sound: String? = null
 
+    init {
+        voltageLevelColor = VoltageLevelColor.Neutral
+    }
+
     open fun draw(angle: Double) {
         for (part in static) {
             part.draw()
@@ -46,18 +50,22 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
     }
 
     override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
-        objItemScale(obj)
-        Direction.ZN.glRotateXnRef();
-        GL11.glPushMatrix();
-        GL11.glTranslatef(0f, -1f, 0f);
-        GL11.glScalef(0.6f, 0.6f, 0.6f);
-        draw(0.0);
-        GL11.glPopMatrix();
+        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
+            super.renderItem(type, item, *data)
+        } else {
+            objItemScale(obj)
+            preserveMatrix {
+                Direction.ZN.glRotateXnRef()
+                GL11.glTranslatef(0f, -1f, 0f)
+                GL11.glScalef(0.6f, 0.6f, 0.6f)
+                draw(0.0)
+            }
+        }
     }
 
     override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper) = true
-    override fun use2DIcon() = false
+    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper) =
+        type != IItemRenderer.ItemRenderType.INVENTORY
 }
 
 open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : TransparentNodeElementRender(entity, desc) {

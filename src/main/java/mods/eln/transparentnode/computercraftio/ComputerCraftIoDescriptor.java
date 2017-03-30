@@ -41,11 +41,6 @@ public class ComputerCraftIoDescriptor extends TransparentNodeDescriptor {
         draw(0, 1f);
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return false;
-    }
-
     void draw(int eggStackSize, float powerFactor) {
     }
 }

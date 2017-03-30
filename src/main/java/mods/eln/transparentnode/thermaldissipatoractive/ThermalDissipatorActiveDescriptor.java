@@ -4,6 +4,7 @@ import mods.eln.Eln;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.Utils;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
@@ -54,6 +55,8 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
             main = obj.getPart("main");
             rot = obj.getPart("rot");
         }
+
+        voltageLevelColor = VoltageLevelColor.fromCable(cableDescriptor);
     }
 
     double warmLimit, coolLimit;
@@ -89,25 +92,22 @@ public class ThermalDissipatorActiveDescriptor extends TransparentNodeDescriptor
 
     @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-
         return true;
     }
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
                                          ItemRendererHelper helper) {
-
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        draw(0f);
-    }
-
-    @Override
-    public boolean use2DIcon() {
-        return false;
+        if (type == ItemRenderType.INVENTORY) {
+            super.renderItem(type, item, data);
+        } else {
+            draw(0f);
+        }
     }
 
     @Override

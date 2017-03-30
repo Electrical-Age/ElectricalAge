@@ -50,7 +50,7 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
         }
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
-        changeDefaultIcon("electricalalarm");
+        setDefaultIcon("electricalalarm");
     }
 
     @Override
@@ -76,11 +76,6 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
         if (lightPart != null) {
             UtilsClient.drawLightNoBind(lightPart);
         }
-    }
-
-    @Override
-    public boolean use2DIcon() {
-        return true;
     }
 
     @Override

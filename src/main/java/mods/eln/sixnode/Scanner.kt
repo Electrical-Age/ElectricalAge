@@ -28,6 +28,10 @@ class ScannerDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, Scan
     val main = obj.getPart("main")!!
     val leds = arrayOf("LED_0", "LED_1").map { obj.getPart(it) }.requireNoNulls()
 
+    init {
+        voltageLevelColor = VoltageLevelColor.SignalVoltage
+    }
+
     fun draw(mode: ScanMode) {
         main.draw()
         leds[mode.value.toInt()].draw()

@@ -157,9 +157,10 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY)
+        super.renderItem(type, item, data);
+        if (type == ItemRenderType.INVENTORY) {
             UtilsClient.drawEnergyBare(type, (float) (getEnergy(item) / getEnergyMax(item)));
-        UtilsClient.drawIcon(type, rIcon);
+        }
     }
 
     @Override

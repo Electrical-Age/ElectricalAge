@@ -51,11 +51,6 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
         return serie.getValue(cableCount - 1) / uTemp / uTemp;
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     public double getCValue(IInventory inventory) {
         ItemStack core = inventory.getStackInSlot(PowerCapacitorSixContainer.redId);
         ItemStack diel = inventory.getStackInSlot(PowerCapacitorSixContainer.dielectricId);

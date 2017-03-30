@@ -38,11 +38,6 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     void draw(boolean state, EntitySensorFilterDescriptor filter) {
         if (detector != null) detector.draw();
         if (state) {

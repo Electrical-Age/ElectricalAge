@@ -32,11 +32,6 @@ public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
 
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return false;
-    }
-
     ISerie serie;
     public double dischargeTao;
 

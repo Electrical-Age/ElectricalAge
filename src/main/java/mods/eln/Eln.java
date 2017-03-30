@@ -308,6 +308,9 @@ public class Eln {
     public static double fuelHeatValueFactor = 0.0000675;
     private int plateConversionRatio;
 
+    public static boolean noSymbols = false;
+    public static boolean noVoltageBackground = false;
+
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
 
@@ -455,6 +458,9 @@ public class Eln {
 
         fuelHeatValueFactor = config.get("balancing", "fuelHeatValueFactor", 0.0000675,
             "Factor to apply when converting real word heat values to Minecraft heat values (1mB = 1l).").getDouble();
+
+        Eln.noSymbols = config.get("general", "noSymbols", false).getBoolean();
+        Eln.noVoltageBackground = config.get("general", "noVoltageBackground", false).getBoolean();
 
         config.save();
 
@@ -1658,7 +1664,6 @@ public class Eln {
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
             desc.cameraOpt = false;
-            desc.useIcon(true);
         }
         {
             subId = 13;
@@ -1674,7 +1679,6 @@ public class Eln {
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
             desc.cameraOpt = false;
-            desc.useIcon(true);
         }
 
         // TODO: Modern street light.
@@ -2544,7 +2548,8 @@ public class Eln {
 
             name = TR_NAME(Type.NONE, "Signal Switch");
 
-            ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, ledswitch, true, "switch");
+            ElectricalGateSourceDescriptor desc = new ElectricalGateSourceDescriptor(name, ledswitch, true,
+                Eln.noSymbols ? "signalswitch" : "switch");
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
         }
@@ -4153,7 +4158,7 @@ public class Eln {
                 MVU, 60,// double nominalElectricalU,double
                 // electricalNominalP,
                 1200,// double nominalElectricalCoolingPower,
-                lowVoltageCableDescriptor,// ElectricalCableDescriptor
+                meduimVoltageCableDescriptor,// ElectricalCableDescriptor
                 // cableDescriptor,
                 130, -100,// double warmLimit,double coolLimit,
                 200, 30,// double nominalP,double nominalT,

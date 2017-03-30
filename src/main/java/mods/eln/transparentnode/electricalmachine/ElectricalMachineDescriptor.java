@@ -2,10 +2,7 @@ package mods.eln.transparentnode.electricalmachine;
 
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.gui.GuiLabel;
-import mods.eln.misc.Direction;
-import mods.eln.misc.Recipe;
-import mods.eln.misc.RecipesList;
-import mods.eln.misc.Utils;
+import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ElectricalStackMachineProcess;
@@ -57,16 +54,13 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
         this.thermal = thermal;
         resistorR = nominalU * nominalU / nominalP;
         this.recipe = recipe;
+
+        voltageLevelColor = VoltageLevelColor.fromCable(cable);
     }
 
     public ElectricalMachineDescriptor setRunningSound(String runningSound) {
         this.runningSound = runningSound;
         return this;
-    }
-
-    @Override
-    public boolean use2DIcon() {
-        return false;
     }
 
     public ElectricalMachineDescriptor setEndSound(SoundCommand endSound) {
@@ -137,7 +131,7 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
@@ -147,7 +141,11 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        draw(null, getDefaultHandle(), null, null, 0f, 0f);
+        if (type == ItemRenderType.INVENTORY) {
+            super.renderItem(type, item, data);
+        } else {
+            draw(null, getDefaultHandle(), null, null, 0f, 0f);
+        }
     }
 
     private Object getDefaultHandle() {

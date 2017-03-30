@@ -45,16 +45,16 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
 
     @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
+        return voltageLevelColor != VoltageLevelColor.None;
     }
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return (type == ItemRenderType.INVENTORY) ? false : !use2DIcon();
+        return false;
     }
 
     public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return !use2DIcon();
+        return false;
     }
 
     @Override

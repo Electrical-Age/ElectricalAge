@@ -75,11 +75,6 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
         }
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     void draw(Obj3DPart fero, int priCableNbr, int secCableNbr, boolean hasCasing, float doorOpen) {
         if (main != null) main.draw();
         if (fero != null) {

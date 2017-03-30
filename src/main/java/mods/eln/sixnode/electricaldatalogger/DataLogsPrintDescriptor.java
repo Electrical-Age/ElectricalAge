@@ -33,11 +33,6 @@ public class DataLogsPrintDescriptor extends GenericItemUsingDamageDescriptor {
     }
 
     @Override
-    public boolean use2DIcon() {
-        return false;
-    }
-
-    @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         NBTTagCompound nbt = item.getTagCompound();
         //byte [] logsArray = nbt.getByteArray("logs");

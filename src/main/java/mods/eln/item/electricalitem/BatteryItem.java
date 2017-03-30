@@ -87,9 +87,7 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        if (type == ItemRenderType.INVENTORY)
-            return false;
-        return true;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
@@ -99,9 +97,10 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY)
+        super.renderItem(type, item, data);
+        if (type == ItemRenderType.INVENTORY) {
             UtilsClient.drawEnergyBare(type, (float) (getEnergy(item) / getEnergyMax(item)));
-        UtilsClient.drawIcon(type, iconResource);
+        }
     }
 
     @Override

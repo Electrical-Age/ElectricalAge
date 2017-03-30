@@ -1,6 +1,5 @@
 package mods.eln.item;
 
-import mods.eln.misc.VoltageLevelColor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
@@ -13,7 +12,6 @@ public class OverHeatingProtectionDescriptor extends GenericItemUsingDamageDescr
 
     public OverHeatingProtectionDescriptor(String name) {
         super(name);
-        voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
     @Override

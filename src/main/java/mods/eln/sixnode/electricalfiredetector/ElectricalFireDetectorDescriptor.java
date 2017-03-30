@@ -48,11 +48,6 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
         Data.addSignal(newItemStack());
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     void draw(boolean firePresent) {
         if (detector != null) detector.draw();
         if (led != null) {

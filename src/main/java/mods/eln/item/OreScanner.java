@@ -1,6 +1,5 @@
 package mods.eln.item;
 
-import mods.eln.misc.VoltageLevelColor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
@@ -10,7 +9,6 @@ public class OreScanner extends GenericItemUsingDamageDescriptorUpgrade {
 
     public OreScanner(String name) {
         super(name);
-        voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
     @Override

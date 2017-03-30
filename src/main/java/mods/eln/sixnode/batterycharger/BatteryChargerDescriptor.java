@@ -50,7 +50,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
             pinDistance = Utils.getSixNodePinDistance(main);
         }
 
-        changeDefaultIcon("batterycharger");
+        setDefaultIcon("batterycharger");
         voltageLevelColor = VoltageLevelColor.fromVoltage(nominalVoltage);
     }
 
@@ -76,11 +76,6 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
             }
             idx++;
         }
-    }
-
-    @Override
-    public boolean use2DIcon() {
-        return true;
     }
 
     @Override
