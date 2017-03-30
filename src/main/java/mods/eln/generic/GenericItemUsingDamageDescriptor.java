@@ -60,14 +60,9 @@ public class GenericItemUsingDamageDescriptor {
         list.add(stack);
     }
 
-    public boolean use2DIcon() {
-        return true;
-    }
-
     @SideOnly(value = Side.CLIENT)
     public void updateIcons(IIconRegister iconRegister) {
-        if (use2DIcon())
-            this.iconIndex = iconRegister.registerIcon(IconName);
+        this.iconIndex = iconRegister.registerIcon(IconName);
     }
 
     public IIcon getIcon() {
@@ -127,11 +122,11 @@ public class GenericItemUsingDamageDescriptor {
     }
 
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return voltageLevelColor != VoltageLevelColor.None || !use2DIcon();
+        return voltageLevelColor != VoltageLevelColor.None;
     }
 
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return !use2DIcon();
+        return false;
     }
 
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {

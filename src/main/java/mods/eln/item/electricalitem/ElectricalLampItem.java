@@ -216,9 +216,10 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery {
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY)
-            UtilsClient.drawEnergyBare(type, (float) (getEnergy(item) / getEnergyMax(item)));
         UtilsClient.drawIcon(type, (getLight(item) != 0 && getLightState(item) != 0 ? on : off));
+        if (type == ItemRenderType.INVENTORY) {
+            UtilsClient.drawEnergyBare(type, (float) (getEnergy(item) / getEnergyMax(item)));
+        }
     }
 
     @Override

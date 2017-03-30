@@ -28,7 +28,7 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
 
     @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
+        return voltageLevelColor != VoltageLevelColor.None;
     }
 
     @Override

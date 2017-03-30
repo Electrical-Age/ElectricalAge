@@ -83,10 +83,6 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
         iconResource = new ResourceLocation("eln", "textures/items/x-rayscanner.png");
     }
 
-    public boolean use2DIcon() {
-        return false;
-    }
-
     @Override
     public void onUpdate(ItemStack stack, World world, Entity entity, int par4, boolean par5) {
         if (world.isRemote) return;
@@ -242,10 +238,13 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
     }
 
     @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        if (type == ItemRenderType.INVENTORY)
-            return false;
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
         return true;
+    }
+
+    @Override
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        return type != ItemRenderType.INVENTORY;
     }
 
     /*
@@ -267,31 +266,34 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY)
+        if (type == ItemRenderType.INVENTORY) {
+            super.renderItem(type, item, data);
             UtilsClient.drawEnergyBare(type, (float) (getEnergy(item) / getEnergyMax(item)));
+            return;
+        }
 
         double energy = getEnergy(item);
         byte state = getState(item);
-        short counter = getCounter(item);
 
         GL11.glPushMatrix();
         Entity e;
 
         switch (type) {
             case ENTITY:
-                e = null;//(Entity)data[1];
+                e = null;
                 GL11.glTranslatef(0, -0.2f, 0);
                 GL11.glRotatef(90, 0, 0, 1);
                 break;
+
             case EQUIPPED:
                 e = (Entity) data[1];
-                //GL11.glTranslatef(0, 1, 0);
                 GL11.glRotatef(130, 0, 0, 1);
                 GL11.glRotatef(140, 1, 0, 0);
                 GL11.glRotatef(-20, 0, 1, 0);
                 GL11.glScalef(1.6f, 1.6f, 1.6f);
                 GL11.glTranslatef(-0.2f, 0.7f, -0.0f);
                 break;
+
             case EQUIPPED_FIRST_PERSON:
                 e = (Entity) data[1];
                 GL11.glTranslatef(0, 1, 0);
@@ -299,14 +301,15 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
                 GL11.glRotatef(35, 1, 0, 0);
                 GL11.glTranslatef(0.0f, 1, -0.2f);
                 break;
+
             case INVENTORY:
-                UtilsClient.drawIcon(type, iconResource);
                 GL11.glPopMatrix();
                 return;
 
             case FIRST_PERSON_MAP:
-                e = null;//(Entity)data[0];
+                e = null;
                 break;
+
             default:
                 e = null;
                 break;
