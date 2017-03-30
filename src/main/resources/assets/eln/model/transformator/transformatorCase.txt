@@ -5,7 +5,12 @@
 # =============================================
 # Objects visible when non-cased (standard)
 
-o Door
+o DoorR
+f originX -0.37835
+f originY 0.5829
+f originZ 0.49915
+
+o DoorL
 f originX -0.38618
-f originY 0.0
-f originZ 0.49296
+f originY 0.5829
+f originZ -0.49296
