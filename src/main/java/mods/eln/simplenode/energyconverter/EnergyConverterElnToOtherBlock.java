@@ -17,8 +17,7 @@ public class EnergyConverterElnToOtherBlock extends SimpleNodeBlock {
 
     private EnergyConverterElnToOtherDescriptor descriptor;
 
-    private IIcon elnIcon, eln2Icon;
-    private IIcon sideIcon;
+    private IIcon elnIcon, eln2Icon, sideIcon, tbIcon;
 
     public EnergyConverterElnToOtherBlock(EnergyConverterElnToOtherDescriptor descriptor) {
         super(Material.packedIce);
@@ -43,28 +42,24 @@ public class EnergyConverterElnToOtherBlock extends SimpleNodeBlock {
         Direction s = Direction.fromIntMinecraftSide(side);
         if (e == null) return sideIcon;
         if (e.front == null) return sideIcon;
-        if (e.front == s) return getElnIcon(side);
+        if (e.front == s) return elnIcon;
         if (e.front.back() == s) return blockIcon;
         return sideIcon;
     }
 
     public IIcon getIcon(int side, int meta) {
         Direction s = Direction.fromIntMinecraftSide(side);
-        if (s == Direction.XP) return getElnIcon(side);
+        if (s == Direction.XP) return elnIcon;
         if (s == Direction.XN) return blockIcon;
+		if (s == Direction.YN || s == Direction.YP) return tbIcon;
         return sideIcon;
-    }
-
-    IIcon getElnIcon(int side) {
-        if (side == 2 || side == 5) return eln2Icon;
-        return elnIcon;
     }
 
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister register) {
-        this.blockIcon = register.registerIcon("eln:elntoic2lvu_ic2");
-        this.elnIcon = register.registerIcon("eln:elntoic2lvu_eln");
-        this.eln2Icon = register.registerIcon("eln:elntoic2lvu_eln2");
-        this.sideIcon = register.registerIcon("eln:elntoic2lvu_side");
+        this.blockIcon = register.registerIcon("eln:elntootherlvu_other");
+        this.elnIcon = register.registerIcon("eln:elntootherlvu_eln");
+        this.sideIcon = register.registerIcon("eln:elntootherlvu_side");
+		this.tbIcon = register.registerIcon("eln:elntootherlvu_tb");
     }
 }
