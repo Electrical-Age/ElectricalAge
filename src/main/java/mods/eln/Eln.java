@@ -25,6 +25,7 @@ import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
 import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
 import mods.eln.i18n.I18N;
+import mods.eln.integration.minetweaker.MinetweakerIntegration;
 import mods.eln.item.*;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
 import mods.eln.item.electricalitem.*;
@@ -957,6 +958,9 @@ public class Eln {
 
         serverEventListener = new ServerEventListener();
 
+		if(Loader.isModLoaded("MineTweaker3")){
+			MinetweakerIntegration.instance.initialize();
+		}
     }
 
 	/*
