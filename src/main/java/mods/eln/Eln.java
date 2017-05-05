@@ -25,6 +25,7 @@ import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
 import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
 import mods.eln.i18n.I18N;
+import mods.eln.integration.minetweaker.MinetweakerIntegration;
 import mods.eln.item.*;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
 import mods.eln.item.electricalitem.*;
@@ -957,6 +958,9 @@ public class Eln {
 
         serverEventListener = new ServerEventListener();
 
+		if(Loader.isModLoaded("MineTweaker3")){
+			MinetweakerIntegration.instance.initialize();
+		}
     }
 
 	/*
@@ -2851,7 +2855,7 @@ public class Eln {
     }
 
     private ElectricalFurnaceDescriptor electricalFurnace;
-    private RecipesList maceratorRecipes = new RecipesList();
+    public RecipesList maceratorRecipes = new RecipesList();
 
     private void registerMacerator(int id) {
         int subId, completId;
@@ -2888,8 +2892,8 @@ public class Eln {
         }
     }
 
-    private RecipesList compressorRecipes = new RecipesList();
-    private RecipesList plateMachineRecipes = new RecipesList();
+    public RecipesList compressorRecipes = new RecipesList();
+    public RecipesList plateMachineRecipes = new RecipesList();
 
     private void registerPlateMachine(int id) {
 
@@ -2993,7 +2997,7 @@ public class Eln {
         }
     }
 
-    private RecipesList magnetizerRecipes = new RecipesList();
+    public RecipesList magnetizerRecipes = new RecipesList();
 
     private void registerMagnetizer(int id) {
 
