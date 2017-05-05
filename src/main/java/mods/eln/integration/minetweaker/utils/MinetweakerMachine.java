@@ -16,7 +16,7 @@ public class MinetweakerMachine {
 
 	public static MinetweakerMachine MACERATOR = new MinetweakerMachine(Eln.instance.maceratorRecipes, "Adding Macerator Recipe", "Removing Macerator Recipe");
 	public static MinetweakerMachine COMPRESSOR = new MinetweakerMachine(Eln.instance.compressorRecipes, "Adding Compressor Recipe", "Removing Compressor Recipe");
-	public static MinetweakerMachine MAGNETIZER = new MinetweakerMachine(Eln.instance.magnetiserRecipes, "Adding Magnetizer Recipe", "Removing Magnetizer Recipe");
+	public static MinetweakerMachine MAGNETIZER = new MinetweakerMachine(Eln.instance.magnetizerRecipes, "Adding Magnetizer Recipe", "Removing Magnetizer Recipe");
 	public static MinetweakerMachine PLATEMACHINE = new MinetweakerMachine(Eln.instance.plateMachineRecipes, "Adding Plate Machine Recipe", "Removing Plate Machine Recipe");
 
 	public RecipesList recipes;
