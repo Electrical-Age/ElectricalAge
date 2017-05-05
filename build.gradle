@@ -56,6 +56,8 @@ minecraft {
     // TODO(Baughn): After moving to 1.10, this should be replaced with the shadow plugin,
     // e.g. as used in https://github.com/Emberwalker/Laundarray/blob/master/build.gradle
     srgExtra "PK: org/apache/commons/math3 mods/eln/libs/org/apache/commons/math3"
+    srgExtra "PK: kotlin mods/eln/libs/kotlin"
+    srgExtra "PK: org/jetbrains/annotations mods/eln/libs/annotations"
 
     replaceIn "Version.java"
     replace "@VERSION@", project.version
@@ -67,6 +69,8 @@ minecraft {
 configurations {
     external
     compile.extendsFrom external
+    shade
+    compile.extendsFrom shade
 }
 
 repositories {
@@ -83,8 +87,8 @@ repositories {
 
 dependencies {
     external files("libs/commons-math3-3.3.jar")
-    external "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
-    external "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    shade "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
+    shade "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "mcp.mobius.waila:Waila:1.5.11-RC2-NONEI_1.7.10:dev"
 }
 
@@ -153,6 +157,12 @@ jar {
     from('src/main/resources/assets/eln/textures') {
         include '**/*.png'
         into 'assets/eln/textures'
+    }
+    
+    configurations.shade.each { dep ->
+        from(project.zipTree(dep)){
+            exclude 'META-INF', 'META-INF/**'
+        }
     }
 }
 
