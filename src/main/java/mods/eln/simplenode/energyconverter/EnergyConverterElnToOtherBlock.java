@@ -44,6 +44,8 @@ public class EnergyConverterElnToOtherBlock extends SimpleNodeBlock {
         if (e.front == null) return sideIcon;
         if (e.front == s) return elnIcon;
         if (e.front.back() == s) return blockIcon;
+        if (e.front.up() == s) return tbIcon;
+        if (e.front.down() == s) return tbIcon;
         return sideIcon;
     }
 
