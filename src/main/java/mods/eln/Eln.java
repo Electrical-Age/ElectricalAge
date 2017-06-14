@@ -970,7 +970,12 @@ public class Eln {
 	/* Remember to use the right event! */
     public void onServerStopped(FMLServerStoppedEvent ev) {
         TutorialSignElement.resetBalise();
-        modbusServer.destroy();
+
+        if (modbusServer != null) {
+            modbusServer.destroy();
+            modbusServer = null;
+        }
+
         LightBlockEntity.observers.clear();
         NodeBlockEntity.clientList.clear();
         TeleporterElement.teleporterList.clear();
