@@ -29,8 +29,7 @@ public class BatteryProcess implements IProcess {
 
     @Override
     public void process(double time) {
-//		Utils.print("*");
-        Q -= voltageSource.getCurrent() * time / QNominal;
+        Q = Math.max(Q - voltageSource.getCurrent() * time / QNominal, 0);
 
         double voltage = computeVoltage();
 
