@@ -81,7 +81,7 @@ repositories {
     }
     maven {
         name = "mobiusstrip"
-        url = "http://mobiusstrip.eu/maven/"
+        url = "http://default.mobiusstrip.eu/maven/"
     }
 }
 
