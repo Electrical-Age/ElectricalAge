@@ -46,7 +46,11 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
             if (battery == null || (energy = battery.getEnergy(batteryStack)) < element.descriptor.PowerComsumption * time * 4) {
                 boolean changed = element.powered;
                 element.powered = false;
-                if (changed) element.needPublish();
+                if (changed) {
+                    element.firePresent = false;
+                    element.needPublish();
+                }
+                return;
             } else {
                 boolean changed = !element.powered;
                 element.powered = true;
@@ -54,8 +58,6 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                 battery.setEnergy(batteryStack, energy - element.descriptor.PowerComsumption * time);
             }
         }
-
-        if (!element.powered) return;
 
         t += time;
         if (t >= element.descriptor.updateInterval) {
