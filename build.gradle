@@ -84,8 +84,8 @@ repositories {
         url = "http://default.mobiusstrip.eu/maven/"
     }
     ivy {
-        name = 'MineTweaker3' 
-        artifactPattern = "http://minetweaker3.powerofbytes.com/download/[module]-[classifier]-[revision].[ext]"
+        name 'MineTweaker3'
+        artifactPattern "http://minetweaker3.powerofbytes.com/download/[module]-[classifier]-[revision].[ext]"
     }
 }
 

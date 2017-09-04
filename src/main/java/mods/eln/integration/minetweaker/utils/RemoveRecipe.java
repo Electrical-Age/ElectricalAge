@@ -1,11 +1,10 @@
 package mods.eln.integration.minetweaker.utils;
 
-import java.util.ArrayList;
-
 import minetweaker.api.item.IIngredient;
 import minetweaker.api.minecraft.MineTweakerMC;
-import mods.eln.Eln;
-import mods.eln.misc.Recipe;
+import mods.eln.api.recipe.Recipe;
+
+import java.util.ArrayList;
 
 
 public class RemoveRecipe extends BasicUndoableAction{
@@ -15,22 +14,27 @@ public class RemoveRecipe extends BasicUndoableAction{
 	public RemoveRecipe(MinetweakerMachine machine, IIngredient input) {
 		super(machine);
 		this.input = input;
-	}
+        this.toRemove = new ArrayList<>();
+    }
 	
 	@Override
 	public void apply() {
-		toRemove = new ArrayList<Recipe>();
-		for (Recipe r : Eln.instance.maceratorRecipes.getRecipes()){
-			if(input.matches(MineTweakerMC.getIItemStack(r.input))){
-				toRemove.add(r);
-			}
-		}
-		machine.recipes.getRecipes().removeAll(toRemove);		
-	}
+        for (Recipe recipe : machine.recipes.getRecipes()) {
+            if (input.matches(MineTweakerMC.getIItemStack(recipe.input))) {
+                toRemove.add(recipe);
+            }
+        }
+        for (Recipe recipe : toRemove) {
+            machine.recipes.removeRecipe(recipe.input);
+        }
+    }
 	
 	@Override
 	public void undo() {
-		machine.recipes.getRecipes().addAll(toRemove);
-	}
+        for (Recipe recipe : toRemove) {
+            machine.recipes.addRecipe(recipe);
+        }
+        toRemove = new ArrayList<>();
+    }
 
 }

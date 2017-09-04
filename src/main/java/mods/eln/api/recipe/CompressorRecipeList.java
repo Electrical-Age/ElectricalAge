@@ -1,9 +1,9 @@
 package mods.eln.api.recipe;
 
-import java.util.ArrayList;
-
 import mods.eln.api.Misc;
 import net.minecraft.item.ItemStack;
+
+import java.util.ArrayList;
 
 public class CompressorRecipeList implements IELNMachineRecipeList {
 	private static RecipesList recipes = (RecipesList) Misc.getRecipeList("compressorRecipes");
@@ -38,8 +38,13 @@ public class CompressorRecipeList implements IELNMachineRecipeList {
 		Recipe recipe = new Recipe(input, output, energy);
 		recipes.addRecipe(recipe);
 	}
-	
-	/**
+
+    public void addRecipe(Recipe recipe) {
+        //Maintain existing checks
+        addRecipe(recipe.input, recipe.output, recipe.energy);
+    }
+
+    /**
 	 * Removes a recipe from the compressor
 	 * @param input an ItemStack representing the input of the recipe
 	 */

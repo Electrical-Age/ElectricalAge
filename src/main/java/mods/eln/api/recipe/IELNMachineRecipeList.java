@@ -16,6 +16,8 @@ public interface IELNMachineRecipeList {
 
     void addRecipe(ItemStack input, ItemStack output, double energy) throws IllegalArgumentException;
 
+    void addRecipe(Recipe recipe);
+
     void removeRecipe(ItemStack input);
 
     void removeRecipeByOutput(ItemStack output);

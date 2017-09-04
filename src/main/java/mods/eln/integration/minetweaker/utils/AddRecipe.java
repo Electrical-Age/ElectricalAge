@@ -1,6 +1,6 @@
 package mods.eln.integration.minetweaker.utils;
 
-import mods.eln.misc.Recipe;
+import mods.eln.api.recipe.Recipe;
 
 public class AddRecipe extends BasicUndoableAction {
 	Recipe recipe;
@@ -17,7 +17,7 @@ public class AddRecipe extends BasicUndoableAction {
 
 	@Override
 	public void undo() {
-		machine.recipes.getRecipes().remove(recipe);
-	}
+        machine.recipes.removeRecipe(recipe.input);
+    }
 
 }

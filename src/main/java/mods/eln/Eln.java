@@ -13,7 +13,6 @@ import cpw.mods.fml.relauncher.Side;
 import mods.eln.api.Utilities;
 import mods.eln.api.recipe.Recipe;
 import mods.eln.api.recipe.RecipesList;
-import mods.eln.packets.*;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
@@ -149,7 +148,6 @@ import mods.eln.transparentnode.turret.TurretDescriptor;
 import mods.eln.transparentnode.waterturbine.WaterTurbineDescriptor;
 import mods.eln.transparentnode.windturbine.WindTurbineDescriptor;
 import mods.eln.wiki.Data;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.command.ICommandManager;
@@ -170,7 +168,6 @@ import net.minecraft.launchwrapper.LogWrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.WorldServer;
-
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
@@ -965,8 +962,8 @@ public class Eln {
         serverEventListener = new ServerEventListener();
 		
 		if(Loader.isModLoaded("MineTweaker3")){
-			MinetweakerIntegration.instance.initialize();
-		}
+            MinetweakerIntegration.INSTANCE.initialize();
+        }
     }
 
 	/*

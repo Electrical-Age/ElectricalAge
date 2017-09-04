@@ -1,5 +1,7 @@
 package mods.eln.api;
 
+import java.lang.reflect.Field;
+
 /**
  * Created by Gregory Maddra on 2016-11-16.
  */
@@ -9,7 +11,9 @@ public class Misc {
         try {
             Class<?> Eln = getEln();
             Object instanceObject = getElnInstance(Eln);
-            return Eln != null ? Eln.getDeclaredField(list).get(instanceObject) : null;
+            Field recipeList = Eln.getDeclaredField(list);
+            recipeList.setAccessible(true);
+            return Eln != null ? recipeList.get(instanceObject) : null;
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }

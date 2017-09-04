@@ -1,9 +1,9 @@
 package mods.eln.api.recipe;
 
-import java.util.ArrayList;
-
 import mods.eln.api.Misc;
 import net.minecraft.item.ItemStack;
+
+import java.util.ArrayList;
 
 public class MaceratorRecipeList implements IELNMachineRecipeList {
 
@@ -42,8 +42,13 @@ public class MaceratorRecipeList implements IELNMachineRecipeList {
 		recipes.addRecipe(recipe);
 		System.out.println("Added recipe to macerator!");
 	}
-	
-	/**
+
+    public void addRecipe(Recipe recipe) {
+        //Maintain existing checks
+        addRecipe(recipe.input, recipe.output, recipe.energy);
+    }
+
+    /**
 	 * Removes a recipe from the macerator
 	 * @param input an ItemStack representing the input of the recipe
 	 */
