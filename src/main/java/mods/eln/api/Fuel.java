@@ -32,7 +32,6 @@ public class Fuel {
 
     /**
      * Add a fuel to the gasoline fuels list (turbine and fuel generator).
-     * Must be called before Eln starts preinit.
      * @param name The name of the fuel in the fuel registry
      * @param heatingValue The energy for 1L of the fuel
      * @return true if the addition succeeded, false otherwise.
@@ -60,7 +59,6 @@ public class Fuel {
 
     /**
      * Add a fuel to the gas fuels list (gas turbine).
-     * Must be called before Eln starts preinit.
      * @param name The name of the fuel in the fuel registry
      * @param heatingValue The energy of the fuel in MJ per cubic meter
      * @return true if the addition succeeded, false otherwise.
@@ -90,8 +88,6 @@ public class Fuel {
 
     /**
      * Add a fuel to the diesels list.
-     * Must be called before Eln starts preinit.
-     *
      * @param name         The name of the fuel in the fuel registry
      * @param heatingValue Energy for 1L of the fuel
      * @return true if the addition succeeded, false otherwise.
@@ -118,4 +114,5 @@ public class Fuel {
 
         return false;
     }
+
 }

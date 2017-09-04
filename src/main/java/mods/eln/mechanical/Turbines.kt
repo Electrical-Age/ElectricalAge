@@ -28,7 +28,7 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
     // How we describe the fluid in the tooltip.
     abstract val fluidDescription: String
     // The fluids actually accepted.
-    abstract val fluidTypes: Array<String>
+    abstract val fluidTypes: () -> Array<String>
     // Width of the efficiency curve.
     // <1 means "Can't be started without power".
     abstract val efficiencyCurve: Float
@@ -37,7 +37,7 @@ abstract class TurbineDescriptor(baseName: String, obj: Obj3D) :
     val optimalRads = absoluteMaximumShaftSpeed * 0.8f
     // Power stats
     val power: List<Double> by lazy {
-        fluidTypes.map { FuelRegistry.heatEnergyPerMilliBucket(it) * fluidConsumption }
+        fluidTypes.invoke().map { FuelRegistry.heatEnergyPerMilliBucket(it) * fluidConsumption }
     }
     val maxFluidPower: Double by lazy {
         power.max() ?: 0.0
@@ -82,7 +82,7 @@ class SteamTurbineDescriptor(baseName: String, obj: Obj3D) :
     // bonus because you're using Electrical Age you crazy person you.
     // This pretty much fills up a VHV line. The generator drag gives us a bit of leeway.
     override val fluidDescription = "steam"
-    override val fluidTypes = FuelRegistry.steamList
+    override val fluidTypes = { FuelRegistry.steamList }
     // Steam turbines can, just barely, be started without power.
     override val efficiencyCurve = 1.1f
     override val sound = "eln:steam_turbine"
@@ -97,7 +97,7 @@ class GasTurbineDescriptor(basename: String, obj: Obj3D) :
     override val fluidConsumption = 4f
     override val fluidDescription = "gasoline"
     // It runs on puns.
-    override val fluidTypes = FuelRegistry.gasolineList + FuelRegistry.gasList
+    override val fluidTypes = { FuelRegistry.gasolineList + FuelRegistry.gasList }
     // Gas turbines are finicky about turbine speed.
     override val efficiencyCurve = 0.5f
     // And need to be spun up before working.
@@ -156,7 +156,7 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     }
 
     init {
-        tank.setFilter(FuelRegistry.fluidListToFluids(desc.fluidTypes))
+        tank.setFilter(FuelRegistry.fluidListToFluids(desc.fluidTypes.invoke()))
         slowProcessList.add(turbineSlowProcess)
         electricalLoadList.add(throttle)
     }
