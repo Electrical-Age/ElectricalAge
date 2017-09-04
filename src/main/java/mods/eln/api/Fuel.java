@@ -2,7 +2,6 @@ package mods.eln.api;
 
 import cpw.mods.fml.common.FMLLog;
 import net.minecraft.item.ItemStack;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -97,7 +96,7 @@ public class Fuel {
      * @param heatingValue Energy for 1L of the fuel
      * @return true if the addition succeeded, false otherwise.
      */
-    public static boolean addDieselFuel(String name, Double heatingValue) throws NotImplementedException {
+    public static boolean addDieselFuel(String name, Double heatingValue) {
         try {
             Class<?> FuelRegistry = Class.forName("mods.eln.fluid.FuelRegistry");
             Field dieselFuels = FuelRegistry.getDeclaredField("dieselFuels");
