@@ -56,7 +56,7 @@ An introduction of git-flow can be found [here](http://nvie.com/posts/a-successf
 [here](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow).
 
 You do not necessarily have to adopt git-flow for yourself in order to contribute to the mod, as long as your changes
- use the branch **"develop"** as a base and the pull request is against the **"development"** branch, we will be able
+ use the branch **"develop"** as a base and the pull request is against the **"develop"** branch, we will be able
   to integrate your changes easily.
 
 #### In short for EA:
