@@ -229,10 +229,10 @@ class PIDRegulator : AnalogFunction() {
 
     internal var Kp = 1.0
     internal var Ki = 0.0
-        set(value) {
-            field = value
-            errorIntegral = 0.0
-        }
+    set(value) {
+        field = value
+        errorIntegral = 0.0
+    }
     internal var Kd = 0.0
 
     private var lastError = 0.0
@@ -240,10 +240,21 @@ class PIDRegulator : AnalogFunction() {
 
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
         val error = (inputs[0] ?: 0.0) - (inputs[1] ?: 0.0)
-        errorIntegral += error * deltaTime
-        val result = Kp * error + Ki * errorIntegral + Kd * (error - lastError) / deltaTime
+        val deltaError = error - lastError
         lastError = error
-        return result
+        errorIntegral += error * deltaTime
+        val result = Kp * error + Ki * errorIntegral + Kd * deltaError / deltaTime
+        if (result > 50.0 || result < 0.0) {
+            val clamp = Math.max(Math.min(result,50.0),0.0)
+            if (Ki > 0) {
+                errorIntegral = (clamp-Kp*error-Kd*deltaError/deltaTime)/Ki
+            } else {
+                errorIntegral = clamp
+            }
+            return clamp
+        } else {
+            return result
+        }
     }
 
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
@@ -263,6 +274,7 @@ class PIDRegulator : AnalogFunction() {
     override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
         val info = super.getWaila(inputs, output)
         info[I18N.tr("Params")] = "Kp = $Kp, Ki = $Ki, Kd = $Kd"
+        info[I18N.tr("State")] = "Si = $errorIntegral, Sd = $lastError"
         return info
     }
 }
@@ -335,7 +347,7 @@ class PIDRegulatorGui(val render: PIDRegulatorRender) : GuiScreenEln() {
 
         KpBar = newGuiVerticalTrackBar(10, 20, 20, 80)
         KpBar?.setRange(0f, 20f)
-        KpBar?.setStepIdMax(20)
+        KpBar?.setStepIdMax(40)
         KpBar?.value = render.Kp
         KiBar = newGuiVerticalTrackBar(40, 20, 20, 80)
         KiBar?.value = render.Ki
@@ -791,3 +803,8 @@ class FilterGui(private var render: FilterRender) : GuiScreenEln() {
         return GuiHelper(this, 12 + 20, 12 + 50 + 4)
     }
 }
+
+// Local Variables:
+// indent-tabs-mode: nil
+// kotlin-tab-width: 4
+// End:
