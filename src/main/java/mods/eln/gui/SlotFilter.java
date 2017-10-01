@@ -5,11 +5,11 @@ import net.minecraft.item.ItemStack;
 
 public class SlotFilter extends SlotWithSkinAndComment {
 
-    ItemStackFilter[] itemStackFilter;
+    IItemStackFilter[] itemStackFilter;
     int stackLimit;
 
     public SlotFilter(IInventory par1iInventory, int slot, int x, int y,
-                      int stackLimit, ItemStackFilter[] itemStackFilter, SlotSkin skin, String[] comment) {
+                      int stackLimit, IItemStackFilter[] itemStackFilter, SlotSkin skin, String[] comment) {
         super(par1iInventory, slot, x, y, skin, comment);
 
         this.stackLimit = stackLimit;
@@ -21,7 +21,7 @@ public class SlotFilter extends SlotWithSkinAndComment {
      * the armor slots.
      */
     public boolean isItemValid(ItemStack itemStack) {
-        for (ItemStackFilter filter : itemStackFilter) {
+        for (IItemStackFilter filter : itemStackFilter) {
             if (filter.tryItemStack(itemStack))
                 return true;
         }
