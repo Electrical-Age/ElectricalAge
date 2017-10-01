@@ -372,20 +372,23 @@ public class Obj3D {
         if (trySource) {
             final String path = "../src/main/resources/assets/eln/" + filePath;
             try {
-                reader = new BufferedReader(new FileReader(path));
+                return new BufferedReader(new FileReader(path));
             } catch (FileNotFoundException e) {
                 System.out.println(e);
             }
         }
-        if (reader == null) {
-            final String path = "assets/eln/" + filePath;
-            try {
-                InputStream in = getClass().getClassLoader().getResourceAsStream(path);
-                reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-            } catch (Exception e) {
+
+        final String path = "assets/eln/" + filePath;
+        try {
+            InputStream in = getClass().getClassLoader().getResourceAsStream(path);
+            reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+        } catch (Exception e) {
+            // txt files are optional.
+            if (!filePath.endsWith(".txt")) {
                 System.out.println(e);
             }
         }
+
         return reader;
     }
 
