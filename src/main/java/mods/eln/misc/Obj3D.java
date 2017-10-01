@@ -526,6 +526,8 @@ public class Obj3D {
                     String[] words = line.split(" ");
                     if (words[0].startsWith("#")) {
                         // # is a comment - ignore line.
+                    } else if (words.length == 1 && "".equals(words[0])) {
+                        // empty line, ignore.
                     } else if (words[0].equals("o")) {
                         part = nameToPartHash.get(words[1]);
                     } else if (words[0].equals("f")) {
