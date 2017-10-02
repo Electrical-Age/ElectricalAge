@@ -1,5 +1,6 @@
 package mods.eln.item;
 
+import mods.eln.misc.Utils;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.RegulatorThermalLoadToElectricalResistor;
@@ -57,8 +58,8 @@ public class HeatingCorpElement extends GenericItemUsingDamageDescriptorUpgrade 
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         list.add(tr("Nominal:"));
-        list.add("  " + tr("Voltage: %1$V", electricalNominalU));
-        list.add("  " + tr("Power: %1$W", electricalNominalP));
-        list.add("  " + tr("Resistance: %1$Ω", electricalR));
+        list.add("  " + tr("Voltage: %1$V", Utils.plotValue(electricalNominalU)));
+        list.add("  " + tr("Power: %1$W", Utils.plotValue(electricalNominalP)));
+        list.add("  " + tr("Resistance: %1$Ω", Utils.plotValue(electricalR)));
     }
 }

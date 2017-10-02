@@ -3,6 +3,7 @@ package mods.eln.sixnode.electricalcable;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
+import mods.eln.misc.Utils;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -130,7 +131,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
         if (signalWire) {
             Collections.addAll(list, tr("Cable is adapted to conduct\nelectrical signals.").split("\n"));
-            Collections.addAll(list, tr("A signal is electrical information\nwhich must be between 0V and %1$V", Eln.SVU).split("\n"));
+            Collections.addAll(list, tr("A signal is electrical information\nwhich must be between 0V and %1$", Utils.plotVolt(Eln.SVU)).split("\n"));
             list.add(tr("Not adapted to transport power."));
 
 			/*String lol = "";
@@ -145,11 +146,10 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
         } else {
             //list.add("Low resistor => low power lost");
             list.add(tr("Save usage:"));
-            list.add("  " + tr("Voltage: %1$V", (int) electricalNominalVoltage));
-            list.add("  " + tr("Current: %1$A", electricalNominalPower / electricalNominalVoltage));
-            list.add("  " + tr("Power: %1$W", (int) electricalNominalPower));
-            //	list.add("  Power lost : " + (int)(electricalNominalPowerDropFactor * electricalNominalPower) + " W/Block");
-            list.add("  " + tr("Serial resistance: %1$Ω", electricalNominalRs * 2));
+            list.add("  " + tr("Voltage: %1$V", Utils.plotValue(electricalNominalVoltage)));
+            list.add("  " + tr("Current: %1$A", Utils.plotValue(electricalNominalPower / electricalNominalVoltage)));
+            list.add("  " + tr("Power: %1$W", Utils.plotValue(electricalNominalPower)));
+            list.add("  " + tr("Serial resistance: %1$Ω", Utils.plotValue(electricalNominalRs * 2)));
         }
     }
 
