@@ -1294,6 +1294,7 @@ public class Eln {
                 "Miaou !");// description
 
             desc.addToData(false);
+            desc.setDefaultIcon("empty-texture");
             sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
 
         }
@@ -1478,6 +1479,7 @@ public class Eln {
                 "Obselete, must be deleted" // name, description)
             );
             desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
+            desc.setDefaultIcon("empty-texture");
             transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
         }
 
@@ -1499,6 +1501,7 @@ public class Eln {
                 "the battery" // name, description)
             );
             desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
+            desc.setDefaultIcon("empty-texture");
             transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
         }
     }
@@ -1816,6 +1819,7 @@ public class Eln {
                 name, 20, lowVoltageCableDescriptor
             );
 
+            desc.setDefaultIcon("empty-texture");
             sixNodeItem.addWithoutRegistry(subId + (id << 6), desc);
         }
 
@@ -4974,6 +4978,7 @@ public class Eln {
             name = TR_NAME(Type.NONE, "Data Logger Print");
             DataLogsPrintDescriptor desc = new DataLogsPrintDescriptor(name);
             dataLogsPrintDescriptor = desc;
+            desc.setDefaultIcon("empty-texture");
             sharedItem.addWithoutRegistry(subId + (id << 6), desc);
         }
 

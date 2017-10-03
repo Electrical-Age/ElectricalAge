@@ -37,6 +37,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery {
         this.dischargeMin = dischargeMin;
         this.dischargeMax = dischargeMax;
         this.energyStorage = energyStorage;
+        setDefaultIcon(name + "off");
         on = new ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + "on.png");
         off = new ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + "off.png");
         //	off = new ResourceLocation("eln", "/model/StoneFurnace/all.png");
