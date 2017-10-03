@@ -119,10 +119,14 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
                 }
             }
 
-            if (closestPowerSupply != null && closestPowerSupply!!.element.getChannelState(closestPowerSupply!!.id)) {
+            if (closestPowerSupply != null) {
                 isConnectedToLampSupply = true
-                closestPowerSupply!!.element.addToRp(chargingResistor.r)
-                load.state = closestPowerSupply!!.element.powerLoad.state
+                if (closestPowerSupply!!.element.getChannelState(closestPowerSupply!!.id)) {
+                    closestPowerSupply!!.element.addToRp(chargingResistor.r)
+                    load.state = closestPowerSupply!!.element.powerLoad.state
+                } else {
+                    load.state = 0.0
+                }
             } else {
                 isConnectedToLampSupply = false
                 load.state = 0.0

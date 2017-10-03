@@ -142,7 +142,7 @@ public class BatteryChargerElement extends SixNodeElement {
         if (onBlockActivatedRotate(entityPlayer)) {
             return true;
         } else {
-            return inventory.take(entityPlayer.getCurrentEquippedItem(), this, true, false);
+            return inventory.take(entityPlayer.getCurrentEquippedItem(), this, false, true);
         }
     }
 

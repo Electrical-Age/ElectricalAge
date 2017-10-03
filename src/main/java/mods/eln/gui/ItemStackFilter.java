@@ -8,7 +8,7 @@ import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.List;
 
-public class ItemStackFilter {
+public class ItemStackFilter implements IItemStackFilter {
 
     int itemId;
     int damageMask;
@@ -47,6 +47,7 @@ public class ItemStackFilter {
         return filters;
     }
 
+    @Override
     public boolean tryItemStack(ItemStack itemStack) {// caca1.5.1
         if (Utils.getItemId(itemStack) != itemId)
             return false;

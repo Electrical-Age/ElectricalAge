@@ -37,6 +37,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery {
         this.dischargeMin = dischargeMin;
         this.dischargeMax = dischargeMax;
         this.energyStorage = energyStorage;
+        setDefaultIcon(name + "off");
         on = new ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + "on.png");
         off = new ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + "off.png");
         //	off = new ResourceLocation("eln", "/model/StoneFurnace/all.png");
@@ -153,9 +154,9 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery {
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
-        list.add(tr("Discharge power: %1$W", (int) dischargeMin));
+        list.add(tr("Discharge power: %1$W", Utils.plotValue(dischargeMin)));
         if (itemStack != null) {
-            list.add(tr("Stored Energy: %1$J (%2$%)", getEnergy(itemStack),
+            list.add(tr("Stored Energy: %1$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
                 (int) (getEnergy(itemStack) / energyStorage * 100)));
             list.add(tr("State:") + " " + (getLightState(itemStack) != 0 ? tr("On") : tr("Off")));
         }
