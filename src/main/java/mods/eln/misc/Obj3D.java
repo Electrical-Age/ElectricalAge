@@ -372,20 +372,23 @@ public class Obj3D {
         if (trySource) {
             final String path = "../src/main/resources/assets/eln/" + filePath;
             try {
-                reader = new BufferedReader(new FileReader(path));
+                return new BufferedReader(new FileReader(path));
             } catch (FileNotFoundException e) {
                 System.out.println(e);
             }
         }
-        if (reader == null) {
-            final String path = "assets/eln/" + filePath;
-            try {
-                InputStream in = getClass().getClassLoader().getResourceAsStream(path);
-                reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-            } catch (Exception e) {
+
+        final String path = "assets/eln/" + filePath;
+        try {
+            InputStream in = getClass().getClassLoader().getResourceAsStream(path);
+            reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+        } catch (Exception e) {
+            // txt files are optional.
+            if (!filePath.endsWith(".txt")) {
                 System.out.println(e);
             }
         }
+
         return reader;
     }
 
@@ -523,6 +526,8 @@ public class Obj3D {
                     String[] words = line.split(" ");
                     if (words[0].startsWith("#")) {
                         // # is a comment - ignore line.
+                    } else if (words.length == 1 && "".equals(words[0])) {
+                        // empty line, ignore.
                     } else if (words[0].equals("o")) {
                         part = nameToPartHash.get(words[1]);
                     } else if (words[0].equals("f")) {
