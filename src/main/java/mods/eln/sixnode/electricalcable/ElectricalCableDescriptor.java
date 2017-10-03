@@ -149,7 +149,7 @@ public class ElectricalCableDescriptor extends SixNodeDescriptor {
             list.add("  " + tr("Voltage: %1$V", Utils.plotValue(electricalNominalVoltage)));
             list.add("  " + tr("Current: %1$A", Utils.plotValue(electricalNominalPower / electricalNominalVoltage)));
             list.add("  " + tr("Power: %1$W", Utils.plotValue(electricalNominalPower)));
-            list.add("  " + tr("Serial resistance: %1$Ω", Utils.plotValue(electricalNominalRs * 2)));
+            list.add("  " + tr("Serial resistance: %1$\u2126", Utils.plotValue(electricalNominalRs * 2)));
         }
     }
 

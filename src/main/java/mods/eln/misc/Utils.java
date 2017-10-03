@@ -320,7 +320,7 @@ public class Utils {
     }
 
     public static String plotOhm(double value) {
-        return plotValue(value, "Ω ");
+        return plotValue(value, "\u2126 ");
     }
 
     public static String plotOhm(String header, double value) {
