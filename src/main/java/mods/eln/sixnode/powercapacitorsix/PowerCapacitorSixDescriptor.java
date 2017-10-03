@@ -15,8 +15,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
-import java.util.List;
-
 public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
 
     private Obj3D obj;
@@ -102,11 +100,6 @@ public class PowerCapacitorSixDescriptor extends SixNodeDescriptor {
         } else {
             super.renderItem(type, item, data);
         }
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-        super.addInformation(itemStack, entityPlayer, list, par4);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package mods.eln.item;
 
+import mods.eln.misc.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
@@ -25,8 +26,8 @@ public class ElectricalDrillDescriptor extends GenericItemUsingDamageDescriptorU
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         list.add(tr("Nominal:"));
-        list.add("  " + tr("Power: %1$W", nominalPower));
-        list.add("  " + tr("Time per operation: %1$s", operationTime));
-        list.add("  " + tr("Energy per operation: %1$J", OperationEnergy));
+        list.add("  " + tr("Power: %1$W", Utils.plotValue(nominalPower)));
+        list.add("  " + tr("Time per operation: %1$h", operationTime));
+        list.add("  " + tr("Energy per operation: %1$J", Utils.plotValue(OperationEnergy)));
     }
 }
