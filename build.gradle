@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.1.0'
+    ext.kotlin_version = '1.1.51'
     repositories {
         mavenCentral()
         maven {
@@ -37,8 +37,8 @@ group = GROUP
 archivesBaseName = ARCHIVE_NAME
 version = MAJORVERSION + "." + MINORVERSION + "." + REVISION
 
-targetCompatibility = '1.7'
-sourceCompatibility = '1.7'
+targetCompatibility = '1.8'
+sourceCompatibility = '1.8'
 
 sourceSets {
     main {
