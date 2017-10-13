@@ -312,7 +312,7 @@ public class LampSocketElement extends SixNodeElement {
             }
         }
 
-        return acceptingInventory.take(entityPlayer.getCurrentEquippedItem());
+        return acceptingInventory.take(entityPlayer.getCurrentEquippedItem(), this, true, false);
     }
 
     public int getLightValue() {

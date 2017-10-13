@@ -2,6 +2,7 @@ package mods.eln.item.electricalitem;
 
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
+import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -48,10 +49,10 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Charge power: %1$W", (int) chargePower));
-        list.add(tr("Discharge power: %1$W", (int) dischargePower));
+        list.add(tr("Charge power: %1$W", Utils.plotValue(chargePower)));
+        list.add(tr("Discharge power: %1$W", Utils.plotValue(dischargePower)));
         if (itemStack != null) {
-            list.add(tr("Stored energy: %1$J (%2$%)", getEnergy(itemStack),
+            list.add(tr("Stored energy: %1$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
                 (int) (getEnergy(itemStack) / energyStorage * 100)));
         }
     }

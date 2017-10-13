@@ -172,9 +172,9 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Discharge power: %1$W", (int) dischargePower));
+        list.add(tr("Discharge power: %1$W", Utils.plotValue(dischargePower)));
         if (itemStack != null) {
-            list.add(tr("Stored energy: %1$J (%2$%)", getEnergy(itemStack),
+            list.add(tr("Stored energy: %1$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
                 (int) (getEnergy(itemStack) / energyStorage * 100)));
         }
     }
