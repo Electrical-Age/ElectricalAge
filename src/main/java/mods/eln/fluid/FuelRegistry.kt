@@ -12,7 +12,8 @@ object FuelRegistry {
      */
     private val dieselFuels = mapOf(
         "biodiesel" to 32560000.0, // Immersive Engineering, density = 0.88 kg/l, heating value = 37 MJ/kg
-        "heavyoil" to 39100000.0    // Magneticraft, heating value = 39.1 MJ/l
+        "heavyoil" to 39100000.0,  // Magneticraft, heating value = 39.1 MJ/l
+        "creosote" to 21350000.0   // Railcraft, approx; treating as pyrolysis oil
     )
     val dieselList = dieselFuels.keys.toTypedArray()
 
