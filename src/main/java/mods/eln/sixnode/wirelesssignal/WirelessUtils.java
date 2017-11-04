@@ -4,6 +4,7 @@ import mods.eln.misc.Coordonate;
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
+import net.minecraft.world.World;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -178,9 +179,12 @@ public class WirelessUtils {
                 c.z = (int) vz;
                 if (c.getBlockExist()) {
                     Block b = c.getBlock();
-                    if (b != Blocks.air && b.isOpaqueCube()) {
-                        virtualDistance += 2.0;
-                    }
+                    World w = c.world();
+
+                    virtualDistance +=
+                        b.isOpaqueCube() &&
+                        !b.isAir(w, c.x, c.y, c.z) ?
+                        2.0 : 0.0;
                 }
             }
         }
