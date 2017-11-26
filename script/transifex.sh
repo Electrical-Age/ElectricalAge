@@ -4,11 +4,15 @@
 #
 # Generate and push the source language file to Transifex.
 # This script is called after every successful build on Travis CI.
-# It relies on $TRANSIFEX_PASSWORD being set in .travis.yml
-# The Transifex client must be installed.
 
 if [ "$TRAVIS_REPO_SLUG" == "Electrical-Age/ElectricalAge" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_BRANCH" == "develop" ]
 then
+  echo "Installing Transifex client"
+  pip install virtualenv
+  virtualenv ~/env
+  source ~/env/bin/activate
+  pip install transifex-client
+
   echo "Generating the latest language source file from the develop branch"
   ./gradlew updateMasterLanguageFile
 
@@ -16,9 +20,8 @@ then
   # Write .transifexrc file
   echo "[https://www.transifex.com]
 hostname = https://www.transifex.com
-password = $TRANSIFEX_PASSWORD
-token =
-username = metc" > ~/.transifexrc
+token = $TRANSIFEX_API_TOKEN
+username = $TRANSIFEX_USER" > ~/.transifexrc
   
   tx push --source --translations -l en_us --no-interactive --skip
 
