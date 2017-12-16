@@ -21,10 +21,10 @@ public class TransformerContainer extends BasicContainer {
 
     public TransformerContainer(EntityPlayer player, IInventory inventory) {
         super(player, inventory, new Slot[]{
-            new SixNodeItemSlot(inventory, primaryCableSlotId, 58, 30, 4, new Class[]{ElectricalCableDescriptor.class},
+            new SixNodeItemSlot(inventory, primaryCableSlotId, 58, 30, 64, new Class[]{ElectricalCableDescriptor.class},
                 SlotSkin.medium,
                 new String[]{tr("Electrical cable slot")}),
-            new SixNodeItemSlot(inventory, secondaryCableSlotId, 100, 30, 4,
+            new SixNodeItemSlot(inventory, secondaryCableSlotId, 100, 30, 64,
                 new Class[]{ElectricalCableDescriptor.class}, SlotSkin.medium,
                 new String[]{tr("Electrical cable slot")}),
             new GenericItemUsingDamageSlot(inventory, ferromagneticSlotId, 58 + (100 - 58) / 2, 30, 1,

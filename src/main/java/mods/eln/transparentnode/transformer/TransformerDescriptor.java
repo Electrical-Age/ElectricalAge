@@ -83,22 +83,22 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
             fero.draw();
             if (priCableNbr != 0) {
                 GL11.glPushMatrix();
-                float y = (priCableNbr - 1) * 1f / 16f;
-                GL11.glTranslatef(0f, -y, 0f);
+                float separation = 0.5f / (priCableNbr + 1);
+                GL11.glTranslatef (0f, separation-4/16f, 0f);
                 for (int idx = 0; idx < priCableNbr; idx++) {
                     sbire.draw();
-                    GL11.glTranslatef(0f, 2f / 16f, 0f);
+                    GL11.glTranslatef (0f, separation, 0f);
                 }
                 GL11.glPopMatrix();
             }
             if (secCableNbr != 0) {
                 GL11.glPushMatrix();
                 GL11.glRotatef(180, 0f, 1f, 0f);
-                float y = (secCableNbr - 1) * 1f / 16f;
-                GL11.glTranslatef(0f, -y, 0f);
+                float separation = 0.5f / (secCableNbr + 1);
+                GL11.glTranslatef (0f, separation-4/16f, 0f);
                 for (int idx = 0; idx < secCableNbr; idx++) {
                     sbire.draw();
-                    GL11.glTranslatef(0f, 2f / 16f, 0f);
+                    GL11.glTranslatef (0f, separation, 0f);
                 }
                 GL11.glPopMatrix();
             }
