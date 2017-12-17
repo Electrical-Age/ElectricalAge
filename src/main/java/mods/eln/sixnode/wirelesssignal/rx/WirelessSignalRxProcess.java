@@ -32,8 +32,8 @@ public class WirelessSignalRxProcess implements IProcess, INBTTReady {
         if (sleepTimer < 0) {
             sleepTimer += Utils.rand(1.2, 2);
 
-            IWirelessSignalSpot spot = WirelessUtils.buildSpot(rx.getCoordonate(), rx.channel, 0);
-            WirelessUtils.getTx(spot, txSet, txStrength);
+            IWirelessSignalSpot spot = WirelessUtils.INSTANCE.buildSpot(rx.getCoordonate(), rx.channel, 0);
+            WirelessUtils.INSTANCE.getTx(spot, txSet, txStrength);
         }
 
         HashSet<IWirelessSignalTx> txs = txSet.get(rx.channel);

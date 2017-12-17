@@ -144,8 +144,8 @@ public class LampSupplyElement extends SixNodeElement {
             if (sleepTimer < 0) {
                 sleepTimer += Utils.rand(1.2, 2);
 
-                IWirelessSignalSpot spot = WirelessUtils.buildSpot(LampSupplyElement.this.getCoordonate(), null, 0);
-                WirelessUtils.getTx(spot, txSet, txStrength);
+                IWirelessSignalSpot spot = WirelessUtils.INSTANCE.buildSpot(LampSupplyElement.this.getCoordonate(), null, 0);
+                WirelessUtils.INSTANCE.getTx(spot, txSet, txStrength);
             }
 
 

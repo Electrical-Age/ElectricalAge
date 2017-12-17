@@ -77,10 +77,10 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
 
     double wirelessRead(String channel, String aggregatorName) {
         if (spot == null) {
-            spot = WirelessUtils.buildSpot(coordonate, null, 0);
+            spot = WirelessUtils.INSTANCE.buildSpot(coordonate, null, 0);
             txSet.clear();
             txStrength.clear();
-            WirelessUtils.getTx(spot, txSet, txStrength);
+            WirelessUtils.INSTANCE.getTx(spot, txSet, txStrength);
             spotTimeout = Utils.rand(1, 2);
         }
 

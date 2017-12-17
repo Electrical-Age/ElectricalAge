@@ -29,7 +29,7 @@ public class WirelessSignalRepeaterProcess implements IProcess, IWirelessSignalS
         if (sleepTimer < 0) {
             sleepTimer += Utils.rand(1.2, 2);
 
-            spot = WirelessUtils.buildSpot(rx.getCoordonate(), null, rx.descriptor.range);
+            spot = WirelessUtils.INSTANCE.buildSpot(rx.getCoordonate(), null, rx.descriptor.range);
 
             if (boot) {
                 boot = false;

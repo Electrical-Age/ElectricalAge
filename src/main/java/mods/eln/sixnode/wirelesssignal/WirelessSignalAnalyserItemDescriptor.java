@@ -28,10 +28,10 @@ public class WirelessSignalAnalyserItemDescriptor extends GenericItemUsingDamage
         Coordonate c = new Coordonate(x, y, z, world);
         c.move(dir);
 
-        WirelessSignalSpot spot = WirelessUtils.buildSpot(c, null, 0);
+        WirelessSignalSpot spot = WirelessUtils.INSTANCE.buildSpot(c, null, 0);
         HashMap<String, HashSet<IWirelessSignalTx>> txSet = new HashMap<String, HashSet<IWirelessSignalTx>>();
         HashMap<IWirelessSignalTx, Double> txStrength = new HashMap<IWirelessSignalTx, Double>();
-        WirelessUtils.getTx(spot, txSet, txStrength);
+        WirelessUtils.INSTANCE.getTx(spot, txSet, txStrength);
 
         BiggerAggregator aggregator = new BiggerAggregator();
 

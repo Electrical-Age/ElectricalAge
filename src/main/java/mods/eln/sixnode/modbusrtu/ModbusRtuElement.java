@@ -104,8 +104,8 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
             if (sleepTimer < 0) {
                 sleepTimer += Utils.rand(1.2, 2);
 
-                IWirelessSignalSpot spot = WirelessUtils.buildSpot(getCoordonate(), null, 0);
-                WirelessUtils.getTx(spot, txSet, txStrength);
+                IWirelessSignalSpot spot = WirelessUtils.INSTANCE.buildSpot(getCoordonate(), null, 0);
+                WirelessUtils.INSTANCE.getTx(spot, txSet, txStrength);
             }
 
             for (ServerWirelessRxStatus rx : wirelessRxStatusList.values()) {
