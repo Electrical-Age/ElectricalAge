@@ -110,6 +110,7 @@ import mods.eln.sixnode.tutorialsign.TutorialSignDescriptor;
 import mods.eln.sixnode.tutorialsign.TutorialSignElement;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
 import mods.eln.sixnode.wirelesssignal.WirelessSignalAnalyserItemDescriptor;
+import mods.eln.sixnode.wirelesssignal.WirelessUtils;
 import mods.eln.sixnode.wirelesssignal.repeater.WirelessSignalRepeaterDescriptor;
 import mods.eln.sixnode.wirelesssignal.rx.WirelessSignalRxDescriptor;
 import mods.eln.sixnode.wirelesssignal.source.WirelessSignalSourceDescriptor;
@@ -1019,6 +1020,7 @@ public class Eln {
         //tileEntityDestructor.clear();
         LightBlockEntity.observers.clear();
         WirelessSignalTxElement.channelMap.clear();
+        WirelessUtils.INSTANCE.getRaytraceCache().clear();
         LampSupplyElement.channelMap.clear();
         PowerSocketElement.channelMap.clear();
         playerManager.clear();

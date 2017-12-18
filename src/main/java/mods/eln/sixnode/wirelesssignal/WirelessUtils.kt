@@ -5,6 +5,7 @@ import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement
 import net.minecraft.block.Block
 import net.minecraft.init.Blocks
 import net.minecraft.world.World
+import net.minecraft.world.chunk.Chunk
 
 import java.util.*
 import kotlin.collections.Map.Entry
@@ -154,6 +155,11 @@ object WirelessUtils {
         if (distance > range) return false
         return if (getVirtualDistance(txC, rxC, distance) > range) false else true
     }
+
+    data class WirelessRaytraceCache(val startCoordonate: Coordonate, val endCoordonate: Coordonate, val currentChunk: Chunk)
+
+    public val raytraceCache: Hashtable<WirelessRaytraceCache, Double>
+        get() = raytraceCache
 
     private fun getVirtualDistance(txC: Coordonate, rxC: Coordonate, distance: Double): Double {
         var virtualDistance = distance
