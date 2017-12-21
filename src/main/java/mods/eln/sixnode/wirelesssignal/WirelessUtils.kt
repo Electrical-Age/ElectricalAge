@@ -169,10 +169,17 @@ object WirelessUtils {
         var virtualDistance = distance
         if (distance > 2) {
 
+            val DEBUG = true
+
+            val syncStr = System.nanoTime().toString()
+            val sync = syncStr.substring(syncStr.length - 3)
+
             // generate chunk list
             val chunkList = ArrayList<Chunk>()
             chunkList.add(txC.chunk)
-            chunkList.add(rxC.chunk)
+            if (!chunkList.contains(rxC.chunk)) {
+                chunkList.add(rxC.chunk)
+            }
 
             val tx = txC.x
             val tz = txC.z
@@ -197,7 +204,9 @@ object WirelessUtils {
                 vaz += dfz
                 cord.x = vax.toInt()
                 cord.z = vaz.toInt()
-                chunkList.add(cord.chunk)
+                if (!chunkList.contains(cord.chunk)) {
+                    chunkList.add(cord.chunk)
+                }
                 indx++
             }
 
@@ -206,7 +215,9 @@ object WirelessUtils {
             var chunkLen = 0.0
 
             for (chunk in chunkList) {
-                chunkLen += getDistanceInChunk(txC, rxC, chunk)
+                var thisChunk = getDistanceInChunk(txC, rxC, chunk)
+                if (DEBUG) System.out.println(sync + "   Working on chunk (" + chunk.xPosition.toString() + ", " + chunk.zPosition.toString() + "), output: " + thisChunk.toString())
+                chunkLen += thisChunk
             }
 
 
@@ -251,7 +262,7 @@ object WirelessUtils {
                 idx++
             }
 
-            Utils.println("The total length by the new function is: " + chunkLen.toString() + " and the old length is: " + virtualDistance.toString())
+            if (DEBUG) System.out.println(sync + " The total length by the new function is: " + chunkLen.toString() + " and the old length is: " + virtualDistance.toString())
         }
         return virtualDistance
     }
@@ -274,11 +285,14 @@ object WirelessUtils {
         // if the item is not in cache, we create it
         val cacheDist = raytraceCache[key]
         if (cacheDist != null) {
+            System.out.println("Cache: dist: " + cacheDist.distance + " ttl: " + cacheDist.ttl)
+            System.out.println("CacheTiming: (ttl, tickCtr) " + cacheDist.ttl + ", " + MinecraftServer.getServer().tickCounter)
             // if the cache is older than the ttl timestamp AND the chunk is loaded, then drop the cached object, and let it be re-calculated
             // if the cache is old, but the chunk isn't loaded, this means that nothing has happened in that chunk, and the calculation is still valid.
-            if ((cacheDist.ttl <= MinecraftServer.getServer().tickCounter) && currentChunk.isChunkLoaded) {
+            if ((cacheDist.ttl > MinecraftServer.getServer().tickCounter) && currentChunk.isChunkLoaded) {
                 raytraceCache.remove(key)
             }else{
+                System.out.println("Used Cache!!!")
                 return cacheDist.distance
             }
         }
@@ -379,7 +393,8 @@ object WirelessUtils {
         //TODO: create the proper vritual distance. This will work on top of the betterDistance variable.
 
         // this is the distance that the raytrace is in /this/ chunk for. The getVirtualDistance() function above will add all chunks together, to get the whole distance
-        raytraceCache[key] = WirelessCacheData(virtualDistance, MinecraftServer.getServer().tickCounter + (5 * 20)) // 5 second TTL, with 20TPS nominal
+        raytraceCache.remove(key)
+        raytraceCache[key] = WirelessCacheData(virtualDistance, (MinecraftServer.getServer().tickCounter + (5 * 20))) // 5 second TTL, with 20TPS nominal
         return virtualDistance
     }
 
