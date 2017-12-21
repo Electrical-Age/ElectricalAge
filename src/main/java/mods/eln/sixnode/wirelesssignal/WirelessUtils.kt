@@ -4,11 +4,17 @@ import mods.eln.misc.Coordonate
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement
 import net.minecraft.block.Block
 import net.minecraft.init.Blocks
+import net.minecraft.server.MinecraftServer
 import net.minecraft.world.World
 import net.minecraft.world.chunk.Chunk
 
 import java.util.*
 import kotlin.collections.Map.Entry
+
+data class WirelessRaytraceCache(val startCoordonate: Coordonate, val endCoordonate: Coordonate, val currentChunk: Chunk)
+
+data class WirelessCacheData(val distance: Double, val ttl: Int)
+// the TTL is measured in ticks, compared to MinecraftServer.getServer().tickCounter(). It is cumulative, NOT a countdown timer
 
 object WirelessUtils {
 
@@ -156,24 +162,23 @@ object WirelessUtils {
         return if (getVirtualDistance(txC, rxC, distance) > range) false else true
     }
 
-    data class WirelessRaytraceCache(val startCoordonate: Coordonate, val endCoordonate: Coordonate, val currentChunk: Chunk)
-
-    public val raytraceCache: Hashtable<WirelessRaytraceCache, Double>
-        get() = raytraceCache
+    public val raytraceCache = Hashtable<WirelessRaytraceCache, WirelessCacheData>()
 
     private fun getVirtualDistance(txC: Coordonate, rxC: Coordonate, distance: Double): Double {
         var virtualDistance = distance
         if (distance > 2) {
 
-            //determine what chunks are touched by raytrace
+
+            //determine what chunks are touched by raytrace, by doing effectively the old raytrace calculation on an xz plane for every 8 blocks.
+            //  don't forget to include the txC and rxC chunks. This should create an array to iterate over (in no particular order)
             //for chunks touched by the raytrace:
-            //  run getDistanceInChunk() for each chunk (this can use a cached distance if the chunk is unloaded and rather new)
-            //  -> TODO: Figure out when to clear "old" stuff, and what is considered "old"
+            //  run getDistanceInChunk() for each chunk (this can use a cached distance)
             //  add distances together for each chunk distance to get total virtual distance
             //return virtual distance
 
-            // fallback method - use old code (for now)
-            // later, remove below code in this function entirely.
+            // fallback method - use old code (for now, so that we don't crash)
+            // later, remove below code in this function entirely, once the function below this one is finished
+            // we can also compare the new code to the old code's performance, over time.
 
             var vx: Double
             var vy: Double
@@ -214,74 +219,130 @@ object WirelessUtils {
         return virtualDistance
     }
 
+    private fun pythagoreanHyp2D(a: Double, b: Double):Double {
+        return Math.sqrt(((a * a) + (b * b)))
+    }
 
-    // helper function not used yet, but will be called by getVirtualDistance()
+    private fun pythagoreanHyp3D(a: Double, b: Double, c: Double):Double {
+        // the less well known pythagorean theorem for 3 dimensions
+        return Math.sqrt(((a * a) + (b * b) + (c * c)))
+    }
+
     private fun getDistanceInChunk(txC: Coordonate, rxC: Coordonate, currentChunk: Chunk): Double {
-        // check cache, firstly. This makes it go faaast. :D
-        // we will want to change this to only read from cache for unloaded chunks, and when they are not "expired".
-        val cacheDist = raytraceCache[WirelessRaytraceCache(txC, rxC, currentChunk)]
+
+        // this variable holds the current cache key w.r.t. the arguments
+        val key = WirelessRaytraceCache(txC, rxC, currentChunk)
+
+        // check cache, firstly. This makes it go faaast! :D
+        // if the item is not in cache, we create it
+        val cacheDist = raytraceCache[key]
         if (cacheDist != null) {
-            return cacheDist
-        }
-
-        //cache miss? calculate it! (the rest of the function does this
-
-        var virtualDistance: Double = 0.0 // this is what we will return
-        //break out x,y,z for the start and end locations.
-        val tx = txC.x
-        val ty = txC.y
-        val tz = txC.z
-        val rx = rxC.x
-        val ry = rxC.y
-        val rz = rxC.z
-
-        //simple wthin-chunk calculation, probably faster than below trig code (theoretically, this can have some error)
-        if (txC.chunk == rxC.chunk) {
-            // use old code (for now?), works fine in scenario
-            val dist = txC.trueDistanceTo(rxC)
-            virtualDistance = dist
-            val dx = (tx-rx) / dist
-            val dy = (ty-ry) / dist
-            val dz = (ty-ry) / dist
-            val c = Coordonate()
-            c.setDimention(rxC.dimention)
-            var vx = rx + 0.5
-            var vy = ry + 0.5
-            var vz = rz + 0.5
-
-            var idx = 0
-            // incrementally, for every 1 unit of minecraft distance check the block type contained.
-            // This has the potential to measure twice within a block, or miss a block
-            while (idx < dist - 1) {
-                vx += dx
-                vy += dy
-                vz += dz
-                c.x = vx.toInt()
-                c.y = vy.toInt()
-                c.z = vz.toInt()
-                if (c.blockExist) { // this call causes the chunk to be loaded
-                    val b = c.block // as does this call
-                    val w = c.world()
-                    virtualDistance += if(b.isOpaqueCube && !b.isAir(w, c.x, c.y, c.z))
-                        2.0// if we wanted, we could change this number to be the block hardness we are in :D
-                    else
-                        0.0
-                }
-                idx++
+            // if the cache is older than the ttl timestamp AND the chunk is loaded, then drop the cached object, and let it be re-calculated
+            // if the cache is old, but the chunk isn't loaded, this means that nothing has happened in that chunk, and the calculation is still valid.
+            if ((cacheDist.ttl <= MinecraftServer.getServer().tickCounter) && currentChunk.isChunkLoaded) {
+                raytraceCache.remove(key)
+            }else{
+                return cacheDist.distance
             }
-            // save the raytrace to the cache, for later.
-            raytraceCache[WirelessRaytraceCache(txC, rxC, currentChunk)] = virtualDistance
-            return virtualDistance
         }
 
-        // the rest of the calculations would be across chunk boundaries (and thus, loading chunks to do so), and probably need trigonometrics to do cleanly.
+        //cache miss? calculate it! (the rest of the function does this) This loads the current chunk, so we try not to do it often
 
-        // probably includes entry and exit points as 3 axis doubles at each entry and exit point, then calculate the distance through each block
-        // could be used to replace above code, if higher accuracy desired. Likely, it will be more accurate in general, since it could measure travel through part of a block
-        // error here can be likely mostly caused by double precision limitations, and not a "quick and dirty" method like above,
-        //   since the old code can both hit a block twice, as well as miss blocks entirely (which may not be desired)
+        var virtualDistance: Double = 0.0 // fyi, this is the variable we will return at the end
+        //break out x,y,z for the start and end locations.
+        var tx: Double
+        var ty: Double
+        var tz: Double
+        var rx: Double
+        var ry: Double
+        var rz: Double
+        val chunkX = currentChunk.xPosition
+        val chunkZ = currentChunk.zPosition
+        val chunkXPos = ((chunkX * 16) + 15).toDouble()
+        val chunkXNeg = (chunkX * 16).toDouble()
+        val chunkZPos = ((chunkZ * 16) + 15).toDouble()
+        val chunkZNeg = (chunkZ * 16).toDouble()
+        val xDiff = Math.abs(txC.x - rxC.x).toDouble()
+        val yDiff = Math.abs(txC.y - rxC.y)
+        val zDiff = Math.abs(txC.z - rxC.z).toDouble()
+        val xzHypotenuse = pythagoreanHyp2D(xDiff, zDiff)
 
-        // this is the distance that the raytrace is in /this/ chunk for. The function above will add all chunks together, to get the whole distance
+        val obo = 1 //TODO: Fix this, it may be 0 or 1, I'm not sure. Off by one errors are great!!
+        // it's used 4 times, so I made a variable so that search and replace gets the right ones
+
+        // calculate tx entry point x and z
+        if (txC.chunk == currentChunk) {
+            // the entry point is in this chunk
+            tx = txC.x.toDouble() + 0.5
+            ty = txC.y.toDouble() + 0.5
+            tz = txC.z.toDouble() + 0.5
+        }else{
+            //calcuate the entry point to the chunk from an adjacent chunk
+            if (txC.x.toDouble() < chunkXNeg) {
+                tx = chunkXNeg
+            }else{
+                tx = chunkXPos + obo //TODO: Fix this
+            }
+            if (txC.z.toDouble() < chunkZNeg) {
+                tz = chunkZNeg
+            }else {
+                tz = chunkXPos + obo //TODO: Fix this
+            }
+        }
+
+        //calculate rx entry point x and z
+        if (rxC.chunk == currentChunk) {
+            //the entry point is in this chunk
+            rx = rxC.x.toDouble() + 0.5
+            ry = rxC.y.toDouble() + 0.5
+            rz = rxC.z.toDouble() + 0.5
+        }else{
+            //calcuate the entry point to the chunk from an adjacent chunk
+            if (rxC.x.toDouble() < chunkXNeg) {
+                rx = chunkXNeg
+            }else{
+                rx = chunkXPos + obo //TODO: Fix this
+            }
+            if (rxC.z.toDouble() < chunkZNeg) {
+                rz = chunkZNeg
+            }else {
+                rz = chunkXPos + obo //TODO: Fix this
+            }
+        }
+
+        //tHyp is the hypotenuse on the xz plane that is between the chunk in question and txC
+        //rHyp is the hypotenuse on the xz plane that is between the chunk in question and rxC
+        //cHyp is the tHyp for within the chunk on the xz plane
+        val tHyp = pythagoreanHyp2D(tx, tz) - xzHypotenuse
+        val rHyp = pythagoreanHyp2D(rx, rz) - xzHypotenuse
+        val cHyp = xzHypotenuse - (tHyp - rHyp)
+        val tPercHyp = tHyp / xzHypotenuse
+        val rPercHyp = rHyp / xzHypotenuse
+
+        // calculate y entry/exit point
+        if (yDiff == 0) {
+            ty = txC.y.toDouble()
+            ry = rxC.y.toDouble()
+        }else{
+            if (txC.y < rxC.y) {
+                ty = (tPercHyp * yDiff) + txC.y.toDouble()
+                ry = rxC.y.toDouble() - (rPercHyp * yDiff)
+            }else{
+                ty = txC.y.toDouble() - (tPercHyp * yDiff)
+                ry = (rPercHyp * yDiff) + rxC.y.toDouble()
+            }
+        }
+
+        // betterDistance gives the distance of the hypotenuse in 3D space for this chunk. It does not consider the objects in the chunk
+        val betterDistance = pythagoreanHyp3D(Math.abs(tx - rx), Math.abs(ty - ry), Math.abs(tz - rz))
+        virtualDistance = betterDistance
+
+        // calculate the distance through each block. This will be fun :) Here is where we touch the world itself.
+
+        //TODO: create the proper vritual distance. This will work on top of the betterDistance variable.
+
+        // this is the distance that the raytrace is in /this/ chunk for. The getVirtualDistance() function above will add all chunks together, to get the whole distance
+        raytraceCache[key] = WirelessCacheData(virtualDistance, MinecraftServer.getServer().tickCounter + (5 * 20)) // 5 second TTL, with 20TPS nominal
         return virtualDistance
     }
 
