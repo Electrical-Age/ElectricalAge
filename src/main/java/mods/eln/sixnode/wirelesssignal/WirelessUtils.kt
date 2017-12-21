@@ -1,6 +1,7 @@
 package mods.eln.sixnode.wirelesssignal
 
 import mods.eln.misc.Coordonate
+import mods.eln.misc.Utils
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement
 import net.minecraft.block.Block
 import net.minecraft.init.Blocks
@@ -168,16 +169,50 @@ object WirelessUtils {
         var virtualDistance = distance
         if (distance > 2) {
 
+            // generate chunk list
+            val chunkList = ArrayList<Chunk>()
+            chunkList.add(txC.chunk)
+            chunkList.add(rxC.chunk)
 
-            //determine what chunks are touched by raytrace, by doing effectively the old raytrace calculation on an xz plane for every 8 blocks.
-            //  don't forget to include the txC and rxC chunks. This should create an array to iterate over (in no particular order)
-            //for chunks touched by the raytrace:
-            //  run getDistanceInChunk() for each chunk (this can use a cached distance)
-            //  add distances together for each chunk distance to get total virtual distance
-            //return virtual distance
+            val tx = txC.x
+            val tz = txC.z
+            val rx = rxC.x
+            val rz = rxC.z
+            val xDiff = Math.abs(tx - rx)
+            val zDiff = Math.abs(tz - rz)
+            val xzHyp = pythagoreanHyp2D(xDiff.toDouble(), zDiff.toDouble())
+            val dfx = (tx - rx) / xzHyp
+            val dfz = (tz - rz) / xzHyp
+            var vax = rxC.x + 0.5
+            var vaz = rxC.z + 0.5
 
-            // fallback method - use old code (for now, so that we don't crash)
-            // later, remove below code in this function entirely, once the function below this one is finished
+            val cord = Coordonate()
+            cord.setDimention(rxC.dimention)
+
+            cord.y = 1 // doesn't matter here.
+
+            var indx = 0
+            while (indx < xzHyp - 1) {
+                vax += dfx
+                vaz += dfz
+                cord.x = vax.toInt()
+                cord.z = vaz.toInt()
+                chunkList.add(cord.chunk)
+                indx++
+            }
+
+            // chunk list generated! Now to run getDistanceInChunk() for all chunks!
+
+            var chunkLen = 0.0
+
+            for (chunk in chunkList) {
+                chunkLen += getDistanceInChunk(txC, rxC, chunk)
+            }
+
+
+            //return chunkLen
+
+            // later, remove below code in this function entirely, once the code above works
             // we can also compare the new code to the old code's performance, over time.
 
             var vx: Double
@@ -215,6 +250,8 @@ object WirelessUtils {
                 }
                 idx++
             }
+
+            Utils.println("The total length by the new function is: " + chunkLen.toString() + " and the old length is: " + virtualDistance.toString())
         }
         return virtualDistance
     }
