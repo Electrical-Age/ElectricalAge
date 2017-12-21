@@ -164,6 +164,17 @@ object WirelessUtils {
     private fun getVirtualDistance(txC: Coordonate, rxC: Coordonate, distance: Double): Double {
         var virtualDistance = distance
         if (distance > 2) {
+
+            //determine what chunks are touched by raytrace
+            //for chunks touched by the raytrace:
+            //  run getDistanceInChunk() for each chunk (this can use a cached distance if the chunk is unloaded and rather new)
+            //  -> TODO: Figure out when to clear "old" stuff, and what is considered "old"
+            //  add distances together for each chunk distance to get total virtual distance
+            //return virtual distance
+
+            // fallback method - use old code (for now)
+            // later, remove below code in this function entirely.
+
             var vx: Double
             var vy: Double
             var vz: Double
@@ -200,6 +211,77 @@ object WirelessUtils {
                 idx++
             }
         }
+        return virtualDistance
+    }
+
+
+    // helper function not used yet, but will be called by getVirtualDistance()
+    private fun getDistanceInChunk(txC: Coordonate, rxC: Coordonate, currentChunk: Chunk): Double {
+        // check cache, firstly. This makes it go faaast. :D
+        // we will want to change this to only read from cache for unloaded chunks, and when they are not "expired".
+        val cacheDist = raytraceCache[WirelessRaytraceCache(txC, rxC, currentChunk)]
+        if (cacheDist != null) {
+            return cacheDist
+        }
+
+        //cache miss? calculate it! (the rest of the function does this
+
+        var virtualDistance: Double = 0.0 // this is what we will return
+        //break out x,y,z for the start and end locations.
+        val tx = txC.x
+        val ty = txC.y
+        val tz = txC.z
+        val rx = rxC.x
+        val ry = rxC.y
+        val rz = rxC.z
+
+        //simple wthin-chunk calculation, probably faster than below trig code (theoretically, this can have some error)
+        if (txC.chunk == rxC.chunk) {
+            // use old code (for now?), works fine in scenario
+            val dist = txC.trueDistanceTo(rxC)
+            virtualDistance = dist
+            val dx = (tx-rx) / dist
+            val dy = (ty-ry) / dist
+            val dz = (ty-ry) / dist
+            val c = Coordonate()
+            c.setDimention(rxC.dimention)
+            var vx = rx + 0.5
+            var vy = ry + 0.5
+            var vz = rz + 0.5
+
+            var idx = 0
+            // incrementally, for every 1 unit of minecraft distance check the block type contained.
+            // This has the potential to measure twice within a block, or miss a block
+            while (idx < dist - 1) {
+                vx += dx
+                vy += dy
+                vz += dz
+                c.x = vx.toInt()
+                c.y = vy.toInt()
+                c.z = vz.toInt()
+                if (c.blockExist) { // this call causes the chunk to be loaded
+                    val b = c.block // as does this call
+                    val w = c.world()
+                    virtualDistance += if(b.isOpaqueCube && !b.isAir(w, c.x, c.y, c.z))
+                        2.0// if we wanted, we could change this number to be the block hardness we are in :D
+                    else
+                        0.0
+                }
+                idx++
+            }
+            // save the raytrace to the cache, for later.
+            raytraceCache[WirelessRaytraceCache(txC, rxC, currentChunk)] = virtualDistance
+            return virtualDistance
+        }
+
+        // the rest of the calculations would be across chunk boundaries (and thus, loading chunks to do so), and probably need trigonometrics to do cleanly.
+
+        // probably includes entry and exit points as 3 axis doubles at each entry and exit point, then calculate the distance through each block
+        // could be used to replace above code, if higher accuracy desired. Likely, it will be more accurate in general, since it could measure travel through part of a block
+        // error here can be likely mostly caused by double precision limitations, and not a "quick and dirty" method like above,
+        //   since the old code can both hit a block twice, as well as miss blocks entirely (which may not be desired)
+
+        // this is the distance that the raytrace is in /this/ chunk for. The function above will add all chunks together, to get the whole distance
         return virtualDistance
     }
 

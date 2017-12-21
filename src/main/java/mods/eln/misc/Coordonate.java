@@ -9,6 +9,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.DimensionManager;
 
 public class Coordonate implements INBTTReady {
@@ -293,5 +294,9 @@ public class Coordonate implements INBTTReady {
 
     public Coordonate negate() {
         return new Coordonate(-x, -y, -z, dimention);
+    }
+
+    public Chunk getChunk() {
+        return world().getChunkFromBlockCoords(x, z);
     }
 }
