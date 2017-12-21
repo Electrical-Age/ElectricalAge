@@ -276,6 +276,20 @@ object WirelessUtils {
         return Math.sqrt(((a * a) + (b * b) + (c * c)))
     }
 
+    private fun intersection(p1: Pair<Double, Double>, p2: Pair<Double, Double>, p3: Pair<Double, Double>, p4: Pair<Double, Double>):Pair<Double, Double> {
+        val x1 = p1.first
+        val x2 = p2.first
+        val x3 = p3.first
+        val x4 = p4.first
+        val y1 = p1.second
+        val y2 = p2.second
+        val y3 = p3.second
+        val y4 = p4.second
+        val x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4))
+        val y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4))
+        return Pair(x, y)
+    }
+
     private fun getDistanceInChunk(txC: Coordonate, rxC: Coordonate, currentChunk: Chunk): Double {
 
         // this variable holds the current cache key w.r.t. the arguments
@@ -285,15 +299,13 @@ object WirelessUtils {
         // if the item is not in cache, we create it
         val cacheDist = raytraceCache[key]
         if (cacheDist != null) {
-            System.out.println("Cache: dist: " + cacheDist.distance + " ttl: " + cacheDist.ttl)
-            System.out.println("CacheTiming: (ttl, tickCtr) " + cacheDist.ttl + ", " + MinecraftServer.getServer().tickCounter)
             // if the cache is older than the ttl timestamp AND the chunk is loaded, then drop the cached object, and let it be re-calculated
             // if the cache is old, but the chunk isn't loaded, this means that nothing has happened in that chunk, and the calculation is still valid.
             if ((cacheDist.ttl > MinecraftServer.getServer().tickCounter) && currentChunk.isChunkLoaded) {
                 raytraceCache.remove(key)
             }else{
-                System.out.println("Used Cache!!!")
-                return cacheDist.distance
+                System.out.println("Would use cache")
+                //return cacheDist.distance //disable cache temporarilly
             }
         }
 
@@ -318,48 +330,30 @@ object WirelessUtils {
         val zDiff = Math.abs(txC.z - rxC.z).toDouble()
         val xzHypotenuse = pythagoreanHyp2D(xDiff, zDiff)
 
-        val obo = 1 //TODO: Fix this, it may be 0 or 1, I'm not sure. Off by one errors are great!!
-        // it's used 4 times, so I made a variable so that search and replace gets the right ones
-
         // calculate tx entry point x and z
         if (txC.chunk == currentChunk) {
             // the entry point is in this chunk
             tx = txC.x.toDouble() + 0.5
-            ty = txC.y.toDouble() + 0.5
             tz = txC.z.toDouble() + 0.5
         }else{
             //calcuate the entry point to the chunk from an adjacent chunk
-            if (txC.x.toDouble() < chunkXNeg) {
-                tx = chunkXNeg
-            }else{
-                tx = chunkXPos + obo //TODO: Fix this
-            }
-            if (txC.z.toDouble() < chunkZNeg) {
-                tz = chunkZNeg
-            }else {
-                tz = chunkXPos + obo //TODO: Fix this
-            }
+            val pair = Pair(chunkXPos, chunkXNeg)
         }
 
         //calculate rx entry point x and z
         if (rxC.chunk == currentChunk) {
             //the entry point is in this chunk
             rx = rxC.x.toDouble() + 0.5
-            ry = rxC.y.toDouble() + 0.5
             rz = rxC.z.toDouble() + 0.5
         }else{
             //calcuate the entry point to the chunk from an adjacent chunk
-            if (rxC.x.toDouble() < chunkXNeg) {
-                rx = chunkXNeg
-            }else{
-                rx = chunkXPos + obo //TODO: Fix this
-            }
-            if (rxC.z.toDouble() < chunkZNeg) {
-                rz = chunkZNeg
-            }else {
-                rz = chunkXPos + obo //TODO: Fix this
-            }
+
         }
+
+        tx = 0.0
+        rx = 0.0
+        tz = 0.0
+        rz = 0.0
 
         //tHyp is the hypotenuse on the xz plane that is between the chunk in question and txC
         //rHyp is the hypotenuse on the xz plane that is between the chunk in question and rxC
@@ -383,6 +377,9 @@ object WirelessUtils {
                 ry = (rPercHyp * yDiff) + rxC.y.toDouble()
             }
         }
+
+        System.out.println("txC: (" + tx + ", " + ty + ", " + tz + ")")
+        System.out.println("rxC: (" + rx + ", " + ry + ", " + rz + ")")
 
         // betterDistance gives the distance of the hypotenuse in 3D space for this chunk. It does not consider the objects in the chunk
         val betterDistance = pythagoreanHyp3D(Math.abs(tx - rx), Math.abs(ty - ry), Math.abs(tz - rz))
