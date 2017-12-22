@@ -60,11 +60,11 @@ public class ElectricalSensorDescriptor extends SixNodeDescriptor {
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         if (voltageOnly) {
-            list.add(tr("Measures voltage on cables."));
+            list.add(tr("Measures voltage of cables."));
             list.add(tr("Has a signal output."));
         } else {
-            list.add(tr("Measures electrical values on cables."));
-            list.add(tr("Can measure Voltage/Power/Current"));
+            list.add(tr("Measures electrical values of cables."));
+            list.add(tr("Can measure Voltage, Power, or Current"));
             list.add(tr("Has a signal output."));
         }
     }

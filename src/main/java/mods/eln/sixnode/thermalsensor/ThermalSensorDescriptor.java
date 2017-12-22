@@ -41,12 +41,14 @@ public class ThermalSensorDescriptor extends SixNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         if (temperatureOnly) {
-            list.add(tr("Measures temperature of cables."));
+            list.add(tr("Measures temperature of"));
+            list.add(tr("electrical and thermal cables."));
             list.add(tr("Has a signal output."));
         } else {
-            list.add(tr("Measures thermal values on cables."));
-            list.add(tr("Can measure:"));
-            list.add(tr("  Temperature/Power conducted"));
+            list.add(tr("Measures temperature of"));
+            list.add(tr("thermal cables (only)."));
+            list.add(tr("Can measure Temperature"));
+            list.add(tr("or Power Conducted."));
             list.add(tr("Has a signal output."));
         }
     }
