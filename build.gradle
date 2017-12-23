@@ -90,6 +90,8 @@ dependencies {
     shade "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
     shade "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "mcp.mobius.waila:Waila:1.5.11-RC2-NONEI_1.7.10:dev"
+	// TODO(Grissess): Consider depending on this in lieu of mods/eln/misc/FloatLinear.kt
+	// compile group: "org.apache.commons", name: "commons-math3", version: "3.6.1"
 }
 
 jar {
