@@ -13,7 +13,12 @@ data class Vec3f(var x: Float, var y: Float, var z: Float) {
     }
 
     constructor(c: Coordonate) : this(c.x.toFloat(), c.y.toFloat(), c.z.toFloat())
-    fun toCoordonate(dim: Int = 0) = Coordonate(x.toInt(), y.toInt(), z.toInt(), dim)
+    fun toCoordonate(dim: Int = 0) = Coordonate(
+        Math.floor(x.toDouble()).toInt(),
+        Math.floor(y.toDouble()).toInt(),
+        Math.floor(z.toDouble()).toInt(),
+        dim
+    )
 
     fun dot(other: Vec3f) = x * other.x + y * other.y + z * other.z
 
