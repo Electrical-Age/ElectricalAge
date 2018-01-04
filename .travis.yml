@@ -13,6 +13,8 @@ install:
   - pip install --user 'git+https://github.com/eliben/pycparser@release_v2.14'
   - pip install --user 'requests[security]'
   - pip install --user transifex-client
+  - echo "Preparing FORGE workspace"
+  - gradle setupDecompWorkspace
 
 env:
   global:
