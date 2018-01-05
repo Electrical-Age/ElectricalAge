@@ -261,6 +261,9 @@ class PIDRegulator : AnalogFunction() {
     override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
         val info = super.getWaila(inputs, output)
         info[I18N.tr("Params")] = "Kp = $Kp, Ki = $Ki, Kd = $Kd"
+        if (Eln.wailaEasyMode) {
+            info[I18N.tr("State")] = "Si = ${pid.iStack}"
+        }
         return info
     }
 }
