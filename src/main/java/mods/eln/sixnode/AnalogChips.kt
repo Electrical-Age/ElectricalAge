@@ -332,12 +332,16 @@ class PIDRegulatorGui(val render: PIDRegulatorRender) : GuiScreenEln() {
         super.initGui()
 
         KpBar = newGuiVerticalTrackBar(10, 20, 20, 80)
-        KpBar?.setRange(0f, 20f)
-        KpBar?.setStepIdMax(20)
+        KpBar?.setRange(0f, 50f)
+        KpBar?.setStepIdMax(50)
         KpBar?.value = render.Kp
         KiBar = newGuiVerticalTrackBar(40, 20, 20, 80)
+        KiBar?.setRange(0f, 5f)
+        KiBar?.setStepIdMax(50)
         KiBar?.value = render.Ki
         KdBar = newGuiVerticalTrackBar(70, 20, 20, 80)
+        KdBar?.setRange(0f, 5f);
+        KdBar?.setStepIdMax(50)
         KdBar?.value = render.Kd
     }
 
