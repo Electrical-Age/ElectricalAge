@@ -761,7 +761,7 @@ public class Equation implements IValue, INBTTReady {
             dValue = (error - oldError) / time;
 
             if (iStack > 1) iStack = 1;
-            if (iStack < -1) iStack = -1;
+            if (iStack < 0) iStack = 0;
             oldError = error;
         }
 
