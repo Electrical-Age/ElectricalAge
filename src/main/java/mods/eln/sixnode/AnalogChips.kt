@@ -231,32 +231,17 @@ class PIDRegulator : AnalogFunction() {
 
     internal var Kp = 1.0
     internal var Ki = 0.0
-        set(value) {
-            field = value
-            //errorIntegral = 0.0
-        }
     internal var Kd = 0.0
-
     private val pid = Equation.Pid()
-
-
-    //private var lastError = 0.0
-    //private var errorIntegral = 0.0
 
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
         pid.setOperator(arrayOf(
-            IValue { (inputs[0] ?: 0.0) / 50.0 },
-            IValue { (inputs[1] ?: 0.0) / 50.0 } ,
+            IValue { (inputs[0] ?: 0.0) / Eln.SVU },
+            IValue { (inputs[1] ?: 0.0) / Eln.SVU } ,
             IValue { Kp }, IValue { Ki} , IValue { Kd }
         ))
         pid.process(deltaTime)
-        return 50.0 * pid.value
-
-        /*val error = (inputs[0] ?: 0.0) - (inputs[1] ?: 0.0)
-        errorIntegral += error * deltaTime
-        val result = Kp * error + Ki * errorIntegral + Kd * (error - lastError) / deltaTime
-        lastError = error
-        return result*/
+        return Eln.SVU * pid.value
     }
 
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
@@ -264,7 +249,6 @@ class PIDRegulator : AnalogFunction() {
         Ki = nbt?.getDouble("Ki") ?: 0.0
         Kd = nbt?.getDouble("Kd") ?: 0.0
         pid.readFromNBT(nbt, "pid")
-        //errorIntegral = nbt?.getDouble("errorIntegral") ?: 0.0
     }
 
     override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
@@ -272,7 +256,6 @@ class PIDRegulator : AnalogFunction() {
         nbt?.setDouble("Ki", Ki)
         nbt?.setDouble("Kd", Kd)
         pid.writeToNBT(nbt, "pid")
-        //nbt?.setDouble("errorIntegral", errorIntegral)
     }
 
     override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
