@@ -2895,7 +2895,7 @@ public class Eln {
     }
 
     private ElectricalFurnaceDescriptor electricalFurnace;
-    private RecipesList maceratorRecipes = new RecipesList();
+    public RecipesList maceratorRecipes = new RecipesList();
 
     private void registerMacerator(int id) {
         int subId, completId;
@@ -2932,8 +2932,8 @@ public class Eln {
         }
     }
 
-    private RecipesList compressorRecipes = new RecipesList();
-    private RecipesList plateMachineRecipes = new RecipesList();
+    public RecipesList compressorRecipes = new RecipesList();
+    public RecipesList plateMachineRecipes = new RecipesList();
 
     private void registerPlateMachine(int id) {
 
@@ -3037,7 +3037,7 @@ public class Eln {
         }
     }
 
-    private RecipesList magnetizerRecipes = new RecipesList();
+    public RecipesList magnetiserRecipes = new RecipesList();
 
     private void registerMagnetizer(int id) {
 
@@ -3054,7 +3054,7 @@ public class Eln {
                 LVU * 1.25,// double maximalU,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
                 lowVoltageCableDescriptor,// ElectricalCableDescriptor cable
-                magnetizerRecipes);
+                magnetiserRecipes);
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 
@@ -3073,7 +3073,7 @@ public class Eln {
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
                 meduimVoltageCableDescriptor,// ElectricalCableDescriptor
                 // cable
-                magnetizerRecipes);
+                magnetiserRecipes);
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
 
@@ -6782,9 +6782,9 @@ public class Eln {
     }
 
     private void recipeMagnetizer() {
-        magnetizerRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot, 2),
+        magnetiserRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot, 2),
             new ItemStack[]{findItemStack("Basic Magnet")}, 5000.0));
-        magnetizerRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", 2),
+        magnetiserRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", 2),
             new ItemStack[]{findItemStack("Advanced Magnet")}, 15000.0));
     }
 

@@ -66,7 +66,7 @@ open class GridDescriptor(name: String, private val obj: Obj3D, ElementClass: Cl
         return true
     }
 
-    override fun use2DIcon(): Boolean {
+    fun use2DIcon(): Boolean {
         return false
     }
 
