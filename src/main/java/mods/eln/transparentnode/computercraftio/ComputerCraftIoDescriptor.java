@@ -3,11 +3,8 @@ package mods.eln.transparentnode.computercraftio;
 import mods.eln.misc.Obj3D;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-
-import java.util.List;
 
 public class ComputerCraftIoDescriptor extends TransparentNodeDescriptor {
 
@@ -19,11 +16,6 @@ public class ComputerCraftIoDescriptor extends TransparentNodeDescriptor {
     public void setParent(Item item, int damage) {
         super.setParent(item, damage);
         Data.addSignal(newItemStack());
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-        super.addInformation(itemStack, entityPlayer, list, par4);
     }
 
     @Override
@@ -39,11 +31,6 @@ public class ComputerCraftIoDescriptor extends TransparentNodeDescriptor {
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         draw(0, 1f);
-    }
-
-    @Override
-    public boolean use2DIcon() {
-        return false;
     }
 
     void draw(int eggStackSize, float powerFactor) {

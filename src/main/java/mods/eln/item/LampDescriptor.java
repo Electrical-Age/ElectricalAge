@@ -38,7 +38,7 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
         double nominalU, double nominalP, double nominalLight, double nominalLife,
         double vegetableGrowRate) {
         super(name);
-        changeDefaultIcon(iconName);
+        setDefaultIcon(iconName);
         this.type = type;
         this.socket = socket;
         this.nominalU = nominalU;
@@ -115,8 +115,8 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
 
         list.add(tr("Technology: %1$", type));
         list.add(tr("Range: %1$ blocks", (int) (nominalLight * 15)));
-        list.add(tr("Power: %1$W", (int) nominalP));
-        list.add(tr("Resistance: %1$Ω", getR()));
+        list.add(tr("Power: %1$W", Utils.plotValue(nominalP)));
+        list.add(tr("Resistance: %1$\u2126", Utils.plotValue(getR())));
         list.add(tr("Nominal lifetime: %1$h", serverNominalLife));
         if (itemStack != null) {
             if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey("life"))

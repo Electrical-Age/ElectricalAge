@@ -52,11 +52,6 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
-    @Override
     public void setParent(Item item, int damage) {
         super.setParent(item, damage);
         Data.addSignal(newItemStack());

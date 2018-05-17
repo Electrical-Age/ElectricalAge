@@ -1,5 +1,6 @@
 package mods.eln.sixnode.lampsocket;
 
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -14,8 +15,6 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
 
     public LampSocketType socketType;
     LampSocketObjRender render;
-
-    boolean useIconEnable = false;
 
     public boolean cameraOpt = true;
 
@@ -46,6 +45,8 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
         this.alphaZMax = alphaZMax;
         this.alphaZBoot = alphaZBoot;
         this.render = render;
+
+        voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
     public void setInitialOrientation(float rotateDeg) {
@@ -54,10 +55,6 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
 
     public void setUserRotationLibertyDegrees(boolean only180) {
         this.rotateOnlyBy180Deg = only180;
-    }
-
-    public void useIcon(boolean enable) {
-        useIconEnable = enable;
     }
 
     boolean noCameraOpt() {
@@ -70,28 +67,23 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
     }
 
     @Override
-    public boolean use2DIcon() {
-        return useIconEnable;
-    }
-
-    @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
         return true;
     }
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return !useIconEnable;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
     public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return !useIconEnable;
+        return type != ItemRenderType.INVENTORY;
     }
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (useIconEnable)
+        if (type == ItemRenderType.INVENTORY)
             super.renderItem(type, item, data);
         else {
             GL11.glScalef(1.25f, 1.25f, 1.25f);

@@ -16,8 +16,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
-import java.util.List;
-
 public class PowerInductorSixDescriptor extends SixNodeDescriptor {
 
     private Obj3D obj;
@@ -52,11 +50,6 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
             return getlValue(0);
         else
             return getlValue(core.stackSize);
-    }
-
-    @Override
-    public boolean use2DIcon() {
-        return true;
     }
 
     public double getRsValue(IInventory inventory) {
@@ -104,11 +97,6 @@ public class PowerInductorSixDescriptor extends SixNodeDescriptor {
         } else {
             super.renderItem(type, item, data);
         }
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-        super.addInformation(itemStack, entityPlayer, list, par4);
     }
 
     @Override

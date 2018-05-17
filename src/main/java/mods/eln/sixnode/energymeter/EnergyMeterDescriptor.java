@@ -6,12 +6,9 @@ import mods.eln.misc.Utils;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
-
-import java.util.List;
 
 public class EnergyMeterDescriptor extends SixNodeDescriptor {
 
@@ -51,11 +48,6 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
     public void setParent(Item item, int damage) {
         super.setParent(item, damage);
         Data.addWiring(newItemStack());
-    }
-
-    @Override
-    public boolean use2DIcon() {
-        return true;
     }
 
     @Override
@@ -218,10 +210,5 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
             }
         }
         // UtilsClient.enableCulling();
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-        super.addInformation(itemStack, entityPlayer, list, par4);
     }
 }

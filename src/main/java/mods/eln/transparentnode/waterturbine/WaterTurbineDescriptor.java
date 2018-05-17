@@ -77,11 +77,6 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
-    @Override
     public Direction getFrontFromPlace(Direction side,
                                        EntityLivingBase entityLiving) {
         return super.getFrontFromPlace(side, entityLiving);

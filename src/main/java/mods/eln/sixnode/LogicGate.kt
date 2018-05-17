@@ -159,17 +159,6 @@ open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: S
         inputPins.map { if (it != null && it.connectedComponents.count() > 0) it.normalized else null }.toTypedArray(),
         outputPin.u / Eln.SVU)
 
-    override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            front = front.nextClockwise
-            sixNode.reconnect()
-            needPublish()
-            return true
-        } else {
-            return false
-        }
-    }
-
     override fun readFromNBT(nbt: NBTTagCompound?) {
         super.readFromNBT(nbt)
         function.readFromNBT(nbt, "function")
@@ -432,8 +421,8 @@ class PalElement(node: SixNode, side: Direction, descriptor: SixNodeDescriptor) 
         try {
             when (stream?.readByte()?.toInt()) {
                 TruthTablePositionClickedEvent -> {
-                    val position = stream?.readInt()
-                    if (position != null && position >= 0 && position < 8) {
+                    val position = stream.readInt()
+                    if (position in 0..7) {
                         val truthTable = (function as Pal).truthTable
                         truthTable[position] = !truthTable[position]
                         needPublish()

@@ -29,7 +29,11 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
         }
         this.signalSource = signalSource;
 
-        voltageLevelColor = VoltageLevelColor.Neutral;
+        if (signalSource) {
+          voltageLevelColor = VoltageLevelColor.SignalVoltage;
+        } else {
+            voltageLevelColor = VoltageLevelColor.Neutral;
+        }
     }
 
     public boolean isSignalSource() {
@@ -55,7 +59,7 @@ public class ElectricalSourceDescriptor extends SixNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Provides an ideal voltage source\nwithout energy or power limitation.").split("\\\n"));
         list.add("");
-        list.add(tr("Internal resistance: %1$Ω", Eln.instance.lowVoltageCableDescriptor.electricalRs));
+        list.add(tr("Internal resistance: %1$\u2126", Utils.plotValue(Eln.instance.lowVoltageCableDescriptor.electricalRs)));
         list.add("");
         list.add(tr("Creative block."));
     }

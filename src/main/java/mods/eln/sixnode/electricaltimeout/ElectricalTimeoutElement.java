@@ -127,20 +127,6 @@ public class ElectricalTimeoutElement extends SixNodeElement {
     public void initialize() {
     }
 
-    @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
-
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            front = front.getNextClockwise();
-            sixNode.reconnect();
-            sixNode.setNeedPublish(true);
-            return true;
-        }
-        //front = LRDU.fromInt((front.toInt() + 1) & 3);
-        return false;
-    }
-
     void set() {
         timeOutCounter = timeOutValue;
         needPublish();

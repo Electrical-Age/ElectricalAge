@@ -80,8 +80,6 @@ class FuelGeneratorDescriptor(name: String, internal val obj: Obj3D?, internal v
         }
     }
 
-    override fun use2DIcon() = true
-
     override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
 
     override fun shouldUseRenderHelper(
@@ -191,7 +189,7 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
                 }
             } else {
                 if (Eln.multiMeterElement.checkSameItemStack(player?.currentEquippedItem) ||
-                    Eln.thermoMeterElement.checkSameItemStack(player?.currentEquippedItem) ||
+                    Eln.thermometerElement.checkSameItemStack(player?.currentEquippedItem) ||
                     Eln.allMeterElement.checkSameItemStack(player?.currentEquippedItem)) {
                     return false
                 }

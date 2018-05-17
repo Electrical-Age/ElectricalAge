@@ -6,11 +6,8 @@ import mods.eln.misc.Obj3D;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sim.mna.misc.MnaConst;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-
-import java.util.List;
 
 public class PowerInductorDescriptor extends TransparentNodeDescriptor {
 
@@ -81,18 +78,4 @@ public class PowerInductorDescriptor extends TransparentNodeDescriptor {
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         draw();
     }
-
-    @Override
-    public boolean use2DIcon() {
-        return false;
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-                               List list, boolean par4) {
-
-        super.addInformation(itemStack, entityPlayer, list, par4);
-
-    }
-
 }

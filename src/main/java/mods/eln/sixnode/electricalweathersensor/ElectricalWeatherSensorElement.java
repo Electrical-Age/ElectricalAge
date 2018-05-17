@@ -75,9 +75,4 @@ public class ElectricalWeatherSensorElement extends SixNodeElement {
     @Override
     public void initialize() {
     }
-
-    @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return onBlockActivatedRotate(entityPlayer);
-    }
 }

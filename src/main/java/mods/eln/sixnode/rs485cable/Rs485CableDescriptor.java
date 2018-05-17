@@ -3,11 +3,7 @@ package mods.eln.sixnode.rs485cable;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-
-import java.util.List;
 
 public class Rs485CableDescriptor extends SixNodeDescriptor {
 
@@ -23,10 +19,5 @@ public class Rs485CableDescriptor extends SixNodeDescriptor {
         super.setParent(item, damage);
         Data.addWiring(newItemStack());
         Data.addSignal(newItemStack());
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-        super.addInformation(itemStack, entityPlayer, list, par4);
     }
 }

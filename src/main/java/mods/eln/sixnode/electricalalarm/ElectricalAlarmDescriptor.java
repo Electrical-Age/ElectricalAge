@@ -50,7 +50,7 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
         }
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
-        changeDefaultIcon("electricalalarm");
+        setDefaultIcon("electricalalarm");
     }
 
     @Override
@@ -76,11 +76,6 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
         if (lightPart != null) {
             UtilsClient.drawLightNoBind(lightPart);
         }
-    }
-
-    @Override
-    public boolean use2DIcon() {
-        return true;
     }
 
     @Override
@@ -110,7 +105,6 @@ public class ElectricalAlarmDescriptor extends SixNodeDescriptor {
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Emits an acoustic alarm if\nthe input signal is high").split("\n"));
-        list.add(tr(""));
     }
 
     @Override

@@ -8,7 +8,7 @@ public class RegulatorAnalogDescriptor extends IRegulatorDescriptor {
 
     public RegulatorAnalogDescriptor(String name, String iconName) {
         super(name);
-        changeDefaultIcon(iconName);
+        setDefaultIcon(iconName);
     }
 
     @Override

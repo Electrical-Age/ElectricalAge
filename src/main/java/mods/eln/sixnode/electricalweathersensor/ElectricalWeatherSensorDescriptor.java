@@ -52,13 +52,8 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Provides an electrical signal\ndepending the actual weather.").split("\n"));
         list.add(tr("Clear: %1$V", 0));
-        list.add(tr("Rain: %1$V", Eln.SVU / 2));
-        list.add(tr("Storm: %1$V", Eln.SVU));
-    }
-
-    @Override
-    public boolean use2DIcon() {
-        return true;
+        list.add(tr("Rain: %1$V", Utils.plotValue(Eln.SVU / 2)));
+        list.add(tr("Storm: %1$V", Utils.plotValue(Eln.SVU)));
     }
 
     @Override

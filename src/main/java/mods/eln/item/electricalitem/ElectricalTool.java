@@ -110,9 +110,8 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         if (itemStack != null)
-            list.add(tr("Stored energy: %1$J (%2$%)", getEnergy(itemStack),
+            list.add(tr("Stored energy: %1$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
                 (int) (getEnergy(itemStack) / energyStorage * 100)));
-        //list.add("Power button is " + (getPowerOn(itemStack) ? "ON" : "OFF"));
     }
 
     public double getEnergy(ItemStack stack) {
@@ -157,9 +156,10 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY)
+        super.renderItem(type, item, data);
+        if (type == ItemRenderType.INVENTORY) {
             UtilsClient.drawEnergyBare(type, (float) (getEnergy(item) / getEnergyMax(item)));
-        UtilsClient.drawIcon(type, rIcon);
+        }
     }
 
     @Override

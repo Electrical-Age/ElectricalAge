@@ -5,14 +5,12 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.misc.UtilsClient;
 import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
-import mods.eln.node.transparent.TransparentNodeEntity;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -60,16 +58,6 @@ public class EggIncubatorDescriptor extends TransparentNodeDescriptor {
     public void setParent(Item item, int damage) {
         super.setParent(item, damage);
         Data.addMachine(newItemStack());
-    }
-
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-        super.addInformation(itemStack, entityPlayer, list, par4);
     }
 
     @Override

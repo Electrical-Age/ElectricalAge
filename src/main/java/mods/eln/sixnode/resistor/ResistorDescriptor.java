@@ -14,8 +14,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
 import org.lwjgl.opengl.GL11;
 
-import java.util.List;
-
 /**
  * Created by svein on 05/08/15.
  */
@@ -52,11 +50,6 @@ public class ResistorDescriptor extends SixNodeDescriptor {
             Cables = obj.getPart("CapacitorCables");
         }
         voltageLevelColor = VoltageLevelColor.Neutral;
-    }
-
-    @Override
-    public boolean use2DIcon() {
-        return true;
     }
 
     public double getRsValue(IInventory inventory) {
@@ -113,11 +106,6 @@ public class ResistorDescriptor extends SixNodeDescriptor {
         } else {
             super.renderItem(type, item, data);
         }
-    }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-        super.addInformation(itemStack, entityPlayer, list, par4);
     }
 
     @Override

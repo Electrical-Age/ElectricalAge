@@ -41,7 +41,7 @@ public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor {
         this.obj = obj;
         if (obj != null) main = obj.getPart("main");
 
-        changeDefaultIcon("electricalantennarx");
+        setDefaultIcon("electricalantennarx");
         voltageLevelColor = VoltageLevelColor.fromVoltage(electricalNominalVoltage);
     }
 
@@ -58,11 +58,6 @@ public class ElectricalAntennaRxDescriptor extends TransparentNodeDescriptor {
 
     @Override
     public boolean mustHaveWallFrontInverse() {
-        return true;
-    }
-
-    @Override
-    public boolean use2DIcon() {
         return true;
     }
 

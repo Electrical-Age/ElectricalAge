@@ -76,7 +76,10 @@ public class LampSocketElement extends SixNodeElement {
 
     @Override
     public IInventory getInventory() {
-        return acceptingInventory.getInventory();
+        if (acceptingInventory != null)
+            return acceptingInventory.getInventory();
+        else
+            return null;
     }
 
     @Override
@@ -309,7 +312,7 @@ public class LampSocketElement extends SixNodeElement {
             }
         }
 
-        return acceptingInventory.take(entityPlayer.getCurrentEquippedItem());
+        return acceptingInventory.take(entityPlayer.getCurrentEquippedItem(), this, true, false);
     }
 
     public int getLightValue() {

@@ -2,7 +2,7 @@ package mods.eln.node
 
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor
 import mods.eln.generic.GenericItemUsingDamageDescriptor
-import mods.eln.item.electricalitem.BatteryItem
+import mods.eln.item.electricalinterface.IItemEnergyBattery
 import net.minecraft.inventory.IInventory
 import net.minecraft.item.ItemStack
 
@@ -28,7 +28,7 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
                 GenericItemUsingDamageDescriptor.getDescriptor(itemStack)?.let { desc ->
                     if (acceptedItems.any { it.isAssignableFrom(desc.javaClass) }) {
                         val newItemStack = desc.newItemStack()
-                        (desc as? BatteryItem)?.let { it.setEnergy(newItemStack, it.getEnergy(itemStack)) }
+                        (desc as? IItemEnergyBattery)?.let { it.setEnergy(newItemStack, it.getEnergy(itemStack)) }
                         itemStack!!.stackSize -= 1
                         inventory.setInventorySlotContents(index, newItemStack)
                         return true
@@ -134,16 +134,15 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
 
     fun take(itemStack: ItemStack?) = itemAcceptors.filterNotNull().any { it.take(itemStack, inventory) }
 
-    fun take(itemStack: ItemStack?, publishable: IPublishable?) =
+    fun take(itemStack: ItemStack?, nodeElement: INodeElement?, publish: Boolean = false,
+             notifyInventoryChange: Boolean = false) =
         if (take(itemStack)) {
-            publishable?.needPublish()
-            true
-        } else
-            false
-
-    fun take(itemStack: ItemStack?, inventoryChangeListener: IInventoryChangeListener?) =
-        if (take(itemStack)) {
-            inventoryChangeListener?.inventoryChange(inventory)
+            if (publish) {
+                nodeElement?.needPublish()
+            }
+            if (notifyInventoryChange) {
+                nodeElement?.inventoryChange(inventory)
+            }
             true
         } else
             false

@@ -6,7 +6,6 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.AutoAcceptInventoryProxy;
-import mods.eln.node.IInventoryChangeListener;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -68,7 +67,10 @@ public class ThermalSensorElement extends SixNodeElement {
     }
 
     public IInventory getInventory() {
-        return inventory.getInventory();
+        if (inventory != null)
+            return inventory.getInventory();
+        else
+            return null;
     }
 
     public static boolean canBePlacedOnSide(Direction side, int type) {
@@ -218,23 +220,19 @@ public class ThermalSensorElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        if (onBlockActivatedRotate(entityPlayer)) return true;
         ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
 
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            front = front.getNextClockwise();
-            sixNode.reconnect();
-            sixNode.setNeedPublish(true);
-            return true;
-        } else if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+        if (Eln.multiMeterElement.checkSameItemStack(currentItemStack)) {
             return false;
         }
-        if (Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+        if (Eln.thermometerElement.checkSameItemStack(currentItemStack)) {
             return false;
         }
-        if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+        if (Eln.allMeterElement.checkSameItemStack(currentItemStack)) {
             return false;
         }
-        return inventory.take(entityPlayer.getCurrentEquippedItem(), (IInventoryChangeListener) this);
+        return inventory.take(currentItemStack, this, false, true);
     }
 
     @Override

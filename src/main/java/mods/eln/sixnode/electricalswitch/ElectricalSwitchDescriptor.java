@@ -1,5 +1,6 @@
 package mods.eln.sixnode.electricalswitch;
 
+import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -50,7 +51,12 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
         double maximalVoltage, double maximalPower,
         ThermalLoadInitializer thermal,
         boolean signalSwitch) {
-        super(name, ElectricalSwitchElement.class, ElectricalSwitchRender.class, "switch");
+        super(name, ElectricalSwitchElement.class, ElectricalSwitchRender.class);
+
+        if (!Eln.noSymbols) {
+            setDefaultIcon("switch");
+        }
+
         this.nominalVoltage = nominalVoltage;
         this.nominalPower = nominalPower;
         this.maximalPower = maximalPower;
@@ -100,11 +106,6 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
     public void setParent(Item item, int damage) {
         super.setParent(item, damage);
         Data.addWiring(newItemStack());
-    }
-
-    @Override
-    public boolean use2DIcon() {
-        return true;
     }
 
     public void applyTo(ElectricalLoad load) {
@@ -172,12 +173,20 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
                 }
                 break;
             case Lever:
+                GL11.glPushMatrix();
+                if (nominalVoltage <= Eln.MVU) {
+                    GL11.glScaled(0.5f, 0.5f, 0.5f);
+                }
+
                 if (main != null)
                     main.draw();
 
                 if (lever != null)
                     lever.draw(on * (alphaOn - alphaOff) + alphaOff, 0, 1, 0);
+
+                GL11.glPopMatrix();
                 break;
+
             default:
                 break;
         }

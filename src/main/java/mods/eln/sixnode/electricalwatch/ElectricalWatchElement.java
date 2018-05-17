@@ -6,7 +6,6 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.AutoAcceptInventoryProxy;
-import mods.eln.node.IPublishable;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
@@ -76,7 +75,7 @@ public class ElectricalWatchElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return inventory.take(entityPlayer.getCurrentEquippedItem(), (IPublishable) this);
+        return inventory.take(entityPlayer.getCurrentEquippedItem(), this, true, false);
     }
 
     @Override
@@ -86,7 +85,10 @@ public class ElectricalWatchElement extends SixNodeElement {
 
     @Override
     public IInventory getInventory() {
-        return inventory.getInventory();
+        if (inventory != null)
+            return inventory.getInventory();
+        else
+            return null;
     }
 
     @Override

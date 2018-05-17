@@ -50,7 +50,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
             pinDistance = Utils.getSixNodePinDistance(main);
         }
 
-        changeDefaultIcon("batterycharger");
+        setDefaultIcon("batterycharger");
         voltageLevelColor = VoltageLevelColor.fromVoltage(nominalVoltage);
     }
 
@@ -76,11 +76,6 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
             }
             idx++;
         }
-    }
-
-    @Override
-    public boolean use2DIcon() {
-        return true;
     }
 
     @Override
@@ -118,8 +113,7 @@ public class BatteryChargerDescriptor extends SixNodeDescriptor {
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Can be used to recharge\nelectrical items like:\nFlash Light, X-Ray scanner\nand Portable Battery ...").split("\\\n"));
-        list.add(tr("Nominal power: %1$W", nominalPower));
-        //list.add(Utils.plotPower("Maximal power", nominalPower * 3));
+        list.add(tr("Nominal power: %1$W", Utils.plotValue(nominalPower)));
     }
 
     @Override

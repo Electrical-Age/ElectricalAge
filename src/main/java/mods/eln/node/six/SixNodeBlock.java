@@ -162,6 +162,7 @@ public class SixNodeBlock extends NodeBlock {
 
     @Override
     public boolean canPlaceBlockOnSide(World par1World, int par2, int par3, int par4, int par5) {
+		/* see canPlaceBlockAt; it needs changing if this method is fixed */
         return true;/*
 					 * if(par1World.isRemote) return true; SixNodeEntity tileEntity = (SixNodeEntity) par1World.getBlockTileEntity(par2, par3, par4); if(tileEntity == null || (tileEntity instanceof SixNodeEntity) == false) return true; Direction direction = Direction.fromIntMinecraftSide(par5); SixNode node = (SixNode) tileEntity.getNode(); if(node == null) return true; if(node.getSideEnable(direction))return false;
 					 * 
@@ -171,9 +172,19 @@ public class SixNodeBlock extends NodeBlock {
 
     @Override
     public boolean canPlaceBlockAt(World par1World, int par2, int par3, int par4) {
-        Utils.println("CACATOTAL1");
-        while (true)
-            ;// DON'tCALL THAT XD
+		/* This should probably call canPlaceBlockOnSide with each
+		 * appropriate side to see if it can go somewhere.
+		 * (cf. BlockLever, BlockTorch, etc)
+
+		 * Currently, canPlaceBlockOnSide returns true and defers
+		 * check to other code.  The rest of the sixnode code isn't
+		 * expecting blind canPlaceBlockAt to work, so things that
+		 * call it (e.g. Rannuncarpus) confuse it terribly and leak
+		 * cables and nodepieces.
+
+		 * So for now, make the Rannuncarpus et al ignore it.
+		 */
+		return false;
     }
 
     @Override

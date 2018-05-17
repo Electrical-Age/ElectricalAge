@@ -40,8 +40,6 @@ class ElectricalFuseHolderDescriptor(name: String, obj: Obj3D) :
         Data.addWiring(newItemStack())
     }
 
-    override fun use2DIcon() = true
-
     override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?) = true
 
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
@@ -205,11 +203,7 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
     }
 
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float, vz: Float): Boolean {
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            front = front.nextClockwise
-            sixNode.reconnect()
-            return true
-        }
+        if (onBlockActivatedRotate(entityPlayer)) return true
 
         var takenOutFuse: ElectricalFuseDescriptor? = null
         val itemStack = entityPlayer?.currentEquippedItem

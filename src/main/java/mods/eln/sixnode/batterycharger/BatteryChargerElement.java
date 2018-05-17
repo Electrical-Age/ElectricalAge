@@ -8,7 +8,6 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.AutoAcceptInventoryProxy;
-import mods.eln.node.IPublishable;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -64,7 +63,10 @@ public class BatteryChargerElement extends SixNodeElement {
 
     @Override
     public IInventory getInventory() {
-        return inventory.getInventory();
+        if (inventory != null)
+            return inventory.getInventory();
+        else
+            return null;
     }
 
     @Override
@@ -137,13 +139,11 @@ public class BatteryChargerElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            front = front.getNextClockwise();
-            sixNode.reconnect();
-            sixNode.setNeedPublish(true);
+        if (onBlockActivatedRotate(entityPlayer)) {
             return true;
+        } else {
+            return inventory.take(entityPlayer.getCurrentEquippedItem(), this, false, true);
         }
-        return inventory.take(entityPlayer.getCurrentEquippedItem(), (IPublishable) this);
     }
 
     @Override

@@ -54,7 +54,7 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
         this.obj = obj;
         if (obj != null) main = obj.getPart("main");
 
-        changeDefaultIcon("electricalantennatx");
+        setDefaultIcon("electricalantennatx");
         voltageLevelColor = VoltageLevelColor.fromVoltage(electricalNominalVoltage);
     }
 
@@ -77,11 +77,6 @@ public class ElectricalAntennaTxDescriptor extends TransparentNodeDescriptor {
     @Override
     public boolean mustHaveFloor() {
         return false;
-    }
-
-    @Override
-    public boolean use2DIcon() {
-        return true;
     }
 
     @Override

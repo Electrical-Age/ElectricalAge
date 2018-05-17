@@ -6,7 +6,6 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import mods.eln.node.AutoAcceptInventoryProxy;
-import mods.eln.node.IInventoryChangeListener;
 import mods.eln.node.NodeBase;
 import mods.eln.node.six.SixNode;
 import mods.eln.node.six.SixNodeDescriptor;
@@ -85,7 +84,10 @@ public class ElectricalSensorElement extends SixNodeElement {
     }
 
     public IInventory getInventory() {
-        return inventory.getInventory();
+        if (inventory != null)
+            return inventory.getInventory();
+        else
+            return null;
     }
 
     public static boolean canBePlacedOnSide(Direction side, int type) {
@@ -228,14 +230,8 @@ public class ElectricalSensorElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (Utils.isPlayerUsingWrench(entityPlayer)) {
-            front = front.getNextClockwise();
-            sixNode.reconnect();
-            sixNode.setNeedPublish(true);
-            return true;
-        }
-
-        return inventory.take(entityPlayer.getCurrentEquippedItem(), (IInventoryChangeListener) this);
+        if (onBlockActivatedRotate(entityPlayer)) return true;
+        return inventory.take(entityPlayer.getCurrentEquippedItem(), this, false, true);
     }
 
     @Override

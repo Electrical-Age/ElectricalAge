@@ -1,5 +1,6 @@
 package mods.eln.misc;
 
+import cpw.mods.fml.common.FMLLog;
 import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -371,20 +372,23 @@ public class Obj3D {
         if (trySource) {
             final String path = "../src/main/resources/assets/eln/" + filePath;
             try {
-                reader = new BufferedReader(new FileReader(path));
+                return new BufferedReader(new FileReader(path));
             } catch (FileNotFoundException e) {
                 System.out.println(e);
             }
         }
-        if (reader == null) {
-            final String path = "assets/eln/" + filePath;
-            try {
-                InputStream in = getClass().getClassLoader().getResourceAsStream(path);
-                reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-            } catch (Exception e) {
+
+        final String path = "assets/eln/" + filePath;
+        try {
+            InputStream in = getClass().getClassLoader().getResourceAsStream(path);
+            reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+        } catch (Exception e) {
+            // txt files are optional.
+            if (!filePath.endsWith(".txt")) {
                 System.out.println(e);
             }
         }
+
         return reader;
     }
 
@@ -516,9 +520,15 @@ public class Obj3D {
                 Utils.println(String.format(" - failed to load txt '%s'", txtPath));
             } else {
                 String line;
+                int lineNumber = 0;
                 while ((line = bufferedReader.readLine()) != null) {
+                    ++lineNumber;
                     String[] words = line.split(" ");
-                    if (words[0].equals("o")) {
+                    if (words[0].startsWith("#")) {
+                        // # is a comment - ignore line.
+                    } else if (words.length == 1 && "".equals(words[0])) {
+                        // empty line, ignore.
+                    } else if (words[0].equals("o")) {
                         part = nameToPartHash.get(words[1]);
                     } else if (words[0].equals("f")) {
                         if (words[1].equals("originX")) {
@@ -550,6 +560,9 @@ public class Obj3D {
                                 }
                             }, refresh, refresh);
                         }
+                    } else {
+                        FMLLog.warning("Invalid syntax in EA model text file %1$s on line %2$d: %3$s",
+                            txtPath, lineNumber, line);
                     }
                 }
             }

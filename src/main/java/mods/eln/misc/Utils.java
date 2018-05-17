@@ -253,16 +253,24 @@ public class Utils {
         return plotValue(value) + unit;
     }
 
+    public static String plotVolt(double value) {
+        return plotValue(value, "V  ");
+    }
+
     public static String plotVolt(String header, double value) {
         if (!header.equals(""))
             header += " ";
-        return header + plotValue(value, "V  ");
+        return header + plotVolt(value);
+    }
+
+    public static String plotAmpere(double value) {
+        return plotValue(value, "A  ");
     }
 
     public static String plotAmpere(String header, double value) {
         if (!header.equals(""))
             header += " ";
-        return header + plotValue(value, "A  ");
+        return header + plotAmpere(value);
     }
 
     public static String plotCelsius(String header, double value) {
@@ -281,10 +289,14 @@ public class Utils {
             return header + String.format("%3.1f", value * 100.0) + "%   ";
     }
 
+    public static String plotEnergy(double value) {
+        return plotValue(value, "J  ");
+    }
+
     public static String plotEnergy(String header, double value) {
         if (!header.equals(""))
             header += " ";
-        return header + plotValue(value, "J  ");
+        return header + plotEnergy(value);
     }
 
     public static String plotRads(String header, double value) {
@@ -307,10 +319,14 @@ public class Utils {
         return header + plotPower(value);
     }
 
+    public static String plotOhm(double value) {
+        return plotValue(value, "\u2126 ");
+    }
+
     public static String plotOhm(String header, double value) {
         if (!header.equals(""))
             header += " ";
-        return header + plotValue(value, "Ω  ");
+        return header + plotOhm(value);
     }
 
     public static String plotUIP(double U, double I) {
@@ -786,16 +802,9 @@ public class Utils {
     }
 
     public static boolean playerHasMeter(EntityPlayer entityPlayer) {
-        if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
-            return true;
-        }
-        if (Eln.thermoMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
-            return true;
-        }
-        if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
-            return true;
-        }
-        return false;
+        return Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())
+            || Eln.thermometerElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())
+            || Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem());
     }
 
     public static int getRedstoneLevelAround(Coordonate coord, Direction side) {

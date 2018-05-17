@@ -1,6 +1,5 @@
 package mods.eln.item;
 
-import mods.eln.misc.VoltageLevelColor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
@@ -12,7 +11,6 @@ public class CombustionChamber extends GenericItemUsingDamageDescriptorUpgrade {
 
     public CombustionChamber(String name) {
         super(name);
-        voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
     @Override

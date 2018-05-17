@@ -18,7 +18,7 @@ import static mods.eln.i18n.I18N.tr;
 public class TransformerDescriptor extends TransparentNodeDescriptor {
     public final float minimalLoadToHum;
 
-    public TransformerDescriptor(String name, Obj3D obj, Obj3D defaultFeroObj, float minimalLoadToHum) {
+    public TransformerDescriptor(String name, Obj3D obj, Obj3D defaultFeroObj, Obj3D casing, float minimalLoadToHum) {
         super(name, TransformerElement.class, TransformerRender.class);
         this.minimalLoadToHum = minimalLoadToHum;
 
@@ -28,6 +28,11 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
         }
         if (defaultFeroObj != null) {
             defaultFero = defaultFeroObj.getPart("fero");
+        }
+        if (casing != null) {
+            this.casing = casing.getPart("Case");
+            casingDoorR = casing.getPart("DoorR");
+            casingDoorL = casing.getPart("DoorL");
         }
 
         voltageLevelColor = VoltageLevelColor.Neutral;
@@ -42,6 +47,9 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
     private Obj3DPart main;
     private Obj3DPart defaultFero;
     private Obj3DPart sbire;
+    private Obj3DPart casing;
+    private Obj3DPart casingDoorR;
+    private Obj3DPart casingDoorL;
 
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
@@ -65,16 +73,11 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
         if (type == ItemRenderType.INVENTORY) {
             super.renderItem(type, item, data);
         } else {
-            draw(defaultFero, 1, 4);
+            draw(defaultFero, 1, 4, false, 0f);
         }
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
-    void draw(Obj3DPart fero, int priCableNbr, int secCableNbr) {
+    void draw(Obj3DPart fero, int priCableNbr, int secCableNbr, boolean hasCasing, float doorOpen) {
         if (main != null) main.draw();
         if (fero != null) {
             fero.draw();
@@ -100,6 +103,12 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
                 GL11.glPopMatrix();
             }
 
+        }
+
+        if (hasCasing) {
+            if (casing != null) casing.draw();
+            if (casingDoorR != null) casingDoorR.draw(doorOpen * 90, 0f, 1f, 0f);
+            if (casingDoorL != null) casingDoorL.draw(-doorOpen * 90, 0f, 1f, 0f);
         }
     }
 }

@@ -21,7 +21,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 public class TransformerRender extends TransparentNodeElementRender {
-    private final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(3, 64, this);
+    private final TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(4, 64, this);
     private final TransformerDescriptor descriptor;
 
     private SlewLimiter load = new SlewLimiter(0.5f);
@@ -39,13 +39,16 @@ public class TransformerRender extends TransparentNodeElementRender {
                     return 0f;
             }
         });
+
+        coordinate = new Coordonate(tileEntity);
+        doorOpen = new PhysicalInterpolator(0.4f, 4.0f, 0.9f, 0.05f);
     }
 
     @Override
     public void draw() {
         GL11.glPushMatrix();
         front.glRotateXnRef();
-        descriptor.draw(feroPart, primaryStackSize, secondaryStackSize);
+        descriptor.draw(feroPart, primaryStackSize, secondaryStackSize, hasCasing, doorOpen.get());
         GL11.glPopMatrix();
         cableRenderType = drawCable(front.down(), priRender, priConn, cableRenderType);
         cableRenderType = drawCable(front.down(), secRender, secConn, cableRenderType);
@@ -63,6 +66,10 @@ public class TransformerRender extends TransparentNodeElementRender {
     public boolean isIsolator;
 
     private Obj3DPart feroPart;
+    private boolean hasCasing = false;
+
+    private final Coordonate coordinate;
+    private final PhysicalInterpolator doorOpen;
 
     @Override
     public void networkUnserialize(DataInputStream stream) {
@@ -108,6 +115,7 @@ public class TransformerRender extends TransparentNodeElementRender {
             isIsolator = stream.readBoolean();
 
             load.setTarget(stream.readFloat());
+            hasCasing = stream.readBoolean();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -140,5 +148,13 @@ public class TransformerRender extends TransparentNodeElementRender {
     public void refresh(float deltaT) {
         super.refresh(deltaT);
         load.step(deltaT);
+
+        if (hasCasing) {
+            if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coordinate.moved(front).getAxisAlignedBB(0)))
+                doorOpen.setTarget(0f);
+            else
+                doorOpen.setTarget(1f);
+            doorOpen.step(deltaT);
+        }
     }
 }

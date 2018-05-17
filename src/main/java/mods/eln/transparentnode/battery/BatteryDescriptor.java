@@ -71,11 +71,6 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
         }
     }
 
-    @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
     public BatteryDescriptor(String name, String modelName,
                              ElectricalCableDescriptor cable,
                              double startCharge, boolean isRechargable, boolean lifeEnable,
@@ -141,7 +136,6 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
         }
 
         voltageLevelColor = VoltageLevelColor.fromVoltage(electricalU);
-        changeDefaultIcon("battery");
     }
 
     @Override

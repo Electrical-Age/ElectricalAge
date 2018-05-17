@@ -110,11 +110,6 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
     }
 
     @Override
-    public boolean use2DIcon() {
-        return true;
-    }
-
-    @Override
     public boolean mustHaveFloor() {
         return false;
     }
