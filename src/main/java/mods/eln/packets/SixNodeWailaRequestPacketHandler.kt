@@ -1,16 +1,16 @@
 package mods.eln.packets
 
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler
-import cpw.mods.fml.common.network.simpleimpl.MessageContext
 import mods.eln.node.NodeManager
 import mods.eln.node.six.SixNode
 import net.minecraft.item.ItemStack
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext
 
 class SixNodeWailaRequestPacketHandler : IMessageHandler<SixNodeWailaRequestPacket, SixNodeWailaResponsePacket> {
     override fun onMessage(message: SixNodeWailaRequestPacket, ctx: MessageContext?): SixNodeWailaResponsePacket {
         val coord = message.coord
         val side = message.side
-        val node = NodeManager.instance.getNodeFromCoordonate(coord) as? SixNode
+        val node = NodeManager.instance.getNodeFromCoordinate(coord) as? SixNode
         var stringMap: Map<String, String> = emptyMap()
         var itemStack: ItemStack? = null
         if (node != null) {

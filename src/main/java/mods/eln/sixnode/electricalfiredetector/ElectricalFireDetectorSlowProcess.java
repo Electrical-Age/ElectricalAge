@@ -1,7 +1,7 @@
 package mods.eln.sixnode.electricalfiredetector;
 
 import mods.eln.item.electricalitem.BatteryItem;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
@@ -65,7 +65,7 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
             boolean fireDetected = false;
 
             int maxRangeHalf = ((int) element.descriptor.maxRange - 1) / 2;
-            Coordonate detectionBBCenter = new Coordonate();
+            Coordinate detectionBBCenter = new Coordinate();
             detectionBBCenter.copyFrom(element.getCoordonate());
             switch (element.side) {
                 case XP:
@@ -101,7 +101,7 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                         if (block.getClass() == BlockFire.class) {
                             fireDetected = true;
 
-                            Coordonate coord = element.getCoordonate();
+                            Coordinate coord = element.getCoordonate();
                             List<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5,
                                 detectionBBCenter.x + dx + 0.5, detectionBBCenter.y + dy + 0.5, detectionBBCenter.z + dz + 0.5);
 

@@ -2,8 +2,6 @@ package mods.eln.misc;
 
 import mods.eln.Eln;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.IItemRenderer;
 import org.lwjgl.opengl.GL11;
 
 public enum VoltageLevelColor {
@@ -22,12 +20,13 @@ public enum VoltageLevelColor {
         this.voltageLevel = voltageLevel;
     }
 
-    public void drawIconBackground(IItemRenderer.ItemRenderType type) {
-        if (!Eln.noVoltageBackground && voltageLevel != null &&
-            type == IItemRenderer.ItemRenderType.INVENTORY || type == IItemRenderer.ItemRenderType.FIRST_PERSON_MAP) {
-            UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/voltages/" + voltageLevel + ".png"));
-        }
-    }
+    // TODO(1.10): Item rendering.
+//    public void drawIconBackground(IItemRenderer.ItemRenderType type) {
+//        if (!Eln.noVoltageBackground && voltageLevel != null &&
+//            type == IItemRenderer.ItemRenderType.INVENTORY || type == IItemRenderer.ItemRenderType.FIRST_PERSON_MAP) {
+//            UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/voltages/" + voltageLevel + ".png"));
+//        }
+//    }
 
     private String voltageLevel;
 

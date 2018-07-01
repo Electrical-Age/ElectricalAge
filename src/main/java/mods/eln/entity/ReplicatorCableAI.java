@@ -1,7 +1,7 @@
 package mods.eln.entity;
 
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import mods.eln.node.six.SixNode;
@@ -10,33 +10,33 @@ import mods.eln.sim.*;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sixnode.electricalcable.ElectricalCableElement;
 import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.pathfinding.PathEntity;
+import net.minecraft.pathfinding.Path;
 import net.minecraft.util.DamageSource;
 
 import java.util.List;
 import java.util.Random;
 
-public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserver {
+public class ReplicatorCableAI extends EntityAIBase implements ITimeRemoverObserver {
 
     ReplicatorEntity entity;
 
-    public Coordonate cableCoordonate = null;
-    Random rand = new Random();
-    int lookingPerUpdate = 20;
+    private Coordinate cableCoordinate = null;
+    private Random rand = new Random();
+    private int lookingPerUpdate = 20;
 
-    ElectricalLoad load = new ElectricalLoad(), cableLoad;
-    Resistor resistorLoad = new Resistor(load, null);
-    ElectricalConnection connection;
-    TimeRemover timeRemover = new TimeRemover(this);
+    private ElectricalLoad load = new ElectricalLoad(), cableLoad;
+    private Resistor resistorLoad = new Resistor(load, null);
+    private ElectricalConnection connection;
+    private TimeRemover timeRemover = new TimeRemover(this);
 
-    double moveTimeOut;
-    double moveTimeOutReset = 20;
-    double resetTimeout;
-    double resetTimeoutReset = 120;
+    private double moveTimeOut;
+    private double moveTimeOutReset = 20;
+    private double resetTimeout;
+    private double resetTimeoutReset = 120;
 
     PreSimCheck preSimCheck;
 
-    public ReplicatoCableAI(ReplicatorEntity entity) {
+    ReplicatorCableAI(ReplicatorEntity entity) {
         load.setAsPrivate();
         this.entity = entity;
         Eln.instance.highVoltageCableDescriptor.applyTo(load);
@@ -51,30 +51,30 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
         if (nodes.isEmpty()) return false;
         for (int idx = 0; idx < lookingPerUpdate; idx++) {
             NodeBase node = nodes.get(rand.nextInt(nodes.size()));
-            double distance = node.coordonate.distanceTo(entity);
+            double distance = node.coordinate.distanceTo(entity);
 
             if (distance > 15) continue;
 
-            if (node instanceof SixNode == false) continue;
+            if (!(node instanceof SixNode)) continue;
 
             SixNode sixNode = (SixNode) node;
 
             for (SixNodeElement e : sixNode.sideElementList) {
                 if (e == null) continue;
 
-                if (e instanceof ElectricalCableElement == false) continue;
+                if (!(e instanceof ElectricalCableElement)) continue;
 
                 ElectricalCableElement cable = (ElectricalCableElement) e;
 
-                if (isElectricalCableInterresting(cable) == false) continue;
+                if (!isElectricalCableInterresting(cable)) continue;
 
 
-                PathEntity path = entity.getNavigator().getPathToXYZ(node.coordonate.x, node.coordonate.y, node.coordonate.z);
+                Path path = entity.getNavigator().getPathToXYZ(node.coordinate.pos.getX(), node.coordinate.pos.getY(), node.coordinate.pos.getZ());
 
                 if (path == null/* || path.isFinished() == false*/) continue;
 
                 entity.getNavigator().setPath(path, 1);
-                cableCoordonate = node.coordonate;
+                cableCoordinate = node.coordinate;
                 //Utils.println("LookingForCableAi done");
                 moveTimeOut = moveTimeOutReset;
                 resistorLoad.highImpedance();
@@ -89,7 +89,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
     @Override
     public boolean continueExecuting() {
         //Utils.println("Continue");
-        return cableCoordonate != null;
+        return cableCoordinate != null;
     }
 
     @Override
@@ -100,15 +100,15 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
         ElectricalCableElement cable;
 
         if ((cable = getCable()) == null) {
-            cableCoordonate = null;
+            cableCoordinate = null;
             return;
         }
 
         cableLoad = cable.electricalLoad;
-        double distance = cableCoordonate.distanceTo(entity);
+        double distance = cableCoordinate.distanceTo(entity);
 
         if (distance > 2 && (entity.getNavigator().getPath() == null || entity.getNavigator().getPath().isFinished())) {
-            this.entity.getNavigator().tryMoveToXYZ(cableCoordonate.x, cableCoordonate.y, cableCoordonate.z, 1);
+            this.entity.getNavigator().tryMoveToXYZ(cableCoordinate.x, cableCoordinate.y, cableCoordinate.z, 1);
         }
         if (distance < 2) {
             //Utils.println("replicator on cable !");
@@ -129,7 +129,7 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
         }
 
         if (moveTimeOut < 0 || resetTimeout < 0) {
-            cableCoordonate = null;
+            cableCoordinate = null;
         }
     }
 
@@ -141,9 +141,9 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
     }
 
     ElectricalCableElement getCable() {
-        if (cableCoordonate == null) return null;
+        if (cableCoordinate == null) return null;
 
-        NodeBase node = NodeManager.instance.getNodeFromCoordonate(cableCoordonate);
+        NodeBase node = NodeManager.instance.getNodeFromCoordinate(cableCoordinate);
 
         if (node == null) return null;
 
@@ -188,8 +188,8 @@ public class ReplicatoCableAI extends EntityAIBase implements ITimeRemoverObserv
     class PreSimCheck implements IProcess {
         @Override
         public void process(double time) {
-            if (timeRemover.isArmed() == false) return;
-            if (Eln.simulator.isRegistred(cableLoad) == false) {
+            if (!timeRemover.isArmed()) return;
+            if (!Eln.simulator.isRegistred(cableLoad)) {
                 timeRemover.shot();
             }
         }

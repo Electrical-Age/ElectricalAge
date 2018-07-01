@@ -1,8 +1,6 @@
 package mods.eln.node;
 
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.*;
@@ -14,10 +12,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.EnumSkyBlock;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -54,25 +53,17 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
             boolean newRedstone = (b & 0x10) != 0;
             if (redstone != newRedstone) {
                 redstone = newRedstone;
-                worldObj.notifyBlockChange(xCoord, yCoord, zCoord, getBlockType());
-            } else {
-                redstone = newRedstone;
+                worldObj.notifyNeighborsRespectDebug(getPos(), getBlockType());
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-    /*	if(lastLight == 0xFF) //boot trololol
-        {
-			lastLight = 15;
-			worldObj.updateLightByType(EnumSkyBlock.Block,xCoord,yCoord,zCoord);
-		}*/
 
         if (lastLight != light) {
             lastLight = light;
-            worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+            worldObj.checkLightFor(EnumSkyBlock.BLOCK, getPos());
         }
-
 
     }
 
@@ -105,14 +96,14 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
 
     public NodeBlockEntity() {
-
     }
 
 
     @SideOnly(Side.CLIENT)
     public AxisAlignedBB getRenderBoundingBox() {
         if (cameraDrawOptimisation()) {
-            return AxisAlignedBB.getBoundingBox(xCoord - 1, yCoord - 1, zCoord - 1, xCoord + 1, yCoord + 1, zCoord + 1);
+            // TODO(1.10): This may not be correct.
+            return new AxisAlignedBB(pos);
         } else {
             return INFINITE_EXTENT_AABB;
         }
@@ -136,7 +127,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     }
 
     /**
-     * Reads a tile entity from NBT.
+     * Reads a tile entity fromFacing NBT.
      */
     public void readFromNBT(NBTTagCompound nbt) {
         super.readFromNBT(nbt);
@@ -245,13 +236,13 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         }
         if (this.worldObj == null) return null;
         if (node == null) {
-            NodeBase nodeFromCoordonate = NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord, worldObj));
+            NodeBase nodeFromCoordonate = NodeManager.instance.getNodeFromCoordinate(new Coordinate(xCoord, yCoord, zCoord, worldObj));
             if (nodeFromCoordonate instanceof Node) {
                 node = (Node) nodeFromCoordonate;
             } else {
-                Utils.println("ASSERT WRONG TYPE public Node getNode " + new Coordonate(xCoord, yCoord, zCoord, worldObj));
+                Utils.println("ASSERT WRONG TYPE public Node getNode " + new Coordinate(xCoord, yCoord, zCoord, worldObj));
             }
-            if (node == null) DelayedBlockRemove.add(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
+            if (node == null) DelayedBlockRemove.add(new Coordinate(xCoord, yCoord, zCoord, this.worldObj));
         }
         return node;
     }
@@ -313,7 +304,6 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     }
 
     public boolean canConnectRedstone(Direction xn) {
-
         if (worldObj.isRemote)
             return redstone;
         else {

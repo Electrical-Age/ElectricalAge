@@ -60,31 +60,32 @@ public class GridDescriptor extends TransparentNodeDescriptor {
         }
     }
 
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glPushMatrix();
-            objItemScale(obj);
-            Direction.ZN.glRotateXnRef();
-            GL11.glTranslatef(0, -1, 0);
-            GL11.glScalef(0.6f, 0.6f, 0.6f);
-            draw(0);
-            GL11.glPopMatrix();
-        }
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            GL11.glPushMatrix();
+//            objItemScale(obj);
+//            Direction.ZN.glRotateXnRef();
+//            GL11.glTranslatef(0, -1, 0);
+//            GL11.glScalef(0.6f, 0.6f, 0.6f);
+//            draw(0);
+//            GL11.glPopMatrix();
+//        }
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+//                                         ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
 
     public boolean rotationIsFixed() {
         return false;

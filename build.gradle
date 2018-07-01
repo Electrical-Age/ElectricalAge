@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.41'
+    ext.kotlin_version = '1.2.50'
     repositories {
         mavenCentral()
         maven {
@@ -78,9 +78,11 @@ configurations {
 
 repositories {
     jcenter()
-    maven {
-		    url "https://maven.shadowfacts.net/"
-	  }
+    maven { url "https://maven.shadowfacts.net/" }
+    maven { url "https://tehnut.info/maven" }
+    maven { url "https://cc.crzd.me/maven/" }
+    maven { url "https://maven.cil.li/" }
+    
 //     mavenCentral()
 //     maven {
 //         name = "codechicken"
@@ -95,6 +97,9 @@ repositories {
 dependencies {
     external files("libs/commons-math3-3.3.jar")
 	  compile group: "net.shadowfacts", name: "Forgelin", version: "1.7.3"
+    compile "dan200.computercraft:ComputerCraft:1.80pr1-build5"
+    compile "li.cil.oc:OpenComputers:MC1.10.2-1.7.2.172"
+    deobfCompile "mcp.mobius.waila:Hwyla:1.8.17-B31_1.10.2"
     // compile "mcp.mobius.waila:Waila:1.5.11-RC2-NONEI_1.7.10:dev"
 }
 

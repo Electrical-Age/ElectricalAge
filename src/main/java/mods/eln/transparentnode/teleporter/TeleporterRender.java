@@ -16,14 +16,14 @@ import java.io.IOException;
 public class TeleporterRender extends TransparentNodeElementRender {
 
     TeleporterDescriptor d;
-    Coordonate c;
+    Coordinate c;
 
     public TeleporterRender(TransparentNodeEntity tileEntity,
                             TransparentNodeDescriptor descriptor) {
         super(tileEntity, descriptor);
         this.d = (TeleporterDescriptor) descriptor;
         doorInterpolator.setMaxSpeed(0.3f);
-        c = new Coordonate(tileEntity);
+        c = new Coordinate(tileEntity);
     }
 
     public static final float doorAlphaOpen = -90;
@@ -41,10 +41,10 @@ public class TeleporterRender extends TransparentNodeElementRender {
 
     @Override
     public void draw() {
-        Coordonate lightCoordonate = new Coordonate(this.d.lightCoordonate);
-        lightCoordonate.applyTransformation(front, c);
+        Coordinate lightCoordinate = new Coordinate(this.d.lightCoordinate);
+        lightCoordinate.applyTransformation(front, c);
 
-        boolean lightEnable = tileEntity.getWorldObj().getBlock(lightCoordonate.x, lightCoordonate.y, lightCoordonate.z) == Eln.lightBlock;
+        boolean lightEnable = tileEntity.getWorldObj().getBlock(lightCoordinate.x, lightCoordinate.y, lightCoordinate.z) == Eln.lightBlock;
 
 
         front.glRotateXnRef();

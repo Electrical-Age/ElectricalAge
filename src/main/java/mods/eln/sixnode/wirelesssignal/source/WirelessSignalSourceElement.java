@@ -1,6 +1,6 @@
 package mods.eln.sixnode.wirelesssignal.source;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -42,7 +42,7 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
 
         this.descriptor = (WirelessSignalSourceDescriptor) descriptor;
         WirelessSignalTxElement.channelRegister(this);
-        slowProcessList.add(lightningGlitchProcess = new LightningGlitchProcess(getCoordonate()));
+        slowProcessList.add(lightningGlitchProcess = new LightningGlitchProcess(getCoordinate()));
         if (this.descriptor.autoReset) {
             slowProcessList.add(autoResetProcess = new AutoResetProcess());
             autoResetProcess.reset();
@@ -136,8 +136,8 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
     }
 
     @Override
-    public Coordonate getCoordonate() {
-        return sixNode.coordonate;
+    public Coordinate getCoordinate() {
+        return sixNode.coordinate;
     }
 
     @Override

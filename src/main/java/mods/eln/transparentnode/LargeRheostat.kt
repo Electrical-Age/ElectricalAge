@@ -27,7 +27,6 @@ import net.minecraft.client.gui.GuiScreen
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.IInventory
 import net.minecraft.item.ItemStack
-import net.minecraftforge.client.IItemRenderer
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -53,12 +52,13 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
         dissipator.obj.getPart("wiper")?.draw()
     }
 
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack,
-                                       helper: IItemRenderer.ItemRendererHelper) = type != IItemRenderer.ItemRenderType.INVENTORY
-
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) =
-        if (type != IItemRenderer.ItemRenderType.INVENTORY) draw() else super.renderItem(type, item, *data)
+    // TODO(1.10): Item rendering.
+//    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
+//    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack,
+//                                       helper: IItemRenderer.ItemRendererHelper) = type != IItemRenderer.ItemRenderType.INVENTORY
+//
+//    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) =
+//        if (type != IItemRenderer.ItemRenderType.INVENTORY) draw() else super.renderItem(type, item, *data)
 }
 
 class LargeRheostatElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :

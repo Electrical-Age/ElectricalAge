@@ -5,7 +5,7 @@ import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -42,8 +42,8 @@ public abstract class GridRender extends TransparentNodeElementRender {
         glEnable(GL_CULL_FACE);
     }
 
-    private Vec3 readVec(DataInputStream stream) throws IOException {
-        return Vec3.createVectorHelper(stream.readFloat(), stream.readFloat(), stream.readFloat());
+    private Vec3d readVec(DataInputStream stream) throws IOException {
+        return Vec3d.createVectorHelper(stream.readFloat(), stream.readFloat(), stream.readFloat());
     }
 
     @Override
@@ -58,12 +58,12 @@ public abstract class GridRender extends TransparentNodeElementRender {
             int linkCount = stream.readInt();
             for (int i = 0; i < linkCount; i++) {
                 // Links always come in pairs.
-                Vec3 splus = readVec(stream);
-                Vec3 tplus = readVec(stream);
-                Vec3 sgnd = readVec(stream);
-                Vec3 tgnd = readVec(stream);
-                Vec3 dplus = splus.subtract(tplus).normalize();
-                Vec3 dgnd = sgnd.subtract(tgnd).normalize();
+                Vec3d splus = readVec(stream);
+                Vec3d tplus = readVec(stream);
+                Vec3d sgnd = readVec(stream);
+                Vec3d tgnd = readVec(stream);
+                Vec3d dplus = splus.subtract(tplus).normalize();
+                Vec3d dgnd = sgnd.subtract(tgnd).normalize();
                 double straightV = dplus.dotProduct(dgnd);
                 dplus = splus.subtract(tgnd).normalize();
                 dgnd = sgnd.subtract(tplus).normalize();
@@ -89,7 +89,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
     private class Catenary {
         final int list;
 
-        final Vec3 origin = Vec3.createVectorHelper(0, 0, 0);
+        final Vec3d origin = Vec3d.createVectorHelper(0, 0, 0);
         final int box[] = {
             3, 7, 5, 3, 5, 1,
             4, 8, 6, 4, 6, 2,
@@ -113,9 +113,9 @@ public abstract class GridRender extends TransparentNodeElementRender {
         // Probably need make physical "cable" blocks, to make minecraft cooperate.
         // The individual blocks should do the rendering.
         // ...later. Much later.
-        Catenary(Vec3 start, Vec3 end) {
+        Catenary(Vec3d start, Vec3d end) {
             // These are the central vertices of the catenary.
-            Vec3[] catenary = getConnectionCatenary(start, end);
+            Vec3d[] catenary = getConnectionCatenary(start, end);
 
             list = glGenLists(1);
             glNewList(list, GL_COMPILE);
@@ -126,23 +126,23 @@ public abstract class GridRender extends TransparentNodeElementRender {
                 drawBox(spread(start, end), spread(end, start));
             } else {
                 // Four points at the starting pole.
-                Vec3 previous[] = spread(start, catenary[0]);
+                Vec3d previous[] = spread(start, catenary[0]);
                 for (int i = 0; i < catenary.length - 1; i++) {
                     // Some more points at intermediate junctions.
-                    Vec3 next[] = spread(catenary[i], catenary[i + 1]);
+                    Vec3d next[] = spread(catenary[i], catenary[i + 1]);
                     drawBox(previous, next);
                     previous = next;
                 }
                 // Finally, at the ending pole. We'll just translate the second-to-last points to fit.
-                Vec3 last[] = translate(previous, catenary[catenary.length - 2].subtract(catenary[catenary.length - 1]));
+                Vec3d last[] = translate(previous, catenary[catenary.length - 2].subtract(catenary[catenary.length - 1]));
                 drawBox(previous, last);
             }
             glEnd();
             glEndList();
         }
 
-        private void drawBox(Vec3[] from, Vec3[] to) {
-            Vec3 v[] = new Vec3[]{from[0], from[1], from[2], from[3], to[0], to[1], to[2], to[3]};
+        private void drawBox(Vec3d[] from, Vec3d[] to) {
+            Vec3d v[] = new Vec3d[]{from[0], from[1], from[2], from[3], to[0], to[1], to[2], to[3]};
 
             // Figure out the lighting.
 //            Vec3 middle = Vec3.createVectorHelper(0, 0, 0);
@@ -163,39 +163,39 @@ public abstract class GridRender extends TransparentNodeElementRender {
             }
         }
 
-        private Vec3[] translate(Vec3[] start, Vec3 delta) {
-            Vec3 ret[] = new Vec3[start.length];
+        private Vec3d[] translate(Vec3d[] start, Vec3d delta) {
+            Vec3d ret[] = new Vec3d[start.length];
             for (int i = 0; i < start.length; i++) {
                 ret[i] = start[i].addVector(delta.xCoord, delta.yCoord, delta.zCoord);
             }
             return ret;
         }
 
-        private Vec3[] spread(Vec3 a, Vec3 b) {
+        private Vec3d[] spread(Vec3d a, Vec3d b) {
             // We want to draw a box-shaped cable following the catenary.
             // To start with, compute a vector perpendicular to the first
             // catenary segment, then rotate it around the catenary to form four points.
-            final Vec3 delta = b.subtract(a);
+            final Vec3d delta = b.subtract(a);
             // This is just to copy.
             // We don't care what r is, so long as it's linearly independent of delta.
-            final Vec3 r = delta.normalize();
+            final Vec3d r = delta.normalize();
             r.rotateAroundY(1);
             r.rotateAroundX(1);
             // This gives us one vector which is perpendicular to delta.
-            final Vec3 x1 = multiply(delta.crossProduct(r).normalize(), cableWidth);
+            final Vec3d x1 = multiply(delta.crossProduct(r).normalize(), cableWidth);
             // And this, another, perpendicular to delta and x1.
-            final Vec3 y1 = multiply(delta.crossProduct(x1).normalize(), cableWidth);
+            final Vec3d y1 = multiply(delta.crossProduct(x1).normalize(), cableWidth);
             // Now just invert those to get the other two corners.
-            final Vec3 x2 = negate(x1), y2 = negate(y1);
-            return translate(new Vec3[]{x1, y1, y2, x2}, a);
+            final Vec3d x2 = negate(x1), y2 = negate(y1);
+            return translate(new Vec3d[]{x1, y1, y2, x2}, a);
         }
 
-        private Vec3 negate(Vec3 v) {
+        private Vec3d negate(Vec3d v) {
             return v.subtract(origin);
         }
 
-        Vec3 multiply(Vec3 a, double b) {
-            return Vec3.createVectorHelper(
+        Vec3d multiply(Vec3d a, double b) {
+            return Vec3d.createVectorHelper(
                 a.xCoord * b,
                 a.yCoord * b,
                 a.zCoord * b
@@ -203,7 +203,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
         }
 
         // This function borrowed from Immersive Engineering. Check them out!
-        private Vec3[] getConnectionCatenary(Vec3 start, Vec3 end) {
+        private Vec3d[] getConnectionCatenary(Vec3d start, Vec3d end) {
             // TODO: Thermal heating.
             final double slack = 1.005;
             final int vertices = 16;
@@ -225,14 +225,14 @@ public abstract class GridRender extends TransparentNodeElementRender {
             double p = (0 + dw - a * Math.log((k + dy) / (k - dy))) * 0.5;
             double q = (dy + 0 - k * Math.cosh(l) / Math.sinh(l)) * 0.5;
 
-            Vec3[] vex = new Vec3[vertices];
+            Vec3d[] vex = new Vec3d[vertices];
 
             for (int i = 0; i < vertices; i++) {
                 float n1 = (i + 1) / (float) vertices;
                 double x1 = 0 + dx * n1;
                 double z1 = 0 + dz * n1;
                 double y1 = a * Math.cosh(((Math.sqrt(x1 * x1 + z1 * z1)) - p) / a) + q;
-                vex[i] = Vec3.createVectorHelper(start.xCoord + x1, start.yCoord + y1, start.zCoord + z1);
+                vex[i] = Vec3d.createVectorHelper(start.xCoord + x1, start.yCoord + y1, start.zCoord + z1);
             }
             return vex;
         }

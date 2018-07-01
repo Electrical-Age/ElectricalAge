@@ -158,7 +158,7 @@ public class ElectricalCableElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-	/*	World w = sixNode.coordonate.world();
+	/*	World w = sixNode.coordinate.world();
 		boolean exist = w.blockExists(10000, 0, 0);
 		int id = w.getBlockId(10000, 0, 0);*/
         ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();

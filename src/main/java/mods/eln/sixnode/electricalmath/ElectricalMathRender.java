@@ -17,7 +17,7 @@ import java.io.IOException;
 public class ElectricalMathRender extends SixNodeElementRender {
 
     ElectricalMathDescriptor descriptor;
-    Coordonate coord;
+    Coordinate coord;
     PhysicalInterpolator interpolator;
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
@@ -34,7 +34,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
         super(tileEntity, side, descriptor);
         this.descriptor = (ElectricalMathDescriptor) descriptor;
         interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
-        coord = new Coordonate(tileEntity);
+        coord = new Coordinate(tileEntity);
         ledOn[0] = true;
         ledOn[4] = true;
     }

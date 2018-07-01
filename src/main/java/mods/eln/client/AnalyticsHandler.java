@@ -1,10 +1,10 @@
 package mods.eln.client;
 
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
 import mods.eln.misc.Version;
@@ -20,8 +20,8 @@ import java.io.IOException;
 
 /**
  * Sent analytics information about the mod and the game configuration.<br>
- * Singleton class. Uses the {@link cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent} and must be registered by
- * the caller on the {@link cpw.mods.fml.common.FMLCommonHandler} bus.
+ * Singleton class. Uses the {@link net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent} and must be registered by
+ * the caller on the {@link net.minecraftforge.fml.common.FMLCommonHandler} bus.
  *
  * @author metc
  */

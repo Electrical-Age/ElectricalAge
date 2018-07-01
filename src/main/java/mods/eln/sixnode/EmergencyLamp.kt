@@ -112,7 +112,7 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
             var closestDistance = 10000f
 
             LampSupplyElement.channelMap[channel]?.forEach {
-                val distance = it.element.sixNode.coordonate.trueDistanceTo(sixNode.coordonate).toFloat()
+                val distance = it.element.sixNode.coordinate.trueDistanceTo(sixNode.coordinate).toFloat()
                 if (distance < closestDistance && distance <= it.element.range) {
                     closestDistance = distance
                     closestPowerSupply = it

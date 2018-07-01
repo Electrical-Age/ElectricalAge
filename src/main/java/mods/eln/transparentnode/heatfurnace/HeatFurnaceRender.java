@@ -1,6 +1,6 @@
 package mods.eln.transparentnode.heatfurnace;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.PhysicalInterpolator;
 import mods.eln.misc.Utils;
@@ -29,7 +29,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
 
     HeatFurnaceDescriptor descriptor;
 
-    Coordonate coord;
+    Coordinate coord;
     PhysicalInterpolator interpolator;
 
     float counter = 0;
@@ -44,7 +44,7 @@ public class HeatFurnaceRender extends TransparentNodeElementRender {
         super(tileEntity, descriptor);
         this.descriptor = (HeatFurnaceDescriptor) descriptor;
         interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
-        coord = new Coordonate(tileEntity);
+        coord = new Coordinate(tileEntity);
     }
 
     @Override

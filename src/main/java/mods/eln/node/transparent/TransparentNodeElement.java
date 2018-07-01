@@ -248,9 +248,9 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         if (useUuid()) stop(uuid);
 
         if (transparentNodeDescriptor.hasGhostGroup()) {
-            Eln.ghostManager.removeObserver(node.coordonate);
-            Eln.ghostManager.removeGhostAndBlockWithObserver(node.coordonate);
-            //transparentNodeDescriptor.getGhostGroup(front).erase(node.coordonate);
+            Eln.ghostManager.removeObserver(node.coordinate);
+            Eln.ghostManager.removeGhostAndBlockWithObserver(node.coordinate);
+            //transparentNodeDescriptor.getGhostGroup(front).erase(node.coordinate);
         }
         node.dropInventory(getInventory());
         node.dropElement(node.removedByPlayer);
@@ -413,8 +413,8 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return 0f;
     }
 
-    public Coordonate getGhostObserverCoordonate() {
-        return node.coordonate;
+    public Coordinate getGhostObserverCoordonate() {
+        return node.coordinate;
 
     }
 
@@ -434,11 +434,11 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     public World world() {
 
-        return node.coordonate.world();
+        return node.coordinate.world();
     }
 
-    public Coordonate coordonate() {
-        return node.coordonate;
+    public Coordinate coordonate() {
+        return node.coordinate;
     }
 
 
@@ -457,7 +457,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     public void play(SoundCommand s) {
         s.addUuid(getUuid());
-        s.set(node.coordonate);
+        s.set(node.coordinate);
         s.play();
     }
 

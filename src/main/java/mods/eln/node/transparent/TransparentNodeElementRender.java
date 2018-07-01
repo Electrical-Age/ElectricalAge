@@ -1,7 +1,7 @@
 package mods.eln.node.transparent;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.cable.CableRender;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
@@ -228,9 +228,8 @@ public abstract class TransparentNodeElementRender {
 
     }
 
-    protected Coordonate coordonate() {
-
-        return new Coordonate(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, tileEntity.getWorldObj());
+    protected Coordinate coordinate() {
+        return new Coordinate(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, tileEntity.getWorldObj());
     }
 
 
