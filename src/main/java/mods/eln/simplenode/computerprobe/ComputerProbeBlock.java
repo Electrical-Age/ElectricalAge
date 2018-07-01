@@ -38,7 +38,7 @@ public class ComputerProbeBlock extends SimpleNodeBlock {
         icon[5] = register.registerIcon("eln:computerprobe_xp");
         icon[2] = register.registerIcon("eln:computerprobe_zn");
         icon[3] = register.registerIcon("eln:computerprobe_zp");
-        icon[0] = register.registerIcon("eln:computerprobe_y");
-        icon[1] = icon[0];
+        icon[0] = register.registerIcon("eln:computerprobe_yn");
+        icon[1] = register.registerIcon("eln:computerprobe_yp");
     }
 }

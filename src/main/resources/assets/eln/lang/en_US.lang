@@ -332,7 +332,7 @@ Upgrade_for_the_Stone_Heat_Furnace.=Upgrade for the Stone Heat Furnace.
 
 # ./src/main/java/mods/eln/item/ElectricalDrillDescriptor.java
 Energy_per_operation\:_%1$J=Energy per operation: %1$J
-Time_per_operation\:_%1$s=Time per operation: %1$s
+Time_per_operation\:_%1$h=Time per operation: %1$h
 
 # ./src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
 Cable_loss_factor\:_%1$=Cable loss factor: %1$
@@ -453,7 +453,6 @@ Electrical_current_can_only\nflow_through_the_diode\nfrom_anode_to_cathode=Elect
 Forward_Voltage=Forward Voltage
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmDescriptor.java
-=
 Emits_an_acoustic_alarm_if\nthe_input_signal_is_high=Emits an acoustic alarm if\nthe input signal is high
 
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmElement.java
@@ -479,12 +478,12 @@ Switch_is_off=Switch is off
 Switch_is_on=Switch is on
 
 # ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableDescriptor.java
-A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$V=A signal is electrical information\nwhich must be between 0V and %1$V
+A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$=A signal is electrical information\nwhich must be between 0V and %1$
 Cable_is_adapted_to_conduct\nelectrical_signals.=Cable is adapted to conduct\nelectrical signals.
 Current\:_%1$A=Current: %1$A
 Not_adapted_to_transport_power.=Not adapted to transport power.
 Save_usage\:=Save usage:
-Serial_resistance\:_%1$Ω=Serial resistance: %1$Ω
+Serial_resistance\:_%1$\u2126=Serial resistance: %1$\u2126
 
 # ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableElement.java
 Signal_Voltage=Signal Voltage
@@ -859,6 +858,7 @@ Set_point\:_%1$°C=Set point: %1$°C
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
 Cost=Cost
+Nominal_voltage\:_%1V$=Nominal voltage: %1V$
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineElement.java
 Power_provided=Power provided
@@ -1028,7 +1028,7 @@ Inductance\:_%1$H=Inductance: %1$H
 Input=Input
 Input_voltage=Input voltage
 Internal_control=Internal control
-Internal_resistance\:_%1$Ω=Internal resistance: %1$Ω
+Internal_resistance\:_%1$\u2126=Internal resistance: %1$\u2126
 Is_off=Is off
 Is_on=Is on
 Life=Life
@@ -1063,7 +1063,7 @@ Redstone_value=Redstone value
 Regulator_slot=Regulator slot
 Reset=Reset
 Resistance=Resistance
-Resistance\:_%1$Ω=Resistance: %1$Ω
+Resistance\:_%1$\u2126=Resistance: %1$\u2126
 Smallest=Smallest
 Specify_the_channel=Specify the channel
 Specify_the_supply_channel=Specify the supply channel

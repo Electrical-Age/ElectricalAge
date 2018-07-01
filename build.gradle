@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.1.1'
+    ext.kotlin_version = '1.1.51'
     repositories {
         mavenCentral()
         maven {
@@ -87,7 +87,7 @@ repositories {
     }
     maven {
         name = "mobiusstrip"
-        url = "http://mobiusstrip.eu/maven/"
+        url = "http://default.mobiusstrip.eu/maven/"
     }
 }
 
@@ -113,7 +113,6 @@ jar {
 
     // Copy libs jar files
     from { configurations.external.collect { it.isDirectory() ? it : zipTree(it) } }
-    exclude(['dan200/**', 'ic2/**', 'li/**', 'buildcraft/**'])
 
     // Add README and LICENSE to the release jar
     from(['README.md', 'LICENSE.md'])

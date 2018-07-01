@@ -5,11 +5,8 @@ import mods.eln.item.DielectricItem;
 import mods.eln.misc.Obj3D;
 import mods.eln.misc.series.ISerie;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-
-import java.util.List;
 
 public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
 
@@ -85,13 +82,4 @@ public class PowerCapacitorDescriptor extends TransparentNodeDescriptor {
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         draw();
     }
-
-    @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-                               List list, boolean par4) {
-
-        super.addInformation(itemStack, entityPlayer, list, par4);
-
-    }
-
 }
