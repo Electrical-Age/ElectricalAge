@@ -76,19 +76,19 @@ public enum Direction {
         if (dir == 5) vector[2] += distance;
     }
 
-    public BlockPos applyTo(BlockPos pos, int distance) {
-        return pos.add(
-            dir == 0 ? -distance : dir == 1 ? distance : 0,
-            dir == 2 ? -distance : dir == 3 ? distance : 0,
-            dir == 4 ? -distance : dir == 5 ? distance : 0
-        );
-    }
-
     public void applyTo(BlockPos.MutableBlockPos pos, int distance) {
         pos.setPos(
             pos.getX() + (dir == 0 ? -distance : dir == 1 ? distance : 0),
             pos.getY() + (dir == 2 ? -distance : dir == 3 ? distance : 0),
             pos.getZ() + (dir == 4 ? -distance : dir == 5 ? distance : 0)
+        );
+    }
+
+    public BlockPos applied(BlockPos pos, int distance) {
+        return pos.add(
+            dir == 0 ? -distance : dir == 1 ? distance : 0,
+            dir == 2 ? -distance : dir == 3 ? distance : 0,
+            dir == 4 ? -distance : dir == 5 ? distance : 0
         );
     }
 

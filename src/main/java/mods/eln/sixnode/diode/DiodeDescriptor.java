@@ -98,7 +98,7 @@ public class DiodeDescriptor extends SixNodeDescriptor {
 //        }
 //    }
 
-    /*	public void applyTo(DiodeProcess diode) {
+    /*	public void applied(DiodeProcess diode) {
             diode.IfU = IfU;
         }
         */

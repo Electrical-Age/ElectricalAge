@@ -8,7 +8,6 @@ import mods.eln.node.NodeBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,10 +23,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
@@ -422,7 +418,7 @@ public class SixNodeBlock extends NodeBlock {
     }
 
     boolean getIfOtherBlockIsSolid(World world, BlockPos pos, Direction direction) {
-        pos = direction.applyTo(pos, 1);
+        pos = direction.applied(pos, 1);
 
         IBlockState state = world.getBlockState(pos);
         if (state.getBlock().isAir(state, world, pos)) return false;

@@ -187,13 +187,9 @@ public abstract class NodeBase {
                                             EntityLivingBase entityLiving, ItemStack itemStack);
 
     public NodeBase getNeighbor(Direction direction) {
-        int[] position = new int[3];
-        position[0] = coordinate.x;
-        position[1] = coordinate.y;
-        position[2] = coordinate.z;
-        direction.applyTo(position, 1);
-        Coordinate nodeCoordinate = new Coordinate(position[0], position[1], position[2], coordinate.dimension);
-        return NodeManager.instance.getNodeFromCoordinate(nodeCoordinate);
+        BlockPos neighbour = direction.applied(coordinate.pos, 1);
+        Coordinate coordinate = new Coordinate(neighbour, this.coordinate.getDimension());
+        return NodeManager.instance.getNodeFromCoordinate(coordinate);
     }
 
     // leaf

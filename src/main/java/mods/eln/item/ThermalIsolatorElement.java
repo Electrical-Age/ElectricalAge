@@ -12,7 +12,7 @@ public class ThermalIsolatorElement extends GenericItemUsingDamageDescriptorUpgr
     }
 
 /*
-	public void applyTo(ThermalLoad resistor) {
+	public void applied(ThermalLoad resistor) {
 		resistor.setRp(thermalRp);
 	}*/
 }
