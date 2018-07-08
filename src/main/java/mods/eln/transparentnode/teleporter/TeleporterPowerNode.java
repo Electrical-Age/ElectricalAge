@@ -26,13 +26,13 @@ public class TeleporterPowerNode extends GhostNode {
     }
 
     @Override
-    public ThermalLoad getThermalLoad(Direction directionA, LRDU lrduA) {
+    public ThermalLoad getThermalLoad(Direction directionA, LRDU lrduA, int mask) {
 
         return null;
     }
 
     @Override
-    public ElectricalLoad getElectricalLoad(Direction directionB, LRDU lrduB) {
+    public ElectricalLoad getElectricalLoad(Direction directionB, LRDU lrduB, int mask) {
         if (e == null) return null;
         return e.powerLoad;
     }

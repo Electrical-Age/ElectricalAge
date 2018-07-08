@@ -116,7 +116,7 @@ public class ElectricalSensorElement extends SixNodeElement {
     }
 
     @Override
-    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+    public ElectricalLoad getElectricalLoad(LRDU lrdu, int mask) {
         if (!descriptor.voltageOnly) {
             if (front.left() == lrdu) return aLoad;
             if (front.right() == lrdu) return bLoad;
@@ -129,7 +129,7 @@ public class ElectricalSensorElement extends SixNodeElement {
     }
 
     @Override
-    public ThermalLoad getThermalLoad(LRDU lrdu) {
+    public ThermalLoad getThermalLoad(LRDU lrdu, int mask) {
         return null;
     }
 

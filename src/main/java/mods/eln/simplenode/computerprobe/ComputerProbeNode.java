@@ -116,12 +116,12 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
     }
 
     @Override
-    public ThermalLoad getThermalLoad(Direction side, LRDU lrduA) {
+    public ThermalLoad getThermalLoad(Direction side, LRDU lrduA, int mask) {
         return null;
     }
 
     @Override
-    public ElectricalLoad getElectricalLoad(Direction side, LRDU lrduB) {
+    public ElectricalLoad getElectricalLoad(Direction side, LRDU lrduB, int mask) {
         return ioGate[side.getInt()];
     }
 

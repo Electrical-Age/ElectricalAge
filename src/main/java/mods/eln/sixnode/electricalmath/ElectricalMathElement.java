@@ -143,7 +143,7 @@ public class ElectricalMathElement extends SixNodeElement {
     }
 
     @Override
-    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+    public ElectricalLoad getElectricalLoad(LRDU lrdu, int mask) {
         if (lrdu == front) return gateOutput;
         if (lrdu == front.left() && sideConnectionEnable[2]) return gateInput[2];
         if (lrdu == front.inverse() && sideConnectionEnable[1]) return gateInput[1];
@@ -152,7 +152,7 @@ public class ElectricalMathElement extends SixNodeElement {
     }
 
     @Override
-    public ThermalLoad getThermalLoad(LRDU lrdu) {
+    public ThermalLoad getThermalLoad(LRDU lrdu, int mask) {
         return null;
     }
 

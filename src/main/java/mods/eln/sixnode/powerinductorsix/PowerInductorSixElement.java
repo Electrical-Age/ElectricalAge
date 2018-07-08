@@ -46,14 +46,14 @@ public class PowerInductorSixElement extends SixNodeElement {
     }
 
     @Override
-    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+    public ElectricalLoad getElectricalLoad(LRDU lrdu, int mask) {
         if (lrdu == front.right()) return positiveLoad;
         if (lrdu == front.left()) return negativeLoad;
         return null;
     }
 
     @Override
-    public ThermalLoad getThermalLoad(LRDU lrdu) {
+    public ThermalLoad getThermalLoad(LRDU lrdu, int mask) {
         return null;
     }
 

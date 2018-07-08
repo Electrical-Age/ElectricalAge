@@ -29,12 +29,12 @@ public class AutoMinerPowerNode extends GhostNode {
     }
 
     @Override
-    public ThermalLoad getThermalLoad(Direction directionA, LRDU lrduA) {
+    public ThermalLoad getThermalLoad(Direction directionA, LRDU lrduA, int mask) {
         return null;
     }
 
     @Override
-    public ElectricalLoad getElectricalLoad(Direction directionB, LRDU lrduB) {
+    public ElectricalLoad getElectricalLoad(Direction directionB, LRDU lrduB, int mask) {
         if (element == null) return null;
         return element.inPowerLoad;
     }

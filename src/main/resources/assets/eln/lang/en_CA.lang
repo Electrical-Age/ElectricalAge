@@ -196,6 +196,7 @@ Schmitt_Trigger_Chip.name=Schmitt Trigger Chip
 Sconce_Lamp_Socket.name=Sconce Lamp Socket
 Signal_20H_inductor.name=Signal 20H inductor
 Signal_Antenna.name=Signal Antenna
+Signal_Bus_Cable.name=Signal Bus Cable
 Signal_Button.name=Signal Button
 Signal_Cable.name=Signal Cable
 Signal_Diode.name=Signal Diode
