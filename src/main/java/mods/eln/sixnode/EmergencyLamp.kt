@@ -8,7 +8,9 @@ import mods.eln.node.Node
 import mods.eln.node.NodePeriodicPublishProcess
 import mods.eln.node.published
 import mods.eln.node.six.*
+import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
+import mods.eln.sim.ThermalLoad
 import mods.eln.sim.mna.component.ResistorSwitch
 import mods.eln.sim.nbt.NbtElectricalLoad
 import mods.eln.sim.process.destruct.VoltageStateWatchDog
@@ -171,8 +173,8 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
         else -> 0
     }
 
-    override fun getElectricalLoad(lrdu: LRDU) = load
-    override fun getThermalLoad(lrdu: LRDU) = null
+    override fun getElectricalLoad(lrdu: LRDU, mask: Int): ElectricalLoad? = load
+    override fun getThermalLoad(lrdu: LRDU, mask: Int): ThermalLoad? = null
     override fun multiMeterString() = buildString {
         append(Utils.plotVolt("U:", load.u))
         append(Utils.plotAmpere("I:", load.i))

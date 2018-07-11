@@ -94,7 +94,7 @@ public class ResistorElement extends SixNodeElement {
     }
 
     @Override
-    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+    public ElectricalLoad getElectricalLoad(LRDU lrdu, int mask) {
         if (lrdu == front.right()) return aLoad;
         if (lrdu == front.left()) return bLoad;
         if (lrdu == front) return control;
@@ -102,7 +102,7 @@ public class ResistorElement extends SixNodeElement {
     }
 
     @Override
-    public ThermalLoad getThermalLoad(LRDU lrdu) {
+    public ThermalLoad getThermalLoad(LRDU lrdu, int mask) {
         return thermalLoad;
     }
 

@@ -86,12 +86,12 @@ public class TransparentNode extends Node {
     }
 
     @Override
-    public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
+    public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu, int mask) {
         return element.getElectricalLoad(side, lrdu);
     }
 
     @Override
-    public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
+    public ThermalLoad getThermalLoad(Direction side, LRDU lrdu, int mask) {
         return element.getThermalLoad(side, lrdu);
     }
 

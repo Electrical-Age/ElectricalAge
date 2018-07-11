@@ -6,7 +6,9 @@ import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
 import mods.eln.node.six.*
+import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
+import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
 import net.minecraft.entity.player.EntityPlayer
@@ -148,8 +150,8 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         return true
     }
 
-    override fun getElectricalLoad(lrdu: LRDU?) = output
-    override fun getThermalLoad(lrdu: LRDU?) = null
+    override fun getElectricalLoad(lrdu: LRDU, mask: Int): ElectricalLoad? = output
+    override fun getThermalLoad(lrdu: LRDU, mask: Int): ThermalLoad? = null
 
     override fun getConnectionMask(lrdu: LRDU) = when (lrdu) {
         front.inverse() -> NodeBase.maskElectricalOutputGate

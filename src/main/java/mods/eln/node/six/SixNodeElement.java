@@ -4,6 +4,7 @@ import mods.eln.Eln;
 import mods.eln.ghost.GhostObserver;
 import mods.eln.misc.*;
 import mods.eln.node.INodeElement;
+import mods.eln.node.NodeConnection;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
 import mods.eln.sim.ThermalConnection;
@@ -158,11 +159,13 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         sixNode.preparePacketForClient(stream, this);
     }
 
-    public abstract ElectricalLoad getElectricalLoad(LRDU lrdu);
+    public abstract ElectricalLoad getElectricalLoad(LRDU lrdu, int mask);
 
-    public abstract ThermalLoad getThermalLoad(LRDU lrdu);
+    public abstract ThermalLoad getThermalLoad(LRDU lrdu, int mask);
 
     public abstract int getConnectionMask(LRDU lrdu);
+
+    public void newConnectionAt(NodeConnection connection, boolean isA) {}
 
     public abstract String multiMeterString();
 

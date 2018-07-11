@@ -72,6 +72,7 @@ import mods.eln.sixnode.diode.DiodeDescriptor;
 import mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor;
 import mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.electricalcable.ElectricalSignalBusCableElement;
 import mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor;
 import mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor;
 import mods.eln.sixnode.electricalentitysensor.ElectricalEntitySensorDescriptor;
@@ -261,6 +262,7 @@ public class Eln {
     public ElectricalCableDescriptor lowVoltageCableDescriptor;
     public ElectricalCableDescriptor batteryCableDescriptor;
     public ElectricalCableDescriptor meduimVoltageCableDescriptor;
+    public ElectricalCableDescriptor signalBusCableDescriptor;
 
     public OreRegenerate oreRegenerate;
 
@@ -1307,6 +1309,38 @@ public class Eln {
             );
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
+
+        }
+
+        {
+            subId = 20;
+
+            name = TR_NAME(Type.NONE, "Signal Bus Cable");
+
+            stdCableRenderSignal = new CableRenderDescriptor("eln",
+                "sprites/cable.png", 3.95f, 3.95f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRenderSignal,
+                "For transmitting many signals.", true);
+
+            signalBusCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(SVU, SVP, 0.02 / 50
+                    * gateOutputCurrent / SVII,// electricalNominalVoltage,
+                // electricalNominalPower,
+                // electricalNominalPowerDrop,
+                SVU * 1.3, SVP * 1.2,// electricalMaximalVoltage,
+                // electricalMaximalPower,
+                0.5,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, 1// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+
+            desc.ElementClass = ElectricalSignalBusCableElement.class;
+
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            // GameRegistry.registerCustomItemStack(name, desc.newItemStack(1));
 
         }
     }
@@ -5109,6 +5143,12 @@ public class Eln {
             "CCC",
             "RRR",
             'C', new ItemStack(Items.iron_ingot),
+            'R', "itemRubber");
+
+        addRecipe(signalBusCableDescriptor.newItemStack(1),
+            "R",
+            "C",
+            'C', signalCableDescriptor.newItemStack(1),
             'R', "itemRubber");
 
         addRecipe(lowVoltageCableDescriptor.newItemStack(6),

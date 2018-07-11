@@ -68,20 +68,20 @@ public class HubElement extends SixNodeElement {
     }
 
     @Override
-    public ElectricalLoad getElectricalLoad(LRDU lrdu) {
+    public ElectricalLoad getElectricalLoad(LRDU lrdu, int mask) {
         if (inventory.getStackInSlot(HubContainer.cableSlotId + lrdu.toInt()) != null)
             return electricalLoad[lrdu.toInt()];
         return null;
     }
 
     @Override
-    public ThermalLoad getThermalLoad(LRDU lrdu) {
+    public ThermalLoad getThermalLoad(LRDU lrdu, int mask) {
         return null;
     }
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if (getElectricalLoad(lrdu) != null)
+        if (getElectricalLoad(lrdu, 0) != null)
             return NodeBase.maskElectricalAll;
 
         return 0;

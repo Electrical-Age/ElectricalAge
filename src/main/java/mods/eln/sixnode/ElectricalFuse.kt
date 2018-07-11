@@ -154,13 +154,13 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
         }
     }
 
-    override fun getElectricalLoad(lrdu: LRDU?): ElectricalLoad? = when (lrdu) {
+    override fun getElectricalLoad(lrdu: LRDU, mask: Int): ElectricalLoad? = when (lrdu) {
         front -> aLoad
         front.inverse() -> bLoad
         else -> null
     }
 
-    override fun getThermalLoad(lrdu: LRDU?): ThermalLoad? = null
+    override fun getThermalLoad(lrdu: LRDU, mask: Int): ThermalLoad? = null
 
     override fun getConnectionMask(lrdu: LRDU?): Int = when (lrdu) {
         front -> NodeBase.maskElectricalAll

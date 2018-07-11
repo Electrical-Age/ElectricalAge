@@ -126,7 +126,7 @@ open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: S
         })
     }
 
-    override fun getElectricalLoad(lrdu: LRDU?): ElectricalLoad? = when (lrdu) {
+    override fun getElectricalLoad(lrdu: LRDU, mask: Int): ElectricalLoad? = when (lrdu) {
         front -> outputPin
         front.inverse() -> inputPins[0]
         front.left() -> inputPins[1]
@@ -169,7 +169,7 @@ open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: S
         function.writeToNBT(nbt, "function")
     }
 
-    override fun getThermalLoad(lrdu: LRDU?): ThermalLoad? = null
+    override fun getThermalLoad(lrdu: LRDU, mask: Int): ThermalLoad? = null
     override fun thermoMeterString(): String? = null
     override fun initialize() {}
 }

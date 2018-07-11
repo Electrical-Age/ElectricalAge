@@ -3,6 +3,7 @@ package mods.eln.misc
 import mods.eln.node.GhostNode
 import mods.eln.node.NodeBase
 import mods.eln.sim.ElectricalLoad
+import mods.eln.sim.ThermalLoad
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.item.ItemStack
 
@@ -23,7 +24,7 @@ class GhostPowerNode(origin: Coordonate, front: Direction, offset: Coordonate, v
 
     override fun getSideConnectionMask(directionA: Direction?, lrduA: LRDU?) = NodeBase.maskElectricalPower
 
-    override fun getThermalLoad(directionA: Direction?, lrduA: LRDU?) = null
+    override fun getThermalLoad(directionA: Direction, lrduA: LRDU, mask: Int): ThermalLoad? = null
 
-    override fun getElectricalLoad(directionB: Direction?, lrduB: LRDU?) = load
+    override fun getElectricalLoad(directionB: Direction, lrduB: LRDU, mask: Int): ElectricalLoad? = load
 }
