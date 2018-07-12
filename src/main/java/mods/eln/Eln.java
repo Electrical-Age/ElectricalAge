@@ -314,6 +314,8 @@ public class Eln {
     public static boolean noSymbols = false;
     public static boolean noVoltageBackground = false;
 
+    public static double maxSoundDistance = 64;
+
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
 
@@ -464,6 +466,8 @@ public class Eln {
 
         Eln.noSymbols = config.get("general", "noSymbols", false).getBoolean();
         Eln.noVoltageBackground = config.get("general", "noVoltageBackground", false).getBoolean();
+
+        Eln.maxSoundDistance = config.get("debug", "maxSoundDistance", 64.0).getDouble();
 
         config.save();
 
