@@ -467,7 +467,7 @@ public class Eln {
         Eln.noSymbols = config.get("general", "noSymbols", false).getBoolean();
         Eln.noVoltageBackground = config.get("general", "noVoltageBackground", false).getBoolean();
 
-        Eln.maxSoundDistance = config.get("debug", "maxSoundDistance", 64.0).getDouble();
+        Eln.maxSoundDistance = config.get("debug", "maxSoundDistance", 16.0).getDouble();
 
         config.save();
 
