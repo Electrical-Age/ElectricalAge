@@ -111,6 +111,14 @@ public class ElectricalGateSourceElement extends SixNodeElement {
     @Override
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<String, String>();
+        if (descriptor.onOffOnly && !descriptor.autoReset) {
+            boolean isOn = outputGateProcess.getOutputOnOff();
+            if (isOn) {
+                info.put(I18N.tr("State"), "§a" + I18N.tr("On"));
+            }else{
+                info.put(I18N.tr("State"), "§c" + I18N.tr("Off"));
+            }
+        }
         info.put(I18N.tr("Output voltage"), Utils.plotVolt("", outputGate.getU()));
         return info;
     }

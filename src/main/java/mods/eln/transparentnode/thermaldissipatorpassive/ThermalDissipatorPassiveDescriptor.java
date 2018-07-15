@@ -55,9 +55,7 @@ public class ThermalDissipatorPassiveDescriptor extends TransparentNodeDescripto
     }
 
     @Override
-    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer,
-                               List list, boolean par4) {
-
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         list.add(tr("Used to cool down turbines."));
         list.add(tr("Max. temperature: %1$°C", Utils.plotValue(warmLimit)));

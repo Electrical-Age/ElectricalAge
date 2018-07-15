@@ -1,5 +1,6 @@
 package mods.eln.sixnode.wirelesssignal.source;
 
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -17,11 +18,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 
+import javax.annotation.Nullable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class WirelessSignalSourceElement extends SixNodeElement implements IWirelessSignalTx {
 
@@ -94,6 +97,21 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
     @Override
     public String thermoMeterString() {
         return null;
+    }
+
+    @Nullable
+    @Override
+    public Map<String, String> getWaila() {
+        Map<String, String> info = new HashMap<String, String>();
+        info.put(I18N.tr("Channel"), channel);
+        if(!descriptor.autoReset) {
+            if (state) {
+                info.put(I18N.tr("State"), "§a" + I18N.tr("On"));
+            }else{
+                info.put(I18N.tr("State"), "§c" + I18N.tr("Off"));
+            }
+        }
+        return info;
     }
 
     @Override

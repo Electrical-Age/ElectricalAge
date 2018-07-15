@@ -135,6 +135,8 @@ public class BatteryElement extends TransparentNodeElement {
         return null;
     }
 
+
+
     @Override
     public int getConnectionMask(Direction side, LRDU lrdu) {
         if (lrdu != LRDU.Down) return 0;
@@ -269,6 +271,7 @@ public class BatteryElement extends TransparentNodeElement {
         if (Eln.wailaEasyMode) {
             wailaList.put(I18N.tr("Voltage"), Utils.plotVolt("", batteryProcess.getU()));
             wailaList.put(I18N.tr("Current"), Utils.plotAmpere("", batteryProcess.getDischargeCurrent()));
+            wailaList.put(I18N.tr("Temperature"), Utils.plotCelsius("", thermalLoad.Tc));
         }
         return wailaList;
     }

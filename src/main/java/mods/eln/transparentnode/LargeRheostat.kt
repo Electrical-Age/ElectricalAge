@@ -41,6 +41,17 @@ class LargeRheostatDescriptor(name: String, val dissipator: ThermalDissipatorPas
         voltageLevelColor = VoltageLevelColor.Neutral
     }
 
+    override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>?, par4: Boolean) {
+        super.addInformation(itemStack, entityPlayer, list, par4)
+        if (list != null) {
+            // TODO: Substantiate this with some data
+            list.add(tr("Set resistance with coal dust"))
+            list.add(tr("Control resistance with signal"))
+            list.add(tr("Dissapates ~4kW of heat passively"))
+        }
+
+    }
+
     fun getRsValue(inventory: IInventory): Double {
         val core = inventory.getStackInSlot(ResistorContainer.coreId) ?: return series.getValue(0)
 

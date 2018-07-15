@@ -43,6 +43,7 @@ class ScannerDescriptor(name: String, obj: Obj3D) : SixNodeDescriptor(name, Scan
         super.addInformation(itemStack, entityPlayer, list, par4)
         list.add(tr("Scans blocks to produce signals."))
         list.add(tr("- For tanks, outputs fill percentage."))
+        // This string sucks. I can't use the normal Java method to fix this problem. TODO: fix this so that it is readable on windowed games.
         list.add(tr("- For inventories, outputs either total fill or fraction of slots with any items."))
         list.add(tr("Right-click to change mode."))
         list.add(tr("Otherwise behaves as a vanilla comparator."))

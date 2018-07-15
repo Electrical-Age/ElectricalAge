@@ -72,7 +72,8 @@ class GeneratorDescriptor(
     ).requireNoNulls()
 
     override fun addInformation(stack: ItemStack, player: EntityPlayer, list: MutableList<String>, par4: Boolean) {
-        list.add("Converts mechanical energy into electricity, or (badly) vice versa.")
+        list.add("Converts mechanical energy into ")
+        list.add("electricity, or (badly) vice versa.")
         list.add("Nominal usage ->")
         list.add(Utils.plotVolt("  Voltage out: ", nominalU.toDouble()))
         list.add(Utils.plotPower("  Power out: ", nominalP.toDouble()))

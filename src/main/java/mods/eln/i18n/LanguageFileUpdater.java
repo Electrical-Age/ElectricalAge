@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 class LanguageFileUpdater {
     private LanguageFileUpdater() {
@@ -35,6 +36,17 @@ class LanguageFileUpdater {
 
             // Get the strings to translate from the actual source code.
             Map<String, Set<TranslationItem>> stringsToTranslate = SourceCodeParser.parseSourceFolder(srcFolder);
+
+            // TEMPROARY FIX! TODO: BE ABLE TO REMOVE THIS!
+
+            Set<TranslationItem> item = new TreeSet<>();
+
+            item.add(new TranslationItem("Grid_DC-DC_Converter.name", "Grid Transformer"));
+            item.add(new TranslationItem("Transmission_Tower.name", "T2 Transmission Tower"));
+            item.add(new TranslationItem("Utility_Pole.name", "T1 Utility Pole"));
+            item.add(new TranslationItem("Utility_Pole_w/DC-DC_Converter.name", "T1 Utility Pole with Transformer"));
+
+            stringsToTranslate.putIfAbsent("FIXME", item);
 
             // If a single file is passed to the main method, we just update that particular file.
             if (languageFileOrFolder.isFile()) {

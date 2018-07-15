@@ -61,7 +61,7 @@ Alloy_Dust.name=Alloy Dust
 Alloy_Ingot.name=Alloy Ingot
 Alloy_Plate.name=Alloy Plate
 Amplifier.name=Amplifier
-Analog_Watch.name=Analog watch
+Analog_Watch.name=Analog Watch
 Analog_vuMeter.name=Analog Gauge
 Analogic_Regulator.name=Analogic Regulator
 Animal_Filter.name=Animal Filter
@@ -461,7 +461,7 @@ Sound_is_muted=Sound is muted
 Sound_is_not_muted=Sound is not muted
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
-Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds the cable limit
+Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n__-_Current_exceeds_the_cable_limit=Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n  - Current exceeds the cable limit
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerElement.java
 Contact=Contact
@@ -476,12 +476,11 @@ Switch_is_on=Switch is on
 A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$=A signal is electrical information\nwhich must be between 0V and %1$
 Cable_is_adapted_to_conduct\nelectrical_signals.=Cable is adapted to conduct\nelectrical signals.
 Current\:_%1$A=Current: %1$A
+Nominal_Ratings\:=Nominal Ratings:
 Not_adapted_to_transport_power.=Not adapted to transport power.
-Save_usage\:=Save usage:
 Serial_resistance\:_%1$\u2126=Serial resistance: %1$\u2126
 
 # ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableElement.java
-Signal_Voltage=Signal Voltage
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerDescriptor.java
 It_can_store_up_to_256_points.=It can store up to 256 points.
@@ -558,7 +557,8 @@ Converts_electrical_voltage\ninto_a_Redstone_signal.=Converts electrical voltage
 # ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayDescriptor.java
-A_relay_is_an_electrical\ncontact_that_conducts_electric\ncurrent_or_not,_depending\nthe_actual_input_signal_voltage.=A relay is an electrical\ncontact that conducts electric\ncurrent or not, depending\nthe actual input signal voltage.
+A_relay_is_an_electrical\ncontact_that_conducts\ncurrent_when_a_signal\nvoltage_is_applied.=A relay is an electrical\ncontact that conducts\ncurrent when a signal\nvoltage is applied.
+The_relay's_input_behaves\nlike_a_Schmitt_Trigger.=The relay's input behaves\nlike a Schmitt Trigger.
 
 # ./src/main/java/mods/eln/sixnode/electricalrelay/ElectricalRelayElement.java
 Default_position=Default position
@@ -605,6 +605,10 @@ The_time_interval_the\noutput_is_kept_high.=The time interval the\noutput is kep
 Displays_the_value_of_a_signal.=Displays the value of a signal.
 
 # ./src/main/java/mods/eln/sixnode/electricalwatch/ElectricalWatchContainer.java
+
+# ./src/main/java/mods/eln/sixnode/electricalwatch/ElectricalWatchDescriptor.java
+Requires_batteries_for_operation.=Requires batteries for operation.
+Tells_the_time.=Tells the time.
 
 # ./src/main/java/mods/eln/sixnode/electricalwatch/ElectricalWatchElement.java
 
@@ -666,7 +670,9 @@ Serial=Serial
 Electrical_cable_slot\nBase_range_is_32_blocks.\nEach_additional_cable\nincreases_range_by_one.=Electrical cable slot\nBase range is 32 blocks.\nEach additional cable\nincreases range by one.
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyDescriptor.java
-Supplies_all_lamps_on_the_channel.=Supplies all lamps on the channel.
+Capable_of_operating_3_light_channels.=Capable of operating 3 light channels.
+Supplies_power_to_nearby_lamps.=Supplies power to nearby lamps.
+Supports_control_from_a_wireless_signal\nchannel_for_each_lighting_channel.=Supports control from a wireless signal\nchannel for each lighting channel.
 
 # ./src/main/java/mods/eln/sixnode/lampsupply/LampSupplyElement.java
 Total_power=Total power
@@ -750,7 +756,6 @@ Fuel_level=Fuel level
 Nominal_power\:_%1$_W=Nominal power: %1$ W
 Nominal_voltage\:_%1$_V=Nominal voltage: %1$ V
 Produces_electricity_using_gasoline.=Produces electricity using gasoline.
-State=State
 
 # ./src/main/java/mods/eln/transparentnode/FuelHeatFurnace.kt
 Actual\:_%1$=Actual: %1$
@@ -764,8 +769,11 @@ Set_point\:_%1$=Set point: %1$
 __Max._temperature\:_=  Max. temperature: 
 
 # ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
+Control_resistance_with_signal=Control resistance with signal
+Dissapates_~4kW_of_heat_passively=Dissapates ~4kW of heat passively
 Nom._Resistance\:_%1$=Nom. Resistance: %1$
 Power_loss=Power loss
+Set_resistance_with_coal_dust=Set resistance with coal dust
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
 Drill_slot=Drill slot
@@ -795,7 +803,7 @@ Internal_resistance\:_=Internal resistance:
 Life_\:_=Life : 
 Nominal_power\:_=Nominal power: 
 Nominal_voltage\:_=Nominal voltage: 
-_charged_at_=charged at 
+_charged_at_=charged at
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryElement.java
 
@@ -894,6 +902,9 @@ It_is_night=It is night
 Solar_panel_angle\:_%1$°=Solar panel angle: %1$°
 Sun_angle\:_%1$°=Sun angle: %1$°
 
+# ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterDescriptor.java
+It's_experimental!=It's experimental!
+
 # ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterElement.java
 Destination=Destination
 Distance=Distance
@@ -946,7 +957,7 @@ Standby_power\:_%1$W=Standby power: %1$W
 # ./src/main/java/mods/eln/transparentnode/turret/TurretElement.java
 ??=??
 Charge_level=Charge level
-Shoot_=Shoot 
+Shoot_=Shoot
 Shoot_everything=Shoot everything
 Shoot_nothing=Shoot nothing
 Target=Target
@@ -999,6 +1010,8 @@ Recipe\:=Recipe:
 %1$_is_not_in_range!=%1$ is not in range!
 (Increases_capacity)=(Increases capacity)
 (Increases_inductance)=(Increases inductance)
+Acts_like_a\npush_button.=Acts like a\npush button.
+Acts_like_a\ntoggle_switch.=Acts like a\ntoggle switch.
 Actual\:_%1$°C=Actual: %1$°C
 Battery_level=Battery level
 Biggest=Biggest
@@ -1065,9 +1078,11 @@ Regulator_slot=Regulator slot
 Reset=Reset
 Resistance=Resistance
 Resistance\:_%1$\u2126=Resistance: %1$\u2126
+Signal_Voltage=Signal Voltage
 Smallest=Smallest
 Specify_the_channel=Specify the channel
 Specify_the_supply_channel=Specify the supply channel
+State=State
 Stored_energy\:_%1$J_(%2$%)=Stored energy: %1$J (%2$%)
 Temperature=Temperature
 Temperature\:_%1$°C=Temperature: %1$°C
@@ -1088,3 +1103,9 @@ Voltages=Voltages
 Yes=Yes
 You_can't_place_this_block_at_this_side=You can't place this block at this side
 _O\:_= O: 
+
+# FIXME
+Grid_DC-DC_Converter.name=Grid Transformer
+Transmission_Tower.name=T2 Transmission Tower
+Utility_Pole.name=T1 Utility Pole
+Utility_Pole_w/DC-DC_Converter.name=T1 Utility Pole with Transformer

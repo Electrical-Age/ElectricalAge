@@ -18,12 +18,16 @@ import static mods.eln.i18n.I18N.tr;
 
 public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
 
+    // onOffOnly: if true, is a button. Otherwise, it's a signal trimmer.
     public boolean onOffOnly;
 
+    // autoReset: if true, this button will press and release. Otherwise, it will act like a latch
     public boolean autoReset = false;
+
 
     enum ObjType {Pot, Button}
 
+    // objType is often null... IDEA flags leverTx as unused as well.
     ObjType objType;
     float leverTx;
     ElectricalGateSourceRenderObj render;
@@ -40,7 +44,15 @@ public class ElectricalGateSourceDescriptor extends SixNodeDescriptor {
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        Collections.addAll(list, tr("Provides configurable signal\nvoltage.").split("\n"));
+        if (!onOffOnly) {
+            Collections.addAll(list, tr("Provides configurable signal\nvoltage.").split("\n"));
+        }else{
+            if (autoReset) {
+                Collections.addAll(list, tr("Acts like a\npush button.").split("\n"));
+            } else {
+                Collections.addAll(list, tr("Acts like a\ntoggle switch.").split("\n"));
+            }
+        }
     }
 
     public void setWithAutoReset() {

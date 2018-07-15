@@ -4,10 +4,16 @@ import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceRenderObj;
 import mods.eln.wiki.Data;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import org.lwjgl.opengl.GL11;
+
+import java.util.Collections;
+import java.util.List;
+
+import static mods.eln.i18n.I18N.tr;
 
 public class WirelessSignalSourceDescriptor extends SixNodeDescriptor {
 
@@ -24,6 +30,16 @@ public class WirelessSignalSourceDescriptor extends SixNodeDescriptor {
         this.render = render;
 
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
+    }
+
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List<String> list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        if (autoReset) {
+            Collections.addAll(list, tr("Acts like a\npush button.").split("\n"));
+        } else {
+            Collections.addAll(list, tr("Acts like a\ntoggle switch.").split("\n"));
+        }
     }
 
     void draw(float factor, float distance, TileEntity e) {
