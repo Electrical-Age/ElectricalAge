@@ -1119,6 +1119,7 @@ public class Eln {
 
 
     public CableRenderDescriptor stdCableRenderSignal;
+    public CableRenderDescriptor stdCableRenderSignalBus;
     public CableRenderDescriptor stdCableRender50V;
     public CableRenderDescriptor stdCableRender200V;
     public CableRenderDescriptor stdCableRender800V;
@@ -1321,10 +1322,10 @@ public class Eln {
 
             name = TR_NAME(Type.NONE, "Signal Bus Cable");
 
-            stdCableRenderSignal = new CableRenderDescriptor("eln",
+            stdCableRenderSignalBus = new CableRenderDescriptor("eln",
                 "sprites/cable.png", 3.95f, 3.95f);
 
-            desc = new ElectricalCableDescriptor(name, stdCableRenderSignal,
+            desc = new ElectricalCableDescriptor(name, stdCableRenderSignalBus,
                 "For transmitting many signals.", true);
 
             signalBusCableDescriptor = desc;
