@@ -180,6 +180,7 @@ class GeneratorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) 
         thermal.setAsSlow()
         thermalLoadList.add(thermal)
         thermalLoadWatchDog.set(thermal).set(WorldExplosion(this).machineExplosion())
+        slowProcessList.add(thermalLoadWatchDog)
 
         heater = ElectricalLoadHeatThermalLoad(inputLoad, thermal)
         thermalFastProcessList.add(heater)

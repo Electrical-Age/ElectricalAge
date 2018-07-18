@@ -259,5 +259,14 @@
                 "stream": false
             }
         ]
-    }
+    },
+	"shaft_motor": {
+		"category": "block",
+		"sounds": [
+			{
+				"name": "shaft_motor",
+				"stream": false
+			}
+		]
+	}
 }

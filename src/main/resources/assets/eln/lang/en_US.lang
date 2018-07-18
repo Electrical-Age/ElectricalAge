@@ -126,6 +126,7 @@ Flywheel.name=Flywheel
 Fuel_Heat_Furnace.name=Fuel Heat Furnace
 Gas_Turbine.name=Gas Turbine
 Generator.name=Generator
+Shaft_Motor.name=Shaft Motor
 Gold_Dust.name=Gold Dust
 Gold_Plate.name=Gold Plate
 Gray_Brush.name=Gray Brush

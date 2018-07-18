@@ -2893,6 +2893,27 @@ public class Eln {
                 obj.getObj("Tachometer"));
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
+
+        {
+            subId = 16;
+
+            float nominalRads = 800, nominalU = 3200;
+            float nominalP = 1200;
+
+            MotorDescriptor desc = new MotorDescriptor(
+                TR_NAME(Type.NONE, "Shaft Motor"),
+                obj.getObj("Motor"),
+                veryHighVoltageCableDescriptor,
+                nominalRads,
+                nominalU,
+                nominalP,
+                25.0f * nominalP / nominalU,
+                25.0f * nominalP / nominalU,
+                sixNodeThermalLoadInitializer.copy()
+            );
+
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
     }
 
     public ArrayList<ItemStack> furnaceList = new ArrayList<ItemStack>();
@@ -5721,6 +5742,14 @@ public class Eln {
             'M', findItemStack("Advanced Machine Block"),
             'a', firstExistingOre("ingotAluminum", "ingotIron"),
             'E', findItemStack("High Voltage Cable")
+        );
+        addRecipe(findItemStack("Shaft Motor"),
+            "imi",
+            " ME",
+            'i', "ingotIron",
+            'M', findItemStack("Advanced Machine Block"),
+            'm', findItemStack("Advanced Electrical Motor"),
+            'E', findItemStack("Very High Voltage Cable")
         );
         addRecipe(findItemStack("Steam Turbine"),
             " a ",
