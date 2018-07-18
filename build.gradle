@@ -243,7 +243,10 @@ task updateMasterLanguageFile(type: JavaExec, dependsOn: 'classes') {
     args = ['./src', './src/main/resources/assets/eln/lang/en_US.lang']
 }
 
-jar.dependsOn(updateMasterLanguageFile)
+// Until this gets fixed, I'm disabling automatic language file updates.
+// It has been causing more harm in merge requests and other jank than good.
+// Please be pedantic about making further edits to the language file.
+// jar.dependsOn(updateMasterLanguageFile)
 
 publishing {
     publications {
