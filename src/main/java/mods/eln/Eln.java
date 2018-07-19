@@ -5884,7 +5884,8 @@ public class Eln {
                 "WWW",
                 "IWI",
                 " W ",
-                'I', "ingotIron"
+                'I', "ingotIron",
+                'W', "logWood"
             );
         }
         addRecipe(findItemStack("Utility Pole w/DC-DC Converter"),

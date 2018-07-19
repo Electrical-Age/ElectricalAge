@@ -1,5 +1,6 @@
 package mods.eln.gridnode
 
+import jdk.nashorn.internal.objects.NativeDebug.getClass
 import mods.eln.misc.Direction
 import mods.eln.misc.Obj3D
 import mods.eln.misc.preserveMatrix
@@ -47,7 +48,14 @@ open class GridDescriptor(name: String, private val obj: Obj3D, ElementClass: Cl
         }
     }
 
+    open fun hasCustomIcon() = false
+
     override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
+        if(type == IItemRenderer.ItemRenderType.INVENTORY &&
+            hasCustomIcon()) {
+            super.renderItem(type, item, data)
+            return
+        }
         objItemScale(obj)
         Direction.ZN.glRotateXnRef()
         GL11.glPushMatrix()
@@ -63,11 +71,13 @@ open class GridDescriptor(name: String, private val obj: Obj3D, ElementClass: Cl
 
     override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack,
                                        helper: IItemRenderer.ItemRendererHelper): Boolean {
+        if(helper == IItemRenderer.ItemRendererHelper.INVENTORY_BLOCK)
+            return !hasCustomIcon()
         return true
     }
 
     fun use2DIcon(): Boolean {
-        return false
+        return hasCustomIcon()
     }
 
     open fun rotationIsFixed(): Boolean {

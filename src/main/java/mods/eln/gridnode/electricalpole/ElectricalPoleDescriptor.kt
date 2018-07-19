@@ -25,4 +25,6 @@ class ElectricalPoleDescriptor(name: String,
             }
         }
     }
+
+    override fun hasCustomIcon() = this.name == "Transmission Tower"
 }
