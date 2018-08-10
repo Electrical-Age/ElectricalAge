@@ -57,12 +57,23 @@ public class ElectricalSignalBusCableElement extends ElectricalCableElement {
     public Map<String, String> getWaila() {
         Map<String, String> info = new HashMap<>();
 
+        String[] arry = new String[coloredElectricalLoads.length / 4];
+
         String t = "";
-        for(ElectricalLoad load : coloredElectricalLoads) {
-            t += Utils.plotVolt("", load.getU()).trim() + ",";
+
+        for (int i = 0; i < coloredElectricalLoads.length; i++) {
+            t += wool_to_chat[15-i] + Utils.plotVolt("",  coloredElectricalLoads[i].getU()).trim() + "\u00A7r, ";
+            if ((i+1)% 4 == 0) {
+                arry[(i-3) / 4 ] = t.substring(0, t.length() - 2);
+                t = "";
+            }
         }
 
-        info.put(I18N.tr("Signal Voltage"), t);
+        for (int i = 0; i < arry.length; i++) {
+            info.put(I18N.tr("Channel") + " " + (i + 1), arry[i]);
+        }
+
+
         return info;
     }
 
