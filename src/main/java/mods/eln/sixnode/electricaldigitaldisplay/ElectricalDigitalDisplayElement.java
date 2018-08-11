@@ -24,16 +24,20 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement {
 
     public ElectricalDigitalDisplayProcess process = new ElectricalDigitalDisplayProcess(this);
 
-    public NbtElectricalGateInput input;
+    public NbtElectricalGateInput input, strobeIn;
     public float current = 0.0f;
     public float last = 0.0f;
     public float min = 0.0f;
     public float max = 1000.0f;
+    public float strobe = 0.0f;
+    public float strobeLast = 0.0f;
 
     public ElectricalDigitalDisplayElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         super(sixNode, side, descriptor);
         input = new NbtElectricalGateInput("input");
+        strobeIn = new NbtElectricalGateInput("strobe");
         electricalLoadList.add(input);
+        electricalLoadList.add(strobeIn);
         slowProcessList.add(process);
         this.descriptor = (ElectricalDigitalDisplayDescriptor) descriptor;
     }
@@ -43,6 +47,7 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement {
 
     @Override
     public ElectricalLoad getElectricalLoad(LRDU lrdu, int mask) {
+        if(lrdu == front) return strobeIn;
         if(lrdu == front.inverse()) return input;
         return null;
     }
@@ -64,7 +69,7 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if(lrdu == front.inverse()) return NodeBase.maskElectricalInputGate;
+        if(lrdu == front.inverse() || lrdu == front) return NodeBase.maskElectricalInputGate;
         return 0;
     }
 
@@ -98,6 +103,7 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement {
             stream.writeFloat(current);
             stream.writeFloat(min);
             stream.writeFloat(max);
+            stream.writeBoolean(strobe >= 0.5);
         } catch(IOException e) {
             e.printStackTrace();
         }

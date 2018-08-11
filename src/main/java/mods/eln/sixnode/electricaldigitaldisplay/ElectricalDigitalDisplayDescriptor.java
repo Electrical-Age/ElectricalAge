@@ -42,7 +42,7 @@ public class ElectricalDigitalDisplayDescriptor extends SixNodeDescriptor {
         list.add(tr("Displays signal value."));
     }
 
-    void draw(int value, Style style) {
+    void draw(int value, boolean strobe, Style style) {
         switch(style) {
             case LED:
                 obj.bindTexture("Digits_LED.png");
@@ -53,7 +53,11 @@ public class ElectricalDigitalDisplayDescriptor extends SixNodeDescriptor {
         GL11.glColor3f(0.95f, 0.0f, 0.0f);
         int divisor = 1;
         for(int i = 0; i < 4; i++) {
-            digits[i].draw((value / divisor) % 10 / 16.0f, 0.0f);
+            if(strobe) {
+                digits[i].draw(10.0f/16.0f, 0.0f);
+            } else {
+                digits[i].draw((value / divisor) % 10 / 16.0f, 0.0f);
+            }
             divisor *= 10;
         }
 

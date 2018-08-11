@@ -16,5 +16,10 @@ public class ElectricalDigitalDisplayProcess implements IProcess {
             element.needPublish();
             element.last = element.current;
         }
+        element.strobe = (float) element.strobeIn.getNormalized();
+        if(element.strobe != element.strobeLast) {
+            element.needPublish();
+            element.strobeLast = element.strobe;
+        }
     }
 }

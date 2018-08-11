@@ -23,6 +23,7 @@ public class ElectricalDigitalDisplayRender extends SixNodeElementRender {
     public float current = 0.0f;
     public float max = 1000.0f;
     public float min = 0.0f;
+    public boolean strobe = false;
     public ElectricalDigitalDisplayDescriptor.Style style = LED;
 
     public ElectricalDigitalDisplayRender(SixNodeEntity entity, Direction side, SixNodeDescriptor descriptor) {
@@ -30,21 +31,16 @@ public class ElectricalDigitalDisplayRender extends SixNodeElementRender {
         this.descriptor = (ElectricalDigitalDisplayDescriptor) descriptor;
     }
 
-    protected CableRenderDescriptor cableRenderDescriptor = new CableRenderDescriptor(
-        "eln", "sprites/cable.png",
-        0.95f, 0.10f
-    );
-
     @Override
     public CableRenderDescriptor getCableRender(LRDU lrdu) {
-        return cableRenderDescriptor;
+        return Eln.instance.stdCableRenderSignal;
     }
 
     @Override
     public void draw() {
         super.draw();
         drawSignalPin(front.inverse(), descriptor.pinDistance);
-        descriptor.draw((int) (min + current * (max - min)), style);
+        descriptor.draw((int) (min + current * (max - min)), strobe, style);
     }
 
     @Override
@@ -54,6 +50,7 @@ public class ElectricalDigitalDisplayRender extends SixNodeElementRender {
             current = stream.readFloat();
             min = stream.readFloat();
             max = stream.readFloat();
+            strobe = stream.readBoolean();
             //Utils.println(String.format("EDDR values %f (%f - %f)", current, min, max));
         } catch(IOException e) {
             e.printStackTrace();
