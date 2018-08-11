@@ -75,6 +75,7 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalSignalBusCableElement;
 import mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor;
 import mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor;
+import mods.eln.sixnode.electricaldigitaldisplay.ElectricalDigitalDisplayDescriptor;
 import mods.eln.sixnode.electricalentitysensor.ElectricalEntitySensorDescriptor;
 import mods.eln.sixnode.electricalfiredetector.ElectricalFireDetectorDescriptor;
 import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor;
@@ -2199,6 +2200,18 @@ public class Eln {
                 obj.getObj("DigitalWallClock"),
                 20000.0 / (3600 * 15)
 
+            );
+
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+
+        {
+            subId = 6;
+            name = TR_NAME(Type.NONE, "Digital Display");
+
+            ElectricalDigitalDisplayDescriptor desc = new ElectricalDigitalDisplayDescriptor(
+                name,
+                obj.getObj("DigitalDisplay")
             );
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
