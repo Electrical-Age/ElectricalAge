@@ -99,6 +99,7 @@ D_Flip_Flop_Chip.name=D Flip Flop Chip
 Data_Logger.name=Data Logger
 Data_Logger_Print.name=Data Logger Print
 Dielectric.name=Dielectric
+Digital_Display.name=Digital Display
 Digital_Watch.name=Digital Watch
 Electrical_Anemometer_Sensor.name=Electrical Anemometer Sensor
 Electrical_Breaker.name=Electrical Breaker
