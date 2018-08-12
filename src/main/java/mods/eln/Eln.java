@@ -122,6 +122,7 @@ import mods.eln.sound.SoundCommand;
 import mods.eln.transparentnode.FuelGeneratorDescriptor;
 import mods.eln.transparentnode.FuelHeatFurnaceDescriptor;
 import mods.eln.transparentnode.LargeRheostatDescriptor;
+import mods.eln.transparentnode.NixieTubeDescriptor;
 import mods.eln.transparentnode.autominer.AutoMinerDescriptor;
 import mods.eln.transparentnode.battery.BatteryDescriptor;
 import mods.eln.transparentnode.computercraftio.PeripheralHandler;
@@ -2162,6 +2163,18 @@ public class Eln {
             );
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+
+        {
+            subId = 7;
+            name = TR_NAME(Type.NONE, "Nixie Tube");
+
+            NixieTubeDescriptor desc = new NixieTubeDescriptor(
+                name,
+                obj.getObj("NixieTube")
+            );
+
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
 
         {
