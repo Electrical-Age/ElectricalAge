@@ -43,6 +43,9 @@ public class ElectricalDigitalDisplayDescriptor extends SixNodeDescriptor {
     }
 
     void draw(int value, boolean strobe, Style style) {
+        if(value < 0) value = 0;
+        if(value > 9999) value = 9999;
+
         switch(style) {
             case LED:
                 obj.bindTexture("Digits_LED.png");
