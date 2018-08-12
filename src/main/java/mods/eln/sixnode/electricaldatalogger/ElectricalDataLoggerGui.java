@@ -19,7 +19,7 @@ import static mods.eln.i18n.I18N.tr;
 
 public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextFieldElnObserver {
 
-    GuiButton resetBt, voltageType, energyType, currentType, powerType, celsiusType, percentType, config, printBt, pause;
+    GuiButton resetBt, voltageType, energyType, currentType, powerType, celsiusType, percentType, noType, config, printBt, pause;
     GuiTextFieldEln samplingPeriod, maxValue, minValue, yCursorValue;
     ElectricalDataLoggerRender render;
 
@@ -40,6 +40,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
         voltageType.visible = false;
         energyType.visible = false;
         percentType.visible = false;
+        noType.visible = false;
         currentType.visible = false;
         powerType.visible = false;
         celsiusType.visible = false;
@@ -59,6 +60,7 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
         voltageType.visible = true;
         energyType.visible = true;
         percentType.visible = true;
+        noType.visible = true;
         currentType.visible = true;
         powerType.visible = true;
         celsiusType.visible = true;
@@ -81,21 +83,22 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
         celsiusType = newGuiButton(176 / 2 + 2, 8 + 40 + 4 - 2, 75, tr("Temp. [*C]"));
         percentType = newGuiButton(176 / 2 - 75 - 2, 8 + 60 + 6 - 2, 75, tr("Percent [-]%"));
         energyType = newGuiButton(176 / 2 + 2, 8 + 60 + 6 - 2, 75, tr("Energy [J]"));
+        noType = newGuiButton(176 / 2 - 75 / 2 - 2, 8 + 80 + 8 - 2, 75, tr("Unit"));
 
         resetBt = newGuiButton(176 / 2 - 50, 8 + 20 + 2 - 2, 48, tr("Reset"));
         pause = newGuiButton(176 / 2 + 2, 8 + 20 + 2 - 2, 48, "");
 
-        printBt = newGuiButton(176 / 2 - 48 / 2, 123, 48, tr("Print"));
+        printBt = newGuiButton(176 / 2 - 48 / 2, 146, 48, tr("Print"));
 
-        samplingPeriod = newGuiTextField(30, 101, 50);
+        samplingPeriod = newGuiTextField(30, 124, 50);
         samplingPeriod.setText(render.log.samplingPeriod);
         samplingPeriod.setComment(new String[]{tr("Sampling period")});
 
-        maxValue = newGuiTextField(176 - 50 - 30, 101 - 7, 50);
+        maxValue = newGuiTextField(176 - 50 - 30, 124 - 7, 50);
         maxValue.setText(render.log.maxValue);
         maxValue.setComment(new String[]{tr("Y-axis max")});
 
-        minValue = newGuiTextField(176 - 50 - 30, 101 + 8, 50);
+        minValue = newGuiTextField(176 - 50 - 30, 124 + 8, 50);
         minValue.setText(render.log.minValue);
         minValue.setComment(new String[]{tr("Y-axis min")});
 
@@ -120,6 +123,8 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
                 render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.energyType);
             } else if (object == percentType) {
                 render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.percentType);
+            } else if(object == noType) {
+                render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.noType);
             } else if (object == powerType) {
                 render.clientSetByte(ElectricalDataLoggerElement.setUnitId, DataLogs.powerType);
             } else if (object == celsiusType) {
@@ -179,6 +184,9 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
             case DataLogs.energyType:
                 energyType.enabled = false;
                 break;
+            case DataLogs.noType:
+                noType.enabled = false;
+                break;
         }
 
         if (render.pause)
@@ -208,20 +216,20 @@ public class ElectricalDataLoggerGui extends GuiContainerEln implements GuiTextF
             GL11.glBegin(GL11.GL_QUADS);
             GL11.glVertex2f(-bckrndMargin, -bckrndMargin);
             GL11.glVertex2f(3.2f + bckrndMargin, -bckrndMargin);
-            GL11.glVertex2f(3.2f + bckrndMargin, 1.2f + 3 * bckrndMargin);
-            GL11.glVertex2f(-bckrndMargin, 1.2f + 3 * bckrndMargin);
+            GL11.glVertex2f(3.2f + bckrndMargin, 1.6f + 3 * bckrndMargin);
+            GL11.glVertex2f(-bckrndMargin, 1.6f + 3 * bckrndMargin);
             GL11.glEnd();
             UtilsClient.enableCulling();
             UtilsClient.enableTexture();
 
             GL11.glColor4f(render.descriptor.cr, render.descriptor.cg, render.descriptor.cb, 1);
-            render.log.draw(2.9f, 1.2f, render.descriptor.textColor);
+            render.log.draw(2.9f, 1.6f, render.descriptor.textColor);
             GL11.glPopMatrix();
         }
     }
 
     @Override
     protected GuiHelperContainer newHelper() {
-        return new GuiHelperContainer(this, 176, 230, 8, 148);
+        return new GuiHelperContainer(this, 176, 253, 8, 171);
     }
 }
