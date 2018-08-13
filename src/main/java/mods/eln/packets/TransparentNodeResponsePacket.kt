@@ -40,7 +40,7 @@ open class TransparentNodeResponsePacket : IMessage {
         coord = Coordonate(x, y, z, w)
         val i1 = keys.iterator()
         val i2 = values.iterator()
-        var localmap = HashMap<String, String>()
+        var localmap = LinkedHashMap<String, String>()
         while (i1.hasNext() && i2.hasNext()) {
             localmap.put(i1.next(), i2.next())
         }
