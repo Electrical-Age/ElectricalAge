@@ -88,7 +88,7 @@ public class SixNodeBlock extends NodeBlock {
         return entity == null ? 0 : entity.getDamageValue(world, x, y, z);
     }
 
-    SixNodeEntity getEntity(World world, int x, int y, int z) {
+    SixNodeEntity getEntity(IBlockAccess world, int x, int y, int z) {
         TileEntity tileEntity = world.getTileEntity(x, y, z);
         if (tileEntity != null && tileEntity instanceof SixNodeEntity)
             return (SixNodeEntity) tileEntity;
@@ -120,7 +120,16 @@ public class SixNodeBlock extends NodeBlock {
         return 0;
     }
 
-	/*
+    @Override
+    public int colorMultiplier(IBlockAccess p_149720_1_, int p_149720_2_, int p_149720_3_, int p_149720_4_) {
+        SixNodeEntity ent = getEntity(p_149720_1_, p_149720_2_, p_149720_3_, p_149720_4_);
+        if(ent != null && ent.sixNodeCacheBlock != Blocks.air) {
+            return ent.sixNodeCacheBlock.colorMultiplier(p_149720_1_, p_149720_2_, p_149720_3_, p_149720_4_);
+        }
+        return super.colorMultiplier(p_149720_1_, p_149720_2_, p_149720_3_, p_149720_4_);
+    }
+
+    /*
 	 * @Override public int getLightOpacity(World world, int x, int y, int z) {
 	 * 
 	 * return 255; }

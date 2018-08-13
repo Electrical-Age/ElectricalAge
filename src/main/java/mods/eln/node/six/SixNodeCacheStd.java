@@ -13,7 +13,13 @@ public class SixNodeCacheStd implements ISixNodeCache {
         Block b = Block.getBlockFromItem(stack.getItem());
         if (b == null) return false;
         if (b instanceof BlockContainer) return false;
-        return b.getRenderType() == 0 && stack.getItem() instanceof SixNodeItem == false;
+        if (stack.getItem() instanceof SixNodeItem) return false;
+        switch(b.getRenderType()) {
+            case 0: return true;
+            case 31: return true;  // Logs
+            case 39: return true;  // Quartz block
+            default: return false;
+        }
     }
 
     @Override
