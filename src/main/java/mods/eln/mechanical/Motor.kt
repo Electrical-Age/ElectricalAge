@@ -50,13 +50,14 @@ class MotorDescriptor(
     val nominalRads = nominalRads
     val nominalU = nominalU
     val nominalP = nominalP
+    val maxP = 32000f  // TODO (Grissess): Calculate?
     val elecPPerDU = elecPPerDU
     val shaftPPerDU = shaftPPerDU
     val thermalLoadInitializer = thermalLoadInitializer
 
     val radsToU = LinearFunction(0f, 0f, nominalRads, nominalU)
 
-    override val sound = "eln:shaft_motor"
+    val customSound = "eln:shaft_motor"
     val efficiency = 0.99
 
     override val obj = obj
@@ -122,7 +123,7 @@ class MotorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescripto
     }
 
     init {
-        addLoopedSound(MotorLoopedSound(desc.sound, coordonate()))
+        addLoopedSound(MotorLoopedSound(desc.customSound, coordonate()))
         mask.set(LRDU.Down, true)
     }
 
@@ -131,7 +132,7 @@ class MotorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescripto
             for(i in 1..6) ledColors[i] = Color.black
             ledColors[0] = RED.adjustLuminanceClamped((-power / desc.nominalP * 400).toFloat(), 0f, 60f)
         } else {
-            val slice = desc.nominalP / 5
+            val slice = desc.maxP / 5
             var current = power
             for(i in 0..6) {
                 ledColors[i] = ledColorBase[i].adjustLuminanceClamped((current / slice * 100).toFloat(), 0f, 65f)
@@ -163,7 +164,7 @@ class MotorRender(entity: TransparentNodeEntity, desc_: TransparentNodeDescripto
         val power = stream.readDouble()
 
         setPower(power)
-        volumeSetting.target = Math.abs(power / desc.nominalP).toFloat() / 4f
+        volumeSetting.target = Math.min(1.0f, Math.abs(power / desc.maxP).toFloat()) / 4f
     }
 }
 
@@ -212,11 +213,9 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
             // admonition: I don't actually know how this works.
             val th = wireLoad.subSystem.getTh(wireLoad, powerSource)
             var U: Double
-            if(th.U < noTorqueU) {
-                // Input U is insufficient to spin the shaft faster.
-                // Lower the voltage very slightly--this acts like a very
-                // inefficient generator.
-                U = th.U * 0.95 + noTorqueU * 0.05
+            if(noTorqueU < th.U) {
+                //
+                U = th.U * 0.999 + noTorqueU * 0.001
             } else if(th.isHighImpedance()) {
                 // No actual connection, let the system float
                 U = noTorqueU
@@ -239,11 +238,10 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     inner class MotorShaftProcess : IProcess {
         override fun process(time: Double) {
             val p = powerSource.p
-            val pFrac = (p / desc.nominalP).toFloat()
             var E = -p * time
-            if(E > 0) {
+            if(E < 0) {
                 // Pushing power--this is very inefficient
-                E = E * 2.0
+                E = E * 10.0
             }
             maybePublishP(E / time)
             E = E - defaultDrag * Math.max(shaft.rads, 10.0)
