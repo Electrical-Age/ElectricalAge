@@ -10,63 +10,60 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
-import java.util.Random;
-
 public class ReplicatorPopProcess implements IProcess {
 
-	public ReplicatorPopProcess() {
-	}
-	
-	public static double popPerSecondPerPlayer = 1.0 / 60;
+    public ReplicatorPopProcess() {
+    }
 
-	@Override
-	public void process(double time) {
-		World world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServers[0];
-		
-		int replicatorCount = 0;
+    public static double popPerSecondPerPlayer = 1.0 / 60;
 
-		for(Object o : world.loadedEntityList) {
-			if(o instanceof ReplicatorEntity) {
-				replicatorCount++;
-				if(replicatorCount > 100) {
-					ReplicatorEntity r = (ReplicatorEntity)o;
-					r.setDead();
-				}
-			}
-		}
+    @Override
+    public void process(double time) {
+        World world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServers[0];
 
-		if(world.difficultySetting == EnumDifficulty.PEACEFUL) return;
-		
-		if (world.getWorldInfo().isThundering()) {
-	        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();       
-		    for (Object obj :  world.playerEntities) {
-		    	EntityPlayerMP player = (EntityPlayerMP) obj;
-				if (Math.random()*(world.playerEntities.size()) < time * popPerSecondPerPlayer && player.worldObj == world) {	
-					int x, y, z;				
-					Random rand = new Random();
-					x = (int) (player.posX + Utils.rand(-100, 100));
-					z = (int) (player.posZ + Utils.rand(-100, 100));
-					y = 2;
-					Utils.println("POP");
+        int replicatorCount = 0;
 
-					if(world.blockExists(x, y, z) == false) break;
+        for (Object o : world.loadedEntityList) {
+            if (o instanceof ReplicatorEntity) {
+                replicatorCount++;
+                if (replicatorCount > 100) {
+                    ReplicatorEntity r = (ReplicatorEntity) o;
+                    r.setDead();
+                }
+            }
+        }
 
-					while (world.getBlock(x, y, z) != Blocks.air || Utils.getLight(world, EnumSkyBlock.Block, x, y, z) > 6) {
-						y++;
-					}
+        if (world.difficultySetting == EnumDifficulty.PEACEFUL) return;
 
-					ReplicatorEntity entityliving = new ReplicatorEntity(world);
-					entityliving.setLocationAndAngles(x + 0.5, y, z + 0.5, 0f, 0f);
-					entityliving.rotationYawHead = entityliving.rotationYaw;
-					entityliving.renderYawOffset = entityliving.rotationYaw;
-					world.spawnEntityInWorld(entityliving);
-					entityliving.playLivingSound();
-					entityliving.isSpawnedFromWeather = true;
-					Utils.println("Spawn Replicator at " + x + " " + y + " " + z);					
-				}
-			}
-		}
-	}
+        if (world.getWorldInfo().isThundering()) {
+            MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+            for (Object obj : world.playerEntities) {
+                EntityPlayerMP player = (EntityPlayerMP) obj;
+                if (Math.random() * (world.playerEntities.size()) < time * popPerSecondPerPlayer && player.worldObj == world) {
+                    int x, y, z;
+                    x = (int) (player.posX + Utils.rand(-100, 100));
+                    z = (int) (player.posZ + Utils.rand(-100, 100));
+                    y = 2;
+                    Utils.println("POP");
+
+                    if (world.blockExists(x, y, z) == false) break;
+
+                    while (world.getBlock(x, y, z) != Blocks.air || Utils.getLight(world, EnumSkyBlock.Block, x, y, z) > 6) {
+                        y++;
+                    }
+
+                    ReplicatorEntity entityliving = new ReplicatorEntity(world);
+                    entityliving.setLocationAndAngles(x + 0.5, y, z + 0.5, 0f, 0f);
+                    entityliving.rotationYawHead = entityliving.rotationYaw;
+                    entityliving.renderYawOffset = entityliving.rotationYaw;
+                    world.spawnEntityInWorld(entityliving);
+                    entityliving.playLivingSound();
+                    entityliving.isSpawnedFromWeather = true;
+                    Utils.println("Spawn Replicator at " + x + " " + y + " " + z);
+                }
+            }
+        }
+    }
 }
 /*		World world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServers[0];
 if (world.getWorldInfo().isThundering()) {

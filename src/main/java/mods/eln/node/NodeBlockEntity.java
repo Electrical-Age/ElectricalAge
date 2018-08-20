@@ -1,62 +1,34 @@
 package mods.eln.node;
 
 
-import java.awt.JobAttributes.SidesType;
-import java.io.ByteArrayInputStream;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import mods.eln.Eln;
+import mods.eln.cable.CableRenderDescriptor;
+import mods.eln.misc.*;
+import mods.eln.server.DelayedBlockRemove;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S3FPacketCustomPayload;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.world.EnumSkyBlock;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
-
-import cpw.mods.fml.common.FMLCommonHandler;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-
-import mods.eln.Eln;
-import mods.eln.cable.CableRender;
-import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.misc.Coordonate;
-import mods.eln.misc.Direction;
-import mods.eln.misc.INBTTReady;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.LRDUCubeMask;
-import mods.eln.misc.LRDUMask;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
-import mods.eln.server.DelayedBlockRemove;
-import mods.eln.sim.*;
-import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerManager;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 
 
 public abstract class NodeBlockEntity extends TileEntity implements ITileEntitySpawnClient, INodeEntity {
 
-    public static LinkedList<NodeBlockEntity> clientList = new LinkedList<NodeBlockEntity>();
+    public static final LinkedList<NodeBlockEntity> clientList = new LinkedList<NodeBlockEntity>();
 
 
     public NodeBlock getBlock() {
@@ -213,9 +185,8 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
 
     public void onBlockAdded() {
-        if (!worldObj.isRemote) {
-            if (getNode() == null)
-                worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+        if (!worldObj.isRemote && getNode() == null) {
+            worldObj.setBlockToAir(xCoord, yCoord, zCoord);
         }
     }
 
@@ -274,7 +245,12 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         }
         if (this.worldObj == null) return null;
         if (node == null) {
-            node = (Node) NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
+            NodeBase nodeFromCoordonate = NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord, worldObj));
+            if (nodeFromCoordonate instanceof Node) {
+                node = (Node) nodeFromCoordonate;
+            } else {
+                Utils.println("ASSERT WRONG TYPE public Node getNode " + new Coordonate(xCoord, yCoord, zCoord, worldObj));
+            }
             if (node == null) DelayedBlockRemove.add(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
         }
         return node;

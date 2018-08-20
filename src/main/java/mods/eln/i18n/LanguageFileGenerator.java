@@ -10,6 +10,9 @@ import java.util.Set;
 class LanguageFileGenerator {
     private static final String FILE_HEADER = "#<ELN_LANGFILE_V1_1>\n";
 
+    private LanguageFileGenerator() {
+    }
+
     public static void updateFile(final File file, final Map<String, Set<TranslationItem>> strings,
                                   final Properties existingTranslations) throws IOException {
         final FileWriter writer = new FileWriter(file);

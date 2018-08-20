@@ -8,6 +8,9 @@ import java.util.Properties;
 import java.util.Set;
 
 class LanguageFileUpdater {
+    private LanguageFileUpdater() {
+    }
+
     private static void updateFile(final File languageFile, final Map<String, Set<TranslationItem>> stringsToTranslate)
         throws IOException {
         // Parse the existing translations from the language file.
@@ -37,7 +40,7 @@ class LanguageFileUpdater {
             if (languageFileOrFolder.isFile()) {
                 updateFile(languageFileOrFolder, stringsToTranslate);
             } else if (languageFileOrFolder.isDirectory()) {
-                for (File file: languageFileOrFolder.listFiles()) {
+                for (File file : languageFileOrFolder.listFiles()) {
                     if (file.getName().endsWith(".lang") && !file.getName().startsWith("_")) {
                         updateFile(file, stringsToTranslate);
                     }
@@ -45,7 +48,7 @@ class LanguageFileUpdater {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.exit(1);
+            Runtime.getRuntime().exit(1);
         }
     }
 }

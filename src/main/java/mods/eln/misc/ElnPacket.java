@@ -8,13 +8,13 @@ import java.nio.ByteBuffer;
 
 public class ElnPacket extends Packet {
 
-	private String channel;
-	private byte[] data;
+    private String channel;
+    private byte[] data;
 
-	public ElnPacket(String channel, ByteBuffer data) {
-		//  this(channel, data.array());
-	}
-	  /*
+    public ElnPacket(String channel, ByteBuffer data) {
+        //  this(channel, data.array());
+    }
+      /*
 	  	public ElnPacket(String channel, byte[] data) {
 		  ByteBuf
 	    this.channel = channel;
@@ -51,15 +51,15 @@ public class ElnPacket extends Packet {
 		return data.length;
 	}*/
 
-	@Override
-	public void processPacket(INetHandler arg0) {
-	}
+    @Override
+    public void processPacket(INetHandler arg0) {
+    }
 
-	@Override
-	public void readPacketData(PacketBuffer arg0) {
-	}
+    @Override
+    public void readPacketData(PacketBuffer arg0) {
+    }
 
-	@Override
-	public void writePacketData(PacketBuffer arg0) {
-	}
+    @Override
+    public void writePacketData(PacketBuffer arg0) {
+    }
 }

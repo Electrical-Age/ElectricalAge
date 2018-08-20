@@ -5,11 +5,11 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.security.CodeSource;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -18,9 +18,11 @@ import java.util.jar.JarFile;
  */
 public class Obj3DFolder {
 
-    private HashMap<String, Obj3D> nameToObjHash = new HashMap<String, Obj3D>();
+    private Map<String, Obj3D> nameToObjHash = new HashMap<String, Obj3D>();
 
-    /** Load all obj models available in the release mod asset folder. */
+    /**
+     * Load all obj models available in the release mod asset folder.
+     */
     public void loadAllElnModels() {
         try {
             // Find location of electrical age jar file.
@@ -56,7 +58,7 @@ public class Obj3DFolder {
     }
 
     private void loadModelsRecursive(File folder, Integer modelCount) {
-        for (File file: folder.listFiles()) {
+        for (File file : folder.listFiles()) {
             if (file.isDirectory()) {
                 loadModelsRecursive(file, modelCount);
             } else if (file.getName().toLowerCase().endsWith(".obj")) {
@@ -68,19 +70,22 @@ public class Obj3DFolder {
         }
     }
 
-  /**
-   * Load an obj file of a model.
-   * @param modelPath path inside model folder (ex. Vumeter/Vumeter.obj)
-   */
-  private void loadObj(String modelPath) {
+    /**
+     * Load an obj file of a model.
+     *
+     * @param modelPath path inside model folder (ex. Vumeter/Vumeter.obj)
+     */
+    private void loadObj(String modelPath) {
         Obj3D obj = new Obj3D();
         if (obj.loadFile(modelPath)) {
             String tag = modelPath.replaceAll(".obj", "").replaceAll(".OBJ", "");
             tag = tag.substring(tag.lastIndexOf('/') + 1, tag.length());
-            nameToObjHash.put(tag, obj);	// name of the file, without extension
+            if (nameToObjHash.containsKey(tag)) {
+                Utils.println("Double load of model " + tag);
+            }
+            nameToObjHash.put(tag, obj);    // name of the file, without extension
             Utils.println(String.format(" - model '%s' loaded", modelPath));
-        }
-      else {
+        } else {
             Utils.println(String.format(" - unable to load model '%s'", modelPath));
         }
     }

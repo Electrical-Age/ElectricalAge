@@ -12,7 +12,7 @@ public class ConfigurableAiWander extends EntityAIBase {
     private double yPosition;
     private double zPosition;
     private double speed;
-    
+
     private int randLimit;
 
     public ConfigurableAiWander(EntityCreature par1EntityCreature, double speed, int randLimit) {

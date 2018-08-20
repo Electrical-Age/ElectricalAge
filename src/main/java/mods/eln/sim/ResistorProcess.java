@@ -27,8 +27,8 @@ public class ResistorProcess implements IProcess {
     @Override
     public void process(double time) {
         double newR = Math.max(
-                MnaConst.noImpedance,
-                element.nominalRs * (1 + descriptor.tempCoef * thermal.Tc));
+            MnaConst.noImpedance,
+            element.nominalRs * (1 + descriptor.tempCoef * thermal.Tc));
         if (element.control != null) {
             newR *= (element.control.getNormalized() + 0.01) / 1.01;
         }

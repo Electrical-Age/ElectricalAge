@@ -15,22 +15,22 @@ public class ComputerProbeBlock extends SimpleNodeBlock {
     private IIcon[] icon = new IIcon[6];
 
     public ComputerProbeBlock() {
-		super(Material.rock);
-	}
+        super(Material.packedIce);
+    }
 
-	@Override
-	public TileEntity createNewTileEntity(World var1, int var2) {
-		return new ComputerProbeEntity();
-	}
+    @Override
+    public TileEntity createNewTileEntity(World var1, int var2) {
+        return new ComputerProbeEntity();
+    }
 
-	@Override
-	protected SimpleNode newNode() {
-		return new ComputerProbeNode();
-	}
+    @Override
+    protected SimpleNode newNode() {
+        return new ComputerProbeNode();
+    }
 
-	public IIcon getIcon(int side, int meta) {
-		return icon[side];
-	}
+    public IIcon getIcon(int side, int meta) {
+        return icon[side];
+    }
 
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister register) {
@@ -38,7 +38,7 @@ public class ComputerProbeBlock extends SimpleNodeBlock {
         icon[5] = register.registerIcon("eln:computerprobe_xp");
         icon[2] = register.registerIcon("eln:computerprobe_zn");
         icon[3] = register.registerIcon("eln:computerprobe_zp");
-        icon[0] = register.registerIcon("eln:computerprobe_y");
-        icon[1] = icon[0];
+        icon[0] = register.registerIcon("eln:computerprobe_yn");
+        icon[1] = register.registerIcon("eln:computerprobe_yp");
     }
 }

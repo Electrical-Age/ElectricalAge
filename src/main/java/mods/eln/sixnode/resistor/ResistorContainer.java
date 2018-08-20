@@ -14,7 +14,7 @@ import static mods.eln.i18n.I18N.tr;
  * Created by svein on 05/08/15.
  */
 public class ResistorContainer extends BasicContainer {
-    static final int coreId = 0;
+    public static final int coreId = 0;
 
     public ResistorContainer(EntityPlayer player, IInventory inventory) {
         super(player, inventory, new Slot[]{

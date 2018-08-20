@@ -10,48 +10,53 @@ public abstract class Component {
 
     public IAbstractor abstractedBy;
 
-	public Component() {
-		//System.out.println("new " + this);
-	}
+    public Component() {
+        //System.out.println("new " + this);
+    }
 
-	public void addedTo(SubSystem s) {
-		this.subSystem = s;
-	}
+    public void addedTo(SubSystem s) {
+        this.subSystem = s;
+    }
 
-	public SubSystem getSubSystem() {
-		if(isAbstracted()) return abstractedBy.getAbstractorSubSystem();
-		return subSystem;
-	}
+    public SubSystem getSubSystem() {
+        if (isAbstracted()) return abstractedBy.getAbstractorSubSystem();
+        return subSystem;
+    }
 
-	public abstract void applyTo(SubSystem s);
+    public abstract void applyTo(SubSystem s);
 
-	public abstract State[] getConnectedStates();
+    public abstract State[] getConnectedStates();
 
-	public boolean canBeReplacedByInterSystem(){ return false; }
+    public boolean canBeReplacedByInterSystem() {
+        return false;
+    }
 
-	public void breakConnection(){}
+    public void breakConnection() {
+    }
 
-	public void returnToRootSystem(RootSystem root){
-		root.addComponents.add(this);
-	}
+    public void returnToRootSystem(RootSystem root) {
+        root.addComponents.add(this);
+    }
 
-	public void dirty() {
-		if (abstractedBy != null) {
-			abstractedBy.dirty(this);
-		} else if (getSubSystem() != null) {
-			getSubSystem().invalidate();
-		}
-	}
-	
-	public void quitSubSystem() {
-		subSystem = null;
-	}
+    public void dirty() {
+        if (abstractedBy != null) {
+            abstractedBy.dirty(this);
+        } else if (getSubSystem() != null) {
+            getSubSystem().invalidate();
+        }
+    }
 
-	public boolean isAbstracted() {
-		return abstractedBy != null;
-	}	
-	
-	public void onAddToRootSystem(){}
+    public void quitSubSystem() {
+        subSystem = null;
+    }
 
-	public void onRemovefromRootSystem(){}
+    public boolean isAbstracted() {
+        return abstractedBy != null;
+    }
+
+    public void onAddToRootSystem() {
+    }
+
+    public void onRemovefromRootSystem() {
+    }
 }

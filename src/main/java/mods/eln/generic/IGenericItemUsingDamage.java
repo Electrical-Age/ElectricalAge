@@ -4,6 +4,7 @@ import net.minecraft.item.ItemStack;
 
 public interface IGenericItemUsingDamage {
 
-	public GenericItemUsingDamageDescriptor getDescriptor(int damage);
-	public GenericItemUsingDamageDescriptor getDescriptor(ItemStack itemStack);
+    public GenericItemUsingDamageDescriptor getDescriptor(int damage);
+
+    public GenericItemUsingDamageDescriptor getDescriptor(ItemStack itemStack);
 }

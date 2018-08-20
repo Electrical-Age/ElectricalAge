@@ -8,41 +8,41 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 
 public class ElectricalWeatherSensorSlowProcess implements IProcess, INBTTReady {
-	
-	ElectricalWeatherSensorElement element;
+
+    ElectricalWeatherSensorElement element;
 
     double timeCounter = 0;
     static final double refreshPeriode = 0.2;
     RcInterpolator rc = new RcInterpolator(3f);
     final float premonitionTime = 120;
-	
-	public ElectricalWeatherSensorSlowProcess(ElectricalWeatherSensorElement element) {
-		this.element = element;
-	}
 
-	@Override
-	public void process(double time) {
-		timeCounter += time;
+    public ElectricalWeatherSensorSlowProcess(ElectricalWeatherSensorElement element) {
+        this.element = element;
+    }
+
+    @Override
+    public void process(double time) {
+        timeCounter += time;
 
         if (timeCounter > refreshPeriode) {
-			timeCounter -= refreshPeriode;
-			Coordonate coord = element.sixNode.coordonate;
+            timeCounter -= refreshPeriode;
+            Coordonate coord = element.sixNode.coordonate;
 
-	    	float target = 0f;
-	    	
-	    	if (coord.getWorldExist()) {
-				World world = coord.world();
-	
-		    	if (world.isRaining()) {
-		    		//float f = Math.max(0f, (float)((premonitionTime - rain * time) / premonitionTime));
-		    		target = 0.5f;
-		    	}
-		    	if (world.isThundering()) {
-		    		target = 1.0f;
-		    	}
-				rc.setTarget(target);
-	    	}
-	    	
+            float target = 0f;
+
+            if (coord.getWorldExist()) {
+                World world = coord.world();
+
+                if (world.isRaining()) {
+                    //float f = Math.max(0f, (float)((premonitionTime - rain * time) / premonitionTime));
+                    target = 0.5f;
+                }
+                if (world.isThundering()) {
+                    target = 1.0f;
+                }
+                rc.setTarget(target);
+            }
+
 	    /*	int rain = world.getWorldInfo().getRainTime();
 	    	int thunder = world.getWorldInfo().getThunderTime();
 	    	
@@ -52,21 +52,21 @@ public class ElectricalWeatherSensorSlowProcess implements IProcess, INBTTReady 
 	    		target = target * (1 - f) + f * 1f;
 	    	}
 	    	*/
-	    	//Utils.println(target);
+            //Utils.println(target);
 
-			rc.step((float) time);
-			element.outputGateProcess.setOutputNormalized(rc.get());
-		}
-	}
-	
-	@Override
-	public void readFromNBT(NBTTagCompound nbt, String str) {
-		rc.setValue(nbt.getFloat(str + "rc"));
-		
-	}
-	
-	@Override
-	public void writeToNBT(NBTTagCompound nbt, String str) {
-		nbt.setFloat(str + "rc", rc.get());
-	}
+            rc.step((float) time);
+            element.outputGateProcess.setOutputNormalized(rc.get());
+        }
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound nbt, String str) {
+        rc.setValue(nbt.getFloat(str + "rc"));
+
+    }
+
+    @Override
+    public void writeToNBT(NBTTagCompound nbt, String str) {
+        nbt.setFloat(str + "rc", rc.get());
+    }
 }

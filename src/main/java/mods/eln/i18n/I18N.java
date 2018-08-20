@@ -13,11 +13,11 @@ public class I18N {
         return FMLCommonHandler.instance().getCurrentLanguage();
     }
 
-    public static String encodeLangKey(final String key) {
+    static String encodeLangKey(final String key) {
         return encodeLangKey(key, true);
     }
 
-    public static String encodeLangKey(String key, boolean replaceWhitspaces) {
+    static String encodeLangKey(String key, boolean replaceWhitspaces) {
         if (key != null) {
             if (replaceWhitspaces) {
                 key = key.replace(' ', '_');
@@ -34,19 +34,19 @@ public class I18N {
     /**
      * Translates the given string. You can pass arguments to the method and reference them in the string using
      * the placeholders %N$ whereas N is the index of the actual parameter <b>starting at 1</b>.
-     *
+     * <p>
      * Example: tr("You have %1$ lives left", 4);
-     *
+     * <p>
      * IT IS IMPORTANT THAT YOU PASS THE <b>STRING LITERALS</b> AT LEAST ONCE AS THE FIRST PARAMETER TO THIS METHOD or
      * you call the method TR() with the actual string literal in order to register the translation text automatically!
      * Otherwise the translation will not be added to the language files. There is no problem to use the tr() method
      * afterwards using an already registered string in the code using a string variable as the first parameter.
      * <p/>
      *
-     * @param text      Text to translate
-     * @param objects   Arguments to integrate into the text.
-     * @return          Translated text or original text (Argument placeholders are replaced by the actual arguments
-     *                  anyway) if no translation is present.
+     * @param text    Text to translate
+     * @param objects Arguments to integrate into the text.
+     * @return Translated text or original text (Argument placeholders are replaced by the actual arguments
+     * anyway) if no translation is present.
      */
     public static String tr(final String text, Object... objects) {
         // Try to find the translation for the string using forge API.
@@ -56,8 +56,8 @@ public class I18N {
         if (translation == null || "".equals(translation)) {
             translation = text;
         } else {
-            // Replace new line placeholders by real new lines.
-            translation = translation.replace("\\n", "\n");
+            // Replace placeholders .
+            translation = translation.replace("\\n", "\n").replace("\\:", ":");
         }
 
         // Replace placeholders in string by actual string values of the passed objects.
@@ -74,8 +74,8 @@ public class I18N {
      * A common use case is to add text to the language file which is translated using a text variable with the
      * method tr().
      *
-     * @param text    String LITERAL to add to the language files.
-     * @return          Exactly the same text as given to the method.
+     * @param text String LITERAL to add to the language files.
+     * @return Exactly the same text as given to the method.
      */
     public static String TR(final String text) {
         return encodeLangKey(text);
@@ -152,7 +152,7 @@ public class I18N {
         /**
          * Returns the prefix.
          *
-         * @return  Prefix for the type of translatable text.
+         * @return Prefix for the type of translatable text.
          */
         public String getPrefix() {
             return prefix;
@@ -165,14 +165,14 @@ public class I18N {
         public boolean isWhitespacesInFileReplaced() {
             return replaceWhitespacesInFile;
         }
-    };
+    }
 
     /**
      * Used to register a name to translate. The forge mechanisms are used in order to translate the name.
      *
-     * @param type      Type the translatable name is related to.
-     * @param text      String LITERAL to register for translation.
-     * @return          Returns the same text literal, forge will translate the name magically.
+     * @param type Type the translatable name is related to.
+     * @param text String LITERAL to register for translation.
+     * @return Returns the same text literal, forge will translate the name magically.
      */
     public static String TR_NAME(final Type type, final String text) {
         if (type.isEncodedAtRuntime()) {
@@ -185,9 +185,9 @@ public class I18N {
     /**
      * Used to register a description to translate. The forge mechanisms are used in order to translate the description.
      *
-     * @param type      Type the translatable description is related to.
-     * @param text      String LITERAL to register for translation.
-     * @return          Returns the same text literal, forge will translate the description magically.
+     * @param type Type the translatable description is related to.
+     * @param text String LITERAL to register for translation.
+     * @return Returns the same text literal, forge will translate the description magically.
      */
     public static String TR_DESC(final Type type, final String text) {
         if (type.isEncodedAtRuntime()) {

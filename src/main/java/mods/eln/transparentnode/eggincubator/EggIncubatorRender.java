@@ -1,8 +1,5 @@
 package mods.eln.transparentnode.eggincubator;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.cable.CableRenderType;
 import mods.eln.misc.Direction;
@@ -18,13 +15,15 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-
 import org.lwjgl.opengl.GL11;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class EggIncubatorRender extends TransparentNodeElementRender {
 
-	TransparentNodeElementInventory inventory = new EggIncubatorInventory(1, 64, this);
-	EggIncubatorDescriptor descriptor;
+    TransparentNodeElementInventory inventory = new EggIncubatorInventory(1, 64, this);
+    EggIncubatorDescriptor descriptor;
 
     float alpha = 0;
 
@@ -37,59 +36,59 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
     CableRenderType cableRenderType;
 
     public EggIncubatorRender(TransparentNodeEntity tileEntity, TransparentNodeDescriptor descriptor) {
-		super(tileEntity, descriptor);
-		this.descriptor = (EggIncubatorDescriptor) descriptor;
-	}
+        super(tileEntity, descriptor);
+        this.descriptor = (EggIncubatorDescriptor) descriptor;
+    }
 
-	@Override
-	public void draw() {
-		GL11.glPushMatrix();
-		front.glRotateXnRef();
-		if (egg != null) {
-			UtilsClient.drawEntityItem(egg, 0.0f, -0.3f, 0.13f, alpha, 0.6f);
-		}
-		descriptor.draw(eggStackSize, (float) (voltage / descriptor.nominalVoltage));
-		GL11.glPopMatrix();
-		cableRenderType = drawCable(front.down(), descriptor.cable.render, eConn, cableRenderType);
-	}
+    @Override
+    public void draw() {
+        GL11.glPushMatrix();
+        front.glRotateXnRef();
+        if (egg != null) {
+            UtilsClient.drawEntityItem(egg, 0.0f, -0.3f, 0.13f, alpha, 0.6f);
+        }
+        descriptor.draw(eggStackSize, (float) (voltage / descriptor.nominalVoltage));
+        GL11.glPopMatrix();
+        cableRenderType = drawCable(front.down(), descriptor.cable.render, eConn, cableRenderType);
+    }
 
-	@Override
-	public void refresh(float deltaT) {
-		alpha += deltaT * 60;
-		if (alpha >= 360) alpha -= 360;
-	}
-    
-	@Override
-	public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
-		return new EggIncubatorGuiDraw(player, inventory, this);
-	}
-    
-	@Override
-	public void networkUnserialize(DataInputStream stream) {
-		super.networkUnserialize(stream);
-		try {
-			eggStackSize = stream.readByte();
-			if (eggStackSize != 0) {
-				egg = new EntityItem(this.tileEntity.getWorldObj(), 0, 0, 0, new ItemStack(Items.egg));
-			} else {
-				egg = null;
-			}	
-			eConn.deserialize(stream);
-			voltage = stream.readFloat();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}		
-		cableRenderType = null;
-	}
+    @Override
+    public void refresh(float deltaT) {
+        alpha += deltaT * 60;
+        if (alpha >= 360) alpha -= 360;
+    }
 
-	@Override
-	public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
-		return descriptor.cable.render;
-	}
-	
-	@Override
-	public void notifyNeighborSpawn() {
-		super.notifyNeighborSpawn();
-		cableRenderType = null;
-	}
+    @Override
+    public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
+        return new EggIncubatorGuiDraw(player, inventory, this);
+    }
+
+    @Override
+    public void networkUnserialize(DataInputStream stream) {
+        super.networkUnserialize(stream);
+        try {
+            eggStackSize = stream.readByte();
+            if (eggStackSize != 0) {
+                egg = new EntityItem(this.tileEntity.getWorldObj(), 0, 0, 0, new ItemStack(Items.egg));
+            } else {
+                egg = null;
+            }
+            eConn.deserialize(stream);
+            voltage = stream.readFloat();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        cableRenderType = null;
+    }
+
+    @Override
+    public CableRenderDescriptor getCableRender(Direction side, LRDU lrdu) {
+        return descriptor.cable.render;
+    }
+
+    @Override
+    public void notifyNeighborSpawn() {
+        super.notifyNeighborSpawn();
+        cableRenderType = null;
+    }
 }

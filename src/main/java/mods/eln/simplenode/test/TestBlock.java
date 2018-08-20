@@ -8,17 +8,17 @@ import net.minecraft.world.World;
 
 public class TestBlock extends SimpleNodeBlock {
 
-	public TestBlock() {
-		super(Material.rock);
-	}
+    public TestBlock() {
+        super(Material.packedIce);
+    }
 
-	@Override
-	public TileEntity createNewTileEntity(World var1, int meta) {
-		return new TestEntity();
-	}
+    @Override
+    public TileEntity createNewTileEntity(World var1, int meta) {
+        return new TestEntity();
+    }
 
-	@Override
-	protected SimpleNode newNode() {
-		return new TestNode();
-	}
+    @Override
+    protected SimpleNode newNode() {
+        return new TestNode();
+    }
 }

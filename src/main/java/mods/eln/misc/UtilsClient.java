@@ -1,10 +1,6 @@
 package mods.eln.misc;
 
-import java.awt.Color;
-import java.io.ByteArrayOutputStream;
-import java.util.HashSet;
-import java.util.List;
-
+import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.misc.Obj3D.Obj3DPart;
@@ -30,12 +26,15 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import static mods.eln.i18n.I18N.tr;
-
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
+import java.awt.Color;
+import java.io.ByteArrayOutputStream;
+import java.util.HashSet;
+import java.util.List;
+
+import static mods.eln.i18n.I18N.tr;
 
 public class UtilsClient {
 
@@ -49,12 +48,15 @@ public class UtilsClient {
 
     final static ResourceLocation whiteTexture = new ResourceLocation("eln", "sprites/cable.png");
 
+    private UtilsClient() {
+    }
+
     public static float distanceFromClientPlayer(World world, int xCoord, int yCoord, int zCoord) {
         EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
 
         return (float) Math.sqrt((xCoord - player.posX) * (xCoord - player.posX)
-                + (yCoord - player.posY) * (yCoord - player.posY)
-                + (zCoord - player.posZ) * (zCoord - player.posZ));
+            + (yCoord - player.posY) * (yCoord - player.posY)
+            + (zCoord - player.posZ) * (zCoord - player.posZ));
     }
 
     public static float distanceFromClientPlayer(SixNodeEntity tileEntity) {
@@ -198,7 +200,7 @@ public class UtilsClient {
         GL11.glAlphaFunc(GL11.GL_GREATER, 0.02f);
         // GL11.glDisable(GL11.GL_ALPHA_TEST);
         /*
-		 * Utils.println(GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB) + " " + GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA) + " " + GL11.glGetInteger(GL14.GL_BLEND_DST_RGB) + " " + GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
+         * Utils.println(GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB) + " " + GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA) + " " + GL11.glGetInteger(GL14.GL_BLEND_DST_RGB) + " " + GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
 		 */
 
         // Utils.println(GL11.glGetInteger(GL11.GL_BLEND_SRC) + " " + GL11.glGetInteger(GL11.GL_BLEND_DST) + " " + GL11.glIsEnabled(GL11.GL_BLEND));
@@ -278,23 +280,25 @@ public class UtilsClient {
     }
 
     public static void drawEnergyBare(ItemRenderType type, float e) {
-        float x = 13f, y = 15f - e * 14f;
+        drawIcon(type, new ResourceLocation("eln", "sprites/portablebatteryoverlay.png"));
+
+        float x = 13f, y = 14f - e * 12f;
         GL11.glDisable(GL11.GL_TEXTURE_2D);
 
         GL11.glColor3f(0f, 0f, 0f);
         GL11.glBegin(GL11.GL_QUADS);
-        GL11.glVertex3f(x + 2f, 1, 0.01f);
-        GL11.glVertex3f(x, 1, 0f);
-        GL11.glVertex3f(x, 15f, 0f);
-        GL11.glVertex3f(x + 2f, 15f, 0.01f);
+        GL11.glVertex3f(x + 1f, 2, 0.01f);
+        GL11.glVertex3f(x, 2, 0f);
+        GL11.glVertex3f(x, 14f, 0f);
+        GL11.glVertex3f(x + 1f, 14f, 0.01f);
         GL11.glEnd();
 
         GL11.glColor3f(1, e, 0f);
         GL11.glBegin(GL11.GL_QUADS);
         GL11.glVertex3f(x + 1f, y, 0.01f);
         GL11.glVertex3f(x, y, 0f);
-        GL11.glVertex3f(x, 15f, 0f);
-        GL11.glVertex3f(x + 1f, 15f, 0.01f);
+        GL11.glVertex3f(x, 14f, 0f);
+        GL11.glVertex3f(x + 1f, 14f, 0.01f);
         GL11.glEnd();
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -551,7 +555,7 @@ public class UtilsClient {
         return uuid++;
     }
 
-    static HashSet<Integer> glListsAllocated = new HashSet<Integer>();
+    static final HashSet<Integer> glListsAllocated = new HashSet<Integer>();
 
     public static int glGenListsSafe() {
         int id = GL11.glGenLists(1);
@@ -576,7 +580,7 @@ public class UtilsClient {
     }
 
     public static void showItemTooltip(List src, List dst) {
-        if (src.size() == 0) return;
+        if (src.isEmpty()) return;
         if (showItemTooltip()) {
             dst.addAll(src);
         } else {

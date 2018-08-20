@@ -1,31 +1,65 @@
 package mods.eln.sixnode.electricalfiredetector;
 
+import mods.eln.item.electricalitem.BatteryItem;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
+import mods.eln.sixnode.electricalwatch.ElectricalWatchContainer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFire;
+import net.minecraft.item.ItemStack;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class ElectricalFireDetectorSlowProcess implements IProcess {
 
-	ElectricalFireDetectorElement element;
+    ElectricalFireDetectorElement element;
 
-    boolean firePresent;
-    RcInterpolator rc = new RcInterpolator(0.6f);
+    RcInterpolator rc;
 
     double t = 0;
 
-	public ElectricalFireDetectorSlowProcess(ElectricalFireDetectorElement element) {
-		this.element = element;
-	}
+    public ElectricalFireDetectorSlowProcess(final ElectricalFireDetectorElement element) {
+        this.element = element;
+        if (!element.descriptor.batteryPowered) {
+            rc = new RcInterpolator(0.6f);
+        }
+    }
 
-	@Override
-	public void process(double time) {
+    double getBatteryLevel() {
+        ItemStack batteryStack = element.getInventory().getStackInSlot(ElectricalWatchContainer.batteryId);
+        BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack);
+        if (battery != null) {
+            return battery.getEnergy(batteryStack) / battery.getEnergyMax(batteryStack);
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public void process(double time) {
+        if (element.descriptor.batteryPowered) {
+            ItemStack batteryStack = element.getInventory().getStackInSlot(ElectricalFireDetectorContainer.Companion.getBatteryId());
+            BatteryItem battery = (BatteryItem) BatteryItem.getDescriptor(batteryStack);
+            double energy;
+            if (battery == null || (energy = battery.getEnergy(batteryStack)) < element.descriptor.PowerComsumption * time * 4) {
+                boolean changed = element.powered;
+                element.powered = false;
+                if (changed) {
+                    element.firePresent = false;
+                    element.needPublish();
+                }
+                return;
+            } else {
+                boolean changed = !element.powered;
+                element.powered = true;
+                if (changed) element.needPublish();
+                battery.setEnergy(batteryStack, energy - element.descriptor.PowerComsumption * time);
+            }
+        }
+
         t += time;
-
         if (t >= element.descriptor.updateInterval) {
             t = 0;
             boolean fireDetected = false;
@@ -63,13 +97,13 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                 for (int dy = -maxRangeHalf; dy <= maxRangeHalf; ++dy)
                     for (int dz = -maxRangeHalf; dz <= maxRangeHalf; ++dz) {
                         Block block = detectionBBCenter.world().getBlock(detectionBBCenter.x + dx, detectionBBCenter.y + dy,
-                                detectionBBCenter.z + dz);
+                            detectionBBCenter.z + dz);
                         if (block.getClass() == BlockFire.class) {
                             fireDetected = true;
 
                             Coordonate coord = element.getCoordonate();
-                            ArrayList<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5,
-                                    detectionBBCenter.x + dx + 0.5, detectionBBCenter.y + dy + 0.5, detectionBBCenter.z + dz + 0.5);
+                            List<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5,
+                                detectionBBCenter.x + dx + 0.5, detectionBBCenter.y + dy + 0.5, detectionBBCenter.z + dz + 0.5);
 
                             for (Block b : blockList)
                                 if (b.isOpaqueCube()) {
@@ -82,14 +116,16 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                             }
                         }
                     }
-            if (firePresent != fireDetected) {
-                firePresent = fireDetected;
+            if (element.firePresent != fireDetected) {
+                element.firePresent = fireDetected;
                 element.needPublish();
             }
         }
 
-        rc.setTarget(firePresent ? 1 : 0);
-        rc.step((float)time);
-        element.outputGateProcess.setOutputNormalized(rc.get());
+        if (!element.descriptor.batteryPowered) {
+            rc.setTarget(element.firePresent ? 1 : 0);
+            rc.step((float) time);
+            element.outputGateProcess.setOutputNormalized(rc.get());
+        }
     }
 }

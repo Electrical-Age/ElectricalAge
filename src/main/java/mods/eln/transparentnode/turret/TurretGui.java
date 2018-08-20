@@ -1,9 +1,12 @@
 package mods.eln.transparentnode.turret;
 
-import mods.eln.gui.*;
+import mods.eln.gui.GuiContainerEln;
+import mods.eln.gui.GuiHelperContainer;
+import mods.eln.gui.GuiVerticalTrackBar;
+import mods.eln.gui.IGuiObject;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.client.gui.GuiButton;
 
 import static mods.eln.i18n.I18N.tr;
 
@@ -21,12 +24,12 @@ public class TurretGui extends GuiContainerEln {
     public void initGui() {
         super.initGui();
 
-        killOrSpareButton = newGuiButton(11, 6, 60, "");
+        killOrSpareButton = newGuiButton(11, 6, 100, "");
 
-        chargePower = newGuiVerticalTrackBar(106, 8, 20, 35);
-        chargePower.setStepId(99);
-        chargePower.setStepIdMax(99);
-        chargePower.setRange(100, 10000);
+        chargePower = newGuiVerticalTrackBar(146, 8, 20, 35);
+        chargePower.setStepId(49);
+        chargePower.setStepIdMax(49);
+        chargePower.setRange(100, 5000);
         chargePower.setComment(0, tr("Recharge power:"));
         chargePower.setValue(render.chargePower);
     }

@@ -1,9 +1,7 @@
 package mods.eln.sixnode.electricalredstoneinput;
 
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,67 +16,72 @@ import static mods.eln.i18n.I18N.tr;
 
 public class ElectricalRedstoneInputDescriptor extends SixNodeDescriptor {
 
-	public float[] pinDistance;
+    public float[] pinDistance;
 
     Obj3D obj;
     Obj3DPart main, led;
 
-	public ElectricalRedstoneInputDescriptor(String name, Obj3D obj) {
-		super(name, ElectricalRedstoneInputElement.class, ElectricalRedstoneInputRender.class);
-		//obj = Eln.instance.obj.getObj(objName);
-		this.obj = obj;
-		if (obj != null) {
-			main = obj.getPart("main");
-			led = obj.getPart("led");
+    public ElectricalRedstoneInputDescriptor(String name, Obj3D obj) {
+        super(name, ElectricalRedstoneInputElement.class, ElectricalRedstoneInputRender.class);
+        //obj = Eln.instance.obj.getObj(objName);
+        this.obj = obj;
+        if (obj != null) {
+            main = obj.getPart("main");
+            led = obj.getPart("led");
 
-			pinDistance = Utils.getSixNodePinDistance(main);
-		}
-	}
+            pinDistance = Utils.getSixNodePinDistance(main);
+        }
 
-	void draw(int redstone) {
-		//LRDU.Down.glRotateOnX();
-		if (main != null) main.draw();
-		
-		float light = redstone / 15f;
-		GL11.glColor4f(light, light, light, 1f);
-		UtilsClient.drawLight(led);
-	}
+        voltageLevelColor = VoltageLevelColor.SignalVoltage;
+    }
 
-	@Override
-	public boolean use2DIcon() {
-		return false;
-	}
+    void draw(int redstone) {
+        //LRDU.Down.glRotateOnX();
+        if (main != null) main.draw();
 
-	@Override
-	public void setParent(Item item, int damage) {
-		super.setParent(item, damage);
-		Data.addSignal(newItemStack());
-	}
-	
-	@Override
-	public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
-		super.addInformation(itemStack, entityPlayer, list, par4);
-		Collections.addAll(list, tr("Converts Redstone signal\nto an electrical voltage.").split("\n"));
-	}
-	
-	@Override
-	public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
-	}
-	
-	@Override
-	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		return true;
-	}
+        float light = redstone / 15f;
+        GL11.glColor4f(light, light, light, 1f);
+        UtilsClient.drawLight(led);
+    }
 
-	@Override
-	public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-		return true;
-	}
-	
-	@Override
-	public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-		if (type == ItemRenderType.INVENTORY) GL11.glScalef(2.8f, 2.8f, 2.8f);
-		draw(15);
-	}
+    @Override
+    public void setParent(Item item, int damage) {
+        super.setParent(item, damage);
+        Data.addSignal(newItemStack());
+    }
+
+    @Override
+    public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
+        super.addInformation(itemStack, entityPlayer, list, par4);
+        Collections.addAll(list, tr("Converts Redstone signal\nto an electrical voltage.").split("\n"));
+    }
+
+    @Override
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        return type != ItemRenderType.INVENTORY;
+    }
+
+    @Override
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+        return true;
+    }
+
+    @Override
+    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        return type != ItemRenderType.INVENTORY;
+    }
+
+    @Override
+    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+        if (type == ItemRenderType.INVENTORY) {
+            super.renderItem(type, item, data);
+        } else {
+            draw(15);
+        }
+    }
+
+    @Override
+    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+        return super.getFrontFromPlace(side, player).right();
+    }
 }

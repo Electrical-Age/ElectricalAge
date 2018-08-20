@@ -130,8 +130,8 @@ public class PacketHandler {
         EntityPlayer clientPlayer = (EntityPlayer) player;
         try {
             clientPlayer.openGui(Eln.instance, stream.readInt(),
-                    clientPlayer.worldObj, stream.readInt(), stream.readInt(),
-                    stream.readInt());
+                clientPlayer.worldObj, stream.readInt(), stream.readInt(),
+                stream.readInt());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -140,7 +140,7 @@ public class PacketHandler {
     void packetForNode(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
         try {
             Coordonate coordonate = new Coordonate(stream.readInt(),
-                    stream.readInt(), stream.readInt(), stream.readByte());
+                stream.readInt(), stream.readInt(), stream.readByte());
 
             NodeBase node = NodeManager.instance.getNodeFromCoordonate(coordonate);
             if (node != null && node.getNodeUuid().equals(stream.readUTF())) {
@@ -155,7 +155,7 @@ public class PacketHandler {
 
     void packetForClientNode(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
         EntityPlayer clientPlayer = (EntityPlayer) player;
-        int x = 0, y = 0, z = 0, dimention = 0;
+        int x, y, z, dimention;
         try {
 
             x = stream.readInt();

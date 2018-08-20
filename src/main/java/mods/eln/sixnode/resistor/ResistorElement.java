@@ -1,5 +1,7 @@
 package mods.eln.sixnode.resistor;
 
+import mods.eln.Eln;
+import mods.eln.i18n.I18N;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -9,8 +11,8 @@ import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.node.six.SixNodeElement;
 import mods.eln.node.six.SixNodeElementInventory;
 import mods.eln.sim.ElectricalLoad;
-import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.ResistorProcess;
+import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Resistor;
 import mods.eln.sim.mna.misc.MnaConst;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
@@ -23,8 +25,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 
+import javax.annotation.Nullable;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ResistorElement extends SixNodeElement {
 
@@ -67,9 +72,9 @@ public class ResistorElement extends SixNodeElement {
         thermalLoad.set(thermalRs, thermalRp, thermalC);
         slowProcessList.add(thermalWatchdog);
         thermalWatchdog
-                .set(thermalLoad)
-                .setLimit(this.descriptor.thermalWarmLimit, this.descriptor.thermalCoolLimit)
-                .set(new WorldExplosion(this).cableExplosion());
+            .set(thermalLoad)
+            .setLimit(this.descriptor.thermalWarmLimit, this.descriptor.thermalCoolLimit)
+            .set(new WorldExplosion(this).cableExplosion());
 
         resistorProcess = new ResistorProcess(this, r, thermalLoad, this.descriptor);
         if (this.descriptor.tempCoef != 0 || this.descriptor.isRheostat) {
@@ -113,7 +118,20 @@ public class ResistorElement extends SixNodeElement {
         double u = -Math.abs(aLoad.getU() - bLoad.getU());
         double i = Math.abs(r.getI());
         return Utils.plotOhm(Utils.plotUIP(u, i), r.getR()) +
-                (control != null ? Utils.plotPercent("C", control.getNormalized()) : "");
+            (control != null ? Utils.plotPercent("C", control.getNormalized()) : "");
+    }
+
+    @Nullable
+    @Override
+    public Map<String, String> getWaila() {
+        Map<String, String> info = new HashMap<String, String>();
+        info.put(I18N.tr("Resistance"), Utils.plotValue(r.getR(), "\u2126"));
+        info.put(I18N.tr("Voltage drop"), Utils.plotVolt("", Math.abs(r.getU())));
+        if (Eln.wailaEasyMode) {
+            info.put(I18N.tr("Current"), Utils.plotAmpere("", Math.abs(r.getI())));
+
+        }
+        return info;
     }
 
     @Override
@@ -135,11 +153,6 @@ public class ResistorElement extends SixNodeElement {
     public void setupPhysical() {
         nominalRs = descriptor.getRsValue(inventory);
         resistorProcess.process(0);
-    }
-
-    @Override
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return onBlockActivatedRotate(entityPlayer);
     }
 
     @Override

@@ -12,23 +12,21 @@ import net.minecraft.inventory.Slot;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class PowerInductorContainer extends BasicContainer{
+public class PowerInductorContainer extends BasicContainer {
 
 
-	static final int cableId = 0;
-	static final int coreId = 1;
-	
-	public PowerInductorContainer(EntityPlayer player, IInventory inventory) {
-		super(player, inventory, new Slot[]{
-			new GenericItemUsingDamageSlot(inventory, cableId, 132, 8, 19, CopperCableDescriptor.class,
-				SlotSkin.medium,
-				new String[]{tr("Copper cable slot"), tr("(Increases inductance)")}),
-			new GenericItemUsingDamageSlot(inventory, coreId, 132 + 20, 8, 1, FerromagneticCoreDescriptor.class,
-				SlotSkin.medium,
-				new String[]{tr("Ferromagnetic core slot")})});
-	}
+    static final int cableId = 0;
+    static final int coreId = 1;
 
-
+    public PowerInductorContainer(EntityPlayer player, IInventory inventory) {
+        super(player, inventory, new Slot[]{
+            new GenericItemUsingDamageSlot(inventory, cableId, 132, 8, 19, CopperCableDescriptor.class,
+                SlotSkin.medium,
+                new String[]{tr("Copper cable slot"), tr("(Increases inductance)")}),
+            new GenericItemUsingDamageSlot(inventory, coreId, 132 + 20, 8, 1, FerromagneticCoreDescriptor.class,
+                SlotSkin.medium,
+                new String[]{tr("Ferromagnetic core slot")})});
+    }
 
 
 }

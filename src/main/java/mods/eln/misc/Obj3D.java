@@ -1,15 +1,16 @@
 package mods.eln.misc;
 
+import cpw.mods.fml.common.FMLLog;
 import net.minecraft.util.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Obj3D {
+    private Timer updateTimer = null;
+    private boolean locked = false;
 
     List<Vertex> vertex = new ArrayList<Vertex>();
     List<Uv> uv = new ArrayList<Uv>();
@@ -24,11 +25,11 @@ public class Obj3D {
 
     private String dirPath;
 
-	public void bindTexture(String texFilename){
-		ResourceLocation textureResource = new ResourceLocation("eln", "model/" + dirPath + "/" + texFilename);
-		UtilsClient.bindTexture(textureResource);
-	}
-	
+    public void bindTexture(String texFilename) {
+        ResourceLocation textureResource = new ResourceLocation("eln", "model/" + dirPath + "/" + texFilename);
+        UtilsClient.bindTexture(textureResource);
+    }
+
     public static class FaceGroup {
         String mtlName = null;
         public ResourceLocation textureResource;
@@ -38,6 +39,29 @@ public class Obj3D {
 
         public void bindTexture() {
             UtilsClient.bindTexture(textureResource);
+        }
+
+        public BoundingBox boundingBox() {
+            float xMin = 0, xMax = 0, yMin = 0, yMax = 0, zMin = 0, zMax = 0;
+            for (Face f : face) {
+                for (Vertex v : f.vertex) {
+                    xMin = xMax = v.x;
+                    yMin = yMax = v.y;
+                    zMin = zMax = v.z;
+                    break;
+                }
+            }
+            for (Face f : face) {
+                for (Vertex v : f.vertex) {
+                    xMin = Math.min(xMin, v.x);
+                    xMax = Math.max(xMax, v.x);
+                    yMin = Math.min(yMin, v.y);
+                    yMax = Math.max(yMax, v.y);
+                    zMin = Math.min(zMin, v.z);
+                    zMax = Math.max(zMax, v.z);
+                }
+            }
+            return new BoundingBox(xMin, xMax, yMin, yMax, zMin, zMax);
         }
 
         public void draw() {
@@ -54,44 +78,44 @@ public class Obj3D {
         private void drawVertex() {
             drawVertex(0, 0);
         }
-		
+
         private void drawVertex(float offsetX, float offsetY) {
-          int mode = 0;
+            int mode = 0;
 
-          for (Face f : face) {
-            if (f.vertexNbr != mode) {
-              if (mode != 0)
+            for (Face f : face) {
+                if (f.vertexNbr != mode) {
+                    if (mode != 0)
+                        GL11.glEnd();
+                    switch (f.vertexNbr) {
+                        case 3:
+                            GL11.glBegin(GL11.GL_TRIANGLES);
+                            break;
+                        case 4:
+                            GL11.glBegin(GL11.GL_QUADS);
+                            break;
+                        case 6:
+                            //	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
+                            break;
+                        case 8:
+                            //	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
+                            break;
+                    }
+
+                    mode = f.vertexNbr;
+                }
+
+                GL11.glNormal3f(f.normal.x, f.normal.y, f.normal.z);
+                for (int idx = 0; idx < mode; idx++) {
+                    if (f.uv[idx] != null)
+                        GL11.glTexCoord2f(f.uv[idx].u + offsetX, f.uv[idx].v + offsetY);
+                    GL11.glVertex3f(f.vertex[idx].x, f.vertex[idx].y, f.vertex[idx].z);
+                }
+            }
+
+            if (mode != 0)
                 GL11.glEnd();
-              switch (f.vertexNbr) {
-                case 3:
-                  GL11.glBegin(GL11.GL_TRIANGLES);
-                  break;
-                case 4:
-                  GL11.glBegin(GL11.GL_QUADS);
-                  break;
-                case 6:
-                  //	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
-                  break;
-                case 8:
-                  //	GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
-                  break;
-              }
-
-              mode = f.vertexNbr;
-            }
-
-            GL11.glNormal3f(f.normal.x, f.normal.y, f.normal.z);
-            for (int idx = 0; idx < mode; idx++) {
-              if (f.uv[idx] != null)
-                GL11.glTexCoord2f(f.uv[idx].u+offsetX, f.uv[idx].v+offsetY);
-              GL11.glVertex3f(f.vertex[idx].x, f.vertex[idx].y, f.vertex[idx].z);
-            }
-          }
-
-          if (mode != 0)
-            GL11.glEnd();
         }
-		
+
         public void drawNoBind() {
             if (!listReady) {
                 listReady = true;
@@ -107,6 +131,7 @@ public class Obj3D {
     }
 
     public class Obj3DPart {
+        // TODO(Baughn): Profile, see if it makes sense to use vertex arrays.
 
         List<Vertex> vertex;
         List<Uv> uv;
@@ -117,6 +142,7 @@ public class Obj3D {
 
         public float xMin = 0, yMin = 0, zMin = 0;
         public float xMax = 0, yMax = 0, zMax = 0;
+        private BoundingBox boundingBox = null;
 
         float ox, oy, oz;
         float ox2, oy2, oz2;
@@ -124,6 +150,17 @@ public class Obj3D {
         public Obj3DPart(List<Vertex> vertex, List<Uv> uv) {
             this.vertex = vertex;
             this.uv = uv;
+        }
+
+        void clear() {
+            faceGroup.clear();
+            boundingBox = null;
+            xMin = 0;
+            yMin = 0;
+            zMin = 0;
+            xMax = 0;
+            yMax = 0;
+            zMax = 0;
         }
 
         void addVertex(Vertex v) {
@@ -134,13 +171,16 @@ public class Obj3D {
             xMax = Math.max(xMax, v.x);
             yMax = Math.max(yMax, v.y);
             zMax = Math.max(zMax, v.z);
+            boundingBox = null;
         }
 
         public float getFloat(String name) {
-            return nameToFloatHash.get(name);
+            return nameToFloatHash.getOrDefault(name, 0f);
         }
 
         public void draw(float angle, float x, float y, float z) {
+            if (locked) return;
+
             GL11.glPushMatrix();
 
             GL11.glTranslatef(ox, oy, oz);
@@ -152,17 +192,21 @@ public class Obj3D {
         }
 
         public void draw(float angle, float x, float y, float z, float texOffsetX, float texOffsetY) {
+            if (locked) return;
+
             GL11.glPushMatrix();
 
             GL11.glTranslatef(ox, oy, oz);
             GL11.glRotatef(angle, x, y, z);
             GL11.glTranslatef(-ox, -oy, -oz);
-            draw(texOffsetX,texOffsetY);
+            draw(texOffsetX, texOffsetY);
 
             GL11.glPopMatrix();
         }
 
         public void draw(float angle, float x, float y, float z, float angle2, float x2, float y2, float z2) {
+            if (locked) return;
+
             GL11.glPushMatrix();
 
             GL11.glTranslatef(ox, oy, oz);
@@ -177,6 +221,8 @@ public class Obj3D {
         }
 
         public void drawNoBind(float angle, float x, float y, float z) {
+            if (locked) return;
+
             GL11.glPushMatrix();
 
             GL11.glTranslatef(ox, oy, oz);
@@ -188,31 +234,49 @@ public class Obj3D {
         }
 
         public void drawNoBind() {
+            if (locked) return;
+
             for (FaceGroup fg : faceGroup) {
                 fg.drawNoBind();
             }
         }
 
         public void draw() {
+            if (locked) return;
+
             //	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
             for (FaceGroup fg : faceGroup) {
                 fg.draw();
             }
             //	Minecraft.getMinecraft().mcProfiler.endSection();
         }
-		
-		public void draw(float texOffsetX, float texOffsetY) {
-			//	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
-			for (FaceGroup fg : faceGroup) {
-				fg.drawVertex(texOffsetX,texOffsetY);
-			}
-			//	Minecraft.getMinecraft().mcProfiler.endSection();
-		}
+
+        public void draw(float texOffsetX, float texOffsetY) {
+            if (locked) return;
+
+            //	Minecraft.getMinecraft().mcProfiler.startSection("OBJ");
+            for (FaceGroup fg : faceGroup) {
+                fg.drawVertex(texOffsetX, texOffsetY);
+            }
+            //	Minecraft.getMinecraft().mcProfiler.endSection();
+        }
+
+        // Returns the bounding box of the vertices we'd draw.
+        public BoundingBox boundingBox() {
+            if (boundingBox == null) {
+                BoundingBox box = BoundingBox.mergeIdentity();
+                for (FaceGroup fg : faceGroup) {
+                    box = box.merge(fg.boundingBox());
+                }
+                boundingBox = box;
+            }
+            return boundingBox;
+        }
     }
 
     Hashtable<String, Obj3DPart> nameToPartHash = new Hashtable<String, Obj3DPart>();
 
-    class Vertex {
+    public class Vertex {
         Vertex(float x, float y, float z) {
             this.x = x;
             this.y = y;
@@ -298,30 +362,62 @@ public class Obj3D {
 
     /**
      * Load a resource (obj, mtl, txt file) for a model.
+     *
      * @param filePath the path from the "assets/eln" folder
      * @return the  {@code BufferedReader} or null if the resource does not exist
      */
-    private BufferedReader getResourceAsStream(String filePath) {
+    @Nullable
+    private BufferedReader getResourceAsStream(String filePath, boolean trySource) {
+        BufferedReader reader = null;
+        if (trySource) {
+            final String path = "../src/main/resources/assets/eln/" + filePath;
+            try {
+                return new BufferedReader(new FileReader(path));
+            } catch (FileNotFoundException e) {
+                System.out.println(e);
+            }
+        }
+
         final String path = "assets/eln/" + filePath;
         try {
             InputStream in = getClass().getClassLoader().getResourceAsStream(path);
-            return new BufferedReader(new InputStreamReader(in, "UTF-8"));
+            reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
         } catch (Exception e) {
-            // Utils.println("Unable to load the resource '" + path + "' !");
-            return null;
+            // txt files are optional.
+            if (!filePath.endsWith(".txt")) {
+                System.out.println(e);
+            }
         }
+
+        return reader;
     }
 
-    public boolean loadFile(String filePath) {
+    public boolean loadFile(final String filePath) {
+        return loadFile(filePath, false);
+    }
+
+    public boolean loadFile(final String filePath, boolean reload) {
         Obj3DPart part = null;
         FaceGroup fg = null;
+
+        if (reload) {
+            locked = true;
+            vertex.clear();
+            uv.clear();
+            xMax = 0;
+            yMin = 0;
+            zMin = 0;
+            xMax = 0;
+            yMax = 0;
+            zMax = 0;
+        }
 
         dirPath = filePath.substring(0, filePath.lastIndexOf('/'));
         String mtlName = null;
 
         try {
             {
-                BufferedReader bufferedReader = getResourceAsStream("model/" + filePath);
+                BufferedReader bufferedReader = getResourceAsStream("model/" + filePath, reload);
                 if (bufferedReader == null) {
                     Utils.println(String.format(" - failed to load obj '%s'", filePath));
                     return false;
@@ -331,8 +427,19 @@ public class Obj3D {
                 while ((line = bufferedReader.readLine()) != null) {
                     String[] words = line.split(" ");
                     if (words[0].equals("o")) {
-                        part = new Obj3DPart(vertex, uv);
-                        nameToPartHash.put(words[1], part);
+                        if (reload) {
+                            part = nameToPartHash.get(words[1]);
+                            if (part != null) {
+                                part.clear();
+                            } else {
+                                part = new Obj3DPart(vertex, uv);
+                                nameToPartHash.put(words[1], part);
+                            }
+                        } else {
+                            part = new Obj3DPart(vertex, uv);
+                            nameToPartHash.put(words[1], part);
+                        }
+
                     } else if (words[0].equals("v")) {
                         Vertex v = new Vertex(Float.parseFloat(words[1]), Float.parseFloat(words[2]), Float.parseFloat(words[3]));
                         part.addVertex(v);
@@ -344,7 +451,7 @@ public class Obj3D {
                         zMax = Math.max(zMax, v.z);
                     } else if (words[0].equals("vt")) {
                         part.uv.add(new Uv(Float.parseFloat(words[1]),
-                                1 - Float.parseFloat(words[2])));
+                            1 - Float.parseFloat(words[2])));
                     } else if (words[0].equals("f")) {
                         int vertexNbr = words.length - 1;
                         if (vertexNbr == 3) {
@@ -375,7 +482,7 @@ public class Obj3D {
             }
 
             {
-                BufferedReader bufferedReader = getResourceAsStream("model/" + dirPath + "/" + mtlName);
+                BufferedReader bufferedReader = getResourceAsStream("model/" + dirPath + "/" + mtlName, reload);
                 if (bufferedReader == null) {
                     Utils.println(String.format(" - failed to load mtl '%s'", mtlName));
                     return false;
@@ -408,15 +515,20 @@ public class Obj3D {
 
         try {
             final String txtPath = filePath.replace(".obj", ".txt").replace(".OBJ", ".txt");
-            BufferedReader bufferedReader = getResourceAsStream("model/" + txtPath);
+            BufferedReader bufferedReader = getResourceAsStream("model/" + txtPath, reload);
             if (bufferedReader == null) {
                 Utils.println(String.format(" - failed to load txt '%s'", txtPath));
-            }
-            else {
+            } else {
                 String line;
+                int lineNumber = 0;
                 while ((line = bufferedReader.readLine()) != null) {
+                    ++lineNumber;
                     String[] words = line.split(" ");
-                    if (words[0].equals("o")) {
+                    if (words[0].startsWith("#")) {
+                        // # is a comment - ignore line.
+                    } else if (words.length == 1 && "".equals(words[0])) {
+                        // empty line, ignore.
+                    } else if (words[0].equals("o")) {
                         part = nameToPartHash.get(words[1]);
                     } else if (words[0].equals("f")) {
                         if (words[1].equals("originX")) {
@@ -436,6 +548,21 @@ public class Obj3D {
                         }
                     } else if (words[0].equals("s")) {
                         nameToStringHash.put(words[1], words[2]);
+                    } else if (!reload && words.length == 2 && words[0].equals("r")) {
+                        int refresh = Integer.parseInt(words[1]);
+                        if (refresh != 0) {
+                            updateTimer = new Timer();
+                            updateTimer.scheduleAtFixedRate(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    Utils.println("Reloading model data from " + filePath);
+                                    loadFile(filePath, true);
+                                }
+                            }, refresh, refresh);
+                        }
+                    } else {
+                        FMLLog.warning("Invalid syntax in EA model text file %1$s on line %2$d: %3$s",
+                            txtPath, lineNumber, line);
                     }
                 }
             }
@@ -451,6 +578,11 @@ public class Obj3D {
 
         dimMax = Math.max(Math.max(xMax, yMax), zMax);
         dimMaxInv = 1.0f / dimMax;
+
+        if (reload) {
+            locked = false;
+        }
+
         return true;
     }
 

@@ -1,5 +1,21 @@
 language: java
 
+dist: trusty
+
+# Container-based infrastructure
+sudo: false
+
+# Install python dependencies in the home directory (no sudo access)
+# Transifex-client version 0.12.1 is required
+# See https://github.com/transifex/transifex-client/issues/113
+install:
+  - echo "Installing the Transifex client"
+  - pip install --user 'git+https://github.com/eliben/pycparser@release_v2.14'
+  - pip install --user 'requests[security]'
+  - pip install --user transifex-client
+  - echo "Preparing FORGE workspace"
+  - gradle setupDecompWorkspace
+
 env:
   global:
     # $TRANSIFEX_PASSWORD for Transifex (travis encrypt)
@@ -12,6 +28,8 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    - $HOME/.cache/pip
 
 after_success:
   - ./script/transifex.sh
+  - if [ "$TRAVIS_BRANCH" == "1.7.10-MNA" ]; then ./gradlew bintrayUpload; fi

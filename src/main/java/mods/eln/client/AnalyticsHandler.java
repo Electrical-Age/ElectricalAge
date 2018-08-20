@@ -55,7 +55,7 @@ public class AnalyticsHandler {
                     CloseableHttpResponse response = client.execute(new HttpGet(url));
 
                     final int repCode = response.getStatusLine().getStatusCode();
-                    if(repCode != HttpStatus.SC_OK)
+                    if (repCode != HttpStatus.SC_OK)
                         throw new IOException("HTTP error " + repCode);
 
                     // Utils.println("URL: " + url);

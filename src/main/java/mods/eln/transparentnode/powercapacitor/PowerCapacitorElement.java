@@ -1,8 +1,5 @@
 package mods.eln.transparentnode.powercapacitor;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -11,16 +8,11 @@ import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
-import mods.eln.sim.DiodeProcess;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.IProcess;
-import mods.eln.sim.Simulator;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.Capacitor;
-import mods.eln.sim.mna.component.Inductor;
 import mods.eln.sim.mna.component.Resistor;
-import mods.eln.sim.mna.component.VoltageSource;
-import mods.eln.sim.mna.process.PowerSourceBipole;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.BipoleVoltageWatchdog;
 import mods.eln.sim.process.destruct.WorldExplosion;
@@ -29,149 +21,150 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.io.DataInputStream;
+
 public class PowerCapacitorElement extends TransparentNodeElement {
 
-	PowerCapacitorDescriptor descriptor;
-	NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
-	NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
+    PowerCapacitorDescriptor descriptor;
+    NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
+    NbtElectricalLoad negativeLoad = new NbtElectricalLoad("negativeLoad");
 
-	Capacitor capacitor = new Capacitor(positiveLoad, negativeLoad);
-	Resistor dischargeResistor = new Resistor(positiveLoad,negativeLoad);
-	PunkProcess punkProcess = new PunkProcess();
-	BipoleVoltageWatchdog watchdog = new BipoleVoltageWatchdog().set(capacitor);
-	
-	public PowerCapacitorElement(TransparentNode transparentNode,
-			TransparentNodeDescriptor descriptor) {
-		super(transparentNode, descriptor);
-		this.descriptor = (PowerCapacitorDescriptor) descriptor;
+    Capacitor capacitor = new Capacitor(positiveLoad, negativeLoad);
+    Resistor dischargeResistor = new Resistor(positiveLoad, negativeLoad);
+    PunkProcess punkProcess = new PunkProcess();
+    BipoleVoltageWatchdog watchdog = new BipoleVoltageWatchdog().set(capacitor);
 
-		electricalLoadList.add(positiveLoad);
-		electricalLoadList.add(negativeLoad);
-		electricalComponentList.add(capacitor);
-		electricalComponentList.add(dischargeResistor);
-		electricalProcessList.add(punkProcess);
-		slowProcessList.add(watchdog);
-		
-		watchdog.set(new WorldExplosion(this).machineExplosion());
-		positiveLoad.setAsMustBeFarFromInterSystem();
-	}
-	
-	
-	
-	class PunkProcess implements IProcess{
-		double eLeft = 0;
-		double eLegaliseResistor;
-		
-		@Override
-		public void process(double time) {
-			if(eLeft <= 0){
-				eLeft = 0;
-				dischargeResistor.setR(stdDischargeResistor);
-			}else{
-				eLeft -= dischargeResistor.getP()*time;
-				dischargeResistor.setR(eLegaliseResistor);
-			}
-		}
-	}
+    public PowerCapacitorElement(TransparentNode transparentNode,
+                                 TransparentNodeDescriptor descriptor) {
+        super(transparentNode, descriptor);
+        this.descriptor = (PowerCapacitorDescriptor) descriptor;
 
-	@Override
-	public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
-		if (lrdu != LRDU.Down) return null;
-		if (side == front.left()) return positiveLoad;
-		if (side == front.right()) return negativeLoad;
-		return null;
-	}
+        electricalLoadList.add(positiveLoad);
+        electricalLoadList.add(negativeLoad);
+        electricalComponentList.add(capacitor);
+        electricalComponentList.add(dischargeResistor);
+        electricalProcessList.add(punkProcess);
+        slowProcessList.add(watchdog);
 
-	@Override
-	public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
-		return null;
-	}
+        watchdog.set(new WorldExplosion(this).machineExplosion());
+        positiveLoad.setAsMustBeFarFromInterSystem();
+    }
 
-	@Override
-	public int getConnectionMask(Direction side, LRDU lrdu) {
-		if (lrdu != LRDU.Down) return 0;
-		if (side == front.left()) return node.maskElectricalPower;
-		if (side == front.right()) return node.maskElectricalPower;
-		return 0;
-	}
 
-	@Override
-	public String multiMeterString(Direction side) {
-		return Utils.plotAmpere("I", capacitor.getCurrent());
-	}
+    class PunkProcess implements IProcess {
+        double eLeft = 0;
+        double eLegaliseResistor;
 
-	@Override
-	public String thermoMeterString(Direction side) {
-		return null;
-	}
+        @Override
+        public void process(double time) {
+            if (eLeft <= 0) {
+                eLeft = 0;
+                dischargeResistor.setR(stdDischargeResistor);
+            } else {
+                eLeft -= dischargeResistor.getP() * time;
+                dischargeResistor.setR(eLegaliseResistor);
+            }
+        }
+    }
 
-	@Override
-	public void initialize() {
-		Eln.applySmallRs(positiveLoad);
-		Eln.applySmallRs(negativeLoad);
+    @Override
+    public ElectricalLoad getElectricalLoad(Direction side, LRDU lrdu) {
+        if (lrdu != LRDU.Down) return null;
+        if (side == front.left()) return positiveLoad;
+        if (side == front.right()) return negativeLoad;
+        return null;
+    }
 
-		setupPhysical();
-		
-		
-		connect();
-	}
+    @Override
+    public ThermalLoad getThermalLoad(Direction side, LRDU lrdu) {
+        return null;
+    }
 
-	@Override
-	public void inventoryChange(IInventory inventory) {
-		super.inventoryChange(inventory);
-		setupPhysical();
-	}
-	
-	double stdDischargeResistor;
-	
-	boolean fromNbt = false;
-	public void setupPhysical() {
-		double eOld = capacitor.getE();
-		capacitor.setC(descriptor.getCValue(inventory));
-		stdDischargeResistor = descriptor.dischargeTao/capacitor.getC();
-		
-		watchdog.setUNominal(descriptor.getUNominalValue(inventory));
-		punkProcess.eLegaliseResistor = Math.pow(descriptor.getUNominalValue(inventory),2)/400;
-		
-		if(fromNbt){
-			dischargeResistor.setR(stdDischargeResistor);
-			fromNbt = false;
-		}else{
-			double deltaE = capacitor.getE()-eOld;
-			punkProcess.eLeft += deltaE;
-			if(deltaE < 0){
-				dischargeResistor.setR(stdDischargeResistor);
-			}else{
-				dischargeResistor.setR(punkProcess.eLegaliseResistor);
-			}
-		}	
-	}
+    @Override
+    public int getConnectionMask(Direction side, LRDU lrdu) {
+        if (lrdu != LRDU.Down) return 0;
+        if (side == front.left()) return node.maskElectricalPower;
+        if (side == front.right()) return node.maskElectricalPower;
+        return 0;
+    }
 
-	@Override
-	public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
-			float vx, float vy, float vz) {
+    @Override
+    public String multiMeterString(Direction side) {
+        return Utils.plotAmpere("I", capacitor.getCurrent());
+    }
 
-		return false;
-	}
+    @Override
+    public String thermoMeterString(Direction side) {
+        return null;
+    }
 
-	@Override
-	public void writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-		nbt.setDouble("punkELeft",punkProcess.eLeft);
-	}
+    @Override
+    public void initialize() {
+        Eln.applySmallRs(positiveLoad);
+        Eln.applySmallRs(negativeLoad);
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		punkProcess.eLeft = nbt.getDouble("punkELeft");
-		if(Double.isNaN(punkProcess.eLeft)) punkProcess.eLeft = 0;
-		fromNbt = true;
-	}
+        setupPhysical();
 
-	public void networkSerialize(java.io.DataOutputStream stream)
-	{
-		super.networkSerialize(stream);
-		/*
+
+        connect();
+    }
+
+    @Override
+    public void inventoryChange(IInventory inventory) {
+        super.inventoryChange(inventory);
+        setupPhysical();
+    }
+
+    double stdDischargeResistor;
+
+    boolean fromNbt = false;
+
+    public void setupPhysical() {
+        double eOld = capacitor.getE();
+        capacitor.setC(descriptor.getCValue(inventory));
+        stdDischargeResistor = descriptor.dischargeTao / capacitor.getC();
+
+        watchdog.setUNominal(descriptor.getUNominalValue(inventory));
+        punkProcess.eLegaliseResistor = Math.pow(descriptor.getUNominalValue(inventory), 2) / 400;
+
+        if (fromNbt) {
+            dischargeResistor.setR(stdDischargeResistor);
+            fromNbt = false;
+        } else {
+            double deltaE = capacitor.getE() - eOld;
+            punkProcess.eLeft += deltaE;
+            if (deltaE < 0) {
+                dischargeResistor.setR(stdDischargeResistor);
+            } else {
+                dischargeResistor.setR(punkProcess.eLegaliseResistor);
+            }
+        }
+    }
+
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
+                                    float vx, float vy, float vz) {
+
+        return false;
+    }
+
+    @Override
+    public void writeToNBT(NBTTagCompound nbt) {
+        super.writeToNBT(nbt);
+        nbt.setDouble("punkELeft", punkProcess.eLeft);
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound nbt) {
+        super.readFromNBT(nbt);
+        punkProcess.eLeft = nbt.getDouble("punkELeft");
+        if (Double.isNaN(punkProcess.eLeft)) punkProcess.eLeft = 0;
+        fromNbt = true;
+    }
+
+    public void networkSerialize(java.io.DataOutputStream stream) {
+        super.networkSerialize(stream);
+        /*
 		 * try {
 		 * 
 		 * 
@@ -179,13 +172,13 @@ public class PowerCapacitorElement extends TransparentNodeElement {
 		 * 
 		 * e.printStackTrace(); }
 		 */
-	}
+    }
 
-	public static final byte unserializePannelAlpha = 0;
+    public static final byte unserializePannelAlpha = 0;
 
-	public byte networkUnserialize(DataInputStream stream) {
+    public byte networkUnserialize(DataInputStream stream) {
 
-		byte packetType = super.networkUnserialize(stream);
+        byte packetType = super.networkUnserialize(stream);
 		/*
 		 * try { switch(packetType) {
 		 * 
@@ -194,25 +187,25 @@ public class PowerCapacitorElement extends TransparentNodeElement {
 		 * 
 		 * e.printStackTrace(); }
 		 */
-		return unserializeNulldId;
-	}
+        return unserializeNulldId;
+    }
 
-	TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2, 64, this);
+    TransparentNodeElementInventory inventory = new TransparentNodeElementInventory(2, 64, this);
 
-	@Override
-	public IInventory getInventory() {
+    @Override
+    public IInventory getInventory() {
 
-		return inventory;
-	}
+        return inventory;
+    }
 
-	@Override
-	public boolean hasGui() {
-		return true;
-	}
+    @Override
+    public boolean hasGui() {
+        return true;
+    }
 
-	@Override
-	public Container newContainer(Direction side, EntityPlayer player) {
-		return new PowerCapacitorContainer(player, inventory);
-	}
+    @Override
+    public Container newContainer(Direction side, EntityPlayer player) {
+        return new PowerCapacitorContainer(player, inventory);
+    }
 
 }

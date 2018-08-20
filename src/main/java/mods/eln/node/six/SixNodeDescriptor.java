@@ -12,6 +12,7 @@ import static mods.eln.i18n.I18N.tr;
 
 public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor implements IItemRenderer {
     public Class ElementClass, RenderClass;
+    public VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
 
     public SixNodeDescriptor(String name, Class ElementClass, Class RenderClass) {
         super(name);
@@ -19,24 +20,32 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
         this.RenderClass = RenderClass;
     }
 
+    public SixNodeDescriptor(String name, Class ElementClass, Class RenderClass, String iconName) {
+        super(name, iconName);
+        this.ElementClass = ElementClass;
+        this.RenderClass = RenderClass;
+    }
+
     @Override
     public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
+        return voltageLevelColor != VoltageLevelColor.None;
     }
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return (type == ItemRenderType.INVENTORY) ? false : !use2DIcon();
+        return false;
     }
 
     public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return !use2DIcon();
+        return false;
     }
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
         if (getIcon() == null)
             return;
+
+        voltageLevelColor.drawIconBackground(type);
 
         // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
         String icon = getIcon().getIconName().substring(4);
@@ -109,5 +118,18 @@ public class SixNodeDescriptor extends GenericItemBlockUsingDamageDescriptor imp
         if (ghostGroup != null && !ghostGroup.canBePloted(coord))
             return tr("Not enough space for this block");
         return null;
+    }
+
+    public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {
+        switch (side) {
+            case YN:
+            case YP:
+                Direction viewDirection = Utils.entityLivingHorizontalViewDirection(player);
+                LRDU front = side.getLRDUGoingTo(viewDirection);
+                return side == Direction.YN ? front : front.inverse();
+
+            default:
+                return LRDU.Up;
+        }
     }
 }
