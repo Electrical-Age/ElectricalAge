@@ -11,7 +11,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.IItemRenderer;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -86,27 +85,28 @@ public class ResistorDescriptor extends SixNodeDescriptor {
         }
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(IItemRenderer.ItemRenderType type, ItemStack item, IItemRenderer.ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, IItemRenderer.ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public void renderItem(IItemRenderer.ItemRenderType type, ItemStack item, Object... data) {
-        if (type != ItemRenderType.INVENTORY) {
-            GL11.glTranslatef(0.0f, 0.0f, -0.2f);
-            GL11.glScalef(1.25f, 1.25f, 1.25f);
-            GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
-            draw(0);
-        } else {
-            super.renderItem(type, item, data);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean shouldUseRenderHelper(IItemRenderer.ItemRenderType type, ItemStack item, IItemRenderer.ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, IItemRenderer.ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public void renderItem(IItemRenderer.ItemRenderType type, ItemStack item, Object... data) {
+//        if (type != ItemRenderType.INVENTORY) {
+//            GL11.glTranslatef(0.0f, 0.0f, -0.2f);
+//            GL11.glScalef(1.25f, 1.25f, 1.25f);
+//            GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
+//            draw(0);
+//        } else {
+//            super.renderItem(type, item, data);
+//        }
+//    }
 
     @Override
     public LRDU getFrontFromPlace(Direction side, EntityPlayer player) {

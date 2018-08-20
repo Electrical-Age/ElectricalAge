@@ -21,7 +21,6 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer
 import org.lwjgl.opengl.GL11
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
@@ -54,25 +53,26 @@ open class AnalogChipDescriptor(name: String, obj: Obj3D?, functionName: String,
         top?.draw()
     }
 
-    override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?): Boolean = true
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
-                                       helper: IItemRenderer.ItemRendererHelper?): Boolean =
-        type != IItemRenderer.ItemRenderType.INVENTORY
-
-    override fun shouldUseRenderHelperEln(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
-                                          helper: IItemRenderer.ItemRendererHelper?): Boolean =
-        type != IItemRenderer.ItemRenderType.INVENTORY
-
-    override fun renderItem(type: IItemRenderer.ItemRenderType?, item: ItemStack?, vararg data: Any?) {
-        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, *data)
-        } else {
-            GL11.glTranslatef(0.0f, 0.0f, -0.2f)
-            GL11.glScalef(1.25f, 1.25f, 1.25f)
-            GL11.glRotatef(-90.0f, 0.0f, 1.0f, 0.0f)
-            draw()
-        }
-    }
+    // TODO(1.10): Reimplement chip renderings.
+//    override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?): Boolean = true
+//    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
+//                                       helper: IItemRenderer.ItemRendererHelper?): Boolean =
+//        type != IItemRenderer.ItemRenderType.INVENTORY
+//
+//    override fun shouldUseRenderHelperEln(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
+//                                          helper: IItemRenderer.ItemRendererHelper?): Boolean =
+//        type != IItemRenderer.ItemRenderType.INVENTORY
+//
+//    override fun renderItem(type: IItemRenderer.ItemRenderType?, item: ItemStack?, vararg data: Any?) {
+//        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, *data)
+//        } else {
+//            GL11.glTranslatef(0.0f, 0.0f, -0.2f)
+//            GL11.glScalef(1.25f, 1.25f, 1.25f)
+//            GL11.glRotatef(-90.0f, 0.0f, 1.0f, 0.0f)
+//            draw()
+//        }
+//    }
 
     override fun getFrontFromPlace(side: Direction?, player: EntityPlayer?): LRDU? =
         super.getFrontFromPlace(side, player).left()
@@ -652,7 +652,7 @@ class SummingUnitGui(val render: SummingUnitRender) : GuiScreenEln() {
 class SampleAndHold : AnalogFunction() {
     override val hasState = true
     override val inputCount = 2
-    override val infos = I18N.tr("Samples the voltage of a varying analog signal when\nthe clock input changes from 0 to 1 and holds its\noutput voltage at a constant level until next clock pulse.\nYou can see it as an analog D-Flipflop.")
+    override val infos = I18N.tr("Samples the voltage of a varying analog signal when\nthe clock input changes fromFacing 0 to 1 and holds its\noutput voltage at a constant level until next clock pulse.\nYou can see it as an analog D-Flipflop.")
     private var clock = false
     private var value = 0.0
 

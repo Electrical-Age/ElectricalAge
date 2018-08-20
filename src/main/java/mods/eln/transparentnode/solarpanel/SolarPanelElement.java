@@ -139,7 +139,7 @@ public class SolarPanelElement extends TransparentNodeElement {
         descriptor.applyTo(negativeLoad);
 
         if (descriptor.groundCoordinate != null) {
-            GhostPowerNode n = new GhostPowerNode(node.coordonate, front, descriptor.groundCoordinate, negativeLoad);
+            GhostPowerNode n = new GhostPowerNode(node.coordinate, front, descriptor.groundCoordinate, negativeLoad);
             n.initialize();
             groundNode = n;
         }

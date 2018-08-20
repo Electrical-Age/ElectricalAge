@@ -41,7 +41,7 @@ public class HeatingCorpElement extends GenericItemUsingDamageDescriptorUpgrade 
         voltageLevelColor = VoltageLevelColor.fromVoltage(electricalNominalU);
     }
 /*
-    public void applyTo(ElectricalResistor resistor) {
+    public void applied(ElectricalResistor resistor) {
 		resistor.setR(electricalR);
 	}*/
 

@@ -3,15 +3,12 @@ package mods.eln.item.electricalitem;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
-import mods.eln.misc.UtilsClient;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 import java.util.List;
 
@@ -86,23 +83,24 @@ public class BatteryItem extends GenericItemUsingDamageDescriptor implements IIt
         return priority;
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        super.renderItem(type, item, data);
-        if (type == ItemRenderType.INVENTORY) {
-            UtilsClient.drawEnergyBare(type, (float) (getEnergy(item) / getEnergyMax(item)));
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        super.renderItem(type, item, data);
+//        if (type == ItemRenderType.INVENTORY) {
+//            UtilsClient.drawEnergyBare(type, (float) (getEnergy(item) / getEnergyMax(item)));
+//        }
+//    }
 
     @Override
     public void electricalItemUpdate(ItemStack stack, double time) {

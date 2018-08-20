@@ -1,6 +1,6 @@
 package mods.eln.sixnode.electricalweathersensor;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.sim.IProcess;
@@ -26,11 +26,11 @@ public class ElectricalWeatherSensorSlowProcess implements IProcess, INBTTReady 
 
         if (timeCounter > refreshPeriode) {
             timeCounter -= refreshPeriode;
-            Coordonate coord = element.sixNode.coordonate;
+            Coordinate coord = element.sixNode.coordinate;
 
             float target = 0f;
 
-            if (coord.getWorldExist()) {
+            if (coord.doesWorldExist()) {
                 World world = coord.world();
 
                 if (world.isRaining()) {

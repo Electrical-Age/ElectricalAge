@@ -1,7 +1,7 @@
 package mods.eln.integration.waila
 
-import cpw.mods.fml.common.Optional
 import mcp.mobius.waila.api.IWailaRegistrar
+import net.minecraftforge.fml.common.Optional
 
 @Optional.Interface(iface = "mcp.mobius.waila.api.IWailaRegistrar", modid = "Waila")
 object WailaIntegration {

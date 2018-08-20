@@ -7,9 +7,7 @@ import mods.eln.misc.*
 import mods.eln.node.transparent.*
 import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sound.LoopedSound
-import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -49,23 +47,24 @@ abstract class SimpleShaftDescriptor(name: String, elm: KClass<out TransparentNo
         }
     }
 
-    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
-        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, *data)
-        } else {
-            objItemScale(obj)
-            preserveMatrix {
-                Direction.ZN.glRotateXnRef()
-                GL11.glTranslatef(0f, -1f, 0f)
-                GL11.glScalef(0.6f, 0.6f, 0.6f)
-                draw(0.0)
-            }
-        }
-    }
+    // TODO(1.10): Shaft item renderer
+//    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
+//        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, *data)
+//        } else {
+//            objItemScale(obj)
+//            preserveMatrix {
+//                Direction.ZN.glRotateXnRef()
+//                GL11.glTranslatef(0f, -1f, 0f)
+//                GL11.glScalef(0.6f, 0.6f, 0.6f)
+//                draw(0.0)
+//            }
+//        }
+//    }
 
-    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper) =
-        type != IItemRenderer.ItemRenderType.INVENTORY
+//    override fun handleRenderType(item: ItemStack, type: IItemRenderer.ItemRenderType) = true
+//    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType, item: ItemStack, helper: IItemRenderer.ItemRendererHelper) =
+//        type != IItemRenderer.ItemRenderType.INVENTORY
 }
 
 open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescriptor) : TransparentNodeElementRender(entity, desc) {
@@ -83,7 +82,7 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     private val soundLooper: ShaftSoundLooper?
     val volumeSetting = SlewLimiter(0.5f)
 
-    inner private class ShaftSoundLooper(sound: String, coord: Coordonate) : LoopedSound(sound, coord) {
+    inner private class ShaftSoundLooper(sound: String, coord: Coordinate) : LoopedSound(sound, coord) {
         override fun getPitch() = Math.max(0.05, rads / absoluteMaximumShaftSpeed).toFloat()
         override fun getVolume() = volumeSetting.position
     }
@@ -93,7 +92,7 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
         volumeSetting.position = 0f
         val sound = this.desc.sound
         if (sound != null) {
-            soundLooper = ShaftSoundLooper(sound, coordonate())
+            soundLooper = ShaftSoundLooper(sound, coordinate())
             addLoopedSound(soundLooper)
         } else {
             soundLooper = null

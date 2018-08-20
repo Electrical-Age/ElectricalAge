@@ -147,7 +147,7 @@ public class ElectricalSwitchElement extends SixNodeElement {
 
     @Override
     public void initialize() {
-        //descriptor.thermal.applyTo(thermalLoad);
+        //descriptor.thermal.applied(thermalLoad);
 
         descriptor.applyTo(aLoad);
         descriptor.applyTo(bLoad);

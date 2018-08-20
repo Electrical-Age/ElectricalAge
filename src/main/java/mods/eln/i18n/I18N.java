@@ -1,14 +1,14 @@
 package mods.eln.i18n;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.registry.LanguageRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraft.util.text.TextComponentTranslation;
+
+import javax.xml.soap.Text;
 
 /**
  * Internationalization and localization helper class.
  */
 public class I18N {
-    private final static LanguageRegistry languageRegistry = LanguageRegistry.instance();
-
     public static String getCurrentLanguage() {
         return FMLCommonHandler.instance().getCurrentLanguage();
     }
@@ -50,15 +50,10 @@ public class I18N {
      */
     public static String tr(final String text, Object... objects) {
         // Try to find the translation for the string using forge API.
-        String translation = languageRegistry.getStringLocalization(encodeLangKey(text));
+        String translation = new TextComponentTranslation(encodeLangKey(text)).getFormattedText();
 
-        // If no translation was found, just use the original text.
-        if (translation == null || "".equals(translation)) {
-            translation = text;
-        } else {
-            // Replace placeholders .
-            translation = translation.replace("\\n", "\n").replace("\\:", ":");
-        }
+        // Replace placeholders .
+        translation = translation.replace("\\n", "\n").replace("\\:", ":");
 
         // Replace placeholders in string by actual string values of the passed objects.
         for (int i = 0; i < objects.length; ++i) {

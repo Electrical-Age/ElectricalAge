@@ -1,9 +1,9 @@
 package mods.eln.packets
 
-import cpw.mods.fml.common.network.ByteBufUtils
-import cpw.mods.fml.common.network.simpleimpl.IMessage
 import io.netty.buffer.ByteBuf
-import mods.eln.misc.Coordonate
+import mods.eln.misc.Coordinate
+import net.minecraftforge.fml.common.network.ByteBufUtils
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage
 import java.util.*
 
 /**
@@ -12,13 +12,13 @@ import java.util.*
 open class TransparentNodeResponsePacket : IMessage {
 
     lateinit var map: Map<String, String>
-    lateinit var coord: Coordonate
+    lateinit var coord: Coordinate
 
     constructor() {
 
     }
 
-    constructor(m: Map<String, String>, c: Coordonate) {
+    constructor(m: Map<String, String>, c: Coordinate) {
         map = m
         coord = c
     }
@@ -37,7 +37,7 @@ open class TransparentNodeResponsePacket : IMessage {
         val y = ByteBufUtils.readVarInt(buf, 5)
         val z = ByteBufUtils.readVarInt(buf, 5)
         val w = ByteBufUtils.readVarInt(buf, 5)
-        coord = Coordonate(x, y, z, w)
+        coord = Coordinate(x, y, z, w)
         val i1 = keys.iterator()
         val i2 = values.iterator()
         var localmap = HashMap<String, String>()
@@ -55,9 +55,9 @@ open class TransparentNodeResponsePacket : IMessage {
         for (element: String in map.values.iterator()) {
             ByteBufUtils.writeUTF8String(buf, element)
         }
-        ByteBufUtils.writeVarInt(buf, coord.x, 5)
-        ByteBufUtils.writeVarInt(buf, coord.y, 5)
-        ByteBufUtils.writeVarInt(buf, coord.z, 5)
-        ByteBufUtils.writeVarInt(buf, coord.dimention, 5)
+        ByteBufUtils.writeVarInt(buf, coord.pos.x, 5)
+        ByteBufUtils.writeVarInt(buf, coord.pos.y, 5)
+        ByteBufUtils.writeVarInt(buf, coord.pos.z, 5)
+        ByteBufUtils.writeVarInt(buf, coord.dimension, 5)
     }
 }

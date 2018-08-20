@@ -13,7 +13,6 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
-import net.minecraft.entity.player.EntityPlayer;
 
 import java.io.DataOutputStream;
 import java.io.IOException;

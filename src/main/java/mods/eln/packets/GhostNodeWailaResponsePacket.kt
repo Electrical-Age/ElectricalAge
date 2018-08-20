@@ -1,14 +1,14 @@
 package mods.eln.packets
 
-import cpw.mods.fml.common.network.ByteBufUtils
-import cpw.mods.fml.common.network.simpleimpl.IMessage
 import io.netty.buffer.ByteBuf
-import mods.eln.misc.Coordonate
+import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
 import net.minecraft.item.ItemStack
+import net.minecraftforge.fml.common.network.ByteBufUtils
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage
 
-class GhostNodeWailaResponsePacket(var coord: Coordonate = Coordonate(0, 0, 0, 0),
-                                   var realCoord: Coordonate = Coordonate(0, 0, 0, 0),
+class GhostNodeWailaResponsePacket(var coord: Coordinate = Coordinate(0, 0, 0, 0),
+                                   var realCoord: Coordinate = Coordinate(0, 0, 0, 0),
                                    var itemStack: ItemStack? = null,
                                    var type: Byte = UNKNOWN_TYPE,
                                    var realSide: Direction = Direction.XN) : IMessage {
@@ -19,21 +19,22 @@ class GhostNodeWailaResponsePacket(var coord: Coordonate = Coordonate(0, 0, 0, 0
         val SIXNODE_TYPE: Byte = 2
     }
 
-    private fun Coordonate.write(buf: ByteBuf?) {
+    private fun Coordinate.write(buf: ByteBuf?) {
         if (buf != null) {
-            ByteBufUtils.writeVarInt(buf, this.x, 5)
-            ByteBufUtils.writeVarInt(buf, this.y, 5)
-            ByteBufUtils.writeVarInt(buf, this.z, 5)
-            ByteBufUtils.writeVarInt(buf, this.dimention, 5)
+            ByteBufUtils.writeVarInt(buf, this.pos.x, 5)
+            ByteBufUtils.writeVarInt(buf, this.pos.y, 5)
+            ByteBufUtils.writeVarInt(buf, this.pos.z, 5)
+            ByteBufUtils.writeVarInt(buf, this.dimension, 5)
         }
     }
 
-    private fun Coordonate.read(buf: ByteBuf?) {
+    private fun Coordinate.read(buf: ByteBuf?) {
         if (buf != null) {
-            this.x = ByteBufUtils.readVarInt(buf, 5)
-            this.y = ByteBufUtils.readVarInt(buf, 5)
-            this.z = ByteBufUtils.readVarInt(buf, 5)
-            this.dimention = ByteBufUtils.readVarInt(buf, 5)
+            val x = ByteBufUtils.readVarInt(buf, 5)
+            val y = ByteBufUtils.readVarInt(buf, 5)
+            val z = ByteBufUtils.readVarInt(buf, 5)
+            this.pos.setPos(x, y, z)
+            this.dimension = ByteBufUtils.readVarInt(buf, 5)
         }
     }
 

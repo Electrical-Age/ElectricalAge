@@ -37,7 +37,7 @@ public class LampSocketElement extends SixNodeElement {
 
     LampSocketDescriptor socketDescriptor = null;
 
-    public MonsterPopFreeProcess monsterPopFreeProcess = new MonsterPopFreeProcess(sixNode.coordonate, Eln.instance.killMonstersAroundLampsRange);
+    public MonsterPopFreeProcess monsterPopFreeProcess = new MonsterPopFreeProcess(sixNode.coordinate, Eln.instance.killMonstersAroundLampsRange);
     public NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
 
     public LampSocketProcess lampProcess = new LampSocketProcess(this);
@@ -274,7 +274,7 @@ public class LampSocketElement extends SixNodeElement {
             //negativeLoad.highImpedance();
         } else {
             cableDescriptor.applyTo(positiveLoad);
-            //cableDescriptor.applyTo(negativeLoad, grounded,5);
+            //cableDescriptor.applied(negativeLoad, grounded,5);
         }
 
         lampDescriptor = (LampDescriptor) Utils.getItemObject(lamp);

@@ -1,13 +1,12 @@
 package mods.eln.ore;
 
-import cpw.mods.fml.common.IWorldGenerator;
+import net.minecraftforge.fml.common.IWorldGenerator;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -33,9 +32,10 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
         this.spawnSizeMax = spawnSizeMax;
     }
 
-    public IIcon getBlockIconId(int side, int damage) {
-        return getIcon();
-    }
+    // TODO(1.10): Fix item rendering.
+//    public IIcon getBlockIconId(int side, int damage) {
+//        return getIcon();
+//    }
 
     @Override
     public void setParent(Item item, int damage) {

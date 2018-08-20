@@ -1,29 +1,20 @@
 package mods.eln.generic;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import mods.eln.misc.UtilsClient;
 import mods.eln.misc.VoltageLevelColor;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.IIcon;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
 import java.util.List;
 
 public class GenericItemUsingDamageDescriptor {
 
     public String IconName;
-    private IIcon iconIndex;
     public String name;
     public VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
 
@@ -60,14 +51,15 @@ public class GenericItemUsingDamageDescriptor {
         list.add(stack);
     }
 
-    @SideOnly(value = Side.CLIENT)
-    public void updateIcons(IIconRegister iconRegister) {
-        this.iconIndex = iconRegister.registerIcon(IconName);
-    }
-
-    public IIcon getIcon() {
-        return iconIndex;
-    }
+    // TODO(1.10): These are all implicit now.
+//    @SideOnly(value = Side.CLIENT)
+//    public void updateIcons(IIconRegister iconRegister) {
+//        this.iconIndex = iconRegister.registerIcon(IconName);
+//    }
+//
+//    public IIcon getIcon() {
+//        return iconIndex;
+//    }
 
     public String getName(ItemStack stack) {
         return name;
@@ -76,7 +68,7 @@ public class GenericItemUsingDamageDescriptor {
     public static GenericItemUsingDamageDescriptor getDescriptor(ItemStack stack) {
         if (stack == null)
             return null;
-        if ((stack.getItem() instanceof GenericItemUsingDamage) == false)
+        if (!(stack.getItem() instanceof GenericItemUsingDamage))
             return null;
         return ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) stack.getItem()).getDescriptor(stack);
     }
@@ -121,24 +113,25 @@ public class GenericItemUsingDamageDescriptor {
         return false;
     }
 
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return voltageLevelColor != VoltageLevelColor.None;
-    }
-
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return false;
-    }
-
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (getIcon() == null)
-            return;
-
-        voltageLevelColor.drawIconBackground(type);
-
-        // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
-        String icon = getIcon().getIconName().substring(4);
-        UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/items/" + icon + ".png"));
-    }
+    // TODO(1.10): Fix item render.
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return voltageLevelColor != VoltageLevelColor.None;
+//    }
+//
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return false;
+//    }
+//
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (getIcon() == null)
+//            return;
+//
+//        voltageLevelColor.drawIconBackground(type);
+//
+//        // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
+//        String icon = getIcon().getIconName().substring(4);
+//        UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/items/" + icon + ".png"));
+//    }
 
     public void onUpdate(ItemStack stack, World world, Entity entity, int par4, boolean par5) {
     }

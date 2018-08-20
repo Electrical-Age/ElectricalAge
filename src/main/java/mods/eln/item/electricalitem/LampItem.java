@@ -7,8 +7,8 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public abstract class LampItem extends GenericItemUsingDamageDescriptor {
@@ -33,7 +33,7 @@ public abstract class LampItem extends GenericItemUsingDamageDescriptor {
         for (int yOffset = 0; yOffset < 2; yOffset++) {
             double x = entity.posX, y = entity.posY + 1.62 - yOffset, z = entity.posZ;
 
-            Vec3 v = entity.getLookVec();
+            Vec3d v = entity.getLookVec();
 
             v.xCoord *= 0.25;
             v.yCoord *= 0.25;

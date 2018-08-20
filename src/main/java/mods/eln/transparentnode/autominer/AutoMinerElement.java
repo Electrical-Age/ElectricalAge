@@ -3,7 +3,7 @@ package mods.eln.transparentnode.autominer;
 import mods.eln.i18n.I18N;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -44,7 +44,7 @@ public class AutoMinerElement extends TransparentNodeElement {
 
     final AutoMinerDescriptor descriptor;
 
-    Coordonate lightCoordonate;
+    Coordinate lightCoordinate;
 
     private final VoltageStateWatchDog voltageWatchdog = new VoltageStateWatchDog();
 
@@ -94,14 +94,14 @@ public class AutoMinerElement extends TransparentNodeElement {
 
     @Override
     public void initialize() {
-        lightCoordonate = new Coordonate(this.descriptor.lightCoord);
-        lightCoordonate.applyTransformation(front, node.coordonate);
+        lightCoordinate = new Coordinate(this.descriptor.lightCoord);
+        lightCoordinate.applyTransformation(front, node.coordinate);
 
         int idx = 0;
-        for (Coordonate c : descriptor.getPowerCoordonate(node.coordonate.world())) {
+        for (Coordinate c : descriptor.getPowerCoordonate(node.coordinate.world())) {
             AutoMinerPowerNode n = new AutoMinerPowerNode();
             n.setElement(this);
-            c.applyTransformation(front, node.coordonate);
+            c.applyTransformation(front, node.coordinate);
 
             Direction dir;
             if (idx != 0)

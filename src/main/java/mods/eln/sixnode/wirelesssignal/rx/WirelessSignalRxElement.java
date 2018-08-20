@@ -1,7 +1,7 @@
 package mods.eln.sixnode.wirelesssignal.rx;
 
 import mods.eln.i18n.I18N;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -17,7 +17,6 @@ import mods.eln.sixnode.wirelesssignal.aggregator.BiggerAggregator;
 import mods.eln.sixnode.wirelesssignal.aggregator.IWirelessSignalAggregator;
 import mods.eln.sixnode.wirelesssignal.aggregator.SmallerAggregator;
 import mods.eln.sixnode.wirelesssignal.aggregator.ToogleAggregator;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nullable;
@@ -129,8 +128,8 @@ public class WirelessSignalRxElement extends SixNodeElement {
     }
 
     @Override
-    public Coordonate getCoordonate() {
-        return sixNode.coordonate;
+    public Coordinate getCoordonate() {
+        return sixNode.coordinate;
     }
 
     @Override

@@ -1,9 +1,7 @@
 package mods.eln.node.simple;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.DescriptorManager;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
@@ -15,13 +13,15 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ITickable;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 
-public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity {
+public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity, ITickable {
 
     private SimpleNode node;
 
@@ -30,11 +30,10 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
             Utils.fatal();
             return null;
         }
-        if (this.worldObj == null) return null;
         if (node == null) {
-            node = (SimpleNode) NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
+            node = (SimpleNode) NodeManager.instance.getNodeFromCoordinate(new Coordinate(pos, worldObj));
             if (node == null) {
-                DelayedBlockRemove.add(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
+                DelayedBlockRemove.add(new Coordinate(pos, this.worldObj));
                 return null;
             }
         }
@@ -49,7 +48,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 	}
 */
 
-    public void onBlockAdded() {
+    void onBlockAdded() {
 		/*if (!worldObj.isRemote){
 			if (getNode() == null) {
 				worldObj.setBlockToAir(xCoord, yCoord, zCoord);
@@ -72,8 +71,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
     }
 
     // client only
-    public void destructor() {
-
+    void destructor() {
     }
 
     @Override
@@ -93,7 +91,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
         return true;
     }
 
-    public void onNeighborBlockChange() {
+    void onNeighborBlockChange() {
         if (!worldObj.isRemote) {
             if (getNode() == null) return;
             getNode().onNeighborBlockChange();

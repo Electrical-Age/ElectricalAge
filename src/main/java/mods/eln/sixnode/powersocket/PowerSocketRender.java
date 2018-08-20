@@ -1,7 +1,7 @@
 package mods.eln.sixnode.powersocket;
 
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -21,7 +21,7 @@ public class PowerSocketRender extends SixNodeElementRender {
 
     PowerSocketDescriptor descriptor;
 
-    Coordonate coord;
+    Coordinate coord;
     String channel;
 
     CableRenderDescriptor cableRender;
@@ -31,7 +31,7 @@ public class PowerSocketRender extends SixNodeElementRender {
     public PowerSocketRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (PowerSocketDescriptor) descriptor;
-        coord = new Coordonate(tileEntity);
+        coord = new Coordinate(tileEntity);
     }
 
     @Override
