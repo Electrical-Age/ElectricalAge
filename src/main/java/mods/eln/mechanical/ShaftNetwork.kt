@@ -1,6 +1,6 @@
 package mods.eln.mechanical
 
-import mods.eln.misc.Coordonate
+import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
 import mods.eln.misc.INBTTReady
 import mods.eln.node.NodeManager
@@ -141,7 +141,7 @@ class ShaftNetwork() : INBTTReady {
     }
 
     private fun getNeighbours(from: ShaftElement): ArrayList<ShaftNeighbour> {
-        val c = Coordonate()
+        val c = Coordinate()
         val ret = ArrayList<ShaftNeighbour>(6)
         for (dir in from.shaftConnectivity) {
             c.copyFrom(from.coordonate())
@@ -173,7 +173,7 @@ interface ShaftElement {
     var shaft: ShaftNetwork
     val shaftMass: Double
     val shaftConnectivity: Array<Direction>
-    fun coordonate(): Coordonate
+    fun coordonate(): Coordinate
 
     fun initialize() {
         shaft.connectShaft(this)

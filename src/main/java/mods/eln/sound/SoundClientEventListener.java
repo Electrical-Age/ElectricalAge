@@ -1,6 +1,6 @@
 package mods.eln.sound;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import mods.eln.client.UuidManager;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SoundManager;

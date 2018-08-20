@@ -12,7 +12,7 @@ import mods.eln.sim.mna.process.TransformerInterSystemProcess;
 import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 
 /**
  * Created by svein on 07/08/15.
@@ -88,7 +88,7 @@ public class GridTransformerElement extends GridElement {
 
     // TODO: Factor this against super.
     @Override
-    public Vec3 getCablePoint(Direction side, int i) {
+    public Vec3d getCablePoint(Direction side, int i) {
         if (i >= 2) throw new AssertionError("Invalid cable point index");
         int idx = side == front.up() ? 1 : 0;
         Obj3D.Obj3DPart part = (i == 0 ? desc.plus : desc.gnd).get(idx);

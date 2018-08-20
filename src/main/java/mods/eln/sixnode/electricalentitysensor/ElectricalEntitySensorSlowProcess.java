@@ -2,7 +2,7 @@ package mods.eln.sixnode.electricalentitysensor;
 
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.EntitySensorFilterDescriptor;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.RcInterpolator;
 import mods.eln.misc.Utils;
@@ -13,29 +13,28 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import java.util.HashMap;
 import java.util.List;
 
 public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
+    private ElectricalEntitySensorElement element;
 
-    ElectricalEntitySensorElement element;
+    private double timeCounter = 0;
+    private static final double refreshPeriode = 0.2;
 
-    double timeCounter = 0;
-    static final double refreshPeriode = 0.2;
+    private RcInterpolator rc1 = new RcInterpolator(0.4f);
+    private RcInterpolator rc2 = new RcInterpolator(0.4f);
 
-    RcInterpolator rc1 = new RcInterpolator(0.4f);
-    RcInterpolator rc2 = new RcInterpolator(0.4f);
-
-    boolean oldState = false;
+    private boolean oldState = false;
     boolean state = false;
 
-    HashMap<Object, Vec3> lastEPos = new HashMap<Object, Vec3>();
+    HashMap<Object, Vec3d> lastEPos = new HashMap<Object, Vec3d>();
 
-    public ElectricalEntitySensorSlowProcess(ElectricalEntitySensorElement element) {
+    ElectricalEntitySensorSlowProcess(ElectricalEntitySensorElement element) {
         this.element = element;
     }
 
@@ -47,7 +46,7 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
             timeCounter -= refreshPeriode;
             boolean useSpeed = element.descriptor.useEntitySpeed;
             double speedFactor = element.descriptor.speedFactor;
-            Coordonate coord = element.sixNode.coordonate;
+            Coordinate coord = element.sixNode.coordinate;
             ItemStack filterStack = element.getInventory().getStackInSlot(ElectricalEntitySensorContainer.filterId);
 
             Class filterClass = EntityLivingBase.class;
@@ -68,7 +67,7 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
 
             for (Object o : list) {
                 Entity e = (Entity) o;
-                Vec3 lastPos;
+                Vec3d lastPos;
                 if ((lastPos = lastEPos.get(e)) != null) {
                     double weight = 0.4;
                     List<Block> blockList = Utils.traceRay(world, coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ);
@@ -97,7 +96,7 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
                     }
                 }
                 output = Math.min(1, output);
-                lastEPos.put(e, Vec3.createVectorHelper(e.posX, e.posY, e.posZ));
+                lastEPos.put(e, new Vec3d(e.posX, e.posY, e.posZ));
             }
             //Utils.println(output);
             rc1.setTarget((float) output);

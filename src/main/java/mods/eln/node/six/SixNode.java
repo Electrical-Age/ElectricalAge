@@ -127,15 +127,15 @@ public class SixNode extends Node {
         protected void dropItem(ItemStack itemStack)
 	    {
 	    	
-	        if (coordonate.world().getGameRules().getGameRuleBooleanValue("doTileDrops"))
+	        if (coordinate.world().getGameRules().getGameRuleBooleanValue("doTileDrops"))
 	        {
 	            float var6 = 0.7F;
-	            double var7 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
-	            double var9 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
-	            double var11 = (double)(coordonate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
-	            EntityItem var13 = new EntityItem(coordonate.world(), (double)coordonate.x + var7, (double)coordonate.y + var9, (double)coordonate.z + var11, itemStack);
+	            double var7 = (double)(coordinate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
+	            double var9 = (double)(coordinate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
+	            double var11 = (double)(coordinate.world().rand.nextFloat() * var6) + (double)(1.0F - var6) * 0.5D;
+	            EntityItem var13 = new EntityItem(coordinate.world(), (double)coordinate.x + var7, (double)coordinate.y + var9, (double)coordinate.z + var11, itemStack);
 	            var13.delayBeforeCanPickup = 10;
-	            coordonate.world().spawnEntityInWorld(var13);
+	            coordinate.world().spawnEntityInWorld(var13);
 	        }
 	    }*/
 
@@ -523,11 +523,11 @@ public class SixNode extends Node {
 
                 //if(sixNodeCacheMapId != sixNodeCacheMapIdOld)
                 {
-                    Chunk chunk = coordonate.world().getChunkFromBlockCoords(coordonate.x, coordonate.z);
+                    Chunk chunk = coordinate.world().getChunkFromBlockCoords(coordinate.x, coordinate.z);
                     Utils.generateHeightMap(chunk);
                     Utils.updateSkylight(chunk);
                     chunk.generateSkylightMap();
-                    Utils.updateAllLightTypes(coordonate.world(), coordonate.x, coordonate.y, coordonate.z);
+                    Utils.updateAllLightTypes(coordinate.world(), coordinate.x, coordinate.y, coordinate.z);
                 }
                 return true;
             } else {

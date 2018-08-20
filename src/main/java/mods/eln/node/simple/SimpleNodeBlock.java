@@ -39,7 +39,7 @@ public abstract class SimpleNodeBlock extends BlockContainer {
 		if(w.isRemote == false){
 			SimpleNode node = newNode();
 			node.setDescriptorKey(descriptorKey);
-			node.onBlockPlacedBy(new Coordonate(x,y,z,w), getFrontForPlacement(e), e, stack);
+			node.onBlockPlacedBy(new Coordinate(x,y,z,w), getFrontForPlacement(e), e, stack);
 		}
 	}*/
 

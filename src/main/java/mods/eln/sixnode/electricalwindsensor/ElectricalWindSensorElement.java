@@ -13,7 +13,6 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateOutput;
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess;
-import net.minecraft.entity.player.EntityPlayer;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -85,7 +84,7 @@ public class ElectricalWindSensorElement extends SixNodeElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            stream.writeFloat((float) Utils.getWind(sixNode.coordonate.dimention, sixNode.coordonate.y));
+            stream.writeFloat((float) Utils.getWind(sixNode.coordinate.dimension, sixNode.coordinate.y));
         } catch (IOException e) {
             e.printStackTrace();
         }

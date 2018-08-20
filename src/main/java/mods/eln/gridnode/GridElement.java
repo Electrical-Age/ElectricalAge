@@ -11,7 +11,7 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.DataOutputStream;
@@ -28,7 +28,7 @@ abstract public class GridElement extends TransparentNodeElement {
     /**
      * The last place any given player tried to link two instance nodes.
      */
-    private static HashMap<UUID, Pair<Coordonate, Direction>> pending = new HashMap<UUID, Pair<Coordonate, Direction>>();
+    private static HashMap<UUID, Pair<Coordinate, Direction>> pending = new HashMap<UUID, Pair<Coordinate, Direction>>();
     public HashSet<GridLink> gridLinkList = new HashSet<GridLink>();
     public HashSet<GridLink> gridLinksBooting = new HashSet<GridLink>();
     GridDescriptor desc;
@@ -57,7 +57,7 @@ abstract public class GridElement extends TransparentNodeElement {
     private boolean onTryGridConnect(EntityPlayer entityPlayer, ItemStack stack, ElectricalCableDescriptor cable, Direction side) {
         // First node, or second node?
         UUID uuid = entityPlayer.getPersistentID();
-        Pair<Coordonate, Direction> p = pending.get(uuid);
+        Pair<Coordinate, Direction> p = pending.get(uuid);
         GridElement other = null;
         if (p != null) {
             other = GridLink.getElementFromCoordinate(p.getLeft());
@@ -210,7 +210,7 @@ abstract public class GridElement extends TransparentNodeElement {
             double angles[] = new double[gridLinkList.size()];
             int i = 0;
             for (GridLink link : gridLinkList) {
-                Coordonate vec = link.a.subtract(link.b);
+                Coordinate vec = link.a.subtract(link.b);
                 // Angles 180 degrees apart are equivalent.
                 if (vec.z < 0)
                     vec = vec.negate();
@@ -262,11 +262,11 @@ abstract public class GridElement extends TransparentNodeElement {
                 Direction ourSide = link.getSide(this);
                 Direction theirSide = link.getSide(target);
                 // It's always the "a" side doing this.
-                Coordonate offset = link.b.subtract(link.a);
+                Coordinate offset = link.b.subtract(link.a);
                 for (int i = 0; i < 2; i++) {
-                    final Vec3 start = getCablePoint(ourSide, i);
+                    final Vec3d start = getCablePoint(ourSide, i);
                     start.rotateAroundY((float) Math.toRadians(idealRenderingAngle));
-                    Vec3 end = target.getCablePoint(theirSide, i);
+                    Vec3d end = target.getCablePoint(theirSide, i);
                     end.rotateAroundY((float) Math.toRadians(target.idealRenderingAngle));
                     end = end.addVector(offset.x, offset.y, offset.z);
                     writeVec(stream, start);
@@ -278,14 +278,14 @@ abstract public class GridElement extends TransparentNodeElement {
         }
     }
 
-    protected Vec3 getCablePoint(Direction side, int i) {
+    protected Vec3d getCablePoint(Direction side, int i) {
         if (i >= 2) throw new AssertionError("Invalid cable point index");
         Obj3D.Obj3DPart part = (i == 0 ? desc.plus : desc.gnd).get(0);
         BoundingBox bb = part.boundingBox();
         return bb.centre();
     }
 
-    private void writeVec(DataOutputStream stream, Vec3 sp) throws IOException {
+    private void writeVec(DataOutputStream stream, Vec3d sp) throws IOException {
         stream.writeFloat((float) sp.xCoord);
         stream.writeFloat((float) sp.yCoord);
         stream.writeFloat((float) sp.zCoord);

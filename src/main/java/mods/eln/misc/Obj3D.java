@@ -1,6 +1,6 @@
 package mods.eln.misc;
 
-import cpw.mods.fml.common.FMLLog;
+import net.minecraftforge.fml.common.FMLLog;
 import net.minecraft.util.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
@@ -15,7 +15,7 @@ public class Obj3D {
     List<Vertex> vertex = new ArrayList<Vertex>();
     List<Uv> uv = new ArrayList<Uv>();
 
-    // Model obj properties read from the txt file
+    // Model obj properties read fromFacing the txt file
     Map<String, String> nameToStringHash = new Hashtable<String, String>();
 
     public float xDim, yDim, zDim;
@@ -363,7 +363,7 @@ public class Obj3D {
     /**
      * Load a resource (obj, mtl, txt file) for a model.
      *
-     * @param filePath the path from the "assets/eln" folder
+     * @param filePath the path fromFacing the "assets/eln" folder
      * @return the  {@code BufferedReader} or null if the resource does not exist
      */
     @Nullable
@@ -555,7 +555,7 @@ public class Obj3D {
                             updateTimer.scheduleAtFixedRate(new TimerTask() {
                                 @Override
                                 public void run() {
-                                    Utils.println("Reloading model data from " + filePath);
+                                    Utils.println("Reloading model data fromFacing " + filePath);
                                     loadFile(filePath, true);
                                 }
                             }, refresh, refresh);
@@ -597,6 +597,6 @@ public class Obj3D {
     }
 
     public String getString(String name) {
-        return nameToStringHash.get(name); // Property read from the txt file
+        return nameToStringHash.get(name); // Property read fromFacing the txt file
     }
 }
