@@ -226,8 +226,10 @@ public class Utils {
 
     public static String plotValue(double value) {
         double valueAbs = Math.abs(value);
-        if (valueAbs < 0.001) {
+        if (valueAbs < 0.0001) {
             return "0";
+        } else if (valueAbs < 0.000999) {
+            return String.format("%1.2fµ",value * 10000);
         } else if (valueAbs < 0.00999) {
             return String.format("%1.2fm", value * 1000);
         } else if (valueAbs < 0.0999) {
