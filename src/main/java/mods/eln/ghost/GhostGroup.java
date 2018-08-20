@@ -1,7 +1,7 @@
 package mods.eln.ghost;
 
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import net.minecraft.block.Block;
@@ -61,8 +61,8 @@ public class GhostGroup {
         }
     }
 
-    public boolean canBePloted(Coordonate c) {
-        return canBePloted(c.world(), c.x, c.y, c.z);
+    public boolean canBePloted(Coordinate c) {
+        return canBePloted(c.world(), c.pos.getX(), c.pos.getY(), c.pos.getZ());
     }
 
     public boolean canBePloted(World world, int x, int y, int z) {
@@ -73,27 +73,27 @@ public class GhostGroup {
         return true;
     }
 
-    public boolean plot(Coordonate coordonate, Coordonate observerCoordonate, int UUID) {
-        if (canBePloted(coordonate.world(), coordonate.x, coordonate.y, coordonate.z) == false) return false;
+    public boolean plot(Coordinate coordinate, Coordinate observerCoordinate, int UUID) {
+        if (!canBePloted(coordinate.world(), coordinate.pos.getX(), coordinate.pos.getY(), coordinate.pos.getZ())) return false;
 
         for (GhostGroupElement element : elementList) {
-            Coordonate offsetCoordonate = coordonate.newWithOffset(element.x, element.y, element.z);
-            Eln.ghostManager.createGhost(offsetCoordonate, observerCoordonate, UUID, element.block, element.meta);
+            Coordinate offsetCoordinate = coordinate.newWithOffset(element.x, element.y, element.z);
+            Eln.ghostManager.createGhost(offsetCoordinate, observerCoordinate, UUID, element.block, element.meta);
         }
         return true;
     }
 
-    public void erase(Coordonate observerCoordonate) {
-        Eln.ghostManager.removeGhostAndBlockWithObserver(observerCoordonate);
+    public void erase(Coordinate observerCoordinate) {
+        Eln.ghostManager.removeGhostAndBlockWithObserver(observerCoordinate);
     }
 
-    public void erase(Coordonate observerCoordonate, int uuid) {
-        Eln.ghostManager.removeGhostAndBlockWithObserver(observerCoordonate, uuid);
+    public void erase(Coordinate observerCoordinate, int uuid) {
+        Eln.ghostManager.removeGhostAndBlockWithObserver(observerCoordinate, uuid);
     }
 
-    public void eraseGeo(Coordonate coordonate) {
+    public void eraseGeo(Coordinate coordinate) {
         for (GhostGroupElement element : elementList) {
-            Eln.ghostManager.removeGhostAndBlock(coordonate.newWithOffset(element.x, element.y, element.z));
+            Eln.ghostManager.removeGhostAndBlock(coordinate.newWithOffset(element.x, element.y, element.z));
         }
     }
 
@@ -149,7 +149,7 @@ public class GhostGroup {
         return elementList.size();
     }
 
-	/*public void eraseWithNoNotification(Coordonate observerCoordonate) {
+	/*public void eraseWithNoNotification(Coordinate observerCoordonate) {
         Eln.ghostManager.removeGhostAndBlockWithObserver(observerCoordonate);
 	}
 	*/
