@@ -52,7 +52,7 @@ class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
     }
 
     fun use(stack: ItemStack, entityPlayer: EntityPlayer): Boolean {
-        val creative = Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode
+        val creative = entityPlayer.capabilities.isCreativeMode
         var life = stack.tagCompound!!.getInteger("life")
         return if (creative || life != 0) {
             if (!creative) {
