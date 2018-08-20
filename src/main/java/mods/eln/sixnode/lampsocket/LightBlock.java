@@ -18,7 +18,7 @@ import java.util.Random;
 public class LightBlock extends BlockContainer {
 
     public LightBlock() {
-        super(Material.air);
+        super(Material.AIR);
     }
 
     public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 start, Vec3 end) {
