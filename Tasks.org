@@ -1,6 +1,8 @@
 * Tasks
-** TODO Fix item rendering for basically everything
-** TODO Add IC2 exporter
-** TODO Not all TEs should be tickable.
+** Port to 1.10
+*** TODO Fix item rendering for basically everything
+*** TODO Re-add IC2 exporter
+*** TODO Not all TEs should be tickable.
+*** TODO Some TESRs can be FastTESRs.
 * Ideas
 ** TODO Try gravity sketch
