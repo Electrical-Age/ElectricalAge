@@ -296,7 +296,7 @@ public class LampSocketElement extends SixNodeElement {
             return true;
         }
 
-        ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
+        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
         if (currentItemStack != null) {
             GenericItemUsingDamageDescriptor itemDescriptor = GenericItemUsingDamageDescriptor.getDescriptor(currentItemStack);
             if (itemDescriptor != null) {
@@ -312,7 +312,7 @@ public class LampSocketElement extends SixNodeElement {
             }
         }
 
-        return acceptingInventory.take(entityPlayer.getHeldItemMainhand(), this, true, false);
+        return acceptingInventory.take(entityPlayer.getCurrentEquippedItem(), this, true, false);
     }
 
     public int getLightValue() {

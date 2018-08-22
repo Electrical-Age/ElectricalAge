@@ -161,7 +161,7 @@ public class ElectricalCableElement extends SixNodeElement {
 	/*	World w = sixNode.coordinate.world();
 		boolean exist = w.blockExists(10000, 0, 0);
 		int id = w.getBlockId(10000, 0, 0);*/
-        ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
+        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
         //int i;
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             colorCare = colorCare ^ 1;

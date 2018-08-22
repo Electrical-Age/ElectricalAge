@@ -33,10 +33,10 @@ public class PacketHandler {
 
     @SubscribeEvent
     public void onServerPacket(ServerCustomPacketEvent event) {
-        FMLProxyPacket packet = event.getPacket();
+        FMLProxyPacket packet = event.packet;
         DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
-        NetworkManager manager = event.getManager();
-        EntityPlayer player = ((NetHandlerPlayServer) event.getHandler()).playerEntity; // EntityPlayerMP
+        NetworkManager manager = event.manager;
+        EntityPlayer player = ((NetHandlerPlayServer) event.handler).playerEntity; // EntityPlayerMP
 
         packetRx(stream, manager, player);
     }
@@ -165,7 +165,7 @@ public class PacketHandler {
 
 
             if (clientPlayer.dimension == dimention) {
-                TileEntity entity = clientPlayer.worldObj.getTileEntity(new BlockPos(x,y,z));
+                TileEntity entity = clientPlayer.worldObj.getTileEntity(x, y, z);
                 if (entity != null && entity instanceof INodeEntity) {
                     INodeEntity node = (INodeEntity) entity;
                     if (node.getNodeUuid().equals(stream.readUTF())) {
@@ -198,7 +198,7 @@ public class PacketHandler {
             dimention = stream.readByte();
 
             if (clientPlayer.dimension == dimention) {
-                TileEntity entity = clientPlayer.worldObj.getTileEntity(new BlockPos(x,y,z));
+                TileEntity entity = clientPlayer.worldObj.getTileEntity(x, y, z);
                 if (entity != null && entity instanceof INodeEntity) {
                     INodeEntity node = (INodeEntity) entity;
                     if (node.getNodeUuid().equals(stream.readUTF())) {

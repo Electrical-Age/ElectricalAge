@@ -62,8 +62,7 @@ public class GhostGroup {
     }
 
     public boolean canBePloted(Coordinate c) {
-        return canBePloted(c.world(), c.pos.getX(), c.pos.getY(), c.pos.getZ());
-
+        return canBePloted(c.world(), c.x, c.y, c.z);
     }
 
     public boolean canBePloted(World world, int x, int y, int z) {
@@ -75,7 +74,7 @@ public class GhostGroup {
     }
 
     public boolean plot(Coordinate coordinate, Coordinate observerCoordinate, int UUID) {
-        if (!canBePloted(coordinate.world(), coordinate.pos.getX(), coordinate.pos.getY(), coordinate.pos.getZ())) return false;
+        if (canBePloted(coordinate.world(), coordinate.x, coordinate.y, coordinate.z) == false) return false;
 
         for (GhostGroupElement element : elementList) {
             Coordinate offsetCoordinate = coordinate.newWithOffset(element.x, element.y, element.z);

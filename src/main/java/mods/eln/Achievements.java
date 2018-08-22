@@ -14,7 +14,7 @@ public class Achievements {
 
     public static void init() {
         openGuide = new Achievement(TR("achievement.open_guide"),
-            "open_guide", 0, 0, Items.BOOK, null).registerStat();
+            "open_guide", 0, 0, Items.book, null).registerStat();
 
         TR_DESC(Type.ACHIEVEMENT, "open_guide");
 

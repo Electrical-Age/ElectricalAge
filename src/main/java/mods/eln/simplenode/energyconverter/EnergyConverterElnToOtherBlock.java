@@ -20,7 +20,7 @@ public class EnergyConverterElnToOtherBlock extends SimpleNodeBlock {
 //    private IIcon sideIcon;
 
     public EnergyConverterElnToOtherBlock(EnergyConverterElnToOtherDescriptor descriptor) {
-        super(Material.PACKED_ICE);
+        super(Material.packedIce);
         this.descriptor = descriptor;
         setDescriptor(descriptor);
     }

@@ -100,7 +100,7 @@ public class ElectricalMathRender extends SixNodeElementRender {
             ledTime = 0;
         }
 
-        if (!Utils.isPlayerAround(tileEntity.getWorld(), coord.getAxisAlignedBB(0)))
+        if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coord.getAxisAlignedBB(0)))
             interpolator.setTarget(0f);
         else
             interpolator.setTarget(1f);

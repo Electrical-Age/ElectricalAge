@@ -9,7 +9,6 @@ import mods.eln.sixnode.electricalwatch.ElectricalWatchContainer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFire;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
 
@@ -70,44 +69,44 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
             detectionBBCenter.copyFrom(element.getCoordonate());
             switch (element.side) {
                 case XP:
-                    detectionBBCenter.pos.add(-maxRangeHalf, 0, 0);
+                    detectionBBCenter.x -= maxRangeHalf;
                     break;
 
                 case XN:
-                    detectionBBCenter.pos.add(maxRangeHalf,0,0);
+                    detectionBBCenter.x += maxRangeHalf;
                     break;
 
                 case YP:
-                    detectionBBCenter.pos.add(0, -maxRangeHalf, 0);
+                    detectionBBCenter.y -= maxRangeHalf;
                     break;
 
                 case YN:
-                    detectionBBCenter.pos.add(0, maxRangeHalf, 0);
+                    detectionBBCenter.y += maxRangeHalf;
                     break;
 
                 case ZP:
-                    detectionBBCenter.pos.add(0,0,  -maxRangeHalf);
+                    detectionBBCenter.z -= maxRangeHalf;
                     break;
 
                 case ZN:
-                    detectionBBCenter.pos.add(0,0, maxRangeHalf);
+                    detectionBBCenter.z += maxRangeHalf;
                     break;
             }
 
             for (int dx = -maxRangeHalf; dx <= maxRangeHalf; ++dx)
                 for (int dy = -maxRangeHalf; dy <= maxRangeHalf; ++dy)
                     for (int dz = -maxRangeHalf; dz <= maxRangeHalf; ++dz) {
-                        Block block = detectionBBCenter.world().getBlockState(new BlockPos(detectionBBCenter.pos.getX() + dx, detectionBBCenter.pos.getY() + dy,
-                            detectionBBCenter.pos.getZ() + dz)).getBlock();
+                        Block block = detectionBBCenter.world().getBlock(detectionBBCenter.x + dx, detectionBBCenter.y + dy,
+                            detectionBBCenter.z + dz);
                         if (block.getClass() == BlockFire.class) {
                             fireDetected = true;
 
                             Coordinate coord = element.getCoordonate();
-                            List<Block> blockList = Utils.traceRay(coord.world(), coord.pos.getX() + 0.5, coord.pos.getY() + 0.5, coord.pos.getZ() + 0.5,
-                                detectionBBCenter.pos.getX() + dx + 0.5, detectionBBCenter.pos.getY() + dy + 0.5, detectionBBCenter.pos.getZ() + dz + 0.5);
+                            List<Block> blockList = Utils.traceRay(coord.world(), coord.x + 0.5, coord.y + 0.5, coord.z + 0.5,
+                                detectionBBCenter.x + dx + 0.5, detectionBBCenter.y + dy + 0.5, detectionBBCenter.z + dz + 0.5);
 
                             for (Block b : blockList)
-                                if (b.isOpaqueCube(b.getBlockState().getBaseState())) {
+                                if (b.isOpaqueCube()) {
                                     fireDetected = false;
                                     break;
                                 }

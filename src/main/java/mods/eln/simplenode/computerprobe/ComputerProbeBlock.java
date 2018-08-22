@@ -14,7 +14,7 @@ public class ComputerProbeBlock extends SimpleNodeBlock {
 //    private IIcon[] icon = new IIcon[6];
 
     public ComputerProbeBlock() {
-        super(Material.PACKED_ICE);
+        super(Material.packedIce);
     }
 
     @Override

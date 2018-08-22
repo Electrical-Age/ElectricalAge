@@ -121,7 +121,7 @@ public class GroundCableElement extends SixNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
+        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
         if (Utils.isPlayerUsingWrench(entityPlayer)) {
             colorCare = colorCare ^ 1;
             Utils.addChatMessage(entityPlayer, "Wire color care " + colorCare);

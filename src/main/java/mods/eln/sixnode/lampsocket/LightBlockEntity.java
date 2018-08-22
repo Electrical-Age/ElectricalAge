@@ -8,7 +8,6 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
@@ -110,15 +109,16 @@ public class LightBlockEntity extends TileEntity {
 		}*/
     }
 
+    @Override
     public void updateEntity() {
         if (worldObj.isRemote) return;
 
         if (lightList.isEmpty()) {
             //	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
-            worldObj.setBlockToAir(new BlockPos(this.pos.getX(), this.pos.getY(), this.pos.getZ()));
+            worldObj.setBlockToAir(xCoord, yCoord, zCoord);
             //worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
             //Eln.instance.tileEntityDestructor.add(this);
-            Utils.println("Destroy light at " + this.pos.getX() + " " + this.pos.getY() + " " + this.pos.getZ() + " ");
+            Utils.println("Destroy light at " + xCoord + " " + yCoord + " " + zCoord + " ");
             return;
         }
 
@@ -135,22 +135,21 @@ public class LightBlockEntity extends TileEntity {
             }
         }
 
-        if (light != worldObj.getBlockState(this.pos).getBlock().getMetaFromState(worldObj.getBlockState(this.pos))) {
-            worldObj.getBlockState(this.pos).getBlock().setLightLevel(2);
-            //TO BE FIXED
-            worldObj.updateLightByType(EnumSkyBlock.BLOCK, xCoord, yCoord, zCoord);
+        if (light != worldObj.getBlockMetadata(xCoord, yCoord, zCoord)) {
+
+            worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light, 2);
+            worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
         }
     }
 
     public static void addLight(World w, int x, int y, int z, int light, int timeout) {
-        Block block = w.getBlockState(new BlockPos(x, y, z)).getBlock();
+        Block block = w.getBlock(x, y, z);
         if (block != Eln.lightBlock) {
-            if (block != Blocks.AIR) return;
-            w.setBlockState(new BlockPos(x, y, z), Eln.lightBlock.getDefaultState());
-            w.setLightFor(EnumSkyBlock.BLOCK, new BlockPos(x,y,z), 2);
+            if (block != Blocks.air) return;
+            w.setBlock(x, y, z, Eln.lightBlock, light, 2);
         }
 
-        TileEntity t = w.getTileEntity(new BlockPos(x, y, z));
+        TileEntity t = w.getTileEntity(x, y, z);
         if (t != null && t instanceof LightBlockEntity)
             ((LightBlockEntity) t).addLight(light, timeout);
         else
@@ -158,7 +157,7 @@ public class LightBlockEntity extends TileEntity {
     }
 
     public static void addLight(Coordinate coord, int light, int timeout) {
-        addLight(coord.world(), coord.pos.getX(), coord.pos.getY(), coord.pos.getZ(), light, timeout);
+        addLight(coord.world(), coord.x, coord.y, coord.z, light, timeout);
     }
 
 	/*public static void removeLight(Coordinate coord, int light) {

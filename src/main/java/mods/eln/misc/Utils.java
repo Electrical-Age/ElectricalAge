@@ -574,7 +574,7 @@ public class Utils {
     }
 
     public static void dropItem(ItemStack itemStack, Coordinate coordinate) {
-        dropItem(itemStack, coordinate.pos.getX(), coordinate.pos.getY(), coordinate.pos.getZ(), coordinate.world());
+        dropItem(itemStack, coordinate.x, coordinate.y, coordinate.z, coordinate.world());
     }
 
     public static boolean tryPutStackInInventory(ItemStack stack, IInventory inventory, int start, int count) {
@@ -962,9 +962,8 @@ public class Utils {
         double d = 0;
 
         while (d < norm) {
-            if (world.isBlockLoaded(new BlockPos( x, y, z))) {
-                //ASKS FOR BLOCK ID with Utils.getBlock()
-                Block b = world.getBlockState(new BlockPos(x,y,z)).getBlock();
+            if (Utils.isBlockLoaded(world, x, y, z)) {
+                Block b = Utils.getBlock(world, x, y, z);
                 if (b != null)
                     blockList.add(b);
             }

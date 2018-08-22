@@ -23,9 +23,9 @@ public class ClientPacketHandler {
     @SubscribeEvent
     public void onClientPacket(ClientCustomPacketEvent event) {
         //Utils.println("onClientPacket");
-        FMLProxyPacket packet = event.getPacket();
+        FMLProxyPacket packet = event.packet;
         DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
-        NetworkManager manager = event.getManager();
+        NetworkManager manager = event.manager;
         EntityPlayer player = Minecraft.getMinecraft().thePlayer; // EntityClientPlayerMP
 
         Eln.packetHandler.packetRx(stream, manager, player);
