@@ -25,4 +25,7 @@
  - Animating the player *using* all this would be complicated. Having Steve flail wildly might be almost as good.
  - Later in the game, robots can be used to automate most of this. CnC machines, robot arms, etc.
 * Ideas
+** Research system
+ How do we do this so it isn't annoying?
+ It could be used as a gating mechanic, by having research blocks that require ever larger and more irregular bursts of power. It should probably be part of the workshop multiblock. The player should also have a way to opt out, though.
 ** TODO Try gravity sketch
