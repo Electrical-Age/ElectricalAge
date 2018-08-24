@@ -5,6 +5,7 @@ import mods.eln.misc.Coordinate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -124,7 +125,7 @@ public class LightBlockEntity extends TileEntity {
 
         int light = 0;
         Iterator<LightHandle> iterator = lightList.iterator();
-
+        
         while (iterator.hasNext()) {
             LightHandle l = iterator.next();
             if (light < l.value) light = l.value;
@@ -134,23 +135,23 @@ public class LightBlockEntity extends TileEntity {
                 iterator.remove();
             }
         }
-
-        if (light != worldObj.getBlockState(this.pos).getBlock().getMetaFromState(worldObj.getBlockState(this.pos))) {
-            worldObj.getBlockState(this.pos).getBlock().setLightLevel(2);
-            //TODO
-            worldObj.updateLightByType(EnumSkyBlock.BLOCK, xCoord, yCoord, zCoord);
+        IBlockState state = worldObj.getBlockState(pos);
+        Block block = state.getBlock();
+        if (light != block.getMetaFromState(state)) {
+            block.setLightLevel(2);
+            worldObj.notifyLightSet(pos);
         }
     }
 
-    public static void addLight(World w, int x, int y, int z, int light, int timeout) {
-        Block block = w.getBlockState(new BlockPos(x, y, z)).getBlock();
+    public static void addLight(World w, BlockPos pos, int light, int timeout) {
+        Block block = w.getBlockState(pos).getBlock();
         if (block != Eln.lightBlock) {
             if (block != Blocks.AIR) return;
-            w.setBlockState(new BlockPos(x, y, z), Eln.lightBlock.getDefaultState());
-            w.setLightFor(EnumSkyBlock.BLOCK, new BlockPos(x,y,z), 2);
+            w.setBlockState(pos, Eln.lightBlock.getDefaultState());
+            w.setLightFor(EnumSkyBlock.BLOCK, pos, 2);
         }
 
-        TileEntity t = w.getTileEntity(new BlockPos(x, y, z));
+        TileEntity t = w.getTileEntity(pos);
         if (t != null && t instanceof LightBlockEntity)
             ((LightBlockEntity) t).addLight(light, timeout);
         else
@@ -158,7 +159,7 @@ public class LightBlockEntity extends TileEntity {
     }
 
     public static void addLight(Coordinate coord, int light, int timeout) {
-        addLight(coord.world(), coord.pos.getX(), coord.pos.getY(), coord.pos.getZ(), light, timeout);
+        addLight(coord.world(), coord.pos, light, timeout);
     }
 
 	/*public static void removeLight(Coordinate coord, int light) {
