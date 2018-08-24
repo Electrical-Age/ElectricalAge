@@ -5,6 +5,7 @@ import mods.eln.misc.Coordinate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -136,9 +137,10 @@ public class LightBlockEntity extends TileEntity {
                 iterator.remove();
             }
         }
-
-        if (light != worldObj.getBlockState(pos).getBlock().getMetaFromState(worldObj.getBlockState(pos))) {
-            worldObj.getBlockState(pos).getBlock().setLightLevel(2);
+        IBlockState state = worldObj.getBlockState(pos);
+        Block block = state.getBlock();
+        if (light != block.getMetaFromState(state)) {
+            block.setLightLevel(2);
             worldObj.notifyLightSet(pos);
         }
     }
@@ -159,7 +161,7 @@ public class LightBlockEntity extends TileEntity {
     }
 
     public static void addLight(Coordinate coord, int light, int timeout) {
-        addLight(coord.world(), new BlockPos(coord.pos.getX(), coord.pos.getY(), coord.pos.getZ()), light, timeout);
+        addLight(coord.world(), coord.pos, light, timeout);
     }
 
 	/*public static void removeLight(Coordinate coord, int light) {

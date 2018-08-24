@@ -209,7 +209,7 @@ public abstract class TransparentNodeElementRender {
 
         for (LRDU lrdu : LRDU.values()) {
             Utils.setGlColorFromDye(renderPreProcess.otherdry[lrdu.toInt()]);
-            if (connection.get(lrdu) == false) continue;
+            if (!connection.get(lrdu)) continue;
             maskTempDraw.set(1 << lrdu.toInt());
             CableRender.drawCable(render, maskTempDraw, renderPreProcess);
         }
@@ -228,9 +228,8 @@ public abstract class TransparentNodeElementRender {
 
     }
 
-    protected Coordonate coordonate() {
-
-        return new Coordonate(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, tileEntity.getWorldObj());
+    protected Coordinate coordinate() {
+        return new Coordinate(tileEntity.getPos(), tileEntity.getWorld());
     }
 
 

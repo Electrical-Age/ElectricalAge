@@ -44,7 +44,7 @@ public class ClientKeyHandler {
     @SubscribeEvent
     public void onKeyInput(KeyInputEvent event) {
         for (int i = 0; i < desc.length; ++i) {
-            boolean s = keys[i].getIsKeyPressed();
+            boolean s = keys[i].isPressed();
             if (s == false) continue;
             if (states[i])
                 setState(i, false);
@@ -56,7 +56,7 @@ public class ClientKeyHandler {
     public void tick(ClientTickEvent event) {
         if (event.phase != Phase.START) return;
         for (int i = 0; i < desc.length; ++i) {
-            boolean s = keys[i].getIsKeyPressed();
+            boolean s = keys[i].isPressed();
             if (s == false && states[i] == true) {
                 setState(i, false);
             }

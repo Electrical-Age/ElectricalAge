@@ -40,12 +40,13 @@ public abstract class SimpleNode extends NodeBase {
 
     public void setFront(Direction front) {
         this.front = front;
-        if (applayFrontToMetadata()) {
-            coordonate.setMetadata(front.getInt());
+        if (applyFrontToMetadata()) {
+            //TODO
+            this.coordinate.world().setBlockState(this.coordinate.pos, this.coordinate.world().getBlockState(this.coordinate.pos).getBlock().getStateFromMeta(front.getInt()));
         }
     }
 
-    protected boolean applayFrontToMetadata() {
+    protected boolean applyFrontToMetadata() {
         return false;
     }
 

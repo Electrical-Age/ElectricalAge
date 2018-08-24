@@ -1,7 +1,5 @@
 package mods.eln.node.simple;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.DescriptorManager;
@@ -15,13 +13,16 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
+import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ITickable;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 
-public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity {
+public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity, ITickable {
 
     private SimpleNode node;
 
@@ -30,11 +31,10 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
             Utils.fatal();
             return null;
         }
-        if (this.worldObj == null) return null;
         if (node == null) {
-            node = (SimpleNode) NodeManager.instance.getNodeFromCoordonate(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
+            node = (SimpleNode) NodeManager.instance.getNodeFromCoordinate(new Coordinate(pos, worldObj));
             if (node == null) {
-                DelayedBlockRemove.add(new Coordonate(xCoord, yCoord, zCoord, this.worldObj));
+                DelayedBlockRemove.add(new Coordinate(pos, this.worldObj));
                 return null;
             }
         }
@@ -116,7 +116,8 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
     public void serverPublishUnserialize(DataInputStream stream) {
         try {
             if (front != (front = Direction.fromInt(stream.readByte()))) {
-                worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+                //TODO
+                worldObj.notifyBlockUpdate(getPos(), null, null, 0);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -128,14 +129,16 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
     }
 
-    @Override
+
     public Packet getDescriptionPacket() {
         SimpleNode node = getNode();
         if (node == null) {
             Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
             return null;
         }
-        return new S3FPacketCustomPayload(Eln.channelName, node.getPublishPacket().toByteArray());
+        //TODO
+
+        return new SPacketCustomPayload(Eln.channelName, node.getPublishPacket());
     }
 
 

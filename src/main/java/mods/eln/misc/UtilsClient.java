@@ -63,9 +63,9 @@ public class UtilsClient {
             return;
         if (bilinear)
             enableBilinear();
-        int light = getLight(w, x, y, z) * 19 / 15 - 4;
+        int light = getLight(w,pos) * 19 / 15 - 4;
         Entity e = getClientPlayer();
-        float d = (float) (Math.abs(x - e.posX) + Math.abs(y - e.posY) + Math.abs(z - e.posZ));
+        float d = (float) (Math.abs(pos.getX() - e.posX) + Math.abs(pos.getY() - e.posY) + Math.abs(pos.getZ() - e.posZ));
 
         GL11.glColor4f(r, g, b, 1f - (light / 15f));
         halo.draw(d * 20, 1, 0, 0);
@@ -80,11 +80,11 @@ public class UtilsClient {
         clientPlayer.openGui(Eln.instance, GuiHandler.genericOpen, clientPlayer.worldObj, 0, 0, 0);
     }
 
-    public static void drawHalo(Obj3DPart halo, float r, float g, float b, World w, int x, int y, int z, boolean bilinear) {
+    public static void drawHalo(Obj3DPart halo, float r, float g, float b, World w, BlockPos pos, boolean bilinear) {
         disableLight();
         enableBlend();
 
-        UtilsClient.drawHaloNoLightSetup(halo, r, g, b, w, x, y, z, bilinear);
+        UtilsClient.drawHaloNoLightSetup(halo, r, g, b, w, pos, bilinear);
         enableLight();
         disableBlend();
     }
@@ -119,7 +119,7 @@ public class UtilsClient {
             return;
         if (bilinear)
             enableBilinear();
-        int light = getLight(e.worldObj, MathHelper.floor_double(e.posX), MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ));
+        int light = getLight(e.worldObj, new BlockPos(MathHelper.floor_double(e.posX), MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ)));
         // light =
         // e.worldObj.getLightBrightnessForSkyBlocks(MathHelper.floor_double(e.posX),
         // MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ),0);

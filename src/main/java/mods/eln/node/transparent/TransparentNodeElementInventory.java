@@ -6,8 +6,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.text.ITextComponent;
+
+import javax.annotation.Nullable;
 
 public class TransparentNodeElementInventory implements ISidedInventory, INBTTReady {
+    //TODO
+    //FIX INVENTORIES 1.10
     protected TransparentNodeElementRender transparentNodeRender = null;
     protected TransparentNodeElement transparentNodeElement = null;
 
@@ -59,7 +65,13 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
         return stack;
     }
 
+    @Nullable
     @Override
+    public ItemStack removeStackFromSlot(int index) {
+        return null;
+    }
+
+
     public ItemStack getStackInSlotOnClosing(int slot) {
         ItemStack stack = getStackInSlot(slot);
         if (stack != null) {
@@ -76,7 +88,7 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
         }
     }
 
-    @Override
+
     public String getInventoryName() {
         return "tco.TransparentNodeInventory";
     }
@@ -98,16 +110,16 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
     }
 
     @Override
-    public void openInventory() {
+    public void openInventory(EntityPlayer player) {
 
     }
 
     @Override
-    public void closeInventory() {
+    public void closeInventory(EntityPlayer player) {
 
     }
 
-    @Override
+
     public void markDirty() {
         if (transparentNodeElement != null && !transparentNodeElement.node.isDestructing()) {
             transparentNodeElement.inventoryChange(this);
@@ -140,24 +152,67 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
     }
 
     @Override
-    public boolean hasCustomInventoryName() {
-
-        return false;
+    public int getField(int id) {
+        return 0;
     }
 
     @Override
+    public void setField(int id, int value) {
+
+    }
+
+    @Override
+    public int getFieldCount() {
+        return 0;
+    }
+
+    @Override
+    public void clear() {
+
+    }
+
+
     public int[] getAccessibleSlotsFromSide(int var1) {
         return new int[]{};
     }
 
-    @Override
+
     public boolean canInsertItem(int var1, ItemStack var2, int var3) {
         return false;
     }
 
-    @Override
+
     public boolean canExtractItem(int var1, ItemStack var2, int var3) {
         return false;
     }
 
+    @Override
+    public int[] getSlotsForFace(EnumFacing side) {
+        return new int[0];
+    }
+
+    @Override
+    public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
+        return false;
+    }
+
+    @Override
+    public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
+        return false;
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
+
+    @Override
+    public boolean hasCustomName() {
+        return false;
+    }
+
+    @Override
+    public ITextComponent getDisplayName() {
+        return null;
+    }
 }

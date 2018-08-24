@@ -1,10 +1,10 @@
 package mods.eln.node;
 
+import mods.eln.misc.Coordinate;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
 
 public class NodeBlockItem extends ItemBlock {
 
@@ -23,11 +23,11 @@ public class NodeBlockItem extends ItemBlock {
     /*int getBlockID(){
         return Block.getIdFromBlock(getBlock());
     }*/
-    NodeBlock getBlock() {
+    public NodeBlock getBlock() {
         return (NodeBlock) Block.getBlockFromItem(this);
     }
 
-    public boolean placeBlockAt(ItemStack stack, EntityLivingBase player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata) {
+    public boolean placeBlockAt(ItemStack stack, EntityLivingBase player, Coordinate coord, float hitX, float hitY, float hitZ, int metadata) {
     /*	if(world.isRemote) return false;
         Direction direction = Direction.fromIntMinecraftSide(side).getInverse();
     	
