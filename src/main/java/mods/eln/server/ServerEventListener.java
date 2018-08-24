@@ -1,11 +1,11 @@
 package mods.eln.server;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
+import mods.eln.misc.Coordinate;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeManager;
 import net.minecraft.entity.effect.EntityLightningBolt;
@@ -53,7 +53,7 @@ public class ServerEventListener {
         lightningList.clear();
     }
 
-    public double getLightningClosestTo(Coordonate c) {
+    public double getLightningClosestTo(Coordinate c) {
         double best = 10000000;
         for (EntityLightningBolt l : lightningList) {
             if (c.world() != l.worldObj) continue;

@@ -106,6 +106,7 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                             List<Block> blockList = Utils.traceRay(coord.world(), coord.pos.getX() + 0.5, coord.pos.getY() + 0.5, coord.pos.getZ() + 0.5,
                                 detectionBBCenter.pos.getX() + dx + 0.5, detectionBBCenter.pos.getY() + dy + 0.5, detectionBBCenter.pos.getZ() + dz + 0.5);
 
+
                             for (Block b : blockList)
                                 if (b.isOpaqueCube(b.getBlockState().getBaseState())) {
                                     fireDetected = false;

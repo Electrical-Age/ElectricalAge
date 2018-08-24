@@ -1,7 +1,7 @@
 package mods.eln.sixnode.batterycharger;
 
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -23,7 +23,7 @@ public class BatteryChargerRender extends SixNodeElementRender {
 
     BatteryChargerDescriptor descriptor;
 
-    Coordonate coord;
+    Coordinate coord;
     boolean[] charged = new boolean[]{false, false, false, false};
     boolean[] batteryPresence = new boolean[]{false, false, false, false};
 
@@ -37,7 +37,7 @@ public class BatteryChargerRender extends SixNodeElementRender {
         super(tileEntity, side, descriptor);
         this.descriptor = (BatteryChargerDescriptor) descriptor;
 
-        coord = new Coordonate(tileEntity);
+        coord = new Coordinate(tileEntity);
     }
 
     @Override

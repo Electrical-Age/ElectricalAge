@@ -120,30 +120,31 @@ public class ElectricalSwitchDescriptor extends SixNodeDescriptor {
         }
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        //if (type == ItemRenderType.INVENTORY) GL11.glScalef(1.8f, 1.8f, 1.8f);
-        if (type != ItemRenderType.INVENTORY) {
-            draw(0f, 0f, null);
-        } else {
-            super.renderItem(type, item, data);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        //if (type == ItemRenderType.INVENTORY) GL11.glScalef(1.8f, 1.8f, 1.8f);
+//        if (type != ItemRenderType.INVENTORY) {
+//            draw(0f, 0f, null);
+//        } else {
+//            super.renderItem(type, item, data);
+//        }
+//    }
 
     public void draw(float on, float distance, TileEntity e) {
         switch (objType) {

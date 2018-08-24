@@ -1,14 +1,13 @@
 package mods.eln.ore;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -38,52 +37,24 @@ public class OreBlock extends Block {
         Eln.oreItem.getSubItems(i, tab, l);
     }
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public IIcon getIcon(int par1, int par2) {
-        OreDescriptor desc = Eln.oreItem.getDescriptor(par2);
-        if (desc == null) return null;
-        return desc.getBlockIconId(par1, par2);
-    }
+    // TODO(1.10): Fix item rendering.
+//    @Override
+//    @SideOnly(Side.CLIENT)
+//    public IIcon getIcon(int par1, int par2) {
+//        OreDescriptor desc = Eln.oreItem.getDescriptor(par2);
+//        if (desc == null) return null;
+//        return desc.getBlockIconId(par1, par2);
+//    }
 
     public ArrayList<ItemStack> getBlockDropped(World w, int x, int y, int z, int meta, int fortune) { //Specifies the block drop
-	/*	ArrayList<ItemStack> list = new ArrayList<ItemStack>(); //The list of items
-		
-		list.add(new ItemStack(meta == 0 ? TutorialMain.ruby : TutorialMain.metaGem,1,meta == 0 ? 0 : meta-1)); //One guaranteed
-		
-		for(int i=0;i<2+fortune;i++){ //A loop for drops, increased by fortune enchant
-			if(w.rand.nextInt(101) > 49){ //50% chance
-			list.add(new ItemStack(meta == 0 ? TutorialMain.ruby : TutorialMain.metaGem,1,meta == 0 ? 0 : meta-1)); //Adds the gem
-			}
-		}
-		
-		return list; //Returns the finished list :)*/
         OreDescriptor desc = Eln.oreItem.getDescriptor(meta);
         if (desc == null) return new ArrayList<ItemStack>();
         return desc.getBlockDropped(fortune);
     }
 
-	/*//caca1.5.1
-	@Override
-	public String getTextureFile() {
-		return CommonProxy.BLOCK_PNG;
-	}
-	*/
-
     @Override
     public void breakBlock(World par1World, int par2, int par3, int par4, Block par5, int par6) {
         super.breakBlock(par1World, par2, par3, par4, par5, par6);
         if (par1World.isRemote) return;
-		/*
-		
-		ArrayList<ItemStack> list = Eln.oreItem.getDescriptor(par6).getBlockDropped(0);
-		if(list == null) {
-			dropBlockAsItem_do(par1World, par2, par3, par4, new ItemStack(this, 1, par6));
-		} else {
-			for(ItemStack stack : list) {
-				dropBlockAsItem_do(par1World, par2, par3, par4, stack);
-			}
-		}
-	*/
     }
 }

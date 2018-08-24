@@ -17,13 +17,10 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import net.minecraftforge.client.IItemRenderer.ItemRenderType;
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -237,25 +234,6 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
         return 0;
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    /*
-    @Override
-    public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
-        if(entityLiving.worldObj.isRemote == false){
-            setDamage(stack, (byte) (getDamage(stack)+1));
-            Utils.println("Break");
-        }
-        return super.onEntitySwing(entityLiving, stack);
-    }*/
     public boolean onBlockStartBreak(ItemStack itemstack, int x, int y, int z, EntityPlayer player) {
         if (!player.worldObj.isRemote) {
             setDamage(itemstack, (byte) (getDamage(itemstack) + 1));
@@ -264,165 +242,176 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
         return super.onBlockStartBreak(itemstack, x, y, z, player);
     }
 
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-            UtilsClient.drawEnergyBare(type, (float) (getEnergy(item) / getEnergyMax(item)));
-            return;
-        }
-
-        double energy = getEnergy(item);
-        byte state = getState(item);
-
-        GL11.glPushMatrix();
-        Entity e;
-
-        switch (type) {
-            case ENTITY:
-                e = null;
-                GL11.glTranslatef(0, -0.2f, 0);
-                GL11.glRotatef(90, 0, 0, 1);
-                break;
-
-            case EQUIPPED:
-                e = (Entity) data[1];
-                GL11.glRotatef(130, 0, 0, 1);
-                GL11.glRotatef(140, 1, 0, 0);
-                GL11.glRotatef(-20, 0, 1, 0);
-                GL11.glScalef(1.6f, 1.6f, 1.6f);
-                GL11.glTranslatef(-0.2f, 0.7f, -0.0f);
-                break;
-
-            case EQUIPPED_FIRST_PERSON:
-                e = (Entity) data[1];
-                GL11.glTranslatef(0, 1, 0);
-                GL11.glRotatef(90, 0, 0, 1);
-                GL11.glRotatef(35, 1, 0, 0);
-                GL11.glTranslatef(0.0f, 1, -0.2f);
-                break;
-
-            case INVENTORY:
-                GL11.glPopMatrix();
-                return;
-
-            case FIRST_PERSON_MAP:
-                e = null;
-                break;
-
-            default:
-                e = null;
-                break;
-        }
-
-        boolean drawScreen = e != null && UtilsClient.clientDistanceTo(e) < 10;
-        boolean drawRay = drawScreen && state == sRun;
-
-        base.draw();
-
-        if (drawRay) {
-            GL11.glPushMatrix();
-
-            Object oRender = Eln.clientLiveDataManager.getData(item, 1);
-            if (oRender == null)
-                oRender = Eln.clientLiveDataManager.newData(item, new RenderStorage(viewRange, viewYAlpha, resWidth, resHeight), 1);
-            RenderStorage render = (RenderStorage) oRender;
-
-            render.generate(e.worldObj, e.posX, Utils.getHeadPosY(e), e.posZ, e.rotationYaw * (float) Math.PI / 180.0F, e.rotationPitch * (float) Math.PI / 180.0F);
-
-            float scale = 1f / resWidth * 0.50f;
-            float p = 1 / 64f;
-            GL11.glTranslatef(0.90668f, 0.163f, -0.25078f);
-            GL11.glRotatef(270, 1, 0, 0);
-            GL11.glRotatef(270, 0, 0, 1);
-            GL11.glScalef(scale, -scale, 1);
-            render.draw();
-
-            GL11.glPopMatrix();
-
-            float r = 0, g = 0, b = 0;
-            int count = 0;
-
-            for (int y = 0; y < resHeight; y += 6) {
-                for (int x = 0; x < resHeight; x += 6) {
-                    r += render.screenRed[y][x];
-                    g += render.screenGreen[y][x];
-                    b += render.screenBlue[y][x];
-                    count++;
-                }
-            }
-            r /= count;
-            g /= count;
-            b /= count;
-            UtilsClient.drawHalo(screenLuma, r, g, b, e, false);
-        }
-
-        if (drawScreen) {
-            if (state == sIdle) {
-                GL11.glColor4f(0.5f, 0.5f, 0.5f, 1f);
-                led.draw();
-                GL11.glColor4f(1f, 1f, 1f, 1f);
-                buttons.draw();
-            }
-            UtilsClient.disableLight();
-            if (state != sIdle) {
-                GL11.glColor4f(1f, 1f, 1f, 1f);
-                buttons.draw();
-
-                float r = 0, g = 0, b = 0;
-                switch (state) {
-                    case sBoot:
-                        r = 0.9f;
-                        g = 0.4f;
-                        b = 0f;
-                        break;
-                    case sRun:
-                        r = 0f;
-                        g = 1f;
-                        b = 0f;
-                        break;
-                    case sStop:
-                        r = 1f;
-                        g = 0f;
-                        b = 0f;
-                        break;
-                    default:
-                        break;
-                }
-                GL11.glColor4f(r * 0.6f, g * 0.6f, b * 0.6f, 1f);
-                led.draw();
-                UtilsClient.enableBlend();
-                UtilsClient.drawHaloNoLightSetup(ledHalo, r, g, b, e, false);
-            }
-
-            GL11.glColor4f(1f, 1f, 1f, 0.4f);
-            switch (state) {
-                case sBoot:
-                    textInit.draw();
-                    break;
-                case sRun:
-                    textRun.draw();
-                    int batLevel = Math.min(textBat.length - 1, (int) (energy / energyStorage * textBat.length + 0.5f));
-                    textBat[batLevel].draw();
-                    break;
-                default:
-                    break;
-            }
-            UtilsClient.enableBlend();
-            GL11.glColor4f(1f, 1f, 1f, 1f);
-            int breakLevel = getDamage(item) / damagePerBreakLevel;
-            if (state == sIdle) breakLevel = Math.min(breakLevel, screenDamage.length - 1);
-            for (int idx = 0; idx < breakLevel; idx++) {
-                if (idx == screenDamage.length) break;
-                screenDamage[Math.min(screenDamage.length - 1, breakLevel - 1) - idx].draw();
-            }
-
-            UtilsClient.disableBlend();
-            UtilsClient.enableLight();
-        }
-
-        GL11.glPopMatrix();
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//            UtilsClient.drawEnergyBare(type, (float) (getEnergy(item) / getEnergyMax(item)));
+//            return;
+//        }
+//
+//        double energy = getEnergy(item);
+//        byte state = getState(item);
+//
+//        GL11.glPushMatrix();
+//        Entity e;
+//
+//        switch (type) {
+//            case ENTITY:
+//                e = null;
+//                GL11.glTranslatef(0, -0.2f, 0);
+//                GL11.glRotatef(90, 0, 0, 1);
+//                break;
+//
+//            case EQUIPPED:
+//                e = (Entity) data[1];
+//                GL11.glRotatef(130, 0, 0, 1);
+//                GL11.glRotatef(140, 1, 0, 0);
+//                GL11.glRotatef(-20, 0, 1, 0);
+//                GL11.glScalef(1.6f, 1.6f, 1.6f);
+//                GL11.glTranslatef(-0.2f, 0.7f, -0.0f);
+//                break;
+//
+//            case EQUIPPED_FIRST_PERSON:
+//                e = (Entity) data[1];
+//                GL11.glTranslatef(0, 1, 0);
+//                GL11.glRotatef(90, 0, 0, 1);
+//                GL11.glRotatef(35, 1, 0, 0);
+//                GL11.glTranslatef(0.0f, 1, -0.2f);
+//                break;
+//
+//            case INVENTORY:
+//                GL11.glPopMatrix();
+//                return;
+//
+//            case FIRST_PERSON_MAP:
+//                e = null;
+//                break;
+//
+//            default:
+//                e = null;
+//                break;
+//        }
+//
+//        boolean drawScreen = e != null && UtilsClient.clientDistanceTo(e) < 10;
+//        boolean drawRay = drawScreen && state == sRun;
+//
+//        base.draw();
+//
+//        if (drawRay) {
+//            GL11.glPushMatrix();
+//
+//            Object oRender = Eln.clientLiveDataManager.getData(item, 1);
+//            if (oRender == null)
+//                oRender = Eln.clientLiveDataManager.newData(item, new RenderStorage(viewRange, viewYAlpha, resWidth, resHeight), 1);
+//            RenderStorage render = (RenderStorage) oRender;
+//
+//            render.generate(e.worldObj, e.posX, Utils.getHeadPosY(e), e.posZ, e.rotationYaw * (float) Math.PI / 180.0F, e.rotationPitch * (float) Math.PI / 180.0F);
+//
+//            float scale = 1f / resWidth * 0.50f;
+//            float p = 1 / 64f;
+//            GL11.glTranslatef(0.90668f, 0.163f, -0.25078f);
+//            GL11.glRotatef(270, 1, 0, 0);
+//            GL11.glRotatef(270, 0, 0, 1);
+//            GL11.glScalef(scale, -scale, 1);
+//            render.draw();
+//
+//            GL11.glPopMatrix();
+//
+//            float r = 0, g = 0, b = 0;
+//            int count = 0;
+//
+//            for (int y = 0; y < resHeight; y += 6) {
+//                for (int x = 0; x < resHeight; x += 6) {
+//                    r += render.screenRed[y][x];
+//                    g += render.screenGreen[y][x];
+//                    b += render.screenBlue[y][x];
+//                    count++;
+//                }
+//            }
+//            r /= count;
+//            g /= count;
+//            b /= count;
+//            UtilsClient.drawHalo(screenLuma, r, g, b, e, false);
+//        }
+//
+//        if (drawScreen) {
+//            if (state == sIdle) {
+//                GL11.glColor4f(0.5f, 0.5f, 0.5f, 1f);
+//                led.draw();
+//                GL11.glColor4f(1f, 1f, 1f, 1f);
+//                buttons.draw();
+//            }
+//            UtilsClient.disableLight();
+//            if (state != sIdle) {
+//                GL11.glColor4f(1f, 1f, 1f, 1f);
+//                buttons.draw();
+//
+//                float r = 0, g = 0, b = 0;
+//                switch (state) {
+//                    case sBoot:
+//                        r = 0.9f;
+//                        g = 0.4f;
+//                        b = 0f;
+//                        break;
+//                    case sRun:
+//                        r = 0f;
+//                        g = 1f;
+//                        b = 0f;
+//                        break;
+//                    case sStop:
+//                        r = 1f;
+//                        g = 0f;
+//                        b = 0f;
+//                        break;
+//                    default:
+//                        break;
+//                }
+//                GL11.glColor4f(r * 0.6f, g * 0.6f, b * 0.6f, 1f);
+//                led.draw();
+//                UtilsClient.enableBlend();
+//                UtilsClient.drawHaloNoLightSetup(ledHalo, r, g, b, e, false);
+//            }
+//
+//            GL11.glColor4f(1f, 1f, 1f, 0.4f);
+//            switch (state) {
+//                case sBoot:
+//                    textInit.draw();
+//                    break;
+//                case sRun:
+//                    textRun.draw();
+//                    int batLevel = Math.min(textBat.length - 1, (int) (energy / energyStorage * textBat.length + 0.5f));
+//                    textBat[batLevel].draw();
+//                    break;
+//                default:
+//                    break;
+//            }
+//            UtilsClient.enableBlend();
+//            GL11.glColor4f(1f, 1f, 1f, 1f);
+//            int breakLevel = getDamage(item) / damagePerBreakLevel;
+//            if (state == sIdle) breakLevel = Math.min(breakLevel, screenDamage.length - 1);
+//            for (int idx = 0; idx < breakLevel; idx++) {
+//                if (idx == screenDamage.length) break;
+//                screenDamage[Math.min(screenDamage.length - 1, breakLevel - 1) - idx].draw();
+//            }
+//
+//            UtilsClient.disableBlend();
+//            UtilsClient.enableLight();
+//        }
+//
+//        GL11.glPopMatrix();
+//    }
 
     public static class RenderStorage {
 

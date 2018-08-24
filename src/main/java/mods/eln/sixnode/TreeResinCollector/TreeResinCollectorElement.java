@@ -1,7 +1,7 @@
 package mods.eln.sixnode.TreeResinCollector;
 
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -66,7 +66,7 @@ public class TreeResinCollectorElement extends SixNodeElement {
     }
 
     double getProductPerSecond() {
-        Coordonate coord = sixNode.coordonate;
+        Coordinate coord = sixNode.coordinate;
         World worldObj = coord.world();
         int[] posWood = new int[3];
         int[] posCollector = new int[3];
@@ -96,12 +96,12 @@ public class TreeResinCollectorElement extends SixNodeElement {
         yEnd = posWood[1];
 
         int collectiorCount = 0;
-        Coordonate coordTemp = new Coordonate(posCollector[0], 0, posCollector[2], worldObj);
+        Coordinate coordTemp = new Coordinate(posCollector[0], 0, posCollector[2], worldObj);
         posCollector[1] = yStart;
         for (posCollector[1] = yStart; posCollector[1] <= yEnd; posCollector[1]++) {
             coordTemp.y = posCollector[1];
             // if(worldObj.getBlockId(posCollector[0],posCollector[1]+1,posCollector[2]) == Eln.treeResinCollectorBlock.blockID)
-            NodeBase node = NodeManager.instance.getNodeFromCoordonate(coordTemp);
+            NodeBase node = NodeManager.instance.getNodeFromCoordinate(coordTemp);
             if (node instanceof SixNode) {
                 SixNode six = (SixNode) node;
                 if (six.getElement(side) != null && six.getElement(side) instanceof TreeResinCollectorElement) {
@@ -176,7 +176,7 @@ public class TreeResinCollectorElement extends SixNodeElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            if (getCoordonate().getBlockExist())
+            if (getCoordonate().doesBlockExist())
                 stream.writeFloat((float) getProduct(getProductPerSecond()));
             else
                 stream.writeFloat(0);

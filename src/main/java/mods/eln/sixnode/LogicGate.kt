@@ -24,7 +24,6 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer
 import org.lwjgl.opengl.GL11
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
@@ -57,25 +56,26 @@ open class LogicGateDescriptor(name: String, obj: Obj3D?, functionName: String, 
         top?.draw()
     }
 
-    override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?): Boolean = true
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
-                                       helper: IItemRenderer.ItemRendererHelper?): Boolean =
-        type != IItemRenderer.ItemRenderType.INVENTORY
-
-    override fun shouldUseRenderHelperEln(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
-                                          helper: IItemRenderer.ItemRendererHelper?): Boolean =
-        type != IItemRenderer.ItemRenderType.INVENTORY
-
-    override fun renderItem(type: IItemRenderer.ItemRenderType?, item: ItemStack?, vararg data: Any?) {
-        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, *data)
-        } else {
-            GL11.glTranslatef(0.0f, 0.0f, -0.2f)
-            GL11.glScalef(1.25f, 1.25f, 1.25f)
-            GL11.glRotatef(-90.0f, 0.0f, 1.0f, 0.0f)
-            draw()
-        }
-    }
+    // TODO(1.10): Reimplement this...
+//    override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?): Boolean = true
+//    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
+//                                       helper: IItemRenderer.ItemRendererHelper?): Boolean =
+//        type != IItemRenderer.ItemRenderType.INVENTORY
+//
+//    override fun shouldUseRenderHelperEln(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
+//                                          helper: IItemRenderer.ItemRendererHelper?): Boolean =
+//        type != IItemRenderer.ItemRenderType.INVENTORY
+//
+//    override fun renderItem(type: IItemRenderer.ItemRenderType?, item: ItemStack?, vararg data: Any?) {
+//        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, *data)
+//        } else {
+//            GL11.glTranslatef(0.0f, 0.0f, -0.2f)
+//            GL11.glScalef(1.25f, 1.25f, 1.25f)
+//            GL11.glRotatef(-90.0f, 0.0f, 1.0f, 0.0f)
+//            draw()
+//        }
+//    }
 
     override fun getFrontFromPlace(side: Direction?, player: EntityPlayer?): LRDU? =
         super.getFrontFromPlace(side, player).left()

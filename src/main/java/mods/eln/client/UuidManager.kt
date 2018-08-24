@@ -1,9 +1,8 @@
 package mods.eln.client
 
-import cpw.mods.fml.common.FMLCommonHandler
-import cpw.mods.fml.common.eventhandler.SubscribeEvent
-import cpw.mods.fml.common.gameevent.TickEvent
-import cpw.mods.fml.common.gameevent.TickEvent.Phase
+import net.minecraftforge.fml.common.FMLCommonHandler
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent
 import java.util.*
 
 class UuidManager {
@@ -23,7 +22,7 @@ class UuidManager {
 
     @SubscribeEvent
     fun tick(event: TickEvent.ClientTickEvent) {
-        if (event.phase == Phase.END) return
+        if (event.phase == TickEvent.Phase.END) return
 
         val i = entities.iterator()
 

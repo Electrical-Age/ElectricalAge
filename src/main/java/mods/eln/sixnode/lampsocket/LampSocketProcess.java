@@ -17,6 +17,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+
 import net.minecraft.util.math.Vec3d;
 
 import java.io.ByteArrayOutputStream;
@@ -115,6 +116,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                         vp.addVector(vv.xCoord, vv.yCoord, vv.zCoord);
                         c.setPosition(vp);
                         Block b = c.getBlockState().getBlock();
+
                         if (!c.doesBlockExist()) {
                             exit = true;
                             break;
@@ -319,6 +321,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
         Block block = coord.getBlockState().getBlock();
         boolean isNotOpaque = block == Blocks.AIR || !block.isOpaqueCube(block.getBlockState().getBaseState());
         if (block == Blocks.FARMLAND)
+
             isNotOpaque = false;
         return !isNotOpaque;
     }

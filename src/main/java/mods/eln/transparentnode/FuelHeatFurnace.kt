@@ -28,7 +28,6 @@ import net.minecraft.inventory.IInventory
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.client.IItemRenderer
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -76,12 +75,13 @@ class FuelHeatFurnaceDescriptor(name: String, model: Obj3D, val thermal: Thermal
         GL11.glColor3f(1f, 1f, 1f)
     }
 
-    override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?) = true
-    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
-                                       helper: IItemRenderer.ItemRendererHelper?) =
-        type != IItemRenderer.ItemRenderType.INVENTORY
-    override fun renderItem(type: IItemRenderer.ItemRenderType?, item: ItemStack?, vararg data: Any?) =
-        if (type == IItemRenderer.ItemRenderType.INVENTORY) super.renderItem(type, item, *data) else draw()
+    // TODO(1.10): Item rendering.
+//    override fun handleRenderType(item: ItemStack?, type: IItemRenderer.ItemRenderType?) = true
+//    override fun shouldUseRenderHelper(type: IItemRenderer.ItemRenderType?, item: ItemStack?,
+//                                       helper: IItemRenderer.ItemRendererHelper?) =
+//        type != IItemRenderer.ItemRenderType.INVENTORY
+//    override fun renderItem(type: IItemRenderer.ItemRenderType?, item: ItemStack?, vararg data: Any?) =
+//        if (type == IItemRenderer.ItemRenderType.INVENTORY) super.renderItem(type, item, *data) else draw()
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
@@ -282,7 +282,7 @@ class FuelHeatFurnaceRender(tileEntity: TransparentNodeEntity, descriptor: Trans
     var heatPower = 0f
     var actualTemperature = 0f
 
-    val sound = object : LoopedSound("eln:fuelheatfurnace", coordonate()) {
+    val sound = object : LoopedSound("eln:fuelheatfurnace", coordinate()) {
         override fun getPitch() = FuelBurnerDescriptor.pitchForType(type)
         override fun getVolume() = if (heatPower > 0) 0.01f + 0.00001f * heatPower else 0f
     }

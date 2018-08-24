@@ -575,6 +575,7 @@ public class Utils {
 
     public static void dropItem(ItemStack itemStack, Coordinate coordinate) {
         dropItem(itemStack, coordinate.pos.getX(), coordinate.pos.getY(), coordinate.pos.getZ(), coordinate.world());
+
     }
 
     public static boolean tryPutStackInInventory(ItemStack stack, IInventory inventory, int start, int count) {

@@ -18,8 +18,8 @@ import java.util.List;
 import static mods.eln.i18n.I18N.tr;
 
 public class AutoMinerDescriptor extends TransparentNodeDescriptor {
-    private final Coordonate[] powerCoord;
-    final Coordonate lightCoord;
+    private final Coordinate[] powerCoord;
+    final Coordinate lightCoord;
     private final Obj3DPart core;
     private final Obj3DPart gui;
     private final Obj3DPart lampSocket;
@@ -48,8 +48,8 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 
     final double pipeOperationRp;
 
-    public AutoMinerDescriptor(String name, Obj3D obj, Coordonate[] powerCoord, Coordonate lightCoord,
-                               Coordonate miningCoord, int deltaX, int deltaY, int deltaZ,
+    public AutoMinerDescriptor(String name, Obj3D obj, Coordinate[] powerCoord, Coordinate lightCoord,
+                               Coordinate miningCoord, int deltaX, int deltaY, int deltaZ,
                                ElectricalCableDescriptor cable, double pipeOperationTime, double pipeOperationEnergy) {
         super(name, AutoMinerElement.class, AutoMinerRender.class);
         this.nominalVoltage = cable.electricalNominalVoltage;
@@ -157,31 +157,32 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
         UtilsClient.enableCulling();
     }
 
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glScalef(0.18f, 0.18f, 0.18f);
-            draw(false, buttonsStateDefault, ledsAStateDefault, ledsPStateDefault);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            GL11.glScalef(0.18f, 0.18f, 0.18f);
+//            draw(false, buttonsStateDefault, ledsAStateDefault, ledsPStateDefault);
+//        }
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    public Coordonate[] getPowerCoordonate(World w) {
-        Coordonate[] temp = new Coordonate[powerCoord.length];
+    public Coordinate[] getPowerCoordonate(World w) {
+        Coordinate[] temp = new Coordinate[powerCoord.length];
         for (int idx = 0; idx < temp.length; idx++) {
-            temp[idx] = new Coordonate(powerCoord[idx]);
-            temp[idx].setDimention(w.provider.dimensionId);
+            temp[idx] = new Coordinate(powerCoord[idx]);
+            temp[idx].setDimension(w.provider.getDimension());
         }
         return temp;
     }

@@ -1,0 +1,31 @@
+* Tasks
+** Port to 1.10
+*** TODO Fix item rendering for basically everything
+*** TODO Re-add IC2 exporter
+*** TODO Not all TEs should be tickable.
+*** TODO Some TESRs can be FastTESRs.
+* Plans
+** TODO Workbench
+ A CfB and Factorio-style crafting system. The player churns through recipes at a configurable rate; say 0.5/second. It's like Cooking for Blockheads in that the base workbench only supports the minimum functionality, with expansion blocks adding to it.
+ - The recipe ordering is precalculated, and automatically ordered to minimize time spent waiting.
+ - Workbench space is limited. Intermediate items are shown, and *not* stored in the player's inventory. Additional benches let more complex recipes be crafted.
+ - Very few Eln devices will be possible to hand-craft with the Minecraft system. No AE2 for you, but that never worked great anyway.
+ - Minecraft recipes *can* be crafted with the multiblock.
+   - However, pack creators can use a configuration file to make particular recipes require some of the extra blocks sketched below. Will need substring/oredict matching for this.
+ - The planned MA expansion will add quality parameters to most items. Upgraded blocks can provide better quality, often faster. Steve is strong, and can shape metal with his bare hands. This does not mean it's a good idea.
+   - Workbench w/drawers. Mostly decorative, but acts like component storage. (Is however twice the size, 2x1x1.)
+   - Component storage. Single block, 8x4 storage slots. Not intended to be used by hand. Does not export an inventory interface, for that matter. Can be seen in the UI. Max stack size: 16.
+     - This is intended to be used for e.g. resistors. More on that later.
+   - Hand tools can be crafted, and stored. Note: This will happen automatically.
+   - A lathe, which will require said hand tools.
+     - Upgraded lathes... requiring lathes to build. Electrical ones, say.
+   - A furnace. Can we use the vanilla one?
+   - All the existing Eln devices.
+ - Once the above is in place, it becomes reasonable to add a degree of "microcrafting" to everything, to make the recipes more realistic. This is essentially fluff, given that players would never be crafting by hand anyway.
+ - Animating the player *using* all this would be complicated. Having Steve flail wildly might be almost as good.
+ - Later in the game, robots can be used to automate most of this. CnC machines, robot arms, etc.
+* Ideas
+** Research system
+ How do we do this so it isn't annoying?
+ It could be used as a gating mechanic, by having research blocks that require ever larger and more irregular bursts of power. It should probably be part of the workshop multiblock. The player should also have a way to opt out, though.
+** TODO Try gravity sketch

@@ -1,20 +1,18 @@
 package mods.eln.generic;
 
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -104,20 +102,21 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
         }
     }
 
-    @Override
-    public IIcon getIconFromDamage(int damage) {
-        Descriptor desc = getDescriptor(damage);
-        if (desc == null) return null;
-        return desc.getIcon();
-    }
-
-    @Override
-    @SideOnly(value = Side.CLIENT)
-    public void registerIcons(IIconRegister iconRegister) {
-        for (GenericItemBlockUsingDamageDescriptor descriptor : subItemList.values()) {
-            descriptor.updateIcons(iconRegister);
-        }
-    }
+    // TODO(1.10): Fix item rendering.
+//    @Override
+//    public IIcon getIconFromDamage(int damage) {
+//        Descriptor desc = getDescriptor(damage);
+//        if (desc == null) return null;
+//        return desc.getIcon();
+//    }
+//
+//    @Override
+//    @SideOnly(value = Side.CLIENT)
+//    public void registerIcons(IIconRegister iconRegister) {
+//        for (GenericItemBlockUsingDamageDescriptor descriptor : subItemList.values()) {
+//            descriptor.updateIcons(iconRegister);
+//        }
+//    }
 
     @SideOnly(Side.CLIENT)
     @Override

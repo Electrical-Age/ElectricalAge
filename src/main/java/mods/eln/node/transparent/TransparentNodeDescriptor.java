@@ -6,20 +6,19 @@ import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNode.FrontType;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHopper;
+import net.minecraft.block.BlockStone;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.client.IItemRenderer;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
 import static mods.eln.i18n.I18N.tr;
 
-public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescriptor implements IItemRenderer {
+public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescriptor {
     public Class ElementClass, RenderClass;
     protected VoltageLevelColor voltageLevelColor = VoltageLevelColor.None;
 
@@ -43,31 +42,32 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         this(name, ElementClass, RenderClass, EntityMetaTag.Basic);
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return voltageLevelColor != VoltageLevelColor.None;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return false;
-    }
-
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return false;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (getIcon() == null)
-            return;
-
-        voltageLevelColor.drawIconBackground(type);
-
-        // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
-        String icon = getIcon().getIconName().substring(4);
-        UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/blocks/" + icon + ".png"));
-    }
+    // TODO(1.10): Item rendering.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return voltageLevelColor != VoltageLevelColor.None;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return false;
+//    }
+//
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return false;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (getIcon() == null)
+//            return;
+//
+//        voltageLevelColor.drawIconBackground(type);
+//
+//        // remove "eln:" to add the full path replace("eln:", "textures/blocks/") + ".png";
+//        String icon = getIcon().getIconName().substring(4);
+//        UtilsClient.drawIcon(type, new ResourceLocation("eln", "textures/blocks/" + icon + ".png"));
+//    }
 
     public void objItemScale(Obj3D obj) {
         if (obj == null) return;
@@ -101,44 +101,44 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         return false;
     }
 
-    public String checkCanPlace(Coordonate coord, Direction front) {
+    public String checkCanPlace(Coordinate coord, Direction front) {
         Block block;
         boolean needDestroy = false;
         if (mustHaveFloor()) {
-            Coordonate temp = new Coordonate(coord);
+            Coordinate temp = new Coordinate(coord);
             temp.move(Direction.YN);
             block = temp.getBlock();
             if (block == null || ((!block.isOpaqueCube()) && block instanceof BlockHopper == false))
                 return tr("You can't place this block at this side");
         }
         if (mustHaveCeiling()) {
-            Coordonate temp = new Coordonate(coord);
+            Coordinate temp = new Coordinate(coord);
             temp.move(Direction.YP);
             block = temp.getBlock();
             if (block == null || !block.isOpaqueCube()) return tr("You can't place this block at this side");
         }
         if (mustHaveWallFrontInverse()) {
-            Coordonate temp = new Coordonate(coord);
+            Coordinate temp = new Coordinate(coord);
             temp.move(front.getInverse());
             block = temp.getBlock();
             if (block == null || !block.isOpaqueCube()) return tr("You can't place this block at this side");
         }
         if (mustHaveWall()) {
-            Coordonate temp;
+            Coordinate temp;
             boolean wall = false;
-            temp = new Coordonate(coord);
+            temp = new Coordinate(coord);
             temp.move(Direction.XN);
             block = temp.getBlock();
             if (block != null && block.isOpaqueCube()) wall = true;
-            temp = new Coordonate(coord);
+            temp = new Coordinate(coord);
             temp.move(Direction.XP);
             block = temp.getBlock();
             if (block != null && block.isOpaqueCube()) wall = true;
-            temp = new Coordonate(coord);
+            temp = new Coordinate(coord);
             temp.move(Direction.ZN);
             block = temp.getBlock();
             if (block != null && block.isOpaqueCube()) wall = true;
-            temp = new Coordonate(coord);
+            temp = new Coordinate(coord);
             temp.move(Direction.ZP);
             block = temp.getBlock();
             if (block != null && block.isOpaqueCube()) wall = true;
@@ -201,8 +201,8 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         return 0;
     }
 
-    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, World world, int x, int y, int z) {
-        AxisAlignedBB bb = Blocks.stone.getCollisionBoundingBoxFromPool(world, x, y, z);
+    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, BlockPos pos) {
+        AxisAlignedBB bb = new AxisAlignedBB(pos);
         if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
     }
 

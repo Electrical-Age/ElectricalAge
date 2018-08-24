@@ -4,7 +4,7 @@ import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
 import mods.eln.item.EntitySensorFilterDescriptor;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -97,7 +97,7 @@ public class TurretElement extends TransparentNodeElement {
     }
 
     public void shoot() {
-        Coordonate lightSourceCoordinate = new Coordonate();
+        Coordinate lightSourceCoordinate = new Coordinate();
         lightSourceCoordinate.copyFrom(coordonate());
         lightSourceCoordinate.move(front);
         LightBlockEntity.addLight(lightSourceCoordinate, 25, 2);

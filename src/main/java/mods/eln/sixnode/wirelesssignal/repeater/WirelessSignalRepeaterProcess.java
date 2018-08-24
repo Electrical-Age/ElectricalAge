@@ -1,6 +1,6 @@
 package mods.eln.sixnode.wirelesssignal.repeater;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import mods.eln.sixnode.wirelesssignal.IWirelessSignalSpot;
@@ -49,7 +49,7 @@ public class WirelessSignalRepeaterProcess implements IProcess, IWirelessSignalS
     }
 
     @Override
-    public Coordonate getCoordonate() {
+    public Coordinate getCoordinate() {
         return rx.getCoordonate();
     }
 

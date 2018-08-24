@@ -1,6 +1,6 @@
 package mods.eln.item.electricalinterface;
 
-import cpw.mods.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.Eln;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;

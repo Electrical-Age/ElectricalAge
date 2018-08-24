@@ -1,7 +1,7 @@
 package mods.eln.packets
 
 import io.netty.buffer.ByteBuf
-import mods.eln.misc.Coordonate
+import mods.eln.misc.Coordinate
 import mods.eln.misc.Direction
 
 class SixNodeWailaRequestPacket : TransparentNodeRequestPacket {
@@ -9,7 +9,7 @@ class SixNodeWailaRequestPacket : TransparentNodeRequestPacket {
 
     constructor() {}
 
-    constructor(coord: Coordonate, side: Direction) : super(coord) {
+    constructor(coord: Coordinate, side: Direction) : super(coord) {
         this.side = side
     }
 

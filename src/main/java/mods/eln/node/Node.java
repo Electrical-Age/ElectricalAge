@@ -17,7 +17,7 @@ public abstract class Node extends NodeBase {
         if (light < 0) light = 0;
         if (lastLight != light) {
             lastLight = light;
-            coordonate.world().updateLightByType(EnumSkyBlock.Block, coordonate.x, coordonate.y, coordonate.z);
+            coordinate.world().updateLightByType(EnumSkyBlock.Block, coordinate.x, coordinate.y, coordinate.z);
             setNeedPublish(true);
         }
 
@@ -59,7 +59,7 @@ public abstract class Node extends NodeBase {
 
 
     public NodeBlockEntity getEntity() {
-        return (NodeBlockEntity) coordonate.world().getTileEntity(coordonate.x, coordonate.y, coordonate.z);
+        return (NodeBlockEntity) coordinate.world().getTileEntity(coordinate.x, coordinate.y, coordinate.z);
     }
 
     public int isProvidingWeakPower(Direction side) {

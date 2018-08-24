@@ -1,12 +1,12 @@
 package mods.eln;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
-import cpw.mods.fml.common.network.internal.FMLProxyPacket;
+import mods.eln.misc.Coordinate;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 import io.netty.channel.ChannelHandler.Sharable;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.ClientProxy;
-import mods.eln.misc.Coordonate;
 import mods.eln.misc.IConfigSharing;
 import mods.eln.misc.Utils;
 import mods.eln.node.INodeEntity;
@@ -139,10 +139,10 @@ public class PacketHandler {
 
     void packetForNode(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
         try {
-            Coordonate coordonate = new Coordonate(stream.readInt(),
+            Coordinate coordinate = new Coordinate(stream.readInt(),
                 stream.readInt(), stream.readInt(), stream.readByte());
 
-            NodeBase node = NodeManager.instance.getNodeFromCoordonate(coordonate);
+            NodeBase node = NodeManager.instance.getNodeFromCoordinate(coordinate);
             if (node != null && node.getNodeUuid().equals(stream.readUTF())) {
                 node.networkUnserialize(stream, (EntityPlayerMP) player);
             } else {
