@@ -1,40 +1,50 @@
 # Minecraft Mod - Codename : ELN
 
-[![Build Status](https://travis-ci.org/Electrical-Age/ElectricalAge.svg?branch=1.7.10-MNA)](https://travis-ci.org/Electrical-Age/ElectricalAge)
+[![Build Status](https://travis-ci.org/Electrical-Age/ElectricalAge.svg?branch=ports/1.10)](https://travis-ci.org/Electrical-Age/ElectricalAge)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FElectrical-Age%2FElectricalAge.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FElectrical-Age%2FElectricalAge?ref=badge_shield)
 
 Electrical Age (ELN) is a Minecraft Mod offering the ability to perform large-scale in-game electrical simulations.
 
-Look at the official project website [electrical-age.net](https://electrical-age.net/) and [the Wiki](http://wiki.electrical-age.net/) to get general information. [This official Minecraft forum post](http://www.minecraftforum.net/topic/2741783-172forge-electrical-age-mod-beta-146/) is updated frequently.
+Look at the official project website [electrical-age.net](https://electrical-age.net/) and [the Wiki](http://wiki.electrical-age.net/) for general information. [This official Minecraft forum post](http://www.minecraftforum.net/topic/2741783-172forge-electrical-age-mod-beta-146/) is occasionally updated. You can also visit our Discord server.
+
+<img src="https://img.shields.io/discord/463476274527076374.svg?style=for-the-badge">
 
 ## How to get started
 
-**ElectricalAge is Minecraft 1.7.10 compatible only. Forge is needed.**
+**The newest Electrical Age is Minecraft 1.10.2 compatible only. Forge is needed.**
 
 1. Download the [last mod release](https://minecraft.curseforge.com/projects/electrical-age) (other versions are available through the same link). Copy the Jar file to the `.minecraft/mods/` directory (or related folder depending on your platform).
 2. Get started with the tutorial map or start playing on the offical demonstration map. The two official maps can be [downloaded from here](https://github.com/Electrical-Age/ElectricalAge/releases/download/BETA-1.10/ElectricalAge_tutorialMap_BETA-1.9_r41.zip). They must be copied to the `.minecraft/saves/` (or related) directory.
-3. Launch Minecraft using the `1.7.10-Forge` profile, select the tutorial map and enjoy!
+3. Launch Minecraft using the `1.10.2-Forge` profile, select the tutorial map and enjoy!
 
-Or add it with the Curse launcher.
+Alternately to the above: Search for Electrical Age using the Curse launcher. Add it to your profile, and enjoy.
 
 ### Building from source
 
-Alternatively, you can compile and launch the current development version.
-[Download](https://github.com/Electrical-Age/ElectricalAge/archive/develop.zip) or clone the `develop` branch. Then build and launch the tutorial map using Gradle:
+This option is primarily for developers. If you take it, make sure to join our Discord first; see the chat button above.
+
+To build Electrical Age, you need to already have Git and the Java development kit installed. You should also have IDEA, which is what we recommend for working on it. You don't have to be running Linux, but it helps; you can typically install git and the JDK with your package manager, if they don't come preinstalled. Windows users are on your own.
+
+Once the prerequisites are in place, run these commands:
 
 ```sh
 $ git clone https://github.com/Electrical-Age/ElectricalAge.git
 $ cd ElectricalAge
-$ gradle unzipTutoMap runClient
+$ git checkout <branch you want to work on>  # Optional. The main development branch is also the default.
+$ gradle setupDecompWorkspace
+$ gradle build  # Confirm that everything works.
+$ gradle unzipTutoMap runClient  # To launch the tutorial map, which is also useful for testing. You only need to unzip once.
 ```
+
+For more information, see Discord and [HACKING.md](HACKING.md).
 
 ## Contributing
 
-We appreciate any help from the community to improve the mod. You can find more information [here](./CONTRIBUTING.md).
+We appreciate any help from the community to improve the mod, but please follow the pull request and issue guidelines. You can find the basic guidelines whenever you open one. For more information, go [here](./CONTRIBUTING.md).
 
 ## ABOUT
 
-Here is some highlighted features:
+Here are some highlighted features:
 
 A better simulation
 > Electrical simulation with resistive and capacitive effects. Behaviour similar to those of real life objects.
@@ -83,6 +93,7 @@ Code/models:
 - **meelock** (typo fix)
 - **Sukasa** (code enhancement)
 - **DrummingFish** (GUI text parsing, cleaning/refactoring, some tweaks)
+- **lolmegaxde1** (lots of work on the 1.10 port)
 
 Languages:
 

@@ -1,9 +1,10 @@
 * Tasks
 ** Port to 1.10
-*** TODO Fix item rendering for basically everything
-*** TODO Re-add IC2 exporter
-*** TODO Not all TEs should be tickable.
-*** TODO Some TESRs can be FastTESRs.
+ - TODO Fix item rendering for basically everything
+ - TODO Re-add IC2 exporter
+ - TODO Not all TEs should be tickable.
+ - TODO Some TESRs can be FastTESRs.
+ - TODO Make sure that HACKING.md exists.
 * Plans
 ** TODO Workshop
  A CfB and Factorio-style crafting system. The player churns through recipes at a configurable rate; say 0.5/second. It's like Cooking for Blockheads in that the base workbench only supports the minimum functionality, with expansion blocks adding to it.
