@@ -70,11 +70,11 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
             detectionBBCenter.copyFrom(element.getCoordonate());
             switch (element.side) {
                 case XP:
-                    detectionBBCenter.pos.add(-maxRangeHalf, 0, 0);
+                    detectionBBCenter.pos.add( -maxRangeHalf, 0, 0);
                     break;
 
                 case XN:
-                    detectionBBCenter.pos.add(maxRangeHalf,0,0);
+                    detectionBBCenter.pos.add( maxRangeHalf, 0, 0);
                     break;
 
                 case YP:
