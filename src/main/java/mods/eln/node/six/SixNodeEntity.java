@@ -11,6 +11,8 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
@@ -25,7 +27,7 @@ public class SixNodeEntity extends NodeBlockEntity {
     public SixNodeElementRender[] elementRenderList = new SixNodeElementRender[6];
     short[] elementRenderIdList = new short[6];
 
-    public Block sixNodeCacheBlock = Blocks.air;
+    public Block sixNodeCacheBlock = Blocks.AIR;
     public byte sixNodeCacheBlockMeta = 0;
 
     public SixNodeEntity() {
@@ -97,13 +99,13 @@ public class SixNodeEntity extends NodeBlockEntity {
             e.printStackTrace();
         }
 
-        //	worldObj.setLightValue(EnumSkyBlock.Sky, xCoord,yCoord,zCoord,15);
+        	worldObj.setLightFor(EnumSkyBlock.SKY, pos,15);
         if (sixNodeCacheBlock != sixNodeCacheBlockOld) {
-            Chunk chunk = worldObj.getChunkFromBlockCoords(xCoord, zCoord);
-            chunk.generateHeightMap();
+            Chunk chunk = worldObj.getChunkFromBlockCoords(pos);
+            chunk.getHeightMap();
             Utils.updateSkylight(chunk);
             chunk.generateSkylightMap();
-            Utils.updateAllLightTypes(worldObj, xCoord, yCoord, zCoord);
+            Utils.updateAllLightTypes(worldObj, pos);
         }
 
     }
@@ -177,7 +179,7 @@ public class SixNodeEntity extends NodeBlockEntity {
 
         return 0;
     }*/
-    public int getDamageValue(World world, int x, int y, int z) {
+    public int getDamageValue(World world, BlockPos pos) {
         if (world.isRemote) {
             for (int idx = 0; idx < 6; idx++) {
                 if (elementRenderList[idx] != null) {
@@ -188,7 +190,7 @@ public class SixNodeEntity extends NodeBlockEntity {
         return 0;
     }
 
-    public boolean hasVolume(World world, int x, int y, int z) {
+    public boolean hasVolume(World world, BlockPos pos) {
 
         if (worldObj.isRemote) {
             for (SixNodeElementRender e : elementRenderList) {

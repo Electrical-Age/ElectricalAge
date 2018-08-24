@@ -33,7 +33,7 @@ public class NodeBlockItem extends ItemBlock {
     	
 
     	NodeBase node = (NodeBase) getBlock().newNodeBase();
-		node.onBlockPlacedBy(new Coordonate(x, y, z,world),direction,player,stack);
+		node.onBlockPlacedBy(new Coordinate(x, y, z,world),direction,player,stack);
 		
 		world.setBlock(x, y, z, getBlock(), node.getBlockMetadata(),0x03);//caca1.5.1
     	getBlock().onBlockPlacedBy(world, x, y, z,direction, player,metadata);

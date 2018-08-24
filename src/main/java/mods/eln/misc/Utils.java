@@ -1,15 +1,5 @@
 package mods.eln.misc;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.relauncher.Side;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.generic.GenericItemUsingDamage;
@@ -17,6 +7,7 @@ import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.ITileEntitySpawnClient;
 import mods.eln.sim.PhysicalConstant;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityOtherPlayerMP;
 import net.minecraft.creativetab.CreativeTabs;
@@ -38,11 +29,20 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
@@ -1280,14 +1280,16 @@ public class Utils {
         return Block.getBlockById(blockId);
     }
 
-//    public static void updateSkylight(Chunk chunk) {
-//        chunk.generateSkylightMap();
-//    }
-//
-//    public static void updateAllLightTypes(World worldObj, int xCoord, int yCoord, int zCoord) {
-//        worldObj.func_147451_t(xCoord, yCoord, zCoord);
-//        worldObj.markBlocksDirtyVertical(xCoord, zCoord, 0, 255);
-//    }
+    //TODO
+    public static void updateSkylight(Chunk chunk) {
+       chunk.generateSkylightMap();
+    }
+
+    //TODO
+    public static void updateAllLightTypes(World worldObj, BlockPos pos) {
+        worldObj.notifyLightSet(pos);
+        worldObj.markBlocksDirtyVertical(pos.getX(), pos.getZ(), 0, 255);
+    }
 
     public static int getItemId(ItemStack stack) {
         return Item.getIdFromItem(stack.getItem());
