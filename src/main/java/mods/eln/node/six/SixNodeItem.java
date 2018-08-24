@@ -3,17 +3,20 @@ package mods.eln.node.six;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamage;
 import mods.eln.ghost.GhostGroup;
-import mods.eln.misc.Coordinate;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import net.minecraftforge.client.IItemRenderer;
+import org.lwjgl.opengl.GL11;
 
-public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> {
+public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> implements IItemRenderer {
 
     public SixNodeItem(Block b) {
         super(b);
@@ -84,7 +87,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         int[] vect = new int[]{x, y, z};
         Direction.fromIntMinecraftSide(par5).applyTo(vect, 1);
         SixNodeDescriptor descriptor = getDescriptor(par7ItemStack);
-        if (descriptor.canBePlacedOnSide(par6EntityPlayer, new Coordinate(x, y, z, par1World), Direction.fromIntMinecraftSide(par5).getInverse()) == false) {
+        if (descriptor.canBePlacedOnSide(par6EntityPlayer, new Coordonate(x, y, z, par1World), Direction.fromIntMinecraftSide(par5).getInverse()) == false) {
             return false;
         }
         if (par1World.getBlock(vect[0], vect[1], vect[2]) == Eln.sixNodeBlock)
@@ -112,7 +115,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         if (blockOld == Blocks.air || blockOld.isReplaceable(world, x, y, z)) {
             // blockID = this.getBlockID();
 
-            Coordinate coord = new Coordinate(x, y, z, world);
+            Coordonate coord = new Coordonate(x, y, z, world);
             SixNodeDescriptor descriptor = getDescriptor(stack);
 
             String error;
@@ -127,7 +130,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
                     ghostgroup.plot(coord, coord, descriptor.getGhostGroupUuid());
 
                 SixNode sixNode = new SixNode();
-                sixNode.onBlockPlacedBy(new Coordinate(x, y, z, world), direction, player, stack);
+                sixNode.onBlockPlacedBy(new Coordonate(x, y, z, world), direction, player, stack);
                 sixNode.createSubBlock(stack, direction, player);
 
                 world.setBlock(x, y, z, block, metadata, 0x03);
@@ -159,65 +162,64 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         return false;
     }
 
-    // TODO(1.10): Fix item rendering.
-//    @Override
-//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-//        if (getDescriptor(item) == null)
-//            return false;
-//        return getDescriptor(item).handleRenderType(item, type);
-//    }
-//
-//    @Override
-//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-//        if (!isStackValidToPlace(item))
-//            return false;
-//        return getDescriptor(item).shouldUseRenderHelper(type, item, helper);
-//    }
-//
-//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-//        if (!isStackValidToPlace(item))
-//            return false;
-//        return getDescriptor(item).shouldUseRenderHelperEln(type, item, helper);
-//    }
-//
-//    @Override
-//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-//        if (!isStackValidToPlace(item))
-//            return;
-//
-//        Minecraft.getMinecraft().mcProfiler.startSection("SixNodeItem");
-//        if (shouldUseRenderHelperEln(type, item, null)) {
-//            switch (type) {
-//
-//                case ENTITY:
-//                    GL11.glRotatef(90, 0, 0, 1);
-//                    // GL11.glTranslatef(0, 1, 0);
-//                    break;
-//
-//                case EQUIPPED_FIRST_PERSON:
-//                    GL11.glRotatef(160, 0, 1, 0);
-//                    GL11.glTranslatef(-0.70f, 1, -0.7f);
-//                    GL11.glScalef(1.8f, 1.8f, 1.8f);
-//                    GL11.glRotatef(-90, 1, 0, 0);
-//                    break;
-//                case EQUIPPED:
-//                    GL11.glRotatef(180, 0, 1, 0);
-//                    GL11.glTranslatef(-0.70f, 1, -0.7f);
-//                    GL11.glScalef(1.5f, 1.5f, 1.5f);
-//                    break;
-//                case FIRST_PERSON_MAP:
-//                    // GL11.glTranslatef(0, 1, 0);
-//                    break;
-//                case INVENTORY:
-//                    GL11.glRotatef(-90, 0, 1, 0);
-//                    GL11.glRotatef(-90, 1, 0, 0);
-//                    break;
-//                default:
-//                    break;
-//            }
-//        }
-//        // GL11.glTranslatef(0, 1, 0);
-//        getDescriptor(item).renderItem(type, item, data);
-//        Minecraft.getMinecraft().mcProfiler.endSection();
-//    }
+    @Override
+    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+        if (getDescriptor(item) == null)
+            return false;
+        return getDescriptor(item).handleRenderType(item, type);
+    }
+
+    @Override
+    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        if (!isStackValidToPlace(item))
+            return false;
+        return getDescriptor(item).shouldUseRenderHelper(type, item, helper);
+    }
+
+    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+        if (!isStackValidToPlace(item))
+            return false;
+        return getDescriptor(item).shouldUseRenderHelperEln(type, item, helper);
+    }
+
+    @Override
+    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+        if (!isStackValidToPlace(item))
+            return;
+
+        Minecraft.getMinecraft().mcProfiler.startSection("SixNodeItem");
+        if (shouldUseRenderHelperEln(type, item, null)) {
+            switch (type) {
+
+                case ENTITY:
+                    GL11.glRotatef(90, 0, 0, 1);
+                    // GL11.glTranslatef(0, 1, 0);
+                    break;
+
+                case EQUIPPED_FIRST_PERSON:
+                    GL11.glRotatef(160, 0, 1, 0);
+                    GL11.glTranslatef(-0.70f, 1, -0.7f);
+                    GL11.glScalef(1.8f, 1.8f, 1.8f);
+                    GL11.glRotatef(-90, 1, 0, 0);
+                    break;
+                case EQUIPPED:
+                    GL11.glRotatef(180, 0, 1, 0);
+                    GL11.glTranslatef(-0.70f, 1, -0.7f);
+                    GL11.glScalef(1.5f, 1.5f, 1.5f);
+                    break;
+                case FIRST_PERSON_MAP:
+                    // GL11.glTranslatef(0, 1, 0);
+                    break;
+                case INVENTORY:
+                    GL11.glRotatef(-90, 0, 1, 0);
+                    GL11.glRotatef(-90, 1, 0, 0);
+                    break;
+                default:
+                    break;
+            }
+        }
+        // GL11.glTranslatef(0, 1, 0);
+        getDescriptor(item).renderItem(type, item, data);
+        Minecraft.getMinecraft().mcProfiler.endSection();
+    }
 }

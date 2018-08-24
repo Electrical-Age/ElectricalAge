@@ -1,5 +1,7 @@
 package mods.eln.node.six;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.Eln;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
@@ -7,7 +9,8 @@ import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -16,15 +19,14 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.IIcon;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
@@ -38,55 +40,56 @@ public class SixNodeBlock extends NodeBlock {
         // setBlockTextureName("eln:air");
     }
 
+
     @Override
-    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
-        SixNodeEntity entity = (SixNodeEntity) world.getTileEntity(pos);
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z, EntityPlayer player) {
+        SixNodeEntity entity = (SixNodeEntity) world.getTileEntity(x, y, z);
         if (entity != null) {
-            SixNodeElementRender render = entity.elementRenderList[Direction.fromFacing(target.sideHit).getInt()];
+            SixNodeElementRender render = entity.elementRenderList[Direction.fromIntMinecraftSide(target.sideHit).getInt()];
             if (render != null) {
                 return render.sixNodeDescriptor.newItemStack();
             }
         }
-        return super.getPickBlock(state, target, world, pos, player);
+
+        return super.getPickBlock(target, world, x, y, z, player);
     }
 
-    // TODO(1.10): Fix item render.
-//    @Override
-//    public void registerBlockIcons(IIconRegister r) {
-//        super.registerBlockIcons(r);
-//        this.blockIcon = r.registerIcon("eln:air");
-//    }
+    @Override
+    public void registerBlockIcons(IIconRegister r) {
+        super.registerBlockIcons(r);
+        this.blockIcon = r.registerIcon("eln:air");
+    }
 
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(World par1World, BlockPos pos) {
-        if (nodeHasCache(par1World, pos) || hasVolume(par1World, pos))
-            return super.getCollisionBoundingBox(par1World.getBlockState(pos), par1World, pos);
+    public AxisAlignedBB getCollisionBoundingBoxFromPool(World par1World, int par2, int par3, int par4) {
+        if (nodeHasCache(par1World, par2, par3, par4) || hasVolume(par1World, par2, par3, par4))
+            return super.getCollisionBoundingBoxFromPool(par1World, par2, par3, par4);
         else
             return null;
     }
 
 
-    public boolean hasVolume(World world, BlockPos pos) {
-        SixNodeEntity entity = getEntity(world, pos);
+    public boolean hasVolume(World world, int x, int y, int z) {
+        SixNodeEntity entity = getEntity(world, x, y, z);
         if (entity == null) return false;
-        return entity.hasVolume(world, pos);
+        return entity.hasVolume(world, x, y, z);
 
     }
 
-
-    public float getBlockHardness(World world, BlockPos pos) {
+    @Override
+    public float getBlockHardness(World world, int x, int y, int z) {
         return 0.3f;
     }
 
-
-    public int getDamageValue(World world, BlockPos pos) {
+    @Override
+    public int getDamageValue(World world, int x, int y, int z) {
         if (world == null)
             return 0;
-        SixNodeEntity entity = getEntity(world, pos);
-        return entity == null ? 0 : entity.getDamageValue(world, pos);
+        SixNodeEntity entity = getEntity(world, x, y, z);
+        return entity == null ? 0 : entity.getDamageValue(world, x, y, z);
     }
 
-    SixNodeEntity getEntity(World world, BlockPos pos) {
-        TileEntity tileEntity = world.getTileEntity(pos);
+    SixNodeEntity getEntity(World world, int x, int y, int z) {
+        TileEntity tileEntity = world.getTileEntity(x, y, z);
         if (tileEntity != null && tileEntity instanceof SixNodeEntity)
             return (SixNodeEntity) tileEntity;
         Utils.println("ASSERTSixNodeEntity getEntity() null");
@@ -123,7 +126,7 @@ public class SixNodeBlock extends NodeBlock {
 	 * return 255; }
 	 */
 
-
+    @Override
     public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
 
         return null;
@@ -133,32 +136,31 @@ public class SixNodeBlock extends NodeBlock {
         return 0;
     }
 
-    // TODO(1.10): Fix item rendering.
-//    @Override
-//    @SideOnly(Side.CLIENT)
-//    public IIcon getIcon(IBlockAccess w, int x, int y, int z, int side) {
-//        TileEntity e = w.getTileEntity(x, y, z);
-//        if (e == null) return blockIcon;
-//        SixNodeEntity sne = (SixNodeEntity) e;
-//        Block b = sne.sixNodeCacheBlock;
-//        if (b == Blocks.air) return blockIcon;
-//        // return b.getIcon(w, x, y, z, side);
-//        try {
-//            return b.getIcon(side, sne.sixNodeCacheBlockMeta);
-//        } catch (Exception e2) {
-//            return blockIcon;
-//        }
-//
-//        // return Blocks.sand.getIcon(p_149673_1_, p_149673_2_, p_149673_3_, p_149673_4_, p_149673_5_);
-//        // return Blocks.stone.getIcon(w, x, y, z, side);
-//    }
+    @Override
+    @SideOnly(Side.CLIENT)
+    public IIcon getIcon(IBlockAccess w, int x, int y, int z, int side) {
+        TileEntity e = w.getTileEntity(x, y, z);
+        if (e == null) return blockIcon;
+        SixNodeEntity sne = (SixNodeEntity) e;
+        Block b = sne.sixNodeCacheBlock;
+        if (b == Blocks.air) return blockIcon;
+        // return b.getIcon(w, x, y, z, side);
+        try {
+            return b.getIcon(side, sne.sixNodeCacheBlockMeta);
+        } catch (Exception e2) {
+            return blockIcon;
+        }
 
+        // return Blocks.sand.getIcon(p_149673_1_, p_149673_2_, p_149673_3_, p_149673_4_, p_149673_5_);
+        // return Blocks.stone.getIcon(w, x, y, z, side);
+    }
 
+    @Override
     public boolean isReplaceable(IBlockAccess world, int x, int y, int z) {
         return false;
     }
 
-
+    @Override
     public boolean canPlaceBlockOnSide(World par1World, int par2, int par3, int par4, int par5) {
 		/* see canPlaceBlockAt; it needs changing if this method is fixed */
         return true;/*
@@ -168,7 +170,7 @@ public class SixNodeBlock extends NodeBlock {
 					 */
     }
 
-
+    @Override
     public boolean canPlaceBlockAt(World par1World, int par2, int par3, int par4) {
 		/* This should probably call canPlaceBlockOnSide with each
 		 * appropriate side to see if it can go somewhere.
@@ -185,7 +187,7 @@ public class SixNodeBlock extends NodeBlock {
 		return false;
     }
 
-
+    @Override
     public boolean onBlockPlacedBy(World world, int x, int y, int z, Direction direction, EntityLivingBase entityLiving, int metadata) {
 
         return true;
@@ -196,48 +198,48 @@ public class SixNodeBlock extends NodeBlock {
      *
      * return tileEntity.onBlockActivated(entityPlayer, Direction.fromIntMinecraftSide(minecraftSide),vx,vy,vz); }
      */
-
-    public boolean removedByPlayer(World world, EntityPlayer entityPlayer, BlockPos pos) {
+    @Override
+    public boolean removedByPlayer(World world, EntityPlayer entityPlayer, int x, int y, int z) {
         if (world.isRemote) return false;
 
-        SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(pos);
+        SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(x, y, z);
 
-        MovingObjectPosition MOP = collisionRayTrace(world, pos, entityPlayer);
+        MovingObjectPosition MOP = collisionRayTrace(world, x, y, z, entityPlayer);
         if (MOP == null) return false;
 
         SixNode sixNode = (SixNode) tileEntity.getNode();
         if (sixNode == null) return true;
-        if (sixNode.sixNodeCacheBlock != Blocks.AIR) {
+        if (sixNode.sixNodeCacheBlock != Blocks.air) {
 
-            if (!(Utils.isCreative((EntityPlayerMP) entityPlayer))) {
+            if (Utils.isCreative((EntityPlayerMP) entityPlayer) == false) {
                 ItemStack stack = new ItemStack(sixNode.sixNodeCacheBlock, 1, sixNode.sixNodeCacheBlockMeta);
                 sixNode.dropItem(stack);
             }
 
-            sixNode.sixNodeCacheBlock = Blocks.AIR;
+            sixNode.sixNodeCacheBlock = Blocks.air;
 
-            Chunk chunk = world.getChunkFromBlockCoords(pos);
+            Chunk chunk = world.getChunkFromBlockCoords(x, z);
             Utils.generateHeightMap(chunk);
             Utils.updateSkylight(chunk);
             chunk.generateSkylightMap();
-            Utils.updateAllLightTypes(world, pos);
+            Utils.updateAllLightTypes(world, x, y, z);
 
             sixNode.setNeedPublish(true);
             return false;
         }
-        if (!sixNode.playerAskToBreakSubBlock((EntityPlayerMP) entityPlayer, Direction.fromIntMinecraftSide(MOP.sideHit))) {
+        if (false == sixNode.playerAskToBreakSubBlock((EntityPlayerMP) entityPlayer, Direction.fromIntMinecraftSide(MOP.sideHit)))
             return false;
-        }
+
         if (sixNode.getIfSideRemain()) return true;
 
-        return super.removedByPlayer(world.getBlockState(pos), world, pos, entityPlayer, true);
+        return super.removedByPlayer(world, entityPlayer, x, y, z);
     }
 
+    @Override
+    public void breakBlock(World world, int x, int y, int z, Block par5, int par6) {
 
-    public void breakBlock(World world, BlockPos pos, Block par5, int par6) {
-
-        if (!world.isRemote) {
-            SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(pos);
+        if (world.isRemote == false) {
+            SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(x, y, z);
             SixNode sixNode = (SixNode) tileEntity.getNode();
             if (sixNode == null) return;
 
@@ -247,27 +249,27 @@ public class SixNodeBlock extends NodeBlock {
                 }
             }
         }
-        super.breakBlock(world, pos, par5, par6);
+        super.breakBlock(world, x, y, z, par5, par6);
     }
 
     @Override
-    public void onNeighborBlockChange(World world, BlockPos pos, Block par5) {
-        SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(pos);
+    public void onNeighborBlockChange(World world, int x, int y, int z, Block par5) {
+        SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(x, y, z);
         SixNode sixNode = (SixNode) tileEntity.getNode();
         if (sixNode == null) return;
 
         for (Direction direction : Direction.values()) {
             if (sixNode.getSideEnable(direction)) {
-                if (!getIfOtherBlockIsSolid(world, pos, direction)) {
+                if (!getIfOtherBlockIsSolid(world, x, y, z, direction)) {
                     sixNode.deleteSubBlock(null, direction);
                 }
             }
         }
 
         if (!sixNode.getIfSideRemain()) {
-            world.setBlockToAir(pos);
+            world.setBlockToAir(x, y, z);
         } else {
-            super.onNeighborBlockChange(world, pos, par5);
+            super.onNeighborBlockChange(world, x, y, z, par5);
         }
     }
 
@@ -275,13 +277,10 @@ public class SixNodeBlock extends NodeBlock {
 
     boolean[] booltemp = new boolean[6];
 
-    @Nullable
     @Override
-    public RayTraceResult collisionRayTrace(IBlockState blockState, World world, BlockPos pos, Vec3d start, Vec3d end) {
-        // TODO(??): Pretty sure this can be improved. Do we even want to use collisionRayTrace?
-        final int x = pos.getX(), y = pos.getY(), z = pos.getZ();
-        if (nodeHasCache(world, pos)) return super.collisionRayTrace(blockState, world, pos, start, end);
-        SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(pos);
+    public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, Vec3 start, Vec3 end) {
+        if (nodeHasCache(world, x, y, z)) return super.collisionRayTrace(world, x, y, z, start, end);
+        SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(x, y, z);
         if (tileEntity == null) return null;
         if (world.isRemote) {
             booltemp[0] = tileEntity.getSyncronizedSideEnable(Direction.XN);
@@ -290,13 +289,13 @@ public class SixNodeBlock extends NodeBlock {
             booltemp[3] = tileEntity.getSyncronizedSideEnable(Direction.YP);
             booltemp[4] = tileEntity.getSyncronizedSideEnable(Direction.ZN);
             booltemp[5] = tileEntity.getSyncronizedSideEnable(Direction.ZP);
-            SixNodeEntity entity = getEntity(world, pos);
+            SixNodeEntity entity = getEntity(world, x, y, z);
             if (entity != null) {
                 SixNodeElementRender element = entity.elementRenderList[Direction.YN.getInt()];
                 // setBlockBounds(0, 0, 0, 1, 1, 1);
                 if (element != null && element.sixNodeDescriptor.hasVolume()) {
-                    // We're going to assume this is a lamp socket on the roof? Okay.
-                    return new RayTraceResult(new Vec3d(0.5, 0.5, 0.5), Direction.YN.toForge(), pos);
+
+                    return new MovingObjectPosition(x, y, z, Direction.YN.toSideValue(), Vec3.createVectorHelper(0.5, 0.5, 0.5));
                 }
             }
 
@@ -309,14 +308,13 @@ public class SixNodeBlock extends NodeBlock {
             booltemp[3] = sixNode.getSideEnable(Direction.YP);
             booltemp[4] = sixNode.getSideEnable(Direction.ZN);
             booltemp[5] = sixNode.getSideEnable(Direction.ZP);
-            SixNodeEntity entity = getEntity(world, pos);
+            SixNodeEntity entity = getEntity(world, x, y, z);
             if (entity != null) {
                 NodeBase node = entity.getNode();
                 if (node != null && node instanceof SixNode) {
                     SixNodeElement element = ((SixNode) node).sideElementList[Direction.YN.getInt()];
                     if (element != null && element.sixNodeElementDescriptor.hasVolume())
-                        // Yup, still a lamp socket.
-                        return new RayTraceResult(new Vec3d(0.5, 0.5, 0.5), Direction.YN.toForge(), pos);
+                        return new MovingObjectPosition(x, y, z, Direction.YN.toSideValue(), Vec3.createVectorHelper(0.5, 0.5, 0.5));
                 }
             }
 
@@ -331,7 +329,7 @@ public class SixNodeBlock extends NodeBlock {
                 hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
                 hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
                 if (isIn(hitY, y + w, y + 1 - w) && isIn(hitZ, z + w, z + 1 - w))
-                    return new RayTraceResult(new Vec3d(hitX, hitY, hitZ), Direction.XN.toForge(), pos);
+                    return new MovingObjectPosition(x, y, z, Direction.XN.toSideValue(), Vec3.createVectorHelper(hitX, hitY, hitZ));
             }
         }
         // XP
@@ -343,7 +341,7 @@ public class SixNodeBlock extends NodeBlock {
                 hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
                 hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
                 if (isIn(hitY, y + w, y + 1 - w) && isIn(hitZ, z + w, z + 1 - w))
-                    return new RayTraceResult(new Vec3d(hitX, hitY, hitZ), Direction.XP.toForge(), pos);
+                    return new MovingObjectPosition(x, y, z, Direction.XP.toSideValue(), Vec3.createVectorHelper(hitX, hitY, hitZ));
             }
         }
         // YN
@@ -355,7 +353,7 @@ public class SixNodeBlock extends NodeBlock {
                 hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
                 hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
                 if (isIn(hitX, x + w, x + 1 - w) && isIn(hitZ, z + w, z + 1 - w))
-                    return new RayTraceResult(new Vec3d(hitX, hitY, hitZ), Direction.YN.toForge(), pos);
+                    return new MovingObjectPosition(x, y, z, Direction.YN.toSideValue(), Vec3.createVectorHelper(hitX, hitY, hitZ));
             }
 
         }
@@ -368,7 +366,7 @@ public class SixNodeBlock extends NodeBlock {
                 hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
                 hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
                 if (isIn(hitX, x + w, x + 1 - w) && isIn(hitZ, z + w, z + 1 - w))
-                    return new RayTraceResult(new Vec3d(hitX, hitY, hitZ), Direction.YP.toForge(), pos);
+                    return new MovingObjectPosition(x, y, z, Direction.YP.toSideValue(), Vec3.createVectorHelper(hitX, hitY, hitZ));
             }
         }
         // ZN
@@ -380,8 +378,7 @@ public class SixNodeBlock extends NodeBlock {
                 hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
                 hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
                 if (isIn(hitY, y + w, y + 1 - w) && isIn(hitX, x + w, x + 1 - w))
-                    return new RayTraceResult(new Vec3d(hitX, hitY, hitZ), Direction.ZN.toForge(), pos);
-
+                    return new MovingObjectPosition(x, y, z, Direction.ZN.toSideValue(), Vec3.createVectorHelper(hitX, hitY, hitZ));
             }
         }
         // ZP
@@ -393,85 +390,92 @@ public class SixNodeBlock extends NodeBlock {
                 hitY = start.yCoord + ratio * (end.yCoord - start.yCoord);
                 hitZ = start.zCoord + ratio * (end.zCoord - start.zCoord);
                 if (isIn(hitY, y + w, y + 1 - w) && isIn(hitX, x + w, x + 1 - w))
-                    return new RayTraceResult(new Vec3d(hitX, hitY, hitZ), Direction.ZP.toForge(), pos);
+                    return new MovingObjectPosition(x, y, z, Direction.ZP.toSideValue(), Vec3.createVectorHelper(hitX, hitY, hitZ));
             }
         }
 
         return null;
     }
 
-    private static boolean isIn(double value, double min, double max) {
-        return value >= min && value <= max;
+    public static boolean isIn(double value, double min, double max) {
+        if (value >= min && value <= max) return true;
+        return false;
     }
 
-    private RayTraceResult collisionRayTrace(World world, BlockPos pos, EntityPlayer entityLiving) {
+    public MovingObjectPosition collisionRayTrace(World world, int x, int y, int z, EntityPlayer entityLiving) {
+
+        // double distanceMax = (double)Minecraft.getMinecraft().playerController.getBlockReachDistance();
         double distanceMax = 5.0;
-        Vec3d start = new Vec3d(entityLiving.posX, entityLiving.posY, entityLiving.posZ);
+        Vec3 start = Vec3.createVectorHelper(entityLiving.posX, entityLiving.posY, entityLiving.posZ);
 
-        // TODO(1.10): Really?
-        if (!world.isRemote)
-            start = start.addVector(0, 1.62, 0);
-        Vec3d var5 = entityLiving.getLook(0.5f);
-        Vec3d end = start.addVector(var5.xCoord * distanceMax, var5.yCoord * distanceMax, var5.zCoord * distanceMax);
+        if (!world.isRemote) start.yCoord += 1.62;
+        Vec3 var5 = entityLiving.getLook(0.5f);
+        Vec3 end = start.addVector(var5.xCoord * distanceMax, var5.yCoord * distanceMax, var5.zCoord * distanceMax);
 
-        return collisionRayTrace(world.getBlockState(pos), world, pos, start, end);
+        return collisionRayTrace(world, x, y, z, start, end);
     }
 
-    boolean getIfOtherBlockIsSolid(World world, BlockPos pos, Direction direction) {
-        pos = direction.applied(pos, 1);
+    public boolean getIfOtherBlockIsSolid(World world, int x, int y, int z, Direction direction) {
 
-        IBlockState state = world.getBlockState(pos);
-        if (state.getBlock().isAir(state, world, pos)) return false;
-        return state.isOpaqueCube();
+        int[] vect = new int[3];
+        vect[0] = x;
+        vect[1] = y;
+        vect[2] = z;
+        direction.applyTo(vect, 1);
+
+        Block block = world.getBlock(vect[0], vect[1], vect[2]);
+        if (block == Blocks.air) return false;
+        if (block.isOpaqueCube()) return true;
+
+        return false;
     }
 
-    private boolean nodeHasCache(IBlockAccess world, BlockPos pos) {
+    public boolean nodeHasCache(IBlockAccess world, int x, int y, int z) {
         if (Utils.isRemote(world)) {
-            TileEntity tileEntity = world.getTileEntity(pos);
-            if (tileEntity instanceof SixNodeEntity)
-                return ((SixNodeEntity) tileEntity).sixNodeCacheBlock != Blocks.AIR;
+            TileEntity tileEntity = world.getTileEntity(x, y, z);
+            if (tileEntity != null && tileEntity instanceof SixNodeEntity)
+                return ((SixNodeEntity) tileEntity).sixNodeCacheBlock != Blocks.air;
             else
                 Utils.println("ASSERT B public boolean nodeHasCache(World world, int x, int y, int z) ");
 
         } else {
-            SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(pos);
+            SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(x, y, z);
             SixNode sixNode = (SixNode) tileEntity.getNode();
             if (sixNode != null)
-                return sixNode.sixNodeCacheBlock != Blocks.AIR;
+                return sixNode.sixNodeCacheBlock != Blocks.air;
             else
                 Utils.println("ASSERT A public boolean nodeHasCache(World world, int x, int y, int z) ");
         }
         return false;
     }
 
-     //TODO(1.10): This has to be done with block-states now.
+    @Override
+    public int getLightOpacity(IBlockAccess w, int x, int y, int z) {
 
-    public int getLightOpacity(IBlockAccess w, BlockPos pos) {
-
-        TileEntity e = w.getTileEntity(pos);
+        TileEntity e = w.getTileEntity(x, y, z);
         if (e == null) return 0;
         SixNodeEntity sne = (SixNodeEntity) e;
         Block b = sne.sixNodeCacheBlock;
-        if (b == Blocks.AIR) return 0;
-            //return b.getIcon(w, x, y, z, side);
+        if (b == Blocks.air) return 0;
+        // return b.getIcon(w, x, y, z, side);
         try {
-            return b.getLightOpacity(w.getBlockState(pos), w, pos);
+            return b.getLightOpacity();
         } catch (Exception e2) {
             return 255;
         }
+
     }
 
     public String getNodeUuid() {
+
         return "s";
     }
 
-    //TODO(1.10): Should probably be done by block states.
-    /*
     @Override
     @SideOnly(Side.CLIENT)
-    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World world, BlockPos pos) {
-        if (hasVolume(world, pos)) return super.getSelectedBoundingBox(world.getBlockState(pos), world, pos);
-        MovingObjectPosition col = collisionRayTrace(world, pos, Minecraft.getMinecraft().thePlayer);
+    public AxisAlignedBB getSelectedBoundingBoxFromPool(World w, int x, int y, int z) {
+        if (hasVolume(w, x, y, z)) return super.getSelectedBoundingBoxFromPool(w, x, y, z);
+        MovingObjectPosition col = collisionRayTrace(w, x, y, z, Minecraft.getMinecraft().thePlayer);
         double h = 0.2;
         double hn = 1 - h;
 
@@ -479,7 +483,7 @@ public class SixNodeBlock extends NodeBlock {
         double bn = 1 - 0.02;
         if (col != null) {
             // Utils.println(Direction.fromIntMinecraftSide(col.sideHit));
-            switch (Direction.fromIntMinecraftSide(col.sideHit.getIndex())) {
+            switch (Direction.fromIntMinecraftSide(col.sideHit)) {
                 case XN:
                     return AxisAlignedBB.getBoundingBox((double) x + b, (double) y, (double) z, (double) x + h, (double) y + 1, (double) z + 1);
                 case XP:
@@ -498,5 +502,5 @@ public class SixNodeBlock extends NodeBlock {
         return AxisAlignedBB.getBoundingBox(0.5, 0.5, 0.5, 0.5, 0.5, 0.5);//super.getSelectedBoundingBoxFromPool(w, x, y, z);
         // return AxisAlignedBB.getBoundingBox((double)p_149633_2_ , (double)p_149633_3_ , (double)p_149633_4_ + this.minZ+0.2, (double)p_149633_2_ + this.maxX, (double)p_149633_3_ + this.maxY, (double)p_149633_4_ + this.maxZ);
         // return super.getSelectedBoundingBoxFromPool(w, x, y, z);
-    }*/
+    }
 }

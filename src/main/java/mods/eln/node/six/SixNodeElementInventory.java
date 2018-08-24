@@ -107,16 +107,16 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
 
 		/*if(sixNodeElement != null)
 		{
-			SixNode sixNode = (SixNode) NodeManager.instance.getNodeFromCoordonate(sixNodeElement.sixNode.coordinate);
+			SixNode sixNode = (SixNode) NodeManager.instance.getNodeFromCoordonate(sixNodeElement.sixNode.coordonate);
 			if(sixNode == null) return false;
 			if(sixNode.sideElementList[sixNodeElement.side.getInt()] != sixNodeElement) return false;
 		//	if( != transparentNodeElement.node) return false;
-			return player.getDistanceSq(sixNodeElement.sixNode.coordinate.x + 0.5, sixNodeElement.sixNode.coordinate.y + 0.5, sixNodeElement.sixNode.coordinate.z + 0.5) < 18;
+			return player.getDistanceSq(sixNodeElement.sixNode.coordonate.x + 0.5, sixNodeElement.sixNode.coordonate.y + 0.5, sixNodeElement.sixNode.coordonate.z + 0.5) < 18;
 		}*/
         return true;
 		
 /*		if(sixNodeElement != null)
-			return player.getDistanceSq(sixNodeElement.sixNode.coordinate.x + 0.5, sixNodeElement.sixNode.coordinate.y + 0.5, sixNodeElement.sixNode.coordinate.z + 0.5) < 18;
+			return player.getDistanceSq(sixNodeElement.sixNode.coordonate.x + 0.5, sixNodeElement.sixNode.coordonate.y + 0.5, sixNodeElement.sixNode.coordonate.z + 0.5) < 18;
 		return player.getDistanceSq(sixnodeRender.tileEntity.xCoord + 0.5, sixnodeRender.tileEntity.yCoord + 0.5, sixnodeRender.tileEntity.zCoord + 0.5) < 18;
 */
     }

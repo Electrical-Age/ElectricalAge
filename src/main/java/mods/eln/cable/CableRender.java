@@ -65,7 +65,7 @@ public class CableRender {
             }
 
             //standardConnection
-            otherTileEntity = entity.getWorld().getTileEntity(pos);
+            otherTileEntity = entity.getWorld().getTileEntity(new BlockPos(x2, y2, z2));
             if (otherTileEntity instanceof SixNodeEntity) {
                 SixNodeEntity sixNodeEntity = (SixNodeEntity) otherTileEntity;
                 if (sixNodeEntity.elementRenderList[side.getInt()] != null) {
@@ -77,7 +77,7 @@ public class CableRender {
             }
 
             //no wrappeConection ?
-            if (!NodeBase.isBlockWrappable(entity.getWorld().getBlockState(pos).getBlock(), entity.getWorld(), pos)) {
+            if (!NodeBase.isBlockWrappable(entity.getWorld().getBlockState(new BlockPos(x2, y2, z2)).getBlock(), entity.getWorld(), new BlockPos(x2, y2, z2))) {
                 continue;
             } else {
                 switch (side) {
@@ -103,7 +103,7 @@ public class CableRender {
                         break;
                 }
 
-                otherTileEntity = entity.getWorld().getTileEntity(pos);
+                otherTileEntity = entity.getWorld().getTileEntity(new BlockPos(x2, y2, z2));
 
                 if (otherTileEntity instanceof NodeBlockEntity) {
 				/*
@@ -240,7 +240,7 @@ public class CableRender {
             }
 
             //standardConnection
-            otherTileEntity = element.tileEntity.getWorld().getTileEntity(pos);
+            otherTileEntity = element.tileEntity.getWorld().getTileEntity(new BlockPos(x2, y2, z2));
             if (otherTileEntity instanceof SixNodeEntity) {
                 SixNodeEntity sixNodeEntity = (SixNodeEntity) otherTileEntity;
                 if (sixNodeEntity.elementRenderList[side.getInt()] != null) {
@@ -251,7 +251,7 @@ public class CableRender {
             }
 
             //no wrappeConection ?
-            if (!NodeBase.isBlockWrappable(element.tileEntity.getWorld().getBlockState(pos).getBlock(), element.tileEntity.getWorld(), pos)) {
+            if (!NodeBase.isBlockWrappable(element.tileEntity.getWorld().getBlockState(new BlockPos(x2, y2, z2)).getBlock(), element.tileEntity.getWorld(), new BlockPos(x2, y2, z2))) {
                 continue;
             } else {
                 switch (side) {
@@ -277,7 +277,7 @@ public class CableRender {
                         break;
                 }
 
-                otherTileEntity = element.tileEntity.getWorld().getTileEntity(pos);
+                otherTileEntity = element.tileEntity.getWorld().getTileEntity(new BlockPos(x2, y2, z2));
 
                 if (otherTileEntity instanceof NodeBlockEntity) {
                     //Direction otherDirection = side.getInverse();

@@ -62,12 +62,12 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
     public void play(SoundCommand s) {
         s.addUuid(getUuid());
-        s.set(sixNode.coordinate);
+        s.set(sixNode.coordonate);
         s.play();
     }
 
-    public Coordinate getCoordonate() {
-        return sixNode.coordinate;
+    public Coordonate getCoordonate() {
+        return sixNode.coordonate;
     }
 
     protected boolean onBlockActivatedRotate(EntityPlayer entityPlayer) {
@@ -213,12 +213,12 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         }
 
         if (sixNodeElementDescriptor.hasGhostGroup()) {
-            Eln.ghostManager.removeObserver(sixNode.coordinate);
-            sixNodeElementDescriptor.getGhostGroup(side, front).erase(sixNode.coordinate);
+            Eln.ghostManager.removeObserver(sixNode.coordonate);
+            sixNodeElementDescriptor.getGhostGroup(side, front).erase(sixNode.coordonate);
         }
 
         sixNode.dropInventory(getInventory());
-        //	getCoordinate().world().getWorldInfo().
+        //	getCoordonate().world().getWorldInfo().
         if (Utils.mustDropItem(entityPlayer))
             sixNode.dropItem(getDropItemStack());
     }
@@ -367,8 +367,8 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         return false;
     }
 
-    public Coordinate getGhostObserverCoordonate() {
-        return sixNode.coordinate;
+    public Coordonate getGhostObserverCoordonate() {
+        return sixNode.coordonate;
 
     }
 

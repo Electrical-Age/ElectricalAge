@@ -1,7 +1,7 @@
 package mods.eln.node.transparent;
 
 import mods.eln.node.Node;
-import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
@@ -35,7 +35,7 @@ public class TransparentNodeEntityWithFluid extends TransparentNodeEntity implem
      * @return Amount of resource that was (or would have been, if simulated) filled.
      */
     @Override
-    public int fill(EnumFacing from, FluidStack resource, boolean doFill) {
+    public int fill(ForgeDirection from, FluidStack resource, boolean doFill) {
         return getFluidHandler().fill(from, resource, doFill);
     }
 
@@ -49,7 +49,7 @@ public class TransparentNodeEntityWithFluid extends TransparentNodeEntity implem
      * simulated) drained.
      */
     @Override
-    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain) {
+    public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain) {
         return getFluidHandler().drain(from, resource, doDrain);
     }
 
@@ -65,7 +65,7 @@ public class TransparentNodeEntityWithFluid extends TransparentNodeEntity implem
      * simulated) drained.
      */
     @Override
-    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain) {
+    public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain) {
         return getFluidHandler().drain(from, maxDrain, doDrain);
     }
 
@@ -78,7 +78,7 @@ public class TransparentNodeEntityWithFluid extends TransparentNodeEntity implem
      * @param fluid
      */
     @Override
-    public boolean canFill(EnumFacing from, Fluid fluid) {
+    public boolean canFill(ForgeDirection from, Fluid fluid) {
         return false;
     }
 
@@ -91,7 +91,7 @@ public class TransparentNodeEntityWithFluid extends TransparentNodeEntity implem
      * @param fluid
      */
     @Override
-    public boolean canDrain(EnumFacing from, Fluid fluid) {
+    public boolean canDrain(ForgeDirection from, Fluid fluid) {
         return getFluidHandler().canDrain(from, fluid);
     }
 
@@ -103,7 +103,7 @@ public class TransparentNodeEntityWithFluid extends TransparentNodeEntity implem
      * @return Info for the relevant internal tanks.
      */
     @Override
-    public FluidTankInfo[] getTankInfo(EnumFacing from) {
+    public FluidTankInfo[] getTankInfo(ForgeDirection from) {
         return getFluidHandler().getTankInfo(from);
     }
 
@@ -111,32 +111,32 @@ public class TransparentNodeEntityWithFluid extends TransparentNodeEntity implem
         static FakeFluidHandler INSTANCE = new FakeFluidHandler();
 
         @Override
-        public int fill(EnumFacing from, FluidStack resource, boolean doFill) {
+        public int fill(ForgeDirection from, FluidStack resource, boolean doFill) {
             return 0;
         }
 
         @Override
-        public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain) {
+        public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain) {
             return null;
         }
 
         @Override
-        public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain) {
+        public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain) {
             return null;
         }
 
         @Override
-        public boolean canFill(EnumFacing from, Fluid fluid) {
+        public boolean canFill(ForgeDirection from, Fluid fluid) {
             return false;
         }
 
         @Override
-        public boolean canDrain(EnumFacing from, Fluid fluid) {
+        public boolean canDrain(ForgeDirection from, Fluid fluid) {
             return false;
         }
 
         @Override
-        public FluidTankInfo[] getTankInfo(EnumFacing from) {
+        public FluidTankInfo[] getTankInfo(ForgeDirection from) {
             return new FluidTankInfo[0];
         }
     }
