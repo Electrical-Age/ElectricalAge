@@ -137,7 +137,7 @@ public class LightBlockEntity extends TileEntity {
 
         if (light != worldObj.getBlockState(this.pos).getBlock().getMetaFromState(worldObj.getBlockState(this.pos))) {
             worldObj.getBlockState(this.pos).getBlock().setLightLevel(2);
-            //TO BE FIXED
+            //TODO
             worldObj.updateLightByType(EnumSkyBlock.BLOCK, xCoord, yCoord, zCoord);
         }
     }
