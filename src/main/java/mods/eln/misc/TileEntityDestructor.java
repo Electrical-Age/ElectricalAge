@@ -1,5 +1,8 @@
 package mods.eln.misc;
 
+
+import net.minecraft.util.math.BlockPos;
+
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
@@ -28,9 +31,10 @@ public class TileEntityDestructor {
     public void tick(ServerTickEvent event) {
         if (event.phase != Phase.START) return;
         for (TileEntity t : destroyList) {
-            if (t.getWorldObj() != null && t.getWorldObj().getTileEntity(t.xCoord, t.yCoord, t.zCoord) == t) {
-                t.getWorldObj().setBlockToAir(t.xCoord, t.yCoord, t.zCoord);
-                Utils.println("destroy light at " + t.xCoord + " " + t.yCoord + " " + t.zCoord);
+            BlockPos pos = t.getPos();
+            if (t.getWorld().getTileEntity(new BlockPos(pos.getX(), pos.getY(), pos.getZ())) == t) {
+                t.getWorld().setBlockToAir(new BlockPos(pos.getX(), pos.getY(), pos.getZ()));
+                Utils.println("destroy light at " + pos.getX() + " " + pos.getY() + " " + pos.getZ());
             }
         }
         destroyList.clear();

@@ -14,8 +14,8 @@ import java.util.Random;
 
 public class LightBlock extends BlockContainer {
 
-    public LightBlock()
-    {
+    public LightBlock() {
+
         super(Material.AIR);
     }
 

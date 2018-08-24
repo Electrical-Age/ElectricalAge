@@ -26,8 +26,8 @@ public class ElectricalWindSensorSlowProcess implements IProcess, INBTTReady {
         if (timeCounter > refreshPeriode) {
             timeCounter -= refreshPeriode;
             Coordinate coord = element.sixNode.coordinate;
+            element.outputGateProcess.setOutputNormalized(Utils.getWind(coord.getDimension(), coord.pos.geY()) / element.descriptor.windMax);
 
-            element.outputGateProcess.setOutputNormalized(Utils.getWind(coord.dimension, coord.y) / element.descriptor.windMax);
         }
     }
 

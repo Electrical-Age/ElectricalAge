@@ -70,11 +70,11 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
                 Vec3d lastPos;
                 if ((lastPos = lastEPos.get(e)) != null) {
                     double weight = 0.4;
-                    List<Block> blockList = Utils.traceRay(world, coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ);
+                    List<Block> blockList = Utils.traceRay(world, coord.pos.getX() + 0.5, coord.pos.getY() + 0.5, coord.pos.getZ() + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ);
                     boolean view = true;
 
                     for (Block b : blockList) {
-                        if (b.isOpaqueCube()) {
+                        if (b.isOpaqueCube(b.getBlockState().getBaseState())) {
                             view = false;
                             break;
                         }
@@ -82,7 +82,7 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
 
                     if (view) {
                         if (e instanceof EntityPlayerMP) weight *= 2.0;
-                        double distance = Utils.getLength(coord.x + 0.5, coord.y + 0.5, coord.z + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ);
+                        double distance = Utils.getLength(coord.pos.getX() + 0.5, coord.pos.getY() + 0.5, coord.pos.getZ() + 0.5, e.posX, e.posY + e.getEyeHeight(), e.posZ);
                         if (distance < rayMax) {
                             double sf = 1;
                             if (useSpeed) {

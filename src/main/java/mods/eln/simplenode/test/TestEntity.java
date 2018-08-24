@@ -8,4 +8,9 @@ public class TestEntity extends SimpleNodeEntity {
     public String getNodeUuid() {
         return TestNode.getNodeUuidStatic();
     }
+
+    @Override
+    public void update() {
+        
+    }
 }

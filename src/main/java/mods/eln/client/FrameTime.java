@@ -65,7 +65,7 @@ public class FrameTime {
             float deltaTcaped = getNotCaped2();
             while (i.hasNext()) {
                 NodeBlockEntity e = i.next();
-                if (e.getWorldObj() != w) {
+                if (e.getWorld() != w) {
                     i.remove();
                     continue;
                 }

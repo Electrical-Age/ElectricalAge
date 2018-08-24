@@ -5,9 +5,11 @@ import mods.eln.misc.Coordinate;
 import mods.eln.misc.INBTTReady;
 import mods.eln.misc.Utils;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
@@ -109,22 +111,21 @@ public class LightBlockEntity extends TileEntity {
 		}*/
     }
 
-    @Override
     public void updateEntity() {
         if (worldObj.isRemote) return;
 
         if (lightList.isEmpty()) {
             //	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
-            worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+            worldObj.setBlockToAir(new BlockPos(this.pos.getX(), this.pos.getY(), this.pos.getZ()));
             //worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
             //Eln.instance.tileEntityDestructor.add(this);
-            Utils.println("Destroy light at " + xCoord + " " + yCoord + " " + zCoord + " ");
+            Utils.println("Destroy light at " + this.pos.getX() + " " + this.pos.getY() + " " + this.pos.getZ() + " ");
             return;
         }
 
         int light = 0;
         Iterator<LightHandle> iterator = lightList.iterator();
-
+        
         while (iterator.hasNext()) {
             LightHandle l = iterator.next();
             if (light < l.value) light = l.value;
@@ -134,22 +135,23 @@ public class LightBlockEntity extends TileEntity {
                 iterator.remove();
             }
         }
-
-        if (light != worldObj.getBlockMetadata(xCoord, yCoord, zCoord)) {
-
-            worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, light, 2);
-            worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+        IBlockState state = worldObj.getBlockState(pos);
+        Block block = state.getBlock();
+        if (light != block.getMetaFromState(state)) {
+            block.setLightLevel(2);
+            worldObj.notifyLightSet(pos);
         }
     }
 
-    public static void addLight(World w, int x, int y, int z, int light, int timeout) {
-        Block block = w.getBlock(x, y, z);
+    public static void addLight(World w, BlockPos pos, int light, int timeout) {
+        Block block = w.getBlockState(pos).getBlock();
         if (block != Eln.lightBlock) {
-            if (block != Blocks.air) return;
-            w.setBlock(x, y, z, Eln.lightBlock, light, 2);
+            if (block != Blocks.AIR) return;
+            w.setBlockState(pos, Eln.lightBlock.getDefaultState());
+            w.setLightFor(EnumSkyBlock.BLOCK, pos, 2);
         }
 
-        TileEntity t = w.getTileEntity(x, y, z);
+        TileEntity t = w.getTileEntity(pos);
         if (t != null && t instanceof LightBlockEntity)
             ((LightBlockEntity) t).addLight(light, timeout);
         else
@@ -157,7 +159,7 @@ public class LightBlockEntity extends TileEntity {
     }
 
     public static void addLight(Coordinate coord, int light, int timeout) {
-        addLight(coord.world(), coord.x, coord.y, coord.z, light, timeout);
+        addLight(coord.world(), coord.pos, light, timeout);
     }
 
 	/*public static void removeLight(Coordinate coord, int light) {
