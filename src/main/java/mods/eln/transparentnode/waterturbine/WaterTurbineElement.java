@@ -2,7 +2,7 @@ package mods.eln.transparentnode.waterturbine;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -83,14 +83,14 @@ public class WaterTurbineElement extends TransparentNodeElement {
         return null;
     }
 
-    Coordonate waterCoord;
+    Coordinate waterCoord;
 
     @Override
     public void initialize() {
 
         setPhysicalValue();
-        waterCoord = descriptor.getWaterCoordonate(node.coordonate.world());
-        waterCoord.applyTransformation(front, node.coordonate);
+        waterCoord = descriptor.getWaterCoordonate(node.coordinate.world());
+        waterCoord.applyTransformation(front, node.coordinate);
         powerSource.setUmax(descriptor.maxVoltage);
         powerSource.setImax(descriptor.nominalPower * 5 / descriptor.maxVoltage);
         connect();

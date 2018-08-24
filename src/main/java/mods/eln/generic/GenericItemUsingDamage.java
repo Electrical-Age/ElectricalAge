@@ -1,20 +1,17 @@
 package mods.eln.generic;
 
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.LanguageRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -71,29 +68,6 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
         return desc.onItemRightClick(s, w, p);
     }
 
-	/*//caca1.5.1
-    @Override
-	@SideOnly(Side.CLIENT)
-	public int getIconFromDamage(int damage) {
-	return getDescriptor(damage).getIconId();
-	
-	}
-	@Override
-	public String getTextureFile () {
-	return CommonProxy.ITEMS_PNG;
-	}
-	@Override
-	public String getItemNameIS(ItemStack itemstack) {
-	return getItemName() + "." + getDescriptor(itemstack).name;
-	}
-
-	/*
-	@Override
-	public String getUnlocalizedNameInefficiently(ItemStack par1ItemStack) {
-		return "trololol";
-	}
-	*/
-
     @Override
     public String getUnlocalizedName(ItemStack par1ItemStack) {
         Descriptor desc = getDescriptor(par1ItemStack);
@@ -104,31 +78,22 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
         }
     }
 
-	/*
-	@Override
-	public String getItemStackDisplayName(ItemStack par1ItemStack) {
-		Descriptor desc = getDescriptor(par1ItemStack);
-		if (desc == null)
-			return "NullItem";
-		return desc.getName(par1ItemStack);
-	}
-	*/
-
-    public IIcon getIconFromDamage(int damage) {
-        GenericItemUsingDamageDescriptor desc = getDescriptor(damage);
-        if (desc != null) {
-            return getDescriptor(damage).getIcon();
-        }
-        return null;
-    }
-
-    @Override
-    @SideOnly(value = Side.CLIENT)
-    public void registerIcons(IIconRegister iconRegister) {
-        for (GenericItemUsingDamageDescriptor descriptor : subItemList.values()) {
-            descriptor.updateIcons(iconRegister);
-        }
-    }
+    // TODO(1.10): Fix item rendering.
+//    public IIcon getIconFromDamage(int damage) {
+//        GenericItemUsingDamageDescriptor desc = getDescriptor(damage);
+//        if (desc != null) {
+//            return getDescriptor(damage).getIcon();
+//        }
+//        return null;
+//    }
+//
+//    @Override
+//    @SideOnly(value = Side.CLIENT)
+//    public void registerIcons(IIconRegister iconRegister) {
+//        for (GenericItemUsingDamageDescriptor descriptor : subItemList.values()) {
+//            descriptor.updateIcons(iconRegister);
+//        }
+//    }
 
     @Override
     @SideOnly(Side.CLIENT)

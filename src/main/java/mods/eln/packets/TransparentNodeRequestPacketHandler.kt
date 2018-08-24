@@ -1,10 +1,10 @@
 package mods.eln.packets
 
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler
-import cpw.mods.fml.common.network.simpleimpl.MessageContext
 import mods.eln.misc.Utils
 import mods.eln.node.NodeManager
 import mods.eln.node.transparent.TransparentNode
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext
 
 /**
  * Created by Gregory Maddra on 2016-06-27.
@@ -12,7 +12,7 @@ import mods.eln.node.transparent.TransparentNode
 class TransparentNodeRequestPacketHandler : IMessageHandler<TransparentNodeRequestPacket, TransparentNodeResponsePacket> {
     override fun onMessage(message: TransparentNodeRequestPacket?, ctx: MessageContext?): TransparentNodeResponsePacket? {
         val c = message!!.coord
-        val node = NodeManager.instance.getNodeFromCoordonate(c) as? TransparentNode
+        val node = NodeManager.instance.getNodeFromCoordinate(c) as? TransparentNode
         var stringMap: Map<String, String> = emptyMap()
         if (node != null) {
             try {

@@ -1,6 +1,5 @@
 package mods.eln.entity;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -9,6 +8,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class ReplicatorPopProcess implements IProcess {
 

@@ -14,7 +14,6 @@ import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -70,34 +69,35 @@ public class DiodeDescriptor extends SixNodeDescriptor {
         Data.addEnergy(newItemStack());
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            GL11.glTranslatef(0.0f, 0.0f, -0.2f);
+//            GL11.glScalef(1.25f, 1.25f, 1.25f);
+//            GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
+//            draw();
+//        }
+//    }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            GL11.glTranslatef(0.0f, 0.0f, -0.2f);
-            GL11.glScalef(1.25f, 1.25f, 1.25f);
-            GL11.glRotatef(-90.f, 0.f, 1.f, 0.f);
-            draw();
-        }
-    }
-
-    /*	public void applyTo(DiodeProcess diode) {
+    /*	public void applied(DiodeProcess diode) {
             diode.IfU = IfU;
         }
         */

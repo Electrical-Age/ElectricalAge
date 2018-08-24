@@ -2,7 +2,7 @@ package mods.eln.fluid;
 
 import mods.eln.misc.INBTTReady;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fluids.*;
 
 /**
@@ -39,7 +39,7 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
     }
 
     @Override
-    public int fill(ForgeDirection from, FluidStack resource, boolean doFill) {
+    public int fill(EnumFacing from, FluidStack resource, boolean doFill) {
         if (tank.getFluidAmount() > 0) {
             // No change in type of fluid.
             return tank.fill(resource, doFill);
@@ -48,19 +48,17 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
             setHeatEnergyPerMilliBucket(resource.getFluid());
             return tank.fill(resource, doFill);
         } else {
-            int resourceId = resource.getFluidID();
-            for (int i = 0; i < whitelist.length; i++) {
-                if (whitelist[i].getID() == resourceId) {
+            for (Fluid whitelisted : whitelist) {
+                if (whitelisted == resource.getFluid())
                     setHeatEnergyPerMilliBucket(resource.getFluid());
-                    return tank.fill(resource, doFill);
-                }
+                return tank.fill(resource, doFill);
             }
             return 0;
         }
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain) {
+    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain) {
         if (resource.isFluidEqual(tank.getFluid()))
             return tank.drain(resource.amount, doDrain);
         else
@@ -68,32 +66,30 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
     }
 
     @Override
-    public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain) {
+    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain) {
         return tank.drain(maxDrain, doDrain);
     }
 
     @Override
-    public boolean canFill(ForgeDirection from, Fluid fluid) {
-        int fluidId = fluid.getID();
+    public boolean canFill(EnumFacing from, Fluid fluid) {
         if (tank.getFluidAmount() > 0) {
-            return tank.getFluid().getFluidID() == fluidId;
+            return tank.getFluid().getFluid() == fluid;
         } else {
-            for (int i = 0; i < whitelist.length; i++) {
-                if (whitelist[i].getID() == fluidId) {
+            for (Fluid whitelisted : whitelist) {
+                if (whitelisted == fluid)
                     return true;
-                }
             }
         }
         return false;
     }
 
     @Override
-    public boolean canDrain(ForgeDirection from, Fluid fluid) {
+    public boolean canDrain(EnumFacing from, Fluid fluid) {
         return true;
     }
 
     @Override
-    public FluidTankInfo[] getTankInfo(ForgeDirection from) {
+    public FluidTankInfo[] getTankInfo(EnumFacing from) {
         return new FluidTankInfo[]{tank.getInfo()};
     }
 

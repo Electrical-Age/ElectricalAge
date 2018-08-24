@@ -63,6 +63,7 @@ public class GhostGroup {
 
     public boolean canBePloted(Coordinate c) {
         return canBePloted(c.world(), c.pos.getX(), c.pos.getY(), c.pos.getZ());
+
     }
 
     public boolean canBePloted(World world, int x, int y, int z) {

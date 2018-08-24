@@ -15,7 +15,7 @@ import java.util.HashMap;
 
 public class ModbusRtuRender extends SixNodeElementRender {
 
-    Coordonate coord;
+    Coordinate coord;
     PhysicalInterpolator interpolator;
     float modbusActivityTimeout = 0;
     float modbusErrorTimeout = 0;
@@ -36,7 +36,7 @@ public class ModbusRtuRender extends SixNodeElementRender {
         this.descriptor = (ModbusRtuDescriptor) descriptor;
 
         interpolator = new PhysicalInterpolator(0.4f, 8.0f, 0.9f, 0.2f);
-        coord = new Coordonate(tileEntity);
+        coord = new Coordinate(tileEntity);
     }
 
     @Override

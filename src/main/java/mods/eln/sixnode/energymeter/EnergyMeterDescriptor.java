@@ -7,7 +7,6 @@ import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 public class EnergyMeterDescriptor extends SixNodeDescriptor {
@@ -50,36 +49,30 @@ public class EnergyMeterDescriptor extends SixNodeDescriptor {
         Data.addWiring(newItemStack());
     }
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        /*
-			GL11.glRotatef(45, 0, 0, 1);
-			GL11.glRotatef(90, 1, 0, 0);
-			GL11.glRotatef(30, 0, 0, 1);
-			float scal = 2.5f;
-			GL11.glScalef(scal, scal, scal);
-			draw(13896, 1511, 1, 0, false);*/
-        } else {
-            draw(13896, 1511, 1, 0, true);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            draw(13896, 1511, 1, 0, true);
+//        }
+//    }
 
     public void draw(double energy, double time, int energyUnit, int timeUnit, boolean drawAll) {
         // UtilsClient.disableCulling();

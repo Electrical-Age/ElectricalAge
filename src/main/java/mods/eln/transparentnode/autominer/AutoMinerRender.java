@@ -65,7 +65,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
             ledsPState[idx] = Math.random() > 0.5;
         }
 
-        addLoopedSound(new LoopedSound("eln:autominer", coordonate(), ISound.AttenuationType.LINEAR) {
+        addLoopedSound(new LoopedSound("eln:autominer", coordinate(), ISound.AttenuationType.LINEAR) {
             @Override
             public float getVolume() {
                 if (powerOk &&

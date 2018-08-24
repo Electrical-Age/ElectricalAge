@@ -37,7 +37,7 @@ public class ReplicatorEntity extends EntityMob {
 
         this.setSize(0.3F, 0.7F);
 
-        ReplicatoCableAI replicatorIa = new ReplicatoCableAI(this);
+        ReplicatorCableAI replicatorIa = new ReplicatorCableAI(this);
         int p = 0;
 
         this.tasks.addTask(p++, new EntityAISwimming(this));

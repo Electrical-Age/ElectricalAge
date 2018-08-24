@@ -2,7 +2,7 @@ package mods.eln.transparentnode.electricalantennatx;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -41,7 +41,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement {
 
     ElectricalAntennaTxDescriptor descriptor;
 
-    Coordonate rxCoord = null;
+    Coordinate rxCoord = null;
     ElectricalAntennaRxElement rxElement = null;
     double powerEfficency = 0.0;
 
@@ -72,7 +72,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement {
     ElectricalAntennaRxElement getRxElement() {
         if (rxCoord == null) return null;
         if (rxElement == null) {
-            NodeBase node = NodeManager.instance.getNodeFromCoordonate(rxCoord);
+            NodeBase node = NodeManager.instance.getNodeFromCoordinate(rxCoord);
             if (node != null && node instanceof TransparentNode && ((TransparentNode) node).element instanceof ElectricalAntennaRxElement)
                 rxElement = (ElectricalAntennaRxElement) ((TransparentNode) node).element;
             else {
@@ -147,7 +147,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement {
     public void readFromNBT(NBTTagCompound nbt) {
         super.readFromNBT(nbt);
         if (nbt.getBoolean("rxCoordValid")) {
-            rxCoord = new Coordonate();
+            rxCoord = new Coordinate();
             rxCoord.readFromNBT(nbt, "rxCoord");
         }
         rot = LRDU.readFromNBT(nbt, "rot");

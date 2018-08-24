@@ -1,6 +1,5 @@
 package mods.eln;
 
-import cpw.mods.fml.common.network.IGuiHandler;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
@@ -8,7 +7,9 @@ import mods.eln.node.INodeEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.IGuiHandler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;

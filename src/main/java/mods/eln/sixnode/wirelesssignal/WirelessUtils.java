@@ -1,9 +1,10 @@
 package mods.eln.sixnode.wirelesssignal;
 
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import java.util.*;
@@ -30,13 +31,13 @@ public class WirelessUtils {
             for (List<IWirelessSignalTx> txs : from.getTx().values()) {
                 for (IWirelessSignalTx tx : txs) {
                     if (isRoot)
-                        strength = tx.getRange() - getVirtualDistance(tx.getCoordonate(), from.getCoordonate(), tx.getCoordonate().trueDistanceTo(from.getCoordonate()));
+                        strength = tx.getRange() - getVirtualDistance(tx.getCoordinate(), from.getCoordinate(), tx.getCoordinate().trueDistanceTo(from.getCoordinate()));
                     addTo(tx, strength, txSet, txStrength);
                 }
             }
             for (IWirelessSignalSpot spot : from.getSpot()) {
                 if (isRoot)
-                    strength = spot.getRange() - getVirtualDistance(spot.getCoordonate(), from.getCoordonate(), spot.getCoordonate().trueDistanceTo(from.getCoordonate()));
+                    strength = spot.getRange() - getVirtualDistance(spot.getCoordinate(), from.getCoordinate(), spot.getCoordinate().trueDistanceTo(from.getCoordinate()));
                 getTx(spot, txSet, txStrength, spotSet, false, strength);
             }
         } else {
@@ -53,7 +54,7 @@ public class WirelessUtils {
             while (!spots.isEmpty() || !txs.isEmpty()) {
                 bestScore = Double.MAX_VALUE;
                 for (IWirelessSignalSpot spot : spots) {
-                    double temp = spot.getCoordonate().trueDistanceTo(from.getCoordonate());
+                    double temp = spot.getCoordinate().trueDistanceTo(from.getCoordinate());
                     if (temp < bestScore) {
                         bestScore = temp;
                         best = spot;
@@ -61,7 +62,7 @@ public class WirelessUtils {
                 }
 
                 for (IWirelessSignalTx tx : txs) {
-                    double temp = tx.getCoordonate().trueDistanceTo(from.getCoordonate());
+                    double temp = tx.getCoordinate().trueDistanceTo(from.getCoordinate());
                     if (temp < bestScore) {
                         bestScore = temp;
                         best = tx;
@@ -71,7 +72,7 @@ public class WirelessUtils {
                 if (best instanceof IWirelessSignalSpot) {
                     IWirelessSignalSpot b = (IWirelessSignalSpot) best;
                     if (isRoot)
-                        strength = b.getRange() - getVirtualDistance(b.getCoordonate(), from.getCoordonate(), b.getCoordonate().trueDistanceTo(from.getCoordonate()));
+                        strength = b.getRange() - getVirtualDistance(b.getCoordinate(), from.getCoordinate(), b.getCoordinate().trueDistanceTo(from.getCoordinate()));
                     getTx(b, txSet, txStrength, spotSet, false, strength);
                     spots.remove(best);
                 } else if (best == null) {
@@ -80,7 +81,7 @@ public class WirelessUtils {
                     IWirelessSignalTx tx = (IWirelessSignalTx) best;
 
                     if (isRoot)
-                        strength = tx.getRange() - getVirtualDistance(tx.getCoordonate(), from.getCoordonate(), tx.getCoordonate().trueDistanceTo(from.getCoordonate()));
+                        strength = tx.getRange() - getVirtualDistance(tx.getCoordinate(), from.getCoordinate(), tx.getCoordinate().trueDistanceTo(from.getCoordinate()));
                     addTo(tx, strength, txSet, txStrength);
                     txs.remove(best);
                 }
@@ -107,12 +108,12 @@ public class WirelessUtils {
 	 * if(channel != null){ ArrayList<IWirelessSignalTx> txs = root.getTx().get(channel); if(txs != null) txSet.addAll(txs); }else{ for(ArrayList<IWirelessSignalTx> txs : root.getTx().values()){ txSet.addAll(txs); } } }
 	 */
 
-    public static WirelessSignalSpot buildSpot(Coordonate c, String channel, int range) {
+    public static WirelessSignalSpot buildSpot(Coordinate c, String channel, int range) {
         HashMap<String, ArrayList<IWirelessSignalTx>> txs = new HashMap<String, ArrayList<IWirelessSignalTx>>();
         ArrayList<IWirelessSignalSpot> spots = new ArrayList<IWirelessSignalSpot>();
 
         for (IWirelessSignalSpot spot : IWirelessSignalSpot.spots) {
-            if (isInRange(spot.getCoordonate(), c, spot.getRange())) {
+            if (isInRange(spot.getCoordinate(), c, spot.getRange())) {
                 spots.add(spot);
             }
         }
@@ -123,7 +124,7 @@ public class WirelessUtils {
             List<IWirelessSignalTx> sameChannelTx = WirelessSignalTxElement.channelMap.get(channel);
             if (sameChannelTx != null) {
                 for (IWirelessSignalTx tx : sameChannelTx) {
-                    if (isInRange(tx.getCoordonate(), c, tx.getRange())) {
+                    if (isInRange(tx.getCoordinate(), c, tx.getRange())) {
                         inRangeTx.add(tx);
                     }
                 }
@@ -135,7 +136,7 @@ public class WirelessUtils {
                 ArrayList<IWirelessSignalTx> inRangeTx = new ArrayList<IWirelessSignalTx>();
 
                 for (IWirelessSignalTx tx : entryTxs.getValue()) {
-                    if (isInRange(tx.getCoordonate(), c, tx.getRange())) {
+                    if (isInRange(tx.getCoordinate(), c, tx.getRange())) {
                         inRangeTx.add(tx);
                     }
                 }
@@ -148,42 +149,40 @@ public class WirelessUtils {
         return new WirelessSignalSpot(txs, spots, c, range);
     }
 
-    static private boolean isInRange(Coordonate txC, Coordonate rxC, double range) {
+    static private boolean isInRange(Coordinate txC, Coordinate rxC, double range) {
         double distance = txC.trueDistanceTo(rxC);
         if (distance > range) return false;
         if (getVirtualDistance(txC, rxC, distance) > range) return false;
         return true;
     }
 
-    static private double getVirtualDistance(Coordonate txC, Coordonate rxC, double distance) {
+    static private double getVirtualDistance(Coordinate txC, Coordinate rxC, double distance) {
         double virtualDistance = distance;
         if (distance > 2) {
             double vx, vy, vz;
             double dx, dy, dz;
-            vx = rxC.x + 0.5;
-            vy = rxC.y + 0.5;
-            vz = rxC.z + 0.5;
+            vx = rxC.pos.getX() + 0.5;
+            vy = rxC.pos.getY() + 0.5;
+            vz = rxC.pos.getZ() + 0.5;
 
-            dx = (txC.x - rxC.x) / distance;
-            dy = (txC.y - rxC.y) / distance;
-            dz = (txC.z - rxC.z) / distance;
-            Coordonate c = new Coordonate();
-            c.setDimention(rxC.dimention);
+            dx = (txC.pos.getX() - rxC.pos.getX()) / distance;
+            dy = (txC.pos.getY() - rxC.pos.getY()) / distance;
+            dz = (txC.pos.getZ() - rxC.pos.getZ()) / distance;
+            Coordinate c = new Coordinate();
+            c.setDimension(rxC.getDimension());
 
             for (int idx = 0; idx < distance - 1; idx++) {
                 vx += dx;
                 vy += dy;
                 vz += dz;
-                c.x = (int) vx;
-                c.y = (int) vy;
-                c.z = (int) vz;
-                if (c.getBlockExist()) {
-                    Block b = c.getBlock();
+                c.setPosition(new Vec3d(vx, vy, vz));
+                if (c.doesBlockExist()) {
+                    Block b = c.getBlockState().getBlock();
                     World w = c.world();
 
                     virtualDistance +=
-                        b.isOpaqueCube() &&
-                        !b.isAir(w, c.x, c.y, c.z) ?
+                        b.isOpaqueCube(b.getDefaultState()) &&
+                        !b.isAir(b.getDefaultState(), w,new BlockPos(c.pos.getX(), c.pos.getY(), c.pos.getZ())) ?
                         2.0 : 0.0;
                 }
             }
@@ -195,13 +194,13 @@ public class WirelessUtils {
 
         HashMap<String, ArrayList<IWirelessSignalTx>> txs;
         ArrayList<IWirelessSignalSpot> spots;
-        Coordonate coordonate;
+        Coordinate coordinate;
         int range;
 
-        public WirelessSignalSpot(HashMap<String, ArrayList<IWirelessSignalTx>> txs, ArrayList<IWirelessSignalSpot> spots, Coordonate coordonate, int range) {
+        public WirelessSignalSpot(HashMap<String, ArrayList<IWirelessSignalTx>> txs, ArrayList<IWirelessSignalSpot> spots, Coordinate coordinate, int range) {
             this.txs = txs;
             this.spots = spots;
-            this.coordonate = coordonate;
+            this.coordinate = coordinate;
             this.range = range;
         }
 
@@ -216,8 +215,8 @@ public class WirelessUtils {
         }
 
         @Override
-        public Coordonate getCoordonate() {
-            return coordonate;
+        public Coordinate getCoordinate() {
+            return coordinate;
         }
 
         @Override

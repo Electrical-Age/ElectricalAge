@@ -1,12 +1,12 @@
 package mods.eln.item.electricalinterface;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import mods.eln.Eln;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.util.ArrayList;
 import java.util.Iterator;

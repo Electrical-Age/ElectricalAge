@@ -1,7 +1,7 @@
 package mods.eln.gridnode;
 
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.INBTTReady;
 import mods.eln.node.NodeManager;
@@ -21,7 +21,7 @@ import java.util.Optional;
  */
 public class GridLink implements INBTTReady {
 
-    Coordonate a = new Coordonate(), b = new Coordonate();
+    Coordinate a = new Coordinate(), b = new Coordinate();
 
     boolean connected = false;
     // Drop this if the link is broken.
@@ -33,7 +33,7 @@ public class GridLink implements INBTTReady {
     private ElectricalConnection ab;
     private double rs = MnaConst.highImpedance;
 
-    public GridLink(Coordonate a, Coordonate b, Direction as, Direction bs, ItemStack cable, double rs) {
+    public GridLink(Coordinate a, Coordinate b, Direction as, Direction bs, ItemStack cable, double rs) {
         this.rs = rs;
         assert a != null && b != null && as != null && bs != null && cable != null;
         this.a = a;
@@ -47,7 +47,7 @@ public class GridLink implements INBTTReady {
         readFromNBT(nbt, str);
     }
 
-    public static GridElement getElementFromCoordinate(Coordonate coord) {
+    public static GridElement getElementFromCoordinate(Coordinate coord) {
         if (coord == null) return null;
         TransparentNodeElement element = NodeManager.instance.getTransparentNodeFromCoordinate(coord);
         if (element instanceof GridElement) {

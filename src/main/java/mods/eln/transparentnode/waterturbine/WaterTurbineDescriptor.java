@@ -21,7 +21,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
         ElectricalCableDescriptor cable,
         double nominalPower,
         double maxVoltage,
-        Coordonate waterCoord,
+        Coordinate waterCoord,
         String soundName,
         float nominalVolume
     ) {
@@ -45,7 +45,7 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.LowVoltage;
     }
 
-    Coordonate waterCoord;
+    Coordinate waterCoord;
 
     public void setParent(net.minecraft.item.Item item, int damage) {
         super.setParent(item, damage);
@@ -83,29 +83,30 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
     }
 
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            objItemScale(obj);
-            Direction.ZN.glRotateXnRef();
-            draw(0f);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+//                                         ItemRendererHelper helper) {
+//
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            objItemScale(obj);
+//            Direction.ZN.glRotateXnRef();
+//            draw(0f);
+//        }
+//    }
 
 
     @Override
@@ -120,15 +121,15 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
     }
 
 
-    public Coordonate getWaterCoordonate(World w) {
-        Coordonate coord = new Coordonate(waterCoord);
-        coord.setDimention(w.provider.dimensionId);
+    public Coordinate getWaterCoordonate(World w) {
+        Coordinate coord = new Coordinate(waterCoord);
+        coord.setDimension(w.provider.dimensionId);
         return coord;
     }
 
 
     @Override
-    public String checkCanPlace(Coordonate coord, Direction front) {
+    public String checkCanPlace(Coordinate coord, Direction front) {
 
         String str = super.checkCanPlace(coord, front);
         if (str != null) return str;
@@ -137,11 +138,11 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
     }
 
 
-    public boolean checkCanPlaceWater(Coordonate coord, Direction front) {
-        Coordonate water = new Coordonate(waterCoord);
+    public boolean checkCanPlaceWater(Coordinate coord, Direction front) {
+        Coordinate water = new Coordinate(waterCoord);
         water.applyTransformation(front, coord);
-        if (coord.getBlockExist() == false) return true;
-        if (water.getBlock() == Blocks.air || Utils.isWater(water)) return true;
+        if (coord.doesBlockExist() == false) return true;
+        if (water.getBlock() == Blocks.air || Utils.isWateryEnoughForTurbine(water)) return true;
         return false;
     }
 }

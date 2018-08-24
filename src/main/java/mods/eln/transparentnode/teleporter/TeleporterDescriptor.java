@@ -1,40 +1,42 @@
 package mods.eln.transparentnode.teleporter;
 
 import mods.eln.ghost.GhostGroup;
-import mods.eln.misc.*;
+import mods.eln.misc.Coordinate;
+import mods.eln.misc.Direction;
+import mods.eln.misc.Obj3D;
 import mods.eln.misc.Obj3D.Obj3DPart;
+import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.transparent.TransparentNodeDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 
 public class TeleporterDescriptor extends TransparentNodeDescriptor {
 
     private Obj3D obj;
-    public Obj3DPart main, ext_control, ext_power;
-    public Obj3DPart door_out, door_in, door_in_charge;
-    public Obj3DPart indoor_open, indoor_closed;
-    public Obj3DPart outlampline0_alpha, outlampline0;
-    public Obj3DPart[] leds = new Obj3DPart[10];
-    public Obj3DPart scr0_electrictity, scr1_cables, scr2_transporter, scr3_userin, scr5_dooropen, src4_doorclosed;
-    public Obj3DPart gyro_alpha, gyro, whiteblur;
+    Obj3DPart main, ext_control, ext_power;
+    Obj3DPart door_out, door_in, door_in_charge;
+    Obj3DPart indoor_open, indoor_closed;
+    private Obj3DPart outlampline0_alpha, outlampline0;
+    Obj3DPart[] leds = new Obj3DPart[10];
+    Obj3DPart scr0_electrictity, scr1_cables, scr2_transporter, scr3_userin, scr5_dooropen, src4_doorclosed;
+    Obj3DPart gyro_alpha, gyro, whiteblur;
 
     public TeleporterDescriptor(
         String name, Obj3D obj,
         ElectricalCableDescriptor cable,
-        Coordonate areaCoordonate, Coordonate lightCoordonate,
+        Coordinate areaCoordinate, Coordinate lightCoordinate,
         int areaH,
-        Coordonate[] powerCoordonate,
+        Coordinate[] powerCoordinate,
         GhostGroup ghostDoorOpen, GhostGroup ghostDoorClose
 
     ) {
         super(name, TeleporterElement.class, TeleporterRender.class);
         this.cable = cable;
         this.obj = obj;
-        this.powerCoordonate = powerCoordonate;
+        this.powerCoordinate = powerCoordinate;
         if (obj != null) {
             main = obj.getPart("main");
             ext_control = obj.getPart("ext_control");
@@ -60,32 +62,32 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor {
                 leds[idx] = obj.getPart("led" + idx);
             }
         }
-        this.areaCoordonate = areaCoordonate;
+        this.areaCoordinate = areaCoordinate;
         this.areaH = areaH;
         this.ghostDoorClose = ghostDoorClose;
         this.ghostDoorOpen = ghostDoorOpen;
-        this.lightCoordonate = lightCoordonate;
+        this.lightCoordinate = lightCoordinate;
 
         voltageLevelColor = VoltageLevelColor.HighVoltage;
     }
 
-    public GhostGroup ghostDoorOpen, ghostDoorClose;
+    GhostGroup ghostDoorOpen, ghostDoorClose;
 
-    int areaH;
-    public Coordonate areaCoordonate, lightCoordonate;
+    private int areaH;
+    private Coordinate areaCoordinate;
+    Coordinate lightCoordinate;
 
-    public AxisAlignedBB getBB(Coordonate c, Direction front) {
-        Coordonate temp = new Coordonate(areaCoordonate);
-        temp.setDimention(c.dimention);
+    AxisAlignedBB getBB(Coordinate c, Direction front) {
+        Coordinate temp = new Coordinate(areaCoordinate);
+        temp.setDimension(c.getDimension());
         temp.applyTransformation(front, c);
 
-        AxisAlignedBB bb = AxisAlignedBB.getBoundingBox(temp.x, temp.y, temp.z, temp.x + 1, temp.y + areaH, temp.z + 1);
-        return bb;
+        return new AxisAlignedBB(temp.pos);
     }
 
-    public Coordonate getTeleportCoordonate(Direction front, Coordonate c) {
-        Coordonate temp = new Coordonate(areaCoordonate);
-        temp.setDimention(c.dimention);
+    Coordinate getTeleportCoordinate(Direction front, Coordinate c) {
+        Coordinate temp = new Coordinate(areaCoordinate);
+        temp.setDimension(c.getDimension());
         temp.applyTransformation(front, c);
 
         return temp;
@@ -94,7 +96,6 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor {
 
     @Override
     public void setParent(Item item, int damage) {
-
         super.setParent(item, damage);
         Data.addMachine(newItemStack());
     }
@@ -109,13 +110,13 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor {
         if (door_out != null) door_out.draw();
     }
 
-    Coordonate[] powerCoordonate;
+    private Coordinate[] powerCoordinate;
 
-    public Coordonate[] getPowerCoordonate(World w) {
-        Coordonate[] temp = new Coordonate[powerCoordonate.length];
+    Coordinate[] getPowerCoordinate(World w) {
+        Coordinate[] temp = new Coordinate[powerCoordinate.length];
         for (int idx = 0; idx < temp.length; idx++) {
-            temp[idx] = new Coordonate(powerCoordonate[idx]);
-            temp[idx].setDimention(w.provider.dimensionId);
+            temp[idx] = new Coordinate(powerCoordinate[idx]);
+            temp[idx].setDimension(w.provider.getDimension());
         }
         return temp;
     }
@@ -137,30 +138,31 @@ public class TeleporterDescriptor extends TransparentNodeDescriptor {
     }
 
 
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            objItemScale(obj);
-            main.draw();
-            ext_control.draw();
-            ext_power.draw();
-            UtilsClient.disableCulling();
-            door_out.draw();
-            UtilsClient.enableCulling();
-            indoor_open.draw();
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+//                                         ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            objItemScale(obj);
+//            main.draw();
+//            ext_control.draw();
+//            ext_power.draw();
+//            UtilsClient.disableCulling();
+//            door_out.draw();
+//            UtilsClient.enableCulling();
+//            indoor_open.draw();
+//        }
+//    }
 }

@@ -9,10 +9,9 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.World;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -21,7 +20,7 @@ import static mods.eln.i18n.I18N.tr;
 
 public class SolarPanelDescriptor extends TransparentNodeDescriptor {
 
-    final Coordonate groundCoordinate;
+    final Coordinate groundCoordinate;
     boolean basicModel;
     private Obj3D obj;
     private Obj3DPart main;
@@ -31,7 +30,7 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
         String name,
         Obj3D obj, CableRenderDescriptor cableRender,
         GhostGroup ghostGroup, int solarOffsetX, int solarOffsetY, int solarOffsetZ,
-        Coordonate groundCoordinate, double electricalUmax, double electricalPmax,
+        Coordinate groundCoordinate, double electricalUmax, double electricalPmax,
         double electricalDropFactor,
         double alphaMin, double alphaMax
 
@@ -112,44 +111,44 @@ public class SolarPanelDescriptor extends TransparentNodeDescriptor {
         }
     }
 
-    @Override
-    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
-                                         ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
-    }
-
-    @Override
-    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-        return true;
-    }
-
-    @Override
-    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY) {
-            super.renderItem(type, item, data);
-        } else {
-            draw((float) alphaMin, Direction.XN);
-        }
-    }
+    // TODO(1.10): Fix item render.
+//    @Override
+//    public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item,
+//                                         ItemRendererHelper helper) {
+//        return type != ItemRenderType.INVENTORY;
+//    }
+//
+//    @Override
+//    public boolean handleRenderType(ItemStack item, ItemRenderType type) {
+//        return true;
+//    }
+//
+//    @Override
+//    public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
+//        if (type == ItemRenderType.INVENTORY) {
+//            super.renderItem(type, item, data);
+//        } else {
+//            draw((float) alphaMin, Direction.XN);
+//        }
+//    }
 
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
-        list.add(tr("Produces power from solar radiation."));
+        list.add(tr("Produces power fromFacing solar radiation."));
         list.add("  " + tr("Max. voltage: %1$V", Utils.plotValue(electricalUmax)));
         list.add("  " + tr("Max. power: %1$W", Utils.plotValue(electricalPmax)));
         if (canRotate) list.add(tr("Can be geared towards the sun."));
     }
 
     @Override
-    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, World world, int x, int y, int z) {
+    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, BlockPos pos) {
         if (canRotate) {
-            super.addCollisionBoxesToList(par5AxisAlignedBB, list, world, x, y, z);
+            super.addCollisionBoxesToList(par5AxisAlignedBB, list, pos);
             return;
         }
-        AxisAlignedBB bb = Blocks.stone.getCollisionBoundingBoxFromPool(world, x, y, z);
-        bb.maxY -= 0.5;
+        AxisAlignedBB bb = new AxisAlignedBB(pos).setMaxY(0.5);
         if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
     }
 }

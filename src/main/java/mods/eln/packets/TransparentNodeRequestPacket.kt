@@ -1,22 +1,22 @@
 package mods.eln.packets
 
-import cpw.mods.fml.common.network.ByteBufUtils
-import cpw.mods.fml.common.network.simpleimpl.IMessage
 import io.netty.buffer.ByteBuf
-import mods.eln.misc.Coordonate
+import mods.eln.misc.Coordinate
+import net.minecraftforge.fml.common.network.ByteBufUtils
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage
 
 /**
  * Created by Gregory Maddra on 2016-06-27.
  */
 open class TransparentNodeRequestPacket : IMessage {
 
-    lateinit var coord: Coordonate
+    lateinit var coord: Coordinate
 
     constructor() {
 
     }
 
-    constructor(c: Coordonate) {
+    constructor(c: Coordinate) {
         coord = c
     }
 
@@ -25,13 +25,13 @@ open class TransparentNodeRequestPacket : IMessage {
         val y = ByteBufUtils.readVarInt(buf, 5)
         val z = ByteBufUtils.readVarInt(buf, 5)
         val w = ByteBufUtils.readVarInt(buf, 5)
-        coord = Coordonate(x, y, z, w)
+        coord = Coordinate(x, y, z, w)
     }
 
     override fun toBytes(buf: ByteBuf?) {
-        ByteBufUtils.writeVarInt(buf, coord.x, 5)
-        ByteBufUtils.writeVarInt(buf, coord.y, 5)
-        ByteBufUtils.writeVarInt(buf, coord.z, 5)
-        ByteBufUtils.writeVarInt(buf, coord.dimention, 5)
+        ByteBufUtils.writeVarInt(buf, coord.pos.x, 5)
+        ByteBufUtils.writeVarInt(buf, coord.pos.y, 5)
+        ByteBufUtils.writeVarInt(buf, coord.pos.z, 5)
+        ByteBufUtils.writeVarInt(buf, coord.dimension, 5)
     }
 }

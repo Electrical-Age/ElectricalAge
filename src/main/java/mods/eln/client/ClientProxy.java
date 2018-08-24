@@ -1,8 +1,5 @@
 package mods.eln.client;
 
-import cpw.mods.fml.client.registry.ClientRegistry;
-import cpw.mods.fml.client.registry.RenderingRegistry;
-import cpw.mods.fml.common.FMLCommonHandler;
 import mods.eln.CommonProxy;
 import mods.eln.Eln;
 import mods.eln.entity.ReplicatorEntity;
@@ -16,6 +13,9 @@ import mods.eln.sound.SoundClientEventListener;
 import net.minecraft.client.model.ModelSilverfish;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class ClientProxy extends CommonProxy {
 

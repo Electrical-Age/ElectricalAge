@@ -1,7 +1,7 @@
 package mods.eln.transparentnode.electricalantennatx;
 
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeManager;
 import mods.eln.node.transparent.TransparentNode;
@@ -28,12 +28,12 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
     @Override
     public void process(double time) {
         //if(element.rxCoord == null)
-        World world = element.node.coordonate.world();
+        World world = element.node.coordinate.world();
 
         if (timeCounter <= 0.0) {
             timeCounter = periode;
             int rangeMax = element.descriptor.rangeMax;
-            Coordonate coord = new Coordonate(element.node.coordonate);
+            Coordinate coord = new Coordinate(element.node.coordinate);
 
             int distance = 0;
             TransparentNode node = null;
@@ -47,7 +47,7 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
                     //	a++;
                     if ((block = coord.getBlock()) != Blocks.air && block != Blocks.fire) {
                         if (block == Eln.transparentNodeBlock
-                            && (node = (TransparentNode) NodeManager.instance.getNodeFromCoordonate(coord)) != null
+                            && (node = (TransparentNode) NodeManager.instance.getNodeFromCoordinate(coord)) != null
                             && (node.element instanceof ElectricalAntennaRxElement)) {
                             ElectricalAntennaRxElement rx = (ElectricalAntennaRxElement) node.element;
                             if (rx.front == element.front.getInverse()) {
@@ -58,7 +58,7 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
                     }
                 } else {
                     //	b++;
-                    NodeBase unknowNode = NodeManager.instance.getNodeFromCoordonate(coord);
+                    NodeBase unknowNode = NodeManager.instance.getNodeFromCoordinate(coord);
                     if (node != null) {
                         if (unknowNode instanceof TransparentNode
                             && (((TransparentNode) unknowNode).element instanceof ElectricalAntennaRxElement)) {
@@ -74,7 +74,7 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
             } while (distance < rangeMax);
             if (!find) {
                 element.txDisconnect();
-                Coordonate coordCpy = new Coordonate(coord);
+                Coordinate coordCpy = new Coordinate(coord);
                 coordCpy.move(element.front.getInverse());
                 if (element.powerResistor.getP() > 50) {
                     if (coordCpy.world().blockExists(coordCpy.x, coordCpy.y, coordCpy.z)) {
@@ -89,10 +89,10 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
                 if (world.getWorldInfo().isRaining()) element.powerEfficency *= 0.707;
                 if (world.getWorldInfo().isThundering()) element.powerEfficency *= 0.707;
 
-                element.rxCoord = node.coordonate;
+                element.rxCoord = node.coordinate;
                 element.rxElement = (ElectricalAntennaRxElement) node.element;
             }
-            List list = world.getEntitiesWithinAABBExcludingEntity((Entity) null, Coordonate.getAxisAlignedBB(element.node.coordonate, coord));
+            List list = world.getEntitiesWithinAABBExcludingEntity((Entity) null, Coordinate.getAxisAlignedBB(element.node.coordinate, coord));
 
             for (Object o : list) {
                 Entity e = (Entity) o;

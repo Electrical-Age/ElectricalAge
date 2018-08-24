@@ -1,0 +1,6 @@
+* Tasks
+** TODO Fix item rendering for basically everything
+** TODO Add IC2 exporter
+** TODO Not all TEs should be tickable.
+* Ideas
+** TODO Try gravity sketch

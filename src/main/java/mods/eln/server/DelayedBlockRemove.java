@@ -1,7 +1,7 @@
 package mods.eln.server;
 
 import mods.eln.Eln;
-import mods.eln.misc.Coordonate;
+import mods.eln.misc.Coordinate;
 import mods.eln.server.DelayedTaskManager.ITask;
 import net.minecraft.init.Blocks;
 
@@ -10,11 +10,11 @@ import java.util.Set;
 
 public class DelayedBlockRemove implements ITask {
 
-    Coordonate c;
+    Coordinate c;
 
-    private static final Set<Coordonate> blocks = new HashSet<Coordonate>();
+    private static final Set<Coordinate> blocks = new HashSet<Coordinate>();
 
-    private DelayedBlockRemove(Coordonate c) {
+    private DelayedBlockRemove(Coordinate c) {
         this.c = c;
     }
 
@@ -22,7 +22,7 @@ public class DelayedBlockRemove implements ITask {
         blocks.clear();
     }
 
-    public static void add(Coordonate c) {
+    public static void add(Coordinate c) {
         if (blocks.contains(c)) return;
         blocks.add(c);
         Eln.delayedTask.add(new DelayedBlockRemove(c));
