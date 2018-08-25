@@ -2,7 +2,7 @@ package mods.eln.node.transparent;
 
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
-import mods.eln.misc.Coordinate;
+import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.FakeSideInventory;
 import mods.eln.misc.LRDU;
@@ -15,8 +15,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 
 import java.io.ByteArrayOutputStream;
@@ -25,7 +24,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-
+    //TODO
+    //FIX SIDEDINV 1.10
 public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInventory { // boolean[] syncronizedSideEnable = new boolean[6];
     TransparentNodeElementRender elementRender = null;
     short elementRenderId;
@@ -124,7 +124,7 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
         if (elementRender != null) elementRender.notifyNeighborSpawn();
     }
 
-    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, Coordinate blockCoord) {
+    public void addCollisionBoxesToList(AxisAlignedBB par5AxisAlignedBB, List list, Coordonate blockCoord) {
         TransparentNodeDescriptor desc = null;
         if (worldObj.isRemote) {
             desc = elementRender == null ? null : elementRender.transparentNodedescriptor;
@@ -132,17 +132,21 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
             TransparentNode node = (TransparentNode) getNode();
             desc = node == null ? null : node.element.transparentNodeDescriptor;
         }
-        BlockPos pos;
+        int x, y, z;
         if (blockCoord != null) {
-            pos = blockCoord.pos;
+            x = blockCoord.x;
+            y = blockCoord.y;
+            z = blockCoord.z;
         } else {
-            pos = this.pos;
+            x = xCoord;
+            y = yCoord;
+            z = zCoord;
         }
         if (desc == null) {
-            AxisAlignedBB bb = new AxisAlignedBB(pos);
+            AxisAlignedBB bb = Blocks.stone.getCollisionBoundingBoxFromPool(worldObj, x, y, z);
             if (par5AxisAlignedBB.intersectsWith(bb)) list.add(bb);
         } else {
-            desc.addCollisionBoxesToList(par5AxisAlignedBB, list, pos);
+            desc.addCollisionBoxesToList(par5AxisAlignedBB, list, worldObj, x, y, z);
         }
     }
 

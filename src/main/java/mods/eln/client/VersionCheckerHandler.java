@@ -2,16 +2,17 @@ package mods.eln.client;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import mods.eln.Eln;
 import mods.eln.misc.Color;
 import mods.eln.misc.Version;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -111,8 +112,8 @@ public class VersionCheckerHandler {
 
         // Print the current version when the client start a map
         if (Eln.versionCheckEnabled) {
-            m.thePlayer.addChatMessage(new ChatComponentText(Version.printColor()));
-            m.thePlayer.addChatMessage(new ChatComponentText(versionMsg));
+            m.thePlayer.addChatMessage(new TextComponentString(Version.printColor()));
+            m.thePlayer.addChatMessage(new TextComponentString(versionMsg));
         }
 
         FMLCommonHandler.instance().bus().unregister(this);

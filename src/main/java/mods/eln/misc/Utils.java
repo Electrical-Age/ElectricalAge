@@ -559,7 +559,7 @@ public class Utils {
     // return Math.max(0.0, Eln.instance.wind.getWind(y) * factor + world.getRainStrength(0) * 1f + world.getWeightedThunderStrength(0) * 2f);
     // }
 
-    public static void dropItem(ItemStack itemStack, int x, int y, int z, World world) {
+    public static void dropItem(ItemStack itemStack, BlockPos pos, World world) {
         if (itemStack == null)
             return;
         if (world.getGameRules().getBoolean("doTileDrops")) {
@@ -567,15 +567,14 @@ public class Utils {
             double var7 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             double var9 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             double var11 = (double) (world.rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-            EntityItem drop = new EntityItem(world, (double) x + var7, (double) y + var9, (double) z + var11, itemStack);
+            EntityItem drop = new EntityItem(world, (double) pos.getX() + var7, (double) pos.getY() + var9, (double) pos.getZ() + var11, itemStack);
             drop.setPickupDelay(10);
             world.spawnEntityInWorld(drop);
         }
     }
 
     public static void dropItem(ItemStack itemStack, Coordinate coordinate) {
-        dropItem(itemStack, coordinate.pos.getX(), coordinate.pos.getY(), coordinate.pos.getZ(), coordinate.world());
-
+        dropItem(itemStack, coordinate.pos, coordinate.world());
     }
 
     public static boolean tryPutStackInInventory(ItemStack stack, IInventory inventory, int start, int count) {
@@ -963,8 +962,9 @@ public class Utils {
         double d = 0;
 
         while (d < norm) {
-            if (Utils.isBlockLoaded(world, x, y, z)) {
-                Block b = Utils.getBlock(world, x, y, z);
+            if (world.isBlockLoaded(new BlockPos( x, y, z))) {
+                //ASKS FOR BLOCK ID with Utils.getBlock()
+                Block b = world.getBlockState(new BlockPos(x,y,z)).getBlock();
                 if (b != null)
                     blockList.add(b);
             }
@@ -1404,5 +1404,10 @@ public class Utils {
             Utils.println(func.getValue(x));
         }
         Utils.println("********");
+    }
+
+    public static int getMetaFromPos(World worldIn, BlockPos pos){
+        IBlockState state = worldIn.getBlockState(pos);
+        return state.getBlock().getMetaFromState(state);
     }
 }

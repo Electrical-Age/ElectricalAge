@@ -111,22 +111,23 @@ public class LightBlockEntity extends TileEntity {
 		}*/
     }
 
-    @Override
     public void updateEntity() {
         if (worldObj.isRemote) return;
-
+        BlockPos pos = this.pos;
         if (lightList.isEmpty()) {
+
             //	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
-            worldObj.setBlockToAir(new BlockPos(this.pos.getX(), this.pos.getY(), this.pos.getZ()));
+            worldObj.setBlockToAir(pos);
             //worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
             //Eln.instance.tileEntityDestructor.add(this);
-            Utils.println("Destroy light at " + this.pos.getX() + " " + this.pos.getY() + " " + this.pos.getZ() + " ");
+            Utils.println("Destroy light at " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " ");
+            //MIGHT CHANGE THE STRING LATER
             return;
         }
 
         int light = 0;
         Iterator<LightHandle> iterator = lightList.iterator();
-        
+
         while (iterator.hasNext()) {
             LightHandle l = iterator.next();
             if (light < l.value) light = l.value;

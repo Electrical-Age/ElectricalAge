@@ -1,38 +1,27 @@
 package mods.eln.misc;
 
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.renderer.RenderItem;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.client.CPacketCustomPayload;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 import mods.eln.Eln;
 import mods.eln.GuiHandler;
 import mods.eln.misc.Obj3D.Obj3DPart;
 import mods.eln.node.six.SixNodeEntity;
 import mods.eln.node.transparent.TransparentNodeEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
-import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import java.util.List;
 
@@ -74,9 +63,9 @@ public class UtilsClient {
             return;
         if (bilinear)
             enableBilinear();
-        int light = getLight(w, x, y, z) * 19 / 15 - 4;
+        int light = getLight(w,pos) * 19 / 15 - 4;
         Entity e = getClientPlayer();
-        float d = (float) (Math.abs(x - e.posX) + Math.abs(y - e.posY) + Math.abs(z - e.posZ));
+        float d = (float) (Math.abs(pos.getX() - e.posX) + Math.abs(pos.getY() - e.posY) + Math.abs(pos.getZ() - e.posZ));
 
         GL11.glColor4f(r, g, b, 1f - (light / 15f));
         halo.draw(d * 20, 1, 0, 0);
@@ -91,11 +80,11 @@ public class UtilsClient {
         clientPlayer.openGui(Eln.instance, GuiHandler.genericOpen, clientPlayer.worldObj, 0, 0, 0);
     }
 
-    public static void drawHalo(Obj3DPart halo, float r, float g, float b, World w, int x, int y, int z, boolean bilinear) {
+    public static void drawHalo(Obj3DPart halo, float r, float g, float b, World w, BlockPos pos, boolean bilinear) {
         disableLight();
         enableBlend();
 
-        UtilsClient.drawHaloNoLightSetup(halo, r, g, b, w, x, y, z, bilinear);
+        UtilsClient.drawHaloNoLightSetup(halo, r, g, b, w, pos, bilinear);
         enableLight();
         disableBlend();
     }
@@ -130,7 +119,7 @@ public class UtilsClient {
             return;
         if (bilinear)
             enableBilinear();
-        int light = getLight(e.worldObj, MathHelper.floor_double(e.posX), MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ));
+        int light = getLight(e.worldObj, new BlockPos(MathHelper.floor_double(e.posX), MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ)));
         // light =
         // e.worldObj.getLightBrightnessForSkyBlocks(MathHelper.floor_double(e.posX),
         // MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ),0);

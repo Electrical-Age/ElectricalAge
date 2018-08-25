@@ -97,37 +97,33 @@ public class NodeManager extends WorldSavedData {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
-		/*
-		 * int nodeCounter = 0; for(NodeBase node : nodesmap.values()) { try { if(node.mustBeSaved() == false) continue; NBTTagCompound nbtNode = new NBTTagCompound(); nbtNode.setString("tag", node.getNodeUuid()); node.writeToNBT(nbtNode); nbt.setTag("n" + nodeCounter++, nbtNode); } catch (Exception e) { e.printStackTrace(); }
-		 * 
-		 * }
-		 */
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+		int nodeCounter = 0; for(NodeBase node : nodesMap.values()) { try { if(node.mustBeSaved() == false) continue; NBTTagCompound nbtNode = new NBTTagCompound(); nbtNode.setString("tag", node.getNodeUuid()); node.writeToNBT(nbtNode); nbt.setTag("n" + nodeCounter++, nbtNode); } catch (Exception e) { e.printStackTrace(); }
     }
 
-    public NodeBase getNodeFromCoordinate(Coordinate nodeCoordinate) {
+    public Coordinate getNodeFromCoordinate(Coordinate coord) {
         int idx = 0;
         idx++;
         // for(Node node : nodeArray)
         {
             // if(nodeCoordinate.equals(node.coordinate)) return node;
         }
-        return nodesMap.get(nodeCoordinate);
+        return nodesMap.get(coord);
         // return null;
     }
 
-    public TransparentNodeElement getTransparentNodeFromCoordinate(Coordinate coord) {
-        NodeBase base = getNodeFromCoordinate(coord);
+    public TransparentNodeElement getTransparentNodeFromCoordinate(Coordonate coord) {
+        NodeBase base = getNodeFromCoordonate(coord);
         if (base instanceof TransparentNode) {
             TransparentNode n = (TransparentNode) base;
-            return n.element;
+            return n.element.getItemStackNBT();
         }
         return null;
     }
 
     Random rand = new Random();
 
-    public NodeBase getRandomNode() {
+    public Coordinate getRandomNode() {
         if (nodes.isEmpty()) return null;
         return nodes.get(rand.nextInt(nodes.size()));
     }
@@ -155,13 +151,12 @@ public class NodeManager extends WorldSavedData {
     }
 
     public void saveToNbt(NBTTagCompound nbt, int dim) {
-        int nodeCounter = 0;
         List<NodeBase> nodesCopy = new ArrayList<NodeBase>();
         nodesCopy.addAll(nodes);
         for (NodeBase node : nodesCopy) {
             try {
                 if (node.mustBeSaved() == false) continue;
-                if (dim != Integer.MIN_VALUE && node.coordinate.dimension != dim) continue;
+                if (dim != Integer.MIN_VALUE && node.coordinate.getDimension() != dim) continue;
                 NBTTagCompound nbtNode = new NBTTagCompound();
                 nbtNode.setString("tag", node.getNodeUuid());
                 node.writeToNBT(nbtNode);
@@ -184,7 +179,7 @@ public class NodeManager extends WorldSavedData {
         Iterator<NodeBase> i = nodes.iterator();
         while (i.hasNext()) {
             NodeBase n = i.next();
-            if (n.coordinate.dimension == dimensionId) {
+            if (n.coordinate.getDimension() == dimensionId) {
                 n.unload();
                 i.remove();
                 nodesMap.remove(n.coordinate);
