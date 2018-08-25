@@ -963,9 +963,8 @@ public class Utils {
         double d = 0;
 
         while (d < norm) {
-            if (world.isBlockLoaded(new BlockPos( x, y, z))) {
-                //ASKS FOR BLOCK ID with Utils.getBlock()
-                Block b = world.getBlockState(new BlockPos(x,y,z)).getBlock();
+            if (Utils.isBlockLoaded(world, x, y, z)) {
+                Block b = Utils.getBlock(world, x, y, z);
                 if (b != null)
                     blockList.add(b);
             }

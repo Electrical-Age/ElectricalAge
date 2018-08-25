@@ -111,6 +111,7 @@ public class LightBlockEntity extends TileEntity {
 		}*/
     }
 
+    @Override
     public void updateEntity() {
         if (worldObj.isRemote) return;
 
