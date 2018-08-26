@@ -1,24 +1,22 @@
 package mods.eln.node.transparent;
 
 import mods.eln.Eln;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlock;
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Random;
@@ -74,28 +72,28 @@ public class TransparentNodeBlock extends NodeBlock {
             }
         }
 
-        return super.removedByPlayer(world, entityPlayer, x, y, z);
+        return super.removedByPlayer(world.getBlockState(pos), world, pos, entityPlayer, true);
 
     }
 
-    @Override
-    public int getDamageValue(World world, int x, int y, int z) {
+
+    public int getDamageValue(World world, BlockPos pos) {
         if (world == null)
             return 0;
-        TileEntity tile = world.getTileEntity(x, y, z);
+        TileEntity tile = world.getTileEntity(pos);
         if (tile != null && tile instanceof TransparentNodeEntity)
-            return ((TransparentNodeEntity) world.getTileEntity(x, y, z)).getDamageValue(world, x, y, z);
+            return ((TransparentNodeEntity) world.getTileEntity(pos)).getDamageValue(world, pos.getX(), pos.getY(), pos.getZ());
         return 0;
     }
 
 
-    @Override
-    public int getLightOpacity(IBlockAccess world, int x, int y, int z) {
-        return (world.getBlockMetadata(x, y, z) & 3) << 6;
+
+    public int getLightOpacity(IBlockAccess world, BlockPos pos) {
+        return (Utils.getMetaFromPos(world, pos)) & 3) << 6;
     }
 
 
-    @Override
+
     public Item getItemDropped(int p_149650_1_, Random p_149650_2_,
                                int p_149650_3_) {
         return null;
@@ -105,10 +103,10 @@ public class TransparentNodeBlock extends NodeBlock {
         return 0;
     }
 
-    public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB par5AxisAlignedBB, List list, Entity entity) {
-        TileEntity tileEntity = world.getTileEntity(x, y, z);
+    public void addCollisionBoxesToList(World world, BlockPos pos, AxisAlignedBB par5AxisAlignedBB, List list, Entity entity) {
+        TileEntity tileEntity = world.getTileEntity(pos);
         if (tileEntity == null || (tileEntity instanceof TransparentNodeEntity == false)) {
-            super.addCollisionBoxesToList(world, x, y, z, par5AxisAlignedBB, list, entity);
+            super.addCollisionBoxToList(world.getBlockState(pos), world, pos, par5AxisAlignedBB, list, entity);
         } else {
             ((TransparentNodeEntity) tileEntity).addCollisionBoxesToList(par5AxisAlignedBB, list, null);
         }

@@ -1,15 +1,15 @@
 package mods.eln.client;
 
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import mods.eln.Eln;
 import mods.eln.misc.UtilsClient;
 import mods.eln.wiki.Root;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import org.lwjgl.input.Keyboard;
 
 import java.io.ByteArrayOutputStream;
@@ -44,7 +44,7 @@ public class ClientKeyHandler {
     @SubscribeEvent
     public void onKeyInput(KeyInputEvent event) {
         for (int i = 0; i < desc.length; ++i) {
-            boolean s = keys[i].getIsKeyPressed();
+            boolean s = keys[i].isPressed();
             if (s == false) continue;
             if (states[i])
                 setState(i, false);
@@ -56,7 +56,7 @@ public class ClientKeyHandler {
     public void tick(ClientTickEvent event) {
         if (event.phase != Phase.START) return;
         for (int i = 0; i < desc.length; ++i) {
-            boolean s = keys[i].getIsKeyPressed();
+            boolean s = keys[i].isPressed();
             if (s == false && states[i] == true) {
                 setState(i, false);
             }

@@ -6,6 +6,7 @@ import mods.eln.ghost.GhostBlock;
 import mods.eln.misc.*;
 import mods.eln.node.six.SixNode;
 import mods.eln.sim.*;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -17,10 +18,9 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.server.management.PlayerManager;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -109,7 +109,7 @@ public abstract class NodeBase {
 
             Block b = world.getBlockState(pos).getBlock();
             neighborOpaque |= 1 << direction.getInt();
-            if (isBlockWrappable(b, world, pos))
+            if (isBlockWrappable(b, world, pos)
                 neighborWrapable |= 1 << direction.getInt();
         }
     }
@@ -171,9 +171,9 @@ public abstract class NodeBase {
     }
 
     // NodeBaseTodo
-    public void onBlockPlacedBy(Coordinate coordinate, Direction front, EntityLivingBase entityLiving, ItemStack itemStack) {
+    public void onBlockPlacedBy(Coordinate coord, Direction front, EntityLivingBase entityLiving, ItemStack itemStack) {
         // this.entity = entity;
-        this.coordinate = coordinate;
+        this.coordinate = coord;
         neighborBlockRead();
         NodeManager.instance.addNode(this);
 
@@ -201,20 +201,20 @@ public abstract class NodeBase {
     }
 
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (!entityPlayer.worldObj.isRemote && entityPlayer.getCurrentEquippedItem() != null) {
-            if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+        if (!entityPlayer.worldObj.isRemote && entityPlayer.getHeldItemMainhand() != null) {
+            if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
                 String str = multiMeterString(side);
                 if (str != null)
                     Utils.addChatMessage(entityPlayer, str);
                 return true;
             }
-            if (Eln.thermometerElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+            if (Eln.thermometerElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
                 String str = thermoMeterString(side);
                 if (str != null)
                     Utils.addChatMessage(entityPlayer, str);
                 return true;
             }
-            if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+            if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getHeldItemMainhand())) {
                 String str1 = multiMeterString(side);
                 String str2 = thermoMeterString(side);
                 String str = "";
@@ -228,7 +228,8 @@ public abstract class NodeBase {
             }
         }
         if (hasGui(side)) {
-            entityPlayer.openGui(Eln.instance, GuiHandler.nodeBaseOpen + side.getInt(), coordinate.world(), coordinate.x, coordinate.y, coordinate.z);
+            BlockPos pos = coordinate.pos;
+            entityPlayer.openGui(Eln.instance, GuiHandler.nodeBaseOpen + side.getInt(), coordinate.world(), pos.getX(), pos.getY(), pos.getZ());
             return true;
         }
 
@@ -299,9 +300,10 @@ public abstract class NodeBase {
             int[] otherBlockCoord = new int[3];
             for (Direction direction : Direction.values()) {
                 if (isBlockWrappable(direction)) {
-                    emptyBlockCoord[0] = coordinate.x;
-                    emptyBlockCoord[1] = coordinate.y;
-                    emptyBlockCoord[2] = coordinate.z;
+                    BlockPos pos = coordinate.pos;
+                    emptyBlockCoord[0] = pos.getX();
+                    emptyBlockCoord[1] = pos.getY();
+                    emptyBlockCoord[2] = pos.getZ();
                     direction.applyTo(emptyBlockCoord, 1);
                     for (LRDU lrdu : LRDU.values()) {
                         Direction elementSide = direction.applyLRDU(lrdu);
@@ -309,7 +311,7 @@ public abstract class NodeBase {
                         otherBlockCoord[1] = emptyBlockCoord[1];
                         otherBlockCoord[2] = emptyBlockCoord[2];
                         elementSide.applyTo(otherBlockCoord, 1);
-                        NodeBase otherNode = NodeManager.instance.getNodeFromCoordinate(new Coordinate(otherBlockCoord[0], otherBlockCoord[1], otherBlockCoord[2], coordinate.dimension));
+                        NodeBase otherNode = NodeManager.instance.getNodeFromCoordinate(new Coordinate(otherBlockCoord[0], otherBlockCoord[1], otherBlockCoord[2], coordinate.getDimension()));
                         if (otherNode == null) continue;
                         Direction otherDirection = elementSide.getInverse();
                         LRDU otherLRDU = otherDirection.getLRDUGoingTo(direction).inverse();
@@ -457,12 +459,12 @@ public abstract class NodeBase {
     public void preparePacketForClient(DataOutputStream stream) {
         try {
             stream.writeByte(Eln.packetForClientNode);
+            BlockPos pos = coordinate.pos;
+            stream.writeInt(pos.getX());
+            stream.writeInt(pos.getY());
+            stream.writeInt(pos.getZ());
 
-            stream.writeInt(coordinate.x);
-            stream.writeInt(coordinate.y);
-            stream.writeInt(coordinate.z);
-
-            stream.writeByte(coordinate.dimension);
+            stream.writeByte(coordinate.getDimension());
 
             stream.writeUTF(getNodeUuid());
 
@@ -482,17 +484,21 @@ public abstract class NodeBase {
     }
 
     public void sendPacketToAllClient(ByteArrayOutputStream bos, double range) {
+        //TODO
+        //Find new way to get isPlayerWatchingChunk()
         //Profiler p = new Profiler();
 
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
-        for (Object obj : server.getConfigurationManager().playerEntityList) {
+        for (Object obj : server.getEntityWorld().playerEntities) {
 
             EntityPlayerMP player = (EntityPlayerMP) obj;
-            WorldServer worldServer = (WorldServer) MinecraftServer.getServer().worldServerForDimension(player.dimension);
-            PlayerManager playerManager = worldServer.getPlayerManager();
-            if (player.dimension != this.coordinate.dimension) continue;
-            if (!playerManager.isPlayerWatchingChunk(player, coordinate.x / 16, coordinate.z / 16)) continue;
+            WorldServer worldServer = (WorldServer) server.worldServerForDimension(player.dimension);
+            //TODO
+            //Find a way to see if player is watching chunk
+            //PlayerManager playerManager = worldServer.getPlayerManager();
+            if (player.dimension != this.coordinate.getDimension()) continue;
+            //if (!playerManager.isPlayerWatchingChunk(player, coordinate.pos.getX() / 16, coordinate.pos.getZ() / 16)) continue;
             if (coordinate.distanceTo(player) > range) continue;
 
             Utils.sendPacketToClient(bos, player);
@@ -508,11 +514,11 @@ public abstract class NodeBase {
         try {
 
             stream.writeByte(Eln.packetNodeSingleSerialized);
-
-            stream.writeInt(coordinate.x);
-            stream.writeInt(coordinate.y);
-            stream.writeInt(coordinate.z);
-            stream.writeByte(coordinate.dimension);
+            BlockPos pos = coordinate.pos;
+            stream.writeInt(pos.getX());
+            stream.writeInt(pos.getY());
+            stream.writeInt(pos.getZ());
+            stream.writeByte(coordinate.getDimension());
 
             stream.writeUTF(getNodeUuid());
 
@@ -528,15 +534,16 @@ public abstract class NodeBase {
     }
 
     public void publishToAllPlayer() {
+
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-
-        for (Object obj : server.getConfigurationManager().playerEntityList) {
+        for (Object obj : server.getEntityWorld().playerEntities) {
             EntityPlayerMP player = (EntityPlayerMP) obj;
-            WorldServer worldServer = (WorldServer) MinecraftServer.getServer().worldServerForDimension(player.dimension);
-            PlayerManager playerManager = worldServer.getPlayerManager();
-            if (player.dimension != this.coordinate.dimension) continue;
-            if (!playerManager.isPlayerWatchingChunk(player, coordinate.x / 16, coordinate.z / 16)) continue;
-
+            WorldServer worldServer = (WorldServer) server.worldServerForDimension(player.dimension);
+            //TODO
+            //Find a way to see if player is watching chunk
+            //PlayerManager playerManager = new PlayerManager();
+            if (player.dimension != this.coordinate.getDimension()) continue;
+            //if (!playerManager.isPlayerWatchingChunk(player, coordinate.pos.getX() / 16, coordinate.pos.getZ() / 16)) continue;
             Utils.sendPacketToClient(getPublishPacket(), player);
         }
         if (needNotify) {
@@ -552,12 +559,13 @@ public abstract class NodeBase {
 
     public void dropItem(ItemStack itemStack) {
         if (itemStack == null) return;
-        if (coordinate.world().getGameRules().getGameRuleBooleanValue("doTileDrops")) {
+        if (coordinate.world().getGameRules().getBoolean("doTileDrops")) {
             float var6 = 0.7F;
             double var7 = (double) (coordinate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             double var9 = (double) (coordinate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             double var11 = (double) (coordinate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-            EntityItem var13 = new EntityItem(coordinate.world(), (double) coordinate.x + var7, (double) coordinate.y + var9, (double) coordinate.z + var11, itemStack);
+            BlockPos pos = coordinate.pos;
+            EntityItem var13 = new EntityItem(coordinate.world(), (double) pos.getX() + var7, (double) pos.getY() + var9, (double) pos.getZ() + var11, itemStack);
             var13.delayBeforeCanPickup = 10;
             coordinate.world().spawnEntityInWorld(var13);
         }

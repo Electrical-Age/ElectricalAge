@@ -6,12 +6,9 @@ import mods.eln.misc.*;
 import mods.eln.node.transparent.TransparentNode.FrontType;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockHopper;
-import net.minecraft.block.BlockStone;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
@@ -107,41 +104,41 @@ public class TransparentNodeDescriptor extends GenericItemBlockUsingDamageDescri
         if (mustHaveFloor()) {
             Coordinate temp = new Coordinate(coord);
             temp.move(Direction.YN);
-            block = temp.getBlock();
-            if (block == null || ((!block.isOpaqueCube()) && block instanceof BlockHopper == false))
+            block = temp.getBlockState().getBlock();
+            if (block == null || ((!block.isOpaqueCube(coord.world().getBlockState(coord.pos))) && block instanceof BlockHopper))
                 return tr("You can't place this block at this side");
         }
         if (mustHaveCeiling()) {
             Coordinate temp = new Coordinate(coord);
             temp.move(Direction.YP);
-            block = temp.getBlock();
-            if (block == null || !block.isOpaqueCube()) return tr("You can't place this block at this side");
+            block = temp.getBlockState().getBlock();
+            if (block == null || !block.isOpaqueCube(coord.world().getBlockState(coord.pos))) return tr("You can't place this block at this side");
         }
         if (mustHaveWallFrontInverse()) {
             Coordinate temp = new Coordinate(coord);
             temp.move(front.getInverse());
-            block = temp.getBlock();
-            if (block == null || !block.isOpaqueCube()) return tr("You can't place this block at this side");
+            block = temp.getBlockState().getBlock();
+            if (block == null || !block.isOpaqueCube(coord.world().getBlockState(coord.pos))) return tr("You can't place this block at this side");
         }
         if (mustHaveWall()) {
             Coordinate temp;
             boolean wall = false;
             temp = new Coordinate(coord);
             temp.move(Direction.XN);
-            block = temp.getBlock();
-            if (block != null && block.isOpaqueCube()) wall = true;
+            block = temp.getBlockState().getBlock();
+            if (block != null && block.isOpaqueCube(coord.world().getBlockState(coord.pos))) wall = true;
             temp = new Coordinate(coord);
             temp.move(Direction.XP);
-            block = temp.getBlock();
-            if (block != null && block.isOpaqueCube()) wall = true;
+            block = temp.getBlockState().getBlock();
+            if (block != null && block.isOpaqueCube(coord.world().getBlockState(coord.pos))) wall = true;
             temp = new Coordinate(coord);
             temp.move(Direction.ZN);
-            block = temp.getBlock();
-            if (block != null && block.isOpaqueCube()) wall = true;
+            block = temp.getBlockState().getBlock();
+            if (block != null && block.isOpaqueCube(coord.world().getBlockState(coord.pos))) wall = true;
             temp = new Coordinate(coord);
             temp.move(Direction.ZP);
-            block = temp.getBlock();
-            if (block != null && block.isOpaqueCube()) wall = true;
+            block = temp.getBlockState().getBlock();
+            if (block != null && block.isOpaqueCube(coord.world().getBlockState(coord.pos))) wall = true;
 
             if (!wall) return tr("You can't place this block at this side");
         }

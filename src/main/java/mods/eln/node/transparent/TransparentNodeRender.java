@@ -5,7 +5,8 @@ import net.minecraft.tileentity.TileEntity;
 import org.lwjgl.opengl.GL11;
 
 public class TransparentNodeRender extends TileEntitySpecialRenderer {
-    @Override
+
+
     public void renderTileEntityAt(TileEntity entity, double x, double y,
                                    double z, float var8) {
 
