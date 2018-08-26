@@ -6,6 +6,7 @@ import mods.eln.ghost.GhostBlock;
 import mods.eln.misc.*;
 import mods.eln.node.six.SixNode;
 import mods.eln.sim.*;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -59,7 +60,7 @@ public abstract class NodeBase {
 
     public static int teststatic;
 
-    public Coordonate coordonate;
+    public Coordinate coordinate;
 
     public ArrayList<NodeConnection> nodeConnectionList = new ArrayList<NodeConnection>(4);
 
@@ -108,7 +109,7 @@ public abstract class NodeBase {
 
             Block b = world.getBlockState(pos).getBlock();
             neighborOpaque |= 1 << direction.getInt();
-            if (isBlockWrappable(b, world, coordonate.x, coordonate.y, coordonate.z))
+            if (isBlockWrappable(b, world, pos)
                 neighborWrapable |= 1 << direction.getInt();
         }
     }
@@ -146,7 +147,7 @@ public abstract class NodeBase {
     }
 
     public NodeBase() {
-        coordonate = new Coordonate();
+        coordinate = new Coordinate();
     }
 
     boolean destructed = false;
@@ -170,9 +171,9 @@ public abstract class NodeBase {
     }
 
     // NodeBaseTodo
-    public void onBlockPlacedBy(Coordonate coordonate, Direction front, EntityLivingBase entityLiving, ItemStack itemStack) {
+    public void onBlockPlacedBy(Coordinate coord, Direction front, EntityLivingBase entityLiving, ItemStack itemStack) {
         // this.entity = entity;
-        this.coordonate = coordonate;
+        this.coordinate = coord;
         neighborBlockRead();
         NodeManager.instance.addNode(this);
 
@@ -227,7 +228,8 @@ public abstract class NodeBase {
             }
         }
         if (hasGui(side)) {
-            entityPlayer.openGui(Eln.instance, GuiHandler.nodeBaseOpen + side.getInt(), coordinate.world(), coordinate.pos.getX(), coordinate.pos.getY(), coordinate.pos.getZ());
+            BlockPos pos = coordinate.pos;
+            entityPlayer.openGui(Eln.instance, GuiHandler.nodeBaseOpen + side.getInt(), coordinate.world(), pos.getX(), pos.getY(), pos.getZ());
             return true;
         }
 
@@ -298,9 +300,10 @@ public abstract class NodeBase {
             int[] otherBlockCoord = new int[3];
             for (Direction direction : Direction.values()) {
                 if (isBlockWrappable(direction)) {
-                    emptyBlockCoord[0] = coordinate.pos.getX();
-                    emptyBlockCoord[1] = coordinate.pos.getY();
-                    emptyBlockCoord[2] = coordinate.pos.getZ();
+                    BlockPos pos = coordinate.pos;
+                    emptyBlockCoord[0] = pos.getX();
+                    emptyBlockCoord[1] = pos.getY();
+                    emptyBlockCoord[2] = pos.getZ();
                     direction.applyTo(emptyBlockCoord, 1);
                     for (LRDU lrdu : LRDU.values()) {
                         Direction elementSide = direction.applyLRDU(lrdu);
@@ -456,10 +459,10 @@ public abstract class NodeBase {
     public void preparePacketForClient(DataOutputStream stream) {
         try {
             stream.writeByte(Eln.packetForClientNode);
-
-            stream.writeInt(coordinate.pos.getX());
-            stream.writeInt(coordinate.pos.getY());
-            stream.writeInt(coordinate.pos.getZ());
+            BlockPos pos = coordinate.pos;
+            stream.writeInt(pos.getX());
+            stream.writeInt(pos.getY());
+            stream.writeInt(pos.getZ());
 
             stream.writeByte(coordinate.getDimension());
 
@@ -511,10 +514,10 @@ public abstract class NodeBase {
         try {
 
             stream.writeByte(Eln.packetNodeSingleSerialized);
-
-            stream.writeInt(coordinate.pos.getX());
-            stream.writeInt(coordinate.pos.getY());
-            stream.writeInt(coordinate.pos.getZ());
+            BlockPos pos = coordinate.pos;
+            stream.writeInt(pos.getX());
+            stream.writeInt(pos.getY());
+            stream.writeInt(pos.getZ());
             stream.writeByte(coordinate.getDimension());
 
             stream.writeUTF(getNodeUuid());
@@ -561,9 +564,10 @@ public abstract class NodeBase {
             double var7 = (double) (coordinate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             double var9 = (double) (coordinate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
             double var11 = (double) (coordinate.world().rand.nextFloat() * var6) + (double) (1.0F - var6) * 0.5D;
-            EntityItem var13 = new EntityItem(coordinate.world(), (double) coordinate.pos.getX() + var7, (double) coordinate.pos.getY() + var9, (double) coordinate.pos.getZ() + var11, itemStack);
+            BlockPos pos = coordinate.pos;
+            EntityItem var13 = new EntityItem(coordinate.world(), (double) pos.getX() + var7, (double) pos.getY() + var9, (double) pos.getZ() + var11, itemStack);
             var13.delayBeforeCanPickup = 10;
-            coordonate.world().spawnEntityInWorld(var13);
+            coordinate.world().spawnEntityInWorld(var13);
         }
     }
 
