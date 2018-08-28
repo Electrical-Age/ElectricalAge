@@ -3,6 +3,7 @@ package mods.eln.node;
 import mods.eln.Eln;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -21,12 +22,12 @@ public class NodeEntityClientSender {
     public void preparePacketForServer(DataOutputStream stream) {
         try {
             stream.writeByte(Eln.packetPublishForNode);
+            BlockPos pos = e.getPos();
+            stream.writeInt(pos.getX());
+            stream.writeInt(pos.getY());
+            stream.writeInt(pos.getZ());
 
-            stream.writeInt(e.xCoord);
-            stream.writeInt(e.yCoord);
-            stream.writeInt(e.zCoord);
-
-            stream.writeByte(e.getWorldObj().provider.dimensionId);
+            stream.writeByte(e.getWorld().provider.getDimension());
 
             stream.writeUTF(nodeUuid);
 
@@ -36,6 +37,7 @@ public class NodeEntityClientSender {
             e.printStackTrace();
         }
     }
+
 
     public void sendPacketToServer(ByteArrayOutputStream bos) {
         UtilsClient.sendPacketToServer(bos);

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+//TODO: FIX ISidedInventory 1.10
 public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInventory { // boolean[] syncronizedSideEnable = new boolean[6];
     TransparentNodeElementRender elementRender = null;
     short elementRenderId;
@@ -111,7 +112,7 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
         return elementRender.cameraDrawOptimisation();
     }
 
-    public int getDamageValue(World world, int x, int y, int z) {
+    public int getDamageValue(World world, BlockPos pos) {
         if (world.isRemote) {
             return elementRenderId;
         }
@@ -225,7 +226,7 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
 
     @Override
     public String getInventoryName() {
-        return getSidedInventory().getInventoryName();
+        return getSidedInventory().getName();
     }
 
     @Override

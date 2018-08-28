@@ -9,10 +9,12 @@ import mods.eln.node.INodeEntity;
 import mods.eln.node.NodeEntityClientSender;
 import mods.eln.node.NodeManager;
 import mods.eln.server.DelayedBlockRemove;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.fml.relauncher.Side;
@@ -114,7 +116,8 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
     public void serverPublishUnserialize(DataInputStream stream) {
         try {
             if (front != (front = Direction.fromInt(stream.readByte()))) {
-                worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+                IBlockState state = this.worldObj.getBlockState(this.pos);
+                worldObj.notifyBlockUpdate(getPos(), state, state, 0);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -126,6 +129,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
     }
 
+    //TODO: FIX Packets
     @Override
     public Packet getDescriptionPacket() {
         SimpleNode node = getNode();
@@ -133,7 +137,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
             Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
             return null;
         }
-        return new S3FPacketCustomPayload(Eln.channelName, node.getPublishPacket().toByteArray());
+        return new SPacketCustomPayload(Eln.channelName, node.getPublishPacket());
     }
 
 

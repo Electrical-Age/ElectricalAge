@@ -113,13 +113,13 @@ public class LightBlockEntity extends TileEntity {
 
     public void updateEntity() {
         if (worldObj.isRemote) return;
-
+        BlockPos pos = this.pos;
         if (lightList.isEmpty()) {
             //	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
-            worldObj.setBlockToAir(new BlockPos(this.pos.getX(), this.pos.getY(), this.pos.getZ()));
+            worldObj.setBlockToAir(pos);
             //worldObj.updateLightByType(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
             //Eln.instance.tileEntityDestructor.add(this);
-            Utils.println("Destroy light at " + this.pos.getX() + " " + this.pos.getY() + " " + this.pos.getZ() + " ");
+            Utils.println("Destroy light at " + pos.getX() + " " + pos.getY() + " " + pos.getZ() + " ");
             return;
         }
 

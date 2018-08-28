@@ -10,10 +10,13 @@ import mods.eln.sim.ThermalConnection;
 import mods.eln.sim.mna.component.Component;
 import mods.eln.sim.mna.state.State;
 import mods.eln.sim.nbt.NbtThermalLoad;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -40,12 +43,14 @@ public abstract class SimpleNode extends NodeBase {
 
     public void setFront(Direction front) {
         this.front = front;
-        if (applayFrontToMetadata()) {
-            coordinate.setMetadata(front.getInt());
+        BlockPos pos = coordinate.pos;
+        World w = coordinate.world();
+        if (applyFrontToMetadata()) {
+            w.setBlockState(pos, w.getBlockState(pos).getBlock().getStateFromMeta(front.getInt()));
         }
     }
 
-    protected boolean applayFrontToMetadata() {
+    protected boolean applyFrontToMetadata() {
         return false;
     }
 

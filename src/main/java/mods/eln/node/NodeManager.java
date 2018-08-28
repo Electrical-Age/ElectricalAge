@@ -97,13 +97,21 @@ public class NodeManager extends WorldSavedData {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
-		/*
-		 * int nodeCounter = 0; for(NodeBase node : nodesmap.values()) { try { if(node.mustBeSaved() == false) continue; NBTTagCompound nbtNode = new NBTTagCompound(); nbtNode.setString("tag", node.getNodeUuid()); node.writeToNBT(nbtNode); nbt.setTag("n" + nodeCounter++, nbtNode); } catch (Exception e) { e.printStackTrace(); }
-		 * 
-		 * }
-		 */
-    }
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+        int nodeCounter = 0;
+        for(NodeBase node : nodesMap.values()) {
+            try {
+                if(!node.mustBeSaved()) {
+                    continue;
+                }
+                NBTTagCompound nbtNode = new NBTTagCompound(); nbtNode.setString("tag", node.getNodeUuid()); node.writeToNBT(nbtNode); nbt.setTag("n" + nodeCounter++, nbtNode); }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return nbt;
+     }
+
 
     public NodeBase getNodeFromCoordinate(Coordinate nodeCoordinate) {
         int idx = 0;
@@ -161,7 +169,7 @@ public class NodeManager extends WorldSavedData {
         for (NodeBase node : nodesCopy) {
             try {
                 if (node.mustBeSaved() == false) continue;
-                if (dim != Integer.MIN_VALUE && node.coordinate.dimension != dim) continue;
+                if (dim != Integer.MIN_VALUE && node.coordinate.getDimension() != dim) continue;
                 NBTTagCompound nbtNode = new NBTTagCompound();
                 nbtNode.setString("tag", node.getNodeUuid());
                 node.writeToNBT(nbtNode);
@@ -184,7 +192,7 @@ public class NodeManager extends WorldSavedData {
         Iterator<NodeBase> i = nodes.iterator();
         while (i.hasNext()) {
             NodeBase n = i.next();
-            if (n.coordinate.dimension == dimensionId) {
+            if (n.coordinate.getDimension() == dimensionId) {
                 n.unload();
                 i.remove();
                 nodesMap.remove(n.coordinate);
