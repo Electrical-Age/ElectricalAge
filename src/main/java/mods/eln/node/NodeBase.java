@@ -136,14 +136,14 @@ public abstract class NodeBase {
     }
 
     public static boolean isBlockWrappable(Block block, World w, BlockPos pos) {
+        Block[] blocks = {Blocks.AIR, Eln.sixNodeBlock, Blocks.TORCH, Blocks.REDSTONE_TORCH, Blocks.UNLIT_REDSTONE_TORCH, Blocks.REDSTONE_WIRE};
         if (block.isReplaceable(w, pos)) return true;
-        if (block == Blocks.AIR) return true;
-        if (block == Eln.sixNodeBlock) return true;
+
+        for (int i = 0; i < blocks.length; i++) {
+            if (block == blocks[i]) return true;
+        }
+
         if (block instanceof GhostBlock) return true;
-        if (block == Blocks.TORCH) return true;
-        if (block == Blocks.REDSTONE_TORCH) return true;
-        if (block == Blocks.UNLIT_REDSTONE_TORCH) return true;
-        if (block == Blocks.REDSTONE_WIRE) return true;
 
         return false;
     }
@@ -301,12 +301,12 @@ public abstract class NodeBase {
             //int[] otherBlockCoord = new int[3];
             for (Direction direction : Direction.values()) {
                 if (isBlockWrappable(direction)) {
-                    BlockPos emptyBlockCoord = coordinate.pos;
-                    direction.applyTo(new BlockPos.MutableBlockPos(emptyBlockCoord), 1);
+                    BlockPos.MutableBlockPos emptyBlockCoord = new BlockPos.MutableBlockPos(coordinate.pos);
+                    direction.applyTo(emptyBlockCoord, 1);
                     for (LRDU lrdu : LRDU.values()) {
                         Direction elementSide = direction.applyLRDU(lrdu);
-                        BlockPos otherBlockCoord = emptyBlockCoord;
-                        elementSide.applyTo(new BlockPos.MutableBlockPos(otherBlockCoord), 1);
+                        BlockPos.MutableBlockPos otherBlockCoord = new BlockPos.MutableBlockPos(emptyBlockCoord);
+                        elementSide.applyTo(otherBlockCoord, 1);
                         NodeBase otherNode = NodeManager.instance.getNodeFromCoordinate(new Coordinate(otherBlockCoord, coordinate.getDimension()));
                         if (otherNode == null) continue;
                         Direction otherDirection = elementSide.getInverse();

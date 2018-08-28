@@ -39,22 +39,21 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
             side = 1;
         } else if ((block != Blocks.VINE) && (block != Blocks.TALLGRASS) && (block != Blocks.DEADBUSH) && (!block.isReplaceable(world, pos))) {
             if (side == 0)
-                pos.add(0,-1,0);
+                pos = pos.add(0,-1,0);
             if (side == 1)
-
-            pos.add(0,1,0);
+                pos = pos.add(0,1,0);
             if (side == 2)
 
-                pos.add(0,0,-1);
+                pos = pos.add(0,0,-1);
             if (side == 3)
 
-                pos.add(0,0,1);
+                pos = pos.add(0,0,1);
             if (side == 4)
 
-                pos.add(-1,0,0);
+                pos = pos.add(-1,0,0);
             if (side == 5)
 
-                pos.add(1,0,0);
+                pos = pos.add(1,0,0);
         }
 
         if (stack.stackSize == 0)
@@ -81,18 +80,18 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 
     // func_150936_a <= canPlaceItemBlockOnSide
     @Override
-    public boolean func_150936_a(World par1World, int x, int y, int z, int par5, EntityPlayer par6EntityPlayer, ItemStack par7ItemStack) {
+    public boolean func_150936_a(World par1World, BlockPos pos, int par5, EntityPlayer par6EntityPlayer, ItemStack par7ItemStack) {
         if (!isStackValidToPlace(par7ItemStack))
             return false;
-        int[] vect = new int[]{x, y, z};
+        int[] vect = new int[]{pos.getX(), pos.getY(), pos.getZ()};
         Direction.fromIntMinecraftSide(par5).applyTo(vect, 1);
         SixNodeDescriptor descriptor = getDescriptor(par7ItemStack);
-        if (descriptor.canBePlacedOnSide(par6EntityPlayer, new Coordinate(x, y, z, par1World), Direction.fromIntMinecraftSide(par5).getInverse()) == false) {
+        if (descriptor.canBePlacedOnSide(par6EntityPlayer, new Coordinate(pos, par1World), Direction.fromIntMinecraftSide(par5).getInverse()) == false) {
             return false;
         }
-        if (par1World.getBlock(vect[0], vect[1], vect[2]) == Eln.sixNodeBlock)
+        if (par1World.getBlockState(new BlockPos(vect[0], vect[1], vect[2])).getBlock() == Eln.sixNodeBlock)
             return true;
-        if (super.func_150936_a(par1World, x, y, z, par5, par6EntityPlayer, par7ItemStack))
+        if (super.func_150936_a(par1World, pos, par5, par6EntityPlayer, par7ItemStack))
             return true;
 
         return false;

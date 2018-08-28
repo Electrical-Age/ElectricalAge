@@ -30,7 +30,7 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
         Direction front = descriptor.getFrontFromPlace(direction, player);
         int[] v = new int[]{descriptor.getSpawnDeltaX(), descriptor.getSpawnDeltaY(), descriptor.getSpawnDeltaZ()};
         front.rotateFromXN(v);
-        pos.add(v[0], v[1], v[2]);
+        pos = pos.add(v[0], v[1], v[2]);
 
         Block bb = world.getBlockState(pos).getBlock();
         if (bb.isReplaceable(world, pos)) ;

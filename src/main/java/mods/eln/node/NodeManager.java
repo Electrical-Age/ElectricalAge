@@ -83,17 +83,15 @@ public class NodeManager extends WorldSavedData {
     public void readFromNBT(NBTTagCompound nbt) {
         int i = 0;
         i++;
-        /*
-		 * for(Object o : Utils.getTags(nbt)) { NBTTagCompound tag = (NBTTagCompound) o; Class nodeClass = UUIDToClass.get(tag.getString("tag")); try { NodeBase node = (NodeBase) nodeClass.getConstructor().newInstance(); node.readFromNBT(tag); addNode(node); node.initializeFromNBT();
-		 * 
-		 * } catch (Exception e) { e.printStackTrace(); }
-		 * 
-		 * }
-		 * 
-		 * 
-		 * 
-		 * for(NodeBase node : nodes){ node.globalBoot(); }
-		 */
+		 for(Object o : Utils.getTags(nbt)) { NBTTagCompound tag = (NBTTagCompound) o; Class nodeClass = UUIDToClass.get(tag.getString("tag")); try { NodeBase node = (NodeBase) nodeClass.getConstructor().newInstance(); node.readFromNBT(tag); addNode(node); node.initializeFromNBT();
+
+		 } catch (Exception e) { e.printStackTrace(); }
+
+		 }
+
+
+
+		 for(NodeBase node : nodes){ node.globalBoot(); }
     }
 
     @Override
@@ -104,7 +102,11 @@ public class NodeManager extends WorldSavedData {
                 if(!node.mustBeSaved()) {
                     continue;
                 }
-                NBTTagCompound nbtNode = new NBTTagCompound(); nbtNode.setString("tag", node.getNodeUuid()); node.writeToNBT(nbtNode); nbt.setTag("n" + nodeCounter++, nbtNode); }
+                NBTTagCompound nbtNode = new NBTTagCompound();
+                nbtNode.setString("tag", node.getNodeUuid());
+                node.writeToNBT(nbtNode);
+                nbt.setTag("n" + nodeCounter++, nbtNode);
+            }
             catch (Exception e) {
                 e.printStackTrace();
             }
