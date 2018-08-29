@@ -1412,4 +1412,9 @@ public class Utils {
         return state.getBlock().getMetaFromState(state);
     }
 
+    public static int getMetaFromPos(Coordinate coord){
+        IBlockState state = coord.world().getBlockState(coord.pos);
+        return state.getBlock().getMetaFromState(state);
+    }
+
 }
