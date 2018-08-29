@@ -37,7 +37,7 @@ public class SixNode extends Node {
     public ArrayList<ElectricalConnection> internalElectricalConnectionList = new ArrayList<ElectricalConnection>(1);
     public ArrayList<ThermalConnection> internalThermalConnectionList = new ArrayList<ThermalConnection>(1);
 
-    public Block sixNodeCacheBlock = Blocks.air;
+    public Block sixNodeCacheBlock = Blocks.AIR;
     public byte sixNodeCacheBlockMeta = 0;
     //public int sixNodeCacheMapId = -1;
 
@@ -485,13 +485,13 @@ public class SixNode extends Node {
     }
 
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (sixNodeCacheBlock != Blocks.air) {
+        if (sixNodeCacheBlock != Blocks.AIR) {
             return false;
         } else {
 
-            ItemStack stack = entityPlayer.getCurrentEquippedItem();
+            ItemStack stack = entityPlayer.getHeldItemMainhand();
 
-            Block b = Blocks.air;
+            Block b = Blocks.AIR;
             if (stack != null)
                 b = Block.getBlockFromItem(stack.getItem());
 

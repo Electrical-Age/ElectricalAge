@@ -16,7 +16,7 @@ public class ElnForgeEventsHandler {
     @SideOnly(Side.CLIENT)
     @SuppressWarnings("unused")
     public void openGuide(GuiOpenEvent e) {
-        if (e.gui instanceof Root) {
+        if (e.getGui() instanceof Root) {
             Eln.elnNetwork.sendToServer(p);
         }
     }

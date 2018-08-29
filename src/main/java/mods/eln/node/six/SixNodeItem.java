@@ -111,7 +111,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
         Direction direction = Direction.fromIntMinecraftSide(side).getInverse();
         Block blockOld = world.getBlockState(pos).getBlock();
         SixNodeBlock block = (SixNodeBlock) Block.getBlockFromItem(this);
-        if (blockOld == Blocks.AIR || blockOld.isReplaceable(world, pos)) {
+        if (world.isAirBlock(pos) || blockOld.isReplaceable(world, pos)) {
             // blockID = this.getBlockID();
 
             Coordinate coord = new Coordinate(pos, world);

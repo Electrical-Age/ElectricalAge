@@ -25,7 +25,7 @@ public class SixNodeEntity extends NodeBlockEntity {
     public SixNodeElementRender[] elementRenderList = new SixNodeElementRender[6];
     short[] elementRenderIdList = new short[6];
 
-    public Block sixNodeCacheBlock = Blocks.air;
+    public Block sixNodeCacheBlock = Blocks.AIR;
     public byte sixNodeCacheBlockMeta = 0;
 
     public SixNodeEntity() {

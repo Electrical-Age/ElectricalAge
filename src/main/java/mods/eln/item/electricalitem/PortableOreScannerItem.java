@@ -18,6 +18,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -554,7 +555,7 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
                             int zBlock = posZint + (int) zFloor;
                             blockKey = 0;
                             if (yBlock >= 0 && yBlock < 256) {
-                                Chunk chunk = w.getChunkFromBlockCoords(xBlock, zBlock);
+                                Chunk chunk = w.getChunkFromBlockCoords(new BlockPos(xBlock, yBlock, zBlock));
                                 if (chunk != null) {
                                     ExtendedBlockStorage storage = chunk.getBlockStorageArray()[yBlock >> 4];
                                     if (storage != null) {
@@ -586,8 +587,8 @@ public class PortableOreScannerItem extends GenericItemUsingDamageDescriptor imp
 
                         stackGreen += blockKeyFactor[blockKey] * dToStack;
                         Block b = Block.getBlockById(blockKey & 0xFFF);
-                        if (b != Blocks.air && b != Eln.lightBlock) {
-                            if (b.isOpaqueCube())
+                        if (b != Blocks.AIR && b != Eln.lightBlock) {
+                            if (b.isOpaqueCube(b.getDefaultState()))
                                 stackRed += 0.2f * dToStack;
                             else
                                 stackRed += 0.1f * dToStack;

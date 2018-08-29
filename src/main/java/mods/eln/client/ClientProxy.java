@@ -22,6 +22,7 @@ public class ClientProxy extends CommonProxy {
     public static UuidManager uuidManager;
     public static SoundClientEventListener soundClientEventListener;
 
+    //TODO: FIX ITEM RENDERING 1.10
     @Override
     public void registerRenderers() {
         new ClientPacketHandler();

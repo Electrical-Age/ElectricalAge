@@ -33,7 +33,7 @@ public class genericArmorItem extends ItemArmor {
 
     @Override
     public String getArmorTexture(ItemStack stack, Entity entity, int slot, String layer) {
-        if (this.armorType == 2) {
+        if (this.armorType.getIndex() == 2) {
             return t2;
         } else {
             return t1;

@@ -7,6 +7,7 @@ import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.simplenode.energyconverter.EnergyConverterElnToOtherNode;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.math.BlockPos;
 
 public class WorldExplosion implements IDestructable {
 
@@ -53,9 +54,9 @@ public class WorldExplosion implements IDestructable {
         //NodeManager.instance.removeNode(NodeManager.instance.getNodeFromCoordonate(c));
 
         if (Eln.instance.explosionEnable)
-            c.world().createExplosion((Entity) null, c.x, c.y, c.z, strength, true);
+            c.world().createExplosion((Entity) null, c.pos.getX(), c.pos.getY(), c.pos.getZ(), strength, true);
         else
-            c.world().setBlock(c.x, c.y, c.z, Blocks.air);
+            c.world().setBlockToAir(new BlockPos(c.pos.getX(), c.pos.getY(), c.pos.getZ()));
     }
 
     @Override

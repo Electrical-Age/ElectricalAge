@@ -132,7 +132,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                     if (!exit) {
                         Block b = c.getBlockState().getBlock();
 
-                        if (b != Blocks.AIR) {
+                        if (c.isAir()) {
                             b.updateTick(c.world(), new BlockPos(c.pos.getX(), c.pos.getY(), c.pos.getZ()), c.getBlockState(), new Random());
                         }
                     }
@@ -304,7 +304,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
             int count = 0;
             while (!newCoord.equals(myCoord())) {
                 Block block = newCoord.getBlockState().getBlock();
-                if (block == Blocks.AIR || block == Eln.lightBlock) {
+                if (newCoord.world().isAirBlock(newCoord.pos) || block == Eln.lightBlock) {
                     count++;
                     if (count == 2)
                         break;
@@ -319,7 +319,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 
     public boolean isOpaque(Coordinate coord) {
         Block block = coord.getBlockState().getBlock();
-        boolean isNotOpaque = block == Blocks.AIR || !block.isOpaqueCube(block.getBlockState().getBaseState());
+        boolean isNotOpaque = coord.world().isAirBlock(coord.pos)|| !block.isOpaqueCube(block.getBlockState().getBaseState());
         if (block == Blocks.FARMLAND)
 
             isNotOpaque = false;

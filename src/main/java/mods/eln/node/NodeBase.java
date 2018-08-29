@@ -136,9 +136,13 @@ public abstract class NodeBase {
     }
 
     public static boolean isBlockWrappable(Block block, World w, BlockPos pos) {
-        Block[] blocks = {Blocks.AIR, Eln.sixNodeBlock, Blocks.TORCH, Blocks.REDSTONE_TORCH, Blocks.UNLIT_REDSTONE_TORCH, Blocks.REDSTONE_WIRE};
+        Block[] blocks = {Eln.sixNodeBlock,
+            Blocks.TORCH,
+            Blocks.REDSTONE_TORCH,
+            Blocks.UNLIT_REDSTONE_TORCH,
+            Blocks.REDSTONE_WIRE};
         if (block.isReplaceable(w, pos)) return true;
-
+        if (w.isAirBlock(pos)) return true;
         for (int i = 0; i < blocks.length; i++) {
             if (block == blocks[i]) return true;
         }

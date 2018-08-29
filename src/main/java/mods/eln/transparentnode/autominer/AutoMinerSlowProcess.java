@@ -17,6 +17,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.List;
 
@@ -223,10 +224,10 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     }
 
     private boolean isMinable(Block block) {
-        return block != Blocks.air
-            && (block) != Blocks.flowing_water && (block) != Blocks.water
-            && (block) != Blocks.flowing_lava && (block) != Blocks.lava
-            && (block) != Blocks.obsidian && (block) != Blocks.bedrock;
+        return block != Blocks.AIR
+            && (block) != Blocks.FLOWING_WATER && (block) != Blocks.WATER
+            && (block) != Blocks.FLOWING_LAVA && (block) != Blocks.LAVA
+            && (block) != Blocks.OBSIDIAN && (block) != Blocks.BEDROCK;
     }
 
     private void setupJob() {
@@ -237,10 +238,8 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         int scannerRadius = Eln.instance.autominerRange;
         double scannerEnergy = 0;
 
-        jobCoord.dimension = miner.node.coordinate.dimension;
-        jobCoord.x = miner.node.coordinate.x;
-        jobCoord.y = miner.node.coordinate.y - pipeLength;
-        jobCoord.z = miner.node.coordinate.z;
+        jobCoord.setDimension(miner.node.coordinate.getDimension());
+        jobCoord.setPosition(new Vec3d(miner.node.coordinate.pos.getX(), miner.node.coordinate.pos.getY() - pipeLength, miner.node.coordinate.pos.getZ()));
 
         boolean jobFind = false;
         if (!miner.node.coordinate.doesBlockExist()) {
@@ -248,7 +247,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         } else if (!miner.powerOk) {
             setJob(jobType.none);
         } else if (drill == null) {
-            if (jobCoord.y != miner.node.coordinate.y) {
+            if (jobCoord.pos.getY() != miner.node.coordinate.pos.getY()) {
                 ItemStack pipeStack = miner.getInventory().getStackInSlot(AutoMinerContainer.MiningPipeSlotId);
                 if (pipeStack == null || (pipeStack.stackSize != pipeStack.getMaxStackSize() && pipeStack.stackSize != miner.getInventory().getInventoryStackLimit())) {
                     jobFind = true;

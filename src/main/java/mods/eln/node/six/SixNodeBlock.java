@@ -209,7 +209,7 @@ public class SixNodeBlock extends NodeBlock {
 
         SixNode sixNode = (SixNode) tileEntity.getNode();
         if (sixNode == null) return true;
-        if (sixNode.sixNodeCacheBlock != Blocks.AIR) {
+        if (sixNode.sixNodeCacheBlock.isAir(world.getBlockState(pos), world, pos)) {
 
             if (!(Utils.isCreative((EntityPlayerMP) entityPlayer))) {
                 ItemStack stack = new ItemStack(sixNode.sixNodeCacheBlock, 1, sixNode.sixNodeCacheBlockMeta);
