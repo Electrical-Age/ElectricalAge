@@ -93,7 +93,8 @@ public class NodeManager extends WorldSavedData {
 
 		 for(NodeBase node : nodes){ node.globalBoot(); }
     }
-
+    
+    /*
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         int nodeCounter = 0;
@@ -113,6 +114,7 @@ public class NodeManager extends WorldSavedData {
         }
         return nbt;
      }
+     */
 
 
     public NodeBase getNodeFromCoordinate(Coordinate nodeCoordinate) {
