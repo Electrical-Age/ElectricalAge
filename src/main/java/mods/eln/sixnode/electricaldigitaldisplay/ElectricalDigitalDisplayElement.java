@@ -1,5 +1,8 @@
 package mods.eln.sixnode.electricaldigitaldisplay;
 
+import mods.eln.generic.GenericItemUsingDamage;
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
+import mods.eln.item.BrushDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -10,6 +13,9 @@ import mods.eln.node.six.SixNodeElement;
 import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nullable;
@@ -31,6 +37,7 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement {
     public float max = 1000.0f;
     public float strobe = 0.0f;
     public float strobeLast = 0.0f;
+    public int dye = 5;
 
     public ElectricalDigitalDisplayElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         super(sixNode, side, descriptor);
@@ -69,7 +76,8 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement {
 
     @Override
     public int getConnectionMask(LRDU lrdu) {
-        if(lrdu == front.inverse() || lrdu == front) return NodeBase.maskElectricalInputGate;
+        if(lrdu == front.inverse()) return NodeBase.maskElectricalInputGate;
+        if(lrdu == front) return NodeBase.maskElectricalInputGate | (1 << NodeBase.maskColorShift);
         return 0;
     }
 
@@ -104,9 +112,28 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement {
             stream.writeFloat(min);
             stream.writeFloat(max);
             stream.writeBoolean(strobe >= 0.5);
+            stream.writeByte(dye);
         } catch(IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        ItemStack stack = entityPlayer.getCurrentEquippedItem();
+        if(stack != null) {
+            GenericItemUsingDamageDescriptor desc = BrushDescriptor.getDescriptor(stack);
+            if(desc != null && desc instanceof BrushDescriptor) {
+                BrushDescriptor brush = (BrushDescriptor) desc;
+                int color = brush.getColor(stack);
+                if(color != dye && brush.use(stack, entityPlayer)) {
+                    dye = color;
+                    needPublish();
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -116,6 +143,7 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement {
         nbt.setFloat("current", current);
         nbt.setFloat("min", min);
         nbt.setFloat("max", max);
+        nbt.setByte("dye", (byte) dye);
     }
 
     @Override
@@ -125,6 +153,7 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement {
         current = nbt.getFloat("current");
         min = nbt.getFloat("min");
         max = nbt.getFloat("max");
+        dye = nbt.getByte("dye");
     }
 
     @Nullable

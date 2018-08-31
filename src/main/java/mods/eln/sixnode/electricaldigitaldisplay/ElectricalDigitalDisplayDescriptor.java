@@ -42,7 +42,9 @@ public class ElectricalDigitalDisplayDescriptor extends SixNodeDescriptor {
         list.add(tr("Displays signal value."));
     }
 
-    void draw(int value, boolean strobe, Style style) {
+    void draw(int value, boolean strobe, Style style) { draw(value, strobe, style, 0); }
+
+    void draw(int value, boolean strobe, Style style, int dye) {
         if(value < 0) value = 0;
         if(value > 9999) value = 9999;
 
@@ -64,10 +66,11 @@ public class ElectricalDigitalDisplayDescriptor extends SixNodeDescriptor {
             divisor *= 10;
         }
 
-        GL11.glColor3f(1.0f, 1.0f, 1.0f);
+        Utils.setGlColorFromDye(dye);
         UtilsClient.enableLight();
         base.draw();
 
+        GL11.glColor3f(1.0f, 1.0f, 1.0f);
         UtilsClient.enableBlend();
         obj.bindTexture("Reflection.png");
         EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
