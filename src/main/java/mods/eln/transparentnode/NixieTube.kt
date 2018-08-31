@@ -1,7 +1,9 @@
 package mods.eln.transparentnode
 
 import mods.eln.Eln
+import mods.eln.cable.CableRender
 import mods.eln.cable.CableRenderDescriptor
+import mods.eln.cable.CableRenderType
 import mods.eln.i18n.I18N.tr
 import mods.eln.misc.*
 import mods.eln.node.NodeBase
@@ -10,6 +12,7 @@ import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateInput
+import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import org.lwjgl.opengl.GL11
@@ -53,6 +56,10 @@ class NixieTubeDescriptor(val name: String, val obj: Obj3D) : TransparentNodeDes
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f)
         tube.draw()
         UtilsClient.disableBlend()
+    }
+
+    override fun getFrontFromPlace(side: Direction?, entityLiving: EntityLivingBase?): Direction {
+        return super.getFrontFromPlace(side, entityLiving).inverse
     }
 }
 
@@ -135,10 +142,30 @@ class NixieTubeRender(entity: TransparentNodeEntity, _descriptor: TransparentNod
     var digit = 0
     var blank = false
 
+    var connType: CableRenderType? = null
+
     override fun draw() {
         preserveMatrix {
             front.glRotateXnRef()
             descriptor.draw(digit, blank)
+        }
+
+        preserveMatrix {
+            if (connType == null) {
+                val mask = LRDUMask(15)
+                connType = CableRender.connectionType(tileEntity, mask, front.down())
+            }
+
+            glCableTransforme(front.down())
+            for (lrdu in LRDU.values()) {
+                val render = getCableRender(front.down(), lrdu)
+                if(render != null) {
+                    render.bindCableTexture()
+                    Utils.setGlColorFromDye(connType!!.otherdry[lrdu.toInt()])
+                    val mask = LRDUMask(1.shl(lrdu.ordinal))
+                    CableRender.drawCable(render, mask, connType)
+                }
+            }
         }
     }
 
@@ -151,6 +178,7 @@ class NixieTubeRender(entity: TransparentNodeEntity, _descriptor: TransparentNod
         } catch(e: IOException) {
             e.printStackTrace()
         }
+        connType = null  // Force refresh
     }
 
     override fun getCableRender(side: Direction?, lrdu: LRDU?): CableRenderDescriptor? {
