@@ -187,6 +187,7 @@ MultiMeter.name=Multimeter
 NAND_Chip.name=NAND Chip
 NOR_Chip.name=NOR Chip
 NOT_Chip.name=NOT Chip
+Nixie_Tube.name=Nixie Tube
 Nuclear_Alarm.name=Nuclear Alarm
 OR_Chip.name=OR Chip
 On_OFF_Regulator_10_Percent.name=On/off regulator 10%

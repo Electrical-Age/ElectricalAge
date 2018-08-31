@@ -45,6 +45,7 @@ class NixieTubeDescriptor(val name: String, val obj: Obj3D) : TransparentNodeDes
         UtilsClient.disableLight()
         UtilsClient.disableCulling()
         obj.bindTexture("digit_atlas.png")
+        GL11.glColor4f(1f, 0.4f, 0.2f, 1.0f)
         if(blank) {
             display.draw(10.0f / 16.0f, 0.0f)
         } else {
@@ -142,7 +143,7 @@ class NixieTubeRender(entity: TransparentNodeEntity, _descriptor: TransparentNod
     var digit = 0
     var blank = false
 
-    var connType: CableRenderType? = null
+    var connTypes: Array<CableRenderType?>? = null
 
     override fun draw() {
         preserveMatrix {
@@ -151,19 +152,19 @@ class NixieTubeRender(entity: TransparentNodeEntity, _descriptor: TransparentNod
         }
 
         preserveMatrix {
-            if (connType == null) {
-                val mask = LRDUMask(15)
-                connType = CableRender.connectionType(tileEntity, mask, front.down())
-            }
+            if (connTypes == null) {
+                glCableTransforme(front.down())
+                connTypes = arrayOfNulls(4)
 
-            glCableTransforme(front.down())
-            for (lrdu in LRDU.values()) {
-                val render = getCableRender(front.down(), lrdu)
-                if(render != null) {
-                    render.bindCableTexture()
-                    Utils.setGlColorFromDye(connType!!.otherdry[lrdu.toInt()])
-                    val mask = LRDUMask(1.shl(lrdu.ordinal))
-                    CableRender.drawCable(render, mask, connType)
+                for (lrdu in LRDU.values()) {
+                    connTypes!!.set(lrdu.ordinal, CableRender.connectionType(tileEntity, LRDUMask(1.shl(lrdu.ordinal)), front.down()))
+                    val render = getCableRender(front.down(), lrdu)
+                    if (render != null) {
+                        render.bindCableTexture()
+                        Utils.setGlColorFromDye(connTypes!!.get(lrdu.ordinal)!!.otherdry[lrdu.toInt()])
+                        val mask = LRDUMask(1.shl(lrdu.ordinal))
+                        CableRender.drawCable(render, mask, connTypes!!.get(lrdu.ordinal))
+                    }
                 }
             }
         }
@@ -178,12 +179,10 @@ class NixieTubeRender(entity: TransparentNodeEntity, _descriptor: TransparentNod
         } catch(e: IOException) {
             e.printStackTrace()
         }
-        connType = null  // Force refresh
+        connTypes = null  // Force refresh
     }
 
     override fun getCableRender(side: Direction?, lrdu: LRDU?): CableRenderDescriptor? {
-        if(lrdu != LRDU.Down) return null
-        if(side == front || side == front.inverse) return Eln.instance.stdCableRenderSignal
-        return null
+        return Eln.instance.stdCableRenderSignal
     }
 }
