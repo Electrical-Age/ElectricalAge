@@ -1,5 +1,6 @@
 package mods.eln;
 
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.IGuiHandler;
 import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;

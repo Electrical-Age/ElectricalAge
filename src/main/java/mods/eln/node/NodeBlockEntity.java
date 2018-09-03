@@ -12,8 +12,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -136,8 +138,8 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     /**
      * Writes a tile entity to NBT.
      */
-    public void writeToNBT(NBTTagCompound nbt) {
-        super.writeToNBT(nbt);
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+        return super.writeToNBT(nbt);
     }
 
 
@@ -155,29 +157,20 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
 
 
     @Override
-    public boolean canUpdate() {
-
-        return true;
-    }
-
-    boolean updateEntityFirst = true;
-
-    @Override
-    public void updateEntity() {
-        if (updateEntityFirst) {
-            updateEntityFirst = false;
-            if (!worldObj.isRemote) {
-                // worldObj.setBlock(xCoord, yCoord, zCoord, 0);
-            } else {
-                clientList.add(this);
-            }
+    public void onLoad()
+    {
+        if (!worldObj.isRemote) {
+            // worldObj.setBlock(xCoord, yCoord, zCoord, 0);
+        } else {
+            clientList.add(this);
         }
     }
 
 
+
     public void onBlockAdded() {
         if (!worldObj.isRemote && getNode() == null) {
-            worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+            worldObj.setBlockToAir(pos);
         }
     }
 
@@ -236,21 +229,21 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         }
         if (this.worldObj == null) return null;
         if (node == null) {
-            NodeBase nodeFromCoordonate = NodeManager.instance.getNodeFromCoordinate(new Coordinate(xCoord, yCoord, zCoord, worldObj));
-            if (nodeFromCoordonate instanceof Node) {
-                node = (Node) nodeFromCoordonate;
+            NodeBase nodeFromCoordinate = NodeManager.instance.getNodeFromCoordinate(new Coordinate(pos, worldObj));
+            if (nodeFromCoordinate instanceof Node) {
+                node = (Node) nodeFromCoordinate;
             } else {
-                Utils.println("ASSERT WRONG TYPE public Node getNode " + new Coordinate(xCoord, yCoord, zCoord, worldObj));
+                Utils.println("ASSERT WRONG TYPE public Node getNode " + new Coordinate(pos, worldObj));
             }
-            if (node == null) DelayedBlockRemove.add(new Coordinate(xCoord, yCoord, zCoord, this.worldObj));
+            if (node == null) DelayedBlockRemove.add(new Coordinate(pos, this.worldObj));
         }
         return node;
     }
 
 
-    public static NodeBlockEntity getEntity(int x, int y, int z) {
+    public static NodeBlockEntity getEntity(BlockPos pos) {
         TileEntity entity;
-        if ((entity = Minecraft.getMinecraft().theWorld.getTileEntity(x, y, z)) != null) {
+        if ((entity = Minecraft.getMinecraft().theWorld.getTileEntity(pos)) != null) {
             if (entity instanceof NodeBlockEntity) {
                 return (NodeBlockEntity) entity;
             }
@@ -258,7 +251,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         return null;
     }
 
-
+    //TODO: FIX PACKETS
     @Override
     public Packet getDescriptionPacket() {
         Node node = getNode(); //TO DO NULL POINTER
@@ -266,7 +259,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
             Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
             return null;
         }
-        return new S3FPacketCustomPayload(Eln.channelName, node.getPublishPacket().toByteArray());
+        return new SPacketCustomPayload(Eln.channelName, node.getPublishPacket().toByteArray());
         //return null;
     }
 
@@ -275,11 +268,11 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         try {
             stream.writeByte(Eln.packetPublishForNode);
 
-            stream.writeInt(xCoord);
-            stream.writeInt(yCoord);
-            stream.writeInt(zCoord);
+            stream.writeInt(pos.getX());
+            stream.writeInt(pos.getY());
+            stream.writeInt(pos.getZ());
 
-            stream.writeByte(worldObj.provider.dimensionId);
+            stream.writeByte(worldObj.provider.getDimension());
 
             stream.writeUTF(getNodeUuid());
 

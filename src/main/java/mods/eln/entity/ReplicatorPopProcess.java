@@ -45,9 +45,12 @@ public class ReplicatorPopProcess implements IProcess {
                     x = (int) (player.posX + Utils.rand(-100, 100));
                     z = (int) (player.posZ + Utils.rand(-100, 100));
                     y = 2;
-                    BlockPos pos = new BlockPos(x,y,z)
+                    BlockPos pos = new BlockPos(x,y,z);
                     Utils.println("POP");
 
+                    //TODO: Fix blockExists()
+                    //Only solution I found was canPlaceBlockAt() but its not what we want
+                    //Maybe its not needed anymore?
                     if (world.blockExists(pos) == false) break;
 
                     while (world.isAirBlock(pos) || Utils.getLight(world, EnumSkyBlock.BLOCK, pos) > 6) {
