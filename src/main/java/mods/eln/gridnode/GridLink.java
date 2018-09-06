@@ -72,7 +72,7 @@ public class GridLink implements INBTTReady {
 
         // Makin' a Link. Where'd Zelda go?
         GridLink link = new GridLink(
-            a.coordonate(), b.coordonate(), as, bs, cable.newItemStack(cableLength),
+            a.coordinate(), b.coordinate(), as, bs, cable.newItemStack(cableLength),
             cable.electricalRs * cableLength);
         link.connect();
 
@@ -153,11 +153,11 @@ public class GridLink implements INBTTReady {
     }
 
     private boolean links(GridElement a, GridElement b) {
-        if (this.a.equals(a.coordonate())) {
-            return this.b.equals(b.coordonate());
+        if (this.a.equals(a.coordinate())) {
+            return this.b.equals(b.coordinate());
         }
-        if (this.a.equals(b.coordonate())) {
-            return this.b.equals(a.coordonate());
+        if (this.a.equals(b.coordinate())) {
+            return this.b.equals(a.coordinate());
         }
         return false;
     }
@@ -173,13 +173,13 @@ public class GridLink implements INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         a.writeToNBT(nbt, str + "a");
         b.writeToNBT(nbt, str + "b");
         as.writeToNBT(nbt, str + "as");
         bs.writeToNBT(nbt, str + "bs");
         nbt.setDouble(str + "rs", rs);
-        cable.writeToNBT(nbt);
+        return cable.writeToNBT(nbt);
     }
 
     public void selfDestroy() {

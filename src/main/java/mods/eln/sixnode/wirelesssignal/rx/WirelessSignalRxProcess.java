@@ -32,7 +32,7 @@ public class WirelessSignalRxProcess implements IProcess, INBTTReady {
         if (sleepTimer < 0) {
             sleepTimer += Utils.rand(1.2, 2);
 
-            IWirelessSignalSpot spot = WirelessUtils.buildSpot(rx.getCoordonate(), rx.channel, 0);
+            IWirelessSignalSpot spot = WirelessUtils.buildSpot(rx.getCoordinate(), rx.channel, 0);
             WirelessUtils.getTx(spot, txSet, txStrength);
         }
 
@@ -53,6 +53,7 @@ public class WirelessSignalRxProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
+        return nbt;
     }
 }

@@ -6,7 +6,7 @@ import net.minecraft.entity.player.EntityPlayer;
 
 public interface GhostObserver {
 
-    public abstract Coordinate getGhostObserverCoordonate();
+    public abstract Coordinate getGhostObserverCoordinate();
 
     public abstract void ghostDestroyed(int UUID);
 

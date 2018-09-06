@@ -383,7 +383,7 @@ public class Utils {
         }
     }
 
-    public static void writeToNBT(NBTTagCompound nbt, String str, IInventory inventory) {
+    public static NBTTagCompound writeToNBT(NBTTagCompound nbt, String str, IInventory inventory) {
         NBTTagList var2 = new NBTTagList();
 
         for (int var3 = 0; var3 < inventory.getSizeInventory(); ++var3) {
@@ -396,6 +396,7 @@ public class Utils {
         }
 
         nbt.setTag(str, var2);
+        return nbt;
     }
 
     public static void sendPacketToClient(ByteArrayOutputStream bos, EntityPlayerMP player) {

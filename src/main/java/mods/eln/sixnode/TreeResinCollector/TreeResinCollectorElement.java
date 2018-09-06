@@ -176,7 +176,7 @@ public class TreeResinCollectorElement extends SixNodeElement {
     public void networkSerialize(DataOutputStream stream) {
         super.networkSerialize(stream);
         try {
-            if (getCoordonate().doesBlockExist())
+            if (getCoordinate().doesBlockExist())
                 stream.writeFloat((float) getProduct(getProductPerSecond()));
             else
                 stream.writeFloat(0);

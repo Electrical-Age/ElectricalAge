@@ -108,7 +108,7 @@ public class ReplicatorCableAI extends EntityAIBase implements ITimeRemoverObser
         double distance = cableCoordinate.distanceTo(entity);
 
         if (distance > 2 && (entity.getNavigator().getPath() == null || entity.getNavigator().getPath().isFinished())) {
-            this.entity.getNavigator().tryMoveToXYZ(cableCoordinate.x, cableCoordinate.y, cableCoordinate.z, 1);
+            this.entity.getNavigator().tryMoveToXYZ(cableCoordinate.pos.getX(), cableCoordinate.pos.getY(), cableCoordinate.pos.getZ(), 1);
         }
         if (distance < 2) {
             //Utils.println("replicator on cable !");

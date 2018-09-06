@@ -89,7 +89,7 @@ public class WaterTurbineElement extends TransparentNodeElement {
     public void initialize() {
 
         setPhysicalValue();
-        waterCoord = descriptor.getWaterCoordonate(node.coordinate.world());
+        waterCoord = descriptor.getWaterCoordinate(node.coordinate.world());
         waterCoord.applyTransformation(front, node.coordinate);
         powerSource.setUmax(descriptor.maxVoltage);
         powerSource.setImax(descriptor.nominalPower * 5 / descriptor.maxVoltage);

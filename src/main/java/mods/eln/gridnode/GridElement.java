@@ -45,7 +45,7 @@ abstract public class GridElement extends TransparentNodeElement {
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         // Check if user is holding an appropriate tool.
-        final ItemStack stack = entityPlayer.getCurrentEquippedItem();
+        final ItemStack stack = entityPlayer.getHeldItemMainhand();
         final GenericItemBlockUsingDamageDescriptor itemDesc = GenericItemBlockUsingDamageDescriptor.getDescriptor(stack);
         if (itemDesc instanceof ElectricalCableDescriptor) {
             return onTryGridConnect(entityPlayer, stack, (ElectricalCableDescriptor) itemDesc, side);
@@ -69,9 +69,9 @@ abstract public class GridElement extends TransparentNodeElement {
         }
         if (other == null || other == this) {
             Utils.addChatMessage(entityPlayer, "Setting starting point");
-            pending.put(uuid, Pair.of(this.coordonate(), side));
+            pending.put(uuid, Pair.of(this.coordinate(), side));
         } else {
-            final double distance = other.coordonate().trueDistanceTo(this.coordonate());
+            final double distance = other.coordinate().trueDistanceTo(this.coordinate());
             final int cableLength = (int) Math.ceil(distance);
             final int range = Math.min(connectRange, other.connectRange);
             if (stack.stackSize < distance) {
@@ -212,7 +212,7 @@ abstract public class GridElement extends TransparentNodeElement {
             for (GridLink link : gridLinkList) {
                 Coordinate vec = link.a.subtract(link.b);
                 // Angles 180 degrees apart are equivalent.
-                if (vec.z < 0)
+                if (vec.pos.getZ() < 0)
                     vec = vec.negate();
                 double h = Math.sqrt(vec.x * vec.x + vec.z * vec.z);
                 angles[i++] = Math.acos(vec.x / h);
@@ -246,7 +246,7 @@ abstract public class GridElement extends TransparentNodeElement {
             // Check for which ones it's this one.
             ArrayList<GridLink> ourLinks = new ArrayList<GridLink>();
             for (GridLink link : gridLinkList) {
-                if (link.a.equals(coordonate())/* && link.connected*/) {
+                if (link.a.equals(coordinate())/* && link.connected*/) {
                     ourLinks.add(link);
                 }
             }

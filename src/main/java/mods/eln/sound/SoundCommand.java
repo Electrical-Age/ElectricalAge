@@ -2,6 +2,7 @@ package mods.eln.sound;
 
 import mods.eln.misc.Coordinate;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.io.DataInputStream;
@@ -72,16 +73,18 @@ public class SoundCommand {
 
     public void set(Coordinate c) {
         world = c.world();
-        x = c.x + 0.5;
-        y = c.y + 0.5;
-        z = c.z + 0.5;
+        BlockPos pos = c.pos;
+        x = pos.getX() + 0.5;
+        y = pos.getY() + 0.5;
+        z = pos.getZ() + 0.5;
     }
 
     public SoundCommand set(TileEntity c) {
-        world = c.getWorldObj();
-        x = c.xCoord + 0.5;
-        y = c.yCoord + 0.5;
-        z = c.zCoord + 0.5;
+        world = c.getWorld();
+        BlockPos pos = c.getPos();
+        x = pos.getX() + 0.5;
+        y = pos.getY() + 0.5;
+        z = pos.getZ() + 0.5;
         //mediumRange();
         return this;
     }

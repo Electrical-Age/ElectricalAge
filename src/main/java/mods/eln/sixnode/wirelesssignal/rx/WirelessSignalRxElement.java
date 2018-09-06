@@ -128,7 +128,7 @@ public class WirelessSignalRxElement extends SixNodeElement {
     }
 
     @Override
-    public Coordinate getCoordonate() {
+    public Coordinate getCoordinate() {
         return sixNode.coordinate;
     }
 

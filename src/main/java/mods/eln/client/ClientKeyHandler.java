@@ -1,5 +1,6 @@
 package mods.eln.client;
 
+import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;

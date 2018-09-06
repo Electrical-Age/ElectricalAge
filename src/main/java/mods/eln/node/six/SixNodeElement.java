@@ -66,7 +66,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         s.play();
     }
 
-    public Coordinate getCoordonate() {
+    public Coordinate getCoordinate() {
         return sixNode.coordinate;
     }
 
@@ -367,7 +367,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         return false;
     }
 
-    public Coordinate getGhostObserverCoordonate() {
+    public Coordinate getGhostObserverCoordinate() {
         return sixNode.coordinate;
 
     }

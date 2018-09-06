@@ -178,7 +178,7 @@ public class AutoMinerDescriptor extends TransparentNodeDescriptor {
 //        return type != ItemRenderType.INVENTORY;
 //    }
 
-    public Coordinate[] getPowerCoordonate(World w) {
+    public Coordinate[] getPowerCoordinate(World w) {
         Coordinate[] temp = new Coordinate[powerCoord.length];
         for (int idx = 0; idx < temp.length; idx++) {
             temp[idx] = new Coordinate(powerCoord[idx]);

@@ -64,7 +64,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
 
     val updater = IProcess {
         val appliedLRDU = side.applyLRDU(front)
-        val scannedCoord = Coordinate(coordonate).apply {
+        val scannedCoord = Coordinate(coordinate).apply {
             move(appliedLRDU)
         }
         val targetSide: EnumFacing = appliedLRDU.inverse.toForge()

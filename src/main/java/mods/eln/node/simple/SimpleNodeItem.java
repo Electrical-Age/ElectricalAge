@@ -2,9 +2,12 @@ package mods.eln.node.simple;
 
 import mods.eln.misc.Coordinate;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class SimpleNodeItem extends ItemBlock {
@@ -16,23 +19,24 @@ public class SimpleNodeItem extends ItemBlock {
     }
 
     @Override
-    public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata) {
-        SimpleNode node = null;
-        if (world.isRemote == false) {
+    public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState) {
+        SimpleNode node = null;<
+        if (!world.isRemote) {
             node = block.newNode();
             node.setDescriptorKey(block.descriptorKey);
-            node.onBlockPlacedBy(new Coordinate(x, y, z, world), block.getFrontForPlacement(player), player, stack);
+            node.onBlockPlacedBy(new Coordinate(pos, world), block.getFrontForPlacement(player), player, stack);
         }
 
-        if (!world.setBlock(x, y, z, field_150939_a, metadata, 3)) {
+        if (!world.setBlockState(pos, newState, 3)) {
             if (node != null) node.onBreakBlock();
             return false;
         }
 
-
-        if (world.getBlock(x, y, z) == field_150939_a) {
-            field_150939_a.onBlockPlacedBy(world, x, y, z, player, stack);
-            field_150939_a.onPostBlockPlaced(world, x, y, z, metadata);
+        IBlockState state = world.getBlockState(pos);
+        if (state.getBlock() == this.block) {
+            this.block.onBlockPlacedBy(world, pos, state, player, stack);
+            //TODO: find replacement of onPostBlockPlaced
+            this.block.onPostBlockPlaced(world, pos, metadata);
         }
 
         return true;

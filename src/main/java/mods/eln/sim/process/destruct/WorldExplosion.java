@@ -22,13 +22,13 @@ public class WorldExplosion implements IDestructable {
     }
 
     public WorldExplosion(SixNodeElement e) {
-        this.c = e.getCoordonate();
+        this.c = e.getCoordinate();
         this.type = e.toString();
         origine = e;
     }
 
     public WorldExplosion(TransparentNodeElement e) {
-        this.c = e.coordonate();
+        this.c = e.coordinate();
         this.type = e.toString();
         origine = e;
     }
@@ -51,7 +51,7 @@ public class WorldExplosion implements IDestructable {
 
     @Override
     public void destructImpl() {
-        //NodeManager.instance.removeNode(NodeManager.instance.getNodeFromCoordonate(c));
+        //NodeManager.instance.removeNode(NodeManager.instance.getNodeFromCoordinate(c));
 
         if (Eln.instance.explosionEnable)
             c.world().createExplosion((Entity) null, c.pos.getX(), c.pos.getY(), c.pos.getZ(), strength, true);

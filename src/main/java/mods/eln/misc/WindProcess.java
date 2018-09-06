@@ -62,10 +62,11 @@ public class WindProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setDouble(str + "windHit", windHit);
         nbt.setDouble(str + "windTarget", windTarget);
         nbt.setDouble(str + "windVariation", windVariation);
         nbt.setFloat(str + "windTargetFiltred", windTargetFiltred.get());
+        return nbt;
     }
 }

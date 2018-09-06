@@ -11,11 +11,12 @@ public class SoundClient {
 		play(world, x + 0.5, y + 0.5, z + 0.5, track, volume, pitch, rangeNominal, rangeMax);
 	}*/
 
+    //TODO: FIX SOUNDS
     public static void play(SoundCommand p) {
         ClientProxy.soundClientEventListener.currentUuid = p.uuid; //trolilole
 
         EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-        if (p.world.provider.dimensionId != player.dimension) return;
+        if (p.world.provider.getDimension() != player.dimension) return;
         double distance = Math.sqrt(Math.pow(p.x - player.posX, 2) + Math.pow(p.y - player.posY, 2) + Math.pow(p.z - player.posZ, 2));
         if (distance >= p.rangeMax) return;
         float distanceFactor = 1;

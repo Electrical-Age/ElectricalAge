@@ -98,7 +98,7 @@ public class AutoMinerElement extends TransparentNodeElement {
         lightCoordinate.applyTransformation(front, node.coordinate);
 
         int idx = 0;
-        for (Coordinate c : descriptor.getPowerCoordonate(node.coordinate.world())) {
+        for (Coordinate c : descriptor.getPowerCoordinate(node.coordinate.world())) {
             AutoMinerPowerNode n = new AutoMinerPowerNode();
             n.setElement(this);
             c.applyTransformation(front, node.coordinate);

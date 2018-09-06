@@ -43,7 +43,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
     }
 
     private Vec3d readVec(DataInputStream stream) throws IOException {
-        return Vec3d.createVectorHelper(stream.readFloat(), stream.readFloat(), stream.readFloat());
+        return new Vec3d(stream.readFloat(), stream.readFloat(), stream.readFloat());
     }
 
     @Override
@@ -89,7 +89,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
     private class Catenary {
         final int list;
 
-        final Vec3d origin = Vec3d.createVectorHelper(0, 0, 0);
+        final Vec3d origin = new Vec3d(0, 0, 0);
         final int box[] = {
             3, 7, 5, 3, 5, 1,
             4, 8, 6, 4, 6, 2,
@@ -195,7 +195,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
         }
 
         Vec3d multiply(Vec3d a, double b) {
-            return Vec3d.createVectorHelper(
+            return new Vec3d(
                 a.xCoord * b,
                 a.yCoord * b,
                 a.zCoord * b
@@ -232,7 +232,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
                 double x1 = 0 + dx * n1;
                 double z1 = 0 + dz * n1;
                 double y1 = a * Math.cosh(((Math.sqrt(x1 * x1 + z1 * z1)) - p) / a) + q;
-                vex[i] = Vec3d.createVectorHelper(start.xCoord + x1, start.yCoord + y1, start.zCoord + z1);
+                vex[i] = new Vec3d(start.xCoord + x1, start.yCoord + y1, start.zCoord + z1);
             }
             return vex;
         }

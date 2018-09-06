@@ -413,7 +413,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return 0f;
     }
 
-    public Coordinate getGhostObserverCoordonate() {
+    public Coordinate getGhostObserverCoordinate() {
         return node.coordinate;
 
     }
@@ -437,7 +437,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return node.coordinate.world();
     }
 
-    public Coordinate coordonate() {
+    public Coordinate coordinate() {
         return node.coordinate;
     }
 

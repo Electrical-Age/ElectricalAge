@@ -94,7 +94,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
         if (lampStack != null) {
             LampDescriptor lampDescriptor = (LampDescriptor) ((GenericItemUsingDamage<GenericItemUsingDamageDescriptor>) lampStack.getItem()).getDescriptor(lampStack);
 
-            if (lamp.getCoordonate().doesBlockExist() && lampDescriptor.vegetableGrowRate != 0.0) {
+            if (lamp.getCoordinate().doesBlockExist() && lampDescriptor.vegetableGrowRate != 0.0) {
                 double randTarget = 1.0 / lampDescriptor.vegetableGrowRate * time * (1.0 * light / lampDescriptor.nominalLight / 15.0);
                 if (randTarget > Math.random()) {
                     boolean exit = false;

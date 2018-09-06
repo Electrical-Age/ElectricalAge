@@ -67,7 +67,7 @@ public class NodeManager extends WorldSavedData {
         Utils.println("NodeManager has " + nodesMap.size() + "node");
     }
 
-    public void removeCoordonate(Coordinate c) {
+    public void removeCoordinate(Coordinate c) {
         // nodeArray.remove(node);
         NodeBase n = nodesMap.remove(c);
         if (n != null) nodes.remove(n);

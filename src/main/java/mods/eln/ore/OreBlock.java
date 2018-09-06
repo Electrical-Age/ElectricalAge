@@ -1,5 +1,7 @@
 package mods.eln.ore;
 
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import mods.eln.Eln;
@@ -16,7 +18,7 @@ import java.util.List;
 public class OreBlock extends Block {
 
     public OreBlock() {
-        super(Material.rock); //Parameters: Block ID, Block material
+        super(Material.ROCK); //Parameters: Block ID, Block material
     /*	setTextureFile("/TutorialGFX/Blocks.png"); //The texture file used
 		setBlockName("DeverionXBlockOre"); //The incode block name
 		setCreativeTab(eln.c.tabGems); //The tab it appears in*/
@@ -53,8 +55,8 @@ public class OreBlock extends Block {
     }
 
     @Override
-    public void breakBlock(World par1World, int par2, int par3, int par4, Block par5, int par6) {
-        super.breakBlock(par1World, par2, par3, par4, par5, par6);
+    public void breakBlock(World par1World, BlockPos pos , IBlockState state) {
+        super.breakBlock(par1World, pos, state);
         if (par1World.isRemote) return;
     }
 }
