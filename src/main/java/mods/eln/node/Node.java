@@ -35,9 +35,10 @@ public abstract class Node extends NodeBase {
     }
 
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("lastLight", (byte) lastLight);
+        return nbt;
     }
 
     boolean oldSendedRedstone = false;

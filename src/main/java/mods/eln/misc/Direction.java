@@ -465,8 +465,9 @@ public enum Direction {
         return coordinate.world().getTileEntity(new BlockPos(x, y, z));
     }
 
-    public void writeToNBT(NBTTagCompound nbt, String name) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String name) {
         nbt.setByte(name, (byte) getInt());
+        return nbt;
     }
 
     static public Direction readFromNBT(NBTTagCompound nbt, String name) {

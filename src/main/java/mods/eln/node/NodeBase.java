@@ -416,7 +416,7 @@ public abstract class NodeBase {
         initialized = true;
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 
         coordinate.writeToNBT(nbt, "c");
 
@@ -424,7 +424,7 @@ public abstract class NodeBase {
 
         nbt.setByte("NBOpaque", neighborOpaque);
         nbt.setByte("NBWrap", neighborWrapable);
-
+        return nbt;
     }
 
     public String multiMeterString(Direction side) {

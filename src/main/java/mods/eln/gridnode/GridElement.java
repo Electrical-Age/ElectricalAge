@@ -140,7 +140,7 @@ abstract public class GridElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
 
         Integer i = 0;
@@ -149,6 +149,7 @@ abstract public class GridElement extends TransparentNodeElement {
             link.writeToNBT(Utils.newNbtTagCompund(gridLinks, i.toString()), "");
             i++;
         }
+        return nbt;
     }
 
     @Override

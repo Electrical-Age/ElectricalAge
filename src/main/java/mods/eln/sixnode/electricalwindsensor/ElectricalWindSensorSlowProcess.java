@@ -26,7 +26,7 @@ public class ElectricalWindSensorSlowProcess implements IProcess, INBTTReady {
         if (timeCounter > refreshPeriode) {
             timeCounter -= refreshPeriode;
             Coordinate coord = element.sixNode.coordinate;
-            element.outputGateProcess.setOutputNormalized(Utils.getWind(coord.getDimension(), coord.pos.geY()) / element.descriptor.windMax);
+            element.outputGateProcess.setOutputNormalized(Utils.getWind(coord.getDimension(), coord.pos.getY()) / element.descriptor.windMax);
 
         }
     }
@@ -36,6 +36,7 @@ public class ElectricalWindSensorSlowProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
+        return nbt;
     }
 }

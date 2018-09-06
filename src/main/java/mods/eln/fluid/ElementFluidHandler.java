@@ -100,10 +100,11 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         NBTTagCompound t = new NBTTagCompound();
         tank.writeToNBT(t);
         nbt.setTag(str + "tank", t);
         nbt.setFloat(str + "fhm", fluid_heat_mb);
+        return nbt;
     }
 }

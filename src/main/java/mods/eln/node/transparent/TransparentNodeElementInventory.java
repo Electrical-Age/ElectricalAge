@@ -121,9 +121,9 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
 
-        Utils.writeToNBT(nbt, str, this);
+        return Utils.writeToNBT(nbt, str, this);
     }
 
     @Override

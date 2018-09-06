@@ -104,10 +104,11 @@ public class WindTurbineElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         cableFront.writeToNBT(nbt, "cableFront");
         Utils.println(cableFront);
+        return nbt;
     }
 
     @Override

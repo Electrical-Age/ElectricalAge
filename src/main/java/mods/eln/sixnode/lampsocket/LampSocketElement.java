@@ -103,12 +103,13 @@ public class LampSocketElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("front", (byte) ((front.toInt() << 0) + (grounded ? 4 : 0)));
         nbt.setBoolean("poweredByLampSupply", poweredByLampSupply);
         nbt.setString("channel", channel);
         nbt.setByte("color", (byte) (paintColor));
+        return nbt;
     }
 
     public void networkUnserialize(DataInputStream stream) {

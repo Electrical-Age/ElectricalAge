@@ -110,11 +110,12 @@ public class Coordinate implements INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setInteger(str + "x", pos.getX());
         nbt.setInteger(str + "y", pos.getY());
         nbt.setInteger(str + "z", pos.getZ());
         nbt.setInteger(str + "d", dimension);
+        return nbt;
     }
 
     @Override

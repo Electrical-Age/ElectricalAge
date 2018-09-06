@@ -120,8 +120,9 @@ public class ElectricalEntitySensorSlowProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         rc1.writeToNBT(nbt, str + "rc1");
         rc2.writeToNBT(nbt, str + "rc2");
+        return nbt;
     }
 }

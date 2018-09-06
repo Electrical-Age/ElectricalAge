@@ -275,7 +275,7 @@ public class EnergyMeterElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
 
         nbt.setString("mode", mod.toString());
@@ -284,6 +284,7 @@ public class EnergyMeterElement extends SixNodeElement {
         nbt.setString("password", password);
         nbt.setByte("energyUnit", (byte) energyUnit);
         nbt.setByte("timeUnit", (byte) timeUnit);
+        return nbt;
     }
 
     class SlowProcess implements IProcess {

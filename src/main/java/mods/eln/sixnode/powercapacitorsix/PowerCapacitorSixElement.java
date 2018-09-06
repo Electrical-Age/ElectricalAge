@@ -155,9 +155,10 @@ public class PowerCapacitorSixElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setDouble("punkELeft", punkProcess.eLeft);
+        return nbt;
     }
 
     @Override

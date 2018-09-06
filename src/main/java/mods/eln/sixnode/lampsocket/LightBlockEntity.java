@@ -56,9 +56,10 @@ public class LightBlockEntity extends TileEntity {
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
+        public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
             nbt.setByte(str + "value", value);
             nbt.setInteger(str + "timeout", timeout);
+            return nbt;
         }
     }
 

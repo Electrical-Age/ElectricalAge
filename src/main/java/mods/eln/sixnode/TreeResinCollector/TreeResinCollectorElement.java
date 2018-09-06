@@ -95,7 +95,7 @@ public class TreeResinCollectorElement extends SixNodeElement {
         }
         yEnd = posWood[1];
 
-        int collectiorCount = 0;
+        int collectorCount = 0;
         Coordinate coordTemp = new Coordinate(posCollector[0], 0, posCollector[2], worldObj);
         posCollector[1] = yStart;
         for (posCollector[1] = yStart; posCollector[1] <= yEnd; posCollector[1]++) {
@@ -105,16 +105,16 @@ public class TreeResinCollectorElement extends SixNodeElement {
             if (node instanceof SixNode) {
                 SixNode six = (SixNode) node;
                 if (six.getElement(side) != null && six.getElement(side) instanceof TreeResinCollectorElement) {
-                    collectiorCount++;
+                    collectorCount++;
                 }
             }
         }
-        if (collectiorCount == 0) {
-            collectiorCount++;
-            Utils.println("ASSERT collectiorCount == 0");
+        if (collectorCount == 0) {
+            collectorCount++;
+            Utils.println("ASSERT collectorCount == 0");
         }
         double leaf = leafCount >= 1 ? 1 : 0.000000001;
-        double productPerSeconde = Math.min(0.05, occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectiorCount) * leaf;
+        double productPerSeconde = Math.min(0.05, occupancyProductPerSecondPerTreeBlock * (yEnd - yStart + 1) / collectorCount) * leaf;
         return productPerSeconde;
     }
 
@@ -154,9 +154,10 @@ public class TreeResinCollectorElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setDouble("timeFromLastActivated", timeFromLastActivated);
+        return nbt;
     }
 
     class TreeResinCollectorSlowProcess implements IProcess {

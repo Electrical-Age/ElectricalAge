@@ -59,10 +59,11 @@ public class WirelessTxStatus implements INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setString(str + "name", name);
         nbt.setInteger(str + "id", id);
         nbt.setDouble(str + "value", value);
         nbt.setInteger(str + "uuid", uuid);
+        return nbt;
     }
 }

@@ -159,7 +159,7 @@ public abstract class SimpleNode extends NodeBase {
         }
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
 
         front.writeToNBT(nbt, "SNfront");
@@ -190,6 +190,6 @@ public abstract class SimpleNode extends NodeBase {
         for (IProcess process : thermalSlowProcessList) {
             if (process instanceof INBTTReady) ((INBTTReady) process).writeToNBT(nbt, "");
         }
-
+        return nbt;
     }
 }

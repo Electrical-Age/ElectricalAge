@@ -389,11 +389,12 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setDouble(str + "LSP" + "stableProb", stableProb);
         lbCoord.writeToNBT(nbt, str + "lbCoordInst");
         nbt.setFloat(str + "alphaZ", (float) alphaZ);
         nbt.setInteger(str + "light", light);
+        return nbt;
     }
 
     public int getBlockLight() {

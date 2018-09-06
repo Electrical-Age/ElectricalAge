@@ -173,11 +173,12 @@ public class TurretElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setDouble("chargePower", chargePower);
         nbt.setBoolean("filterIsSpare", filterIsSpare);
         nbt.setDouble("energyBuffer", energyBuffer);
+        return nbt;
     }
 
     @Override

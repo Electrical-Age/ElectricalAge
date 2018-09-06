@@ -379,8 +379,9 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setInteger(str + "AMSP" + "pipeLength", pipeLength);
         nbt.setInteger(str + "AMSP" + "drillCount", drillCount);
+        return nbt;
     }
 }

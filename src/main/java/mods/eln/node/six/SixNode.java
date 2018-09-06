@@ -231,7 +231,7 @@ public class SixNode extends Node {
         return false;
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         int idx = 0;
         nbt.setInteger("cacheBlockId", Block.getIdFromBlock(sixNodeCacheBlock));
         nbt.setByte("cacheBlockMeta", sixNodeCacheBlockMeta);
@@ -250,6 +250,7 @@ public class SixNode extends Node {
         NBTTagCompound nodeNbt = new NBTTagCompound();
         super.writeToNBT(nodeNbt);
         nbt.setTag("node", nodeNbt);
+        return nbt;
     }
 
     public boolean getSideEnable(Direction direction) {

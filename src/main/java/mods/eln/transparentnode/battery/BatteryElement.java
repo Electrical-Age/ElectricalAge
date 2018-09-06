@@ -202,9 +202,10 @@ public class BatteryElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         //inventory.writeToNBT(nbt, str + "inv");
+        return nbt;
     }
 
     @Override

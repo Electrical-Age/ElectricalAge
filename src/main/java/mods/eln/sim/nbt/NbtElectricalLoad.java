@@ -20,7 +20,8 @@ public class NbtElectricalLoad extends ElectricalLoad implements INBTTReady {
         if (getU() == Float.POSITIVE_INFINITY) setU(0);
     }
 
-    public void writeToNBT(NBTTagCompound nbttagcompound, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound, String str) {
         nbttagcompound.setFloat(str + name + "Uc", (float) getU());
+        return nbttagcompound;
     }
 }

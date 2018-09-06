@@ -160,10 +160,11 @@ public class SolarPanelElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         powerSource.writeToNBT(nbt, "powerSource");
         nbt.setDouble("panelAlpha", panelAlpha);
+        return nbt;
     }
 
     @Override

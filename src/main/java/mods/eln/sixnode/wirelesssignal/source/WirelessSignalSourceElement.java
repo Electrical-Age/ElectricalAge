@@ -118,10 +118,11 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setString("channel", channel);
         nbt.setBoolean("state", state);
+        return nbt;
     }
 
     @Override

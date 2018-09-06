@@ -117,10 +117,11 @@ public class ElectricalAntennaRxElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
 
         rot.writeToNBT(nbt, "rot");
+        return nbt;
     }
 
     public boolean mustHaveFloor() {

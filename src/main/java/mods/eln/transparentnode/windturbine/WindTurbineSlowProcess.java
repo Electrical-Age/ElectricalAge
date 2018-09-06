@@ -136,8 +136,9 @@ class WindTurbineSlowProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setDouble(str + name + "localWind", localWind);
         nbt.setDouble(str + name + "environementWindFactor", environmentWindFactor);
+        return nbt;
     }
 }

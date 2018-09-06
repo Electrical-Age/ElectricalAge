@@ -147,10 +147,11 @@ public class BatteryChargerElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setBoolean("powerOn", powerOn);
         nbt.setDouble("energyCounter", slowProcess.energyCounter);
+        return nbt;
     }
 
     @Override

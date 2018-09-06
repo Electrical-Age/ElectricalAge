@@ -79,7 +79,7 @@ public class PowerSource extends VoltageSource implements IRootSystemPreStepProc
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         super.writeToNBT(nbt, str);
 
         str += name;
@@ -87,5 +87,6 @@ public class PowerSource extends VoltageSource implements IRootSystemPreStepProc
         nbt.setDouble(str + "P", getP());
         nbt.setDouble(str + "Umax", Umax);
         nbt.setDouble(str + "Imax", Imax);
+        return nbt;
     }
 }

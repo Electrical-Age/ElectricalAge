@@ -100,8 +100,9 @@ public class EggIncubatorElement extends TransparentNodeElement {
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
+        public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
             nbt.setDouble(str + "energyCounter", energy);
+            return nbt;
         }
     }
 

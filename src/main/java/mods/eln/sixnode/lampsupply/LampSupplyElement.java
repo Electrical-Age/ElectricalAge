@@ -278,7 +278,7 @@ public class LampSupplyElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         int idx = 0;
         for (Entry e : entries) {
@@ -291,6 +291,7 @@ public class LampSupplyElement extends SixNodeElement {
 
             idx++;
         }
+        return nbt;
     }
 
     @Override

@@ -55,8 +55,9 @@ public class ElectricalWatchSlowProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setBoolean(str + "upToDate", upToDate);
         nbt.setLong(str + "oldDate", oldDate);
+        return nbt;
     }
 }

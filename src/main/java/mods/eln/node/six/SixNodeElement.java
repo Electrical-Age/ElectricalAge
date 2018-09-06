@@ -291,7 +291,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 
         int idx;
 
@@ -331,6 +331,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
             if (process instanceof INBTTReady)
                 ((INBTTReady) process).writeToNBT(nbt, "");
         }
+        return nbt;
 
     }
 

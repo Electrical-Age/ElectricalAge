@@ -352,7 +352,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         int idx = 0;
 
         IInventory inv = getInventory();
@@ -385,6 +385,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
 
         nbt.setByte("others", (byte) (front.getInt() + (grounded ? 8 : 0)));
+        return nbt;
     }
 
     public void reconnect() {

@@ -232,11 +232,13 @@ public class HeatFurnaceElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
 
         nbt.setBoolean("takeFuel", takeFuel);
         nbt.setBoolean("controlExternal", controlExternal);
+
+        return nbt;
     }
 
     @Override

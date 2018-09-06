@@ -149,9 +149,10 @@ public class PowerCapacitorElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setDouble("punkELeft", punkProcess.eLeft);
+        return nbt;
     }
 
     @Override

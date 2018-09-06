@@ -456,7 +456,7 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setInteger("station", station);
         nbt.setString("name", name);
@@ -476,6 +476,7 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
             rx.writeToNBT(nbt, "rx" + idx);
             idx++;
         }
+        return nbt;
     }
 
     @Override
