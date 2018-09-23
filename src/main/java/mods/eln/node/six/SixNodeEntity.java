@@ -99,7 +99,7 @@ public class SixNodeEntity extends NodeBlockEntity {
 
         //	worldObj.setLightValue(EnumSkyBlock.Sky, xCoord,yCoord,zCoord,15);
         if (sixNodeCacheBlock != sixNodeCacheBlockOld) {
-            Chunk chunk = worldObj.getChunkFromBlockCoords(xCoord, zCoord);
+            Chunk chunk = worldObj.getChunkFromBlockCoords(pos);
             chunk.generateHeightMap();
             Utils.updateSkylight(chunk);
             chunk.generateSkylightMap();

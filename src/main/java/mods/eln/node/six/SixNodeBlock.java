@@ -253,8 +253,7 @@ public class SixNodeBlock extends NodeBlock {
     }
 
     @Override
-    //TODO: REQUIRES IBlockAccess
-    public void onNeighborBlockChange(World world, BlockPos pos, BlockPos par5) {
+    public void onNeighborBlockChange(IBlockAccess world, BlockPos pos, BlockPos par5) {
         SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(pos);
         SixNode sixNode = (SixNode) tileEntity.getNode();
         if (sixNode == null) return;

@@ -164,9 +164,9 @@ open class LogicGateElement(node: SixNode, side: Direction, sixNodeDescriptor: S
         function.readFromNBT(nbt, "function")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?) {
+    override fun writeToNBT(nbt: NBTTagCompound?): NBTTagCompound? {
         super.writeToNBT(nbt)
-        function.writeToNBT(nbt, "function")
+        return function.writeToNBT(nbt, "function")
     }
 
     override fun getThermalLoad(lrdu: LRDU?): ThermalLoad? = null
@@ -220,7 +220,9 @@ abstract class LogicFunction : INBTTReady {
     )
 
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {}
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {}
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
+        return nbt
+    }
 }
 
 class Not : LogicFunction() {
@@ -302,8 +304,9 @@ class SchmittTrigger : LogicFunction() {
         state = nbt?.getBoolean(str + "state") ?: false
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
         nbt?.setBoolean(str + "state", state)
+        return nbt
     }
 }
 
@@ -334,9 +337,10 @@ class Oscillator : LogicFunction() {
         state = nbt?.getBoolean(str + "state") ?: false
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
         nbt?.setDouble(str + "ramp", ramp)
         nbt?.setBoolean(str + "state", state)
+        return nbt
     }
 }
 
@@ -368,9 +372,10 @@ abstract class TriggeredLogicFunction(private val triggerIndex: Int) : LogicFunc
         state = nbt?.getBoolean(str + "state") ?: false
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
         nbt?.setBoolean(str + "trigger", trigger)
         nbt?.setBoolean(str + "state", state)
+        return nbt
     }
 }
 
@@ -517,11 +522,12 @@ class Pal : LogicFunction() {
             (inputs[2] ?: false) * 2 +
             ((inputs[2] ?: false) xor (inputs[1] ?: false)) * 1]
 
-    override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
+    override fun readFromNBT(nbt: NBTTagCompound?, str: String?){
         truthTable.fromInt(nbt?.getInteger(str + "truthTable") ?: 0)
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
         nbt?.setInteger(str + "truthTable", truthTable.toInt())
+        return nbt
     }
 }

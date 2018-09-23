@@ -20,7 +20,7 @@ public class SimpleNodeItem extends ItemBlock {
 
     @Override
     public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState) {
-        SimpleNode node = null;<
+        SimpleNode node = null;
         if (!world.isRemote) {
             node = block.newNode();
             node.setDescriptorKey(block.descriptorKey);

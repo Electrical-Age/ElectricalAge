@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL11;
 public class TransparentNodeRender extends TileEntitySpecialRenderer {
     @Override
     public void renderTileEntityAt(TileEntity entity, double x, double y,
-                                   double z, float var8) {
+                                   double z, float var8, int var9) {
 
         //Utils.println("delta T : " + var8);
         TransparentNodeEntity tileEntity = (TransparentNodeEntity) entity;

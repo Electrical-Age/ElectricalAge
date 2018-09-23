@@ -220,7 +220,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         return TransparentNodeElement.unserializeNulldId
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound? {
         super.writeToNBT(nbt)
         tank.writeToNBT(nbt, "tank")
         nbt.setBoolean("externalControlled", externalControlled)
@@ -229,6 +229,7 @@ class FuelHeatFurnaceElement(transparentNode: TransparentNode, descriptor: Trans
         nbt.setDouble("manualControl", manualControl)
         nbt.setDouble("setTemperature", setTemperature)
         nbt.setDouble("actualHeatPower", actualHeatPower)
+        return nbt
     }
 
     override fun readFromNBT(nbt: NBTTagCompound) {

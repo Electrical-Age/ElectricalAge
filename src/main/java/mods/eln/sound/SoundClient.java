@@ -33,7 +33,6 @@ public class SoundClient {
             p.volume *= Math.pow(temp, 2);
             p.volume *= distanceFactor;
             if (p.volume <= 0) return;
-
             p.world.playSound(player.posX + 2 * (p.x - player.posX) / distance, player.posY + 2 * (p.y - player.posY) / distance, player.posZ + 2 * (p.z - player.posZ) / distance, p.track, p.volume, p.pitch, false);
         } else {
             for (int idx = 0; idx < trackCount; idx++) {

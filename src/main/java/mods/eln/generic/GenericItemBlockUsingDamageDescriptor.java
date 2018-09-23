@@ -6,6 +6,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumActionResult;
 
 import java.util.List;
 
@@ -90,7 +91,7 @@ public class GenericItemBlockUsingDamageDescriptor {
         return false;
     }
 
-    public boolean onItemUseFirst(ItemStack stack, EntityPlayer player) {
-        return false;
+    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer player) {
+        return EnumActionResult.FAIL;
     }
 }

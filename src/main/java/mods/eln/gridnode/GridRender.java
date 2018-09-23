@@ -179,8 +179,8 @@ public abstract class GridRender extends TransparentNodeElementRender {
             // This is just to copy.
             // We don't care what r is, so long as it's linearly independent of delta.
             final Vec3d r = delta.normalize();
-            r.rotateAroundY(1);
-            r.rotateAroundX(1);
+            r.rotateYaw(1);
+            r.rotateYaw(1);
             // This gives us one vector which is perpendicular to delta.
             final Vec3d x1 = multiply(delta.crossProduct(r).normalize(), cableWidth);
             // And this, another, perpendicular to delta and x1.

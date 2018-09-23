@@ -69,7 +69,7 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
         try {
             eggStackSize = stream.readByte();
             if (eggStackSize != 0) {
-                egg = new EntityItem(this.tileEntity.getWorldObj(), 0, 0, 0, new ItemStack(Items.egg));
+                egg = new EntityItem(this.tileEntity.getWorld(), 0, 0, 0, new ItemStack(Items.EGG));
             } else {
                 egg = null;
             }

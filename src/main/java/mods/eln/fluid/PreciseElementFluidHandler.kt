@@ -11,9 +11,10 @@ class PreciseElementFluidHandler(tankSize: Int) : ElementFluidHandler(tankSize) 
         fixup = nbt.getDouble(str + "fixup")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound, str: String?) {
+    override fun writeToNBT(nbt: NBTTagCompound, str: String?): NBTTagCompound? {
         super.writeToNBT(nbt, str)
         nbt.setDouble(str + "fixup", fixup)
+        return nbt;
     }
 
     fun drain(demand: Double): Double {

@@ -2,12 +2,18 @@ package mods.eln.generic;
 
 import mods.eln.misc.UtilsClient;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
@@ -61,10 +67,10 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     }
 
     @Override
-    public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p) {
+    public ActionResult<ItemStack> onItemRightClick(ItemStack s, World w, EntityPlayer p, EnumHand hand) {
         Descriptor desc = getDescriptor(s);
         if (desc == null)
-            return s;
+            return new ActionResult(EnumActionResult.PASS, s);
         return desc.onItemRightClick(s, w, p);
     }
 
@@ -122,11 +128,11 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
      * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
     @Override
-    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float vx, float vy, float vz) {
+    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float vx, float vy, float vz) {
         GenericItemUsingDamageDescriptor d = getDescriptor(stack);
         if (d == null)
-            return false;
-        return d.onItemUse(stack, player, world, x, y, z, side, vx, vy, vz);
+            return EnumActionResult.PASS;
+        return d.onItemUse(stack, player, world, pos, hand, facing, vx, vy, vz);
     }
 
     public boolean onEntitySwing(EntityLivingBase entityLiving, ItemStack stack) {
@@ -139,7 +145,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     public boolean onBlockStartBreak(ItemStack itemstack, int X, int Y, int Z, EntityPlayer player) {
         GenericItemUsingDamageDescriptor d = getDescriptor(itemstack);
         if (d == null)
-            return super.onBlockStartBreak(itemstack, X, Y, Z, player);
+            return super.onBlockStartBreak(itemstack, new BlockPos(X, Y, Z), player);
         return d.onBlockStartBreak(itemstack, X, Y, Z, player);
     }
 
@@ -156,20 +162,20 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     }
 
     @Override
-    public float func_150893_a(ItemStack stack, Block block) { //getStrVsBlock
+    public float func_150893_a(ItemStack stack, IBlockState state) { //getStrVsBlock
         GenericItemUsingDamageDescriptor d = getDescriptor(stack);
         if (d == null)
             return 0.2f;
-        return d.getStrVsBlock(stack, block);
+        return d.getStrVsBlock(stack, state);
     }
 
     @Override
-    public boolean canHarvestBlock(Block par1Block, ItemStack item) {
+    public boolean canHarvestBlock(IBlockState state) {
         return true;
     }
 
     @Override
-    public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity) {
+    public boolean onBlockDestroyed(ItemStack stack, World w, IBlockState state, BlockPos pos, EntityLivingBase entity) {
         if (w.isRemote) {
             return false;
         }
@@ -178,7 +184,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 
         if (d == null)
             return true;
-        return d.onBlockDestroyed(stack, w, block, x, y, z, entity);
+        return d.onBlockDestroyed(stack, w, state, pos, entity);
     }
 
     @Override

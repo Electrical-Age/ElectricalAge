@@ -216,10 +216,11 @@ class FuelGeneratorElement(transparentNode: TransparentNode, descriptor_: Transp
         on = nbt?.getBoolean("on") ?: false
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?) {
+    override fun writeToNBT(nbt: NBTTagCompound?): NBTTagCompound? {
         super.writeToNBT(nbt)
         nbt?.setDouble("tankLevel", tankLevel)
         nbt?.setBoolean("on", on)
+        return nbt;
     }
 
     override fun getWaila(): Map<String, String> = mutableMapOf(

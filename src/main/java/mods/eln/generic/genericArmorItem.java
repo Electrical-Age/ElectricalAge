@@ -1,6 +1,7 @@
 package mods.eln.generic;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 
@@ -26,11 +27,12 @@ public class genericArmorItem extends ItemArmor {
     }
 
     public genericArmorItem(ArmorMaterial par2EnumArmorMaterial, int par3, ArmourType Type, String t1, String t2) {
-        super(par2EnumArmorMaterial, par3, Type.getValue());
+        super(par2EnumArmorMaterial, par3, EntityEquipmentSlot.valueOf(Type.toString()));
         this.t1 = t1;
         this.t2 = t2;
     }
 
+    //TODO: FIX TEXTURES
     @Override
     public String getArmorTexture(ItemStack stack, Entity entity, int slot, String layer) {
         if (this.armorType.getIndex() == 2) {

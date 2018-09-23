@@ -64,7 +64,7 @@ public class TransparentNodeBlock extends NodeBlock {
 
 
     @Override
-    public boolean removedByPlayer(IBlockState state, World world, EntityPlayer entityPlayer, BlockPos pos, boolean willHarvest) {
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer entityPlayer, boolean willHarvest) {
         if (!world.isRemote) {
             NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(pos);
             if (entity != null) {
@@ -98,7 +98,7 @@ public class TransparentNodeBlock extends NodeBlock {
 
 
     @Override
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_,
+    public Item getItemDropped(IBlockState p_149650_1_, Random p_149650_2_,
                                int p_149650_3_) {
         return null;
     }

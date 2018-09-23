@@ -126,7 +126,7 @@ public class ElectricalSourceElement extends SixNodeElement {
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
         if (currentItemStack != null) {
             Item item = currentItemStack.getItem();
 

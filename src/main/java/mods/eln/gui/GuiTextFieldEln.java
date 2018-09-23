@@ -127,7 +127,7 @@ public class GuiTextFieldEln extends GuiTextField implements IGuiObject {
     @Override
     public void idraw2(int x, int y) {
         if (!isFocused() && getVisible() && x >= xPos && y >= yPos && x < xPos + width && y < yPos + height)
-            helper.drawHoveringText(comment, x, y, Minecraft.getMinecraft().fontRenderer);
+            helper.drawHoveringText(comment, x, y, Minecraft.getMinecraft().fontRendererObj);
 
     }
 

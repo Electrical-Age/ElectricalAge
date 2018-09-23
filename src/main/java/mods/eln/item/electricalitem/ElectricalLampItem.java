@@ -9,6 +9,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
@@ -125,7 +127,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery {
 	}*/
 
     @Override
-    public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p) {
+    public ActionResult<ItemStack> onItemRightClick(ItemStack s, World w, EntityPlayer p) {
         if (!w.isRemote) {
             int lightState = getLightState(s) + 1;
             if (lightState > 1) lightState = 0;
@@ -145,7 +147,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery {
             }
             setLightState(s, lightState);
         }
-        return s;
+        return new ActionResult(EnumActionResult.PASS, s);
     }
 
     @Override

@@ -3,6 +3,7 @@ package mods.eln.transparentnode.solarpanel;
 import mods.eln.misc.Coordinate;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -74,7 +75,7 @@ public class SolarPannelSlowProcess implements IProcess {
         int count = 0;
         ///world.getChunkProvider().chunkExists(var1, var2)
         while (world.getChunkProvider().chunkExists(((int) x) >> 4, ((int) z) >> 4)) {
-            double opacity = world.getBlockLightOpacity((int) x, (int) y, (int) z);
+            double opacity = world.getBlockLightOpacity(new BlockPos((int) x, (int) y, (int) z));
             light *= (255 - opacity) / 255;
             if (light == 0.0) {
                 break;

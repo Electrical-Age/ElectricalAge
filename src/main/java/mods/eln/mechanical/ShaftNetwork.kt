@@ -163,8 +163,9 @@ class ShaftNetwork() : INBTTReady {
         rads = nbt.getFloat(str + "rads").toDouble()
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound, str: String?) {
+    override fun writeToNBT(nbt: NBTTagCompound, str: String?): NBTTagCompound?{
         nbt.setFloat(str + "rads", rads.toFloat())
+        return nbt
     }
 
 }

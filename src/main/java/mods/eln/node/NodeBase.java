@@ -102,10 +102,7 @@ public abstract class NodeBase {
         neighborWrapable = 0;
         for (Direction direction : Direction.values()) {
             BlockPos.MutableBlockPos pos = coordinate.pos;
-            vector[0] = pos.getX();
-            vector[1] = pos.getY();
-            vector[2] = pos.getZ();
-
+            vector = Utils.posToArray(pos);
             direction.applyTo(vector, 1);
 
             Block b = world.getBlockState(pos).getBlock();

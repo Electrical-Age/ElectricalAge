@@ -1418,4 +1418,12 @@ public class Utils {
         return state.getBlock().getMetaFromState(state);
     }
 
+    public static int[] posToArray(BlockPos pos){
+        int[] array = new int[3];
+        array[0] = pos.getX();
+        array[1] = pos.getY();
+        array[2] = pos.getZ();
+        return array;
+    }
+
 }

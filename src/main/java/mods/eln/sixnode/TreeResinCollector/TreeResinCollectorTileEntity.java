@@ -37,12 +37,9 @@ public class TreeResinCollectorTileEntity extends TileEntity implements ITickabl
             int[] posWood = new int[3];
             int[] posCollector = new int[3];
             Direction woodDirection = Direction.fromIntMinecraftSide(getBlockMetadata()).getInverse();
-            posWood[0] = pos.getX();
-            posWood[1] = pos.getY();
-            posWood[2] = pos.getZ();
-            posCollector[0] = pos.getX();
-            posCollector[1] = pos.getY();
-            posCollector[2] = pos.getZ();
+            posWood = Utils.posToArray(pos);
+            //Tried not using the function again
+            posCollector = posWood;
             woodDirection.applyTo(posWood, 1);
 
             int yStart, yEnd;

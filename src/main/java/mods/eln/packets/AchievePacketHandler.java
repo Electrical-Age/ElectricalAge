@@ -11,9 +11,9 @@ public class AchievePacketHandler implements IMessageHandler<AchievePacket, IMes
     public IMessage onMessage(AchievePacket message, MessageContext ctx) {
         //System.out.println("Got message: " + message.text);
         if (message.text.equals("openWiki")) {
-            ctx.getServerHandler().playerEntity.triggerAchievement(Achievements.openGuide);
+            ctx.getServerHandler().playerEntity.addStat(Achievements.openGuide);
         } else if (message.text.equals("craft50VMacerator")) {
-            ctx.getServerHandler().playerEntity.triggerAchievement(Achievements.craft50VMacerator);
+            ctx.getServerHandler().playerEntity.addStat(Achievements.craft50VMacerator);
         } else {
             System.out.println("[ELN]: ELN Wiki Achievement Handler has received an invalid message/packet: " + message.text);
         }

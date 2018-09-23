@@ -190,14 +190,14 @@ abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeD
         node.lrduCubeMask.getTranslate(front.down()).serialize(stream)
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound? {
         super.writeToNBT(nbt)
-        shaft.writeToNBT(nbt, "shaft")
+        return shaft.writeToNBT(nbt, "shaft")
     }
 
     override fun readFromNBT(nbt: NBTTagCompound) {
         super.readFromNBT(nbt)
-        shaft.readFromNBT(nbt, "shaft")
+        return shaft.readFromNBT(nbt, "shaft")
     }
 
     override fun multiMeterString(side: Direction?): String {

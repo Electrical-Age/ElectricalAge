@@ -4,6 +4,8 @@ import mods.eln.gui.GuiTextFieldEln.GuiTextFieldElnObserver;
 import mods.eln.gui.IGuiObject.IGuiObjectObserver;
 import net.minecraft.client.gui.GuiScreen;
 
+import java.io.IOException;
+
 public abstract class GuiScreenEln extends GuiScreen implements GuiTextFieldElnObserver, IGuiObjectObserver {
 
     protected GuiHelper helper;
@@ -53,12 +55,13 @@ public abstract class GuiScreenEln extends GuiScreen implements GuiTextFieldElnO
     }
 
     @Override
-    protected void keyTyped(char key, int code) {
+    protected void keyTyped(char key, int code) throws IOException {
         helper.keyTyped(key, code);
         super.keyTyped(key, code);
     }
 
-    protected void mouseClicked(int x, int y, int code) {
+    @Override
+    protected void mouseClicked(int x, int y, int code) throws IOException {
         helper.mouseClicked(x, y, code);
         super.mouseClicked(x, y, code);
     }

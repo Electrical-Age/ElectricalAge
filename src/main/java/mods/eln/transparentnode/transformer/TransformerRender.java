@@ -150,7 +150,7 @@ public class TransformerRender extends TransparentNodeElementRender {
         load.step(deltaT);
 
         if (hasCasing) {
-            if (!Utils.isPlayerAround(tileEntity.getWorldObj(), coordinate.moved(front).getAxisAlignedBB(0)))
+            if (!Utils.isPlayerAround(tileEntity.getWorld(), coordinate.moved(front).getAxisAlignedBB(0)))
                 doorOpen.setTarget(0f);
             else
                 doorOpen.setTarget(1f);

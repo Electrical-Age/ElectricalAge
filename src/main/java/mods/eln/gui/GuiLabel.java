@@ -13,7 +13,7 @@ public class GuiLabel extends Gui implements IGuiObject {
 
     public GuiLabel(int x, int y, String text) {
         this.text = text;
-        font = Minecraft.getMinecraft().fontRenderer;
+        font = Minecraft.getMinecraft().fontRendererObj;
         color = 0x00FFFFFF;
         xPos = x;
         yPos = y;

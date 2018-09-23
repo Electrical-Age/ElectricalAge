@@ -106,10 +106,11 @@ open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescri
         maxRads = nbt.getFloat("maxRads")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound? {
         super.writeToNBT(nbt)
         nbt.setFloat("minRads", minRads)
         nbt.setFloat("maxRads", maxRads)
+        return nbt
     }
 
     override fun getWaila(): Map<String, String> {

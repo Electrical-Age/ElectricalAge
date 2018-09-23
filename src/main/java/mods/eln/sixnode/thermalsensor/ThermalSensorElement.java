@@ -222,7 +222,7 @@ public class ThermalSensorElement extends SixNodeElement {
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
 
         if (Eln.multiMeterElement.checkSameItemStack(currentItemStack)) {
             return false;

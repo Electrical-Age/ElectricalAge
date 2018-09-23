@@ -24,6 +24,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.MathHelper;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -76,7 +77,7 @@ public class EggIncubatorElement extends TransparentNodeElement {
                     EntityChicken chicken = new EntityChicken(node.coordinate.world());
                     chicken.setGrowingAge(-24000);
                     EntityLiving entityliving = (EntityLiving) chicken;
-                    entityliving.setLocationAndAngles(node.coordinate.x + 0.5, node.coordinate.y + 0.5, node.coordinate.z + 0.5, MathHelper.wrapAngleTo180_float(node.coordinate.world().rand.nextFloat() * 360.0F), 0.0F);
+                    entityliving.setLocationAndAngles(node.coordinate.pos.getX() + 0.5, node.coordinate.pos.getY() + 0.5, node.coordinate.pos.getZ() + 0.5, MathHelper.wrapDegrees(node.coordinate.world().rand.nextFloat() * 360.0F), 0.0F);
                     entityliving.rotationYawHead = entityliving.rotationYaw;
                     entityliving.renderYawOffset = entityliving.rotationYaw;
                     //entityliving.func_110161_a((EntityLivingData)null); 1.6.4

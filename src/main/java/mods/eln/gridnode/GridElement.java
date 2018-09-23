@@ -215,8 +215,8 @@ abstract public class GridElement extends TransparentNodeElement {
                 // Angles 180 degrees apart are equivalent.
                 if (vec.pos.getZ() < 0)
                     vec = vec.negate();
-                double h = Math.sqrt(vec.x * vec.x + vec.z * vec.z);
-                angles[i++] = Math.acos(vec.x / h);
+                double h = Math.sqrt(vec.pos.getX() * vec.pos.getX() + vec.pos.getZ() * vec.pos.getZ());
+                angles[i++] = Math.acos(vec.pos.getX() / h);
             }
             // This could probably be optimised with a bit of math, but w.e.
             double optAngle = 0;
@@ -266,10 +266,10 @@ abstract public class GridElement extends TransparentNodeElement {
                 Coordinate offset = link.b.subtract(link.a);
                 for (int i = 0; i < 2; i++) {
                     final Vec3d start = getCablePoint(ourSide, i);
-                    start.rotateAroundY((float) Math.toRadians(idealRenderingAngle));
+                    start.rotateYaw((float) Math.toRadians(idealRenderingAngle));
                     Vec3d end = target.getCablePoint(theirSide, i);
-                    end.rotateAroundY((float) Math.toRadians(target.idealRenderingAngle));
-                    end = end.addVector(offset.x, offset.y, offset.z);
+                    end.rotateYaw((float) Math.toRadians(target.idealRenderingAngle));
+                    end = end.addVector(offset.pos.getX(), offset.pos.getY(), offset.pos.getZ());
                     writeVec(stream, start);
                     writeVec(stream, end);
                 }

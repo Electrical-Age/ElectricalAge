@@ -1,10 +1,13 @@
 package mods.eln.node;
 
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import mods.eln.Eln;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.misc.*;
 import mods.eln.server.DelayedBlockRemove;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.EntityLivingBase;
@@ -12,6 +15,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -151,7 +155,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     }
 
 
-    void onBlockPlacedBy(Direction front, EntityLivingBase entityLiving, int metadata) {
+    void onBlockPlacedBy(Direction front, EntityLivingBase entityLiving, IBlockState state) {
 
     }
 
@@ -259,7 +263,9 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
             Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
             return null;
         }
-        return new SPacketCustomPayload(Eln.channelName, node.getPublishPacket().toByteArray());
+
+        ByteBuf buffer = Unpooled.buffer();
+        return new SPacketCustomPayload(Eln.channelName, new PacketBuffer(buffer.writeBytes(node.getPublishPacket().toByteArray())));
         //return null;
     }
 
@@ -284,7 +290,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
     }
 
     public void sendPacketToServer(ByteArrayOutputStream bos) {
-        UtilsClient.sendPacketToServer(bos);
+        UtilsClient.sendPacketToServer(new PacketBuffer(Unpooled.buffer().readBytes(bos.toByteArray())));
     }
 
 

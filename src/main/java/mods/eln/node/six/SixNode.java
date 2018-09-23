@@ -524,11 +524,11 @@ public class SixNode extends Node {
 
                 //if(sixNodeCacheMapId != sixNodeCacheMapIdOld)
                 {
-                    Chunk chunk = coordinate.world().getChunkFromBlockCoords(coordinate.x, coordinate.z);
+                    Chunk chunk = coordinate.world().getChunkFromBlockCoords(coordinate.pos);
                     Utils.generateHeightMap(chunk);
                     Utils.updateSkylight(chunk);
                     chunk.generateSkylightMap();
-                    Utils.updateAllLightTypes(coordinate.world(), coordinate.x, coordinate.y, coordinate.z);
+                    Utils.updateAllLightTypes(coordinate.world(), coordinate.pos);
                 }
                 return true;
             } else {

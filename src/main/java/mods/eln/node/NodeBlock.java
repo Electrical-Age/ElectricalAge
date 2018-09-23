@@ -87,11 +87,11 @@ public abstract class NodeBlock extends Block {//BlockContainer
 
 
     //client server
-    public boolean onBlockPlacedBy(World world, BlockPos pos, Direction front, EntityLivingBase entityLiving, int metadata) {
+    public boolean onBlockPlacedBy(World world, BlockPos pos, Direction front, EntityLivingBase entityLiving, IBlockState state) {
 
         NodeBlockEntity tileEntity = (NodeBlockEntity) world.getTileEntity(pos);
 
-        tileEntity.onBlockPlacedBy(front, entityLiving, metadata);
+        tileEntity.onBlockPlacedBy(front, entityLiving, state);
         return true;
     }
 
@@ -136,10 +136,10 @@ public abstract class NodeBlock extends Block {//BlockContainer
     }
 
     //client server
-    public boolean onBlockActivated(World world, BlockPos pos, EntityPlayer entityPlayer, int side, float vx, float vy, float vz) {
+    public boolean onBlockActivated(World world, BlockPos pos, EntityPlayer entityPlayer, EnumFacing side, float vx, float vy, float vz) {
         NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(pos);
 //    	entityPlayer.openGui( Eln.instance, 0,world,x ,y, z);
-        return entity.onBlockActivated(entityPlayer, Direction.fromIntMinecraftSide(side), vx, vy, vz);
+        return entity.onBlockActivated(entityPlayer, Direction.fromFacing(side), vx, vy, vz);
     }
 
     @Override

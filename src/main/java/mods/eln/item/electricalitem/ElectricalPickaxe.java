@@ -3,6 +3,7 @@ package mods.eln.item.electricalitem;
 import mods.eln.wiki.Data;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -20,10 +21,11 @@ public class ElectricalPickaxe extends ElectricalTool {
     }
 
     @Override
-    public float getStrVsBlock(ItemStack stack, Block block) {
-        float value = block != null && (block.getMaterial() == Material.iron || block.getMaterial() == Material.glass || block.getMaterial() == Material.anvil || block.getMaterial() == Material.rock) ? getStrength(stack) : super.getStrVsBlock(stack, block);
+    public float getStrVsBlock(ItemStack stack, IBlockState state) {
+        Block bl = state.getBlock();
+        float value = bl != null && (state.getMaterial() == Material.IRON || state.getMaterial() == Material.GLASS || state.getMaterial() == Material.ANVIL || state.getMaterial() == Material.ROCK) ? getStrength(stack) : super.getStrVsBlock(stack, state);
         for (Block b : blocksEffectiveAgainst) {
-            if (b == block) {
+            if (b == bl) {
                 value = getStrength(stack);
                 break;
             }

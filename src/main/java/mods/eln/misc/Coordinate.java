@@ -206,4 +206,18 @@ public class Coordinate implements INBTTReady {
     public IBlockState getBlockState() {
         return world().getBlockState(pos);
     }
+
+    public Block getBlock() { return getBlockState().getBlock(); }
+
+    public int getMeta(){
+        return Utils.getMetaFromPos(this);
+    }
+
+    public Coordinate subtract(Coordinate b) {
+        return newWithOffset(-b.pos.getX(), -b.pos.getY(), -b.pos.getZ());
+    }
+    public Coordinate negate() {
+        return new Coordinate(-pos.getX(), -pos.getY(), -pos.getZ(), dimension);
+    }
+
 }
