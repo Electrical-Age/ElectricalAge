@@ -320,7 +320,7 @@ tile.eln.EnergyConverterElnToOtherMVUBlock.name=200V Electrical Age to other ene
 # ./src/main/java/mods/eln/i18n/I18N.java
 You_have_%1$_lives_left=You have %1$ lives left
 
-# ./src/main/java/mods/eln/item/BrushDescriptor.java
+# ./src/main/java/mods/eln/item/BrushDescriptor.kt
 Brush_is_dry=Brush is dry
 Can_paint_%1$_blocks=Can paint %1$ blocks
 
@@ -367,9 +367,13 @@ Solar_panel_upgrade=Solar panel upgrade
 
 # ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
 
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalArmor.java
+
 # ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
 State\:=State:
 Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
+
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalTool.java
 
 # ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
 
@@ -406,8 +410,6 @@ The_summing_unit_outputs_the_sum_of\nthe_three_weighted_inputs.The\ngain_for_eac
 
 # ./src/main/java/mods/eln/sixnode/ElectricalFuse.kt
 Protects_electrical_components.\nFuse_melts_if_current_exceeds_the\nfuse_limit=Protects electrical components.\nFuse melts if current exceeds the\nfuse limit
-
-# ./src/main/java/mods/eln/sixnode/EmergencyLamp.kt
 
 # ./src/main/java/mods/eln/sixnode/LogicGate.kt
 A_Programmable_Array_Logic_(PAL)_is_a_programmable\nlogic_device_semiconductors_used_to__implement_any_logic\nfunction_in_only_one_digital_circuit._The_function_is\nstateless,_which_means_that_no_intermediate_state_is_saved.=A Programmable Array Logic (PAL) is a programmable\nlogic device semiconductors used to  implement any logic\nfunction in only one digital circuit. The function is\nstateless, which means that no intermediate state is saved.
@@ -462,8 +464,6 @@ Input_Voltage=Input Voltage
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
 Sound_is_muted=Sound is muted
 Sound_is_not_muted=Sound is not muted
-
-# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
 Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n-_Current_exceeds_the_cable_limit=Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n- Current exceeds the cable limit
@@ -563,8 +563,6 @@ Waiting_for_completion...=Waiting for completion...
 # ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputDescriptor.java
 Converts_Redstone_signal\nto_an_electrical_voltage.=Converts Redstone signal\nto an electrical voltage.
 
-# ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputElement.java
-
 # ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputDescriptor.java
 Converts_electrical_voltage\ninto_a_Redstone_signal.=Converts electrical voltage\ninto a Redstone signal.
 
@@ -600,6 +598,8 @@ Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides a
 
 # ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
 Can_break_an_electrical_circuit\ninterrupting_the_current.=Can break an electrical circuit\ninterrupting the current.
+
+# ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
 Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=Upon application of a high signal,\nthe timer maintains the output high for\na configurable interval. Can be re-triggered.
@@ -655,6 +655,8 @@ Provides_a_zero_volt_reference.=Provides a zero volt reference.
 
 # ./src/main/java/mods/eln/sixnode/hub/HubDescriptor.java
 Allows_crossing_cables\non_one_single_block.=Allows crossing cables\non one single block.
+
+# ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketContainer.java
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketDescriptor.java
 Angle\:_%1$°_to_%2$°=Angle: %1$° to %2$°
@@ -757,6 +759,8 @@ No_text_associated_to_this_beacon=No text associated to this beacon
 Set_beacon_name=Set beacon name
 
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
+
+# ./src/main/java/mods/eln/sixnode/wirelesssignal/source/WirelessSignalSourceGui.java
 
 # ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
 Fuel_level=Fuel level
@@ -867,6 +871,8 @@ Power_provided=Power provided
 Combustion_chamber_slot=Combustion chamber slot
 Fuel_slot=Fuel slot
 
+# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceDescriptor.java
+
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceElement.java
 Set_temperature=Set temperature
 
@@ -915,7 +921,9 @@ Fan_cooling_power\:_%1$W=Fan cooling power: %1$W
 Fan_power_consumption\:_%1$W=Fan power consumption: %1$W
 Fan_voltage\:_%1$V=Fan voltage: %1$V
 
-# ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveElement.java
+# ./src/main/java/mods/eln/transparentnode/thermaldissipatorpassive/ThermalDissipatorPassiveDescriptor.java
+
+# ./src/main/java/mods/eln/transparentnode/thermaldissipatorpassive/ThermalDissipatorPassiveElement.java
 
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerContainer.java
 Casing_slot=Casing slot
