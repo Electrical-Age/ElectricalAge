@@ -108,6 +108,7 @@ jar {
 
     // Copy libs jar files
     from { configurations.external.collect { it.isDirectory() ? it : zipTree(it) } }
+    exclude(['dan200/**', 'ic2/**', 'li/**', 'buildcraft/**'])
 
     // Add README and LICENSE to the release jar
     from(['README.md', 'LICENSE.md'])
