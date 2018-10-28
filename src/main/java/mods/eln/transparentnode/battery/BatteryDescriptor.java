@@ -201,7 +201,7 @@ public class BatteryDescriptor extends TransparentNodeDescriptor {
         list.add(Utils.plotPercent(tr("Actual charge: "), getChargeInTag(itemStack)));
 
         if (lifeEnable)
-            list.add(Utils.plotPercent(tr("Life : "), getLifeInTag(itemStack)));
+            list.add(Utils.plotPercent(tr("Life: "), getLifeInTag(itemStack)));
     }
 
     @Override

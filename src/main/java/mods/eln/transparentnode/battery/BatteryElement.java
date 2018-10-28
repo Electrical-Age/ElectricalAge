@@ -147,9 +147,13 @@ public class BatteryElement extends TransparentNodeElement {
 
     @Override
     public String multiMeterString(Direction side) {
-        //	if (side == front)return  Utils.plotVolt("U+", positiveLoad.Uc );
-        //	if (side == front.back() && ! grounded)return  Utils.plotVolt("U-", negativeLoad.Uc );
-        return Utils.plotVolt("Ubat:", batteryProcess.getU()) + Utils.plotAmpere("Current Output:", batteryProcess.getDischargeCurrent());
+        String str = "";
+        str += Utils.plotVolt("Ubat:", batteryProcess.getU());
+        str += Utils.plotAmpere("I:", batteryProcess.getDischargeCurrent());
+        str += Utils.plotPercent("Charge:", batteryProcess.getCharge());
+        // batteryProcess.life is a percentage from 1.0 to 0.0.
+        str += Utils.plotPercent("Life:", batteryProcess.life);
+        return str;
     }
 
     @Override
