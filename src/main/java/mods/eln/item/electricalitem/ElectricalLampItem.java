@@ -24,7 +24,7 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery {
     int lightMax, rangeMax;
     double energyStorage, dischargeMin, dischargeMax, chargePower;
 
-    ResourceLocation on, off;
+    ResourceLocation on, off, boosted;
 
     public ElectricalLampItem(String name, int lightMin, int rangeMin, double dischargeMin, int lightMax,
                               int rangeMax, double dischargeMax, double energyStorage, double chargePower) {
@@ -32,12 +32,13 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery {
         this.lightMin = lightMin;
         this.rangeMin = rangeMin;
         this.lightMax = lightMax;
-        this.rangeMax = rangeMax;
+        this.rangeMax = rangeMax + 1; //adding 1 is a hack. Since the value is locked at 1 anyway, I would rather not change a ton of code to make this work, and just double its range by adding 1 here
         this.chargePower = chargePower;
         this.dischargeMin = dischargeMin;
         this.dischargeMax = dischargeMax;
         this.energyStorage = energyStorage;
         setDefaultIcon(name + "off");
+		boosted = new ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + "boosted.png");
         on = new ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + "on.png");
         off = new ResourceLocation("eln", "textures/items/" + name.replace(" ", "").toLowerCase() + "off.png");
         //	off = new ResourceLocation("eln", "/model/StoneFurnace/all.png");
@@ -130,17 +131,17 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery {
     public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p) {
         if (!w.isRemote) {
             int lightState = getLightState(s) + 1;
-            if (lightState > 1) lightState = 0;
+            if (lightState > 2) lightState = 0;
             //((EntityPlayer) entity).addChatMessage("Flashlight !!!");
             switch (lightState) {
                 case 0:
-                    Utils.addChatMessage((EntityPlayerMP) p, "Flashlight OFF");
+                    Utils.addChatMessage((EntityPlayerMP) p, "flashlight OFF");
                     break;
                 case 1:
-                    Utils.addChatMessage((EntityPlayerMP) p, "Flashlight ON");
+                    Utils.addChatMessage((EntityPlayerMP) p, "flashlight ON");
                     break;
                 case 2:
-                    Utils.addChatMessage((EntityPlayerMP) p, "Flashlight ON-2");
+                    Utils.addChatMessage((EntityPlayerMP) p, "flashlight BOOSTED");
                     break;
                 default:
                     break;
@@ -217,7 +218,20 @@ public class ElectricalLampItem extends LampItem implements IItemEnergyBattery {
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        UtilsClient.drawIcon(type, (getLight(item) != 0 && getLightState(item) != 0 ? on : off));
+		ResourceLocation drawlightstate = off;
+			switch (getLightState(item)) {  //just a heads up this could be done way better
+			case 0:
+				drawlightstate = off;
+				break;
+			case 1:
+				drawlightstate = on;
+				break;
+			case 2:
+				drawlightstate = boosted;
+				break;
+			}
+		UtilsClient.drawIcon(type,drawlightstate);
+        //UtilsClient.drawIcon(type, (getLight(item) != 0 && getLightState(item) != 0 ? on : off));		
         if (type == ItemRenderType.INVENTORY) {
             UtilsClient.drawEnergyBare(type, (float) (getEnergy(item) / getEnergyMax(item)));
         }
