@@ -23,6 +23,7 @@ public class ElectricalDigitalDisplayRender extends SixNodeElementRender {
     public float current = 0.0f;
     public float max = 1000.0f;
     public float min = 0.0f;
+    public float dots = 0.0f;
     public boolean strobe = false;
     public ElectricalDigitalDisplayDescriptor.Style style = LED;
     public int dye;
@@ -41,7 +42,7 @@ public class ElectricalDigitalDisplayRender extends SixNodeElementRender {
     public void draw() {
         super.draw();
         drawSignalPin(front.inverse(), descriptor.pinDistance);
-        descriptor.draw((int) (min + current * (max - min)), strobe, style, dye);
+        descriptor.draw((int) (min + current * (max - min)), strobe, style, dye, (int) (dots * descriptor.DOT_STATES));
     }
 
     @Override
@@ -51,6 +52,7 @@ public class ElectricalDigitalDisplayRender extends SixNodeElementRender {
             current = stream.readFloat();
             min = stream.readFloat();
             max = stream.readFloat();
+            dots = stream.readFloat();
             strobe = stream.readBoolean();
             dye = stream.readByte();
             //Utils.println(String.format("EDDR values %f (%f - %f)", current, min, max));

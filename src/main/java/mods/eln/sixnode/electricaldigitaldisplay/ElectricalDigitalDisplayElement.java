@@ -30,21 +30,25 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement {
 
     public ElectricalDigitalDisplayProcess process = new ElectricalDigitalDisplayProcess(this);
 
-    public NbtElectricalGateInput input, strobeIn;
+    public NbtElectricalGateInput input, strobeIn, dotsIn;
     public float current = 0.0f;
     public float last = 0.0f;
     public float min = 0.0f;
     public float max = 1000.0f;
     public float strobe = 0.0f;
     public float strobeLast = 0.0f;
+    public float dots = 0.0f;
+    public float dotsLast = 0.0f;
     public int dye = 5;
 
     public ElectricalDigitalDisplayElement(SixNode sixNode, Direction side, SixNodeDescriptor descriptor) {
         super(sixNode, side, descriptor);
         input = new NbtElectricalGateInput("input");
         strobeIn = new NbtElectricalGateInput("strobe");
+        dotsIn = new NbtElectricalGateInput("dots");
         electricalLoadList.add(input);
         electricalLoadList.add(strobeIn);
+        electricalLoadList.add(dotsIn);
         slowProcessList.add(process);
         this.descriptor = (ElectricalDigitalDisplayDescriptor) descriptor;
     }
@@ -54,9 +58,9 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement {
 
     @Override
     public ElectricalLoad getElectricalLoad(LRDU lrdu, int mask) {
-        if(lrdu == front) return strobeIn;
+        if(lrdu == front) return dotsIn;
         if(lrdu == front.inverse()) return input;
-        return null;
+        return strobeIn;
     }
 
     @Override
@@ -77,8 +81,8 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement {
     @Override
     public int getConnectionMask(LRDU lrdu) {
         if(lrdu == front.inverse()) return NodeBase.maskElectricalInputGate;
-        if(lrdu == front) return NodeBase.maskElectricalInputGate | (1 << NodeBase.maskColorShift);
-        return 0;
+        if(lrdu == front) return NodeBase.maskElectricalInputGate | (11 << NodeBase.maskColorShift);
+        return NodeBase.maskElectricalInputGate | (1 << NodeBase.maskColorShift);
     }
 
     @Override
@@ -111,6 +115,7 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement {
             stream.writeFloat(current);
             stream.writeFloat(min);
             stream.writeFloat(max);
+            stream.writeFloat(dots);
             stream.writeBoolean(strobe >= 0.5);
             stream.writeByte(dye);
         } catch(IOException e) {

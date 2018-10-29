@@ -18,8 +18,12 @@ import static mods.eln.i18n.I18N.tr;
 public class ElectricalDigitalDisplayDescriptor extends SixNodeDescriptor {
     protected Obj3D obj;
     protected Obj3D.Obj3DPart digits[] = new Obj3D.Obj3DPart[4];
+    protected Obj3D.Obj3DPart dots[] = new Obj3D.Obj3DPart[5];
+    protected Obj3D.Obj3DPart colons[] = new Obj3D.Obj3DPart[3];
     protected Obj3D.Obj3DPart base, glass;
     public float pinDistance[];
+
+    public static int DOT_STATES = 256;
 
     enum Style {LED}
 
@@ -34,6 +38,12 @@ public class ElectricalDigitalDisplayDescriptor extends SixNodeDescriptor {
         for(int i = 0; i < 4; i++) {
             digits[i] = obj.getPart("digit" + i);
         }
+        for(int i = 0; i < 5; i++) {
+            dots[i] = obj.getPart("dot" + i);
+        }
+        for(int i = 1; i < 4; i++) {
+            colons[i - 1] = obj.getPart("colon" + i);
+        }
         voltageLevelColor = VoltageLevelColor.Neutral;
     }
 
@@ -42,11 +52,19 @@ public class ElectricalDigitalDisplayDescriptor extends SixNodeDescriptor {
         list.add(tr("Displays signal value."));
     }
 
-    void draw(int value, boolean strobe, Style style) { draw(value, strobe, style, 0); }
+    private void bitToColor(int i) {
+        if(i != 0) GL11.glColor3f(0.95f, 0.0f, 0.0f);
+        else GL11.glColor3f(0.0f, 0.0f, 0.0f);
+    }
 
-    void draw(int value, boolean strobe, Style style, int dye) {
+    void draw(int value, boolean strobe, Style style) { draw(value, strobe, style, 0, 0); }
+    void draw(int value, boolean strobe, Style style, int dye) { draw(value, strobe, style, dye, 0); }
+
+    void draw(int value, boolean strobe, Style style, int dye, int dotconfig) {
         if(value < 0) value = 0;
         if(value > 9999) value = 9999;
+        if(dotconfig < 0) dotconfig = 0;
+        if(dotconfig > 255) dotconfig = 255;
 
         switch(style) {
             case LED:
@@ -64,6 +82,18 @@ public class ElectricalDigitalDisplayDescriptor extends SixNodeDescriptor {
                 digits[i].draw((value / divisor) % 10 / 16.0f, 0.0f);
             }
             divisor *= 10;
+        }
+
+        if(!strobe) {
+            int i;
+            for(i = 0; i < 5; i++) {
+                bitToColor(dotconfig & (1 << i));
+                dots[i].draw();
+            }
+            for(i = 0; i < 3; i++) {
+                bitToColor(dotconfig & (1 << (5 + i)));
+                colons[i].draw();
+            }
         }
 
         Utils.setGlColorFromDye(dye);
