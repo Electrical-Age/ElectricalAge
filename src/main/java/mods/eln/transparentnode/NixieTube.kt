@@ -27,7 +27,9 @@ class NixieTubeDescriptor(val name: String, val obj: Obj3D) : TransparentNodeDes
 
     val pinDistance = Utils.getSixNodePinDistance(base)!!
 
-    val voltageLevelColor = VoltageLevelColor.Neutral
+    init {
+        voltageLevelColor = VoltageLevelColor.Neutral
+    }
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<String>?, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
