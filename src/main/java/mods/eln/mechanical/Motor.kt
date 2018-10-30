@@ -215,7 +215,7 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
             var U: Double
             if(noTorqueU < th.U) {
                 //
-                U = th.U * 0.999 + noTorqueU * 0.001
+                U = th.U * 0.997 + noTorqueU * 0.003
             } else if(th.isHighImpedance()) {
                 // No actual connection, let the system float
                 U = noTorqueU
