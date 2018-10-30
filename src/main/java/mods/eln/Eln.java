@@ -6647,18 +6647,20 @@ public class Eln {
             'R', new ItemStack(Items.redstone));
 
         addRecipe(findItemStack("Machine Block"),
-            " L ",
+            "rLr",
             "LcL",
-            " L ",
+            "rLr",
             'L', findItemStack("Iron Cable"), //I made it cheaper, no more iron poverty
-            'c', findItemStack("Copper Cable"));
+            'c', findItemStack("Copper Cable"),
+			'r', findItemStack("Tree Resin")
+			);
 
         addRecipe(findItemStack("Advanced Machine Block"),
-            " C ",
+            "rCr",
             "CcC",
-            " C ",
+            "rCr",
             'C', "plateAlloy",
-            'L', "ingotAlloy",
+            'r', findItemStack("Tree Resin"),
             'c', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("Electrical Probe Chip"),
