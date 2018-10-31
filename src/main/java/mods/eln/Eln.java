@@ -255,6 +255,7 @@ public class Eln {
     public int electricalInterSystemOverSampling;
 
     public CopperCableDescriptor copperCableDescriptor;
+	public GraphiteDescriptor GraphiteDescriptor;
 
     public ElectricalCableDescriptor veryHighVoltageCableDescriptor;
     public ElectricalCableDescriptor highVoltageCableDescriptor;
@@ -641,6 +642,7 @@ public class Eln {
         registerMiningPipe(17);
         registerTreeResinAndRubber(64);
         registerRawCable(65);
+		registerGraphite(69);
         registerBrush(119);
         registerMiscItem(120);
         registerElectricalTool(121);
@@ -836,6 +838,7 @@ public class Eln {
         recipeMiningPipe();
         recipeTreeResinAndRubber();
         recipeRawCable();
+		recipeGraphite();
         recipeMiscItem();
         recipeBatteryItem();
         recipeElectricalTool();
@@ -4733,6 +4736,61 @@ public class Eln {
             Data.addResource(descriptor.newItemStack());
         }
     }
+	
+	private void registerGraphite(int id) {
+        int subId, completId;
+        String name;
+
+        {
+            subId = 0;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Graphite Rod");
+
+            GraphiteDescriptor = new GraphiteDescriptor(name);
+            sharedItem.addElement(completId, GraphiteDescriptor);
+            Data.addResource(GraphiteDescriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 1;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "2x Graphite Rods");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 2;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "3x Graphite Rods");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+		{
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 3;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "4x Graphite Rods");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 4;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Synthetic Diamond");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+    }
 
     private void registerBrush(int id) {
 
@@ -6523,6 +6581,52 @@ public class Eln {
             'I', dictTungstenIngot);
 
     }
+	private void recipeGraphite() {
+		addRecipe(findItemStack("Graphite Rod", 2),
+            "I",
+            'I', findItemStack("2x Graphite Rods"));
+		addRecipe(findItemStack("Graphite Rod", 3),
+            "I",
+            'I', findItemStack("3x Graphite Rods"));
+		addRecipe(findItemStack("Graphite Rod", 4),
+            "I",
+            'I', findItemStack("4x Graphite Rods"));
+        addShapelessRecipe(
+            findItemStack("2x Graphite Rods"),
+			findItemStack("Graphite Rod"),
+			findItemStack("Graphite Rod"));
+		addShapelessRecipe(
+            findItemStack("3x Graphite Rods"),
+			findItemStack("Graphite Rod"),
+			findItemStack("Graphite Rod"),
+			findItemStack("Graphite Rod"));
+		addShapelessRecipe(
+            findItemStack("3x Graphite Rods"),
+			findItemStack("Graphite Rod"),
+			findItemStack("2x Graphite Rods"));
+		addShapelessRecipe(
+            findItemStack("4x Graphite Rods"),
+			findItemStack("Graphite Rod"),
+			findItemStack("Graphite Rod"),
+			findItemStack("Graphite Rod"),
+			findItemStack("Graphite Rod"));
+		addShapelessRecipe(
+            findItemStack("4x Graphite Rods"),
+			findItemStack("2x Graphite Rods"),
+			findItemStack("Graphite Rod"),
+			findItemStack("Graphite Rod"));
+		addShapelessRecipe(
+            findItemStack("4x Graphite Rods"),
+			findItemStack("2x Graphite Rods"),
+			findItemStack("2x Graphite Rods"));
+		addShapelessRecipe(
+            findItemStack("4x Graphite Rods"),
+			findItemStack("3x Graphite Rods"),
+			findItemStack("Graphite Rod"));
+		addShapelessRecipe(
+            new ItemStack(Items.diamond),
+			findItemStack("Synthetic Diamond"));
+    }
 
     private void recipeBatteryItem() {
         addRecipe(findItemStack("Portable Battery"),
@@ -6711,7 +6815,7 @@ public class Eln {
             'g', new ItemStack(Blocks.glass_pane),
             'c', new ItemStack(Items.dye, 1, 1));
 
-        addRecipe(findItemStack("Casing", 8),
+        addRecipe(findItemStack("Casing", 1),
             "ppp",
             "p p",
             "ppp",
@@ -6732,9 +6836,9 @@ public class Eln {
         maceratorRecipes.addRecipe(new Recipe(findItemStack("Tungsten Ore"),
             new ItemStack[]{findItemStack("Tungsten Dust", 2)}, 2.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.coal, 1, 0),
-            new ItemStack[]{findItemStack("Coal Dust", 2)}, 1.0 * f));
+            new ItemStack[]{findItemStack("Coal Dust", 1)}, 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.coal, 1, 1),
-            new ItemStack[]{findItemStack("Coal Dust", 2)}, 1.0 * f));
+            new ItemStack[]{findItemStack("Coal Dust", 1)}, 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.sand, 1),
             new ItemStack[]{findItemStack("Silicon Dust", 1)}, 3.0 * f));
         maceratorRecipes.addRecipe(new Recipe(findItemStack("Cinnabar Ore"),
@@ -6832,14 +6936,17 @@ public class Eln {
     }
 
     private void recipeCompressor() {
-        compressorRecipes.addRecipe(new Recipe(findItemStack("Coal Plate", 4),
-            new ItemStack[]{new ItemStack(Items.diamond)}, 80000.0));
+        compressorRecipes.addRecipe(new Recipe(findItemStack("4x Graphite Rods", 1),
+            findItemStack("Synthetic Diamond"), 80000.0));
         // extractorRecipes.addRecipe(new
         // Recipe("dustCinnabar",new
         // ItemStack[]{findItemStack("Purified Cinnabar Dust",1)}, 1000.0));
 
         compressorRecipes.addRecipe(new Recipe(findItemStack("Coal Dust", 4),
-            findItemStack("Coal Plate"), 4000.0));
+            findItemStack("Coal Plate"), 40000.0));
+			
+		compressorRecipes.addRecipe(new Recipe(findItemStack("Coal Plate", 4),
+            findItemStack("Graphite Rod"), 80000.0));
 
         compressorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.sand),
             findItemStack("Dielectric"), 2000.0));
