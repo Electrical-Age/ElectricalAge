@@ -18,7 +18,7 @@ public class VoltageStateWatchDog extends ValueWatchdog {
 
     public VoltageStateWatchDog setUNominal(double uNominal) {
         this.max = uNominal * 1.3;
-        this.min = -uNominal * 0.2;
+        this.min = -uNominal * 1.3;
         this.timeoutReset = uNominal * 0.05 * 5;
         return this;
     }
