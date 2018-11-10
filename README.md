@@ -87,7 +87,7 @@ Code/models:
 Languages:
 
 - **bomdia** (it_IT)
-- **Ahtsm** (zh_CN)
+- **KLsz, aneBlack and Ahtsm** (zh_CN)
 - **dcbrwn** (ru_RU)
 - **XxCoolGamesxX** (es_ES - deprecated)
 
