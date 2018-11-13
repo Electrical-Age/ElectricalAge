@@ -185,7 +185,7 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
             x += 22;
             extender.add(new GuiLabel(x, y + 4, Utils.plotEnergy(tr("Cost"), r.energy)));
 
-            counter = (counter + 1) % 1; // WTF ? (% 1 is afaik always 0...)
+            counter = (counter + 1) % 1; // WTF ? (% 1 is afaik always 0...) H: They should have just used counter = 0;
         }
         y += (int) (18 * 1.3);
 
