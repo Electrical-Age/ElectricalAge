@@ -1439,27 +1439,28 @@ public class Eln {
 
         Utils.printFunction(voltageFunction, -0.2, 1.2, 0.1);
 
-        double stdDischargeTime = 4 * 60;
+        double stdDischargeTime = 60 * 16;
         double stdU = LVU;
-        double stdP = LVP / 4;
-        double stdEfficiency = 1.0 - 2.0 / 50.0;
-        double condoEfficiency = 1.0 - 2.0 / 50.0;
+        double stdP = LVP / 16; // changed from 4 to account for increased wire pacing
+        double stdEfficiency = 1.0 - 2.0 / 50.0; //96%
+        double condoEfficiency = 1.0 - 2.0 / 50.0; //96%
 
         batteryVoltageFunctionTable = voltageFunction;
         {
             subId = 0;
             name = TR_NAME(Type.NONE, "Cost Oriented Battery");
 
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
-                stdP * 1.2, 0.000, // electricalU,
-                // electricalPMax,electricalDischargeRate
-                stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
+            BatteryDescriptor desc = new BatteryDescriptor(name,"BatteryBig", batteryCableDescriptor,
+				0.5, //what % of charge it starts out with
+				true, true,  //is rechargable?, Uses Life Mechanic?
+				voltageFunction,
+				stdU, //battery nominal voltage
+                stdP * 1.2, //how much power it can handle at max,
+				0.00,  //precentage of its total output to self-discharge. Should probably be 0
+                stdP, //no idea
+				stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife,
+                
+				heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit, // thermalCoolLimit,
                 "Cheap battery" // name, description)
             );
             desc.setRenderSpec("lowcost");
@@ -1532,7 +1533,7 @@ public class Eln {
             name = TR_NAME(Type.NONE, "Life Oriented Battery");
 
             BatteryDescriptor desc = new BatteryDescriptor(name,
-                "BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
+                "BatteryBig", batteryCableDescriptor, 0.5, true, false, voltageFunction, stdU,
                 stdP * 1.2, 0.000, // electricalU,
                 // electricalPMax,electricalDischargeRate
                 stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
@@ -1565,6 +1566,26 @@ public class Eln {
                 "the battery" // name, description)
             );
             desc.setRenderSpec("coal");
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 6;
+            name = TR_NAME(Type.NONE, "Experimental Battery");
+
+            BatteryDescriptor desc = new BatteryDescriptor(name,
+                "BatteryBig", batteryCableDescriptor, 0.5, true, false, voltageFunction, stdU * 2,
+                stdP * 1.2 * 8, 0.025, // electricalU,
+                // electricalPMax,electricalDischargeRate
+                stdP * 8, stdDischargeTime / 4 * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
+                // electricalStdDischargeTime,
+                // electricalStdEfficiency,
+                // electricalStdHalfLife,
+                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
+                // thermalCoolLimit,
+                "You were unable to fix the power leaking problem, though." // name, description)
+            );
+            desc.setRenderSpec("highvoltage");
+            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
         /*{
@@ -6038,6 +6059,15 @@ public class Eln {
             "PBP",
             'B', findItemStack("Cost Oriented Battery"),
             'P', new ItemStack(Items.gold_ingot));
+        addRecipe(findItemStack("Experimental Battery"),
+            " S ",
+			"LDV",
+			" C ",
+            'S', findItemStack("Capacity Oriented Battery"),
+			'L', findItemStack("Life Oriented Battery"),
+			'V', findItemStack("Voltage Oriented Battery"),
+			'C', findItemStack("Current Oriented Battery"),
+            'D', new ItemStack(Items.diamond));
 
         addRecipe(findItemStack("Single-use Battery"),
             "ppp",
@@ -6251,10 +6281,11 @@ public class Eln {
 
     private void recipeSolarPanel() {
         addRecipe(findItemStack("Small Solar Panel"),
-            "III",
+            "LLL",
             "CSC",
             "III",
             'S', "plateSilicon",
+			'L', findItemStack("Lapis Dust"),
             'I', new ItemStack(Items.iron_ingot),
             'C', findItemStack("Low Voltage Cable"));
 
@@ -6793,7 +6824,7 @@ public class Eln {
 			findItemStack("3x Graphite Rods"),
 			findItemStack("Graphite Rod"));
 		addShapelessRecipe(
-            new ItemStack(Items.diamond),
+            new ItemStack(Items.diamond, 2),
 			findItemStack("Synthetic Diamond"));
     }
 
@@ -7044,6 +7075,19 @@ public class Eln {
             new ItemStack[]{findItemStack("Coal Dust", 24)}, 10.0 * f));
 		maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Leggings"),
             new ItemStack[]{findItemStack("Coal Dust", 24)}, 10.0 * f));
+		maceratorRecipes.addRecipe(new Recipe(findItemStack("Cost Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+		maceratorRecipes.addRecipe(new Recipe(findItemStack("Life Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+		maceratorRecipes.addRecipe(new Recipe(findItemStack("Current Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+		maceratorRecipes.addRecipe(new Recipe(findItemStack("Voltage Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+		maceratorRecipes.addRecipe(new Recipe(findItemStack("Capacity Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+		maceratorRecipes.addRecipe(new Recipe(findItemStack("Single-use Battery"),
+            new ItemStack[]{findItemStack("Copper Dust", 3)}, 10.0 * f));
+
 		//end recycling recipes
     }
     private void recipeArcFurnace() {
