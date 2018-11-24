@@ -1557,7 +1557,7 @@ public class Eln {
                 "BatteryBig", batteryCableDescriptor, 1.0, false, false, voltageFunction, stdU,
                 stdP * 1.2 * 2, 0.000, // electricalU,
                 // electricalPMax,electricalDischargeRate
-                stdP * 2, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
+                stdP * 2, stdDischargeTime / 4 * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
                 // electricalStdDischargeTime,
                 // electricalStdEfficiency,
                 // electricalStdHalfLife,
