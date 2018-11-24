@@ -18,7 +18,8 @@ object FuelRegistry {
 
     /**
      * Gasoline-equivalents: Light oils, the type which can reasonably be burned by internal combustion engines or gas turbines.
-     * The ones on this list are all pretty close to each other in energy content.
+     * Works in both the gas turbine and the fuel furnace
+	 * The ones on this list are all pretty close to each other in energy content.
      *
      * The values represent the heating value (energy) for 1L of the fuel IRL.
      */
@@ -27,6 +28,7 @@ object FuelRegistry {
         "rc ethanol" to 21172000.0, // RotaryCraft, density = 0,79 kg/l, heating value = 26.8 MJ/kg
         "biofuel" to 17826480.0, // Minefactory Reloaded, (Bioethanol) density = 0.786 kg/l, heating value = 22,68 MJ/l
         "bioethanol" to 17826480.0, // Forestry
+		"ic2biogas" to 17826480.0, // IC2
         "gasoline" to 25820000.0, // PneumaticCraft, density = 0.755 kg/L, heat value = 34,2 MJ/l
         "kerosene" to 34800000.0, // PneumaticCraft, heat value = 34,8 MJ/l
         "lpg" to 24840000.0, // PneumaticCraft, density = 0.54 kg/l, heat value = 46 MJ/kg
@@ -36,7 +38,7 @@ object FuelRegistry {
     val gasolineList = gasolineFuels.keys.toTypedArray()
 
     /**
-     * Burnable gases. Gas turbine is still happy, fuel generator is not.
+     * Burnable gases. Gas turbine accepts them, the fuel generator can not.
      *
      * The values represent the heating value (energy) for 1L of the fuel IRL.
      */
