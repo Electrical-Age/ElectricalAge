@@ -3397,6 +3397,46 @@ public class Eln {
                 highVoltageCableDescriptor);
             sharedItem.addElement(completId, element);
         }
+        {
+            subId = 12;
+            completId = subId + (id << 6);
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 800V Tungsten Heating Corp"),// iconId,
+                // name,
+                HVU, 3600,// electricalNominalU, electricalNominalP,
+                4800,// electricalMaximalP)
+                veryHighVoltageCableDescriptor);
+            sharedItem.addElement(completId, element);
+        }
+        {
+            subId = 13;
+            completId = subId + (id << 6);
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "800V Tungsten Heating Corp"),// iconId,
+                // name,
+                HVU, 4812,// electricalNominalU, electricalNominalP,
+                6015,// electricalMaximalP)
+                veryHighVoltageCableDescriptor);
+            sharedItem.addElement(completId, element);
+        }
+        {
+            subId = 14;
+            completId = subId + (id << 6);
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "Small 3.2kV Tungsten Heating Corp"),// iconId,
+                // name,
+                VVU, 4000,// electricalNominalU, electricalNominalP,
+                6000,// electricalMaximalP)
+                veryHighVoltageCableDescriptor);
+            sharedItem.addElement(completId, element);
+        }
+        {
+            subId = 15;
+            completId = subId + (id << 6);
+            element = new HeatingCorpElement(TR_NAME(Type.NONE, "3.2kV Tungsten Heating Corp"),// iconId,
+                // name,
+                VVU, 12000,// electricalNominalU, electricalNominalP,
+                15000,// electricalMaximalP)
+                veryHighVoltageCableDescriptor);
+            sharedItem.addElement(completId, element);
+        }
 
     }
 
@@ -6222,6 +6262,18 @@ public class Eln {
         addRecipe(findItemStack("200V Tungsten Heating Corp"),
             "CC",
             'C', findItemStack("Small 200V Tungsten Heating Corp"));
+        addRecipe(findItemStack("Small 800V Tungsten Heating Corp"),
+            "CC",
+            'C', findItemStack("200V Tungsten Heating Corp"));
+        addRecipe(findItemStack("800V Tungsten Heating Corp"),
+            "CC",
+            'C', findItemStack("Small 800V Tungsten Heating Corp"));
+        addRecipe(findItemStack("Small 3.2kV Tungsten Heating Corp"),
+            "CC",
+            'C', findItemStack("800V Tungsten Heating Corp"));
+        addRecipe(findItemStack("3.2kV Tungsten Heating Corp"),
+            "CC",
+            'C', findItemStack("Small 3.2kV Tungsten Heating Corp"));
     }
 
     private void recipeRegulatorItem() {
