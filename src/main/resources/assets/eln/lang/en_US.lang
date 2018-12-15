@@ -375,9 +375,13 @@ Solar_panel_upgrade=Solar panel upgrade
 
 # ./src/main/java/mods/eln/item/electricalitem/ElectricalArmor.java
 
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalArmor.java
+
 # ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
 State\:=State:
 Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
+
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalTool.java
 
 # ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
 
@@ -660,6 +664,8 @@ Provides_a_zero_volt_reference.=Provides a zero volt reference.
 # ./src/main/java/mods/eln/sixnode/hub/HubDescriptor.java
 Allows_crossing_cables\non_one_single_block.=Allows crossing cables\non one single block.
 
+# ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketContainer.java
+
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketDescriptor.java
 Angle\:_%1$°_to_%2$°=Angle: %1$° to %2$°
 Spot_range\:_%1$_blocks=Spot range: %1$ blocks
@@ -757,6 +763,8 @@ No_text_associated_to_this_beacon=No text associated to this beacon
 Set_beacon_name=Set beacon name
 
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
+
+# ./src/main/java/mods/eln/sixnode/wirelesssignal/source/WirelessSignalSourceGui.java
 
 # ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
 Fuel_level=Fuel level
@@ -872,6 +880,8 @@ Power_provided=Power provided
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceContainer.java
 Combustion_chamber_slot=Combustion chamber slot
 Fuel_slot=Fuel slot
+
+# ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceDescriptor.java
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceElement.java
 Set_temperature=Set temperature
