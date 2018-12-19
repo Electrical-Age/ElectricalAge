@@ -11,6 +11,7 @@ eclipse
 /config
 /saves
 *.json
+*.bat
 options.txt
 /out
 /classes
@@ -24,3 +25,4 @@ options.txt
 # Blender backup files
 *.blend1
 *.blend2
+*.bat
