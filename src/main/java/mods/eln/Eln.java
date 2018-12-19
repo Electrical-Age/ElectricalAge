@@ -301,6 +301,7 @@ public class Eln {
     public int autominerRange = 10;
 
     public static double cableRsFactor = 1.0;
+	public static double cablePace = 1.0;
 
     public boolean killMonstersAroundLamps;
     public int killMonstersAroundLampsRange;
@@ -458,6 +459,7 @@ public class Eln {
         electricalInterSystemOverSampling = config.get("simulation", "electricalInterSystemOverSampling", 50).getInt(50);
         thermalFrequency = config.get("simulation", "thermalFrequency", 400).getDouble(400);
         cableRsFactor = config.get("simulation", "cableRsFactor", 1.0).getDouble(1.0);
+        cablePace = config.get("simulation", "cablePace", 1.0).getDouble(1.0);
 
         wirelessTxRange = config.get("wireless", "txRange", 32).getInt();
 
@@ -1136,10 +1138,10 @@ public class Eln {
     public static final double VVU = 3200;
 
     public static final double SVP = gateOutputCurrent * SVU;
-    public static final double LVP = 1000;
-    public static final double MVP = 2000;
-    public static final double HVP = 5000;
-    public static final double VVP = 15000;
+    public static final double LVP = 1000 * cablePace;
+    public static final double MVP = 2000 * cablePace;
+    public static final double HVP = 5000 * cablePace;
+    public static final double VVP = 15000 * cablePace;
 
     public static final double electricalCableDeltaTMax = 20;
 
@@ -1409,27 +1411,28 @@ public class Eln {
 
         Utils.printFunction(voltageFunction, -0.2, 1.2, 0.1);
 
-        double stdDischargeTime = 4 * 60;
+        double stdDischargeTime = 60 * 16;
         double stdU = LVU;
-        double stdP = LVP / 4;
-        double stdEfficiency = 1.0 - 2.0 / 50.0;
-        double condoEfficiency = 1.0 - 2.0 / 50.0;
+        double stdP = LVP / 4 / cablePace; //you need 4 to support a full cable
+        double stdEfficiency = 1.0 - 2.0 / 50.0; //96%
+        double condoEfficiency = 1.0 - 2.0 / 50.0; //96%
 
         batteryVoltageFunctionTable = voltageFunction;
         {
             subId = 0;
             name = TR_NAME(Type.NONE, "Cost Oriented Battery");
 
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
-                stdP * 1.2, 0.000, // electricalU,
-                // electricalPMax,electricalDischargeRate
-                stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
+            BatteryDescriptor desc = new BatteryDescriptor(name,"BatteryBig", batteryCableDescriptor,
+				0.5, //what % of charge it starts out with
+				true, true,  //is rechargable?, Uses Life Mechanic?
+				voltageFunction,
+				stdU, //battery nominal voltage
+                stdP * 1.2, //how much power it can handle at max,
+				0.00,  //precentage of its total output to self-discharge. Should probably be 0
+                stdP, //no idea
+				stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife,
+                
+				heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit, // thermalCoolLimit,
                 "Cheap battery" // name, description)
             );
             desc.setRenderSpec("lowcost");
