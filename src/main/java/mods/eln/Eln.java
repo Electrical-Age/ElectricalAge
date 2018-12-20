@@ -5675,7 +5675,7 @@ public class Eln {
     private void recipePassiveComponent() {
         addRecipe(findItemStack("Signal Diode", 4),
             " RB",
-            "IIR",
+            " IR",
             " RB",
             'R', new ItemStack(Items.redstone),
             'I', findItemStack("Iron Cable"),
