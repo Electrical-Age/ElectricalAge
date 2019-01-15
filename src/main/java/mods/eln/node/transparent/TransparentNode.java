@@ -170,6 +170,8 @@ public class TransparentNode extends Node {
             e.printStackTrace();
         }
 
+        Utils.println("TN.iFT element = " + element + " elId = " + elementId);
+
     }
 
     @Override
@@ -200,6 +202,9 @@ public class TransparentNode extends Node {
 
     @Override
     public int getBlockMetadata() {
+        Utils.println("TN.gBM");
+        Utils.println(element);
+        Utils.println(element.transparentNodeDescriptor);
         return element.transparentNodeDescriptor.tileEntityMetaTag.meta;
     }
 

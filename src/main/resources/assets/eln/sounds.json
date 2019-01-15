@@ -268,5 +268,23 @@
 				"stream": false
 			}
 		]
+	},
+	"clutch": {
+		"category": "block",
+		"sounds": [
+			{
+				"name": "clutch",
+				"stream": false
+			}
+		]
+	},
+	"click": {
+		"category": "block",
+		"sounds": [
+			{
+				"name": "click",
+				"stream": false
+			}
+		]
 	}
 }

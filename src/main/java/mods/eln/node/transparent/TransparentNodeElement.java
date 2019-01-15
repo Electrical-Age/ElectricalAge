@@ -35,6 +35,8 @@ import java.util.Map;
 public abstract class TransparentNodeElement implements GhostObserver, IPlayer, INodeElement {
 
     public ArrayList<IProcess> slowProcessList = new ArrayList<IProcess>(4);
+    public ArrayList<IProcess> slowPreProcessList = new ArrayList<IProcess>(4);
+    public ArrayList<IProcess> slowPostProcessList = new ArrayList<IProcess>(4);
 
     public ArrayList<IProcess> electricalProcessList = new ArrayList<IProcess>(4);
     public ArrayList<Component> electricalComponentList = new ArrayList<Component>(4);
@@ -62,6 +64,8 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         if (node != null && node.isDestructing()) return;
         
         Eln.simulator.addAllSlowProcess(slowProcessList);
+        for(IProcess p : slowPreProcessList) Eln.simulator.addSlowPreProcess(p);
+        for(IProcess p : slowPostProcessList) Eln.simulator.addSlowPostProcess(p);
 
         Eln.simulator.addAllElectricalComponent(electricalComponentList);
         for (State load : electricalLoadList) Eln.simulator.addElectricalLoad(load);
@@ -74,6 +78,8 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
     public void disconnectJob() {
         Eln.simulator.removeAllSlowProcess(slowProcessList);
+        for(IProcess p : slowPreProcessList) Eln.simulator.removeSlowPreProcess(p);
+        for(IProcess p : slowPostProcessList) Eln.simulator.removeSlowPostProcess(p);
 
         Eln.simulator.removeAllElectricalComponent(electricalComponentList);
         for (State load : electricalLoadList) Eln.simulator.removeElectricalLoad(load);

@@ -22,6 +22,7 @@ public class Simulator /* ,IPacketHandler */ {
 
     private ArrayList<IProcess> slowProcessList;
     private List<IProcess> slowPreProcessList;
+    private List<IProcess> slowPostProcessList;
 
     private ArrayList<IProcess> electricalProcessList;
 
@@ -78,6 +79,7 @@ public class Simulator /* ,IPacketHandler */ {
 
         slowProcessList = new ArrayList<IProcess>();
         slowPreProcessList = new ArrayList<IProcess>();
+        slowPostProcessList = new ArrayList<IProcess>();
 
         electricalProcessList = new ArrayList<IProcess>();
         // electricalConnectionList = new ArrayList<ElectricalConnection>();
@@ -101,6 +103,7 @@ public class Simulator /* ,IPacketHandler */ {
 
         slowProcessList.clear();
         slowPreProcessList.clear();
+        slowPostProcessList.clear();
 
         electricalProcessList.clear();
         // electricalConnectionList.clear();
@@ -124,6 +127,7 @@ public class Simulator /* ,IPacketHandler */ {
 
         slowProcessList.clear();
         slowPreProcessList.clear();
+        slowPostProcessList.clear();
 
         electricalProcessList.clear();
         // electricalConnectionList.clear();
@@ -223,6 +227,10 @@ public class Simulator /* ,IPacketHandler */ {
     public void removeSlowPreProcess(IProcess process) {
         if (process != null) slowPreProcessList.remove(process);
     }
+
+    public void addSlowPostProcess(IProcess process) { if(process != null) slowPostProcessList.add(process); }
+
+    public void removeSlowPostProcess(IProcess process) { if(process != null) slowPostProcessList.remove(process); }
 
     public void addElectricalProcess(IProcess process) {
         if (process != null) electricalProcessList.add(process);
@@ -489,6 +497,10 @@ public class Simulator /* ,IPacketHandler */ {
             thermalFastNsStack = 0;
             slowNsStack = 0;
             thermalSlowNsStack = 0;
+        }
+
+        for(IProcess o : slowPostProcessList) {
+            o.process(1 / 20.0);
         }
     }
 

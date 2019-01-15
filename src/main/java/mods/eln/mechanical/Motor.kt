@@ -214,14 +214,14 @@ class MotorElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
             val th = wireLoad.subSystem.getTh(wireLoad, powerSource)
             var U: Double
             if(noTorqueU < th.U) {
-                //
+                // Input is greater than our output, spin up the shaft
                 U = th.U * 0.997 + noTorqueU * 0.003
             } else if(th.isHighImpedance()) {
                 // No actual connection, let the system float
                 U = noTorqueU
             } else {
-                // Input voltage is high enough to spin up shaft.
-                // Solve a quadratic, I guess?
+                // Provide an output voltage by
+                // solving a quadratic, I guess?
                 val a = 1 / th.R
                 val b = desc.elecPPerDU - th.U / th.R
                 val c = -desc.elecPPerDU * noTorqueU

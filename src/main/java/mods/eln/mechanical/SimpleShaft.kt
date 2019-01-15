@@ -7,6 +7,7 @@ import mods.eln.misc.*
 import mods.eln.node.transparent.*
 import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sound.LoopedSound
+import net.minecraft.entity.EntityLivingBase
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraftforge.client.IItemRenderer
@@ -80,7 +81,7 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     open val cableRender: CableRenderDescriptor? = null
     var cableRefresh = true
     // Sound:
-    private val soundLooper: ShaftSoundLooper?
+    private var soundLooper: ShaftSoundLooper? = null
     val volumeSetting = SlewLimiter(0.5f)
 
     inner private class ShaftSoundLooper(sound: String, coord: Coordonate) : LoopedSound(sound, coord) {
@@ -88,10 +89,10 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
         override fun getVolume() = volumeSetting.position
     }
 
-    init {
+    open fun initSound(desc: SimpleShaftDescriptor) {
         volumeSetting.target = 1f
         volumeSetting.position = 0f
-        val sound = this.desc.sound
+        val sound = desc.sound
         if (sound != null) {
             soundLooper = ShaftSoundLooper(sound, coordonate())
             addLoopedSound(soundLooper)
@@ -101,6 +102,7 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
     }
 
     init {
+        initSound(this.desc)
         mask.set(LRDU.Down, true)
     }
 
@@ -164,7 +166,13 @@ open class ShaftRender(entity: TransparentNodeEntity, desc: TransparentNodeDescr
 abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     TransparentNodeElement(node, desc_), ShaftElement {
     override val shaftMass = 5.0
-    override var shaft = ShaftNetwork(this)
+    open var shaft: ShaftNetwork = ShaftNetwork()
+    override fun getShaft(dir: Direction): ShaftNetwork? = shaft
+    override fun setShaft(dir: Direction, net: ShaftNetwork?) {
+        if(net != null) shaft = net
+    }
+    var destructing = false
+    override fun isDestructing() = destructing
 
     init {
         val exp = WorldExplosion(this).machineExplosion()
@@ -176,16 +184,26 @@ abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeD
 
     override fun initialize() {
         reconnect()
-        shaft.connectShaft(this)
+        val rads = shaft.rads  // Carry over loaded rads, if any
+        shaft = ShaftNetwork(this, shaftConnectivity.iterator())
+        shaft.rads = rads
+        // Utils.println(String.format("SS.i: new %s r=%f", shaft, shaft.rads))
+        shaftConnectivity.forEach {
+            // These calls can still change the speed via mergeShaft
+            shaft.connectShaft(this, it)
+        }
     }
 
     override fun onBreakElement() {
         super.onBreakElement()
-        shaft.disconnectShaft(this)
+        destructing = true
+        shaftConnectivity.forEach {
+            shaft.disconnectShaft(this)
+        }
     }
 
     override fun networkSerialize(stream: DataOutputStream) {
-        super.networkSerialize(stream);
+        super.networkSerialize(stream)
         stream.writeFloat(shaft.rads.toFloat())
         // For cables.
         node.lrduCubeMask.getTranslate(front.down()).serialize(stream)
@@ -199,6 +217,7 @@ abstract class SimpleShaftElement(node: TransparentNode, desc_: TransparentNodeD
     override fun readFromNBT(nbt: NBTTagCompound) {
         super.readFromNBT(nbt)
         shaft.readFromNBT(nbt, "shaft")
+        // Utils.println(String.format("SS.rFN: %s r=%f", shaft, shaft.rads))
     }
 
     override fun multiMeterString(side: Direction?): String {

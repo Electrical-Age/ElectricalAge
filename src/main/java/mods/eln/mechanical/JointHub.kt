@@ -79,12 +79,12 @@ class JointHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
     override fun onBlockActivated(entityPlayer: EntityPlayer?, side: Direction?, vx: Float, vy: Float,
                                   vz: Float): Boolean = false
 
-    override fun connectedOnSide(direction: Direction) {
+    override fun connectedOnSide(direction: Direction, _net: ShaftNetwork) {
         connectedSides.add(direction)
         needPublish()
     }
 
-    override fun disconnectedOnSide(direction: Direction) {
+    override fun disconnectedOnSide(direction: Direction, _net: ShaftNetwork?) {
         connectedSides.remove(direction)
         needPublish()
     }

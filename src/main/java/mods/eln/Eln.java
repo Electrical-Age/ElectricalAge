@@ -2940,6 +2940,24 @@ public class Eln {
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
+
+        {
+            subId = 17;
+            ClutchDescriptor desc = new ClutchDescriptor(
+                TR_NAME(Type.NONE, "Clutch"),
+                obj.getObj("Clutch")
+            );
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+
+        {
+            subId = 18;
+            FixedShaftDescriptor desc = new FixedShaftDescriptor(
+                TR_NAME(Type.NONE, "Fixed Shaft"),
+                obj.getObj("FixedShaft")
+            );
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
     }
 
     public ArrayList<ItemStack> furnaceList = new ArrayList<ItemStack>();
@@ -5189,6 +5207,9 @@ public class Eln {
         }
 
         sharedItem.addElement(53 + (id << 6), new CaseItemDescriptor(TR_NAME(Type.NONE, "Casing")));
+
+        sharedItem.addElement(54 + (id << 6), new ClutchPlateItem("Clutch Plate"));
+        sharedItem.addElement(55 + (id << 6), new ClutchPinItem("Clutch Pin"));
     }
 
     public DataLogsPrintDescriptor dataLogsPrintDescriptor;
@@ -5868,6 +5889,20 @@ public class Eln {
             'm', findItemStack("Machine Block"),
             'p', findItemStack("Electrical Probe Chip"),
             'c', findItemStack("Signal Cable")
+        );
+        addRecipe(findItemStack("Clutch"),
+            "iIi",
+            " c ",
+            'i', "ingotIron",
+            'I', "plateIron",
+            'c', findItemStack("Machine Block")
+        );
+        addRecipe(findItemStack("Fixed Shaft"),
+            "iBi",
+            " c ",
+            'i', "ingotIron",
+            'B', "blockIron",
+            'c', findItemStack("Machine Block")
         );
     }
 
@@ -6820,6 +6855,20 @@ public class Eln {
             "p p",
             "ppp",
             'p', findItemStack("Iron Plate"));
+
+        addRecipe(findItemStack("Clutch Plate"),
+            " t ",
+            "tIt",
+            " t ",
+            'I', "plateIron",
+            't', dictTungstenDust
+        );
+
+        addRecipe(findItemStack("Clutch Pin", 4),
+            "s",
+            "s",
+            's', firstExistingOre("ingotSteel", "ingotAlloy")
+        );
 
     }
 
