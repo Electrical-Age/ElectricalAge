@@ -16,7 +16,7 @@ public class RootSystem {
     double dt;
     int interSystemOverSampling;
 
-    ArrayList<SubSystem> systems = new ArrayList<SubSystem>();
+    public ArrayList<SubSystem> systems = new ArrayList<SubSystem>();
 
     //public HashMap<Component, IDestructor> componentDestructor = new HashMap<Component, IDestructor>();
 

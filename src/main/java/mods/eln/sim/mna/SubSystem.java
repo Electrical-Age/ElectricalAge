@@ -409,4 +409,18 @@ public class SubSystem {
         th.U = Uth;
         return th;
     }
+
+    public String toString() {
+        String str = "";
+        for (Component c: component) {
+            if (c != null)
+                str += c.toString();
+        }
+        //str = component.size() + "components";
+        return str;
+    }
+
+    public int componentSize() {
+        return component.size();
+    }
 }

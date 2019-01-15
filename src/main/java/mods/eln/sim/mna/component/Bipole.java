@@ -53,4 +53,8 @@ public abstract class Bipole extends Component {
     public double getBipoleU() {
         return getU();
     }
+
+    public String toString() {
+        return "[" + aPin + " " + this.getClass().getSimpleName() + " " + bPin + "]";
+    }
 }

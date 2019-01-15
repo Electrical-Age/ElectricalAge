@@ -59,4 +59,8 @@ public abstract class Component {
 
     public void onRemovefromRootSystem() {
     }
+
+    public String toString() {
+        return "(" + this.getClass().getSimpleName() + ")";
+    }
 }

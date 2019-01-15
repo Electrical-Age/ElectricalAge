@@ -97,4 +97,9 @@ public class State {
     public boolean isNotSimulated() {
         return subSystem == null && abstractedBy == null;
     }
+
+    @Override
+    public String toString() {
+        return "(" + this.getId() + "," + this.getClass().getSimpleName() + ")";
+    }
 }
