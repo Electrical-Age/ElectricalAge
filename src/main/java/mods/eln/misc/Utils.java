@@ -600,34 +600,53 @@ public class Utils {
         dropItem(itemStack, coordonate.x, coordonate.y, coordonate.z, coordonate.world());
     }
 
-    public static boolean tryPutStackInInventory(ItemStack stack, IInventory inventory, int start, int count) {
+    public static boolean tryPutStackInInventory(ItemStack stack, IInventory inventory) {
         if (inventory == null) return false;
-        for (int idx = start; idx < start + count; idx++) {
-            ItemStack targetStack = inventory.getStackInSlot(idx);
-            if (targetStack == null) {
-                inventory.setInventorySlotContents(idx, stack.copy());
-                stack.stackSize = 0;
-                return true;
-            } else if (targetStack.isItemEqual(stack)) {
-                // inventory.decrStackSize(idx, -stack.stackSize);
-                int transferMax = inventory.getInventoryStackLimit() - targetStack.stackSize;
-                if (transferMax > 0) {
-                    int transfer = stack.stackSize;
-                    if (transfer > transferMax)
-                        transfer = transferMax;
-                    inventory.decrStackSize(idx, -transfer);
-                    stack.stackSize -= transfer;
-                }
+        int limit = inventory.getInventoryStackLimit();
 
-                if (stack.stackSize == 0) {
-                    return true;
-                }
+        // First, make a list of possible target slots.
+        ArrayList<Integer> slots = new ArrayList<>(4);
+        int need = stack.stackSize;
+        for (int i = 0; i < inventory.getSizeInventory() && need > 0; i++) {
+            ItemStack slot = inventory.getStackInSlot(i);
+            if (slot != null && slot.stackSize < limit && slot.isItemEqual(stack)) {
+                slots.add(i);
+                need -= limit - slot.stackSize;
+            }
+        }
+        for (int i = 0; i < inventory.getSizeInventory() && need > 0; i++) {
+            if (inventory.getStackInSlot(i) == null) {
+                slots.add(i);
+                need -= limit;
             }
         }
 
-        return false;
+        // Is there space enough?
+        if (need > 0) {
+            return false;
+        }
+
+        // Yes. Proceed.
+        int toPut = stack.stackSize;
+        for (Integer slot : slots) {
+            ItemStack target = inventory.getStackInSlot(slot);
+            if (target == null) {
+                int amount = Math.min(toPut, limit);
+                inventory.setInventorySlotContents(slot, new ItemStack(stack.getItem(), amount, stack.getItemDamage()));
+                toPut -= amount;
+            } else {
+               int space = limit - target.stackSize;
+               int amount = Math.min(toPut, space);
+               target.stackSize += amount;
+               toPut -= amount;
+            }
+            if (toPut <= 0) break;
+        }
+
+        return true;
     }
 
+    @Deprecated
     public static boolean canPutStackInInventory(ItemStack[] stackList, IInventory inventory, int[] slotsIdList) {
         int limit = inventory.getInventoryStackLimit();
         ItemStack[] outputStack = new ItemStack[slotsIdList.length];
@@ -676,6 +695,7 @@ public class Utils {
         return true;
     }
 
+    @Deprecated
     public static boolean tryPutStackInInventory(ItemStack[] stackList, IInventory inventory, int[] slotsIdList) {
         int limit = inventory.getInventoryStackLimit();
 
