@@ -17,8 +17,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntityChest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AutoMinerSlowProcess implements IProcess, INBTTReady {
@@ -41,6 +41,8 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     private int blinkCounter = 0;
 
     private int drillCount = 1;
+
+    private ArrayList<ItemStack> itemsToDrop = new ArrayList<ItemStack>(4);
 
     public AutoMinerSlowProcess(AutoMinerElement autoMiner) {
         this.miner = autoMiner;
@@ -96,13 +98,9 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                         Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
                         int meta = jobCoord.world().getBlockMetadata(jobCoord.x, jobCoord.y, jobCoord.z);
                         if (silkTouch) {
-                            drop(new ItemStack(block, 1, meta));
+                            itemsToDrop.add(new ItemStack(block, 1, meta));
                         } else {
-                            List<ItemStack> drop = block.getDrops(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0);
-
-                            for (ItemStack stack : drop) {
-                                drop(stack);
-                            }
+                            itemsToDrop.addAll(block.getDrops(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0));
                         }
 
                         // Use cobblestone instead of air, everywhere except the mining shaft.
@@ -219,8 +217,8 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         return chestEntity;
     }
 
-    private void drop(ItemStack stack) {
-        Utils.tryPutStackInInventory(stack, getDropInventory(), 0, 36);
+    private boolean drop(ItemStack stack) {
+        return Utils.tryPutStackInInventory(stack, getDropInventory());
     }
 
     private boolean isMinable(Block block) {
@@ -243,6 +241,14 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         jobCoord.y = miner.node.coordonate.y - pipeLength;
         jobCoord.z = miner.node.coordonate.z;
 
+        // Attempt to drop items. This might not be successful.
+        while (itemsToDrop.size() > 0) {
+            int index = itemsToDrop.size() - 1;
+            if (drop(itemsToDrop.get(index))) {
+                itemsToDrop.remove(index);
+            }
+        }
+
         boolean jobFind = false;
         if (!miner.node.coordonate.getBlockExist()) {
             setJob(jobType.none);
@@ -259,13 +265,13 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                     setJob(jobType.full);
                 }
             }
-        } else if (!isStorageReady()) {
+        } else if (!isStorageReady() || itemsToDrop.size() != 0) {
             setJob(jobType.chestFull);
             jobFind = true;
         } else if (pipe != null) {
             if (jobCoord.y < miner.node.coordonate.y - 2) {
                 int depth = (miner.node.coordonate.y - jobCoord.y);
-                double miningRay = depth / 10 + 0.1;
+                double miningRay = depth / 10.0 + 0.1;
                 miningRay = Math.min(miningRay, 2);
                 if (depth < scannerRadius) scannerRadius = depth + 1;
                 miningRay = Math.min(miningRay, scannerRadius - 2);

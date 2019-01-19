@@ -417,6 +417,8 @@ The_summing_unit_outputs_the_sum_of\nthe_three_weighted_inputs.The\ngain_for_eac
 # ./src/main/java/mods/eln/sixnode/ElectricalFuse.kt
 Protects_electrical_components.\nFuse_melts_if_current_exceeds_the\nfuse_limit=Protects electrical components.\nFuse melts if current exceeds the\nfuse limit
 
+# ./src/main/java/mods/eln/sixnode/EmergencyLamp.kt
+
 # ./src/main/java/mods/eln/sixnode/LogicGate.kt
 A_Programmable_Array_Logic_(PAL)_is_a_programmable\nlogic_device_semiconductors_used_to__implement_any_logic\nfunction_in_only_one_digital_circuit._The_function_is\nstateless,_which_means_that_no_intermediate_state_is_saved.=A Programmable Array Logic (PAL) is a programmable\nlogic device semiconductors used to  implement any logic\nfunction in only one digital circuit. The function is\nstateless, which means that no intermediate state is saved.
 If_the_input_J_is_1_(high)_and_K_is_0_(low)\nduring_a_clock_pulse,_the_output_becomes_1_(high).\nIf_J_is_0_(low)_and_K_is_1_(high)_during_the_pulse,\nthe_output_becomes_0_(low)._If_both_inputs_are_0_(low)\nduring_the_clock_pulse,_the_state_is_maintained._If_both\ninputs_are_1_(high)_the_input_is_toggled_if_a_rising_edge\nwas_detected_at_the_clock_input.=If the input J is 1 (high) and K is 0 (low)\nduring a clock pulse, the output becomes 1 (high).\nIf J is 0 (low) and K is 1 (high) during the pulse,\nthe output becomes 0 (low). If both inputs are 0 (low)\nduring the clock pulse, the state is maintained. If both\ninputs are 1 (high) the input is toggled if a rising edge\nwas detected at the clock input.
@@ -468,6 +470,8 @@ Input_Voltage=Input Voltage
 # ./src/main/java/mods/eln/sixnode/electricalalarm/ElectricalAlarmGui.java
 Sound_is_muted=Sound is muted
 Sound_is_not_muted=Sound is not muted
+
+# ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerContainer.java
 
 # ./src/main/java/mods/eln/sixnode/electricalbreaker/ElectricalBreakerDescriptor.java
 Protects_electrical_components\nOpens_contact_if\:\n__-_Voltage_exceeds_a_certain_level\n__-_Current_exceeds_the_cable_limit=Protects electrical components\nOpens contact if:\n  - Voltage exceeds a certain level\n  - Current exceeds the cable limit
@@ -560,6 +564,8 @@ Waiting_for_completion...=Waiting for completion...
 # ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputDescriptor.java
 Converts_Redstone_signal\nto_an_electrical_voltage.=Converts Redstone signal\nto an electrical voltage.
 
+# ./src/main/java/mods/eln/sixnode/electricalredstoneinput/ElectricalRedstoneInputElement.java
+
 # ./src/main/java/mods/eln/sixnode/electricalredstoneoutput/ElectricalRedstoneOutputDescriptor.java
 Converts_electrical_voltage\ninto_a_Redstone_signal.=Converts electrical voltage\ninto a Redstone signal.
 
@@ -596,8 +602,6 @@ Provides_an_ideal_voltage_source\nwithout_energy_or_power_limitation.=Provides a
 
 # ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchDescriptor.java
 Can_break_an_electrical_circuit\ninterrupting_the_current.=Can break an electrical circuit\ninterrupting the current.
-
-# ./src/main/java/mods/eln/sixnode/electricalswitch/ElectricalSwitchElement.java
 
 # ./src/main/java/mods/eln/sixnode/electricaltimeout/ElectricalTimeoutDescriptor.java
 Upon_application_of_a_high_signal,\nthe_timer_maintains_the_output_high_for\na_configurable_interval._Can_be_re-triggered.=Upon application of a high signal,\nthe timer maintains the output high for\na configurable interval. Can be re-triggered.
@@ -932,9 +936,7 @@ Fan_cooling_power\:_%1$W=Fan cooling power: %1$W
 Fan_power_consumption\:_%1$W=Fan power consumption: %1$W
 Fan_voltage\:_%1$V=Fan voltage: %1$V
 
-# ./src/main/java/mods/eln/transparentnode/thermaldissipatorpassive/ThermalDissipatorPassiveDescriptor.java
-
-# ./src/main/java/mods/eln/transparentnode/thermaldissipatorpassive/ThermalDissipatorPassiveElement.java
+# ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveElement.java
 
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerContainer.java
 Casing_slot=Casing slot
