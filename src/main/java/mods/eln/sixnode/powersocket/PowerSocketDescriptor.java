@@ -1,15 +1,13 @@
 package mods.eln.sixnode.powersocket;
 
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.Obj3D;
+import mods.eln.misc.*;
 import mods.eln.misc.Obj3D.Obj3DPart;
-import mods.eln.misc.VoltageLevelColor;
 import mods.eln.node.six.SixNodeDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import org.lwjgl.opengl.GL11;
 
 import java.util.Collections;
 import java.util.List;
@@ -55,11 +53,18 @@ public class PowerSocketDescriptor extends SixNodeDescriptor {
     }
 
     public void draw() {
+        draw(0);
+    }
+
+    public void draw(int color) {
         //GL11.glRotatef(90.f,1.f,0.f,0.f);
         if (base != null)
             base.draw();
-        if (socket != null)
+        if (socket != null) {
+            Utils.setGlColorFromDye(color, 0.7f, 0.3f);
             socket.draw();
+            GL11.glColor3f(1f, 1f, 1f);
+        }
     }
 
     @Override

@@ -13,6 +13,7 @@ import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import org.lwjgl.opengl.GL11;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -28,6 +29,8 @@ public class PowerSocketRender extends SixNodeElementRender {
 
     SixNodeElementInventory inventory = new SixNodeElementInventory(1, 64, this);
 
+    public int paintColor = 15;
+
     public PowerSocketRender(SixNodeEntity tileEntity, Direction side, SixNodeDescriptor descriptor) {
         super(tileEntity, side, descriptor);
         this.descriptor = (PowerSocketDescriptor) descriptor;
@@ -35,9 +38,16 @@ public class PowerSocketRender extends SixNodeElementRender {
     }
 
     @Override
+    public void drawCables() {
+        Utils.setGlColorFromDye(paintColor, 1.0f);
+        super.drawCables();
+        GL11.glColor3f(1f, 1f, 1f);
+    }
+
+    @Override
     public void draw() {
         super.draw();
-        descriptor.draw();
+        descriptor.draw(paintColor);
     }
 
     @Override
@@ -68,6 +78,8 @@ public class PowerSocketRender extends SixNodeElementRender {
             } else {
                 cableRender = null;
             }
+
+            paintColor = stream.readInt();
         } catch (IOException e) {
             e.printStackTrace();
         }

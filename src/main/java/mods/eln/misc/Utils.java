@@ -430,58 +430,60 @@ public class Utils {
         setGlColorFromDye(damage, 1.0f);
     }
 
-    public static void setGlColorFromDye(int damage, float gain) {
+    public static void setGlColorFromDye(int damage, float gain) { setGlColorFromDye(damage, gain, 0f); }
+
+    public static void setGlColorFromDye(int damage, float gain, float bias) {
         switch (damage) {
             default:
-                GL11.glColor3f(0.05f * gain, 0.05f * gain, 0.05f * gain);
+                GL11.glColor3f(0.05f * gain + bias, 0.05f * gain + bias, 0.05f * gain + bias);
                 break;
             case 0:
-                GL11.glColor3f(0.2f * gain, 0.2f * gain, 0.2f * gain);
+                GL11.glColor3f(0.2f * gain + bias, 0.2f * gain + bias, 0.2f * gain + bias);
                 break; // black
             case 1:
-                GL11.glColor3f(1.0f * gain, 0.05f * gain, 0.05f * gain);
+                GL11.glColor3f(1.0f * gain + bias, 0.05f * gain + bias, 0.05f * gain + bias);
                 break; // red
             case 2:
-                GL11.glColor3f(0.2f * gain, 0.5f * gain, 0.1f * gain);
+                GL11.glColor3f(0.2f * gain + bias, 0.5f * gain + bias, 0.1f * gain + bias);
                 break; // green
             case 3:
-                GL11.glColor3f(0.3f * gain, 0.2f * gain, 0.1f * gain);
+                GL11.glColor3f(0.3f * gain + bias, 0.2f * gain + bias, 0.1f * gain + bias);
                 break; // brown
             case 4:
-                GL11.glColor3f(0.2f * gain, 0.2f * gain, 1.0f * gain);
+                GL11.glColor3f(0.2f * gain + bias, 0.2f * gain + bias, 1.0f * gain + bias);
                 break; // blue
             case 5:
-                GL11.glColor3f(0.7f * gain, 0.05f * gain, 1.0f * gain);
+                GL11.glColor3f(0.7f * gain + bias, 0.05f * gain + bias, 1.0f * gain + bias);
                 break; // purple
             case 6:
-                GL11.glColor3f(0.2f * gain, 0.7f * gain, 0.9f * gain);
+                GL11.glColor3f(0.2f * gain + bias, 0.7f * gain + bias, 0.9f * gain + bias);
                 break;
             case 7:
-                GL11.glColor3f(0.7f * gain, 0.7f * gain, 0.7f * gain);
+                GL11.glColor3f(0.7f * gain + bias, 0.7f * gain + bias, 0.7f * gain + bias);
                 break;
             case 8:
-                GL11.glColor3f(0.4f * gain, 0.4f * gain, 0.4f * gain);
+                GL11.glColor3f(0.4f * gain + bias, 0.4f * gain + bias, 0.4f * gain + bias);
                 break;
             case 9:
-                GL11.glColor3f(1.0f * gain, 0.5f * gain, 0.5f * gain);
+                GL11.glColor3f(1.0f * gain + bias, 0.5f * gain + bias, 0.5f * gain + bias);
                 break;
             case 10:
-                GL11.glColor3f(0.05f * gain, 1.0f * gain, 0.05f * gain);
+                GL11.glColor3f(0.05f * gain + bias, 1.0f * gain + bias, 0.05f * gain + bias);
                 break;
             case 11:
-                GL11.glColor3f(0.9f * gain, 0.8f * gain, 0.1f * gain);
+                GL11.glColor3f(0.9f * gain + bias, 0.8f * gain + bias, 0.1f * gain + bias);
                 break;
             case 12:
-                GL11.glColor3f(0.4f * gain, 0.5f * gain, 1.0f * gain);
+                GL11.glColor3f(0.4f * gain + bias, 0.5f * gain + bias, 1.0f * gain + bias);
                 break;
             case 13:
-                GL11.glColor3f(0.9f * gain, 0.3f * gain, 0.9f * gain);
+                GL11.glColor3f(0.9f * gain + bias, 0.3f * gain + bias, 0.9f * gain + bias);
                 break;
             case 14:
-                GL11.glColor3f(1.0f * gain, 0.6f * gain, 0.3f * gain);
+                GL11.glColor3f(1.0f * gain + bias, 0.6f * gain + bias, 0.3f * gain + bias);
                 break;
             case 15:
-                GL11.glColor3f(1.0f * gain, 1.0f * gain, 1.0f * gain);
+                GL11.glColor3f(1.0f * gain + bias, 1.0f * gain + bias, 1.0f * gain + bias);
                 break;
         }
         // GL11.glColor3f(((color >> 16) & 0xFF) / 255f, ((color >> 7) & 0xFF) / 255f, ((color >> 0) & 0xFF) / 255f);

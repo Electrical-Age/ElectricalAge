@@ -225,8 +225,11 @@ public class RootSystem {
                 System.out.println("ELN generateInterSystems ERROR");
             }
 
-            new InterSystemAbstraction(this, (Resistor) c);
+            Resistor r = (Resistor) c;
+            // If a pin is disconnected, we can't be intersystem
+            if(r.aPin == null || r.bPin == null) continue;
 
+            new InterSystemAbstraction(this, r);
             ic.remove();
         }
     }

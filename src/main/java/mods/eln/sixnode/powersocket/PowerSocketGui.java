@@ -11,7 +11,7 @@ import static mods.eln.i18n.I18N.tr;
 
 public class PowerSocketGui extends GuiContainerEln {
 
-    final static int maxDeviceCount = 3;
+    final static int maxDeviceCount = 1;
 
     GuiTextFieldEln[] devices = new GuiTextFieldEln[3];
     private PowerSocketRender render;

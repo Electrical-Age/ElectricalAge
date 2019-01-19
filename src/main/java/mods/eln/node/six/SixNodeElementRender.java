@@ -83,6 +83,19 @@ public abstract class SixNodeElementRender {
 
     }
 
+    public void drawCables() {
+        for (int idx = 0; idx < 4; idx++) {
+            CableRenderDescriptor render = getCableRender(LRDU.fromInt(idx));
+            cableListReady[idx] = false;
+            if (render != null && (connectedSide.mask & (1 << idx)) != 0) {
+                GL11.glNewList(cableList[idx], GL11.GL_COMPILE);
+                CableRender.drawCable(render, new LRDUMask(1 << idx), connectionType);
+                GL11.glEndList();
+                cableListReady[idx] = true;
+            }
+        }
+    }
+
     public void draw() {
         // Minecraft.getMinecraft().mcProfiler.startSection("SixNodeRender");
         if (needRedraw) {
@@ -90,16 +103,7 @@ public abstract class SixNodeElementRender {
             connectionType = CableRender.connectionType(this, side);
             newConnectionType(connectionType);
             if (drawCableAuto()) {
-                for (int idx = 0; idx < 4; idx++) {
-                    CableRenderDescriptor render = getCableRender(LRDU.fromInt(idx));
-                    cableListReady[idx] = false;
-                    if (render != null && (connectedSide.mask & (1 << idx)) != 0) {
-                        GL11.glNewList(cableList[idx], GL11.GL_COMPILE);
-                        CableRender.drawCable(render, new LRDUMask(1 << idx), connectionType);
-                        GL11.glEndList();
-                        cableListReady[idx] = true;
-                    }
-                }
+                drawCables();
             }
         }
 
