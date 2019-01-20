@@ -9,6 +9,9 @@ achievement.open_guide.desc=Open the wiki guide
 
 # ./src/main/java/mods/eln/Eln.java
 10A_Diode.name=10A Diode
+800V_Arc_Furnace.name=800V Arc Furnace
+Experimental_Battery.name=Experimental Battery
+Creative_Cable.name=Creative Cable
 200V_Active_Thermal_Dissipator.name=200V Active Thermal Dissipator
 200V_Battery_Charger.name=200V Battery Charger
 200V_Compressor.name=200V Compressor
@@ -322,6 +325,8 @@ item.E-Coal Helmet.name=E-Coal Helmet
 item.E-Coal Leggings.name=E-Coal Leggings
 itemGroup.Eln=Electrical Age
 mod.meta.desc=Electricity in your base!
+tile.arc_clay_block.name=Arc Clay Block
+tile.arc_metal_block.name=Arc Metal Block
 tile.eln.ElnProbe.name=Eln Computer Probe
 tile.eln.EnergyConverterElnToOtherHVUBlock.name=800V Electrical Age to other energy exporter
 tile.eln.EnergyConverterElnToOtherLVUBlock.name=50V Electrical Age to other energy exporter

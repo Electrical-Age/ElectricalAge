@@ -10,6 +10,10 @@ import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
+import mods.eln.block.ArcClayBlock;
+import mods.eln.block.ArcClayItemBlock;
+import mods.eln.block.ArcMetalBlock;
+import mods.eln.block.ArcMetalItemBlock;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
@@ -130,6 +134,7 @@ import mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor;
 import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxDescriptor;
 import mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxDescriptor;
 import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor;
+import mods.eln.transparentnode.electricalmachine.ArcFurnaceDescriptor;
 import mods.eln.transparentnode.electricalmachine.CompressorDescriptor;
 import mods.eln.transparentnode.electricalmachine.MaceratorDescriptor;
 import mods.eln.transparentnode.electricalmachine.MagnetizerDescriptor;
@@ -240,6 +245,8 @@ public class Eln {
     public static OreBlock oreBlock;
     public static GhostBlock ghostBlock;
     public static LightBlock lightBlock;
+    public static ArcClayBlock arcClayBlock;
+    public static ArcMetalBlock arcMetalBlock;
 
     public static SixNodeItem sixNodeItem;
     public static TransparentNodeItem transparentNodeItem;
@@ -257,7 +264,11 @@ public class Eln {
     public int electricalInterSystemOverSampling;
 
     public CopperCableDescriptor copperCableDescriptor;
+    public GraphiteDescriptor GraphiteDescriptor;
 
+    public ElectricalCableDescriptor creativeCableDescriptor;
+    /*public ElectricalCableDescriptor T2TransmissionCableDescriptor;
+    public ElectricalCableDescriptor T1TransmissionCableDescriptor;*/
     public ElectricalCableDescriptor veryHighVoltageCableDescriptor;
     public ElectricalCableDescriptor highVoltageCableDescriptor;
     public ElectricalCableDescriptor signalCableDescriptor;
@@ -301,6 +312,7 @@ public class Eln {
     public int autominerRange = 10;
 
     public static double cableRsFactor = 1.0;
+    public static double cablePace = 1.0;
 
     public boolean killMonstersAroundLamps;
     public int killMonstersAroundLampsRange;
@@ -461,6 +473,7 @@ public class Eln {
         electricalInterSystemOverSampling = config.get("simulation", "electricalInterSystemOverSampling", 50).getInt(50);
         thermalFrequency = config.get("simulation", "thermalFrequency", 400).getDouble(400);
         cableRsFactor = config.get("simulation", "cableRsFactor", 1.0).getDouble(1.0);
+        cablePace = config.get("simulation", "cablePace", 1.0).getDouble(1.0);
 
         wirelessTxRange = config.get("wireless", "txRange", 32).getInt();
 
@@ -510,6 +523,9 @@ public class Eln {
 
         oreBlock = (OreBlock) new OreBlock().setCreativeTab(creativeTab).setBlockName("OreEln");
 
+        arcClayBlock = (ArcClayBlock) new ArcClayBlock();
+        arcMetalBlock = (ArcMetalBlock) new ArcMetalBlock();
+
         sharedItem = (SharedItem) new SharedItem()
             .setCreativeTab(creativeTab).setMaxStackSize(64)
             .setUnlocalizedName("sharedItem");
@@ -540,6 +556,8 @@ public class Eln {
         GameRegistry.registerBlock(sixNodeBlock, SixNodeItem.class, "Eln.SixNode");
         GameRegistry.registerBlock(transparentNodeBlock, TransparentNodeItem.class, "Eln.TransparentNode");
         GameRegistry.registerBlock(oreBlock, OreItem.class, "Eln.Ore");
+        GameRegistry.registerBlock(arcClayBlock, ArcClayItemBlock.class, "Eln.arc_clay_block");
+        GameRegistry.registerBlock(arcMetalBlock, ArcMetalItemBlock.class, "Eln.arc_metal_block");
         TileEntity.addMapping(TransparentNodeEntity.class, "TransparentNodeEntity");
         TileEntity.addMapping(TransparentNodeEntityWithFluid.class, "TransparentNodeEntityWF");
         // TileEntity.addMapping(TransparentNodeEntityWithSiededInv.class, "TransparentNodeEntityWSI");
@@ -556,8 +574,8 @@ public class Eln {
         oreItem = (OreItem) Item.getItemFromBlock(oreBlock);
         /*
          *
-		 * int id = 0,subId = 0,completId; String name;
-		 */
+         * int id = 0,subId = 0,completId; String name;
+         */
 
         SixNode.sixNodeCacheList.add(new SixNodeCacheStd());
 
@@ -611,6 +629,7 @@ public class Eln {
         registerBattery(16);
         registerElectricalFurnace(32);
         registerMacerator(33);
+        registerArcFurnace(34);
         registerCompressor(35);
         registerMagnetizer(36);
         registerPlateMachine(37);
@@ -646,11 +665,15 @@ public class Eln {
         registerMiningPipe(17);
         registerTreeResinAndRubber(64);
         registerRawCable(65);
+        registerArc(69);
         registerBrush(119);
         registerMiscItem(120);
         registerElectricalTool(121);
         registerPortableItem(122);
         registerFuelBurnerItem(124);
+
+        OreDictionary.registerOre("blockAluminum", arcClayBlock);
+        OreDictionary.registerOre("blockSteel", arcMetalBlock);
 
         // Register WIP items only on development runs!
         if (isDevelopmentRun()) {
@@ -668,18 +691,18 @@ public class Eln {
         }
         {
             subId = 3;
-			GridTransformerDescriptor descriptor =
-					new GridTransformerDescriptor("Grid DC-DC Converter", obj.getObj("GridConverter"), "textures/wire.png", highVoltageCableDescriptor);
-			GhostGroup g = new GhostGroup();
-			g.addElement(1, 0, 0);
-			g.addElement(0, 0, -1);
-			g.addElement(1, 0, -1);
-			g.addElement(1, 1, 0);
-			g.addElement(0, 1, 0);
-			g.addElement(1, 1, -1);
-			g.addElement(0, 1, -1);
-			descriptor.setGhostGroup(g);
-			transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
+            GridTransformerDescriptor descriptor =
+                new GridTransformerDescriptor("Grid DC-DC Converter", obj.getObj("GridConverter"), "textures/wire.png", highVoltageCableDescriptor);
+            GhostGroup g = new GhostGroup();
+            g.addElement(1, 0, 0);
+            g.addElement(0, 0, -1);
+            g.addElement(1, 0, -1);
+            g.addElement(1, 1, 0);
+            g.addElement(0, 1, 0);
+            g.addElement(1, 1, -1);
+            g.addElement(0, 1, -1);
+            descriptor.setGhostGroup(g);
+            transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
         }
         {
             subId = 4;
@@ -841,12 +864,14 @@ public class Eln {
         recipeMiningPipe();
         recipeTreeResinAndRubber();
         recipeRawCable();
+        recipeGraphite();
         recipeMiscItem();
         recipeBatteryItem();
         recipeElectricalTool();
         recipePortableCapacitor();
 
         recipeFurnace();
+        recipeArcFurnace();
         recipeMacerator();
         recipeCompressor();
         recipePlateMachine();
@@ -944,11 +969,11 @@ public class Eln {
     TestBlock testBlock;
 
     private void registerTestBlock() {
-		/*
-		 * testBlock = new TestBlock(); testBlock.setCreativeTab(creativeTab).setBlockName("TestBlock"); GameRegistry.registerBlock(testBlock, "Eln.TestBlock"); TileEntity.addMapping(TestEntity.class, "Eln.TestEntity"); //LanguageRegistry.addName(testBlock,"Test Block"); NodeManager.instance.registerUuid(TestNode.getInfoStatic().getUuid(), TestNode.class);
-		 *
-		 * GameRegistry.registerCustomItemStack("Test Block", new ItemStack(testBlock));
-		 */
+        /*
+         * testBlock = new TestBlock(); testBlock.setCreativeTab(creativeTab).setBlockName("TestBlock"); GameRegistry.registerBlock(testBlock, "Eln.TestBlock"); TileEntity.addMapping(TestEntity.class, "Eln.TestEntity"); //LanguageRegistry.addName(testBlock,"Test Block"); NodeManager.instance.registerUuid(TestNode.getInfoStatic().getUuid(), TestNode.class);
+         *
+         * GameRegistry.registerCustomItemStack("Test Block", new ItemStack(testBlock));
+         */
     }
 
     private void checkRecipe() {
@@ -1006,15 +1031,15 @@ public class Eln {
 
     }
 
-	/*
-	 * @EventHandler public void clientStart(Client event) {
-	 *
-	 *
-	 * }
-	 */
+    /*
+     * @EventHandler public void clientStart(Client event) {
+     *
+     *
+     * }
+     */
 
     @EventHandler
-	/* Remember to use the right event! */
+    /* Remember to use the right event! */
     public void onServerStopped(FMLServerStoppedEvent ev) {
         TutorialSignElement.resetBalise();
 
@@ -1077,7 +1102,7 @@ public class Eln {
     }
 
     @EventHandler
-	/* Remember to use the right event! */
+    /* Remember to use the right event! */
     public void onServerStarting(FMLServerStartingEvent ev) {
 
         {
@@ -1128,6 +1153,7 @@ public class Eln {
     public CableRenderDescriptor stdCableRender200V;
     public CableRenderDescriptor stdCableRender800V;
     public CableRenderDescriptor stdCableRender3200V;
+    public CableRenderDescriptor stdCableRenderCreative;
 
     public static final double gateOutputCurrent = 0.100;
     public static final double SVU = 50, SVII = gateOutputCurrent / 50,
@@ -1138,11 +1164,10 @@ public class Eln {
     public static final double VVU = 3200;
 
     public static final double SVP = gateOutputCurrent * SVU;
-    public static final double LVP = 1000;
-    public static final double MVP = 2000;
-    public static final double HVP = 5000;
-    public static final double VVP = 15000;
-
+    public static final double LVP = 1000 * cablePace;
+    public static final double MVP = 2000 * cablePace;
+    public static final double HVP = 5000 * cablePace;
+    public static final double VVP = 15000 * cablePace;
     public static final double electricalCableDeltaTMax = 20;
 
     public static final double cableHeatingTime = 30;
@@ -1324,6 +1349,29 @@ public class Eln {
         {
             subId = 20;
 
+            name = TR_NAME(Type.NONE, "Creative Cable");
+
+            stdCableRenderCreative = new CableRenderDescriptor("eln",
+                "sprites/cablecreative.png", 8.0f, 4.0f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRenderCreative,
+                "Experience the power of Microresistance", false);
+
+            creativeCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(VVU, VVU * VVP, 0.025 * 5 / 4 / 20 / 8 * cableRsFactor / 9001, //what!?
+                VVU * 1.3, VVU * VVP * 1.2,
+                40,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+
+        {
+            subId = 24;
+
             name = TR_NAME(Type.NONE, "Signal Bus Cable");
 
             stdCableRenderSignalBus = new CableRenderDescriptor("eln",
@@ -1411,27 +1459,28 @@ public class Eln {
 
         Utils.printFunction(voltageFunction, -0.2, 1.2, 0.1);
 
-        double stdDischargeTime = 4 * 60;
+        double stdDischargeTime = 60 * 16;
         double stdU = LVU;
-        double stdP = LVP / 4;
-        double stdEfficiency = 1.0 - 2.0 / 50.0;
-        double condoEfficiency = 1.0 - 2.0 / 50.0;
+        double stdP = LVP / 4 / cablePace; //you need 4 to support a full cable
+        double stdEfficiency = 1.0 - 2.0 / 50.0; //96%
+        double condoEfficiency = 1.0 - 2.0 / 50.0; //96%
 
         batteryVoltageFunctionTable = voltageFunction;
         {
             subId = 0;
             name = TR_NAME(Type.NONE, "Cost Oriented Battery");
 
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
-                stdP * 1.2, 0.000, // electricalU,
-                // electricalPMax,electricalDischargeRate
-                stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
+            BatteryDescriptor desc = new BatteryDescriptor(name, "BatteryBig", batteryCableDescriptor,
+                0.5, //what % of charge it starts out with
+                true, true,  //is rechargable?, Uses Life Mechanic?
+                voltageFunction,
+                stdU, //battery nominal voltage
+                stdP * 1.2, //how much power it can handle at max,
+                0.00,  //precentage of its total output to self-discharge. Should probably be 0
+                stdP, //no idea
+                stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife,
+
+                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit, // thermalCoolLimit,
                 "Cheap battery" // name, description)
             );
             desc.setRenderSpec("lowcost");
@@ -1504,7 +1553,7 @@ public class Eln {
             name = TR_NAME(Type.NONE, "Life Oriented Battery");
 
             BatteryDescriptor desc = new BatteryDescriptor(name,
-                "BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
+                "BatteryBig", batteryCableDescriptor, 0.5, true, false, voltageFunction, stdU,
                 stdP * 1.2, 0.000, // electricalU,
                 // electricalPMax,electricalDischargeRate
                 stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
@@ -1528,7 +1577,7 @@ public class Eln {
                 "BatteryBig", batteryCableDescriptor, 1.0, false, false, voltageFunction, stdU,
                 stdP * 1.2 * 2, 0.000, // electricalU,
                 // electricalPMax,electricalDischargeRate
-                stdP * 2, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
+                stdP * 2, stdDischargeTime / 4 * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
                 // electricalStdDischargeTime,
                 // electricalStdEfficiency,
                 // electricalStdHalfLife,
@@ -1540,6 +1589,26 @@ public class Eln {
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
         {
+            subId = 6;
+            name = TR_NAME(Type.NONE, "Experimental Battery");
+
+            BatteryDescriptor desc = new BatteryDescriptor(name,
+                "BatteryBig", batteryCableDescriptor, 0.5, true, false, voltageFunction, stdU * 2,
+                stdP * 1.2 * 8, 0.025, // electricalU,
+                // electricalPMax,electricalDischargeRate
+                stdP * 8, stdDischargeTime / 4 * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
+                // electricalStdDischargeTime,
+                // electricalStdEfficiency,
+                // electricalStdHalfLife,
+                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
+                // thermalCoolLimit,
+                "You were unable to fix the power leaking problem, though." // name, description)
+            );
+            desc.setRenderSpec("highvoltage");
+            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        /*{
             subId = 32;
             name = TR_NAME(Type.NONE, "50V Condensator");
 
@@ -1581,7 +1650,7 @@ public class Eln {
             desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
             desc.setDefaultIcon("empty-texture");
             transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
-        }
+        } */
     }
 
     private void registerGround(int id) {
@@ -2791,12 +2860,12 @@ public class Eln {
             name = TR_NAME(Type.NONE, "Stone Heat Furnace");
 
             HeatFurnaceDescriptor desc = new HeatFurnaceDescriptor(name,
-                "stonefurnace", 1000,
+                "stonefurnace", 4000,
                 Utils.getCoalEnergyReference() * 2 / 3,// double
                 // nominalPower,
                 // double
                 // nominalCombustibleEnergy,
-                2, 500,// int combustionChamberMax,double
+                8, 500,// int combustionChamberMax,double
                 // combustionChamberPower,
                 new ThermalLoadInitializerByPowerDrop(780, -100, 10, 2) // thermal
             );
@@ -2828,7 +2897,7 @@ public class Eln {
             name = TR_NAME(Type.NONE, "50V Turbine");
             double RsFactor = 0.1;
             double nominalU = LVU;
-            double nominalP = 300 * heatTurbinePowerFactor;
+            double nominalP = 1000 * heatTurbinePowerFactor; // it was 300 before
             double nominalDeltaT = 250;
             TurbineDescriptor desc = new TurbineDescriptor(name, "turbineb", lowVoltageCableDescriptor.render,
                 TtoU.duplicate(nominalDeltaT, nominalU), PoutToPin.duplicate(nominalP, nominalP), nominalDeltaT,
@@ -2842,7 +2911,7 @@ public class Eln {
             name = TR_NAME(Type.NONE, "200V Turbine");
             double RsFactor = 0.10;
             double nominalU = MVU;
-            double nominalP = 500 * heatTurbinePowerFactor;
+            double nominalP = 2000 * heatTurbinePowerFactor;
             double nominalDeltaT = 350;
             TurbineDescriptor desc = new TurbineDescriptor(name, "turbinebblue", meduimVoltageCableDescriptor.render,
                 TtoU.duplicate(nominalDeltaT, nominalU), PoutToPin.duplicate(nominalP, nominalP), nominalDeltaT,
@@ -3040,6 +3109,30 @@ public class Eln {
 
     public RecipesList compressorRecipes = new RecipesList();
     public RecipesList plateMachineRecipes = new RecipesList();
+    public RecipesList arcFurnaceRecipes = new RecipesList();
+
+    private void registerArcFurnace(int id) {
+
+        int subId, completId;
+        String name;
+        {
+            subId = 0;
+            name = TR_NAME(Type.NONE, "800V Arc Furnace");
+
+            ArcFurnaceDescriptor desc = new ArcFurnaceDescriptor(
+                name,// String name,
+                obj.getObj("arcfurnace"),
+                HVU, 10000,// double nominalU,double nominalP,
+                HVU * 1.25,// double maximalU,
+                new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
+                highVoltageCableDescriptor,// ElectricalCableDescriptor cable
+                arcFurnaceRecipes);
+
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+            desc.setRunningSound("eln:arc_furnace");
+
+        }
+    }
 
     private void registerPlateMachine(int id) {
 
@@ -3698,7 +3791,7 @@ public class Eln {
             element = new FerromagneticCoreDescriptor(
                 TR_NAME(Type.NONE, "Cheap Ferromagnetic Core"), obj.getObj("feromagneticcorea"),// iconId,
                 // name,
-                10);
+                100);
             sharedItem.addElement(completId, element);
         }
         {
@@ -3707,7 +3800,7 @@ public class Eln {
             element = new FerromagneticCoreDescriptor(
                 TR_NAME(Type.NONE, "Average Ferromagnetic Core"), obj.getObj("feromagneticcorea"),// iconId,
                 // name,
-                4);
+                50);
             sharedItem.addElement(completId, element);
         }
         {
@@ -3840,6 +3933,32 @@ public class Eln {
             sharedItem.addElement(completId, element);
             Data.addResource(element.newItemStack());
             addToOre("dustIron", element.newItemStack());
+        }
+        {
+            subId = 3;
+            completId = subId + (id << 6);
+
+            name = TR_NAME(Type.NONE, "Lapis Dust");
+            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
+                // name,
+                new String[]{});
+            dustCopper = element;
+            sharedItem.addElement(completId, element);
+            Data.addResource(element.newItemStack());
+            addToOre("dustLapis", element.newItemStack());
+        }
+        {
+            subId = 4;
+            completId = subId + (id << 6);
+
+            name = TR_NAME(Type.NONE, "Diamond Dust");
+            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
+                // name,
+                new String[]{});
+            dustCopper = element;
+            sharedItem.addElement(completId, element);
+            Data.addResource(element.newItemStack());
+            addToOre("dustDiamond", element.newItemStack());
         }
 
         {
@@ -4106,7 +4225,7 @@ public class Eln {
             armorMarge = 2; //getting rid of this. Safe to delete.
             helmetECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Helmet, t1, t2,
                 //(armor + armorMarge) * energyPerDamage * 10
-				8000, 2000.0,// double energyStorage,double chargePower
+                8000, 2000.0,// double energyStorage,double chargePower
                 armor / 20.0, armor * energyPerDamage,// double ratioMax,double ratioMaxEnergy,
                 energyPerDamage// double energyPerDamage
             )).setUnlocalizedName(name).setTextureName("eln:ecoal_helmet").setCreativeTab(creativeTab);
@@ -4119,7 +4238,7 @@ public class Eln {
             armorMarge = 4;
             plateECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Chestplate, t1, t2,
                 //(armor + armorMarge) * energyPerDamage * 10
-				8000, 2000.0,// double
+                8000, 2000.0,// double
                 // energyStorage,double
                 // chargePower
                 armor / 20.0, armor * energyPerDamage,// double
@@ -4136,7 +4255,7 @@ public class Eln {
             armorMarge = 3;
             legsECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Leggings, t1, t2,
                 //(armor + armorMarge) * energyPerDamage * 10
-				8000, 2000.0,// double
+                8000, 2000.0,// double
                 // energyStorage,double
                 // chargePower
                 armor / 20.0, armor * energyPerDamage,// double
@@ -4153,7 +4272,7 @@ public class Eln {
             armorMarge = 2;
             bootsECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Boots, t1, t2,
                 //(armor + armorMarge) * energyPerDamage * 10
-				8000, 2000.0,// double
+                8000, 2000.0,// double
                 // energyStorage,double
                 // chargePower
                 armor / 20.0, armor * energyPerDamage,// double
@@ -4253,6 +4372,34 @@ public class Eln {
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
 
+        /*{ //TODO Work on the large wind turbine
+            subId = 1;
+            name = TR_NAME(Type.NONE, "Large Wind Turbine");
+
+            WindTurbineDescriptor desc = new WindTurbineDescriptor(
+                name, obj.getObj("WindTurbineMini"), // name,Obj3D obj,
+                lowVoltageCableDescriptor,// ElectricalCableDescriptor
+                // cable,
+                PfW,// PfW
+                160 * windTurbinePowerFactor, 10,// double nominalPower,double nominalWind,
+                LVU * 1.18, 22,// double maxVoltage, double maxWind,
+                3,// int offY,
+                7, 2, 2,// int rayX,int rayY,int rayZ,
+                2, 0.07,// int blockMalusMinCount,double blockMalus
+                "eln:WINDTURBINE_BIG_SF", 1f // Use the wind turbine sound and play at normal volume (1 => 100%)
+            );
+
+            GhostGroup g = new GhostGroup();
+            g.addElement(0, 1, 0);
+            g.addElement(0, 2, -1);
+            g.addElement(0, 2, 1);
+            g.addElement(0, 3, -1);
+            g.addElement(0, 3, 1);
+            g.addRectangle(0, 0, 1, 3, 0, 0);
+            desc.setGhostGroup(g);
+            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
+        } */
+
         {
             subId = 16;
             name = TR_NAME(Type.NONE, "Water Turbine");
@@ -4285,14 +4432,14 @@ public class Eln {
             subId = 1;
             FuelGeneratorDescriptor descriptor =
                 new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "50V Fuel Generator"), obj.getObj("FuelGenerator50V"),
-                    lowVoltageCableDescriptor, fuelGeneratorPowerFactor * 300, LVU * 1.05, fuelGeneratorTankCapacity);
+                    lowVoltageCableDescriptor, fuelGeneratorPowerFactor * 1200, LVU * 1.25, fuelGeneratorTankCapacity);
             transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
         }
         {
             subId = 2;
             FuelGeneratorDescriptor descriptor =
                 new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "200V Fuel Generator"), obj.getObj("FuelGenerator200V"),
-                    meduimVoltageCableDescriptor, fuelGeneratorPowerFactor * 1500, MVU * 1.05,
+                    meduimVoltageCableDescriptor, fuelGeneratorPowerFactor * 6000, MVU * 1.25,
                     fuelGeneratorTankCapacity);
             transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
         }
@@ -4703,6 +4850,26 @@ public class Eln {
             );
             sharedItem.addElement(completId, descriptor);
         }
+        {
+            subId = 3;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Turbo Electrical Drill");
+
+            descriptor = new ElectricalDrillDescriptor(name,// iconId, name,
+                1, 10000 // double operationTime,double operationEnergy
+            );
+            sharedItem.addElement(completId, descriptor);
+        }
+        {
+            subId = 4;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Irresponsible Electrical Drill");
+
+            descriptor = new ElectricalDrillDescriptor(name,// iconId, name,
+                0.1, 20000 // double operationTime,double operationEnergy
+            );
+            sharedItem.addElement(completId, descriptor);
+        }
 
     }
 
@@ -4820,6 +4987,144 @@ public class Eln {
         }
     }
 
+    private void registerArc(int id) {
+        int subId, completId;
+        String name;
+
+        {
+            subId = 0;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Graphite Rod");
+
+            GraphiteDescriptor = new GraphiteDescriptor(name);
+            sharedItem.addElement(completId, GraphiteDescriptor);
+            Data.addResource(GraphiteDescriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 1;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "2x Graphite Rods");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 2;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "3x Graphite Rods");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 3;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "4x Graphite Rods");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 4;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Synthetic Diamond");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 5;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "unreleasedium");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 6;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Arc Clay Ingot");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+            OreDictionary.registerOre("ingotAluminum", descriptor.newItemStack());
+            OreDictionary.registerOre("ingotAluminium", descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 7;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Arc Metal Ingot");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+            OreDictionary.registerOre("ingotSteel", descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 8;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Inert Canister");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        /*{
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 9;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "T1 Transmission Cable");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 10;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "T2 Transmission Cable");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }*/
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 11;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Canister of Water");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 12;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Canister of Arc Water");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+    }
+
     private void registerBrush(int id) {
 
         int subId, completId;
@@ -4857,7 +5162,7 @@ public class Eln {
 
             addShapelessRecipe(emptyStack.copy(),
                 new ItemStack(Blocks.wool, 1, idx),
-                new ItemStack(Items.iron_ingot));
+                findItemStack("Iron Cable"));
         }
 
         for (int idx = 0; idx < 16; idx++) {
@@ -4879,7 +5184,7 @@ public class Eln {
 
             ElectricalLampItem desc = new ElectricalLampItem(
                 name,
-				//10, 8, 20, 15, 5, 50, old
+                //10, 8, 20, 15, 5, 50, old
                 10, 8, 20, 15, 5, 50,// int light,int range
                 6000, 100// , energyStorage,discharg, charge
             );
@@ -4893,7 +5198,7 @@ public class Eln {
             ElectricalPickaxe desc = new ElectricalPickaxe(
                 name,
                 22, 1,// float strengthOn,float strengthOff, - Haxorian note: buffed this from 8,3 putting it around eff 4
-                40000, 200, 2000// double energyStorage,double
+                40000, 200, 10000// double energyStorage,double
                 // energyPerBlock,double chargePower
             );
             sharedItemStackOne.addElement(subId + (id << 6), desc);
@@ -4906,7 +5211,7 @@ public class Eln {
             ElectricalAxe desc = new ElectricalAxe(
                 name,
                 22, 1,// float strengthOn,float strengthOff, - Haxorian note: buffed this too
-                40000, 200, 2000// double energyStorage,double energyPerBlock,double chargePower
+                40000, 200, 10000// double energyStorage,double energyPerBlock,double chargePower
             );
             sharedItemStackOne.addElement(subId + (id << 6), desc);
         }
@@ -5233,31 +5538,33 @@ public class Eln {
     }
 
     private void recipeElectricalCable() {
-        addRecipe(signalCableDescriptor.newItemStack(1),
-            "R",
+        addRecipe(signalCableDescriptor.newItemStack(2), //signal wire
+            "R", //rubber
+            "C", //iron cable
             "C",
             'C', findItemStack("Iron Cable"),
             'R', "itemRubber");
 
-        addRecipe(lowVoltageCableDescriptor.newItemStack(1),
+        addRecipe(lowVoltageCableDescriptor.newItemStack(2), //Low Voltage Cable
             "R",
+            "C",
             "C",
             'C', findItemStack("Copper Cable"),
             'R', "itemRubber");
 
-        addRecipe(meduimVoltageCableDescriptor.newItemStack(1),
+        addRecipe(meduimVoltageCableDescriptor.newItemStack(1), //Meduim Voltage Cable (Medium Voltage Cable)
             "R",
             "C",
             'C', lowVoltageCableDescriptor.newItemStack(1),
             'R', "itemRubber");
 
-        addRecipe(highVoltageCableDescriptor.newItemStack(1),
+        addRecipe(highVoltageCableDescriptor.newItemStack(1), //High Voltage Cable
             "R",
             "C",
             'C', meduimVoltageCableDescriptor.newItemStack(1),
             'R', "itemRubber");
 
-        addRecipe(signalCableDescriptor.newItemStack(6),
+        addRecipe(signalCableDescriptor.newItemStack(12), //Signal Wire
             "RRR",
             "CCC",
             "RRR",
@@ -5270,7 +5577,7 @@ public class Eln {
             'C', signalCableDescriptor.newItemStack(1),
             'R', "itemRubber");
 
-        addRecipe(lowVoltageCableDescriptor.newItemStack(6),
+        addRecipe(lowVoltageCableDescriptor.newItemStack(12),
             "RRR",
             "CCC",
             "RRR",
@@ -5278,7 +5585,7 @@ public class Eln {
             'R', "itemRubber");
 
 
-        addRecipe(veryHighVoltageCableDescriptor.newItemStack(6),
+        addRecipe(veryHighVoltageCableDescriptor.newItemStack(12),
             "RRR",
             "CCC",
             "RRR",
@@ -5288,7 +5595,7 @@ public class Eln {
     }
 
     private void recipeThermalCable() {
-        addRecipe(findItemStack("Copper Thermal Cable", 6),
+        addRecipe(findItemStack("Copper Thermal Cable", 12),
             "SSS",
             "CCC",
             "SSS",
@@ -5308,12 +5615,12 @@ public class Eln {
             "IG",
             "G ",
             'G', new ItemStack(Blocks.glass_pane),
-            'I', new ItemStack(Items.iron_ingot));
+            'I', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("Lamp Socket B Projector", 3),
-            " I",
-            "IG",
-            " I",
+            " G",
+            "GI",
+            " G",
             'G', new ItemStack(Blocks.glass_pane),
             'I', new ItemStack(Items.iron_ingot));
 
@@ -5331,7 +5638,7 @@ public class Eln {
         addRecipe(findItemStack("Flat Lamp Socket", 3),
             "IGI",
             'G', new ItemStack(Blocks.glass_pane),
-            'I', new ItemStack(Items.iron_ingot));
+            'I', findItemStack("Iron Cable"));
         addRecipe(findItemStack("Simple Lamp Socket", 3),
             " I ",
             "GGG",
@@ -5340,8 +5647,8 @@ public class Eln {
 
         addRecipe(findItemStack("Fluorescent Lamp Socket", 3),
             " I ",
-            "I I",
-            'G', new ItemStack(Blocks.glass_pane),
+            "G G",
+            'G', findItemStack("Iron Cable"),
             'I', new ItemStack(Items.iron_ingot));
 
 
@@ -5349,14 +5656,14 @@ public class Eln {
             "I",
             "G",
             'G', findItemStack("Robust Lamp Socket"),
-            'I', new ItemStack(Items.iron_ingot));
+            'I', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("Long Suspended Lamp Socket", 2),
             "I",
             "I",
             "G",
             'G', findItemStack("Robust Lamp Socket"),
-            'I', new ItemStack(Items.iron_ingot));
+            'I', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("Sconce Lamp Socket", 2),
             "GCG",
@@ -5414,7 +5721,7 @@ public class Eln {
     private void recipePassiveComponent() {
         addRecipe(findItemStack("Signal Diode", 4),
             " RB",
-            "IIR",
+            " IR",
             " RB",
             'R', new ItemStack(Items.redstone),
             'I', findItemStack("Iron Cable"),
@@ -5425,7 +5732,7 @@ public class Eln {
             "IIR",
             " RB",
             'R', new ItemStack(Items.redstone),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'B', "itemRubber");
 
         addRecipe(findItemStack("25A Diode"),
@@ -5443,20 +5750,18 @@ public class Eln {
             'P', "plateIron");
 
         addRecipe(findItemStack("Power Inductor"),
-            " P ",
+            "   ",
             "cIc",
-            "IPI",
+            "   ",
             'I', new ItemStack(Items.iron_ingot),
-            'c', findItemStack("Copper Cable"),
-            'P', "plateIron");
+            'c', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("Power Resistor"),
-            " P ",
-            "c c",
-            "IPI",
-            'I', new ItemStack(Items.iron_ingot),
+            "   ",
+            "cCc",
+            "   ",
             'c', findItemStack("Copper Cable"),
-            'P', "plateCopper");
+            'C', findItemStack("Coal Dust"));
 
         addRecipe(findItemStack("Rheostat"),
             " R ",
@@ -5470,13 +5775,11 @@ public class Eln {
         );
 
         addRecipe(findItemStack("Thermistor"),
-            " P ",
+            "   ",
             "csc",
-            "IPI",
+            "   ",
             's', "dustSilicon",
-            'I', new ItemStack(Items.iron_ingot),
-            'c', findItemStack("Copper Cable"),
-            'P', "plateCopper");
+            'c', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("Large Rheostat"),
             "   ",
@@ -5489,11 +5792,11 @@ public class Eln {
     }
 
     private void recipeSwitch() {
-		/*
-		 * addRecipe(findItemStack("Signal Switch"), "  I", " I ", "CAC", 'R', new ItemStack(Items.redstone), 'A', "itemRubber", 'I', findItemStack("Copper Cable"), 'C', findItemStack("Signal Cable"));
-		 *
-		 * addRecipe(findItemStack("Signal Switch with LED"), " RI", " I ", "CAC", 'R', new ItemStack(Items.redstone), 'A', "itemRubber", 'I', findItemStack("Copper Cable"), 'C', findItemStack("Signal Cable"));
-		 */
+        /*
+         * addRecipe(findItemStack("Signal Switch"), "  I", " I ", "CAC", 'R', new ItemStack(Items.redstone), 'A', "itemRubber", 'I', findItemStack("Copper Cable"), 'C', findItemStack("Signal Cable"));
+         *
+         * addRecipe(findItemStack("Signal Switch with LED"), " RI", " I ", "CAC", 'R', new ItemStack(Items.redstone), 'A', "itemRubber", 'I', findItemStack("Copper Cable"), 'C', findItemStack("Signal Cable"));
+         */
 
         addRecipe(findItemStack("Low Voltage Switch"),
             "  I",
@@ -5539,7 +5842,7 @@ public class Eln {
             "OIO",
             "CRC",
             'R', new ItemStack(Items.redstone),
-            'O', new ItemStack(Items.iron_ingot),
+            'O', findItemStack("Iron Cable"),
             'G', new ItemStack(Blocks.glass_pane),
             'A', "itemRubber",
             'I', findItemStack("Copper Cable"),
@@ -5550,7 +5853,7 @@ public class Eln {
             "OIO",
             "CRC",
             'R', new ItemStack(Items.redstone),
-            'O', new ItemStack(Items.iron_ingot),
+            'O', findItemStack("Iron Cable"),
             'G', new ItemStack(Blocks.glass_pane),
             'A', "itemRubber",
             'I', findItemStack("Copper Cable"),
@@ -5561,7 +5864,7 @@ public class Eln {
             "OIO",
             "CRC",
             'R', new ItemStack(Items.redstone),
-            'O', new ItemStack(Items.iron_ingot),
+            'O', findItemStack("Iron Cable"),
             'G', new ItemStack(Blocks.glass_pane),
             'A', "itemRubber",
             'I', findItemStack("Copper Cable"),
@@ -5572,7 +5875,7 @@ public class Eln {
             "OIO",
             "CRC",
             'R', new ItemStack(Items.redstone),
-            'O', new ItemStack(Items.iron_ingot),
+            'O', findItemStack("Iron Cable"),
             'G', new ItemStack(Blocks.glass_pane),
             'A', "itemRubber",
             'I', findItemStack("Copper Cable"),
@@ -5583,7 +5886,7 @@ public class Eln {
             "OIO",
             "CRC",
             'R', new ItemStack(Items.redstone),
-            'O', new ItemStack(Items.iron_ingot),
+            'O', findItemStack("Iron Cable"),
             'G', new ItemStack(Blocks.glass_pane),
             'I', findItemStack("Copper Cable"),
             'C', findItemStack("Signal Cable"));
@@ -5595,7 +5898,7 @@ public class Eln {
             " R ",
             "ICI",
             'R', new ItemStack(Items.redstone),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'C', dictCheapChip,
             'S', findItemStack("Signal Antenna"));
 
@@ -5604,7 +5907,7 @@ public class Eln {
             "R R",
             "ICI",
             'R', new ItemStack(Items.redstone),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'C', dictCheapChip,
             'S', findItemStack("Signal Antenna"));
 
@@ -5612,7 +5915,7 @@ public class Eln {
             " S ",
             "ICI",
             'R', new ItemStack(Items.redstone),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'C', dictCheapChip,
             'S', findItemStack("Signal Antenna"));
     }
@@ -5922,32 +6225,33 @@ public class Eln {
             'I', new ItemStack(Items.iron_ingot));
 
         addRecipe(findItemStack("Capacity Oriented Battery"),
-            "PPP",
             "PBP",
-            "PPP",
             'B', findItemStack("Cost Oriented Battery"),
             'P', "ingotLead");
 
         addRecipe(findItemStack("Voltage Oriented Battery"),
-            "PPP",
             "PBP",
-            "PPP",
             'B', findItemStack("Cost Oriented Battery"),
-            'P', new ItemStack(Items.iron_ingot));
+            'P', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("Current Oriented Battery"),
-            "PPP",
             "PBP",
-            "PPP",
             'B', findItemStack("Cost Oriented Battery"),
             'P', "ingotCopper");
 
         addRecipe(findItemStack("Life Oriented Battery"),
-            "P P",
-            " B ",
-            "P P",
+            "PBP",
             'B', findItemStack("Cost Oriented Battery"),
             'P', new ItemStack(Items.gold_ingot));
+        addRecipe(findItemStack("Experimental Battery"),
+            " S ",
+            "LDV",
+            " C ",
+            'S', findItemStack("Capacity Oriented Battery"),
+            'L', findItemStack("Life Oriented Battery"),
+            'V', findItemStack("Voltage Oriented Battery"),
+            'C', findItemStack("Current Oriented Battery"),
+            'D', new ItemStack(Items.diamond));
 
         addRecipe(findItemStack("Single-use Battery"),
             "ppp",
@@ -6005,6 +6309,7 @@ public class Eln {
         );
 
         // I don't care what you think, if your modpack lacks steel then you don't *need* this much power.
+        // Or just use the new Arc furnace. Other mod's steel methods are slow and tedious and require huge multiblocks.
         // Feel free to add alternate non-iron recipes, though. Here, or by minetweaker.
         for (String type : new String[]{
             "Aluminum",
@@ -6061,6 +6366,10 @@ public class Eln {
             'C', findItemStack("Low Voltage Cable"),
             'F', new ItemStack(Blocks.furnace),
             'I', new ItemStack(Items.iron_ingot));
+        addShapelessRecipe(findItemStack("Canister of Water", 1),
+            findItemStack("Inert Canister"),
+            new ItemStack(Items.water_bucket));
+
     }
 
     private void recipeSixNodeMisc() {
@@ -6069,21 +6378,21 @@ public class Eln {
             "III",
             'c', findItemStack("Iron Cable"),
             'r', new ItemStack(Items.redstone),
-            'I', new ItemStack(Items.iron_ingot));
+            'I', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("Digital Watch"),
             "rcr",
             "III",
             'c', findItemStack("Iron Cable"),
             'r', new ItemStack(Items.redstone),
-            'I', new ItemStack(Items.iron_ingot));
+            'I', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("Hub"),
             "I I",
             " c ",
             "I I",
             'c', findItemStack("Copper Cable"),
-            'I', new ItemStack(Items.iron_ingot));
+            'I', findItemStack("Iron Cable"));
 
 
         addRecipe(findItemStack("Energy Meter"),
@@ -6092,7 +6401,7 @@ public class Eln {
             "IcI",
             'c', findItemStack("Copper Cable"),
             'R', dictCheapChip,
-            'I', new ItemStack(Items.iron_ingot));
+            'I', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("Advanced Energy Meter"),
             " c ",
@@ -6101,7 +6410,6 @@ public class Eln {
             'c', findItemStack("Copper Cable"),
             'R', dictAdvancedChip,
             'P', findItemStack("Iron Plate"));
-
     }
 
     private void recipeAutoMiner() {
@@ -6124,6 +6432,13 @@ public class Eln {
             'B', findItemStack("Machine Block"),
             'I', "plateIron",
             'M', findItemStack("Electrical Motor"));
+
+        /*addRecipe(findItemStack("Large Wind Turbine"), //todo add recipe to large wind turbine
+            "TTT",
+            "TCT",
+            "TTT",
+            'T', findItemStack("Wind Turbine"),
+            'C', findItemStack("Advanced Machine Block")); */
 
         addRecipe(findItemStack("Water Turbine"),
             "  I",
@@ -6159,10 +6474,11 @@ public class Eln {
 
     private void recipeSolarPanel() {
         addRecipe(findItemStack("Small Solar Panel"),
-            "III",
+            "LLL",
             "CSC",
             "III",
             'S', "plateSilicon",
+            'L', findItemStack("Lapis Dust"),
             'I', new ItemStack(Items.iron_ingot),
             'C', findItemStack("Low Voltage Cable"));
 
@@ -6173,8 +6489,8 @@ public class Eln {
             'M', findItemStack("Electrical Motor"),
             'I', new ItemStack(Items.iron_ingot));
 
-        for (String metal : new String[] { "blockSteel", "blockAluminum", "blockAluminium", "casingMachineAdvanced" }) {
-            for (String panel : new String[] {"Small Solar Panel", "Small Rotating Solar Panel"}) {
+        for (String metal : new String[]{"blockSteel", "blockAluminum", "blockAluminium", "casingMachineAdvanced"}) {
+            for (String panel : new String[]{"Small Solar Panel", "Small Rotating Solar Panel"}) {
                 addRecipe(findItemStack("2x3 Solar Panel"),
                     "PPP",
                     "PPP",
@@ -6201,16 +6517,6 @@ public class Eln {
             'I', "ingotCopper",
             'C', findItemStack("Copper Thermal Cable"));
 
-	/*	addRecipe(
-				findItemStack("Small Active Thermal Dissipator"),
-				"RMR",
-				"I I",
-				"III",
-				'I', "ingotCopper",
-				'M', findItemStack("Electrical Motor"),
-				'R', "itemRubber",
-				'C', findItemStack("Copper Thermal Cable"));*/
-
         addRecipe(
             findItemStack("Small Active Thermal Dissipator"),
             "RMR",
@@ -6218,16 +6524,6 @@ public class Eln {
             'D', findItemStack("Small Passive Thermal Dissipator"),
             'M', findItemStack("Electrical Motor"),
             'R', "itemRubber");
-
-	/*	addRecipe(
-				findItemStack("200V Active Thermal Dissipator"),
-				"RMR",
-				"I I",
-				"III",
-				'I', "ingotCopper",
-				'M', findItemStack("Advanced Electrical Motor"),
-				'R', "itemRubber",
-				'C', findItemStack("Copper Thermal Cable"));*/
 
         addRecipe(
             findItemStack("200V Active Thermal Dissipator"),
@@ -6253,10 +6549,8 @@ public class Eln {
             'C', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("50V Copper Heating Corp"),
-            "C C",
-            "CCC",
-            "C C",
-            'C', "ingotCopper");
+            "CC",
+            'C', findItemStack("Small 50V Copper Heating Corp"));
 
         addRecipe(findItemStack("Small 200V Copper Heating Corp"),
             "CC",
@@ -6272,10 +6566,8 @@ public class Eln {
             "C C", 'C', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("50V Iron Heating Corp"),
-            "C C",
-            "CCC",
-            "C C",
-            'C', new ItemStack(Items.iron_ingot));
+            "CC",
+            'C', findItemStack("Small 50V Iron Heating Corp"));
 
         addRecipe(findItemStack("Small 200V Iron Heating Corp"),
             "CC",
@@ -6292,10 +6584,8 @@ public class Eln {
             'C', findItemStack("Tungsten Cable"));
 
         addRecipe(findItemStack("50V Tungsten Heating Corp"),
-            "C C",
-            "CCC",
-            "C C",
-            'C', findItemStack("Tungsten Ingot"));
+            "CC",
+            'C', findItemStack("Small 50V Tungsten Heating Corp"));
 
         addRecipe(findItemStack("Small 200V Tungsten Heating Corp"),
             "CC",
@@ -6323,20 +6613,20 @@ public class Eln {
             " R ",
             " I ",
             'R', new ItemStack(Items.redstone),
-            'I', new ItemStack(Items.iron_ingot));
+            'I', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("On/OFF Regulator 1 Percent", 1),
             "RRR",
             " I ",
             'R', new ItemStack(Items.redstone),
-            'I', new ItemStack(Items.iron_ingot));
+            'I', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("Analogic Regulator", 1),
             "R R",
             " C ",
             " I ",
             'R', new ItemStack(Items.redstone),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'C', dictCheapChip);
     }
 
@@ -6488,7 +6778,7 @@ public class Eln {
             "LLL",
             "L  ",
             "LLL",
-            'L', Items.iron_ingot);
+            'L', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("Average Ferromagnetic Core"),
             "PCP",
@@ -6496,9 +6786,9 @@ public class Eln {
             'P', "plateIron");
 
         addRecipe(findItemStack("Optimal Ferromagnetic Core"),
-            "P",
-            "C",
-            "P",
+            " P ",
+            "PCP",
+            " P ",
             'C', findItemStack("Average Ferromagnetic Core"),
             'P', "plateIron");
     }
@@ -6510,9 +6800,22 @@ public class Eln {
     private void recipeDust() {
         addShapelessRecipe(findItemStack("Alloy Dust", 2),
             "dustIron",
-            "dustIron",
             "dustCoal",
+            dictTungstenDust,
+            dictTungstenDust,
+            dictTungstenDust,
             dictTungstenDust);
+        addShapelessRecipe(findItemStack("Inert Canister", 1),
+            findItemStack("Lapis Dust"),
+            findItemStack("Lapis Dust"),
+            findItemStack("Lapis Dust"),
+            findItemStack("Lapis Dust"),
+            findItemStack("Diamond Dust"),
+            findItemStack("Lapis Dust"),
+            findItemStack("Lapis Dust"),
+            findItemStack("Lapis Dust"),
+            findItemStack("Lapis Dust"));
+
 
     }
 
@@ -6525,7 +6828,7 @@ public class Eln {
             " C ",
             "III",
             "C C",
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'C', findItemStack("Low Voltage Cable"));
 
         addRecipe(findItemStack("Advanced Electrical Motor"),
@@ -6609,7 +6912,8 @@ public class Eln {
         addRecipe(findItemStack("Average Electrical Drill"),
             "RCR",
             " D ",
-            " d ", 'R', Items.redstone,
+            " d ",
+            'R', Items.redstone,
             'C', dictCheapChip,
             'D', findItemStack("Cheap Electrical Drill"),
             'd', new ItemStack(Items.diamond));
@@ -6622,7 +6926,20 @@ public class Eln {
             'C', dictAdvancedChip,
             'M', findItemStack("Advanced Electrical Motor"),
             'P', new ItemStack(Items.diamond_pickaxe));
-
+        addRecipe(findItemStack("Turbo Electrical Drill"),
+            "RCR",
+            " F ",
+            " D ",
+            'F', findItemStack("Fast Electrical Drill"),
+            'C', dictAdvancedChip,
+            'R', findItemStack("Graphite Rod"),
+            'D', findItemStack("Synthetic Diamond"));
+        addRecipe(findItemStack("Irresponsible Electrical Drill"),
+            "DDD",
+            "DFD",
+            "DDD",
+            'F', findItemStack("Turbo Electrical Drill"),
+            'D', findItemStack("Synthetic Diamond"));
     }
 
     private void recipeOreScanner() {
@@ -6632,14 +6949,13 @@ public class Eln {
             "IGI",
             'C', dictCheapChip,
             'R', new ItemStack(Items.redstone),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'G', new ItemStack(Items.gold_ingot));
 
     }
 
     private void recipeMiningPipe() {
         addRecipe(findItemStack("Mining Pipe", 4),
-            "A",
             "A",
             "A",
             'A', "ingotAlloy");
@@ -6657,18 +6973,92 @@ public class Eln {
     }
 
     private void recipeRawCable() {
-        addRecipe(findItemStack("Copper Cable", 6),
+        addRecipe(findItemStack("Copper Cable", 12),
             "III",
             'I', "ingotCopper");
 
-        addRecipe(findItemStack("Iron Cable", 6),
+        addRecipe(findItemStack("Iron Cable", 12),
             "III",
             'I', new ItemStack(Items.iron_ingot));
 
         addRecipe(findItemStack("Tungsten Cable", 6),
             "III",
             'I', dictTungstenIngot);
+        /*addRecipe(findItemStack("T1 Transmission Cable", 6),
+            "III",
+            'I', firstExistingOre("ingotSteel", "Arc Metal Ingot"));
+        addRecipe(findItemStack("T2 Transmission Cable", 6),
+            "III",
+            'I', firstExistingOre("ingotAluminium", "ingotAluminum", "Arc Clay Ingot"));
+*/
+    }
 
+    private void recipeGraphite() {
+        addRecipe(findItemStack("Creative Cable", 1),
+            "I",
+            "S",
+            'S', findItemStack("unreleasedium"),
+            'I', findItemStack("Synthetic Diamond"));
+        addRecipe(new ItemStack(arcClayBlock),
+            "III",
+            "III",
+            "III",
+            'I', findItemStack("Arc Clay Ingot"));
+        addRecipe(findItemStack("Arc Clay Ingot", 9),
+            "I",
+            'I', new ItemStack(arcClayBlock));
+        addRecipe(new ItemStack(arcMetalBlock),
+            "III",
+            "III",
+            "III",
+            'I', findItemStack("Arc Metal Ingot"));
+        addRecipe(findItemStack("Arc Metal Ingot", 9),
+            "I",
+            'I', new ItemStack(arcMetalBlock));
+        addRecipe(findItemStack("Graphite Rod", 2),
+            "I",
+            'I', findItemStack("2x Graphite Rods"));
+        addRecipe(findItemStack("Graphite Rod", 3),
+            "I",
+            'I', findItemStack("3x Graphite Rods"));
+        addRecipe(findItemStack("Graphite Rod", 4),
+            "I",
+            'I', findItemStack("4x Graphite Rods"));
+        addShapelessRecipe(
+            findItemStack("2x Graphite Rods"),
+            findItemStack("Graphite Rod"),
+            findItemStack("Graphite Rod"));
+        addShapelessRecipe(
+            findItemStack("3x Graphite Rods"),
+            findItemStack("Graphite Rod"),
+            findItemStack("Graphite Rod"),
+            findItemStack("Graphite Rod"));
+        addShapelessRecipe(
+            findItemStack("3x Graphite Rods"),
+            findItemStack("Graphite Rod"),
+            findItemStack("2x Graphite Rods"));
+        addShapelessRecipe(
+            findItemStack("4x Graphite Rods"),
+            findItemStack("Graphite Rod"),
+            findItemStack("Graphite Rod"),
+            findItemStack("Graphite Rod"),
+            findItemStack("Graphite Rod"));
+        addShapelessRecipe(
+            findItemStack("4x Graphite Rods"),
+            findItemStack("2x Graphite Rods"),
+            findItemStack("Graphite Rod"),
+            findItemStack("Graphite Rod"));
+        addShapelessRecipe(
+            findItemStack("4x Graphite Rods"),
+            findItemStack("2x Graphite Rods"),
+            findItemStack("2x Graphite Rods"));
+        addShapelessRecipe(
+            findItemStack("4x Graphite Rods"),
+            findItemStack("3x Graphite Rods"),
+            findItemStack("Graphite Rod"));
+        addShapelessRecipe(
+            new ItemStack(Items.diamond, 2),
+            findItemStack("Synthetic Diamond"));
     }
 
     private void recipeBatteryItem() {
@@ -6681,9 +7071,9 @@ public class Eln {
         addShapelessRecipe(
             findItemStack("Portable Battery Pack"),
             findItemStack("Portable Battery"),
-			findItemStack("Portable Battery"),
-			findItemStack("Portable Battery"),
-			findItemStack("Portable Battery"));
+            findItemStack("Portable Battery"),
+            findItemStack("Portable Battery"),
+            findItemStack("Portable Battery"));
     }
 
     private void recipeElectricalTool() {
@@ -6720,7 +7110,7 @@ public class Eln {
                 "PBP",
                 'C', dictAdvancedChip,
                 'B', findItemStack("Portable Battery"),
-                'P', new ItemStack(Items.iron_ingot),
+                'P', findItemStack("Iron Cable"),
                 'G', findItemStack("Ore Scanner"));
         }
 
@@ -6764,8 +7154,8 @@ public class Eln {
             'R', "itemRubber",
             'w', findItemStack("Copper Cable"),
             'c', "plateCopper");*/
-			" r ",
-			"cDc",
+            " r ",
+            "cDc",
             " r ",
             'r', new ItemStack(Items.redstone),
             'c', findItemStack("Iron Cable"),
@@ -6773,7 +7163,7 @@ public class Eln {
 
         addShapelessRecipe(findItemStack("Portable Condensator Pack"),
             findItemStack("Portable Condensator"),
-			findItemStack("Portable Condensator"),
+            findItemStack("Portable Condensator"),
             findItemStack("Portable Condensator"),
             findItemStack("Portable Condensator"));
     }
@@ -6794,18 +7184,20 @@ public class Eln {
             'R', new ItemStack(Items.redstone));
 
         addRecipe(findItemStack("Machine Block"),
-            "LLL",
+            "rLr",
             "LcL",
-            "LLL",
-            'L', new ItemStack(Items.iron_ingot),
-            'c', findItemStack("Copper Cable"));
+            "rLr",
+            'L', findItemStack("Iron Cable"),
+            'c', findItemStack("Copper Cable"),
+            'r', findItemStack("Tree Resin")
+        );
 
         addRecipe(findItemStack("Advanced Machine Block"),
-            " C ",
+            "rCr",
             "CcC",
-            " C ",
+            "rCr",
             'C', "plateAlloy",
-            'L', "ingotAlloy",
+            'r', findItemStack("Tree Resin"),
             'c', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("Electrical Probe Chip"),
@@ -6820,7 +7212,7 @@ public class Eln {
             "RIR",
             " C ",
             'G', new ItemStack(Items.gold_ingot),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'C', "ingotCopper",
             'R', new ItemStack(Items.redstone));
 
@@ -6840,7 +7232,7 @@ public class Eln {
             " c ",
             "cc ",
             "  c",
-            'c', new ItemStack(Items.iron_ingot));
+            'c', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("Player Filter"),
             " g",
@@ -6856,11 +7248,11 @@ public class Eln {
             'g', new ItemStack(Blocks.glass_pane),
             'c', new ItemStack(Items.dye, 1, 1));
 
-        addRecipe(findItemStack("Casing", 8),
+        addRecipe(findItemStack("Casing", 1),
             "ppp",
             "p p",
             "ppp",
-            'p', findItemStack("Iron Plate"));
+            'p', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("Iron Clutch Plate"),
             " t ",
@@ -6925,13 +7317,17 @@ public class Eln {
         maceratorRecipes.addRecipe(new Recipe(findItemStack("Tungsten Ore"),
             new ItemStack[]{findItemStack("Tungsten Dust", 2)}, 2.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.coal, 1, 0),
-            new ItemStack[]{findItemStack("Coal Dust", 2)}, 1.0 * f));
+            new ItemStack[]{findItemStack("Coal Dust", 1)}, 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.coal, 1, 1),
-            new ItemStack[]{findItemStack("Coal Dust", 2)}, 1.0 * f));
+            new ItemStack[]{findItemStack("Coal Dust", 1)}, 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.sand, 1),
             new ItemStack[]{findItemStack("Silicon Dust", 1)}, 3.0 * f));
         maceratorRecipes.addRecipe(new Recipe(findItemStack("Cinnabar Ore"),
-            new ItemStack[]{findItemStack("Cinnabar Dust", 2)}, 2.0 * f));
+            new ItemStack[]{findItemStack("Cinnabar Dust", 1)}, 2.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.dye, 1, 4),
+            new ItemStack[]{findItemStack("Lapis Dust", 1)}, 2.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.diamond, 1),
+            new ItemStack[]{findItemStack("Diamond Dust", 1)}, 2.0 * f));
 
         maceratorRecipes.addRecipe(new Recipe(findItemStack("Copper Ingot"),
             new ItemStack[]{findItemStack("Copper Dust", 1)}, 0.5 * f));
@@ -6951,16 +7347,67 @@ public class Eln {
 
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.dirt),
             new ItemStack[]{new ItemStack(Blocks.sand)}, 1.0 * f));
-		//recycling recipes
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Helmet"),
+        //recycling recipes
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Helmet"),
             new ItemStack[]{findItemStack("Coal Dust", 16)}, 10.0 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Boots"),
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Boots"),
             new ItemStack[]{findItemStack("Coal Dust", 12)}, 10.0 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Chestplate"),
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Chestplate"),
             new ItemStack[]{findItemStack("Coal Dust", 24)}, 10.0 * f));
-		maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Leggings"),
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Leggings"),
             new ItemStack[]{findItemStack("Coal Dust", 24)}, 10.0 * f));
-		//end recycling recipes
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("Cost Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("Life Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("Current Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("Voltage Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("Capacity Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("Single-use Battery"),
+            new ItemStack[]{findItemStack("Copper Dust", 3)}, 10.0 * f));
+
+        //end recycling recipes
+    }
+
+    private void recipeArcFurnace() {
+        float f = 200000;
+        float smeltf = 5000;
+        //start smelting recipes
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.iron_ore, 1),
+            new ItemStack[]{new ItemStack(Items.iron_ingot, 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.gold_ore, 1),
+            new ItemStack[]{new ItemStack(Items.gold_ingot, 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.coal_ore, 1),
+            new ItemStack[]{new ItemStack(Items.coal, 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.redstone_ore, 1),
+            new ItemStack[]{new ItemStack(Items.redstone, 6)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.lapis_ore, 1),
+            new ItemStack[]{new ItemStack(Blocks.lapis_block, 1)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.diamond_ore, 1),
+            new ItemStack[]{new ItemStack(Items.diamond, 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.emerald_ore, 1),
+            new ItemStack[]{new ItemStack(Items.emerald, 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.quartz_ore, 1),
+            new ItemStack[]{new ItemStack(Items.quartz, 2)}, smeltf));
+
+        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Copper Ore", 1),
+            new ItemStack[]{findItemStack("Copper Ingot", 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Lead Ore", 1),
+            new ItemStack[]{findItemStack("Lead Ingot", 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Tungsten Ore", 1),
+            new ItemStack[]{findItemStack("Tungsten Ingot", 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Alloy Dust", 1),
+            new ItemStack[]{findItemStack("Alloy Ingot", 1)}, smeltf));
+        //end smelting recipes
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Items.clay_ball, 2),
+            new ItemStack[]{findItemStack("Arc Clay Ingot", 1)}, 2.0 * f));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot, 1),
+            new ItemStack[]{findItemStack("Arc Metal Ingot", 1)}, 1.0 * f));
+        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Canister of Water", 1),
+            new ItemStack[]{findItemStack("Canister of Arc Water", 1)}, 7000000)); //hardcoded 7MJ to prevent overunity
     }
 
     private void recipeMaceratorModOres() {
@@ -7025,14 +7472,17 @@ public class Eln {
     }
 
     private void recipeCompressor() {
-        compressorRecipes.addRecipe(new Recipe(findItemStack("Coal Plate", 4),
-            new ItemStack[]{new ItemStack(Items.diamond)}, 80000.0));
+        compressorRecipes.addRecipe(new Recipe(findItemStack("4x Graphite Rods", 1),
+            findItemStack("Synthetic Diamond"), 80000.0));
         // extractorRecipes.addRecipe(new
         // Recipe("dustCinnabar",new
         // ItemStack[]{findItemStack("Purified Cinnabar Dust",1)}, 1000.0));
 
         compressorRecipes.addRecipe(new Recipe(findItemStack("Coal Dust", 4),
-            findItemStack("Coal Plate"), 4000.0));
+            findItemStack("Coal Plate"), 40000.0));
+
+        compressorRecipes.addRecipe(new Recipe(findItemStack("Coal Plate", 4),
+            findItemStack("Graphite Rod"), 80000.0));
 
         compressorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.sand),
             findItemStack("Dielectric"), 2000.0));
@@ -7047,6 +7497,13 @@ public class Eln {
             new ItemStack[]{findItemStack("Basic Magnet")}, 5000.0));
         magnetiserRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", 2),
             new ItemStack[]{findItemStack("Advanced Magnet")}, 15000.0));
+        magnetiserRecipes.addRecipe(new Recipe(findItemStack("Copper Dust", 1),
+            new ItemStack[]{new ItemStack(Items.redstone)}, 5000.0));
+        magnetiserRecipes.addRecipe(new Recipe(findItemStack("Basic Magnet", 3),
+            new ItemStack[]{findItemStack("Optimal Ferromagnetic Core")}, 5000.0));
+
+        magnetiserRecipes.addRecipe(new Recipe(findItemStack("Inert Canister", 1),
+            new ItemStack[]{new ItemStack(Items.ender_pearl)}, 150000.0));
     }
 
     private void recipeFuelBurnerItem() {
@@ -7180,7 +7637,7 @@ public class Eln {
             'M', findItemStack("Machine Block"),
             'c', findItemStack("Electrical Motor"),
             'F', new ItemStack(Items.flint),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'R', new ItemStack(Items.redstone));
         addRecipe(findItemStack("200V Macerator", 1),
             "ICI",
@@ -7199,7 +7656,7 @@ public class Eln {
             'M', findItemStack("Machine Block"),
             'c', findItemStack("Electrical Motor"),
             'F', "plateIron",
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'R', new ItemStack(Items.redstone));
         addRecipe(findItemStack("200V Compressor", 1),
             "ICI",
@@ -7217,7 +7674,7 @@ public class Eln {
             "IcI",
             'M', findItemStack("Machine Block"),
             'c', findItemStack("Electrical Motor"),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'R', new ItemStack(Items.redstone));
 
         addRecipe(findItemStack("200V Plate Machine", 1),
@@ -7236,7 +7693,7 @@ public class Eln {
             "III",
             'M', findItemStack("Machine Block"),
             'c', findItemStack("Electrical Motor"),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'R', new ItemStack(Items.redstone));
 
         addRecipe(findItemStack("200V Magnetizer", 1),
@@ -7247,6 +7704,16 @@ public class Eln {
             'C', dictAdvancedChip,
             'c', findItemStack("Advanced Electrical Motor"),
             'I', "ingotAlloy");
+        addRecipe(findItemStack("800V Arc Furnace", 1),
+            "ICI",
+            "DMD",
+            "IcI",
+            'M', findItemStack("Advanced Machine Block"),
+            'C', findItemStack("3x Graphite Rods"),
+            'c', findItemStack("Synthetic Diamond"),
+            'D', "plateGold",
+            'I', "ingotAlloy");
+
     }
 
     private void recipeElectricalGate() {
@@ -7300,7 +7767,7 @@ public class Eln {
             " R ",
             "I I",
             'R', new ItemStack(Items.redstone),
-            'I', new ItemStack(Items.iron_ingot));
+            'I', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("Electrical Entity Sensor"),
             " G ",
@@ -7340,7 +7807,7 @@ public class Eln {
                 "WSW",
                 'W', new ItemStack(Blocks.planks, 1, idx),
                 'R', new ItemStack(Items.redstone),
-                'I', new ItemStack(Items.iron_ingot),
+                'I', findItemStack("Iron Cable"),
                 'r', new ItemStack(Items.dye, 1, 1),
                 'S', findItemStack("Signal Cable"));
         }
@@ -7371,7 +7838,7 @@ public class Eln {
             "i",
             " ",
             "i",
-            'i', new ItemStack(Items.iron_ingot));
+            'i', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("Lead Fuse for low voltage cables", 4),
             "rcr",
@@ -7413,7 +7880,7 @@ public class Eln {
             'M', findItemStack("Machine Block"),
             'c', findItemStack("Signal Cable"),
             'r', "itemRubber",
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'R', new ItemStack(Items.redstone));
 
         addRecipe(findItemStack("Signal Button", 3),
@@ -7423,7 +7890,7 @@ public class Eln {
             'M', findItemStack("Machine Block"),
             'c', findItemStack("Signal Cable"),
             'r', "itemRubber",
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'R', new ItemStack(Items.redstone));
 
         addRecipe(findItemStack("Wireless Switch", 3),
@@ -7435,7 +7902,7 @@ public class Eln {
             'C', dictCheapChip,
             'a', findItemStack("Signal Antenna"),
             'r', "itemRubber",
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'R', new ItemStack(Items.redstone));
 
         addRecipe(findItemStack("Wireless Button", 3),
@@ -7447,7 +7914,7 @@ public class Eln {
             'C', dictCheapChip,
             'a', findItemStack("Signal Antenna"),
             'r', "itemRubber",
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'R', new ItemStack(Items.redstone));
 
         // Wireless Switch
@@ -7491,7 +7958,7 @@ public class Eln {
             "IcI",
             'c', findItemStack("Signal Cable"),
             'T', new ItemStack(Blocks.redstone_torch),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'M', new ItemStack(Blocks.noteblock));
         addRecipe(findItemStack("Standard Alarm", 1),
             "MTM",
@@ -7499,7 +7966,7 @@ public class Eln {
             "III",
             'c', findItemStack("Signal Cable"),
             'T', new ItemStack(Blocks.redstone_torch),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'M', new ItemStack(Blocks.noteblock));
 
     }
@@ -7562,7 +8029,7 @@ public class Eln {
             "III",
             "RcR",
             'c', findItemStack("Low Voltage Cable"),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'R', new ItemStack(Items.redstone));
         addRecipe(findItemStack("50V Battery Charger", 1),
             "RIR",
@@ -7570,7 +8037,7 @@ public class Eln {
             "RcR",
             'C', dictCheapChip,
             'c', findItemStack("Low Voltage Cable"),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'R', new ItemStack(Items.redstone));
 
         addRecipe(findItemStack("200V Battery Charger", 1),
@@ -7579,7 +8046,7 @@ public class Eln {
             "RcR",
             'C', dictAdvancedChip,
             'c', findItemStack("Medium Voltage Cable"),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'R', new ItemStack(Items.redstone));
 
     }
@@ -7604,7 +8071,7 @@ public class Eln {
                 "III",
                 'C', dictCheapChip,
                 'c', findItemStack("Low Voltage Cable"),
-                'I', new ItemStack(Items.iron_ingot),
+                'I', findItemStack("Iron Cable"),
                 'R', "ingotCopper");
 
             addRecipe(new ItemStack(elnToOtherBlockMvu),
@@ -7613,7 +8080,7 @@ public class Eln {
                 "III",
                 'C', dictCheapChip,
                 'c', findItemStack("Medium Voltage Cable"),
-                'I', new ItemStack(Items.iron_ingot),
+                'I', findItemStack("Iron Cable"),
                 'R', dictTungstenIngot);
 
             addRecipe(new ItemStack(elnToOtherBlockHvu),
@@ -7622,7 +8089,7 @@ public class Eln {
                 "III",
                 'C', dictAdvancedChip,
                 'c', findItemStack("High Voltage Cable"),
-                'I', new ItemStack(Items.iron_ingot),
+                'I', findItemStack("Iron Cable"),
                 'R', new ItemStack(Items.gold_ingot));
 
         }
@@ -7636,7 +8103,7 @@ public class Eln {
                 "WIc",
                 'C', dictAdvancedChip,
                 'c', findItemStack("Signal Cable"),
-                'I', new ItemStack(Items.iron_ingot),
+                'I', findItemStack("Iron Cable"),
                 'w', findItemStack("Wireless Signal Receiver"),
                 'W', findItemStack("Wireless Signal Transmitter"));
         }
