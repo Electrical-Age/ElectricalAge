@@ -1347,7 +1347,7 @@ public class Eln {
         }
 
         {
-            subId = 20;
+            subId = 24;
 
             name = TR_NAME(Type.NONE, "Creative Cable");
 
@@ -1370,7 +1370,7 @@ public class Eln {
         }
 
         {
-            subId = 24;
+            subId = 20;
 
             name = TR_NAME(Type.NONE, "Signal Bus Cable");
 
