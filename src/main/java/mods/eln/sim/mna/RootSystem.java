@@ -222,7 +222,7 @@ public class RootSystem {
         while (ic.hasNext()) {
             Component c = ic.next();
             if (!c.canBeReplacedByInterSystem()) {
-                System.out.println("ELN generateInterSystems ERROR");
+                Utils.println("ELN generateInterSystems ERROR");
             }
 
             Resistor r = (Resistor) c;
