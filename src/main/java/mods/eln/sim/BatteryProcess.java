@@ -11,6 +11,7 @@ public class BatteryProcess implements IProcess {
     public double Q = 0, QNominal = 0;
     public double uNominal = 0;
     public double life = 1.0;
+    private ThermalLoad thermalLoad = null;
     //public double efficiency = 1.0;
 
     public VoltageSource voltageSource;
@@ -27,27 +28,30 @@ public class BatteryProcess implements IProcess {
         this.voltageSource = voltageSource;
     }
 
+    public BatteryProcess(VoltageState positiveLoad, VoltageState negativeLoad, FunctionTable voltageFunction, double IMax, VoltageSource voltageSource, ThermalLoad thermalLoad) {
+        this.positiveLoad = positiveLoad;
+        this.negativeLoad = negativeLoad;
+        this.voltageFunction = voltageFunction;
+        this.thermalLoad = thermalLoad;
+        this.IMax = IMax;
+        this.voltageSource = voltageSource;
+    }
+
     @Override
     public void process(double time) {
+        double lastQ = Q;
+        double wasteQ = 0;
         Q = Math.max(Q - voltageSource.getCurrent() * time / QNominal, 0);
-
+        if (Q > lastQ && !isRechargeable) {
+            System.out.println("Battery is recharging when it shouldn't!");
+            wasteQ = Q - lastQ;
+            Q = lastQ;
+        }
         double voltage = computeVoltage();
-
         voltageSource.setU(voltage);
-
-		/*double Cequ = (positiveLoad.getC() * negativeLoad.getC()) / (positiveLoad.getC() + negativeLoad.getC());
-		double QNeeded = (voltage - (positiveLoad.Uc - negativeLoad.Uc)) * Cequ;
-		//Q -= QNeeded > 0 ? QNeeded : QNeeded * efficiency;
-		if (isRechargeable == true || QNeeded > 0) {
-			double I = QNeeded / time;
-			if (I > IMax) I = IMax;
-			if (I < -IMax) I = -IMax;
-			ElectricalLoad.moveCurrent(I, negativeLoad, positiveLoad);
-			Q -= I * time;
-			dischargeCurrentMesure = I;
-		} else {
-			dischargeCurrentMesure = 0;
-		}*/
+        if (wasteQ > 0 && thermalLoad != null) {
+            thermalLoad.movePowerTo(Math.abs(voltageSource.getCurrent() * voltage));
+        }
     }
 
     double computeVoltage() {

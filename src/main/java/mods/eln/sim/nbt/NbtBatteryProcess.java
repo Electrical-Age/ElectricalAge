@@ -3,6 +3,7 @@ package mods.eln.sim.nbt;
 import mods.eln.misc.FunctionTable;
 import mods.eln.misc.INBTTReady;
 import mods.eln.sim.BatteryProcess;
+import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.mna.component.VoltageSource;
 import mods.eln.sim.mna.state.VoltageState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -11,6 +12,10 @@ public class NbtBatteryProcess extends BatteryProcess implements INBTTReady {
 
     public NbtBatteryProcess(VoltageState positiveLoad, VoltageState negativeLoad, FunctionTable voltageFunction, double IMax, VoltageSource voltageSource) {
         super(positiveLoad, negativeLoad, voltageFunction, IMax, voltageSource);
+    }
+
+    public NbtBatteryProcess(VoltageState positiveLoad, VoltageState negativeLoad, FunctionTable voltageFunction, double IMax, VoltageSource voltageSource, ThermalLoad thermalLoad) {
+        super(positiveLoad, negativeLoad, voltageFunction, IMax, voltageSource, thermalLoad);
     }
 
     @Override
