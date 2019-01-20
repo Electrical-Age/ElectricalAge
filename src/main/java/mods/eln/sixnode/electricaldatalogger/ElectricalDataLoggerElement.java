@@ -1,6 +1,9 @@
 package mods.eln.sixnode.electricaldatalogger;
 
+import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
+import mods.eln.item.BrushDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -15,6 +18,7 @@ import mods.eln.sim.nbt.NbtElectricalGateInput;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.io.ByteArrayOutputStream;
@@ -37,6 +41,8 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     SixNodeElementInventory inventory = new SixNodeElementInventory(2, 64, this);
 
     public double timeToNextSample = 0;
+
+    public byte color = 15;
 
     public DataLogs logs = new DataLogs(logsSizeMax);
 
@@ -92,6 +98,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         timeToNextSample = nbt.getDouble("timeToNextSample");
         sampleStack = nbt.getInteger("sampleStack");
         sampleStackNbr = nbt.getInteger("sampleStackNbr");
+        color = nbt.getByte("color");
     }
 
     @Override
@@ -100,6 +107,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         nbt.setByte("front", (byte) (front.toInt() << 0));
         nbt.setDouble("timeToNextSample", timeToNextSample);
         nbt.setBoolean("pause", pause);
+        nbt.setByte("color", color);
 
         logs.writeToNBT(nbt, "logs");
         nbt.setInteger("sampleStack", sampleStack);
@@ -149,6 +157,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
             stream.writeFloat((float) logs.samplingPeriod);
             stream.writeFloat((float) logs.maxValue);
             stream.writeFloat((float) logs.minValue);
+            stream.writeByte(color);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -243,5 +252,24 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     public void sampleStackReset() {
         sampleStack = 0;
         sampleStackNbr = 0;
+    }
+
+    @Override
+    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
+        ItemStack cur = entityPlayer.getCurrentEquippedItem();
+        if(cur != null) {
+            GenericItemUsingDamageDescriptor desc = BrushDescriptor.getDescriptor(cur);
+            if(desc != null && desc instanceof BrushDescriptor) {
+                BrushDescriptor brush = (BrushDescriptor) desc;
+                int brushColor = brush.getColor(cur);
+                if(brushColor != color && brush.use(cur, entityPlayer)) {
+                    color = (byte) brushColor;
+                    needPublish();
+                }
+                return true;
+            }
+        }
+
+        return false;
     }
 }

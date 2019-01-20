@@ -22,6 +22,7 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
     long time;
 
     public boolean pause;
+    public byte color = 15;
 
     DataLogs log = new DataLogs(ElectricalDataLoggerElement.logsSizeMax);
     boolean waitFistSync = true;
@@ -51,7 +52,7 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
                 drawSignalPin(front.inverse(), new float[]{6.37f, 6.37f, 5.67f, 6.12f});
             }
         }
-        descriptor.draw(log, side, front, this.tileEntity.xCoord, this.tileEntity.zCoord);
+        descriptor.draw(log, side, front, this.tileEntity.xCoord, this.tileEntity.zCoord, color);
     }
 
 	/*
@@ -70,6 +71,7 @@ public class ElectricalDataLoggerRender extends SixNodeElementRender {
             log.samplingPeriod = stream.readFloat();
             log.maxValue = stream.readFloat();
             log.minValue = stream.readFloat();
+            color = stream.readByte();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -68,11 +68,15 @@ public class ElectricalDataLoggerDescriptor extends SixNodeDescriptor {
         voltageLevelColor = VoltageLevelColor.SignalVoltage;
     }
 
-    void draw(DataLogs log, Direction side, LRDU front, int objPosMX, int objPosMZ) {
+    void draw(DataLogs log, Direction side, LRDU front, int objPosMX, int objPosMZ, byte color) {
         if (onFloor || side.isY()) front.glRotateOnX();
         if (!onFloor && side.isNotY()) GL11.glRotatef(90, 1, 0, 0);
         //GL11.glDisable(GL11.GL_TEXTURE_2D);
-        if (main != null) main.draw();
+        if (main != null) {
+            Utils.setGlColorFromDye(color);
+            main.draw();
+            GL11.glColor3f(1f, 1f, 1f);
+        }
         //GL11.glEnable(GL11.GL_TEXTURE_2D);
 
         //Glass (reflections)
