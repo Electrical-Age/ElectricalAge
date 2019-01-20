@@ -184,12 +184,12 @@ import static mods.eln.i18n.I18N.*;
 public class Eln {
     // Mod information (override from 'mcmod.info' file)
     public final static String MODID = "Eln";
-    public final static String NAME = "Electrical Age";
-    public final static String MODDESC = "Electricity in your base !";
-    public final static String URL = "https://electrical-age.net";
-    public final static String UPDATE_URL = "https://github.com/Electrical-Age/ElectricalAge/releases";
-    public final static String SRC_URL = "https://github.com/Electrical-Age";
-    public final static String[] AUTHORS = {"Dolu1990", "lambdaShade", "cm0x4D", "metc", "Baughn"};
+    public final static String NAME = "Electrical Age - jrddunbr edition";
+    public final static String MODDESC = "Electricity in your base!";
+    public final static String URL = "https://eln.ja13.org";
+    public final static String UPDATE_URL = "https://github.com/jrddunbr/ElectricalAge/releases";
+    public final static String SRC_URL = "https://github.com/jrddunbr/ElectricalAge";
+    public final static String[] AUTHORS = {"Dolu1990", "lambdaShade", "cm0x4D", "metc", "Baughn", "jrddunbr", "Grissess", "OmegaHaxors"};
 
     public static final String channelName = "miaouMod";
     public static final double solarPanelBasePower = 65.0;

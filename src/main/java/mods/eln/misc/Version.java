@@ -25,9 +25,19 @@ public final class Version {
      */
     public final static int REVISION = parseVersion("@REVISION@");
 
+    public final static String BUILD_HOST = parseAdditionals("@BUILD_HOST@");
+    public final static String BUILD_DATE = parseAdditionals("@BUILD_DATE@");
+    public final static String JAVA_VERSION = parseAdditionals("@JAVA_VERSION@");
+    public final static String GIT_REVISION = parseAdditionals("@GIT_REVISION@");
+
     private static int parseVersion(String s) {
         if (s.charAt(0) == '@') return 999;
         return Integer.parseInt(s);
+    }
+
+    private static String parseAdditionals(String s) {
+        if (s.charAt(0) == '@') return "";
+        return s;
     }
 
     /**

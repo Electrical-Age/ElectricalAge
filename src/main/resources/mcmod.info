@@ -3,8 +3,8 @@
         "modid":"Eln",
         "version": "${version}",
         "mcversion": "${mcversion}",
-        "name":"Electrical Age",
-        "url":"http://electrical-age.net/",
+        "name":"Electrical Age - jrddunbr's build",
+        "url":"http://eln.ja13.org/",
 		"credits": "The Electrical Age Team",
         "logoFile": "assets/eln/logo.png",
         "requiredMods":[

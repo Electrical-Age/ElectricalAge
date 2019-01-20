@@ -28,13 +28,13 @@ import java.net.URL;
  */
 public class VersionCheckerHandler {
 
-    // Current mod version file hosted on Github
-    private final static String URL = "http://electrical-age.net/modinfo/modinfo.json";
+    // Current mod version
+    private final static String URL = "http://eln.ja13.org/modinfo.json";
 
     private static VersionCheckerHandler instance;
 
     private boolean ready = false;
-    private String versionMsg = null;
+    private String versionMsg = "";
 
     public static VersionCheckerHandler getInstance() {
         if (instance == null)
@@ -42,19 +42,47 @@ public class VersionCheckerHandler {
         return instance;
     }
 
+    @SubscribeEvent
+    public void tick(ClientTickEvent event) {
+        if (!ready || event.phase == Phase.START)
+            return;
+
+        final Minecraft m = FMLClientHandler.instance().getClient();
+        final WorldClient world = m.theWorld;
+
+        if (m == null || world == null)
+            return;
+
+        if (!ready)
+            return;
+
+        // Print the current version when the client start a map
+        if (Eln.versionCheckEnabled) {
+            //m.thePlayer.addChatMessage(new ChatComponentText(Version.printColor()));
+            System.out.println(Version.printColor());
+            String elnVers = "Electrical Age - Built by jrddunbr";
+            m.thePlayer.addChatMessage(new ChatComponentText(elnVers));
+            m.thePlayer.addChatMessage(new ChatComponentText(versionMsg));
+        }
+
+        FMLCommonHandler.instance().bus().unregister(this);
+        ready = false;
+    }
+
     private VersionCheckerHandler() {
         // Check online if a new mod version if available (asynchronous HTTP request).
         Thread versionThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                String msg;
+                String msg = "";
                 try {
                     // Get the mod info Json file
                     final String urlSrc = IOUtils.toString(new URL(URL));
                     JsonObject j = new JsonParser().parse(urlSrc).getAsJsonObject();
                     int manifestVersion = j.get("manifest_version").getAsInt();
-                    if (manifestVersion != 1)
+                    if (manifestVersion != 1) {
                         throw new IOException();
+                    }
 
                     // Read the last stable version
                     JsonObject stable = j.get("stable").getAsJsonObject();
@@ -94,29 +122,5 @@ public class VersionCheckerHandler {
         });
 
         versionThread.start();
-    }
-
-    @SubscribeEvent
-    public void tick(ClientTickEvent event) {
-        if (!ready || event.phase == Phase.START)
-            return;
-
-        final Minecraft m = FMLClientHandler.instance().getClient();
-        final WorldClient world = m.theWorld;
-
-        if (m == null || world == null)
-            return;
-
-        if (!ready)
-            return;
-
-        // Print the current version when the client start a map
-        if (Eln.versionCheckEnabled) {
-            m.thePlayer.addChatMessage(new ChatComponentText(Version.printColor()));
-            m.thePlayer.addChatMessage(new ChatComponentText(versionMsg));
-        }
-
-        FMLCommonHandler.instance().bus().unregister(this);
-        ready = false;
     }
 }

@@ -64,6 +64,11 @@ minecraft {
     replace "@MAJORVERSION@", MAJORVERSION
     replace "@MINORVERSION@", MINORVERSION
     replace "@REVISION@", REVISION
+
+    replace "@BUILD_HOST@", BUILD_HOST
+    replace "@BUILD_DATE@", BUILD_DATE
+    replace "@JAVA_VERSION@", JAVA_VERSION
+    replace "@GIT_REVISION@", GIT_REVISION
 }
 
 configurations {
@@ -98,10 +103,10 @@ jar {
         attributes 'Build-Date': new Date().format("yyyy-MM-dd HH:mm:ss")
         attributes 'Built-JDK': System.getProperty('java.version')
         attributes 'Implementation-Title': project.name
-        attributes 'Implementation-URL': 'https://github.com/Electrical-Age'
+        attributes 'Implementation-URL': 'https://github.com/jrddunbr/ElectricalAge'
         attributes 'Implementation-Vendor': 'Electrical-Age Team'
         attributes 'Implementation-Vendor-Id': 'net.electricalage.eln'
-        attributes 'Project-Url': 'https://electrical-age.net/'
+        attributes 'Project-Url': 'https://eln.ja13.org/'
         attributes 'Source-Compatibility': project.sourceCompatibility
         attributes 'Target-Compatibility': project.targetCompatibility
     }

@@ -5,21 +5,8 @@ dist: trusty
 # Container-based infrastructure
 sudo: false
 
-# Install python dependencies in the home directory (no sudo access)
-# Transifex-client version 0.12.1 is required
-# See https://github.com/transifex/transifex-client/issues/113
 install:
-  - echo "Installing the Transifex client"
-  - pip install --user 'git+https://github.com/eliben/pycparser@release_v2.14'
-  - pip install --user 'requests[security]'
-  - pip install --user transifex-client
-  - echo "Preparing FORGE workspace"
   - gradle setupDecompWorkspace
-
-env:
-  global:
-    # $TRANSIFEX_PASSWORD for Transifex (travis encrypt)
-    secure: c2LmAS3T90ZsRQCj5Qn2GUhWLU3DLumcD2jTMwTdnY8xwLPfsT8WOxPKq03aF/AnUH//67lRMToS5V4mYh/5sek7GX67+HMJBenQOuUjaSpcSK3/ik9hheTVt4M5i5Pu5JZrTe+D3LvGzukasho9jwmR/F0q6gmZYcfpkIKZ5QQ=
 
 # Caching Gradle
 before_cache:
@@ -29,7 +16,3 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
     - $HOME/.cache/pip
-
-after_success:
-  - ./script/transifex.sh
-  - if [ "$TRAVIS_BRANCH" == "1.7.10-MNA" ]; then ./gradlew bintrayUpload; fi
