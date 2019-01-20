@@ -19,6 +19,8 @@ import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateInput
+import mods.eln.sim.process.destruct.DelayedDestruction
+import mods.eln.sim.process.destruct.WorldExplosion
 import mods.eln.sound.LoopedSound
 import mods.eln.sound.SoundCommand
 import net.minecraft.client.gui.GuiScreen
@@ -28,11 +30,17 @@ import net.minecraft.inventory.Container
 import net.minecraft.inventory.IInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.world.World
 import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
-class ClutchPlateItem(name: String) : GenericItemUsingDamageDescriptor(name) {
+class ClutchPlateItem(
+    name: String,
+    val maxEF: Float, val minEF: Float,
+    val maxDTF: Float, val minDTF: Float,
+    val wearSpeed: Float, public val explodes: Boolean
+) : GenericItemUsingDamageDescriptor(name) {
     override fun getDefaultNBT() = NBTTagCompound()
 
     fun setWear(stack: ItemStack, wear: Double) {
@@ -46,6 +54,13 @@ class ClutchPlateItem(name: String) : GenericItemUsingDamageDescriptor(name) {
         if (!stack.hasTagCompound()) return 0.0
         return stack.tagCompound.getDouble("wear")
     }
+
+    fun maxStaticEnergyF(stack: ItemStack): IFunction =
+        LinearFunction(0f, maxEF, 1f, minEF)
+    fun dynamicMaxTransferF(stack: ItemStack): IFunction =
+        LinearFunction(0f, maxDTF, 1f, minDTF)
+    fun slipWearF(stack: ItemStack): IFunction =
+        LinearFunction(0f, 0f, 1000f, wearSpeed)
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<Any?>?, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
@@ -104,17 +119,6 @@ class ClutchDescriptor(name: String, override val obj: Obj3D) : SimpleShaftDescr
 }
 
 class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : SimpleShaftElement(node, desc_) {
-    companion object {
-        // rads -> rads
-        val staticMarginF = LinearFunction(0f, 1f, 1000f, 5f)
-        // wear -> Joules
-        val maxStaticEnergyF = LinearFunction(0f, 20480f, 1f, 1280f)
-        // wear -> N*m
-        val dynamicMaxTransferF = LinearFunction(0f, 2560f, 1f, 640f)
-        // rads -> wear
-        val slipWearF = LinearFunction(0f, 0f, 1000f, 0.0001f)
-    }
-
     override val shaftMass: Double = 0.5
     val connectedSides = DirectionSet()
     var leftShaft = ShaftNetwork()
@@ -224,6 +228,9 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
                 return
             }
             val wear = plateDescriptor.getWear(stack)
+            val maxStaticEnergyF = plateDescriptor.maxStaticEnergyF(stack)
+            val dynamicMaxTransferF = plateDescriptor.dynamicMaxTransferF(stack)
+            val slipWearF = plateDescriptor.slipWearF(stack)
             if(wear >= 1.0) {
                 // Utils.println("CP.p: stop: wear too high")
                 slipping = true
@@ -258,6 +265,13 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
 
             */
             if(slipping) {
+                if(plateDescriptor.explodes && (faster.rads - slower.rads) > 5) {
+                    DelayedDestruction(
+                        WorldExplosion(this@ClutchElement).machineExplosion(),
+                        0.0
+                    )
+                    return
+                }
                 // Always publish while slipping so the volume controller
                 // can keep up
                 needPublish()

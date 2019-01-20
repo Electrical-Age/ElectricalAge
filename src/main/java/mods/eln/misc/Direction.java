@@ -39,6 +39,10 @@ public enum Direction {
 
     static final Direction[] intToDir = {XN, XP, YN, YP, ZN, ZP};
 
+    public static final Direction[] all = {XN, XP, YN, YP, ZN, ZP};
+
+    public static final Direction[][] axes = {{XN, XP}, {YN, YP}, {ZN, ZP}};
+
     int dir;
 
     Direction(int dir) {

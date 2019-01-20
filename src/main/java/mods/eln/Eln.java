@@ -2898,9 +2898,9 @@ public class Eln {
         {
             subId = 13;
 
-            JointHubDescriptor desc = new JointHubDescriptor(
+            VerticalHubDescriptor desc = new VerticalHubDescriptor(
                 TR_NAME(Type.NONE, "Joint hub"),
-                obj.getObj("JointHub"));
+                obj.getObj("VerticalHub"));
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
 
@@ -5210,8 +5210,12 @@ public class Eln {
 
         sharedItem.addElement(53 + (id << 6), new CaseItemDescriptor(TR_NAME(Type.NONE, "Casing")));
 
-        sharedItem.addElement(54 + (id << 6), new ClutchPlateItem("Clutch Plate"));
+        sharedItem.addElement(54 + (id << 6), new ClutchPlateItem("Iron Clutch Plate", 20480f, 1280f, 2560f, 640f, 0.0001f, false));
         sharedItem.addElement(55 + (id << 6), new ClutchPinItem("Clutch Pin"));
+        sharedItem.addElement(56 + (id << 6), new ClutchPlateItem("Gold Clutch Plate", 4096f, 2048f, 512f, 128f, 0.01f, false));
+        sharedItem.addElement(57 + (id << 6), new ClutchPlateItem("Copper Clutch Plate", 8192f, 4096f, 1024f, 512f, 0.003f, false));
+        sharedItem.addElement(58 + (id << 6), new ClutchPlateItem("Lead Clutch Plate", 4096f, 1024f, 512f, 128f, 0.01f, false));
+        sharedItem.addElement(59 + (id << 6), new ClutchPlateItem("Coal Clutch Plate", 1024f, 128f, 128f, 32f, 0.1f, true));
     }
 
     public DataLogsPrintDescriptor dataLogsPrintDescriptor;
@@ -6858,11 +6862,43 @@ public class Eln {
             "ppp",
             'p', findItemStack("Iron Plate"));
 
-        addRecipe(findItemStack("Clutch Plate"),
+        addRecipe(findItemStack("Iron Clutch Plate"),
             " t ",
             "tIt",
             " t ",
             'I', "plateIron",
+            't', dictTungstenDust
+        );
+
+        addRecipe(findItemStack("Gold Clutch Plate"),
+            " t ",
+            "tGt",
+            " t ",
+            'G', "plateGold",
+            't', dictTungstenDust
+        );
+
+        addRecipe(findItemStack("Copper Clutch Plate"),
+            " t ",
+            "tCt",
+            " t ",
+            'C', "plateCopper",
+            't', dictTungstenDust
+        );
+
+        addRecipe(findItemStack("Lead Clutch Plate"),
+            " t ",
+            "tLt",
+            " t ",
+            'L', "plateLead",
+            't', dictTungstenDust
+        );
+
+        addRecipe(findItemStack("Coal Clutch Plate"),
+        " t ",
+            "tCt",
+            " t ",
+            'C', "plateCoal",
             't', dictTungstenDust
         );
 
