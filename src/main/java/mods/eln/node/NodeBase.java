@@ -7,6 +7,7 @@ import mods.eln.ghost.GhostBlock;
 import mods.eln.misc.*;
 import mods.eln.node.six.SixNode;
 import mods.eln.sim.*;
+import mods.eln.sound.SoundCommand;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -205,21 +206,26 @@ public abstract class NodeBase {
         Utils.println("Node::onBreakBlock()");
     }
 
+    public static SoundCommand beepUploaded = new SoundCommand("eln:beep_accept_2").smallRange();
+    public static SoundCommand beepDownloaded = new SoundCommand("eln:beep_accept").smallRange();
+    public static SoundCommand beepError = new SoundCommand("eln:beep_error").smallRange();
+
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         if (!entityPlayer.worldObj.isRemote && entityPlayer.getCurrentEquippedItem() != null) {
-            if (Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+            ItemStack equipped = entityPlayer.getCurrentEquippedItem();
+            if (Eln.multiMeterElement.checkSameItemStack(equipped)) {
                 String str = multiMeterString(side);
                 if (str != null)
                     Utils.addChatMessage(entityPlayer, str);
                 return true;
             }
-            if (Eln.thermometerElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+            if (Eln.thermometerElement.checkSameItemStack(equipped)) {
                 String str = thermoMeterString(side);
                 if (str != null)
                     Utils.addChatMessage(entityPlayer, str);
                 return true;
             }
-            if (Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())) {
+            if (Eln.allMeterElement.checkSameItemStack(equipped)) {
                 String str1 = multiMeterString(side);
                 String str2 = thermoMeterString(side);
                 String str = "";
@@ -229,6 +235,30 @@ public abstract class NodeBase {
                     str += str2;
                 if (str.equals("") == false)
                     Utils.addChatMessage(entityPlayer, str);
+                return true;
+            }
+            if (Eln.configCopyToolElement.checkSameItemStack(equipped)) {
+                if(!equipped.hasTagCompound()) {
+                    equipped.setTagCompound(new NBTTagCompound());
+                }
+                String act;
+                SoundCommand snd = beepError;
+                if(entityPlayer.isSneaking() || Eln.playerManager.get(entityPlayer).getInteractEnable()) {
+                    if(writeConfigTool(side, equipped.getTagCompound(), entityPlayer))
+                        snd = beepDownloaded;
+                    act = "write";
+                } else {
+                    if(readConfigTool(side, equipped.getTagCompound(), entityPlayer))
+                        snd = beepUploaded;
+                    act = "read";
+                }
+                snd.set(
+                    entityPlayer.posX,
+                    entityPlayer.posY,
+                    entityPlayer.posZ,
+                    entityPlayer.worldObj
+                ).play();
+                Utils.println(String.format("NB.oBA: act %s data %s", act, equipped.getTagCompound().toString()));
                 return true;
             }
         }
@@ -443,6 +473,10 @@ public abstract class NodeBase {
     public String thermoMeterString(Direction side) {
         return "";
     }
+
+    public boolean readConfigTool(Direction side, NBTTagCompound tag, EntityPlayer invoker) { return false; }
+
+    public boolean writeConfigTool(Direction side, NBTTagCompound tag, EntityPlayer invoker) { return false; }
 
     public void setNeedPublish(boolean needPublish) {
         this.needPublish = needPublish;

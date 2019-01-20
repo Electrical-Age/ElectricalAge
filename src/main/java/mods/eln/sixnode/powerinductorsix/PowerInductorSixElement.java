@@ -1,7 +1,10 @@
 package mods.eln.sixnode.powerinductorsix;
 
 import mods.eln.Eln;
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
+import mods.eln.item.IConfigurable;
+import mods.eln.item.ItemMovingHelper;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -17,13 +20,14 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PowerInductorSixElement extends SixNodeElement {
+public class PowerInductorSixElement extends SixNodeElement implements IConfigurable {
 
     PowerInductorSixDescriptor descriptor;
     NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
@@ -135,5 +139,73 @@ public class PowerInductorSixElement extends SixNodeElement {
     @Override
     public Container newContainer(Direction side, EntityPlayer player) {
         return new PowerInductorSixContainer(player, inventory);
+    }
+
+    @Override
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        if(compound.hasKey("indCableAmt")) {
+            int desired = compound.getInteger("indCableAmt");
+            (new ItemMovingHelper() {
+                @Override
+                public boolean acceptsStack(ItemStack stack) {
+                    return Eln.instance.copperCableDescriptor.checkSameItemStack(stack);
+                }
+
+                @Override
+                public ItemStack newStackOfSize(int items) {
+                    return Eln.instance.copperCableDescriptor.newItemStack(items);
+                }
+            }).move(invoker.inventory, inventory, PowerInductorSixContainer.cableId, desired);
+        }
+        if(compound.hasKey("indCore")) {
+            String descName = compound.getString("indCore");
+            if(descName == GenericItemUsingDamageDescriptor.INVALID_NAME) {
+                ItemStack stack = inventory.getStackInSlot(PowerInductorSixContainer.coreId);
+                GenericItemUsingDamageDescriptor desc = GenericItemUsingDamageDescriptor.getDescriptor(stack);
+                if(desc != null) {
+                    (new ItemMovingHelper() {
+                        @Override
+                        public boolean acceptsStack(ItemStack stack) {
+                            return desc == GenericItemUsingDamageDescriptor.getDescriptor(stack);
+                        }
+
+                        @Override
+                        public ItemStack newStackOfSize(int items) {
+                            return desc.newItemStack(items);
+                        }
+                    }).move(invoker.inventory, inventory, PowerInductorSixContainer.coreId, 0);
+                }
+            } else {
+                GenericItemUsingDamageDescriptor desc = GenericItemUsingDamageDescriptor.getByName(compound.getString("indCore"));
+                (new ItemMovingHelper() {
+                    @Override
+                    public boolean acceptsStack(ItemStack stack) {
+                        return GenericItemUsingDamageDescriptor.getDescriptor(stack) == desc;
+                    }
+
+                    @Override
+                    public ItemStack newStackOfSize(int items) {
+                        return desc.newItemStack(items);
+                    }
+                }).move(invoker.inventory, inventory, PowerInductorSixContainer.coreId, 1);
+            }
+        }
+    }
+
+    @Override
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        ItemStack stack = inventory.getStackInSlot(PowerInductorSixContainer.cableId);
+        if(stack == null) {
+            compound.setInteger("indCableAmt", 0);
+        } else {
+            compound.setInteger("indCableAmt", stack.stackSize);
+        }
+        stack = inventory.getStackInSlot(PowerInductorSixContainer.coreId);
+        GenericItemUsingDamageDescriptor desc = GenericItemUsingDamageDescriptor.getDescriptor(stack);
+        if(desc == null) {
+            compound.setString("indCore", GenericItemUsingDamageDescriptor.INVALID_NAME);
+        } else {
+            compound.setString("indCore", desc.name);
+        }
     }
 }

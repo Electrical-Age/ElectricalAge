@@ -826,9 +826,11 @@ public class Utils {
     }
 
     public static boolean playerHasMeter(EntityPlayer entityPlayer) {
-        return Eln.multiMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())
-            || Eln.thermometerElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem())
-            || Eln.allMeterElement.checkSameItemStack(entityPlayer.getCurrentEquippedItem());
+        ItemStack cur = entityPlayer.getCurrentEquippedItem();
+        return Eln.multiMeterElement.checkSameItemStack(cur)
+            || Eln.thermometerElement.checkSameItemStack(cur)
+            || Eln.allMeterElement.checkSameItemStack(cur)
+            || Eln.configCopyToolElement.checkSameItemStack(cur);
     }
 
     public static int getRedstoneLevelAround(Coordonate coord, Direction side) {

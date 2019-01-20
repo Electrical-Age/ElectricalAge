@@ -2,7 +2,9 @@ package mods.eln.node
 
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor
 import mods.eln.generic.GenericItemUsingDamageDescriptor
+import mods.eln.item.ItemMovingHelper
 import mods.eln.item.electricalinterface.IItemEnergyBattery
+import net.minecraft.entity.player.InventoryPlayer
 import net.minecraft.inventory.IInventory
 import net.minecraft.item.ItemStack
 
@@ -17,12 +19,12 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
         }
     }
 
-    private abstract class ItemAcceptor(val index: Int) {
+    private abstract class ItemAcceptor(val index: Int, val acceptedItems: Array<out Class<out Any>>) {
         abstract fun take(itemStack: ItemStack?, inventory: IInventory): Boolean
     }
 
-    private open class ItemAcceptorIfEmpty(index: Int, val acceptedItems: Array<out Class<out Any>>)
-        : ItemAcceptor(index) {
+    private open class ItemAcceptorIfEmpty(index: Int, acceptedItems: Array<out Class<out Any>>)
+        : ItemAcceptor(index, acceptedItems) {
         override fun take(itemStack: ItemStack?, inventory: IInventory): Boolean {
             if (inventory.getStackInSlot(index) == null) {
                 GenericItemUsingDamageDescriptor.getDescriptor(itemStack)?.let { desc ->
@@ -146,4 +148,23 @@ class AutoAcceptInventoryProxy(val inventory: IInventory) {
             true
         } else
             false
+
+    fun takeFrom(inv: InventoryPlayer, nodeElement: INodeElement?, publish: Boolean = false, notifyInventoryChange: Boolean = false, matchDescriptor: GenericItemUsingDamageDescriptor? = null): Boolean {
+        var ret = false
+        for(idx in 0 until inv.sizeInventory) {
+            val stack = inv.getStackInSlot(idx)
+            if(stack == null) continue
+            if(matchDescriptor != null) {
+                val desc = GenericItemUsingDamageDescriptor.getDescriptor(stack)
+                if(matchDescriptor != desc) continue
+            }
+            ret = ret || take(stack)
+        }
+        if(ret) {
+            if(publish) nodeElement?.needPublish()
+            if(notifyInventoryChange) nodeElement?.inventoryChange(inventory)
+            ItemMovingHelper.syncEntireInventory(inv.player)
+        }
+        return ret
+    }
 }

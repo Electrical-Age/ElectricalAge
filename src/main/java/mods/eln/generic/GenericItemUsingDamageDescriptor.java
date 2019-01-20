@@ -18,6 +18,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class GenericItemUsingDamageDescriptor {
@@ -30,6 +31,13 @@ public class GenericItemUsingDamageDescriptor {
     public Item parentItem;
     public int parentItemDamage;
 
+    public static HashMap<String, GenericItemUsingDamageDescriptor> byName = new HashMap<>();
+    public static String INVALID_NAME = "$NO_DESCRIPTOR";
+
+    public static GenericItemUsingDamageDescriptor getByName(String name) {
+        return byName.get(name);
+    }
+
     public GenericItemUsingDamageDescriptor(String name) {
         this(name, name);
     }
@@ -37,6 +45,7 @@ public class GenericItemUsingDamageDescriptor {
     public GenericItemUsingDamageDescriptor(String name, String iconName) {
         setDefaultIcon(iconName);
         this.name = name;
+        byName.put(name, this);
     }
 
     public void setDefaultIcon(String name) {
@@ -85,7 +94,7 @@ public class GenericItemUsingDamageDescriptor {
         GenericItemUsingDamageDescriptor desc = getDescriptor(stack);
         if (desc == null)
             return null;
-        if (extendClass.isAssignableFrom(desc.getClass()) == false)
+        if (!extendClass.isAssignableFrom(desc.getClass()))
             return null;
         return desc;
     }

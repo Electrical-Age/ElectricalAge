@@ -8,6 +8,7 @@ import mods.eln.gui.GuiScreenEln
 import mods.eln.gui.GuiTextFieldEln
 import mods.eln.gui.IGuiObject
 import mods.eln.i18n.I18N
+import mods.eln.item.IConfigurable
 import mods.eln.misc.Direction
 import mods.eln.misc.LRDU
 import mods.eln.misc.LRDUMask
@@ -22,6 +23,7 @@ import mods.eln.sim.IProcess
 import mods.eln.sim.ThermalLoad
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
+import mods.eln.sixnode.electricaldatalogger.DataLogs
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.entity.player.EntityPlayer
@@ -40,7 +42,7 @@ class TachometerDescriptor(baseName: String, obj: Obj3D) : SimpleShaftDescriptor
     override val rotating = arrayOf(obj.getPart("Shaft"))
 }
 
-open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : SimpleShaftElement(node, desc_) {
+open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : SimpleShaftElement(node, desc_), IConfigurable {
     companion object {
         val SetRangeEventId = 1
 
@@ -114,6 +116,20 @@ open class TachometerElement(node: TransparentNode, desc_: TransparentNodeDescri
 
     override fun getWaila(): Map<String, String> {
         return mapOf()
+    }
+
+    override fun readConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
+        if(compound.hasKey("min"))
+            minRads = compound.getFloat("min")
+        if(compound.hasKey("max"))
+            maxRads = compound.getFloat("max")
+        needPublish()
+    }
+
+    override fun writeConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
+        compound.setFloat("min", minRads)
+        compound.setFloat("max", maxRads)
+        compound.setByte("unit", DataLogs.noType)
     }
 }
 

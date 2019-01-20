@@ -1,6 +1,7 @@
 package mods.eln.node.transparent;
 
 import mods.eln.Eln;
+import mods.eln.item.IConfigurable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -108,6 +109,24 @@ public class TransparentNode extends Node {
     @Override
     public String thermoMeterString(Direction side) {
         return element.thermoMeterString(side);
+    }
+
+    @Override
+    public boolean readConfigTool(Direction side, NBTTagCompound tag, EntityPlayer invoker) {
+        if(element instanceof IConfigurable) {
+            ((IConfigurable) element).readConfigTool(tag, invoker);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean writeConfigTool(Direction side, NBTTagCompound tag, EntityPlayer invoker) {
+        if(element instanceof IConfigurable) {
+            ((IConfigurable) element).writeConfigTool(tag, invoker);
+            return true;
+        }
+        return false;
     }
 
     public IFluidHandler getFluidHandler() {

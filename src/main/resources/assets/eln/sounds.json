@@ -304,5 +304,32 @@
 				"stream": false
 			}
 		]
+	},
+	"beep_accept": {
+		"category": "player",
+		"sounds": [
+			{
+				"name": "beep_accept",
+				"stream": false
+			}
+		]
+	},
+	"beep_accept_2": {
+		"category": "player",
+		"sounds": [
+			{
+				"name": "beep_accept_2",
+				"stream": false
+			}
+		]
+	},
+	"beep_error": {
+		"category": "player",
+		"sounds": [
+			{
+				"name": "beep_error",
+				"stream": false
+			}
+		]
 	}
 }

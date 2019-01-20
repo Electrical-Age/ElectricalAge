@@ -70,11 +70,12 @@ public class SoundCommand {
             SoundServer.play(this);
     }
 
-    public void set(Coordonate c) {
+    public SoundCommand set(Coordonate c) {
         world = c.world();
         x = c.x + 0.5;
         y = c.y + 0.5;
         z = c.z + 0.5;
+        return this;
     }
 
     public SoundCommand set(TileEntity c) {
@@ -83,6 +84,14 @@ public class SoundCommand {
         y = c.yCoord + 0.5;
         z = c.zCoord + 0.5;
         //mediumRange();
+        return this;
+    }
+
+    public SoundCommand set(double x, double y, double z, World w) {
+        world = w;
+        this.x = x;
+        this.y = y;
+        this.z = z;
         return this;
     }
 

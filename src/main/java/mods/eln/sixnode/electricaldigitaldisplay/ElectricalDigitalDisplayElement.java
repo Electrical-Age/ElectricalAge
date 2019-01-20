@@ -1,8 +1,8 @@
 package mods.eln.sixnode.electricaldigitaldisplay;
 
-import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.BrushDescriptor;
+import mods.eln.item.IConfigurable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -14,7 +14,6 @@ import mods.eln.sim.ElectricalLoad;
 import mods.eln.sim.ThermalLoad;
 import mods.eln.sim.nbt.NbtElectricalGateInput;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -25,7 +24,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ElectricalDigitalDisplayElement extends SixNodeElement {
+public class ElectricalDigitalDisplayElement extends SixNodeElement implements IConfigurable {
     ElectricalDigitalDisplayDescriptor descriptor;
 
     public ElectricalDigitalDisplayProcess process = new ElectricalDigitalDisplayProcess(this);
@@ -169,5 +168,20 @@ public class ElectricalDigitalDisplayElement extends SixNodeElement {
         info.put("Min: ", String.format("%.2f", min));
         info.put("Max: ", String.format("%.2f", max));
         return info;
+    }
+
+    @Override
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        if(compound.hasKey("min"))
+            min = compound.getFloat("min");
+        if(compound.hasKey("max"))
+            max = compound.getFloat("max");
+        needPublish();
+    }
+
+    @Override
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        compound.setFloat("min", min);
+        compound.setFloat("max", max);
     }
 }

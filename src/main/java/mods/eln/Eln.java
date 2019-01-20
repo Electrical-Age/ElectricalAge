@@ -4688,6 +4688,7 @@ public class Eln {
 
     static public GenericItemUsingDamageDescriptor multiMeterElement,
         thermometerElement, allMeterElement;
+    static public GenericItemUsingDamageDescriptor configCopyToolElement;
 
     private void registerMeter(int id) {
         int subId, completId;
@@ -4720,6 +4721,13 @@ public class Eln {
             element = new WirelessSignalAnalyserItemDescriptor(TR_NAME(Type.NONE, "Wireless Analyser"));
             sharedItem.addElement(completId, element);
 
+        }
+        {
+            subId = 16;
+            completId = subId + (id << 6);
+            element = new ConfigCopyToolDescriptor(TR_NAME(Type.NONE, "Config Copy Tool"));
+            sharedItem.addElement(completId, element);
+            configCopyToolElement = element;
         }
 
     }
@@ -6896,6 +6904,13 @@ public class Eln {
             'S', findItemStack("Signal Antenna"),
             'E', new ItemStack(Items.redstone),
             'R', "itemRubber");
+        addRecipe(findItemStack("Config Copy Tool"),
+            "wR",
+            "RC",
+            'w', findItemStack("Wrench"),
+            'R', new ItemStack(Items.redstone),
+            'C', dictAdvancedChip
+        );
 
     }
 

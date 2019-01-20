@@ -9,6 +9,7 @@ import mods.eln.sim.ElectricalLoad
 import mods.eln.sim.ThermalLoad
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.Vec3
@@ -65,7 +66,7 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             val range = Math.min(connectRange, other.connectRange)
             val stackSize = entityPlayer.totalItemsCarried(stack)
 
-            if (stackSize < distance) {
+            if (stackSize < distance && !Utils.isCreative(entityPlayer as EntityPlayerMP)) {
                 Utils.addChatMessage(entityPlayer, "You need $cableLength units of cable")
             } else if (distance > range) {
                 Utils.addChatMessage(entityPlayer, "Cannot connect, range " + Math.ceil(distance) + " and limit " + range + " blocks")

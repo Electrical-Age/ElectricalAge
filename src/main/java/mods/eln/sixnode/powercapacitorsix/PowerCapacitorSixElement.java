@@ -1,7 +1,11 @@
 package mods.eln.sixnode.powercapacitorsix;
 
 import mods.eln.Eln;
+import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
+import mods.eln.item.DielectricItem;
+import mods.eln.item.IConfigurable;
+import mods.eln.item.ItemMovingHelper;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -19,15 +23,17 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.BipoleVoltageWatchdog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PowerCapacitorSixElement extends SixNodeElement {
+public class PowerCapacitorSixElement extends SixNodeElement implements IConfigurable {
 
     PowerCapacitorSixDescriptor descriptor;
     NbtElectricalLoad positiveLoad = new NbtElectricalLoad("positiveLoad");
@@ -193,5 +199,51 @@ public class PowerCapacitorSixElement extends SixNodeElement {
     @Override
     public Container newContainer(Direction side, EntityPlayer player) {
         return new PowerCapacitorSixContainer(player, inventory);
+    }
+
+    @Override
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        if(compound.hasKey("capRedstoneAmt")) {
+            int desired = compound.getInteger("capRedstoneAmt");
+            (new ItemMovingHelper() {
+                public boolean acceptsStack(ItemStack stack) {
+                    return stack.getItem() == Items.redstone;
+                }
+
+                public ItemStack newStackOfSize(int size) {
+                    return new ItemStack(Items.redstone, size);
+                }
+            }).move(invoker.inventory, inventory, PowerCapacitorSixContainer.redId, desired);
+        }
+        if(compound.hasKey("capDielectricAmt")) {
+            int desired = compound.getInteger("capDielectricAmt");
+            GenericItemUsingDamageDescriptor dielectric = GenericItemUsingDamageDescriptor.getByName("Dielectric");
+            (new ItemMovingHelper() {
+                public boolean acceptsStack(ItemStack stack) {
+                    return dielectric.checkSameItemStack(stack);
+                }
+
+                @Override
+                public ItemStack newStackOfSize(int items) {
+                    return dielectric.newItemStack(items);
+                }
+            }).move(invoker.inventory, inventory, PowerCapacitorSixContainer.dielectricId, desired);
+        }
+    }
+
+    @Override
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        ItemStack stack = inventory.getStackInSlot(PowerCapacitorSixContainer.redId);
+        if(stack == null) {
+            compound.setInteger("capRedstoneAmt", 0);
+        } else {
+            compound.setInteger("capRedstoneAmt", stack.stackSize);
+        }
+        stack = inventory.getStackInSlot(PowerCapacitorSixContainer.dielectricId);
+        if(stack == null) {
+            compound.setInteger("capDielectricAmt", 0);
+        } else {
+            compound.setInteger("capDielectricAmt", stack.stackSize);
+        }
     }
 }

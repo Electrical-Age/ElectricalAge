@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IIcon;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class GenericItemBlockUsingDamageDescriptor {
@@ -18,6 +19,14 @@ public class GenericItemBlockUsingDamageDescriptor {
     String iconName;
     IIcon iconIndex;
     public String name;
+
+    public static String INVALID_NAME = "$NO_DESCRIPTOR";
+
+    public static HashMap<String, GenericItemBlockUsingDamageDescriptor> byName = new HashMap<>();
+
+    public static GenericItemBlockUsingDamageDescriptor getByName(String name) {
+        return byName.get(name);
+    }
 
     public Item parentItem;
     public int parentItemDamage;
@@ -29,6 +38,7 @@ public class GenericItemBlockUsingDamageDescriptor {
     public GenericItemBlockUsingDamageDescriptor(String name, String iconName) {
         setDefaultIcon(iconName);
         this.name = name;
+        byName.put(name, this);
     }
 
     public void setDefaultIcon(String name) {
@@ -73,6 +83,12 @@ public class GenericItemBlockUsingDamageDescriptor {
 
     public ItemStack newItemStack() {
         return new ItemStack(parentItem, 1, parentItemDamage);
+    }
+
+    public boolean checkSameItemStack(ItemStack stack) {
+        if(stack == null) return false;
+        if(stack.getItem() != parentItem || stack.getItemDamage() != parentItemDamage) return false;
+        return true;
     }
 
     public static GenericItemBlockUsingDamageDescriptor getDescriptor(ItemStack stack) {

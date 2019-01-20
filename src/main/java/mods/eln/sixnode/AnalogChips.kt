@@ -4,6 +4,7 @@ import mods.eln.Eln
 import mods.eln.cable.CableRenderDescriptor
 import mods.eln.gui.*
 import mods.eln.i18n.I18N
+import mods.eln.item.IConfigurable
 import mods.eln.misc.*
 import mods.eln.node.Node
 import mods.eln.node.Synchronizable
@@ -21,6 +22,8 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.NBTTagDouble
+import net.minecraft.nbt.NBTTagList
 import net.minecraftforge.client.IItemRenderer
 import org.lwjgl.opengl.GL11
 import java.io.ByteArrayOutputStream
@@ -268,7 +271,7 @@ class PIDRegulator : AnalogFunction() {
 }
 
 class PIDRegulatorElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor) :
-    AnalogChipElement(node, side, sixNodeDescriptor) {
+    AnalogChipElement(node, side, sixNodeDescriptor), IConfigurable {
     companion object {
         val KpParameterChangedEvent = 1
         val KiParameterChangedEvent = 2
@@ -301,6 +304,29 @@ class PIDRegulatorElement(node: SixNode, side: Direction, sixNodeDescriptor: Six
             needPublish()
         } catch (e: IOException) {
             e.printStackTrace()
+        }
+    }
+
+    override fun readConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
+        with(function as PIDRegulator) {
+            if(compound.hasKey("kp")) {
+                Kp = compound.getDouble ("kp")
+            }
+            if(compound.hasKey("ki")) {
+                Ki = compound.getDouble("ki")
+            }
+            if(compound.hasKey("kd")) {
+                Kd = compound.getDouble("kd")
+            }
+        }
+        needPublish()
+    }
+
+    override fun writeConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
+        with(function as PIDRegulator) {
+            compound.setDouble("kp", Kp)
+            compound.setDouble("ki", Ki)
+            compound.setDouble("kd", Kd)
         }
     }
 }
@@ -436,7 +462,7 @@ class Amplifier : AnalogFunction() {
 }
 
 class AmplifierElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor) :
-    AnalogChipElement(node, side, sixNodeDescriptor) {
+    AnalogChipElement(node, side, sixNodeDescriptor), IConfigurable {
 
     companion object {
         val GainChangedEvent = 1
@@ -466,6 +492,20 @@ class AmplifierElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNod
             needPublish()
         } catch (e: IOException) {
             e.printStackTrace()
+        }
+    }
+
+    override fun readConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
+        with(function as Amplifier) {
+            if(compound.hasKey("gain")) {
+                gain = compound.getDouble("gain")
+            }
+        }
+    }
+
+    override fun writeConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
+        with(function as Amplifier) {
+            compound.setDouble("gain", gain)
         }
     }
 }
@@ -559,7 +599,7 @@ class SummingUnit : AnalogFunction() {
 }
 
 class SummingUnitElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor) :
-    AnalogChipElement(node, side, sixNodeDescriptor) {
+    AnalogChipElement(node, side, sixNodeDescriptor), IConfigurable {
 
     companion object {
         val GainChangedEvents = arrayOf(1, 2, 3)
@@ -593,6 +633,27 @@ class SummingUnitElement(node: SixNode, side: Direction, sixNodeDescriptor: SixN
             needPublish()
         } catch (e: IOException) {
             e.printStackTrace()
+        }
+    }
+
+    override fun readConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
+        with(function as SummingUnit) {
+            if(compound.hasKey("gains")) {
+                val list = compound.getTagList("gains", 6)
+                for(idx in 0 until Math.min(list.tagCount(), 3)) {
+                    gains[idx] = list.func_150309_d(idx)
+                }
+            }
+        }
+    }
+
+    override fun writeConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
+        with(function as SummingUnit) {
+            var list = NBTTagList();
+            for(d in gains) {
+                list.appendTag(NBTTagDouble(d))
+            }
+            compound.setTag("gains", list)
         }
     }
 }
@@ -703,7 +764,7 @@ class Filter: AnalogFunction() {
 }
 
 class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDescriptor) :
-    AnalogChipElement(node, side, sixNodeDescriptor) {
+    AnalogChipElement(node, side, sixNodeDescriptor), IConfigurable {
 
     enum class Event(val value: Byte) {
         CUTOFF_FREQUENCY_CHANGED(1)
@@ -739,6 +800,16 @@ class FilterElement(node: SixNode, side: Direction, sixNodeDescriptor: SixNodeDe
         } catch (e: IOException) {
             e.printStackTrace()
         }
+    }
+
+    override fun readConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
+        if(compound.hasKey("cutoff")) {
+            cutOffFrequency = compound.getDouble("cutoff")
+        }
+    }
+
+    override fun writeConfigTool(compound: NBTTagCompound, invoker: EntityPlayer) {
+        compound.setDouble("cutoff", cutOffFrequency)
     }
 }
 

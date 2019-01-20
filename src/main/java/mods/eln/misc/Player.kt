@@ -20,6 +20,7 @@ fun EntityPlayer.totalItemsCarried(stack: ItemStack): Int {
 }
 
 fun EntityPlayer.removeMultipleItems(stack: ItemStack, count: Int) {
+    if(Utils.isCreative(this as EntityPlayerMP)) return
     assert(count <= totalItemsCarried(stack))
     var left = count
     try {

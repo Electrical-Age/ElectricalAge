@@ -2,6 +2,7 @@ package mods.eln.sixnode.lampsupply;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.item.IConfigurable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -31,14 +32,14 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.*;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.*;
 
-public class LampSupplyElement extends SixNodeElement {
+public class LampSupplyElement extends SixNodeElement implements IConfigurable {
 
     public static class PowerSupplyChannelHandle {
         PowerSupplyChannelHandle(LampSupplyElement element, int id) {
@@ -406,5 +407,49 @@ public class LampSupplyElement extends SixNodeElement {
         ItemStack stack = getInventory().getStackInSlot(LampSupplyContainer.cableSlotId);
         if (stack == null) return desc.range;
         return desc.range + stack.stackSize;
+    }
+
+    @Override
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        if(compound.hasKey("powerChannels")) {
+            NBTTagList list = compound.getTagList("powerChannel", 8);
+            for(int idx = 0; idx < descriptor.channelCount && idx < list.tagCount(); idx++) {
+                channelRemove(this, idx, entries.get(idx).powerChannel);
+                entries.get(idx).powerChannel = list.getStringTagAt(idx);
+                channelRegister(this, idx, entries.get(idx).powerChannel);
+            }
+            needPublish();
+        }
+        if(compound.hasKey("wirelessChannels")) {
+            NBTTagList list = compound.getTagList("wirelessChannel", 8);
+            for(int idx = 0; idx < descriptor.channelCount && idx < list.tagCount(); idx++) {
+                channelRemove(this, idx, entries.get(idx).wirelessChannel);
+                entries.get(idx).wirelessChannel = list.getStringTagAt(idx);
+                channelRegister(this, idx, entries.get(idx).wirelessChannel);
+            }
+            needPublish();
+        }
+        if(compound.hasKey("aggregators")) {
+            int[] aggregators = compound.getIntArray("aggregators");
+            for(int idx = 0; idx < descriptor.channelCount && idx < aggregators.length; idx++) {
+                entries.get(idx).aggregator = aggregators[idx];
+            }
+            needPublish();
+        }
+    }
+
+    @Override
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        NBTTagList powerList = new NBTTagList();
+        NBTTagList wirelessList = new NBTTagList();
+        int[] aggregators = new int[descriptor.channelCount];
+        for(int idx = 0; idx < descriptor.channelCount; idx++) {
+            powerList.appendTag(new NBTTagString(entries.get(idx).powerChannel));
+            wirelessList.appendTag(new NBTTagString(entries.get(idx).wirelessChannel));
+            aggregators[idx] = entries.get(idx).aggregator;
+        }
+        compound.setTag("powerChannels", powerList);
+        compound.setTag("wirelessChannels", wirelessList);
+        compound.setIntArray("aggregators", aggregators);
     }
 }

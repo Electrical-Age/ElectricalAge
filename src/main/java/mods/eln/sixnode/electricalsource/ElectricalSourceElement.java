@@ -4,6 +4,7 @@ import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
 import mods.eln.item.BrushDescriptor;
+import mods.eln.item.IConfigurable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -26,7 +27,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ElectricalSourceElement extends SixNodeElement {
+public class ElectricalSourceElement extends SixNodeElement implements IConfigurable {
 
     NbtElectricalLoad electricalLoad = new NbtElectricalLoad("electricalLoad");
     VoltageSource voltageSource = new VoltageSource("voltSrc", electricalLoad, null);
@@ -160,5 +161,18 @@ public class ElectricalSourceElement extends SixNodeElement {
     @Override
     public boolean hasGui() {
         return true;
+    }
+
+    @Override
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        if(compound.hasKey("voltage")) {
+            voltageSource.setU(compound.getDouble("voltage"));
+            needPublish();
+        }
+    }
+
+    @Override
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        compound.setDouble("voltage", voltageSource.getU());
     }
 }

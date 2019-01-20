@@ -4,6 +4,7 @@ import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
 import mods.eln.item.BrushDescriptor;
+import mods.eln.item.IConfigurable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -28,7 +29,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ElectricalDataLoggerElement extends SixNodeElement {
+public class ElectricalDataLoggerElement extends SixNodeElement implements IConfigurable {
 
     public static final int logsSizeMax = 256;
 
@@ -257,12 +258,12 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         ItemStack cur = entityPlayer.getCurrentEquippedItem();
-        if(cur != null) {
+        if (cur != null) {
             GenericItemUsingDamageDescriptor desc = BrushDescriptor.getDescriptor(cur);
-            if(desc != null && desc instanceof BrushDescriptor) {
+            if (desc != null && desc instanceof BrushDescriptor) {
                 BrushDescriptor brush = (BrushDescriptor) desc;
                 int brushColor = brush.getColor(cur);
-                if(brushColor != color && brush.use(cur, entityPlayer)) {
+                if (brushColor != color && brush.use(cur, entityPlayer)) {
                     color = (byte) brushColor;
                     needPublish();
                 }
@@ -271,5 +272,43 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         }
 
         return false;
+    }
+
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        if(compound.hasKey("min"))
+            logs.minValue = compound.getFloat("min");
+        if(compound.hasKey("max"))
+            logs.maxValue = compound.getFloat("max");
+        if(compound.hasKey("unit"))
+            logs.unitType = compound.getByte("unit");
+        if(compound.hasKey("period"))
+            logs.samplingPeriod = compound.getFloat("period");
+
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(64);
+            DataOutputStream packet = new DataOutputStream(bos);
+
+            preparePacketForClient(packet);
+            packet.writeByte(toClientLogsClear);
+
+            int size = logs.size();
+            for(int i = size - 1; i >= 0; i--) {
+                packet.writeByte(logs.read(i));
+            }
+
+            sendPacketToAllClient(bos);
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+
+        needPublish();
+    }
+
+    @Override
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        compound.setFloat("min", logs.minValue);
+        compound.setFloat("max", logs.maxValue);
+        compound.setByte("unit", logs.unitType);
+        compound.setFloat("period", logs.samplingPeriod);
     }
 }

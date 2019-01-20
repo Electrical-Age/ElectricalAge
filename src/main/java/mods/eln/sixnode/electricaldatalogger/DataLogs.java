@@ -16,7 +16,7 @@ public class DataLogs implements INBTTReady {
     float samplingPeriod = 0.5f;
     float maxValue = 100f, minValue = 0f;
     byte unitType = percentType;
-    static final byte voltageType = 0, currentType = 1, powerType = 2, celsiusType = 3, percentType = 4, energyType = 5, noType = 6;
+    public static final byte voltageType = 0, currentType = 1, powerType = 2, celsiusType = 3, percentType = 4, energyType = 5, noType = 6;
 
     public DataLogs(int sizeMax) {
         log = new byte[sizeMax];

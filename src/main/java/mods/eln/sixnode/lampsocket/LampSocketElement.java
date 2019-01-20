@@ -1,9 +1,12 @@
 package mods.eln.sixnode.lampsocket;
 
 import mods.eln.Eln;
+import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
 import mods.eln.item.BrushDescriptor;
+import mods.eln.item.IConfigurable;
+import mods.eln.item.ItemMovingHelper;
 import mods.eln.item.LampDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -26,6 +29,9 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
+import net.minecraft.world.WorldSettings;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -33,7 +39,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LampSocketElement extends SixNodeElement {
+public class LampSocketElement extends SixNodeElement implements IConfigurable {
 
     LampSocketDescriptor socketDescriptor = null;
 
@@ -330,5 +336,104 @@ public class LampSocketElement extends SixNodeElement {
             isConnectedToLampSupply = value;
             needPublish();
         }
+    }
+
+    @Override
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        if(compound.hasKey("powerChannels")) {
+            String newChannel = compound.getTagList("powerChannels", 8).getStringTagAt(0);
+            if(newChannel != null && newChannel != "") {
+                channel = newChannel;
+                needPublish();
+            }
+        }
+        if(compound.hasKey("lampType")) {
+            String type = compound.getString("lampType");
+            GenericItemUsingDamageDescriptor thisLampDesc = GenericItemUsingDamageDescriptor.getDescriptor(getInventory().getStackInSlot(0), LampDescriptor.class);
+            if(thisLampDesc != null) {
+                (new ItemMovingHelper() {
+                    @Override
+                    public boolean acceptsStack(ItemStack stack) {
+                        return thisLampDesc.checkSameItemStack(stack);
+                    }
+
+                    @Override
+                    public ItemStack newStackOfSize(int items) {
+                        return thisLampDesc.newItemStack(items);
+                    }
+                }).move(invoker.inventory, getInventory(), 0, 0);
+            }
+            if(!type.equals(GenericItemUsingDamageDescriptor.INVALID_NAME)) {
+                GenericItemUsingDamageDescriptor lampDesc = GenericItemUsingDamageDescriptor.getByName(type);
+                (new ItemMovingHelper() {
+                    @Override
+                    public boolean acceptsStack(ItemStack stack) {
+                        return lampDesc.checkSameItemStack(stack);
+                    }
+
+                    @Override
+                    public ItemStack newStackOfSize(int items) {
+                        return lampDesc.newItemStack(items);
+                    }
+                }).move(invoker.inventory, getInventory(), 0, 1);
+            }
+        }
+        if(compound.hasKey("cableType")) {
+            int type = compound.getInteger("cableType");
+            GenericItemBlockUsingDamageDescriptor thisCableDesc = GenericItemBlockUsingDamageDescriptor.getDescriptor(getInventory().getStackInSlot(1), ElectricalCableDescriptor.class);
+            if(thisCableDesc != null) {
+                (new ItemMovingHelper() {
+                    @Override
+                    public boolean acceptsStack(ItemStack stack) {
+                        return thisCableDesc.checkSameItemStack(stack);
+                    }
+
+                    @Override
+                    public ItemStack newStackOfSize(int items) {
+                        return thisCableDesc.newItemStack(items);
+                    }
+                }).move(invoker.inventory, getInventory(), 1, 0);
+            }
+            if(type != -1) {
+                GenericItemBlockUsingDamageDescriptor cableDesc = Eln.sixNodeItem.getDescriptor(type);
+                (new ItemMovingHelper() {
+                    @Override
+                    public boolean acceptsStack(ItemStack stack) {
+                        GenericItemBlockUsingDamageDescriptor thisDesc = GenericItemBlockUsingDamageDescriptor.getDescriptor(stack);
+                        Utils.println(String.format("LSE.rCT: IMH.aS: cableDesc %s stack %s descriptor %s", cableDesc, stack, GenericItemBlockUsingDamageDescriptor.getDescriptor(stack)));
+                        if(thisDesc != null) {
+                            Utils.println(String.format("... cable is %s DMG %d", cableDesc.parentItem, cableDesc.parentItemDamage));
+                            Utils.println(String.format("... this is %s DMG %d", thisDesc.parentItem, thisDesc.parentItemDamage));
+                        }
+                        return cableDesc.checkSameItemStack(stack);
+                    }
+
+                    @Override
+                    public ItemStack newStackOfSize(int items) {
+                        return cableDesc.newItemStack(items);
+                    }
+                }).move(invoker.inventory, getInventory(), 1, 1);
+            }
+        }
+    }
+
+    @Override
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        NBTTagList list = new NBTTagList();
+        list.appendTag(new NBTTagString(channel));
+        compound.setTag("powerChannels", list);
+        IInventory inv = getInventory();
+        ItemStack lampStack = inv.getStackInSlot(0);
+        ItemStack cableStack = inv.getStackInSlot(1);
+        GenericItemUsingDamageDescriptor lampDesc = GenericItemUsingDamageDescriptor.getDescriptor(lampStack, LampDescriptor.class);
+        GenericItemBlockUsingDamageDescriptor cableDesc = GenericItemBlockUsingDamageDescriptor.getDescriptor(cableStack);
+        if(lampDesc != null)
+            compound.setString("lampType", lampDesc.name);
+        else
+            compound.setString("lampType", GenericItemUsingDamageDescriptor.INVALID_NAME);
+        if(cableDesc != null)
+            compound.setInteger("cableType", cableDesc.parentItemDamage);
+        else
+            compound.setInteger("cableType", -1);
     }
 }

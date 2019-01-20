@@ -1,10 +1,8 @@
 package mods.eln.node.six;
 
 import mods.eln.Eln;
-import mods.eln.misc.Direction;
-import mods.eln.misc.LRDU;
-import mods.eln.misc.LRDUCubeMask;
-import mods.eln.misc.Utils;
+import mods.eln.item.IConfigurable;
+import mods.eln.misc.*;
 import mods.eln.node.ISixNodeCache;
 import mods.eln.node.Node;
 import mods.eln.node.NodeConnection;
@@ -299,6 +297,26 @@ public class SixNode extends Node {
         if (element == null)
             return "";
         return element.thermoMeterString();
+    }
+
+    @Override
+    public boolean readConfigTool(Direction side, NBTTagCompound tag, EntityPlayer invoker) {
+        SixNodeElement element = sideElementList[side.getInt()];
+        if(element instanceof IConfigurable) {
+            ((IConfigurable) element).readConfigTool(tag, invoker);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean writeConfigTool(Direction side, NBTTagCompound tag, EntityPlayer invoker) {
+        SixNodeElement element = sideElementList[side.getInt()];
+        if(element instanceof IConfigurable) {
+            ((IConfigurable) element).writeConfigTool(tag, invoker);
+            return true;
+        }
+        return false;
     }
 
     @Override

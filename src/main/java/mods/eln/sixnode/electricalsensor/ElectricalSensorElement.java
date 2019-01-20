@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalsensor;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.item.IConfigurable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -19,6 +20,7 @@ import mods.eln.sim.nbt.NbtElectricalLoad;
 import mods.eln.sim.process.destruct.VoltageStateWatchDog;
 import mods.eln.sim.process.destruct.WorldExplosion;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.electricaldatalogger.DataLogs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
@@ -31,7 +33,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ElectricalSensorElement extends SixNodeElement {
+public class ElectricalSensorElement extends SixNodeElement implements IConfigurable {
 
     VoltageStateWatchDog voltageWatchDog = new VoltageStateWatchDog();
     //ResistorCurrentWatchdog currentWatchDog = new ResistorCurrentWatchdog();
@@ -49,7 +51,7 @@ public class ElectricalSensorElement extends SixNodeElement {
 
     static final byte dirNone = 0, dirAB = 1, dirBA = 2;
     byte dirType = dirNone;
-    static final byte powerType = 0, currantType = 1, voltageType = 2;
+    public static final byte powerType = 0, currantType = 1, voltageType = 2;
     int typeOfSensor = voltageType;
     float lowValue = 0, highValue = 50;
 
@@ -267,5 +269,48 @@ public class ElectricalSensorElement extends SixNodeElement {
     @Override
     public Container newContainer(Direction side, EntityPlayer player) {
         return new ElectricalSensorContainer(player, inventory.getInventory(), descriptor);
+    }
+
+    @Override
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        if(compound.hasKey("min"))
+            lowValue = compound.getFloat("min");
+        if(compound.hasKey("max"))
+            highValue = compound.getFloat("max");
+        if (lowValue == highValue) highValue += 0.0001;
+        if(compound.hasKey("unit")) {
+            switch (compound.getByte("unit")) {
+                case DataLogs.powerType:
+                    typeOfSensor = powerType;
+                    break;
+                case DataLogs.currentType:
+                    typeOfSensor = currantType;
+                    break;
+                case DataLogs.voltageType:
+                    typeOfSensor = voltageType;
+                    break;
+            }
+        }
+        if(compound.hasKey("dir") && !descriptor.voltageOnly)
+            dirType = compound.getByte("dir");
+        needPublish();
+    }
+
+    @Override
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        compound.setFloat("min", lowValue);
+        compound.setFloat("max", highValue);
+        switch(typeOfSensor) {
+            case powerType:
+                compound.setByte("unit", DataLogs.powerType);
+                break;
+            case currantType:
+                compound.setByte("unit", DataLogs.currentType);
+                break;
+            case voltageType:
+                compound.setByte("unit", DataLogs.voltageType);
+                break;
+        }
+        compound.setByte("dir", dirType);
     }
 }

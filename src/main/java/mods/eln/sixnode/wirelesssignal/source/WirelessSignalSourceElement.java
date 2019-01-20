@@ -1,6 +1,7 @@
 package mods.eln.sixnode.wirelesssignal.source;
 
 import mods.eln.i18n.I18N;
+import mods.eln.item.IConfigurable;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -17,6 +18,8 @@ import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement.LightningGlitc
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 
 import javax.annotation.Nullable;
 import java.io.DataInputStream;
@@ -26,7 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WirelessSignalSourceElement extends SixNodeElement implements IWirelessSignalTx {
+public class WirelessSignalSourceElement extends SixNodeElement implements IWirelessSignalTx, IConfigurable {
 
     public static final HashMap<String, ArrayList<IWirelessSignalTx>> channelMap = new HashMap<String, ArrayList<IWirelessSignalTx>>();
 
@@ -205,5 +208,25 @@ public class WirelessSignalSourceElement extends SixNodeElement implements IWire
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        if(compound.hasKey("wirelessChannels")) {
+            String newChannel = compound.getTagList("wirelessChannels", 8).getStringTagAt(0);
+            if(newChannel != null && newChannel != "") {
+                WirelessSignalTxElement.channelRemove(this);
+                channel = newChannel;
+                WirelessSignalTxElement.channelRegister(this);
+                needPublish();
+            }
+        }
+    }
+
+    @Override
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        NBTTagList list = new NBTTagList();
+        list.appendTag(new NBTTagString(channel));
+        compound.setTag("wirelessChannels", list);
     }
 }
