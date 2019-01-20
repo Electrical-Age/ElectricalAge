@@ -60,7 +60,7 @@ public class VersionCheckerHandler {
         if (Eln.versionCheckEnabled) {
             //m.thePlayer.addChatMessage(new ChatComponentText(Version.printColor()));
             System.out.println(Version.printColor());
-            String elnVers = "Electrical Age - Built by jrddunbr";
+            String elnVers = "Electrical Age";
             m.thePlayer.addChatMessage(new ChatComponentText(elnVers));
             m.thePlayer.addChatMessage(new ChatComponentText(versionMsg));
         }

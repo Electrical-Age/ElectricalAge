@@ -184,7 +184,7 @@ import static mods.eln.i18n.I18N.*;
 public class Eln {
     // Mod information (override from 'mcmod.info' file)
     public final static String MODID = "Eln";
-    public final static String NAME = "Electrical Age - jrddunbr edition";
+    public final static String NAME = "Electrical Age";
     public final static String MODDESC = "Electricity in your base!";
     public final static String URL = "https://eln.ja13.org";
     public final static String UPDATE_URL = "https://github.com/jrddunbr/ElectricalAge/releases";
