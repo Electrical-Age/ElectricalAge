@@ -324,6 +324,8 @@ public class Eln {
 
     public static boolean wailaEasyMode = false;
 
+    public static double shaftEnergyFactor = 0.05;
+
     public static double fuelHeatValueFactor = 0.0000675;
     private int plateConversionRatio;
 
@@ -415,6 +417,7 @@ public class Eln {
         Other.ElnToTeConversionRatio = config.get("balancing", "ElnToThermalExpansionConversionRatio", 1.0 / 3.0 * 4).getDouble(1.0 / 3.0 * 4);
         //	Other.ElnToBuildcraftConversionRatio = config.get("balancing", "ElnToBuildcraftConversionRatio", 1.0 / 3.0 / 5 * 2).getDouble(1.0 / 3.0 / 5 * 2);
         plateConversionRatio = config.get("balancing", "platesPerIngot", 1).getInt(1);
+        shaftEnergyFactor = config.get("balancing", "shaftEnergyFactor", 0.05).getDouble(0.05);
 
         stdBatteryHalfLife = config.get("battery", "batteryHalfLife", 2, "How many days it takes for a battery to decay half way").getDouble(2) * Utils.minecraftDay;
         batteryCapacityFactor = config.get("balancing", "batteryCapacityFactor", 1.).getDouble(1.);

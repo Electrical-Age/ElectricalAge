@@ -2,6 +2,7 @@ package mods.eln.mechanical
 
 import cpw.mods.fml.common.Loader
 import cpw.mods.fml.common.LoaderState
+import mods.eln.Eln
 import mods.eln.misc.Coordonate
 import mods.eln.misc.Direction
 import mods.eln.misc.INBTTReady
@@ -80,12 +81,12 @@ open class ShaftNetwork() : INBTTReady {
     var radsLastPublished = rads
 
     var energy: Double
-        get() = mass * rads * rads * 0.5
+        get() = mass * rads * rads * 0.5 * Eln.shaftEnergyFactor
         set(value) {
             if(value < 0)
                 rads = 0.0
             else
-                rads = Math.sqrt(2 * value / mass)
+                rads = Math.sqrt(2 * value / (mass * Eln.shaftEnergyFactor))
         }
 
     fun afterSetRads() {
@@ -216,7 +217,9 @@ open class ShaftNetwork() : INBTTReady {
         val unseen = HashSet<ShaftPart>(parts)
         val queue = HashMap<ShaftPart,ShaftNetwork>()
         val seen = HashSet<ShaftPart>()
-        var shaft = ShaftNetwork();
+        val curRads = rads
+        var shaft = ShaftNetwork()
+        shaft.rads = curRads
         // Utils.println("SN.rN ----- START -----")
         while (unseen.size > 0) {
             shaft.parts.clear();
@@ -250,6 +253,7 @@ open class ShaftNetwork() : INBTTReady {
             // Utils.println("SN.rN new shaft, unseen.size = " + unseen.size)
             // We ran out of network. Any elements remaining in unseen should thus form a new network.
             shaft = ShaftNetwork()
+            shaft.rads = curRads
         }
 
         // Utils.println("SN.rN ----- FINISH -----")
