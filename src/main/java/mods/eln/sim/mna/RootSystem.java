@@ -221,9 +221,11 @@ public class RootSystem {
         Iterator<Component> ic = addComponents.iterator();
         while (ic.hasNext()) {
             Component c = ic.next();
+            /*
             if (!c.canBeReplacedByInterSystem()) {
                 Utils.println("ELN generateInterSystems ERROR");
             }
+            */
 
             Resistor r = (Resistor) c;
             // If a pin is disconnected, we can't be intersystem

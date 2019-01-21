@@ -280,8 +280,10 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
                 val deltaR = faster.rads - slower.rads
                 // These don't lose energy properly
                 //val power = torque * deltaR
+                //Utils.println(String.format("CPP.p: transfer torque %f from %s %f to %s %f", torque, faster, faster.rads, slower, slower.rads))
                 slower.rads += torque / slower.mass  // Exert a constant torque
                 faster.rads -= torque / faster.mass
+                //Utils.println(String.format("CPP.p: faster %s now %f, slower %s now %f",faster, faster.rads, slower, slower.rads))
                 // Add a small margin to account for numerical inaccuracies
                 //val margin = staticMarginF.getValue(Math.max(faster.rads, slower.rads))
                 //if (slower.rads >= faster.rads - margin)
@@ -323,8 +325,8 @@ class ClutchElement(node: TransparentNode, desc_: TransparentNodeDescriptor) : S
                     slipping = true
                     needPublish()
                 } else {
-                    leftShaft.rads = Math.sqrt(2 * leftEnergy / mass)
-                    rightShaft.rads = Math.sqrt(2 * rightEnergy / mass)
+                    leftShaft.rads = Math.sqrt(2 * leftEnergy / (mass * Eln.shaftEnergyFactor))
+                    rightShaft.rads = Math.sqrt(2 * rightEnergy / (mass * Eln.shaftEnergyFactor))
                 }
             }
         }
