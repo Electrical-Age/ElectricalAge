@@ -77,28 +77,39 @@ public class TransformerDescriptor extends TransparentNodeDescriptor {
         }
     }
 
+    public static float coilScale = 4f;
+    public static int coilScaleLimit = 16;
+
     void draw(Obj3DPart fero, int priCableNbr, int secCableNbr, boolean hasCasing, float doorOpen) {
         if (main != null) main.draw();
         if (fero != null) {
             fero.draw();
             if (priCableNbr != 0) {
+                float scale = coilScale;
+                if(priCableNbr < coilScaleLimit) {
+                    scale *= ((float) priCableNbr / coilScaleLimit);
+                }
                 GL11.glPushMatrix();
-                float y = (priCableNbr - 1) * 1f / 16f;
-                GL11.glTranslatef(0f, -y, 0f);
+                GL11.glScalef(1f, scale * 2f / (priCableNbr + 1), 1f);
+                GL11.glTranslatef(0f, -0.125f * (priCableNbr - 1) / coilScale, 0f);
                 for (int idx = 0; idx < priCableNbr; idx++) {
                     sbire.draw();
-                    GL11.glTranslatef(0f, 2f / 16f, 0f);
+                    GL11.glTranslatef (0f, 0.25f / coilScale, 0f);
                 }
                 GL11.glPopMatrix();
             }
             if (secCableNbr != 0) {
+                float scale = coilScale;
+                if(secCableNbr < coilScaleLimit) {
+                    scale *= ((float) secCableNbr / coilScaleLimit);
+                }
                 GL11.glPushMatrix();
                 GL11.glRotatef(180, 0f, 1f, 0f);
-                float y = (secCableNbr - 1) * 1f / 16f;
-                GL11.glTranslatef(0f, -y, 0f);
+                GL11.glScalef(1f, scale * 2f / (secCableNbr + 1), 1f);
+                GL11.glTranslatef(0f, -0.125f * (secCableNbr - 1) / coilScale, 0f);
                 for (int idx = 0; idx < secCableNbr; idx++) {
                     sbire.draw();
-                    GL11.glTranslatef(0f, 2f / 16f, 0f);
+                    GL11.glTranslatef (0f, 0.25f / coilScale, 0f);
                 }
                 GL11.glPopMatrix();
             }
