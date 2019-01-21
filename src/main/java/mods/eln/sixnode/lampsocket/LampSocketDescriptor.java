@@ -30,6 +30,7 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
     public boolean rotateOnlyBy180Deg = false;
 
     public boolean paintable = false;
+    public boolean renderIconInHand = false;
 
     public LampSocketDescriptor(String name, LampSocketObjRender render,
                                 LampSocketType socketType,
@@ -73,17 +74,17 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
 
     @Override
     public boolean shouldUseRenderHelper(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
+        return !renderIconInHand && type != ItemRenderType.INVENTORY;
     }
 
     @Override
     public boolean shouldUseRenderHelperEln(ItemRenderType type, ItemStack item, ItemRendererHelper helper) {
-        return type != ItemRenderType.INVENTORY;
+        return !renderIconInHand && type != ItemRenderType.INVENTORY;
     }
 
     @Override
     public void renderItem(ItemRenderType type, ItemStack item, Object... data) {
-        if (type == ItemRenderType.INVENTORY)
+        if (type == ItemRenderType.INVENTORY || renderIconInHand)
             super.renderItem(type, item, data);
         else {
             GL11.glScalef(1.25f, 1.25f, 1.25f);

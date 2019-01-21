@@ -1791,6 +1791,7 @@ public class Eln {
             g.addElement(1, 0, 0);
             g.addElement(2, 0, 0);
             desc.setGhostGroup(g);
+            desc.renderIconInHand = true;
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
             desc.cameraOpt = false;
         }
