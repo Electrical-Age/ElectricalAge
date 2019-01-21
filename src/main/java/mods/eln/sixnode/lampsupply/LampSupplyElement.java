@@ -2,6 +2,7 @@ package mods.eln.sixnode.lampsupply;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.item.ConfigCopyToolDescriptor;
 import mods.eln.item.IConfigurable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -436,6 +437,8 @@ public class LampSupplyElement extends SixNodeElement implements IConfigurable {
             }
             needPublish();
         }
+        if(ConfigCopyToolDescriptor.readCableType(compound, getInventory(), 0, invoker))
+            needPublish();
     }
 
     @Override
@@ -451,5 +454,7 @@ public class LampSupplyElement extends SixNodeElement implements IConfigurable {
         compound.setTag("powerChannels", powerList);
         compound.setTag("wirelessChannels", wirelessList);
         compound.setIntArray("aggregators", aggregators);
+        ItemStack cables = getInventory().getStackInSlot(0);
+        ConfigCopyToolDescriptor.writeCableType(compound, cables);
     }
 }

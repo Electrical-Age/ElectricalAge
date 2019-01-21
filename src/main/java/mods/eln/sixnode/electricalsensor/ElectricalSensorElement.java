@@ -2,6 +2,7 @@ package mods.eln.sixnode.electricalsensor;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.item.ConfigCopyToolDescriptor;
 import mods.eln.item.IConfigurable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -293,6 +294,7 @@ public class ElectricalSensorElement extends SixNodeElement implements IConfigur
         }
         if(compound.hasKey("dir") && !descriptor.voltageOnly)
             dirType = compound.getByte("dir");
+        ConfigCopyToolDescriptor.readCableType(compound, getInventory(), 0, invoker);
         needPublish();
     }
 
@@ -312,5 +314,6 @@ public class ElectricalSensorElement extends SixNodeElement implements IConfigur
                 break;
         }
         compound.setByte("dir", dirType);
+        ConfigCopyToolDescriptor.writeCableType(compound, getInventory().getStackInSlot(0));
     }
 }

@@ -3,6 +3,8 @@ package mods.eln.sixnode.powersocket;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.BrushDescriptor;
+import mods.eln.item.ConfigCopyToolDescriptor;
+import mods.eln.item.IConfigurable;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -28,6 +30,8 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -36,8 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-//TODO Copy-pasted from LampSupply. PowerSocket behavior must be implemented.
-public class PowerSocketElement extends SixNodeElement {
+public class PowerSocketElement extends SixNodeElement implements IConfigurable {
 
     //NodeElectricalGateInput inputGate = new NodeElectricalGateInput("inputGate");
     public PowerSocketDescriptor descriptor;
@@ -235,5 +238,26 @@ public class PowerSocketElement extends SixNodeElement {
         }
 
         return acceptingInventory.take(used, this, true, true);
+    }
+
+    @Override
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        if(compound.hasKey("powerChannels")) {
+            String newChannel = compound.getTagList("powerChannels", 8).getStringTagAt(0);
+            if(newChannel != null && newChannel != "") {
+                channel = newChannel;
+                needPublish();
+            }
+        }
+        if(ConfigCopyToolDescriptor.readCableType(compound, getInventory(), 0, invoker))
+            needPublish();
+    }
+
+    @Override
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        NBTTagList list = new NBTTagList();
+        list.appendTag(new NBTTagString(channel));
+        compound.setTag("powerChannels", list);
+        ConfigCopyToolDescriptor.writeCableType(compound, getInventory().getStackInSlot(0));
     }
 }

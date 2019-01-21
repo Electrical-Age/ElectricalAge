@@ -2,6 +2,7 @@ package mods.eln.sixnode.thermalsensor;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.item.ConfigCopyToolDescriptor;
 import mods.eln.item.IConfigurable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -284,6 +285,7 @@ public class ThermalSensorElement extends SixNodeElement implements IConfigurabl
                     break;
             }
         }
+        ConfigCopyToolDescriptor.readCableType(compound, getInventory(), 0, invoker);
         needPublish();
     }
 
@@ -299,5 +301,6 @@ public class ThermalSensorElement extends SixNodeElement implements IConfigurabl
                 compound.setByte("unit", DataLogs.celsiusType);
                 break;
         }
+        ConfigCopyToolDescriptor.writeCableType(compound, getInventory().getStackInSlot(0));
     }
 }

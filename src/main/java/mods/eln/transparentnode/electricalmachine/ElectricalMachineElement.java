@@ -2,6 +2,8 @@ package mods.eln.transparentnode.electricalmachine;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.item.ConfigCopyToolDescriptor;
+import mods.eln.item.IConfigurable;
 import mods.eln.item.MachineBoosterDescriptor;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -31,7 +33,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ElectricalMachineElement extends TransparentNodeElement implements ElectricalStackMachineProcessObserver {
+public class ElectricalMachineElement extends TransparentNodeElement implements ElectricalStackMachineProcessObserver, IConfigurable {
     private final TransparentNodeElementInventory inventory;
     AutoAcceptInventoryProxy booterAccepter;
 
@@ -195,5 +197,18 @@ public class ElectricalMachineElement extends TransparentNodeElement implements 
             info.put(I18N.tr("Power provided"), Utils.plotPower("", electricalLoad.getI() * electricalLoad.getU()));
         }
         return info;
+    }
+
+    @Override
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        if(ConfigCopyToolDescriptor.readGenDescriptor(compound, "booster", inventory, descriptor.outStackCount + 1, invoker)) {
+            inventoryChange(inventory);
+            needPublish();
+        }
+    }
+
+    @Override
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        ConfigCopyToolDescriptor.writeGenDescriptor(compound, "booster", inventory.getStackInSlot(descriptor.outStackCount + 1));
     }
 }

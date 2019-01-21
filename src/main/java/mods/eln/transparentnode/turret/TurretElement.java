@@ -3,7 +3,9 @@ package mods.eln.transparentnode.turret;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.i18n.I18N;
+import mods.eln.item.ConfigCopyToolDescriptor;
 import mods.eln.item.EntitySensorFilterDescriptor;
+import mods.eln.item.IConfigurable;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -33,7 +35,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TurretElement extends TransparentNodeElement {
+public class TurretElement extends TransparentNodeElement implements IConfigurable {
 
     public static final byte ToggleFilterMeaning = 1;
     public static final byte UnserializeChargePower = 2;
@@ -270,5 +272,25 @@ public class TurretElement extends TransparentNodeElement {
                 Utils.plotPercent("", energyBuffer / descriptor.getProperties().impulseEnergy));
         }
         return info;
+    }
+
+    @Override
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        if(compound.hasKey("chargePower")) {
+            chargePower = compound.getDouble("chargePower");
+            needPublish();
+        }
+        if(compound.hasKey("filterInvert")) {
+            filterIsSpare = compound.getBoolean("filterInvert");
+        }
+        if(ConfigCopyToolDescriptor.readGenDescriptor(compound, "filter", getInventory(), 0, invoker))
+            needPublish();
+    }
+
+    @Override
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        compound.setDouble("chargePower", chargePower);
+        compound.setBoolean("filterInvert", filterIsSpare);
+        ConfigCopyToolDescriptor.writeGenDescriptor(compound, "filter", getInventory().getStackInSlot(0));
     }
 }

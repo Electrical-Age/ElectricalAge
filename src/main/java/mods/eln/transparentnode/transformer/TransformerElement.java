@@ -2,7 +2,9 @@ package mods.eln.transparentnode.transformer;
 
 import mods.eln.Eln;
 import mods.eln.i18n.I18N;
+import mods.eln.item.ConfigCopyToolDescriptor;
 import mods.eln.item.FerromagneticCoreDescriptor;
+import mods.eln.item.IConfigurable;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
 import mods.eln.misc.Utils;
@@ -33,7 +35,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TransformerElement extends TransparentNodeElement {
+public class TransformerElement extends TransparentNodeElement implements IConfigurable {
     private final NbtElectricalLoad primaryLoad = new NbtElectricalLoad("primaryLoad");
     private final NbtElectricalLoad secondaryLoad = new NbtElectricalLoad("secondaryLoad");
 
@@ -322,5 +324,30 @@ public class TransformerElement extends TransparentNodeElement {
                 "\u00A7e" + Utils.plotVolt("", secondaryLoad.getU()));
         }
         return info;
+    }
+
+    @Override
+    public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        if(compound.hasKey("isolator")) {
+            disconnect();
+            isIsolator = compound.getBoolean("isolator");
+            applyIsolation();
+            reconnect();
+            needPublish();
+        }
+        if(ConfigCopyToolDescriptor.readCableType(compound, "primary", inventory, TransformerContainer.primaryCableSlotId, invoker))
+            inventoryChange(inventory);
+        if(ConfigCopyToolDescriptor.readCableType(compound, "secondary", inventory, TransformerContainer.secondaryCableSlotId, invoker))
+            inventoryChange(inventory);
+        if(ConfigCopyToolDescriptor.readGenDescriptor(compound, "core", inventory, TransformerContainer.ferromagneticSlotId, invoker))
+            inventoryChange(inventory);
+    }
+
+    @Override
+    public void writeConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
+        compound.setBoolean("isolator", isIsolator);
+        ConfigCopyToolDescriptor.writeCableType(compound, "primary", inventory.getStackInSlot(TransformerContainer.primaryCableSlotId));
+        ConfigCopyToolDescriptor.writeCableType(compound, "secondary", inventory.getStackInSlot(TransformerContainer.secondaryCableSlotId));
+        ConfigCopyToolDescriptor.writeGenDescriptor(compound, "core", inventory.getStackInSlot(TransformerContainer.ferromagneticSlotId));
     }
 }
