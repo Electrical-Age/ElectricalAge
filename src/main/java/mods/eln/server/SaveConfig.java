@@ -39,7 +39,6 @@ public class SaveConfig extends WorldSavedData {
         nbt.setBoolean("batteryAging", batteryAging);
         nbt.setBoolean("infinitPortableBattery", infinitePortableBattery);
         nbt.setBoolean("reGenOre", reGenOre);
-        nbt.setDouble("cableRsFactor_lastUsed", Eln.cableRsFactor);
 
         Eln.wind.writeToNBT(nbt, "wind");
     }
