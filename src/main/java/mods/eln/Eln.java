@@ -4001,6 +4001,18 @@ public class Eln {
             Data.addResource(element.newItemStack());
             addToOre("dustCinnabar", element.newItemStack());
         }
+        {
+            id = 11;
+
+            name = TR_NAME(Type.NONE, "Resistive Dust");
+
+            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
+                // name,
+                new String[]{});
+            sharedItem.addElement(id, element);
+            Data.addResource(element.newItemStack());
+            addToOre("dustResistive", element.newItemStack());
+        }
 
     }
 
@@ -6783,7 +6795,17 @@ public class Eln {
             findItemStack("Lapis Dust"),
             findItemStack("Lapis Dust"),
             findItemStack("Lapis Dust"));
-
+        addShapelessRecipe(findItemStack("Coal Dust", 1),
+            "dustResistive",
+            "dustResistive",
+            "dustResistive",
+            "dustResistive",
+            "dustResistive",
+            "dustResistive",
+            "dustResistive",
+            "dustResistive");
+        addShapelessRecipe(findItemStack("Resistive Dust", 8),
+            "dustCoal");
 
     }
 
@@ -7264,9 +7286,9 @@ public class Eln {
             new ItemStack[]{new ItemStack(Blocks.gravel)}, 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.gravel),
             new ItemStack[]{new ItemStack(Items.flint)}, 1.0 * f));
-
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.dirt),
             new ItemStack[]{new ItemStack(Blocks.sand)}, 1.0 * f));
+
         //recycling recipes
         maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Helmet"),
             new ItemStack[]{findItemStack("Coal Dust", 16)}, 10.0 * f));
