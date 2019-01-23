@@ -71,8 +71,10 @@ import mods.eln.sixnode.diode.DiodeDescriptor;
 import mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor;
 import mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
+import mods.eln.sixnode.electricalcable.ElectricalSignalBusCableElement;
 import mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor;
 import mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor;
+import mods.eln.sixnode.electricaldigitaldisplay.ElectricalDigitalDisplayDescriptor;
 import mods.eln.sixnode.electricalentitysensor.ElectricalEntitySensorDescriptor;
 import mods.eln.sixnode.electricalfiredetector.ElectricalFireDetectorDescriptor;
 import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor;
@@ -3738,6 +3740,18 @@ public class Eln {
             Data.addResource(element.newItemStack());
             addToOre("dustCinnabar", element.newItemStack());
         }
+        {
+            id = 11;
+
+            name = TR_NAME(Type.NONE, "Resistive Dust");
+
+            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
+                // name,
+                new String[]{});
+            sharedItem.addElement(id, element);
+            Data.addResource(element.newItemStack());
+            addToOre("dustResistive", element.newItemStack());
+        }
 
     }
 
@@ -6235,7 +6249,7 @@ public class Eln {
             "LLL",
             "L  ",
             "LLL",
-            'L', Items.iron_ingot);
+            'L', findItemStack("Iron Cable"));
 
         addRecipe(findItemStack("Average Ferromagnetic Core"),
             "PCP",
@@ -6243,9 +6257,9 @@ public class Eln {
             'P', "plateIron");
 
         addRecipe(findItemStack("Optimal Ferromagnetic Core"),
-            "P",
-            "C",
-            "P",
+            " P ",
+            "PCP",
+            " P ",
             'C', findItemStack("Average Ferromagnetic Core"),
             'P', "plateIron");
     }
@@ -6259,7 +6273,31 @@ public class Eln {
             "dustIron",
             "dustIron",
             "dustCoal",
+            dictTungstenDust,
+            dictTungstenDust,
+            dictTungstenDust,
             dictTungstenDust);
+        addShapelessRecipe(findItemStack("Inert Canister", 1),
+            findItemStack("Lapis Dust"),
+            findItemStack("Lapis Dust"),
+            findItemStack("Lapis Dust"),
+            findItemStack("Lapis Dust"),
+            findItemStack("Diamond Dust"),
+            findItemStack("Lapis Dust"),
+            findItemStack("Lapis Dust"),
+            findItemStack("Lapis Dust"),
+            findItemStack("Lapis Dust"));
+        addShapelessRecipe(findItemStack("Coal Dust", 1),
+            "dustResistive",
+            "dustResistive",
+            "dustResistive",
+            "dustResistive",
+            "dustResistive",
+            "dustResistive",
+            "dustResistive",
+            "dustResistive");
+        addShapelessRecipe(findItemStack("Resistive Dust", 8),
+            "dustCoal");
 
     }
 
@@ -6272,7 +6310,7 @@ public class Eln {
             " C ",
             "III",
             "C C",
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'C', findItemStack("Low Voltage Cable"));
 
         addRecipe(findItemStack("Advanced Electrical Motor"),
@@ -6639,9 +6677,70 @@ public class Eln {
             new ItemStack[]{new ItemStack(Blocks.gravel)}, 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.gravel),
             new ItemStack[]{new ItemStack(Items.flint)}, 1.0 * f));
-
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.dirt),
             new ItemStack[]{new ItemStack(Blocks.sand)}, 1.0 * f));
+
+        //recycling recipes
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Helmet"),
+            new ItemStack[]{findItemStack("Coal Dust", 16)}, 10.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Boots"),
+            new ItemStack[]{findItemStack("Coal Dust", 12)}, 10.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Chestplate"),
+            new ItemStack[]{findItemStack("Coal Dust", 24)}, 10.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Leggings"),
+            new ItemStack[]{findItemStack("Coal Dust", 24)}, 10.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("Cost Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("Life Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("Current Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("Voltage Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("Capacity Oriented Battery"),
+            new ItemStack[]{findItemStack("Lead Dust", 6)}, 50.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(findItemStack("Single-use Battery"),
+            new ItemStack[]{findItemStack("Copper Dust", 3)}, 10.0 * f));
+
+        //end recycling recipes
+    }
+
+    private void recipeArcFurnace() {
+        float f = 200000;
+        float smeltf = 5000;
+        //start smelting recipes
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.iron_ore, 1),
+            new ItemStack[]{new ItemStack(Items.iron_ingot, 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.gold_ore, 1),
+            new ItemStack[]{new ItemStack(Items.gold_ingot, 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.coal_ore, 1),
+            new ItemStack[]{new ItemStack(Items.coal, 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.redstone_ore, 1),
+            new ItemStack[]{new ItemStack(Items.redstone, 6)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.lapis_ore, 1),
+            new ItemStack[]{new ItemStack(Blocks.lapis_block, 1)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.diamond_ore, 1),
+            new ItemStack[]{new ItemStack(Items.diamond, 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.emerald_ore, 1),
+            new ItemStack[]{new ItemStack(Items.emerald, 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.quartz_ore, 1),
+            new ItemStack[]{new ItemStack(Items.quartz, 2)}, smeltf));
+
+        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Copper Ore", 1),
+            new ItemStack[]{findItemStack("Copper Ingot", 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Lead Ore", 1),
+            new ItemStack[]{findItemStack("Lead Ingot", 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Tungsten Ore", 1),
+            new ItemStack[]{findItemStack("Tungsten Ingot", 2)}, smeltf));
+        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Alloy Dust", 1),
+            new ItemStack[]{findItemStack("Alloy Ingot", 1)}, smeltf));
+        //end smelting recipes
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Items.clay_ball, 2),
+            new ItemStack[]{findItemStack("Arc Clay Ingot", 1)}, 2.0 * f));
+        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot, 1),
+            new ItemStack[]{findItemStack("Arc Metal Ingot", 1)}, 1.0 * f));
+        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Canister of Water", 1),
+            new ItemStack[]{findItemStack("Canister of Arc Water", 1)}, 7000000)); //hardcoded 7MJ to prevent overunity
     }
 
     private void recipeMaceratorModOres() {
