@@ -83,6 +83,7 @@ class ModbusTcpServer(port: Int = 1502) {
                                 when (functionCode.toInt()) {
                                     0x01 -> readCoils(slave, response)
                                     0x02 -> readDiscreteInputs(slave, response)
+                                    0x03 -> readHoldingRegisters(slave, response)
                                     0x04 -> readInputRegisters(slave, response)
                                     0x05 -> writeSingleCoil(slave, response)
                                     0x06 -> writeSingleRegister(slave, response)
@@ -155,6 +156,23 @@ class ModbusTcpServer(port: Int = 1502) {
             } catch (e: IllegalAddressException) {
             }
             response.put((0x84.toByte())).put(0x02.toByte())
+        }
+
+        private fun readHoldingRegisters(slave: IModbusSlave, response: ByteBuffer) {
+            val address = inputBuffer.short
+            val quantity = inputBuffer.short
+
+            try {
+                val data = Array<Short>(quantity.toInt(), { 0 })
+                for (i in 0..quantity - 1) {
+                    data[i] = slave.getHoldingRegister(address.toInt() + i)
+                }
+                response.put(0x03.toByte()).put((quantity * 2).toByte())
+                data.forEach { response.putShort(it) }
+                return
+            } catch (e: IllegalAddressException) {
+            }
+            response.put((0x83.toByte())).put(0x02.toByte())
         }
 
         private fun writeSingleCoil(slave: IModbusSlave, response: ByteBuffer) {

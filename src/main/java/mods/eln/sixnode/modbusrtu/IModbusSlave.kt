@@ -16,5 +16,8 @@ interface IModbusSlave {
     fun getInputRegister(address: Int): Short
 
     @Throws(IllegalAddressException::class)
+    fun getHoldingRegister(address: Int): Short
+
+    @Throws(IllegalAddressException::class)
     fun setHoldingRegister(address: Int, value: Short)
 }
