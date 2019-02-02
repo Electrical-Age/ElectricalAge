@@ -7413,7 +7413,7 @@ public class Eln {
     }
 
     public void regenOreScannerFactors() {
-        PortableOreScannerItem.RenderStorage.blockKeyFactor = null;
+        OreColorMapping.INSTANCE.updateColorMapping();
 
         oreScannerConfig.clear();
 
@@ -7429,7 +7429,7 @@ public class Eln {
                         // Utils.println(OreDictionary.getOreID(name));
                         boolean find = false;
                         for (OreScannerConfigElement c : oreScannerConfig) {
-                            if (c.blockKey == id) {
+                            if (c.getBlockKey() == id) {
                                 find = true;
                                 break;
                             }
