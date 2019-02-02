@@ -5525,11 +5525,11 @@ public class Eln {
 
         sharedItem.addElement(53 + (id << 6), new CaseItemDescriptor(TR_NAME(Type.NONE, "Casing")));
 
-        sharedItem.addElement(54 + (id << 6), new ClutchPlateItem("Iron Clutch Plate", 20480f, 1280f, 2560f, 640f, 0.0001f, false));
+        sharedItem.addElement(54 + (id << 6), new ClutchPlateItem("Iron Clutch Plate", 5120f, 640f, 640f, 160f, 0.0001f, false));
         sharedItem.addElement(55 + (id << 6), new ClutchPinItem("Clutch Pin"));
-        sharedItem.addElement(56 + (id << 6), new ClutchPlateItem("Gold Clutch Plate", 4096f, 2048f, 512f, 128f, 0.01f, false));
-        sharedItem.addElement(57 + (id << 6), new ClutchPlateItem("Copper Clutch Plate", 8192f, 4096f, 1024f, 512f, 0.003f, false));
-        sharedItem.addElement(58 + (id << 6), new ClutchPlateItem("Lead Clutch Plate", 4096f, 1024f, 512f, 128f, 0.01f, false));
+        sharedItem.addElement(56 + (id << 6), new ClutchPlateItem("Gold Clutch Plate", 10240f, 2048f, 1024f, 512f, 0.001f, false));
+        sharedItem.addElement(57 + (id << 6), new ClutchPlateItem("Copper Clutch Plate", 8192f, 4096f, 1024f, 512f, 0.0003f, false));
+        sharedItem.addElement(58 + (id << 6), new ClutchPlateItem("Lead Clutch Plate", 15360f, 1024f, 1536f, 768f, 0.0015f, false));
         sharedItem.addElement(59 + (id << 6), new ClutchPlateItem("Coal Clutch Plate", 1024f, 128f, 128f, 32f, 0.1f, true));
     }
 
