@@ -3,6 +3,7 @@ package mods.eln.transparentnode.autominer;
 import mods.eln.Eln;
 import mods.eln.item.ElectricalDrillDescriptor;
 import mods.eln.item.MiningPipeDescriptor;
+import mods.eln.item.electricalitem.OreColorMapping;
 import mods.eln.item.electricalitem.PortableOreScannerItem;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.INBTTReady;
@@ -352,10 +353,8 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         if (block instanceof BlockOre) return true;
         if (block instanceof OreBlock) return true;
         if (block instanceof BlockRedstoneOre) return true;
-        if (PortableOreScannerItem.RenderStorage.getBlockKeyFactor()[Block.getIdFromBlock(block) +
-            (coordonate.world().getBlockMetadata(coordonate.x, coordonate.y, coordonate.z) << 12)] != 0)
-            return true;
-        return false;
+        return OreColorMapping.INSTANCE.getMap()[Block.getIdFromBlock(block) +
+            (coordonate.world().getBlockMetadata(coordonate.x, coordonate.y, coordonate.z) << 12)] != 0;
     }
 
     public void onBreakElement() {
@@ -376,7 +375,7 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
         }
     }
 
-    public void ghostDestroyed() {
+    void ghostDestroyed() {
         destroyPipe();
     }
 
