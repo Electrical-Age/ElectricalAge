@@ -271,7 +271,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement implements IConf
             }
         }
 
-        return false;
+        return onBlockActivatedRotate(entityPlayer);
     }
 
     public void readConfigTool(NBTTagCompound compound, EntityPlayer invoker) {
