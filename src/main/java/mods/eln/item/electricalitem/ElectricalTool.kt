@@ -2,6 +2,7 @@ package mods.eln.item.electricalitem
 
 import mods.eln.Eln
 import mods.eln.generic.GenericItemUsingDamageDescriptor
+import mods.eln.i18n.I18N.tr
 import mods.eln.item.electricalinterface.IItemEnergyBattery
 import mods.eln.misc.Utils
 import mods.eln.misc.UtilsClient
@@ -11,12 +12,9 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.init.Blocks
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.util.ResourceLocation
 import net.minecraft.world.World
 import net.minecraftforge.client.IItemRenderer.ItemRenderType
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
-
-import mods.eln.i18n.I18N.tr
 
 open class ElectricalTool(name: String, private var strengthOn: Float, private var strengthOff: Float,
                           private var energyStorage: Double, private var energyPerBlock: Double, internal var chargePower: Double) : GenericItemUsingDamageDescriptor(name), IItemEnergyBattery {
@@ -32,13 +30,17 @@ open class ElectricalTool(name: String, private var strengthOn: Float, private v
     }
 
     override fun onBlockDestroyed(stack: ItemStack, w: World, block: Block, x: Int, y: Int, z: Int, entity: EntityLivingBase): Boolean {
+        subtractEnergyForBlockBreak(stack, block)
+        Utils.println("destroy")
+        return true
+    }
+
+    fun subtractEnergyForBlockBreak(stack: ItemStack, block: Block) {
         if (getStrVsBlock(stack, block) == strengthOn) {
             var e = getEnergy(stack) - energyPerBlock
             if (e < 0) e = 0.0
             setEnergy(stack, e)
         }
-        Utils.println("destroy")
-        return true
     }
 
     fun getStrength(stack: ItemStack): Float {
