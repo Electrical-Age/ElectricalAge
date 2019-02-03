@@ -47,22 +47,6 @@ public enum VoltageLevelColor {
         }
     }
 
-    public static VoltageLevelColor fromMaxCurrent(double maxCurrent) {
-        if (maxCurrent <= 0) {
-            return None;
-        } else if (maxCurrent <= Eln.VVP / Eln.VVU) {
-            return VeryHighVoltage;
-        } else if (maxCurrent <= Eln.HVP / Eln.HVU) {
-            return HighVoltage;
-        } else if (maxCurrent <= Eln.MVP / Eln.MVU) {
-            return MediumVoltage;
-        } else if (maxCurrent <= Eln.LVP / Eln.LVU) {
-            return LowVoltage;
-        } else {
-            return None;
-        }
-    }
-
     public static VoltageLevelColor fromCable(ElectricalCableDescriptor descriptor) {
         if (descriptor != null) {
             if (descriptor.signalWire) {

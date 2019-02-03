@@ -295,8 +295,6 @@ public class Eln {
     public double fuelHeatFurnacePowerFactor = 1;
     public int autominerRange = 10;
 
-    public static double cableRsFactor = 1.0;
-
     public boolean killMonstersAroundLamps;
     public int killMonstersAroundLampsRange;
 
@@ -310,6 +308,9 @@ public class Eln {
 
     public static boolean noSymbols = false;
     public static boolean noVoltageBackground = false;
+
+    public static double maxSoundDistance = 16;
+    private double cablePowerFactor;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -450,11 +451,11 @@ public class Eln {
         electricalFrequency = config.get("simulation", "electricalFrequency", 20).getDouble(20);
         electricalInterSystemOverSampling = config.get("simulation", "electricalInterSystemOverSampling", 50).getInt(50);
         thermalFrequency = config.get("simulation", "thermalFrequency", 400).getDouble(400);
-        cableRsFactor = config.get("simulation", "cableRsFactor", 1.0).getDouble(1.0);
 
         wirelessTxRange = config.get("wireless", "txRange", 32).getInt();
 
         wailaEasyMode = config.get("balancing", "wailaEasyMode", false, "Display more detailed WAILA info on some machines").getBoolean(false);
+        cablePowerFactor = config.get("balancing", "cablePowerFactor", 1.0, "Multiplication factor for cable power capacity. We recommend 2.0 to 4.0 for larger modpacks, but 1.0 for Eln standalone, or if you like a challenge.", 0.5, 4.0).getDouble(1.0);
 
         fuelHeatValueFactor = config.get("balancing", "fuelHeatValueFactor", 0.0000675,
             "Factor to apply when converting real word heat values to Minecraft heat values (1mB = 1l).").getDouble();
@@ -462,13 +463,9 @@ public class Eln {
         Eln.noSymbols = config.get("general", "noSymbols", false).getBoolean();
         Eln.noVoltageBackground = config.get("general", "noVoltageBackground", false).getBoolean();
 
+        Eln.maxSoundDistance = config.get("debug", "maxSoundDistance", 16.0).getDouble();
+
         config.save();
-
-
-        Object o;
-
-        //computerCraftReady = Utils.isClassLoaded("dan200.computercraft.ComputerCraft");
-
 
         eventChannel = NetworkRegistry.INSTANCE.newEventDrivenChannel(channelName);
 
@@ -537,7 +534,6 @@ public class Eln {
         NodeManager.registerUuid(sixNodeBlock.getNodeUuid(), SixNode.class);
         NodeManager.registerUuid(transparentNodeBlock.getNodeUuid(), TransparentNode.class);
 
-        o = Item.getItemFromBlock(sixNodeBlock);
         sixNodeItem = (SixNodeItem) Item.getItemFromBlock(sixNodeBlock);
         transparentNodeItem = (TransparentNodeItem) Item.getItemFromBlock(transparentNodeBlock);
 
@@ -842,7 +838,7 @@ public class Eln {
 
             {
                 String blockName = TR_NAME(Type.TILE, "eln.EnergyConverterElnToOtherLVUBlock");
-                ElnDescriptor elnDesc = new ElnDescriptor(LVU, LVP);
+                ElnDescriptor elnDesc = new ElnDescriptor(LVU, LVP());
                 Ic2Descriptor ic2Desc = new Ic2Descriptor(32, 1);
                 OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax * Other.getElnToOcConversionRatio() / Other.getElnToIc2ConversionRatio());
                 EnergyConverterElnToOtherDescriptor desc =
@@ -853,7 +849,7 @@ public class Eln {
             }
             {
                 String blockName = TR_NAME(Type.TILE, "eln.EnergyConverterElnToOtherMVUBlock");
-                ElnDescriptor elnDesc = new ElnDescriptor(MVU, MVP);
+                ElnDescriptor elnDesc = new ElnDescriptor(MVU, MVP());
                 Ic2Descriptor ic2Desc = new Ic2Descriptor(128, 2);
                 OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax * Other.getElnToOcConversionRatio() / Other.getElnToIc2ConversionRatio());
                 EnergyConverterElnToOtherDescriptor desc =
@@ -864,7 +860,7 @@ public class Eln {
             }
             {
                 String blockName = TR_NAME(Type.TILE, "eln.EnergyConverterElnToOtherHVUBlock");
-                ElnDescriptor elnDesc = new ElnDescriptor(HVU, HVP);
+                ElnDescriptor elnDesc = new ElnDescriptor(HVU, HVP());
                 Ic2Descriptor ic2Desc = new Ic2Descriptor(512, 3);
                 OcDescriptor ocDesc = new OcDescriptor(ic2Desc.outMax * Other.getElnToOcConversionRatio() / Other.getElnToIc2ConversionRatio());
                 EnergyConverterElnToOtherDescriptor desc =
@@ -1092,12 +1088,19 @@ public class Eln {
     public static final double VVU = 3200;
 
     public static final double SVP = gateOutputCurrent * SVU;
-    public static final double LVP = 1000;
-    public static final double MVP = 2000;
-    public static final double HVP = 5000;
-    public static final double VVP = 15000;
 
-    public static final double electricalCableDeltaTMax = 20;
+    public double LVP() {
+        return 1000 * cablePowerFactor;
+    }
+    public double MVP() {
+        return 2000 * cablePowerFactor;
+    }
+    public double HVP() {
+        return 5000 * cablePowerFactor;
+    }
+    public double VVP() {
+        return 15000 * cablePowerFactor;
+    }
 
     public static final double cableHeatingTime = 30;
     public static final double cableWarmLimit = 130;
@@ -1158,10 +1161,10 @@ public class Eln {
 
             lowVoltageCableDescriptor = desc;
 
-            desc.setPhysicalConstantLikeNormalCable(LVU, LVP, 0.2 / 20 * cableRsFactor,// electricalNominalVoltage,
+            desc.setPhysicalConstantLikeNormalCable(LVU, LVP(), 0.2 / 20,// electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
-                LVU * 1.3, LVP * 1.2,// electricalMaximalVoltage,
+                LVU * 1.3, LVP() * 1.2,// electricalMaximalVoltage,
                 // electricalMaximalPower,
                 20,// electricalOverVoltageStartPowerLost,
                 cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
@@ -1175,10 +1178,10 @@ public class Eln {
                 "For low voltage with high current.", false);
 
             desc.setPhysicalConstantLikeNormalCable(
-                LVU, LVP / 4, 0.2 / 20,// electricalNominalVoltage,
+                LVU, LVP() / 4, 0.2 / 20,// electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
-                LVU * 1.3, LVP * 1.2,// electricalMaximalVoltage,
+                LVU * 1.3, LVP() * 1.2,// electricalMaximalVoltage,
                 // electricalMaximalPower,
                 20,// electricalOverVoltageStartPowerLost,
                 cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
@@ -1202,10 +1205,10 @@ public class Eln {
 
             meduimVoltageCableDescriptor = desc;
 
-            desc.setPhysicalConstantLikeNormalCable(MVU, MVP, 0.10 / 20 * cableRsFactor,// electricalNominalVoltage,
+            desc.setPhysicalConstantLikeNormalCable(MVU, MVP(), 0.10 / 20,// electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
-                MVU * 1.3, MVP * 1.2,// electricalMaximalVoltage,
+                MVU * 1.3, MVP() * 1.2,// electricalMaximalVoltage,
                 // electricalMaximalPower,
                 30,// electricalOverVoltageStartPowerLost,
                 cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
@@ -1230,10 +1233,10 @@ public class Eln {
 
             highVoltageCableDescriptor = desc;
 
-            desc.setPhysicalConstantLikeNormalCable(HVU, HVP, 0.025 * 5 / 4 / 20 * cableRsFactor,// electricalNominalVoltage,
+            desc.setPhysicalConstantLikeNormalCable(HVU, HVP(), 0.025 * 5 / 4 / 20,// electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
-                HVU * 1.3, HVP * 1.2,// electricalMaximalVoltage,
+                HVU * 1.3, HVP() * 1.2,// electricalMaximalVoltage,
                 // electricalMaximalPower,
                 40,// electricalOverVoltageStartPowerLost,
                 cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
@@ -1260,10 +1263,10 @@ public class Eln {
 
             veryHighVoltageCableDescriptor = desc;
 
-            desc.setPhysicalConstantLikeNormalCable(VVU, VVP, 0.025 * 5 / 4 / 20 / 8 * cableRsFactor,// electricalNominalVoltage,
+            desc.setPhysicalConstantLikeNormalCable(VVU, VVP(), 0.025 * 5 / 4 / 20 / 8,// electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
-                VVU * 1.3, VVP * 1.2,// electricalMaximalVoltage,
+                VVU * 1.3, VVP() * 1.2,// electricalMaximalVoltage,
                 // electricalMaximalPower,
                 40,// electricalOverVoltageStartPowerLost,
                 cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
@@ -1335,7 +1338,7 @@ public class Eln {
 
         double stdDischargeTime = 4 * 60;
         double stdU = LVU;
-        double stdP = LVP / 4;
+        double stdP = LVP() / 4;
         double stdEfficiency = 1.0 - 2.0 / 50.0;
         double condoEfficiency = 1.0 - 2.0 / 50.0;
 
@@ -1490,9 +1493,9 @@ public class Eln {
             BatteryDescriptor desc = new BatteryDescriptor(name,
                 "condo200", highVoltageCableDescriptor, 0.0, true, false,
                 condoVoltageFunction,
-                MVU, MVP * 1.5, 0.005, // electricalU,//
+                MVU, MVP() * 1.5, 0.005, // electricalU,//
                 // electricalPMax,electricalDischargeRate
-                MVP, 4, condoEfficiency, stdBatteryHalfLife, // electricalStdP,
+                MVP(), 4, condoEfficiency, stdBatteryHalfLife, // electricalStdP,
                 // electricalStdDischargeTime,
                 // electricalStdEfficiency,
                 // electricalStdHalfLife,
@@ -1945,10 +1948,10 @@ public class Eln {
             name = TR_NAME(Type.NONE, "Very High Voltage Switch");
 
             desc = new ElectricalSwitchDescriptor(name, stdCableRender3200V,
-                obj.getObj("HighVoltageSwitch"), VVU, VVP, veryHighVoltageCableDescriptor.electricalRs * 2,// nominalVoltage,
+                obj.getObj("HighVoltageSwitch"), VVU, VVP(), veryHighVoltageCableDescriptor.electricalRs * 2,// nominalVoltage,
                 // nominalPower,
                 // nominalDropFactor,
-                VVU * 1.5, VVP * 1.2,// maximalVoltage, maximalPower
+                VVU * 1.5, VVP() * 1.2,// maximalVoltage, maximalPower
                 cableThermalLoadInitializer.copy(), false);
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1960,10 +1963,10 @@ public class Eln {
             name = TR_NAME(Type.NONE, "High Voltage Switch");
 
             desc = new ElectricalSwitchDescriptor(name, stdCableRender800V,
-                obj.getObj("HighVoltageSwitch"), HVU, HVP, highVoltageCableDescriptor.electricalRs * 2,// nominalVoltage,
+                obj.getObj("HighVoltageSwitch"), HVU, HVP(), highVoltageCableDescriptor.electricalRs * 2,// nominalVoltage,
                 // nominalPower,
                 // nominalDropFactor,
-                HVU * 1.5, HVP * 1.2,// maximalVoltage, maximalPower
+                HVU * 1.5, HVP() * 1.2,// maximalVoltage, maximalPower
                 cableThermalLoadInitializer.copy(), false);
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1974,10 +1977,10 @@ public class Eln {
             name = TR_NAME(Type.NONE, "Low Voltage Switch");
 
             desc = new ElectricalSwitchDescriptor(name, stdCableRender50V,
-                obj.getObj("LowVoltageSwitch"), LVU, LVP, lowVoltageCableDescriptor.electricalRs * 2,// nominalVoltage,
+                obj.getObj("LowVoltageSwitch"), LVU, LVP(), lowVoltageCableDescriptor.electricalRs * 2,// nominalVoltage,
                 // nominalPower,
                 // nominalDropFactor,
-                LVU * 1.5, LVP * 1.2,// maximalVoltage, maximalPower
+                LVU * 1.5, LVP() * 1.2,// maximalVoltage, maximalPower
                 cableThermalLoadInitializer.copy(), false);
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1988,10 +1991,10 @@ public class Eln {
             name = TR_NAME(Type.NONE, "Medium Voltage Switch");
 
             desc = new ElectricalSwitchDescriptor(name, stdCableRender200V,
-                obj.getObj("LowVoltageSwitch"), MVU, MVP, meduimVoltageCableDescriptor.electricalRs * 2,// nominalVoltage,
+                obj.getObj("LowVoltageSwitch"), MVU, MVP(), meduimVoltageCableDescriptor.electricalRs * 2,// nominalVoltage,
                 // nominalPower,
                 // nominalDropFactor,
-                MVU * 1.5, MVP * 1.2,// maximalVoltage, maximalPower
+                MVU * 1.5, MVP() * 1.2,// maximalVoltage, maximalPower
                 cableThermalLoadInitializer.copy(), false);
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -6600,6 +6603,8 @@ public class Eln {
 
     private void recipeMacerator() {
         float f = 4000;
+	maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.coal_ore, 1),
+	    new ItemStack(Items.coal, 3, 0), 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(findItemStack("Copper Ore"),
             new ItemStack[]{findItemStack("Copper Dust", 2)}, 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.iron_ore),
@@ -7408,7 +7413,7 @@ public class Eln {
     }
 
     public void regenOreScannerFactors() {
-        PortableOreScannerItem.RenderStorage.blockKeyFactor = null;
+        OreColorMapping.INSTANCE.updateColorMapping();
 
         oreScannerConfig.clear();
 
@@ -7424,7 +7429,7 @@ public class Eln {
                         // Utils.println(OreDictionary.getOreID(name));
                         boolean find = false;
                         for (OreScannerConfigElement c : oreScannerConfig) {
-                            if (c.blockKey == id) {
+                            if (c.getBlockKey() == id) {
                                 find = true;
                                 break;
                             }

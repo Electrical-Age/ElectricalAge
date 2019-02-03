@@ -137,7 +137,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
 
         if (drawRay) {
             float raySize = 0.625f - 0.02f * 2;
-            float scale = 1f / render.resWidth * raySize;
+            float scale = 1f / render.getResWidth() * raySize;
 
             GL11.glTranslatef(-raySize, 0, 0);
             GL11.glScalef(scale, -scale, 1);

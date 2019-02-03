@@ -5,6 +5,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import mods.eln.Eln;
+import mods.eln.item.electricalitem.TreeCapitation;
 import mods.eln.misc.Coordonate;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeManager;
@@ -40,6 +41,8 @@ public class ServerEventListener {
 
         lightningList = lightningListNext;
         lightningListNext = new LinkedList<EntityLightningBolt>();
+
+        TreeCapitation.INSTANCE.process(0.05);
     }
 
     @SubscribeEvent

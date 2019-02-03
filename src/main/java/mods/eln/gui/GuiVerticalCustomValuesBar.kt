@@ -5,9 +5,9 @@ class GuiVerticalCustomValuesBar(x: Int, y:Int, width: Int, height: Int, helper:
     GuiVerticalTrackBar(x, y, width, height, helper) {
 
     companion object {
-        fun logarithmicScale(startDecade: Int, steps: Int) = Array(steps, {
-            when(it.mod(3)) { 0 -> 1; 1 -> 2; else -> 5 } * Math.pow(10.0, startDecade + (it / 3).toDouble()).toFloat()
-        })
+        fun logarithmicScale(startDecade: Int, steps: Int) = Array(steps) {
+            when(it.rem(3)) { 0 -> 1; 1 -> 2; else -> 5 } * Math.pow(10.0, startDecade + (it / 3).toDouble()).toFloat()
+        }
     }
 
     init {

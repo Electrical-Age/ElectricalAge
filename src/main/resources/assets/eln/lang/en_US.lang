@@ -320,7 +320,7 @@ tile.eln.EnergyConverterElnToOtherMVUBlock.name=200V Electrical Age to other ene
 # ./src/main/java/mods/eln/i18n/I18N.java
 You_have_%1$_lives_left=You have %1$ lives left
 
-# ./src/main/java/mods/eln/item/BrushDescriptor.java
+# ./src/main/java/mods/eln/item/BrushDescriptor.kt
 Brush_is_dry=Brush is dry
 Can_paint_%1$_blocks=Can paint %1$ blocks
 
