@@ -83,15 +83,27 @@ public class NodeManager extends WorldSavedData {
     public void readFromNBT(NBTTagCompound nbt) {
         int i = 0;
         i++;
-		 for(Object o : Utils.getTags(nbt)) { NBTTagCompound tag = (NBTTagCompound) o; Class nodeClass = UUIDToClass.get(tag.getString("tag")); try { NodeBase node = (NodeBase) nodeClass.getConstructor().newInstance(); node.readFromNBT(tag); addNode(node); node.initializeFromNBT();
+        for(Object o : Utils.getTags(nbt)) {
+            NBTTagCompound tag = (NBTTagCompound) o;
+            Class nodeClass = UUIDToClass.get(tag.getString("tag"));
+            try {
+                NodeBase node = (NodeBase) nodeClass.getConstructor().newInstance();
+                node.readFromNBT(tag);
+                addNode(node);
+                node.initializeFromNBT();
 
-		 } catch (Exception e) { e.printStackTrace(); }
+            } catch (Exception e) { e.printStackTrace(); }
 
-		 }
+        }
 
-		 for(NodeBase node : nodes){ node.globalBoot(); }
+        for(NodeBase node : nodes){ node.globalBoot(); }
     }
-    
+
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+        return compound;
+    }
+
     /*
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {

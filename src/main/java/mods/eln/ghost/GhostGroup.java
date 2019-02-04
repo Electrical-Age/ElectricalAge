@@ -69,7 +69,7 @@ public class GhostGroup {
 
     public boolean canBePloted(World world, int x, int y, int z) {
         for (GhostGroupElement element : elementList) {
-            if (!Eln.ghostManager.canCreateGhostAt(world, new BlockPos( + element.x, y + element.y, z + element.z)))
+            if (!Eln.ghostManager.canCreateGhostAt(world, new BlockPos( x + element.x, y + element.y, z + element.z)))
                 return false;
         }
         return true;

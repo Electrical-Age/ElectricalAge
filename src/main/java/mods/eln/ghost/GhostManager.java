@@ -130,7 +130,7 @@ public class GhostManager extends WorldSavedData {
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 	/*	int nodeCounter = 0;
-		
+
 		for(GhostElement ghost : ghostTable.values()) {
 			NBTTagCompound nbtGhost = new NBTTagCompound();
 			ghost.writeToNBT(nbtGhost, "");
@@ -170,6 +170,7 @@ public class GhostManager extends WorldSavedData {
         }
     }
 
+    //TODO(1.10):
     public boolean canCreateGhostAt(World world, BlockPos pos) {
         //Probably isn't needed anymore since now when asked for a chunk even if it isnt generated it auto generates it
         /*
