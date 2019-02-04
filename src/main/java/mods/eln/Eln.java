@@ -24,6 +24,7 @@ import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
 import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
+import mods.eln.gridnode.transformer.GridTransformerDescriptor;
 import mods.eln.i18n.I18N;
 import mods.eln.item.*;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
@@ -2890,7 +2891,7 @@ public class Eln {
             name = TR_NAME(Type.NONE, "200V Macerator");
 
             MaceratorDescriptor desc = new MaceratorDescriptor(name,
-                "maceratorb", MVU, 400,// double nominalU,double nominalP,
+                "maceratorb", MVU, 200*5,// double nominalU,double nominalP,
                 MVU * 1.25,// double maximalU,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
                 meduimVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -2934,7 +2935,7 @@ public class Eln {
             PlateMachineDescriptor desc = new PlateMachineDescriptor(
                 name,// String name,
                 obj.getObj("platemachineb"),
-                MVU, 400,// double nominalU,double nominalP,
+                MVU, 200*5,// double nominalU,double nominalP,
                 MVU * 1.25,// double maximalU,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
                 meduimVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -2994,7 +2995,7 @@ public class Eln {
             CompressorDescriptor desc = new CompressorDescriptor(
                 name,// String name,
                 obj.getObj("compressorb"),
-                MVU, 400,// double nominalU,double nominalP,
+                MVU, 200*5,// double nominalU,double nominalP,
                 MVU * 1.25,// double maximalU,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
                 meduimVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -3038,7 +3039,7 @@ public class Eln {
             MagnetizerDescriptor desc = new MagnetizerDescriptor(
                 name,// String name,
                 obj.getObj("magnetizerb"),
-                MVU, 400,// double nominalU,double nominalP,
+                MVU, 200*5,// double nominalU,double nominalP,
                 MVU * 1.25,// double maximalU,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
                 meduimVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -5237,7 +5238,7 @@ public class Eln {
     private void recipePassiveComponent() {
         addRecipe(findItemStack("Signal Diode", 4),
             " RB",
-            "IIR",
+            " IR",
             " RB",
             'R', new ItemStack(Items.redstone),
             'I', findItemStack("Iron Cable"),
@@ -5248,7 +5249,7 @@ public class Eln {
             "IIR",
             " RB",
             'R', new ItemStack(Items.redstone),
-            'I', new ItemStack(Items.iron_ingot),
+            'I', findItemStack("Iron Cable"),
             'B', "itemRubber");
 
         addRecipe(findItemStack("25A Diode"),
@@ -5266,20 +5267,18 @@ public class Eln {
             'P', "plateIron");
 
         addRecipe(findItemStack("Power Inductor"),
-            " P ",
+            "   ",
             "cIc",
-            "IPI",
+            "   ",
             'I', new ItemStack(Items.iron_ingot),
-            'c', findItemStack("Copper Cable"),
-            'P', "plateIron");
+            'c', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("Power Resistor"),
-            " P ",
-            "c c",
-            "IPI",
-            'I', new ItemStack(Items.iron_ingot),
+            "   ",
+            "cCc",
+            "   ",
             'c', findItemStack("Copper Cable"),
-            'P', "plateCopper");
+            'C', findItemStack("Resistive Dust"));
 
         addRecipe(findItemStack("Rheostat"),
             " R ",
@@ -5293,13 +5292,11 @@ public class Eln {
         );
 
         addRecipe(findItemStack("Thermistor"),
-            " P ",
+            "   ",
             "csc",
-            "IPI",
+            "   ",
             's', "dustSilicon",
-            'I', new ItemStack(Items.iron_ingot),
-            'c', findItemStack("Copper Cable"),
-            'P', "plateCopper");
+            'c', findItemStack("Copper Cable"));
 
         addRecipe(findItemStack("Large Rheostat"),
             "   ",
@@ -5312,11 +5309,11 @@ public class Eln {
     }
 
     private void recipeSwitch() {
-		/*
-		 * addRecipe(findItemStack("Signal Switch"), "  I", " I ", "CAC", 'R', new ItemStack(Items.redstone), 'A', "itemRubber", 'I', findItemStack("Copper Cable"), 'C', findItemStack("Signal Cable"));
-		 *
-		 * addRecipe(findItemStack("Signal Switch with LED"), " RI", " I ", "CAC", 'R', new ItemStack(Items.redstone), 'A', "itemRubber", 'I', findItemStack("Copper Cable"), 'C', findItemStack("Signal Cable"));
-		 */
+        /*
+         * addRecipe(findItemStack("Signal Switch"), "  I", " I ", "CAC", 'R', new ItemStack(Items.redstone), 'A', "itemRubber", 'I', findItemStack("Copper Cable"), 'C', findItemStack("Signal Cable"));
+         *
+         * addRecipe(findItemStack("Signal Switch with LED"), " RI", " I ", "CAC", 'R', new ItemStack(Items.redstone), 'A', "itemRubber", 'I', findItemStack("Copper Cable"), 'C', findItemStack("Signal Cable"));
+         */
 
         addRecipe(findItemStack("Low Voltage Switch"),
             "  I",
@@ -5598,7 +5595,7 @@ public class Eln {
             'd', findItemStack("Dielectric"),
             'c', findItemStack("Copper Cable"),
             'C', findItemStack("Copper Plate"),
-            'D', findItemStack("Coal Dust"),
+            'D', findItemStack("Resistive Dust"),
             's', dictCheapChip);
     }
 
