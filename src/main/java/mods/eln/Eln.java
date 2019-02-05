@@ -72,10 +72,8 @@ import mods.eln.sixnode.diode.DiodeDescriptor;
 import mods.eln.sixnode.electricalalarm.ElectricalAlarmDescriptor;
 import mods.eln.sixnode.electricalbreaker.ElectricalBreakerDescriptor;
 import mods.eln.sixnode.electricalcable.ElectricalCableDescriptor;
-import mods.eln.sixnode.electricalcable.ElectricalSignalBusCableElement;
 import mods.eln.sixnode.electricaldatalogger.DataLogsPrintDescriptor;
 import mods.eln.sixnode.electricaldatalogger.ElectricalDataLoggerDescriptor;
-import mods.eln.sixnode.electricaldigitaldisplay.ElectricalDigitalDisplayDescriptor;
 import mods.eln.sixnode.electricalentitysensor.ElectricalEntitySensorDescriptor;
 import mods.eln.sixnode.electricalfiredetector.ElectricalFireDetectorDescriptor;
 import mods.eln.sixnode.electricalgatesource.ElectricalGateSourceDescriptor;
@@ -256,13 +254,29 @@ public class Eln {
     public int electricalInterSystemOverSampling;
 
     public CopperCableDescriptor copperCableDescriptor;
+    public GraphiteDescriptor GraphiteDescriptor;
 
+    public ElectricalCableDescriptor creativeCableDescriptor;
+    /*public ElectricalCableDescriptor T2TransmissionCableDescriptor;
+    public ElectricalCableDescriptor T1TransmissionCableDescriptor;*/
     public ElectricalCableDescriptor veryHighVoltageCableDescriptor;
+    public ElectricalCableDescriptor LQveryHighVoltageCableDescriptor;
+    public ElectricalCableDescriptor HQveryHighVoltageCableDescriptor;
+    public ElectricalCableDescriptor PQveryHighVoltageCableDescriptor;
     public ElectricalCableDescriptor highVoltageCableDescriptor;
+    public ElectricalCableDescriptor LQhighVoltageCableDescriptor;
+    public ElectricalCableDescriptor HQhighVoltageCableDescriptor;
+    public ElectricalCableDescriptor PQhighVoltageCableDescriptor;
     public ElectricalCableDescriptor signalCableDescriptor;
     public ElectricalCableDescriptor lowVoltageCableDescriptor;
+    public ElectricalCableDescriptor LQlowVoltageCableDescriptor;
+    public ElectricalCableDescriptor HQlowVoltageCableDescriptor;
+    public ElectricalCableDescriptor PQlowVoltageCableDescriptor;
     public ElectricalCableDescriptor batteryCableDescriptor;
     public ElectricalCableDescriptor meduimVoltageCableDescriptor;
+    public ElectricalCableDescriptor LQmeduimVoltageCableDescriptor;
+    public ElectricalCableDescriptor HQmeduimVoltageCableDescriptor;
+    public ElectricalCableDescriptor PQmeduimVoltageCableDescriptor;
 
     public OreRegenerate oreRegenerate;
 
@@ -1164,7 +1178,7 @@ public class Eln {
 
             lowVoltageCableDescriptor = desc;
 
-            desc.setPhysicalConstantLikeNormalCable(LVU, LVP(), 0.2 / 20,// electricalNominalVoltage,
+            desc.setPhysicalConstantLikeNormalCable(LVU, LVP(), 0.2 / 20, // electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
                 LVU * 1.3, LVP() * 1.2,// electricalMaximalVoltage,
@@ -1192,9 +1206,82 @@ public class Eln {
                 // thermalConductivityTao
             );
             batteryCableDescriptor = desc;
-
         }
+        {
+            subId = 5;
 
+            name = TR_NAME(Type.NONE, "Shoddy Low Voltage Cable");
+
+            stdCableRender50V = new CableRenderDescriptor("eln",
+                "sprites/cableshoddy.png", 1.95f, 0.95f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRender50V,
+                "It's totally useless", false);
+
+            LQlowVoltageCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(LVU, LVP() / 2, 0.10 / 20, // electricalNominalVoltage,
+                // electricalNominalPower,
+                // electricalNominalPowerDrop,
+                LVU * 1.3, LVP() * 1.2,// electricalMaximalVoltage,
+                // electricalMaximalPower,
+                30,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 6;
+
+            name = TR_NAME(Type.NONE, "Quality Low Voltage Cable");
+
+            stdCableRender50V = new CableRenderDescriptor("eln",
+                "sprites/cablequality.png", 1.95f, 0.95f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRender50V,
+                "A cable of great quality", false);
+
+            HQlowVoltageCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(LVU, LVP() * 2, 0.10 / 20, // electricalNominalVoltage,
+                // electricalNominalPower,
+                // electricalNominalPowerDrop,
+                LVU * 1.3, LVP() * 1.2,// electricalMaximalVoltage,
+                // electricalMaximalPower,
+                30,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 7;
+
+            name = TR_NAME(Type.NONE, "Perfect Low Voltage Cable");
+
+            stdCableRender50V = new CableRenderDescriptor("eln",
+                "sprites/cableperfect.png", 1.95f, 0.95f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRender50V,
+                "The fruits of meticulous crafting", false);
+
+            PQlowVoltageCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(LVU, LVP() * 4, 0.10 / 20, // electricalNominalVoltage,
+                // electricalNominalPower,
+                // electricalNominalPowerDrop,
+                LVU * 1.3, LVP() * 1.2,// electricalMaximalVoltage,
+                // electricalMaximalPower,
+                30,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
         {
             subId = 8;
 
@@ -1208,7 +1295,7 @@ public class Eln {
 
             meduimVoltageCableDescriptor = desc;
 
-            desc.setPhysicalConstantLikeNormalCable(MVU, MVP(), 0.10 / 20,// electricalNominalVoltage,
+            desc.setPhysicalConstantLikeNormalCable(MVU, MVP(), 0.10 / 20, // electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
                 MVU * 1.3, MVP() * 1.2,// electricalMaximalVoltage,
@@ -1221,6 +1308,81 @@ public class Eln {
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
 
+        }
+        {
+            subId = 9;
+
+            name = TR_NAME(Type.NONE, "Shoddy Medium Voltage Cable");
+
+            stdCableRender200V = new CableRenderDescriptor("eln",
+                "sprites/cableshoddy.png", 2.95f, 0.95f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRender200V,
+                "It's totally useless", false);
+
+            LQmeduimVoltageCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(MVU, MVP() / 2, 0.10 / 20, // electricalNominalVoltage,
+                // electricalNominalPower,
+                // electricalNominalPowerDrop,
+                MVU * 1.3, MVP() * 1.2,// electricalMaximalVoltage,
+                // electricalMaximalPower,
+                30,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 10;
+
+            name = TR_NAME(Type.NONE, "Quality Medium Voltage Cable");
+
+            stdCableRender200V = new CableRenderDescriptor("eln",
+                "sprites/cablequality.png", 2.95f, 0.95f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRender200V,
+                "A cable of great quality", false);
+
+            HQmeduimVoltageCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(MVU, MVP() * 2, 0.10 / 20, // electricalNominalVoltage,
+                // electricalNominalPower,
+                // electricalNominalPowerDrop,
+                MVU * 1.3, MVP() * 1.2,// electricalMaximalVoltage,
+                // electricalMaximalPower,
+                30,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 11;
+
+            name = TR_NAME(Type.NONE, "Perfect Medium Voltage Cable");
+
+            stdCableRender200V = new CableRenderDescriptor("eln",
+                "sprites/cableperfect.png", 2.95f, 0.95f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRender200V,
+                "The fruits of meticulous crafting", false);
+
+            PQmeduimVoltageCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(MVU, MVP() * 4, 0.10 / 20, // electricalNominalVoltage,
+                // electricalNominalPower,
+                // electricalNominalPowerDrop,
+                MVU * 1.3, MVP() * 1.2,// electricalMaximalVoltage,
+                // electricalMaximalPower,
+                30,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
         }
         {
             subId = 12;
@@ -1236,7 +1398,7 @@ public class Eln {
 
             highVoltageCableDescriptor = desc;
 
-            desc.setPhysicalConstantLikeNormalCable(HVU, HVP(), 0.025 * 5 / 4 / 20,// electricalNominalVoltage,
+            desc.setPhysicalConstantLikeNormalCable(HVU, HVP(), 0.025 * 5 / 4 / 20, // electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
                 HVU * 1.3, HVP() * 1.2,// electricalMaximalVoltage,
@@ -1250,8 +1412,81 @@ public class Eln {
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
 
         }
+        {
+            subId = 13;
 
+            name = TR_NAME(Type.NONE, "Shoddy High Voltage Cable");
 
+            stdCableRender800V = new CableRenderDescriptor("eln",
+                "sprites/cableshoddy.png", 3.95f, 1.95f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRender800V,
+                "It's totally useless", false);
+
+            LQhighVoltageCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(HVU, HVP() / 2, 0.10 / 20, // electricalNominalVoltage,
+                // electricalNominalPower,
+                // electricalNominalPowerDrop,
+                HVU * 1.3, HVP() * 1.2,// electricalMaximalVoltage,
+                // electricalMaximalPower,
+                30,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 14;
+
+            name = TR_NAME(Type.NONE, "Quality High Voltage Cable");
+
+            stdCableRender800V = new CableRenderDescriptor("eln",
+                "sprites/cablequality.png", 3.95f, 1.95f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRender800V,
+                "A cable of great quality", false);
+
+            HQhighVoltageCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(HVU, HVP() * 2, 0.10 / 20, // electricalNominalVoltage,
+                // electricalNominalPower,
+                // electricalNominalPowerDrop,
+                HVU * 1.3, HVP() * 1.2,// electricalMaximalVoltage,
+                // electricalMaximalPower,
+                30,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 15;
+
+            name = TR_NAME(Type.NONE, "Perfect High Voltage Cable");
+
+            stdCableRender800V = new CableRenderDescriptor("eln",
+                "sprites/cableperfect.png", 3.95f, 1.95f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRender800V,
+                "The fruits of meticulous crafting", false);
+
+            PQhighVoltageCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(HVU, HVP() * 4, 0.10 / 20, // electricalNominalVoltage,
+                // electricalNominalPower,
+                // electricalNominalPowerDrop,
+                HVU * 1.3, HVP() * 1.2,// electricalMaximalVoltage,
+                // electricalMaximalPower,
+                30,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
         {
             subId = 16;
 
@@ -1266,7 +1501,7 @@ public class Eln {
 
             veryHighVoltageCableDescriptor = desc;
 
-            desc.setPhysicalConstantLikeNormalCable(VVU, VVP(), 0.025 * 5 / 4 / 20 / 8,// electricalNominalVoltage,
+            desc.setPhysicalConstantLikeNormalCable(VVU, VVP(), 0.025 * 5 / 4 / 20 / 8, // electricalNominalVoltage,
                 // electricalNominalPower,
                 // electricalNominalPowerDrop,
                 VVU * 1.3, VVP() * 1.2,// electricalMaximalVoltage,
@@ -1280,6 +1515,137 @@ public class Eln {
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
 
         }
+        {
+            subId = 17;
+
+            name = TR_NAME(Type.NONE, "Shoddy Very High Voltage Cable");
+
+            stdCableRender3200V = new CableRenderDescriptor("eln",
+                "sprites/cableVHVshoddy.png", 3.95f, 1.95f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRender3200V,
+                "It's totally useless", false);
+
+            LQveryHighVoltageCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(VVU, VVP() / 2, 0.10 / 20, // electricalNominalVoltage,
+                // electricalNominalPower,
+                // electricalNominalPowerDrop,
+                VVU * 1.3, VVP() * 1.2,// electricalMaximalVoltage,
+                // electricalMaximalPower,
+                30,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 18;
+
+            name = TR_NAME(Type.NONE, "Quality Very High Voltage Cable");
+
+            stdCableRender3200V = new CableRenderDescriptor("eln",
+                "sprites/cableVHVquality.png", 3.95f, 1.95f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRender3200V,
+                "A cable of great quality", false);
+
+            HQveryHighVoltageCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(VVU, VVP() * 2, 0.10 / 20, // electricalNominalVoltage,
+                // electricalNominalPower,
+                // electricalNominalPowerDrop,
+                VVU * 1.3, VVP() * 1.2,// electricalMaximalVoltage,
+                // electricalMaximalPower,
+                30,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+        {
+            subId = 19;
+
+            name = TR_NAME(Type.NONE, "Perfect Very High Voltage Cable");
+
+            stdCableRender3200V = new CableRenderDescriptor("eln",
+                "sprites/cableVHVperfect.png", 3.95f, 1.95f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRender3200V,
+                "The fruits of meticulous crafting", false);
+
+            PQveryHighVoltageCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(VVU, VVP() * 4, 0.10 / 20, // electricalNominalVoltage,
+                // electricalNominalPower,
+                // electricalNominalPowerDrop,
+                VVU * 1.3, VVP() * 1.2,// electricalMaximalVoltage,
+                // electricalMaximalPower,
+                30,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+
+
+        {
+            subId = 20;
+
+            name = TR_NAME(Type.NONE, "Creative Cable");
+
+            stdCableRenderCreative = new CableRenderDescriptor("eln",
+                "sprites/cablecreative.png", 8.0f, 4.0f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRenderCreative,
+                "Experience the power of Microresistance", false);
+
+            creativeCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(VVU, VVU * VVP(), 0.025 * 5 / 4 / 20 / 8 / 9001, //what!?
+                VVU * 1.3, VVU * VVP() * 1.2,
+                40,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+        }
+
+        /*{
+            subId = 24;
+
+            name = TR_NAME(Type.NONE, "Signal Bus Cable");
+
+            stdCableRenderSignalBus = new CableRenderDescriptor("eln",
+                "sprites/cable.png", 3.95f, 3.95f);
+
+            desc = new ElectricalCableDescriptor(name, stdCableRenderSignalBus,
+                "For transmitting many signals.", true);
+
+            signalBusCableDescriptor = desc;
+
+            desc.setPhysicalConstantLikeNormalCable(SVU, SVP, 0.02 / 50
+                    * gateOutputCurrent / SVII,// electricalNominalVoltage,
+                // electricalNominalPower,
+                // electricalNominalPowerDrop,
+                SVU * 1.3, SVP * 1.2,// electricalMaximalVoltage,
+                // electricalMaximalPower,
+                0.5,// electricalOverVoltageStartPowerLost,
+                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
+                cableHeatingTime, 1// thermalNominalHeatTime,
+                // thermalConductivityTao
+            );
+
+            desc.ElementClass = ElectricalSignalBusCableElement.class;
+
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
+            // GameRegistry.registerCustomItemStack(name, desc.newItemStack(1));
+
+        } */
     }
 
     private void registerThermalCable(int id) {
@@ -2891,7 +3257,7 @@ public class Eln {
             name = TR_NAME(Type.NONE, "200V Macerator");
 
             MaceratorDescriptor desc = new MaceratorDescriptor(name,
-                "maceratorb", MVU, 200*5,// double nominalU,double nominalP,
+                "maceratorb", MVU, 200 * 5,// double nominalU,double nominalP,
                 MVU * 1.25,// double maximalU,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
                 meduimVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -2935,7 +3301,7 @@ public class Eln {
             PlateMachineDescriptor desc = new PlateMachineDescriptor(
                 name,// String name,
                 obj.getObj("platemachineb"),
-                MVU, 200*5,// double nominalU,double nominalP,
+                MVU, 200 * 5,// double nominalU,double nominalP,
                 MVU * 1.25,// double maximalU,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
                 meduimVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -2995,7 +3361,7 @@ public class Eln {
             CompressorDescriptor desc = new CompressorDescriptor(
                 name,// String name,
                 obj.getObj("compressorb"),
-                MVU, 200*5,// double nominalU,double nominalP,
+                MVU, 200 * 5,// double nominalU,double nominalP,
                 MVU * 1.25,// double maximalU,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
                 meduimVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -3039,7 +3405,7 @@ public class Eln {
             MagnetizerDescriptor desc = new MagnetizerDescriptor(
                 name,// String name,
                 obj.getObj("magnetizerb"),
-                MVU, 200*5,// double nominalU,double nominalP,
+                MVU, 200 * 5,// double nominalU,double nominalP,
                 MVU * 1.25,// double maximalU,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
                 meduimVoltageCableDescriptor,// ElectricalCableDescriptor
@@ -3861,6 +4227,21 @@ public class Eln {
             Data.addResource(element.newItemStack());
             addToOre("quicksilver", element.newItemStack());
         }
+        {
+            subId = 9;
+            completId = subId + (id << 6);
+
+            name = TR_NAME(Type.NONE, "Silver Ingot");
+            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
+                // name,
+                new String[]{});
+            sharedItem.addElement(completId, element);
+            // GameRegistry.registerCustomItemStack(name,
+            // element.newItemStack(1));
+            silverIngot = element;
+            Data.addResource(element.newItemStack());
+            addToOre("ingotSilver", element.newItemStack());
+        }
     }
 
     private void registerElectricalMotor(int id) {
@@ -4657,6 +5038,239 @@ public class Eln {
         }
     }
 
+    private void registerArc(int id) {
+        int subId, completId;
+        String name;
+
+        {
+            subId = 0;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Graphite Rod");
+
+            GraphiteDescriptor = new GraphiteDescriptor(name);
+            sharedItem.addElement(completId, GraphiteDescriptor);
+            Data.addResource(GraphiteDescriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 1;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "2x Graphite Rods");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 2;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "3x Graphite Rods");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 3;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "4x Graphite Rods");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 4;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Synthetic Diamond");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 5;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "unreleasedium");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 6;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Arc Clay Ingot");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+            OreDictionary.registerOre("ingotAluminum", descriptor.newItemStack());
+            OreDictionary.registerOre("ingotAluminium", descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 7;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Arc Clay Chunk");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+            OreDictionary.registerOre("blockAluminium", descriptor.newItemStack());
+            //OreDictionary.registerOre("blockAluminum", descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 8;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Arc Metal Ingot");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+            OreDictionary.registerOre("ingotSteel", descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 9;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Arc Metal Chunk");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+            OreDictionary.registerOre("blockSteel", descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 10;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Inert Canister");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 11;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "T1 Transmission Cable");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 12;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "T2 Transmission Cable");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 13;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Canister of Water");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            GenericItemUsingDamageDescriptor descriptor;
+            subId = 14;
+            completId = subId + (id << 6);
+            name = TR_NAME(Type.NONE, "Canister of Arc Water");
+
+            descriptor = new GenericItemUsingDamageDescriptor(name);
+            sharedItem.addElement(completId, descriptor);
+            Data.addResource(descriptor.newItemStack());
+        }
+        {
+            subId = 15;
+            name = TR_NAME(Type.NONE, "Copper Folded Plate");
+            GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+                name, new String[]{"Now it can fit inside a bucket"});
+            sharedItem.addElement(subId + (id << 6), desc);
+            Data.addResource(desc.newItemStack());
+        }
+        {
+            subId = 16;
+            name = TR_NAME(Type.NONE, "Copper Folded Plate in a Bucket");
+            GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+                name, new String[]{"It just needs smelting now"});
+            sharedItem.addElement(subId + (id << 6), desc);
+            Data.addResource(desc.newItemStack());
+        }
+        {
+            subId = 17;
+            name = TR_NAME(Type.NONE, "Molten Copper Bucket");
+            GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+                name, new String[]{"Next we add Lead Dust"});
+            sharedItem.addElement(subId + (id << 6), desc);
+            Data.addResource(desc.newItemStack());
+        }
+        {
+            subId = 18;
+            name = TR_NAME(Type.NONE, "Peppered Molten Copper Bucket");
+            GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+                name, new String[]{"Now to melt the Lead Dust into the mix"});
+            sharedItem.addElement(subId + (id << 6), desc);
+            Data.addResource(desc.newItemStack());
+        }
+        {
+            subId = 19;
+            name = TR_NAME(Type.NONE, "Copper Slag Bucket");
+            GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+                name, new String[]{"Pour into a bucket to get Lead and Slag"});
+            sharedItem.addElement(subId + (id << 6), desc);
+            Data.addResource(desc.newItemStack());
+        }
+        {
+            subId = 20;
+            name = TR_NAME(Type.NONE, "Seperated Molten Copper Bucket");
+            GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+                name, new String[]{"Cool it to get your resources"});
+            sharedItem.addElement(subId + (id << 6), desc);
+            Data.addResource(desc.newItemStack());
+        }
+        {
+            subId = 21;
+            name = TR_NAME(Type.NONE, "Copper Slag");
+            GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+                name, new String[]{"Contains Silver"});
+            sharedItem.addElement(subId + (id << 6), desc);
+            Data.addResource(desc.newItemStack());
+        }
+        {
+            subId = 22;
+            name = TR_NAME(Type.NONE, "Pure Copper Ingot");
+            GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+                name, new String[]{"Great for building High Quality Cables"});
+            sharedItem.addElement(subId + (id << 6), desc);
+            Data.addResource(desc.newItemStack());
+        }
+        {
+            subId = 23;
+            name = TR_NAME(Type.NONE, "Glorious Copper Plate");
+            GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
+                name, new String[]{"It's been folded 1000 times"});
+            sharedItem.addElement(subId + (id << 6), desc);
+            Data.addResource(desc.newItemStack());
+        }
+    }
+
     private void registerBrush(int id) {
 
         int subId, completId;
@@ -5080,34 +5694,106 @@ public class Eln {
             "C",
             'C', lowVoltageCableDescriptor.newItemStack(1),
             'R', "itemRubber");
+        addRecipe(LQmeduimVoltageCableDescriptor.newItemStack(1), //Shoddy Meduim Voltage Cable (Medium Voltage Cable)
+            "S",
+            "C",
+            'C', LQlowVoltageCableDescriptor.newItemStack(1),
+            'S', new ItemStack(Blocks.cobblestone));
+        addRecipe(HQmeduimVoltageCableDescriptor.newItemStack(1), //Quality Meduim Voltage Cable (Medium Voltage Cable)
+            "G",
+            "C",
+            'C', HQlowVoltageCableDescriptor.newItemStack(1),
+            'G', new ItemStack(Items.gold_ingot));
+        addRecipe(PQmeduimVoltageCableDescriptor.newItemStack(1), //Perfect Meduim Voltage Cable (Medium Voltage Cable)
+            "D",
+            "C",
+            'C', PQlowVoltageCableDescriptor.newItemStack(1),
+            'D', new ItemStack(Items.diamond));
 
-        addRecipe(highVoltageCableDescriptor.newItemStack(1),
+        addRecipe(highVoltageCableDescriptor.newItemStack(1), //High Voltage Cable
             "R",
             "C",
             'C', meduimVoltageCableDescriptor.newItemStack(1),
             'R', "itemRubber");
+        addRecipe(LQhighVoltageCableDescriptor.newItemStack(1), //Shoddy High Voltage Cable
+            "S",
+            "C",
+            'C', LQmeduimVoltageCableDescriptor.newItemStack(1),
+            'S', new ItemStack(Blocks.cobblestone));
+        addRecipe(HQhighVoltageCableDescriptor.newItemStack(1), //Quality High Voltage Cable
+            "G",
+            "C",
+            'C', HQmeduimVoltageCableDescriptor.newItemStack(1),
+            'G', new ItemStack(Items.gold_ingot));
+        addRecipe(PQhighVoltageCableDescriptor.newItemStack(1), //Perfect High Voltage Cable
+            "D",
+            "C",
+            'C', PQmeduimVoltageCableDescriptor.newItemStack(1),
+            'D', new ItemStack(Items.diamond));
 
-        addRecipe(signalCableDescriptor.newItemStack(6),
+        addRecipe(signalCableDescriptor.newItemStack(12), //Signal Wire
             "RRR",
             "CCC",
             "RRR",
             'C', new ItemStack(Items.iron_ingot),
             'R', "itemRubber");
 
-        addRecipe(lowVoltageCableDescriptor.newItemStack(6),
+        /*addRecipe(signalBusCableDescriptor.newItemStack(1),
+            "R",
+            "C",
+            'C', signalCableDescriptor.newItemStack(1),
+            'R', "itemRubber"); */
+
+        addRecipe(lowVoltageCableDescriptor.newItemStack(12), //Low Voltage Cable
             "RRR",
             "CCC",
             "RRR",
             'C', "ingotCopper",
             'R', "itemRubber");
 
+        addRecipe(LQlowVoltageCableDescriptor.newItemStack(12), //Shoddy Low Voltage Cable
+            "SSS",
+            "GCG",
+            "SSS",
+            'C', "ingotCopper",
+            'G', new ItemStack(Blocks.gravel),
+            'S', new ItemStack(Blocks.cobblestone));
 
-        addRecipe(veryHighVoltageCableDescriptor.newItemStack(6),
-            "RRR",
+        addRecipe(HQlowVoltageCableDescriptor.newItemStack(12), //Quality Low Voltage Cable
+            "AAA",
             "CCC",
-            "RRR",
+            "AAA",
+            'C', findItemStack("Pure Copper Ingot"),
+            'A', new ItemStack(Items.gold_ingot));
+        addRecipe(PQlowVoltageCableDescriptor.newItemStack(12), //Perfect Low Voltage Cable
+            "DDD",
+            "CCC",
+            "DDD",
+            'C', findItemStack("Glorious Copper Plate"),
+            'D', new ItemStack(Items.diamond));
+
+
+        addRecipe(LQveryHighVoltageCableDescriptor.newItemStack(12), //Shoddy Very High Voltage Cable
+            "SSS",
+            "GCG",
+            "SSS",
             'C', "ingotAlloy",
-            'R', "itemRubber");
+            'G', new ItemStack(Blocks.gravel),
+            'S', new ItemStack(Blocks.cobblestone));
+
+        addRecipe(HQveryHighVoltageCableDescriptor.newItemStack(12), //Quality Very High Voltage Cable
+            "GGG",
+            "CCC",
+            "GGG",
+            'C', findItemStack("Alloy Plate"),
+            'G', new ItemStack(Blocks.gold_block));
+
+        addRecipe(PQveryHighVoltageCableDescriptor.newItemStack(4), //Perfect Very High Voltage Cable
+            "DDD",
+            "CCC",
+            "DDD",
+            'C', findItemStack("Alloy Plate"),
+            'D', findItemStack("Synthetic Diamond"));
 
     }
 
@@ -6262,7 +6948,24 @@ public class Eln {
     }
 
     private void recipeIngot() {
-        // Done
+
+        addRecipe(findItemStack("Copper Folded Plate in a Bucket"),
+            "P",
+            "B",
+            'B', new ItemStack(Items.bucket),
+            'P', findItemStack("Copper Folded Plate")
+        );
+        addRecipe(findItemStack("Peppered Molten Copper Bucket"),
+            "P",
+            "B",
+            'B', findItemStack("Molten Copper Bucket"),
+            'P', findItemStack("Lead Dust")
+        );
+        addRecipe(findItemStack("Pure Copper Ingot"),
+            "BW",
+            'B', findItemStack("Seperated Molten Copper Bucket"),
+            'W', new ItemStack(Items.water_bucket)
+        );
     }
 
     private void recipeDust() {
@@ -6738,6 +7441,10 @@ public class Eln {
             new ItemStack[]{findItemStack("Arc Metal Ingot", 1)}, 1.0 * f));
         arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Canister of Water", 1),
             new ItemStack[]{findItemStack("Canister of Arc Water", 1)}, 7000000)); //hardcoded 7MJ to prevent overunity
+        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Copper Slag", 64),
+            new ItemStack[]{findItemStack("Silver Ingot", 1)}, 1.0 * f));
+        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Copper Plate", 8),
+            new ItemStack[]{findItemStack("Pure Copper Ingot", 1)}, f / 5));
     }
 
     private void recipeMaceratorModOres() {
@@ -6782,6 +7489,9 @@ public class Eln {
         plateMachineRecipes.addRecipe(new Recipe(
             findItemStack("Copper Ingot", plateConversionRatio),
             findItemStack("Copper Plate"), 1.0 * f));
+        plateMachineRecipes.addRecipe(new Recipe(
+            findItemStack("Copper Plate", 8),
+            findItemStack("Copper Folded Plate"), 4.0 * f));
 
         plateMachineRecipes.addRecipe(new Recipe(findItemStack("Lead Ingot", plateConversionRatio),
             findItemStack("Lead Plate"), 1.0 * f));
@@ -6789,6 +7499,9 @@ public class Eln {
         plateMachineRecipes.addRecipe(new Recipe(
             findItemStack("Silicon Ingot", 4),
             findItemStack("Silicon Plate"), 1.0 * f));
+        plateMachineRecipes.addRecipe(new Recipe(
+            findItemStack("Pure Copper Ingot", 50),
+            findItemStack("Glorious Copper Plate"), 20.0 * f));
 
         plateMachineRecipes.addRecipe(new Recipe(findItemStack("Alloy Ingot", plateConversionRatio),
             findItemStack("Alloy Plate"), 1.0 * f));
@@ -6798,6 +7511,7 @@ public class Eln {
 
         plateMachineRecipes.addRecipe(new Recipe(new ItemStack(Items.gold_ingot, plateConversionRatio,
             0), findItemStack("Gold Plate"), 1.0 * f));
+
 
     }
 
@@ -6892,6 +7606,13 @@ public class Eln {
         in = findItemStack("Silicon Dust");
         Utils.addSmelting(in.getItem(), in.getItemDamage(),
             findItemStack("Silicon Ingot"));
+        in = findItemStack("Copper Folded Plate in a Bucket");
+        Utils.addSmelting(in.getItem(), in.getItemDamage(),
+            findItemStack("Molten Copper Bucket"));
+        in = findItemStack("Peppered Molten Copper Bucket");
+        Utils.addSmelting(in.getItem(), in.getItemDamage(),
+            findItemStack("Seperated Molten Copper Bucket"));
+
 
         // in = findItemStack("Purified Cinnabar Dust");
         in = findItemStack("dustCinnabar");
