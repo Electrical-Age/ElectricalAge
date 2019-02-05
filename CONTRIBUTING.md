@@ -72,3 +72,5 @@ stop just because a release is happening.
 **development branch** is first committed there, then cherry-picked to the **release branch**. The **release branch**
 is then pushed to **master** (again), and tagged (again), going from e.g. 0.52.0 to 0.52.1.
 - **develop**, **master** and the **release branches** are all protected; no rebasing happens there.
+- If you want to test multiple features together, you should still develop them separately. You can create a separate combined branch in your own repository that you regularly merge the feature branches into. Do not attempt to PR the combo branch.
+- If you want to develop one feature on top of another, then make sure you PR the 'base' feature before the derived one. If you send us a too-large PR we will ask you to chop it up.
