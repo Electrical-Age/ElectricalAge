@@ -109,7 +109,7 @@ public class ServerWirelessTxStatus extends WirelessTxStatus implements IWireles
 
     @Override
     public short getInputRegister(int id) {
-        return 0;
+        return getHoldingRegister(id);
     }
 
     @Override

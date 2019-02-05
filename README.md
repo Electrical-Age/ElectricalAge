@@ -7,7 +7,7 @@ Electrical Age (ELN) is a Minecraft Mod offering the ability to perform large-sc
 
 Look at the official project website [electrical-age.net](https://electrical-age.net/) and [the Wiki](http://wiki.electrical-age.net/) for general information. [This official Minecraft forum post](http://www.minecraftforum.net/topic/2741783-172forge-electrical-age-mod-beta-146/) is occasionally updated. You can also visit our Discord server.
 
-<a href="https://discord.gg/38j6H8B">
+<a href="https://discord.gg/YjK2JAD">
 <img src="https://img.shields.io/discord/463476274527076374.svg?style=for-the-badge">
 </a>
 
@@ -100,7 +100,7 @@ Code/models:
 Languages:
 
 - **bomdia** (it_IT)
-- **Ahtsm** (zh_CN)
+- **KLsz, aneBlack and Ahtsm** (zh_CN)
 - **dcbrwn** (ru_RU)
 - **XxCoolGamesxX** (es_ES - deprecated)
 

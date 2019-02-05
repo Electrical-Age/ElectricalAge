@@ -160,7 +160,7 @@ public class ElectricalGateSourceElement extends SixNodeElement {
             needPublish();
             return true;
         }
-        // front = LRDU.fromInt((front.toInt() + 1)&3);
+        // front = LRDU.from((front.toInt() + 1)&3);
         return false;
     }
 

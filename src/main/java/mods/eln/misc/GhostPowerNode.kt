@@ -8,7 +8,12 @@ import net.minecraft.item.ItemStack
 
 class GhostPowerNode(origin: Coordinate, front: Direction, offset: Coordinate, val load: ElectricalLoad): GhostNode() {
 
-    val coord = Coordinate(offset).apply { applyTransformation(front, origin) }
+class GhostPowerNode(origin: Coordonate, front: Direction, offset: Coordonate, val load: ElectricalLoad): GhostNode() {
+
+    val coord = Coordinate(offset).apply {
+        applyTransformation(front, origin)
+        dimension = origin.dimension
+    }
 
     fun initialize() {
         onBlockPlacedBy(coord, Direction.XN, null, null)

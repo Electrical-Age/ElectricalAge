@@ -15,6 +15,8 @@ import mods.eln.sim.nbt.NbtElectricalGateInput
 import mods.eln.sim.nbt.NbtElectricalGateOutput
 import mods.eln.sim.nbt.NbtElectricalGateOutputProcess
 import mods.eln.sixnode.SummingUnitElement.Companion.GainChangedEvents
+import mods.eln.solver.Equation
+import mods.eln.solver.IValue
 import mods.eln.wiki.Data
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.entity.player.EntityPlayer
@@ -227,45 +229,44 @@ class OpAmp : AnalogFunction() {
 class PIDRegulator : AnalogFunction() {
     override val hasState = true
     override val inputCount = 2
-    override val infos = I18N.tr("Proportional–integral–derivative controller. A PID\ncontroller continuously calculates an error value as\nthe difference between a desired setpoint and a measured\nprocess variable and applies a correction based on\nproportional, integral, and derivative terms.")
+    override val infos: String = I18N.tr("Proportional–integral–derivative controller. A PID\ncontroller continuously calculates an error value as\nthe difference between a desired setpoint and a measured\nprocess variable and applies a correction based on\nproportional, integral, and derivative terms.")
 
     internal var Kp = 1.0
     internal var Ki = 0.0
-        set(value) {
-            field = value
-            errorIntegral = 0.0
-        }
     internal var Kd = 0.0
-
-    private var lastError = 0.0
-    private var errorIntegral = 0.0
+    private val pid = Equation.Pid()
 
     override fun process(inputs: Array<Double?>, deltaTime: Double): Double {
-        val error = (inputs[0] ?: 0.0) - (inputs[1] ?: 0.0)
-        errorIntegral += error * deltaTime
-        val result = Kp * error + Ki * errorIntegral + Kd * (error - lastError) / deltaTime
-        lastError = error
-        return result
+        pid.setOperator(arrayOf(
+            IValue { (inputs[0] ?: 0.0) / Eln.SVU },
+            IValue { (inputs[1] ?: 0.0) / Eln.SVU } ,
+            IValue { Kp }, IValue { Ki} , IValue { Kd }
+        ))
+        pid.process(deltaTime)
+        return Eln.SVU * pid.value
     }
 
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {
         Kp = nbt?.getDouble("Kp") ?: 1.0
         Ki = nbt?.getDouble("Ki") ?: 0.0
         Kd = nbt?.getDouble("Kd") ?: 0.0
-        errorIntegral = nbt?.getDouble("errorIntegral") ?: 0.0
+        pid.readFromNBT(nbt, "pid")
     }
 
     override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
         nbt?.setDouble("Kp", Kp)
         nbt?.setDouble("Ki", Ki)
         nbt?.setDouble("Kd", Kd)
-        nbt?.setDouble("errorIntegral", errorIntegral)
+        pid.writeToNBT(nbt, "pid")
         return nbt
     }
 
     override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
         val info = super.getWaila(inputs, output)
         info[I18N.tr("Params")] = "Kp = $Kp, Ki = $Ki, Kd = $Kd"
+        if (Eln.wailaEasyMode) {
+            info[I18N.tr("State")] = "Si = ${pid.iStack}"
+        }
         return info
     }
 }
@@ -337,12 +338,16 @@ class PIDRegulatorGui(val render: PIDRegulatorRender) : GuiScreenEln() {
         super.initGui()
 
         KpBar = newGuiVerticalTrackBar(10, 20, 20, 80)
-        KpBar?.setRange(0f, 20f)
-        KpBar?.setStepIdMax(20)
+        KpBar?.setRange(0f, 50f)
+        KpBar?.setStepIdMax(50)
         KpBar?.value = render.Kp
         KiBar = newGuiVerticalTrackBar(40, 20, 20, 80)
+        KiBar?.setRange(0f, 5f)
+        KiBar?.setStepIdMax(50)
         KiBar?.value = render.Ki
         KdBar = newGuiVerticalTrackBar(70, 20, 20, 80)
+        KdBar?.setRange(0f, 5f);
+        KdBar?.setStepIdMax(50)
         KdBar?.value = render.Kd
     }
 

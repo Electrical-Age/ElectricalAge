@@ -6,6 +6,7 @@ This is an open source project. We appreciate any help from the community to imp
 
 Did you found a bug or do you have an idea how to improve the mod? We are happy to hear from you.
 
+- [Discord](https://discord.gg/YjK2JAD)
 - [IRC Channel](https://qchat.rizon.net/?channels=electricalage)
 - [Bug Tracker](https://github.com/Electrical-Age/ElectricalAge/issues)
 

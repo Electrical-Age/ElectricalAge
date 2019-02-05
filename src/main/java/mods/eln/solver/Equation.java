@@ -766,7 +766,7 @@ public class Equation implements IValue, INBTTReady {
             dValue = (error - oldError) / time;
 
             if (iStack > 1) iStack = 1;
-            if (iStack < -1) iStack = -1;
+            if (iStack < 0) iStack = 0;
             oldError = error;
         }
 
@@ -947,9 +947,9 @@ public class Equation implements IValue, INBTTReady {
     public static class BatteryCharge implements IOperator {
         public BatteryCharge() {
             FunctionTable uFq = Eln.instance.batteryVoltageFunctionTable;
-            double q, dq = 0.01;
+            double dq = 0.001;
+            double q = 0;
             eMax = 0;
-            q = 0;
             while (q <= 1.0) {
                 eMax += uFq.getValue(q) * dq;
                 q += dq;
@@ -974,7 +974,7 @@ public class Equation implements IValue, INBTTReady {
             FunctionTable uFq = Eln.instance.batteryVoltageFunctionTable;
             double probeU = probe.getValue();
             if (probeU > 1.5) return 1;
-            double q = 0, dq = 0.01;
+            double q = 0, dq = 0.001;
             double e = 0;
             double u;
 

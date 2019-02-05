@@ -40,6 +40,8 @@ public class ServerEventListener {
 
         lightningList = lightningListNext;
         lightningListNext = new LinkedList<EntityLightningBolt>();
+
+        TreeCapitation.INSTANCE.process(0.05);
     }
 
     @SubscribeEvent
