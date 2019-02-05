@@ -37,7 +37,7 @@ public class SixNode extends Node {
     public ArrayList<ElectricalConnection> internalElectricalConnectionList = new ArrayList<ElectricalConnection>(1);
     public ArrayList<ThermalConnection> internalThermalConnectionList = new ArrayList<ThermalConnection>(1);
 
-    public Block sixNodeCacheBlock = Blocks.air;
+    public Block sixNodeCacheBlock = Blocks.AIR;
     public byte sixNodeCacheBlockMeta = 0;
     //public int sixNodeCacheMapId = -1;
 
@@ -231,7 +231,7 @@ public class SixNode extends Node {
         return false;
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         int idx = 0;
         nbt.setInteger("cacheBlockId", Block.getIdFromBlock(sixNodeCacheBlock));
         nbt.setByte("cacheBlockMeta", sixNodeCacheBlockMeta);
@@ -250,6 +250,7 @@ public class SixNode extends Node {
         NBTTagCompound nodeNbt = new NBTTagCompound();
         super.writeToNBT(nodeNbt);
         nbt.setTag("node", nodeNbt);
+        return nbt;
     }
 
     public boolean getSideEnable(Direction direction) {
@@ -485,13 +486,13 @@ public class SixNode extends Node {
     }
 
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        if (sixNodeCacheBlock != Blocks.air) {
+        if (sixNodeCacheBlock != Blocks.AIR) {
             return false;
         } else {
 
-            ItemStack stack = entityPlayer.getCurrentEquippedItem();
+            ItemStack stack = entityPlayer.getHeldItemMainhand();
 
-            Block b = Blocks.air;
+            Block b = Blocks.AIR;
             if (stack != null)
                 b = Block.getBlockFromItem(stack.getItem());
 
@@ -523,11 +524,11 @@ public class SixNode extends Node {
 
                 //if(sixNodeCacheMapId != sixNodeCacheMapIdOld)
                 {
-                    Chunk chunk = coordinate.world().getChunkFromBlockCoords(coordinate.x, coordinate.z);
+                    Chunk chunk = coordinate.world().getChunkFromBlockCoords(coordinate.pos);
                     Utils.generateHeightMap(chunk);
                     Utils.updateSkylight(chunk);
                     chunk.generateSkylightMap();
-                    Utils.updateAllLightTypes(coordinate.world(), coordinate.x, coordinate.y, coordinate.z);
+                    Utils.updateAllLightTypes(coordinate.world(), coordinate.pos);
                 }
                 return true;
             } else {

@@ -144,7 +144,7 @@ class ShaftNetwork() : INBTTReady {
         val c = Coordinate()
         val ret = ArrayList<ShaftNeighbour>(6)
         for (dir in from.shaftConnectivity) {
-            c.copyFrom(from.coordonate())
+            c.copyFrom(from.coordinate())
             c.move(dir)
             val to = NodeManager.instance!!.getTransparentNodeFromCoordinate(c)
             if (to is ShaftElement) {
@@ -163,8 +163,9 @@ class ShaftNetwork() : INBTTReady {
         rads = nbt.getFloat(str + "rads").toDouble()
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound, str: String?) {
+    override fun writeToNBT(nbt: NBTTagCompound, str: String?): NBTTagCompound?{
         nbt.setFloat(str + "rads", rads.toFloat())
+        return nbt
     }
 
 }
@@ -173,7 +174,7 @@ interface ShaftElement {
     var shaft: ShaftNetwork
     val shaftMass: Double
     val shaftConnectivity: Array<Direction>
-    fun coordonate(): Coordinate
+    fun coordinate(): Coordinate
 
     fun initialize() {
         shaft.connectShaft(this)

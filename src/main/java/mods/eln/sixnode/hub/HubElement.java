@@ -55,11 +55,12 @@ public class HubElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         for (int idx = 0; idx < 6; idx++) {
             nbt.setBoolean("connectionGrid" + idx, connectionGrid[idx]);
         }
+        return nbt;
     }
 
     @Override

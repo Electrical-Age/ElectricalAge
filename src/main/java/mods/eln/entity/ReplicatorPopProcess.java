@@ -1,5 +1,6 @@
 package mods.eln.entity;
 
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.misc.Utils;
 import mods.eln.sim.IProcess;
@@ -33,7 +34,7 @@ public class ReplicatorPopProcess implements IProcess {
             }
         }
 
-        if (world.difficultySetting == EnumDifficulty.PEACEFUL) return;
+        if (world.getDifficulty() == EnumDifficulty.PEACEFUL) return;
 
         if (world.getWorldInfo().isThundering()) {
             MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
@@ -44,11 +45,15 @@ public class ReplicatorPopProcess implements IProcess {
                     x = (int) (player.posX + Utils.rand(-100, 100));
                     z = (int) (player.posZ + Utils.rand(-100, 100));
                     y = 2;
+                    BlockPos pos = new BlockPos(x,y,z);
                     Utils.println("POP");
 
-                    if (world.blockExists(x, y, z) == false) break;
+                    //TODO: Fix blockExists()
+                    //Only solution I found was canPlaceBlockAt() but its not what we want
+                    //Maybe its not needed anymore?
+                    if (world.blockExists(pos) == false) break;
 
-                    while (world.getBlock(x, y, z) != Blocks.air || Utils.getLight(world, EnumSkyBlock.Block, x, y, z) > 6) {
+                    while (world.isAirBlock(pos) || Utils.getLight(world, EnumSkyBlock.BLOCK, pos) > 6) {
                         y++;
                     }
 

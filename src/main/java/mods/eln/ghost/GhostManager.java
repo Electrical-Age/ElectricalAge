@@ -8,8 +8,11 @@ import mods.eln.node.NodeManager;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
+import net.minecraftforge.common.ForgeChunkManager;
 
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -52,7 +55,7 @@ public class GhostManager extends WorldSavedData {
     }
 
     public void addObserver(GhostObserver observer) {
-        observerTable.put(observer.getGhostObserverCoordonate(), observer);
+        observerTable.put(observer.getGhostObserverCoordinate(), observer);
     }
 
     public GhostObserver getObserver(Coordinate coordinate) {
@@ -71,7 +74,7 @@ public class GhostManager extends WorldSavedData {
             if (element.observatorCoordinate.equals(observerCoordinate)) {
                 iterator.remove();
                 removeGhostNode(element.elementCoordinate);
-                element.elementCoordinate.world().setBlockToAir(element.elementCoordinate.x, element.elementCoordinate.y, element.elementCoordinate.z);
+                element.elementCoordinate.world().setBlockToAir(element.elementCoordinate.pos);
             }
         }
     }
@@ -84,7 +87,7 @@ public class GhostManager extends WorldSavedData {
             if (element.observatorCoordinate.equals(observerCoordinate) && element.getUUID() == uuid) {
                 iterator.remove();
                 removeGhostNode(element.elementCoordinate);
-                element.elementCoordinate.world().setBlockToAir(element.elementCoordinate.x, element.elementCoordinate.y, element.elementCoordinate.z);
+                element.elementCoordinate.world().setBlockToAir(element.elementCoordinate.pos);
             }
         }
     }
@@ -97,7 +100,7 @@ public class GhostManager extends WorldSavedData {
             if (element.observatorCoordinate.equals(observerCoordinate) && element.getUUID() != uuid) {
                 iterator.remove();
                 removeGhostNode(element.elementCoordinate);
-                element.elementCoordinate.world().setBlockToAir(element.elementCoordinate.x, element.elementCoordinate.y, element.elementCoordinate.z);
+                element.elementCoordinate.world().setBlockToAir(element.elementCoordinate.pos);
             }
         }
     }
@@ -110,7 +113,7 @@ public class GhostManager extends WorldSavedData {
 
     public void removeGhostAndBlock(Coordinate coordinate) {
         removeGhost(coordinate);
-        coordinate.world().setBlockToAir(coordinate.x, coordinate.y, coordinate.z); //caca1.5.1
+        coordinate.world().setBlockToAir(coordinate.pos); //caca1.5.1
     }
 
     @Override
@@ -125,9 +128,9 @@ public class GhostManager extends WorldSavedData {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 	/*	int nodeCounter = 0;
-		
+
 		for(GhostElement ghost : ghostTable.values()) {
 			NBTTagCompound nbtGhost = new NBTTagCompound();
 			ghost.writeToNBT(nbtGhost, "");
@@ -149,7 +152,7 @@ public class GhostManager extends WorldSavedData {
         int nodeCounter = 0;
 
         for (GhostElement ghost : ghostTable.values()) {
-            if (dim != Integer.MIN_VALUE && ghost.elementCoordinate.dimension != dim) continue;
+            if (dim != Integer.MIN_VALUE && ghost.elementCoordinate.getDimension() != dim) continue;
             NBTTagCompound nbtGhost = new NBTTagCompound();
             ghost.writeToNBT(nbtGhost, "");
             nbt.setTag("n" + nodeCounter++, nbtGhost);
@@ -161,16 +164,21 @@ public class GhostManager extends WorldSavedData {
 
         while (i.hasNext()) {
             GhostElement n = i.next();
-            if (n.elementCoordinate.dimension == dimensionId) {
+            if (n.elementCoordinate.getDimension() == dimensionId) {
                 i.remove();
             }
         }
     }
 
-    public boolean canCreateGhostAt(World world, int x, int y, int z) {
-        if (!world.getChunkProvider().chunkExists(x >> 4, z >> 4)) {
+    //TODO(1.10):
+    public boolean canCreateGhostAt(World world, BlockPos pos) {
+        //Probably isn't needed anymore since now when asked for a chunk even if it isnt generated it auto generates it
+        /*
+        if (!world.getChunkProvider().chunkExists(pos.getX() >> 4, pos.getZ() >> 4)) {
             return false;
-        } else if (world.getBlock(x, y, z) != Blocks.air && !world.getBlock(x, y, z).isReplaceable(world, x, y, z)) {
+        }
+        */
+        if (world.isAirBlock(pos) && !world.getBlockState(pos).getBlock().isReplaceable(world, pos)) {
             return false;
         } else return true;
     }
@@ -180,8 +188,9 @@ public class GhostManager extends WorldSavedData {
     }
 
     public void createGhost(Coordinate coordinate, Coordinate observerCoordinate, int UUID, Block block, int meta) {
-        coordinate.world().setBlockToAir(coordinate.x, coordinate.y, coordinate.z);
-        if (coordinate.world().setBlock(coordinate.x, coordinate.y, coordinate.z, block, meta, 3)) {
+        coordinate.world().setBlockToAir(coordinate.pos);
+
+        if (coordinate.world().setBlockState(coordinate.pos, block.getStateFromMeta(meta), 3)) {
             coordinate = new Coordinate(coordinate);
             GhostElement element = new GhostElement(coordinate, observerCoordinate, UUID);
             ghostTable.put(element.elementCoordinate, element);

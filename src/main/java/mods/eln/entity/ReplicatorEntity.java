@@ -9,11 +9,14 @@ import net.minecraft.entity.ai.*;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.sound.SoundEvent;
 
 import java.util.ArrayList;
 import java.util.Map.Entry;
@@ -53,8 +56,8 @@ public class ReplicatorEntity extends EntityMob {
         this.tasks.addTask(p++, new EntityAILookIdle(this));
         p = 1;
         this.targetTasks.addTask(p++, new EntityAIHurtByTarget(this, true));
-        this.targetTasks.addTask(p, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true));
-        this.targetTasks.addTask(p, new EntityAINearestAttackableTarget(this, EntityVillager.class, 0, false));
+        this.targetTasks.addTask(p, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true, true));
+        this.targetTasks.addTask(p, new EntityAINearestAttackableTarget(this, EntityVillager.class, true, false));
         this.targetTasks.addTask(p++, new ReplicatorHungryAttack(this, ReplicatorEntity.class, 0, false));
         // this.targetTasks.addTask(p++, new EntityAINearestAttackableTarget(this, ReplicatorEntity.class, 0, false));
         // this.targetTasks.addTask(p++, replicatorIa);
@@ -70,8 +73,8 @@ public class ReplicatorEntity extends EntityMob {
     }
 
     @Override
-    protected void updateAITick() {
-        super.updateAITick();
+    protected void updateAITasks() {
+        super.updateAITasks();
         //setDead();
         hunger += 0.05 / hungerTime;
 
@@ -98,10 +101,10 @@ public class ReplicatorEntity extends EntityMob {
 
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getEntityAttribute(SharedMonsterAttributes.followRange).setBaseValue(8.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(8.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.23000000417232513D);
-        this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(3.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(8.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0D);
+        this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23000000417232513D);
+        this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(3.0D);
         // this.getAttributeMap().func_111150_b(field_110186_bp).setAttribute(this.rand.nextDouble() * ForgeDummyContainer.zombieSummonBaseChance);
     }
 
@@ -109,16 +112,17 @@ public class ReplicatorEntity extends EntityMob {
         return true;
     }
 
-    protected String getLivingSound() {
-        return "mob.silverfish.say";
+    //TODO: FIX SOUND EVENTS
+    protected SoundEvent getLivingSound() {
+        return SoundEvents.ENTITY_SILVERFISH_AMBIENT;
     }
 
-    protected String getHurtSound() {
-        return "mob.silverfish.hit";
+    protected SoundEvent getHurtSound() {
+        return SoundEvents.ENTITY_SILVERFISH_HURT;
     }
 
-    protected String getDeathSound() {
-        return "mob.silverfish.kill";
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.ENTITY_SILVERFISH_DEATH;
     }
 
     /*protected void playStepSound(int par1, int par2, int par3, int par4) {
@@ -135,10 +139,10 @@ public class ReplicatorEntity extends EntityMob {
 
         if (isSpawnedFromWeather) {
             if (Math.random() < 0.33) {
-                for (Object s : EntityList.IDtoClassMapping.entrySet()) {
+                for (Object s : EntityList.ID_TO_CLASS.entrySet()) {
                     Entry e = (Entry) s;
                     if (e.getValue() == ReplicatorEntity.class) {
-                        this.entityDropItem(new ItemStack((Item) Item.itemRegistry.getObject("spawn_egg"), 1, (Integer) e.getKey()), 0.5f);
+                        this.entityDropItem(new ItemStack((Item) Item.getByNameOrId("spawn_egg"), 1, (Integer) e.getKey()), 0.5f);
                         break;
                     }
                 }

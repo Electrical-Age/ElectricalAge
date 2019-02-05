@@ -39,8 +39,9 @@ class DirectionSet : TreeSet<Direction>() {
         fromInt(stream.readInt())
     }
 
-    fun writeToNBT(nbt: NBTTagCompound, name: String) {
+    fun writeToNBT(nbt: NBTTagCompound, name: String): NBTTagCompound? {
         nbt.setInteger(name, toInt())
+        return nbt
     }
 
     fun readFromNBT(nbt: NBTTagCompound, name: String) {

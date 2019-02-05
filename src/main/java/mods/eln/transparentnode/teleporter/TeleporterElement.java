@@ -165,7 +165,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
     private double powerCharge = 2000;
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 
         super.writeToNBT(nbt);
 
@@ -173,6 +173,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
         nbt.setString("targetName", targetName);
         nbt.setDouble("powerCharge", powerCharge);
         nbt.setBoolean("reset", state != StateIdle);
+        return nbt;
 
     }
 

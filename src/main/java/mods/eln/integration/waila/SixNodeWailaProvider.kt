@@ -23,7 +23,7 @@ class SixNodeWailaProvider : IWailaDataProvider {
         val side = Direction.fromFacing(accessor.side)
         var sixData: SixNodeWailaData? = null
         try {
-            sixData = WailaCache.sixNodes.get(SixNodeCoordonate(coord, side))
+            sixData = WailaCache.sixNodes.get(SixNodeCoordinate(coord, side))
         } catch(e: CacheLoader.InvalidCacheLoadException) {
         }
 

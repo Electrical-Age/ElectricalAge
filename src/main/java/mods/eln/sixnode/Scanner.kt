@@ -64,7 +64,7 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
 
     val updater = IProcess {
         val appliedLRDU = side.applyLRDU(front)
-        val scannedCoord = Coordinate(coordonate).apply {
+        val scannedCoord = Coordinate(coordinate).apply {
             move(appliedLRDU)
         }
         val targetSide: EnumFacing = appliedLRDU.inverse.toForge()
@@ -173,9 +173,10 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
         stream.writeByte(mode.value.toInt())
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound? {
         super.writeToNBT(nbt)
         nbt.setByte("mode", mode.value)
+        return nbt;
     }
 
     override fun readFromNBT(nbt: NBTTagCompound) {

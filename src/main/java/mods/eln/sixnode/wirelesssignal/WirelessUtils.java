@@ -3,6 +3,8 @@ package mods.eln.sixnode.wirelesssignal;
 import mods.eln.misc.Coordinate;
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.*;
@@ -154,35 +156,34 @@ public class WirelessUtils {
         return true;
     }
 
+    //TODO: Needs performance improvement
     static private double getVirtualDistance(Coordinate txC, Coordinate rxC, double distance) {
         double virtualDistance = distance;
         if (distance > 2) {
             double vx, vy, vz;
             double dx, dy, dz;
-            vx = rxC.x + 0.5;
-            vy = rxC.y + 0.5;
-            vz = rxC.z + 0.5;
+            vx = rxC.pos.getX() + 0.5;
+            vy = rxC.pos.getY() + 0.5;
+            vz = rxC.pos.getZ() + 0.5;
 
-            dx = (txC.x - rxC.x) / distance;
-            dy = (txC.y - rxC.y) / distance;
-            dz = (txC.z - rxC.z) / distance;
+            dx = (txC.pos.getX() - rxC.pos.getX()) / distance;
+            dy = (txC.pos.getY() - rxC.pos.getY()) / distance;
+            dz = (txC.pos.getZ() - rxC.pos.getZ()) / distance;
             Coordinate c = new Coordinate();
-            c.setDimension(rxC.dimension);
+            c.setDimension(rxC.getDimension());
 
             for (int idx = 0; idx < distance - 1; idx++) {
                 vx += dx;
                 vy += dy;
                 vz += dz;
-                c.x = (int) vx;
-                c.y = (int) vy;
-                c.z = (int) vz;
+                c.pos = c.pos.setPos((int) vx, (int) vy, (int) vz);
                 if (c.doesBlockExist()) {
-                    Block b = c.getBlock();
+                    IBlockState s = c.getBlockState();
+                    Block b = s.getBlock();
                     World w = c.world();
-
                     virtualDistance +=
-                        b.isOpaqueCube() &&
-                        !b.isAir(w, c.x, c.y, c.z) ?
+                        b.isOpaqueCube(c.getBlockState()) &&
+                        !b.isAir(s, w, c.pos) ?
                         2.0 : 0.0;
                 }
             }

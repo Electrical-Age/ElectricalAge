@@ -1,6 +1,7 @@
 package mods.eln.node.transparent;
 
 import mods.eln.Eln;
+import mods.eln.misc.Utils;
 import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlock;
 import mods.eln.node.NodeBlockEntity;
@@ -12,6 +13,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -46,7 +48,7 @@ public class TransparentNodeBlock extends NodeBlock {
     }
 
     @Override
-    public boolean isOpaqueCube() {
+    public boolean isOpaqueCube(IBlockState state) {
         return false;
     }
 
@@ -56,15 +58,15 @@ public class TransparentNodeBlock extends NodeBlock {
     }
 
     @Override
-    public int getRenderType() {
-        return -1;
+    public EnumBlockRenderType getRenderType(IBlockState state) {
+        return state.getRenderType();
     }
 
 
     @Override
-    public boolean removedByPlayer(World world, EntityPlayer entityPlayer, int x, int y, int z) {
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer entityPlayer, boolean willHarvest) {
         if (!world.isRemote) {
-            NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(x, y, z);
+            NodeBlockEntity entity = (NodeBlockEntity) world.getTileEntity(pos);
             if (entity != null) {
                 NodeBase nodeBase = entity.getNode();
                 if (nodeBase instanceof TransparentNode) {
@@ -74,29 +76,29 @@ public class TransparentNodeBlock extends NodeBlock {
             }
         }
 
-        return super.removedByPlayer(world, entityPlayer, x, y, z);
+        return super.removedByPlayer(state, world, pos, entityPlayer, willHarvest);
 
     }
 
     @Override
-    public int getDamageValue(World world, int x, int y, int z) {
+    public int getDamageValue(World world, BlockPos pos) {
         if (world == null)
             return 0;
-        TileEntity tile = world.getTileEntity(x, y, z);
+        TileEntity tile = world.getTileEntity(pos);
         if (tile != null && tile instanceof TransparentNodeEntity)
-            return ((TransparentNodeEntity) world.getTileEntity(x, y, z)).getDamageValue(world, x, y, z);
+            return ((TransparentNodeEntity) world.getTileEntity(pos)).getDamageValue(world, pos);
         return 0;
     }
 
 
     @Override
-    public int getLightOpacity(IBlockAccess world, int x, int y, int z) {
-        return (world.getBlockMetadata(x, y, z) & 3) << 6;
+    public int getLightValue(IBlockAccess world, BlockPos pos) {
+        return (world.getBlockState(pos).getBlock().getMetaFromState(world.getBlockState(pos)) & 3) << 6;
     }
 
 
     @Override
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_,
+    public Item getItemDropped(IBlockState p_149650_1_, Random p_149650_2_,
                                int p_149650_3_) {
         return null;
     }
@@ -105,20 +107,20 @@ public class TransparentNodeBlock extends NodeBlock {
         return 0;
     }
 
-    public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB par5AxisAlignedBB, List list, Entity entity) {
-        TileEntity tileEntity = world.getTileEntity(x, y, z);
+    public void addCollisionBoxesToList(World world, BlockPos pos, AxisAlignedBB par5AxisAlignedBB, List list, Entity entity) {
+        TileEntity tileEntity = world.getTileEntity(pos);
         if (tileEntity == null || (tileEntity instanceof TransparentNodeEntity == false)) {
-            super.addCollisionBoxesToList(world, x, y, z, par5AxisAlignedBB, list, entity);
+            super.addCollisionBoxToList(world.getBlockState(pos), world, pos, par5AxisAlignedBB, list, entity);
         } else {
             ((TransparentNodeEntity) tileEntity).addCollisionBoxesToList(par5AxisAlignedBB, list, null);
         }
     }
 
     @Override
-    public TileEntity createTileEntity(World var1, int meta) {
+    public TileEntity createTileEntity(World var1, IBlockState state) {
         try {
             for (EntityMetaTag tag : EntityMetaTag.values()) {
-                if (tag.meta == meta) {
+                if (tag.meta == state.getBlock().getMetaFromState(state)) {
                     return (TileEntity) tag.cls.getConstructor().newInstance();
                 }
             }
@@ -126,7 +128,7 @@ public class TransparentNodeBlock extends NodeBlock {
             // Only real fix is to replace the blocks, but there should be no
             // serious downside to getting the wrong subclass so long as they really
             // wanted the superclass.
-            System.out.println("Unknown block meta-tag: " + meta);
+            System.out.println("Unknown block meta-tag: " + state.getBlock().getMetaFromState(state));
             return (TileEntity) EntityMetaTag.Basic.cls.getConstructor().newInstance();
         } catch (InstantiationException e) {
             e.printStackTrace();

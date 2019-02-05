@@ -46,10 +46,11 @@ public class ResistorSwitch extends Resistor implements INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         str += name;
         nbt.setDouble(str + "R", baseR);
         nbt.setBoolean(str + "State", getState());
+        return nbt;
     }
 
     public void mustUseUltraImpedance() {

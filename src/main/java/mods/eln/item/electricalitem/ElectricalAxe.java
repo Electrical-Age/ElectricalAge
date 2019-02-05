@@ -4,6 +4,7 @@ import mods.eln.misc.Utils;
 import mods.eln.wiki.Data;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -21,8 +22,8 @@ public class ElectricalAxe extends ElectricalTool {
     }
 
     @Override
-    public float getStrVsBlock(ItemStack stack, Block block) {
-        float value = block != null && (block.getMaterial() == Material.wood || block.getMaterial() == Material.plants || block.getMaterial() == Material.vine) ? getStrength(stack) : super.getStrVsBlock(stack, block);
+    public float getStrVsBlock(ItemStack stack, IBlockState state) {
+        float value = state.getBlock() != null && (state.getMaterial() == Material.WOOD || state.getMaterial() == Material.PLANTS || state.getMaterial() == Material.VINE) ? getStrength(stack) : super.getStrVsBlock(stack, state);
         Utils.println(value);
         return value;
     }

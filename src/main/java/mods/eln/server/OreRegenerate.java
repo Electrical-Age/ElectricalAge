@@ -67,7 +67,7 @@ public class OreRegenerate {
                 for (int y = 0; y < 60; y += 2) {
                     for (int z = y & 1; z < 16; z += 2) {
                         for (int x = y & 1; x < 16; x += 2) {
-                            if (chunk.getBlock(x, y, z) == Eln.oreBlock) {
+                            if (chunk.getBlockState(x, y, z).getBlock() == Eln.oreBlock) {
                                 //	Utils.println("NO Regenrate ore ! left " + jobs.size());
                                 return;
                             }
@@ -87,9 +87,9 @@ public class OreRegenerate {
     @SubscribeEvent
     public void chunkLoad(ChunkEvent.Load e) {
         //	if (e.world.isRemote == false) Utils.println("Chunk loaded!");
-        if (e.world.isRemote || (Eln.instance.saveConfig != null && !Eln.instance.saveConfig.reGenOre)) return;
+        if (e.getWorld().isRemote || (Eln.instance.saveConfig != null && !Eln.instance.saveConfig.reGenOre)) return;
         Chunk c = e.getChunk();
-        ChunkRef ref = new ChunkRef(c.xPosition, c.zPosition, c.worldObj.provider.dimensionId);
+        ChunkRef ref = new ChunkRef(c.xPosition, c.zPosition, c.getWorld().provider.getDimension());
         if (alreadyLoadedChunks.contains(ref)) {
             Utils.println("Already regenerated!");
             return;

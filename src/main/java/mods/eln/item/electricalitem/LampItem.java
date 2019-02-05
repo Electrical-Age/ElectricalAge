@@ -5,8 +5,8 @@ import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.sixnode.lampsocket.LightBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -34,10 +34,7 @@ public abstract class LampItem extends GenericItemUsingDamageDescriptor {
             double x = entity.posX, y = entity.posY + 1.62 - yOffset, z = entity.posZ;
 
             Vec3d v = entity.getLookVec();
-
-            v.xCoord *= 0.25;
-            v.yCoord *= 0.25;
-            v.zCoord *= 0.25;
+            v = new Vec3d(v.xCoord * 0.25, v.yCoord * 0.25, v.zCoord * 0.25);
 
             int range = getRange(stack) + 1;
             int rCount = 0;
@@ -46,9 +43,9 @@ public abstract class LampItem extends GenericItemUsingDamageDescriptor {
                 x += v.xCoord;
                 y += v.yCoord;
                 z += v.zCoord;
-
-                Block block = world.getBlock(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
-                if (block != Blocks.air && block != Eln.instance.lightBlock /*&& Block.blocksList[blockId].isOpaqueCube() == false*/) {
+                BlockPos pos = new BlockPos(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
+                Block block = world.getBlockState(pos).getBlock();
+                if (!world.isAirBlock(pos) && block != Eln.instance.lightBlock /*&& Block.blocksList[blockId].isOpaqueCube() == false*/) {
                     x -= v.xCoord;
                     y -= v.yCoord;
                     z -= v.zCoord;
@@ -58,10 +55,10 @@ public abstract class LampItem extends GenericItemUsingDamageDescriptor {
             }
 
             while (rCount > 0) {
-                Block block = world.getBlock(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
-                if (block == Blocks.air || block == Eln.instance.lightBlock) {
+                BlockPos pos = new BlockPos(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z));
+                if (world.isAirBlock(pos) || world.getBlockState(pos).getBlock() == Eln.instance.lightBlock) {
                     //break;
-                    LightBlockEntity.addLight(world, MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z), light, 10);
+                    LightBlockEntity.addLight(world, pos, light, 10);
                     return;/*
                     x -= v.xCoord * 4;
 					y -= v.yCoord * 4;

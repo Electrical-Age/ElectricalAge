@@ -214,12 +214,13 @@ class EmergencyLampElement(sixNode: SixNode, side: Direction, descriptor: SixNod
         channel = nbt.getString("channel")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound? {
         super.writeToNBT(nbt)
         nbt.setBoolean("on", on)
         nbt.setDouble("charge", charge)
         nbt.setBoolean("poweredByCable", poweredByCable)
         nbt.setString("channel", channel)
+        return nbt
     }
 
     override fun hasGui() = true

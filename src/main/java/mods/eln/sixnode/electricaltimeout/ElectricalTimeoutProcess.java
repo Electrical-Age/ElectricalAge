@@ -52,7 +52,8 @@ public class ElectricalTimeoutProcess implements IProcess, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setBoolean(str + "SProcinputState", inputState);
+        return nbt;
     }
 }

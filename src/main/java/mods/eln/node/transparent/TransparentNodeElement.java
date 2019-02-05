@@ -352,7 +352,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
     }
 
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         int idx = 0;
 
         IInventory inv = getInventory();
@@ -385,6 +385,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
 
 
         nbt.setByte("others", (byte) (front.getInt() + (grounded ? 8 : 0)));
+        return nbt;
     }
 
     public void reconnect() {
@@ -413,7 +414,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return 0f;
     }
 
-    public Coordinate getGhostObserverCoordonate() {
+    public Coordinate getGhostObserverCoordinate() {
         return node.coordinate;
 
     }
@@ -437,7 +438,7 @@ public abstract class TransparentNodeElement implements GhostObserver, IPlayer, 
         return node.coordinate.world();
     }
 
-    public Coordinate coordonate() {
+    public Coordinate coordinate() {
         return node.coordinate;
     }
 

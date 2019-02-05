@@ -144,7 +144,7 @@ public class LampSupplyElement extends SixNodeElement {
             if (sleepTimer < 0) {
                 sleepTimer += Utils.rand(1.2, 2);
 
-                IWirelessSignalSpot spot = WirelessUtils.buildSpot(LampSupplyElement.this.getCoordonate(), null, 0);
+                IWirelessSignalSpot spot = WirelessUtils.buildSpot(LampSupplyElement.this.getCoordinate(), null, 0);
                 WirelessUtils.getTx(spot, txSet, txStrength);
             }
 
@@ -278,7 +278,7 @@ public class LampSupplyElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         int idx = 0;
         for (Entry e : entries) {
@@ -291,6 +291,7 @@ public class LampSupplyElement extends SixNodeElement {
 
             idx++;
         }
+        return nbt;
     }
 
     @Override

@@ -9,6 +9,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
@@ -47,7 +51,7 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
         orderList.add(damage);
         descriptors.add(descriptor);
         descriptor.setParent(this, damage);
-        GameRegistry.registerCustomItemStack(descriptor.name, descriptor.newItemStack(1));
+        GameRegistry.registerItem(descriptor.parentItem);
     }
 
     public void addWithoutRegistry(int damage, Descriptor descriptor) {
@@ -144,10 +148,11 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
         return false;
     }
 
+    //TODO: Maybe its onItemUse only?
     @Override
-    public boolean onItemUseFirst(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
+    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
         Descriptor desc = getDescriptor(stack);
-        if (desc != null) return desc.onItemUseFirst(stack, player);
-        return false;
+        if (desc != null) return desc.onItemUse(stack, player);
+        return EnumActionResult.FAIL;
     }
 }

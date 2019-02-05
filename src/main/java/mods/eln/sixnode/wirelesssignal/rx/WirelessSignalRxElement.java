@@ -110,12 +110,13 @@ public class WirelessSignalRxElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setString("channel", channel);
         nbt.setBoolean("connection", connection);
         nbt.setInteger("selectedAggregator", selectedAggregator);
         toogleAggregator.writeToNBT(nbt, "toogleAggregator");
+        return nbt;
     }
 
     @Override
@@ -128,7 +129,7 @@ public class WirelessSignalRxElement extends SixNodeElement {
     }
 
     @Override
-    public Coordinate getCoordonate() {
+    public Coordinate getCoordinate() {
         return sixNode.coordinate;
     }
 

@@ -40,7 +40,7 @@ public class GuiHelper {
 
     GuiTextFieldEln newGuiTextField(int x, int y, int width) {
         GuiTextFieldEln o;
-        o = new GuiTextFieldEln(Minecraft.getMinecraft().fontRenderer,
+        o = new GuiTextFieldEln(Minecraft.getMinecraft().fontRendererObj,
             screen.width / 2 - xSize / 2 + x, screen.height / 2 - ySize / 2 + y, width, 12, this);
         objectList.add(o);
         return o;
@@ -188,7 +188,7 @@ public class GuiHelper {
     }
 
     public void drawString(int x, int y, int color, String str) {
-        Minecraft.getMinecraft().fontRenderer.drawString(str, screen.width / 2 - xSize / 2 + x, screen.height / 2 - ySize / 2 + y, color);
+        Minecraft.getMinecraft().fontRendererObj.drawString(str, screen.width / 2 - xSize / 2 + x, screen.height / 2 - ySize / 2 + y, color);
     }
 
     public void draw2(int x, int y) {

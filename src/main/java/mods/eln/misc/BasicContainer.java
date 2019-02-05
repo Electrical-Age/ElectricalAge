@@ -4,6 +4,7 @@ import mods.eln.gui.ISlotSkin.SlotSkin;
 import mods.eln.gui.SlotWithSkin;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -179,7 +180,7 @@ public class BasicContainer extends Container {
     }
 
     @Override
-    public ItemStack slotClick(int arg0, int arg1, int arg2, EntityPlayer arg3) {
+    public ItemStack slotClick(int arg0, int arg1, ClickType type, EntityPlayer arg3) {
         if (arg0 >= this.inventorySlots.size()) {
             System.out.println("Damned !!! What happen ?");
             Utils.addChatMessage(arg3, "Damn! Sorry, this is a debug");
@@ -188,6 +189,6 @@ public class BasicContainer extends Container {
             Utils.addChatMessage(arg3, "Thanks :D");
             return null;
         }
-        return super.slotClick(arg0, arg1, arg2, arg3);
+        return super.slotClick(arg0, arg1, type, arg3);
     }
 }

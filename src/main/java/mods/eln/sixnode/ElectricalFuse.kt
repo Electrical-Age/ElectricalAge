@@ -139,7 +139,7 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
         }
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?) {
+    override fun writeToNBT(nbt: NBTTagCompound?): NBTTagCompound? {
         super.writeToNBT(nbt)
         if (nbt != null) {
             front.writeToNBT(nbt, "front")
@@ -152,6 +152,7 @@ class ElectricalFuseHolderElement(sixNode: SixNode, side: Direction, descriptor:
 
             nbt.setDouble("T", T)
         }
+        return nbt
     }
 
     override fun getElectricalLoad(lrdu: LRDU?): ElectricalLoad? = when (lrdu) {

@@ -295,9 +295,10 @@ public class TransformerElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setBoolean("isIsolated", isIsolator);
+        return nbt;
     }
 
     @Override

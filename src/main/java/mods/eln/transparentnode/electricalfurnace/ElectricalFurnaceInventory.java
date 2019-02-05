@@ -5,6 +5,7 @@ import mods.eln.node.transparent.TransparentNodeElement;
 import mods.eln.node.transparent.TransparentNodeElementInventory;
 import mods.eln.node.transparent.TransparentNodeElementRender;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 
 public class ElectricalFurnaceInventory extends TransparentNodeElementInventory {
 
@@ -17,8 +18,8 @@ public class ElectricalFurnaceInventory extends TransparentNodeElementInventory 
     }
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int side) {
-        switch (Direction.fromIntMinecraftSide(side)) {
+    public int[] getSlotsForFace(EnumFacing side) {
+        switch (Direction.fromFacing(side)) {
             case YP:
                 return new int[]{ElectricalFurnaceElement.inSlotId};
             default:
@@ -28,8 +29,8 @@ public class ElectricalFurnaceInventory extends TransparentNodeElementInventory 
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, int side) {
-        switch (Direction.fromIntMinecraftSide(side)) {
+    public boolean canInsertItem(int var1, ItemStack var2, EnumFacing side) {
+        switch (Direction.fromFacing(side)) {
             case YP:
                 return true;
             default:
@@ -38,8 +39,8 @@ public class ElectricalFurnaceInventory extends TransparentNodeElementInventory 
     }
 
     @Override
-    public boolean canExtractItem(int var1, ItemStack var2, int side) {
-        switch (Direction.fromIntMinecraftSide(side)) {
+    public boolean canExtractItem(int var1, ItemStack var2, EnumFacing side) {
+        switch (Direction.fromFacing(side)) {
             case YP:
                 return false;
             default:

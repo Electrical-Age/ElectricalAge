@@ -589,9 +589,10 @@ public class Equation implements IValue, INBTTReady {
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
+        public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
 
             nbt.setDouble(str + "counter", counter);
+            return nbt;
         }
 
         @Override
@@ -628,8 +629,9 @@ public class Equation implements IValue, INBTTReady {
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
+        public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
             nbt.setDouble(str + "counter", counter);
+            return nbt;
         }
 
         @Override
@@ -666,8 +668,9 @@ public class Equation implements IValue, INBTTReady {
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
+        public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
             nbt.setDouble(str + "counter", counter);
+            return nbt;
         }
 
         @Override
@@ -706,9 +709,10 @@ public class Equation implements IValue, INBTTReady {
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
+        public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
             nbt.setDouble(str + "old", old);
             nbt.setDouble(str + "value", value);
+            return nbt;
         }
 
         @Override
@@ -748,10 +752,11 @@ public class Equation implements IValue, INBTTReady {
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
+        public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
             nbt.setDouble(str + "iStack", iStack);
             nbt.setDouble(str + "oldError", oldError);
             nbt.setDouble(str + "dValue", dValue);
+            return nbt;
         }
 
         @Override
@@ -860,8 +865,9 @@ public class Equation implements IValue, INBTTReady {
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
+        public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
             nbt.setBoolean(str + "state", state);
+            return nbt;
         }
 
         @Override
@@ -898,8 +904,9 @@ public class Equation implements IValue, INBTTReady {
         }
 
         @Override
-        public void writeToNBT(NBTTagCompound nbt, String str) {
+        public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
             nbt.setDouble(str + "state", state);
+            return nbt;
         }
 
         @Override
@@ -1028,13 +1035,14 @@ public class Equation implements IValue, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
-        if (!isValid()) return;
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
+        if (!isValid()) return nbt;
         int idx = 0;
         for (INBTTReady o : nbtList) {
             o.writeToNBT(nbt, str + idx);
             idx++;
         }
+        return nbt;
     }
 
     public int getOperatorCount() {

@@ -37,6 +37,7 @@ public abstract class TransparentNodeElementRender {
 
     }
 
+    //TODO: ITEM RENDERING
     public void drawEntityItem(EntityItem entityItem, double x, double y, double z, float roty, float scale) {/*
         if(entityItem == null) return;
 		
@@ -209,7 +210,7 @@ public abstract class TransparentNodeElementRender {
 
         for (LRDU lrdu : LRDU.values()) {
             Utils.setGlColorFromDye(renderPreProcess.otherdry[lrdu.toInt()]);
-            if (connection.get(lrdu) == false) continue;
+            if (!connection.get(lrdu)) continue;
             maskTempDraw.set(1 << lrdu.toInt());
             CableRender.drawCable(render, maskTempDraw, renderPreProcess);
         }
@@ -229,7 +230,7 @@ public abstract class TransparentNodeElementRender {
     }
 
     protected Coordinate coordinate() {
-        return new Coordinate(tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord, tileEntity.getWorldObj());
+        return new Coordinate(tileEntity.getPos(), tileEntity.getWorld());
     }
 
 

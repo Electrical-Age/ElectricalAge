@@ -10,6 +10,7 @@ import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxElement;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -43,9 +44,9 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
                 coord.move(element.front);
                 distance++;
                 Block block;
-                if (element.placeBoot || element.rxCoord == null || coord.world().blockExists(coord.x, coord.y, coord.z)) {
-                    //	a++;
-                    if ((block = coord.getBlock()) != Blocks.air && block != Blocks.fire) {
+                if (element.placeBoot || element.rxCoord == null || coord.world().blockExists(coord.pos.getX(), coord.pos.getY(), coord.pos.getZ())) {
+                    block = coord.world().getBlockState(coord.pos).getBlock();
+                    if ((coord.world().isAirBlock(coord.pos) && block != Blocks.FIRE)) {
                         if (block == Eln.transparentNodeBlock
                             && (node = (TransparentNode) NodeManager.instance.getNodeFromCoordinate(coord)) != null
                             && (node.element instanceof ElectricalAntennaRxElement)) {
@@ -76,10 +77,15 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
                 element.txDisconnect();
                 Coordinate coordCpy = new Coordinate(coord);
                 coordCpy.move(element.front.getInverse());
+                BlockPos pos = coordCpy.pos;
+                int x = pos.getX();
+                int y = pos.getY();
+                int z = pos.getZ();
                 if (element.powerResistor.getP() > 50) {
-                    if (coordCpy.world().blockExists(coordCpy.x, coordCpy.y, coordCpy.z)) {
-                        if (coordCpy.getBlock() == Blocks.air) {
-                            coordCpy.world().setBlock(coordCpy.x, coordCpy.y, coordCpy.z, Blocks.fire);
+                    //TODO: Check if blockExists
+                    if (coordCpy.world().blockExists(x, y, z)) {
+                        if (coordCpy.world().isAirBlock(pos)) {
+                            coordCpy.world().setBlockState(pos, Blocks.FIRE.getDefaultState());
                         }
                     }
                 }

@@ -6,6 +6,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.text.ITextComponent;
 
 public class SixNodeElementInventory implements IInventory, INBTTReady {
     SixNodeElementRender sixnodeRender = null;
@@ -63,9 +64,8 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
         return stack;
     }
 
-
     @Override
-    public ItemStack getStackInSlotOnClosing(int slot) {
+    public ItemStack removeStackFromSlot(int slot) {
         ItemStack stack = getStackInSlot(slot);
         if (stack != null) {
             setInventorySlotContents(slot, null);
@@ -90,7 +90,7 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
 
 
     @Override
-    public String getInventoryName() {
+    public String getName() {
         return "tco.SixNodeInventory";
     }
 
@@ -121,19 +121,16 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
 */
     }
 
-
     @Override
-    public void openInventory() {
-
+    public void openInventory(EntityPlayer player) {
 
     }
 
-
     @Override
-    public void closeInventory() {
-
+    public void closeInventory(EntityPlayer player) {
 
     }
+
 
     @Override
     public void markDirty() {
@@ -149,9 +146,9 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
 
-        Utils.writeToNBT(nbt, str, this);
+        return Utils.writeToNBT(nbt, str, this);
     }
 
 
@@ -162,9 +159,34 @@ public class SixNodeElementInventory implements IInventory, INBTTReady {
     }
 
     @Override
-    public boolean hasCustomInventoryName() {
+    public int getField(int id) {
+        return 0;
+    }
+
+    @Override
+    public void setField(int id, int value) {
+
+    }
+
+    @Override
+    public int getFieldCount() {
+        return 0;
+    }
+
+    @Override
+    public void clear() {
+
+    }
+
+    @Override
+    public boolean hasCustomName() {
 
         return false;
+    }
+
+    @Override
+    public ITextComponent getDisplayName() {
+        return null;
     }
 
 

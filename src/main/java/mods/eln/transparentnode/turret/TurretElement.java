@@ -98,7 +98,7 @@ public class TurretElement extends TransparentNodeElement {
 
     public void shoot() {
         Coordinate lightSourceCoordinate = new Coordinate();
-        lightSourceCoordinate.copyFrom(coordonate());
+        lightSourceCoordinate.copyFrom(coordinate());
         lightSourceCoordinate.move(front);
         LightBlockEntity.addLight(lightSourceCoordinate, 25, 2);
         if (simulation.shoot()) needPublish();
@@ -151,7 +151,7 @@ public class TurretElement extends TransparentNodeElement {
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side,
                                     float vx, float vy, float vz) {
-        return acceptingInventory.take(entityPlayer.getCurrentEquippedItem());
+        return acceptingInventory.take(entityPlayer.getHeldItemMainhand());
     }
 
     @Override
@@ -173,11 +173,12 @@ public class TurretElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setDouble("chargePower", chargePower);
         nbt.setBoolean("filterIsSpare", filterIsSpare);
         nbt.setDouble("energyBuffer", energyBuffer);
+        return nbt;
     }
 
     @Override

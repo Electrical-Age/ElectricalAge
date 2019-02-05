@@ -67,7 +67,7 @@ public class NodeManager extends WorldSavedData {
         Utils.println("NodeManager has " + nodesMap.size() + "node");
     }
 
-    public void removeCoordonate(Coordinate c) {
+    public void removeCoordinate(Coordinate c) {
         // nodeArray.remove(node);
         NodeBase n = nodesMap.remove(c);
         if (n != null) nodes.remove(n);
@@ -83,27 +83,49 @@ public class NodeManager extends WorldSavedData {
     public void readFromNBT(NBTTagCompound nbt) {
         int i = 0;
         i++;
-        /*
-		 * for(Object o : Utils.getTags(nbt)) { NBTTagCompound tag = (NBTTagCompound) o; Class nodeClass = UUIDToClass.get(tag.getString("tag")); try { NodeBase node = (NodeBase) nodeClass.getConstructor().newInstance(); node.readFromNBT(tag); addNode(node); node.initializeFromNBT();
-		 * 
-		 * } catch (Exception e) { e.printStackTrace(); }
-		 * 
-		 * }
-		 * 
-		 * 
-		 * 
-		 * for(NodeBase node : nodes){ node.globalBoot(); }
-		 */
+        for(Object o : Utils.getTags(nbt)) {
+            NBTTagCompound tag = (NBTTagCompound) o;
+            Class nodeClass = UUIDToClass.get(tag.getString("tag"));
+            try {
+                NodeBase node = (NodeBase) nodeClass.getConstructor().newInstance();
+                node.readFromNBT(tag);
+                addNode(node);
+                node.initializeFromNBT();
+
+            } catch (Exception e) { e.printStackTrace(); }
+
+        }
+
+        for(NodeBase node : nodes){ node.globalBoot(); }
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
-		/*
-		 * int nodeCounter = 0; for(NodeBase node : nodesmap.values()) { try { if(node.mustBeSaved() == false) continue; NBTTagCompound nbtNode = new NBTTagCompound(); nbtNode.setString("tag", node.getNodeUuid()); node.writeToNBT(nbtNode); nbt.setTag("n" + nodeCounter++, nbtNode); } catch (Exception e) { e.printStackTrace(); }
-		 * 
-		 * }
-		 */
+    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+        return compound;
     }
+
+    /*
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+        int nodeCounter = 0;
+        for(NodeBase node : nodesMap.values()) {
+            try {
+                if(!node.mustBeSaved()) {
+                    continue;
+                }
+                NBTTagCompound nbtNode = new NBTTagCompound();
+                nbtNode.setString("tag", node.getNodeUuid());
+                node.writeToNBT(nbtNode);
+                nbt.setTag("n" + nodeCounter++, nbtNode);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return nbt;
+     }
+     */
+
 
     public NodeBase getNodeFromCoordinate(Coordinate nodeCoordinate) {
         int idx = 0;
@@ -161,7 +183,7 @@ public class NodeManager extends WorldSavedData {
         for (NodeBase node : nodesCopy) {
             try {
                 if (node.mustBeSaved() == false) continue;
-                if (dim != Integer.MIN_VALUE && node.coordinate.dimension != dim) continue;
+                if (dim != Integer.MIN_VALUE && node.coordinate.getDimension() != dim) continue;
                 NBTTagCompound nbtNode = new NBTTagCompound();
                 nbtNode.setString("tag", node.getNodeUuid());
                 node.writeToNBT(nbtNode);
@@ -184,7 +206,7 @@ public class NodeManager extends WorldSavedData {
         Iterator<NodeBase> i = nodes.iterator();
         while (i.hasNext()) {
             NodeBase n = i.next();
-            if (n.coordinate.dimension == dimensionId) {
+            if (n.coordinate.getDimension() == dimensionId) {
                 n.unload();
                 i.remove();
                 nodesMap.remove(n.coordinate);

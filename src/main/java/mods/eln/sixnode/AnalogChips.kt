@@ -159,9 +159,9 @@ open class AnalogChipElement(node: SixNode, side: Direction, sixNodeDescriptor: 
         function.readFromNBT(nbt, "function")
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?) {
+    override fun writeToNBT(nbt: NBTTagCompound?): NBTTagCompound? {
         super.writeToNBT(nbt)
-        function.writeToNBT(nbt, "function")
+        return function.writeToNBT(nbt, "function")
     }
 
     override fun getThermalLoad(lrdu: LRDU?): ThermalLoad? = null
@@ -211,7 +211,9 @@ abstract class AnalogFunction : INBTTReady {
     )
 
     override fun readFromNBT(nbt: NBTTagCompound?, str: String?) {}
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {}
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
+        return nbt
+    }
 }
 
 class OpAmp : AnalogFunction() {
@@ -253,11 +255,12 @@ class PIDRegulator : AnalogFunction() {
         errorIntegral = nbt?.getDouble("errorIntegral") ?: 0.0
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
         nbt?.setDouble("Kp", Kp)
         nbt?.setDouble("Ki", Ki)
         nbt?.setDouble("Kd", Kd)
         nbt?.setDouble("errorIntegral", errorIntegral)
+        return nbt
     }
 
     override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
@@ -401,8 +404,9 @@ open class VoltageControlledSawtoothOscillator : AnalogFunction() {
         out = nbt?.getDouble("out") ?: 0.0
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
         nbt?.setDouble("out", out)
+        return nbt
     }
 }
 
@@ -424,8 +428,9 @@ class Amplifier : AnalogFunction() {
         gain = nbt?.getDouble("gain") ?: 1.0
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
         nbt?.setDouble("gain", gain)
+        return nbt
     }
 
     override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
@@ -545,10 +550,11 @@ class SummingUnit : AnalogFunction() {
         }
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
         for (i in gains.indices) {
             nbt?.setDouble("gain$i", gains[i])
         }
+        return nbt
     }
 
     override fun getWaila(inputs: Array<Double?>, output: Double): MutableMap<String, String> {
@@ -668,9 +674,10 @@ class SampleAndHold : AnalogFunction() {
         value = nbt?.getDouble("value") ?: 0.0
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
         nbt?.setBoolean("clock", clock)
         nbt?.setDouble("value", value)
+        return nbt
     }
 }
 
@@ -694,11 +701,12 @@ class Filter: AnalogFunction() {
         }
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
+    override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
         nbt?.apply {
             setDouble("feedback", feedback)
             setDouble("output", output)
         }
+        return nbt
     }
 }
 

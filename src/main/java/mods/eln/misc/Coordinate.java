@@ -110,11 +110,12 @@ public class Coordinate implements INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setInteger(str + "x", pos.getX());
         nbt.setInteger(str + "y", pos.getY());
         nbt.setInteger(str + "z", pos.getZ());
         nbt.setInteger(str + "d", dimension);
+        return nbt;
     }
 
     @Override
@@ -205,4 +206,18 @@ public class Coordinate implements INBTTReady {
     public IBlockState getBlockState() {
         return world().getBlockState(pos);
     }
+
+    public Block getBlock() { return getBlockState().getBlock(); }
+
+    public int getMeta(){
+        return Utils.getMetaFromPos(this);
+    }
+
+    public Coordinate subtract(Coordinate b) {
+        return newWithOffset(-b.pos.getX(), -b.pos.getY(), -b.pos.getZ());
+    }
+    public Coordinate negate() {
+        return new Coordinate(-pos.getX(), -pos.getY(), -pos.getZ(), dimension);
+    }
+
 }

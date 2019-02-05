@@ -67,7 +67,7 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
 
             int maxRangeHalf = ((int) element.descriptor.maxRange - 1) / 2;
             Coordinate detectionBBCenter = new Coordinate();
-            detectionBBCenter.copyFrom(element.getCoordonate());
+            detectionBBCenter.copyFrom(element.getCoordinate());
             switch (element.side) {
                 case XP:
                     detectionBBCenter.pos.add( -maxRangeHalf, 0, 0);
@@ -102,7 +102,7 @@ public class ElectricalFireDetectorSlowProcess implements IProcess {
                         if (block.getClass() == BlockFire.class) {
                             fireDetected = true;
 
-                            Coordinate coord = element.getCoordonate();
+                            Coordinate coord = element.getCoordinate();
                             List<Block> blockList = Utils.traceRay(coord.world(), coord.pos.getX() + 0.5, coord.pos.getY() + 0.5, coord.pos.getZ() + 0.5,
                                 detectionBBCenter.pos.getX() + dx + 0.5, detectionBBCenter.pos.getY() + dy + 0.5, detectionBBCenter.pos.getZ() + dz + 0.5);
 

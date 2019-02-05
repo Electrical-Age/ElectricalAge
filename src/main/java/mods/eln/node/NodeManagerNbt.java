@@ -19,7 +19,8 @@ public class NodeManagerNbt extends WorldSavedData {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
-        //NodeManager.instance.saveToNbt(nbt, Integer.MIN_VALUE);
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+        NodeManager.instance.saveToNbt(nbt, Integer.MIN_VALUE);
+        return nbt;
     }
 }

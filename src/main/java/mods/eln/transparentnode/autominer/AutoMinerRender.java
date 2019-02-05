@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.math.BlockPos;
 import org.lwjgl.opengl.GL11;
 
 import java.io.DataInputStream;
@@ -127,7 +128,7 @@ public class AutoMinerRender extends TransparentNodeElementRender {
             GL11.glScalef(1 / 128f, -1 / 128f, 1);
             int idx = 0;
             for (String log : logs) {
-                Minecraft.getMinecraft().fontRenderer.drawString(idx == 0 ? Color.COLOR_BRIGHT_GREEN + "> " +
+                Minecraft.getMinecraft().fontRendererObj.drawString(idx == 0 ? Color.COLOR_BRIGHT_GREEN + "> " +
                     log.substring(2) : Color.COLOR_DARK_GREEN + log, 80, 1 + idx, 0xFFD0D0D0 /*No effect...*/);
                 idx += 8;
             }
@@ -192,9 +193,10 @@ public class AutoMinerRender extends TransparentNodeElementRender {
                         camAlpha = (float) (Math.PI / 2);
                         break;
                 }
-                render.generate(this.tileEntity.getWorldObj(), tileEntity.xCoord + 0.5,
-                    tileEntity.yCoord + 0.5 - (Math.max(0, pipeLength - 5)),
-                    tileEntity.zCoord + 0.5, -(float) (Math.PI * 1 / 2) + camAlpha, -(float) (Math.PI / 2));
+                BlockPos pos = tileEntity.getPos();
+                render.generate(this.tileEntity.getWorld(), pos.getX() + 0.5,
+                    pos.getY() + 0.5 - (Math.max(0, pipeLength - 5)),
+                    pos.getZ() + 0.5, -(float) (Math.PI * 1 / 2) + camAlpha, -(float) (Math.PI / 2));
             }
         }
 

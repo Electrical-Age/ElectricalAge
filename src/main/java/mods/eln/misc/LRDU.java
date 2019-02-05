@@ -235,8 +235,9 @@ public enum LRDU {
         return Left;
     }
 
-    public void writeToNBT(NBTTagCompound nbt, String name) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String name) {
         nbt.setByte(name, (byte) toInt());
+        return nbt;
     }
 
     static public LRDU readFromNBT(NBTTagCompound nbt, String name) {

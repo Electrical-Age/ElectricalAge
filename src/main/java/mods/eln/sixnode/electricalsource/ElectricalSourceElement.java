@@ -57,11 +57,12 @@ public class ElectricalSourceElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("color", (byte) (color + (colorCare << 4)));
 
         nbt.setDouble("voltage", voltageSource.getU());
+        return nbt;
     }
 
     @Override
@@ -125,7 +126,7 @@ public class ElectricalSourceElement extends SixNodeElement {
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         if (onBlockActivatedRotate(entityPlayer)) return true;
-        ItemStack currentItemStack = entityPlayer.getCurrentEquippedItem();
+        ItemStack currentItemStack = entityPlayer.getHeldItemMainhand();
         if (currentItemStack != null) {
             Item item = currentItemStack.getItem();
 

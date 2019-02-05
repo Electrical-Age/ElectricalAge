@@ -104,7 +104,7 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
             if (sleepTimer < 0) {
                 sleepTimer += Utils.rand(1.2, 2);
 
-                IWirelessSignalSpot spot = WirelessUtils.buildSpot(getCoordonate(), null, 0);
+                IWirelessSignalSpot spot = WirelessUtils.buildSpot(getCoordinate(), null, 0);
                 WirelessUtils.getTx(spot, txSet, txStrength);
             }
 
@@ -456,7 +456,7 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setInteger("station", station);
         nbt.setString("name", name);
@@ -476,6 +476,7 @@ public class ModbusRtuElement extends SixNodeElement implements IModbusSlave {
             rx.writeToNBT(nbt, "rx" + idx);
             idx++;
         }
+        return nbt;
     }
 
     @Override

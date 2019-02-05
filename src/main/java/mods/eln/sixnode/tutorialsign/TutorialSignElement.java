@@ -129,9 +129,10 @@ public class TutorialSignElement extends SixNodeElement {
 
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setString("baliseName", baliseName);
+        return nbt;
     }
 
     @Override

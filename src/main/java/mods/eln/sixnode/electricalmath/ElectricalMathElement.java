@@ -224,10 +224,10 @@ public class ElectricalMathElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setString("expression", expression);
-        equation.writeToNBT(nbt, "equation");
+        return equation.writeToNBT(nbt, "equation");
     }
 
     @Override

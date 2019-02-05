@@ -121,9 +121,9 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
     }
 
 
-    public Coordinate getWaterCoordonate(World w) {
+    public Coordinate getWaterCoordinate(World w) {
         Coordinate coord = new Coordinate(waterCoord);
-        coord.setDimension(w.provider.dimensionId);
+        coord.setDimension(w.provider.getDimension());
         return coord;
     }
 
@@ -141,8 +141,8 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
     public boolean checkCanPlaceWater(Coordinate coord, Direction front) {
         Coordinate water = new Coordinate(waterCoord);
         water.applyTransformation(front, coord);
-        if (coord.doesBlockExist() == false) return true;
-        if (water.getBlock() == Blocks.air || Utils.isWateryEnoughForTurbine(water)) return true;
+        if (!coord.doesBlockExist()) return true;
+        if (water.world().isAirBlock(water.pos)  || Utils.isWateryEnoughForTurbine(water)) return true;
         return false;
     }
 }

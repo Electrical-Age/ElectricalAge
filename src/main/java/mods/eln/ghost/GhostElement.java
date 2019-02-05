@@ -50,10 +50,11 @@ public class GhostElement implements INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
 
         elementCoordinate.writeToNBT(nbt, str + "elemCoord");
         observatorCoordinate.writeToNBT(nbt, str + "obserCoord");
         nbt.setInteger(str + "UUID", UUID);
+        return nbt;
     }
 }

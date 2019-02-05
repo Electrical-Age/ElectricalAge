@@ -156,14 +156,15 @@ public class SolarPanelElement extends TransparentNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return descriptor.canRotate && inventory.take(entityPlayer.getCurrentEquippedItem(), this, true, false);
+        return descriptor.canRotate && inventory.take(entityPlayer.getHeldItemMainHand(), this, true, false);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         powerSource.writeToNBT(nbt, "powerSource");
         nbt.setDouble("panelAlpha", panelAlpha);
+        return nbt;
     }
 
     @Override

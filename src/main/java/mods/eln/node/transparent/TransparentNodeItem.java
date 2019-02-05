@@ -7,8 +7,13 @@ import mods.eln.misc.Direction;
 import mods.eln.misc.Utils;
 import mods.eln.node.NodeBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class TransparentNodeItem extends GenericItemBlockUsingDamage<TransparentNodeDescriptor> {
@@ -22,22 +27,20 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 
 
     @Override
-    public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ, int metadata) {
+    public boolean placeBlockAt(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState state) {
         if (world.isRemote) return false;
         TransparentNodeDescriptor descriptor = getDescriptor(stack);
-        Direction direction = Direction.fromIntMinecraftSide(side).getInverse();
+        Direction direction = Direction.fromFacing(side).getInverse();
         Direction front = descriptor.getFrontFromPlace(direction, player);
         int[] v = new int[]{descriptor.getSpawnDeltaX(), descriptor.getSpawnDeltaY(), descriptor.getSpawnDeltaZ()};
         front.rotateFromXN(v);
-        x += v[0];
-        y += v[1];
-        z += v[2];
+        pos = pos.add(v[0], v[1], v[2]);
 
-        Block bb = world.getBlock(x, y, z);
-        if (bb.isReplaceable(world, x, y, z)) ;
+        Block bb = world.getBlockState(pos).getBlock();
+        if (bb.isReplaceable(world, pos)) ;
         //if(world.getBlock(x, y, z) != Blocks.air) return false;
 
-        Coordinate coord = new Coordinate(x, y, z, world);
+        Coordinate coord = new Coordinate(pos, world);
 
 
         String error;
@@ -51,9 +54,9 @@ public class TransparentNodeItem extends GenericItemBlockUsingDamage<Transparent
 
         TransparentNode node = new TransparentNode();
         node.onBlockPlacedBy(coord, front, player, stack);
-
-        world.setBlock(x, y, z, Block.getBlockFromItem(this), node.getBlockMetadata(), 0x03);//caca1.5.1
-        ((NodeBlock) Block.getBlockFromItem(this)).onBlockPlacedBy(world, x, y, z, direction, player, metadata);
+        //TODO: Probably use getStateForPlacement instead
+        world.setBlockState(pos, Block.getBlockFromItem(this).getStateFromMeta(node.getBlockMetadata() & 0x03));//caca1.5.1
+        ((NodeBlock) Block.getBlockFromItem(this)).onBlockPlacedBy(world, pos, direction, player, state);
 
 
         node.checkCanStay(true);

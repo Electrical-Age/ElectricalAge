@@ -45,7 +45,7 @@ abstract public class GridElement extends TransparentNodeElement {
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
         // Check if user is holding an appropriate tool.
-        final ItemStack stack = entityPlayer.getCurrentEquippedItem();
+        final ItemStack stack = entityPlayer.getHeldItemMainhand();
         final GenericItemBlockUsingDamageDescriptor itemDesc = GenericItemBlockUsingDamageDescriptor.getDescriptor(stack);
         if (itemDesc instanceof ElectricalCableDescriptor) {
             return onTryGridConnect(entityPlayer, stack, (ElectricalCableDescriptor) itemDesc, side);
@@ -69,9 +69,9 @@ abstract public class GridElement extends TransparentNodeElement {
         }
         if (other == null || other == this) {
             Utils.addChatMessage(entityPlayer, "Setting starting point");
-            pending.put(uuid, Pair.of(this.coordonate(), side));
+            pending.put(uuid, Pair.of(this.coordinate(), side));
         } else {
-            final double distance = other.coordonate().trueDistanceTo(this.coordonate());
+            final double distance = other.coordinate().trueDistanceTo(this.coordinate());
             final int cableLength = (int) Math.ceil(distance);
             final int range = Math.min(connectRange, other.connectRange);
             if (stack.stackSize < distance) {
@@ -140,7 +140,7 @@ abstract public class GridElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
 
         Integer i = 0;
@@ -149,6 +149,7 @@ abstract public class GridElement extends TransparentNodeElement {
             link.writeToNBT(Utils.newNbtTagCompund(gridLinks, i.toString()), "");
             i++;
         }
+        return nbt;
     }
 
     @Override
@@ -212,10 +213,10 @@ abstract public class GridElement extends TransparentNodeElement {
             for (GridLink link : gridLinkList) {
                 Coordinate vec = link.a.subtract(link.b);
                 // Angles 180 degrees apart are equivalent.
-                if (vec.z < 0)
+                if (vec.pos.getZ() < 0)
                     vec = vec.negate();
-                double h = Math.sqrt(vec.x * vec.x + vec.z * vec.z);
-                angles[i++] = Math.acos(vec.x / h);
+                double h = Math.sqrt(vec.pos.getX() * vec.pos.getX() + vec.pos.getZ() * vec.pos.getZ());
+                angles[i++] = Math.acos(vec.pos.getX() / h);
             }
             // This could probably be optimised with a bit of math, but w.e.
             double optAngle = 0;
@@ -246,7 +247,7 @@ abstract public class GridElement extends TransparentNodeElement {
             // Check for which ones it's this one.
             ArrayList<GridLink> ourLinks = new ArrayList<GridLink>();
             for (GridLink link : gridLinkList) {
-                if (link.a.equals(coordonate())/* && link.connected*/) {
+                if (link.a.equals(coordinate())/* && link.connected*/) {
                     ourLinks.add(link);
                 }
             }
@@ -265,10 +266,10 @@ abstract public class GridElement extends TransparentNodeElement {
                 Coordinate offset = link.b.subtract(link.a);
                 for (int i = 0; i < 2; i++) {
                     final Vec3d start = getCablePoint(ourSide, i);
-                    start.rotateAroundY((float) Math.toRadians(idealRenderingAngle));
+                    start.rotateYaw((float) Math.toRadians(idealRenderingAngle));
                     Vec3d end = target.getCablePoint(theirSide, i);
-                    end.rotateAroundY((float) Math.toRadians(target.idealRenderingAngle));
-                    end = end.addVector(offset.x, offset.y, offset.z);
+                    end.rotateYaw((float) Math.toRadians(target.idealRenderingAngle));
+                    end = end.addVector(offset.pos.getX(), offset.pos.getY(), offset.pos.getZ());
                     writeVec(stream, start);
                     writeVec(stream, end);
                 }

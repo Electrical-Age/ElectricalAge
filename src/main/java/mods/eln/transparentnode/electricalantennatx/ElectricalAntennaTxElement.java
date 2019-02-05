@@ -155,7 +155,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         if (rxCoord == null)
             nbt.setBoolean("rxCoordValid", false);
@@ -163,7 +163,7 @@ public class ElectricalAntennaTxElement extends TransparentNodeElement {
             nbt.setBoolean("rxCoordValid", true);
             rxCoord.writeToNBT(nbt, "rxCoord");
         }
-        rot.writeToNBT(nbt, "rot");
+        return rot.writeToNBT(nbt, "rot");
     }
 
     @Override

@@ -66,7 +66,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         s.play();
     }
 
-    public Coordinate getCoordonate() {
+    public Coordinate getCoordinate() {
         return sixNode.coordinate;
     }
 
@@ -291,7 +291,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
 
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 
         int idx;
 
@@ -331,6 +331,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
             if (process instanceof INBTTReady)
                 ((INBTTReady) process).writeToNBT(nbt, "");
         }
+        return nbt;
 
     }
 
@@ -367,7 +368,7 @@ public abstract class SixNodeElement implements GhostObserver, IPlayer, INodeEle
         return false;
     }
 
-    public Coordinate getGhostObserverCoordonate() {
+    public Coordinate getGhostObserverCoordinate() {
         return sixNode.coordinate;
 
     }

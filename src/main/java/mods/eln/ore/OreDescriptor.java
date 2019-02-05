@@ -1,5 +1,7 @@
 package mods.eln.ore;
 
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraftforge.fml.common.IWorldGenerator;
 import mods.eln.Eln;
 import mods.eln.generic.GenericItemBlockUsingDamageDescriptor;
@@ -51,7 +53,7 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
 
     @Override
     public void generate(Random random, int chunkX, int chunkZ, World world,
-                         IChunkProvider chunkGenerator, IChunkProvider chunkProvider) {
+                         IChunkGenerator chunkGenerator, IChunkProvider chunkProvider) {
         if (world.provider.isSurfaceWorld()) {
             generateSurface(random, chunkX * 16, chunkZ * 16, world); //This makes it gen overworld (the *16 is important)
         }
@@ -65,7 +67,7 @@ public class OreDescriptor extends GenericItemBlockUsingDamageDescriptor impleme
             int posY = spawnHeightMin + random.nextInt(spawnHeightMax - spawnHeightMin); //Y coordinate less than 40 to gen at
             int posZ = z + random.nextInt(16); //Z coordinate to gen at
             int size = spawnSizeMin + random.nextInt(spawnSizeMax - spawnSizeMin);
-            new WorldGenMinable(Eln.oreBlock, metadata, size, Blocks.stone).generate(w, random, posX, posY, posZ); //The gen call
+            new WorldGenMinable(Eln.oreBlock.getStateFromMeta(metadata), size).generate(w, random, new BlockPos( posX, posY, posZ)); //The gen call
         }
         //}
         //new WorldGenTrees(par1, par2, par3, par4, par5)

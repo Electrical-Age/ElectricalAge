@@ -93,9 +93,9 @@ class JointHubElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
         connectedSides.serialize(stream)
     }
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound? {
         super.writeToNBT(nbt)
-        connectedSides.writeToNBT(nbt, "connectedSides")
+        return connectedSides.writeToNBT(nbt, "connectedSides")
     }
 
     override fun readFromNBT(nbt: NBTTagCompound) {

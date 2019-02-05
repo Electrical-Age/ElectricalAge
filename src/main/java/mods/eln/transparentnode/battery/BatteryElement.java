@@ -198,13 +198,14 @@ public class BatteryElement extends TransparentNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return inventory.take(entityPlayer.getCurrentEquippedItem());
+        return inventory.take(entityPlayer.getHeldItemMainhand());
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         //inventory.writeToNBT(nbt, str + "inv");
+        return nbt;
     }
 
     @Override

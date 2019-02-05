@@ -2,12 +2,18 @@ package mods.eln.generic;
 
 import mods.eln.misc.VoltageLevelColor;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -42,8 +48,8 @@ public class GenericItemUsingDamageDescriptor {
 
     }
 
-    public ItemStack onItemRightClick(ItemStack s, World w, EntityPlayer p) {
-        return s;
+    public ActionResult<ItemStack> onItemRightClick(ItemStack s, World w, EntityPlayer p) {
+        return new ActionResult(EnumActionResult.PASS, s);
     }
 
     public void getSubItems(List list) {
@@ -109,8 +115,8 @@ public class GenericItemUsingDamageDescriptor {
      * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
      * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
      */
-    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float vx, float vy, float vz) {
-        return false;
+    public EnumActionResult onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing facing, float vx, float vy, float vz) {
+        return EnumActionResult.PASS;
     }
 
     // TODO(1.10): Fix item render.
@@ -144,11 +150,11 @@ public class GenericItemUsingDamageDescriptor {
         return nbt;
     }
 
-    public float getStrVsBlock(ItemStack stack, Block block) {
+    public float getStrVsBlock(ItemStack stack, IBlockState state) {
         return 0.2f;
     }
 
-    public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity) {
+    public boolean onBlockDestroyed(ItemStack stack, World w, IBlockState state, BlockPos pos, EntityLivingBase entity) {
         return false;
     }
 

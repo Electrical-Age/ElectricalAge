@@ -38,18 +38,18 @@ public class WailaCache {
             }
         );
 
-    public static LoadingCache<SixNodeCoordonate, SixNodeWailaData> sixNodes = CacheBuilder.newBuilder()
+    public static LoadingCache<SixNodeCoordinate, SixNodeWailaData> sixNodes = CacheBuilder.newBuilder()
         .maximumSize(20)
         .refreshAfterWrite(2, TimeUnit.SECONDS)
         .build(
-            new CacheLoader<SixNodeCoordonate, SixNodeWailaData>() {
-                public SixNodeWailaData load(SixNodeCoordonate key) throws Exception {
+            new CacheLoader<SixNodeCoordinate, SixNodeWailaData>() {
+                public SixNodeWailaData load(SixNodeCoordinate key) throws Exception {
                     Eln.elnNetwork.sendToServer(new SixNodeWailaRequestPacket(key.getCoord(), key.getSide()));
                     return null;
                 }
 
                 @Override
-                public ListenableFuture<SixNodeWailaData> reload(SixNodeCoordonate key,
+                public ListenableFuture<SixNodeWailaData> reload(SixNodeCoordinate key,
                                                                  SixNodeWailaData oldValue) throws Exception {
                     load(key);
                     return Futures.immediateFuture(oldValue);

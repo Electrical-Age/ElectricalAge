@@ -6,12 +6,14 @@ import mods.eln.item.electricalinterface.IItemEnergyBattery;
 import mods.eln.misc.Utils;
 import mods.eln.misc.UtilsClient;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -49,8 +51,8 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
     }
 
     @Override
-    public boolean onBlockDestroyed(ItemStack stack, World w, Block block, int x, int y, int z, EntityLivingBase entity) {
-        if (getStrVsBlock(stack, block) == strengthOn) {
+    public boolean onBlockDestroyed(ItemStack stack, World w, IBlockState state, BlockPos pos, EntityLivingBase entity) {
+        if (getStrVsBlock(stack, state) == strengthOn) {
             double e = getEnergy(stack) - energyPerBlock;
             if (e < 0) e = 0;
             setEnergy(stack, e);
@@ -60,7 +62,7 @@ public class ElectricalTool extends GenericItemUsingDamageDescriptor implements 
     }
 
     // public static final Block[] blocksEffectiveAgainst = new Block[] {Block.cobblestone, Block.stoneDoubleSlab, Block.stoneSingleSlab, Block.stone, Block.sandStone, Block.cobblestoneMossy, Block.oreIron, Block.blockIron, Block.oreCoal, Block.blockGold, Block.oreGold, Block.oreDiamond, Block.blockDiamond, Block.ice, Block.netherrack, Block.oreLapis, Block.blockLapis, Block.oreRedstone, Block.oreRedstoneGlowing, Block.rail, Block.railDetector, Block.railPowered, Block.railActivator};
-    public static final Block[] blocksEffectiveAgainst = new Block[]{Blocks.grass, Blocks.dirt, Blocks.sand, Blocks.gravel, Blocks.snow, Blocks.snow, Blocks.clay, Blocks.farmland, Blocks.soul_sand, Blocks.mycelium};
+    public static final Block[] blocksEffectiveAgainst = new Block[]{Blocks.GRASS, Blocks.DIRT, Blocks.SAND, Blocks.GRAVEL, Blocks.SNOW, Blocks.CLAY, Blocks.FARMLAND, Blocks.SOUL_SAND, Blocks.MYCELIUM};
 
     //@Override
     //public abstract float getStrVsBlock(ItemStack stack, Block block);

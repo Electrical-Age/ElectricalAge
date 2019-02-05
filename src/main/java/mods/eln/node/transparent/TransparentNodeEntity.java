@@ -15,6 +15,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -25,6 +26,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+
 
 public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInventory { // boolean[] syncronizedSideEnable = new boolean[6];
     TransparentNodeElementRender elementRender = null;
@@ -111,7 +113,7 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
         return elementRender.cameraDrawOptimisation();
     }
 
-    public int getDamageValue(World world, int x, int y, int z) {
+    public int getDamageValue(World world, BlockPos pos) {
         if (world.isRemote) {
             return elementRenderId;
         }
@@ -214,8 +216,8 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     }
 
     @Override
-    public ItemStack getStackInSlotOnClosing(int var1) {
-        return getSidedInventory().getStackInSlotOnClosing(var1);
+    public ItemStack removeStackFromSlot(int var1) {
+        return getSidedInventory().removeStackFromSlot(var1);
     }
 
     @Override
@@ -224,13 +226,13 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     }
 
     @Override
-    public String getInventoryName() {
-        return getSidedInventory().getInventoryName();
+    public String getName() {
+        return getSidedInventory().getName();
     }
 
     @Override
-    public boolean hasCustomInventoryName() {
-        return getSidedInventory().hasCustomInventoryName();
+    public boolean hasCustomName() {
+        return getSidedInventory().hasCustomName();
     }
 
     @Override
@@ -244,14 +246,12 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     }
 
     @Override
-    public void openInventory() {
-        getSidedInventory().openInventory();
+    public void openInventory(EntityPlayer var1) {
+        getSidedInventory().openInventory(var1);
     }
 
     @Override
-    public void closeInventory() {
-        getSidedInventory().closeInventory();
-    }
+    public void closeInventory(EntityPlayer var1) { getSidedInventory().closeInventory(var1); }
 
     @Override
     public boolean isItemValidForSlot(int var1, ItemStack var2) {
@@ -259,17 +259,37 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     }
 
     @Override
-    public int[] getAccessibleSlotsFromSide(int var1) {
-        return getSidedInventory().getAccessibleSlotsFromSide(var1);
+    public int getField(int id) {
+        return 0;
     }
 
     @Override
-    public boolean canInsertItem(int var1, ItemStack var2, int var3) {
+    public void setField(int id, int value) {
+
+    }
+
+    @Override
+    public int getFieldCount() {
+        return 0;
+    }
+
+    @Override
+    public void clear() {
+
+    }
+
+    @Override
+    public int[] getSlotsForFace(EnumFacing var1) {
+        return getSidedInventory().getSlotsForFace(var1);
+    }
+
+    @Override
+    public boolean canInsertItem(int var1, ItemStack var2, EnumFacing var3) {
         return getSidedInventory().canInsertItem(var1, var2, var3);
     }
 
     @Override
-    public boolean canExtractItem(int var1, ItemStack var2, int var3) {
+    public boolean canExtractItem(int var1, ItemStack var2, EnumFacing var3) {
         return getSidedInventory().canExtractItem(var1, var2, var3);
     }
 }

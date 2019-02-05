@@ -69,12 +69,12 @@ public class TransparentNode extends Node {
 
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(Utils.newNbtTagCompund(nbt, "node"));
 
         nbt.setShort("eid", (short) elementId);
 
-        element.writeToNBT(Utils.newNbtTagCompund(nbt, "element"));
+        return element.writeToNBT(Utils.newNbtTagCompund(nbt, "element"));
 
     }
 

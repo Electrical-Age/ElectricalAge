@@ -47,9 +47,10 @@ public class RcRcInterpolator implements INBTTReady {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt, String str) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt, String str) {
         nbt.setFloat(str + "c1", c1);
         nbt.setFloat(str + "c2", c2);
         nbt.setFloat(str + "target", target);
+        return nbt;
     }
 }

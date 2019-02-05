@@ -98,7 +98,7 @@ public class AutoMinerElement extends TransparentNodeElement {
         lightCoordinate.applyTransformation(front, node.coordinate);
 
         int idx = 0;
-        for (Coordinate c : descriptor.getPowerCoordonate(node.coordinate.world())) {
+        for (Coordinate c : descriptor.getPowerCoordinate(node.coordinate.world())) {
             AutoMinerPowerNode n = new AutoMinerPowerNode();
             n.setElement(this);
             c.applyTransformation(front, node.coordinate);
@@ -133,7 +133,7 @@ public class AutoMinerElement extends TransparentNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return inventory.take(entityPlayer.getCurrentEquippedItem());
+        return inventory.take(entityPlayer.getHeldItemMainhand());
     }
 
     @Override
@@ -179,10 +179,11 @@ public class AutoMinerElement extends TransparentNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setBoolean("powerOk", powerOk);
         nbt.setBoolean("silkTouch", slowProcess.silkTouch);
+        return nbt;
     }
 
     @Override

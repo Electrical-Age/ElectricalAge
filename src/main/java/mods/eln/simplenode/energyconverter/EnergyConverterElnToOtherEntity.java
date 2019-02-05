@@ -236,9 +236,10 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
             getOc().readFromNBT(nbt);
     }
 
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         if (Other.ocLoaded)
             getOc().writeToNBT(nbt);
+        return nbt;
     }
 }

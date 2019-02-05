@@ -1,6 +1,7 @@
 package mods.eln;
 
 import mods.eln.misc.Coordinate;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ServerCustomPacketEvent;
 import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
@@ -155,16 +156,16 @@ public class PacketHandler {
 
     void packetForClientNode(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
         EntityPlayer clientPlayer = (EntityPlayer) player;
-        int x, y, z, dimention;
+        int x, y, z, dimension;
         try {
 
             x = stream.readInt();
             y = stream.readInt();
             z = stream.readInt();
-            dimention = stream.readByte();
+            dimension = stream.readByte();
 
 
-            if (clientPlayer.dimension == dimention) {
+            if (clientPlayer.dimension == dimension) {
                 TileEntity entity = clientPlayer.worldObj.getTileEntity(new BlockPos(x,y,z));
                 if (entity != null && entity instanceof INodeEntity) {
                     INodeEntity node = (INodeEntity) entity;
@@ -191,13 +192,13 @@ public class PacketHandler {
     void packetNodeSingleSerialized(DataInputStream stream, NetworkManager manager, EntityPlayer player) {
         try {
             EntityPlayer clientPlayer = player;
-            int x, y, z, dimention;
+            int x, y, z, dimension;
             x = stream.readInt();
             y = stream.readInt();
             z = stream.readInt();
-            dimention = stream.readByte();
+            dimension = stream.readByte();
 
-            if (clientPlayer.dimension == dimention) {
+            if (clientPlayer.dimension == dimension) {
                 TileEntity entity = clientPlayer.worldObj.getTileEntity(new BlockPos(x,y,z));
                 if (entity != null && entity instanceof INodeEntity) {
                     INodeEntity node = (INodeEntity) entity;

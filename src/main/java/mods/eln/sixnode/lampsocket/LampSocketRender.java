@@ -17,6 +17,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import org.lwjgl.opengl.GL11;
 
@@ -81,10 +82,10 @@ public class LampSocketRender extends SixNodeElementRender {
     public void refresh(float deltaT) {
         if (descriptor.render instanceof LampSocketSuspendedObjRender) {
             float dt = deltaT;
-
+            BlockPos pos = tileEntity.getPos();
             entityTimout -= dt;
             if (entityTimout < 0) {
-                entityList = tileEntity.getWorldObj().getEntitiesWithinAABB(Entity.class, new Coordinate(tileEntity.xCoord, tileEntity.yCoord - 2, tileEntity.zCoord, tileEntity.getWorldObj()).getAxisAlignedBB(2));
+                entityList = tileEntity.getWorld().getEntitiesWithinAABB(Entity.class, new Coordinate(pos.getX(), pos.getY() - 2, pos.getZ(), tileEntity.getWorld()).getAxisAlignedBB(2));
                 entityTimout = 0.1f;
             }
 
@@ -102,8 +103,8 @@ public class LampSocketRender extends SixNodeElementRender {
                 pertuVy += e.motionZ * eFactor * dt;
             }
 
-            if (tileEntity.getWorldObj().getSavedLightValue(EnumSkyBlock.Sky, tileEntity.xCoord, tileEntity.yCoord, tileEntity.zCoord) > 3) {
-                float weather = (float) UtilsClient.getWeather(tileEntity.getWorldObj()) * 0.9f + 0.1f;
+            if (tileEntity.getWorld().getSavedLightValue(EnumSkyBlock.SKY, pos.getX(), pos.getY(), pos.getZ()) > 3) {
+                float weather = (float) UtilsClient.getWeather(tileEntity.getWorld()) * 0.9f + 0.1f;
 
                 weatherAlphaY += (0.4 - Math.random()) * dt * Math.PI / 0.2 * weather;
                 weatherAlphaZ += (0.4 - Math.random()) * dt * Math.PI / 0.2 * weather;

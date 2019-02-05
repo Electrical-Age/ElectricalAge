@@ -37,7 +37,7 @@ public class NodeServer {
                 }
             }
 
-            for (Object obj : server.getConfigurationManager().playerEntityList) {
+            for (Object obj : server.getPlayerList().getPlayerList()) {
                 EntityPlayerMP player = (EntityPlayerMP) obj;
 
                 NodeBase openContainerNode = null;

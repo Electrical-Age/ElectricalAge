@@ -29,7 +29,7 @@ public class ElectricalPoleRender extends GridRender {
         this.descriptor = (ElectricalPoleDescriptor) descriptor;
 
         if (this.descriptor.includeTransformer) {
-            addLoopedSound(new LoopedSound("eln:Transformer", coordonate(), ISound.AttenuationType.LINEAR) {
+            addLoopedSound(new LoopedSound("eln:Transformer", coordinate(), ISound.AttenuationType.LINEAR) {
                 @Override
                 public float getVolume() {
                     if (load.getPosition() > ElectricalPoleRender.this.descriptor.minimalLoadToHum)

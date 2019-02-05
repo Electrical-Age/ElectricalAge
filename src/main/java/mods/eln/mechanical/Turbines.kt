@@ -150,8 +150,8 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
             rc.readFromNBT(nbt, str)
         }
 
-        override fun writeToNBT(nbt: NBTTagCompound?, str: String?) {
-            rc.writeToNBT(nbt, str)
+        override fun writeToNBT(nbt: NBTTagCompound?, str: String?): NBTTagCompound? {
+            return rc.writeToNBT(nbt, str)
         }
     }
 
@@ -174,10 +174,10 @@ class TurbineElement(node: TransparentNode, desc_: TransparentNodeDescriptor) :
 
     override fun thermoMeterString(side: Direction?) = Utils.plotPercent(" Eff:", efficiency.toDouble()) + fluidRate.toString() + "mB/s"
 
-    override fun writeToNBT(nbt: NBTTagCompound) {
+    override fun writeToNBT(nbt: NBTTagCompound): NBTTagCompound? {
         super.writeToNBT(nbt)
         tank.writeToNBT(nbt, "tank")
-        turbineSlowProcess.writeToNBT(nbt, "proc")
+        return turbineSlowProcess.writeToNBT(nbt, "proc")
     }
 
     override fun readFromNBT(nbt: NBTTagCompound) {

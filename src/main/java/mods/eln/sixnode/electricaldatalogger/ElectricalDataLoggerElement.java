@@ -96,7 +96,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) {
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
         nbt.setByte("front", (byte) (front.toInt() << 0));
         nbt.setDouble("timeToNextSample", timeToNextSample);
@@ -105,6 +105,7 @@ public class ElectricalDataLoggerElement extends SixNodeElement {
         logs.writeToNBT(nbt, "logs");
         nbt.setInteger("sampleStack", sampleStack);
         nbt.setInteger("sampleStackNbr", sampleStackNbr);
+        return nbt;
     }
 
     @Override

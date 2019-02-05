@@ -44,8 +44,8 @@ public class ServerEventListener {
 
     @SubscribeEvent
     public void onNewEntity(EntityConstructing event) {
-        if (event.entity instanceof EntityLightningBolt) {
-            lightningListNext.add((EntityLightningBolt) event.entity);
+        if (event.getEntity() instanceof EntityLightningBolt) {
+            lightningListNext.add((EntityLightningBolt) event.getEntity());
         }
     }
 
@@ -57,7 +57,7 @@ public class ServerEventListener {
         double best = 10000000;
         for (EntityLightningBolt l : lightningList) {
             if (c.world() != l.worldObj) continue;
-            double d = l.getDistance(c.x, c.y, c.z);
+            double d = l.getDistance(c.pos.getX(), c.pos.getY(), c.pos.getZ());
             if (d < best) best = d;
         }
         return best;
@@ -68,8 +68,9 @@ public class ServerEventListener {
 
     @SubscribeEvent
     public void onWorldLoad(Load e) {
-        if (e.world.isRemote) return;
-        loadedWorlds.add(e.world.provider.dimensionId);
+        World w = e.getWorld();
+        if (w.isRemote) return;
+        loadedWorlds.add(w.provider.getDimension());
         FileNames fileNames = new FileNames(e);
 
         try {
@@ -82,7 +83,7 @@ public class ServerEventListener {
             } catch (Exception ex2) {
                 ex2.printStackTrace();
                 System.out.println("Failed to read backup save!");
-                ElnWorldStorage storage = ElnWorldStorage.forWorld(e.world);
+                ElnWorldStorage storage = ElnWorldStorage.forWorld(w);
             }
         }
     }
@@ -95,11 +96,13 @@ public class ServerEventListener {
 
     @SubscribeEvent
     public void onWorldUnload(Unload e) {
-        if (e.world.isRemote) return;
-        loadedWorlds.remove(e.world.provider.dimensionId);
+        World w = e.getWorld();
+        int dim = w.provider.getDimension();
+        if (w.isRemote) return;
+        loadedWorlds.remove(dim);
         try {
-            NodeManager.instance.unload(e.world.provider.dimensionId);
-            Eln.ghostManager.unload(e.world.provider.dimensionId);
+            NodeManager.instance.unload(dim);
+            Eln.ghostManager.unload(dim);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -108,14 +111,16 @@ public class ServerEventListener {
 
     @SubscribeEvent
     public void onWorldSave(Save e) {
-        if (e.world.isRemote) return;
-        if (!loadedWorlds.contains(e.world.provider.dimensionId)) {
+        World w = e.getWorld();
+        int dim = w.provider.getDimension();
+        if (w.isRemote) return;
+        if (!loadedWorlds.contains(dim)) {
             //System.out.println("I hate you minecraft");
             return;
         }
         try {
             NBTTagCompound nbt = new NBTTagCompound();
-            writeToEaWorldNBT(nbt, e.world.provider.dimensionId);
+            writeToEaWorldNBT(nbt, dim);
 
             FileNames fileNames = new FileNames(e);
 
@@ -175,14 +180,14 @@ public class ServerEventListener {
         final Path backupSave;
 
         FileNames(WorldEvent e) {
-            String saveName = getEaWorldSaveName(e.world);
+            String saveName = getEaWorldSaveName(e.getWorld());
             worldSave = FileSystems.getDefault().getPath(saveName);
             tempSave = FileSystems.getDefault().getPath(saveName + ".tmp");
             backupSave = FileSystems.getDefault().getPath(saveName + ".bak");
         }
 
         private String getEaWorldSaveName(World w) {
-            return Utils.getMapFolder() + "data/electricalAgeWorld" + w.provider.dimensionId + ".dat";
+            return Utils.getMapFolder() + "data/electricalAgeWorld" + w.provider.getDimension() + ".dat";
         }
     }
 }

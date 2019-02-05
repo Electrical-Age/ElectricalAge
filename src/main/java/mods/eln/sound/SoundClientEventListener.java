@@ -22,7 +22,7 @@ public class SoundClientEventListener {
     @SubscribeEvent
     public void event(PlaySoundSourceEvent e) {
         if (currentUuid == null) return;
-        uuidManager.add(currentUuid, new SoundClientEntity(e.manager, e.sound));
+        uuidManager.add(currentUuid, new SoundClientEntity(e.getManager(), e.getSound()));
     }
 
     static class KillSound {

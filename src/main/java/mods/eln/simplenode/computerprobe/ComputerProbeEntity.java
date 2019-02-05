@@ -104,4 +104,9 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
     public String getNodeUuid() {
         return ComputerProbeNode.getNodeUuidStatic();
     }
+
+    @Override
+    public void update() {
+
+    }
 }
