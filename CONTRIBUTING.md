@@ -43,8 +43,7 @@ integrated into the development version of the mod. Anyone who wish to try the c
 can download the develop branch and build the mod himself.
 
 Pull requests are always merged into the **"develop"** branch. If you are willing to contribute, make sure sending us
-pull requests against the develop branch but not the *master* branch. Attention, **"develop"** is not the default branch
-on github, so you need to pull and checkout the development branch before atually starting your development.
+pull requests against the develop branch but not the *master* branch. Unlike a lot of projects **"develop"** is the main branch on GitHub, so this is the default if you don't go out of your way to change it.
 
 
 ### GIT Flow
