@@ -1,6 +1,7 @@
 package mods.eln.simplenode.energyconverter;
 
-import cofh.api.energy.IEnergyHandler;
+//import cofh.api.energy.IEnergyHandler;
+import cofh.api.energy.IEnergyProvider;
 import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
@@ -21,9 +22,9 @@ import java.io.IOException;
 
 @Optional.InterfaceList({
     @Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = Other.modIdIc2),
-    @Optional.Interface(iface = "cofh.api.energy.IEnergyHandler", modid = Other.modIdTe),
+    @Optional.Interface(iface = "cofh.api.energy.IEnergyProvider", modid = Other.modIdTe),
     @Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = Other.modIdOc)})
-public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements Environment, IEnergyHandler {
+public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements Environment, IEnergyProvider {
 
     float inPowerFactor;
     boolean hasChanges = false;
@@ -157,13 +158,6 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
 
     @Override
     @Optional.Method(modid = Other.modIdTe)
-    public int receiveEnergy(EnumFacing from, int maxReceive, boolean simulate) {
-        // Utils.println("*****receiveEnergy*****");
-        return 0;
-    }
-
-    @Override
-    @Optional.Method(modid = Other.modIdTe)
     public int extractEnergy(EnumFacing from, int maxExtract, boolean simulate) {
         // Utils.println("*****extractEnergy*****");
         if (worldObj.isRemote)
@@ -206,16 +200,16 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
             EnergyConverterElnToOtherFireWallRf.updateEntity(this);
     }
 
-    public void onLoaded() {
-        if (Other.ic2Loaded)
-            EnergyConverterElnToOtherFireWallIc2.onLoaded(this);
-    }
+//    public void onLoaded() {
+//        if (Other.ic2Loaded)
+//            EnergyConverterElnToOtherFireWallIc2.onLoaded(this);
+//    }
 
     @Override
     public void invalidate() {
         super.invalidate();
-        if (Other.ic2Loaded)
-            EnergyConverterElnToOtherFireWallIc2.invalidate(this);
+//        if (Other.ic2Loaded)
+//            EnergyConverterElnToOtherFireWallIc2.invalidate(this);
         if (Other.ocLoaded)
             getOc().invalidate();
     }
@@ -223,8 +217,8 @@ public class EnergyConverterElnToOtherEntity extends SimpleNodeEntity implements
     @Override
     public void onChunkUnload() {
         super.onChunkUnload();
-        if (Other.ic2Loaded)
-            EnergyConverterElnToOtherFireWallIc2.onChunkUnload(this);
+//        if (Other.ic2Loaded)
+//            EnergyConverterElnToOtherFireWallIc2.onChunkUnload(this);
         if (Other.ocLoaded)
             getOc().onChunkUnload();
     }
