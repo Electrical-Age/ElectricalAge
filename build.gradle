@@ -81,6 +81,10 @@ repositories {
     maven { url "https://tehnut.info/maven" }
     maven { url "https://cc.crzd.me/maven/" }
     maven { url "https://maven.cil.li/" }
+//    maven {
+//        name = "CoFH Maven"
+//        url = "https://maven.covers1624.net"
+//    }
     
 //     mavenCentral()
 //     maven {
@@ -96,10 +100,12 @@ repositories {
 dependencies {
     external files("libs/commons-math3-3.3.jar")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-	compile group: "net.shadowfacts", name: "Forgelin", version: "1.7.3"
+	compile group: "net.shadowfacts", name: "Forgelin", version: "1.8.2"
     compile "dan200.computercraft:ComputerCraft:1.80pr1-build5"
     compile "li.cil.oc:OpenComputers:MC1.10.2-1.7.2.172"
     deobfCompile "mcp.mobius.waila:Hwyla:1.8.17-B31_1.10.2"
+    // TODO(1.12): Switch to this.
+//    deobfCompile "cofh:RedstoneFlux:1.12-2.0.0.1:universal"
     // compile "mcp.mobius.waila:Waila:1.5.11-RC2-NONEI_1.7.10:dev"
 }
 
