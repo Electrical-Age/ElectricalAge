@@ -11,6 +11,7 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public abstract class GuiContainerEln extends GuiContainer implements IGuiObjectObserver, GuiTextFieldElnObserver {
@@ -84,22 +85,23 @@ public abstract class GuiContainerEln extends GuiContainer implements IGuiObject
     }
 
     @Override
-    protected void keyTyped(char key, int code) {
+    protected void keyTyped(char key, int code) throws IOException {
         helper.keyTyped(key, code);
         if (code == Keyboard.KEY_ESCAPE) {
             super.keyTyped(key, code);
         }
     }
 
-    protected void mouseClicked(int x, int y, int code) {
+    protected void mouseClicked(int x, int y, int code) throws IOException {
         helper.mouseClicked(x, y, code);
         super.mouseClicked(x, y, code);
     }
 
     @Override
-    protected void mouseMovedOrUp(int x, int y, int witch) {
-        helper.mouseMovedOrUp(x, y, witch);
-        super.mouseMovedOrUp(x, y, witch);
+    protected void mouseReleased(int mouseX, int mouseY, int state) {
+        // TODO(1.10): Really not sure about this.
+        super.mouseReleased(mouseX, mouseY, state);
+        helper.mouseMovedOrUp(mouseX, mouseY, state);
     }
 
     public boolean doesGuiPauseGame() {
