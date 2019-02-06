@@ -65,14 +65,14 @@ class ElectricalArmor(par2EnumArmorMaterial: ItemArmor.ArmorMaterial,
         if (nbt == null) {
             stack.tagCompound = defaultNBT
         }
-        return stack.tagCompound
+        return stack.tagCompound!!
     }
 
-    override fun addInformation(itemStack: ItemStack, entityPlayer: EntityPlayer?, list: MutableList<Any?>, par4: Boolean) {
-        super.addInformation(itemStack, entityPlayer, list, par4)
-        list.add(tr("Charge power: %1\$W", chargePower.toInt()))
-        list.add(tr("Stored energy: %1\$J (%2$%)", getEnergy(itemStack),
-                (getEnergy(itemStack) / energyStorage * 100).toInt()))
+    override fun addInformation(stack: ItemStack, playerIn: EntityPlayer, tooltip: MutableList<String>, advanced: Boolean) {
+        super.addInformation(stack, playerIn, tooltip, advanced)
+        tooltip.add(tr("Charge power: %1\$W", chargePower.toInt()))
+        tooltip.add(tr("Stored energy: %1\$J (%2$%)", getEnergy(stack),
+                (getEnergy(stack) / energyStorage * 100).toInt()))
     }
 
     override fun getEnergy(stack: ItemStack): Double {

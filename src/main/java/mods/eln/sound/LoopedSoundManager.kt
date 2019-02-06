@@ -24,9 +24,10 @@ class LoopedSoundManager(val updateInterval: Float = 0.5f) {
             val soundHandler = Minecraft.getMinecraft().soundHandler
             loops.forEach {
                 // add 0.5 to put the point in the center of the block making sounds
-                val cx = it.coord.x + 0.5
-                val cy = it.coord.y + 0.5
-                val cz = it.coord.z + 0.5
+                val pos = it.coord.pos
+                val cx = pos.x + 0.5
+                val cy = pos.y + 0.5
+                val cz = pos.z + 0.5
                 // get the player, and get the squared distance between the player and the block
                 val player = Minecraft.getMinecraft().thePlayer
                 val distDeltaSquared = sqDistDelta(cx, cy, cz, player.posX, player.posY, player.posZ)

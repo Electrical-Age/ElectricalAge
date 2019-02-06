@@ -3,6 +3,7 @@ package mods.eln.item.electricalitem
 import mods.eln.wiki.Data
 import net.minecraft.block.Block
 import net.minecraft.block.material.Material
+import net.minecraft.block.state.IBlockState
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 
@@ -14,14 +15,18 @@ class ElectricalPickaxe(name: String, strengthOn: Float, strengthOff: Float,
         Data.addPortable(newItemStack())
     }
 
-    override fun getStrVsBlock(stack: ItemStack, block: Block?): Float {
-        var value = when {
-            block != null && (block.material === Material.iron || block.material === Material.glass || block.material === Material.anvil || block.material === Material.rock) -> getStrength(stack)
-            else -> super.getStrVsBlock(stack, block)
+    override fun getStrVsBlock(stack: ItemStack, state: IBlockState): Float {
+        return when {
+            state.material in pickaxeEffectiveAgainst -> getStrength(stack)
+            state.block in blocksEffectiveAgainst -> getStrength(stack)
+            else -> super.getStrVsBlock(stack, state)
         }
-        if (blocksEffectiveAgainst.any { it == block }) {
-            value = getStrength(stack)
-        }
-        return value
     }
+
+    private val pickaxeEffectiveAgainst = arrayOf(
+        Material.IRON,
+        Material.GLASS,
+        Material.ANVIL,
+        Material.ROCK
+    )
 }

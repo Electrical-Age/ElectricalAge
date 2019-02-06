@@ -1,5 +1,6 @@
 package mods.eln.item.electricalitem
 
+import mods.eln.i18n.I18N.tr
 import mods.eln.item.electricalinterface.IItemEnergyBattery
 import mods.eln.misc.Utils
 import mods.eln.misc.UtilsClient
@@ -9,12 +10,10 @@ import net.minecraft.entity.player.EntityPlayerMP
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.util.ActionResult
+import net.minecraft.util.EnumActionResult
 import net.minecraft.util.ResourceLocation
 import net.minecraft.world.World
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
-
-import mods.eln.i18n.I18N.tr
 
 class ElectricalLampItem(name: String, private var lightMin: Int, private var rangeMin: Int, private var dischargeMin: Double, private var lightMax: Int,
                          private var rangeMax: Int, internal var dischargeMax: Double, internal var energyStorage: Double, internal var chargePower: Double) : LampItem(name), IItemEnergyBattery {
@@ -61,7 +60,7 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
         return nbt
     }
 
-    internal override fun getLightState(stack: ItemStack): Int {
+    override fun getLightState(stack: ItemStack): Int {
         return getNbt(stack).getInteger("LightState")
     }
 
@@ -73,7 +72,7 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
         return if (getLightState(stack) == 1) lightMin else lightMax
     }
 
-    override fun onItemRightClick(s: ItemStack, w: World, p: EntityPlayer): ItemStack {
+    override fun onItemRightClick(s: ItemStack, w: World, p: EntityPlayer): ActionResult<ItemStack> {
         if (!w.isRemote) {
             var lightState = getLightState(s) + 1
             if (lightState > 1) lightState = 0
@@ -87,7 +86,7 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
             }
             setLightState(s, lightState)
         }
-        return s
+        return ActionResult(EnumActionResult.SUCCESS, s)
     }
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer, list: MutableList<Any?>, par4: Boolean) {
@@ -125,20 +124,21 @@ class ElectricalLampItem(name: String, private var lightMin: Int, private var ra
         return 0
     }
 
-    override fun shouldUseRenderHelper(type: ItemRenderType, item: ItemStack, helper: ItemRendererHelper): Boolean {
-        return type != ItemRenderType.INVENTORY
-    }
-
-    override fun handleRenderType(item: ItemStack, type: ItemRenderType): Boolean {
-        return true
-    }
-
-    override fun renderItem(type: ItemRenderType, item: ItemStack, vararg data: Any) {
-        UtilsClient.drawIcon(type, if (getLight(item) != 0 && getLightState(item) != 0) on else off)
-        if (type == ItemRenderType.INVENTORY) {
-            UtilsClient.drawEnergyBare(type, (getEnergy(item) / getEnergyMax(item)).toFloat())
-        }
-    }
+    // TODO(!.10): Fix rendering
+//    override fun shouldUseRenderHelper(type: ItemRenderType, item: ItemStack, helper: ItemRendererHelper): Boolean {
+//        return type != ItemRenderType.INVENTORY
+//    }
+//
+//    override fun handleRenderType(item: ItemStack, type: ItemRenderType): Boolean {
+//        return true
+//    }
+//
+//    override fun renderItem(type: ItemRenderType, item: ItemStack, vararg data: Any) {
+//        UtilsClient.drawIcon(type, if (getLight(item) != 0 && getLightState(item) != 0) on else off)
+//        if (type == ItemRenderType.INVENTORY) {
+//            UtilsClient.drawEnergyBare(type, (getEnergy(item) / getEnergyMax(item)).toFloat())
+//        }
+//    }
 
     override fun electricalItemUpdate(stack: ItemStack, time: Double) {
         val energy = getEnergy(stack)
