@@ -14,9 +14,11 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketCustomPayload;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -24,10 +26,8 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import javax.annotation.Nullable;
+import java.io.*;
 import java.util.LinkedList;
 
 
@@ -255,20 +255,32 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         return null;
     }
 
-    //TODO: FIX PACKETS
+    // TODO(1.10): Packets are probably still broken somehow!
+    @Nullable
     @Override
-    public Packet getDescriptionPacket() {
-        Node node = getNode(); //TO DO NULL POINTER
+    public SPacketUpdateTileEntity getUpdatePacket() {
+        Node node = getNode();
         if (node == null) {
             Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
             return null;
         }
 
-        ByteBuf buffer = Unpooled.buffer();
-        return new SPacketCustomPayload(Eln.channelName, new PacketBuffer(buffer.writeBytes(node.getPublishPacket().toByteArray())));
-        //return null;
+        NBTTagCompound tagCompound = new NBTTagCompound();
+        tagCompound.setByteArray("eln", node.getPublishPacket().toByteArray());
+        return new SPacketUpdateTileEntity(
+            getPos(),
+            getBlockMetadata(),
+            tagCompound
+        );
     }
 
+    @Override
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+        assert(worldObj.isRemote);
+        byte[] bytes = pkt.getNbtCompound().getByteArray("eln");
+        DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(bytes));
+        Eln.packetHandler.packetRx(dataInputStream, net, Minecraft.getMinecraft().thePlayer);
+    }
 
     public void preparePacketForServer(DataOutputStream stream) {
         try {
