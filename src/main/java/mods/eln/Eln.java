@@ -7352,6 +7352,8 @@ public class Eln {
 
         magnetizerRecipes.addRecipe(new Recipe(findItemStack("Inert Canister", 1),
             new ItemStack[]{new ItemStack(Items.ender_pearl)}, 150000.0));
+        magnetiserRecipes.addRecipe(new Recipe(new ItemStack(Items.ender_pearl),
+            new ItemStack[]{new ItemStack(Items.experience_bottle,20)}, 100000.0));
     }
 
     private void recipeFuelBurnerItem() {
