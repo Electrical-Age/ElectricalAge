@@ -14,6 +14,8 @@ eclipse
 options.txt
 /out
 /classes
+/build-play.bat
+/build-full.bat
 
 # IntelliJ
 .idea
@@ -24,4 +26,4 @@ options.txt
 # Blender backup files
 *.blend1
 *.blend2
-*.bat
+

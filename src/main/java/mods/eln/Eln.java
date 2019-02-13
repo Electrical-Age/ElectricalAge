@@ -24,8 +24,6 @@ import mods.eln.ghost.GhostGroup;
 import mods.eln.ghost.GhostManager;
 import mods.eln.ghost.GhostManagerNbt;
 import mods.eln.gridnode.electricalpole.ElectricalPoleDescriptor;
-import mods.eln.gridnode.transformer.GridTransformerDescriptor;
-import mods.eln.i18n.I18N;
 import mods.eln.item.*;
 import mods.eln.item.electricalinterface.ItemEnergyInventoryProcess;
 import mods.eln.item.electricalitem.*;
@@ -255,11 +253,11 @@ public class Eln {
     public int electricalInterSystemOverSampling;
 
     public CopperCableDescriptor copperCableDescriptor;
-	public GraphiteDescriptor GraphiteDescriptor;
+    public GraphiteDescriptor GraphiteDescriptor;
 
-	/*public ElectricalCableDescriptor creativeCableDescriptor;
-	public ElectricalCableDescriptor T2TransmissionCableDescriptor;
-	public ElectricalCableDescriptor T1TransmissionCableDescriptor;*/
+    /*public ElectricalCableDescriptor creativeCableDescriptor;
+    public ElectricalCableDescriptor T2TransmissionCableDescriptor;
+    public ElectricalCableDescriptor T1TransmissionCableDescriptor;*/
     public ElectricalCableDescriptor veryHighVoltageCableDescriptor;
     public ElectricalCableDescriptor LQveryHighVoltageCableDescriptor;
     public ElectricalCableDescriptor HQveryHighVoltageCableDescriptor;
@@ -278,6 +276,7 @@ public class Eln {
     public ElectricalCableDescriptor LQmeduimVoltageCableDescriptor;
     public ElectricalCableDescriptor HQmeduimVoltageCableDescriptor;
     public ElectricalCableDescriptor PQmeduimVoltageCableDescriptor;
+    public ElectricalCableDescriptor creativeCableDescriptor;
 
     public OreRegenerate oreRegenerate;
 
@@ -558,8 +557,8 @@ public class Eln {
         oreItem = (OreItem) Item.getItemFromBlock(oreBlock);
         /*
          *
-		 * int id = 0,subId = 0,completId; String name;
-		 */
+         * int id = 0,subId = 0,completId; String name;
+         */
 
         SixNode.sixNodeCacheList.add(new SixNodeCacheStd());
 
@@ -613,7 +612,7 @@ public class Eln {
         registerBattery(16);
         registerElectricalFurnace(32);
         registerMacerator(33);
-		registerArcFurnace(34);
+        registerArcFurnace(34);
         registerCompressor(35);
         registerMagnetizer(36);
         registerPlateMachine(37);
@@ -649,7 +648,7 @@ public class Eln {
         registerMiningPipe(17);
         registerTreeResinAndRubber(64);
         registerRawCable(65);
-		registerArc(69);
+        registerArc(69);
         registerBrush(119);
         registerMiscItem(120);
         registerElectricalTool(121);
@@ -811,14 +810,14 @@ public class Eln {
         recipeMiningPipe();
         recipeTreeResinAndRubber();
         recipeRawCable();
-		recipeGraphite();
+        recipeGraphite();
         recipeMiscItem();
         recipeBatteryItem();
         recipeElectricalTool();
         recipePortableCapacitor();
 
         recipeFurnace();
-		recipeArcFurnace();
+        recipeArcFurnace();
         recipeMacerator();
         recipeCompressor();
         recipePlateMachine();
@@ -915,11 +914,11 @@ public class Eln {
     TestBlock testBlock;
 
     private void registerTestBlock() {
-		/*
-		 * testBlock = new TestBlock(); testBlock.setCreativeTab(creativeTab).setBlockName("TestBlock"); GameRegistry.registerBlock(testBlock, "Eln.TestBlock"); TileEntity.addMapping(TestEntity.class, "Eln.TestEntity"); //LanguageRegistry.addName(testBlock,"Test Block"); NodeManager.instance.registerUuid(TestNode.getInfoStatic().getUuid(), TestNode.class);
-		 *
-		 * GameRegistry.registerCustomItemStack("Test Block", new ItemStack(testBlock));
-		 */
+        /*
+         * testBlock = new TestBlock(); testBlock.setCreativeTab(creativeTab).setBlockName("TestBlock"); GameRegistry.registerBlock(testBlock, "Eln.TestBlock"); TileEntity.addMapping(TestEntity.class, "Eln.TestEntity"); //LanguageRegistry.addName(testBlock,"Test Block"); NodeManager.instance.registerUuid(TestNode.getInfoStatic().getUuid(), TestNode.class);
+         *
+         * GameRegistry.registerCustomItemStack("Test Block", new ItemStack(testBlock));
+         */
     }
 
     private void checkRecipe() {
@@ -977,15 +976,15 @@ public class Eln {
 
     }
 
-	/*
-	 * @EventHandler public void clientStart(Client event) {
-	 *
-	 *
-	 * }
-	 */
+    /*
+     * @EventHandler public void clientStart(Client event) {
+     *
+     *
+     * }
+     */
 
     @EventHandler
-	/* Remember to use the right event! */
+    /* Remember to use the right event! */
     public void onServerStopped(FMLServerStoppedEvent ev) {
         TutorialSignElement.resetBalise();
 
@@ -1050,7 +1049,7 @@ public class Eln {
     }
 
     @EventHandler
-	/* Remember to use the right event! */
+    /* Remember to use the right event! */
     public void onServerStarting(FMLServerStartingEvent ev) {
 
         {
@@ -1100,7 +1099,6 @@ public class Eln {
     public CableRenderDescriptor stdCableRender200V;
     public CableRenderDescriptor stdCableRender800V;
     public CableRenderDescriptor stdCableRender3200V;
-    public CableRenderDescriptor stdCableRenderCreative;
     public CableRenderDescriptor activerendermodel;
 
     public static final double gateOutputCurrent = 0.100;
@@ -1116,12 +1114,15 @@ public class Eln {
     public double LVP() {
         return 1000 * cablePowerFactor;
     }
+
     public double MVP() {
         return 2000 * cablePowerFactor;
     }
+
     public double HVP() {
         return 5000 * cablePowerFactor;
     }
+
     public double VVP() {
         return 15000 * cablePowerFactor;
     }
@@ -1178,10 +1179,10 @@ public class Eln {
         double nominalcablevoltage = 0;
         double nominalcablepower = 0;
 
-        stdCableRender50V = new CableRenderDescriptor("eln","sprites/cable.png", 1.95f, 0.95f);
-        stdCableRender200V = new CableRenderDescriptor("eln","sprites/cable.png", 2.95f, 0.95f);
-        stdCableRender800V = new CableRenderDescriptor("eln","sprites/cable.png", 3.95f, 1.95f);
-        stdCableRender3200V = new CableRenderDescriptor("eln","sprites/cableVHV.png", 3.95f, 1.95f);
+        stdCableRender50V = new CableRenderDescriptor("eln", "sprites/cable.png", 1.95f, 0.95f);
+        stdCableRender200V = new CableRenderDescriptor("eln", "sprites/cable.png", 2.95f, 0.95f);
+        stdCableRender800V = new CableRenderDescriptor("eln", "sprites/cable.png", 3.95f, 1.95f);
+        stdCableRender3200V = new CableRenderDescriptor("eln", "sprites/cableVHV.png", 3.95f, 1.95f);
 
         List<String> voltagelist = new ArrayList<>();
         voltagelist.add("Low ");
@@ -1189,19 +1190,24 @@ public class Eln {
         voltagelist.add("High ");
         voltagelist.add("Very High ");
         List<String> qualitylist = new ArrayList<>();
-        qualitylist.add ("Shoddy ");
-        qualitylist.add ("");
-        qualitylist.add ("Quality ");
-        qualitylist.add ("Perfect ");
+        qualitylist.add("");
+        qualitylist.add("Shoddy ");
+        qualitylist.add("Quality ");
+        qualitylist.add("Perfect ");
+        List<Double> valuelist = new ArrayList<>();
+        valuelist.add(1d);
+        valuelist.add(0.5d);
+        valuelist.add(2d);
+        valuelist.add(4d);
         List<String> renderlist = new ArrayList<>();
-        renderlist.add ("sprites/cableshoddy.png");
-        renderlist.add ("sprites/cable.png");
-        renderlist.add ("sprites/cablequality.png");
-        renderlist.add ("sprites/cableperfect.png");
-        renderlist.add ("sprites/cableVHVshoddy.png");
-        renderlist.add ("sprites/cableVHV.png");
-        renderlist.add ("sprites/cableVHVquality.png");
-        renderlist.add ("sprites/cableVHVperfect.png");
+        renderlist.add("sprites/cable.png");
+        renderlist.add("sprites/cableshoddy.png");
+        renderlist.add("sprites/cablequality.png");
+        renderlist.add("sprites/cableperfect.png");
+        renderlist.add("sprites/cableVHV.png");
+        renderlist.add("sprites/cableVHVshoddy.png");
+        renderlist.add("sprites/cableVHVquality.png");
+        renderlist.add("sprites/cableVHVperfect.png");
         List<Float> rendercablesizes = new ArrayList<>();
         rendercablesizes.add(1.95f);
         rendercablesizes.add(0.95f);
@@ -1221,84 +1227,114 @@ public class Eln {
             renderspriteindex = cablequality;
 
             switch (cablevoltage) {
-                case 0: power = LVP(); nominalcablevoltage = LVU; renderfloatindex = 0; break;
-                case 1: power = MVP(); nominalcablevoltage = MVU; renderfloatindex = 2; break;
-                case 2: power = HVP(); nominalcablevoltage = HVU; renderfloatindex = 4; break;
-                case 3: power = VVP(); nominalcablevoltage = VVU; renderfloatindex = 4; renderspriteindex = renderspriteindex + 4; break;
+                case 0:
+                    power = LVP();
+                    nominalcablevoltage = LVU;
+                    renderfloatindex = 0;
+                    break;
+                case 1:
+                    power = MVP();
+                    nominalcablevoltage = MVU;
+                    renderfloatindex = 2;
+                    break;
+                case 2:
+                    power = HVP();
+                    nominalcablevoltage = HVU;
+                    renderfloatindex = 4;
+                    break;
+                case 3:
+                    power = VVP();
+                    nominalcablevoltage = VVU;
+                    renderfloatindex = 4;
+                    renderspriteindex = renderspriteindex + 4;
+                    break;
             }
-            activerendermodel = new CableRenderDescriptor("eln",renderlist.get(renderspriteindex), rendercablesizes.get(renderfloatindex), rendercablesizes.get(renderfloatindex+1));
-            desc = new ElectricalCableDescriptor(name,activerendermodel,"Haxors was Here", false);
-            nominalcablepower = power*(cablequality+1) / 2;
-                switch (cablequality) {
-                    case 0:
-                        switch (cablevoltage) { case 0: LQlowVoltageCableDescriptor = desc; break; case 1: LQmeduimVoltageCableDescriptor = desc; break; case 2: LQhighVoltageCableDescriptor = desc; break; case 3: LQveryHighVoltageCableDescriptor = desc; break;}
-                    case 1:
-                        switch (cablevoltage) { case 0: lowVoltageCableDescriptor = desc; break; case 1: meduimVoltageCableDescriptor = desc; break; case 2: highVoltageCableDescriptor = desc; break; case 3: veryHighVoltageCableDescriptor = desc; break; }
-                    case 2:
-                        switch (cablevoltage) { case 0: HQlowVoltageCableDescriptor = desc; break; case 1: HQmeduimVoltageCableDescriptor = desc; break; case 2: HQhighVoltageCableDescriptor = desc; break; case 3: HQveryHighVoltageCableDescriptor = desc; break; }
-                    case 3:
-                        switch (cablevoltage) { case 0: PQlowVoltageCableDescriptor = desc; break; case 1: PQmeduimVoltageCableDescriptor = desc; break; case 2: PQhighVoltageCableDescriptor = desc; break; case 3: PQveryHighVoltageCableDescriptor = desc; break; }
+            activerendermodel = new CableRenderDescriptor("eln", renderlist.get(renderspriteindex), rendercablesizes.get(renderfloatindex), rendercablesizes.get(renderfloatindex + 1));
+            desc = new ElectricalCableDescriptor(name, activerendermodel, "Haxors was Here", false);
+            nominalcablepower = power * valuelist.get(cablequality);
+            switch (cablequality) {
+                case 0:
+                    switch (cablevoltage) {
+                        case 0:
+                            LQlowVoltageCableDescriptor = desc;
+                            break;
+                        case 1:
+                            LQmeduimVoltageCableDescriptor = desc;
+                            break;
+                        case 2:
+                            LQhighVoltageCableDescriptor = desc;
+                            break;
+                        case 3:
+                            LQveryHighVoltageCableDescriptor = desc;
+                            break;
+                    }
+                case 1:
+                    switch (cablevoltage) {
+                        case 0:
+                            lowVoltageCableDescriptor = desc;
+                            break;
+                        case 1:
+                            meduimVoltageCableDescriptor = desc;
+                            break;
+                        case 2:
+                            highVoltageCableDescriptor = desc;
+                            break;
+                        case 3:
+                            veryHighVoltageCableDescriptor = desc;
+                            break;
+                    }
+                case 2:
+                    switch (cablevoltage) {
+                        case 0:
+                            HQlowVoltageCableDescriptor = desc;
+                            break;
+                        case 1:
+                            HQmeduimVoltageCableDescriptor = desc;
+                            break;
+                        case 2:
+                            HQhighVoltageCableDescriptor = desc;
+                            break;
+                        case 3:
+                            HQveryHighVoltageCableDescriptor = desc;
+                            break;
+                    }
+                case 3:
+                    switch (cablevoltage) {
+                        case 0:
+                            PQlowVoltageCableDescriptor = desc;
+                            break;
+                        case 1:
+                            PQmeduimVoltageCableDescriptor = desc;
+                            break;
+                        case 2:
+                            PQhighVoltageCableDescriptor = desc;
+                            break;
+                        case 3:
+                            PQveryHighVoltageCableDescriptor = desc;
+                            break;
+                    }
 
-                }
-            desc.setPhysicalConstantLikeNormalCable(nominalcablevoltage,nominalcablepower,0.10/20,nominalcablevoltage*1.3,nominalcablepower*1.2,30,cableWarmLimit,-100,cableHeatingTime,cableThermalConductionTao);
-            sixNodeItem.addDescriptor(subId+ (id << 6), desc);
+            }
+            desc.setPhysicalConstantLikeNormalCable(
+                nominalcablevoltage,
+                nominalcablepower,
+                0.10 / 20,
+                nominalcablevoltage * 1.3,
+                nominalcablepower * 1.2, 30,
+                cableWarmLimit,
+                -100,
+                cableHeatingTime,
+                cableThermalConductionTao
+            );
+            sixNodeItem.addDescriptor(subId + (id << 6), desc);
 
             //advance down the loop
             cablequality = cablequality + 1;
-            if (cablequality > 3){cablequality = 0; cablevoltage = cablevoltage + 1;}
+            if (cablequality > 3) {
+                cablequality = 0;
+                cablevoltage = cablevoltage + 1;
+            }
         }
-        {
-            subId = 20;
-
-            name = TR_NAME(Type.NONE, "Creative Cable");
-
-            stdCableRenderCreative = new CableRenderDescriptor("eln","sprites/cablecreative.png", 8.0f, 4.0f);
-
-            desc = new ElectricalCableDescriptor(name, stdCableRenderCreative, "Experience the power of Microresistance", false);
-
-            creativeCableDescriptor = desc;
-
-            desc.setPhysicalConstantLikeNormalCable(VVU, VVU * VVP, 0.025 * 5 / 4 / 20 / 8 / 9001, //what!?
-                VVU * 1.3, VVU * VVP * 1.2,
-                40,// electricalOverVoltageStartPowerLost,
-                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
-                cableHeatingTime, cableThermalConductionTao// thermalNominalHeatTime,
-                // thermalConductivityTao
-            );
-            sixNodeItem.addDescriptor(subId + (id << 6), desc);
-        }
-
-        /*{
-            subId = 24;
-
-            name = TR_NAME(Type.NONE, "Signal Bus Cable");
-
-            stdCableRenderSignalBus = new CableRenderDescriptor("eln",
-                "sprites/cable.png", 3.95f, 3.95f);
-
-            desc = new ElectricalCableDescriptor(name, stdCableRenderSignalBus,
-                "For transmitting many signals.", true);
-
-            signalBusCableDescriptor = desc;
-
-            desc.setPhysicalConstantLikeNormalCable(SVU, SVP, 0.02 / 50
-                    * gateOutputCurrent / SVII,// electricalNominalVoltage,
-                // electricalNominalPower,
-                // electricalNominalPowerDrop,
-                SVU * 1.3, SVP * 1.2,// electricalMaximalVoltage,
-                // electricalMaximalPower,
-                0.5,// electricalOverVoltageStartPowerLost,
-                cableWarmLimit, -100,// thermalWarmLimit, thermalCoolLimit,
-                cableHeatingTime, 1// thermalNominalHeatTime,
-                // thermalConductivityTao
-            );
-
-            desc.ElementClass = ElectricalSignalBusCableElement.class;
-
-            sixNodeItem.addDescriptor(subId + (id << 6), desc);
-            // GameRegistry.registerCustomItemStack(name, desc.newItemStack(1));
-
-        } */
     }
 
     private void registerThermalCable(int id) {
@@ -1369,17 +1405,23 @@ public class Eln {
             subId = 0;
             name = TR_NAME(Type.NONE, "Cost Oriented Battery");
 
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
-                stdP * 1.2, 0.000, // electricalU,
-                // electricalPMax,electricalDischargeRate
-                stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
-                "Cheap battery" // name, description)
+            BatteryDescriptor desc = new BatteryDescriptor(
+                name,
+                "BatteryBig",
+                batteryCableDescriptor,
+                0.5,
+                true,
+                true,
+                voltageFunction,
+                stdU,
+                stdP * 1.2,
+                0.000,
+                stdP,
+                stdDischargeTime * batteryCapacityFactor,
+                stdEfficiency,
+                stdBatteryHalfLife,
+                heatTIme, 60, -100,
+                "A framework battery which can be modified to fit your needs."
             );
             desc.setRenderSpec("lowcost");
             desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
@@ -1389,17 +1431,24 @@ public class Eln {
             subId = 1;
             name = TR_NAME(Type.NONE, "Capacity Oriented Battery");
 
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction,
-                stdU / 4, stdP / 2 * 1.2, 0.000, // electricalU,
-                // electricalPMax,electricalDischargeRate
-                stdP / 2, stdDischargeTime * 8 * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
-                "the battery" // name, description)
+            BatteryDescriptor desc = new BatteryDescriptor(
+                name,
+                "BatteryBig",
+                batteryCableDescriptor,
+                0.5,
+                true,
+                true,
+                voltageFunction,
+                stdU / 4, stdP / 2 * 1.2,
+                0.000,
+                stdP / 2,
+                stdDischargeTime * 8 * batteryCapacityFactor,
+                stdEfficiency,
+                stdBatteryHalfLife,
+                heatTIme,
+                60,
+                -100,
+                "By using a Lower Voltage and supporting Less Power, you can squeeze out every last bit of Capacity." // name, description)
             );
             desc.setRenderSpec("capacity");
             desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
@@ -1409,17 +1458,24 @@ public class Eln {
             subId = 2;
             name = TR_NAME(Type.NONE, "Voltage Oriented Battery");
 
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "BatteryBig", meduimVoltageCableDescriptor, 0.5, true, true, voltageFunction, stdU * 4,
-                stdP * 1.2, 0.000, // electricalU,
-                // electricalPMax,electricalDischargeRate
-                stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
-                "the battery" // name, description)
+            BatteryDescriptor desc = new BatteryDescriptor(
+                name,
+                "BatteryBig",
+                meduimVoltageCableDescriptor,
+                0.5,
+                true,
+                true,
+                voltageFunction,
+                stdU * 4,
+                stdP * 1.2, 0.000,
+                stdP,
+                stdDischargeTime * batteryCapacityFactor,
+                stdEfficiency,
+                stdBatteryHalfLife,
+                heatTIme,
+                60,
+                -100,
+                "A different layout increase the voltage rating of your battery."
             );
             desc.setRenderSpec("highvoltage");
             desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
@@ -1430,17 +1486,25 @@ public class Eln {
             subId = 3;
             name = TR_NAME(Type.NONE, "Current Oriented Battery");
 
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "BatteryBig", batteryCableDescriptor, 0.5, true, true, voltageFunction, stdU,
-                stdP * 1.2 * 4, 0.000, // electricalU,
-                // electricalPMax,electricalDischargeRate
-                stdP * 4, stdDischargeTime / 6 * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
-                "the battery" // name, description)
+            BatteryDescriptor desc = new BatteryDescriptor(
+                name,
+                "BatteryBig",
+                batteryCableDescriptor,
+                0.5,
+                true,
+                true,
+                voltageFunction,
+                stdU,
+                stdP * 1.2 * 4,
+                0.000,
+                stdP * 4,
+                stdDischargeTime / 6 * batteryCapacityFactor,
+                stdEfficiency,
+                stdBatteryHalfLife,
+                heatTIme,
+                60,
+                -100,
+                "You've tapped into the raw speed of Lead Acid at the cost of Capacity." // name, description)
             );
             desc.setRenderSpec("current");
             desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
@@ -1450,17 +1514,22 @@ public class Eln {
             subId = 4;
             name = TR_NAME(Type.NONE, "Life Oriented Battery");
 
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "BatteryBig", batteryCableDescriptor, 0.5, true, false, voltageFunction, stdU,
-                stdP * 1.2, 0.000, // electricalU,
-                // electricalPMax,electricalDischargeRate
-                stdP, stdDischargeTime * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
-                "the battery" // name, description)
+            BatteryDescriptor desc = new BatteryDescriptor(
+                name,
+                "BatteryBig",
+                batteryCableDescriptor,
+                0.5,
+                true,
+                false,
+                voltageFunction,
+                stdU,
+                stdP * 1.2,
+                0.000,
+                stdP, stdDischargeTime * batteryCapacityFactor,
+                stdEfficiency,
+                stdBatteryHalfLife * 8,
+                heatTIme, 60, -100,
+                "A marvel of technology. You've solved the chemical problem of battery decay with no compromises!"
             );
             desc.setRenderSpec("life");
             desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
@@ -1471,17 +1540,23 @@ public class Eln {
             subId = 5;
             name = TR_NAME(Type.NONE, "Single-use Battery");
 
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "BatteryBig", batteryCableDescriptor, 1.0, false, false, voltageFunction, stdU,
-                stdP * 1.2 * 2, 0.000, // electricalU,
-                // electricalPMax,electricalDischargeRate
-                stdP * 2, stdDischargeTime / 4 * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
-                "the battery" // name, description)
+            BatteryDescriptor desc = new BatteryDescriptor(
+                name,
+                "BatteryBig",
+                batteryCableDescriptor,
+                1.0,
+                false,
+                false,
+                voltageFunction,
+                stdU,
+                stdP * 1.2 * 2,
+                0.000,
+                stdP * 2,
+                stdDischargeTime / 4 * batteryCapacityFactor,
+                stdEfficiency,
+                stdBatteryHalfLife * 8,
+                heatTIme, 60, -100,
+                "A single use battery. Attempt to recharge it at your own risk."
             );
             desc.setRenderSpec("coal");
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -1492,63 +1567,20 @@ public class Eln {
 
             BatteryDescriptor desc = new BatteryDescriptor(name,
                 "BatteryBig", batteryCableDescriptor, 0.5, true, false, voltageFunction, stdU * 2,
-                stdP * 1.2 * 8, 0.025, // electricalU,
-                // electricalPMax,electricalDischargeRate
-                stdP * 8, stdDischargeTime / 4 * batteryCapacityFactor, stdEfficiency, stdBatteryHalfLife * 8, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
-                "You were unable to fix the power leaking problem, though." // name, description)
+                stdP * 1.2 * 8,
+                0.025,
+                stdP * 8, stdDischargeTime / 4 * batteryCapacityFactor,
+                stdEfficiency,
+                stdBatteryHalfLife * 8,
+                heatTIme,
+                60,
+                -100,
+                "A prototype battery which combines the benefits of the other batteries. Too bad leaks power, though."
             );
             desc.setRenderSpec("highvoltage");
             desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 1.0);
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
-        /*{
-            subId = 32;
-            name = TR_NAME(Type.NONE, "50V Condensator");
-
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "condo200", batteryCableDescriptor, 0.0, true, false,
-                condoVoltageFunction,
-                stdU, stdP * 1.2 * 8, 0.005, // electricalU,//
-                // electricalPMax,electricalDischargeRate
-                stdP * 8, 4, condoEfficiency, stdBatteryHalfLife, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
-                "Obselete, must be deleted" // name, description)
-            );
-            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
-            desc.setDefaultIcon("empty-texture");
-            transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
-        }
-
-        {
-            subId = 36;
-            name = TR_NAME(I18N.Type.NONE, "200V Condensator");
-
-            BatteryDescriptor desc = new BatteryDescriptor(name,
-                "condo200", highVoltageCableDescriptor, 0.0, true, false,
-                condoVoltageFunction,
-                MVU, MVP() * 1.5, 0.005, // electricalU,//
-                // electricalPMax,electricalDischargeRate
-                MVP(), 4, condoEfficiency, stdBatteryHalfLife, // electricalStdP,
-                // electricalStdDischargeTime,
-                // electricalStdEfficiency,
-                // electricalStdHalfLife,
-                heatTIme, 60, -100, // thermalHeatTime, thermalWarmLimit,
-                // thermalCoolLimit,
-                "the battery" // name, description)
-            );
-            desc.setCurrentDrop(desc.electricalU * 1.2, desc.electricalStdP * 2.0);
-            desc.setDefaultIcon("empty-texture");
-            transparentNodeItem.addWithoutRegistry(subId + (id << 6), desc);
-        } */
     }
 
     private void registerGround(int id) {
@@ -2930,11 +2962,10 @@ public class Eln {
             name = TR_NAME(Type.NONE, "200V Macerator");
 
             MaceratorDescriptor desc = new MaceratorDescriptor(name,
-                "maceratorb", MVU, 200 * 5,// double nominalU,double nominalP,
-                MVU * 1.25,// double maximalU,
-                new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
-                meduimVoltageCableDescriptor,// ElectricalCableDescriptor
-                // cable
+                "maceratorb", MVU, 1000,
+                MVU * 1.25,
+                new ThermalLoadInitializer(80, -100, 10, 100000.0),
+                meduimVoltageCableDescriptor,
                 maceratorRecipes);
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -2944,9 +2975,9 @@ public class Eln {
 
     public RecipesList compressorRecipes = new RecipesList();
     public RecipesList plateMachineRecipes = new RecipesList();
-	public RecipesList arcFurnaceRecipes = new RecipesList();
+    public RecipesList arcFurnaceRecipes = new RecipesList();
 
-	private void registerArcFurnace(int id) {
+    private void registerArcFurnace(int id) {
 
         int subId, completId;
         String name;
@@ -2968,7 +2999,7 @@ public class Eln {
 
         }
     }
-	
+
     private void registerPlateMachine(int id) {
 
         int subId, completId;
@@ -2978,12 +3009,12 @@ public class Eln {
             name = TR_NAME(Type.NONE, "50V Plate Machine");
 
             PlateMachineDescriptor desc = new PlateMachineDescriptor(
-                name,// String name,
+                name,
                 obj.getObj("platemachinea"),
-                LVU, 200,// double nominalU,double nominalP,
-                LVU * 1.25,// double maximalU,
-                new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
-                lowVoltageCableDescriptor,// ElectricalCableDescriptor cable
+                LVU, 200,
+                LVU * 1.25,
+                new ThermalLoadInitializer(80, -100, 10, 100000.0),
+                lowVoltageCableDescriptor,
                 plateMachineRecipes);
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -2996,13 +3027,12 @@ public class Eln {
             name = TR_NAME(Type.NONE, "200V Plate Machine");
 
             PlateMachineDescriptor desc = new PlateMachineDescriptor(
-                name,// String name,
+                name,
                 obj.getObj("platemachineb"),
-                MVU, 200 * 5,// double nominalU,double nominalP,
-                MVU * 1.25,// double maximalU,
-                new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
-                meduimVoltageCableDescriptor,// ElectricalCableDescriptor
-                // cable
+                MVU, 1000,
+                MVU * 1.25,
+                new ThermalLoadInitializer(80, -100, 10, 100000.0),
+                meduimVoltageCableDescriptor,
                 plateMachineRecipes);
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -3056,13 +3086,12 @@ public class Eln {
             name = TR_NAME(Type.NONE, "200V Compressor");
 
             CompressorDescriptor desc = new CompressorDescriptor(
-                name,// String name,
+                name,
                 obj.getObj("compressorb"),
-                MVU, 200 * 5,// double nominalU,double nominalP,
-                MVU * 1.25,// double maximalU,
-                new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
-                meduimVoltageCableDescriptor,// ElectricalCableDescriptor
-                // cable
+                MVU, 1000,
+                MVU * 1.25,
+                new ThermalLoadInitializer(80, -100, 10, 100000.0),
+                meduimVoltageCableDescriptor,
                 compressorRecipes);
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -3100,13 +3129,12 @@ public class Eln {
             name = TR_NAME(Type.NONE, "200V Magnetizer");
 
             MagnetizerDescriptor desc = new MagnetizerDescriptor(
-                name,// String name,
+                name,
                 obj.getObj("magnetizerb"),
-                MVU, 200 * 5,// double nominalU,double nominalP,
-                MVU * 1.25,// double maximalU,
-                new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
-                meduimVoltageCableDescriptor,// ElectricalCableDescriptor
-                // cable
+                MVU, 1000,
+                MVU * 1.25,
+                new ThermalLoadInitializer(80, -100, 10, 100000.0),
+                meduimVoltageCableDescriptor,
                 magnetizerRecipes);
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -3708,9 +3736,7 @@ public class Eln {
             completId = subId + (id << 6);
 
             name = TR_NAME(Type.NONE, "Copper Dust");
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{"It can be magnetized into Redstone"});
             dustCopper = element;
             sharedItem.addElement(completId, element);
             Data.addResource(element.newItemStack());
@@ -3721,9 +3747,7 @@ public class Eln {
             completId = subId + (id << 6);
 
             name = TR_NAME(Type.NONE, "Iron Dust");
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{"Used to make Alloy Dust"});
             dustCopper = element;
             sharedItem.addElement(completId, element);
             Data.addResource(element.newItemStack());
@@ -3734,9 +3758,7 @@ public class Eln {
             completId = subId + (id << 6);
 
             name = TR_NAME(Type.NONE, "Lapis Dust");
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{"For making solar panels and canisters"});
             dustCopper = element;
             sharedItem.addElement(completId, element);
             Data.addResource(element.newItemStack());
@@ -3747,9 +3769,7 @@ public class Eln {
             completId = subId + (id << 6);
 
             name = TR_NAME(Type.NONE, "Diamond Dust");
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{"Used to make a Canister"});
             dustCopper = element;
             sharedItem.addElement(completId, element);
             Data.addResource(element.newItemStack());
@@ -3761,9 +3781,7 @@ public class Eln {
 
             name = TR_NAME(Type.NONE, "Lead Dust");
 
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{"Used to refine Copper"});
             sharedItem.addElement(id, element);
             Data.addResource(element.newItemStack());
             addToOre("dustLead", element.newItemStack());
@@ -3773,9 +3791,7 @@ public class Eln {
 
             name = TR_NAME(Type.NONE, "Tungsten Dust");
 
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{"Used to make Alloy Dust"});
             sharedItem.addElement(id, element);
             Data.addResource(element.newItemStack());
             addToOre(dictTungstenDust, element.newItemStack());
@@ -3785,9 +3801,7 @@ public class Eln {
             id = 7;
 
             name = TR_NAME(Type.NONE, "Gold Dust");
-
-            element = new GenericItemUsingDamageDescriptorWithComment(
-                name, new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{"Not useful, but it is pretty"});
             sharedItem.addElement(id, element);
             Data.addResource(element.newItemStack());
             addToOre("dustGold", element.newItemStack());
@@ -3798,9 +3812,7 @@ public class Eln {
 
             name = TR_NAME(Type.NONE, "Coal Dust");
 
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{"Used to make Resistive Dust"});
             sharedItem.addElement(id, element);
             Data.addResource(element.newItemStack());
             addToOre("dustCoal", element.newItemStack());
@@ -3810,9 +3822,7 @@ public class Eln {
 
             name = TR_NAME(Type.NONE, "Alloy Dust");
 
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{"Smelt it to make a powerful ingot"});
             sharedItem.addElement(id, element);
             Data.addResource(element.newItemStack());
             addToOre("dustAlloy", element.newItemStack());
@@ -3823,9 +3833,7 @@ public class Eln {
 
             name = TR_NAME(Type.NONE, "Cinnabar Dust");
 
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{"Just looking around in creative? This stuff does nothing. I don't even know why we even keep it around."});
             sharedItem.addElement(id, element);
             Data.addResource(element.newItemStack());
             addToOre("dustCinnabar", element.newItemStack());
@@ -3835,9 +3843,7 @@ public class Eln {
 
             name = TR_NAME(Type.NONE, "Resistive Dust");
 
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{"Used to set Resistance in Resistors"});
             sharedItem.addElement(id, element);
             Data.addResource(element.newItemStack());
             addToOre("dustResistive", element.newItemStack());
@@ -3859,12 +3865,8 @@ public class Eln {
             completId = subId + (id << 6);
 
             name = TR_NAME(Type.NONE, "Copper Ingot");
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{});
             sharedItem.addElement(completId, element);
-            // GameRegistry.registerCustomItemStack(name,
-            // element.newItemStack(1));
             copperIngot = element;
             Data.addResource(element.newItemStack());
             addToOre("ingotCopper", element.newItemStack());
@@ -3875,12 +3877,8 @@ public class Eln {
             completId = subId + (id << 6);
 
             name = TR_NAME(Type.NONE, "Lead Ingot");
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{});
             sharedItem.addElement(completId, element);
-            // GameRegistry.registerCustomItemStack(name,
-            // element.newItemStack(1));
             plumbIngot = element;
             Data.addResource(element.newItemStack());
             addToOre("ingotLead", element.newItemStack());
@@ -3892,12 +3890,8 @@ public class Eln {
             completId = subId + (id << 6);
 
             name = TR_NAME(Type.NONE, "Tungsten Ingot");
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{});
             sharedItem.addElement(completId, element);
-            // GameRegistry.registerCustomItemStack(name,
-            // element.newItemStack(1));
             tungstenIngot = element;
             Data.addResource(element.newItemStack());
             addToOre(dictTungstenIngot, element.newItemStack());
@@ -3908,13 +3902,8 @@ public class Eln {
             completId = subId + (id << 6);
 
             name = TR_NAME(Type.NONE, "Ferrite Ingot");
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{"useless", "Really useless"});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{"useless", "Really useless"});
             sharedItem.addElement(completId, element);
-            // GameRegistry.registerCustomItemStack(name,
-            // element.newItemStack(1));
-
             Data.addResource(element.newItemStack());
             addToOre("ingotFerrite", element.newItemStack());
         }
@@ -3924,13 +3913,8 @@ public class Eln {
             completId = subId + (id << 6);
 
             name = TR_NAME(Type.NONE, "Alloy Ingot");
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{});
             sharedItem.addElement(completId, element);
-            // GameRegistry.registerCustomItemStack(name,
-            // element.newItemStack(1));
-
             Data.addResource(element.newItemStack());
             addToOre("ingotAlloy", element.newItemStack());
         }
@@ -3940,13 +3924,8 @@ public class Eln {
             completId = subId + (id << 6);
 
             name = TR_NAME(Type.NONE, "Mercury");
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{"useless", "miaou"});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{"useless", "miaou"});
             sharedItem.addElement(completId, element);
-            // GameRegistry.registerCustomItemStack(name,
-            // element.newItemStack(1));
-
             Data.addResource(element.newItemStack());
             addToOre("quicksilver", element.newItemStack());
         }
@@ -3955,12 +3934,8 @@ public class Eln {
             completId = subId + (id << 6);
 
             name = TR_NAME(Type.NONE, "Silver Ingot");
-            element = new GenericItemUsingDamageDescriptorWithComment(name,// iconId,
-                // name,
-                new String[]{});
+            element = new GenericItemUsingDamageDescriptorWithComment(name, new String[]{});
             sharedItem.addElement(completId, element);
-            // GameRegistry.registerCustomItemStack(name,
-            // element.newItemStack(1));
             silverIngot = element;
             Data.addResource(element.newItemStack());
             addToOre("ingotSilver", element.newItemStack());
@@ -4900,7 +4875,7 @@ public class Eln {
             sharedItem.addElement(completId, descriptor);
             Data.addResource(descriptor.newItemStack());
         }
-        {
+        /*{
             GenericItemUsingDamageDescriptor descriptor;
             subId = 11;
             completId = subId + (id << 6);
@@ -4925,7 +4900,6 @@ public class Eln {
             subId = 13;
             completId = subId + (id << 6);
             name = TR_NAME(Type.NONE, "Canister of Water");
-
             descriptor = new GenericItemUsingDamageDescriptor(name);
             sharedItem.addElement(completId, descriptor);
             Data.addResource(descriptor.newItemStack());
@@ -4939,7 +4913,7 @@ public class Eln {
             descriptor = new GenericItemUsingDamageDescriptor(name);
             sharedItem.addElement(completId, descriptor);
             Data.addResource(descriptor.newItemStack());
-        }
+        } */
         {
             subId = 15;
             name = TR_NAME(Type.NONE, "Copper Folded Plate");
@@ -5013,7 +4987,7 @@ public class Eln {
             Data.addResource(desc.newItemStack());
         }
     }
-	
+
     private void registerBrush(int id) {
 
         int subId, completId;
@@ -5327,7 +5301,7 @@ public class Eln {
         {
             subId = 23;
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
-                TR_NAME(Type.NONE, "Advanced Machine Block"), new String[]{}); // TODO: Description.
+                TR_NAME(Type.NONE, "Advanced Machine Block"), new String[]{});
             sharedItem.addElement(subId + (id << 6), desc);
             Data.addResource(desc.newItemStack());
             addToOre("casingMachineAdvanced", desc.newItemStack());
@@ -5438,20 +5412,24 @@ public class Eln {
             'C', lowVoltageCableDescriptor.newItemStack(1),
             'R', "itemRubber");
         addRecipe(LQmeduimVoltageCableDescriptor.newItemStack(1), //Shoddy Meduim Voltage Cable (Medium Voltage Cable)
-            "S",
+            "W",
             "C",
             'C', LQlowVoltageCableDescriptor.newItemStack(1),
-            'S', new ItemStack(Blocks.cobblestone));
+            'W', "plankWood");
         addRecipe(HQmeduimVoltageCableDescriptor.newItemStack(1), //Quality Meduim Voltage Cable (Medium Voltage Cable)
+            "R",
+            "C",
             "G",
-            "C",
             'C', HQlowVoltageCableDescriptor.newItemStack(1),
-            'G', new ItemStack(Items.gold_ingot));
+            'R', "itemRubber",
+            'G', findItemStack("Gold Dust"));
         addRecipe(PQmeduimVoltageCableDescriptor.newItemStack(1), //Perfect Meduim Voltage Cable (Medium Voltage Cable)
-            "D",
+            "R",
             "C",
+            "D",
             'C', PQlowVoltageCableDescriptor.newItemStack(1),
-            'D', new ItemStack(Items.diamond));
+            'R', "itemRubber",
+            'D', findItemStack("Diamond Dust"));
 
         addRecipe(highVoltageCableDescriptor.newItemStack(1), //High Voltage Cable
             "R",
@@ -5459,20 +5437,24 @@ public class Eln {
             'C', meduimVoltageCableDescriptor.newItemStack(1),
             'R', "itemRubber");
         addRecipe(LQhighVoltageCableDescriptor.newItemStack(1), //Shoddy High Voltage Cable
-            "S",
+            "W",
             "C",
             'C', LQmeduimVoltageCableDescriptor.newItemStack(1),
-            'S', new ItemStack(Blocks.cobblestone));
+            'W', "plankWood");
         addRecipe(HQhighVoltageCableDescriptor.newItemStack(1), //Quality High Voltage Cable
+            "R",
+            "C",
             "G",
-            "C",
             'C', HQmeduimVoltageCableDescriptor.newItemStack(1),
-            'G', new ItemStack(Items.gold_ingot));
+            'R', "itemRubber",
+            'G', findItemStack("Gold Dust"));
         addRecipe(PQhighVoltageCableDescriptor.newItemStack(1), //Perfect High Voltage Cable
-            "D",
+            "R",
             "C",
+            "D",
             'C', PQmeduimVoltageCableDescriptor.newItemStack(1),
-            'D', new ItemStack(Items.diamond));
+            'R', "itemRubber",
+            'D', findItemStack("Diamond Dust"));
 
         addRecipe(signalCableDescriptor.newItemStack(12), //Signal Wire
             "RRR",
@@ -5495,55 +5477,59 @@ public class Eln {
             'R', "itemRubber");
 
         addRecipe(LQlowVoltageCableDescriptor.newItemStack(12), //Shoddy Low Voltage Cable
-            "SSS",
+            "WWW",
             "GCG",
-            "SSS",
+            "WWW",
             'C', "ingotCopper",
             'G', new ItemStack(Blocks.gravel),
-            'S', new ItemStack(Blocks.cobblestone));
+            'W', "plankWood");
 
         addRecipe(HQlowVoltageCableDescriptor.newItemStack(12), //Quality Low Voltage Cable
-            "AAA",
+            "RRR",
             "CCC",
-            "AAA",
+            "GGG",
             'C', findItemStack("Pure Copper Ingot"),
-            'A', new ItemStack(Items.gold_ingot));
+            'G', findItemStack("Gold Dust"),
+            'R', "itemRubber");
         addRecipe(PQlowVoltageCableDescriptor.newItemStack(12), //Perfect Low Voltage Cable
-            "DDD",
+            "RRR",
             "CCC",
             "DDD",
             'C', findItemStack("Glorious Copper Plate"),
-            'D', new ItemStack(Items.diamond));
+            'R', "itemRubber",
+            'D', findItemStack("Diamond Dust"));
 
 
         addRecipe(LQveryHighVoltageCableDescriptor.newItemStack(12), //Shoddy Very High Voltage Cable
-            "SSS",
+            "WWW",
             "GCG",
-            "SSS",
+            "WWW",
             'C', "ingotAlloy",
             'G', new ItemStack(Blocks.gravel),
-            'S', new ItemStack(Blocks.cobblestone));
+            'W', "plankWood");
 
         addRecipe(veryHighVoltageCableDescriptor.newItemStack(12), //Very High Voltage Cable
             "RRR",
             "CCC",
             "RRR",
             'C', findItemStack("Alloy Ingot"),
-            'R', findItemStack("Rubber"));
+            'R', "itemRubber");
 
         addRecipe(HQveryHighVoltageCableDescriptor.newItemStack(12), //Quality Very High Voltage Cable
-            "GGG",
+            "RRR",
             "CCC",
             "GGG",
             'C', findItemStack("Alloy Plate"),
-            'G', new ItemStack(Blocks.gold_block));
+            'R', "itemRubber",
+            'G', findItemStack("Gold Dust"));
 
         addRecipe(PQveryHighVoltageCableDescriptor.newItemStack(4), //Perfect Very High Voltage Cable
-            "DDD",
+            "RRR",
             "CCC",
             "DDD",
             'C', findItemStack("Alloy Plate"),
-            'D', findItemStack("Synthetic Diamond"));
+            'R', "itemRubber",
+            'D', findItemStack("Diamond Dust"));
 
     }
 
@@ -6177,12 +6163,12 @@ public class Eln {
             'P', new ItemStack(Items.gold_ingot));
         addRecipe(findItemStack("Experimental Battery"),
             " S ",
-			"LDV",
-			" C ",
+            "LDV",
+            " C ",
             'S', findItemStack("Capacity Oriented Battery"),
-			'L', findItemStack("Life Oriented Battery"),
-			'V', findItemStack("Voltage Oriented Battery"),
-			'C', findItemStack("Current Oriented Battery"),
+            'L', findItemStack("Life Oriented Battery"),
+            'V', findItemStack("Voltage Oriented Battery"),
+            'C', findItemStack("Current Oriented Battery"),
             'D', new ItemStack(Items.diamond));
 
         addRecipe(findItemStack("Single-use Battery"),
@@ -6261,7 +6247,7 @@ public class Eln {
 
 
     private void recipeElectricalFurnace() {
-        addRecipe(findItemStack("Electrical Furnace"),
+        /*addRecipe(findItemStack("Electrical Furnace"),
             "III",
             "IFI",
             "ICI",
@@ -6270,8 +6256,8 @@ public class Eln {
             'I', new ItemStack(Items.iron_ingot));
         addShapelessRecipe(findItemStack("Canister of Water", 1),
             findItemStack("Inert Canister"),
-            new ItemStack(Items.water_bucket));
-			
+            new ItemStack(Items.water_bucket)); */
+
     }
 
     private void recipeSixNodeMisc() {
@@ -6384,8 +6370,8 @@ public class Eln {
             'M', findItemStack("Electrical Motor"),
             'I', new ItemStack(Items.iron_ingot));
 
-        for (String metal : new String[] { "blockSteel", "blockAluminum", "blockAluminium", "casingMachineAdvanced" }) {
-            for (String panel : new String[] {"Small Solar Panel", "Small Rotating Solar Panel"}) {
+        for (String metal : new String[]{"blockSteel", "blockAluminum", "blockAluminium", "casingMachineAdvanced"}) {
+            for (String panel : new String[]{"Small Solar Panel", "Small Rotating Solar Panel"}) {
                 addRecipe(findItemStack("2x3 Solar Panel"),
                     "PPP",
                     "PPP",
@@ -6830,7 +6816,7 @@ public class Eln {
             "RCR",
             " D ",
             " d ",
-			'R', Items.redstone,
+            'R', Items.redstone,
             'C', dictCheapChip,
             'D', findItemStack("Cheap Electrical Drill"),
             'd', new ItemStack(Items.diamond));
@@ -6843,7 +6829,7 @@ public class Eln {
             'C', dictAdvancedChip,
             'M', findItemStack("Advanced Electrical Motor"),
             'P', new ItemStack(Items.diamond_pickaxe));
-		addRecipe(findItemStack("Turbo Electrical Drill"),
+        addRecipe(findItemStack("Turbo Electrical Drill"),
             "RCR",
             " F ",
             " D ",
@@ -6851,7 +6837,7 @@ public class Eln {
             'C', dictAdvancedChip,
             'R', findItemStack("Graphite Rod"),
             'D', findItemStack("Synthetic Diamond"));
-		addRecipe(findItemStack("Irresponsible Electrical Drill"),
+        addRecipe(findItemStack("Irresponsible Electrical Drill"),
             "DDD",
             "DFD",
             "DDD",
@@ -6901,21 +6887,22 @@ public class Eln {
         addRecipe(findItemStack("Tungsten Cable", 6),
             "III",
             'I', dictTungstenIngot);
-        addRecipe(findItemStack("T1 Transmission Cable", 6),
+        /*addRecipe(findItemStack("T1 Transmission Cable", 6),
             "III",
             'I', findItemStack("Arc Metal Ingot")); //this should be oredict steel, but I can't figure that out. Plz to help??
         addRecipe(findItemStack("T2 Transmission Cable", 6),
             "III",
-            'I', findItemStack("Arc Clay Ingot")); //likewise, but with aluminium
+            'I', findItemStack("Arc Clay Ingot")); //likewise, but with aluminium */
 
     }
-	private void recipeGraphite() {
-		addRecipe(findItemStack("Creative Cable", 1),
+
+    private void recipeGraphite() {
+        /*addRecipe(findItemStack("Creative Cable", 1),
             "I",
-			"S",
+            "S",
             'S', findItemStack("unreleasedium"),
-			'I', findItemStack("Synthetic Diamond"));
-		/*addRecipe(findItemStack("Arc Clay Block", 1),
+            'I', findItemStack("Synthetic Diamond"));
+		addRecipe(findItemStack("Arc Clay Block", 1),
             "III",
 			"III",
 			"III",
@@ -6923,50 +6910,50 @@ public class Eln {
 		addRecipe(findItemStack("Arc Clay Ingot", 9),
             "I",
             'I', findItemStack("Arc Clay Block")); */
-		addRecipe(findItemStack("Graphite Rod", 2),
+        addRecipe(findItemStack("Graphite Rod", 2),
             "I",
             'I', findItemStack("2x Graphite Rods"));
-		addRecipe(findItemStack("Graphite Rod", 3),
+        addRecipe(findItemStack("Graphite Rod", 3),
             "I",
             'I', findItemStack("3x Graphite Rods"));
-		addRecipe(findItemStack("Graphite Rod", 4),
+        addRecipe(findItemStack("Graphite Rod", 4),
             "I",
             'I', findItemStack("4x Graphite Rods"));
         addShapelessRecipe(
             findItemStack("2x Graphite Rods"),
-			findItemStack("Graphite Rod"),
-			findItemStack("Graphite Rod"));
-		addShapelessRecipe(
+            findItemStack("Graphite Rod"),
+            findItemStack("Graphite Rod"));
+        addShapelessRecipe(
             findItemStack("3x Graphite Rods"),
-			findItemStack("Graphite Rod"),
-			findItemStack("Graphite Rod"),
-			findItemStack("Graphite Rod"));
-		addShapelessRecipe(
+            findItemStack("Graphite Rod"),
+            findItemStack("Graphite Rod"),
+            findItemStack("Graphite Rod"));
+        addShapelessRecipe(
             findItemStack("3x Graphite Rods"),
-			findItemStack("Graphite Rod"),
-			findItemStack("2x Graphite Rods"));
-		addShapelessRecipe(
+            findItemStack("Graphite Rod"),
+            findItemStack("2x Graphite Rods"));
+        addShapelessRecipe(
             findItemStack("4x Graphite Rods"),
-			findItemStack("Graphite Rod"),
-			findItemStack("Graphite Rod"),
-			findItemStack("Graphite Rod"),
-			findItemStack("Graphite Rod"));
-		addShapelessRecipe(
+            findItemStack("Graphite Rod"),
+            findItemStack("Graphite Rod"),
+            findItemStack("Graphite Rod"),
+            findItemStack("Graphite Rod"));
+        addShapelessRecipe(
             findItemStack("4x Graphite Rods"),
-			findItemStack("2x Graphite Rods"),
-			findItemStack("Graphite Rod"),
-			findItemStack("Graphite Rod"));
-		addShapelessRecipe(
+            findItemStack("2x Graphite Rods"),
+            findItemStack("Graphite Rod"),
+            findItemStack("Graphite Rod"));
+        addShapelessRecipe(
             findItemStack("4x Graphite Rods"),
-			findItemStack("2x Graphite Rods"),
-			findItemStack("2x Graphite Rods"));
-		addShapelessRecipe(
+            findItemStack("2x Graphite Rods"),
+            findItemStack("2x Graphite Rods"));
+        addShapelessRecipe(
             findItemStack("4x Graphite Rods"),
-			findItemStack("3x Graphite Rods"),
-			findItemStack("Graphite Rod"));
-		addShapelessRecipe(
+            findItemStack("3x Graphite Rods"),
+            findItemStack("Graphite Rod"));
+        addShapelessRecipe(
             new ItemStack(Items.diamond, 2),
-			findItemStack("Synthetic Diamond"));
+            findItemStack("Synthetic Diamond"));
     }
 
     private void recipeBatteryItem() {
@@ -7154,8 +7141,8 @@ public class Eln {
 
     private void recipeMacerator() {
         float f = 4000;
-	maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.coal_ore, 1),
-	    new ItemStack(Items.coal, 3, 0), 1.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.coal_ore, 1),
+            new ItemStack(Items.coal, 3, 0), 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(findItemStack("Copper Ore"),
             new ItemStack[]{findItemStack("Copper Dust", 2)}, 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.iron_ore),
@@ -7256,8 +7243,8 @@ public class Eln {
             new ItemStack[]{findItemStack("Arc Clay Ingot", 1)}, 2.0 * f));
         arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot, 1),
             new ItemStack[]{findItemStack("Arc Metal Ingot", 1)}, 1.0 * f));
-        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Canister of Water", 1),
-            new ItemStack[]{findItemStack("Canister of Arc Water", 1)}, 7000000)); //hardcoded 7MJ to prevent overunity
+        //arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Canister of Water", 1),
+        //    new ItemStack[]{findItemStack("Canister of Arc Water", 1)}, 7000000)); //hardcoded 7MJ to prevent overunity
         arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Copper Slag", 64),
             new ItemStack[]{findItemStack("Silver Ingot", 1)}, 1.0 * f));
         arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Copper Plate", 8),
@@ -7341,8 +7328,8 @@ public class Eln {
 
         compressorRecipes.addRecipe(new Recipe(findItemStack("Coal Dust", 4),
             findItemStack("Coal Plate"), 40000.0));
-			
-		compressorRecipes.addRecipe(new Recipe(findItemStack("Coal Plate", 4),
+
+        compressorRecipes.addRecipe(new Recipe(findItemStack("Coal Plate", 4),
             findItemStack("Graphite Rod"), 80000.0));
 
         compressorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.sand),
@@ -7360,9 +7347,9 @@ public class Eln {
             new ItemStack[]{findItemStack("Advanced Magnet")}, 15000.0));
         magnetizerRecipes.addRecipe(new Recipe(findItemStack("Copper Dust", 1),
             new ItemStack[]{new ItemStack(Items.redstone)}, 5000.0));
-		magnetizerRecipes.addRecipe(new Recipe(findItemStack("Basic Magnet", 3),
+        magnetizerRecipes.addRecipe(new Recipe(findItemStack("Basic Magnet", 3),
             new ItemStack[]{findItemStack("Optimal Ferromagnetic Core")}, 5000.0));
-			
+
         magnetizerRecipes.addRecipe(new Recipe(findItemStack("Inert Canister", 1),
             new ItemStack[]{new ItemStack(Items.ender_pearl)}, 150000.0));
     }
@@ -7572,7 +7559,7 @@ public class Eln {
             'C', dictAdvancedChip,
             'c', findItemStack("Advanced Electrical Motor"),
             'I', "ingotAlloy");
-		addRecipe(findItemStack("800V Arc Furnace", 1),
+        addRecipe(findItemStack("800V Arc Furnace", 1),
             "ICI",
             "DMD",
             "IcI",
