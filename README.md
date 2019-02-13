@@ -1,5 +1,6 @@
 # Minecraft Mod - Codename : ELN
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fc9e1c9a05a04d2e81a618fc6832ff71)](https://app.codacy.com/app/Baughn/ElectricalAge?utm_source=github.com&utm_medium=referral&utm_content=Electrical-Age/ElectricalAge&utm_campaign=Badge_Grade_Settings)
 [![Build Status](https://travis-ci.org/Electrical-Age/ElectricalAge.svg?branch=1.7.10-MNA)](https://travis-ci.org/Electrical-Age/ElectricalAge)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FElectrical-Age%2FElectricalAge.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FElectrical-Age%2FElectricalAge?ref=badge_shield)
 
