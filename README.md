@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/Electrical-Age/ElectricalAge.svg?branch=1.7.10-MNA)](https://travis-ci.org/Electrical-Age/ElectricalAge)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FElectrical-Age%2FElectricalAge.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FElectrical-Age%2FElectricalAge?ref=badge_shield)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/0dd12c97357f4542903a667fa82a852c)](https://www.codacy.com/app/Baughn/ElectricalAge?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Electrical-Age/ElectricalAge&amp;utm_campaign=Badge_Grade)
 
 Electrical Age (ELN) is a Minecraft Mod offering the ability to perform large-scale in-game electrical simulations.
 
