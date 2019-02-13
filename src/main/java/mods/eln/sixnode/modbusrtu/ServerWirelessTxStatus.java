@@ -104,7 +104,7 @@ public class ServerWirelessTxStatus extends WirelessTxStatus implements IWireles
 
     @Override
     public boolean getInput(int id) {
-        return false;
+        return getCoil(id);
     }
 
     @Override
@@ -138,10 +138,12 @@ public class ServerWirelessTxStatus extends WirelessTxStatus implements IWireles
 
     @Override
     public void setInput(int id, boolean value) {
+        setCoil(id, value);
     }
 
     @Override
     public void setInputRegister(int id, short value) {
+        setHoldingRegister(id, value);
     }
 
     @Override

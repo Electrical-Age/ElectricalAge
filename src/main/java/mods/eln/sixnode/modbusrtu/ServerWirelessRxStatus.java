@@ -50,12 +50,12 @@ public class ServerWirelessRxStatus extends WirelessRxStatus implements IModbusS
 
     @Override
     public boolean getCoil(int id) {
-        return false;
+        return getInput(id);
     }
 
     @Override
     public short getHoldingRegister(int id) {
-        return 0;
+        return getInputRegister(id);
     }
 
     @Override
