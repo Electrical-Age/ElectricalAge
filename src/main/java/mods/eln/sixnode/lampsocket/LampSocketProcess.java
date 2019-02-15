@@ -1,6 +1,7 @@
 package mods.eln.sixnode.lampsocket;
 
 import mods.eln.Eln;
+import mods.eln.eventhandlers.MonsterEventHandler;
 import mods.eln.generic.GenericItemUsingDamage;
 import mods.eln.generic.GenericItemUsingDamageDescriptor;
 import mods.eln.item.LampDescriptor;
@@ -22,6 +23,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.List;
+
+import static mods.eln.Eln.instance;
 
 public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObserver*/ {
 
@@ -46,6 +49,11 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
     double updateLifeTimeout = 0, updateLifeTimeoutMax = 5;
 
     Coordonate lbCoord;
+
+    final static int monsterBlockTimeout = 24000; // 1 day
+    int monsterBlockTicksWhilePowerLoss = 0;
+    boolean monsterBlockRegistered = false;
+
 
     public LampSocketProcess(LampSocketElement l) {
         this.lamp = l;
@@ -262,6 +270,23 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
         lampStackLast = lampStack;
 
         placeSpot(newLight);
+        setMonsterBlocking(newLight);
+    }
+
+    private void setMonsterBlocking(int newLight) {
+        if (newLight > 0) {
+            monsterBlockTicksWhilePowerLoss = 0;
+        } else {
+            monsterBlockTicksWhilePowerLoss++;
+        }
+        if (!monsterBlockRegistered && monsterBlockTicksWhilePowerLoss < monsterBlockTimeout) {
+            MonsterEventHandler.INSTANCE.registerMonsterBlock(myCoord(), Eln.instance.blockMonstersAroundLampsRange);
+            monsterBlockRegistered = true;
+        }
+        if (monsterBlockRegistered && monsterBlockTicksWhilePowerLoss > monsterBlockTimeout) {
+            MonsterEventHandler.INSTANCE.unregisterMonsterBlock(myCoord(), Eln.instance.blockMonstersAroundLampsRange);
+            monsterBlockRegistered = false;
+        }
     }
 
     // ElectricalConnectionOneWay connection = null;

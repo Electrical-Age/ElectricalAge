@@ -30,7 +30,6 @@ public class ConsoleListener extends CommandBase {
     private final String cmdNameStr_newWind = "newWind";
     private final String cmdNameStr_regenOre = "regenOre";
     private final String cmdNameStr_generateLangFileTemplate = "generateLangFileTemplate";
-    private final String cmdNameStr_killMonstersAroundLamps = "killMonstersAroundLamps";
 
     private final String strOffsetL0 = "  ";
     private final String strOffsetL1 = "    ";
@@ -50,7 +49,6 @@ public class ConsoleListener extends CommandBase {
         cmdVisibleList.add(cmdNameStr_newWind);
         cmdVisibleList.add(cmdNameStr_regenOre);
         cmdVisibleList.add(cmdNameStr_generateLangFileTemplate);
-        cmdVisibleList.add(cmdNameStr_killMonstersAroundLamps);
         java.util.Collections.sort(cmdVisibleList);
     }
 
@@ -214,24 +212,9 @@ public class ConsoleListener extends CommandBase {
             cprint(ics, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_YELLOW + cmdNameStr_generateLangFileTemplate);
             cprint(ics, strOffsetL0 + "New language system parses source code, see here how to generate language " +
                 "files: https://github.com/Electrical-Age/ElectricalAge");
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_killMonstersAroundLamps)) {
-            cprint(ics, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_YELLOW + cmdNameStr_killMonstersAroundLamps);
-            if (!checkArgCount(ics, astring, 1))
-                return;
-            ConsoleArg<Boolean> arg0 = getArgBool(ics, astring[1]);
-            if (!arg0.valid)
-                return;
-            Eln.instance.killMonstersAroundLamps = arg0.value;
-            cprint(ics, strOffsetL0 + "Avoid monsters spawning around lamps : " + Color.COLOR_DARK_GREEN + boolToStr(arg0.value));
-            cprint(ics, strOffsetL0 + "Warning: Command effective to this game instance only.");
         } else {
             cprint(ics, Color.COLOR_DARK_CYAN + "ELN > " + Color.COLOR_DARK_RED + "Error: Unknown command.");
         }
-
-        return;
-
-        //Eln.simulator.setSimplify(!astring[1].equals("0"));
-        //Eln.simulator.pleaseCrash = true;
     }
 
     private boolean checkArgCount(ICommandSender ics, String[] args, int exceptedArgc) {
@@ -342,15 +325,6 @@ public class ConsoleListener extends CommandBase {
             cprint(ics, "");
             cprint(ics, strOffsetL0 + "Parameters :");
             cprint(ics, strOffsetL1 + "@0:string : full file path.");
-            cprint(ics, "");
-        } else if (cmd.equalsIgnoreCase(cmdNameStr_killMonstersAroundLamps)) {
-            cprint(ics, strOffsetL0 + "When set, monsters don't spawn around the lamps (default).");
-            cprint(ics, strOffsetL0 + "When clear, leaving lights on in dark zones is recommended...");
-            cprint(ics, strOffsetL0 + "Effective only during this game instance.");
-            cprint(ics, strOffsetL0 + "(See \"Eln.cfg\" for permanent effect.)");
-            cprint(ics, "");
-            cprint(ics, strOffsetL0 + "Parameters :");
-            cprint(ics, strOffsetL1 + "@0:bool : Enable/disable.");
             cprint(ics, "");
         } else {
             cprint(ics, Color.COLOR_DARK_RED + strOffsetL0 + "Error : Unknown/Undocumented command.");
