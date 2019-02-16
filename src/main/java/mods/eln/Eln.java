@@ -125,7 +125,6 @@ import mods.eln.transparentnode.eggincubator.EggIncubatorDescriptor;
 import mods.eln.transparentnode.electricalantennarx.ElectricalAntennaRxDescriptor;
 import mods.eln.transparentnode.electricalantennatx.ElectricalAntennaTxDescriptor;
 import mods.eln.transparentnode.electricalfurnace.ElectricalFurnaceDescriptor;
-import mods.eln.transparentnode.electricalmachine.ArcFurnaceDescriptor;
 import mods.eln.transparentnode.electricalmachine.CompressorDescriptor;
 import mods.eln.transparentnode.electricalmachine.MaceratorDescriptor;
 import mods.eln.transparentnode.electricalmachine.MagnetizerDescriptor;
@@ -608,7 +607,6 @@ public class Eln {
         registerBattery(16);
         registerElectricalFurnace(32);
         registerMacerator(33);
-        registerArcFurnace(34);
         registerCompressor(35);
         registerMagnetizer(36);
         registerPlateMachine(37);
@@ -644,7 +642,7 @@ public class Eln {
         registerMiningPipe(17);
         registerTreeResinAndRubber(64);
         registerRawCable(65);
-        registerArc(69);
+        registerCableQualityItems(70);
         registerBrush(119);
         registerMiscItem(120);
         registerElectricalTool(121);
@@ -806,14 +804,12 @@ public class Eln {
         recipeMiningPipe();
         recipeTreeResinAndRubber();
         recipeRawCable();
-        recipeGraphite();
         recipeMiscItem();
         recipeBatteryItem();
         recipeElectricalTool();
         recipePortableCapacitor();
 
         recipeFurnace();
-        recipeArcFurnace();
         recipeMacerator();
         recipeCompressor();
         recipePlateMachine();
@@ -2965,30 +2961,6 @@ public class Eln {
 
     public RecipesList compressorRecipes = new RecipesList();
     public RecipesList plateMachineRecipes = new RecipesList();
-    public RecipesList arcFurnaceRecipes = new RecipesList();
-
-    private void registerArcFurnace(int id) {
-
-        int subId, completId;
-        String name;
-        {
-            subId = 0;
-            name = TR_NAME(Type.NONE, "800V Arc Furnace");
-
-            ArcFurnaceDescriptor desc = new ArcFurnaceDescriptor(
-                name,// String name,
-                obj.getObj("arcfurnace"),
-                HVU, 10000,// double nominalU,double nominalP,
-                HVU * 1.25,// double maximalU,
-                new ThermalLoadInitializer(80, -100, 10, 100000.0),// thermal,
-                highVoltageCableDescriptor,// ElectricalCableDescriptor cable
-                arcFurnaceRecipes);
-
-            transparentNodeItem.addDescriptor(subId + (id << 6), desc);
-            desc.setRunningSound("eln:arc_furnace");
-
-        }
-    }
 
     private void registerPlateMachine(int id) {
 
@@ -4746,104 +4718,12 @@ public class Eln {
         }
     }
 
-    private void registerArc(int id) {
+    private void registerCableQualityItems(int id) {
         int subId, completId;
         String name;
 
         {
             subId = 0;
-            completId = subId + (id << 6);
-            name = TR_NAME(Type.NONE, "Graphite Rod");
-
-            GraphiteDescriptor = new GraphiteDescriptor(name);
-            sharedItem.addElement(completId, GraphiteDescriptor);
-            Data.addResource(GraphiteDescriptor.newItemStack());
-        }
-        {
-            GenericItemUsingDamageDescriptor descriptor;
-            subId = 1;
-            completId = subId + (id << 6);
-            name = TR_NAME(Type.NONE, "2x Graphite Rods");
-
-            descriptor = new GenericItemUsingDamageDescriptor(name);
-            sharedItem.addElement(completId, descriptor);
-            Data.addResource(descriptor.newItemStack());
-        }
-        {
-            GenericItemUsingDamageDescriptor descriptor;
-            subId = 2;
-            completId = subId + (id << 6);
-            name = TR_NAME(Type.NONE, "3x Graphite Rods");
-
-            descriptor = new GenericItemUsingDamageDescriptor(name);
-            sharedItem.addElement(completId, descriptor);
-            Data.addResource(descriptor.newItemStack());
-        }
-        {
-            GenericItemUsingDamageDescriptor descriptor;
-            subId = 3;
-            completId = subId + (id << 6);
-            name = TR_NAME(Type.NONE, "4x Graphite Rods");
-
-            descriptor = new GenericItemUsingDamageDescriptor(name);
-            sharedItem.addElement(completId, descriptor);
-            Data.addResource(descriptor.newItemStack());
-        }
-        {
-            GenericItemUsingDamageDescriptor descriptor;
-            subId = 4;
-            completId = subId + (id << 6);
-            name = TR_NAME(Type.NONE, "Synthetic Diamond");
-
-            descriptor = new GenericItemUsingDamageDescriptor(name);
-            sharedItem.addElement(completId, descriptor);
-            Data.addResource(descriptor.newItemStack());
-        }
-        {
-            GenericItemUsingDamageDescriptor descriptor;
-            subId = 5;
-            completId = subId + (id << 6);
-            name = TR_NAME(Type.NONE, "unreleasedium");
-
-            descriptor = new GenericItemUsingDamageDescriptor(name);
-            sharedItem.addElement(completId, descriptor);
-            Data.addResource(descriptor.newItemStack());
-        }
-        {
-            GenericItemUsingDamageDescriptor descriptor;
-            subId = 6;
-            completId = subId + (id << 6);
-            name = TR_NAME(Type.NONE, "Arc Clay Ingot");
-
-            descriptor = new GenericItemUsingDamageDescriptor(name);
-            sharedItem.addElement(completId, descriptor);
-            Data.addResource(descriptor.newItemStack());
-            OreDictionary.registerOre("ingotAluminum", descriptor.newItemStack());
-            OreDictionary.registerOre("ingotAluminium", descriptor.newItemStack());
-        }
-        {
-            GenericItemUsingDamageDescriptor descriptor;
-            subId = 8;
-            completId = subId + (id << 6);
-            name = TR_NAME(Type.NONE, "Arc Metal Ingot");
-
-            descriptor = new GenericItemUsingDamageDescriptor(name);
-            sharedItem.addElement(completId, descriptor);
-            Data.addResource(descriptor.newItemStack());
-            OreDictionary.registerOre("ingotSteel", descriptor.newItemStack());
-        }
-        {
-            GenericItemUsingDamageDescriptor descriptor;
-            subId = 10;
-            completId = subId + (id << 6);
-            name = TR_NAME(Type.NONE, "Inert Canister");
-
-            descriptor = new GenericItemUsingDamageDescriptor(name);
-            sharedItem.addElement(completId, descriptor);
-            Data.addResource(descriptor.newItemStack());
-        }
-        {
-            subId = 15;
             name = TR_NAME(Type.NONE, "Copper Folded Plate");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
                 name, new String[]{"Now it can fit inside a bucket"});
@@ -4851,7 +4731,7 @@ public class Eln {
             Data.addResource(desc.newItemStack());
         }
         {
-            subId = 16;
+            subId = 1;
             name = TR_NAME(Type.NONE, "Copper Folded Plate in a Bucket");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
                 name, new String[]{"It just needs smelting now"});
@@ -4859,7 +4739,7 @@ public class Eln {
             Data.addResource(desc.newItemStack());
         }
         {
-            subId = 17;
+            subId = 2;
             name = TR_NAME(Type.NONE, "Molten Copper Bucket");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
                 name, new String[]{"Next we add Lead Dust"});
@@ -4867,7 +4747,7 @@ public class Eln {
             Data.addResource(desc.newItemStack());
         }
         {
-            subId = 18;
+            subId = 3;
             name = TR_NAME(Type.NONE, "Peppered Molten Copper Bucket");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
                 name, new String[]{"Now to melt the Lead Dust into the mix"});
@@ -4875,7 +4755,7 @@ public class Eln {
             Data.addResource(desc.newItemStack());
         }
         {
-            subId = 19;
+            subId = 4;
             name = TR_NAME(Type.NONE, "Copper Slag Bucket");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
                 name, new String[]{"Pour into a bucket to get Lead and Slag"});
@@ -4883,7 +4763,7 @@ public class Eln {
             Data.addResource(desc.newItemStack());
         }
         {
-            subId = 20;
+            subId = 5;
             name = TR_NAME(Type.NONE, "Seperated Molten Copper Bucket");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
                 name, new String[]{"Cool it to get your resources"});
@@ -4891,7 +4771,7 @@ public class Eln {
             Data.addResource(desc.newItemStack());
         }
         {
-            subId = 21;
+            subId = 6;
             name = TR_NAME(Type.NONE, "Copper Slag");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
                 name, new String[]{"Contains Silver"});
@@ -4899,7 +4779,7 @@ public class Eln {
             Data.addResource(desc.newItemStack());
         }
         {
-            subId = 22;
+            subId = 7;
             name = TR_NAME(Type.NONE, "Pure Copper Ingot");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
                 name, new String[]{"Great for building High Quality Cables"});
@@ -4907,7 +4787,7 @@ public class Eln {
             Data.addResource(desc.newItemStack());
         }
         {
-            subId = 23;
+            subId = 8;
             name = TR_NAME(Type.NONE, "Glorious Copper Plate");
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
                 name, new String[]{"It's been folded 1000 times"});
@@ -6640,16 +6520,6 @@ public class Eln {
             dictTungstenDust,
             dictTungstenDust,
             dictTungstenDust);
-        addShapelessRecipe(findItemStack("Inert Canister", 1),
-            findItemStack("Lapis Dust"),
-            findItemStack("Lapis Dust"),
-            findItemStack("Lapis Dust"),
-            findItemStack("Lapis Dust"),
-            findItemStack("Diamond Dust"),
-            findItemStack("Lapis Dust"),
-            findItemStack("Lapis Dust"),
-            findItemStack("Lapis Dust"),
-            findItemStack("Lapis Dust"));
         addShapelessRecipe(findItemStack("Coal Dust", 1),
             "dustResistive",
             "dustResistive",
@@ -6769,20 +6639,6 @@ public class Eln {
             'C', dictAdvancedChip,
             'M', findItemStack("Advanced Electrical Motor"),
             'P', new ItemStack(Items.diamond_pickaxe));
-        addRecipe(findItemStack("Turbo Electrical Drill"),
-            "RCR",
-            " F ",
-            " D ",
-            'F', findItemStack("Fast Electrical Drill"),
-            'C', dictAdvancedChip,
-            'R', findItemStack("Graphite Rod"),
-            'D', findItemStack("Synthetic Diamond"));
-        addRecipe(findItemStack("Irresponsible Electrical Drill"),
-            "DDD",
-            "DFD",
-            "DDD",
-            'F', findItemStack("Turbo Electrical Drill"),
-            'D', findItemStack("Synthetic Diamond"));
     }
 
     private void recipeOreScanner() {
@@ -6827,53 +6683,6 @@ public class Eln {
         addRecipe(findItemStack("Tungsten Cable", 6),
             "III",
             'I', dictTungstenIngot);
-    }
-
-    private void recipeGraphite() {
-        addRecipe(findItemStack("Graphite Rod", 2),
-            "I",
-            'I', findItemStack("2x Graphite Rods"));
-        addRecipe(findItemStack("Graphite Rod", 3),
-            "I",
-            'I', findItemStack("3x Graphite Rods"));
-        addRecipe(findItemStack("Graphite Rod", 4),
-            "I",
-            'I', findItemStack("4x Graphite Rods"));
-        addShapelessRecipe(
-            findItemStack("2x Graphite Rods"),
-            findItemStack("Graphite Rod"),
-            findItemStack("Graphite Rod"));
-        addShapelessRecipe(
-            findItemStack("3x Graphite Rods"),
-            findItemStack("Graphite Rod"),
-            findItemStack("Graphite Rod"),
-            findItemStack("Graphite Rod"));
-        addShapelessRecipe(
-            findItemStack("3x Graphite Rods"),
-            findItemStack("Graphite Rod"),
-            findItemStack("2x Graphite Rods"));
-        addShapelessRecipe(
-            findItemStack("4x Graphite Rods"),
-            findItemStack("Graphite Rod"),
-            findItemStack("Graphite Rod"),
-            findItemStack("Graphite Rod"),
-            findItemStack("Graphite Rod"));
-        addShapelessRecipe(
-            findItemStack("4x Graphite Rods"),
-            findItemStack("2x Graphite Rods"),
-            findItemStack("Graphite Rod"),
-            findItemStack("Graphite Rod"));
-        addShapelessRecipe(
-            findItemStack("4x Graphite Rods"),
-            findItemStack("2x Graphite Rods"),
-            findItemStack("2x Graphite Rods"));
-        addShapelessRecipe(
-            findItemStack("4x Graphite Rods"),
-            findItemStack("3x Graphite Rods"),
-            findItemStack("Graphite Rod"));
-        addShapelessRecipe(
-            new ItemStack(Items.diamond, 2),
-            findItemStack("Synthetic Diamond"));
     }
 
     private void recipeBatteryItem() {
@@ -7130,44 +6939,6 @@ public class Eln {
         //end recycling recipes
     }
 
-    private void recipeArcFurnace() {
-        float f = 200000;
-        float smeltf = 5000;
-        //start smelting recipes
-        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.iron_ore, 1),
-            new ItemStack[]{new ItemStack(Items.iron_ingot, 2)}, smeltf));
-        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.gold_ore, 1),
-            new ItemStack[]{new ItemStack(Items.gold_ingot, 2)}, smeltf));
-        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.coal_ore, 1),
-            new ItemStack[]{new ItemStack(Items.coal, 2)}, smeltf));
-        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.redstone_ore, 1),
-            new ItemStack[]{new ItemStack(Items.redstone, 6)}, smeltf));
-        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.lapis_ore, 1),
-            new ItemStack[]{new ItemStack(Blocks.lapis_block, 1)}, smeltf));
-        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.diamond_ore, 1),
-            new ItemStack[]{new ItemStack(Items.diamond, 2)}, smeltf));
-        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.emerald_ore, 1),
-            new ItemStack[]{new ItemStack(Items.emerald, 2)}, smeltf));
-        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Blocks.quartz_ore, 1),
-            new ItemStack[]{new ItemStack(Items.quartz, 2)}, smeltf));
-
-        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Copper Ore", 1),
-            new ItemStack[]{findItemStack("Copper Ingot", 2)}, smeltf));
-        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Lead Ore", 1),
-            new ItemStack[]{findItemStack("Lead Ingot", 2)}, smeltf));
-        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Tungsten Ore", 1),
-            new ItemStack[]{findItemStack("Tungsten Ingot", 2)}, smeltf));
-        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Alloy Dust", 1),
-            new ItemStack[]{findItemStack("Alloy Ingot", 1)}, smeltf));
-        //end smelting recipes
-        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Items.clay_ball, 2),
-            new ItemStack[]{findItemStack("Arc Clay Ingot", 1)}, 2.0 * f));
-        arcFurnaceRecipes.addRecipe(new Recipe(new ItemStack(Items.iron_ingot, 1),
-            new ItemStack[]{findItemStack("Arc Metal Ingot", 1)}, 1.0 * f));
-        arcFurnaceRecipes.addRecipe(new Recipe(findItemStack("Copper Plate", 8),
-            new ItemStack[]{findItemStack("Pure Copper Ingot", 1)}, f / 5));
-    }
-
     private void recipeMaceratorModOres() {
         float f = 4000;
 
@@ -7237,17 +7008,12 @@ public class Eln {
     }
 
     private void recipeCompressor() {
-        compressorRecipes.addRecipe(new Recipe(findItemStack("4x Graphite Rods", 1),
-            findItemStack("Synthetic Diamond"), 80000.0));
         // extractorRecipes.addRecipe(new
         // Recipe("dustCinnabar",new
         // ItemStack[]{findItemStack("Purified Cinnabar Dust",1)}, 1000.0));
 
         compressorRecipes.addRecipe(new Recipe(findItemStack("Coal Dust", 4),
             findItemStack("Coal Plate"), 40000.0));
-
-        compressorRecipes.addRecipe(new Recipe(findItemStack("Coal Plate", 4),
-            findItemStack("Graphite Rod"), 80000.0));
 
         compressorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.sand),
             findItemStack("Dielectric"), 2000.0));
@@ -7267,8 +7033,6 @@ public class Eln {
         magnetizerRecipes.addRecipe(new Recipe(findItemStack("Basic Magnet", 3),
             new ItemStack[]{findItemStack("Optimal Ferromagnetic Core")}, 5000.0));
 
-        magnetizerRecipes.addRecipe(new Recipe(findItemStack("Inert Canister", 1),
-            new ItemStack[]{new ItemStack(Items.ender_pearl)}, 150000.0));
         magnetizerRecipes.addRecipe(new Recipe(new ItemStack(Items.ender_pearl),
             new ItemStack[]{new ItemStack(Items.experience_bottle, 20)}, 100000.0));
     }
@@ -7478,16 +7242,6 @@ public class Eln {
             'C', dictAdvancedChip,
             'c', findItemStack("Advanced Electrical Motor"),
             'I', "ingotAlloy");
-        addRecipe(findItemStack("800V Arc Furnace", 1),
-            "ICI",
-            "DMD",
-            "IcI",
-            'M', findItemStack("Advanced Machine Block"),
-            'C', findItemStack("3x Graphite Rods"),
-            'c', findItemStack("Synthetic Diamond"),
-            'D', "plateGold",
-            'I', "ingotAlloy");
-
     }
 
     private void recipeElectricalGate() {
