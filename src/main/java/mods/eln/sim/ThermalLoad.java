@@ -2,7 +2,39 @@ package mods.eln.sim;
 
 public class ThermalLoad {
 
-    public double Tc, Rp, Rs, C, PcTemp, Pc, Prs, Psp, PrsTemp = 0, PspTemp = 0;
+    /**
+     * Current temperature, in celsius.
+     */
+    public double Tc;
+    public double Rp;
+    /**
+     * Thermal resistance, analogous to ohms.
+     */
+    public double Rs;
+    public double C;
+    /**
+     * Current thermal power, in watts, of this load.
+     * This will be negative if it's cooling down.
+     */
+    public double Pc;
+    /**
+     * Current resistive loss, in watts.
+     */
+    public double Prs;
+    public double Psp;
+
+    /**
+     * Absolute heat transfer in this simulator tick.
+     */
+    public double PrsTemp = 0;
+    /**
+     * Heat power transferred during this simulator tick.
+     */
+    public double PspTemp = 0;
+    /**
+     * Relative heat transfer during this simulator tick.
+     */
+    public double PcTemp;
 
     boolean isSlow;
 

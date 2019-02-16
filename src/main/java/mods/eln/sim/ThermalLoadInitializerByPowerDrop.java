@@ -8,8 +8,19 @@ public class ThermalLoadInitializerByPowerDrop {
     double heatingTao;
     double TConductivityDrop;
 
-    public double Rs, Rp, C;
+    public double Rs;
+    public double Rp;
+    /**
+     * Thermal capacitance.
+     */
+    public double C;
 
+    /**
+     * @param warmLimit Intended maximum temperature in celsius.
+     * @param coolLimit Intended minimum temperature in celsius.
+     * @param heatingTao
+     * @param TConductivityDrop
+     */
     public ThermalLoadInitializerByPowerDrop(double warmLimit, double coolLimit, double heatingTao, double TConductivityDrop) {
         this.TConductivityDrop = TConductivityDrop;
         this.coolLimit = coolLimit;
@@ -18,7 +29,7 @@ public class ThermalLoadInitializerByPowerDrop {
     }
 
     public void setMaximalPower(double P) {
-        C = P * heatingTao / (warmLimit);
+        C = P * heatingTao / warmLimit;
         Rp = warmLimit / P;
         Rs = TConductivityDrop / P / 2;
 
