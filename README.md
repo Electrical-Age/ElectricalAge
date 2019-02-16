@@ -111,6 +111,8 @@ Most graphics and all 3D models are licensed under the Creative Commons Attribut
   Designed by [Luis Prado](https://thenounproject.com/Luis/).
 - src/main/resources/assets/eln/textures/blocks/scanner.png
   Designed by [Creative Stall](https://thenounproject.com/creativestall/).
+- src/main/resources/assets/eln/textures/items/
+Designed by Guillermo Guso from the Noun Project
 
 Some graphics are public domain. These are:
 

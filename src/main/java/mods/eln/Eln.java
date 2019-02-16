@@ -3507,7 +3507,17 @@ public class Eln {
             element = new CombustionChamber(TR_NAME(Type.NONE, "Combustion Chamber"));
             sharedItem.addElement(completId, element);
         }
-
+        {
+            ThermalIsolatorElement element;
+            subId = 1;
+            completId = subId + (id << 6);
+            element = new ThermalIsolatorElement(
+                TR_NAME(Type.NONE, "Thermal Insulation"),
+                0.5,
+                500
+            );
+            sharedItem.addElement(completId, element);
+        }
     }
 
     private void registerFerromagneticCore(int id) {
@@ -6228,6 +6238,12 @@ public class Eln {
             "L L",
             " L ",
             'L', new ItemStack(Blocks.stone));
+        addRecipe(findItemStack("Thermal Insulation", 4),
+            "WSW",
+            "SWS",
+            "WSW",
+            'S', new ItemStack(Blocks.stone),
+            'W', new ItemStack(Blocks.wool));
     }
 
     private void recipeFerromagneticCore() {

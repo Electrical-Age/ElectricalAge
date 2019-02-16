@@ -33,7 +33,7 @@ public class ElectricalFurnaceProcess implements IProcess {
             furnace.descriptor.refreshTo(furnace.thermalLoad, 1);
         } else {
             ThermalIsolatorElement element = ((GenericItemUsingDamage<ThermalIsolatorElement>) itemStack.getItem()).getDescriptor(itemStack);
-            furnace.descriptor.refreshTo(furnace.thermalLoad, element.conductionFactor);
+            furnace.descriptor.refreshTo(furnace.thermalLoad, element.getConductionFactor());
         }
 
         ItemStack itemStackIn = inventory.getStackInSlot(ElectricalFurnaceElement.inSlotId);
