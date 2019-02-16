@@ -9,7 +9,8 @@ class ThermalIsolatorElement(name: String, val conductionFactor: Double, val Tma
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer?, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
         list.add(tr("Upgrade for the Stone Heat Furnace"))
-        list.add(Utils.plotCelsius(tr("  Heat tolerance: "), Tmax))
-        list.add(Utils.plotPercent(tr("  Insulation: "), conductionFactor))
+        list.add(tr("Organic Asbestos™"))
+        list.add(Utils.plotCelsius(tr("  Heat tolerance:"), Tmax))
+        list.add(Utils.plotPercent(tr("  Insulation:"), conductionFactor))
     }
 }
