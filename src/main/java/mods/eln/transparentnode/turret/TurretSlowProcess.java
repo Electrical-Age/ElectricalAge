@@ -18,9 +18,6 @@ import net.minecraft.util.DamageSource;
 import java.util.List;
 import java.util.Random;
 
-import static scala.Console.print;
-import static scala.Console.println;
-
 
 public class TurretSlowProcess extends StateMachine {
     private static final Random rand = new Random();

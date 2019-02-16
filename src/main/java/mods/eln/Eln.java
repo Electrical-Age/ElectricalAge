@@ -255,23 +255,23 @@ public class Eln {
     public GraphiteDescriptor GraphiteDescriptor;
 
     public ElectricalCableDescriptor veryHighVoltageCableDescriptor;
-    public ElectricalCableDescriptor LQveryHighVoltageCableDescriptor;
-    public ElectricalCableDescriptor HQveryHighVoltageCableDescriptor;
-    public ElectricalCableDescriptor PQveryHighVoltageCableDescriptor;
+    public ElectricalCableDescriptor veryHighVoltageLQCableDescriptor;
+    public ElectricalCableDescriptor veryHighVoltageHQCableDescriptor;
+    public ElectricalCableDescriptor veryHighVoltagePQCableDescriptor;
     public ElectricalCableDescriptor highVoltageCableDescriptor;
-    public ElectricalCableDescriptor LQhighVoltageCableDescriptor;
-    public ElectricalCableDescriptor HQhighVoltageCableDescriptor;
-    public ElectricalCableDescriptor PQhighVoltageCableDescriptor;
+    public ElectricalCableDescriptor highVoltageLQCableDescriptor;
+    public ElectricalCableDescriptor highVoltageHQCableDescriptor;
+    public ElectricalCableDescriptor highVoltagePQCableDescriptor;
     public ElectricalCableDescriptor signalCableDescriptor;
     public ElectricalCableDescriptor lowVoltageCableDescriptor;
-    public ElectricalCableDescriptor LQlowVoltageCableDescriptor;
-    public ElectricalCableDescriptor HQlowVoltageCableDescriptor;
-    public ElectricalCableDescriptor PQlowVoltageCableDescriptor;
+    public ElectricalCableDescriptor lowVoltageLQCableDescriptor;
+    public ElectricalCableDescriptor lowVoltageHQCableDescriptor;
+    public ElectricalCableDescriptor lowVoltagePQCableDescriptor;
     public ElectricalCableDescriptor batteryCableDescriptor;
-    public ElectricalCableDescriptor meduimVoltageCableDescriptor;
-    public ElectricalCableDescriptor LQmeduimVoltageCableDescriptor;
-    public ElectricalCableDescriptor HQmeduimVoltageCableDescriptor;
-    public ElectricalCableDescriptor PQmeduimVoltageCableDescriptor;
+    public ElectricalCableDescriptor mediumVoltageCableDescriptor;
+    public ElectricalCableDescriptor mediumVoltageLQCableDescriptor;
+    public ElectricalCableDescriptor mediumVoltageHQCableDescriptor;
+    public ElectricalCableDescriptor mediumVoltagePQCableDescriptor;
 
     public OreRegenerate oreRegenerate;
 
@@ -1091,7 +1091,6 @@ public class Eln {
     public CableRenderDescriptor stdCableRender200V;
     public CableRenderDescriptor stdCableRender800V;
     public CableRenderDescriptor stdCableRender3200V;
-    public CableRenderDescriptor activerendermodel;
 
     public static final double gateOutputCurrent = 0.100;
     public static final double SVU = 50, SVII = gateOutputCurrent / 50,
@@ -1174,152 +1173,150 @@ public class Eln {
         stdCableRender800V = new CableRenderDescriptor("eln", "sprites/cable.png", 3.95f, 1.95f);
         stdCableRender3200V = new CableRenderDescriptor("eln", "sprites/cableVHV.png", 3.95f, 1.95f);
 
-        List<String> voltagelist = new ArrayList<>(Arrays.asList(
-            "Low ",
-            "Medium ",
-            "High ",
-            "Very High "));
-        List<String> qualitylist = new ArrayList<>(Arrays.asList(
-            "Standard ",
-            "Shoddy ",
-            "Quality ",
-            "Perfect "));
-        List<Double> valuelist = new ArrayList<>(Arrays.asList(
-            1d,
-            0.5d,
-            2d,
-            4d));
-        List<String> renderlist = new ArrayList<>(Arrays.asList(
-            "sprites/cable.png",
+        List<String> voltages = new ArrayList<>(Arrays.asList( //The order in which to register cable voltages
+            "Low ",        //50V
+            "Medium ",     //200V
+            "High ",       //800V
+            "Very High "));//3200V
+        List<String> qualities = new ArrayList<>(Arrays.asList( //The order in which to register cables quality
+            "Standard ", //Normal Cable
+            "Shoddy ",   //Bad Cable
+            "Quality ",  //Great Cable
+            "Perfect "));//Best Cable
+        List<Double> valuelist = new ArrayList<>(Arrays.asList( //Power Factor of each cable quality, in Double
+            1d,   //Normal
+            0.5d, //Half
+            2d,   //Double
+            4d)); //Quadruple
+        List<String> textures = new ArrayList<>(Arrays.asList( //List of textures for each cable
+            "sprites/cable.png", //Most cables use the same texture
             "sprites/cableshoddy.png",
             "sprites/cablequality.png",
             "sprites/cableperfect.png",
-            "sprites/cableVHV.png",
+            "sprites/cableVHV.png", //VHV cables have their own textures
             "sprites/cableVHVshoddy.png",
             "sprites/cableVHVquality.png",
             "sprites/cableVHVperfect.png"));
-        List<Float> rendercablesizes = new ArrayList<>(Arrays.asList(
-            1.95f,
-            0.95f,
-            2.95f,
-            0.95f,
-            3.95f,
-            1.95f));
+        List<Float> sizes = new ArrayList<>(Arrays.asList( //Contains the cable size values.
+            1.95f,  //First size value for 50V cable
+            0.95f,  //Second size value for 50V cable
+            2.95f,  //First size value for the 200V cable
+            0.95f,  //Second size value for 200V cable
+            3.95f,  //First size value for 800V/3200V cables
+            1.95f));//Second size value for 800V/3200V cables
 
-        int renderspriteindex = 0;
-        int renderfloatindex = 0;
+        int renderspriteindex = 0; //This value tells the register where to point in the texture list
+        int renderfloatindex = 0; //This value tells the register which size the cable ought to be
         subId = 3;
-        for(int cablevoltage = 0; cablevoltage <=3; cablevoltage++){
-        for(int cablequality = 0; cablequality <=3; cablequality++) {
-            //while (cablevoltage <= 3) {
-            renderspriteindex = 0;
-            subId++;
-            name = TR_NAME(Type.NONE, qualitylist.get(cablequality) + voltagelist.get(cablevoltage) + "Voltage Cable");
+        for (int cablevoltage = 0; cablevoltage <= 3; cablevoltage++) { //It goes through each voltage, from low to very high
+            for (int cablequality = 0; cablequality <= 3; cablequality++) { //Within those voltages, it registers the quality of each voltage
+                subId++;
+                name = TR_NAME(Type.NONE, qualities.get(cablequality) + voltages.get(cablevoltage) + "Voltage Cable"); //Constructs the cable's name from the names in the first two tables. (quality and voltage)
 
-            renderspriteindex = cablequality;
+                renderspriteindex = cablequality;
 
-            switch (cablevoltage) {
-                case 0:
-                    power = LVP();
-                    nominalcablevoltage = LVU;
-                    renderfloatindex = 0;
-                    break;
-                case 1:
-                    power = MVP();
-                    nominalcablevoltage = MVU;
-                    renderfloatindex = 2;
-                    break;
-                case 2:
-                    power = HVP();
-                    nominalcablevoltage = HVU;
-                    renderfloatindex = 4;
-                    break;
-                case 3:
-                    power = VVP();
-                    nominalcablevoltage = VVU;
-                    renderfloatindex = 4;
-                    renderspriteindex = renderspriteindex + 4;
-                    break;
+                switch (cablevoltage) { //Tells the register which voltage rating to give the active cable
+                    case 0:
+                        power = LVP();
+                        nominalcablevoltage = LVU;
+                        renderfloatindex = 0;
+                        break;
+                    case 1:
+                        power = MVP();
+                        nominalcablevoltage = MVU;
+                        renderfloatindex = 2;
+                        break;
+                    case 2:
+                        power = HVP();
+                        nominalcablevoltage = HVU;
+                        renderfloatindex = 4;
+                        break;
+                    case 3:
+                        power = VVP();
+                        nominalcablevoltage = VVU;
+                        renderfloatindex = 4;
+                        renderspriteindex = renderspriteindex + 4; //VHV cables have their own pool of textures
+                        break;
+                }
+                CableRenderDescriptor activerendermodel = new CableRenderDescriptor("eln", textures.get(renderspriteindex), sizes.get(renderfloatindex), sizes.get(renderfloatindex + 1)); //construct the model using data stored in each list
+                desc = new ElectricalCableDescriptor(name, activerendermodel, "A Conduit of Electrical Power", false); //Create the descriptor.
+                nominalcablepower = power * valuelist.get(cablequality);
+                switch (cablequality) { //Finds out which descriptor to bind the active cable to
+                    case 0:
+                        switch (cablevoltage) { //register Standard Cables
+                            case 0:
+                                lowVoltageCableDescriptor = desc;
+                                break;
+                            case 1:
+                                mediumVoltageCableDescriptor = desc;
+                                break;
+                            case 2:
+                                highVoltageCableDescriptor = desc;
+                                break;
+                            case 3:
+                                veryHighVoltageCableDescriptor = desc;
+                                break;
+                        }
+                    case 1:
+                        switch (cablevoltage) { //register Low Quality Cables
+                            case 0:
+                                lowVoltageLQCableDescriptor = desc;
+                                break;
+                            case 1:
+                                mediumVoltageLQCableDescriptor = desc;
+                                break;
+                            case 2:
+                                highVoltageLQCableDescriptor = desc;
+                                break;
+                            case 3:
+                                veryHighVoltageLQCableDescriptor = desc;
+                                break;
+                        }
+                    case 2:
+                        switch (cablevoltage) { //register High Quality Cables
+                            case 0:
+                                lowVoltageHQCableDescriptor = desc;
+                                break;
+                            case 1:
+                                mediumVoltageHQCableDescriptor = desc;
+                                break;
+                            case 2:
+                                highVoltageHQCableDescriptor = desc;
+                                break;
+                            case 3:
+                                veryHighVoltageHQCableDescriptor = desc;
+                                break;
+                        }
+                    case 3:
+                        switch (cablevoltage) { //register Perfect Quality Cables
+                            case 0:
+                                lowVoltagePQCableDescriptor = desc;
+                                break;
+                            case 1:
+                                mediumVoltagePQCableDescriptor = desc;
+                                break;
+                            case 2:
+                                highVoltagePQCableDescriptor = desc;
+                                break;
+                            case 3:
+                                veryHighVoltagePQCableDescriptor = desc;
+                                break;
+                        }
+
+                }
+                desc.setPhysicalConstantLikeNormalCable( //now we register it into the... register.
+                    nominalcablevoltage,
+                    nominalcablepower,
+                    0.10 / 20,
+                    nominalcablevoltage * 1.3,
+                    nominalcablepower * 1.2, 30,
+                    cableWarmLimit,
+                    -100,
+                    cableHeatingTime,
+                    cableThermalConductionTao
+                );
+                sixNodeItem.addDescriptor(subId + (id << 6), desc); //and just like that, it's all over.
             }
-            activerendermodel = new CableRenderDescriptor("eln", renderlist.get(renderspriteindex), rendercablesizes.get(renderfloatindex), rendercablesizes.get(renderfloatindex + 1));
-            desc = new ElectricalCableDescriptor(name, activerendermodel, "Haxors was Here", false);
-            nominalcablepower = power * valuelist.get(cablequality);
-            switch (cablequality) {
-                case 0:
-                    switch (cablevoltage) {
-                        case 0:
-                            lowVoltageCableDescriptor = desc;
-                            break;
-                        case 1:
-                            meduimVoltageCableDescriptor = desc;
-                            break;
-                        case 2:
-                            highVoltageCableDescriptor = desc;
-                            break;
-                        case 3:
-                            veryHighVoltageCableDescriptor = desc;
-                            break;
-                    }
-                case 1:
-                    switch (cablevoltage) {
-                        case 0:
-                            LQlowVoltageCableDescriptor = desc;
-                            break;
-                        case 1:
-                            LQmeduimVoltageCableDescriptor = desc;
-                            break;
-                        case 2:
-                            LQhighVoltageCableDescriptor = desc;
-                            break;
-                        case 3:
-                            LQveryHighVoltageCableDescriptor = desc;
-                            break;
-                    }
-                case 2:
-                    switch (cablevoltage) {
-                        case 0:
-                            HQlowVoltageCableDescriptor = desc;
-                            break;
-                        case 1:
-                            HQmeduimVoltageCableDescriptor = desc;
-                            break;
-                        case 2:
-                            HQhighVoltageCableDescriptor = desc;
-                            break;
-                        case 3:
-                            HQveryHighVoltageCableDescriptor = desc;
-                            break;
-                    }
-                case 3:
-                    switch (cablevoltage) {
-                        case 0:
-                            PQlowVoltageCableDescriptor = desc;
-                            break;
-                        case 1:
-                            PQmeduimVoltageCableDescriptor = desc;
-                            break;
-                        case 2:
-                            PQhighVoltageCableDescriptor = desc;
-                            break;
-                        case 3:
-                            PQveryHighVoltageCableDescriptor = desc;
-                            break;
-                    }
-
-            }
-            desc.setPhysicalConstantLikeNormalCable(
-                nominalcablevoltage,
-                nominalcablepower,
-                0.10 / 20,
-                nominalcablevoltage * 1.3,
-                nominalcablepower * 1.2, 30,
-                cableWarmLimit,
-                -100,
-                cableHeatingTime,
-                cableThermalConductionTao
-            );
-            sixNodeItem.addDescriptor(subId + (id << 6), desc);
-        }
         }
     }
 
@@ -1383,7 +1380,7 @@ public class Eln {
         double stdDischargeTime = 4 * 60;
         double stdU = LVU;
         double stdP = LVP() / 4;
-        double stdEfficiency = 1.0 - 2.0 / 50.0; //96%
+        double stdEfficiency = 0.96;
         double condoEfficiency = 1.0 - 2.0 / 50.0;
 
         batteryVoltageFunctionTable = voltageFunction;
@@ -1447,7 +1444,7 @@ public class Eln {
             BatteryDescriptor desc = new BatteryDescriptor(
                 name,
                 "BatteryBig",
-                meduimVoltageCableDescriptor,
+                mediumVoltageCableDescriptor,
                 0.5,
                 true,
                 true,
@@ -1760,7 +1757,7 @@ public class Eln {
 
         sixNodeItem.addDescriptor(16 + (id << 6),
             new EmergencyLampDescriptor(TR_NAME(Type.NONE, "200V Emergency Lamp"),
-                meduimVoltageCableDescriptor, 10 * 60 * 20, 25, 10, 8, obj.getObj("EmergencyExitLighting")));
+                mediumVoltageCableDescriptor, 10 * 60 * 20, 25, 10, 8, obj.getObj("EmergencyExitLighting")));
     }
 
     private void registerLampSupply(int id) {
@@ -2051,7 +2048,7 @@ public class Eln {
             name = TR_NAME(Type.NONE, "Medium Voltage Switch");
 
             desc = new ElectricalSwitchDescriptor(name, stdCableRender200V,
-                obj.getObj("LowVoltageSwitch"), MVU, MVP(), meduimVoltageCableDescriptor.electricalRs * 2,// nominalVoltage,
+                obj.getObj("LowVoltageSwitch"), MVU, MVP(), mediumVoltageCableDescriptor.electricalRs * 2,// nominalVoltage,
                 // nominalPower,
                 // nominalDropFactor,
                 MVU * 1.5, MVP() * 1.2,// maximalVoltage, maximalPower
@@ -2202,7 +2199,7 @@ public class Eln {
 
             name = TR_NAME(Type.NONE, "Lead Fuse for medium voltage cables");
 
-            ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, meduimVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
+            ElectricalFuseDescriptor desc = new ElectricalFuseDescriptor(name, mediumVoltageCableDescriptor, obj.getObj("ElectricalFuse"));
             sharedItem.addElement(subId + (id << 6), desc);
         }
         {
@@ -2558,7 +2555,7 @@ public class Eln {
 
             desc = new ElectricalRelayDescriptor(
                 name, obj.getObj("RelayBig"),
-                meduimVoltageCableDescriptor);
+                mediumVoltageCableDescriptor);
 
             sixNodeItem.addDescriptor(subId + (id << 6), desc);
         }
@@ -2789,7 +2786,7 @@ public class Eln {
             name = TR_NAME(Type.NONE, "50V Turbine");
             double RsFactor = 0.1;
             double nominalU = LVU;
-            double nominalP = 1000 * heatTurbinePowerFactor; // it was 300 before
+            double nominalP = 1000 * heatTurbinePowerFactor;
             double nominalDeltaT = 250;
             TurbineDescriptor desc = new TurbineDescriptor(name, "turbineb", lowVoltageCableDescriptor.render,
                 TtoU.duplicate(nominalDeltaT, nominalU), PoutToPin.duplicate(nominalP, nominalP), nominalDeltaT,
@@ -2803,11 +2800,11 @@ public class Eln {
             name = TR_NAME(Type.NONE, "200V Turbine");
             double RsFactor = 0.10;
             double nominalU = MVU;
-            double nominalP = 2000 * heatTurbinePowerFactor; // it was 2000 before
+            double nominalP = 2000 * heatTurbinePowerFactor;
             double nominalDeltaT = 350;
-            TurbineDescriptor desc = new TurbineDescriptor(name, "turbinebblue", meduimVoltageCableDescriptor.render,
+            TurbineDescriptor desc = new TurbineDescriptor(name, "turbinebblue", mediumVoltageCableDescriptor.render,
                 TtoU.duplicate(nominalDeltaT, nominalU), PoutToPin.duplicate(nominalP, nominalP), nominalDeltaT,
-                nominalU, nominalP, nominalP / 40, meduimVoltageCableDescriptor.electricalRs * RsFactor, 50.0,
+                nominalU, nominalP, nominalP / 40, mediumVoltageCableDescriptor.electricalRs * RsFactor, 50.0,
                 nominalDeltaT / 40, nominalP / (nominalU / 25), "eln:heat_turbine_200v");
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
@@ -2951,7 +2948,7 @@ public class Eln {
                 "maceratorb", MVU, 1000,
                 MVU * 1.25,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),
-                meduimVoltageCableDescriptor,
+                mediumVoltageCableDescriptor,
                 maceratorRecipes);
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -2994,7 +2991,7 @@ public class Eln {
                 MVU, 1000,
                 MVU * 1.25,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),
-                meduimVoltageCableDescriptor,
+                mediumVoltageCableDescriptor,
                 plateMachineRecipes);
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -3053,7 +3050,7 @@ public class Eln {
                 MVU, 1000,
                 MVU * 1.25,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),
-                meduimVoltageCableDescriptor,
+                mediumVoltageCableDescriptor,
                 compressorRecipes);
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -3096,7 +3093,7 @@ public class Eln {
                 MVU, 1000,
                 MVU * 1.25,
                 new ThermalLoadInitializer(80, -100, 10, 100000.0),
-                meduimVoltageCableDescriptor,
+                mediumVoltageCableDescriptor,
                 magnetizerRecipes);
 
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
@@ -3174,7 +3171,7 @@ public class Eln {
             ghostGroup.removeElement(0, 0, 0);
 
             SolarPanelDescriptor desc = new SolarPanelDescriptor(name,
-                obj.getObj("bigSolarPanel"), meduimVoltageCableDescriptor.render,
+                obj.getObj("bigSolarPanel"), mediumVoltageCableDescriptor.render,
                 ghostGroup, 1, 1, 0,
                 groundCoordinate,
                 LVSolarU * 2, solarPanelBasePower * solarPanelPowerFactor * 8,
@@ -3195,7 +3192,7 @@ public class Eln {
             ghostGroup.removeElement(0, 0, 0);
 
             SolarPanelDescriptor desc = new SolarPanelDescriptor(name,
-                obj.getObj("bigSolarPanelrot"), meduimVoltageCableDescriptor.render,
+                obj.getObj("bigSolarPanelrot"), mediumVoltageCableDescriptor.render,
                 ghostGroup, 1, 1, 1,
                 groundCoordinate,
                 LVSolarU * 2, solarPanelBasePower * solarPanelPowerFactor * 8,
@@ -3240,7 +3237,7 @@ public class Eln {
                 // name,
                 MVU, 400,// electricalNominalU, electricalNominalP,
                 500,// electricalMaximalP)
-                meduimVoltageCableDescriptor);
+                mediumVoltageCableDescriptor);
             sharedItem.addElement(completId, element);
         }
         {
@@ -3281,7 +3278,7 @@ public class Eln {
                 // name,
                 MVU, 600,// electricalNominalU, electricalNominalP,
                 750,// electricalMaximalP)
-                meduimVoltageCableDescriptor);
+                mediumVoltageCableDescriptor);
             sharedItem.addElement(completId, element);
         }
         {
@@ -3322,7 +3319,7 @@ public class Eln {
                 TR_NAME(Type.NONE, "Small 200V Tungsten Heating Corp"),// iconId, name,
                 MVU, 800,// electricalNominalU, electricalNominalP,
                 1000,// electricalMaximalP)
-                meduimVoltageCableDescriptor);
+                mediumVoltageCableDescriptor);
             sharedItem.addElement(completId, element);
         }
         {
@@ -4170,7 +4167,7 @@ public class Eln {
             subId = 2;
             FuelGeneratorDescriptor descriptor =
                 new FuelGeneratorDescriptor(TR_NAME(Type.NONE, "200V Fuel Generator"), obj.getObj("FuelGenerator200V"),
-                    meduimVoltageCableDescriptor, fuelGeneratorPowerFactor * 6000, MVU * 1.25,
+                    mediumVoltageCableDescriptor, fuelGeneratorPowerFactor * 6000, MVU * 1.25,
                     fuelGeneratorTankCapacity);
             transparentNodeItem.addDescriptor(subId + (id << 6), descriptor);
         }
@@ -4226,7 +4223,7 @@ public class Eln {
                 MVU, 60,// double nominalElectricalU,double
                 // electricalNominalP,
                 1200,// double nominalElectricalCoolingPower,
-                meduimVoltageCableDescriptor,// ElectricalCableDescriptor
+                mediumVoltageCableDescriptor,// ElectricalCableDescriptor
                 // cableDescriptor,
                 130, -100,// double warmLimit,double coolLimit,
                 200, 30,// double nominalP,double nominalT,
@@ -4363,7 +4360,7 @@ public class Eln {
                 // electricalNominalPower,
                 MVU * 1.3, P * 1.3,// electricalMaximalVoltage,double
                 // electricalMaximalPower,
-                meduimVoltageCableDescriptor);
+                mediumVoltageCableDescriptor);
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
         {
@@ -4378,7 +4375,7 @@ public class Eln {
                 // electricalNominalPower,
                 MVU * 1.3, P * 1.3,// electricalMaximalVoltage,double
                 // electricalMaximalPower,
-                meduimVoltageCableDescriptor);
+                mediumVoltageCableDescriptor);
             transparentNodeItem.addDescriptor(subId + (id << 6), desc);
         }
 
@@ -4512,7 +4509,7 @@ public class Eln {
 
             descriptor = new BatteryChargerDescriptor(
                 name, obj.getObj("batterychargera"),
-                LQlowVoltageCableDescriptor,// ElectricalCableDescriptor
+                lowVoltageLQCableDescriptor,// ElectricalCableDescriptor
                 // cable,
                 LVU, 200// double nominalVoltage,double nominalPower
             );
@@ -4538,7 +4535,7 @@ public class Eln {
 
             descriptor = new BatteryChargerDescriptor(
                 name, obj.getObj("batterychargera"),
-                meduimVoltageCableDescriptor,// ElectricalCableDescriptor
+                mediumVoltageCableDescriptor,// ElectricalCableDescriptor
                 // cable,
                 MVU, 1000// double nominalVoltage,double nominalPower
             );
@@ -4833,7 +4830,7 @@ public class Eln {
 
             addShapelessRecipe(emptyStack.copy(),
                 new ItemStack(Blocks.wool, 1, idx),
-                findItemStack("Iron Cable"));
+                new ItemStack(Items.iron_ingot));
         }
 
         for (int idx = 0; idx < 16; idx++) {
@@ -5109,7 +5106,7 @@ public class Eln {
         {
             subId = 23;
             GenericItemUsingDamageDescriptorWithComment desc = new GenericItemUsingDamageDescriptorWithComment(
-                TR_NAME(Type.NONE, "Advanced Machine Block"), new String[]{});
+                TR_NAME(Type.NONE, "Advanced Machine Block"), new String[]{}); //todo add description
             sharedItem.addElement(subId + (id << 6), desc);
             Data.addResource(desc.newItemStack());
             addToOre("casingMachineAdvanced", desc.newItemStack());
@@ -5216,53 +5213,53 @@ public class Eln {
             'C', findItemStack("Copper Cable"),
             'R', "itemRubber");
 
-        addRecipe(meduimVoltageCableDescriptor.newItemStack(1), //Meduim Voltage Cable (Medium Voltage Cable)
+        addRecipe(mediumVoltageCableDescriptor.newItemStack(1), //Medium Voltage Cable
             "R",
             "C",
             'C', lowVoltageCableDescriptor.newItemStack(1),
             'R', "itemRubber");
-        addRecipe(LQmeduimVoltageCableDescriptor.newItemStack(1), //Shoddy Meduim Voltage Cable (Medium Voltage Cable)
+        addRecipe(mediumVoltageLQCableDescriptor.newItemStack(1), //Shoddy Medium Voltage Cable
             "W",
             "C",
-            'C', LQlowVoltageCableDescriptor.newItemStack(1),
+            'C', lowVoltageLQCableDescriptor.newItemStack(1),
             'W', "plankWood");
-        addRecipe(HQmeduimVoltageCableDescriptor.newItemStack(1), //Quality Meduim Voltage Cable (Medium Voltage Cable)
+        addRecipe(mediumVoltageHQCableDescriptor.newItemStack(1), //Quality Medium Voltage Cable
             "R",
             "C",
             "G",
-            'C', HQlowVoltageCableDescriptor.newItemStack(1),
+            'C', lowVoltageHQCableDescriptor.newItemStack(1),
             'R', "itemRubber",
             'G', findItemStack("Gold Dust"));
-        addRecipe(PQmeduimVoltageCableDescriptor.newItemStack(1), //Perfect Meduim Voltage Cable (Medium Voltage Cable)
+        addRecipe(mediumVoltagePQCableDescriptor.newItemStack(1), //Perfect Medium Voltage Cable
             "R",
             "C",
             "D",
-            'C', PQlowVoltageCableDescriptor.newItemStack(1),
+            'C', lowVoltagePQCableDescriptor.newItemStack(1),
             'R', "itemRubber",
             'D', findItemStack("Diamond Dust"));
 
         addRecipe(highVoltageCableDescriptor.newItemStack(1), //High Voltage Cable
             "R",
             "C",
-            'C', meduimVoltageCableDescriptor.newItemStack(1),
+            'C', mediumVoltageCableDescriptor.newItemStack(1),
             'R', "itemRubber");
-        addRecipe(LQhighVoltageCableDescriptor.newItemStack(1), //Shoddy High Voltage Cable
+        addRecipe(highVoltageLQCableDescriptor.newItemStack(1), //Shoddy High Voltage Cable
             "W",
             "C",
-            'C', LQmeduimVoltageCableDescriptor.newItemStack(1),
+            'C', mediumVoltageLQCableDescriptor.newItemStack(1),
             'W', "plankWood");
-        addRecipe(HQhighVoltageCableDescriptor.newItemStack(1), //Quality High Voltage Cable
+        addRecipe(highVoltageHQCableDescriptor.newItemStack(1), //Quality High Voltage Cable
             "R",
             "C",
             "G",
-            'C', HQmeduimVoltageCableDescriptor.newItemStack(1),
+            'C', mediumVoltageHQCableDescriptor.newItemStack(1),
             'R', "itemRubber",
             'G', findItemStack("Gold Dust"));
-        addRecipe(PQhighVoltageCableDescriptor.newItemStack(1), //Perfect High Voltage Cable
+        addRecipe(highVoltagePQCableDescriptor.newItemStack(1), //Perfect High Voltage Cable
             "R",
             "C",
             "D",
-            'C', PQmeduimVoltageCableDescriptor.newItemStack(1),
+            'C', mediumVoltagePQCableDescriptor.newItemStack(1),
             'R', "itemRubber",
             'D', findItemStack("Diamond Dust"));
 
@@ -5280,7 +5277,7 @@ public class Eln {
             'C', "ingotCopper",
             'R', "itemRubber");
 
-        addRecipe(LQlowVoltageCableDescriptor.newItemStack(12), //Shoddy Low Voltage Cable
+        addRecipe(lowVoltageLQCableDescriptor.newItemStack(12), //Shoddy Low Voltage Cable
             "WWW",
             "GCG",
             "WWW",
@@ -5288,7 +5285,7 @@ public class Eln {
             'G', new ItemStack(Blocks.gravel),
             'W', "plankWood");
 
-        addRecipe(HQlowVoltageCableDescriptor.newItemStack(12), //Quality Low Voltage Cable
+        addRecipe(lowVoltageHQCableDescriptor.newItemStack(12), //Quality Low Voltage Cable
             "RRR",
             "CCC",
             "GGG",
@@ -5296,7 +5293,7 @@ public class Eln {
             'G', findItemStack("Gold Dust"),
             'R', "itemRubber");
 
-        addRecipe(PQlowVoltageCableDescriptor.newItemStack(12), //Perfect Low Voltage Cable
+        addRecipe(lowVoltagePQCableDescriptor.newItemStack(12), //Perfect Low Voltage Cable
             "RRR",
             "CCC",
             "DDD",
@@ -5305,7 +5302,7 @@ public class Eln {
             'D', findItemStack("Diamond Dust"));
 
 
-        addRecipe(LQveryHighVoltageCableDescriptor.newItemStack(12), //Shoddy Very High Voltage Cable
+        addRecipe(veryHighVoltageLQCableDescriptor.newItemStack(12), //Shoddy Very High Voltage Cable
             "WWW",
             "GCG",
             "WWW",
@@ -5320,7 +5317,7 @@ public class Eln {
             'C', findItemStack("Alloy Ingot"),
             'R', "itemRubber");
 
-        addRecipe(HQveryHighVoltageCableDescriptor.newItemStack(12), //Quality Very High Voltage Cable
+        addRecipe(veryHighVoltageHQCableDescriptor.newItemStack(12), //Quality Very High Voltage Cable
             "RRR",
             "CCC",
             "GGG",
@@ -5328,7 +5325,7 @@ public class Eln {
             'R', "itemRubber",
             'G', findItemStack("Gold Dust"));
 
-        addRecipe(PQveryHighVoltageCableDescriptor.newItemStack(4), //Perfect Very High Voltage Cable
+        addRecipe(veryHighVoltagePQCableDescriptor.newItemStack(4), //Perfect Very High Voltage Cable
             "RRR",
             "CCC",
             "DDD",
@@ -6914,7 +6911,7 @@ public class Eln {
             new ItemStack[]{new ItemStack(Items.flint)}, 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.dirt),
             new ItemStack[]{new ItemStack(Blocks.sand)}, 1.0 * f));
-        double batf = 50000 * batteryCapacityFactor + f; //to prevent overunity
+        double batf = 50000 * batteryCapacityFactor + f; //"Prevent overunity by using more power than a new battery stores."
         //recycling recipes
         maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Helmet"),
             new ItemStack[]{findItemStack("Coal Dust", 16)}, batf));
