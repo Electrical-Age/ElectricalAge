@@ -295,7 +295,7 @@ public class ElectricalSensorElement extends SixNodeElement implements IConfigur
         if(compound.hasKey("dir") && !descriptor.voltageOnly)
             dirType = compound.getByte("dir");
         ConfigCopyToolDescriptor.readCableType(compound, getInventory(), 0, invoker);
-        needPublish();
+        reconnect();
     }
 
     @Override

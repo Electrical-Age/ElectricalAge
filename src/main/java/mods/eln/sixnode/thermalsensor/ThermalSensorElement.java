@@ -286,7 +286,7 @@ public class ThermalSensorElement extends SixNodeElement implements IConfigurabl
             }
         }
         ConfigCopyToolDescriptor.readCableType(compound, getInventory(), 0, invoker);
-        needPublish();
+        reconnect();
     }
 
     @Override

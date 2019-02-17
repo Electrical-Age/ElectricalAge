@@ -214,6 +214,7 @@ public class PowerCapacitorSixElement extends SixNodeElement implements IConfigu
                     return new ItemStack(Items.redstone, size);
                 }
             }).move(invoker.inventory, inventory, PowerCapacitorSixContainer.redId, desired);
+            reconnect();
         }
         if(compound.hasKey("capDielectricAmt")) {
             int desired = compound.getInteger("capDielectricAmt");
@@ -228,6 +229,7 @@ public class PowerCapacitorSixElement extends SixNodeElement implements IConfigu
                     return dielectric.newItemStack(items);
                 }
             }).move(invoker.inventory, inventory, PowerCapacitorSixContainer.dielectricId, desired);
+            reconnect();
         }
     }
 

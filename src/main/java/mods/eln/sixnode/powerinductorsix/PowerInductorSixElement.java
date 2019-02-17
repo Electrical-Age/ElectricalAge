@@ -156,6 +156,7 @@ public class PowerInductorSixElement extends SixNodeElement implements IConfigur
                     return Eln.instance.copperCableDescriptor.newItemStack(items);
                 }
             }).move(invoker.inventory, inventory, PowerInductorSixContainer.cableId, desired);
+            reconnect();
         }
         if(compound.hasKey("indCore")) {
             String descName = compound.getString("indCore");
@@ -189,6 +190,7 @@ public class PowerInductorSixElement extends SixNodeElement implements IConfigur
                     }
                 }).move(invoker.inventory, inventory, PowerInductorSixContainer.coreId, 1);
             }
+            reconnect();
         }
     }
 
