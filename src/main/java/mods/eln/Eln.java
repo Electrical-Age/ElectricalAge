@@ -1187,7 +1187,7 @@ public class Eln {
             1d,   //Normal
             0.5d, //Half
             2d,   //Double
-            4d)); //Quadruple
+            10d)); //Ten Times
         List<String> textures = new ArrayList<>(Arrays.asList( //List of textures for each cable
             "sprites/cable.png", //Most cables use the same texture
             "sprites/cableshoddy.png",
@@ -5279,10 +5279,10 @@ public class Eln {
 
         addRecipe(lowVoltageLQCableDescriptor.newItemStack(12), //Shoddy Low Voltage Cable
             "WWW",
-            "GCG",
+            "DCD",
             "WWW",
             'C', "ingotCopper",
-            'G', new ItemStack(Blocks.gravel),
+            'D', new ItemStack(Blocks.dirt),
             'W', "plankWood");
 
         addRecipe(lowVoltageHQCableDescriptor.newItemStack(12), //Quality Low Voltage Cable
@@ -6885,6 +6885,8 @@ public class Eln {
             new ItemStack[]{findItemStack("Coal Dust", 1)}, 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.coal, 1, 1),
             new ItemStack[]{findItemStack("Coal Dust", 1)}, 1.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.flint, 4),
+            new ItemStack[]{findItemStack("Silicon Dust", 1)}, 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.sand, 1),
             new ItemStack[]{findItemStack("Silicon Dust", 1)}, 3.0 * f));
         maceratorRecipes.addRecipe(new Recipe(findItemStack("Cinnabar Ore"),
@@ -7252,7 +7254,7 @@ public class Eln {
             "IcI",
             'I', new ItemStack(Items.iron_ingot),
             'c', findItemStack("Signal Cable"),
-            'C', dictCheapChip);
+            'C', dictAdvancedChip);
     }
 
     private void recipeElectricalRedstone() {
