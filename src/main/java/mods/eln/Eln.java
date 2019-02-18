@@ -1187,7 +1187,7 @@ public class Eln {
             1d,   //Normal
             0.5d, //Half
             2d,   //Double
-            4d)); //Quadruple
+            10d)); //Ten Times
         List<String> textures = new ArrayList<>(Arrays.asList( //List of textures for each cable
             "sprites/cable.png", //Most cables use the same texture
             "sprites/cableshoddy.png",
@@ -5279,10 +5279,10 @@ public class Eln {
 
         addRecipe(lowVoltageLQCableDescriptor.newItemStack(12), //Shoddy Low Voltage Cable
             "WWW",
-            "GCG",
+            "DCD",
             "WWW",
             'C', "ingotCopper",
-            'G', new ItemStack(Blocks.gravel),
+            'D', new ItemStack(Blocks.dirt),
             'W', "plankWood");
 
         addRecipe(lowVoltageHQCableDescriptor.newItemStack(12), //Quality Low Voltage Cable
@@ -6885,14 +6885,14 @@ public class Eln {
             new ItemStack[]{findItemStack("Coal Dust", 1)}, 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.coal, 1, 1),
             new ItemStack[]{findItemStack("Coal Dust", 1)}, 1.0 * f));
-        maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.sand, 1),
+        maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.flint, 4),
             new ItemStack[]{findItemStack("Silicon Dust", 1)}, 3.0 * f));
         maceratorRecipes.addRecipe(new Recipe(findItemStack("Cinnabar Ore"),
             new ItemStack[]{findItemStack("Cinnabar Dust", 1)}, 2.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.dye, 1, 4),
             new ItemStack[]{findItemStack("Lapis Dust", 1)}, 2.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Items.diamond, 1),
-            new ItemStack[]{findItemStack("Diamond Dust", 1)}, 2.0 * f));
+            new ItemStack[]{findItemStack("Diamond Dust", 1)}, 16.0 * f));
 
         maceratorRecipes.addRecipe(new Recipe(findItemStack("Copper Ingot"),
             new ItemStack[]{findItemStack("Copper Dust", 1)}, 0.5 * f));
@@ -6905,12 +6905,12 @@ public class Eln {
         maceratorRecipes.addRecipe(new Recipe(findItemStack("Tungsten Ingot"),
             new ItemStack[]{findItemStack("Tungsten Dust", 1)}, 0.5 * f));
 
-        maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.cobblestone),
-            new ItemStack[]{new ItemStack(Blocks.gravel)}, 1.0 * f));
+        maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.cobblestone,32),
+            new ItemStack[]{new ItemStack(Blocks.gravel)}, 10.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.gravel),
-            new ItemStack[]{new ItemStack(Items.flint)}, 1.0 * f));
-        maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.dirt),
-            new ItemStack[]{new ItemStack(Blocks.sand)}, 1.0 * f));
+            new ItemStack[]{new ItemStack(Items.flint)}, 0.25 * f));
+        maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.stone),
+            new ItemStack[]{new ItemStack(Blocks.sand)}, 5.0 * f));
         double batf = 50000 * batteryCapacityFactor + f; //"Prevent overunity by using more power than a new battery stores."
         //recycling recipes
         maceratorRecipes.addRecipe(new Recipe(findItemStack("E-Coal Helmet"),
