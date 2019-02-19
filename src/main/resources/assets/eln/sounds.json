@@ -17,15 +17,6 @@
             }
         ]
     },
-    "arc_furnace": {
-        "category": "block",
-        "sounds": [
-            {
-                "name": "arc_furnace",
-                "stream": false
-            }
-        ]
-    },
     "wind_turbine": {
         "category": "block",
         "sounds": [

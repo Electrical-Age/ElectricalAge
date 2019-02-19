@@ -207,7 +207,7 @@ public class TurretSlowProcess extends StateMachine {
                         }
 
                     if (visible) {
-                        if(entity.getHealth()>0) {
+                        if(entity.getHealth() > 0) {
                             element.play(new SoundCommand("eln:TurretFire").mulVolume(0.4));
                         } else {
                             element.play(new SoundCommand("eln:TurretKill").mulVolume(0.4));
@@ -242,7 +242,7 @@ public class TurretSlowProcess extends StateMachine {
 
         @Override
         public State state(double time) {
-            if (target.getHealth()<=0) return new SeekingState();
+            if (target.getHealth() <= 0) return new SeekingState();
 
             Class filterClass = null;
             ItemStack filterStack = element.getInventory().getStackInSlot(TurretContainer.filterId);
@@ -334,7 +334,7 @@ public class TurretSlowProcess extends StateMachine {
 
         @Override
         public State state(double time) {
-            if (target == null || target.getHealth()<=0)
+            if (target == null || target.getHealth() <= 0)
                 return new SeekingState();
             else
                 return new AimingState(target);

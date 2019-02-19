@@ -1187,7 +1187,7 @@ public class Eln {
             1d,   //Normal
             0.5d, //Half
             2d,   //Double
-            10d)); //Ten Times
+            10d)); //Dectuple
         List<String> textures = new ArrayList<>(Arrays.asList( //List of textures for each cable
             "sprites/cable.png", //Most cables use the same texture
             "sprites/cableshoddy.png",
@@ -5279,10 +5279,9 @@ public class Eln {
 
         addRecipe(lowVoltageLQCableDescriptor.newItemStack(12), //Shoddy Low Voltage Cable
             "WWW",
-            "DCD",
+            " C ",
             "WWW",
             'C', "ingotCopper",
-            'D', new ItemStack(Blocks.dirt),
             'W', "plankWood");
 
         addRecipe(lowVoltageHQCableDescriptor.newItemStack(12), //Quality Low Voltage Cable
@@ -5304,10 +5303,9 @@ public class Eln {
 
         addRecipe(veryHighVoltageLQCableDescriptor.newItemStack(12), //Shoddy Very High Voltage Cable
             "WWW",
-            "GCG",
+            " C ",
             "WWW",
             'C', "ingotAlloy",
-            'G', new ItemStack(Blocks.gravel),
             'W', "plankWood");
 
         addRecipe(veryHighVoltageCableDescriptor.newItemStack(12), //Very High Voltage Cable
