@@ -57,7 +57,12 @@ abstract class GridElement(transparentNode: TransparentNode, descriptor: Transpa
             Utils.addChatMessage(entityPlayer, "Wrong cable, you need " + desc.cableDescriptor.name)
             return true
         }
-        if (other == null || other === this) {
+        if(other == this) {
+            Utils.addChatMessage(entityPlayer, "Cancelled connection")
+            pending.remove(uuid)
+            return true
+        }
+        if (other == null) {
             Utils.addChatMessage(entityPlayer, "Setting starting point")
             pending.put(uuid, Pair.of(this.coordonate(), side))
         } else {
