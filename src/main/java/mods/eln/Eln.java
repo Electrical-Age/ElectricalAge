@@ -4711,8 +4711,19 @@ public class Eln {
 
             ElectricalLampItem desc = new ElectricalLampItem(
                 name,
-                10, 8, 20, 15, 5, 50,// int light,int range,
-                6000, 100// , energyStorage,discharg, charge
+                10, 6, 20, 12, 8, 50,// int light,int range,
+                6000, 100// , energyStorage, discharge, charge
+            );
+            sharedItemStackOne.addElement(subId + (id << 6), desc);
+        }
+        {
+            subId = 1;
+            name = TR_NAME(Type.NONE, "Improved Flashlight");
+
+            ElectricalLampItem desc = new ElectricalLampItem(
+                name,
+                15, 8, 20, 15, 12, 50,// int light,int range,
+                24000, 400// , energyStorage, discharge, charge
             );
             sharedItemStackOne.addElement(subId + (id << 6), desc);
         }
@@ -6453,6 +6464,14 @@ public class Eln {
             " I ",
             'L', findItemStack("50V Incandescent Light Bulb"),
             'B', findItemStack("Portable Battery"),
+            'G', new ItemStack(Blocks.glass_pane),
+            'I', new ItemStack(Items.iron_ingot));
+        addRecipe(findItemStack("Improved Flashlight"),
+            "GLG",
+            "IBI",
+            " I ",
+            'L', findItemStack("50V LED Bulb"),
+            'B', findItemStack("Portable Battery Pack"),
             'G', new ItemStack(Blocks.glass_pane),
             'I', new ItemStack(Items.iron_ingot));
 
