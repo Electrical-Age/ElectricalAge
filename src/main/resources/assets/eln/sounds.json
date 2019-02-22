@@ -206,6 +206,15 @@
             }
         ]
     },
+    "TurretKill": {
+        "category": "block",
+        "sounds": [
+            {
+                "name": "TurretKill",
+                "stream": false
+            }
+        ]
+    },
     "FuelGenerator": {
         "category": "block",
         "sounds": [

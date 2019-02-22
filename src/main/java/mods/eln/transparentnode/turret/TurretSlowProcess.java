@@ -18,6 +18,7 @@ import net.minecraft.util.DamageSource;
 import java.util.List;
 import java.util.Random;
 
+
 public class TurretSlowProcess extends StateMachine {
     private static final Random rand = new Random();
     private double actualPower;
@@ -206,7 +207,11 @@ public class TurretSlowProcess extends StateMachine {
                         }
 
                     if (visible) {
-                        element.play(new SoundCommand("eln:TurretFire").mulVolume(0.4));
+                        if(entity.getHealth() > 0) {
+                            element.play(new SoundCommand("eln:TurretFire").mulVolume(0.4));
+                        } else {
+                            element.play(new SoundCommand("eln:TurretKill").mulVolume(0.4));
+                        }
                         return new AimingState(entity);
                     }
                 }
@@ -237,7 +242,7 @@ public class TurretSlowProcess extends StateMachine {
 
         @Override
         public State state(double time) {
-            if (target.isDead) return new SeekingState();
+            if (target.getHealth() <= 0) return new SeekingState();
 
             Class filterClass = null;
             ItemStack filterStack = element.getInventory().getStackInSlot(TurretContainer.filterId);
@@ -319,14 +324,17 @@ public class TurretSlowProcess extends StateMachine {
 
         @Override
         public void enter() {
-            if (target != null) target.attackEntityFrom(new DamageSource("Unknown"), 5);
-            element.shoot();
+            if (target != null){
+            target.hurtResistantTime = 0;
+		    target.attackEntityFrom(new DamageSource("Unknown"), 5);
+			element.shoot();
             element.play(new SoundCommand("eln:LaserGun"));
+		    }
         }
 
         @Override
         public State state(double time) {
-            if (target == null || target.isDead)
+            if (target == null || target.getHealth() <= 0)
                 return new SeekingState();
             else
                 return new AimingState(target);

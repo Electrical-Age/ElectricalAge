@@ -18,9 +18,10 @@ public class ResistorContainer extends BasicContainer {
 
     public ResistorContainer(EntityPlayer player, IInventory inventory) {
         super(player, inventory, new Slot[]{
-            new SlotFilter(inventory, coreId, 132, 8, 64, ItemStackFilter.OreDict("dustCoal"),
+            new SlotFilter(inventory, coreId, 135, 8, 64, ItemStackFilter.OreDict("dustResistive"),
                 ISlotSkin.SlotSkin.medium,
-                new String[]{tr("Coal dust slot"), tr("(Sets resistance)")})
-        });
+                new String[]{tr("Resistive Dust slot"), tr("(Each dust adds more resistance)")})
+        }
+            );
     }
 }

@@ -12,7 +12,6 @@ achievement.open_guide.desc=Open the wiki guide
 200V_Active_Thermal_Dissipator.name=200V Active Thermal Dissipator
 200V_Battery_Charger.name=200V Battery Charger
 200V_Compressor.name=200V Compressor
-200V_Condensator.name=200V Capacitor
 200V_Copper_Heating_Corp.name=200V Copper Heating Corp
 200V_Economic_Light_Bulb.name=200V Economic Light Bulb
 200V_Emergency_Lamp.name=200V Emergency Lamp
@@ -33,7 +32,6 @@ achievement.open_guide.desc=Open the wiki guide
 50V_Battery_Charger.name=50V Battery Charger
 50V_Carbon_Incandescent_Light_Bulb.name=50V Carbon Incandescent Light Bulb
 50V_Compressor.name=50V Compressor
-50V_Condensator.name=50V Capacitor
 50V_Copper_Heating_Corp.name=50V Copper Heating Corp
 50V_Economic_Light_Bulb.name=50V Economic Light Bulb
 50V_Egg_Incubator.name=50V Egg Incubator
@@ -87,9 +85,13 @@ Combustion_Chamber.name=Combustion Chamber
 Configurable_summing_unit.name=Configurable summing unit
 Copper_Cable.name=Copper Cable
 Copper_Dust.name=Copper Dust
+Copper_Folded_Plate.name=Copper Folded Plate
+Copper_Folded_Plate_in_a_Bucket.name=Copper Folded Plate in a Bucket
 Copper_Ingot.name=Copper Ingot
 Copper_Ore.name=Copper Ore
 Copper_Plate.name=Copper Plate
+Copper_Slag.name=Copper Slag
+Copper_Slag_Bucket.name=Copper Slag Bucket
 Copper_Thermal_Cable.name=Copper Thermal Cable
 Cost_Oriented_Battery.name=Cost Oriented Battery
 Current_Oriented_Battery.name=Current Oriented Battery
@@ -98,6 +100,7 @@ DC-DC_Converter.name=DC-DC Converter
 D_Flip_Flop_Chip.name=D Flip Flop Chip
 Data_Logger.name=Data Logger
 Data_Logger_Print.name=Data Logger Print
+Diamond_Dust.name=Diamond Dust
 Dielectric.name=Dielectric
 Digital_Watch.name=Digital Watch
 Electrical_Anemometer_Sensor.name=Electrical Anemometer Sensor
@@ -117,6 +120,7 @@ Electrical_Timer.name=Electrical Timer
 Electrical_Weather_Sensor.name=Electrical Weather Sensor
 Electrical_age_wrench,\nCan_be_used_to_turn\nsmall_wall_blocks=Electrical age wrench,\nCan be used to turn\nsmall wall blocks
 Energy_Meter.name=Energy Meter
+Experimental_Battery.name=Experimental Battery
 Experimental_Transporter.name=Experimental Transporter
 Fast_Electrical_Drill.name=Fast Electrical Drill
 Ferrite_Ingot.name=Ferrite Ingot
@@ -126,6 +130,7 @@ Flywheel.name=Flywheel
 Fuel_Heat_Furnace.name=Fuel Heat Furnace
 Gas_Turbine.name=Gas Turbine
 Generator.name=Generator
+Glorious_Copper_Plate.name=Glorious Copper Plate
 Gold_Dust.name=Gold Dust
 Gold_Plate.name=Gold Plate
 Gray_Brush.name=Gray Brush
@@ -133,7 +138,6 @@ Green_Brush.name=Green Brush
 Ground_Cable.name=Ground Cable
 High_Power_Receiver_Antenna.name=High Power Receiver Antenna
 High_Power_Transmitter_Antenna.name=High Power Transmitter Antenna
-High_Voltage_Cable.name=High Voltage Cable
 High_Voltage_Relay.name=High Voltage Relay
 High_Voltage_Switch.name=High Voltage Switch
 Hub.name=Hub
@@ -141,6 +145,7 @@ Industrial_Data_Logger.name=Industrial Data Logger
 Iron_Cable.name=Iron Cable
 Iron_Dust.name=Iron Dust
 Iron_Plate.name=Iron Plate
+Irresponsible_Electrical_Drill.name=Irresponsible Electrical Drill
 JK_Flip_Flop_Chip.name=JK Flip Flop Chip
 Joint.name=Joint
 Joint_hub.name=Joint hub
@@ -148,6 +153,7 @@ LED_vuMeter.name=LED vuMeter
 Lamp_Socket_A.name=Lamp Socket A
 Lamp_Socket_B_Projector.name=Lamp Socket B Projector
 Lamp_Supply.name=Lamp Supply
+Lapis_Dust.name=Lapis Dust
 Large_Rheostat.name=Large Rheostat
 Lead_Dust.name=Lead Dust
 Lead_Fuse_for_high_voltage_cables.name=Lead Fuse for high voltage cables
@@ -163,7 +169,6 @@ Lime_Brush.name=Lime Brush
 Long_Suspended_Lamp_Socket.name=Long Suspended Lamp Socket
 Low_Power_Receiver_Antenna.name=Low Power Receiver Antenna
 Low_Power_Transmitter_Antenna.name=Low Power Transmitter Antenna
-Low_Voltage_Cable.name=Low Voltage Cable
 Low_Voltage_Relay.name=Low Voltage Relay
 Low_Voltage_Switch.name=Low Voltage Switch
 Lowpass_filter.name=Lowpass filter
@@ -173,13 +178,13 @@ Magenta_Brush.name=Magenta Brush
 Medium_Fuel_Burner.name=Medium Fuel Burner
 Medium_Power_Receiver_Antenna.name=Medium Power Receiver Antenna
 Medium_Power_Transmitter_Antenna.name=Medium Power Transmitter Antenna
-Medium_Voltage_Cable.name=Medium Voltage Cable
 Medium_Voltage_Relay.name=Medium Voltage Relay
 Medium_Voltage_Switch.name=Medium Voltage Switch
 Mercury.name=Mercury
 Mining_Pipe.name=Mining Pipe
 Modbus_RTU.name=Modbus RTU
 Modern_Data_Logger.name=Modern Data Logger
+Molten_Copper_Bucket.name=Molten Copper Bucket
 Monster_Filter.name=Monster Filter
 MultiMeter.name=Multimeter
 NAND_Chip.name=NAND Chip
@@ -198,6 +203,7 @@ Overheating_Protection.name=Overheating Protection
 Overvoltage_Protection.name=Overvoltage Protection
 PAL_Chip.name=PAL Chip
 PID_Regulator.name=PID Regulator
+Peppered_Molten_Copper_Bucket.name=Peppered Molten Copper Bucket
 Pink_Brush.name=Pink Brush
 Player_Filter.name=Player Filter
 Portable_Battery.name=Portable Battery
@@ -211,9 +217,11 @@ Power_Inductor.name=Power Inductor
 Power_Resistor.name=Power Resistor
 Power_capacitor.name=Power capacitor
 Power_inductor.name=Power inductor
+Pure_Copper_Ingot.name=Pure Copper Ingot
 Purple_Brush.name=Purple Brush
 Red_Brush.name=Red Brush
 Redstone-to-Voltage_Converter.name=Redstone-to-Voltage Converter
+Resistive_Dust.name=Resistive Dust
 Rheostat.name=Rheostat
 Robust_Lamp_Socket.name=Robust Lamp Socket
 Rubber.name=Rubber
@@ -221,6 +229,7 @@ Sample_and_hold.name=Sample and hold
 Scanner.name=Scanner
 Schmitt_Trigger_Chip.name=Schmitt Trigger Chip
 Sconce_Lamp_Socket.name=Sconce Lamp Socket
+Seperated_Molten_Copper_Bucket.name=Seperated Molten Copper Bucket
 Signal_20H_inductor.name=Signal 20H inductor
 Signal_Antenna.name=Signal Antenna
 Signal_Button.name=Signal Button
@@ -236,6 +245,7 @@ Silicon_Dust.name=Silicon Dust
 Silicon_Ingot.name=Silicon Ingot
 Silicon_Plate.name=Silicon Plate
 Silver_Brush.name=Silver Brush
+Silver_Ingot.name=Silver Ingot
 Simple_Lamp_Socket.name=Simple Lamp Socket
 Single-use_Battery.name=Single-use Battery
 Small_200V_Copper_Heating_Corp.name=Small 200V Copper Heating Corp
@@ -271,8 +281,8 @@ Tungsten_Cable.name=Tungsten Cable
 Tungsten_Dust.name=Tungsten Dust
 Tungsten_Ingot.name=Tungsten Ingot
 Tungsten_Ore.name=Tungsten Ore
+Turbo_Electrical_Drill.name=Turbo Electrical Drill
 Tutorial_Sign.name=Tutorial Sign
-Very_High_Voltage_Cable.name=Very High Voltage Cable
 Very_High_Voltage_Relay.name=Very High Voltage Relay
 Very_High_Voltage_Switch.name=Very High Voltage Switch
 Voltage-to-Redstone_Converter.name=Voltage-to-Redstone Converter
@@ -365,11 +375,11 @@ Useful_to_prevent_over-voltage\nof_Batteries=Useful to prevent over-voltage\nof 
 # ./src/main/java/mods/eln/item/SolarTrackerDescriptor.java
 Solar_panel_upgrade=Solar panel upgrade
 
-# ./src/main/java/mods/eln/item/electricalitem/BatteryItem.java
+# ./src/main/java/mods/eln/item/electricalitem/BatteryItem.kt
 
-# ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.java
+# ./src/main/java/mods/eln/item/electricalitem/ElectricalLampItem.kt
 State\:=State:
-Stored_Energy\:_%1$J_(%2$%)=Stored Energy: %1$J (%2$%)
+Stored_Energy\:_%1\$J_(%2$%)=Stored Energy: %1\$J (%2$%)
 
 # ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
 
@@ -719,14 +729,14 @@ Supplies_any_device\nplugged_in_with_energy.=Supplies any device\nplugged in wit
 Specify_the_device_to_supply_through_this_socket.=Specify the device to supply through this socket.
 
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorContainer.java
-(Sets_resistance)=(Sets resistance)
-Coal_dust_slot=Coal dust slot
+(Each_dust_adds_more_resistance)=(Each dust adds more resistance)
+Resistive_Dust_slot=Resistive Dust slot
 
 # ./src/main/java/mods/eln/sixnode/resistor/ResistorElement.java
 
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
 High_parallel_resistance\n_\=>_Low_power_dissipation.=High parallel resistance\n => Low power dissipation.
-Low_serial_resistance\n_\=>_High_conductivity.=Low serial resistance\n => High conductivity.
+Low_serialized_resistance\n_\=>_High_conductivity.=Low serialized resistance\n => High conductivity.
 Parallel_resistance\:_%1$K_W=Parallel resistance: %1$K/W
 Serial_resistance\:_%1$K_W=Serial resistance: %1$K/W
 
@@ -763,7 +773,6 @@ Fuel_level=Fuel level
 Nominal_power\:_%1$_W=Nominal power: %1$ W
 Nominal_voltage\:_%1$_V=Nominal voltage: %1$ V
 Produces_electricity_using_gasoline.=Produces electricity using gasoline.
-State=State
 
 # ./src/main/java/mods/eln/transparentnode/FuelHeatFurnace.kt
 Actual\:_%1$=Actual: %1$
@@ -1007,14 +1016,14 @@ Capacity\:_%1$F=Capacity: %1$F
 Channel=Channel
 Charge=Charge
 Charge_power=Charge power
-Charge_power\:_%1$W=Charge power: %1$W
+Charge_power\:_%1\$W=Charge power: %1\$W
 Closed=Closed
 Connected=Connected
 Cooling_power\:_%1$W=Cooling power: %1$W
 Copper_cable_slot=Copper cable slot
 Current=Current
 Dielectric_slot=Dielectric slot
-Discharge_power\:_%1$W=Discharge power: %1$W
+Discharge_power\:_%1\$W=Discharge power: %1\$W
 Electrical_cable_slot=Electrical cable slot
 Energy=Energy
 Entity_filter_slot=Entity filter slot
@@ -1067,7 +1076,8 @@ Resistance\:_%1$\u2126=Resistance: %1$\u2126
 Smallest=Smallest
 Specify_the_channel=Specify the channel
 Specify_the_supply_channel=Specify the supply channel
-Stored_energy\:_%1$J_(%2$%)=Stored energy: %1$J (%2$%)
+State=State
+Stored_energy\:_%1\$J_(%2$%)=Stored energy: %1\$J (%2$%)
 Temperature=Temperature
 Temperature\:_%1$°C=Temperature: %1$°C
 Temperature_gauge=Temperature gauge
