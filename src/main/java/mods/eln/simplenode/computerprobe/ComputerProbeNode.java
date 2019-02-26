@@ -1,10 +1,5 @@
 package mods.eln.simplenode.computerprobe;
 
-import net.minecraftforge.fml.common.Optional;
-import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.lua.LuaException;
-import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Context;
 import mods.eln.Eln;
@@ -28,12 +23,13 @@ import mods.eln.sixnode.wirelesssignal.aggregator.IWirelessSignalAggregator;
 import mods.eln.sixnode.wirelesssignal.aggregator.SmallerAggregator;
 import mods.eln.sixnode.wirelesssignal.tx.WirelessSignalTxElement;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.Optional;
 
 import java.util.HashMap;
 import java.util.HashSet;
 
 @Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = Other.modIdCc)
-public class ComputerProbeNode extends SimpleNode implements IPeripheral {
+public class ComputerProbeNode extends SimpleNode /*implements IPeripheral */{
 
     public NbtElectricalGateInputOutput[] ioGate = new NbtElectricalGateInputOutput[6];
     public NbtElectricalGateOutputProcess[] ioGateProcess = new NbtElectricalGateOutputProcess[6];
@@ -257,71 +253,71 @@ public class ComputerProbeNode extends SimpleNode implements IPeripheral {
     }
 
     // *************************** CC ********************
-    @Override
-    @Optional.Method(modid = Other.modIdCc)
-    public String getType() {
-        return "ElnProbe";
-    }
-
-    String[] functionNames = {"signalSetDir", "signalGetDir", "signalSetOut", "signalGetOut", "signalGetIn", "wirelessSet", "wirelessRemove", "wirelessRemoveAll", "wirelessGet"};
-
-    @Override
-    @Optional.Method(modid = Other.modIdCc)
-    public String[] getMethodNames() {
-        return functionNames;
-    }
-
-    @Override
-    @Optional.Method(modid = Other.modIdCc)
-    public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] args) throws LuaException, InterruptedException {
-        try {
-            if (method < 0 || method >= functionNames.length) return null;
-            switch (method) {
-                case 0:
-                    return signalSetDir(Direction.valueOf((String) args[0]), args[1].equals("in"));
-                case 1:
-                    return signalGetDir(Direction.valueOf((String) args[0]));
-                case 2:
-                    return signalSetOut(Direction.valueOf((String) args[0]), (Double) args[1]);
-                case 3:
-                    return signalGetOut(Direction.valueOf((String) args[0]));
-                case 4:
-                    return signalGetIn(Direction.valueOf((String) args[0]));
-                case 5:
-                    return wirelessSet((String) args[0], (Double) args[1]);
-                case 6:
-                    return wirelessRemove((String) args[0]);
-                case 7:
-                    return wirelessRemoveAll();
-                case 8: {
-                    String aggregation = "bigger";
-                    if (args.length == 2) aggregation = (String) args[1];
-                    return wirelessGet((String) args[0], aggregation);
-                }
-            }
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-        return null;
-    }
-
-    @Override
-    @Optional.Method(modid = Other.modIdCc)
-    public void attach(IComputerAccess computer) {
-        Utils.println("CC attache");
-    }
-
-    @Override
-    @Optional.Method(modid = Other.modIdCc)
-    public void detach(IComputerAccess computer) {
-        Utils.println("CC detach");
-    }
-
-    @Override
-    @Optional.Method(modid = Other.modIdCc)
-    public boolean equals(IPeripheral other) {
-        return this == other;
-    }
+//    @Override
+//    @Optional.Method(modid = Other.modIdCc)
+//    public String getType() {
+//        return "ElnProbe";
+//    }
+//
+//    String[] functionNames = {"signalSetDir", "signalGetDir", "signalSetOut", "signalGetOut", "signalGetIn", "wirelessSet", "wirelessRemove", "wirelessRemoveAll", "wirelessGet"};
+//
+//    @Override
+//    @Optional.Method(modid = Other.modIdCc)
+//    public String[] getMethodNames() {
+//        return functionNames;
+//    }
+//
+//    @Override
+//    @Optional.Method(modid = Other.modIdCc)
+//    public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] args) throws LuaException, InterruptedException {
+//        try {
+//            if (method < 0 || method >= functionNames.length) return null;
+//            switch (method) {
+//                case 0:
+//                    return signalSetDir(Direction.valueOf((String) args[0]), args[1].equals("in"));
+//                case 1:
+//                    return signalGetDir(Direction.valueOf((String) args[0]));
+//                case 2:
+//                    return signalSetOut(Direction.valueOf((String) args[0]), (Double) args[1]);
+//                case 3:
+//                    return signalGetOut(Direction.valueOf((String) args[0]));
+//                case 4:
+//                    return signalGetIn(Direction.valueOf((String) args[0]));
+//                case 5:
+//                    return wirelessSet((String) args[0], (Double) args[1]);
+//                case 6:
+//                    return wirelessRemove((String) args[0]);
+//                case 7:
+//                    return wirelessRemoveAll();
+//                case 8: {
+//                    String aggregation = "bigger";
+//                    if (args.length == 2) aggregation = (String) args[1];
+//                    return wirelessGet((String) args[0], aggregation);
+//                }
+//            }
+//        } catch (Exception e) {
+//            // TODO: handle exception
+//        }
+//        return null;
+//    }
+//
+//    @Override
+//    @Optional.Method(modid = Other.modIdCc)
+//    public void attach(IComputerAccess computer) {
+//        Utils.println("CC attache");
+//    }
+//
+//    @Override
+//    @Optional.Method(modid = Other.modIdCc)
+//    public void detach(IComputerAccess computer) {
+//        Utils.println("CC detach");
+//    }
+//
+//    @Override
+//    @Optional.Method(modid = Other.modIdCc)
+//    public boolean equals(IPeripheral other) {
+//        return this == other;
+//    }
 
     // ********************** NBT *****************
 

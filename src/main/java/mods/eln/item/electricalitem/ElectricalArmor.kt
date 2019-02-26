@@ -7,22 +7,21 @@ import mods.eln.misc.Utils
 import mods.eln.wiki.Data
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.inventory.EntityEquipmentSlot
 import net.minecraft.item.ItemArmor
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.DamageSource
 import net.minecraftforge.common.ISpecialArmor
 
-class ElectricalArmor(par2EnumArmorMaterial: ItemArmor.ArmorMaterial,
-                      par3: Int,
-                      type: genericArmorItem.ArmourType,
-                      t1: String,
-                      t2: String,
+class ElectricalArmor(materialIn: ItemArmor.ArmorMaterial,
+                      renderSlotIn: Int,
+                      equipmentSlotIn: EntityEquipmentSlot,
                       private var energyStorage: Double,
                       internal var chargePower: Double,
                       private var ratioMax: Double,
                       private var ratioMaxEnergy: Double,
-                      private var energyPerDamage: Double) : genericArmorItem(par2EnumArmorMaterial, par3, type, t1, t2), IItemEnergyBattery, ISpecialArmor {
+                      private var energyPerDamage: Double) : genericArmorItem(materialIn, renderSlotIn, equipmentSlotIn), IItemEnergyBattery, ISpecialArmor {
 
     private val defaultNBT: NBTTagCompound
         get() {

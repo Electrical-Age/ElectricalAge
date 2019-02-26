@@ -1,9 +1,5 @@
 package mods.eln.transparentnode.computercraftio;
 
-import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.lua.LuaException;
-import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
 import mods.eln.misc.Coordinate;
 import mods.eln.misc.Direction;
 import mods.eln.misc.LRDU;
@@ -20,7 +16,7 @@ import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.Map;
 
-public class ComputerCraftIoElement extends TransparentNodeElement implements IPeripheral {
+public class ComputerCraftIoElement extends TransparentNodeElement /*implements IPeripheral */{
 
     public NbtElectricalGateInputOutput[] ioGate = new NbtElectricalGateInputOutput[4];
     public NbtElectricalGateOutputProcess[] ioGateProcess = new NbtElectricalGateOutputProcess[4];
@@ -85,83 +81,83 @@ public class ComputerCraftIoElement extends TransparentNodeElement implements IP
         return "EAProbe";
     }
 
-    @Override
-    public String[] getMethodNames() {
-        return new String[]{"writeDirection", "readDirection", "writeOutput", "readOutput", "readInput"};
-    }
-
-    @Override
-    public Object[] callMethod(IComputerAccess computer, ILuaContext context,
-                               int method, Object[] arguments) throws LuaException, InterruptedException {
-        int id = -1;
-        if (arguments.length < 1) return null;
-        if (!(arguments[0] instanceof String)) return null;
-        String arg0 = (String) arguments[0];
-        if (arg0.length() < 2) return null;
-
-        String sideStr = arg0.substring(0, 2);
-        String remaineStr = arg0.substring(2, arg0.length());
-
-        //Utils.println(sideStr + " " + remaineStr);
-
-        if (sideStr.equals("XN")) id = 0;
-        if (sideStr.equals("XP")) id = 1;
-        if (sideStr.equals("ZN")) id = 2;
-        if (sideStr.equals("ZP")) id = 3;
-        if (id == -1) return null;
-
-        if (remaineStr.length() != 0) {
-            Coordinate c = new Coordinate(this.node.coordinate);
-            Direction side = Direction.fromHorizontalIndex(id);
-            c.move(side);
-            //Utils.println("SUB probe ! " + side + " " + c);
-            NodeBase n = NodeManager.instance.getNodeFromCoordinate(c);
-            if (n == null) return null;
-            //Utils.println("  NodeBase");
-            if (!(n instanceof TransparentNode)) return null;
-            //Utils.println("  TransparentNode");
-            TransparentNode tn = (TransparentNode) n;
-            if (!(tn.element instanceof ComputerCraftIoElement)) return null;
-            //Utils.println("  ComputerCraftIoElement");
-            ComputerCraftIoElement e = (ComputerCraftIoElement) tn.element;
-            Object[] argumentsCopy = arguments.clone();
-            argumentsCopy[0] = remaineStr;
-            return e.callMethod(computer, context, method, argumentsCopy);
-        }
-
-        switch (method) {
-            case 0:
-                if (arguments.length < 2) return null;
-                ioGateProcess[id].setHighImpedance(arguments[1].equals("in"));
-                break;
-            case 1:
-                return new Object[]{ioGateProcess[id].isHighImpedance() ? "in" : "out"};
-            case 2:
-                if (arguments.length < 2) return null;
-                ioGateProcess[id].setOutputNormalized((Double) arguments[1]);
-                break;
-            case 3:
-                return new Object[]{ioGateProcess[id].getOutputNormalized()};
-            case 4:
-                return new Object[]{ioGate[id].getInputNormalized()};
-            default:
-                break;
-        }
-        return null;
-    }
-
-    @Override
-    public void attach(IComputerAccess computer) {
-    }
-
-    @Override
-    public void detach(IComputerAccess computer) {
-    }
-
-    @Override
-    public boolean equals(IPeripheral other) {
-        return other == this;
-    }
+//    @Override
+//    public String[] getMethodNames() {
+//        return new String[]{"writeDirection", "readDirection", "writeOutput", "readOutput", "readInput"};
+//    }
+//
+//    @Override
+//    public Object[] callMethod(IComputerAccess computer, ILuaContext context,
+//                               int method, Object[] arguments) throws LuaException, InterruptedException {
+//        int id = -1;
+//        if (arguments.length < 1) return null;
+//        if (!(arguments[0] instanceof String)) return null;
+//        String arg0 = (String) arguments[0];
+//        if (arg0.length() < 2) return null;
+//
+//        String sideStr = arg0.substring(0, 2);
+//        String remaineStr = arg0.substring(2, arg0.length());
+//
+//        //Utils.println(sideStr + " " + remaineStr);
+//
+//        if (sideStr.equals("XN")) id = 0;
+//        if (sideStr.equals("XP")) id = 1;
+//        if (sideStr.equals("ZN")) id = 2;
+//        if (sideStr.equals("ZP")) id = 3;
+//        if (id == -1) return null;
+//
+//        if (remaineStr.length() != 0) {
+//            Coordinate c = new Coordinate(this.node.coordinate);
+//            Direction side = Direction.fromHorizontalIndex(id);
+//            c.move(side);
+//            //Utils.println("SUB probe ! " + side + " " + c);
+//            NodeBase n = NodeManager.instance.getNodeFromCoordinate(c);
+//            if (n == null) return null;
+//            //Utils.println("  NodeBase");
+//            if (!(n instanceof TransparentNode)) return null;
+//            //Utils.println("  TransparentNode");
+//            TransparentNode tn = (TransparentNode) n;
+//            if (!(tn.element instanceof ComputerCraftIoElement)) return null;
+//            //Utils.println("  ComputerCraftIoElement");
+//            ComputerCraftIoElement e = (ComputerCraftIoElement) tn.element;
+//            Object[] argumentsCopy = arguments.clone();
+//            argumentsCopy[0] = remaineStr;
+//            return e.callMethod(computer, context, method, argumentsCopy);
+//        }
+//
+//        switch (method) {
+//            case 0:
+//                if (arguments.length < 2) return null;
+//                ioGateProcess[id].setHighImpedance(arguments[1].equals("in"));
+//                break;
+//            case 1:
+//                return new Object[]{ioGateProcess[id].isHighImpedance() ? "in" : "out"};
+//            case 2:
+//                if (arguments.length < 2) return null;
+//                ioGateProcess[id].setOutputNormalized((Double) arguments[1]);
+//                break;
+//            case 3:
+//                return new Object[]{ioGateProcess[id].getOutputNormalized()};
+//            case 4:
+//                return new Object[]{ioGate[id].getInputNormalized()};
+//            default:
+//                break;
+//        }
+//        return null;
+//    }
+//
+//    @Override
+//    public void attach(IComputerAccess computer) {
+//    }
+//
+//    @Override
+//    public void detach(IComputerAccess computer) {
+//    }
+//
+//    @Override
+//    public boolean equals(IPeripheral other) {
+//        return other == this;
+//    }
 
     @Override
     public Map<String, String> getWaila() {

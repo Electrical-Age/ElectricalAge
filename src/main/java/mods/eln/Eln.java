@@ -692,7 +692,8 @@ public class Eln {
     public void modsLoaded(FMLPostInitializationEvent event) {
         Other.check();
         if (Other.ccLoaded) {
-            PeripheralHandler.register();
+            // TODO(1.12): Re-enable this.
+//            PeripheralHandler.register();
         }
         recipeMaceratorModOres();
     }
@@ -3869,128 +3870,129 @@ public class Eln {
 
     private void registerArmor() {
         // TODO(1.10): Fix the textures?
+        // TODO(1.10): Register armor some other way. Maybe LibLib.
 
         ItemStack stack;
         String name;
 
-        {
-            name = TR_NAME(Type.ITEM, "Copper Helmet");
-            helmetCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Helmet, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
-                .setUnlocalizedName(name)
-                .setRegistryName(name)
-//                .setTextureName("eln:copper_helmet")
-                .setCreativeTab(creativeTab);
-            GameRegistry.register(helmetCopper);
-            //GameRegistry.registerCustomItemStack(name, new ItemStack(helmetCopper));
-        }
-        {
-            name = TR_NAME(Type.ITEM, "Copper Chestplate");
-            plateCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Chestplate, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
-                .setUnlocalizedName(name)
-                .setRegistryName(name)
-//                .setTextureName("eln:copper_chestplate")
-                .setCreativeTab(creativeTab);
-            GameRegistry.register(plateCopper);
-            //GameRegistry.registerCustomItemStack(name, new ItemStack(plateCopper));
-        }
-        {
-            name = TR_NAME(Type.ITEM, "Copper Leggings");
-            legsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Leggings, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
-                .setUnlocalizedName(name)
-                .setRegistryName(name)
-//                .setTextureName("eln:copper_leggings")
-                .setCreativeTab(creativeTab);
-            GameRegistry.register(legsCopper);
-            //GameRegistry.registerCustomItemStack(name, new ItemStack(legsCopper));
-        }
-        {
-            name = TR_NAME(Type.ITEM, "Copper Boots");
-            bootsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Boots, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
-                .setUnlocalizedName(name)
-                .setRegistryName(name)
-//                .setTextureName("eln:copper_boots")
-                .setCreativeTab(creativeTab);
-            GameRegistry.register(bootsCopper);
-            //GameRegistry.registerCustomItemStack(name, new ItemStack(bootsCopper));
-        }
-
-        String t1, t2;
-        t1 = "eln:textures/armor/ecoal_layer_1.png";
-        t2 = "eln:textures/armor/ecoal_layer_2.png";
-        double energyPerDamage = 500;
-        int armor, armorMarge;
-        ArmorMaterial eCoalMaterial = net.minecraftforge.common.util.EnumHelper.addArmorMaterial(
-            "ECoal",
-            "ECoal",
-            10,
-            new int[]{2, 6, 5, 2},
-            9,
-            SoundEvents.ITEM_ARMOR_EQUIP_LEATHER,
-            10);
-        {
-            name = TR_NAME(Type.ITEM, "E-Coal Helmet");
-            armor = 2;
-            armorMarge = 1;
-            helmetECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Helmet, t1, t2,
-                (armor + armorMarge) * energyPerDamage, 250.0,// double
-                // energyStorage,double
-                // chargePower
-                armor / 20.0, armor * energyPerDamage,// double
-                // ratioMax,double
-                // ratioMaxEnergy,
-                energyPerDamage// double energyPerDamage
-            )).setUnlocalizedName(name).setRegistryName("eln:ecoal_helmet").setCreativeTab(creativeTab);
-            GameRegistry.registerItem(helmetECoal, "Eln." + name);
-            //GameRegistry.registerCustomItemStack(name, new ItemStack(helmetECoal));
-        }
-        {
-            name = TR_NAME(Type.ITEM, "E-Coal Chestplate");
-            armor = 6;
-            armorMarge = 2;
-            plateECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Chestplate, t1, t2,
-                (armor + armorMarge) * energyPerDamage, 250.0,// double
-                // energyStorage,double
-                // chargePower
-                armor / 20.0, armor * energyPerDamage,// double
-                // ratioMax,double
-                // ratioMaxEnergy,
-                energyPerDamage// double energyPerDamage
-            )).setUnlocalizedName(name).setRegistryName("eln:ecoal_chestplate").setCreativeTab(creativeTab);
-            GameRegistry.registerItem(plateECoal, "Eln." + name);
-            //GameRegistry.registerCustomItemStack(name, new ItemStack(plateECoal));
-        }
-        {
-            name = TR_NAME(Type.ITEM, "E-Coal Leggings");
-            armor = 5;
-            armorMarge = 2;
-            legsECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Leggings, t1, t2,
-                (armor + armorMarge) * energyPerDamage, 250.0,// double
-                // energyStorage,double
-                // chargePower
-                armor / 20.0, armor * energyPerDamage,// double
-                // ratioMax,double
-                // ratioMaxEnergy,
-                energyPerDamage// double energyPerDamage
-            )).setUnlocalizedName(name).setRegistryName("eln:ecoal_leggings").setCreativeTab(creativeTab);
-            GameRegistry.registerItem(legsECoal, "Eln." + name);
-            //GameRegistry.registerCustomItemStack(name, new ItemStack(legsECoal));
-        }
-        {
-            name = TR_NAME(Type.ITEM, "E-Coal Boots");
-            armor = 2;
-            armorMarge = 1;
-            bootsECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Boots, t1, t2,
-                (armor + armorMarge) * energyPerDamage, 250.0,// double
-                // energyStorage,double
-                // chargePower
-                armor / 20.0, armor * energyPerDamage,// double
-                // ratioMax,double
-                // ratioMaxEnergy,
-                energyPerDamage// double energyPerDamage
-            )).setUnlocalizedName(name).setRegistryName("eln:ecoal_boots").setCreativeTab(creativeTab);
-            GameRegistry.registerItem(bootsECoal, "Eln." + name);
-            //GameRegistry.registerCustomItemStack(name, new ItemStack(bootsECoal));
-        }
+//        {
+//            name = TR_NAME(Type.ITEM, "Copper Helmet");
+//            helmetCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Helmet, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
+//                .setUnlocalizedName(name)
+//                .setRegistryName(name)
+////                .setTextureName("eln:copper_helmet")
+//                .setCreativeTab(creativeTab);
+//            GameRegistry.register(helmetCopper);
+//            //GameRegistry.registerCustomItemStack(name, new ItemStack(helmetCopper));
+//        }
+//        {
+//            name = TR_NAME(Type.ITEM, "Copper Chestplate");
+//            plateCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Chestplate, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
+//                .setUnlocalizedName(name)
+//                .setRegistryName(name)
+////                .setTextureName("eln:copper_chestplate")
+//                .setCreativeTab(creativeTab);
+//            GameRegistry.register(plateCopper);
+//            //GameRegistry.registerCustomItemStack(name, new ItemStack(plateCopper));
+//        }
+//        {
+//            name = TR_NAME(Type.ITEM, "Copper Leggings");
+//            legsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Leggings, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
+//                .setUnlocalizedName(name)
+//                .setRegistryName(name)
+////                .setTextureName("eln:copper_leggings")
+//                .setCreativeTab(creativeTab);
+//            GameRegistry.register(legsCopper);
+//            //GameRegistry.registerCustomItemStack(name, new ItemStack(legsCopper));
+//        }
+//        {
+//            name = TR_NAME(Type.ITEM, "Copper Boots");
+//            bootsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Boots, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
+//                .setUnlocalizedName(name)
+//                .setRegistryName(name)
+////                .setTextureName("eln:copper_boots")
+//                .setCreativeTab(creativeTab);
+//            GameRegistry.register(bootsCopper);
+//            //GameRegistry.registerCustomItemStack(name, new ItemStack(bootsCopper));
+//        }
+//
+//        String t1, t2;
+//        t1 = "eln:textures/armor/ecoal_layer_1.png";
+//        t2 = "eln:textures/armor/ecoal_layer_2.png";
+//        double energyPerDamage = 500;
+//        int armor, armorMarge;
+//        ArmorMaterial eCoalMaterial = net.minecraftforge.common.util.EnumHelper.addArmorMaterial(
+//            "ECoal",
+//            "ECoal",
+//            10,
+//            new int[]{2, 6, 5, 2},
+//            9,
+//            SoundEvents.ITEM_ARMOR_EQUIP_LEATHER,
+//            10);
+//        {
+//            name = TR_NAME(Type.ITEM, "E-Coal Helmet");
+//            armor = 2;
+//            armorMarge = 1;
+//            helmetECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Helmet, t1, t2,
+//                (armor + armorMarge) * energyPerDamage, 250.0,// double
+//                // energyStorage,double
+//                // chargePower
+//                armor / 20.0, armor * energyPerDamage,// double
+//                // ratioMax,double
+//                // ratioMaxEnergy,
+//                energyPerDamage// double energyPerDamage
+//            )).setUnlocalizedName(name).setRegistryName("eln:ecoal_helmet").setCreativeTab(creativeTab);
+//            GameRegistry.registerItem(helmetECoal, "Eln." + name);
+//            //GameRegistry.registerCustomItemStack(name, new ItemStack(helmetECoal));
+//        }
+//        {
+//            name = TR_NAME(Type.ITEM, "E-Coal Chestplate");
+//            armor = 6;
+//            armorMarge = 2;
+//            plateECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Chestplate, t1, t2,
+//                (armor + armorMarge) * energyPerDamage, 250.0,// double
+//                // energyStorage,double
+//                // chargePower
+//                armor / 20.0, armor * energyPerDamage,// double
+//                // ratioMax,double
+//                // ratioMaxEnergy,
+//                energyPerDamage// double energyPerDamage
+//            )).setUnlocalizedName(name).setRegistryName("eln:ecoal_chestplate").setCreativeTab(creativeTab);
+//            GameRegistry.registerItem(plateECoal, "Eln." + name);
+//            //GameRegistry.registerCustomItemStack(name, new ItemStack(plateECoal));
+//        }
+//        {
+//            name = TR_NAME(Type.ITEM, "E-Coal Leggings");
+//            armor = 5;
+//            armorMarge = 2;
+//            legsECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Leggings, t1, t2,
+//                (armor + armorMarge) * energyPerDamage, 250.0,// double
+//                // energyStorage,double
+//                // chargePower
+//                armor / 20.0, armor * energyPerDamage,// double
+//                // ratioMax,double
+//                // ratioMaxEnergy,
+//                energyPerDamage// double energyPerDamage
+//            )).setUnlocalizedName(name).setRegistryName("eln:ecoal_leggings").setCreativeTab(creativeTab);
+//            GameRegistry.registerItem(legsECoal, "Eln." + name);
+//            //GameRegistry.registerCustomItemStack(name, new ItemStack(legsECoal));
+//        }
+//        {
+//            name = TR_NAME(Type.ITEM, "E-Coal Boots");
+//            armor = 2;
+//            armorMarge = 1;
+//            bootsECoal = (ItemArmor) (new ElectricalArmor(eCoalMaterial, 2, ArmourType.Boots, t1, t2,
+//                (armor + armorMarge) * energyPerDamage, 250.0,// double
+//                // energyStorage,double
+//                // chargePower
+//                armor / 20.0, armor * energyPerDamage,// double
+//                // ratioMax,double
+//                // ratioMaxEnergy,
+//                energyPerDamage// double energyPerDamage
+//            )).setUnlocalizedName(name).setRegistryName("eln:ecoal_boots").setCreativeTab(creativeTab);
+//            GameRegistry.registerItem(bootsECoal, "Eln." + name);
+//            //GameRegistry.registerCustomItemStack(name, new ItemStack(bootsECoal));
+//        }
     }
 
     private void registerTool() {

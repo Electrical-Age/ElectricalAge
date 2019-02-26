@@ -1,13 +1,15 @@
 package mods.eln.generic;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemArmor;
-import net.minecraft.item.ItemStack;
 
 public class genericArmorItem extends ItemArmor {
 
     String t1, t2;
+
+    public genericArmorItem(ArmorMaterial materialIn, int renderIndexIn, EntityEquipmentSlot equipmentSlotIn) {
+        super(materialIn, renderIndexIn, equipmentSlotIn);
+    }
 
     public enum ArmourType {
         Helmet(0),
@@ -26,19 +28,14 @@ public class genericArmorItem extends ItemArmor {
         }
     }
 
-    public genericArmorItem(ArmorMaterial par2EnumArmorMaterial, int par3, ArmourType Type, String t1, String t2) {
-        super(par2EnumArmorMaterial, par3, EntityEquipmentSlot.valueOf(Type.toString()));
-        this.t1 = t1;
-        this.t2 = t2;
-    }
-
-    // TODO(1.10): WTF?
-    @Override
-    public String getArmorTexture(ItemStack stack, Entity entity, EntityEquipmentSlot slot, String type) {
-        if (this.armorType.getIndex() == 2) {
-            return t2;
-        } else {
-            return t1;
-        }
-    }
+//
+//    // TODO(1.10): WTF?
+//    @Override
+//    public String getArmorTexture(ItemStack stack, Entity entity, EntityEquipmentSlot slot, String type) {
+//        if (this.armorType.getIndex() == 2) {
+//            return t2;
+//        } else {
+//            return t1;
+//        }
+//    }
 }
