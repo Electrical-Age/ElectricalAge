@@ -19,7 +19,7 @@ buildscript {
 }
 
 plugins {
-  id 'org.jetbrains.kotlin.jvm' version '1.3.11'
+  id 'org.jetbrains.kotlin.jvm' version '1.2.0'  // TODO(1.12): Bump along with Forgelin.
 //     id 'com.matthewprenger.cursegradle' version '1.0.8'
 //     id "com.github.johnrengelman.shadow" version "1.2.4"
 }
@@ -81,6 +81,7 @@ repositories {
     maven { url "https://tehnut.info/maven" }
     maven { url "https://cc.crzd.me/maven/" }
     maven { url "https://maven.cil.li/" }
+    maven { url = "http://maven.bluexin.be/repository/snapshots/" }
 //    maven {
 //        name = "CoFH Maven"
 //        url = "https://maven.covers1624.net"

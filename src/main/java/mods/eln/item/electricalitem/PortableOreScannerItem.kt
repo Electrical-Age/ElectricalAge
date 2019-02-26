@@ -24,7 +24,6 @@ import net.minecraft.util.math.MathHelper
 import net.minecraft.world.World
 import org.lwjgl.opengl.GL11
 
-@ExperimentalUnsignedTypes
 class PortableOreScannerItem(name: String, obj: Obj3D,
                              private var energyStorage: Double, internal var chargePower: Double, private var dischargePower: Double,
                              private var viewRange: Float, private var viewYAlpha: Float, private var resWidth: Int, private var resHeight: Int) : GenericItemUsingDamageDescriptor(name), IItemEnergyBattery {
@@ -341,12 +340,11 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
 //    }
 
     class RenderStorage(private var viewRange: Float, viewYAlpha: Float, var resWidth: Int, private var resHeight: Int) {
-
         private var camDist: Float = 0.toFloat()
         internal var screenRed: Array<FloatArray>
         internal var screenBlue: Array<FloatArray>
         internal var screenGreen: Array<FloatArray>
-        private var worldBlocks: Array<Array<UShortArray>>
+        private var worldBlocks: Array<Array<ShortArray>>
         private var worldBlocksDim: Int = 0
         private var worldBlocksDim2: Int = 0
 
@@ -357,12 +355,13 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
             screenRed = Array(resHeight) { FloatArray(resWidth) }
             screenBlue = Array(resHeight) { FloatArray(resWidth) }
             screenGreen = Array(resHeight) { FloatArray(resWidth) }
-            worldBlocks = Array(worldBlocksDim) { Array(worldBlocksDim) { UShortArray(worldBlocksDim) } }
+            worldBlocks = Array(worldBlocksDim) { Array(worldBlocksDim) { ShortArray(worldBlocksDim) } }
         }
 
         class OreScannerConfigElement(var blockKey: Int, var factor: Float)
 
         fun generate(w: World, posX: Double, posY: Double, posZ: Double, alphaY: Float, alphaX: Float) {
+            // TODO(1.10): This is pretty much entirely broken.
             val blockKeyFactor = OreColorMapping.map
 
             val posXint = Math.round(posX).toInt()
@@ -372,7 +371,7 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
             for (z in 0 until worldBlocksDim) {
                 for (y in 0 until worldBlocksDim) {
                     for (x in 0 until worldBlocksDim) {
-                        worldBlocks[x][y][z] = 65535U
+                        worldBlocks[x][y][z] = 65535.toShort()
                     }
                 }
             }
@@ -441,11 +440,11 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
                         val zInt = zFloor.toInt() + worldBlocksDim2
 
                         var blockKey = worldBlocks[xInt][yInt][zInt]
-                        if (blockKey == 65535.toUShort()) {
+                        if (blockKey == 65535.toShort()) {
                             val xBlock = posXint + xFloor.toInt()
                             val yBlock = posYint + yFloor.toInt()
                             val zBlock = posZint + zFloor.toInt()
-                            blockKey = 0U
+                            blockKey = 0
                             if (yBlock in 0..255) {
                                 val chunk = w.getChunkFromBlockCoords(BlockPos(xBlock, yBlock, zBlock))
                                 val storage = chunk.blockStorageArray[yBlock shr 4]
@@ -455,11 +454,11 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
                                     val zLocal = zBlock and 0xF
 
                                     val state = storage.get(xLocal, yLocal, zLocal)
-                                    blockKey = Block.getStateId(state).toUShort()
+                                    blockKey = Block.getStateId(state).toShort()
                                 }
                             }
-                            if (blockKey >= 1024U * 64U) {
-                                blockKey = 0U
+                            if (blockKey >= 1024 * 64) {
+                                blockKey = 0
                             }
                             worldBlocks[xInt][yInt][zInt] = blockKey
                         }
@@ -558,7 +557,6 @@ private enum class State(val serialized: Byte) {
 private const val bootTime: Short = 4 * 20
 private const val stopTime: Short = 1 * 20
 
-@ExperimentalUnsignedTypes
 object OreColorMapping {
     val map: FloatArray
         get() {

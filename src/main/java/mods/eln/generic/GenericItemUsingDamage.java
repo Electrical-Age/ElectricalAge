@@ -45,6 +45,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
         setUnlocalizedName(descriptor.name);
         orderList.add(damage);
         descriptor.setParent(this, damage);
+        GameRegistry.register(descriptor.parentItem);
     }
 
     public Descriptor getDescriptor(int damage) {

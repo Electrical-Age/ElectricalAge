@@ -158,6 +158,7 @@ import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LogWrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
@@ -186,13 +187,16 @@ import static mods.eln.i18n.I18N.*;
 @Mod(modid = Eln.MODID, name = Eln.NAME, version = "@VERSION@")
 public class Eln {
     // Mod information (override from 'mcmod.info' file)
-    public final static String MODID = "Eln";
+    public final static String MODID = "eln";
     public final static String NAME = "Electrical Age";
     public final static String MODDESC = "Electricity in your base !";
     public final static String URL = "https://electrical-age.net";
     public final static String UPDATE_URL = "https://github.com/Electrical-Age/ElectricalAge/releases";
     public final static String SRC_URL = "https://github.com/Electrical-Age";
     public final static String[] AUTHORS = {"Dolu1990", "lambdaShade", "cm0x4D", "metc", "Baughn"};
+    // The instance of your mod that Forge uses.
+    @Instance("eln")
+    public static Eln instance;
 
     public static final String channelName = "miaouMod";
     public static final double solarPanelBasePower = 65.0;
@@ -247,10 +251,6 @@ public class Eln {
     public static SixNodeItem sixNodeItem;
     public static TransparentNodeItem transparentNodeItem;
     public static OreItem oreItem;
-
-    // The instance of your mod that Forge uses.
-    @Instance("Eln")
-    public static Eln instance;
 
     // Says where the client and server 'proxy' code is loaded.
     @SidedProxy(clientSide = "mods.eln.client.ClientProxy", serverSide = "mods.eln.CommonProxy")
@@ -319,14 +319,9 @@ public class Eln {
     public static double maxSoundDistance = 16;
     private double cablePowerFactor;
 
-    public static final Logger logger = LogManager.getLogger("eln");
-
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        logger.debug("foo", this);
-
-        elnNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("electrical-age");
-        elnNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
+        elnNetwork = NetworkRegistry.INSTANCE.newSimpleChannel(Eln.MODID);
         elnNetwork.registerMessage(TransparentNodeRequestPacketHandler.class, TransparentNodeRequestPacket.class, 1, Side.SERVER);
         elnNetwork.registerMessage(TransparentNodeResponsePacketHandler.class, TransparentNodeResponsePacket.class, 2, Side.CLIENT);
         elnNetwork.registerMessage(GhostNodeWailaRequestPacketHandler.class, GhostNodeWailaRequestPacket.class, 3, Side.SERVER);
@@ -623,7 +618,7 @@ public class Eln {
         registerMiningPipe(17);
         registerTreeResinAndRubber(64);
         registerRawCable(65);
-        registerBrush(119);
+//        registerBrush(119); // TODO(1.10): Use LL for this.
         registerMiscItem(120);
         registerElectricalTool(121);
         registerPortableItem(122);
@@ -715,6 +710,8 @@ public class Eln {
         registerReplicator();
         //
 
+        // TODO(1.10): None of this will work before we register items properly.
+/*
         recipeEnergyConverter();
         recipeComputerProbe();
 
@@ -800,16 +797,13 @@ public class Eln {
         recipeECoal();
 
         recipeGridDevices(oreNames);
+*/
 
         proxy.registerRenderers();
 
         TR("itemGroup.Eln");
 
         checkRecipe();
-
-        if (isDevelopmentRun()) {
-            Achievements.init();
-        }
 
         MinecraftForge.EVENT_BUS.register(new ElnForgeEventsHandler());
         FMLCommonHandler.instance().bus().register(new ElnFMLEventsHandler());
@@ -7405,9 +7399,10 @@ public class Eln {
 
     private void registerReplicator() {
         EntityRegistry.registerModEntity(ReplicatorEntity.class, TR_NAME(Type.ENTITY, "EAReplicator"), EntityIDs.REPLICATOR.getId(), Eln.instance, 20, 20, true);
-        ReplicatorEntity.dropList.add(findItemStack("Iron Dust", 1));
-        ReplicatorEntity.dropList.add(findItemStack("Copper Dust", 1));
-        ReplicatorEntity.dropList.add(findItemStack("Gold Dust", 1));
+        // TODO(1.10): Fix.
+//        ReplicatorEntity.dropList.add(findItemStack("Iron Dust", 1));
+//        ReplicatorEntity.dropList.add(findItemStack("Copper Dust", 1));
+//        ReplicatorEntity.dropList.add(findItemStack("Gold Dust", 1));
         ReplicatorEntity.dropList.add(new ItemStack(Items.REDSTONE));
         ReplicatorEntity.dropList.add(new ItemStack(Items.GLOWSTONE_DUST));
     }
@@ -7475,12 +7470,13 @@ public class Eln {
     }
 
     static ItemStack findItemStack(String name, int stackSize) {
-        ItemStack stack =  new ItemStack(GameRegistry.findItem("Eln", name), stackSize);
-        if (stack == null) {
-            stack = dictionnaryOreFromMod.get(name);
-            stack = Utils.newItemStack(Item.getIdFromItem(stack.getItem()), stackSize, stack.getItemDamage());
+        Item item = Item.REGISTRY.getObject(new ResourceLocation(Eln.MODID, name));
+        if (item == null) {
+            ItemStack stack = dictionnaryOreFromMod.get(name);
+            return Utils.newItemStack(Item.getIdFromItem(stack.getItem()), stackSize, stack.getItemDamage());
+        } else {
+            return new ItemStack(item, stackSize);
         }
-        return stack;
     }
 
     private ItemStack findItemStack(String name) {
