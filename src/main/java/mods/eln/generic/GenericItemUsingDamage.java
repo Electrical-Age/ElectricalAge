@@ -37,16 +37,12 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     public void addWithoutRegistry(int damage, Descriptor descriptor) {
         subItemList.put(damage, descriptor);
         setUnlocalizedName(descriptor.name);
-        setRegistryName(descriptor.name);
-        GameRegistry.register(this);
         descriptor.setParent(this, damage);
     }
 
     public void addElement(int damage, Descriptor descriptor) {
         subItemList.put(damage, descriptor);
         setUnlocalizedName(descriptor.name);
-        setRegistryName(descriptor.name);
-        GameRegistry.register(this);
         orderList.add(damage);
         descriptor.setParent(this, damage);
     }

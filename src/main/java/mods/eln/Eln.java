@@ -175,6 +175,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -317,8 +319,11 @@ public class Eln {
     public static double maxSoundDistance = 16;
     private double cablePowerFactor;
 
+    public static final Logger logger = LogManager.getLogger("eln");
+
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        logger.debug("foo", this);
 
         elnNetwork = NetworkRegistry.INSTANCE.newSimpleChannel("electrical-age");
         elnNetwork.registerMessage(AchievePacketHandler.class, AchievePacket.class, 0, Side.SERVER);
@@ -3525,8 +3530,6 @@ public class Eln {
         }
     }
 
-    private static OreDescriptor oreTin, oreCopper, oreSilver;
-
     private void registerOre() {
         int id;
         String name;
@@ -3545,7 +3548,6 @@ public class Eln {
                 // spawnSizeMax,int spawnHeightMin,int
                 // spawnHeightMax
             );
-            oreCopper = desc;
             oreItem.addDescriptor(id, desc);
             addToOre("oreCopper", desc.newItemStack());
         }
@@ -3996,46 +3998,52 @@ public class Eln {
     }
 
     private void registerTool() {
-        //TODO(1.10): ALL registerCustomItemStack commented
-        //ALL setTextureName replaced with registry name WIP
-        ItemStack stack;
-        String name;
+        // TODO(1.10): Actually, this might be fine.
         {
-            name = TR_NAME(Type.ITEM, "Copper Sword");
-            swordCopper = (new ItemSword(ToolMaterial.IRON)).setUnlocalizedName(name).setRegistryName("eln:copper_sword").setCreativeTab(creativeTab);
-            GameRegistry.registerItem(swordCopper, "Eln." + name);
-            //GameRegistry.registerCustomItemStack(name, new ItemStack(swordCopper));
+            String name = TR_NAME(Type.ITEM, "Copper Sword");
+            swordCopper = (new ItemSword(ToolMaterial.IRON))
+                .setUnlocalizedName(name)
+                .setRegistryName("copper_sword")
+                .setCreativeTab(creativeTab);
+            GameRegistry.register(swordCopper);
         }
         {
-            name = TR_NAME(Type.ITEM, "Copper Hoe");
-            hoeCopper = (new ItemHoe(ToolMaterial.IRON)).setUnlocalizedName(name).setRegistryName("eln:copper_hoe").setCreativeTab(creativeTab);
-            GameRegistry.registerItem(hoeCopper, "Eln." + name);
-            //GameRegistry.registerItem(name, new ItemStack(hoeCopper));
+            String name = TR_NAME(Type.ITEM, "Copper Hoe");
+            hoeCopper = (new ItemHoe(ToolMaterial.IRON))
+                .setUnlocalizedName(name)
+                .setRegistryName("copper_hoe")
+                .setCreativeTab(creativeTab);
+            GameRegistry.register(hoeCopper);
         }
         {
-            name = TR_NAME(Type.ITEM, "Copper Shovel");
-            shovelCopper = (new ItemSpade(ToolMaterial.IRON)).setUnlocalizedName(name).setRegistryName("eln:copper_shovel").setCreativeTab(creativeTab);
-            GameRegistry.registerItem(shovelCopper, "Eln." + name);
-            //GameRegistry.registerCustomItemStack(name, new ItemStack(shovelCopper));
+            String name = TR_NAME(Type.ITEM, "Copper Shovel");
+            shovelCopper = (new ItemSpade(ToolMaterial.IRON))
+                .setUnlocalizedName(name)
+                .setRegistryName("copper_shovel")
+                .setCreativeTab(creativeTab);
+            GameRegistry.register(shovelCopper);
         }
         {
-            name = TR_NAME(Type.ITEM, "Copper Pickaxe");
-            pickaxeCopper = new ItemPickaxeEln(ToolMaterial.IRON).setUnlocalizedName(name).setRegistryName("eln:copper_pickaxe").setCreativeTab(creativeTab);
-            GameRegistry.registerItem(pickaxeCopper, "Eln." + name);
-            //GameRegistry.registerCustomItemStack(name, new ItemStack(pickaxeCopper));
+            String name = TR_NAME(Type.ITEM, "Copper Pickaxe");
+            pickaxeCopper = new ItemPickaxeEln(ToolMaterial.IRON)
+                .setUnlocalizedName(name)
+                .setRegistryName("copper_pickaxe")
+                .setCreativeTab(creativeTab);
+            GameRegistry.register(pickaxeCopper);
         }
         {
-            name = TR_NAME(Type.ITEM, "Copper Axe");
-            axeCopper = new ItemAxeEln(ToolMaterial.IRON).setUnlocalizedName(name).setRegistryName("eln:copper_axe").setCreativeTab(creativeTab);
-            GameRegistry.registerItem(axeCopper, "Eln." + name);
-            //GameRegistry.registerCustomItemStack(name, new ItemStack(axeCopper));
+            String name = TR_NAME(Type.ITEM, "Copper Axe");
+            axeCopper = new ItemAxeEln(ToolMaterial.IRON)
+                .setUnlocalizedName(name)
+                .setRegistryName("copper_axe")
+                .setCreativeTab(creativeTab);
+            GameRegistry.register(axeCopper);
         }
 
     }
 
     private void registerSolarTracker(int id) {
         int subId, completId;
-        String name;
 
         SolarTrackerDescriptor element;
         {

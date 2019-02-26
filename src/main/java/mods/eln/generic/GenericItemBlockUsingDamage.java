@@ -51,7 +51,8 @@ public class GenericItemBlockUsingDamage<Descriptor extends GenericItemBlockUsin
         orderList.add(damage);
         descriptors.add(descriptor);
         descriptor.setParent(this, damage);
-        GameRegistry.registerItem(descriptor.parentItem);
+        // TODO(1.10): Mumble mumble.
+        GameRegistry.register(descriptor.parentItem);
     }
 
     public void addWithoutRegistry(int damage, Descriptor descriptor) {
