@@ -60,7 +60,7 @@ public class ElectricalEntitySensorDescriptor extends SixNodeDescriptor {
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Output voltage increases\nif entities are moving around.").split("\n"));
-        list.add(tr("Range: %1$ blocks", (int) maxRange));
+        list.add(tr("Range: %s blocks", (int) maxRange));
     }
 
     // TODO(1.10): Fix item render.

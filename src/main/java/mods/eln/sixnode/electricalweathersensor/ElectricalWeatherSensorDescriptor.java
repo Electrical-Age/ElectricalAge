@@ -51,9 +51,9 @@ public class ElectricalWeatherSensorDescriptor extends SixNodeDescriptor {
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
         Collections.addAll(list, tr("Provides an electrical signal\ndepending the actual weather.").split("\n"));
-        list.add(tr("Clear: %1$V", 0));
-        list.add(tr("Rain: %1$V", Utils.plotValue(Eln.SVU / 2)));
-        list.add(tr("Storm: %1$V", Utils.plotValue(Eln.SVU)));
+        list.add(tr("Clear: %sV", 0));
+        list.add(tr("Rain: %sV", Utils.plotValue(Eln.SVU / 2)));
+        list.add(tr("Storm: %sV", Utils.plotValue(Eln.SVU)));
     }
 
     // TODO(1.10): Fix item render.

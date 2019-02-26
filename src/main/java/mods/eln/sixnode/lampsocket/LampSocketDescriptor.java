@@ -105,10 +105,10 @@ public class LampSocketDescriptor extends SixNodeDescriptor {
         if (range != 0 || alphaZMin != alphaZMax) {
             //list.add("Projector");
             if (range != 0) {
-                list.add(tr("Spot range: %1$ blocks", range));
+                list.add(tr("Spot range: %s blocks", range));
             }
             if (alphaZMin != alphaZMax) {
-                list.add(tr("Angle: %1$° to %2$°", ((int) alphaZMin), ((int) alphaZMax)));
+                list.add(tr("Angle: %s° to %s°", ((int) alphaZMin), ((int) alphaZMax)));
             }
         }
     }

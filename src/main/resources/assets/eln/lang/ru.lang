@@ -287,21 +287,21 @@ tile.eln.EnergyConverterElnToOtherLVUBlock.name=Конвертер электр�
 tile.eln.EnergyConverterElnToOtherMVUBlock.name=Конвертер электричества на 200В
 
 # ./src/main/java/mods/eln/i18n/I18N.java
-You_have_%1$_lives_left=У вас осталось %1$ жизней
+You_have_%s_lives_left=У вас осталось %s жизней
 
 # ./src/main/java/mods/eln/item/BrushDescriptor.java
 Brush_is_dry=Кисточка - сухая
-Can_paint_%1$_blocks=Может окрасить до %1$ блоков
+Can_paint_%s_blocks=Может окрасить до %s блоков
 
 # ./src/main/java/mods/eln/item/CombustionChamber.java
 Upgrade_for_the_Stone_Heat_Furnace.=Улучшение для каменной тепловой печи
 
 # ./src/main/java/mods/eln/item/ElectricalDrillDescriptor.java
-Energy_per_operation\:_%1$J=Необх. энерг. для одого процесса\: %1$Дж
-Time_per_operation\:_%1$s=Необх. время для одного процесса\: %1$сек
+Energy_per_operation\:_%sJ=Необх. энерг. для одого процесса\: %sДж
+Time_per_operation\:_%ss=Необх. время для одного процесса\: %sсек
 
 # ./src/main/java/mods/eln/item/FerromagneticCoreDescriptor.java
-Cable_loss_factor\:_%1$=Коэффициент потерь\: %1$
+Cable_loss_factor\:_%s=Коэффициент потерь\: %s
 
 # ./src/main/java/mods/eln/item/HeatingCorpElement.java
 
@@ -311,8 +311,8 @@ Condition\:=Условие\:
 End_of_life=Окончание срока службы
 Good=Хорошее
 New=Новое
-Nominal_lifetime\:_%1$h=Минимальная продолжительность жизни\: %1$ч
-Technology\:_%1$=Технология\: %1$
+Nominal_lifetime\:_%sh=Минимальная продолжительность жизни\: %sч
+Technology\:_%s=Технология\: %s
 Used=Уже использованное
 
 # ./src/main/java/mods/eln/item/LampSlot.java
@@ -333,7 +333,7 @@ Solar_panel_upgrade=Улучшение для солнечной батареи
 Off=Выкл
 On=Вкл
 State\:=Состояние\:
-Stored_Energy\:_%1$J_(%2$%)=Содержащаяся энергия\: %1$Дж (%2$%)
+Stored_Energy\:_%sJ_(%s)=Содержащаяся энергия\: %sДж (%s)
 
 # ./src/main/java/mods/eln/item/regulator/RegulatorSlot.java
 
@@ -346,7 +346,7 @@ mod.name=Electrical Age
 # ./src/main/java/mods/eln/node/six/SixNodeDescriptor.java
 
 # ./src/main/java/mods/eln/simplenode/energyconverter/EnergyConverterElnToOtherGui.java
-Input_power_is_limited_to_%1$W=Входная мощность ограничена до %1$Вт
+Input_power_is_limited_to_%sW=Входная мощность ограничена до %sВт
 
 # ./src/main/java/mods/eln/sixnode/LogicGate.kt
 _O\:_= O\:
@@ -386,12 +386,12 @@ Switch_is_off=Переключатель выключен
 Switch_is_on=Переключатель включен
 
 # ./src/main/java/mods/eln/sixnode/electricalcable/ElectricalCableDescriptor.java
-A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%1$V=Сигнал - это электрическая\nинформация, которая варьирует в пределах\n0 и %1$ вольт
+A_signal_is_electrical_information\nwhich_must_be_between_0V_and_%sV=Сигнал - это электрическая\nинформация, которая варьирует в пределах\n0 и %s вольт
 Cable_is_adapted_to_conduct\nelectrical_signals.=Этот кабель адаптирован для \nпередачи электрических сигналов.
-Current\:_%1$A=Сила тока\: %1$A
+Current\:_%sA=Сила тока\: %sA
 Not_adapted_to_transport_power.=Не адаптирован для передачи энергии.
 Save_usage\:=Безопасное использование\:
-Serial_resistance\:_%1$Ω=Сопротивление тока\: %1$Ω
+Serial_resistance\:_%sΩ=Сопротивление тока\: %sΩ
 
 # ./src/main/java/mods/eln/sixnode/electricaldatalogger/ElectricalDataLoggerDescriptor.java
 It_can_store_up_to_256_points.=Может хранить в себе до 256 точек.
@@ -423,10 +423,10 @@ Output_voltage_increases\nif_a_fire_has_been_detected.=При обнаружен
 Provides_configurable_signal\nvoltage.=Выдаёт настраиваемое напряжение.
 
 # ./src/main/java/mods/eln/sixnode/electricalgatesource/ElectricalGateSourceGui.java
-Output_at_%1$%=Выход на %1$%
+Output_at_%s=Выход на %s
 
 # ./src/main/java/mods/eln/sixnode/electricallightsensor/ElectricalLightSensorDescriptor.java
-0V_at_night,_%1$V_at_noon.=0В ночью, %1$В днем.
+0V_at_night,_%sV_at_noon.=0В ночью, %sВ днем.
 Provides_an_electrical_voltage\nin_the_presence_of_light.=При наличии света испускает \nэлектрический сигнал.
 Provides_an_electrical_voltage\nwhich_is_proportional_to\nthe_intensity_of_daylight.=Испускает электрический сигнал,\nпропорциональный интенсивности\nдневного света.
 
@@ -439,7 +439,7 @@ Applicable_mathematical_operators\:=Допустимые математичес�
 Calculates_an_output_signal_from\n3_inputs_(A,_B,_C)_using_an_equation.=Высчитывает выходной сигнал\nна основе 3-х входов (A, B, C), при\nпомощи уравнения.
 
 # ./src/main/java/mods/eln/sixnode/electricalmath/ElectricalMathGui.java
-%1$_Redstone(s)_required=Требуется %1$ ед. редстоун(-а)
+%s_Redstone(s)_required=Требуется %s ед. редстоун(-а)
 Equation_required!=Требуется ввести уравнение\!
 Inputs_are=Входы
 Invalid_equation!=Неверное уравнение\!
@@ -483,13 +483,13 @@ Displays_the_value_of_a_signal.=Отображает значение сигна
 Portable_battery_slot=Слот для батарейки
 
 # ./src/main/java/mods/eln/sixnode/electricalweathersensor/ElectricalWeatherSensorDescriptor.java
-Clear\:_%1$V=Ясно\: %1$В
+Clear\:_%sV=Ясно\: %sВ
 Provides_an_electrical_signal\ndepending_the_actual_weather.=Испускает электрический\nсигнал, зависящий от\nтекущей погоды.
-Rain\:_%1$V=Дождь\: %1$В
-Storm\:_%1$V=Буря\: %1$В
+Rain\:_%sV=Дождь\: %sВ
+Storm\:_%sV=Буря\: %sВ
 
 # ./src/main/java/mods/eln/sixnode/electricalwindsensor/ElectricalWindSensorDescriptor.java
-Maximum_wind_speed_is_%1$m_s=Максимальная скорость ветра - %1$м/с
+Maximum_wind_speed_is_%sm_s=Максимальная скорость ветра - %sм/с
 Provides_an_electrical_signal\ndependant_on_wind_speed.=Испускает электрический\nсигнал, зависящий от силы\nветра.
 You_can't_place_this_block_on_the_floor_or_the_ceiling=Вы не можете разместить этот блок на полу или на потолке
 
@@ -508,7 +508,7 @@ Voltage=Напряжение
 Change_password=Сменить пароль
 Counter_Mode=Режим счетчика
 Counts_the_energy_conducted_from\n\u00a74red\u00a7f_to_\u00a71blue\u00a7f.=Считает электричество, переданное от\n\\u00a74красного\\u00a7f к \\u00a71синему\\u00a7f.
-Energy_counter\:_%1$J=Энергии насчитано\: %1$Дж
+Energy_counter\:_%sJ=Энергии насчитано\: %sДж
 Enter_new_energy=Введите новое кол-во энергии
 Enter_password=Введите пароль
 Prepay_Mode=Режим предоплаты
@@ -529,13 +529,13 @@ Provides_a_zero_volt_reference.=Обеспечивает нулевой воль
 Allows_crossing_cables\non_one_single_block.=Позволяет проводам\nпересекаться в одном \nблоке.
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketDescriptor.java
-Angle\:_%1$°_to_%2$°=Угол\: %1$° до %2$°
-Spot_range\:_%1$_blocks=Дальность света\: %1$ блока(-ов)
+Angle\:_%s°_to_%s°=Угол\: %s° до %s°
+Spot_range\:_%s_blocks=Дальность света\: %s блока(-ов)
 
 # ./src/main/java/mods/eln/sixnode/lampsocket/LampSocketGuiDraw.java
-%1$_is_not_in_range!=%1$ вне диапазона\!
+%s_is_not_in_range!=%s вне диапазона\!
 Cable_slot_empty=Слот для провода пуст
-Orientation\:_%1$°=Ориентация\: %1$°
+Orientation\:_%s°=Ориентация\: %s°
 Parallel=Парралельно
 Powered_by_Lamp_Supply=Беспроводной режим
 Powered_by_cable=Проводной режим
@@ -584,8 +584,8 @@ Coal_dust_slot=Слот для распыленного угля
 # ./src/main/java/mods/eln/sixnode/thermalcable/ThermalCableDescriptor.java
 High_parallel_resistance\n_\=>_Low_power_dissipation.=Высокое параллельное \nсопротивление \=> Низкие \nпотери мощности.
 Low_serial_resistance\n_\=>_High_conductivity.=Низкое сопротивление \=> Высокая проводимость.
-Parallel_resistance\:_%1$K_W=Параллельное сопротивление\: %1$K/Вт
-Serial_resistance\:_%1$K_W=Последовательное сопротивление\: %1$K/Вт
+Parallel_resistance\:_%sK_W=Параллельное сопротивление\: %sK/Вт
+Serial_resistance\:_%sK_W=Последовательное сопротивление\: %sK/Вт
 
 # ./src/main/java/mods/eln/sixnode/thermalsensor/ThermalSensorContainer.java
 Cable_slot=Слот для провода
@@ -610,12 +610,12 @@ Set_beacon_name=Имя подсказки
 # ./src/main/java/mods/eln/sixnode/wirelesssignal/rx/WirelessSignalRxGui.java
 
 # ./src/main/java/mods/eln/transparentnode/FuelGenerator.kt
-Nominal_power\:_%1$_W=Минимальная мощность\: %1$ Вт
-Nominal_voltage\:_%1$_V=Минимальное напряжение\: %1$ В
+Nominal_power\:_%s_W=Минимальная мощность\: %s Вт
+Nominal_voltage\:_%s_V=Минимальное напряжение\: %s В
 Produces_electricity_using_fuel.=Производит электричество сжигая топливо.
 
 # ./src/main/java/mods/eln/transparentnode/LargeRheostat.kt
-Nom._Resistance\:_%1$=Мин. сопротивление\: %1$
+Nom._Resistance\:_%s=Мин. сопротивление\: %s
 
 # ./src/main/java/mods/eln/transparentnode/autominer/AutoMinerContainer.java
 Drill_slot=Слот для наконечника для бура
@@ -637,16 +637,16 @@ Overheating_protection=Защита от перегрева
 Overvoltage_protection=Защита от перенапряжения
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryDescriptor.java
-Actual_charge\:_%1$%=Текущий заряд\: %1$%
-Energy_capacity\:_%1$J=Вместимость\: %1$Дж
-_charged_at_%1$%=заряжен на %1$%
+Actual_charge\:_%s=Текущий заряд\: %s
+Energy_capacity\:_%sJ=Вместимость\: %sДж
+_charged_at_%s=заряжен на %s
 
 # ./src/main/java/mods/eln/transparentnode/battery/BatteryGuiDraw.java
 Charge=Заряд
 Charged=Полностью заряжен
 Discharge=Разряжается
 Energy\:=Энергия\:
-Energy\:_%1$=Энергия\: %1$
+Energy\:_%s=Энергия\: %s
 Life\:=Срок службы\:
 No_charge=Не заряжается
 Power_in\:=Входная мощность\: 
@@ -659,7 +659,7 @@ Egg_slot=Слот для яйца
 Wireless_energy_receiver.=Беспроводной приемник электричества
 
 # ./src/main/java/mods/eln/transparentnode/electricalantennatx/ElectricalAntennaTxDescriptor.java
-Efficiency\:_%1$%_up_to_%2$%=Эффективность\: %1$% вплоть до %2$%
+Efficiency\:_%s_up_to_%s=Эффективность\: %s вплоть до %s
 Wireless_energy_transmitter.=Беспроводной передатчик электричества.
 
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceContainer.java
@@ -671,7 +671,7 @@ Similar_to_a_vanilla_furnace,\nbut_heats_with_electricity.=Схожа с ван�
 # ./src/main/java/mods/eln/transparentnode/electricalfurnace/ElectricalFurnaceGuiDraw.java
 Auto_shutdown=Автовыключение
 Manual_shutdown=Ручное выключение
-Set_point\:_%1$°C=Контрольная точка\: %1$°C
+Set_point\:_%s°C=Контрольная точка\: %s°C
 
 # ./src/main/java/mods/eln/transparentnode/electricalmachine/ElectricalMachineDescriptor.java
 Cost=Затраты
@@ -684,7 +684,7 @@ Fuel_slot=Слот для топлива
 Generates_heat_when_supplied_with_fuel.=Генерирует тепло, когда в нем есть топливо.
 
 # ./src/main/java/mods/eln/transparentnode/heatfurnace/HeatFurnaceGuiDraw.java
-Control_gauge_at_%1$%=Шкала контроля на %1$%
+Control_gauge_at_%s=Шкала контроля на %s
 Decline_fuel=Отклонять топливо
 External_control=Внешн. контроль
 Internal_control=Внутр. контроль
@@ -698,27 +698,27 @@ Solar_tracker_slot=Слот для отслеживателя солнца
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPanelDescriptor.java
 Can_be_geared_towards_the_sun.=Может быть повернута к солнцу.
-Max._power\:_%1$W=Макс. мощность\: %1$Вт
-Max._voltage\:_%1$V=Макс. напряжение\: %1$В
+Max._power\:_%sW=Макс. мощность\: %sВт
+Max._voltage\:_%sV=Макс. напряжение\: %sВ
 Produces_power_from_solar_radiation.=Производит электричество из солнечной радиации.
 
 # ./src/main/java/mods/eln/transparentnode/solarpanel/SolarPannelGuiDraw.java
 It_is_night=Сейчас ночь
-Solar_panel_angle\:_%1$°=Угол солнечной батареи\: %1$°
-Sun_angle\:_%1$°=Угол солнца\: %1$°
+Solar_panel_angle\:_%s°=Угол солнечной батареи\: %s°
+Sun_angle\:_%s°=Угол солнца\: %s°
 
 # ./src/main/java/mods/eln/transparentnode/teleporter/TeleporterGui.java
 Destination_transporter=Конечный транспортер
 Power_consumption\:=Потребление энергии\:
-Power_consumption\:_%1$W=Потребление энергии\:  %1$Вт
-Required_energy\:_%1$J=Требуемая энергия\: %1$Дж
+Power_consumption\:_%sW=Потребление энергии\:  %sВт
+Required_energy\:_%sJ=Требуемая энергия\: %sДж
 Start=Начать
 Transporter_name=Имя транспортера
 
 # ./src/main/java/mods/eln/transparentnode/thermaldissipatoractive/ThermalDissipatorActiveDescriptor.java
-Fan_cooling_power\:_%1$W=Сила охлаждения вентилятора\: %1$Вт
-Fan_power_consumption\:_%1$W=Расход энергии вентилятором\: %1$Вт
-Fan_voltage\:_%1$V=Напряжение вентилятора\: %1$В
+Fan_cooling_power\:_%sW=Сила охлаждения вентилятора\: %sВт
+Fan_power_consumption\:_%sW=Расход энергии вентилятором\: %sВт
+Fan_voltage\:_%sV=Напряжение вентилятора\: %sВ
 
 # ./src/main/java/mods/eln/transparentnode/transformer/TransformerDescriptor.java
 The_voltage_ratio_is_proportional\nto_the_cable_stacks_count_ratio.=Соотношение сопротивления\nпропорционально кол-ву\nпроводов в стеке.
@@ -726,13 +726,13 @@ Transforms_an_input_voltage_to\nan_output_voltage.=Превращает вход
 
 # ./src/main/java/mods/eln/transparentnode/turbine/TurbineDescriptor.java
 Generates_electricity_using_heat.=Генерирует электричество используя тепло.
-Temperature_difference\:_%1$°C=Различие температуры\: %1$°C
+Temperature_difference\:_%s°C=Различие температуры\: %s°C
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretDescriptor.java
 CAUTION\:_Cables_can_get_quite_hot!=ОСТОРОЖНО\: Провода могут быть очень горячими\!
-Laser_charge_power\:_%1$W...%2$kW=Энергопотребление при перезарядке\: %1$Вт...%2$кВт
+Laser_charge_power\:_%sW...%skW=Энергопотребление при перезарядке\: %sВт...%sкВт
 Scans_for_entities_and_shoots_if_the\nentity_matches_the_configurable_filter_criteria.=Ищет сущностей, совпадающих\nпо признакам с теми, что указаны\nв настройках и атакует их.
-Standby_power\:_%1$W=Энергопотребление в бездействии\: %1$Вт
+Standby_power\:_%sW=Энергопотребление в бездействии\: %sВт
 
 # ./src/main/java/mods/eln/transparentnode/turret/TurretGui.java
 Attack\:=Атаковать\:
@@ -744,10 +744,10 @@ Generates_energy_using_water_stream.=Генерирует электричест
 No_place_for_water_turbine!=Нет места для турбины\!
 
 # ./src/main/java/mods/eln/transparentnode/windturbine/WindTurbineDescriptor.java
-Front\:_%1$=Перед\: %1$
+Front\:_%s=Перед\: %s
 Generates_energy_from_wind.=Генерирует энергию при помощи силы ветра.
-Left_Right\:_%1$=Слева/Справа\: %1$
-Up_Down\:_%1$=Сверху/Снизу\: %1$
+Left_Right\:_%s=Слева/Справа\: %s
+Up_Down\:_%s=Сверху/Снизу\: %s
 Wind_area\:=Ветреная площадь\:
 
 # ./src/main/java/mods/eln/wiki/Data.java
@@ -769,7 +769,7 @@ Previous=Предыдущ.
 # ./src/main/java/mods/eln/wiki/ItemDefault.java
 Can_be_used_to_craft\:=Используется в рецепте\:
 Cannot_be_crafted!=Не может быть создано\!
-Cost_%1$J=Затрачивает %1$Дж
+Cost_%sJ=Затрачивает %sДж
 Created_by\:=Создано\:
 Is_not_a_crafting_material!=Не является материалом для рецепта\!
 Recipe\:=Рецепт\:
@@ -777,45 +777,45 @@ Recipe\:=Рецепт\:
 # Appearing in multiple source files
 (Increases_capacity)=(Увеличивает емкость)
 (Increases_inductance)=(Повышает индуктивность)
-Actual\:_%1$°C=Текущ.\: %1$°C
+Actual\:_%s°C=Текущ.\: %s°C
 Biggest=Наибольш.
 Booster_slot=Слот для ускорителя
 Can_create\:=Может создавать\:
-Capacity\:_%1$F=Емкость\: %1$F
-Charge_power\:_%1$W=Мощность подзарядки\: %1$Вт
+Capacity\:_%sF=Емкость\: %sF
+Charge_power\:_%sW=Мощность подзарядки\: %sВт
 Connected=Подключено
-Cooling_power\:_%1$W=Мощность охлаждения\: %1$Вт
+Cooling_power\:_%sW=Мощность охлаждения\: %sВт
 Copper_cable_slot=Слот для медного проаода
 Dielectric_slot=Слот для диэлектрика
-Discharge_power\:_%1$W=Мощность разрядки\: %1$Вт
+Discharge_power\:_%sW=Мощность разрядки\: %sВт
 Electrical_cable_slot=Слот для провода
 Entity_filter_slot=Слот для фильтра существ
 Ferromagnetic_core_slot=Слот для ферромагнитного ядра
 Has_a_signal_output.=Имеет выходной сигнал.
-Inductance\:_%1$H=Индуктивность\: %1$H
-Internal_resistance\:_%1$Ω=Внутреннее сопротивление\: %1$Ω
+Inductance\:_%sH=Индуктивность\: %sH
+Internal_resistance\:_%sΩ=Внутреннее сопротивление\: %sΩ
 Is_off=Выкл.
 Is_on=Вкл.
-Max._temperature\:_%1$°C=Макс. нагрев\: %1$°C
+Max._temperature\:_%s°C=Макс. нагрев\: %s°C
 Measured_value\ncorresponding\nto_0%_output=Измеренное значение\nблизко к 0%
 Measured_value\ncorresponding\nto_100%_output=Измеренное значение\nблизко к 100%
 Nominal\:=Минимум\: 
-Nominal_power\:_%1$W=Минимальная мощность\: %1$Вт
+Nominal_power\:_%sW=Минимальная мощность\: %sВт
 Nominal_usage\:=Минимальное кол-во использований\: 
-Nominal_voltage\:_%1$V=Минимальное напряжение\: %1$В
+Nominal_voltage\:_%sV=Минимальное напряжение\: %sВ
 Not_connected=Не соединено
 Not_enough_space_for_this_block=Недостаточно места для этого блока
 Power=Мощность
-Power\:_%1$W=Мощность\: %1$Вт
-Range\:_%1$_blocks=Дальность\: %1$ блока(-ов)
+Power\:_%sW=Мощность\: %sВт
+Range\:_%s_blocks=Дальность\: %s блока(-ов)
 Redstone_slot=Слот для редстоуна
 Regulator_slot=Слот для регулировщика
 Reset=Сброс
-Resistance\:_%1$Ω=Сопротивление\: %1$Ω
+Resistance\:_%sΩ=Сопротивление\: %sΩ
 Smallest=Наименьш.
 Specify_the_channel=Необходимо указать канал
-Stored_energy\:_%1$J_(%2$%)=Содержащаяся энергия\: %1$Дж (%2$%)
-Temperature\:_%1$°C=Температура\: %1$°C
+Stored_energy\:_%sJ_(%s)=Содержащаяся энергия\: %sДж (%s)
+Temperature\:_%s°C=Температура\: %s°C
 Temperature_gauge=Шкала температуры
 Thermal_isolator_slot=Слот для термального изолятора
 Toggle=Переключать
@@ -825,5 +825,5 @@ Used_to_cool_down_turbines.=Используется для охлаждения
 Uses_the_biggest\nvalue_on_the_channel.=Использует наибольшее \nзначение в канале.
 Uses_the_smallest\nvalue_on_the_channel.=Использует наименьшее \nзначение в канале.
 Validate=Проверить
-Voltage\:_%1$V=Напряжение\: %1$В
+Voltage\:_%sV=Напряжение\: %sВ
 You_can't_place_this_block_at_this_side=Вы не можете разместить данный блок с этой стороны

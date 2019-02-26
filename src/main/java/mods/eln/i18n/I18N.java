@@ -35,7 +35,7 @@ public class I18N {
      * Translates the given string. You can pass arguments to the method and reference them in the string using
      * the placeholders %N$ whereas N is the index of the actual parameter <b>starting at 1</b>.
      * <p>
-     * Example: tr("You have %1$ lives left", 4);
+     * Example: tr("You have %s lives left", 4);
      * <p>
      * IT IS IMPORTANT THAT YOU PASS THE <b>STRING LITERALS</b> AT LEAST ONCE AS THE FIRST PARAMETER TO THIS METHOD or
      * you call the method TR() with the actual string literal in order to register the translation text automatically!

@@ -378,8 +378,8 @@ class FuelHeatFurnaceGui(player: EntityPlayer, val inventory: IInventory, val re
         }
         manualControl.setEnable(inventory.getStackInSlot(FuelHeatFurnaceContainer.RegulatorSlot) == null &&
             !render.externalControlled)
-        manualControl.setComment(0, I18N.tr("Control value at %1$", Utils.plotPercent("", manualControl.value.toDouble())))
-        manualControl.setComment(1, I18N.tr("Heat Power: %1$", Utils.plotPower("", render.heatPower.toDouble())))
+        manualControl.setComment(0, I18N.tr("Control value at %s", Utils.plotPercent("", manualControl.value.toDouble())))
+        manualControl.setComment(1, I18N.tr("Heat Power: %s", Utils.plotPower("", render.heatPower.toDouble())))
 
         if (render.setTemperature.pending) {
             setTemperature.value = render.setTemperature.value
@@ -388,9 +388,9 @@ class FuelHeatFurnaceGui(player: EntityPlayer, val inventory: IInventory, val re
             !render.externalControlled)
         setTemperature.temperatureHit = Math.max(0f, render.actualTemperature)
         setTemperature.setComment(0, I18N.tr("Temperature"))
-        setTemperature.setComment(1, I18N.tr("Actual: %1$", Utils.plotCelsius("", render.actualTemperature.toDouble())))
+        setTemperature.setComment(1, I18N.tr("Actual: %s", Utils.plotCelsius("", render.actualTemperature.toDouble())))
         if (!render.externalControlled)
-            setTemperature.setComment(2, I18N.tr("Set point: %1$", Utils.plotCelsius("", setTemperature.value.toDouble())))
+            setTemperature.setComment(2, I18N.tr("Set point: %s", Utils.plotCelsius("", setTemperature.value.toDouble())))
     }
 
     override fun guiObjectEvent(sender: IGuiObject?) {

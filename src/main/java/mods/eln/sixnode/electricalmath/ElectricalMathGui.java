@@ -65,7 +65,7 @@ public class ElectricalMathGui extends GuiContainerEln {
                 c = 0xFF108F00;
             else
                 c = 0xFFFF0000;
-            helper.drawString(8 + 44 / 2, 29, c, tr("%1$ Redstone(s) required", render.redstoneRequired));
+            helper.drawString(8 + 44 / 2, 29, c, tr("%s Redstone(s) required", render.redstoneRequired));
         } else {
             c = 0xFFFF0000;
             helper.drawString(8 + 44 / 2, 29, c, tr("Invalid equation!"));

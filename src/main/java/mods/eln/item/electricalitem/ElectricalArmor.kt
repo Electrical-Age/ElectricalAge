@@ -69,8 +69,8 @@ class ElectricalArmor(materialIn: ItemArmor.ArmorMaterial,
 
     override fun addInformation(stack: ItemStack, playerIn: EntityPlayer, tooltip: MutableList<String>, advanced: Boolean) {
         super.addInformation(stack, playerIn, tooltip, advanced)
-        tooltip.add(tr("Charge power: %1\$W", chargePower.toInt()))
-        tooltip.add(tr("Stored energy: %1\$J (%2$%)", getEnergy(stack),
+        tooltip.add(tr("Charge power: %sW", chargePower.toInt()))
+        tooltip.add(tr("Stored energy: %sJ (%s)", getEnergy(stack),
                 (getEnergy(stack) / energyStorage * 100).toInt()))
     }
 

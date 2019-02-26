@@ -48,7 +48,7 @@ public class BatteryGuiDraw extends GuiContainerEln {
         super.preDraw(f, x, y);
         buttonGrounded.displayString = tr("Grounded: " + render.grounded);
         energyBar.setValue((float) (render.energy / (render.descriptor.electricalStdEnergy * render.life)));
-        energyBar.setComment(0, tr("Energy: %1$", Utils.plotPercent("", energyBar.getValue()).replace(" ", "")));
+        energyBar.setComment(0, tr("Energy: %s", Utils.plotPercent("", energyBar.getValue()).replace(" ", "")));
 
     }
 

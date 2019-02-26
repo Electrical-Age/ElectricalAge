@@ -116,8 +116,8 @@ public class WaterTurbineDescriptor extends TransparentNodeDescriptor {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
         list.add(tr("Generates energy using water stream."));
-        list.add(tr("Voltage: %1$V", Utils.plotValue(cable.electricalNominalVoltage)));
-        list.add(tr("Power: %1$W", Utils.plotValue(nominalPower)));
+        list.add(tr("Voltage: %sV", Utils.plotValue(cable.electricalNominalVoltage)));
+        list.add(tr("Power: %sW", Utils.plotValue(nominalPower)));
     }
 
 

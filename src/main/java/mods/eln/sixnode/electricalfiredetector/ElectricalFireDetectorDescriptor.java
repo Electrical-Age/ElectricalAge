@@ -69,7 +69,7 @@ public class ElectricalFireDetectorDescriptor extends SixNodeDescriptor {
         } else {
             Collections.addAll(list, tr("Output voltage increases\nif a fire has been detected.").split("\n"));
         }
-        list.add(tr("Range: %1$ blocks", (int) maxRange));
+        list.add(tr("Range: %s blocks", (int) maxRange));
     }
 
     // TODO(1.10): Fix item render.

@@ -44,7 +44,7 @@ public class PowerInductorGui extends GuiContainerEln {
 
     @Override
     protected void postDraw(float f, int x, int y) {
-        helper.drawString(8, 12, 0xFF000000, tr("Inductance: %1$H", Utils.plotValue(render.descriptor.getlValue(render.inventory))));
+        helper.drawString(8, 12, 0xFF000000, tr("Inductance: %sH", Utils.plotValue(render.descriptor.getlValue(render.inventory))));
         super.postDraw(f, x, y);
     }
 

@@ -27,10 +27,10 @@ class BatteryItem(name: String, private var energyStorage: Double, internal var 
 
     override fun addInformation(itemStack: ItemStack?, entityPlayer: EntityPlayer, list: MutableList<Any?>, par4: Boolean) {
         super.addInformation(itemStack, entityPlayer, list, par4)
-        list.add(tr("Charge power: %1\$W", Utils.plotValue(chargePower)))
-        list.add(tr("Discharge power: %1\$W", Utils.plotValue(dischargePower)))
+        list.add(tr("Charge power: %sW", Utils.plotValue(chargePower)))
+        list.add(tr("Discharge power: %sW", Utils.plotValue(dischargePower)))
         if (itemStack != null) {
-            list.add(tr("Stored energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
+            list.add(tr("Stored energy: %sJ (%s)", Utils.plotValue(getEnergy(itemStack)),
                     (getEnergy(itemStack) / energyStorage * 100).toInt()))
         }
     }

@@ -561,7 +561,7 @@ public class Obj3D {
                             }, refresh, refresh);
                         }
                     } else {
-                        FMLLog.warning("Invalid syntax in EA model text file %1$s on line %2$d: %3$s",
+                        FMLLog.warning("Invalid syntax in EA model text file %ss on line %sd: %ss",
                             txtPath, lineNumber, line);
                     }
                 }

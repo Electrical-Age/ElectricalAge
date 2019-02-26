@@ -296,7 +296,7 @@ class EmergencyLampGui(private var render: EmergencyLampRender)
             if (render.isConnectedToLampSupply)
                 channel.setComment(1, "§2" + tr("connected to " + render.channel))
             else
-                channel.setComment(1, "§4" + tr("%1$ is not in range!", render.channel))
+                channel.setComment(1, "§4" + tr("%s is not in range!", render.channel))
         } else {
             channel.visible = false
             buttonSupplyType.displayString = tr("Powered by cable")

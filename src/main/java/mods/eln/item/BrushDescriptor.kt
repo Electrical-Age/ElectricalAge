@@ -47,7 +47,7 @@ class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
 
         if (itemStack != null) {
             val creative = Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode
-            list.add(tr("Can paint %1$ blocks", if (creative) "infinite" else itemStack.tagCompound!!.getInteger("life")))
+            list.add(tr("Can paint %s blocks", if (creative) "infinite" else itemStack.tagCompound!!.getInteger("life")))
         }
     }
 

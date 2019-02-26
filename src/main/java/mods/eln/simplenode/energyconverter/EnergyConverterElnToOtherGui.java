@@ -46,7 +46,7 @@ public class EnergyConverterElnToOtherGui extends GuiScreenEln {
     protected void preDraw(float f, int x, int y) {
         super.preDraw(f, x, y);
         if (render.hasChanges) syncVoltage();
-        voltage.setComment(0, tr("Input power is limited to %1$W", (int) (voltage.getValue() * render.inPowerMax)));
+        voltage.setComment(0, tr("Input power is limited to %sW", (int) (voltage.getValue() * render.inPowerMax)));
     }
 
     @Override

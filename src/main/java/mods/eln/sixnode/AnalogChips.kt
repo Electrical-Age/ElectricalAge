@@ -796,7 +796,7 @@ class FilterGui(private var render: FilterRender) : GuiScreenEln() {
         if (render.cutOffFrequency.pending) {
             freq?.value = render.cutOffFrequency.value
         }
-        freq?.setComment(0, I18N.tr("Cut-off frequency %1$ Hz",
+        freq?.setComment(0, I18N.tr("Cut-off frequency %s Hz",
             String.format("%1.3f", freq?.value ?: Eln.instance.electricalFrequency / 4f)))
     }
 

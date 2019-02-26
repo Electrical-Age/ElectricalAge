@@ -113,11 +113,11 @@ public class LampDescriptor extends GenericItemUsingDamageDescriptorUpgrade impl
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
 
-        list.add(tr("Technology: %1$", type));
-        list.add(tr("Range: %1$ blocks", (int) (nominalLight * 15)));
-        list.add(tr("Power: %1$W", Utils.plotValue(nominalP)));
-        list.add(tr("Resistance: %1$\u2126", Utils.plotValue(getR())));
-        list.add(tr("Nominal lifetime: %1$h", serverNominalLife));
+        list.add(tr("Technology: %s", type));
+        list.add(tr("Range: %s blocks", (int) (nominalLight * 15)));
+        list.add(tr("Power: %sW", Utils.plotValue(nominalP)));
+        list.add(tr("Resistance: %s\u2126", Utils.plotValue(getR())));
+        list.add(tr("Nominal lifetime: %sh", serverNominalLife));
         if (itemStack != null) {
             if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey("life"))
                 list.add(tr("Condition:") + " " + tr("New"));

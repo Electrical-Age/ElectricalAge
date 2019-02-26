@@ -85,8 +85,8 @@ public class ElectricalMachineDescriptor extends TransparentNodeDescriptor imple
     @Override
     public void addInformation(ItemStack itemStack, EntityPlayer entityPlayer, List list, boolean par4) {
         super.addInformation(itemStack, entityPlayer, list, par4);
-        list.add(tr("Nominal voltage: %1V$", Utils.plotValue(nominalU)));
-        list.add(tr("Nominal power: %1$W", Utils.plotValue(nominalP)));
+        list.add(tr("Nominal voltage: %sV", Utils.plotValue(nominalU)));
+        list.add(tr("Nominal power: %sW", Utils.plotValue(nominalP)));
     }
 
     public void applyTo(ElectricalLoad load) {

@@ -57,7 +57,7 @@ open class ElectricalTool(name: String, private var strengthOn: Float, private v
         super.addInformation(itemStack, entityPlayer, list, par4)
 
         if (itemStack != null)
-            list.add(tr("Stored energy: %1\$J (%2$%)", Utils.plotValue(getEnergy(itemStack)),
+            list.add(tr("Stored energy: %sJ (%s)", Utils.plotValue(getEnergy(itemStack)),
                 (getEnergy(itemStack) / energyStorage * 100).toInt()))
     }
 

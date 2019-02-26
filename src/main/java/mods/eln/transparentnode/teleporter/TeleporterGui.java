@@ -75,12 +75,12 @@ public class TeleporterGui extends GuiScreenEln {
             chargePower.setValue(render.chargePower);
             render.chargePowerNew = false;
         }
-        chargePower.setComment(0, tr("Power consumption: %1$W", chargePower.getValue()));
+        chargePower.setComment(0, tr("Power consumption: %sW", chargePower.getValue()));
         start.enabled = render.state == TeleporterElement.StateIdle;
 
         chargeBar.setRange(0, render.energyTarget);
         chargeBar.temperatureHit = render.energyHit;
-        chargeBar.setComment(0, tr("Required energy: %1$J", render.energyTarget));
+        chargeBar.setComment(0, tr("Required energy: %sJ", render.energyTarget));
         chargeBar.setComment(1, ((int) (render.processRatio * 100)) + "%");
     /*	if(render.defaultOutput)
 			toogleDefaultOutput.displayString = "default output is high";

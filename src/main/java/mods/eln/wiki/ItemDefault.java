@@ -166,7 +166,7 @@ public class ItemDefault extends Default {
                         extender.add(new GuiItemStack(x, y, r.getOutputCopy()[0], helper));
 
                         x += 22;
-                        extender.add(new GuiLabel(x, y + 4, tr("Cost %1$J", r.energy)));
+                        extender.add(new GuiLabel(x, y + 4, tr("Cost %sJ", r.energy)));
 
                         counter = (counter + 1) % 1;
                     }
@@ -196,7 +196,7 @@ public class ItemDefault extends Default {
                         extender.add(new GuiItemStack(x, y, r.getOutputCopy()[0], helper));
 
                         x += 22;
-                        extender.add(new GuiLabel(x, y + 4, tr("Cost %1$J", r.energy)));
+                        extender.add(new GuiLabel(x, y + 4, tr("Cost %sJ", r.energy)));
 
                         counter = (counter + 1) % 1;
                     }

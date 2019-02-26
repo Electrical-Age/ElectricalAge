@@ -242,7 +242,7 @@ class LargeRheostatGUI(player: EntityPlayer, inventory: IInventory, internal var
     GuiContainerEln(ResistorContainer(player, inventory)) {
 
     override fun postDraw(f: Float, x: Int, y: Int) {
-        helper.drawString(8, 12, -16777216, tr("Nom. Resistance: %1$", Utils.plotValue(render.desc.getRsValue(render.inventory), "Ohm")))
+        helper.drawString(8, 12, -16777216, tr("Nom. Resistance: %s", Utils.plotValue(render.desc.getRsValue(render.inventory), "Ohm")))
         super.postDraw(f, x, y)
     }
 
