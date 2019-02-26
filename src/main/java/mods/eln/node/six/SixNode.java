@@ -523,12 +523,13 @@ public class SixNode extends Node {
                     entityPlayer.inventory.decrStackSize(entityPlayer.inventory.currentItem, 1);
 
                 //if(sixNodeCacheMapId != sixNodeCacheMapIdOld)
+                // TODO(1.10): Hopefully this is unnecessary.
                 {
-                    Chunk chunk = coordinate.world().getChunkFromBlockCoords(coordinate.pos);
-                    Utils.generateHeightMap(chunk);
-                    Utils.updateSkylight(chunk);
-                    chunk.generateSkylightMap();
-                    Utils.updateAllLightTypes(coordinate.world(), coordinate.pos);
+//                    Chunk chunk = coordinate.world().getChunkFromBlockCoords(coordinate.pos);
+//                    Utils.generateHeightMap(chunk);
+//                    Utils.updateSkylight(chunk);
+//                    chunk.generateSkylightMap();
+//                    Utils.updateAllLightTypes(coordinate.world(), coordinate.pos);
                 }
                 return true;
             } else {

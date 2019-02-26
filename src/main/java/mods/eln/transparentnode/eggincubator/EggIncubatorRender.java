@@ -40,12 +40,13 @@ public class EggIncubatorRender extends TransparentNodeElementRender {
         this.descriptor = (EggIncubatorDescriptor) descriptor;
     }
 
+    // TODO(1.10): Fix rendering.
     @Override
     public void draw() {
         GL11.glPushMatrix();
         front.glRotateXnRef();
         if (egg != null) {
-            UtilsClient.drawEntityItem(egg, 0.0f, -0.3f, 0.13f, alpha, 0.6f);
+            //UtilsClient.drawEntityItem(egg, 0.0f, -0.3f, 0.13f, alpha, 0.6f);
         }
         descriptor.draw(eggStackSize, (float) (voltage / descriptor.nominalVoltage));
         GL11.glPopMatrix();

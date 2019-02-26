@@ -1,6 +1,7 @@
 package mods.eln.entity;
 
 import mods.eln.misc.Utils;
+import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EnumCreatureAttribute;
@@ -9,14 +10,15 @@ import net.minecraft.entity.ai.*;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.client.event.sound.SoundEvent;
 
 import java.util.ArrayList;
 import java.util.Map.Entry;
@@ -36,7 +38,7 @@ public class ReplicatorEntity extends EntityMob {
     public ReplicatorEntity(World par1World) {
         super(par1World);
 
-        func_110163_bv(); //persistenceRequired
+        enablePersistence();
 
         this.setSize(0.3F, 0.7F);
 
@@ -44,10 +46,11 @@ public class ReplicatorEntity extends EntityMob {
         int p = 0;
 
         this.tasks.addTask(p++, new EntityAISwimming(this));
-        // this.tasks.addTask(p++, new EntityAIBreakDoor(this));
-        this.tasks.addTask(p++, new EntityAIAttackOnCollide(this, EntityPlayer.class, 1.0D, false));
-        this.tasks.addTask(p++, new EntityAIAttackOnCollide(this, EntityVillager.class, 1.0D, true));
-        this.tasks.addTask(p++, new EntityAIAttackOnCollide(this, ReplicatorEntity.class, 1.0D, true));
+        // TODO(1.10): Is there a replacement for this? Is it even needed anymore?
+        // TODO: Also, consider leaping towards targets.
+//        this.tasks.addTask(p++, new EntityAIAttackOnCollide(this, EntityPlayer.class, 1.0D, false));
+//        this.tasks.addTask(p++, new EntityAIAttackOnCollide(this, EntityVillager.class, 1.0D, true));
+//        this.tasks.addTask(p++, new EntityAIAttackOnCollide(this, ReplicatorEntity.class, 1.0D, true));
         this.tasks.addTask(p++, replicatorIa);
         this.tasks.addTask(p++, new EntityAIMoveTowardsRestriction(this, 1.0D));
         this.tasks.addTask(p++, new EntityAIMoveThroughVillage(this, 1.0D, false));
@@ -58,7 +61,7 @@ public class ReplicatorEntity extends EntityMob {
         this.targetTasks.addTask(p++, new EntityAIHurtByTarget(this, true));
         this.targetTasks.addTask(p, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true, true));
         this.targetTasks.addTask(p, new EntityAINearestAttackableTarget(this, EntityVillager.class, true, false));
-        this.targetTasks.addTask(p++, new ReplicatorHungryAttack(this, ReplicatorEntity.class, 0, false));
+        this.targetTasks.addTask(p++, new ReplicatorHungryAttack(this, ReplicatorEntity.class, 0, false, true, null));
         // this.targetTasks.addTask(p++, new EntityAINearestAttackableTarget(this, ReplicatorEntity.class, 0, false));
         // this.targetTasks.addTask(p++, replicatorIa);
     }
@@ -108,30 +111,31 @@ public class ReplicatorEntity extends EntityMob {
         // this.getAttributeMap().func_111150_b(field_110186_bp).setAttribute(this.rand.nextDouble() * ForgeDummyContainer.zombieSummonBaseChance);
     }
 
-    protected boolean isAIEnabled() {
-        return true;
-    }
+    // TODO(1.10): Necessary?
+//    @Override
+//    public boolean isAIDisabled() {
+//        return false;
+//    }
 
-    //TODO: FIX SOUND EVENTS
-    protected SoundEvent getLivingSound() {
+    protected SoundEvent getAmbientSound()
+    {
         return SoundEvents.ENTITY_SILVERFISH_AMBIENT;
     }
 
-    protected SoundEvent getHurtSound() {
+    protected SoundEvent getHurtSound()
+    {
         return SoundEvents.ENTITY_SILVERFISH_HURT;
     }
 
-    protected SoundEvent getDeathSound() {
+    protected SoundEvent getDeathSound()
+    {
         return SoundEvents.ENTITY_SILVERFISH_DEATH;
     }
 
-    /*protected void playStepSound(int par1, int par2, int par3, int par4) {
-        this.playSound("mob.silverfish.step", 0.15F, 1.0F);
+    protected void playStepSound(BlockPos pos, Block blockIn)
+    {
+        this.playSound(SoundEvents.ENTITY_SILVERFISH_STEP, 0.15F, 1.0F);
     }
-
-    protected int getDropItemId() {
-        return Item.getIdFromItem(Items.rotten_flesh);
-    }*/
 
     @Override
     protected void dropFewItems(boolean par1, int par2) {

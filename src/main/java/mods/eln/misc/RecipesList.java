@@ -66,7 +66,7 @@ public class RecipesList {
             list.addAll(recipesList.getRecipeFromOutput(output));
         }
 
-        FurnaceRecipes furnaceRecipes = FurnaceRecipes.smelting();
+        FurnaceRecipes furnaceRecipes = FurnaceRecipes.instance();
 
         {
             Iterator it = furnaceRecipes.getSmeltingList().entrySet().iterator();
@@ -99,7 +99,7 @@ public class RecipesList {
                 list.add(r);
         }
 
-        FurnaceRecipes furnaceRecipes = FurnaceRecipes.smelting();
+        FurnaceRecipes furnaceRecipes = FurnaceRecipes.instance();
         ItemStack smeltResult = furnaceRecipes.getSmeltingResult(input);
         Recipe smeltRecipe;
         if (smeltResult != null) {

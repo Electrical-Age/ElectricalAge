@@ -1,5 +1,6 @@
 package mods.eln.misc;
 
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -32,6 +33,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import java.util.List;
@@ -549,6 +551,11 @@ public class UtilsClient {
     public static void sendPacketToServer(PacketBuffer bos) {
         CPacketCustomPayload packet = new CPacketCustomPayload(Eln.channelName, bos);
         Eln.eventChannel.sendToServer(new FMLProxyPacket(packet));
+    }
+
+    @Deprecated
+    public static void sendPacketToServer(ByteArrayOutputStream bos) {
+        sendPacketToServer(new PacketBuffer(Unpooled.buffer().readBytes(bos.toByteArray())));
     }
 
     public static int getUuid() {

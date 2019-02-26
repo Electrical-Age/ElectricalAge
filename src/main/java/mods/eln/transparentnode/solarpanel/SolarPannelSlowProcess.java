@@ -72,9 +72,7 @@ public class SolarPannelSlowProcess implements IProcess {
             yD = 1.0;
             xD /= yD;
         }
-        int count = 0;
-        ///world.getChunkProvider().chunkExists(var1, var2)
-        while (world.getChunkProvider().chunkExists(((int) x) >> 4, ((int) z) >> 4)) {
+        while (y <= 256.0) {
             double opacity = world.getBlockLightOpacity(new BlockPos((int) x, (int) y, (int) z));
             light *= (255 - opacity) / 255;
             if (light == 0.0) {
@@ -83,10 +81,7 @@ public class SolarPannelSlowProcess implements IProcess {
 
             x += xD;
             y += yD;
-            count++;
-            if (y > 256.0) break;
         }
-//		Utils.print("count : " + count + "   ");
         return light;
     }
 

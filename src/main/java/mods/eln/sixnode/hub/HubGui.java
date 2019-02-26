@@ -7,6 +7,8 @@ import mods.eln.gui.IGuiObject;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 
+import java.io.IOException;
+
 public class HubGui extends GuiContainerEln {
 
     int w, w2;
@@ -120,7 +122,7 @@ public class HubGui extends GuiContainerEln {
         }
     }
 
-    protected void mouseClicked(int x, int y, int code) {
+    protected void mouseClicked(int x, int y, int code) throws IOException {
         super.mouseClicked(x, y, code);
         x -= width / 2 - xSize / 2;
         y -= height / 2 - ySize / 2;

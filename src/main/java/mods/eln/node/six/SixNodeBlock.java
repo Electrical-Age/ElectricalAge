@@ -220,9 +220,10 @@ public class SixNodeBlock extends NodeBlock {
 
             Chunk chunk = world.getChunkFromBlockCoords(pos);
             Utils.generateHeightMap(chunk);
-            Utils.updateSkylight(chunk);
-            chunk.generateSkylightMap();
-            Utils.updateAllLightTypes(world, pos);
+            // TODO(1.10): Was this important?
+            //Utils.updateSkylight(chunk);
+            //chunk.generateSkylightMap();
+            //Utils.updateAllLightTypes(world, pos);
 
             sixNode.setNeedPublish(true);
             return false;
@@ -253,7 +254,7 @@ public class SixNodeBlock extends NodeBlock {
     }
 
     @Override
-    public void onNeighborBlockChange(IBlockAccess world, BlockPos pos, BlockPos par5) {
+    public void onNeighborChange(IBlockAccess world, BlockPos pos, BlockPos neighbor) {
         SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(pos);
         SixNode sixNode = (SixNode) tileEntity.getNode();
         if (sixNode == null) return;
@@ -268,9 +269,9 @@ public class SixNodeBlock extends NodeBlock {
         }
 
         if (!sixNode.getIfSideRemain()) {
-            world.setBlockToAir(pos);
+            // TODO(1.10): Set this block to air.
         } else {
-            super.onNeighborChange(world, pos, par5);
+            super.onNeighborChange(world, pos, neighbor);
         }
     }
 
@@ -420,7 +421,7 @@ public class SixNodeBlock extends NodeBlock {
         return collisionRayTrace(world.getBlockState(pos), world, pos, start, end);
     }
 
-    boolean getIfOtherBlockIsSolid(World world, BlockPos pos, Direction direction) {
+    boolean getIfOtherBlockIsSolid(IBlockAccess world, BlockPos pos, Direction direction) {
         pos = direction.applied(pos, 1);
 
         IBlockState state = world.getBlockState(pos);

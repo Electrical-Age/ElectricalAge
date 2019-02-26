@@ -18,6 +18,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -486,15 +487,13 @@ public abstract class NodeBase {
 
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
-        //TODO: Find new way to get isPlayerWatchingChunk()
-
         for (Object obj : server.getEntityWorld().playerEntities) {
 
             EntityPlayerMP player = (EntityPlayerMP) obj;
             WorldServer worldServer = (WorldServer) server.worldServerForDimension(player.dimension);
-            PlayerManager playerManager = worldServer.getPlayerManager();
+
             if (player.dimension != this.coordinate.getDimension()) continue;
-            if (!playerManager.isPlayerWatchingChunk(player, coordinate.pos.getX() / 16, coordinate.pos.getZ() / 16)) continue;
+            if (!worldServer.getPlayerChunkMap().isPlayerWatchingChunk(player, coordinate.pos.getX() / 16, coordinate.pos.getZ() / 16)) continue;
             if (coordinate.distanceTo(player) > range) continue;
 
             Utils.sendPacketToClient(bos, player);
@@ -535,9 +534,8 @@ public abstract class NodeBase {
         for (Object obj : server.getEntityWorld().playerEntities) {
             EntityPlayerMP player = (EntityPlayerMP) obj;
             WorldServer worldServer = (WorldServer) server.worldServerForDimension(player.dimension);
-            PlayerManager playerManager = worldServer.getPlayerManager();
             if (player.dimension != this.coordinate.getDimension()) continue;
-            if (!playerManager.isPlayerWatchingChunk(player, coordinate.pos.getX() / 16, coordinate.pos.getZ() / 16)) continue;
+            if (!worldServer.getPlayerChunkMap().isPlayerWatchingChunk(player, coordinate.pos.getX() / 16, coordinate.pos.getZ() / 16)) continue;
 
             Utils.sendPacketToClient(getPublishPacket(), player);
         }

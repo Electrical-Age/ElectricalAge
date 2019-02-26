@@ -16,12 +16,6 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
         return "ElnProbe";
     }
 
-  /*  @Callback
-    @Optional.Method(modid = Other.modIdOc)
-    public Object[] greet(Context context, Arguments args) {
-        return new Object[]{String.format("Hello, %s!", args.checkString(0))};
-    }*/
-
     @Callback
     @Optional.Method(modid = Other.modIdOc)
     public Object[] signalSetDir(Context context, Arguments args) {
@@ -97,8 +91,6 @@ public class ComputerProbeEntity extends SimpleNodeEntity implements SimpleCompo
     public ComputerProbeNode getNode() {
         return (ComputerProbeNode) super.getNode();
     }
-
-    //return new String[]{"writeDir", "readDir", "writeOut", "readOut", "readIn"};
 
     @Override
     public String getNodeUuid() {

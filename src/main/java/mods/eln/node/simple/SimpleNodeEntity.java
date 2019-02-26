@@ -10,16 +10,20 @@ import mods.eln.node.NodeEntityClientSender;
 import mods.eln.node.NodeManager;
 import mods.eln.server.DelayedBlockRemove;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.SPacketCustomPayload;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
@@ -44,11 +48,6 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
 
     //***************** Wrapping **************************
-    /*
-	public void onBlockPlacedBy(Direction front, EntityLivingBase entityLiving, int metadata) {
-	
-	}
-*/
 
     void onBlockAdded() {
 		/*if (!worldObj.isRemote){
@@ -112,6 +111,32 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
     public Direction front;
 
+    // TODO(1.10): Packets are probably still broken somehow!
+    @Nullable
+    @Override
+    public SPacketUpdateTileEntity getUpdatePacket() {
+        SimpleNode node = getNode();
+        if (node == null) {
+            Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
+            return null;
+        }
+        NBTTagCompound tagCompound = new NBTTagCompound();
+        tagCompound.setByteArray("eln", node.getPublishPacket().toByteArray());
+        return new SPacketUpdateTileEntity(
+            getPos(),
+            getBlockMetadata(),
+            tagCompound
+        );
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+        assert(worldObj.isRemote);
+        byte[] bytes = pkt.getNbtCompound().getByteArray("eln");
+        DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(bytes));
+        Eln.packetHandler.packetRx(dataInputStream, net, Minecraft.getMinecraft().thePlayer);
+    }
+
     @Override
     public void serverPublishUnserialize(DataInputStream stream) {
         try {
@@ -126,20 +151,7 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
 
     @Override
     public void serverPacketUnserialize(DataInputStream stream) {
-
     }
-
-    //TODO: FIX Packets
-    @Override
-    public Packet getDescriptionPacket() {
-        SimpleNode node = getNode();
-        if (node == null) {
-            Utils.println("ASSERT NULL NODE public Packet getDescriptionPacket() nodeblock entity");
-            return null;
-        }
-        return new SPacketCustomPayload(Eln.channelName, node.getPublishPacket());
-    }
-
 
     public NodeEntityClientSender sender = new NodeEntityClientSender(this, getNodeUuid());
 
@@ -155,6 +167,4 @@ public abstract class SimpleNodeEntity extends TileEntity implements INodeEntity
     public GuiScreen newGuiDraw(Direction side, EntityPlayer player) {
         return null;
     }
-
-
 }

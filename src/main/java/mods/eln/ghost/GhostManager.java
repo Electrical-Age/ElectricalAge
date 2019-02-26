@@ -129,13 +129,14 @@ public class GhostManager extends WorldSavedData {
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-	/*	int nodeCounter = 0;
+        /*	int nodeCounter = 0;
 
 		for(GhostElement ghost : ghostTable.values()) {
 			NBTTagCompound nbtGhost = new NBTTagCompound();
 			ghost.writeToNBT(nbtGhost, "");
 			nbt.setTag("n" + nodeCounter++, nbtGhost);
 		}*/
+    	return nbt;
     }
 
     public void loadFromNBT(NBTTagCompound nbt) {

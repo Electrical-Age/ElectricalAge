@@ -35,6 +35,7 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
         return new MaceratorDescriptorHandle();
     }
 
+    // TODO(1.10): Fix rendering.
     @Override
     void draw(ElectricalMachineRender render, Object handleO, EntityItem inEntity, EntityItem outEntity,
               float powerFactor, float processState) {
@@ -46,8 +47,8 @@ public class MaceratorDescriptor extends ElectricalMachineDescriptor {
 
         //UtilsClient.enableDepthTest();
         GL11.glScalef(0.7f, 0.7f, 0.7f);
-        UtilsClient.drawEntityItem(inEntity, 0.0, 0.4f, 0f, handle.itemCounter, 1f);
-        UtilsClient.drawEntityItem(outEntity, 0.0, -0.5f, 0f, 130 + handle.itemCounter, 1f);
+        //UtilsClient.drawEntityItem(inEntity, 0.0, 0.4f, 0f, handle.itemCounter, 1f);
+        //UtilsClient.drawEntityItem(outEntity, 0.0, -0.5f, 0f, 130 + handle.itemCounter, 1f);
     }
 
     @Override

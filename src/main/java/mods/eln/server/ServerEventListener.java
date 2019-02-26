@@ -1,5 +1,6 @@
 package mods.eln.server;
 
+import mods.eln.item.electricalitem.TreeCapitation;
 import mods.eln.misc.Coordinate;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;

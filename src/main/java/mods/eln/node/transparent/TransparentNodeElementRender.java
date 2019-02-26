@@ -37,7 +37,7 @@ public abstract class TransparentNodeElementRender {
 
     }
 
-    //TODO: ITEM RENDERING
+    // TODO(1.10): ITEM RENDERING
     public void drawEntityItem(EntityItem entityItem, double x, double y, double z, float roty, float scale) {/*
         if(entityItem == null) return;
 		
@@ -58,7 +58,7 @@ public abstract class TransparentNodeElementRender {
 			var10.doRender(entityItem,0, 0, 0, 0, 0);	
 		GL11.glPopMatrix();	
 		*/
-        UtilsClient.drawEntityItem(entityItem, x, y, z, roty, scale);
+        //UtilsClient.drawEntityItem(entityItem, x, y, z, roty, scale);
 
     }
 

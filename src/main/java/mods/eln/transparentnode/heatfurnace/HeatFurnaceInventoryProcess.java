@@ -50,7 +50,7 @@ public class HeatFurnaceInventoryProcess implements IProcess, INBTTReady {
                         combustibleBuffer += itemEnergy;
                         furnace.inventory.decrStackSize(HeatFurnaceContainer.combustibleId, 1);
                         if (combustibleStack.getItem().getUnlocalizedName().toLowerCase().contains("bucket")) {
-                            furnace.inventory.setInventorySlotContents(HeatFurnaceContainer.combustibleId, new ItemStack(Items.bucket));
+                            furnace.inventory.setInventorySlotContents(HeatFurnaceContainer.combustibleId, new ItemStack(Items.BUCKET));
                         }
                     }
                 }

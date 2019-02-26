@@ -1,18 +1,9 @@
 package mods.eln;
 
-import net.minecraftforge.fml.common.*;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.event.*;
-import net.minecraftforge.fml.common.network.FMLEventChannel;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.relauncher.Side;
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
 import mods.eln.client.SoundLoader;
+import mods.eln.entity.EntityIDs;
 import mods.eln.entity.ReplicatorEntity;
 import mods.eln.entity.ReplicatorPopProcess;
 import mods.eln.eventhandlers.ElnFMLEventsHandler;
@@ -93,7 +84,10 @@ import mods.eln.sixnode.electricalwindsensor.ElectricalWindSensorDescriptor;
 import mods.eln.sixnode.energymeter.EnergyMeterDescriptor;
 import mods.eln.sixnode.groundcable.GroundCableDescriptor;
 import mods.eln.sixnode.hub.HubDescriptor;
-import mods.eln.sixnode.lampsocket.*;
+import mods.eln.sixnode.lampsocket.LampSocketDescriptor;
+import mods.eln.sixnode.lampsocket.LampSocketType;
+import mods.eln.sixnode.lampsocket.LightBlock;
+import mods.eln.sixnode.lampsocket.LightBlockEntity;
 import mods.eln.sixnode.lampsupply.LampSupplyDescriptor;
 import mods.eln.sixnode.lampsupply.LampSupplyElement;
 import mods.eln.sixnode.logicgate.*;
@@ -154,6 +148,7 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.*;
 import net.minecraft.item.Item.ToolMaterial;
 import net.minecraft.item.ItemArmor.ArmorMaterial;
@@ -167,6 +162,16 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
+import net.minecraftforge.fml.common.*;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.event.*;
+import net.minecraftforge.fml.common.network.FMLEventChannel;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
@@ -348,28 +353,12 @@ public class Eln {
             event.getSuggestedConfigurationFile());
         config.load();
 
-
-        //Hacks for correct long date typing failures in config file
-        //WARNING/BUG: "renameProperty" changes the type to String! However read functions don't seem to care attention to it, so it's OK... for the moment.
-        if (config.hasKey("lamp", "incondescentLifeInHours"))
-            config.renameProperty("lamp", "incondescentLifeInHours", "incandescentLifeInHours");
-        if (config.hasKey("mapgenerate", "plumb"))
-            config.renameProperty("mapgenerate", "plumb", "lead");
-        if (config.hasKey("mapgenerate", "cooper"))
-            config.renameProperty("mapgenerate", "cooper", "copper");
-        if (config.hasKey("simulation", "electricalFrequancy"))
-            config.renameProperty("simulation", "electricalFrequancy", "electricalFrequency");
-        if (config.hasKey("simulation", "thermalFrequancy"))
-            config.renameProperty("simulation", "thermalFrequancy", "thermalFrequency");
-
-
         modbusEnable = config.get("modbus", "enable", false).getBoolean(false);
         modbusPort = config.get("modbus", "port", 1502).getInt(1502);
         debugEnabled = config.get("debug", "enable", false).getBoolean(false);
 
         explosionEnable = config.get("gameplay", "explosion", true).getBoolean(true);
 
-        //explosionEnable = false;
         versionCheckEnabled = config.get("general", "versionCheckEnable", true).getBoolean(true);
         analyticsEnabled = config.get("general", "analyticsEnable", true).getBoolean(true);
 
@@ -404,7 +393,6 @@ public class Eln {
 
         replicatorPop = config.get("entity", "replicatorPop", true).getBoolean(true);
         ReplicatorPopProcess.popPerSecondPerPlayer = config.get("entity", "replicatorPopWhenThunderPerSecond", 1.0 / 120).getDouble(1.0 / 120);
-        replicatorRegistrationId = config.get("entity", "replicatorId", -1).getInt(-1);
         killMonstersAroundLamps = config.get("entity", "killMonstersAroundLamps", true).getBoolean(true);
         killMonstersAroundLampsRange = config.get("entity", "killMonstersAroundLampsRange", 9).getInt(9);
 
@@ -3880,43 +3868,65 @@ public class Eln {
     }
 
     private void registerArmor() {
-        //TODO(1.10): ALL registerCustomItemStack commented
+        // TODO(1.10): Fix the textures?
 
         ItemStack stack;
         String name;
 
         {
             name = TR_NAME(Type.ITEM, "Copper Helmet");
-            helmetCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Helmet, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_helmet").setCreativeTab(creativeTab);
-            GameRegistry.registerItem(helmetCopper, "Eln." + name);
+            helmetCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Helmet, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
+                .setUnlocalizedName(name)
+                .setRegistryName(name)
+//                .setTextureName("eln:copper_helmet")
+                .setCreativeTab(creativeTab);
+            GameRegistry.register(helmetCopper);
             //GameRegistry.registerCustomItemStack(name, new ItemStack(helmetCopper));
         }
         {
             name = TR_NAME(Type.ITEM, "Copper Chestplate");
-            plateCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Chestplate, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_chestplate").setCreativeTab(creativeTab);
-            GameRegistry.registerItem(plateCopper, "Eln." + name);
+            plateCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Chestplate, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
+                .setUnlocalizedName(name)
+                .setRegistryName(name)
+//                .setTextureName("eln:copper_chestplate")
+                .setCreativeTab(creativeTab);
+            GameRegistry.register(plateCopper);
             //GameRegistry.registerCustomItemStack(name, new ItemStack(plateCopper));
         }
         {
             name = TR_NAME(Type.ITEM, "Copper Leggings");
-            legsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Leggings, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_leggings").setCreativeTab(creativeTab);
-            GameRegistry.registerItem(legsCopper, "Eln." + name);
+            legsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Leggings, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
+                .setUnlocalizedName(name)
+                .setRegistryName(name)
+//                .setTextureName("eln:copper_leggings")
+                .setCreativeTab(creativeTab);
+            GameRegistry.register(legsCopper);
             //GameRegistry.registerCustomItemStack(name, new ItemStack(legsCopper));
         }
         {
             name = TR_NAME(Type.ITEM, "Copper Boots");
-            bootsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Boots, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png")).setUnlocalizedName(name).setTextureName("eln:copper_boots").setCreativeTab(creativeTab);
-            GameRegistry.registerItem(bootsCopper, "Eln." + name);
+            bootsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Boots, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
+                .setUnlocalizedName(name)
+                .setRegistryName(name)
+//                .setTextureName("eln:copper_boots")
+                .setCreativeTab(creativeTab);
+            GameRegistry.register(bootsCopper);
             //GameRegistry.registerCustomItemStack(name, new ItemStack(bootsCopper));
         }
 
-        int armorPoint;
         String t1, t2;
         t1 = "eln:textures/armor/ecoal_layer_1.png";
         t2 = "eln:textures/armor/ecoal_layer_2.png";
         double energyPerDamage = 500;
         int armor, armorMarge;
-        ArmorMaterial eCoalMaterial = net.minecraftforge.common.util.EnumHelper.addArmorMaterial("ECoal", 10, new int[]{2, 6, 5, 2}, 9);
+        ArmorMaterial eCoalMaterial = net.minecraftforge.common.util.EnumHelper.addArmorMaterial(
+            "ECoal",
+            "ECoal",
+            10,
+            new int[]{2, 6, 5, 2},
+            9,
+            SoundEvents.ITEM_ARMOR_EQUIP_LEATHER,
+            10);
         {
             name = TR_NAME(Type.ITEM, "E-Coal Helmet");
             armor = 2;
@@ -6600,8 +6610,8 @@ public class Eln {
 
     private void recipeMacerator() {
         float f = 4000;
-	maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.coal_ore, 1),
-	    new ItemStack(Items.coal, 3, 0), 1.0 * f));
+	    maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.COAL_ORE, 1),
+	        new ItemStack(Items.COAL, 3, 0), 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(findItemStack("Copper Ore"),
             new ItemStack[]{findItemStack("Copper Dust", 2)}, 1.0 * f));
         maceratorRecipes.addRecipe(new Recipe(new ItemStack(Blocks.IRON_ORE),
@@ -7383,26 +7393,13 @@ public class Eln {
 
     }
 
-    private int replicatorRegistrationId = -1;
-
     private void registerReplicator() {
-        int redColor = (255 << 16);
-        int orangeColor = (255 << 16) + (200 << 8);
-
-        if (replicatorRegistrationId == -1)
-            //PROBABLY WILL HAVE TO BE REMOVED
-            replicatorRegistrationId = EntityRegistry.findGlobalUniqueEntityId();
-        Utils.println("Replicator registred at" + replicatorRegistrationId);
-        // Register mob WIP VARIABLES
-        EntityRegistry.registerModEntity(ReplicatorEntity.class, TR_NAME(Type.ENTITY, "EAReplicator"), replicatorRegistrationId, Eln.instance, 20, 20, true);
+        EntityRegistry.registerModEntity(ReplicatorEntity.class, TR_NAME(Type.ENTITY, "EAReplicator"), EntityIDs.REPLICATOR.getId(), Eln.instance, 20, 20, true);
         ReplicatorEntity.dropList.add(findItemStack("Iron Dust", 1));
         ReplicatorEntity.dropList.add(findItemStack("Copper Dust", 1));
         ReplicatorEntity.dropList.add(findItemStack("Gold Dust", 1));
         ReplicatorEntity.dropList.add(new ItemStack(Items.REDSTONE));
         ReplicatorEntity.dropList.add(new ItemStack(Items.GLOWSTONE_DUST));
-        // Add mob spawn
-        // EntityRegistry.addSpawn(ReplicatorEntity.class, 1, 1, 2, EnumCreatureType.monster, BiomeGenBase.plains);
-
     }
 
     // Registers WIP items.

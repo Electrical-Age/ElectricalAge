@@ -37,15 +37,12 @@ public abstract class NodeBlock extends Block {//BlockContainer
 
     @Override
     public float getBlockHardness(IBlockState blockState, World worldIn, BlockPos pos) {
-
         return 1.0f;
     }
 
-
-    //TODO: Fix function isProvidingWeakPower
     @Override
-    public int isProvidingWeakPower(IBlockAccess block, BlockPos pos, EnumFacing side) {
-        NodeBlockEntity entity = (NodeBlockEntity) block.getTileEntity(pos);
+    public int getWeakPower(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side) {
+        NodeBlockEntity entity = (NodeBlockEntity) blockAccess.getTileEntity(pos);
         return entity.isProvidingWeakPower(Direction.fromFacing(side));
     }
 

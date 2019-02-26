@@ -62,34 +62,22 @@ class WindTurbineSlowProcess implements IProcess, INBTTReady {
             z2 = zc + d.rayZ;
 
             int blockBusyCount = -d.blockMalusSubCount;
-            boolean notInCache = false;
             if (turbine.node.coordinate.doesWorldExist()) {
                 World world = turbine.node.coordinate.world();
-                //IChunkProvider chunk = world.getChunkProvider();
 
                 for (int x = x1; x <= x2; x++) {
                     for (int y = y1; y <= y2; y++) {
                         for (int z = z1; z <= z2; z++) {
-                            if (!world.blockExists(x, y, z)) {
-                                notInCache = true;
-                                break;
-                            }
                             if (!world.isAirBlock(new BlockPos(x,y,z))) {
                                 blockBusyCount++;
                             }
                         }
-                        if (notInCache) break;
                     }
-                    if (notInCache) break;
                 }
-            } else {
-                notInCache = true;
             }
-            if (!notInCache) {
-                environmentWindFactor = Math.max(0.0, Math.min(1.0, 1.0 - blockBusyCount * d.blockMalus));
+            environmentWindFactor = Math.max(0.0, Math.min(1.0, 1.0 - blockBusyCount * d.blockMalus));
 
-                Utils.println("EnvironementWindFactor : " + environmentWindFactor);
-            }
+            Utils.println("EnvironementWindFactor : " + environmentWindFactor);
         }
 
         localWindTimeCounter -= time;

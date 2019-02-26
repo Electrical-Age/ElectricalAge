@@ -74,15 +74,16 @@ public class BatteryChargerRender extends SixNodeElementRender {
         entityItem.motionZ = 0.0;
         //scale *= 10;
         Render var10;
-        var10 = RenderManager.instance.getEntityRenderObject(entityItem);
-        GL11.glPushMatrix();
-        GL11.glTranslatef((float) x, (float) y, (float) z);
-        GL11.glRotatef(90, 0f, 1f, 0f);
-        GL11.glRotatef(roty, 0, 1, 0);
-        GL11.glScalef(scale, scale, scale);
-        GL11.glTranslatef(0.0f, -0.25f, 0.0f);
-        var10.doRender(entityItem, 0, 0, 0, 0, 0);
-        GL11.glPopMatrix();
+        // TODO(1.10): Render items.
+//        var10 = RenderManager.instance.getEntityRenderObject(entityItem);
+//        GL11.glPushMatrix();
+//        GL11.glTranslatef((float) x, (float) y, (float) z);
+//        GL11.glRotatef(90, 0f, 1f, 0f);
+//        GL11.glRotatef(roty, 0, 1, 0);
+//        GL11.glScalef(scale, scale, scale);
+//        GL11.glTranslatef(0.0f, -0.25f, 0.0f);
+//        var10.doRender(entityItem, 0, 0, 0, 0, 0);
+//        GL11.glPopMatrix();
     }
 
     @Override

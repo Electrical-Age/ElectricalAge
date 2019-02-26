@@ -28,7 +28,6 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
 
     @Override
     public void process(double time) {
-        //if(element.rxCoord == null)
         World world = element.node.coordinate.world();
 
         if (timeCounter <= 0.0) {
@@ -44,33 +43,17 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
                 coord.move(element.front);
                 distance++;
                 Block block;
-                if (element.placeBoot || element.rxCoord == null || coord.world().blockExists(coord.pos.getX(), coord.pos.getY(), coord.pos.getZ())) {
-                    block = coord.world().getBlockState(coord.pos).getBlock();
-                    if ((coord.world().isAirBlock(coord.pos) && block != Blocks.FIRE)) {
-                        if (block == Eln.transparentNodeBlock
-                            && (node = (TransparentNode) NodeManager.instance.getNodeFromCoordinate(coord)) != null
-                            && (node.element instanceof ElectricalAntennaRxElement)) {
-                            ElectricalAntennaRxElement rx = (ElectricalAntennaRxElement) node.element;
-                            if (rx.front == element.front.getInverse()) {
-                                find = true;
-                            }
+                block = coord.world().getBlockState(coord.pos).getBlock();
+                if ((coord.world().isAirBlock(coord.pos) && block != Blocks.FIRE)) {
+                    if (block == Eln.transparentNodeBlock
+                        && (node = (TransparentNode) NodeManager.instance.getNodeFromCoordinate(coord)) != null
+                        && (node.element instanceof ElectricalAntennaRxElement)) {
+                        ElectricalAntennaRxElement rx = (ElectricalAntennaRxElement) node.element;
+                        if (rx.front == element.front.getInverse()) {
+                            find = true;
                         }
-                        break;
                     }
-                } else {
-                    //	b++;
-                    NodeBase unknowNode = NodeManager.instance.getNodeFromCoordinate(coord);
-                    if (node != null) {
-                        if (unknowNode instanceof TransparentNode
-                            && (((TransparentNode) unknowNode).element instanceof ElectricalAntennaRxElement)) {
-                            node = (TransparentNode) unknowNode;
-                            ElectricalAntennaRxElement rx = (ElectricalAntennaRxElement) node.element;
-                            if (rx.front == element.front.getInverse()) {
-                                find = true;
-                            }
-                        }
-                        break;
-                    }
+                    break;
                 }
             } while (distance < rangeMax);
             if (!find) {
@@ -78,16 +61,8 @@ public class ElectricalAntennaTxSlowProcess implements IProcess {
                 Coordinate coordCpy = new Coordinate(coord);
                 coordCpy.move(element.front.getInverse());
                 BlockPos pos = coordCpy.pos;
-                int x = pos.getX();
-                int y = pos.getY();
-                int z = pos.getZ();
-                if (element.powerResistor.getP() > 50) {
-                    //TODO: Check if blockExists
-                    if (coordCpy.world().blockExists(x, y, z)) {
-                        if (coordCpy.world().isAirBlock(pos)) {
-                            coordCpy.world().setBlockState(pos, Blocks.FIRE.getDefaultState());
-                        }
-                    }
+                if (element.powerResistor.getP() > 50 && coordCpy.world().isAirBlock(pos)) {
+                    coordCpy.world().setBlockState(pos, Blocks.FIRE.getDefaultState());
                 }
             } else {
                 element.powerEfficency = 1 - (element.descriptor.electricalPowerRatioLostOffset + element.descriptor.electricalPowerRatioLostPerBlock * distance);

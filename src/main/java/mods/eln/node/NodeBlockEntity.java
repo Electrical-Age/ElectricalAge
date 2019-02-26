@@ -293,16 +293,13 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
             stream.writeByte(worldObj.provider.getDimension());
 
             stream.writeUTF(getNodeUuid());
-
-
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }
 
     public void sendPacketToServer(ByteArrayOutputStream bos) {
-        UtilsClient.sendPacketToServer(new PacketBuffer(Unpooled.buffer().readBytes(bos.toByteArray())));
+        UtilsClient.sendPacketToServer(bos);
     }
 
 

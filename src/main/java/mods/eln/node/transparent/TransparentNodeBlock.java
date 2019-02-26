@@ -6,6 +6,7 @@ import mods.eln.node.NodeBase;
 import mods.eln.node.NodeBlock;
 import mods.eln.node.NodeBlockEntity;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -77,29 +78,27 @@ public class TransparentNodeBlock extends NodeBlock {
         }
 
         return super.removedByPlayer(state, world, pos, entityPlayer, willHarvest);
-
     }
 
-    @Override
-    public int getDamageValue(World world, BlockPos pos) {
-        if (world == null)
-            return 0;
-        TileEntity tile = world.getTileEntity(pos);
-        if (tile != null && tile instanceof TransparentNodeEntity)
-            return ((TransparentNodeEntity) world.getTileEntity(pos)).getDamageValue(world, pos);
-        return 0;
-    }
-
+    // TOOD(1.10): Was this important?
+//    @Override
+//    public int getDamageValue(World world, BlockPos pos) {
+//        if (world == null)
+//            return 0;
+//        TileEntity tile = world.getTileEntity(pos);
+//        if (tile != null && tile instanceof TransparentNodeEntity)
+//            return ((TransparentNodeEntity) world.getTileEntity(pos)).getDamageValue(world, pos);
+//        return 0;
+//    }
 
     @Override
     public int getLightValue(IBlockAccess world, BlockPos pos) {
         return (world.getBlockState(pos).getBlock().getMetaFromState(world.getBlockState(pos)) & 3) << 6;
     }
 
-
+    @Nullable
     @Override
-    public Item getItemDropped(IBlockState p_149650_1_, Random p_149650_2_,
-                               int p_149650_3_) {
+    public Item getItemDropped(IBlockState state, Random rand, int fortune) {
         return null;
     }
 

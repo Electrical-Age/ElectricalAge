@@ -15,8 +15,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockOre;
 import net.minecraft.block.BlockRedstoneOre;
 import net.minecraft.block.state.BlockStateBase;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.Vec3d;
@@ -98,12 +100,12 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
                     case ore:
                         drillCount++;
 
-                        Block block = jobCoord.world().getBlock(jobCoord.x, jobCoord.y, jobCoord.z);
-                        int meta = jobCoord.world().getBlockMetadata(jobCoord.x, jobCoord.y, jobCoord.z);
+                        IBlockState state = jobCoord.getBlockState();
+                        Block block = state.getBlock();
                         if (silkTouch) {
-                            itemsToDrop.add(new ItemStack(block, 1, meta));
+                            itemsToDrop.add(new ItemStack(block, 1, block.getMetaFromState(state)));
                         } else {
-                            itemsToDrop.addAll(block.getDrops(jobCoord.world(), jobCoord.x, jobCoord.y, jobCoord.z, meta, 0));
+                            itemsToDrop.addAll(block.getDrops(jobCoord.world(), jobCoord.pos, state, 0));
                         }
 
                         // Use cobblestone instead of air, everywhere except the mining shaft.
@@ -347,12 +349,15 @@ public class AutoMinerSlowProcess implements IProcess, INBTTReady {
     }
 
     private boolean checkIsOre(Coordinate coordinate) {
-        Block block = coordinate.world().getBlockState(coordinate.pos).getBlock();
+        IBlockState state = coordinate.world().getBlockState(coordinate.pos);
+        Block block = state.getBlock();
         if (block instanceof BlockOre) return true;
         if (block instanceof OreBlock) return true;
         if (block instanceof BlockRedstoneOre) return true;
+
+
         return OreColorMapping.INSTANCE.getMap()[Block.getIdFromBlock(block) +
-            (coordonate.world().getBlockMetadata(coordinate.x, coordinate.y, coordinate.z) << 12)] != 0;
+            block.getMetaFromState(state) << 12] != 0;
     }
 
     public void onBreakElement() {

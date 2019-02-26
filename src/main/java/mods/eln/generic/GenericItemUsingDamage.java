@@ -34,24 +34,21 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
         setHasSubtypes(true);
     }
 
-    public void setDefaultElement(Descriptor descriptor) {
-        defaultElement = descriptor;
-    }
-
     public void addWithoutRegistry(int damage, Descriptor descriptor) {
         subItemList.put(damage, descriptor);
-        ItemStack stack = new ItemStack(this, 1, damage);
-        LanguageRegistry.addName(stack, descriptor.name);
+        setUnlocalizedName(descriptor.name);
+        setRegistryName(descriptor.name);
+        GameRegistry.register(this);
         descriptor.setParent(this, damage);
     }
 
     public void addElement(int damage, Descriptor descriptor) {
         subItemList.put(damage, descriptor);
-        ItemStack stack = new ItemStack(this, 1, damage);
-        LanguageRegistry.addName(stack, descriptor.name);
+        setUnlocalizedName(descriptor.name);
+        setRegistryName(descriptor.name);
+        GameRegistry.register(this);
         orderList.add(damage);
         descriptor.setParent(this, damage);
-        GameRegistry.registerCustomItemStack(descriptor.name, descriptor.newItemStack(1));
     }
 
     public Descriptor getDescriptor(int damage) {
@@ -162,7 +159,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     }
 
     @Override
-    public float func_150893_a(ItemStack stack, IBlockState state) { //getStrVsBlock
+    public float getStrVsBlock(ItemStack stack, IBlockState state) {
         GenericItemUsingDamageDescriptor d = getDescriptor(stack);
         if (d == null)
             return 0.2f;

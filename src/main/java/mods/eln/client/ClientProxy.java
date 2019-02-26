@@ -1,6 +1,9 @@
 package mods.eln.client;
 
+import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import mods.eln.CommonProxy;
@@ -29,12 +32,14 @@ public class ClientProxy extends CommonProxy {
         ClientRegistry.bindTileEntitySpecialRenderer(SixNodeEntity.class, new SixNodeRender());
         ClientRegistry.bindTileEntitySpecialRenderer(TransparentNodeEntity.class, new TransparentNodeRender());
 
-        MinecraftForgeClient.registerItemRenderer(Eln.transparentNodeItem, Eln.transparentNodeItem);
-        MinecraftForgeClient.registerItemRenderer(Eln.sixNodeItem, Eln.sixNodeItem);
-        MinecraftForgeClient.registerItemRenderer(Eln.sharedItem, Eln.sharedItem);
-        MinecraftForgeClient.registerItemRenderer(Eln.sharedItemStackOne, Eln.sharedItemStackOne);
+//        MinecraftForgeClient.registerItemRenderer(Eln.transparentNodeItem, Eln.transparentNodeItem);
+//        MinecraftForgeClient.registerItemRenderer(Eln.sixNodeItem, Eln.sixNodeItem);
+//        MinecraftForgeClient.registerItemRenderer(Eln.sharedItem, Eln.sharedItem);
+//        MinecraftForgeClient.registerItemRenderer(Eln.sharedItemStackOne, Eln.sharedItemStackOne);
 
-        RenderingRegistry.registerEntityRenderingHandler(ReplicatorEntity.class, new ReplicatorRender(new ModelSilverfish(), (float) 0.3));
+        RenderingRegistry.registerEntityRenderingHandler(
+            ReplicatorEntity.class,
+            manager -> new ReplicatorRender(manager, new ModelSilverfish(), 0.3f));
 
         Eln.clientKeyHandler = new ClientKeyHandler();
         FMLCommonHandler.instance().bus().register(Eln.clientKeyHandler);

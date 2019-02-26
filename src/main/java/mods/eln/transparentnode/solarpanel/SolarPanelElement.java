@@ -156,7 +156,7 @@ public class SolarPanelElement extends TransparentNodeElement {
 
     @Override
     public boolean onBlockActivated(EntityPlayer entityPlayer, Direction side, float vx, float vy, float vz) {
-        return descriptor.canRotate && inventory.take(entityPlayer.getHeldItemMainHand(), this, true, false);
+        return descriptor.canRotate && inventory.take(entityPlayer.getHeldItemMainhand(), this, true, false);
     }
 
     @Override

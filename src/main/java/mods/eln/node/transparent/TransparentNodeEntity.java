@@ -95,11 +95,8 @@ public class TransparentNodeEntity extends NodeBlockEntity implements ISidedInve
     public void preparePacketForServer(DataOutputStream stream) {
         try {
             super.preparePacketForServer(stream);
-
             stream.writeShort(elementRenderId);
-
         } catch (IOException e) {
-
             e.printStackTrace();
         }
     }

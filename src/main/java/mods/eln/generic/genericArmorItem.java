@@ -32,9 +32,9 @@ public class genericArmorItem extends ItemArmor {
         this.t2 = t2;
     }
 
-    //TODO: FIX TEXTURES
+    // TODO(1.10): WTF?
     @Override
-    public String getArmorTexture(ItemStack stack, Entity entity, int slot, String layer) {
+    public String getArmorTexture(ItemStack stack, Entity entity, EntityEquipmentSlot slot, String type) {
         if (this.armorType.getIndex() == 2) {
             return t2;
         } else {

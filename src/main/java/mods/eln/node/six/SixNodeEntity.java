@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 public class SixNodeEntity extends NodeBlockEntity {
-    //boolean[] syncronizedSideEnable = new boolean[6];
-
 
     public SixNodeElementRender[] elementRenderList = new SixNodeElementRender[6];
     short[] elementRenderIdList = new short[6];
@@ -35,22 +33,8 @@ public class SixNodeEntity extends NodeBlockEntity {
         }
     }
 
-	/* caca
-    public boolean onBlockActivated(EntityPlayer entityPlayer, Direction direction) {
-		
-		//Utils.println("onBlockActivated " + direction);
-		
-		return getNode().onBlockActivated(entityPlayer, direction);
-	}
-	*/
-
-    public static final int singleTargetId = 2;
-
     @Override
     public void serverPublishUnserialize(DataInputStream stream) {
-
-        Block sixNodeCacheBlockOld = sixNodeCacheBlock;
-
         super.serverPublishUnserialize(stream);
 
         try {
@@ -74,38 +58,19 @@ public class SixNodeEntity extends NodeBlockEntity {
                 }
             }
 
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-
-            e.printStackTrace();
-        } catch (SecurityException e) {
-
+        } catch (IOException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
         }
 
         //	worldObj.setLightValue(EnumSkyBlock.Sky, xCoord,yCoord,zCoord,15);
-        if (sixNodeCacheBlock != sixNodeCacheBlockOld) {
-            Chunk chunk = worldObj.getChunkFromBlockCoords(pos);
-            chunk.generateHeightMap();
-            Utils.updateSkylight(chunk);
-            chunk.generateSkylightMap();
-            Utils.updateAllLightTypes(worldObj, xCoord, yCoord, zCoord);
-        }
-
+        // TODO(1.10): This is hopefully unneeded.
+//        if (sixNodeCacheBlock != sixNodeCacheBlockOld) {
+//            Chunk chunk = worldObj.getChunkFromBlockCoords(pos);
+//            chunk.generateHeightMap();
+//            Utils.updateSkylight(chunk);
+//            chunk.generateSkylightMap();
+//            Utils.updateAllLightTypes(worldObj, xCoord, yCoord, zCoord);
+//        }
     }
 
     @Override

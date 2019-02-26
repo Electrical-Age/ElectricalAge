@@ -35,8 +35,6 @@ public class SimpleNodeItem extends ItemBlock {
         IBlockState state = world.getBlockState(pos);
         if (state.getBlock() == this.block) {
             this.block.onBlockPlacedBy(world, pos, state, player, stack);
-            //TODO: find replacement of onPostBlockPlaced
-            this.block.onPostBlockPlaced(world, pos, metadata);
         }
 
         return true;

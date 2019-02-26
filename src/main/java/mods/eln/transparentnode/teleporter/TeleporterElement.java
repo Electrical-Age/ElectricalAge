@@ -190,7 +190,7 @@ public class TeleporterElement extends TransparentNodeElement implements ITelepo
             state = StateReset;
     }
 
-    private static final byte StateIdle = 0;
+    public static final byte StateIdle = 0;
     private static final byte StateStart = 1;
     private static final byte StateClose = 2;
     private static final byte StateCharge = 3;

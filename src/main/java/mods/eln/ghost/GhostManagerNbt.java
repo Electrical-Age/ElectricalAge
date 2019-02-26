@@ -22,5 +22,6 @@ public class GhostManagerNbt extends WorldSavedData {
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         //Eln.ghostManager.saveToNbt(nbt, Integer.MIN_VALUE);
+        return nbt;
     }
 }

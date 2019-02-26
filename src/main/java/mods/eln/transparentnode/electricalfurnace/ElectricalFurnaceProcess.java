@@ -109,7 +109,7 @@ public class ElectricalFurnaceProcess implements IProcess {
     }
 
     public ItemStack getSmeltResult() {
-        return FurnaceRecipes.smelting().getSmeltingResult(inventory.getStackInSlot(ElectricalFurnaceElement.inSlotId));
+        return FurnaceRecipes.instance().getSmeltingResult(inventory.getStackInSlot(ElectricalFurnaceElement.inSlotId));
     }
 
     /**

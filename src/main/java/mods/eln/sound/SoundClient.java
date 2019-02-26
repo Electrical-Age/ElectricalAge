@@ -5,13 +5,13 @@ import mods.eln.client.SoundLoader;
 import mods.eln.misc.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 
 public class SoundClient {
-    /*public static void playFromBlock(World world, int x, int y, int z, String track, float volume, float pitch, float rangeNominal, float rangeMax) {
-		play(world, x + 0.5, y + 0.5, z + 0.5, track, volume, pitch, rangeNominal, rangeMax);
-	}*/
-
-    //TODO: FIX SOUNDS
+    // TODO(1.10): Fix sounds.
     public static void play(SoundCommand p) {
         ClientProxy.soundClientEventListener.currentUuid = p.uuid; //trolilole
 
@@ -28,21 +28,34 @@ public class SoundClient {
 
         int trackCount = SoundLoader.getTrackCount(p.track);
 
+        BlockPos soundPos = new BlockPos(p.x, p.y, p.z);
         if (trackCount == 1) {
             float temp = 1.0f / (1 + blockFactor);
             p.volume *= Math.pow(temp, 2);
             p.volume *= distanceFactor;
             if (p.volume <= 0) return;
-            p.world.playSound(player.posX + 2 * (p.x - player.posX) / distance, player.posY + 2 * (p.y - player.posY) / distance, player.posZ + 2 * (p.z - player.posZ) / distance, p.track, p.volume, p.pitch, false);
+            p.world.playSound(
+                player,
+                soundPos,
+                new SoundEvent(new ResourceLocation("eln", p.track)),
+                SoundCategory.BLOCKS,  // TODO(1.10): Move this to the sound command.
+                p.volume,
+                p.pitch);
         } else {
             for (int idx = 0; idx < trackCount; idx++) {
                 float bandVolume = p.volume;
                 bandVolume *= distanceFactor;
-                float normalizedBlockFactor = blockFactor;
-
-                bandVolume -= ((trackCount - 1 - idx) / (trackCount - 1f) + 0.2) * normalizedBlockFactor;
+                bandVolume -= ((trackCount - 1 - idx) / (trackCount - 1f) + 0.2) * blockFactor;
                 Utils.print(bandVolume + " ");
-                p.world.playSound(player.posX + 2 * (p.x - player.posX) / distance, player.posY + 2 * (p.y - player.posY) / distance, player.posZ + 2 * (p.z - player.posZ) / distance, p.track + "_" + idx + "x", bandVolume, p.pitch, false);
+                if (bandVolume > 0) {
+                    p.world.playSound(
+                        player,
+                        soundPos,
+                        new SoundEvent(new ResourceLocation("eln", p.track + "_" + idx + "x")),
+                        SoundCategory.BLOCKS,
+                        bandVolume,
+                        p.pitch);
+                }
             }
             Utils.println("");
         }
