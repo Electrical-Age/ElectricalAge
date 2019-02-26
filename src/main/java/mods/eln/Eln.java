@@ -330,6 +330,7 @@ public class Eln {
         elnNetwork.registerMessage(SixNodeWailaResponsePacketHandler.class, SixNodeWailaResponsePacket.class, 6, Side.CLIENT);
 
         ModContainer container = FMLCommonHandler.instance().findContainerFor(this);
+        // TODO(1.10): How does this work now?
         // LanguageRegistry.instance().loadLanguagesFor(container, Side.CLIENT);
 
         // Update ModInfo by code

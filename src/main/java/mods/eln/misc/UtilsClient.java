@@ -1,5 +1,6 @@
 package mods.eln.misc;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.renderer.RenderItem;
@@ -555,7 +556,9 @@ public class UtilsClient {
 
     @Deprecated
     public static void sendPacketToServer(ByteArrayOutputStream bos) {
-        sendPacketToServer(new PacketBuffer(Unpooled.buffer().readBytes(bos.toByteArray())));
+        ByteBuf buf = Unpooled.buffer()
+            .writeBytes(bos.toByteArray());
+        sendPacketToServer(new PacketBuffer(buf));
     }
 
     public static int getUuid() {
