@@ -102,7 +102,7 @@ public class GuiItemStack extends Gui implements IGuiObject {
             int px, py;
             px = posX;
             py = posY;
-            List list = stack.getTooltip(Minecraft.getMinecraft().thePlayer, false);
+            List list = stack.getTooltip(Minecraft.getMinecraft().player, false);
             helper.drawHoveringText(list, x, y, Minecraft.getMinecraft().fontRendererObj);
         }
     }

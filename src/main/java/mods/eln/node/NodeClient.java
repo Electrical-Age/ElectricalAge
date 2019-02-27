@@ -38,7 +38,7 @@ public class NodeClient {
 			refreshCounter = 0;
 			
     	    
-	    	EntityClientPlayerMP player =  Minecraft.getMinecraft().thePlayer;
+	    	EntityClientPlayerMP player =  Minecraft.getMinecraft().player;
 	    	ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream stream = new DataOutputStream(bos);   	
 

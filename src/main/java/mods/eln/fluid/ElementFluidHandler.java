@@ -3,7 +3,14 @@ package mods.eln.fluid;
 import mods.eln.misc.INBTTReady;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.fluids.*;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.FluidTankInfo;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
+
+import javax.annotation.Nullable;
 
 /**
  * Use one of these if you want your block to support Forge fluids!
@@ -39,7 +46,7 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
     }
 
     @Override
-    public int fill(EnumFacing from, FluidStack resource, boolean doFill) {
+    public int fill(FluidStack resource, boolean doFill) {
         if (tank.getFluidAmount() > 0) {
             // No change in type of fluid.
             return tank.fill(resource, doFill);
@@ -49,48 +56,34 @@ public class ElementFluidHandler implements IFluidHandler, INBTTReady {
             return tank.fill(resource, doFill);
         } else {
             for (Fluid whitelisted : whitelist) {
-                if (whitelisted == resource.getFluid())
+                if (whitelisted == resource.getFluid()) {
                     setHeatEnergyPerMilliBucket(resource.getFluid());
-                return tank.fill(resource, doFill);
+                    return tank.fill(resource, doFill);
+                }
             }
             return 0;
         }
     }
 
+    @Nullable
     @Override
-    public FluidStack drain(EnumFacing from, FluidStack resource, boolean doDrain) {
-        if (resource.isFluidEqual(tank.getFluid()))
+    public FluidStack drain(FluidStack resource, boolean doDrain) {
+        if (resource.isFluidEqual(tank.getFluid())) {
             return tank.drain(resource.amount, doDrain);
-        else
+        } else {
             return null;
+        }
     }
 
+    @Nullable
     @Override
-    public FluidStack drain(EnumFacing from, int maxDrain, boolean doDrain) {
+    public FluidStack drain(int maxDrain, boolean doDrain) {
         return tank.drain(maxDrain, doDrain);
     }
 
     @Override
-    public boolean canFill(EnumFacing from, Fluid fluid) {
-        if (tank.getFluidAmount() > 0) {
-            return tank.getFluid().getFluid() == fluid;
-        } else {
-            for (Fluid whitelisted : whitelist) {
-                if (whitelisted == fluid)
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean canDrain(EnumFacing from, Fluid fluid) {
-        return true;
-    }
-
-    @Override
-    public FluidTankInfo[] getTankInfo(EnumFacing from) {
-        return new FluidTankInfo[]{tank.getInfo()};
+    public IFluidTankProperties[] getTankProperties() {
+        return tank.getTankProperties();
     }
 
     @Override

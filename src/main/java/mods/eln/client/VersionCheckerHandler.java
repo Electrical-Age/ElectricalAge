@@ -112,8 +112,8 @@ public class VersionCheckerHandler {
 
         // Print the current version when the client start a map
         if (Eln.versionCheckEnabled) {
-            m.thePlayer.addChatMessage(new TextComponentString(Version.printColor()));
-            m.thePlayer.addChatMessage(new TextComponentString(versionMsg));
+            m.player.addChatMessage(new TextComponentString(Version.printColor()));
+            m.player.addChatMessage(new TextComponentString(versionMsg));
         }
 
         FMLCommonHandler.instance().bus().unregister(this);

@@ -279,7 +279,7 @@ public abstract class NodeBlockEntity extends TileEntity implements ITileEntityS
         assert(worldObj.isRemote);
         byte[] bytes = pkt.getNbtCompound().getByteArray("eln");
         DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(bytes));
-        Eln.packetHandler.packetRx(dataInputStream, net, Minecraft.getMinecraft().thePlayer);
+        Eln.packetHandler.packetRx(dataInputStream, net, Minecraft.getMinecraft().player);
     }
 
     public void preparePacketForServer(DataOutputStream stream) {

@@ -22,7 +22,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;

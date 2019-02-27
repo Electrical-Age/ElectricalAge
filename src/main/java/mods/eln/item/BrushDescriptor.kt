@@ -17,7 +17,7 @@ class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
     private val icon = ResourceLocation("eln", "textures/items/" + name.toLowerCase().replace(" ", "") + ".png")
 
     override fun getName(stack: ItemStack): String {
-        val creative = Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode
+        val creative = Minecraft.getMinecraft().player.capabilities.isCreativeMode
         val color = getColor(stack)
         val life = getLife(stack)
         return if (!creative && color == 15 && life == 0) "Empty " + super.getName(stack) else super.getName(stack)
@@ -46,7 +46,7 @@ class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
         super.addInformation(itemStack, entityPlayer, list, par4)
 
         if (itemStack != null) {
-            val creative = Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode
+            val creative = Minecraft.getMinecraft().player.capabilities.isCreativeMode
             list.add(tr("Can paint %s blocks", if (creative) "infinite" else itemStack.tagCompound!!.getInteger("life")))
         }
     }
@@ -69,7 +69,7 @@ class BrushDescriptor(name: String): GenericItemUsingDamageDescriptor(name) {
 // TODO(1.10): Reimplement brush coloring
 //    override fun renderItem(type: IItemRenderer.ItemRenderType, item: ItemStack, vararg data: Any) {
 //        if (type == IItemRenderer.ItemRenderType.INVENTORY) {
-//            val creative = Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode
+//            val creative = Minecraft.getMinecraft().player.capabilities.isCreativeMode
 //            UtilsClient.drawIcon(type, icon)
 //            if (!creative) {
 //                GL11.glColor4f(1f, 1f, 1f, 0.75f - 0.75f * getLife(item) / 32f)

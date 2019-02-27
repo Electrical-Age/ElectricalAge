@@ -16,7 +16,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
-import net.minecraftforge.fluids.IFluidHandler
+import net.minecraftforge.fluids.capability.IFluidHandler
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
@@ -102,9 +102,9 @@ class ScannerElement(sixNode: SixNode, side: Direction, descriptor: SixNodeDescr
     private fun scanTileEntity(te: TileEntity, targetSide: EnumFacing): Double? {
         when (te) {
             is IFluidHandler -> {
-                val info = te.getTankInfo(targetSide)
+                val info = te.tankProperties
                 return info.sumByDouble {
-                    (it.fluid?.amount ?: 0).toDouble() / it.capacity
+                    (it.contents?.amount ?: 0).toDouble() / it.capacity
                 } / info.size
             }
             is ISidedInventory -> {

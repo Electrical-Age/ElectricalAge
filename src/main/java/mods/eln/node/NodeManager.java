@@ -5,7 +5,7 @@ import mods.eln.misc.Utils;
 import mods.eln.node.transparent.TransparentNode;
 import mods.eln.node.transparent.TransparentNodeElement;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.world.storage.WorldSavedData;
 
 import java.util.*;
 

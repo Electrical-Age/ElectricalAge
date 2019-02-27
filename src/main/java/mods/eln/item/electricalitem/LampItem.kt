@@ -34,33 +34,33 @@ abstract class LampItem(name: String) : GenericItemUsingDamageDescriptor(name) {
             var rCount = 0
 
             for (idx in 0 until range) {
-                x += v.xCoord
-                y += v.yCoord
-                z += v.zCoord
+                x += v.x
+                y += v.y
+                z += v.z
 
-                val pos = BlockPos(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z))
+                val pos = BlockPos(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z))
                 val state = world.getBlockState(pos)
                 val block = state.block
                 if (!block.isAir(state, world, pos) && block !== Eln.lightBlock) {
-                    x -= v.xCoord
-                    y -= v.yCoord
-                    z -= v.zCoord
+                    x -= v.x
+                    y -= v.y
+                    z -= v.z
                     break
                 }
                 rCount++
             }
 
             while (rCount > 0) {
-                val pos = BlockPos(MathHelper.floor_double(x), MathHelper.floor_double(y), MathHelper.floor_double(z))
+                val pos = BlockPos(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z))
                 val state = world.getBlockState(pos)
                 val block = state.block
                 if (block.isAir(state, world, pos) || block === Eln.lightBlock) {
                     LightBlockEntity.addLight(world, pos, light, 10)
                     return
                 }
-                x -= v.xCoord
-                y -= v.yCoord
-                z -= v.zCoord
+                x -= v.x
+                y -= v.y
+                z -= v.z
                 rCount--
             }
         }

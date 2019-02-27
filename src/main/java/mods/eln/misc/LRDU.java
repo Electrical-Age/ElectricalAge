@@ -190,7 +190,7 @@ public enum LRDU {
     }
 
     public Vec3d rotateOnXnLeft(Vec3d v) {
-        double x = v.xCoord;
+        double x = v.x;
         double y = v.yCoord;
         double z = v.zCoord;
         switch (this) {

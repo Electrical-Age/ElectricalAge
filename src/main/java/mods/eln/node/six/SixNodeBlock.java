@@ -474,7 +474,7 @@ public class SixNodeBlock extends NodeBlock {
 //    @SideOnly(Side.CLIENT)
 //    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World world, BlockPos pos) {
 //        if (hasVolume(w, x, y, z)) return super.getSelectedBoundingBoxFromPool(w, x, y, z);
-//        MovingObjectPosition col = collisionRayTrace(w, x, y, z, Minecraft.getMinecraft().thePlayer);
+//        MovingObjectPosition col = collisionRayTrace(w, x, y, z, Minecraft.getMinecraft().player);
 //        double h = 0.2;
 //        double hn = 1 - h;
 //

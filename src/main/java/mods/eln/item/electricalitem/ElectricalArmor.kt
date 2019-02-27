@@ -5,6 +5,7 @@ import mods.eln.i18n.I18N.tr
 import mods.eln.item.electricalinterface.IItemEnergyBattery
 import mods.eln.misc.Utils
 import mods.eln.wiki.Data
+import net.minecraft.client.util.ITooltipFlag
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.EntityEquipmentSlot
@@ -12,6 +13,7 @@ import net.minecraft.item.ItemArmor
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.DamageSource
+import net.minecraft.world.World
 import net.minecraftforge.common.ISpecialArmor
 
 class ElectricalArmor(materialIn: ItemArmor.ArmorMaterial,
@@ -67,8 +69,8 @@ class ElectricalArmor(materialIn: ItemArmor.ArmorMaterial,
         return stack.tagCompound!!
     }
 
-    override fun addInformation(stack: ItemStack, playerIn: EntityPlayer, tooltip: MutableList<String>, advanced: Boolean) {
-        super.addInformation(stack, playerIn, tooltip, advanced)
+    override fun addInformation(stack: ItemStack, worldIn: World?, tooltip: MutableList<String>, flagIn: ITooltipFlag) {
+        super.addInformation(stack, worldIn, tooltip, flagIn)
         tooltip.add(tr("Charge power: %sW", chargePower.toInt()))
         tooltip.add(tr("Stored energy: %sJ (%s)", getEnergy(stack),
                 (getEnergy(stack) / energyStorage * 100).toInt()))

@@ -159,7 +159,7 @@ public class Utils {
             return Direction.YN;
         if (entityLiving.rotationPitch < -45)
             return Direction.YP;
-        int dirx = MathHelper.floor_double((double) (entityLiving.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+        int dirx = MathHelper.floor((double) (entityLiving.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
         if (dirx == 3)
             return Direction.XP;
         if (dirx == 0)
@@ -170,7 +170,7 @@ public class Utils {
     }
 
     public static Direction entityLivingHorizontalViewDirection(EntityLivingBase entityLiving) {
-        int dirx = MathHelper.floor_double((double) (entityLiving.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+        int dirx = MathHelper.floor((double) (entityLiving.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
         if (dirx == 3)
             return Direction.XP;
         if (dirx == 0)
@@ -1046,9 +1046,9 @@ public class Utils {
         float d = 0;
 
         while (d < rangeMax) {
-            float xFloor = MathHelper.floor_float(x);
-            float yFloor = MathHelper.floor_float(y);
-            float zFloor = MathHelper.floor_float(z);
+            float xFloor = MathHelper.floor(x);
+            float yFloor = MathHelper.floor(y);
+            float zFloor = MathHelper.floor(z);
 
             float dx = x - xFloor, dy = y - yFloor, dz = z - zFloor;
             dx = (vx > 0 ? (1 - dx) * vxInv : -dx * vxInv);

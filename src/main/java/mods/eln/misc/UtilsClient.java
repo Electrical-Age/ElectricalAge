@@ -56,7 +56,7 @@ public class UtilsClient {
 
     private static float distanceFromClientPlayer(World world, int xCoord, int yCoord, int zCoord) {
         // TODO(1.10): Not sure this will work in multiplayer.
-        EntityPlayerSP player = Minecraft.getMinecraft().thePlayer;
+        EntityPlayerSP player = Minecraft.getMinecraft().player;
 
         return (float) Math.sqrt((xCoord - player.posX) * (xCoord - player.posX)
             + (yCoord - player.posY) * (yCoord - player.posY)
@@ -69,7 +69,7 @@ public class UtilsClient {
     }
 
     public static EntityPlayerSP getClientPlayer() {
-        return Minecraft.getMinecraft().thePlayer;
+        return Minecraft.getMinecraft().player;
     }
 
     public static void drawHaloNoLightSetup(Obj3DPart halo, float r, float g, float b, World w, BlockPos pos, boolean bilinear) {
@@ -133,10 +133,10 @@ public class UtilsClient {
             return;
         if (bilinear)
             enableBilinear();
-        int light = getLight(e.worldObj, new BlockPos(MathHelper.floor_double(e.posX), MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ)));
+        int light = getLight(e.worldObj, new BlockPos(MathHelper.floor(e.posX), MathHelper.floor(e.posY), MathHelper.floor(e.posZ)));
         // light =
-        // e.worldObj.getLightBrightnessForSkyBlocks(MathHelper.floor_double(e.posX),
-        // MathHelper.floor_double(e.posY), MathHelper.floor_double(e.posZ),0);
+        // e.worldObj.getLightBrightnessForSkyBlocks(MathHelper.floor(e.posX),
+        // MathHelper.floor(e.posY), MathHelper.floor(e.posZ),0);
         // Utils.println(light);
         GL11.glColor4f(r, g, b, 1f - (light / 15f));
         halo.draw();
@@ -518,7 +518,7 @@ public class UtilsClient {
     public static double clientDistanceTo(Entity e) {
         if (e == null)
             return 100000000.0;
-        Entity c = Minecraft.getMinecraft().thePlayer;
+        Entity c = Minecraft.getMinecraft().player;
         double x = (c.posX - e.posX), y = (c.posY - e.posY), z = (c.posZ - e.posZ);
         return Math.sqrt(x * x + y * y + z * z);
     }
@@ -526,7 +526,7 @@ public class UtilsClient {
     public static double clientDistanceTo(TransparentNodeEntity t) {
         if (t == null)
             return 100000000.0;
-        Entity c = Minecraft.getMinecraft().thePlayer;
+        Entity c = Minecraft.getMinecraft().player;
         BlockPos pos = t.getPos();
         double x = (c.posX - pos.getX()), y = (c.posY - pos.getY()), z = (c.posZ - pos.getZ());
         return Math.sqrt(x * x + y * y + z * z);

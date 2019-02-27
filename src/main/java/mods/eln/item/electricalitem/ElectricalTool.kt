@@ -21,7 +21,7 @@ open class ElectricalTool(name: String, private var strengthOn: Float, private v
     internal var range: Int = 0
 
     override fun onEntitySwing(entityLiving: EntityLivingBase, stack: ItemStack): Boolean {
-        if (entityLiving.worldObj.isRemote) return false
+        if (entityLiving.world.isRemote) return false
 
         Eln.itemEnergyInventoryProcess.addExclusion(this, 2.0)
         return super.onEntitySwing(entityLiving, stack)

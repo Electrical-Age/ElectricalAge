@@ -52,9 +52,9 @@ public class LampSupplyDescriptor extends SixNodeDescriptor {
         //UtilsClient.disableDepthTest();
         UtilsClient.enableBlend();
         obj.bindTexture("Glass.png");
-        float rotYaw = Minecraft.getMinecraft().thePlayer.rotationYaw / 360.f;
-        float rotPitch = Minecraft.getMinecraft().thePlayer.rotationPitch / 180.f;
-        float pos = (((float) Minecraft.getMinecraft().thePlayer.posX) + ((float) Minecraft.getMinecraft().thePlayer.posZ)) / 64.f;
+        float rotYaw = Minecraft.getMinecraft().player.rotationYaw / 360.f;
+        float rotPitch = Minecraft.getMinecraft().player.rotationPitch / 180.f;
+        float pos = (((float) Minecraft.getMinecraft().player.posX) + ((float) Minecraft.getMinecraft().player.posZ)) / 64.f;
         if (window != null)
             window.draw((1f - openFactor) * windowOpenAngle, 0f, 0f, 1f, rotYaw + pos + (openFactor * 0.5f), rotPitch * 0.65f);
         UtilsClient.disableBlend();

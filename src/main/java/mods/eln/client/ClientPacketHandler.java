@@ -26,7 +26,7 @@ public class ClientPacketHandler {
         FMLProxyPacket packet = event.getPacket();
         DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.payload().array()));
         NetworkManager manager = event.getManager();
-        EntityPlayer player = Minecraft.getMinecraft().thePlayer; // EntityClientPlayerMP
+        EntityPlayer player = Minecraft.getMinecraft().player; // EntityClientPlayerMP
 
         Eln.packetHandler.packetRx(stream, manager, player);
     }

@@ -32,9 +32,9 @@ class JointHubDescriptor(baseName: String, override val obj: Obj3D) : SimpleShaf
         assert(rotatingOnAllSides.isNotEmpty())
         val bb = rotatingOnAllSides[0].boundingBox()
         val centre = bb.centre()
-        val ox = centre.xCoord
-        val oy = centre.yCoord
-        val oz = centre.zCoord
+        val ox = centre.x
+        val oy = centre.y
+        val oz = centre.z
         var direction = front;
         for (i in 0..3) {
             if (connectedSides.contains(direction)) {

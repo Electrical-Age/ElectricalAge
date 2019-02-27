@@ -1,6 +1,5 @@
 package mods.eln.transparentnode
 
-import mods.eln.Eln
 import mods.eln.cable.CableRenderType
 import mods.eln.fluid.FuelRegistry
 import mods.eln.i18n.I18N
@@ -22,9 +21,7 @@ import net.minecraft.client.audio.ISound
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraftforge.fluids.FluidContainerRegistry
 import net.minecraftforge.fluids.FluidRegistry
-import org.lwjgl.opengl.GL11
 import java.io.DataInputStream
 import java.io.DataOutputStream
 

@@ -163,7 +163,7 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
     }
 
     override fun onBlockStartBreak(itemstack: ItemStack, x: Int, y: Int, z: Int, player: EntityPlayer): Boolean {
-        if (!player.worldObj.isRemote) {
+        if (!player.world.isRemote) {
             setDamage(itemstack, (getDamage(itemstack) + 1).toByte())
         }
         return super.onBlockStartBreak(itemstack, x, y, z, player)
@@ -422,9 +422,9 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
                     var d = 0f
 
                     while (d < viewRange) {
-                        val xFloor = MathHelper.floor_float(x).toFloat()
-                        val yFloor = MathHelper.floor_float(y).toFloat()
-                        val zFloor = MathHelper.floor_float(z).toFloat()
+                        val xFloor = MathHelper.floor(x).toFloat()
+                        val yFloor = MathHelper.floor(y).toFloat()
+                        val zFloor = MathHelper.floor(z).toFloat()
 
                         var dx = x - xFloor
                         var dy = y - yFloor
@@ -477,7 +477,7 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
                         val b = state.block
                         //val b = Block.getBlockById((blockKey and 0xFFFU).toInt())
                         if (b !== Blocks.AIR && b !== Eln.lightBlock) {
-                            stackRed += if (b.isVisuallyOpaque)
+                            stackRed += if (state.isOpaqueCube)
                                 0.2f * dToStack
                             else
                                 0.1f * dToStack
