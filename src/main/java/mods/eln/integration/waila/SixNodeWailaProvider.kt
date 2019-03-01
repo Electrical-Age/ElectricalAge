@@ -39,8 +39,8 @@ class SixNodeWailaProvider : IWailaDataProvider {
         return currenttip
     }
 
-    override fun getWailaStack(accessor: IWailaDataAccessor, config: IWailaConfigHandler?): ItemStack?
-        = getSixData(accessor)?.itemStack
+    override fun getWailaStack(accessor: IWailaDataAccessor, config: IWailaConfigHandler?): ItemStack
+        = getSixData(accessor)?.itemStack ?: ItemStack.EMPTY
 
     override fun getWailaTail(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor?,
                               config: IWailaConfigHandler?): MutableList<String> = currenttip

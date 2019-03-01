@@ -160,7 +160,7 @@ abstract public class GridElement extends TransparentNodeElement {
         final NBTTagCompound gridLinks = nbt.getCompoundTag("gridLinks");
         for (Integer i = 0; ; i++) {
             final NBTTagCompound linkTag = gridLinks.getCompoundTag(i.toString());
-            if (linkTag.hasNoTags())
+            if (linkTag.isEmpty())
                 break;
             gridLinksBooting.add(new GridLink(linkTag, ""));
         }
@@ -269,7 +269,7 @@ abstract public class GridElement extends TransparentNodeElement {
                     start.rotateYaw((float) Math.toRadians(idealRenderingAngle));
                     Vec3d end = target.getCablePoint(theirSide, i);
                     end.rotateYaw((float) Math.toRadians(target.idealRenderingAngle));
-                    end = end.addVector(offset.pos.getX(), offset.pos.getY(), offset.pos.getZ());
+                    end = end.add(offset.pos.getX(), offset.pos.getY(), offset.pos.getZ());
                     writeVec(stream, start);
                     writeVec(stream, end);
                 }

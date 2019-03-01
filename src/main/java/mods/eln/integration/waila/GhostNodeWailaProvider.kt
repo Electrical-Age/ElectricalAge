@@ -81,8 +81,8 @@ class GhostNodeWailaProvider(private val transparentNodeProvider: TransparentNod
         }
     }
 
-    override fun getWailaStack(accessor: IWailaDataAccessor, config: IWailaConfigHandler?): ItemStack? =
-        getGhostData(accessor)?.itemStack
+    override fun getWailaStack(accessor: IWailaDataAccessor, config: IWailaConfigHandler?): ItemStack =
+        getGhostData(accessor)?.itemStack ?: ItemStack.EMPTY
 
     override fun getWailaTail(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor,
                               config: IWailaConfigHandler?) = currenttip

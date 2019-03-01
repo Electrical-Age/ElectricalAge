@@ -113,18 +113,16 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
 
                     for (int idx = 0; idx < lamp.socketDescriptor.range + light; idx++) {
                         // newCoord.move(lamp.side.getInverse());
-                        vp.addVector(vv.x, vv.y, vv.z);
+                        vp.add(vv.x, vv.y, vv.z);
                         c.setPosition(vp);
-                        Block b = c.getBlockState().getBlock();
 
                         if (!c.doesBlockExist()) {
                             exit = true;
                             break;
                         }
                         if (isOpaque(c)) {
-                            vp.addVector(-vv.x, -vv.y, -vv.z);
+                            vp.add(-vv.x, -vv.y, -vv.z);
                             c.setPosition(vp);
-                            b = c.getBlockState().getBlock();
                             break;
                         }
                     }
@@ -241,7 +239,7 @@ public class LampSocketProcess implements IProcess, INBTTReady /*,LightBlockObse
                     lampDescriptor.setLifeInTag(lampStack, life);
                 }
                 if (life < 0 || overFactor > 3) {
-                    lamp.getInventory().setInventorySlotContents(0, null);
+                    lamp.getInventory().setInventorySlotContents(0, ItemStack.EMPTY);
                     light = 0;
                 }
 

@@ -12,7 +12,7 @@ public class SixNodeRender extends TileEntitySpecialRenderer {
 
     @Override
     public void renderTileEntityFast(TileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float partial, BufferBuilder buffer) {
-        Minecraft.getMinecraft().mcProfiler.startSection("SixNode");
+        Minecraft.getMinecraft().profiler.startSection("SixNode");
 
         SixNodeEntity tileEntity = (SixNodeEntity) te;
 
@@ -42,7 +42,7 @@ public class SixNodeRender extends TileEntitySpecialRenderer {
         }
         GL11.glPopMatrix();
         //Utils.glDefaultColor();
-        Minecraft.getMinecraft().mcProfiler.endSection();
+        Minecraft.getMinecraft().profiler.endSection();
 
     }
 

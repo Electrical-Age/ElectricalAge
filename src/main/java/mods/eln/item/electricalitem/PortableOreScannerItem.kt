@@ -446,7 +446,7 @@ class PortableOreScannerItem(name: String, obj: Obj3D,
                             val zBlock = posZint + zFloor.toInt()
                             blockKey = 0
                             if (yBlock in 0..255) {
-                                val chunk = w.getChunkFromBlockCoords(BlockPos(xBlock, yBlock, zBlock))
+                                val chunk = w.getChunk(BlockPos(xBlock, yBlock, zBlock))
                                 val storage = chunk.blockStorageArray[yBlock shr 4]
                                 if (storage != null) {
                                     val xLocal = xBlock and 0xF

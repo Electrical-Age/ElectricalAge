@@ -31,13 +31,13 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
 
     public void addWithoutRegistry(int damage, Descriptor descriptor) {
         subItemList.put(damage, descriptor);
-        setUnlocalizedName(descriptor.name);
+        setTranslationKey(descriptor.name);
         descriptor.setParent(this, damage);
     }
 
     public void addElement(int damage, Descriptor descriptor) {
         subItemList.put(damage, descriptor);
-        setUnlocalizedName(descriptor.name);
+        setTranslationKey(descriptor.name);
         orderList.add(damage);
         descriptor.setParent(this, damage);
         // TODO(1.12): Registration is fucked.
@@ -66,7 +66,7 @@ public class GenericItemUsingDamage<Descriptor extends GenericItemUsingDamageDes
     }
 
     @Override
-    public String getUnlocalizedName(ItemStack par1ItemStack) {
+    public String getTranslationKey(ItemStack par1ItemStack) {
         Descriptor desc = getDescriptor(par1ItemStack);
         if (desc != null && desc.name != null) {
             return desc.name.replaceAll("\\s+", "_");

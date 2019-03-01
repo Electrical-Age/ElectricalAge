@@ -26,7 +26,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
     public SixNodeItem(Block b) {
         super(b);
         setHasSubtypes(true);
-        setUnlocalizedName("SixNodeItem");
+        setTranslationKey("SixNodeItem");
     }
 
     @Override
@@ -195,7 +195,7 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 //        if (!isStackValidToPlace(item))
 //            return;
 //
-//        Minecraft.getMinecraft().mcProfiler.startSection("SixNodeItem");
+//        Minecraft.getMinecraft().profiler.startSection("SixNodeItem");
 //        if (shouldUseRenderHelperEln(type, item, null)) {
 //            switch (type) {
 //
@@ -228,6 +228,6 @@ public class SixNodeItem extends GenericItemBlockUsingDamage<SixNodeDescriptor> 
 //        }
 //        // GL11.glTranslatef(0, 1, 0);
 //        getDescriptor(item).renderItem(type, item, data);
-//        Minecraft.getMinecraft().mcProfiler.endSection();
+//        Minecraft.getMinecraft().profiler.endSection();
 //    }
 }

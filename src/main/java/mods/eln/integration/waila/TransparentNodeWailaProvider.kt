@@ -33,8 +33,8 @@ class TransparentNodeWailaProvider : IWailaDataProvider {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getWailaStack(accessor: IWailaDataAccessor?, config: IWailaConfigHandler?): ItemStack? {
-        return null
+    override fun getWailaStack(accessor: IWailaDataAccessor?, config: IWailaConfigHandler?): ItemStack {
+        return ItemStack.EMPTY
     }
 
     override fun getWailaTail(itemStack: ItemStack?, currenttip: MutableList<String>, accessor: IWailaDataAccessor?, config: IWailaConfigHandler?): MutableList<String> {

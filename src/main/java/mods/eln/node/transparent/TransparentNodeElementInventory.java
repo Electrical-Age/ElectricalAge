@@ -123,9 +123,9 @@ public class TransparentNodeElementInventory implements ISidedInventory, INBTTRe
     @Override
     public boolean isItemValidForSlot(int i, ItemStack itemstack) {
         for (int idx = 0; idx < 6; idx++) {
-            int[] lol = getSlotsForFace(EnumFacing.getFront(idx));
+            int[] lol = getSlotsForFace(EnumFacing.VALUES[idx]);
             for (int hohoho : lol) {
-                if (hohoho == i && canInsertItem(i, itemstack, EnumFacing.getFront(idx))) {
+                if (hohoho == i && canInsertItem(i, itemstack, EnumFacing.VALUES[idx])) {
                     return true;
                 }
             }

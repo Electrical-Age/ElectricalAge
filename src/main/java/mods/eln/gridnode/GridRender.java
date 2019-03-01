@@ -166,7 +166,7 @@ public abstract class GridRender extends TransparentNodeElementRender {
         private Vec3d[] translate(Vec3d[] start, Vec3d delta) {
             Vec3d ret[] = new Vec3d[start.length];
             for (int i = 0; i < start.length; i++) {
-                ret[i] = start[i].addVector(delta.x, delta.y, delta.z);
+                ret[i] = start[i].add(delta.x, delta.y, delta.z);
             }
             return ret;
         }

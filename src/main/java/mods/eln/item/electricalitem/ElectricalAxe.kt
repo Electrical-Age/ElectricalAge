@@ -370,7 +370,7 @@ object TreeCapitation : IProcess {
                     block.onBlockHarvested(world, pos, state, player)
 
                     if (block.removedByPlayer(state, world, pos, player, true)) {
-                        block.onBlockDestroyedByPlayer(world, pos, state)
+                        block.onPlayerDestroy(world, pos, state)
                         block.harvestBlock(world, player, pos, state, null, stack)
                     }
                 }

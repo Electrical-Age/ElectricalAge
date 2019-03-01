@@ -17,7 +17,7 @@ public class GenericCreativeTab extends CreativeTabs {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public ItemStack getTabIconItem() {
+    public ItemStack createIcon() {
         return new ItemStack(item);
     }
 }

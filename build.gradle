@@ -53,9 +53,9 @@ sourceSets {
 }
 
 minecraft {
-    version = "1.12.2-14.23.5.2768"
+    version = "1.12.2-14.23.5.2814"
     runDir = "run"
-    mappings = "snapshot_20171003"
+    mappings = "stable_39"
 
 //     TODO(Baughn): After moving to 1.10, this should be replaced with the shadow plugin,
 //     e.g. as used in https://github.com/Emberwalker/Laundarray/blob/master/build.gradle
@@ -101,13 +101,13 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 	compile group: "net.shadowfacts", name: "Forgelin", version: "1.8.2"
     compile group: "com.teamwizardry.librarianlib", name: "librarianlib-1.12.2", version: "4.17"
-    implementation "dan200.computercraft:ComputerCraft:1.80pr1-build5"
-    implementation "li.cil.oc:OpenComputers:MC1.10.2-1.7.2.172"
-    deobfCompile "mcp.mobius.waila:Hwyla:1.8.17-B31_1.10.2"
+    compileOnly "dan200.computercraft:ComputerCraft:1.80pr1-build5"
+    compileOnly "li.cil.oc:OpenComputers:MC1.12.2-1.7.4.153"
+    compileOnly "mcp.mobius.waila:Hwyla:1.8.26-B41_1.12.2"
     // TODO(1.12): Switch to this.
 //    deobfCompile "cofh:RedstoneFlux:1.12-2.0.0.1:universal"
 }

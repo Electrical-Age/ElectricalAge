@@ -27,7 +27,7 @@ public abstract class NodeBlock extends Block {//BlockContainer
 
     public NodeBlock(Material material, Class tileEntityClass, int blockItemNbr) {
         super(material);
-        setUnlocalizedName("NodeBlock");
+        setTranslationKey("NodeBlock");
         this.tileEntityClass = tileEntityClass;
         useNeighborBrightness = true;
         this.blockItemNbr = blockItemNbr;

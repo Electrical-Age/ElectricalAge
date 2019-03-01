@@ -63,9 +63,7 @@ public class ElectricalStackMachineProcess implements IProcess {
     public void process(double time) {
         ItemStack itemStackIn = inventory.getStackInSlot(inputSlotId);
 
-        boolean itemTypeChanged = itemStackIn == null && itemStackInOld != null ||
-            itemStackIn != null && itemStackInOld == null ||
-            itemStackIn != null && itemStackInOld != null && !itemStackIn.getUnlocalizedName().equals(itemStackInOld.getUnlocalizedName());
+        boolean itemTypeChanged = !itemStackIn.isItemEqual(itemStackInOld);
 
         if (itemTypeChanged || (!smeltCan()) || !smeltInProcess) {
             smeltInit();

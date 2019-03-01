@@ -16,7 +16,7 @@ public class GenericItemBlock extends ItemBlock {
         this.textureIdOffset = textureIdOffset;
         this.subNames = subNames;
         setHasSubtypes(true);
-        setUnlocalizedName("wireItemBlock");
+        setTranslationKey("wireItemBlock");
     }
 
 	/*

@@ -7,7 +7,7 @@ public class NodeBlockItemWithSubTypes extends NodeBlockItem {
     public NodeBlockItemWithSubTypes(Block b) {
         super(b);
         setHasSubtypes(true);
-        setUnlocalizedName("NodeBlockItemWithSubTypes");
+        setTranslationKey("NodeBlockItemWithSubTypes");
     }
     /*//caca1.5.1
 	@Override

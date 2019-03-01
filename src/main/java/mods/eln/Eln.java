@@ -2,10 +2,8 @@ package mods.eln;
 
 import mods.eln.cable.CableRenderDescriptor;
 import mods.eln.client.ClientKeyHandler;
-import mods.eln.entity.EntityIDs;
-import mods.eln.entity.ReplicatorEntity;
+import mods.eln.client.SoundLoader;
 import mods.eln.entity.ReplicatorPopProcess;
-import mods.eln.eventhandlers.ElnFMLEventsHandler;
 import mods.eln.eventhandlers.ElnForgeEventsHandler;
 import mods.eln.generic.*;
 import mods.eln.ghost.GhostBlock;
@@ -33,6 +31,7 @@ import mods.eln.node.transparent.*;
 import mods.eln.ore.OreBlock;
 import mods.eln.ore.OreDescriptor;
 import mods.eln.ore.OreItem;
+import mods.eln.packets.*;
 import mods.eln.server.*;
 import mods.eln.signalinductor.SignalInductorDescriptor;
 import mods.eln.sim.Simulator;
@@ -126,6 +125,7 @@ import mods.eln.transparentnode.waterturbine.WaterTurbineDescriptor;
 import mods.eln.transparentnode.windturbine.WindTurbineDescriptor;
 import mods.eln.wiki.Data;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.creativetab.CreativeTabs;
@@ -137,24 +137,25 @@ import net.minecraft.init.Items;
 import net.minecraft.item.*;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LogWrapper;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.*;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.network.FMLEventChannel;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.oredict.OreDictionary;
-import net.minecraftforge.oredict.ShapedOreRecipe;
-import net.minecraftforge.oredict.ShapelessOreRecipe;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -300,7 +301,6 @@ public class Eln {
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-
         // TODO(1.12): Finish reimplementing this.
 
         /*
@@ -312,7 +312,6 @@ public class Eln {
         elnNetwork.registerMessage(SixNodeWailaRequestPacketHandler.class, SixNodeWailaRequestPacket.class, 5, Side.SERVER);
         elnNetwork.registerMessage(SixNodeWailaResponsePacketHandler.class, SixNodeWailaResponsePacket.class, 6, Side.CLIENT);
 
-        ModContainer container = FMLCommonHandler.instance().findContainerFor(this);
         // TODO(1.10): How does this work now?
         // LanguageRegistry.instance().loadLanguagesFor(container, Side.CLIENT);
 
@@ -460,20 +459,20 @@ public class Eln {
         NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
 
         Item itemCreativeTab = new Item()
-            .setUnlocalizedName("eln:elncreativetab");
+            .setTranslationKey("eln:elncreativetab");
             //.setTextureName("eln:elncreativetab");
         GameRegistry.registerItem(itemCreativeTab, "eln.itemCreativeTab");
         creativeTab = new GenericCreativeTab("Eln", itemCreativeTab);
 
-        oreBlock = (OreBlock) new OreBlock().setCreativeTab(creativeTab).setUnlocalizedName("OreEln");
+        oreBlock = (OreBlock) new OreBlock().setCreativeTab(creativeTab).setTranslationKey("OreEln");
 
         sharedItem = (SharedItem) new SharedItem()
             .setCreativeTab(creativeTab).setMaxStackSize(64)
-            .setUnlocalizedName("sharedItem");
+            .setTranslationKey("sharedItem");
 
         sharedItemStackOne = (SharedItem) new SharedItem()
             .setCreativeTab(creativeTab).setMaxStackSize(1)
-            .setUnlocalizedName("sharedItemStackOne");
+            .setTranslationKey("sharedItemStackOne");
 
         transparentNodeBlock = (TransparentNodeBlock) new TransparentNodeBlock(
             Material.IRON,
@@ -784,7 +783,6 @@ public class Eln {
         recipeECoal();
 
         recipeGridDevices(oreNames);
-*/
 
         proxy.registerRenderers();
 
@@ -793,11 +791,11 @@ public class Eln {
         checkRecipe();
 
         MinecraftForge.EVENT_BUS.register(new ElnForgeEventsHandler());
-        MinecraftForge.EVENT_BUS.register(new ElnFMLEventsHandler());
 
         FMLInterModComms.sendMessage("Waila", "register", "mods.eln.integration.waila.WailaIntegration.callbackRegister");
 
         Utils.println("Electrical age init done");
+*/
     }
 
     private EnergyConverterElnToOtherBlock elnToOtherBlockLvu;
@@ -820,7 +818,7 @@ public class Eln {
                 EnergyConverterElnToOtherDescriptor desc =
                     new EnergyConverterElnToOtherDescriptor("EnergyConverterElnToOtherLVU", elnDesc, ic2Desc, ocDesc);
                 elnToOtherBlockLvu = new EnergyConverterElnToOtherBlock(desc);
-                elnToOtherBlockLvu.setCreativeTab(creativeTab).setUnlocalizedName(blockName);
+                elnToOtherBlockLvu.setCreativeTab(creativeTab).setTranslationKey(blockName);
                 GameRegistry.registerBlock(elnToOtherBlockLvu, SimpleNodeItem.class, blockName);
             }
             {
@@ -831,7 +829,7 @@ public class Eln {
                 EnergyConverterElnToOtherDescriptor desc =
                     new EnergyConverterElnToOtherDescriptor("EnergyConverterElnToOtherMVU", elnDesc, ic2Desc, ocDesc);
                 elnToOtherBlockMvu = new EnergyConverterElnToOtherBlock(desc);
-                elnToOtherBlockMvu.setCreativeTab(creativeTab).setUnlocalizedName(blockName);
+                elnToOtherBlockMvu.setCreativeTab(creativeTab).setTranslationKey(blockName);
                 GameRegistry.registerBlock(elnToOtherBlockMvu, SimpleNodeItem.class, blockName);
             }
             {
@@ -842,7 +840,7 @@ public class Eln {
                 EnergyConverterElnToOtherDescriptor desc =
                     new EnergyConverterElnToOtherDescriptor("EnergyConverterElnToOtherHVU", elnDesc, ic2Desc, ocDesc);
                 elnToOtherBlockHvu = new EnergyConverterElnToOtherBlock(desc);
-                elnToOtherBlockHvu.setCreativeTab(creativeTab).setUnlocalizedName(blockName);
+                elnToOtherBlockHvu.setCreativeTab(creativeTab).setTranslationKey(blockName);
                 GameRegistry.registerBlock(elnToOtherBlockHvu, SimpleNodeItem.class, blockName);
             }
         }
@@ -3861,7 +3859,7 @@ public class Eln {
 //        {
 //            name = TR_NAME(Type.ITEM, "Copper Helmet");
 //            helmetCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Helmet, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
-//                .setUnlocalizedName(name)
+//                .setTranslationKey(name)
 //                .setRegistryName(name)
 ////                .setTextureName("eln:copper_helmet")
 //                .setCreativeTab(creativeTab);
@@ -3871,7 +3869,7 @@ public class Eln {
 //        {
 //            name = TR_NAME(Type.ITEM, "Copper Chestplate");
 //            plateCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Chestplate, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
-//                .setUnlocalizedName(name)
+//                .setTranslationKey(name)
 //                .setRegistryName(name)
 ////                .setTextureName("eln:copper_chestplate")
 //                .setCreativeTab(creativeTab);
@@ -3881,7 +3879,7 @@ public class Eln {
 //        {
 //            name = TR_NAME(Type.ITEM, "Copper Leggings");
 //            legsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Leggings, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
-//                .setUnlocalizedName(name)
+//                .setTranslationKey(name)
 //                .setRegistryName(name)
 ////                .setTextureName("eln:copper_leggings")
 //                .setCreativeTab(creativeTab);
@@ -3891,7 +3889,7 @@ public class Eln {
 //        {
 //            name = TR_NAME(Type.ITEM, "Copper Boots");
 //            bootsCopper = (ItemArmor) (new genericArmorItem(ArmorMaterial.IRON, 2, ArmourType.Boots, "eln:textures/armor/copper_layer_1.png", "eln:textures/armor/copper_layer_2.png"))
-//                .setUnlocalizedName(name)
+//                .setTranslationKey(name)
 //                .setRegistryName(name)
 ////                .setTextureName("eln:copper_boots")
 //                .setCreativeTab(creativeTab);
@@ -3924,7 +3922,7 @@ public class Eln {
 //                // ratioMax,double
 //                // ratioMaxEnergy,
 //                energyPerDamage// double energyPerDamage
-//            )).setUnlocalizedName(name).setRegistryName("eln:ecoal_helmet").setCreativeTab(creativeTab);
+//            )).setTranslationKey(name).setRegistryName("eln:ecoal_helmet").setCreativeTab(creativeTab);
 //            GameRegistry.registerItem(helmetECoal, "Eln." + name);
 //            //GameRegistry.registerCustomItemStack(name, new ItemStack(helmetECoal));
 //        }
@@ -3940,7 +3938,7 @@ public class Eln {
 //                // ratioMax,double
 //                // ratioMaxEnergy,
 //                energyPerDamage// double energyPerDamage
-//            )).setUnlocalizedName(name).setRegistryName("eln:ecoal_chestplate").setCreativeTab(creativeTab);
+//            )).setTranslationKey(name).setRegistryName("eln:ecoal_chestplate").setCreativeTab(creativeTab);
 //            GameRegistry.registerItem(plateECoal, "Eln." + name);
 //            //GameRegistry.registerCustomItemStack(name, new ItemStack(plateECoal));
 //        }
@@ -3956,7 +3954,7 @@ public class Eln {
 //                // ratioMax,double
 //                // ratioMaxEnergy,
 //                energyPerDamage// double energyPerDamage
-//            )).setUnlocalizedName(name).setRegistryName("eln:ecoal_leggings").setCreativeTab(creativeTab);
+//            )).setTranslationKey(name).setRegistryName("eln:ecoal_leggings").setCreativeTab(creativeTab);
 //            GameRegistry.registerItem(legsECoal, "Eln." + name);
 //            //GameRegistry.registerCustomItemStack(name, new ItemStack(legsECoal));
 //        }
@@ -3972,7 +3970,7 @@ public class Eln {
 //                // ratioMax,double
 //                // ratioMaxEnergy,
 //                energyPerDamage// double energyPerDamage
-//            )).setUnlocalizedName(name).setRegistryName("eln:ecoal_boots").setCreativeTab(creativeTab);
+//            )).setTranslationKey(name).setRegistryName("eln:ecoal_boots").setCreativeTab(creativeTab);
 //            GameRegistry.registerItem(bootsECoal, "Eln." + name);
 //            //GameRegistry.registerCustomItemStack(name, new ItemStack(bootsECoal));
 //        }
@@ -3983,7 +3981,7 @@ public class Eln {
         {
             String name = TR_NAME(Type.ITEM, "Copper Sword");
             swordCopper = (new ItemSword(ToolMaterial.IRON))
-                .setUnlocalizedName(name)
+                .setTranslationKey(name)
                 .setRegistryName("copper_sword")
                 .setCreativeTab(creativeTab);
             GameRegistry.register(swordCopper);
@@ -3991,7 +3989,7 @@ public class Eln {
         {
             String name = TR_NAME(Type.ITEM, "Copper Hoe");
             hoeCopper = (new ItemHoe(ToolMaterial.IRON))
-                .setUnlocalizedName(name)
+                .setTranslationKey(name)
                 .setRegistryName("copper_hoe")
                 .setCreativeTab(creativeTab);
             GameRegistry.register(hoeCopper);
@@ -3999,7 +3997,7 @@ public class Eln {
         {
             String name = TR_NAME(Type.ITEM, "Copper Shovel");
             shovelCopper = (new ItemSpade(ToolMaterial.IRON))
-                .setUnlocalizedName(name)
+                .setTranslationKey(name)
                 .setRegistryName("copper_shovel")
                 .setCreativeTab(creativeTab);
             GameRegistry.register(shovelCopper);
@@ -4007,7 +4005,7 @@ public class Eln {
         {
             String name = TR_NAME(Type.ITEM, "Copper Pickaxe");
             pickaxeCopper = new ItemPickaxeEln(ToolMaterial.IRON)
-                .setUnlocalizedName(name)
+                .setTranslationKey(name)
                 .setRegistryName("copper_pickaxe")
                 .setCreativeTab(creativeTab);
             GameRegistry.register(pickaxeCopper);
@@ -4015,7 +4013,7 @@ public class Eln {
         {
             String name = TR_NAME(Type.ITEM, "Copper Axe");
             axeCopper = new ItemAxeEln(ToolMaterial.IRON)
-                .setUnlocalizedName(name)
+                .setTranslationKey(name)
                 .setRegistryName("copper_axe")
                 .setCreativeTab(creativeTab);
             GameRegistry.register(axeCopper);

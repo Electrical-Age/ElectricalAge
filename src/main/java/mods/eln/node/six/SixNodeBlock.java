@@ -216,7 +216,7 @@ public class SixNodeBlock extends NodeBlock {
 
             sixNode.sixNodeCacheBlock = Blocks.AIR;
 
-            Chunk chunk = world.getChunkFromBlockCoords(pos);
+            Chunk chunk = world.getChunk(pos);
             Utils.generateHeightMap(chunk);
             // TODO(1.10): Was this important?
             //Utils.updateSkylight(chunk);
@@ -237,7 +237,7 @@ public class SixNodeBlock extends NodeBlock {
     @Override
     public void breakBlock(World world, BlockPos pos, Block par5, int par6) {
 
-        if (world.isRemote == false) {
+        if (!world.isRemote) {
             SixNodeEntity tileEntity = (SixNodeEntity) world.getTileEntity(pos);
             SixNode sixNode = (SixNode) tileEntity.getNode();
             if (sixNode == null) return;
@@ -412,9 +412,9 @@ public class SixNodeBlock extends NodeBlock {
 
         // TODO(1.10): Really?
         if (!world.isRemote)
-            start = start.addVector(0, 1.62, 0);
+            start = start.add(0, 1.62, 0);
         Vec3d var5 = entityLiving.getLook(0.5f);
-        Vec3d end = start.addVector(var5.x * distanceMax, var5.y * distanceMax, var5.z * distanceMax);
+        Vec3d end = start.add(var5.x * distanceMax, var5.y * distanceMax, var5.z * distanceMax);
 
         return collisionRayTrace(world.getBlockState(pos), world, pos, start, end);
     }

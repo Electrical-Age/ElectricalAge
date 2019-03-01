@@ -62,7 +62,7 @@ public class OreRegenerate {
                 if (!Eln.saveConfig.reGenOre && !Eln.instance.forceOreRegen) return;
 
                 WorldServer server = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(j.worldId);
-                Chunk chunk = server.getChunkFromChunkCoords(j.x, j.z);
+                Chunk chunk = server.getChunk(j.x, j.z);
 
                 for (int y = 0; y < 60; y += 2) {
                     for (int z = y & 1; z < 16; z += 2) {
